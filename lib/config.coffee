@@ -11,10 +11,19 @@ folders = "supportFolder fixturesFolder integrationFolder unitFolder".split(" ")
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
-convertRelativeToAbsolutePaths = (projectRoot, obj) ->
+convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   _.reduce folders, (memo, folder) ->
-    if existing = obj[folder]
-      memo[folder] = path.resolve(projectRoot, existing)
+    val = obj[folder]
+    if val?
+      ## if this folder has been specifically turned off
+      ## then set its value to the default value and
+      ## set the Remove key to true
+      if val is false and def = defaults[folder]
+        memo[folder + "Remove"] = true
+        memo[folder] = path.resolve(projectRoot, def)
+      else
+        ## else just resolve the folder from the projectRoot
+        memo[folder] = path.resolve(projectRoot, val)
 
     return memo
   , {}
@@ -61,7 +70,7 @@ module.exports = {
       ## always strip trailing slashes
       config.baseUrl = str.rtrim(url, "/")
 
-    _.defaults config,
+    defaults = {
       morgan:         true
       baseUrl:        null
       socketId:       null
@@ -85,6 +94,9 @@ module.exports = {
       integrationFolder: "cypress/integration"
       javascripts:    []
       namespace:      "__cypress"
+    }
+
+    _.defaults config, defaults
 
     ## split out our own app wide env from user env variables
     ## and delete envFile
@@ -94,16 +106,16 @@ module.exports = {
 
     config = @setUrls(config)
 
-    config = @setAbsolutePaths(config)
+    config = @setAbsolutePaths(config, defaults)
 
     return config
 
-  setAbsolutePaths: (obj) ->
+  setAbsolutePaths: (obj, defaults) ->
     obj = _.clone(obj)
 
     ## if we have a projectRoot
     if pr = obj.projectRoot
-      _.extend obj, convertRelativeToAbsolutePaths(pr, obj)
+      _.extend obj, convertRelativeToAbsolutePaths(pr, obj, defaults)
 
     return obj
 

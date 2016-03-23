@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+path     = require("path")
 config   = require("#{root}lib/config")
 settings = require("#{root}lib/util/settings")
 
@@ -218,6 +219,24 @@ describe "lib/config", ->
       }
 
       expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
+
+    it "sets special Remove property to true when folder is false", ->
+      obj = {
+        projectRoot: "/path/to/project"
+        fixturesFolder: "f"
+        supportFolder: false
+      }
+
+      defaults = {
+        supportFolder: "cypress/support"
+      }
+
+      expect(config.setAbsolutePaths(obj, defaults)).to.deep.eq({
+        projectRoot: "/path/to/project"
+        fixturesFolder: "/path/to/project/f"
+        supportFolder: "/path/to/project/cypress/support" ## default
+        supportFolderRemove: true
+      })
 
     ["supportFolder", "fixturesFolder", "integrationFolder", "unitFolder"].forEach (folder) ->
 
