@@ -1,9 +1,10 @@
-Promise   = require("bluebird")
+_         = require("lodash")
 fs        = require("fs-extra")
 path      = require("path")
-jsonlint  = require("jsonlint")
 check     = require("syntax-error")
 coffee    = require("coffee-script")
+Promise   = require("bluebird")
+jsonlint  = require("jsonlint")
 beautify  = require("js-beautify").html
 pretty    = require("js-object-pretty-print").pretty
 formatter = require("jsonlint/lib/formatter").formatter
@@ -171,23 +172,37 @@ module.exports = {
     dest = path.join(fixturesDir, "example.json")
     fs.copyAsync(src, dest)
 
-  scaffold: (folder) ->
-    ## we want to build out the fixturesFolder + and example file
-    ## but only create the example file if the fixturesFolder doesnt
-    ## exist
-    ##
-    ## this allows us to automatically insert the folder on existing
-    ## projects (whenever they are booted) but allows the user to delete
-    ## the fixtures file and not have it re-generated each time
-    ##
-    ## this is ideal because users who are upgrading to newer cypress version
-    ## will still get the folder support enabled but existing users wont be
-    ## annoyed by new example files coming into their projects unnecessarily
+  scaffold: (folder, options = {}) ->
+    _.defaults options, {
+      remove: false
+    }
 
-    ## if the fixtures dir doesnt exist
-    ## then create it + the example fixture
-    fs.statAsync(folder)
-    .catch =>
-      @copyExample(folder)
+    ## if opts.remove is true then we should automatically
+    ## remove the folder if it exists else noop
+    if options.remove
+      remove = ->
+        ## try to remove it twice
+        fs.removeAsync(folder)
+        .catch(remove)
+
+      fs.statAsync(folder)
+      .then(remove)
+      .catch ->
+
+    else
+      ## we want to build out the fixturesFolder + and example file
+      ## but only create the example file if the fixturesFolder doesnt
+      ## exist
+      ##
+      ## this allows us to automatically insert the folder on existing
+      ## projects (whenever they are booted) but allows the user to delete
+      ## the fixtures file and not have it re-generated each time
+      ##
+      ## this is ideal because users who are upgrading to newer cypress version
+      ## will still get the folder support enabled but existing users wont be
+      ## annoyed by new example files coming into their projects unnecessarily
+      fs.statAsync(folder)
+      .catch =>
+        @copyExample(folder)
 
 }

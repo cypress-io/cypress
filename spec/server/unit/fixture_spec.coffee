@@ -316,7 +316,25 @@ describe "lib/fixture", ->
             </html>\n
           """
 
-  context "#scaffold", ->
+  context ".scaffold", ->
+    it "is noop when removal is true and there is no folder", ->
+      fixture.scaffold(@fixturesFolder, {remove: true})
+      .then =>
+        fs.statAsync(@fixturesFolder)
+        .then ->
+          throw new Error("should have failed but didnt")
+        .catch ->
+
+    it "removes fixturesFolder + contents when existing", ->
+      fixture.scaffold(@fixturesFolder)
+      .then =>
+        fixture.scaffold(@fixturesFolder, {remove: true})
+      .then =>
+        fs.statAsync(@fixturesFolder)
+        .then ->
+          throw new Error("should have failed but didnt")
+        .catch ->
+
     it "creates both fixturesFolder and example.json when fixturesFolder does not exist", ->
       ## todos has a fixtures folder so let's first nuke it and then scaffold
       fs.removeAsync(@todosPath).then =>

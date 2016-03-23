@@ -190,7 +190,10 @@ class Project extends EE
     Promise.join(
       ## ensure fixtures dir is created
       ## and example fixture if dir doesnt exist
-      fixture.scaffold(config.fixturesFolder),
+      fixture.scaffold(config.fixturesFolder, {
+        remove: config.fixturesFolderRemove
+      })
+
       ## ensure support dir is created
       ## and example support file if dir doesnt exist
       support.scaffold(config.supportFolder, {
