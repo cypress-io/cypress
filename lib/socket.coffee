@@ -9,8 +9,6 @@ Request       = require("./request")
 logger        = require("./logger")
 Reporter      = require("./reporter")
 
-leadingSlashesRe = /^\/+/
-
 class Socket
   constructor: ->
     if not (@ instanceof Socket)
