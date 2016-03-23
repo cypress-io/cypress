@@ -14,6 +14,7 @@ headed   = require("#{root}lib/modes/headed")
 headless = require("#{root}lib/modes/headless")
 api      = require("#{root}lib/api")
 user     = require("#{root}lib/user")
+config   = require("#{root}lib/config")
 cache    = require("#{root}lib/cache")
 errors   = require("#{root}lib/errors")
 cypress  = require("#{root}lib/cypress")
@@ -245,6 +246,46 @@ describe "lib/cypress", ->
         cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"]).then =>
           expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/test2.coffee?__ui=satellite")
           @expectExitWith(0)
+
+    it "scaffolds out fixtures + files if they do not exist", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        config.get(@pristinePath).then (@cfg) =>
+
+        Project.add(@pristinePath)
+      ])
+      .then =>
+        fs.statAsync(@cfg.fixturesFolder)
+        .then ->
+          throw new Error("fixturesFolder should not exist!")
+        .catch =>
+          cypress.start(["--run-project=#{@pristinePath}"])
+        .then =>
+          fs.statAsync(@cfg.fixturesFolder)
+        .then =>
+          fs.statAsync path.join(@cfg.fixturesFolder, "example.json")
+
+    it "scaffolds out support + files if they do not exist", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        config.get(@pristinePath).then (@cfg) =>
+
+        Project.add(@pristinePath)
+      ])
+      .then =>
+        fs.statAsync(@cfg.supportFolder)
+        .then ->
+          throw new Error("supportFolder should not exist!")
+        .catch =>
+          cypress.start(["--run-project=#{@pristinePath}"])
+        .then =>
+          fs.statAsync(@cfg.supportFolder)
+        .then =>
+          fs.statAsync path.join(@cfg.supportFolder, "commands.js")
+        .then =>
+          fs.statAsync path.join(@cfg.supportFolder, "defaults.js")
 
     it "logs error and exits when user isn't logged in", ->
       user.set({})
