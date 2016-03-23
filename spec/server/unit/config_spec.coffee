@@ -4,7 +4,7 @@ config   = require("#{root}lib/config")
 settings = require("#{root}lib/util/settings")
 
 describe "lib/config", ->
-  context "#get", ->
+  context ".get", ->
     beforeEach ->
       @sandbox.stub(settings, "readEnv").withArgs("path/to/project").resolves({foo: "bar"})
       @sandbox.stub(settings, "read").withArgs("path/to/project").resolves({})
@@ -31,7 +31,7 @@ describe "lib/config", ->
         .then (obj) ->
           expect(obj.clientUrlDisplay).to.eq "http://localhost:8080"
 
-  context "#mergeDefaults", ->
+  context ".mergeDefaults", ->
     beforeEach ->
       @defaults = (prop, value, cfg = {}, options = {}) =>
         expect(config.mergeDefaults(cfg, options)[prop]).to.deep.eq(value)
@@ -136,7 +136,7 @@ describe "lib/config", ->
         foo: "bar"
       })
 
-  context "#parseEnv", ->
+  context ".parseEnv", ->
     it "merges together env from config, env from file, env from process, and env from CLI", ->
       @sandbox.stub(config, "getProcessEnvVars").returns({version: "0.12.1", user: "bob"})
 
@@ -169,7 +169,7 @@ describe "lib/config", ->
         baz: "quux"
       })
 
-  context "#getProcessEnvVars", ->
+  context ".getProcessEnvVars", ->
     ["cypress_", "CYPRESS_"].forEach (key) ->
 
       it "reduces key: #{key}", ->
@@ -195,3 +195,41 @@ describe "lib/config", ->
       expect(config.getProcessEnvVars(obj)).to.deep.eq({
         FOO: "bar"
       })
+
+  context ".setUrls", ->
+    it "does not mutate existing obj", ->
+      obj = {}
+      expect(config.setUrls(obj)).not.to.eq(obj)
+
+  context ".setAbsolutePaths", ->
+    it "is noop without projectRoot", ->
+      expect(config.setAbsolutePaths({})).to.deep.eq({})
+
+    it "does not mutate existing obj", ->
+      obj = {}
+      expect(config.setAbsolutePaths(obj)).not.to.eq(obj)
+
+    it "ignores non special *folder properties", ->
+      obj = {
+        projectRoot: "path/to/project"
+        blehFolder: "some/rando/path"
+        foo: "bar"
+        baz: "quux"
+      }
+
+      expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
+
+    ["supportFolder", "fixturesFolder", "integrationFolder", "unitFolder"].forEach (folder) ->
+
+      it "converts relative #{folder} to absolute path", ->
+        obj = {
+          projectRoot: "/path/to/project"
+        }
+        obj[folder] = "foo/bar"
+
+        expected = {
+          projectRoot: "/path/to/project"
+        }
+        expected[folder] = "/path/to/project/foo/bar"
+
+        expect(config.setAbsolutePaths(obj)).to.deep.eq(expected)

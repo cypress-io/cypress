@@ -165,15 +165,21 @@ class Project extends EE
         @getUrlBySpec(cfg.clientUrl, "/__all")
 
   ensureSpecExists: (integrationFolder, spec) ->
-    specFile = path.resolve(@projectRoot, integrationFolder, spec)
+    specFile = path.resolve(integrationFolder, spec)
 
     ## we want to make it easy on the user by allowing them to pass both
     ## an absolute path to the spec, or a relative path from their test folder
     fs
     .statAsync(specFile)
     .then =>
-      ## strip out the projectRoot + integrationFolder
-      specFile.replace(path.join(@projectRoot, integrationFolder), "")
+      ## strip out the integration folder and prepend with "/"
+      ## example:
+      ##
+      ## /Users/bmann/Dev/cypress-app/.projects/todos/tests
+      ## /Users/bmann/Dev/cypress-app/.projects/todos/tests/test2.coffee
+      ##
+      ## becomes /test2.coffee
+      "/" + path.relative(integrationFolder, specFile)
     .catch ->
       errors.throw("SPEC_FILE_NOT_FOUND", specFile)
 
@@ -184,10 +190,10 @@ class Project extends EE
     Promise.join(
       ## ensure fixtures dir is created
       ## and example fixture if dir doesnt exist
-      fixture.scaffold(config.projectRoot, config.fixturesFolder),
+      fixture.scaffold(config.fixturesFolder),
       ## ensure support dir is created
       ## and example support file if dir doesnt exist
-      support.scaffold(config.projectRoot, config.supportFolder)
+      support.scaffold(config.supportFolder)
     )
 
   writeProjectId: (id) ->
@@ -255,7 +261,7 @@ class Project extends EE
     .call("getConfig")
     .then (cfg) ->
       ## remove all of the ids for the test files found in the integrationFolder
-      ids.remove path.join(cfg.projectRoot, cfg.integrationFolder)
+      ids.remove(cfg.integrationFolder)
 
   @id = (path) ->
     Project(path).getProjectId()

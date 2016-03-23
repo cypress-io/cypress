@@ -60,9 +60,7 @@ class Socket
       cb({__error: err.message})
 
   onFixture: (config, file, cb) ->
-    {projectRoot, fixturesFolder} = config
-
-    fixture.get(projectRoot, fixturesFolder, file)
+    fixture.get(config.fixturesFolder, file)
     .then(cb)
     .catch (err) ->
       cb({__error: err.message})
@@ -165,7 +163,7 @@ class Socket
       socket.on "mocha", =>
         options.onMocha.apply(options, arguments)
 
-    @testsDir = path.join(projectRoot, integrationFolder)
+    @testsDir = integrationFolder
 
     fs.ensureDirAsync(@testsDir).bind(@)
 

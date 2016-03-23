@@ -171,9 +171,7 @@ module.exports = {
     dest = path.join(fixturesDir, "example.json")
     fs.copyAsync(src, dest)
 
-  scaffold: ->
-    p = path.join.apply(path, arguments)
-
+  scaffold: (folder) ->
     ## we want to build out the fixturesFolder + and example file
     ## but only create the example file if the fixturesFolder doesnt
     ## exist
@@ -188,9 +186,8 @@ module.exports = {
 
     ## if the fixtures dir doesnt exist
     ## then create it + the example fixture
-    fs.statAsync(p)
-    .bind(@)
-    .catch ->
-      @copyExample(p)
+    fs.statAsync(folder)
+    .catch =>
+      @copyExample(folder)
 
 }

@@ -50,8 +50,7 @@ module.exports = {
 
   _get: (resp, config) ->
     file = resp.replace(fixturesRe, "")
-    {projectRoot, fixturesFolder} = config
-    fixture.get(projectRoot, fixturesFolder, file)
+    fixture.get(config.fixturesFolder, file)
 
   getStream: (resp) ->
     if fixturesRe.test(resp)

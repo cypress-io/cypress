@@ -17,9 +17,7 @@ module.exports = {
       @_copy("commands.js", folder)
     )
 
-  scaffold: ->
-    folder = path.join.apply(path, arguments)
-
+  scaffold: (folder) ->
     ## we want to build out the supportFolder + and example file
     ## but only create the example file if the supportFolder doesnt
     ## exist

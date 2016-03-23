@@ -181,17 +181,17 @@ describe "lib/project", ->
       @sandbox.stub(fixture, "scaffold").resolves()
       @sandbox.stub(support, "scaffold").resolves()
 
-    it "calls fixture.scaffold with projectRoot + fixturesFolder", ->
+    it "calls fixture.scaffold with fixturesFolder", ->
       obj = {projectRoot: "pr", fixturesFolder: "ff", supportFolder: "sf"}
 
       @project.scaffold(obj).then ->
-        expect(fixture.scaffold).to.be.calledWith(obj.projectRoot, obj.fixturesFolder)
+        expect(fixture.scaffold).to.be.calledWith(obj.fixturesFolder)
 
-    it "calls support.scaffold with projectRoot + fixturesFolder", ->
+    it "calls support.scaffold with supportFolder", ->
       obj = {projectRoot: "pr", fixturesFolder: "ff", supportFolder: "sf"}
 
       @project.scaffold(obj).then ->
-        expect(support.scaffold).to.be.calledWith(obj.projectRoot, obj.supportFolder)
+        expect(support.scaffold).to.be.calledWith(obj.supportFolder)
 
   context "#watchSettings", ->
     beforeEach ->

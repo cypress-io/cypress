@@ -12,8 +12,7 @@ describe "lib/support", ->
     @todosPath = Fixtures.projectPath("todos")
 
     config.get(@todosPath).then (cfg) =>
-      @cfg    = cfg
-      @folder = path.join(cfg.projectRoot, cfg.supportFolder)
+      {@supportFolder} = cfg
 
   afterEach ->
     Fixtures.remove()
@@ -21,9 +20,9 @@ describe "lib/support", ->
   context "#scaffold", ->
     it "creates both supportFolder and commands.js and defaults.js when supportFolder does not exist", ->
       ## todos has a _support folder so let's first nuke it and then scaffold
-      fs.removeAsync(@folder).then =>
-        support.scaffold(@cfg.projectRoot, @cfg.supportFolder).then =>
-          fs.readFileAsync(@folder + "/commands.js", "utf8").then (str) =>
+      fs.removeAsync(@supportFolder).then =>
+        support.scaffold(@supportFolder).then =>
+          fs.readFileAsync(@supportFolder + "/commands.js", "utf8").then (str) =>
             expect(str).to.eq """
             // ***********************************************
             // This example commands.js shows you how to
@@ -66,7 +65,7 @@ describe "lib/support", ->
             // })
             """
 
-            fs.readFileAsync(@folder + "/defaults.js", "utf8").then (str) ->
+            fs.readFileAsync(@supportFolder + "/defaults.js", "utf8").then (str) ->
                 expect(str).to.eq """
                 // ***********************************************
                 // This example defaults.js shows you how to
@@ -88,11 +87,11 @@ describe "lib/support", ->
                 """
 
     it "does not create spec_helper.js if supportFolder already exists", (done) ->
-      fs.removeAsync(@folder).then =>
+      fs.removeAsync(@supportFolder).then =>
         ## create the supportFolder ourselves manually
-        fs.ensureDirAsync(@folder).then =>
+        fs.ensureDirAsync(@supportFolder).then =>
           ## now scaffold
-          support.scaffold(@cfg.projectRoot, @cfg.supportFolder).then =>
+          support.scaffold(@supportFolder).then =>
             ## ensure spec_helper.js doesnt exist
-            fs.statAsync(path.join(@folder, "spec_helper.js"))
+            fs.statAsync(path.join(@supportFolder, "spec_helper.js"))
               .catch -> done()

@@ -39,7 +39,7 @@ module.exports = {
     _.defaults options,
       test: true
 
-    {integrationFolder, rootFolder, supportFolder} = config
+    {integrationFolder, projectRoot, rootFolder, supportFolder} = config
 
     ## return the specs prefixed with /tests?p=spec
     _(specs).map (spec) ->
@@ -49,8 +49,12 @@ module.exports = {
         spec = _.str.trim(spec, "/")
       else
         if options.test
-          ## prepend with tests path
-          spec = "#{integrationFolder}/#{spec}"
+          ## prepend with tests path excluding
+          ## the projectRoot. basically turn
+          ## integrationFolder back into a relative
+          ## path
+          relativeIntegrationPath = path.relative(projectRoot, integrationFolder)
+          spec = "#{relativeIntegrationPath}/#{spec}"
         else
           ## make sure we have no leading
           ## or trailing forward slashes
@@ -87,8 +91,9 @@ module.exports = {
         return p if not p.includes("*")
 
         new Promise (resolve, reject) ->
-          ## ensure we are looking in our projectRoot
-          p = path.join(projectRoot, p)
+          ## handle both relative + absolute paths
+          ## by simply resolving the path from projectRoot
+          p = path.resolve(projectRoot, p)
           glob p, (err, files) ->
             reject(err) if err
             resolve(files)
@@ -101,10 +106,7 @@ module.exports = {
         @convertToSpecPath(files, config, {test: false})
 
   getTestFiles: (config) ->
-    integrationFolderPath = path.join(
-      config.projectRoot,
-      config.integrationFolder
-    )
+    integrationFolderPath = config.integrationFolder
 
     ## support files are not automatically
     ## ignored because only _fixtures are hard
@@ -112,20 +114,21 @@ module.exports = {
     ## the javascripts array
 
     fixturesFolderPath = path.join(
-      config.projectRoot,
       config.fixturesFolder,
       "**",
       "*"
     )
 
     supportFolderPath = path.join(
-      config.projectRoot,
       config.supportFolder,
       "**",
       "*"
     )
 
     ## map all of the javascripts to the project root
+    ## TODO: think about moving this into config
+    ## and mapping each of the javascripts into an
+    ## absolute path
     javascriptsPath = _.map config.javascripts, (js) ->
       path.join(config.projectRoot, js)
 

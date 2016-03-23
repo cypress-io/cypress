@@ -1,12 +1,23 @@
 _        = require("lodash")
 str      = require("underscore.string")
+path     = require("path")
 settings = require("./util/settings")
 
 ## cypress following by _
 cypressEnvRe = /^(cypress_)/i
 
+folders = "supportFolder fixturesFolder integrationFolder unitFolder".split(" ")
+
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
+
+convertRelativeToAbsolutePaths = (projectRoot, obj) ->
+  _.reduce folders, (memo, folder) ->
+    if existing = obj[folder]
+      memo[folder] = path.resolve(projectRoot, existing)
+
+    return memo
+  , {}
 
 module.exports = {
   get: (projectRoot, options = {}) ->
@@ -68,10 +79,10 @@ module.exports = {
       autoOpen:       false
       viewportWidth:  1000
       viewportHeight: 660
+      # unitFolder:        "cypress/unit"
       supportFolder:     "cypress/support"
       fixturesFolder:    "cypress/fixtures"
       integrationFolder: "cypress/integration"
-      # unitFolder:        "cypress/unit"
       javascripts:    []
       namespace:      "__cypress"
 
@@ -81,17 +92,32 @@ module.exports = {
     config.env = process.env["CYPRESS_ENV"]
     delete config.envFile
 
-    @setUrls(config)
+    config = @setUrls(config)
+
+    config = @setAbsolutePaths(config)
 
     return config
 
+  setAbsolutePaths: (obj) ->
+    obj = _.clone(obj)
+
+    ## if we have a projectRoot
+    if pr = obj.projectRoot
+      _.extend obj, convertRelativeToAbsolutePaths(pr, obj)
+
+    return obj
+
   setUrls: (obj) ->
+    obj = _.clone(obj)
+
     rootUrl = "http://localhost:" + obj.port
 
     _.extend obj,
       clientUrlDisplay: rootUrl
       clientUrl:        rootUrl + obj.clientRoute
       xhrUrl:           obj.namespace + obj.xhrRoute
+
+    return obj
 
   parseEnv: (cfg) ->
     envCfg  = cfg.env ? {}

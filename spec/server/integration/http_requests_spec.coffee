@@ -90,10 +90,12 @@ describe "Routes", ->
 
       @setup({
         projectRoot: Fixtures.project("todos")
-        integrationFolder: "tests"
-        fixturesFolder: "tests/_fixtures"
-        supportFolder: "tests/_support"
-        javascripts: ["tests/etc/**/*"]
+        config: {
+          integrationFolder: "tests"
+          fixturesFolder: "tests/_fixtures"
+          supportFolder: "tests/_support"
+          javascripts: ["tests/etc/**/*"]
+        }
       })
 
     afterEach ->
@@ -134,10 +136,10 @@ describe "Routes", ->
 
         @setup({
           projectRoot: Fixtures.project("todos")
-          integrationFolder: "tests"
-          javascripts: ["support/spec_helper.coffee"]
-          sinon: false
-          fixtures: false
+          config: {
+            integrationFolder: "tests"
+            javascripts: ["support/spec_helper.coffee"]
+          }
         })
 
       afterEach ->
@@ -169,10 +171,10 @@ describe "Routes", ->
 
         @setup({
           projectRoot: Fixtures.project("no-server")
-          integrationFolder: "my-tests"
-          javascripts: ["helpers/includes.js"]
-          sinon: false
-          fixtures: false
+          config: {
+            integrationFolder: "my-tests"
+            javascripts: ["helpers/includes.js"]
+          }
         })
 
       afterEach ->
@@ -291,8 +293,10 @@ describe "Routes", ->
 
           @setup({
             projectRoot: Fixtures.project("todos")
-            integrationFolder: "tests"
-            fixturesFolder: "tests/_fixtures"
+            config: {
+              integrationFolder: "tests"
+              fixturesFolder: "tests/_fixtures"
+            }
           })
 
         afterEach ->
@@ -371,12 +375,12 @@ describe "Routes", ->
 
         @setup({
           projectRoot: Fixtures.project("todos")
-          integrationFolder: "tests"
-          fixturesFolder: "tests/_fixtures"
-          supportFolder: "tests/_support"
-          javascripts: ["tests/etc/etc.js"]
-          sinon: false
-          fixtures: false
+          config: {
+            integrationFolder: "tests"
+            fixturesFolder: "tests/_fixtures"
+            supportFolder: "tests/_support"
+            javascripts: ["tests/etc/etc.js"]
+          }
         })
 
       afterEach ->
@@ -408,14 +412,14 @@ describe "Routes", ->
 
         @setup({
           projectRoot: Fixtures.project("no-server")
-          integrationFolder: "my-tests"
-          javascripts: ["helpers/includes.js"]
-          ## even though there are no files here
-          ## we are adding rootFolder to test that
-          ## only the support files receive this value
-          rootFolder: "foo"
-          sinon: false
-          fixtures: false
+          config: {
+            integrationFolder: "my-tests"
+            javascripts: ["helpers/includes.js"]
+            ## even though there are no files here
+            ## we are adding rootFolder to test that
+            ## only the support files receive this value
+            rootFolder: "foo"
+          }
         })
 
       afterEach ->
@@ -460,7 +464,11 @@ describe "Routes", ->
           .expect(200, "foo")
 
       it "falls back to app baseUrl property", ->
-        @setup({baseUrl: "http://localhost:8080"})
+        @setup({
+          config: {
+            baseUrl: "http://localhost:8080"
+          }
+        })
 
         ## should ignore this since it has least precendence
         @app.set("__cypress.remoteHost", "http://www.github.com")
@@ -1312,8 +1320,10 @@ describe "Routes", ->
 
         @setup({
           projectRoot: Fixtures.project("no-server")
-          rootFolder: "dev"
-          integrationFolder: "my-tests"
+          config: {
+            rootFolder: "dev"
+            integrationFolder: "my-tests"
+          }
         })
 
         @session
@@ -1458,7 +1468,9 @@ describe "Routes", ->
 
       it "falls back to baseUrl when no FQDN and no remoteHost", ->
         @setup({
-          baseUrl: "http://www.google.com"
+          config: {
+            baseUrl: "http://www.google.com"
+          }
         })
 
         nock("http://www.google.com")
