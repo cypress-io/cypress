@@ -17,7 +17,7 @@ cypressIcons = require("cypress-icons")
 log          = require("./log")
 meta         = require("./meta")
 pkg          = require("../package.json")
-konfig       = require("../konfig")
+konfig       = require("../lib/konfig")
 Fixtures     = require("../spec/server/helpers/fixtures")
 
 pkgr     = Promise.promisify(pkgr)
