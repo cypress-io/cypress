@@ -51,7 +51,7 @@ module.exports = {
       autoOpen:       false
       viewportWidth:  1000
       viewportHeight: 660
-      supportFolder:     "tests/_support"
+      supportFolder:     "cypress/helpers"
       fixturesFolder:    "cypress/fixtures"
       integrationFolder: "cypress/integration"
       # unitFolder:        "cypress/unit"

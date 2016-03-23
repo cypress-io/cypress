@@ -19,7 +19,7 @@ describe "lib/support", ->
 
   context "#constructor", ->
     it "sets folder to supportFolder", ->
-      expect(@support.folder).to.eq @todosPath + "/tests/_support"
+      expect(@support.folder).to.eq @todosPath + "/cypress/helpers"
 
   context "#scaffold", ->
     it "creates both supportFolder and spec_helper.js when supportFolder does not exist", ->

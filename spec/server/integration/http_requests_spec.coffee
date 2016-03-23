@@ -92,6 +92,7 @@ describe "Routes", ->
         projectRoot: Fixtures.project("todos")
         integrationFolder: "tests"
         fixturesFolder: "tests/_fixtures"
+        supportFolder: "tests/_support"
         javascripts: ["tests/etc/**/*"]
       })
 
@@ -372,6 +373,7 @@ describe "Routes", ->
           projectRoot: Fixtures.project("todos")
           integrationFolder: "tests"
           fixturesFolder: "tests/_fixtures"
+          supportFolder: "tests/_support"
           javascripts: ["tests/etc/etc.js"]
           sinon: false
           fixtures: false
