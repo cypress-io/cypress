@@ -156,11 +156,11 @@ describe "Routes", ->
             expect(res.text).to.eq file
 
       it "processes support/spec_helper.coffee javascripts", ->
-        file = Fixtures.get("projects/todos/support/spec_helper.coffee")
+        file = Fixtures.get("projects/todos/lib/my_coffee.coffee")
         file = coffee.compile(file)
 
         supertest(@app)
-          .get("/__cypress/tests?p=support/spec_helper.coffee")
+          .get("/__cypress/tests?p=lib/my_coffee.coffee")
           .expect(200)
           .then (res) ->
             expect(res.text).to.eq file
