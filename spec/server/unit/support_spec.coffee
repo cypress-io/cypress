@@ -19,22 +19,22 @@ describe "lib/support", ->
 
   context "#constructor", ->
     it "sets folder to supportFolder", ->
-      expect(@support.folder).to.eq @todosPath + "/cypress/helpers"
+      expect(@support.folder).to.eq @todosPath + "/cypress/support"
 
   context "#scaffold", ->
-    it "creates both supportFolder and spec_helper.js when supportFolder does not exist", ->
+    it "creates both supportFolder and commands.js and defaults.js when supportFolder does not exist", ->
       ## todos has a _support folder so let's first nuke it and then scaffold
       fs.removeAsync(@support.folder).then =>
         @support.scaffold().then =>
-          fs.readFileAsync(@support.folder + "/spec_helper.js", "utf8").then (str) ->
+          fs.readFileAsync(@support.folder + "/commands.js", "utf8").then (str) =>
             expect(str).to.eq """
             // ***********************************************
-            // This example spec_helper.js shows you how to
+            // This example commands.js shows you how to
             // create the custom command: 'login'.
             //
-            // The spec_helper.js file is a great place to
-            // add reusable logic / custom commands which
-            // become usable in every single test file.
+            // The commands.js file is a great place to
+            // modify existing commands and create custom
+            // commands for use throughout your tests.
             //
             // You can read more about custom commands here:
             // https://on.cypress.io/api/commands
@@ -68,6 +68,27 @@ describe "lib/support", ->
             //     })
             // })
             """
+
+            fs.readFileAsync(@support.folder + "/defaults.js", "utf8").then (str) ->
+                expect(str).to.eq """
+                // ***********************************************
+                // This example defaults.js shows you how to
+                // customize the internal behavior of Cypress.
+                //
+                // The defaults.js file is a great place to
+                // override defaults used throughout all tests.
+                //
+                // ***********************************************
+                //
+                // Cypress.Server.defaults({
+                //   delay: 500,
+                //   whitelist: function(xhr){}
+                // })
+
+                // Cypress.Cookies.defaults({
+                //   whitelist: ["session_id", "remember_token"]
+                // })
+                """
 
     it "does not create spec_helper.js if supportFolder already exists", (done) ->
       fs.removeAsync(@support.folder).then =>

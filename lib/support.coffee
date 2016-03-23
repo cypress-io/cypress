@@ -18,10 +18,16 @@ class Support
 
     @folder = path.join(pr, sf)
 
-  copyExample: (folder) ->
-    src  = cwd("lib", "scaffold", "spec_helper.js")
-    dest = path.join(folder, "spec_helper.js")
+  _copy: (file, folder) ->
+    src  = cwd("lib", "scaffold", file)
+    dest = path.join(folder, file)
     fs.copyAsync(src, dest)
+
+  copyFiles: (folder) ->
+    Promise.join(
+      @_copy("defaults.js", folder)
+      @_copy("commands.js", folder)
+    )
 
   scaffold: ->
     ## we want to build out the supportFolder + and example file
@@ -39,8 +45,7 @@ class Support
     ## if the support dir doesnt exist
     ## then create it + the example fixture
     fs.statAsync(@folder)
-      .bind(@)
-      .catch ->
-        @copyExample(@folder)
+    .catch =>
+      @copyFiles(@folder)
 
 module.exports = Support
