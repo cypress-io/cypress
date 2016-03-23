@@ -26,8 +26,9 @@ describe "lib/cypress", ->
     cache.removeSync()
 
     Fixtures.scaffold()
-    @todosPath = Fixtures.projectPath("todos")
+    @todosPath    = Fixtures.projectPath("todos")
     @pristinePath = Fixtures.projectPath("pristine")
+    @idsPath      = Fixtures.projectPath("ids")
 
     ## force cypress to call directly into main without
     ## spawning a separate process
@@ -286,6 +287,52 @@ describe "lib/cypress", ->
           fs.statAsync path.join(@cfg.supportFolder, "commands.js")
         .then =>
           fs.statAsync path.join(@cfg.supportFolder, "defaults.js")
+
+    it "removes fixtures when they exist and fixturesFolder is false", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        config.get(@idsPath).then (@cfg) =>
+
+        Project.add(@idsPath)
+      ])
+      .then =>
+        fs.statAsync(@cfg.fixturesFolder)
+      .then =>
+        Settings.read(@idsPath)
+      .then (json) =>
+        json.fixturesFolder = false
+        Settings.write(@idsPath, json)
+      .then =>
+        cypress.start(["--run-project=#{@idsPath}"])
+      .then =>
+        fs.statAsync(@cfg.fixturesFolder)
+        .then ->
+          throw new Error("fixturesFolder should not exist!")
+        .catch ->
+
+    it "removes support when they exist and supportFolder is false", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        config.get(@idsPath).then (@cfg) =>
+
+        Project.add(@idsPath)
+      ])
+      .then =>
+        fs.statAsync(@cfg.supportFolder)
+      .then =>
+        Settings.read(@idsPath)
+      .then (json) =>
+        json.supportFolder = false
+        Settings.write(@idsPath, json)
+      .then =>
+        cypress.start(["--run-project=#{@idsPath}"])
+      .then =>
+        fs.statAsync(@cfg.supportFolder)
+        .then ->
+          throw new Error("fixturesFolder should not exist!")
+        .catch ->
 
     it "logs error and exits when user isn't logged in", ->
       user.set({})
