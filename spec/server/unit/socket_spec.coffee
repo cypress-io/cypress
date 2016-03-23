@@ -180,7 +180,9 @@ describe "lib/socket", ->
 
       it "returns undefined if #testFilePath matches arguments", ->
         @socket.testFilePath = @filePath
-        expect(@socket.watchTestFileByPath(@config, "test1.js", @watchers)).to.be.undefined
+        cb = @sandbox.spy()
+        @socket.watchTestFileByPath(@config, "test1.js", @watchers, cb)
+        expect(cb).to.be.calledOnce
 
       it "closes existing watchedTestFile", ->
         remove = @sandbox.stub(@watchers, "remove")
