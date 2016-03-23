@@ -16,7 +16,7 @@ class Socket
     if not (@ instanceof Socket)
       return new Socket
 
-  onTestFileChange: (config, filePath, stats) ->
+  onTestFileChange: (integrationFolder, filePath, stats) ->
     logger.info "onTestFileChange", filePath: filePath
 
     ## return if we're not a js or coffee file.
@@ -25,9 +25,14 @@ class Socket
 
     fs.statAsync(filePath).bind(@)
       .then ->
-        ## strip out our integrationFolder path from the filePath, and any leading forward slashes
-        filePath      = filePath.split(config.projectRoot).join("").replace(leadingSlashesRe, "")
-        strippedPath  = filePath.replace(config.integrationFolder, "").replace(leadingSlashesRe, "")
+        ## strip out the integration folder
+        ## example:
+        ##
+        ## /Users/bmann/Dev/cypress-app/.projects/todos/tests
+        ## /Users/bmann/Dev/cypress-app/.projects/todos/tests/test1.js
+        ##
+        ## becomes test1.js
+        strippedPath = path.relative(integrationFolder, filePath)
 
         @io.emit "test:changed", {file: strippedPath}
       .catch(->)
@@ -49,7 +54,7 @@ class Socket
     @testFilePath = testFilePath
 
     watchers.watchAsync(testFilePath, {
-      onChange: _.bind(@onTestFileChange, @, config)
+      onChange: _.bind(@onTestFileChange, @, config.integrationFolder)
     })
     .then(cb)
 
