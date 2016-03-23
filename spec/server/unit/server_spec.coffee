@@ -14,7 +14,7 @@ mockery.registerMock("morgan", -> morganFn)
 
 describe "lib/server", ->
   beforeEach ->
-    @config = config.mergeDefaults()
+    @config = config.set({})
     @server = Server()
 
   afterEach ->

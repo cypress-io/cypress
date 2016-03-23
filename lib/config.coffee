@@ -11,14 +11,31 @@ isCypressEnvLike = (key) ->
 module.exports = {
   get: (projectRoot, options = {}) ->
     Promise.all([
-      settings.readEnv(projectRoot)
       settings.read(projectRoot)
+      settings.readEnv(projectRoot)
     ])
-    .spread (env, config) =>
-      config.projectRoot = projectRoot
-      config.envFile = env
+    .spread (settings, envFile) =>
+      @set({
+        projectRoot: projectRoot
+        config:      settings
+        envFile:     envFile
+        options:     options
+      })
 
-      @mergeDefaults(config, options)
+  set: (obj = {}) ->
+    {projectRoot, config, envFile, options} = obj
+
+    ## just force config to be an object
+    ## so we dont have to do as much
+    ## work in our tests
+    config ?= {}
+
+    ## flatten the object's properties
+    ## into the master config object
+    config.envFile     = envFile
+    config.projectRoot = projectRoot
+
+    @mergeDefaults(config, options)
 
   mergeDefaults: (config = {}, options = {}) ->
     _.extend config, _.pick(options, "isHeadless", "socketId")

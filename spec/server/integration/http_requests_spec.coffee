@@ -32,7 +32,7 @@ describe "Routes", ->
       ## get all the config defaults
       ## and allow us to override them
       ## for each test
-      cfg = config.mergeDefaults(obj)
+      cfg = config.set(obj)
 
       @app = @server.createExpressApp()
       @server.createRoutes(@app, cfg)

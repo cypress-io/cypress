@@ -19,7 +19,7 @@ describe "lib/project", ->
     @todosPath = Fixtures.projectPath("todos")
     @projectId = settings.readSync(@todosPath).projectId
 
-    @config  = config.mergeDefaults({})
+    @config  = config.set({})
     @project = Project("path/to/project")
 
   afterEach ->
