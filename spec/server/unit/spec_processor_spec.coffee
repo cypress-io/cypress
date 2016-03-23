@@ -19,7 +19,7 @@ describe "lib/controllers/spec_processor", ->
   beforeEach ->
     @config = {
       projectRoot: ""
-      testFolder: fixturesRoot
+      integrationFolder: fixturesRoot
       browserify: {
         basedir: fixturesRoot
       }

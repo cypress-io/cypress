@@ -2,7 +2,7 @@ _        = require("lodash")
 str      = require("underscore.string")
 settings = require("./util/settings")
 
-## cypress following by _ or - or .
+## cypress following by _
 cypressEnvRe = /^(cypress_)/i
 
 isCypressEnvLike = (key) ->
@@ -51,10 +51,9 @@ module.exports = {
       autoOpen:       false
       viewportWidth:  1000
       viewportHeight: 660
-      testFolder:     "tests"
       fixturesFolder: "tests/_fixtures"
       supportFolder:  "tests/_support"
-      # integrationFolder: "cypress/integration"
+      integrationFolder: "cypress/integration"
       # unitFolder:        "cypress/unit"
       # fixturesFolder:    "cypress/fixtures"
       # helpersFolder:     "cypress/helpers"

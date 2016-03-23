@@ -405,7 +405,7 @@ describe "lib/project", ->
       p = Fixtures.projectPath("ids")
 
       Project.removeIds(p).then ->
-        expect(ids.remove).to.be.calledWith(p + "/tests")
+        expect(ids.remove).to.be.calledWith(p + "/cypress/integration")
 
   context ".getSecretKeyByPath", ->
     beforeEach ->

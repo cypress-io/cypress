@@ -158,22 +158,22 @@ class Project extends EE
     @getConfig()
     .then (cfg) =>
       if spec
-        @ensureSpecExists(cfg.testFolder, spec)
+        @ensureSpecExists(cfg.integrationFolder, spec)
         .then (str) =>
           @getUrlBySpec(cfg.clientUrl, str)
       else
         @getUrlBySpec(cfg.clientUrl, "/__all")
 
-  ensureSpecExists: (testFolder, spec) ->
-    specFile = path.resolve(@projectRoot, testFolder, spec)
+  ensureSpecExists: (integrationFolder, spec) ->
+    specFile = path.resolve(@projectRoot, integrationFolder, spec)
 
     ## we want to make it easy on the user by allowing them to pass both
     ## an absolute path to the spec, or a relative path from their test folder
     fs
     .statAsync(specFile)
     .then =>
-      ## strip out the projectRoot + testFolder
-      specFile.replace(path.join(@projectRoot, testFolder), "")
+      ## strip out the projectRoot + integrationFolder
+      specFile.replace(path.join(@projectRoot, integrationFolder), "")
     .catch ->
       errors.throw("SPEC_FILE_NOT_FOUND", specFile)
 
@@ -254,8 +254,8 @@ class Project extends EE
     .verifyExistance()
     .call("getConfig")
     .then (cfg) ->
-      ## remove all of the ids for the test files found in the testFolder
-      ids.remove path.join(cfg.projectRoot, cfg.testFolder)
+      ## remove all of the ids for the test files found in the integrationFolder
+      ids.remove path.join(cfg.projectRoot, cfg.integrationFolder)
 
   @id = (path) ->
     Project(path).getProjectId()

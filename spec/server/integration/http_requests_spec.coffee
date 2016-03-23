@@ -90,7 +90,7 @@ describe "Routes", ->
 
       @setup({
         projectRoot: Fixtures.project("todos")
-        testFolder: "tests"
+        integrationFolder: "tests"
         fixturesFolder: "tests/_fixtures"
         javascripts: ["tests/etc/**/*"]
       })
@@ -133,7 +133,7 @@ describe "Routes", ->
 
         @setup({
           projectRoot: Fixtures.project("todos")
-          testFolder: "tests"
+          integrationFolder: "tests"
           javascripts: ["support/spec_helper.coffee"]
           sinon: false
           fixtures: false
@@ -168,7 +168,7 @@ describe "Routes", ->
 
         @setup({
           projectRoot: Fixtures.project("no-server")
-          testFolder: "my-tests"
+          integrationFolder: "my-tests"
           javascripts: ["helpers/includes.js"]
           sinon: false
           fixtures: false
@@ -290,7 +290,7 @@ describe "Routes", ->
 
           @setup({
             projectRoot: Fixtures.project("todos")
-            testFolder: "tests"
+            integrationFolder: "tests"
           })
 
         afterEach ->
@@ -369,7 +369,7 @@ describe "Routes", ->
 
         @setup({
           projectRoot: Fixtures.project("todos")
-          testFolder: "tests"
+          integrationFolder: "tests"
           javascripts: ["tests/etc/etc.js"]
           sinon: false
           fixtures: false
@@ -404,7 +404,7 @@ describe "Routes", ->
 
         @setup({
           projectRoot: Fixtures.project("no-server")
-          testFolder: "my-tests"
+          integrationFolder: "my-tests"
           javascripts: ["helpers/includes.js"]
           ## even though there are no files here
           ## we are adding rootFolder to test that
@@ -1309,7 +1309,7 @@ describe "Routes", ->
         @setup({
           projectRoot: Fixtures.project("no-server")
           rootFolder: "dev"
-          testFolder: "my-tests"
+          integrationFolder: "my-tests"
         })
 
         @session

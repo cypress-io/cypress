@@ -216,15 +216,15 @@ describe "lib/socket", ->
             fs.writeFileAsync(@socket.testsDir + "/test2.coffee", "foooooooooo")
 
     context "#startListening", ->
-      it "creates testFolder if does not exist", ->
-        @config.testFolder = "does-not-exist"
+      it "creates integrationFolder if does not exist", ->
+        @config.integrationFolder = "does-not-exist"
 
         @socket.startListening(@server.getHttpServer(), {}, @config, {}).then ->
           dir = fs.statSync(Fixtures.project("todos") + "/does-not-exist")
           expect(dir.isDirectory()).to.be.true
 
       it "sets #testsDir", ->
-        @config.testFolder = "does-not-exist"
+        @config.integrationFolder = "does-not-exist"
 
         @socket.startListening(@server.getHttpServer(), {}, @config, {}).then ->
           expect(@testsDir).to.eq Fixtures.project("todos/does-not-exist")
@@ -247,7 +247,7 @@ describe "lib/socket", ->
         beforeEach ->
           @statAsync = @sandbox.spy(fs, "statAsync")
 
-          @config.testFolder = "tests"
+          @config.integrationFolder = "tests"
 
         it "does not emit if not a js or coffee files", ->
           @socket.onTestFileChange(@config, "foo/bar")

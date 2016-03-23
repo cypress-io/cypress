@@ -86,7 +86,7 @@
         else item
 
     getPathToSpec: (id) ->
-      _.compact([@get("testFolder"), id]).join("/")
+      _.compact([@get("integrationFolder"), id]).join("/")
 
     getProjectName: ->
       _.last @get("projectRoot").split("/")

@@ -25,9 +25,9 @@ class Socket
 
     fs.statAsync(filePath).bind(@)
       .then ->
-        ## strip out our testFolder path from the filePath, and any leading forward slashes
+        ## strip out our integrationFolder path from the filePath, and any leading forward slashes
         filePath      = filePath.split(config.projectRoot).join("").replace(leadingSlashesRe, "")
-        strippedPath  = filePath.replace(config.testFolder, "").replace(leadingSlashesRe, "")
+        strippedPath  = filePath.replace(config.integrationFolder, "").replace(leadingSlashesRe, "")
 
         @io.emit "test:changed", {file: strippedPath}
       .catch(->)
@@ -81,7 +81,7 @@ class Socket
     messages = {}
     chromiums = {}
 
-    {projectRoot, testFolder, socketIoRoute} = config
+    {projectRoot, integrationFolder, socketIoRoute} = config
 
     @io = @createIo(server, socketIoRoute)
 
@@ -165,7 +165,7 @@ class Socket
       socket.on "mocha", =>
         options.onMocha.apply(options, arguments)
 
-    @testsDir = path.join(projectRoot, testFolder)
+    @testsDir = path.join(projectRoot, integrationFolder)
 
     fs.ensureDirAsync(@testsDir).bind(@)
 

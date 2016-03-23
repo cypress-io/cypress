@@ -39,7 +39,7 @@ module.exports = {
     _.defaults options,
       test: true
 
-    {testFolder, rootFolder, supportFolder} = config
+    {integrationFolder, rootFolder, supportFolder} = config
 
     ## return the specs prefixed with /tests?p=spec
     _(specs).map (spec) ->
@@ -50,7 +50,7 @@ module.exports = {
       else
         if options.test
           ## prepend with tests path
-          spec = "#{testFolder}/#{spec}"
+          spec = "#{integrationFolder}/#{spec}"
         else
           ## make sure we have no leading
           ## or trailing forward slashes
@@ -101,9 +101,9 @@ module.exports = {
         @convertToSpecPath(files, config, {test: false})
 
   getTestFiles: (config) ->
-    testFolderPath = path.join(
+    integrationFolderPath = path.join(
       config.projectRoot,
-      config.testFolder
+      config.integrationFolder
     )
 
     ## support files are not automatically
@@ -137,15 +137,15 @@ module.exports = {
       }
 
       ## grab all the js and coffee files
-      glob "#{testFolderPath}/**/*.+(js|coffee)", options, (err, files) ->
+      glob "#{integrationFolderPath}/**/*.+(js|coffee)", options, (err, files) ->
         reject(err) if err
 
-        ## slice off the testFolder directory(ies) (which is our test folder)
-        testFolderLength = testFolderPath.split("/").length
+        ## slice off the integrationFolder directory(ies) (which is our test folder)
+        integrationFolderLength = integrationFolderPath.split("/").length
 
         files = _(files).map (file) ->
-          {name: file.split("/").slice(testFolderLength).join("/")}
-        files.path = testFolderPath
+          {name: file.split("/").slice(integrationFolderLength).join("/")}
+        files.path = integrationFolderPath
 
         resolve(files)
 

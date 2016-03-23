@@ -1,6 +1,6 @@
 {
   "cypress": {
-    "testFolder": "my-tests",
+    "integrationFolder": "my-tests",
     "rootFolder": "dev"
   }
 }
