@@ -8,7 +8,7 @@ cache        = require("#{root}lib/cache")
 errors       = require("#{root}lib/errors")
 config       = require("#{root}lib/config")
 fixture      = require("#{root}lib/fixture")
-Support      = require("#{root}lib/support")
+support      = require("#{root}lib/support")
 Project      = require("#{root}lib/project")
 settings     = require("#{root}lib/util/settings")
 
@@ -179,13 +179,19 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("path/to/project")
       @sandbox.stub(fixture, "scaffold").resolves()
-      @sandbox.stub(Support.prototype, "scaffold").resolves()
+      @sandbox.stub(support, "scaffold").resolves()
 
     it "calls fixture.scaffold with projectRoot + fixturesFolder", ->
       obj = {projectRoot: "pr", fixturesFolder: "ff", supportFolder: "sf"}
 
       @project.scaffold(obj).then ->
         expect(fixture.scaffold).to.be.calledWith(obj.projectRoot, obj.fixturesFolder)
+
+    it "calls support.scaffold with projectRoot + fixturesFolder", ->
+      obj = {projectRoot: "pr", fixturesFolder: "ff", supportFolder: "sf"}
+
+      @project.scaffold(obj).then ->
+        expect(support.scaffold).to.be.calledWith(obj.projectRoot, obj.supportFolder)
 
   context "#watchSettings", ->
     beforeEach ->

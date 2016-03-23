@@ -5,19 +5,7 @@ cwd       = require("./cwd")
 
 fs = Promise.promisifyAll(fs)
 
-class Support
-  constructor: (config = {}) ->
-    if not (@ instanceof Support)
-      return new Support(config)
-
-    if not pr = config.projectRoot
-      throw new Error("Instantiating lib/support requires a projectRoot!")
-
-    if not sf = config.supportFolder
-      throw new Error("Instantiating lib/support requires a supportFolder!")
-
-    @folder = path.join(pr, sf)
-
+module.exports = {
   _copy: (file, folder) ->
     src  = cwd("lib", "scaffold", file)
     dest = path.join(folder, file)
@@ -30,6 +18,8 @@ class Support
     )
 
   scaffold: ->
+    folder = path.join.apply(path, arguments)
+
     ## we want to build out the supportFolder + and example file
     ## but only create the example file if the supportFolder doesnt
     ## exist
@@ -44,8 +34,7 @@ class Support
 
     ## if the support dir doesnt exist
     ## then create it + the example fixture
-    fs.statAsync(@folder)
+    fs.statAsync(folder)
     .catch =>
-      @copyFiles(@folder)
-
-module.exports = Support
+      @copyFiles(folder)
+}

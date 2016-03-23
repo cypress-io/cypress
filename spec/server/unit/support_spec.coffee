@@ -2,7 +2,7 @@ require("../spec_helper")
 
 path        = require("path")
 config      = require("#{root}lib/config")
-Support     = require("#{root}lib/support")
+support     = require("#{root}lib/support")
 Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
 describe "lib/support", ->
@@ -12,21 +12,18 @@ describe "lib/support", ->
     @todosPath = Fixtures.projectPath("todos")
 
     config.get(@todosPath).then (cfg) =>
-      @support = Support(cfg)
+      @cfg    = cfg
+      @folder = path.join(cfg.projectRoot, cfg.supportFolder)
 
   afterEach ->
     Fixtures.remove()
 
-  context "#constructor", ->
-    it "sets folder to supportFolder", ->
-      expect(@support.folder).to.eq @todosPath + "/cypress/support"
-
   context "#scaffold", ->
     it "creates both supportFolder and commands.js and defaults.js when supportFolder does not exist", ->
       ## todos has a _support folder so let's first nuke it and then scaffold
-      fs.removeAsync(@support.folder).then =>
-        @support.scaffold().then =>
-          fs.readFileAsync(@support.folder + "/commands.js", "utf8").then (str) =>
+      fs.removeAsync(@folder).then =>
+        support.scaffold(@cfg.projectRoot, @cfg.supportFolder).then =>
+          fs.readFileAsync(@folder + "/commands.js", "utf8").then (str) =>
             expect(str).to.eq """
             // ***********************************************
             // This example commands.js shows you how to
@@ -69,7 +66,7 @@ describe "lib/support", ->
             // })
             """
 
-            fs.readFileAsync(@support.folder + "/defaults.js", "utf8").then (str) ->
+            fs.readFileAsync(@folder + "/defaults.js", "utf8").then (str) ->
                 expect(str).to.eq """
                 // ***********************************************
                 // This example defaults.js shows you how to
@@ -91,11 +88,11 @@ describe "lib/support", ->
                 """
 
     it "does not create spec_helper.js if supportFolder already exists", (done) ->
-      fs.removeAsync(@support.folder).then =>
+      fs.removeAsync(@folder).then =>
         ## create the supportFolder ourselves manually
-        fs.ensureDirAsync(@support.folder).then =>
+        fs.ensureDirAsync(@folder).then =>
           ## now scaffold
-          @support.scaffold().then =>
+          support.scaffold(@cfg.projectRoot, @cfg.supportFolder).then =>
             ## ensure spec_helper.js doesnt exist
-            fs.statAsync(path.join(@support.folder, "spec_helper.js"))
+            fs.statAsync(path.join(@folder, "spec_helper.js"))
               .catch -> done()

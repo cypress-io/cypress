@@ -11,7 +11,7 @@ config    = require("./config")
 logger    = require("./logger")
 errors    = require("./errors")
 Server    = require("./server")
-Support   = require("./support")
+support   = require("./support")
 fixture   = require("./fixture")
 Watchers  = require("./watchers")
 Reporter  = require("./reporter")
@@ -187,7 +187,7 @@ class Project extends EE
       fixture.scaffold(config.projectRoot, config.fixturesFolder),
       ## ensure support dir is created
       ## and example support file if dir doesnt exist
-      Support(config).scaffold()
+      support.scaffold(config.projectRoot, config.supportFolder)
     )
 
   writeProjectId: (id) ->
