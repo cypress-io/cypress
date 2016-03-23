@@ -291,6 +291,7 @@ describe "Routes", ->
           @setup({
             projectRoot: Fixtures.project("todos")
             integrationFolder: "tests"
+            fixturesFolder: "tests/_fixtures"
           })
 
         afterEach ->
@@ -370,6 +371,7 @@ describe "Routes", ->
         @setup({
           projectRoot: Fixtures.project("todos")
           integrationFolder: "tests"
+          fixturesFolder: "tests/_fixtures"
           javascripts: ["tests/etc/etc.js"]
           sinon: false
           fixtures: false
