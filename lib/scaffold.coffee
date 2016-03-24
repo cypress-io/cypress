@@ -6,10 +6,12 @@ cwd       = require("./cwd")
 
 fs = Promise.promisifyAll(fs)
 
+INTEGRATION_EXAMPLE_SPEC_FILENAME = "example_spec.js"
+
 module.exports = {
   integration: (folder) ->
     @verifyScaffolding folder, =>
-      @copy("example_spec.js", folder)
+      @copy(INTEGRATION_EXAMPLE_SPEC_FILENAME, folder)
 
   fixture: (folder, options) ->
     @verifyScaffolding folder, options, =>
@@ -26,6 +28,13 @@ module.exports = {
     src  = cwd("lib", "scaffold", file)
     dest = path.join(folder, file)
     fs.copyAsync(src, dest)
+
+  integrationExampleSize: ->
+    fs
+    .statAsync(cwd("lib", "scaffold", INTEGRATION_EXAMPLE_SPEC_FILENAME))
+    .get("size")
+
+  integrationExampleName: -> INTEGRATION_EXAMPLE_SPEC_FILENAME
 
   verifyScaffolding: (folder, options = {}, fn) ->
     if _.isFunction(options)

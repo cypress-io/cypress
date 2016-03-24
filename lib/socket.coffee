@@ -4,6 +4,7 @@ fs            = require("fs-extra")
 opn           = require("opn")
 path          = require("path")
 uuid          = require("node-uuid")
+Promise       = require("bluebird")
 socketIo      = require("socket.io")
 cwd           = require("./cwd")
 fixture       = require("./fixture")
@@ -79,7 +80,11 @@ class Socket
       onMocha: ->
       onConnect: ->
       onChromiumRun: ->
+      onIsNewProject: ->
       checkForAppErrors: ->
+
+    ## promisify this function
+    options.onIsNewProject = Promise.method(options.onIsNewProject)
 
     messages = {}
     chromiums = {}
@@ -178,6 +183,10 @@ class Socket
 
         opn(config.parentTestsFolder, opts)
         .then -> cb()
+
+      socket.on "is:new:project", (cb) =>
+        options.onIsNewProject()
+        .then(cb)
 
   end: ->
     ## TODO: we need an 'ack' from this end

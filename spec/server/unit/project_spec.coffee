@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+path         = require("path")
 Fixtures     = require("../helpers/fixtures")
 ids          = require("#{root}lib/ids")
 api          = require("#{root}lib/api")
@@ -15,7 +16,10 @@ describe "lib/project", ->
   beforeEach ->
     Fixtures.scaffold()
 
-    @todosPath = Fixtures.projectPath("todos")
+    @todosPath    = Fixtures.projectPath("todos")
+    @idsPath      = Fixtures.projectPath("ids")
+    @pristinePath = Fixtures.projectPath("pristine")
+
     @projectId = settings.readSync(@todosPath).projectId
 
     @config  = config.set({})
@@ -160,6 +164,60 @@ describe "lib/project", ->
       @project.close().then =>
         expect(@project.listeners("foo").length).to.be.eq(0)
 
+  context "#determineIsNewProject", ->
+    it "is false when files.length isnt 1", ->
+      id = =>
+        @ids = Project(@idsPath)
+        @ids.getConfig()
+        .then (cfg) =>
+          @ids.scaffold(cfg).return(cfg)
+        .then (cfg) =>
+          @ids.determineIsNewProject(cfg.integrationFolder)
+        .then (ret) ->
+          expect(ret).to.be.false
+
+      todo = =>
+        @todos = Project(@todosPath)
+        @todos.getConfig()
+        .then (cfg) =>
+          @todos.scaffold(cfg).return(cfg)
+        .then (cfg) =>
+          @todos.determineIsNewProject(cfg.integrationFolder)
+        .then (ret) ->
+          expect(ret).to.be.false
+
+      Promise.join(id, todo)
+
+    it "is true when files, name + bytes match to scaffold", ->
+      pristine = Project(@pristinePath)
+      pristine.getConfig()
+      .then (cfg) ->
+        pristine.scaffold(cfg).return(cfg)
+      .then (cfg) ->
+        pristine.determineIsNewProject(cfg.integrationFolder)
+      .then (ret) ->
+        expect(ret).to.be.true
+
+    it "is false when bytes dont match scaffold", ->
+      pristine = Project(@pristinePath)
+      pristine.getConfig()
+      .then (cfg) ->
+        pristine.scaffold(cfg).return(cfg)
+      .then (cfg) ->
+        example = scaffold.integrationExampleName()
+        file    = path.join(cfg.integrationFolder, example)
+
+        ## write some data to the file so it is now
+        ## different in file size
+        fs.readFileAsync(file, "utf8")
+        .then (str) ->
+          str += "foo bar baz"
+          fs.writeFileAsync(file, str).return(cfg)
+      .then (cfg) ->
+        pristine.determineIsNewProject(cfg.integrationFolder)
+      .then (ret) ->
+        expect(ret).to.be.false
+
   context "#updateProject", ->
     beforeEach ->
       @project = Project("path/to/project")
@@ -236,6 +294,29 @@ describe "lib/project", ->
       obj.onChange()
 
       expect(emit).to.be.calledWith("settings:changed")
+
+  context "#watchSettingsAndStartWebsockets", ->
+    beforeEach ->
+      @project = Project("path/to/project")
+      @project.watchers = {}
+      @project.server = @sandbox.stub({startWebsockets: ->})
+      @sandbox.stub(@project, "watchSettings")
+
+    it "calls server.startWebsockets with watchers + config", ->
+      @project.watchSettingsAndStartWebsockets({}, 2)
+
+      expect(@project.server.startWebsockets).to.be.calledWith(@project.watchers, 2)
+
+    it "passes onIsNewProject callback", ->
+      @sandbox.stub(@project, "determineIsNewProject")
+
+      @project.server.startWebsockets.yieldsTo("onIsNewProject")
+
+      @project.watchSettingsAndStartWebsockets({}, {
+        integrationFolder: "foo/bar/baz"
+      })
+
+      expect(@project.determineIsNewProject).to.be.calledWith("foo/bar/baz")
 
   context "#getProjectId", ->
     afterEach ->

@@ -1,4 +1,5 @@
 path      = require("path")
+glob      = require("glob")
 EE        = require("events")
 _         = require("lodash")
 fs        = require("fs-extra")
@@ -16,7 +17,8 @@ Watchers  = require("./watchers")
 Reporter  = require("./reporter")
 settings  = require("./util/settings")
 
-fs = Promise.promisifyAll(fs)
+fs   = Promise.promisifyAll(fs)
+glob = Promise.promisify(glob)
 
 class Project extends EE
   constructor: (projectRoot) ->
@@ -123,6 +125,10 @@ class Project extends EE
       reporter = Reporter()
 
     @server.startWebsockets(@watchers, config, {
+      onIsNewProject: =>
+        ## return a boolean whether this is a new project or not
+        @determineIsNewProject(config.integrationFolder)
+
       onConnect: (id) =>
         @emit("socket:connected", id)
 
@@ -146,6 +152,36 @@ class Project extends EE
             # console.log stats
             @emit("end", stats)
     })
+
+  determineIsNewProject: (integrationFolder) ->
+    ## logic to determine if new project
+    ## 1. there is only 1 file in 'integrationFolder'
+    ## 2. the file is called 'example_spec.js'
+    ## 3. the bytes of the file match lib/scaffold/example_spec.js
+    nameIsDefault = (file) ->
+      path.basename(file) is scaffold.integrationExampleName()
+
+    getCurrentSize = (file) ->
+      fs
+      .statAsync(file)
+      .get("size")
+
+    checkIfBothMatch = (current, scaffold) ->
+      current is scaffold
+
+    glob("**/*", {cwd: integrationFolder, realpath: true})
+    .then (files) ->
+      return false if files.length isnt 1
+
+      exampleSpec = files[0]
+
+      return false if not def = nameIsDefault(exampleSpec)
+
+      Promise.join(
+        getCurrentSize(exampleSpec),
+        scaffold.integrationExampleSize(),
+        checkIfBothMatch
+      )
 
   getConfig: (options = {}) ->
     if c = @cfg
