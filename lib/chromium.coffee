@@ -1,6 +1,7 @@
 _        = require("lodash")
 util     = require("util")
 request  = require("request-promise")
+Promise  = require("bluebird")
 Routes   = require("./util/routes")
 
 class Chromium
