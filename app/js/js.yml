@@ -16,6 +16,7 @@ vendor:
   - bower_components/spin.js/jquery.spin.js
   - bower_components/jsuri/Uri.js
   - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js
+  - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/modal.js
   - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/tooltip.js
   - bower_components/jquery-ui/ui/core.js
   - bower_components/jquery-ui/ui/widget.js
@@ -36,6 +37,7 @@ cypress:
 app:
   - app/js/config/**
   - app/js/backbone/app.coffee
+  - app/js/backbone/lib/regions/**
   - app/js/backbone/lib/templates/**
   - app/js/backbone/lib/entities/**
   - app/js/backbone/lib/utilities/**

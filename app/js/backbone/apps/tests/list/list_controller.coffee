@@ -3,9 +3,19 @@
   class List.Controller extends App.Controllers.Application
 
     initialize: ->
-      files = App.request "file:entities"
+      files  = App.request "file:entities"
+      socket = App.request "socket:entity"
 
       @layout = @getLayoutView()
+
+      ## if this is our first time visiting files
+      ## after adding the project, we want to onboard
+      @listenTo @layout, "show", ->
+        socket.emit "is:new:project", (bool) ->
+          files.trigger("is:new:project", bool)
+
+      @listenTo files, "is:new:project", (bool) ->
+        @onboardingRegion() if bool
 
       @listenTo files, "sync", =>
         # @searchRegion(files) if files.length
@@ -15,6 +25,9 @@
       @show @layout,
         loading:
           entities: files
+
+    onboardingRegion: ->
+      App.execute "show:files:onboarding"
 
     searchRegion: (files) ->
       searchView = @getSearchView files
