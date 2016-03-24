@@ -3,6 +3,7 @@ str      = require("underscore.string")
 path     = require("path")
 Promise  = require("bluebird")
 settings = require("./util/settings")
+scaffold = require("./scaffold")
 
 ## cypress following by _
 cypressEnvRe = /^(cypress_)/i
@@ -113,7 +114,19 @@ module.exports = {
 
     config = @setParentTestsPaths(config)
 
+    config = @setScaffoldPaths(config)
+
     return config
+
+  setScaffoldPaths: (obj) ->
+    obj = _.clone(obj)
+
+    fileName = scaffold.integrationExampleName()
+
+    obj.integrationExampleFile = path.join(obj.integrationFolder, fileName)
+    obj.integrationExampleName = fileName
+
+    return obj
 
   setParentTestsPaths: (obj) ->
     ## projectRoot:              "/path/to/project"

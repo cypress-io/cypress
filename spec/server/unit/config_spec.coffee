@@ -207,6 +207,18 @@ describe "lib/config", ->
       obj = {}
       expect(config.setUrls(obj)).not.to.eq(obj)
 
+  context ".setScaffoldPaths", ->
+    it "sets integrationExampleFile + integrationExampleName", ->
+      obj = {
+        integrationFolder: "/path/to/project/cypress/integration"
+      }
+
+      expect(config.setScaffoldPaths(obj)).to.deep.eq({
+        integrationFolder: "/path/to/project/cypress/integration"
+        integrationExampleFile: "/path/to/project/cypress/integration/example_spec.js"
+        integrationExampleName: "example_spec.js"
+      })
+
   context ".setParentTestsPaths", ->
     it "sets parentTestsFolder and parentTestsFolderDisplay", ->
       obj = {
