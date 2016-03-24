@@ -55,7 +55,7 @@ class Server
     e.portInUse = true
     e
 
-  open: (projectRoot, config = {}, options = {}) ->
+  open: (projectRoot, config = {}) ->
     Promise.try =>
       app = @createExpressApp(config.port, config.morgan)
 

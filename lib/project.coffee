@@ -40,7 +40,7 @@ class Project extends EE
 
     @getConfig(options)
     .then (cfg) =>
-      @server.open(@projectRoot, cfg, options)
+      @server.open(@projectRoot, cfg)
       .then =>
         ## sync but do not block
         @sync(options)
