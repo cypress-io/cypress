@@ -1,17 +1,28 @@
 require("../spec_helper")
 
 _            = require("lodash")
+os           = require("os")
 path         = require("path")
 uuid         = require("node-uuid")
 client       = require("socket.io-client")
 config       = require("#{root}lib/config")
-Socket       = require("#{root}lib/socket")
-Server       = require("#{root}lib/server")
 Watchers     = require("#{root}lib/watchers")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
+Socket       = null
+Server       = null
 
 describe "lib/socket", ->
   beforeEach ->
+    @opnStub = @sandbox.stub()
+
+    Socket = proxyquire("../../lib/socket", {
+      opn: @opnStub
+    })
+
+    Server = proxyquire("../../lib/server", {
+      "./socket": Socket
+    })
+
     Fixtures.scaffold()
 
     @todosPath = Fixtures.projectPath("todos")
@@ -43,6 +54,25 @@ describe "lib/socket", ->
 
     afterEach ->
       @client.disconnect()
+
+    context "on(open:project:tests)", ->
+      it "calls opn with config.parentTestsFolder + opts on darwin", (done) ->
+        @sandbox.stub(os, "platform").returns("darwin")
+
+        @opnStub.resolves()
+
+        @client.emit "open:project:tests", =>
+          expect(@opnStub).to.be.calledWith(@cfg.parentTestsFolder, {args: "-R"})
+          done()
+
+      it "calls opn with config.parentTestsFolder + no opts when not on darwin", (done) ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        @opnStub.resolves()
+
+        @client.emit "open:project:tests", =>
+          expect(@opnStub).to.be.calledWith(@cfg.parentTestsFolder, {})
+          done()
 
     context "on(watch:test:file)", ->
       it "calls socket#watchTestFileByPath with config, filePath, watchers", (done) ->

@@ -170,13 +170,14 @@ class Socket
       socket.on "mocha", =>
         options.onMocha.apply(options, arguments)
 
-      socket.on "open:project:tests", ->
+      socket.on "open:project:tests", (cb = ->) ->
         opts = {}
 
         if os.platform() is "darwin"
           opts.args = "-R"
 
         opn(config.parentTestsFolder, opts)
+        .then -> cb()
 
   end: ->
     ## TODO: we need an 'ack' from this end
