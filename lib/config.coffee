@@ -1,6 +1,7 @@
 _        = require("lodash")
 str      = require("underscore.string")
 path     = require("path")
+Promise  = require("bluebird")
 settings = require("./util/settings")
 
 ## cypress following by _
