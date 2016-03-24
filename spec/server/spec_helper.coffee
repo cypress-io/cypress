@@ -2,13 +2,13 @@ global.root      = "../../../"
 global.supertest = require("supertest-as-promised")
 global.nock      = require("nock")
 global.fs        = require("fs-extra")
-global.Promise   = require("bluebird")
 global.expect    = require("chai").expect
 global.mockery   = require("mockery")
 global.proxyquire = require("proxyquire")
+Promise          = require("bluebird")
 path             = require("path")
 sinon            = require("sinon")
-sinonPromise     = require("sinon-as-promised")
+sinonPromise     = require("sinon-as-promised")(Promise)
 cache            = require("../../lib/cache")
 
 global.fs = fs = Promise.promisifyAll(global.fs)

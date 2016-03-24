@@ -1,8 +1,9 @@
 require("../spec_helper")
 
 _             = require("lodash")
-winston       = require("winston")
 path          = require("path")
+winston       = require("winston")
+Promise       = require("bluebird")
 konfig        = require("#{root}lib/konfig")
 logger        = require("#{root}lib/logger")
 exception     = require("#{root}lib/exception")

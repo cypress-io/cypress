@@ -1,6 +1,7 @@
 require("../spec_helper")
 
 path           = require("path")
+Promise        = require("bluebird")
 config         = require("#{root}lib/config")
 fixture        = require("#{root}lib/fixture")
 FixturesHelper = require("#{root}/spec/server/helpers/fixtures")

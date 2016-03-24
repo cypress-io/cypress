@@ -1,5 +1,6 @@
 require("../../spec_helper")
 
+Promise  = require("bluebird")
 inquirer = require("inquirer")
 electron = require("electron")
 user     = require("#{root}../lib/user")

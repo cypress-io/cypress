@@ -1,9 +1,13 @@
 require("../spec_helper")
 
+fs        = require("fs-extra")
 path      = require("path")
+Promise   = require("bluebird")
 cwd       = require("#{root}lib/cwd")
 cache     = require("#{root}lib/cache")
 Fixtures  = require("../helpers/fixtures")
+
+fs = Promise.promisifyAll(fs)
 
 describe "lib/cache", ->
   context "#ensureExists", ->

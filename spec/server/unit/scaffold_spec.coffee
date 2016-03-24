@@ -3,6 +3,7 @@ require("../spec_helper")
 path       = require("path")
 glob       = require("glob")
 config     = require("#{root}lib/config")
+Promise    = require("bluebird")
 scaffold   = require("#{root}lib/scaffold")
 Fixtures   = require("#{root}/spec/server/helpers/fixtures")
 
