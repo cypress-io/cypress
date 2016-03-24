@@ -124,7 +124,7 @@
     "node-notifier": "^4.5.0",
     "node-uuid": "1.4.1",
     "node-webkit-updater": "cypress-io/node-webkit-updater",
-    "open": "0.0.5",
+    "opn": "^4.0.1",
     "promise-semaphore": "cypress-io/promise-semaphore",
     "request": "2.69.0",
     "request-promise": "2.0.0",
