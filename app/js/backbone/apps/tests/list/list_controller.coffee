@@ -5,14 +5,18 @@
     initialize: ->
       files  = App.request "file:entities"
       socket = App.request "socket:entity"
+      config = App.request "app:config:entity"
 
-      @layout = @getLayoutView()
+      @layout = @getLayoutView(config)
 
       ## if this is our first time visiting files
       ## after adding the project, we want to onboard
       @listenTo @layout, "show", ->
         socket.emit "is:new:project", (bool) ->
           files.trigger("is:new:project", bool)
+
+      @listenTo @layout, "project:name:clicked", ->
+        socket.emit "open:project:root"
 
       @listenTo files, "is:new:project", (bool) ->
         @onboardingRegion() if bool
@@ -51,8 +55,9 @@
       @show filesView,
         region: @layout.allFilesRegion
 
-    getLayoutView: ->
+    getLayoutView: (config) ->
       new List.Layout
+        model: config
 
     getSearchView: (files) ->
       new List.Search

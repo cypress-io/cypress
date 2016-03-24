@@ -4,20 +4,25 @@
     margin: 20px;
   }
 
+  code:hover {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
   .outer-files-container {
     @include list-columns(100%);
     margin-bottom: 0;
   }
 
   .all-files-container {
-    margin-top: 20px;
+    margin-top: 60px;
     margin-bottom: 40px;
   }
 
   .file.all-tests {
     position: absolute;
     top: 68px;
-    left: 100px;
+    left: 20px;
     border-bottom: 1px solid #3861bf;
 
     &>div, &>div>div {

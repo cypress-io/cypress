@@ -88,9 +88,6 @@
     getPathToSpec: (id) ->
       _.compact([@get("integrationFolder"), id]).join("/")
 
-    getProjectName: ->
-      _.last @get("projectRoot").split("/")
-
     getCypressConfig: ->
       ## todo test cloning this to prevent env mutation
       _.clone @pick "waitForAnimations", "animationDistanceThreshold", "commandTimeout", "visitTimeout", "requestTimeout", "responseTimeout", "environmentVariables", "xhrUrl", "baseUrl", "viewportWidth", "viewportHeight"

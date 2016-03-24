@@ -1,5 +1,6 @@
 _             = require("lodash")
 fs            = require("fs-extra")
+opn           = require("opn")
 path          = require("path")
 uuid          = require("node-uuid")
 socketIo      = require("socket.io")
@@ -167,6 +168,9 @@ class Socket
 
       socket.on "mocha", =>
         options.onMocha.apply(options, arguments)
+
+      socket.on "open:project:root", ->
+        opn(projectRoot)
 
   end: ->
     ## TODO: we need an 'ack' from this end

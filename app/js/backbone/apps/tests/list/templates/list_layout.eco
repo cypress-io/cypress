@@ -3,7 +3,9 @@
     <div class="wrapper">
       <div class="block-panel">
         <div class="title-bar">
-          <h1>My Test Files</h1>
+          <h1>
+            Tests found in: <code data-js="project-name"><%= @projectName %>/cypress</code>
+          </h1>
           <div class="controls">
             <div id="search-region"></div>
           </div>
