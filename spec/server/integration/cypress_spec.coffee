@@ -307,7 +307,7 @@ describe "lib/cypress", ->
         .then =>
           fs.statAsync path.join(@cfg.supportFolder, "defaults.js")
 
-    it "removes fixtures when they exist and fixturesFolder is false", ->
+    it "removes fixtures when they exist and fixturesFolder is false", (done) ->
       Promise.all([
         user.set({session_token: "session-123"}),
 
@@ -328,9 +328,9 @@ describe "lib/cypress", ->
         fs.statAsync(@cfg.fixturesFolder)
         .then ->
           throw new Error("fixturesFolder should not exist!")
-        .catch ->
+        .catch -> done()
 
-    it "removes support when they exist and supportFolder is false", ->
+    it "removes support when they exist and supportFolder is false", (done) ->
       Promise.all([
         user.set({session_token: "session-123"}),
 
@@ -351,7 +351,7 @@ describe "lib/cypress", ->
         fs.statAsync(@cfg.supportFolder)
         .then ->
           throw new Error("fixturesFolder should not exist!")
-        .catch ->
+        .catch -> done()
 
     it "logs error and exits when user isn't logged in", ->
       user.set({})
