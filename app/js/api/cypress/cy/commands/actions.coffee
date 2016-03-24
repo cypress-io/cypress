@@ -388,6 +388,14 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           _(dblclicks).invoke("cancel")
           throw err
 
+
+    hover: (args) ->
+      @throwErr("""
+        cy.hover() command is not currently supported\n
+        https://on.cypress.io/api/hover
+      """)
+
+
     click: (subject, positionOrX, y, options = {}) ->
       ## TODO handle pointer-events: none
       ## http://caniuse.com/#feat=pointer-events
