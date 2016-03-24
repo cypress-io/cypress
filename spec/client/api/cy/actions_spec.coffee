@@ -4295,14 +4295,10 @@ describe "$Cypress.Cy Actions Commands", ->
     beforeEach ->
       @allowErrors()
 
-    it "throws when not a dom subject", (done) ->
-      @cy.on "fail", -> done()
-
-      @cy.hover()
-
-    it "throws when attempting to click multiple elements", (done) ->
+    it "throws when invoking", (done) ->
       @cy.on "fail", (err) ->
-        expect(err.message).to.eq "cy.hover() command is not currently supported\n\nhttps://on.cypress.io/api/hover"
+        expect(err.message).to.include "cy.hover() is not currently implemented."
+        expect(err.message).to.include "https://on.cypress.io/api/hover"
         done()
 
       @cy.get("button").hover()
