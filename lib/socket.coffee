@@ -84,6 +84,8 @@ class Socket
 
     {projectRoot, integrationFolder, socketIoRoute} = config
 
+    @testsDir = integrationFolder
+
     @io = @createIo(server, socketIoRoute)
 
     @io.on "connection", (socket) =>
@@ -165,10 +167,6 @@ class Socket
 
       socket.on "mocha", =>
         options.onMocha.apply(options, arguments)
-
-    @testsDir = integrationFolder
-
-    fs.ensureDirAsync(@testsDir).bind(@)
 
   end: ->
     ## TODO: we need an 'ack' from this end

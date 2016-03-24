@@ -7,18 +7,31 @@ cwd       = require("./cwd")
 fs = Promise.promisifyAll(fs)
 
 module.exports = {
-  _copy: (file, folder) ->
+  integration: (folder) ->
+    @verifyScaffolding folder, =>
+      @copy("example_spec.js", folder)
+
+  fixture: (folder, options) ->
+    @verifyScaffolding folder, options, =>
+      @copy("example.json", folder)
+
+  support: (folder, options) ->
+    @verifyScaffolding folder, options, =>
+      Promise.join(
+        @copy("defaults.js", folder)
+        @copy("commands.js", folder)
+      )
+
+  copy: (file, folder) ->
     src  = cwd("lib", "scaffold", file)
     dest = path.join(folder, file)
     fs.copyAsync(src, dest)
 
-  copyFiles: (folder) ->
-    Promise.join(
-      @_copy("defaults.js", folder)
-      @_copy("commands.js", folder)
-    )
+  verifyScaffolding: (folder, options = {}, fn) ->
+    if _.isFunction(options)
+      fn = options
+      options = {}
 
-  scaffold: (folder, options = {}) ->
     _.defaults options, {
       remove: false
     }
@@ -49,5 +62,5 @@ module.exports = {
       ## annoyed by new example files coming into their projects unnecessarily
       fs.statAsync(folder)
       .catch =>
-        @copyFiles(folder)
+        fn.call(@)
 }

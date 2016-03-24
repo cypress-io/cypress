@@ -11,8 +11,7 @@ config    = require("./config")
 logger    = require("./logger")
 errors    = require("./errors")
 Server    = require("./server")
-support   = require("./support")
-fixture   = require("./fixture")
+scaffold  = require("./scaffold")
 Watchers  = require("./watchers")
 Reporter  = require("./reporter")
 settings  = require("./util/settings")
@@ -50,10 +49,10 @@ class Project extends EE
         ## opening the server
         @cfg = cfg
 
-        @watchSettingsAndStartWebsockets(options, cfg)
-
-        .then =>
+        Promise.join(
+          @watchSettingsAndStartWebsockets(options, cfg)
           @scaffold(cfg)
+        )
 
         ## return our project instance
         .return(@)
@@ -188,15 +187,19 @@ class Project extends EE
 
   scaffold: (config) ->
     Promise.join(
+      ## ensure integration folder is created
+      ## and example spec if dir doesnt exit
+      scaffold.integration(config.integrationFolder)
+
       ## ensure fixtures dir is created
       ## and example fixture if dir doesnt exist
-      fixture.scaffold(config.fixturesFolder, {
+      scaffold.fixture(config.fixturesFolder, {
         remove: config.fixturesFolderRemove
       })
 
       ## ensure support dir is created
       ## and example support file if dir doesnt exist
-      support.scaffold(config.supportFolder, {
+      scaffold.support(config.supportFolder, {
         remove: config.supportFolderRemove
       })
     )

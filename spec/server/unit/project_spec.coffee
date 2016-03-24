@@ -7,8 +7,7 @@ user         = require("#{root}lib/user")
 cache        = require("#{root}lib/cache")
 errors       = require("#{root}lib/errors")
 config       = require("#{root}lib/config")
-fixture      = require("#{root}lib/fixture")
-support      = require("#{root}lib/support")
+scaffold     = require("#{root}lib/scaffold")
 Project      = require("#{root}lib/project")
 settings     = require("#{root}lib/util/settings")
 
@@ -178,20 +177,23 @@ describe "lib/project", ->
   context "#scaffold", ->
     beforeEach ->
       @project = Project("path/to/project")
-      @sandbox.stub(fixture, "scaffold").resolves()
-      @sandbox.stub(support, "scaffold").resolves()
+      @sandbox.stub(scaffold, "integration").resolves()
+      @sandbox.stub(scaffold, "fixture").resolves()
+      @sandbox.stub(scaffold, "support").resolves()
+
+      @obj = {projectRoot: "pr", fixturesFolder: "ff", supportFolder: "sf", integrationFolder: "if"}
+
+    it "calls scaffold.integration with integrationFolder", ->
+      @project.scaffold(@obj).then =>
+        expect(scaffold.integration).to.be.calledWith(@obj.integrationFolder)
 
     it "calls fixture.scaffold with fixturesFolder", ->
-      obj = {projectRoot: "pr", fixturesFolder: "ff", supportFolder: "sf"}
-
-      @project.scaffold(obj).then ->
-        expect(fixture.scaffold).to.be.calledWith(obj.fixturesFolder)
+      @project.scaffold(@obj).then =>
+        expect(scaffold.fixture).to.be.calledWith(@obj.fixturesFolder)
 
     it "calls support.scaffold with supportFolder", ->
-      obj = {projectRoot: "pr", fixturesFolder: "ff", supportFolder: "sf"}
-
-      @project.scaffold(obj).then ->
-        expect(support.scaffold).to.be.calledWith(obj.supportFolder)
+      @project.scaffold(@obj).then =>
+        expect(scaffold.support).to.be.calledWith(@obj.supportFolder)
 
   context "#watchSettings", ->
     beforeEach ->

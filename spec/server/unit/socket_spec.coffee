@@ -155,8 +155,8 @@ describe "lib/socket", ->
 
       @sandbox.stub(Socket.prototype, "createIo").returns(@io)
 
-      @server.startWebsockets({}, @cfg, {}).then =>
-        @socket = @server._socket
+      @server.startWebsockets({}, @cfg, {})
+      @socket = @server._socket
 
     context "#close", ->
       beforeEach ->
@@ -217,23 +217,16 @@ describe "lib/socket", ->
             fs.writeFileAsync(@socket.testsDir + "/test2.coffee", "foooooooooo")
 
     context "#startListening", ->
-      it "creates integrationFolder if does not exist", ->
-        @cfg.integrationFolder = path.join(@todosPath, "does-not-exist")
-
-        @socket.startListening(@server.getHttpServer(), {}, @cfg, {}).then =>
-          dir = fs.statSync(@cfg.integrationFolder)
-          expect(dir.isDirectory()).to.be.true
-
       it "sets #testsDir", ->
         @cfg.integrationFolder = path.join(@todosPath, "does-not-exist")
 
-        @socket.startListening(@server.getHttpServer(), {}, @cfg, {}).then =>
-          expect(@socket.testsDir).to.eq @cfg.integrationFolder
+        @socket.startListening(@server.getHttpServer(), {}, @cfg, {})
+        expect(@socket.testsDir).to.eq @cfg.integrationFolder
 
       describe "watch:test:file", ->
         it "listens for watch:test:file event", ->
-          @socket.startListening(@server.getHttpServer(), {}, @cfg, {}).then =>
-            expect(@mockClient.on).to.be.calledWith("watch:test:file")
+          @socket.startListening(@server.getHttpServer(), {}, @cfg, {})
+          expect(@mockClient.on).to.be.calledWith("watch:test:file")
 
         it "passes filePath to #watchTestFileByPath", ->
           watchers = {}
@@ -241,8 +234,8 @@ describe "lib/socket", ->
 
           @mockClient.on.withArgs("watch:test:file").yields("foo/bar/baz")
 
-          @socket.startListening(@server.getHttpServer(), watchers, @cfg, {}).then =>
-            expect(watchTestFileByPath).to.be.calledWith @cfg, "foo/bar/baz", watchers
+          @socket.startListening(@server.getHttpServer(), watchers, @cfg, {})
+          expect(watchTestFileByPath).to.be.calledWith @cfg, "foo/bar/baz", watchers
 
       describe "#onTestFileChange", ->
         beforeEach ->

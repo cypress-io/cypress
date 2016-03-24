@@ -1,31 +1,29 @@
 require("../spec_helper")
 
-path        = require("path")
-glob        = require("glob")
-config      = require("#{root}lib/config")
-support     = require("#{root}lib/support")
-Fixtures    = require("#{root}/spec/server/helpers/fixtures")
+path       = require("path")
+glob       = require("glob")
+config     = require("#{root}lib/config")
+scaffold   = require("#{root}lib/scaffold")
+Fixtures   = require("#{root}/spec/server/helpers/fixtures")
 
 glob = Promise.promisify(glob)
 
-describe "lib/support", ->
+describe "lib/scaffold", ->
   beforeEach ->
     Fixtures.scaffold()
-
-    pristinePath = Fixtures.projectPath("pristine")
-
-    config.get(pristinePath).then (cfg) =>
-      {@supportFolder} = cfg
 
   afterEach ->
     Fixtures.remove()
 
-  context ".scaffold", ->
+  context ".support", ->
     beforeEach ->
-      fs.removeAsync(@supportFolder)
+      pristinePath = Fixtures.projectPath("pristine")
+
+      config.get(pristinePath).then (cfg) =>
+        {@supportFolder} = cfg
 
     it "is noop when removal is true and there is no folder", ->
-      support.scaffold(@supportFolder, {remove: true})
+      scaffold.support(@supportFolder, {remove: true})
       .then =>
         fs.statAsync(@supportFolder)
         .then ->
@@ -33,9 +31,9 @@ describe "lib/support", ->
         .catch ->
 
     it "removes supportFolder + contents when existing", ->
-      support.scaffold(@supportFolder)
+      scaffold.support(@supportFolder)
       .then =>
-        support.scaffold(@supportFolder, {remove: true})
+        scaffold.support(@supportFolder, {remove: true})
       .then =>
         fs.statAsync(@supportFolder)
         .then ->
@@ -47,7 +45,7 @@ describe "lib/support", ->
       fs.ensureDirAsync(@supportFolder)
       .then =>
         ## now scaffold
-        support.scaffold(@supportFolder)
+        scaffold.support(@supportFolder)
       .then =>
         glob("**/*", {cwd: @supportFolder})
       .then (files) ->
@@ -56,7 +54,7 @@ describe "lib/support", ->
 
     it "creates both supportFolder and commands.js and defaults.js when supportFolder does not exist", ->
       ## todos has a _support folder so let's first nuke it and then scaffold
-      support.scaffold(@supportFolder).then =>
+      scaffold.support(@supportFolder).then =>
         fs.readFileAsync(@supportFolder + "/commands.js", "utf8").then (str) =>
           expect(str).to.eq """
           // ***********************************************
@@ -121,3 +119,56 @@ describe "lib/support", ->
               // })
               """
 
+  context ".fixture", ->
+    beforeEach ->
+      todosPath = Fixtures.projectPath("todos")
+
+      config.get(todosPath).then (cfg) =>
+        {@fixturesFolder} = cfg
+
+    it "is noop when removal is true and there is no folder", ->
+      scaffold.fixture(@fixturesFolder, {remove: true})
+      .then =>
+        fs.statAsync(@fixturesFolder)
+        .then ->
+          throw new Error("should have failed but didnt")
+        .catch ->
+
+    it "removes fixturesFolder + contents when existing", ->
+      scaffold.fixture(@fixturesFolder)
+      .then =>
+        scaffold.fixture(@fixturesFolder, {remove: true})
+      .then =>
+        fs.statAsync(@fixturesFolder)
+        .then ->
+          throw new Error("should have failed but didnt")
+        .catch ->
+
+    it "creates both fixturesFolder and example.json when fixturesFolder does not exist", ->
+      ## todos has a fixtures folder so let's first nuke it and then scaffold
+      fs.removeAsync(@fixturesFolder)
+      .then =>
+        scaffold.fixture(@fixturesFolder)
+      .then =>
+        fs.readFileAsync(@fixturesFolder + "/example.json", "utf8")
+      .then (str) ->
+        expect(str).to.eq """
+        {
+          "example": "fixture"
+        }
+        """
+
+    it "does not create example.json if fixturesFolder already exists", ->
+      ## first remove it
+      fs.removeAsync(@fixturesFolder)
+      .then =>
+        ## create the fixturesFolder ourselves manually
+        fs.ensureDirAsync(@fixturesFolder)
+      .then =>
+        ## now scaffold
+        scaffold.fixture(@fixturesFolder)
+      .then =>
+        glob("**/*", {cwd: @fixturesFolder})
+      .then (files) ->
+        ## ensure no files exist
+        expect(files.length).to.eq(0)

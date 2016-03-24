@@ -9,12 +9,6 @@ errors       = require("./errors")
 logger       = require("./logger")
 Socket       = require("./socket")
 
-# ## cypress following by _ or - or .
-# cypressEnvRe = /^(cypress_)/i
-
-# isCypressEnvLike = (key) ->
-#   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
-
 ## currently not making use of event emitter
 ## but may do so soon
 class Server
