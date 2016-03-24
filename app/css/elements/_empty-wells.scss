@@ -19,6 +19,10 @@ strong {
   max-width: 650px;
   overflow: auto;
 
+  strong:hover {
+    cursor: pointer;
+  }
+
   h1 {
     text-align: center;
     color: $pass;
