@@ -25,13 +25,13 @@ describe "lib/server", ->
       @use = @sandbox.spy(express.application, "use")
 
     it "instantiates express instance without morgan", ->
-      app = @server.createExpressApp(1234, false)
-      expect(app.get("port")).to.eq(1234)
+      app = @server.createExpressApp(54321, false)
+      expect(app.get("port")).to.eq(54321)
       expect(app.get("view engine")).to.eq("html")
       expect(@use).not.to.be.calledWith(morganFn)
 
     it "requires morgan if true", ->
-      @server.createExpressApp(1234, true)
+      @server.createExpressApp(54321, true)
       expect(@use).to.be.calledWith(morganFn)
 
   context "#open", ->
@@ -46,11 +46,11 @@ describe "lib/server", ->
     it "calls #createExpressApp with port + morgan", ->
       @sandbox.spy(@server, "createExpressApp")
 
-      _.extend @config, {port: 1234, morgan: false}
+      _.extend @config, {port: 54321, morgan: false}
 
       @server.open("/", @config)
       .then =>
-        expect(@server.createExpressApp).to.be.calledWith(1234, false)
+        expect(@server.createExpressApp).to.be.calledWith(54321, false)
 
     it "calls #createRoutes with app + config", ->
       obj = {}
@@ -81,7 +81,7 @@ describe "lib/server", ->
 
   context "#createServer", ->
     beforeEach ->
-      @port = 1234
+      @port = 54321
       @app  = @server.createExpressApp(@port, true)
 
     it "isListening=true", ->
