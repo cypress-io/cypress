@@ -15,12 +15,31 @@ excerpt: Walkthrough writing your first test
 After adding your project, Cypress will automatically scaffold out a suggested folder structure. By default it will create:
 
 ```text
-/tests
-/tests/_fixtures
-/tests/_support
+/cypress
+/cypress/fixtures
+/cypress/integration
+/cypress/support
 ```
 
-While Cypress allows for configuration of where your test files can be located, if you're starting your first project, we recommend you use the following structure.
+Cypress also adds placeholder files to help get you started with examples in each folder.
+
+**Example JSON fixture**
+```text
+/cypress/fixtures/example.json
+```
+
+**Example Integration Test**
+```text
+/cypress/integration/example_spec.js
+```
+
+**Example JavaScript Support Files**
+```text
+/cypress/support/commands.js
+/cypress/support/defaults.js
+```
+
+While Cypress allows for configuration of where your test files can be located, if you're starting your first project, we recommend you use the above structure.
 
 [block:callout]
 {
@@ -36,17 +55,11 @@ While Cypress allows for configuration of where your test files can be located, 
 
 Test files may be written as either `.js` or `.coffee` files.
 
-To get started, simply create a new file called `app_spec.js` within your `tests` folder.
+To see an example of every command used in Cypress, open the `example_spec.js` within your `cypress/integration` folder.
 
 Navigate to `http://localhost:2020`. You should see this spec file listed inside of Cypress.
 
-[block:callout]
-{
-  "type": "warning",
-  "body": "If you already had specs written within a `tests` folder, you may see those listed in Cypress as well. For now, just ignore these and we'll come back to them later.",
-  "title": "I already had test files"
-}
-[/block]
+To start writing tests for your app, simply create a new file called `app_spec.js` within your `cypress/integration` folder. Refresh `http://localhost:2020` and your new file should have appeared in the list.
 
 ***
 
@@ -57,15 +70,3 @@ Cypress is built on top of [Mocha](https://on.cypress.io/guides/bundled-tools#se
 If you're familiar with writing tests in JavaScript, then writing tests in Cypress will be a breeze.
 
 We're still working on introductory docs and videos. For now, [check out some examples](https://on.cypress.io/guides/all-example-apps) of applications using Cypress tests.
-
-***
-
-# Command Line Tools
-
-Cypress can also be run headlessly from the command line. You can use the [CLI tools](https://github.com/cypress-io/cypress-cli) to do things like:
-
-- Run Headlessly
-- Run in CI
-- Install Cypress
-
-The [documentation for this tool is here](https://github.com/cypress-io/cypress-cli).

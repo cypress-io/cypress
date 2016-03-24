@@ -35,7 +35,7 @@ If an extension is omitted, Cypress will attempt to resolve the fixture by order
 
 # [cy.fixture( *fixture* )](#section-single-fixture-usage)
 
-Loads the fixture at the specified filepath.
+Loads the fixture at the specified filepath within `cypress/fixtures`.
 
 ***
 
@@ -57,9 +57,9 @@ cy.fixture("admin")
 
 Cypress will search for files called `admin` and resolve the first one in this order:
 
-1. `{your project root}/tests/_fixtures/admin.json`
-2. `{your project root}/tests/_fixtures/admin.js`
-3. `{your project root}/tests/_fixtures/admin.coffee`
+1. `{your project root}/cypress/fixtures/admin.json`
+2. `{your project root}/cypress/fixtures/admin.js`
+3. `{your project root}/cypress/fixtures/admin.coffee`
 
 ***
 
@@ -81,7 +81,7 @@ cy.fixture("images/logo.png").then(function(logo){
 
 You can nest fixtures within folders and reference them by defining the path to the file:
 
-`{your project root}/tests/_fixtures/users/admin.json`
+`{your project root}/cypress/fixtures/users/admin.json`
 
 ```javascript
 cy.fixture("users/admin.json")

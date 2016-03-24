@@ -66,15 +66,15 @@ Cypress will automatically scaffold out a suggested folder structure for organiz
 
 ```text
 // within your project's root folder
-/tests/_fixtures/example.json
+/cypress/fixtures/example.json
 ```
 
 Your fixtures can be further organized within additional folders. For instance, you could create another folder called `images` and add images:
 
 ```text
-/tests/_fixtures/images/cats.png
-/tests/_fixtures/images/dogs.png
-/tests/_fixtures/images/birds.png
+/cypress/fixtures/images/cats.png
+/cypress/fixtures/images/dogs.png
+/cypress/fixtures/images/birds.png
 ```
 
 To access the fixtures nested within the `images` folder, simply include the folder in your [`cy.fixture`](https://on.cypress.io/api/fixture) command.
