@@ -4291,6 +4291,22 @@ describe "$Cypress.Cy Actions Commands", ->
             Elements: 1
           }
 
+  context "#hover", ->
+    beforeEach ->
+      @allowErrors()
+
+    it "throws when not a dom subject", (done) ->
+      @cy.on "fail", -> done()
+
+      @cy.hover()
+
+    it "throws when attempting to click multiple elements", (done) ->
+      @cy.on "fail", (err) ->
+        expect(err.message).to.eq "cy.hover() command is not currently supported\n\nhttps://on.cypress.io/api/hover"
+        done()
+
+      @cy.get("button").hover()
+
   context "#click", ->
     it "receives native click event", (done) ->
       btn = @cy.$$("#button")
