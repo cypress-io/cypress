@@ -1,9 +1,23 @@
 <div class="empty-onboarding">
   <h1>To help you get started...</h1>
-  <p>We've created a folder in "<%= @projectName %>" called <strong><i class="fa fa-folder-o"></i> cypress</strong>. In there, you'll find a folder for <strong><i class="fa fa-folder-o"></i> integration</strong> tests.</p>
-  <hr>
-  <p>We've also written some integration tests in <strong><i class="fa fa-file-code-o"></i> example_spec.js</strong> to get you started.</p>
   <p>
+    We've created a folder here:
+    <strong data-js="cypress-folder"><i class="fa fa-folder-o"></i> <%= @parentTestsFolderDisplay %></strong>
+  </p>
+  <p>
+    In there you'll find integration tests:
+    <strong data-js="example-file"><i class="fa fa-file-code-o"></i>
+    <%= @integrationExampleName %></strong>
+  </p>
+  <p>
+  <hr>
+  <p>
+    We've also created a
+    <strong data-js="fixtures-folder"><i class="fa fa-folder-o"></i> fixtures</strong>
+    and
+    <strong data-js="support-folder"><i class="fa fa-folder-o"></i> support</strong>
+    folder.
+  </p>
   <div class="folder-preview-onboarding">
     <ul>
       <li>

@@ -19,8 +19,14 @@ strong {
   max-width: 650px;
   overflow: auto;
 
+  strong {
+    margin-left: 5px;
+    white-space: nowrap;
+  }
+
   strong:hover {
     cursor: pointer;
+    border-bottom: 1px dotted #333;
   }
 
   h1 {

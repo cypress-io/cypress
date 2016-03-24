@@ -142,7 +142,7 @@
         background-color: #e9e9e9;
       }
 
-      &:active:focus {
+      &:active, &:focus {
         outline: 0
       }
     }

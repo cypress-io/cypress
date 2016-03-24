@@ -175,13 +175,13 @@ class Socket
       socket.on "mocha", =>
         options.onMocha.apply(options, arguments)
 
-      socket.on "open:project:tests", (cb = ->) ->
+      socket.on "open:finder", (p, cb = ->) ->
         opts = {}
 
         if os.platform() is "darwin"
           opts.args = "-R"
 
-        opn(config.parentTestsFolder, opts)
+        opn(p, opts)
         .then -> cb()
 
       socket.on "is:new:project", (cb) =>

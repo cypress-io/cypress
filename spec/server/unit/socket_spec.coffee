@@ -56,22 +56,22 @@ describe "lib/socket", ->
     afterEach ->
       @client.disconnect()
 
-    context "on(open:project:tests)", ->
-      it "calls opn with config.parentTestsFolder + opts on darwin", (done) ->
+    context "on(open:finder)", ->
+      it "calls opn with path + opts on darwin", (done) ->
         @sandbox.stub(os, "platform").returns("darwin")
 
         @opnStub.resolves()
 
-        @client.emit "open:project:tests", =>
+        @client.emit "open:finder", @cfg.parentTestsFolder, =>
           expect(@opnStub).to.be.calledWith(@cfg.parentTestsFolder, {args: "-R"})
           done()
 
-      it "calls opn with config.parentTestsFolder + no opts when not on darwin", (done) ->
+      it "calls opn with path + no opts when not on darwin", (done) ->
         @sandbox.stub(os, "platform").returns("linux")
 
         @opnStub.resolves()
 
-        @client.emit "open:project:tests", =>
+        @client.emit "open:finder", @cfg.parentTestsFolder, =>
           expect(@opnStub).to.be.calledWith(@cfg.parentTestsFolder, {})
           done()
 
