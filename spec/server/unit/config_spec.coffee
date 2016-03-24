@@ -207,6 +207,20 @@ describe "lib/config", ->
       obj = {}
       expect(config.setUrls(obj)).not.to.eq(obj)
 
+  context ".setParentTestsPaths", ->
+    it "sets parentTestsFolder and parentTestsFolderDisplay", ->
+      obj = {
+        projectRoot:       "/path/to/project"
+        integrationFolder: "/path/to/project/cypress/integration"
+      }
+
+      expect(config.setParentTestsPaths(obj)).to.deep.eq({
+        projectRoot:       "/path/to/project"
+        integrationFolder: "/path/to/project/cypress/integration"
+        parentTestsFolder: "/path/to/project/cypress"
+        parentTestsFolderDisplay: "project/cypress"
+      })
+
   context ".setAbsolutePaths", ->
     it "is noop without projectRoot", ->
       expect(config.setAbsolutePaths({})).to.deep.eq({})

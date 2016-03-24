@@ -111,7 +111,26 @@ module.exports = {
 
     config = @setAbsolutePaths(config, defaults)
 
+    config = @setParentTestsPaths(config)
+
     return config
+
+  setParentTestsPaths: (obj) ->
+    ## projectRoot:              "/path/to/project"
+    ## integrationFolder:        "/path/to/project/cypress/integration"
+    ## parentTestsFolder:        "/path/to/project/cypress"
+    ## parentTestsFolderDisplay: "project/cypress"
+
+    obj = _.clone(obj)
+
+    ptf = obj.parentTestsFolder = path.dirname(obj.integrationFolder)
+
+    pr = path.basename(obj.projectRoot)
+    f  = path.basename(ptf)
+
+    obj.parentTestsFolderDisplay = path.join(pr, f)
+
+    return obj
 
   setAbsolutePaths: (obj, defaults) ->
     obj = _.clone(obj)

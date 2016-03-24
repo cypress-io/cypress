@@ -4,7 +4,7 @@
       <div class="block-panel">
         <div class="title-bar">
           <h1>
-            Tests found in: <code data-js="project-name"><%= @projectName %>/cypress</code>
+            Tests found in: <code data-js="project-name"><%= @parentTestsFolderDisplay %></code>
           </h1>
           <div class="controls">
             <div id="search-region"></div>
