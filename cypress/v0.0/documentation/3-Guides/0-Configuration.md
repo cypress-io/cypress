@@ -40,6 +40,8 @@ Option | Default | Description
 
 # Directory Options
 
+To turn off the use of `fixture` folders or `support` folders, pass `false` into the respective configuration option.
+
 Option | Default | Description
 ----- | ---- | ----
 `integrationFolder` | `/cypress/integration` | Where Cypress will look for integration test files
