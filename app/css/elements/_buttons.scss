@@ -28,3 +28,13 @@
   border-radius: 20px;
   color: #9ea4ab;
 }
+
+.btn.btn-link {
+  padding: 0;
+}
+
+h1>.btn-link {
+  font-size: 22px;
+  position: relative;
+  top: -1px;
+}
