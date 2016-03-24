@@ -1,6 +1,6 @@
 <div class="empty-onboarding">
   <h1>To help you get started...</h1>
-  <p>We've created a folder in your project called <strong><i class="fa fa-folder-o"></i> cypress</strong>. In there, you'll find a folder for <strong><i class="fa fa-folder-o"></i> integration</strong> tests.</p>
+  <p>We've created a folder in "<%= @projectName %>" called <strong><i class="fa fa-folder-o"></i> cypress</strong>. In there, you'll find a folder for <strong><i class="fa fa-folder-o"></i> integration</strong> tests.</p>
   <hr>
   <p>We've also written some integration tests in <strong><i class="fa fa-file-code-o"></i> example_spec.js</strong> to get you started.</p>
   <p>
@@ -9,13 +9,13 @@
       <li>
         <span>
           <i class="fa fa-folder-open-o"></i>
-          your-project
+          <%= @projectName %>
         </span>
         <ul>
           <li class="app-code">
             <span >
               <i class="fa fa-folder-o"></i>
-              your_application_code...
+              ...
             </span>
           </li>
           <li class="new-code">

@@ -3,9 +3,12 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (options) ->
-      view = @getView()
+      config = App.request "app:config:entity"
+
+      view = @getView(config)
 
       @show view
 
-    getView: ->
+    getView: (config) ->
       new Show.Layout
+        model: config
