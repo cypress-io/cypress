@@ -16,6 +16,11 @@ describe "lib/config", ->
         expect(obj.projectRoot).to.eq("path/to/project")
         expect(obj.environmentVariables).to.deep.eq({foo: "bar"})
 
+    it "sets projectName", ->
+      config.get("path/to/my-project")
+      .then (obj) ->
+        expect(obj.projectName).to.eq("my-project")
+
     context "port", ->
       it "can override default port", ->
         config.get("path/to/project", {port: 8080})

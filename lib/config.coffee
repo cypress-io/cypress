@@ -37,6 +37,7 @@ module.exports = {
     ])
     .spread (settings, envFile) =>
       @set({
+        projectName: @getNameFromRoot(projectRoot)
         projectRoot: projectRoot
         config:      settings
         envFile:     envFile
@@ -44,7 +45,7 @@ module.exports = {
       })
 
   set: (obj = {}) ->
-    {projectRoot, config, envFile, options} = obj
+    {projectRoot, projectName, config, envFile, options} = obj
 
     ## just force config to be an object
     ## so we dont have to do as much
@@ -55,6 +56,7 @@ module.exports = {
     ## into the master config object
     config.envFile     = envFile
     config.projectRoot = projectRoot
+    config.projectName = projectName
 
     @mergeDefaults(config, options)
 
@@ -153,5 +155,8 @@ module.exports = {
         memo[normalize(key)] = value
       memo
     , {}
+
+  getNameFromRoot: (root = "") ->
+    path.basename(root)
 
 }
