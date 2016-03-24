@@ -16,7 +16,7 @@
           files.trigger("is:new:project", bool)
 
       @listenTo @layout, "project:name:clicked", ->
-        socket.emit "open:project:root"
+        socket.emit "open:project:tests"
 
       @listenTo files, "is:new:project", (bool) ->
         @onboardingRegion() if bool

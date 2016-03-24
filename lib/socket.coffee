@@ -1,4 +1,5 @@
 _             = require("lodash")
+os            = require("os")
 fs            = require("fs-extra")
 opn           = require("opn")
 path          = require("path")
@@ -83,7 +84,7 @@ class Socket
     messages = {}
     chromiums = {}
 
-    {projectRoot, integrationFolder, socketIoRoute} = config
+    {integrationFolder, socketIoRoute} = config
 
     @testsDir = integrationFolder
 
@@ -169,8 +170,13 @@ class Socket
       socket.on "mocha", =>
         options.onMocha.apply(options, arguments)
 
-      socket.on "open:project:root", ->
-        opn(projectRoot)
+      socket.on "open:project:tests", ->
+        opts = {}
+
+        if os.platform() is "darwin"
+          opts.args = "-R"
+
+        opn(config.parentTestsFolder, opts)
 
   end: ->
     ## TODO: we need an 'ack' from this end
