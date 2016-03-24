@@ -1,5 +1,19 @@
 $Cypress.register "Connectors", (Cypress, _, $) ->
 
+  returnFalseIfThenable = (key, args...) ->
+    if key is "then" and _.isFunction(args[0]) and _.isFunction(args[1])
+      ## https://github.com/cypress-io/cypress/issues/111
+      ## if we're inside of a promise then the promise lib will naturally
+      ## pass (at least) two functions to another cy.then
+      ## this works similar to the way mocha handles thenables. for instance
+      ## in coffeescript when we pass cypress commands within a Promise's
+      ## .then() because the return value is the cypress instance means that
+      ## the Promise lib will attach a new .then internally. it would never
+      ## resolve unless we invoked it immediately, so we invoke it and
+      ## return false then ensuring the command is not queued
+      args[0]()
+      return false
+
   Cypress.Cy.extend
     isCommandFromMocha: (cmd) ->
       not cmd.get("next") and
@@ -41,6 +55,11 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     ## name could be invoke or its!
     name = @prop("current").get("name")
 
+    cleanup = =>
+      @stopListening @Cypress, "on:inject:command", returnFalseIfThenable
+
+    @listenTo @Cypress, "on:inject:command", returnFalseIfThenable
+
     getRet = =>
       ret = fn.apply(@private("runnable").ctx, args)
       if (ret is @ or ret is @chain()) then null else ret
@@ -49,6 +68,8 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     .try(getRet)
     .timeout(options.timeout)
     .then (ret) =>
+      cleanup()
+
       ## if ret is null or undefined then
       ## resolve with the existing subject
       return ret ? subject

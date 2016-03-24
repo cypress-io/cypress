@@ -43,7 +43,7 @@
     "moment": "2.10.3",
     "sinon-as-promised": "~2.0.3",
     "underscore.inflection": "~1.2.0",
-    "js-cookie": "~1.5.1",
+    "js-cookie": "git://github.com/cypress-io/js-cookie#4510ebda7e5b4f6bf814c420d0c05ad19d7077e6",
     "bootstrap": "~3.3.5",
     "kendo-ui": "~2015.1.616",
     "jquery": "~2.1.4",

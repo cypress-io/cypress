@@ -19,8 +19,12 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
     return if not current
 
+    runnable = @private("runnable")
+
+    return if not runnable
+
     options = _.last(current.get("args"))
-    options?.onBeforeLoad?.call(@, contentWindow)
+    options?.onBeforeLoad?.call(runnable.ctx, contentWindow)
 
   Cypress.Cy.extend
     _href: (win, url) ->
@@ -239,6 +243,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
       win           = @private("window")
       $remoteIframe = @private("$remoteIframe")
+      runnable      = @private("runnable")
 
       p = new Promise (resolve, reject) =>
         visit = (win, url, options) =>
@@ -246,7 +251,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           # ## callback fn
           $remoteIframe.one "load", =>
             @_timeout(prevTimeout)
-            options.onLoad?.call(@, win)
+            options.onLoad?.call(runnable.ctx, win)
             if Cypress.cy.$$("[data-cypress-visit-error]").length
               try
                 @throwErr("Could not load the remote page: #{url}", options._log)

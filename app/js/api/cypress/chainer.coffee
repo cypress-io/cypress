@@ -16,6 +16,11 @@ $Cypress.Chainer = do ($Cypress, _) ->
       ## when our instance methods are invoked
       ## we know we are chaining on an existing series
       $Chainer.prototype[key] = (args...) ->
+        ## dont return cypress instance if any
+        ## return value from our on:inject:command is false
+        return if _.any Cypress.invoke("on:inject:command", key, args...), (ret) ->
+          ret is false
+
         ## call back the original function with our new args
         ## pass args an as array and not a destructured invocation
         fn.call(@cy, @id, args)
