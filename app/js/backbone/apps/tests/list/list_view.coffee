@@ -3,8 +3,12 @@
   class List.Layout extends App.Views.LayoutView
     template: "tests/list/list_layout"
 
-    triggers:
-      "click [data-js='project-name']" : "project:name:clicked"
+    events:
+      "click [data-js='project-name']" : "projectNameClicked"
+
+    projectNameClicked: (e) ->
+      e.preventDefault()
+      @trigger "project:name:clicked"
 
   class List.Search extends App.Views.ItemView
     template: "tests/list/_search"
