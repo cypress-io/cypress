@@ -42,9 +42,9 @@ Option | Default | Description
 
 Option | Default | Description
 ----- | ---- | ----
-`testFolder` | `/tests` | Test folder where your test files
-`fixturesFolder` | `/tests/_fixtures` | Where Cypress will look for fixture files
-`supportFolder` | `/tests/_support` | Where Cypress will auto load support files
+`integrationFolder` | `/cypress/integration` | Where Cypress will look for integration test files
+`fixturesFolder`    | `/cypress/fixtures`    | Where Cypress will look for fixture files
+`supportFolder`     | `/cypress/support`     | Where Cypress will auto load support files
 
 # Viewport Options
 
