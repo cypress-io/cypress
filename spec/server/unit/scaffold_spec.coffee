@@ -15,6 +15,36 @@ describe "lib/scaffold", ->
   afterEach ->
     Fixtures.remove()
 
+  context ".integration", ->
+    beforeEach ->
+      todosPath = Fixtures.projectPath("todos")
+
+      config.get(todosPath).then (cfg) =>
+        {@integrationFolder} = cfg
+
+    it "creates both integrationFolder and example_spec.js when integrationFolder does not exist", ->
+      ## todos has a integrations folder so let's first nuke it and then scaffold
+      fs.removeAsync(@integrationFolder)
+      .then =>
+        scaffold.integration(@integrationFolder)
+      .then =>
+        fs.statAsync(@integrationFolder + "/example_spec.js")
+
+    it "does not create example_spec.js if integrationFolder already exists", ->
+      ## first remove it
+      fs.removeAsync(@integrationFolder)
+      .then =>
+        ## create the integrationFolder ourselves manually
+        fs.ensureDirAsync(@integrationFolder)
+      .then =>
+        ## now scaffold
+        scaffold.integration(@integrationFolder)
+      .then =>
+        glob("**/*", {cwd: @integrationFolder})
+      .then (files) ->
+        ## ensure no files exist
+        expect(files.length).to.eq(0)
+
   context ".support", ->
     beforeEach ->
       pristinePath = Fixtures.projectPath("pristine")

@@ -248,6 +248,25 @@ describe "lib/cypress", ->
           expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/test2.coffee?__ui=satellite")
           @expectExitWith(0)
 
+    it "scaffolds out integration and example_spec if they do not exist", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        config.get(@pristinePath).then (@cfg) =>
+
+        Project.add(@pristinePath)
+      ])
+      .then =>
+        fs.statAsync(@cfg.integrationFolder)
+        .then ->
+          throw new Error("integrationolder should not exist!")
+        .catch =>
+          cypress.start(["--run-project=#{@pristinePath}"])
+        .then =>
+          fs.statAsync(@cfg.integrationFolder)
+        .then =>
+          fs.statAsync path.join(@cfg.integrationFolder, "example_spec.js")
+
     it "scaffolds out fixtures + files if they do not exist", ->
       Promise.all([
         user.set({session_token: "session-123"}),
