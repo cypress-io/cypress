@@ -1,11 +1,11 @@
 _             = require("lodash")
 os            = require("os")
 fs            = require("fs-extra")
-opn           = require("opn")
 path          = require("path")
 uuid          = require("node-uuid")
 Promise       = require("bluebird")
 socketIo      = require("socket.io")
+open          = require("./util/open")
 cwd           = require("./cwd")
 fixture       = require("./fixture")
 Request       = require("./request")
@@ -181,7 +181,7 @@ class Socket
         if os.platform() is "darwin"
           opts.args = "-R"
 
-        opn(p, opts)
+        open.opn(p, opts)
         .then -> cb()
 
       socket.on "is:new:project", (cb) =>

@@ -6,24 +6,15 @@ path         = require("path")
 uuid         = require("node-uuid")
 client       = require("socket.io-client")
 Promise      = require("bluebird")
+open         = require("#{root}lib/util/open")
 config       = require("#{root}lib/config")
+Socket       = require("#{root}lib/socket")
+Server       = require("#{root}lib/server")
 Watchers     = require("#{root}lib/watchers")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
-Socket       = null
-Server       = null
 
 describe "lib/socket", ->
   beforeEach ->
-    @opnStub = @sandbox.stub()
-
-    Socket = proxyquire("../../lib/socket", {
-      opn: @opnStub
-    })
-
-    Server = proxyquire("../../lib/server", {
-      "./socket": Socket
-    })
-
     Fixtures.scaffold()
 
     @todosPath = Fixtures.projectPath("todos")
@@ -57,22 +48,21 @@ describe "lib/socket", ->
       @client.disconnect()
 
     context "on(open:finder)", ->
+      beforeEach ->
+        @sandbox.stub(open, "opn").resolves()
+
       it "calls opn with path + opts on darwin", (done) ->
         @sandbox.stub(os, "platform").returns("darwin")
 
-        @opnStub.resolves()
-
         @client.emit "open:finder", @cfg.parentTestsFolder, =>
-          expect(@opnStub).to.be.calledWith(@cfg.parentTestsFolder, {args: "-R"})
+          expect(open.opn).to.be.calledWith(@cfg.parentTestsFolder, {args: "-R"})
           done()
 
       it "calls opn with path + no opts when not on darwin", (done) ->
         @sandbox.stub(os, "platform").returns("linux")
 
-        @opnStub.resolves()
-
         @client.emit "open:finder", @cfg.parentTestsFolder, =>
-          expect(@opnStub).to.be.calledWith(@cfg.parentTestsFolder, {})
+          expect(open.opn).to.be.calledWith(@cfg.parentTestsFolder, {})
           done()
 
     context "on(is:new:project)", ->
