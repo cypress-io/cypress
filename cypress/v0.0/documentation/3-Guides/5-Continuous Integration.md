@@ -50,7 +50,7 @@ Cypress verifies that your project is allowed to run in CI by using a secret key
 
 ```shell
 # install the Cypress CLI tool
-npm install -g cypress
+npm install -g cypress-cli
 ```
 
 Run this following Cypress command from your terminal:
@@ -87,7 +87,7 @@ You'll only need to add two lines of code to this file to run Cypress tests.
 
 ```yaml
 # this will install the cypress-cli tools
-npm install -g cypress
+npm install -g cypress-cli
 
 
 # this will run tests headlessly
@@ -96,7 +96,7 @@ cypress ci <your-secret-key>
 
 You'll want to refer to your CI providers documentation for knowing when to run those commands. Generally each CI provider gives you a lifecyle of build commands.
 
-For instance, with [Travis CI](https://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle) they expose a `before_install` and `script` phase. You'd write `npm install -g cypress` in the `before_install` phase, and `cypress ci` in the `script` phase.
+For instance, with [Travis CI](https://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle) they expose a `before_install` and `script` phase. You'd write `npm install -g cypress-cli` in the `before_install` phase, and `cypress ci` in the `script` phase.
 
 ***
 
