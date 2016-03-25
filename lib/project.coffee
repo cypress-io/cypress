@@ -28,7 +28,7 @@ class Project extends EE
     if not projectRoot
       throw new Error("Instantiating lib/project requires a projectRoot!")
 
-    @projectRoot = projectRoot
+    @projectRoot = path.resolve(projectRoot)
     @server      = Server()
     @watchers    = Watchers()
 

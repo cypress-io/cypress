@@ -33,6 +33,11 @@ describe "lib/project", ->
     fn = -> Project()
     expect(fn).to.throw "Instantiating lib/project requires a projectRoot!"
 
+  it "always resolves the projectRoot to be absolute", ->
+    p = Project("../foo/bar")
+    expect(p.projectRoot).not.to.eq("../foo/bar")
+    expect(p.projectRoot).to.eq(path.resolve("../foo/bar"))
+
   context "#getConfig", ->
     beforeEach ->
       @sandbox.stub(config, "get").withArgs("path/to/project", {foo: "bar"}).resolves({baz: "quux"})
