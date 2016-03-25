@@ -5,37 +5,37 @@ excerpt: Manage your application's cookies
 
 Additionally you can take advantage of `Cypress.Cookies.preserveOnce` or even **whitelist** cookies by their name to preserve values across multiple tests. This enables you to preserve sessions through several tests.
 
-# [Cypress.Cookies.get( *key* )](#get-usage)
+# [Cypress.Cookies.get( *key* )](#section-get-usage)
 
 Get a cookie by its key. Returns the string value.
 
 ***
 
-# [Cypress.Cookies.set( *key*, *value* )](#set-usage)
+# [Cypress.Cookies.set( *key*, *value* )](#section-set-usage)
 
 Set a cookie by key, value.
 
 ***
 
-# [Cypress.Cookies.remove( *key* )](#remove-usage)
+# [Cypress.Cookies.remove( *key* )](#section-remove-usage)
 
 Remove a cookie by its key. Overrides any whitelisted cookies or preserved cookies.
 
 ***
 
-# [Cypress.Cookies.debug( *boolean* )](#debug-usage)
+# [Cypress.Cookies.debug( *boolean* )](#section-debug-usage)
 
 Enable or disable cookie debugging. When enabled, Cypress will log out when cookies are set or removed.
 
 ***
 
-# [Cypress.Cookies.preserveOnce( *key1*, *key2*, *key3*, ... )](#preserve-usage)
+# [Cypress.Cookies.preserveOnce( *key1*, *key2*, *key3*, ... )](#section-preserve-usage)
 
 Will preserve cookies by key. Pass an unlimited number of arguments. These preserved cookies will not be cleared when the next test starts.
 
 ***
 
-# [Cypress.Cookies.defaults( *options* )](#defaults-usage)
+# [Cypress.Cookies.defaults( *options* )](#section-defaults-usage)
 
 Set defaults for all cookies such as whitelisting a set of cookies to bypass being removed after each test.
 

@@ -1,7 +1,7 @@
 slug: cypress-blob
 excerpt: Convert base64 strings to blob objects
 
-# [Cypress.Blob.method()](#usage)
+# [Cypress.Blob.method()](#setion-usage)
 
 Cypress proxies a [`Blob Utilities`](https://github.com/nolanlawson/blob-util) library and exposes it as `Cypress.Blob`.
 
@@ -10,6 +10,8 @@ Use `Cypress.Blob` to convert `base64` strings to `blob` objects. Useful for tes
 ***
 
 # Usage
+
+## Using an image fixture
 
 ```javascript
 // programmatically upload the logo
@@ -25,4 +27,21 @@ cy
       $input.fileupload("add", {files: blob})
     })
   })
+```
+
+## Getting dataUrl string
+
+```javascript
+Cypress.Blob.imgSrcToDataURL("/assets/img/logo.png").then(function(dataUrl){
+
+  // create an <img> element and set its src to the dataUrl
+  var img = Cypress.$("<img />", {src: dataUrl})
+
+  cy
+    .get(".utility-blob").then(function($div){
+      // append the image
+      $div.append(img)
+    })
+    .get(".utility-blob img").click().should("have.attr", "src", dataUrl)
+})
 ```
