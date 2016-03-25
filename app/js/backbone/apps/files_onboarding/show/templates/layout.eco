@@ -5,18 +5,18 @@
     <strong data-js="cypress-folder"><i class="fa fa-folder-o"></i> <%= @parentTestsFolderDisplay %></strong>
   </p>
   <p>
-    In there you'll find integration tests:
+    In there you'll find some sample tests:
     <strong data-js="example-file"><i class="fa fa-file-code-o"></i>
     <%= @integrationExampleName %></strong>
   </p>
   <p>
   <hr>
   <p>
-    We've also created a
+    We've also created
     <strong data-js="fixtures-folder"><i class="fa fa-folder-o"></i> fixtures</strong>
     and
     <strong data-js="support-folder"><i class="fa fa-folder-o"></i> support</strong>
-    folder.
+    for you.
   </p>
   <div class="folder-preview-onboarding">
     <ul>
