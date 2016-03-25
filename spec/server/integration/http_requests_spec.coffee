@@ -16,6 +16,8 @@ Fixtures      = require("#{root}/spec/server/helpers/fixtures")
 ## force supertest-session to use supertest-as-promised, hah
 Session       = proxyquire("supertest-session", {supertest: supertest})
 
+glob = Promise.promisify(glob)
+
 removeWhitespace = (c) ->
   c = str.clean(c)
   c = str.lines(c).join(" ")
@@ -88,47 +90,59 @@ describe "Routes", ->
   context "GET /__cypress/files", ->
     beforeEach ->
       Fixtures.scaffold("todos")
-
-      @setup({
-        projectRoot: Fixtures.project("todos")
-        config: {
-          integrationFolder: "tests"
-          fixturesFolder: "tests/_fixtures"
-          supportFolder: "tests/_support"
-          javascripts: ["tests/etc/**/*"]
-        }
-      })
+      Fixtures.scaffold("ids")
 
     afterEach ->
       Fixtures.remove("todos")
+      Fixtures.remove("ids")
 
-    it "returns base json file path objects", (done) ->
-      ## this should omit any _fixture files, _support files and javascripts
+    describe "todos with specific configuration", ->
+      beforeEach ->
+        @setup({
+          projectRoot: Fixtures.projectPath("todos")
+          config: {
+            integrationFolder: "tests"
+            fixturesFolder: "tests/_fixtures"
+            supportFolder: "tests/_support"
+            javascripts: ["tests/etc/**/*"]
+          }
+        })
 
-      glob path.join(Fixtures.project("todos"), "tests", "_fixtures", "**", "*"), (err, files) =>
-        ## make sure there are fixtures in here!
-        expect(files.length).to.be.gt(0)
+      it "returns base json file path objects", ->
+        ## this should omit any _fixture files, _support files and javascripts
 
-        glob path.join(Fixtures.project("todos"), "tests", "_support", "**", "*"), (err, files) =>
-          ## make sure there are support files in here!
+        glob(path.join(Fixtures.projectPath("todos"), "tests", "_fixtures", "**", "*"))
+        .then (files) =>
+          ## make sure there are fixtures in here!
           expect(files.length).to.be.gt(0)
 
-          supertest(@app)
-          .get("/__cypress/files")
-          .expect(200, [
-            { name: "sub/sub_test.coffee" },
-            { name: "test1.js" },
-            { name: "test2.coffee" }
-          ])
-          .then -> done()
+          glob(path.join(Fixtures.projectPath("todos"), "tests", "_support", "**", "*"))
+          .then (files) =>
+            ## make sure there are support files in here!
+            expect(files.length).to.be.gt(0)
 
-    it "sets X-Files-Path header to the length of files", ->
-      filesPath = Fixtures.project("todos") + "/" + "tests"
+            supertest(@app)
+            .get("/__cypress/files")
+            .expect(200, [
+              { name: "integration/sub/sub_test.coffee" },
+              { name: "integration/test1.js" },
+              { name: "integration/test2.coffee" }
+            ])
 
-      supertest(@app)
+    describe "ids with regular configuration", ->
+      beforeEach ->
+        @setup({
+          projectRoot: Fixtures.projectPath("ids")
+        })
+
+      it "returns test files as json", ->
+        supertest(@app)
         .get("/__cypress/files")
-        .expect(200)
-        .expect("X-Files-Path", filesPath)
+        .expect(200, [
+          { name: "integration/bar.js" }
+          { name: "integration/foo.coffee" }
+          { name: "integration/noop.coffee" }
+        ])
 
   context "GET /__cypress/tests", ->
     describe "todos", ->
@@ -136,7 +150,7 @@ describe "Routes", ->
         Fixtures.scaffold("todos")
 
         @setup({
-          projectRoot: Fixtures.project("todos")
+          projectRoot: Fixtures.projectPath("todos")
           config: {
             integrationFolder: "tests"
             javascripts: ["support/spec_helper.coffee"]
@@ -171,7 +185,7 @@ describe "Routes", ->
         Fixtures.scaffold("no-server")
 
         @setup({
-          projectRoot: Fixtures.project("no-server")
+          projectRoot: Fixtures.projectPath("no-server")
           config: {
             integrationFolder: "my-tests"
             javascripts: ["helpers/includes.js"]
@@ -293,7 +307,7 @@ describe "Routes", ->
           Fixtures.scaffold("todos")
 
           @setup({
-            projectRoot: Fixtures.project("todos")
+            projectRoot: Fixtures.projectPath("todos")
             config: {
               integrationFolder: "tests"
               fixturesFolder: "tests/_fixtures"
@@ -370,12 +384,20 @@ describe "Routes", ->
     #       .expect(JSON.parse(json))
 
   context "GET /__cypress/iframes/*", ->
+    beforeEach ->
+      Fixtures.scaffold("todos")
+      Fixtures.scaffold("no-server")
+      Fixtures.scaffold("ids")
+
+    afterEach ->
+      Fixtures.remove("todos")
+      Fixtures.remove("no-server")
+      Fixtures.remove("ids")
+
     describe "todos", ->
       beforeEach ->
-        Fixtures.scaffold("todos")
-
         @setup({
-          projectRoot: Fixtures.project("todos")
+          projectRoot: Fixtures.projectPath("todos")
           config: {
             integrationFolder: "tests"
             fixturesFolder: "tests/_fixtures"
@@ -384,21 +406,18 @@ describe "Routes", ->
           }
         })
 
-      afterEach ->
-        Fixtures.remove("todos")
-
-      it "renders empty inject with variables passed in", ->
-        contents = removeWhitespace Fixtures.get("server/expected_empty_inject.html")
+      it "renders iframe with variables passed in", ->
+        contents = removeWhitespace Fixtures.get("server/expected_todos_iframe.html")
 
         supertest(@app)
-          .get("/__cypress/iframes/test2.coffee")
+          .get("/__cypress/iframes/integration/test2.coffee")
           .expect(200)
           .then (res) ->
             body = removeWhitespace(res.text)
             expect(body).to.eq contents
 
       it "can send back all tests", ->
-        contents = removeWhitespace Fixtures.get("server/expected_all_tests_empty_inject.html")
+        contents = removeWhitespace Fixtures.get("server/expected_todos_all_tests_iframe.html")
 
         supertest(@app)
           .get("/__cypress/iframes/__all")
@@ -409,10 +428,8 @@ describe "Routes", ->
 
     describe "no-server", ->
       beforeEach ->
-        Fixtures.scaffold("no-server")
-
         @setup({
-          projectRoot: Fixtures.project("no-server")
+          projectRoot: Fixtures.projectPath("no-server")
           config: {
             integrationFolder: "my-tests"
             javascripts: ["helpers/includes.js"]
@@ -423,14 +440,37 @@ describe "Routes", ->
           }
         })
 
-      afterEach ->
-        Fixtures.remove("no-server")
-
-      it "renders empty inject with variables passed in", ->
-        contents = removeWhitespace Fixtures.get("server/expected_no_server_empty_inject.html")
+      it "renders iframe with variables passed in", ->
+        contents = removeWhitespace Fixtures.get("server/expected_no_server_iframe.html")
 
         supertest(@app)
-          .get("/__cypress/iframes/test1.js")
+          .get("/__cypress/iframes/integration/test1.js")
+          .expect(200)
+          .then (res) ->
+            body = removeWhitespace(res.text)
+            expect(body).to.eq contents
+
+    describe "ids", ->
+      beforeEach ->
+        @setup({
+          projectRoot: Fixtures.projectPath("ids")
+        })
+
+      it "renders iframe with variables passed in", ->
+        contents = removeWhitespace Fixtures.get("server/expected_ids_iframe.html")
+
+        supertest(@app)
+          .get("/__cypress/iframes/integration/foo.coffee")
+          .expect(200)
+          .then (res) ->
+            body = removeWhitespace(res.text)
+            expect(body).to.eq contents
+
+      it "can send back all tests", ->
+        contents = removeWhitespace Fixtures.get("server/expected_ids_all_tests_iframe.html")
+
+        supertest(@app)
+          .get("/__cypress/iframes/__all")
           .expect(200)
           .then (res) ->
             body = removeWhitespace(res.text)
@@ -1320,7 +1360,7 @@ describe "Routes", ->
         Fixtures.scaffold()
 
         @setup({
-          projectRoot: Fixtures.project("no-server")
+          projectRoot: Fixtures.projectPath("no-server")
           config: {
             rootFolder: "dev"
             integrationFolder: "my-tests"
