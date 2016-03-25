@@ -13,7 +13,7 @@ folders = "supportFolder fixturesFolder integrationFolder unitFolder".split(" ")
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
-convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
+convertRelativeToAbsolutePaths = (rootFolder, obj, defaults = {}) ->
   _.reduce folders, (memo, folder) ->
     val = obj[folder]
     if val?
@@ -22,10 +22,10 @@ convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
       ## set the Remove key to true
       if val is false and def = defaults[folder]
         memo[folder + "Remove"] = true
-        memo[folder] = path.resolve(projectRoot, def)
+        memo[folder] = path.resolve(rootFolder, def)
       else
-        ## else just resolve the folder from the projectRoot
-        memo[folder] = path.resolve(projectRoot, val)
+        ## else just resolve the folder from the rootFolder
+        memo[folder] = path.resolve(rootFolder, val)
 
     return memo
   , {}
@@ -92,6 +92,7 @@ module.exports = {
       autoOpen:       false
       viewportWidth:  1000
       viewportHeight: 660
+      rootFolder:     config.projectRoot
       # unitFolder:        "cypress/unit"
       supportFolder:     "cypress/support"
       fixturesFolder:    "cypress/fixtures"
@@ -130,6 +131,7 @@ module.exports = {
 
   setParentTestsPaths: (obj) ->
     ## projectRoot:              "/path/to/project"
+    ## rootFolder:               "/path/to/project"
     ## integrationFolder:        "/path/to/project/cypress/integration"
     ## parentTestsFolder:        "/path/to/project/cypress"
     ## parentTestsFolderDisplay: "project/cypress"
@@ -138,7 +140,7 @@ module.exports = {
 
     ptf = obj.parentTestsFolder = path.dirname(obj.integrationFolder)
 
-    pr = path.basename(obj.projectRoot)
+    pr = path.basename(obj.rootFolder)
     f  = path.basename(ptf)
 
     obj.parentTestsFolderDisplay = path.join(pr, f)
@@ -148,9 +150,13 @@ module.exports = {
   setAbsolutePaths: (obj, defaults) ->
     obj = _.clone(obj)
 
-    ## if we have a projectRoot
+    ## if we have a rootFolder
     if pr = obj.projectRoot
-      _.extend obj, convertRelativeToAbsolutePaths(pr, obj, defaults)
+      ## reset rootFolder to be absolute
+      obj.rootFolder = rf = path.resolve(pr, obj.rootFolder)
+
+      ## and do the same for all the rest
+      _.extend obj, convertRelativeToAbsolutePaths(rf, obj, defaults)
 
     return obj
 
