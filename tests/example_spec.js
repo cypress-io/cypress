@@ -30,8 +30,6 @@ describe('Kitchen Sink', function(){
     // clears the Local Storage and Cookies
     // before each test.
 
-
-
   })
 
   it('cy.should - assert that <title> is correct', function(){
@@ -430,11 +428,6 @@ describe('Kitchen Sink', function(){
 
     it('cy.select() - select an option in a <select> element', function(){
 
-      // SOME OF THESE ARE COMMENTED OUT DUE TO AN
-      // ERROR CURRENTLY IN CYPRESS
-      // https://github.com/cypress-io/cypress/issues/107
-      // *******************************************
-
       // http://on.cypress.io/api/select
 
       // Select the option with matching text content
@@ -442,19 +435,6 @@ describe('Kitchen Sink', function(){
 
       // Select the option with matching value
       cy.get('.action-select').select('fr-bananas')
-
-      // **** Select Options ****
-      //
-      // cy.select() accepts options that control selecting
-      //
-      // Ignore error checking prior to select
-      // like whether the select or options is disabled
-      //
-      // this select below is disabled.
-      // cy.get('.action-select-disabled').select('option2', {force: true})
-
-      // this option in the select below is disabled.
-      // cy.get('.action-option-disabled').select('fr-oranges', {force: true})
 
     })
 
@@ -745,17 +725,6 @@ describe('Kitchen Sink', function(){
               'And even more text from third p'
             ])
         })
-
-      })
-
-      it.skip('assert - make an assertion about a specified subject', function(){
-        // THIS IS SKIPPED DUE TO AN
-        // ERROR CURRENTLY IN CYPRESS
-        // https://github.com/cypress-io/cypress/issues/101
-        // *******************************************
-
-        // We can use Chai's TDD style assertions
-        assert.isTrue(true, "true should be true")
 
       })
 
@@ -1237,22 +1206,30 @@ describe('Kitchen Sink', function(){
     // that give you access to methods from other
     // commonly used libraries
 
-    it.skip('Cypress._.method() - call an underscore method', function(){
+    it('Cypress._.method() - call an underscore method', function(){
 
-      cy.get('.utility-each').then(function($li){
-
-        // use the _.each function
+      cy
+        // use the _.chain, _.pluck, _.first, and _.value functions
         // http://on.cypress.io/api/cypress-underscore
+        .request('http://jsonplaceholder.typicode.com/users').then(function(response){
+          var _ = Cypress._
+          var ids = _.chain(response.body).pluck('id').first(3).value()
 
-      })
+          expect(ids).to.deep.eq([1, 2, 3])
+        })
 
     })
 
-    it.skip('Cypress.$(selector) - call a jQuery method', function(){
-
-      cy.get('.utility-jquery')
+    it('Cypress.$(selector) - call a jQuery method', function(){
 
       // http://on.cypress.io/api/cypress-jquery
+      var $li = Cypress.$('.utility-jquery li:first')
+
+      cy
+        .wrap($li)
+          .should('not.have.class', 'active')
+        .click()
+          .should('have.class', 'active')
 
     })
 
@@ -1268,247 +1245,251 @@ describe('Kitchen Sink', function(){
 
     })
 
-    it.skip('Cypress.Blob.method() - convert a vase64 strings to blob objects', function(){
-
-      cy.get('.utility-blob')
+    it('Cypress.Blob.method() - convert a vase64 strings to blob objects', function(){
 
       // http://on.cypress.io/api/cypress-blob
+      // get the dataUrl string for the javascript-logo
+      Cypress.Blob.imgSrcToDataURL('/assets/img/javascript-logo.png').then(function(dataUrl){
+
+        // create an <img> element and set its src to the dataUrl
+        var img = Cypress.$('<img />', {src: dataUrl})
+
+        cy
+          .get('.utility-blob').then(function($div){
+            // append the image
+            $div.append(img)
+          })
+          .get('.utility-blob img').click().should('have.attr', 'src', dataUrl)
+      })
 
     })
 
-    it.skip('new Cypress.Promise(function) - instantiate a bluebird promise', function(){
-
-      cy.get('.utility-promise')
+    it('new Cypress.Promise(function) - instantiate a bluebird promise', function(){
 
       // http://on.cypress.io/api/cypress-promise
+      var waited = false
+
+      function waitOneSecond(){
+        // return a promise that resolves after 1 second
+        return new Cypress.Promise(function(resolve, reject){
+          setTimeout(function(){
+            // set waited to true
+            waited = true
+
+            // resolve with 'foo' string
+            resolve('foo')
+          }, 1000)
+        })
+      }
+
+      cy
+        .then(function(){
+          // return a promise to cy.then() that
+          // is awaited until it resolves
+          return waitOneSecond().then(function(str){
+            expect(str).to.eq('foo')
+            expect(waited).to.be.true
+          })
+        })
 
     })
 
   })
 
-  context('Cypress API', function(){
+  context('Cypress.config()', function(){
+    beforeEach(function(){
+      cy.visit('/cypress-api/config')
+    })
 
-    describe('Config', function(){
-      beforeEach(function(){
-        cy.visit('/cypress-api/config')
+    // **** Config ****
+    //
+
+    it('Cypress.config() - get and set configuration options', function(){
+
+      // http://on.cypress.io/api/config
+      var myConfig = Cypress.config()
+
+      expect(myConfig).to.have.property('animationDistanceThreshold', 5)
+      expect(myConfig).to.have.property('baseUrl', 'https://example.cypress.io')
+      expect(myConfig).to.have.property('commandTimeout', 4000)
+      expect(myConfig).to.have.property('requestTimeout', 5000)
+      expect(myConfig).to.have.property('responseTimeout', 20000)
+      expect(myConfig).to.have.property('viewportHeight', 660)
+      expect(myConfig).to.have.property('viewportWidth', 1000)
+      expect(myConfig).to.have.property('visitTimeout', 30000) // failing
+      expect(myConfig).to.have.property('waitForAnimations', true)
+
+
+      // *** get a single configuration option **
+      expect(Cypress.config('visitTimeout')).to.eq(30000)
+
+
+      // *** set a single configuration option **
+      //
+      // this will change the config for the rest of your tests!
+      Cypress.config('visitTimeout', 20000)
+
+      expect(Cypress.config('visitTimeout')).to.eq(20000)
+
+      Cypress.config('visitTimeout', 30000)
+
+    })
+
+  })
+
+  context('Cypress.env', function(){
+    beforeEach(function(){
+      cy.visit('/cypress-api/env')
+    })
+
+    // **** Env ****
+    //
+    // We can set environment variables for highly dynamic values
+    //
+    // https://on.cypress.io/guides/environment-variables
+
+    it('Cypress.env() - get the environment variables', function(){
+
+      // http://on.cypress.io/api/env
+      // set multiple environment variables
+      Cypress.env({
+        host: 'veronica.dev.local',
+        api_server: 'http://localhost:8888/api/v1/'
       })
 
-      // **** Config ****
-      //
+      // get environment variable
+      expect(Cypress.env('host')).to.eq('veronica.dev.local')
 
-      it('Cypress.config() - get and set configuration options', function(){
+      // set environment variable
+      Cypress.env('api_server', 'http://localhost:8888/api/v2/')
+      expect(Cypress.env('api_server')).to.eq('http://localhost:8888/api/v2/')
 
-        // http://on.cypress.io/api/config
-        var myConfig = Cypress.config()
+      // get all environment variable
+      expect(Cypress.env()).to.have.property('host', 'veronica.dev.local')
+      expect(Cypress.env()).to.have.property('api_server', 'http://localhost:8888/api/v2/')
 
-        expect(myConfig).to.have.property('animationDistanceThreshold', 5)
-        expect(myConfig).to.have.property('baseUrl', 'https://example.cypress.io')
-        expect(myConfig).to.have.property('commandTimeout', 4000)
-        expect(myConfig).to.have.property('requestTimeout', 5000)
-        expect(myConfig).to.have.property('responseTimeout', 20000)
-        expect(myConfig).to.have.property('viewportHeight', 660)
-        expect(myConfig).to.have.property('viewportWidth', 1000)
-        expect(myConfig).to.have.property('visitTimeout', 30000) // failing
-        expect(myConfig).to.have.property('waitForAnimations', true)
+    })
+  })
 
+  context('Cypress.Cookies', function(){
+    beforeEach(function(){
+      cy.visit('/cypress-api/cookies')
+    })
 
-        // *** get a single configuration option **
-        expect(Cypress.config('visitTimeout')).to.eq(30000)
+    // **** Cookies ****
+    //
+    // Manage your app's cookies while testing
+    //
+    // http://on.cypress.io/api/cookies
 
+    it('Cypress.Cookies.set() - set a cookie by key, value', function(){
 
-        // *** set a single configuration option **
-        //
-        // this will change the config for the rest of your tests!
-        Cypress.config('visitTimeout', 20000)
+      Cypress.Cookies.set('fakeCookie', '123ABC')
 
-        expect(Cypress.config('visitTimeout')).to.eq(20000)
+      cy.getCookies().should('have.property', 'fakeCookie', '123ABC')
 
-        Cypress.config('visitTimeout', 30000)
+    })
 
+    it('Cypress.Cookies.get() - get a cookie by its key', function(){
+
+      Cypress.Cookies.set('fakeCookie', '123ABC')
+
+      expect(Cypress.Cookies.get('fakeCookie')).to.eq('123ABC')
+
+    })
+
+    it('Cypress.Cookies.remove() - remove a cookie by its key', function(){
+
+      Cypress.Cookies.set('fakeCookie', '123ABC')
+      expect(Cypress.Cookies.get('fakeCookie')).to.eq('123ABC')
+
+      Cypress.Cookies.remove('fakeCookie')
+      expect(Cypress.Cookies.get('fakeCookie')).to.not.be.ok
+
+    })
+
+    it('Cypress.Cookies.debug() - enable or disable debugging', function(){
+
+      Cypress.Cookies.debug(true)
+
+      // Cypress will now log in the console when
+      // cookies are set or removed
+      Cypress.Cookies.set('fakeCookie', '123ABC')
+      Cypress.Cookies.remove('fakeCookie')
+      Cypress.Cookies.set('fakeCookie', '123ABC')
+      Cypress.Cookies.remove('fakeCookie')
+      Cypress.Cookies.set('fakeCookie', '123ABC')
+
+    })
+
+    it('Cypress.Cookies.preserveOnce() - preserve cookies by key', function(){
+
+      // normally cookies are reset after each test
+      expect(Cypress.Cookies.get('fakeCookie')).to.not.be.ok
+
+      // preserving a cookie will not clear it when
+      // the next test starts
+      Cypress.Cookies.set('lastCookie', '789XYZ')
+      Cypress.Cookies.preserveOnce('lastCookie')
+
+    })
+
+    it('Cypress.Cookies.defaults() - set defaults for all cookies', function(){
+
+      // now any cookie with the name 'session_id' will
+      // not be cleared before each new test runs
+      Cypress.Cookies.defaults({
+        whitelist: "session_id"
       })
 
     })
 
-    describe('Env', function(){
-      beforeEach(function(){
-        cy.visit('/cypress-api/env')
-      })
+  })
 
-      // **** Env ****
-      //
-      // We can set environment variables for highly dynamic values
-      //
-      // https://on.cypress.io/guides/environment-variables
-
-      it('Cypress.env() - get the environment variables', function(){
-
-        // http://on.cypress.io/api/env
-        // set multiple environment variables
-        Cypress.env({
-          host: 'veronica.dev.local',
-          api_server: 'http://localhost:8888/api/v1/'
-        })
-
-        // get environment variable
-        expect(Cypress.env('host')).to.eq('veronica.dev.local')
-
-        // set environment variable
-        Cypress.env('api_server', 'http://localhost:8888/api/v2/')
-        expect(Cypress.env('api_server')).to.eq('http://localhost:8888/api/v2/')
-
-        // get all environment variable
-        expect(Cypress.env()).to.have.property('host', 'veronica.dev.local')
-        expect(Cypress.env()).to.have.property('api_server', 'http://localhost:8888/api/v2/')
-
-      })
+  context('Cypress.Dom', function(){
+    beforeEach(function(){
+      cy.visit('/cypress-api/dom')
     })
 
-    describe.skip('Commands', function(){
-      beforeEach(function(){
-        cy.visit('/cypress-api/commands')
-      })
+    // **** Dom ****
+    //
+    // Cypress.Dom holds methods and logic related to DOM.
+    //
+    // http://on.cypress.io/api/dom
 
-      // **** Commands ****
-      //
-      // http://on.cypress.io/api/commands
+    it('Cypress.Dom.isHidden() - determine if a DOM element is hidden', function(){
 
-      it('Cypress.addChildCommant() - add a child command', function(){
+      var hiddenP = Cypress.$('.dom-p p.hidden').get(0)
+      var visibleP = Cypress.$('.dom-p p.visible').get(0)
 
-
-      })
-
-      it('Cypress.addDualCommand() - add a dual command', function(){
-
-
-      })
-
-      it('Cypress.addParentCommand() - add a parent command', function(){
-
-
-      })
-    })
-
-    describe('Cookies', function(){
-      beforeEach(function(){
-        cy.visit('/cypress-api/cookies')
-      })
-
-      // **** Cookies ****
-      //
-      // Manage your app's cookies while testing
-      //
-      // http://on.cypress.io/api/cookies
-
-      it('Cypress.Cookies.set() - set a cookie by key, value', function(){
-
-        Cypress.Cookies.set('fakeCookie', '123ABC')
-
-        cy.getCookies().should('have.property', 'fakeCookie', '123ABC')
-
-      })
-
-      it('Cypress.Cookies.get() - get a cookie by its key', function(){
-
-        Cypress.Cookies.set('fakeCookie', '123ABC')
-
-        expect(Cypress.Cookies.get('fakeCookie')).to.eq('123ABC')
-
-      })
-
-      it('Cypress.Cookies.remove() - remove a cookie by its key', function(){
-
-        Cypress.Cookies.set('fakeCookie', '123ABC')
-        expect(Cypress.Cookies.get('fakeCookie')).to.eq('123ABC')
-
-        Cypress.Cookies.remove('fakeCookie')
-        expect(Cypress.Cookies.get('fakeCookie')).to.not.be.ok
-
-      })
-
-      it('Cypress.Cookies.debug() - enable or disable debugging', function(){
-
-        Cypress.Cookies.debug(true)
-
-        // Cypress will now log in the console when
-        // cookies are set or removed
-        Cypress.Cookies.set('fakeCookie', '123ABC')
-        Cypress.Cookies.remove('fakeCookie')
-        Cypress.Cookies.set('fakeCookie', '123ABC')
-        Cypress.Cookies.remove('fakeCookie')
-        Cypress.Cookies.set('fakeCookie', '123ABC')
-
-      })
-
-      it('Cypress.Cookies.preserveOnce() - preserve cookies by key', function(){
-
-        // normally cookies are reset after each test
-        expect(Cypress.Cookies.get('fakeCookie')).to.not.be.ok
-
-        // preserving a cookie will not clear it when
-        // the next test starts
-        Cypress.Cookies.set('lastCookie', '789XYZ')
-        Cypress.Cookies.preserveOnce('lastCookie')
-
-      })
-
-      it('Cypress.Cookies.defaults() - set defaults for all cookies', function(){
-
-        // now any cookie with the name 'session_id' will
-        // not be cleared before each new test runs
-        Cypress.Cookies.defaults({
-          whitelist: "session_id"
-        })
-
-      })
+      // our first paragraph has css class 'hidden'
+      expect(Cypress.Dom.isHidden(hiddenP)).to.be.true
+      expect(Cypress.Dom.isHidden(visibleP)).to.be.false
 
     })
 
-    describe('Dom', function(){
-      beforeEach(function(){
-        cy.visit('/cypress-api/dom')
-      })
+  })
 
-      // **** Dom ****
-      //
-      // Cypress.Dom holds methods and logic related to DOM.
-      //
-      // http://on.cypress.io/api/dom
-
-      it('Cypress.Dom.isHidden() - determine if a DOM element is hidden', function(){
-
-        var hiddenP = Cypress.$('.dom-p p.hidden').get(0)
-        var visibleP = Cypress.$('.dom-p p.visible').get(0)
-
-        // our first paragraph has css class 'hidden'
-        expect(Cypress.Dom.isHidden(hiddenP)).to.be.true
-        expect(Cypress.Dom.isHidden(visibleP)).to.be.false
-
-      })
-
+  context('Cypress.Server', function(){
+    beforeEach(function(){
+      cy.visit('/cypress-api/server')
     })
 
-    describe('Server', function(){
-      beforeEach(function(){
-        cy.visit('/cypress-api/server')
-      })
+    // **** Server ****
+    //
+    // Permanently override server options for
+    // all instances of cy.server()
+    //
+    // http://on.cypress.io/api/api-server
 
-      // **** Server ****
-      //
-      // Permanently override server options for
-      // all instances of cy.server()
-      //
-      // http://on.cypress.io/api/api-server
+    it('Cypress.Server.defaults() - change default config of server', function(){
 
-      it('Cypress.Server.defaults() - change default config of server', function(){
-
-        Cypress.Server.defaults({
-          delay: 0,
-          force404: false,
-          whitelist: function(xhr){
-            // handle custom logic for whitelisting
-          }
-        })
-
+      Cypress.Server.defaults({
+        delay: 0,
+        force404: false,
+        whitelist: function(xhr){
+          // handle custom logic for whitelisting
+        }
       })
 
     })
