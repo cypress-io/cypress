@@ -1,7 +1,7 @@
 slug: cypress-moment
 excerpt: Format or parse dates using moment methods
 
-# [Cypress.moment()](#usage)
+# [Cypress.moment()](#section-usage)
 
 Cypress automatically proxies [`moment.js`](http://momentjs.com/) and exposes it as `Cypress.moment`.
 
