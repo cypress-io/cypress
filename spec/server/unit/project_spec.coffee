@@ -24,7 +24,7 @@ describe "lib/project", ->
     @projectId = settings.readSync(@todosPath).projectId
 
     @config  = config.set({})
-    @project = Project("path/to/project")
+    @project = Project("/path/to/project")
 
   afterEach ->
     Fixtures.remove()
@@ -40,7 +40,7 @@ describe "lib/project", ->
 
   context "#getConfig", ->
     beforeEach ->
-      @sandbox.stub(config, "get").withArgs("path/to/project", {foo: "bar"}).resolves({baz: "quux"})
+      @sandbox.stub(config, "get").withArgs("/path/to/project", {foo: "bar"}).resolves({baz: "quux"})
 
     it "calls config.get with projectRoot + options", ->
       @project.getConfig({foo: "bar"})
