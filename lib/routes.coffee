@@ -1,6 +1,7 @@
 path        = require("path")
 CacheBuster = require("./util/cache_buster")
 cwd         = require("./cwd")
+logger      = require("./logger")
 spec        = require("./controllers/spec_processor")
 xhrs        = require("./controllers/xhrs")
 files       = require("./controllers/files")
@@ -46,7 +47,16 @@ module.exports = (app, config) ->
   app.all "*", (req, res, next) ->
     proxy.handle(req, res, config, app, next)
 
-  ## turn this on to debug error handling
-  ## in test mode
-  # app.use (err, req, res, next) ->
-  #   console.log err.stack
+  ## when we experience uncaught errors
+  ## during routing just log them out to
+  ## the console and send 500 status
+  ## and report to raygun (in production)
+  app.use (err, req, res, next) ->
+    console.log err.stack
+
+    res.set("x-cypress-error", err.message)
+    res.set("x-cypress-stack", err.stack.replace("\n", "\\n"))
+    res.sendStatus(500)
+
+    ## swallow any errors creating this exception
+    logger.createException(err).catch(->)
