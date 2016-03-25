@@ -8,8 +8,8 @@ CacheBuster = require("../util/cache_buster")
 
 module.exports = {
   handleFiles: (req, res, config) ->
-    @getTestFiles(config).then (files) ->
-      res.set "X-Files-Path", files.path
+    @getTestFiles(config)
+    .then (files) ->
       res.json files
 
   handleIframe: (req, res, config) ->
