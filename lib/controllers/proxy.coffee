@@ -185,7 +185,7 @@ module.exports = {
 
   getFileContent: (thr, req, res, remoteHost, app, config) ->
     args = _.compact([
-      config.rootFolder,
+      config.fileServerFolder,
       req.url
     ])
 

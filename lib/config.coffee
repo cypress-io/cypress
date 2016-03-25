@@ -8,12 +8,12 @@ scaffold = require("./scaffold")
 ## cypress following by _
 cypressEnvRe = /^(cypress_)/i
 
-folders = "supportFolder fixturesFolder integrationFolder unitFolder".split(" ")
+folders = "fileServerFolder supportFolder fixturesFolder integrationFolder unitFolder".split(" ")
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
-convertRelativeToAbsolutePaths = (rootFolder, obj, defaults = {}) ->
+convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   _.reduce folders, (memo, folder) ->
     val = obj[folder]
     if val?
@@ -22,10 +22,10 @@ convertRelativeToAbsolutePaths = (rootFolder, obj, defaults = {}) ->
       ## set the Remove key to true
       if val is false and def = defaults[folder]
         memo[folder + "Remove"] = true
-        memo[folder] = path.resolve(rootFolder, def)
+        memo[folder] = path.resolve(projectRoot, def)
       else
-        ## else just resolve the folder from the rootFolder
-        memo[folder] = path.resolve(rootFolder, val)
+        ## else just resolve the folder from the projectRoot
+        memo[folder] = path.resolve(projectRoot, val)
 
     return memo
   , {}
@@ -92,7 +92,7 @@ module.exports = {
       autoOpen:       false
       viewportWidth:  1000
       viewportHeight: 660
-      rootFolder:     config.projectRoot
+      fileServerFolder: ""
       # unitFolder:        "cypress/unit"
       supportFolder:     "cypress/support"
       fixturesFolder:    "cypress/fixtures"
@@ -131,32 +131,30 @@ module.exports = {
 
   setParentTestsPaths: (obj) ->
     ## projectRoot:              "/path/to/project"
-    ## rootFolder:               "/path/to/project"
     ## integrationFolder:        "/path/to/project/cypress/integration"
     ## parentTestsFolder:        "/path/to/project/cypress"
     ## parentTestsFolderDisplay: "project/cypress"
 
     obj = _.clone(obj)
 
-    ptf = obj.parentTestsFolder = path.dirname(obj.integrationFolder)
+    ptfd = obj.parentTestsFolder = path.dirname(obj.integrationFolder)
 
-    pr = path.basename(obj.rootFolder)
-    f  = path.basename(ptf)
+    prd = path.dirname(obj.projectRoot)
 
-    obj.parentTestsFolderDisplay = path.join(pr, f)
+    obj.parentTestsFolderDisplay = path.relative(prd, ptfd)
 
     return obj
 
   setAbsolutePaths: (obj, defaults) ->
     obj = _.clone(obj)
 
-    ## if we have a rootFolder
+    ## if we have a projectRoot
     if pr = obj.projectRoot
-      ## reset rootFolder to be absolute
-      obj.rootFolder = rf = path.resolve(pr, obj.rootFolder)
+      ## reset fileServerFolder to be absolute
+      # obj.fileServerFolder = path.resolve(pr, obj.fileServerFolder)
 
       ## and do the same for all the rest
-      _.extend obj, convertRelativeToAbsolutePaths(rf, obj, defaults)
+      _.extend obj, convertRelativeToAbsolutePaths(pr, obj, defaults)
 
     return obj
 

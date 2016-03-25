@@ -223,32 +223,43 @@ describe "lib/config", ->
     it "sets parentTestsFolder and parentTestsFolderDisplay", ->
       obj = {
         projectRoot:       "/path/to/project"
-        rootFolder:        "/path/to/project"
         integrationFolder: "/path/to/project/cypress/integration"
       }
 
       expect(config.setParentTestsPaths(obj)).to.deep.eq({
         projectRoot:       "/path/to/project"
-        rootFolder:        "/path/to/project"
         integrationFolder: "/path/to/project/cypress/integration"
         parentTestsFolder: "/path/to/project/cypress"
         parentTestsFolderDisplay: "project/cypress"
+      })
+
+    it "sets parentTestsFolderDisplay to parentTestsFolder if they are the same", ->
+      obj = {
+        projectRoot:       "/path/to/project"
+        integrationFolder: "/path/to/project/tests"
+      }
+
+      expect(config.setParentTestsPaths(obj)).to.deep.eq({
+        projectRoot:       "/path/to/project"
+        integrationFolder: "/path/to/project/tests"
+        parentTestsFolder: "/path/to/project"
+        parentTestsFolderDisplay: "project"
       })
 
   context ".setAbsolutePaths", ->
     it "is noop without projectRoot", ->
       expect(config.setAbsolutePaths({})).to.deep.eq({})
 
-    it "resolves rootFolder with projectRoot", ->
-      obj = {
-        projectRoot: "/path/to/project"
-        rootFolder: "foo"
-      }
+    # it "resolves fileServerFolder with projectRoot", ->
+    #   obj = {
+    #     projectRoot: "/path/to/project"
+    #     fileServerFolder: "foo"
+    #   }
 
-      expect(config.setAbsolutePaths(obj)).to.deep.eq({
-        projectRoot: "/path/to/project"
-        rootFolder: "/path/to/project/foo"
-      })
+    #   expect(config.setAbsolutePaths(obj)).to.deep.eq({
+    #     projectRoot: "/path/to/project"
+    #     fileServerFolder: "/path/to/project/foo"
+    #   })
 
     it "does not mutate existing obj", ->
       obj = {}
@@ -257,7 +268,6 @@ describe "lib/config", ->
     it "ignores non special *folder properties", ->
       obj = {
         projectRoot: "/path/to/project"
-        rootFolder: "/path/to/project"
         blehFolder: "some/rando/path"
         foo: "bar"
         baz: "quux"
@@ -268,7 +278,6 @@ describe "lib/config", ->
     it "sets special Remove property to true when folder is false", ->
       obj = {
         projectRoot: "/path/to/project"
-        rootFolder: "/path/to/project"
         fixturesFolder: "f"
         supportFolder: false
       }
@@ -279,24 +288,21 @@ describe "lib/config", ->
 
       expect(config.setAbsolutePaths(obj, defaults)).to.deep.eq({
         projectRoot: "/path/to/project"
-        rootFolder: "/path/to/project"
         fixturesFolder: "/path/to/project/f"
         supportFolder: "/path/to/project/cypress/support" ## default
         supportFolderRemove: true
       })
 
-    ["supportFolder", "fixturesFolder", "integrationFolder", "unitFolder"].forEach (folder) ->
+    ["fileServerFolder", "supportFolder", "fixturesFolder", "integrationFolder", "unitFolder"].forEach (folder) ->
 
       it "converts relative #{folder} to absolute path", ->
         obj = {
           projectRoot: "/path/to/project"
-          rootFolder: "/path/to/project"
         }
         obj[folder] = "foo/bar"
 
         expected = {
           projectRoot: "/path/to/project"
-          rootFolder: "/path/to/project"
         }
         expected[folder] = "/path/to/project/foo/bar"
 

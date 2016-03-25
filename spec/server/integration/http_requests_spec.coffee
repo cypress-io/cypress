@@ -433,10 +433,7 @@ describe "Routes", ->
           config: {
             integrationFolder: "my-tests"
             javascripts: ["helpers/includes.js"]
-            ## even though there are no files here
-            ## we are adding rootFolder to test that
-            ## only the support files receive this value
-            rootFolder: "foo"
+            fileServerFolder: "foo"
           }
         })
 
@@ -1362,7 +1359,7 @@ describe "Routes", ->
         @setup({
           projectRoot: Fixtures.projectPath("no-server")
           config: {
-            rootFolder: "dev"
+            fileServerFolder: "dev"
             integrationFolder: "my-tests"
           }
         })

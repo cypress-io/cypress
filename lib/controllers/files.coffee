@@ -96,7 +96,7 @@ module.exports = {
     if test is "__all" then "All Tests" else test
 
   getJavascripts: (config) ->
-    {rootFolder, projectRoot, javascripts, supportFolder} = config
+    {projectRoot, javascripts, supportFolder} = config
 
     ## automatically add in our support folder and any javascripts
     files = [].concat path.join(supportFolder, "**", "*"), javascripts
@@ -106,7 +106,7 @@ module.exports = {
     ## to the javascripts array but that should
     ## probably be mapped during the config
     paths = _.map files, (file) ->
-      path.resolve(rootFolder, file)
+      path.resolve(projectRoot, file)
 
     Promise
     .map paths, (p) ->
@@ -114,7 +114,7 @@ module.exports = {
       return p if not p.includes("*")
 
       ## handle both relative + absolute paths
-      ## by simply resolving the path from rootFolder
+      ## by simply resolving the path from projectRoot
       p = path.resolve(projectRoot, p)
       glob(p)
     .then(_.flatten)
@@ -146,7 +146,7 @@ module.exports = {
     ## and mapping each of the javascripts into an
     ## absolute path
     javascriptsPath = _.map config.javascripts, (js) ->
-      path.join(config.rootFolder, js)
+      path.join(config.projectRoot, js)
 
     ## ignore _fixtures + _support + javascripts
     options = {
