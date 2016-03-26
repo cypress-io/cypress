@@ -47,7 +47,7 @@ You can install Cypress in 2 different ways:
 
 ```shell
 ## install the Cypress CLI tool
-npm install -g cypress
+npm install -g cypress cli
 
 ## install the Desktop Cypress app
 cypress install
