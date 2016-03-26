@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "preinstall": "npm cache clean && rm -rf app && mkdir app && npm i examples-kitchen-sink",
-    "postinstall": "cp -r node_modules/examples-kitchen-sink/app . && npm run build",
+    "preinstall": "npm cache clean && rm -rf app && mkdir app && npm i cypress-example-kitchensink",
+    "postinstall": "cp -r node_modules/cypress-example-kitchensink/app . && npm run build",
     "test": "cypress ci",
     "build": "gulp build",
     "deploy": "gulp deploy"
@@ -13,7 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "examples-kitchen-sink": "cypress-io/examples-kitchen-sink"
+    "cypress-example-kitchensink": "cypress-io/cypress-example-kitchensink"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
