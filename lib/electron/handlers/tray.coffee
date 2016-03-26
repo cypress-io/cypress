@@ -1,5 +1,5 @@
 _            = require("lodash")
-cypressIcons = require("cypress-icons")
+cypressIcons = require("cypress-core-icons")
 nativeImage  = require("electron").nativeImage
 Tray         = require("electron").Tray
 

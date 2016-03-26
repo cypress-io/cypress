@@ -51,7 +51,7 @@ describe "lib/cache", ->
             USER: {name: "brian"}
             PROJECTS: [
               "/Users/bmann/Dev/examples-angular-circle-ci"
-              "/Users/bmann/Dev/cypress-gui"
+              "/Users/bmann/Dev/cypress-core-gui"
               "/Users/bmann/Dev/cypress-app/spec/fixtures/projects/todos"
             ]
           }
@@ -70,7 +70,7 @@ describe "lib/cache", ->
         USER: {name: "brian"}
         PROJECTS: [
           "/Users/bmann/Dev/examples-angular-circle-ci"
-          "/Users/bmann/Dev/cypress-gui"
+          "/Users/bmann/Dev/cypress-core-gui"
           "/Users/bmann/Dev/cypress-app/spec/fixtures/projects/todos"
         ]
       })
