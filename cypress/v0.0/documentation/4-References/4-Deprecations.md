@@ -49,7 +49,7 @@ cy
 
 # Cypress Package Renamed
 
-<img width="637" alt="screen shot 2016-03-26 at 1 00 11 pm" src="https://cloud.githubusercontent.com/assets/1268976/14061389/8f421228-f355-11e5-8e24-cf96d88b6823.png">
+<img width="638" alt="screen shot 2016-03-26 at 2 06 48 pm" src="https://cloud.githubusercontent.com/assets/1268976/14061658/0f675e30-f35c-11e5-9765-ab0049a2653d.png">
 
 In previous versions of Cypress (below `0.15.0`) we distributed our CLI Tools under the package: `cypress`.
 
