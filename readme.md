@@ -17,7 +17,7 @@ For instance you can do common tasks like:
 ## Installation
 
 ```bash
-npm install -g cypress
+npm install -g cypress-cli
 ```
 
 This will make the `cypress` command globally available from your command line.
