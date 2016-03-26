@@ -1,5 +1,5 @@
 {
-  "name": "cypress-gui",
+  "name": "cypress-core-gui",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cypress-io/cypress-gui.git"
+    "url": "https://github.com/cypress-io/cypress-core-gui.git"
   },
   "author": "Brian Mann",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/cypress-io/cypress-gui/issues"
+    "url": "https://github.com/cypress-io/cypress-core-gui/issues"
   },
-  "homepage": "https://github.com/cypress-io/cypress-gui",
+  "homepage": "https://github.com/cypress-io/cypress-core-gui",
   "dependencies": {
     "coffee-script": "^1.10.0",
     "path": "^0.12.7"
