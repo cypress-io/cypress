@@ -62,7 +62,7 @@ module.exports = {
     @mergeDefaults(config, options)
 
   mergeDefaults: (config = {}, options = {}) ->
-    _.extend config, _.pick(options, "isHeadless", "socketId")
+    _.extend config, _.pick(options, "morgan", "isHeadless", "socketId")
 
     if p = options.port
       config.port = p

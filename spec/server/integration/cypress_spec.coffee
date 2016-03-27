@@ -432,6 +432,18 @@ describe "lib/cypress", ->
             fs.removeAsync(permissionsPath).then =>
               @expectExitWithErr("ERROR_WRITING_FILE", permissionsPath)
 
+    describe "morgan", ->
+      it "sets morgan to false", ->
+        Promise.all([
+          user.set({name: "brian", session_token: "session-123"}),
+
+          Project.add(@todosPath)
+        ])
+        .then =>
+          cypress.start(["--run-project=#{@todosPath}"]).then =>
+            expect(project.opened().cfg.morgan).to.be.false
+            @expectExitWith(0)
+
     describe "--port", ->
       beforeEach ->
         headless.waitForTestsToFinishRunning.resolves({})

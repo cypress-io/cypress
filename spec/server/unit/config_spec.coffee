@@ -95,6 +95,30 @@ describe "lib/config", ->
     it "animationDistanceThreshold=5", ->
       @defaults "animationDistanceThreshold", 5
 
+    it "morgan=true", ->
+      @defaults "morgan", true
+
+    it "isHeadless=false", ->
+      @defaults "isHeadless", false
+
+    it "socketId=null", ->
+      @defaults "socketId", null
+
+    it "can override morgan in options", ->
+      cfg = config.mergeDefaults({}, {morgan: false})
+
+      expect(cfg.morgan).to.be.false
+
+    it "can override isHeadless in options", ->
+      cfg = config.mergeDefaults({}, {isHeadless: true})
+
+      expect(cfg.isHeadless).to.be.true
+
+    it "can override socketId in options", ->
+      cfg = config.mergeDefaults({}, {socketId: 1234})
+
+      expect(cfg.socketId).to.eq(1234)
+
     it "deletes envFile", ->
       obj = {
         env: {
