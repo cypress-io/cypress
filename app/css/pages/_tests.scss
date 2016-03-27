@@ -120,8 +120,20 @@
   .outer-files-container.list-as-table>.file:not(.all-tests) {
 
     &>div>div:first-child {
-      padding-left: 20px;
-      padding-right: 20px;
+      padding: 5px 20px;
+      background-color: #fcfcfc;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border-bottom: 1px solid #eee;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: #222;
+
+      i {
+        font-weight: bold;
+        color: #222;
+        margin-right: 0;
+      }
     }
 
     &>div>div:last-child {
@@ -130,7 +142,7 @@
       &>.list-as-table>.file {
 
         &>div>div:first-child {
-          padding-left: 40px;
+          padding-left: 20px;
         }
 
         &>div>div:last-child {
@@ -139,7 +151,7 @@
           &>.list-as-table>.file {
 
             &>div>div:first-child {
-              padding-left: 60px;
+              padding-left: 40px;
             }
 
             &>div>div:last-child {
@@ -148,7 +160,7 @@
               &>.list-as-table>.file {
 
                 &>div>div:first-child {
-                  padding-left: 80px;
+                  padding-left: 60px;
                 }
 
                 &>div>div:last-child {
@@ -157,7 +169,7 @@
                   &>.list-as-table>.file {
 
                     &>div>div:first-child {
-                      padding-left: 100px;
+                      padding-left: 80px;
                     }
 
                     &>div>div:last-child {
@@ -166,7 +178,7 @@
                       &>.list-as-table>.file {
 
                         &>div>div:first-child {
-                          padding-left: 120px;
+                          padding-left: 100px;
                         }
 
                       }
