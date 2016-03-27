@@ -4,7 +4,7 @@ This repo contains the source code for pushing out [https://example.cypress.io](
 
 This is not actually a Cypress Example, we use this for internal purposes.
 
-If you're looking for the kitchen sink repo [it is here](https://github.com/cypress-io/examples-kitchen-sink).
+If you're looking for the kitchen sink repo [it is here](https://github.com/cypress-io/cypress-example-kitchensink).
 
 ## Developing
 
@@ -12,7 +12,7 @@ If you're looking for the kitchen sink repo [it is here](https://github.com/cypr
 npm install
 ```
 
-This copies the `examples-kitchen-sink` src files here, and they can now be built + pushed.
+This copies the `cypress-example-kitchensink` src files here, and they can now be built + pushed.
 
 ## Building
 
