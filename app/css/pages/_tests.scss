@@ -115,7 +115,6 @@
 
   }
 
-
   // need to refactor to be calculated using javascript
   .outer-files-container.list-as-table>.folder,
   .outer-files-container.list-as-table>.file:not(.all-tests) {
@@ -150,6 +149,32 @@
 
                 &>div>div:first-child {
                   padding-left: 80px;
+                }
+
+                &>div>div:last-child {
+
+                  &>.list-as-table>.folder,
+                  &>.list-as-table>.file {
+
+                    &>div>div:first-child {
+                      padding-left: 100px;
+                    }
+
+                    &>div>div:last-child {
+
+                      &>.list-as-table>.folder,
+                      &>.list-as-table>.file {
+
+                        &>div>div:first-child {
+                          padding-left: 120px;
+                        }
+
+                      }
+
+                    }
+
+                  }
+
                 }
 
               }
