@@ -20,7 +20,7 @@
       new Entities.NavsCollection [
         {name: "Tests",     href: "#tests",      icon: "fa fa-code"}
         # {name: "Builds",    href: "#builds",     icon: "fa fa-th"}
-        {name: "Analytics", href: "#analytics",  icon: "fa fa-bar-chart-o"}
+        # {name: "Analytics", href: "#analytics",  icon: "fa fa-bar-chart-o"}
         # {name: "Settings",  href: "#settings",   icon: "fa fa-cog"}
         {name: "Docs",      href: "https://on.cypress.io",  icon: "fa fa-graduation-cap", external: true}
       ]
