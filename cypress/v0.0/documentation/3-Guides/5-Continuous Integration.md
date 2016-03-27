@@ -125,7 +125,7 @@ As long as a previous version has not been removed (due to security issues) this
 
 You can see a fully working project in TravisCI here:
 
-- [TravisCI](https://github.com/cypress-io/examples-react-travis-ci#4-run-in-travis-ci)
+- [TravisCI](https://github.com/cypress-io/cypress-example-todomvc#4-run-in-travis-ci)
 
 ![travis-logs](https://cloud.githubusercontent.com/assets/1268976/9291527/8ea21024-4393-11e5-86b7-80e3b5d1047e.gif)
 
