@@ -44,8 +44,9 @@ To turn off the use of `fixture` folders or `support` folders, pass `false` into
 
 Option | Default | Description
 ----- | ---- | ----
-`integrationFolder` | `/cypress/integration` | Where Cypress will look for integration test files
+`fileServerFolder`    | root project directory    | Where Cypress will attempt to serve your application files
 `fixturesFolder`    | `/cypress/fixtures`    | Where Cypress will look for fixture files
+`integrationFolder` | `/cypress/integration` | Where Cypress will look for integration test files
 `supportFolder`     | `/cypress/support`     | Where Cypress will auto load support files
 
 # Viewport Options
