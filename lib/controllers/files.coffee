@@ -4,12 +4,10 @@ path        = require("path")
 glob        = require("glob")
 Promise     = require("bluebird")
 cwd         = require("../cwd")
+pathHelpers = require("../util/path_helpers")
 CacheBuster = require("../util/cache_buster")
 
 glob = Promise.promisify(glob)
-
-isIntegrationTestRe = /^integration/
-isUnitTestRe        = /^unit/
 
 module.exports = {
   handleFiles: (req, res, config) ->
@@ -37,7 +35,7 @@ module.exports = {
     convertSpecPath = (spec) =>
       ## get the absolute path to this spec and
       ## get the browser url + cache buster
-      spec = @getAbsolutePathToSpec(spec, config)
+      spec = pathHelpers.getAbsolutePathToSpec(spec, config)
 
       @prepareForBrowser(spec, config.projectRoot)
 
@@ -56,32 +54,6 @@ module.exports = {
     Promise
     .try =>
       getSpecs()
-
-  getAbsolutePathToSpec: (spec, config) ->
-    switch
-      ## if our file is an integration test
-      ## then figure out the absolute path
-      ## to it
-      when isIntegrationTestRe.test(spec)
-        ## strip off the integration part
-        spec = path.relative("integration", spec)
-
-        ## now simply join this with our integrationFolder
-        ## which makes it an absolute path
-        spec = path.join(config.integrationFolder, spec)
-
-      # ## commented out until we implement unit testing
-      # when isUnitTestRe.test(spec)
-
-        ## strip off the unit part
-        # spec = path.relative("unit", spec)
-
-        # ## now simply resolve this with our unitFolder
-        # ## which makes it an absolute path
-        # spec = path.resolve(config.unitFolder, spec)
-
-      else
-        spec
 
   prepareForBrowser: (filePath, projectRoot) ->
     filePath = path.relative(projectRoot, filePath)

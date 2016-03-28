@@ -1,11 +1,13 @@
 _             = require("lodash")
 os            = require("os")
 fs            = require("fs-extra")
+str           = require("underscore.string")
 path          = require("path")
 uuid          = require("node-uuid")
 Promise       = require("bluebird")
 socketIo      = require("socket.io")
 open          = require("./util/open")
+pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
 fixture       = require("./fixture")
 Request       = require("./request")
@@ -17,30 +19,27 @@ class Socket
     if not (@ instanceof Socket)
       return new Socket
 
-  onTestFileChange: (integrationFolder, filePath, stats) ->
+  onTestFileChange: (integrationFolder, originalFilePath, filePath, stats) ->
     logger.info "onTestFileChange", filePath: filePath
 
     ## return if we're not a js or coffee file.
     ## this will weed out directories as well
     return if not /\.(js|coffee)$/.test filePath
 
-    fs.statAsync(filePath).bind(@)
-      .then ->
-        ## strip out the integration folder
-        ## example:
-        ##
-        ## /Users/bmann/Dev/cypress-app/.projects/todos/tests
-        ## /Users/bmann/Dev/cypress-app/.projects/todos/tests/test1.js
-        ##
-        ## becomes test1.js
-        strippedPath = path.relative(integrationFolder, filePath)
+    ## originalFilePath is what was originally sent to us when
+    ## we were told to 'watch:test:file'
+    ## and its what we want to send back to the client
 
-        @io.emit "test:changed", {file: strippedPath}
-      .catch(->)
+    fs.statAsync(filePath)
+    .then =>
+      @io.emit "test:changed", {file: originalFilePath}
+    .catch(->)
 
-  watchTestFileByPath: (config, testFilePath, watchers, cb = ->) ->
+  watchTestFileByPath: (config, originalFilePath, watchers, cb = ->) ->
+    testFilePath = str.ltrim(originalFilePath, "/")
+
     ## normalize the testFilePath
-    testFilePath = path.join(@testsDir, testFilePath)
+    testFilePath = pathHelpers.getAbsolutePathToSpec(testFilePath, config)
 
     ## bail if we're already watching this
     ## exact file
@@ -55,7 +54,7 @@ class Socket
     @testFilePath = testFilePath
 
     watchers.watchAsync(testFilePath, {
-      onChange: _.bind(@onTestFileChange, @, config.integrationFolder)
+      onChange: _.bind(@onTestFileChange, @, config.integrationFolder, originalFilePath)
     })
     .then(cb)
 

@@ -211,7 +211,7 @@ describe "lib/socket", ->
       it "returns undefined if #testFilePath matches arguments", ->
         @socket.testFilePath = @filePath
         cb = @sandbox.spy()
-        @socket.watchTestFileByPath(@cfg, "test1.js", @watchers, cb)
+        @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers, cb)
         expect(cb).to.be.calledOnce
 
       it "closes existing watchedTestFile", ->
@@ -221,11 +221,11 @@ describe "lib/socket", ->
           expect(remove).to.be.calledWithMatch("test1.js")
 
       it "sets #testFilePath", ->
-        @socket.watchTestFileByPath(@cfg, "test1.js", @watchers).then =>
+        @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers).then =>
           expect(@socket.testFilePath).to.eq @filePath
 
       it "can normalizes leading slash", ->
-        @socket.watchTestFileByPath(@cfg, "/test1.js", @watchers).then =>
+        @socket.watchTestFileByPath(@cfg, "/integration/test1.js", @watchers).then =>
           expect(@socket.testFilePath).to.eq @filePath
 
       it "watches file by path", (done) ->
@@ -238,12 +238,40 @@ describe "lib/socket", ->
           expect(@).to.eq(socket)
           done()
 
-        ## not delaying this here causes random failures when running
-        ## all the tests. there prob some race condition or we arent
-        ## waiting for a promise or something to resolve
-        Promise.delay(200).then =>
-          @socket.watchTestFileByPath(@cfg, "test2.coffee", @watchers).bind(@).then ->
-            fs.writeFileAsync(@socket.testsDir + "/test2.coffee", "foooooooooo")
+        @socket.watchTestFileByPath(@cfg, "integration/test2.coffee", @watchers)
+        .then =>
+          fs.writeFileAsync(@socket.testsDir + "/test2.coffee", "foooooooooo")
+
+      describe "ids project", ->
+        beforeEach ->
+          @idsPath = Fixtures.projectPath("ids")
+          @server  = Server(@idsPath)
+
+          config.get(@idsPath).then (@idCfg) =>
+
+        it "joins on integration test files", ->
+          @socket.testsDir = @idCfg.integrationFolder
+
+          cfg = {integrationFolder: @idCfg.integrationFolder}
+
+          @socket.watchTestFileByPath(cfg, "integration/foo.coffee", @watchers)
+          .then =>
+            expect(@socket.testFilePath).to.eq path.join(@idCfg.integrationFolder, "foo.coffee")
+
+        it "watches file by path for integration folder", (done) ->
+          file = path.join(@idCfg.integrationFolder, "bar.js")
+
+          @sandbox.stub @socket, "onTestFileChange", =>
+            expect(@socket.onTestFileChange).to.be.calledWith(
+              @idCfg.integrationFolder,
+              "integration/bar.js",
+              file
+            )
+            done()
+
+          @socket.watchTestFileByPath(@idCfg, "integration/bar.js", @watchers)
+          .then =>
+            fs.writeFileAsync(file, "foooooooooo")
 
     context "#startListening", ->
       it "sets #testsDir", ->
@@ -279,18 +307,18 @@ describe "lib/socket", ->
           expect(fs.statAsync).not.to.be.called
 
         it "calls statAsync on .js file", ->
-          @socket.onTestFileChange(@cfg.integrationFolder, "foo/bar.js").catch(->).then =>
+          @socket.onTestFileChange(@cfg.integrationFolder, "original/path", "foo/bar.js").catch(->).then =>
             expect(fs.statAsync).to.be.calledWith("foo/bar.js")
 
         it "calls statAsync on .coffee file", ->
-          @socket.onTestFileChange(@cfg.integrationFolder, "foo/bar.coffee").then =>
+          @socket.onTestFileChange(@cfg.integrationFolder, "original/path", "foo/bar.coffee").then =>
             expect(fs.statAsync).to.be.calledWith("foo/bar.coffee")
 
         it "does not emit if stat throws", ->
-          @socket.onTestFileChange(@cfg.integrationFolder, "foo/bar.js").then =>
+          @socket.onTestFileChange(@cfg.integrationFolder, "original/path", "foo/bar.js").then =>
             expect(@io.emit).not.to.be.called
 
-        it "emits 'generate:ids:for:test'", ->
+        it "emits 'test:changed' with original/path", ->
           p = Fixtures.project("todos") + "/tests/test1.js"
-          @socket.onTestFileChange(@cfg.integrationFolder, p).then =>
-            expect(@io.emit).to.be.calledWith("test:changed", {file: "test1.js"})
+          @socket.onTestFileChange(@cfg.integrationFolder, "original/path", p).then =>
+            expect(@io.emit).to.be.calledWith("test:changed", {file: "original/path"})
