@@ -6,6 +6,7 @@ excerpt: Configure global, network, directory, viewport, and animation options
 - :fa-angle-right: [Global Options](#section-global-options)
 - :fa-angle-right: [Network Options](#section-network-options)
 - :fa-angle-right: [Directory Options](#section-directory-options)
+- :fa-angle-right: [Web Server Options](#section-web-server-options)
 - :fa-angle-right: [Viewport Options](#section-viewport-options)
 - :fa-angle-right: [Animation Options](#section-animation-options)
 
@@ -44,10 +45,15 @@ To turn off the use of `fixture` folders or `support` folders, pass `false` into
 
 Option | Default | Description
 ----- | ---- | ----
-`fileServerFolder`    | root project directory    | Where Cypress will attempt to serve your application files
 `fixturesFolder`    | `/cypress/fixtures`    | Where Cypress will look for fixture files
 `integrationFolder` | `/cypress/integration` | Where Cypress will look for integration test files
 `supportFolder`     | `/cypress/support`     | Where Cypress will auto load support files
+
+# Web Server Options
+
+Option | Default | Description
+----- | ---- | ----
+`fileServerFolder`    | root project directory    | Where Cypress will attempt to serve your application files
 
 # Viewport Options
 
