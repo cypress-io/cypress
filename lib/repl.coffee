@@ -1,9 +1,10 @@
 require("./util/http_overrides")
 
-_       = require("lodash")
-path    = require("path")
-repl    = require("repl")
-history = require("repl.history")
+_        = require("lodash")
+path     = require("path")
+repl     = require("repl")
+history  = require("repl.history")
+Fixtures = require("../spec/server/helpers/fixtures")
 
 replServer = repl.start({
   prompt: "> "
@@ -22,6 +23,7 @@ getObj = ->
     deploy: deploy
     darwin: deploy.getPlatform("darwin")
     linux:  deploy.getPlatform("linux")
+    Fixtures: Fixtures
 
     reload: ->
       for key of require.cache
