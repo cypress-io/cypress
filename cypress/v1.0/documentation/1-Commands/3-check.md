@@ -18,6 +18,12 @@ Checks checkboxes or radios.
 
 ***
 
+# [cy.check( *value* )](#section-value-usage)
+
+Checks the checkbox or radio with the matching value.
+
+***
+
 # [cy.check( *values* )](#section-values-usage)
 
 Checks the checkboxes or radios with the matching values.
@@ -65,12 +71,22 @@ cy.get("#saveUserName").check()
 
 ***
 
-# Values Usage
+# Value Usage
 
-## Check the checkbox with the value of "ga"
+## Check the checkbox with the value of "US"
 
 ```javascript
-cy.get("input[type='checkbox']").check(["ga"])
+cy.get("input[type='checkbox']").check("US")
+```
+
+***
+
+# Values Usage
+
+## Check the checkbox with the value of "ga" and "ca"
+
+```javascript
+cy.get("input[type='checkbox']").check(["ga", "ca"])
 ```
 
 ***
