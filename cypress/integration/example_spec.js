@@ -1276,12 +1276,13 @@ describe('Kitchen Sink', function(){
 
       // http://on.cypress.io/api/cypress-blob
       // get the dataUrl string for the javascript-logo
-      Cypress.Blob.imgSrcToDataURL('/assets/img/javascript-logo.png').then(function(dataUrl){
-
+      return Cypress.Blob.imgSrcToDataURL('/assets/img/javascript-logo.png').then(function(dataUrl){
         // create an <img> element and set its src to the dataUrl
         var img = Cypress.$('<img />', {src: dataUrl})
 
-        cy
+        // need to explicitly return cy here since we are initially returning
+        // the Cypress.Blog.imgSrcToDataURL promise to our test
+        return cy
           .get('.utility-blob').then(function($div){
             // append the image
             $div.append(img)
