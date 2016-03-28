@@ -2,7 +2,7 @@
   <ul class="list-as-table list-header files-list-header">
     <li>
       <div>
-        <div>Name</div>
+        <!-- <div>Name</div> -->
       </div>
       <div>
         <!-- <div>Last Modified</div> -->
