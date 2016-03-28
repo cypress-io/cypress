@@ -117,6 +117,9 @@ cypress ci
 
 You can specify a specific version of Cypress to use in CI by setting an Environment Variable: `CYPRESS_VERSION`.
 
+**Example**
+![screen shot 2016-03-28 at 11 28 26 am](https://cloud.githubusercontent.com/assets/1271364/14081365/601e2da4-f4d8-11e5-8ea8-0491ffcb0999.png)
+
 As long as a previous version has not been removed (due to security issues) this will work.
 
 ***
