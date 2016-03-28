@@ -11,6 +11,8 @@ Name | JS | Server | CI
 
 This is an example app is used to showcase every command available in Cypress. The [tests](https://github.com/cypress-io/examples-kitchen-sink/blob/master/cypress/integration/example_spec.js) cover all of the following features:
 
+![kitchensink](https://cloud.githubusercontent.com/assets/1268976/14084252/e309e370-f4e7-11e5-9562-24f516563ac9.gif)
+
 **Features:**
 
 - Querying
