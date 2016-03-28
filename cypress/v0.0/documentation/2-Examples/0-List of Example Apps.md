@@ -5,7 +5,7 @@ Name | JS | Server | CI
 --- | --- | --- |
 [Kitchen Sink](https://github.com/cypress-io/cypress-example-kitchensink) | jQuery | Node | TravisCI, CircleCI, Codeship
 [TodoMVC](https://github.com/cypress-io/cypress-example-todomvc) | React | Node | TravisCI, CircleCI
-[PieChopper](https://github.com/cypress-io/cypress-example-piechopper) | Angular | Node | CircleCI
+[PieChopper](https://github.com/cypress-io/cypress-example-piechopper) | Angular | Node | TravisCI, CircleCI
 
 # [Kitchen Sink](https://github.com/cypress-io/cypress-example-kitchensink)
 
