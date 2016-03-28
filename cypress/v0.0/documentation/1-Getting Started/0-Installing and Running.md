@@ -82,7 +82,7 @@ You can download Cypress directly [here.](http://download.cypress.io/desktop)
 After installing, you will need to add the project(s) you want to write Cypress tests in.
 
 - Open the Cypress App -- just double click the app from you OS application's folder.
-- Authorize GitHub access to your account**
+- Authorize GitHub access to your account*
 - Add your project directory to Cypress by clicking :fa-plus:.
 - Click on the project. You should see a `Server Running` message.
 - Click on the `http://localhost:2020` link.
