@@ -1,4 +1,4 @@
-describe "Login [000]", ->
+describe "Login", ->
   beforeEach ->
     cy
       .visit("/")
@@ -11,28 +11,28 @@ describe "Login [000]", ->
 
         @ipc.handle("get:options", null, {})
 
-  context "without a current user [02s]", ->
+  context "without a current user", ->
     beforeEach ->
       @ipc.handle("get:current:user", null, {})
 
-    it "displays 'Cypress.io' [02t]", ->
+    it "displays 'Cypress.io'", ->
       cy.get("#login").contains("Cypress.io")
 
-    it "has Github Login button [02u]", ->
+    it "has Github Login button", ->
       cy.get("#login").contains("button", "Login with GitHub")
 
-    it "displays help link [05r]", ->
+    it "displays help link", ->
       cy.contains("a", "Need help?")
 
-    it "opens link to docs on click of help link [05s]", ->
+    it "opens link to docs on click of help link", ->
       cy.contains("a", "Need help?").click().then ->
         expect(@App.ipc).to.be.calledWith("external:open", "https://docs.cypress.io")
 
-    describe "click 'Login with GitHub' [005]", ->
+    describe "click 'Login with GitHub'", ->
       beforeEach ->
         cy.get("#login").contains("button", "Login with GitHub").as("loginBtn")
 
-      it "triggers ipc 'window:open' on click [002]", ->
+      it "triggers ipc 'window:open' on click", ->
         cy
           .get("@loginBtn").click().then ->
             expect(@App.ipc).to.be.calledWithExactly("window:open", {
@@ -45,47 +45,47 @@ describe "Login [000]", ->
               type: "GITHUB_LOGIN"
             })
 
-      it "does not lock up UI if login is clicked multiple times [05u]", ->
+      it "does not lock up UI if login is clicked multiple times", ->
         cy
           .get("@loginBtn").click().click().then ->
             @ipc.handle("window:open", {alreadyOpen: true}, null)
           .get("#login").contains("button", "Login with GitHub").should("not.be.disabled")
 
-      context "on 'window:open' ipc response [007]", ->
+      context "on 'window:open' ipc response", ->
         beforeEach ->
           cy
             .get("@loginBtn").click().then ->
               @ipc.handle("window:open", null, "code-123")
 
-        it "triggers ipc 'log:in' [008]", ->
+        it "triggers ipc 'log:in'", ->
           cy.then ->
             expect(@App.ipc).to.be.calledWith("log:in", "code-123")
 
-        it "displays spinner with 'Logging in...' on ipc response [004]", ->
+        it "displays spinner with 'Logging in...' on ipc response", ->
           cy.contains("Logging in...")
 
-        it "disables 'Login' button [006]", ->
+        it "disables 'Login' button", ->
           cy
             .get("@loginBtn").should("be.disabled")
 
-        describe "on ipc log:in success [05x]", ->
+        describe "on ipc log:in success", ->
           beforeEach ->
             cy
               .contains("Logging in...")
               .fixture("user").then (@user) ->
                 @ipc.handle("log:in", null, @user)
 
-          it "triggers get:project:paths [05t]", ->
+          it "triggers get:project:paths", ->
             expect(@App.ipc).to.be.calledWith("get:project:paths")
 
-          it "displays username in UI [00c]", ->
+          it "displays username in UI", ->
             cy
               .then ->
                 @ipc.handle("get:project:paths", null, [])
               .get("header a").should ($a) ->
                 expect($a).to.contain(@user.name)
 
-          it "has login button enabled on logout [05y]", ->
+          it "has login button enabled on logout", ->
             cy
               .then ->
                 @ipc.handle("get:project:paths", null, [])
@@ -96,8 +96,8 @@ describe "Login [000]", ->
               .get("@loginBtn").should("not.be.disabled")
 
 
-        describe "on ipc 'log:in' error [00a]", ->
-          it "displays error in ui [00d]", ->
+        describe "on ipc 'log:in' error", ->
+          it "displays error in ui", ->
             cy
               .fixture("user").then (@user) ->
                 @ipc.handle("log:in", {message: "There's an error"}, null)
@@ -105,7 +105,7 @@ describe "Login [000]", ->
                 .should("be.visible")
                 .contains("There's an error")
 
-          it "login button should be enabled [00e]", ->
+          it "login button should be enabled", ->
             cy
               .fixture("user").then (@user) ->
                 @ipc.handle("log:in", {message: "There's an error"}, null)

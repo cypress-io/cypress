@@ -1,4 +1,4 @@
-describe "Options [015]", ->
+describe "Options", ->
   beforeEach ->
     cy
       .visit("/")
@@ -12,17 +12,17 @@ describe "Options [015]", ->
 
       .get(".fa-cog").as("optionsLink")
 
-  it "link to options has tooltip attrs [016]", ->
+  it "link to options has tooltip attrs", ->
     cy
       .get("#footer").find(".dropup")
         .should("have.attr", "data-original-title")
 
-  it "displays options on click [017]", ->
+  it "displays options on click", ->
     cy
       .get("@optionsLink").click()
       .get(".dropdown-menu").should("be.visible")
 
-  context "click about link [018]", ->
+  context "click about link", ->
     beforeEach ->
       @opts = {
         position: "center"
@@ -33,14 +33,14 @@ describe "Options [015]", ->
         type: "ABOUT"
       }
 
-    it "triggers window:open [019]", ->
+    it "triggers window:open", ->
       @agents.spy(@App, "ipc")
 
       cy.get("@optionsLink").click()
       cy.contains("a", "About").click().then ->
           expect(@App.ipc).to.be.calledWith("window:open", @opts)
 
-  context "click debug console link [018]", ->
+  context "click debug console link", ->
     beforeEach ->
       @opts = {
         height: 400
@@ -51,14 +51,14 @@ describe "Options [015]", ->
         width: 800
       }
 
-    it "triggers window:open [019]", ->
+    it "triggers window:open", ->
       @agents.spy(@App, "ipc")
 
       cy.get("@optionsLink").click()
       cy.contains("a", "Debug Console").click().then ->
           expect(@App.ipc).to.be.calledWith("window:open", @opts)
 
-  context "click check for updates link [018]", ->
+  context "click check for updates link", ->
     beforeEach ->
       @opts = {
         height: 210
@@ -69,17 +69,17 @@ describe "Options [015]", ->
         width: 300
       }
 
-    it "triggers window:open [019]", ->
+    it "triggers window:open", ->
       @agents.spy(@App, "ipc")
 
       cy.get("@optionsLink").click()
       cy.contains("a", "Check for updates").click().then ->
           expect(@App.ipc).to.be.calledWith("window:open", @opts)
 
-  context "click Quit link [018]", ->
+  context "click Quit link", ->
     beforeEach ->
 
-    it "triggers quit [019]", ->
+    it "triggers quit", ->
       @agents.spy(@App, "ipc")
 
       cy.get("@optionsLink").click()

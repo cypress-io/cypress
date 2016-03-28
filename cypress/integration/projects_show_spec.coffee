@@ -1,4 +1,4 @@
-describe "Project Show [00r]", ->
+describe "Project Show", ->
   beforeEach ->
     cy
       .visit("/")
@@ -15,24 +15,24 @@ describe "Project Show [00r]", ->
         @ipc.handle("get:project:paths", null, @projects)
       .get("#projects-container>li").first().click()
 
-  describe "begins starting server [00h]", ->
-    it "displays folder name [00v]", ->
+  describe "begins starting server", ->
+    it "displays folder name", ->
       cy.contains("h3", "My-Fake-Project")
 
-    it "displays folder path [00v]", ->
+    it "displays folder path", ->
       cy.contains(@projects[0])
 
-    it "displays Starting Server... message [00w]", ->
+    it "displays Starting Server... message", ->
       cy.contains("Starting server...")
 
-  describe "server error [00x]", ->
+  describe "server error", ->
     beforeEach ->
       @err = {
         name: "Port 2020"
         msg: "There is already a port running"
       }
 
-    it "displays normal error message [00y]", ->
+    it "displays normal error message", ->
       @ipc.handle("open:project", {name: @err.name, message: @err.msg}, {})
 
       cy
@@ -40,7 +40,7 @@ describe "Project Show [00r]", ->
           .should("contain", @err.name)
           .and("contain", @err.msg)
 
-    it "displays Port in Use instructions on err [00z]", ->
+    it "displays Port in Use instructions on err", ->
       @ipc.handle("open:project", {portInUse: true, name: @err.name, message: @err.msg}, {})
 
       cy
@@ -49,7 +49,7 @@ describe "Project Show [00r]", ->
           .and("contain", @err.msg)
           .and("contain", "To fix")
 
-    it "triggers close:project on dismiss button click [013]", ->
+    it "triggers close:project on dismiss button click", ->
       @ipc.handle("open:project", {name: @err.name, message: @err.msg}, {})
       @agents.spy(@App, "ipc")
 
@@ -60,7 +60,7 @@ describe "Project Show [00r]", ->
         .then ->
           expect(@App.ipc).to.be.calledWith("get:project:paths")
 
-    it "returns to projects on dismiss button click [010]", ->
+    it "returns to projects on dismiss button click", ->
       @ipc.handle("open:project", {name: @err.name, message: @err.msg}, {})
 
       cy
@@ -69,7 +69,7 @@ describe "Project Show [00r]", ->
           @ipc.handle("get:project:paths", null, @projects)
         .get("#projects-container")
 
-  describe "successfully starts server [011]", ->
+  describe "successfully starts server", ->
     beforeEach ->
       @agents.spy(@App, "ipc")
 
@@ -80,15 +80,15 @@ describe "Project Show [00r]", ->
 
       @ipc.handle("open:project", null, @config)
 
-    it "displays Server url [00v]", ->
+    it "displays Server url", ->
       cy.contains(@config.clientUrlDisplay)
 
-    it "triggers external:open on click of url [012]", ->
+    it "triggers external:open on click of url", ->
       cy
         .contains("a", @config.clientUrlDisplay).click().then ->
           expect(@App.ipc).to.be.calledWith("external:open", "http://localhost:2020")
 
-    it "triggers close:project on click of Stop [014]", ->
+    it "triggers close:project on click of Stop", ->
       cy
         .contains(".btn", "Stop").click().then ->
           expect(@App.ipc).to.be.calledWith("close:project")
@@ -97,17 +97,17 @@ describe "Project Show [00r]", ->
           expect(@App.ipc).to.be.calledWith("get:project:paths")
 
 
-    it "returns to projects on Stop button click [010]", ->
+    it "returns to projects on Stop button click", ->
       cy
         .contains(".btn", "Stop").click().then ->
           @ipc.handle("close:project", null, {})
           @ipc.handle("get:project:paths", null, @projects)
         .get("#projects-container")
 
-    it "attaches 'on:project:settings:change' after project opens [02z]", ->
+    it "attaches 'on:project:settings:change' after project opens", ->
       cy.wrap(@App.ipc).should("be.calledWith", "on:project:settings:change")
 
-    it "closes existing server + reopens on 'on:project:settings:change' [030]", ->
+    it "closes existing server + reopens on 'on:project:settings:change'", ->
       @agents.spy(@App.ipc, "off")
 
       cy

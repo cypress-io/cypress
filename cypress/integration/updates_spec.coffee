@@ -1,4 +1,4 @@
-describe "Updates [01o]", ->
+describe "Updates", ->
   beforeEach ->
     cy
       .viewport(300, 210)
@@ -13,60 +13,60 @@ describe "Updates [01o]", ->
 
         @ipc.handle("get:options", null, {version: @v})
 
-  it "has updates title [01g]", ->
+  it "has updates title", ->
     cy.title().should("include", "Updates")
 
-  it "links to Changelog [02e]", ->
+  it "links to Changelog", ->
     cy.contains("a", "View Changelog").click().then ->
       expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/changelog")
 
-  it "displays current version [02f]", ->
+  it "displays current version", ->
     cy.get(".version").contains(@v)
 
-  it "triggers updater:run [028]", ->
+  it "triggers updater:run", ->
     expect(@App.ipc).to.be.calledWith("updater:run")
 
-  describe "updater:run start [02a]", ->
-    it "displays check for updates msg [02b]", ->
+  describe "updater:run start", ->
+    it "displays check for updates msg", ->
       @ipc.handle("updater:run", null, {event: "start"})
       cy.contains("Checking for updates...")
 
-  describe "updater:run apply [05z]", ->
-    it "displays applying updates msg [060]", ->
+  describe "updater:run apply", ->
+    it "displays applying updates msg", ->
       @ipc.handle("updater:run", null, {event: "apply"})
       cy.contains("Applying updates...")
 
-  describe "updater:run error [02c]", ->
-    it "displays error msg [02b]", ->
+  describe "updater:run error", ->
+    it "displays error msg", ->
       @ipc.handle("updater:run", null, {event: "error"})
       cy.contains("An error occurred updating")
 
-    it "triggers window:close on click of close btn [02d]", ->
+    it "triggers window:close on click of close btn", ->
       @ipc.handle("updater:run", null, {event: "error"})
       cy.contains(".btn", "Done").click().then ->
         expect(@App.ipc).to.be.calledWith("window:close")
 
-  describe "updater:run none [061]", ->
-    it "displays none msg [062]", ->
+  describe "updater:run none", ->
+    it "displays none msg", ->
       @ipc.handle("updater:run", null, {event: "none"})
       cy.contains("No updates available")
 
-    it "triggers window:close on click of close btn [063]", ->
+    it "triggers window:close on click of close btn", ->
       @ipc.handle("updater:run", null, {event: "none"})
       cy.contains(".btn", "Done").click().then ->
         expect(@App.ipc).to.be.calledWith("window:close")
 
-  describe "updater:run download [064]", ->
-    it "displays download msg [065]", ->
+  describe "updater:run download", ->
+    it "displays download msg", ->
       @ipc.handle("updater:run", null, {event: "download"})
       cy.contains("Downloading updates...")
 
-  describe "updater:run done [066]", ->
-    it "displays done msg [02b]", ->
+  describe "updater:run done", ->
+    it "displays done msg", ->
       @ipc.handle("updater:run", null, {event: "done"})
       cy.contains("Updates ready")
 
-    it "triggers window:close on click of restart btn [067]", ->
+    it "triggers window:close on click of restart btn", ->
       @ipc.handle("updater:run", null, {event: "done"})
       cy.contains(".btn", "Restart").click().then ->
         expect(@App.ipc).to.be.calledWith("window:close")

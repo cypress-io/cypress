@@ -1,4 +1,4 @@
-describe "About [01f]", ->
+describe "About", ->
   beforeEach ->
     cy
       .viewport(300, 230)
@@ -13,19 +13,19 @@ describe "About [01f]", ->
 
         @ipc.handle("get:options", null, {version: @v})
 
-  it "has about title [01g]", ->
+  it "has about title", ->
     @src = "logo.png"
     @ipc.handle("get:about:logo:src", null, @src)
 
     cy.title().should("include", "About")
 
-  context "Cypress logo [01i]", ->
-    it "triggers get:about:logo:src on about app start [01b]", ->
+  context "Cypress logo", ->
+    it "triggers get:about:logo:src on about app start", ->
       cy
         .then ->
           expect(@App.ipc).to.be.calledWith("get:about:logo:src")
 
-    it "logo img sets src to logo:src [01k]", ->
+    it "logo img sets src to logo:src", ->
       @src = "logo.png"
       @ipc.handle("get:about:logo:src", null, @src)
 
@@ -34,18 +34,18 @@ describe "About [01f]", ->
           .should("have.attr", "src")
           .and("include", @src)
 
-    it "gracefully handles logo err [01m]", ->
+    it "gracefully handles logo err", ->
       @ipc.handle("get:about:logo:src", {message: "foobar"}, {})
 
       cy.contains("Version").should("be.visible")
 
 
-  it "displays app version [01l]", ->
+  it "displays app version", ->
     @ipc.handle("get:about:logo:src", null, "logo.png")
 
     cy.get(".version").contains(@v)
 
-  it "triggers external:open on click of link to cypress.io [01n]", ->
+  it "triggers external:open on click of link to cypress.io", ->
     @ipc.handle("get:about:logo:src", null, "logo.png")
 
     cy
