@@ -1,11 +1,11 @@
 slug: configuration
-excerpt: Configure global, network, directory, viewport, and animation options
+excerpt: Configure global, network, folder, viewport, and animation options
 
 # Contents
 
 - :fa-angle-right: [Global Options](#section-global-options)
 - :fa-angle-right: [Network Options](#section-network-options)
-- :fa-angle-right: [Directory Options](#section-directory-options)
+- :fa-angle-right: [Folder Options](#section-folder-options)
 - :fa-angle-right: [Web Server Options](#section-web-server-options)
 - :fa-angle-right: [Viewport Options](#section-viewport-options)
 - :fa-angle-right: [Animation Options](#section-animation-options)
@@ -39,7 +39,7 @@ Option | Default | Description
 `requestTimeout` | `5000` | Time, in milliseconds, to wait for an XHR request during [`cy.wait`](wait) command
 `responseTimeout` | `20000` | Time, in milliseconds, to wait until a response for [`cy.request`](request) and [`cy.wait`](https://on.cypress.io/api/wait) commands
 
-# Directory Options
+# Folder Options
 
 To turn off the use of `fixture` folders or `support` folders, pass `false` into the respective configuration option.
 
@@ -53,7 +53,7 @@ Option | Default | Description
 
 Option | Default | Description
 ----- | ---- | ----
-`fileServerFolder`    | root project directory    | Where Cypress will attempt to serve your application files
+`fileServerFolder`    | root project folder    | Where Cypress will attempt to serve your application files
 
 # Viewport Options
 
