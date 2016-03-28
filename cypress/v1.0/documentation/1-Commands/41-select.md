@@ -36,6 +36,7 @@ Pass in an options object to change the default behavior of `cy.select`.
 
 **cy.select( *text*, *options* )**
 **cy.select( *value*, *options* )**
+**cy.select( *array*, *options* )**
 
 Option | Default | Notes
 --- | --- | ---
