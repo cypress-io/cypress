@@ -24,6 +24,12 @@ Select an option within a `<select>` element based on the value of the option.
 
 ***
 
+# [cy.select( *array* )](#section-array-usage)
+
+Select multiple options within a `<select>` element based on the value or text of the option.
+
+***
+
 # Options
 
 Pass in an options object to change the default behavior of `cy.select`.
@@ -74,6 +80,38 @@ cy.get("select").select("apples")
 ```javascript
 // returns <option value="456">apples</option>
 cy.get("select").select("456")
+```
+
+***
+
+# Array Usage
+
+## Select the options with the texts "apples" and "bananas"
+
+```html
+<select multiple>
+  <option value="456">apples</option>
+  <option value="457">oranges</option>
+  <option value="458">bananas</option>
+</select>
+```
+
+```javascript
+cy.get("select").select(["apples", "bananas"])
+```
+
+## Select the options with the values "456" and "457"
+
+```html
+<select multiple>
+  <option value="456">apples</option>
+  <option value="457">oranges</option>
+  <option value="458">bananas</option>
+</select>
+```
+
+```javascript
+cy.get("select").select(["456", "457"])
 ```
 
 ***
