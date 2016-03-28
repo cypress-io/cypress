@@ -121,18 +121,22 @@
 
     &>div>div:first-child {
       padding: 5px 20px;
-      background-color: #fcfcfc;
+      background-color: #F9F9F9;
       font-weight: 500;
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      border-bottom: 1px solid #eee;
+      border-bottom: 2px solid #eee;
+      border-top: 1px solid #eee;
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      color: #222;
+      color: #444;
 
       i {
-        font-weight: bold;
-        color: #222;
+        display: none;
         margin-right: 0;
+      }
+
+      &:after {
+        content: "tests"
       }
     }
 
