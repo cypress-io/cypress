@@ -124,6 +124,16 @@ As long as a previous version has not been removed (due to security issues) this
 
 ***
 
+
+## Specifying a project ID
+
+You can specify a specific project ID in CI by setting an Environment Variable: `CYPRESS_PROJECT_ID`. The `projectId` value can be found in your [`cypress.json`](https://on.cypress.io/guides/configuration) file generated when first running tests in Cypress.
+
+**Example**
+![screen shot 2016-03-28 at 11 32 50 am](https://cloud.githubusercontent.com/assets/1271364/14081563/5e2ede20-f4d9-11e5-9e3f-38d052e8f104.png)
+
+***
+
 # Examples
 
 You can see a fully working project in TravisCI here:
