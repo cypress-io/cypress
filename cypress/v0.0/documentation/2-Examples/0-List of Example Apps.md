@@ -9,7 +9,7 @@ Name | JS | Server | CI
 
 # [Kitchen Sink](https://github.com/cypress-io/cypress-example-kitchensink)
 
-This is an example app is used to showcase every command available in Cypress.
+This is an example app is used to showcase every command available in Cypress. The [tests](https://github.com/cypress-io/examples-kitchen-sink/blob/master/cypress/integration/example_spec.js) cover all of the following features:
 
 **Features:**
 

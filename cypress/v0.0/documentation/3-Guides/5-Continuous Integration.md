@@ -8,9 +8,14 @@ excerpt: Run Cypress in any CI provider
   - [Add your project to your CI provider](#section-add-you-project-to-your-ci-provider)
   - [Acquire a Cypress secret key](#section-acquire-a-cypress-secret-key)
   - [Add 2 lines of code to your CI config file](#section-add-2-lines-of-code-to-your-ci-config-file)
-  - [Storing your secret key as an environment variable](#section-storing-your-secret-key-as-an-environment-variable)
-  - [Specifying a version of Cypress](#section-specifying-a-version-of-cypress)
+- :fa-angle-right: [Environment Variables](#section-environment-variables)
+  - [Cypress CI Key](#section-cypress-ci-key)
+  - [Cypress Version](#section-cypress-version)
+  - [Cypress Project Id](#section-cypress-project-id)
 - :fa-angle-right: [Examples](#section-examples)
+  - [CircleCI](#section-circleci)
+  - [Travis CI](#section-travis-ci)
+  - [Codeship](#section-codeship)
 
 ***
 
@@ -50,7 +55,7 @@ Cypress verifies that your project is allowed to run in CI by using a secret key
 
 ```shell
 # install the Cypress CLI tool
-npm install -g cypress
+npm install -g cypress-cli
 ```
 
 Run this following Cypress command from your terminal:
@@ -87,7 +92,7 @@ You'll only need to add two lines of code to this file to run Cypress tests.
 
 ```yaml
 # this will install the cypress-cli tools
-npm install -g cypress
+npm install -g cypress-cli
 
 
 # this will run tests headlessly
@@ -96,15 +101,23 @@ cypress ci <your-secret-key>
 
 You'll want to refer to your CI providers documentation for knowing when to run those commands. Generally each CI provider gives you a lifecyle of build commands.
 
-For instance, with [Travis CI](https://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle) they expose a `before_install` and `script` phase. You'd write `npm install -g cypress` in the `before_install` phase, and `cypress ci` in the `script` phase.
+For instance, with [Travis CI](https://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle) they expose a `before_install` and `script` phase. You'd write `npm install -g cypress-cli` in the `before_install` phase, and `cypress ci` in the `script` phase.
 
 ***
 
-## Storing your secret key as an environment variable
+# Environment variables
+
+## Cypress CI Key
 
 Instead of hard-coding your secret key into a configuration file, you can opt to store this as an environment variable with your CI provider. This prevents your secret key from being stored in version control. Each CI provider will be different, but generally each exposes a way to set environment variables.
 
-Set the name of the environment variable to `CYPRESS_CI_KEY` and paste your secret key as the value, then run your tests in CI by simply calling:
+Set the name of the environment variable to `CYPRESS_CI_KEY` and paste your secret key as the value.
+
+**Example of Env Variable in CircleCI**
+![screen shot 2016-03-28 at 11 38 36 am](https://cloud.githubusercontent.com/assets/1271364/14081640/b5a25e52-f4d9-11e5-977b-43e209809716.png)
+
+
+Then run your tests in CI by simply calling:
 
 ```yaml
 # this will run tests headlessly
@@ -113,19 +126,52 @@ cypress ci
 
 ***
 
-## Specifying a version of Cypress
+## Cypress Version
 
 You can specify a specific version of Cypress to use in CI by setting an Environment Variable: `CYPRESS_VERSION`.
+
+**Example of Env Variable in Codeship**
+![screen shot 2016-03-28 at 11 28 26 am](https://cloud.githubusercontent.com/assets/1271364/14081365/601e2da4-f4d8-11e5-8ea8-0491ffcb0999.png)
 
 As long as a previous version has not been removed (due to security issues) this will work.
 
 ***
 
+
+## Cypress Project Id
+
+You can specify a specific project ID in CI by setting an Environment Variable: `CYPRESS_PROJECT_ID`. The `projectId` value can be found in your [`cypress.json`](https://on.cypress.io/guides/configuration) file generated when first running tests in Cypress.
+
+**Example of Env Variable in Travis CI**
+![screen shot 2016-03-28 at 11 32 50 am](https://cloud.githubusercontent.com/assets/1271364/14081563/5e2ede20-f4d9-11e5-9e3f-38d052e8f104.png)
+
+***
+
 # Examples
 
-You can see a fully working project in TravisCI here:
+## CircleCI
 
-- [TravisCI](https://github.com/cypress-io/cypress-example-todomvc#4-run-in-travis-ci)
+- [Kitchen Sink Example](https://circleci.com/gh/cypress-io/cypress-example-kitchensink)
+- [Pie Chopper Example](https://circleci.com/gh/cypress-io/cypress-example-piechopper)
+
+## Travis CI
+
+- [Kitchen Sink Example](https://travis-ci.org/cypress-io/cypress-example-kitchensink)
+- [TodoMVC Example](https://travis-ci.org/cypress-io/cypress-example-todomvc)
 
 ![travis-logs](https://cloud.githubusercontent.com/assets/1268976/9291527/8ea21024-4393-11e5-86b7-80e3b5d1047e.gif)
 
+## Codeship
+
+**Kitchen Sink Example Setup Commands**
+```text
+nvm install 5.3
+npm install
+npm install -g cypress-cli
+npm start -- --silent &
+```
+
+**Kitchen Sink Example Test Commands**
+```text
+cypress ci
+```

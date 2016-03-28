@@ -7,14 +7,60 @@ This allows you to build up specific commands for your application which take th
 
 For example, the first custom command you'll probably create is the canonical `login` command. This typically would navigate the user to your `/login` url, fill out a username / password combination, submit the form, and then assert that the dashboard page comes up (or whatever happens upon successful login).
 
+[block:callout]
+{
+  "type": "info",
+  "body": "A great place to define these commands is in your `cypress/support/commands.js` file, since it is loaded before any test files are evaluated."
+}
+[/block]
+
 # [Cypress.addChildCommand()]()
 
 Child commands are always chained off of a **parent** command, or another **child** command.
+
+***
 
 # [Cypress.addDualCommand]()
 
 While parent commands always start a new chain of commands and child commands require being chained off a parent command, dual commands can behave as parent or child command. That is, they can **start** a new chain, or be chained off of an **existing** chain.
 
-# [Cypress.addParentCommand]()
+***
+
+# [Cypress.addParentCommand](#add-parent-command-usage)
 
 Parent commands always **begin** a new chain of commands. Even if you've written a previous chain, parent commands will always start a new chain, and ignore previous chains.
+
+***
+
+# Add Parent Command Usage
+
+## Custom command for 'login'
+```javascript
+Cypress.addParentCommand("login", function(email, password){
+  var email    = email || "joe@example.com"
+  var password = password || "foobar"
+
+  var log = Cypress.Log.command({
+    name: "login",
+    message: [email, password],
+    onConsole: function(){
+      return {
+        email: email,
+        password: password
+      }
+    }
+  })
+
+  cy
+    .visit("/login", {log: false})
+    .contains("Log In", {log: false})
+    .get("#email", {log: false}).type(email, {log: false})
+    .get("#password", {log: false}).type(password, {log: false})
+    .get("button", {log: false}).click({log: false}) //this should submit the form
+    .get("h1", {log: false}).contains("Dashboard", {log: false}) //we should be on the dashboard now
+    .url({log: false}).should("match", /dashboard/, {log: false})
+    .then(function(){
+      log.snapshot().end()
+    })
+})
+```

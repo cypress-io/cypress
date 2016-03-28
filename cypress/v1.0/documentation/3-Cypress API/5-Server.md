@@ -12,7 +12,7 @@ Change default configuration for [`cy.server`](https://on.cypress.io/api/server)
 [block:callout]
 {
   "type": "info",
-  "body": "A great place to put this configuration is in your `tests/_support/spec_helper.js` file, since it is loaded before any test files are evaluated."
+  "body": "A great place to put this configuration is in your `cypress/support/defaults.js` file, since it is loaded before any test files are evaluated."
 }
 [/block]
 
