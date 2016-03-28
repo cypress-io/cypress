@@ -1,9 +1,13 @@
 require("../spec_helper")
 
+fs        = require("fs-extra")
 path      = require("path")
+Promise   = require("bluebird")
 cwd       = require("#{root}lib/cwd")
 cache     = require("#{root}lib/cache")
 Fixtures  = require("../helpers/fixtures")
+
+fs = Promise.promisifyAll(fs)
 
 describe "lib/cache", ->
   context "#ensureExists", ->
@@ -47,7 +51,7 @@ describe "lib/cache", ->
             USER: {name: "brian"}
             PROJECTS: [
               "/Users/bmann/Dev/examples-angular-circle-ci"
-              "/Users/bmann/Dev/cypress-gui"
+              "/Users/bmann/Dev/cypress-core-gui"
               "/Users/bmann/Dev/cypress-app/spec/fixtures/projects/todos"
             ]
           }
@@ -66,7 +70,7 @@ describe "lib/cache", ->
         USER: {name: "brian"}
         PROJECTS: [
           "/Users/bmann/Dev/examples-angular-circle-ci"
-          "/Users/bmann/Dev/cypress-gui"
+          "/Users/bmann/Dev/cypress-core-gui"
           "/Users/bmann/Dev/cypress-app/spec/fixtures/projects/todos"
         ]
       })

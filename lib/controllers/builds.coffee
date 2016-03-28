@@ -2,20 +2,11 @@ request     = require("request")
 api         = require("../api")
 user        = require("../user")
 
-class Builds
-  constructor: (app) ->
-    if not (@ instanceof Builds)
-      return new Builds(app)
-
-    if not app
-      throw new Error("Instantiating controllers/proxy requires an app!")
-
-    @app = app
-
-  handleBuilds: (req, res, next) ->
+module.exports = {
+  handle: (req, res, config, next) ->
     user.get().then (user) =>
       api.getBuilds(
-        @app.get("cypress").projectId,
+        config.projectId,
         user?.session_token
       )
       ## should we send up the error here?
@@ -25,4 +16,4 @@ class Builds
       .on("error", next)
       .pipe(res)
 
-module.exports = Builds
+}

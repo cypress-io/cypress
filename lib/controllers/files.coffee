@@ -1,136 +1,100 @@
-_           = require("underscore")
-_.str       = require("underscore.string")
+_           = require("lodash")
+str         = require("underscore.string")
 path        = require("path")
 glob        = require("glob")
 Promise     = require("bluebird")
 cwd         = require("../cwd")
+pathHelpers = require("../util/path_helpers")
 CacheBuster = require("../util/cache_buster")
 
-class Files
-  constructor: (app) ->
-    if not (@ instanceof Files)
-      return new Files(app)
+glob = Promise.promisify(glob)
 
-    if not app
-      throw new Error("Instantiating controllers/proxy requires an app!")
-
-    @app = app
-
-  handleFiles: (req, res) ->
-    @getTestFiles().then (files) ->
-      res.set "X-Files-Path", files.path
+module.exports = {
+  handleFiles: (req, res, config) ->
+    @getTestFiles(config)
+    .then (files) ->
       res.json files
 
-  handleIframe: (req, res) ->
+  handleIframe: (req, res, config) ->
     test = req.params[0]
 
-    filePath = cwd("lib", "html", "empty_inject.html")
+    iframePath = cwd("lib", "html", "iframe.html")
 
-    @getSpecs(test).bind(@).then (specs) ->
-      @getJavascripts().bind(@).then (js) ->
-        res.render filePath, {
+    @getSpecs(test, config)
+    .then (specs) =>
+      @getJavascripts(config)
+      .then (js) =>
+        res.render iframePath, {
           title:        @getTitle(test)
-          # stylesheets:  @getStylesheets()
+          # stylesheets:  @getStylesheets(config)
           javascripts:  js
-          utilities:    @getUtilities()
           specs:        specs
         }
+
+  getSpecs: (spec, config) ->
+    convertSpecPath = (spec) =>
+      ## get the absolute path to this spec and
+      ## get the browser url + cache buster
+      spec = pathHelpers.getAbsolutePathToSpec(spec, config)
+
+      @prepareForBrowser(spec, config.projectRoot)
+
+    getSpecs = =>
+      ## grab all of the specs if this is ci
+      if spec is "__all"
+        @getTestFiles(config)
+        .map (spec) ->
+          ## grab the name of each
+          spec.name
+        .map(convertSpecPath)
+      else
+        ## normalize by sending in an array of 1
+        [convertSpecPath(spec)]
+
+    Promise
+    .try =>
+      getSpecs()
+
+  prepareForBrowser: (filePath, projectRoot) ->
+    filePath = path.relative(projectRoot, filePath)
+
+    @getTestUrl(filePath)
+
+  getTestUrl: (file) ->
+    file += CacheBuster.get()
+    "/__cypress/tests?p=#{file}"
 
   getTitle: (test) ->
     if test is "__all" then "All Tests" else test
 
-  convertToAbsolutePath: (files) ->
-    ## make sure its an array and remap to an absolute path
-    files = _([files]).flatten()
-    files.map (files) ->
-      if /^\//.test(files) then files else "/" + files
-
-  convertToSpecPath: (specs, options = {}) ->
-    _.defaults options,
-      test: true
-
-    {testFolder, rootFolder, supportFolder} = @app.get("cypress")
-
-    ## return the specs prefixed with /tests?p=spec
-    _(specs).map (spec) ->
-      ## if this is our support folder then
-      ## its already prefixed with the correct path
-      if _.str.contains(spec, supportFolder)
-        spec = _.str.trim(spec, "/")
-      else
-        if options.test
-          ## prepend with tests path
-          spec = "#{testFolder}/#{spec}"
-        else
-          ## make sure we have no leading
-          ## or trailing forward slashes
-          spec = _.compact([rootFolder, spec])
-          spec = path.join(spec...)
-          spec = _.str.trim(spec, "/")
-
-
-      spec += CacheBuster.get()
-      "/__cypress/tests?p=#{spec}"
-
-  getSpecs: (test) ->
-    ## grab all of the specs if this is ci
-    if test is "__all"
-      @getTestFiles().then (specs) =>
-        @convertToSpecPath _(specs).pluck("name")
-    else
-      ## return just this single test
-      Promise.resolve @convertToSpecPath([test])
-
-  getStylesheets: ->
-    @convertToAbsolutePath @app.get("cypress").stylesheets
-
-  getJavascripts: ->
-    {projectRoot, javascripts, supportFolder} = @app.get("cypress")
+  getJavascripts: (config) ->
+    {projectRoot, javascripts, supportFolder} = config
 
     ## automatically add in our support folder and any javascripts
     files = [].concat path.join(supportFolder, "**", "*"), javascripts
-    paths = @convertToAbsolutePath _.chain(files).compact().uniq().value()
+
+    ## TODO: there shouldn't be any reason
+    ## why we need to re-map these. its due
+    ## to the javascripts array but that should
+    ## probably be mapped during the config
+    paths = _.map files, (file) ->
+      path.resolve(projectRoot, file)
 
     Promise
-      .map paths, (p) ->
-        ## does the path include a globstar?
-        return p if not p.includes("*")
+    .map paths, (p) ->
+      ## does the path include a globstar?
+      return p if not p.includes("*")
 
-        new Promise (resolve, reject) ->
-          ## ensure we are looking in our projectRoot
-          p = path.join(projectRoot, p)
-          glob p, (err, files) ->
-            reject(err) if err
-            resolve(files)
-      .then (files) ->
-        _.chain(files).flatten().map (file) ->
-          ## slice out the projectRoot from our files again
-          file.replace(projectRoot, "")
-        .value()
-      .then (files) =>
-        @convertToSpecPath(files, {test: false})
+      ## handle both relative + absolute paths
+      ## by simply resolving the path from projectRoot
+      p = path.resolve(projectRoot, p)
+      glob(p)
+    .then(_.flatten)
+    .map (filePath) =>
+      @prepareForBrowser(filePath, projectRoot)
 
-  getUtilities: ->
-    utils = ["iframe"]
-    # utils = ["jquery", "iframe"]
-
-    ## push sinon into utilities if enabled
-    utils.push "sinon" if @app.get("cypress").sinon
-    # utils.push "chai-jquery" if @app.get("cypress")["chai-jquery"]
-
-    ## i believe fixtures can be moved to the parent since
-    ## its not actually mutated within the specs
-    utils.push "fixtures" if @app.get("cypress").fixtures
-
-    utils.map (util) -> "/__cypress/static/js/#{util}.js"
-
-  getTestFiles: ->
-    cypress = @app.get("cypress")
-
-    testFolderPath = path.join(
-      cypress.projectRoot,
-      cypress.testFolder
-    )
+  getTestFiles: (config) ->
+    integrationFolderPath = config.integrationFolder
 
     ## support files are not automatically
     ## ignored because only _fixtures are hard
@@ -138,41 +102,43 @@ class Files
     ## the javascripts array
 
     fixturesFolderPath = path.join(
-      cypress.projectRoot,
-      cypress.fixturesFolder,
+      config.fixturesFolder,
       "**",
       "*"
     )
 
     supportFolderPath = path.join(
-      cypress.projectRoot,
-      cypress.supportFolder,
+      config.supportFolder,
       "**",
       "*"
     )
 
     ## map all of the javascripts to the project root
-    javascriptsPath = _.map cypress.javascripts, (js) ->
-      path.join(cypress.projectRoot, js)
+    ## TODO: think about moving this into config
+    ## and mapping each of the javascripts into an
+    ## absolute path
+    javascriptsPath = _.map config.javascripts, (js) ->
+      path.join(config.projectRoot, js)
 
-    new Promise (resolve, reject) ->
-      ## ignore _fixtures + _support + javascripts
-      options = {
-        sort: true
-        ignore: [].concat(javascriptsPath, supportFolderPath, fixturesFolderPath)
-      }
+    ## ignore _fixtures + _support + javascripts
+    options = {
+      sort:     true
+      realpath: true
+      cwd:      integrationFolderPath
+      ignore:   [].concat(javascriptsPath, supportFolderPath, fixturesFolderPath)
+    }
 
-      ## grab all the js and coffee files
-      glob "#{testFolderPath}/**/*.+(js|coffee)", options, (err, files) ->
-        reject(err) if err
+    ## integrationFolderPath: /Users/bmann/Dev/my-project/cypress/integration
+    ## filePath:              /Users/bmann/Dev/my-project/cypress/integration/foo.coffee
+    ## prependedFilePath:     integration/foo.coffee
 
-        ## slice off the testFolder directory(ies) (which is our test folder)
-        testFolderLength = testFolderPath.split("/").length
+    prependIntegrationPath = (file) ->
+      ## prepend integration before the file and return only the relative
+      ## path between the integrationFolderPath + the file
+      path.join("integration", path.relative(integrationFolderPath, file))
 
-        files = _(files).map (file) ->
-          {name: file.split("/").slice(testFolderLength).join("/")}
-        files.path = testFolderPath
-
-        resolve(files)
-
-module.exports = Files
+    ## grab all the js and coffee files
+    glob("**/*.+(js|coffee)", options)
+    .map (file) ->
+      {name: prependIntegrationPath(file)}
+}

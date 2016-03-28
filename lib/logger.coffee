@@ -3,16 +3,16 @@ _              = require("lodash")
 fs             = require("fs-extra")
 Promise        = require("bluebird")
 winston        = require("winston")
-config         = require("./config")
+konfig         = require("./konfig")
 
 ## make sure the log folder is available
-fs.ensureDirSync(config.app.log_path)
+fs.ensureDirSync(konfig("log_path"))
 
 getName = (name) ->
   name + ".log"
 
 getPathToLog = (name) ->
-  path.join config.app.log_path, getName(name)
+  path.join konfig("log_path"), getName(name)
 
 createFile = (name, level, opts = {}) ->
   obj = {

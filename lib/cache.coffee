@@ -6,10 +6,10 @@ PSemaphore = require("promise-semaphore")
 request    = require("request-promise")
 errors     = require("request-promise/errors")
 api        = require("./api")
-config     = require("./config")
+konfig     = require("./konfig")
 logger     = require("./logger")
 
-CACHE = config.app.cache_path
+CACHE = konfig("cache_path")
 fs    = Promise.promisifyAll(fs)
 queue = new PSemaphore
 

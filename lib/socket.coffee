@@ -1,53 +1,49 @@
 _             = require("lodash")
+os            = require("os")
 fs            = require("fs-extra")
+str           = require("underscore.string")
 path          = require("path")
 uuid          = require("node-uuid")
+Promise       = require("bluebird")
 socketIo      = require("socket.io")
+open          = require("./util/open")
+pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
 fixture       = require("./fixture")
 Request       = require("./request")
 logger        = require("./logger")
 Reporter      = require("./reporter")
 
-leadingSlashesRe = /^\/+/
-
 class Socket
-  constructor: (app) ->
+  constructor: ->
     if not (@ instanceof Socket)
-      return new Socket(app)
+      return new Socket
 
-    if not app
-      throw new Error("Instantiating lib/socket requires an app instance!")
-
-    @app = app
-
-  onTestFileChange: (filePath, stats) ->
+  onTestFileChange: (integrationFolder, originalFilePath, filePath, stats) ->
     logger.info "onTestFileChange", filePath: filePath
-
-    ## simple solution for preventing firing test:changed events
-    ## when we are making modifications to our own files
-    return if @app.enabled("editFileMode")
 
     ## return if we're not a js or coffee file.
     ## this will weed out directories as well
     return if not /\.(js|coffee)$/.test filePath
 
-    fs.statAsync(filePath).bind(@)
-      .then ->
-        ## strip out our testFolder path from the filePath, and any leading forward slashes
-        filePath      = filePath.split(@app.get("cypress").projectRoot).join("").replace(leadingSlashesRe, "")
-        strippedPath  = filePath.replace(@app.get("cypress").testFolder, "").replace(leadingSlashesRe, "")
+    ## originalFilePath is what was originally sent to us when
+    ## we were told to 'watch:test:file'
+    ## and its what we want to send back to the client
 
-        @io.emit "test:changed", {file: strippedPath}
-      .catch(->)
+    fs.statAsync(filePath)
+    .then =>
+      @io.emit "test:changed", {file: originalFilePath}
+    .catch(->)
 
-  watchTestFileByPath: (testFilePath, watchers) ->
+  watchTestFileByPath: (config, originalFilePath, watchers, cb = ->) ->
+    testFilePath = str.ltrim(originalFilePath, "/")
+
     ## normalize the testFilePath
-    testFilePath = path.join(@testsDir, testFilePath)
+    testFilePath = pathHelpers.getAbsolutePathToSpec(testFilePath, config)
 
     ## bail if we're already watching this
     ## exact file
-    return if testFilePath is @testFilePath
+    return cb() if testFilePath is @testFilePath
 
     logger.info "watching test file", {path: testFilePath}
 
@@ -58,8 +54,9 @@ class Socket
     @testFilePath = testFilePath
 
     watchers.watchAsync(testFilePath, {
-      onChange: @onTestFileChange.bind(@)
+      onChange: _.bind(@onTestFileChange, @, config.integrationFolder, originalFilePath)
     })
+    .then(cb)
 
   onRequest: (options, cb) ->
     Request.send(options)
@@ -67,10 +64,8 @@ class Socket
     .catch (err) ->
       cb({__error: err.message})
 
-  onFixture: (file, cb) ->
-    {projectRoot, fixturesFolder} = @app.get("cypress")
-
-    fixture.get(projectRoot, fixturesFolder, file)
+  onFixture: (config, file, cb) ->
+    fixture.get(config.fixturesFolder, file)
     .then(cb)
     .catch (err) ->
       cb({__error: err.message})
@@ -78,18 +73,24 @@ class Socket
   createIo: (server, path) ->
     socketIo(server, {path: path})
 
-  _startListening: (server, watchers, options) ->
+  _startListening: (server, watchers, config, options) ->
     _.defaults options,
       socketId: null
       onMocha: ->
       onConnect: ->
       onChromiumRun: ->
+      onIsNewProject: ->
       checkForAppErrors: ->
+
+    ## promisify this function
+    options.onIsNewProject = Promise.method(options.onIsNewProject)
 
     messages = {}
     chromiums = {}
 
-    {projectRoot, testFolder, socketIoRoute} = @app.get("cypress")
+    {integrationFolder, socketIoRoute} = config
+
+    @testsDir = integrationFolder
 
     @io = @createIo(server, socketIoRoute)
 
@@ -153,23 +154,19 @@ class Socket
       socket.on "run:tests:in:chromium", (src) ->
         options.onChromiumRun(src)
 
-      socket.on "watch:test:file", (filePath) =>
-        @watchTestFileByPath(filePath, watchers)
+      socket.on "watch:test:file", (filePath, cb) =>
+        @watchTestFileByPath(config, filePath, watchers, cb)
 
       socket.on "request", =>
         @onRequest.apply(@, arguments)
 
-      socket.on "fixture", =>
-        @onFixture.apply(@, arguments)
+      socket.on "fixture", (fixturePath, cb) =>
+        @onFixture(config, fixturePath, cb)
 
       _.each "load:spec:iframe url:changed page:loading command:add command:attrs:changed runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) =>
         socket.on event, (args...) =>
           args = _.chain(args).reject(_.isUndefined).reject(_.isFunction).value()
           @io.emit event, args...
-
-      # socket.on "app:errors", (err) ->
-        # process.stdout.write "app:errors"
-        # options.onAppError(err)
 
       socket.on "app:connect", (socketId) ->
         options.onConnect(socketId, socket)
@@ -177,20 +174,29 @@ class Socket
       socket.on "mocha", =>
         options.onMocha.apply(options, arguments)
 
-    @testsDir = path.join(projectRoot, testFolder)
+      socket.on "open:finder", (p, cb = ->) ->
+        opts = {}
 
-    fs.ensureDirAsync(@testsDir).bind(@)
+        if os.platform() is "darwin"
+          opts.args = "-R"
+
+        open.opn(p, opts)
+        .then -> cb()
+
+      socket.on "is:new:project", (cb) =>
+        options.onIsNewProject()
+        .then(cb)
 
   end: ->
     ## TODO: we need an 'ack' from this end
     ## event from the other side
     @io and @io.emit("tests:finished")
 
-  startListening: (server, watchers, options) ->
+  startListening: (server, watchers, config, options) ->
     if process.env["CYPRESS_ENV"] is "development"
       @listenToCssChanges(watchers)
 
-    @_startListening(server, watchers, options)
+    @_startListening(server, watchers, config, options)
 
   listenToCssChanges: (watchers) ->
     watchers.watch cwd("lib", "public", "css"), {

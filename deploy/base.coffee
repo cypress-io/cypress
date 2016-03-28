@@ -13,10 +13,11 @@ expect       = require("chai").expect
 Promise      = require("bluebird")
 obfuscator   = require("obfuscator")
 runSequence  = require("run-sequence")
-cypressIcons = require("cypress-icons")
+cypressIcons = require("cypress-core-icons")
 log          = require("./log")
 meta         = require("./meta")
 pkg          = require("../package.json")
+konfig       = require("../lib/konfig")
 Fixtures     = require("../spec/server/helpers/fixtures")
 
 pkgr     = Promise.promisify(pkgr)
@@ -90,14 +91,15 @@ class Base
           copy("./lib/exception.coffee",    "/src/lib/exception.coffee")
           copy("./lib/fixture.coffee",      "/src/lib/fixture.coffee")
           copy("./lib/ids.coffee",          "/src/lib/ids.coffee")
+          copy("./lib/konfig.coffee",       "/src/lib/konfig.coffee")
           copy("./lib/logger.coffee",       "/src/lib/logger.coffee")
           copy("./lib/project.coffee",      "/src/lib/project.coffee")
           copy("./lib/reporter.coffee",     "/src/lib/reporter.coffee")
           copy("./lib/request.coffee",      "/src/lib/request.coffee")
           copy("./lib/routes.coffee",       "/src/lib/routes.coffee")
+          copy("./lib/scaffold.coffee",     "/src/lib/scaffold.coffee")
           copy("./lib/server.coffee",       "/src/lib/server.coffee")
           copy("./lib/socket.coffee",       "/src/lib/socket.coffee")
-          copy("./lib/support.coffee",      "/src/lib/support.coffee")
           copy("./lib/updater.coffee",      "/src/lib/updater.coffee")
           copy("./lib/user.coffee",         "/src/lib/user.coffee")
           copy("./lib/watchers.coffee",     "/src/lib/watchers.coffee")
@@ -235,7 +237,7 @@ class Base
     @uploadToS3("osx64", "fixture")
 
   getManifest: ->
-    requestPromise(config.app.desktop_manifest_url).then (resp) ->
+    requestPromise(konfig("desktop_manifest_url")).then (resp) ->
       console.log resp
 
   fixture: (cb) ->
@@ -264,12 +266,7 @@ class Base
 
     fs.outputJsonAsync(cache, {
       USER: {session_token: "abc123"}
-      PROJECTS: {
-        ## hard code the todos project id for now
-        "e3e58d3f-3769-4b50-af38-e31b8989a938": {
-          PATH: todosProject
-        }
-      }
+      PROJECTS: [todosProject]
     })
 
   removeCyCache: ->
@@ -287,7 +284,9 @@ class Base
 
     runProjectTest = =>
       new Promise (resolve, reject) =>
-        sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{todos}"], {stdio: "inherit"}
+        env = _.omit(process.env, "CYPRESS_ENV")
+
+        sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{todos}"], {stdio: "inherit", env: env}
         sp.on "exit", (code) ->
           Fixtures.remove()
 

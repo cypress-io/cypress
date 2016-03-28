@@ -1,22 +1,24 @@
 path      = require("path")
+glob      = require("glob")
 EE        = require("events")
 _         = require("lodash")
 fs        = require("fs-extra")
 Promise   = require("bluebird")
-Settings  = require("./util/settings")
 ids       = require("./ids")
 api       = require("./api")
 user      = require("./user")
 cache     = require("./cache")
+config    = require("./config")
 logger    = require("./logger")
 errors    = require("./errors")
 Server    = require("./server")
-Support   = require("./support")
-fixture   = require("./fixture")
+scaffold  = require("./scaffold")
 Watchers  = require("./watchers")
 Reporter  = require("./reporter")
+settings  = require("./util/settings")
 
-fs = Promise.promisifyAll(fs)
+fs   = Promise.promisifyAll(fs)
+glob = Promise.promisify(glob)
 
 class Project extends EE
   constructor: (projectRoot) ->
@@ -26,8 +28,8 @@ class Project extends EE
     if not projectRoot
       throw new Error("Instantiating lib/project requires a projectRoot!")
 
-    @projectRoot = projectRoot
-    @server      = Server(projectRoot)
+    @projectRoot = path.resolve(projectRoot)
+    @server      = Server()
     @watchers    = Watchers()
 
   open: (options = {}) ->
@@ -38,23 +40,24 @@ class Project extends EE
       changeEvents: false
     }
 
-    @server.open(options)
-    .bind(@)
-    .then (config) ->
-      ## sync but do not block
-      @sync(options)
-
-      ## store the config from
-      ## opening the server
-      @config = config
-
-      @watchSettingsAndStartWebsockets(options)
-
+    @getConfig(options)
+    .then (cfg) =>
+      @server.open(@projectRoot, cfg)
       .then =>
-        @scaffold(config)
+        ## sync but do not block
+        @sync(options)
 
-      ## return our project instance
-      .return(@)
+        ## store the cfg from
+        ## opening the server
+        @cfg = cfg
+
+        Promise.join(
+          @watchSettingsAndStartWebsockets(options, cfg)
+          @scaffold(cfg)
+        )
+
+        ## return our project instance
+        .return(@)
 
   sync: (options) ->
     ## attempt to sync up with the remote
@@ -111,9 +114,9 @@ class Project extends EE
         @emit("settings:changed")
     }
 
-    @watchers.watch(Settings.pathToCypressJson(@projectRoot), obj)
+    @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
 
-  watchSettingsAndStartWebsockets: (options) ->
+  watchSettingsAndStartWebsockets: (options, config) ->
     @watchSettings(options)
 
     ## if we've passed down reporter
@@ -121,7 +124,11 @@ class Project extends EE
     if options.reporter
       reporter = Reporter()
 
-    @server.startWebsockets(@watchers, {
+    @server.startWebsockets(@watchers, config, {
+      onIsNewProject: =>
+        ## return a boolean whether this is a new project or not
+        @determineIsNewProject(config.integrationFolder)
+
       onConnect: (id) =>
         @emit("socket:connected", id)
 
@@ -146,46 +153,91 @@ class Project extends EE
             @emit("end", stats)
     })
 
-  getConfig: ->
-    @config ? {}
+  determineIsNewProject: (integrationFolder) ->
+    ## logic to determine if new project
+    ## 1. there is only 1 file in 'integrationFolder'
+    ## 2. the file is called 'example_spec.js'
+    ## 3. the bytes of the file match lib/scaffold/example_spec.js
+    nameIsDefault = (file) ->
+      path.basename(file) is scaffold.integrationExampleName()
+
+    getCurrentSize = (file) ->
+      fs
+      .statAsync(file)
+      .get("size")
+
+    checkIfBothMatch = (current, scaffold) ->
+      current is scaffold
+
+    glob("**/*", {cwd: integrationFolder, realpath: true})
+    .then (files) ->
+      return false if files.length isnt 1
+
+      exampleSpec = files[0]
+
+      return false if not def = nameIsDefault(exampleSpec)
+
+      Promise.join(
+        getCurrentSize(exampleSpec),
+        scaffold.integrationExampleSize(),
+        checkIfBothMatch
+      )
+
+  getConfig: (options = {}) ->
+    if c = @cfg
+      Promise.resolve(c)
+    else
+      config.get(@projectRoot, options)
 
   ensureSpecUrl: (spec) ->
-    Promise.try =>
+    @getConfig()
+    .then (cfg) =>
       if spec
-        @ensureSpecExists(spec)
+        @ensureSpecExists(cfg.integrationFolder, spec)
         .then (str) =>
-          @getUrlBySpec(str)
+          @getUrlBySpec(cfg.clientUrl, str)
       else
-        @getUrlBySpec("/__all")
+        @getUrlBySpec(cfg.clientUrl, "/__all")
 
-  ensureSpecExists: (spec) ->
-    {testFolder} = @getConfig()
-
-    ## TODO this assumes we've already opened the project and have config
-    ## refactor this not to be dependent on state
-    specFile = path.resolve(@projectRoot, testFolder, spec)
+  ensureSpecExists: (integrationFolder, spec) ->
+    specFile = path.resolve(integrationFolder, spec)
 
     ## we want to make it easy on the user by allowing them to pass both
     ## an absolute path to the spec, or a relative path from their test folder
     fs
     .statAsync(specFile)
     .then =>
-      ## strip out the projectRoot + testFolder
-      specFile.replace(path.join(@projectRoot, testFolder), "")
+      ## strip out the integration folder and prepend with "/"
+      ## example:
+      ##
+      ## /Users/bmann/Dev/cypress-app/.projects/todos/tests
+      ## /Users/bmann/Dev/cypress-app/.projects/todos/tests/test2.coffee
+      ##
+      ## becomes /test2.coffee
+      "/" + path.relative(integrationFolder, specFile)
     .catch ->
       errors.throw("SPEC_FILE_NOT_FOUND", specFile)
 
-  getUrlBySpec: (spec) ->
-    [@getConfig().clientUrl, "#/tests", spec, "?__ui=satellite"].join("")
+  getUrlBySpec: (clientUrl, spec) ->
+    [clientUrl, "#/tests", spec, "?__ui=satellite"].join("")
 
   scaffold: (config) ->
     Promise.join(
+      ## ensure integration folder is created
+      ## and example spec if dir doesnt exit
+      scaffold.integration(config.integrationFolder)
+
       ## ensure fixtures dir is created
       ## and example fixture if dir doesnt exist
-      fixture.scaffold(config.projectRoot, config.fixturesFolder),
+      scaffold.fixture(config.fixturesFolder, {
+        remove: config.fixturesFolderRemove
+      })
+
       ## ensure support dir is created
       ## and example support file if dir doesnt exist
-      Support(config).scaffold()
+      scaffold.support(config.supportFolder, {
+        remove: config.supportFolderRemove
+      })
     )
 
   writeProjectId: (id) ->
@@ -194,7 +246,7 @@ class Project extends EE
 
     @generatedProjectIdTimestamp = new Date
 
-    Settings
+    settings
     .write(@projectRoot, attrs)
     .return(id)
 
@@ -219,7 +271,7 @@ class Project extends EE
       if id = process.env.CYPRESS_PROJECT_ID
         {projectId: id}
       else
-        Settings.read(@projectRoot)
+        settings.read(@projectRoot)
     .then (settings) =>
       if settings and id = settings.projectId
         return id
@@ -249,11 +301,11 @@ class Project extends EE
 
   @removeIds = (p) ->
     Project(p)
-    .verifyExistance().then (project) ->
-      config = project.server.config
-
-      ## remove all of the ids for the test files found in the testFolder
-      ids.remove path.join(config.projectRoot, config.testFolder)
+    .verifyExistance()
+    .call("getConfig")
+    .then (cfg) ->
+      ## remove all of the ids for the test files found in the integrationFolder
+      ids.remove(cfg.integrationFolder)
 
   @id = (path) ->
     Project(path).getProjectId()

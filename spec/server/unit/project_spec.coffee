@@ -1,5 +1,7 @@
 require("../spec_helper")
 
+path         = require("path")
+Promise      = require("bluebird")
 Fixtures     = require("../helpers/fixtures")
 ids          = require("#{root}lib/ids")
 api          = require("#{root}lib/api")
@@ -7,17 +9,22 @@ user         = require("#{root}lib/user")
 cache        = require("#{root}lib/cache")
 errors       = require("#{root}lib/errors")
 config       = require("#{root}lib/config")
-fixture      = require("#{root}lib/fixture")
-Support      = require("#{root}lib/support")
+scaffold     = require("#{root}lib/scaffold")
 Project      = require("#{root}lib/project")
-Settings     = require("#{root}lib/util/settings")
+settings     = require("#{root}lib/util/settings")
 
 describe "lib/project", ->
   beforeEach ->
     Fixtures.scaffold()
 
-    @todosPath = Fixtures.projectPath("todos")
-    @projectId = Settings.readSync(@todosPath).projectId
+    @todosPath    = Fixtures.projectPath("todos")
+    @idsPath      = Fixtures.projectPath("ids")
+    @pristinePath = Fixtures.projectPath("pristine")
+
+    @projectId = settings.readSync(@todosPath).projectId
+
+    @config  = config.set({})
+    @project = Project("/path/to/project")
 
   afterEach ->
     Fixtures.remove()
@@ -25,6 +32,99 @@ describe "lib/project", ->
   it "requires a projectRoot", ->
     fn = -> Project()
     expect(fn).to.throw "Instantiating lib/project requires a projectRoot!"
+
+  it "always resolves the projectRoot to be absolute", ->
+    p = Project("../foo/bar")
+    expect(p.projectRoot).not.to.eq("../foo/bar")
+    expect(p.projectRoot).to.eq(path.resolve("../foo/bar"))
+
+  context "#getConfig", ->
+    beforeEach ->
+      @sandbox.stub(config, "get").withArgs("/path/to/project", {foo: "bar"}).resolves({baz: "quux"})
+
+    it "calls config.get with projectRoot + options", ->
+      @project.getConfig({foo: "bar"})
+      .then (cfg) ->
+        expect(cfg).to.deep.eq({baz: "quux"})
+
+    it "resolves if cfg is already set", ->
+      @project.cfg = {foo: "bar"}
+
+      @project.getConfig()
+      .then (cfg) ->
+        expect(cfg).to.deep.eq({foo: "bar"})
+
+  context "#open", ->
+    beforeEach ->
+      @sandbox.stub(@project, "watchSettingsAndStartWebsockets").resolves()
+      @sandbox.stub(@project, "ensureProjectId").resolves("id-123")
+      @sandbox.stub(@project, "updateProject").withArgs("id-123", "opened").resolves()
+      @sandbox.stub(@project, "scaffold").resolves()
+      @sandbox.stub(@project, "getConfig").resolves(@config)
+      @sandbox.stub(@project.server, "open").resolves()
+
+    it "sets changeEvents to false by default", ->
+      opts = {}
+      @project.open(opts).then ->
+        expect(opts.changeEvents).to.be.false
+
+    it "sets updateProject to false by default", ->
+      opts = {}
+      @project.open(opts).then ->
+        expect(opts.sync).to.be.false
+
+    it "sets type to opened by default", ->
+      opts = {}
+      @project.open(opts).then ->
+        expect(opts.type).to.eq("opened")
+
+    it "calls #watchSettingsAndStartWebsockets with options", ->
+      opts = {}
+      @project.open(opts).then =>
+        expect(@project.watchSettingsAndStartWebsockets).to.be.calledWith(opts)
+
+    it "calls #scaffold with server config", ->
+      @project.open().then =>
+        expect(@project.scaffold).to.be.calledWith(@config)
+
+    it "calls #getConfig options", ->
+      opts = {}
+      @project.open(opts).then =>
+        expect(@project.getConfig).to.be.calledWith(opts)
+
+    it "passes id + options to updateProject", ->
+      opts = {}
+
+      @project.open(opts).then =>
+        expect(@project.updateProject).to.be.calledWith("id-123", opts)
+
+    it "swallows errors from ensureProjectId", ->
+      @project.ensureProjectId.rejects(new Error)
+      @project.open()
+
+    it "swallows errors from updateProject", ->
+      @project.updateProject.rejects(new Error)
+      @project.open()
+
+    it "does not wait on ensureProjectId", ->
+      @project.ensureProjectId.resolves(Promise.delay(10000))
+      @project.open()
+
+    it "does not wait on updateProject", ->
+      @project.updateProject.resolves(Promise.delay(10000))
+      @project.open()
+
+    it.skip "watches cypress.json", ->
+      @server.open().bind(@).then ->
+        expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
+
+    it.skip "passes watchers to Socket.startListening", ->
+      options = {}
+
+      @server.open(options).then ->
+        startListening = Socket::startListening
+        expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
+        expect(startListening.getCall(0).args[1]).to.eq(options)
 
   context "#close", ->
     beforeEach ->
@@ -70,73 +170,59 @@ describe "lib/project", ->
       @project.close().then =>
         expect(@project.listeners("foo").length).to.be.eq(0)
 
-  context "#open", ->
-    beforeEach ->
-      @project = Project("path/to/project")
+  context "#determineIsNewProject", ->
+    it "is false when files.length isnt 1", ->
+      id = =>
+        @ids = Project(@idsPath)
+        @ids.getConfig()
+        .then (cfg) =>
+          @ids.scaffold(cfg).return(cfg)
+        .then (cfg) =>
+          @ids.determineIsNewProject(cfg.integrationFolder)
+        .then (ret) ->
+          expect(ret).to.be.false
 
-      @sandbox.stub(@project, "watchSettingsAndStartWebsockets").resolves()
-      @sandbox.stub(@project, "ensureProjectId").resolves("id-123")
-      @sandbox.stub(@project, "updateProject").withArgs("id-123", "opened").resolves()
-      @sandbox.stub(@project, "scaffold").resolves()
-      @sandbox.stub(@project.server, "open").resolves({projectRoot: "a", fixturesFolder: "b"})
+      todo = =>
+        @todos = Project(@todosPath)
+        @todos.getConfig()
+        .then (cfg) =>
+          @todos.scaffold(cfg).return(cfg)
+        .then (cfg) =>
+          @todos.determineIsNewProject(cfg.integrationFolder)
+        .then (ret) ->
+          expect(ret).to.be.false
 
-    it "sets changeEvents to false by default", ->
-      opts = {}
-      @project.open(opts).then ->
-        expect(opts.changeEvents).to.be.false
+      Promise.join(id, todo)
 
-    it "sets updateProject to false by default", ->
-      opts = {}
-      @project.open(opts).then ->
-        expect(opts.sync).to.be.false
+    it "is true when files, name + bytes match to scaffold", ->
+      pristine = Project(@pristinePath)
+      pristine.getConfig()
+      .then (cfg) ->
+        pristine.scaffold(cfg).return(cfg)
+      .then (cfg) ->
+        pristine.determineIsNewProject(cfg.integrationFolder)
+      .then (ret) ->
+        expect(ret).to.be.true
 
-    it "sets type to opened by default", ->
-      opts = {}
-      @project.open(opts).then ->
-        expect(opts.type).to.eq("opened")
+    it "is false when bytes dont match scaffold", ->
+      pristine = Project(@pristinePath)
+      pristine.getConfig()
+      .then (cfg) ->
+        pristine.scaffold(cfg).return(cfg)
+      .then (cfg) ->
+        example = scaffold.integrationExampleName()
+        file    = path.join(cfg.integrationFolder, example)
 
-    it "calls #watchSettingsAndStartWebsockets with options", ->
-      opts = {}
-      @project.open(opts).then =>
-        expect(@project.watchSettingsAndStartWebsockets).to.be.calledWith(opts)
-
-    it "calls #scaffold with server config", ->
-      @project.open().then =>
-        expect(@project.scaffold).to.be.calledWith({projectRoot: "a", fixturesFolder: "b"})
-
-    it "passes id + options to updateProject", ->
-      opts = {}
-
-      @project.open(opts).then =>
-        expect(@project.updateProject).to.be.calledWith("id-123", opts)
-
-    it "swallows errors from ensureProjectId", ->
-      @project.ensureProjectId.rejects(new Error)
-      @project.open()
-
-    it "swallows errors from updateProject", ->
-      @project.updateProject.rejects(new Error)
-      @project.open()
-
-    it "does not wait on ensureProjectId", ->
-      @project.ensureProjectId.resolves(Promise.delay(10000))
-      @project.open()
-
-    it "does not wait on updateProject", ->
-      @project.updateProject.resolves(Promise.delay(10000))
-      @project.open()
-
-    it.skip "watches cypress.json", ->
-      @server.open().bind(@).then ->
-        expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
-
-    it.skip "passes watchers to Socket.startListening", ->
-      options = {}
-
-      @server.open(options).then ->
-        startListening = Socket::startListening
-        expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
-        expect(startListening.getCall(0).args[1]).to.eq(options)
+        ## write some data to the file so it is now
+        ## different in file size
+        fs.readFileAsync(file, "utf8")
+        .then (str) ->
+          str += "foo bar baz"
+          fs.writeFileAsync(file, str).return(cfg)
+      .then (cfg) ->
+        pristine.determineIsNewProject(cfg.integrationFolder)
+      .then (ret) ->
+        expect(ret).to.be.false
 
   context "#updateProject", ->
     beforeEach ->
@@ -155,14 +241,23 @@ describe "lib/project", ->
   context "#scaffold", ->
     beforeEach ->
       @project = Project("path/to/project")
-      @sandbox.stub(fixture, "scaffold").resolves()
-      @sandbox.stub(Support.prototype, "scaffold").resolves()
+      @sandbox.stub(scaffold, "integration").resolves()
+      @sandbox.stub(scaffold, "fixture").resolves()
+      @sandbox.stub(scaffold, "support").resolves()
 
-    it "calls fixture.scaffold with projectRoot + fixturesFolder", ->
-      obj = {projectRoot: "pr", fixturesFolder: "ff", supportFolder: "sf"}
+      @obj = {projectRoot: "pr", fixturesFolder: "ff", supportFolder: "sf", integrationFolder: "if"}
 
-      @project.scaffold(obj).then ->
-        expect(fixture.scaffold).to.be.calledWith(obj.projectRoot, obj.fixturesFolder)
+    it "calls scaffold.integration with integrationFolder", ->
+      @project.scaffold(@obj).then =>
+        expect(scaffold.integration).to.be.calledWith(@obj.integrationFolder)
+
+    it "calls fixture.scaffold with fixturesFolder", ->
+      @project.scaffold(@obj).then =>
+        expect(scaffold.fixture).to.be.calledWith(@obj.fixturesFolder)
+
+    it "calls support.scaffold with supportFolder", ->
+      @project.scaffold(@obj).then =>
+        expect(scaffold.support).to.be.calledWith(@obj.supportFolder)
 
   context "#watchSettings", ->
     beforeEach ->
@@ -206,6 +301,29 @@ describe "lib/project", ->
 
       expect(emit).to.be.calledWith("settings:changed")
 
+  context "#watchSettingsAndStartWebsockets", ->
+    beforeEach ->
+      @project = Project("path/to/project")
+      @project.watchers = {}
+      @project.server = @sandbox.stub({startWebsockets: ->})
+      @sandbox.stub(@project, "watchSettings")
+
+    it "calls server.startWebsockets with watchers + config", ->
+      @project.watchSettingsAndStartWebsockets({}, 2)
+
+      expect(@project.server.startWebsockets).to.be.calledWith(@project.watchers, 2)
+
+    it "passes onIsNewProject callback", ->
+      @sandbox.stub(@project, "determineIsNewProject")
+
+      @project.server.startWebsockets.yieldsTo("onIsNewProject")
+
+      @project.watchSettingsAndStartWebsockets({}, {
+        integrationFolder: "foo/bar/baz"
+      })
+
+      expect(@project.determineIsNewProject).to.be.calledWith("foo/bar/baz")
+
   context "#getProjectId", ->
     afterEach ->
       delete process.env.CYPRESS_PROJECT_ID
@@ -221,21 +339,21 @@ describe "lib/project", ->
         expect(id).to.eq("123")
 
     it "calls verifyExistance", ->
-      @sandbox.stub(Settings, "read").resolves({projectId: "id-123"})
+      @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
 
       @project.getProjectId()
       .then =>
         expect(@verifyExistance).to.be.calledOnce
 
     it "returns the project id from settings", ->
-      @sandbox.stub(Settings, "read").resolves({projectId: "id-123"})
+      @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
 
       @project.getProjectId()
       .then (id) ->
         expect(id).to.eq "id-123"
 
     it "throws NO_PROJECT_ID with the projectRoot when no projectId was found", ->
-      @sandbox.stub(Settings, "read").resolves({})
+      @sandbox.stub(settings, "read").resolves({})
 
       @project.getProjectId()
       .then (id) ->
@@ -248,7 +366,7 @@ describe "lib/project", ->
       err = new Error
       err.code = "EACCES"
 
-      @sandbox.stub(Settings, "read").rejects(err)
+      @sandbox.stub(settings, "read").rejects(err)
 
       @project.getProjectId()
       .then (id) ->
@@ -287,7 +405,7 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("path/to/project")
 
-      @sandbox.stub(Settings, "write")
+      @sandbox.stub(settings, "write")
         .withArgs(@project.projectRoot, {projectId: "id-123"})
         .resolves({projectId: "id-123"})
 
@@ -382,7 +500,7 @@ describe "lib/project", ->
       p = Fixtures.projectPath("ids")
 
       Project.removeIds(p).then ->
-        expect(ids.remove).to.be.calledWith(p + "/tests")
+        expect(ids.remove).to.be.calledWith(p + "/cypress/integration")
 
   context ".getSecretKeyByPath", ->
     beforeEach ->

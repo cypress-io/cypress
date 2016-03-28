@@ -96,13 +96,13 @@ module.exports = {
     ## default cypress web app client
     if options.autoOpen
       _.delay ->
-        require("open")("http://localhost:2020/__")
+        require("opn")("http://localhost:2020/__")
       , 2000
 
     if options.debug
       cp.spawn("node-inspector", [], {stdio: "inherit"})
 
-      require("open")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
+      require("opn")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
 
   start: (argv = []) ->
     logger.info("starting desktop app", args: argv)

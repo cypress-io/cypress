@@ -1,4 +1,4 @@
-config   = require("konfig")()
+konfig   = require("konfig")()
 path     = require("path")
 fs       = require("fs-extra")
 Promise  = require("bluebird")
@@ -42,7 +42,7 @@ module.exports =
       fs.ensureDirSync zip.split("/cypress.zip").join("")
 
       file = fs.createWriteStream(zip)
-      url  = [config.app.cdn_url, "desktop", "fixture", "cypress.zip"].join("/")
+      url  = [konfig.app.cdn_url, "desktop", "fixture", "cypress.zip"].join("/")
 
       request.get(url).pipe(file)
 

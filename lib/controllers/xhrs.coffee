@@ -19,20 +19,38 @@ isValidJSON = (text) ->
 
   return false
 
-class Xhr
-  constructor: (app) ->
-    if not (@ instanceof Xhr)
-      return new Xhr(app)
+module.exports = {
+  handle: (req, res, config, next) ->
+    delay    = ~~req.get("x-cypress-delay")
+    status   = req.get("x-cypress-status")   ? 200
+    headers  = req.get("x-cypress-headers")  ? null
+    response = req.get("x-cypress-response") ? ""
 
-    if not app
-      throw new Error("Instantiating controllers/xhr requires an app!")
+    respond = =>
+      ## figure out the stream interface and pipe these
+      ## chunks to the response
+      @getResponse(response, config)
+        .then (resp) =>
+          headers = @parseHeaders(headers, resp)
 
-    @app = app
+          ## grab content-type from x-cypress-headers if present
+          res
+            .set(headers)
+            .status(status)
+            .send(resp)
+        .catch (err) ->
+          res
+            .status(400)
+            .send({__error: err.message})
 
-  _get: (resp) ->
+    if delay > 0
+      Promise.delay(delay).then(respond)
+    else
+      respond()
+
+  _get: (resp, config) ->
     file = resp.replace(fixturesRe, "")
-    {projectRoot, fixturesFolder} = @app.get("cypress")
-    fixture.get(projectRoot, fixturesFolder, file)
+    fixture.get(config.fixturesFolder, file)
 
   getStream: (resp) ->
     if fixturesRe.test(resp)
@@ -41,9 +59,9 @@ class Xhr
     else
       str(resp)
 
-  getResponse: (resp) ->
+  getResponse: (resp, config) ->
     if fixturesRe.test(resp)
-      @_get(resp)
+      @_get(resp, config)
     else
       Promise.resolve(resp)
 
@@ -68,32 +86,4 @@ class Xhr
 
     return headers
 
-  handleXhr: (req, res, next) ->
-    delay    = ~~req.get("x-cypress-delay")
-    status   = req.get("x-cypress-status")   ? 200
-    headers  = req.get("x-cypress-headers")  ? null
-    response = req.get("x-cypress-response") ? ""
-
-    respond = =>
-      ## figure out the stream interface and pipe these
-      ## chunks to the response
-      @getResponse(response)
-        .then (resp) =>
-          headers = @parseHeaders(headers, resp)
-
-          ## grab content-type from x-cypress-headers if present
-          res
-            .set(headers)
-            .status(status)
-            .send(resp)
-        .catch (err) ->
-          res
-            .status(400)
-            .send({__error: err.message})
-
-    if delay > 0
-      Promise.delay(delay).then(respond)
-    else
-      respond()
-
-module.exports = Xhr
+}

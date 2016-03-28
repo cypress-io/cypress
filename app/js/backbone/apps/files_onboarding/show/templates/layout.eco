@@ -1,0 +1,84 @@
+<div class="empty-onboarding">
+  <h1>To help you get started...</h1>
+  <p>
+    We've created a folder here:
+    <strong data-js="cypress-folder"><i class="fa fa-folder-o"></i> <%= @parentTestsFolderDisplay %></strong>
+  </p>
+  <p>
+    In there you'll find some sample tests:
+    <strong data-js="example-file"><i class="fa fa-file-code-o"></i>
+    <%= @integrationExampleName %></strong>
+  </p>
+  <p>
+  <hr>
+  <p>
+    We've also created
+    <strong data-js="fixtures-folder"><i class="fa fa-folder-o"></i> fixtures</strong>
+    and
+    <strong data-js="support-folder"><i class="fa fa-folder-o"></i> support</strong>
+    for you.
+  </p>
+  <div class="folder-preview-onboarding">
+    <ul>
+      <li>
+        <span>
+          <i class="fa fa-folder-open-o"></i>
+          <%= @projectName %>
+        </span>
+        <ul>
+          <li class="app-code">
+            <span >
+              <i class="fa fa-folder-o"></i>
+              ...
+            </span>
+          </li>
+          <li class="new-code">
+            <span>
+              <i class="fa fa-folder-open-o"></i>
+              cypress
+            </span>
+            <ul>
+              <li>
+                <span>
+                  <i class="fa fa-folder-o"></i>
+                  fixtures
+                </span>
+              </li>
+              <li>
+                <span>
+                  <i class="fa fa-folder-open-o"></i>
+                  integration
+                </span>
+                <ul>
+                  <li>
+                    <span>
+                      <i class="fa fa-file-code-o"></i>
+                      example_spec.js
+                    </span>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <span>
+                  <i class="fa fa-folder-o"></i>
+                  support
+                </span>
+              </li>
+<!--               <li>
+                <span>
+                  <i class="fa fa-folder-o"></i>
+                  unit_tests
+                </span>
+              </li> -->
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+  <div class="helper-line">
+    <button type="button" class="btn btn-success btn-lg" data-dismiss="modal">
+      OK, got it!
+    </button>
+  </div>
+</div>

@@ -10,23 +10,8 @@ Domain      = require 'domain'
 Snockets    = require 'snockets'
 requirejs   = require 'requirejs'
 
-class SpecProcessor
-  constructor: (app) ->
-    if not (@ instanceof SpecProcessor)
-      return new SpecProcessor(app)
-
-    @app = app
-
-  browserify: (opts, fileStream) ->
-    browserify([fileStream], opts)
-    .transform({}, coffeeify)
-    .bundle()
-
-  # requirejs: (opts, fileStream) ->
-  #   requirejs opts, (buildResponse) ->
-  #     debugger
-
-  handle: (spec, req, res, next) ->
+module.exports = {
+  handle: (spec, req, res, config, next) ->
     res.set({
       "Cache-Control": "no-cache, no-store, must-revalidate"
       "Pragma": "no-cache"
@@ -35,25 +20,23 @@ class SpecProcessor
 
     res.type "js"
 
-    settings = @app.get("cypress")
-
     filePath = path.join(
-      settings.projectRoot,
+      config.projectRoot,
       spec
     )
 
-    config =
-      baseUrl: settings.projectRoot
+    options =
+      baseUrl: config.projectRoot
       name: filePath
       out: "main.js"
 
-    if settings.requirejs
-      requirejs.optimize config, (buildResponse) ->
+    if config.requirejs
+      requirejs.optimize options, (buildResponse) ->
         ## need to wrap these contents with almond so we dont
         ## have to add the require.js script tag (which is huge)
-        contents = fs.readFileSync(config.out, 'utf8')
+        contents = fs.readFileSync(options.out, 'utf8')
 
-        ## also we need to delete config.out since requirejs
+        ## also we need to delete options.out since requirejs
         ## generates this
         debugger
 
@@ -81,13 +64,23 @@ class SpecProcessor
       gutil.beep()
       next arguments...
     domain.run =>
-      if opts = settings.browserify
+      if opts = config.browserify
         @browserify(opts, stream)
         .pipe(res)
-      # if opts = settings.requirejs
+      # if opts = config.requirejs
         # @requirejs(opts, stream)
         # .pipe(res)
       else
         stream.pipe(res)
 
-module.exports = SpecProcessor
+  browserify: (opts, fileStream) ->
+    browserify([fileStream], opts)
+    .transform({}, coffeeify)
+    .bundle()
+
+  # requirejs: (opts, fileStream) ->
+  #   requirejs opts, (buildResponse) ->
+  #     debugger
+
+
+}

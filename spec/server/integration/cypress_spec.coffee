@@ -3,6 +3,7 @@ require("../spec_helper")
 os       = require("os")
 path     = require("path")
 http     = require("http")
+Promise  = require("bluebird")
 electron = require("electron")
 inquirer = require("inquirer")
 Fixtures = require("../helpers/fixtures")
@@ -14,6 +15,7 @@ headed   = require("#{root}lib/modes/headed")
 headless = require("#{root}lib/modes/headless")
 api      = require("#{root}lib/api")
 user     = require("#{root}lib/user")
+config   = require("#{root}lib/config")
 cache    = require("#{root}lib/cache")
 errors   = require("#{root}lib/errors")
 cypress  = require("#{root}lib/cypress")
@@ -25,8 +27,9 @@ describe "lib/cypress", ->
     cache.removeSync()
 
     Fixtures.scaffold()
-    @todosPath = Fixtures.projectPath("todos")
+    @todosPath    = Fixtures.projectPath("todos")
     @pristinePath = Fixtures.projectPath("pristine")
+    @idsPath      = Fixtures.projectPath("ids")
 
     ## force cypress to call directly into main without
     ## spawning a separate process
@@ -246,6 +249,111 @@ describe "lib/cypress", ->
           expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/test2.coffee?__ui=satellite")
           @expectExitWith(0)
 
+    it "scaffolds out integration and example_spec if they do not exist", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        config.get(@pristinePath).then (@cfg) =>
+
+        Project.add(@pristinePath)
+      ])
+      .then =>
+        fs.statAsync(@cfg.integrationFolder)
+        .then ->
+          throw new Error("integrationolder should not exist!")
+        .catch =>
+          cypress.start(["--run-project=#{@pristinePath}"])
+        .then =>
+          fs.statAsync(@cfg.integrationFolder)
+        .then =>
+          fs.statAsync path.join(@cfg.integrationFolder, "example_spec.js")
+
+    it "scaffolds out fixtures + files if they do not exist", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        config.get(@pristinePath).then (@cfg) =>
+
+        Project.add(@pristinePath)
+      ])
+      .then =>
+        fs.statAsync(@cfg.fixturesFolder)
+        .then ->
+          throw new Error("fixturesFolder should not exist!")
+        .catch =>
+          cypress.start(["--run-project=#{@pristinePath}"])
+        .then =>
+          fs.statAsync(@cfg.fixturesFolder)
+        .then =>
+          fs.statAsync path.join(@cfg.fixturesFolder, "example.json")
+
+    it "scaffolds out support + files if they do not exist", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        config.get(@pristinePath).then (@cfg) =>
+
+        Project.add(@pristinePath)
+      ])
+      .then =>
+        fs.statAsync(@cfg.supportFolder)
+        .then ->
+          throw new Error("supportFolder should not exist!")
+        .catch =>
+          cypress.start(["--run-project=#{@pristinePath}"])
+        .then =>
+          fs.statAsync(@cfg.supportFolder)
+        .then =>
+          fs.statAsync path.join(@cfg.supportFolder, "commands.js")
+        .then =>
+          fs.statAsync path.join(@cfg.supportFolder, "defaults.js")
+
+    it "removes fixtures when they exist and fixturesFolder is false", (done) ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        config.get(@idsPath).then (@cfg) =>
+
+        Project.add(@idsPath)
+      ])
+      .then =>
+        fs.statAsync(@cfg.fixturesFolder)
+      .then =>
+        Settings.read(@idsPath)
+      .then (json) =>
+        json.fixturesFolder = false
+        Settings.write(@idsPath, json)
+      .then =>
+        cypress.start(["--run-project=#{@idsPath}"])
+      .then =>
+        fs.statAsync(@cfg.fixturesFolder)
+        .then ->
+          throw new Error("fixturesFolder should not exist!")
+        .catch -> done()
+
+    it "removes support when they exist and supportFolder is false", (done) ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        config.get(@idsPath).then (@cfg) =>
+
+        Project.add(@idsPath)
+      ])
+      .then =>
+        fs.statAsync(@cfg.supportFolder)
+      .then =>
+        Settings.read(@idsPath)
+      .then (json) =>
+        json.supportFolder = false
+        Settings.write(@idsPath, json)
+      .then =>
+        cypress.start(["--run-project=#{@idsPath}"])
+      .then =>
+        fs.statAsync(@cfg.supportFolder)
+        .then ->
+          throw new Error("fixturesFolder should not exist!")
+        .catch -> done()
+
     it "logs error and exits when user isn't logged in", ->
       user.set({})
       .then =>
@@ -324,6 +432,18 @@ describe "lib/cypress", ->
             fs.removeAsync(permissionsPath).then =>
               @expectExitWithErr("ERROR_WRITING_FILE", permissionsPath)
 
+    describe "morgan", ->
+      it "sets morgan to false", ->
+        Promise.all([
+          user.set({name: "brian", session_token: "session-123"}),
+
+          Project.add(@todosPath)
+        ])
+        .then =>
+          cypress.start(["--run-project=#{@todosPath}"]).then =>
+            expect(project.opened().cfg.morgan).to.be.false
+            @expectExitWith(0)
+
     describe "--port", ->
       beforeEach ->
         headless.waitForTestsToFinishRunning.resolves({})
@@ -339,9 +459,9 @@ describe "lib/cypress", ->
         open   = @sandbox.spy(Server.prototype, "open")
 
         cypress.start(["--run-project=#{@todosPath}", "--port=5555"]).then =>
-          expect(project.opened().getConfig().port).to.eq(5555)
+          expect(project.opened().cfg.port).to.eq(5555)
           expect(listen).to.be.calledWith(5555)
-          expect(open).to.be.calledWithMatch({port: 5555})
+          expect(open).to.be.calledWithMatch(@todosPath, {port: 5555})
           @expectExitWith(0)
 
       ## TODO: handle PORT_IN_USE short integration test
@@ -369,7 +489,7 @@ describe "lib/cypress", ->
           "--env",
           "version=0.12.1,foo=bar,host=http://localhost:8888"
         ]).then =>
-          expect(project.opened().getConfig().environmentVariables).to.deep.eq({
+          expect(project.opened().cfg.environmentVariables).to.deep.eq({
             version: "0.12.1"
             foo: "bar"
             host: "http://localhost:8888"

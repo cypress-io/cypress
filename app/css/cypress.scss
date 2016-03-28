@@ -29,6 +29,9 @@
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/tooltip";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/wells";
 
+// Components w/ JavaScript
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/modals";
+
 // Utilities
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/utilities";
 
@@ -39,11 +42,13 @@
 @import "elements/block-panels";
 @import "elements/buttons";
 @import "elements/dropdown-menus";
+@import "elements/empty-wells";
 @import "elements/forms";
 @import "elements/general";
 @import "elements/labels";
 @import "elements/lists";
 @import "elements/main-content";
+@import "elements/modal";
 @import "elements/nav";
 @import "elements/panels";
 @import "elements/scroll-bars";

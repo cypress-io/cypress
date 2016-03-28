@@ -4,6 +4,7 @@ rp       = require("request-promise")
 os       = require("os")
 pkg      = require("#{root}package.json")
 api      = require("#{root}lib/api")
+Promise  = require("bluebird")
 provider = require("#{root}lib/util/provider")
 
 describe "lib/api", ->

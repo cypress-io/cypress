@@ -86,10 +86,7 @@
         else item
 
     getPathToSpec: (id) ->
-      _.compact([@get("testFolder"), id]).join("/")
-
-    getProjectName: ->
-      _.last @get("projectRoot").split("/")
+      _.compact([@get("integrationFolder"), id]).join("/")
 
     getCypressConfig: ->
       ## todo test cloning this to prevent env mutation

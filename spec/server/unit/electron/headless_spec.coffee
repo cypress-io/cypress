@@ -1,9 +1,10 @@
 require("../../spec_helper")
 
+Promise  = require("bluebird")
 inquirer = require("inquirer")
 electron = require("electron")
-Project  = require("#{root}../lib/project")
 user     = require("#{root}../lib/user")
+Project  = require("#{root}../lib/project")
 project  = require("#{root}../lib/electron/handlers/project")
 headless = require("#{root}../lib/modes/headless")
 Renderer = require("#{root}../lib/electron/handlers/renderer")
@@ -224,10 +225,9 @@ describe "electron/headless", ->
 
       headless.waitForTestsToFinishRunning(@projectInstance)
 
-  context ".waitForTestsToFinishRunning", ->
-
   context ".run", ->
     beforeEach ->
+      @sandbox.stub(@projectInstance, "getConfig").resolves({})
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureSession").resolves("abc-123")
       @sandbox.stub(headless, "getId").returns(1234)

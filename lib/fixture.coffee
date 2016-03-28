@@ -1,9 +1,10 @@
-Promise   = require("bluebird")
+_         = require("lodash")
 fs        = require("fs-extra")
 path      = require("path")
-jsonlint  = require("jsonlint")
 check     = require("syntax-error")
 coffee    = require("coffee-script")
+Promise   = require("bluebird")
+jsonlint  = require("jsonlint")
 beautify  = require("js-beautify").html
 pretty    = require("js-object-pretty-print").pretty
 formatter = require("jsonlint/lib/formatter").formatter
@@ -165,32 +166,5 @@ module.exports = {
   parseBase64: (p, fixture) ->
     fs.readFileAsync(p, "base64")
       .bind(@)
-
-  copyExample: (fixturesDir) ->
-    src  = cwd("lib", "scaffold", "example.json")
-    dest = path.join(fixturesDir, "example.json")
-    fs.copyAsync(src, dest)
-
-  scaffold: ->
-    p = path.join.apply(path, arguments)
-
-    ## we want to build out the fixturesFolder + and example file
-    ## but only create the example file if the fixturesFolder doesnt
-    ## exist
-    ##
-    ## this allows us to automatically insert the folder on existing
-    ## projects (whenever they are booted) but allows the user to delete
-    ## the fixtures file and not have it re-generated each time
-    ##
-    ## this is ideal because users who are upgrading to newer cypress version
-    ## will still get the folder support enabled but existing users wont be
-    ## annoyed by new example files coming into their projects unnecessarily
-
-    ## if the fixtures dir doesnt exist
-    ## then create it + the example fixture
-    fs.statAsync(p)
-    .bind(@)
-    .catch ->
-      @copyExample(p)
 
 }

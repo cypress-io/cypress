@@ -8,7 +8,7 @@ describe "lib/ids", ->
   beforeEach ->
     Fixtures.scaffold()
 
-    @testIdsPath = path.join(Fixtures.projectPath("ids"), "tests")
+    @testIdsPath = path.join(Fixtures.projectPath("ids"), "cypress", "integration")
 
   afterEach ->
     Fixtures.remove()

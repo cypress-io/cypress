@@ -1,9 +1,10 @@
 require("../spec_helper")
 
 _             = require("lodash")
-winston       = require("winston")
 path          = require("path")
-config        = require("#{root}lib/config")
+winston       = require("winston")
+Promise       = require("bluebird")
+konfig        = require("#{root}lib/konfig")
 logger        = require("#{root}lib/logger")
 exception     = require("#{root}lib/exception")
 
@@ -15,7 +16,7 @@ describe "lib/logger", ->
     logger.removeAllListeners("logging")
 
   after ->
-    fs.removeAsync(config.app.log_path)
+    fs.removeAsync(konfig("log_path"))
 
   it "has 1 transport", ->
     expect(logger.transports).to.have.keys("all")

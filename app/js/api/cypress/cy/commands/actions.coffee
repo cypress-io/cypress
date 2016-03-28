@@ -388,6 +388,15 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           _(dblclicks).invoke("cancel")
           throw err
 
+
+    hover: (args) ->
+      @throwErr("""
+        cy.hover() is not currently implemented.\n
+        However it is usually easy to workaround.\n
+        Read the following document for a detailed explanation.\n
+        https://on.cypress.io/api/hover
+      """)
+
     click: (subject, positionOrX, y, options = {}) ->
       ## TODO handle pointer-events: none
       ## http://caniuse.com/#feat=pointer-events

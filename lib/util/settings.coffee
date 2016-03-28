@@ -27,7 +27,7 @@ module.exports =
 
   _get: (method, projectRoot, options = {}) ->
     if not projectRoot
-      throw new Error("Settings requires projectRoot to be defined!")
+      throw new Error("lib/util/settings requires projectRoot to be defined!")
 
     _.defaults options,
       writeInitial: true
@@ -72,25 +72,20 @@ module.exports =
 
         @_logReadErr(file, err)
 
-  readEnvSync: (projectRoot) ->
+  readEnv: (projectRoot) ->
     options = {
       file: "cypress.env.json"
       writeInitial: false
     }
 
-    try
-      @_get("readJsonSync", projectRoot, options)
-    catch err
-      ## dont catch errors if
-      ## there wasnt a cypress.env.json
-      if err.code is "ENOENT"
-        return {}
-
+    @_get("readJsonAsync", projectRoot, options)
+    .catch {code: "ENOENT"}, ->
+      return {}
+    .catch (err) =>
       throw err if errors.isCypressErr(err)
 
-      ## TODO: this should not be project root
-      ## it should be projectRoot + cypress.env.json
-      @_logReadErr(projectRoot, err, options.file)
+      file = @_pathToFile(projectRoot, options.file)
+      @_logReadErr(file, err)
 
   readSync: (projectRoot) ->
     options = {

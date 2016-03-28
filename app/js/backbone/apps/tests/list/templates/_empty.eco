@@ -1,7 +1,6 @@
-<div class="well well-lg">
-  <h4>
-    <i class="fa fa-warning"></i>
-    Sorry, couldn't find any tests here:
-  </h4>
-  <pre><%= @path %></pre>
+<div class="empty-well">
+  <h2>
+    No files found in
+    <code><%= @path %></code>
+  </h2>
 </div>

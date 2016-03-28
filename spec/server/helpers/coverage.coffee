@@ -1,6 +1,8 @@
 path           = require("path")
 coffeeCoverage = require("coffee-coverage")
 
+return if not process.env["NODE_COVERAGE"]
+
 projectRoot = path.resolve(__dirname, "../../..")
 coverageVar = coffeeCoverage.findIstanbulVariable()
 

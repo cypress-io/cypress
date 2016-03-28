@@ -246,7 +246,7 @@
       remoteLoaded = $.Deferred()
       specLoaded = $.Deferred()
 
-      name = App.config.getProjectName()
+      name = App.config.get("projectName")
 
       remoteOpts =
         id: "Your App: '#{name}' "

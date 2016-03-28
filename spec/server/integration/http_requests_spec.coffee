@@ -7,12 +7,16 @@ glob          = require("glob")
 path          = require("path")
 str           = require("underscore.string")
 coffee        = require("coffee-script")
+Promise       = require("bluebird")
+config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 CacheBuster   = require("#{root}/lib/util/cache_buster")
 Fixtures      = require("#{root}/spec/server/helpers/fixtures")
 
 ## force supertest-session to use supertest-as-promised, hah
 Session       = proxyquire("supertest-session", {supertest: supertest})
+
+glob = Promise.promisify(glob)
 
 removeWhitespace = (c) ->
   c = str.clean(c)
@@ -25,19 +29,20 @@ describe "Routes", ->
 
     nock.enableNetConnect()
 
-    @sandbox.stub(Server.prototype, "getCypressJson").returns({})
+    @setup = (obj = {}) =>
+      @server = Server("/Users/brian/app")
 
-    @server = Server("/Users/brian/app")
-    @server.configureApplication()
+      ## get all the config defaults
+      ## and allow us to override them
+      ## for each test
+      cfg = config.set(obj)
 
-    @app    = @server.app
-    @server.setCypressJson {
-      projectRoot: "/Users/brian/app"
-    }
+      @app = @server.createExpressApp()
+      @server.createRoutes(@app, cfg)
 
-    ## create a session which will store cookies
-    ## in between session requests :-)
-    @session = new (Session({app: @app}))
+      ## create a session which will store cookies
+      ## in between session requests :-)
+      @session = new (Session({app: @app}))
 
   afterEach ->
     @session.destroy()
@@ -46,6 +51,8 @@ describe "Routes", ->
   context "GET /", ->
     beforeEach ->
       @baseUrl = "http://www.github.com"
+
+      @setup()
 
     it "redirects to config.clientRoute without a __cypress.remoteHost", ->
       supertest(@app)
@@ -83,57 +90,72 @@ describe "Routes", ->
   context "GET /__cypress/files", ->
     beforeEach ->
       Fixtures.scaffold("todos")
-
-      @server.setCypressJson {
-        projectRoot: Fixtures.project("todos")
-        testFolder: "tests"
-        fixturesFolder: "tests/_fixtures"
-        javascripts: ["tests/etc/**/*"]
-      }
+      Fixtures.scaffold("ids")
 
     afterEach ->
       Fixtures.remove("todos")
+      Fixtures.remove("ids")
 
-    it "returns base json file path objects", (done) ->
-      ## this should omit any _fixture files, _support files and javascripts
+    describe "todos with specific configuration", ->
+      beforeEach ->
+        @setup({
+          projectRoot: Fixtures.projectPath("todos")
+          config: {
+            integrationFolder: "tests"
+            fixturesFolder: "tests/_fixtures"
+            supportFolder: "tests/_support"
+            javascripts: ["tests/etc/**/*"]
+          }
+        })
 
-      glob path.join(Fixtures.project("todos"), "tests", "_fixtures", "**", "*"), (err, files) =>
-        ## make sure there are fixtures in here!
-        expect(files.length).to.be.gt(0)
+      it "returns base json file path objects", ->
+        ## this should omit any _fixture files, _support files and javascripts
 
-        glob path.join(Fixtures.project("todos"), "tests", "_support", "**", "*"), (err, files) =>
-          ## make sure there are support files in here!
+        glob(path.join(Fixtures.projectPath("todos"), "tests", "_fixtures", "**", "*"))
+        .then (files) =>
+          ## make sure there are fixtures in here!
           expect(files.length).to.be.gt(0)
 
-          supertest(@app)
+          glob(path.join(Fixtures.projectPath("todos"), "tests", "_support", "**", "*"))
+          .then (files) =>
+            ## make sure there are support files in here!
+            expect(files.length).to.be.gt(0)
+
+            supertest(@app)
             .get("/__cypress/files")
             .expect(200, [
-              { name: "sub/sub_test.coffee" },
-              { name: "test1.js" },
-              { name: "test2.coffee" }
+              { name: "integration/sub/sub_test.coffee" },
+              { name: "integration/test1.js" },
+              { name: "integration/test2.coffee" }
             ])
-            .then -> done()
 
-    it "sets X-Files-Path header to the length of files", ->
-      filesPath = Fixtures.project("todos") + "/" + "tests"
+    describe "ids with regular configuration", ->
+      beforeEach ->
+        @setup({
+          projectRoot: Fixtures.projectPath("ids")
+        })
 
-      supertest(@app)
+      it "returns test files as json", ->
+        supertest(@app)
         .get("/__cypress/files")
-        .expect(200)
-        .expect("X-Files-Path", filesPath)
+        .expect(200, [
+          { name: "integration/bar.js" }
+          { name: "integration/foo.coffee" }
+          { name: "integration/noop.coffee" }
+        ])
 
   context "GET /__cypress/tests", ->
     describe "todos", ->
       beforeEach ->
         Fixtures.scaffold("todos")
 
-        @server.setCypressJson {
-          projectRoot: Fixtures.project("todos")
-          testFolder: "tests"
-          javascripts: ["support/spec_helper.coffee"]
-          sinon: false
-          fixtures: false
-        }
+        @setup({
+          projectRoot: Fixtures.projectPath("todos")
+          config: {
+            integrationFolder: "tests"
+            javascripts: ["support/spec_helper.coffee"]
+          }
+        })
 
       afterEach ->
         Fixtures.remove("todos")
@@ -149,11 +171,11 @@ describe "Routes", ->
             expect(res.text).to.eq file
 
       it "processes support/spec_helper.coffee javascripts", ->
-        file = Fixtures.get("projects/todos/support/spec_helper.coffee")
+        file = Fixtures.get("projects/todos/lib/my_coffee.coffee")
         file = coffee.compile(file)
 
         supertest(@app)
-          .get("/__cypress/tests?p=support/spec_helper.coffee")
+          .get("/__cypress/tests?p=lib/my_coffee.coffee")
           .expect(200)
           .then (res) ->
             expect(res.text).to.eq file
@@ -162,13 +184,13 @@ describe "Routes", ->
       beforeEach ->
         Fixtures.scaffold("no-server")
 
-        @server.setCypressJson {
-          projectRoot: Fixtures.project("no-server")
-          testFolder: "my-tests"
-          javascripts: ["helpers/includes.js"]
-          sinon: false
-          fixtures: false
-        }
+        @setup({
+          projectRoot: Fixtures.projectPath("no-server")
+          config: {
+            integrationFolder: "my-tests"
+            javascripts: ["helpers/includes.js"]
+          }
+        })
 
       afterEach ->
         Fixtures.remove("no-server")
@@ -284,10 +306,13 @@ describe "Routes", ->
         beforeEach ->
           Fixtures.scaffold("todos")
 
-          @server.setCypressJson {
-            projectRoot: Fixtures.project("todos")
-            testFolder: "tests"
-          }
+          @setup({
+            projectRoot: Fixtures.projectPath("todos")
+            config: {
+              integrationFolder: "tests"
+              fixturesFolder: "tests/_fixtures"
+            }
+          })
 
         afterEach ->
           Fixtures.remove("todos")
@@ -359,33 +384,40 @@ describe "Routes", ->
     #       .expect(JSON.parse(json))
 
   context "GET /__cypress/iframes/*", ->
+    beforeEach ->
+      Fixtures.scaffold("todos")
+      Fixtures.scaffold("no-server")
+      Fixtures.scaffold("ids")
+
+    afterEach ->
+      Fixtures.remove("todos")
+      Fixtures.remove("no-server")
+      Fixtures.remove("ids")
+
     describe "todos", ->
       beforeEach ->
-        Fixtures.scaffold("todos")
+        @setup({
+          projectRoot: Fixtures.projectPath("todos")
+          config: {
+            integrationFolder: "tests"
+            fixturesFolder: "tests/_fixtures"
+            supportFolder: "tests/_support"
+            javascripts: ["tests/etc/etc.js"]
+          }
+        })
 
-        @server.setCypressJson {
-          projectRoot: Fixtures.project("todos")
-          testFolder: "tests"
-          javascripts: ["tests/etc/etc.js"]
-          sinon: false
-          fixtures: false
-        }
-
-      afterEach ->
-        Fixtures.remove("todos")
-
-      it "renders empty inject with variables passed in", ->
-        contents = removeWhitespace Fixtures.get("server/expected_empty_inject.html")
+      it "renders iframe with variables passed in", ->
+        contents = removeWhitespace Fixtures.get("server/expected_todos_iframe.html")
 
         supertest(@app)
-          .get("/__cypress/iframes/test2.coffee")
+          .get("/__cypress/iframes/integration/test2.coffee")
           .expect(200)
           .then (res) ->
             body = removeWhitespace(res.text)
             expect(body).to.eq contents
 
       it "can send back all tests", ->
-        contents = removeWhitespace Fixtures.get("server/expected_all_tests_empty_inject.html")
+        contents = removeWhitespace Fixtures.get("server/expected_todos_all_tests_iframe.html")
 
         supertest(@app)
           .get("/__cypress/iframes/__all")
@@ -396,28 +428,46 @@ describe "Routes", ->
 
     describe "no-server", ->
       beforeEach ->
-        Fixtures.scaffold("no-server")
+        @setup({
+          projectRoot: Fixtures.projectPath("no-server")
+          config: {
+            integrationFolder: "my-tests"
+            javascripts: ["helpers/includes.js"]
+            fileServerFolder: "foo"
+          }
+        })
 
-        @server.setCypressJson {
-          projectRoot: Fixtures.project("no-server")
-          testFolder: "my-tests"
-          javascripts: ["helpers/includes.js"]
-          ## even though there are no files here
-          ## we are adding rootFolder to test that
-          ## only the support files receive this value
-          rootFolder: "foo"
-          sinon: false
-          fixtures: false
-        }
-
-      afterEach ->
-        Fixtures.remove("no-server")
-
-      it "renders empty inject with variables passed in", ->
-        contents = removeWhitespace Fixtures.get("server/expected_no_server_empty_inject.html")
+      it "renders iframe with variables passed in", ->
+        contents = removeWhitespace Fixtures.get("server/expected_no_server_iframe.html")
 
         supertest(@app)
-          .get("/__cypress/iframes/test1.js")
+          .get("/__cypress/iframes/integration/test1.js")
+          .expect(200)
+          .then (res) ->
+            body = removeWhitespace(res.text)
+            expect(body).to.eq contents
+
+    describe "ids", ->
+      beforeEach ->
+        @setup({
+          projectRoot: Fixtures.projectPath("ids")
+        })
+
+      it "renders iframe with variables passed in", ->
+        contents = removeWhitespace Fixtures.get("server/expected_ids_iframe.html")
+
+        supertest(@app)
+          .get("/__cypress/iframes/integration/foo.coffee")
+          .expect(200)
+          .then (res) ->
+            body = removeWhitespace(res.text)
+            expect(body).to.eq contents
+
+      it "can send back all tests", ->
+        contents = removeWhitespace Fixtures.get("server/expected_ids_all_tests_iframe.html")
+
+        supertest(@app)
+          .get("/__cypress/iframes/__all")
           .expect(200)
           .then (res) ->
             body = removeWhitespace(res.text)
@@ -452,10 +502,14 @@ describe "Routes", ->
           .expect(200, "foo")
 
       it "falls back to app baseUrl property", ->
+        @setup({
+          config: {
+            baseUrl: "http://localhost:8080"
+          }
+        })
+
         ## should ignore this since it has least precendence
         @app.set("__cypress.remoteHost", "http://www.github.com")
-
-        @app.set("cypress", {baseUrl: "http://localhost:8080"})
 
         nock("http://localhost:8080")
           .get("/assets/app.js")
@@ -1302,11 +1356,13 @@ describe "Routes", ->
 
         Fixtures.scaffold()
 
-        @server.setCypressJson {
-          projectRoot: Fixtures.project("no-server")
-          rootFolder: "dev"
-          testFolder: "my-tests"
-        }
+        @setup({
+          projectRoot: Fixtures.projectPath("no-server")
+          config: {
+            fileServerFolder: "dev"
+            integrationFolder: "my-tests"
+          }
+        })
 
         @session
           .get(@baseUrl)
@@ -1449,8 +1505,10 @@ describe "Routes", ->
             expect(res.text).to.eq "{}"
 
       it "falls back to baseUrl when no FQDN and no remoteHost", ->
-        @server.setCypressJson({
-          baseUrl: "http://www.google.com"
+        @setup({
+          config: {
+            baseUrl: "http://www.google.com"
+          }
         })
 
         nock("http://www.google.com")

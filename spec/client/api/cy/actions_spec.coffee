@@ -4291,6 +4291,18 @@ describe "$Cypress.Cy Actions Commands", ->
             Elements: 1
           }
 
+  context "#hover", ->
+    beforeEach ->
+      @allowErrors()
+
+    it "throws when invoking", (done) ->
+      @cy.on "fail", (err) ->
+        expect(err.message).to.include "cy.hover() is not currently implemented."
+        expect(err.message).to.include "https://on.cypress.io/api/hover"
+        done()
+
+      @cy.get("button").hover()
+
   context "#click", ->
     it "receives native click event", (done) ->
       btn = @cy.$$("#button")
