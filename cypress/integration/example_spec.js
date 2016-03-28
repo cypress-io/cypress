@@ -369,8 +369,9 @@ describe('Kitchen Sink', function(){
       // matching checkbox or radio elements in succession, one after another
 
       // http://on.cypress.io/api/check
-      cy.get('.action-checkboxes [type="checkbox"]').not('[disabled]').check().should('be.checked')
-      cy.get('.action-radios [type="radio"]').not('[disabled]').check().should('be.checked')
+      cy
+        .get('.action-checkboxes [type="checkbox"]').not('[disabled]').check().should('be.checked')
+        .get('.action-radios [type="radio"]').not('[disabled]').check().should('be.checked')
 
       // **** Check Value ****
       //
@@ -378,7 +379,15 @@ describe('Kitchen Sink', function(){
       // that checks only checkboxes or radios
       // with matching values
       //
-      cy.get('.action-radios [type="radio"]').check('radio1').should('be.checked')
+        .get('.action-radios [type="radio"]').check('radio1').should('be.checked')
+
+      // **** Check Values ****
+      //
+      // cy.check() accepts an array of values
+      // that checks only checkboxes or radios
+      // with matching values
+      //
+        .get('.action-multiple-checkboxes [type="checkbox"]').check(['checkbox1', 'checkbox2']).should('be.checked')
 
       // **** Check Options ****
       //
@@ -387,10 +396,10 @@ describe('Kitchen Sink', function(){
       // Ignore error checking prior to checking
       // like whether the element is visible, clickable or disabled
       // this checkbox below is disabled.
-      cy
         .get('.action-checkboxes [disabled]')
           .check({force: true}).should('be.checked')
-      cy.get('.action-radios [type="radio"]').check('radio3', {force: true}).should('be.checked')
+
+        .get('.action-radios [type="radio"]').check('radio3', {force: true}).should('be.checked')
 
     })
 
@@ -403,7 +412,8 @@ describe('Kitchen Sink', function(){
       // http://on.cypress.io/api/uncheck
       cy
         .get('.action-check [type="checkbox"]')
-          .not('[disabled]').uncheck().should('not.be.checked')
+          .not('[disabled]')
+            .uncheck().should('not.be.checked')
 
       // **** Check Value ****
       //
@@ -411,7 +421,19 @@ describe('Kitchen Sink', function(){
       // that unchecks only checkboxes
       // with matching values
       //
-      cy.get('.action-check [type="checkbox"]').check('checkbox1').uncheck('checkbox1').should('not.be.checked')
+        .get('.action-check [type="checkbox"]')
+          .check('checkbox1')
+          .uncheck('checkbox1').should('not.be.checked')
+
+      // **** Uncheck Values ****
+      //
+      // cy.uncheck() accepts an array of values
+      // that unchecks only checkboxes or radios
+      // with matching values
+      //
+        .get('.action-check [type="checkbox"]')
+          .check(['checkbox1', 'checkbox3'])
+          .uncheck(['checkbox1', 'checkbox3']).should('not.be.checked')
 
       // **** Uncheck Options ****
       //
@@ -420,7 +442,6 @@ describe('Kitchen Sink', function(){
       // Ignore error checking prior to unchecking
       // like whether the element is visible, clickable or disabled
       // this checkbox below is disabled.
-      cy
         .get('.action-check [disabled]')
           .uncheck({force: true}).should('not.be.checked')
 
@@ -435,6 +456,12 @@ describe('Kitchen Sink', function(){
 
       // Select the option with matching value
       cy.get('.action-select').select('fr-bananas')
+
+      // Select the options with matching text content
+      cy.get('.action-select-multiple').select(['apples', 'oranges', 'bananas'])
+
+      // Select the options with matching values
+      cy.get('.action-select-multiple').select(['fr-apples', 'fr-oranges', 'fr-bananas'])
 
     })
 
