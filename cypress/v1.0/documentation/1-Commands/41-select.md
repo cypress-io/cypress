@@ -24,9 +24,16 @@ Select an option within a `<select>` element based on the value of the option.
 
 ***
 
-# [cy.select( *array* )](#section-array-usage)
+# [cy.select( *texts* )](#section-texts-usage)
 
-Select multiple options within a `<select>` element based on the value or text of the option.
+Select multiple options within a `<select>` element based on the text of the option.
+
+***
+
+# [cy.select( *values* )](#section-values-usage)
+
+Select multiple options within a `<select>` element based on the value of the option.
+
 
 ***
 
@@ -85,7 +92,7 @@ cy.get("select").select("456")
 
 ***
 
-# Array Usage
+# Texts Usage
 
 ## Select the options with the texts "apples" and "bananas"
 
@@ -100,6 +107,10 @@ cy.get("select").select("456")
 ```javascript
 cy.get("select").select(["apples", "bananas"])
 ```
+
+***
+
+# Values Usage
 
 ## Select the options with the values "456" and "457"
 
