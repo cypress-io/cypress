@@ -5,7 +5,7 @@ machine:
 dependencies:
   override:
     - npm install
-    - npm install -g cypress
+    - npm install -g cypress-cli
 
 test:
   pre:
