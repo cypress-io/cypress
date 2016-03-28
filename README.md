@@ -4,7 +4,7 @@ Cypress is a test engine that runs unit and integration tests in your browser.
 
 ### What's in this repo?
 
-Currently this repo is used to house all ofthe issues (from early adopters) and the changelog.
+Currently this repo is used to house all of the issues (from early adopters) and the changelog.
 
 - #### [Changelog](../../wiki/changelog)
 
