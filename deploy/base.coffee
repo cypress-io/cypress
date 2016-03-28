@@ -266,12 +266,7 @@ class Base
 
     fs.outputJsonAsync(cache, {
       USER: {session_token: "abc123"}
-      PROJECTS: {
-        ## hard code the todos project id for now
-        "e3e58d3f-3769-4b50-af38-e31b8989a938": {
-          PATH: todosProject
-        }
-      }
+      PROJECTS: [todosProject]
     })
 
   removeCyCache: ->
@@ -289,7 +284,9 @@ class Base
 
     runProjectTest = =>
       new Promise (resolve, reject) =>
-        sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{todos}"], {stdio: "inherit"}
+        env = _.omit(process.env, "CYPRESS_ENV")
+
+        sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{todos}"], {stdio: "inherit", env: env}
         sp.on "exit", (code) ->
           Fixtures.remove()
 
