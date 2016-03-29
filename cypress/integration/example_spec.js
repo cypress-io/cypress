@@ -1276,7 +1276,7 @@ describe('Kitchen Sink', function(){
 
       // http://on.cypress.io/api/cypress-blob
       // get the dataUrl string for the javascript-logo
-      return Cypress.Blob.imgSrcToDataURL('https://example.cypress.io/assets/img/javascript-logo.png', undefined, {crossOrigin: 'Anonymous'})
+      return Cypress.Blob.imgSrcToDataURL('https://example.cypress.io/assets/img/javascript-logo.png', undefined, 'anonymous')
       .then(function(dataUrl){
         // create an <img> element and set its src to the dataUrl
         var img = Cypress.$('<img />', {src: dataUrl})
