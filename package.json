@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "preinstall": "npm cache clean && rm -rf app && mkdir app && npm i cypress-example-kitchensink",
-    "postinstall": "cp -r node_modules/cypress-example-kitchensink/app . && npm run build",
+    "postinstall": "./bin/postinstall.sh",
     "test": "cypress ci",
     "build": "gulp build",
     "deploy": "gulp deploy"
