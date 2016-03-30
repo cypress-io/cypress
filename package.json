@@ -1,14 +1,15 @@
 {
   "name": "cypress-core-example",
   "version": "0.0.0",
-  "description": "",
+  "description": "Interal Cypress repo for managing https://example.cypress.io",
   "main": "index.js",
   "scripts": {
     "preinstall": "npm cache clean && rm -rf app && mkdir app && npm i cypress-example-kitchensink",
     "postinstall": "./bin/postinstall.sh",
     "test": "cypress ci",
     "build": "gulp build",
-    "deploy": "gulp deploy"
+    "deploy": "gulp deploy",
+    "release": "releaser"
   },
   "author": "Brian Mann",
   "license": "MIT",
@@ -17,6 +18,7 @@
     "glob": "^7.0.3"
   },
   "devDependencies": {
+    "cypress-core-releaser": "^0.1.2",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.1",
     "gulp-gh-pages": "^0.5.4",
