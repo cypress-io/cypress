@@ -6,8 +6,8 @@ var runSequence = require('run-sequence')
 
 gulp.task('assets', function(){
   var revAll = new RevAll({
-    dontGlobal: ['.ico', 'fira.css'],
-    dontRenameFile: ['.ico', '.html', 'javascript-logo.png', /fonts/],
+    dontGlobal: ['.ico', 'fira.css', 'javascript-logo.png'],
+    dontRenameFile: ['.ico', '.html', /fonts/],
     dontSearchFile: ['.js'],
     debug: false
   })
