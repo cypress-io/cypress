@@ -26,3 +26,9 @@ npm run build
 npm run deploy
 ```
 
+
+
+## Changelog
+
+#### 0.1.0
+- initial release
