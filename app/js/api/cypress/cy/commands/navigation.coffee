@@ -71,7 +71,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
       @prop("pageChangeEvent", true)
 
       _.defaults options,
-        timeout: Cypress.config("visitTimeout")
+        timeout: Cypress.config("pageLoadTimeout")
 
       options._log = Cypress.Log.command
         type: "parent"
@@ -224,7 +224,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
       _.defaults options,
         log: true
-        timeout: Cypress.config("visitTimeout")
+        timeout: Cypress.config("pageLoadTimeout")
         onBeforeLoad: ->
         onLoad: ->
 

@@ -93,7 +93,7 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
       @Cypress.setConfig({
         xhrUrl: "__cypress/xhrs/"
         commandTimeout: 2000
-        visitTimeout: 2001
+        pageLoadTimeout: 2001
         requestTimeout: 2002
         responseTimeout: 2003
         waitForAnimations: true
@@ -159,7 +159,7 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       @Cypress.setConfig({
         xhrUrl: "__cypress/xhrs/"
         commandTimeout: 2000
-        visitTimeout: 2001
+        pageLoadTimeout: 2001
         requestTimeout: 2002
         responseTimeout: 2003
         waitForAnimations: true

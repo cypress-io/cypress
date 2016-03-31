@@ -167,9 +167,9 @@ describe "$Cypress.Cy Navigation Commands", ->
     describe ".log", ->
 
   context "#visit", ->
-    it "sets timeout to Cypress.config(visitTimeout)", ->
+    it "sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = @sandbox.spy Promise.prototype, "timeout"
-      @Cypress.config("visitTimeout", 1500)
+      @Cypress.config("pageLoadTimeout", 1500)
       @cy.visit("/foo").then ->
         expect(timeout).to.be.calledWith(1500)
 
@@ -401,9 +401,9 @@ describe "$Cypress.Cy Navigation Commands", ->
         @cy.visit("timeout?ms=5000", {timeout: 500})
 
   context "#loading", ->
-    it "sets timeout to Cypress.config(visitTimeout)", ->
+    it "sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = @sandbox.spy Promise.prototype, "timeout"
-      @Cypress.config("visitTimeout", 1500)
+      @Cypress.config("pageLoadTimeout", 1500)
       @cy.visit("/foo").then ->
         expect(timeout).to.be.calledWith(1500)
 
