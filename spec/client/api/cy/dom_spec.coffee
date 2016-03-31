@@ -9,6 +9,12 @@ describe "$Cypress.jQuery Extensions", ->
     expect($Cypress.Dom.isHidden).to.be.a("function")
     expect(Cypress.Dom.isHidden).to.be.a("function")
 
+  it "throws when not passed a DOM element", ->
+    fn = ->
+      $Cypress.Dom.isHidden(null)
+
+    expect(fn).to.throw("$Cypress.Dom.isHidden() must be passed a basic DOM element. You passed: 'null'")
+
   context "hidden overrides", ->
     beforeEach ->
       add = (el) =>
