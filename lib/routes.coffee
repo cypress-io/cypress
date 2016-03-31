@@ -57,6 +57,3 @@ module.exports = (app, config) ->
     res.set("x-cypress-error", err.message)
     res.set("x-cypress-stack", err.stack.replace("\n", "\\n"))
     res.sendStatus(500)
-
-    ## swallow any errors creating this exception
-    logger.createException(err).catch(->)
