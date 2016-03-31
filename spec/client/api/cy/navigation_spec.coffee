@@ -138,6 +138,19 @@ describe "$Cypress.Cy Navigation Commands", ->
             done()
 
   context "#go", ->
+    it "sets timeout to Cypress.config(pageLoadTimeout)", ->
+      @cy
+        .visit("fixtures/html/sinon.html")
+        .then =>
+          timeout = @sandbox.spy Promise.prototype, "timeout"
+          @Cypress.config("pageLoadTimeout", 456)
+
+          @cy.on "command:end", (cmd) =>
+            if cmd.get("name") is "go"
+              expect(timeout).to.be.calledWith(456)
+
+          @cy.go("back")
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -163,6 +176,30 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy.go(0)
+
+      it "throws when go times out", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Timed out after waiting '1ms' for your remote page to load."
+          done()
+
+        @cy
+          .visit("fixtures/html/sinon.html")
+          .go("back", {timeout: 1})
+
+      it "only logs once on error", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(3)
+          expect(logs[1].get("error")).to.eq(err)
+          done()
+
+        @cy
+          .visit("foo")
+          .go("back", {timeout: 1})
 
     describe ".log", ->
 

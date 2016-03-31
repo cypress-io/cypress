@@ -158,7 +158,10 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         @private("window").location.reload(forceReload)
 
     go: (numberOrString, options = {}) ->
-      _.defaults options, {log: true}
+      _.defaults options, {
+        log: true
+        timeout: Cypress.config("pageLoadTimeout")
+      }
 
       if options.log
         options._log = Cypress.Log.command()
@@ -181,21 +184,25 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         Cypress.on "before:unload", beforeUnload
         Cypress.on "load", resolve
 
+        ## clear the current timeout
+        @_clearTimeout()
+
         win.history.go(num)
 
-        Promise.delay(100).then =>
+        cleanup = =>
+          Cypress.off "load", resolve
+
+          ## need to set the attributes of 'go'
+          ## onConsole here with win
+
+          ## make sure we resolve our go function
+          ## with the remove window (just like cy.visit)
+          @private("window")
+
+        Promise.delay(100)
+        .then =>
           ## cleanup the handler
           Cypress.off("before:unload", beforeUnload)
-
-          cleanup = =>
-            Cypress.off "load", resolve
-
-            ## need to set the attributes of 'go'
-            ## onConsole here with win
-
-            ## make sure we resolve our go function
-            ## with the remove window (just like cy.visit)
-            @private("window")
 
           ## if we've didUnload then we know we're
           ## doing a full page refresh and we need
@@ -204,6 +211,10 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             pending.promise.then(cleanup)
           else
             cleanup()
+        .timeout(options.timeout)
+        .catch Promise.TimeoutError, (err) =>
+          cleanup()
+          @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", options._log
 
       goString = (str) =>
         switch str
@@ -247,8 +258,10 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
       p = new Promise (resolve, reject) =>
         visit = (win, url, options) =>
-          # ## when the remote iframe's load event fires
-          # ## callback fn
+          ## when the remote iframe's load event fires
+          ## callback fn
+          ## TODO: why are we using $remoteIframe load event here
+          ## instead of Cypress.on("load")?
           $remoteIframe.one "load", =>
             @_timeout(prevTimeout)
             options.onLoad?.call(runnable.ctx, win)
