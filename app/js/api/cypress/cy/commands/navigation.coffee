@@ -135,11 +135,19 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         else
           throwArgsErr()
 
-      new Promise (resolve, reject) =>
+      ## clear the current timeout
+      @_clearTimeout()
+
+      cleanup = null
+
+      p = new Promise (resolve, reject) =>
         forceReload ?= false
         options     ?= {}
 
-        _.defaults options, {log: true}
+        _.defaults options, {
+          log: true
+          timeout: Cypress.config("pageLoadTimeout")
+        }
 
         if not _.isBoolean(forceReload)
           throwArgsErr()
@@ -152,10 +160,22 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
           options._log.snapshot("before", {next: "after"})
 
-        Cypress.on "load", ->
+        cleanup = =>
+          Cypress.off "load", loaded
+
+        loaded = =>
+          cleanup()
           resolve @private("window")
 
+        Cypress.on "load", loaded
+
         @private("window").location.reload(forceReload)
+
+      .timeout(options.timeout)
+      .catch Promise.TimeoutError, (err) =>
+        cleanup()
+
+        @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", options._log
 
     go: (numberOrString, options = {}) ->
       _.defaults options, {

@@ -58,6 +58,16 @@ describe "$Cypress.Cy Navigation Commands", ->
 
             expect(win).to.eq(@cy.private("window"))
 
+    it "sets timeout to Cypress.config(pageLoadTimeout)", ->
+      timeout = @sandbox.spy Promise.prototype, "timeout"
+      @Cypress.config("pageLoadTimeout", 456)
+
+      @cy.on "command:end", (cmd) =>
+        if cmd.get("name") is "reload"
+          expect(timeout).to.be.calledWith(456)
+
+      @cy.reload()
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -102,6 +112,14 @@ describe "$Cypress.Cy Navigation Commands", ->
           .reload()
           .window().then (win) ->
             expect(win.foo).to.be.undefined
+
+      it "throws when go times out", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Timed out after waiting '1ms' for your remote page to load."
+          done()
+
+        @cy
+          .reload({timeout: 1})
 
     describe ".log", ->
       beforeEach ->
