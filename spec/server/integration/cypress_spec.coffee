@@ -354,6 +354,17 @@ describe "lib/cypress", ->
           throw new Error("fixturesFolder should not exist!")
         .catch -> done()
 
+    it "runs project headlessly and displays gui", ->
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@todosPath)
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}", "--show-headless-gui"]).then =>
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all?__ui=satellite", true)
+          @expectExitWith(0)
+
     it "logs error and exits when user isn't logged in", ->
       user.set({})
       .then =>
