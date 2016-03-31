@@ -86,6 +86,13 @@
         else item
 
     getPathToSpec: (id) ->
+      if id isnt "__all"
+        ## if id isnt all then we need to slice
+        ## off the first segment which will be either
+        ## 'integration' or 'unit'.
+        ## TODO: move this logic elsewhere
+        id = id.split("/").slice(1).join("/")
+
       _.compact([@get("integrationFolder"), id]).join("/")
 
     getCypressConfig: ->
