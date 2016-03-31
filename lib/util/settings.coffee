@@ -6,6 +6,16 @@ errors   = require("../errors")
 
 fs = Promise.promisifyAll(fs)
 
+flattenCypress = (obj) ->
+  if cypress = obj.cypress
+    return cypress
+
+renameVisitToPageLoad = (obj) ->
+  if v = obj.visitTimeout
+    obj = _.omit(obj, "visitTimeout")
+    obj.pageLoadTimeout = v
+    obj
+
 module.exports =
   _pathToFile: (projectRoot, file) ->
     path.join(projectRoot, file)
@@ -22,92 +32,56 @@ module.exports =
   _logWriteErr: (file, err) ->
     @_err("ERROR_WRITING_FILE", file, err)
 
-  _stringify: (obj) ->
-    JSON.stringify(obj, null, 2)
-
-  _get: (method, projectRoot, options = {}) ->
-    if not projectRoot
-      throw new Error("lib/util/settings requires projectRoot to be defined!")
-
-    _.defaults options,
-      writeInitial: true
-
-    file = @_pathToFile(projectRoot, options.file)
-
-    ## should synchronously check to see if cypress.json exists
-    ## and if not, create an empty one
-    if not fs.existsSync(file) and options.writeInitial
-      @_writeSync(file, {})
-
-    fs[method](file)
-
   _write: (file, obj = {}) ->
-    fs.writeFileAsync(file, @_stringify(obj))
+    fs.writeJsonAsync(file, obj, {spaces: 2})
     .return(obj)
     .catch (err) =>
       @_logWriteErr(file, err)
 
-  _writeSync: (file, obj = {}) ->
-    try
-      fs.writeFileSync(file, @_stringify(obj))
-      return obj
-
-    catch err
-      @_logWriteErr(file, err)
+  _applyRewriteRules: (obj = {}) ->
+    _.reduce [flattenCypress, renameVisitToPageLoad], (memo, fn) ->
+      if ret = fn(memo)
+        return ret
+      else
+        return memo
+    , obj
 
   read: (projectRoot) ->
     file = @_pathToFile(projectRoot, "cypress.json")
 
-    ## must re-wrap this because readJsonAsync may
-    ## throw a sync error from _writeSync
-    Promise.try =>
-      @_get("readJsonAsync", projectRoot, {file: "cypress.json"})
-      .then (obj) =>
-        if settings = obj.cypress
-          @_write(file, settings)
-        else
-          obj
-      .catch (err) =>
-        throw err if errors.isCypressErr(err)
+    fs.readJsonAsync(file)
+    .catch {code: "ENOENT"}, =>
+      @_write(file, {})
+    .then (json = {}) =>
+      changed = @_applyRewriteRules(json)
 
-        @_logReadErr(file, err)
+      ## if our object is unchanged
+      ## then just return it
+      if _.isEqual(json, changed)
+        return json
+      else
+        ## else write the new reduced obj
+        @_write(file, changed)
+
+    .catch (err) =>
+      throw err if errors.isCypressErr(err)
+
+      @_logReadErr(file, err)
 
   readEnv: (projectRoot) ->
-    options = {
-      file: "cypress.env.json"
-      writeInitial: false
-    }
+    file = @_pathToFile(projectRoot, "cypress.env.json")
 
-    @_get("readJsonAsync", projectRoot, options)
+    fs.readJsonAsync(file)
     .catch {code: "ENOENT"}, ->
       return {}
     .catch (err) =>
       throw err if errors.isCypressErr(err)
 
-      file = @_pathToFile(projectRoot, options.file)
-      @_logReadErr(file, err)
-
-  readSync: (projectRoot) ->
-    options = {
-      file: "cypress.json"
-    }
-
-    file = @_pathToFile(projectRoot, "cypress.json")
-
-    try
-      obj = @_get("readJsonSync", projectRoot, options)
-
-      if settings = obj.cypress
-        @_writeSync(file, settings)
-      else
-        obj
-    catch err
-      throw err if errors.isCypressErr(err)
-
       @_logReadErr(file, err)
 
   write: (projectRoot, obj = {}) ->
-    @read(projectRoot).bind(@).then (settings) ->
+    @read(projectRoot)
+    .then (settings) =>
       _.extend settings, obj
 
       file = @_pathToFile(projectRoot, "cypress.json")
