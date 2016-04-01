@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.2.3
+- renamed visitTimeout -> pageLoadTimeout
+
 #### 0.2.2
 - build in ci first
 
