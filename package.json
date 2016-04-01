@@ -8,7 +8,7 @@
     "test": "cypress ci",
     "build": "./bin/build.sh && gulp build",
     "deploy": "gulp deploy",
-    "release": "releaser"
+    "release": "npm run build && releaser"
   },
   "author": "Brian Mann",
   "license": "MIT",
