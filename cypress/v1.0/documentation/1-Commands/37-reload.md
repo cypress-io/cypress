@@ -6,7 +6,7 @@ Reload the page.
 | | |
 |--- | --- |
 | **Returns** | the `window` object of the newly reloaded page |
-| **Timeout** | `cy.reload` will retry for the duration of the [visitTimeout](https://on.cypress.io/guides/configuration#section-network-options) or the duration of the `timeout` specified in the command's [options](#section-options).  |
+| **Timeout** | `cy.reload` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#section-network-options) or the duration of the `timeout` specified in the command's [options](#section-options).  |
 
 ***
 
@@ -30,7 +30,7 @@ Pass in an options object to change the default behavior of `cy.reload`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout`      | [visitTimeout](https://on.cypress.io/guides/configuration#section-network-options) | Total time to retry the visit
+`timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#section-network-options) | Total time to retry the visit
 `log` | `true` | Display command in command log
 
 ***

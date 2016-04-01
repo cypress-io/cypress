@@ -50,7 +50,7 @@ Sets multiple configuration options.
 ```
 
 ```javascript
-Cypress.config() // => {commandTimeout: 10000, visitTimeout: 30000, ...}
+Cypress.config() // => {commandTimeout: 10000, pageLoadTimeout: 30000, ...}
 ```
 
 ***
@@ -62,12 +62,12 @@ Cypress.config() // => {commandTimeout: 10000, visitTimeout: 30000, ...}
 ```javascript
 // cypress.json
 {
-  "visitTimeout": 60000
+  "pageLoadTimeout": 60000
 }
 ```
 
 ```javascript
-Cypress.config("visitTimeout") // => 60000
+Cypress.config("pageLoadTimeout") // => 60000
 ```
 
 ***
@@ -107,7 +107,7 @@ Cypress.config("viewportWidth") // => 800
 // cypress.json
 {
   "commandTimeout": 4000,
-  "visitTimeout": 30000,
+  "pageLoadTimeout": 30000,
 }
 ```
 

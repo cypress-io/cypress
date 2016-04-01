@@ -10,7 +10,7 @@ Using `baseUrl` is a great way to prevent repeating yourself in every `cy.visit`
 | | |
 |--- | --- |
 | **Returns** | the remote page's window object |
-| **Timeout** | `cy.visit` will retry for the duration of the [visitTimeout](https://on.cypress.io/guides/configuration#section-network-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Timeout** | `cy.visit` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#section-network-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
 ***
 
@@ -30,10 +30,10 @@ Option | Default | Notes
 --- | --- | ---
 `onBeforeLoad` | `function` | Called before your page has loaded all of its resources.
 `onLoad`       | `function` | Called once your page has fired its load event.
-`timeout`      | [visitTimeout](https://on.cypress.io/guides/configuration#section-network-options) | Total time to wait until `cy.visit` resolves
+`timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#section-network-options) | Total time to wait until `cy.visit` resolves
 `log` | `true` | Display command in command log
 
-You can also set options for all `cy.visit` `visitTimeout` and `baseUrl` globally in [configuration](https://on.cypress.io/guides/configuration).
+You can also set options for all `cy.visit` `pageLoadTimeout` and `baseUrl` globally in [configuration](https://on.cypress.io/guides/configuration).
 
 ***
 
