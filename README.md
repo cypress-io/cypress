@@ -30,5 +30,8 @@ npm run deploy
 
 ## Changelog
 
+#### 0.2.0
+- public interface for accessing path to example_spec.js
+
 #### 0.1.0
 - initial release
