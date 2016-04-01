@@ -10,7 +10,7 @@ Fixtures   = require("#{root}/spec/server/helpers/fixtures")
 
 glob = Promise.promisify(glob)
 
-describe.only "lib/scaffold", ->
+describe "lib/scaffold", ->
   beforeEach ->
     Fixtures.scaffold()
 
