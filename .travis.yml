@@ -12,6 +12,8 @@ install:
   - npm install -g cypress-cli
 
 script:
+  - npm run build
+
   ## now run cypress in CI mode
   ## which runs all of the tests
   ## and uses the CYPRESS_API_KEY

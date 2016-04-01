@@ -10,3 +10,5 @@ dependencies:
     ## which gives us access to the
     ## `cypress` command used below
     - npm install -g cypress-cli
+
+    - npm run build
