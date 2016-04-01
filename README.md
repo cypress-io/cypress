@@ -12,13 +12,15 @@ The actual example repo you're probably looking for is [the kitchen sink app her
 npm install
 ```
 
-This copies the `cypress-example-kitchensink` src files here, and they can now be built + pushed.
-
 ## Building
+
+After running `npm install` you must build the app + spec files.
 
 ```bash
 npm run build
 ```
+
+This copies the src files from `cypress-example-kitchensink`, modifies them to point to `https://example.cypress.io` and creates the `example_spec.js`.
 
 ## Deploying
 
@@ -26,7 +28,11 @@ npm run build
 npm run deploy
 ```
 
+## Releasing
 
+```bash
+npm run release
+```
 
 ## Changelog
 

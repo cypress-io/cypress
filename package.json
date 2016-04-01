@@ -4,11 +4,9 @@
   "description": "Interal Cypress repo for managing https://example.cypress.io",
   "main": "index.js",
   "scripts": {
-    "preinstall": "npm cache clean && rm -rf app && mkdir app && npm i cypress-example-kitchensink",
-    "postinstall": "./bin/postinstall.sh",
     "test-lib": "NODE_ENV=test mocha",
     "test": "cypress ci",
-    "build": "gulp build",
+    "build": "./bin/build.sh && gulp build",
     "deploy": "gulp deploy",
     "release": "releaser"
   },
