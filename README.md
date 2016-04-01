@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.2.2
+- build in ci first
+
 #### 0.2.1
 - bugfix do not preinstall or postinstall
 
