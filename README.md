@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.2.1
+- bugfix do not preinstall or postinstall
+
 #### 0.2.0
 - public interface for accessing path to example_spec.js
 
