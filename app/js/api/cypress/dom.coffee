@@ -6,6 +6,9 @@ $Cypress.Dom = do ($Cypress, _, $) ->
     ## assign this fn to jquery and to our revealing module
     ## at the same time. #pro
     isHidden: $.expr.filters.hidden = (el) ->
+      if not $Cypress.Utils.hasElement(el)
+        throw $Cypress.Utils.cypressError("$Cypress.Dom.isHidden() must be passed a basic DOM element. You passed: '#{el}'")
+
       $el = $(el)
 
       ## in Cypress-land we consider the element hidden if

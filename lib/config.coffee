@@ -82,9 +82,9 @@ module.exports = {
       clientRoute:    "/__/"
       xhrRoute:       "/xhrs/"
       socketIoRoute:  "/__socket.io"
-      commandTimeout: 4000
-      visitTimeout:   30000
-      requestTimeout: 5000
+      commandTimeout:  4000
+      pageLoadTimeout: 30000
+      requestTimeout:  5000
       responseTimeout: 20000
       port:            2020
       waitForAnimations: true

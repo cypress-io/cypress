@@ -80,8 +80,8 @@ describe "lib/config", ->
     it "commandTimeout=4000", ->
       @defaults "commandTimeout", 4000
 
-    it "visitTimeout=30000", ->
-      @defaults "visitTimeout", 30000
+    it "pageLoadTimeout=30000", ->
+      @defaults "pageLoadTimeout", 30000
 
     it "requestTimeout=5000", ->
       @defaults "requestTimeout", 5000

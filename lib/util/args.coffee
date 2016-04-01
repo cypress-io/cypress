@@ -3,7 +3,7 @@ path     = require("path")
 minimist = require("minimist")
 cwd      = require("../cwd")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter ci updating ping coords key logs clearLogs port returnPkg environmentVariables version mode autoOpen removeIds".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter ci updating ping coords key logs clearLogs port returnPkg environmentVariables version mode autoOpen removeIds showHeadlessGui".split(" ")
 
 parseCoords = (coords) ->
   [x, y] = _.map(coords.split("x"), parseFloat)
@@ -41,6 +41,7 @@ module.exports = {
         "return-pkg":  "returnPkg"
         "auto-open":   "autoOpen"
         "env":         "environmentVariables"
+        "show-headless-gui":"showHeadlessGui"
       }
     })
 

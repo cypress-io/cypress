@@ -86,11 +86,18 @@
         else item
 
     getPathToSpec: (id) ->
+      if id isnt "__all"
+        ## if id isnt all then we need to slice
+        ## off the first segment which will be either
+        ## 'integration' or 'unit'.
+        ## TODO: move this logic elsewhere
+        id = id.split("/").slice(1).join("/")
+
       _.compact([@get("integrationFolder"), id]).join("/")
 
     getCypressConfig: ->
       ## todo test cloning this to prevent env mutation
-      _.clone @pick "waitForAnimations", "animationDistanceThreshold", "commandTimeout", "visitTimeout", "requestTimeout", "responseTimeout", "environmentVariables", "xhrUrl", "baseUrl", "viewportWidth", "viewportHeight"
+      _.clone @pick "waitForAnimations", "animationDistanceThreshold", "commandTimeout", "pageLoadTimeout", "requestTimeout", "responseTimeout", "environmentVariables", "xhrUrl", "baseUrl", "viewportWidth", "viewportHeight"
 
   App.reqres.setHandler "new:config:entity", (attrs = {}) ->
     new Entities.Config attrs

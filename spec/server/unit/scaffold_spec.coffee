@@ -2,8 +2,9 @@ require("../spec_helper")
 
 path       = require("path")
 glob       = require("glob")
-config     = require("#{root}lib/config")
 Promise    = require("bluebird")
+cypressEx  = require("cypress-core-example")
+config     = require("#{root}lib/config")
 scaffold   = require("#{root}lib/scaffold")
 Fixtures   = require("#{root}/spec/server/helpers/fixtures")
 
@@ -15,6 +16,10 @@ describe "lib/scaffold", ->
 
   afterEach ->
     Fixtures.remove()
+
+  context ".integrationExampleName", ->
+    it "returns example_spec.js", ->
+      expect(scaffold.integrationExampleName()).to.eq("example_spec.js")
 
   context ".integration", ->
     beforeEach ->
@@ -29,7 +34,11 @@ describe "lib/scaffold", ->
       .then =>
         scaffold.integration(@integrationFolder)
       .then =>
-        fs.statAsync(@integrationFolder + "/example_spec.js")
+        Promise.all([
+          fs.statAsync(@integrationFolder + "/example_spec.js").get("size")
+          fs.statAsync(cypressEx.getPathToExample()).get("size")
+        ]).spread (size1, size2) ->
+          expect(size1).to.eq(size2)
 
     it "does not create example_spec.js if integrationFolder already exists", ->
       ## first remove it

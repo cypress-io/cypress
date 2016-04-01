@@ -107,6 +107,7 @@ describe "electron/headless", ->
       @win    = @sandbox.stub({
         hide: ->
         setSize: ->
+        center: ->
       })
 
       @create = @sandbox.stub(Renderer, "create").resolves(@win)
@@ -126,6 +127,20 @@ describe "electron/headless", ->
       headless.createRenderer("foo/bar/baz").then =>
         expect(@win.hide).to.be.calledOnce
         expect(@win.setSize).to.be.calledWith(1280, 720)
+        expect(@win.center).to.be.calledOnce
+
+    it "can show window", ->
+      headless.createRenderer("foo/bar/baz", true).then =>
+        expect(@create).to.be.calledWith({
+          url: "foo/bar/baz"
+          width: 0
+          height: 0
+          show: true
+          frame: false
+          type: "PROJECT"
+        })
+
+        expect(@win.hide).not.to.be.called
 
   context ".waitForRendererToConnect", ->
     it "resolves on waitForSocketConnection", ->
@@ -261,3 +276,9 @@ describe "electron/headless", ->
 
       headless.run().then ->
         expect(headless.createRenderer).to.be.calledWith("foo/bar")
+
+    it "passes showHeadlessGui to createRenderer", ->
+      @sandbox.stub(@projectInstance, "ensureSpecUrl").resolves("foo/bar")
+
+      headless.run({showHeadlessGui: true}).then ->
+        expect(headless.createRenderer).to.be.calledWith("foo/bar", true)

@@ -21,10 +21,11 @@ describe "lib/project", ->
     @idsPath      = Fixtures.projectPath("ids")
     @pristinePath = Fixtures.projectPath("pristine")
 
-    @projectId = settings.readSync(@todosPath).projectId
+    settings.read(@todosPath).then (obj = {}) =>
+      {@projectId} = obj
 
-    @config  = config.set({})
-    @project = Project("/path/to/project")
+      @config  = config.set({})
+      @project = Project("/path/to/project")
 
   afterEach ->
     Fixtures.remove()

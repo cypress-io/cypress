@@ -2,16 +2,17 @@ _         = require("lodash")
 fs        = require("fs-extra")
 Promise   = require("bluebird")
 path      = require("path")
+cypressEx = require("cypress-core-example")
 cwd       = require("./cwd")
 
 fs = Promise.promisifyAll(fs)
 
-INTEGRATION_EXAMPLE_SPEC_FILENAME = "example_spec.js"
+INTEGRATION_EXAMPLE_SPEC = cypressEx.getPathToExample()
 
 module.exports = {
   integration: (folder) ->
     @verifyScaffolding folder, =>
-      @copy(INTEGRATION_EXAMPLE_SPEC_FILENAME, folder)
+      @copy(INTEGRATION_EXAMPLE_SPEC, folder)
 
   fixture: (folder, options) ->
     @verifyScaffolding folder, options, =>
@@ -25,16 +26,19 @@ module.exports = {
       )
 
   copy: (file, folder) ->
-    src  = cwd("lib", "scaffold", file)
-    dest = path.join(folder, file)
+    ## allow file to be relative or absolute
+    src  = path.resolve(cwd("lib", "scaffold"), file)
+    dest = path.join(folder, path.basename(file))
+
     fs.copyAsync(src, dest)
 
   integrationExampleSize: ->
     fs
-    .statAsync(cwd("lib", "scaffold", INTEGRATION_EXAMPLE_SPEC_FILENAME))
+    .statAsync(INTEGRATION_EXAMPLE_SPEC)
     .get("size")
 
-  integrationExampleName: -> INTEGRATION_EXAMPLE_SPEC_FILENAME
+  integrationExampleName: ->
+    path.basename(INTEGRATION_EXAMPLE_SPEC)
 
   verifyScaffolding: (folder, options = {}, fn) ->
     if _.isFunction(options)
