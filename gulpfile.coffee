@@ -109,7 +109,6 @@ gulp.task "client:css", -> compileCss("app", "lib")
 gulp.task "client:fonts", ->
   gulp.src("bower_components/font-awesome/fonts/**")
     .pipe gulp.dest "lib/public/css/fonts"
-    .pipe gulp.dest "nw/app/public/css/fonts"
 
 gulp.task "client:img", ["vendor:img", "project:img"]
 
