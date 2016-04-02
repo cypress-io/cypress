@@ -55,7 +55,12 @@ class Reporter
 
     @reporterName = reporterName
 
-    @mocha    = new Mocha({reporter: @reporterName})
+    if reporterName is "teamcity"
+      reporter = require("mocha-teamcity-reporter")
+    else
+      reporter = @reporterName
+
+    @mocha    = new Mocha({reporter: reporter})
     @runner   = new Mocha.Runner(@mocha.suite)
     @reporter = new @mocha._reporter(@runner, {})
 
