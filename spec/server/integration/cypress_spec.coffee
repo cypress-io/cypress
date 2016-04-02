@@ -8,7 +8,7 @@ electron = require("electron")
 inquirer = require("inquirer")
 Fixtures = require("../helpers/fixtures")
 pkg      = require("#{root}package.json")
-Settings = require("#{root}lib/util/settings")
+settings = require("#{root}lib/util/settings")
 project  = require("#{root}lib/electron/handlers/project")
 ci       = require("#{root}lib/modes/ci")
 headed   = require("#{root}lib/modes/headed")
@@ -21,6 +21,7 @@ errors   = require("#{root}lib/errors")
 cypress  = require("#{root}lib/cypress")
 Project  = require("#{root}lib/project")
 Server   = require("#{root}lib/server")
+Reporter = require("#{root}lib/reporter")
 
 describe "lib/cypress", ->
   beforeEach ->
@@ -319,10 +320,10 @@ describe "lib/cypress", ->
       .then =>
         fs.statAsync(@cfg.fixturesFolder)
       .then =>
-        Settings.read(@idsPath)
+        settings.read(@idsPath)
       .then (json) =>
         json.fixturesFolder = false
-        Settings.write(@idsPath, json)
+        settings.write(@idsPath, json)
       .then =>
         cypress.start(["--run-project=#{@idsPath}"])
       .then =>
@@ -342,10 +343,10 @@ describe "lib/cypress", ->
       .then =>
         fs.statAsync(@cfg.supportFolder)
       .then =>
-        Settings.read(@idsPath)
+        settings.read(@idsPath)
       .then (json) =>
         json.supportFolder = false
-        Settings.write(@idsPath, json)
+        settings.write(@idsPath, json)
       .then =>
         cypress.start(["--run-project=#{@idsPath}"])
       .then =>
@@ -364,6 +365,53 @@ describe "lib/cypress", ->
         cypress.start(["--run-project=#{@todosPath}", "--show-headless-gui"]).then =>
           expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all?__ui=satellite", true)
           @expectExitWith(0)
+
+    it "turns on reporting", ->
+      @sandbox.spy(Reporter, "create")
+
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@todosPath)
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}"]).then  =>
+          expect(Reporter.create).to.be.calledWith(true)
+          @expectExitWith(0)
+
+    it "can change the reporter to nyan", ->
+      @sandbox.spy(Reporter, "create")
+
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@todosPath)
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}", "--reporter=nyan"]).then  =>
+          expect(Reporter.create).to.be.calledWith("nyan")
+          @expectExitWith(0)
+
+    it "can change the reporter with cypress.json", ->
+      @sandbox.spy(Reporter, "create")
+
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        config.get(@idsPath).then (@cfg) =>
+
+        Project.add(@idsPath)
+      ])
+      .then =>
+        settings.read(@idsPath)
+      .then (json) =>
+        json.reporter = "dot"
+        settings.write(@idsPath, json)
+      .then =>
+        cypress.start(["--run-project=#{@idsPath}"]).then  =>
+      .then =>
+        expect(Reporter.create).to.be.calledWith("dot")
+        @expectExitWith(0)
 
     it "logs error and exits when user isn't logged in", ->
       user.set({})

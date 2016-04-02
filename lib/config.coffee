@@ -64,6 +64,12 @@ module.exports = {
   mergeDefaults: (config = {}, options = {}) ->
     _.extend config, _.pick(options, "morgan", "isHeadless", "socketId")
 
+    if _.isString(options.reporter)
+      config.reporter = options.reporter
+
+    if options.reporter and not config.reporter
+      config.reporter = options.reporter
+
     if p = options.port
       config.port = p
 

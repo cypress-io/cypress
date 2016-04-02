@@ -79,10 +79,11 @@ describe "lib/project", ->
       @project.open(opts).then ->
         expect(opts.type).to.eq("opened")
 
-    it "calls #watchSettingsAndStartWebsockets with options", ->
-      opts = {}
+    it "calls #watchSettingsAndStartWebsockets with options.changeEvents + config", ->
+      opts = {changeEvents: false}
+      @project.cfg = {}
       @project.open(opts).then =>
-        expect(@project.watchSettingsAndStartWebsockets).to.be.calledWith(opts)
+        expect(@project.watchSettingsAndStartWebsockets).to.be.calledWith(false, @project.cfg)
 
     it "calls #scaffold with server config", ->
       @project.open().then =>
@@ -267,7 +268,7 @@ describe "lib/project", ->
       @watch = @sandbox.stub(@project.watchers, "watch")
 
     it "sets onChange event when {changeEvents: true}", (done) ->
-      @project.watchSettingsAndStartWebsockets({changeEvents: true})
+      @project.watchSettingsAndStartWebsockets(true)
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
@@ -278,7 +279,7 @@ describe "lib/project", ->
       obj.onChange()
 
     it "does not call watch when {changeEvents: false}", ->
-      @project.watchSettingsAndStartWebsockets({changeEvents: false})
+      @project.watchSettingsAndStartWebsockets(false)
 
       expect(@watch).not.to.be.called
 
@@ -287,7 +288,7 @@ describe "lib/project", ->
 
       emit = @sandbox.spy(@project, "emit")
 
-      @project.watchSettingsAndStartWebsockets({changeEvents: true})
+      @project.watchSettingsAndStartWebsockets(true)
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]

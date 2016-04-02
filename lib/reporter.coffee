@@ -44,11 +44,16 @@ events = {
 }
 
 class Reporter
-  constructor: (options = {}) ->
+  constructor: (reporterName = "spec") ->
     if not (@ instanceof Reporter)
-      return new Reporter(options)
+      return new Reporter(reporterName)
 
-    @reporterName = "spec"
+    ## coerce 'true' reporter
+    ## into the default spec reporter
+    if reporterName is true
+      reporterName = "spec"
+
+    @reporterName = reporterName
 
     @mocha    = new Mocha({reporter: @reporterName})
     @runner   = new Mocha.Runner(@mocha.suite)
@@ -73,5 +78,8 @@ class Reporter
 
   stats: ->
     _.extend {reporter: @reporterName}, _.pick(@reporter.stats, STATS)
+
+  @create = (reporterName) ->
+    new Reporter(reporterName)
 
 module.exports = Reporter

@@ -12,7 +12,6 @@ cwd           = require("./cwd")
 fixture       = require("./fixture")
 Request       = require("./request")
 logger        = require("./logger")
-Reporter      = require("./reporter")
 
 class Socket
   constructor: ->

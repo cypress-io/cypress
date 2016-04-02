@@ -52,7 +52,7 @@ class Project extends EE
         @cfg = cfg
 
         Promise.join(
-          @watchSettingsAndStartWebsockets(options, cfg)
+          @watchSettingsAndStartWebsockets(options.changeEvents, cfg)
           @scaffold(cfg)
         )
 
@@ -97,10 +97,10 @@ class Project extends EE
       .then (session) ->
         api.updateProject(id, options.type, session)
 
-  watchSettings: (options) ->
+  watchSettings: (changeEvents) ->
     ## bail if we havent been told to
     ## watch anything
-    return if not options.changeEvents
+    return if not changeEvents
 
     obj = {
       onChange: (filePath, stats) =>
@@ -116,13 +116,13 @@ class Project extends EE
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
 
-  watchSettingsAndStartWebsockets: (options, config) ->
-    @watchSettings(options)
+  watchSettingsAndStartWebsockets: (changeEvents, config = {}) ->
+    @watchSettings(changeEvents)
 
     ## if we've passed down reporter
     ## then record these via mocha reporter
-    if options.reporter
-      reporter = Reporter()
+    if r = config.reporter
+      reporter = Reporter.create(r)
 
     @server.startWebsockets(@watchers, config, {
       onIsNewProject: =>
