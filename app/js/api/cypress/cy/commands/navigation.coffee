@@ -11,6 +11,11 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
     Cypress.Location.override(Cypress, contentWindow, navigated)
 
+  timedOutWaitingForPageLoad = (ms, log) ->
+    msg = "Timed out after waiting '#{ms}ms' for your remote page to load."
+
+    @throwErr(msg, log)
+
   Cypress.on "before:window:load", (contentWindow) ->
     ## override the remote iframe getters
     overrideRemoteLocationGetters(@, contentWindow)
@@ -106,7 +111,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           return
         .catch Promise.TimeoutError, (err) =>
           try
-            @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", options._log
+            timedOutWaitingForPageLoad.call(@, options.timeout, options._log)
           catch e
             ## must directly fail here else we potentially
             ## get unhandled promise exception
@@ -175,7 +180,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
       .catch Promise.TimeoutError, (err) =>
         cleanup()
 
-        @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", options._log
+        timedOutWaitingForPageLoad.call(@, options.timeout, options._log)
 
     go: (numberOrString, options = {}) ->
       _.defaults options, {
@@ -234,7 +239,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         .timeout(options.timeout)
         .catch Promise.TimeoutError, (err) =>
           cleanup()
-          @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", options._log
+          timedOutWaitingForPageLoad.call(@, options.timeout, options._log)
 
       goString = (str) =>
         switch str
@@ -298,7 +303,6 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           ## any existing global variables will get nuked after it navigates
           $remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
 
-
         ## if we're visiting a page and we're not currently
         ## on about:blank then we need to nuke the window
         ## and after its nuked then visit the url
@@ -315,4 +319,4 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         .timeout(options.timeout)
         .catch Promise.TimeoutError, (err) =>
           $remoteIframe.off("load")
-          @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", options._log
+          timedOutWaitingForPageLoad.call(@, options.timeout, options._log)
