@@ -104,6 +104,12 @@ describe "lib/config", ->
     it "socketId=null", ->
       @defaults "socketId", null
 
+    it "reporter=null", ->
+      @defaults "reporter", null
+
+    it "watchForFileChanges=true", ->
+      @defaults "watchForFileChanges", true
+
     it "can override morgan in options", ->
       cfg = config.mergeDefaults({}, {morgan: false})
 

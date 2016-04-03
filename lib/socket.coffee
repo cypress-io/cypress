@@ -41,8 +41,9 @@ class Socket
     testFilePath = pathHelpers.getAbsolutePathToSpec(testFilePath, config)
 
     ## bail if we're already watching this
-    ## exact file
-    return cb() if testFilePath is @testFilePath
+    ## exact file or we've turned off watching
+    ## for file changes
+    return cb() if (testFilePath is @testFilePath) or (config.watchForFileChanges is false)
 
     logger.info "watching test file", {path: testFilePath}
 

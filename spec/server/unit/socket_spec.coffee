@@ -208,6 +208,12 @@ describe "lib/socket", ->
       afterEach ->
         @watchers.close()
 
+      it "returns undefined if config.watchForFileChanges is false", ->
+        @cfg.watchForFileChanges = false
+        cb = @sandbox.spy()
+        @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers, cb)
+        expect(cb).to.be.calledOnce
+
       it "returns undefined if #testFilePath matches arguments", ->
         @socket.testFilePath = @filePath
         cb = @sandbox.spy()

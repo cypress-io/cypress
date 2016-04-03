@@ -82,6 +82,7 @@ module.exports = {
 
     defaults = {
       morgan:         true
+      reporter:       null
       baseUrl:        null
       socketId:       null
       isHeadless:     false
@@ -95,6 +96,7 @@ module.exports = {
       port:            2020
       waitForAnimations: true
       animationDistanceThreshold: 5
+      watchForFileChanges: true
       autoOpen:       false
       viewportWidth:  1000
       viewportHeight: 660
