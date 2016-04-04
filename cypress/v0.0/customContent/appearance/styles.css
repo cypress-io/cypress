@@ -17,10 +17,10 @@ body {
 }
 
 .highlight-boxes {
-  margin-top: 40px;
 }
 
 #landing-page .highlight-boxes>div>.highlight-box {
+  margin-top: 40px;
   display: block;
   border: 1px solid #eee;
   padding: 20px;
@@ -46,6 +46,19 @@ body {
 
 #landing-page .highlight-boxes>div:nth-child(3)>.highlight-box:hover {
   color: #ce810d;
+}
+
+
+#landing-page .highlight-boxes.chat>div>.highlight-box {
+  color: #0094ff;
+}
+
+#landing-page .highlight-boxes.chat>div>.highlight-box:hover {
+  color: #428bca;
+}
+
+#landing-page .highlight-boxes.chat>div>.highlight-box i, #landing-page .highlight-boxes.chat>div>.highlight-box h3{
+  display: inline;
 }
 
 #landing-page .highlight-boxes>div>.highlight-box:hover>p {
