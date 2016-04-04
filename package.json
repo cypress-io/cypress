@@ -7,8 +7,8 @@
   "scripts": {
     "start": "node index.js",
     "server": "node index.js --mode server",
-    "build": "gulp client:build",
-    "watch": "gulp client",
+    "build": "gulp app:build",
+    "watch": "gulp app",
     "deploy": "gulp deploy",
     "release": "gulp release",
     "test": "npm run test-server & chokidar 'spec/server/**/*' 'lib/**/*' -c 'npm run test-server' --polling --poll-interval=250 ",

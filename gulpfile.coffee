@@ -9,6 +9,7 @@ Promise       = require("bluebird")
 child_process = require("child_process")
 runSequence   = require("run-sequence")
 importOnce    = require("node-sass-import-once")
+cyIcons       = require("cypress-core-icons")
 deploy        = require("./deploy")
 
 fs = Promise.promisifyAll(fs)
@@ -100,17 +101,17 @@ minify = (source, destination) ->
     }))
     .pipe(gulp.dest(destination))
 
-getClientJsOpts = ->
+getAppJsOpts = ->
   destination: "lib/public/js"
   basePath: "app/js"
 
-gulp.task "client:css", -> compileCss("app", "lib")
+gulp.task "app:css", -> compileCss("app", "lib")
 
-gulp.task "client:fonts", ->
+gulp.task "app:fonts", ->
   gulp.src("bower_components/font-awesome/fonts/**")
     .pipe gulp.dest "lib/public/css/fonts"
 
-gulp.task "client:img", ["vendor:img", "project:img"]
+gulp.task "app:img", ["vendor:img", "project:img", "project:favicon", "project:logo"]
 
 gulp.task "vendor:img", ->
   gulp.src("bower_components/jquery-ui/themes/smoothness/images/**")
@@ -120,37 +121,45 @@ gulp.task "project:img", ->
   gulp.src("app/img/**/*")
     .pipe gulp.dest "lib/public/img"
 
-gulp.task "client:js", ->
-  compileJs("app", getClientJsOpts())
+gulp.task "project:favicon", ->
+  gulp.src(cyIcons.getPathToFavicon())
+    .pipe gulp.dest "lib/public/img"
+
+gulp.task "project:logo", ->
+  gulp.src cyIcons.getPathToIcon("icon_128x128@2x.png")
+    .pipe gulp.dest "lib/public/img"
+
+gulp.task "app:js", ->
+  compileJs("app", getAppJsOpts())
 
 gulp.task "bower", ->
   $.bower()
 
-gulp.task "client:html", ->
+gulp.task "app:html", ->
   gulp.src(["app/html/*"])
     .pipe gulp.dest("lib/public")
 
-gulp.task "client:watch", ["watch:client:css", "watch:client:js", "watch:client:html"]
+gulp.task "app:watch", ["watch:app:css", "watch:app:js", "watch:app:html"]
 
-gulp.task "watch:client:css", ->
-  gulp.watch "app/css/**", ["client:css"]
+gulp.task "watch:app:css", ->
+  gulp.watch "app/css/**", ["app:css"]
 
-gulp.task "watch:client:js", ->
-  options = getClientJsOpts()
+gulp.task "watch:app:js", ->
+  options = getAppJsOpts()
 
   getYaml("app").then (bundles) ->
     ## watch all of the files in the app.yml so we rebuild
     ## on any reloads including vendor changes
     files = _.chain(bundles).values().flatten().uniq().value()
-    watcher = gulp.watch files, ["client:js"]
+    watcher = gulp.watch files, ["app:js"]
 
   #   _.each bundles, (files, name) ->
   #     watcher = gulp.watch files, ->
   #       start = process.hrtime()
-  #       gulp.emit("task_start", {task: "client:js (#{name})"})
+  #       gulp.emit("task_start", {task: "app:js (#{name})"})
   #       transform(files, _.extend({concat: name}, options)).then ->
   #         end = process.hrtime(start)
-  #         gulp.emit("task_stop", {task: "client:js (#{name})", hrDuration: end})
+  #         gulp.emit("task_stop", {task: "app:js (#{name})", hrDuration: end})
 
     ## nuke everything on delete or add
     watcher.on "change", (event) ->
@@ -162,8 +171,8 @@ gulp.task "watch:client:js", ->
         _.each rememberedNames, (name) ->
           $.remember.forgetAll(name)
 
-gulp.task "watch:client:html", ->
-  gulp.watch "app/html/index.html", ["client:html"]
+gulp.task "watch:app:html", ->
+  gulp.watch "app/html/index.html", ["app:html"]
 
 gulp.task "server", -> require("./server.coffee")
 
@@ -178,11 +187,11 @@ gulp.task "build", deploy.build
 
 gulp.task "deploy", deploy.deploy
 
-gulp.task "client",        ["client:build", "client:watch"]
+gulp.task "app",        ["app:build", "app:watch"]
 
-gulp.task "client:minify", ->
+gulp.task "app:minify", ->
   ## dont minify cypress or sinon
   minify("lib/public/js/!(cypress|sinon).js", "lib/public/js")
 
-gulp.task "client:build",  ["bower"], (cb) ->
-  runSequence ["client:css", "client:img", "client:fonts", "client:js", "client:html"], cb
+gulp.task "app:build",  ["bower"], (cb) ->
+  runSequence ["app:css", "app:img", "app:fonts", "app:js", "app:html"], cb

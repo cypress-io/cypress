@@ -1,7 +1,7 @@
 <div class="collapse-container">
   <div class="pull-left logo">Cypress</div>
   <div class="pull-right">
-    <img src="/__cypress/static/img/cypress.iconset/icon_128x128@2x.png" />
+    <img src="/__cypress/static/img/icon_128x128@2x.png" />
   </div>
 </div>
 <ul class="cy-vnavigation"></ul>
