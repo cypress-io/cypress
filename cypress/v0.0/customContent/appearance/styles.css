@@ -8,6 +8,10 @@ body {
   word-wrap: break-word;
 }
 
+.landing-heading {
+  text-align: center;
+}
+
 #jumbotron {
   display: none;
 }
