@@ -8,6 +8,10 @@ body {
   word-wrap: break-word;
 }
 
+.highlight-boxes {
+  margin-top: 40px;
+}
+
 #landing-page .highlight-boxes>div>.highlight-box {
   display: block;
   border: 1px solid #eee;
