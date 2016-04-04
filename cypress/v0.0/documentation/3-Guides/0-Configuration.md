@@ -29,6 +29,8 @@ Option | Default | Description
 `port` | `2020` | Port to use for Cypress
 `env` | `{}` | [Environment Variables](https://on.cypress.io/guides/environment-variables)
 `commandTimeout` | `4000` | Time, in milliseconds, to wait until commands are considered timed out
+`watchForFileChanges` | true | Whether Cypress will watch and restart tests on file changes
+`reporter` | `spec` | The [Mocha reporter](https://mochajs.org/#reporters) used during headless or CI runs
 
 # Network Options
 
