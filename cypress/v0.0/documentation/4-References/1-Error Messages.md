@@ -263,20 +263,20 @@ describe("simple example", function(){
 
 ```javascript
 describe("a complex example with async code", function(){
-  it("you can cause commands to bleed into the next test by not correctly writing your test code", function(){
-    // what's happening here is that we have not indicated to mocha t
-    // even though this test will pass
-    // when the setTimeout callback function runs
+  it("you can cause commands to bleed into the next test", function(){
+    // what's happening here is that because we not told mocha this is an async test
+    // this test will pass immediately and move onto the next test...
+    //
+    // ...then, when the setTimeout callback function runs
     // new commands will get queued on the wrong test
-    // Cypress will detect this and print out the list
-    // of commands which should give you a hint that
-    // you've written something wrong
+    //
+    // Cypress will detect this and fail the next test
     setTimeout(function(){
       cy.get("body").children().should("not.contain", "foo")
     }, 10)
 
     // the correct way to write the above test code would be this:
-    // it("you can cause commands to bleed into the next test by not correctly writing your test code", function(done){
+    // it("does not cause commands to bleed into the next test", function(done){
     //   setTimeout(function(){
     //     cy.get("body").children().should("not.contain", "foo").then(function(){
     //       done()
@@ -286,9 +286,13 @@ describe("a complex example with async code", function(){
 
   })
 
-  it("there's nothing wrong with this test, but it will fail due to the previous test", function(){
-    // we will get the error here that Cypress detected it still had commands in its command queue
-    // it will print them out, and help us figure out its the previous test which is the problem
+  it("this test will fail due to the previous poorly written test", function(){
+    // we will get the error here that Cypress detected
+    // it still had commands in its command queue
+    //
+    // Cypress will print the commands out which should
+    // help us figure out that the previous test is
+    // causing this error message
     cy.wait(10)
   })
 })
@@ -300,26 +304,31 @@ describe("a complex example with async code", function(){
 describe("another complex example using a forgotten 'return'", function(){
   it("forgets to return a promise", function(){
     // we forget to return the promise to our test
-    // which means the test passes synchronously and
-    // our promise resolves during the next test run
-    // and queues commands on the wrong test
+    // which means the test passes synchronously but
+    // our promise resolves during the next test.
+    //
+    // this causes the commands to be queued on the
+    // wrong test
     Cypress.Promise.delay(10).then(function(){
       cy.get("body").children().should("not.contain", "foo")
     })
 
     // the correct way to write the above test code would be this:
-    // it("forgets to return a promise", function(){
+    // it("does not forget to return a promise", function(){
     //   return Cypress.Promise.delay(10).then(function(){
     //     return cy.get("body").children().should("not.contain", "foo")
     //   })
     // }
   })
 
-  it("there's nothing wrong with this test, but it will also fail due to the previous test", function(){
-    // we will get the error here that Cypress detected it still had commands in its command queue
-    // it will print them out, and help us figure out its the previous test which is the problem
+  it("this test will fail due to the previous poorly written test", function(){
+    // we will get the error here that Cypress detected
+    // it still had commands in its command queue
+    //
+    // Cypress will print the commands out which should
+    // help us figure out that the previous test is
+    // causing this error message
     cy.wait(10)
   })
-
 })
 ```
