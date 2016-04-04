@@ -37,6 +37,34 @@ describe "$Cypress.Commands API", ->
       c2 = cmd.clone()
       expect(c2.get("args")).to.deep.eq ["foo"]
 
+  context "#stringify", ->
+    beforeEach ->
+      @commands.splice(0, 1, {name: "get", args: ["form:first"]})
+      @commands.splice(1, 2, {name: "click", args: [{multiple: true}]})
+      @commands.splice(2, 3, {name: "then", args: [->]})
+      @commands.splice(3, 4, {name: "get", args: ["body", {timeout: 1000}]})
+      @commands.splice(4, 5, {name: "should", args: ["have.prop", "class", "active"]})
+
+    it "returns command name + args", ->
+      expect(@commands.at(0).stringify()).to.eq("cy.get('form:first')")
+      expect(@commands.at(1).stringify()).to.eq("cy.click('...')")
+      expect(@commands.at(2).stringify()).to.eq("cy.then('...')")
+      expect(@commands.at(3).stringify()).to.eq("cy.get('body, ...')")
+      expect(@commands.at(4).stringify()).to.eq("cy.should('have.prop, class, active')")
+
+  context "#reduce", ->
+    beforeEach ->
+      @commands.splice(0, 1, {name: "get", args: ["form:first"]})
+      @commands.splice(1, 2, {name: "click", args: [{multiple: true}]})
+
+    it "reduces commands into array", ->
+      cmds = @commands.reduce (memo, cmd) ->
+        memo.push cmd.get("name")
+        memo
+      , []
+
+      expect(cmds).to.deep.eq(["get", "click"])
+
   context "#slice", ->
     beforeEach ->
       @commands.splice(0, 1, {})
