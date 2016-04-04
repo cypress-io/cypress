@@ -9,6 +9,7 @@ excerpt: Errors that require additional explanation are listed here.
 - :fa-angle-right: [cy.method() failed because the element cannot be interacted with](#section-cy-method-failed-because-the-element-cannot-be-interacted-with)
 - :fa-angle-right: [cy.method() failed because the element is currently animating](#section-cy-method-failed-because-the-element-is-currently-animating)
 - :fa-angle-right: [Running Cypress in CI requires a secret project key](#section-running-cypress-in-ci-requires-a-secret-project-key)
+- :fa-angle-right: [The test has finished but Cypress still has commands in its queue](#section-the-test-has-finished-but-cypress-still-has-commands-in-its-queue)
 
 ***
 
@@ -201,4 +202,6 @@ You can get your project's secret key by running the terminal command: `cypress 
 
 Then [add the key to your config file or as an environment variable](https://on.cypress.io/guides/continous-integration#section-acquire-a-cypress-secret-key).
 
+# The test has finished but Cypress still has commands in its queue
 
+![screen shot 2016-04-03 at 9 24 00 pm](https://cloud.githubusercontent.com/assets/1268976/14236396/e831fcf2-f9e2-11e5-9eac-eafaf75128c0.png)
