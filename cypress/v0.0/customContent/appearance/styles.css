@@ -30,6 +30,7 @@ body {
 
 #landing-page .highlight-boxes>div>.highlight-box:hover {
   color: #d32f3d;
+  border: 2px solid #ccc;
 }
 
 #landing-page .highlight-boxes>div:nth-child(2)>.highlight-box {
