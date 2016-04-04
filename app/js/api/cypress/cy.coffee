@@ -101,7 +101,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## then we know we've ended early due to a done() and
       ## we should throw a very specific error message
       index = @prop("index")
-      @endedEarlyErr() if index > 0 and index < @commands.length
+      if index > 0 and index < @commands.length
+        @endedEarlyErr(index)
 
       @clearTimeout @prop("runId")
       @clearTimeout @prop("timerId")

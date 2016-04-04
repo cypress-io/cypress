@@ -57,11 +57,33 @@ do ($Cypress, _) ->
 
       return @
 
-    endedEarlyErr: ->
+    endedEarlyErr: (index) ->
       ## return if we already have an error
       return if @prop("err")
 
-      err = @cypressErr("Cypress detected your test ended early before all of the commands have run. This can happen if you explicitly done() a test before all of the commands have finished.")
+      commands = @commands.slice(index).reduce (memo, cmd) =>
+        if @isCommandFromThenable(cmd) or @isCommandFromMocha(cmd)
+          memo
+        else
+          memo.push "- " + cmd.stringify()
+          memo
+      , []
+
+      err = @cypressErr("""
+        Oops, Cypress detected something wrong with your test code.
+
+        The test has finished but Cypress still has commands in its queue.
+        The #{commands.length} queued commands which have not yet run are:
+
+        #{commands.join('\n')}
+
+        In every situation we've seen, this has been caused by programmer error.
+        Most often this indicates a race condition due to a forgotten 'return' or from commands in a previously run test bleeding into the current test.
+
+        For a much more thorough explanation including examples please review this error here:
+
+        https://on.cypress.io/command-queue-ended-early
+      """)
       err.onFail = ->
       @fail(err)
 

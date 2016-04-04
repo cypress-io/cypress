@@ -15,6 +15,13 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       return false
 
   Cypress.Cy.extend
+    isCommandFromThenable: (cmd) ->
+      args = cmd.get("args")
+
+      cmd.get("name") is "then" and
+        args.length is 3 and
+          _.all(args, _.isFunction)
+
     isCommandFromMocha: (cmd) ->
       not cmd.get("next") and
         cmd.get("args").length is 2 and

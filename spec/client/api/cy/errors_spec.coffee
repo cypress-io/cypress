@@ -3,7 +3,7 @@ describe "$Cypress.Cy Errors Extensions", ->
     @iframe = $("<iframe />").appendTo $("body")
 
   beforeEach ->
-    @Cypress = $Cypress.create()
+    @Cypress = $Cypress.create({loadModules: true})
     @cy      = $Cypress.Cy.create(@Cypress, @iframe)
 
     ## make sure not to accidentally return
@@ -23,6 +23,24 @@ describe "$Cypress.Cy Errors Extensions", ->
         @cy.throwErr("foo")
       catch e
         expect(e.name).to.eq "CypressError"
+
+  context "#endedEarlyErr", ->
+    beforeEach ->
+      @commands = @cy.commands
+      @commands.splice(0, 1, {name: "get", args: ["form:first"]})
+      @commands.splice(1, 2, {name: "find", args: ["button"]})
+      @commands.splice(2, 3, {name: "click", args: [{multiple: true}]})
+      @commands.splice(3, 4, {name: "then", args: [->]})
+      @commands.splice(4, 5, {name: "get", args: ["body", {timeout: 1000}]})
+      @commands.splice(5, 6, {name: "should", args: ["have.prop", "class", "active"]})
+
+    it "displays commands which have not yet run", (done) ->
+      @cy.on "fail", (err) ->
+        expect(err.message).to.include("The test has finished but Cypress still has commands in its queue.")
+        expect(err.message).to.include("https://on.cypress.io/command-queue-ended-early")
+        done()
+
+      @cy.endedEarlyErr(1)
 
   context "#fail", ->
     it "triggers fail with err and runnable", ->

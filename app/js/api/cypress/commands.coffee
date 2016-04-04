@@ -72,6 +72,19 @@ do ($Cypress, _) ->
     skip: ->
       @set("skip", true)
 
+    stringify: ->
+      {name, args} = @attributes
+
+      args = _.reduce args, (memo, arg) ->
+        arg = if _.isString(arg) then _.truncate(arg, 20) else "..."
+        memo.push(arg)
+        memo
+      , []
+
+      args = args.join(", ")
+
+      "cy.#{name}('#{args}')"
+
     clone: ->
       @_removeNonPrimitives @get("args")
       $Command.create _.clone(@attributes)
@@ -159,7 +172,7 @@ do ($Cypress, _) ->
       _[method].apply(_, args)
 
   ## mixin underscore methods
-  _.each ["invoke", "map", "pluck", "first", "find", "filter", "last", "indexOf", "each"], (method) ->
+  _.each ["invoke", "map", "pluck", "first", "reduce", "find", "filter", "reject", "last", "indexOf", "each"], (method) ->
     $Commands.prototype[method] = (args...) ->
       args.unshift(@commands)
       _[method].apply(_, args)

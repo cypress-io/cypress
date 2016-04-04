@@ -443,6 +443,30 @@ describe "$Cypress.Cy API", ->
 
         @cy.noop({})
 
+    describe "#endedEarlyErr", ->
+      beforeEach ->
+        @allowErrors()
+
+      it "displays error with commands listed", (done) ->
+        @cy.endedEarlyErr.restore()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include("The 6 queued commands which have not yet run are:")
+          expect(err.message).to.include("- cy.find('input')")
+          expect(err.message).to.include("- cy.click('...')")
+          expect(err.message).to.include("- cy.then('...')")
+          expect(err.message).to.include("- cy.get('.badge, ...')")
+          expect(err.message).to.include("- cy.should('have.prop, class, badge')")
+          expect(err.message).to.include("- cy.then('...')")
+          done()
+
+        @cy
+          .get("form:first").find('input').click({multiple: true})
+          .then -> "foo"
+          .get(".badge", {timeout: 1000}).should("have.prop", "class", "badge")
+          .then ->
+            @cy.endedEarlyErr(1)
+
     describe "nested commands", ->
       beforeEach ->
         @setup = (fn = ->) =>
