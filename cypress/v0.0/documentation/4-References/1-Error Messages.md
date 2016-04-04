@@ -204,4 +204,118 @@ Then [add the key to your config file or as an environment variable](https://on.
 
 # The test has finished but Cypress still has commands in its queue
 
-![screen shot 2016-04-03 at 9 24 00 pm](https://cloud.githubusercontent.com/assets/1268976/14236396/e831fcf2-f9e2-11e5-9eac-eafaf75128c0.png)
+![screen shot 2016-04-04 at 12 07 40 pm](https://cloud.githubusercontent.com/assets/1268976/14254496/fa15f8da-fa5d-11e5-91b8-cdc8387e4dc8.png)
+
+Let's examine several different ways you may get this error message. In every situation, you'll need to change something in your code to prevent this error.
+
+[block:callout]
+{
+  "type": "warning",
+  "title": "Flaky tests below!"
+  "body": "Several of these tests are dependent on race conditions. You may have to run these tests multiple times before they will actually fail. You can also try tweaking some of the delays.",
+}
+[/block]
+
+### Simple Example
+
+```javascript
+describe("simple example", function(){
+  // this first test will actually pass and shows you that
+  // Cypress attempts to prevent this problem in every test
+  it("Cypress is smart and this does not fail", function(){
+    // queue up some commands
+    // without returning the cy object
+    // which is ok!
+    cy
+      .get("body")
+      .children()
+      .should("not.contain", "foo")
+
+    // even though we return the string here
+    // Cypress automatically figures out that you've
+    // queued commands above and does not end the test
+    // until all commands have finished
+    return "foobarbaz"
+  })
+
+  it("but you can forcibly end the test early which does fail", function(done){
+    // this example will fail because you've forcibly terminated
+    // the test early with mocha
+    cy
+      .get("body")
+      .then(function(){
+        // forcibly end the test
+        // even though there are still
+        // pending queued commands below
+        done()
+      })
+      .children()
+      .should("not.contain", "foo")
+  })
+})
+```
+
+### Complex Async Example
+
+```javascript
+describe("a complex example with async code", function(){
+  it("you can cause commands to bleed into the next test by not correctly writing your test code", function(){
+    // what's happening here is that we have not indicated to mocha t
+    // even though this test will pass
+    // when the setTimeout callback function runs
+    // new commands will get queued on the wrong test
+    // Cypress will detect this and print out the list
+    // of commands which should give you a hint that
+    // you've written something wrong
+    setTimeout(function(){
+      cy.get("body").children().should("not.contain", "foo")
+    }, 10)
+
+    // the correct way to write the above test code would be this:
+    // it("you can cause commands to bleed into the next test by not correctly writing your test code", function(done){
+    //   setTimeout(function(){
+    //     cy.get("body").children().should("not.contain", "foo").then(function(){
+    //       done()
+    //     })
+    //   }, 1)
+    // })
+
+  })
+
+  it("there's nothing wrong with this test, but it will fail due to the previous test", function(){
+    // we will get the error here that Cypress detected it still had commands in its command queue
+    // it will print them out, and help us figure out its the previous test which is the problem
+    cy.wait(10)
+  })
+})
+```
+
+### Complex Promise Example
+
+```javascript
+describe("another complex example using a forgotten 'return'", function(){
+  it("forgets to return a promise", function(){
+    // we forget to return the promise to our test
+    // which means the test passes synchronously and
+    // our promise resolves during the next test run
+    // and queues commands on the wrong test
+    Cypress.Promise.delay(10).then(function(){
+      cy.get("body").children().should("not.contain", "foo")
+    })
+
+    // the correct way to write the above test code would be this:
+    // it("forgets to return a promise", function(){
+    //   return Cypress.Promise.delay(10).then(function(){
+    //     return cy.get("body").children().should("not.contain", "foo")
+    //   })
+    // }
+  })
+
+  it("there's nothing wrong with this test, but it will also fail due to the previous test", function(){
+    // we will get the error here that Cypress detected it still had commands in its command queue
+    // it will print them out, and help us figure out its the previous test which is the problem
+    cy.wait(10)
+  })
+
+})
+```
