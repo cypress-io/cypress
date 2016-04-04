@@ -264,7 +264,7 @@ describe("simple example", function(){
 ```javascript
 describe("a complex example with async code", function(){
   it("you can cause commands to bleed into the next test", function(){
-    // what's happening here is that because we not told mocha this is an async test
+    // what's happening here is that because we have NOT told mocha this is an async test
     // this test will pass immediately and move onto the next test...
     //
     // ...then, when the setTimeout callback function runs
@@ -279,9 +279,11 @@ describe("a complex example with async code", function(){
     // it("does not cause commands to bleed into the next test", function(done){
     //   setTimeout(function(){
     //     cy.get("body").children().should("not.contain", "foo").then(function(){
+    //       now all the commands are correctly processed on this test
+    //       and do not bleed into the next test
     //       done()
     //     })
-    //   }, 1)
+    //   }, 10)
     // })
 
   })
