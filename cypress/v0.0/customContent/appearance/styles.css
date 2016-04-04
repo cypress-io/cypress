@@ -22,7 +22,7 @@ body {
 #landing-page .highlight-boxes>div>.highlight-box {
   margin-top: 40px;
   display: block;
-  border: 1px solid #eee;
+  border: 2px solid #ddd;
   padding: 20px;
   text-align: center;
   color: #ec4f5c;
