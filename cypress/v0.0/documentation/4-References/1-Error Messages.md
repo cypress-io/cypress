@@ -192,6 +192,8 @@ You can globally disable animation error checking, or increase the threshold by 
 }
 ```
 
+***
+
 # Running Cypress in CI requires a secret project key
 
 You may receive this error when trying to run Cypress tests in Continous Integration. This means that you did not pass a specific key to: `cypress ci` in your CI configuration file.
@@ -202,6 +204,12 @@ You can get your project's secret key by running the terminal command: `cypress 
 
 Then [add the key to your config file or as an environment variable](https://on.cypress.io/guides/continous-integration#section-acquire-a-cypress-secret-key).
 
+***
+
 # The test has finished but Cypress still has commands in its queue
+
+You will receive this error if the tests finished before the Cypress commands were all finished.
+
+In most situations, this happens due to an error within your application. Most often, it indicates a race condition due to a forgotten `return` or from commands in a previously run test bleeding into the current test.
 
 ![screen shot 2016-04-03 at 9 24 00 pm](https://cloud.githubusercontent.com/assets/1268976/14236396/e831fcf2-f9e2-11e5-9eac-eafaf75128c0.png)
