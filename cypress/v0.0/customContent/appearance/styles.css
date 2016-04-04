@@ -64,6 +64,11 @@ body {
   margin-bottom: 5px;
 }
 
+#landing-page h2 {
+  margin-top: 2em;
+  margin-bottom: 5px;
+}
+
 #landing-page p {
   color: #888;
   margin-bottom: 1em;
