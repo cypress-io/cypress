@@ -97,7 +97,26 @@ module.exports = {
       })
 
   ready: (options = {}) ->
-    options.app = app
+    _.defaults options,
+      onQuit: ->
+        ## TODO: fix this. if the debug window
+        ## is open and we attempt to quit
+        ## it will not be closed because
+        ## there is a memory reference
+        ## thus we have to remove it first
+        logs.off()
+
+        ## exit the app immediately
+        app.exit(0)
+
+      onOpenProject: ->
+        Tray.setImage("blue")
+
+      onCloseProject: ->
+        Tray.setImage("black")
+
+      onError: (err) ->
+        Tray.setImage("red")
 
     ready = =>
       ## TODO:
@@ -111,6 +130,9 @@ module.exports = {
         if options.updating
           Updater.install(options)
 
+        ## TODO: change this to return
+        ## the tray instannce (above in ready)
+        ## and to then call Tray.display(tray, {})
         Tray.display({
           onDrop: ->
 

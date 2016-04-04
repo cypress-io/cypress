@@ -1,7 +1,7 @@
 _           = require("lodash")
 ipc         = require("electron").ipcMain
 shell       = require("electron").shell
-cypressIcons = require("@cypress/core-icons")
+cyIcons     = require("@cypress/core-icons")
 dialog      = require("./dialog")
 project     = require("./project")
 pgk         = require("./package")
@@ -19,22 +19,20 @@ handleEvent = (options, event, id, type, arg) ->
       event.sender.send("response", data)
 
   sendErr = (err) ->
+    callback("onError", err)
     sendResponse({id: id, __error: errors.clone(err)})
 
   send = (data) ->
     sendResponse({id: id, data: data})
 
+  callback = (key, args...) ->
+    fn = options[key]
+    if _.isFunction(fn)
+      fn.apply(null, args)
+
   switch type
     when "quit"
-      ## TODO: fix this. if the debug window
-      ## is open and we attempt to quit
-      ## it will not be closed because
-      ## there is a memory reference
-      ## thus we have to remove it first
-      logs.off()
-
-      ## exit the app immediately
-      options.app.exit(0)
+      callback("onQuit")
 
     when "gui:error"
       logs.error(arg)
@@ -109,7 +107,7 @@ handleEvent = (options, event, id, type, arg) ->
         upd.cancel()
 
     when "get:about:logo:src"
-      send(cypressIcons.getPathToIcon("icon_32x32@2x.png"))
+      send(cyIcons.getPathToIcon("icon_32x32@2x.png"))
 
     when "get:logs"
       logs.get()
@@ -150,13 +148,18 @@ handleEvent = (options, event, id, type, arg) ->
       })
       .call("getConfig")
       .then(send)
-      .catch(sendErr)
+      .then ->
+        callback("onOpenProject")
+      .catch (err) ->
+        sendErr(err)
 
     when "close:project"
       project.close({
         sync: true
       })
       .then(send)
+      .then ->
+        callback("onCloseProject")
       .catch(sendErr)
 
     when "on:project:settings:change"

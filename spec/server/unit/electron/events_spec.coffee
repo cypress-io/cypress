@@ -22,9 +22,10 @@ describe "lib/electron/handlers/events", ->
     @send    = @sandbox.spy()
     @cookies = {}
     @options = {
-      app: {
-        exit: @sandbox.spy()
-      }
+      onQuit: @sandbox.spy()
+      onOpenProject: @sandbox.spy()
+      onCloseProject: @sandbox.spy()
+      onError: @sandbox.spy()
     }
     @event   = {
       sender: {
@@ -43,6 +44,7 @@ describe "lib/electron/handlers/events", ->
       expect(@send).to.be.calledWith("response", {id: @id, data: data})
 
     @expectSendErrCalledWith = (err) =>
+      expect(@options.onError).to.be.calledWith(err)
       expect(@send).to.be.calledWith("response", {id: @id, __error: errors.clone(err)})
 
   context ".stop", ->
@@ -73,14 +75,9 @@ describe "lib/electron/handlers/events", ->
       expect(fn).to.throw("No ipc event registered for: 'no:such:event'")
 
   context "quit", ->
-    it "exits the app", ->
+    it "calls options.onQuit", ->
       @handleEvent("quit")
-      expect(@options.app.exit).to.be.calledWith(0)
-
-    it "calls logs.off", ->
-      @sandbox.stub(logger, "off")
-      @handleEvent("quit")
-      expect(logger.off).to.be.calledOnce
+      expect(@options.onQuit).to.be.calledOnce
 
   context "dialog", ->
     describe "show:directory:dialog", ->
@@ -364,6 +361,8 @@ describe "lib/electron/handlers/events", ->
 
         @handleEvent("open:project", "path/to/project")
         .then =>
+          expect(@options.onOpenProject).to.be.calledOnce
+
           @expectSendCalledWith({some: "config"})
 
       it "catches errors", ->
@@ -394,6 +393,8 @@ describe "lib/electron/handlers/events", ->
 
           @handleEvent("close:project")
           .then =>
+            expect(@options.onCloseProject).to.be.calledOnce
+
             ## it should store the opened project
             expect(project.opened()).to.be.null
 

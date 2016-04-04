@@ -10,4 +10,5 @@ pathToPkg = cwd("package.json")
 module.exports = (options) ->
   fs.readJsonAsync(pathToPkg)
   .then (json) ->
+    ## TODO: omit anything from options which is a function
     _.extend {}, options, _.pick(json, "version")

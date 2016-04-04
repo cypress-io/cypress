@@ -5,12 +5,19 @@ module.exports = {
   dialog: {}
   ipcMain: {}
   nativeImage: {
-    createFromPath: ->
+    createFromPath: -> {}
   }
   app: {
     on: ->
+    exit: ->
     commandLine: {
       appendSwitch: ->
     }
+  }
+  Tray: -> {
+    on: ->
+    setToolTip: ->
+    setImage: ->
+    setPressedImage: ->
   }
 }
