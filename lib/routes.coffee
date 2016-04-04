@@ -41,7 +41,8 @@ module.exports = (app, config) ->
   ## and therefore should not conflict
   app.get config.clientRoute, (req, res) ->
     res.render cwd("lib", "public", "index.html"), {
-      config: JSON.stringify(config)
+      config:      JSON.stringify(config)
+      projectName: config.projectName
     }
 
   app.all "*", (req, res, next) ->

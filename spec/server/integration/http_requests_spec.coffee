@@ -50,8 +50,6 @@ describe "Routes", ->
 
   context "GET /", ->
     beforeEach ->
-      @baseUrl = "http://www.github.com"
-
       @setup()
 
     it "redirects to config.clientRoute without a __cypress.remoteHost", ->
@@ -74,11 +72,21 @@ describe "Routes", ->
         .expect(200)
 
   context "GET /__", ->
+    beforeEach ->
+      @setup({projectName: "foobarbaz"})
+
     it "routes config.clientRoute to serve cypress client app html", ->
       supertest(@app)
         .get("/__")
         .expect(200)
         .expect(/App.start\(.+\)/)
+
+    it "sets title to projectName", ->
+      supertest(@app)
+      .get("/__")
+      .expect(200)
+      .then (res) ->
+        expect(res.text).to.include("<title>foobarbaz</title>")
 
     it "omits x-powered-by", ->
       supertest(@app)
