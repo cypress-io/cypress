@@ -215,12 +215,12 @@ Let's examine several different ways you may get this error message. In every si
 [block:callout]
 {
   "type": "warning",
-  "title": "Flaky tests below!"
-  "body": "Several of these tests are dependent on race conditions. You may have to run these tests multiple times before they will actually fail. You can also try tweaking some of the delays.",
+  "title": "Flaky tests below!",
+  "body": "Several of these tests are dependent on race conditions. You may have to run these tests multiple times before they will actually fail. You can also try tweaking some of the delays."
 }
 [/block]
 
-### Simple Example
+## Simple Example
 
 ```javascript
 describe("simple example", function(){
@@ -259,7 +259,7 @@ describe("simple example", function(){
 })
 ```
 
-### Complex Async Example
+## Complex Async Example
 
 ```javascript
 describe("a complex example with async code", function(){
@@ -294,7 +294,7 @@ describe("a complex example with async code", function(){
 })
 ```
 
-### Complex Promise Example
+## Complex Promise Example
 
 ```javascript
 describe("another complex example using a forgotten 'return'", function(){
