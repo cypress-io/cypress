@@ -1,13 +1,49 @@
-<% if @length: %>
-  <ul class="list-as-table list-header files-list-header">
-    <li>
-      <div>
-        <!-- <div>Name</div> -->
-      </div>
-      <div>
-        <!-- <div>Last Modified</div> -->
-      </div>
-    </li>
-  </ul>
-<% end %>
+<div id="options-region">
+  <div class="btn-group">
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Configuration
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right">
+        <p><strong>Configuration</strong> is determined by the default Cypress options or options defined in <span class="json">cypress.json</span>, <span class="env">Environment Variables</span>, or <span class="cli">CLI</span>.
+<pre>
+{
+  <span class="env">"port": "2020"</span>,
+  "env": {},
+  <span class="cli">"commandTimeout": 4000</span>,
+  <span class="json">"watchForFileChanges": true</span>,
+  "reporter": "spec"
+}
+</pre>
+          <p id="viewport-link">
+            <a href="https://on.cypress.io/guides/configuration" target="_blank">
+              <i class="fa fa-info-circle"></i>
+              Read more about configuration.
+            </a>
+          </p>
+      </ul>
+    </div>
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Health Check
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right health-check">
+        <p><strong>Health Check</strong> is determined by <code>baseUrl</code>.
+
+        <li>
+          <i class="fa fa-check-circle green"></i>
+          <span class="url">http://localhost:8080</span>
+          <span class="msg">Website if available</span>
+        </li>
+        <li>
+          <i class="fa fa-close red"></i>
+          <span class="url">http://localhost:6464</span>
+          <span class="msg">Website if unavailable</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
 <ul class="outer-files-container list-as-table"></ul>

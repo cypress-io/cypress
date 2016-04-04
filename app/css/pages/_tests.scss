@@ -1,5 +1,55 @@
 #tests-list-page {
 
+  .dropdown-menu-right {
+    padding: 10px 20px;
+  }
+
+
+  .env {
+    background-color: #dafff4;
+  }
+
+  .json {
+    background-color: #fdf3e3;
+
+  }
+
+  .cli {
+    background-color: #fce7e9;
+  }
+
+  .health-check {
+    li {
+      min-width: 330px;
+      i, span {
+        display: inline;
+      }
+
+      i.green {
+        color: $pass;
+      }
+
+      i.red {
+        color: $fail;
+      }
+    }
+
+    .url {
+      font-weight: bold;
+      margin: 0 5px;
+    }
+
+    .msg {
+      color: #777;
+    }
+  }
+
+  #options-region {
+    position: absolute;
+    top: 68px;
+    right: 20px;
+  }
+
   .well {
     margin: 20px;
   }
