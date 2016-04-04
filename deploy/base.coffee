@@ -258,7 +258,7 @@ class Base
     @log "gulpBuild"
 
     new Promise (resolve, reject) ->
-      runSequence "client:build", "client:minify", (err) ->
+      runSequence "app:build", "app:minify", (err) ->
         if err then reject(err) else resolve()
 
   createCyCache: (todosProject) ->
