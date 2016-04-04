@@ -122,7 +122,7 @@ gulp.task "project:img", ->
     .pipe gulp.dest "lib/public/img"
 
 gulp.task "project:favicon", ->
-  gulp.src(cyIcons.getPathToFavicon())
+  gulp.src(cyIcons.getPathToFavicon("**/*"))
     .pipe gulp.dest "lib/public/img"
 
 gulp.task "project:logo", ->
