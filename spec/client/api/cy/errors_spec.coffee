@@ -3,7 +3,7 @@ describe "$Cypress.Cy Errors Extensions", ->
     @iframe = $("<iframe />").appendTo $("body")
 
   beforeEach ->
-    @Cypress = $Cypress.create()
+    @Cypress = $Cypress.create({loadModules: true})
     @cy      = $Cypress.Cy.create(@Cypress, @iframe)
 
     ## make sure not to accidentally return
@@ -24,7 +24,7 @@ describe "$Cypress.Cy Errors Extensions", ->
       catch e
         expect(e.name).to.eq "CypressError"
 
-  context.only "#endedEarlyErr", ->
+  context "#endedEarlyErr", ->
     beforeEach ->
       @commands = @cy.commands
       @commands.splice(0, 1, {name: "get", args: ["form:first"]})

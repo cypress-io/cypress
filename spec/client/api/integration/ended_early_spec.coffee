@@ -34,5 +34,5 @@ describe "Ended Early Integration Tests", ->
 
       @Cypress.run (failures) ->
         test = runner.getTestByTitle("does end early [003]")
-        expect(test.err.message).to.eq "Cypress detected your test ended early before all of the commands have run. This can happen if you explicitly done() a test before all of the commands have finished."
+        expect(test.err.message).to.include "Oops, Cypress detected something wrong with your test code."
         done()
