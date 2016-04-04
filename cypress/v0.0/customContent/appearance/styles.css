@@ -8,6 +8,10 @@ body {
   word-wrap: break-word;
 }
 
+#jumbotron {
+  display: none;
+}
+
 .highlight-boxes {
   margin-top: 40px;
 }
