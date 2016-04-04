@@ -1,7 +1,7 @@
 require("../../spec_helper")
 
 os       = require("os")
-icons    = require("cypress-core-icons")
+icons    = require("@cypress/core-icons")
 notifier = require("node-notifier")
 electron = require("electron")
 user     = require("#{root}../lib/user")

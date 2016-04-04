@@ -2,7 +2,7 @@ _         = require("lodash")
 fs        = require("fs-extra")
 Promise   = require("bluebird")
 path      = require("path")
-cypressEx = require("cypress-core-example")
+cypressEx = require("@cypress/core-example")
 cwd       = require("./cwd")
 
 fs = Promise.promisifyAll(fs)
