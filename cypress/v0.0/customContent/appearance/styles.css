@@ -8,6 +8,43 @@ body {
   word-wrap: break-word;
 }
 
+#landing-page .highlight-boxes>div>.highlight-box {
+  display: block;
+  border: 1px solid #eee;
+  padding: 20px;
+  text-align: center;
+  color: #ec4f5c;
+}
+
+#landing-page .highlight-boxes>div>.highlight-box:hover {
+  color: #d32f3d;
+}
+
+#landing-page .highlight-boxes>div:nth-child(2)>.highlight-box {
+  color: #08bf88;
+}
+
+#landing-page .highlight-boxes>div:nth-child(2)>.highlight-box:hover {
+  color: #069167;
+}
+
+#landing-page .highlight-boxes>div:nth-child(3)>.highlight-box {
+  color: #f5a327;
+}
+
+#landing-page .highlight-boxes>div:nth-child(3)>.highlight-box:hover {
+  color: #ce810d;
+}
+
+#landing-page .highlight-boxes>div>.highlight-box:hover>p {
+  color: #555;
+}
+
+.highlight-box i {
+  display: block;
+  font-size: 40px;
+}
+
 #landing-page h1 {
   font-size: 2em;
   font-weight: bold;
