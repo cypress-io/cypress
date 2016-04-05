@@ -37,6 +37,36 @@ describe "lib/config", ->
         .then (obj) ->
           expect(obj.clientUrlDisplay).to.eq "http://localhost:8080"
 
+  context ".resolveConfigValues", ->
+    beforeEach ->
+      @expected = (obj) ->
+        merged = config.resolveConfigValues(obj.config, obj.defaults, obj.resolved)
+        expect(merged).to.deep.eq(obj.final)
+
+    it "sets baseUrl to default", ->
+      @expected({
+        config:   {baseUrl: null}
+        defaults: {baseUrl: null}
+        resolved: {}
+        final:    {baseUrl: "default"}
+      })
+
+    it "sets baseUrl to config", ->
+      @expected({
+        config:   {baseUrl: "localhost"}
+        defaults: {baseUrl: null}
+        resolved: {}
+        final:    {baseUrl: "config"}
+      })
+
+    it "does not change existing resolved values", ->
+      @expected({
+        config:   {baseUrl: "localhost"}
+        defaults: {baseUrl: null}
+        resolved: {baseUrl: "cli"}
+        final:    {baseUrl: "cli"}
+      })
+
   context ".mergeDefaults", ->
     beforeEach ->
       @defaults = (prop, value, cfg = {}, options = {}) =>
