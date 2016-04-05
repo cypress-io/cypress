@@ -1,6 +1,6 @@
 {
   "name": "@cypress/core-gui",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Desktop GUI for managing Cypress projects.",
   "main": "index.js",
   "scripts": {
