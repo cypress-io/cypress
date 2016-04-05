@@ -1,7 +1,7 @@
 {
-  "name": "cypress-core-gui",
+  "name": "@cypress/core-gui",
   "version": "0.0.1",
-  "description": "",
+  "description": "Desktop GUI for managing Cypress projects.",
   "main": "index.js",
   "scripts": {
     "start": "http-server ./dist -o -p 6060",
@@ -15,7 +15,7 @@
     "url": "https://github.com/cypress-io/cypress-core-gui.git"
   },
   "author": "Brian Mann",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress-core-gui/issues"
   },

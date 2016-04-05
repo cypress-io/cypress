@@ -34,3 +34,4 @@ node_modules
 .node_repl_history
 
 bower_components
+dist
