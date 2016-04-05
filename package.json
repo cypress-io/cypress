@@ -8,7 +8,9 @@
     "server": "http-server ./dist -p 6060",
     "build": "gulp build",
     "dev": "gulp dev",
-    "test": "npm run server & npm run dev"
+    "test": "npm run server & npm run dev",
+    "prerelease": "npm run build",
+    "release": "releaser"
   },
   "repository": {
     "type": "git",

@@ -5,10 +5,7 @@ This repository contains the source code for the Cypress Desktop App Gui.
 ## Installing
 
 ```bash
-npm install
-
-## post install it will automatically
-## build the files into ./dist
+npm install @cypress/core-gui
 ```
 
 ## Developing

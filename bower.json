@@ -1,5 +1,5 @@
 {
-  "name": "cypress-core-gui",
+  "name": "@cypress/core-gui",
   "version": "0.0.1",
   "homepage": "https://github.com/cypress-io/cypress-core-gui",
   "authors": [
