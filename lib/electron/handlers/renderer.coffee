@@ -1,7 +1,7 @@
 _             = require("lodash")
 path          = require("path")
 uri           = require("url")
-cypressGui    = require("cypress-core-gui")
+cypressGui    = require("@cypress/core-gui")
 BrowserWindow = require("electron").BrowserWindow
 cwd           = require("../../cwd")
 user          = require("../../user")
