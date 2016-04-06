@@ -84,7 +84,7 @@
       path: @collection.path
 
     getSpan: (key, obj, comma) ->
-      "<div class='line'>#{key}<span class='colon'>:</span> <span class='#{obj.from}'data-toggle='tooltip' title='#{obj.from}'>#{@getString(obj.value)}#{obj.value}#{@getString(obj.value)}</span>#{@getComma(comma)}</div>"
+      "<div class='line'><span class='key'>#{key}</span><span class='colon'>:</span> <span class='#{obj.from}'data-toggle='tooltip' title='#{obj.from}'>#{@getString(obj.value)}#{obj.value}#{@getString(obj.value)}</span>#{@getComma(comma)}</div>"
 
     getString: (val) ->
       if _.isString(val)

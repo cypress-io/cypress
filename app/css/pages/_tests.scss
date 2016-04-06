@@ -1,5 +1,9 @@
 #tests-list-page {
 
+  table tr:first-child td {
+    border-top: 0;
+  }
+
   .dropdown-menu-right {
     padding: 15px 15px 0;
   }
@@ -7,15 +11,16 @@
   .config-explanation {
     font-size: 13px;
     font-weight: bold;
+    margin-bottom: 5px;
+
+    a {
+      float: right;
+    }
   }
 
   .config-keys {
     margin-bottom: 0;
     line-height: 16px;
-  }
-
-  #config-link {
-    margin-top: 5px;
   }
 
   .config-vars {
@@ -25,13 +30,17 @@
       margin-bottom: 0;
     }
 
-    .comma, .colon {
+    .key {
+      color: #666;
+    }
+
+    .comma, .colon, {
       color: #888;
     }
 
     .line {
       margin-left: 15px;
-      color: #444;
+      color: #000;
     }
 
     .envVars {
