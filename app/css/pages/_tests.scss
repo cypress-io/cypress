@@ -30,6 +30,10 @@
       margin-bottom: 0;
     }
 
+    [data-toggle=tooltip]:hover {
+      border-bottom: 1px dotted #777;
+    }
+
     .key {
       color: #666;
     }
