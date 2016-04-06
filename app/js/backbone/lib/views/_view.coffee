@@ -3,12 +3,6 @@
   _mixinTemplateHelpers = Marionette.View::mixinTemplateHelpers
 
   _.extend Marionette.View::,
-    addOpacityWrapper: (init = true, options = {}) ->
-      _.defaults options,
-        className: "opacity"
-
-      @$el.toggleWrapper options, @cid, init
-
     mixinTemplateHelpers: (target) ->
       target.env = App.config.env()
       target.debug = App.config.get("debug")

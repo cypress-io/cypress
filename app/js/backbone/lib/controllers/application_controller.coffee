@@ -13,7 +13,6 @@
       throw new Error("getMainView() did not return a view instance or #{view?.constructor?.name} is not a view instance") if not view
 
       _.defaults options,
-        loading: false
         region: @region
 
       @setMainView view
@@ -37,8 +36,4 @@
     onMainShow: ->
 
     _manageView: (view, options) ->
-      if options.loading
-        ## show the loading view
-        App.execute "show:loading", view, options
-      else
-        options.region.show view if options.region
+      options.region.show view if options.region
