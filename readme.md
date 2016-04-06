@@ -57,5 +57,9 @@ If you want to see the `ipc` events which are pending from Cypress tests:
 
 ## Changelog
 
+#### 0.1.1
+- renamed to cypress-core-desktop-gui
+- removed dead code
+
 #### 0.1.0
 - initial release
