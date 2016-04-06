@@ -70,6 +70,11 @@
         }
       })
 
+#       <% for optionName, obj of @resolved: %>  <%= optionName %>:<% if !obj.value?: %> {
+#   <% for envOptionName, envObj of obj: %>  <%= envOptionName %>: <span class=<%= envObj.from %> title=<%= envObj.from %>><%= envObj.value %>,</span>
+#   <% end %>}<% else: %> <span class=<%= obj.from %> title=<%= obj.from %>><%= if obj.value.length is 0 then "''" else obj.value %></span>,<% end %>
+# <% end %>
+
       files.resetToTreeView()
 
       files.prependWithAllTests() if files.length

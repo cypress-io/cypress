@@ -71,6 +71,60 @@
     emptyViewOptions: ->
       path: @collection.path
 
+    getSpan: (key, obj, comma) ->
+      "<p>#{key}: <span class='#{obj.from}'>#{@getValue(obj.value)}</span>#{@getComma(comma)}</p>"
+
+    getComma: (bool) ->
+      if bool then "," else ""
+
+    getValue: (val) ->
+      if _.isBlank(val)
+        "''"
+      else
+        val
+
     templateHelpers: ->
-      length: @collection.length
-      resolved: @options.config.get("resolved")
+      resolved = @options.config.get("resolved")
+
+      config  = _.omit resolved, "environmentVariables"
+      envVars = resolved.environmentVariables
+
+      {
+        length: @collection.length
+        config: config
+        envVars: envVars
+        displayResolved: (obj, opts = {}) =>
+          keys = _.keys(obj)
+          last = _.last(keys)
+
+          _.reduce keys, (memo, key) =>
+            val      = obj[key]
+            hasComma = opts.comma ? last isnt key
+
+            memo += (@getSpan(key, val, hasComma))
+
+          , ""
+      }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

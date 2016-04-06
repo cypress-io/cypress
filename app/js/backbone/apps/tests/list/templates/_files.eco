@@ -9,12 +9,15 @@
       <ul class="dropdown-menu dropdown-menu-right">
 <pre>
 {
-<% for option, obj of @resolved: %>  <%= option %>:<% if !obj.value?: %> {
-  <% for envOption, envObj of obj: %>  <%= envOption %>: <span class=<%= envObj.from %> title=<%= envObj.from %>><%= envObj.value %>,</span>
-  <% end %>}<% else: %> <span class=<%= obj.from %> title=<%= obj.from %>><%= if obj.value.length is 0 then "''" else obj.value %></span>,<% end %>
-<% end %>}
+<%- @displayResolved(@config, {comma: true}) %>
+<div class="envVars">
+  environmentVariables: {
+  <%- @displayResolved(@envVars) %>
+  }
+</div>
+}
 </pre>
-        <p><span class="config">cypress.json</span> <span class="env">Environment Variable</span> <span class="cli">CLI</span></p>
+        <p><span class="config">config</span> <span class="env">env</span> <span class="envFile">envFile</span> <span class="cli">CLI</span></p>
         <p id="viewport-link">
           <a href="https://on.cypress.io/guides/configuration" target="_blank">
             <i class="fa fa-info-circle"></i>
