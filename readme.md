@@ -59,6 +59,9 @@ LGPL
 
 ## Changelog
 
+#### 0.1.2
+- updated license
+
 #### 0.1.1
 - renamed to cypress-core-desktop-gui
 - removed dead code
