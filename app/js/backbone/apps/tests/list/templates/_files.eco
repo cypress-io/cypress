@@ -38,7 +38,7 @@
           </tr>
           <tr class="config-keys">
             <td><span class="cli">CLI</span></td>
-            <td>set from CLI</td>
+            <td>set from CLI arguments</td>
           </tr>
         </table>
       </div>
