@@ -46,35 +46,6 @@
         region: @layout.recentFilesRegion
 
     filesRegion: (files, config) ->
-      config.set("resolved", {
-        port: { value: 2121, from: 'cli' },
-        reporter: { value: true, from: 'config' },
-        baseUrl: { value: 'http://localhost:8080', from: 'config' },
-        commandTimeout: { value: 4000, from: 'default' },
-        pageLoadTimeout: { value: 30000, from: 'default' },
-        requestTimeout: { value: 5000, from: 'default' },
-        responseTimeout: { value: 20000, from: 'default' },
-        waitForAnimations: { value: true, from: 'default' },
-        animationDistanceThreshold: { value: 5, from: 'default' },
-        watchForFileChanges: { value: true, from: 'default' },
-        viewportWidth: { value: 1000, from: 'default' },
-        viewportHeight: { value: 660, from: 'default' },
-        fileServerFolder: { value: '', from: 'default' },
-        supportFolder: { value: 'cypress/support', from: 'default' },
-        fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
-        integrationFolder: { value: 'cypress/integration', from: 'default' },
-        environmentVariables: {
-          foo: { value: 'foo', from: 'env' },
-          bar: { value: 'bar', from: 'envFile' },
-          baz: { value: 'baz', from: 'cli'}
-        }
-      })
-
-#       <% for optionName, obj of @resolved: %>  <%= optionName %>:<% if !obj.value?: %> {
-#   <% for envOptionName, envObj of obj: %>  <%= envOptionName %>: <span class=<%= envObj.from %> title=<%= envObj.from %>><%= envObj.value %>,</span>
-#   <% end %>}<% else: %> <span class=<%= obj.from %> title=<%= obj.from %>><%= if obj.value.length is 0 then "''" else obj.value %></span>,<% end %>
-# <% end %>
-
       files.resetToTreeView()
 
       files.prependWithAllTests() if files.length
