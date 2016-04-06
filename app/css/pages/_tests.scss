@@ -9,25 +9,30 @@
     font-weight: bold;
   }
 
+  .config-keys {
+    margin-bottom: 0;
+    line-height: 16px;
+  }
+
+  #config-link {
+    margin-top: 5px;
+  }
+
   .config-vars {
     font-size: 13px;
+
     p {
       margin-bottom: 0;
     }
 
-    .key {
-      color: #476FC9;
-    }
-
-    .comma {
-      color: #777;
+    .comma, .colon {
+      color: #888;
     }
 
     .line {
       margin-left: 15px;
       color: #444;
     }
-
 
     .envVars {
       margin-left: 15px;
@@ -38,24 +43,29 @@
     }
   }
 
+  .envFile, .env, .config, .cli {
+    font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    padding: 2px;
+  }
+
   .envFile {
-    background-color: #cdedff;
-    padding: 2px
+    background-color: #fdf3e3;
+    color: #7B4804;
   }
 
   .env {
     background-color: #dafff4;
-    padding: 2px
+    color: #045431;
   }
 
   .config {
-    background-color: #fdf3e3;
-    padding: 2px
+    background-color: #cdedff;
+    color: #0C5263;
   }
 
   .cli {
     background-color: #fce7e9;
-    padding: 2px;
+    color: #A21313;
   }
 
   .health-check {

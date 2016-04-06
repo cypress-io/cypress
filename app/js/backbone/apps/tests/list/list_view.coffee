@@ -68,14 +68,23 @@
     emptyView: List.Empty
     childViewContainer: ".outer-files-container"
 
+    ui:
+      span: ".dropdown-menu span"
+
     events:
       "click .dropdown-menu" : (e) -> e.stopPropagation()
+
+    onRender: ->
+      @ui.span.tooltip({placement: "right", trigger: "hover"})
+
+    onDestroy: ->
+      @ui.span.tooltip("destroy")
 
     emptyViewOptions: ->
       path: @collection.path
 
     getSpan: (key, obj, comma) ->
-      "<div class='line'><span class='key'>#{key}</span>: <span class='#{obj.from}'>#{@getString(obj.value)}#{obj.value}#{@getString(obj.value)}</span>#{@getComma(comma)}</div>"
+      "<div class='line'>#{key}<span class='colon'>:</span> <span class='#{obj.from}'data-toggle='tooltip' title='#{obj.from}'>#{@getString(obj.value)}#{obj.value}#{@getString(obj.value)}</span>#{@getComma(comma)}</div>"
 
     getString: (val) ->
       if _.isString(val)
