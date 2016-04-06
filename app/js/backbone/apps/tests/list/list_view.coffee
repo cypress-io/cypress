@@ -72,16 +72,16 @@
       path: @collection.path
 
     getSpan: (key, obj, comma) ->
-      "<p>#{key}: <span class='#{obj.from}'>#{@getValue(obj.value)}</span>#{@getComma(comma)}</p>"
+      "<span class='line'>#{key}: <span class='#{obj.from}'>#{@getString(obj.value)}#{obj.value}#{@getString(obj.value)}</span>#{@getComma(comma)}</span>"
+
+    getString: (val) ->
+      if _.isString(val)
+        "'"
+      else
+        ""
 
     getComma: (bool) ->
       if bool then "," else ""
-
-    getValue: (val) ->
-      if _.isBlank(val)
-        "''"
-      else
-        val
 
     templateHelpers: ->
       resolved = @options.config.get("resolved")
@@ -105,26 +105,3 @@
 
           , ""
       }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

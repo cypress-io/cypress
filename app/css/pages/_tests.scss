@@ -1,11 +1,33 @@
 #tests-list-page {
 
   .dropdown-menu-right {
-    padding: 10px 20px;
+    padding: 15px 15px 0;
+  }
+
+  .config-vars {
+    font-size: 13px;
+    p {
+      margin-bottom: 0;
+    }
+
+    .line {
+      margin-left: 15px;
+      display: block;
+      clear: both;
+    }
+
+
+    .envVars {
+      margin-left: 15px;
+
+      .line {
+        margin-left: 30px;
+      }
+    }
   }
 
   .envFile {
-    background-color: red;
+    background-color: #cdedff;
   }
 
   .env {

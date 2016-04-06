@@ -7,14 +7,9 @@
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu dropdown-menu-right">
-<pre>
+<pre class="config-vars">
 {
-<%- @displayResolved(@config, {comma: true}) %>
-<div class="envVars">
-  environmentVariables: {
-  <%- @displayResolved(@envVars) %>
-  }
-</div>
+<%- @displayResolved(@config, {comma: true}) %><span class=" envVars">environmentVariables: {<%- @displayResolved(@envVars) %>  }</span>
 }
 </pre>
         <p><span class="config">config</span> <span class="env">env</span> <span class="envFile">envFile</span> <span class="cli">CLI</span></p>
