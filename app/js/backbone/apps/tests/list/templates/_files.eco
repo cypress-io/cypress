@@ -8,25 +8,13 @@
       </button>
       <ul class="dropdown-menu dropdown-menu-right">
 <pre>
-<% for key, value of @resolved: %>
-  key: <%= key %>
-  value:
-    <% for key2, value2 of value: %>
-      key: <%= key2 %>
-      value: <%= value2 %>
-    <% end %>
-<% end %>
-
-
 {
-  "port": <span class="env" title="Environment Variable">"2020"</span>,
-  "env": {},
-  "commandTimeout": <span class="cli" title="CLI">4000</span>,
-  "watchForFileChanges": <span class="json" title="cypress.json">true</span>,
-  "reporter": "spec"
-}
+<% for option, obj of @resolved: %>  <%= option %>:<% if !obj.value?: %> {
+  <% for envOption, envObj of obj: %>  <%= envOption %>: <span class=<%= envObj.from %> title=<%= envObj.from %>><%= envObj.value %>,</span>
+  <% end %>}<% else: %> <span class=<%= obj.from %> title=<%= obj.from %>><%= if obj.value.length is 0 then "''" else obj.value %></span>,<% end %>
+<% end %>}
 </pre>
-        <p><span class="json">cypress.json</span> <span class="env">Environment Variable</span> <span class="cli">CLI</span></p>
+        <p><span class="config">cypress.json</span> <span class="env">Environment Variable</span> <span class="cli">CLI</span></p>
         <p id="viewport-link">
           <a href="https://on.cypress.io/guides/configuration" target="_blank">
             <i class="fa fa-info-circle"></i>
