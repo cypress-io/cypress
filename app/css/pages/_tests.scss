@@ -4,16 +4,28 @@
     padding: 15px 15px 0;
   }
 
+  .config-explanation {
+    font-size: 13px;
+    font-weight: bold;
+  }
+
   .config-vars {
     font-size: 13px;
     p {
       margin-bottom: 0;
     }
 
+    .key {
+      color: #476FC9;
+    }
+
+    .comma {
+      color: #777;
+    }
+
     .line {
       margin-left: 15px;
-      display: block;
-      clear: both;
+      color: #444;
     }
 
 
@@ -28,19 +40,22 @@
 
   .envFile {
     background-color: #cdedff;
+    padding: 2px
   }
 
   .env {
     background-color: #dafff4;
+    padding: 2px
   }
 
   .config {
     background-color: #fdf3e3;
-
+    padding: 2px
   }
 
   .cli {
     background-color: #fce7e9;
+    padding: 2px;
   }
 
   .health-check {

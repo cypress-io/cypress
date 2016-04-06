@@ -3,23 +3,29 @@
     <div class="btn-group" role="group">
       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <i class="fa fa-cog"></i>
+        <span class="text-muted">View</span>
         Configuration
         <span class="caret"></span>
       </button>
-      <ul class="dropdown-menu dropdown-menu-right">
+      <div class="dropdown-menu dropdown-menu-right">
+        <div class="config-explanation">
+          Your project's configuration:
+        </div>
 <pre class="config-vars">
 {
-<%- @displayResolved(@config, {comma: true}) %><span class=" envVars">environmentVariables: {<%- @displayResolved(@envVars) %>  }</span>
+<%- @displayResolved(@config, {comma: true}) %><span class="envVars"><span class="key">environmentVariables</span>: {<%- @displayResolved(@envVars) %>  }</span>
 }
 </pre>
-        <p><span class="config">config</span> <span class="env">env</span> <span class="envFile">envFile</span> <span class="cli">CLI</span></p>
+        <p>
+          <span class="config">config</span> <span class="env">env</span> <span class="envFile">envFile</span> <span class="cli">CLI</span>
+        </p>
         <p id="viewport-link">
           <a href="https://on.cypress.io/guides/configuration" target="_blank">
             <i class="fa fa-info-circle"></i>
             Read more about configuration.
           </a>
         </p>
-      </ul>
+      </div>
     </div>
 <!--     <div class="btn-group" role="group">
       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

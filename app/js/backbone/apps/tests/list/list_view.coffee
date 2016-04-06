@@ -68,11 +68,14 @@
     emptyView: List.Empty
     childViewContainer: ".outer-files-container"
 
+    events:
+      "click .dropdown-menu" : (e) -> e.stopPropagation()
+
     emptyViewOptions: ->
       path: @collection.path
 
     getSpan: (key, obj, comma) ->
-      "<span class='line'>#{key}: <span class='#{obj.from}'>#{@getString(obj.value)}#{obj.value}#{@getString(obj.value)}</span>#{@getComma(comma)}</span>"
+      "<div class='line'><span class='key'>#{key}</span>: <span class='#{obj.from}'>#{@getString(obj.value)}#{obj.value}#{@getString(obj.value)}</span>#{@getComma(comma)}</div>"
 
     getString: (val) ->
       if _.isString(val)
@@ -81,7 +84,7 @@
         ""
 
     getComma: (bool) ->
-      if bool then "," else ""
+      if bool then "<span class='comma'>,</span>" else ""
 
     templateHelpers: ->
       resolved = @options.config.get("resolved")
