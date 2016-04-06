@@ -73,3 +73,4 @@
 
     templateHelpers: ->
       length: @collection.length
+      resolved: @options.config.get("resolved")

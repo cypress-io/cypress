@@ -1,13 +1,60 @@
-<% if @length: %>
-  <ul class="list-as-table list-header files-list-header">
-    <li>
-      <div>
-        <!-- <div>Name</div> -->
-      </div>
-      <div>
-        <!-- <div>Last Modified</div> -->
-      </div>
-    </li>
-  </ul>
+<div id="options-region">
+  <div class="btn-group">
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fa fa-cog"></i>
+        Configuration
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right">
+<pre>
+<% for key, value of @resolved: %>
+  key: <%= key %>
+  value:
+    <% for key2, value2 of value: %>
+      key: <%= key2 %>
+      value: <%= value2 %>
+    <% end %>
 <% end %>
+
+
+{
+  "port": <span class="env" title="Environment Variable">"2020"</span>,
+  "env": {},
+  "commandTimeout": <span class="cli" title="CLI">4000</span>,
+  "watchForFileChanges": <span class="json" title="cypress.json">true</span>,
+  "reporter": "spec"
+}
+</pre>
+        <p><span class="json">cypress.json</span> <span class="env">Environment Variable</span> <span class="cli">CLI</span></p>
+        <p id="viewport-link">
+          <a href="https://on.cypress.io/guides/configuration" target="_blank">
+            <i class="fa fa-info-circle"></i>
+            Read more about configuration.
+          </a>
+        </p>
+      </ul>
+    </div>
+<!--     <div class="btn-group" role="group">
+      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Health Check
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right health-check">
+        <p><strong>Health Check</strong> is determined by <code>baseUrl</code>.
+
+        <li>
+          <i class="fa fa-check-circle green"></i>
+          <span class="url">http://localhost:8080</span>
+          <span class="msg">Website if available</span>
+        </li>
+        <li>
+          <i class="fa fa-close red"></i>
+          <span class="url">http://localhost:6464</span>
+          <span class="msg">Website if unavailable</span>
+        </li>
+      </ul>
+    </div> -->
+  </div>
+</div>
 <ul class="outer-files-container list-as-table"></ul>
