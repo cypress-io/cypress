@@ -1,4 +1,6 @@
+_       = require("lodash")
 Promise = require("bluebird")
+config  = require("../../config")
 errors  = require("../../errors")
 cache   = require("../../cache")
 Project = require("../../project")
@@ -7,7 +9,9 @@ Project = require("../../project")
 openProject = null
 
 module.exports = {
-  open: (path, options = {}) ->
+  open: (path, args = {}, options = {}) ->
+    options = _.extend {}, config.whitelist(args), options
+
     ## store the currently open project
     openProject = Project(path)
 

@@ -142,7 +142,7 @@ handleEvent = (options, event, id, type, arg) ->
       .catch(sendErr)
 
     when "open:project"
-      project.open(arg, {
+      project.open(arg, options, {
         sync: true
         changeEvents: true
       })

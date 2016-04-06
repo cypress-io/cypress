@@ -61,6 +61,11 @@ convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   , {}
 
 module.exports = {
+  getConfigKeys: -> configKeys
+
+  whitelist: (obj = {}) ->
+    _.pick(obj, configKeys...)
+
   get: (projectRoot, options = {}) ->
     Promise.all([
       settings.read(projectRoot)

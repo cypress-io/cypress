@@ -1,9 +1,11 @@
 _        = require("lodash")
 path     = require("path")
 minimist = require("minimist")
+config   = require("../config")
 cwd      = require("../cwd")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter ci updating ping coords key logs clearLogs port returnPkg environmentVariables version mode autoOpen removeIds showHeadlessGui".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci updating ping coords key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui".split(" ")
+whitelist = whitelist.concat(config.getConfigKeys())
 
 parseCoords = (coords) ->
   [x, y] = _.map(coords.split("x"), parseFloat)
