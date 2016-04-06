@@ -1,7 +1,7 @@
 _             = require("lodash")
 path          = require("path")
 uri           = require("url")
-cypressGui    = require("@cypress/core-gui")
+cyDesktop     = require("@cypress/core-desktop-gui")
 BrowserWindow = require("electron").BrowserWindow
 cwd           = require("../../cwd")
 user          = require("../../user")
@@ -14,13 +14,13 @@ getUrl = (type) ->
     when "GITHUB_LOGIN"
       user.getLoginUrl()
     when "ABOUT"
-      cypressGui.getPathToAbout()
+      cyDesktop.getPathToAbout()
     when "DEBUG"
-      cypressGui.getPathToDebug()
+      cyDesktop.getPathToDebug()
     when "UPDATES"
-      cypressGui.getPathToUpdates()
+      cyDesktop.getPathToUpdates()
     when "INDEX"
-      cypressGui.getPathToIndex()
+      cyDesktop.getPathToIndex()
     else
       throw new Error("No acceptable window type found for: '#{type}'")
 
