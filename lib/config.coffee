@@ -140,31 +140,31 @@ module.exports = {
 
     obj.resolved = @resolveConfigValues(config, defaults, resolved)
 
-    console.log obj.resolved
-
     return obj
 
   resolveConfigValues: (config, defaults, resolved = {}) ->
-    ## pick out only the keys found in configKeys
-    config = _.pick(config, configKeys)
 
-    _.reduce config, (memo, val, key) ->
+    ## pick out only the keys found in configKeys
+    _.chain(config)
+    .pick(configKeys)
+    .mapValues (val, key) ->
       source = (s) ->
-        memo[key] = {
+        {
           value: val
           from:  s
         }
 
       switch
         when r = resolved[key]
-          source(r)
+          if _.isObject(r)
+            r
+          else
+            source(r)
         when not _.isEqual(config[key], defaults[key])
           source("config")
         else
           source("default")
-
-      memo
-    , {}
+    .value()
 
   setScaffoldPaths: (obj) ->
     obj = _.clone(obj)
@@ -220,9 +220,12 @@ module.exports = {
   parseEnv: (cfg, resolved = {}) ->
     envVars = resolved.environmentVariables ?= {}
 
-    resolveFrom = (type, obj = {}) ->
+    resolveFrom = (from, obj = {}) ->
       _.each obj, (val, key) ->
-        envVars[key] = type
+        envVars[key] = {
+          value: val
+          from: from
+        }
 
     envCfg  = cfg.env ? {}
     envFile = cfg.envFile ? {}
