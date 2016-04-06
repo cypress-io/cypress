@@ -2,29 +2,40 @@
   <div class="btn-group">
     <div class="btn-group" role="group">
       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fa fa-cog"></i>
         Configuration
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu dropdown-menu-right">
-        <p><strong>Configuration</strong> is determined by the default Cypress options or options defined in <span class="json">cypress.json</span>, <span class="env">Environment Variables</span>, or <span class="cli">CLI</span>.
 <pre>
+<% for key, value of @resolved: %>
+  key: <%= key %>
+  value:
+    <% for key2, value2 of value: %>
+      key: <%= key2 %>
+      value: <%= value2 %>
+    <% end %>
+<% end %>
+
+
 {
-  <span class="env">"port": "2020"</span>,
+  "port": <span class="env" title="Environment Variable">"2020"</span>,
   "env": {},
-  <span class="cli">"commandTimeout": 4000</span>,
-  <span class="json">"watchForFileChanges": true</span>,
+  "commandTimeout": <span class="cli" title="CLI">4000</span>,
+  "watchForFileChanges": <span class="json" title="cypress.json">true</span>,
   "reporter": "spec"
 }
 </pre>
-          <p id="viewport-link">
-            <a href="https://on.cypress.io/guides/configuration" target="_blank">
-              <i class="fa fa-info-circle"></i>
-              Read more about configuration.
-            </a>
-          </p>
+        <p><span class="json">cypress.json</span> <span class="env">Environment Variable</span> <span class="cli">CLI</span></p>
+        <p id="viewport-link">
+          <a href="https://on.cypress.io/guides/configuration" target="_blank">
+            <i class="fa fa-info-circle"></i>
+            Read more about configuration.
+          </a>
+        </p>
       </ul>
     </div>
-    <div class="btn-group" role="group">
+<!--     <div class="btn-group" role="group">
       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         Health Check
         <span class="caret"></span>
@@ -43,7 +54,7 @@
           <span class="msg">Website if unavailable</span>
         </li>
       </ul>
-    </div>
+    </div> -->
   </div>
 </div>
 <ul class="outer-files-container list-as-table"></ul>
