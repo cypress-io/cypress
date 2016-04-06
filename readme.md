@@ -1,11 +1,11 @@
-## Cypress Gui [![CircleCI](https://circleci.com/gh/cypress-io/cypress-core-gui.svg?style=shield&circle-token=2d68c0ace2f8c89ce0ddbf3f14776764f9f70d0f)](https://circleci.com/gh/cypress-io/cypress-core-gui)
+## Cypress Gui [![CircleCI](https://circleci.com/gh/cypress-io/cypress-core-desktop-gui.svg?style=shield&circle-token=2d68c0ace2f8c89ce0ddbf3f14776764f9f70d0f)](https://circleci.com/gh/cypress-io/cypress-core-desktop-gui)
 
 This repository contains the source code for the Cypress Desktop App Gui.
 
 ## Installing
 
 ```bash
-npm install @cypress/core-gui
+npm install @cypress/core-desktop-gui
 ```
 
 ## Developing

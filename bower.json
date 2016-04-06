@@ -1,7 +1,7 @@
 {
-  "name": "@cypress/core-gui",
+  "name": "@cypress/core-desktop-gui",
   "version": "0.0.1",
-  "homepage": "https://github.com/cypress-io/cypress-core-gui",
+  "homepage": "https://github.com/cypress-io/cypress-core-desktop-gui",
   "authors": [
     "brian.mann86@gmail.com"
   ],

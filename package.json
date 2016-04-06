@@ -1,5 +1,5 @@
 {
-  "name": "@cypress/core-gui",
+  "name": "@cypress/core-desktop-gui",
   "version": "0.1.0",
   "description": "Desktop GUI for managing Cypress projects.",
   "main": "index.js",
@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cypress-io/cypress-core-gui.git"
+    "url": "https://github.com/cypress-io/cypress-core-desktop-gui.git"
   },
   "author": "Brian Mann",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cypress-io/cypress-core-gui/issues"
+    "url": "https://github.com/cypress-io/cypress-core-desktop-gui/issues"
   },
-  "homepage": "https://github.com/cypress-io/cypress-core-gui",
+  "homepage": "https://github.com/cypress-io/cypress-core-desktop-gui",
   "dependencies": {
     "coffee-script": "^1.10.0",
     "path": "^0.12.7"
