@@ -21,6 +21,10 @@ describe "Run", ->
       @parse("run myApp --env foo=bar,host=http://localhost:8888")
       expect(@spy).to.be.calledWith("myApp", {env: "foo=bar,host=http://localhost:8888"})
 
+    it "calls run with config", ->
+      @parse("run myApp --config watchForFileChanges=false,baseUrl=localhost")
+      expect(@spy).to.be.calledWith("myApp", {config: "watchForFileChanges=false,baseUrl=localhost"})
+
   context "#constructor", ->
     beforeEach ->
       @spawn  = @sandbox.stub(utils, "spawn")
@@ -37,3 +41,8 @@ describe "Run", ->
       @setup(null, {env: "host=http://localhost:1337,name=brian"})
       pathToProject = path.resolve(process.cwd(), ".")
       expect(@spawn).to.be.calledWith(["--run-project", pathToProject, "--env", "host=http://localhost:1337,name=brian"])
+
+    it "spawns --run-project with --config", ->
+      @setup(null, {config: "watchForFileChanges=false,baseUrl=localhost"})
+      pathToProject = path.resolve(process.cwd(), ".")
+      expect(@spawn).to.be.calledWith(["--run-project", pathToProject, "--config", "watchForFileChanges=false,baseUrl=localhost"])
