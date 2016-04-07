@@ -139,7 +139,6 @@ module.exports = {
     return obj
 
   resolveConfigValues: (config, defaults, resolved = {}) ->
-
     ## pick out only the keys found in configKeys
     _.chain(config)
     .pick(configKeys)
@@ -229,6 +228,9 @@ module.exports = {
     envCLI  = cfg.environmentVariables ? {}
 
     matchesConfigKey = (key) ->
+      if _.has(cfg, key)
+        return key
+
       key = key.toLowerCase().replace(dashesOrUnderscoresRe, "")
       key = str.camelize(key)
 
@@ -236,12 +238,16 @@ module.exports = {
         return key
 
     configFromEnv = _.reduce envProc, (memo, val, key) ->
-      if key = matchesConfigKey(key)
-        cfg[key] = val
-        resolved[key] = {
-          value: val
-          from: "env"
-        }
+      if cfgKey = matchesConfigKey(key)
+        ## only change the value if its the default
+        ## else its been set from the CLI
+        if _.isEqual(cfg[cfgKey], defaults[cfgKey])
+          cfg[cfgKey] = val
+          resolved[cfgKey] = {
+            value: val
+            from: "env"
+          }
+
         memo.push(key)
       memo
     , []
@@ -263,9 +269,20 @@ module.exports = {
     normalize = (key) ->
       key.replace(cypressEnvRe, "")
 
+    convert = (value) ->
+      switch
+        ## convert to number
+        when str.toNumber(value)?.toString() is value
+          str.toNumber(value)
+        ## convert to boolean
+        when str.toBoolean(value)?.toString() is value
+          str.toBoolean(value)
+        else
+          value
+
     _.reduce obj, (memo, value, key) ->
       if isCypressEnvLike(key)
-        memo[normalize(key)] = value
+        memo[normalize(key)] = convert(value)
       memo
     , {}
 

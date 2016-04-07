@@ -731,6 +731,12 @@ describe "lib/cypress", ->
       @sandbox.stub(Tray, "display")
       @sandbox.stub(electron.ipcMain, "on")
 
+    afterEach ->
+      delete process.env.CYPRESS_BASE_URL
+      delete process.env.CYPRESS_port
+      delete process.env.CYPRESS_responseTimeout
+      delete process.env.CYPRESS_watch_for_file_changes
+
     it "passes options to headed.ready", ->
       @sandbox.stub(headed, "ready")
 
@@ -745,7 +751,11 @@ describe "lib/cypress", ->
       sync      = @sandbox.stub(Project.prototype, "sync").resolves()
       getConfig = @sandbox.spy(Project.prototype, "getConfig")
       open      = @sandbox.stub(Server.prototype, "open").resolves()
-      @sandbox.stub(config, "getProcessEnvVars").returns({port: 2222})
+
+      process.env.CYPRESS_BASE_URL = "localhost"
+      process.env.CYPRESS_port = "2222"
+      process.env.CYPRESS_responseTimeout = "5555"
+      process.env.CYPRESS_watch_for_file_changes = "false"
 
       Promise.all([
         user.set({name: "brian", session_token: "session-123"}),
@@ -764,21 +774,39 @@ describe "lib/cypress", ->
           sync: true
           changeEvents: true
           type: "opened"
-          reporter: false
+          report: false
         })
 
         expect(open).to.be.calledWith(@todosPath)
         cfg = open.getCall(0).args[1]
 
         expect(cfg.pageLoadTimeout).to.eq(1000)
-        expect(cfg.port).to.eq(2222)
+        expect(cfg.port).to.eq(2121)
+        expect(cfg.baseUrl).to.eq("localhost")
+        expect(cfg.watchForFileChanges).to.be.false
+        expect(cfg.responseTimeout).to.eq(5555)
         expect(cfg.environmentVariables).not.to.have.property("port")
+        expect(cfg.environmentVariables).not.to.have.property("BASE_URL")
+        expect(cfg.environmentVariables).not.to.have.property("watchForFileChanges")
+        expect(cfg.environmentVariables).not.to.have.property("responseTimeout")
         expect(cfg.resolved.pageLoadTimeout).to.deep.eq({
           value: 1000
           from: "cli"
         })
         expect(cfg.resolved.port).to.deep.eq({
-          value: 2222
+          value: 2121
+          from: "cli"
+        })
+        expect(cfg.resolved.baseUrl).to.deep.eq({
+          value: "localhost"
+          from: "env"
+        })
+        expect(cfg.resolved.watchForFileChanges).to.deep.eq({
+          value: false
+          from: "env"
+        })
+        expect(cfg.resolved.responseTimeout).to.deep.eq({
+          value: 5555
           from: "env"
         })
 
