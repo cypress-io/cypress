@@ -1,14 +1,31 @@
+_       = require("lodash")
+path    = require("path")
 utils   = require("../utils")
 
 class Open
-  constructor: ->
+  constructor: (project = ".", options = {}) ->
     if not (@ instanceof Open)
-      return new Open
+      return new Open(project, options)
 
-    @open()
+    _.defaults options,
+      project:  path.resolve(process.cwd(), project)
 
-  open: ->
-    utils.spawn(null, {
+    @open(options)
+
+  open: (options) ->
+    opts = {}
+    args = ["--project", options.project]
+
+    if options.env
+      args.push("--env", options.env)
+
+    if options.config
+      args.push("--config", options.config)
+
+    if options.port
+      args.push("--port", options.port)
+
+    utils.spawn(args, {
       xvfb: false
       detached: true
       stdio: ["ignore", "ignore", "ignore"]

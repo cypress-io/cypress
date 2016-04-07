@@ -18,6 +18,7 @@ descriptions = {
   env:         "sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json"
   config:      "sets configuration values. separate multiple values with a comma. overrides any value in cypress.json."
   version:     "installs a specific version of Cypress"
+  noLaunch:      "disable automatically launching your project and opening Chrome"
 }
 
 text = (d) ->
@@ -77,10 +78,15 @@ module.exports = ->
       require("./commands/ci")(key, parseOpts(opts))
 
   program
-    .command("open")
-    .description("Opens Cypress as a regular application")
-    .action (key, opts) ->
-      require("./commands/open")()
+    .command("open [project]")
+    .usage("[project] [options]")
+    .description("Opens Cypress as a regular application. If your current pwd matches an existing Cypress project, that project will automatically open and Chrome will be launched.")
+    .option("-p, --port <port>",         text("port"))
+    .option("-e, --env <env>",           text("env"))
+    .option("-c, --config <config>",     text("config"))
+    .option("--no-auto-launch",          text("noLaunch"))
+    .action (project, opts) ->
+      require("./commands/open")(project, parseOpts(opts))
 
   program
     .command("get:path")
