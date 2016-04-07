@@ -379,7 +379,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         cypress.start(["--run-project=#{@todosPath}"]).then  =>
-          expect(Reporter.create).to.be.calledWith(true)
+          expect(Reporter.create).to.be.calledWith("spec")
           @expectExitWith(0)
 
     it "can change the reporter to nyan", ->

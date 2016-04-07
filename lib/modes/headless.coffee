@@ -70,7 +70,7 @@ module.exports = {
     project.open(options.projectPath, options, {
       morgan:       false
       socketId:     id
-      reporter:     options.reporter ? true
+      report:       true
       isHeadless:   true
     })
     .catch {portInUse: true}, (err) ->

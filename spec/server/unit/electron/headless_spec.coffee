@@ -100,7 +100,7 @@ describe "electron/headless", ->
         }, {
           morgan: false
           socketId: 1234
-          reporter: true
+          report: true
           isHeadless: true
         })
 

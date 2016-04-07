@@ -17,10 +17,10 @@ isCypressEnvLike = (key) ->
 
 defaults = {
   morgan:         true
-  reporter:       null
   baseUrl:        null
   socketId:       null
   isHeadless:     false
+  reporter:       "spec"
   clientRoute:    "/__/"
   xhrRoute:       "/xhrs/"
   socketIoRoute:  "/__socket.io"
@@ -100,13 +100,7 @@ module.exports = {
   mergeDefaults: (config = {}, options = {}) ->
     resolved = {}
 
-    _.extend config, _.pick(options, "morgan", "isHeadless", "socketId")
-
-    ## if we have a reporter set in our config and
-    ## options.reporter = true then dont overwrite
-    ## the config reporter, just remove options.reporter
-    if options.reporter is true and config.reporter
-      delete options.reporter
+    _.extend config, _.pick(options, "morgan", "isHeadless", "socketId", "report")
 
     _.each @whitelist(options), (val, key) ->
       resolved[key] = "cli"

@@ -48,11 +48,6 @@ class Reporter
     if not (@ instanceof Reporter)
       return new Reporter(reporterName)
 
-    ## coerce 'true' reporter
-    ## into the default spec reporter
-    if reporterName is true
-      reporterName = "spec"
-
     @reporterName = reporterName
 
     if reporterName is "teamcity"

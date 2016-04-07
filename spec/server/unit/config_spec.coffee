@@ -162,8 +162,8 @@ describe "lib/config", ->
     it "socketId=null", ->
       @defaults "socketId", null
 
-    it "reporter=null", ->
-      @defaults "reporter", null
+    it "reporter=spec", ->
+      @defaults "reporter", "spec"
 
     it "watchForFileChanges=true", ->
       @defaults "watchForFileChanges", true
@@ -283,7 +283,7 @@ describe "lib/config", ->
 
         expect(cfg.resolved).to.deep.eq({
           port:                       { value: 2020, from: "default" },
-          reporter:                   { value: null, from: "default" },
+          reporter:                   { value: "spec", from: "default" },
           baseUrl:                    { value: "http://localhost:8080", from: "config" },
           commandTimeout:             { value: 4000, from: "default" },
           pageLoadTimeout:            { value: 30000, from: "default" },

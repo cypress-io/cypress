@@ -36,7 +36,7 @@ class Project extends EE
     _.defaults options, {
       type:         "opened"
       sync:         false
-      reporter:     false
+      report:       false
       changeEvents: false
     }
 
@@ -121,8 +121,8 @@ class Project extends EE
 
     ## if we've passed down reporter
     ## then record these via mocha reporter
-    if r = config.reporter
-      reporter = Reporter.create(r)
+    if config.report
+      reporter = Reporter.create(config.reporter)
 
     @server.startWebsockets(@watchers, config, {
       onIsNewProject: =>
