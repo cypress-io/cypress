@@ -732,6 +732,7 @@ describe "lib/cypress", ->
       @sandbox.stub(electron.ipcMain, "on")
 
     afterEach ->
+      delete process.env.CYPRESS_FILE_SERVER_FOLDER
       delete process.env.CYPRESS_BASE_URL
       delete process.env.CYPRESS_port
       delete process.env.CYPRESS_responseTimeout
@@ -752,6 +753,7 @@ describe "lib/cypress", ->
       getConfig = @sandbox.spy(Project.prototype, "getConfig")
       open      = @sandbox.stub(Server.prototype, "open").resolves()
 
+      process.env.CYPRESS_FILE_SERVER_FOLDER = "foo"
       process.env.CYPRESS_BASE_URL = "localhost"
       process.env.CYPRESS_port = "2222"
       process.env.CYPRESS_responseTimeout = "5555"
@@ -762,6 +764,12 @@ describe "lib/cypress", ->
 
         Project.add(@todosPath)
       ])
+      .then =>
+        settings.read(@todosPath)
+      .then (json) =>
+        ## this should be overriden by the env argument
+        json.baseUrl = "http://localhost:8080"
+        settings.write(@todosPath, json)
       .then =>
         cypress.start(["--port=2121", "--pageLoadTimeout=1000", "--foo=bar"])
       .then =>
@@ -780,15 +788,22 @@ describe "lib/cypress", ->
         expect(open).to.be.calledWith(@todosPath)
         cfg = open.getCall(0).args[1]
 
+        expect(cfg.fileServerFolder).to.eq(path.join(@todosPath, "foo"))
         expect(cfg.pageLoadTimeout).to.eq(1000)
         expect(cfg.port).to.eq(2121)
         expect(cfg.baseUrl).to.eq("localhost")
         expect(cfg.watchForFileChanges).to.be.false
         expect(cfg.responseTimeout).to.eq(5555)
+        expect(cfg.environmentVariables).not.to.have.property("fileServerFolder")
         expect(cfg.environmentVariables).not.to.have.property("port")
         expect(cfg.environmentVariables).not.to.have.property("BASE_URL")
         expect(cfg.environmentVariables).not.to.have.property("watchForFileChanges")
         expect(cfg.environmentVariables).not.to.have.property("responseTimeout")
+
+        expect(cfg.resolved.fileServerFolder).to.deep.eq({
+          value: "foo"
+          from: "env"
+        })
         expect(cfg.resolved.pageLoadTimeout).to.deep.eq({
           value: 1000
           from: "cli"

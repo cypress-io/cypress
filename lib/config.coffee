@@ -239,9 +239,9 @@ module.exports = {
 
     configFromEnv = _.reduce envProc, (memo, val, key) ->
       if cfgKey = matchesConfigKey(key)
-        ## only change the value if its the default
-        ## else its been set from the CLI
-        if _.isEqual(cfg[cfgKey], defaults[cfgKey])
+        ## only change the value if it hasnt been
+        ## set by the CLI. override default + config
+        if resolved[cfgKey] isnt "cli"
           cfg[cfgKey] = val
           resolved[cfgKey] = {
             value: val
