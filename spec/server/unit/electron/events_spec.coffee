@@ -36,6 +36,9 @@ describe "lib/electron/handlers/events", ->
       }
     }
 
+    @sandbox.stub(electron.ipcMain, "on")
+    @sandbox.stub(electron.ipcMain, "removeAllListeners")
+
     ## setup default options and event and id
     ## as the first three arguments
     @handleEvent = _.partial(events.handleEvent, @options, @event, @id)
@@ -49,21 +52,19 @@ describe "lib/electron/handlers/events", ->
 
   context ".stop", ->
     it "calls ipc#removeAllListeners", ->
-      ral = electron.ipcMain.removeAllListeners = @sandbox.spy()
       events.stop()
-      expect(ral).to.be.calledOnce
+      expect(electron.ipcMain.removeAllListeners).to.be.calledOnce
 
   context ".start", ->
     it "ipc attaches callback on request", ->
-      onFn = electron.ipcMain.on = @sandbox.stub()
       handleEvent = @sandbox.stub(events, "handleEvent")
       events.start({foo: "bar"})
-      expect(onFn).to.be.calledWith("request")
+      expect(electron.ipcMain.on).to.be.calledWith("request")
 
     it "partials in options in request callback", ->
-      onFn = electron.ipcMain.on = @sandbox.stub()
-      onFn.yields("arg1", "arg2")
+      electron.ipcMain.on.yields("arg1", "arg2")
       handleEvent = @sandbox.stub(events, "handleEvent")
+
       events.start({foo: "bar"})
       expect(handleEvent).to.be.calledWith({foo: "bar"}, "arg1", "arg2")
 

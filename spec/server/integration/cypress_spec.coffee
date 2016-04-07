@@ -9,7 +9,10 @@ inquirer = require("inquirer")
 Fixtures = require("../helpers/fixtures")
 pkg      = require("#{root}package.json")
 settings = require("#{root}lib/util/settings")
+Tray     = require("#{root}lib/electron/handlers/tray")
+Events   = require("#{root}lib/electron/handlers/events")
 project  = require("#{root}lib/electron/handlers/project")
+Renderer = require("#{root}lib/electron/handlers/renderer")
 ci       = require("#{root}lib/modes/ci")
 headed   = require("#{root}lib/modes/headed")
 headless = require("#{root}lib/modes/headless")
@@ -503,6 +506,32 @@ describe "lib/cypress", ->
             expect(project.opened().cfg.morgan).to.be.false
             @expectExitWith(0)
 
+    describe "config overrides", ->
+      it "can override default values", ->
+        Promise.all([
+          user.set({name: "brian", session_token: "session-123"}),
+
+          Project.add(@todosPath)
+        ])
+        .then =>
+          cypress.start(["--run-project=#{@todosPath}", "--baseUrl=localhost", "--requestTimeout=1234"])
+        .then =>
+          cfg = project.opened().cfg
+
+          expect(cfg.baseUrl).to.eq("localhost")
+          expect(cfg.requestTimeout).to.eq(1234)
+
+          expect(cfg.resolved.baseUrl).to.deep.eq({
+            value: "localhost"
+            from: "cli"
+          })
+          expect(cfg.resolved.requestTimeout).to.deep.eq({
+            value: 1234
+            from: "cli"
+          })
+
+          @expectExitWith(0)
+
     describe "--port", ->
       beforeEach ->
         headless.waitForTestsToFinishRunning.resolves({})
@@ -692,6 +721,67 @@ describe "lib/cypress", ->
       cypress.start(["--remove-ids", "--project=path/to/no/project"]).then =>
         @expectExitWithErr("NO_PROJECT_FOUND_AT_PROJECT_ROOT", "path/to/no/project")
 
+  context "headed", ->
+    beforeEach ->
+      @win = {}
+      @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      @sandbox.stub(headed, "notify").resolves()
+      @sandbox.stub(Renderer, "create").resolves(@win)
+      @sandbox.spy(Events, "start")
+      @sandbox.stub(Tray, "display")
+      @sandbox.stub(electron.ipcMain, "on")
+
+    it "passes options to headed.ready", ->
+      @sandbox.stub(headed, "ready")
+
+      cypress.start(["--updating", "--port=2121", "--pageLoadTimeout=1000"]).then ->
+        expect(headed.ready).to.be.calledWithMatch({updating: true, port: 2121, pageLoadTimeout: 1000})
+
+    it "passes options to Events.start", ->
+      cypress.start(["--port=2121", "--pageLoadTimeout=1000"]).then ->
+        expect(Events.start).to.be.calledWithMatch({port: 2121, pageLoadTimeout: 1000})
+
+    it "passes filtered options to Project#open and sets cli config", ->
+      sync      = @sandbox.stub(Project.prototype, "sync").resolves()
+      getConfig = @sandbox.spy(Project.prototype, "getConfig")
+      open      = @sandbox.stub(Server.prototype, "open").resolves()
+      @sandbox.stub(config, "getProcessEnvVars").returns({port: 2222})
+
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@todosPath)
+      ])
+      .then =>
+        cypress.start(["--port=2121", "--pageLoadTimeout=1000", "--foo=bar"])
+      .then =>
+        options = Events.start.firstCall.args[0]
+        Events.handleEvent(options, {}, 123, "open:project", @todosPath)
+      .then =>
+        expect(getConfig).to.be.calledWith({
+          port: 2121
+          pageLoadTimeout: 1000
+          sync: true
+          changeEvents: true
+          type: "opened"
+          reporter: false
+        })
+
+        expect(open).to.be.calledWith(@todosPath)
+        cfg = open.getCall(0).args[1]
+
+        expect(cfg.pageLoadTimeout).to.eq(1000)
+        expect(cfg.port).to.eq(2222)
+        expect(cfg.environmentVariables).not.to.have.property("port")
+        expect(cfg.resolved.pageLoadTimeout).to.deep.eq({
+          value: 1000
+          from: "cli"
+        })
+        expect(cfg.resolved.port).to.deep.eq({
+          value: 2222
+          from: "env"
+        })
+
   context "no args", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
@@ -700,8 +790,3 @@ describe "lib/cypress", ->
     it "runs headed and does not exit", ->
       cypress.start().then ->
         expect(headed.ready).to.be.calledOnce
-
-    it "passes options to headed.ready", ->
-      cypress.start(["--updating"]).then ->
-        expect(headed.ready).to.be.calledWithMatch({updating: true})
-

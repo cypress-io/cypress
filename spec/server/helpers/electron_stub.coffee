@@ -3,7 +3,10 @@
 module.exports = {
   shell: {}
   dialog: {}
-  ipcMain: {}
+  ipcMain: {
+    on: ->
+    removeAllListeners: ->
+  }
   nativeImage: {
     createFromPath: -> {}
   }

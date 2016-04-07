@@ -7,6 +7,7 @@ scaffold = require("./scaffold")
 
 ## cypress following by _
 cypressEnvRe = /^(cypress_)/i
+dashesOrUnderscoresRe = /^(_-)+/
 
 folders = "fileServerFolder supportFolder fixturesFolder integrationFolder unitFolder".split(" ")
 configKeys = "port reporter baseUrl commandTimeout pageLoadTimeout requestTimeout responseTimeout waitForAnimations animationDistanceThreshold watchForFileChanges viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder environmentVariables".split(" ")
@@ -64,7 +65,7 @@ module.exports = {
   getConfigKeys: -> configKeys
 
   whitelist: (obj = {}) ->
-    _.pick(obj, configKeys...)
+    _.pick(obj, configKeys)
 
   get: (projectRoot, options = {}) ->
     Promise.all([
@@ -101,20 +102,16 @@ module.exports = {
 
     _.extend config, _.pick(options, "morgan", "isHeadless", "socketId")
 
-    if _.isString(options.reporter)
-      ## this is wrong
-      resolved.reporter = "cli"
-      config.reporter = options.reporter
+    ## if we have a reporter set in our config and
+    ## options.reporter = true then dont overwrite
+    ## the config reporter, just remove options.reporter
+    if options.reporter is true and config.reporter
+      delete options.reporter
 
-    if options.reporter and not config.reporter
-      config.reporter = options.reporter
-
-    if p = options.port
-      resolved.port = "cli"
-      config.port = p
-
-    if e = options.environmentVariables
-      config.environmentVariables = e
+    _.each @whitelist(options), (val, key) ->
+      resolved[key] = "cli"
+      config[key] = val
+      return
 
     if url = config.baseUrl
       ## always strip trailing slashes
@@ -236,6 +233,26 @@ module.exports = {
     envFile = cfg.envFile ? {}
     envProc = @getProcessEnvVars(process.env) ? {}
     envCLI  = cfg.environmentVariables ? {}
+
+    matchesConfigKey = (key) ->
+      key = key.toLowerCase().replace(dashesOrUnderscoresRe, "")
+      key = str.camelize(key)
+
+      if _.has(cfg, key)
+        return key
+
+    configFromEnv = _.reduce envProc, (memo, val, key) ->
+      if key = matchesConfigKey(key)
+        cfg[key] = val
+        resolved[key] = {
+          value: val
+          from: "env"
+        }
+        memo.push(key)
+      memo
+    , []
+
+    envProc = _.omit(envProc, configFromEnv)
 
     resolveFrom("config",  envCfg)
     resolveFrom("envFile", envFile)
