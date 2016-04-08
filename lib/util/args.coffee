@@ -5,7 +5,7 @@ coerce   = require("./coerce")
 config   = require("../config")
 cwd      = require("../cwd")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci updating ping coords key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci updating ping coords key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config".split(" ")
 whitelist = whitelist.concat(config.getConfigKeys())
 
 parseCoords = (coords) ->
@@ -72,6 +72,19 @@ module.exports = {
     if envs = options.environmentVariables
       backup("environmentVariables", options)
       options.environmentVariables = parseNestedValues(envs)
+
+    if c = options.config
+      backup("config", options)
+
+      ## convert config to an object
+      c = parseNestedValues(c)
+
+      ## store the config
+      options.config = c
+
+      ## and pull up and flatten any whitelisted
+      ## config directly into our options
+      _.extend options, config.whitelist(c)
 
     ## normalize runProject or project to projectPath
     if rp = options.runProject or p = options.project

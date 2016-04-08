@@ -514,7 +514,7 @@ describe "lib/cypress", ->
           Project.add(@todosPath)
         ])
         .then =>
-          cypress.start(["--run-project=#{@todosPath}", "--baseUrl=localhost", "--requestTimeout=1234"])
+          cypress.start(["--run-project=#{@todosPath}", "--config=requestTimeout=1234,baseUrl=localhost"])
         .then =>
           cfg = project.opened().cfg
 
@@ -741,12 +741,19 @@ describe "lib/cypress", ->
     it "passes options to headed.ready", ->
       @sandbox.stub(headed, "ready")
 
-      cypress.start(["--updating", "--port=2121", "--pageLoadTimeout=1000"]).then ->
-        expect(headed.ready).to.be.calledWithMatch({updating: true, port: 2121, pageLoadTimeout: 1000})
+      cypress.start(["--updating", "--port=2121", "--config=pageLoadTimeout=1000"]).then ->
+        expect(headed.ready).to.be.calledWithMatch({
+          updating: true
+          port: 2121
+          pageLoadTimeout: 1000
+        })
 
     it "passes options to Events.start", ->
-      cypress.start(["--port=2121", "--pageLoadTimeout=1000"]).then ->
-        expect(Events.start).to.be.calledWithMatch({port: 2121, pageLoadTimeout: 1000})
+      cypress.start(["--port=2121", "--config=pageLoadTimeout=1000"]).then ->
+        expect(Events.start).to.be.calledWithMatch({
+          port: 2121,
+          pageLoadTimeout: 1000
+        })
 
     it "passes filtered options to Project#open and sets cli config", ->
       sync      = @sandbox.stub(Project.prototype, "sync").resolves()
@@ -771,7 +778,7 @@ describe "lib/cypress", ->
         json.baseUrl = "http://localhost:8080"
         settings.write(@todosPath, json)
       .then =>
-        cypress.start(["--port=2121", "--pageLoadTimeout=1000", "--foo=bar"])
+        cypress.start(["--port=2121", "--config", "pageLoadTimeout=1000", "--foo=bar"])
       .then =>
         options = Events.start.firstCall.args[0]
         Events.handleEvent(options, {}, 123, "open:project", @todosPath)
