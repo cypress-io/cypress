@@ -214,7 +214,7 @@ module.exports = {
     return obj
 
   parseEnv: (cfg, resolved = {}) ->
-    envVars = resolved.environmentVariables ?= {}
+    envVars = resolved.environmentVariables = {}
 
     resolveFrom = (from, obj = {}) ->
       _.each obj, (val, key) ->

@@ -778,7 +778,7 @@ describe "lib/cypress", ->
         json.baseUrl = "http://localhost:8080"
         settings.write(@todosPath, json)
       .then =>
-        cypress.start(["--port=2121", "--config", "pageLoadTimeout=1000", "--foo=bar"])
+        cypress.start(["--port=2121", "--config", "pageLoadTimeout=1000", "--foo=bar", "--env=baz=baz"])
       .then =>
         options = Events.start.firstCall.args[0]
         Events.handleEvent(options, {}, 123, "open:project", @todosPath)
@@ -790,6 +790,7 @@ describe "lib/cypress", ->
           changeEvents: true
           type: "opened"
           report: false
+          environmentVariables: { baz: "baz" }
         })
 
         expect(open).to.be.calledWith(@todosPath)
@@ -801,6 +802,7 @@ describe "lib/cypress", ->
         expect(cfg.baseUrl).to.eq("localhost")
         expect(cfg.watchForFileChanges).to.be.false
         expect(cfg.responseTimeout).to.eq(5555)
+        expect(cfg.environmentVariables.baz).to.eq("baz")
         expect(cfg.environmentVariables).not.to.have.property("fileServerFolder")
         expect(cfg.environmentVariables).not.to.have.property("port")
         expect(cfg.environmentVariables).not.to.have.property("BASE_URL")
@@ -830,6 +832,10 @@ describe "lib/cypress", ->
         expect(cfg.resolved.responseTimeout).to.deep.eq({
           value: 5555
           from: "env"
+        })
+        expect(cfg.resolved.environmentVariables.baz).to.deep.eq({
+          value: "baz"
+          from: "cli"
         })
 
   context "no args", ->
