@@ -79,7 +79,7 @@ module.exports = {
       }
     })
 
-  createProject: (session) ->
+  createProject: (projectName, session) ->
     rp.post({
       url: Routes.projects()
       json: true
@@ -87,12 +87,13 @@ module.exports = {
         "x-session": session
         "x-platform": os.platform()
         "x-version": pkg.version
+        "x-project-name": projectName
       }
     })
     .promise()
     .get("uuid")
 
-  updateProject: (projectId, type, session) ->
+  updateProject: (projectId, type, projectName, session) ->
     ## TODO: change this to PUT method
     rp.get({
       url: Routes.project(projectId)
@@ -102,6 +103,7 @@ module.exports = {
         "x-session": session
         "x-platform": os.platform()
         "x-version": pkg.version
+        "x-project-name": projectName
       }
     })
 

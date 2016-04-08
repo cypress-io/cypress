@@ -122,13 +122,14 @@ describe "lib/api", ->
     it "POSTs /projects", ->
       nock("http://localhost:1234")
       .matchHeader("x-session", "session-123")
+      .matchHeader("x-project-name", "foobar")
       .matchHeader("x-version", pkg.version)
       .post("/projects")
       .reply(200, {
         uuid: "uuid-123"
       })
 
-      api.createProject("session-123").then (uuid) ->
+      api.createProject("foobar", "session-123").then (uuid) ->
         expect(uuid).to.eq("uuid-123")
 
   context ".updateProject", ->
@@ -138,10 +139,11 @@ describe "lib/api", ->
       .matchHeader("x-platform", "linux")
       .matchHeader("x-type", "opened")
       .matchHeader("x-version", pkg.version)
+      .matchHeader("x-project-name", "foobar")
       .get("/projects/project-123")
       .reply(200, {})
 
-      api.updateProject("project-123", "opened", "session-123").then (resp) ->
+      api.updateProject("project-123", "opened", "foobar", "session-123").then (resp) ->
         expect(resp).to.deep.eq({})
 
   context ".createRaygunException", ->

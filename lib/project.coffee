@@ -44,12 +44,12 @@ class Project extends EE
     .then (cfg) =>
       @server.open(@projectRoot, cfg)
       .then =>
-        ## sync but do not block
-        @sync(options)
-
         ## store the cfg from
         ## opening the server
         @cfg = cfg
+
+        ## sync but do not block
+        @sync(options)
 
         Promise.join(
           @watchSettingsAndStartWebsockets(options.changeEvents, cfg)
@@ -93,9 +93,12 @@ class Project extends EE
       ## bail if sync isnt true
       return if not options.sync
 
-      user.ensureSession()
-      .then (session) ->
-        api.updateProject(id, options.type, session)
+      Promise.all([
+        user.ensureSession()
+        @getConfig()
+      ])
+      .spread (session, cfg) ->
+        api.updateProject(id, options.type, cfg.projectName, session)
 
   watchSettings: (changeEvents) ->
     ## bail if we havent been told to
@@ -259,10 +262,13 @@ class Project extends EE
     if id = process.env.CYPRESS_PROJECT_ID
       return @writeProjectId(id)
 
-    user.ensureSession()
+    Promise.all([
+      user.ensureSession()
+      @getConfig()
+    ])
     .bind(@)
-    .then (session) ->
-      api.createProject(session)
+    .spread (session, cfg) ->
+      api.createProject(cfg.projectName, session)
     .then(@writeProjectId)
 
   getProjectId: ->

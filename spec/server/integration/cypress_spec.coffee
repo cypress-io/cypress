@@ -193,7 +193,7 @@ describe "lib/cypress", ->
           @expectExitWith(0)
 
     it "generates a project id if missing one", ->
-      @sandbox.stub(api, "createProject").resolves("pristine-id-123")
+      @sandbox.stub(api, "createProject").withArgs("pristine", "session-123").resolves("pristine-id-123")
 
       Promise.all([
         user.set({name: "brian", session_token: "session-123"}),
@@ -210,7 +210,7 @@ describe "lib/cypress", ->
               expect(id).to.eq("pristine-id-123")
 
     it "does not error when getting a creating a project id fails", ->
-      @sandbox.stub(api, "createProject").rejects(new Error)
+      @sandbox.stub(api, "createProject").withArgs("pristine", "session-123").rejects(new Error)
 
       Promise.all([
         user.set({name: "brian", session_token: "session-123"}),
@@ -754,6 +754,55 @@ describe "lib/cypress", ->
           port: 2121,
           pageLoadTimeout: 1000
         })
+
+    it "calls api.updateProject with projectName and session on open", ->
+      @sandbox.stub(Server.prototype, "open").resolves()
+      @sandbox.stub(api, "updateProject").resolves()
+
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@todosPath)
+
+        Project.id(@todosPath)
+        .then (id) =>
+          @projectId = id
+      ])
+      .then =>
+        cypress.start([])
+      .then =>
+        options = Events.start.firstCall.args[0]
+        Events.handleEvent(options, {}, 123, "open:project", @todosPath)
+      .delay(100)
+      .then =>
+        ## must delay here because sync isnt promise connected
+        expect(api.updateProject).to.be.calledWith(@projectId, "opened", "todos", "session-123")
+
+    it "calls api.updateProject with projectName and session on close", ->
+      @sandbox.stub(Server.prototype, "open").resolves()
+      @sandbox.stub(api, "updateProject").resolves()
+
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@todosPath)
+
+        Project.id(@todosPath)
+        .then (id) =>
+          @projectId = id
+      ])
+      .then =>
+        cypress.start([])
+      .then =>
+        options = Events.start.firstCall.args[0]
+        Events.handleEvent(options, {}, 123, "open:project", @todosPath)
+        .delay(100)
+        .then =>
+          Events.handleEvent(options, {}, 123, "close:project")
+      .delay(100)
+      .then =>
+        ## must delay here because sync isnt promise connected
+        expect(api.updateProject).to.be.calledWith(@projectId, "closed", "todos", "session-123")
 
     it "passes filtered options to Project#open and sets cli config", ->
       sync      = @sandbox.stub(Project.prototype, "sync").resolves()
