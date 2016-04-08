@@ -2,6 +2,7 @@ _        = require("lodash")
 str      = require("underscore.string")
 path     = require("path")
 Promise  = require("bluebird")
+coerce   = require("./util/coerce")
 settings = require("./util/settings")
 scaffold = require("./scaffold")
 
@@ -269,20 +270,9 @@ module.exports = {
     normalize = (key) ->
       key.replace(cypressEnvRe, "")
 
-    convert = (value) ->
-      switch
-        ## convert to number
-        when str.toNumber(value)?.toString() is value
-          str.toNumber(value)
-        ## convert to boolean
-        when str.toBoolean(value)?.toString() is value
-          str.toBoolean(value)
-        else
-          value
-
     _.reduce obj, (memo, value, key) ->
       if isCypressEnvLike(key)
-        memo[normalize(key)] = convert(value)
+        memo[normalize(key)] = coerce(value)
       memo
     , {}
 

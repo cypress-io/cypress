@@ -1,6 +1,7 @@
 _        = require("lodash")
 path     = require("path")
 minimist = require("minimist")
+coerce   = require("./coerce")
 config   = require("../config")
 cwd      = require("../cwd")
 
@@ -11,12 +12,15 @@ parseCoords = (coords) ->
   [x, y] = _.map(coords.split("x"), parseFloat)
   {x: x, y: y}
 
-parseEnv = (envs) ->
+parseNestedValues = (vals) ->
   ## convert foo=bar,version=1.2.3 to
   ## {foo: 'bar', version: '1.2.3'}
-  _(envs.split(",")).map (pair) ->
+  _(vals.split(","))
+  .map (pair) ->
     pair.split("=")
-  .object().value()
+  .object()
+  .mapValues(coerce)
+  .value()
 
 backup = (key, options) ->
   options["_#{key}"] = options[key]
@@ -67,7 +71,7 @@ module.exports = {
 
     if envs = options.environmentVariables
       backup("environmentVariables", options)
-      options.environmentVariables = parseEnv(envs)
+      options.environmentVariables = parseNestedValues(envs)
 
     ## normalize runProject or project to projectPath
     if rp = options.runProject or p = options.project
