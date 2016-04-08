@@ -16,6 +16,7 @@ module.exports = {
       json: true
       headers: {
         "x-project-token": options.key
+        "x-project-name":  options.projectName
         "x-git-branch":    options.branch
         "x-git-author":    options.author
         "x-git-message":   options.message
@@ -36,6 +37,7 @@ module.exports = {
       headers: {
         "x-ci-id":         options.ciId
         "x-project-token": options.key
+        "x-project-name":  options.projectName
         "x-version":       pkg.version
         "x-platform":      os.platform()
         "x-provider":      provider.get()

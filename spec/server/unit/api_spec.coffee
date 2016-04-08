@@ -16,6 +16,7 @@ describe "lib/api", ->
     it "POST /ci/:id + returns ci_guid", ->
       nock("http://localhost:1234")
       .matchHeader("x-project-token", "guid")
+      .matchHeader("x-project-name", "foobar")
       .matchHeader("x-git-branch", "master")
       .matchHeader("x-git-author", "brian")
       .matchHeader("x-git-message", "such hax")
@@ -33,6 +34,7 @@ describe "lib/api", ->
         author: "brian"
         message: "such hax"
         projectId: "project-123"
+        projectName: "foobar"
       })
       .then (ret) ->
         expect(ret).to.eq("new_ci_guid")
@@ -41,6 +43,7 @@ describe "lib/api", ->
     it "PUTS /ci/:id", ->
       nock("http://localhost:1234")
       .matchHeader("x-project-token", "key-123")
+      .matchHeader("x-project-name", "foobar")
       .matchHeader("x-version", pkg.version)
       .matchHeader("x-platform", "linux")
       .matchHeader("x-provider", "circle")
@@ -55,6 +58,7 @@ describe "lib/api", ->
         key: "key-123"
         ciId: "ci-123"
         projectId: "project-123"
+        projectName: "foobar"
         stats: {
           tests: 3
           passes: 1

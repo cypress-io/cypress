@@ -38,7 +38,7 @@ module.exports = {
 
       errors.throw("NOT_CI_ENVIRONMENT")
 
-  ensureProjectAPIToken: (projectId, projectPath, key) ->
+  ensureProjectAPIToken: (projectId, projectPath, projectName, key) ->
     if not key
       return errors.throw("CI_KEY_MISSING")
 
@@ -53,6 +53,7 @@ module.exports = {
       api.createCi({
         key:       key
         projectId: projectId
+        projectName: projectName
         branch:    git.branch
         author:    git.author
         message:   git.message
@@ -69,12 +70,13 @@ module.exports = {
             ## logger.createException(err)
             errors.throw("CI_CANNOT_COMMUNICATE")
 
-  reportStats: (projectId, ciId, key, stats) ->
+  reportStats: (projectId, ciId, projectName, key, stats) ->
     api.updateCi({
       key:       key
       ciId:      ciId
       stats:     stats
       projectId: projectId
+      projectName: projectName
     })
     .catch (err) ->
       ## swallow errors
@@ -88,17 +90,21 @@ module.exports = {
 
     @ensureCi()
     .then ->
-      Project.add(projectPath)
-    .then =>
-      Project.id(projectPath)
-    .then (id) =>
-      @ensureProjectAPIToken(id, projectPath, options.key)
+      Promise.all([
+        Project.id(projectPath)
+        Project.config(projectPath)
+        Project.add(projectPath)
+      ])
+    .spread (id, cfg = {}) =>
+      {projectName} = cfg
+
+      @ensureProjectAPIToken(id, projectPath, projectName, options.key)
       .then (ciId) =>
         ## dont check that the user is logged in
         options.ensureSession = false
 
         headless.run(options)
         .then (stats = {}) =>
-          @reportStats(id, ciId, options.key, stats)
+          @reportStats(id, ciId, projectName, options.key, stats)
           .return(stats.failures)
 }

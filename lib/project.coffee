@@ -320,6 +320,9 @@ class Project extends EE
     @paths().then (paths) ->
       path in paths
 
+  @config = (path) ->
+    Project(path).getConfig()
+
   @getSecretKeyByPath = (path) ->
     ## get project id
     Project.id(path)

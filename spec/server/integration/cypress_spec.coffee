@@ -205,7 +205,7 @@ describe "lib/cypress", ->
           @expectExitWith(0)
 
           ## give it time to request the project id
-          Promise.delay(100).then =>
+          Promise.delay(200).then =>
             Project(@pristinePath).getProjectId().then (id) ->
               expect(id).to.eq("pristine-id-123")
 
@@ -219,7 +219,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         cypress.start(["--run-project=#{@pristinePath}"]).then =>
-          Promise.delay(100).then =>
+          Promise.delay(200).then =>
             @expectExitWith(0)
 
     it "prompts to add the project and then immediately runs the tests and exits with 0", ->
@@ -592,6 +592,16 @@ describe "lib/cypress", ->
       delete process.env.CYPRESS_PROJECT_ID
 
     beforeEach ->
+      @setup = (projectName) =>
+        @createCi = @sandbox.stub(api, "createCi").withArgs({
+          key: "secret-key-123"
+          projectId: @projectId
+          projectName: projectName
+          branch: "bem/ci"
+          author: "brian"
+          message: "foo"
+        })
+
       @sandbox.stub(os, "platform").returns("linux")
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(ci, "getBranch").resolves("bem/ci")
@@ -606,27 +616,22 @@ describe "lib/cypress", ->
       Promise.all([
         ## make sure we have no user object
         user.set({})
-        .then =>
-          Project.id(@todosPath)
+
+        Project.id(@todosPath)
         .then (id) =>
           @projectId = id
       ])
-      .then =>
-        @createCi = @sandbox.stub(api, "createCi").withArgs({
-          key: "secret-key-123"
-          projectId: @projectId
-          branch: "bem/ci"
-          author: "brian"
-          message: "foo"
-        })
 
     it "runs project in ci and exits with number of failures", ->
+      @setup("todos")
+
       @createCi.resolves("ci_guid-123")
 
       @updateCi = @sandbox.stub(api, "updateCi").withArgs({
         key: "secret-key-123"
         ciId: "ci_guid-123"
         projectId: @projectId
+        projectName: "todos"
         stats: {failures: 10}
       }).resolves()
 
@@ -635,6 +640,8 @@ describe "lib/cypress", ->
         @expectExitWith(10)
 
     it "uses process.env.CYPRESS_PROJECT_ID", ->
+      @setup("pristine")
+
       ## set the projectId to be todos even though
       ## we are running the prisine project
       process.env.CYPRESS_PROJECT_ID = @projectId
@@ -646,10 +653,14 @@ describe "lib/cypress", ->
         @expectExitWith(10)
 
     it "logs error when missing project id", ->
+      @setup("pristine")
+
       cypress.start(["--run-project=#{@pristinePath}", "--key=secret-key-123", "--ci"]).then =>
         @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
 
     it "logs error and exits when ci key is not valid", ->
+      @setup("todos")
+
       err = new Error
       err.statusCode = 401
       @createCi.rejects(err)
@@ -658,6 +669,8 @@ describe "lib/cypress", ->
         @expectExitWithErr("CI_KEY_NOT_VALID", "secre...y-123")
 
     it "logs error and exits when project could not be found", ->
+      @setup("todos")
+
       err = new Error
       err.statusCode = 404
       @createCi.rejects(err)
@@ -666,6 +679,8 @@ describe "lib/cypress", ->
         @expectExitWithErr("CI_PROJECT_NOT_FOUND")
 
     it "logs error and exits when cannot communicate with api", ->
+      @setup("todos")
+
       err = new Error
       err.statusCode = 500
       @createCi.rejects(err)
@@ -674,6 +689,8 @@ describe "lib/cypress", ->
         @expectExitWithErr("CI_CANNOT_COMMUNICATE")
 
     it "logs error and exits when ci key is missing", ->
+      @setup("todos")
+
       err = new Error
       err.statusCode = 401
       @createCi.rejects(err)
@@ -773,7 +790,7 @@ describe "lib/cypress", ->
       .then =>
         options = Events.start.firstCall.args[0]
         Events.handleEvent(options, {}, 123, "open:project", @todosPath)
-      .delay(100)
+      .delay(200)
       .then =>
         ## must delay here because sync isnt promise connected
         expect(api.updateProject).to.be.calledWith(@projectId, "opened", "todos", "session-123")
@@ -796,10 +813,10 @@ describe "lib/cypress", ->
       .then =>
         options = Events.start.firstCall.args[0]
         Events.handleEvent(options, {}, 123, "open:project", @todosPath)
-        .delay(100)
+        .delay(200)
         .then =>
           Events.handleEvent(options, {}, 123, "close:project")
-      .delay(100)
+      .delay(200)
       .then =>
         ## must delay here because sync isnt promise connected
         expect(api.updateProject).to.be.calledWith(@projectId, "closed", "todos", "session-123")
