@@ -90,21 +90,21 @@ module.exports = {
 
     @ensureCi()
     .then ->
-      Promise.all([
-        Project.id(projectPath)
-        Project.config(projectPath)
-        Project.add(projectPath)
-      ])
-    .spread (id, cfg = {}) =>
-      {projectName} = cfg
+      Project.add(projectPath)
+    .then ->
+      Project.id(projectPath)
+    .then (id) =>
+      Project.config(projectPath)
+      .then (cfg) =>
+        {projectName} = cfg
 
-      @ensureProjectAPIToken(id, projectPath, projectName, options.key)
-      .then (ciId) =>
-        ## dont check that the user is logged in
-        options.ensureSession = false
+        @ensureProjectAPIToken(id, projectPath, projectName, options.key)
+        .then (ciId) =>
+          ## dont check that the user is logged in
+          options.ensureSession = false
 
-        headless.run(options)
-        .then (stats = {}) =>
-          @reportStats(id, ciId, projectName, options.key, stats)
-          .return(stats.failures)
+          headless.run(options)
+          .then (stats = {}) =>
+            @reportStats(id, ciId, projectName, options.key, stats)
+            .return(stats.failures)
 }

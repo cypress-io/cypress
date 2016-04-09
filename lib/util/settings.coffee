@@ -4,6 +4,12 @@ path     = require("path")
 fs       = require("fs-extra")
 errors   = require("../errors")
 
+## TODO:
+## think about adding another PSemaphore
+## here since we can read + write the
+## settings at the same time something else
+## is potentially reading it
+
 fs = Promise.promisifyAll(fs)
 
 flattenCypress = (obj) ->
