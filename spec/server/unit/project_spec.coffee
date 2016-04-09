@@ -25,7 +25,7 @@ describe "lib/project", ->
       {@projectId} = obj
 
       @config  = config.set({projectName: "project"})
-      @project = Project("/path/to/project")
+      @project = Project(@todosPath)
 
   afterEach ->
     Fixtures.remove()
@@ -41,7 +41,7 @@ describe "lib/project", ->
 
   context "#getConfig", ->
     beforeEach ->
-      @sandbox.stub(config, "get").withArgs("/path/to/project", {foo: "bar"}).resolves({baz: "quux"})
+      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({baz: "quux"})
 
     it "calls config.get with projectRoot + options", ->
       @project.getConfig({foo: "bar"})
@@ -451,6 +451,58 @@ describe "lib/project", ->
       .catch (e) ->
         expect(e).to.eq(err)
         expect(createProjectId).not.to.be.calledWith(err)
+
+  context "#ensureSpecUrl", ->
+    beforeEach ->
+      @project2 = Project(@idsPath)
+
+    it "returns fully qualified url when spec exists", ->
+      @project2.ensureSpecUrl("cypress/integration/bar.js")
+      .then (str) ->
+        expect(str).to.eq("http://localhost:2020/__/#/tests/integration/bar.js?__ui=satellite")
+
+    it "returns fully qualified url on absolute path to spec", ->
+      todosSpec = path.join(@todosPath, "tests/sub/sub_test.coffee")
+      @project.ensureSpecUrl(todosSpec)
+      .then (str) ->
+        expect(str).to.eq("http://localhost:8888/__/#/tests/integration/sub/sub_test.coffee?__ui=satellite")
+
+    it "returns __all spec url", ->
+      @project.ensureSpecUrl()
+      .then (str) ->
+        expect(str).to.eq("http://localhost:8888/__/#/tests/__all?__ui=satellite")
+
+    it "throws when spec isnt found", ->
+      @project.ensureSpecUrl("does/not/exist.js")
+      .catch (err) ->
+        expect(err.type).to.eq("SPEC_FILE_NOT_FOUND")
+
+  context "#ensureSpecExists", ->
+    beforeEach ->
+      @project2 = Project(@idsPath)
+
+    it "resolves relative path to test file against projectRoot", ->
+      @project2.ensureSpecExists("cypress/integration/foo.coffee")
+      .then =>
+        @project.ensureSpecExists("tests/test1.js")
+
+    it "resolves + returns absolute path to test file", ->
+      idsSpec   = path.join(@idsPath, "cypress/integration/foo.coffee")
+      todosSpec = path.join(@todosPath, "tests/sub/sub_test.coffee")
+
+      @project2.ensureSpecExists(idsSpec)
+      .then (spec1) =>
+        expect(spec1).to.eq(idsSpec)
+
+        @project.ensureSpecExists(todosSpec)
+      .then (spec2) ->
+        expect(spec2).to.eq(todosSpec)
+
+    it "throws SPEC_FILE_NOT_FOUND when spec does not exist", ->
+      @project2.ensureSpecExists("does/not/exist.js")
+      .catch (err) =>
+        expect(err.type).to.eq("SPEC_FILE_NOT_FOUND")
+        expect(err.message).to.include(path.join(@idsPath, "does/not/exist.js"))
 
   context ".add", ->
     beforeEach ->

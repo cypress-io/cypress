@@ -196,33 +196,43 @@ class Project extends EE
     @getConfig()
     .then (cfg) =>
       if spec
-        @ensureSpecExists(cfg.integrationFolder, spec)
-        .then (str) =>
-          @getUrlBySpec(cfg.clientUrl, str)
+        @ensureSpecExists(spec)
+        .then (pathToSpec) =>
+          ## TODO:
+          ## to handle both unit + integration tests we need
+          ## to figure out (based on the config) where this spec
+          ## lives. does it live in the integrationFolder or
+          ## the unit folder?
+          ## once we determine that we can then prefix it correctly
+          ## with either integration or unit
+          prefixedPath = @getPrefixedPathToSpec(cfg.integrationFolder, pathToSpec)
+          @getUrlBySpec(cfg.clientUrl, prefixedPath)
       else
         @getUrlBySpec(cfg.clientUrl, "/__all")
 
-  ensureSpecExists: (integrationFolder, spec) ->
-    specFile = path.resolve(integrationFolder, spec)
+  ensureSpecExists: (spec) ->
+    specFile = path.resolve(@projectRoot, spec)
 
     ## we want to make it easy on the user by allowing them to pass both
     ## an absolute path to the spec, or a relative path from their test folder
     fs
     .statAsync(specFile)
-    .then =>
-      ## strip out the integration folder and prepend with "/"
-      ## example:
-      ##
-      ## /Users/bmann/Dev/cypress-app/.projects/todos/tests
-      ## /Users/bmann/Dev/cypress-app/.projects/todos/tests/test2.coffee
-      ##
-      ## becomes /test2.coffee
-      "/" + path.relative(integrationFolder, specFile)
+    .return(specFile)
     .catch ->
       errors.throw("SPEC_FILE_NOT_FOUND", specFile)
 
-  getUrlBySpec: (clientUrl, spec) ->
-    [clientUrl, "#/tests", spec, "?__ui=satellite"].join("")
+  getPrefixedPathToSpec: (integrationFolder, pathToSpec) ->
+    ## strip out the integration folder and prepend with "/"
+    ## example:
+    ##
+    ## /Users/bmann/Dev/cypress-app/.projects/cypress/integration
+    ## /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.coffee
+    ##
+    ## becomes /integration/foo.coffee
+    "/" + path.join("integration", path.relative(integrationFolder, pathToSpec))
+
+  getUrlBySpec: (clientUrl, specUrl) ->
+    [clientUrl, "#/tests", specUrl, "?__ui=satellite"].join("")
 
   scaffold: (config) ->
     Promise.join(

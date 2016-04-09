@@ -238,8 +238,19 @@ describe "lib/cypress", ->
         Project.add(@todosPath)
       ])
       .then =>
-        cypress.start(["--run-project=#{@todosPath}", "--spec=test2.coffee"]).then =>
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/test2.coffee?__ui=satellite")
+        cypress.start(["--run-project=#{@todosPath}", "--spec=tests/test2.coffee"]).then =>
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee?__ui=satellite")
+          @expectExitWith(0)
+
+    it "runs project by specific spec with default configuration", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        Project.add(@idsPath)
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@idsPath}", "--spec=cypress/integration/bar.js"]).then =>
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:2020/__/#/tests/integration/bar.js?__ui=satellite")
           @expectExitWith(0)
 
     it "runs project by specific absolute spec and exits with status 0", ->
@@ -250,7 +261,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"]).then =>
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/test2.coffee?__ui=satellite")
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee?__ui=satellite")
           @expectExitWith(0)
 
     it "scaffolds out integration and example_spec if they do not exist", ->
@@ -438,7 +449,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         cypress.start(["--run-project=#{@todosPath}", "--spec=path/to/spec"]).then =>
-          @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/tests/path/to/spec")
+          @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/path/to/spec")
 
     it "logs error and exits when spec absolute file was specified and does not exist", ->
       Promise.all([
