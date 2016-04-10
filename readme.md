@@ -106,11 +106,18 @@ cypress run --spec cypress/integration/app_spec.js
 cypress run --env host=api.dev.local
 ```
 
-You can [read more about environment variables here.](https://on.cypress.io/environment-variables)
+```bash
+## specify configuration values which override cypress.json
+cypress run --config pageLoadTimeout=100000,watchForFileChanges=false
+```
+
+You can read more about [environment variables](https://on.cypress.io/environment-variables) and [configuration](https://on.cypress.io/configuration) here.
 
 ### cypress ci
 
 Run Cypress headlessly in CI. [Read the Continuous Integration docs for examples.](https://on.cypress.io/continuous-integration)
+
+> **Note:** `cypress ci` supports all the same flags as `cypress run`.
 
 ```bash
 ## provide the CI secret key directly
