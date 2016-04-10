@@ -37,6 +37,64 @@ describe "lib/config", ->
         .then (obj) ->
           expect(obj.clientUrlDisplay).to.eq "http://localhost:8080"
 
+  context ".resolveConfigValues", ->
+    beforeEach ->
+      @expected = (obj) ->
+        merged = config.resolveConfigValues(obj.config, obj.defaults, obj.resolved)
+        expect(merged).to.deep.eq(obj.final)
+
+    it "sets baseUrl to default", ->
+      @expected({
+        config:   {baseUrl: null}
+        defaults: {baseUrl: null}
+        resolved: {}
+        final:    {
+          baseUrl: {
+            value: null
+            from: "default"
+          }
+        }
+      })
+
+    it "sets baseUrl to config", ->
+      @expected({
+        config:   {baseUrl: "localhost"}
+        defaults: {baseUrl: null}
+        resolved: {}
+        final: {
+          baseUrl: {
+            value: "localhost"
+            from: "config"
+          }
+        }
+      })
+
+    it "does not change existing resolved values", ->
+      @expected({
+        config:   {baseUrl: "localhost"}
+        defaults: {baseUrl: null}
+        resolved: {baseUrl: "cli"}
+        final: {
+          baseUrl: {
+            value: "localhost"
+            from: "cli"
+          }
+        }
+      })
+
+    it "ignores values not found in configKeys", ->
+      @expected({
+        config:   {baseUrl: "localhost", foo: "bar"}
+        defaults: {baseUrl: null}
+        resolved: {baseUrl: "cli"}
+        final: {
+          baseUrl: {
+            value: "localhost"
+            from: "cli"
+          }
+        }
+      })
+
   context ".mergeDefaults", ->
     beforeEach ->
       @defaults = (prop, value, cfg = {}, options = {}) =>
@@ -104,8 +162,8 @@ describe "lib/config", ->
     it "socketId=null", ->
       @defaults "socketId", null
 
-    it "reporter=null", ->
-      @defaults "reporter", null
+    it "reporter=spec", ->
+      @defaults "reporter", "spec"
 
     it "watchForFileChanges=true", ->
       @defaults "watchForFileChanges", true
@@ -171,6 +229,94 @@ describe "lib/config", ->
         version: "0.13.1"
         foo: "bar"
       })
+
+    describe ".resolved", ->
+      it "sets reporter and port to cli", ->
+        obj = {}
+
+        options = {
+          reporter: "json"
+          port: 1234
+        }
+
+        cfg = config.mergeDefaults(obj, options)
+
+        expect(cfg.resolved).to.deep.eq({
+          port:                       { value: 1234, from: "cli" },
+          reporter:                   { value: "json", from: "cli" },
+          baseUrl:                    { value: null, from: "default" },
+          commandTimeout:             { value: 4000, from: "default" },
+          pageLoadTimeout:            { value: 30000, from: "default" },
+          requestTimeout:             { value: 5000, from: "default" },
+          responseTimeout:            { value: 20000, from: "default" },
+          waitForAnimations:          { value: true, from: "default" },
+          animationDistanceThreshold: { value: 5, from: "default" },
+          watchForFileChanges:        { value: true, from: "default" },
+          viewportWidth:              { value: 1000, from: "default" },
+          viewportHeight:             { value: 660, from: "default" },
+          fileServerFolder:           { value: "", from: "default" },
+          supportFolder:              { value: "cypress/support", from: "default" },
+          fixturesFolder:             { value: "cypress/fixtures", from: "default" },
+          integrationFolder:          { value: "cypress/integration", from: "default" },
+          environmentVariables:       { }
+        })
+
+      it "sets config, envFile and env", ->
+        @sandbox.stub(config, "getProcessEnvVars").returns({quux: "quux"})
+
+        obj = {
+          baseUrl: "http://localhost:8080"
+          env: {
+            foo: "foo"
+          }
+          envFile: {
+            bar: "bar"
+          }
+          environmentVariables: {
+            baz: "baz"
+          }
+        }
+
+        options = {}
+
+        cfg = config.mergeDefaults(obj, options)
+
+        expect(cfg.resolved).to.deep.eq({
+          port:                       { value: 2020, from: "default" },
+          reporter:                   { value: "spec", from: "default" },
+          baseUrl:                    { value: "http://localhost:8080", from: "config" },
+          commandTimeout:             { value: 4000, from: "default" },
+          pageLoadTimeout:            { value: 30000, from: "default" },
+          requestTimeout:             { value: 5000, from: "default" },
+          responseTimeout:            { value: 20000, from: "default" },
+          waitForAnimations:          { value: true, from: "default" },
+          animationDistanceThreshold: { value: 5, from: "default" },
+          watchForFileChanges:        { value: true, from: "default" },
+          viewportWidth:              { value: 1000, from: "default" },
+          viewportHeight:             { value: 660, from: "default" },
+          fileServerFolder:           { value: "", from: "default" },
+          supportFolder:              { value: "cypress/support", from: "default" },
+          fixturesFolder:             { value: "cypress/fixtures", from: "default" },
+          integrationFolder:          { value: "cypress/integration", from: "default" },
+          environmentVariables:       {
+            foo: {
+              value: "foo"
+              from: "config"
+            }
+            bar: {
+              value: "bar"
+              from: "envFile"
+            }
+            baz: {
+              value: "baz"
+              from: "cli"
+            }
+            quux: {
+              value: "quux"
+              from: "env"
+            }
+          }
+        })
 
   context ".parseEnv", ->
     it "merges together env from config, env from file, env from process, and env from CLI", ->

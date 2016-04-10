@@ -47,6 +47,25 @@ describe "lib/util/args", ->
         host: "localhost:8888"
       })
 
+  context "--config", ->
+    it "converts to object literal", ->
+      options = @setup("--config", "pageLoadTimeout=10000,waitForAnimations=false")
+
+      expect(options.pageLoadTimeout).eq(10000)
+      expect(options.waitForAnimations).eq(false)
+
+    it "whitelists config properties", ->
+      options = @setup("--config", "foo=bar,port=1111,supportFolder=path/to/support")
+
+      expect(options.port).to.eq(1111)
+      expect(options.supportFolder).to.eq("path/to/support")
+      expect(options).not.to.have.property("foo")
+
+    it "overrides existing flat options", ->
+      options = @setup("--port", 2222, "--config", "port=3333")
+
+      expect(options.port).to.eq(3333)
+
   context ".toArray", ->
     beforeEach ->
       @obj = {coords: {x: 1, y: 2}, _coords: "1x2", project: "foo/bar"}
@@ -56,7 +75,8 @@ describe "lib/util/args", ->
 
   context ".toObject", ->
     beforeEach ->
-      @obj = @setup("--get-key", "--coords=1x2", "--env=foo=bar,baz=quux")
+      ## make sure it works with both --env=foo=bar and --config foo=bar
+      @obj = @setup("--get-key", "--coords=1x2", "--env=foo=bar,baz=quux", "--config", "requestTimeout=1234,responseTimeout=9876")
 
     it "backs up coords + environmentVariables", ->
       expect(@obj).to.deep.eq({
@@ -71,11 +91,23 @@ describe "lib/util/args", ->
           foo: "bar"
           baz: "quux"
         }
+        config: {
+          requestTimeout: 1234
+          responseTimeout: 9876
+        }
+        _config: "requestTimeout=1234,responseTimeout=9876"
+        requestTimeout: 1234
+        responseTimeout: 9876
       })
 
     it "can transpose back to an array", ->
       expect(argsUtil.toArray(@obj)).to.deep.eq([
-        "--getKey=true", "--coords=1x2", "--environmentVariables=foo=bar,baz=quux"
+        "--getKey=true"
+        "--coords=1x2"
+        "--config=requestTimeout=1234,responseTimeout=9876"
+        "--requestTimeout=1234"
+        "--responseTimeout=9876"
+        "--environmentVariables=foo=bar,baz=quux"
       ])
 
   context "--updating", ->

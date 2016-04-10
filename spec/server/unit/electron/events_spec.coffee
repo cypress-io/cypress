@@ -1,7 +1,7 @@
 require("../../spec_helper")
 
 _        = require("lodash")
-icons    = require("cypress-core-icons")
+icons    = require("@cypress/core-icons")
 electron = require("electron")
 cache    = require("#{root}../lib/cache")
 logger   = require("#{root}../lib/logger")
@@ -22,9 +22,10 @@ describe "lib/electron/handlers/events", ->
     @send    = @sandbox.spy()
     @cookies = {}
     @options = {
-      app: {
-        exit: @sandbox.spy()
-      }
+      onQuit: @sandbox.spy()
+      onOpenProject: @sandbox.spy()
+      onCloseProject: @sandbox.spy()
+      onError: @sandbox.spy()
     }
     @event   = {
       sender: {
@@ -35,6 +36,9 @@ describe "lib/electron/handlers/events", ->
       }
     }
 
+    @sandbox.stub(electron.ipcMain, "on")
+    @sandbox.stub(electron.ipcMain, "removeAllListeners")
+
     ## setup default options and event and id
     ## as the first three arguments
     @handleEvent = _.partial(events.handleEvent, @options, @event, @id)
@@ -43,25 +47,24 @@ describe "lib/electron/handlers/events", ->
       expect(@send).to.be.calledWith("response", {id: @id, data: data})
 
     @expectSendErrCalledWith = (err) =>
+      expect(@options.onError).to.be.calledWith(err)
       expect(@send).to.be.calledWith("response", {id: @id, __error: errors.clone(err)})
 
   context ".stop", ->
     it "calls ipc#removeAllListeners", ->
-      ral = electron.ipcMain.removeAllListeners = @sandbox.spy()
       events.stop()
-      expect(ral).to.be.calledOnce
+      expect(electron.ipcMain.removeAllListeners).to.be.calledOnce
 
   context ".start", ->
     it "ipc attaches callback on request", ->
-      onFn = electron.ipcMain.on = @sandbox.stub()
       handleEvent = @sandbox.stub(events, "handleEvent")
       events.start({foo: "bar"})
-      expect(onFn).to.be.calledWith("request")
+      expect(electron.ipcMain.on).to.be.calledWith("request")
 
     it "partials in options in request callback", ->
-      onFn = electron.ipcMain.on = @sandbox.stub()
-      onFn.yields("arg1", "arg2")
+      electron.ipcMain.on.yields("arg1", "arg2")
       handleEvent = @sandbox.stub(events, "handleEvent")
+
       events.start({foo: "bar"})
       expect(handleEvent).to.be.calledWith({foo: "bar"}, "arg1", "arg2")
 
@@ -73,14 +76,9 @@ describe "lib/electron/handlers/events", ->
       expect(fn).to.throw("No ipc event registered for: 'no:such:event'")
 
   context "quit", ->
-    it "exits the app", ->
+    it "calls options.onQuit", ->
       @handleEvent("quit")
-      expect(@options.app.exit).to.be.calledWith(0)
-
-    it "calls logs.off", ->
-      @sandbox.stub(logger, "off")
-      @handleEvent("quit")
-      expect(logger.off).to.be.calledOnce
+      expect(@options.onQuit).to.be.calledOnce
 
   context "dialog", ->
     describe "show:directory:dialog", ->
@@ -364,6 +362,8 @@ describe "lib/electron/handlers/events", ->
 
         @handleEvent("open:project", "path/to/project")
         .then =>
+          expect(@options.onOpenProject).to.be.calledOnce
+
           @expectSendCalledWith({some: "config"})
 
       it "catches errors", ->
@@ -394,6 +394,8 @@ describe "lib/electron/handlers/events", ->
 
           @handleEvent("close:project")
           .then =>
+            expect(@options.onCloseProject).to.be.calledOnce
+
             ## it should store the opened project
             expect(project.opened()).to.be.null
 

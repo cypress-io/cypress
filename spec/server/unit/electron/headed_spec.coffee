@@ -1,10 +1,11 @@
 require("../../spec_helper")
 
 os       = require("os")
-icons    = require("cypress-core-icons")
+icons    = require("@cypress/core-icons")
 notifier = require("node-notifier")
 electron = require("electron")
 user     = require("#{root}../lib/user")
+logger   = require("#{root}../lib/logger")
 Updater  = require("#{root}../lib/updater")
 headed   = require("#{root}../lib/modes/headed")
 Tray     = require("#{root}../lib/electron/handlers/tray")
@@ -64,11 +65,15 @@ describe "electron/headed", ->
       @sandbox.stub(headed, "notify").resolves()
       @sandbox.stub(Renderer, "create").resolves(@win)
 
-    it "sets options.app to app", ->
+    it "sets options.onQuit", ->
       opts = {}
 
       headed.ready(opts).then ->
-        expect(opts.app).to.eq(electron.app)
+        expect(opts.onQuit).to.be.a("function")
+
+    it "sets options.onOpenProject"
+    it "sets options.onCloseProject"
+    it "sets options.onError"
 
     it "calls Events.start with options", ->
       opts = {}
@@ -95,6 +100,47 @@ describe "electron/headed", ->
     it "resolves with win", ->
       headed.ready({}).then (win) =>
         expect(win).to.eq(@win)
+
+    context "option callbacks", ->
+      it "exits the app", ->
+        @sandbox.stub(electron.app, "exit")
+
+        opts = {}
+        headed.ready(opts).then ->
+          opts.onQuit()
+          expect(electron.app.exit).to.be.calledWith(0)
+
+      it "calls logs.off", ->
+        @sandbox.stub(logger, "off")
+
+        opts = {}
+        headed.ready(opts).then ->
+          opts.onQuit()
+          expect(logger.off).to.be.calledOnce
+
+      it "sets tray image to blue", ->
+        @sandbox.stub(Tray, "setImage")
+
+        opts = {}
+        headed.ready(opts).then ->
+          opts.onOpenProject()
+          expect(Tray.setImage).to.be.calledWith("blue")
+
+      it "sets tray image to black", ->
+        @sandbox.stub(Tray, "setImage")
+
+        opts = {}
+        headed.ready(opts).then ->
+          opts.onCloseProject()
+          expect(Tray.setImage).to.be.calledWith("black")
+
+      it "sets tray image to red", ->
+        @sandbox.stub(Tray, "setImage")
+
+        opts = {}
+        headed.ready(opts).then ->
+          opts.onError()
+          expect(Tray.setImage).to.be.calledWith("red")
 
   context ".run", ->
     beforeEach ->

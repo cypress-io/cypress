@@ -9,7 +9,7 @@ Promise       = require("bluebird")
 child_process = require("child_process")
 runSequence   = require("run-sequence")
 importOnce    = require("node-sass-import-once")
-cyIcons       = require("cypress-core-icons")
+cyIcons       = require("@cypress/core-icons")
 deploy        = require("./deploy")
 
 fs = Promise.promisifyAll(fs)
@@ -122,7 +122,7 @@ gulp.task "project:img", ->
     .pipe gulp.dest "lib/public/img"
 
 gulp.task "project:favicon", ->
-  gulp.src(cyIcons.getPathToFavicon())
+  gulp.src(cyIcons.getPathToFavicon("**/*"))
     .pipe gulp.dest "lib/public/img"
 
 gulp.task "project:logo", ->

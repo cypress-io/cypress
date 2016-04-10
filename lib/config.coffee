@@ -2,16 +2,48 @@ _        = require("lodash")
 str      = require("underscore.string")
 path     = require("path")
 Promise  = require("bluebird")
+coerce   = require("./util/coerce")
 settings = require("./util/settings")
 scaffold = require("./scaffold")
 
 ## cypress following by _
 cypressEnvRe = /^(cypress_)/i
+dashesOrUnderscoresRe = /^(_-)+/
 
 folders = "fileServerFolder supportFolder fixturesFolder integrationFolder unitFolder".split(" ")
+configKeys = "port reporter baseUrl commandTimeout pageLoadTimeout requestTimeout responseTimeout waitForAnimations animationDistanceThreshold watchForFileChanges viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder environmentVariables".split(" ")
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
+
+defaults = {
+  morgan:         true
+  baseUrl:        null
+  socketId:       null
+  isHeadless:     false
+  reporter:       "spec"
+  clientRoute:    "/__/"
+  xhrRoute:       "/xhrs/"
+  socketIoRoute:  "/__socket.io"
+  commandTimeout:  4000
+  pageLoadTimeout: 30000
+  requestTimeout:  5000
+  responseTimeout: 20000
+  port:            2020
+  waitForAnimations: true
+  animationDistanceThreshold: 5
+  watchForFileChanges: true
+  autoOpen:       false
+  viewportWidth:  1000
+  viewportHeight: 660
+  fileServerFolder: ""
+  # unitFolder:        "cypress/unit"
+  supportFolder:     "cypress/support"
+  fixturesFolder:    "cypress/fixtures"
+  integrationFolder: "cypress/integration"
+  javascripts:    []
+  namespace:      "__cypress"
+}
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   _.reduce folders, (memo, folder) ->
@@ -31,6 +63,11 @@ convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   , {}
 
 module.exports = {
+  getConfigKeys: -> configKeys
+
+  whitelist: (obj = {}) ->
+    _.pick(obj, configKeys)
+
   get: (projectRoot, options = {}) ->
     Promise.all([
       settings.read(projectRoot)
@@ -62,60 +99,28 @@ module.exports = {
     @mergeDefaults(config, options)
 
   mergeDefaults: (config = {}, options = {}) ->
-    _.extend config, _.pick(options, "morgan", "isHeadless", "socketId")
+    resolved = {}
 
-    if _.isString(options.reporter)
-      config.reporter = options.reporter
+    _.extend config, _.pick(options, "morgan", "isHeadless", "socketId", "report")
 
-    if options.reporter and not config.reporter
-      config.reporter = options.reporter
-
-    if p = options.port
-      config.port = p
-
-    if e = options.environmentVariables
-      config.environmentVariables = e
+    _.each @whitelist(options), (val, key) ->
+      resolved[key] = "cli"
+      config[key] = val
+      return
 
     if url = config.baseUrl
       ## always strip trailing slashes
       config.baseUrl = str.rtrim(url, "/")
 
-    defaults = {
-      morgan:         true
-      reporter:       null
-      baseUrl:        null
-      socketId:       null
-      isHeadless:     false
-      clientRoute:    "/__/"
-      xhrRoute:       "/xhrs/"
-      socketIoRoute:  "/__socket.io"
-      commandTimeout:  4000
-      pageLoadTimeout: 30000
-      requestTimeout:  5000
-      responseTimeout: 20000
-      port:            2020
-      waitForAnimations: true
-      animationDistanceThreshold: 5
-      watchForFileChanges: true
-      autoOpen:       false
-      viewportWidth:  1000
-      viewportHeight: 660
-      fileServerFolder: ""
-      # unitFolder:        "cypress/unit"
-      supportFolder:     "cypress/support"
-      fixturesFolder:    "cypress/fixtures"
-      integrationFolder: "cypress/integration"
-      javascripts:    []
-      namespace:      "__cypress"
-    }
-
     _.defaults config, defaults
 
     ## split out our own app wide env from user env variables
     ## and delete envFile
-    config.environmentVariables = @parseEnv(config)
+    config.environmentVariables = @parseEnv(config, resolved)
     config.env = process.env["CYPRESS_ENV"]
     delete config.envFile
+
+    config = @setResolvedConfigValues(config, defaults, resolved)
 
     config = @setUrls(config)
 
@@ -126,6 +131,36 @@ module.exports = {
     config = @setScaffoldPaths(config)
 
     return config
+
+  setResolvedConfigValues: (config, defaults, resolved) ->
+    obj = _.clone(config)
+
+    obj.resolved = @resolveConfigValues(config, defaults, resolved)
+
+    return obj
+
+  resolveConfigValues: (config, defaults, resolved = {}) ->
+    ## pick out only the keys found in configKeys
+    _.chain(config)
+    .pick(configKeys)
+    .mapValues (val, key) ->
+      source = (s) ->
+        {
+          value: val
+          from:  s
+        }
+
+      switch
+        when r = resolved[key]
+          if _.isObject(r)
+            r
+          else
+            source(r)
+        when not _.isEqual(config[key], defaults[key])
+          source("config")
+        else
+          source("default")
+    .value()
 
   setScaffoldPaths: (obj) ->
     obj = _.clone(obj)
@@ -178,15 +213,56 @@ module.exports = {
 
     return obj
 
-  parseEnv: (cfg) ->
+  parseEnv: (cfg, resolved = {}) ->
+    envVars = resolved.environmentVariables = {}
+
+    resolveFrom = (from, obj = {}) ->
+      _.each obj, (val, key) ->
+        envVars[key] = {
+          value: val
+          from: from
+        }
+
     envCfg  = cfg.env ? {}
     envFile = cfg.envFile ? {}
     envProc = @getProcessEnvVars(process.env) ? {}
     envCLI  = cfg.environmentVariables ? {}
 
+    matchesConfigKey = (key) ->
+      if _.has(cfg, key)
+        return key
+
+      key = key.toLowerCase().replace(dashesOrUnderscoresRe, "")
+      key = str.camelize(key)
+
+      if _.has(cfg, key)
+        return key
+
+    configFromEnv = _.reduce envProc, (memo, val, key) ->
+      if cfgKey = matchesConfigKey(key)
+        ## only change the value if it hasnt been
+        ## set by the CLI. override default + config
+        if resolved[cfgKey] isnt "cli"
+          cfg[cfgKey] = val
+          resolved[cfgKey] = {
+            value: val
+            from: "env"
+          }
+
+        memo.push(key)
+      memo
+    , []
+
+    envProc = _.omit(envProc, configFromEnv)
+
+    resolveFrom("config",  envCfg)
+    resolveFrom("envFile", envFile)
+    resolveFrom("env",     envProc)
+    resolveFrom("cli",     envCLI)
+
     ## envCfg is from cypress.json
     ## envFile is from cypress.env.json
-    ## envPRoc is from process env vars
+    ## envProc is from process env vars
     ## envCLI is from CLI arguments
     _.extend envCfg, envFile, envProc, envCLI
 
@@ -196,7 +272,7 @@ module.exports = {
 
     _.reduce obj, (memo, value, key) ->
       if isCypressEnvLike(key)
-        memo[normalize(key)] = value
+        memo[normalize(key)] = coerce(value)
       memo
     , {}
 

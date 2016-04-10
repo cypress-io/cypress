@@ -71,7 +71,7 @@ class Socket
       cb({__error: err.message})
 
   createIo: (server, path) ->
-    socketIo(server, {path: path})
+    socketIo(server, {path: path, destroyUpgrade: false})
 
   _startListening: (server, watchers, config, options) ->
     _.defaults options,

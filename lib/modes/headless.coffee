@@ -67,13 +67,11 @@ module.exports = {
     ## putting our web client app in headless mode
     ## - NO  display server logs (via morgan)
     ## - YES display reporter results (via mocha reporter)
-    project.open(options.projectPath, {
+    project.open(options.projectPath, options, {
       morgan:       false
       socketId:     id
-      reporter:     options.reporter ? true
+      report:       true
       isHeadless:   true
-      port:         options.port
-      environmentVariables: options.environmentVariables
     })
     .catch {portInUse: true}, (err) ->
       errors.throw("PORT_IN_USE_LONG", err.port)

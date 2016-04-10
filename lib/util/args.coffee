@@ -1,20 +1,26 @@
 _        = require("lodash")
 path     = require("path")
 minimist = require("minimist")
+coerce   = require("./coerce")
+config   = require("../config")
 cwd      = require("../cwd")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter ci updating ping coords key logs clearLogs port returnPkg environmentVariables version mode autoOpen removeIds showHeadlessGui".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci updating ping coords key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config".split(" ")
+whitelist = whitelist.concat(config.getConfigKeys())
 
 parseCoords = (coords) ->
   [x, y] = _.map(coords.split("x"), parseFloat)
   {x: x, y: y}
 
-parseEnv = (envs) ->
+parseNestedValues = (vals) ->
   ## convert foo=bar,version=1.2.3 to
   ## {foo: 'bar', version: '1.2.3'}
-  _(envs.split(",")).map (pair) ->
+  _(vals.split(","))
+  .map (pair) ->
     pair.split("=")
-  .object().value()
+  .object()
+  .mapValues(coerce)
+  .value()
 
 backup = (key, options) ->
   options["_#{key}"] = options[key]
@@ -65,7 +71,20 @@ module.exports = {
 
     if envs = options.environmentVariables
       backup("environmentVariables", options)
-      options.environmentVariables = parseEnv(envs)
+      options.environmentVariables = parseNestedValues(envs)
+
+    if c = options.config
+      backup("config", options)
+
+      ## convert config to an object
+      c = parseNestedValues(c)
+
+      ## store the config
+      options.config = c
+
+      ## and pull up and flatten any whitelisted
+      ## config directly into our options
+      _.extend options, config.whitelist(c)
 
     ## normalize runProject or project to projectPath
     if rp = options.runProject or p = options.project

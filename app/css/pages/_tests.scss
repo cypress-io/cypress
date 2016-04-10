@@ -1,5 +1,118 @@
 #tests-list-page {
 
+  table tr:first-child td {
+    border-top: 0;
+  }
+
+  .dropdown-menu-right {
+    padding: 15px 15px 0;
+  }
+
+  .config-explanation {
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 5px;
+
+    a {
+      float: right;
+    }
+  }
+
+  .config-keys {
+    margin-bottom: 0;
+    line-height: 16px;
+  }
+
+  .config-vars {
+    font-size: 13px;
+
+    p {
+      margin-bottom: 0;
+    }
+
+    [data-toggle=tooltip]:hover {
+      border-bottom: 1px dotted #777;
+    }
+
+    .key {
+      color: #666;
+    }
+
+    .comma, .colon, {
+      color: #888;
+    }
+
+    .line {
+      margin-left: 15px;
+      color: #000;
+    }
+
+    .envVars {
+      margin-left: 15px;
+
+      .line {
+        margin-left: 30px;
+      }
+    }
+  }
+
+  .envFile, .env, .config, .cli {
+    font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    padding: 2px;
+  }
+
+  .envFile {
+    background-color: #fdf3e3;
+    color: #7B4804;
+  }
+
+  .env {
+    background-color: #dafff4;
+    color: #045431;
+  }
+
+  .config {
+    background-color: #cdedff;
+    color: #0C5263;
+  }
+
+  .cli {
+    background-color: #fce7e9;
+    color: #A21313;
+  }
+
+  .health-check {
+    li {
+      min-width: 330px;
+      i, span {
+        display: inline;
+      }
+
+      i.green {
+        color: $pass;
+      }
+
+      i.red {
+        color: $fail;
+      }
+    }
+
+    .url {
+      font-weight: bold;
+      margin: 0 5px;
+    }
+
+    .msg {
+      color: #777;
+    }
+  }
+
+  #options-region {
+    position: absolute;
+    top: 68px;
+    right: 20px;
+  }
+
   .well {
     margin: 20px;
   }

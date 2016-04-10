@@ -16,6 +16,7 @@ describe "lib/api", ->
     it "POST /ci/:id + returns ci_guid", ->
       nock("http://localhost:1234")
       .matchHeader("x-project-token", "guid")
+      .matchHeader("x-project-name", "foobar")
       .matchHeader("x-git-branch", "master")
       .matchHeader("x-git-author", "brian")
       .matchHeader("x-git-message", "such hax")
@@ -33,6 +34,7 @@ describe "lib/api", ->
         author: "brian"
         message: "such hax"
         projectId: "project-123"
+        projectName: "foobar"
       })
       .then (ret) ->
         expect(ret).to.eq("new_ci_guid")
@@ -41,6 +43,7 @@ describe "lib/api", ->
     it "PUTS /ci/:id", ->
       nock("http://localhost:1234")
       .matchHeader("x-project-token", "key-123")
+      .matchHeader("x-project-name", "foobar")
       .matchHeader("x-version", pkg.version)
       .matchHeader("x-platform", "linux")
       .matchHeader("x-provider", "circle")
@@ -55,6 +58,7 @@ describe "lib/api", ->
         key: "key-123"
         ciId: "ci-123"
         projectId: "project-123"
+        projectName: "foobar"
         stats: {
           tests: 3
           passes: 1
@@ -122,13 +126,14 @@ describe "lib/api", ->
     it "POSTs /projects", ->
       nock("http://localhost:1234")
       .matchHeader("x-session", "session-123")
+      .matchHeader("x-project-name", "foobar")
       .matchHeader("x-version", pkg.version)
       .post("/projects")
       .reply(200, {
         uuid: "uuid-123"
       })
 
-      api.createProject("session-123").then (uuid) ->
+      api.createProject("foobar", "session-123").then (uuid) ->
         expect(uuid).to.eq("uuid-123")
 
   context ".updateProject", ->
@@ -138,10 +143,11 @@ describe "lib/api", ->
       .matchHeader("x-platform", "linux")
       .matchHeader("x-type", "opened")
       .matchHeader("x-version", pkg.version)
+      .matchHeader("x-project-name", "foobar")
       .get("/projects/project-123")
       .reply(200, {})
 
-      api.updateProject("project-123", "opened", "session-123").then (resp) ->
+      api.updateProject("project-123", "opened", "foobar", "session-123").then (resp) ->
         expect(resp).to.deep.eq({})
 
   context ".createRaygunException", ->

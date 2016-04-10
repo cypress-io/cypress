@@ -71,7 +71,7 @@ describe "lib/server", ->
 
       @server.open("/", @config)
       .then =>
-        expect(@server.createServer).to.be.calledWith(@config.port, obj)
+        expect(@server.createServer).to.be.calledWith(@config.port, @config.socketIoRoute, obj)
 
     it "calls logger.setSettings with config", ->
       @sandbox.spy(logger, "setSettings")
@@ -162,3 +162,47 @@ describe "lib/server", ->
       .then =>
         expect(@server._socket.close).to.be.calledOnce
 
+  context "#proxyWebsockets", ->
+    beforeEach ->
+      @proxy  = @sandbox.stub({ws: ->})
+      @socket = @sandbox.stub({end: ->})
+      @head   = {}
+
+    it "is noop if req.url startsWith socketIoRoute", ->
+      noop = @server.proxyWebsockets(@proxy, "/foo", {
+        url: "/foobarbaz"
+      })
+
+      expect(noop).to.be.undefined
+
+    it "calls proxy.ws with hostname + port", ->
+      req = {
+        url: "/"
+        headers: {
+          cookie: "foo=bar; __cypress.remoteHost=https://www.google.com"
+        }
+      }
+
+      @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
+
+      expect(@proxy.ws).to.be.calledWith(req, @socket, @head, {
+        target: {
+          host: "www.google.com"
+          port: null
+        }
+      })
+
+    it "ends the socket if its writable and there is no __cypress.remoteHost", ->
+      req = {
+        url: "/"
+        headers: {
+          cookie: "foo=bar"
+        }
+      }
+
+      @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
+      expect(@socket.end).not.to.be.called
+
+      @socket.writable = true
+      @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
+      expect(@socket.end).to.be.called

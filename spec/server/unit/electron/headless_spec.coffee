@@ -94,12 +94,14 @@ describe "electron/headless", ->
 
       headless.openProject(1234, options).then ->
         expect(project.open).to.be.calledWith("path/to/project/foo", {
+          port: 8080
+          projectPath: "path/to/project/foo"
+          environmentVariables: {foo: "bar"}
+        }, {
           morgan: false
           socketId: 1234
-          reporter: true
+          report: true
           isHeadless: true
-          port: 8080
-          environmentVariables: {foo: "bar"}
         })
 
   context ".createRenderer", ->

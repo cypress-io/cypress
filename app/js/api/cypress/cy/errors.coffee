@@ -73,7 +73,7 @@ do ($Cypress, _) ->
         Oops, Cypress detected something wrong with your test code.
 
         The test has finished but Cypress still has commands in its queue.
-        The #{commands.length} queued commands which have not yet run are:
+        The #{commands.length} queued commands that have not yet run are:
 
         #{commands.join('\n')}
 

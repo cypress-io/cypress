@@ -24,7 +24,7 @@
       @listenTo files, "sync", =>
         # @searchRegion(files) if files.length
         # @recentFilesRegion(files)
-        @filesRegion(files)
+        @filesRegion(files, config)
 
       @show @layout,
         loading:
@@ -45,12 +45,12 @@
       @show recentFilesView,
         region: @layout.recentFilesRegion
 
-    filesRegion: (files) ->
+    filesRegion: (files, config) ->
       files.resetToTreeView()
 
       files.prependWithAllTests() if files.length
 
-      filesView = @getFilesView files
+      filesView = @getFilesView files, config
 
       @show filesView,
         region: @layout.allFilesRegion
@@ -67,6 +67,7 @@
       new List.RecentFiles
         collection: files
 
-    getFilesView: (files) ->
+    getFilesView: (files, config) ->
       new List.Files
         collection: files
+        config: config

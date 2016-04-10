@@ -16,10 +16,6 @@ describe "lib/reporter", ->
       expect(reporter.reporterName).to.eq("teamcity")
       expect(teamCityFn).to.be.calledWith(reporter.runner)
 
-    it "sets reportaName to 'spec' if true", ->
-      reporter = Reporter.create(true)
-      expect(reporter.reporterName).to.eq("spec")
-
   context "createSuite", ->
     beforeEach ->
       @testObj = {

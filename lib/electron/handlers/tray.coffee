@@ -1,11 +1,43 @@
 _            = require("lodash")
-cypressIcons = require("cypress-core-icons")
+cypressIcons = require("@cypress/core-icons")
 nativeImage  = require("electron").nativeImage
 Tray         = require("electron").Tray
 
 tray = null
 
+## the primary (black) icon can be a template
+## but the white varient (setPressedImage) CANNOT be a template
+colors = {
+  black: nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal.png"))
+  blue:  nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal-blue.png"))
+  red:   nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal-red.png"))
+  white: nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal-inverse.png"))
+}
+
 module.exports = {
+  setImage: (color, options = {}) ->
+    return if not tray
+
+    if not c = colors[color]
+      throw new Error("Did not receive a valid tray icon color. Got: '#{color}'")
+
+    if options.pressed
+      tray.setPressedImage(c)
+    else
+      tray.setImage(c)
+
+  getColors: -> colors
+
+  getTray: -> tray
+
+  resetTray: -> tray = null
+
+  ## TODO: restructure this
+  ## to return the tray instance
+  ## so it can then be passed around
+  ## to methods like 'display' or
+  ## setImage instead of acting like
+  ## a singleton
   display: (options = {}) ->
     _.defaults options,
       onDrop: ->
@@ -13,11 +45,6 @@ module.exports = {
       onRightClick: ->
       onDragEnter: ->
       onDragLeave: ->
-
-    ## the primary (black) icon can be a template
-    ## but the white varient (setPressedImage) CANNOT be a template
-    black = nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal.png"))
-    white = nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal-inverse.png"))
 
     tray = new Tray(null)
 
@@ -32,9 +59,8 @@ module.exports = {
     ## click event
     tray.on "double-click", options.onClick
 
-    tray.setImage(black)
-    tray.setPressedImage(white)
-    # tray.setPressedImage(cypressIcons.getPathToTray("mac-normal-inverse.png"))
+    @setImage("black")
+    @setImage("white", {pressed: true})
     tray.setToolTip("Cypress")
 
     return tray

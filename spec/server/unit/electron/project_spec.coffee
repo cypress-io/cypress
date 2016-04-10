@@ -11,13 +11,29 @@ describe "lib/electron/handlers/projects", ->
     @todosPath = Fixtures.projectPath("todos")
 
   afterEach ->
+    Fixtures.remove()
+
     project.close()
 
   context ".open", ->
     it "resolves with opened project instance", ->
       project.open(@todosPath)
-      .then (p) ->
+      .then (p) =>
+        expect(p.projectRoot).to.eq(@todosPath)
         expect(p).to.be.an.instanceOf(Project)
+
+    it "merges options into whitelisted config args", ->
+      open = @sandbox.stub(Project.prototype, "open").resolves()
+
+      args = {port: 2222, baseUrl: "localhost", foo: "bar"}
+      options = {socketId: 123, port: 2020}
+      project.open(@todosPath, args, options)
+      .then ->
+        expect(open).to.be.calledWith({
+          port: 2020
+          socketId: 123
+          baseUrl: "localhost"
+        })
 
   context ".close", ->
 

@@ -36,7 +36,7 @@ class Project extends EE
     _.defaults options, {
       type:         "opened"
       sync:         false
-      reporter:     false
+      report:       false
       changeEvents: false
     }
 
@@ -44,12 +44,12 @@ class Project extends EE
     .then (cfg) =>
       @server.open(@projectRoot, cfg)
       .then =>
-        ## sync but do not block
-        @sync(options)
-
         ## store the cfg from
         ## opening the server
         @cfg = cfg
+
+        ## sync but do not block
+        @sync(options)
 
         Promise.join(
           @watchSettingsAndStartWebsockets(options.changeEvents, cfg)
@@ -93,9 +93,12 @@ class Project extends EE
       ## bail if sync isnt true
       return if not options.sync
 
-      user.ensureSession()
-      .then (session) ->
-        api.updateProject(id, options.type, session)
+      Promise.all([
+        user.ensureSession()
+        @getConfig()
+      ])
+      .spread (session, cfg) ->
+        api.updateProject(id, options.type, cfg.projectName, session)
 
   watchSettings: (changeEvents) ->
     ## bail if we havent been told to
@@ -121,8 +124,8 @@ class Project extends EE
 
     ## if we've passed down reporter
     ## then record these via mocha reporter
-    if r = config.reporter
-      reporter = Reporter.create(r)
+    if config.report
+      reporter = Reporter.create(config.reporter)
 
     @server.startWebsockets(@watchers, config, {
       onIsNewProject: =>
@@ -193,33 +196,43 @@ class Project extends EE
     @getConfig()
     .then (cfg) =>
       if spec
-        @ensureSpecExists(cfg.integrationFolder, spec)
-        .then (str) =>
-          @getUrlBySpec(cfg.clientUrl, str)
+        @ensureSpecExists(spec)
+        .then (pathToSpec) =>
+          ## TODO:
+          ## to handle both unit + integration tests we need
+          ## to figure out (based on the config) where this spec
+          ## lives. does it live in the integrationFolder or
+          ## the unit folder?
+          ## once we determine that we can then prefix it correctly
+          ## with either integration or unit
+          prefixedPath = @getPrefixedPathToSpec(cfg.integrationFolder, pathToSpec)
+          @getUrlBySpec(cfg.clientUrl, prefixedPath)
       else
         @getUrlBySpec(cfg.clientUrl, "/__all")
 
-  ensureSpecExists: (integrationFolder, spec) ->
-    specFile = path.resolve(integrationFolder, spec)
+  ensureSpecExists: (spec) ->
+    specFile = path.resolve(@projectRoot, spec)
 
     ## we want to make it easy on the user by allowing them to pass both
     ## an absolute path to the spec, or a relative path from their test folder
     fs
     .statAsync(specFile)
-    .then =>
-      ## strip out the integration folder and prepend with "/"
-      ## example:
-      ##
-      ## /Users/bmann/Dev/cypress-app/.projects/todos/tests
-      ## /Users/bmann/Dev/cypress-app/.projects/todos/tests/test2.coffee
-      ##
-      ## becomes /test2.coffee
-      "/" + path.relative(integrationFolder, specFile)
+    .return(specFile)
     .catch ->
       errors.throw("SPEC_FILE_NOT_FOUND", specFile)
 
-  getUrlBySpec: (clientUrl, spec) ->
-    [clientUrl, "#/tests", spec, "?__ui=satellite"].join("")
+  getPrefixedPathToSpec: (integrationFolder, pathToSpec) ->
+    ## strip out the integration folder and prepend with "/"
+    ## example:
+    ##
+    ## /Users/bmann/Dev/cypress-app/.projects/cypress/integration
+    ## /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.coffee
+    ##
+    ## becomes /integration/foo.coffee
+    "/" + path.join("integration", path.relative(integrationFolder, pathToSpec))
+
+  getUrlBySpec: (clientUrl, specUrl) ->
+    [clientUrl, "#/tests", specUrl, "?__ui=satellite"].join("")
 
   scaffold: (config) ->
     Promise.join(
@@ -259,10 +272,13 @@ class Project extends EE
     if id = process.env.CYPRESS_PROJECT_ID
       return @writeProjectId(id)
 
-    user.ensureSession()
+    Promise.all([
+      user.ensureSession()
+      @getConfig()
+    ])
     .bind(@)
-    .then (session) ->
-      api.createProject(session)
+    .spread (session, cfg) ->
+      api.createProject(cfg.projectName, session)
     .then(@writeProjectId)
 
   getProjectId: ->
@@ -313,6 +329,9 @@ class Project extends EE
   @exists = (path) ->
     @paths().then (paths) ->
       path in paths
+
+  @config = (path) ->
+    Project(path).getConfig()
 
   @getSecretKeyByPath = (path) ->
     ## get project id

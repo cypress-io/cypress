@@ -24,8 +24,8 @@ describe "lib/project", ->
     settings.read(@todosPath).then (obj = {}) =>
       {@projectId} = obj
 
-      @config  = config.set({})
-      @project = Project("/path/to/project")
+      @config  = config.set({projectName: "project"})
+      @project = Project(@todosPath)
 
   afterEach ->
     Fixtures.remove()
@@ -41,7 +41,7 @@ describe "lib/project", ->
 
   context "#getConfig", ->
     beforeEach ->
-      @sandbox.stub(config, "get").withArgs("/path/to/project", {foo: "bar"}).resolves({baz: "quux"})
+      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({baz: "quux"})
 
     it "calls config.get with projectRoot + options", ->
       @project.getConfig({foo: "bar"})
@@ -132,8 +132,9 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("path/to/project")
 
+      @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(@project, "ensureProjectId").resolves("id-123")
-      @sandbox.stub(api, "updateProject").withArgs("id-123", "closed", "session-123").resolves({})
+      @sandbox.stub(api, "updateProject").withArgs("id-123", "closed", "project", "session-123").resolves({})
       @sandbox.stub(user, "ensureSession").resolves("session-123")
 
     it "closes server", ->
@@ -229,6 +230,7 @@ describe "lib/project", ->
   context "#updateProject", ->
     beforeEach ->
       @project = Project("path/to/project")
+      @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(api, "updateProject").resolves({})
       @sandbox.stub(user, "ensureSession").resolves("session-123")
 
@@ -238,7 +240,7 @@ describe "lib/project", ->
 
     it "calls api.updateProject with id + session", ->
       @project.updateProject("project-123", {sync: true, type: "opened"}).then ->
-        expect(api.updateProject).to.be.calledWith("project-123", "opened", "session-123")
+        expect(api.updateProject).to.be.calledWith("project-123", "opened", "project", "session-123")
 
   context "#scaffold", ->
     beforeEach ->
@@ -379,10 +381,11 @@ describe "lib/project", ->
   context "#createProjectId", ->
     beforeEach ->
       @project = Project("path/to/project")
+      @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(@project, "writeProjectId").resolves("uuid-123")
       @sandbox.stub(user, "ensureSession").resolves("session-123")
       @sandbox.stub(api, "createProject")
-        .withArgs("session-123")
+        .withArgs("project", "session-123")
         .resolves("uuid-123")
 
     afterEach ->
@@ -390,7 +393,7 @@ describe "lib/project", ->
 
     it "calls api.createProject with user session", ->
       @project.createProjectId().then ->
-        expect(api.createProject).to.be.calledWith("session-123")
+        expect(api.createProject).to.be.calledWith("project", "session-123")
 
     it "calls writeProjectId with id", ->
       @project.createProjectId().then =>
@@ -448,6 +451,58 @@ describe "lib/project", ->
       .catch (e) ->
         expect(e).to.eq(err)
         expect(createProjectId).not.to.be.calledWith(err)
+
+  context "#ensureSpecUrl", ->
+    beforeEach ->
+      @project2 = Project(@idsPath)
+
+    it "returns fully qualified url when spec exists", ->
+      @project2.ensureSpecUrl("cypress/integration/bar.js")
+      .then (str) ->
+        expect(str).to.eq("http://localhost:2020/__/#/tests/integration/bar.js?__ui=satellite")
+
+    it "returns fully qualified url on absolute path to spec", ->
+      todosSpec = path.join(@todosPath, "tests/sub/sub_test.coffee")
+      @project.ensureSpecUrl(todosSpec)
+      .then (str) ->
+        expect(str).to.eq("http://localhost:8888/__/#/tests/integration/sub/sub_test.coffee?__ui=satellite")
+
+    it "returns __all spec url", ->
+      @project.ensureSpecUrl()
+      .then (str) ->
+        expect(str).to.eq("http://localhost:8888/__/#/tests/__all?__ui=satellite")
+
+    it "throws when spec isnt found", ->
+      @project.ensureSpecUrl("does/not/exist.js")
+      .catch (err) ->
+        expect(err.type).to.eq("SPEC_FILE_NOT_FOUND")
+
+  context "#ensureSpecExists", ->
+    beforeEach ->
+      @project2 = Project(@idsPath)
+
+    it "resolves relative path to test file against projectRoot", ->
+      @project2.ensureSpecExists("cypress/integration/foo.coffee")
+      .then =>
+        @project.ensureSpecExists("tests/test1.js")
+
+    it "resolves + returns absolute path to test file", ->
+      idsSpec   = path.join(@idsPath, "cypress/integration/foo.coffee")
+      todosSpec = path.join(@todosPath, "tests/sub/sub_test.coffee")
+
+      @project2.ensureSpecExists(idsSpec)
+      .then (spec1) =>
+        expect(spec1).to.eq(idsSpec)
+
+        @project.ensureSpecExists(todosSpec)
+      .then (spec2) ->
+        expect(spec2).to.eq(todosSpec)
+
+    it "throws SPEC_FILE_NOT_FOUND when spec does not exist", ->
+      @project2.ensureSpecExists("does/not/exist.js")
+      .catch (err) =>
+        expect(err.type).to.eq("SPEC_FILE_NOT_FOUND")
+        expect(err.message).to.include(path.join(@idsPath, "does/not/exist.js"))
 
   context ".add", ->
     beforeEach ->

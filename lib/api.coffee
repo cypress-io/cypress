@@ -16,6 +16,7 @@ module.exports = {
       json: true
       headers: {
         "x-project-token": options.key
+        "x-project-name":  options.projectName
         "x-git-branch":    options.branch
         "x-git-author":    options.author
         "x-git-message":   options.message
@@ -36,6 +37,7 @@ module.exports = {
       headers: {
         "x-ci-id":         options.ciId
         "x-project-token": options.key
+        "x-project-name":  options.projectName
         "x-version":       pkg.version
         "x-platform":      os.platform()
         "x-provider":      provider.get()
@@ -79,7 +81,7 @@ module.exports = {
       }
     })
 
-  createProject: (session) ->
+  createProject: (projectName, session) ->
     rp.post({
       url: Routes.projects()
       json: true
@@ -87,12 +89,13 @@ module.exports = {
         "x-session": session
         "x-platform": os.platform()
         "x-version": pkg.version
+        "x-project-name": projectName
       }
     })
     .promise()
     .get("uuid")
 
-  updateProject: (projectId, type, session) ->
+  updateProject: (projectId, type, projectName, session) ->
     ## TODO: change this to PUT method
     rp.get({
       url: Routes.project(projectId)
@@ -102,6 +105,7 @@ module.exports = {
         "x-session": session
         "x-platform": os.platform()
         "x-version": pkg.version
+        "x-project-name": projectName
       }
     })
 
