@@ -171,3 +171,10 @@ These commands have not yet been released:
  npm version [major | minor | patch] -m "release %s"  ## update version
  npm publish                                          ## publish to npm
 ```
+
+
+## Changelog
+
+#### 0.11.0
+- cypress open now accepts arguments
+- you can now pass the --config flag to `cypress run`, `ci`, and `open` which overrides `cypress.json` configuration values
