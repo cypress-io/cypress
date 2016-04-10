@@ -6,7 +6,8 @@
   "scripts": {
     "test": "NODE_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.* mocha --watch",
     "test-ci": "NODE_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.* mocha",
-    "test-debug": "NODE_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.* node-debug --hidden=node_modules --no-preload _mocha --opts test/mocha.opts --watch"
+    "test-debug": "NODE_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.* node-debug --hidden=node_modules --no-preload _mocha --opts test/mocha.opts --watch",
+    "release": "releaser"
   },
   "repository": {
     "type": "git",
@@ -40,6 +41,7 @@
     "cypress": "bin/cypress"
   },
   "devDependencies": {
+    "@cypress/core-releaser": "^0.1.4",
     "chai": "^3.2.0",
     "mocha": "^2.2.5",
     "mock-spawn": "^0.2.6",
