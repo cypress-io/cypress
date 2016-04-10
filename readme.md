@@ -98,7 +98,7 @@ cypress run --reporter json
 
 ```bash
 ## specify a spec to run instead of running all the tests
-cypress run --spec app_spec.js
+cypress run --spec cypress/integration/app_spec.js
 ```
 
 ```bash
@@ -126,7 +126,24 @@ cypress ci
 
 Opens the Cypress application. This is the same thing as double-clicking the application.
 
-In Mac you'll see the `Cy` icon in the tray, and in Linux you'll see the Cypress application window open.
+In Mac you'll see the `cy` icon in the tray, and in Linux you'll see the Cypress application window open.
+
+Arguments you pass to `cypress open` will automatically be applied to the projects you open. These persist onto all projects until you quit the Cypress Desktop Application.
+
+```bash
+## specify a port to use which overrides values in cypress.json
+cypress open --port 8080
+```
+
+```bash
+## specify configuration values which override cypress.json
+cypress open --config pageLoadTimeout=100000,watchForFileChanges=false
+```
+
+```bash
+## specify environment variables
+cypress open --env host=api.dev.local
+```
 
 ### cypress get:path
 
@@ -176,5 +193,5 @@ These commands have not yet been released:
 ## Changelog
 
 #### 0.11.0
-- cypress open now accepts arguments
+- `cypress open` now accepts arguments
 - you can now pass the --config flag to `cypress run`, `ci`, and `open` which overrides `cypress.json` configuration values
