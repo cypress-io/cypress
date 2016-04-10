@@ -1,8 +1,11 @@
 _            = require("underscore")
 hbs          = require("hbs")
+url          = require("url")
 http         = require("http")
+cookie       = require("cookie")
 express      = require("express")
 Promise      = require("bluebird")
+httpProxy    = require("http-proxy")
 allowDestroy = require("server-destroy")
 cwd          = require("./cwd")
 errors       = require("./errors")
@@ -17,6 +20,7 @@ class Server
       return new Server
 
     @_server = null
+    @_proxy  = null
     @_socket = null
 
   createExpressApp: (port, morgan) ->
@@ -63,12 +67,13 @@ class Server
 
       @createRoutes(app, config)
 
-      @createServer(config.port, app)
+      @createServer(config.port, config.socketIoRoute, app)
       .return(@)
 
-  createServer: (port, app) ->
+  createServer: (port, socketIoRoute, app) ->
     new Promise (resolve, reject) =>
       @_server = http.createServer(app)
+      @_proxy  = httpProxy.createProxyServer()
 
       allowDestroy(@_server)
 
@@ -79,6 +84,11 @@ class Server
         if err.code is "EADDRINUSE"
           reject @portInUseErr(port)
 
+      onUpgrade = (req, socket, head) =>
+        @proxyWebsockets(@_proxy, socketIoRoute, req, socket, head)
+
+      @_server.on "upgrade", onUpgrade
+
       @_server.once "error", onError
 
       @_server.listen port, =>
@@ -88,6 +98,28 @@ class Server
         @_server.removeListener "error", onError
 
         resolve(@_server)
+
+  proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
+    ## bail if this is our own namespaced socket.io request
+    return if req.url.startsWith(socketIoRoute)
+
+    ## parse the cookies to find our remoteHost
+    cookies = cookie.parse(req.headers.cookie ? "")
+
+    if remoteHost = cookies["__cypress.remoteHost"]
+      ## get the hostname + port from the remoteHost
+      {hostname, port} = url.parse(remoteHost)
+
+      proxy.ws(req, socket, head, {
+        target: {
+          host: hostname
+          port: port
+        }
+      })
+    else
+      ## we can't do anything with this socket
+      ## since we don't know how to proxy it!
+      socket.end() if socket.writable
 
   _close: ->
     new Promise (resolve) =>
