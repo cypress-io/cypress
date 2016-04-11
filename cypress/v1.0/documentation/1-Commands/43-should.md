@@ -264,6 +264,24 @@ You can [read more about debugging assertions](https://on.cypress.io/guides/maki
 
 ***
 
+## Can I pass options to cy.should()?
+
+Options passed to the preceding command will be passed through to `cy.should`.
+
+The following example is an example of increasing the `timeout` of the `cy.should`:
+
+```javascript
+cy
+  .get("input", {timeout: 10000}) // <-- wait up to 10 seconds for this 'input' to be found
+    .should("have.value", "foo")   // <-- and to have the value 'foo'
+    .and("have.class", "radio")    // <-- and to have the class 'radio'
+
+  .parents("#foo", {timeout: 2000}) // <--
+    .should("not.exist")            // <-- wait up to 2 seconds for this element NOT to be found
+```
+
+***
+
 # Command Log
 
 ## Assert that there should be 8 children in a nav

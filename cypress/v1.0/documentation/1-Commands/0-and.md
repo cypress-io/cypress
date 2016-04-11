@@ -198,6 +198,21 @@ expect({foo: "bar"}).to.have.property("foo").and.eq("bar")
 
 ***
 
+## Can I pass options to cy.and()?
+
+Options passed to the preceding command will be passed through to `cy.and`.
+
+The following example is an example of increasing the `timeout` of the `cy.and`:
+
+```javascript
+cy
+  .get("input", {timeout: 10000}) // <-- wait up to 10 seconds for this 'input' to be found
+    .should("have.value", "foo")   // <-- and to have the value 'foo'
+    .and("have.class", "radio")    // <-- and to have the class 'radio'
+```
+
+***
+
 # Command Log
 
 ## Chain assertions on the same subject
