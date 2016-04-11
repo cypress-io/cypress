@@ -40,19 +40,31 @@
         ## satellite mode
         return if config.get("isHeadless") or config.ui("satellite")
 
+        # config.set("isOutsideExtension", true)
+
+        return @extensionMessage() if config.get("isOutsideExtension")
+
         @statsRegion(runner)
         @specsRegion(runner, iframe, spec)
 
         socket.emit "watch:test:file", id
 
-      @listenTo @layout, "show", ->
-        @iframeRegion(iframe)
 
-        ## start running the tests
-        ## and load the iframe
-        runner.start(id)
+      @listenTo @layout, "show", ->
+        if !config.get("isOutsideExtension")
+          @iframeRegion(iframe)
+
+          ## start running the tests
+          ## and load the iframe
+          runner.start(id)
 
       @show @layout
+
+    extensionMessage: ->
+      extensionMessageView = @getExtensionMessageView()
+
+      @show extensionMessageView,
+        region: @layout.extenstionMessageRegion
 
     statsRegion: (runner) ->
       App.execute "show:test:stats", @layout.statsRegion, runner
@@ -68,6 +80,9 @@
       App.clearAllCookies()
       config.trigger "close:test:panels"
       App.request "stop:test:runner", runner
+
+    getExtensionMessageView: ->
+      new Show.ExtensionMessage
 
     getLayoutView: (config) ->
       new Show.Layout
