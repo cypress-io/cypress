@@ -24,7 +24,7 @@ Visit the specified url passed as a string.
 
 Pass in an options object to change the default behavior of `cy.visit`.
 
-**[cy.visit( *url*, *options* )](#options-usage)**
+**[cy.visit( *url*, *options* )](#section-options-usage)**
 
 Option | Default | Notes
 --- | --- | ---
