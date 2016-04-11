@@ -32,7 +32,7 @@ cy
 ## Getting dataUrl string
 
 ```javascript
-Cypress.Blob.imgSrcToDataURL("/assets/img/logo.png").then(function(dataUrl){
+return Cypress.Blob.imgSrcToDataURL("/assets/img/logo.png").then(function(dataUrl){
 
   // create an <img> element and set its src to the dataUrl
   var img = Cypress.$("<img />", {src: dataUrl})
