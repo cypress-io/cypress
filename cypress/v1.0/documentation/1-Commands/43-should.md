@@ -280,6 +280,14 @@ cy
     .should("not.exist")            // <-- wait up to 2 seconds for this element NOT to be found
 ```
 
+```javascript
+cy.find("input", {timeout: 10000}).should("have.value", "foo").and("have.class", "radio")
+                         ↲
+      // adding the timeout here will automatically
+      // flow down to the assertions, and they will
+      // be retried for up to 10 seconds
+```
+
 ***
 
 # Command Log
