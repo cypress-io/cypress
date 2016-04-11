@@ -53,7 +53,7 @@ npm install -g cypress-cli
 cypress install
 ```
 
-![cypress-install](https://cloud.githubusercontent.com/assets/1268976/9279271/5c3826ba-4284-11e5-969b-91b0c27a8dee.gif)
+![cypress-cli](https://cloud.githubusercontent.com/assets/1268976/14435124/4f632278-ffe4-11e5-9dab-0a2d493551b3.gif)
 
 [block:callout]
 {
