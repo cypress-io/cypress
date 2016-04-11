@@ -20,7 +20,7 @@ Cypress is a desktop application. This desktop application is the equivalent rep
 [block:callout]
 {
   "type": "info",
-  "body": "The desktop application will mostly be used to login, add new projects, and update. Most of your testing will be done in the **browser**, not the desktop application"
+  "body": "The desktop application manages your local projects. The actual testing will be done in the **browser**, not the desktop application"
 }
 [/block]
 
@@ -31,7 +31,7 @@ The desktop application can be installed in the following operating systems:
 | Linux |
 | OSX |
 
-Windows is [*(not yet working)*](https://github.com/cypress-io/cypress/issues/74)
+Windows is [(not yet working)](https://github.com/cypress-io/cypress/issues/74).
 
 There are no dependencies to install the Desktop Application, although if you want to [use Cypress from the Command Line](https://github.com/cypress-io/cypress-cli) you will need to have `node` installed.
 
