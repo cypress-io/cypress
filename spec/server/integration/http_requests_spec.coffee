@@ -30,7 +30,7 @@ describe "Routes", ->
     nock.enableNetConnect()
 
     @setup = (obj = {}) =>
-      @server = Server("/Users/brian/app")
+      @server = Server()
 
       ## get all the config defaults
       ## and allow us to override them
