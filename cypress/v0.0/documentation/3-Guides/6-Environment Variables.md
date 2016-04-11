@@ -9,6 +9,7 @@ excerpt: Set up environment variables
   - [Option #2: Create a `cypress.env.json`](#section-option-2-create-a-cypress-env-json-)
   - [Option #3: Export as `CYPRESS_*`](#section-option-3-export-as-cypress_-)
   - [Option #4: Pass in from the CLI as `--env`](#section-option-4-pass-in-from-the-cli-as-env-)
+- :fa-angle-right: [Overriding Configuration](#section-overriding-configuration)
 
 ***
 
@@ -221,3 +222,21 @@ Cypress.env("api_server") // => "http://localhost:8888/api/v1/"
   "title": "Downsides"
 }
 [/block]
+
+***
+
+# Overriding Configuration
+
+If your environment variables match a standard configuration key then instead of setting an `environment variable` they will instead override the configuration value.
+
+```shell
+## this changes the baseUrl configuration value
+## and will not set an environment variable in Cypress.env()
+export CYPRESS_BASE_URL=http://localhost:8080
+
+## the key 'foo' does not match a configuration key so
+## this just sets a regular environemtn variable in Cypress.env()
+export CYPRESS_FOO=bar
+```
+
+You can [read more about how environment variables can change configuration here](https://on.cypress.io/configuration).
