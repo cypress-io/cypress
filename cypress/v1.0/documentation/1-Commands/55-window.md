@@ -20,7 +20,7 @@ Get the global window object of the remote application you've visited.
 
 Pass in an options object to change the default behavior of `cy.window`.
 
-**cy.window( *options* )**
+**[cy.window( *options* )](#section-options-usage)**
 
 Option | Default | Notes
 --- | --- | ---
@@ -39,6 +39,16 @@ cy
     // win is the remote window
     // of the page at: http://localhost:8080/app
   })
+```
+
+***
+
+# Options Usage
+
+## Passes timeout through to `cy.should` assertion
+
+```javascript
+cy.window({timeout: 10000}).should("have.property", "foo")
 ```
 
 ***
