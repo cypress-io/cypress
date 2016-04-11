@@ -13,6 +13,7 @@ excerpt: Assertions verify an expectation.
 - :fa-angle-right: [Using Chainers with Implicit Subjects](#section-using-chainers-with-implicit-subjects)
 - :fa-angle-right: [Negating Assertions](#section-negating-assertions)
 - :fa-angle-right: [Resolving Assertions](#section-resolving-assertions)
+- :fa-angle-right: [Increasing timeouts of Assertions](#section-increasing-timeouts)
 
 ***
 
@@ -387,3 +388,47 @@ In modern JavaScript frameworks, and in many common web-based actions, there is 
 * DOM Events
 
 Cypress makes it easy to test and make assertions about all of these.
+
+***
+
+## Increasing timeouts
+
+You have two ways of increasing the amount of time Cypress waits for assertions to pass.
+
+1. Change the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) globally
+2. Override the timeout option on a previous command before the assertion command.
+
+Overriding the timeout option on a specific command looks like this:
+
+```javascript
+cy
+  .find("input", {timeout: 10000}) // <-- wait up to 10 seconds for this 'input' to be found
+    .should("have.value", "foo")   // <-- and to have the value 'foo'
+    .and("have.class", "radio")    // <-- and to have the class 'radio'
+
+  .parents("#foo", {timeout: 2000}) // <--
+    .should("not.exist")            // <-- wait up to 2 seconds for this element NOT to be found
+```
+
+It's important to note that timeouts will automatically flow down to their cooresponding assertions.
+
+**In the example we wait up to a total of 10 seconds to:**
+
+1. find the `<input>`
+2. ensure it has a value of `foo`
+3. ensure it has a class of `radio`
+
+```javascript
+cy.find("input", {timeout: 10000}).should("have.value", "foo").and("have.class", "radio")
+                         ↲
+      // adding the timeout here will automatically
+      // flow down to the assertions, and they will
+      // be retried for up to 10 seconds
+```
+
+[block:callout]
+{
+  "type": "warning",
+  "body": "Assuming you have two assertions, if one passes, and one fails, Cypress will continue to retry until they **both** pass. If Cypress eventually times out you'll get a visual indicator in your Command Log to know which specific assertion failed."
+}
+[/block]
