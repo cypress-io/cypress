@@ -1,0 +1,5 @@
+test:
+  override:
+    - nvm install 5.3
+    - npm install
+    - npm run test-ci

@@ -1,0 +1,30 @@
+{
+  "name": "@cypress/core-socket",
+  "version": "0.0.0",
+  "description": "Cypress Shared Socket Libs",
+  "main": "index.js",
+  "scripts": {
+    "test": "NODE_ENV=test mocha --watch",
+    "test-ci": "NODE_ENV=test mocha",
+    "release": "releaser"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress-core-socket.git"
+  },
+  "author": "Brian Mann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress-core-socket/issues"
+  },
+  "homepage": "https://github.com/cypress-io/cypress-core-socket#readme",
+  "dependencies": {
+    "socket.io": "1.4.5",
+    "socket.io-client": "1.4.5"
+  },
+  "devDependencies": {
+    "@cypress/core-releaser": "^0.1.4",
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5"
+  }
+}
