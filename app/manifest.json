@@ -1,0 +1,25 @@
+{
+  "name" : "Cypress Extension",
+  "version" : "0.1",
+  "description" : "Adds chrome.* API's for testing with Cypress",
+  "permissions": [ "cookies", "tabs", "http://*/*", "https://*/*" ],
+  "icons": {
+    "16":  "icons/icon_16x16.png",
+    "48":  "icons/icon_48x48.png",
+    "128": "icons/icon_128x128.png"
+  },
+  "browser_action": {
+    "default_title": "Cypress",
+    "default_icon": {
+      "19": "icons/icon_19x19.png",
+      "38": "icons/icon_38x38.png"
+    }
+  },
+  "background": {
+    "scripts": [
+      "socket.io.js",
+      "background.js"
+    ]
+  },
+  "manifest_version": 2
+}
