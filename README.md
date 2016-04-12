@@ -14,10 +14,14 @@ npm install --save @cypress/core-socket
 var socket = require("@cypress/core-socket")
 
 // returns
-// {
-//   server: require("socket.io"),
-//   client: require("socket.io-client")
-// }
+{
+  server: require("socket.io"),
+  client: require("socket.io-client"),
+  getPathToClientSource: function(){
+    // returns path to the client 'socket.io.js' file
+    // for use in the browser
+  }
+}
 ```
 
 ```javascript
@@ -33,4 +37,8 @@ var client = socket.client("http://localhost:2020")
 client.on("connect", function(){})
 client.on("event", function(){})
 client.on("disconnect", function(){})
+
+// path usage
+socket.getPathToClientSource()
+// returns your/path/to/node_modules/socket.io-client/socket.io.js0
 ```
