@@ -41,3 +41,6 @@
 
     hideIframe: ->
       @ui.iframeWrapper.hide()
+
+  class Show.ExtensionMessage extends App.Views.ItemView
+    template: "tests/show/message"

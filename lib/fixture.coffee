@@ -61,6 +61,7 @@ module.exports = {
 
       @fileExists(p)
         .catch (err) ->
+          ## TODO: move this to lib/errors
           throw new Error("No fixture exists at: #{p}")
         .then ->
           @parseFileByExtension(p, fixture, ext)

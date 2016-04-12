@@ -1,0 +1,11 @@
+<div class="extension-message">
+  <p>It looks like this Cypress test wasn't started through the Desktop App.</p>
+  <p class="muted"><small>Cypress tests need to open in a new, clean profile in order to maintain a clean test environment.</small></p>
+  <button class="btn btn-primary btn-lg">Click here to run the test on a clean profile.</button>
+</div>
+<div class="helper-line">
+  <a class="helper-docs-link" href="" target="_blank">
+    <i class="fa fa-question-circle"></i>
+    Why am I seeing this message?
+  </a>
+</div>

@@ -72,8 +72,8 @@ class Socket
 
   createIo: (server, path) ->
     ## TODO: dont serve the client!
-    # socketIo(server, {path: path, serveClient: false})
-    socketIo(server, {path: path})
+    # socketIo(server, {path: path, destroyUpgrade: false, serveClient: false})
+    socketIo(server, {path: path, destroyUpgrade: false})
 
   _startListening: (server, watchers, config, options) ->
     _.defaults options,
