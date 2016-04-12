@@ -1,3 +1,5 @@
+fs     = require("fs-extra")
+pkg    = require("./package.json")
 gulp   = require("gulp")
 clean  = require("gulp-clean")
 coffee = require("gulp-coffee")
@@ -13,9 +15,14 @@ gulp.task "clean", ->
   gulp.src("dist")
   .pipe(clean())
 
-gulp.task "manifest", ->
+gulp.task "manifest", (done) ->
   gulp.src("app/manifest.json")
   .pipe(gulp.dest("dist"))
+  .on "end", ->
+    fs.readJson "dist/manifest.json", (err, json) ->
+      json.version = pkg.version
+      fs.writeJson "dist/manifest.json", json, {spaces: 2}, done
+  null
 
 gulp.task "coffeescript", ->
   gulp.src("app/**/*.coffee")
@@ -31,6 +38,9 @@ gulp.task "icons", ->
     icons.getPathToIcon("icon_128x128.png")
   ])
   .pipe(gulp.dest("dist/icons"))
+
+gulp.task "watch", ["build"], ->
+  gulp.watch("app/**/*", ["build"])
 
 gulp.task "build", ->
   runSeq "clean", ["copy:socket:client", "icons", "manifest", "coffeescript"]

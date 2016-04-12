@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "npm run build",
+    "watch": "gulp watch",
     "build": "gulp build",
     "test": "NODE_ENV=test mocha --watch",
     "test-ci": "NODE_ENV=test mocha",
@@ -25,6 +26,7 @@
     "@cypress/core-releaser": "^0.1.4",
     "chai": "^3.5.0",
     "coffee-script": "^1.10.0",
+    "fs-extra": "^0.26.7",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
     "gulp-coffee": "^2.3.2",

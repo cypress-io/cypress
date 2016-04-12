@@ -1,6 +1,5 @@
 {
-  "name" : "Cypress Extension",
-  "version" : "0.1",
+  "name" : "Cypress",
   "description" : "Adds chrome.* API's for testing with Cypress",
   "permissions": [ "cookies", "tabs", "http://*/*", "https://*/*" ],
   "icons": {
