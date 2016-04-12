@@ -1,0 +1,29 @@
+{
+  "name": "@cypress/core-extension",
+  "version": "0.0.0",
+  "description": "Cypress Chrome Extension",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run build",
+    "build": "gulp build",
+    "test": "NODE_ENV=test mocha --watch",
+    "test-ci": "NODE_ENV=test mocha",
+    "release": "releaser"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress-core-extension.git"
+  },
+  "author": "Brian Mann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress-core-extension/issues"
+  },
+  "homepage": "https://github.com/cypress-io/cypress-core-extension#readme",
+  "devDependencies": {
+    "@cypress/core-releaser": "^0.1.4",
+    "chai": "^3.5.0",
+    "coffee-script": "^1.10.0",
+    "mocha": "^2.4.5"
+  }
+}
