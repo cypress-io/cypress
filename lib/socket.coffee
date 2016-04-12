@@ -71,6 +71,8 @@ class Socket
       cb({__error: err.message})
 
   createIo: (server, path) ->
+    ## TODO: dont serve the client!
+    # socketIo(server, {path: path, serveClient: false})
     socketIo(server, {path: path})
 
   _startListening: (server, watchers, config, options) ->
@@ -86,7 +88,6 @@ class Socket
     options.onIsNewProject = Promise.method(options.onIsNewProject)
 
     messages = {}
-    chromiums = {}
 
     {integrationFolder, socketIoRoute} = config
 
@@ -97,27 +98,31 @@ class Socket
     @io.on "connection", (socket) =>
       logger.info "socket connected"
 
-      socket.on "chromium:connected", =>
-        return if socket.inChromiumRoom
+      socket.on "automation:connected", =>
+        return if socket.inAutomationRoom
 
-        socket.inChromiumRoom = true
-        socket.join("chromium")
+        socket.inAutomationRoom = true
+        socket.join("automation")
 
-        socket.on "chromium:history:response", (id, response) =>
-          if message = chromiums[id]
-            delete chromiums[id]
+        socket.on "automation:response", (id, response) =>
+          if message = messages[id]
+            delete messages[id]
             message(response)
 
-      socket.on "history:entries", (cb) =>
+      socket.on "automation:request", (message, data, cb) =>
+        if not _.isFunction(cb)
+          cb = data
+          data = null
+
         id = uuid.v4()
 
-        chromiums[id] = cb
+        messages[id] = cb
 
-        if _.keys(@io.sockets.adapter.rooms.chromium).length > 0
+        if _.keys(@io.sockets.adapter.rooms.automation).length > 0
           messages[id] = cb
-          @io.to("chromium").emit "chromium:history:request", id
+          @io.to("automation").emit("automation:request", id, message, data)
         else
-          cb({__error: "Could not process 'history:entries'. No chromium servers connected."})
+          cb({__error: "Could not process '#{message}'. No automation servers connected."})
 
       socket.on "remote:connected", =>
         logger.info "remote:connected"
