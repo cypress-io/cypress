@@ -1,4 +1,7 @@
-client = io.connect("http://localhost:2020", {path: "/__socket.io"})
+HOST = "http://localhost:2020"
+PATH = "/__socket.io"
+
+client = io.connect(HOST, {path: PATH})
 
 automation = {
   getAllCookies: (filter = {}, fn) ->
