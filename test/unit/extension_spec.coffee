@@ -17,12 +17,15 @@ describe "Extension", ->
       expect(extension.getPathToExtension("background.js")).to.eq(cwd + "/dist/background.js")
 
   context ".setHostAndPath", ->
-    beforeEach (done) ->
-      @src = path.join(cwd, "test", "helpers", "background_src.js")
+    beforeEach ->
+      @src  = path.join(cwd, "test", "helpers", "background_src.js")
       @dest = path.join(cwd, "test", "helpers", "background.js")
-      @sandbox.stub(extension, "getPathToExtension").withArgs("background.js").returns(@dest)
 
-      fs.copy(@src, @dest, done)
+      @sandbox.stub(extension, "getPathToExtension")
+        .withArgs("background.js").returns(@dest)
+        .withArgs("background_src.js").returns(@src)
+
+      fs.copyAsync(@src, @dest)
 
     it "rewrites the background.js source", ->
       extension.setHostAndPath("http://dev.local:8080", "/__foo")
@@ -54,3 +57,12 @@ describe "Extension", ->
         }).call(this);
 
         """
+
+    it "does not mutate background_src", ->
+      fs.readFileAsync(@src, "utf8")
+      .then (str) =>
+        extension.setHostAndPath("http://dev.local:8080", "/__foo")
+        .then =>
+          fs.readFileAsync(@src, "utf8")
+        .then (str2) ->
+          expect(str).to.eq(str2)

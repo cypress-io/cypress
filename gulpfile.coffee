@@ -1,11 +1,14 @@
-fs     = require("fs-extra")
-pkg    = require("./package.json")
-gulp   = require("gulp")
-clean  = require("gulp-clean")
-coffee = require("gulp-coffee")
-runSeq = require("run-sequence")
-socket = require("@cypress/core-socket")
-icons  = require("@cypress/core-icons")
+fs      = require("fs-extra")
+pkg     = require("./package.json")
+gulp    = require("gulp")
+clean   = require("gulp-clean")
+coffee  = require("gulp-coffee")
+rename  = require("gulp-rename")
+runSeq  = require("run-sequence")
+socket  = require("@cypress/core-socket")
+icons   = require("@cypress/core-icons")
+Promise = require("bluebird")
+ext     = require("./")
 
 gulp.task "copy:socket:client", ->
   gulp.src(socket.getPathToClientSource())
@@ -23,6 +26,14 @@ gulp.task "manifest", (done) ->
       json.version = pkg.version
       fs.writeJson "dist/manifest.json", json, {spaces: 2}, done
   null
+
+gulp.task "backup", ->
+  gulp.src("dist/background.js")
+  .pipe(rename("background_src.js"))
+  .pipe(gulp.dest("dist"))
+
+gulp.task "default:host:path", ->
+  ext.setHostAndPath("http://localhost:2020", "/__socket.io")
 
 gulp.task "coffeescript", ->
   gulp.src("app/**/*.coffee")
@@ -43,4 +54,4 @@ gulp.task "watch", ["build"], ->
   gulp.watch("app/**/*", ["build"])
 
 gulp.task "build", ->
-  runSeq "clean", ["copy:socket:client", "icons", "manifest", "coffeescript"]
+  runSeq "clean", ["copy:socket:client", "icons", "manifest", "coffeescript"], "backup", "default:host:path"

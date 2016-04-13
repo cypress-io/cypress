@@ -2,9 +2,9 @@
   var HOST, PATH, automation, client, fail, invoke,
     slice = [].slice;
 
-  HOST = "http://localhost:2020";
+  HOST = "CHANGE_ME_HOST";
 
-  PATH = "/__socket.io";
+  PATH = "CHANGE_ME_PATH";
 
   client = io.connect(HOST, {
     path: PATH

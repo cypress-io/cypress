@@ -1,5 +1,5 @@
-HOST = "http://localhost:2020"
-PATH = "/__socket.io"
+HOST = "CHANGE_ME_HOST"
+PATH = "CHANGE_ME_PATH"
 
 client = io.connect(HOST, {path: PATH})
 

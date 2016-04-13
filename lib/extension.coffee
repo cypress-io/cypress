@@ -4,15 +4,6 @@ Promise = require("bluebird")
 
 fs = Promise.promisifyAll(fs)
 
-hostRe = /HOST = (".*")/g
-pathRe = /PATH = (".*")/g
-
-replacer = (val) ->
-  return (line, capture) ->
-    ## swap out the capture group
-    ## in the line with val
-    line.replace(capture, '"' + val + '"')
-
 module.exports = {
   getPathToExtension: (args...) ->
     args = [__dirname, "..", "dist"].concat(args)
@@ -20,14 +11,14 @@ module.exports = {
     path.join.apply(path, args)
 
   setHostAndPath: (host, path) ->
-    background = @getPathToExtension("background.js")
+    src  = @getPathToExtension("background_src.js")
+    dest = @getPathToExtension("background.js")
 
-    fs.readFileAsync(background, "utf8")
+    fs.readFileAsync(src, "utf8")
     .then (str) ->
       str
-      .replace hostRe, replacer(host)
-      .replace pathRe, replacer(path)
-
+      .replace("CHANGE_ME_HOST", host)
+      .replace("CHANGE_ME_PATH", path)
     .then (str) ->
-      fs.writeFileAsync(background, str)
+      fs.writeFileAsync(dest, str)
 }
