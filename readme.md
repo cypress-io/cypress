@@ -59,6 +59,9 @@ LGPL
 
 ## Changelog
 
+#### 0.1.3
+- added specific error msg and link to docs on unauthed login
+
 #### 0.1.2
 - updated license
 
