@@ -17,6 +17,8 @@
 
     setLoginError: (err) ->
       @set "loggingIn", false, {silent: true}
+
+      @set "errorStatusCode", err.statusCode
       @set "error", err.message
 
   App.reqres.setHandler "new:user:entity", (attrs = {}) ->

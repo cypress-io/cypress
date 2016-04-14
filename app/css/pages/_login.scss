@@ -6,6 +6,12 @@
     margin-bottom: 25px;
   }
 
+  .alert-danger a {
+    cursor: pointer;
+    color: #a94442;
+    text-decoration: underline;
+  }
+
 }
 
 .btn-login {

@@ -32,7 +32,7 @@ In order to access the api to do things like logging into the GUI, we need to ru
 
 ```bash
 npm i
-npm run dev
+npm start
 ```
 
 If you get any errors doing the above commands, go through the [install instructions](https://github.com/cypress-io/cypress-api) of the cypress-api app.
