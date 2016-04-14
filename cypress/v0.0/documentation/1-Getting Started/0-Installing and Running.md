@@ -7,6 +7,7 @@ excerpt: Quick start guide for using Cypress
 - :fa-angle-right: [Installing](#section-installing)
   - [Command Line](#section-command-line-tool)
   - [Direct Download](#section-direct-download)
+- :fa-angle-right: [Loggin In](#section-logging-in)
 - :fa-angle-right: [Adding Projects](#section-adding-projects)
 - :fa-angle-right: [Running Headlessly](#section-running-headlessly)
 
@@ -77,17 +78,34 @@ You can download Cypress directly [here.](http://download.cypress.io/desktop)
 
 ***
 
+# Logging In
+
+After installing, you will need to login to Cypress. Login requires a [Github](https://github.com/) account, if you do not have an account, you will have to [create one](https://github.com/join) to use Cypress.
+
+**To Login:**
+
+- Open the Cypress App -- just double click the app from your OS application's folder.
+- Click "Login with Github".
+- Authorize GitHub access to your account
+
+![screen shot 2016-04-14 at 3 19 13 pm](https://cloud.githubusercontent.com/assets/1271364/14540715/6f0ba86c-0254-11e6-9cb7-962827ec0a07.png)
+
+## Your email: ---------- has not been authorized.
+
+While in beta, the Cypress teams needs to directly whitelist your Github email in order for you to use Cypress.
+
+- If you received this error and have never filled out our [Early Adopter Access](http://goo.gl/forms/4vEMwj8LNT) form, fill out this form with the email in the error so we can whitelist it. You will receive an invite during one of our future Beta invites.
+- If you received this error after receiving a Beta invite email from Cypress, please send an email to support@cypress.io telling us the email in the error so we can whitelist it.
+
+***
+
 # Adding Projects
 
-After installing, you will need to add the project(s) you want to write Cypress tests in.
+After successfully logging in, you will need to add the project(s) you want to write Cypress tests in.
 
-- Open the Cypress App -- just double click the app from you OS application's folder.
-- Authorize GitHub access to your account*
-- Add your project directory to Cypress by clicking :fa-plus:.
+- Add the parent directory of your project to Cypress by clicking :fa-folder-o: in the top-right corner.
 - Click on the project. You should see a `Server Running` message.
 - Click on the `http://localhost:2020` link.
-
-** *Note: this requires direct authorization from the Cypress team during Beta to allow your account email. [Fill out this form](http://goo.gl/forms/4vEMwj8LNT) if you get an error stating "Your email address has not been authorized" and we'll invite you as soon as we can.*
 
 ![project](https://cloud.githubusercontent.com/assets/1268976/9286780/adad94b8-42c9-11e5-9a67-df7abb87fac0.gif)
 
