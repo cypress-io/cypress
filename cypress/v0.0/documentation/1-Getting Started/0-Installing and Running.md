@@ -87,7 +87,7 @@ After installing, you will need to add the project(s) you want to write Cypress 
 - Click on the project. You should see a `Server Running` message.
 - Click on the `http://localhost:2020` link.
 
-** *Note: this requires direct authorization from the Cypress team during Beta to allow your account email*
+** *Note: this requires direct authorization from the Cypress team during Beta to allow your account email. [Fill out this form](http://goo.gl/forms/4vEMwj8LNT) if you get an error stating "Your email address has not been authorized" and we'll invite you as soon as we can.*
 
 ![project](https://cloud.githubusercontent.com/assets/1268976/9286780/adad94b8-42c9-11e5-9a67-df7abb87fac0.gif)
 
