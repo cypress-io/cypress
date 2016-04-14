@@ -95,7 +95,7 @@ After installing, you will need to login to Cypress. Login requires a [Github](h
 While in beta, the Cypress teams needs to directly whitelist your Github email in order for you to use Cypress.
 
 - If you received this error and have never filled out our [Early Adopter Access](http://goo.gl/forms/4vEMwj8LNT) form, fill out this form with the email in the error so we can whitelist it. You will receive an invite during one of our future Beta invites.
-- If you received this error after receiving a Beta invite email from Cypress, please send an email to support@cypress.io telling us the email in the error so we can whitelist it.
+- If you received this error after receiving a Beta invite email from Cypress, please send an email to **support@cypress.io** telling us the email in the error so we can whitelist it.
 
 ***
 
