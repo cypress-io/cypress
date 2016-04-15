@@ -75,6 +75,7 @@ module.exports = {
       preload: cwd("lib", "ipc", "ipc.js")
       webPreferences: {
         nodeIntegration: false
+        backgroundThrottling: false
       }
     }
 
