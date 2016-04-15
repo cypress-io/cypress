@@ -12,6 +12,7 @@ user        = require("../../user")
 errors      = require("../../errors")
 Updater     = require("../../updater")
 Project     = require("../../project")
+launcher    = require("../../launcher")
 
 handleEvent = (options, event, id, type, arg) ->
   sendResponse = (data = {}) ->
@@ -66,6 +67,11 @@ handleEvent = (options, event, id, type, arg) ->
 
     when "external:open"
       shell.openExternal(arg)
+
+    when "launch:browser"
+      launcher.launch(arg)
+      .then -> send(null)
+      .catch(sendErr)
 
     when "window:open"
       Renderer.create(arg)
