@@ -56,5 +56,5 @@ module.exports = (app, config) ->
     console.log err.stack
 
     res.set("x-cypress-error", err.message)
-    res.set("x-cypress-stack", err.stack.replace("\n", "\\n"))
+    res.set("x-cypress-stack", JSON.stringify(err.stack))
     res.sendStatus(500)

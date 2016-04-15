@@ -229,7 +229,7 @@ module.exports = {
 
     if e
       res.set("x-cypress-error", e.message)
-      res.set("x-cypress-stack", e.stack.replace("\n", "\\n"))
+      res.set("x-cypress-stack", JSON.stringify(e.stack))
 
     filePath = switch
       when f = req.formattedUrl
