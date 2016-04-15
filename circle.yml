@@ -1,6 +1,6 @@
 machine:
   node:
-    version: 5.1.1
+    version: 5.10.0
 
 test:
   pre:

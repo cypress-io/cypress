@@ -485,6 +485,8 @@ describe "Routes", ->
     beforeEach ->
       @baseUrl = "http://www.github.com"
 
+      @setup()
+
     it "basic 200 html response", ->
       nock(@baseUrl)
         .get("/")
