@@ -1,6 +1,9 @@
 Promise  = require("bluebird")
 
 module.exports = {
+  get: (cookies, filter = {}) ->
+    cookies.getAsync(filter)
+
   clearGithub: (cookies) ->
     cookies = Promise.promisifyAll(cookies)
 

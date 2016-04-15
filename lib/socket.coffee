@@ -78,6 +78,7 @@ class Socket
   _startListening: (server, watchers, config, options) ->
     _.defaults options,
       socketId: null
+      onAutomationRequest: null
       onMocha: ->
       onConnect: ->
       onChromiumRun: ->
@@ -98,16 +99,18 @@ class Socket
     @io.on "connection", (socket) =>
       logger.info "socket connected"
 
+      respond = (id, resp) ->
+        if message = messages[id]
+          delete messages[id]
+          message(resp)
+
       socket.on "automation:connected", =>
         return if socket.inAutomationRoom
 
         socket.inAutomationRoom = true
         socket.join("automation")
 
-        socket.on "automation:response", (id, response) =>
-          if message = messages[id]
-            delete messages[id]
-            message(response)
+        socket.on "automation:response", respond
 
       socket.on "automation:request", (message, data, cb) =>
         if not _.isFunction(cb)
@@ -118,11 +121,16 @@ class Socket
 
         messages[id] = cb
 
-        if _.keys(@io.sockets.adapter.rooms.automation).length > 0
-          messages[id] = cb
-          @io.to("automation").emit("automation:request", id, message, data)
+        ## if we have an onAutomationRequest callback
+        ## handler then use that, else use websockets
+        if oar = options.onAutomationRequest
+          oar(id, message, data, respond)
         else
-          cb({__error: "Could not process '#{message}'. No automation servers connected."})
+          if _.keys(@io.sockets.adapter.rooms.automation).length > 0
+            messages[id] = cb
+            @io.to("automation").emit("automation:request", id, message, data)
+          else
+            cb({__error: "Could not process '#{message}'. No automation servers connected."})
 
       socket.on "remote:connected", =>
         logger.info "remote:connected"
@@ -132,11 +140,7 @@ class Socket
         socket.inRemoteRoom = true
         socket.join("remote")
 
-        socket.on "remote:response", (id, response) =>
-          if message = messages[id]
-            delete messages[id]
-            logger.info "remote:response", id: id, response: response
-            message(response)
+        socket.on "remote:response", respond
 
       socket.on "client:request", (message, data, cb) =>
         ## if cb isnt a function then we know

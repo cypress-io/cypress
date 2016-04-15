@@ -72,6 +72,9 @@ module.exports = {
       socketId:     id
       report:       true
       isHeadless:   true
+      ## TODO: get session into automation.perform
+      onAutomationRequest: automation.perform.bind(automation)
+
     })
     .catch {portInUse: true}, (err) ->
       errors.throw("PORT_IN_USE_LONG", err.port)
