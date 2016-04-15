@@ -89,7 +89,7 @@
     "xvfb": "cypress-io/node-xvfb"
   },
   "dependencies": {
-    "@cypress/core-desktop-gui": "0.1.1",
+    "@cypress/core-desktop-gui": "0.1.3",
     "@cypress/core-example": "0.2.3",
     "@cypress/core-icons": "0.2.1",
     "ansi_up": "^1.3.0",
