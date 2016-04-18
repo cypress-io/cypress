@@ -21,12 +21,31 @@
   <% else: %>
     <% if @clientUrl: %>
       <div class="well well-lg">
-        <div>Server running</div>
-        <div>
-          <a href="#"><%= @clientUrlDisplay %></a>
+      <div><strong>Server running at:</strong></div>
+      <p>
+        <%= @clientUrlDisplay %>
+          <i class="fa fa-question-circle text-muted"></i>
+      </p>
+        <button data-stop class="btn btn-danger btn-sm"><i class="fa fa-stop"></i> Stop </button>
+        <div class="btn-group browser-selector">
+          <button type="button" class="btn btn-primary btn-sm">
+            <i class="fa fa-chrome"></i>
+            Run Chromium 49
+          </button>
+          <button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">
+            <span class="caret"></span>
+            <span class="sr-only">Toggle Dropdown</span>
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="#">
+                <i class="fa fa-chrome"></i>
+                Run Chrome 32
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
-      <button data-stop class="btn btn-danger">Stop server</button>
     <% else: %>
       <span>
         <i class="fa fa-spinner fa-spin"></i>
@@ -34,4 +53,10 @@
       </span>
     <% end %>
   <% end %>
+  <div class="helper-line">
+    <a class="helper-docs-link" data-js="help" href="#">
+      <i class="fa fa-question-circle"></i>
+      Need help?
+    </a>
+  </div>
 </div>
