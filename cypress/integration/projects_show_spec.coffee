@@ -93,8 +93,8 @@ describe "Project Show", ->
       it "switches text in button on switching browser", ->
         cy
           .get(".browser-selector .dropdown-toggle").click()
-          .get(".dropdown-menu").contains("Run Chrome").click()
-          .get("[data-js='run-browser']").contains("Run Chrome")
+          .get(".dropdown-menu").contains("Chrome").click()
+          .get("[data-js='run-browser']").contains("Chrome")
 
     context "run browser", ->
       it.skip "triggers external:open of browser on click of run", ->
@@ -110,7 +110,7 @@ describe "Project Show", ->
       it "updates text and icon in button on click of Run", ->
         cy
           .get("[data-js='run-browser']").click()
-            .should("contain", "Running Chromium")
+            .should("contain", "Chromium")
           .get("[data-js='run-browser']").find(".fa-refresh")
 
     context "stop server", ->

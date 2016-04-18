@@ -1,6 +1,6 @@
 @App.module "ProjectsApp.Show", (Show, App, Backbone, Marionette, $, _) ->
 
-  class Show.Project extends App.Views.ItemView
+  class Show.Project extends App.Views.LayoutView
     template: "projects/show/project"
 
     ui:
@@ -22,11 +22,21 @@
       "click @ui.runBrowser": "runBrowserClicked"
       "click @ui.switchBrowser": "switchBrowserClicked"
 
+    onShow: ->
+      $("html").addClass("project-show")
+
+    onDestroy: ->
+      $("html").removeClass("project-show")
+
+    templateHelpers: ->
+      browsers: @collection.toJSON()
+
     runBrowserClicked: (e) ->
       btn = $(e.currentTarget)
       browser = btn.data().browser
 
       @trigger "run:browser:clicked", browser
+
 
       @toggleBrowserRunning(btn, true, browser)
 
@@ -58,7 +68,6 @@
       runBtnText = runBtn.text()
       runBtnIcon = runBtn.find("i")
 
-
       ## switcheroo the text and icons on the 2 btns
       browserChosen
         .text(runBtnText)
@@ -66,19 +75,3 @@
       runBtn
         .text(browserChosenText)
         .prepend(browserChosenIcon)
-
-
-
-
-
-    onShow: ->
-      $("html").addClass("project-show")
-
-    # onRender: ->
-    #   @ui.hostInfo?.tooltip
-    #     title: "Click to learn about host url"
-    #     placement: "top"
-
-    onDestroy: ->
-      $("html").removeClass("project-show")
-      # @ui.hostInfo?.tooltip("destroy")

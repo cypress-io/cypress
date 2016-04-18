@@ -30,19 +30,25 @@
         <div class="btn-group browser-selector">
           <button type="button" data-js="run-browser"  data-browser="chromium" class="btn btn-primary btn-sm">
             <i class="fa fa-chrome"></i>
-            Run Chromium 49
+           Run
+           <%= @defaultBrowser.get("nameCapitalized") %>
+           <%= @defaultBrowser.get("version") %>
           </button>
           <button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">
             <span class="caret"></span>
             <span class="sr-only">Toggle Dropdown</span>
           </button>
           <ul class="dropdown-menu">
-            <li>
-              <a href="#" data-js="switch-browser" data-browser="chrome">
-                <i class="fa fa-chrome"></i>
-                Run Chrome 32
-              </a>
-            </li>
+            <% for browser in @browsers: %>
+              <li>
+                <a href="#" data-js="switch-browser" data-browser="<%= browser.name %>">
+                  <i class="fa fa-<%= browser.icon %>"></i>
+                  Run
+                  <%= browser.nameCapitalized %>
+                  <%= browser.version %>
+                </a>
+              </li>
+            <% end %>
           </ul>
         </div>
       </div>

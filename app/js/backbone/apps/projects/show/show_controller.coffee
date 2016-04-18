@@ -3,24 +3,29 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (params) ->
-      {project} = params
+      { project } = params
 
-      projectView = @getProjectView(project)
+      browsers = App.request "browser:entities"
+      defaultBrowser = App.request "get:default:browser"
 
-      @listenTo projectView, "host:info:clicked", ->
+      project.set({defaultBrowser: defaultBrowser})
+
+      @projectLayout = @getProjectLayout(project, browsers)
+
+      @listenTo @projectLayout, "host:info:clicked", ->
         App.ipc("external:open", "https://on.cypress.io")
 
-      @listenTo projectView, "run:browser:clicked", (browser) ->
+      @listenTo @projectLayout, "run:browser:clicked", (browser) ->
         ## here's where you write logic to open the url
         ## in a specific browser
 
         # App.ipc("", project.get("clientUrl"), browser)
 
-      @listenTo projectView, "stop:clicked ok:clicked" , ->
+      @listenTo @projectLayout, "stop:clicked ok:clicked" , ->
         @closeProject().then ->
           App.vent.trigger "start:projects:app"
 
-      @listenTo projectView, "show", ->
+      @listenTo @projectLayout, "show", ->
         ## delay opening the project so
         ## we give the UI some time to render
         ## and not block due to sync require's
@@ -29,7 +34,7 @@
           @openProject(project)
         , 100
 
-      @show projectView
+      @show @projectLayout
 
     reboot: (project) ->
       project.reset()
@@ -57,6 +62,7 @@
       .catch (err) ->
         project.setError(err)
 
-    getProjectView: (project) ->
+    getProjectLayout: (project, browsers) ->
       new Show.Project
         model: project
+        collection: browsers
