@@ -143,12 +143,12 @@ header {
     margin: 0 5% 10px;
   }
 
-  a {
-    padding-top: 5px;
-    margin-top: 5px;
-    border-top: 1px dashed #999;
-    display: inline-block;
-  }
+  // a {
+  //   padding-top: 5px;
+  //   margin-top: 5px;
+  //   border-top: 1px dashed #999;
+  //   display: inline-block;
+  // }
 }
 
 #projects .error {
@@ -158,5 +158,12 @@ header {
 #project, #projects {
   p.bg-danger {
     padding: 5px;
+  }
+}
+
+.browser-selector {
+  .dropdown-menu>li>a {
+    padding: 0 10px;
+    font-size: 12px;
   }
 }
