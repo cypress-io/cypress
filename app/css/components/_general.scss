@@ -56,3 +56,7 @@ html.has-updates {
   }
 
 }
+
+.btn:focus {
+  outline: 0 !important;
+}

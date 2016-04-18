@@ -80,50 +80,75 @@ describe "Project Show", ->
 
       @ipc.handle("open:project", null, @config)
 
-    it "displays Server url", ->
-      cy.contains(@config.clientUrlDisplay)
+    context "server host url", ->
+      it "displays server url", ->
+        cy.contains(@config.clientUrlDisplay)
 
-    it "triggers external:open on click of url", ->
-      cy
-        .contains("a", @config.clientUrlDisplay).click().then ->
-          expect(@App.ipc).to.be.calledWith("external:open", "http://localhost:2020")
+      it "triggers external:open to docs on click of question icon", ->
+        cy
+          .get("[data-js='host-info']").click().then ->
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io")
 
-    it "triggers close:project on click of Stop", ->
-      cy
-        .contains(".btn", "Stop").click().then ->
-          expect(@App.ipc).to.be.calledWith("close:project")
-          @ipc.handle("close:project", null, {})
-        .then ->
-          expect(@App.ipc).to.be.calledWith("get:project:paths")
+    context "switch browser", ->
+      it "switches text in button on switching browser", ->
+        cy
+          .get(".browser-selector .dropdown-toggle").click()
+          .get(".dropdown-menu").contains("Run Chrome").click()
+          .get("[data-js='run-browser']").contains("Run Chrome")
 
+    context "run browser", ->
+      it.skip "triggers external:open of browser on click of run", ->
+        cy
+          .get("[data-js='run-browser']").click().then ->
+            # expect(@App.ipc)
 
-    it "returns to projects on Stop button click", ->
-      cy
-        .contains(".btn", "Stop").click().then ->
-          @ipc.handle("close:project", null, {})
-          @ipc.handle("get:project:paths", null, @projects)
-        .get("#projects-container")
+      it "disabled Run button click of Run", ->
+        cy
+          .get("[data-js='run-browser']").click()
+            .should("be.disabled")
 
-    it "attaches 'on:project:settings:change' after project opens", ->
-      cy.wrap(@App.ipc).should("be.calledWith", "on:project:settings:change")
+      it "updates text and icon in button on click of Run", ->
+        cy
+          .get("[data-js='run-browser']").click()
+            .should("contain", "Running Chromium")
+          .get("[data-js='run-browser']").find(".fa-refresh")
 
-    it "closes existing server + reopens on 'on:project:settings:change'", ->
-      @agents.spy(@App.ipc, "off")
+    context "stop server", ->
+      it "triggers close:project on click of Stop", ->
+        cy
+          .contains(".btn", "Stop").click().then ->
+            expect(@App.ipc).to.be.calledWith("close:project")
+            @ipc.handle("close:project", null, {})
+          .then ->
+            expect(@App.ipc).to.be.calledWith("get:project:paths")
 
-      cy
-        .contains(@config.clientUrlDisplay)
-        .then ->
-          @ipc.handle("close:project", null, {})
-          @ipc.handle("open:project", null, {
-            clientUrl: "http://localhost:8888",
-            clientUrlDisplay: "http://localhost:8888"
-          })
+      it "returns to projects on Stop button click", ->
+        cy
+          .contains(".btn", "Stop").click().then ->
+            @ipc.handle("close:project", null, {})
+            @ipc.handle("get:project:paths", null, @projects)
+          .get("#projects-container")
 
-          ## cause a settings change event
-          @ipc.handle("on:project:settings:change")
+      it "attaches 'on:project:settings:change' after project opens", ->
+        cy.wrap(@App.ipc).should("be.calledWith", "on:project:settings:change")
 
-      cy
-        .contains("http://localhost:8888")
-        .then ->
-          expect(@App.ipc.off).to.be.calledWith("on:project:settings:change")
+      it "closes existing server + reopens on 'on:project:settings:change'", ->
+        @agents.spy(@App.ipc, "off")
+
+        cy
+          .contains(@config.clientUrlDisplay)
+          .then ->
+            @ipc.handle("close:project", null, {})
+            @ipc.handle("open:project", null, {
+              clientUrl: "http://localhost:8888",
+              clientUrlDisplay: "http://localhost:8888"
+            })
+
+            ## cause a settings change event
+            @ipc.handle("on:project:settings:change")
+
+        cy
+          .contains("http://localhost:8888")
+          .then ->
+            expect(@App.ipc.off).to.be.calledWith("on:project:settings:change")
 

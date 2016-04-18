@@ -24,11 +24,11 @@
       <div><strong>Server running at:</strong></div>
       <p>
         <%= @clientUrlDisplay %>
-          <i class="fa fa-question-circle text-muted"></i>
+        <i data-js="host-info" class="fa fa-question-circle"></i>
       </p>
         <button data-stop class="btn btn-danger btn-sm"><i class="fa fa-stop"></i> Stop </button>
         <div class="btn-group browser-selector">
-          <button type="button" class="btn btn-primary btn-sm">
+          <button type="button" data-js="run-browser"  data-browser="chromium" class="btn btn-primary btn-sm">
             <i class="fa fa-chrome"></i>
             Run Chromium 49
           </button>
@@ -38,7 +38,7 @@
           </button>
           <ul class="dropdown-menu">
             <li>
-              <a href="#">
+              <a href="#" data-js="switch-browser" data-browser="chrome">
                 <i class="fa fa-chrome"></i>
                 Run Chrome 32
               </a>

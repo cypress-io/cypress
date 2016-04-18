@@ -7,19 +7,14 @@
 
       projectView = @getProjectView(project)
 
-      @listenTo projectView, "client:url:clicked", ->
-        App.ipc("external:open", project.get("clientUrl"))
+      @listenTo projectView, "host:info:clicked", ->
+        App.ipc("external:open", "https://on.cypress.io")
 
-        ## this commented out code runs cypress
-        ## inside of electron as an experiment.
-        ## leave it for the time being.
-        # App.ipc("window:open", {
-        #   position: "center"
-        #   width: 1280
-        #   height: 720
-        #   url: project.get("clientUrl")
-        #   type: "PROJECT"
-        # })
+      @listenTo projectView, "run:browser:clicked", (browser) ->
+        ## here's where you write logic to open the url
+        ## in a specific browser
+
+        # App.ipc("", project.get("clientUrl"), browser)
 
       @listenTo projectView, "stop:clicked ok:clicked" , ->
         @closeProject().then ->
