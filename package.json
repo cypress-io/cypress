@@ -23,7 +23,7 @@
     "socket.io-client": "1.4.5"
   },
   "devDependencies": {
-    "@cypress/core-releaser": "^0.1.4",
+    "@cypress/core-releaser": "^0.1.6",
     "chai": "^3.5.0",
     "mocha": "^2.4.5"
   }
