@@ -15,7 +15,7 @@
   "author": "Brian Mann",
   "license": "MIT",
   "dependencies": {
-    "cypress-example-kitchensink": "0.1.3",
+    "cypress-example-kitchensink": "0.1.4",
     "glob": "^7.0.3"
   },
   "devDependencies": {
