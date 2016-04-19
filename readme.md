@@ -59,6 +59,9 @@ LGPL
 
 ## Changelog
 
+#### 0.1.4
+- added link to gitter chat in options popup
+
 #### 0.1.3
 - added specific error msg and link to docs on unauthed login
 
