@@ -72,9 +72,10 @@ module.exports = {
       width:  600
       height: 500
       show:   true
-      preload: cwd("lib", "ipc", "ipc.js")
       webPreferences: {
+        preload: cwd("lib", "ipc", "ipc.js")
         nodeIntegration: false
+        backgroundThrottling: false
       }
     }
 
