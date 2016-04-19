@@ -27,7 +27,7 @@
     "path": "^0.12.7"
   },
   "devDependencies": {
-    "@cypress/core-releaser": "0.1.5",
+    "@cypress/core-releaser": "0.1.6",
     "bluebird": "^3.1.1",
     "bower": "^1.7.2",
     "gulp": "^3.9.0",
