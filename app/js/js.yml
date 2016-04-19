@@ -28,6 +28,7 @@ vendor:
   - bower_components/blob-util/dist/blob-util.js
   - app/js/vendor/backbone-chooser.coffee
   - app/js/vendor/bililiteRange.js
+  - app/js/vendor/gitter-sidecar.js
 
 cypress:
   - app/js/api/cypress.coffee

@@ -23,7 +23,7 @@
         # {name: "Analytics", href: "#analytics",                           icon: "fa fa-bar-chart-o"}
         # {name: "Settings",  href: "#settings",                            icon: "fa fa-cog"}
         {name: "Docs",        href: "https://on.cypress.io",                icon: "fa fa-graduation-cap", external: true}
-        {name: "Support",     href: "https://gitter.im/cypress-io/cypress", icon: "fa fa-comments",       external: true}
+        {name: "Chat",        href: "#",                                    icon: "fa fa-comments",       class: "gitter-open"}
       ]
 
   App.reqres.setHandler "nav:entities", ->
