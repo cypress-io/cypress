@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-extension#readme",
   "devDependencies": {
-    "@cypress/core-releaser": "^0.1.4",
+    "@cypress/core-releaser": "^0.1.6",
     "chai": "^3.5.0",
     "coffee-script": "^1.10.0",
     "fs-extra": "^0.26.7",
