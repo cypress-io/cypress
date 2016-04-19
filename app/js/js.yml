@@ -29,6 +29,7 @@ vendor:
   - app/js/vendor/backbone-chooser.coffee
   - app/js/vendor/bililiteRange.js
   - app/js/vendor/gitter-sidecar.js
+  - node_modules/gitter-sidecar/dist/sidecar.js
 
 cypress:
   - app/js/api/cypress.coffee

@@ -31,6 +31,7 @@
 
       @listenTo @layout, "show", =>
         @navsRegion(navs, config)
+        new window.gitter.Chat({room: "cypress-io/cypress", activationElement: ".gitter-open"})
 
       @show @layout
 

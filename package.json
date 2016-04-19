@@ -108,6 +108,7 @@
     "express": "4.12.3",
     "fs-extra": "0.26.5",
     "gift": "^0.6.1",
+    "gitter-sidecar": "^1.2.3",
     "glob": "5.0.10",
     "gulp-util": "^3.0.6",
     "hbs": "4.0.0",
