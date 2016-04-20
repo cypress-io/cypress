@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.2.5
+- bumped cypress-example-kitchensink
+
 #### 0.2.4
 - updated node version to 5.10.0
 - updated deps
