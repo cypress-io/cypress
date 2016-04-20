@@ -1,7 +1,5 @@
 @App.module "NavApp.List", (List, App, Backbone, Marionette, $, _) ->
 
-  window.gitter.chat.options.activationElement = false
-
   chat = window.gitter.chat.defaultChat
 
   class List.Controller extends App.Controllers.Application
