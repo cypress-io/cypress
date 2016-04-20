@@ -22,7 +22,6 @@ vendor:
   - bower_components/jquery-ui/ui/widget.js
   - bower_components/jquery-ui/ui/mouse.js
   - bower_components/jquery-ui/ui/slider.js
-  - bower_components/bluebird/js/browser/bluebird.js
   - bower_components/js-cookie/src/js.cookie.js
   - bower_components/moment/moment.js
   - bower_components/blob-util/dist/blob-util.js
@@ -30,6 +29,9 @@ vendor:
   - app/js/vendor/bililiteRange.js
   - app/js/vendor/gitter-sidecar.js
   - node_modules/gitter-sidecar/dist/sidecar.js
+
+  ## this must go at the bottom, do not move it
+  - bower_components/bluebird/js/browser/bluebird.js
 
 cypress:
   - app/js/api/cypress.coffee
