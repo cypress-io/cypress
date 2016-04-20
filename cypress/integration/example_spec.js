@@ -681,11 +681,6 @@ describe('Kitchen Sink', function(){
           // contentWindow is the remote page's window object
         }
       })
-
-      // serve your files. The path should be relative
-      // to your project's root folder.
-      cy.visit("app/index.html")
-
     })
 
   })
