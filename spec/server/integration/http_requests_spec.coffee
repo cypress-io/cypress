@@ -399,6 +399,8 @@ describe "Routes", ->
       Fixtures.scaffold("ids")
 
     afterEach ->
+      files.reset()
+
       Fixtures.remove("todos")
       Fixtures.remove("no-server")
       Fixtures.remove("ids")
@@ -408,9 +410,6 @@ describe "Routes", ->
         @setup({
           projectRoot: Fixtures.projectPath("ids")
         })
-
-      afterEach ->
-        files.reset()
 
       it "counts specs, exampleSpec, and allSpecs", ->
         supertest(@app)

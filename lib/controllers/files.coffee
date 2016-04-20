@@ -21,19 +21,18 @@ do reset = ->
   exampleSpec = false
   allSpecs    = false
 
-  ## stop polling (useful in testing)
-  clearInterval(intervalId) if intervalId
-
 check = ->
-  if numRuns > 0
-    user.ensureSession()
-    .then (session) ->
-      api.sendUsage(numRuns, exampleSpec, allSpecs, session)
-    ## reset on success
-    .then(reset)
-    .catch ->
-      ## fail silently
-      return
+  ## bail if we have no runs yet
+  return if numRuns is 0
+
+  user.ensureSession()
+  .then (session) ->
+    api.sendUsage(numRuns, exampleSpec, allSpecs, session)
+  ## reset on success
+  .then(reset)
+  .catch ->
+    ## fail silently
+    return
 
 ## check every 10 minutes
 do interval = ->
@@ -55,6 +54,9 @@ module.exports = {
 
   reset: ->
     reset()
+
+    ## stop polling (useful in testing)
+    clearInterval(intervalId) if intervalId
 
   increment: (test) ->
     switch test

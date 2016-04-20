@@ -151,7 +151,7 @@ describe "lib/api", ->
         expect(resp).to.deep.eq({})
 
   context ".sendUsage", ->
-    it "POSTs /usage", ->
+    it "POSTs /user/usage", ->
       nock("http://localhost:1234")
       .matchHeader("x-session", "session-123")
       .matchHeader("x-runs", 5)
@@ -159,7 +159,7 @@ describe "lib/api", ->
       .matchHeader("x-all", false)
       .matchHeader("x-version", pkg.version)
       .matchHeader("x-platform", "linux")
-      .post("/usage")
+      .post("/user/usage")
       .reply(200)
 
       api.sendUsage(5, true, false, "session-123")
