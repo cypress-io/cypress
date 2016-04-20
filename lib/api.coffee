@@ -109,9 +109,9 @@ module.exports = {
       }
     })
 
-  ranTests: (numRuns, exampleSpec, session) ->
+  sendUsage: (numRuns, exampleSpec, allSpecs, session) ->
     rp.post({
-      url: Routes.tests()
+      url: Routes.usage()
       json: true
       headers: {
         "x-session": session
@@ -119,6 +119,7 @@ module.exports = {
         "x-version": pkg.version
         "x-runs": numRuns
         "x-example": exampleSpec
+        "x-all": allSpecs
       }
     })
 

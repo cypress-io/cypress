@@ -10,8 +10,9 @@ coffee        = require("coffee-script")
 Promise       = require("bluebird")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
-CacheBuster   = require("#{root}/lib/util/cache_buster")
-Fixtures      = require("#{root}/spec/server/helpers/fixtures")
+files         = require("#{root}lib/controllers/files")
+CacheBuster   = require("#{root}lib/util/cache_buster")
+Fixtures      = require("#{root}spec/server/helpers/fixtures")
 
 ## force supertest-session to use supertest-as-promised, hah
 Session       = proxyquire("supertest-session", {supertest: supertest})
@@ -401,6 +402,46 @@ describe "Routes", ->
       Fixtures.remove("todos")
       Fixtures.remove("no-server")
       Fixtures.remove("ids")
+
+    describe "usage", ->
+      beforeEach ->
+        @setup({
+          projectRoot: Fixtures.projectPath("ids")
+        })
+
+      afterEach ->
+        files.reset()
+
+      it "counts specs, exampleSpec, and allSpecs", ->
+        supertest(@app)
+        .get("/__cypress/iframes/integration/foo.coffee")
+        .expect(200)
+        .then (res) =>
+          expect(files.getStats()).to.deep.eq({
+            numRuns: 1
+            allSpecs: false
+            exampleSpec: false
+          })
+        .then =>
+          supertest(@app)
+          .get("/__cypress/iframes/__all")
+          .expect(200)
+          .then (res) =>
+            expect(files.getStats()).to.deep.eq({
+              numRuns: 2
+              allSpecs: true
+              exampleSpec: false
+            })
+        .then =>
+          supertest(@app)
+          .get("/__cypress/iframes/integration/example_spec.js")
+          .expect(200)
+          .then (res) ->
+            expect(files.getStats()).to.deep.eq({
+              numRuns: 3
+              allSpecs: true
+              exampleSpec: true
+            })
 
     describe "todos", ->
       beforeEach ->

@@ -150,6 +150,20 @@ describe "lib/api", ->
       api.updateProject("project-123", "opened", "foobar", "session-123").then (resp) ->
         expect(resp).to.deep.eq({})
 
+  context ".sendUsage", ->
+    it "POSTs /usage", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-session", "session-123")
+      .matchHeader("x-runs", 5)
+      .matchHeader("x-example", true)
+      .matchHeader("x-all", false)
+      .matchHeader("x-version", pkg.version)
+      .matchHeader("x-platform", "linux")
+      .post("/usage")
+      .reply(200)
+
+      api.sendUsage(5, true, false, "session-123")
+
   context ".createRaygunException", ->
     beforeEach ->
       @setup = (body, session, delay = 0) ->

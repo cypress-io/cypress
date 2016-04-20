@@ -14,16 +14,21 @@ glob = Promise.promisify(glob)
 intervalId  = null
 numRuns     = null
 exampleSpec = null
+allSpecs    = null
 
 do reset = ->
   numRuns = 0
   exampleSpec = false
+  allSpecs    = false
+
+  ## stop polling (useful in testing)
+  clearInterval(intervalId) if intervalId
 
 check = ->
   if numRuns > 0
     user.ensureSession()
     .then (session) ->
-      api.ranTests(numRuns, exampleSpec, session)
+      api.sendUsage(numRuns, exampleSpec, allSpecs, session)
     ## reset on success
     .then(reset)
     .catch ->
@@ -31,14 +36,34 @@ check = ->
       return
 
 ## check every 10 minutes
-intervalId = setInterval(check, 1000 * 60 * 10)
+do interval = ->
+  intervalId = setInterval(check, 1000 * 60 * 10)
 
 module.exports = {
+  interval: ->
+    interval()
+
+  getStats: ->
+    {
+      numRuns: numRuns
+      allSpecs: allSpecs
+      exampleSpec: exampleSpec
+    }
+
+  check: ->
+    check()
+
   reset: ->
     reset()
 
-    ## stop polling (useful in testing)
-    clearInterval(intervalId) if intervalId
+  increment: (test) ->
+    switch test
+      when "integration/example_spec.js"
+        exampleSpec = true
+      when "__all"
+        allSpecs = true
+
+    numRuns += 1
 
   handleFiles: (req, res, config) ->
     @getTestFiles(config)
@@ -50,10 +75,7 @@ module.exports = {
 
     iframePath = cwd("lib", "html", "iframe.html")
 
-    if test is "example_spec.js"
-      exampleSpec = true
-
-    numRuns += 1
+    @increment(test)
 
     @getSpecs(test, config)
     .then (specs) =>
