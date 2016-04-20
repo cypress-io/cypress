@@ -58,6 +58,7 @@
     "gulp-print": "^1.1.0",
     "gulp-remember": "^0.3.0",
     "gulp-rename": "^1.2.0",
+    "gulp-replace": "^0.5.4",
     "gulp-sass": "^2.2.0",
     "gulp-tap": "0.1.1",
     "gulp-uglify": "^1.2.0",
