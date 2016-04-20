@@ -1273,6 +1273,20 @@ describe "Routes", ->
             body = res.text
             expect(body).to.eq '<html><body><a href="/http://www.google.com">google</a></body></html>'
 
+      it "does not rewrite anchor href with data-cypress-ignore", ->
+        nock(@baseUrl)
+        .get("/bar")
+        .reply 200, '<html><body><a href="http://www.google.com" data-cypress-ignore>google</a></body></html>',
+          "Content-Type": "text/html"
+
+        supertest(@app)
+        .get("/bar")
+        .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+        .expect(200)
+        .then (res) ->
+          body = res.text
+          expect(body).to.eq '<html><body><a href="http://www.google.com" data-cypress-ignore>google</a></body></html>'
+
       it "rewrites link tags", ->
         nock(@baseUrl)
           .get("/bar")
@@ -1286,6 +1300,34 @@ describe "Routes", ->
           .then (res) ->
             body = res.text
             expect(body).to.eq '<html><body><link rel="stylesheet" href="/http://cdn.com/reset.css"></body></html>'
+
+      it "rewrites urls which match the remoteHost", ->
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "<html><body><a href='http://www.github.com/foo/bar'>github</a></body></html>",
+            "Content-Type": "text/html"
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .then (res) ->
+            body = res.text
+            expect(body).to.eq '<html><body><a href="/foo/bar">github</a></body></html>'
+
+      it "does not rewrite urls which match the remoteHost and have data-cypress-ignore", ->
+        nock(@baseUrl)
+        .get("/bar")
+        .reply 200, '<html><body><a data-cypress-ignore href="http://www.github.com/foo/bar">github</a></body></html>',
+          "Content-Type": "text/html"
+
+        supertest(@app)
+        .get("/bar")
+        .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+        .expect(200)
+        .then (res) ->
+          body = res.text
+          expect(body).to.eq '<html><body><a data-cypress-ignore href="http://www.github.com/foo/bar">github</a></body></html>'
 
       it "rewrites multiple elements", ->
         contents = removeWhitespace Fixtures.get("server/absolute_url.html")
@@ -1318,6 +1360,34 @@ describe "Routes", ->
             body = res.text
             expect(body).to.eq '<html><body><link rel="stylesheet" href="/http://cdn.com/reset.css"></body></html>'
 
+      it "ignores protocol-less urls with data-cypress-ignore attribute", ->
+        nock(@baseUrl)
+        .get("/bar")
+        .reply 200, '<html><body><link rel="stylesheet" data-cypress-ignore href="//cdn.com/reset.css"><a href="//wistia.net/foo"></a></body></html>',
+          "Content-Type": "text/html"
+
+        supertest(@app)
+        .get("/bar")
+        .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+        .expect(200)
+        .then (res) ->
+          body = res.text
+          expect(body).to.eq '<html><body><link rel="stylesheet" data-cypress-ignore href="//cdn.com/reset.css"><a href="/http://wistia.net/foo"></a></body></html>'
+
+      it "ignores protocol-less forms with data-cypress-ignore attribute", ->
+        nock(@baseUrl)
+        .get("/bar")
+        .reply 200, '<html><body><form action="//external.domain.com/bar/index.php">form</form><form action="//external.domain.com/bar/index.php" data-cypress-ignore="true">form</form></body></html>',
+          "Content-Type": "text/html"
+
+        supertest(@app)
+        .get("/bar")
+        .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+        .expect(200)
+        .then (res) ->
+          body = res.text
+          expect(body).to.eq '<html><body><form action="/http://external.domain.com/bar/index.php">form</form><form action="//external.domain.com/bar/index.php" data-cypress-ignore="true">form</form></body></html>'
+
       it "rewrites protocol-less forms", ->
         nock(@baseUrl)
           .get("/bar")
@@ -1331,20 +1401,6 @@ describe "Routes", ->
           .then (res) ->
             body = res.text
             expect(body).to.eq '<html><body><form action="/http://external.domain.com/bar/index.php">form</form></body></html>'
-
-      it "rewrites urls which match the remoteHost", ->
-        nock(@baseUrl)
-          .get("/bar")
-          .reply 200, "<html><body><a href='http://www.github.com/foo/bar'>github</a></body></html>",
-            "Content-Type": "text/html"
-
-        supertest(@app)
-          .get("/bar")
-          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
-          .expect(200)
-          .then (res) ->
-            body = res.text
-            expect(body).to.eq '<html><body><a href="/foo/bar">github</a></body></html>'
 
       it "rewrites <svg> without hanging", ->
         ## if this test finishes without timing out we know its all good
