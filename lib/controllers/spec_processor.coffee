@@ -1,14 +1,14 @@
-fs          = require 'fs'
-_           = require 'lodash'
-path        = require 'path'
-gutil       = require 'gulp-util'
-Stream      = require 'stream'
-coffee      = require 'coffee-script'
-browserify  = require 'browserify'
-coffeeify   = require 'coffeeify'
-Domain      = require 'domain'
-Snockets    = require 'snockets'
-requirejs   = require 'requirejs'
+fs          = require("fs")
+_           = require("lodash")
+path        = require("path")
+gutil       = require("gulp-util")
+Stream      = require("stream")
+coffee      = require("coffee-script")
+browserify  = require("browserify")
+coffeeify   = require("coffeeify")
+Domain      = require("domain")
+Snockets    = require("snockets")
+requirejs   = require("requirejs")
 
 module.exports = {
   handle: (spec, req, res, config, next) ->

@@ -4,12 +4,42 @@ path        = require("path")
 glob        = require("glob")
 Promise     = require("bluebird")
 cwd         = require("../cwd")
+api         = require("../api")
+user        = require("../user")
 pathHelpers = require("../util/path_helpers")
 CacheBuster = require("../util/cache_buster")
 
 glob = Promise.promisify(glob)
 
+intervalId  = null
+numRuns     = null
+exampleSpec = null
+
+do reset = ->
+  numRuns = 0
+  exampleSpec = false
+
+check = ->
+  if numRuns > 0
+    user.ensureSession()
+    .then (session) ->
+      api.ranTests(numRuns, exampleSpec, session)
+    ## reset on success
+    .then(reset)
+    .catch ->
+      ## fail silently
+      return
+
+## check every 10 minutes
+intervalId = setInterval(check, 1000 * 60 * 10)
+
 module.exports = {
+  reset: ->
+    reset()
+
+    ## stop polling (useful in testing)
+    clearInterval(intervalId) if intervalId
+
   handleFiles: (req, res, config) ->
     @getTestFiles(config)
     .then (files) ->
@@ -19,6 +49,11 @@ module.exports = {
     test = req.params[0]
 
     iframePath = cwd("lib", "html", "iframe.html")
+
+    if test is "example_spec.js"
+      exampleSpec = true
+
+    numRuns += 1
 
     @getSpecs(test, config)
     .then (specs) =>
