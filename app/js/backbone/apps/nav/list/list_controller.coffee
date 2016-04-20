@@ -1,9 +1,8 @@
 @App.module "NavApp.List", (List, App, Backbone, Marionette, $, _) ->
 
-  chat = new window.gitter.Chat({
-    room: "cypress-io/cypress"
-    activationElement: false
-  })
+  window.gitter.chat.options.activationElement = false
+
+  chat = window.gitter.chat.defaultChat
 
   class List.Controller extends App.Controllers.Application
 
