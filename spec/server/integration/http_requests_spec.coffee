@@ -409,6 +409,7 @@ describe "Routes", ->
       beforeEach ->
         @setup({
           projectRoot: Fixtures.projectPath("ids")
+          projectName: "foobarbaz"
         })
 
       it "counts specs, exampleSpec, and allSpecs", ->
@@ -420,6 +421,7 @@ describe "Routes", ->
             numRuns: 1
             allSpecs: false
             exampleSpec: false
+            projectName: "foobarbaz"
           })
         .then =>
           supertest(@app)
@@ -430,6 +432,7 @@ describe "Routes", ->
               numRuns: 2
               allSpecs: true
               exampleSpec: false
+              projectName: "foobarbaz"
             })
         .then =>
           supertest(@app)
@@ -440,6 +443,7 @@ describe "Routes", ->
               numRuns: 3
               allSpecs: true
               exampleSpec: true
+              projectName: "foobarbaz"
             })
 
     describe "todos", ->

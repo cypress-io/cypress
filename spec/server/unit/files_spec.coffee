@@ -6,7 +6,7 @@ api     = require("#{root}lib/api")
 user    = require("#{root}lib/user")
 files   = require("#{root}lib/controllers/files")
 
-describe.only "lib/controllers/files", ->
+describe "lib/controllers/files", ->
   beforeEach ->
     @clock = @sandbox.useFakeTimers("setInterval", "clearInterval")
 
