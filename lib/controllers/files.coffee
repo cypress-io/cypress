@@ -15,9 +15,11 @@ intervalId  = null
 numRuns     = null
 exampleSpec = null
 allSpecs    = null
+projectName = null
 
 do reset = ->
   numRuns = 0
+  projectName = null
   exampleSpec = false
   allSpecs    = false
 
@@ -27,7 +29,7 @@ check = ->
 
   user.ensureSession()
   .then (session) ->
-    api.sendUsage(numRuns, exampleSpec, allSpecs, session)
+    api.sendUsage(numRuns, exampleSpec, allSpecs, projectName, session)
   ## reset on success
   .then(reset)
   .catch ->
@@ -47,6 +49,7 @@ module.exports = {
       numRuns: numRuns
       allSpecs: allSpecs
       exampleSpec: exampleSpec
+      projectName: projectName
     }
 
   check: ->
@@ -58,7 +61,7 @@ module.exports = {
     ## stop polling (useful in testing)
     clearInterval(intervalId) if intervalId
 
-  increment: (test) ->
+  increment: (test, config = {}) ->
     switch test
       when "integration/example_spec.js"
         exampleSpec = true
@@ -66,6 +69,10 @@ module.exports = {
         allSpecs = true
 
     numRuns += 1
+
+    ## set projectName if we have it
+    if p = config.projectName
+      projectName = p
 
   handleFiles: (req, res, config) ->
     @getTestFiles(config)
@@ -77,7 +84,7 @@ module.exports = {
 
     iframePath = cwd("lib", "html", "iframe.html")
 
-    @increment(test)
+    @increment(test, config)
 
     @getSpecs(test, config)
     .then (specs) =>

@@ -109,7 +109,7 @@ module.exports = {
       }
     })
 
-  sendUsage: (numRuns, exampleSpec, allSpecs, session) ->
+  sendUsage: (numRuns, exampleSpec, allSpecs, projectName, session) ->
     rp.post({
       url: Routes.usage()
       json: true
@@ -120,6 +120,7 @@ module.exports = {
         "x-runs": numRuns
         "x-example": exampleSpec
         "x-all": allSpecs
+        "x-project-name": projectName
       }
     })
 

@@ -159,10 +159,11 @@ describe "lib/api", ->
       .matchHeader("x-all", false)
       .matchHeader("x-version", pkg.version)
       .matchHeader("x-platform", "linux")
+      .matchHeader("x-project-name", "admin")
       .post("/user/usage")
       .reply(200)
 
-      api.sendUsage(5, true, false, "session-123")
+      api.sendUsage(5, true, false, "admin", "session-123")
 
   context ".createRaygunException", ->
     beforeEach ->

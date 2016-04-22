@@ -6,7 +6,7 @@ api     = require("#{root}lib/api")
 user    = require("#{root}lib/user")
 files   = require("#{root}lib/controllers/files")
 
-describe "lib/controllers/files", ->
+describe.only "lib/controllers/files", ->
   beforeEach ->
     @clock = @sandbox.useFakeTimers("setInterval", "clearInterval")
 
@@ -36,7 +36,7 @@ describe "lib/controllers/files", ->
       user.ensureSession.resolves("session-123")
       api.sendUsage.resolves()
 
-      files.increment("foo")
+      files.increment("foo", {projectName: "foobar"})
       files.increment("__all")
       files.increment("integration/example_spec.js")
 
@@ -44,27 +44,29 @@ describe "lib/controllers/files", ->
         numRuns: 3
         allSpecs: true
         exampleSpec: true
+        projectName: "foobar"
       })
 
       files.check()
       .then ->
-        expect(api.sendUsage).to.be.calledWith(3, true, true, "session-123")
+        expect(api.sendUsage).to.be.calledWith(3, true, true, "foobar", "session-123")
 
     it "sends exampleSpec false when no example_spec.js has run", ->
       user.ensureSession.resolves("session-123")
       api.sendUsage.resolves()
 
-      files.increment("foo")
+      files.increment("foo", {projectName: "foobar"})
 
       expect(files.getStats()).to.deep.eq({
         numRuns: 1
         allSpecs: false
         exampleSpec: false
+        projectName: "foobar"
       })
 
       files.check()
       .then ->
-        expect(api.sendUsage).to.be.calledWith(1, false, false, "session-123")
+        expect(api.sendUsage).to.be.calledWith(1, false, false, "foobar", "session-123")
 
     it "resets after successfully sending usage", ->
       user.ensureSession.resolves("session-123")
@@ -79,6 +81,7 @@ describe "lib/controllers/files", ->
           numRuns: 0
           allSpecs: false
           exampleSpec: false
+          projectName: null
         })
 
     it "swallows errors ensuring session", ->
@@ -94,7 +97,7 @@ describe "lib/controllers/files", ->
       user.ensureSession.resolves("session-123")
       api.sendUsage.rejects(new Error)
 
-      files.increment("foo")
+      files.increment("foo", {projectName: "foobar"})
       files.increment("__all")
       files.increment("integration/example_spec.js")
 
@@ -104,4 +107,5 @@ describe "lib/controllers/files", ->
           numRuns: 3
           allSpecs: true
           exampleSpec: true
+          projectName: "foobar"
         })
