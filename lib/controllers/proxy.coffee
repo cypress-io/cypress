@@ -333,6 +333,14 @@ module.exports = {
       else
         "/" + str
 
+    conditionallyApplyFn = (attr, fn) ->
+      return (elem, attrs) ->
+        ## if the specific attr is a property of attrs
+        ## and we do not have a data-ignore-cypress attr
+        ## then change the attr to become absolute relative
+        if attr of attrs and not attrs["data-cypress-ignore"]
+          elem.setAttribute attr, fn(attrs[attr])
+
     rewrite = (selector, type, attr, fn) ->
       options = {}
 
@@ -348,6 +356,10 @@ module.exports = {
 
       tr[options.method] selector, (elem) ->
         switch type
+          when "attrs"
+            elem.getAttributes (attrs) ->
+              fn(elem, attrs)
+
           when "attr"
             elem.getAttribute attr, (val) ->
               elem.setAttribute attr, fn(val)
@@ -375,13 +387,13 @@ module.exports = {
     #   else
     #     str
 
-    rewrite "[href^='//']", "attr", "href", changeToAbsoluteRelative
+    rewrite "[href^='//']", "attrs", conditionallyApplyFn("href", changeToAbsoluteRelative)
 
-    rewrite "form[action^='//']", "attr", "action", changeToAbsoluteRelative
+    rewrite "form[action^='//']", "attrs", conditionallyApplyFn("action", changeToAbsoluteRelative)
 
-    rewrite "form[action^='http']", "attr", "action", removeRemoteHostOrMakeAbsoluteRelative
+    rewrite "form[action^='http']", "attrs", conditionallyApplyFn("action", removeRemoteHostOrMakeAbsoluteRelative)
 
-    rewrite "[href^='http']", "attr", "href", removeRemoteHostOrMakeAbsoluteRelative
+    rewrite "[href^='http']", "attrs", conditionallyApplyFn("href", removeRemoteHostOrMakeAbsoluteRelative)
 
     ## only rewrite these script src tags if the origin matches our remote host
     ## or matches a domain which we have a cookie for. store a list of domains

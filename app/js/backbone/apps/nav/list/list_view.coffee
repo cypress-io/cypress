@@ -14,12 +14,19 @@
         $(CY_WRAPPER).removeClass("satellite-mode")
         @$el.show()
 
+    onShow: ->
+      $(".gitter-chat-embed").on "gitter-chat-toggle", (e) =>
+        @trigger "gitter:toggled", e.originalEvent.detail.state
+
   class List.Nav extends App.Views.ItemView
     template: "nav/list/_nav"
     className: "parent"
 
     ui:
       a: "a"
+
+    triggers:
+      "click .gitter-toggle" : "gitter:toggle:clicked"
 
     modelEvents:
       "change:chosen" : "chosenChanged"

@@ -25,6 +25,9 @@
         when _.isRegExp(stringOrRegExp) then stringOrRegExp.test(prop)
         else prop
 
+    toggleGitter: ->
+      @set("gitter", !@get("gitter"))
+
     env: (stringOrRegExp) ->
       @testProp @get("env"), stringOrRegExp
 

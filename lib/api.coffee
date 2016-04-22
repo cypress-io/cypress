@@ -109,6 +109,20 @@ module.exports = {
       }
     })
 
+  sendUsage: (numRuns, exampleSpec, allSpecs, session) ->
+    rp.post({
+      url: Routes.usage()
+      json: true
+      headers: {
+        "x-session": session
+        "x-platform": os.platform()
+        "x-version": pkg.version
+        "x-runs": numRuns
+        "x-example": exampleSpec
+        "x-all": allSpecs
+      }
+    })
+
   getBuilds: (projectId, session) ->
     r.get({
       url: Routes.projectCi(projectId)

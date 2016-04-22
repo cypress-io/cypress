@@ -106,10 +106,13 @@ describe "electron/headless", ->
 
   context ".createRenderer", ->
     beforeEach ->
-      @win    = @sandbox.stub({
+      @win = @sandbox.stub({
         hide: ->
         setSize: ->
         center: ->
+        webContents: {
+          on: @sandbox.stub()
+        }
       })
 
       @create = @sandbox.stub(Renderer, "create").resolves(@win)
@@ -138,11 +141,21 @@ describe "electron/headless", ->
           width: 0
           height: 0
           show: true
-          frame: false
+          frame: true
           type: "PROJECT"
         })
 
         expect(@win.hide).not.to.be.called
+
+    it "sets options.show = false on new-window", ->
+      options = {show: true}
+
+      @win.webContents.on.withArgs("new-window").yields(
+        {}, "foo", "bar", "baz", options
+      )
+
+      headless.createRenderer("foo/bar/baz").then =>
+        expect(options.show).to.eq(false)
 
   context ".waitForRendererToConnect", ->
     it "resolves on waitForSocketConnection", ->
