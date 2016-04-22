@@ -451,7 +451,7 @@ describe "$Cypress.Cy API", ->
         @cy.endedEarlyErr.restore()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include("The 6 queued commands which have not yet run are:")
+          expect(err.message).to.include("The 6 queued commands that have not yet run are:")
           expect(err.message).to.include("- cy.find('input')")
           expect(err.message).to.include("- cy.click('...')")
           expect(err.message).to.include("- cy.then('...')")
