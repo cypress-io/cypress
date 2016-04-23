@@ -85,7 +85,7 @@ module.exports = {
       width:  0
       height: 0
       show:   showGui
-      frame:  false
+      frame:  showGui
       type:   "PROJECT"
     })
     .then (win) ->
@@ -95,6 +95,13 @@ module.exports = {
         ## should show is false so we must 'hide'
         ## the window again and then set its size
         win.hide()
+
+      win.webContents.on "new-window", (e, url, frameName, disposition, options) ->
+        ## force new windows to automatically open with show: false
+        ## this prevents window.open inside of javascript client code
+        ## to cause a new BrowserWindow instance to open
+        ## https://github.com/cypress-io/cypress/issues/123
+        options.show = false
 
       win.setSize(1280, 720)
       win.center()

@@ -11,6 +11,7 @@ routes = {
   token:         "token"
   signin:        "signin"
   signout:       "signout"
+  usage:         "user/usage"
   ci:            "ci/:id"
   tests:         "tests/:id"
   projects:      "projects"

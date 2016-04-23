@@ -94,54 +94,82 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
 
     options = {}
 
-    options._log = Cypress.Log.command
-      $el: if Cypress.Utils.hasElement(subject) then subject else null
-      onConsole: ->
-        Subject: subject
+    getMessage = ->
+      if name is "invoke"
+        ".#{fn}(" + Cypress.Utils.stringify(args) + ")"
+      else
+        ".#{fn}"
 
     ## name could be invoke or its!
     name = @prop("current").get("name")
 
+    message = getMessage()
+
+    options._log = Cypress.Log.command
+      message: message
+      $el: if Cypress.Utils.hasElement(subject) then subject else null
+      onConsole: ->
+        Subject: subject
+
     if not _.isString(fn)
       @throwErr("cy.#{name}() only accepts a string as the first argument.", options._log)
+
+    fail = (prop) =>
+      @throwErr("cy.#{name}() errored because the property: '#{prop}' does not exist on your subject.", options._log)
+
+    failOnPreviousNullOrUndefinedValue = (previousProp, currentProp, value) =>
+      @throwErr("cy.#{name}() errored because the property: '#{previousProp}' returned a '#{value}' value. You cannot call any properties such as '#{currentProp}' on a '#{value}' value.")
+
+    failOnCurrentNullOrUndefinedValue = (prop, value) =>
+      @throwErr("cy.#{name}() errored because your subject is currently: '#{value}'. You cannot call any properties such as '#{prop}' on a '#{value}' value.")
+
+    getReducedProp = (str, subject) ->
+      getValue = (memo, prop) ->
+        switch
+          when _.isString(memo)
+            new String(memo)
+          when _.isNumber(memo)
+            new Number(memo)
+          else
+            memo
+
+      _.reduce str.split("."), (memo, prop, index, array) ->
+
+        ## if the property does not EXIST on the subject
+        ## then throw a specific error message
+        try
+          fail(prop) if prop not of getValue(memo, prop)
+        catch e
+          ## if the value is null or undefined then it does
+          ## not have properties which causes us to throw
+          ## an even more particular error
+          if _.isNull(memo) or _.isUndefined(memo)
+            if index > 0
+              failOnPreviousNullOrUndefinedValue(array[index - 1], prop, memo)
+            else
+              failOnCurrentNullOrUndefinedValue(prop, memo)
+          else
+            throw e
+        return memo[prop]
+
+      , subject
 
     getValue = =>
       remoteSubject = @getRemotejQueryInstance(subject)
 
-      prop = (remoteSubject or subject)[fn]
+      actualSubject = remoteSubject or subject
 
-      fail = =>
-        @throwErr("cy.#{name}() errored because the property: '#{fn}' does not exist on your subject.", options._log)
-
-      ## if the property does not EXIST on the subject
-      ## then throw a specific error message
-      try
-        fail() if fn not of (remoteSubject or subject)
-      catch e
-        # if not Object.prototype.hasOwnProperty.call((remoteSubject or subject), fn)
-        ## fallback to a second attempt at finding the property on the subject
-        ## in case our subject isnt object-like
-        ## think about using the hasOwnProperty
-        fail() if _.isUndefined(prop)
+      prop = getReducedProp(fn, actualSubject)
 
       invoke = =>
-        if _.isFunction(prop)
-          if name is "its"
-            Cypress.Utils.warning("Calling cy.#{name}() on a function is now deprecated. Use cy.invoke('#{fn}') instead.\n\nThis deprecation notice will become an actual error in the next major release.")
-
-          prop.apply (remoteSubject or subject), args
-
-        else
-          if name is "invoke"
-            Cypress.Utils.warning("Calling cy.#{name}() on a property is now deprecated. Use cy.its('#{fn}') instead.\n\nThis deprecation notice will become an actual error in the next major release.")
-
-          return prop
-
-      getMessage = ->
-        if _.isFunction(prop)
-          ".#{fn}(" + Cypress.Utils.stringify(args) + ")"
-        else
-          ".#{fn}"
+        switch name
+          when "its"
+            prop
+          when "invoke"
+            if _.isFunction(prop)
+              prop.apply(actualSubject, args)
+            else
+              @throwErr("Cannot call cy.invoke() because '#{fn}' is not a function. You probably want to use cy.its('#{fn}').", options._log)
 
       getFormattedElement = ($el) ->
         if Cypress.Utils.hasElement($el)
@@ -152,21 +180,18 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       value = invoke()
 
       if options._log
-        message = getMessage()
-
         options._log.set
-          message: message
           onConsole: ->
             obj = {}
 
-            if _.isFunction(prop)
+            if name is "invoke"
               obj["Function"] = message
               obj["With Arguments"] = args if args.length
             else
               obj["Property"] = message
 
             _.extend obj,
-              On:       getFormattedElement(remoteSubject or subject)
+              On:       getFormattedElement(actualSubject)
               Returned: getFormattedElement(value)
 
             obj

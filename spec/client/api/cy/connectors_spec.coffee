@@ -307,11 +307,22 @@ describe "$Cypress.Cy Connectors Commands", ->
         @cy.noop(obj).invoke("bar").then (val) ->
           expect(val).to.be.undefined
 
-      it "warns on deprecation using invoke as a property", ->
-        warn = @sandbox.spy console, "warn"
-        obj = {foo: "foo"}
-        @cy.noop(obj).invoke("foo").then ->
-          expect(warn).to.be.calledWith("Cypress Warning: Calling cy.invoke() on a property is now deprecated. Use cy.its('foo') instead.\n\nThis deprecation notice will become an actual error in the next major release.")
+      it "invokes reduced prop", ->
+        obj = {
+          foo: {
+            bar: {
+              baz: -> "baz"
+            }
+          }
+        }
+
+        cy.wrap(obj).invoke("foo.bar.baz").should("eq", "baz")
+
+      it "handles properties on the prototype", ->
+        num = new Number(10)
+
+        @cy.noop(num).invoke("valueOf").then (num) ->
+          expect(num).to.eq 10
 
       describe "errors", ->
         beforeEach ->
@@ -325,37 +336,29 @@ describe "$Cypress.Cy Connectors Commands", ->
 
           @cy.noop(@obj).invoke("err")
 
-    describe "regular property", ->
-      beforeEach ->
-        @obj = {
-          baz: 10
-        }
+        it "throws when prop is not a function", (done) ->
+          obj = {
+            foo: "foo"
+          }
 
-      it "returns undefined", ->
-        @cy.noop({foo: undefined}).invoke("foo").then (val) ->
-          expect(val).to.be.undefined
+          @Cypress.on "fail", (err) ->
+            expect(err.message).to.include("Cannot call cy.invoke() because 'foo' is not a function. You probably want to use cy.its('foo')")
+            done()
 
-      it "returns property", ->
-        @cy.noop(@obj).invoke("baz").then (num) ->
-          expect(num).to.eq @obj.baz
+          @cy.wrap(obj).invoke("foo")
 
-      it "returns property on remote subject", ->
-        @remoteWindow.$.fn.baz = 123
+        it "throws when reduced prop is not a function", (done) ->
+          obj = {
+            foo: {
+              bar: "bar"
+            }
+          }
 
-        @cy.get("div:first").invoke("baz").then (num) ->
-          expect(num).to.eq 123
+          @Cypress.on "fail", (err) ->
+            expect(err.message).to.include("Cannot call cy.invoke() because 'foo.bar' is not a function. You probably want to use cy.its('foo.bar')")
+            done()
 
-      it "handles string subjects", ->
-        str = "foobarbaz"
-
-        @cy.noop(str).invoke("length").then (num) ->
-          expect(num).to.eq str.length
-
-      it "handles properties on the prototype", ->
-        num = new Number(10)
-
-        @cy.noop(num).invoke("valueOf").then (num) ->
-          expect(num).to.eq 10
+          @cy.wrap(obj).invoke("foo.bar")
 
     describe ".log", ->
       beforeEach ->
@@ -371,28 +374,13 @@ describe "$Cypress.Cy Connectors Commands", ->
             _.reduce args, (memo, num) ->
               memo + num
             , 0
+          math: {
+            sum: =>
+              @obj.sum.apply(@obj, arguments)
+          }
         }
 
         @Cypress.on "log", (@log) =>
-
-      it "logs immediately before resolving", (done) ->
-        @Cypress.on "log", (log) ->
-          if log.get("name") is "invoke"
-            expect(log.get("state")).to.eq("pending")
-            expect(log.get("message")).to.eq "foo"
-            done()
-
-        @cy.noop({foo: "foo"}).invoke("foo")
-
-      it "snapshots after invoking", ->
-        @cy.noop({foo: "foo"}).invoke("foo").then ->
-          expect(@log.get("snapshots").length).to.eq(1)
-          expect(@log.get("snapshots")[0]).to.be.an("object")
-
-      it "ends", ->
-        @cy.noop({foo: "foo"}).invoke("foo").then ->
-          expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
 
       it "logs $el if subject is element", ->
         @cy.get("button:first").invoke("hide").then ($el) ->
@@ -401,16 +389,6 @@ describe "$Cypress.Cy Connectors Commands", ->
       it "does not log $el if subject isnt element", ->
         @cy.noop(@obj).invoke("bar").then ->
           expect(@log.get("$el")).not.to.exist
-
-      it "logs obj as a property", ->
-        @cy.noop(@obj).invoke("foo").then ->
-          obj = {
-            name: "invoke"
-            message: ".foo"
-          }
-
-          _.each obj, (value, key) =>
-            expect(@log.get(key)).to.deep.eq value
 
       it "logs obj as a function", ->
         @cy.noop(@obj).invoke("bar").then ->
@@ -432,16 +410,6 @@ describe "$Cypress.Cy Connectors Commands", ->
             Returned: {numbers: [1,2,3]}
           }
 
-
-      it "#onConsole as a regular property", ->
-        @cy.noop(@obj).invoke("num").then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
-            Command:  "invoke"
-            Property: ".num"
-            On:       @obj
-            Returned: 123
-          }
-
       it "#onConsole as a function property without args", ->
         @cy.noop(@obj).invoke("bar").then ->
           expect(@log.attributes.onConsole()).to.deep.eq {
@@ -456,6 +424,16 @@ describe "$Cypress.Cy Connectors Commands", ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command:  "invoke"
             Function: ".sum(1, 2, 3)"
+            "With Arguments": [1,2,3]
+            On:       @obj
+            Returned: 6
+          }
+
+      it "#onConsole as a function reduced property with args", ->
+        @cy.noop(@obj).invoke("math.sum", 1, 2, 3).then ->
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command:  "invoke"
+            Function: ".math.sum(1, 2, 3)"
             "With Arguments": [1,2,3]
             On:       @obj
             Returned: 6
@@ -535,26 +513,197 @@ describe "$Cypress.Cy Connectors Commands", ->
         @cy.noop({foo: "bar"}).its("baz")
 
   context "#its", ->
-    it "proxies to #invoke", ->
-      @cy.noop({foo: -> "bar"}).its("foo").should("eq", "bar")
+    beforeEach ->
+      ## set the jquery path back to our
+      ## remote window
+      @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
-    it "warns on deprecation using its on a function", ->
-      warn = @sandbox.spy console, "warn"
-      obj = {foo: -> "foo"}
-      @cy.noop(obj).its("foo").then ->
-        expect(warn).to.be.calledWith("Cypress Warning: Calling cy.its() on a function is now deprecated. Use cy.invoke('foo') instead.\n\nThis deprecation notice will become an actual error in the next major release.")
+      @remoteWindow = @cy.private("window")
+
+    it "proxies to #invokeFn", ->
+      fn = -> "bar"
+      @cy.wrap({foo: fn}).its("foo").should("eq", fn)
+
+    it "reduces into dot separated values", ->
+      obj = {
+        foo: {
+          bar: {
+            baz: "baz"
+          }
+        }
+      }
+
+      @cy.wrap(obj).its("foo.bar.baz").should("eq", "baz")
+
+    it "does not invoke a function and uses as a property", ->
+      fn = -> "fn"
+      fn.bar = "bar"
+
+      @cy.wrap(fn).its("bar").should("eq", "bar")
+
+    it "does not invoke a function with multiple its", ->
+      fn = -> "fn"
+      fn.bar = -> "bar"
+      fn.bar.baz = "baz"
+
+      @cy.wrap(fn).its("bar").its("baz").should("eq", "baz")
+
+    it "does not invoke a function and uses as a reduced property", ->
+      fn = -> "fn"
+      fn.bar = -> "bar"
+      fn.bar.baz = "baz"
+
+      obj = {
+        foo: fn
+      }
+
+      @cy.wrap(obj).its("foo.bar.baz").should("eq", "baz")
+
+    it "returns undefined", ->
+      @cy.noop({foo: undefined}).its("foo").then (val) ->
+        expect(val).to.be.undefined
+
+    it "returns property", ->
+      @cy.noop({baz: "baz"}).its("baz").then (num) ->
+        expect(num).to.eq "baz"
+
+    it "returns property on remote subject", ->
+      @remoteWindow.$.fn.baz = 123
+
+      @cy.get("div:first").its("baz").then (num) ->
+        expect(num).to.eq 123
+
+    it "handles string subjects", ->
+      str = "foobarbaz"
+
+      @cy.noop(str).its("length").then (num) ->
+        expect(num).to.eq str.length
+
+    it "handles number subjects", ->
+      num = 12345
+
+      toFixed = Number.prototype.toFixed
+
+      @cy.wrap(num).its("toFixed").should("eq", toFixed)
+
+    describe ".log", ->
+      beforeEach ->
+        @obj = {
+          foo: "foo bar baz"
+          num: 123
+          bar: -> "bar"
+          attr: (key, value) ->
+            obj = {}
+            obj[key] = value
+            obj
+          sum: (args...) ->
+            _.reduce args, (memo, num) ->
+              memo + num
+            , 0
+          baz: ->
+        }
+
+        @obj.baz.quux = -> "quux"
+        @obj.baz.lorem = "ipsum"
+
+        @Cypress.on "log", (@log) =>
+
+      it "logs immediately before resolving", (done) ->
+        @Cypress.on "log", (log) ->
+          if log.get("name") is "its"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("message")).to.eq ".foo"
+            done()
+
+        @cy.noop({foo: "foo"}).its("foo")
+
+      it "snapshots after invoking", ->
+        @cy.noop({foo: "foo"}).its("foo").then ->
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
+
+      it "ends", ->
+        @cy.noop({foo: "foo"}).its("foo").then ->
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
+
+      it "logs obj as a property", ->
+        @cy.noop(@obj).its("foo").then ->
+          obj = {
+            name: "its"
+            message: ".foo"
+          }
+
+          _.each obj, (value, key) =>
+            expect(@log.get(key)).to.deep.eq value
+
+      it "#onConsole as a regular property", ->
+        @cy.noop(@obj).its("num").then ->
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command:  "its"
+            Property: ".num"
+            On:       @obj
+            Returned: 123
+          }
 
     describe "errors", ->
       beforeEach ->
+        @Cypress.on "log", (@log) =>
+
         @allowErrors()
         @currentTest.timeout(200)
 
-      it "throws when property does not exist on the subject", (done) ->
-        @Cypress.on "log", (@log) =>
+      it "does not display parenthesis on command", (done) ->
+        obj = {
+          foo: {
+            bar: ->
+          }
+        }
 
+        obj.foo.bar.baz = => "baz"
+
+        @Cypress.on "fail", (err) =>
+          expect(@log.get("error")).to.include(err)
+          expect(@log.attributes.onConsole().Property).to.eq(".foo.bar.baz")
+          done()
+
+        @cy.wrap(obj).its("foo.bar.baz").should("eq", "baz")
+
+      it "throws when property does not exist on the subject", (done) ->
         @cy.on "fail", (err) =>
           expect(err.message).to.include "cy.its() errored because the property: 'foo' does not exist on your subject."
           expect(@log.get("error")).to.include err
           done()
 
         @cy.noop({}).its("foo")
+
+      it "throws when reduced property does not exist on the subject", (done) ->
+        @cy.on "fail", (err) =>
+          expect(err.message).to.include "cy.its() errored because the property: 'baz' does not exist on your subject."
+          expect(@log.get("error")).to.include err
+          done()
+
+        obj = {
+          foo: {
+            bar: {}
+          }
+        }
+
+        @cy.noop(obj).its("foo.bar.baz")
+
+      [null, undefined].forEach (val) ->
+        it "throws on reduced #{val} subject", (done) ->
+          @Cypress.on "fail", (err) ->
+            expect(err.message).to.include("cy.its() errored because the property: 'foo' returned a '#{val}' value. You cannot call any properties such as 'toString' on a '#{val}' value.")
+            done()
+
+          @cy.wrap({foo: val}).its("foo.toString")
+
+        ## TODO: currently this doesn't work because
+        ## null subjects immediately throw
+        # it "throws on initial #{val} subject", ->
+        #   @Cypress.on "fail", (err) ->
+        #     expect(err.message).to.include("cy.its() errored because the property: 'foo' returned a '#{val}' value. You cannot call any properties such as 'toString' on a '#{val}' value.")
+        #     done()
+
+        #   @cy.wrap(val).its("toString")
