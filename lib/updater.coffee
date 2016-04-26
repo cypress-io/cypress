@@ -100,42 +100,19 @@ class Updater
 
       .on "finish", resolve
 
-  ## copies .cy to the new app path
-  ## so we dont lose our cache, logs, etc
-  copyCyDataTo: (newAppPath) ->
-    p = new Promise (resolve, reject) ->
-      glob "**/app/package.json", {cwd: newAppPath, ignore: "**/node_modules/**"}, (err, files) ->
-        return reject(err) if err
-
-        newAppConfigPath = path.join(newAppPath, path.dirname(files[0]), konfig("cy_path"))
-
-        resolve(newAppConfigPath)
-
-    p.then (newAppConfigPath) ->
-      cyConfigPath  = cwd(konfig("cy_path"))
-
-      logger.info "copying .cy to tmp destination", src: cyConfigPath, destination: newAppConfigPath
-
-      fs.copyAsync(cyConfigPath, newAppConfigPath).then ->
-
-        ## change all the permissions recursively to 0755
-        chmodr(newAppConfigPath, 0o755)
-
   runInstaller: (newAppPath) ->
-    @copyCyDataTo(newAppPath).bind(@).then ->
+    ## get the --updating args + --coords args
+    args = @getArgs()
 
-      ## get the --updating args + --coords args
-      args = @getArgs()
+    logger.info "running installer from tmp", destination: newAppPath, args: args
 
-      logger.info "running installer from tmp", destination: newAppPath, args: args
+    ## runs the 'new' app in the /tmp directory with
+    ## appPath + execPath to the 'existing / old' app
+    ## (which is where its normally installed in /Applications)
+    ## it additionally passes the --updating flag
+    @getClient().runInstaller(newAppPath, args, {})
 
-      ## runs the 'new' app in the /tmp directory with
-      ## appPath + execPath to the 'existing / old' app
-      ## (which is where its normally installed in /Applications)
-      ## it additionally passes the --updating flag
-      @getClient().runInstaller(newAppPath, args, {})
-
-      process.exit()
+    process.exit()
 
   unpack: (destinationPath, manifest) ->
     logger.info "unpacking new version", destination: destinationPath
