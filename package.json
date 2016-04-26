@@ -1,5 +1,6 @@
 {
-  "name": "Cypress",
+  "name": "cypress",
+  "productName": "Cypress",
   "version": "0.15.4",
   "description": "Javascript Test Engine",
   "main": "index.js",
