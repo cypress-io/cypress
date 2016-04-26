@@ -9,6 +9,7 @@ logs      = require("./electron/handlers/logs")
 logger    = require("./logger")
 errors    = require("./errors")
 Project   = require("./project")
+appData   = require("./util/app_data")
 argsUtil  = require("./util/args")
 smokeTest = require("./modes/smoke_test")
 returnPkg = require("./modes/pkg")
@@ -107,53 +108,56 @@ module.exports = {
   start: (argv = []) ->
     logger.info("starting desktop app", args: argv)
 
-    options = argsUtil.toObject(argv)
+    ## make sure we have the appData folder
+    appData.ensure()
+    .then =>
+      options = argsUtil.toObject(argv)
 
-    ## else determine the mode by
-    ## the passed in arguments / options
-    ## and normalize this mode
-    switch
-      when options.removeIds
-        options.mode = "removeIds"
+      ## else determine the mode by
+      ## the passed in arguments / options
+      ## and normalize this mode
+      switch
+        when options.removeIds
+          options.mode = "removeIds"
 
-      when options.version
-        options.mode = "version"
+        when options.version
+          options.mode = "version"
 
-      when options.smokeTest
-        options.mode = "smokeTest"
+        when options.smokeTest
+          options.mode = "smokeTest"
 
-      when options.returnPkg
-        options.mode = "returnPkg"
+        when options.returnPkg
+          options.mode = "returnPkg"
 
-      when options.logs
-        options.mode = "logs"
+        when options.logs
+          options.mode = "logs"
 
-      when options.clearLogs
-        options.mode = "clearLogs"
+        when options.clearLogs
+          options.mode = "clearLogs"
 
-      when options.getKey
-        options.mode = "getKey"
+        when options.getKey
+          options.mode = "getKey"
 
-      when options.generateKey
-        options.mode = "generateKey"
+        when options.generateKey
+          options.mode = "generateKey"
 
-      when options.ci
-        options.mode = "ci"
+        when options.ci
+          options.mode = "ci"
 
-      when options.runProject
-        ## go into headless mode
-        ## when we have 'runProject'
-        options.mode = "headless"
+        when options.runProject
+          ## go into headless mode
+          ## when we have 'runProject'
+          options.mode = "headless"
 
-      else
-        ## set the default mode as headed
-        options.mode ?= "headed"
+        else
+          ## set the default mode as headed
+          options.mode ?= "headed"
 
-    ## remove mode from options
-    mode    = options.mode
-    options = _.omit(options, "mode")
+      ## remove mode from options
+      mode    = options.mode
+      options = _.omit(options, "mode")
 
-    @startInMode(mode, options)
+      @startInMode(mode, options)
 
   startInMode: (mode, options) ->
     switch mode

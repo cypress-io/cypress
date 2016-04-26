@@ -5,11 +5,11 @@ Promise    = require("bluebird")
 PSemaphore = require("promise-semaphore")
 request    = require("request-promise")
 errors     = require("request-promise/errors")
+appData    = require("./util/app_data")
 api        = require("./api")
-konfig     = require("./konfig")
 logger     = require("./logger")
 
-CACHE = konfig("cache_path")
+CACHE = appData.path("cache")
 fs    = Promise.promisifyAll(fs)
 queue = new PSemaphore
 
