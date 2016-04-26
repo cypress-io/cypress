@@ -5147,6 +5147,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.click() failed because the center of this element is hidden from view:"
+          expect(err.message).to.include "<li>quux</li>"
           done()
 
         @cy.get("#overflow-auto-container").contains("quux").click()

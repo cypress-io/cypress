@@ -163,6 +163,7 @@ do ($Cypress, _, $) ->
             https://on.cypress.io/element-cannot-be-interacted-with
           """, onFail)
         else
+          node = $Cypress.Utils.stringifyElement($el1)
           @throwErr("""
             cy.#{method}() failed because the center of this element is hidden from view:\n
             #{node}\n
