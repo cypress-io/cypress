@@ -1,0 +1,33 @@
+{
+  "name": "@cypress/core-launcher",
+  "version": "0.0.0",
+  "description": "Internal lib for spawning browser processes",
+  "main": "index.js",
+  "scripts": {
+    "test": "NODE_ENV=test mocha --watch",
+    "test-ci": "NODE_ENV=test mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress-core-launcher.git"
+  },
+  "author": "Brian Mann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress-core-launcher/issues"
+  },
+  "homepage": "https://github.com/cypress-io/cypress-core-launcher#readme",
+  "devDependencies": {
+    "@cypress/core-releaser": "^0.1.6",
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5",
+    "sinon": "^1.17.3",
+    "sinon-chai": "^2.8.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.3.5",
+    "fs-extra": "^0.28.0",
+    "lodash": "^4.11.1",
+    "plist": "^1.2.0"
+  }
+}
