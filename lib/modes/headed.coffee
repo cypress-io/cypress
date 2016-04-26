@@ -151,13 +151,20 @@ module.exports = {
     .get("ready")
 
   run: (options) ->
-    new Promise (resolve, reject) =>
-      ## prevent chromium from throttling
-      app.commandLine.appendSwitch("disable-renderer-backgrounding")
+    ## prevent chromium from throttling
+    app.commandLine.appendSwitch("disable-renderer-backgrounding")
 
-      app.on "window-all-closed", =>
-        @onWindowAllClosed(app)
+    app.on "window-all-closed", =>
+      @onWindowAllClosed(app)
 
-      app.on "ready", =>
-        resolve @ready(options)
+    waitForReady = ->
+      new Promise (resolve, reject) ->
+        app.on "ready", resolve
+
+    Promise.any([
+      waitForReady()
+      Promise.delay(500)
+    ])
+    .then =>
+      @ready(options)
 }
