@@ -8,14 +8,6 @@ npm install @cypress/core-extension
 
 ## Developing
 
-1. Open Chrome
-2. Go into Extensions
-3. Check **Developer Mode**
-4. Click **Load unpacked extension...**
-5. Choose **cypress-core-extension/dist** directory
-6. Click **background page** to debug `background.js`
-7. Click **Reload (⌘R)** to pull in changes to `manifest.json`
-
 **Install**
 
 ```bash
@@ -33,3 +25,13 @@ npm run build
 ```bash
 npm run watch
 ```
+
+1. Open Chrome
+2. Go into Extensions
+3. Check **Developer Mode**
+4. Click **Load unpacked extension...**
+5. Choose **cypress-core-extension/dist** directory
+6. Click **background page** to debug `background.js`
+7. Click **Reload (⌘R)** to pull in changes to `manifest.json`
+
+
