@@ -1,52 +1,71 @@
+fs        = require("fs-extra")
+path      = require("path")
 Promise   = require("bluebird")
-launcher  = require("browser-launcher2")
+launcher  = require("@cypress/core-launcher")
 extension = require("@cypress/core-extension")
 appData   = require("./util/app_data")
 
-config          = appData.path("browsers", "config.json")
-launcher        = Promise.promisify(launcher)
-updateBrowsers  = Promise.promisify(launcher.update, {context: launcher})
+fs              = Promise.promisifyAll(fs)
+profiles        = appData.path("browsers")
 pathToExtension = extension.getPathToExtension()
 instance        = null
 
-process.once "exit", ->
-  instance?.stop?()
+kill = ->
+  ## cleanup our running browser
+  ## instance
+  return if not instance
+  instance.kill()
+  instance = null
+
+process.once "exit", kill
+
+defaultArgs = [
+  "--test-type"
+  "--ignore-certificate-errors"
+  "--load-and-launch-app=#{pathToExtension}"
+  "--start-maximized"
+  "--silent-debugger-extension-api"
+  "--no-default-browser-check"
+  "--no-first-run"
+  "--noerrdialogs"
+  "--enable-fixed-layout"
+  "--disable-popup-blocking"
+  "--disable-password-generation"
+  "--disable-save-password-bubble"
+  "--disable-single-click-autofill"
+  "--disable-prompt-on-repos"
+  "--disable-background-timer-throttling"
+  "--disable-renderer-throttling"
+  "--disable-restore-session-state"
+  "--disable-translate"
+  "--disable-default-apps"
+  "--disable-sync"
+]
 
 module.exports = {
-  launch: (url, args = []) ->
-    ## modify the extension here too
-    ## Promise.all([launcher(), modifyExtension()])
+  args: defaultArgs
 
-    ## TODO:
-    ## should we always update here first before
-    ## attempting to launch?
+  close: kill
 
-    updateBrowsers(config)
-    .then ->
-      launcher(config)
-    .then (launch) ->
-      launch = Promise.promisify(launch)
+  ensureProfile: (name) ->
+    p = path.join(profiles, name)
 
-      ## TODO: also handle args passed in from process.argv
-      ## like --args ?
-      launch(url, {
-        browser: "chrome"
-        options: [
-          "--test-type"
-          "--ignore-certificate-errors"
-          "--load-and-launch-app=#{pathToExtension}"
-          "--disable-popup-blocking"
-          "--start-maximized"
-          "--disable-password-generation"
-          "--disable-save-password-bubble"
-          "--disable-single-click-autofill"
-          "--disable-prompt-on-repos"
-          "--disable-background-timer-throttling"
-          "--disable-renderer-throttling"
-          "--silent-debugger-extension-api"
-        ].concat(args)
-      })
-    .then (i) ->
-      instance = i
+    fs.ensureDirAsync(p).return(p)
 
+  launch: (name, url, args = []) ->
+    args = defaultArgs.concat(args)
+
+    ## ensure we have a folder created
+    ## for this browser profile
+    @ensureProfile(name)
+    .then (dir) ->
+
+      ## this overrides any previous user-data-dir args
+      ## by being the last one
+      args.push("--user-data-dir=#{dir}")
+
+      launcher()
+      .call("launch", name, url, args)
+      .then (i) ->
+        instance = i
 }

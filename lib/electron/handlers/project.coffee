@@ -1,9 +1,10 @@
-_       = require("lodash")
-Promise = require("bluebird")
-config  = require("../../config")
-errors  = require("../../errors")
-cache   = require("../../cache")
-Project = require("../../project")
+_        = require("lodash")
+Promise  = require("bluebird")
+config   = require("../../config")
+errors   = require("../../errors")
+cache    = require("../../cache")
+Project  = require("../../project")
+launcher = require("../../launcher")
 
 ## global reference to any open projects
 openProject = null
@@ -21,6 +22,9 @@ module.exports = {
     .open(options)
 
   opened: -> openProject
+
+  launch: (browser, url) ->
+    launcher.launch(browser, url)
 
   onSettingsChanged: ->
     Promise.try =>
@@ -40,6 +44,9 @@ module.exports = {
     if not openProject
       nullify()
     else
-      openProject.close(options)
+      Promise.all([
+        launcher.close()
+        openProject.close(options)
+      ])
       .then(nullify)
 }

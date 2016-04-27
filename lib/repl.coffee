@@ -1,9 +1,10 @@
-require("./util/http_overrides")
+require("./environment")
 
 _        = require("lodash")
 path     = require("path")
 repl     = require("repl")
 history  = require("repl.history")
+launcher = require("./launcher")
 Fixtures = require("../spec/server/helpers/fixtures")
 
 replServer = repl.start({
@@ -24,6 +25,7 @@ getObj = ->
     darwin: deploy.getPlatform("darwin")
     linux:  deploy.getPlatform("linux")
     Fixtures: Fixtures
+    launcher: launcher
 
     reload: ->
       for key of require.cache
