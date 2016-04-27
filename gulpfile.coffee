@@ -40,6 +40,10 @@ gulp.task "coffeescript", ->
   .pipe(coffee())
   .pipe(gulp.dest("dist"))
 
+gulp.task "html", ->
+  gulp.src("app/**/*.html")
+  .pipe(gulp.dest("dist"))
+
 gulp.task "icons", ->
   gulp.src([
     icons.getPathToIcon("icon_16x16.png")
@@ -54,4 +58,4 @@ gulp.task "watch", ["build"], ->
   gulp.watch("app/**/*", ["build"])
 
 gulp.task "build", ->
-  runSeq "clean", ["copy:socket:client", "icons", "manifest", "coffeescript"], "backup", "default:host:path"
+  runSeq "clean", ["copy:socket:client", "icons", "manifest", "coffeescript", "html"], "backup", "default:host:path"

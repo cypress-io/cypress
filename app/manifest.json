@@ -1,7 +1,12 @@
 {
   "name" : "Cypress",
   "description" : "Adds chrome.* API's for testing with Cypress",
-  "permissions": [ "cookies", "tabs", "http://*/*", "https://*/*" ],
+  "permissions": [
+    "cookies",
+    "tabs",
+    "http://*/*",
+    "https://*/*"
+  ],
   "icons": {
     "16":  "icons/icon_16x16.png",
     "48":  "icons/icon_48x48.png",
@@ -19,6 +24,9 @@
       "socket.io.js",
       "background.js"
     ]
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
   },
   "manifest_version": 2
 }
