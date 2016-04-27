@@ -1,10 +1,14 @@
+Promise = require("bluebird")
+util    = require("./util")
+
 currentPath = null
 
 module.exports = {
   reset: ->
     currentPath = null
 
-  version: ->
+  version: (p) ->
+    util.parse(p, "KSVersion")
 
   path: ->
     if currentPath
@@ -14,9 +18,14 @@ module.exports = {
     .then (p) ->
       currentPath = p
 
-  get: ->
-    Promise.props({
-      path: @path()
-      version: @version()
-    })
+  executable: (str, executable) ->
+    path.join(str, "Contents", "MacOS", executable)
+
+  get: (executable) ->
+    @path()
+    .then (p) =>
+      Promise.props({
+        path:    @executable(p, executable)
+        version: @version(p)
+      })
 }
