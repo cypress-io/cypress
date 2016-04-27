@@ -7,7 +7,7 @@ module.exports = {
     util.parse(p, "KSVersion")
 
   path: ->
-    util.find("com.google.Chrome")
+    util.find("com.google.Chrome.canary")
 
   get: (executable) ->
     @path()

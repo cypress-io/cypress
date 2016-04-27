@@ -5,11 +5,10 @@ browsers = require("./browsers")
 missingConfig = ->
   Promise.reject(new Error("You must provide a path to a config file."))
 
-api = (browsers) ->
-  console.log browsers
+api = (b) ->
   return {
-    launch: (browser, url, args = []) ->
-      browsers.launch(browsers, browser, url, args)
+    launch: (name, url, args = []) ->
+      browsers.launch(b, name, url, args)
   }
 
 # fn = (pathToConfig, browsers) ->

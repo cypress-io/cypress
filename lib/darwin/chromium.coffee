@@ -4,10 +4,10 @@ util    = require("./util")
 
 module.exports = {
   version: (p) ->
-    util.parse(p, "KSVersion")
+    util.parse(p, "CFBundleShortVersionString")
 
   path: ->
-    util.find("com.google.Chrome")
+    util.find("org.chromium.Chromium")
 
   get: (executable) ->
     @path()

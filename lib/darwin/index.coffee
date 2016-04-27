@@ -1,3 +1,5 @@
 module.exports = {
-  "chrome":        require("./chrome")
+  "chrome":   require("./chrome")
+  "canary":   require("./canary")
+  "chromium": require("./chromium")
 }
