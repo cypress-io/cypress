@@ -12,6 +12,10 @@ h1 {
   margin: 100px auto;
 }
 
+.img-wrapper {
+  text-align: center;
+}
+
 p, ul, a {
   font-size: 18px;
   line-height: 27px;
@@ -22,5 +26,5 @@ a {
 }
 
 img {
-  height: 80px;
+  height: 70px;
 }
