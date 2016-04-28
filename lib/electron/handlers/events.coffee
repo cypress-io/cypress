@@ -12,7 +12,6 @@ user        = require("../../user")
 errors      = require("../../errors")
 Updater     = require("../../updater")
 Project     = require("../../project")
-launcher    = require("../../launcher")
 
 handleEvent = (options, event, id, type, arg) ->
   sendResponse = (data = {}) ->
@@ -69,8 +68,13 @@ handleEvent = (options, event, id, type, arg) ->
       shell.openExternal(arg)
 
     when "launch:browser"
-      launcher.launch(arg)
-      .then -> send(null)
+      # headless.createRenderer(arg, true)
+      project.launch("chrome", arg, {
+        onBrowserOpen: ->
+          send({browserOpened: true})
+        onBrowserClose: ->
+          send({browserClosed: true})
+      })
       .catch(sendErr)
 
     when "window:open"

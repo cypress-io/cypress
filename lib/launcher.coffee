@@ -1,3 +1,4 @@
+_         = require("lodash")
 fs        = require("fs-extra")
 path      = require("path")
 Promise   = require("bluebird")
@@ -52,8 +53,13 @@ module.exports = {
 
     fs.ensureDirAsync(p).return(p)
 
-  launch: (name, url, args = []) ->
-    args = defaultArgs.concat(args)
+  launch: (name, url, options = {}) ->
+    _.defaults options,
+      args: []
+      onBrowserOpen: ->
+      onBrowserClose: ->
+
+    args = defaultArgs.concat(options.args)
 
     ## ensure we have a folder created
     ## for this browser profile

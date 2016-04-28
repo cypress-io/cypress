@@ -23,8 +23,8 @@ module.exports = {
 
   opened: -> openProject
 
-  launch: (browser, url) ->
-    launcher.launch(browser, url)
+  launch: (browser, url, options = {}) ->
+    launcher.launch(browser, url, options)
 
   onSettingsChanged: ->
     Promise.try =>
