@@ -31,8 +31,8 @@
           <button type="button" data-js="run-browser"  data-browser="chromium" class="btn btn-primary btn-sm">
             <i class="fa fa-chrome"></i>
            Run
-           <%= @defaultBrowser.get("nameCapitalized") %>
-           <%= @defaultBrowser.get("version") %>
+           <%= @defaultBrowser?.get("nameCapitalized") %>
+           <%= @defaultBrowser?.get("version") %>
           </button>
           <button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">
             <span class="caret"></span>

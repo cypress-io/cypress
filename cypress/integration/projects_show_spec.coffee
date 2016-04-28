@@ -14,6 +14,9 @@ describe "Project Show", ->
       .fixture("projects").then (@projects) ->
         @ipc.handle("get:project:paths", null, @projects)
       .get("#projects-container>li").first().click()
+      .fixture("browsers").then (@browsers) ->
+        @ipc.handle("get:browsers", null, @browsers)
+
 
   describe "begins starting server", ->
     it "displays folder name", ->

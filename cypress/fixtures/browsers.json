@@ -1,0 +1,12 @@
+[
+  {
+    "name": "chromium",
+    "version": 49,
+    "default": true
+  },
+  {
+    "name": "chrome",
+    "version": 41,
+    "default": false
+  }
+]
