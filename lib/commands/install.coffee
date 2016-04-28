@@ -204,7 +204,7 @@ class Install
 
                 resolve()
               else
-                reject()
+                unzipWithNode()
 
             readline.createInterface({
               input: sp.stderr
