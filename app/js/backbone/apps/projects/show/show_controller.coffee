@@ -34,6 +34,11 @@
       @listenTo browsers, "fetched", ->
         defaultBrowser = browsers.pullOffDefaultBrowser()
         project.set({defaultBrowser: defaultBrowser})
+
+        @show @projectLayout
+
+      @listenTo browsers, "error", (err) ->
+        project.setError(err)
         @show @projectLayout
 
     reboot: (project) ->

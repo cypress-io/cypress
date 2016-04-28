@@ -21,9 +21,13 @@
   API =
     getBrowsers: ->
       browsers = new Entities.BrowsersCollection
-      App.ipc("get:browsers").then (brows) ->
+      App.ipc("get:browsers")
+
+      .then (brows) ->
         browsers.add brows
         browsers.trigger("fetched")
+      .catch (err) ->
+        browsers.trigger("error", err)
       browsers
 
   App.reqres.setHandler "browser:entities", ->
