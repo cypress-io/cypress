@@ -74,9 +74,13 @@
       runBtnIcon = runBtn.find("i")
 
       ## switcheroo the text and icons on the 2 btns
+      ## TODO: this logic is all kinds of busted
       browserChosen
         .text(runBtnText)
         .prepend(runBtnIcon)
       runBtn
         .text(browserChosenText)
         .prepend(browserChosenIcon)
+
+      ## TODO: use model logic here not DOM simulated events
+      @ui.runBrowser.trigger("click")

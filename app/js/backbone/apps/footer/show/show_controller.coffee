@@ -53,6 +53,9 @@
       @listenTo bottomView, "about:clicked", ->
         App.execute "gui:about"
 
+      @listenTo bottomView, "chat:clicked", ->
+        App.ipc("external:open", "https://gitter.im/cypress-io/cypress")
+
       @listenTo bottomView, "preferences:clicked", ->
         App.execute "gui:preferences"
 

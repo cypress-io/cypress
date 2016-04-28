@@ -6,9 +6,6 @@
       { project } = params
 
       browsers = App.request "browser:entities"
-      defaultBrowser = App.request "get:default:browser"
-
-      project.set({defaultBrowser: defaultBrowser})
 
       @projectLayout = @getProjectLayout(project, browsers)
 
@@ -43,7 +40,15 @@
           @openProject(project)
         , 100
 
-      @show @projectLayout
+      @listenTo browsers, "fetched", ->
+        defaultBrowser = browsers.pullOffDefaultBrowser()
+        project.set({defaultBrowser: defaultBrowser})
+
+        @show @projectLayout
+
+      @listenTo browsers, "error", (err) ->
+        project.setError(err)
+        @show @projectLayout
 
     reboot: (project) ->
       project.reset()

@@ -16,6 +16,11 @@ describe "Project Show", ->
       .get("#projects-container>li").first().click()
 
   describe "begins starting server", ->
+    beforeEach ->
+      cy
+        .fixture("browsers").then (@browsers) ->
+          @ipc.handle("get:browsers", null, @browsers)
+
     it "displays folder name", ->
       cy.contains("h3", "My-Fake-Project")
 
@@ -27,6 +32,10 @@ describe "Project Show", ->
 
   describe "server error", ->
     beforeEach ->
+      cy
+        .fixture("browsers").then (@browsers) ->
+          @ipc.handle("get:browsers", null, @browsers)
+
       @err = {
         name: "Port 2020"
         msg: "There is already a port running"
@@ -69,8 +78,12 @@ describe "Project Show", ->
           @ipc.handle("get:project:paths", null, @projects)
         .get("#projects-container")
 
-  describe "successfully starts server", ->
+  describe "successfully starts server with browsers", ->
     beforeEach ->
+      cy
+        .fixture("browsers").then (@browsers) ->
+          @ipc.handle("get:browsers", null, @browsers)
+
       @agents.spy(@App, "ipc")
 
       @config = {
@@ -96,13 +109,20 @@ describe "Project Show", ->
           .get(".dropdown-menu").contains("Chrome").click()
           .get("[data-js='run-browser']").contains("Chrome")
 
-    context.only "run browser", ->
+    context "run browser", ->
       beforeEach ->
         cy.get("[data-js='run-browser']").as("browser")
 
       it "triggers launch:browser of browser on click of run", ->
         cy.get("@browser").click().then ->
           expect(@App.ipc).to.be.calledWith("launch:browser", "chromium")
+
+      it.only "automatically runs browser", ->
+        cy
+          .get(".browser-selector .dropdown-toggle").click()
+          .get(".dropdown-menu").contains("Chrome").click()
+          .get("[data-js='run-browser']")
+            .should("be.disabled").and("contains", "Running")
 
       describe "closed state", ->
         it "is enabled", ->
@@ -187,3 +207,23 @@ describe "Project Show", ->
           .then ->
             expect(@App.ipc.off).to.be.calledWith("on:project:settings:change")
 
+  describe "successfully starts server with no browsers", ->
+    beforeEach ->
+      @error = "We couldn't find any browsers."
+
+      @ipc.handle("get:browsers", {
+          name: "No browsers Found"
+          message: @error
+        }, null)
+
+      @agents.spy(@App, "ipc")
+
+      @config = {
+        clientUrl: "http://localhost:2020",
+        clientUrlDisplay: "http://localhost:2020"
+      }
+
+      @ipc.handle("open:project", null, @config)
+
+    it "displays browser error", ->
+      cy.contains(@error)
