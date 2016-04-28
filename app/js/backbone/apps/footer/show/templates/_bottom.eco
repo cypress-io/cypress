@@ -13,6 +13,9 @@
         <li data-about>
           <a href="#">About</a>
         </li>
+        <li data-chat>
+          <a href="#">Chat</a>
+        </li>
         <li data-debug>
           <a href="#">Debug Console</a>
         </li>

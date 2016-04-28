@@ -29,6 +29,7 @@
       debug:       "[data-debug]"
       tests:       "[data-tests]"
       about:       "[data-about]"
+      chat:        "[data-chat]"
       preferences: "[data-preferences]"
 
     triggers:
@@ -38,6 +39,7 @@
       "click @ui.debug"       : "debug:clicked"
       "click @ui.tests"       : "tests:clicked"
       "click @ui.about"       : "about:clicked"
+      "click @ui.chat"        : "chat:clicked"
       "click @ui.preferences" : "preferences:clicked"
 
     events:

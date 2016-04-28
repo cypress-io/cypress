@@ -40,6 +40,15 @@ describe "Options", ->
       cy.contains("a", "About").click().then ->
           expect(@App.ipc).to.be.calledWith("window:open", @opts)
 
+
+  context "click chat link", ->
+    it "triggers window:open", ->
+      @agents.spy(@App, "ipc")
+
+      cy.get("@optionsLink").click()
+      cy.contains("a", "Chat").click().then ->
+          expect(@App.ipc).to.be.calledWith("external:open", "https://gitter.im/cypress-io/cypress")
+
   context "click debug console link", ->
     beforeEach ->
       @opts = {
