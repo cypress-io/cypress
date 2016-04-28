@@ -29,10 +29,8 @@
         <button data-stop class="btn btn-danger btn-sm"><i class="fa fa-stop"></i> Stop </button>
         <div class="btn-group browser-selector">
           <button type="button" data-js="run-browser"  data-browser="chromium" class="btn btn-primary btn-sm">
-            <i class="fa fa-chrome"></i>
-           Run
-           <%= @defaultBrowser.get("nameCapitalized") %>
-           <%= @defaultBrowser.get("version") %>
+            <i data-js="browser-icon" class="fa fa-chrome"></i>
+            <span data-js="browser-text"><%= @browserText %></span>
           </button>
           <button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">
             <span class="caret"></span>

@@ -18,8 +18,17 @@
       @listenTo @projectLayout, "run:browser:clicked", (browser) ->
         ## here's where you write logic to open the url
         ## in a specific browser
+        project.setBrowser(browser)
+        project.browserOpening()
 
-        # App.ipc("", project.get("clientUrl"), browser)
+        App.ipc "launch:browser", browser, (err, data = {}) ->
+          switch
+            when data.browserOpened
+              project.browserOpened()
+
+            when data.browserClosed
+              App.ipc.off("launch:browser")
+              project.browserClosed()
 
       @listenTo @projectLayout, "stop:clicked ok:clicked" , ->
         @closeProject().then ->

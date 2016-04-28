@@ -7,11 +7,14 @@
       "hostInfo": "[data-js='host-info']"
       "runBrowser": "[data-js='run-browser']"
       "switchBrowser": "[data-js='switch-browser']"
+      "browserIcon": "[data-js='browser-icon']"
+      "browserText": "[data-js='browser-text']"
 
     modelEvents:
-      "rebooted"         : "render"
-      "change:clientUrl" : "render"
-      "change:error"     : "render"
+      "rebooted"            : "render"
+      "change:clientUrl"    : "render"
+      "change:error"        : "render"
+      "change:browserState" : "browserStateChanged"
 
     triggers:
       "click @ui.hostInfo": "host:info:clicked"
@@ -37,27 +40,29 @@
 
       @trigger "run:browser:clicked", browser
 
+    getIconClass: (state) ->
+      switch state
+        when "opening" then "fa-refresh fa-spin"
+        when "opened"  then "fa-check-circle"
+        when "closed"  then "fa-chrome"
 
-      @toggleBrowserRunning(btn, true, browser)
+    browserStateChanged: (model, value, options) ->
+      browser   = @model.get("browser")
+      clickable = @model.get("browserClickable")
 
-    ## need to run toggleBrowserrunning() when browser has stopped
+      icon = @getIconClass(value)
 
-    toggleBrowserRunning: (btn, bool, browser) ->
-      icon = if bool then "fa-refresh fa-spin" else "fa-chrome"
+      @ui.browserIcon.removeClass().addClass("fa #{icon}")
 
-      btn
-        .toggleClass("disabled", bool)
-        .attr("disabled", bool)
-        .text (i, text) ->
-          if bool
-            text.replace("Run", "Running")
-          else
-            text.replace("Running", "Run")
-        .prepend("<i class='fa #{icon}'></i>")
+      @ui.browserText.text(@model.get("browserText"))
+
+      @ui.runBrowser
+        .toggleClass("disabled", !clickable)
+        .attr("disabled", !clickable)
         .parent(".btn-group")
           .find("[data-toggle='dropdown']")
-            .toggleClass("disabled", bool)
-            .attr("disabled", bool)
+            .toggleClass("disabled", !clickable)
+            .attr("disabled", !clickable)
 
     switchBrowserClicked: (e) ->
       browserChosen = $(e.currentTarget)

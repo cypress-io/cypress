@@ -7,8 +7,38 @@
     defaults:
       loading: false
 
+    mutators:
+      browserText: ->
+        word = switch @get("browserState")
+          when "opened"  then "Running"
+          when "opening" then "Opening"
+          when "closed"  then "Run"
+
+        [word, @get("browser"), @get("browserVersion")].join(" ")
+
     initialize: ->
       @setName()
+
+    browserOpening: ->
+      @set({
+        browserState: "opening"
+        browserClickable: false
+      })
+
+    browserOpened: ->
+      @set({
+        browserState: "opened"
+        browserClickable: false
+      })
+
+    browserClosed: ->
+      @set({
+        browserState: "closed"
+        browserClickable: true
+      })
+
+    setBrowser: (browser) ->
+      @set "browser", browser
 
     loaded: ->
       @set("loading", false)

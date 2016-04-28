@@ -96,22 +96,57 @@ describe "Project Show", ->
           .get(".dropdown-menu").contains("Chrome").click()
           .get("[data-js='run-browser']").contains("Chrome")
 
-    context "run browser", ->
-      it.skip "triggers external:open of browser on click of run", ->
-        cy
-          .get("[data-js='run-browser']").click().then ->
-            # expect(@App.ipc)
+    context.only "run browser", ->
+      beforeEach ->
+        cy.get("[data-js='run-browser']").as("browser")
 
-      it "disabled Run button click of Run", ->
-        cy
-          .get("[data-js='run-browser']").click()
-            .should("be.disabled")
+      it "triggers launch:browser of browser on click of run", ->
+        cy.get("@browser").click().then ->
+          expect(@App.ipc).to.be.calledWith("launch:browser", "chromium")
 
-      it "updates text and icon in button on click of Run", ->
-        cy
-          .get("[data-js='run-browser']").click()
-            .should("contain", "Chromium")
-          .get("[data-js='run-browser']").find(".fa-refresh")
+      describe "closed state", ->
+        it "is enabled", ->
+          cy.get("@browser").should("be.enabled")
+
+        it "disables then reenables", ->
+          cy
+            .get("@browser").click().should("be.disabled").then ->
+              @ipc.handle("launch:browser", null, {browserClosed: true})
+            .get("@browser").should("be.enabled")
+
+      describe "opening state", ->
+        beforeEach ->
+          cy.get("@browser").click()
+
+        it "disables button", ->
+          cy.get("@browser").should("be.disabled")
+
+        it "displays browser name", ->
+          cy.get("@browser").should("contain", "Chromium")
+
+        it "sets spinner icon and opening text", ->
+          cy
+            .get("@browser")
+              .should("contain", "Opening")
+              .find("i")
+              .should("have.length", 1).and("have.class", "fa-refresh fa-spin")
+
+      describe "opened state", ->
+        beforeEach ->
+          cy.get("@browser").click().then ->
+            @ipc.handle("launch:browser", null, {browserOpened: true})
+
+        it "continues disabling button", ->
+          cy.get("@browser").should("be.disabled")
+
+        it "displays browser name", ->
+          cy.get("@browser").should("contain", "Chromium")
+
+        it "removes spinner, sets icon to check-circle, and says Running", ->
+          cy
+            .get("@browser").should("contain", "Running")
+              .find("i")
+              .should("have.length", 1).and("have.class", "fa-check-circle")
 
     context "stop server", ->
       it "triggers close:project on click of Stop", ->
