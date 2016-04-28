@@ -2,8 +2,19 @@
 <html>
 <head>
   <title>Cypress is Running</title>
+  <link rel="stylesheet" type="text/css" href="newtab.css">
 </head>
 <body>
-  <h1>This browsing session is currently running Cypress. You cannot open a new tab.</h1>
+  <div class="wrapper">
+    <img src="logos/cypress-bw.png">
+    <h1>This browsing session is currently running Cypress.</h1>
+    <p>We highly recommend not opening new tabs while running Cypress for a number of reasons:
+    <ul>
+      <li>Opening new tabs may cause test failures with shared state.</li>
+      <li>Any new sessions opened will be closed when Cypress is stopped.</li>
+      <li>All cookies will be removed while tests are running.</li>
+    </ul>
+    <a href="https://on.cypress.io" target="_blank">Read more about browser sessions</a>
+  </div>
 </body>
 </html>
