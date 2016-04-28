@@ -44,6 +44,10 @@ gulp.task "html", ->
   gulp.src("app/**/*.html")
   .pipe(gulp.dest("dist"))
 
+gulp.task "css", ->
+  gulp.src("app/**/*.css")
+  .pipe(gulp.dest("dist"))
+
 gulp.task "icons", ->
   gulp.src([
     icons.getPathToIcon("icon_16x16.png")
@@ -54,8 +58,14 @@ gulp.task "icons", ->
   ])
   .pipe(gulp.dest("dist/icons"))
 
+gulp.task "logos", ->
+  gulp.src([
+    icons.getPathToLogo("cypress-bw.png")
+  ])
+  .pipe(gulp.dest("dist/logos"))
+
 gulp.task "watch", ["build"], ->
   gulp.watch("app/**/*", ["build"])
 
 gulp.task "build", ->
-  runSeq "clean", ["copy:socket:client", "icons", "manifest", "coffeescript", "html"], "backup", "default:host:path"
+  runSeq "clean", ["copy:socket:client", "icons", "logos", "manifest", "coffeescript", "html", "css"], "backup", "default:host:path"
