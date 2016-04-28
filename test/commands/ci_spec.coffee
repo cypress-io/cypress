@@ -35,6 +35,14 @@ describe "Ci", ->
       @parse("ci foobar --env foo=bar,host=http://localhost:8888")
       expect(@spy).to.be.calledWith("foobar", {env: "foo=bar,host=http://localhost:8888"})
 
+    it "calls run with config", ->
+      @parse("ci abc --config watchForFileChanges=false,baseUrl=localhost")
+      expect(@spy).to.be.calledWith("abc", {config: "watchForFileChanges=false,baseUrl=localhost"})
+
+    it "calls run with config when no ci key", ->
+      @parse("ci -c watchForFileChanges=false,baseUrl=localhost")
+      expect(@spy).to.be.calledWith(undefined, {config: "watchForFileChanges=false,baseUrl=localhost"})
+
   context "#constructor", ->
     beforeEach ->
       @spawn  = @sandbox.stub(utils, "spawn")
@@ -74,6 +82,11 @@ describe "Ci", ->
       noKeyErr = @sandbox.stub(Ci.prototype, "_noKeyErr")
       @setup().then =>
         expect(noKeyErr).to.be.calledOnce
+
+    it "spawns with config", ->
+      @setup("abc123", {config: "watchForFileChanges=false,baseUrl=localhost"}).then =>
+        pathToProject = path.resolve(process.cwd(), ".")
+        expect(@spawn).to.be.calledWith(["--run-project", pathToProject, "--config", "watchForFileChanges=false,baseUrl=localhost", "--ci", "--key", "abc123"])
 
   context "#initialize", ->
     beforeEach ->
