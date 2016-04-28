@@ -109,6 +109,14 @@ describe "Project Show", ->
           .get(".dropdown-menu").contains("Chrome").click()
           .get("[data-js='run-browser']").contains("Chrome")
 
+      it "automatically runs browser", ->
+        cy
+          .get(".browser-selector .dropdown-toggle").click()
+          .get(".dropdown-menu").contains("Chrome").click()
+          .get("[data-js='run-browser']")
+            .should("be.disabled")
+            .contains("Running")
+
     context "run browser", ->
       it.skip "triggers external:open of browser on click of run", ->
         cy

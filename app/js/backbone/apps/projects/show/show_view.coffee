@@ -75,3 +75,5 @@
       runBtn
         .text(browserChosenText)
         .prepend(browserChosenIcon)
+
+      @ui.runBrowser.trigger("click")
