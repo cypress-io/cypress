@@ -9,6 +9,7 @@ appData   = require("./util/app_data")
 fs              = Promise.promisifyAll(fs)
 profiles        = appData.path("browsers")
 pathToExtension = extension.getPathToExtension()
+pathToTheme     = extension.getPathToTheme()
 instance        = null
 
 kill = ->
@@ -24,6 +25,7 @@ defaultArgs = [
   "--test-type"
   "--ignore-certificate-errors"
   "--load-and-launch-app=#{pathToExtension}"
+  "--load-extension=#{pathToTheme}"
   "--start-maximized"
   "--silent-debugger-extension-api"
   "--no-default-browser-check"
