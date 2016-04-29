@@ -18,8 +18,18 @@ module.exports = {
 
     ## open the project and return
     ## the config for the project instance
-    openProject
-    .open(options)
+    Promise.all([
+      openProject.open(options)
+      launcher.getBrowsers()
+    ])
+    .spread (project, browsers) ->
+      ## TODO: maybe if there are no
+      ## browsers here we should just
+      ## immediately close the server?
+      ## but continue sending the config
+      project
+      .setBrowsers(browsers)
+      .return(project)
 
   opened: -> openProject
 

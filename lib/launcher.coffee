@@ -53,6 +53,9 @@ module.exports = {
 
     fs.ensureDirAsync(p).return(p)
 
+  getBrowsers: ->
+    launcher.detect()
+
   launch: (name, url, options = {}) ->
     _.defaults options,
       args: []
@@ -74,4 +77,11 @@ module.exports = {
       .call("launch", name, url, args)
       .then (i) ->
         instance = i
+
+        options.onBrowserOpen()
+
+        instance.once "exit", ->
+          options.onBrowserClose()
+
+        return instance
 }
