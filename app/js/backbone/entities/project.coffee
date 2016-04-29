@@ -6,6 +6,7 @@
   class Entities.Project extends Entities.Model
     defaults:
       loading: false
+      browserState: "closed"
 
     mutators:
       browserText: ->
