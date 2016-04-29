@@ -42,3 +42,9 @@ client.on("disconnect", function(){})
 socket.getPathToClientSource()
 // returns your/path/to/node_modules/socket.io-client/socket.io.js0
 ```
+
+
+## Changelog
+
+#### 0.1.0 - *(04/29/16)*
+- initial release
