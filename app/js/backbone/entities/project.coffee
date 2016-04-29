@@ -24,8 +24,6 @@
           when "opening" then "fa-refresh fa-spin"
           when "opened"  then "fa-check-circle"
           when "closed"  then "fa-chrome"
-          else
-            "fa-chrome"
 
       browserName: ->
         return if not b = @get("browser")
