@@ -1,7 +1,6 @@
 var fs     = require("fs")
 var server = require("socket.io")
 var client = require("socket.io-client")
-var clientSrc = require.resolve("socket.io-client")
 var expect = require("chai").expect
 var lib    = require("../index")
 
