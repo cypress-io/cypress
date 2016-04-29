@@ -15,6 +15,8 @@
         socket.emit "is:new:project", (bool) ->
           files.trigger("is:new:project", bool)
 
+        return @extensionMessage() if config.get("isOutsideExtension")
+
       @listenTo @layout, "project:name:clicked", ->
         socket.emit "open:finder", config.get("parentTestsFolder")
 
@@ -29,6 +31,12 @@
       @show @layout,
         loading:
           entities: files
+
+    extensionMessage: ->
+      extensionMessageView = @getExtensionMessageView()
+
+      @show extensionMessageView,
+        region: @layout.extensionBannerRegion
 
     onboardingRegion: ->
       App.execute "show:files:onboarding"
@@ -54,6 +62,9 @@
 
       @show filesView,
         region: @layout.allFilesRegion
+
+    getExtensionMessageView: ->
+      new List.ExtensionMessage
 
     getLayoutView: (config) ->
       new List.Layout

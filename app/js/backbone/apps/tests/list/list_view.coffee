@@ -6,6 +6,9 @@
     triggers:
       "click [data-js='project-name']" : "project:name:clicked"
 
+  class List.ExtensionMessage extends App.Views.ItemView
+    template: "tests/list/_message"
+
   class List.Search extends App.Views.ItemView
     template: "tests/list/_search"
 
