@@ -4,7 +4,7 @@ _            = require("lodash")
 os           = require("os")
 path         = require("path")
 uuid         = require("node-uuid")
-client       = require("socket.io-client")
+socketIo     = require("@cypress/core-socket")
 Promise      = require("bluebird")
 open         = require("#{root}lib/util/open")
 config       = require("#{root}lib/config")
@@ -42,7 +42,7 @@ describe "lib/socket", ->
 
         {clientUrlDisplay, socketIoRoute} = @cfg
 
-        @client = client(clientUrlDisplay, {path: socketIoRoute})
+        @client = socketIo.client(clientUrlDisplay, {path: socketIoRoute})
 
     afterEach ->
       @client.disconnect()

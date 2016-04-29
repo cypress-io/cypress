@@ -5,7 +5,7 @@ str           = require("underscore.string")
 path          = require("path")
 uuid          = require("node-uuid")
 Promise       = require("bluebird")
-socketIo      = require("socket.io")
+socketIo      = require("@cypress/core-socket")
 open          = require("./util/open")
 pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
@@ -73,7 +73,7 @@ class Socket
   createIo: (server, path) ->
     ## TODO: dont serve the client!
     # socketIo(server, {path: path, destroyUpgrade: false, serveClient: false})
-    socketIo(server, {path: path, destroyUpgrade: false})
+    socketIo.server(server, {path: path, destroyUpgrade: false})
 
   _startListening: (server, watchers, config, options) ->
     _.defaults options,
