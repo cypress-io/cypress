@@ -3,8 +3,8 @@
   class Entities.Browser extends Entities.Model
     mutators:
       icon: ->
-        return "chrome" if @attributes.name is "chromium"
-        @attributes.name
+        switch @attributes.name
+          when "chrome", "chromium" then "chrome"
 
       displayName: ->
         _.str.capitalize(@attributes.name)
@@ -12,10 +12,19 @@
   class Entities.BrowsersCollection extends Entities.Collection
     model: Entities.Browser
 
+    chooseBrowserByName: (name) ->
+      chosen = @findWhere({chosen: true})
+
+      return chosen if chosen.get("name") is name
+
+      chosen.unset("chosen")
+
+      @findWhere({name: name}).set("chosen", true)
+
     extractDefaultBrowser: ->
-      defaultBrowser = @findWhere({default: true}) ? @first()
-      @remove(defaultBrowser)
-      return defaultBrowser
+      chosenBrowser = @findWhere({default: true}) ? @first()
+      chosenBrowser.set({chosen: true})
+      chosenBrowser
 
   API =
     newBrowsers: (browsers) ->

@@ -28,8 +28,8 @@
       </p>
         <button data-stop class="btn btn-danger btn-sm"><i class="fa fa-stop"></i> Stop </button>
         <div class="btn-group browser-selector">
-          <button type="button" data-js="run-browser"  data-browser="chromium" class="btn btn-primary btn-sm">
-            <i data-js="browser-icon" class="fa fa-chrome"></i>
+          <button type="button" data-js="run-browser" data-browser="<%= @browserName %>" class="btn btn-primary btn-sm">
+            <i data-js="browser-icon" class="fa <%= @browserIcon %>"></i>
             <span data-js="browser-text"><%= @browserText %></span>
           </button>
           <button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">
@@ -38,14 +38,16 @@
           </button>
           <ul class="dropdown-menu">
             <% for browser in @browsers: %>
-              <li>
-                <a href="#" data-js="switch-browser" data-browser="<%= browser.name %>">
-                  <i class="fa fa-<%= browser.icon %>"></i>
-                  Run
-                  <%= browser.displayName %>
-                  <%= browser.majorVersion %>
-                </a>
-              </li>
+              <% if not browser.chosen: %>
+                <li>
+                  <a href="#" data-js="run-browser" data-browser="<%= browser.name %>">
+                    <i class="fa fa-<%= browser.icon %>"></i>
+                    Run
+                    <%= browser.displayName %>
+                    <%= browser.majorVersion %>
+                  </a>
+                </li>
+              <% end %>
             <% end %>
           </ul>
         </div>

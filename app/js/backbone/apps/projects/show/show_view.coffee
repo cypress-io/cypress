@@ -6,7 +6,6 @@
     ui:
       "hostInfo": "[data-js='host-info']"
       "runBrowser": "[data-js='run-browser']"
-      "switchBrowser": "[data-js='switch-browser']"
       "browserIcon": "[data-js='browser-icon']"
       "browserText": "[data-js='browser-text']"
 
@@ -14,6 +13,7 @@
       "rebooted"            : "render"
       "opened"              : "render"
       "change:error"        : "render"
+      "change:browser"      : "render"
       "change:browserState" : "browserStateChanged"
 
     triggers:
@@ -23,7 +23,6 @@
 
     events:
       "click @ui.runBrowser": "runBrowserClicked"
-      "click @ui.switchBrowser": "switchBrowserClicked"
 
     onShow: ->
       $("html").addClass("project-show")
@@ -40,17 +39,10 @@
 
       @trigger "run:browser:clicked", browser
 
-    getIconClass: (state) ->
-      switch state
-        when "opening" then "fa-refresh fa-spin"
-        when "opened"  then "fa-check-circle"
-        when "closed"  then "fa-chrome"
-
     browserStateChanged: (model, value, options) ->
-      browser   = @model.get("browser")
       clickable = @model.get("browserClickable")
 
-      icon = @getIconClass(value)
+      icon = @model.get("browserIcon")
 
       @ui.browserIcon.removeClass().addClass("fa #{icon}")
 
@@ -63,24 +55,3 @@
           .find("[data-toggle='dropdown']")
             .toggleClass("disabled", !clickable)
             .attr("disabled", !clickable)
-
-    switchBrowserClicked: (e) ->
-      browserChosen = $(e.currentTarget)
-      browserChosenText = browserChosen.text()
-      browserChosenIcon = browserChosen.find("i")
-
-      runBtn = browserChosen.parents(".btn-group").find("[data-js='run-browser']")
-      runBtnText = runBtn.text()
-      runBtnIcon = runBtn.find("i")
-
-      ## switcheroo the text and icons on the 2 btns
-      ## TODO: this logic is all kinds of busted
-      browserChosen
-        .text(runBtnText)
-        .prepend(runBtnIcon)
-      runBtn
-        .text(browserChosenText)
-        .prepend(browserChosenIcon)
-
-      ## TODO: use model logic here not DOM simulated events
-      @ui.runBrowser.trigger("click")
