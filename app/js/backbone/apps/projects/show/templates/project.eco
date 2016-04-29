@@ -42,8 +42,8 @@
                 <a href="#" data-js="switch-browser" data-browser="<%= browser.name %>">
                   <i class="fa fa-<%= browser.icon %>"></i>
                   Run
-                  <%= browser.nameCapitalized %>
-                  <%= browser.version %>
+                  <%= browser.displayName %>
+                  <%= browser.majorVersion %>
                 </a>
               </li>
             <% end %>

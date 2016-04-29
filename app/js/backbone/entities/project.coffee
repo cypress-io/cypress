@@ -9,12 +9,14 @@
 
     mutators:
       browserText: ->
+        return if not b = @get("browser")
+
         word = switch @get("browserState")
           when "opened"  then "Running"
           when "opening" then "Opening"
           when "closed"  then "Run"
 
-        [word, @get("browser"), @get("browserVersion")].join(" ")
+        [word, b.get("displayName"), b.get("majorVersion")].join(" ")
 
     initialize: ->
       @setName()
@@ -52,10 +54,23 @@
     getNameFromPath: ->
       _(@get("path").split("/")).last()
 
-    setClientUrl: (url, display) ->
-      @set
-        clientUrl: url
-        clientUrlDisplay: display
+    displayBrowsers: ->
+      if b = @get("browsers")
+        b.toJSON()
+      else
+        []
+
+    getBrowsers: (browsers = []) ->
+      App.request("new:browser:entities", browsers)
+
+    setConfig: (config) ->
+      if b = config.browsers
+        config.browsers = @getBrowsers(b)
+        config.browser = config.browsers.extractDefaultBrowser()
+
+      @set(config, {silent: true})
+
+      @trigger("opened")
 
     setError: (err) ->
       if err.portInUse

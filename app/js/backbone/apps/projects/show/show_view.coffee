@@ -12,7 +12,7 @@
 
     modelEvents:
       "rebooted"            : "render"
-      "change:clientUrl"    : "render"
+      "opened"              : "render"
       "change:error"        : "render"
       "change:browserState" : "browserStateChanged"
 
@@ -32,7 +32,7 @@
       $("html").removeClass("project-show")
 
     templateHelpers: ->
-      browsers: @collection.toJSON()
+      browsers: @model.displayBrowsers()
 
     runBrowserClicked: (e) ->
       btn = $(e.currentTarget)

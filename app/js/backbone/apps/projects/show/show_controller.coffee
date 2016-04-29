@@ -5,9 +5,7 @@
     initialize: (params) ->
       { project } = params
 
-      browsers = App.request "browser:entities"
-
-      @projectLayout = @getProjectLayout(project, browsers)
+      @projectLayout = @getProjectLayout(project)
 
       @listenTo @projectLayout, "host:info:clicked", ->
         App.ipc("external:open", "https://on.cypress.io")
@@ -40,15 +38,7 @@
           @openProject(project)
         , 100
 
-      @listenTo browsers, "fetched", ->
-        defaultBrowser = browsers.pullOffDefaultBrowser()
-        project.set({defaultBrowser: defaultBrowser})
-
-        @show @projectLayout
-
-      @listenTo browsers, "error", (err) ->
-        project.setError(err)
-        @show @projectLayout
+      @show @projectLayout
 
     reboot: (project) ->
       project.reset()
@@ -68,7 +58,7 @@
         Promise.delay(500)
       ])
       .spread (config) ->
-        project.setClientUrl(config.clientUrl, config.clientUrlDisplay)
+        project.setConfig(config)
       .then ->
         App.ipc("on:project:settings:change")
       .then =>
@@ -76,7 +66,6 @@
       .catch (err) ->
         project.setError(err)
 
-    getProjectLayout: (project, browsers) ->
+    getProjectLayout: (project) ->
       new Show.Project
         model: project
-        collection: browsers
