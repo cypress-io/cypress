@@ -16,6 +16,10 @@ describe "Extension", ->
     it "returns path to files in dist", ->
       expect(extension.getPathToExtension("background.js")).to.eq(cwd + "/dist/background.js")
 
+  context ".getPathToTheme", ->
+    it "returns path to theme", ->
+      expect(extension.getPathToTheme()).to.eq(cwd + "/theme")
+
   context ".setHostAndPath", ->
     beforeEach ->
       @src  = path.join(cwd, "test", "helpers", "background_src.js")
