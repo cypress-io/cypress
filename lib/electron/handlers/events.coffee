@@ -69,7 +69,7 @@ handleEvent = (options, event, id, type, arg) ->
 
     when "launch:browser"
       # headless.createRenderer(arg, true)
-      project.launch("chrome", arg, {
+      project.launch(arg, {
         onBrowserOpen: ->
           send({browserOpened: true})
         onBrowserClose: ->

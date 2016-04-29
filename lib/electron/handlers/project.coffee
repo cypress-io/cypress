@@ -33,8 +33,10 @@ module.exports = {
 
   opened: -> openProject
 
-  launch: (browser, url, options = {}) ->
-    launcher.launch(browser, url, options)
+  launch: (browser, options = {}) ->
+    openProject.getConfig()
+    .then (cfg) ->
+      launcher.launch(browser, cfg.clientUrl, options)
 
   onSettingsChanged: ->
     Promise.try =>
