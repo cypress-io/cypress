@@ -4,7 +4,7 @@
     mutators:
       icon: ->
         switch @attributes.name
-          when "chrome", "chromium" then "chrome"
+          when "chrome", "chromium", "canary" then "chrome"
 
       displayName: ->
         _.str.capitalize(@attributes.name)
