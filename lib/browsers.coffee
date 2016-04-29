@@ -15,7 +15,7 @@ module.exports = {
     if not browser
       throw browserNotFoundErr(browsers, name)
 
-    args.unshift(url)
+    args.unshift(url) if url
 
     cp.spawn(browser.path, args, {stdio: "ignore"})
 

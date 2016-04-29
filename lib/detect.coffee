@@ -25,6 +25,10 @@ browsers = [
   }
 ]
 
+setMajorVersion = (obj) ->
+  obj.majorVersion = obj.version.split(".")[0]
+  obj
+
 lookup = (platform, obj) ->
   switch platform
 
@@ -50,6 +54,7 @@ module.exports = ->
       .extend(obj, props)
       .pick("name", "type", "version", "path")
       .value()
+    .then(setMajorVersion)
     .catch {notInstalled: true}, ->
       return false
   .then(_.compact)
