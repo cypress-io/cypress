@@ -17,7 +17,8 @@
     "default_icon": {
       "19": "icons/icon_19x19.png",
       "38": "icons/icon_38x38.png"
-    }
+    },
+    "default_popup": "popup.html"
   },
   "background": {
     "scripts": [
