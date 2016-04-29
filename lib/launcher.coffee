@@ -78,10 +78,14 @@ module.exports = {
       .then (i) ->
         instance = i
 
-        options.onBrowserOpen()
-
         instance.once "exit", ->
           options.onBrowserClose()
 
-        return instance
+        ## give a little padding around
+        ## the browser opening
+        Promise.delay(1000)
+        .then ->
+          options.onBrowserOpen()
+
+          return instance
 }
