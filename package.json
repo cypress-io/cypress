@@ -1,6 +1,6 @@
 {
   "name": "@cypress/core-socket",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Cypress Shared Socket Libs",
   "main": "index.js",
   "scripts": {
