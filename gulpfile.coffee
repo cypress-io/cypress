@@ -14,6 +14,10 @@ gulp.task "copy:socket:client", ->
   gulp.src(socket.getPathToClientSource())
   .pipe(gulp.dest("dist"))
 
+gulp.task "copy:deps", ->
+  gulp.src(require.resolve("lodash"))
+  .pipe(gulp.dest("dist"))
+
 gulp.task "clean", ->
   gulp.src("dist")
   .pipe(clean())
@@ -68,4 +72,4 @@ gulp.task "watch", ["build"], ->
   gulp.watch("app/**/*", ["build"])
 
 gulp.task "build", ->
-  runSeq "clean", ["copy:socket:client", "icons", "logos", "manifest", "coffeescript", "html", "css"], "backup", "default:host:path"
+  runSeq "clean", ["copy:socket:client", "copy:deps", "icons", "logos", "manifest", "coffeescript", "html", "css"], "backup", "default:host:path"
