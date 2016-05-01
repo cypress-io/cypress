@@ -1,4 +1,5 @@
 <div id="tests-list-page">
+  <div id="extension-banner-region"></div>
   <div class="cy-main-content">
     <div class="wrapper">
       <div class="block-panel">
