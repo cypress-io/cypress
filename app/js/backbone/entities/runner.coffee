@@ -62,6 +62,15 @@
         @listenTo @Cypress, "mocha:fail", (test, err) =>
           @socket.emit "mocha", "fail", test, err
 
+        @listenTo @Cypress, "get:cookies", (options, cb) =>
+          @socket.emit "automation:request", "get:cookies", options, cb
+
+        @listenTo @Cypress, "clear:cookies", (options, cb) =>
+          @socket.emit "automation:request", "clear:cookies", options, cb
+
+        @listenTo @Cypress, "set:cookie", (options, cb) =>
+          @socket.emit "automation:request", "set:cookie", options, cb
+
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb
 
