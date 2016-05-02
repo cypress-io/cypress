@@ -40,8 +40,6 @@
         ## satellite mode
         return if config.get("isHeadless") or config.ui("satellite")
 
-        # config.set("isOutsideExtension", true)
-
         return @extensionMessage() if config.get("isOutsideExtension")
 
         @statsRegion(runner)

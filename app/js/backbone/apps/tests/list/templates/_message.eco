@@ -1,3 +1,4 @@
 <div class="alert alert-warning">
-  <p class="center">It looks like this Cypress test wasn't started through the Desktop App. Tests won't be able to run outside of a clean profile.</p>
+  <p class="center">
+  <i class="fa fa-exclamation-triangle"></i> It looks like this Cypress test wasn't started through the Desktop App. Tests won't be able to run outside of a clean profile.</p>
 </div>
