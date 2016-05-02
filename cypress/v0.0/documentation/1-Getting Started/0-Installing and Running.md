@@ -105,7 +105,7 @@ After successfully logging in, you will need to add the project(s) you want to w
 
 - Add the parent directory of your project to Cypress by clicking :fa-folder-o: in the top-right corner.
 - Click on the project. You should see a `Server Running` message.
-- Click on the `http://localhost:2020` link.
+- Click on the `Run in Chrome` button or select another browser to run the tests in (if available).
 
 ![project](https://cloud.githubusercontent.com/assets/1268976/9286780/adad94b8-42c9-11e5-9a67-df7abb87fac0.gif)
 
