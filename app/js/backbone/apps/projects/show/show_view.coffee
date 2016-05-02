@@ -4,8 +4,8 @@
     template: "projects/show/project"
 
     ui:
-      "hostInfo": "[data-js='host-info']"
-      "runBrowser": "[data-js='run-browser']"
+      "hostInfo":    "[data-js='host-info']"
+      "runBrowser":  "[data-js='run-browser']"
       "browserIcon": "[data-js='browser-icon']"
       "browserText": "[data-js='browser-text']"
 
@@ -17,9 +17,10 @@
       "change:browserState" : "browserStateChanged"
 
     triggers:
-      "click @ui.hostInfo": "host:info:clicked"
-      "click [data-stop]" : "stop:clicked"
-      "click [data-ok]"   : "ok:clicked"
+      "click @ui.hostInfo"       : "host:info:clicked"
+      "click [data-stop]"        : "stop:clicked"
+      "click [data-ok]"          : "ok:clicked"
+      "click [data-download-browser]" : "download:browser:clicked"
 
     events:
       "click @ui.runBrowser": "runBrowserClicked"

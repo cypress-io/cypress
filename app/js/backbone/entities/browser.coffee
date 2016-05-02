@@ -22,6 +22,7 @@
       @findWhere({name: name}).set("chosen", true)
 
     extractDefaultBrowser: ->
+      return undefined if @length is 0
       chosenBrowser = @findWhere({default: true}) ? @first()
       chosenBrowser.set({chosen: true})
       chosenBrowser

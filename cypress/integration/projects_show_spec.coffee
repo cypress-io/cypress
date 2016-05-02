@@ -223,16 +223,9 @@ describe "Project Show", ->
           .then ->
             expect(@App.ipc.off).to.be.calledWith("on:project:settings:change")
 
-  ## TODO: update error handling logic
-  describe.skip "successfully starts server with no browsers", ->
+
+  describe "removes dropdown button when only one browser", ->
     beforeEach ->
-      @error = "We couldn't find any browsers."
-
-      @ipc.handle("get:browsers", {
-          name: "No browsers Found"
-          message: @error
-        }, null)
-
       @agents.spy(@App, "ipc")
 
       @config = {
@@ -240,7 +233,61 @@ describe "Project Show", ->
         clientUrlDisplay: "http://localhost:2020"
       }
 
+      @oneBrowser = [{
+        "name": "chrome",
+        "version": "50.0.2661.86",
+        "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "majorVersion": "50"
+      }]
+
+      cy
+        .fixture("browsers").then ->
+          @config.browsers = @oneBrowser
+
+          @ipc.handle("open:project", null, @config)
+
+    context "displays no dropdown btn", ->
+      it "displays the first browser and 2 others in the dropdown", ->
+        cy
+          .get(".browser-selector")
+            .find(".dropdown-toggle").should("not.be.visible")
+
+  ## TODO: update error handling logic
+  describe "shows error with no browsers", ->
+    beforeEach ->
+      @agents.spy(@App, "ipc")
+
+      @config = {
+        clientUrl: "http://localhost:2020",
+        clientUrlDisplay: "http://localhost:2020"
+        browsers: []
+      }
+
       @ipc.handle("open:project", null, @config)
 
     it "displays browser error", ->
-      cy.contains(@error)
+      cy.contains("We couldn't find any browsers")
+
+    it "displays download browser button", ->
+      cy.contains("Download Chrome")
+
+    describe "download browser", ->
+      it "triggers external:open on click", ->
+        cy
+          .get("[data-download-browser]").click().then ->
+            expect(@App.ipc).to.be.calledWith("external:open", "https://www.google.com/chrome/browser/")
+
+      it "triggers close:project on click", ->
+        cy
+          .contains(".btn", "Download Chrome").click().then ->
+            expect(@App.ipc).to.be.calledWith("close:project")
+            @ipc.handle("close:project", null, {})
+          .then ->
+            expect(@App.ipc).to.be.calledWith("get:project:paths")
+
+      it "returns to projects on click", ->
+        cy
+          .contains(".btn", "Download Chrome").click().then ->
+            @ipc.handle("close:project", null, {})
+            @ipc.handle("get:project:paths", null, @projects)
+          .get("#projects-container")

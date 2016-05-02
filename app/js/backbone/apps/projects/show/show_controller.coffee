@@ -29,6 +29,11 @@
         @closeProject().then ->
           App.vent.trigger "start:projects:app"
 
+      @listenTo @projectLayout, "download:browser:clicked", ->
+        App.ipc("external:open", "https://www.google.com/chrome/browser/")
+        @closeProject().then ->
+          App.vent.trigger "start:projects:app"
+
       @listenTo @projectLayout, "show", ->
         ## delay opening the project so
         ## we give the UI some time to render
@@ -58,6 +63,7 @@
         Promise.delay(500)
       ])
       .spread (config) ->
+        ## this will set the available browsers on the project
         project.setConfig(config)
       .then ->
         App.ipc("on:project:settings:change")
