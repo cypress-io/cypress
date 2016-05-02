@@ -9,13 +9,16 @@
 
       @layout = @getLayoutView(config)
 
+      @listenTo socket, "change:automationConnected", ->
+        @extensionMessage(socket)
+
       ## if this is our first time visiting files
       ## after adding the project, we want to onboard
       @listenTo @layout, "show", ->
         socket.emit "is:new:project", (bool) ->
           files.trigger("is:new:project", bool)
 
-        return @extensionMessage() if config.get("isOutsideExtension")
+        @extensionMessage(socket)# if config.get("isOutsideExtension")
 
       @listenTo @layout, "project:name:clicked", ->
         socket.emit "open:finder", config.get("parentTestsFolder")
@@ -32,11 +35,16 @@
         loading:
           entities: files
 
-    extensionMessage: ->
-      extensionMessageView = @getExtensionMessageView()
+    extensionMessage: (socket) ->
+      switch socket.get("automationConnected")
+        when true
+          if r = @layout.extensionBannerRegion
+            r.empty()
+        when false
+          extensionMessageView = @getExtensionMessageView()
 
-      @show extensionMessageView,
-        region: @layout.extensionBannerRegion
+          @show extensionMessageView,
+            region: @layout.extensionBannerRegion
 
     onboardingRegion: ->
       App.execute "show:files:onboarding"

@@ -196,6 +196,9 @@ class Socket
         options.onIsNewProject()
         .then(cb)
 
+      socket.on "is:automation:connected", (cb) ->
+        cb(true)
+
   end: ->
     ## TODO: we need an 'ack' from this end
     ## event from the other side

@@ -1,0 +1,36 @@
+<div class="extension-message">
+  <p>It looks like this Cypress test wasn't started through the Desktop App.</p>
+  <p class="muted"><small>Cypress tests need to open in a new, clean profile in order to maintain a clean test environment.</small></p>
+  <div class="btn-group browser-selector">
+    <button type="button" data-js="run-browser" data-browser="<%= @browserName %>" class="btn btn-primary btn-lg">
+      <i data-js="browser-icon" class="fa fa-<%= @icon %>"></i>
+      <span data-js="browser-text">Run <%= @displayName %> <%= @majorVersion %></span>
+    </button>
+    <% if @browsers.length > 1: %>
+      <button type="button" class="btn btn-primary dropdown-toggle btn-lg" data-toggle="dropdown">
+        <span class="caret"></span>
+        <span class="sr-only">Toggle Dropdown</span>
+      </button>
+      <ul class="dropdown-menu">
+        <% for browser in @browsers: %>
+          <% if not browser.chosen: %>
+            <li>
+              <a href="#" data-js="run-browser" data-browser="<%= browser.name %>">
+                <i class="fa fa-<%= browser.icon %>"></i>
+                Run
+                <%= browser.displayName %>
+                <%= browser.majorVersion %>
+              </a>
+            </li>
+          <% end %>
+        <% end %>
+      </ul>
+    <% end %>
+  </div>
+</div>
+<div class="helper-line">
+  <a class="helper-docs-link" href="" target="_blank">
+    <i class="fa fa-question-circle"></i>
+    Why am I seeing this message?
+  </a>
+</div>

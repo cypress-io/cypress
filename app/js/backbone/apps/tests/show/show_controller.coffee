@@ -35,34 +35,58 @@
 
       @layout = @getLayoutView config
 
+      # socket.emit "is:automation:connected", (bool) ->
+      #   @browsersMessage() if config.get("isOutsideExtension")
+
       @listenTo @layout, "show", ->
         ## bail if we're currently headless or we're in
+        @region.empty()
+
         ## satellite mode
         return if config.get("isHeadless") or config.ui("satellite")
-
-        return @extensionMessage() if config.get("isOutsideExtension")
 
         @statsRegion(runner)
         @specsRegion(runner, iframe, spec)
 
         socket.emit "watch:test:file", id
 
+        @iframeRegion(iframe)
 
-      @listenTo @layout, "show", ->
-        if !config.get("isOutsideExtension")
-          @iframeRegion(iframe)
+        ## start running the tests
+        ## and load the iframe
+        runner.start(id)
 
-          ## start running the tests
-          ## and load the iframe
-          runner.start(id)
+      @listenTo socket, "change:automatedConnected", (bool) ->
+        @region.empty()
+        @browsersMessage()
 
-      @show @layout
+      socket.whenAutomationKnown (bool) =>
+        if bool
+          @show @layout
+        else
+          @automationDisconnected(config.get("browsers"))
+          ## show the not connected message
+
+    # socket.on "automation:disconnected", ->
+    automationDisconnected: ->
+      @region.empty()
+      @extensionMessage()
+
+    browsersMessage: (browsers) ->
+      browsers = App.request "new:browser:entities", browsers
+
+      defaultBrowser = browsers.extractDefaultBrowser()
+
+      browsersMessageView = @getBrowsersMessageView(defaultBrowser, browsers)
+
+      @show browsersMessageView,
+        region: @layout.messageRegion
 
     extensionMessage: ->
       extensionMessageView = @getExtensionMessageView()
 
       @show extensionMessageView,
-        region: @layout.extenstionMessageRegion
+        region: @region
 
     statsRegion: (runner) ->
       App.execute "show:test:stats", @layout.statsRegion, runner
@@ -81,6 +105,11 @@
 
     getExtensionMessageView: ->
       new Show.ExtensionMessage
+
+    getBrowsersMessageView: (defaultBrowser, browsers) ->
+      new Show.BrowsersMessage
+        model: defaultBrowser
+        browsers: browsers
 
     getLayoutView: (config) ->
       new Show.Layout

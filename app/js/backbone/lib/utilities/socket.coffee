@@ -12,6 +12,11 @@
       if socketId
         channel.on "connect", ->
           channel.emit "app:connect", socketId
+      else
+        ## TODO: fix this
+        channel.on "connect", ->
+          channel.emit "is:automation:connected", (bool) ->
+            socket.isAutomationConnected(bool)
 
       _.each [].concat(hostEvents, satelliteEvents, passThruEvents), (event) ->
         channel.on event, (args...) ->
@@ -20,6 +25,9 @@
       # channel.on "check:for:app:errors", ->
       #   console.log "check:for:app:errors"
       #   socket.emit "app:errors", App.error
+
+      channel.on "automation:disconnected", ->
+        socket.onAutomationDisconnected()
 
       channel.on "test:changed", (data) ->
         socket.trigger "test:changed", data.file
