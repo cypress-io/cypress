@@ -1,4 +1,5 @@
 test/unit
+test/integration
 --reporter spec
 --compilers coffee:coffee-script/register
 --recursive

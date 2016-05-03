@@ -1,14 +1,16 @@
-fs      = require("fs-extra")
-pkg     = require("./package.json")
-gulp    = require("gulp")
-clean   = require("gulp-clean")
-coffee  = require("gulp-coffee")
-rename  = require("gulp-rename")
-runSeq  = require("run-sequence")
-socket  = require("@cypress/core-socket")
-icons   = require("@cypress/core-icons")
-Promise = require("bluebird")
-ext     = require("./")
+fs         = require("fs-extra")
+pkg        = require("./package.json")
+gulp       = require("gulp")
+clean      = require("gulp-clean")
+rename     = require("gulp-rename")
+runSeq     = require("run-sequence")
+source     = require("vinyl-source-stream")
+socket     = require("@cypress/core-socket")
+icons      = require("@cypress/core-icons")
+Promise    = require("bluebird")
+coffeeify  = require("coffeeify")
+browserify = require("browserify")
+ext        = require("./")
 
 gulp.task "copy:socket:client", ->
   gulp.src(socket.getPathToClientSource())
@@ -39,9 +41,13 @@ gulp.task "backup", ->
 gulp.task "default:host:path", ->
   ext.setHostAndPath("http://localhost:2020", "/__socket.io")
 
-gulp.task "coffeescript", ->
-  gulp.src("app/**/*.coffee")
-  .pipe(coffee())
+gulp.task "background", ->
+  browserify({
+    entries: "app/background.coffee"
+    transform: coffeeify
+  })
+  .bundle()
+  .pipe(source("background.js"))
   .pipe(gulp.dest("dist"))
 
 gulp.task "html", ->
@@ -72,4 +78,13 @@ gulp.task "watch", ["build"], ->
   gulp.watch("app/**/*", ["build"])
 
 gulp.task "build", ->
-  runSeq "clean", ["copy:socket:client", "copy:deps", "icons", "logos", "manifest", "coffeescript", "html", "css"], "backup", "default:host:path"
+  runSeq "clean", [
+    "copy:socket:client"
+    "copy:deps"
+    "icons"
+    "logos"
+    "manifest"
+    "background"
+    "html"
+    "css"
+  ], "backup", "default:host:path"
