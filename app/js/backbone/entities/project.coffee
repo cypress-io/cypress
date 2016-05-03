@@ -60,8 +60,8 @@
     isLoading: ->
       !!@get("loading")
 
-    isBrowserOpen: (browser) ->
-      (@get("browser") is browser) and (@get("browserState") is "opened")
+    isCurrentBrowserOpen: (browser) ->
+      (@get("browser").get("name") is browser) and (@get("browserState") is "opened")
 
     setName: ->
       @set name: @getNameFromPath()

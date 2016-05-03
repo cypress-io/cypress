@@ -48,3 +48,11 @@
       @ui.browserIcon.removeClass().addClass("fa #{icon}")
 
       @ui.browserText.text(@model.get("browserText"))
+
+      @ui.runBrowser
+        .toggleClass("disabled", !clickable)
+        .attr("disabled", !clickable)
+        .parent(".btn-group")
+          .find("[data-toggle='dropdown']")
+            .toggleClass("disabled", !clickable)
+            .attr("disabled", !clickable)
