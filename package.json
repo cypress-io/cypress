@@ -34,7 +34,7 @@
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
     "gulp-rename": "^1.2.2",
-    "lodash": "^4.11.1",
+    "lodash": "^4.11.2",
     "mocha": "^2.4.5",
     "run-sequence": "^1.1.5",
     "sinon": "^1.17.3",

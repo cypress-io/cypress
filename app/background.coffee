@@ -1,7 +1,12 @@
 Promise = require("bluebird")
+pick    = require("lodash/pick")
 
 HOST = "CHANGE_ME_HOST"
 PATH = "CHANGE_ME_PATH"
+
+## match the w3c webdriver spec on return cookies
+## https://w3c.github.io/webdriver/webdriver-spec.html#cookies
+COOKIE_PROPERTIES = "name value path domain secure httpOnly expiry".split(" ")
 
 connect = (host, path) ->
   fail = (id, err) ->
@@ -27,7 +32,9 @@ connect = (host, path) ->
   client.on "automation:request", (id, msg, data) ->
     switch msg
       when "get:cookies"
-        invoke("getAllCookies", id, data)
+        invoke("getCookies", id, data)
+      when "get:cookie"
+        invoke("getCookie", id, data)
       when "clear:cookies"
         invoke("clearCookies", id, data)
       else
@@ -44,8 +51,26 @@ connect(HOST, PATH)
 automation = {
   connect: connect
 
-  getAllCookies: (filter = {}, fn) ->
-    chrome.cookies.getAll(filter, fn)
+  getAll: (filter = {}) ->
+    getAll = ->
+      new Promise (resolve) ->
+        chrome.cookies.getAll(filter, resolve)
+
+    cookieProps = (cookie) ->
+      pick(cookie, COOKIE_PROPERTIES)
+
+    getAll()
+    .map(cookieProps)
+
+  getCookies: (filter, fn) ->
+    @getAll(filter)
+    .then(fn)
+
+  getCookie: (filter, fn) ->
+    @getAll(filter)
+    .then (cookies) ->
+      cookies[0] ? null
+    .then(fn)
 
   clearCookie: (url, name, fn) ->
     chrome.cookies.remove({url: url, name: name}, fn)

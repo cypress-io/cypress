@@ -44,6 +44,22 @@ describe "app/background", ->
       expect(client.emit).to.be.calledWith("automation:connected")
       done()
 
+  context ".getAll", ->
+    it "resolves with specific cookie properties", ->
+      @sandbox.stub(chrome.cookies, "getAll")
+      .withArgs({domain: "localhost"})
+      .yieldsAsync([
+        {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expiry: 123, a: "a", b: "c"}
+        {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456, c: "a", d: "c"}
+      ])
+
+      background.getAll({domain: "localhost"})
+      .then (cookies) ->
+        expect(cookies).to.deep.eq([
+          {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expiry: 123}
+          {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456}
+        ])
+
   context "get:cookies", ->
     beforeEach (done) ->
       @sandbox.stub(chrome.cookies, "getAll")
@@ -61,6 +77,36 @@ describe "app/background", ->
         done()
 
       @server.emit("automation:request", 123, "get:cookies", {domain: "google.com"})
+
+  context "get:cookie", ->
+    beforeEach (done) ->
+      @sandbox.stub(chrome.cookies, "getAll")
+      .withArgs({domain: "google.com", name: "session"})
+      .yieldsAsync([
+        {name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expiry: 123}
+      ])
+      .withArgs({domain: "google.com", name: "doesNotExist"})
+      .yieldsAsync([])
+
+      @server.on "connection", (@socket) => done()
+
+      @client = background.connect("http://localhost:#{PORT}", "/__socket.io")
+
+    it "returns a specific cookie by name", (done) ->
+      @socket.on "automation:response", (id, obj = {}) ->
+        expect(id).to.eq(123)
+        expect(obj.response).to.deep.eq({name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expiry: 123})
+        done()
+
+      @server.emit("automation:request", 123, "get:cookie", {domain: "google.com", name: "session"})
+
+    it "returns null when no cookie by name is found", (done) ->
+      @socket.on "automation:response", (id, obj = {}) ->
+        expect(id).to.eq(123)
+        expect(obj.response).to.be.null
+        done()
+
+      @server.emit("automation:request", 123, "get:cookie", {domain: "google.com", name: "doesNotExist"})
 
   context "clear:cookies", ->
 
