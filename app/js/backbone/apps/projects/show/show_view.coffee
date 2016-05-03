@@ -17,9 +17,9 @@
       "change:browserState" : "browserStateChanged"
 
     triggers:
-      "click @ui.hostInfo"       : "host:info:clicked"
-      "click [data-stop]"        : "stop:clicked"
-      "click [data-ok]"          : "ok:clicked"
+      "click @ui.hostInfo"            : "host:info:clicked"
+      "click [data-stop]"             : "stop:clicked"
+      "click [data-ok]"               : "ok:clicked"
       "click [data-download-browser]" : "download:browser:clicked"
 
     events:
@@ -48,11 +48,3 @@
       @ui.browserIcon.removeClass().addClass("fa #{icon}")
 
       @ui.browserText.text(@model.get("browserText"))
-
-      @ui.runBrowser
-        .toggleClass("disabled", !clickable)
-        .attr("disabled", !clickable)
-        .parent(".btn-group")
-          .find("[data-toggle='dropdown']")
-            .toggleClass("disabled", !clickable)
-            .attr("disabled", !clickable)
