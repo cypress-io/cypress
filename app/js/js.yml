@@ -22,7 +22,6 @@ vendor:
   - bower_components/jquery-ui/ui/widget.js
   - bower_components/jquery-ui/ui/mouse.js
   - bower_components/jquery-ui/ui/slider.js
-  - bower_components/jquery.scrollTo/jquery.scrollTo.js
   - bower_components/js-cookie/src/js.cookie.js
   - bower_components/moment/moment.js
   - bower_components/blob-util/dist/blob-util.js
