@@ -16,6 +16,9 @@ firstOrNull = (cookies) ->
   cookies[0] ? null
 
 connect = (host, path) ->
+  ## bail if io isnt defined
+  return if not global.io
+
   fail = (id, err) ->
     client.emit("automation:response", id, {
       __error: err.message

@@ -202,10 +202,6 @@ describe "app/background", ->
         .yieldsAsync([
           {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expiry: 123, a: "a", b: "c"}
         ])
-        .withArgs({domain: "cdn.github.com"})
-        .yieldsAsync([
-          {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expiry: 123, a: "a", b: "c"}
-        ])
         .withArgs({domain: "google.com", name: "doesNotExist"})
         .yieldsAsync([])
         .withArgs({domain: "cdn.github.com", name: "shouldThrow"})
