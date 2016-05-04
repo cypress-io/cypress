@@ -11,7 +11,7 @@
 
     class Entities.Runner extends Entities.Model
       initialize: ->
-        @Cypress   = $Cypress.create({loadModules: true})
+        @Cypress = $Cypress.create({loadModules: true})
 
         if App.config.get("isHeadless")
           $Cypress.isHeadless = true
@@ -65,11 +65,17 @@
         @listenTo @Cypress, "get:cookies", (options, cb) =>
           @socket.emit "automation:request", "get:cookies", options, cb
 
-        @listenTo @Cypress, "clear:cookies", (options, cb) =>
-          @socket.emit "automation:request", "clear:cookies", options, cb
+        @listenTo @Cypress, "get:cookie", (options, cb) =>
+          @socket.emit "automation:request", "get:cookie", options, cb
 
         @listenTo @Cypress, "set:cookie", (options, cb) =>
           @socket.emit "automation:request", "set:cookie", options, cb
+
+        @listenTo @Cypress, "clear:cookie", (options, cb) =>
+          @socket.emit "automation:request", "clear:cookie", options, cb
+
+        @listenTo @Cypress, "clear:cookies", (options, cb) =>
+          @socket.emit "automation:request", "clear:cookies", options, cb
 
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb
