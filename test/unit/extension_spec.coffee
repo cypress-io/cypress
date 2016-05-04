@@ -9,6 +9,38 @@ cwd       = process.cwd()
 fs = Promise.promisifyAll(fs)
 
 describe "Extension", ->
+  context ".cookieProps", ->
+    it "returns an object with whitelisted properties", ->
+      expect(extension.cookieProps({
+        name: "foo"
+        value: "bar"
+        path: "/"
+        domain: "google.com"
+        secure: true
+        httpOnly: false
+        expiry: 123
+        a: "a"
+        b: "b"
+      })).to.deep.eq({
+        name: "foo"
+        value: "bar"
+        path: "/"
+        domain: "google.com"
+        secure: true
+        httpOnly: false
+        expiry: 123
+      })
+
+  context ".getCookieUrl", ->
+    it "returns cookie url", ->
+      expect(extension.getCookieUrl({
+        name: "foo"
+        value: "bar"
+        path: "/foo/bar"
+        domain: "www.google.com"
+        secure: true
+      })).to.eq("https://www.google.com/foo/bar")
+
   context ".getPathToExtension", ->
     it "returns path to dist", ->
       expect(extension.getPathToExtension()).to.eq(cwd + "/dist")

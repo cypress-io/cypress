@@ -1,6 +1,7 @@
-fs      = require("fs")
-path    = require("path")
-Promise = require("bluebird")
+fs         = require("fs")
+path       = require("path")
+Promise    = require("bluebird")
+background = require("../app/background")
 
 fs = Promise.promisifyAll(fs)
 
@@ -24,4 +25,8 @@ module.exports = {
       .replace("CHANGE_ME_PATH", path)
     .then (str) ->
       fs.writeFileAsync(dest, str)
+
+  cookieProps: background.cookieProps
+
+  getCookieUrl: background.getUrl
 }

@@ -62,6 +62,8 @@ connect(HOST, PATH)
 automation = {
   connect: connect
 
+  cookieProps: cookieProps
+
   getUrl: (cookie = {}) ->
     prefix = if cookie.secure then "https://" else "http://"
     prefix + cookie.domain + cookie.path
