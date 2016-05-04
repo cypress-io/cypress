@@ -35,10 +35,13 @@
 
       @layout = @getLayoutView config
 
-      # socket.emit "is:automation:connected", (bool) ->
-      #   @browsersMessage() if config.get("isOutsideExtension")
-
       @listenTo @layout, "show", ->
+        @iframeRegion(iframe)
+
+        ## start running the tests
+        ## and load the iframe
+        runner.start(id)
+
         ## bail if we're currently headless or we're in
         ## satellite mode
         return if config.get("isHeadless") or config.ui("satellite")
@@ -48,11 +51,6 @@
 
         socket.emit "watch:test:file", id
 
-        @iframeRegion(iframe)
-
-        ## start running the tests
-        ## and load the iframe
-        runner.start(id)
 
       @listenTo socket, "change:automatedConnected", (bool) ->
         @region.empty()
