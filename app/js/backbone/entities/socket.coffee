@@ -18,7 +18,7 @@
       onAutomationDisconnected: ->
         @set "automationConnected", false
 
-      isAutomationConnected: (bool) ->
+      automationConnected: (bool) ->
         @automationPromise.resolve(bool)
         @set("automationConnected", bool)
 

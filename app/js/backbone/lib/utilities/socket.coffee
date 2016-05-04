@@ -12,11 +12,12 @@
       if socketId
         channel.on "connect", ->
           channel.emit "app:connect", socketId
+          socket.automationConnected(true)
       else
         ## TODO: fix this
         channel.on "connect", ->
           channel.emit "is:automation:connected", (bool) ->
-            socket.isAutomationConnected(bool)
+            socket.automationConnected(bool)
 
       _.each [].concat(hostEvents, satelliteEvents, passThruEvents), (event) ->
         channel.on event, (args...) ->
