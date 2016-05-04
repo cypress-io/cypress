@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+_          = require("lodash")
 http       = require("http")
 socket     = require("@cypress/core-socket")
 background = require("../../app/background")
@@ -8,8 +9,12 @@ PORT = 12345
 
 global.chrome = {
   cookies: {
+    set: ->
     getAll: ->
     remove: ->
+  }
+  runtime: {
+
   }
 }
 
@@ -60,54 +65,83 @@ describe "app/background", ->
           {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456}
         ])
 
-  context "get:cookies", ->
+  context "integration", ->
     beforeEach (done) ->
-      @sandbox.stub(chrome.cookies, "getAll")
-      .withArgs({domain: "google.com"})
-      .yieldsAsync([{}, {}])
-
       @server.on "connection", (@socket) => done()
 
       @client = background.connect("http://localhost:#{PORT}", "/__socket.io")
 
-    it "returns all cookies", (done) ->
-      @socket.on "automation:response", (id, obj = {}) ->
-        expect(id).to.eq(123)
-        expect(obj.response).to.deep.eq([{}, {}])
-        done()
+    describe "get:cookies", ->
+      beforeEach ->
+        @sandbox.stub(chrome.cookies, "getAll")
+        .withArgs({domain: "google.com"})
+        .yieldsAsync([{}, {}])
 
-      @server.emit("automation:request", 123, "get:cookies", {domain: "google.com"})
+      it "returns all cookies", (done) ->
+        @socket.on "automation:response", (id, obj = {}) ->
+          expect(id).to.eq(123)
+          expect(obj.response).to.deep.eq([{}, {}])
+          done()
 
-  context "get:cookie", ->
-    beforeEach (done) ->
-      @sandbox.stub(chrome.cookies, "getAll")
-      .withArgs({domain: "google.com", name: "session"})
-      .yieldsAsync([
-        {name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expiry: 123}
-      ])
-      .withArgs({domain: "google.com", name: "doesNotExist"})
-      .yieldsAsync([])
+        @server.emit("automation:request", 123, "get:cookies", {domain: "google.com"})
 
-      @server.on "connection", (@socket) => done()
+    describe "get:cookie", ->
+      beforeEach ->
+        @sandbox.stub(chrome.cookies, "getAll")
+        .withArgs({domain: "google.com", name: "session"})
+        .yieldsAsync([
+          {name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expiry: 123}
+        ])
+        .withArgs({domain: "google.com", name: "doesNotExist"})
+        .yieldsAsync([])
 
-      @client = background.connect("http://localhost:#{PORT}", "/__socket.io")
+      it "returns a specific cookie by name", (done) ->
+        @socket.on "automation:response", (id, obj = {}) ->
+          expect(id).to.eq(123)
+          expect(obj.response).to.deep.eq({name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expiry: 123})
+          done()
 
-    it "returns a specific cookie by name", (done) ->
-      @socket.on "automation:response", (id, obj = {}) ->
-        expect(id).to.eq(123)
-        expect(obj.response).to.deep.eq({name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expiry: 123})
-        done()
+        @server.emit("automation:request", 123, "get:cookie", {domain: "google.com", name: "session"})
 
-      @server.emit("automation:request", 123, "get:cookie", {domain: "google.com", name: "session"})
+      it "returns null when no cookie by name is found", (done) ->
+        @socket.on "automation:response", (id, obj = {}) ->
+          expect(id).to.eq(123)
+          expect(obj.response).to.be.null
+          done()
 
-    it "returns null when no cookie by name is found", (done) ->
-      @socket.on "automation:response", (id, obj = {}) ->
-        expect(id).to.eq(123)
-        expect(obj.response).to.be.null
-        done()
+        @server.emit("automation:request", 123, "get:cookie", {domain: "google.com", name: "doesNotExist"})
 
-      @server.emit("automation:request", 123, "get:cookie", {domain: "google.com", name: "doesNotExist"})
+    describe "set:cookie", ->
+      beforeEach ->
+        chrome.runtime.lastError = {message: "some error"}
 
-  context "clear:cookies", ->
+        @sandbox.stub(chrome.cookies, "set")
+        .withArgs({domain: "google.com", name: "session", value: "key"})
+        .yieldsAsync(
+          {name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false, a: "a", b: "b"}
+        )
+        .withArgs({name: "foo", value: "bar"})
+        .yieldsAsync(null)
+
+      afterEach ->
+        delete chrome.runtime.lastError
+
+      it "resolves with the cookie details", (done) ->
+        @socket.on "automation:response", (id, obj = {}) ->
+          expect(id).to.eq(123)
+          expect(obj.response).to.deep.eq({name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false})
+          done()
+
+        @server.emit("automation:request", 123, "set:cookie", {domain: "google.com", name: "session", value: "key"})
+
+      it "rejects with chrome.runtime.lastError", (done) ->
+        @socket.on "automation:response", (id, obj = {}) ->
+          expect(id).to.eq(123)
+          expect(obj.__error).to.eq("some error")
+          done()
+
+        @server.emit("automation:request", 123, "set:cookie", {name: "foo", value: "bar"})
+
+    describe "clear:cookies", ->
 
   context "fail", ->

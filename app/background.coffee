@@ -8,6 +8,9 @@ PATH = "CHANGE_ME_PATH"
 ## https://w3c.github.io/webdriver/webdriver-spec.html#cookies
 COOKIE_PROPERTIES = "name value path domain secure httpOnly expiry".split(" ")
 
+cookieProps = (cookie) ->
+  pick(cookie, COOKIE_PROPERTIES)
+
 connect = (host, path) ->
   fail = (id, err) ->
     client.emit("automation:response", id, {
@@ -20,9 +23,9 @@ connect = (host, path) ->
     respond = (data) ->
       client.emit("automation:response", id, {response: data})
 
-    try
+    Promise.try ->
       automation[method].apply(automation, args.concat(respond))
-    catch err
+    .catch (err) ->
       fail(id, err)
 
   ## cannot use required socket here due
@@ -35,6 +38,8 @@ connect = (host, path) ->
         invoke("getCookies", id, data)
       when "get:cookie"
         invoke("getCookie", id, data)
+      when "set:cookie"
+        invoke("setCookie", id, data)
       when "clear:cookies"
         invoke("clearCookies", id, data)
       else
@@ -51,13 +56,14 @@ connect(HOST, PATH)
 automation = {
   connect: connect
 
+  getUrl: (cookie = {}) ->
+    prefix = if cookie.secure then "https://" else "http://"
+    prefix + cookie.domain + cookie.path
+
   getAll: (filter = {}) ->
     getAll = ->
       new Promise (resolve) ->
         chrome.cookies.getAll(filter, resolve)
-
-    cookieProps = (cookie) ->
-      pick(cookie, COOKIE_PROPERTIES)
 
     getAll()
     .map(cookieProps)
@@ -69,15 +75,24 @@ automation = {
   getCookie: (filter, fn) ->
     @getAll(filter)
     .then (cookies) ->
+      ## normalize into null when empty array
       cookies[0] ? null
+    .then(fn)
+
+  setCookie: (props = {}, fn) ->
+    set = ->
+      new Promise (resolve, reject) ->
+        chrome.cookies.set props, (details) ->
+          if details
+            resolve(cookieProps(details))
+          else
+            reject(chrome.runtime.lastError)
+
+    set()
     .then(fn)
 
   clearCookie: (url, name, fn) ->
     chrome.cookies.remove({url: url, name: name}, fn)
-
-  getUrl: (cookie = {}) ->
-    prefix = if cookie.secure then "https://" else "http://"
-    prefix + cookie.domain + cookie.path
 
   clearCookies: (filter = {}, fn) ->
     ## by default remove all
