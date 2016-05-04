@@ -12,7 +12,7 @@ excerpt: Walkthrough writing your first test
 
 # Folder Structure
 
-After adding your project, Cypress will automatically scaffold out a suggested folder structure. By default it will create:
+After adding a new project project, Cypress will automatically scaffold out a suggested folder structure. By default it will create:
 
 ```text
 /cypress
@@ -57,9 +57,7 @@ Test files may be written as either `.js` or `.coffee` files.
 
 To see an example of every command used in Cypress, open the `example_spec.js` within your `cypress/integration` folder.
 
-Navigate to `http://localhost:2020`. You should see this spec file listed inside of Cypress.
-
-To start writing tests for your app, simply create a new file called `app_spec.js` within your `cypress/integration` folder. Refresh `http://localhost:2020` and your new file should have appeared in the list.
+To start writing tests for your app, simply create a new file called `app_spec.js` within your `cypress/integration` folder. Refresh your tests list in the Cypress GUI and your new file should have appeared in the list.
 
 ***
 
