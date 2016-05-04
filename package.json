@@ -7,8 +7,7 @@
     "start": "npm run build",
     "watch": "gulp watch",
     "build": "gulp build",
-    "test": "NODE_ENV=test mocha --watch",
-    "test-ci": "NODE_ENV=test mocha",
+    "test": "NODE_ENV=test mocha",
     "prerelease": "npm run build",
     "release": "releaser"
   },
