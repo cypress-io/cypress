@@ -52,7 +52,7 @@ class Project extends EE
         @sync(options)
 
         Promise.join(
-          @watchSettingsAndStartWebsockets(options.changeEvents, cfg)
+          @watchSettingsAndStartWebsockets(options.changeEvents, options.onAutomationRequest, cfg)
           @scaffold(cfg)
         )
 
@@ -119,7 +119,7 @@ class Project extends EE
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
 
-  watchSettingsAndStartWebsockets: (changeEvents, config = {}) ->
+  watchSettingsAndStartWebsockets: (changeEvents, onAutomationRequest, config = {}) ->
     @watchSettings(changeEvents)
 
     ## if we've passed down reporter
@@ -128,6 +128,8 @@ class Project extends EE
       reporter = Reporter.create(config.reporter)
 
     @server.startWebsockets(@watchers, config, {
+      onAutomationRequest: onAutomationRequest
+
       onIsNewProject: =>
         ## return a boolean whether this is a new project or not
         @determineIsNewProject(config.integrationFolder)

@@ -6,6 +6,7 @@ errors     = require("../errors")
 Project    = require("../project")
 project    = require("../electron/handlers/project")
 Renderer   = require("../electron/handlers/renderer")
+automation = require("../electron/handlers/automation")
 
 module.exports = {
   getId: ->
@@ -86,6 +87,7 @@ module.exports = {
       height: 0
       show:   showGui
       frame:  showGui
+      devTools: showGui
       type:   "PROJECT"
     })
     .then (win) ->
