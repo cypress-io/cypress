@@ -44,7 +44,7 @@
   <% end %>
 </div>
 <div class="helper-line">
-  <a class="helper-docs-link" href="" target="_blank">
+  <a class="helper-docs-link" href="https://on.cypress.io/how-cypress-manages-the-browser-session" target="_blank">
     <i class="fa fa-question-circle"></i>
     Why am I seeing this message?
   </a>
