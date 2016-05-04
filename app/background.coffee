@@ -11,6 +11,10 @@ COOKIE_PROPERTIES = "name value path domain secure httpOnly expiry".split(" ")
 cookieProps = (cookie) ->
   pick(cookie, COOKIE_PROPERTIES)
 
+firstOrNull = (cookies) ->
+  ## normalize into null when empty array
+  cookies[0] ? null
+
 connect = (host, path) ->
   fail = (id, err) ->
     client.emit("automation:response", id, {
@@ -42,6 +46,8 @@ connect = (host, path) ->
         invoke("setCookie", id, data)
       when "clear:cookies"
         invoke("clearCookies", id, data)
+      when "clear:cookie"
+        invoke("clearCookie", id, data)
       else
         fail(id, {message: "No handler registered for: '#{msg}'"})
 
@@ -60,12 +66,25 @@ automation = {
     prefix = if cookie.secure then "https://" else "http://"
     prefix + cookie.domain + cookie.path
 
+  clear: (filter = {}) ->
+    clear = (cookie) =>
+      new Promise (resolve, reject) =>
+        url = @getUrl(cookie)
+        chrome.cookies.remove {url: url, name: cookie.name}, (details) ->
+          if details
+            resolve(cookie)
+          else
+            reject(chrome.runtime.lastError)
+
+    @getAll(filter)
+    .map(clear)
+
   getAll: (filter = {}) ->
-    getAll = ->
+    get = ->
       new Promise (resolve) ->
         chrome.cookies.getAll(filter, resolve)
 
-    getAll()
+    get()
     .map(cookieProps)
 
   getCookies: (filter, fn) ->
@@ -74,9 +93,7 @@ automation = {
 
   getCookie: (filter, fn) ->
     @getAll(filter)
-    .then (cookies) ->
-      ## normalize into null when empty array
-      cookies[0] ? null
+    .then(firstOrNull)
     .then(fn)
 
   setCookie: (props = {}, fn) ->
@@ -91,31 +108,14 @@ automation = {
     set()
     .then(fn)
 
-  clearCookie: (url, name, fn) ->
-    chrome.cookies.remove({url: url, name: name}, fn)
+  clearCookie: (filter, fn) ->
+    @clear(filter)
+    .then(firstOrNull)
+    .then(fn)
 
-  clearCookies: (filter = {}, fn) ->
-    ## by default remove all
-    if _.isEmpty(filter)
-      @getAllCookies {}, (cookies) =>
-        cleared = []
-        ret = ->
-          fn({
-            cleared: cleared
-            count: cleared.length
-          })
-
-        ## handle null as rejected promise (?)
-        callback = _.after(cookies.length, ret)
-
-        _.each cookies, (cookie) =>
-          url = @getUrl(cookie)
-          @clearCookie url, cookie.name, (details) ->
-            ## if details is null then removing the cookie
-            ## failed and we should check chrome.runtime.lastError
-            ## for the error
-            cleared.push(cookie)
-            callback()
+  clearCookies: (filter, fn) ->
+    @clear(filter)
+    .then(fn)
 }
 
 module.exports = automation
