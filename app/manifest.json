@@ -23,7 +23,6 @@
   "background": {
     "scripts": [
       "socket.io.js",
-      "lodash.js",
       "background.js"
     ]
   },
