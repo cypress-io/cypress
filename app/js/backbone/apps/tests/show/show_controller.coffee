@@ -40,8 +40,6 @@
 
       @listenTo @layout, "show", ->
         ## bail if we're currently headless or we're in
-        @region.empty()
-
         ## satellite mode
         return if config.get("isHeadless") or config.ui("satellite")
 
