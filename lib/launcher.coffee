@@ -12,10 +12,12 @@ pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
 instance        = null
 
-kill = ->
+kill = (unbind) ->
   ## cleanup our running browser
   ## instance
   return if not instance
+  if unbind
+    instance.removeAllListeners()
   instance.kill()
   instance = null
 
@@ -59,6 +61,8 @@ module.exports = {
     launcher.detect()
 
   launch: (name, url, options = {}) ->
+    kill(true)
+
     _.defaults options,
       args: []
       onBrowserOpen: ->
