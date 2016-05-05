@@ -51,6 +51,8 @@ connect = (host, path) ->
         invoke("clearCookies", id, data)
       when "clear:cookie"
         invoke("clearCookie", id, data)
+      when "focus:browser:window"
+        invoke("focus", id)
       else
         fail(id, {message: "No handler registered for: '#{msg}'"})
 
@@ -121,6 +123,17 @@ automation = {
   clearCookies: (filter, fn) ->
     @clear(filter)
     .then(fn)
+
+  focus: (fn) ->
+    ## lets just make this simple and whatever is the current
+    ## window bring that into focus
+    ##
+    ## TODO: if we REALLY want to be nice its possible we can
+    ## figure out the exact window that's running Cypress but
+    ## that's too much work with too little value at the moment
+    chrome.windows.getCurrent (window) ->
+      chrome.windows.update window.id, {focused: true}, ->
+        fn()
 }
 
 module.exports = automation
