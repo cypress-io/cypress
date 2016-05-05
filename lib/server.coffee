@@ -148,4 +148,7 @@ class Server
     @_socket = Socket()
     @_socket.startListening(@_server, watchers, config, options)
 
+  automate: (msg) ->
+    @_socket?.automate(msg)
+
 module.exports = Server

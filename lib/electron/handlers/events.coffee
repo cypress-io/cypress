@@ -77,6 +77,10 @@ handleEvent = (options, event, id, type, arg) ->
       })
       .catch(sendErr)
 
+    when "focus:browser"
+      project.focusBrowser()
+      send(null)
+
     when "window:open"
       Renderer.create(arg)
       .then(send)

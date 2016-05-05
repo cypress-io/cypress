@@ -221,6 +221,9 @@ class Socket
         @io.emit "cypress:css:changed", file: filePath
     }
 
+  automate: (msg) ->
+    @io?.to("automation").emit("automation:request", Math.random(), msg)
+
   close: ->
     @io?.close()
 
