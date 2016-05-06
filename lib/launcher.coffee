@@ -40,11 +40,14 @@ defaultArgs = [
   "--disable-single-click-autofill"
   "--disable-prompt-on-repos"
   "--disable-background-timer-throttling"
+  "--disable-renderer-backgrounding"
   "--disable-renderer-throttling"
   "--disable-restore-session-state"
   "--disable-translate"
   "--disable-default-apps"
   "--disable-sync"
+  "--disable-new-profile-management"
+  "--disable-new-avatar-menu"
 ]
 
 module.exports = {
