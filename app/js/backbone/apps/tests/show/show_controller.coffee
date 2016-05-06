@@ -51,10 +51,10 @@
 
         socket.emit "watch:test:file", id
 
-
-      @listenTo socket, "change:automatedConnected", (bool) ->
-        @region.empty()
-        @browsersMessage()
+      ## TODO: why is this here, plz refactor
+      # @listenTo socket, "change:automatedConnected", (bool) ->
+        # @region.empty()
+        # @browsersMessage()
 
       socket.whenAutomationKnown (bool) =>
         if bool
