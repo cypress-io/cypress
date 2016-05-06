@@ -127,7 +127,9 @@
       obj = @formatForConsole(obj)
 
       _.each obj, (value, key) ->
-        fn ["%c" + key, "font-weight: bold;", value] unless _.isBlank(value) and value isnt ""
+        return if _.isBlank(value) and value isnt "" and not _.isArray(value)
+
+        fn ["%c" + key, "font-weight: bold;", value]
 
       if groups
         _.each groups, (group) ->
