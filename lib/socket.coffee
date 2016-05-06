@@ -142,7 +142,7 @@ class Socket
         .then (resp) ->
           cb({response: resp})
         .catch (err) ->
-          cb({__error: err.message, __name: err.name, __stack: err.stack.split("\n")})
+          cb({__error: err.message, __name: err.name, __stack: err.stack})
 
       socket.on "remote:connected", =>
         logger.info "remote:connected"

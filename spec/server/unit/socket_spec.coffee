@@ -5,12 +5,14 @@ os           = require("os")
 path         = require("path")
 uuid         = require("node-uuid")
 socketIo     = require("@cypress/core-socket")
+extension    = require("@cypress/core-extension")
 Promise      = require("bluebird")
 open         = require("#{root}lib/util/open")
 config       = require("#{root}lib/config")
 Socket       = require("#{root}lib/socket")
 Server       = require("#{root}lib/server")
 Watchers     = require("#{root}lib/watchers")
+automation   = require("#{root}lib/automation")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
 
 describe "lib/socket", ->
@@ -36,6 +38,8 @@ describe "lib/socket", ->
         @server.startWebsockets(@watchers, @cfg, @options)
         @socket = @server._socket
 
+        done = _.once(done)
+
         ## when our real client connects then we're done
         @socket.io.on "connection", (socket) ->
           done()
@@ -46,6 +50,120 @@ describe "lib/socket", ->
 
     afterEach ->
       @client.disconnect()
+
+    context "on(automation:request)", ->
+      describe "#onAutomation", ->
+        before ->
+          global.chrome = {
+            cookies: {
+              set: ->
+              getAll: ->
+              remove: ->
+            }
+            runtime: {
+
+            }
+          }
+
+        beforeEach (done) ->
+          @socket.io.on "connection", (@extClient) =>
+            @extClient.on "automation:connected", ->
+              done()
+
+          extension.connect(@cfg.clientUrlDisplay, @cfg.socketIoRoute, socketIo.client)
+
+        afterEach ->
+          @extClient.disconnect()
+
+        after ->
+          delete global.chrome
+
+        it "does not return cypress namespace or socket io cookies", (done) ->
+          @sandbox.stub(chrome.cookies, "getAll")
+          .withArgs({domain: "localhost"})
+          .yieldsAsync([
+            {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expiry: 123, a: "a", b: "c"}
+            {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456, c: "a", d: "c"}
+            {name: "__cypress.foo", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456, c: "a", d: "c"}
+            {name: "__cypress.bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456, c: "a", d: "c"}
+            {name: "__socket.io", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456, c: "a", d: "c"}
+          ])
+
+          @client.emit "automation:request", "get:cookies", {domain: "localhost"}, (resp) ->
+            expect(resp).to.deep.eq({
+              response: [
+                {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expiry: 123}
+                {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456}
+              ]
+            })
+            done()
+
+        it "does not clear any namespaced cookies", (done) ->
+          @sandbox.stub(chrome.cookies, "getAll")
+          .withArgs({name: "session"})
+          .yieldsAsync([
+            {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expiry: 123, a: "a", b: "c"}
+          ])
+
+          @sandbox.stub(chrome.cookies, "remove")
+          .withArgs({name: "session", url: "https://google.com/"})
+          .yieldsAsync(
+            {name: "session", url: "https://google.com/", storeId: "123"}
+          )
+
+          cookies = [
+            {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expiry: 123}
+            {domain: "localhost", name: "__cypress.initial", value: true}
+            {domain: "localhost", name: "__socket.io", value: "123abc"}
+          ]
+
+          @client.emit "automation:request", "clear:cookies", cookies, (resp) ->
+            expect(resp).to.deep.eq({
+              response: [
+                {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expiry: 123}
+              ]
+            })
+            done()
+
+        it "throws trying to clear namespaced cookie"
+
+        it "throws trying to set a namespaced cookie"
+
+        it "throws trying to get a namespaced cookie"
+
+        it "throws when automation:response has an error in it"
+
+        it "throws when no clients connected to automation", (done) ->
+          @extClient.disconnect()
+
+          @client.emit "automation:request", "get:cookies", {domain: "foo"}, (resp) ->
+            expect(resp.__error).to.eq("Could not process 'get:cookies'. No automation servers connected.")
+            done()
+
+      describe "options.onAutomationRequest", ->
+        beforeEach ->
+          @oar = @options.onAutomationRequest = @sandbox.stub()
+
+        it "calls onAutomationRequest with message and data", (done) ->
+          @oar.withArgs("focus", {foo: "bar"}).resolves([])
+
+          @client.emit "automation:request", "focus", {foo: "bar"}, (resp) ->
+            expect(resp).to.deep.eq({response: []})
+            done()
+
+        it "calls callback with error on rejection", ->
+          err = new Error("foo")
+
+          @oar.withArgs("focus", {foo: "bar"}).rejects(err)
+
+          @client.emit "automation:request", "focus", {foo: "bar"}, (resp) ->
+            expect(resp).to.deep.eq({__error: err.message, __name: err.name, __stack: err.stack})
+            done()
+
+        it "does not return __cypress or __socket.io namespaced cookies", ->
+
+        it "throws when onAutomationRequest rejects"
+
 
     context "on(open:finder)", ->
       beforeEach ->
