@@ -8,6 +8,12 @@ cookiesStub = {
 
   get: (options, cb) ->
     cb(null, [])
+
+  set: (props, cb) ->
+    cb(null, {})
+
+  remove: (url, name, cb) ->
+    cb(null, {})
 }
 
 cookiesArray = [
@@ -42,6 +48,30 @@ cookiesArray = [
 ]
 
 describe "electron/cookies", ->
+  context ".set", ->
+    it "sets url onto props", ->
+      @sandbox.spy(cookiesStub, "set")
+
+      cookie = {domain: "google.com", path: "/", secure: true, name: "foo"}
+
+      cookies.set(cookiesStub, cookie)
+      .then ->
+        expect(cookiesStub.set).to.be.calledWith({
+          domain: "google.com"
+          path: "/"
+          secure: true
+          name: "foo"
+          url: "https://google.com/"
+        })
+
+  context ".remove", ->
+    it "passes url and cookie.name", ->
+      @sandbox.spy(cookiesStub, "remove")
+
+      cookies.remove(cookiesStub, {domain: "google.com", path: "/", secure: true, name: "foo"})
+      .then ->
+        expect(cookiesStub.remove).to.be.calledWith("https://google.com/", "foo")
+
   context ".clearGithub", ->
     it "returns null", ->
       cookies.clearGithub(cookiesStub).then (ret) ->
@@ -59,7 +89,7 @@ describe "electron/cookies", ->
 
       cookies.clearGithub(cookiesStub).then ->
         expect(cookiesStub.remove.callCount).to.eq(3)
-        expect(cookiesStub.remove.firstCall).to.be.calledWith("https://www.github.com/foo", "logged_in")
-        expect(cookiesStub.remove.secondCall).to.be.calledWith("http://www.github.com/", "dotcom_user")
+        expect(cookiesStub.remove.firstCall).to.be.calledWith("https://.github.com/foo", "logged_in")
+        expect(cookiesStub.remove.secondCall).to.be.calledWith("http://.github.com/", "dotcom_user")
         expect(cookiesStub.remove.thirdCall).to.be.calledWith("https://github.com/", "user_session")
 

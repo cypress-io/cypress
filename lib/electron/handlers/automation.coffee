@@ -10,7 +10,7 @@ firstOrNull = (cookies) ->
 automation = {
   getSessionCookies: ->
     win = Renderer.get("PROJECT")
-    cookies.promisify(win.webContents.session.cookies)
+    win.webContents.session.cookies
 
   clear: (filter = {}) ->
     c = @getSessionCookies()
