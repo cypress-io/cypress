@@ -104,8 +104,9 @@ automation = {
     .then(fn)
 
   setCookie: (props = {}, fn) ->
-    set = ->
-      new Promise (resolve, reject) ->
+    set = =>
+      new Promise (resolve, reject) =>
+        props.url = @getUrl(props)
         chrome.cookies.set props, (details) ->
           if details
             resolve(cookieProps(details))

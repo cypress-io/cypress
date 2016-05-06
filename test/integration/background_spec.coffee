@@ -118,11 +118,11 @@ describe "app/background", ->
         chrome.runtime.lastError = {message: "some error"}
 
         @sandbox.stub(chrome.cookies, "set")
-        .withArgs({domain: "google.com", name: "session", value: "key"})
+        .withArgs({domain: "google.com", name: "session", value: "key", path: "/", secure: false, url: "http://google.com/"})
         .yieldsAsync(
           {name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false, a: "a", b: "b"}
         )
-        .withArgs({name: "foo", value: "bar"})
+        .withArgs({name: "foo", value: "bar", secure: true, domain: "localhost", path: "/foo", url: "https://localhost/foo"})
         .yieldsAsync(null)
 
       afterEach ->
@@ -134,7 +134,7 @@ describe "app/background", ->
           expect(obj.response).to.deep.eq({name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false})
           done()
 
-        @server.emit("automation:request", 123, "set:cookie", {domain: "google.com", name: "session", value: "key"})
+        @server.emit("automation:request", 123, "set:cookie", {domain: "google.com", name: "session", secure: false, value: "key", path: "/"})
 
       it "rejects with chrome.runtime.lastError", (done) ->
         @socket.on "automation:response", (id, obj = {}) ->
@@ -142,7 +142,7 @@ describe "app/background", ->
           expect(obj.__error).to.eq("some error")
           done()
 
-        @server.emit("automation:request", 123, "set:cookie", {name: "foo", value: "bar"})
+        @server.emit("automation:request", 123, "set:cookie", {name: "foo", value: "bar", domain: "localhost", secure: true, path: "/foo"})
 
     describe "clear:cookies", ->
       beforeEach ->
