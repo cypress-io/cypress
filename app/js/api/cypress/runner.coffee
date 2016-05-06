@@ -443,7 +443,16 @@ $Cypress.Runner = do ($Cypress, _) ->
             ## where the test will be undefined due to the runner.suite
             ## not yet having built its tests/suites array and thus
             ## our @tests array is empty
-            Cypress.trigger "test:before:hooks", _this.wrap(_this.test ? {})
+
+            ## coerce into an array
+            beforeHooks = [].concat Cypress.invoke("test:before:hooks", _this.wrap(_this.test ? {}))
+
+            beforeHooks = _.reject beforeHooks, (r) -> r is @cy
+
+            fn = _.wrap fn, (orig, args...) ->
+              Promise.all(beforeHooks)
+              .then ->
+                orig(args...)
 
         testAfterHooks = ->
           test = _this.test
