@@ -15,9 +15,11 @@ firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null
 
-connect = (host, path) ->
+connect = (host, path, io) ->
+  io ?= global.io
+
   ## bail if io isnt defined
-  return if not global.io
+  return if not io
 
   fail = (id, err) ->
     client.emit("automation:response", id, {
@@ -62,7 +64,7 @@ connect = (host, path) ->
   return client
 
 ## initially connect
-connect(HOST, PATH)
+connect(HOST, PATH, global.io)
 
 automation = {
   connect: connect
