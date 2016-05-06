@@ -9,11 +9,11 @@
     </div>
   </div>
   <ul class="iframe-menu">
-    <li>
+<!--     <li>
       <div id="manual-browser-wrapper" class="dropdown pull-left">
-        <!-- <span id="chosen-manual-browser">
+        <span id="chosen-manual-browser">
           <em>No Browser Selected</em>
-        </span> -->
+        </span>
         <button data-toggle="dropdown" class="btn btn-link">
           <i class="fa fa-cog"></i>
           <i class="fa fa-caret-down"></i>
@@ -66,7 +66,7 @@
           </div>
         </div>
       </div>
-    </li>
+    </li> -->
     <li>
       <div class="dropdown pull-left">
         <button data-toggle="dropdown" class="btn btn-link">
