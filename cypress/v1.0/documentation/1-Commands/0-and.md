@@ -182,6 +182,43 @@ cy
 
 ***
 
+## Assertions that change the subject
+
+Sometimes using a specific chainer will automatically change the assertion subject.
+
+For instance in `chai`, the method [`have.property("...")`](http://chaijs.com/api/bdd/) will automatically change the subject.
+
+Additionally in [`Chai-jQuery`](https://github.com/chaijs/chai-jquery#attrname-value), the methods: `attr`, `prop`, `css`, and `data` also change the subject.
+
+This allows you to utilize other `chainer` methods such as `match` when making assertions about values.
+
+```javascript
+// in this example our subject changed to the string 'sans-serif' because
+// have.css("font-family") returned a string instead of the <body> element
+cy
+  // subject is <body>
+  .get("body")
+
+  // subject changes to the string return value of 'font-family'
+  .should("have.css", "font-family")
+
+  // use match to assert the string matches a regular expression
+  .and("match", /sans-serif/)
+```
+
+```javascript
+// in this example our subject changed to the string '/users' because
+// have.attr, href, /users returned a string instead of the <a> element
+cy
+  // subject is <a>
+  .get("a")
+
+  // subject changes to the string 'users'
+  .should("have.attr", "href", "/users")
+```
+
+***
+
 # Notes
 
 ## Similarities to Chai
@@ -218,6 +255,16 @@ cy.find("input", {timeout: 10000}).should("have.value", "foo").and("have.class",
       // flow down to the assertions, and they will
       // be retried for up to 10 seconds
 ```
+
+***
+
+## How do I know which assertions change the subject and which keep it the same?
+
+The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#section-chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#section-chai-jquery) will always document what they return.
+
+Alternatively, it is very easy to use Cypress itself to figure this out.
+
+You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#sections-debugging-assertions) here.
 
 ***
 

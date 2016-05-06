@@ -210,6 +210,17 @@ cy
   .and("match", /sans-serif/)
 ```
 
+```javascript
+// in this example our subject changed to the string '/users' because
+// have.attr, href, /users returned a string instead of the <a> element
+cy
+  // subject is <a>
+  .get("a")
+
+  // subject changes to the string 'users'
+  .should("have.attr", "href", "/users")
+```
+
 ***
 
 # Automatic Retry Support
