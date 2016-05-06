@@ -70,6 +70,16 @@ class Socket
     .catch (err) ->
       cb({__error: err.message})
 
+  onAutomation: (messages, message, data) ->
+    Promise.try =>
+      if _.isEmpty(@io.sockets.adapter.rooms.automation)
+        throw new Error("Could not process '#{message}'. No automation servers connected.")
+      else
+        new Promise (resolve, reject) ->
+          id = uuid.v4()
+          messages[id] = resolve
+          @io.to("automation").emit("automation:request", id, message, data)
+
   createIo: (server, path) ->
     ## TODO: dont serve the client!
     # socketIo(server, {path: path, destroyUpgrade: false, serveClient: false})
@@ -101,7 +111,7 @@ class Socket
 
       respond = (id, resp) ->
         if message = messages[id]
-          delete messages[id]
+          cleanup(id)
           message(resp)
 
       socket.on "automation:connected", =>
@@ -113,24 +123,15 @@ class Socket
         socket.on "automation:response", respond
 
       socket.on "automation:request", (message, data, cb) =>
-        if not _.isFunction(cb)
-          cb = data
-          data = null
+        automate = options.onAutomationRequest ? (message, data) =>
+          @onAutomation(messages, message, data)
 
-        id = uuid.v4()
-
-        messages[id] = cb
-
-        ## if we have an onAutomationRequest callback
-        ## handler then use that, else use websockets
-        if oar = options.onAutomationRequest
-          oar(id, message, data, respond)
-        else
-          if _.keys(@io.sockets.adapter.rooms.automation).length > 0
-            messages[id] = cb
-            @io.to("automation").emit("automation:request", id, message, data)
-          else
-            cb({__error: "Could not process '#{message}'. No automation servers connected."})
+        automation(config.namespace)
+        .request(config.namespace, message, data, automate)
+        .then (resp) ->
+          cb({response: resp})
+        .catch (err) ->
+          cb({__error: err.message, __name: err.name, __stack: err.stack})
 
       socket.on "remote:connected", =>
         logger.info "remote:connected"

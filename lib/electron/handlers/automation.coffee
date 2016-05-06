@@ -3,13 +3,6 @@ extension = require("@cypress/core-extension")
 cookies   = require("./cookies")
 Renderer  = require("./renderer")
 
-fail = (id, err, cb) ->
-  cb(id, {
-    __error: err.message
-    __stack: err.stack
-    __name:  err.name
-  })
-
 firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null
@@ -30,60 +23,49 @@ automation = {
     .map(clear)
 
   getAll: (filter) ->
-    console.log "getAll", filter
     cookies
     .get(@getSessionCookies(), filter)
     .map(extension.cookieProps)
 
-  getCookies: (filter, cb) ->
+  getCookies: (filter) ->
     @getAll(filter)
-    .then(cb)
 
-  getCookie: (filter, cb) ->
+  getCookie: (filter) ->
     @getAll(filter)
     .then(firstOrNull)
-    .then(cb)
 
-  setCookie: (props = {}, cb) ->
+  setCookie: (props = {}) ->
     cookies
     .set(@getSessionCookies(), props)
     .then(extension.cookieProps)
-    .then(cb)
 
-  clearCookie: (filter, cb) ->
+  clearCookie: (filter) ->
     @clear(filter)
     .then(firstOrNull)
-    .then(cb)
 
-  clearCookies: (filter, cb) ->
+  clearCookies: (filter) ->
     @clear(filter)
-    .then(cb)
 }
 
 module.exports = {
   automation: automation
 
-  invoke: (method, id, data, cb) ->
-    respond = (resp) ->
-      cb(id, {response: resp})
-
+  invoke: (method, data) ->
     Promise.try ->
-      automation[method].call(automation, data, respond)
-    .catch (err) ->
-      fail(id, err, cb)
+      automation[method](data)
 
-  perform: (id, msg, data, cb) ->
+  perform: (msg, data) ->
     switch msg
       when "get:cookies"
-        @invoke("getCookies", id, data, cb)
+        @invoke("getCookies", data)
       when "get:cookie"
-        @invoke("getCookie", id, data, cb)
+        @invoke("getCookie", data)
       when "set:cookie"
-        @invoke("setCookie", id, data, cb)
+        @invoke("setCookie", data)
       when "clear:cookies"
-        @invoke("clearCookies", id, data, cb)
+        @invoke("clearCookies", data)
       when "clear:cookie"
-        @invoke("clearCookie", id, data, cb)
+        @invoke("clearCookie", data)
       else
-        fail(id, {message: "No handler registered for: '#{msg}'"}, cb)
+        Promise.reject new Error("No handler registered for: '#{msg}'")
 }
