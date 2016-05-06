@@ -1,14 +1,17 @@
+_       = require("lodash")
+Promise = require("bluebird")
+
 cookieMiddleware = "get:cookies get:cookie set:cookie clear:cookie clear:cookies".split(" ")
 
-charAfterColonRe = /:(.+){1}/
+charAfterColonRe = /:(.)/
 
-needsCookieMiddleware: (message) ->
+needsCookieMiddleware = (message) ->
   message in cookieMiddleware
 
-module.exports = (namespace) ->
+module.exports = (namespace, socketIoCookie) ->
 
-  isCypressNamespaced = (cookie) ->
-    cookie.name.startsWith(namespace)
+  isCypressNamespaced = (cookie = {}) ->
+    cookie.name.startsWith(namespace) or cookie.name is socketIoCookie
 
   return {
     getCookies: (message, data, automate) ->
@@ -31,7 +34,7 @@ module.exports = (namespace) ->
         automate(message, data)
 
     clearCookie: (message, data, automate) ->
-      if isCypressNamespaced
+      if isCypressNamespaced(data)
         throw new Error("cannot clear cypress namespaced cookie")
       else
         automate(message, data)
@@ -39,8 +42,8 @@ module.exports = (namespace) ->
     clearCookies: (message, data, automate) ->
       cookies = _.reject(data, isCypressNamespaced)
 
-      clear = ->
-        automate("clear:cookie", data)
+      clear = (cookie) ->
+        automate("clear:cookie", {name: cookie.name})
 
       Promise.map(cookies, clear)
 
@@ -51,7 +54,7 @@ module.exports = (namespace) ->
 
         @[fn](message, data, automate)
 
-    request: (message, data, automate) =>
+    request: (message, data, automate) ->
       if needsCookieMiddleware(message)
         @handleCookies(message, data, automate)
       else

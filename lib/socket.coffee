@@ -12,6 +12,7 @@ cwd           = require("./cwd")
 fixture       = require("./fixture")
 Request       = require("./request")
 logger        = require("./logger")
+automation    = require("./automation")
 
 class Socket
   constructor: ->
@@ -75,15 +76,25 @@ class Socket
       if _.isEmpty(@io.sockets.adapter.rooms.automation)
         throw new Error("Could not process '#{message}'. No automation servers connected.")
       else
-        new Promise (resolve, reject) ->
+        new Promise (resolve, reject) =>
           id = uuid.v4()
-          messages[id] = resolve
+          messages[id] = (obj) ->
+            ## normalize the error from automation responses
+            if e = obj.__error
+              err = new Error(e)
+              err.name = obj.__name
+              err.stack = obj.__stack
+              reject(err)
+            else
+              ## normalize the response
+              resolve(obj.response)
+
           @io.to("automation").emit("automation:request", id, message, data)
 
-  createIo: (server, path) ->
+  createIo: (server, path, cookie) ->
     ## TODO: dont serve the client!
     # socketIo(server, {path: path, destroyUpgrade: false, serveClient: false})
-    socketIo.server(server, {path: path, destroyUpgrade: false})
+    socketIo.server(server, {path: path, destroyUpgrade: false, cookie: cookie})
 
   _startListening: (server, watchers, config, options) ->
     _.defaults options,
@@ -100,18 +111,18 @@ class Socket
 
     messages = {}
 
-    {integrationFolder, socketIoRoute} = config
+    {integrationFolder, socketIoRoute, socketIoCookie} = config
 
     @testsDir = integrationFolder
 
-    @io = @createIo(server, socketIoRoute)
+    @io = @createIo(server, socketIoRoute, socketIoCookie)
 
     @io.on "connection", (socket) =>
       logger.info "socket connected"
 
       respond = (id, resp) ->
         if message = messages[id]
-          cleanup(id)
+          delete messages[id]
           message(resp)
 
       socket.on "automation:connected", =>
@@ -126,12 +137,12 @@ class Socket
         automate = options.onAutomationRequest ? (message, data) =>
           @onAutomation(messages, message, data)
 
-        automation(config.namespace)
-        .request(config.namespace, message, data, automate)
+        automation(config.namespace, socketIoCookie)
+        .request(message, data, automate)
         .then (resp) ->
           cb({response: resp})
         .catch (err) ->
-          cb({__error: err.message, __name: err.name, __stack: err.stack})
+          cb({__error: err.message, __name: err.name, __stack: err.stack.split("\n")})
 
       socket.on "remote:connected", =>
         logger.info "remote:connected"
