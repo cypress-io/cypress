@@ -65,6 +65,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
           o.body   = args[2]
 
       _.defaults options, defaults, {
+        cookies: true
         timeout: Cypress.config("responseTimeout")
       }
 
@@ -107,14 +108,12 @@ $Cypress.register "Request", (Cypress, _, $) ->
         else
           @throwErr("cy.request requires headers to be an object literal.")
 
+      isPlainObject = (obj) ->
+        _.isObject(obj) and not _.isArray(obj) and not _.isFunction(obj)
+
       if c = options.cookies
-        switch
-          when _.isObject(c) and not _.isArray(c) and not _.isFunction(c)
-            options.cookies = c
-          when c is true
-            options.cookies = Cypress.Cookies.getAllCookies()
-          else
-            @throwErr("cy.request requires cookies to be true, or an object literal.")
+        if not _.isBoolean(c) and not isPlainObject(c)
+          @throwErr("cy.request requires cookies to be true, or an object literal.")
 
       if not _.isBoolean(options.gzip)
         @throwErr("cy.request requires gzip to be a boolean.")

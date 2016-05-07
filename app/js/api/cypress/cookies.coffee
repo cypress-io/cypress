@@ -58,9 +58,6 @@ $Cypress.Cookies = do ($Cypress, _) ->
       ## told to unload
       return if @getCy("unload") is "true"
 
-      if isDebugging and not isNamespaced(name)
-        console.info("Cypress.Cookies.set", "name:#{name}", "value:#{value}")
-
       Cookies.set name, value, {path: "/"}
 
     get: (name) ->
