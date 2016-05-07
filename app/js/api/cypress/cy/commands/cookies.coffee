@@ -1,8 +1,5 @@
 $Cypress.register "Cookies", (Cypress, _, $) ->
 
-  clearCookies = (key) ->
-    Cypress.Cookies.clearCookies(key)
-
   mergeDefaults = (obj) ->
     merge = (o) ->
       _.defaults o, {domain: window.location.hostname}
@@ -15,9 +12,10 @@ $Cypress.register "Cookies", (Cypress, _, $) ->
   Cypress.on "test:before:hooks", ->
     @_automateCookies("get:cookies")
     .then (resp) =>
+      cookies = Cypress.Cookies.getClearableCookies(resp)
       ## iterate over all of these and ensure none are whitelisted
       ## or preserved
-      @_automateCookies("clear:cookies", resp)
+      @_automateCookies("clear:cookies", cookies)
 
   Cypress.Cy.extend
     _automateCookies: (event, obj = {}, log) ->
@@ -38,33 +36,33 @@ $Cypress.register "Cookies", (Cypress, _, $) ->
         Cypress.trigger(event, mergeDefaults(obj), fn)
 
   Cypress.addParentCommand
+    getCookie: (name, options = {}) ->
+      _.defaults options, {
+        log: true
+      }
 
-    # clearCookie: (key) ->
-    #   if not _.isString(key)
-    #     @throwErr "cy.clearCookie must be passed a string argument"
+      if options.log
+        options._log = Cypress.Log.command({
+          displayName: "get cookie"
+          onConsole: ->
+            obj = {}
 
-    #   doc   = @private("document")
-    #   path  = @_getLocation("pathname")
-    #   paths = path.split("/")
+            if c = options.cookie
+              obj["Cookie"] = c
+            else
+              obj["Note"] = "No cookie with the name: '#{name}' was found."
 
-    #   _.each paths, (p, i) ->
-    #     p = paths.slice(0, i + 1).join("/") or "/"
-    #     Cypress.Cookies.clearCookies(key, {path: p, document: doc})
+            obj
+        })
 
-    #   cookies = Cypress.Cookies.getAllCookies()
+      if not _.isString(name)
+        @throwErr("cy.getCookie() must be passed a string argument for name.", options._log)
 
-    #   Cypress.Log.command
-    #     end: true
-    #     snapshot: true
-    #     onConsole: ->
-    #       cookies: cookies
-
-    #   return cookies
-
-    getCookie: (name) ->
       @_automateCookies("get:cookie", {name: name})
       .then (resp) ->
-        console.log resp
+        options.cookie = resp
+
+        return resp
 
     getCookies: (options = {}) ->
       _.defaults options, {
@@ -115,40 +113,73 @@ $Cypress.register "Cookies", (Cypress, _, $) ->
             obj
         })
 
+      if not _.isString(name) or not _.isString(value)
+        @throwErr("cy.setCookie() must be passed two string arguments for name and value.", options._log)
+
       @_automateCookies("set:cookie", cookie, options._log)
       .then (resp) ->
         options.cookie = resp
 
         return resp
 
-    clearCookie: (name) ->
+    clearCookie: (name, options = {}) ->
+      _.defaults options, {
+        log: true
+      }
+
+      if options.log
+        options._log = Cypress.Log.command({
+          displayName: "clear cookie"
+          onConsole: ->
+            obj = {}
+
+            if c = options.cookie
+              obj["Cleared Cookie"] = c
+            else
+              obj["Note"] = "No matching cookie was found or cleared."
+
+            obj
+        })
+
+      if not _.isString(name)
+        @throwErr("cy.clearCookie() must be passed a string argument for name.", options._log)
+
       ## TODO: prevent clearing a cypress namespace
       @_automateCookies("clear:cookie", {name: name})
       .then (resp) ->
-        console.log resp
+        options.cookie = resp
 
-    clearCookies: ->
+        ## null out the current subject
+        return null
+
+    clearCookies: (options = {}) ->
+      _.defaults options, {
+        log: true
+      }
+
+      if options.log
+        options._log = Cypress.Log.command({
+          displayName: "clear cookies"
+          onConsole: ->
+            obj = {}
+
+            if c = options.cookies
+              obj["Cleared Cookies"] = c
+              obj["Num Cookies"] = c.length
+            else
+              obj["Note"] = "No cookies were found to be removed."
+
+            obj
+        })
+
       @_automateCookies("get:cookies")
       .then (resp) =>
+        cookies = Cypress.Cookies.getClearableCookies(resp)
         ## iterate over all of these and ensure none are whitelisted
         ## or preserved
-        @_automateCookies("clear:cookies", resp)
+        @_automateCookies("clear:cookies", cookies)
       .then (resp) ->
-        console.log resp
-      # doc   = @private("document")
-      # path  = @_getLocation("pathname")
-      # paths = path.split("/")
+        options.cookies = resp
 
-      # _.each paths, (p, i) ->
-      #   p = paths.slice(0, i + 1).join("/") or "/"
-      #   Cypress.Cookies.clearCookies(null, {path: p, document: doc})
-
-      # cookies = Cypress.Cookies.getAllCookies()
-
-      # Cypress.Log.command
-      #   end: true
-      #   snapshot: true
-      #   onConsole: ->
-      #     cookies: cookies
-
-      # return cookies
+        ## null out the current subject
+        return null

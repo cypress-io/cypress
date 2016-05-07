@@ -30,9 +30,28 @@ $Cypress.Cookies = do ($Cypress, _) ->
         else
           false
 
+  removePreserved = (name) ->
+    if preserved[name]
+      delete preserved[name]
+
   return {
     debug: (bool = true) ->
       isDebugging = bool
+
+    log: (cookie, type) ->
+      return if not isDebugging
+
+      m = switch type
+        when "added"    then "info"
+        when "changed"  then "log"
+        when "cleared"  then "warn"
+        else "log"
+
+      console[m]("Cookie #{type}:", cookie)
+
+    getClearableCookies: (cookies = []) ->
+      _.filter cookies, (cookie) ->
+        not isWhitelisted(cookie) and not removePreserved(cookie.name)
 
     set: (name, value) ->
       ## dont set anything if we've been
@@ -46,31 +65,6 @@ $Cypress.Cookies = do ($Cypress, _) ->
 
     get: (name) ->
       Cookies.get(name)
-
-    remove: (name, options = {}) ->
-      _.defaults options,
-        path: "/"
-        force: true
-
-      remove = (name) ->
-        if isDebugging and not isNamespaced(name)
-          console.info("Cypress.Cookies.remove", "name:#{name}")
-
-        Cookies.remove(name, options)
-
-      removePreserved = (name) ->
-        if preserved[name]
-          delete preserved[name]
-
-      if options.force
-        removePreserved(name)
-        remove(name)
-      else
-        if not isWhitelisted(name) and not removePreserved(name)
-          remove(name)
-
-    removeCy: (name) ->
-      @remove("#{namespace}.#{name}")
 
     setCy: (name, value) ->
       @set("#{namespace}.#{name}", value)
@@ -92,54 +86,6 @@ $Cypress.Cookies = do ($Cypress, _) ->
 
     getRemoteHost: ->
       @getCy "remoteHost"
-
-    getAllCookies: (options = {}) ->
-      getAll = ->
-        ## return all the cookies except those which
-        ## start with our namespace
-        _.reduce Cookies.get(), (memo, value, key) ->
-          unless isNamespaced(key)
-            memo[key] = value
-
-          memo
-        , {}
-
-      if doc = options.document
-        Cookies.setDocument(doc)
-        all = getAll()
-        Cookies.setDocument(window.document)
-
-        return all
-      else
-        getAll()
-
-    clearCookies: (cookie, options = {}) ->
-      ## bail if it starts with our namespace
-      return if cookie and isNamespaced(cookie)
-
-      options.force = false
-
-      ## if cookie was passed in then just remove cookies
-      ## that match that key
-      if cookie
-        return @remove(cookie, options)
-
-      getAndRemove = (options) =>
-        ## else nuke all the cookies except for our namesapce
-        _.each Cookies.get(), (value, key) =>
-          ## do not remove cypress namespace'd cookies
-          ## no matter what
-          return if isNamespaced(key)
-
-          @remove(key, options)
-
-      if doc = options.document
-        Cookies.setDocument(doc)
-        getAndRemove(options)
-
-      Cookies.setDocument(window.document)
-      options = _.omit(options, "document")
-      getAndRemove(options)
 
     defaults: (obj = {}) ->
       ## merge obj into defaults
