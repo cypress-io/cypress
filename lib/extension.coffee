@@ -26,8 +26,6 @@ module.exports = {
     .then (str) ->
       fs.writeFileAsync(dest, str)
 
-  cookieProps: background.cookieProps
-
   getCookieUrl: background.getUrl
 
   connect: background.connect

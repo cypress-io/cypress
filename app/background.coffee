@@ -4,13 +4,6 @@ pick    = require("lodash/pick")
 HOST = "CHANGE_ME_HOST"
 PATH = "CHANGE_ME_PATH"
 
-## match the w3c webdriver spec on return cookies
-## https://w3c.github.io/webdriver/webdriver-spec.html#cookies
-COOKIE_PROPERTIES = "name value path domain secure httpOnly expiry".split(" ")
-
-cookieProps = (cookie) ->
-  pick(cookie, COOKIE_PROPERTIES)
-
 firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null
@@ -69,8 +62,6 @@ connect(HOST, PATH, global.io)
 automation = {
   connect: connect
 
-  cookieProps: cookieProps
-
   getUrl: (cookie = {}) ->
     prefix = if cookie.secure then "https://" else "http://"
     prefix + cookie.domain + cookie.path
@@ -94,7 +85,6 @@ automation = {
         chrome.cookies.getAll(filter, resolve)
 
     get()
-    .map(cookieProps)
 
   getCookies: (filter, fn) ->
     @getAll(filter)
@@ -111,7 +101,7 @@ automation = {
         props.url = @getUrl(props)
         chrome.cookies.set props, (details) ->
           if details
-            resolve(cookieProps(details))
+            resolve(details)
           else
             reject(chrome.runtime.lastError)
 
