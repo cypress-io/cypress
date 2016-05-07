@@ -1,4 +1,4 @@
-$Cypress.register "Cookies", (Cypress, _, $) ->
+$Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
 
   mergeDefaults = (obj) ->
     merge = (o) ->
@@ -18,6 +18,9 @@ $Cypress.register "Cookies", (Cypress, _, $) ->
       @_automateCookies("clear:cookies", cookies)
 
   Cypress.Cy.extend
+    _addTwentyYears: ->
+      moment().add(20, "years").unix()
+
     _automateCookies: (event, obj = {}, log) ->
       new Promise (resolve, reject) =>
         fn = (resp) =>
@@ -50,6 +53,7 @@ $Cypress.register "Cookies", (Cypress, _, $) ->
             if c = options.cookie
               obj["Cookie"] = c
             else
+              obj["Returned"] = "null"
               obj["Note"] = "No cookie with the name: '#{name}' was found."
 
             obj
@@ -96,7 +100,7 @@ $Cypress.register "Cookies", (Cypress, _, $) ->
         secure: false
         httpOnly: false
         log: true
-        # expiry: 123123123
+        expiry: @_addTwentyYears()
       }
 
       cookie = _.pick(options, "name", "value", "path", "secure", "httpOnly", "expiry")
@@ -133,6 +137,8 @@ $Cypress.register "Cookies", (Cypress, _, $) ->
           onConsole: ->
             obj = {}
 
+            obj["Returned"] = "null"
+
             if c = options.cookie
               obj["Cleared Cookie"] = c
             else
@@ -162,6 +168,8 @@ $Cypress.register "Cookies", (Cypress, _, $) ->
           displayName: "clear cookies"
           onConsole: ->
             obj = {}
+
+            obj["Returned"] = "null"
 
             if c = options.cookies
               obj["Cleared Cookies"] = c
