@@ -25,7 +25,6 @@ automation = {
   getAll: (filter) ->
     cookies
     .get(@getSessionCookies(), filter)
-    .map(extension.cookieProps)
 
   getCookies: (filter) ->
     @getAll(filter)
@@ -37,7 +36,7 @@ automation = {
   setCookie: (props = {}) ->
     cookies
     .set(@getSessionCookies(), props)
-    .then(extension.cookieProps)
+    .return(props)
 
   clearCookie: (filter) ->
     @clear(filter)
