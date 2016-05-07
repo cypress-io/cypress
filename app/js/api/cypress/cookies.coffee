@@ -16,17 +16,17 @@ $Cypress.Cookies = do ($Cypress, _) ->
   isNamespaced = (name) ->
     _(name).startsWith(namespace)
 
-  isWhitelisted = (name) ->
+  isWhitelisted = (cookie) ->
     if w = defaults.whitelist
       switch
         when _.isString(w)
-          name is w
+          cookie.name is w
         when _.isArray(w)
-          name in w
+          cookie.name in w
         when _.isFunction(w)
-          w(name)
+          w(cookie)
         when _.isRegExp(w)
-          w.test(name)
+          w.test(cookie.name)
         else
           false
 
