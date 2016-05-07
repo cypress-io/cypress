@@ -1,4 +1,4 @@
-do ($Cypress, _, $, Promise) ->
+do ($Cypress, _, $, Promise, moment) ->
 
   $Cypress.extend
     ## move these into cypress/modules.coffee
@@ -12,7 +12,7 @@ do ($Cypress, _, $, Promise) ->
       ## invoke the module with our instance context
       ## and pass back in the Cypress instance, underscore
       ## and jQuery
-      module.call(@, @, _, $, Promise)
+      module.call(@, @, _, $, Promise, moment)
 
     loadModules: (names = []) ->
       ## load specific modules
