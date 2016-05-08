@@ -34,7 +34,7 @@ $Cypress.Cookies = do ($Cypress, _) ->
     if preserved[name]
       delete preserved[name]
 
-  return {
+  API = {
     debug: (bool = true) ->
       isDebugging = bool
 
@@ -53,21 +53,21 @@ $Cypress.Cookies = do ($Cypress, _) ->
       _.filter cookies, (cookie) ->
         not isWhitelisted(cookie) and not removePreserved(cookie.name)
 
-    set: (name, value) ->
+    _set: (name, value) ->
       ## dont set anything if we've been
       ## told to unload
       return if @getCy("unload") is "true"
 
       Cookies.set name, value, {path: "/"}
 
-    get: (name) ->
+    _get: (name) ->
       Cookies.get(name)
 
     setCy: (name, value) ->
-      @set("#{namespace}.#{name}", value)
+      @_set("#{namespace}.#{name}", value)
 
     getCy: (name) ->
-      @get("#{namespace}.#{name}")
+      @_get("#{namespace}.#{name}")
 
     preserveOnce: (keys...) ->
       _.each keys, (key) ->
@@ -89,3 +89,21 @@ $Cypress.Cookies = do ($Cypress, _) ->
       _.extend defaults, obj
 
   }
+
+  _.each ["get", "set", "remove", "getAllCookies", "clearCookies"], (method) ->
+    API[method] = ->
+      throw new Error("""
+        The Cypress.Cookies.#{method}() method has been removed.
+
+        Setting, getting, and clearing cookies is now an asynchronous operation.
+
+        Replace this call with the appropriate command such as:
+          - cy.getCookie()
+          - cy.getCookies()
+          - cy.setCookie()
+          - cy.clearCookie()
+          - cy.clearCookies()
+
+      """)
+
+  return API
