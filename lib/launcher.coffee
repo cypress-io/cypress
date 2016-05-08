@@ -26,8 +26,7 @@ process.once "exit", kill
 defaultArgs = [
   "--test-type"
   "--ignore-certificate-errors"
-  "--load-and-launch-app=#{pathToExtension}"
-  "--load-extension=#{pathToTheme}"
+  "--load-extension=#{pathToExtension},#{pathToTheme}"
   "--start-maximized"
   "--silent-debugger-extension-api"
   "--no-default-browser-check"
@@ -44,10 +43,22 @@ defaultArgs = [
   "--disable-renderer-throttling"
   "--disable-restore-session-state"
   "--disable-translate"
-  "--disable-default-apps"
-  "--disable-sync"
   "--disable-new-profile-management"
   "--disable-new-avatar-menu"
+
+  ## the following come frome chromedriver
+  ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
+  "--metrics-recording-only"
+  "--disable-prompt-on-repost"
+  "--disable-hang-monitor"
+  "--disable-sync"
+  "--disable-background-networking"
+  "--disable-web-resources"
+  "--safebrowsing-disable-auto-update"
+  "--safebrowsing-disable-download-protection"
+  "--disable-client-side-phishing-detection"
+  "--disable-component-update"
+  "--disable-default-apps"
 ]
 
 module.exports = {
