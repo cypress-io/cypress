@@ -1,5 +1,7 @@
 $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
 
+  COOKIE_PROPS = "name value path secure httpOnly expiry".split(" ")
+
   mergeDefaults = (obj) ->
     merge = (o) ->
       _.defaults o, {domain: window.location.hostname}
@@ -9,13 +11,22 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
     else
       merge(obj)
 
-  Cypress.on "test:before:hooks", ->
-    @_automateCookies("get:cookies")
+  getAndClear = (log) ->
+    @_automateCookies("get:cookies", {}, log)
     .then (resp) =>
-      cookies = Cypress.Cookies.getClearableCookies(resp)
+      ## bail early if we got no cookies!
+      return resp if resp and resp.length is 0
+
       ## iterate over all of these and ensure none are whitelisted
       ## or preserved
-      @_automateCookies("clear:cookies", cookies)
+      cookies = Cypress.Cookies.getClearableCookies(resp)
+      @_automateCookies("clear:cookies", cookies, log)
+
+  Cypress.on "test:before:hooks", ->
+    ## TODO: handle failure here somehow
+    ## maybe by tapping into the Cypress reset
+    ## stuff, or handling this in the runner itself?
+    getAndClear.call(@)
 
   Cypress.Cy.extend
     _addTwentyYears: ->
@@ -51,7 +62,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
             obj = {}
 
             if c = options.cookie
-              obj["Cookie"] = c
+              obj["Returned"] = c
             else
               obj["Returned"] = "null"
               obj["Note"] = "No cookie with the name: '#{name}' was found."
@@ -62,7 +73,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
       if not _.isString(name)
         @throwErr("cy.getCookie() must be passed a string argument for name.", options._log)
 
-      @_automateCookies("get:cookie", {name: name})
+      @_automateCookies("get:cookie", {name: name}, options._log)
       .then (resp) ->
         options.cookie = resp
 
@@ -103,7 +114,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
         expiry: @_addTwentyYears()
       }
 
-      cookie = _.pick(options, "name", "value", "path", "secure", "httpOnly", "expiry")
+      cookie = _.pick(options, COOKIE_PROPS)
 
       if options.log
         options._log = Cypress.Log.command({
@@ -142,7 +153,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
             if c = options.cookie
               obj["Cleared Cookie"] = c
             else
-              obj["Note"] = "No matching cookie was found or cleared."
+              obj["Note"] = "No cookie with the name: '#{name}' was found or removed."
 
             obj
         })
@@ -151,7 +162,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
         @throwErr("cy.clearCookie() must be passed a string argument for name.", options._log)
 
       ## TODO: prevent clearing a cypress namespace
-      @_automateCookies("clear:cookie", {name: name})
+      @_automateCookies("clear:cookie", {name: name}, options._log)
       .then (resp) ->
         options.cookie = resp
 
@@ -171,21 +182,16 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
 
             obj["Returned"] = "null"
 
-            if c = options.cookies
+            if (c = options.cookies) and c.length
               obj["Cleared Cookies"] = c
               obj["Num Cookies"] = c.length
             else
-              obj["Note"] = "No cookies were found to be removed."
+              obj["Note"] = "No cookies were found or removed."
 
             obj
         })
 
-      @_automateCookies("get:cookies")
-      .then (resp) =>
-        cookies = Cypress.Cookies.getClearableCookies(resp)
-        ## iterate over all of these and ensure none are whitelisted
-        ## or preserved
-        @_automateCookies("clear:cookies", cookies)
+      getAndClear.call(@, options._log)
       .then (resp) ->
         options.cookies = resp
 
