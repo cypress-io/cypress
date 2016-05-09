@@ -1,329 +1,537 @@
-# describe "$Cypress.Cy Server API", ->
-#   it ".create", ->
-#     fakeServer = @sandbox.useFakeServer()
-#     server = $Cypress.Server.create(fakeServer, {})
-#     expect(server).to.be.instanceof $Cypress.Server
+describe "$Cypress.Cy Server API", ->
+  beforeEach ->
+    @iframe = $("<iframe />").appendTo $("body")
+    @window = @iframe.prop("contentWindow")
 
-#   context ".constructor", ->
+  afterEach ->
+    @iframe.remove()
+
+  it ".create", ->
+    server = $Cypress.Server.create({})
+    expect(server).to.be.instanceof $Cypress.Server
+
+  it ".defaults", ->
+    defaults = _.clone $Cypress.Server.defaults()
+
+    expect(defaults.status).to.eq(200)
+
+    defaults2 = $Cypress.Server.defaults({status: 500})
+    expect(defaults2.status).to.eq(500)
+
+    server = $Cypress.Server.create({})
+    route = server.route()
+
+    expect(route.status).to.eq(500)
+
+    $Cypress.Server.defaults(defaults)
+
+  context "#isWhitelisted", ->
+    beforeEach ->
+      @server = $Cypress.Server.create()
+      @server.bindTo(@window)
+      @xhr = new @window.XMLHttpRequest
+
+    it "whitelists GET *.js", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.js"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.jsx", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.jsx"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.html", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.html"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.css", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.css"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.scss", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.scss"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.less", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.less"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.coffee", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.coffee"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.js.coffee", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.js.coffee"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.js?_=123123", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.js?_=123123"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.html?_=123123&foo=bar", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.html?_=123123&foo=bar"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.svg", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.svg"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "does not whitelist GET *.json?_=123123", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.json?_=123123"
+      expect(@server.isWhitelisted(@xhr)).not.to.be.true
+
+    it "does not whitelist OPTIONS *.js?_=123123", ->
+      @xhr.method = "OPTIONS"
+      @xhr.url = "/foo.js?_=123123"
+      expect(@server.isWhitelisted(@xhr)).not.to.be.true
+
+  context "#setRequestHeader", ->
+    beforeEach ->
+      @server = $Cypress.Server.create({
+        xhrUrl: "__cypress/xhrs/"
+      })
+      @srh  = @sandbox.spy(@window.XMLHttpRequest.prototype, "setRequestHeader")
+      @server.bindTo(@window)
+      @xhr = new @window.XMLHttpRequest
+      @xhr.open("GET", "/fixtures/ajax/app.json")
+      @proxy = @server.getProxyFor(@xhr)
+
+    it "sets request.headers", ->
+      @proxy.setRequestHeader("foo", "bar")
+      expect(@proxy.request.headers).to.deep.eq({foo: "bar"})
+
+    it "appends to request.headers", ->
+      @proxy.setRequestHeader("foo", "bar")
+      @proxy.setRequestHeader("foo", "baz")
+      expect(@proxy.request.headers).to.deep.eq({foo: "bar, baz"})
+
+    it "ignores cypress headers", ->
+      @proxy.setRequestHeader("X-Cypress-Delay", 1000)
+      expect(@proxy.request.headers).not.to.be.ok
+
+    it "sets proxy request headers from xhr", ->
+      @xhr.setRequestHeader("foo", "bar")
+
+      ## the original setRequestHeaders method should be called here
+      expect(@srh).to.be.calledWith("foo", "bar")
+      expect(@proxy.request.headers).to.deep.eq({foo: "bar"})
+
+    ## since we yield the xhrProxy object in tests
+    ## we need to call the original xhr's implementation
+    ## on setRequestHeaders
+    it "calls the original xhr's implementation", ->
+      @proxy.setRequestHeader("foo", "bar")
+      expect(@srh).to.be.calledWith("foo", "bar")
+      expect(@srh).to.be.calledOn(@xhr)
+
+  context "#getResponseHeader", ->
+    beforeEach ->
+      @server = $Cypress.Server.create({
+        xhrUrl: "__cypress/xhrs/"
+      })
+      @grh  = @sandbox.spy(@window.XMLHttpRequest.prototype, "getResponseHeader")
+      @server.bindTo(@window)
+      @xhr = new @window.XMLHttpRequest
+      @xhr.open("GET", "/fixtures/ajax/app.json")
+      @proxy = @server.getProxyFor(@xhr)
+
+    it "calls the original xhr implementation", ->
+      @proxy.getResponseHeader("foo")
+      expect(@grh).to.be.calledWith("foo")
+      expect(@grh).to.be.calledOn(@xhr)
+
+  context "#getAllResponseHeaders", ->
+    beforeEach ->
+      @server = $Cypress.Server.create({
+        xhrUrl: "__cypress/xhrs/"
+      })
+      @garh  = @sandbox.spy(@window.XMLHttpRequest.prototype, "getAllResponseHeaders")
+      @server.bindTo(@window)
+      @xhr = new @window.XMLHttpRequest
+      @xhr.open("GET", "/fixtures/ajax/app.json")
+      @proxy = @server.getProxyFor(@xhr)
+
+    it "calls the original xhr implementation", ->
+      @proxy.getAllResponseHeaders()
+      expect(@garh).to.be.calledOnce
+      expect(@garh).to.be.calledOn(@xhr)
+
+  context "#setResponseHeaders", ->
+    beforeEach ->
+      @server = $Cypress.Server.create({
+        xhrUrl: "__cypress/xhrs/"
+      })
+      @server.bindTo(@window)
+      @xhr = new @window.XMLHttpRequest
+
+    it "sets response.headers and responseHeaders", (done) ->
+      headers = """
+        X-Powered-By: Express
+        Vary: Accept-Encoding
+        Content-Type: application/json
+        Cache-Control: public, max-age=0
+        Connection: keep-alive
+        Content-Length: 53
+      """.split("\n").join('\u000d\u000a')
+
+      @sandbox.stub(@xhr, "getAllResponseHeaders").returns(headers)
+
+      @xhr.open("GET", "/fixtures/ajax/app.json")
+
+      proxy = @server.getProxyFor(@xhr)
+
+      @xhr.onload = ->
+        expect(proxy.responseHeaders).to.eq(proxy.response.headers)
+        expect(proxy.responseHeaders).to.deep.eq({
+          "X-Powered-By": "Express"
+          "Vary": "Accept-Encoding"
+          "Content-Type": "application/json"
+          "Cache-Control": "public, max-age=0"
+          "Connection": "keep-alive"
+          "Content-Length": "53"
+        })
+        done()
+
+      @xhr.send()
+
+  context "#getFullyQualifiedUrl", ->
+    beforeEach ->
+      @server = $Cypress.Server.create()
+
+      @expectUrlToEq = (url, url2) =>
+        expect(@server.getFullyQualifiedUrl(window, url)).to.eq(url2)
+
+    it "resolves absolute relative links", ->
+      @expectUrlToEq("/foo/bar.html", "#{window.location.origin}/foo/bar.html")
+
+    it "resolves relative links", ->
+      ## slice off the last path segment since this is a relative link
+      ## http://localhost:3500/specs/api/cypress/server_spec -> http://localhost:3500/specs/api/cypress
+      path = window.location.origin + window.location.pathname.split("/").slice(0, -1).join("/")
+      @expectUrlToEq("foo/bar.html", "#{path}/foo/bar.html")
+
+  context "XHR#abort", ->
+    beforeEach ->
+      @send = @sandbox.stub(@window.XMLHttpRequest.prototype, "send")
+      @open = @sandbox.spy(@window.XMLHttpRequest.prototype, "open")
+      @abort = @sandbox.spy(@window.XMLHttpRequest.prototype, "abort")
+      @server = $Cypress.Server.create({
+        xhrUrl: "__cypress/xhrs/"
+        onXhrAbort: ->
+        onAnyAbort: ->
+      })
+      @server.bindTo(@window)
+      @xhr = new @window.XMLHttpRequest
+
+    it "sets aborted=true", ->
+      @xhr.open("GET", "/foo")
+      @xhr.abort()
+      expect(@xhr.aborted).to.eq(true)
+
+    it "calls the original abort", ->
+      @xhr.open("GET", "/foo")
+      @xhr.abort()
+      expect(@abort).to.be.calledOn(@xhr)
+
+    it "calls onXhrAbort callback with xhr + stack trace", ->
+      @sandbox.stub(@server, "getStack").returns("foobarbaz")
+      onXhrAbort = @sandbox.spy @server.options, "onXhrAbort"
+      @xhr.open("GET", "/foo")
+      @xhr.abort()
+      expect(onXhrAbort).to.be.calledWith(@server.getProxyFor(@xhr), "foobarbaz")
+
+    it "calls onAnyAbort callback with route + xhr", ->
+      onAnyAbort = @sandbox.spy @server.options, "onAnyAbort"
+
+      @xhr.open("GET", "/foo")
+      @xhr.abort()
+      expect(onAnyAbort).to.be.called
+
+#   context "XHR#open", ->
 #     beforeEach ->
-#       @fakeServer = @sandbox.useFakeServer()
-#       @server = $Cypress.Server.create(@fakeServer, {delay: 10})
+#       @send = @sandbox.stub(@window.XMLHttpRequest.prototype, "send")
+#       @open = @sandbox.spy(@window.XMLHttpRequest.prototype, "open")
+#       @server = $Cypress.Server.create({
+#         xhrUrl: "__cypress/xhrs/"
+#       })
+#       @server.bindTo(@window)
+#       @xhr = new @window.XMLHttpRequest
 
-#     it "sets queue to []", ->
-#       expect(@server.queue).to.deep.eq []
+#     it "adds to server#xhrs", ->
+#       expect(@server.xhrs).to.deep.eq({})
+#       @xhr.open("GET", "/foo")
+#       expect(@server.xhrs[@xhr.id]).to.eq(@xhr)
 
-#     it "has a a reference to sinon's fakeServer", ->
-#       expect(@server.fakeServer).to.eq @fakeServer
+#     it "normalizes async", ->
+#       @xhr.open("GET", "/foo")
+#       expect(@open).to.be.calledWith("GET", "/foo", true)
 
-#     it "sets respondImmediately to true by default", ->
-#       expect(@fakeServer.respondImmediately).to.be.true
+#     it "changes url to stub url", ->
+#       @sandbox.stub(@server, "shouldApplyStub").returns(true)
+#       @xhr.open("GET", "/foo")
+#       expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/foo")
 
-#     it "sets delay to 10", ->
-#       expect(@server._delay).to.eq 10
+#     it "calls the original open", ->
+#       @xhr.open("GET", "/foo", true, "us", "pw")
+#       expect(@open).to.be.calledOn(@xhr)
+#       expect(@open).to.be.calledWith("GET", "/foo", true, "us", "pw")
 
-#   context "#respondImmediately", ->
+#   context "XHR#send", ->
 #     beforeEach ->
-#       @setup = (opts = {}) =>
-#         _.defaults opts, delay: 10
-#         @fakeServer = @sandbox.useFakeServer()
-#         @server = $Cypress.Server.create(@fakeServer, opts)
+#       @send = @sandbox.spy(@window.XMLHttpRequest.prototype, "send")
+#       @server = $Cypress.Server.create({
+#         xhrUrl: "__cypress/xhrs/"
+#       })
+#       @server.bindTo(@window)
+#       @xhr = new @window.XMLHttpRequest
 
-#     it "by default calls fakeServer.respond", ->
-#       @setup()
-#       respond = @sandbox.spy @fakeServer, "respond"
-#       $.get("/users")
-#       expect(respond).to.be.calledOnce
+#     it "bails if server isnt active"
 
-#     it "does not call fakeServer.respond when respondImmediately is false", ->
-#       @setup({respond: false})
-#       respond = @sandbox.spy @fakeServer, "respond"
-#       $.get("/users")
-#       expect(respond).not.to.be.called
+#     it "sets requestBody on all requests", ->
+#       @xhr.open("GET", "/foo")
+#       @xhr.send("a=b")
+#       proxy = @server.getProxyFor(@xhr)
+#       expect(proxy.requestBody).to.eq("a=b")
+#       expect(proxy.request.body).to.eq("a=b")
 
-#   context "#server.respond", ->
-#     it "does not resolve until all responses have resolved", ->
-#       @fakeServer = @sandbox.useFakeServer()
-#       @server = $Cypress.Server.create(@fakeServer, respond: false)
-#       $.get("/users")
-#       $.get("/users")
-#       $.get("/users")
-#       @server.respond().then (xhrs) ->
-#         statuses = _.pluck(xhrs, "status")
-#         expect(xhrs).to.have.length(3)
-#         expect(statuses).to.deep.eq [404, 404, 404]
+#     it "parses requestBody into JSON", ->
+#       @xhr.open("POST", "/users")
+#       @xhr.send(JSON.stringify({foo: "bar"}))
+#       proxy = @server.getProxyFor(@xhr)
+#       expect(proxy.requestBody).to.deep.eq({foo: "bar"})
+#       expect(proxy.request.body).to.deep.eq({foo: "bar"})
 
-#     describe "with {respond: false}", ->
-#       beforeEach ->
-#         @fakeServer = @sandbox.useFakeServer()
-#         @server = $Cypress.Server.create(@fakeServer, delay: 10, respond: false)
+#     it "sets requestBody on formData", ->
+#       formData = new FormData
+#       formData.append("foo", "bar")
+#       formData.append("baz", "quux")
 
-#       it "can forcibly respond to all requests in the queue", ->
-#         @server.stub url: /users/, response: {}, method: "GET"
-#         $.get("/users")
-#         request = @fakeServer.requests[0]
-#         @sandbox.spy request, "respond"
-#         @server.respond()
-#         expect(request.respond).to.be.called
+#       @xhr.open("POST", "/form")
+#       @xhr.send(formData)
 
-#       it "ignores delay", ->
-#         delay = @sandbox.spy Promise, "delay"
-#         @server.stub url: /users/, response: {}, method: "GET", delay: 50
-#         $.get("/users")
-#         @server.respond()
-#         expect(delay).to.be.calledWith 0
+#       proxy = @server.getProxyFor(@xhr)
 
-#     describe "with {respond: true}", ->
-#       beforeEach ->
-#         @fakeServer = @sandbox.useFakeServer()
-#         @server = $Cypress.Server.create(@fakeServer, {delay: 10, respond: true})
+#       expect(proxy.requestBody).to.eq(formData)
 
-#       it "does not respond to an xhr which has {respond: false} when respondImmediately is true", (done) ->
-#         @server.stub url: /users/, response: {}, method: "GET", respond: false
-#         $.get("/users")
+#     it "sets x-cypress-id"
 
-#         ## should not have pushed a promise into our queue
-#         expect(@server.queue).to.have.length(0)
-#         _.delay =>
-#           ## and should not have responded to the request
-#           expect(@fakeServer.requests[0].readyState).to.eq 1
-#           done()
-#         , 100
+#     it "sets x-cypress-testId"
 
-#       it "xhr is put back into the fakeServer queue if its not responded to", ->
-#         expect(@fakeServer.queue).to.be.undefined
-#         @server.stub url: /users/, response: {}, method: "GET", respond: false
-#         $.get("/users")
-#         expect(@fakeServer.queue).to.have.length(1)
+#     it "calls applyStubProperties", ->
+#       @server.enableStubs()
 
-#       it "initially doesnt respond then forcefully responds later", (done) ->
-#         @server.stub url: /users/, response: {}, method: "GET", respond: false
-#         $.get("/users")
-#         _.delay =>
-#           request = @fakeServer.requests[0]
-#           expect(request.readyState).to.eq 1
+#       applyStubProperties = @sandbox.spy @server, "applyStubProperties"
 
-#           ## now forcefully respond here
-#           @server.respond()
+#       stub1 = @server.stub({
+#         method: "POST"
+#         url: /.+/
+#         response: {}
+#         onRequest: ->
+#       })
 
-#           _.delay =>
-#             expect(request.readyState).to.eq 4
-#             done()
-#           , 100
-#         , 100
+#       stub2 = @server.stub({
+#         method: "POST"
+#         url: /users/
+#         response: {}
+#         onRequest: ->
+#       })
 
-#   context "#xhr.respond", ->
+#       @xhr.open("POST", "/users/123")
+#       @xhr.send()
+
+#       expect(applyStubProperties).to.be.calledWith(@xhr, stub2)
+
+#     it "captures send (initiator) stack"
+
+#     it "calls stub.onRequest"
+
+#     it "calls send"
+
+#   context "#applyStubProperties", ->
 #     beforeEach ->
-#       @setup = (opts = {}) =>
-#         _.defaults opts, delay: 10, respond: true
-#         @fakeServer = @sandbox.useFakeServer()
-#         @server = $Cypress.Server.create(@fakeServer, opts)
+#       @setRequestHeader = @sandbox.spy(@window.XMLHttpRequest.prototype, "setRequestHeader")
+#       @server = $Cypress.Server.create({
+#         xhrUrl: "__cypress/xhrs/"
+#       })
+#       @server.bindTo(@window)
+#       @stub = @server.stub({
+#         method: "POST"
+#         url: /foo/
+#         delay: 25
+#         status: 201
+#         headers: {
+#           "x-token": "123-abc"
+#           "contentType": "foo/bar"
+#           "X-Foo-Bar": "sekret"
+#         }
+#         response: [{name: "b"}, {name: "j"}]
+#       })
+#       @xhr = new @window.XMLHttpRequest
+#       @xhr.open("POST", "foobar")
+#       @server.applyStubProperties(@xhr, @stub)
 
-#     it "pushes the promise into server.queue", ->
-#       @setup()
-#       expect(@server.queue).to.have.length(0)
-#       $.get("/users")
-#       expect(@server.queue).to.have.length(1)
+#       @expectRequestHeader = (key, val) =>
+#         expect(@setRequestHeader).to.be.calledOn(@xhr)
+#         expect(@setRequestHeader).to.be.calledWith("X-Cypress-#{key}", val)
 
-#     it "inherits its delay from server.delay", ->
-#       delay = @sandbox.spy Promise, "delay"
-#       @setup({delay: 100})
-#       @server.stub url: /users/, response: {}, method: "GET"
-#       $.get("/users")
-#       expect(delay).to.be.calledWith 100
+#     it "sets status", ->
+#       @expectRequestHeader("Status", 201)
 
-#     it "can have a specific delay itself", ->
-#       delay = @sandbox.spy Promise, "delay"
-#       @setup({delay: 20})
-#       @server.stub url: /users/, response: {}, method: "GET", delay: 50
-#       $.get("/users")
-#       expect(delay).to.be.calledWith 50
+#     it "sets response", ->
+#       @expectRequestHeader("Response", JSON.stringify([{name: "b"}, {name: "j"}]))
 
-#     it "inherits its delay from server.delay on a 404", ->
-#       delay = @sandbox.spy Promise, "delay"
-#       @setup({delay: 100})
-#       $.get("/users")
-#       expect(delay).to.be.calledWith 100
+#     it "sets matched url", ->
+#       @expectRequestHeader("Matched", "/foo/")
 
-#     it "returns if isResponding is true", ->
-#       @setup()
-#       @server.onRequest (@xhr) =>
-#       @server.stub url: /users/, response: {}, method: "GET", delay: 50
-#       $.get("/users")
-#       expect(@xhr.isResponding).to.be.true
-#       expect(@xhr.respond()).to.be.undefined
+#     it "sets delay", ->
+#       @expectRequestHeader("Delay", 25)
 
-#     it "returns if isResponding is true on a 404 route", ->
-#       @setup({delay: 100})
-#       @server.onRequest (@xhr) =>
-#       $.get("/users")
-#       expect(@xhr.isResponding).to.be.true
-#       expect(@xhr.respond()).to.be.undefined
+#     it "sets headers", ->
+#       headers = JSON.stringify({
+#         "x-token": "123-abc"
+#         "content-type": "foo/bar"
+#         "x-foo-bar": "sekret"
+#       })
+#       @expectRequestHeader("Headers", headers)
 
-#     it "does not delay when {respond: false} is on the server", ->
-#       delay = @sandbox.spy Promise, "delay"
-#       @setup({delay: 20, respond: false})
-#       @server.stub url: /users/, response: {}, method: "GET", delay: 50
-#       $.get("/users")
-#       @server.respond()
-#       expect(delay).to.be.calledWith 0
+#     it "does not set null/undefined headers", ->
+#       @setRequestHeader.reset()
 
-#     it "does not delay when {respond: false} is set on the xhr", ->
-#       delay = @sandbox.spy Promise, "delay"
-#       @setup({delay: 20})
-#       @server.stub url: /users/, response: {}, method: "GET", delay: 50, respond: false
-#       $.get("/users")
-#       @server.respond()
-#       expect(delay).to.be.calledWith 0
+#       stub = @server.stub({
+#         method: "POST"
+#         url: /foo/
+#       })
 
-#     it "does not delay when {respond: false} is on the server and no stub", ->
-#       delay = @sandbox.spy Promise, "delay"
-#       @setup({delay: 20, respond: false})
-#       $.get("/users")
-#       @server.respond()
-#       expect(delay).to.be.calledWith 0
+#       xhr = new @window.XMLHttpRequest
+#       xhr.open("POST", "foobar")
+#       @server.applyStubProperties(xhr, stub)
 
-#     it "sets status=0 headers={} body='' when xhr has been aborted", ->
-#       @setup()
-#       @server.stub url: /foo/, response: {}, method: "GET", status: 200
+#       expect(@setRequestHeader).not.to.be.calledWith("X-Cypress-Headers")
 
-#       handleAfterResponse = @sandbox.spy(@server, "handleAfterResponse")
-
-#       x = $.getJSON("/foo")
-#       x.abort()
-
-#       @server.queue[0].then (xhr) ->
-#         expect(handleAfterResponse).to.be.calledWith xhr, {status: 0, headers: {}, body: ""}
-
-#     it "catches xhr aborts and throws AbortError", ->
-#       onAbort = @sandbox.stub()
-
-#       @setup({onAbort: onAbort})
-#       @server.stub url: /foo/, response: {}, method: "GET", status: 200
-
-#       x = $.getJSON("/foo")
-#       x.abort()
-
-#       @server.queue[0].then (xhr) ->
-#         expect(onAbort).to.be.calledWith xhr, xhr.matchedRoute
-
-#         err = onAbort.getCall(0).args[2]
-
-#         expect(err.name).to.eq "AbortError"
-
-#       # @server.queue[0].catch (err) ->
-#         # debugger
-
-#   context "#cancel", ->
+#   context "#stub", ->
 #     beforeEach ->
-#       @fakeServer = @sandbox.useFakeServer()
-#       @server = $Cypress.Server.create(@fakeServer, {delay: 200, respond: true})
+#       @server = $Cypress.Server.create({
+#         xhrUrl: "__cypress/xhrs/"
+#         delay: 100
+#         waitOnResponses: false
+#         foo: "bar"
+#       })
+#       @server.bindTo(@window)
+#       @server.enableStubs()
 
-#     it "can cancel promises in the queue", ->
-#       @server.stub url: /users/, response: {}, method: "GET"
-#       @server.stub url: /posts/, response: {}, method: "GET"
-#       @server.stub url: /messages/, response: {}, method: "GET"
-#       $.get("/users")
-#       $.get("/posts")
-#       $.get("/messages")
-#       expect(@server.queue).to.have.length(3)
-#       Promise.all(@server.cancel()).then =>
-#         _.each @fakeServer.requests, (request) ->
-#           expect(request.aborted).to.be.true
-#           expect(request.readyState).to.eq 0
+#     it "merges defaults into stubs", ->
+#       expect(@server.stubs).to.be.empty
+#       @server.stub({
+#         url: /foo/
+#         response: {}
+#         delay: 50
+#       })
 
-#   context "#handleAfterResponse", ->
+#       expect(@server.stubs.length).to.eq(1)
+#       expect(@server.stubs[0]).to.deep.eq {
+#         url: /foo/
+#         response: {}
+#         delay: 50
+#         method: "GET"
+#         status: 200
+#         stub: true
+#         autoRespond: true
+#         waitOnResponses: false
+#         onRequest: undefined
+#         onResponse: undefined
+#       }
+
+#   context "#add", ->
 #     beforeEach ->
-#       @fakeServer = @sandbox.useFakeServer()
-#       @server = $Cypress.Server.create(@fakeServer, {delay: 10, respond: true, afterResponse: ->})
+#       @send = @sandbox.stub(@window.XMLHttpRequest.prototype, "send")
+#       @open = @sandbox.spy(@window.XMLHttpRequest.prototype, "open")
+#       @server = $Cypress.Server.create({
+#         xhrUrl: "__cypress/xhrs/"
+#       })
+#       @server.bindTo(@window)
+#       @xhr = new @window.XMLHttpRequest
 
-#     it "is called after successful response", ->
-#       handleAfterResponse = @sandbox.spy(@server, "handleAfterResponse")
-#       @server.stub url: /users/, response: {}, method: "GET", status: 201
-#       $.get("/users")
+#     it "sets a unique xhrId", ->
+#       @xhr.open("GET", "/")
+#       expect(@xhr.id).to.be.a("string")
 
-#       ## tap into the promise
-#       @server.queue[0].then (xhr) =>
-#         expect(handleAfterResponse).to.be.calledWith xhr, {status: xhr.status, headers: xhr.responseHeaders, body: xhr.responseText}
+#     it "merges in attrs", ->
+#       @xhr.open("POST", "/bar")
+#       expect(@xhr.method).to.eq("POST")
+#       expect(@xhr.url).to.include("/bar")
 
-#     it "is called after 404 response", ->
-#       handleAfterResponse = @sandbox.spy(@server, "handleAfterResponse")
-#       $.get("/users")
-
-#       ## tap into the promise
-#       @server.queue[0].then (xhr) =>
-#         expect(handleAfterResponse).to.be.calledWith xhr, {status: 404, headers: {}, body: ""}
-
-#     it "pushes the response into server.responses", ->
-#       handleAfterResponse = @sandbox.spy(@server, "handleAfterResponse")
-#       @server.stub url: /users/, response: {}, method: "GET", status: 201
-#       $.get("/users")
-
-#       ## tap into the promise
-#       @server.queue[0].then (xhr) =>
-#         expect(@server.responses).to.have.length(1)
-#         expect(@server.responses[0]).to.deep.eq {status: 201, headers: {"Content-Type": "application/json"}, body: "{}"}
-
-#     it "calls afterResponse with request and request.matchedRoute", ->
-#       afterResponse = @sandbox.spy(@server, "afterResponse")
-#       @server.stub url: /users/, response: {}, method: "GET", status: 201
-#       $.get("/users")
-
-#       ## tap into the promise
-#       @server.queue[0].then (xhr) =>
-#         expect(afterResponse).to.be.calledWith xhr, xhr.matchedRoute
-
-#   context "#onError", ->
+#   context "#deactivate", ->
 #     beforeEach ->
-#       @fakeServer = @sandbox.useFakeServer()
-#       @server = $Cypress.Server.create(@fakeServer, {delay: 10, respond: true, onError: ->})
+#       @abort = @sandbox.spy(@window.XMLHttpRequest.prototype, "abort")
+#       @server = $Cypress.Server.create({
+#         xhrUrl: "__cypress/xhrs/"
+#       })
+#       @server.bindTo(@window)
 
-#     it "invokes onError with matchedRoute", ->
-#       onError = @sandbox.spy @server, "onError"
-#       err = null
-#       @server.stub url: /users/, response: {}, method: "GET", status: 201
+#     it "sets isActive=false", ->
+#       @server.deactivate()
+#       expect(@server.isActive).to.be.false
 
-#       ## cause an error related to the xhr
-#       $.get("/users").done ->
-#         try
-#           foo.bar()
-#         catch e
-#           err = e
-#           throw e
+#     it "aborts outstanding requests", (done) ->
+#       xhr1 = new @window.XMLHttpRequest
+#       xhr2 = new @window.XMLHttpRequest
+#       xhr3 = new @window.XMLHttpRequest
 
-#       @server.queue[0].then (xhr) =>
-#         expect(onError).to.be.calledWith xhr, xhr.matchedRoute, err
+#       xhr1.open("GET", "/fixtures/html/dom.html")
+#       xhr2.open("GET", "/timeout?ms=500")
+#       xhr3.open("GET", "/timeout?ms=500")
 
-#     it "invokes onError without matched route on 404", ->
-#       onError = @sandbox.spy @server, "onError"
-#       err = null
+#       xhr1.onload = =>
+#         @server.deactivate()
 
-#       ## cause an error related to the xhr
-#       $.get("/users").fail ->
-#         try
-#           foo.bar()
-#         catch e
-#           err = e
-#           throw e
+#         ## abort should not have been called
+#         ## on xhr1, only xhr2 + xhr3
+#         expect(@abort).to.be.calledTwice
+#         expect(@abort).to.be.calledOn(xhr2)
+#         expect(@abort).to.be.calledOn(xhr3)
 
-#       @server.queue[0].then (xhr) =>
-#         expect(onError).to.be.calledWith xhr, undefined, err
-
-#   context "#beforeRequest", ->
-#     beforeEach ->
-#       @fakeServer = @sandbox.useFakeServer()
-#       @server = $Cypress.Server.create(@fakeServer, {delay: 10, respond: true, beforeRequest: ->})
-
-#     it "invokes beforeRequest with matched route", (done) ->
-#       beforeRequest = @sandbox.spy(@server, "beforeRequest")
-#       @server.stub url: /users/, response: {}, method: "GET", status: 201
-#       @server.onRequest (xhr) ->
-#         expect(beforeRequest).to.be.calledWithMatch xhr, xhr.matchedRoute
 #         done()
-#       $.get("/users")
 
-#     it "invokes beforeRequest when 404", (done) ->
-#       beforeRequest = @sandbox.spy(@server, "beforeRequest")
-#       @server.onRequest (xhr) ->
-#         expect(beforeRequest).to.be.calledWithMatch xhr, undefined
-#         done()
-#       $.get("/users")
+#       _.invoke [xhr1, xhr2, xhr3], "send"
+
+#   context ".whitelist", ->
+#     it "ignores whitelisted routes even when matching stub"
+  context "#abort", ->
+    it "only aborts xhrs which have not already been aborted", ->
+      xhrAbort = 0
+      anyAbort = 0
+
+      @abort = @sandbox.spy(@window.XMLHttpRequest.prototype, "abort")
+      @server = $Cypress.Server.create({
+        xhrUrl: "__cypress/xhrs/"
+        onXhrAbort: -> xhrAbort += 1
+        onAnyAbort: -> anyAbort += 1
+      })
+      @server.bindTo(@window)
+
+      @xhr1 = new @window.XMLHttpRequest
+      @xhr1.open("GET", "/foo")
+
+      @xhr2 = new @window.XMLHttpRequest
+      @xhr2.open("GET", "/foo")
+
+      @xhr3 = new @window.XMLHttpRequest
+      @xhr3.open("GET", "/foo")
+
+      @xhr1.abort()
+
+      @server.abort()
+
+      expect(xhrAbort).to.eq(3)
+      expect(anyAbort).to.eq(3)
