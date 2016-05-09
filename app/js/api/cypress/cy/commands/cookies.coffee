@@ -1,6 +1,6 @@
 $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
 
-  COOKIE_PROPS = "name value path secure httpOnly expiry".split(" ")
+  COOKIE_PROPS = "name value path secure httpOnly expiry domain".split(" ")
 
   mergeDefaults = (obj) ->
     merge = (o) ->

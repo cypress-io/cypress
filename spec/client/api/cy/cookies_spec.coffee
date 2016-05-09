@@ -229,13 +229,13 @@ describe "$Cypress.Cy Cookie Commands", ->
 
     it "can change options", ->
       @Cypress.on "set:cookie", (data, cb) ->
-        expect(data).to.deep.eq({domain: "localhost", name: "foo", value: "bar", path: "/foo", secure: true, httpOnly: true, expiry: 987})
+        expect(data).to.deep.eq({domain: "brian.dev.local", name: "foo", value: "bar", path: "/foo", secure: true, httpOnly: true, expiry: 987})
         cb({response: {
-          name: "foo", value: "bar", domain: "localhost", path: "/foo", secure: true, httpOnly: true, expiry: 987
+          name: "foo", value: "bar", domain: "brian.dev.local", path: "/foo", secure: true, httpOnly: true, expiry: 987
         }})
 
-      @cy.setCookie("foo", "bar", {path: "/foo", secure: true, httpOnly: true, expiry: 987}).should("deep.eq", {
-        name: "foo", value: "bar", domain: "localhost", path: "/foo", secure: true, httpOnly: true, expiry: 987
+      @cy.setCookie("foo", "bar", {domain: "brian.dev.local", path: "/foo", secure: true, httpOnly: true, expiry: 987}).should("deep.eq", {
+        name: "foo", value: "bar", domain: "brian.dev.local", path: "/foo", secure: true, httpOnly: true, expiry: 987
       })
 
     describe "errors", ->
