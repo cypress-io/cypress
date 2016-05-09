@@ -40,6 +40,7 @@ describe "$Cypress.Cy Request Commands", ->
             method: "GET"
             gzip: true
             domain: "localhost"
+            cookies: true
           })
 
       it "accepts object with url, method, headers, body", ->
@@ -56,6 +57,7 @@ describe "$Cypress.Cy Request Commands", ->
             method: "POST"
             json: true
             gzip: true
+            cookies: true
             domain: "localhost"
             body: {name: "brian"}
             headers: {
@@ -69,6 +71,7 @@ describe "$Cypress.Cy Request Commands", ->
             url: "http://localhost:8080/status"
             method: "GET"
             gzip: true
+            cookies: true
             domain: "localhost"
           })
 
@@ -78,6 +81,7 @@ describe "$Cypress.Cy Request Commands", ->
             url: "http://localhost:1234/users/1"
             method: "DELETE"
             gzip: true
+            cookies: true
             domain: "localhost"
           })
 
@@ -89,6 +93,7 @@ describe "$Cypress.Cy Request Commands", ->
             body: {name: "brian"}
             json: true
             gzip: true
+            cookies: true
             domain: "localhost"
           })
 
@@ -100,6 +105,7 @@ describe "$Cypress.Cy Request Commands", ->
             body: {commits: true}
             json: true
             gzip: true
+            cookies: true
             domain: "localhost"
           })
 
@@ -110,6 +116,7 @@ describe "$Cypress.Cy Request Commands", ->
             method: "GET"
             body: "foo"
             gzip: true
+            cookies: true
             domain: "localhost"
           })
 
@@ -120,6 +127,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "https://www.foo.com/"
               method: "POST"
               gzip: true
+              cookies: true
               domain: "localhost"
             })
 
@@ -132,6 +140,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "https://www.foo.com/"
               method: "GET"
               gzip: true
+              cookies: true
               domain: "localhost"
             })
 
@@ -141,6 +150,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:1234/"
               method: "GET"
               gzip: true
+              cookies: true
               domain: "localhost"
             })
 
@@ -153,6 +163,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:8080/app/foo/bar?cat=1"
               method: "GET"
               gzip: true
+              cookies: true
               domain: "localhost"
             })
 
@@ -165,6 +176,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:1234/foobar?cat=1"
               method: "GET"
               gzip: true
+              cookies: true
               domain: "localhost"
             })
 
@@ -178,6 +190,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:8080/"
               method: "GET"
               gzip: false
+              cookies: true
               domain: "localhost"
             })
 
@@ -192,13 +205,13 @@ describe "$Cypress.Cy Request Commands", ->
               method: "GET"
               domain: "google.com"
               gzip: true
+              cookies: true
             })
 
       context "cookies", ->
         it "is true by default", ->
           @cy.request({
             url: "http://github.com/users"
-            cookies: true
           }).then ->
             @expectOptionsToBe({
               url: "http://github.com/users"
@@ -222,6 +235,20 @@ describe "$Cypress.Cy Request Commands", ->
               domain: "localhost"
             })
 
+        it "can set cookies to false", ->
+          @cy.request({
+            url: "http://github.com/users"
+            cookies: false
+          }).then ->
+            @expectOptionsToBe({
+              url: "http://github.com/users"
+              method: "GET"
+              cookies: false
+              gzip: true
+              domain: "localhost"
+              domain: "localhost"
+            })
+
       context "auth", ->
         it "sends auth when it is an object", ->
           @cy.request({
@@ -235,6 +262,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:8888/"
               method: "GET"
               gzip: true
+              cookies: true
               domain: "localhost"
               auth: {
                 user: "brian"
@@ -363,6 +391,7 @@ describe "$Cypress.Cy Request Commands", ->
               gzip: true
               domain: "localhost"
               json: true
+              cookies: true
             }
             Returned: {
               status: 201

@@ -3,7 +3,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
   isOkStatusCodeRe   = /^2/
   validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
 
-  optionalOpts = "body auth headers json cookies".split(" ")
+  optionalOpts = "body auth headers json".split(" ")
 
   defaults = {
     log: true
@@ -11,7 +11,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
     auth: null
     headers: null
     json: false
-    cookies: false
+    cookies: true
     gzip: true
     failOnStatus: true
     method: "GET"
@@ -65,7 +65,6 @@ $Cypress.register "Request", (Cypress, _, $) ->
           o.body   = args[2]
 
       _.defaults options, defaults, {
-        cookies: true
         domain: window.location.hostname
         timeout: Cypress.config("responseTimeout")
       }
