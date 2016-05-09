@@ -158,7 +158,29 @@ $Cypress.register "Request", (Cypress, _, $) ->
           options.response = response
 
           if err = response.__error
-            @throwErr(err, options._log)
+            body = if b = requestOpts.body
+              "Body: #{Cypress.Utils.stringify(b)}"
+            else
+              ""
+
+            headers = if h = requestOpts.headers
+              "Headers: #{Cypress.Utils.stringify(h)}"
+            else
+              ""
+
+            @throwErr("""
+            cy.request() failed:
+
+            The response from the remote server was:
+
+              > "#{err}"
+
+            The request parameters were:
+              Method: #{requestOpts.method}
+              URL: #{requestOpts.url}
+              #{body}
+              #{headers}
+            """, options._log)
 
           ## bomb if we should fail on non 2xx status code
           if options.failOnStatus and not isOkStatusCodeRe.test(response.status)

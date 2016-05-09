@@ -563,7 +563,7 @@ describe "$Cypress.Cy Request Commands", ->
 
         @cy.request("http://localhost:1234/foo")
 
-      it "throws when response has __error", (done) ->
+      it "logs once on error", (done) ->
         @responseIs({__error: "request failed"})
 
         logs = []
@@ -575,10 +575,91 @@ describe "$Cypress.Cy Request Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("request failed")
           done()
 
         @cy.request("http://localhost:1234/foo")
+
+      context "displays error", ->
+        beforeEach ->
+          @responseIs({__error: "request failed"})
+
+        it "displays method and url in error", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include("""
+            cy.request() failed:
+
+            The response from the remote server was:
+
+              > "request failed"
+
+            The request parameters were:
+              Method: GET
+              URL: http://localhost:1234/foo
+            """)
+
+            done()
+
+          @cy.request("http://localhost:1234/foo")
+
+        it "displays method and url and body in error", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include("""
+            cy.request() failed:
+
+            The response from the remote server was:
+
+              > "request failed"
+
+            The request parameters were:
+              Method: POST
+              URL: http://localhost:1234/foo
+              Body: {foo: foo, bar: Object{3}}
+            """)
+
+            done()
+
+          @cy.request("POST", "http://localhost:1234/foo", {
+            foo: "foo"
+            bar: {
+              a: "a"
+              b: "b"
+              c: "c"
+            }
+          })
+
+        it "displays method, url, body, and headers in error", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include("""
+            cy.request() failed:
+
+            The response from the remote server was:
+
+              > "request failed"
+
+            The request parameters were:
+              Method: POST
+              URL: http://localhost:1234/foo
+              Body: {foo: foo, bar: Object{3}}
+              Headers: {x-token: abc-123}
+            """)
+
+            done()
+
+          @cy.request({
+            method: "POST"
+            url: "http://localhost:1234/foo"
+            body: {
+              foo: "foo"
+              bar: {
+                a: "a"
+                b: "b"
+                c: "c"
+              }
+            }
+            headers: {
+              'x-token': 'abc-123'
+            }
+          })
 
       it "throws after timing out", (done) ->
         @responseIs({status: 200}, 250)
