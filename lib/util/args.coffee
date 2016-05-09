@@ -18,7 +18,7 @@ parseNestedValues = (vals) ->
   _(vals.split(","))
   .map (pair) ->
     pair.split("=")
-  .object()
+  .fromPairs()
   .mapValues(coerce)
   .value()
 

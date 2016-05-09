@@ -299,7 +299,7 @@ module.exports = {
   stripCookieParams: (cookies) ->
     stripHttpOnlyAndSecure = (cookie) =>
       ## trim out whitespace
-      parts = _.invoke cookie.split(";"), "trim"
+      parts = _.invokeMap cookie.split(";"), "trim"
 
       ## if Domain is included then we actually need to duplicate
       ## the cookie for both the domain and without the domain so

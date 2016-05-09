@@ -86,7 +86,7 @@ class Chromium
       ## notify Cypress API
 
       exit = ->
-        failures = _.where(tests, {state: "failed"}).length
+        failures = _.filter(tests, {state: "failed"}).length
 
         # takeScreenshot ->
         process.exit(failures)
