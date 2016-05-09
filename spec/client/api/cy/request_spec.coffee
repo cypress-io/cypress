@@ -39,6 +39,7 @@ describe "$Cypress.Cy Request Commands", ->
             url: "http://localhost:8000/foo"
             method: "GET"
             gzip: true
+            domain: "localhost"
           })
 
       it "accepts object with url, method, headers, body", ->
@@ -55,6 +56,7 @@ describe "$Cypress.Cy Request Commands", ->
             method: "POST"
             json: true
             gzip: true
+            domain: "localhost"
             body: {name: "brian"}
             headers: {
               "x-token": "abc123"
@@ -67,6 +69,7 @@ describe "$Cypress.Cy Request Commands", ->
             url: "http://localhost:8080/status"
             method: "GET"
             gzip: true
+            domain: "localhost"
           })
 
       it "accepts method + url", ->
@@ -75,6 +78,7 @@ describe "$Cypress.Cy Request Commands", ->
             url: "http://localhost:1234/users/1"
             method: "DELETE"
             gzip: true
+            domain: "localhost"
           })
 
       it "accepts method + url + body", ->
@@ -85,6 +89,7 @@ describe "$Cypress.Cy Request Commands", ->
             body: {name: "brian"}
             json: true
             gzip: true
+            domain: "localhost"
           })
 
       it "accepts url + body", ->
@@ -95,6 +100,7 @@ describe "$Cypress.Cy Request Commands", ->
             body: {commits: true}
             json: true
             gzip: true
+            domain: "localhost"
           })
 
       it "accepts url + string body", ->
@@ -104,6 +110,7 @@ describe "$Cypress.Cy Request Commands", ->
             method: "GET"
             body: "foo"
             gzip: true
+            domain: "localhost"
           })
 
       context "method normalization", ->
@@ -113,6 +120,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "https://www.foo.com/"
               method: "POST"
               gzip: true
+              domain: "localhost"
             })
 
       context "url normalization", ->
@@ -124,6 +132,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "https://www.foo.com/"
               method: "GET"
               gzip: true
+              domain: "localhost"
             })
 
         it "uses localhost urls", ->
@@ -132,6 +141,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:1234/"
               method: "GET"
               gzip: true
+              domain: "localhost"
             })
 
         it "prefixes with baseUrl when origin is empty", ->
@@ -143,6 +153,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:8080/app/foo/bar?cat=1"
               method: "GET"
               gzip: true
+              domain: "localhost"
             })
 
         it "prefixes with current origin over baseUrl", ->
@@ -154,6 +165,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:1234/foobar?cat=1"
               method: "GET"
               gzip: true
+              domain: "localhost"
             })
 
       context "gzip", ->
@@ -166,12 +178,24 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:8080/"
               method: "GET"
               gzip: false
+              domain: "localhost"
+            })
+
+      context "domain", ->
+        it "can change the domain", ->
+          @cy.request({
+            url: "http://localhost:8080"
+            domain: "google.com"
+          }).then ->
+            @expectOptionsToBe({
+              url: "http://localhost:8080/"
+              method: "GET"
+              domain: "google.com"
+              gzip: true
             })
 
       context "cookies", ->
-        it "gets all cookies when true", ->
-          @sandbox.stub(@Cypress.Cookies, "getAllCookies").returns({foo: "barbaz"})
-
+        it "is true by default", ->
           @cy.request({
             url: "http://github.com/users"
             cookies: true
@@ -179,8 +203,10 @@ describe "$Cypress.Cy Request Commands", ->
             @expectOptionsToBe({
               url: "http://github.com/users"
               method: "GET"
-              cookies: {foo: "barbaz"}
+              cookies: true
               gzip: true
+              domain: "localhost"
+              domain: "localhost"
             })
 
         it "sends cookies as is if object", ->
@@ -193,6 +219,7 @@ describe "$Cypress.Cy Request Commands", ->
               method: "GET"
               cookies: {foo: "bar"}
               gzip: true
+              domain: "localhost"
             })
 
       context "auth", ->
@@ -208,6 +235,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:8888/"
               method: "GET"
               gzip: true
+              domain: "localhost"
               auth: {
                 user: "brian"
                 pass: "password"
@@ -333,6 +361,7 @@ describe "$Cypress.Cy Request Commands", ->
               method: "POST"
               body: {first: "brian"}
               gzip: true
+              domain: "localhost"
               json: true
             }
             Returned: {

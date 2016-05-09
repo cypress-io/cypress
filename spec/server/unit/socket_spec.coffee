@@ -241,7 +241,7 @@ describe "lib/socket", ->
 
     context "on(request)", ->
       it "calls socket#onRequest", (done) ->
-        onRequest = @sandbox.stub(@socket, "onRequest").yieldsAsync("bar")
+        onRequest = @sandbox.stub(@socket, "onRequest").callsArgWithAsync(2, "bar")
 
         @client.emit "request", "foo", (resp) ->
           expect(resp).to.eq("bar")
@@ -249,41 +249,103 @@ describe "lib/socket", ->
           ## ensure onRequest was called with those same arguments
           ## therefore we have verified the socket binding and
           ## the call into onRequest with the proper arguments
-          expect(onRequest).to.be.calledWith("foo")
+          expect(onRequest.getCall(0).args[1]).to.eq("foo")
           done()
 
       it "returns the request object", ->
         nock("http://localhost:8080")
-          .get("/status.json")
-          .reply(200, {status: "ok"})
+        .matchHeader("Cookie", "foo=bar")
+        .get("/status.json")
+        .reply(200, {status: "ok"})
 
-        cb = @sandbox.spy()
+        cb1 = @sandbox.spy()
+        cb2 = @sandbox.spy()
 
         req = {
           url: "http://localhost:8080/status.json"
+          cookies: {foo: "bar"}
         }
 
-        @socket.onRequest(req, cb).then ->
-          expect(cb).to.be.calledWithMatch {
+        @socket.onRequest(cb1, req, cb2).then ->
+          expect(cb2).to.be.calledWithMatch {
             status: 200
             body: {status: "ok"}
           }
+
+      it "sends up cookies from automation(get:cookies)", (done) ->
+        @oar = @options.onAutomationRequest = @sandbox.stub()
+
+        @oar.withArgs("get:cookies", {domain: "localhost"}).resolves([
+          {name: "__cypress.initial", value: "true"}
+          {name: "foo", value: "bar"}
+          {name: "baz", value: "quux"}
+        ])
+
+        nock("http://localhost:8080")
+        .matchHeader("Cookie", "foo=bar; baz=quux")
+        .get("/status.json")
+        .reply(200, {status: "ok"})
+
+        req = {
+          url: "http://localhost:8080/status.json"
+          cookies: true
+          domain: "localhost"
+        }
+
+        @client.emit "request", req, (resp) ->
+          expect(resp.body).to.deep.eq({status: "ok"})
+          expect(resp.status).to.eq(200)
+          expect(resp.headers).to.deep.eq({
+            "content-type": "application/json"
+          })
+
+          done()
+
+      it "extracts domain from the url when domain is omitted", (done) ->
+        @oar = @options.onAutomationRequest = @sandbox.stub()
+
+        @oar.withArgs("get:cookies", {domain: "www.google.com"}).resolves([
+          {name: "__cypress.initial", value: "true"}
+          {name: "foo", value: "bar"}
+          {name: "baz", value: "quux"}
+        ])
+
+        nock("http://www.google.com:8080")
+        .matchHeader("Cookie", "foo=bar; baz=quux")
+        .get("/status.json")
+        .reply(200, {status: "ok"})
+
+        req = {
+          url: "http://www.google.com:8080/status.json"
+          cookies: true
+        }
+
+        @client.emit "request", req, (resp) ->
+          expect(resp.body).to.deep.eq({status: "ok"})
+          expect(resp.status).to.eq(200)
+          expect(resp.headers).to.deep.eq({
+            "content-type": "application/json"
+          })
+
+          done()
 
       it "errors when request fails", ->
         nock.enableNetConnect()
 
         nock("http://localhost:8080")
-          .get("/status.json")
-          .reply(200, {status: "ok"})
+        .get("/status.json")
+        .reply(200, {status: "ok"})
 
-        cb = @sandbox.spy()
+        cb1 = @sandbox.spy()
+        cb2 = @sandbox.spy()
 
         req = {
           url: "http://localhost:1111/foo"
+          cookies: false
         }
 
-        @socket.onRequest(req, cb).then ->
-          obj = cb.getCall(0).args[0]
+        @socket.onRequest(cb1, req, cb2).then ->
+          obj = cb2.getCall(0).args[0]
           expect(obj).to.have.property("__error", "Error: connect ECONNREFUSED 127.0.0.1:1111")
 
   context "unit", ->

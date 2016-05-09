@@ -45,6 +45,9 @@ describe "lib/request", ->
       })
 
   context "#send", ->
+    beforeEach ->
+      @fn = @sandbox.stub()
+
     it "sets strictSSL=false", ->
       rp = require("request-promise")
 
@@ -55,7 +58,7 @@ describe "lib/request", ->
           "Content-Type": "text/html"
         }
 
-      Request.send({url: "http://www.github.com/foo"}).then ->
+      Request.send(@fn, {url: "http://www.github.com/foo"}).then ->
         expect(init).to.be.calledWithMatch({strictSSL: false})
 
     it "sets simple=false", (done) ->
@@ -65,7 +68,7 @@ describe "lib/request", ->
 
       ## should not bomb on 500
       ## because simple = false
-      Request.send({url: "http://www.github.com/foo"}).then -> done()
+      Request.send(@fn, {url: "http://www.github.com/foo"}).then -> done()
 
     it "sets resolveWithFullResponse=true", ->
       nock("http://www.github.com")
@@ -74,7 +77,7 @@ describe "lib/request", ->
           "Content-Type": "text/html"
         }
 
-      Request.send({url: "http://www.github.com/foo"}).then (resp) ->
+      Request.send(@fn, {url: "http://www.github.com/foo"}).then (resp) ->
         expect(resp).to.have.keys("status", "body", "headers", "duration")
 
         expect(resp.status).to.eq(200)
@@ -90,10 +93,65 @@ describe "lib/request", ->
         })
         .reply(200, {id: 1})
 
-      Request.send({
+      Request.send(@fn, {
         url: "http://localhost:8080/users"
         method: "POST"
         cookies: {foo: "bar", baz: "quux"}
+        json: true
+        body: {
+          first: "brian"
+          last: "mann"
+        }
+      }).then (resp) ->
+        expect(resp.status).to.eq(200)
+        expect(resp.body.id).to.eq(1)
+
+    it "retrieves cookies from automation when cookies true", ->
+      nock("http://localhost:8080")
+      .matchHeader("Cookie", "foo=bar; baz=quux")
+      .post("/users", {
+        first: "brian"
+        last: "mann"
+      })
+      .reply(200, {id: 1})
+
+      @fn.withArgs("get:cookies", {domain: "localhost"}).resolves([
+        {name: "foo", value: "bar"}
+        {name: "baz", value: "quux"}
+      ])
+
+      Request.send(@fn, {
+        url: "http://localhost:8080/users"
+        method: "POST"
+        cookies: true
+        domain: "localhost"
+        json: true
+        body: {
+          first: "brian"
+          last: "mann"
+        }
+      }).then (resp) ->
+        expect(resp.status).to.eq(200)
+        expect(resp.body.id).to.eq(1)
+
+    it "extracts domain when cookies true and no domain in options", ->
+      nock("http://github.com:8080")
+      .matchHeader("Cookie", "foo=bar; baz=quux")
+      .post("/users", {
+        first: "brian"
+        last: "mann"
+      })
+      .reply(200, {id: 1})
+
+      @fn.withArgs("get:cookies", {domain: "github.com"}).resolves([
+        {name: "foo", value: "bar"}
+        {name: "baz", value: "quux"}
+      ])
+
+      Request.send(@fn, {
+        url: "http://github.com:8080/users"
+        method: "POST"
+        cookies: true
         json: true
         body: {
           first: "brian"
@@ -110,7 +168,7 @@ describe "lib/request", ->
           "Content-Type": "application/json"
         })
 
-      Request.send({
+      Request.send(@fn, {
         url: "http://localhost:8080/status.json"
       }).then (resp) ->
         expect(resp.body).to.deep.eq({status: "ok"})
@@ -122,7 +180,7 @@ describe "lib/request", ->
           "Content-Type": "application/json"
         })
 
-      Request.send({
+      Request.send(@fn, {
         url: "http://localhost:8080/status.json"
       }).then (resp) ->
         expect(resp.body).to.eq("{bad: 'json'}")
@@ -134,7 +192,7 @@ describe "lib/request", ->
           "Content-Type": "text/plain"
         })
 
-      Request.send({
+      Request.send(@fn, {
         url: "http://localhost:8080/foo"
       }).then (resp) ->
         expect(resp.duration).to.be.a("Number")

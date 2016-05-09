@@ -83,8 +83,8 @@
         @listenTo @Cypress, "fixture", (fixture, cb) =>
           @socket.emit "fixture", fixture, cb
 
-        @listenTo @Cypress, "request", (request, cb) =>
-          @socket.emit "request", request, cb
+        @listenTo @Cypress, "request", (options, cb) =>
+          @socket.emit "request", options, cb
 
         @listenTo @Cypress, "history:entries", (cb) =>
           @socket.emit "history:entries", cb

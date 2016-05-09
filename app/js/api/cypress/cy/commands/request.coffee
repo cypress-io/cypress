@@ -66,6 +66,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
 
       _.defaults options, defaults, {
         cookies: true
+        domain: window.location.hostname
         timeout: Cypress.config("responseTimeout")
       }
 
@@ -120,7 +121,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
 
       ## clone the requestOpts to prevent
       ## anything from mutating it now
-      requestOpts = _(options).pick("method", "url", "body", "headers", "cookies", "json", "auth", "gzip")
+      requestOpts = _(options).pick("method", "url", "body", "headers", "cookies", "json", "auth", "gzip", "domain")
 
       if options.log
         options._log = Cypress.Log.command({

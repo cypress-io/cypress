@@ -59,8 +59,8 @@ class Socket
     })
     .then(cb)
 
-  onRequest: (options, cb) ->
-    Request.send(options)
+  onRequest: (automation, options, cb) ->
+    Request.send(automation, options)
     .then(cb)
     .catch (err) ->
       cb({__error: err.message})
@@ -125,6 +125,13 @@ class Socket
           delete messages[id]
           message(resp)
 
+      automationRequest = (message, data) =>
+        automate = options.onAutomationRequest ? (message, data) =>
+          @onAutomation(messages, message, data)
+
+        automation(config.namespace, socketIoCookie)
+        .request(message, data, automate)
+
       socket.on "automation:connected", =>
         return if socket.inAutomationRoom
 
@@ -134,11 +141,7 @@ class Socket
         socket.on "automation:response", respond
 
       socket.on "automation:request", (message, data, cb) =>
-        automate = options.onAutomationRequest ? (message, data) =>
-          @onAutomation(messages, message, data)
-
-        automation(config.namespace, socketIoCookie)
-        .request(message, data, automate)
+        automationRequest(message, data)
         .then (resp) ->
           cb({response: resp})
         .catch (err) ->
@@ -178,8 +181,8 @@ class Socket
       socket.on "watch:test:file", (filePath, cb) =>
         @watchTestFileByPath(config, filePath, watchers, cb)
 
-      socket.on "request", =>
-        @onRequest.apply(@, arguments)
+      socket.on "request", (options, cb) =>
+        @onRequest(automationRequest, options, cb)
 
       socket.on "fixture", (fixturePath, cb) =>
         @onFixture(config, fixturePath, cb)
