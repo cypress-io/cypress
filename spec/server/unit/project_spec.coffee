@@ -80,10 +80,10 @@ describe "lib/project", ->
         expect(opts.type).to.eq("opened")
 
     it "calls #watchSettingsAndStartWebsockets with options.changeEvents + config", ->
-      opts = {changeEvents: false}
+      opts = {changeEvents: false, onAutomationRequest: ->}
       @project.cfg = {}
       @project.open(opts).then =>
-        expect(@project.watchSettingsAndStartWebsockets).to.be.calledWith(false, @project.cfg)
+        expect(@project.watchSettingsAndStartWebsockets).to.be.calledWith(false, opts.onAutomationRequest, @project.cfg)
 
     it "calls #scaffold with server config", ->
       @project.open().then =>
@@ -313,7 +313,9 @@ describe "lib/project", ->
       @sandbox.stub(@project, "watchSettings")
 
     it "calls server.startWebsockets with watchers + config", ->
-      @project.watchSettingsAndStartWebsockets({}, 2)
+      fn = ->
+
+      @project.watchSettingsAndStartWebsockets({}, fn, 2)
 
       expect(@project.server.startWebsockets).to.be.calledWith(@project.watchers, 2)
 
@@ -322,11 +324,20 @@ describe "lib/project", ->
 
       @project.server.startWebsockets.yieldsTo("onIsNewProject")
 
-      @project.watchSettingsAndStartWebsockets({}, {
+      @project.watchSettingsAndStartWebsockets({}, (->), {
         integrationFolder: "foo/bar/baz"
       })
 
       expect(@project.determineIsNewProject).to.be.calledWith("foo/bar/baz")
+
+    it "passes onAutomationRequest callback", ->
+      fn = @sandbox.stub()
+
+      @project.server.startWebsockets.yieldsTo("onAutomationRequest")
+
+      @project.watchSettingsAndStartWebsockets({}, fn, {})
+
+      expect(fn).to.be.calledOnce
 
   context "#getProjectId", ->
     afterEach ->

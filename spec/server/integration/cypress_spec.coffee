@@ -25,6 +25,7 @@ cypress  = require("#{root}lib/cypress")
 Project  = require("#{root}lib/project")
 Server   = require("#{root}lib/server")
 Reporter = require("#{root}lib/reporter")
+launcher = require("#{root}lib/launcher")
 
 describe "lib/cypress", ->
   beforeEach ->
@@ -614,6 +615,8 @@ describe "lib/cypress", ->
         })
 
       @sandbox.stub(os, "platform").returns("linux")
+      ## TODO: might need to change this to a different return
+      @sandbox.stub(launcher, "getBrowsers").returns([])
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(ci, "getBranch").resolves("bem/ci")
       @sandbox.stub(ci, "getAuthor").resolves("brian")
@@ -715,7 +718,7 @@ describe "lib/cypress", ->
 
     it "logs package.json and exits", ->
       cypress.start(["--return-pkg"]).then =>
-        expect(console.log).to.be.calledWithMatch('{"name":"Cypress"')
+        expect(console.log).to.be.calledWithMatch('{"name":"cypress"')
         @expectExitWith(0)
 
   context "--version", ->

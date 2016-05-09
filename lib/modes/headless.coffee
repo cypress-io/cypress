@@ -74,7 +74,7 @@ module.exports = {
       report:       true
       isHeadless:   true
       ## TODO: get session into automation.perform
-      onAutomationRequest: automation.perform.bind(automation)
+      onAutomationRequest: automation.perform
 
     })
     .catch {portInUse: true}, (err) ->

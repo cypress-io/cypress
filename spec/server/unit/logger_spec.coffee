@@ -4,6 +4,7 @@ _             = require("lodash")
 path          = require("path")
 winston       = require("winston")
 Promise       = require("bluebird")
+appData       = require("#{root}lib/util/app_data")
 konfig        = require("#{root}lib/konfig")
 logger        = require("#{root}lib/logger")
 exception     = require("#{root}lib/exception")
@@ -16,7 +17,7 @@ describe "lib/logger", ->
     logger.removeAllListeners("logging")
 
   after ->
-    fs.removeAsync(konfig("log_path"))
+    appData.remove()
 
   it "has 1 transport", ->
     expect(logger.transports).to.have.keys("all")

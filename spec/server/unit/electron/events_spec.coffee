@@ -9,6 +9,7 @@ Project  = require("#{root}../lib/project")
 Updater  = require("#{root}../lib/updater")
 user     = require("#{root}../lib/user")
 errors   = require("#{root}../lib/errors")
+launcher = require("#{root}../lib/launcher")
 logs     = require("#{root}../lib/electron/handlers/logs")
 events   = require("#{root}../lib/electron/handlers/events")
 dialog   = require("#{root}../lib/electron/handlers/dialog")
@@ -349,6 +350,7 @@ describe "lib/electron/handlers/events", ->
 
     describe "open:project", ->
       beforeEach ->
+        @sandbox.stub(launcher, "getBrowsers").resolves([])
         @sandbox.stub(Project.prototype, "close").resolves()
 
       afterEach ->
@@ -357,7 +359,11 @@ describe "lib/electron/handlers/events", ->
         project.close()
 
       it "open project + returns config", ->
-        projectInstance = {getConfig: -> {some: "config"}}
+        projectInstance = {
+          getConfig: -> {some: "config"}
+          setBrowsers: @sandbox.stub().resolves([])
+        }
+
         @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true, sync: true}).resolves(projectInstance)
 
         @handleEvent("open:project", "path/to/project")

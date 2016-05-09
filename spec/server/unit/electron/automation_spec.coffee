@@ -16,8 +16,8 @@ describe "lib/electron/handlers/automation", ->
         @sandbox.stub(cookies, "get")
         .withArgs(@cookies, {domain: "localhost"})
         .resolves([
-          {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expiry: 123, a: "a", b: "c"}
-          {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456, c: "a", d: "c"}
+          {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expiry: 123}
+          {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456}
         ])
 
       it "returns all cookies", ->
@@ -53,15 +53,15 @@ describe "lib/electron/handlers/automation", ->
         @sandbox.stub(cookies, "set")
         .withArgs(@cookies, {domain: "google.com", name: "session", value: "key"})
         .resolves(
-          {name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false, a: "a", b: "b"}
+          {name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false}
         )
         .withArgs(@cookies, {name: "foo", value: "bar"})
         .rejects(new Error("some error"))
 
-      it "resolves with the cookie details", ->
+      it "resolves with the cookie props", ->
         automation.perform("set:cookie", {domain: "google.com", name: "session", value: "key"})
         .then (resp) ->
-          expect(resp).to.deep.eq({name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false})
+          expect(resp).to.deep.eq({domain: "google.com", name: "session", value: "key"})
 
       it "rejects with error", ->
         automation.perform("set:cookie", {name: "foo", value: "bar"})
@@ -75,12 +75,12 @@ describe "lib/electron/handlers/automation", ->
         @sandbox.stub(cookies, "get")
         .withArgs(@cookies, {domain: "google.com"})
         .resolves([
-          {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expiry: 123, a: "a", b: "c"}
-          {name: "foo",     value: "bar", path: "/foo", domain: "google.com", secure: false, httpOnly: false, expiry: 456, c: "a", d: "c"}
+          {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expiry: 123}
+          {name: "foo",     value: "bar", path: "/foo", domain: "google.com", secure: false, httpOnly: false, expiry: 456}
         ])
         .withArgs(@cookies, {domain: "cdn.github.com"})
         .resolves([
-          {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expiry: 123, a: "a", b: "c"}
+          {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expiry: 123}
         ])
 
         @sandbox.stub(cookies, "remove")
@@ -115,13 +115,13 @@ describe "lib/electron/handlers/automation", ->
         @sandbox.stub(cookies, "get")
         .withArgs(@cookies, {domain: "google.com", name: "session"})
         .resolves([
-          {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expiry: 123, a: "a", b: "c"}
+          {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expiry: 123}
         ])
         .withArgs(@cookies, {domain: "google.com", name: "doesNotExist"})
         .resolves([])
         .withArgs(@cookies, {domain: "cdn.github.com", name: "shouldThrow"})
         .resolves([
-          {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expiry: 123, a: "a", b: "c"}
+          {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expiry: 123}
         ])
 
         @sandbox.stub(cookies, "remove")

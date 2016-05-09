@@ -82,11 +82,11 @@ describe "lib/socket", ->
           @sandbox.stub(chrome.cookies, "getAll")
           .withArgs({domain: "localhost"})
           .yieldsAsync([
-            {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expiry: 123, a: "a", b: "c"}
-            {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456, c: "a", d: "c"}
-            {name: "__cypress.foo", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456, c: "a", d: "c"}
-            {name: "__cypress.bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456, c: "a", d: "c"}
-            {name: "__socket.io", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456, c: "a", d: "c"}
+            {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expirationDate: 123, a: "a", b: "c"}
+            {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456, c: "a", d: "c"}
+            {name: "__cypress.foo", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456, c: "a", d: "c"}
+            {name: "__cypress.bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456, c: "a", d: "c"}
+            {name: "__socket.io", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456, c: "a", d: "c"}
           ])
 
           @client.emit "automation:request", "get:cookies", {domain: "localhost"}, (resp) ->
@@ -102,7 +102,7 @@ describe "lib/socket", ->
           @sandbox.stub(chrome.cookies, "getAll")
           .withArgs({name: "session"})
           .yieldsAsync([
-            {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expiry: 123, a: "a", b: "c"}
+            {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expirationDate: 123, a: "a", b: "c"}
           ])
 
           @sandbox.stub(chrome.cookies, "remove")

@@ -185,20 +185,22 @@ describe "lib/updater", ->
     describe "#runInstaller", ->
       beforeEach ->
         @sandbox.stub(@updater.client, "runInstaller")
-        @sandbox.stub(@updater,        "copyCyDataTo").resolves()
+        # @sandbox.stub(@updater,        "copyCyDataTo").resolves()
 
-      it "calls copyCyDataTo and passes newAppPath", ->
-        @updater.runInstaller("/Users/bmann/newApp").then =>
-          expect(@updater.copyCyDataTo).to.be.calledWith("/Users/bmann/newApp")
+      ## TODO: no longer does this!
+      # it "calls copyCyDataTo and passes newAppPath", ->
+      #   @updater.runInstaller("/Users/bmann/newApp").then =>
+      #     expect(@updater.copyCyDataTo).to.be.calledWith("/Users/bmann/newApp")
 
       it "calls process.exit", ->
-        @updater.runInstaller("/Users/bmann/newApp").then =>
-          expect(process.exit).to.be.calledOnce
+        @updater.runInstaller("/Users/bmann/newApp")
+        expect(process.exit).to.be.calledOnce
 
       it "calls runInstaller on the client", ->
         c = @updater.client
-        @updater.runInstaller("/Users/bmann/newApp").then =>
-          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating"], {})
+        @updater.runInstaller("/Users/bmann/newApp")
+
+        expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating"], {})
 
       ## we no longer pass up additional App argv
       ## other than from debug i'm not sure why we
@@ -207,14 +209,14 @@ describe "lib/updater", ->
       ## every existing argument
       it "does not pass along additional App argv", ->
         c = @updater.client
-        @updater.runInstaller("/Users/bmann/newApp").then =>
-          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating"], {})
+        @updater.runInstaller("/Users/bmann/newApp")
+        expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating"], {})
 
       it "passes along App.coords if they exist", ->
         Updater.setCoords {x: 600, y: 1200}
         c = @updater.client
-        @updater.runInstaller("/Users/bmann/newApp").then =>
-          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating", "--coords=600x1200"], {})
+        @updater.runInstaller("/Users/bmann/newApp")
+        expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating", "--coords=600x1200"], {})
 
     describe "#copyCyDataTo", ->
       beforeEach ->
@@ -226,22 +228,23 @@ describe "lib/updater", ->
         fs.removeAsync("new").then ->
           fs.removeAsync(".cy/foo")
 
-      it "copies .cy folder to new app path", (done) ->
-        @updater.copyCyDataTo("new/app/path").then ->
-          expect(fs.statSync("new/app/path/Contents/Resources/app/.cy").isDirectory()).to.be.true
-          expect(fs.statSync("new/app/path/Contents/Resources/app/.cy/foo/bar.txt").isFile()).to.be.true
-          fs.readJsonAsync("new/app/path/Contents/Resources/app/.cy/cache").then (obj) ->
-            expect(obj).to.deep.eq {foo: "bar"}
+      ## TODO: update this to always rm -rf the .cy folder
+      # it "copies .cy folder to new app path", (done) ->
+      #   @updater.copyCyDataTo("new/app/path").then ->
+      #     expect(fs.statSync("new/app/path/Contents/Resources/app/.cy").isDirectory()).to.be.true
+      #     expect(fs.statSync("new/app/path/Contents/Resources/app/.cy/foo/bar.txt").isFile()).to.be.true
+      #     fs.readJsonAsync("new/app/path/Contents/Resources/app/.cy/cache").then (obj) ->
+      #       expect(obj).to.deep.eq {foo: "bar"}
 
-          cmd = if process.platform is "darwin" then "-f %Mp%Lp" else "-c %a"
+      #     cmd = if process.platform is "darwin" then "-f %Mp%Lp" else "-c %a"
 
-          cmd = "stat #{cmd} new/app/path/Contents/Resources/app/.cy/foo/bar.txt"
+      #     cmd = "stat #{cmd} new/app/path/Contents/Resources/app/.cy/foo/bar.txt"
 
-          ## make sure we have 0755 permissions!
-          require("child_process").exec cmd, (err, stdout, stderr) ->
-            done(err) if err
-            expect(stdout).to.match /755/
-            done()
+      #     ## make sure we have 0755 permissions!
+      #     require("child_process").exec cmd, (err, stdout, stderr) ->
+      #       done(err) if err
+      #       expect(stdout).to.match /755/
+      #       done()
 
     describe "#copyTmpToAppPath", ->
       beforeEach ->

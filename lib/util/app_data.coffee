@@ -32,4 +32,7 @@ module.exports = {
   path: (paths...) ->
     path.join(data, name, "cy", process.env.CYPRESS_ENV, paths...)
 
+  remove: ->
+    fs.removeAsync(@path())
+
 }
