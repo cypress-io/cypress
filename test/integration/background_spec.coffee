@@ -55,15 +55,15 @@ describe "app/background", ->
       @sandbox.stub(chrome.cookies, "getAll")
       .withArgs({domain: "localhost"})
       .yieldsAsync([
-        {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expiry: 123, a: "a", b: "c"}
-        {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456, c: "a", d: "c"}
+        {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expirationDate: 123}
+        {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456}
       ])
 
       background.getAll({domain: "localhost"})
       .then (cookies) ->
         expect(cookies).to.deep.eq([
-          {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expiry: 123}
-          {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456}
+          {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expirationDate: 123}
+          {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456}
         ])
 
   context "integration", ->
@@ -92,7 +92,7 @@ describe "app/background", ->
         @sandbox.stub(chrome.cookies, "getAll")
         .withArgs({domain: "google.com", name: "session"})
         .yieldsAsync([
-          {name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expiry: 123}
+          {name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expirationDate: 123}
         ])
         .withArgs({domain: "google.com", name: "doesNotExist"})
         .yieldsAsync([])
@@ -100,7 +100,7 @@ describe "app/background", ->
       it "returns a specific cookie by name", (done) ->
         @socket.on "automation:response", (id, obj = {}) ->
           expect(id).to.eq(123)
-          expect(obj.response).to.deep.eq({name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expiry: 123})
+          expect(obj.response).to.deep.eq({name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expirationDate: 123})
           done()
 
         @server.emit("automation:request", 123, "get:cookie", {domain: "google.com", name: "session"})
@@ -120,7 +120,7 @@ describe "app/background", ->
         @sandbox.stub(chrome.cookies, "set")
         .withArgs({domain: "google.com", name: "session", value: "key", path: "/", secure: false, url: "http://google.com/"})
         .yieldsAsync(
-          {name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false, a: "a", b: "b"}
+          {name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false}
         )
         .withArgs({name: "foo", value: "bar", secure: true, domain: "localhost", path: "/foo", url: "https://localhost/foo"})
         .yieldsAsync(null)
@@ -151,12 +151,12 @@ describe "app/background", ->
         @sandbox.stub(chrome.cookies, "getAll")
         .withArgs({domain: "google.com"})
         .yieldsAsync([
-          {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expiry: 123, a: "a", b: "c"}
-          {name: "foo",     value: "bar", path: "/foo", domain: "google.com", secure: false, httpOnly: false, expiry: 456, c: "a", d: "c"}
+          {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expirationDate: 123}
+          {name: "foo",     value: "bar", path: "/foo", domain: "google.com", secure: false, httpOnly: false, expirationDate: 456}
         ])
         .withArgs({domain: "cdn.github.com"})
         .yieldsAsync([
-          {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expiry: 123, a: "a", b: "c"}
+          {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expirationDate: 123}
         ])
 
         @sandbox.stub(chrome.cookies, "remove")
@@ -178,8 +178,8 @@ describe "app/background", ->
         @socket.on "automation:response", (id, obj = {}) ->
           expect(id).to.eq(123)
           expect(obj.response).to.deep.eq([
-            {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expiry: 123}
-            {name: "foo",     value: "bar", path: "/foo", domain: "google.com", secure: false, httpOnly: false, expiry: 456}
+            {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expirationDate: 123}
+            {name: "foo",     value: "bar", path: "/foo", domain: "google.com", secure: false, httpOnly: false, expirationDate: 456}
           ])
           done()
 
@@ -200,13 +200,13 @@ describe "app/background", ->
         @sandbox.stub(chrome.cookies, "getAll")
         .withArgs({domain: "google.com", name: "session"})
         .yieldsAsync([
-          {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expiry: 123, a: "a", b: "c"}
+          {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expirationDate: 123}
         ])
         .withArgs({domain: "google.com", name: "doesNotExist"})
         .yieldsAsync([])
         .withArgs({domain: "cdn.github.com", name: "shouldThrow"})
         .yieldsAsync([
-          {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expiry: 123, a: "a", b: "c"}
+          {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expirationDate: 123}
         ])
 
         @sandbox.stub(chrome.cookies, "remove")
@@ -224,7 +224,7 @@ describe "app/background", ->
         @socket.on "automation:response", (id, obj = {}) ->
           expect(id).to.eq(123)
           expect(obj.response).to.deep.eq(
-            {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expiry: 123}
+            {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expirationDate: 123}
           )
           done()
 
