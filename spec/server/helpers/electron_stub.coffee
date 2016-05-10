@@ -17,6 +17,10 @@ module.exports = {
       appendSwitch: ->
     }
   }
+  systemPreferences: {
+    isDarkMode: ->
+    subscribeNotification: ->
+  }
   Tray: -> {
     on: ->
     setToolTip: ->

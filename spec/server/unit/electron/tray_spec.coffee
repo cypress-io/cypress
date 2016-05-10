@@ -5,46 +5,79 @@ electron = require("electron")
 Tray     = require("#{root}../lib/electron/handlers/tray")
 
 describe "electron/tray", ->
-  context ".setImage", ->
-    beforeEach ->
-      Tray.display()
+  beforeEach ->
+    @spyOnTray = (method)=>
+      electronTray = @tray.getTray()
+      @sandbox.stub(electronTray, method)
+      return electronTray
 
-      @tray = Tray.getTray()
+    @tray = new Tray()
 
-      @sandbox.stub(@tray, "on")
-      @sandbox.stub(@tray, "setImage")
-      @sandbox.stub(@tray, "setPressedImage")
-      @sandbox.stub(@tray, "setToolTip")
+  context ".setState", ->
+    it "is noop without being displayed", ->
+      @electronTray = @spyOnTray("setImage")
+      @tray.setState("running")
+      expect(@electronTray.setImage).not.to.be.called
 
-    it "is noop without a tray", ->
-      Tray.resetTray()
+    it "throws when not a valid state", ->
+      @tray.display()
+      fn = =>
+        @tray.setState("nope")
 
-      expect(Tray.setImage("asdf")).to.be.undefined
+      expect(fn).to.throw("Did not receive a valid tray icon state. Got: 'nope'")
 
-    it "throws when not a valid color", ->
-      fn = ->
-        Tray.setImage("green")
+    it "calls tray.setImage with blue when running", ->
+      @electronTray = @spyOnTray("setImage")
+      @tray.display()
+      @tray.setState("running")
 
-      expect(fn).to.throw("Did not receive a valid tray icon color. Got: 'green'")
+      expect(@electronTray.setImage).to.be.calledWith(@tray.getColors().blue)
 
-    it "calls tray.setImage with blue", ->
-      Tray.setImage("blue")
+    it "calls tray.setPressedImage with red when error", ->
+      @electronTray = @spyOnTray("setImage")
+      @tray.display()
+      @tray.setState("error")
 
-      expect(@tray.setImage).to.be.calledWith(Tray.getColors().blue)
-
-    it "calls tray.setPressedImage with white", ->
-      Tray.setImage("white", {pressed: true})
-
-      expect(@tray.setPressedImage).to.be.calledWith(Tray.getColors().white)
+      expect(@electronTray.setImage).to.be.calledWith(@tray.getColors().red)
 
   context ".display", ->
     beforeEach ->
-      @sandbox.stub(Tray, "setImage")
-      Tray.display()
-      @tray = Tray.getTray()
+      @sn = @sandbox.stub(electron.systemPreferences, "subscribeNotification")
+      .withArgs("AppleInterfaceThemeChangedNotification")
 
-    it "sets black image", ->
-      expect(Tray.setImage).to.be.calledWith("black")
+    describe "when in either mode", ->
+      beforeEach ->
+        @electronTray = @spyOnTray("setPressedImage")
+        @spyOnTray("setToolTip")
+        @tray.display()
 
-    it "sets white pressed image", ->
-      expect(Tray.setImage).to.be.calledWith("white", {pressed: true})
+      it "sets white pressed image", ->
+        expect(@electronTray.setPressedImage).to.be.calledWith(@tray.getColors().white)
+
+      it "sets the tooltip", ->
+        expect(@electronTray.setToolTip).to.be.calledWith("Cypress")
+
+    describe "when in light mode", ->
+      beforeEach ->
+        @electronTray = @spyOnTray("setImage")
+        @tray.display()
+
+      it "sets black as default image", ->
+        expect(@electronTray.setImage).to.be.calledWith(@tray.getColors().black)
+
+      describe "then changes to dark mode", ->
+        beforeEach ->
+          @sandbox.stub(electron.systemPreferences, "isDarkMode").returns(true)
+          @sn.getCall(0).args[1]()
+
+        it "switches default image to white", ->
+          expect(@electronTray.setImage).to.be.calledWithExactly(@tray.getColors().white)
+
+    describe "when in dark mode", ->
+      beforeEach ->
+        @electronTray = @spyOnTray("setImage")
+        @sandbox.stub(electron.systemPreferences, "isDarkMode").returns(true)
+        @tray.display()
+
+      it "sets white as default image", ->
+        expect(@electronTray.setImage).to.be.calledWithExactly(@tray.getColors().white)

@@ -759,7 +759,7 @@ describe "lib/cypress", ->
       @sandbox.stub(headed, "notify").resolves()
       @sandbox.stub(Renderer, "create").resolves(@win)
       @sandbox.spy(Events, "start")
-      @sandbox.stub(Tray, "display")
+      @sandbox.stub(Tray.prototype, "display")
       @sandbox.stub(electron.ipcMain, "on")
 
     afterEach ->

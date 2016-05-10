@@ -1,9 +1,8 @@
 _            = require("lodash")
 cypressIcons = require("@cypress/core-icons")
 nativeImage  = require("electron").nativeImage
-Tray         = require("electron").Tray
-
-tray = null
+systemPrefs  = require("electron").systemPreferences
+ElectronTray = require("electron").Tray
 
 ## the primary (black) icon can be a template
 ## but the white varient (setPressedImage) CANNOT be a template
@@ -14,31 +13,32 @@ colors = {
   white: nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal-inverse.png"))
 }
 
-module.exports = {
-  setImage: (color, options = {}) ->
-    return if not tray
+states = {
+  default: -> if systemPrefs.isDarkMode() then colors.white else colors.black
+  running: -> colors.blue
+  error: -> colors.red
+}
 
-    if not c = colors[color]
-      throw new Error("Did not receive a valid tray icon color. Got: '#{color}'")
-
-    if options.pressed
-      tray.setPressedImage(c)
-    else
-      tray.setImage(c)
+module.exports = class Tray
+  constructor: ->
+    @currentState = 'default'
+    @tray = new ElectronTray(null)
 
   getColors: -> colors
 
-  getTray: -> tray
+  getTray: -> @tray
 
-  resetTray: -> tray = null
+  setState: (state = @currentState) ->
+    return if not @displayed
 
-  ## TODO: restructure this
-  ## to return the tray instance
-  ## so it can then be passed around
-  ## to methods like 'display' or
-  ## setImage instead of acting like
-  ## a singleton
-  display: (options = {}) ->
+    if not getColor = states[state]
+      throw new Error("Did not receive a valid tray icon state. Got: '#{state}'")
+
+    @currentState = state
+    @tray.setImage(getColor())
+
+  display: (options = {})->
+    @displayed = true
     _.defaults options,
       onDrop: ->
       onClick: ->
@@ -46,22 +46,18 @@ module.exports = {
       onDragEnter: ->
       onDragLeave: ->
 
-    tray = new Tray(null)
-
-    tray.on "click",        options.onClick
-    tray.on "right-click",  options.onRightClick
-    tray.on "drop",         options.onDrop
-    tray.on "drag-enter",   options.onDragEnter
-    tray.on "drag-leave",   options.onDragLeave
-
+    @tray.on "click",        options.onClick
+    @tray.on "right-click",  options.onRightClick
+    @tray.on "drop",         options.onDrop
+    @tray.on "drag-enter",   options.onDragEnter
+    @tray.on "drag-leave",   options.onDragLeave
     ## normalize the double click event
     ## to do the same thing as regular
     ## click event
-    tray.on "double-click", options.onClick
+    @tray.on "double-click", options.onClick
 
-    @setImage("black")
-    @setImage("white", {pressed: true})
-    tray.setToolTip("Cypress")
-
-    return tray
-}
+    ## subscribe to pref change events
+    systemPrefs.subscribeNotification "AppleInterfaceThemeChangedNotification", => @setState()
+    @tray.setPressedImage(colors.white)
+    @setState()
+    @tray.setToolTip("Cypress")

@@ -97,6 +97,8 @@ module.exports = {
       })
 
   ready: (options = {}) ->
+    @tray = new Tray()
+
     _.defaults options,
       onQuit: ->
         ## TODO: fix this. if the debug window
@@ -109,14 +111,14 @@ module.exports = {
         ## exit the app immediately
         app.exit(0)
 
-      onOpenProject: ->
-        Tray.setImage("blue")
+      onOpenProject: =>
+        @tray.setState("running")
 
-      onCloseProject: ->
-        Tray.setImage("black")
+      onCloseProject: =>
+        @tray.setState("default")
 
-      onError: (err) ->
-        Tray.setImage("red")
+      onError: (err) =>
+        @tray.setState("error")
 
     ready = =>
       ## TODO:
@@ -130,16 +132,9 @@ module.exports = {
         if options.updating
           Updater.install(options)
 
-        ## TODO: change this to return
-        ## the tray instannce (above in ready)
-        ## and to then call Tray.display(tray, {})
-        Tray.display({
-          onDrop: ->
-
+        @tray.display({
           onClick: (e, bounds) =>
             @onClick(bounds, win)
-
-          onRightClick: ->
         })
 
         return win
