@@ -233,7 +233,7 @@ describe "Project Show", ->
           .then ->
             expect(@App.ipc.off).to.be.calledWith("on:project:settings:change")
 
-    context.only "help link", ->
+    context "help link", ->
       it "displays help link", ->
         cy.contains("a", "Need help?")
 
