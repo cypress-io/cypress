@@ -7,7 +7,7 @@ Cypress automatically invokes this command **between** each test to prevent stat
 
 | | |
 |--- | --- |
-| **Returns** | the remaining cookies |
+| **Returns** | `null` |
 | **Timeout** | *cannot timeout* |
 
 ***
@@ -28,7 +28,7 @@ In this example, on first login our server sends us back a session cookie. After
 cy
   .login("bob@example.com", "p@ssw0rd") // example of custom command
   .clearCookies()
-  .visit("/dashboard") // we should be redirected back to login
+  .visit("/dashboard")                  // we should be redirected back to login
   .url().should("eq", "login")
 ```
 
@@ -40,21 +40,25 @@ cy
 
 ```javascript
 cy
-  .getCookies().should("have.property", "fakeCookie1", "123ABC")
-  .clearCookies().should("not.have.property", "fakeCookie1")
+  .getCookies().should('have.length', 1)
+  .clearCookies()
+  .getCookies().should('be.empty')
 ```
 
 The commands above will display in the command log as:
 
-![screen shot 2016-03-21 at 12 16 30 pm](https://cloud.githubusercontent.com/assets/1271364/13925547/0bc16998-ef5f-11e5-8b89-c95fa392d054.png)
+![screen shot 2016-05-10 at 12 01 38 pm](https://cloud.githubusercontent.com/assets/1271364/15153391/1afa9fb4-16a7-11e6-9a76-3c3e6b4b9f6b.png)
 
 When clicking on `clearCookies` within the command log, the console outputs the following:
 
-![screen shot 2016-03-21 at 12 16 49 pm](https://cloud.githubusercontent.com/assets/1271364/13925548/0ef41bce-ef5f-11e5-8fc1-de98817ed495.png)
+![screen shot 2016-05-10 at 12 02 01 pm](https://cloud.githubusercontent.com/assets/1271364/15153392/1afb086e-16a7-11e6-9541-1b1794e14705.png)
 
 ***
 
 # Related
 
+- [clearCookie](https://on.cypress.io/api/clearcookie)
+- [getCookie](https://on.cypress.io/api/getcookie)
 - [getCookies](https://on.cypress.io/api/getcookies)
+- [setCookie](https://on.cypress.io/api/setcookie)
 - [Cypress API Cookies](https://on.cypress.io/api/cookies)
