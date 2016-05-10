@@ -3,7 +3,7 @@ excerpt: Clear all browser cookies
 
 Clears all of the browser cookies.
 
-Cypress automatically invokes this command **between** each test to prevent state from building up. You shouldn't need to invoke this command unless you're using it to clear cookies inside a single test.
+Cypress automatically invokes this command **before** each test to prevent state from building up. You shouldn't need to invoke this command unless you're using it to clear cookies inside a single test.
 
 | | |
 |--- | --- |

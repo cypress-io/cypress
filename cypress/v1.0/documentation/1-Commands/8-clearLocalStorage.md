@@ -3,6 +3,8 @@ excerpt: Clear all data in local storage
 
 Clears all data in local storage.
 
+Cypress automatically invokes this command **before** each test to prevent state from building up. You shouldn't need to invoke this command unless you're using it to clear localStorage inside a single test.
+
 | | |
 |--- | --- |
 | **Returns** | the remote local storage object |

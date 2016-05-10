@@ -3,6 +3,8 @@ excerpt: Clear a browser cookie
 
 Clears a browser cookie.
 
+Cypress automatically clears all cookies **before** each test to prevent state from building up. You shouldn't need to invoke this command unless you're using it to clear a specific cookie inside a single test.
+
 | | |
 |--- | --- |
 | **Returns** | `null` |

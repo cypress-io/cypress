@@ -3,7 +3,7 @@ excerpt: Manage your application's cookies
 
 `Cypress.Cookies` makes it easy to manage your application's cookies while your tests are running.
 
-Additionally you can take advantage of `Cypress.Cookies.preserveOnce` or even **whitelist** cookies by their name to preserve values across multiple tests. This enables you to preserve sessions through several tests.
+Cypress automatically clears all cookies **before** each test to prevent state from building up. You can take advantage of `Cypress.Cookies.preserveOnce` or even **whitelist** cookies by their name to preserve values across multiple tests. This enables you to preserve sessions through several tests.
 
 # [Cypress.Cookies.debug( *boolean* )](#section-debug-usage)
 
@@ -13,13 +13,13 @@ Enable or disable cookie debugging. When enabled, Cypress will log out when cook
 
 # [Cypress.Cookies.preserveOnce( *name1*, *name2*, *name3*, ... )](#section-preserve-usage)
 
-Will preserve cookies by name. Pass an unlimited number of arguments. These preserved cookies will not be cleared when the next test starts.
+Will preserve cookies by name. Pass an unlimited number of arguments. These preserved cookies will not be cleared before the next test starts.
 
 ***
 
 # [Cypress.Cookies.defaults( *options* )](#section-defaults-usage)
 
-Set defaults for all cookies, such as whitelisting a set of cookies to bypass being cleared after each test.
+Set defaults for all cookies, such as whitelisting a set of cookies to bypass being cleared before each test.
 
 ***
 
@@ -27,7 +27,7 @@ Set defaults for all cookies, such as whitelisting a set of cookies to bypass be
 
 ## Log out when cookie values set or clear
 
-By turning on debugging Cypress will automatically log out to the console when it **sets** or **clears** cookie values. This is useful to help you understand how Cypress clears cookies in between tests, and is useful to visualize how to handle preserving cookies in between tests.
+By turning on debugging, Cypress will automatically log out to the console when it **sets** or **clears** cookie values. This is useful to help you understand how Cypress clears cookies before each test, and is useful to visualize how to handle preserving cookies in between tests.
 
 ```javascript
 Cypress.Cookies.debug(true) // now Cypress will log out when it alters cookies
@@ -49,11 +49,11 @@ Cypress.Cookies.debug(false) // now debugging is turned off
 
 # Preserve Usage
 
-## Preserve cookies after a test finished
+## Preserve cookies through multiple tests
 
-Cypress gives you a simple interface to automatically preserve cookies *after* a test finished. Cypress will automatically clear all cookies before each new test starts by default.
+Cypress gives you a simple interface to automatically preserve cookies for multiple tests. Cypress automatically clears all cookies before each new test starts by default.
 
-By clearing cookies in between tests you are gauranteed to always start from a clean slate. Starting from a clean state prevents coupling your tests to one another and prevents situations where mutating something in your application in one test affects another one downstream.
+By clearing cookies before each test you are gauranteed to always start from a clean slate. Starting from a clean state prevents coupling your tests to one another and prevents situations where mutating something in your application in one test affects another one downstream.
 
 [block:callout]
 {
@@ -62,7 +62,7 @@ By clearing cookies in between tests you are gauranteed to always start from a c
 }
 [/block]
 
-You can use `Cypress.Cookies.preserveOnce` to preserve cookies in between tests.
+You can use `Cypress.Cookies.preserveOnce` to preserve cookies through multiple tests.
 
 There are *likely* better ways to do this, but this isn't well documented at the moment. Every application is different and there is no one-size-fits-all solution. For the moment, if you're using session-based cookies, this method will work.
 
@@ -71,7 +71,7 @@ describe("Dashboard", function(){
   before(function(){
     // log in only once before any of the tests run.
     // your app will likely set some sort of session cookie.
-    // you'll need to know the name of these cookie(s), which you can find
+    // you'll need to know the name of the cookie(s), which you can find
     // in your Resources -> Cookies panel in the Chrome Dev Tools.
     cy.login()
   })
@@ -79,11 +79,10 @@ describe("Dashboard", function(){
   beforeEach(function(){
     // before each test, we can automatically preserve the
     // 'session_id' and 'remember_token' cookies. this means they
-    // will not be removed when the NEXT test starts. thus they
-    // are preserved once after this test ends.
+    // will not be cleared before the NEXT test starts.
     //
-    // the name of your cookies will likely be different, this is
-    // just a simple example
+    // the name of your cookies will likely be different
+    // this is just a simple example
     Cypress.Cookies.preserveOnce("session_id", "remember_token")
   })
 
@@ -107,7 +106,7 @@ describe("Dashboard", function(){
 
 ## Set global default cookies
 
-You can modify the global defaults and whitelist a set of Cookies which will always be preserved between tests.
+You can modify the global defaults and whitelist a set of Cookies which will always be preserved across tests.
 
 Any change you make here will take effect immediately for the remainder of every single test.
 
@@ -129,7 +128,7 @@ Any change you make here will take effect immediately for the remainder of every
 // string usage
 
 // now any cookie with the name 'session_id' will
-// not be cleared before each new test runs
+// not be cleared before each test runs
 Cypress.Cookies.defaults({
   whitelist: "session_id"
 })
@@ -139,7 +138,7 @@ Cypress.Cookies.defaults({
 // array usage
 
 // now any cookie with the name 'session_id' or 'remember_token'
-// will not be cleared before each new test runs
+// will not be cleared before each test runs
 Cypress.Cookies.defaults({
   whitelist: ["session_id", "remember_token"]
 })
@@ -149,7 +148,7 @@ Cypress.Cookies.defaults({
 // RegExp usage
 
 // now any cookie that matches this RegExp
-// will not be cleared before each new test runs
+// will not be cleared before each test runs
 Cypress.Cookies.defaults({
   whitelist: /session|remember/
 })
@@ -162,7 +161,8 @@ Cypress.Cookies.defaults({
   whitelist: function(name){
     // implement your own logic here
     // if the function returns truthy
-    // then the cookie will not be removed
+    // then the cookie will not be cleared
+    // before each test runs
   }
 })
 ```
@@ -175,7 +175,7 @@ Cypress.Cookies.defaults({
 
 The cookie commands chained off of `cy` are useful to use during your tests. Since it is a command, it can be chained onto other commands. Additionally, like other commands, it is asynchronous.
 
-`Cypress.Cookies` is a synchronous interface that allows you to do more than just clear cookies.
+`Cypress.Cookies` is a synchronous interface that allows you to do more than just get, set, or clear cookies.
 
 Typically you'd use `Cypress.Cookies` in hooks like `before`, `beforeEach`, `after`, and `afterEach`.
 
