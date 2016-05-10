@@ -3,6 +3,7 @@ cypressIcons = require("@cypress/core-icons")
 nativeImage  = require("electron").nativeImage
 systemPrefs  = require("electron").systemPreferences
 ElectronTray = require("electron").Tray
+os           = require("os")
 
 ## the primary (black) icon can be a template
 ## but the white varient (setPressedImage) CANNOT be a template
@@ -56,8 +57,10 @@ module.exports = class Tray
     ## click event
     @tray.on "double-click", options.onClick
 
-    ## subscribe to pref change events
-    systemPrefs.subscribeNotification "AppleInterfaceThemeChangedNotification", => @setState()
     @tray.setPressedImage(colors.white)
-    @setState()
     @tray.setToolTip("Cypress")
+    @setState()
+
+    ## subscribe to pref change events (OSX only)
+    if os.platform() is "darwin"
+      systemPrefs.subscribeNotification "AppleInterfaceThemeChangedNotification", => @setState()

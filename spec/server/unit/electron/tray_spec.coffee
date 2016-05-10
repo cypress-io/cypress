@@ -2,6 +2,7 @@ require("../../spec_helper")
 
 icons    = require("@cypress/core-icons")
 electron = require("electron")
+os       = require("os")
 Tray     = require("#{root}../lib/electron/handlers/tray")
 
 describe "electron/tray", ->
@@ -65,7 +66,7 @@ describe "electron/tray", ->
       it "sets black as default image", ->
         expect(@electronTray.setImage).to.be.calledWith(@tray.getColors().black)
 
-      describe "then changes to dark mode", ->
+      describe "and changes to dark mode", ->
         beforeEach ->
           @sandbox.stub(electron.systemPreferences, "isDarkMode").returns(true)
           @sn.getCall(0).args[1]()
@@ -81,3 +82,19 @@ describe "electron/tray", ->
 
       it "sets white as default image", ->
         expect(@electronTray.setImage).to.be.calledWithExactly(@tray.getColors().white)
+
+    describe "when on OSX", ->
+      beforeEach ->
+        @sandbox.stub(os, "platform").returns("darwin")
+        @tray.display()
+
+      it "subscribes to system preferences notifications", ->
+        expect(@sn).to.be.called
+
+    describe "when not on OSX", ->
+      beforeEach ->
+        @sandbox.stub(os, "platform").returns("linux")
+        @tray.display()
+
+      it "does not subscribe to system preferences notifications", ->
+        expect(@sn).not.to.be.called
