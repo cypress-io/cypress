@@ -8,6 +8,7 @@
       "runBrowser":  "[data-js='run-browser']"
       "browserIcon": "[data-js='browser-icon']"
       "browserText": "[data-js='browser-text']"
+      "help":        "[data-js=help]"
 
     modelEvents:
       "rebooted"            : "render"
@@ -17,6 +18,7 @@
       "change:browserState" : "browserStateChanged"
 
     triggers:
+      "click @ui.help"                : "help:clicked"
       "click @ui.hostInfo"            : "host:info:clicked"
       "click [data-stop]"             : "stop:clicked"
       "click [data-ok]"               : "ok:clicked"

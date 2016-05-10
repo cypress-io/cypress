@@ -233,6 +233,13 @@ describe "Project Show", ->
           .then ->
             expect(@App.ipc.off).to.be.calledWith("on:project:settings:change")
 
+    context.only "help link", ->
+      it "displays help link", ->
+        cy.contains("a", "Need help?")
+
+      it "opens link to docs on click of help link", ->
+        cy.contains("a", "Need help?").click().then ->
+          expect(@App.ipc).to.be.calledWith("external:open", "https://docs.cypress.io")
 
   describe "removes dropdown button when only one browser", ->
     beforeEach ->

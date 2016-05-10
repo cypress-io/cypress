@@ -7,6 +7,9 @@
 
       @projectLayout = @getProjectLayout(project)
 
+      @listenTo @projectLayout, "help:clicked", ->
+        App.ipc("external:open", "https://docs.cypress.io")
+
       @listenTo @projectLayout, "host:info:clicked", ->
         App.ipc("external:open", "https://on.cypress.io")
 

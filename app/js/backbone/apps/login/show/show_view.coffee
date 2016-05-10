@@ -4,15 +4,15 @@
     template: "login/show/login"
 
     ui:
-      login:    "[data-login]"
-      retry:    "[data-retry]"
-      help:     "[data-js=help]"
-      unauth:   "[data-js=unauthed]"
+      "login":  "[data-login]"
+      "retry":  "[data-retry]"
+      "help":   "[data-js=help]"
+      "unauth": "[data-js=unauthed]"
 
     triggers:
-      "click @ui.login"   : "login:clicked"
-      "click @ui.help"    : "help:clicked"
-      "click @ui.unauth"  : "unauth:clicked"
+      "click @ui.login"  : "login:clicked"
+      "click @ui.help"   : "help:clicked"
+      "click @ui.unauth" : "unauth:clicked"
 
     modelEvents:
       "change:loggingIn" : "render"
