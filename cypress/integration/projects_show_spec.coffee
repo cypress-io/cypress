@@ -136,6 +136,12 @@ describe "Project Show", ->
         it "is enabled", ->
           cy.get("@browser").should("be.enabled")
 
+        it "disables then reenables", ->
+          cy
+            .get("@browser").click().should("be.disabled").then ->
+              @ipc.handle("launch:browser", null, {browserClosed: true})
+            .get("@browser").should("be.enabled")
+
       describe "opening state", ->
         beforeEach ->
           cy.get("@browser").click()
@@ -156,8 +162,8 @@ describe "Project Show", ->
           cy.get("@browser").click().then ->
             @ipc.handle("launch:browser", null, {browserOpened: true})
 
-        it "re-enables button", ->
-          cy.get("@browser").should("not.be.disabled")
+        it "continues disabling button", ->
+          cy.get("@browser").should("be.disabled")
 
         it "displays browser name", ->
           cy.get("@browser").should("contain", "Running Chrome")
@@ -166,10 +172,6 @@ describe "Project Show", ->
           cy
             .get("@browser").find("i")
               .should("have.length", 1).and("have.class", "fa-check-circle")
-
-        it "triggers focus:browser on click of running", ->
-          cy.get("@browser").should("not.be.disabled").click().then ->
-            expect(@App.ipc).to.be.calledWith("focus:browser")
 
     context "switch browser", ->
       beforeEach ->

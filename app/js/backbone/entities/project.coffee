@@ -42,7 +42,7 @@
     browserOpened: ->
       @set({
         browserState: "opened"
-        browserClickable: true
+        browserClickable: false
       })
 
     browserClosed: ->
@@ -59,9 +59,6 @@
 
     isLoading: ->
       !!@get("loading")
-
-    isCurrentBrowserOpen: (browser) ->
-      (@get("browser").get("name") is browser) and (@get("browserState") is "opened")
 
     setName: ->
       @set name: @getNameFromPath()

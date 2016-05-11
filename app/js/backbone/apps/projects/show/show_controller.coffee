@@ -14,22 +14,19 @@
         App.ipc("external:open", "https://on.cypress.io")
 
       @listenTo @projectLayout, "run:browser:clicked", (browser) ->
-        if project.isCurrentBrowserOpen(browser)
-          App.ipc("focus:browser")
-        else
-          ## here's where you write logic to open the url
-          ## in a specific browser
-          project.setBrowser(browser)
-          project.browserOpening()
+        ## here's where you write logic to open the url
+        ## in a specific browser
+        project.setBrowser(browser)
+        project.browserOpening()
 
-          App.ipc "launch:browser", browser, (err, data = {}) ->
-            switch
-              when data.browserOpened
-                project.browserOpened()
+        App.ipc "launch:browser", browser, (err, data = {}) ->
+          switch
+            when data.browserOpened
+              project.browserOpened()
 
-              when data.browserClosed
-                App.ipc.off("launch:browser")
-                project.browserClosed()
+            when data.browserClosed
+              App.ipc.off("launch:browser")
+              project.browserClosed()
 
       @listenTo @projectLayout, "stop:clicked ok:clicked" , ->
         @closeProject().then ->
