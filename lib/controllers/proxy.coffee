@@ -17,7 +17,7 @@ escapeRegExp  = require("../util/escape_regexp")
 headRe           = /(<head.*?>)/
 htmlRe           = /(<html.*?>)/
 okStatusRe       = /^[2|3|4]\d+$/
-badCookieParamRe = /^(httponly|secure|domain=.+)$/i
+badCookieParamRe = /^(secure|domain=.+)$/i
 
 module.exports = {
   handle: (req, res, config, app, next) ->
