@@ -18,3 +18,4 @@ spec/fixtures/nw/cypress.zip
 bin/chromium
 coverage
 tmp
+.projects

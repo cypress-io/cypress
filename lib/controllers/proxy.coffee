@@ -1,5 +1,4 @@
 _             = require("lodash")
-path          = require("path")
 fs            = require("fs")
 request       = require("request")
 mime          = require("mime")
@@ -13,6 +12,7 @@ cwd           = require("../cwd")
 logger        = require("../logger")
 UrlHelpers    = require("../util/url_helpers")
 escapeRegExp  = require("../util/escape_regexp")
+send          = require("send")
 
 headRe           = /(<head.*?>)/
 htmlRe           = /(<html.*?>)/
@@ -200,21 +200,24 @@ module.exports = {
 
     logger.info "getting relative file content", file: file
 
-    ## set the content-type based on the file extension
-    res.contentType(mime.lookup(file))
-
     res.cookie("__cypress.initial", false)
     res.cookie("__cypress.remoteHost", remoteHost)
     app.set("__cypress.remoteHost", remoteHost)
 
-    stream = fs.createReadStream(file, "utf8")
+    sendOpts = {
+      root: path.resolve(config.fileServerFolder)
+      transform: (stream) =>
+        if req.cookies["__cypress.initial"] is "true"
+          stream.pipe(@rewrite(req, res, remoteHost)).pipe(thr)
+        else
+          stream.pipe(thr)
+    }
 
-    if req.cookies["__cypress.initial"] is "true"
-      stream.pipe(@rewrite(req, res, remoteHost)).pipe(thr)
-    else
-      stream.pipe(thr)
+    unless req.cookies["__cypress.initial"] is "true"
+      sendOpts.etag = true
+      sendOpts.lastModified = true
 
-    return thr
+    send(req, urlHelpers.parse(req.url).pathname, sendOpts)
 
   errorHandler: (e, req, res, remoteHost) ->
     url = urlHelpers.resolve(remoteHost, req.url)
