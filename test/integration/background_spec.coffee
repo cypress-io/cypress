@@ -169,6 +169,20 @@ describe "app/background", ->
         expect(err.length).to.eq(2)
         expect(err).to.be.instanceof(Promise.AggregateError)
 
+    it "rejects if no tabs were found", ->
+      @sandbox.stub(chrome.tabs, "query")
+      .yieldsAsync([])
+
+      background.query("http://localhost:2020", {
+        string: "1234"
+        element: "__cypress-string"
+      })
+      .then ->
+        throw new Error("should have failed")
+      .catch (err) ->
+        ## we good if this hits
+        expect(err).to.be.instanceof(Promise.RangeError)
+
   context "integration", ->
     beforeEach (done) ->
       done = _.once(done)
