@@ -1,5 +1,6 @@
-Promise = require("bluebird")
+map     = require("lodash/map")
 pick    = require("lodash/pick")
+Promise = require("bluebird")
 
 HOST = "CHANGE_ME_HOST"
 PATH = "CHANGE_ME_PATH"
@@ -130,8 +131,16 @@ automation = {
       chrome.windows.update window.id, {focused: true}, ->
         fn()
 
-  verify: (data, fn) ->
+  query: (host, data) ->
+    ## query for tabs which match
+    ## our expected host
+    ## ie: http://localhost:2020/*
+    url  = host + "/*"
     code = "var s; (s = document.getElementById('#{data.element}')) && s.textContent"
+
+    query = ->
+      new Promise (resolve) ->
+        chrome.tabs.query({url: url, windowType: "normal"}, resolve)
 
     queryTab = (tab) ->
       new Promise (resolve, reject) ->
@@ -141,19 +150,14 @@ automation = {
           else
             reject(new Error)
 
-    query = (host) ->
-      url = host + "/*"
+    query()
+    .then (tabs) ->
+      ## generate array of promises
+      map(tabs, queryTab)
+    .any()
 
-      new Promise (resolve, reject) ->
-        chrome.tabs.query {url: url, windowType: "normal"}, (tabs) ->
-          Promise.map(tabs, queryTab)
-          .any()
-          .then ->
-            resolve()
-          .catch Promise.AggregateError, ->
-            reject(new Error)
-
-    query(HOST)
+  verify: (data, fn) ->
+    @query(HOST, data)
     .then(fn)
 }
 
