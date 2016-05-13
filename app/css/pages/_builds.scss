@@ -77,11 +77,40 @@
   }
 }
 
-#builds-show {
-  #iframe-wrapper #iframe-container #iframe-region {
+#builds-show  {
+  #iframe-wrapper #iframe-container {
+    #iframe-region {
 
-    &>div {
-      padding-top: 0;
+      &>div {
+        padding-top: 0;
+      }
+    }
+
+    header {
+      padding: 0;
+    }
+  }
+  #header-container #stats-container {
+    @include list-columns(15%, 25%, 25%, 35%);
+    border-left: 9px solid #e94f5f;
+
+    li {
+      width: 100%;
+      padding: 0;
+
+      &>div>div {
+        padding: 10px 5px;
+      }
+
+      .border-left {
+        border-left: 1px solid #eee;
+      }
+
+
+      &:last-of-type {
+        border-right: 1px solid #eee;
+
+      }
     }
   }
 }

@@ -6,29 +6,39 @@
           <div>
             <div id="stats-region">
               <div>
-                <ul id="stats-container">
+                <ul id="stats-container" class="list-as-table">
                   <li>
-                    #1465
-                  </li>
-                  <li>
-                    <i class="fa fa-code-fork fa-rotate-90"></i>
-                    <%= @branch %>
-                  </li>
-                  <li>
-                    <i class="fa fa-<%= @osNameFormatted %>"></i>
-                    <%= @os_version %>
-                    <i class="fa fa-<%= @browserNameFormatted %>"></i>
-                    <%= @browser_version %>
-                  </li>
-                  <li>
-                    <% if @passed > 0: %>
-                      Pass
-                      <span class="label label-success"><%= @passed %></span>
-                    <% end %>
-                    <% if @failed > 0: %>
-                      Fail
-                      <span class="label label-danger"><%= @failed %></span>
-                    <% end %>
+                    <div>
+                      <div>
+                        #1465
+                      </div>
+                    </div>
+                    <div>
+                      <div>
+                        <i class="fa fa-code-fork fa-rotate-90"></i>
+                        <%= @branch %>
+                      </div>
+                    </div>
+                    <div>
+                      <div>
+                        <i class="fa fa-<%= @osNameFormatted %>"></i>
+                        <%= @os_version %>
+                        <i class="fa fa-<%= @browserNameFormatted %>"></i>
+                        <%= @browser_version %>
+                      </div>
+                    </div>
+                    <div class="border-left">
+                      <div>
+                        <% if @passed > 0: %>
+                          Pass
+                          <span class="label label-success"><%= @passed %></span>
+                        <% end %>
+                        <% if @failed > 0: %>
+                          Fail
+                          <span class="label label-danger"><%= @failed %></span>
+                        <% end %>
+                      </div>
+                    </div>
                   </li>
                 </ul>
               </div>
@@ -183,7 +193,31 @@
     <div id="iframe-container">
       <div id="iframe-region">
         <div style="display: block;">
-          <div id="iframe-size-container" style="transform: scale(0.6424); margin-left: 45px; width: 1000px; height: 660px;">
+          <div id="header-region">
+            <div>
+              <header>
+                <div class="pull-left">
+                  <div>
+                    <div>
+                      <i class="fa fa-clock-o"></i> started
+                      <%= moment(@created_at).fromNow() %>
+                    </div>
+                  </div>
+                  <div>
+                    <div>
+                      <i class="fa fa-hourglass-end"></i> ran for
+                      <%= moment.duration(@duration).humanize() %>
+                    </div>
+                  </div>
+                </div>
+                <button class="btn btn-link pull-right">
+                  <i class="fa fa-download"></i>
+                  Download Video
+                </button>
+              </header>
+            </div>
+          </div>
+          <div id="iframe-size-container">
             <iframe src="https://player.vimeo.com/video/119067384"></iframe>
           </div>
           <div id="message-region">
