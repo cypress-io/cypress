@@ -46,6 +46,8 @@ connect = (host, path, io) ->
         invoke("clearCookies", id, data)
       when "clear:cookie"
         invoke("clearCookie", id, data)
+      when "is:automation:connected"
+        invoke("verify", id, data)
       when "focus:browser:window"
         invoke("focus", id)
       else
@@ -127,6 +129,32 @@ automation = {
     chrome.windows.getCurrent (window) ->
       chrome.windows.update window.id, {focused: true}, ->
         fn()
+
+  verify: (data, fn) ->
+    code = "var s; (s = document.getElementById('#{data.element}')) && s.textContent"
+
+    queryTab = (tab) ->
+      new Promise (resolve, reject) ->
+        chrome.tabs.executeScript tab.id, {code: code}, (result) ->
+          if result and result[0] is data.string
+            resolve()
+          else
+            reject(new Error)
+
+    query = (host) ->
+      url = host + "/*"
+
+      new Promise (resolve, reject) ->
+        chrome.tabs.query {url: url, windowType: "normal"}, (tabs) ->
+          Promise.map(tabs, queryTab)
+          .any()
+          .then ->
+            resolve()
+          .catch Promise.AggregateError, ->
+            reject(new Error)
+
+    query(HOST)
+    .then(fn)
 }
 
 module.exports = automation
