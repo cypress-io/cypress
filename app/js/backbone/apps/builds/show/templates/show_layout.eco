@@ -43,9 +43,138 @@
     <div id="specs-container">
       <div id="specs-region">
         <ul class="runnables" id="specs-list">
-          <div>
-          things here
-          </div>
+          <li class="test runnable failed">
+            <div class="runnable-wrapper" style="padding-left: 19px;">
+              <div class="runnable-content-region">
+                <div>
+                  <div class="runnable-state">
+                    <span class="test-state">
+                      <i class="fa"></i>
+                    </span>
+                    <span class="test-title">
+                      Kitchen Sink traversing cy.should - assert that &lt;title&gt; is correct
+                    </span>
+                  </div>
+                  <div class="runnable-controls">
+                    <i class="fa fa-warning has-command-failures" title="One or more commands failed"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="runnable-instruments">
+                <div class="runnable-commands-region">
+                  <ul class="hooks-container">
+                    <li class="hook-item">
+                      <span class="hook-name">
+                        <i class="fa fa-caret-down"></i>
+                        screenshot at failure
+                      </span>
+                    </li>
+                    <img src="http://placehold.it/200x150">
+                  </ul>
+                </div>
+              </div>
+              <pre class="test-error">CypressError: Could not load the remote page: http://localhost:8080/</pre>
+            </div>
+          </li>
+          <li class="test runnable failed">
+            <div class="runnable-wrapper" style="padding-left: 19px;">
+              <div class="runnable-content-region">
+                <div>
+                  <div class="runnable-state">
+                    <span class="test-state">
+                      <i class="fa"></i>
+                    </span>
+                    <span class="test-title">
+                      Kitchen Sink traversing cy.and - assert that &lt;title&gt; is correct
+                    </span>
+                  </div>
+                  <div class="runnable-controls">
+                    <i class="fa fa-warning has-command-failures" title="One or more commands failed"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="runnable-instruments">
+                <div class="runnable-commands-region">
+                  <ul class="hooks-container">
+                    <li class="hook-item">
+                      <span class="hook-name">
+                        <i class="fa fa-caret-down"></i>
+                        screenshot at failure
+                      </span>
+                    </li>
+                    <img src="http://placehold.it/200x150">
+                  </ul>
+                </div>
+              </div>
+              <pre class="test-error">CypressError: Curabitur blandit tempus porttitor. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</pre>
+            </div>
+          </li>
+          <li class="test runnable failed">
+            <div class="runnable-wrapper" style="padding-left: 19px;">
+              <div class="runnable-content-region">
+                <div>
+                  <div class="runnable-state">
+                    <span class="test-state">
+                      <i class="fa"></i>
+                    </span>
+                    <span class="test-title">
+                      Kitchen Sink Cookies cy.Cookies - reset cookies
+                    </span>
+                  </div>
+                  <div class="runnable-controls">
+                    <i class="fa fa-warning has-command-failures" title="One or more commands failed"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="runnable-instruments">
+                <div class="runnable-commands-region">
+                  <ul class="hooks-container">
+                    <li class="hook-item">
+                      <span class="hook-name">
+                        <i class="fa fa-caret-down"></i>
+                        screenshot at failure
+                      </span>
+                    </li>
+                    <img src="http://placehold.it/200x150">
+                  </ul>
+                </div>
+              </div>
+              <pre class="test-error">CypressError: could not set cookie</pre>
+            </div>
+          </li>
+          <li class="test runnable failed">
+            <div class="runnable-wrapper" style="padding-left: 19px;">
+              <div class="runnable-content-region">
+                <div>
+                  <div class="runnable-state">
+                    <span class="test-state">
+                      <i class="fa"></i>
+                    </span>
+                    <span class="test-title">
+                      Kitchen Sink cookies cy.Cookie.set - assert that &lt;title&gt; is correct
+                    </span>
+                  </div>
+                  <div class="runnable-controls">
+                    <i class="fa fa-warning has-command-failures" title="One or more commands failed"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="runnable-instruments">
+                <div class="runnable-commands-region">
+                  <ul class="hooks-container">
+                    <li class="hook-item">
+                      <span class="hook-name">
+                        <i class="fa fa-caret-down"></i>
+                        screenshot at failure
+                      </span>
+                    </li>
+                    <img src="http://placehold.it/200x150">
+                  </ul>
+                </div>
+              </div>
+              <pre class="test-error">CypressError: Another set of cookie</pre>
+            </div>
+          </li>
         </ul>
       </div>
     </div>
