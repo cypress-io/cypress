@@ -4,6 +4,8 @@
   hostEvents      = "load:spec:iframe".split(" ")
   passThruEvents  = "sauce:job:create sauce:job:start sauce:job:done sauce:job:fail".split(" ")
 
+  element = "__cypress-string"
+
   API =
     start: (socketId) ->
       ## connect to socket io
@@ -16,7 +18,16 @@
       else
         ## TODO: fix this
         channel.on "connect", ->
-          channel.emit "is:automation:connected", (bool) ->
+          str = "" + Math.random()
+
+          obj = {
+            element: element
+            string: str
+          }
+
+          $("##{element}").hide().text(obj.string)
+
+          channel.emit "is:automation:connected", obj, (bool) ->
             socket.automationConnected(bool)
 
       _.each [].concat(hostEvents, satelliteEvents, passThruEvents), (event) ->
