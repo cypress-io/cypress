@@ -27,7 +27,7 @@ $Cypress.register "Communications", (Cypress, _, $, Promise) ->
         Cypress.trigger "message", msg, data, (resp) =>
           if err = resp.__error
             try
-              @throwErr(err, options._log)
+              $Cypress.Utils.throwErr(err, { onFail: options._log })
             catch e
               e.__isMessage = true
               e.name = resp.__name if resp.__name

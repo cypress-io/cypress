@@ -77,7 +77,9 @@ $Cypress.Agents = do ($Cypress, _) ->
       return stub
 
     mock: ->
-      throw new Error("Not yet implemented!")
+      $Cypress.Utils.throwErrByPath("miscellaneous.method_not_implemented", {
+        args: { method: "$Agents#mock" }
+      })
 
     useFakeTimers: ->
 

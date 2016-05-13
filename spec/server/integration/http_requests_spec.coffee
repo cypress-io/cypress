@@ -1481,11 +1481,26 @@ describe "Routes", ->
           .expect(/index.html content/)
           .expect(/sinon.js/)
           .expect "set-cookie", /initial=false/
-          .then =>
+          .then (res) =>
+            expect(res.get("etag")).to.be.undefined
+            expect(res.get("last-modified")).to.be.undefined
             expect(@app.get("__cypress.remoteHost")).to.eq "<root>"
 
       afterEach ->
         Fixtures.remove("no-server")
+
+      it "sets etag", ->
+        @session
+          .get("/assets/app.css")
+          .expect(200, "html { color: black; }")
+          .then (res) =>
+            expect(res.get("etag")).to.be.a("string")
+
+      it "sets last-modified", ->
+        @session
+          .get("/assets/app.css")
+          .then (res) =>
+            expect(res.get("last-modified")).to.be.a("string")
 
       it "streams from file system", ->
         @session

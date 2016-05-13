@@ -7,7 +7,9 @@ do ($Cypress, _, $, Promise, moment) ->
       module = @modules[name]
 
       if not module
-        throw new Error("$Cypress.Module: #{name} not registered!")
+        $Cypress.Utils.throwErrByPath("miscellaneous.module_not_registered", {
+          args: { name }
+        })
 
       ## invoke the module with our instance context
       ## and pass back in the Cypress instance, underscore

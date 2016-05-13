@@ -45,10 +45,16 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if not options.$el.is("form")
         node = Cypress.Utils.stringifyElement(options.$el)
         word = Cypress.Utils.plural(options.$el, "contains", "is")
-        @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}", options._log)
+        $Cypress.Utils.throwErrByPath("submit.not_on_form", {
+          onFail: options._log
+          args: { node, word }
+        })
 
       if (num = options.$el.length) and num > 1
-        @throwErr(".submit() can only be called on a single form! Your subject contained #{num} form elements!", options._log)
+        $Cypress.Utils.throwErrByPath("submit.multiple_forms", {
+          onFail: options._log
+          args: { num }
+        })
 
       ## calling the native submit method will not actually trigger
       ## a submit event, so we need to dispatch this manually so
@@ -72,7 +78,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             })
 
     fill: (subject, obj, options = {}) ->
-      @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
+      $Cypress.Utils.throwErrByPath "fill.invalid_1st_arg" if not _.isObject(obj)
 
     check: (subject, values, options) ->
       @_check_or_uncheck("check", subject, values, options)
@@ -104,12 +110,18 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         return if options.error is false
 
         node = Cypress.Utils.stringifyElement(options.$el)
-        @throwErr(".focus() can only be called on a valid focusable element! Your subject is a: #{node}", options._log)
+        $Cypress.Utils.throwErrByPath("focus.invalid_element", {
+          onFail: options._log
+          args: { node }
+        })
 
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        @throwErr(".focus() can only be called on a single element! Your subject contained #{num} elements!", options._log)
+        $Cypress.Utils.throwErrByPath("focus.multiple_elements", {
+          onFail: options._log
+          args: { num }
+        })
 
       timeout = @_timeout() * .90
 
@@ -197,7 +209,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           return if options.error is false
 
-          @throwErr ".focus() timed out because your browser did not receive any focus events. This is a known bug in Chrome when it is not the currently focused window.", options._log
+          $Cypress.Utils.throwErrByPath "focus.timed_out", { onFail: options._log }
         .then =>
           return options.$el if options.verify is false
 
@@ -231,19 +243,25 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        @throwErr(".blur() can only be called on a single element! Your subject contained #{num} elements!", options._log)
+        $Cypress.Utils.throwErrByPath("blur.multiple_elements", {
+          onFail: options._log
+          args: { num }
+        })
 
       @execute("focused", {log: false, verify: false}).then ($focused) =>
         if options.force isnt true and not $focused
           return if options.error is false
 
-          @throwErr(".blur() can only be called when there is a currently focused element.", options._log)
+          $Cypress.Utils.throwErrByPath("blur.no_focused_element", { onFail: options._log })
 
         if options.force isnt true and options.$el.get(0) isnt $focused.get(0)
           return if options.error is false
 
           node = Cypress.Utils.stringifyElement($focused)
-          @throwErr(".blur() can only be called on the focused element. Currently the focused element is a: #{node}", options._log)
+          $Cypress.Utils.throwErrByPath("blur.wrong_focused_element", {
+            onFail: options._log
+            args: { node }
+          })
 
         timeout = @_timeout() * .90
 
@@ -315,7 +333,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
             return if options.error is false
 
-            @throwErr ".blur() timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window.", command
+            $Cypress.Utils.throwErrByPath "blur.timed_out", { onFail: command }
           .then =>
             return options.$el if options.verify is false
 
@@ -390,12 +408,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
 
     hover: (args) ->
-      @throwErr("""
-        cy.hover() is not currently implemented.\n
-        However it is usually easy to workaround.\n
-        Read the following document for a detailed explanation.\n
-        https://on.cypress.io/api/hover
-      """)
+      $Cypress.Utils.throwErrByPath("hover.not_implemented")
 
     click: (subject, positionOrX, y, options = {}) ->
       ## TODO handle pointer-events: none
@@ -435,7 +448,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## throw if we're trying to click multiple elements
       ## and we did not pass the multiple flag
       if options.multiple is false and options.$el.length > 1
-        @throwErr("Cannot call .click() on multiple elements. You tried to click #{options.$el.length} elements. Pass {multiple: true} if you want to serially click each element.")
+        $Cypress.Utils.throwErrByPath("click.multiple_elements", {
+          args: { num: options.$el.length }
+        })
 
       win  = @private("window")
 
@@ -459,7 +474,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           options._log.snapshot("before", {next: "after"})
 
         if options.errorOnSelect and $el.is("select")
-          @throwErr "Cannot call .click() on a <select> element. Use cy.select() command instead to change the value.", options._log
+          $Cypress.Utils.throwErrByPath "click.on_select_element", { onFail: options._log }
 
         isAttached = ($elToClick) =>
           @_contains($elToClick)
@@ -791,16 +806,25 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       if not options.$el.is(textLike)
         node = Cypress.Utils.stringifyElement(options.$el)
-        @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}", options._log)
+        $Cypress.Utils.throwErrByPath("type.not_on_text_field", {
+          onFail: options._log
+          args: { node }
+        })
 
       if (num = options.$el.length) and num > 1
-        @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!", options._log)
+        $Cypress.Utils.throwErrByPath("type.multiple_elements", {
+          onFail: options._log
+          args: { num }
+        })
 
       if not (_.isString(chars) or _.isFinite(chars))
-        @throwErr(".type() can only accept a String or Number. You passed in: '#{chars}'", options._log)
+        $Cypress.Utils.throwErrByPath("type.wrong_type", {
+          onFail: options._log
+          args: { chars }
+        })
 
       if _.isBlank(chars)
-        @throwErr(".type() cannot accept an empty String! You need to actually type something.", options._log)
+        $Cypress.Utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
       options.chars = "" + chars
 
@@ -908,9 +932,12 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           onNoMatchingSpecialChars: (chars, allChars) =>
             if chars is "{tab}"
-              @throwErr("{tab} isn't a supported character sequence. You'll want to use the command: 'cy.tab()' which is not ready yet, but when it is done that's what you'll use.", options._log)
+              $Cypress.Utils.throwErrByPath("type.tab", { onFail: options._log })
             else
-              @throwErr("Special character sequence: '#{chars}' is not recognized. Available sequences are: #{allChars}", options._log)
+              $Cypress.Utils.throwErrByPath("type.invalid", {
+                onFail: options._log
+                args: { chars, allChars }
+              })
 
         })
 
@@ -980,7 +1007,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         if not $el.is(textLike)
           word = Cypress.Utils.plural(subject, "contains", "is")
-          @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", options._log
+          $Cypress.Utils.throwErrByPath "clear.invalid_element", {
+            onFail: options._log
+            args: { word, node }
+          }
 
         @execute("type", "{selectall}{del}", {
           $el: $el
@@ -1043,10 +1073,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       if not options.$el.is("select")
         node = Cypress.Utils.stringifyElement(options.$el)
-        @throwErr ".select() can only be called on a <select>! Your subject is a: #{node}"
+        $Cypress.Utils.throwErrByPath "select.invalid_element", { args: { node } }
 
       if (num = options.$el.length) and num > 1
-        @throwErr ".select() can only be called on a single <select>! Your subject contained #{num} elements!"
+        $Cypress.Utils.throwErrByPath "select.multiple_elements", { args: { num } }
 
       ## normalize valueOrText if its not an array
       valueOrText = [].concat(valueOrText)
@@ -1055,13 +1085,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## throw if we're not a multiple select and we've
       ## passed an array of values
       if not multiple and valueOrText.length > 1
-        @throwErr ".select() was called with an array of arguments but does not have a 'multiple' attribute set!"
+        $Cypress.Utils.throwErrByPath "select.invalid_multiple"
 
       getOptions = =>
         ## throw if <select> is disabled
         if options.$el.prop("disabled")
           node = Cypress.Utils.stringifyElement(options.$el)
-          @throwErr "cy.select() failed because this element is currently disabled:\n\n#{node}"
+          $Cypress.Utils.throwErrByPath "select.disabled", { args: { node } }
 
         values  = []
         optionEls = []
@@ -1093,15 +1123,21 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## if we didnt set multiple to true and
         ## we have more than 1 option to set then blow up
         if not multiple and values.length > 1
-          @throwErr(".select() matched than one option by value or text: #{valueOrText.join(", ")}")
+          $Cypress.Utils.throwErrByPath("select.multiple_matches", {
+            args: { value: valueOrText.join(", ") }
+          })
 
         if not values.length
-          @throwErr("cy.select() failed because it could not find a single <option> with value or text matching: '#{valueOrText.join(", ")}'")
+          $Cypress.Utils.throwErrByPath("select.no_matches", {
+            args: { value: valueOrText.join(", ") }
+          })
 
         _.each optionEls, ($el) =>
           if $el.prop("disabled")
             node = Cypress.Utils.stringifyElement($el)
-            @throwErr("cy.select() failed because this <option> you are trying to select is currently disabled:\n\n#{node}")
+            $Cypress.Utils.throwErrByPath("select.option_disabled", {
+              args: { node }
+            })
 
         {values: values, optionEls: optionEls}
 
@@ -1261,7 +1297,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         try
           coords = @getCoordinates($el, options.position)
         catch err
-          @throwErr(err, options._log)
+          $Cypress.Utils.throwErr(err, { onFail: options._log })
 
       ## if we're forcing this click event
       ## just immediately send it up
@@ -1371,7 +1407,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             node   = Cypress.Utils.stringifyElement($el)
             word   = Cypress.Utils.plural(options.$el, "contains", "is")
             phrase = if type is "check" then " and :radio" else ""
-            @throwErr "cy.#{type}() can only be called on :checkbox#{phrase}! Your subject #{word} a: #{node}", options._log
+            $Cypress.Utils.throwErrByPath "check_uncheck.invalid_element", {
+              onFail: options._log
+              args: { node, word, phrase, cmd: type }
+            }
 
           ## if the checkbox was already checked
           ## then notify the user of this note

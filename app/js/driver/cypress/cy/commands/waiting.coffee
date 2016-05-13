@@ -10,7 +10,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
       ## to wait on multiple aliases and forget to make this
       ## an array
       if _.isString(options)
-        @throwErr("cy.wait() was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array.")
+        $Cypress.Utils.throwErrByPath("wait.invalid_arguments")
 
       _.defaults options, {log: true}
 
@@ -22,7 +22,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         when _.isString(msOrFnOrAlias)   then @_waitString.apply(@, args)
         when _.isArray(msOrFnOrAlias)    then @_waitString.apply(@, args)
         else
-          @throwErr "wait() must be invoked with either a number, a function, or an alias for a route!"
+          $Cypress.Utils.throwErrByPath "wait.invalid_1st_arg"
 
   Cypress.Cy.extend
     _waitNumber: (subject, ms, options) ->
@@ -41,7 +41,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         .return(subject)
 
     _waitFunction: (subject, fn, options) ->
-      @throwErr("cy.wait(fn) has been deprecated. Instead just change this command to be .should(fn).")
+      $Cypress.Utils.throwErrByPath("wait.fn_deprecated")
 
     _waitString: (subject, str, options) ->
       if options.log isnt false
@@ -67,7 +67,12 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         ## return our xhr object
         return Promise.resolve(xhr) if xhr
 
-        options.error = "cy.wait() timed out waiting '#{options.timeout}ms' for the #{num} #{type} to the route: '#{alias}'. No #{type} ever occured."
+        options.error = $Cypress.Utils.errMessageByPath "wait.timed_out", {
+          timeout: options.timeout
+          alias
+          num
+          type
+        }
 
         args = arguments
 
@@ -102,7 +107,10 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
           log.set "referencesAlias", aliases
 
         if command.get("name") isnt "route"
-          @throwErr("cy.wait() can only accept aliases for routes.\nThe alias: '#{alias}' did not match a route.", options._log)
+          $Cypress.Utils.throwErrByPath("wait.invalid_alias", {
+            onFail: options._log
+            args: { alias }
+          })
 
         ## create shallow copy of each options object
         ## but slice out the error since we may set

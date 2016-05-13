@@ -12,9 +12,10 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
     Cypress.Location.override(Cypress, contentWindow, navigated)
 
   timedOutWaitingForPageLoad = (ms, log) ->
-    msg = "Timed out after waiting '#{ms}ms' for your remote page to load."
-
-    @throwErr(msg, log)
+    $Cypress.Utils.throwErrByPath("navigation.timed_out", {
+      onFail: log
+      args: { ms }
+    })
 
   Cypress.on "before:window:load", (contentWindow) ->
     ## override the remote iframe getters
@@ -98,7 +99,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         .then =>
           if Cypress.cy.$$("[data-cypress-visit-error]").length
             try
-              @throwErr("Loading the new page failed.", options._log)
+              $Cypress.Utils.throwErrByPath("navigation.loading_failed", { onFail: options._log })
             catch e
               @fail(e)
           else
@@ -120,7 +121,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
   Cypress.addParentCommand
     reload: (args...) ->
       throwArgsErr = =>
-        @throwErr("cy.reload() can only accept a boolean or options as its arguments.")
+        $Cypress.Utils.throwErrByPath("reload.invalid_arguments")
 
       switch args.length
         when 0
@@ -195,7 +196,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
       goNumber = (num) =>
         if num is 0
-          @throwErr("cy.go() cannot accept '0'. The number must be greater or less than '0'.", options._log)
+          $Cypress.Utils.throwErrByPath("go.invalid_number", { onFail: options._log })
 
         didUnload = false
         pending   = Promise.pending()
@@ -246,17 +247,20 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           when "forward" then goNumber(1)
           when "back"    then goNumber(-1)
           else
-            @throwErr("cy.go() accepts either 'forward' or 'back'. You passed: '#{str}'", options._log)
+            $Cypress.Utils.throwErrByPath("go.invalid_direction", {
+              onFail: options._log
+              args: { str }
+            })
 
       switch
         when _.isFinite(numberOrString) then goNumber(numberOrString)
         when _.isString(numberOrString) then goString(numberOrString)
         else
-          @throwErr("cy.go() accepts only a string or number argument", options._log)
+          $Cypress.Utils.throwErrByPath("go.invalid_argument", { onFail: options._log })
 
     visit: (url, options = {}) ->
       if not _.isString(url)
-        @throwErr("cy.visit() must be called with a string as its 1st argument")
+        $Cypress.Utils.throwErrByPath("visit.invalid_1st_arg")
 
       _.defaults options,
         log: true
@@ -292,7 +296,10 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             options.onLoad?.call(runnable.ctx, win)
             if Cypress.cy.$$("[data-cypress-visit-error]").length
               try
-                @throwErr("Could not load the remote page: #{url}", options._log)
+                $Cypress.Utils.throwErrByPath("visit.loading_failed", {
+                  onFail: options._log
+                  args: { url }
+                })
               catch e
                 reject(e)
             else

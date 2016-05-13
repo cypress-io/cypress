@@ -29,7 +29,7 @@ describe "$Cypress.Cy Ensure Extensions", ->
 
     it "throws without enough coords provided to calculate distance", ->
       fn = => @cy.ensureElementIsNotAnimating(null, [])
-      expect(fn).to.throw("not enough coord points provided to calculate distance")
+      expect(fn).to.throw("Not enough coord points provided to calculate distance")
 
     it "throws when element is animating", ->
       @commands = $Cypress.Commands.create()

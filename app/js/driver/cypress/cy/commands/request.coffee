@@ -72,13 +72,15 @@ $Cypress.register "Request", (Cypress, _, $) ->
       options.method = options.method.toUpperCase()
 
       if not validHttpMethodsRe.test(options.method)
-        @throwErr("cy.request() was called with an invalid method: '#{o.method}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS")
+        $Cypress.Utils.throwErrByPath("request.invalid_method", {
+          args: { method: o.method }
+        })
 
       if not options.url
-        @throwErr("cy.request requires a url. You did not provide a url.")
+        $Cypress.Utils.throwErrByPath("request.url_missing")
 
       if not _.isString(options.url)
-        @throwErr("cy.request requires the url to be a string.")
+        $Cypress.Utils.throwErrByPath("request.url_wrong_type")
 
       ## normalize the url by prepending it with our current origin
       ## or the baseUrl
@@ -91,7 +93,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
       ## if we made a request prior to a visit then it needs
       ## to be filled out
       if not Cypress.Location.isFullyQualifiedUrl(options.url)
-        @throwErr("cy.request must be provided a fully qualified url - one that begins with 'http'. By default cy.request will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present.")
+        $Cypress.Utils.throwErrByPath("request.url_invalid")
 
       if isValidJsonObj(options.body)
         options.json = true
@@ -100,23 +102,23 @@ $Cypress.register "Request", (Cypress, _, $) ->
 
       if a = options.auth
         if not _.isObject(a)
-          @throwErr("cy.request must be passed an object literal for the 'auth' option.")
+          $Cypress.Utils.throwErrByPath("request.auth_invalid")
 
       if h = options.headers
         if _.isObject(h)
           options.headers = h
         else
-          @throwErr("cy.request requires headers to be an object literal.")
+          $Cypress.Utils.throwErrByPath("request.headers_invalid")
 
       isPlainObject = (obj) ->
         _.isObject(obj) and not _.isArray(obj) and not _.isFunction(obj)
 
       if c = options.cookies
         if not _.isBoolean(c) and not isPlainObject(c)
-          @throwErr("cy.request requires cookies to be true, or an object literal.")
+          $Cypress.Utils.throwErrByPath("request.cookies_invalid")
 
       if not _.isBoolean(options.gzip)
-        @throwErr("cy.request requires gzip to be a boolean.")
+        $Cypress.Utils.throwErrByPath("request.gzip_invalid")
 
       ## clone the requestOpts to prevent
       ## anything from mutating it now
@@ -168,24 +170,27 @@ $Cypress.register "Request", (Cypress, _, $) ->
             else
               ""
 
-            @throwErr("""
-            cy.request() failed:
-
-            The response from the remote server was:
-
-              > "#{err}"
-
-            The request parameters were:
-              Method: #{requestOpts.method}
-              URL: #{requestOpts.url}
-              #{body}
-              #{headers}
-            """, options._log)
+            $Cypress.Utils.throwErrByPath("request.loading_failed", {
+              onFail: options._log
+              args: {
+                error: err
+                method: requestOpts.method
+                url: requestOpts.url
+                body
+                headers
+              }
+            })
 
           ## bomb if we should fail on non 2xx status code
           if options.failOnStatus and not isOkStatusCodeRe.test(response.status)
-            @throwErr("cy.request failed because the response had the status code: #{response.status}", options._log)
+            $Cypress.Utils.throwErrByPath("request.status_invalid", {
+              onFail: options._log
+              args: { status: response.status }
+            })
 
           return response
         .catch Promise.TimeoutError, (err) =>
-          @throwErr "cy.request timed out waiting '#{options.timeout}ms' for a response. No response ever occured.", options._log
+          $Cypress.Utils.throwErrByPath "request.timed_out", {
+            onFail: options._log
+            args: { timeout: options.timeout }
+          }

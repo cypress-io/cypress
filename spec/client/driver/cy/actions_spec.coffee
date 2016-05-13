@@ -211,28 +211,28 @@ describe "$Cypress.Cy Actions Commands", ->
           .select("foo")
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include ".select() can only be called on a single <select>! Your subject contained #{@num} elements!"
+          expect(err.message).to.include "cy.select() can only be called on a single <select>. Your subject contained #{@num} elements."
           done()
 
       it "throws on anything other than a select", (done) ->
         @cy.get("input:first").select("foo")
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".select() can only be called on a <select>! Your subject is a: <input id=\"input\">"
+          expect(err.message).to.include "cy.select() can only be called on a <select>. Your subject is a: <input id=\"input\">"
           done()
 
       it "throws when finding duplicate values", (done) ->
         @cy.get("select[name=names]").select("bm")
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".select() matched than one option by value or text: bm"
+          expect(err.message).to.include "cy.select() matched more than one option by value or text: bm"
           done()
 
       it "throws when passing an array to a non multiple select", (done) ->
         @cy.get("select[name=names]").select(["bm", "ss"])
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".select() was called with an array of arguments but does not have a 'multiple' attribute set!"
+          expect(err.message).to.include "cy.select() was called with an array of arguments but does not have a 'multiple' attribute set."
           done()
 
       it "throws when the subject isnt visible", (done) ->
@@ -425,7 +425,7 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.on "invoke:end", (cmd) =>
         if cmd.get("name") is "type"
           ## 40 is from 4 keys
-          ## 100 is from .click + .focus delays!
+          ## 100 is from .click + .focus delays.
           expect(@test.timeout()).to.eq 40 + 100 + 50 + prevTimeout
           done()
 
@@ -1397,7 +1397,7 @@ describe "$Cypress.Cy Actions Commands", ->
           .get("[contenteditable]:first").type("foo{enter}bar").then ->
             expect(changed).to.eq 0
 
-      ## [contenteditable] does not fire ANY change events ever!
+      ## [contenteditable] does not fire ANY change events ever.
       it "does not fire at ALL for [contenteditable]", ->
         changed = 0
 
@@ -1817,7 +1817,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("form").type("foo")
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".type() can only be called on textarea or :text! Your subject is a: <form id=\"by-id\">...</form>"
+          expect(err.message).to.include "cy.type() can only be called on textarea or :text. Your subject is a: <form id=\"by-id\">...</form>"
           done()
 
       it "throws when subject is a collection of elements", (done) ->
@@ -1828,7 +1828,7 @@ describe "$Cypress.Cy Actions Commands", ->
           .type("foo")
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include ".type() can only be called on a single textarea or :text! Your subject contained #{@num} elements!"
+          expect(err.message).to.include "cy.type() can only be called on a single textarea or :text. Your subject contained #{@num} elements."
           done()
 
       it "throws when the subject isnt visible", (done) ->
@@ -1920,7 +1920,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq 2
-          expect(err.message).to.eq "{tab} isn't a supported character sequence. You'll want to use the command: 'cy.tab()' which is not ready yet, but when it is done that's what you'll use."
+          expect(err.message).to.eq "{tab} isn't a supported character sequence. You'll want to use the command cy.tab(), which is not ready yet, but when it is done that's what you'll use."
           done()
 
         @cy.get(":text:first").type("foo{tab}")
@@ -1933,7 +1933,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq 2
-          expect(err.message).to.eq ".type() cannot accept an empty String! You need to actually type something."
+          expect(err.message).to.eq "cy.type() cannot accept an empty String. You need to actually type something."
           done()
 
         @cy.get(":text:first").type("")
@@ -1947,7 +1947,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           @cy.on "fail", (err) =>
             expect(logs.length).to.eq 2
-            expect(err.message).to.eq ".type() can only accept a String or Number. You passed in: '#{val}'"
+            expect(err.message).to.eq "cy.type() can only accept a String or Number. You passed in: '#{val}'"
             done()
 
           @cy.get(":text:first").type(val)
@@ -2116,28 +2116,28 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(3)
           expect(@log.get("error")).to.eq(err)
-          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <form id=\"checkboxes\">...</form>"
+          expect(err.message).to.include "cy.clear() can only be called on textarea or :text. Your subject contains a: <form id=\"checkboxes\">...</form>"
           done()
 
         @cy.get("textarea:first,form#checkboxes").clear()
 
       it "throws if any subject isnt a :text", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <div id=\"dom\">...</div>"
+          expect(err.message).to.include "cy.clear() can only be called on textarea or :text. Your subject contains a: <div id=\"dom\">...</div>"
           done()
 
         @cy.get("div").clear()
 
       it "throws on an input radio", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <input type=\"radio\" name=\"gender\" value=\"male\">"
+          expect(err.message).to.include "cy.clear() can only be called on textarea or :text. Your subject contains a: <input type=\"radio\" name=\"gender\" value=\"male\">"
           done()
 
         @cy.get(":radio").clear()
 
       it "throws on an input checkbox", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <input type=\"checkbox\" name=\"colors\" value=\"blue\">"
+          expect(err.message).to.include "cy.clear() can only be called on textarea or :text. Your subject contains a: <input type=\"checkbox\" name=\"colors\" value=\"blue\">"
           done()
 
         @cy.get(":checkbox").clear()
@@ -2465,12 +2465,12 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("form").check()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".check() can only be called on :checkbox and :radio! Your subject contains a: <form id=\"by-id\">...</form>"
+          expect(err.message).to.include "cy.check() can only be called on :checkbox and :radio. Your subject contains a: <form id=\"by-id\">...</form>"
           done()
 
       it "throws when any member of the subject isnt a checkbox or radio", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".check() can only be called on :checkbox and :radio! Your subject contains a: <textarea id=\"comments\"></textarea>"
+          expect(err.message).to.include "cy.check() can only be called on :checkbox and :radio. Your subject contains a: <textarea id=\"comments\"></textarea>"
           done()
 
         ## find a textare which should blow up
@@ -2882,7 +2882,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":radio").uncheck()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".uncheck() can only be called on :checkbox!"
+          expect(err.message).to.include "cy.uncheck() can only be called on :checkbox."
           done()
 
       it "throws if not a checkbox", (done) ->
@@ -2891,7 +2891,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", -> done()
 
       it "throws when any member of the subject isnt visible", (done) ->
-        ## grab the first 3 checkboxes!
+        ## grab the first 3 checkboxes.
         chk = @cy.$$(":checkbox").slice(0, 3).show()
 
         logs = []
@@ -3110,7 +3110,7 @@ describe "$Cypress.Cy Actions Commands", ->
           ## if we reach beforeunload we know the form
           ## has been submitted
           $(win).on "beforeunload", ->
-            done("submit event should not submit the form!")
+            done("submit event should not submit the form.")
 
             return undefined
         .get("form:first").submit().then -> done()
@@ -3124,12 +3124,12 @@ describe "$Cypress.Cy Actions Commands", ->
           ## if we reach beforeunload we know the form
           ## has been submitted
           $(win).on "beforeunload", ->
-            done("submit event should not submit the form!")
+            done("submit event should not submit the form.")
 
             return undefined
         .get("form:first").submit().then -> done()
 
-    it "actually submits the form!", ->
+    it "actually submits the form.", ->
       beforeunload = false
 
       @cy
@@ -3143,7 +3143,7 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("form:first").submit().then ->
           expect(beforeunload).to.be.true
 
-    ## if we removed our submit handler this would fail!
+    ## if we removed our submit handler this would fail.
     it "does not resolve the submit command because submit event is captured setting isReady to false", ->
       ## we must rely on isReady already being pending here
       ## because the submit method does not trigger beforeunload
@@ -3264,7 +3264,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(2)
           expect(@log.get("error")).to.eq(err)
-          expect(err.message).to.include ".submit() can only be called on a <form>! Your subject contains a: <input id=\"input\">"
+          expect(err.message).to.include "cy.submit() can only be called on a <form>. Your subject contains a: <input id=\"input\">"
           done()
 
         @cy.get("input").submit()
@@ -3287,11 +3287,11 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when subject is a collection of elements", (done) ->
         forms = @cy.$$("form")
 
-        ## make sure we have more than 1 form!
+        ## make sure we have more than 1 form.
         expect(forms.length).to.be.gt(1)
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include ".submit() can only be called on a single form! Your subject contained #{forms.length} form elements!"
+          expect(err.message).to.include "cy.submit() can only be called on a single form. Your subject contained #{forms.length} form elements."
           done()
 
         @cy.get("form").submit()
@@ -3713,7 +3713,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("form").focus()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".focus() can only be called on a valid focusable element! Your subject is a: <form id=\"by-id\">...</form>"
+          expect(err.message).to.include "cy.focus() can only be called on a valid focusable element. Your subject is a: <form id=\"by-id\">...</form>"
           done()
 
       it "throws when subject is a collection of elements", (done) ->
@@ -3724,7 +3724,7 @@ describe "$Cypress.Cy Actions Commands", ->
           .focus()
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include ".focus() can only be called on a single element! Your subject contained #{@num} elements!"
+          expect(err.message).to.include "cy.focus() can only be called on a single element. Your subject contained #{@num} elements."
           done()
 
       it "logs once when not dom subject", (done) ->
@@ -4006,14 +4006,14 @@ describe "$Cypress.Cy Actions Commands", ->
           .blur()
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include ".blur() can only be called on a single element! Your subject contained #{@num} elements!"
+          expect(err.message).to.include "cy.blur() can only be called on a single element. Your subject contained #{@num} elements."
           done()
 
       it "throws when there isnt an activeElement", (done) ->
         @cy.get("form:first").blur()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".blur() can only be called when there is a currently focused element."
+          expect(err.message).to.include "cy.blur() can only be called when there is a currently focused element."
           done()
 
       it "throws when blur is called on a non-active element", (done) ->
@@ -4022,7 +4022,7 @@ describe "$Cypress.Cy Actions Commands", ->
           .get("#button").blur()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".blur() can only be called on the focused element. Currently the focused element is a: <input id=\"input\">"
+          expect(err.message).to.include "cy.blur() can only be called on the focused element. Currently the focused element is a: <input id=\"input\">"
           done()
 
       it "logs delta options on error", (done) ->
@@ -5005,7 +5005,7 @@ describe "$Cypress.Cy Actions Commands", ->
         num = @cy.$$("button").length
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Cannot call .click() on multiple elements. You tried to click #{num} elements. Pass {multiple: true} if you want to serially click each element."
+          expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 14 elements. Pass {multiple: true} if you want to serially click each element."
           done()
 
         @cy.get("button").click()
@@ -5110,7 +5110,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy._timeout(200)
 
         btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(@cy.$$("body"))
-        span = $("<span>span on button</span>").css(position: "fixed", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$$("body"))
+        span = $("<span>span on button</span>").css(position: "fixed", left: 0, top: 0, padding: 20, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$$("body"))
 
         logs = []
 
@@ -5163,7 +5163,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(logs.length).to.eq(2)
-          expect(err.message).to.eq "Cannot call .click() on a <select> element. Use cy.select() command instead to change the value."
+          expect(err.message).to.eq "cy.click() cannot be called on a <select> element. Use cy.select() command instead to change the value."
           done()
 
         @cy.get("select:first").click()

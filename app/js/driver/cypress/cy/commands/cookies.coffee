@@ -36,12 +36,12 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
       new Promise (resolve, reject) =>
         fn = (resp) =>
           if e = resp.__error
-            err = @cypressErr(e)
+            err = $Cypress.Utils.cypressErr(e)
             err.name = resp.__name
             err.stack = resp.__stack
 
             try
-              @throwErr(err, log)
+              $Cypress.Utils.throwErr(err, { onFail: log })
             catch e
               reject(e)
           else
@@ -71,7 +71,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
         })
 
       if not _.isString(name)
-        @throwErr("cy.getCookie() must be passed a string argument for name.", options._log)
+        $Cypress.Utils.throwErrByPath("getCookie.invalid_argument", { onFail: options._log })
 
       @_automateCookies("get:cookie", {name: name}, options._log)
       .then (resp) ->
@@ -129,7 +129,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
         })
 
       if not _.isString(name) or not _.isString(value)
-        @throwErr("cy.setCookie() must be passed two string arguments for name and value.", options._log)
+        $Cypress.Utils.throwErrByPath("setCookie.invalid_arguments", { onFail: options._log })
 
       @_automateCookies("set:cookie", cookie, options._log)
       .then (resp) ->
@@ -159,7 +159,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
         })
 
       if not _.isString(name)
-        @throwErr("cy.clearCookie() must be passed a string argument for name.", options._log)
+        $Cypress.Utils.throwErrByPath("clearCookie.invalid_argument", { onFail: options._log })
 
       ## TODO: prevent clearing a cypress namespace
       @_automateCookies("clear:cookie", {name: name}, options._log)

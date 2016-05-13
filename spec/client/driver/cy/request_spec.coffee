@@ -416,7 +416,7 @@ describe "$Cypress.Cy Request Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request requires a url. You did not provide a url.")
+          expect(err.message).to.eq("cy.request() requires a url. You did not provide a url.")
           done()
 
         @cy.request()
@@ -434,7 +434,7 @@ describe "$Cypress.Cy Request Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request must be provided a fully qualified url - one that begins with 'http'. By default cy.request will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present.")
+          expect(err.message).to.eq("cy.request() must be provided a fully qualified url - one that begins with 'http'. By default cy.request() will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present.")
           done()
 
         @cy.request("/foo/bar")
@@ -449,7 +449,7 @@ describe "$Cypress.Cy Request Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request requires the url to be a string.")
+          expect(err.message).to.eq("cy.request() requires the url to be a string.")
           done()
 
         @cy.request({
@@ -466,7 +466,7 @@ describe "$Cypress.Cy Request Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request must be passed an object literal for the 'auth' option.")
+          expect(err.message).to.eq("cy.request() must be passed an object literal for the 'auth' option.")
           done()
 
         @cy.request({
@@ -484,7 +484,7 @@ describe "$Cypress.Cy Request Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request requires cookies to be true, or an object literal.")
+          expect(err.message).to.eq("cy.request() requires cookies to be true, or an object literal.")
           done()
 
         @cy.request({
@@ -502,7 +502,7 @@ describe "$Cypress.Cy Request Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request requires headers to be an object literal.")
+          expect(err.message).to.eq("cy.request() requires headers to be an object literal.")
           done()
 
         @cy.request({
@@ -538,7 +538,7 @@ describe "$Cypress.Cy Request Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request requires gzip to be a boolean.")
+          expect(err.message).to.eq("cy.request() requires gzip to be a boolean.")
           done()
 
         @cy.request({
@@ -558,7 +558,7 @@ describe "$Cypress.Cy Request Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request failed because the response had the status code: 500")
+          expect(err.message).to.eq("cy.request() failed because the response had the status code: 500")
           done()
 
         @cy.request("http://localhost:1234/foo")
@@ -673,7 +673,7 @@ describe "$Cypress.Cy Request Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request timed out waiting '50ms' for a response. No response ever occured.")
+          expect(err.message).to.eq("cy.request() timed out waiting 50ms for a response. No response ever occured.")
           done()
 
         @cy.request({url: "http://localhost:1234/foo", timeout: 50})

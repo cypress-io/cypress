@@ -40,17 +40,24 @@ do ($Cypress, _) ->
       ## throw a very specific error if our alias isnt in the right
       ## format, but its word is found in the availableAliases
       if (not aliasRe.test(name)) and (name in availableAliases)
-        @throwErr "Invalid alias: '#{name}'.\nYou forgot the '@'. It should be written as: '@#{@_aliasDisplayName(name)}'.", log
+        displayName = @_aliasDisplayName(name)
+        $Cypress.Utils.throwErrByPath "alias.invalid", {
+          onFail: log
+          args: { name, displayName }
+        }
 
       cmd ?= log and log.get("name") or @prop("current").get("name")
-      err = "cy.#{cmd}() could not find a registered alias for: '#{@_aliasDisplayName(name)}'.\n"
+      displayName = @_aliasDisplayName(name)
 
-      if availableAliases.length
-        err += "Available aliases are: '#{availableAliases.join(", ")}'."
+      errPath = if availableAliases.length
+        "alias.not_registered_with_available"
       else
-        err += "You have not aliased anything yet."
+        "alias.not_registered_without_available"
 
-      @throwErr(err, log)
+      $Cypress.Utils.throwErrByPath errPath, {
+        onFail: log
+        args: { cmd, displayName, availableAliases: availableAliases.join(", ") }
+      }
 
     _getCommandsUntilFirstParentOrValidSubject: (command, memo = []) ->
       return null if not command

@@ -129,15 +129,18 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
 
         @clearTimeout()
 
-        getMsg = ->
+        getErrPath = ->
           ## we've yield an explicit done callback
           if runnable.async
-            "Timed out after '#{ms}ms'. The done() callback was never invoked!"
+            "mocha.async_timed_out"
           else
-            "Cypress command timeout of '#{ms}ms' exceeded."
+            "mocha.timed_out"
 
         @timer = setTimeout ->
-          runnable.callback new Error getMsg()
+          errMessage = $Cypress.Utils.errMessageByPath(getErrPath(), {
+            args: { ms }
+          })
+          runnable.callback new Error(errMessage)
           runnable.timedOut = true
         , ms
 
@@ -172,7 +175,7 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
       ## with the iframe's `window` reference, rather than the parent's.
       mocha.ui = (name) ->
         @_ui = Mocha.interfaces[name]
-        throw new Error('invalid interface "' + name + '"') if not @_ui
+        $Cypress.Utils.throwErrByPath("mocha.invalid_interface", { args: { name } }) if not @_ui
         @_ui = @_ui(@suite)
         @suite.emit 'pre-require', contentWindow, null, @
         return @

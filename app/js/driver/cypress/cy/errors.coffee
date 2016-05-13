@@ -1,27 +1,6 @@
 do ($Cypress, _) ->
 
   $Cypress.Cy.extend
-    cypressErr: (err) ->
-      $Cypress.Utils.cypressError(err)
-
-    throwErr: (err, onFail) ->
-      if _.isString(err)
-        err = @cypressErr(err)
-
-      ## assume onFail is a command if
-      ## onFail is present and isnt a function
-      if onFail and not _.isFunction(onFail)
-        command = onFail
-
-        ## redefine onFail and automatically
-        ## hook this into our command
-        onFail = (err) ->
-          command.error(err)
-
-      err.onFail = onFail if onFail
-
-      throw err
-
     ## submit a generic command error
     commandErr: (err) ->
       current = @prop("current")
@@ -69,21 +48,12 @@ do ($Cypress, _) ->
           memo
       , []
 
-      err = @cypressErr("""
-        Oops, Cypress detected something wrong with your test code.
-
-        The test has finished but Cypress still has commands in its queue.
-        The #{commands.length} queued commands that have not yet run are:
-
-        #{commands.join('\n')}
-
-        In every situation we've seen, this has been caused by programmer error.
-        Most often this indicates a race condition due to a forgotten 'return' or from commands in a previously run test bleeding into the current test.
-
-        For a much more thorough explanation including examples please review this error here:
-
-        https://on.cypress.io/command-queue-ended-early
-      """)
+      err = $Cypress.Utils.cypressErr($Cypress.Utils.errMessageByPath("miscellaneous.dangling_commands", {
+        args: {
+          numCommands: commands.length
+          commands: commands.join('\n')
+        }
+      }))
       err.onFail = ->
       @fail(err)
 

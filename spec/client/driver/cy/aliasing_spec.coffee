@@ -97,14 +97,14 @@ describe "$Cypress.Cy Aliasing Commands", ->
       _.each [null, undefined, {}, [], 123], (value) =>
         it "throws if when passed: #{value}", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.eq "cy.as() can only accept a string!"
+            expect(err.message).to.eq "cy.as() can only accept a string."
             done()
 
           @cy.get("div:first").as(value)
 
       it "throws on blank string", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.as() cannot be passed an empty string!"
+          expect(err.message).to.eq "cy.as() cannot be passed an empty string."
           done()
 
         @cy.get("div:first").as("")
@@ -303,7 +303,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
 
       it "throws when an alias cannot be found", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.get() could not find a registered alias for: 'lastDiv'.\nAvailable aliases are: 'b, firstInput'."
+          expect(err.message).to.include "cy.get() could not find a registered alias for: '@lastDiv'.\nAvailable aliases are: 'b, firstInput'."
           done()
 
         @cy

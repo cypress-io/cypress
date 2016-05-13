@@ -41,9 +41,8 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
 
       return @
 
-    ## TODO: TEST THIS
     run: (fn) ->
-      throw new Error("Cannot call Cypress#run without a runner instance!") if not @runner
+      @Utils.throwErrByPath("miscellaneous.no_runner") if not @runner
 
       @runner.run(fn)
 
@@ -147,7 +146,7 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
 
     $: ->
       if not @cy
-        throw $Cypress.Utils.cypressError("Cypress.cy is undefined. You may be trying to query outside of a running test. Cannot call 'Cypress.$'")
+        $Cypress.Utils.throwErrByPath("miscellaneous.no_cy")
 
       @cy.$$.apply(@cy, arguments)
 
@@ -171,7 +170,7 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
 
       ## attach each of the classes
       ## to the Cypress instance
-      for klass in "Cy Log Utils Chai Mocha Runner Agents Server Chainer Location LocalStorage Cookies Keyboard Mouse Command Commands EnvironmentVariables Dom".split(" ")
+      for klass in "Cy Log Utils Chai Mocha Runner Agents Server Chainer Location LocalStorage Cookies Keyboard Mouse Command Commands EnvironmentVariables Dom ErrorMessages".split(" ")
         Cypress[klass] = $Cypress[klass]
 
       ## copy the modules by reference too

@@ -227,7 +227,7 @@ do ($Cypress, _) ->
         $Cypress.Chainer.remove(key)
 
     add: (key, fn, type) ->
-      throw new Error("Cypress.add(key, fn, type) must include a type!") if not type
+      $Cypress.Utils.throwErrByPath("add.type_missing") if not type
 
       ## allow object signature
       if _.isObject(key)
@@ -291,13 +291,7 @@ do ($Cypress, _) ->
 
       $Cypress.Cy.prototype[key] = (args...) ->
         if not @private("runnable")
-          @throwErr("""
-            \nCypress cannot execute commands outside a running test.
-            This usually happens when you accidentally write commands outside an it(...) test.
-            If that is the case, just move these commands inside an 'it(...)' test.
-            Check your test file for errors.\n
-            https://on.cypress.io/cannot-execute-commands-outside-test
-          """)
+          $Cypress.Utils.throwErrByPath("miscellaneous.outside_test")
 
         ## this is the first call on cypress
         ## so create a new chainer instance

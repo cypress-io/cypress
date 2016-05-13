@@ -81,12 +81,14 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       ## resolve with the existing subject
       return ret ? subject
     .catch Promise.TimeoutError, =>
-      @throwErr """
-        cy.#{name}() timed out after waiting '#{options.timeout}ms'.\n
-        Your callback function returned a promise which never resolved.\n
-        The callback function was:\n
-        #{fn.toString()}
-      """, options._log
+      $Cypress.Utils.throwErrByPath "invoke_its.timed_out", {
+        onFail: options._log
+        args: {
+          cmd: name
+          timeout: options.timeout
+          func: fn.toString()
+        }
+      }
 
   invokeFn = (subject, fn, args...) ->
     @ensureParent()
@@ -112,16 +114,26 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         Subject: subject
 
     if not _.isString(fn)
-      @throwErr("cy.#{name}() only accepts a string as the first argument.", options._log)
+      $Cypress.Utils.throwErrByPath("invoke_its.invalid_1st_arg", {
+        onFail: options._log
+        args: { cmd: name }
+      })
 
     fail = (prop) =>
-      @throwErr("cy.#{name}() errored because the property: '#{prop}' does not exist on your subject.", options._log)
+      $Cypress.Utils.throwErrByPath("invoke_its.invalid_property", {
+        onFail: options._log
+        args: { prop, cmd: name }
+      })
 
     failOnPreviousNullOrUndefinedValue = (previousProp, currentProp, value) =>
-      @throwErr("cy.#{name}() errored because the property: '#{previousProp}' returned a '#{value}' value. You cannot call any properties such as '#{currentProp}' on a '#{value}' value.")
+      $Cypress.Utils.throwErrByPath("invoke_its.previous_prop_nonexistent", {
+        args: { previousProp, currentProp, value, cmd: name }
+      })
 
     failOnCurrentNullOrUndefinedValue = (prop, value) =>
-      @throwErr("cy.#{name}() errored because your subject is currently: '#{value}'. You cannot call any properties such as '#{prop}' on a '#{value}' value.")
+      $Cypress.Utils.throwErrByPath("invoke_its.current_prop_nonexistent", {
+        args: { prop, value, cmd: name }
+      })
 
     getReducedProp = (str, subject) ->
       getValue = (memo, prop) ->
@@ -169,7 +181,10 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
             if _.isFunction(prop)
               prop.apply(actualSubject, args)
             else
-              @throwErr("Cannot call cy.invoke() because '#{fn}' is not a function. You probably want to use cy.its('#{fn}').", options._log)
+              $Cypress.Utils.throwErrByPath("invoke.invalid_type", {
+                onFail: options._log
+                args: { prop: fn }
+              })
 
       getFormattedElement = ($el) ->
         if Cypress.Utils.hasElement($el)
@@ -217,7 +232,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     spread: (subject, options, fn) ->
       ## if this isnt an array blow up right here
       if not _.isArray(subject)
-        @throwErr("cy.spread() requires the existing subject be an array!")
+        $Cypress.Utils.throwErrByPath("spread.invalid_type")
 
       subject._spreadArray = true
 

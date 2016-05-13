@@ -339,7 +339,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.noop({}).should("deep.eq2", {})
 
-      it "logs 'should' when non avaiable chainer", (done) ->
+      it "logs 'should' when non available chainer", (done) ->
         logs = []
 
         @Cypress.on "log", (@log) =>

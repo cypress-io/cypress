@@ -13,16 +13,9 @@ describe "$Cypress.Cy Errors Extensions", ->
   after ->
     @iframe.remove()
 
-  it "adds 4 methods", ->
-    _.each ["cypressErr", "throwErr", "commandErr", "fail"], (name) =>
+  it "adds 2 methods", ->
+    _.each ["commandErr", "fail"], (name) =>
       expect(@cy[name]).to.be.a("function")
-
-  context "#throwErr", ->
-    it "has an err.name of CypressError", ->
-      try
-        @cy.throwErr("foo")
-      catch e
-        expect(e.name).to.eq "CypressError"
 
   context "#endedEarlyErr", ->
     beforeEach ->

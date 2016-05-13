@@ -4,7 +4,7 @@ $Cypress.EnvironmentVariables = do ($Cypress, _) ->
     env: (key, value) ->
       env = @environmentVariables
 
-      throw new Error("Cypress.environmentVariables is not defined. Open an issue if you see this message.") if not env
+      $Cypress.Utils.throwErrByPath("env.variables_missing") if not env
 
       env.getOrSet.apply(env, arguments)
 

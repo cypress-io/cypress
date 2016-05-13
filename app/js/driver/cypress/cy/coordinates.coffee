@@ -120,4 +120,6 @@ do ($Cypress, _) ->
         when "bottomLeft"   then @getBottomLeftCoordinates(rect)
         when "bottomRight"  then @getBottomRightCoordinates(rect)
         else
-          throw new Error("Invalid position argument: '#{position}'. Position may only be center, topLeft, topRight, bottomLeft, or bottomRight.")
+          $Cypress.Utils.throwErrByPath("dom.invalid_position_argument", {
+            args: { position }
+          })

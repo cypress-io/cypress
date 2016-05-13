@@ -52,7 +52,7 @@ describe "$Cypress.Cy Cookie Commands", ->
       beforeEach ->
         @allowErrors()
 
-      it "logs once on error", (done) ->
+      it.skip "logs once on error", (done) ->
         logs = []
 
         @Cypress.on "get:cookies", (data, cb) ->
@@ -131,7 +131,7 @@ describe "$Cypress.Cy Cookie Commands", ->
       beforeEach ->
         @allowErrors()
 
-      it "logs once on error", (done) ->
+      it.skip "logs once on error", (done) ->
         logs = []
 
         @Cypress.on "get:cookie", (data, cb) ->
@@ -242,7 +242,7 @@ describe "$Cypress.Cy Cookie Commands", ->
       beforeEach ->
         @allowErrors()
 
-      it "logs once on error", (done) ->
+      it.skip "logs once on error", (done) ->
         logs = []
 
         @Cypress.on "set:cookie", (data, cb) ->
@@ -340,7 +340,7 @@ describe "$Cypress.Cy Cookie Commands", ->
       beforeEach ->
         @allowErrors()
 
-      it "logs once on error", (done) ->
+      it.skip "logs once on error", (done) ->
         logs = []
 
         @Cypress.on "clear:cookie", (data, cb) ->
@@ -503,7 +503,7 @@ describe "$Cypress.Cy Cookie Commands", ->
       beforeEach ->
         @allowErrors()
 
-      it "logs once on 'get:cookies' error", (done) ->
+      it.skip "logs once on 'get:cookies' error", (done) ->
         logs = []
 
         @Cypress.on "get:cookies", (data, cb) ->
@@ -522,7 +522,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
         @cy.clearCookies()
 
-      it "logs once on 'clear:cookies' error", (done) ->
+      it.skip "logs once on 'clear:cookies' error", (done) ->
         logs = []
 
         @Cypress.on "get:cookies", (data, cb) ->

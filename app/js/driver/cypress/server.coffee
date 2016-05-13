@@ -80,7 +80,7 @@ $Cypress.Server = do ($Cypress, _) ->
       @response      = null
 
     _getXhr: ->
-      @xhr ? throw new Error("XMLHttpRequest#xhr is missing!")
+      @xhr ? $Cypress.Utils.throwErrByPath("xhr.missing")
 
     _setDuration: (timeStart) ->
       @duration = (new Date) - timeStart

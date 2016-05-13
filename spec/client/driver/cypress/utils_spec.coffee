@@ -1,6 +1,90 @@
 describe "$Cypress.Utils API", ->
   enterCommandTestingMode()
 
+  context "#throwErrByPath", ->
+    beforeEach ->
+      $Cypress.ErrorMessages.__test_errors = {
+        simple: "This is a simple error message"
+        with_args: "The has args like '{{foo}}' and {{bar}}"
+        with_multi_args: "This has args like '{{foo}}' and {{bar}}, and '{{foo}}' is used twice"
+      }
+
+    describe "when error message path does not exist", ->
+
+      it "has an err.name of InternalError", ->
+        try
+          $Cypress.Utils.throwErrByPath("not.there")
+        catch e
+          expect(e.name).to.eq "InternalError"
+
+      it "has the right message", ->
+        try
+          $Cypress.Utils.throwErrByPath("not.there")
+        catch e
+          expect(e.message).to.include "Error message path 'not.there' does not exist"
+
+    describe "when error message path exists", ->
+
+      it "has an err.name of CypressError", ->
+        try
+          $Cypress.Utils.throwErrByPath("__test_errors.simple")
+        catch e
+          expect(e.name).to.eq "CypressError"
+
+      it "has the right message", ->
+        try
+          $Cypress.Utils.throwErrByPath("__test_errors.simple")
+        catch e
+          expect(e.message).to.include "This is a simple error message"
+
+    describe "when args are provided for the error", ->
+
+      it "uses them in the error message", ->
+        try
+          $Cypress.Utils.throwErrByPath("__test_errors.with_args", {
+            args: { foo: "foo", bar: ["bar", "qux"]  }
+          })
+        catch e
+          expect(e.message).to.include "The has args like 'foo' and bar,qux"
+
+    describe "when args are provided for the error and some are used multiple times in message", ->
+
+      it "uses them in the error message", ->
+        try
+          $Cypress.Utils.throwErrByPath("__test_errors.with_multi_args", {
+            args: { foo: "foo", bar: ["bar", "qux"]  }
+          })
+        catch e
+          expect(e.message).to.include "This has args like 'foo' and bar,qux, and 'foo' is used twice"
+
+    describe "when onFail is provided as a function", ->
+
+      it "attaches the function to the error", ->
+        onFail = ->
+        try
+          $Cypress.Utils.throwErrByPath("window.iframe_undefined", { onFail })
+        catch e
+          expect(e.onFail).to.equal onFail
+
+    describe "when onFail is provided as a command", ->
+
+      it "attaches the handler to the error", ->
+        command = { error: @sandbox.spy() }
+        try
+          $Cypress.Utils.throwErrByPath("window.iframe_undefined", { onFail: command })
+        catch e
+          e.onFail("the error")
+          expect(command.error).to.be.calledWith("the error")
+
+  context "#throwErr", ->
+
+    it "throws the error as sent", ->
+      try
+        $Cypress.Utils.throwErr("Something unexpected")
+      catch e
+        expect(e.message).to.include "Something unexpected"
+        expect(e.name).to.eq "CypressError"
+
   describe "#filterOutOptions", ->
     it "returns new obj based on the delta from the filter", ->
       obj = $Cypress.Utils.filterOutOptions {visible: true, exist: false, foo: "bar"}, {visible: null, exist: false}
@@ -167,3 +251,29 @@ describe "$Cypress.Utils API", ->
         expect(html).to.eq "<i class='fa-circle'>foo"
 
   describe "#plural", ->
+
+  describe "#getObjValueByPath", ->
+    beforeEach ->
+      @obj =
+        foo: 'foo'
+        bar:
+          baz:
+            qux: 'qux'
+
+    it 'throws if object not provided as first argument', ->
+      expect(-> $Cypress.Utils.getObjValueByPath("foo")).to.throw "The first parameter to $Cypress.Utils.getObjValueByPath() must be an object"
+
+    it 'throws if path not provided as second argument', ->
+      expect(=> $Cypress.Utils.getObjValueByPath(@obj)).to.throw "The second parameter to $Cypress.Utils.getObjValueByPath() must be a string"
+
+    it 'returns value for shallow path', ->
+      expect($Cypress.Utils.getObjValueByPath @obj, 'foo').to.equal 'foo'
+
+    it 'returns value for deeper path', ->
+      expect($Cypress.Utils.getObjValueByPath @obj, 'bar.baz.qux').to.equal 'qux'
+
+    it 'returns undefined for non-existent shallow path', ->
+      expect($Cypress.Utils.getObjValueByPath @obj, 'nope').to.be.undefined
+
+    it 'returns undefined for non-existent deeper path', ->
+      expect($Cypress.Utils.getObjValueByPath @obj, 'bar.baz.nope').to.be.undefined

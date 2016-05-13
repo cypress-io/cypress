@@ -5,7 +5,7 @@ do ($Cypress, _) ->
       runnable = @private("runnable")
 
       if not runnable
-        @throwErr("Cannot call .timeout() without a currently running test!")
+        $Cypress.Utils.throwErrByPath("outside_test_with_cmd", { args: { cmd: "timeout" } })
 
       if ms
         ## if delta is true then we add (or subtract) from the
@@ -20,7 +20,7 @@ do ($Cypress, _) ->
       runnable = @private("runnable")
 
       if not runnable
-        @throwErr("Cannot call .clearTimeout() without a currently running test!")
+        $Cypress.Utils.throwErrByPath("outside_test_with_cmd", { args: { cmd: "clearTimeout" } })
 
       runnable.clearTimeout()
 

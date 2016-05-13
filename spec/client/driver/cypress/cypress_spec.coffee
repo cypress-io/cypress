@@ -62,7 +62,7 @@ describe "$Cypress API", ->
     it "throws when no module is found by name", ->
       fn = => @Cypress.loadModule("foo")
 
-      expect(fn).to.throw "$Cypress.Module: foo not registered!"
+      expect(fn).to.throw "$Cypress.Module: foo not registered."
 
   describe "#loadModules", ->
     beforeEach ->
@@ -141,6 +141,17 @@ describe "$Cypress API", ->
 
     it "calls mocha#options with runner", ->
       expect(@Cypress.mocha.options).to.be.calledWith {}
+
+  describe "#run", ->
+    it "throws when no runner", ->
+      @Cypress.runner = null
+      expect(=> @Cypress.run()).to.throw "Cannot call Cypress#run without a runner instance."
+
+    it "passes the function to the runner#run", ->
+      @fn = ->
+      @Cypress.runner = { run: @sandbox.spy() }
+      @Cypress.run @fn
+      expect(@Cypress.runner.run).to.be.calledWith @fn
 
   describe "#env", ->
     beforeEach ->
