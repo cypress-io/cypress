@@ -164,6 +164,12 @@ describe "lib/socket", ->
 
         it "throws when onAutomationRequest rejects"
 
+        it "is:automation:connected returns true", (done) ->
+          @oar.withArgs("is:automation:connected", {string: "foo"}).resolves(true)
+
+          @client.emit "is:automation:connected", {string: "foo"}, (resp) ->
+            expect(resp).to.be.true
+            done()
 
     context "on(open:finder)", ->
       beforeEach ->

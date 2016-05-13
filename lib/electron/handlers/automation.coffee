@@ -54,6 +54,9 @@ automation = {
 
   clearCookies: (filter) ->
     @clear(filter)
+
+  verify: (data) ->
+    Promise.resolve(true)
 }
 
 module.exports = {
@@ -71,6 +74,8 @@ module.exports = {
         invoke("clearCookies", data)
       when "clear:cookie"
         invoke("clearCookie", data)
+      when "is:automation:connected"
+        invoke("verify", data)
       else
         Promise.reject new Error("No handler registered for: '#{msg}'")
 }
