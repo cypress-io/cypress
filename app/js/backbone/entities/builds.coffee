@@ -99,7 +99,7 @@
         {
           "uuid": "e474ccb9-0352-4ad9-85d3-feeb1e0505d5",
           "buildId": "1891"
-          "branch":"adding-testBranch",
+          "branch":"adding-test-branch",
           "message": "spec_helper updated"
           "duration": 1124424,
           "passed": 2,

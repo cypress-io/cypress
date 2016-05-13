@@ -1,3 +1,14 @@
+#builds-list-page {
+  .title-bar {
+    overflow: visible;
+
+    .controls, #manual-browser-wrapper {
+      margin-left: 10px;
+      margin-bottom: 10px;
+    }
+  }
+}
+
 .builds-container {
   @include list-columns(100%);
   margin-bottom: 40px;
