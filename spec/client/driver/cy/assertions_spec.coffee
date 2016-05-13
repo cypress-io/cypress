@@ -238,7 +238,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.get("button").should("have.length", "asdf")
 
-      it "does not log extra commands on fail and properly fails command + assertions", (done) ->
+      it.skip "does not log extra commands on fail and properly fails command + assertions", (done) ->
         @allowErrors()
 
         logs = []
@@ -339,7 +339,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.noop({}).should("deep.eq2", {})
 
-      it "logs 'should' when non avaiable chainer", (done) ->
+      it.skip "logs 'should' when non available chainer", (done) ->
         logs = []
 
         @Cypress.on "log", (@log) =>
@@ -406,7 +406,7 @@ describe "$Cypress.Cy Assertion Commands", ->
         @cy.get("button:first").click().should("have.class", "foo").then ->
           done("cy.should was supposed to fail")
 
-      it "throws when should('have.length') isnt a number", (done) ->
+      it.skip "throws when should('have.length') isnt a number", (done) ->
         logs = []
 
         @Cypress.on "log", (@log) =>
@@ -429,7 +429,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.get("button").should("have.length", "foo")
 
-      it "eventually.have.length is deprecated", (done) ->
+      it.skip "eventually.have.length is deprecated", (done) ->
         logs = []
 
         @Cypress.on "log", (@log) =>
@@ -450,7 +450,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.get("div:first").should("eventually.have.length", 1)
 
-      it "does not additionally log when .should is the current command", (done) ->
+      it.skip "does not additionally log when .should is the current command", (done) ->
         logs = []
 
         @Cypress.on "log", (@log) =>
@@ -471,7 +471,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.noop({}).should("deep.eq2", {})
 
-      it "logs and immediately fails on custom match assertions", (done) ->
+      it.skip "logs and immediately fails on custom match assertions", (done) ->
         logs = []
 
         @Cypress.on "log", (@log) =>
@@ -492,7 +492,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.wrap("foo").should("match", "foo")
 
-      it "does not log ensureElExistance errors", (done) ->
+      it.skip "does not log ensureElExistance errors", (done) ->
         logs = []
 
         @Cypress.on "log", (@log) =>
@@ -506,7 +506,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.get("#does-not-exist")
 
-      it "logs once with type: parent immediately without retrying", (done) ->
+      it.skip "logs once with type: parent immediately without retrying", (done) ->
         ## when cy.should is used by itself it really just acts like
         ## a cy.then (it does not retry) because nothing has been told
         ## to retry it!

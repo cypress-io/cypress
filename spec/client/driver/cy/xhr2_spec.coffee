@@ -773,7 +773,7 @@ describe "$Cypress.Cy XHR Commands", ->
         _.each ["asdf", 123, null, undefined], (arg) ->
           it "throws on bad argument: #{arg}", (done) ->
             @cy.on "fail", (err) ->
-              expect(err.message).to.include "cy.server() accepts only an object literal as its argument!"
+              expect(err.message).to.include "cy.server() accepts only an object literal as its argument"
               done()
 
             @cy.server(arg)
@@ -1316,7 +1316,7 @@ describe "$Cypress.Cy XHR Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.eq "cy.route() could not find a registered alias for: 'bar'.\nAvailable aliases are: 'foo'."
+          expect(err.message).to.eq "cy.route() could not find a registered alias for: '@bar'.\nAvailable aliases are: 'foo'."
           expect(logs.length).to.eq(2)
           expect(@log.get("name")).to.eq "route"
           expect(@log.get("error")).to.eq err
@@ -1587,7 +1587,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "errors with no pending requests", (done) ->
         @cy.on "fail", (err) =>
-          expect(err.message).to.eq "cy.respond() did not find any pending requests to respond to!"
+          expect(err.message).to.eq "cy.respond() did not find any pending requests to respond to"
           done()
 
         @cy

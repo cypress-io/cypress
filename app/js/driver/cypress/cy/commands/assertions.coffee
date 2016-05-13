@@ -88,7 +88,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
         error: err
       })
 
-      @throwErr(err, log)
+      @throwUnexpectedErr(err, log)
 
     chainers = chainers.split(".")
     lastChainer = _(chainers).last()
@@ -346,7 +346,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
             ## and then push our command into this err
             try
-              @throwErr(err, options._log)
+              @throwUnexpectedErr(err, options._log)
             catch e
               err = e
 

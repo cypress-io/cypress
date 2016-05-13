@@ -167,3 +167,29 @@ describe "$Cypress.Utils API", ->
         expect(html).to.eq "<i class='fa-circle'>foo"
 
   describe "#plural", ->
+
+  describe "#getObjValueByPath", ->
+    beforeEach ->
+      @obj =
+        foo: 'foo'
+        bar:
+          baz:
+            qux: 'qux'
+
+    it 'throws if object not provided as first argument', ->
+      expect(-> $Cypress.Utils.getObjValueByPath("foo")).to.throw "The first parameter to $Cypress.Utils.getObjValueByPath() must be an object"
+
+    it 'throws if path not provided as second argument', ->
+      expect(=> $Cypress.Utils.getObjValueByPath(@obj)).to.throw "The second parameter to $Cypress.Utils.getObjValueByPath() must be a string"
+
+    it 'returns value for shallow path', ->
+      expect($Cypress.Utils.getObjValueByPath @obj, 'foo').to.equal 'foo'
+
+    it 'returns value for deeper path', ->
+      expect($Cypress.Utils.getObjValueByPath @obj, 'bar.baz.qux').to.equal 'qux'
+
+    it 'returns undefined for non-existent shallow path', ->
+      expect($Cypress.Utils.getObjValueByPath @obj, 'nope').to.be.undefined
+
+    it 'returns undefined for non-existent deeper path', ->
+      expect($Cypress.Utils.getObjValueByPath @obj, 'bar.baz.nope').to.be.undefined

@@ -1,13 +1,37 @@
 do ($Cypress, _) ->
 
   $Cypress.Cy.extend
+    getErrMessage: (errPath, args)->
+      errMessage = $Cypress.Utils.getObjValueByPath $Cypress.ErrorMessages, errPath
+      throw new Error "Error message path '#{errPath}' does not exist" if not errMessage
+      _.reduce args, (message, argValue, argKey)->
+        message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), argValue)
+      , errMessage
+
+    internalErr: (err)->
+      err = new Error(err)
+      err.name = "InternalError"
+      err
+
     cypressErr: (err) ->
       $Cypress.Utils.cypressError(err)
 
-    throwErr: (err, onFail) ->
+    throwUnexpectedErr: (err, options = {})->
+      @_handleErr(err, options)
+
+    throwErr: (errPath, options = {}) ->
+      err = try
+        @getErrMessage errPath, options.args
+      catch e
+        err = @internalErr e
+
+      @_handleErr(err, options)
+
+    _handleErr: (err, options)->
       if _.isString(err)
         err = @cypressErr(err)
 
+      onFail = options.onFail
       ## assume onFail is a command if
       ## onFail is present and isnt a function
       if onFail and not _.isFunction(onFail)

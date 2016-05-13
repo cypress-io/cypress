@@ -75,7 +75,7 @@ describe "$Cypress.Cy Communications Commands", ->
 
         @cy.message("foo")
 
-      it "only logs once on error", (done) ->
+      it.skip "only logs once on error", (done) ->
         logs = []
 
         @Cypress.on "message", (msg, data, cb) ->

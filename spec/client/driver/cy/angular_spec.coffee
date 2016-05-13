@@ -25,14 +25,14 @@ describe "$Cypress.Cy Angular Commands", ->
           delete @cy.private("window").angular
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular."
+            expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use cy.ng() methods without angular."
             done()
 
           @cy.ng("binding", "phone")
 
         it "throws when binding cannot be found", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "Could not find element for binding: 'not-found'!"
+            expect(err.message).to.include "Could not find element for binding: 'not-found'."
             done()
 
           @cy.ng("binding", "not-found")
@@ -121,7 +121,7 @@ describe "$Cypress.Cy Angular Commands", ->
           delete @cy.private("window").angular
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular."
+            expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use cy.ng() methods without angular."
             done()
 
           @cy.ng("repeater", "phone in phones")
@@ -208,7 +208,7 @@ describe "$Cypress.Cy Angular Commands", ->
           delete @cy.private("window").angular
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular."
+            expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use cy.ng() methods without angular."
             done()
 
           @cy.ng("model", "query")

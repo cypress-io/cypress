@@ -144,7 +144,7 @@ describe "$Cypress.Cy Querying Commands", ->
       _.each ["", [], {}, 1, null, undefined], (value) =>
         it "throws if passed anything other than a function, such as: #{value}", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.within() must be called with a function!"
+            expect(err.message).to.include "cy.within() must be called with a function."
             done()
 
           @cy.get("body").within(value)
@@ -297,21 +297,21 @@ describe "$Cypress.Cy Querying Commands", ->
 
       it "throws on {exist: false}", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{exist: false}' have been deprecated. Instead write this as an assertion: .should('not.exist')."
+          expect(err.message).to.eq "Command Options such as: '{exist: false}' have been deprecated. Instead write this as an assertion: cy.should('not.exist')."
           done()
 
         @cy.get("ul li", {exist: false})
 
       it "throws on {exists: true}", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{exists: true}' have been deprecated. Instead write this as an assertion: .should('exist')."
+          expect(err.message).to.eq "Command Options such as: '{exists: true}' have been deprecated. Instead write this as an assertion: cy.should('exist')."
           done()
 
         @cy.get("ul li", {exists: true, length: 10})
 
       it "throws on {visible: true}", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{visible: true}' have been deprecated. Instead write this as an assertion: .should('be.visible')."
+          expect(err.message).to.eq "Command Options such as: '{visible: true}' have been deprecated. Instead write this as an assertion: cy.should('be.visible')."
           done()
 
         @cy.get("ul li", {visible: true})
@@ -319,14 +319,14 @@ describe "$Cypress.Cy Querying Commands", ->
 
       it "throws on {visible: false}", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{visible: false}' have been deprecated. Instead write this as an assertion: .should('not.be.visible')."
+          expect(err.message).to.eq "Command Options such as: '{visible: false}' have been deprecated. Instead write this as an assertion: cy.should('not.be.visible')."
           done()
 
         @cy.get("ul li", {visible: false})
 
       it "throws on {length: 3}", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{length: 3}' have been deprecated. Instead write this as an assertion: .should('have.length', '3')."
+          expect(err.message).to.eq "Command Options such as: '{length: 3}' have been deprecated. Instead write this as an assertion: cy.should('have.length', '3')."
           done()
 
         @cy.get("ul li", {length: 3})
@@ -1003,21 +1003,21 @@ describe "$Cypress.Cy Querying Commands", ->
 
       it "throws on {exist: false}", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{exist: false}' have been deprecated. Instead write this as an assertion: .should('not.exist')."
+          expect(err.message).to.eq "Command Options such as: '{exist: false}' have been deprecated. Instead write this as an assertion: cy.should('not.exist')."
           done()
 
         @cy.contains("asdfasdf", {exist: false})
 
       it "throws on {exists: true}", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{exists: true}' have been deprecated. Instead write this as an assertion: .should('exist')."
+          expect(err.message).to.eq "Command Options such as: '{exists: true}' have been deprecated. Instead write this as an assertion: cy.should('exist')."
           done()
 
         @cy.contains("button", {exists: true, length: 10})
 
       it "throws on {visible: true}", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{visible: true}' have been deprecated. Instead write this as an assertion: .should('be.visible')."
+          expect(err.message).to.eq "Command Options such as: '{visible: true}' have been deprecated. Instead write this as an assertion: cy.should('be.visible')."
           done()
 
         @cy.contains("button", {visible: true})
@@ -1025,14 +1025,14 @@ describe "$Cypress.Cy Querying Commands", ->
 
       it "throws on {visible: false}", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{visible: false}' have been deprecated. Instead write this as an assertion: .should('not.be.visible')."
+          expect(err.message).to.eq "Command Options such as: '{visible: false}' have been deprecated. Instead write this as an assertion: cy.should('not.be.visible')."
           done()
 
         @cy.get("ul li").contains("foo", {visible: false})
 
       it "throws on {length: 3}", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Command Options such as: '{length: 3}' have been deprecated. Instead write this as an assertion: .should('have.length', '3')."
+          expect(err.message).to.eq "Command Options such as: '{length: 3}' have been deprecated. Instead write this as an assertion: cy.should('have.length', '3')."
           done()
 
         @cy.contains("foo", {length: 3})
@@ -1088,7 +1088,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "retries until it finds the subject has the matching text node", (done) ->
         count = $("<span class='count'>100</span>")
 
-        ## make sure it retries 3 times!
+        ## make sure it retries 3 times.
         retry = _.after 3, =>
           @cy.$$("#edge-case-contains").append(count)
 
@@ -1124,7 +1124,7 @@ describe "$Cypress.Cy Querying Commands", ->
           expect($icon.get(0)).to.eq icon.get(0)
 
     describe "special characters", ->
-      _.each "' \" [ ] { } ! @ # $ % ^ & * ( ) , ; :".split(" "), (char) ->
+      _.each "' \" [ ] { } . @ # $ % ^ & * ( ) , ; :".split(" "), (char) ->
         it "finds content with character: #{char}", ->
           span = $("<span>special char #{char} content</span>").appendTo @cy.$$("body")
 
@@ -1213,14 +1213,14 @@ describe "$Cypress.Cy Querying Commands", ->
       _.each [undefined, null], (val) ->
         it "throws when text is #{val}", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.eq("cy.contains() can only accept a string or number!")
+            expect(err.message).to.eq("cy.contains() can only accept a string or number.")
             done()
 
           @cy.contains(val)
 
       it "throws on a blank string", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.contains() cannot be passed an empty string!"
+          expect(err.message).to.eq "cy.contains() cannot be passed an empty string."
           done()
 
         @cy.contains("")

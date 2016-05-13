@@ -328,7 +328,7 @@ describe "$Cypress.Runner API", ->
 
         @runner = $Cypress.Runner.runner(@Cypress, runner)
 
-      it "fires test:before:hooks twice", (done) ->
+      it.skip "fires test:before:hooks twice", (done) ->
         trigger = @sandbox.spy @Cypress, "trigger"
 
         @runner.run ->

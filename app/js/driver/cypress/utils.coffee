@@ -208,4 +208,16 @@ $Cypress.Utils = do ($Cypress, _) ->
     ## by going through the cypress object namespace
     setCypressNamespace: (obj, original) ->
       obj[CYPRESS_OBJECT_NAMESPACE] = original
+
+    getObjValueByPath: (obj, keyPath)->
+      if not _.isObject obj
+        throw new Error "The first parameter to $Cypress.Utils.getObjValueByPath() must be an object"
+      if not _.isString keyPath
+        throw new Error "The second parameter to $Cypress.Utils.getObjValueByPath() must be a string"
+      keys = keyPath.split '.'
+      val = obj
+      for key in keys
+        val = val[key]
+        break unless val
+      val
   }

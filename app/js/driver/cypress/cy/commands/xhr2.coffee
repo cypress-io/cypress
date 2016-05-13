@@ -21,7 +21,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
     options.originalUrl or options.url
 
   unavailableErr = ->
-    @throwErr("The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.")
+    @throwErr("server.unavailable")
 
   getDisplayName = (route) ->
     if route and route.response? then "xhr stub" else "xhr"
@@ -264,7 +264,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
         options = {}
 
       if not _.isObject(options)
-        @throwErr("cy.server() accepts only an object literal as its argument!")
+        @throwErr("server.invalid_argument")
 
       _.defaults options,
         enable: true ## set enable to false to turn off stubbing
@@ -285,7 +285,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
       hasResponse = true
 
       if not @prop("serverIsStubbed")
-        @throwErr("cy.route() cannot be invoked before starting the cy.server()")
+        @throwErr("route.failed_prerequisites")
 
       ## get the default options currently set
       ## on our server
@@ -300,7 +300,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
           options = o = _.extend {}, options, args[0]
 
         when args.length is 0
-          @throwErr "cy.route() was not provided any arguments. You must provide valid arguments."
+          @throwErr "route.invalid_arguments"
 
         when args.length is 1
           o.url = args[0]
@@ -343,16 +343,18 @@ $Cypress.register "XHR2", (Cypress, _) ->
       _.defaults options, defaults
 
       if not options.url
-        @throwErr "cy.route() must be called with a url. It can be a string or regular expression."
+        @throwErr "route.url_missing"
 
       if not (_.isString(options.url) or _.isRegExp(options.url))
-        @throwErr "cy.route() was called with a invalid url. Url must be either a string or regular expression."
+        @throwErr "route.url_invalid"
 
       if not validHttpMethodsRe.test(options.method)
-        @throwErr "cy.route() was called with an invalid method: '#{o.method}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
+        @throwErr "route.method_invalid", {
+          args: { method: o.method }
+        }
 
       if hasResponse and not options.response?
-        @throwErr "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
+        @throwErr "route.response_invalid"
 
       ## convert to wildcard regex
       if options.url is "*"
@@ -422,10 +424,14 @@ $Cypress.register "XHR2", (Cypress, _) ->
       [alias, prop] = alias.split(".")
 
       if prop and not validAliasApiRe.test(prop)
-        @throwErr "'#{prop}' is not a valid alias property. Only 'numbers' or 'all' is permitted."
+        @throwErr "get.alias_invalid", {
+          args: { prop }
+        }
 
       if prop is "0"
-        @throwErr "'0' is not a valid alias property. Are you trying to ask for the first response? If so write @#{alias}.1"
+        @throwErr "get.alias_zero", {
+          args: { alias }
+        }
 
       ## return an array of xhrs
       matching = _(@prop("responses")).chain().where({alias: alias}).pluck("xhr").value()
@@ -448,7 +454,9 @@ $Cypress.register "XHR2", (Cypress, _) ->
           return @_getLastXhrByAlias(str, "requests")
         else
           if prop isnt "response"
-            @throwErr "'#{prop}' is not a valid alias property. Are you trying to ask for the first request? If so write @#{str}.request"
+            @throwErr "wait.alias_invalid", {
+              args: { prop, str }
+            }
 
       @_getLastXhrByAlias(str, "responses")
 

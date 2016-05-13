@@ -51,8 +51,10 @@ do ($Cypress, _, Promise) ->
             else
               err
 
-        err = "Timed out retrying: " + getErrMessage(options.error)
-        @throwErr err, (options.onFail or log)
+        @throwErr "miscellaneous.retry_timed_out", {
+          onFail: (options.onFail or log)
+          args: { error: getErrMessage(options.error) }
+        }
 
       Promise.delay(interval).cancellable().then =>
         @trigger("retry", options) unless options.silent is true

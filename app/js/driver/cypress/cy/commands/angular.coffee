@@ -9,7 +9,7 @@ $Cypress.register "Angular", (Cypress, _, $, Promise) ->
       ## and if angular is available through them.  throw a very specific
       ## error message here that's different depending on what module
       ## system you're using
-      @throwErr "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular." if not @private("window").angular
+      @throwErr "ng.no_global" if not @private("window").angular
 
       _.defaults options, {log: true}
 
@@ -56,7 +56,7 @@ $Cypress.register "Angular", (Cypress, _, $, Promise) ->
           @verifyUpcomingAssertions(getEl($elements), options, {
             onRetry: resolveElements
             onFail: (err) ->
-              err.longMessage = "Could not find element for binding: '#{binding}'!"
+              err.longMessage = "Could not find element for binding: '#{binding}'."
           })
 
     _findByNgAttr: (name, attr, el, options) ->
@@ -90,4 +90,4 @@ $Cypress.register "Angular", (Cypress, _, $, Promise) ->
           cancelAll()
           throw err
         .catch Promise.AggregateError, (err) =>
-          @throwErr error
+          @throwUnexpectedErr error

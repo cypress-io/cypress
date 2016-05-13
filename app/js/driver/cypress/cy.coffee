@@ -300,6 +300,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     #   ## by this name argument)
     #   fn = =>
     #     @aliases[name] or
+    #       ## TODO: update this if this code gets uncommented
     #       @throwErr("No alias was found by the name: #{name}")
     #   fn._invokeImmediately = true
     #   fn

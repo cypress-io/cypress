@@ -20,7 +20,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
       it "throws when subject isn't an array", (done) ->
         @cy.on "fail", (err) =>
-          expect(err.message).to.eq "cy.spread() requires the existing subject be an array!"
+          expect(err.message).to.eq "cy.spread() requires the existing subject be an array."
           done()
 
         @cy.noop({}).spread ->
@@ -287,7 +287,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         @obj = {
           foo: -> "foo"
           bar: (num1, num2) -> num1 + num2
-          err: -> throw new Error("fn.err failed!")
+          err: -> throw new Error("fn.err failed.")
           baz: 10
         }
 
@@ -331,7 +331,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
         it "bubbles up automatically", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "fn.err failed!"
+            expect(err.message).to.include "fn.err failed."
             done()
 
           @cy.noop(@obj).invoke("err")
@@ -468,7 +468,7 @@ describe "$Cypress.Cy Connectors Commands", ->
           obj.prev = null
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.invoke() is a child command which operates on an existing subject.  Child commands must be called after a parent command!"
+          expect(err.message).to.eq "cy.invoke() is a child command which operates on an existing subject.  Child commands must be called after a parent command."
           done()
 
         @cy.invoke("queue")
@@ -496,7 +496,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
       it "ensures subject", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Subject is undefined!  You cannot call .its() without a subject."
+          expect(err.message).to.eq "Subject is undefined. You cannot call cy.its() without a subject."
           done()
 
         @cy.noop(undefined).its("attr", "src")
@@ -694,7 +694,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       [null, undefined].forEach (val) ->
         it "throws on reduced #{val} subject", (done) ->
           @Cypress.on "fail", (err) ->
-            expect(err.message).to.include("cy.its() errored because the property: 'foo' returned a '#{val}' value. You cannot call any properties such as 'toString' on a '#{val}' value.")
+            expect(err.message).to.include("cy.its() errored because the property: 'foo' returned a '#{val}' value. You cannot access any properties such as 'toString' on a '#{val}' value.")
             done()
 
           @cy.wrap({foo: val}).its("foo.toString")

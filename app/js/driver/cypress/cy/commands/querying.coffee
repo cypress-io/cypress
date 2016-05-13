@@ -199,8 +199,8 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       @ensureNoCommandOptions(options)
 
-      @throwErr "cy.contains() can only accept a string or number!" if not (_.isString(text) or _.isFinite(text))
-      @throwErr "cy.contains() cannot be passed an empty string!" if _.isBlank(text)
+      @throwErr "contains.invalid_argument" if not (_.isString(text) or _.isFinite(text))
+      @throwErr "contains.empty_string" if _.isBlank(text)
 
       getPhrase = (type, negated) ->
         switch
@@ -307,7 +307,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
               switch err.type
                 when "length"
                   if err.expected > 1
-                    @throwErr "cy.contains() cannot be passed a length option because it will only ever return 1 element.", options._log
+                    @throwErr "contains.length_option", { onFail: options._log }
                 when "existence"
                   err.longMessage = getErr(err)
           })
@@ -327,7 +327,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           $el: subject
           message: ""
 
-      @throwErr("cy.within() must be called with a function!", options._log) if not _.isFunction(fn)
+      @throwErr("within.invalid_argument", { onFail: options._log }) if not _.isFunction(fn)
 
       ## reference the next command after this
       ## within.  when that command runs we'll

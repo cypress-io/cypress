@@ -204,35 +204,35 @@ describe "$Cypress.Cy Traversal Commands", ->
 
     it "throws on {exist: false}", (done) ->
       @cy.on "fail", (err) ->
-        expect(err.message).to.eq "Command Options such as: '{exist: false}' have been deprecated. Instead write this as an assertion: .should('not.exist')."
+        expect(err.message).to.eq "Command Options such as: '{exist: false}' have been deprecated. Instead write this as an assertion: cy.should('not.exist')."
         done()
 
       @cy.root().find("ul li", {exist: false})
 
     it "throws on {exists: true}", (done) ->
       @cy.on "fail", (err) ->
-        expect(err.message).to.eq "Command Options such as: '{exists: true}' have been deprecated. Instead write this as an assertion: .should('exist')."
+        expect(err.message).to.eq "Command Options such as: '{exists: true}' have been deprecated. Instead write this as an assertion: cy.should('exist')."
         done()
 
       @cy.root().find("ul li", {exists: true, length: 10})
 
     it "throws on {visible: true}", (done) ->
       @cy.on "fail", (err) ->
-        expect(err.message).to.eq "Command Options such as: '{visible: true}' have been deprecated. Instead write this as an assertion: .should('be.visible')."
+        expect(err.message).to.eq "Command Options such as: '{visible: true}' have been deprecated. Instead write this as an assertion: cy.should('be.visible')."
         done()
 
       @cy.root().find("ul li", {visible: true})
 
     it "throws on {visible: false}", (done) ->
       @cy.on "fail", (err) ->
-        expect(err.message).to.eq "Command Options such as: '{visible: false}' have been deprecated. Instead write this as an assertion: .should('not.be.visible')."
+        expect(err.message).to.eq "Command Options such as: '{visible: false}' have been deprecated. Instead write this as an assertion: cy.should('not.be.visible')."
         done()
 
       @cy.root().find("ul li", {visible: false})
 
     it "throws on {length: 3}", (done) ->
       @cy.on "fail", (err) ->
-        expect(err.message).to.eq "Command Options such as: '{length: 3}' have been deprecated. Instead write this as an assertion: .should('have.length', '3')."
+        expect(err.message).to.eq "Command Options such as: '{length: 3}' have been deprecated. Instead write this as an assertion: cy.should('have.length', '3')."
         done()
 
       @cy.root().find("ul li", {length: 3})

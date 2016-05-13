@@ -21,7 +21,7 @@ $Cypress.register "Sandbox", (Cypress, _, $) ->
       sinon = @private("window").sinon
 
       if not sinon
-        @throwErr("Could not access the Server, Routes, Stub, Spies, or Mocks. Check to see if your application is loaded and is visible. Please open an issue if you see this message.")
+        @throwErr("miscellaneous.no_sandbox")
 
       sandbox = @prop("sandbox") ? createSandbox(sinon)
 

@@ -13,7 +13,9 @@ $Cypress.register "Commands", (Cypress, _) ->
 
     if not ctx[name]?
       cmds = _.keys(Cypress.Chainer.prototype).join(", ")
-      @throwErr("Could not find a command for: '#{name}'.\n\nAvailable commands are: #{cmds}.\n")
+      @throwErr("miscellaneous.invalid_command", {
+        args: { name, cmds }
+      })
 
     ctx[name].apply(ctx, args)
 

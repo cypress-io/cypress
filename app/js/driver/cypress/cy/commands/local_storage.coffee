@@ -24,7 +24,7 @@ $Cypress.register "LocalStorage", (Cypress, _, $) ->
     clearLocalStorage: (keys) ->
       ## bail if we have keys and we're not a string and we're not a regexp
       if keys and not _.isString(keys) and not _.isRegExp(keys)
-        @throwErr("cy.clearLocalStorage() must be called with either a string or regular expression!")
+        @throwErr("clearLocalStorage.invalid_argument")
 
       remote = clearLocalStorage.call(@, keys)
 
