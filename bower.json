@@ -20,7 +20,7 @@
   "dependencies": {
     "labjs": "*",
     "bootstrap-sass-official": "3.3.5",
-    "font-awesome": "~4.2.0",
+    "font-awesome": "~4.6.0",
     "backbone": "~1.1.2",
     "spin.js": "~2.0.1",
     "underscore.string": "~2.3.3",
