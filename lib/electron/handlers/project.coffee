@@ -38,9 +38,6 @@ module.exports = {
     .then (cfg) ->
       launcher.launch(browser, cfg.clientUrl, options)
 
-  focusBrowser: ->
-    openProject?.focusBrowser()
-
   onSettingsChanged: ->
     Promise.try =>
       if not openProject

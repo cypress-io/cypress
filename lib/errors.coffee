@@ -103,4 +103,4 @@ API = {
     obj
 }
 
-module.exports = _.bindAll(API)
+module.exports = _.bindAll(API, _.functions(API))

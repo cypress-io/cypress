@@ -29,15 +29,7 @@ describe "lib/proxy", ->
   context "#stripCookieParams", ->
     it "doesnt require proper white space", ->
       cookies = proxy.stripCookieParams(["user=brian;path=/;expires=123;HttpOnly"])
-      expect(cookies).to.deep.eq ["user=brian; path=/; expires=123"]
-
-    it "strips HttpOnly", ->
-      cookies = proxy.stripCookieParams(["user=brian; path=/; HttpOnly"])
-      expect(cookies).to.deep.eq ["user=brian; path=/"]
-
-    it "strips httponly", ->
-      cookies = proxy.stripCookieParams(["user=brian; path=/; httponly"])
-      expect(cookies).to.deep.eq ["user=brian; path=/"]
+      expect(cookies).to.deep.eq ["user=brian; path=/; expires=123; HttpOnly"]
 
     it "strips Secure", ->
       cookies = proxy.stripCookieParams(["user=brian; path=/; Secure"])
@@ -47,13 +39,9 @@ describe "lib/proxy", ->
       cookies = proxy.stripCookieParams(["user=brian; path=/; secure"])
       expect(cookies).to.deep.eq ["user=brian; path=/"]
 
-    it "strips HttpOnly and Secure", ->
+    it "strips Secure and does not strip HttpOnly", ->
       cookies = proxy.stripCookieParams(["user=brian; path=/; Secure; HttpOnly"])
-      expect(cookies).to.deep.eq ["user=brian; path=/"]
-
-    it "strips Secure and HttpOnly", ->
-      cookies = proxy.stripCookieParams(["user=brian; path=/; HttpOnly; Secure"])
-      expect(cookies).to.deep.eq ["user=brian; path=/"]
+      expect(cookies).to.deep.eq ["user=brian; path=/; HttpOnly"]
 
   context "#mapHeaders", ->
     it "rewrites x-xhr-referer", ->

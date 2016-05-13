@@ -431,16 +431,19 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get(":text:first").type("foo{enter}")
 
-    # describe "input types", ->
-      # _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->
-        # it "accepts input [type=#{type}]", ->
-        #   input = @cy.$$("<input type='#{type}' id='input-type-#{type}' />")
+    describe "input types where no extra formatting required", ->
+      _.each ["password", "email", "number", "search", "url", "tel"], (type) ->
+        it "accepts input [type=#{type}]", ->
+          input = @cy.$$("<input type='#{type}' id='input-type-#{type}' />")
 
-        #   @cy.$$("body").append(input)
+          @cy.$$("body").append(input)
 
-        #   @cy.get("#input-type-#{type}").type("1234").then ($input) ->
-        #     expect($input).to.have.value "1234"
-        #     expect($input.get(0)).to.eq input.get(0)
+          @cy.get("#input-type-#{type}").type("1234").then ($input) ->
+            expect($input).to.have.value "1234"
+            expect($input.get(0)).to.eq input.get(0)
+
+    ## we will need extra tests and logic for input types date, time, month, & week
+    ## see issue https://github.com/cypress-io/cypress/issues/27
 
     it "waits until element stops animating", (done) ->
       retries = []

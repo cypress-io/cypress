@@ -1096,7 +1096,7 @@ describe "Routes", ->
           .expect(200)
           .then (res) ->
             expect(res.headers["set-cookie"]).to.deep.eq [
-              "user=brian; path=/"
+              "user=brian; path=/; HttpOnly"
               "foo=bar; path=/"
               "token=abc-123; path=/"
               "ssid=qwerty9999; path=/foo"

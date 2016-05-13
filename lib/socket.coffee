@@ -14,6 +14,9 @@ Request       = require("./request")
 logger        = require("./logger")
 automation    = require("./automation")
 
+retry = (fn) ->
+  Promise.delay(50).then(fn)
+
 class Socket
   constructor: ->
     if not (@ instanceof Socket)
@@ -211,8 +214,24 @@ class Socket
         options.onIsNewProject()
         .then(cb)
 
-      socket.on "is:automation:connected", (cb) ->
-        cb(true)
+      socket.on "is:automation:connected", (data = {}, cb) =>
+        isConnected = (err) =>
+          @onAutomation(messages, "is:automation:connected", data)
+
+        tryConnected = =>
+          Promise
+          .try(isConnected)
+          .catch ->
+            retry(tryConnected)
+
+        ## retry for up to 1 second
+        Promise
+        .try(tryConnected)
+        .timeout(1000)
+        .then ->
+          cb(true)
+        .catch Promise.TimeoutError, (err) ->
+          cb(false)
 
   end: ->
     ## TODO: we need an 'ack' from this end
@@ -235,9 +254,6 @@ class Socket
         filePath = path.basename(filePath)
         @io.emit "cypress:css:changed", file: filePath
     }
-
-  automate: (msg) ->
-    @io?.to("automation").emit("automation:request", Math.random(), msg)
 
   close: ->
     @io?.close()

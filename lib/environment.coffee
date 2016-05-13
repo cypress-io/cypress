@@ -1,7 +1,10 @@
 require("./util/http_overrides")
 
-fs  = require("fs-extra")
-cwd = require("./cwd")
+fs      = require("fs-extra")
+cwd     = require("./cwd")
+Promise = require("bluebird")
+
+Promise.config({cancellation: true})
 
 ## never cut off stack traces
 Error.stackTraceLimit = Infinity
