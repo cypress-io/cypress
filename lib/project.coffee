@@ -119,9 +119,6 @@ class Project extends EE
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
 
-  focusBrowser: ->
-    @server?.automate("focus:browser:window")
-
   watchSettingsAndStartWebsockets: (changeEvents, onAutomationRequest, config = {}) ->
     @watchSettings(changeEvents)
 
