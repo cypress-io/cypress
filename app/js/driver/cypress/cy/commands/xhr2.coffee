@@ -217,13 +217,13 @@ $Cypress.register "XHR2", (Cypress, _) ->
             log.snapshot("response").end()
 
         onNetworkError: (xhr) ->
-          err = cy.cypressErr("The network request for this XHR could not be made. Check your console for the reason.")
+          err = $Cypress.Utils.cypressErr($Cypress.Utils.errMessageByPath("xhr.network_error"))
 
           if log = logs[xhr.id]
             log.snapshot("failed").error(err)
 
         onFixtureError: (xhr, err) ->
-          err = cy.cypressErr(err)
+          err = $Cypress.Utils.cypressErr(err)
 
           @onError(xhr, err)
 

@@ -62,7 +62,7 @@ describe "$Cypress API", ->
     it "throws when no module is found by name", ->
       fn = => @Cypress.loadModule("foo")
 
-      expect(fn).to.throw "$Cypress.Module: foo not registered!"
+      expect(fn).to.throw "$Cypress.Module: foo not registered."
 
   describe "#loadModules", ->
     beforeEach ->

@@ -7,7 +7,9 @@ $Cypress.Dom = do ($Cypress, _, $) ->
     ## at the same time. #pro
     isHidden: $.expr.filters.hidden = (el) ->
       if not $Cypress.Utils.hasElement(el)
-        throw $Cypress.Utils.cypressError("$Cypress.Dom.isHidden() must be passed a basic DOM element. You passed: '#{el}'")
+        $Cypress.Utils.throwErrByPath("dom.non_dom_is_hidden", {
+          args: { el }
+        })
 
       $el = $(el)
 

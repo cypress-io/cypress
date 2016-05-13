@@ -22,6 +22,10 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       timed_out:  "#{cmd('blur')} timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window."
       wrong_focused_element: "#{cmd('blur')} can only be called on the focused element. Currently the focused element is a: {{node}}"
 
+    chai:
+      length_invalid_argument: "You must provide a valid number to a length assertion. You passed: '{{length}}'"
+      match_invalid_argument: "chai#match requires its argument be a 'RegExp'. You passed: '{{regExp}}'"
+
     check_uncheck:
       invalid_element: "#{cmd('{{cmd}}')} can only be called on :checkbox{{phrase}}. Your subject {{word}} a: {{node}}"
 
@@ -93,6 +97,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       """
       invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be center, topLeft, topRight, bottomLeft, or bottomRight."
       non_dom: "Cannot call #{cmd('{{cmd}}')} on a non-DOM subject."
+      non_dom_is_hidden: "$Cypress.Dom.isHidden() must be passed a basic DOM element. You passed: '{{el}}'"
       not_visible: """
         #{cmd('{{cmd}}')} failed because this element is not visible:\n
         {{node}}\n
@@ -170,6 +175,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       invalid_command: "Could not find a command for: '{{name}}'.\n\nAvailable commands are: {{cmds}}.\n"
       method_not_implemented: "The method {{method}} is not yet implemented"
       module_not_registered: "$Cypress.Module: {{name}} not registered."
+      no_cy: "Cypress.cy is undefined. You may be trying to query outside of a running test. Cannot call Cypress.$()"
       no_sandbox: "Could not access the Server, Routes, Stub, Spies, or Mocks. Check to see if your application is loaded and is visible. Please open an issue if you see this message."
       no_runner: "Cannot call Cypress#run without a runner instance."
       no_subject: "Subject is {{subject}}. You cannot call #{cmd('{{cmd}}')} without a subject."
@@ -298,4 +304,5 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     xhr:
       aborted: "This XHR was aborted by your code -- check this stack trace below."
       missing: "XMLHttpRequest#xhr is missing."
+      network_error: "The network request for this XHR could not be made. Check your console for the reason."
   }

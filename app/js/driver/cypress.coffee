@@ -146,7 +146,7 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
 
     $: ->
       if not @cy
-        throw $Cypress.Utils.cypressError("Cypress.cy is undefined. You may be trying to query outside of a running test. Cannot call 'Cypress.$'")
+        $Cypress.Utils.throwErrByPath("miscellaneous.no_cy")
 
       @cy.$$.apply(@cy, arguments)
 
