@@ -13,93 +13,9 @@ describe "$Cypress.Cy Errors Extensions", ->
   after ->
     @iframe.remove()
 
-  it "adds 4 methods", ->
-    _.each ["cypressErr", "throwErr", "commandErr", "fail"], (name) =>
+  it "adds 2 methods", ->
+    _.each ["commandErr", "fail"], (name) =>
       expect(@cy[name]).to.be.a("function")
-
-  context "#throwErr", ->
-    beforeEach ->
-      $Cypress.ErrorMessages.__test_errors = {
-        simple: "This is a simple error message"
-        with_args: "The has args like '{{foo}}' and {{bar}}"
-        with_multi_args: "This has args like '{{foo}}' and {{bar}}, and '{{foo}}' is used twice"
-      }
-
-    describe "when error message path does not exist", ->
-
-      it "has an err.name of InternalError", ->
-        try
-          @cy.throwErr("not.there")
-        catch e
-          expect(e.name).to.eq "InternalError"
-
-      it "has the right message", ->
-        try
-          @cy.throwErr("not.there")
-        catch e
-          expect(e.message).to.include "Error message path 'not.there' does not exist"
-
-    describe "when error message path exists", ->
-
-      it "has an err.name of CypressError", ->
-        try
-          @cy.throwErr("__test_errors.simple")
-        catch e
-          expect(e.name).to.eq "CypressError"
-
-      it "has the right message", ->
-        try
-          @cy.throwErr("__test_errors.simple")
-        catch e
-          expect(e.message).to.include "This is a simple error message"
-
-    describe "when args are provided for the error", ->
-
-      it "uses them in the error message", ->
-        try
-          @cy.throwErr("__test_errors.with_args", {
-            args: { foo: "foo", bar: ["bar", "qux"]  }
-          })
-        catch e
-          expect(e.message).to.include "The has args like 'foo' and bar,qux"
-
-    describe "when args are provided for the error and some are used multiple times in message", ->
-
-      it "uses them in the error message", ->
-        try
-          @cy.throwErr("__test_errors.with_multi_args", {
-            args: { foo: "foo", bar: ["bar", "qux"]  }
-          })
-        catch e
-          expect(e.message).to.include "This has args like 'foo' and bar,qux, and 'foo' is used twice"
-
-    describe "when onFail is provided as a function", ->
-
-      it "attaches the function to the error", ->
-        onFail = ->
-        try
-          @cy.throwErr("window.iframe_undefined", { onFail })
-        catch e
-          expect(e.onFail).to.equal onFail
-
-    describe "when onFail is provided as a command", ->
-
-      it "attaches the handler to the error", ->
-        command = { error: @sandbox.spy() }
-        try
-          @cy.throwErr("window.iframe_undefined", { onFail: command })
-        catch e
-          e.onFail("the error")
-          expect(command.error).to.be.calledWith("the error")
-
-  context "#throwUnexpectedErr", ->
-
-    it "throws the error as sent", ->
-      try
-        @cy.throwUnexpectedErr("Something unexpected")
-      catch e
-        expect(e.message).to.include "Something unexpected"
-        expect(e.name).to.eq "CypressError"
 
   context "#endedEarlyErr", ->
     beforeEach ->

@@ -12,7 +12,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
     Cypress.Location.override(Cypress, contentWindow, navigated)
 
   timedOutWaitingForPageLoad = (ms, log) ->
-    @throwErr("navigation.timed_out", {
+    $Cypress.Utils.throwErrByPath("navigation.timed_out", {
       onFail: log
       args: { ms }
     })
@@ -99,7 +99,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         .then =>
           if Cypress.cy.$$("[data-cypress-visit-error]").length
             try
-              @throwErr("navigation.loading_failed", { onFail: options._log })
+              $Cypress.Utils.throwErrByPath("navigation.loading_failed", { onFail: options._log })
             catch e
               @fail(e)
           else
@@ -121,7 +121,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
   Cypress.addParentCommand
     reload: (args...) ->
       throwArgsErr = =>
-        @throwErr("reload.invalid_arguments")
+        $Cypress.Utils.throwErrByPath("reload.invalid_arguments")
 
       switch args.length
         when 0
@@ -196,7 +196,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
       goNumber = (num) =>
         if num is 0
-          @throwErr("go.invalid_number", { onFail: options._log })
+          $Cypress.Utils.throwErrByPath("go.invalid_number", { onFail: options._log })
 
         didUnload = false
         pending   = Promise.pending()
@@ -247,7 +247,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           when "forward" then goNumber(1)
           when "back"    then goNumber(-1)
           else
-            @throwErr("go.invalid_direction", {
+            $Cypress.Utils.throwErrByPath("go.invalid_direction", {
               onFail: options._log
               args: { str }
             })
@@ -256,11 +256,11 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         when _.isFinite(numberOrString) then goNumber(numberOrString)
         when _.isString(numberOrString) then goString(numberOrString)
         else
-          @throwErr("go.invalid_argument", { onFail: options._log })
+          $Cypress.Utils.throwErrByPath("go.invalid_argument", { onFail: options._log })
 
     visit: (url, options = {}) ->
       if not _.isString(url)
-        @throwErr("visit.invalid_1st_arg")
+        $Cypress.Utils.throwErrByPath("visit.invalid_1st_arg")
 
       _.defaults options,
         log: true
@@ -296,7 +296,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             options.onLoad?.call(runnable.ctx, win)
             if Cypress.cy.$$("[data-cypress-visit-error]").length
               try
-                @throwErr("visit.loading_failed", {
+                $Cypress.Utils.throwErrByPath("visit.loading_failed", {
                   onFail: options._log
                   args: { url }
                 })

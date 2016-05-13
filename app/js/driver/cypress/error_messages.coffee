@@ -3,6 +3,9 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     "cy.#{command}(#{args})"
 
   return {
+    add:
+      type_missing: "Cypress.add(key, fn, type) must include a type!"
+
     alias:
       invalid: "Invalid alias: '{{name}}'.\nYou forgot the '@'. It should be written as: '@{{displayName}}'."
       not_registered_with_available: "#{cmd('{{cmd}}')} could not find a registered alias for: '@{{displayName}}'.\nAvailable aliases are: '{{availableAliases}}'."
@@ -39,6 +42,20 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       empty_string: "#{cmd('contains')} cannot be passed an empty string."
       invalid_argument: "#{cmd('contains')} can only accept a string or number."
       length_option: "#{cmd('contains')} cannot be passed a length option because it will only ever return 1 element."
+
+    cookies:
+      removed_method: """
+        The Cypress.Cookies.{{method}}() method has been removed.
+
+        Setting, getting, and clearing cookies is now an asynchronous operation.
+
+        Replace this call with the appropriate command such as:
+          - cy.getCookie()
+          - cy.getCookies()
+          - cy.setCookie()
+          - cy.clearCookie()
+          - cy.clearCookies()
+      """
 
     dom:
       animating: """
@@ -83,6 +100,9 @@ $Cypress.ErrorMessages = do ($Cypress) ->
         Fix this problem, or use {force: true} to disable error checking.\n
         https://on.cypress.io/element-cannot-be-interacted-with
       """
+
+    env:
+      variables_missing: "Cypress.environmentVariables is not defined. Open an issue if you see this message."
 
     fill:
       invalid_1st_arg: "#{cmd('fill')} must be passed an object literal as its 1st argument"
@@ -131,9 +151,27 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       invalid_key: "Location object does not have key: {{key}}"
 
     miscellaneous:
+      dangling_commands: """
+        Oops, Cypress detected something wrong with your test code.
+
+        The test has finished but Cypress still has commands in its queue.
+        The {{numCommands}} queued commands that have not yet run are:
+
+        {{commands}}
+
+        In every situation we've seen, this has been caused by programmer error.
+        Most often this indicates a race condition due to a forgotten 'return' or from commands in a previously run test bleeding into the current test.
+
+        For a much more thorough explanation including examples please review this error here:
+
+        https://on.cypress.io/command-queue-ended-early
+      """
       deprecated: "Command Options such as: '{{{opt}}: {{value}}}' have been deprecated. Instead write this as an assertion: #{cmd('should', '\'{{assertion}}\'')}."
       invalid_command: "Could not find a command for: '{{name}}'.\n\nAvailable commands are: {{cmds}}.\n"
+      method_not_implemented: "The method {{method}} is not yet implemented"
+      module_not_registered: "$Cypress.Module: {{name}} not registered."
       no_sandbox: "Could not access the Server, Routes, Stub, Spies, or Mocks. Check to see if your application is loaded and is visible. Please open an issue if you see this message."
+      no_runner: "Cannot call Cypress#run without a runner instance."
       no_subject: "Subject is {{subject}}. You cannot call #{cmd('{{cmd}}')} without a subject."
       orphan: "#{cmd('{{cmd}}')} is a child command which operates on an existing subject.  Child commands must be called after a parent command."
       outside_test: """
@@ -151,6 +189,11 @@ $Cypress.ErrorMessages = do ($Cypress) ->
         https://on.cypress.io/cannot-execute-commands-outside-test
       """
       retry_timed_out: "Timed out retrying: {{error}}"
+
+    mocha:
+      async_timed_out: "Timed out after {{ms}}ms. The done() callback was never invoked!"
+      invalid_interface: "Invalid mocha interface '{{name}}'"
+      timed_out: "Cypress command timeout of {{ms}}ms exceeded."
 
     navigation:
       loading_failed: "Loading the new page failed."
@@ -251,4 +294,8 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     within:
       invalid_argument: "#{cmd('within')} must be called with a function."
+
+    xhr:
+      aborted: "This XHR was aborted by your code -- check this stack trace below."
+      missing: "XMLHttpRequest#xhr is missing."
   }

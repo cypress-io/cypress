@@ -1,6 +1,90 @@
 describe "$Cypress.Utils API", ->
   enterCommandTestingMode()
 
+  context "#throwErrByPath", ->
+    beforeEach ->
+      $Cypress.ErrorMessages.__test_errors = {
+        simple: "This is a simple error message"
+        with_args: "The has args like '{{foo}}' and {{bar}}"
+        with_multi_args: "This has args like '{{foo}}' and {{bar}}, and '{{foo}}' is used twice"
+      }
+
+    describe "when error message path does not exist", ->
+
+      it "has an err.name of InternalError", ->
+        try
+          $Cypress.Utils.throwErrByPath("not.there")
+        catch e
+          expect(e.name).to.eq "InternalError"
+
+      it "has the right message", ->
+        try
+          $Cypress.Utils.throwErrByPath("not.there")
+        catch e
+          expect(e.message).to.include "Error message path 'not.there' does not exist"
+
+    describe "when error message path exists", ->
+
+      it "has an err.name of CypressError", ->
+        try
+          $Cypress.Utils.throwErrByPath("__test_errors.simple")
+        catch e
+          expect(e.name).to.eq "CypressError"
+
+      it "has the right message", ->
+        try
+          $Cypress.Utils.throwErrByPath("__test_errors.simple")
+        catch e
+          expect(e.message).to.include "This is a simple error message"
+
+    describe "when args are provided for the error", ->
+
+      it "uses them in the error message", ->
+        try
+          $Cypress.Utils.throwErrByPath("__test_errors.with_args", {
+            args: { foo: "foo", bar: ["bar", "qux"]  }
+          })
+        catch e
+          expect(e.message).to.include "The has args like 'foo' and bar,qux"
+
+    describe "when args are provided for the error and some are used multiple times in message", ->
+
+      it "uses them in the error message", ->
+        try
+          $Cypress.Utils.throwErrByPath("__test_errors.with_multi_args", {
+            args: { foo: "foo", bar: ["bar", "qux"]  }
+          })
+        catch e
+          expect(e.message).to.include "This has args like 'foo' and bar,qux, and 'foo' is used twice"
+
+    describe "when onFail is provided as a function", ->
+
+      it "attaches the function to the error", ->
+        onFail = ->
+        try
+          $Cypress.Utils.throwErrByPath("window.iframe_undefined", { onFail })
+        catch e
+          expect(e.onFail).to.equal onFail
+
+    describe "when onFail is provided as a command", ->
+
+      it "attaches the handler to the error", ->
+        command = { error: @sandbox.spy() }
+        try
+          $Cypress.Utils.throwErrByPath("window.iframe_undefined", { onFail: command })
+        catch e
+          e.onFail("the error")
+          expect(command.error).to.be.calledWith("the error")
+
+  context "#throwErr", ->
+
+    it "throws the error as sent", ->
+      try
+        $Cypress.Utils.throwErr("Something unexpected")
+      catch e
+        expect(e.message).to.include "Something unexpected"
+        expect(e.name).to.eq "CypressError"
+
   describe "#filterOutOptions", ->
     it "returns new obj based on the delta from the filter", ->
       obj = $Cypress.Utils.filterOutOptions {visible: true, exist: false, foo: "bar"}, {visible: null, exist: false}

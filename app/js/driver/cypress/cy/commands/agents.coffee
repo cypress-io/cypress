@@ -56,4 +56,4 @@ $Cypress.register "Agents", (Cypress, _, $) ->
               console
 
         onError: (err) =>
-          @throwUnexpectedErr(err)
+          $Cypress.Utils.throwErr(err)

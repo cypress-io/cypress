@@ -142,6 +142,17 @@ describe "$Cypress API", ->
     it "calls mocha#options with runner", ->
       expect(@Cypress.mocha.options).to.be.calledWith {}
 
+  describe "#run", ->
+    it "throws when no runner", ->
+      @Cypress.runner = null
+      expect(=> @Cypress.run()).to.throw "Cannot call Cypress#run without a runner instance."
+
+    it "passes the function to the runner#run", ->
+      @fn = ->
+      @Cypress.runner = { run: @sandbox.spy() }
+      @Cypress.run @fn
+      expect(@Cypress.runner.run).to.be.calledWith @fn
+
   describe "#env", ->
     beforeEach ->
       @Cypress.setConfig({

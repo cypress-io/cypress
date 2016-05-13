@@ -81,7 +81,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       ## resolve with the existing subject
       return ret ? subject
     .catch Promise.TimeoutError, =>
-      @throwErr "invoke_its.timed_out", {
+      $Cypress.Utils.throwErrByPath "invoke_its.timed_out", {
         onFail: options._log
         args: {
           cmd: name
@@ -114,24 +114,24 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         Subject: subject
 
     if not _.isString(fn)
-      @throwErr("invoke_its.invalid_1st_arg", {
+      $Cypress.Utils.throwErrByPath("invoke_its.invalid_1st_arg", {
         onFail: options._log
         args: { cmd: name }
       })
 
     fail = (prop) =>
-      @throwErr("invoke_its.invalid_property", {
+      $Cypress.Utils.throwErrByPath("invoke_its.invalid_property", {
         onFail: options._log
         args: { prop, cmd: name }
       })
 
     failOnPreviousNullOrUndefinedValue = (previousProp, currentProp, value) =>
-      @throwErr("invoke_its.previous_prop_nonexistent", {
+      $Cypress.Utils.throwErrByPath("invoke_its.previous_prop_nonexistent", {
         args: { previousProp, currentProp, value, cmd: name }
       })
 
     failOnCurrentNullOrUndefinedValue = (prop, value) =>
-      @throwErr("invoke_its.current_prop_nonexistent", {
+      $Cypress.Utils.throwErrByPath("invoke_its.current_prop_nonexistent", {
         args: { prop, value, cmd: name }
       })
 
@@ -181,7 +181,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
             if _.isFunction(prop)
               prop.apply(actualSubject, args)
             else
-              @throwErr("invoke.invalid_type", {
+              $Cypress.Utils.throwErrByPath("invoke.invalid_type", {
                 onFail: options._log
                 args: { prop: fn }
               })
@@ -232,7 +232,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     spread: (subject, options, fn) ->
       ## if this isnt an array blow up right here
       if not _.isArray(subject)
-        @throwErr("spread.invalid_type")
+        $Cypress.Utils.throwErrByPath("spread.invalid_type")
 
       subject._spreadArray = true
 

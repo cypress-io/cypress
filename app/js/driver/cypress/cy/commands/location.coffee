@@ -60,7 +60,7 @@ $Cypress.register "Location", (Cypress, _, $) ->
           ## use existential here because we only want to throw
           ## on null or undefined values (and not empty strings)
           location[key] ?
-            @throwErr("location.invalid_key", { args: { key } })
+            $Cypress.Utils.throwErrByPath("location.invalid_key", { args: { key } })
         else
           location
 

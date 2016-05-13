@@ -31,7 +31,7 @@ $Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
 
       fixture(fx).then (response) =>
         if err = response.__error
-          @throwUnexpectedErr(err)
+          $Cypress.Utils.throwErr(err)
         else
           ## add the fixture to the cache
           ## so it can just be returned next time

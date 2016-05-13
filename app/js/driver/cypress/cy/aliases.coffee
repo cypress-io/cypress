@@ -41,7 +41,7 @@ do ($Cypress, _) ->
       ## format, but its word is found in the availableAliases
       if (not aliasRe.test(name)) and (name in availableAliases)
         displayName = @_aliasDisplayName(name)
-        @throwErr "alias.invalid", {
+        $Cypress.Utils.throwErrByPath "alias.invalid", {
           onFail: log
           args: { name, displayName }
         }
@@ -54,7 +54,7 @@ do ($Cypress, _) ->
       else
         "alias.not_registered_without_available"
 
-      @throwErr errPath, {
+      $Cypress.Utils.throwErrByPath errPath, {
         onFail: log
         args: { cmd, displayName, availableAliases: availableAliases.join(", ") }
       }

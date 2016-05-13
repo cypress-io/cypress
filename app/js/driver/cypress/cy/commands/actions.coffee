@@ -45,13 +45,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if not options.$el.is("form")
         node = Cypress.Utils.stringifyElement(options.$el)
         word = Cypress.Utils.plural(options.$el, "contains", "is")
-        @throwErr("submit.not_on_form", {
+        $Cypress.Utils.throwErrByPath("submit.not_on_form", {
           onFail: options._log
           args: { node, word }
         })
 
       if (num = options.$el.length) and num > 1
-        @throwErr("submit.multiple_forms", {
+        $Cypress.Utils.throwErrByPath("submit.multiple_forms", {
           onFail: options._log
           args: { num }
         })
@@ -78,7 +78,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             })
 
     fill: (subject, obj, options = {}) ->
-      @throwErr "fill.invalid_1st_arg" if not _.isObject(obj)
+      $Cypress.Utils.throwErrByPath "fill.invalid_1st_arg" if not _.isObject(obj)
 
     check: (subject, values, options) ->
       @_check_or_uncheck("check", subject, values, options)
@@ -110,7 +110,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         return if options.error is false
 
         node = Cypress.Utils.stringifyElement(options.$el)
-        @throwErr("focus.invalid_element", {
+        $Cypress.Utils.throwErrByPath("focus.invalid_element", {
           onFail: options._log
           args: { node }
         })
@@ -118,7 +118,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        @throwErr("focus.multiple_elements", {
+        $Cypress.Utils.throwErrByPath("focus.multiple_elements", {
           onFail: options._log
           args: { num }
         })
@@ -209,7 +209,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           return if options.error is false
 
-          @throwErr "focus.timed_out", { onFail: options._log }
+          $Cypress.Utils.throwErrByPath "focus.timed_out", { onFail: options._log }
         .then =>
           return options.$el if options.verify is false
 
@@ -243,7 +243,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        @throwErr("blur.multiple_elements", {
+        $Cypress.Utils.throwErrByPath("blur.multiple_elements", {
           onFail: options._log
           args: { num }
         })
@@ -252,13 +252,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         if options.force isnt true and not $focused
           return if options.error is false
 
-          @throwErr("blur.no_focused_element", { onFail: options._log })
+          $Cypress.Utils.throwErrByPath("blur.no_focused_element", { onFail: options._log })
 
         if options.force isnt true and options.$el.get(0) isnt $focused.get(0)
           return if options.error is false
 
           node = Cypress.Utils.stringifyElement($focused)
-          @throwErr("blur.wrong_focused_element", {
+          $Cypress.Utils.throwErrByPath("blur.wrong_focused_element", {
             onFail: options._log
             args: { node }
           })
@@ -333,7 +333,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
             return if options.error is false
 
-            @throwErr "blur.timed_out", { onFail: command }
+            $Cypress.Utils.throwErrByPath "blur.timed_out", { onFail: command }
           .then =>
             return options.$el if options.verify is false
 
@@ -408,7 +408,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
 
     hover: (args) ->
-      @throwErr("hover.not_implemented")
+      $Cypress.Utils.throwErrByPath("hover.not_implemented")
 
     click: (subject, positionOrX, y, options = {}) ->
       ## TODO handle pointer-events: none
@@ -448,7 +448,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## throw if we're trying to click multiple elements
       ## and we did not pass the multiple flag
       if options.multiple is false and options.$el.length > 1
-        @throwErr("click.multiple_elements", {
+        $Cypress.Utils.throwErrByPath("click.multiple_elements", {
           args: { num: options.$el.length }
         })
 
@@ -474,7 +474,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           options._log.snapshot("before", {next: "after"})
 
         if options.errorOnSelect and $el.is("select")
-          @throwErr "click.on_select_element", { onFail: options._log }
+          $Cypress.Utils.throwErrByPath "click.on_select_element", { onFail: options._log }
 
         isAttached = ($elToClick) =>
           @_contains($elToClick)
@@ -806,25 +806,25 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       if not options.$el.is(textLike)
         node = Cypress.Utils.stringifyElement(options.$el)
-        @throwErr("type.not_on_text_field", {
+        $Cypress.Utils.throwErrByPath("type.not_on_text_field", {
           onFail: options._log
           args: { node }
         })
 
       if (num = options.$el.length) and num > 1
-        @throwErr("type.multiple_elements", {
+        $Cypress.Utils.throwErrByPath("type.multiple_elements", {
           onFail: options._log
           args: { num }
         })
 
       if not (_.isString(chars) or _.isFinite(chars))
-        @throwErr("type.wrong_type", {
+        $Cypress.Utils.throwErrByPath("type.wrong_type", {
           onFail: options._log
           args: { chars }
         })
 
       if _.isBlank(chars)
-        @throwErr("type.empty_string", { onFail: options._log })
+        $Cypress.Utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
       options.chars = "" + chars
 
@@ -932,9 +932,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           onNoMatchingSpecialChars: (chars, allChars) =>
             if chars is "{tab}"
-              @throwErr("type.tab", { onFail: options._log })
+              $Cypress.Utils.throwErrByPath("type.tab", { onFail: options._log })
             else
-              @throwErr("type.invalid", {
+              $Cypress.Utils.throwErrByPath("type.invalid", {
                 onFail: options._log
                 args: { chars, allChars }
               })
@@ -1007,7 +1007,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         if not $el.is(textLike)
           word = Cypress.Utils.plural(subject, "contains", "is")
-          @throwErr "clear.invalid_element", {
+          $Cypress.Utils.throwErrByPath "clear.invalid_element", {
             onFail: options._log
             args: { word, node }
           }
@@ -1073,10 +1073,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       if not options.$el.is("select")
         node = Cypress.Utils.stringifyElement(options.$el)
-        @throwErr "select.invalid_element", { args: { node } }
+        $Cypress.Utils.throwErrByPath "select.invalid_element", { args: { node } }
 
       if (num = options.$el.length) and num > 1
-        @throwErr "select.multiple_elements", { args: { num } }
+        $Cypress.Utils.throwErrByPath "select.multiple_elements", { args: { num } }
 
       ## normalize valueOrText if its not an array
       valueOrText = [].concat(valueOrText)
@@ -1085,13 +1085,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## throw if we're not a multiple select and we've
       ## passed an array of values
       if not multiple and valueOrText.length > 1
-        @throwErr "select.invalid_multiple"
+        $Cypress.Utils.throwErrByPath "select.invalid_multiple"
 
       getOptions = =>
         ## throw if <select> is disabled
         if options.$el.prop("disabled")
           node = Cypress.Utils.stringifyElement(options.$el)
-          @throwErr "select.disabled", { args: { node } }
+          $Cypress.Utils.throwErrByPath "select.disabled", { args: { node } }
 
         values  = []
         optionEls = []
@@ -1123,19 +1123,19 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## if we didnt set multiple to true and
         ## we have more than 1 option to set then blow up
         if not multiple and values.length > 1
-          @throwErr("select.multiple_matches", {
+          $Cypress.Utils.throwErrByPath("select.multiple_matches", {
             args: { value: valueOrText.join(", ") }
           })
 
         if not values.length
-          @throwErr("select.no_matches", {
+          $Cypress.Utils.throwErrByPath("select.no_matches", {
             args: { value: valueOrText.join(", ") }
           })
 
         _.each optionEls, ($el) =>
           if $el.prop("disabled")
             node = Cypress.Utils.stringifyElement($el)
-            @throwErr("select.option_disabled", {
+            $Cypress.Utils.throwErrByPath("select.option_disabled", {
               args: { node }
             })
 
@@ -1297,7 +1297,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         try
           coords = @getCoordinates($el, options.position)
         catch err
-          @throwUnexpectedErr(err, { onFail: options._log })
+          $Cypress.Utils.throwErr(err, { onFail: options._log })
 
       ## if we're forcing this click event
       ## just immediately send it up
@@ -1407,7 +1407,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             node   = Cypress.Utils.stringifyElement($el)
             word   = Cypress.Utils.plural(options.$el, "contains", "is")
             phrase = if type is "check" then " and :radio" else ""
-            @throwErr "check_uncheck.invalid_element", {
+            $Cypress.Utils.throwErrByPath "check_uncheck.invalid_element", {
               onFail: options._log
               args: { node, word, phrase, cmd: type }
             }

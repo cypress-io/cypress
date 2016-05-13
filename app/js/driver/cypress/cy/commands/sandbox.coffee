@@ -21,7 +21,7 @@ $Cypress.register "Sandbox", (Cypress, _, $) ->
       sinon = @private("window").sinon
 
       if not sinon
-        @throwErr("miscellaneous.no_sandbox")
+        $Cypress.Utils.throwErrByPath("miscellaneous.no_sandbox")
 
       sandbox = @prop("sandbox") ? createSandbox(sinon)
 

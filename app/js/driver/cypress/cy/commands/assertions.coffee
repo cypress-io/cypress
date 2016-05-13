@@ -88,7 +88,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
         error: err
       })
 
-      @throwUnexpectedErr(err, { onFail: log })
+      $Cypress.Utils.throwErr(err, { onFail: log })
 
     chainers = chainers.split(".")
     lastChainer = _(chainers).last()
@@ -99,7 +99,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
     options = {}
 
     if reEventually.test(chainers)
-      err = @cypressErr("The 'eventually' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.")
+      err = $Cypress.Utils.cypressErr("The 'eventually' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.")
       err.retry = false
       throwAndLogErr(err)
 
@@ -136,7 +136,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
       _.reduce chainers, (memo, value) =>
         if value not of memo
-          err = @cypressErr("The chainer: '#{value}' was not found. Could not build assertion.")
+          err = $Cypress.Utils.cypressErr("The chainer: '#{value}' was not found. Could not build assertion.")
           err.retry = false
           throwAndLogErr(err)
 
@@ -346,7 +346,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
             ## and then push our command into this err
             try
-              @throwUnexpectedErr(err, { onFail: options._log })
+              $Cypress.Utils.throwErr(err, { onFail: options._log })
             catch e
               err = e
 

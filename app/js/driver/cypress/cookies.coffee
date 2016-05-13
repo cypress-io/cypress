@@ -92,18 +92,8 @@ $Cypress.Cookies = do ($Cypress, _) ->
 
   _.each ["get", "set", "remove", "getAllCookies", "clearCookies"], (method) ->
     API[method] = ->
-      throw new Error("""
-        The Cypress.Cookies.#{method}() method has been removed.
-
-        Setting, getting, and clearing cookies is now an asynchronous operation.
-
-        Replace this call with the appropriate command such as:
-          - cy.getCookie()
-          - cy.getCookies()
-          - cy.setCookie()
-          - cy.clearCookie()
-          - cy.clearCookies()
-
-      """)
+      $Cypress.Utils.throwErrByPath("cookies.removed_method", {
+        args: { method }
+      })
 
   return API

@@ -9,7 +9,7 @@ $Cypress.register "Angular", (Cypress, _, $, Promise) ->
       ## and if angular is available through them.  throw a very specific
       ## error message here that's different depending on what module
       ## system you're using
-      @throwErr "ng.no_global" if not @private("window").angular
+      $Cypress.Utils.throwErrByPath "ng.no_global" if not @private("window").angular
 
       _.defaults options, {log: true}
 
@@ -90,4 +90,4 @@ $Cypress.register "Angular", (Cypress, _, $, Promise) ->
           cancelAll()
           throw err
         .catch Promise.AggregateError, (err) =>
-          @throwUnexpectedErr error
+          $Cypress.Utils.throwErr error

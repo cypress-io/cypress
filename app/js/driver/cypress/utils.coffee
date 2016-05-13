@@ -20,10 +20,49 @@ $Cypress.Utils = do ($Cypress, _) ->
     warning: (msg) ->
       console.warn("Cypress Warning: " + msg)
 
-    cypressError: (err) ->
+    throwErr: (err, options = {}) ->
+      if _.isString(err)
+        err = @cypressErr(err)
+
+      onFail = options.onFail
+      ## assume onFail is a command if
+      ## onFail is present and isnt a function
+      if onFail and not _.isFunction(onFail)
+        command = onFail
+
+        ## redefine onFail and automatically
+        ## hook this into our command
+        onFail = (err) ->
+          command.error(err)
+
+      err.onFail = onFail if onFail
+
+      throw err
+
+    throwErrByPath: (errPath, options = {}) ->
+      err = try
+        @errMessageByPath errPath, options.args
+      catch e
+        err = @internalErr e
+
+      @throwErr(err, options)
+
+    internalErr: (err) ->
+      err = new Error(err)
+      err.name = "InternalError"
+      err
+
+    cypressErr: (err) ->
       err = new Error(err)
       err.name = "CypressError"
       err
+
+    errMessageByPath: (errPath, args) ->
+      errMessage = @getObjValueByPath $Cypress.ErrorMessages, errPath
+      throw new Error "Error message path '#{errPath}' does not exist" if not errMessage
+      _.reduce args, (message, argValue, argKey) ->
+        message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), argValue)
+      , errMessage
 
     normalizeObjWithLength: (obj) ->
       ## underscore shits the bed if our object has a 'length'

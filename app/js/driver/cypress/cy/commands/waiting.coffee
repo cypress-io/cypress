@@ -10,7 +10,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
       ## to wait on multiple aliases and forget to make this
       ## an array
       if _.isString(options)
-        @throwErr("wait.invalid_arguments")
+        $Cypress.Utils.throwErrByPath("wait.invalid_arguments")
 
       _.defaults options, {log: true}
 
@@ -22,7 +22,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         when _.isString(msOrFnOrAlias)   then @_waitString.apply(@, args)
         when _.isArray(msOrFnOrAlias)    then @_waitString.apply(@, args)
         else
-          @throwErr "wait.invalid_1st_arg"
+          $Cypress.Utils.throwErrByPath "wait.invalid_1st_arg"
 
   Cypress.Cy.extend
     _waitNumber: (subject, ms, options) ->
@@ -41,7 +41,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         .return(subject)
 
     _waitFunction: (subject, fn, options) ->
-      @throwErr("wait.fn_deprecated")
+      $Cypress.Utils.throwErrByPath("wait.fn_deprecated")
 
     _waitString: (subject, str, options) ->
       if options.log isnt false
@@ -67,7 +67,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         ## return our xhr object
         return Promise.resolve(xhr) if xhr
 
-        options.error = @getErrMessage "wait.timed_out", {
+        options.error = $Cypress.Utils.errMessageByPath "wait.timed_out", {
           timeout: options.timeout
           alias
           num
@@ -107,7 +107,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
           log.set "referencesAlias", aliases
 
         if command.get("name") isnt "route"
-          @throwErr("wait.invalid_alias", {
+          $Cypress.Utils.throwErrByPath("wait.invalid_alias", {
             onFail: options._log
             args: { alias }
           })

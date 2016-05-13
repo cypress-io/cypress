@@ -72,15 +72,15 @@ $Cypress.register "Request", (Cypress, _, $) ->
       options.method = options.method.toUpperCase()
 
       if not validHttpMethodsRe.test(options.method)
-        @throwErr("request.invalid_method", {
+        $Cypress.Utils.throwErrByPath("request.invalid_method", {
           args: { method: o.method }
         })
 
       if not options.url
-        @throwErr("request.url_missing")
+        $Cypress.Utils.throwErrByPath("request.url_missing")
 
       if not _.isString(options.url)
-        @throwErr("request.url_wrong_type")
+        $Cypress.Utils.throwErrByPath("request.url_wrong_type")
 
       ## normalize the url by prepending it with our current origin
       ## or the baseUrl
@@ -93,7 +93,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
       ## if we made a request prior to a visit then it needs
       ## to be filled out
       if not Cypress.Location.isFullyQualifiedUrl(options.url)
-        @throwErr("request.url_invalid")
+        $Cypress.Utils.throwErrByPath("request.url_invalid")
 
       if isValidJsonObj(options.body)
         options.json = true
@@ -102,23 +102,23 @@ $Cypress.register "Request", (Cypress, _, $) ->
 
       if a = options.auth
         if not _.isObject(a)
-          @throwErr("request.auth_invalid")
+          $Cypress.Utils.throwErrByPath("request.auth_invalid")
 
       if h = options.headers
         if _.isObject(h)
           options.headers = h
         else
-          @throwErr("request.headers_invalid")
+          $Cypress.Utils.throwErrByPath("request.headers_invalid")
 
       isPlainObject = (obj) ->
         _.isObject(obj) and not _.isArray(obj) and not _.isFunction(obj)
 
       if c = options.cookies
         if not _.isBoolean(c) and not isPlainObject(c)
-          @throwErr("request.cookies_invalid")
+          $Cypress.Utils.throwErrByPath("request.cookies_invalid")
 
       if not _.isBoolean(options.gzip)
-        @throwErr("request.gzip_invalid")
+        $Cypress.Utils.throwErrByPath("request.gzip_invalid")
 
       ## clone the requestOpts to prevent
       ## anything from mutating it now
@@ -170,7 +170,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
             else
               ""
 
-            @throwErr("request.loading_failed", {
+            $Cypress.Utils.throwErrByPath("request.loading_failed", {
               onFail: options._log
               args: {
                 error: err
@@ -183,14 +183,14 @@ $Cypress.register "Request", (Cypress, _, $) ->
 
           ## bomb if we should fail on non 2xx status code
           if options.failOnStatus and not isOkStatusCodeRe.test(response.status)
-            @throwErr("request.status_invalid", {
+            $Cypress.Utils.throwErrByPath("request.status_invalid", {
               onFail: options._log
               args: { status: response.status }
             })
 
           return response
         .catch Promise.TimeoutError, (err) =>
-          @throwErr "request.timed_out", {
+          $Cypress.Utils.throwErrByPath "request.timed_out", {
             onFail: options._log
             args: { timeout: options.timeout }
           }

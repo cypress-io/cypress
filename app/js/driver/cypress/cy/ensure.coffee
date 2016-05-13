@@ -10,7 +10,7 @@ do ($Cypress, _, $) ->
 
       if not subject?
         cmd = @prop("current").get("name")
-        @throwErr("miscellaneous.no_subject", {
+        $Cypress.Utils.throwErrByPath("miscellaneous.no_subject", {
           args: { subject, cmd }
         })
 
@@ -20,7 +20,7 @@ do ($Cypress, _, $) ->
       current = @prop("current")
 
       if not current.get("prev")
-        @throwErr("miscellaneous.orphan", {
+        $Cypress.Utils.throwErrByPath("miscellaneous.orphan", {
           args: { cmd: current.get("name") }
         })
 
@@ -36,7 +36,7 @@ do ($Cypress, _, $) ->
 
       ## bail if we dont yet have two points
       if lastTwo.length isnt 2
-        @throwErr("dom.animation_check_failed")
+        $Cypress.Utils.throwErrByPath("dom.animation_check_failed")
 
       [point1, point2] = lastTwo
 
@@ -52,7 +52,7 @@ do ($Cypress, _, $) ->
       if distance() > threshold
         cmd  = @prop("current").get("name")
         node = $Cypress.Utils.stringifyElement($el)
-        @throwErr("dom.animating", {
+        $Cypress.Utils.throwErrByPath("dom.animating", {
           args: { cmd, node }
         })
 
@@ -64,7 +64,7 @@ do ($Cypress, _, $) ->
       if subject.prop("disabled")
         node = $Cypress.Utils.stringifyElement(subject)
 
-        @throwErr("dom.disabled", {
+        $Cypress.Utils.throwErrByPath("dom.disabled", {
           onFail
           args: { cmd, node }
         })
@@ -77,7 +77,7 @@ do ($Cypress, _, $) ->
       if not (subject.length is subject.filter(":visible").length)
         reason = $Cypress.Dom.getReasonElIsHidden(subject)
         node   = $Cypress.Utils.stringifyElement(subject)
-        @throwErr("dom.not_visible", {
+        $Cypress.Utils.throwErrByPath("dom.not_visible", {
           onFail
           args: { cmd, node, reason }
         })
@@ -96,14 +96,14 @@ do ($Cypress, _, $) ->
       ## true, false, 0, 1, 3, "foo", "bar"
       if not (isWindow or $Cypress.Utils.hasElement(subject))
         console.warn("Subject is currently: ", subject)
-        @throwErr("dom.non_dom", {
+        $Cypress.Utils.throwErrByPath("dom.non_dom", {
           onFail: log
           args: { cmd }
         })
 
       if not (isWindow or @_contains(subject))
         node = $Cypress.Utils.stringifyElement(subject)
-        @throwErr("dom.detached", {
+        $Cypress.Utils.throwErrByPath("dom.detached", {
           onFail: log
           args: { cmd, node }
         })
@@ -143,7 +143,7 @@ do ($Cypress, _, $) ->
             when "length"
               "have.length', '#{options[opt]}"
 
-          @throwErr("miscellaneous.deprecated", {
+          $Cypress.Utils.throwErrByPath("miscellaneous.deprecated", {
             args: {
               assertion
               opt
@@ -157,13 +157,13 @@ do ($Cypress, _, $) ->
       unless $Cypress.Utils.isDescendent($el1, $el2)
         if $el2
           node = $Cypress.Utils.stringifyElement($el2)
-          @throwErr("dom.covered", {
+          $Cypress.Utils.throwErrByPath("dom.covered", {
             onFail
             args: { cmd, node }
           })
         else
           node = $Cypress.Utils.stringifyElement($el1)
-          @throwErr("dom.hidden", {
+          $Cypress.Utils.throwErrByPath("dom.hidden", {
             onFail
             args: { cmd, node }
           })

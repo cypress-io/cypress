@@ -227,7 +227,7 @@ do ($Cypress, _) ->
         $Cypress.Chainer.remove(key)
 
     add: (key, fn, type) ->
-      throw new Error("Cypress.add(key, fn, type) must include a type!") if not type
+      $Cypress.Utils.throwErrByPath("add.type_missing") if not type
 
       ## allow object signature
       if _.isObject(key)
@@ -291,7 +291,7 @@ do ($Cypress, _) ->
 
       $Cypress.Cy.prototype[key] = (args...) ->
         if not @private("runnable")
-          @throwErr("miscellaneous.outside_test")
+          $Cypress.Utils.throwErrByPath("miscellaneous.outside_test")
 
         ## this is the first call on cypress
         ## so create a new chainer instance

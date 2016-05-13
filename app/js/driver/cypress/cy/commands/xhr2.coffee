@@ -21,7 +21,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
     options.originalUrl or options.url
 
   unavailableErr = ->
-    @throwErr("server.unavailable")
+    $Cypress.Utils.throwErrByPath("server.unavailable")
 
   getDisplayName = (route) ->
     if route and route.response? then "xhr stub" else "xhr"
@@ -238,7 +238,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
         onXhrAbort: (xhr, stack) =>
           setResponse.call(@, xhr)
 
-          err = new Error("This XHR was aborted by your code -- check this stack trace below.")
+          err = new Error $Cypress.Utils.errMessageByPath("xhr.aborted")
           err.name = "AbortError"
           err.stack = stack
 
@@ -264,7 +264,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
         options = {}
 
       if not _.isObject(options)
-        @throwErr("server.invalid_argument")
+        $Cypress.Utils.throwErrByPath("server.invalid_argument")
 
       _.defaults options,
         enable: true ## set enable to false to turn off stubbing
@@ -285,7 +285,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
       hasResponse = true
 
       if not @prop("serverIsStubbed")
-        @throwErr("route.failed_prerequisites")
+        $Cypress.Utils.throwErrByPath("route.failed_prerequisites")
 
       ## get the default options currently set
       ## on our server
@@ -300,7 +300,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
           options = o = _.extend {}, options, args[0]
 
         when args.length is 0
-          @throwErr "route.invalid_arguments"
+          $Cypress.Utils.throwErrByPath "route.invalid_arguments"
 
         when args.length is 1
           o.url = args[0]
@@ -343,18 +343,18 @@ $Cypress.register "XHR2", (Cypress, _) ->
       _.defaults options, defaults
 
       if not options.url
-        @throwErr "route.url_missing"
+        $Cypress.Utils.throwErrByPath "route.url_missing"
 
       if not (_.isString(options.url) or _.isRegExp(options.url))
-        @throwErr "route.url_invalid"
+        $Cypress.Utils.throwErrByPath "route.url_invalid"
 
       if not validHttpMethodsRe.test(options.method)
-        @throwErr "route.method_invalid", {
+        $Cypress.Utils.throwErrByPath "route.method_invalid", {
           args: { method: o.method }
         }
 
       if hasResponse and not options.response?
-        @throwErr "route.response_invalid"
+        $Cypress.Utils.throwErrByPath "route.response_invalid"
 
       ## convert to wildcard regex
       if options.url is "*"
@@ -424,12 +424,12 @@ $Cypress.register "XHR2", (Cypress, _) ->
       [alias, prop] = alias.split(".")
 
       if prop and not validAliasApiRe.test(prop)
-        @throwErr "get.alias_invalid", {
+        $Cypress.Utils.throwErrByPath "get.alias_invalid", {
           args: { prop }
         }
 
       if prop is "0"
-        @throwErr "get.alias_zero", {
+        $Cypress.Utils.throwErrByPath "get.alias_zero", {
           args: { alias }
         }
 
@@ -454,7 +454,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
           return @_getLastXhrByAlias(str, "requests")
         else
           if prop isnt "response"
-            @throwErr "wait.alias_invalid", {
+            $Cypress.Utils.throwErrByPath "wait.alias_invalid", {
               args: { prop, str }
             }
 

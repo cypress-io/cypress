@@ -51,7 +51,7 @@ do ($Cypress, _, Promise) ->
             else
               err
 
-        @throwErr "miscellaneous.retry_timed_out", {
+        $Cypress.Utils.throwErrByPath "miscellaneous.retry_timed_out", {
           onFail: (options.onFail or log)
           args: { error: getErrMessage(options.error) }
         }

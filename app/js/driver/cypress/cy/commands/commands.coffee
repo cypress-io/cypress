@@ -13,7 +13,7 @@ $Cypress.register "Commands", (Cypress, _) ->
 
     if not ctx[name]?
       cmds = _.keys(Cypress.Chainer.prototype).join(", ")
-      @throwErr("miscellaneous.invalid_command", {
+      $Cypress.Utils.throwErrByPath("miscellaneous.invalid_command", {
         args: { name, cmds }
       })
 

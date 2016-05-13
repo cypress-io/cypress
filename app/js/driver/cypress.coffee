@@ -41,9 +41,8 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
 
       return @
 
-    ## TODO: TEST THIS
     run: (fn) ->
-      throw new Error("Cannot call Cypress#run without a runner instance!") if not @runner
+      @Utils.throwErrByPath("miscellaneous.no_runner") if not @runner
 
       @runner.run(fn)
 

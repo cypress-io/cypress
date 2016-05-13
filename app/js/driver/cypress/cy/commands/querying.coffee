@@ -199,8 +199,8 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       @ensureNoCommandOptions(options)
 
-      @throwErr "contains.invalid_argument" if not (_.isString(text) or _.isFinite(text))
-      @throwErr "contains.empty_string" if _.isBlank(text)
+      $Cypress.Utils.throwErrByPath "contains.invalid_argument" if not (_.isString(text) or _.isFinite(text))
+      $Cypress.Utils.throwErrByPath "contains.empty_string" if _.isBlank(text)
 
       getPhrase = (type, negated) ->
         switch
@@ -307,7 +307,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
               switch err.type
                 when "length"
                   if err.expected > 1
-                    @throwErr "contains.length_option", { onFail: options._log }
+                    $Cypress.Utils.throwErrByPath "contains.length_option", { onFail: options._log }
                 when "existence"
                   err.longMessage = getErr(err)
           })
@@ -327,7 +327,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           $el: subject
           message: ""
 
-      @throwErr("within.invalid_argument", { onFail: options._log }) if not _.isFunction(fn)
+      $Cypress.Utils.throwErrByPath("within.invalid_argument", { onFail: options._log }) if not _.isFunction(fn)
 
       ## reference the next command after this
       ## within.  when that command runs we'll

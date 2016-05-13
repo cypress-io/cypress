@@ -70,7 +70,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
 
       getWindow = =>
         window = @private("window")
-        @throwErr("window.iframe_undefined", { onFail: options._log }) if not window
+        $Cypress.Utils.throwErrByPath("window.iframe_undefined", { onFail: options._log }) if not window
 
         return window
 
@@ -98,7 +98,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
       getDocument = =>
         win = @private("window")
         ## TODO: add failing test around logging twice
-        @throwErr("window.iframe_doc_undefined") if not win?.document
+        $Cypress.Utils.throwErrByPath("window.iframe_doc_undefined") if not win?.document
 
         return win.document
 
@@ -135,7 +135,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
             obj
 
       throwErrBadArgs = =>
-        @throwErr "viewport.bad_args", { onFail: options._log }
+        $Cypress.Utils.throwErrByPath "viewport.bad_args", { onFail: options._log }
 
       widthAndHeightAreValidNumbers = (width, height) ->
         _.all [width, height], (val) ->
@@ -147,7 +147,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
 
       switch
         when _.isString(presetOrWidth) and _.isBlank(presetOrWidth)
-          @throwErr "viewport.empty_string", { onFail: options._log }
+          $Cypress.Utils.throwErrByPath "viewport.empty_string", { onFail: options._log }
 
         when _.isString(presetOrWidth)
           getPresetDimensions = (preset) =>
@@ -155,7 +155,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
               _(viewports[presetOrWidth].split("x")).map(Number)
             catch e
               presets = _.keys(viewports).join(", ")
-              @throwErr "viewport.missing_preset", {
+              $Cypress.Utils.throwErrByPath "viewport.missing_preset", {
                 onFail: options._log
                 args: { preset, presets }
               }
@@ -163,7 +163,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
           orientationIsValidAndLandscape = (orientation) =>
             if orientation not in validOrientations
               all = validOrientations.join("' or '")
-              @throwErr "viewport.invalid_orientation", {
+              $Cypress.Utils.throwErrByPath "viewport.invalid_orientation", {
                 onFail: options._log
                 args: { all, orientation }
               }
@@ -187,7 +187,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
           height = heightOrOrientation
 
           if not widthAndHeightAreWithinBounds(width, height)
-            @throwErr "viewport.dimensions_out_of_range", { onFail: options._log }
+            $Cypress.Utils.throwErrByPath "viewport.dimensions_out_of_range", { onFail: options._log }
 
         else
           throwErrBadArgs()

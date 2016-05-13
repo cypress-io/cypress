@@ -10,13 +10,13 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
       aliases = @prop("aliases") ? {}
 
       if not _.isString(str)
-        @throwErr "as.invalid_type"
+        $Cypress.Utils.throwErrByPath "as.invalid_type"
 
       if _.isBlank(str)
-        @throwErr "as.empty_string"
+        $Cypress.Utils.throwErrByPath "as.empty_string"
 
       if str in blacklist
-        @throwErr "as.reserved_word", { args: { str } }
+        $Cypress.Utils.throwErrByPath "as.reserved_word", { args: { str } }
 
       ## this is the previous command
       ## which we are setting the alias as
