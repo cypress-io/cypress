@@ -63,6 +63,10 @@ describe "lib/socket", ->
             runtime: {
 
             }
+            tabs: {
+              query: ->
+              executeScript: ->
+            }
           }
 
         beforeEach (done) ->
@@ -139,6 +143,81 @@ describe "lib/socket", ->
           @client.emit "automation:request", "get:cookies", {domain: "foo"}, (resp) ->
             expect(resp.__error).to.eq("Could not process 'get:cookies'. No automation servers connected.")
             done()
+
+        it "returns true when tab matches magic string", (done) ->
+          code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent"
+
+          @sandbox.stub(chrome.tabs, "query")
+          .withArgs({url: "CHANGE_ME_HOST/*", windowType: "normal"})
+          .yieldsAsync([{id: 1}])
+
+          @sandbox.stub(chrome.tabs, "executeScript")
+          .withArgs(1, {code: code})
+          .yieldsAsync(["string"])
+
+          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string"}, (resp) ->
+            expect(resp).to.be.true
+            done()
+
+        it "returns true after retrying", (done) ->
+          err = new Error
+
+          ## just force onAumation to reject up until the 4th call
+          oA = @sandbox.stub(@socket, "onAutomation")
+
+          oA
+          .onCall(0).rejects(err)
+          .onCall(1).rejects(err)
+          .onCall(2).rejects(err)
+          .onCall(3).resolves()
+
+          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string"}, (resp) ->
+            expect(oA.callCount).to.be.eq(4)
+
+            expect(resp).to.be.true
+            done()
+
+        it "returns false when times out", (done) ->
+          code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent"
+
+          @sandbox.stub(chrome.tabs, "query")
+          .withArgs({url: "CHANGE_ME_HOST/*", windowType: "normal"})
+          .yieldsAsync([{id: 1}])
+
+          @sandbox.stub(chrome.tabs, "executeScript")
+          .withArgs(1, {code: code})
+          .yieldsAsync(["foobarbaz"])
+
+          ## reduce the timeout so we dont have to wait so long
+          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string", timeout: 100}, (resp) ->
+            expect(resp).to.be.false
+            done()
+
+        it "retries multiple times and stops after timing out", (done) ->
+          ## just force onAumation to reject every time its called
+          oA = @sandbox.stub(@socket, "onAutomation").rejects(new Error)
+
+          ## reduce the timeout so we dont have to wait so long
+          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string", timeout: 100}, (resp) ->
+            callCount = oA.callCount
+
+            ## it retries every 25ms so explect that
+            ## this function was called at least 2 times
+            expect(callCount).to.be.gt(2)
+
+            expect(resp).to.be.false
+
+            _.delay ->
+              ## wait another 100ms and make sure
+              ## that it was cancelled and not continuously
+              ## retried!
+              ## if we remove Promise.config({cancellation: true})
+              ## then this will fail. bluebird has changed its
+              ## cancellation logic before and so we want to use
+              ## an integration test to ensure this works as expected
+              expect(callCount).to.eq(oA.callCount)
+              done()
+            , 100
 
       describe "options.onAutomationRequest", ->
         beforeEach ->

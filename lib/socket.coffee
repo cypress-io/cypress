@@ -15,7 +15,7 @@ logger        = require("./logger")
 automation    = require("./automation")
 
 retry = (fn) ->
-  Promise.delay(50).then(fn)
+  Promise.delay(25).then(fn)
 
 class Socket
   constructor: ->
@@ -215,8 +215,8 @@ class Socket
         .then(cb)
 
       socket.on "is:automation:connected", (data = {}, cb) =>
-        isConnected = (err) =>
-          @onAutomation(messages, "is:automation:connected", data)
+        isConnected = =>
+          automationRequest("is:automation:connected", data)
 
         tryConnected = =>
           Promise
@@ -224,10 +224,11 @@ class Socket
           .catch ->
             retry(tryConnected)
 
-        ## retry for up to 1 second
+        ## retry for up to data.timeout
+        ## or 1 second
         Promise
         .try(tryConnected)
-        .timeout(1000)
+        .timeout(data.timeout ? 1000)
         .then ->
           cb(true)
         .catch Promise.TimeoutError, (err) ->
