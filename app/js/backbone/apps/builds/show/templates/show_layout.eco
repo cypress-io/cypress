@@ -20,19 +20,27 @@
                       </div>
                     </div>
                     <div>
-                      <div>
+                      <div class="border-left">
                         <i class="fa fa-<%= @osNameFormatted %>"></i>
                         <%= @os_version %>
+                      </div>
+                    </div>
+                    <div>
+                      <div>
                         <i class="fa fa-<%= @browserNameFormatted %>"></i>
                         <%= @browser_version %>
                       </div>
                     </div>
-                    <div class="border-left">
-                      <div>
+                    <div>
+                      <div class="border-left">
                         <% if @passed > 0: %>
                           Pass
                           <span class="label label-success"><%= @passed %></span>
                         <% end %>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="border-right">
                         <% if @failed > 0: %>
                           Fail
                           <span class="label label-danger"><%= @failed %></span>
@@ -210,7 +218,7 @@
                     </div>
                   </div>
                 </div>
-                <button class="btn btn-link pull-right">
+                <button class="btn btn-primary pull-right">
                   <i class="fa fa-download"></i>
                   Download Video
                 </button>

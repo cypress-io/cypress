@@ -87,11 +87,15 @@
     }
 
     header {
-      padding: 0;
+      padding: 0 10px;
+
+      .btn {
+        margin-top: 6px;
+      }
     }
   }
   #header-container #stats-container {
-    @include list-columns(15%, 25%, 25%, 35%);
+    @include list-columns(15%, 28%, 11%, 11%, 17%, 17%);
     border-left: 9px solid #e94f5f;
 
     li {
@@ -99,18 +103,19 @@
       padding: 0;
 
       &>div>div {
-        padding: 10px 5px;
+        padding: 10px 8px;
       }
-
-      .border-left {
-        border-left: 1px solid #eee;
-      }
-
 
       &:last-of-type {
         border-right: 1px solid #eee;
 
       }
+    }
+    .border-left {
+      border-left: 1px solid #eee;
+    }
+    .border-right {
+      border-right: 1px solid #eee;
     }
   }
 }
