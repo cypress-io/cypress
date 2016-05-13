@@ -3,8 +3,8 @@
   class Router extends App.Routers.Application
     module: BuildsApp
 
-    before: ->
-      App.vent.trigger "main:nav:choose", "Builds"
+    # before: ->
+      # App.vent.trigger "main:nav:choose", "Builds"
 
     actions:
       list: ->

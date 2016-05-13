@@ -1,16 +1,13 @@
 <div class="<%= @status %>">
   <div>
-    <%= @buildId %>
+    #<%= @buildId %>
   </div>
 </div>
 <div>
   <div>
-    <%= @branch %>
-  </div>
-</div>
-<div>
-  <div class="build-message">
-    <div class="user">
+    <div>
+      <i class="fa fa-code-fork fa-rotate-90"></i>
+      <%= @branch %>
       <i class="fa fa-user"></i>
       <%= @author %>
     </div>
@@ -20,72 +17,42 @@
   </div>
 </div>
 <div>
-  <div class="build-stats">
-    <div>
-      <div>
-        <% if @passed > 0: %>
-          <%= @passed %>
-        <% end %>
-      </div>
-      <div>
-        <% if @passed > 0: %>
-          <span class="label label-success">Pass</span>
-        <% end %>
-      </div>
-    </div>
-    <div>
-      <div>
-        <% if @failed > 0: %>
-          <%= @failed %>
-        <% end %>
-      </div>
-      <div>
-        <% if @failed > 0: %>
-          <span class="label label-danger">Fail</span>
-        <% end %>
-      </div>
-    </div>
-    <div>
-      <div>
-        <% if @skipped > 0: %>
-          <%= @skipped %>
-        <% end %>
-      </div>
-      <div>
-        <% if @skipped > 0: %>
-          <span class="label label-warning">Skip</span>
-        <% end %>
-      </div>
-    </div>
-    <div>
-      <div>
-        <% if @pending > 0: %>
-          <%= @pending %>
-        <% end %>
-      </div>
-      <div>
-        <% if @pending > 0: %>
-          <span class="label label-info">Pend</span>
-        <% end %>
-      </div>
-    </div>
-    <div>
-      <div>
-        <%= @total %>
-      </div>
-      <div>
-        <span class="label label-default">Total</span>
-      </div>
-    </div>
-  </div>
-</div>
-<div>
   <div>
-    <%= (@duration / 1000).toFixed(0) %>secs
-  </div>
-</div>
-<div>
-  <div>
+    <i class="fa fa-clock-o"></i> started
     <%= moment(@created_at).fromNow() %>
+  </div>
+</div>
+<div>
+  <div>
+    <i class="fa fa-hourglass-end"></i> ran for
+    <%= moment.duration(@duration).humanize() %>
+  </div>
+</div>
+<div>
+  <div class="td-border-left os-block">
+    <i class="fa fa-<%= @osNameFormatted %>"></i>
+    <%= @os_version %>
+  </div>
+</div>
+<div>
+  <div>
+    <i class="fa fa-<%= @browserNameFormatted %>"></i>
+    <%= @browser_version %>
+  </div>
+</div>
+<div>
+  <div class="td-border-left">
+    <% if @passed > 0: %>
+      Pass
+      <span class="label label-success"><%= @passed %></span>
+    <% end %>
+  </div>
+</div>
+<div>
+  <div>
+    <% if @failed > 0: %>
+      Fail
+      <span class="label label-danger"><%= @failed %></span>
+    <% end %>
   </div>
 </div>
