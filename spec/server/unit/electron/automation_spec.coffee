@@ -150,3 +150,9 @@ describe "lib/electron/handlers/automation", ->
           throw new Error("should have failed")
         .catch (err) ->
           expect(err.message).to.eq("some error")
+
+  describe "is:automation:connected", ->
+    it "always returns true", ->
+      automation.perform("is:automation:connected")
+      .then (ret) ->
+        expect(ret).to.be.true
