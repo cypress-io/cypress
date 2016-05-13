@@ -1,0 +1,68 @@
+<div id="builds-show">
+  <div>
+    <div id="test-container">
+      <div id="header-container">
+        <div id="stats-region">
+          <div>
+            <div id="stats-region">
+              <div>
+                <ul id="stats-container">
+                  <li>
+                    #1465
+                  </li>
+                  <li>
+                    <i class="fa fa-code-fork fa-rotate-90"></i>
+                    <%= @branch %>
+                  </li>
+                  <li>
+                    <i class="fa fa-<%= @osNameFormatted %>"></i>
+                    <%= @os_version %>
+                    <i class="fa fa-<%= @browserNameFormatted %>"></i>
+                    <%= @browser_version %>
+                  </li>
+                  <li>
+                    <% if @passed > 0: %>
+                      Pass
+                      <span class="label label-success"><%= @passed %></span>
+                    <% end %>
+                    <% if @failed > 0: %>
+                      Fail
+                      <span class="label label-danger"><%= @failed %></span>
+                    <% end %>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div id="chosen-region"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="test-specs">
+    <div id="specs-container">
+      <div id="specs-region">
+        <ul class="runnables" id="specs-list">
+          <div>
+          things here
+          </div>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div id="iframe-wrapper" style="right: 0px; width: 1090px;">
+    <div id="iframe-container">
+      <div id="iframe-region">
+        <div style="display: block;">
+          <div id="iframe-size-container" style="transform: scale(0.6424); margin-left: 45px; width: 1000px; height: 660px;">
+            <iframe src="https://player.vimeo.com/video/119067384"></iframe>
+          </div>
+          <div id="message-region">
+            <div id="iframe-message" style="display: none; bottom: 0px; margin-left: 545px; opacity: 0.7;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

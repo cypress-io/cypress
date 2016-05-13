@@ -76,3 +76,12 @@
     color: #bbb;
   }
 }
+
+#builds-show {
+  #iframe-wrapper #iframe-container #iframe-region {
+
+    &>div {
+      padding-top: 0;
+    }
+  }
+}

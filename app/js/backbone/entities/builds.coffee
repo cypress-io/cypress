@@ -43,6 +43,26 @@
     url: "/__cypress/builds"
 
   API =
+    getBuild: ->
+      build = new Entities.Build {
+        "uuid": "e474ccb9-0352-4ad9-85d3-feeb1e0505d2",
+        "buildId": "1894"
+        "branch":"search-todos",
+        "message": "remove listings from search results on clear"
+        "duration": 1424424,
+        "passed": 28,
+        "failed": 4,
+        "created_at":"2015-08-21T02:35:12.748Z",
+        "updated_at":"2015-08-21T02:35:38.687Z",
+        "status": "pass",
+        "author": "Julie Pearson",
+        "browser_name": "chrome",
+        "browser_version": "43",
+        "os_name": "windows",
+        "os_version": "7"
+      }
+      build
+
     getBuilds: ->
       models = [
         {
@@ -127,3 +147,6 @@
 
   App.reqres.setHandler "build:entities", ->
     API.getBuilds()
+
+  App.reqres.setHandler "build:entity", (id) ->
+    API.getBuild id
