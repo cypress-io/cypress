@@ -5103,11 +5103,11 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("#button-covered-in-span").click()
 
-      it.skip "throws when non-descendent element is covering with fixed position", (done) ->
+      it "throws when non-descendent element is covering with fixed position", (done) ->
         @cy._timeout(200)
 
         btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(@cy.$$("body"))
-        span = $("<span>span on button</span>").css(position: "fixed", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$$("body"))
+        span = $("<span>span on button</span>").css(position: "fixed", left: 0, top: 0, padding: 20, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$$("body"))
 
         logs = []
 
@@ -5165,7 +5165,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("select:first").click()
 
-      it.only "throws when provided invalid position", (done) ->
+      it "throws when provided invalid position", (done) ->
         logs = []
 
         @Cypress.on "log", (@log) =>

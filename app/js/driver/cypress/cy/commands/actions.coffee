@@ -1297,7 +1297,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         try
           coords = @getCoordinates($el, options.position)
         catch err
-          @throwUnexpectedErr(err, options._log)
+          @throwUnexpectedErr(err, { onFail: options._log })
 
       ## if we're forcing this click event
       ## just immediately send it up

@@ -72,7 +72,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       beforeEach ->
         @allowErrors()
 
-      it.skip "logs once on failure", (done) ->
+      it "logs once on failure", (done) ->
         logs = []
 
         @Cypress.on "log", (log) ->
@@ -204,7 +204,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           .visit("fixtures/html/sinon.html")
           .go("back", {timeout: 1})
 
-      it.skip "only logs once on error", (done) ->
+      it "only logs once on error", (done) ->
         logs = []
 
         @Cypress.on "log", (log) =>
@@ -442,7 +442,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "unbinds remoteIframe load event"
 
-      it.skip "only logs once on error", (done) ->
+      it "only logs once on error", (done) ->
         logs = []
 
         @Cypress.on "log", (@log) =>

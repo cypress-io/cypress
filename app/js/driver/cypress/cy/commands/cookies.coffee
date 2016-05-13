@@ -41,7 +41,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
             err.stack = resp.__stack
 
             try
-              @throwUnexpectedErr(err, log)
+              @throwUnexpectedErr(err, { onFail: log })
             catch e
               reject(e)
           else

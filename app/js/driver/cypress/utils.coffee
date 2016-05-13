@@ -209,7 +209,7 @@ $Cypress.Utils = do ($Cypress, _) ->
     setCypressNamespace: (obj, original) ->
       obj[CYPRESS_OBJECT_NAMESPACE] = original
 
-    getObjValueByPath: (obj, keyPath)->
+    getObjValueByPath: (obj, keyPath) ->
       if not _.isObject obj
         throw new Error "The first parameter to $Cypress.Utils.getObjValueByPath() must be an object"
       if not _.isString keyPath

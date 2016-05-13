@@ -120,4 +120,6 @@ do ($Cypress, _) ->
         when "bottomLeft"   then @getBottomLeftCoordinates(rect)
         when "bottomRight"  then @getBottomRightCoordinates(rect)
         else
-          @throwErr("dom.invalid_position_argument")
+          @throwErr("dom.invalid_position_argument", {
+            args: { position }
+          })

@@ -1,5 +1,5 @@
 $Cypress.ErrorMessages = do ($Cypress) ->
-  cmd = (command, args = "")->
+  cmd = (command, args = "") ->
     "cy.#{command}(#{args})"
 
   return {
@@ -7,6 +7,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       invalid: "Invalid alias: '{{name}}'.\nYou forgot the '@'. It should be written as: '@{{displayName}}'."
       not_registered_with_available: "#{cmd('{{cmd}}')} could not find a registered alias for: '@{{displayName}}'.\nAvailable aliases are: '{{availableAliases}}'."
       not_registered_without_available: "#{cmd('{{cmd}}')} could not find a registered alias for: '@{{displayName}}'.\nYou have not aliased anything yet."
+
     as:
       empty_string: "#{cmd('as')} cannot be passed an empty string."
       invalid_type: "#{cmd('as')} can only accept a string."
@@ -120,7 +121,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       invalid_property: "#{cmd('{{cmd}}')} errored because the property: '{{prop}}' does not exist on your subject."
       previous_prop_nonexistent: "#{cmd('{{cmd}}')} errored because the property: '{{previousProp}}' returned a '{{value}}' value. You cannot access any properties such as '{{currentProp}}' on a '{{value}}' value."
       timed_out: """
-        \n#{cmd('{{cmd}}')} timed out after waiting '{{timeout}}ms'.\n
+        #{cmd('{{cmd}}')} timed out after waiting '{{timeout}}ms'.\n
         Your callback function returned a promise which never resolved.\n
         The callback function was:\n
         {{func}}
@@ -136,14 +137,14 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       no_subject: "Subject is {{subject}}. You cannot call #{cmd('{{cmd}}')} without a subject."
       orphan: "#{cmd('{{cmd}}')} is a child command which operates on an existing subject.  Child commands must be called after a parent command."
       outside_test: """
-        \nCypress cannot execute commands outside a running test.
+        Cypress cannot execute commands outside a running test.
         This usually happens when you accidentally write commands outside an it(...) test.
         If that is the case, just move these commands inside an 'it(...)' test.
         Check your test file for errors.\n
         https://on.cypress.io/cannot-execute-commands-outside-test
       """
       outside_test_with_cmd: """
-        \nCannot call "#{cmd('{{cmd}}')} outside a running test.
+        Cannot call "#{cmd('{{cmd}}')} outside a running test.
         This usually happens when you accidentally write commands outside an it(...) test.
         If that is the case, just move these commands inside an 'it(...)' test.
         Check your test file for errors.\n
@@ -168,7 +169,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       headers_invalid: "#{cmd('request')} requires headers to be an object literal."
       invalid_method: "#{cmd('request')} was called with an invalid method: '{{method}}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
       loading_failed: """
-        \n#{cmd('request')} failed:
+        #{cmd('request')} failed:
 
         The response from the remote server was:
 

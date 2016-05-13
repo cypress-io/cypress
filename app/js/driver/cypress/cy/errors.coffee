@@ -1,14 +1,14 @@
 do ($Cypress, _) ->
 
   $Cypress.Cy.extend
-    getErrMessage: (errPath, args)->
+    getErrMessage: (errPath, args) ->
       errMessage = $Cypress.Utils.getObjValueByPath $Cypress.ErrorMessages, errPath
       throw new Error "Error message path '#{errPath}' does not exist" if not errMessage
-      _.reduce args, (message, argValue, argKey)->
+      _.reduce args, (message, argValue, argKey) ->
         message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), argValue)
       , errMessage
 
-    internalErr: (err)->
+    internalErr: (err) ->
       err = new Error(err)
       err.name = "InternalError"
       err
@@ -16,7 +16,7 @@ do ($Cypress, _) ->
     cypressErr: (err) ->
       $Cypress.Utils.cypressError(err)
 
-    throwUnexpectedErr: (err, options = {})->
+    throwUnexpectedErr: (err, options = {}) ->
       @_handleErr(err, options)
 
     throwErr: (errPath, options = {}) ->
@@ -27,7 +27,7 @@ do ($Cypress, _) ->
 
       @_handleErr(err, options)
 
-    _handleErr: (err, options)->
+    _handleErr: (err, options) ->
       if _.isString(err)
         err = @cypressErr(err)
 

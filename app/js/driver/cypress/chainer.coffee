@@ -18,6 +18,7 @@ $Cypress.Chainer = do ($Cypress, _) ->
       $Chainer.prototype[key] = (args...) ->
         ## dont return cypress instance if any
         ## return value from our on:inject:command is false
+        ## TODO: fix this
         return if _.any Cypress.invoke("on:inject:command", key, args...), (ret) ->
           ret is false
 
