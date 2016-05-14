@@ -141,6 +141,13 @@ class Socket
         socket.inAutomationRoom = true
         socket.join("automation")
 
+        ## if our automation disconnects then we're
+        ## in trouble and should probably bomb everything
+        socket.on "disconnect", =>
+          ## if we are in headless mode then log out an error and maybe exit with process.exit(1)?
+          console.error("The automation server disconnected. Cannot continue running tests.")
+          @io.emit("automation:disconnected", false)
+
         socket.on "automation:response", respond
 
       socket.on "automation:request", (message, data, cb) =>

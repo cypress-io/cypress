@@ -1,6 +1,6 @@
 <div class="extension-message">
-  <p>It looks like the Cypress chrome extension is no longer running in this browser.</p>
-  <p class="muted"><small>Cypress tests depend on the chrome extension being installed.</small></p>
+  <p>Whoops, the Cypress Chrome extension has disconnected.</p>
+  <p class="muted"><small>Cypress cannot run tests without this extension.</small></p>
   <button class="btn btn-primary btn-lg">
     <i class="fa fa-refresh"></i> Reload the Browser
   </button>
