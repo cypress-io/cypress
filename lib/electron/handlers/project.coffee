@@ -7,10 +7,19 @@ Project  = require("../../project")
 launcher = require("../../launcher")
 
 ## global reference to any open projects
-openProject = null
+openProject     = null
+openBrowser     = null
+openBrowserOpts = null
 
 module.exports = {
   open: (path, args = {}, options = {}) ->
+    _.defaults options, {
+      sync: true
+      changeEvents: true
+      onReloadBrowser: (url) =>
+        @relaunch(url)
+    }
+
     options = _.extend {}, config.whitelist(args), options
 
     ## store the currently open project
@@ -36,7 +45,14 @@ module.exports = {
   launch: (browser, options = {}) ->
     openProject.getConfig()
     .then (cfg) ->
+      openBrowser     = browser
+      openBrowserOpts = options
       launcher.launch(browser, cfg.clientUrl, options)
+
+  relaunch: (url) ->
+    return if not openBrowser
+
+    launcher.launch(openBrowser, url, openBrowserOpts)
 
   onSettingsChanged: ->
     Promise.try =>
@@ -47,9 +63,15 @@ module.exports = {
           openProject.on "settings:changed", -> resolve()
 
   close: (options = {}) ->
+    _.defaults options, {
+      sync: true
+    }
+
     nullify = ->
-      ## null this back out
-      openProject = null
+      ## null these back out
+      openProject     = null
+      openBrowser     = null
+      openBrowserOpts = null
 
       Promise.resolve(null)
 

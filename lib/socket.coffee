@@ -107,6 +107,7 @@ class Socket
       onConnect: ->
       onChromiumRun: ->
       onIsNewProject: ->
+      onReloadBrowser: ->
       checkForAppErrors: ->
 
     ## promisify this function
@@ -217,9 +218,12 @@ class Socket
         open.opn(p, opts)
         .then -> cb()
 
-      socket.on "is:new:project", (cb) =>
+      socket.on "is:new:project", (cb) ->
         options.onIsNewProject()
         .then(cb)
+
+      socket.on "reload:browser", (url) ->
+        options.onReloadBrowser(url)
 
       socket.on "is:automation:connected", (data = {}, cb) =>
         isConnected = =>

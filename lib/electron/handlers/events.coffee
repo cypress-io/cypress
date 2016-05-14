@@ -152,10 +152,7 @@ handleEvent = (options, event, id, type, arg) ->
       .catch(sendErr)
 
     when "open:project"
-      project.open(arg, options, {
-        sync: true
-        changeEvents: true
-      })
+      project.open(arg, options)
       .call("getConfig")
       .then(send)
       .then ->
@@ -164,9 +161,7 @@ handleEvent = (options, event, id, type, arg) ->
         sendErr(err)
 
     when "close:project"
-      project.close({
-        sync: true
-      })
+      project.close()
       .then(send)
       .then ->
         callback("onCloseProject")
