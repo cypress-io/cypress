@@ -1,5 +1,3 @@
-test:
-  override:
-    - nvm install 5.10
-    - npm install
-    - npm run test
+machine:
+  node:
+    version: 5.10.0
