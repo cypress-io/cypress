@@ -8,15 +8,15 @@ fs   = Promise.promisifyAll(fs)
 name = pkg.productName or pkg.name
 data = ospath.data()
 
-isDevelopment = ->
-  process.env.CYPRESS_ENV is "development"
+isProduction = ->
+  process.env.CYPRESS_ENV is "production"
 
 module.exports = {
   ensure: ->
     ensure = =>
       Promise.join(
         fs.ensureDirAsync(@path())
-        @symlink() if isDevelopment()
+        @symlink() unless isProduction()
       )
 
     ## try twice to ensure the dir
