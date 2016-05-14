@@ -41,12 +41,3 @@
 
     hideIframe: ->
       @ui.iframeWrapper.hide()
-
-  class Show.BrowsersMessage extends App.Views.ItemView
-    template: "tests/show/_browsers_message"
-
-    templateHelpers: ->
-      browsers: @options.browsers.toJSON()
-
-  class Show.ExtensionMessage extends App.Views.ItemView
-    template: "tests/show/_extension_message"

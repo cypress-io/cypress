@@ -18,8 +18,6 @@
         socket.emit "is:new:project", (bool) ->
           files.trigger("is:new:project", bool)
 
-        @extensionMessage(socket)
-
       @listenTo @layout, "project:name:clicked", ->
         socket.emit "open:finder", config.get("parentTestsFolder")
 

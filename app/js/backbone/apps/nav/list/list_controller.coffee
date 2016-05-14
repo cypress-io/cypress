@@ -16,7 +16,7 @@
       ## and just let the user reload the browser.
       @listenTo socket, "automation:disconnected", ->
         @layout.destroy()
-        App.execute("show:disconnected")
+        App.execute("show:automation")
 
       @listenTo config, "change:gitter", (model, value, options) ->
         chat.toggleChat(value)

@@ -1,22 +1,22 @@
 <div class="extension-message">
-  <p>It looks like this Cypress test wasn't started through the Desktop App.</p>
-  <p class="muted"><small>Cypress tests need to open in a new, clean profile in order to maintain a clean test environment.</small></p>
+  <p>Whoops, it looks like you're not running tests correctly.</p>
+  <p class="muted"><small>At the moment Cypress only supports Chrome.</small></p>
   <% if @browsers.length is 0: %>
     <div class="alert alert-danger error">
       <p>
         <i class="fa fa-warning"></i>
-        <strong>Can't Run Server in Browser</strong>
+        <strong>No supported browser found.</strong>
       </p>
       <p>
-        We couldn't find any browsers to run the server in. To fix, download a browser.</p>
-      <button data-download-browser class="btn btn-primary btn-sm">
+        We couldn't find any supported browsers capable of running Cypress. Please download Chrome.</p>
+      <a href="https://www.google.com/chrome/browser/desktop" class="btn btn-primary btn-sm">
         <i class="fa fa-chrome"></i>
         Download Chrome
-      </button>
+      </a>
     </div>
   <% else: %>
     <div class="btn-group browser-selector">
-      <button type="button" data-js="run-browser" data-browser="<%= @browserName %>" class="btn btn-primary btn-lg">
+      <button type="button" data-js="run-browser" data-browser="<%= @name %>" class="btn btn-primary btn-lg">
         <i data-js="browser-icon" class="fa fa-<%= @icon %>"></i>
         <span data-js="browser-text">Run <%= @displayName %> <%= @majorVersion %></span>
       </button>

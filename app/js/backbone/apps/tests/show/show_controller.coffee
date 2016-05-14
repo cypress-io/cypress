@@ -51,38 +51,14 @@
 
         socket.emit "watch:test:file", id
 
-      ## TODO: why is this here, plz refactor
-      # @listenTo socket, "change:automatedConnected", (bool) ->
-        # @region.empty()
-        # @browsersMessage()
-
       socket.whenAutomationKnown (bool) =>
         if bool
           @show @layout
         else
-          @automationDisconnected(config.get("browsers"))
-          ## show the not connected message
-
-    # socket.on "automation:disconnected", ->
-    automationDisconnected: ->
-      @region.empty()
-      @extensionMessage()
-
-    browsersMessage: (browsers) ->
-      browsers = App.request "new:browser:entities", browsers
-
-      defaultBrowser = browsers.extractDefaultBrowser()
-
-      browsersMessageView = @getBrowsersMessageView(defaultBrowser, browsers)
-
-      @show browsersMessageView,
-        region: @layout.messageRegion
-
-    extensionMessage: ->
-      extensionMessageView = @getExtensionMessageView()
-
-      @show extensionMessageView,
-        region: @region
+          ## if we never were able to connect to automation
+          ## then we need to display a list of browsers and
+          ## close this window down so we can open up correctly
+          App.execute "list:automation"
 
     statsRegion: (runner) ->
       App.execute "show:test:stats", @layout.statsRegion, runner
@@ -98,9 +74,6 @@
       App.clearAllCookies()
       config.trigger "close:test:panels"
       App.request "stop:test:runner", runner
-
-    getExtensionMessageView: ->
-      new Show.ExtensionMessage
 
     getBrowsersMessageView: (defaultBrowser, browsers) ->
       new Show.BrowsersMessage
