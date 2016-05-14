@@ -38,7 +38,7 @@
 
     runBrowserClicked: (e) ->
       btn = $(e.currentTarget)
-      browser = btn.data().browser
+      browser = btn.data("browser")
 
       @trigger "run:browser:clicked", browser
 

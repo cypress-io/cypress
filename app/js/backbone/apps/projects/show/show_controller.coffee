@@ -7,6 +7,12 @@
 
       @projectLayout = @getProjectLayout(project)
 
+      ## when we are notified by the server to launch
+      ## a browser we will do so!
+      App.ipc "on:launch:browser", (err, data = {}) =>
+        {browser, url} = data
+        @launchBrowser(project, browser, url)
+
       @listenTo @projectLayout, "help:clicked", ->
         App.ipc("external:open", "https://docs.cypress.io")
 
@@ -14,19 +20,7 @@
         App.ipc("external:open", "https://on.cypress.io")
 
       @listenTo @projectLayout, "run:browser:clicked", (browser) ->
-        ## here's where you write logic to open the url
-        ## in a specific browser
-        project.setBrowser(browser)
-        project.browserOpening()
-
-        App.ipc "launch:browser", browser, (err, data = {}) ->
-          switch
-            when data.browserOpened
-              project.browserOpened()
-
-            when data.browserClosed
-              App.ipc.off("launch:browser")
-              project.browserClosed()
+        @launchBrowser(project, browser)
 
       @listenTo @projectLayout, "stop:clicked ok:clicked" , ->
         @closeProject().then ->
@@ -48,6 +42,21 @@
 
       @show @projectLayout
 
+    launchBrowser: (project, browser, url) ->
+      ## here's where you write logic to open the url
+      ## in a specific browser
+      project.setBrowser(browser)
+      project.browserOpening()
+
+      App.ipc "launch:browser", {browser, url}, (err, data = {}) ->
+        switch
+          when data.browserOpened
+            project.browserOpened()
+
+          when data.browserClosed
+            App.ipc.off("launch:browser")
+            project.browserClosed()
+
     reboot: (project) ->
       project.reset()
 
@@ -55,6 +64,7 @@
         @openProject(project)
 
     closeProject: ->
+      App.ipc.off("on:launch:browser")
       App.ipc.off("on:project:settings:change")
       App.ipc("close:project")
 
