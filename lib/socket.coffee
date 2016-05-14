@@ -222,8 +222,8 @@ class Socket
         options.onIsNewProject()
         .then(cb)
 
-      socket.on "reload:browser", (url) ->
-        options.onReloadBrowser(url)
+      socket.on "reload:browser", (url, browser) ->
+        options.onReloadBrowser(url, browser)
 
       socket.on "is:automation:connected", (data = {}, cb) =>
         isConnected = =>

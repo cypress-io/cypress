@@ -67,9 +67,12 @@ handleEvent = (options, event, id, type, arg) ->
     when "external:open"
       shell.openExternal(arg)
 
+    when "on:launch:browser"
+      project.onRelaunch(send)
+
     when "launch:browser"
       # headless.createRenderer(arg, true)
-      project.launch(arg, {
+      project.launch(arg.browser, arg.url, {
         onBrowserOpen: ->
           send({browserOpened: true})
         onBrowserClose: ->

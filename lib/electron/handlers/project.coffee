@@ -6,7 +6,8 @@ cache    = require("../../cache")
 Project  = require("../../project")
 launcher = require("../../launcher")
 
-## global reference to any open projects
+## global reference to open objects
+onRelaunch      = null
 openProject     = null
 openBrowser     = null
 openBrowserOpts = null
@@ -16,8 +17,8 @@ module.exports = {
     _.defaults options, {
       sync: true
       changeEvents: true
-      onReloadBrowser: (url) =>
-        @relaunch(url)
+      onReloadBrowser: (url, browser) =>
+        @relaunch(url, browser)
     }
 
     options = _.extend {}, config.whitelist(args), options
@@ -42,17 +43,29 @@ module.exports = {
 
   opened: -> openProject
 
-  launch: (browser, options = {}) ->
+  launch: (browser, url, options = {}) ->
     openProject.getConfig()
     .then (cfg) ->
+      url            ?= cfg.clientUrl
       openBrowser     = browser
       openBrowserOpts = options
-      launcher.launch(browser, cfg.clientUrl, options)
+      launcher.launch(browser, url, options)
 
-  relaunch: (url) ->
-    return if not openBrowser
+  onRelaunch: (fn) ->
+    onRelaunch = fn
 
-    launcher.launch(openBrowser, url, openBrowserOpts)
+  relaunch: (url, browser) ->
+    if (b = browser) and onRelaunch
+      onRelaunch({
+        browser: b, url: url
+      })
+    else
+      ## if we didnt specify a browser and
+      ## theres not a currently open browser then bail
+      return if not b = openBrowser
+
+      ## assume there are openBrowserOpts
+      launcher.launch(b, url, openBrowserOpts)
 
   onSettingsChanged: ->
     Promise.try =>
@@ -69,6 +82,7 @@ module.exports = {
 
     nullify = ->
       ## null these back out
+      onRelaunch      = null
       openProject     = null
       openBrowser     = null
       openBrowserOpts = null
