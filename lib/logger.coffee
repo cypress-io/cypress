@@ -14,9 +14,14 @@ getPathToLog = (name) ->
   path.join(folder, getName(name))
 
 createFile = (name, level, opts = {}) ->
+  file = getPathToLog(name)
+
+  ## ensure that the containing dir exists
+  fs.ensureDirSync(path.dirname(file))
+
   obj = {
     name: name
-    filename: getPathToLog(name)
+    filename: file
     colorize: true
     tailable: true
     maxsize: 1000000 ## 1mb
