@@ -54,14 +54,14 @@ module.exports = (namespace, socketIoCookie) ->
       automate(message, data)
       .then (cookie) ->
         if isCypressNamespaced(cookie)
-          throw new Error("cannot be cypress cookie")
+          throw new Error("Sorry, you cannot get a Cypress namespaced cookie.")
         else
           cookie
       .then(normalizeCookieProps)
 
     setCookie: (message, data, automate) ->
       if isCypressNamespaced(data)
-        throw new Error("cannot set cypress namespaced cookie")
+        throw new Error("Sorry, you cannot set a Cypress namespaced cookie.")
       else
         cookie = normalizeCookieProps(data)
 
@@ -70,7 +70,7 @@ module.exports = (namespace, socketIoCookie) ->
 
     clearCookie: (message, data, automate) ->
       if isCypressNamespaced(data)
-        throw new Error("cannot clear cypress namespaced cookie")
+        throw new Error("Sorry, you cannot clear a Cypress namespaced cookie.")
       else
         automate(message, data)
         .then(normalizeCookieProps)
