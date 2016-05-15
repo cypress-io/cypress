@@ -187,11 +187,6 @@ describe "lib/updater", ->
         @sandbox.stub(@updater.client, "runInstaller")
         # @sandbox.stub(@updater,        "copyCyDataTo").resolves()
 
-      ## TODO: no longer does this!
-      # it "calls copyCyDataTo and passes newAppPath", ->
-      #   @updater.runInstaller("/Users/bmann/newApp").then =>
-      #     expect(@updater.copyCyDataTo).to.be.calledWith("/Users/bmann/newApp")
-
       it "calls process.exit", ->
         @updater.runInstaller("/Users/bmann/newApp")
         expect(process.exit).to.be.calledOnce
@@ -227,24 +222,6 @@ describe "lib/updater", ->
       afterEach ->
         fs.removeAsync("new").then ->
           fs.removeAsync(".cy/foo")
-
-      ## TODO: update this to always rm -rf the .cy folder
-      # it "copies .cy folder to new app path", (done) ->
-      #   @updater.copyCyDataTo("new/app/path").then ->
-      #     expect(fs.statSync("new/app/path/Contents/Resources/app/.cy").isDirectory()).to.be.true
-      #     expect(fs.statSync("new/app/path/Contents/Resources/app/.cy/foo/bar.txt").isFile()).to.be.true
-      #     fs.readJsonAsync("new/app/path/Contents/Resources/app/.cy/cache").then (obj) ->
-      #       expect(obj).to.deep.eq {foo: "bar"}
-
-      #     cmd = if process.platform is "darwin" then "-f %Mp%Lp" else "-c %a"
-
-      #     cmd = "stat #{cmd} new/app/path/Contents/Resources/app/.cy/foo/bar.txt"
-
-      #     ## make sure we have 0755 permissions!
-      #     require("child_process").exec cmd, (err, stdout, stderr) ->
-      #       done(err) if err
-      #       expect(stdout).to.match /755/
-      #       done()
 
     describe "#copyTmpToAppPath", ->
       beforeEach ->
