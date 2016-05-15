@@ -451,6 +451,15 @@ $Cypress.Runner = do ($Cypress, _) ->
 
             fn = _.wrap fn, (orig, args...) ->
               Promise.all(beforeHooks)
+              .catch (err) ->
+                ## this doesn't take into account hooks running prior to the
+                ## test - but this is the best we can do considering we don't
+                ## yet have test.callback (from mocha). so we just override
+                ## its fn to automatically throw. however this really shouldn't
+                ## ever even happen since the webapp prevents you from running
+                ## tests to begin with. but its here just in case.
+                _this.test.fn = ->
+                  throw err
               .then ->
                 orig(args...)
 
