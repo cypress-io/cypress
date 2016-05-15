@@ -21,7 +21,7 @@ module.exports = {
   ## otherwise it inits an empty JSON config file
   ensureExists: ->
     queue.add =>
-      fs.readJsonAsync(CACHE)
+      fs.readJsonAsync(@path)
       .then (json) =>
         if not json.USER
           json.USER = {}
@@ -58,9 +58,9 @@ module.exports = {
   ## returns a JSON object
   read: ->
     @ensureExists()
-    .then ->
+    .then =>
       queue.add =>
-        fs.readJsonAsync(CACHE)
+        fs.readJsonAsync(@path)
 
   ## Writes over the contents of the local file
   ## takes in an object and serializes it into JSON
@@ -68,9 +68,9 @@ module.exports = {
   write: (obj = {}, enableQueue = true) ->
     logger.info("writing to .cy cache", cache: obj)
 
-    write = ->
+    write = =>
       fs
-      .outputJsonAsync(CACHE, obj, {spaces: 2})
+      .outputJsonAsync(@path, obj, {spaces: 2})
       .return(obj)
 
     if enableQueue
@@ -150,9 +150,9 @@ module.exports = {
     @_set({USER: {}})
 
   remove: ->
-    fs.removeAsync(CACHE)
+    fs.removeAsync(@path)
 
   removeSync: ->
-    fs.removeSync CACHE
+    fs.removeSync(@path)
 
 }
