@@ -36,6 +36,9 @@ npm run watch
 
 ## Changelog
 
+#### 0.1.2 - *(05/15/16)*
+- ignore theme/Cached Theme.pak
+
 #### 0.1.1 - *(05/15/16)*
 - set lodash as dep not devDep
 
