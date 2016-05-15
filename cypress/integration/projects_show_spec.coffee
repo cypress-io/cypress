@@ -310,3 +310,22 @@ describe "Project Show", ->
             @ipc.handle("close:project", null, {})
             @ipc.handle("get:project:paths", null, @projects)
           .get("#projects-container")
+
+    describe.only "cancel", ->
+      it "displays Cancel button to go back to list", ->
+        cy.contains("Cancel")
+
+      it "triggers close:project on cancel button click", ->
+        cy
+          .contains(".btn", "Cancel").click().then ->
+            expect(@App.ipc).to.be.calledWith("close:project")
+            @ipc.handle("close:project", null, {})
+          .then ->
+            expect(@App.ipc).to.be.calledWith("get:project:paths")
+
+      it "returns to projects on cancel button click", ->
+        cy
+          .contains(".btn", "Cancel").click().then ->
+            @ipc.handle("close:project", null, {})
+            @ipc.handle("get:project:paths", null, @projects)
+        .get("#projects-container")

@@ -28,6 +28,9 @@
           </p>
           <p>
             We couldn't find any browsers to run the server in. To fix, download a browser.</p>
+          <button data-ok class="btn btn-default btn-sm">
+            Cancel
+          </button>
           <button data-download-browser class="btn btn-primary btn-sm">
             <i class="fa fa-chrome"></i>
             Download Chrome
