@@ -311,7 +311,7 @@ describe "Project Show", ->
             @ipc.handle("get:project:paths", null, @projects)
           .get("#projects-container")
 
-    describe.only "cancel", ->
+    describe "cancel", ->
       it "displays Cancel button to go back to list", ->
         cy.contains("Cancel")
 
