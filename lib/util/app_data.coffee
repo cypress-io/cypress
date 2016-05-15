@@ -2,6 +2,7 @@ fs      = require("fs-extra")
 path    = require("path")
 ospath  = require("ospath")
 Promise = require("bluebird")
+cwd     = require("../cwd")
 pkg     = require("../../package.json")
 
 fs   = Promise.promisifyAll(fs)
@@ -25,14 +26,20 @@ module.exports = {
 
   symlink: ->
     src  = path.dirname(@path())
-    dest = path.join(__dirname, "..", "..", ".cy")
+    dest = cwd(".cy")
 
     fs.ensureSymlinkAsync(src, dest, "dir")
+
+  removeSymlink: ->
+    fs.removeAsync(cwd(".cy")).catch(->)
 
   path: (paths...) ->
     path.join(data, name, "cy", process.env.CYPRESS_ENV, paths...)
 
   remove: ->
-    fs.removeAsync(@path())
+    Promise.join(
+      fs.removeAsync(@path())
+      @removeSymlink()
+    )
 
 }
