@@ -27,7 +27,6 @@
     "@cypress/core-socket": "0.1.0",
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
-    "coffee-script": "^1.10.0",
     "coffeeify": "^2.0.1",
     "fs-extra": "^0.26.7",
     "gulp": "^3.9.1",
@@ -41,6 +40,7 @@
   },
   "dependencies": {
     "bluebird": "^3.3.5",
+    "coffee-script": "^1.10.0",
     "lodash": "^4.11.2"
   }
 }
