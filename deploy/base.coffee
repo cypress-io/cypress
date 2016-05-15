@@ -18,6 +18,8 @@ log          = require("./log")
 meta         = require("./meta")
 pkg          = require("../package.json")
 konfig       = require("../lib/konfig")
+cache        = require("../lib/cache")
+appData      = require("../lib/util/app_data")
 Fixtures     = require("../spec/server/helpers/fixtures")
 
 pkgr     = Promise.promisify(pkgr)
@@ -82,6 +84,7 @@ class Base
           copy("./lib/modes",               "/src/lib/modes")
           copy("./lib/util",                "/src/lib/util")
           copy("./lib/api.coffee",          "/src/lib/api.coffee")
+          copy("./lib/automation.coffee",   "/src/lib/automation.coffee")
           copy("./lib/cache.coffee",        "/src/lib/cache.coffee")
           copy("./lib/config.coffee",       "/src/lib/config.coffee")
           copy("./lib/cwd.coffee",          "/src/lib/cwd.coffee")
@@ -93,6 +96,7 @@ class Base
           copy("./lib/ids.coffee",          "/src/lib/ids.coffee")
           copy("./lib/konfig.coffee",       "/src/lib/konfig.coffee")
           copy("./lib/logger.coffee",       "/src/lib/logger.coffee")
+          copy("./lib/launcher.coffee",     "/src/lib/launcher.coffee")
           copy("./lib/project.coffee",      "/src/lib/project.coffee")
           copy("./lib/reporter.coffee",     "/src/lib/reporter.coffee")
           copy("./lib/request.coffee",      "/src/lib/request.coffee")
@@ -262,18 +266,22 @@ class Base
         if err then reject(err) else resolve()
 
   createCyCache: (todosProject) ->
-    cache = path.join(@buildPathToAppResources(), ".cy", "production", "cache")
+    cache.path = cache.path.replace("development", "production")
 
-    fs.outputJsonAsync(cache, {
+    # cache = path.join(@buildPathToAppResources(), ".cy", "production", "cache")
+
+    cache.write({
       USER: {session_token: "abc123"}
       PROJECTS: [todosProject]
     })
 
   removeCyCache: ->
     ## empty the .cy/production folder
-    cache = path.join(@buildPathToAppResources(), ".cy", "production")
+    # cache = path.join(@buildPathToAppResources(), ".cy", "production")
 
-    fs.emptyDirAsync(cache)
+    cache.path = cache.path.replace("development", "production")
+
+    cache.remove()
 
   _runProjectTest: ->
     @log("#runProjectTest")
@@ -334,6 +342,9 @@ class Base
 
     smokeTest().then(verifyAppPackage)
 
+  cleanupCy: ->
+    appData.removeSymlink()
+
   build: ->
     Promise
     .bind(@)
@@ -351,6 +362,7 @@ class Base
     .then(@afterBuild)
     .then(@runSmokeTest)
     .then(@runProjectTest)
+    .then(@cleanupCy)
     .then(@codeSign) ## codesign after running smoke tests due to changing .cy
     .then(@verifyAppCanOpen)
     .return(@)
