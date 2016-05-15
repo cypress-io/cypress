@@ -36,6 +36,9 @@ npm run watch
 
 ## Changelog
 
+#### 0.1.1 - *(05/15/16)*
+- set lodash as dep not devDep
+
 #### 0.1.0 - *(05/15/16)*
 - initial release
 - implements cookie automation
