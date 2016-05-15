@@ -191,10 +191,6 @@ class Project extends EE
       )
 
   setBrowsers: (browsers = []) ->
-    ## TODO: if browsers are empty
-    ## then set an error on the config
-    ## and send an array of expected browsers
-    ## under a different key (?)
     @getConfig()
     .then (cfg) ->
       cfg.browsers = browsers
