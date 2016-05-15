@@ -2,6 +2,7 @@ _       = require("lodash")
 chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
+logger  = require("./logger")
 
 exceptions = "CI_CANNOT_COMMUNICATE".split(" ")
 
@@ -75,14 +76,12 @@ API = {
       ## list of Cypress errors
       return if @isCypressErr(err)
 
-      ## else either log the error in raygun
-      ## or log the stack trace in dev mode
-      switch process.env["CYPRESS_ENV"]
-        when "production"
-          ## log this to raygun
-        else
-          ## write stack out to console
-          console.log(err.stack)
+      console.error chalk[color](err.stack)
+
+      if process.env["CYPRESS_ENV"] is "production"
+        ## log this error to raygun since its not
+        ## a known error
+        logger.createException(err).catch(->)
 
   throw: (type, arg) ->
     throw @get(type, arg)
