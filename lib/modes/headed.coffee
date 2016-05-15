@@ -146,9 +146,6 @@ module.exports = {
     .get("ready")
 
   run: (options) ->
-    ## prevent chromium from throttling
-    app.commandLine.appendSwitch("disable-renderer-backgrounding")
-
     app.on "window-all-closed", =>
       @onWindowAllClosed(app)
 

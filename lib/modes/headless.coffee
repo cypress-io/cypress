@@ -177,9 +177,6 @@ module.exports = {
   run: (options) ->
     app = require("electron").app
 
-    ## prevent chromium from throttling
-    app.commandLine.appendSwitch("disable-renderer-backgrounding")
-
     waitForReady = ->
       new Promise (resolve, reject) ->
         app.on "ready", resolve
