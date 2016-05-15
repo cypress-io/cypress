@@ -1,6 +1,5 @@
 _         = require("lodash")
 Promise   = require("bluebird")
-extension = require("@cypress/core-extension")
 cookies   = require("./cookies")
 Renderer  = require("./renderer")
 

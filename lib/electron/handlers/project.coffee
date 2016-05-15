@@ -1,10 +1,11 @@
-_        = require("lodash")
-Promise  = require("bluebird")
-config   = require("../../config")
-errors   = require("../../errors")
-cache    = require("../../cache")
-Project  = require("../../project")
-launcher = require("../../launcher")
+_         = require("lodash")
+Promise   = require("bluebird")
+extension = require("@cypress/core-extension")
+config    = require("../../config")
+errors    = require("../../errors")
+cache     = require("../../cache")
+Project   = require("../../project")
+launcher  = require("../../launcher")
 
 ## global reference to open objects
 onRelaunch      = null
@@ -37,8 +38,12 @@ module.exports = {
       ## browsers here we should just
       ## immediately close the server?
       ## but continue sending the config
-      project
-      .setBrowsers(browsers)
+      Promise.all([
+        project.setBrowsers(browsers)
+        project.getConfig()
+        .then (cfg) ->
+          extension.setHostAndPath(cfg.clientUrlDisplay, cfg.socketIoRoute)
+      ])
       .return(project)
 
   opened: -> openProject
