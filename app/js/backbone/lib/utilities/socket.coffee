@@ -11,31 +11,29 @@
       ## connect to socket io
       channel = io.connect({path: "/__socket.io"})
 
-      if socketId
-        channel.on "connect", ->
-          channel.emit "app:connect", socketId
-          socket.automationConnected(true)
-      else
-        ## TODO: fix this
-        channel.on "connect", ->
-          str = "" + Math.random()
+      str = "" + Math.random()
 
-          obj = {
-            element: element
-            string: str
-          }
+      obj = {
+        element: element
+        string: str
+      }
 
-          $("##{element}").hide().text(obj.string)
+      $("##{element}").hide().text(obj.string)
 
-          channel.emit "is:automation:connected", obj, (bool) ->
-            ## once we get back our initial connection status
-            ## we need to listen for disconnected events
-            channel.on "automation:disconnected", ->
-              ## this is a big deal and we need to nuke
-              ## the client app
-              socket.onAutomationDisconnected()
+      channel.on "connect", ->
+        ## TODO: normalize this into lib/socket
+        ## instead of the webapp
+        channel.emit("app:connect", socketId) if socketId
 
-            socket.automationConnected(bool)
+        channel.emit "is:automation:connected", obj, (bool) ->
+          ## once we get back our initial connection status
+          ## we need to listen for disconnected events
+          channel.on "automation:disconnected", ->
+            ## this is a big deal and we need to nuke
+            ## the client app
+            socket.onAutomationDisconnected()
+
+          socket.automationConnected(bool)
 
       _.each [].concat(hostEvents, satelliteEvents, passThruEvents), (event) ->
         channel.on event, (args...) ->
