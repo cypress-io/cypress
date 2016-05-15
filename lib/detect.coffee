@@ -18,10 +18,10 @@ browsers = [
     executable: "Contents/MacOS/Chromium"
   },{
     name: "canary"
-    re: /Google Canary (\S+)/
+    re: /Google Chrome Canary (\S+)/
     profile: true
     binary: "canary"
-    executable: "Contents/MacOS/Google Canary"
+    executable: "Contents/MacOS/Google Chrome Canary"
   }
 ]
 
