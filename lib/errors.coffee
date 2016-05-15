@@ -47,6 +47,8 @@ API = {
         "Can't find test spec: " + chalk.blue(arg1)
       when "NO_CURRENTLY_OPEN_PROJECT"
         "Can't find open project."
+      when "AUTOMATION_SERVER_DISCONNECTED"
+        "The automation server disconnected. Cannot continue running tests."
 
   get: (type, arg1, arg2) ->
     msg = @getMsgByType(type, arg1, arg2)
@@ -70,7 +72,7 @@ API = {
 
   log: (err, color = "red") ->
     Promise.try =>
-      console.log chalk[color](err.message)
+      console.error chalk[color](err.message)
 
       ## bail if this error came from known
       ## list of Cypress errors

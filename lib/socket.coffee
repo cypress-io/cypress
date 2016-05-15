@@ -11,6 +11,7 @@ pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
 fixture       = require("./fixture")
 Request       = require("./request")
+errors        = require("./errors")
 logger        = require("./logger")
 automation    = require("./automation")
 
@@ -146,7 +147,7 @@ class Socket
         ## in trouble and should probably bomb everything
         socket.on "disconnect", =>
           ## if we are in headless mode then log out an error and maybe exit with process.exit(1)?
-          console.error("The automation server disconnected. Cannot continue running tests.")
+          errors.warning("AUTOMATION_SERVER_DISCONNECTED")
           @io.emit("automation:disconnected", false)
 
         socket.on "automation:response", respond
