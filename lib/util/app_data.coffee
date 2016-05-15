@@ -15,10 +15,12 @@ isProduction = ->
 module.exports = {
   ensure: ->
     ensure = =>
-      Promise.join(
-        fs.ensureDirAsync(@path())
-        @symlink() unless isProduction()
-      )
+      @removeSymlink()
+      .then =>
+        Promise.join(
+          fs.ensureDirAsync(@path())
+          @symlink() unless isProduction()
+        )
 
     ## try twice to ensure the dir
     ensure()
