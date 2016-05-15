@@ -1,18 +1,23 @@
 require("./environment")
 
+## we are not requiring everything up front
+## to optimize how quickly electron boots while
+## in dev or linux production. the reasoning is
+## that we likely may need to spawn a new child process
+## and its a huge waste of time (about 1.5secs) of
+## synchronous requires the first go around just to
+## essentially do it all again when we boot the correct
+## mode.
+
 _         = require("lodash")
+os        = require("os")
 cp        = require("child_process")
 path      = require("path")
 Promise   = require("bluebird")
-api       = require("./api")
-logs      = require("./electron/handlers/logs")
 logger    = require("./logger")
 errors    = require("./errors")
-Project   = require("./project")
 appData   = require("./util/app_data")
 argsUtil  = require("./util/args")
-smokeTest = require("./modes/smoke_test")
-returnPkg = require("./modes/pkg")
 
 exit = (code) ->
   process.exit(code)
@@ -48,7 +53,7 @@ module.exports = {
         ## sanity check to ensure we're running
         ## the local dev server. dont crash just
         ## log a warning
-        api.ping().catch (err) ->
+        require("./api").ping().catch (err) ->
           console.log(err.message)
           errors.warning("DEV_NO_SERVER")
 
@@ -64,7 +69,7 @@ module.exports = {
   openProject: (options) ->
     ## this code actually starts a project
     ## and is spawned from nodemon
-    Project(options.project).open()
+    require("./project")(options.project).open()
 
   runServer: (options) ->
     args = {}
@@ -162,14 +167,14 @@ module.exports = {
   startInMode: (mode, options) ->
     switch mode
       when "removeIds"
-        Project.removeIds(options.projectPath)
+        require("./project").removeIds(options.projectPath)
         .then (stats = {}) ->
           console.log("Removed '#{stats.ids}' ids from '#{stats.files}' files.")
         .then(exit0)
         .catch(exitErr)
 
       when "version"
-        returnPkg(options)
+        require("./modes/pkg")(options)
         .get("version")
         .then (version) ->
           console.log(version)
@@ -177,14 +182,14 @@ module.exports = {
         .catch(exitErr)
 
       when "smokeTest"
-        smokeTest(options)
+        require("./modes/smoke_test")(options)
         .then (pong) ->
           console.log(pong)
         .then(exit0)
         .catch(exitErr)
 
       when "returnPkg"
-        returnPkg(options)
+        require("./modes/pkg")(options)
         .then (pkg) ->
           console.log(JSON.stringify(pkg))
         .then(exit0)
@@ -192,19 +197,19 @@ module.exports = {
 
       when "logs"
         ## print the logs + exit
-        logs.print()
+        require("./electron/handlers/logs").print()
         .then(exit0)
         .catch(exitErr)
 
       when "clearLogs"
         ## clear the logs + exit
-        logs.clear()
+        require("./electron/handlers/logs").clear()
         .then(exit0)
         .catch(exitErr)
 
       when "getKey"
         ## print the key + exit
-        Project.getSecretKeyByPath(options.projectPath)
+        require("./project").getSecretKeyByPath(options.projectPath)
         .then (key) ->
           console.log(key)
         .then(exit0)
@@ -212,7 +217,7 @@ module.exports = {
 
       when "generateKey"
         ## generate + print the key + exit
-        Project.generateSecretKeyByPath(options.projectPath)
+        require("./project").generateSecretKeyByPath(options.projectPath)
         .then (key) ->
           console.log(key)
         .then(exit0)
