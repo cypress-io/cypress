@@ -1,6 +1,6 @@
 <div class="extension-message">
-  <p>Whoops, it looks like you're not running tests correctly.</p>
-  <p class="muted"><small>At the moment Cypress only supports Chrome.</small></p>
+  <p>Whoops, we can't run your tests.</p>
+  <p class="muted"><small>This browser was not launched through Cypress. Tests cannot run.</small></p>
   <% if @browsers.length is 0: %>
     <div class="alert alert-danger error">
       <p>
@@ -9,7 +9,7 @@
       </p>
       <p>
         We couldn't find any supported browsers capable of running Cypress. Please download Chrome.</p>
-      <a href="https://www.google.com/chrome/browser/desktop" class="btn btn-primary btn-sm">
+      <a href="https://www.google.com/chrome/browser/desktop" target="_blank" class="btn btn-primary btn-sm">
         <i class="fa fa-chrome"></i>
         Download Chrome
       </a>
