@@ -18,7 +18,10 @@ describe "lib/electron/handlers/projects", ->
 
   context ".open", ->
     beforeEach ->
-      @projectInstance = {setBrowsers: @sandbox.stub().resolves([])}
+      @projectInstance = {
+        setBrowsers: @sandbox.stub().resolves([])
+      }
+
       @sandbox.stub(launcher, "getBrowsers").resolves([])
 
     it "resolves with opened project instance", ->
@@ -34,11 +37,23 @@ describe "lib/electron/handlers/projects", ->
       options = {socketId: 123, port: 2020}
       project.open(@todosPath, args, options)
       .then ->
-        expect(open).to.be.calledWith({
+        expect(open).to.be.calledWithMatch({
           port: 2020
           socketId: 123
           baseUrl: "localhost"
+          sync: true
+          changeEvents: true
         })
+        expect(open.getCall(0).args[0].onReloadBrowser).to.be.a("function")
+
+    it "passes onReloadBrowser which calls relaunch with url + browser", ->
+      open     = @sandbox.stub(Project.prototype, "open").resolves(@projectInstance)
+      relaunch = @sandbox.stub(project, "relaunch")
+
+      project.open(@todosPath)
+      .then ->
+        open.getCall(0).args[0].onReloadBrowser("foo", "bar")
+        expect(relaunch).to.be.calledWith("foo", "bar")
 
     ## TODO: write these tests!!
     it "gets browsers available for launch"

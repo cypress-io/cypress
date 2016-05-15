@@ -79,11 +79,11 @@ describe "lib/project", ->
       @project.open(opts).then ->
         expect(opts.type).to.eq("opened")
 
-    it "calls #watchSettingsAndStartWebsockets with options.changeEvents + config", ->
+    it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
       @project.cfg = {}
       @project.open(opts).then =>
-        expect(@project.watchSettingsAndStartWebsockets).to.be.calledWith(false, opts.onAutomationRequest, @project.cfg)
+        expect(@project.watchSettingsAndStartWebsockets).to.be.calledWith(opts, @project.cfg)
 
     it "calls #scaffold with server config", ->
       @project.open().then =>
@@ -270,7 +270,7 @@ describe "lib/project", ->
       @watch = @sandbox.stub(@project.watchers, "watch")
 
     it "sets onChange event when {changeEvents: true}", (done) ->
-      @project.watchSettingsAndStartWebsockets(true)
+      @project.watchSettingsAndStartWebsockets({changeEvents: true})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
@@ -281,7 +281,7 @@ describe "lib/project", ->
       obj.onChange()
 
     it "does not call watch when {changeEvents: false}", ->
-      @project.watchSettingsAndStartWebsockets(false)
+      @project.watchSettingsAndStartWebsockets({changeEvents: false})
 
       expect(@watch).not.to.be.called
 
@@ -290,7 +290,7 @@ describe "lib/project", ->
 
       emit = @sandbox.spy(@project, "emit")
 
-      @project.watchSettingsAndStartWebsockets(true)
+      @project.watchSettingsAndStartWebsockets({changeEvents: true})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
@@ -313,18 +313,18 @@ describe "lib/project", ->
       @sandbox.stub(@project, "watchSettings")
 
     it "calls server.startWebsockets with watchers + config", ->
-      fn = ->
+      c = {}
 
-      @project.watchSettingsAndStartWebsockets({}, fn, 2)
+      @project.watchSettingsAndStartWebsockets({}, c)
 
-      expect(@project.server.startWebsockets).to.be.calledWith(@project.watchers, 2)
+      expect(@project.server.startWebsockets).to.be.calledWith(@project.watchers, c)
 
     it "passes onIsNewProject callback", ->
       @sandbox.stub(@project, "determineIsNewProject")
 
       @project.server.startWebsockets.yieldsTo("onIsNewProject")
 
-      @project.watchSettingsAndStartWebsockets({}, (->), {
+      @project.watchSettingsAndStartWebsockets({}, {
         integrationFolder: "foo/bar/baz"
       })
 
@@ -335,7 +335,16 @@ describe "lib/project", ->
 
       @project.server.startWebsockets.yieldsTo("onAutomationRequest")
 
-      @project.watchSettingsAndStartWebsockets({}, fn, {})
+      @project.watchSettingsAndStartWebsockets({onAutomationRequest: fn}, {})
+
+      expect(fn).to.be.calledOnce
+
+    it "passes onReloadBrowser callback", ->
+      fn = @sandbox.stub()
+
+      @project.server.startWebsockets.yieldsTo("onReloadBrowser")
+
+      @project.watchSettingsAndStartWebsockets({onReloadBrowser: fn}, {})
 
       expect(fn).to.be.calledOnce
 

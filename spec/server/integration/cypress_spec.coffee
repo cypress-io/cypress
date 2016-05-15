@@ -863,7 +863,7 @@ describe "lib/cypress", ->
         options = Events.start.firstCall.args[0]
         Events.handleEvent(options, {}, 123, "open:project", @todosPath)
       .then =>
-        expect(getConfig).to.be.calledWith({
+        expect(getConfig).to.be.calledWithMatch({
           port: 2121
           pageLoadTimeout: 1000
           sync: true

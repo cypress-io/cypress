@@ -364,7 +364,7 @@ describe "lib/electron/handlers/events", ->
           setBrowsers: @sandbox.stub().resolves([])
         }
 
-        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true, sync: true}).resolves(projectInstance)
+        @sandbox.stub(Project.prototype, "open").resolves(projectInstance)
 
         @handleEvent("open:project", "path/to/project")
         .then =>
@@ -374,7 +374,7 @@ describe "lib/electron/handlers/events", ->
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true, sync: true}).rejects(err)
+        @sandbox.stub(Project.prototype, "open").rejects(err)
 
         @handleEvent("open:project", "path/to/project")
         .then =>
