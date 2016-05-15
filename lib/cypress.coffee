@@ -36,6 +36,9 @@ module.exports = {
   isCurrentlyRunningElectron: ->
     !!(process.versions and process.versions.electron)
 
+  isLinuxAndHasNotDisabledGpu: (options) ->
+    os.platform() is "linux" and "--disable-gpu" not in process.argv
+
   runElectron: (mode, options) ->
     ## wrap all of this in a promise to force the
     ## promise interface - even if it doesn't matter
@@ -46,9 +49,20 @@ module.exports = {
       ## like in production and we shouldn't spawn a new
       ## process
       if @isCurrentlyRunningElectron()
-        ## just run the gui code directly here
-        ## and pass our options directly to main
-        require("./electron")(mode, options)
+        if @isLinuxAndHasNotDisabledGpu()
+          args = ["."].concat(argsUtil.toArray(options))
+          args.push("--disable-gpu")
+
+          ## respawn the same process except with --disable-gpu
+          electron = cp.spawn(process.execPath, args, {
+            stdio: "inherit"
+          })
+          electron.unref()
+          exit0()
+        else
+          ## just run the gui code directly here
+          ## and pass our options directly to main
+          require("./electron")(mode, options);
       else
         ## sanity check to ensure we're running
         ## the local dev server. dont crash just
