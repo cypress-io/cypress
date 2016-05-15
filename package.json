@@ -43,7 +43,7 @@
     "coveralls": "^2.11.8",
     "electron-osx-sign": "^0.3.0",
     "electron-packager": "electron-userland/electron-packager#ac5098c080a5ed6d1d88584f0a9164cfa258f6da",
-    "electron-prebuilt": "0.37.8",
+    "electron-prebuilt": "1.0.2",
     "gitter-sidecar": "^1.2.3",
     "gulp": "3.8.8",
     "gulp-awspublish": "^3.0.1",
