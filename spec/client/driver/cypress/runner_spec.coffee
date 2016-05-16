@@ -329,10 +329,10 @@ describe "$Cypress.Runner API", ->
         @runner = $Cypress.Runner.runner(@Cypress, runner)
 
       it "fires test:before:hooks twice", (done) ->
-        trigger = @sandbox.spy @Cypress, "trigger"
+        invoke = @sandbox.spy @Cypress, "invoke"
 
         @runner.run ->
-          calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
+          calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
           expect(calls.length).to.eq(2)
           done()
 

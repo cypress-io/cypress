@@ -137,9 +137,7 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
             "mocha.timed_out"
 
         @timer = setTimeout ->
-          errMessage = $Cypress.Utils.errMessageByPath(getErrPath(), {
-            args: { ms }
-          })
+          errMessage = $Cypress.Utils.errMessageByPath(getErrPath(), { ms })
           runnable.callback new Error(errMessage)
           runnable.timedOut = true
         , ms

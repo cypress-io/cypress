@@ -59,9 +59,7 @@ do ($Cypress, _, $, chai) ->
             if _.isRegExp(regExp) or $Cypress.Utils.hasElement(@_obj)
               _super.apply(@, arguments)
             else
-              err = $Cypress.Utils.cypressErr($Cypress.Utils.errMessageByPath("chai.match_invalid_argument", {
-                args: { regExp }
-              }))
+              err = $Cypress.Utils.cypressErr($Cypress.Utils.errMessageByPath("chai.match_invalid_argument", { regExp }))
               err.retry = false
               throw err
 
@@ -136,9 +134,7 @@ do ($Cypress, _, $, chai) ->
                   e1.longMessage = getLongLengthMessage(obj.length, length)
                   throw e1
 
-                e2 = $Cypress.Utils.cypressErr($Cypress.Utils.errMessageByPath("chai.length_invalid_argument", {
-                  args: { length }
-                }))
+                e2 = $Cypress.Utils.cypressErr($Cypress.Utils.errMessageByPath("chai.length_invalid_argument", { length }))
                 e2.retry = false
                 throw e2
 

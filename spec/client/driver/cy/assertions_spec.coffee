@@ -481,7 +481,7 @@ describe "$Cypress.Cy Assertion Commands", ->
           @chai.restore()
 
           expect(logs.length).to.eq(2)
-          expect(err.message).to.eq "'match' requires its argument be a 'RegExp'. You passed: 'foo'"
+          expect(err.message).to.eq "'chai#match' requires its argument be a 'RegExp'. You passed: 'foo'"
           expect(@log.get("name")).to.eq("should")
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
@@ -842,13 +842,13 @@ describe "$Cypress.Cy Assertion Commands", ->
         fn = ->
           expect("foo").to.match("foo")
 
-        expect(fn).to.throw("'match' requires its argument be a 'RegExp'. You passed: 'foo'")
+        expect(fn).to.throw("'chai#match' requires its argument be a 'RegExp'. You passed: 'foo'")
 
       it "throws with cy.should", (done) ->
         @allowErrors()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "'match' requires its argument be a 'RegExp'. You passed: 'bar'"
+          expect(err.message).to.eq "'chai#match' requires its argument be a 'RegExp'. You passed: 'bar'"
           done()
 
         @cy.noop("foo").should("match", "bar")

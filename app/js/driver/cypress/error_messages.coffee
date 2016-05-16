@@ -24,7 +24,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     chai:
       length_invalid_argument: "You must provide a valid number to a length assertion. You passed: '{{length}}'"
-      match_invalid_argument: "chai#match requires its argument be a 'RegExp'. You passed: '{{regExp}}'"
+      match_invalid_argument: "'chai#match' requires its argument be a 'RegExp'. You passed: '{{regExp}}'"
 
     check_uncheck:
       invalid_element: "#{cmd('{{cmd}}')} can only be called on :checkbox{{phrase}}. Your subject {{word}} a: {{node}}"
@@ -197,9 +197,9 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       retry_timed_out: "Timed out retrying: {{error}}"
 
     mocha:
-      async_timed_out: "Timed out after {{ms}}ms. The done() callback was never invoked!"
+      async_timed_out: "Timed out after '{{ms}}ms'. The done() callback was never invoked!"
       invalid_interface: "Invalid mocha interface '{{name}}'"
-      timed_out: "Cypress command timeout of {{ms}}ms exceeded."
+      timed_out: "Cypress command timeout of '{{ms}}ms' exceeded."
 
     navigation:
       loading_failed: "Loading the new page failed."

@@ -111,5 +111,4 @@ describe "$Cypress.Cookies API", ->
           - cy.setCookie()
           - cy.clearCookie()
           - cy.clearCookies()
-
         """
