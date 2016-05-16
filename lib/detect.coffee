@@ -1,6 +1,7 @@
 _       = require("lodash")
 os      = require("os")
 Promise = require("bluebird")
+linux   = require("./linux")
 darwin  = require("./darwin")
 
 browsers = [
@@ -14,13 +15,13 @@ browsers = [
     name: "chromium"
     re: /Chromium (\S+)/
     profile: true
-    binary: "chromium"
+    binary: "chromium-browser"
     executable: "Contents/MacOS/Chromium"
   },{
     name: "canary"
     re: /Google Chrome Canary (\S+)/
     profile: true
-    binary: "canary"
+    binary: "google-chrome-canary"
     executable: "Contents/MacOS/Google Chrome Canary"
   }
 ]
@@ -41,7 +42,7 @@ lookup = (platform, obj) ->
         Promise.reject(err)
 
     when "linux"
-      linux[obj.name].get()
+      linux.get(obj.binary, obj.re)
 
 module.exports = ->
   platform = os.platform()
