@@ -99,10 +99,11 @@ describe "Project Show", ->
       it "displays server url", ->
         cy.contains(@config.clientUrlDisplay)
 
-      it "triggers external:open to docs on click of question icon", ->
-        cy
-          .get("[data-js='host-info']").click().then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io")
+      ## TODO: add this back in when we support changing the hostname
+      # it "triggers external:open to docs on click of question icon", ->
+      #   cy
+      #     .get("[data-js='host-info']").click().then ->
+      #       expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io")
 
     context "list browsers", ->
       it "displays the first browser and 2 others in the dropdown", ->

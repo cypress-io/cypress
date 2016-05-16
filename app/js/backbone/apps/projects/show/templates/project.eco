@@ -41,7 +41,7 @@
           <div><strong>Server running at:</strong></div>
           <p>
             <%= @clientUrlDisplay %>
-            <i data-js="host-info" class="fa fa-question-circle"></i>
+            <!-- <i data-js="host-info" class="fa fa-question-circle"></i> -->
           </p>
           <button data-stop class="btn btn-danger btn-sm"><i class="fa fa-stop"></i> Stop </button>
           <div class="btn-group browser-selector">

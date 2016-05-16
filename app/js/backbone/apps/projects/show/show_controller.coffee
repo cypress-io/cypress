@@ -14,7 +14,7 @@
         @launchBrowser(project, browser, url)
 
       @listenTo @projectLayout, "help:clicked", ->
-        App.ipc("external:open", "https://docs.cypress.io")
+        App.ipc("external:open", "https://on.cypress.io")
 
       @listenTo @projectLayout, "host:info:clicked", ->
         App.ipc("external:open", "https://on.cypress.io")
@@ -28,6 +28,7 @@
 
       @listenTo @projectLayout, "download:browser:clicked", ->
         App.ipc("external:open", "https://www.google.com/chrome/browser/")
+
         @closeProject().then ->
           App.vent.trigger "start:projects:app"
 
