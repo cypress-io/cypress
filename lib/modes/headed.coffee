@@ -97,7 +97,7 @@ module.exports = {
       })
 
   ready: (options = {}) ->
-    @tray = new Tray()
+    tray = new Tray()
 
     _.defaults options,
       onQuit: ->
@@ -112,13 +112,13 @@ module.exports = {
         app.exit(0)
 
       onOpenProject: =>
-        @tray.setState("running")
+        tray.setState("running")
 
       onCloseProject: =>
-        @tray.setState("default")
+        tray.setState("default")
 
       onError: (err) =>
-        @tray.setState("error")
+        tray.setState("error")
 
     ready = =>
       ## TODO:
@@ -132,7 +132,7 @@ module.exports = {
         if options.updating
           Updater.install(options)
 
-        @tray.display({
+        tray.display({
           onClick: (e, bounds) =>
             @onClick(bounds, win)
         })
