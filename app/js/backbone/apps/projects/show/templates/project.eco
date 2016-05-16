@@ -24,10 +24,11 @@
         <div class="alert alert-danger error">
           <p>
             <i class="fa fa-warning"></i>
-            <strong>Can't Run Server in Browser</strong>
+            <strong>Can't Launch Any Browsers</strong>
           </p>
           <p>
-            We couldn't find any browsers to run the server in. To fix, download a browser.</p>
+            We couldn't find any Chrome browsers to launch. To fix, please download Chrome.
+          </p>
           <button data-ok class="btn btn-default btn-sm">
             Cancel
           </button>

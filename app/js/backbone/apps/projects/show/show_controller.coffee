@@ -22,15 +22,12 @@
       @listenTo @projectLayout, "run:browser:clicked", (browser) ->
         @launchBrowser(project, browser)
 
-      @listenTo @projectLayout, "stop:clicked ok:clicked" , ->
+      @listenTo @projectLayout, "stop:clicked ok:clicked download:browser:clicked" , ->
         @closeProject().then ->
           App.vent.trigger "start:projects:app"
 
       @listenTo @projectLayout, "download:browser:clicked", ->
         App.ipc("external:open", "https://www.google.com/chrome/browser/")
-
-        @closeProject().then ->
-          App.vent.trigger "start:projects:app"
 
       @listenTo @projectLayout, "show", ->
         ## delay opening the project so
