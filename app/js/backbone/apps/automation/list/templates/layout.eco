@@ -1,13 +1,19 @@
 <div class="extension-message">
   <p>Whoops, we can't run your tests.</p>
-  <p class="muted"><small>This browser was not launched through Cypress. Tests cannot run.</small></p>
   <% if @browsers.length is 0: %>
-    <p class="muted"><small>We couldn't find any supported browsers capable of running Cypress. Please download Chrome.</small></p>
+    <p class="muted">
+      <small>
+        We couldn't find any supported browsers capable of running Cypress on your machine.
+      </small>
+    </p>
     <a href="https://www.google.com/chrome/browser/desktop" target="_blank" class="btn btn-primary btn-lg">
       <i class="fa fa-chrome"></i>
       Download Chrome
     </a>
   <% else: %>
+    <p class="muted">
+      <small>This browser was not launched through Cypress. Tests cannot run.</small>
+    </p>
     <div class="btn-group browser-selector">
       <button type="button" data-js="run-browser" data-browser="<%= @name %>" class="btn btn-primary btn-lg">
         <i data-js="browser-icon" class="fa fa-<%= @icon %>"></i>
