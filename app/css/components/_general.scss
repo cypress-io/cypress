@@ -8,7 +8,11 @@
 
 html.has-updates {
   .helper-line {
-    bottom: 85px;
+    bottom: 80px;
+  }
+
+  .alert {
+    margin-bottom: 80px;
   }
 }
 
@@ -18,13 +22,14 @@ html.has-updates {
   font-weight: normal;
   position: absolute;
   width: 100%;
-  bottom: 50px;
+  bottom: 40px;
   left: 0;
+  background-color: white;
 
   a {
     display: block;
     font-size: 13px;
-    margin: 10px 0;
+    padding: 10px 0;
 
     &:hover {
       cursor: pointer;
@@ -55,4 +60,8 @@ html.has-updates {
 
   }
 
+}
+
+.btn:focus {
+  outline: 0 !important;
 }

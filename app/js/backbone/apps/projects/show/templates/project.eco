@@ -20,13 +20,58 @@
     </div>
   <% else: %>
     <% if @clientUrl: %>
-      <div class="well well-lg">
-        <div>Server running</div>
-        <div>
-          <a href="#"><%= @clientUrlDisplay %></a>
+      <% if @browsers.length is 0: %>
+        <div class="alert alert-danger error">
+          <p>
+            <i class="fa fa-warning"></i>
+            <strong>Can't Run Server in Browser</strong>
+          </p>
+          <p>
+            We couldn't find any browsers to run the server in. To fix, download a browser.</p>
+          <button data-ok class="btn btn-default btn-sm">
+            Cancel
+          </button>
+          <button data-download-browser class="btn btn-primary btn-sm">
+            <i class="fa fa-chrome"></i>
+            Download Chrome
+          </button>
         </div>
+      <% else: %>
+        <div class="well well-lg">
+          <div><strong>Server running at:</strong></div>
+          <p>
+            <%= @clientUrlDisplay %>
+            <!-- <i data-js="host-info" class="fa fa-question-circle"></i> -->
+          </p>
+          <button data-stop class="btn btn-danger btn-sm"><i class="fa fa-stop"></i> Stop </button>
+          <div class="btn-group browser-selector">
+            <button type="button" data-js="run-browser" data-browser="<%= @browserName %>" class="btn btn-primary btn-sm">
+              <i data-js="browser-icon" class="fa <%= @browserIcon %>"></i>
+              <span data-js="browser-text"><%= @browserText %></span>
+            </button>
+            <% if @browsers.length > 1: %>
+              <button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown">
+                <span class="caret"></span>
+                <span class="sr-only">Toggle Dropdown</span>
+              </button>
+              <ul class="dropdown-menu">
+                <% for browser in @browsers: %>
+                  <% if not browser.chosen: %>
+                    <li>
+                      <a href="#" data-js="run-browser" data-browser="<%= browser.name %>">
+                        <i class="fa fa-<%= browser.icon %>"></i>
+                        Run
+                        <%= browser.displayName %>
+                        <%= browser.majorVersion %>
+                      </a>
+                    </li>
+                  <% end %>
+                <% end %>
+              </ul>
+            <% end %>
+          </div>
+        <% end %>
       </div>
-      <button data-stop class="btn btn-danger">Stop server</button>
     <% else: %>
       <span>
         <i class="fa fa-spinner fa-spin"></i>
@@ -34,4 +79,10 @@
       </span>
     <% end %>
   <% end %>
+  <div class="helper-line">
+    <a class="helper-docs-link" data-js="help" href="#">
+      <i class="fa fa-question-circle"></i>
+      Need help?
+    </a>
+  </div>
 </div>

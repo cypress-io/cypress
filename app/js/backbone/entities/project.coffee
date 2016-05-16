@@ -6,9 +6,53 @@
   class Entities.Project extends Entities.Model
     defaults:
       loading: false
+      browserState: "closed"
+
+    mutators:
+      browserText: ->
+        return if not b = @get("browser")
+
+        word = switch @get("browserState")
+          when "opened"  then "Running"
+          when "opening" then "Opening"
+          when "closed"  then "Run"
+
+        [word, b.get("displayName"), b.get("majorVersion")].join(" ")
+
+      browserIcon: ->
+        switch @get("browserState")
+          when "opening" then "fa-refresh fa-spin"
+          when "opened"  then "fa-check-circle"
+          when "closed"  then "fa-chrome"
+
+      browserName: ->
+        return if not b = @get("browser")
+
+        b.get("name")
 
     initialize: ->
       @setName()
+
+    browserOpening: ->
+      @set({
+        browserState: "opening"
+        browserClickable: false
+      })
+
+    browserOpened: ->
+      @set({
+        browserState: "opened"
+        browserClickable: false
+      })
+
+    browserClosed: ->
+      @set({
+        browserState: "closed"
+        browserClickable: true
+      })
+
+    setBrowser: (name) ->
+      @set "browser", @get("browsers").chooseBrowserByName(name)
 
     loaded: ->
       @set("loading", false)
@@ -22,10 +66,23 @@
     getNameFromPath: ->
       _(@get("path").split("/")).last()
 
-    setClientUrl: (url, display) ->
-      @set
-        clientUrl: url
-        clientUrlDisplay: display
+    displayBrowsers: ->
+      if b = @get("browsers")
+        b.toJSON()
+      else
+        []
+
+    getBrowsers: (browsers = []) ->
+      App.request("new:browser:entities", browsers)
+
+    setConfig: (config) ->
+      if b = config.browsers
+        config.browsers = @getBrowsers(b)
+        config.browser = config.browsers.extractDefaultBrowser()
+
+      @set(config, {silent: true})
+
+      @trigger("opened")
 
     setError: (err) ->
       if err.portInUse
