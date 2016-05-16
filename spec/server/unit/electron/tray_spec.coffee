@@ -7,6 +7,8 @@ Tray     = require("#{root}../lib/electron/handlers/tray")
 
 describe "electron/tray", ->
   beforeEach ->
+    @sandbox.stub(os, "platform").returns("darwin")
+
     @spyOnTray = (method)=>
       electronTray = @tray.getTray()
       @sandbox.stub(electronTray, method)
@@ -85,7 +87,6 @@ describe "electron/tray", ->
 
     describe "when on OSX", ->
       beforeEach ->
-        @sandbox.stub(os, "platform").returns("darwin")
         @tray.display()
 
       it "subscribes to system preferences notifications", ->
@@ -93,8 +94,9 @@ describe "electron/tray", ->
 
     describe "when not on OSX", ->
       beforeEach ->
-        @sandbox.stub(os, "platform").returns("linux")
-        @tray.display()
+        os.platform.returns("linux")
+        @sandbox.spy(@tray, "setState")
 
-      it "does not subscribe to system preferences notifications", ->
-        expect(@sn).not.to.be.called
+      it "returns undefined", ->
+        expect(@tray.display()).to.be.undefined
+        expect(@tray.setState).not.to.be.called
