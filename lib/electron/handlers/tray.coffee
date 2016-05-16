@@ -38,8 +38,18 @@ module.exports = class Tray
     @currentState = state
     @tray.setImage(getColor())
 
-  display: (options = {})->
+  display: (options = {}) ->
+    ## dont use a tray icon in linux
+    ## because this didn't use to work
+    ## and we need to update the code
+    ## like adding a context menu to
+    ## better support it
+    ## TODO: look at how other electron
+    ## apps support linux tray icons
+    return if os.platform() is "linux"
+
     @displayed = true
+
     _.defaults options,
       onDrop: ->
       onClick: ->
