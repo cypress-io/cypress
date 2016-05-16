@@ -59,6 +59,10 @@ LGPL
 
 ## Changelog
 
+#### 0.2.0
+- display list of launchable browsers
+- handle error when no browsers available
+
 #### 0.1.5
 - updated node version to 5.10.0
 
