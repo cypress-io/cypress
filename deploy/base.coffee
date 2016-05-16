@@ -212,7 +212,7 @@ class Base
       pkgr({
         dir: @distDir()
         out: meta.buildDir
-        name: "Cypress"
+        name: pkg.productName or pkg.name
         platform: @osName
         arch: "x64"
         asar: false
