@@ -248,7 +248,7 @@ describe "Project Show", ->
 
       it "opens link to docs on click of help link", ->
         cy.contains("a", "Need help?").click().then ->
-          expect(@App.ipc).to.be.calledWith("external:open", "https://docs.cypress.io")
+          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io")
 
     context "relaunch browser", ->
       it "attaches 'on:launch:browser' after project opens", ->
@@ -293,7 +293,6 @@ describe "Project Show", ->
           .get(".browser-selector")
             .find(".dropdown-toggle").should("not.be.visible")
 
-  ## TODO: update error handling logic
   describe "shows error with no browsers", ->
     beforeEach ->
       @config = {
@@ -305,7 +304,7 @@ describe "Project Show", ->
       @ipc.handle("open:project", null, @config)
 
     it "displays browser error", ->
-      cy.contains("We couldn't find any browsers")
+      cy.contains("We couldn't find any Chrome browsers")
 
     it "displays download browser button", ->
       cy.contains("Download Chrome")
