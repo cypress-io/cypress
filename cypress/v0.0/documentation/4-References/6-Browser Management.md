@@ -1,4 +1,4 @@
-slug: cypress-and-the-browser
+slug: browser-management
 excerpt: How and why Cypress manages the browser session while running tests
 
 # Contents
