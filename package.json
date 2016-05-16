@@ -1,11 +1,12 @@
 {
   "name": "@cypress/core-launcher",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Internal lib for spawning browser processes",
   "main": "index.js",
   "scripts": {
     "test": "NODE_ENV=test mocha --watch",
-    "test-ci": "NODE_ENV=test mocha"
+    "test-ci": "NODE_ENV=test mocha",
+    "release": "releaser"
   },
   "repository": {
     "type": "git",
