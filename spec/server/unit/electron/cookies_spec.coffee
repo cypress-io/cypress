@@ -57,8 +57,7 @@ describe "electron/cookies", ->
       cookies.set(cookiesStub, cookie)
       .then ->
         expect(cookiesStub.set).to.be.calledWith({
-          ## it does not set domain due to a bug in electron
-          # domain: "google.com"
+          domain: "google.com"
           path: "/"
           secure: true
           name: "foo"

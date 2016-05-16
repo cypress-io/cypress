@@ -56,8 +56,8 @@ class Project extends EE
           @scaffold(cfg)
         )
 
-        ## return our project instance
-        .return(@)
+    # return our project instance
+    .return(@)
 
   sync: (options) ->
     ## attempt to sync up with the remote

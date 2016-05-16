@@ -1,5 +1,6 @@
 require("../../spec_helper")
 
+extension = require("@cypress/core-extension")
 Fixtures = require("../../helpers/fixtures")
 project  = require("#{root}../lib/electron/handlers/project")
 Project  = require("#{root}../lib/project")
@@ -19,10 +20,12 @@ describe "lib/electron/handlers/projects", ->
   context ".open", ->
     beforeEach ->
       @projectInstance = {
+        getConfig: @sandbox.stub().resolves({clientUrlDisplay: "foo", socketIoRoute: "bar"})
         setBrowsers: @sandbox.stub().resolves([])
       }
 
       @sandbox.stub(launcher, "getBrowsers").resolves([])
+      @sandbox.stub(extension, "setHostAndPath").withArgs("foo", "bar").resolves()
 
     it "resolves with opened project instance", ->
       project.open(@todosPath)
