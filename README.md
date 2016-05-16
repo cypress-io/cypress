@@ -36,6 +36,9 @@ npm run watch
 
 ## Changelog
 
+#### 0.1.3 - *(05/16/16)*
+- new tab content + phrasing
+
 #### 0.1.2 - *(05/15/16)*
 - ignore theme/Cached Theme.pak
 
