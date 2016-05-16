@@ -9,6 +9,8 @@ describe "Project Show", ->
 
         @ipc.handle("get:options", null, {})
 
+        @agents.spy(@App, "ipc")
+
       .fixture("user").then (@user) ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
@@ -63,7 +65,6 @@ describe "Project Show", ->
 
     it "triggers close:project on dismiss button click", ->
       @ipc.handle("open:project", {name: @err.name, message: @err.msg}, {})
-      @agents.spy(@App, "ipc")
 
       cy
         .contains(".btn", "Dismiss").click().then ->
@@ -83,8 +84,6 @@ describe "Project Show", ->
 
   describe "successfully starts server with browsers", ->
     beforeEach ->
-      @agents.spy(@App, "ipc")
-
       @config = {
         clientUrl: "http://localhost:2020",
         clientUrlDisplay: "http://localhost:2020"
@@ -130,7 +129,10 @@ describe "Project Show", ->
 
       it "triggers launch:browser of browser on click of run", ->
         cy.get("@browser").click().then ->
-          expect(@App.ipc).to.be.calledWith("launch:browser", "chrome")
+          expect(@App.ipc).to.be.calledWith("launch:browser", {
+            browser: "chrome"
+            url: undefined
+          })
 
       describe "closed state", ->
         it "is enabled", ->
@@ -183,7 +185,10 @@ describe "Project Show", ->
         cy.get("[data-js='run-browser']").first().contains("Chromium")
 
       it "sends the 'launch:browser' event immediately", ->
-        cy.wrap(@App.ipc).should("be.calledWith", "launch:browser", "chromium")
+        cy.wrap(@App.ipc).should("be.calledWith", "launch:browser", {
+          browser: "chromium"
+          url: undefined
+        })
 
       it "swaps the chosen browser into the dropdown", ->
         cy
@@ -234,6 +239,7 @@ describe "Project Show", ->
           .contains("http://localhost:8888")
           .then ->
             expect(@App.ipc.off).to.be.calledWith("on:project:settings:change")
+            expect(@App.ipc.off).to.be.calledWith("on:launch:browser")
 
     context "help link", ->
       it "displays help link", ->
@@ -243,10 +249,25 @@ describe "Project Show", ->
         cy.contains("a", "Need help?").click().then ->
           expect(@App.ipc).to.be.calledWith("external:open", "https://docs.cypress.io")
 
+    context "relaunch browser", ->
+      it "attaches 'on:launch:browser' after project opens", ->
+        cy.wrap(@App.ipc).should("be.calledWith", "on:launch:browser")
+
+      it "relaunchers browser when 'on:launch:browser' fires", ->
+        cy
+          .get("[data-js='run-browser']").then ->
+            @ipc.handle("on:launch:browser", null, {
+              browser: "chromium"
+              url: "http://localhost:2020/__/#tests/foo_spec.js"
+            })
+          .wrap(@App.ipc).should("be.calledWith", "launch:browser", {
+            browser: "chromium"
+            url: "http://localhost:2020/__/#tests/foo_spec.js"
+          })
+          .get("[data-js='run-browser']").first().contains("Chromium")
+
   describe "removes dropdown button when only one browser", ->
     beforeEach ->
-      @agents.spy(@App, "ipc")
-
       @config = {
         clientUrl: "http://localhost:2020",
         clientUrlDisplay: "http://localhost:2020"
@@ -274,8 +295,6 @@ describe "Project Show", ->
   ## TODO: update error handling logic
   describe "shows error with no browsers", ->
     beforeEach ->
-      @agents.spy(@App, "ipc")
-
       @config = {
         clientUrl: "http://localhost:2020",
         clientUrlDisplay: "http://localhost:2020"
