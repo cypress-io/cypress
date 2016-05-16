@@ -116,7 +116,7 @@ module.exports = {
     ## default cypress web app client
     if options.autoOpen
       _.delay ->
-        require("./launcher").launch("http://localhost:2020/__")
+        require("./launcher").launch("chrome", "http://localhost:2020/__")
       , 2000
 
     if options.debug
