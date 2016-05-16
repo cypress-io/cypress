@@ -5,8 +5,8 @@ excerpt: How and why Cypress manages the browser session while running tests
 
 - :fa-angle-right: [How Cypress Manages the Browser Session](#section-how-cypress-manages-the-browser-session)
 - :fa-angle-right: [Why Cypress Manages the Browser Session](#section-why-cypress-manages-the-browser-session)
-  - [Validation](#section-validation)
-  - [Formatting](#section-formatting)
+  - [Extending the Cypress API](#section-extending-the-cypress-api)
+  - [Isolating the Test Environment](#section-isolating-the-test-environment)
 
 ***
 
