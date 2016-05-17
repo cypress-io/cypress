@@ -5,8 +5,8 @@ exec = require("#{root}lib/exec")
 
 testFile = "_exec_test.txt"
 
-runCommand = (cmd, timeout = 1000) ->
-  exec.run(process.cwd(), { cmd, timeout })
+runCommand = (cmd, timeout = 1000, env = {}) ->
+  exec.run(process.cwd(), { cmd, timeout, env })
 
 fail = (message) -> throw new Error(message)
 
@@ -37,6 +37,21 @@ describe "lib/exec", ->
       expect(result.stdout).to.eql ["here's some text\n"]
     .catch ->
       fail("should not reject")
+
+  it "passes through environment variables already in env", ->
+    process.env.ALREADY_THERE = "already there"
+    runCommand("echo $ALREADY_THERE")
+    .catch ->
+      fail("should not reject")
+    .then (result)->
+      expect(result.stdout).to.eql ["already there\n"]
+
+  it "passes through environment variables specified", ->
+    runCommand("echo $SOME_VAR", null, { SOME_VAR: "foo" })
+    .catch ->
+      fail("should not reject")
+    .then (result)->
+      expect(result.stdout).to.eql ["foo\n"]
 
   it "reports the stderr", ->
     runCommand(">&2 echo 'some error'")

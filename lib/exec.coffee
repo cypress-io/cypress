@@ -1,3 +1,4 @@
+_       = require("underscore")
 cp      = require("child_process")
 Promise = require("bluebird")
 
@@ -9,7 +10,11 @@ module.exports = {
       new Promise (resolve, reject) ->
         ## this probably won't work on Windows
         ## need to use something different than `sh -c` for Windows
-        child = cp.spawn("sh", ["-c", options.cmd], { cwd: projectRoot })
+        spawnOpts = {
+          cwd: projectRoot
+          env: _.extend({}, process.env, options.env)
+        }
+        child = cp.spawn("sh", ["-c", options.cmd], spawnOpts)
         output = {
           stdout: []
           stderr: []

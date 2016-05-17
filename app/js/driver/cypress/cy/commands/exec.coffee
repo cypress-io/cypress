@@ -15,6 +15,7 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
         log: true
         timeout: Cypress.config("execTimeout")
         failOnNonZeroExit: true
+        env: {}
 
       if options.log
         options._log = Cypress.Log.command({
@@ -35,7 +36,7 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
 
       isTimedoutError = (err)-> err.timedout
 
-      exec(_.pick(options, "cmd", "timeout"))
+      exec(_.pick(options, "cmd", "timeout", "env"))
       .timeout(options.timeout)
       .catch Promise.TimeoutError, isTimedoutError, (err) =>
         $Cypress.Utils.throwErrByPath "exec.timed_out", {

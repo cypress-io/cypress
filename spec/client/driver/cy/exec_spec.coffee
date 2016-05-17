@@ -3,21 +3,29 @@ describe "$Cypress.Cy Exec Command", ->
 
   context "#exec", ->
     beforeEach ->
-      trigger = @Cypress.trigger
+      @Cypress.config("execTimeout", 2500)
 
-      @responseIs = (resp, timeout = 10) =>
-        @Cypress.trigger.restore?()
+      @responseIs = (response) =>
+        @Cypress.on "exec", (data, cb) ->
+          cb(response)
 
-        @sandbox.spy(@Cypress, "trigger")
+    it "triggers 'exec' with the right options", ->
+      @Cypress.on "exec", (data, cb) ->
+        expect(data).to.eql({
+          cmd: "ls"
+          timeout: 2500
+          env: {}
+        })
+        cb({})
 
-        @Cypress.trigger = (args...) ->
-          if args[0] is "exec"
-            trigger.apply(@, arguments)
-            _.delay ->
-              args[2](resp)
-            , timeout
-          else
-            trigger.apply(@, arguments)
+      @cy.exec("ls")
+
+    it "passes through environment variables", ->
+      @Cypress.on "exec", (data, cb) ->
+        expect(data.env).to.eql({ FOO: "foo" })
+        cb({})
+
+      @cy.exec("ls", { env: { FOO: "foo" } })
 
     describe ".log", ->
       beforeEach ->
@@ -41,8 +49,7 @@ describe "$Cypress.Cy Exec Command", ->
         @cy.exec("ls")
 
     describe "timeout", ->
-      it "sets timeout to Cypress.config(execTimeout)", ->
-        @Cypress.config("execTimeout", 2500)
+      it "defaults timeout to Cypress.config(execTimeout)", ->
         @responseIs({})
         timeout = @sandbox.spy(Promise.prototype, "timeout")
 
