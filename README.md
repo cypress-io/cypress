@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.3.2
+- bump kitchen sink dep
+
 #### 0.3.1
 - fix failed push
 
