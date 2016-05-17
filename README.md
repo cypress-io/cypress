@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.3.1
+- fix failed push
+
 #### 0.3.0
 - new cypress cookie commands
 
