@@ -11,6 +11,10 @@ module.exports = {
         stderr: []
       }
 
+      timeout = setTimeout ->
+        child.kill()
+      , options.timeout
+
       child.stdout.on 'data', (data) ->
         output.stdout.push(data.toString())
 
@@ -18,11 +22,18 @@ module.exports = {
         output.stderr.push(data.toString())
 
       child.on 'error', (err) ->
+        clearTimeout(timeout)
         reject(err)
 
-      child.on 'close', (code, signal) ->
+      child.on 'close', (code) ->
+        clearTimeout(timeout)
         if code is 0
           resolve(output)
+          return
+
+        error = if code
+          "Process exited with code #{code}"
         else
-          reject(new Error("Process exited with code #{code}"))
+          "Process timed out"
+        reject(new Error(error))
 }
