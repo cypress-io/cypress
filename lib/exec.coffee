@@ -16,15 +16,15 @@ module.exports = {
         }
         child = cp.spawn("sh", ["-c", options.cmd], spawnOpts)
         output = {
-          stdout: []
-          stderr: []
+          stdout: ""
+          stderr: ""
         }
 
         child.stdout.on 'data', (data) ->
-          output.stdout.push(data.toString())
+          output.stdout += data.toString()
 
         child.stderr.on 'data', (data) ->
-          output.stderr.push(data.toString())
+          output.stderr += data.toString()
 
         child.on 'error', (err) ->
           reject(err)

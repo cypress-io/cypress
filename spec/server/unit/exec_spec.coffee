@@ -22,21 +22,28 @@ describe "lib/exec", ->
     .catch ->
       fail("should not reject")
     .then (result)->
-      expect(result.stdout).to.eql ["here's some text\non multiple lines\n"]
+      expect(result.stdout).to.eql "here's some text\non multiple lines\n"
+
+  it "handles multiple data events", ->
+    runCommand("echo 'foo'; sleep 0.01; echo 'bar'")
+    .catch ->
+      fail("should not reject")
+    .then (result)->
+      expect(result.stdout).to.eql "foo\nbar\n"
 
   it "handles various arguments", ->
     runCommand("cat -be #{testFile}")
     .catch ->
       fail("should not reject")
     .then (result)->
-      expect(result.stdout).to.eql ["     1\there's some text$\n     2\ton multiple lines$\n"]
+      expect(result.stdout).to.eql "     1\there's some text$\n     2\ton multiple lines$\n"
 
   it "handles pipes", ->
     runCommand("cat #{testFile} | grep some")
     .catch ->
       fail("should not reject")
     .then (result)->
-      expect(result.stdout).to.eql ["here's some text\n"]
+      expect(result.stdout).to.eql "here's some text\n"
 
   it "passes through environment variables already in env", ->
     process.env.ALREADY_THERE = "already there"
@@ -44,21 +51,21 @@ describe "lib/exec", ->
     .catch ->
       fail("should not reject")
     .then (result)->
-      expect(result.stdout).to.eql ["already there\n"]
+      expect(result.stdout).to.eql "already there\n"
 
   it "passes through environment variables specified", ->
     runCommand("echo $SOME_VAR", null, { SOME_VAR: "foo" })
     .catch ->
       fail("should not reject")
     .then (result)->
-      expect(result.stdout).to.eql ["foo\n"]
+      expect(result.stdout).to.eql "foo\n"
 
   it "reports the stderr", ->
     runCommand(">&2 echo 'some error'")
     .catch ->
       fail("should not reject")
     .then (result)->
-      expect(result.stderr).to.eql ["some error\n"]
+      expect(result.stderr).to.eql "some error\n"
 
   it "errors on non-zero exit", ->
     runCommand("cat nooope")
