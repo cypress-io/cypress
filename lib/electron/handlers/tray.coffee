@@ -1,9 +1,9 @@
 _            = require("lodash")
 cypressIcons = require("@cypress/core-icons")
 nativeImage  = require("electron").nativeImage
-Tray         = require("electron").Tray
-
-tray = null
+systemPrefs  = require("electron").systemPreferences
+ElectronTray = require("electron").Tray
+os           = require("os")
 
 ## the primary (black) icon can be a template
 ## but the white varient (setPressedImage) CANNOT be a template
@@ -14,31 +14,42 @@ colors = {
   white: nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal-inverse.png"))
 }
 
-module.exports = {
-  setImage: (color, options = {}) ->
-    return if not tray
+states = {
+  default: -> if systemPrefs.isDarkMode() then colors.white else colors.black
+  running: -> colors.blue
+  error: -> colors.red
+}
 
-    if not c = colors[color]
-      throw new Error("Did not receive a valid tray icon color. Got: '#{color}'")
-
-    if options.pressed
-      tray.setPressedImage(c)
-    else
-      tray.setImage(c)
+module.exports = class Tray
+  constructor: ->
+    @currentState = 'default'
+    @tray = new ElectronTray(null)
 
   getColors: -> colors
 
-  getTray: -> tray
+  getTray: -> @tray
 
-  resetTray: -> tray = null
+  setState: (state = @currentState) ->
+    return if not @displayed
 
-  ## TODO: restructure this
-  ## to return the tray instance
-  ## so it can then be passed around
-  ## to methods like 'display' or
-  ## setImage instead of acting like
-  ## a singleton
+    if not getColor = states[state]
+      throw new Error("Did not receive a valid tray icon state. Got: '#{state}'")
+
+    @currentState = state
+    @tray.setImage(getColor())
+
   display: (options = {}) ->
+    ## dont use a tray icon in linux
+    ## because this didn't use to work
+    ## and we need to update the code
+    ## like adding a context menu to
+    ## better support it
+    ## TODO: look at how other electron
+    ## apps support linux tray icons
+    return if os.platform() is "linux"
+
+    @displayed = true
+
     _.defaults options,
       onDrop: ->
       onClick: ->
@@ -46,22 +57,20 @@ module.exports = {
       onDragEnter: ->
       onDragLeave: ->
 
-    tray = new Tray(null)
-
-    tray.on "click",        options.onClick
-    tray.on "right-click",  options.onRightClick
-    tray.on "drop",         options.onDrop
-    tray.on "drag-enter",   options.onDragEnter
-    tray.on "drag-leave",   options.onDragLeave
-
+    @tray.on "click",        options.onClick
+    @tray.on "right-click",  options.onRightClick
+    @tray.on "drop",         options.onDrop
+    @tray.on "drag-enter",   options.onDragEnter
+    @tray.on "drag-leave",   options.onDragLeave
     ## normalize the double click event
     ## to do the same thing as regular
     ## click event
-    tray.on "double-click", options.onClick
+    @tray.on "double-click", options.onClick
 
-    @setImage("black")
-    @setImage("white", {pressed: true})
-    tray.setToolTip("Cypress")
+    @tray.setPressedImage(colors.white)
+    @tray.setToolTip("Cypress")
+    @setState()
 
-    return tray
-}
+    ## subscribe to pref change events (OSX only)
+    if os.platform() is "darwin"
+      systemPrefs.subscribeNotification "AppleInterfaceThemeChangedNotification", => @setState()

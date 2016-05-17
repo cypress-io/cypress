@@ -90,6 +90,8 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
         console.error(err.stack)
 
     @loadDom(fixture).then =>
+      @sandbox.stub(@Cypress.cy, "_automateCookies").resolves([])
+
       @Cypress.setConfig({
         xhrUrl: "__cypress/xhrs/"
         commandTimeout: 2000
@@ -141,6 +143,8 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       ## and Runner and Chai overrides
       @cy = $Cypress.Cy.create(@Cypress, {})
       $Cypress.Log.create(@Cypress, @cy)
+
+      @sandbox.stub(@Cypress.cy, "_automateCookies").resolves([])
 
       ## lets prevent getting a ton of noise
       ## from ending early. we need to do that

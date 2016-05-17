@@ -2,6 +2,8 @@ require("../spec_helper")
 
 describe "lib/konfig", ->
   beforeEach ->
+    @env = process.env["CYPRESS_ENV"]
+
     @setup = (env) =>
       process.env["CYPRESS_ENV"] = env
 
@@ -11,6 +13,8 @@ describe "lib/konfig", ->
         expect(@konfig(key)).to.eq(val)
 
   afterEach ->
+    process.env["CYPRESS_ENV"] = @env
+
     delete require.cache[require.resolve("#{root}lib/konfig")]
 
   it "does not set global.config", ->
@@ -35,37 +39,19 @@ describe "lib/konfig", ->
     beforeEach ->
       @setup("development")
 
-    it "cache_path", ->
-      @eq("cache_path", ".cy/development/cache")
-
     it "api_url", ->
       @eq("api_url", "http://localhost:1234")
-
-    it "log_path", ->
-      @eq("log_path", ".cy/development")
 
   context "test", ->
     beforeEach ->
       @setup("test")
 
-    it "cache_path", ->
-      @eq("cache_path", ".cy/test/cache")
-
     it "api_url", ->
       @eq("api_url", "http://localhost:1234")
-
-    it "log_path", ->
-      @eq("log_path", ".cy/test")
 
   context "production", ->
     beforeEach ->
       @setup("production")
-
-    it "cache_path", ->
-      @eq("cache_path", ".cy/production/cache")
-
-    it "log_path", ->
-      @eq("log_path", ".cy/production")
 
     it "api_url", ->
       @eq("api_url", "https://api.cypress.io")

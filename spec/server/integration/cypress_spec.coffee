@@ -6,6 +6,7 @@ http     = require("http")
 Promise  = require("bluebird")
 electron = require("electron")
 inquirer = require("inquirer")
+extension = require("@cypress/core-extension")
 Fixtures = require("../helpers/fixtures")
 pkg      = require("#{root}package.json")
 settings = require("#{root}lib/util/settings")
@@ -25,6 +26,7 @@ cypress  = require("#{root}lib/cypress")
 Project  = require("#{root}lib/project")
 Server   = require("#{root}lib/server")
 Reporter = require("#{root}lib/reporter")
+launcher = require("#{root}lib/launcher")
 
 describe "lib/cypress", ->
   beforeEach ->
@@ -38,6 +40,8 @@ describe "lib/cypress", ->
     ## force cypress to call directly into main without
     ## spawning a separate process
     @sandbox.stub(cypress, "isCurrentlyRunningElectron").returns(true)
+    @sandbox.stub(extension, "setHostAndPath").resolves()
+    @sandbox.stub(launcher, "getBrowsers").returns([])
     @sandbox.stub(process, "exit")
     @sandbox.spy(errors, "log")
 
@@ -614,6 +618,7 @@ describe "lib/cypress", ->
         })
 
       @sandbox.stub(os, "platform").returns("linux")
+      ## TODO: might need to change this to a different return
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(ci, "getBranch").resolves("bem/ci")
       @sandbox.stub(ci, "getAuthor").resolves("brian")
@@ -715,7 +720,7 @@ describe "lib/cypress", ->
 
     it "logs package.json and exits", ->
       cypress.start(["--return-pkg"]).then =>
-        expect(console.log).to.be.calledWithMatch('{"name":"Cypress"')
+        expect(console.log).to.be.calledWithMatch('{"name":"cypress"')
         @expectExitWith(0)
 
   context "--version", ->
@@ -756,7 +761,7 @@ describe "lib/cypress", ->
       @sandbox.stub(headed, "notify").resolves()
       @sandbox.stub(Renderer, "create").resolves(@win)
       @sandbox.spy(Events, "start")
-      @sandbox.stub(Tray, "display")
+      @sandbox.stub(Tray.prototype, "display")
       @sandbox.stub(electron.ipcMain, "on")
 
     afterEach ->
@@ -860,7 +865,7 @@ describe "lib/cypress", ->
         options = Events.start.firstCall.args[0]
         Events.handleEvent(options, {}, 123, "open:project", @todosPath)
       .then =>
-        expect(getConfig).to.be.calledWith({
+        expect(getConfig).to.be.calledWithMatch({
           port: 2121
           pageLoadTimeout: 1000
           sync: true

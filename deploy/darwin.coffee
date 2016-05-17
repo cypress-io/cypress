@@ -33,23 +33,13 @@ class Darwin extends Base
   afterBuild: (pathToBuild) ->
     @log("#afterBuild")
 
-    Promise.all([
-      @renameExecutable(pathToBuild)
-      @modifyPlist(pathToBuild)
-    ])
-
-  renameExecutable: (pathToBuild) ->
-    pathToElectron = path.join(pathToBuild, "Cypress.app", "Contents", "MacOS", "Electron")
-    pathToCypress  = path.join(path.dirname(pathToElectron), "Cypress")
-
-    fs.renameAsync(pathToElectron, pathToCypress)
+    @modifyPlist(pathToBuild)
 
   modifyPlist: (pathToBuild) ->
     pathToPlist = path.join(pathToBuild, "Cypress.app", "Contents", "Info.plist")
 
     fs.readFileAsync(pathToPlist, "utf8").then (contents) ->
       obj = plist.parse(contents)
-      obj.CFBundleExecutable = "Cypress"
       obj.LSUIElement = 1
       fs.writeFileAsync(pathToPlist, plist.build(obj))
 

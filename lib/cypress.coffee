@@ -1,17 +1,23 @@
 require("./environment")
 
+## we are not requiring everything up front
+## to optimize how quickly electron boots while
+## in dev or linux production. the reasoning is
+## that we likely may need to spawn a new child process
+## and its a huge waste of time (about 1.5secs) of
+## synchronous requires the first go around just to
+## essentially do it all again when we boot the correct
+## mode.
+
 _         = require("lodash")
+os        = require("os")
 cp        = require("child_process")
 path      = require("path")
 Promise   = require("bluebird")
-api       = require("./api")
-logs      = require("./electron/handlers/logs")
 logger    = require("./logger")
 errors    = require("./errors")
-Project   = require("./project")
+appData   = require("./util/app_data")
 argsUtil  = require("./util/args")
-smokeTest = require("./modes/smoke_test")
-returnPkg = require("./modes/pkg")
 
 exit = (code) ->
   process.exit(code)
@@ -30,6 +36,9 @@ module.exports = {
   isCurrentlyRunningElectron: ->
     !!(process.versions and process.versions.electron)
 
+  isLinuxAndHasNotDisabledGpu: (options) ->
+    process.env["CYPRESS_ENV"] isnt "test" and os.platform() is "linux" and "--disable-gpu" not in process.argv
+
   runElectron: (mode, options) ->
     ## wrap all of this in a promise to force the
     ## promise interface - even if it doesn't matter
@@ -40,14 +49,25 @@ module.exports = {
       ## like in production and we shouldn't spawn a new
       ## process
       if @isCurrentlyRunningElectron()
-        ## just run the gui code directly here
-        ## and pass our options directly to main
-        require("./electron")(mode, options)
+        if @isLinuxAndHasNotDisabledGpu()
+          args = ["."].concat(argsUtil.toArray(options))
+          args.push("--disable-gpu")
+
+          ## respawn the same process except with --disable-gpu
+          electron = cp.spawn(process.execPath, args, {
+            stdio: "inherit"
+          })
+          electron.unref()
+          exit0()
+        else
+          ## just run the gui code directly here
+          ## and pass our options directly to main
+          require("./electron")(mode, options);
       else
         ## sanity check to ensure we're running
         ## the local dev server. dont crash just
         ## log a warning
-        api.ping().catch (err) ->
+        require("./api").ping().catch (err) ->
           console.log(err.message)
           errors.warning("DEV_NO_SERVER")
 
@@ -63,7 +83,7 @@ module.exports = {
   openProject: (options) ->
     ## this code actually starts a project
     ## and is spawned from nodemon
-    Project(options.project).open()
+    require("./project")(options.project).open()
 
   runServer: (options) ->
     args = {}
@@ -96,7 +116,7 @@ module.exports = {
     ## default cypress web app client
     if options.autoOpen
       _.delay ->
-        require("opn")("http://localhost:2020/__")
+        require("./launcher").launch("http://localhost:2020/__")
       , 2000
 
     if options.debug
@@ -107,65 +127,68 @@ module.exports = {
   start: (argv = []) ->
     logger.info("starting desktop app", args: argv)
 
-    options = argsUtil.toObject(argv)
+    ## make sure we have the appData folder
+    appData.ensure()
+    .then =>
+      options = argsUtil.toObject(argv)
 
-    ## else determine the mode by
-    ## the passed in arguments / options
-    ## and normalize this mode
-    switch
-      when options.removeIds
-        options.mode = "removeIds"
+      ## else determine the mode by
+      ## the passed in arguments / options
+      ## and normalize this mode
+      switch
+        when options.removeIds
+          options.mode = "removeIds"
 
-      when options.version
-        options.mode = "version"
+        when options.version
+          options.mode = "version"
 
-      when options.smokeTest
-        options.mode = "smokeTest"
+        when options.smokeTest
+          options.mode = "smokeTest"
 
-      when options.returnPkg
-        options.mode = "returnPkg"
+        when options.returnPkg
+          options.mode = "returnPkg"
 
-      when options.logs
-        options.mode = "logs"
+        when options.logs
+          options.mode = "logs"
 
-      when options.clearLogs
-        options.mode = "clearLogs"
+        when options.clearLogs
+          options.mode = "clearLogs"
 
-      when options.getKey
-        options.mode = "getKey"
+        when options.getKey
+          options.mode = "getKey"
 
-      when options.generateKey
-        options.mode = "generateKey"
+        when options.generateKey
+          options.mode = "generateKey"
 
-      when options.ci
-        options.mode = "ci"
+        when options.ci
+          options.mode = "ci"
 
-      when options.runProject
-        ## go into headless mode
-        ## when we have 'runProject'
-        options.mode = "headless"
+        when options.runProject
+          ## go into headless mode
+          ## when we have 'runProject'
+          options.mode = "headless"
 
-      else
-        ## set the default mode as headed
-        options.mode ?= "headed"
+        else
+          ## set the default mode as headed
+          options.mode ?= "headed"
 
-    ## remove mode from options
-    mode    = options.mode
-    options = _.omit(options, "mode")
+      ## remove mode from options
+      mode    = options.mode
+      options = _.omit(options, "mode")
 
-    @startInMode(mode, options)
+      @startInMode(mode, options)
 
   startInMode: (mode, options) ->
     switch mode
       when "removeIds"
-        Project.removeIds(options.projectPath)
+        require("./project").removeIds(options.projectPath)
         .then (stats = {}) ->
           console.log("Removed '#{stats.ids}' ids from '#{stats.files}' files.")
         .then(exit0)
         .catch(exitErr)
 
       when "version"
-        returnPkg(options)
+        require("./modes/pkg")(options)
         .get("version")
         .then (version) ->
           console.log(version)
@@ -173,14 +196,14 @@ module.exports = {
         .catch(exitErr)
 
       when "smokeTest"
-        smokeTest(options)
+        require("./modes/smoke_test")(options)
         .then (pong) ->
           console.log(pong)
         .then(exit0)
         .catch(exitErr)
 
       when "returnPkg"
-        returnPkg(options)
+        require("./modes/pkg")(options)
         .then (pkg) ->
           console.log(JSON.stringify(pkg))
         .then(exit0)
@@ -188,19 +211,19 @@ module.exports = {
 
       when "logs"
         ## print the logs + exit
-        logs.print()
+        require("./electron/handlers/logs").print()
         .then(exit0)
         .catch(exitErr)
 
       when "clearLogs"
         ## clear the logs + exit
-        logs.clear()
+        require("./electron/handlers/logs").clear()
         .then(exit0)
         .catch(exitErr)
 
       when "getKey"
         ## print the key + exit
-        Project.getSecretKeyByPath(options.projectPath)
+        require("./project").getSecretKeyByPath(options.projectPath)
         .then (key) ->
           console.log(key)
         .then(exit0)
@@ -208,7 +231,7 @@ module.exports = {
 
       when "generateKey"
         ## generate + print the key + exit
-        Project.generateSecretKeyByPath(options.projectPath)
+        require("./project").generateSecretKeyByPath(options.projectPath)
         .then (key) ->
           console.log(key)
         .then(exit0)

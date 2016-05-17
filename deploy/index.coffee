@@ -88,4 +88,4 @@ deploy = {
 
 }
 
-module.exports = _.bindAll(deploy)
+module.exports = _.bindAll(deploy, _.functions(deploy))

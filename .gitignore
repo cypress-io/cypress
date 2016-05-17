@@ -6,7 +6,7 @@ build/css
 lib/public
 .DS_Store
 npm-debug.log
-.cy/
+.cy
 nw/app/public
 nw/public
 dist

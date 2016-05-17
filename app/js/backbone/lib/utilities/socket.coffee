@@ -4,14 +4,36 @@
   hostEvents      = "load:spec:iframe".split(" ")
   passThruEvents  = "sauce:job:create sauce:job:start sauce:job:done sauce:job:fail".split(" ")
 
+  element = "__cypress-string"
+
   API =
     start: (socketId) ->
       ## connect to socket io
       channel = io.connect({path: "/__socket.io"})
 
-      if socketId
-        channel.on "connect", ->
-          channel.emit "app:connect", socketId
+      str = "" + Math.random()
+
+      obj = {
+        element: element
+        string: str
+      }
+
+      $("##{element}").hide().text(obj.string)
+
+      channel.on "connect", ->
+        ## TODO: normalize this into lib/socket
+        ## instead of the webapp
+        channel.emit("app:connect", socketId) if socketId
+
+        channel.emit "is:automation:connected", obj, (bool) ->
+          ## once we get back our initial connection status
+          ## we need to listen for disconnected events
+          channel.on "automation:disconnected", ->
+            ## this is a big deal and we need to nuke
+            ## the client app
+            socket.onAutomationDisconnected()
+
+          socket.automationConnected(bool)
 
       _.each [].concat(hostEvents, satelliteEvents, passThruEvents), (event) ->
         channel.on event, (args...) ->

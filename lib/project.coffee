@@ -52,12 +52,12 @@ class Project extends EE
         @sync(options)
 
         Promise.join(
-          @watchSettingsAndStartWebsockets(options.changeEvents, cfg)
+          @watchSettingsAndStartWebsockets(options, cfg)
           @scaffold(cfg)
         )
 
-        ## return our project instance
-        .return(@)
+    # return our project instance
+    .return(@)
 
   sync: (options) ->
     ## attempt to sync up with the remote
@@ -119,8 +119,8 @@ class Project extends EE
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
 
-  watchSettingsAndStartWebsockets: (changeEvents, config = {}) ->
-    @watchSettings(changeEvents)
+  watchSettingsAndStartWebsockets: (options = {}, config = {}) ->
+    @watchSettings(options.changeEvents)
 
     ## if we've passed down reporter
     ## then record these via mocha reporter
@@ -128,6 +128,10 @@ class Project extends EE
       reporter = Reporter.create(config.reporter)
 
     @server.startWebsockets(@watchers, config, {
+      onReloadBrowser: options.onReloadBrowser
+
+      onAutomationRequest: options.onAutomationRequest
+
       onIsNewProject: =>
         ## return a boolean whether this is a new project or not
         @determineIsNewProject(config.integrationFolder)
@@ -185,6 +189,11 @@ class Project extends EE
         scaffold.integrationExampleSize(),
         checkIfBothMatch
       )
+
+  setBrowsers: (browsers = []) ->
+    @getConfig()
+    .then (cfg) ->
+      cfg.browsers = browsers
 
   getConfig: (options = {}) ->
     if c = @cfg

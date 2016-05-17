@@ -5,13 +5,18 @@ str           = require("underscore.string")
 path          = require("path")
 uuid          = require("node-uuid")
 Promise       = require("bluebird")
-socketIo      = require("socket.io")
+socketIo      = require("@cypress/core-socket")
 open          = require("./util/open")
 pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
 fixture       = require("./fixture")
 Request       = require("./request")
+errors        = require("./errors")
 logger        = require("./logger")
+automation    = require("./automation")
+
+retry = (fn) ->
+  Promise.delay(25).then(fn)
 
 class Socket
   constructor: ->
@@ -58,8 +63,8 @@ class Socket
     })
     .then(cb)
 
-  onRequest: (options, cb) ->
-    Request.send(options)
+  onRequest: (automation, options, cb) ->
+    Request.send(automation, options)
     .then(cb)
     .catch (err) ->
       cb({__error: err.message})
@@ -70,54 +75,100 @@ class Socket
     .catch (err) ->
       cb({__error: err.message})
 
-  createIo: (server, path) ->
-    socketIo(server, {path: path, destroyUpgrade: false})
+  onAutomation: (messages, message, data) ->
+    Promise.try =>
+      ## instead of throwing immediately here perhaps we need
+      ## to make this more resilient by automatically retrying
+      ## up to 1 second in the case where our automation room
+      ## is empty. that would give padding for reconnections
+      ## to automatically happen.
+      ## for instance when socket.io detects a disconnect
+      ## does it immediately remove the member from the room?
+      ## YES it does per http://socket.io/docs/rooms-and-namespaces/#disconnection
+      if _.isEmpty(@io.sockets.adapter.rooms.automation)
+        throw new Error("Could not process '#{message}'. No automation servers connected.")
+      else
+        new Promise (resolve, reject) =>
+          id = uuid.v4()
+          messages[id] = (obj) ->
+            ## normalize the error from automation responses
+            if e = obj.__error
+              err = new Error(e)
+              err.name = obj.__name
+              err.stack = obj.__stack
+              reject(err)
+            else
+              ## normalize the response
+              resolve(obj.response)
+
+          @io.to("automation").emit("automation:request", id, message, data)
+
+  createIo: (server, path, cookie) ->
+    ## TODO: dont serve the client!
+    # socketIo(server, {path: path, destroyUpgrade: false, serveClient: false})
+    socketIo.server(server, {path: path, destroyUpgrade: false, cookie: cookie})
 
   _startListening: (server, watchers, config, options) ->
     _.defaults options,
       socketId: null
+      onAutomationRequest: null
       onMocha: ->
       onConnect: ->
       onChromiumRun: ->
       onIsNewProject: ->
+      onReloadBrowser: ->
       checkForAppErrors: ->
 
     ## promisify this function
     options.onIsNewProject = Promise.method(options.onIsNewProject)
 
     messages = {}
-    chromiums = {}
 
-    {integrationFolder, socketIoRoute} = config
+    {integrationFolder, socketIoRoute, socketIoCookie} = config
 
     @testsDir = integrationFolder
 
-    @io = @createIo(server, socketIoRoute)
+    @io = @createIo(server, socketIoRoute, socketIoCookie)
 
     @io.on "connection", (socket) =>
       logger.info "socket connected"
 
-      socket.on "chromium:connected", =>
-        return if socket.inChromiumRoom
+      respond = (id, resp) ->
+        if message = messages[id]
+          delete messages[id]
+          message(resp)
 
-        socket.inChromiumRoom = true
-        socket.join("chromium")
+      automationRequest = (message, data) =>
+        automate = options.onAutomationRequest ? (message, data) =>
+          @onAutomation(messages, message, data)
 
-        socket.on "chromium:history:response", (id, response) =>
-          if message = chromiums[id]
-            delete chromiums[id]
-            message(response)
+        automation(config.namespace, socketIoCookie)
+        .request(message, data, automate)
 
-      socket.on "history:entries", (cb) =>
-        id = uuid.v4()
+      socket.on "automation:connected", =>
+        return if socket.inAutomationRoom
 
-        chromiums[id] = cb
+        socket.inAutomationRoom = true
+        socket.join("automation")
 
-        if _.keys(@io.sockets.adapter.rooms.chromium).length > 0
-          messages[id] = cb
-          @io.to("chromium").emit "chromium:history:request", id
-        else
-          cb({__error: "Could not process 'history:entries'. No chromium servers connected."})
+        ## if our automation disconnects then we're
+        ## in trouble and should probably bomb everything
+        socket.on "disconnect", =>
+          ## if we are in headless mode then log out an error and maybe exit with process.exit(1)?
+
+          ## TODO: if all of our clients have also disconnected
+          ## then don't warn anything
+          errors.warning("AUTOMATION_SERVER_DISCONNECTED")
+          @io.emit("automation:disconnected", false)
+
+        socket.on "automation:response", respond
+
+      socket.on "automation:request", (message, data, cb) =>
+        automationRequest(message, data)
+        .then (resp) ->
+          cb({response: resp})
+        .catch (err) ->
+          cb({__error: err.message, __name: err.name, __stack: err.stack})
 
       socket.on "remote:connected", =>
         logger.info "remote:connected"
@@ -127,11 +178,7 @@ class Socket
         socket.inRemoteRoom = true
         socket.join("remote")
 
-        socket.on "remote:response", (id, response) =>
-          if message = messages[id]
-            delete messages[id]
-            logger.info "remote:response", id: id, response: response
-            message(response)
+        socket.on "remote:response", respond
 
       socket.on "client:request", (message, data, cb) =>
         ## if cb isnt a function then we know
@@ -157,8 +204,8 @@ class Socket
       socket.on "watch:test:file", (filePath, cb) =>
         @watchTestFileByPath(config, filePath, watchers, cb)
 
-      socket.on "request", =>
-        @onRequest.apply(@, arguments)
+      socket.on "request", (options, cb) =>
+        @onRequest(automationRequest, options, cb)
 
       socket.on "fixture", (fixturePath, cb) =>
         @onFixture(config, fixturePath, cb)
@@ -183,9 +230,32 @@ class Socket
         open.opn(p, opts)
         .then -> cb()
 
-      socket.on "is:new:project", (cb) =>
+      socket.on "is:new:project", (cb) ->
         options.onIsNewProject()
         .then(cb)
+
+      socket.on "reload:browser", (url, browser) ->
+        options.onReloadBrowser(url, browser)
+
+      socket.on "is:automation:connected", (data = {}, cb) =>
+        isConnected = =>
+          automationRequest("is:automation:connected", data)
+
+        tryConnected = =>
+          Promise
+          .try(isConnected)
+          .catch ->
+            retry(tryConnected)
+
+        ## retry for up to data.timeout
+        ## or 1 second
+        Promise
+        .try(tryConnected)
+        .timeout(data.timeout ? 1000)
+        .then ->
+          cb(true)
+        .catch Promise.TimeoutError, (err) ->
+          cb(false)
 
   end: ->
     ## TODO: we need an 'ack' from this end

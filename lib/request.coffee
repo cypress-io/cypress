@@ -1,4 +1,5 @@
 _       = require("lodash")
+urlUtil = require("url")
 request = require("request-promise")
 
 module.exports = {
@@ -34,7 +35,11 @@ module.exports = {
   createCookieString: (c) ->
     @reduceCookieToArray(c).join("; ")
 
-  send: (options = {}) ->
+  extractDomain: (url) ->
+    ## parse the hostname from the url
+    urlUtil.parse(url).hostname
+
+  send: (automation, options = {}) ->
     _.defaults options, {
       headers: {}
       gzip: true
@@ -46,16 +51,42 @@ module.exports = {
       resolveWithFullResponse: true
     }
 
-    if c = options.cookies
-      options.headers["Cookie"] = @createCookieString(c)
+    flattenCookies = (cookies) ->
+      _.reduce cookies, (memo, cookie) ->
+        memo[cookie.name] = cookie.value
+        memo
+      , {}
 
-    ms = Date.now()
+    setCookies = (cookies) =>
+      options.headers["Cookie"] = @createCookieString(cookies)
 
-    request(options)
+    send = =>
+      ms = Date.now()
+
+      ## dont send in domain
+      options = _.omit(options, "domain")
+
+      request(options)
       .then(@normalizeResponse.bind(@))
       .then (resp) ->
         resp.duration = Date.now() - ms
 
         return resp
+
+    if c = options.cookies
+      ## if we have a cookie object then just
+      ## send the request up!
+      if _.isObject(c)
+        setCookies(c)
+        send()
+      else
+        ## else go get the cookies first
+        ## then make the request
+        automation("get:cookies", {domain: options.domain ? @extractDomain(options.url)})
+        .then(flattenCookies)
+        .then(setCookies)
+        .then(send)
+    else
+      send()
 
 }

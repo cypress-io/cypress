@@ -36,6 +36,12 @@
       @layout = @getLayoutView config
 
       @listenTo @layout, "show", ->
+        @iframeRegion(iframe)
+
+        ## start running the tests
+        ## and load the iframe
+        runner.start(id)
+
         ## bail if we're currently headless or we're in
         ## satellite mode
         return if config.get("isHeadless") or config.ui("satellite")
@@ -45,14 +51,14 @@
 
         socket.emit "watch:test:file", id
 
-      @listenTo @layout, "show", ->
-        @iframeRegion(iframe)
-
-        ## start running the tests
-        ## and load the iframe
-        runner.start(id)
-
-      @show @layout
+      socket.whenAutomationKnown (bool) =>
+        if bool
+          @show @layout
+        else
+          ## if we never were able to connect to automation
+          ## then we need to display a list of browsers and
+          ## close this window down so we can open up correctly
+          App.execute "list:automation"
 
     statsRegion: (runner) ->
       App.execute "show:test:stats", @layout.statsRegion, runner
@@ -68,6 +74,11 @@
       App.clearAllCookies()
       config.trigger "close:test:panels"
       App.request "stop:test:runner", runner
+
+    getBrowsersMessageView: (defaultBrowser, browsers) ->
+      new Show.BrowsersMessage
+        model: defaultBrowser
+        browsers: browsers
 
     getLayoutView: (config) ->
       new Show.Layout

@@ -4,13 +4,15 @@ _            = require("lodash")
 os           = require("os")
 path         = require("path")
 uuid         = require("node-uuid")
-client       = require("socket.io-client")
+socketIo     = require("@cypress/core-socket")
+extension    = require("@cypress/core-extension")
 Promise      = require("bluebird")
 open         = require("#{root}lib/util/open")
 config       = require("#{root}lib/config")
 Socket       = require("#{root}lib/socket")
 Server       = require("#{root}lib/server")
 Watchers     = require("#{root}lib/watchers")
+automation   = require("#{root}lib/automation")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
 
 describe "lib/socket", ->
@@ -36,16 +38,217 @@ describe "lib/socket", ->
         @server.startWebsockets(@watchers, @cfg, @options)
         @socket = @server._socket
 
+        done = _.once(done)
+
         ## when our real client connects then we're done
         @socket.io.on "connection", (socket) ->
           done()
 
         {clientUrlDisplay, socketIoRoute} = @cfg
 
-        @client = client(clientUrlDisplay, {path: socketIoRoute})
+        @client = socketIo.client(clientUrlDisplay, {path: socketIoRoute})
 
     afterEach ->
       @client.disconnect()
+
+    context "on(automation:request)", ->
+      describe "#onAutomation", ->
+        before ->
+          global.chrome = {
+            cookies: {
+              set: ->
+              getAll: ->
+              remove: ->
+            }
+            runtime: {
+
+            }
+            tabs: {
+              query: ->
+              executeScript: ->
+            }
+          }
+
+        beforeEach (done) ->
+          @socket.io.on "connection", (@extClient) =>
+            @extClient.on "automation:connected", ->
+              done()
+
+          extension.connect(@cfg.clientUrlDisplay, @cfg.socketIoRoute, socketIo.client)
+
+        afterEach ->
+          @extClient.disconnect()
+
+        after ->
+          delete global.chrome
+
+        it "does not return cypress namespace or socket io cookies", (done) ->
+          @sandbox.stub(chrome.cookies, "getAll")
+          .withArgs({domain: "localhost"})
+          .yieldsAsync([
+            {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expirationDate: 123, a: "a", b: "c"}
+            {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456, c: "a", d: "c"}
+            {name: "__cypress.foo", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456, c: "a", d: "c"}
+            {name: "__cypress.bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456, c: "a", d: "c"}
+            {name: "__socket.io", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456, c: "a", d: "c"}
+          ])
+
+          @client.emit "automation:request", "get:cookies", {domain: "localhost"}, (resp) ->
+            expect(resp).to.deep.eq({
+              response: [
+                {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expiry: 123}
+                {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456}
+              ]
+            })
+            done()
+
+        it "does not clear any namespaced cookies", (done) ->
+          @sandbox.stub(chrome.cookies, "getAll")
+          .withArgs({name: "session"})
+          .yieldsAsync([
+            {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expirationDate: 123, a: "a", b: "c"}
+          ])
+
+          @sandbox.stub(chrome.cookies, "remove")
+          .withArgs({name: "session", url: "https://google.com/"})
+          .yieldsAsync(
+            {name: "session", url: "https://google.com/", storeId: "123"}
+          )
+
+          cookies = [
+            {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expiry: 123}
+            {domain: "localhost", name: "__cypress.initial", value: true}
+            {domain: "localhost", name: "__socket.io", value: "123abc"}
+          ]
+
+          @client.emit "automation:request", "clear:cookies", cookies, (resp) ->
+            expect(resp).to.deep.eq({
+              response: [
+                {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expiry: 123}
+              ]
+            })
+            done()
+
+        it "throws trying to clear namespaced cookie"
+
+        it "throws trying to set a namespaced cookie"
+
+        it "throws trying to get a namespaced cookie"
+
+        it "throws when automation:response has an error in it"
+
+        it "throws when no clients connected to automation", (done) ->
+          @extClient.disconnect()
+
+          @client.emit "automation:request", "get:cookies", {domain: "foo"}, (resp) ->
+            expect(resp.__error).to.eq("Could not process 'get:cookies'. No automation servers connected.")
+            done()
+
+        it "returns true when tab matches magic string", (done) ->
+          code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent"
+
+          @sandbox.stub(chrome.tabs, "query")
+          .withArgs({url: "CHANGE_ME_HOST/*", windowType: "normal"})
+          .yieldsAsync([{id: 1}])
+
+          @sandbox.stub(chrome.tabs, "executeScript")
+          .withArgs(1, {code: code})
+          .yieldsAsync(["string"])
+
+          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string"}, (resp) ->
+            expect(resp).to.be.true
+            done()
+
+        it "returns true after retrying", (done) ->
+          err = new Error
+
+          ## just force onAumation to reject up until the 4th call
+          oA = @sandbox.stub(@socket, "onAutomation")
+
+          oA
+          .onCall(0).rejects(err)
+          .onCall(1).rejects(err)
+          .onCall(2).rejects(err)
+          .onCall(3).resolves()
+
+          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string"}, (resp) ->
+            expect(oA.callCount).to.be.eq(4)
+
+            expect(resp).to.be.true
+            done()
+
+        it "returns false when times out", (done) ->
+          code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent"
+
+          @sandbox.stub(chrome.tabs, "query")
+          .withArgs({url: "CHANGE_ME_HOST/*", windowType: "normal"})
+          .yieldsAsync([{id: 1}])
+
+          @sandbox.stub(chrome.tabs, "executeScript")
+          .withArgs(1, {code: code})
+          .yieldsAsync(["foobarbaz"])
+
+          ## reduce the timeout so we dont have to wait so long
+          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string", timeout: 100}, (resp) ->
+            expect(resp).to.be.false
+            done()
+
+        it "retries multiple times and stops after timing out", (done) ->
+          ## just force onAumation to reject every time its called
+          oA = @sandbox.stub(@socket, "onAutomation").rejects(new Error)
+
+          ## reduce the timeout so we dont have to wait so long
+          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string", timeout: 100}, (resp) ->
+            callCount = oA.callCount
+
+            ## it retries every 25ms so explect that
+            ## this function was called at least 2 times
+            expect(callCount).to.be.gt(2)
+
+            expect(resp).to.be.false
+
+            _.delay ->
+              ## wait another 100ms and make sure
+              ## that it was cancelled and not continuously
+              ## retried!
+              ## if we remove Promise.config({cancellation: true})
+              ## then this will fail. bluebird has changed its
+              ## cancellation logic before and so we want to use
+              ## an integration test to ensure this works as expected
+              expect(callCount).to.eq(oA.callCount)
+              done()
+            , 100
+
+      describe "options.onAutomationRequest", ->
+        beforeEach ->
+          @oar = @options.onAutomationRequest = @sandbox.stub()
+
+        it "calls onAutomationRequest with message and data", (done) ->
+          @oar.withArgs("focus", {foo: "bar"}).resolves([])
+
+          @client.emit "automation:request", "focus", {foo: "bar"}, (resp) ->
+            expect(resp).to.deep.eq({response: []})
+            done()
+
+        it "calls callback with error on rejection", ->
+          err = new Error("foo")
+
+          @oar.withArgs("focus", {foo: "bar"}).rejects(err)
+
+          @client.emit "automation:request", "focus", {foo: "bar"}, (resp) ->
+            expect(resp).to.deep.eq({__error: err.message, __name: err.name, __stack: err.stack})
+            done()
+
+        it "does not return __cypress or __socket.io namespaced cookies", ->
+
+        it "throws when onAutomationRequest rejects"
+
+        it "is:automation:connected returns true", (done) ->
+          @oar.withArgs("is:automation:connected", {string: "foo"}).resolves(true)
+
+          @client.emit "is:automation:connected", {string: "foo"}, (resp) ->
+            expect(resp).to.be.true
+            done()
 
     context "on(open:finder)", ->
       beforeEach ->
@@ -123,7 +326,7 @@ describe "lib/socket", ->
 
     context "on(request)", ->
       it "calls socket#onRequest", (done) ->
-        onRequest = @sandbox.stub(@socket, "onRequest").yieldsAsync("bar")
+        onRequest = @sandbox.stub(@socket, "onRequest").callsArgWithAsync(2, "bar")
 
         @client.emit "request", "foo", (resp) ->
           expect(resp).to.eq("bar")
@@ -131,41 +334,103 @@ describe "lib/socket", ->
           ## ensure onRequest was called with those same arguments
           ## therefore we have verified the socket binding and
           ## the call into onRequest with the proper arguments
-          expect(onRequest).to.be.calledWith("foo")
+          expect(onRequest.getCall(0).args[1]).to.eq("foo")
           done()
 
       it "returns the request object", ->
         nock("http://localhost:8080")
-          .get("/status.json")
-          .reply(200, {status: "ok"})
+        .matchHeader("Cookie", "foo=bar")
+        .get("/status.json")
+        .reply(200, {status: "ok"})
 
-        cb = @sandbox.spy()
+        cb1 = @sandbox.spy()
+        cb2 = @sandbox.spy()
 
         req = {
           url: "http://localhost:8080/status.json"
+          cookies: {foo: "bar"}
         }
 
-        @socket.onRequest(req, cb).then ->
-          expect(cb).to.be.calledWithMatch {
+        @socket.onRequest(cb1, req, cb2).then ->
+          expect(cb2).to.be.calledWithMatch {
             status: 200
             body: {status: "ok"}
           }
+
+      it "sends up cookies from automation(get:cookies)", (done) ->
+        @oar = @options.onAutomationRequest = @sandbox.stub()
+
+        @oar.withArgs("get:cookies", {domain: "localhost"}).resolves([
+          {name: "__cypress.initial", value: "true"}
+          {name: "foo", value: "bar"}
+          {name: "baz", value: "quux"}
+        ])
+
+        nock("http://localhost:8080")
+        .matchHeader("Cookie", "foo=bar; baz=quux")
+        .get("/status.json")
+        .reply(200, {status: "ok"})
+
+        req = {
+          url: "http://localhost:8080/status.json"
+          cookies: true
+          domain: "localhost"
+        }
+
+        @client.emit "request", req, (resp) ->
+          expect(resp.body).to.deep.eq({status: "ok"})
+          expect(resp.status).to.eq(200)
+          expect(resp.headers).to.deep.eq({
+            "content-type": "application/json"
+          })
+
+          done()
+
+      it "extracts domain from the url when domain is omitted", (done) ->
+        @oar = @options.onAutomationRequest = @sandbox.stub()
+
+        @oar.withArgs("get:cookies", {domain: "www.google.com"}).resolves([
+          {name: "__cypress.initial", value: "true"}
+          {name: "foo", value: "bar"}
+          {name: "baz", value: "quux"}
+        ])
+
+        nock("http://www.google.com:8080")
+        .matchHeader("Cookie", "foo=bar; baz=quux")
+        .get("/status.json")
+        .reply(200, {status: "ok"})
+
+        req = {
+          url: "http://www.google.com:8080/status.json"
+          cookies: true
+        }
+
+        @client.emit "request", req, (resp) ->
+          expect(resp.body).to.deep.eq({status: "ok"})
+          expect(resp.status).to.eq(200)
+          expect(resp.headers).to.deep.eq({
+            "content-type": "application/json"
+          })
+
+          done()
 
       it "errors when request fails", ->
         nock.enableNetConnect()
 
         nock("http://localhost:8080")
-          .get("/status.json")
-          .reply(200, {status: "ok"})
+        .get("/status.json")
+        .reply(200, {status: "ok"})
 
-        cb = @sandbox.spy()
+        cb1 = @sandbox.spy()
+        cb2 = @sandbox.spy()
 
         req = {
           url: "http://localhost:1111/foo"
+          cookies: false
         }
 
-        @socket.onRequest(req, cb).then ->
-          obj = cb.getCall(0).args[0]
+        @socket.onRequest(cb1, req, cb2).then ->
+          obj = cb2.getCall(0).args[0]
           expect(obj).to.have.property("__error", "Error: connect ECONNREFUSED 127.0.0.1:1111")
 
   context "unit", ->

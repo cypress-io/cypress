@@ -8,6 +8,7 @@ Project  = require("#{root}../lib/project")
 project  = require("#{root}../lib/electron/handlers/project")
 headless = require("#{root}../lib/modes/headless")
 Renderer = require("#{root}../lib/electron/handlers/renderer")
+automation = require("#{root}../lib/electron/handlers/automation")
 
 describe "electron/headless", ->
   beforeEach ->
@@ -93,7 +94,7 @@ describe "electron/headless", ->
       }
 
       headless.openProject(1234, options).then ->
-        expect(project.open).to.be.calledWith("path/to/project/foo", {
+        expect(project.open).to.be.calledWithMatch("path/to/project/foo", {
           port: 8080
           projectPath: "path/to/project/foo"
           environmentVariables: {foo: "bar"}
@@ -102,7 +103,11 @@ describe "electron/headless", ->
           socketId: 1234
           report: true
           isHeadless: true
+          onAutomationRequest: automation.perform
         })
+
+    ## TODO: write this test!
+    it "binds onAutomationRequest to automation.perform"
 
   context ".createRenderer", ->
     beforeEach ->
@@ -125,6 +130,7 @@ describe "electron/headless", ->
           height: 0
           show: false
           frame: false
+          devTools: false
           type: "PROJECT"
         })
 
@@ -142,6 +148,7 @@ describe "electron/headless", ->
           height: 0
           show: true
           frame: true
+          devTools: true
           type: "PROJECT"
         })
 

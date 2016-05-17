@@ -1,6 +1,9 @@
 require("../spec_helper")
 
 describe "lib/environment", ->
+  before ->
+    @env = process.env["CYPRESS_ENV"]
+
   beforeEach ->
     @expectedEnv = (env) ->
       require("#{root}lib/environment")
@@ -9,6 +12,9 @@ describe "lib/environment", ->
   afterEach ->
     delete require.cache[require.resolve("#{root}lib/environment")]
     delete process.env["CYPRESS_ENV"]
+
+  after ->
+    process.env["CYPRESS_ENV"] = @env
 
   context "#existing process.env.CYPRESS_ENV", ->
     beforeEach ->

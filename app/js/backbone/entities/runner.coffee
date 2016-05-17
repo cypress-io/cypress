@@ -11,7 +11,7 @@
 
     class Entities.Runner extends Entities.Model
       initialize: ->
-        @Cypress   = $Cypress.create({loadModules: true})
+        @Cypress = $Cypress.create({loadModules: true})
 
         if App.config.get("isHeadless")
           $Cypress.isHeadless = true
@@ -62,14 +62,29 @@
         @listenTo @Cypress, "mocha:fail", (test, err) =>
           @socket.emit "mocha", "fail", test, err
 
+        @listenTo @Cypress, "get:cookies", (options, cb) =>
+          @socket.emit "automation:request", "get:cookies", options, cb
+
+        @listenTo @Cypress, "get:cookie", (options, cb) =>
+          @socket.emit "automation:request", "get:cookie", options, cb
+
+        @listenTo @Cypress, "set:cookie", (options, cb) =>
+          @socket.emit "automation:request", "set:cookie", options, cb
+
+        @listenTo @Cypress, "clear:cookie", (options, cb) =>
+          @socket.emit "automation:request", "clear:cookie", options, cb
+
+        @listenTo @Cypress, "clear:cookies", (options, cb) =>
+          @socket.emit "automation:request", "clear:cookies", options, cb
+
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb
 
         @listenTo @Cypress, "fixture", (fixture, cb) =>
           @socket.emit "fixture", fixture, cb
 
-        @listenTo @Cypress, "request", (request, cb) =>
-          @socket.emit "request", request, cb
+        @listenTo @Cypress, "request", (options, cb) =>
+          @socket.emit "request", options, cb
 
         @listenTo @Cypress, "history:entries", (cb) =>
           @socket.emit "history:entries", cb

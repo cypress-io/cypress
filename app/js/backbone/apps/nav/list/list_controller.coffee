@@ -7,7 +7,16 @@
     initialize: (options) ->
       { navs } = options
 
-      config   = App.request "app:config:entity"
+      config = App.request "app:config:entity"
+      socket = App.request "socket:entity"
+
+      ## if we receive an automation:disconnected event
+      ## it means that we were once connected but now are
+      ## lost and we need to shut down the entire app
+      ## and just let the user reload the browser.
+      @listenTo socket, "automation:disconnected", ->
+        @layout.destroy()
+        App.execute("show:automation")
 
       @listenTo config, "change:gitter", (model, value, options) ->
         chat.toggleChat(value)

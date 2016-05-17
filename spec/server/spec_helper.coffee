@@ -10,6 +10,7 @@ path             = require("path")
 sinon            = require("sinon")
 sinonPromise     = require("sinon-as-promised")(Promise)
 cache            = require("../../lib/cache")
+appData          = require("../../lib/util/app_data")
 
 global.fs = fs = Promise.promisifyAll(global.fs)
 
@@ -28,6 +29,9 @@ mockery.registerSubstitute("electron", path.join(__dirname, "./helpers/electron_
 
 ## stub out electron's original-fs module which is available when running in electron
 mockery.registerMock("original-fs", {})
+
+before ->
+  appData.ensure()
 
 beforeEach ->
   if global.fs isnt fs

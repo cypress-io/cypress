@@ -53,7 +53,7 @@ module.exports = {
     dependencies = snockets.getCompiledChain filePath, {async: false}
 
     ## pluck out the js raw content and join with a semicolon + new line
-    contents     = _.pluck(dependencies, "js").join(";\n")
+    contents     = _.map(dependencies, "js").join(";\n")
 
     stream = new Stream.Readable()
     stream.push(contents)

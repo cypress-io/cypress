@@ -17,7 +17,7 @@ send          = require("send")
 headRe           = /(<head.*?>)/
 htmlRe           = /(<html.*?>)/
 okStatusRe       = /^[2|3|4]\d+$/
-badCookieParamRe = /^(httponly|secure|domain=.+)$/i
+badCookieParamRe = /^(secure|domain=.+)$/i
 
 module.exports = {
   handle: (req, res, config, app, next) ->
@@ -302,7 +302,7 @@ module.exports = {
   stripCookieParams: (cookies) ->
     stripHttpOnlyAndSecure = (cookie) =>
       ## trim out whitespace
-      parts = _.invoke cookie.split(";"), "trim"
+      parts = _.invokeMap cookie.split(";"), "trim"
 
       ## if Domain is included then we actually need to duplicate
       ## the cookie for both the domain and without the domain so

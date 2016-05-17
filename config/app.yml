@@ -1,7 +1,4 @@
 default:
-  cy_path: ".cy"
-  cache_path: ".cy/#{process.env.CYPRESS_ENV}/cache"
-  log_path: ".cy/#{process.env.CYPRESS_ENV}"
   cdn_url: "https://cdn.cypress.io"
   desktop_url: "https://download.cypress.io/desktop"
   desktop_manifest_url: https://download.cypress.io/desktop.json

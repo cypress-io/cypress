@@ -66,8 +66,6 @@ module.exports = {
           when 404
             errors.throw("CI_PROJECT_NOT_FOUND")
           else
-            ## TODO: shouldn't we report this to raygun?
-            ## logger.createException(err)
             errors.throw("CI_CANNOT_COMMUNICATE")
 
   reportStats: (projectId, ciId, projectName, key, stats) ->

@@ -67,6 +67,19 @@ handleEvent = (options, event, id, type, arg) ->
     when "external:open"
       shell.openExternal(arg)
 
+    when "on:launch:browser"
+      project.onRelaunch(send)
+
+    when "launch:browser"
+      # headless.createRenderer(arg, true)
+      project.launch(arg.browser, arg.url, {
+        onBrowserOpen: ->
+          send({browserOpened: true})
+        onBrowserClose: ->
+          send({browserClosed: true})
+      })
+      .catch(sendErr)
+
     when "window:open"
       Renderer.create(arg)
       .then(send)
@@ -142,10 +155,7 @@ handleEvent = (options, event, id, type, arg) ->
       .catch(sendErr)
 
     when "open:project"
-      project.open(arg, options, {
-        sync: true
-        changeEvents: true
-      })
+      project.open(arg, options)
       .call("getConfig")
       .then(send)
       .then ->
@@ -154,9 +164,7 @@ handleEvent = (options, event, id, type, arg) ->
         sendErr(err)
 
     when "close:project"
-      project.close({
-        sync: true
-      })
+      project.close()
       .then(send)
       .then ->
         callback("onCloseProject")

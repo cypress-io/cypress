@@ -25,6 +25,7 @@
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/navs";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/navbar";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/labels";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/alerts";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/progress-bars";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/tooltip";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/wells";
@@ -56,6 +57,7 @@
 @import "elements/title-bars";
 
 // Independent Pages
+@import "pages/automation";
 @import "pages/analytics";
 @import "pages/builds";
 @import "pages/tests";

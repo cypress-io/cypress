@@ -1,7 +1,7 @@
 require("../spec_helper")
 
 ws        = require("ws")
-wsClient  = require("socket.io-client")
+socketIo  = require("@cypress/core-socket")
 config    = require("#{root}lib/config")
 Server    = require("#{root}lib/server")
 Fixtures  = require("#{root}/spec/server/helpers/fixtures")
@@ -58,7 +58,7 @@ describe "Web Sockets", ->
     beforeEach (done) ->
       @server.startWebsockets({}, @cfg, {})
 
-      @wsClient = wsClient(@cfg.clientUrlDisplay, {path: @cfg.socketIoRoute})
+      @wsClient = socketIo.client(@cfg.clientUrlDisplay, {path: @cfg.socketIoRoute})
       @wsClient.on "connect", -> done()
 
     afterEach ->

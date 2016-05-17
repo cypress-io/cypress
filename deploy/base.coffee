@@ -18,6 +18,8 @@ log          = require("./log")
 meta         = require("./meta")
 pkg          = require("../package.json")
 konfig       = require("../lib/konfig")
+cache        = require("../lib/cache")
+appData      = require("../lib/util/app_data")
 Fixtures     = require("../spec/server/helpers/fixtures")
 
 pkgr     = Promise.promisify(pkgr)
@@ -82,6 +84,7 @@ class Base
           copy("./lib/modes",               "/src/lib/modes")
           copy("./lib/util",                "/src/lib/util")
           copy("./lib/api.coffee",          "/src/lib/api.coffee")
+          copy("./lib/automation.coffee",   "/src/lib/automation.coffee")
           copy("./lib/cache.coffee",        "/src/lib/cache.coffee")
           copy("./lib/config.coffee",       "/src/lib/config.coffee")
           copy("./lib/cwd.coffee",          "/src/lib/cwd.coffee")
@@ -93,6 +96,7 @@ class Base
           copy("./lib/ids.coffee",          "/src/lib/ids.coffee")
           copy("./lib/konfig.coffee",       "/src/lib/konfig.coffee")
           copy("./lib/logger.coffee",       "/src/lib/logger.coffee")
+          copy("./lib/launcher.coffee",     "/src/lib/launcher.coffee")
           copy("./lib/project.coffee",      "/src/lib/project.coffee")
           copy("./lib/reporter.coffee",     "/src/lib/reporter.coffee")
           copy("./lib/request.coffee",      "/src/lib/request.coffee")
@@ -208,7 +212,7 @@ class Base
       pkgr({
         dir: @distDir()
         out: meta.buildDir
-        name: "Cypress"
+        name: pkg.productName or pkg.name
         platform: @osName
         arch: "x64"
         asar: false
@@ -261,41 +265,61 @@ class Base
       runSequence "app:build", "app:minify", (err) ->
         if err then reject(err) else resolve()
 
-  createCyCache: (todosProject) ->
-    cache = path.join(@buildPathToAppResources(), ".cy", "production", "cache")
+  createCyCache: (cookiesProject) ->
+    cache.path = cache.path.replace("development", "production")
 
-    fs.outputJsonAsync(cache, {
+    # cache = path.join(@buildPathToAppResources(), ".cy", "production", "cache")
+
+    cache.write({
       USER: {session_token: "abc123"}
-      PROJECTS: [todosProject]
+      PROJECTS: [cookiesProject]
     })
 
   removeCyCache: ->
     ## empty the .cy/production folder
-    cache = path.join(@buildPathToAppResources(), ".cy", "production")
+    # cache = path.join(@buildPathToAppResources(), ".cy", "production")
 
-    fs.emptyDirAsync(cache)
+    cache.path = cache.path.replace("development", "production")
+
+    cache.remove()
 
   _runProjectTest: ->
     @log("#runProjectTest")
 
     Fixtures.scaffold()
 
-    todos = Fixtures.projectPath("todos")
+    cookies = Fixtures.projectPath("cookies")
 
     runProjectTest = =>
       new Promise (resolve, reject) =>
-        env = _.omit(process.env, "CYPRESS_ENV")
+        express = require("express")
+        parser  = require("cookie-parser")
 
-        sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{todos}"], {stdio: "inherit", env: env}
-        sp.on "exit", (code) ->
-          Fixtures.remove()
+        app = express()
 
-          if code is 0
-            resolve()
-          else
-            reject(new Error("running project tests failed with: '#{code}' errors."))
+        app.use(parser())
 
-    @createCyCache(todos)
+        app.get "/foo", (req, res) ->
+          console.log "cookies", req.cookies
+          res.send(req.cookies)
+
+        server = app.listen 2121, =>
+          console.log "listening on 2121"
+
+          env = _.omit(process.env, "CYPRESS_ENV")
+
+          sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{cookies}"], {stdio: "inherit", env: env}
+          sp.on "exit", (code) ->
+            server.close()
+
+            Fixtures.remove()
+
+            if code is 0
+              resolve()
+            else
+              reject(new Error("running project tests failed with: '#{code}' errors."))
+
+    @createCyCache(cookies)
     .then(runProjectTest)
     .then =>
       @removeCyCache()
@@ -334,6 +358,9 @@ class Base
 
     smokeTest().then(verifyAppPackage)
 
+  cleanupCy: ->
+    appData.removeSymlink()
+
   build: ->
     Promise
     .bind(@)
@@ -351,6 +378,7 @@ class Base
     .then(@afterBuild)
     .then(@runSmokeTest)
     .then(@runProjectTest)
+    .then(@cleanupCy)
     .then(@codeSign) ## codesign after running smoke tests due to changing .cy
     .then(@verifyAppCanOpen)
     .return(@)

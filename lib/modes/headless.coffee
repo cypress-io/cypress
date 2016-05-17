@@ -6,6 +6,7 @@ errors     = require("../errors")
 Project    = require("../project")
 project    = require("../electron/handlers/project")
 Renderer   = require("../electron/handlers/renderer")
+automation = require("../electron/handlers/automation")
 
 module.exports = {
   getId: ->
@@ -72,6 +73,9 @@ module.exports = {
       socketId:     id
       report:       true
       isHeadless:   true
+      ## TODO: get session into automation.perform
+      onAutomationRequest: automation.perform
+
     })
     .catch {portInUse: true}, (err) ->
       errors.throw("PORT_IN_USE_LONG", err.port)
@@ -83,6 +87,7 @@ module.exports = {
       height: 0
       show:   showGui
       frame:  showGui
+      devTools: showGui
       type:   "PROJECT"
     })
     .then (win) ->
@@ -171,9 +176,6 @@ module.exports = {
 
   run: (options) ->
     app = require("electron").app
-
-    ## prevent chromium from throttling
-    app.commandLine.appendSwitch("disable-renderer-backgrounding")
 
     waitForReady = ->
       new Promise (resolve, reject) ->

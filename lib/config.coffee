@@ -25,6 +25,7 @@ defaults = {
   clientRoute:    "/__/"
   xhrRoute:       "/xhrs/"
   socketIoRoute:  "/__socket.io"
+  socketIoCookie: "__socket.io"
   commandTimeout:  4000
   pageLoadTimeout: 30000
   requestTimeout:  5000

@@ -1,23 +1,27 @@
-path           = require("path")
-_              = require("lodash")
-fs             = require("fs-extra")
-Promise        = require("bluebird")
-winston        = require("winston")
-konfig         = require("./konfig")
+path     = require("path")
+_        = require("lodash")
+fs       = require("fs-extra")
+Promise  = require("bluebird")
+winston  = require("winston")
+appData  = require("./util/app_data")
 
-## make sure the log folder is available
-fs.ensureDirSync(konfig("log_path"))
+folder = appData.path()
 
 getName = (name) ->
   name + ".log"
 
 getPathToLog = (name) ->
-  path.join konfig("log_path"), getName(name)
+  path.join(folder, getName(name))
 
 createFile = (name, level, opts = {}) ->
+  file = getPathToLog(name)
+
+  ## ensure that the containing dir exists
+  fs.ensureDirSync(path.dirname(file))
+
   obj = {
     name: name
-    filename: getPathToLog(name)
+    filename: file
     colorize: true
     tailable: true
     maxsize: 1000000 ## 1mb

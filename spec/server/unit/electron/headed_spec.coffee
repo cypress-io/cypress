@@ -59,7 +59,7 @@ describe "electron/headed", ->
     beforeEach ->
       @win = {}
 
-      @sandbox.stub(Tray, "display")
+      @sandbox.stub(Tray.prototype, "display")
       @sandbox.stub(Events, "start")
       @sandbox.stub(Updater, "install")
       @sandbox.stub(headed, "notify").resolves()
@@ -89,9 +89,9 @@ describe "electron/headed", ->
       headed.ready({}).then ->
         expect(Updater.install).not.to.be.called
 
-    it "calls Tray.display", ->
+    it "calls tray.display", ->
       headed.ready({}).then ->
-        expect(Tray.display).to.be.calledOnce
+        expect(Tray.prototype.display).to.be.calledOnce
 
     it "headed.notify", ->
       headed.ready({}).then ->
@@ -118,29 +118,29 @@ describe "electron/headed", ->
           opts.onQuit()
           expect(logger.off).to.be.calledOnce
 
-      it "sets tray image to blue", ->
-        @sandbox.stub(Tray, "setImage")
+      it "sets tray state to running", ->
+        @sandbox.stub(Tray.prototype, "setState")
 
         opts = {}
         headed.ready(opts).then ->
           opts.onOpenProject()
-          expect(Tray.setImage).to.be.calledWith("blue")
+          expect(Tray.prototype.setState).to.be.calledWith("running")
 
-      it "sets tray image to black", ->
-        @sandbox.stub(Tray, "setImage")
+      it "sets tray state to default", ->
+        @sandbox.stub(Tray.prototype, "setState")
 
         opts = {}
         headed.ready(opts).then ->
           opts.onCloseProject()
-          expect(Tray.setImage).to.be.calledWith("black")
+          expect(Tray.prototype.setState).to.be.calledWith("default")
 
-      it "sets tray image to red", ->
-        @sandbox.stub(Tray, "setImage")
+      it "sets tray state to error", ->
+        @sandbox.stub(Tray.prototype, "setState")
 
         opts = {}
         headed.ready(opts).then ->
           opts.onError()
-          expect(Tray.setImage).to.be.calledWith("red")
+          expect(Tray.prototype.setState).to.be.calledWith("error")
 
   context ".run", ->
     beforeEach ->
@@ -160,4 +160,3 @@ describe "electron/headed", ->
 
       headed.run().then ->
         expect(headed.onWindowAllClosed).to.be.calledWith(electron.app)
-

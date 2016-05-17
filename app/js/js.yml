@@ -34,9 +34,9 @@ vendor:
   - bower_components/bluebird/js/browser/bluebird.js
 
 cypress:
-  - app/js/api/cypress.coffee
-  - app/js/api/cypress/*
-  - app/js/api/cypress/cy/**/*
+  - app/js/driver/cypress.coffee
+  - app/js/driver/cypress/*
+  - app/js/driver/cypress/cy/**/*
 
 app:
   - app/js/config/**
@@ -53,7 +53,7 @@ app:
   - app/js/backbone/apps/**
 
 iframe:
-  - app/js/api/iframe.coffee
+  - app/js/driver/iframe.coffee
 
 sinon:
   - bower_components/sinon/index.js
