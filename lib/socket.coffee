@@ -9,6 +9,7 @@ socketIo      = require("@cypress/core-socket")
 open          = require("./util/open")
 pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
+exec          = require("./exec")
 fixture       = require("./fixture")
 Request       = require("./request")
 errors        = require("./errors")
@@ -71,6 +72,12 @@ class Socket
 
   onFixture: (config, file, cb) ->
     fixture.get(config.fixturesFolder, file)
+    .then(cb)
+    .catch (err) ->
+      cb({__error: err.message})
+
+  onExec: (projectRoot, options, cb) ->
+    exec.run(projectRoot, options)
     .then(cb)
     .catch (err) ->
       cb({__error: err.message})
@@ -198,6 +205,9 @@ class Socket
 
       socket.on "fixture", (fixturePath, cb) =>
         @onFixture(config, fixturePath, cb)
+
+      socket.on "exec", (options, cb) =>
+        @onExec(config.projectRoot, options, cb)
 
       _.each "load:spec:iframe url:changed page:loading command:add command:attrs:changed runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) =>
         socket.on event, (args...) =>

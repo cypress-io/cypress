@@ -37,6 +37,12 @@ describe "Runner Entity", ->
       @Cypress.trigger "request", req = {url: "http://www.github.com/users"}, fn
       expect(emit).to.be.calledWith "request", req, fn
 
+    it "listens to Cypress.exec", ->
+      emit = @sandbox.stub @runner.socket, "emit"
+      fn = @sandbox.stub()
+      @Cypress.trigger "exec", req = {cmd: "ls"}, fn
+      expect(emit).to.be.calledWith "exec", req, fn
+
   context "#stop", ->
     beforeEach ->
       @stop = @sandbox.stub(@Cypress, "stop").resolves()

@@ -89,6 +89,9 @@
         @listenTo @Cypress, "history:entries", (cb) =>
           @socket.emit "history:entries", cb
 
+        @listenTo @Cypress, "exec", (options, cb) =>
+          @socket.emit "exec", options, cb
+
         @listenTo @Cypress, "initialized", (obj) =>
           @receivedRunner(obj.runner)
 

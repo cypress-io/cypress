@@ -147,6 +147,9 @@ describe "lib/config", ->
     it "responseTimeout=20000", ->
       @defaults "responseTimeout", 20000
 
+    it "execTimeout=60000", ->
+      @defaults "execTimeout", 60000
+
     it "waitForAnimations=true", ->
       @defaults "waitForAnimations", true
 

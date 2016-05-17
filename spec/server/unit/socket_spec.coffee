@@ -14,6 +14,7 @@ Server       = require("#{root}lib/server")
 Watchers     = require("#{root}lib/watchers")
 automation   = require("#{root}lib/automation")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
+exec         = require("#{root}lib/exec")
 
 describe "lib/socket", ->
   beforeEach ->
@@ -432,6 +433,22 @@ describe "lib/socket", ->
         @socket.onRequest(cb1, req, cb2).then ->
           obj = cb2.getCall(0).args[0]
           expect(obj).to.have.property("__error", "Error: connect ECONNREFUSED 127.0.0.1:1111")
+
+    context "on(exec)", ->
+      it "calls exit#run with project root and options", (done) ->
+        run = @sandbox.stub(exec, "run").returns(Promise.resolve("Desktop Music Pictures"))
+
+        @client.emit "exec", { cmd: "ls" }, (resp) =>
+          expect(run).to.be.calledWith(@cfg.projectRoot, { cmd: "ls" })
+          expect(resp).to.eq("Desktop Music Pictures")
+          done()
+
+      it "errors when execution fails", (done) ->
+        @sandbox.stub(exec, "run").rejects(new Error("command not found: lsd"))
+
+        @client.emit "exec", { cmd: "lsd" }, (resp) =>
+          expect(resp.__error).to.equal("command not found: lsd")
+          done()
 
   context "unit", ->
     beforeEach ->

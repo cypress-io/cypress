@@ -162,6 +162,7 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
         pageLoadTimeout: 2001
         requestTimeout: 2002
         responseTimeout: 2003
+        execTimeout: 2004
         waitForAnimations: true
         animationDistanceThreshold: 5
       })

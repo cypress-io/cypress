@@ -30,6 +30,7 @@ defaults = {
   pageLoadTimeout: 30000
   requestTimeout:  5000
   responseTimeout: 20000
+  execTimeout:     60000
   port:            2020
   waitForAnimations: true
   animationDistanceThreshold: 5

@@ -109,6 +109,11 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     env:
       variables_missing: "Cypress.environmentVariables is not defined. Open an issue if you see this message."
 
+    exec:
+      failed: "#{cmd('exec', '\'{{cmd}}\'')} failed with the following error: {{error}}"
+      invalid_argument: "#{cmd('exec')} must be passed a non-empty string as its 1st argument. You passed: '{{cmd}}'."
+      timed_out: "#{cmd('exec', '\'{{cmd}}\'')} timed out after waiting {{timeout}}ms."
+
     fill:
       invalid_1st_arg: "#{cmd('fill')} must be passed an object literal as its 1st argument"
 
