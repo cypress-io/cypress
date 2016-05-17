@@ -5,37 +5,33 @@ describe "$Cypress.Cy Fixtures Commands", ->
   ## the real browser environment
   context "#fixture", ->
     beforeEach ->
-      @responseIs = (resp, timeout = 10) =>
-        @Cypress.trigger.restore?()
+      @respondWith = (resp, timeout = 10) =>
+        @Cypress.once "fixture", (data, cb) ->
+          _.delay ->
+            cb(resp)
+          , timeout
 
-        @sandbox.spy(@Cypress, "trigger")
-
-        trigger = @Cypress.trigger
-        @Cypress.trigger = (args...) ->
-          if args[0] is "fixture"
-            trigger.apply(@, arguments)
-            _.delay ->
-              args[2](resp)
-            , timeout
-          else
-            trigger.apply(@, arguments)
-
-      @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWithAsync(2, {foo: "bar"})
+    afterEach ->
+      @Cypress.off("fixture")
 
     it "triggers 'fixture' on Cypress", ->
+      @respondWith({foo: "bar"})
+
       @cy.fixture("foo").then (obj) ->
         expect(obj).to.deep.eq {foo: "bar"}
 
     it "can support an array of fixtures"
 
     it "can be aliases", ->
+      @respondWith({foo: "bar"})
+
       @cy.fixture("foo").as("foo").then ->
         expect(@foo).to.deep.eq {foo: "bar"}
 
     describe "cancellation", ->
       it "cancels promise", (done) ->
         ## respond after 50 ms
-        @responseIs({}, 50)
+        @respondWith({}, 50)
 
         @Cypress.on "fixture", =>
           @cmd = @cy.commands.first()
@@ -53,48 +49,98 @@ describe "$Cypress.Cy Fixtures Commands", ->
     describe "errors", ->
       beforeEach ->
         @allowErrors()
-        @responseIs({__error: "some error"})
 
       it "throws if response contains __error key", (done) ->
-        @cy.on "fail", (err) ->
-          expect(err.message).to.eq "some error"
-          done()
+        @respondWith({__error: "some error"})
 
-        @cy.fixture("err")
-
-      it "logs command error", (done) ->
         logs = []
 
         @Cypress.on "log", (@log) =>
-          logs.push log
+          logs.push(log)
 
         @cy.on "fail", (err) =>
-          expect(logs.length).to.eq 1
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
           expect(@log.get("name")).to.eq "fixture"
           expect(@log.get("message")).to.eq "err"
           done()
 
         @cy.fixture("err")
 
+      it "throws after timing out", (done) ->
+        @respondWith({foo: "bar"}, 1000)
+
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("name")).to.eq "fixture"
+          expect(@log.get("message")).to.eq "foo, {timeout: 50}"
+          expect(err.message).to.eq("cy.fixture() timed out waiting '50ms' to receive a fixture. No fixture was ever sent by the server.")
+          done()
+
+        @cy.fixture("foo", {timeout: 50})
+
+    describe "timeout", ->
+      it "sets timeout to Cypress.config(responseTimeout)", ->
+        @Cypress.config("responseTimeout", 2500)
+
+        @respondWith({foo: "bar"})
+
+        timeout = @sandbox.spy(Promise.prototype, "timeout")
+
+        @cy.fixture("foo").then ->
+          expect(timeout).to.be.calledWith(2500)
+
+      it "can override timeout", ->
+        @respondWith({foo: "bar"})
+
+        timeout = @sandbox.spy(Promise.prototype, "timeout")
+
+        @cy.fixture("foo", {timeout: 1000}).then ->
+          expect(timeout).to.be.calledWith(1000)
+
+      it "clears the current timeout and restores after success", ->
+        @respondWith({foo: "bar"})
+
+        @cy._timeout(100)
+
+        calledTimeout = false
+        _clearTimeout = @sandbox.spy(@cy, "_clearTimeout")
+
+        @Cypress.on "fixture", =>
+          calledTimeout = true
+          expect(_clearTimeout).to.be.calledOnce
+
+        @cy.fixture("foo").then ->
+          expect(calledTimeout).to.be.true
+          ## restores the timeout afterwards
+          expect(@cy._timeout()).to.eq(100)
+
     describe "caching", ->
-      beforeEach ->
-        @Cypress.trigger.restore()
-        @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture", "foo").callsArgWithAsync(2, {foo: "bar"})
-        @trigger2 = @trigger.withArgs("fixture", "bar").callsArgWithAsync(2, {bar: "baz"})
-
       it "caches fixtures by name", ->
-        cy.fixture("foo").then ->
-          expect(@trigger).to.be.calledOnce
+        @respondWith({foo: "bar"})
+        cy.fixture("foo").then (obj) =>
+          expect(obj).to.deep.eq({foo: "bar"})
 
-          cy.fixture("bar").then (obj) ->
+          @respondWith({bar: "baz"})
+          cy.fixture("bar").then (obj) =>
             expect(obj).to.deep.eq {bar: "baz"}
-            expect(@trigger2).to.be.calledOnce
 
-            cy.fixture("foo").then (obj) ->
+            ## respond with an error now
+            @respondWith({__error: "asdf"})
+            cy.fixture("foo").then (obj) =>
               expect(obj).to.deep.eq {foo: "bar"}
-              expect(@trigger).to.be.calledOnce
 
       it "clones fixtures to prevent accidental mutation", ->
+        @respondWith({foo: "bar"})
+
         cy.fixture("foo").then (obj) ->
           ## mutate the object
           obj.baz = "quux"

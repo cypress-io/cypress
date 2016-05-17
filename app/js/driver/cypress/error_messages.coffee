@@ -112,6 +112,9 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     fill:
       invalid_1st_arg: "#{cmd('fill')} must be passed an object literal as its 1st argument"
 
+    fixture:
+      timed_out: "#{cmd('fixture')} timed out waiting '{{timeout}}ms' to receive a fixture. No fixture was ever sent by the server."
+
     focus:
       invalid_element: "#{cmd('focus')} can only be called on a valid focusable element. Your subject is a: {{node}}"
       multiple_elements: "#{cmd('focus')} can only be called on a single element. Your subject contained {{num}} elements."

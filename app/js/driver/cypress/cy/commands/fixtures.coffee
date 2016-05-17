@@ -17,7 +17,7 @@ $Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
     cache = {}
 
   Cypress.addParentCommand
-    fixture: (fx) ->
+    fixture: (fx, options = {}) ->
       ## if we already have cached
       ## this fixture then just return it
 
@@ -29,7 +29,17 @@ $Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
         ## accidentally mutating the one in the cache
         return Promise.resolve clone(resp)
 
-      fixture(fx).then (response) =>
+      _.defaults options, {
+        timeout: Cypress.config("responseTimeout")
+      }
+
+      ## need to remove the current timeout
+      ## because we're handling timeouts ourselves
+      @_clearTimeout()
+
+      fixture(fx)
+      .timeout(options.timeout)
+      .then (response) =>
         if err = response.__error
           $Cypress.Utils.throwErr(err)
         else
@@ -39,6 +49,10 @@ $Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
 
           ## return the cloned response
           return clone(response)
+      .catch Promise.TimeoutError, (err) ->
+        $Cypress.Utils.throwErrByPath "fixture.timed_out", {
+          args: { timeout: options.timeout }
+        }
 
   Cypress.Cy.extend
     matchesFixture: (fixture) ->
