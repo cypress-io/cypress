@@ -224,3 +224,20 @@ describe "lib/cache", ->
         cache.removeUser().then =>
           cache.getUser().then (user) ->
             expect(user).to.deep.eq({})
+
+  context "queues public methods", ->
+    it "is able to write both values", ->
+      Promise.all([
+        cache.setUser({name: "brian", session_token: "session-123"}),
+        cache.insertProject("foo")
+      ])
+      .then ->
+        cache.read()
+      .then (json) ->
+        expect(json).to.deep.eq({
+          USER: {
+            name: "brian"
+            session_token: "session-123"
+          }
+          PROJECTS: ["foo"]
+        })

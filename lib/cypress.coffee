@@ -37,7 +37,7 @@ module.exports = {
     !!(process.versions and process.versions.electron)
 
   isLinuxAndHasNotDisabledGpu: (options) ->
-    os.platform() is "linux" and "--disable-gpu" not in process.argv
+    process.env["CYPRESS_ENV"] isnt "test" and os.platform() is "linux" and "--disable-gpu" not in process.argv
 
   runElectron: (mode, options) ->
     ## wrap all of this in a promise to force the

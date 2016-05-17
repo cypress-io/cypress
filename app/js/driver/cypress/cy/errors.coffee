@@ -49,10 +49,8 @@ do ($Cypress, _) ->
       , []
 
       err = $Cypress.Utils.cypressErr($Cypress.Utils.errMessageByPath("miscellaneous.dangling_commands", {
-        args: {
-          numCommands: commands.length
-          commands: commands.join('\n')
-        }
+        numCommands: commands.length
+        commands:    commands.join('\n')
       }))
       err.onFail = ->
       @fail(err)

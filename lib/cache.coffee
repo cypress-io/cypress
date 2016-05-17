@@ -2,7 +2,6 @@ _          = require("lodash")
 fs         = require("fs-extra")
 path       = require("path")
 Promise    = require("bluebird")
-PSemaphore = require("promise-semaphore")
 request    = require("request-promise")
 errors     = require("request-promise/errors")
 appData    = require("./util/app_data")
@@ -11,7 +10,22 @@ logger     = require("./logger")
 
 CACHE = appData.path("cache")
 fs    = Promise.promisifyAll(fs)
-queue = new PSemaphore
+
+current = null
+
+queue = (fn) ->
+  if current
+    Promise.delay(20)
+    .then ->
+      queue(fn)
+
+  else
+    current = true
+
+    Promise
+    .try(fn)
+    .finally ->
+      current = null
 
 module.exports = {
   path: CACHE
@@ -20,26 +34,25 @@ module.exports = {
   ## if so returns true;
   ## otherwise it inits an empty JSON config file
   ensureExists: ->
-    queue.add =>
-      fs.readJsonAsync(@path)
-      .then (json) =>
-        if not json.USER
-          json.USER = {}
+    fs.readJsonAsync(@path)
+    .then (json) =>
+      if not json.USER
+        json.USER = {}
 
-        if not json.PROJECTS
-          json.PROJECTS = []
+      if not json.PROJECTS
+        json.PROJECTS = []
 
-        @write(json, false)
-      .then (json) =>
-        ## if our project structure is not
-        ## an array then its legacy and we
-        ## need to convert it
-        if not _.isArray(json.PROJECTS)
-          json = @convertLegacyCache(json)
-          @write(json, false)
-      .return(true)
-      .catch =>
-        @write(@defaults(), false)
+      @write(json)
+    .then (json) =>
+      ## if our project structure is not
+      ## an array then its legacy and we
+      ## need to convert it
+      if not _.isArray(json.PROJECTS)
+        json = @convertLegacyCache(json)
+        @write(json)
+    .return(true)
+    .catch =>
+      @write(@defaults())
 
   exists: ->
     @ensureExists().return(true).catch(false)
@@ -59,24 +72,17 @@ module.exports = {
   read: ->
     @ensureExists()
     .then =>
-      queue.add =>
-        fs.readJsonAsync(@path)
+      fs.readJsonAsync(@path)
 
   ## Writes over the contents of the local file
   ## takes in an object and serializes it into JSON
   ## finally returning the JSON object that was written
-  write: (obj = {}, enableQueue = true) ->
+  write: (obj = {}) ->
     logger.info("writing to .cy cache", cache: obj)
 
-    write = =>
-      fs
-      .outputJsonAsync(@path, obj, {spaces: 2})
-      .return(obj)
-
-    if enableQueue
-      queue.add(write)
-    else
-      write()
+    fs
+    .outputJsonAsync(@path, obj, {spaces: 2})
+    .return(obj)
 
   _mergeOrWrite: (contents, key, val) ->
     switch
@@ -100,14 +106,6 @@ module.exports = {
     @read().then (contents) ->
       contents[key]
 
-  insertProject: (path) ->
-    @_getProjects().then (projects) =>
-      ## bail if we already have this path
-      return projects if path in projects
-
-      projects.push(path)
-      @_set("PROJECTS", projects)
-
   _getProjects: ->
     @_get("PROJECTS")
 
@@ -120,11 +118,10 @@ module.exports = {
   getProjectPaths: ->
     @_getProjects().then (projects) =>
       pathsToRemove = Promise.reduce projects, (memo, path) ->
-        queue.add ->
-          fs.statAsync(path)
-          .catch ->
-            memo.push(path)
-          .return(memo)
+        fs.statAsync(path)
+        .catch ->
+          memo.push(path)
+        .return(memo)
       , []
 
       pathsToRemove.then (removedPaths) =>
@@ -133,21 +130,34 @@ module.exports = {
         @_getProjects()
 
   removeProject: (path) ->
-    @_getProjects().then (projects) =>
-      @_removeProjects(projects, path)
+    queue =>
+      @_getProjects().then (projects) =>
+        @_removeProjects(projects, path)
+
+  insertProject: (path) ->
+    queue =>
+      @_getProjects().then (projects) =>
+        ## bail if we already have this path
+        return projects if path in projects
+
+        projects.push(path)
+        @_set("PROJECTS", projects)
 
   getUser: ->
     logger.info "getting user"
 
-    @_get("USER")
+    queue =>
+      @_get("USER")
 
   setUser: (user) ->
     logger.info "setting user", user: user
 
-    @_set {USER: user}
+    queue =>
+      @_set {USER: user}
 
   removeUser: ->
-    @_set({USER: {}})
+    queue =>
+      @_set({USER: {}})
 
   remove: ->
     fs.removeAsync(@path)

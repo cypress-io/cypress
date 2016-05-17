@@ -2,6 +2,7 @@ require("../../spec_helper")
 
 _        = require("lodash")
 icons    = require("@cypress/core-icons")
+extension = require("@cypress/core-extension")
 electron = require("electron")
 cache    = require("#{root}../lib/cache")
 logger   = require("#{root}../lib/logger")
@@ -350,6 +351,7 @@ describe "lib/electron/handlers/events", ->
 
     describe "open:project", ->
       beforeEach ->
+        @sandbox.stub(extension, "setHostAndPath").resolves()
         @sandbox.stub(launcher, "getBrowsers").resolves([])
         @sandbox.stub(Project.prototype, "close").resolves()
 
@@ -360,7 +362,7 @@ describe "lib/electron/handlers/events", ->
 
       it "open project + returns config", ->
         projectInstance = {
-          getConfig: -> {some: "config"}
+          getConfig: @sandbox.stub().resolves({some: "config"})
           setBrowsers: @sandbox.stub().resolves([])
         }
 

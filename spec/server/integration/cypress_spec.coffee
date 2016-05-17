@@ -6,6 +6,7 @@ http     = require("http")
 Promise  = require("bluebird")
 electron = require("electron")
 inquirer = require("inquirer")
+extension = require("@cypress/core-extension")
 Fixtures = require("../helpers/fixtures")
 pkg      = require("#{root}package.json")
 settings = require("#{root}lib/util/settings")
@@ -39,6 +40,8 @@ describe "lib/cypress", ->
     ## force cypress to call directly into main without
     ## spawning a separate process
     @sandbox.stub(cypress, "isCurrentlyRunningElectron").returns(true)
+    @sandbox.stub(extension, "setHostAndPath").resolves()
+    @sandbox.stub(launcher, "getBrowsers").returns([])
     @sandbox.stub(process, "exit")
     @sandbox.spy(errors, "log")
 
@@ -616,7 +619,6 @@ describe "lib/cypress", ->
 
       @sandbox.stub(os, "platform").returns("linux")
       ## TODO: might need to change this to a different return
-      @sandbox.stub(launcher, "getBrowsers").returns([])
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(ci, "getBranch").resolves("bem/ci")
       @sandbox.stub(ci, "getAuthor").resolves("brian")

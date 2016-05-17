@@ -447,7 +447,14 @@ $Cypress.Runner = do ($Cypress, _) ->
             ## coerce into an array
             beforeHooks = [].concat Cypress.invoke("test:before:hooks", _this.wrap(_this.test ? {}))
 
-            beforeHooks = _.reject beforeHooks, (r) -> r is @cy
+            beforeHooks = _.filter beforeHooks, (r) ->
+              ## get us out only promises
+              ## due to a bug in bluebird with
+              ## not being able to call {}.hasOwnProperty
+              ## https://github.com/petkaantonov/bluebird/issues/1104
+              ## TODO: think about applying this to the other areas
+              ## that use Cypress.invoke(...)
+              Cypress.Utils.isInstanceOf(r, Promise)
 
             fn = _.wrap fn, (orig, args...) ->
               Promise.all(beforeHooks)
