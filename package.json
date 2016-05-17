@@ -93,7 +93,7 @@
   },
   "dependencies": {
     "@cypress/core-desktop-gui": "0.2.0",
-    "@cypress/core-example": "0.2.5",
+    "@cypress/core-example": "0.3.2",
     "@cypress/core-extension": "0.1.3",
     "@cypress/core-icons": "0.4.1",
     "@cypress/core-launcher": "0.1.0",
