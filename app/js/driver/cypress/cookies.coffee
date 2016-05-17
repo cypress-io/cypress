@@ -36,6 +36,7 @@ $Cypress.Cookies = do ($Cypress, _) ->
 
   API = {
     debug: (bool = true) ->
+      $Cypress.Utils.warning("Cypress.Cookies.debug() is temporarily disabled. This will be re-enabled sometime in 0.16.x")
       isDebugging = bool
 
     log: (cookie, type) ->
