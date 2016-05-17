@@ -265,14 +265,14 @@ class Base
       runSequence "app:build", "app:minify", (err) ->
         if err then reject(err) else resolve()
 
-  createCyCache: (todosProject) ->
+  createCyCache: (cookiesProject) ->
     cache.path = cache.path.replace("development", "production")
 
     # cache = path.join(@buildPathToAppResources(), ".cy", "production", "cache")
 
     cache.write({
       USER: {session_token: "abc123"}
-      PROJECTS: [todosProject]
+      PROJECTS: [cookiesProject]
     })
 
   removeCyCache: ->
@@ -288,22 +288,38 @@ class Base
 
     Fixtures.scaffold()
 
-    todos = Fixtures.projectPath("todos")
+    cookies = Fixtures.projectPath("cookies")
 
     runProjectTest = =>
       new Promise (resolve, reject) =>
-        env = _.omit(process.env, "CYPRESS_ENV")
+        express = require("express")
+        parser  = require("cookie-parser")
 
-        sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{todos}"], {stdio: "inherit", env: env}
-        sp.on "exit", (code) ->
-          Fixtures.remove()
+        app = express()
 
-          if code is 0
-            resolve()
-          else
-            reject(new Error("running project tests failed with: '#{code}' errors."))
+        app.use(parser())
 
-    @createCyCache(todos)
+        app.get "/foo", (req, res) ->
+          console.log "cookies", req.cookies
+          res.send(req.cookies)
+
+        server = app.listen 2121, =>
+          console.log "listening on 2121"
+
+          env = _.omit(process.env, "CYPRESS_ENV")
+
+          sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{cookies}"], {stdio: "inherit", env: env}
+          sp.on "exit", (code) ->
+            server.close()
+
+            Fixtures.remove()
+
+            if code is 0
+              resolve()
+            else
+              reject(new Error("running project tests failed with: '#{code}' errors."))
+
+    @createCyCache(cookies)
     .then(runProjectTest)
     .then =>
       @removeCyCache()

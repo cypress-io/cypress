@@ -67,11 +67,11 @@ module.exports = {
       options = _.omit(options, "domain")
 
       request(options)
-        .then(@normalizeResponse.bind(@))
-        .then (resp) ->
-          resp.duration = Date.now() - ms
+      .then(@normalizeResponse.bind(@))
+      .then (resp) ->
+        resp.duration = Date.now() - ms
 
-          return resp
+        return resp
 
     if c = options.cookies
       ## if we have a cookie object then just
