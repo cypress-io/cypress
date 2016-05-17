@@ -3,9 +3,7 @@ machine:
     version: 5.10.0
 
 dependencies:
-  pre:
-    - npm install
-
+  post:
     ## install the Cypress CLI Tools
     ## which gives us access to the
     ## `cypress` command used below
