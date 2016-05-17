@@ -16,20 +16,12 @@
         if App.config.get("isHeadless")
           $Cypress.isHeadless = true
 
-        @satelliteEvents = App.request("satellite:events")
-        @passThruEvents  = App.request("pass:thru:events")
-        @hostEvents      = App.request("host:events")
-
         @commands  = App.request "command:entities"
         @routes    = App.request "route:entities"
         @agents    = App.request "agent:entities"
         @socket    = App.request "socket:entity"
         @iframe    = App.request "iframe:entity", @, @Cypress
         @stats     = App.request "stats:entity", @
-
-        _.each @passThruEvents, (event) =>
-          @listenTo @socket, event, (args...) =>
-            @trigger event, args...
 
         _.each CypressEvents, (event) =>
           @listenTo @Cypress, event, (args...) =>
@@ -95,52 +87,10 @@
         @listenTo @Cypress, "paused", (nextCmd) =>
           @trigger "paused", nextCmd
 
-        ## dont do anything else if we're in headless mode
-        return if $Cypress.isHeadless
-
-        if App.config.ui("host")
-          _.each @satelliteEvents, (event) =>
-            @listenTo @socket, event, (args...) =>
-              switch event
-                when "command:add"
-                  attrs = args[0]
-                  log = new @Cypress.Log(@Cypress, attrs)
-                  c = @commands.add log
-                  c.set("id", attrs.id)
-                when "command:attrs:changed"
-                  attrs = args[0]
-                  @commands.get(attrs.id).set(attrs)
-                else
-                  @trigger event, args...
-
-          _.each ["url:changed", "page:loading"], (event) =>
-            @listenTo @socket, event, (args...) =>
-              @Cypress.trigger event, args...
-
-        if App.config.ui("satellite")
-          _.each @hostEvents, (event) =>
-            @listenTo @socket, event, (args...) =>
-              @trigger event, args...
-
-          @listenTo @commands, "command:attrs:changed", (attrs) ->
-            attrs = @transformEmitAttrs(attrs)
-            @socket.emit "command:attrs:changed", attrs
-
-          _.each ["url:changed", "page:loading"], (event) =>
-            @listenTo @Cypress, event, (args...) =>
-              @socket.emit event, args...
-
         @listenTo @Cypress, "log", (log) =>
           switch log.get("instrument")
             when "command"
               id = _.uniqueId("command")
-
-              ## if we're in satellite mode then we need to
-              ## broadcast this through websockets
-              if App.config.ui("satellite")
-                attrs = @transformEmitAttrs(log.attributes)
-                attrs.id = id
-                @socket.emit "command:add", attrs
 
               c = @commands.add log
               c.set "id", id
@@ -192,18 +142,6 @@
         ## because of defaults the change:iframes event
         ## fires before our initialize (which is stupid)
         return if not @socket
-
-        ## if we're in satellite mode and our event is
-        ## a satellite event then emit over websockets
-        if App.config.ui("satellite") and event in @satelliteEvents
-          args = @transformRunnableArgs(args)
-          return @socket.emit event, args...
-
-        ## if we're in host mode and our event is a
-        ## satellite event AND we have a remoteIrame defined
-        # if App.config.ui("host") and event in @hostEvents #and @$remoteIframe
-          # debugger
-          # return @socket.emit event, args...
 
         ## else just do the normal trigger and
         ## remove the satellite namespace

@@ -1,9 +1,5 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
-  satelliteEvents = "runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test command:add command:attrs:changed url:changed page:loading".split(" ")
-  hostEvents      = "load:spec:iframe".split(" ")
-  passThruEvents  = "sauce:job:create sauce:job:start sauce:job:done sauce:job:fail".split(" ")
-
   element = "__cypress-string"
 
   API =
@@ -35,10 +31,6 @@
 
           socket.automationConnected(bool)
 
-      _.each [].concat(hostEvents, satelliteEvents, passThruEvents), (event) ->
-        channel.on event, (args...) ->
-          socket.trigger event, args...
-
       # channel.on "check:for:app:errors", ->
       #   console.log "check:for:app:errors"
       #   socket.emit "app:errors", App.error
@@ -69,7 +61,3 @@
 
   App.commands.setHandler "socket:start", (socketId) ->
     API.start(socketId)
-
-  App.reqres.setHandler "satellite:events", -> satelliteEvents
-  App.reqres.setHandler "host:events",      -> hostEvents
-  App.reqres.setHandler "pass:thru:events", -> passThruEvents

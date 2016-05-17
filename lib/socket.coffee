@@ -210,11 +210,6 @@ class Socket
       socket.on "fixture", (fixturePath, cb) =>
         @onFixture(config, fixturePath, cb)
 
-      _.each "load:spec:iframe url:changed page:loading command:add command:attrs:changed runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) =>
-        socket.on event, (args...) =>
-          args = _.chain(args).reject(_.isUndefined).reject(_.isFunction).value()
-          @io.emit event, args...
-
       socket.on "app:connect", (socketId) ->
         options.onConnect(socketId, socket)
 
