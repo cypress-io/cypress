@@ -19,24 +19,24 @@ describe "lib/exec", ->
 
   it "reports the stdout", ->
     runCommand("cat #{testFile}")
-    .then (result)->
-      expect(result.stdout).to.eql ["here's some text\non multiple lines\n"]
     .catch ->
       fail("should not reject")
+    .then (result)->
+      expect(result.stdout).to.eql ["here's some text\non multiple lines\n"]
 
   it "handles various arguments", ->
     runCommand("cat -be #{testFile}")
-    .then (result)->
-      expect(result.stdout).to.eql ["     1\there's some text$\n     2\ton multiple lines$\n"]
     .catch ->
       fail("should not reject")
+    .then (result)->
+      expect(result.stdout).to.eql ["     1\there's some text$\n     2\ton multiple lines$\n"]
 
   it "handles pipes", ->
     runCommand("cat #{testFile} | grep some")
-    .then (result)->
-      expect(result.stdout).to.eql ["here's some text\n"]
     .catch ->
       fail("should not reject")
+    .then (result)->
+      expect(result.stdout).to.eql ["here's some text\n"]
 
   it "passes through environment variables already in env", ->
     process.env.ALREADY_THERE = "already there"
@@ -55,10 +55,10 @@ describe "lib/exec", ->
 
   it "reports the stderr", ->
     runCommand(">&2 echo 'some error'")
-    .then (result)->
-      expect(result.stderr).to.eql ["some error\n"]
     .catch ->
       fail("should not reject")
+    .then (result)->
+      expect(result.stderr).to.eql ["some error\n"]
 
   it "errors on non-zero exit", ->
     runCommand("cat nooope")
