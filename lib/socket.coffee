@@ -77,6 +77,14 @@ class Socket
 
   onAutomation: (messages, message, data) ->
     Promise.try =>
+      ## instead of throwing immediately here perhaps we need
+      ## to make this more resilient by automatically retrying
+      ## up to 1 second in the case where our automation room
+      ## is empty. that would give padding for reconnections
+      ## to automatically happen.
+      ## for instance when socket.io detects a disconnect
+      ## does it immediately remove the member from the room?
+      ## YES it does per http://socket.io/docs/rooms-and-namespaces/#disconnection
       if _.isEmpty(@io.sockets.adapter.rooms.automation)
         throw new Error("Could not process '#{message}'. No automation servers connected.")
       else
@@ -147,6 +155,9 @@ class Socket
         ## in trouble and should probably bomb everything
         socket.on "disconnect", =>
           ## if we are in headless mode then log out an error and maybe exit with process.exit(1)?
+
+          ## TODO: if all of our clients have also disconnected
+          ## then don't warn anything
           errors.warning("AUTOMATION_SERVER_DISCONNECTED")
           @io.emit("automation:disconnected", false)
 

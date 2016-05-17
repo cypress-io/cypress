@@ -101,6 +101,15 @@ module.exports = {
         instance.once "exit", ->
           options.onBrowserClose()
 
+        ## TODO: instead of waiting an arbitrary
+        ## amount of time here we could instead
+        ## wait for the socket.io connect event
+        ## which would mean that our browser is
+        ## completely rendered and open. that would
+        ## mean moving this code out of here and
+        ## into the project itself
+        ## (just like headless code)
+        ## ----------------------------
         ## give a little padding around
         ## the browser opening
         Promise.delay(1000)
