@@ -15,6 +15,7 @@ describe "$Cypress.Cy Exec Command", ->
           cmd: "ls"
           timeout: 2500
           env: {}
+          failOnNonZeroExit: true
         })
         cb({})
 
@@ -26,6 +27,13 @@ describe "$Cypress.Cy Exec Command", ->
         cb({})
 
       @cy.exec("ls", { env: { FOO: "foo" } })
+
+    it "can override failOnNonZeroExit", ->
+      @Cypress.on "exec", (data, cb) ->
+        expect(data.failOnNonZeroExit).to.be.false
+        cb({})
+
+      @cy.exec("ls", { failOnNonZeroExit: false })
 
     describe ".log", ->
       beforeEach ->
