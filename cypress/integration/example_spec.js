@@ -19,6 +19,8 @@ describe('Kitchen Sink', function(){
 
   beforeEach(function(){
 
+
+
     // **** Resetting State Before Each Test ****
     //
     // Visiting our app before each test
@@ -36,6 +38,7 @@ describe('Kitchen Sink', function(){
 
     // https://on.cypress.io/api/visit
     cy.visit('https://example.cypress.io')
+
 
     // **** Making Assertions ****
     //
@@ -158,7 +161,6 @@ describe('Kitchen Sink', function(){
 
       // https://on.cypress.io/api/find
       cy.get('.traversal-pagination').find('li').find('a').should('have.length', 7)
-
     })
 
     it('cy.first() - get first DOM element', function(){
@@ -1177,11 +1179,21 @@ describe('Kitchen Sink', function(){
 
   context('Cookies', function(){
     beforeEach(function(){
-      cy
-        .visit('https://example.cypress.io/commands/cookies')
-        .clearCookies()
-
       Cypress.Cookies.debug(true)
+
+      cy.visit('https://example.cypress.io/commands/cookies')
+    })
+
+    it('cy.getCookie() - get a browser cookie', function(){
+
+      // **** Get a Cookie ****
+      //
+      // // https://on.cypress.io/api/getcookie
+      cy
+        .get('#getCookie .set-a-cookie').click()
+
+        // getCookie() returns a cookie object
+        .getCookie('token').should('have.property', 'value', '123ABC')
     })
 
     it('cy.getCookies() - get browser cookies', function(){
@@ -1190,12 +1202,54 @@ describe('Kitchen Sink', function(){
       //
       // // https://on.cypress.io/api/getcookies
       cy
-        .getCookies().should('not.have.property', 'fakeCookie1')
+        .getCookies().should('be.empty')
 
-        .get('.get-cookies-btn').click()
+        .get('#getCookies .set-a-cookie').click()
 
-        .getCookies().should('have.property', 'fakeCookie1', '123ABC')
+        // getCookies() returns an array of cookies
+        .getCookies().should('have.length', 1).then( function(cookies) {
 
+          // each cookie has these properties
+          expect(cookies[0]).to.have.property('name', 'token')
+          expect(cookies[0]).to.have.property('value', '123ABC')
+          expect(cookies[0]).to.have.property('httpOnly', false)
+          expect(cookies[0]).to.have.property('secure', false)
+          expect(cookies[0]).to.have.property('domain')
+          expect(cookies[0]).to.have.property('path')
+
+        })
+    })
+
+    it('cy.setCookie() - set a browser cookie', function(){
+
+      // **** Set a Cookie ****
+      //
+      // // https://on.cypress.io/api/setcookie
+      cy
+        .getCookies().should('be.empty')
+
+        .setCookie('foo', 'bar')
+
+        // getCookie() returns a cookie object
+        .getCookie('foo').should('have.property', 'value', 'bar')
+    })
+
+    it('cy.clearCookie() - clear a browser cookie', function(){
+
+      // **** Clear a Cookie ****
+      //
+      // // https://on.cypress.io/api/clearcookie
+      cy
+        .getCookie('token').should('be.null')
+
+        .get('#clearCookie .set-a-cookie').click()
+
+        .getCookie('token').should('have.property', 'value', '123ABC')
+
+        // clearCookies() returns null
+        .clearCookie('token').should('be.null')
+
+        .getCookie('token').should('be.null')
     })
 
     it('cy.clearCookies() - clear browser cookies', function(){
@@ -1205,14 +1259,17 @@ describe('Kitchen Sink', function(){
       // https://on.cypress.io/api/clearcookies
 
       cy
-        .getCookies().should('not.have.property', 'fakeCookie1')
+        .getCookies().should('be.empty')
 
-        .get('.clear-cookies-btn').click()
+        .get('#clearCookies .set-a-cookie').click()
 
-        .getCookies().should('have.property', 'fakeCookie1', '123ABC')
+        .getCookies().should('have.length', 1)
 
-        // clearCookies() returns cookie represented as an object
-        .clearCookies().should('not.have.property', 'fakeCookie1')
+        // clearCookies() returns null
+        .clearCookies()
+
+        .getCookies().should('be.empty')
+
     })
 
   })
@@ -1410,54 +1467,28 @@ describe('Kitchen Sink', function(){
     //
     // https://on.cypress.io/api/cookies
 
-    it('Cypress.Cookies.set() - set a cookie by key, value', function(){
-
-      Cypress.Cookies.set('fakeCookie', '123ABC')
-
-      cy.getCookies().should('have.property', 'fakeCookie', '123ABC')
-
-    })
-
-    it('Cypress.Cookies.get() - get a cookie by its key', function(){
-
-      Cypress.Cookies.set('fakeCookie', '123ABC')
-
-      expect(Cypress.Cookies.get('fakeCookie')).to.eq('123ABC')
-
-    })
-
-    it('Cypress.Cookies.remove() - remove a cookie by its key', function(){
-
-      Cypress.Cookies.set('fakeCookie', '123ABC')
-      expect(Cypress.Cookies.get('fakeCookie')).to.eq('123ABC')
-
-      Cypress.Cookies.remove('fakeCookie')
-      expect(Cypress.Cookies.get('fakeCookie')).to.not.be.ok
-
-    })
-
     it('Cypress.Cookies.debug() - enable or disable debugging', function(){
 
       Cypress.Cookies.debug(true)
 
       // Cypress will now log in the console when
-      // cookies are set or removed
-      Cypress.Cookies.set('fakeCookie', '123ABC')
-      Cypress.Cookies.remove('fakeCookie')
-      Cypress.Cookies.set('fakeCookie', '123ABC')
-      Cypress.Cookies.remove('fakeCookie')
-      Cypress.Cookies.set('fakeCookie', '123ABC')
+      // cookies are set or cleared
+      cy.setCookie('fakeCookie', '123ABC')
+      cy.clearCookie('fakeCookie')
+      cy.setCookie('fakeCookie', '123ABC')
+      cy.clearCookie('fakeCookie')
+      cy.setCookie('fakeCookie', '123ABC')
 
     })
 
     it('Cypress.Cookies.preserveOnce() - preserve cookies by key', function(){
 
       // normally cookies are reset after each test
-      expect(Cypress.Cookies.get('fakeCookie')).to.not.be.ok
+      cy.getCookie('fakeCookie').should('not.be.ok')
 
       // preserving a cookie will not clear it when
       // the next test starts
-      Cypress.Cookies.set('lastCookie', '789XYZ')
+      cy.setCookie('lastCookie', '789XYZ')
       Cypress.Cookies.preserveOnce('lastCookie')
 
     })
@@ -1467,7 +1498,7 @@ describe('Kitchen Sink', function(){
       // now any cookie with the name 'session_id' will
       // not be cleared before each new test runs
       Cypress.Cookies.defaults({
-        whitelist: "session_id"
+        whitelist: 'session_id'
       })
 
     })
