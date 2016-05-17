@@ -3,31 +3,29 @@ describe "$Cypress.Cy Request Commands", ->
 
   context "#request", ->
     beforeEach ->
-      trigger = @Cypress.trigger
+      @respondWith = (resp, timeout = 10) =>
+        @Cypress.once "request", (data, cb) ->
+          _.delay ->
+            cb(resp)
+          , timeout
 
-      @responseIs = (resp, timeout = 10) =>
-        @Cypress.trigger.restore?()
-
-        @sandbox.spy(@Cypress, "trigger")
-
-        @Cypress.trigger = (args...) ->
-          if args[0] is "request"
-            trigger.apply(@, arguments)
-            _.delay ->
-              args[2](resp)
-            , timeout
-          else
-            trigger.apply(@, arguments)
+    afterEach ->
+      @Cypress.off("request")
 
     describe "argument signature", ->
       beforeEach ->
-        trigger = @sandbox.stub(@Cypress, "trigger").withArgs("request").callsArgWithAsync(2, {status: 200})
+        @respondWith({status: 200})
+
+        trigger = @sandbox.spy(@Cypress, "trigger")
 
         @cy.on "fail", (err) ->
           debugger
 
         @expectOptionsToBe = (opts) ->
-          options = trigger.getCall(0).args[1]
+          t = _.find trigger.getCalls(), (c) -> c.args[0] is "request"
+
+          options = t.args[1]
+
           _.each options, (value, key) ->
             expect(options[key]).to.deep.eq(opts[key], "failed on property: (#{key})")
           _.each opts, (value, key) ->
@@ -270,19 +268,19 @@ describe "$Cypress.Cy Request Commands", ->
               }
             })
 
-      context "failOnStatus", ->
-        it "does not fail even on 500 when failOnStatus=false", ->
-          @responseIs({status: 500})
+    describe "failOnStatus", ->
+      it "does not fail even on 500 when failOnStatus=false", ->
+        @respondWith({status: 500})
 
-          @cy.request({url: "http://localhost:1234/foo", failOnStatus: false}).then (resp) ->
-            ## make sure it really was 500!
-            expect(resp.status).to.eq(500)
+        @cy.request({url: "http://localhost:1234/foo", failOnStatus: false}).then (resp) ->
+          ## make sure it really was 500!
+          expect(resp.status).to.eq(500)
 
     describe "subjects", ->
       it "resolves with response obj", ->
         resp = {status: 200, headers: {foo: "bar"}, body: "<html>foo</html>"}
 
-        @responseIs(resp)
+        @respondWith(resp)
 
         @cy.request("http://www.foo.com").then (subject) ->
           expect(subject).to.deep.eq(resp)
@@ -291,7 +289,7 @@ describe "$Cypress.Cy Request Commands", ->
       it "sets timeout to Cypress.config(responseTimeout)", ->
         @Cypress.config("responseTimeout", 2500)
 
-        @responseIs({status: 200})
+        @respondWith({status: 200})
 
         timeout = @sandbox.spy(Promise.prototype, "timeout")
 
@@ -299,7 +297,7 @@ describe "$Cypress.Cy Request Commands", ->
           expect(timeout).to.be.calledWith(2500)
 
       it "can override timeout", ->
-        @responseIs({status: 200})
+        @respondWith({status: 200})
 
         timeout = @sandbox.spy(Promise.prototype, "timeout")
 
@@ -307,23 +305,26 @@ describe "$Cypress.Cy Request Commands", ->
           expect(timeout).to.be.calledWith(1000)
 
       it "clears the current timeout and restores after success", ->
-        @responseIs({status: 200})
+        @respondWith({status: 200})
 
         @cy._timeout(100)
 
+        calledTimeout = false
         _clearTimeout = @sandbox.spy(@cy, "_clearTimeout")
 
         @Cypress.on "request", =>
+          calledTimeout = true
           expect(_clearTimeout).to.be.calledOnce
 
         @cy.request("http://www.foo.com").then ->
           ## restores the timeout afterwards
+          expect(calledTimeout).to.be.true
           expect(@cy._timeout()).to.eq(100)
 
     describe "cancellation", ->
       it "cancels promise", (done) ->
         ## respond after 50 ms
-        @responseIs({}, 50)
+        @respondWith({}, 50)
 
         @Cypress.on "log", (@log) =>
           @cmd = @cy.commands.first()
@@ -341,11 +342,11 @@ describe "$Cypress.Cy Request Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @responseIs({status: 200})
-
         @Cypress.on "log", (@log) =>
 
       it "can turn off logging", ->
+        @respondWith({status: 200})
+
         @cy.request({
           url: "http://localhost:8080"
           log: false
@@ -353,6 +354,8 @@ describe "$Cypress.Cy Request Commands", ->
           expect(@log).to.be.undefined
 
       it "logs immediately before resolving", (done) ->
+        @respondWith({status: 200})
+
         @Cypress.on "log", (log) ->
           if log.get("name") is "request"
             expect(log.get("state")).to.eq("pending")
@@ -362,12 +365,14 @@ describe "$Cypress.Cy Request Commands", ->
         @cy.request("http://localhost:8080")
 
       it "snapshots after clicking", ->
+        @respondWith({status: 200})
+
         @cy.request("http://localhost:8080").then ->
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it ".onConsole", ->
-        @responseIs({
+        @respondWith({
           status: 201
           body: {id: 123}
           headers: {
@@ -547,7 +552,7 @@ describe "$Cypress.Cy Request Commands", ->
         })
 
       it "throws when status code doesnt start with 2 and failOnStatus is true", (done) ->
-        @responseIs({status: 500})
+        @respondWith({status: 500})
 
         logs = []
 
@@ -564,7 +569,7 @@ describe "$Cypress.Cy Request Commands", ->
         @cy.request("http://localhost:1234/foo")
 
       it "logs once on error", (done) ->
-        @responseIs({__error: "request failed"})
+        @respondWith({__error: "request failed"})
 
         logs = []
 
@@ -581,7 +586,7 @@ describe "$Cypress.Cy Request Commands", ->
 
       context "displays error", ->
         beforeEach ->
-          @responseIs({__error: "request failed"})
+          @respondWith({__error: "request failed"})
 
         it "displays method and url in error", (done) ->
           @cy.on "fail", (err) =>
@@ -662,7 +667,7 @@ describe "$Cypress.Cy Request Commands", ->
           })
 
       it "throws after timing out", (done) ->
-        @responseIs({status: 200}, 250)
+        @respondWith({status: 200}, 250)
 
         logs = []
 
