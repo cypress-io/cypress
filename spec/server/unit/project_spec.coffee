@@ -479,18 +479,18 @@ describe "lib/project", ->
     it "returns fully qualified url when spec exists", ->
       @project2.ensureSpecUrl("cypress/integration/bar.js")
       .then (str) ->
-        expect(str).to.eq("http://localhost:2020/__/#/tests/integration/bar.js?__ui=satellite")
+        expect(str).to.eq("http://localhost:2020/__/#/tests/integration/bar.js")
 
     it "returns fully qualified url on absolute path to spec", ->
       todosSpec = path.join(@todosPath, "tests/sub/sub_test.coffee")
       @project.ensureSpecUrl(todosSpec)
       .then (str) ->
-        expect(str).to.eq("http://localhost:8888/__/#/tests/integration/sub/sub_test.coffee?__ui=satellite")
+        expect(str).to.eq("http://localhost:8888/__/#/tests/integration/sub/sub_test.coffee")
 
     it "returns __all spec url", ->
       @project.ensureSpecUrl()
       .then (str) ->
-        expect(str).to.eq("http://localhost:8888/__/#/tests/__all?__ui=satellite")
+        expect(str).to.eq("http://localhost:8888/__/#/tests/__all")
 
     it "throws when spec isnt found", ->
       @project.ensureSpecUrl("does/not/exist.js")

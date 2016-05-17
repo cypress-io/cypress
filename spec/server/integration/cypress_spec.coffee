@@ -193,7 +193,7 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--run-project=#{@todosPath}"]).then =>
           expect(api.updateProject).not.to.be.called
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all?__ui=satellite")
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
           @expectExitWith(0)
 
     it "generates a project id if missing one", ->
@@ -243,7 +243,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         cypress.start(["--run-project=#{@todosPath}", "--spec=tests/test2.coffee"]).then =>
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee?__ui=satellite")
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
           @expectExitWith(0)
 
     it "runs project by specific spec with default configuration", ->
@@ -254,7 +254,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         cypress.start(["--run-project=#{@idsPath}", "--spec=cypress/integration/bar.js"]).then =>
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:2020/__/#/tests/integration/bar.js?__ui=satellite")
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:2020/__/#/tests/integration/bar.js")
           @expectExitWith(0)
 
     it "runs project by specific absolute spec and exits with status 0", ->
@@ -265,7 +265,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"]).then =>
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee?__ui=satellite")
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
           @expectExitWith(0)
 
     it "scaffolds out integration and example_spec if they do not exist", ->
@@ -381,7 +381,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         cypress.start(["--run-project=#{@todosPath}", "--show-headless-gui"]).then =>
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all?__ui=satellite", true)
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all", true)
           @expectExitWith(0)
 
     it "turns on reporting", ->

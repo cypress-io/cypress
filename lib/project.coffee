@@ -241,7 +241,7 @@ class Project extends EE
     "/" + path.join("integration", path.relative(integrationFolder, pathToSpec))
 
   getUrlBySpec: (clientUrl, specUrl) ->
-    [clientUrl, "#/tests", specUrl, "?__ui=satellite"].join("")
+    [clientUrl, "#/tests", specUrl].join("")
 
   scaffold: (config) ->
     Promise.join(
