@@ -112,6 +112,13 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     exec:
       failed: "#{cmd('exec', '\'{{cmd}}\'')} failed with the following error: {{error}}"
       invalid_argument: "#{cmd('exec')} must be passed a non-empty string as its 1st argument. You passed: '{{cmd}}'."
+      non_zero_exit: """
+        \n#{cmd('exec', '\'{{cmd}}\'')} failed because the command exited with a non-zero code. Pass {failOnNonZeroExit: false} for non-zero exits to not be treated as failures.
+
+        Information about the failure:
+        Code: {{code}}
+        {{output}}
+      """
       timed_out: "#{cmd('exec', '\'{{cmd}}\'')} timed out after waiting {{timeout}}ms."
 
     fill:

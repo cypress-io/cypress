@@ -30,19 +30,8 @@ module.exports = {
           reject(err)
 
         child.on 'close', (code) ->
-          if code is 0
-            resolve(output)
-          else if not options.failOnNonZeroExit
-            output.code = code
-            resolve(output)
-          else
-            reject(new Error("""
-            Process exited with code #{code}
-
-            stdout: #{output.stdout}
-
-            stderr: #{output.stderr}
-            """))
+          output.code = code
+          resolve(output)
 
     Promise
     .try(run)

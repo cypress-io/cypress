@@ -36,13 +36,25 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
 
       isTimedoutError = (err)-> err.timedout
 
-      exec(_.pick(options, "cmd", "timeout", "env", "failOnNonZeroExit"))
+      exec(_.pick(options, "cmd", "timeout", "env"))
       .timeout(options.timeout)
-      .catch Promise.TimeoutError, isTimedoutError, (err) =>
+      .then (result) ->
+        return result if result.code is 0 or not options.failOnNonZeroExit
+
+        output = ""
+        output += "\nStdout:\n#{result.stdout}\n" if result.stdout
+        output += "Stderr:\n#{result.stderr}" if result.stderr
+        $Cypress.Utils.throwErrByPath "exec.non_zero_exit", {
+          onFail: options._log
+          args: { cmd, output, code: result.code }
+        }
+
+      .catch Promise.TimeoutError, isTimedoutError, (err) ->
         $Cypress.Utils.throwErrByPath "exec.timed_out", {
           onFail: options._log
           args: { cmd, timeout: options.timeout }
         }
+
       .catch (error) ->
         ## re-throw if timedout error from above
         throw error if error.name is "CypressError"
