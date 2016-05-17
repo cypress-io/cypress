@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.3.0
+- new cypress cookie commands
+
 #### 0.2.5
 - bumped cypress-example-kitchensink
 
