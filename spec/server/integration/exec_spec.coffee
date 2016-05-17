@@ -5,7 +5,9 @@ exec = require("#{root}lib/exec")
 
 testFile = "_exec_test.txt"
 
-runCommand = (cmd, timeout = 1000) -> exec.run(process.cwd(), { cmd, timeout })
+runCommand = (cmd, timeout = 1000) ->
+  exec.run(process.cwd(), { cmd, timeout })
+
 fail = (message) -> throw new Error(message)
 
 describe "lib/exec", ->
@@ -49,10 +51,12 @@ describe "lib/exec", ->
       fail("should not resolve")
     .catch (err)->
       expect(err.message).to.equal "Process exited with code 1"
+      expect(err.timedout).to.be.undefined
 
   it "errors when it times out", ->
-    runCommand("cat #{testFile}", 0)
+    runCommand("sleep 2", 0)
     .then ->
       fail("should not resolve")
     .catch (err)->
       expect(err.message).to.equal "Process timed out"
+      expect(err.timedout).to.be.true

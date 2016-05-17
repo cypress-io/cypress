@@ -80,7 +80,7 @@ class Socket
     exec.run(projectRoot, options)
     .then(cb)
     .catch (err) ->
-      cb({__error: err.message})
+      cb({__error: err.message, timedout: err.timedout})
 
   onAutomation: (messages, message, data) ->
     Promise.try =>

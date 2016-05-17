@@ -443,11 +443,14 @@ describe "lib/socket", ->
           expect(resp).to.eq("Desktop Music Pictures")
           done()
 
-      it "errors when execution fails", (done) ->
-        @sandbox.stub(exec, "run").rejects(new Error("command not found: lsd"))
+      it "errors when execution fails, passing through timedout", (done) ->
+        error = new Error("command not found: lsd")
+        error.timedout = true
+        @sandbox.stub(exec, "run").rejects(error)
 
         @client.emit "exec", { cmd: "lsd" }, (resp) =>
           expect(resp.__error).to.equal("command not found: lsd")
+          expect(resp.timedout).to.be.true
           done()
 
   context "unit", ->

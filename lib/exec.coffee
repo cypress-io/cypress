@@ -1,39 +1,41 @@
-spawn = require("child_process").spawn
+cp      = require("child_process")
+Promise = require("bluebird")
 
 module.exports = {
   run: (projectRoot, options) ->
-    new Promise (resolve, reject) ->
-      ## this probably won't work on Windows
-      ## need to use something different than `sh -c` for Windows
-      child = spawn("sh", ["-c", options.cmd], { cwd: projectRoot })
-      output = {
-        stdout: []
-        stderr: []
-      }
+    child = null
 
-      timeout = setTimeout ->
-        child.kill()
-      , options.timeout
+    run = ->
+      new Promise (resolve, reject) ->
+        ## this probably won't work on Windows
+        ## need to use something different than `sh -c` for Windows
+        child = cp.spawn("sh", ["-c", options.cmd], { cwd: projectRoot })
+        output = {
+          stdout: []
+          stderr: []
+        }
 
-      child.stdout.on 'data', (data) ->
-        output.stdout.push(data.toString())
+        child.stdout.on 'data', (data) ->
+          output.stdout.push(data.toString())
 
-      child.stderr.on 'data', (data) ->
-        output.stderr.push(data.toString())
+        child.stderr.on 'data', (data) ->
+          output.stderr.push(data.toString())
 
-      child.on 'error', (err) ->
-        clearTimeout(timeout)
-        reject(err)
+        child.on 'error', (err) ->
+          reject(err)
 
-      child.on 'close', (code) ->
-        clearTimeout(timeout)
-        if code is 0
-          resolve(output)
-          return
+        child.on 'close', (code) ->
+          if code is 0
+            resolve(output)
+          else
+            reject(new Error("Process exited with code #{code}"))
 
-        error = if code
-          "Process exited with code #{code}"
-        else
-          "Process timed out"
-        reject(new Error(error))
+    Promise
+    .try(run)
+    .timeout(options.timeout)
+    .catch Promise.TimeoutError, ->
+      child.kill() if child
+      err = new Error("Process timed out")
+      err.timedout = true
+      throw err
 }

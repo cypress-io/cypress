@@ -4,6 +4,7 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
     new Promise (resolve, reject) ->
       Cypress.trigger "exec", options, (resp) ->
         if err = resp.__error
+          err.timedout = resp.timedout
           reject(err)
         else
           resolve(resp)
@@ -32,18 +33,20 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
       ## because we're handling timeouts ourselves
       @_clearTimeout()
 
+      isTimedoutError = (err)-> err.timedout
+
       exec(_.pick(options, "cmd", "timeout"))
       .timeout(options.timeout)
+      .catch Promise.TimeoutError, isTimedoutError, (err) =>
+        $Cypress.Utils.throwErrByPath "exec.timed_out", {
+          onFail: options._log
+          args: { cmd, timeout: options.timeout }
+        }
       .catch (error) ->
-        ## pass timeout errors to next catch
-        throw error if error instanceof Promise.TimeoutError
+        ## re-throw if timedout error from above
+        throw error if error.name is "CypressError"
 
         $Cypress.Utils.throwErrByPath("exec.failed", {
           onFail: options._log
           args: { cmd, error }
         })
-      .catch Promise.TimeoutError, (err) =>
-        $Cypress.Utils.throwErrByPath "exec.timed_out", {
-          onFail: options._log
-          args: { cmd, timeout: options.timeout }
-        }
