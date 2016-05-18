@@ -7,6 +7,8 @@
 
       testViewQueue = testQueue = null
 
+      numTestsKeptInMemory = App.request("app:config:entity").get("numTestsKeptInMemory")
+
       ## hold onto every single runnable type (suite or test)
       container  = App.request "runnable:container:entity"
 
@@ -109,7 +111,7 @@
         ## find the client runnable model by the test's ide
         runnable = container.get(test.id)
 
-        @addRunnableToQueue(testQueue, runnable)
+        @addRunnableToQueue(testQueue, runnable, numTestsKeptInMemory)
 
         ## set the results of the test on the test client model
         ## passed | failed | pending
@@ -147,16 +149,16 @@
 
       testViewQueue.push(runnable)
 
-    addRunnableToQueue: (queue, test) ->
+    addRunnableToQueue: (queue, test, numTestsKeptInMemory) ->
       queue.push(test)
 
-      @cleanupQueue(queue)
+      @cleanupQueue(queue, numTestsKeptInMemory)
 
-    cleanupQueue: (queue) ->
-      if queue.length > 50
+    cleanupQueue: (queue, numTestsKeptInMemory) ->
+      if queue.length > numTestsKeptInMemory
         runnable = queue.shift()
         runnable.reduceCommandMemory()
-        @cleanupQueue(queue)
+        @cleanupQueue(queue, numTestsKeptInMemory)
 
     startInsertingTestViews: (testViewQueue) ->
       return if not runnable = testViewQueue.shift()

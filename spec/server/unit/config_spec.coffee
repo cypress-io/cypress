@@ -171,6 +171,14 @@ describe "lib/config", ->
     it "watchForFileChanges=true", ->
       @defaults "watchForFileChanges", true
 
+    it "numTestsKeptInMemory=50", ->
+      @defaults "numTestsKeptInMemory", 50
+
+    it "resets numTestsKeptInMemory to 0 when", ->
+      cfg = config.mergeDefaults({}, {isHeadless: true})
+
+      expect(cfg.numTestsKeptInMemory).to.eq(0)
+
     it "can override morgan in options", ->
       cfg = config.mergeDefaults({}, {morgan: false})
 

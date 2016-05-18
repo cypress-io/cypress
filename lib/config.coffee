@@ -34,6 +34,7 @@ defaults = {
   port:            2020
   waitForAnimations: true
   animationDistanceThreshold: 5
+  numTestsKeptInMemory: 50
   watchForFileChanges: true
   autoOpen:       false
   viewportWidth:  1000
@@ -121,6 +122,11 @@ module.exports = {
     config.environmentVariables = @parseEnv(config, resolved)
     config.env = process.env["CYPRESS_ENV"]
     delete config.envFile
+
+    ## forcibly reset numTestsKeptInMemory
+    ## to zero when isHeadless
+    if config.isHeadless
+      config.numTestsKeptInMemory = 0
 
     config = @setResolvedConfigValues(config, defaults, resolved)
 
