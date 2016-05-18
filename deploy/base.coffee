@@ -92,6 +92,7 @@ class Base
           copy("./lib/environment.coffee",  "/src/lib/environment.coffee")
           copy("./lib/errors.coffee",       "/src/lib/errors.coffee")
           copy("./lib/exception.coffee",    "/src/lib/exception.coffee")
+          copy("./lib/exec.coffee",         "/src/lib/exec.coffee")
           copy("./lib/fixture.coffee",      "/src/lib/fixture.coffee")
           copy("./lib/ids.coffee",          "/src/lib/ids.coffee")
           copy("./lib/konfig.coffee",       "/src/lib/konfig.coffee")
