@@ -77,8 +77,28 @@ module.exports = {
       if not openProject
         errors.throw("NO_CURRENTLY_OPEN_PROJECT")
       else
-        new Promise (resolve, reject) ->
-          openProject.on "settings:changed", -> resolve()
+        new Promise (resolve, reject) =>
+          reboot = =>
+            ## store if the browser is open
+            b = openBrowser
+
+            openProject
+            .getConfig()
+            .then (cfg) =>
+              @close()
+              .then =>
+                @open(cfg.projectRoot)
+            .then (p) ->
+              p.getConfig()
+            .then (cfg) ->
+              {
+                config: cfg
+                browser: b
+              }
+            .then(resolve)
+            .catch(reject)
+
+          openProject.on "settings:changed", reboot
 
   close: (options = {}) ->
     _.defaults options, {
