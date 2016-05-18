@@ -11,7 +11,7 @@ cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
 folders = "fileServerFolder supportFolder fixturesFolder integrationFolder unitFolder".split(" ")
-configKeys = "port reporter baseUrl commandTimeout pageLoadTimeout requestTimeout responseTimeout waitForAnimations animationDistanceThreshold watchForFileChanges viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder environmentVariables".split(" ")
+configKeys = "port reporter baseUrl execTimeout commandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory waitForAnimations animationDistanceThreshold watchForFileChanges viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder environmentVariables".split(" ")
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
