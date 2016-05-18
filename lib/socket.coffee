@@ -162,11 +162,16 @@ class Socket
         ## in trouble and should probably bomb everything
         socket.on "disconnect", =>
           ## if we are in headless mode then log out an error and maybe exit with process.exit(1)?
+          Promise.delay(500)
+          .then =>
+            ## give ourselves about 500ms to reconnected
+            ## and if we're connected its all good
+            return if socket.connected
 
-          ## TODO: if all of our clients have also disconnected
-          ## then don't warn anything
-          errors.warning("AUTOMATION_SERVER_DISCONNECTED")
-          @io.emit("automation:disconnected", false)
+            ## TODO: if all of our clients have also disconnected
+            ## then don't warn anything
+            errors.warning("AUTOMATION_SERVER_DISCONNECTED")
+            @io.emit("automation:disconnected")
 
         socket.on "automation:response", respond
 
