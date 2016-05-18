@@ -116,18 +116,19 @@ module.exports = {
     @_set {PROJECTS: projects}
 
   getProjectPaths: ->
-    @_getProjects().then (projects) =>
-      pathsToRemove = Promise.reduce projects, (memo, path) ->
-        fs.statAsync(path)
-        .catch ->
-          memo.push(path)
-        .return(memo)
-      , []
+    queue =>
+      @_getProjects().then (projects) =>
+        pathsToRemove = Promise.reduce projects, (memo, path) ->
+          fs.statAsync(path)
+          .catch ->
+            memo.push(path)
+          .return(memo)
+        , []
 
-      pathsToRemove.then (removedPaths) =>
-        @_removeProjects(projects, removedPaths)
-      .then =>
-        @_getProjects()
+        pathsToRemove.then (removedPaths) =>
+          @_removeProjects(projects, removedPaths)
+        .then =>
+          @_getProjects()
 
   removeProject: (path) ->
     queue =>
