@@ -1,6 +1,7 @@
 require("../spec_helper")
 
 os       = require("os")
+cp       = require("child_process")
 path     = require("path")
 http     = require("http")
 Promise  = require("bluebird")
@@ -928,3 +929,17 @@ describe "lib/cypress", ->
     it "runs headed and does not exit", ->
       cypress.start().then ->
         expect(headed.ready).to.be.calledOnce
+
+  context "when running electron in linux", ->
+    beforeEach ->
+      @sandbox.stub(cypress, "isLinuxAndHasNotDisabledGpu").returns(true)
+
+    it "captures exit code from re-spawned electron process", ->
+      cpStub = @sandbox.stub({on: ->})
+      cpStub.on.withArgs("close").yieldsAsync(10)
+
+      @sandbox.stub(cp, "spawn").withArgs(process.execPath, [".", "--disable-gpu"], {stdio: "inherit"}).returns(cpStub)
+
+      cypress.runElectron("", {})
+      .then (code) ->
+        expect(code).to.eq(10)
