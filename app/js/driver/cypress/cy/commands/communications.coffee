@@ -14,6 +14,11 @@ $Cypress.register "Communications", (Cypress, _, $, Promise) ->
 
       ## should we increase the command timeout here to 10s?
 
+      ## TODO:
+      ## NEED TO ADD TIMEOUT HANDLING TO THESE COMMANDS
+      ## REFER TO OTHER COMMANDS SUCH AS CY.COOKIES,
+      ## CY.EXEC, CY.REQUEST FOR IMPLEMENTATION DETAILS
+
       _.defaults options,
         log: true
 
