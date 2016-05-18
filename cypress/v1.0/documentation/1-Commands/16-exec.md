@@ -1,11 +1,13 @@
 slug: exec
 excerpt: Execute a system command
 
-Allows you to execute any system command. The system command can be anything you would normally run on the command line, such as `npm run build`, `rake db:seed`, etc.
+Allows you to execute a system command. The system command can be anything you would normally run on the command line, such as `npm run build`, `rake db:seed`, etc.
 
-This is a complementary command to `cy.request`. Whereas you can use `cy.request` for talking to external endpoints, you can use `cy.exec` to execute command line scripts on your system. This is great for running build scripts, seeding your test database, starting or killing processes, etc.
+`cy.exec` provides an escape hatch for running arbitrary system commands, so you can take actions necessary for your test, but outside the scope of Cypress. This is great for running build scripts, seeding your test database, starting or killing processes, etc.
 
-Does not support long-running commands, such as `rails server`, a task that runs a watch, or any process that needs to be manually interrupted to stop. It must exit within the timeout or Cypress will kill the process and fail the current test.
+`cy.exec` does not support commands that don't exit, such as `rails server`, a task that runs a watch, or any process that needs to be manually interrupted to stop. A command must exit within the timeout or Cypress will kill it and fail the current test.
+
+We don't recommend executing commands that take a long time to exit. Cypress will not continue running any other commands until `cy.exec` has finished, so a long-running command will drastically slow down your test cycle.
 
 The current working directory is set to the root of your project (the parent of the cypress directory).
 
@@ -64,6 +66,30 @@ cy.exec("rake db:seed").its("code").should("eq", 0)
 
 ```javascript
 cy.exec("npm run my-script").its("stdout").should("contain", "Done running the script")
+```
+
+## Change the timeout
+
+```javascript
+// will fail if script takes longer than 20 seconds to finish
+cy.exec("npm run build", { timeout: 20000 });
+```
+
+## Choose not to fail on non-zero exit and assert on code and stderr
+
+```javascript
+cy
+  .exec("man bear pig", { failOnNonZeroExit: false })
+  .its("code").should("eq", 1)
+  .its("stderr").should("contain", "No manual entry for bear")
+```
+
+## Specify environment variables
+
+```javascript
+cy
+  .exec("echo $USERNAME", { env: { USERNAME: "johndoe" } })
+  .its("stdout").should("contain", "johndoe")
 ```
 
 ***
