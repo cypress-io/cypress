@@ -5,11 +5,11 @@ Allows you to execute a system command. The system command can be anything you w
 
 `cy.exec` provides an escape hatch for running arbitrary system commands, so you can take actions necessary for your test, but outside the scope of Cypress. This is great for running build scripts, seeding your test database, starting or killing processes, etc.
 
-`cy.exec` does not support commands that don't exit, such as `rails server`, a task that runs a watch, or any process that needs to be manually interrupted to stop. A command must exit within the timeout or Cypress will kill it and fail the current test.
+`cy.exec` does not support commands that don't exit, such as `rails server`, a task that runs a watch, or any process that needs to be manually interrupted to stop. A command must exit within the timeout or Cypress will kill the command's process and fail the current test.
 
 We don't recommend executing commands that take a long time to exit. Cypress will not continue running any other commands until `cy.exec` has finished, so a long-running command will drastically slow down your test cycle.
 
-The current working directory is set to the root of your project (the parent of the cypress directory).
+The current working directory is set to the project root (the directory that contains cypress.json).
 
 | | |
 |--- | --- |
