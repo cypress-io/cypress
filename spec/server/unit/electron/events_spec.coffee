@@ -410,11 +410,13 @@ describe "lib/electron/handlers/events", ->
             @expectSendCalledWith(null)
 
     describe "on:project:settings:change", ->
-      it "returns null", ->
-        @sandbox.stub(project, "onSettingsChanged").resolves()
+      it "resolves with obj", ->
+        obj = {foo: "bar"}
+
+        @sandbox.stub(project, "onSettingsChanged").resolves(obj)
 
         @handleEvent("on:project:settings:change").then =>
-          @expectSendCalledWith(null)
+          @expectSendCalledWith(obj)
 
       it "catches errors", ->
         err = new Error("foo")
