@@ -12,6 +12,64 @@
             <option value="add">adding-testBranch</option>
           </select>
         </div>
+        <div id="manual-browser-wrapper" class="dropdown pull-right">
+          <button data-toggle="dropdown" class="btn btn-default">
+            All Browsers
+            <i class="fa fa-caret-down"></i>
+          </button>
+          <div id="browser-versions-container" class="dropdown-menu dropdown-menu-right">
+            <div class="container-fluid">
+              <div class="row">
+                <div>
+                  <img src="/__cypress/static/img/chromium_16x16.png" />
+                  <ul class="browser-versions list-unstyled"  data-browser="chromium">
+                    <li>41</li>
+                  </ul>
+                </div>
+                <div>
+                  <img src="/__cypress/static/img/chrome_16x16.png" />
+                  <ul class="browser-versions list-unstyled"  data-browser="chrome">
+                    <li>43</li>
+                    <li>36</li>
+                    <li>35</li>
+                    <li>34</li>
+                  </ul>
+                </div>
+                <div>
+                  <img src="/__cypress/static/img/firefox_16x16.png" />
+                  <ul class="browser-versions list-unstyled" data-browser="firefox">
+                    <li>32</li>
+                    <li>31</li>
+                    <li>30</li>
+                    <li>29</li>
+                  </ul>
+                </div>
+                <div>
+                  <img src="/__cypress/static/img/safari_16x16.png" />
+                  <ul class="browser-versions list-unstyled" data-browser="safari">
+                    <li>5.1</li>
+                    <li>5.0.5</li>
+                    <li>4.0</li>
+                  </ul>
+                </div>
+                <div>
+                  <img src="/__cypress/static/img/ie_16x16.png" />
+                  <ul class="browser-versions list-unstyled" data-browser="ie">
+                    <li>11</li>
+                    <li>10</li>
+                    <li>9</li>
+                    <li>8</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="controls">
+          <select class="form-control">
+            <option value="all-branches">All Operating Systems</option>
+          </select>
+        </div>
       </div>
       <div id="builds-region"></div>
     </div>

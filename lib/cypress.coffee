@@ -50,15 +50,19 @@ module.exports = {
       ## process
       if @isCurrentlyRunningElectron()
         if @isLinuxAndHasNotDisabledGpu()
-          args = ["."].concat(argsUtil.toArray(options))
-          args.push("--disable-gpu")
+          return new Promise (resolve) ->
+            args = ["."].concat(argsUtil.toArray(options))
+            args.push("--disable-gpu")
 
-          ## respawn the same process except with --disable-gpu
-          electron = cp.spawn(process.execPath, args, {
-            stdio: "inherit"
-          })
-          electron.unref()
-          exit0()
+            ## respawn the same process except with --disable-gpu
+            electron = cp.spawn(process.execPath, args, {
+              stdio: "inherit"
+            })
+
+            ## whenever our new child electron process
+            ## closes then we pass this exit code on
+            electron.on("close", resolve)
+
         else
           ## just run the gui code directly here
           ## and pass our options directly to main
@@ -73,12 +77,11 @@ module.exports = {
 
         args = ["."].concat(argsUtil.toArray(options))
 
-        new Promise (resolve, reject) ->
+        new Promise (resolve) ->
           ## kick off the electron process and resolve the calling
           ## promise code when this new child process closes
           electron = cp.spawn("electron", args, { stdio: "inherit" })
-          electron.on "close", (code, signal) ->
-            resolve(code)
+          electron.on("close", resolve)
 
   openProject: (options) ->
     ## this code actually starts a project
@@ -160,6 +163,9 @@ module.exports = {
         when options.generateKey
           options.mode = "generateKey"
 
+        when options.exitWithCode?
+          options.mode = "exitWithCode"
+
         when options.ci
           options.mode = "ci"
 
@@ -235,6 +241,11 @@ module.exports = {
         .then (key) ->
           console.log(key)
         .then(exit0)
+        .catch(exitErr)
+
+      when "exitWithCode"
+        require("./modes/exit")(options)
+        .then(exit)
         .catch(exitErr)
 
       when "headless"

@@ -1,25 +1,23 @@
+#builds-list-page {
+  .title-bar {
+    overflow: visible;
+
+    .controls, #manual-browser-wrapper {
+      margin-left: 10px;
+      margin-bottom: 10px;
+    }
+  }
+}
+
 .builds-container {
   @include list-columns(100%);
   margin-bottom: 40px;
 }
 
-.builds-list-header {
-  margin-top: 25px;
-  @include list-columns(9%, 13%, 27%, 31%, 10%, 10%);
-
-  &>li>div:nth-child(4)>div {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  &>li>div:last-child {
-    text-align: right;
-  }
-
-}
-
 .builds-container {
-  @include list-columns(9%, 13%, 27%, 31%, 10%, 10%);
+  border-top: 1px solid #eee;
+  margin-top: 15px;
+  @include list-columns(6%, 33%, 15%, 15%, 6%, 7%, 9%, 9%);
 
   &>li {
 
@@ -32,45 +30,32 @@
       padding: 10px 20px;
       font-weight: 500;
     }
+    .os-block {
+      padding-right: 0;
+    }
 
     &>div:first-child {
       border-left: 5px solid #eee;
       min-height: 62px;
+
       &.pass {
         border-color: #1CB77E;
       }
       &.fail {
         border-color: #CC4239;
       }
-    }
-
-    &>div:last-child {
-      text-align: right;
+      &>div {
+        padding-right: 0;
+      }
     }
 
   }
-
-}
-
-.list-as-table>li>div>div.build-stats {
-  padding: 0;
-  text-align: center;
-  font-size: 14px;
-  font-weight: 600;
-
-
-  &>div {
-    min-height: 62px;
-    @include responsive-width(20%);
-    border-right: 1px solid #eee;
-    padding: 10px;
-
-    &:first-child {
-      border-left: 1px solid #eee;
-    }
-
+  .td-border-left {
+    border-left: 1px solid #eee;
+      min-height: 62px;
 
   }
+
 }
 
 .build-message {
@@ -89,5 +74,48 @@
 
   .fa-user {
     color: #bbb;
+  }
+}
+
+#builds-show  {
+  #iframe-wrapper #iframe-container {
+    #iframe-region {
+
+      &>div {
+        padding-top: 0;
+      }
+    }
+
+    header {
+      padding: 0 10px;
+
+      .btn {
+        margin-top: 6px;
+      }
+    }
+  }
+  #header-container #stats-container {
+    @include list-columns(15%, 28%, 11%, 11%, 17%, 17%);
+    border-left: 9px solid #e94f5f;
+
+    li {
+      width: 100%;
+      padding: 0;
+
+      &>div>div {
+        padding: 10px 8px;
+      }
+
+      &:last-of-type {
+        border-right: 1px solid #eee;
+
+      }
+    }
+    .border-left {
+      border-left: 1px solid #eee;
+    }
+    .border-right {
+      border-right: 1px solid #eee;
+    }
   }
 }

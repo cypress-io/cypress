@@ -90,7 +90,7 @@ class Linux extends Base
     deploy = =>
       new Promise (resolve, reject) =>
         ssh = ->
-          vagrant.ssh ["-c", "cd /cypress-app && gulp build --version #{version} #{getOpts()}"], (code) ->
+          vagrant.ssh ["-c", "cd /cypress-app && ./node_modules/.bin/gulp build --version #{version} #{getOpts()}"], (code) ->
             if code isnt 0
               reject("vagrant.ssh gulp build failed!")
             else

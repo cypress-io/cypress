@@ -17,6 +17,9 @@
     buildsRegion: (builds) ->
       buildsView = @getBuildsView builds
 
+      @listenTo buildsView, "childview:build:clicked", (obj) ->
+        App.vent.trigger "show:build", obj.model
+
       @show buildsView,
         region: @layout.buildsRegion
 

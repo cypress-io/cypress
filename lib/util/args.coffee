@@ -5,7 +5,7 @@ coerce   = require("./coerce")
 config   = require("../config")
 cwd      = require("../cwd")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci updating ping coords key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci updating ping coords key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode".split(" ")
 whitelist = whitelist.concat(config.getConfigKeys())
 
 parseCoords = (coords) ->
@@ -48,6 +48,7 @@ module.exports = {
         "auto-open":   "autoOpen"
         "env":         "environmentVariables"
         "show-headless-gui":"showHeadlessGui"
+        "exit-with-code": "exitWithCode"
       }
     })
 

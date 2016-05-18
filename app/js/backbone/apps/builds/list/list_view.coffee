@@ -7,6 +7,9 @@
     template: "builds/list/_build"
     tagName: "li"
 
+    triggers:
+      "click" : "build:clicked"
+
   class List.Empty extends App.Views.ItemView
     template: "builds/list/_empty"
 

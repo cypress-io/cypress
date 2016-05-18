@@ -42,10 +42,6 @@
         ## and load the iframe
         runner.start(id)
 
-        ## bail if we're currently headless or we're in
-        ## satellite mode
-        return if config.get("isHeadless") or config.ui("satellite")
-
         @statsRegion(runner)
         @specsRegion(runner, iframe, spec)
 

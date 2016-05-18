@@ -60,6 +60,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
           - cy.clearCookie()
           - cy.clearCookies()
       """
+      timed_out: "#{cmd('{{cmd}}')} timed out waiting '{{timeout}}ms' to complete."
 
     dom:
       animating: """
@@ -123,6 +124,9 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     fill:
       invalid_1st_arg: "#{cmd('fill')} must be passed an object literal as its 1st argument"
+
+    fixture:
+      timed_out: "#{cmd('fixture')} timed out waiting '{{timeout}}ms' to receive a fixture. No fixture was ever sent by the server."
 
     focus:
       invalid_element: "#{cmd('focus')} can only be called on a valid focusable element. Your subject is a: {{node}}"

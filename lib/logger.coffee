@@ -69,8 +69,8 @@ logger.defaultErrorHandler = (err) ->
       ## instead of console'ing these we should
       ## think about chalking them so they are
       ## formatted and displayed
-      console.error(err)
-      console.error(err.stack)
+      console.log(err)
+      console.log(err.stack)
       exit()
 
   logger.createException(err).then(handleErr).catch(handleErr)
