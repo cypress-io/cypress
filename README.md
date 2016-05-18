@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.3.3
+- fixes clearing 3rd party cookies after cy.visit
+
 #### 0.3.2
 - bump kitchen sink dep
 
