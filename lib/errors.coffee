@@ -72,13 +72,13 @@ API = {
 
   log: (err, color = "red") ->
     Promise.try =>
-      console.error chalk[color](err.message)
+      console.log chalk[color](err.message)
 
       ## bail if this error came from known
       ## list of Cypress errors
       return if @isCypressErr(err)
 
-      console.error chalk[color](err.stack)
+      console.log chalk[color](err.stack)
 
       if process.env["CYPRESS_ENV"] is "production"
         ## log this error to raygun since its not

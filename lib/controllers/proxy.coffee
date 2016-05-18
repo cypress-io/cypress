@@ -225,7 +225,7 @@ module.exports = {
     ## disregard ENOENT errors (that means the file wasnt found)
     ## which is a perfectly acceptable error (we account for that)
     if process.env["CYPRESS_ENV"] isnt "production" and e and e.code isnt "ENOENT"
-      console.error(e.stack)
+      console.log(e.stack)
       debugger
 
     logger.info "error handling initial request", url: url, error: e
