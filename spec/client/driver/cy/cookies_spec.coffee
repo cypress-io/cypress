@@ -44,13 +44,88 @@ describe "$Cypress.Cy Cookie Commands", ->
           expect(get).to.be.true
           expect(clear).to.be.false
 
+      it "does not attempt to time out", ->
+        @Cypress.on "get:cookies", (data, cb) ->
+          cb({response: [{name: "foo"}]})
+
+        @Cypress.on "clear:cookies", (data, cb) ->
+          cb({response: []})
+
+        timeout = @sandbox.spy(Promise.prototype, "timeout")
+
+        hooks = @Cypress.invoke("test:before:hooks", {})
+        Promise.resolve(hooks)
+        .then ->
+          expect(timeout).not.to.be.called
+
     context "#getCookies", ->
+      beforeEach ->
+        @respondWith = (resp, timeout = 10) =>
+          @Cypress.once "get:cookies", (data, cb) ->
+            _.delay ->
+              cb(resp)
+            , timeout
+
       it "returns array of cookies", ->
         @Cypress.on "get:cookies", (data, cb) ->
           expect(data).to.deep.eq({domain: "localhost"})
           cb({response: []})
 
         @cy.getCookies().should("deep.eq", [])
+
+      describe "cancellation", ->
+        it "cancels promise", (done) ->
+          ## respond after 50 ms
+          @respondWith([], 50)
+
+          @Cypress.on "get:cookies", =>
+            @cmd = @cy.commands.first()
+            @Cypress.abort()
+
+          @cy.on "cancel", (cancelledCmd) =>
+            _.delay =>
+              expect(cancelledCmd).to.eq(@cmd)
+              expect(@cmd.get("subject")).to.be.undefined
+              done()
+            , 100
+
+          @cy.getCookies()
+
+      describe "timeout", ->
+        it "sets timeout to Cypress.config(responseTimeout)", ->
+          @Cypress.config("responseTimeout", 2500)
+
+          @respondWith([])
+
+          timeout = @sandbox.spy(Promise.prototype, "timeout")
+
+          @cy.getCookies().then ->
+            expect(timeout).to.be.calledWith(2500)
+
+        it "can override timeout", ->
+          @respondWith([])
+
+          timeout = @sandbox.spy(Promise.prototype, "timeout")
+
+          @cy.getCookies({timeout: 1000}).then ->
+            expect(timeout).to.be.calledWith(1000)
+
+        it "clears the current timeout and restores after success", ->
+          @respondWith([])
+
+          @cy._timeout(100)
+
+          calledTimeout = false
+          _clearTimeout = @sandbox.spy(@cy, "_clearTimeout")
+
+          @Cypress.on "get:cookies", =>
+            calledTimeout = true
+            expect(_clearTimeout).to.be.calledOnce
+
+          @cy.getCookies().then ->
+            expect(calledTimeout).to.be.true
+            ## restores the timeout afterwards
+            expect(@cy._timeout()).to.eq(100)
 
       describe "errors", ->
         beforeEach ->
@@ -74,6 +149,25 @@ describe "$Cypress.Cy Cookie Commands", ->
             done()
 
           @cy.getCookies()
+
+        it "throws after timing out", (done) ->
+          @respondWith([], 1000)
+
+          logs = []
+
+          @Cypress.on "log", (@log) =>
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(1)
+            expect(@log.get("error")).to.eq(err)
+            expect(@log.get("state")).to.eq("failed")
+            expect(@log.get("name")).to.eq("getCookies")
+            expect(@log.get("message")).to.eq("")
+            expect(err.message).to.eq("cy.getCookies() timed out waiting '50ms' to complete.")
+            done()
+
+          @cy.getCookies({timeout: 50})
 
       describe ".log", ->
         beforeEach ->
@@ -113,6 +207,13 @@ describe "$Cypress.Cy Cookie Commands", ->
             expect(c["Num Cookies"]).to.eq 1
 
     context "#getCookie", ->
+      beforeEach ->
+        @respondWith = (resp, timeout = 10) =>
+          @Cypress.once "get:cookie", (data, cb) ->
+            _.delay ->
+              cb(resp)
+            , timeout
+
       it "returns single cookie by name", ->
         @Cypress.on "get:cookie", (data, cb) ->
           expect(data).to.deep.eq({domain: "localhost", name: "foo"})
@@ -131,9 +232,64 @@ describe "$Cypress.Cy Cookie Commands", ->
 
         @cy.getCookie("foo").should("be.null")
 
+      describe "timeout", ->
+        it "sets timeout to Cypress.config(responseTimeout)", ->
+          @Cypress.config("responseTimeout", 2500)
+
+          @respondWith([])
+
+          timeout = @sandbox.spy(Promise.prototype, "timeout")
+
+          @cy.getCookie("foo").then ->
+            expect(timeout).to.be.calledWith(2500)
+
+        it "can override timeout", ->
+          @respondWith([])
+
+          timeout = @sandbox.spy(Promise.prototype, "timeout")
+
+          @cy.getCookie("foo", {timeout: 1000}).then ->
+            expect(timeout).to.be.calledWith(1000)
+
+        it "clears the current timeout and restores after success", ->
+          @respondWith([])
+
+          @cy._timeout(100)
+
+          calledTimeout = false
+          _clearTimeout = @sandbox.spy(@cy, "_clearTimeout")
+
+          @Cypress.on "get:cookie", =>
+            calledTimeout = true
+            expect(_clearTimeout).to.be.calledOnce
+
+          @cy.getCookie("foo").then ->
+            expect(calledTimeout).to.be.true
+            ## restores the timeout afterwards
+            expect(@cy._timeout()).to.eq(100)
+
       describe "errors", ->
         beforeEach ->
           @allowErrors()
+
+        it "throws after timing out", (done) ->
+          @respondWith({}, 1000)
+
+          logs = []
+
+          @Cypress.on "log", (@log) =>
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(1)
+            expect(@log.get("error")).to.eq(err)
+            expect(@log.get("state")).to.eq("failed")
+            expect(@log.get("name")).to.eq("getCookie")
+            expect(@log.get("message")).to.eq("foo")
+            expect(err.message).to.eq("cy.getCookie() timed out waiting '50ms' to complete.")
+            done()
+
+          @cy.getCookie("foo", {timeout: 50})
 
         it "logs once on error", (done) ->
           logs = []
@@ -194,6 +350,10 @@ describe "$Cypress.Cy Cookie Commands", ->
             expect(@log.get("end")).to.be.true
             expect(@log.get("state")).to.eq("passed")
 
+        it "has correct message", ->
+          @cy.getCookie("foo").then ->
+            expect(@log.get("message")).to.eq("foo")
+
         it "snapshots immediately", ->
           @cy.getCookie("foo").then ->
             expect(@log.get("snapshots").length).to.eq(1)
@@ -220,6 +380,12 @@ describe "$Cypress.Cy Cookie Commands", ->
       beforeEach ->
         @sandbox.stub(@cy, "_addTwentyYears").returns(12345)
 
+        @respondWith = (resp, timeout = 10) =>
+          @Cypress.once "set:cookie", (data, cb) ->
+            _.delay ->
+              cb(resp)
+            , timeout
+
       it "returns set cookie", ->
         @Cypress.on "set:cookie", (data, cb) ->
           expect(data).to.deep.eq({domain: "localhost", name: "foo", value: "bar", path: "/", secure: false, httpOnly: false, expiry: 12345})
@@ -242,9 +408,64 @@ describe "$Cypress.Cy Cookie Commands", ->
           name: "foo", value: "bar", domain: "brian.dev.local", path: "/foo", secure: true, httpOnly: true, expiry: 987
         })
 
+      describe "timeout", ->
+        it "sets timeout to Cypress.config(responseTimeout)", ->
+          @Cypress.config("responseTimeout", 2500)
+
+          @respondWith([])
+
+          timeout = @sandbox.spy(Promise.prototype, "timeout")
+
+          @cy.setCookie("foo", "bar").then ->
+            expect(timeout).to.be.calledWith(2500)
+
+        it "can override timeout", ->
+          @respondWith([])
+
+          timeout = @sandbox.spy(Promise.prototype, "timeout")
+
+          @cy.setCookie("foo", "bar", {timeout: 1000}).then ->
+            expect(timeout).to.be.calledWith(1000)
+
+        it "clears the current timeout and restores after success", ->
+          @respondWith([])
+
+          @cy._timeout(100)
+
+          calledTimeout = false
+          _clearTimeout = @sandbox.spy(@cy, "_clearTimeout")
+
+          @Cypress.on "set:cookie", =>
+            calledTimeout = true
+            expect(_clearTimeout).to.be.calledOnce
+
+          @cy.setCookie("foo", "bar").then ->
+            expect(calledTimeout).to.be.true
+            ## restores the timeout afterwards
+            expect(@cy._timeout()).to.eq(100)
+
       describe "errors", ->
         beforeEach ->
           @allowErrors()
+
+        it "throws after timing out", (done) ->
+          @respondWith({}, 1000)
+
+          logs = []
+
+          @Cypress.on "log", (@log) =>
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(1)
+            expect(@log.get("error")).to.eq(err)
+            expect(@log.get("state")).to.eq("failed")
+            expect(@log.get("name")).to.eq("setCookie")
+            expect(@log.get("message")).to.eq("foo, bar")
+            expect(err.message).to.eq("cy.setCookie() timed out waiting '50ms' to complete.")
+            done()
+
+          @cy.setCookie("foo", "bar", {timeout: 50})
 
         it "logs once on error", (done) ->
           logs = []
@@ -331,6 +552,13 @@ describe "$Cypress.Cy Cookie Commands", ->
             expect(c["Returned"]).to.deep.eq cookie
 
     context "#clearCookie", ->
+      beforeEach ->
+        @respondWith = (resp, timeout = 10) =>
+          @Cypress.once "clear:cookie", (data, cb) ->
+            _.delay ->
+              cb(resp)
+            , timeout
+
       it "returns null", ->
         @Cypress.on "clear:cookie", (data, cb) ->
           expect(data).to.deep.eq({domain: "localhost", name: "foo"})
@@ -340,9 +568,64 @@ describe "$Cypress.Cy Cookie Commands", ->
 
         @cy.clearCookie("foo").should("be.null")
 
+      describe "timeout", ->
+        it "sets timeout to Cypress.config(responseTimeout)", ->
+          @Cypress.config("responseTimeout", 2500)
+
+          @respondWith({})
+
+          timeout = @sandbox.spy(Promise.prototype, "timeout")
+
+          @cy.clearCookie("foo").then ->
+            expect(timeout).to.be.calledWith(2500)
+
+        it "can override timeout", ->
+          @respondWith([])
+
+          timeout = @sandbox.spy(Promise.prototype, "timeout")
+
+          @cy.clearCookie("foo", {timeout: 1000}).then ->
+            expect(timeout).to.be.calledWith(1000)
+
+        it "clears the current timeout and restores after success", ->
+          @respondWith([])
+
+          @cy._timeout(100)
+
+          calledTimeout = false
+          _clearTimeout = @sandbox.spy(@cy, "_clearTimeout")
+
+          @Cypress.on "clear:cookie", =>
+            calledTimeout = true
+            expect(_clearTimeout).to.be.calledOnce
+
+          @cy.clearCookie("foo").then ->
+            expect(calledTimeout).to.be.true
+            ## restores the timeout afterwards
+            expect(@cy._timeout()).to.eq(100)
+
       describe "errors", ->
         beforeEach ->
           @allowErrors()
+
+        it "throws after timing out", (done) ->
+          @respondWith({}, 1000)
+
+          logs = []
+
+          @Cypress.on "log", (@log) =>
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(1)
+            expect(@log.get("error")).to.eq(err)
+            expect(@log.get("state")).to.eq("failed")
+            expect(@log.get("name")).to.eq("clearCookie")
+            expect(@log.get("message")).to.eq("foo")
+            expect(err.message).to.eq("cy.clearCookie() timed out waiting '50ms' to complete.")
+            done()
+
+          @cy.clearCookie("foo", {timeout: 50})
 
         it "logs once on error", (done) ->
           logs = []
@@ -428,6 +711,18 @@ describe "$Cypress.Cy Cookie Commands", ->
             expect(c["Note"]).to.eq "No cookie with the name: 'bar' was found or removed."
 
     context "#clearCookies", ->
+      beforeEach ->
+        @respondWith = (resp, timeout = 10) =>
+          @Cypress.once "get:cookies", (data, cb) ->
+            _.delay ->
+              cb(resp)
+            , timeout
+
+          @Cypress.once "clear:cookies", (data, cb) ->
+            _.delay ->
+              cb(resp)
+            , timeout
+
       it "returns null", ->
         @Cypress.on "get:cookies", (data, cb) ->
           expect(data).to.deep.eq({domain: "localhost"})
@@ -503,9 +798,64 @@ describe "$Cypress.Cy Cookie Commands", ->
           .clearCookies().should("be.null")
           .clearCookies().should("be.null")
 
+      describe "timeout", ->
+        it "sets timeout to Cypress.config(responseTimeout)", ->
+          @Cypress.config("responseTimeout", 2500)
+
+          @respondWith([])
+
+          timeout = @sandbox.spy(Promise.prototype, "timeout")
+
+          @cy.clearCookies().then ->
+            expect(timeout).to.be.calledWith(2500)
+
+        it "can override timeout", ->
+          @respondWith([])
+
+          timeout = @sandbox.spy(Promise.prototype, "timeout")
+
+          @cy.clearCookies({timeout: 1000}).then ->
+            expect(timeout).to.be.calledWith(1000)
+
+        it "clears the current timeout and restores after success", ->
+          @respondWith([])
+
+          @cy._timeout(100)
+
+          calledTimeout = false
+          _clearTimeout = @sandbox.spy(@cy, "_clearTimeout")
+
+          @Cypress.on "clear:cookies", =>
+            calledTimeout = true
+            expect(_clearTimeout).to.be.calledTwice
+
+          @cy.clearCookies().then ->
+            expect(calledTimeout).to.be.true
+            ## restores the timeout afterwards
+            expect(@cy._timeout()).to.eq(100)
+
       describe "errors", ->
         beforeEach ->
           @allowErrors()
+
+        it "throws after timing out", (done) ->
+          @respondWith({}, 1000)
+
+          logs = []
+
+          @Cypress.on "log", (@log) =>
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq(1)
+            expect(@log.get("error")).to.eq(err)
+            expect(@log.get("state")).to.eq("failed")
+            expect(@log.get("name")).to.eq("clearCookies")
+            expect(@log.get("message")).to.eq("")
+            expect(err.message).to.eq("cy.clearCookies() timed out waiting '50ms' to complete.")
+            done()
+
+          @cy.clearCookies({timeout: 50})
 
         it "logs once on 'get:cookies' error", (done) ->
           logs = []

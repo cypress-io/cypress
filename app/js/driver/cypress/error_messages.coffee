@@ -60,6 +60,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
           - cy.clearCookie()
           - cy.clearCookies()
       """
+      timed_out: "#{cmd('{{cmd}}')} timed out waiting '{{timeout}}ms' to complete."
 
     dom:
       animating: """

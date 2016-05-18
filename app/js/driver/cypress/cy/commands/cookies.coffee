@@ -2,6 +2,12 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
 
   COOKIE_PROPS = "name value path secure httpOnly expiry domain".split(" ")
 
+  commandNameRe = /(:)(\w)/
+
+  getCommandFromEvent = (event) ->
+    event.replace commandNameRe, (match, p1, p2) ->
+      p2.toUpperCase()
+
   mergeDefaults = (obj) ->
     merge = (o) ->
       _.defaults o, {domain: window.location.hostname}
@@ -11,8 +17,8 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
     else
       merge(obj)
 
-  getAndClear = (log) ->
-    @_automateCookies("get:cookies", {}, log)
+  getAndClear = (log, timeout) ->
+    @_automateCookies("get:cookies", {}, log, timeout)
     .then (resp) =>
       ## bail early if we got no cookies!
       return resp if resp and resp.length is 0
@@ -20,7 +26,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
       ## iterate over all of these and ensure none are whitelisted
       ## or preserved
       cookies = Cypress.Cookies.getClearableCookies(resp)
-      @_automateCookies("clear:cookies", cookies, log)
+      @_automateCookies("clear:cookies", cookies, log, timeout)
 
   Cypress.on "test:before:hooks", ->
     ## TODO: handle failure here somehow
@@ -32,31 +38,52 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
     _addTwentyYears: ->
       moment().add(20, "years").unix()
 
-    _automateCookies: (event, obj = {}, log) ->
-      new Promise (resolve, reject) =>
-        fn = (resp) =>
-          if e = resp.__error
-            err = $Cypress.Utils.cypressErr(e)
-            err.name = resp.__name
-            err.stack = resp.__stack
+    _automateCookies: (event, obj = {}, log, timeout) ->
+      automate = ->
+        new Promise (resolve, reject) ->
+          fn = (resp) =>
+            if e = resp.__error
+              err = $Cypress.Utils.cypressErr(e)
+              err.name = resp.__name
+              err.stack = resp.__stack
 
-            try
-              $Cypress.Utils.throwErr(err, { onFail: log })
-            catch e
-              reject(e)
-          else
-            resolve(resp.response)
+              try
+                $Cypress.Utils.throwErr(err, { onFail: log })
+              catch e
+                reject(e)
+            else
+              resolve(resp.response)
 
-        Cypress.trigger(event, mergeDefaults(obj), fn)
+          Cypress.trigger(event, mergeDefaults(obj), fn)
+
+      if not timeout
+        automate()
+      else
+        ## need to remove the current timeout
+        ## because we're handling timeouts ourselves
+        @_clearTimeout()
+
+        automate()
+        .timeout(timeout)
+        .catch Promise.TimeoutError, (err) ->
+          $Cypress.Utils.throwErrByPath "cookies.timed_out", {
+            onFail: log
+            args: {
+              cmd:     getCommandFromEvent(event)
+              timeout: timeout
+            }
+          }
 
   Cypress.addParentCommand
     getCookie: (name, options = {}) ->
       _.defaults options, {
         log: true
+        timeout: Cypress.config("responseTimeout")
       }
 
       if options.log
         options._log = Cypress.Log.command({
+          message: name
           displayName: "get cookie"
           onConsole: ->
             obj = {}
@@ -73,7 +100,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
       if not _.isString(name)
         $Cypress.Utils.throwErrByPath("getCookie.invalid_argument", { onFail: options._log })
 
-      @_automateCookies("get:cookie", {name: name}, options._log)
+      @_automateCookies("get:cookie", {name: name}, options._log, options.timeout)
       .then (resp) ->
         options.cookie = resp
 
@@ -82,10 +109,12 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
     getCookies: (options = {}) ->
       _.defaults options, {
         log: true
+        timeout: Cypress.config("responseTimeout")
       }
 
       if options.log
         options._log = Cypress.Log.command({
+          message: ""
           displayName: "get cookies"
           onConsole: ->
             obj = {}
@@ -97,7 +126,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
             obj
         })
 
-      @_automateCookies("get:cookies", {}, options._log)
+      @_automateCookies("get:cookies", {}, options._log, options.timeout)
       .then (resp) ->
         options.cookies = resp
 
@@ -112,12 +141,14 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
         httpOnly: false
         log: true
         expiry: @_addTwentyYears()
+        timeout: Cypress.config("responseTimeout")
       }
 
       cookie = _.pick(options, COOKIE_PROPS)
 
       if options.log
         options._log = Cypress.Log.command({
+          message: [name, value]
           displayName: "set cookie"
           onConsole: ->
             obj = {}
@@ -131,7 +162,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
       if not _.isString(name) or not _.isString(value)
         $Cypress.Utils.throwErrByPath("setCookie.invalid_arguments", { onFail: options._log })
 
-      @_automateCookies("set:cookie", cookie, options._log)
+      @_automateCookies("set:cookie", cookie, options._log, options.timeout)
       .then (resp) ->
         options.cookie = resp
 
@@ -140,10 +171,12 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
     clearCookie: (name, options = {}) ->
       _.defaults options, {
         log: true
+        timeout: Cypress.config("responseTimeout")
       }
 
       if options.log
         options._log = Cypress.Log.command({
+          message: name
           displayName: "clear cookie"
           onConsole: ->
             obj = {}
@@ -162,7 +195,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
         $Cypress.Utils.throwErrByPath("clearCookie.invalid_argument", { onFail: options._log })
 
       ## TODO: prevent clearing a cypress namespace
-      @_automateCookies("clear:cookie", {name: name}, options._log)
+      @_automateCookies("clear:cookie", {name: name}, options._log, options.timeout)
       .then (resp) ->
         options.cookie = resp
 
@@ -172,10 +205,12 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
     clearCookies: (options = {}) ->
       _.defaults options, {
         log: true
+        timeout: Cypress.config("responseTimeout")
       }
 
       if options.log
         options._log = Cypress.Log.command({
+          message: ""
           displayName: "clear cookies"
           onConsole: ->
             obj = {}
@@ -191,9 +226,13 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
             obj
         })
 
-      getAndClear.call(@, options._log)
+      getAndClear.call(@, options._log, options.timeout, "clearCookies")
       .then (resp) ->
         options.cookies = resp
 
         ## null out the current subject
         return null
+      .catch (err) ->
+        ## make sure we always say to clearCookies
+        err.message = err.message.replace("getCookies", "clearCookies")
+        throw err
