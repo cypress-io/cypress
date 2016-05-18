@@ -55,16 +55,14 @@ module.exports = {
 
           ## respawn the same process except with --disable-gpu
           electron = cp.spawn(process.execPath, args, {
-            detached: true
             stdio: "inherit"
           })
 
-          ## unref to allow this child to continue
-          ## after parent exits
-          electron.unref()
+          ## whenever our new child electron process
+          ## closes then we pass this exit code on
+          return new Promise (resolve) ->
+            electron.on("close", resolve)
 
-          ## bail with 0 exit code
-          return 0
         else
           ## just run the gui code directly here
           ## and pass our options directly to main
