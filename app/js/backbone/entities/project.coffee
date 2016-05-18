@@ -100,8 +100,6 @@
 
       @set(props, {silent: true})
 
-      @trigger("rebooted")
-
   class Entities.ProjectsCollection extends Entities.Collection
     model: Entities.Project
 

@@ -34,9 +34,34 @@
         ## we give the UI some time to render
         ## and not block due to sync require's
         ## in the main process
-        _.delay =>
+        Promise
+        .delay(100)
+        .then =>
           @openProject(project)
-        , 100
+          .spread (config) ->
+            ## this will set the available browsers on the project
+            project.setConfig(config)
+          .then =>
+            ## create a promise which listens for
+            ## project settings change events
+            ## and updates our project model
+            do listenToProjectSettingsChange = =>
+              App.ipc("on:project:settings:change")
+              .then (data = {}) =>
+                project.reset()
+                project.setConfig(data.config)
+                project.trigger("rebooted")
+
+                ## if we had an open browser
+                ## then launch it again!
+                if b = data.browser
+                  @launchBrowser(project, b)
+
+                ## recursively listen for more
+                ## change events!
+                listenToProjectSettingsChange()
+          .catch (err) ->
+            project.setError(err)
 
       @show @projectLayout
 
@@ -55,15 +80,8 @@
             App.ipc.off("launch:browser")
             project.browserClosed()
 
-    reboot: (project) ->
-      project.reset()
-
-      @closeProject().then =>
-        @openProject(project)
-
     closeProject: ->
       App.ipc.off("on:launch:browser")
-      App.ipc.off("on:project:settings:change")
       App.ipc("close:project")
 
     openProject: (project) ->
@@ -73,15 +91,6 @@
         App.ipc("open:project", project.get("path")),
         Promise.delay(500)
       ])
-      .spread (config) ->
-        ## this will set the available browsers on the project
-        project.setConfig(config)
-      .then ->
-        App.ipc("on:project:settings:change")
-      .then =>
-        @reboot(project)
-      .catch (err) ->
-        project.setError(err)
 
     getProjectLayout: (project) ->
       new Show.Project

@@ -105,6 +105,72 @@ describe "Project Show", ->
       #     .get("[data-js='host-info']").click().then ->
       #       expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io")
 
+    context "on:project:settings:change", ->
+      beforeEach ->
+        cy
+          .contains(@config.clientUrlDisplay)
+          .then ->
+            @config.clientUrl = "http://localhost:8888"
+            @config.clientUrlDisplay = "http://localhost:8888"
+            @config.browsers = @browsers
+
+            @ipc.handle("on:project:settings:change", null, {
+              config: @config
+              browser: null
+            })
+
+        cy.contains("http://localhost:8888")
+
+      it "displays updated config", ->
+        @config.clientUrl = "http://localhost:7777"
+        @config.clientUrlDisplay = "http://localhost:7777"
+        @config.browsers = @browsers
+
+        @ipc.handle("on:project:settings:change", null, {
+          config: @config
+          browser: null
+        })
+
+        cy.contains("http://localhost:7777")
+
+      it "relaunches browser when present", ->
+        @config.clientUrl = "http://localhost:7777"
+        @config.clientUrlDisplay = "http://localhost:7777"
+        @config.browsers = @browsers
+
+        @ipc.handle("on:project:settings:change", null, {
+          config: @config
+          browser: "chrome"
+        })
+
+        cy
+          .contains("http://localhost:7777")
+          .then ->
+            cy.wrap(@App.ipc).should("be.calledWith", "launch:browser", {
+              browser: "chrome"
+              url: undefined
+            })
+
+      it "displays errors", ->
+        @config.clientUrl = "http://localhost:7777"
+        @config.clientUrlDisplay = "http://localhost:7777"
+        @config.browsers = @browsers
+
+        @ipc.handle("on:project:settings:change", null, {
+          config: @config
+          browser: null
+        })
+
+        cy
+          .contains("http://localhost:7777")
+          .then ->
+            @ipc.handle("on:project:settings:change", {
+              name: "Port 2020"
+              msg: "There is already a port running"
+            }, null)
+
+        cy.contains("Can't start server")
+
     context "list browsers", ->
       it "displays the first browser and 2 others in the dropdown", ->
         cy
@@ -220,27 +286,6 @@ describe "Project Show", ->
 
       it "attaches 'on:project:settings:change' after project opens", ->
         cy.wrap(@App.ipc).should("be.calledWith", "on:project:settings:change")
-
-      it "closes existing server + reopens on 'on:project:settings:change'", ->
-        @agents.spy(@App.ipc, "off")
-
-        cy
-          .contains(@config.clientUrlDisplay)
-          .then ->
-            @ipc.handle("close:project", null, {})
-            @ipc.handle("open:project", null, {
-              clientUrl: "http://localhost:8888",
-              clientUrlDisplay: "http://localhost:8888"
-            })
-
-            ## cause a settings change event
-            @ipc.handle("on:project:settings:change")
-
-        cy
-          .contains("http://localhost:8888")
-          .then ->
-            expect(@App.ipc.off).to.be.calledWith("on:project:settings:change")
-            expect(@App.ipc.off).to.be.calledWith("on:launch:browser")
 
     context "help link", ->
       it "displays help link", ->
