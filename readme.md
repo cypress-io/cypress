@@ -39,6 +39,18 @@ export README_PASSWORD=<readmeio_account_password>
 ```
 
 ```bash
+# add a new command
+npm run add-command <command-name>
+# see what add-command will do without changing files
+npm run add-command <command-name> -- --dry-run
+
+# remove a command
+npm run remove-command <command-name>
+# see what remove-command will do without changing files
+npm run remove-command <command-name> -- --dry-run
+```
+
+```bash
 # modify local files
 <hack hack hack>
 
