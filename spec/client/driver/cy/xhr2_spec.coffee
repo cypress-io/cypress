@@ -30,6 +30,7 @@
 #       context "#onConsole", ->
 
 #   context "#route", ->
+
 describe "$Cypress.Cy XHR Commands", ->
   enterCommandTestingMode()
 
@@ -59,6 +60,88 @@ describe "$Cypress.Cy XHR Commands", ->
     it "sends xhrUrl", ->
       @setup()
       expect(@create).to.be.calledWithMatch {xhrUrl: "__cypress/xhrs/"}
+
+    describe "onload handling", ->
+      beforeEach ->
+        @setup()
+
+      it "calls existing onload handlers", ->
+        onloaded = false
+
+        @cy
+          .server()
+          .route({url: /foo/}).as("getFoo")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            xhr = new win.XMLHttpRequest
+            xhr.onload = ->
+              onloaded = true
+            xhr.open("GET", "/foo")
+            xhr.send()
+            null
+          .wait("@getFoo").then (xhr) ->
+            expect(onloaded).to.be.true
+            expect(xhr.status).to.eq(404)
+
+      it "calls onload handlers attached after xhr#send", ->
+        onloaded = false
+
+        @cy
+          .server()
+          .route({url: /foo/}).as("getFoo")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            xhr = new win.XMLHttpRequest
+            xhr.open("GET", "/foo")
+            xhr.send()
+            xhr.onload = ->
+              onloaded = true
+            null
+          .wait("@getFoo").then (xhr) ->
+            expect(onloaded).to.be.true
+            expect(xhr.status).to.eq(404)
+
+      it "calls onload handlers attached after xhr#send asynchronously", ->
+        onloaded = false
+
+        @cy
+          .server()
+          .route({url: /timeout/}).as("getTimeout")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            xhr = new win.XMLHttpRequest
+            xhr.open("GET", "/timeout?ms=100")
+            xhr.send()
+            _.delay ->
+              xhr.onload = ->
+                onloaded = true
+            , 20
+            null
+          .wait("@getTimeout").then (xhr) ->
+            expect(onloaded).to.be.true
+            expect(xhr.status).to.eq(200)
+
+      it "fallbacks even when onreadystatechange is overriden", ->
+        onloaded = false
+        onreadystatechanged = false
+
+        @cy
+          .server()
+          .route({url: /timeout/}).as("getTimeout")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            xhr = new win.XMLHttpRequest
+            xhr.open("GET", "/timeout?ms=100")
+            xhr.send()
+            xhr.onreadystatechange = ->
+              onreadystatechanged = true
+            xhr.onload = ->
+              onloaded = true
+            null
+          .wait("@getTimeout").then (xhr) ->
+            expect(onloaded).to.be.true
+            expect(onreadystatechanged).to.be.true
+            expect(xhr.status).to.eq(200)
 
     describe.skip "filtering requests", ->
       beforeEach ->
@@ -695,6 +778,7 @@ describe "$Cypress.Cy XHR Commands", ->
         @setup()
         @allowErrors()
 
+      it "sets err on log when caused by code errors", (done) ->
         logs = []
 
         @Cypress.on "log", (@log) =>
@@ -713,6 +797,32 @@ describe "$Cypress.Cy XHR Commands", ->
             new Promise (resolve) ->
               win.$.get("http://www.google.com/foo.json").fail ->
                 foo.bar()
+
+      it "causes errors caused by onreadystatechange callback function", (done) ->
+        logs = []
+
+        e = new Error("onreadystatechange caused this error")
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          ## visit + window + xhr log === 3
+          expect(logs.length).to.eq(3)
+          expect(@log.get("error")).to.be.ok
+          expect(@log.get("error")).to.eq err
+          expect(err).to.eq(e)
+          done()
+
+        @cy
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            xhr = new win.XMLHttpRequest
+            xhr.open("GET", "/foo")
+            xhr.onreadystatechange = ->
+              throw e
+            xhr.send()
+            null
 
   context "#server", ->
     beforeEach ->
