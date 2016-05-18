@@ -214,6 +214,21 @@ describe "$Cypress.Cy Exec Command", ->
 
           @cy.exec("ls")
 
+        it "truncates the stdout and stderr in the error message", (done) ->
+          @respondWith({
+            code: 1
+            stderr: "#{_.range(50).join()}stderr should be truncated"
+            stdout: "#{_.range(50).join()}stdout should be truncated"
+          })
+
+          @cy.on "fail", (err) ->
+            expect(err.message).not.to.contain("stderr should be truncated")
+            expect(err.message).not.to.contain("stdout should be truncated")
+            expect(err.message).to.contain("...")
+            done()
+
+          @cy.exec("ls")
+
         describe "and failOnNonZeroExit is false", ->
 
           it "does not error", ->

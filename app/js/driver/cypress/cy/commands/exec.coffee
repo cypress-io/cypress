@@ -42,8 +42,8 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
         return result if result.code is 0 or not options.failOnNonZeroExit
 
         output = ""
-        output += "\nStdout:\n#{result.stdout}\n" if result.stdout
-        output += "Stderr:\n#{result.stderr}" if result.stderr
+        output += "\nStdout:\n#{_.truncate(result.stdout, 50)}" if result.stdout
+        output += "\nStderr:\n#{_.truncate(result.stderr, 50)}" if result.stderr
         $Cypress.Utils.throwErrByPath "exec.non_zero_exit", {
           onFail: options._log
           args: { cmd, output, code: result.code }
