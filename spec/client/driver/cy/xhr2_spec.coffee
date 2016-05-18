@@ -695,7 +695,6 @@ describe "$Cypress.Cy XHR Commands", ->
         @setup()
         @allowErrors()
 
-      it "sets err on log when caused by XHR network failure", (done) ->
         logs = []
 
         @Cypress.on "log", (@log) =>

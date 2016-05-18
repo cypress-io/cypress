@@ -475,12 +475,12 @@ $Cypress.Server = do ($Cypress, _) ->
 
         timeStart = new Date
 
-        ## if our server is in specific mode for
-        ## not waiting or auto responding or delay
-        ## or not logging or auto responding with 404
-        ## do that here.
-        onload = @onload
-        @onload = ->
+        xhr = @
+        onload = null
+        onerror = null
+        onreadystatechange = null
+
+        onLoadFn = ->
           proxy._setDuration(timeStart)
           proxy._setStatus()
           proxy._setResponseHeaders()
@@ -493,7 +493,7 @@ $Cypress.Server = do ($Cypress, _) ->
           ## by the onload function
           try
             if _.isFunction(onload)
-              onload.apply(@, arguments)
+              onload.apply(xhr, arguments)
             getServer().options.onLoad(proxy, route)
           catch err
             getServer().options.onError(proxy, err)
@@ -501,18 +501,61 @@ $Cypress.Server = do ($Cypress, _) ->
           if _.isFunction(getServer().options.onAnyResponse)
             getServer().options.onAnyResponse(route, proxy)
 
-        onerror = @onerror
-        @onerror = ->
+        onErrorFn = ->
           ## its possible our real onerror handler
           ## throws so we need to catch those errors too
           try
             if _.isFunction(onerror)
-              onerror.apply(@, arguments)
+              onerror.apply(xhr, arguments)
             getServer().options.onNetworkError(proxy)
           catch err
             getServer().options.onError(proxy, err)
 
-        send.apply(@, arguments)
+        onReadyStateFn = ->
+          checkFns()
+
+          ## catch synchronous errors caused
+          ## by the onreadystatechange function
+          try
+            if _.isFunction(onreadystatechange)
+              onreadystatechange.apply(xhr, arguments)
+          catch err
+            ## its failed stop sending the callack
+            xhr.onreadystatechange = null
+            getServer().options.onError(proxy, err)
+
+        checkFns = ->
+          ## back and restore if these
+          ## have been modified!
+          if xhr.onload isnt onLoadFn
+            onload = xhr.onload
+            xhr.onload = onLoadFn
+
+          if xhr.onerror isnt onErrorFn
+            onerror = xhr.onerror
+            xhr.onerror = onErrorFn
+
+          if xhr.onreadystatechange isnt onReadyStateFn
+            onreadystatechange = xhr.onreadystatechange
+            xhr.onreadystatechange = onReadyStateFn
+
+        onload = @onload
+        @onload = onLoadFn
+
+        onreadystatechange = @onreadystatechange
+        @onreadystatechange = onReadyStateFn
+
+        onerror = @onerror
+        @onerror = onErrorFn
+
+        ## wait 1 turn loop and verify
+        ## no listeners have been attached
+        ## **AFTER** xhr.send(...)
+        ## if they have then just restore
+        ## our own callback handlers
+        setImmediate(checkFns)
+
+        return send.apply(@, arguments)
 
     ## override the defaults for all
     ## servers
