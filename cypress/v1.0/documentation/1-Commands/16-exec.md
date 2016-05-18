@@ -1,9 +1,11 @@
 slug: exec
 excerpt: Execute a system command
 
-Allows you to execute any system command. The system command can be anything you would normally run on the command line, such as `npm run build`, `rails -s -e test -p 3001`, etc.
+Allows you to execute any system command. The system command can be anything you would normally run on the command line, such as `npm run build`, `rake db:seed`, etc.
 
-Does not support long-running process, such as `rails s`, a task that runs a watch, or any process that needs to be manually interrupted to stop.
+This is a complementary command to `cy.request`. Whereas you can use `cy.request` for talking to external endpoints, you can use `cy.exec` to execute command line scripts on your system. This is great for running build scripts, seeding your test database, starting or killing processes, etc.
+
+Does not support long-running commands, such as `rails server`, a task that runs a watch, or any process that needs to be manually interrupted to stop. It must exit within the timeout or Cypress will kill the process and fail the current test.
 
 The current working directory is set to the root of your project (the parent of the cypress directory).
 
@@ -32,6 +34,37 @@ Option | Default | Notes
 `timeout` | [`execTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to allow the command to execute
 `failOnNonZeroExit` | `true` | Fail if the command exits with a non-zero code
 `env` | `{}` | Object of environment variables to set before the command executes (e.g. { USERNAME: 'johndoe' }). Will be merged with existing system environment variables
+
+***
+
+# Usage
+
+## Run a build command
+
+```javascript
+cy
+  .exec("npm run build")
+  .then(function (result) {
+    // subject is now the result object
+    // {
+    //   code: 0,
+    //   stdout: "Files successfully built",
+    //   stderr: ""
+    // }
+  })
+```
+
+## Seed the database and assert it was successful
+
+```javascript
+cy.exec("rake db:seed").its("code").should("eq", 0)
+```
+
+## Run an arbitrary script and assert its output
+
+```javascript
+cy.exec("npm run my-script").its("stdout").should("contain", "Done running the script")
+```
 
 ***
 
