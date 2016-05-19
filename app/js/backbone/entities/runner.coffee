@@ -13,7 +13,7 @@
       initialize: ->
         @Cypress = $Cypress.create({loadModules: true})
 
-        if App.config.get("isHeadless")
+        if isHeadless = App.config.get("isHeadless")
           $Cypress.isHeadless = true
 
         @commands  = App.request "command:entities"
@@ -89,6 +89,11 @@
 
         @listenTo @Cypress, "paused", (nextCmd) =>
           @trigger "paused", nextCmd
+
+        ## if we dont return here then InspectAll tests
+        ## will eventually hit the 4gb limit. This is due
+        ## to holding a reference to all of the commands
+        return if isHeadless
 
         @listenTo @Cypress, "log", (log) =>
           switch log.get("instrument")
