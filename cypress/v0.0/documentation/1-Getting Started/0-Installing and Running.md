@@ -104,12 +104,25 @@ While in beta, the Cypress team will need to whitelist your Github email in orde
 After successfully logging in, you will need to add the project(s) you want to write Cypress tests in.
 
 - Add the parent directory of your project to Cypress by clicking :fa-folder-o: in the top-right corner.
+
+***
+
+# Running Tests from the GUI
+
+To run tests:
+
 - Click on the project. You should see a `Server Running` message.
-- Click on the `http://localhost:2020` link.
+- Click on the `Run in Chrome` button or select another browser to run the tests in (if available).
 
 ![project](https://cloud.githubusercontent.com/assets/1268976/9286780/adad94b8-42c9-11e5-9a67-df7abb87fac0.gif)
 
-After adding your project to Cypress, Cypress will generate a `cypress.json` file in your project:
+A new browser window will open and take you to a page listing the Integration Test files.
+
+If it's a new project, you'll see a message about the folder structure generated for you and also an example_spec.js file.
+
+![screen shot 2016-05-04 at 1 33 07 pm](https://cloud.githubusercontent.com/assets/1271364/15023087/d51eb7ae-11fc-11e6-8e8a-bef2690e4924.png)
+
+Go ahead and click on the example_spec.js file to see some example tests run. After running your project in Cypress, Cypress will generate a `cypress.json` file in your project:
 
 ```text
 <your project>/cypress.json
