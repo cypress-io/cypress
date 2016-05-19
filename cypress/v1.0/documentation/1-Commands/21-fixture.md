@@ -39,6 +39,18 @@ Loads the fixture at the specified filepath within `cypress/fixtures`.
 
 ***
 
+# Options
+
+Pass in an options object to change the default behavior of `cy.fixture`.
+
+**[cy.fixture( *fixture*, *options* )](#options-usage)**
+
+Option | Default | Notes
+--- | --- | ---
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the fixture command
+
+***
+
 # Single Fixture Usage
 
 ## Load the `users.json` fixture
