@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+_        = require("lodash")
 rp       = require("request-promise")
 os       = require("os")
 pkg      = require("#{root}package.json")
@@ -15,15 +16,16 @@ describe "lib/api", ->
   context ".createCi", ->
     it "POST /ci/:id + returns ci_guid", ->
       nock("http://localhost:1234")
-      .matchHeader("x-project-token", "guid")
-      .matchHeader("x-project-name", "foobar")
-      .matchHeader("x-git-branch", "master")
-      .matchHeader("x-git-author", "brian")
-      .matchHeader("x-git-message", "such hax")
-      .matchHeader("x-version", pkg.version)
-      .matchHeader("x-platform", "linux")
-      .matchHeader("x-provider", "circle")
-      .post("/ci/project-123")
+      .post("/ci/project-123", {
+        "x-project-token": "guid"
+        "x-project-name": "foobar"
+        "x-git-branch": "master"
+        "x-git-author": "brian"
+        "x-git-message": "such hax"
+        "x-version": pkg.version
+        "x-platform": "linux"
+        "x-provider": "circle"
+      })
       .reply(200, {
         ci_guid: "new_ci_guid"
       })
@@ -42,15 +44,16 @@ describe "lib/api", ->
   context ".updateCi", ->
     it "PUTS /ci/:id", ->
       nock("http://localhost:1234")
-      .matchHeader("x-project-token", "key-123")
-      .matchHeader("x-project-name", "foobar")
-      .matchHeader("x-version", pkg.version)
-      .matchHeader("x-platform", "linux")
-      .matchHeader("x-provider", "circle")
       .put("/ci/project-123", {
         tests: 3
         passes: 1
         failures: 2
+        "x-ci-id": "ci-123"
+        "x-project-token": "key-123"
+        "x-project-name": "foobar"
+        "x-version": pkg.version
+        "x-platform": "linux"
+        "x-provider": "circle"
       })
       .reply(200)
 
@@ -86,9 +89,10 @@ describe "lib/api", ->
   context ".createSignin", ->
     it "POSTs /signin + returns user object", ->
       nock("http://localhost:1234")
-      .matchHeader("x-version", pkg.version)
-      .matchHeader("x-platform", "linux")
-      .post("/signin")
+      .post("/signin", {
+        "x-version": pkg.version
+        "x-platform": "linux"
+      })
       .query({code: "abc-123"})
       .reply(200, {
         name: "brian"
@@ -114,10 +118,11 @@ describe "lib/api", ->
   context ".createSignout", ->
     it "POSTs /signout", ->
       nock("http://localhost:1234")
-      .matchHeader("x-session", "abc-123")
-      .matchHeader("x-version", pkg.version)
-      .matchHeader("x-platform", "linux")
-      .post("/signout")
+      .post("/signout", {
+        "x-session": "abc-123"
+        "x-version": pkg.version
+        "x-platform": "linux"
+      })
       .reply(200)
 
       api.createSignout("abc-123")
@@ -125,10 +130,12 @@ describe "lib/api", ->
   context ".createProject", ->
     it "POSTs /projects", ->
       nock("http://localhost:1234")
-      .matchHeader("x-session", "session-123")
-      .matchHeader("x-project-name", "foobar")
-      .matchHeader("x-version", pkg.version)
-      .post("/projects")
+      .post("/projects", {
+        "x-session": "session-123"
+        "x-platform": "linux"
+        "x-project-name": "foobar"
+        "x-version": pkg.version
+      })
       .reply(200, {
         uuid: "uuid-123"
       })
@@ -139,12 +146,13 @@ describe "lib/api", ->
   context ".updateProject", ->
     it "GETs /projects/:id", ->
       nock("http://localhost:1234")
-      .matchHeader("x-session", "session-123")
-      .matchHeader("x-platform", "linux")
-      .matchHeader("x-type", "opened")
-      .matchHeader("x-version", pkg.version)
-      .matchHeader("x-project-name", "foobar")
-      .get("/projects/project-123")
+      .get("/projects/project-123", {
+        "x-session": "session-123"
+        "x-platform": "linux"
+        "x-type": "opened"
+        "x-version": pkg.version
+        "x-project-name": "foobar"
+      })
       .reply(200, {})
 
       api.updateProject("project-123", "opened", "foobar", "session-123").then (resp) ->
@@ -153,24 +161,54 @@ describe "lib/api", ->
   context ".sendUsage", ->
     it "POSTs /user/usage", ->
       nock("http://localhost:1234")
-      .matchHeader("x-session", "session-123")
-      .matchHeader("x-runs", 5)
-      .matchHeader("x-example", true)
-      .matchHeader("x-all", false)
-      .matchHeader("x-version", pkg.version)
-      .matchHeader("x-platform", "linux")
-      .matchHeader("x-project-name", "admin")
-      .post("/user/usage")
+      .post("/user/usage", {
+        "x-session": "session-123"
+        "x-runs": 5
+        "x-example": true
+        "x-all": false
+        "x-version": pkg.version
+        "x-platform": "linux"
+        "x-project-name": "admin"
+      })
       .reply(200)
 
       api.sendUsage(5, true, false, "admin", "session-123")
+
+  context ".getProjectToken", ->
+    it "GETs /projects/:id/token", ->
+      nock("http://localhost:1234")
+      .get("/projects/project-123/token", {
+        "x-session": "session-123"
+      })
+      .reply(200, {
+        api_token: "token-123"
+      })
+
+      api.getProjectToken("project-123", "session-123")
+      .then (resp) ->
+        expect(resp).to.eq("token-123")
+
+  context ".updateProjectToken", ->
+    it "PUTs /projects/:id/token", ->
+      nock("http://localhost:1234")
+      .put("/projects/project-123/token", {
+        "x-session": "session-123"
+      })
+      .reply(200, {
+        api_token: "token-123"
+      })
+
+      api.updateProjectToken("project-123", "session-123")
+      .then (resp) ->
+        expect(resp).to.eq("token-123")
 
   context ".createRaygunException", ->
     beforeEach ->
       @setup = (body, session, delay = 0) ->
         nock("http://localhost:1234")
-        .matchHeader("x-session", session)
-        .post("/exceptions", body)
+        .post("/exceptions", _.extend({}, body, {
+          "x-session": session
+        }))
         .delayConnection(delay)
         .reply(200)
 
