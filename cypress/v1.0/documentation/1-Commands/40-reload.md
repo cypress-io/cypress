@@ -31,7 +31,7 @@ Pass in an options object to change the default behavior of `cy.reload`.
 Option | Default | Notes
 --- | --- | ---
 `timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#section-network-options) | Total time to retry the visit
-`log` | `true` | Display command in command log
+`log` | `true` | whether to display command in command log
 
 ***
 

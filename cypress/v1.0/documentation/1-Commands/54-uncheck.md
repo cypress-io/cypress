@@ -35,7 +35,7 @@ Option | Default | Notes
 `interval` | `16` | Interval which to retry a uncheck
 `timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the uncheck
 `force` | `false` | Forces uncheck, disables error checking prior to uncheck
-`log` | `true` | Display command in command log
+`log` | `true` | whether to display command in command log
 
 ***
 

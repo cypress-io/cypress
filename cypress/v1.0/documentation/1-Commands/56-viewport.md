@@ -46,7 +46,7 @@ Pass in an options object to change the default behavior of `cy.viewport`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | Display command in command log
+`log` | `true` | whether to display command in command log
 
 You can also set options for the viewport's `viewportWidth` and `viewportHeight` globally in [configuration](https://on.cypress.io/guides/configuration).
 

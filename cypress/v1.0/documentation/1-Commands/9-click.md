@@ -65,7 +65,7 @@ Option | Default | Notes
 `multiple` | `false` | Enables serially clicking multiple elements
 `interval` | `16` | Interval which to retry a click
 `timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the click
-`log` | `true` | Display command in command log
+`log` | `true` | whether to display command in command log
 
 ***
 

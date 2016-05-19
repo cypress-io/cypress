@@ -41,7 +41,7 @@ Option | Default | Notes
 `interval` | `16` | Interval which to retry a check
 `timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the check
 `force` | `false` | Forces check, disables error checking prior to check
-`log` | `true` | Display command in command log
+`log` | `true` | whether to display command in command log
 
 ***
 

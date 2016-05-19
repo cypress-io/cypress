@@ -49,7 +49,7 @@ Option | Default | Notes
 `force` | `false` | Forces type, disables error checking prior to type
 `interval` | `16` | Interval which to retry type
 `timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the type
-`log` | `true` | Display command in command log
+`log` | `true` | whether to display command in command log
 
 ***
 

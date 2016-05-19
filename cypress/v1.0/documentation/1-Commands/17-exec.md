@@ -32,7 +32,7 @@ Pass in an options object to change the default behavior of `cy.exec`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | Display command in command log
+`log` | `true` | whether to display command in command log
 `timeout` | [`execTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to allow the command to execute
 `failOnNonZeroExit` | `true` | Fail if the command exits with a non-zero code
 `env` | `{}` | Object of environment variables to set before the command executes (e.g. { USERNAME: 'johndoe' }). Will be merged with existing system environment variables

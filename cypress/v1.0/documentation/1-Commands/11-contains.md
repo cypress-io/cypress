@@ -38,7 +38,7 @@ Pass in an options object to change the default behavior of `cy.contains`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | Display command in command log
+`log` | `true` | whether to display command in command log
 
 ***
 

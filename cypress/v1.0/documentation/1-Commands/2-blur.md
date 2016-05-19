@@ -27,7 +27,7 @@ Pass in an options object to change the default behavior of `cy.blur`.
 Option | Default | Notes
 --- | --- | ---
 `force` | `false` | Forces blur, disables error checking prior to blur
-`log` | `true` | Display command in command log
+`log` | `true` | whether to display command in command log
 
 ***
 

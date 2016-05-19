@@ -24,7 +24,7 @@ Pass in an options object to change the default behavior of `cy.last`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | Display command in command log
+`log` | `true` | whether to display command in command log
 `timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry getting the element
 
 ***

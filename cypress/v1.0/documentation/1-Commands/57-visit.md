@@ -31,7 +31,7 @@ Option | Default | Notes
 `onBeforeLoad` | `function` | Called before your page has loaded all of its resources.
 `onLoad`       | `function` | Called once your page has fired its load event.
 `timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#section-network-options) | Total time to wait until `cy.visit` resolves
-`log` | `true` | Display command in command log
+`log` | `true` | whether to display command in command log
 
 You can also set options for all `cy.visit` `pageLoadTimeout` and `baseUrl` globally in [configuration](https://on.cypress.io/guides/configuration).
 
