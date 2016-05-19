@@ -938,8 +938,8 @@ describe "lib/cypress", ->
       cpStub = @sandbox.stub({on: ->})
       cpStub.on.withArgs("close").yieldsAsync(10)
 
-      @sandbox.stub(cp, "spawn").withArgs(process.execPath, [".", "--disable-gpu"], {stdio: "inherit"}).returns(cpStub)
+      @sandbox.stub(cp, "spawn").withArgs(process.execPath, [".", "--runProject=foo/bar", "--disable-gpu"], {stdio: "inherit"}).returns(cpStub)
 
-      cypress.runElectron("", {})
+      cypress.runElectron("", {runProject: "foo/bar"})
       .then (code) ->
         expect(code).to.eq(10)
