@@ -40,6 +40,8 @@ Option | Default | Description
 `commandTimeout` | `4000` | Time, in milliseconds, to wait until commands are considered timed out
 `watchForFileChanges` | `true` | Whether Cypress will watch and restart tests on file changes
 `reporter` | `spec` | The [Mocha reporter](https://mochajs.org/#reporters) used during headless or CI runs
+`execTimeout` | `60000` | Time, in milliseconds, to wait for a system command to finish executing during [`cy.exec`](https://on.cypress.io/api/exec) command
+`numTestsKeptInMemory` | `50` | The number of test's snapshots and command data that is kept in memory while tests are running
 
 ## Network
 
@@ -79,12 +81,6 @@ Option | Default | Description
 ----- | ---- | ----
 `waitForAnimations` | `true` | Whether to wait for elements to finish animating before applying commands
 `animationDistanceThreshold` | `5` | The distance in pixels an element must exceed to be considered animating
-
-## Other
-
-Option | Default | Description
------ | ---- | ----
-`execTimeout` | `60000` | Time, in milliseconds, to wait for a system command to finish executing during [`cy.exec`](exec) command
 
 ***
 
