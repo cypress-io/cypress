@@ -59,6 +59,9 @@ LGPL
 
 ## Changelog
 
+#### 0.2.1
+- internal updates to cypress.json settings change notification
+
 #### 0.2.0
 - display list of launchable browsers
 - handle error when no browsers available
