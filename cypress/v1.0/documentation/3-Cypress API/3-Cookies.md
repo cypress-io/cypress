@@ -1,7 +1,9 @@
 slug: cookies
 excerpt: Manage your application's cookies
 
-`Cypress.Cookies` makes it easy to manage your application's cookies while your tests are running.
+`Cypress.Cookies` is a synchronous interface that allows you to do more than just get, set, or clear cookies.
+
+Typically you'd use `Cypress.Cookies` in hooks like `before`, `beforeEach`, `after`, and `afterEach`.
 
 Cypress automatically clears all cookies **before** each test to prevent state from building up. You can take advantage of `Cypress.Cookies.preserveOnce` or even **whitelist** cookies by their name to preserve values across multiple tests. This enables you to preserve sessions through several tests.
 
@@ -117,33 +119,30 @@ Any change you make here will take effect immediately for the remainder of every
 }
 [/block]
 
-**Whitelist accepts** Cookie object with a name. Name can be:
+**Whitelist accepts:**
+
 - string
 - array
-- RegExp
+- regexp
 - function
 
 ```javascript
-// name as string usage
+// string usage
 
 // now any cookie with the name 'session_id' will
 // not be cleared before each test runs
 Cypress.Cookies.defaults({
-  whitelist: {
-    name: "session_id"
-  }
+  whitelist: "session_id"
 })
 ```
 
 ```javascript
-// name as array usage
+// array usage
 
 // now any cookie with the name 'session_id' or 'remember_token'
 // will not be cleared before each test runs
 Cypress.Cookies.defaults({
-  whitelist: {
-    name: ["session_id", "remember_token"]
-  }
+  whitelist: ["session_id", "remember_token"]
 })
 ```
 
@@ -153,9 +152,7 @@ Cypress.Cookies.defaults({
 // now any cookie that matches this RegExp
 // will not be cleared before each test runs
 Cypress.Cookies.defaults({
-  whitelist: {
-    name: /session|remember/
-  }
+  whitelist: /session|remember/
 })
 ```
 
@@ -163,28 +160,14 @@ Cypress.Cookies.defaults({
 // function usage
 
 Cypress.Cookies.defaults({
-  whitelist: {
-    name: function(name){
-      // implement your own logic here
-      // if the function returns truthy
-      // then the cookie will not be cleared
-      // before each test runs
-    }
+  whitelist: function(cookie){
+    // implement your own logic here
+    // if the function returns truthy
+    // then the cookie will not be cleared
+    // before each test runs
   }
 })
 ```
-
-***
-
-# Notes
-
-## Whats the difference between this interface and [`cy.clearCookie`](https://on.cypress.io/api/clearcookie), [`cy.clearCookies`](https://on.cypress.io/api/clearcookies), [`cy.getCookie`](https://on.cypress.io/api/getcookie), [`cy.getCookies`](https://on.cypress.io/api/getcookies), and [`cy.setCookie`](https://on.cypress.io/api/setcookie)?
-
-The cookie commands chained off of `cy` are useful to use during your tests. Since it is a command, it can be chained onto other commands. Additionally, like other commands, it is asynchronous.
-
-`Cypress.Cookies` is a synchronous interface that allows you to do more than just get, set, or clear cookies.
-
-Typically you'd use `Cypress.Cookies` in hooks like `before`, `beforeEach`, `after`, and `afterEach`.
 
 ***
 
