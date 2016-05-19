@@ -1,4 +1,3 @@
-request  = require("request-promise")
 Promise  = require("bluebird")
 winston  = require("winston")
 fs       = require("fs-extra")
