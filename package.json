@@ -6,11 +6,15 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "upload": "readmeio-sync upload",
-    "clean": "readmeio-sync clean-remote"
+    "clean": "readmeio-sync clean-remote",
+    "add-command": "node ./scripts/add-command.js",
+    "remove-command": "node ./scripts/remove-command.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "colors": "^1.1.2",
+    "glob": "^7.0.3",
     "readmeio-sync": "git+https://github.com/jennifer-mann/readmeio-sync.git"
   }
 }

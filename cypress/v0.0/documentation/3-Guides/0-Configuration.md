@@ -80,6 +80,12 @@ Option | Default | Description
 `waitForAnimations` | `true` | Whether to wait for elements to finish animating before applying commands
 `animationDistanceThreshold` | `5` | The distance in pixels an element must exceed to be considered animating
 
+## Other
+
+Option | Default | Description
+----- | ---- | ----
+`execTimeout` | `60000` | Time, in milliseconds, to wait for a system command to finish executing during [`cy.exec`](exec) command
+
 ***
 
 # Overriding Options
