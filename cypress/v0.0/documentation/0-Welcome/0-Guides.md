@@ -36,5 +36,8 @@ excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 | References | |
 | -------------------- | -- |
 | [Error Messages](https://on.cypress.io/guides/error-messages) | Error messages |
+| [Anti-patterns](https://on.cypress.io/guides/anti-patterns) | Anti-patterns |
 | [Troubleshooting](https://on.cypress.io/guides/troubleshooting) | Troubleshooting |
 | [Deprecations](https://on.cypress.io/guides/deprecations) | Deprecations |
+| [Known Issues](https://on.cypress.io/guides/known-issues) | Known Issues |
+| [Browser Management](https://on.cypress.io/guides/browser-management) | Browser Management |
