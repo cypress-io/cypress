@@ -69,7 +69,7 @@ module.exports = {
 
   ## Reads the contents of the local file
   ## returns a JSON object
-  read: ->
+  _read: ->
     @ensureExists()
     .then =>
       fs.readJsonAsync(@path)
@@ -99,11 +99,11 @@ module.exports = {
     @write contents
 
   _set: (key, val) ->
-    @read().then (contents) =>
+    @_read().then (contents) =>
       @_mergeOrWrite(contents, key, val)
 
   _get: (key) ->
-    @read().then (contents) ->
+    @_read().then (contents) ->
       contents[key]
 
   _getProjects: ->
@@ -114,6 +114,10 @@ module.exports = {
     projects = _.without(projects, [].concat(paths)...)
 
     @_set {PROJECTS: projects}
+
+  read: ->
+    queue =>
+      @_read()
 
   getProjectPaths: ->
     queue =>
