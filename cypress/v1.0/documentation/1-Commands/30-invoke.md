@@ -18,7 +18,7 @@ Invokes the function with the specified name
 
 ***
 
-# [cy.invoke( *functionName*, \**arguments* )](#section-function-with-arguments-usage)
+# [cy.invoke( *functionName*, **arguments* )](#section-function-with-arguments-usage)
 
 Invokes the function with the specified name and forwards any additional arguments to the function call. There are no limits to the number of arguments.
 
@@ -95,8 +95,8 @@ cy
 
 ```javascript
 cy
-  .get("form").invoke("attr", "ng-show")
-    .should("not.include", "myValue")
+  .get("img").invoke("attr", "src")
+    .should("include", "myLogo")
 ```
 
 ***
