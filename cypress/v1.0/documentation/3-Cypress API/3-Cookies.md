@@ -117,30 +117,33 @@ Any change you make here will take effect immediately for the remainder of every
 }
 [/block]
 
-**Whitelist accepts:**
-
+**Whitelist accepts** Cookie object with a name. Name can be:
 - string
 - array
-- regexp
+- RegExp
 - function
 
 ```javascript
-// string usage
+// name as string usage
 
 // now any cookie with the name 'session_id' will
 // not be cleared before each test runs
 Cypress.Cookies.defaults({
-  whitelist: "session_id"
+  whitelist: {
+    name: "session_id"
+  }
 })
 ```
 
 ```javascript
-// array usage
+// name as array usage
 
 // now any cookie with the name 'session_id' or 'remember_token'
 // will not be cleared before each test runs
 Cypress.Cookies.defaults({
-  whitelist: ["session_id", "remember_token"]
+  whitelist: {
+    name: ["session_id", "remember_token"]
+  }
 })
 ```
 
@@ -150,7 +153,9 @@ Cypress.Cookies.defaults({
 // now any cookie that matches this RegExp
 // will not be cleared before each test runs
 Cypress.Cookies.defaults({
-  whitelist: /session|remember/
+  whitelist: {
+    name: /session|remember/
+  }
 })
 ```
 
@@ -158,11 +163,13 @@ Cypress.Cookies.defaults({
 // function usage
 
 Cypress.Cookies.defaults({
-  whitelist: function(name){
-    // implement your own logic here
-    // if the function returns truthy
-    // then the cookie will not be cleared
-    // before each test runs
+  whitelist: {
+    name: function(name){
+      // implement your own logic here
+      // if the function returns truthy
+      // then the cookie will not be cleared
+      // before each test runs
+    }
   }
 })
 ```
