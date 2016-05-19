@@ -18,6 +18,19 @@ Clears the browser cookies.
 
 ***
 
+# Options
+
+Pass in an options object to change the default behavior of `cy.clearCookies`.
+
+**[cy.clearCookies(*options* )](#options-usage)**
+
+Option | Default | Notes
+--- | --- | ---
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the clearCookies command
+`log` | `true` | whether to display command in command log
+
+***
+
 # Usage
 
 ## Clear cookies after logging in

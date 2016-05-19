@@ -32,8 +32,6 @@ Option | Default | Notes
 `timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the setCookie command
 `log` | `true` | whether to display command in command log
 
-You can also set options for all [cy.wait](https://on.cypress.io/api/wait) `requestTimeout` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration) to control how long to wait for the request and response of the supplied route.
-
 ***
 
 # Usage

@@ -16,6 +16,19 @@ Gets a browser cookie and their properties.
 
 ***
 
+# Options
+
+Pass in an options object to change the default behavior of `cy.getCookie`.
+
+**[cy.getCookie( *name*, *options* )](#options-usage)**
+
+Option | Default | Notes
+--- | --- | ---
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the getCookie command
+`log` | `true` | whether to display command in command log
+
+***
+
 # Usage
 
 ## Get `session_id` cookie after logging in
