@@ -3,14 +3,14 @@
   <div class="well well-lg">
     <button data-login class="btn btn-primary btn-login">
       <i class="fa fa-github"></i>
-      Login with GitHub
+      Log In with GitHub
     </button>
   </div>
   <% if @error: %>
     <div class="alert alert-danger">
       <p>
         <i class="fa fa-warning"></i>
-        <strong>Can't login</strong></p>
+        <strong>Can't Log In</strong></p>
       <p>
         <%= @error %>
       </p>

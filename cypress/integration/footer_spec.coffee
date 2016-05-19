@@ -49,6 +49,6 @@ describe "Footer", ->
 
     it "gracefully handles error", ->
       @ipc.handle("updater:check", "Something bad happened", null)
-      cy.contains("Login with GitHub")
+      cy.contains("Log In with GitHub")
       cy.get("#footer").should("be.visible")
 
