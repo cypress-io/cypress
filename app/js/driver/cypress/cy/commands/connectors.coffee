@@ -119,6 +119,12 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         args: { cmd: name }
       })
 
+    if name is "its" and args.length > 0
+      $Cypress.Utils.throwErrByPath("invoke_its.invalid_num_of_args", {
+        onFail: options._log
+        args: { cmd: name }
+      })
+
     fail = (prop) =>
       $Cypress.Utils.throwErrByPath("invoke_its.invalid_property", {
         onFail: options._log
