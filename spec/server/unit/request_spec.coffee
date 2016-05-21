@@ -202,7 +202,7 @@ describe "lib/request", ->
     context "bad headers", ->
       beforeEach (done) ->
         @srv = http.createServer (req, res) ->
-          res.writeHead(200, {"Content-Type": "text/plain"})
+          res.writeHead(200)
           res.end()
 
         @srv.listen(9988, done)
@@ -212,7 +212,7 @@ describe "lib/request", ->
 
       it "recovers from bad headers", ->
         Request.send(@fn, {
-          url: "http://localhost:8080/foo"
+          url: "http://localhost:9988/foo"
           headers: {
             "x-text": "אבגד"
           }
@@ -222,3 +222,11 @@ describe "lib/request", ->
         .catch (err) ->
           expect(err.message).to.eq "TypeError: The header content contains invalid characters"
 
+      it "handles weird content in the body just fine", ->
+        Request.send(@fn, {
+          url: "http://localhost:9988/foo"
+          json: true
+          body: {
+            "x-text": "אבגד"
+          }
+        })
