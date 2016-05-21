@@ -21,6 +21,10 @@ module.exports = {
     isDarkMode: ->
     subscribeNotification: ->
   }
+  Menu: {
+    buildFromTemplate: ->
+    setApplicationMenu: ->
+  }
   Tray: -> {
     on: ->
     setToolTip: ->
