@@ -482,9 +482,9 @@ describe "$Cypress.Cy Navigation Commands", ->
         win.location.href = "about:blank"
 
     it "clears current cy subject", ->
-      input = @cy.$$("form#click-me input")
+      input = @cy.$$("form#click-me input[type=submit]")
 
-      @cy.get("form#click-me").find("input").click().then (subject) ->
+      @cy.get("form#click-me").find("input[type=submit]").click().then (subject) ->
         expect(@cy.commands.names()).to.deep.eq [
           "get", "find", "click", "then", "then"
         ]
@@ -515,7 +515,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(logs).to.have.length(1)
 
       it "is name: page load", ->
-        @cy.get("form#click-me").find("input").click().then ->
+        @cy.get("form#click-me").find("input[type=submit]").click().then ->
           expect(@log.get("name")).to.eq "page load"
 
       it "is type: parent", ->
@@ -540,8 +540,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         @Cypress.on "log", (log) ->
           logs.push log
 
-        @cy.on "fail", (err) ->
-          console.log err
+        @cy.once "fail", (err) ->
           ## should only log once
           expect(logs.length).to.eq 1
           expect(err.message).to.eq "Timed out after waiting '100ms' for your remote page to load."
