@@ -14,7 +14,7 @@ describe "$Cypress.Chainer API", ->
       expect($Cypress.Chainer.prototype.foo).to.be.a("function")
 
     it "calls the callback with cy context, id, and args", (done) ->
-      cy = {}
+      cy = {prop: ->}
 
       fn = (id, args) ->
         expect(@).to.eq cy

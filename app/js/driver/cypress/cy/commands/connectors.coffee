@@ -63,9 +63,9 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     name = @prop("current").get("name")
 
     cleanup = =>
-      @stopListening @Cypress, "on:inject:command", returnFalseIfThenable
+      @prop("onInjectCommand", null)
 
-    @listenTo @Cypress, "on:inject:command", returnFalseIfThenable
+    @prop("onInjectCommand", returnFalseIfThenable)
 
     getRet = =>
       ret = fn.apply(@private("runnable").ctx, args)
