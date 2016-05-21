@@ -118,8 +118,8 @@ describe "lib/api", ->
   context ".createSignout", ->
     it "POSTs /signout", ->
       nock("http://localhost:1234")
+      .matchHeader("x-session", "abc-123")
       .post("/signout", {
-        "x-session": "abc-123"
         "x-version": pkg.version
         "x-platform": "linux"
       })
@@ -130,8 +130,8 @@ describe "lib/api", ->
   context ".createProject", ->
     it "POSTs /projects", ->
       nock("http://localhost:1234")
+      .matchHeader("x-session", "session-123")
       .post("/projects", {
-        "x-session": "session-123"
         "x-platform": "linux"
         "x-project-name": "foobar"
         "x-version": pkg.version
@@ -146,8 +146,8 @@ describe "lib/api", ->
   context ".updateProject", ->
     it "GETs /projects/:id", ->
       nock("http://localhost:1234")
+      .matchHeader("x-session", "session-123")
       .get("/projects/project-123", {
-        "x-session": "session-123"
         "x-platform": "linux"
         "x-type": "opened"
         "x-version": pkg.version
@@ -161,8 +161,8 @@ describe "lib/api", ->
   context ".sendUsage", ->
     it "POSTs /user/usage", ->
       nock("http://localhost:1234")
+      .matchHeader("x-session", "session-123")
       .post("/user/usage", {
-        "x-session": "session-123"
         "x-runs": 5
         "x-example": true
         "x-all": false
@@ -177,9 +177,8 @@ describe "lib/api", ->
   context ".getProjectToken", ->
     it "GETs /projects/:id/token", ->
       nock("http://localhost:1234")
-      .get("/projects/project-123/token", {
-        "x-session": "session-123"
-      })
+      .matchHeader("x-session", "session-123")
+      .get("/projects/project-123/token")
       .reply(200, {
         api_token: "token-123"
       })
@@ -191,9 +190,8 @@ describe "lib/api", ->
   context ".updateProjectToken", ->
     it "PUTs /projects/:id/token", ->
       nock("http://localhost:1234")
-      .put("/projects/project-123/token", {
-        "x-session": "session-123"
-      })
+      .matchHeader("x-session", "session-123")
+      .put("/projects/project-123/token")
       .reply(200, {
         api_token: "token-123"
       })
@@ -206,9 +204,8 @@ describe "lib/api", ->
     beforeEach ->
       @setup = (body, session, delay = 0) ->
         nock("http://localhost:1234")
-        .post("/exceptions", _.extend({}, body, {
-          "x-session": session
-        }))
+        .matchHeader("x-session", session)
+        .post("/exceptions", body)
         .delayConnection(delay)
         .reply(200)
 

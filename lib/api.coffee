@@ -48,9 +48,10 @@ module.exports = {
     rp.post({
       url: Routes.exceptions()
       json: true
-      body: _.extend({}, body, {
+      body: body
+      headers: {
         "x-session": session
-      })
+      }
     })
     .promise()
     .timeout(timeout)
@@ -74,8 +75,10 @@ module.exports = {
     rp.post({
       url: Routes.signout()
       json: true
-      body: {
+      headers: {
         "x-session": session
+      }
+      body: {
         "x-platform": os.platform()
         "x-version":  pkg.version
       }
@@ -85,8 +88,10 @@ module.exports = {
     rp.post({
       url: Routes.projects()
       json: true
-      body: {
+      headers: {
         "x-session": session
+      }
+      body: {
         "x-platform": os.platform()
         "x-version": pkg.version
         "x-project-name": projectName
@@ -100,9 +105,11 @@ module.exports = {
     rp.get({
       url: Routes.project(projectId)
       json: true
+      headers: {
+        "x-session": session
+      }
       body: {
         "x-type": type
-        "x-session": session
         "x-platform": os.platform()
         "x-version": pkg.version
         "x-project-name": projectName
@@ -113,8 +120,10 @@ module.exports = {
     rp.post({
       url: Routes.usage()
       json: true
-      body: {
+      headers: {
         "x-session": session
+      }
+      body: {
         "x-platform": os.platform()
         "x-version": pkg.version
         "x-runs": numRuns
@@ -147,7 +156,7 @@ module.exports = {
       method: method
       url: Routes.projectToken(projectId)
       json: true
-      body: {
+      headers: {
         "x-session": session
       }
     })
