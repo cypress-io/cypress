@@ -189,8 +189,8 @@ $Cypress.Runner = do ($Cypress, _) ->
     run: (fn) ->
       @runnerListeners()
 
-      @runner.run (err) =>
-        fn(err, @getTestResults()) if fn
+      @runner.run (failures) =>
+        fn(failures, @getTestResults()) if fn
 
     getTestResults: ->
       _(@tests).map (test) ->
