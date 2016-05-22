@@ -59,6 +59,9 @@ LGPL
 
 ## Changelog
 
+#### 0.2.2
+- renamed Login -> Log In
+
 #### 0.2.1
 - internal updates to cypress.json settings change notification
 
