@@ -42,7 +42,8 @@ describe "lib/socket", ->
         done = _.once(done)
 
         ## when our real client connects then we're done
-        @socket.io.on "connection", (socket) ->
+        @socket.io.on "connection", (socket) =>
+          @socketClient = socket
           done()
 
         {clientUrlDisplay, socketIoRoute} = @cfg
@@ -250,6 +251,25 @@ describe "lib/socket", ->
           @client.emit "is:automation:connected", {string: "foo"}, (resp) ->
             expect(resp).to.be.true
             done()
+
+    context "on(automation:push:request)", ->
+      beforeEach (done) ->
+        @socketClient.on "automation:connected", -> done()
+
+        @client.emit("automation:connected")
+
+      it "emits 'automation:push:message'", (done) ->
+        data = {cause: "explicit", cookie: {name: "foo", value: "bar"}, removed: true}
+
+        emit = @sandbox.stub(@socket.io, "emit")
+
+        @client.emit "automation:push:request", "change:cookie", data, ->
+          expect(emit).to.be.calledWith("automation:push:message", "change:cookie", {
+            cookie: {name: "foo", value: "bar"}
+            message: "Cookie Removed: 'foo=bar'"
+            removed: true
+          })
+          done()
 
     context "on(open:finder)", ->
       beforeEach ->

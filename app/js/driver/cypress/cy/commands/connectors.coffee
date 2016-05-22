@@ -63,9 +63,9 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     name = @prop("current").get("name")
 
     cleanup = =>
-      @stopListening @Cypress, "on:inject:command", returnFalseIfThenable
+      @prop("onInjectCommand", null)
 
-    @listenTo @Cypress, "on:inject:command", returnFalseIfThenable
+    @prop("onInjectCommand", returnFalseIfThenable)
 
     getRet = =>
       ret = fn.apply(@private("runnable").ctx, args)
@@ -115,6 +115,12 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
 
     if not _.isString(fn)
       $Cypress.Utils.throwErrByPath("invoke_its.invalid_1st_arg", {
+        onFail: options._log
+        args: { cmd: name }
+      })
+
+    if name is "its" and args.length > 0
+      $Cypress.Utils.throwErrByPath("invoke_its.invalid_num_of_args", {
         onFail: options._log
         args: { cmd: name }
       })

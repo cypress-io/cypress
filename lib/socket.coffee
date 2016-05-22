@@ -173,6 +173,14 @@ class Socket
             errors.warning("AUTOMATION_SERVER_DISCONNECTED")
             @io.emit("automation:disconnected")
 
+        socket.on "automation:push:request", (msg, data, cb = ->) =>
+          fn = (data) =>
+            @io.emit("automation:push:message", msg, data)
+            cb()
+
+          automation(config.namespace, socketIoCookie)
+          .pushMessage(msg, data, fn)
+
         socket.on "automation:response", respond
 
       socket.on "automation:request", (message, data, cb) =>

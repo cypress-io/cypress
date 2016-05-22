@@ -3,6 +3,7 @@ $Cypress.Cookies = do ($Cypress, _) ->
   reHttp = /^http/
 
   isDebugging = false
+  isDebuggingVerbose = false
 
   ## TODO have app set this on cypress via config
   namespace = "__cypress"
@@ -35,20 +36,25 @@ $Cypress.Cookies = do ($Cypress, _) ->
       delete preserved[name]
 
   API = {
-    debug: (bool = true) ->
-      $Cypress.Utils.warning("Cypress.Cookies.debug() is temporarily disabled. This will be re-enabled sometime in 0.16.x")
-      isDebugging = bool
+    debug: (bool = true, options = {}) ->
+      _.defaults options, {
+        verbose: true
+      }
 
-    log: (cookie, type) ->
+      isDebugging = bool
+      isDebuggingVerbose = bool and options.verbose
+
+    log: (message, cookie, removed) ->
       return if not isDebugging
 
-      m = switch type
-        when "added"    then "info"
-        when "changed"  then "log"
-        when "cleared"  then "warn"
-        else "log"
+      m = if removed then "warn" else "info"
 
-      console[m]("Cookie #{type}:", cookie)
+      args = [_.truncate(message, 50)]
+
+      if isDebuggingVerbose
+        args.push(cookie)
+
+      console[m].apply(console, args)
 
     getClearableCookies: (cookies = []) ->
       _.filter cookies, (cookie) ->
@@ -73,6 +79,11 @@ $Cypress.Cookies = do ($Cypress, _) ->
     preserveOnce: (keys...) ->
       _.each keys, (key) ->
         preserved[key] = true
+
+    clearCypressCookies: ->
+      _.each Cookies.get(), (value, key) ->
+        if isNamespaced(key)
+          Cookies.remove(key, {path: "/"})
 
     setInitial: ->
       @setCy "initial", true

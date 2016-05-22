@@ -1,3 +1,4 @@
+_        = require("lodash")
 os       = require("os")
 r        = require("request")
 rp       = require("request-promise")
@@ -14,7 +15,7 @@ module.exports = {
     rp.post({
       url: Routes.ci(options.projectId)
       json: true
-      headers: {
+      body: {
         "x-project-token": options.key
         "x-project-name":  options.projectName
         "x-git-branch":    options.branch
@@ -32,23 +33,22 @@ module.exports = {
     rp.put({
       url: Routes.ci(options.projectId)
       json: true
-      body: options.stats
       timeout: 10000
-      headers: {
+      body: _.extend({}, options.stats, {
         "x-ci-id":         options.ciId
         "x-project-token": options.key
         "x-project-name":  options.projectName
         "x-version":       pkg.version
         "x-platform":      os.platform()
         "x-provider":      provider.get()
-      }
+      })
     })
 
   createRaygunException: (body, session, timeout = 3000) ->
     rp.post({
       url: Routes.exceptions()
-      body: body
       json: true
+      body: body
       headers: {
         "x-session": session
       }
@@ -60,7 +60,7 @@ module.exports = {
     rp.post({
       url: Routes.signin({code: code})
       json: true
-      headers: {
+      body: {
         "x-platform": os.platform()
         "x-version":  pkg.version
       }
@@ -74,8 +74,11 @@ module.exports = {
   createSignout: (session) ->
     rp.post({
       url: Routes.signout()
+      json: true
       headers: {
         "x-session": session
+      }
+      body: {
         "x-platform": os.platform()
         "x-version":  pkg.version
       }
@@ -87,6 +90,8 @@ module.exports = {
       json: true
       headers: {
         "x-session": session
+      }
+      body: {
         "x-platform": os.platform()
         "x-version": pkg.version
         "x-project-name": projectName
@@ -101,8 +106,10 @@ module.exports = {
       url: Routes.project(projectId)
       json: true
       headers: {
-        "x-type": type
         "x-session": session
+      }
+      body: {
+        "x-type": type
         "x-platform": os.platform()
         "x-version": pkg.version
         "x-project-name": projectName
@@ -115,6 +122,8 @@ module.exports = {
       json: true
       headers: {
         "x-session": session
+      }
+      body: {
         "x-platform": os.platform()
         "x-version": pkg.version
         "x-runs": numRuns
@@ -141,24 +150,6 @@ module.exports = {
     })
     .promise()
     .get("url")
-
-  _token: (method, session) ->
-    rp({
-      method: method
-      url: Routes.token()
-      json: true
-      headers: {
-        "x-session": session
-      }
-    })
-    .promise()
-    .get("api_token")
-
-  getToken: (session) ->
-    @_token("get", session)
-
-  updateToken:  ->
-    @_token("put", session)
 
   _projectToken: (method, projectId, session) ->
     rp({

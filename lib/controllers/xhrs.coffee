@@ -1,6 +1,5 @@
 _           = require("lodash")
 mime        = require("mime")
-request     = require("request")
 str         = require("string-to-stream")
 Promise     = require("bluebird")
 fixture     = require("../fixture")

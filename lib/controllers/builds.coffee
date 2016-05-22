@@ -1,4 +1,3 @@
-request     = require("request")
 api         = require("../api")
 user        = require("../user")
 

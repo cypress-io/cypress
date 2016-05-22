@@ -91,9 +91,32 @@ module.exports = (namespace, socketIoCookie) ->
 
         @[fn](message, data, automate)
 
+    changeCookie: (data, cb) ->
+      c = normalizeCookieProps(data.cookie)
+
+      return if isCypressNamespaced(c)
+
+      msg = if data.removed
+        "Cookie Removed: '#{c.name}=#{c.value}'"
+      else
+        "Cookie Set: '#{c.name}=#{c.value}'"
+
+      cb({
+        cookie:  c
+        message: msg
+        removed: data.removed
+      })
+
     request: (message, data, automate) ->
       if needsCookieMiddleware(message)
         @handleCookies(message, data, automate)
       else
         automate(message, data)
+
+    pushMessage: (message, data, cb) ->
+      switch message
+        when "change:cookie"
+          @changeCookie(data, cb)
+        else
+          throw new Error("Automation push message: '#{message}' not recognized.")
   }

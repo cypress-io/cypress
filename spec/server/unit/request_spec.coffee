@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+http    = require("http")
 Request = require("#{root}lib/request")
 
 describe "lib/request", ->
@@ -197,3 +198,35 @@ describe "lib/request", ->
       }).then (resp) ->
         expect(resp.duration).to.be.a("Number")
         expect(resp.duration).to.be.gt(0)
+
+    context "bad headers", ->
+      beforeEach (done) ->
+        @srv = http.createServer (req, res) ->
+          res.writeHead(200)
+          res.end()
+
+        @srv.listen(9988, done)
+
+      afterEach ->
+        @srv.close()
+
+      it "recovers from bad headers", ->
+        Request.send(@fn, {
+          url: "http://localhost:9988/foo"
+          headers: {
+            "x-text": "אבגד"
+          }
+        })
+        .then ->
+          throw new Error("should have failed")
+        .catch (err) ->
+          expect(err.message).to.eq "TypeError: The header content contains invalid characters"
+
+      it "handles weird content in the body just fine", ->
+        Request.send(@fn, {
+          url: "http://localhost:9988/foo"
+          json: true
+          body: {
+            "x-text": "אבגד"
+          }
+        })

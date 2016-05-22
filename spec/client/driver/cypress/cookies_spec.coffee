@@ -47,6 +47,46 @@ describe "$Cypress.Cookies API", ->
       cookies = @Cypress.Cookies.getClearableCookies([{name: "foo"}, {name: "bar"}])
       expect(cookies).to.deep.eq([{name: "foo"}, {name: "bar"}])
 
+  context ".log", ->
+    beforeEach ->
+      @Cypress.Cookies.debug(false)
+
+      @sandbox.stub(console, "info")
+      @sandbox.stub(console, "warn")
+
+    it "is noop without debugging", ->
+      expect(@Cypress.Cookies.log()).to.be.undefined
+      expect(console.info).not.to.be.called
+      expect(console.warn).not.to.be.called
+
+    it "warns when removed is true", ->
+      @Cypress.Cookies.debug()
+
+      @Cypress.Cookies.log("asdf", {}, true)
+
+      expect(console.warn).to.be.calledWith("asdf", {})
+
+    it "infos when removed is false", ->
+      @Cypress.Cookies.debug()
+
+      @Cypress.Cookies.log("asdf", {}, false)
+
+      expect(console.info).to.be.calledWith("asdf", {})
+
+    it "does not log the cookie when verbose is false", ->
+      @Cypress.Cookies.debug(true, {verbose: false})
+
+      @Cypress.Cookies.log("asdf", {}, false)
+
+      expect(console.info).to.be.calledWithExactly("asdf")
+
+    it "does not log the cookie when false and verbose is true", ->
+      @Cypress.Cookies.debug(false, {verbose: true})
+
+      @Cypress.Cookies.log("asdf", {}, false)
+
+      expect(console.info).not.to.be.called
+
   context ".defaults", ->
     afterEach ->
       @Cypress.Cookies.defaults({

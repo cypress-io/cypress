@@ -8,6 +8,7 @@ user     = require("#{root}../lib/user")
 logger   = require("#{root}../lib/logger")
 Updater  = require("#{root}../lib/updater")
 headed   = require("#{root}../lib/modes/headed")
+menu     = require("#{root}../lib/electron/handlers/menu")
 Tray     = require("#{root}../lib/electron/handlers/tray")
 Events   = require("#{root}../lib/electron/handlers/events")
 Renderer = require("#{root}../lib/electron/handlers/renderer")
@@ -59,6 +60,7 @@ describe "electron/headed", ->
     beforeEach ->
       @win = {}
 
+      @sandbox.stub(menu, "set")
       @sandbox.stub(Tray.prototype, "display")
       @sandbox.stub(Events, "start")
       @sandbox.stub(Updater, "install")
@@ -88,6 +90,10 @@ describe "electron/headed", ->
     it "does not call Updater.install", ->
       headed.ready({}).then ->
         expect(Updater.install).not.to.be.called
+
+    it "calls menu.set", ->
+      headed.ready({}).then ->
+        expect(menu.set).to.be.calledOnce
 
     it "calls tray.display", ->
       headed.ready({}).then ->

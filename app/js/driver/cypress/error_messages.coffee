@@ -159,6 +159,10 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     invoke_its:
       current_prop_nonexistent: "#{cmd('{{cmd}}')} errored because your subject is currently: '{{value}}'. You cannot call any properties such as '{{prop}}' on a '{{value}}' value."
       invalid_1st_arg: "#{cmd('{{cmd}}')} only accepts a string as the first argument."
+      invalid_num_of_args:  """
+        #{cmd('{{cmd}}')} only accepts a single argument.\n
+        If you want to invoke a function with arguments, use cy.invoke().
+      """
       invalid_property: "#{cmd('{{cmd}}')} errored because the property: '{{prop}}' does not exist on your subject."
       previous_prop_nonexistent: "#{cmd('{{cmd}}')} errored because the property: '{{previousProp}}' returned a '{{value}}' value. You cannot access any properties such as '{{currentProp}}' on a '{{value}}' value."
       timed_out: """

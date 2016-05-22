@@ -699,6 +699,19 @@ describe "$Cypress.Cy Connectors Commands", ->
 
           @cy.wrap({foo: val}).its("foo.toString")
 
+      it "throws two args were passed as subject", (done) ->
+
+        @cy.on "fail", (err) =>
+          expect(err.message).to.include "cy.its() only accepts a single argument."
+          expect(@log.get("error")).to.include err
+          done()
+
+        fn = -> "fn"
+        fn.bar = -> "bar"
+        fn.bar.baz = "baz"
+
+        @cy.wrap(fn).its("bar", "baz").should("eq", "baz")
+
         ## TODO: currently this doesn't work because
         ## null subjects immediately throw
         # it "throws on initial #{val} subject", ->
