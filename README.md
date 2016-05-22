@@ -36,6 +36,9 @@ npm run watch
 
 ## Changelog
 
+#### 0.2.0 - *(05/22/16)*
+- notify on cookie change
+
 #### 0.1.3 - *(05/16/16)*
 - new tab content + phrasing
 
