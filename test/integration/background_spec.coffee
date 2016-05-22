@@ -13,6 +13,9 @@ global.chrome = {
     set: ->
     getAll: ->
     remove: ->
+    onChanged: {
+      addListener: ->
+    }
   }
   runtime: {
 
@@ -96,6 +99,42 @@ describe "app/background", ->
       client.on "connect", _.once ->
         expect(client.emit).to.be.calledWith("automation:connected")
         done()
+
+    it "listens to cookie changes", (done) ->
+      addListener = @sandbox.stub(chrome.cookies.onChanged, "addListener")
+      client      = background.connect("http://localhost:#{PORT}", "/__socket.io")
+
+      client.on "connect", _.once ->
+        expect(addListener).to.be.calledOnce
+        done()
+
+  context "onChanged", ->
+    it "does not emit when cause is overwrite", (done) ->
+      addListener = @sandbox.stub(chrome.cookies.onChanged, "addListener")
+      client      = background.connect("http://localhost:#{PORT}", "/__socket.io")
+
+      @sandbox.spy(client, "emit")
+
+      client.on "connect", _.once ->
+        fn = addListener.getCall(0).args[0]
+
+        fn({cause: "overwrite"})
+
+        expect(client.emit).not.to.be.calledWith("automation:push:request")
+        done()
+
+    it "emits 'automation:push:request'", (done) ->
+      info = { cause: "explicit", cookie: {name: "foo", value: "bar"} }
+
+      addListener = @sandbox.stub(chrome.cookies.onChanged, "addListener").yieldsAsync(info)
+      client      = background.connect("http://localhost:#{PORT}", "/__socket.io")
+
+      client.on "connect", ->
+        client.emit = _.once (req, msg, data) ->
+          expect(req).to.eq("automation:push:request")
+          expect(msg).to.eq("change:cookie")
+          expect(data).to.deep.eq(info)
+          done()
 
   context ".getAll", ->
     it "resolves with specific cookie properties", ->

@@ -1,5 +1,6 @@
 map     = require("lodash/map")
 pick    = require("lodash/pick")
+once    = require("lodash/once")
 Promise = require("bluebird")
 
 HOST = "CHANGE_ME_HOST"
@@ -14,6 +15,11 @@ connect = (host, path, io) ->
 
   ## bail if io isnt defined
   return if not io
+
+  listenToCookieChanges = once ->
+    chrome.cookies.onChanged.addListener (info) ->
+      if info.cause isnt "overwrite"
+        client.emit("automation:push:request", "change:cookie", info)
 
   fail = (id, err) ->
     client.emit("automation:response", id, {
@@ -55,6 +61,8 @@ connect = (host, path, io) ->
         fail(id, {message: "No handler registered for: '#{msg}'"})
 
   client.on "connect", ->
+    listenToCookieChanges()
+
     client.emit("automation:connected")
 
   return client
