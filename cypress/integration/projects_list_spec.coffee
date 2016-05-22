@@ -50,7 +50,7 @@ describe "Projects List", ->
       it.skip "displays login screen on logout", ->
         cy.contains("Jane Lane").click()
         cy.contains("a", "Logout").click()
-        cy.contains(".btn", "Login with GitHub")
+        cy.contains(".btn", "Log In with GitHub")
 
     describe "no projects", ->
       beforeEach ->

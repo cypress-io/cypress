@@ -19,7 +19,7 @@ describe "Login", ->
       cy.get("#login").contains("Cypress.io")
 
     it "has Github Login button", ->
-      cy.get("#login").contains("button", "Login with GitHub")
+      cy.get("#login").contains("button", "Log In with GitHub")
 
     it "displays help link", ->
       cy.contains("a", "Need help?")
@@ -28,9 +28,9 @@ describe "Login", ->
       cy.contains("a", "Need help?").click().then ->
         expect(@App.ipc).to.be.calledWith("external:open", "https://docs.cypress.io")
 
-    describe "click 'Login with GitHub'", ->
+    describe "click 'Log In with GitHub'", ->
       beforeEach ->
-        cy.get("#login").contains("button", "Login with GitHub").as("loginBtn")
+        cy.get("#login").contains("button", "Log In with GitHub").as("loginBtn")
 
       it "triggers ipc 'window:open' on click", ->
         cy
@@ -49,7 +49,7 @@ describe "Login", ->
         cy
           .get("@loginBtn").click().click().then ->
             @ipc.handle("window:open", {alreadyOpen: true}, null)
-          .get("#login").contains("button", "Login with GitHub").should("not.be.disabled")
+          .get("#login").contains("button", "Log In with GitHub").should("not.be.disabled")
 
       context "on 'window:open' ipc response", ->
         beforeEach ->
