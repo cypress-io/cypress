@@ -1,32 +1,33 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
-  _.extend App,
+  do ($Cypress) ->
 
-    clearAllCookiesBeforeUnload: ->
-      ## when we actually unload then
-      ## nuke all of the cookies again
-      ## so we clear out unload
-      $(window).on "unload", =>
-        @clearAllCookies()
+    _.extend App,
 
-      ## when our window triggers beforeunload
-      ## we know we've change the URL and we need
-      ## to clear our cookies
-      ## additionally we set unload to true so
-      ## that Cypress knows not to set any more
-      ## cookies
-      $(window).on "beforeunload", =>
-        @clearAllCookies()
-        @setUnload()
+      clearAllCookiesBeforeUnload: ->
+        ## when we actually unload then
+        ## nuke all of the cookies again
+        ## so we clear out unload
+        $(window).on "unload", =>
+          @clearAllCookies()
 
-        return undefined
+        ## when our window triggers beforeunload
+        ## we know we've change the URL and we need
+        ## to clear our cookies
+        ## additionally we set unload to true so
+        ## that Cypress knows not to set any more
+        ## cookies
+        $(window).on "beforeunload", =>
+          @clearAllCookies()
+          @setUnload()
 
-    ## clear all the cypress specific cookies
-    ## whenever our app starts
-    ## and additional when we stop running our tests
-    clearAllCookies: ->
-      _.each Cookies.get(), (value, key) ->
-        Cookies.remove(key, {path: "/"})
+          return undefined
 
-    setUnload: ->
-      Cookies.set("__cypress.unload", true, {path: "/"})
+      ## clear all the cypress specific cookies
+      ## whenever our app starts
+      ## and additional when we stop running our tests
+      clearAllCookies: ->
+        $Cypress.Cookies.clearCypressCookies()
+
+      setUnload: ->
+        $Cypress.Cookies.setCy("unload", true)

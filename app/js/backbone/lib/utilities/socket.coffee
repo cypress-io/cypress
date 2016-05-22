@@ -35,6 +35,9 @@
       #   console.log "check:for:app:errors"
       #   socket.emit "app:errors", App.error
 
+      channel.on "automation:push:message", (msg, data) ->
+        socket.trigger "automation:push:message", msg, data
+
       channel.on "test:changed", (data) ->
         socket.trigger "test:changed", data.file
 

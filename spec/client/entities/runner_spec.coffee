@@ -14,6 +14,18 @@ describe "Runner Entity", ->
 
       expect(reRun).to.be.calledWith "entities/user_spec.coffee"
 
+    it "listens to automation:push:messag and calls Cypress.Cookies.log", ->
+      log = @sandbox.stub(@Cypress.Cookies, "log")
+
+      socket = App.request "socket:entity"
+      socket.trigger "automation:push:message", "change:cookie", {
+        message: "foo"
+        cookie: "bar"
+        removed: "baz"
+      }
+
+      expect(log).to.be.calledWith("foo", "bar", "baz")
+
     it "listens to Cypress.initialized", ->
       receivedRunner = @sandbox.stub @runner, "receivedRunner"
       @Cypress.trigger "initialized", {runner: runner = {}}

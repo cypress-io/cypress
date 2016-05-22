@@ -114,6 +114,11 @@
 
         @listenTo @socket, "test:changed", @reRun
 
+        @listenTo @socket, "automation:push:message", (msg, data = {}) ->
+          switch msg
+            when "change:cookie"
+              @Cypress.Cookies.log(data.message, data.cookie, data.removed)
+
       start: (specPath) ->
         @Cypress.start()
 
