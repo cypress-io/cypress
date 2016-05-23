@@ -39,9 +39,14 @@
       ## promise resolves so we dont block the UI
       App.vent.trigger "start:login:app"
 
-      App.ipc("log:out")
-      .then ->
+      clearGithubCookies: ->
         App.ipc("clear:github:cookies")
+
+      ## clear the cookies even on failure due to
+      ## 401 not authorized
+      App.ipc("log:out")
+      .then(clearGithubCookies)
+      .catch(clearGithubCookies)
 
   App.commands.setHandler "login:request", ->
     API.loginRequest()
