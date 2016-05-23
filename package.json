@@ -1,7 +1,7 @@
 {
   "name": "cypress",
   "productName": "Cypress",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "description": "Javascript Test Engine",
   "main": "index.js",
   "single-instance": false,
