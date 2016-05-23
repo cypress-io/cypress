@@ -13,6 +13,8 @@ excerpt: Known issues which cause problems in Cypress
 
 Some commands have not been implemented in Cypress. Some commands will be implemented in the future and some do not make sense to implement in Cypress.
 
+***
+
 ## Right click
 
 [Issue #53](https://github.com/cypress-io/cypress/issues/53)
