@@ -95,4 +95,4 @@ When clicking on `getCookies` within the command log, the console outputs the fo
 - [clearCookies](https://on.cypress.io/api/clearcookies)
 - [getCookie](https://on.cypress.io/api/getcookie)
 - [setCookie](https://on.cypress.io/api/setcookie)
-- [Cypress Cookie API](https://on.cypress.io/api/cookies)
+- [Cypress Cookies API](https://on.cypress.io/api/cookies)

@@ -74,4 +74,4 @@ When clicking on `setCookie` within the command log, the console outputs the fol
 - [clearCookies](https://on.cypress.io/api/clearcookies)
 - [getCookie](https://on.cypress.io/api/getcookie)
 - [getCookies](https://on.cypress.io/api/getcookies)
-- [Cypress Cookie API](https://on.cypress.io/api/cookies)
+- [Cypress Cookies API](https://on.cypress.io/api/cookies)

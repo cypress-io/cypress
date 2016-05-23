@@ -74,4 +74,4 @@ When clicking on `clearCookies` within the command log, the console outputs the 
 - [getCookie](https://on.cypress.io/api/getcookie)
 - [getCookies](https://on.cypress.io/api/getcookies)
 - [setCookie](https://on.cypress.io/api/setcookie)
-- [Cypress Cookie API](https://on.cypress.io/api/cookies)
+- [Cypress Cookies API](https://on.cypress.io/api/cookies)
