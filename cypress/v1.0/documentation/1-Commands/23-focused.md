@@ -6,7 +6,7 @@ Get the DOM element that is currently focused.
 | | |
 |--- | --- |
 | **Returns** | the current DOM element that is focused or `null` |
-| **Timeout** | `cy.focused` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Timeout** | `cy.focused` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) |
 
 ***
 

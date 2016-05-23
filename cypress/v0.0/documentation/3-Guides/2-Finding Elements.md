@@ -174,7 +174,7 @@ When you provide assertions, Cypress knows to automatically wait until those ass
 
 When an assertion does not pass, Cypress will wait a brief period of time and retry again.
 
-By default, all commands will retry until [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) is exceeded. By default this means Cypress will wait up to **4 seconds** per DOM command + its associated assertions.
+By default, all commands will retry until [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) is exceeded. By default this means Cypress will wait up to **4 seconds** per DOM command + its associated assertions.
 
 Imagine this example:
 
@@ -198,7 +198,7 @@ cy
 
 You have two ways of increasing the amount of time Cypress waits for resolving DOM commands.
 
-1. Change the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) globally
+1. Change the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) globally
 2. Override the timeout option on a specific command
 
 Overriding the timeout option on a specific command looks like this:

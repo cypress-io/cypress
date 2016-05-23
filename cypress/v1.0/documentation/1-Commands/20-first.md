@@ -6,7 +6,7 @@ Get the first DOM element within a set of DOM elements.
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.first` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Timeout** | `cy.first` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) |
 
 ***
 
@@ -25,7 +25,7 @@ Pass in an options object to change the default behavior of `cy.first`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry getting the element
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) | Total time to retry getting the element
 
 ***
 

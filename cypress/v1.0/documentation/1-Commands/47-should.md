@@ -14,7 +14,7 @@ excerpt: Make an assertion about the current subject
 | | |
 |--- | --- |
 | **Returns** | the current subject but (in some cases) a new subject |
-| **Timeout** | the assertion will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Timeout** | the assertion will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) |
 
 ***
 

@@ -47,7 +47,7 @@ Pass in an options object to change the default behavior of `cy.fixture`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the fixture command
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) | Total time to retry the fixture command
 
 ***
 

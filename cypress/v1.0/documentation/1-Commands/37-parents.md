@@ -6,7 +6,7 @@ Get the parents DOM elements of the DOM elements.
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.parents` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Timeout** | `cy.parents` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) |
 
 ***
 
@@ -32,7 +32,7 @@ Pass in an options object to change the default behavior of `cy.parents`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry getting the element
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) | Total time to retry getting the element
 
 ***
 
