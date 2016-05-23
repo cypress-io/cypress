@@ -6,7 +6,7 @@ Set a browser cookie.
 | | |
 |--- | --- |
 | **Returns** | a cookie object |
-| **Timeout** | `cy.setCookie` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-network) for the automation server to process this command. |
+| **Timeout** | `cy.setCookie` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the automation server to process this command. |
 
 ***
 
@@ -29,7 +29,7 @@ Option | Default | Notes
 `secure` | `false` | whether the cookie is a secure cookie
 `httpOnly` | `false` | whether the cookie is an HTTP only cookie
 `expiry` | 20 years into the future | when the cookie expires, specified in seconds since [Unix Epoch](https://en.wikipedia.org/wiki/Unix_time).
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-network) | Total time to wait for the `cy.setCookie` command to be processed
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.setCookie` command to be processed
 `log` | `true` | whether to display command in command log
 
 ***

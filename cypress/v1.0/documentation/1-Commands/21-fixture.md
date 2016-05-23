@@ -29,7 +29,7 @@ If an extension is omitted, Cypress will attempt to resolve the fixture by order
 | | |
 |--- | --- |
 | **Returns** | the contents of the file, formatted by file extension |
-| **Timeout** | `cy.fixture` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-network) for the server to process this command. |
+| **Timeout** | `cy.fixture` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the server to process this command. |
 
 ***
 
@@ -47,7 +47,7 @@ Pass in an options object to change the default behavior of `cy.fixture`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-network) | Total time to wait for the `cy.fixture` command to be processed
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.fixture` command to be processed
 
 ***
 

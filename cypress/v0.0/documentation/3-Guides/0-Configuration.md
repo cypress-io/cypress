@@ -5,7 +5,7 @@ excerpt: Configure global, network, folder, viewport, and animation options
 
 - :fa-angle-right: [Configuration Options](#section-configuration-options)
   - [Global](#section-global)
-  - [Network](#section-network)
+  - [Timeouts](#section-timeouts)
   - [Folders](#section-folders)
   - [Web Server](#section-web-server)
   - [Viewport](#section-viewport)
@@ -37,19 +37,19 @@ Option | Default | Description
 ----- | ---- | ----
 `port` | `2020` | Port to use for Cypress
 `env` | `{}` | [Environment Variables](https://on.cypress.io/guides/environment-variables)
-`commandTimeout` | `4000` | Time, in milliseconds, to wait until commands are considered timed out
-`watchForFileChanges` | `true` | Whether Cypress will watch and restart tests on file changes
+`baseUrl` | `null` | Base url to prefix to [`cy.visit`](https://on.cypress.io/api/visit) or [`cy.request`](https://on.cypress.io/api/request) command
 `reporter` | `spec` | The [Mocha reporter](https://mochajs.org/#reporters) used during headless or CI runs
-`execTimeout` | `60000` | Time, in milliseconds, to wait for a system command to finish executing during [`cy.exec`](https://on.cypress.io/api/exec) command
+`watchForFileChanges` | `true` | Whether Cypress will watch and restart tests on file changes
 `numTestsKeptInMemory` | `50` | The number of tests for which snapshots and command data are kept in memory. Reduce this number if you seeing extremely high memory consumption in your browser.
 
 ***
 
-## Network
+## Timeouts
 
 Option | Default | Description
 ----- | ---- | ----
-`baseUrl` | `null` | Base url to prefix to [`cy.visit`](https://on.cypress.io/api/visit) or [`cy.request`](https://on.cypress.io/api/request) command
+`commandTimeout` | `4000` | Time, in milliseconds, to wait until most DOM based commands are considered timed out
+`execTimeout` | `60000` | Time, in milliseconds, to wait for a system command to finish executing during [`cy.exec`](https://on.cypress.io/api/exec) command
 `pageLoadTimeout` | `30000` | Time, in milliseconds, to wait until [`cy.visit`](https://on.cypress.io/api/visit), [`cy.go`](https://on.cypress.io/api/go), [`cy.reload`](https://on.cypress.io/api/reload), or a page load times out
 `requestTimeout` | `5000` | Time, in milliseconds, to wait for an XHR request during [`cy.wait`](wait) command
 `responseTimeout` | `20000` | Time, in milliseconds, to wait until a response for [`cy.request`](request), [`cy.wait`](https://on.cypress.io/api/wait), [`cy.fixture`](https://on.cypress.io/api/fixture), [`cy.getCookie`](https://on.cypress.io/api/getcookie), [`cy.getCookies`](https://on.cypress.io/api/getcookies), [`cy.setCookie`](https://on.cypress.io/api/setcookie), [`cy.clearCookie`](https://on.cypress.io/api/clearcookie) and [`cy.clearCookies`](https://on.cypress.io/api/clearcookies) commands

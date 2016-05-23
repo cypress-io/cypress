@@ -6,7 +6,7 @@ Use `cy.request` to make XHR requests. Great for talking to an external endpoint
 | | |
 |--- | --- |
 | **Returns** | the `response` as an object literal. |
-| **Timeout** | `cy.request` will wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#section-network-options) or the [`timeout`](#section-options) passed in the options object of the command. |
+| **Timeout** | `cy.request` will wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#section-timeouts) or the [`timeout`](#section-options) passed in the options object of the command. |
 
 ***
 
@@ -49,7 +49,7 @@ Option | Default | Notes
 `cookies` | `false` | Whether to send the current browser cookies. Can also accept an object literal.
 `gzip` | `true` | Whether to accept the `gzip` encoding.
 `failOnStatus` | `true` | Whether to fail on response codes other than `2xx`.
-`timeout` | [responseTimeout](https://on.cypress.io/guides/configuration#section-network-options) | Total time to wait for a response (in ms)
+`timeout` | [responseTimeout](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for a response (in ms)
 `log` | `true` | Whether to log the request in the Command Log
 
 You can also set options for the `cy.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
