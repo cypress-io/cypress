@@ -83,6 +83,10 @@ module.exports = {
         "x-version":  pkg.version
       }
     })
+    .catch (err) ->
+      return if err.statusCode is 401
+
+      throw err
 
   createProject: (projectName, session) ->
     rp.post({
