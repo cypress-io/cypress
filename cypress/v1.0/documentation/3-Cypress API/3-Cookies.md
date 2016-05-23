@@ -7,7 +7,7 @@ Typically you'd use `Cypress.Cookies` in hooks like `before`, `beforeEach`, `aft
 
 Cypress automatically clears all cookies **before** each test to prevent state from building up. You can take advantage of `Cypress.Cookies.preserveOnce` or even **whitelist** cookies by their name to preserve values across multiple tests. This enables you to preserve sessions through several tests.
 
-# [Cypress.Cookies.debug( *boolean* )](#section-debug-usage)
+# [Cypress.Cookies.debug( *boolean*, *options* )](#section-debug-usage)
 
 Enable or disable cookie debugging. When enabled, Cypress will log out when cookies are set or cleared.
 
@@ -34,12 +34,23 @@ By turning on debugging, Cypress will automatically log out to the console when 
 ```javascript
 Cypress.Cookies.debug(true) // now Cypress will log out when it alters cookies
 
-cy.setCookie('session_id', '89ujfas0ef9273faosdfvsgb4')
-cy.clearCookie('session_id')
-cy.setCookie('session_id', '89ujfas0ef9273faosdfvsgb4')
-cy.clearCookie('session_id')
-cy.setCookie('session_id', '89ujfas0ef9273faosdfvsgb4')
+cy.clearCookie('foo')
+cy.setCookie('foo', 'bar')
 ```
+
+![screen shot 2016-05-22 at 8 54 00 pm](https://cloud.githubusercontent.com/assets/1268976/15457855/e2b6e99c-205f-11e6-8b25-ac6e0dcae9ce.png)
+
+## Turn off verbose debugging output
+
+By default Cypress will log out the cookie object which allows you to inspect all of its properties. However you may not need that level of detail and you can turn this off.
+
+```javascript
+Cypress.Cookies.debug(true, {verbose: false})
+```
+
+Now when Cypress logs cookies they will only include the `name` and `value`.
+
+![screen shot 2016-05-22 at 8 54 13 pm](https://cloud.githubusercontent.com/assets/1268976/15457832/680bc71c-205f-11e6-9b8b-1c84380790e0.png)
 
 Debugging will be turned on until you explictly turn it back off.
 
