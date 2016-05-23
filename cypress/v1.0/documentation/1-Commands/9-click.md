@@ -11,8 +11,8 @@ By default, the click is issued at the exact center of the element. You can pass
 
 | | |
 |--- | --- |
-| **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.click` will wait and retry until the element is 'clickable' for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Returns** | the existing DOM subject |
+| **Timeout** | `cy.click` will wait and retry until the element is 'clickable' for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
 ***
 
@@ -64,7 +64,7 @@ Option | Default | Notes
 `force` | `false` | Forces click, disables error checking prior to click
 `multiple` | `false` | Enables serially clicking multiple elements
 `interval` | `16` | Interval which to retry a click
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the click
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) | Total time to retry the click
 `log` | `true` | whether to display command in command log
 
 ***
