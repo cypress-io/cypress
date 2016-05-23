@@ -8,7 +8,7 @@ If you want to call a function on the current subject, use [`cy.invoke`](https:/
 | | |
 |--- | --- |
 | **Returns** | the value of the property |
-| **Timeout** | *cannot timeout* |
+| **Timeout** | `cy.its` cannot timeout unless you've added assertions. The assertions will retry for the duration of [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) |
 
 ***
 

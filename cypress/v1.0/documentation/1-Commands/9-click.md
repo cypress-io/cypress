@@ -12,7 +12,7 @@ By default, the click is issued at the exact center of the element. You can pass
 | | |
 |--- | --- |
 | **Returns** | the existing DOM subject |
-| **Timeout** | `cy.click` will wait and retry until the element is 'clickable' for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Timeout** | `cy.click` will wait and retry until the element is 'clickable' for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) or the duration of the `timeout` specified in the command's [options](#section-options) |
 
 ***
 

@@ -8,7 +8,7 @@ If you want to call a regular property that is not a function on the current sub
 | | |
 |--- | --- |
 | **Returns** | the return value of the invoked property |
-| **Timeout** | *cannot timeout* |
+| **Timeout** | `cy.invoke` cannot timeout unless you've added assertions. The assertions will retry for the duration of [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global)  |
 
 ***
 
