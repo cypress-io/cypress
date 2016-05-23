@@ -49,10 +49,10 @@ Option | Default | Notes
 `cookies` | `false` | Whether to send the current browser cookies. Can also accept an object literal.
 `gzip` | `true` | Whether to accept the `gzip` encoding.
 `failOnStatus` | `true` | Whether to fail on response codes other than `2xx`.
-`timeout` | [responseTimeout](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for a response (in ms)
+`timeout` | [`responseTimeout](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for a response (in ms)
 `log` | `true` | Whether to log the request in the Command Log
 
-You can also set options for the `cy.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
+You can also set options for the `cy.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration#section-global).
 
 ***
 
