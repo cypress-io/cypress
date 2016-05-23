@@ -14,11 +14,15 @@ If you want to call a function on the current subject, use [`cy.invoke`](https:/
 
 # [cy.its( *propertyName* )](#section-usage)
 
-Gets the property with the specified name
+Gets the property with the specified name.
+
+You can also access multiple nested properties with **dot notation**.
 
 ***
 
 # Usage
+
+## Access properties
 
 ```javascript
 cy.wrap({foo: "bar"}).its("foo").should("eq", "bar") // true
@@ -32,6 +36,54 @@ cy
   .its("length") // calls the 'length' property returning that value
   .should("be.gt", 2) // ensure this length is greater than 2
 })
+```
+
+***
+
+## Access functions
+
+You can access functions to then drill into their own properties instead of invoking them.
+
+```javascript
+// Your app code
+
+// a basic Factory constructor
+var Factory = function(arg){
+  ...
+}
+
+Factory.create = function(arg){
+  return new Factory(arg)
+}
+
+// assign it to the window
+window.Factory = Factory
+```
+
+```javascript
+cy
+  .window() // get the window object
+  .its("Factory") // now we are on the Factory function
+  .invoke("create", "arg") // and now we can invoke properties on it
+
+```
+
+***
+
+## Drill into nested properties
+
+You can additionally automatically drill into nested properties by using **dot notation**.
+
+```javascript
+var obj = {
+  foo: {
+    bar: {
+      baz: "quux"
+    }
+  }
+}
+
+cy.wrap(obj).its("foo.bar.baz").should("eq", "quux") // true
 ```
 
 ***
