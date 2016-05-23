@@ -41,7 +41,7 @@ Option | Default | Description
 `watchForFileChanges` | `true` | Whether Cypress will watch and restart tests on file changes
 `reporter` | `spec` | The [Mocha reporter](https://mochajs.org/#reporters) used during headless or CI runs
 `execTimeout` | `60000` | Time, in milliseconds, to wait for a system command to finish executing during [`cy.exec`](https://on.cypress.io/api/exec) command
-`numTestsKeptInMemory` | `50` | The number of test's snapshots and command data that is kept in memory while tests are running
+`numTestsKeptInMemory` | `50` | The number of tests for which snapshots and command data are kept in memory. Reduce this number if you seeing extremely high memory consumption in your browser.
 
 ## Network
 
