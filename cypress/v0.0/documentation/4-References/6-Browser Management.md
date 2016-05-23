@@ -24,6 +24,8 @@ When you're ready to start testing, Cypress launches the browser for you. It doe
 1. To create a clean, pristine testing environment.
 2. To access the exclusive browser API's for automation.
 
+***
+
 # Launching Browsers
 
 When Cypress is initially [run from the Desktop application](https://on.cypress.io/guides/installing-and-running#section-logging-in), you can choose to run Cypress in a select number of browsers including:
@@ -55,9 +57,13 @@ Additionally, we've made the browsers spawned by Cypress look different than reg
 
 <screenshot of darker theme>
 
+***
+
 ## Unsupported Browsers
 
 <screenshot of trying to visit cypress outside a supported browser>
+
+***
 
 # Clean Testing Environment
 
@@ -66,6 +72,8 @@ When we launch browsers we open them in a way that makes testing more reliable a
 1. Creating an isolated testing profile
 2. Disabling virtually everything that gets in the way of testing
 3. Enabling access to browser automation API's
+
+***
 
 ## Cypress Profile
 
@@ -79,6 +87,8 @@ Cypress generates its own isolated profile away from your regular browsing profi
 [/block]
 
 That's no problem - you simply have to reinstall them **once**. We'll continue to use this Cypress testing profile on subsequent launches so all of your configuration will automatically be preserved.
+
+***
 
 ## Testing Barriers
 
@@ -96,14 +106,22 @@ For instance we will automatically:
 - Disable a ton of background network traffic
 - Disable background and renderer throttling
 
+***
+
 ## Tabbed Browsing
+
+***
 
 # Automation API's
 
 ## Cypress Extension
 <talk about not using the debugger protocol>
 
+***
+
 ## Browser Drivers
+
+***
 
 ## No Selenium Server
 

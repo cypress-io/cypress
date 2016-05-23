@@ -126,7 +126,6 @@ These two commands work together to control the behavior of your responses withi
 
 [`cy.server`](https://on.cypress.io/api/server) enables stubbing, while [`cy.route`](https://on.cypress.io/api/route) provides a routing table so Cypress understands which response should go with which request.
 
-
 ***
 
 # Requests

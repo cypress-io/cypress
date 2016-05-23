@@ -96,6 +96,8 @@ Because Cypress implements a fluent API, all commands are linked together.  Cypr
 - [Child Commands](#section-child-commands)
 - [Dual Commands](#section-dual-commands)
 
+***
+
 ## Parent Commands
 
 Parent commands always *begin* a new chain of commands. Even if you've written a previous chain, parent commands will always start a new chain, and ignore previous chains. Parent commands should be written off the `cy` object:
@@ -120,6 +122,8 @@ cy
   // the previous chain is ignored and we query from the root document
   .get("input").type("foobarbaz")
 ```
+
+***
 
 ## Child Commands
 
@@ -167,6 +171,8 @@ cy
     // we type into an existing DOM <input /> subject
     .type("foobarbaz")
 ```
+
+***
 
 ## Dual Commands
 

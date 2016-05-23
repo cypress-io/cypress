@@ -5,6 +5,8 @@ excerpt: Patterns which you should avoid
 
 - :fa-angle-right: [Adding unncessary waits](#section-adding-unnecessary-waits)
 
+***
+
 # Adding unncessary waits
 
 In Cypress, you almost **never** need to `cy.wait` for an arbitrary period of time. If you are finding yourself do this, there is likely a much better, simpler way.

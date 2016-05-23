@@ -26,6 +26,8 @@ Oftentimes you can use [`cy.invoke`](https://on.cypress.io/api/invoke) or [`cy.w
 cy.get("#nav").first().invoke("trigger", "contextmenu")
 ```
 
+***
+
 ## Hover
 
 [Issue #10](https://github.com/cypress-io/cypress/issues/10)

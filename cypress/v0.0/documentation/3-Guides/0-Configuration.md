@@ -43,6 +43,8 @@ Option | Default | Description
 `execTimeout` | `60000` | Time, in milliseconds, to wait for a system command to finish executing during [`cy.exec`](https://on.cypress.io/api/exec) command
 `numTestsKeptInMemory` | `50` | The number of tests for which snapshots and command data are kept in memory. Reduce this number if you seeing extremely high memory consumption in your browser.
 
+***
+
 ## Network
 
 Option | Default | Description
@@ -51,6 +53,8 @@ Option | Default | Description
 `pageLoadTimeout` | `30000` | Time, in milliseconds, to wait until [`cy.visit`](https://on.cypress.io/api/visit), [`cy.go`](https://on.cypress.io/api/go), [`cy.reload`](https://on.cypress.io/api/reload), or a page load times out
 `requestTimeout` | `5000` | Time, in milliseconds, to wait for an XHR request during [`cy.wait`](wait) command
 `responseTimeout` | `20000` | Time, in milliseconds, to wait until a response for [`cy.request`](request), [`cy.wait`](https://on.cypress.io/api/wait), [`cy.fixture`](https://on.cypress.io/api/fixture), [`cy.getCookie`](https://on.cypress.io/api/getcookie), [`cy.getCookies`](https://on.cypress.io/api/getcookies), [`cy.setCookie`](https://on.cypress.io/api/setcookie), [`cy.clearCookie`](https://on.cypress.io/api/clearcookie) and [`cy.clearCookies`](https://on.cypress.io/api/clearcookies) commands
+
+***
 
 ## Folders
 
@@ -62,11 +66,15 @@ Option | Default | Description
 `integrationFolder` | `cypress/integration` | Where Cypress will look for integration test files
 `supportFolder`     | `cypress/support`     | Where Cypress will auto load support files
 
+***
+
 ## Web Server
 
 Option | Default | Description
 ----- | ---- | ----
 `fileServerFolder`    | root project folder    | Where Cypress will attempt to serve your application files
+
+***
 
 ## Viewport
 
@@ -74,6 +82,8 @@ Option | Default | Description
 ----- | ---- | ----
 `viewportWidth` | `1000` | Default width in pixels for [`cy.viewport`](https://on.cypress.io/api/viewport)
 `viewportHeight` | `660` | Default hidth in pixels for  [`cy.viewport`](https://on.cypress.io/api/viewport)
+
+***
 
 ## Animations
 
@@ -104,6 +114,8 @@ cypress run --config integrationFolder=tests,fixturesFolder=false,supportFolder=
 
 cypress ci --config viewportWidth=1280,viewportHeight=720
 ```
+
+***
 
 ## Environment Variables
 

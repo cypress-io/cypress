@@ -7,6 +7,8 @@ Name | JS | Server | CI
 [TodoMVC](https://github.com/cypress-io/cypress-example-todomvc) | React | Node | TravisCI, CircleCI
 [PieChopper](https://github.com/cypress-io/cypress-example-piechopper) | Angular | Node | TravisCI, CircleCI
 
+***
+
 # [Kitchen Sink](https://github.com/cypress-io/cypress-example-kitchensink)
 
 This is an example app is used to showcase every command available in Cypress. The [tests](https://github.com/cypress-io/examples-kitchen-sink/blob/master/cypress/integration/example_spec.js) cover all of the following features:

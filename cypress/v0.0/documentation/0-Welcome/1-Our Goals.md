@@ -6,6 +6,8 @@ excerpt: What we believe and why
 - :fa-angle-right: [Problems with current front-end testing tools](#section-problems-with-current-front-end-testing-tools)
 - :fa-angle-right: [Goals of Cypress](#section-goals-of-cypress)
 
+***
+
 # Problems with current front-end testing tools
 
 There are clear benefits to testing code. But many *web applications* are not fully covered in tests. Why? There are many testing tools for the front end, but most (if not all) suffer from some problems.
@@ -30,6 +32,8 @@ There is a lot of mental friction when writing tests. Testing just becomes anoth
 Because of this complexity, most organizations have an entire Quality Assurance (QA) department dedicated to these tasks.
 
 > Cypress aims to solve the biggest difficulties when it comes to testing web applications. It aims to reduce the mental effort required to write tests. Cypress works in your typical development workflow (in the browser) and allows you to see your application while it's being tested. This enables you to practice TDD since there is no context shift between testing and development.
+
+***
 
 # Goals of Cypress
 
