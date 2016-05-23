@@ -1,5 +1,5 @@
 slug: browser-management
-excerpt: How and why Cypress manages the browser session while running tests
+excerpt: How and why Cypress manages your browser
 
 # Contents
 
@@ -39,7 +39,7 @@ We'll automatically detect available browsers based on your OS. In `Linux` we de
 [block:callout]
 {
   "type": "warning",
-  "body": "I'm confused which is the Cypres profile and which is my own profile!"
+  "body": "I'm confused which is the Cypress browser and which is my own browser!"
 }
 [/block]
 
@@ -69,7 +69,7 @@ When we launch browsers we open them in a way that makes testing more reliable a
 
 ## Cypress Profile
 
-For instance we generate our own isolated profile away from your regular browsing. This means things like `history` entries, `cookies`, and **3rd party extensions** will not affect Cypress.
+Cypress generates its own isolated profile away from your regular browsing profile. This means things like `history` entries, `cookies`, and `3rd party extensions` from your regular browsing session will not affect Cypress.
 
 [block:callout]
 {
@@ -82,25 +82,19 @@ That's no problem - you simply have to reinstall them **once**. We'll continue t
 
 ## Testing Barriers
 
-Cypress automatically disables certain functionality in your browser which can get in the way of automated testing. For instance it will automatically:
+Cypress automatically disables certain functionality in your browser which can get in the way of automated testing.
 
-**Ignore certificate errors**
+For instance we will automatically:
 
-**Allow blocked pop-ups**
-
-**Disable 'Saving passwords'**
-
-**Disable 'Autofill forms and passwords'
-
-**Disable asking to become your primary browser**
-
-**Disable language translations**
-
-**Disable restoring sessions**
-
-**Disable a ton of background network traffic**
-
-**Disable background and renderer throttling**
+- Ignore certificate errors
+- Allow blocked pop-ups
+- Disable 'Saving passwords'
+- Disable 'Autofill forms and passwords'
+- Disable asking to become your primary browser
+- Disable language translations
+- Disable restoring sessions
+- Disable a ton of background network traffic
+- Disable background and renderer throttling
 
 ## Tabbed Browsing
 
