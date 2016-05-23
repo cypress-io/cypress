@@ -80,6 +80,6 @@ When clicking on `getCookie` within the command log, the console outputs the fol
 
 - [clearCookie](https://on.cypress.io/api/clearcookie)
 - [clearCookies](https://on.cypress.io/api/clearcookies)
-- [getCookie](https://on.cypress.io/api/getcookie)
+- [getCookies](https://on.cypress.io/api/getcookies)
 - [setCookie](https://on.cypress.io/api/setcookie)
 - [Cypress Cookie API](https://on.cypress.io/api/cookies)
