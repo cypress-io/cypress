@@ -52,7 +52,7 @@ Option | Default | Notes
 `timeout` | [`responseTimeout](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for a response (in ms)
 `log` | `true` | Whether to log the request in the Command Log
 
-You can also set options for the `cy.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration#section-global).
+You can also set options for the `cy.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
 
 ***
 

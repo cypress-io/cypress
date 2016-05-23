@@ -6,7 +6,7 @@ Get the immediately following sibling of each DOM element in the set of matched 
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.next` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) |
+| **Timeout** | `cy.next` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
@@ -32,7 +32,7 @@ Pass in an options object to change the default behavior of `cy.next`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) | Total time to retry getting the element
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
 
 ***
 

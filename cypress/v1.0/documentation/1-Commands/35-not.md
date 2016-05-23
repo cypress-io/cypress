@@ -6,7 +6,7 @@ Remove DOM elements from the set of DOM elements. Opposite of [`cy.filter()`](ht
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.not` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) |
+| **Timeout** | `cy.not` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
@@ -25,7 +25,7 @@ Pass in an options object to change the default behavior of `cy.not`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) | Total time to retry getting the element
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
 
 ***
 

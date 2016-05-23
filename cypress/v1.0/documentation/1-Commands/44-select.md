@@ -8,7 +8,7 @@ Select an option within a `<select>` DOM element.
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.select` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Timeout** | `cy.select` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
 ***
 
@@ -49,7 +49,7 @@ Option | Default | Notes
 --- | --- | ---
 `force` | `false` | Forces select, disables error checking prior to select
 `interval` | `50` | Interval which to retry a select
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) | Total time to retry the select
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the select
 `log` | `true` | whether to display command in command log
 
 ***

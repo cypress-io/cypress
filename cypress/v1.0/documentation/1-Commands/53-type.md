@@ -27,7 +27,7 @@ Additionally `change` events will be fired either when the `{enter}` key is pres
 | | |
 |--- | --- |
 | **Returns** | the DOM element that was typed into |
-| **Timeout** | `cy.type` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Timeout** | `cy.type` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
 ***
 
@@ -48,7 +48,7 @@ Option | Default | Notes
 `delay` | `10` | Delay after each keypress
 `force` | `false` | Forces type, disables error checking prior to type
 `interval` | `16` | Interval which to retry type
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) | Total time to retry the type
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the type
 `log` | `true` | whether to display command in command log
 
 ***

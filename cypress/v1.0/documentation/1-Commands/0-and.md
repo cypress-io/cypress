@@ -16,7 +16,7 @@ You'd typically use `cy.and` when you are making multiple assertions about the s
 | | |
 |--- | --- |
 | **Returns** | the current subject but (in some cases) a new subject  |
-| **Timeout** | the assertion will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) |
+| **Timeout** | the assertion will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 

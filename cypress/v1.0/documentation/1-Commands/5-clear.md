@@ -16,7 +16,7 @@ Prior to clearing, if the element isn't currently focused, Cypress will issue a 
 | | |
 |--- | --- |
 | **Returns** | the element that was typed into |
-| **Timeout** | `cy.clear` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) or the duration of the `timeout` specified in the command's [options](#section-options).|
+| **Timeout** | `cy.clear` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options).|
 
 ***
 
@@ -36,7 +36,7 @@ Option | Default | Notes
 --- | --- | ---
 `force` | `false` | Forces clear, disables error checking prior to clear
 `interval` | `16` | Interval which to retry type
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) | Total time to retry the type
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the type
 `log` | `true` | whether to display command in command log
 
 ***

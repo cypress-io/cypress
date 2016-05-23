@@ -12,7 +12,7 @@ Just like Promises, you can return any compatible "thenable" (anything that has 
 | | |
 |--- | --- |
 | **Returns** | the return of the callback function |
-| **Timeout** | `cy.then` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Timeout** | `cy.then` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
 ***
 
@@ -50,7 +50,7 @@ Pass in an options object to change the default behavior of `cy.then`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) | Total time to retry the click
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the click
 
 ***
 

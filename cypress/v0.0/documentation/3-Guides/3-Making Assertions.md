@@ -444,7 +444,7 @@ Cypress makes it easy to test and make assertions about all of these.
 
 You have two ways of increasing the amount of time Cypress waits for assertions to pass.
 
-1. Change the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global) globally
+1. Change the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) globally
 2. Override the timeout option on a previous command before the assertion command.
 
 Overriding the timeout option on a specific command looks like this:
