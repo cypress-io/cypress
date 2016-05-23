@@ -8,13 +8,13 @@ Cypress automatically invokes this command **before** each test to prevent state
 | | |
 |--- | --- |
 | **Returns** | `null` |
-| **Timeout** | *cannot timeout* |
+| **Timeout** | `cy.clearCookies` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-network) for the automation server to process this command.|
 
 ***
 
 # [cy.clearCookies()](#section-usage)
 
-Clears the browser cookies.
+Clears all the browser cookies.
 
 ***
 
@@ -26,7 +26,7 @@ Pass in an options object to change the default behavior of `cy.clearCookies`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the clearCookies command
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-network) | Total time to wait for the `cy.clearCookies` command to be processed
 `log` | `true` | whether to display command in command log
 
 ***

@@ -5,14 +5,26 @@ Gets all of the browser cookies.
 
 | | |
 |--- | --- |
-| **Returns** | an array of cookies |
-| **Timeout** | *cannot timeout* |
+| **Returns** | an array of cookie objects |
+| **Timeout** | `cy.getCookies` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-network) for the automation server to process this command.  |
 
 ***
 
 # [cy.getCookies()](#section-usage)
 
-Gets the browser cookies and their properties.
+Gets the browser cookies.
+
+Each cookie object will have the following properties:
+
+| Properties |
+| --- |
+| `name` |
+| `value` |
+| `path` |
+| `domain` |
+| `httpOnly` |
+| `secure` |
+| `expiry` |
 
 ***
 
@@ -25,7 +37,7 @@ Pass in an options object to change the default behavior of `cy.getCookies`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the getCookies command
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-network) | Total time to wait for the `cy.getCookies` command to be processed
 `log` | `true` | whether to display command in command log
 
 ***
@@ -41,7 +53,7 @@ cy
   .login("bob@example.com", "p@ssw0rd") // example of a custom command
   .getCookies()
     .should('have.length', 1)
-    .then( function(cookies) {
+    .then(function(cookies) {
       expect(cookies[0]).to.have.property('name', 'session_id')
     })
 ```

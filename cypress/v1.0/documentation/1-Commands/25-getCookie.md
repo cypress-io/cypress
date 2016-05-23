@@ -5,14 +5,26 @@ Get a browser cookie.
 
 | | |
 |--- | --- |
-| **Returns** | a cookie object |
-| **Timeout** | *cannot timeout* |
+| **Returns** | a cookie object literal |
+| **Timeout** | `cy.getCookie` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-network) for the automation server to process this command. |
 
 ***
 
 # [cy.getCookie( *name* )](#section-usage)
 
-Gets a browser cookie and their properties.
+Gets a browser cookie by its name.
+
+This object will have the following properties:
+
+| Properties |
+| --- |
+| `name` |
+| `value` |
+| `path` |
+| `domain` |
+| `httpOnly` |
+| `secure` |
+| `expiry` |
 
 ***
 
@@ -24,7 +36,7 @@ Pass in an options object to change the default behavior of `cy.getCookie`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the getCookie command
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-network) | Total time to wait for the `cy.getCookie` command to be processed
 `log` | `true` | whether to display command in command log
 
 ***
@@ -70,4 +82,4 @@ When clicking on `getCookie` within the command log, the console outputs the fol
 - [clearCookies](https://on.cypress.io/api/clearcookies)
 - [getCookie](https://on.cypress.io/api/getcookie)
 - [setCookie](https://on.cypress.io/api/setcookie)
-- [Cypress API Cookies](https://on.cypress.io/api/cookies)
+- [Cypress Cookie API](https://on.cypress.io/api/cookies)

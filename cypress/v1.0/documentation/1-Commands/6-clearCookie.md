@@ -8,13 +8,13 @@ Cypress automatically clears all cookies **before** each test to prevent state f
 | | |
 |--- | --- |
 | **Returns** | `null` |
-| **Timeout** | *cannot timeout* |
+| **Timeout** | `cy.clearCookie` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-network) for the automation server to process this command. |
 
 ***
 
 # [cy.clearCookie( *name* )](#section-usage)
 
-Clears a browser cookie.
+Clears a browser cookie by its name.
 
 ***
 
@@ -26,7 +26,7 @@ Pass in an options object to change the default behavior of `cy.clearCookie`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the clearCookie command
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-network) | Total time to wait for the `cy.clearCookie` command to be processed
 `log` | `true` | whether to display command in command log
 
 ***
@@ -49,22 +49,22 @@ cy
 
 # Command Log
 
-## Clearing a cookie after getting a cookie
+## Clearing a cookie after setting a cookie
 
 ```javascript
 cy
-  .getCookie('fakeCookie1').should('have.property', 'value', '123ABC')
-  .clearCookie('fakeCookie1')
-  .getCookie('fakeCookie1').should('be.null')
+  .setCookie('foo', 'bar')
+  .clearCookie('foo')
+  .getCookie('foo').should('be.null')
 ```
 
 The commands above will display in the command log as:
 
-![screen shot 2016-05-10 at 11 58 03 am](https://cloud.githubusercontent.com/assets/1271364/15153246/7a9d1a92-16a6-11e6-9415-6985204477e7.png)
+![screen shot 2016-05-22 at 9 21 14 pm](https://cloud.githubusercontent.com/assets/1268976/15458066/345b5bb8-2063-11e6-91bb-173421c8440a.png)
 
 When clicking on `clearCookie` within the command log, the console outputs the following:
 
-![screen shot 2016-05-10 at 11 57 56 am](https://cloud.githubusercontent.com/assets/1271364/15153245/7a9b246c-16a6-11e6-8925-04247aaf5401.png)
+![screen shot 2016-05-22 at 9 21 32 pm](https://cloud.githubusercontent.com/assets/1268976/15458067/345dba3e-2063-11e6-8739-af971bc79068.png)
 
 ***
 
