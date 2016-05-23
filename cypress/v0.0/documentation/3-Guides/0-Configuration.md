@@ -50,7 +50,7 @@ Option | Default | Description
 `baseUrl` | `null` | Base url to prefix to [`cy.visit`](https://on.cypress.io/api/visit) or [`cy.request`](https://on.cypress.io/api/request) command
 `pageLoadTimeout` | `30000` | Time, in milliseconds, to wait until [`cy.visit`](https://on.cypress.io/api/visit), [`cy.go`](https://on.cypress.io/api/go), [`cy.reload`](https://on.cypress.io/api/reload), or a page load times out
 `requestTimeout` | `5000` | Time, in milliseconds, to wait for an XHR request during [`cy.wait`](wait) command
-`responseTimeout` | `20000` | Time, in milliseconds, to wait until a response for [`cy.request`](request) and [`cy.wait`](https://on.cypress.io/api/wait) commands
+`responseTimeout` | `20000` | Time, in milliseconds, to wait until a response for [`cy.request`](request), [`cy.wait`](https://on.cypress.io/api/wait), [`cy.fixture`](https://on.cypress.io/api/fixture), [`cy.getCookie`](https://on.cypress.io/api/getcookie), [`cy.getCookies`](https://on.cypress.io/api/getcookies), [`cy.setCookie`](https://on.cypress.io/api/setcookie), [`cy.clearCookie`](https://on.cypress.io/api/clearcookie) and [`cy.clearCookies`](https://on.cypress.io/api/clearcookies) commands
 
 ## Folders
 
