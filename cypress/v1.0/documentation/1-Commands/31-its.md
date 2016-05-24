@@ -90,7 +90,7 @@ cy.wrap(obj).its("foo.bar.baz").should("eq", "quux") // true
 
 # Command Log
 
-## Click the button in the form that has text "Create User"
+## Fetch 'comments' fixture
 
 ```javascript
 cy
