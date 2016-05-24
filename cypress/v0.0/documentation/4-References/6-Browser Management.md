@@ -34,7 +34,7 @@ When Cypress is initially [run from the Desktop application](https://on.cypress.
 - Chromium
 - Canary
 
-<animated gif of browsers opening>
+![open browsers](https://cloud.githubusercontent.com/assets/1268976/15519992/11fa3c36-21d2-11e6-9557-9b0f4139ac70.gif)
 
 We'll automatically detect available browsers based on your OS. In `Linux` we detect browsers by their executable binary, and in `OSX` we'll automatically find them even if they aren't in your `/Applications` folder.
 
@@ -47,21 +47,21 @@ We'll automatically detect available browsers based on your OS. In `Linux` we de
 
 You might notice that if you already have the browser open you will see two icons of the same browser in your Dock.
 
-<screenshot of multiple browsers with same icon>
+![switching browsers](https://cloud.githubusercontent.com/assets/1268976/15520492/b812cfe6-21d4-11e6-8764-831f33bd0acf.gif)
 
 We understand that when Cypress is running in its own profile it can be confusing telling the difference from your normal browser and Cypress. For this reason we recommend [downloading Chromium](https://download-chromium.appspot.com/) or [downloading Canary](https://www.google.com/chrome/browser/canary.html). These browsers both have different icons from the standard Chrome browser and it'll be much easier to tell the difference.
 
-<screenshot of chrome/chromium/canary alonside each other>
+![switch canary](https://cloud.githubusercontent.com/assets/1268976/15520491/b812bfe2-21d4-11e6-99ea-c77dae947b26.gif)
 
 Additionally, we've made the browsers spawned by Cypress look different than regular sessions. You'll see a darker theme around the chrome of the browser. You'll always be able to visually distinguish these.
 
-<screenshot of darker theme>
+![screen shot 2016-05-24 at 5 25 19 pm](https://cloud.githubusercontent.com/assets/1268976/15520464/936b3976-21d4-11e6-8aca-33d05f2c2a8b.png)
 
 ***
 
 ## Unsupported Browsers
 
-<screenshot of trying to visit cypress outside a supported browser>
+![screen shot 2016-05-24 at 5 29 05 pm](https://cloud.githubusercontent.com/assets/1268976/15520572/12b158a0-21d5-11e6-92e0-2e75e42fa517.png)
 
 ***
 
