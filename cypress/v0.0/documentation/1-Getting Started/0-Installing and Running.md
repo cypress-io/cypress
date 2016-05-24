@@ -114,7 +114,7 @@ To run tests:
 - Click on the project. You should see a `Server Running` message.
 - Click on the `Run in Chrome` button or select another browser to run the tests in (if available).
 
-![project](https://cloud.githubusercontent.com/assets/1268976/9286780/adad94b8-42c9-11e5-9a67-df7abb87fac0.gif)
+![launching browsers](https://cloud.githubusercontent.com/assets/1268976/15519167/1cf8d790-21ce-11e6-8fa5-8810d03b25c7.gif)
 
 A new browser window will open and take you to a page listing the Integration Test files.
 
