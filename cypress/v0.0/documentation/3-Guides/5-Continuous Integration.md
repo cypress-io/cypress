@@ -37,9 +37,9 @@ If you're running on your own `Jenkins` server you may have to install some othe
 
 Running Cypress in CI is very easy. If you're using a hosted CI service, generally the workflow is the same:
 
-1. [Add your project's repo to your CI provider](#add-your-project-to-your-ci-provider)
-2. [Acquire a Cypress secret key](#acquire-a-cypress-secret-key)
-3. [Add 2 lines of code to your CI config file](#add-2-lines-of-code-to-your-ci-config-file)
+1. [Add your project's repo to your CI provider](#section-add-your-project-to-your-ci-provider)
+2. [Acquire a Cypress secret key](#section-acquire-a-cypress-secret-key)
+3. [Add 2 lines of code to your CI config file](#section-add-2-lines-of-code-to-your-ci-config-file)
 
 ***
 
