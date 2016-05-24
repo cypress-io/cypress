@@ -88,6 +88,33 @@ cy.wrap(obj).its("foo.bar.baz").should("eq", "quux") // true
 
 ***
 
+# Command Log
+
+## Click the button in the form that has text "Create User"
+
+```javascript
+cy
+  .server()
+  .route(/comments/, 'fixture:comments.json').as('getComments')
+  .get('#fetch-comments').click()
+  .wait('@getComments')
+    .its('responseBody')
+    .should('deep.eq', [
+      {id: 1, comment: 'hi'},
+      {id: 2, comment: 'there'}
+    ])
+```
+
+The commands above will display in the command log as:
+
+![screen shot 2016-05-24 at 12 39 40 pm](https://cloud.githubusercontent.com/assets/1268976/15512229/d512cbb4-21ac-11e6-9a9a-5d358ae4fe4b.png)
+
+When clicking on `its` within the command log, the console outputs the following:
+
+![screen shot 2016-05-24 at 12 40 17 pm](https://cloud.githubusercontent.com/assets/1268976/15512225/d14723cc-21ac-11e6-88d5-39ffe6c0a195.png)
+
+***
+
 # Related
 
 - [invoke](https://on.cypress.io/api/invoke)
