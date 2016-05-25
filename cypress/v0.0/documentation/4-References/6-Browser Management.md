@@ -28,7 +28,7 @@ When you're ready to start testing, Cypress launches the browser for you. It doe
 
 # Launching Browsers
 
-When Cypress is initially [run from the Desktop application](https://on.cypress.io/guides/installing-and-running#section-logging-in), you can choose to run Cypress in a select number of browsers including:
+When Cypress is initially [run from the Desktop application](https://on.cypress.io/guides/installing-and-running#section-running-tests-from-the-gui), you can choose to run Cypress in a select number of browsers including:
 
 - Chrome
 - Chromium
