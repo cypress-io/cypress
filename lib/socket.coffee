@@ -111,9 +111,12 @@ class Socket
           @io.to("automation").emit("automation:request", id, message, data)
 
   createIo: (server, path, cookie) ->
-    ## TODO: dont serve the client!
-    # socketIo(server, {path: path, destroyUpgrade: false, serveClient: false})
-    socketIo.server(server, {path: path, destroyUpgrade: false, cookie: cookie})
+    socketIo.server(server, {
+      path: path
+      destroyUpgrade: false
+      serveClient: false
+      cookie: cookie
+    })
 
   _startListening: (server, watchers, config, options) ->
     _.defaults options,

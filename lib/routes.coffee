@@ -4,6 +4,7 @@ cwd         = require("./cwd")
 logger      = require("./logger")
 spec        = require("./controllers/spec_processor")
 xhrs        = require("./controllers/xhrs")
+client      = require("./controllers/client")
 files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
 builds      = require("./controllers/builds")
@@ -16,6 +17,9 @@ module.exports = (app, config) ->
     test = CacheBuster.strip(req.query.p)
 
     spec.handle(test, req, res, config, next)
+
+  app.get "/__cypress/socket.io.js", (req, res) ->
+    client.handle(req, res)
 
   ## routing for /files JSON endpoint
   app.get "/__cypress/files", (req, res) ->
