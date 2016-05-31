@@ -3,6 +3,10 @@
     "browser": true,
     "node": true
   },
+  "globals": {
+    "$": true,
+    "Mocha": true
+  },
   "parserOptions": {
     "ecmaVersion": 6,
     "sourceType": "module",
@@ -82,7 +86,7 @@
     "prefer-rest-params": "error",
     "prefer-spread": "error",
     "prefer-template": "error",
-    "semi-spacing": "error",
+    "semi": ["error", "never"],
     "space-before-blocks": "error",
     "space-before-function-paren": "error",
     "space-in-parens": ["error", "never"],

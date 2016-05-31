@@ -1,4 +1,12 @@
-import React from 'react';
-import { render } from 'react-dom';
+import React from 'react'
+import { render } from 'react-dom'
 
-render(<h1>AUT</h1>, document.getElementById('app'));
+import Iframes from './iframe/iframes'
+
+render(
+  <div id="aut-wrapper">
+    <div id="header-region"></div>
+    <Iframes />
+    <div id="message-region"></div>
+  </div>
+, document.getElementById('app'))
