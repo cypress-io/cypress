@@ -12,7 +12,7 @@ export default class SpecIframe extends Component {
   }
 
   render () {
-    const src = 'test.html'
+    const src = '/__cypress/aut/test.html'
 
     return <iframe ref="iframe" id={`Your Spec: '${src}'`} className='iframe-spec' src={src} />
   }

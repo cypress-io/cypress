@@ -14,7 +14,7 @@ export default class AutIframe extends Component {
 
   componentDidMount () {
     const contents = `
-      <link rel='stylesheet' href='/blank.css' />
+      <link rel='stylesheet' href='/__cypress/aut/blank.css' />
       <div class='container'>
         <div class='jumbotron text-center'>
           <h1><i class='fa fa-home'></i></h1>
