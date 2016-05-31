@@ -18,6 +18,16 @@ export default {
     _.each(CypressEvents, (event) => {
       Cypress.on(event, (...args) => channel.emit(event, ...args))
     })
+
+    // hacks to simply force a response to automation
+    // requests so our tests run
+    Cypress.on("get:cookies", (options, cb) => {
+      cb({response: []})
+    })
+
+    Cypress.on("clear:cookies", (options, cb) => {
+      cb({response: []})
+    })
   },
 
   run (specWindow, remoteIframe) {
