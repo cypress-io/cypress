@@ -1,0 +1,27 @@
+{
+  "name": "@cypress/core-aut",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress-core-aut.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress-core-aut/issues"
+  },
+  "homepage": "https://github.com/cypress-io/cypress-core-aut#readme",
+  "scripts": {
+    "build": "zunder build-prod",
+    "server": "zunder serve-prod --port 8000",
+    "start": "zunder watch"
+  },
+  "devDependencies": {
+    "eslint": "^2.11.1",
+    "eslint-plugin-react": "^5.1.1",
+    "zunder": "^3.2.0"
+  },
+  "dependencies": {
+    "react": "^15.1.0",
+    "react-dom": "^15.1.0"
+  }
+}
