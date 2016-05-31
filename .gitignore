@@ -1,0 +1,9 @@
+.DS_Store
+node_modules
+bower_components
+*.log
+dist
+dist-prod
+build
+cypress.env.json
+tmp
