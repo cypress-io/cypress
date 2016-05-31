@@ -184,6 +184,22 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.match(/App.start\(.+\)/)
 
+  context "GET /__cypress/aut/*", ->
+    beforeEach ->
+      @setup()
+
+    it "can get app.js", ->
+      supertest(@app)
+      .get("/__cypress/aut/app.js")
+      .expect(200)
+      .expect(/React/)
+
+    it "can get app.css", ->
+      supertest(@app)
+      .get("/__cypress/aut/app.css")
+      .expect(200)
+      .expect(/aut-container/)
+
   context "GET /__cypress/files", ->
     beforeEach ->
       Fixtures.scaffold("todos")
