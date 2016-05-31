@@ -1,6 +1,7 @@
 {
   "name": "@cypress/core-aut",
   "version": "0.0.0",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cypress-io/cypress-core-aut.git"
