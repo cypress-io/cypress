@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <script>
+      (function (parent) {
+        window.Cypress = parent.Cypress
+        if (!Cypress) {
+          throw new Error("Tests cannot run without a reference to Cypress!")
+        }
+        Cypress.window(window)
+      })(window.opener || window.parent)
+    </script>
+    <script src="foo_spec.js"></script>
+  </body>
+</html>
