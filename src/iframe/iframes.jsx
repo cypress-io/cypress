@@ -12,7 +12,7 @@ export default class Iframes extends Component {
 
   render () {
     return (
-      <div id='aut-size-container'>
+      <div>
         <AutIframe ref='autIframe' />
         <SpecIframe onLoaded={this.specIframeLoaded.bind(this)} />
       </div>

@@ -11,10 +11,6 @@ export default class SpecIframe extends Component {
     iframe.addEventListener('load', onLoad)
   }
 
-  shouldComponentUpdate () {
-    return false
-  }
-
   render () {
     const src = 'test.html'
 

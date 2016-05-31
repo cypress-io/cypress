@@ -5,8 +5,10 @@ import Iframes from './iframe/iframes'
 
 render(
   <div id="aut-wrapper">
-    <div id="header-region"></div>
-    <Iframes />
-    <div id="message-region"></div>
+    <div id="aut-container">
+      <div id="header-region"></div>
+      <Iframes />
+      <div id="message-region"></div>
+    </div>
   </div>
 , document.getElementById('app'))

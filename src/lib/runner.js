@@ -1,6 +1,5 @@
 import overrides from './overrides'
-
-const Cypress = $Cypress.create({loadModules: true})
+import Cypress from './cypress'
 
 export default {
   start () {
@@ -15,7 +14,6 @@ export default {
     Cypress.initialize(specWindow, $(remoteIframe))
 
     Cypress.run((numErrs, results) => {
-      debugger
     })
   },
 }
