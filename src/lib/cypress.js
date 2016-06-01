@@ -1,1 +1,3 @@
-export default $Cypress.create({loadModules: true})
+/* global $Cypress */
+
+export default $Cypress.create({ loadModules: true })

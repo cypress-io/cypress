@@ -3,11 +3,6 @@
     "browser": true,
     "node": true
   },
-  "globals": {
-    "$": true,
-    "io": true,
-    "Mocha": true
-  },
   "parserOptions": {
     "ecmaVersion": 6,
     "sourceType": "module",

@@ -1,3 +1,5 @@
+/* global io */
+
 import _ from 'lodash'
 
 import overrides from './overrides'
@@ -33,7 +35,6 @@ export default {
   run (specWindow, $autIframe) {
     Cypress.initialize(specWindow, $autIframe)
 
-    Cypress.run((numErrs, results) => {
-    })
+    Cypress.run(() => {})
   },
 }

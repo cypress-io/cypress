@@ -1,3 +1,5 @@
+/* global Mocha */
+
 import _ from 'lodash'
 
 const runnableEmit = Mocha.Runnable.prototype.emit
@@ -25,8 +27,8 @@ export default {
   overloadMochaRunnerUncaught () {
     return Mocha.Runner.prototype.uncaught = _.wrap(uncaught, function (orig, err) {
       if (!/(AssertionError|CypressError)/.test(err.name) && !err.__isMessage && !/SilenceError/.test(err.message)) {
-        console.error(err.stack)
-        debugger
+        console.error(err.stack) // eslint-disable-line no-console
+        debugger // eslint-disable-line no-debugger
       }
       return orig.call(this, err)
     })

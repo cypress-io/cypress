@@ -1,3 +1,5 @@
+/* global $ */
+
 import React, { Component } from 'react'
 
 import blankContents from './blank-contents'
