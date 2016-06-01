@@ -5,6 +5,7 @@
   },
   "globals": {
     "$": true,
+    "io": true,
     "Mocha": true
   },
   "parserOptions": {
