@@ -1,24 +1,16 @@
 /* global $ */
 
+import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
 import blankContents from './blank-contents'
-import Cypress from '../lib/cypress'
+import IframeModel from './iframe-model'
 import runner from '../lib/runner'
 
+@observer
 export default class Iframes extends Component {
-  constructor (props) {
-    super(props)
-
-    // TODO: move this to UI State
-    this.state = {
-      width: 1000,
-      height: 660,
-    }
-  }
-
   render () {
-    const { width, height } = this.state
+    const { width, height } = this.props.uiState
 
     return <div
       ref='container'
@@ -28,6 +20,9 @@ export default class Iframes extends Component {
   }
 
   componentWillMount () {
+    this.iframeModel = new IframeModel(this.props.uiState)
+    this.iframeModel.listen()
+
     runner.start()
   }
 
@@ -60,13 +55,9 @@ export default class Iframes extends Component {
       // view.$el.show()
       // view.calcWidth()
     })
+  }
 
-    // TODO: should go elsewhere and update UI state
-    Cypress.on('viewport', (viewport) => {
-      this.setState({
-        width: viewport.viewportWidth,
-        height: viewport.viewportHeight,
-      })
-    })
+  componentWillUnmount () {
+    this.iframeModel.stopListening()
   }
 }
