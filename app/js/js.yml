@@ -1,0 +1,37 @@
+vendor:
+  - bower_components/jquery/dist/jquery.js
+  - bower_components/underscore/underscore.js
+  - bower_components/backbone/backbone.js
+  - bower_components/backbone.marionette/lib/backbone.marionette.js
+  - bower_components/underscore.string/lib/underscore.string.js
+  - bower_components/underscore.inflection/lib/underscore.inflection.js
+  - bower_components/spin.js/spin.js
+  - bower_components/spin.js/jquery.spin.js
+  - bower_components/backbone-query-parameters/backbone.queryparams.js
+  - bower_components/backbone.mutators/backbone.mutators.js
+  - bower_components/jsuri/Uri.js
+  - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js
+  - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/modal.js
+  - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/tooltip.js
+  - bower_components/jquery-ui/ui/core.js
+  - bower_components/jquery-ui/ui/widget.js
+  - bower_components/jquery-ui/ui/mouse.js
+  - bower_components/jquery-ui/ui/slider.js
+  - app/js/vendor/backbone-chooser.coffee
+
+  ## this must go at the bottom, do not move it
+  - bower_components/bluebird/js/browser/bluebird.js
+
+app:
+  - app/js/config/**
+  - app/js/backbone/app.coffee
+  - app/js/backbone/lib/regions/**
+  - app/js/backbone/lib/templates/**
+  - app/js/backbone/lib/entities/**
+  - app/js/backbone/lib/utilities/**
+  - app/js/backbone/lib/views/**
+  - app/js/backbone/lib/controllers/**
+  - app/js/backbone/lib/components/**
+  - app/js/backbone/lib/routers/**
+  - app/js/backbone/entities/**
+  - app/js/backbone/apps/**

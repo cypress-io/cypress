@@ -1,0 +1,45 @@
+.btn-default:hover,
+.btn-default:focus,
+.btn-default:active,
+.btn-default.active,
+.open>.btn-default.dropdown-toggle {
+  // background-color: #d4dae0;
+}
+
+.btn-large, .btn-group>.btn {
+  font-size: 14px;
+  font-weight: 500;
+
+}
+
+.dropdown {
+
+  // turn off tab-focus() mixin on buttons in dropdowns
+  button[data-toggle='dropdown'] {
+    &:active, &:focus {
+      outline: 0;
+    }
+
+    outline: 0;
+  }
+}
+
+.btn-upload {
+  border-radius: 20px;
+  color: #9ea4ab;
+}
+
+.btn.btn-link {
+  padding: 0;
+}
+
+h1>.btn-link {
+  font-size: 22px;
+  position: relative;
+  top: -1px;
+  outline: 0;
+
+  &:active, &:focus {
+    outline: 0;
+  }
+}

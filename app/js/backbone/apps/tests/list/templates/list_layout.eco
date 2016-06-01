@@ -1,0 +1,25 @@
+<div id="tests-list-page">
+  <div id="extension-banner-region"></div>
+  <div class="cy-main-content">
+    <div class="wrapper">
+      <div class="block-panel">
+        <div class="title-bar">
+          <h1>
+            Tests found in: <button class="btn btn-link" data-js="project-name"><%= @parentTestsFolderDisplay %></button>
+          </h1>
+          <div class="controls">
+            <div id="search-region"></div>
+          </div>
+        </div>
+        <div id="recent-files-region"></div>
+        <div id="all-files-region" class="all-files-container"></div>
+      </div>
+      <div class="helper-line">
+        <a class="helper-docs-link" href="https://on.cypress.io/guides/writing-your-first-test" target="_blank">
+          <i class="fa fa-question-circle"></i>
+          Need help?
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

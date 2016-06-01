@@ -1,0 +1,281 @@
+#test-container {
+  background-color: #f8f8f8;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  top: 0;
+  width: 33%;
+  min-width: 450px;
+  border-left: 1px solid #191919;
+}
+
+#test-specs {
+  overflow: auto;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 47px;
+  bottom: 0;
+
+  #specs-container {
+    padding-left: 0;
+    width: 100%;
+    overflow: auto;
+    padding-bottom: 30px;
+
+    #specs-region {
+      height: 100%;
+    }
+
+    #specs-list {
+      box-shadow: 0 1px 2px #aaa;
+      // margin-bottom: 100px;
+    }
+
+    li {
+      list-style-type: none;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+    }
+
+    #no-tests-found {
+      ul {
+        padding-left: 20px;
+        font-size: 13px;
+        color: #777;
+      }
+
+      li {
+        list-style: decimal inside;
+        line-height: 1.6;
+      }
+    }
+
+  }
+
+  .keyboard-shortcuts-helper {
+    // this needs to be styled to work like
+    // a sticky footer
+    color: #aaa;
+    text-align: center;
+    position: absolute;
+    bottom: 5px;
+    left: 25%;
+
+    mark {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 0 5px;
+      display: inline-block;
+      color: #888;
+    }
+  }
+
+  ul.runnables {
+    padding-left: 0;
+    @include user-select(none);
+
+    li.runnable {
+      width: 100%;
+      color: #6c6c6c;
+      background-color: #fff;
+      overflow: auto;
+      line-height: 18px;
+      padding-left: 0;
+
+      .runnable-wrapper {
+        padding: 5px;
+        position: relative;
+        overflow: hidden;
+        border-left: 10px solid transparent;
+
+        .test-title, .suite-title {
+          font-size: 12.5px;
+        }
+
+
+        .runnable-content-region {
+          overflow: auto;
+
+          .runnable-state {
+            width: 80%;
+            float: left;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+
+            .suite-title {
+              color: #111;
+              font-weight: 800;
+              font-size: 13px;
+            }
+          }
+
+          .runnable-controls {
+            width: 50px;
+            float: right;
+            text-align: right;
+            margin-right: 7px;
+            overflow: hidden;
+
+            label {
+              padding: 2px 4px;
+            }
+
+            i {
+              margin: 0 2px;
+              color: #999;
+              visibility: hidden;
+              font-size: 15px;
+
+              &:hover {
+                // color: #DDD;
+              }
+            }
+          }
+        }
+      }
+
+      pre {
+        margin-top: 2px;
+        margin-bottom: 0;
+        padding-bottom: 2px;
+        padding-top: 2px;
+        padding-left: 10px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        clear: both;
+
+        &:empty {
+          display: none;
+        }
+
+        &.test-error {
+          background-color: darken($yellow-lightest, 5%);
+          border-left: 5px solid $fail;
+
+          &:hover {
+            cursor: pointer;
+            background-color: darken($yellow-lightest, 15%);
+          }
+        }
+      }
+
+      &.hover {
+        background-color: #f7f8f9;
+        cursor: pointer;
+
+        &>.runnable-wrapper .runnable-controls i.fa-repeat {
+          visibility: visible !important;
+        }
+
+      }
+
+      &.active {
+        .test-state i {
+          @extend .#{$fa-css-prefix}-refresh;
+          @extend .#{$fa-css-prefix}-spin;
+        }
+      }
+
+      .suite-state, .test-state {
+        width: 12px;
+        display: inline-block;
+        margin-right: 1px;
+        text-align: left;
+      }
+
+      .suite-state  {
+        margin-left: 1px;
+
+        i {
+          padding-left: 2px;
+          font-size: 14px;
+          color: #bbbcbd;
+        }
+      }
+
+      &.processing > .runnable-wrapper {
+        .test-state i {
+          @extend .#{$fa-css-prefix}-square-o;
+          // @extend .fa-spin;
+          color: #888;
+        }
+      }
+
+      &.test.failed > .runnable-wrapper {
+        border-left: 10px solid $fail;
+
+        .fa-warning.has-command-failures {
+          visibility: visible;
+        }
+      }
+
+
+      &.suite.failed > .runnable-wrapper {
+        border-left: 10px solid $fail;
+      }
+
+      &.test.passed > .runnable-wrapper {
+        border-left: 10px solid $pass;
+      }
+
+      &.suite.passed > .runnable-wrapper {
+        border-left: 10px solid $pass;
+      }
+
+      &.failed > .runnable-wrapper {
+        pre {
+          color: $fail;
+        }
+
+        .suite-title i {
+          border-radius: 3px;
+          background-color: $fail;
+          color: #FFF;
+          padding: 0 4px 0 3px;
+          font-size: 10px;
+          margin-left: 2px;
+        }
+
+        .test-state i {
+          @extend .#{$fa-css-prefix}-times;
+          color: #E94B3B;
+        }
+
+        label {
+          text-transform: uppercase;
+        }
+      }
+
+      &.passed > .runnable-wrapper {
+        // .suite-state i {
+        //   color: #23AE89;
+        // }
+
+        .test-state i {
+          @extend .#{$fa-css-prefix}-check;
+          color: $pass;
+        }
+      }
+
+      &.pending > .runnable-wrapper {
+        // .suite-state {
+        //   color: lighten($pending, 20%);
+        // }
+
+        .test-title {
+          color: lighten($pending, 25%);
+        }
+
+        .test-state i {
+          @extend .#{$fa-css-prefix}-circle-o-notch;
+          color: lighten($pending, 20%);
+        }
+      }
+    }
+  }
+}

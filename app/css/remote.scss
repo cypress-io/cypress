@@ -1,0 +1,48 @@
+@import "core/variables";
+
+// Core variables and mixins
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/variables";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/mixins";
+
+// Reset and dependencies
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/normalize";
+
+// Core CSS
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/code";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/buttons";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/jumbotron";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/grid";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/scaffolding";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/type";
+
+// Fonts
+@import "font-awesome/scss/font-awesome";
+
+.jumbotron {
+  margin-top: 20px;
+
+  kbd {
+    background-color: #777;
+    display: inline-block;
+
+    a {
+      color: $kbd-color;
+    }
+  }
+
+  ul {
+    text-align: left;
+    margin-right: 25%;
+    margin-left: 25%;
+    padding: 20px 20px 20px 40px;
+    list-style: none;
+    background-color: #ddd;
+    border-radius: 10px;
+
+    li {
+      list-style: decimal;
+      list-style-position: outside;
+      margin: 4px 0;
+    }
+  }
+}

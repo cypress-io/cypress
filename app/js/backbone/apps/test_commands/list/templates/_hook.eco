@@ -1,0 +1,7 @@
+<span class="hook-name">
+  <i class="fa fa-caret-down"></i>
+  <%= @name %>
+  <span class="hook-failed hidden">(failed)</span>
+  <i class="fa fa-ellipsis-h hidden"></i>
+</span>
+<ul class="commands-container"></ul>

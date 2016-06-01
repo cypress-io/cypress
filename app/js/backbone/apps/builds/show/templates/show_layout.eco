@@ -1,0 +1,239 @@
+<div id="builds-show">
+  <div>
+    <div id="test-container">
+      <div id="header-container">
+        <div id="stats-region">
+          <div>
+            <div id="stats-region">
+              <div>
+                <ul id="stats-container" class="list-as-table">
+                  <li>
+                    <div>
+                      <div>
+                        #1465
+                      </div>
+                    </div>
+                    <div>
+                      <div>
+                        <i class="fa fa-code-fork fa-rotate-90"></i>
+                        <%= @branch %>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="border-left">
+                        <i class="fa fa-<%= @osNameFormatted %>"></i>
+                        <%= @os_version %>
+                      </div>
+                    </div>
+                    <div>
+                      <div>
+                        <i class="fa fa-<%= @browserNameFormatted %>"></i>
+                        <%= @browser_version %>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="border-left">
+                        <% if @passed > 0: %>
+                          Pass
+                          <span class="label label-success"><%= @passed %></span>
+                        <% end %>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="border-right">
+                        <% if @failed > 0: %>
+                          Fail
+                          <span class="label label-danger"><%= @failed %></span>
+                        <% end %>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div id="chosen-region"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="test-specs">
+    <div id="specs-container">
+      <div id="specs-region">
+        <ul class="runnables" id="specs-list">
+          <li class="test runnable failed">
+            <div class="runnable-wrapper" style="padding-left: 19px;">
+              <div class="runnable-content-region">
+                <div>
+                  <div class="runnable-state">
+                    <span class="test-state">
+                      <i class="fa"></i>
+                    </span>
+                    <span class="test-title">
+                      Kitchen Sink traversing cy.should - assert that &lt;title&gt; is correct
+                    </span>
+                  </div>
+                  <div class="runnable-controls">
+                    <i class="fa fa-warning has-command-failures" title="One or more commands failed"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="runnable-instruments">
+                <div class="runnable-commands-region">
+                  <ul class="hooks-container">
+                    <li class="hook-item">
+                      <span class="hook-name">
+                        <i class="fa fa-caret-down"></i>
+                        screenshot at failure
+                      </span>
+                    </li>
+                    <img src="http://placehold.it/200x150">
+                  </ul>
+                </div>
+              </div>
+              <pre class="test-error">CypressError: Could not load the remote page: http://localhost:8080/</pre>
+            </div>
+          </li>
+          <li class="test runnable failed">
+            <div class="runnable-wrapper" style="padding-left: 19px;">
+              <div class="runnable-content-region">
+                <div>
+                  <div class="runnable-state">
+                    <span class="test-state">
+                      <i class="fa"></i>
+                    </span>
+                    <span class="test-title">
+                      Kitchen Sink traversing cy.and - assert that &lt;title&gt; is correct
+                    </span>
+                  </div>
+                  <div class="runnable-controls">
+                    <i class="fa fa-warning has-command-failures" title="One or more commands failed"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="runnable-instruments">
+                <div class="runnable-commands-region">
+                  <ul class="hooks-container">
+                    <li class="hook-item">
+                      <span class="hook-name">
+                        <i class="fa fa-caret-down"></i>
+                        screenshot at failure
+                      </span>
+                    </li>
+                    <img src="http://placehold.it/200x150">
+                  </ul>
+                </div>
+              </div>
+              <pre class="test-error">CypressError: Curabitur blandit tempus porttitor. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</pre>
+            </div>
+          </li>
+          <li class="test runnable failed">
+            <div class="runnable-wrapper" style="padding-left: 19px;">
+              <div class="runnable-content-region">
+                <div>
+                  <div class="runnable-state">
+                    <span class="test-state">
+                      <i class="fa"></i>
+                    </span>
+                    <span class="test-title">
+                      Kitchen Sink Cookies cy.Cookies - reset cookies
+                    </span>
+                  </div>
+                  <div class="runnable-controls">
+                    <i class="fa fa-warning has-command-failures" title="One or more commands failed"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="runnable-instruments">
+                <div class="runnable-commands-region">
+                  <ul class="hooks-container">
+                    <li class="hook-item">
+                      <span class="hook-name">
+                        <i class="fa fa-caret-down"></i>
+                        screenshot at failure
+                      </span>
+                    </li>
+                    <img src="http://placehold.it/200x150">
+                  </ul>
+                </div>
+              </div>
+              <pre class="test-error">CypressError: could not set cookie</pre>
+            </div>
+          </li>
+          <li class="test runnable failed">
+            <div class="runnable-wrapper" style="padding-left: 19px;">
+              <div class="runnable-content-region">
+                <div>
+                  <div class="runnable-state">
+                    <span class="test-state">
+                      <i class="fa"></i>
+                    </span>
+                    <span class="test-title">
+                      Kitchen Sink cookies cy.Cookie.set - assert that &lt;title&gt; is correct
+                    </span>
+                  </div>
+                  <div class="runnable-controls">
+                    <i class="fa fa-warning has-command-failures" title="One or more commands failed"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="runnable-instruments">
+                <div class="runnable-commands-region">
+                  <ul class="hooks-container">
+                    <li class="hook-item">
+                      <span class="hook-name">
+                        <i class="fa fa-caret-down"></i>
+                        screenshot at failure
+                      </span>
+                    </li>
+                    <img src="http://placehold.it/200x150">
+                  </ul>
+                </div>
+              </div>
+              <pre class="test-error">CypressError: Another set of cookie</pre>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div id="iframe-wrapper" style="right: 0px; width: 1090px;">
+    <div id="iframe-container">
+      <div id="iframe-region">
+        <div style="display: block;">
+          <div id="header-region">
+            <div>
+              <header>
+                <div class="pull-left">
+                  <div>
+                    <div>
+                      <i class="fa fa-clock-o"></i> started
+                      <%= moment(@created_at).fromNow() %>
+                    </div>
+                  </div>
+                  <div>
+                    <div>
+                      <i class="fa fa-hourglass-end"></i> ran for
+                      <%= moment.duration(@duration).humanize() %>
+                    </div>
+                  </div>
+                </div>
+                <button class="btn btn-primary pull-right">
+                  <i class="fa fa-download"></i>
+                  Download Video
+                </button>
+              </header>
+            </div>
+          </div>
+          <div id="iframe-size-container">
+            <iframe src="https://player.vimeo.com/video/119067384"></iframe>
+          </div>
+          <div id="message-region">
+            <div id="iframe-message" style="display: none; bottom: 0px; margin-left: 545px; opacity: 0.7;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

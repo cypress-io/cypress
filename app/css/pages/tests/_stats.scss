@@ -1,0 +1,162 @@
+#header-container {
+  background-color: #f8f8f8;
+  overflow: visible;
+  position: absolute;
+  // border-bottom: 1px solid #ddd;
+  width: 100%;
+  z-index: 1;
+  box-shadow: 0 1px 3px #ccc;
+
+  #stats-container {
+    padding: 0;
+    float: left;
+    margin-bottom: 0;
+
+    li {
+      list-style-type: none;
+      float: left;
+      padding: 10px;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 26px;
+
+      &#tests-passed {
+        color: #23AE89;
+      }
+
+      &#tests-failed {
+        color: #E94B3B;
+      }
+
+      &#tests-pending {
+        color: #aaa;
+      }
+    }
+
+    #tests-duration {
+      border-left: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+  }
+
+  #chosen-runnable {
+    position: relative;
+    top: 6px;
+
+    .uppercase {
+      font-size: 10px;
+      display: block;
+    }
+
+    label {
+      cursor: pointer;
+      float: left;
+      line-height: 14px;
+    }
+  }
+
+  #cross-browsers {
+    float: right;
+    position: relative;
+    top: 6px;
+    border-radius: 5px;
+    background-color: white;
+    padding: 2px;
+    box-shadow: 0 1px 1px #888;
+
+    li {
+      padding: 0 5px;
+      border-right: 1px solid #CCC;
+      margin: 0 0;
+      position: relative;
+      top: -1px;
+
+      &:last-child {
+        border-right: 0;
+      }
+    }
+  }
+
+  #runner-config {
+    float: right;
+    padding: 6px;
+
+    i {
+      font-size: 17px;
+    }
+
+    .btn-link {
+      text-decoration: none;
+
+       &:hover {
+        text-decoration: none;
+      }
+    }
+
+    .save-container {
+      padding: 0 10px 3px;
+      overflow: auto;
+
+      i {
+        font-size: 12px;
+      }
+    }
+  }
+
+  #pause-controls {
+    float: right;
+
+    // margin: 7px 7px 0;
+
+  //   line-height: 22px;
+  //   overflow: hidden;
+
+  //   li {
+  //     float: left;
+  //     // padding: 5px;
+
+  //     &:first-child {
+  //       // margin-right: 5px;
+  //     }
+
+  //     &:last-child {
+  //       // margin-right: 5px;
+  //     }
+  //   }
+
+    button {
+      line-height: 26px;
+      // background-color: transparent;
+      border: transparent;
+      border-radius: 0;
+      background-color: #f8f8f8;
+      outline: 0;
+
+      // &:hover {
+      //   background-color: #dfdfdf;
+      // }
+
+      &:hover {
+        background-color: #e9e9e9;
+      }
+
+      &:active, &:focus {
+        outline: 0
+      }
+    }
+
+    i {
+      font-size: 90%;
+
+      &.fa-repeat {
+        font-size: 112%;
+      }
+    }
+
+  //   i.fa-play {
+  //     font-size: 82%;
+  //   }
+  }
+}

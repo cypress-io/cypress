@@ -1,0 +1,101 @@
+html {
+  height: 100%;
+}
+
+body {
+  position: relative;
+  padding: 0;
+  background-color: #F6F6F6;
+  font-family: "Muli", sans-serif;
+  font-size: 12px;
+  color: #555;
+  // opacity: 0;
+  // margin-left: -20px;
+  height: 100%;
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: 'Muli', sans-serif;
+  font-weight: 300;
+}
+
+a {
+  color: #3380FF;
+  text-decoration: none;
+  outline: 0 none;
+}
+
+a:focus, a:hover, a:active {
+  outline: 0 none;
+  text-decoration: none;
+  color: #2363CC;
+}
+
+p {
+  font-size: 13px;
+  line-height: 22px;
+}
+
+b {
+  font-weight: 400;
+}
+
+blockquote p {
+  font-size: 15px;
+}
+
+ul {
+  padding-left: 0px;
+}
+
+#cy-wrapper {
+  height: 100%;
+
+  &.collapsed {
+    #main-region {
+      margin-left: 55px;
+    }
+  }
+
+  &.satellite-mode {
+    #main-region {
+      margin-left: 0;
+    }
+
+    #iframe-region > div {
+      padding-top: 0 !important;
+    }
+  }
+
+  #main-region {
+    margin-left: 200px;
+    position: relative;
+    padding: 0;
+    height: 100%;
+    vertical-align: top;
+    -webkit-transition: margin-left 0.05s ease;
+    transition: margin-left 0.05s ease;
+
+    &>div {
+      top: 0;
+      bottom: 0;
+      height: 100%;
+      overflow: auto;
+
+    }
+  }
+}
+
+code, kbd, pre, samp {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.05em;
+  letter-spacing: 0.5px;
+}
+
+.gitter-chat-embed {
+  border-left: 0;
+}
+
+.center {
+  text-align: center;
+}

@@ -1,0 +1,214 @@
+#iframe-wrapper {
+  position: absolute;
+  overflow: hidden;
+  box-sizing: border-box;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  box-shadow: 2px 0 7px #333;
+
+  .iframe-spec {
+    display: none !important;
+  }
+
+  #iframe-container {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    // box-shadow: 0 0 12px #CCCCCC;
+    // bottom: 24px;
+    // left: 24px;
+    top: 0px;
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjOWU5ZTllIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiM4ODgiIHN0cm9rZS13aWR0aD0iMSI+PC9wYXRoPgo8L3N2Zz4=");
+
+    #iframe-region {
+      height: 100%;
+
+      & > div {
+        height: 100%;
+        padding-top: $header-height;
+      }
+    }
+
+    #iframe-size-container {
+      width: 100%;
+      height: 100%;
+      margin: 0 0;
+      transform: scale(1);
+      transform-origin: 50% 0%;
+    }
+
+    #iframe-message {
+      background-color: #111;
+      color: #FFF;
+      padding: 5px 10px;
+      border-radius: 5px;
+      margin-bottom: 2px;
+      position: absolute;
+      display: inline-block;
+
+      &:empty {
+        display: none;
+      }
+
+      &.cannot-revert {
+        background-color: $fail;
+      }
+
+      .snapshot-name {
+        color: #F5A327;
+      }
+    }
+
+    header {
+      height: $header-height;
+      position: absolute;
+      background-color: #f8f8f8;
+      line-height: 22px;
+      padding: 10px;
+      color: #888;
+      // border-bottom: 1px solid #ddd;
+      left: 0;
+      right: 0;
+      top: 0;
+      box-shadow: 0 1px 5px #888;
+      z-index: 1;
+
+      .iframe-menu {
+        float: right;
+        margin-bottom: 0;
+        position: relative;
+        top: 1px;
+
+        .btn-link {
+          padding: 0 0;
+          color: #888;
+        }
+
+        &>li {
+          border-right: 1px solid #ccc;
+          border-left: 1px solid #fff;
+          float: left;
+          height: 24px;
+          list-style: none;
+          padding: 0 10px;
+
+          &:last-child {
+            border-right: 0;
+          }
+
+          &:first-child {
+            border-left: 0;
+          }
+        }
+
+      }
+
+
+
+      #url-container {
+        width: 56%;
+
+        #url-wrapper {
+          float: left;
+          width: 80%;
+          position: relative;
+
+          .loading-wrapper {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 2px;
+            color: #AAA;
+
+            i {
+              margin: 0 5px 0 2px;
+              font-size: 14px;
+              position: relative;
+              top: 1px;
+            }
+
+            .loading-content {
+              top: 1px;
+              position: relative;
+            }
+          }
+
+          &.loading {
+            .loading-wrapper {
+              display: inline-block;
+            }
+          }
+        }
+      }
+
+      #current-viewport-sizes {
+        float: left;
+        margin-right: 7px;
+        font-size: 13px;
+        text-shadow: 0 1px 1px #fff;
+        position: relative;
+        top: 1px;
+
+        #viewport-scale-container {
+          margin-left: 3px;
+          font-size: 12px;
+          color: #999;
+        }
+      }
+
+      input.url {
+        box-shadow: inset 0 1px 2px #AAA;
+        border-radius: 20px;
+        border: 0;
+        padding: 2px 10px;
+        width: 100%;
+        letter-spacing: .3px;
+
+        &.reverted {
+          background-color: #FFF4DE;
+        }
+
+        &:focus {
+          // the outline color on focus looks strange
+          // because it doesn't respect input's
+          outline: 0;
+          background-color: #FFFFD5;
+        }
+      }
+
+      #viewport-wrapper {
+        width: 300px;
+        padding: 7px 15px;
+        font-size: 12px;
+
+        pre {
+          font-size: 12px;
+        }
+
+        kbd {
+          background-color: #999;
+        }
+
+        i {
+          float: none;
+          margin-right: 0;
+          margin-top: 0;
+          font-size: 13px;
+        }
+      }
+    }
+
+    iframe {
+      background-color: #fff;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      position: relative;
+      bottom: 0;
+      overflow: auto;
+      display: block;
+      box-shadow: 0 6px 10px #555;
+    }
+  }
+}

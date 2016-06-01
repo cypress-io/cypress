@@ -1,0 +1,6 @@
+<% if @message: %>
+  <%= @messageFormatted %>
+  <% if @snapshotName: %>
+    <span class="snapshot-name"><%= @snapshotName %></span>
+  <% end %>
+<% end %>

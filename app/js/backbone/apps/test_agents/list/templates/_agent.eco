@@ -1,0 +1,11 @@
+<td><%= @type %></td>
+<td><%= @functionName %></td>
+<td>
+  <% if @callCount is 0: %>
+    <span class="text-fail">
+      -
+    </span>
+  <% else: %>
+    <%= @callCount %>
+  <% end %>
+</td>
