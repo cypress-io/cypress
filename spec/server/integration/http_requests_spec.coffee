@@ -184,6 +184,28 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.match(/App.start\(.+\)/)
 
+  context "GET /__cypress/runner", ->
+    beforeEach ->
+      @setup()
+
+    it "can get runner.html", ->
+      supertest(@app)
+      .get("/__cypress/runner")
+      .expect(200)
+      .expect(/App.start/)
+
+    it "can get app.js", ->
+      supertest(@app)
+      .get("/__cypress/runner/js/app.js")
+      .expect(200)
+      .expect(/dialog-region/)
+
+    it.only "can get cypress.css", ->
+      supertest(@app)
+      .get("/__cypress/runner/css/cypress.css")
+      .expect(200)
+      .expect(/#cy/)
+
   context "GET /__cypress/aut/*", ->
     beforeEach ->
       @setup()

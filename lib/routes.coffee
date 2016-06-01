@@ -9,6 +9,7 @@ client      = require("./controllers/client")
 files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
 builds      = require("./controllers/builds")
+runner      = require("./controllers/runner")
 
 module.exports = (app, config, getRemoteOrigin) ->
   ## routing for the actual specs which are processed automatically
@@ -24,6 +25,12 @@ module.exports = (app, config, getRemoteOrigin) ->
 
   app.get "/__cypress/aut/*", (req, res) ->
     aut.handle(req, res)
+
+  app.get "/__cypress/runner", (req, res) ->
+    runner.serve(req, res, config)
+
+  app.get "/__cypress/runner/*", (req, res) ->
+    runner.handle(req, res)
 
   ## routing for /files JSON endpoint
   app.get "/__cypress/files", (req, res) ->
