@@ -183,3 +183,68 @@ socket.emit("remote:response", "123-a-guid-as-an-id", {a: "new response data obj
 - `npm i`
 - Open new tab: `npm run watch`
 - `node_modules/.bin/nw .`
+
+## Catalog of Events
+
+### Order of Runnable Events
+
+Event | From | To | Description
+--- | --- | --- | ---
+before:run | Runner | Anyone | before run has started but after iframes have loaded
+before:add | Runner | Anyone | before any tests have been added to the UI
+suite:add | Runner | Anyone | when a suite should be added to the UI
+test:add | Runner | Anyone | when a test should be added to the UI
+after:add | Runner | Anyone | when all runnables have been added to the UI
+run:start | Mocha | Cypress | when mocha runner triggers its 'start' event
+suite:start | Mocha | Cypress | when mocha runner fires its 'suite' event
+test:before:hooks | Cypress | Cypress | before any hooks for a test have started
+hook:start | Mocha | Cypress | when mocha runner fires its 'hook' event
+test:start | Mocha | Cypress | when mocha runner fires its 'test' event
+suite:end | Mocha | Cypress | when mocha runner fires its 'suite end' event
+hook:end | Mocha | Cypress | when mocha runner fires its 'hook end' event
+mocha:pass | Mocha | Cypress | when mocha runner fires its 'pass' event
+mocha:pending | Mocha | Cypress | when mocha runner fires its 'pending' event
+mocha:fail | Mocha | Cypress | when mocha runner fires its 'fail' event
+test:end | Mocha | Cypress | when mocha runner fires its 'test end' event
+test:results:ready | Runner | Anyone | when we receive the 'test:end' event
+test:after:hooks | Cypress | Cypress | after all hooks have run for a test
+run:end | Mocha | Cypress | when mocha runner fires its 'end' event
+after:run | Runner | Anyone | after run has finished
+
+### Command Events
+
+Event | From | To | Description
+--- | --- | --- | ---
+command:add | Cypress | Runner | when command has been created for the log
+command:state:changed | Cypress | Runner | when an existing commands state have changed
+
+### Request Events
+
+Event | From | To | Description
+--- | --- | --- | ---
+get:cookies | Cypress | Runner | when cookies are being requested
+get:cookie | Cypress | Runner | when a cookie is being requested
+set:cookie | Cypress | Runner | when setting cookie is being requested
+clear:cookie | Cypress | Runner | when clearing a cookie is being requested
+clear:cookies | Cypress | Runner | when clearing cookies is being requested
+message | Cypress | Runner | when a msg is being requested
+fixture | Cypress | Runner | when a fixture is being requested
+request | Cypress | Runner | when a request is being requested
+exec | Cypress | Runner | when exec is being requested
+paused | Cypress | Runner | when pausing is being requested
+
+### AUT Events
+
+Event | From | To | Description
+--- | --- | --- | ---
+url:changed | Cypress | Anyone | when aut app url is changed
+page:loading | Cypress | Anyone | when aut app is currently loading a page
+viewport | Cypress | Anyone | when viewport has changed
+
+### Server Sent Events
+
+Event | From | To | Description
+--- | --- | --- | ---
+test:changed | Server | Runner | when user has changed local spec file
+automation:push:message | Server | Runner | when automation server has sent a message
+
