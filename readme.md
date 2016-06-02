@@ -196,6 +196,7 @@ before:add | Runner | Anyone | before any tests have been added to the UI
 suite:add | Runner | Anyone | when a suite should be added to the UI
 test:add | Runner | Anyone | when a test should be added to the UI
 after:add | Runner | Anyone | when all runnables have been added to the UI
+runnables:ready | Runner | Anyone | when all runnables have been reduced to basic objects
 run:start | Mocha | Cypress | when mocha runner triggers its 'start' event
 suite:start | Mocha | Cypress | when mocha runner fires its 'suite' event
 test:before:hooks | Cypress | Cypress | before any hooks for a test have started
@@ -216,8 +217,8 @@ after:run | Runner | Anyone | after run has finished
 
 Event | From | To | Description
 --- | --- | --- | ---
-command:add | Cypress | Runner | when command has been created for the log
-command:state:changed | Cypress | Runner | when an existing commands state have changed
+log:add | Cypress | Runner | when log entries have been added (commands / routes / spies)
+log:state:changed | Cypress | Runner | when an existing logs state or attributes have changed
 
 ### Request Events
 
