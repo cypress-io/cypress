@@ -11,7 +11,7 @@ export default class Header extends Component {
   }
 
   render () {
-    const { width, height, scale, defaults, isLoading, url } = this.props.uiState
+    const { width, height, displayScale, defaults, isLoading, url } = this.props.uiState
     const { showingViewportMenu } = this.state
 
     return (
@@ -26,7 +26,7 @@ export default class Header extends Component {
           <li className={cs('viewport-info', { open: showingViewportMenu })}>
             <button onClick={this._toggleViewportMenu}>
               <i className='fa fa-caret-down'></i>
-              {width} x {height} <span className='viewport-scale'>({scale}%)</span>
+              {width} x {height} <span className='viewport-scale'>({displayScale}%)</span>
             </button>
             <div className='viewport-menu'>
               <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be <strong>{defaults.width}px</strong> by <strong>{defaults.height}px</strong> unless specified by a <code>cy.viewport</code> command.</p>

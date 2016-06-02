@@ -18,7 +18,7 @@ export default class Iframes extends Component {
       style={{
         width: `${width}px`,
         height: `${height}px`,
-        transform: `scale(${scale / 100})`
+        transform: `scale(${scale})`,
       }}
     />
   }
@@ -59,6 +59,11 @@ export default class Iframes extends Component {
       // view.$el.show()
       // view.calcWidth()
     })
+
+    const $window = $(window)
+    $window.on('resize', () => {
+      this.props.uiState.updateWindowDimensions($window.width(), $window.height())
+    }).trigger('resize')
   }
 
   componentWillUnmount () {

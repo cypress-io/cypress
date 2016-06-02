@@ -1,5 +1,7 @@
 import _ from 'lodash'
-import { action, observable } from 'mobx'
+import { action, computed, observable } from 'mobx'
+
+const headerHeight = 46
 
 const defaults = {
   isRunning: false,
@@ -9,7 +11,6 @@ const defaults = {
 
   width: 1000,
   height: 660,
-  scale: 100,
 }
 
 class UiState {
@@ -22,7 +23,27 @@ class UiState {
 
   @observable width = defaults.width
   @observable height = defaults.height
-  @observable scale = defaults.scale
+
+  @observable _windowWidth = 0;
+  @observable _windowHeight = 0;
+
+  @computed get scale () {
+    const containerHeight = this._windowHeight - headerHeight
+
+    if (this._windowWidth < this.width || containerHeight < this.height) {
+      return Math.min(this._windowWidth / this.width, containerHeight / this.height, 1)
+    }
+    return 1
+  }
+
+  @computed get displayScale () {
+    return Math.floor(this.scale * 100)
+  }
+
+  @action updateWindowDimensions (width, height) {
+    this._windowWidth = width
+    this._windowHeight = height
+  }
 
   @action reset () {
     _.each(defaults, (defaultValue, key) => {
@@ -30,10 +51,14 @@ class UiState {
     })
   }
 
+  // used for logging in main.jsx
   serialize () {
-    return _.transform(defaults, (state, __, key) => {
-      state[key] = this[key]
-    }, {})
+    return _(defaults)
+      .transform((state, __, key) => {
+        state[key] = this[key]
+      }, {})
+      .extend(_.pick(this, '_windowWidth', '_windowHeight', 'scale', 'displayScale'))
+      .value()
   }
 }
 
