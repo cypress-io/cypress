@@ -17,7 +17,7 @@ body {
 .container {
   background-color: #EEE;
   border-radius: 6px;
-  padding: 30px 0;
+  padding: 30px 15px;
   text-align: center;
 }
 
@@ -57,7 +57,8 @@ ul {
   background-color: #DDD;
   border-radius: 10px;
   text-align: left;
-  margin: 0 25% 10px;
+  margin: 0 auto 10px;
+  max-width: 220px;
   padding: 20px 20px 20px 40px;
 }
 

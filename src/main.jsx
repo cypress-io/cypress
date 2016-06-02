@@ -14,11 +14,8 @@ autorun(() => {
 })
 
 render(
-  <div id="aut-wrapper">
-    <div id="aut-container">
-      <Header uiState={uiState} />
-      <Iframes uiState={uiState} />
-      <div id="message-region"></div>
-    </div>
+  <div className="container">
+    <Header uiState={uiState} />
+    <Iframes uiState={uiState} />
   </div>
 , document.getElementById('app'))

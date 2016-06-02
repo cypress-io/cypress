@@ -4,8 +4,8 @@ import { action, observable } from 'mobx'
 const defaults = {
   isRunning: false,
 
-  url: '',
-  loading: false,
+  url: 'https://google.com',
+  isLoading: false,
 
   width: 1000,
   height: 660,
@@ -18,7 +18,7 @@ class UiState {
   @observable isRunning = defaults.isRunning
 
   @observable url = defaults.url
-  @observable loading = defaults.loading
+  @observable isLoading = defaults.isLoading
 
   @observable width = defaults.width
   @observable height = defaults.height

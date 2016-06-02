@@ -12,6 +12,7 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-aut#readme",
   "scripts": {
+    "postinstall": "bower install",
     "build": "zunder build-prod",
     "server": "zunder serve-prod --port 8000",
     "start": "zunder watch"
@@ -20,9 +21,11 @@
     "babel-eslint": "^6.0.4",
     "eslint": "^2.11.1",
     "eslint-plugin-react": "^5.1.1",
+    "vinyl-fs": "^2.4.3",
     "zunder": "^3.2.0"
   },
   "dependencies": {
+    "classnames": "^2.2.5",
     "mobx": "^2.2.2",
     "mobx-react": "^3.3.0",
     "react": "^15.1.0",

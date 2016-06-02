@@ -10,12 +10,16 @@ import runner from '../lib/runner'
 @observer
 export default class Iframes extends Component {
   render () {
-    const { width, height } = this.props.uiState
+    const { width, height, scale } = this.props.uiState
 
     return <div
       ref='container'
-      id='aut-size-container'
-      style={{ width: `${width}px`, height: `${height}px` }}
+      className='size-container'
+      style={{
+        width: `${width}px`,
+        height: `${height}px`,
+        transform: `scale(${scale / 100})`
+      }}
     />
   }
 
@@ -36,7 +40,7 @@ export default class Iframes extends Component {
 
     const $autIframe = $('<iframe>', {
       id: `Your App: '${name}'`,
-      class: 'iframe-aut',
+      class: 'aut-iframe',
     })
     .appendTo($container)
 
@@ -44,7 +48,7 @@ export default class Iframes extends Component {
 
     const $specIframe = $('<iframe />', {
       id: `Your Spec: '${specSrc}'`,
-      class: 'iframe-spec',
+      class: 'spec-iframe',
     }).appendTo($container)
 
     $specIframe.prop('src', specSrc).one('load', () => {
