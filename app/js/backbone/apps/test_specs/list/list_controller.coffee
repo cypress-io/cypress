@@ -3,7 +3,7 @@
   class List.Controller extends App.Controllers.Application
 
     initialize: (options) ->
-      { runner, iframe, spec } = options
+      { runner, spec } = options
 
       testViewQueue = testQueue = null
 
@@ -42,7 +42,7 @@
       @createRunnableListeners = _.partial(@createRunnableListeners, runner, container)
 
       ## always make the first argument the runner
-      @insertChildViews = _.partial(@insertChildViews, runner, iframe)
+      @insertChildViews = _.partial(@insertChildViews, runner)
 
       @listenTo runner, "paused", ->
         ## open the runnable if we find one
@@ -103,11 +103,11 @@
         ## add the test to the container collection of runnables
         @addRunnable(test, "test", testViewQueue)
 
-      @listenTo runner, "test:start", (test) ->
+      @listenTo runner, "test:before:hooks", (test) ->
         runnable = container.get(test.id)
         runnable.activate() if runnable
 
-      @listenTo runner, "test:end", (test) ->
+      @listenTo runner, "test:after:hooks", (test) ->
         ## find the client runnable model by the test's ide
         runnable = container.get(test.id)
 
@@ -168,7 +168,7 @@
       requestAnimationFrame =>
         @startInsertingTestViews(testViewQueue)
 
-    insertChildViews: (runner, iframe, model) ->
+    insertChildViews: (runner, model) ->
       ## we could alternatively loop through all of the children
       ## from the root as opposed to going through the model
       ## to receive its layout but that would be much slower
@@ -192,7 +192,7 @@
           App.execute "list:test:routes", model, layout.routesRegion
 
           ## and pass up the commands collection (via hooks) and the commands region
-          App.execute "list:test:commands", model, iframe, layout.commandsRegion
+          App.execute "list:test:commands", model, layout.commandsRegion
         else
           region = layout.runnablesRegion
 

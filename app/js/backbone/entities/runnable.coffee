@@ -47,7 +47,7 @@
     setAttrsFromRunnable: (runnable, index) ->
       @set
         id: runnable.id
-        title: _.result(runnable, "originalTitle")
+        title: runnable.title
         parentId: runnable.parent.id
         parentRoot: runnable.parent.root
         index: index

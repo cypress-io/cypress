@@ -49,7 +49,7 @@
       ## add or remove command-failed whether we have an error
       @$el.toggleClass "command-failed", @model.state("failed")
 
-      @model.triggerCommandCallback("onRender", @$el)
+      # @model.triggerCommandCallback("onRender", @$el)
 
       @ui.tooltips.tooltip({container: "body", delay: 250})
 

@@ -104,16 +104,16 @@
       selector.replace parent, ""
 
     reduceMemory: ->
-      @getLog().reduceMemory()
+      # @getLog().reduceMemory()
 
     getSnapshots: ->
-      @getLog().get("snapshots")
+      # @getLog().get("snapshots")
 
     getEl: ->
-      @getLog().get("$el")
+      # @getLog().get("$el")
 
     getLog: ->
-      @log or throw new Error("Command is missing its log reference!")
+      # @log or throw new Error("Command is missing its log reference!")
 
     getConsoleDisplay: (fn) ->
       obj = @triggerCommandCallback("onConsole", @getLog().attributes)
@@ -229,23 +229,10 @@
       @invoke "reduceMemory"
 
     createCommand: (log) ->
-      if log.get("type") not in ["parent", "child"]
-        throw new Error("Commands may only have type of 'parent' or 'child'.  Command was: {name: #{log.get('name')}, type: #{log.get('type')}}")
+      if log.type not in ["parent", "child"]
+        throw new Error("Commands may only have type of 'parent' or 'child'.  Command was: {name: #{log.name}, type: #{log.type}}")
 
-      command = new Entities.Command log.pick.apply(log, logAttrs)
-      command.log = log
-
-      command.listenTo log, "attrs:changed", (attrs) ->
-        attrs = _.pick(attrs, logAttrs...)
-        command.set(attrs)
-
-        attrs.id = command.id
-
-        ## trigger this so we can get command attrs updates
-        ## when in host / satellite mode
-        @trigger("command:attrs:changed", attrs)
-
-      return command
+      new Entities.Command(log)
 
     add: (attrs, hook) ->
       command = attrs

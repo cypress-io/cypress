@@ -7,8 +7,46 @@
       ## connect to socket io
       channel = io.connect({path: "/__socket.io"})
 
+      autEvents = [
+        "reset:test:run"
+        "before:add"
+        "suite:add"
+        "test:add"
+        "after:add"
+        "runnables:ready"
+        "run:start"
+        "test:before:hooks"
+        "log:add"
+        "log:state:changed"
+        "paused"
+        "test:after:hooks"
+        "run:end"
+      ]
+
+      autEvents.forEach (event) ->
+        channel.on event, (data) ->
+          console.info event, data
+
+      channel.on "connect", ->
+        channel.emit "runner:connected"
+
       channel.on "test:changed", (data) ->
         socket.trigger "test:changed", data.file
+
+      channel.on "test:before:hooks", (test) ->
+        socket.trigger "test:before:hooks", test
+
+      channel.on "test:after:hooks", (test) ->
+        socket.trigger "test:after:hooks", test
+
+      channel.on "log:add", (log) ->
+        socket.trigger "log:add", log
+
+      channel.on "log:state:changed", (log) ->
+        socket.trigger "log:state:changed", log
+
+      channel.on "runnables:ready", (root) ->
+        socket.trigger "runnables:ready", root
 
       channel.on "cypress:css:changed", (data) ->
         ## find the cypress stylesheet
