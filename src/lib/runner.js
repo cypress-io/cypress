@@ -5,7 +5,6 @@ import _ from 'lodash'
 import overrides from './overrides'
 import Cypress from './cypress'
 
-const channel = io.connect({ path: "/__socket.io" })
 
 const CypressEvents = "run:start run:end suite:start suite:end hook:start hook:end test:start test:end".split(" ")
 
