@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { action } from 'mobx'
-import Cypress from '../lib/cypress'
+import runner from '../lib/runner'
 
 export default class IframeModel {
   constructor (uiState) {
@@ -15,20 +15,20 @@ export default class IframeModel {
     // @listenTo runner, "after:run", ->
     //   @isRunning(false)
 
-    Cypress.on('viewport', this._updateViewport)
+    runner.on('viewport', this._updateViewport)
 
-    Cypress.on('config', (config) => {
+    runner.on('config', (config) => {
       this._updateViewport(_.map(config, 'viewportHeight', 'viewportWidth'))
     })
 
-    Cypress.on('stop', () => {
+    runner.on('stop', () => {
       this.reset()
       this.stopListening()
     })
 
-    Cypress.on('url:changed', this._updateUrl)
+    runner.on('url:changed', this._updateUrl)
 
-    Cypress.on('page:loading', this._updateLoading)
+    runner.on('page:loading', this._updateLoading)
   }
 
   reset () {
