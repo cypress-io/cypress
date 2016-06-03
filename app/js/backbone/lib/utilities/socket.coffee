@@ -28,7 +28,7 @@
           console.info event, data
 
       channel.on "connect", ->
-        channel.emit "runner:connected"
+        channel.emit "reporter:connected"
 
       channel.on "test:changed", (data) ->
         socket.trigger "test:changed", data.file

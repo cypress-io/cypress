@@ -2,6 +2,7 @@
   &.collapsed {
     #cy-sidebar {
       width: 55px;
+      display: none;
 
       .logo {
         display: none !important;

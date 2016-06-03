@@ -9,9 +9,6 @@
 
       @layout = @getLayoutView(config)
 
-      @listenTo socket, "change:automationConnected", ->
-        @extensionMessage(socket)
-
       ## if this is our first time visiting files
       ## after adding the project, we want to onboard
       @listenTo @layout, "show", ->
@@ -29,20 +26,15 @@
         # @recentFilesRegion(files)
         @filesRegion(files, config)
 
+      @listenTo config, "go:to:file", (path) ->
+        path = "/tests/" + path
+
+        window.location.hash = path
+        socket.emit("go:to:file", path)
+
       @show @layout,
         loading:
           entities: files
-
-    extensionMessage: (socket) ->
-      switch socket.get("automationConnected")
-        when true
-          if r = @layout.extensionBannerRegion
-            r.empty()
-        when false
-          extensionMessageView = @getExtensionMessageView()
-
-          @show extensionMessageView,
-            region: @layout.extensionBannerRegion
 
     onboardingRegion: ->
       App.execute "show:files:onboarding"
@@ -68,9 +60,6 @@
 
       @show filesView,
         region: @layout.allFilesRegion
-
-    getExtensionMessageView: ->
-      new List.ExtensionMessage
 
     getLayoutView: (config) ->
       new List.Layout

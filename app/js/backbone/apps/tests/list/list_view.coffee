@@ -6,9 +6,6 @@
     triggers:
       "click [data-js='project-name']" : "project:name:clicked"
 
-  class List.ExtensionMessage extends App.Views.ItemView
-    template: "tests/list/_message"
-
   class List.Search extends App.Views.ItemView
     template: "tests/list/_search"
 
@@ -30,6 +27,9 @@
   class List.File extends App.Views.CompositeView
     childView: List.File
     childViewContainer: "ul"
+    childViewOptions: ->
+      {config: @options.config}
+
     tagName: "li"
 
     events:
@@ -44,7 +44,7 @@
         @collapseFolder()
 
     goToFile: ->
-      window.location.hash = "/tests/" + @model.get("fullPath")
+      @options.config.trigger("go:to:file", @model.get("fullPath"))
 
     collapseFolder: ->
 
@@ -70,6 +70,8 @@
     childView: List.File
     emptyView: List.Empty
     childViewContainer: ".outer-files-container"
+    childViewOptions: ->
+      {config: @options.config}
 
     ui:
       span: ".dropdown-menu span"

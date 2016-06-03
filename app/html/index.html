@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>{{projectName}}</title>
+
+      <link href="/__cypress/static/img/favicon.ico" rel="icon">
+
+      <link rel="stylesheet" href="/__cypress/reporter/css/cypress.css">
+
+  </head>
+  <body>
+    <div id="cy-wrapper">
+      <div id="nav-region"></div>
+      <div id="main-region"></div>
+    </div>
+    <div id="dialog-region"></div>
+
+    <script type="text/javascript" src="/__cypress/socket.io.js"></script>
+    <script type="text/javascript" src="/__cypress/reporter/js/vendor.js"></script>
+    <script type="text/javascript" src="/__cypress/reporter/js/app.js"></script>
+    <script type="text/javascript">
+      $(function(){
+        setTimeout(function(){
+          App.start({{{config}}})
+        }, 0)
+      });
+    </script>
+  </body>
+</html>

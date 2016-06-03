@@ -124,7 +124,7 @@ gulp.task "clean", ->
 
 gulp.task "html", ->
   gulp.src(["app/html/*"])
-    .pipe gulp.dest("dist/public")
+    .pipe gulp.dest("dist/html")
 
 gulp.task "watch", ["watch:css", "watch:js", "watch:html"]
 
