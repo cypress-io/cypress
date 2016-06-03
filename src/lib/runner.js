@@ -41,6 +41,7 @@ export default {
     _.each(runnerEvents, (event) => {
       driver.on(event, (...args) => eventBus.emit(event, ...args))
     })
+    driver.on('fail', console.error.bind(console))
   },
 
   run (specWindow, $autIframe) {
