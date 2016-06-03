@@ -25,7 +25,7 @@ export default class Iframes extends Component {
   }
 
   componentWillMount () {
-    runner.start()
+    runner.start(this.props.config)
 
     this.iframeModel = new IframeModel(this.props.uiState)
     this.iframeModel.listen()

@@ -16,13 +16,13 @@ const runnerEvents = 'viewport config stop url:changed page:loading'.split(' ')
 const eventBus = new EventEmitter()
 
 export default {
-  start () {
+  start (config) {
     // eventBus.removeAllListeners()
     // driver.off()
 
     overrides.overloadMochaRunnerUncaught()
 
-    driver.setConfig({})
+    driver.setConfig(_.pick(config, 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout'))
 
     driver.start()
 
@@ -41,6 +41,7 @@ export default {
     _.each(runnerEvents, (event) => {
       driver.on(event, (...args) => eventBus.emit(event, ...args))
     })
+
     driver.on('fail', console.error.bind(console))
   },
 

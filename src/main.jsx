@@ -13,9 +13,13 @@ autorun(() => {
   console.log('UI State:', uiState.serialize())
 })
 
-render(
-  <div className="container">
-    <Header uiState={uiState} />
-    <Iframes uiState={uiState} />
-  </div>
-, document.getElementById('app'))
+window.Runner = {
+  start (config) {
+    render(
+      <div className="container">
+        <Header uiState={uiState} />
+        <Iframes uiState={uiState} config={config} />
+      </div>
+    , document.getElementById('app'))
+  },
+}
