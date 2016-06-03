@@ -25,6 +25,7 @@
     "zunder": "^3.2.0"
   },
   "dependencies": {
+    "bluebird": "^3.4.0",
     "classnames": "^2.2.5",
     "mobx": "^2.2.2",
     "mobx-react": "^3.3.0",
