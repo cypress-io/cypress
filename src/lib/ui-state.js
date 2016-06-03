@@ -6,7 +6,7 @@ const headerHeight = 46
 const defaults = {
   isRunning: false,
 
-  url: 'https://google.com',
+  url: '',
   isLoading: false,
 
   width: 1000,
