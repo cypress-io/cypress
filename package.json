@@ -13,16 +13,15 @@
   "homepage": "https://github.com/cypress-io/cypress-core-runner#readme",
   "scripts": {
     "postinstall": "bower install",
-    "build": "zunder build-prod",
-    "server": "zunder serve-prod --port 8000",
-    "start": "zunder watch"
+    "build": "node ./scripts/build.js",
+    "start": "node ./scripts/watch.js"
   },
   "devDependencies": {
     "babel-eslint": "^6.0.4",
     "eslint": "^2.11.1",
     "eslint-plugin-react": "^5.1.1",
     "vinyl-fs": "^2.4.3",
-    "zunder": "^3.2.0"
+    "zunder": "^3.3.0"
   },
   "dependencies": {
     "bluebird": "^3.4.0",
