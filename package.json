@@ -1,16 +1,16 @@
 {
-  "name": "@cypress/core-aut",
+  "name": "@cypress/core-runner",
   "version": "0.0.0",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cypress-io/cypress-core-aut.git"
+    "url": "git+https://github.com/cypress-io/cypress-core-runner.git"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cypress-io/cypress-core-aut/issues"
+    "url": "https://github.com/cypress-io/cypress-core-runner/issues"
   },
-  "homepage": "https://github.com/cypress-io/cypress-core-aut#readme",
+  "homepage": "https://github.com/cypress-io/cypress-core-runner#readme",
   "scripts": {
     "postinstall": "bower install",
     "build": "zunder build-prod",

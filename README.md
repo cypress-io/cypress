@@ -1,4 +1,4 @@
-# Cypress Core AUT (App Under Test)
+# Cypress Core Runner
 
 ## Development
 

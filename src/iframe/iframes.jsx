@@ -34,7 +34,7 @@ export default class Iframes extends Component {
   // wiped out and reset on re-runs
   componentDidMount () {
     const name = 'foobar' //App.config.get('projectName')
-    const specSrc = '/__cypress/aut/test.html' // should come from URL hash
+    const specSrc = '/__cypress/runner/test.html' // should come from URL hash
 
     const $container = $(this.refs.container)
 
