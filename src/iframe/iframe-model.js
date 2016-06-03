@@ -8,15 +8,10 @@ export default class IframeModel {
   }
 
   listen () {
-    // @listenTo runner, "before:run", ->
-    //   @initialize()
-    //   @isRunning(true)
-
-    // @listenTo runner, "after:run", ->
-    //   @isRunning(false)
+    runner.on('before:run', this._beforeRun)
+    runner.on('after:run', this._afterRun)
 
     runner.on('viewport', this._updateViewport)
-
     runner.on('config', (config) => {
       this._updateViewport(_.map(config, 'viewportHeight', 'viewportWidth'))
     })
@@ -27,7 +22,6 @@ export default class IframeModel {
     })
 
     runner.on('url:changed', this._updateUrl)
-
     runner.on('page:loading', this._updateLoading)
   }
 
@@ -37,6 +31,15 @@ export default class IframeModel {
 
   stopListening () {
     // tear down listeners
+  }
+
+  @action _beforeRun = () => {
+    this.uiState.reset()
+    this.uiState.isRunning = true
+  }
+
+  @action _afterRun = () => {
+    this.uiState.isRunning = false
   }
 
   @action _updateViewport = (viewport) => {

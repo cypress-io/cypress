@@ -24,10 +24,10 @@ export default class Iframes extends Component {
   }
 
   componentWillMount () {
+    runner.start()
+
     this.iframeModel = new IframeModel(this.props.uiState)
     this.iframeModel.listen()
-
-    runner.start()
   }
 
   // jQuery is a better fit for managing these iframes, since they need to get

@@ -9,7 +9,8 @@ import overrides from './overrides'
 const driver = $Cypress.create({ loadModules: true })
 const channel = io.connect({ path: '/__socket.io' })
 
-const socketEvents = 'run:start run:end suite:start suite:end hook:start hook:end test:start test:end'.split(' ')
+const socketEvents = 'run:start run:end suite:start suite:end hook:start hook:end test:start test:end fixture request history:entries exec'.split(' ')
+const automationEvents = 'get:cookies get:cookie set:cookie clear:cookies clear:cookie'.split(' ')
 const runnerEvents = 'viewport config stop url:changed page:loading'.split(' ')
 
 const eventBus = new EventEmitter()
@@ -29,19 +30,16 @@ export default {
       driver.on(event, (...args) => channel.emit(event, ...args))
     })
 
+    _.each(automationEvents, (event) => {
+      driver.on(event, (...args) => channel.emit('automation:request', event, ...args))
+    })
+
+    driver.on('message', (msg, data, cb) => {
+      channel.emit('client:request', msg, data, cb)
+    })
+
     _.each(runnerEvents, (event) => {
       driver.on(event, (...args) => eventBus.emit(event, ...args))
-    })
-
-    // hacks to simply force a response to automation
-    // requests so our tests run
-    driver.on('get:cookies', (options, cb) => {
-      // channel.emit('get:cookies', cb)
-      cb({ response: [] })
-    })
-
-    driver.on('clear:cookies', (options, cb) => {
-      cb({ response: [] })
     })
   },
 
@@ -54,6 +52,4 @@ export default {
   on (event, ...args) {
     eventBus.on(event, ...args)
   },
-
-  eventBus
 }
