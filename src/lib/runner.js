@@ -42,13 +42,19 @@ export default {
       driver.on(event, (...args) => eventBus.emit(event, ...args))
     })
 
-    driver.on('fail', console.error.bind(console))
+    driver.on('fail', (error) => {
+      console.error('Failure:', error)
+    })
   },
 
   run (specWindow, $autIframe) {
     driver.initialize(specWindow, $autIframe)
 
-    driver.run(() => {})
+    driver.run((error, results) => {
+      console.log('Tests finished')
+      if (error) console.error('Error:', error)
+      if (results) console.log('Results:', results)
+    })
   },
 
   on (event, ...args) {
