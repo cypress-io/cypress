@@ -1,1 +1,1 @@
-module.exports = require("./lib/runner")
+module.exports = require("./lib/reporter")

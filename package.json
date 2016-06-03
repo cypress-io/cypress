@@ -1,5 +1,5 @@
 {
-  "name": "@cypress/core-runner",
+  "name": "@cypress/core-reporter",
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cypress-io/cypress-core-runner.git"
+    "url": "git+https://github.com/cypress-io/cypress-core-reporter.git"
   },
   "author": "Brian Mann",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cypress-io/cypress-core-runner/issues"
+    "url": "https://github.com/cypress-io/cypress-core-reporter/issues"
   },
-  "homepage": "https://github.com/cypress-io/cypress-core-runner#readme",
+  "homepage": "https://github.com/cypress-io/cypress-core-reporter#readme",
   "devDependencies": {
     "@cypress/core-icons": "^0.4.1",
     "bluebird": "^3.4.0",
