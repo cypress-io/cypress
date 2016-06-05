@@ -24,9 +24,9 @@
         @stats     = App.request "stats:entity", @
 
         _.each CypressEvents, (event) =>
-          @listenTo @Cypress, event, (args...) =>
-            @socket.emit(event, args...)
-            @trigger event, args...
+          @listenTo @Cypress, event, (runnable) =>
+            @socket.emit(event, @transferFlattened(runnable))
+            @trigger(event, runnable)
 
         @listenTo @Cypress, "run:start", =>
           @socket.emit "mocha", "start"
@@ -350,12 +350,18 @@
 
         return runnable.id = id
 
-      transfer: (test) ->
-        obj = @ids[test.id]
+      transfer: (runnable) ->
+        return if not runnable
+
+        obj = @ids[runnable.id]
 
         ## TODO: normalize the pending stuff here?
         ## and add the err properties?
-        _.extend obj, _.pick(test, "state", "pending", "stopped", "duration")
+        _.extend obj, _.pick(runnable, "state", "pending", "stopped", "duration")
+
+      transferFlattened: (runnable) ->
+        if r = @transfer(runnable)
+          _.omit(r, "tests", "suites")
 
       receivedRunner: (runner) ->
         triggerAddEvents = true
@@ -377,13 +383,17 @@
 
         @ids = runner.runnableIds
 
+        runnables = []
+
+        ## TODO: the only reason we need to do this
+        ## is so that 'test:after:hooks' fires correctly
+        ## due to needing to hold onto the state for
+        ## the driver runnables
+        runner.getRunnables
+          onRunnable: (runnable) =>
+            runnables.push(runnable)
+
         if e = @get("existingRunnable")
-          runnables = []
-
-          runner.getRunnables
-            onRunnable: (runnable) =>
-              runnables.push(runnable)
-
           for runnable in runnables
             if runnable.pending or runnable.type isnt "test"
               ## move along if we arent even a test yet
