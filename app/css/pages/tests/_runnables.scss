@@ -217,6 +217,14 @@
         border-left: 10px solid $fail;
       }
 
+      &.suite.pending > .runnable-wrapper {
+        border-left: 10px solid lighten($pending, 25%);
+      }
+
+      &.test.pending > .runnable-wrapper {
+        border-left: 10px solid lighten($pending, 25%);
+      }
+
       &.test.passed > .runnable-wrapper {
         border-left: 10px solid $pass;
       }

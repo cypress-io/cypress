@@ -30,6 +30,8 @@
       channel.on "connect", ->
         channel.emit "reporter:connected"
 
+      ## TODO: rename this event its confusing
+      ## should be something like watched:file:changed
       channel.on "test:changed", (data) ->
         socket.trigger "test:changed", data.file
 

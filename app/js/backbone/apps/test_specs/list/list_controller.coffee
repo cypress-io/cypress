@@ -121,6 +121,14 @@
         ## and causes our runner to fire 'test:results:ready'
         runner.logResults runnable
 
+        ## if we have a parent suite then update its state!
+        do updateParentSuiteState = (r = runnable) ->
+          if suite = container.get(r.get("parentId"))
+            suite.updateState()
+
+            ## keep on keepin' on
+            updateParentSuiteState(suite)
+
       @listenTo runner, "reset:test:run", ->
         ## when our runner says to reset the test run
         ## we do this so our tests go into the 'reset' state prior to the iframe

@@ -228,11 +228,11 @@
     anyAreFailed: (states) ->
       _(states).any (state) -> state is "failed"
 
+    anyArePending: (states) ->
+      _(states).any (state) -> state is "pending"
+
     allArePassed: (states) ->
       _(states).all (state) -> state is "passed"
-
-    allArePending: (states) ->
-      _(states).all (state) -> state is "pending"
 
     updateState: ->
       ## grab all of the states of the tests
@@ -241,8 +241,8 @@
       state = switch
         when @anyAreProcessing(states) then "processing"
         when @anyAreFailed(states) then "failed"
+        when @anyArePending(states) then "pending"
         when @allArePassed(states) then "passed"
-        when @allArePending(states) then "pending"
 
       @set state: state
 
