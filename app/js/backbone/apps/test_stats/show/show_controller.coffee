@@ -7,17 +7,17 @@
 
       stats = @stats = App.request "stats:entity"
 
-      @listenTo runner, "before:run", ->
+      @listenTo runner, "run:start", ->
         stats.running()
 
-      @listenTo runner, "suite:start", ->
-        stats.startCounting()
-
-      @listenTo runner, "after:run", ->
+      @listenTo runner, "run:end", ->
         stats.end()
         stats.setGlobally()
 
-      @listenTo runner, "test:end", ->
+      @listenTo runner, "test:before:hooks", ->
+        stats.startCounting()
+
+      @listenTo runner, "test:after:hooks", ->
         stats.setDuration()
 
       @listenTo runner, "test:results:ready", (test) ->
@@ -27,7 +27,7 @@
         chosen = runner.getChosen()
         @chosenRegion runner, chosen
 
-      @listenTo runner, "reset:test:run", ->
+      @listenTo runner, "restart:test:run", ->
         ## anytime the iframe needs to be restarted
         ## we reset our stats back to 0
         stats.reset()

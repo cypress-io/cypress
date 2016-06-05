@@ -12,11 +12,17 @@
       @stats     = App.request "stats:entity", @
 
       @listenTo @socket, "runnables:ready", (root) =>
-        @trigger("before:run")
+        @trigger("before:add")
 
         @process(root)
 
         @trigger("after:add")
+
+      @listenTo @socket, "run:start", =>
+        @trigger "run:start"
+
+      @listenTo @socket, "run:end", =>
+        @trigger "run:end"
 
       @listenTo @socket, "test:before:hooks", (test) =>
         @trigger "test:before:hooks", test
@@ -24,12 +30,23 @@
       @listenTo @socket, "test:after:hooks", (test) =>
         @trigger "test:after:hooks", test
 
+      @listenTo @socket, "restart:test:run", ->
+        @trigger "restart:test:run"
+
+        @socket.emit "reporter:restarted"
+
       @listenTo @socket, "log:add", (log) =>
         @logs[log.id] = @addLog(log)
 
       @listenTo @socket, "log:state:changed", (attrs) ->
         log = @logs[attrs.id]
         log.set(attrs) if log
+
+    restart: ->
+      @socket.emit("runner:restart")
+
+    abort: ->
+      @socket.emit("runner:abort")
 
     addLog: (log) ->
       switch log.instrument
