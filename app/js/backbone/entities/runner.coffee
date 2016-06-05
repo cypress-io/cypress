@@ -12,6 +12,10 @@
       @stats     = App.request "stats:entity", @
 
       @listenTo @socket, "runnables:ready", (root) =>
+        @reset()
+
+        @trigger("restart:test:run")
+
         @trigger("before:add")
 
         @process(root)
