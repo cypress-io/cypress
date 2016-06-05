@@ -21,6 +21,8 @@
         ## instead of the webapp
         channel.emit("app:connect", socketId) if socketId
 
+        channel.emit("runner:connected")
+
         channel.emit "get:current:runnable", (runnable) ->
           if runnable
             socket.trigger("existing:runnable", runnable)
@@ -43,8 +45,17 @@
       channel.on "automation:push:message", (msg, data) ->
         socket.trigger "automation:push:message", msg, data
 
-      channel.on "test:changed", (data) ->
-        socket.trigger "test:changed", data.file
+      channel.on "watched:file:changed", (data) ->
+        socket.trigger "watched:file:changed", data.file
+
+      channel.on "runner:restart", ->
+        socket.trigger "runner:restart"
+
+      channel.on "runner:abort", ->
+        socket.trigger "runner:abort"
+
+      channel.on "reporter:restarted", ->
+        socket.trigger "reporter:restarted"
 
       channel.on "cypress:css:changed", (data) ->
         ## find the cypress stylesheet

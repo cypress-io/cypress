@@ -21,11 +21,7 @@ runnableTitle = null
 runnableFn    = null
 
 autEvents = [
-  "reset:test:run"
-  "before:add"
-  "suite:add"
-  "test:add"
-  "after:add"
+  "restart:test:run"
   "runnables:ready"
   "run:start"
   "test:before:hooks"
@@ -38,6 +34,9 @@ autEvents = [
 
 reporterEvents = [
   # "go:to:file"
+  "runner:restart"
+  "runner:abort"
+  "reporter:restarted"
 ]
 
 retry = (fn) ->
@@ -61,7 +60,7 @@ class Socket
 
     fs.statAsync(filePath)
     .then =>
-      @io.emit "test:changed", {file: originalFilePath}
+      @io.emit "watched:file:changed", {file: originalFilePath}
     .catch(->)
 
   watchTestFileByPath: (config, originalFilePath, watchers, cb = ->) ->
@@ -110,7 +109,7 @@ class Socket
     @io.to("reporter").emit(event, data)
 
   onReporter: (event, data) ->
-    @io.to("runner", event, data)
+    @io.to("runner").emit(event, data)
 
   onAutomation: (messages, message, data) ->
     Promise.try =>

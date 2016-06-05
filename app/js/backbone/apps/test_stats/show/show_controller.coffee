@@ -27,7 +27,7 @@
         chosen = runner.getChosen()
         @chosenRegion runner, chosen
 
-      @listenTo runner, "reset:test:run", ->
+      @listenTo runner, "restart:test:run", ->
         ## anytime the iframe needs to be restarted
         ## we reset our stats back to 0
         stats.reset()
@@ -57,19 +57,19 @@
     configRegion: (stats, runner) ->
       configView = @getConfigView(stats)
 
-      @listenTo configView, "play:clicked", ->
-        runner.resume()
+      # @listenTo configView, "play:clicked", ->
+      #   runner.resume()
 
-      @listenTo configView, "restart:clicked", ->
-        runner.restart()
+      # @listenTo configView, "restart:clicked", ->
+      #   runner.restart()
 
-      @listenTo configView, "stop:clicked", ->
-        stats.stop()
-        runner.abort()
+      # @listenTo configView, "stop:clicked", ->
+      #   stats.stop()
+      #   runner.abort()
 
-      @listenTo configView, "next:clicked", ->
-        stats.disableNext()
-        runner.next()
+      # @listenTo configView, "next:clicked", ->
+      #   stats.disableNext()
+      #   runner.next()
 
       @show configView, region: @layout.configRegion
 

@@ -637,7 +637,7 @@ describe "lib/socket", ->
           @socket.onTestFileChange(@cfg.integrationFolder, "original/path", "foo/bar.js").then =>
             expect(@io.emit).not.to.be.called
 
-        it "emits 'test:changed' with original/path", ->
+        it "emits 'watched:file:changed' with original/path", ->
           p = Fixtures.project("todos") + "/tests/test1.js"
           @socket.onTestFileChange(@cfg.integrationFolder, "original/path", p).then =>
-            expect(@io.emit).to.be.calledWith("test:changed", {file: "original/path"})
+            expect(@io.emit).to.be.calledWith("watched:file:changed", {file: "original/path"})

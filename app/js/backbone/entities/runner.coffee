@@ -130,10 +130,15 @@
           attrs = @transformEmitAttrs(attrs)
           @socket.emit "log:state:changed", attrs
 
-        @listenTo @socket, "test:changed", @reRun
+        @listenTo @socket, "watched:file:changed", @reRun
 
         @listenTo @socket, "existing:runnable", (runnable) ->
           @set("existingRunnable", runnable)
+
+        @listenTo @socket, "runner:restart", =>
+          @reRun(@specPath)
+
+        @listenTo @socket, "runner:abort", @abort
 
         @listenTo @socket, "automation:push:message", (msg, data = {}) ->
           switch msg
@@ -273,9 +278,15 @@
         ## always reload the iframe
         @reRun @specPath
 
+      # restart: ->
+      #   ## always reload the iframe
+      #   @reRun @specPath
+
       restart: ->
-        ## always reload the iframe
-        @reRun @specPath
+        new Promise (resolve) =>
+          @listenTo(@socket, "reporter:restarted", resolve)
+
+          @socket.emit("restart:test:run")
 
       logResults: (test) ->
         @trigger "test:results:ready", test
@@ -288,14 +299,18 @@
 
         ## when we are re-running we first
         ## need to abort cypress always
-        @Cypress.abort().then =>
-          ## start the abort process since we're about
-          ## to load up in case we're running any tests
-          ## right this moment
+        Promise.join(
+          @abort()
+          @restart()
+        )
+        .then =>
+        ## start the abort process since we're about
+        ## to load up in case we're running any tests
+        ## right this moment
 
-          ## tells different areas of the app to prepare
-          ## for the resetting of the test run
-          @trigger "reset:test:run"
+        ## tells different areas of the app to prepare
+        ## for the resetting of the test run
+        # @trigger "restart:test:run"
 
           @triggerLoadSpecFrame(specPath, options)
 
