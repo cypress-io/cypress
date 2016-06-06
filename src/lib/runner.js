@@ -13,11 +13,11 @@ const socketEvents = 'run:start run:end suite:start suite:end hook:start hook:en
 const automationEvents = 'get:cookies get:cookie set:cookie clear:cookies clear:cookie'.split(' ')
 const runnerEvents = 'viewport config stop url:changed page:loading'.split(' ')
 
-const eventBus = new EventEmitter()
+const localBus = new EventEmitter()
 
 export default {
   start (config) {
-    // eventBus.removeAllListeners()
+    // localBus.removeAllListeners()
     // driver.off()
 
     overrides.overloadMochaRunnerUncaught()
@@ -39,7 +39,7 @@ export default {
     })
 
     _.each(runnerEvents, (event) => {
-      driver.on(event, (...args) => eventBus.emit(event, ...args))
+      driver.on(event, (...args) => localBus.emit(event, ...args))
     })
 
     driver.on('fail', (error) => {
@@ -58,6 +58,6 @@ export default {
   },
 
   on (event, ...args) {
-    eventBus.on(event, ...args)
+    localBus.on(event, ...args)
   },
 }
