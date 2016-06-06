@@ -13,7 +13,7 @@ export default {
   specSrc () {
     if (location.hash) {
       const match = location.hash.match(/tests\/(.*)$/)
-      return match[0]
+      return match[1]
     } else {
       // TODO: what should be returned in this scenario and how should caller react?
       return ''
