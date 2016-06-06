@@ -25,7 +25,7 @@ export default class IframeModel {
     runner.on('page:loading', this._updateLoading)
   }
 
-  reset () {
+  @action reset () {
     this.uiState.reset()
   }
 

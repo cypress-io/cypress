@@ -40,12 +40,12 @@ class UiState {
     return Math.floor(this.scale * 100)
   }
 
-  @action updateWindowDimensions (width, height) {
+  updateWindowDimensions (width, height) {
     this._windowWidth = width
     this._windowHeight = height
   }
 
-  @action reset () {
+  reset () {
     _.each(defaults, (defaultValue, key) => {
       this[key] = defaultValue
     })

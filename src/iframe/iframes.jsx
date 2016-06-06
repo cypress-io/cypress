@@ -7,6 +7,7 @@ import React, { Component } from 'react'
 import blankContents from './blank-contents'
 import IframeModel from './iframe-model'
 import runner from '../lib/runner'
+import windowUtil from '../lib/window-util'
 
 @observer
 export default class Iframes extends Component {
@@ -31,23 +32,20 @@ export default class Iframes extends Component {
     this.iframeModel.listen()
   }
 
-  // jQuery is a better fit for managing these iframes, since they need to get
-  // wiped out and reset on re-runs
   componentDidMount () {
     this._loadIframes().then(([specWindow, $autIframe]) => {
       runner.run(specWindow, $autIframe)
     })
 
-    const $window = $(window)
-    $window.on('resize', () => {
-      this.props.uiState.updateWindowDimensions($window.width(), $window.height())
-    }).trigger('resize')
+    windowUtil.monitorWindowResize(this.props.uiState)
   }
 
+  // jQuery is a better fit for managing these iframes, since they need to get
+  // wiped out and reset on re-runs
   _loadIframes () {
     return new Promise((resolve) => {
-      const name = '<Real Project Name Goes Here>' //App.config.get('projectName')
-      const specSrc = '/__cypress/runner/test.html' // should come from URL hash
+      const name = this.props.config.projectName
+      const specSrc = `/__cypress/iframes/${windowUtil.specSrc()}`
 
       const $container = $(this.refs.container)
 
