@@ -12,15 +12,16 @@ import windowUtil from '../lib/window-util'
 @observer
 export default class Iframes extends Component {
   render () {
-    const { width, height, scale } = this.props.uiState
+    const { width, height, scale, marginLeft } = this.props.uiState
 
     return <div
       ref='container'
       className='size-container'
       style={{
-        width: `${width}px`,
-        height: `${height}px`,
+        marginLeft,
+        height,
         transform: `scale(${scale})`,
+        width,
       }}
     />
   }

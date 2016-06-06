@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { action, computed, observable } from 'mobx'
+import { computed, observable } from 'mobx'
 
 const headerHeight = 46
 
@@ -34,6 +34,10 @@ class UiState {
       return Math.min(this._windowWidth / this.width, containerHeight / this.height, 1)
     }
     return 1
+  }
+
+  @computed get marginLeft () {
+    return (this._windowWidth / 2) - (this.width / 2)
   }
 
   @computed get displayScale () {
