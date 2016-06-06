@@ -3,7 +3,7 @@ CacheBuster = require("./util/cache_buster")
 cwd         = require("./cwd")
 logger      = require("./logger")
 spec        = require("./controllers/spec_processor")
-aut         = require("./controllers/aut")
+runner      = require("./controllers/runner")
 xhrs        = require("./controllers/xhrs")
 client      = require("./controllers/client")
 files       = require("./controllers/files")
@@ -23,8 +23,8 @@ module.exports = (app, config, getRemoteOrigin) ->
   app.get "/__cypress/socket.io.js", (req, res) ->
     client.handle(req, res)
 
-  app.get "/__cypress/aut/*", (req, res) ->
-    aut.handle(req, res)
+  app.get "/__cypress/runner/*", (req, res) ->
+    runner.handle(req, res)
 
   ## routing for /files JSON endpoint
   app.get "/__cypress/files", (req, res) ->
