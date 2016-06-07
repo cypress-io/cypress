@@ -20,6 +20,7 @@ const socketEvents = 'run:start run:end fixture request history:entries exec dom
 const testEvents = 'test:before:hooks test:after:hooks'.split(' ')
 const automationEvents = 'get:cookies get:cookie set:cookie clear:cookies clear:cookie'.split(' ')
 const runnerEvents = 'viewport config stop url:changed page:loading'.split(' ')
+const rerunEvents = 'runner:restart watched:file:changed'.split(' ')
 
 const localBus = new EventEmitter()
 
@@ -105,8 +106,11 @@ export default {
       driver.on(event, (...args) => localBus.emit(event, ...args))
     })
 
-    channel.on('watched:file:changed', () => {
-      this._reRun()
+    _.each(rerunEvents, this._reRun.bind(this))
+
+    channel.on('runner:abort', () => {
+      // TODO: tell the driver not to fire 'test:after:hooks' event
+      driver.abort()
     })
 
     // when we actually unload then
