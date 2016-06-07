@@ -135,7 +135,20 @@ export default {
 
   run (specWindow, $autIframe) {
     driver.initialize(specWindow, $autIframe)
-    driver.run(() => {})
+
+    // get the current runnable in case we reran mid-test due to a visit
+    // to a new domain
+    channel.emit("get:current:runnable", (runnable) => {
+      if (runnable) {
+        // TODO: need this method implemented in driver
+        // driver.skipToRunnable(runnable)
+
+        // tell reporter to clear out logs for current runnable
+        channel.emit('reporter:reset:current:runnable:logs')
+      }
+
+      driver.run(() => {})
+    })
   },
 
   _reRun () {
