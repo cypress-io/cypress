@@ -3,9 +3,7 @@ import React from 'react'
 import { render } from 'react-dom'
 
 import uiState from './lib/ui-state'
-
-import Header from './header/header'
-import Iframes from './iframe/iframes'
+import App from './app'
 
 useStrict(true)
 
@@ -15,11 +13,6 @@ autorun(() => {
 
 window.Runner = {
   start (config) {
-    render(
-      <div className="container">
-        <Header uiState={uiState} />
-        <Iframes uiState={uiState} config={config} />
-      </div>
-    , document.getElementById('app'))
+    render(<App config={config} uiState={uiState} />, document.getElementById('app'))
   },
 }

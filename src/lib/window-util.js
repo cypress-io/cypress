@@ -10,7 +10,7 @@ export default {
     })).trigger('resize')
   },
 
-  specSrc () {
+  specFile () {
     if (location.hash) {
       const match = location.hash.match(/tests\/(.*)$/)
       return match[1]
