@@ -146,26 +146,25 @@
     preClicked: (e) ->
       ## TODO: REFACTOR THIS METHOD TO USE THE VIEWS
       ## METHOD AND DRY UP CODE
-      return if not err = @model.originalError
+      return if not err = @model.get("error")
 
       e.stopPropagation()
 
-      ## TODO: DRY THIS UP
-      if /(AssertionError|CypressError)/.test(err.name)
+      @displayConsoleMessage()
+      # @trigger("error:clicked", @model)
+      #
+      # ## TODO: DRY THIS UP
+      if /(AssertionError|CypressError)/.test(err)
+        ## TODO: update to match based on err string not object
         command = @model.getLastCommandThatMatchesError(err)
 
         return if not command
 
-        ## get command by error
-        console.clear?()
-
-        @displayConsoleMessage()
-
-        command.getConsoleDisplay (args) ->
-          console.log.apply(console, args)
+        @model.trigger("display:command", command.id)
+        # command.getConsoleDisplay (args) ->
+        #   console.log.apply(console, args)
       else
-        @displayConsoleMessage()
-        console.error(err.stack)
+        @model.trigger("display:error", @model.id)
 
     displayConsoleMessage: ->
       width  = @ui.pre.outerWidth()

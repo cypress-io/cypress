@@ -220,6 +220,12 @@
       ## the view event bus in a reliable way.  thus we have to go through
       ## our models.
 
+      @listenTo model, "display:error", (id) ->
+        runner.sendError(id)
+
+      @listenTo model, "display:command", (id) ->
+        runner.sendCommand(id)
+
       ## we also can't use the normal backbone-chooser because
       ## we have unlimited nested / fragmented collections
       ## so we have to handle this logic ourselves

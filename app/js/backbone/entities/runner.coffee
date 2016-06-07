@@ -46,6 +46,12 @@
         log = @logs[attrs.id]
         log.set(attrs) if log
 
+    sendError: (id) ->
+      @socket.emit("runner:console:error", id)
+
+    sendCommand: (id) ->
+      @socket.emit("runner:console:log", id)
+
     restart: ->
       @socket.emit("runner:restart")
 

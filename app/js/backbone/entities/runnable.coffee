@@ -164,14 +164,16 @@
         state:    if test.pending then "pending" else test.state
         duration: test.duration
 
-      if test.err
-        test.err = @parseErrorFromString(test.err) if _.isString(test.err)
-
+      if e = test.err
+        # test.err = @parseErrorFromString(test.err) if _.isString(test.err)
+        #
         ## backup the original error to output to the console
-        @originalError = test.err
+        # @originalError = e
+        #
+        # ## set the err on the attrs
+        # attrs.error = _.result e, "toString"
 
-        ## set the err on the attrs
-        attrs.error = _.result test.err, "toString"
+        attrs.error = e
 
         ## get the hook name (beforeEach, afterEach, etc)
         ## if the test failed from a hook
