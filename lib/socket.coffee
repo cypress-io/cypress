@@ -21,12 +21,12 @@ runnableTitle = null
 runnableFn    = null
 
 runnerEvents = [
-  "restart:test:run"
+  "reporter:restart:test:run"
   "runnables:ready"
   "run:start"
   "test:before:hooks"
-  "log:add"
-  "log:state:changed"
+  "reporter:log:add"
+  "reporter:log:state:changed"
   "paused"
   "test:after:hooks"
   "run:end"
@@ -303,6 +303,9 @@ class Socket
         options.onReloadBrowser(url, browser)
 
       socket.on "is:automation:connected", (data = {}, cb) =>
+        ## TODO: temporary hack to get runner working
+        return cb(true)
+
         isConnected = =>
           automationRequest("is:automation:connected", data)
 
