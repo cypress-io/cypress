@@ -1,4 +1,4 @@
-import { useStrict, autorun } from 'mobx'
+import { useStrict, observe } from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'
 
@@ -7,8 +7,8 @@ import App from './app'
 
 useStrict(true)
 
-autorun(() => {
-  console.log('UI State:', uiState.serialize())
+observe(uiState, (change) => {
+  console.log(change.type, `uiState.${change.name}`, 'from', change.oldValue, 'to', change.object[change.name])
 })
 
 window.Runner = {

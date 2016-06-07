@@ -13,19 +13,19 @@ const defaults = {
   height: 660,
 }
 
-class UiState {
-  defaults = defaults
+const uiState = observable({
+  defaults,
 
-  @observable isRunning = defaults.isRunning
+  isRunning: defaults.isRunning,
 
-  @observable url = defaults.url
-  @observable isLoading = defaults.isLoading
+  url: defaults.url,
+  isLoading: defaults.isLoading,
 
-  @observable width = defaults.width
-  @observable height = defaults.height
+  width: defaults.width,
+  height: defaults.height,
 
-  @observable _windowWidth = 0;
-  @observable _windowHeight = 0;
+  _windowWidth: 0,
+  _windowHeight: 0,
 
   @computed get scale () {
     const containerHeight = this._windowHeight - headerHeight
@@ -34,26 +34,26 @@ class UiState {
       return Math.min(this._windowWidth / this.width, containerHeight / this.height, 1)
     }
     return 1
-  }
+  },
 
   @computed get marginLeft () {
     return (this._windowWidth / 2) - (this.width / 2)
-  }
+  },
 
   @computed get displayScale () {
     return Math.floor(this.scale * 100)
-  }
+  },
 
   updateWindowDimensions (width, height) {
     this._windowWidth = width
     this._windowHeight = height
-  }
+  },
 
   reset () {
     _.each(defaults, (defaultValue, key) => {
       this[key] = defaultValue
     })
-  }
+  },
 
   // used for logging in main.jsx
   serialize () {
@@ -63,7 +63,7 @@ class UiState {
       }, {})
       .extend(_.pick(this, '_windowWidth', '_windowHeight', 'scale', 'displayScale'))
       .value()
-  }
-}
+  },
+})
 
-export default new UiState()
+export default uiState
