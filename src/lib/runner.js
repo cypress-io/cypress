@@ -162,6 +162,7 @@ export default {
     )
     .then(() => {
       logs.reset()
+      tests.reset()
       localBus.emit('restart')
     })
   },
