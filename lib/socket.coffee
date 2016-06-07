@@ -20,7 +20,7 @@ automation    = require("./automation")
 runnableTitle = null
 runnableFn    = null
 
-autEvents = [
+runnerEvents = [
   "restart:test:run"
   "runnables:ready"
   "run:start"
@@ -36,6 +36,8 @@ reporterEvents = [
   # "go:to:file"
   "runner:restart"
   "runner:abort"
+  "runner:console:log"
+  "runner:console:error"
   "reporter:restarted"
 ]
 
@@ -105,7 +107,7 @@ class Socket
     .catch (err) ->
       cb({__error: err.message, timedout: err.timedout})
 
-  onAut: (event, data) ->
+  onRunner: (event, data) ->
     @io.to("reporter").emit(event, data)
 
   onReporter: (event, data) ->
@@ -204,6 +206,7 @@ class Socket
             ## TODO: if all of our clients have also disconnected
             ## then don't warn anything
             errors.warning("AUTOMATION_SERVER_DISCONNECTED")
+            ## TODO: no longer emit this, just close the browser and display message in reporter
             @io.emit("automation:disconnected")
 
         socket.on "automation:push:request", (msg, data, cb = ->) =>
@@ -345,9 +348,9 @@ class Socket
         socket.on event, (data) =>
           @onReporter(event, data)
 
-      autEvents.forEach (event) =>
+      runnerEvents.forEach (event) =>
         socket.on event, (data) =>
-          @onAut(event, data)
+          @onRunner(event, data)
 
   end: ->
     ## TODO: we need an 'ack' from this end

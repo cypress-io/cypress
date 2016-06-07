@@ -284,7 +284,7 @@
 
       restart: ->
         new Promise (resolve) =>
-          @listenTo(@socket, "reporter:restarted", resolve)
+          @listenToOnce(@socket, "reporter:restarted", resolve)
 
           @socket.emit("restart:test:run")
 
@@ -408,6 +408,7 @@
           onRunnable: (runnable) =>
             runnables.push(runnable)
 
+        ## TODO: move into driver
         if e = @get("existingRunnable")
           for runnable in runnables
             if runnable.pending or runnable.type isnt "test"

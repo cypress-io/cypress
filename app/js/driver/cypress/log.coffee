@@ -93,6 +93,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
   class $Log
     constructor: (@Cypress, obj = {}) ->
       _.defaults obj,
+        id: _.uniqueId("l")
         state: "pending"
 
       @set(obj)
@@ -113,6 +114,13 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
     unset: (key) ->
       @set key, undefined
+
+    toJSON: ->
+      _(@attributes)
+      .chain()
+      .omit(_.isFunction)
+      .omit("snapshots")
+      .value()
 
     set: (key, val) ->
       if _.isString(key)
@@ -139,6 +147,8 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       if obj and obj.$el
         @setElAttrs()
 
+      ## TODO: only send the changed delta
+      ## not the full set of attributes
       @trigger "state:changed", @attributes
 
       return @

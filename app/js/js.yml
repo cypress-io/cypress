@@ -29,6 +29,7 @@ vendor:
   - app/js/vendor/backbone-chooser.coffee
   - app/js/vendor/bililiteRange.js
   - app/js/vendor/gitter-sidecar.js
+  - app/js/config/underscore.coffee
   - node_modules/gitter-sidecar/dist/sidecar.js
 
   ## this must go at the bottom, do not move it
