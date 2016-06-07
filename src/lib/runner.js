@@ -42,20 +42,20 @@ export default {
 
     channel.emit('watch:test:file', specSrc)
 
-    driver.on('initialized', (obj) => {
-      channel.emit('runnables:ready', obj.runner.getNormalizedRunnables())
+    driver.on('initialized', ({ runner }) => {
+      channel.emit('runnables:ready', runner.getNormalizedRunnables())
     })
 
     driver.on('log', (log) => {
       logs.add(log)
-      channel.emit('log:add', log.toJSON(), (row) => {
+      channel.emit('reporter:log:add', log.toJSON(), (row) => {
         log.set('row', row)
 
         // render it calling onRender
       })
 
       log.on('state:changed', () => {
-        channel.emit('log:state:changed', log.toJSON())
+        channel.emit('reporter:log:state:changed', log.toJSON())
       })
     })
 
@@ -150,7 +150,7 @@ export default {
   _restart () {
     return new Promise((resolve) => {
       channel.once('reporter:restarted', resolve)
-      channel.emit('restart:test:run')
+      channel.emit('reporter:restart:test:run')
     })
   },
 
