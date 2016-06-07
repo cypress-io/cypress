@@ -5,6 +5,7 @@ import { EventEmitter } from 'events'
 import Promise from 'bluebird'
 
 import logs from './logs'
+import logger from './logger'
 import tests from './tests'
 import overrides from './overrides'
 
@@ -63,6 +64,7 @@ export default {
     channel.on('runner:console:error', (testId) => {
       let test = tests.get(testId)
       if (test) {
+        logger.clearLog()
         this._logError(test.err.stack)
       } else {
         this._logError('No error found for test id', testId)
@@ -72,8 +74,8 @@ export default {
     channel.on('runner:console:log', (logId) => {
       let log = logs.get(logId)
       if (log) {
-        console.log('log', log)
-        // log using reporter entities command.coffee logBlahBlah
+        logger.clearLog()
+        logger.logFormatted(log)
       } else {
         this._logError('No log found for log id', logId)
       }
@@ -187,7 +189,6 @@ export default {
   },
 
   _logError (...args) {
-    if (console.clear) console.clear() // eslint-disable-line no-console
-    console.error(...args) // eslint-disable-line no-console
+    logger.logError(...args)
   },
 }
