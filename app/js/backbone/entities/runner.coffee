@@ -14,7 +14,7 @@
       @listenTo @socket, "runnables:ready", (root) =>
         @reset()
 
-        @trigger("restart:test:run")
+        @trigger("reporter:restart:test:run")
 
         @trigger("before:add")
 
@@ -34,15 +34,15 @@
       @listenTo @socket, "test:after:hooks", (test) =>
         @trigger "test:after:hooks", test
 
-      @listenTo @socket, "restart:test:run", ->
-        @trigger "restart:test:run"
+      @listenTo @socket, "reporter:restart:test:run", ->
+        @trigger "reporter:restart:test:run"
 
         @socket.emit "reporter:restarted"
 
-      @listenTo @socket, "log:add", (log) =>
+      @listenTo @socket, "reporter:log:add", (log) =>
         @logs[log.id] = @addLog(log)
 
-      @listenTo @socket, "log:state:changed", (attrs) ->
+      @listenTo @socket, "reporter:log:state:changed", (attrs) ->
         log = @logs[attrs.id]
         log.set(attrs) if log
 

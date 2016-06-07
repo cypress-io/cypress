@@ -7,26 +7,6 @@
       ## connect to socket io
       channel = io.connect({path: "/__socket.io"})
 
-      autEvents = [
-        "restart:test:run"
-        "before:add"
-        "suite:add"
-        "test:add"
-        "after:add"
-        "runnables:ready"
-        "run:start"
-        "test:before:hooks"
-        "log:add"
-        "log:state:changed"
-        "paused"
-        "test:after:hooks"
-        "run:end"
-      ]
-
-      autEvents.forEach (event) ->
-        channel.on event, (data) ->
-          console.info event, data
-
       channel.on "connect", ->
         channel.emit "reporter:connected"
 
@@ -47,17 +27,17 @@
       channel.on "test:after:hooks", (test) ->
         socket.trigger "test:after:hooks", test
 
-      channel.on "log:add", (log) ->
-        socket.trigger "log:add", log
+      channel.on "reporter:log:add", (log) ->
+        socket.trigger "reporter:log:add", log
 
-      channel.on "log:state:changed", (log) ->
-        socket.trigger "log:state:changed", log
+      channel.on "reporter:log:state:changed", (log) ->
+        socket.trigger "reporter:log:state:changed", log
 
       channel.on "runnables:ready", (root) ->
         socket.trigger "runnables:ready", root
 
-      channel.on "restart:test:run", ->
-        socket.trigger "restart:test:run"
+      channel.on "reporter:restart:test:run", ->
+        socket.trigger "reporter:restart:test:run"
 
       channel.on "cypress:css:changed", (data) ->
         ## find the cypress stylesheet

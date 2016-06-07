@@ -129,7 +129,7 @@
             ## keep on keepin' on
             updateParentSuiteState(suite)
 
-      @listenTo runner, "restart:test:run", ->
+      @listenTo runner, "reporter:restart:test:run", ->
         ## when our runner says to reset the test run
         ## we do this so our tests go into the 'reset' state prior to the iframe
         ## loading -- so it visually looks like things are moving along faster

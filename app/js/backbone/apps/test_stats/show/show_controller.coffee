@@ -27,7 +27,7 @@
         chosen = runner.getChosen()
         @chosenRegion runner, chosen
 
-      @listenTo runner, "restart:test:run", ->
+      @listenTo runner, "reporter:restart:test:run", ->
         ## anytime the iframe needs to be restarted
         ## we reset our stats back to 0
         stats.reset()
