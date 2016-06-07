@@ -146,6 +146,7 @@ $Cypress.Runner = do ($Cypress, _) ->
       console.log "FINISHED PROCESSING NORMALIZED RUNNABLES", new Date - d
       return r
 
+    ## TODO: need to take into account grepping for .only's
     normalize: (runnable) ->
       obj = {title: runnable.title}
 
