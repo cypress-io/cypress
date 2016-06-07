@@ -17,6 +17,9 @@
 
       commandsView = @getCommandsView hooks
 
+      @listenTo commandsView, "childview:childview:command:clicked", (cv, cv2, command) ->
+        test.trigger("display:command", command.id)
+
       ## revert rules
       ##
       ## 1. when we hover over a command, wait 50 ms

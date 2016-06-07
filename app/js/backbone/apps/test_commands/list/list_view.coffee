@@ -58,10 +58,14 @@
 
       @displayConsoleMessage()
 
-      console.clear?()
+      @trigger("command:clicked", @model)
 
-      @model.getConsoleDisplay (args) ->
-        console.log.apply(console, args)
+      # @model.trigger("display:command", @model.get("id"))
+
+      # console.clear?()
+
+      # @model.getConsoleDisplay (args) ->
+      #   console.log.apply(console, args)
 
     displayConsoleMessage: ->
       width  = @$el.outerWidth()
