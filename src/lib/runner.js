@@ -109,7 +109,9 @@ export default {
       driver.on(event, (...args) => localBus.emit(event, ...args))
     })
 
-    _.each(rerunEvents, this._reRun.bind(this))
+    _.each(rerunEvents, (event) => {
+      channel.on(event,  this._reRun.bind(this))
+    })
 
     channel.on('runner:abort', () => {
       // TODO: tell the driver not to fire 'test:after:hooks' event
