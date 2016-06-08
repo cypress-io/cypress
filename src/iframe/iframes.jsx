@@ -6,6 +6,7 @@ import React, { Component } from 'react'
 
 import blankContents from './blank-contents'
 import IframeModel from './iframe-model'
+import logger from '../lib/logger'
 import runner from '../lib/runner'
 import windowUtil from '../lib/window-util'
 
@@ -39,6 +40,7 @@ export default class Iframes extends Component {
   }
 
   _run () {
+    logger.clearLog()
     this._loadIframes(this.specFile).then(([specWindow, $autIframe]) => {
       runner.run(specWindow, $autIframe)
     })
