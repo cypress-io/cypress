@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { computed, observable } from 'mobx'
+import { computed, observable, asReference } from 'mobx'
 
 const headerHeight = 46
 
@@ -14,7 +14,7 @@ const defaults = {
 }
 
 const uiState = observable({
-  defaults,
+  defaults: asReference(defaults),
 
   isRunning: defaults.isRunning,
 
@@ -44,26 +44,16 @@ const uiState = observable({
     return Math.floor(this.scale * 100)
   },
 
-  updateWindowDimensions (width, height) {
+  updateWindowDimensions: asReference(function (width, height) {
     this._windowWidth = width
     this._windowHeight = height
-  },
+  }),
 
-  reset () {
+  reset: asReference(function () {
     _.each(defaults, (defaultValue, key) => {
       this[key] = defaultValue
     })
-  },
-
-  // used for logging in main.jsx
-  serialize () {
-    return _(defaults)
-      .transform((state, __, key) => {
-        state[key] = this[key]
-      }, {})
-      .extend(_.pick(this, '_windowWidth', '_windowHeight', 'scale', 'displayScale'))
-      .value()
-  },
+  }),
 })
 
 export default uiState
