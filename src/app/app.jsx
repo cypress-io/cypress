@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 
-import runner from './lib/runner'
+import runner from '../lib/runner'
 
-import Header from './header/header'
-import Iframes from './iframe/iframes'
+import Header from '../header/header'
+import Iframes from '../iframe/iframes'
 
 const elementId = "__cypress-string"
 
@@ -55,6 +55,6 @@ export default class App extends Component {
   }
 
   _automationElement () {
-    return <div id={elementId}>{this.randomString}</div>
+    return <div id={elementId} className="automation-string">{this.randomString}</div>
   }
 }
