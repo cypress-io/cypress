@@ -24,12 +24,16 @@
   "homepage": "https://github.com/cypress-io/cypress-core-desktop-gui",
   "dependencies": {
     "coffee-script": "^1.10.0",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "react": "^15.1.0",
+    "react-dom": "^15.1.0"
   },
   "devDependencies": {
     "@cypress/core-releaser": "0.1.6",
     "bluebird": "^3.1.1",
     "bower": "^1.7.2",
+    "eslint": "^2.11.1",
+    "eslint-plugin-react": "^5.1.1",
     "gulp": "^3.9.0",
     "gulp-bower": "0.0.11",
     "gulp-cached": "^1.1.0",
@@ -48,6 +52,7 @@
     "js-yaml": "^3.5.2",
     "lodash": "^4.0.0",
     "node-sass-import-once": "^1.2.0",
-    "run-sequence": "^1.1.5"
+    "run-sequence": "^1.1.5",
+    "zunder": "^3.2.0"
   }
 }
