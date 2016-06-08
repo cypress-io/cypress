@@ -18,8 +18,12 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
         env: {}
 
       if options.log
+        consoleOutput = {}
+
         options._log = Cypress.Log.command({
           message: _.truncate(cmd, 25)
+          onConsole: ->
+            consoleOutput
         })
 
       if not cmd or not _.isString(cmd)
@@ -39,6 +43,9 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
       exec(_.pick(options, "cmd", "timeout", "env"))
       .timeout(options.timeout)
       .then (result) ->
+        if options._log
+          _.extend(consoleOutput, result)
+
         return result if result.code is 0 or not options.failOnNonZeroExit
 
         output = ""
