@@ -33,6 +33,7 @@ export default {
   },
 
   start (config, specSrc) {
+    // TODO: remove listeners before (re)starting
     // localBus.removeAllListeners()
     // driver.off()
 

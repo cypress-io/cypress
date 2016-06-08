@@ -30,7 +30,7 @@ export default class IframeModel {
   }
 
   stopListening () {
-    // tear down listeners
+    // TODO: tear down listeners
   }
 
   @action _beforeRun = () => {
