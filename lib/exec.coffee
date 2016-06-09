@@ -1,6 +1,32 @@
 _       = require("underscore")
+str     = require("underscore.string")
 cp      = require("child_process")
 Promise = require("bluebird")
+
+profiles = {
+  "~/.profile": /\/sh$/
+  "~/.bash_profile": /\/bash$/
+  "~/.cshrc": /\/csh$/
+  "~/.profile": /\/ksh$/
+  "~/.zshrc": /\/zsh$/
+  "~/.config/fish/config.fish": /\/fish$/
+}
+
+getProfilePath = (shellPath) ->
+  for profilePath, regex of profiles
+    return profilePath if regex.test(shellPath)
+
+shell = null
+
+getShell = ->
+  return shell if shell
+
+  path = str.trim(cp.execSync("echo $SHELL"))
+  shell = {
+    shellPath: path
+    profilePath: getProfilePath(path)
+  }
+  return shell
 
 module.exports = {
   run: (projectRoot, options) ->
@@ -8,13 +34,21 @@ module.exports = {
 
     run = ->
       new Promise (resolve, reject) ->
-        ## this probably won't work on Windows
-        ## need to use something different than `sh -c` for Windows
-        spawnOpts = {
+        { profilePath, shellPath } = getShell()
+
+        cmd = if profilePath
+          ## sourcing the profile can output un-needed garbage,
+          ## so suppress it by sending it to /dev/null
+          "source #{profilePath} > /dev/null 2>&1 && #{options.cmd}"
+        else
+          options.cmd
+
+        child = cp.spawn(cmd, {
           cwd: projectRoot
           env: _.extend({}, process.env, options.env)
-        }
-        child = cp.spawn("sh", ["-c", options.cmd], spawnOpts)
+          shell: shellPath ? true
+        })
+
         output = {
           stdout: ""
           stderr: ""
