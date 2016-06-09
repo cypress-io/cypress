@@ -9,6 +9,7 @@
     "build": "gulp build",
     "dev": "gulp dev",
     "test": "npm run server & npm run dev",
+    "postinstall": "bower i",
     "prerelease": "npm run build",
     "release": "releaser"
   },
@@ -23,6 +24,7 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-desktop-gui",
   "dependencies": {
+    "bootstrap": "^3.3.6",
     "coffee-script": "^1.10.0",
     "path": "^0.12.7",
     "react": "^15.1.0",

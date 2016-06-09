@@ -1,5 +1,4 @@
-@import 'vendor/fontawesome/font-awesome';
 @import 'lib/variables';
-@import 'lib/base';
-@import './*/*';
-@import './*/**/*';
+@import 'lib/mixins';
+@import "lib/vendor";
+@import "lib/components/*";

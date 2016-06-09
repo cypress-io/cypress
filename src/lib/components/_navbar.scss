@@ -1,0 +1,48 @@
+.navbar-default {
+  background-color:#dfe2e4;
+  .navbar-nav>li>a {
+    font-size: 13px;
+    color: #444;
+  }
+}
+
+.navbar .container-fluid {
+  padding: 0;
+
+  .navbar-brand {
+    font-size: 15px;
+    margin-left: 0;
+
+  }
+
+  a:hover {
+    cursor: pointer;
+  }
+}
+.navbar-collapse {
+  padding-left: 0;
+}
+
+.navbar-inverse {
+  background-color: #252831;
+  min-height: 40px;
+
+  .navbar-brand {
+    height: 40px;
+    line-height: 30px;
+  }
+
+  .nav.navbar-nav:not(.navbar-right)>li>a {
+    border: 1px solid #444a52;
+    border-top: 0;
+    border-bottom: 0;
+
+  }
+  .nav.navbar-nav>li>a {
+    line-height: 30px;
+  }
+}
+
+.nav.navbar-nav.navbar-right>li>a {
+  font-size: 12px;
+}

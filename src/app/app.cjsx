@@ -1,6 +1,15 @@
 React = require("react")
+Nav = require("../nav/nav")
+ProjectNav = require("../project-nav/project-nav")
+FilesList = require("../files/files-list")
+Footer = require("../footer/footer")
 
 module.exports = React.createClass({
   render: ->
-    <div>Hello World</div>
+    <div>
+      <Nav />
+      <ProjectNav />
+      <FilesList />
+      <Footer />
+    </div>
 })
