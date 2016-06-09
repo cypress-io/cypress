@@ -147,6 +147,17 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
           rng.bounds([left, right])
 
+      ## charCode = 38
+      ## no keyPress
+      ## no textInput
+      ## no input
+      "{uparrow}": (el, options) ->
+        options.charCode  = 38
+        options.keypress  = false
+        options.textInput = false
+        options.input     = false
+        @ensureKey(el, null, options)
+
       ## charCode = 39
       ## no keyPress
       ## no textInput
@@ -172,6 +183,17 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
               left = right
 
           rng.bounds([left, right])
+
+      ## charCode = 40
+      ## no keyPress
+      ## no textInput
+      ## no input
+      "{downarrow}": (el, options) ->
+        options.charCode  = 40
+        options.keypress  = false
+        options.textInput = false
+        options.input     = false
+        @ensureKey(el, null, options)
     }
 
     boundsAreEqual: (bounds) ->
