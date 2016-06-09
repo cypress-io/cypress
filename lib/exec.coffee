@@ -54,16 +54,16 @@ module.exports = {
           stderr: ""
         }
 
-        child.stdout.on 'data', (data) ->
+        child.stdout.on "data", (data) ->
           output.stdout += data.toString()
 
-        child.stderr.on 'data', (data) ->
+        child.stderr.on "data", (data) ->
           output.stderr += data.toString()
 
-        child.on 'error', (err) ->
+        child.on "error", (err) ->
           reject(err)
 
-        child.on 'close', (code) ->
+        child.on "close", (code) ->
           output.code = code
           resolve(output)
 
