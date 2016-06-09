@@ -3,6 +3,8 @@ str     = require("underscore.string")
 cp      = require("child_process")
 Promise = require("bluebird")
 
+exec = Promise.promisify(cp.exec)
+
 profiles = {
   "~/.profile": /\/sh$/
   "~/.bash_profile": /\/bash$/
@@ -19,53 +21,55 @@ getProfilePath = (shellPath) ->
 shell = null
 
 getShell = ->
-  return shell if shell
+  return Promise.resolve(shell) if shell
 
-  path = str.trim(cp.execSync("echo $SHELL"))
-  shell = {
-    shellPath: path
-    profilePath: getProfilePath(path)
-  }
-  return shell
+  exec("echo $SHELL").then (shell) ->
+    path = str.trim(shell)
+    shell = {
+      shellPath: path
+      profilePath: getProfilePath(path)
+    }
+    return shell
 
 module.exports = {
   run: (projectRoot, options) ->
     child = null
 
     run = ->
-      new Promise (resolve, reject) ->
-        { profilePath, shellPath } = getShell()
+      getShell().then (shell) ->
+        new Promise (resolve, reject) ->
 
-        cmd = if profilePath
-          ## sourcing the profile can output un-needed garbage,
-          ## so suppress it by sending it to /dev/null
-          "source #{profilePath} > /dev/null 2>&1 && #{options.cmd}"
-        else
-          options.cmd
+          cmd = if shell.profilePath
+            ## sourcing the profile can output un-needed garbage,
+            ## so suppress it by sending it to /dev/null
+            "source #{shell.profilePath} > /dev/null 2>&1 && #{options.cmd}"
+          else
+            options.cmd
 
-        child = cp.spawn(cmd, {
-          cwd: projectRoot
-          env: _.extend({}, process.env, options.env)
-          shell: shellPath ? true
-        })
+          child = cp.spawn(cmd, {
+            cwd: projectRoot
+            env: _.extend({}, process.env, options.env)
+            shell: shell.shellPath ? true
+          })
 
-        output = {
-          stdout: ""
-          stderr: ""
-        }
+          output = {
+            shell: shell
+            stdout: ""
+            stderr: ""
+          }
 
-        child.stdout.on "data", (data) ->
-          output.stdout += data.toString()
+          child.stdout.on "data", (data) ->
+            output.stdout += data.toString()
 
-        child.stderr.on "data", (data) ->
-          output.stderr += data.toString()
+          child.stderr.on "data", (data) ->
+            output.stderr += data.toString()
 
-        child.on "error", (err) ->
-          reject(err)
+          child.on "error", (err) ->
+            reject(err)
 
-        child.on "close", (code) ->
-          output.code = code
-          resolve(output)
+          child.on "close", (code) ->
+            output.code = code
+            resolve(output)
 
     Promise
     .try(run)
