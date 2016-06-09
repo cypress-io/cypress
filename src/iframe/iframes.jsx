@@ -13,7 +13,7 @@ import windowUtil from '../lib/window-util'
 @observer
 export default class Iframes extends Component {
   render () {
-    const { width, height, scale, marginLeft } = this.props.uiState
+    const { width, height, scale, marginLeft } = this.props.state
 
     return <div
       ref='container'
@@ -33,10 +33,10 @@ export default class Iframes extends Component {
     runner.start(this.props.config, specFile)
     runner.on('restart', this._run.bind(this))
 
-    this.iframeModel = new IframeModel(this.props.uiState)
+    this.iframeModel = new IframeModel(this.props.state)
     this.iframeModel.listen()
     this._run()
-    windowUtil.monitorWindowResize(this.props.uiState)
+    windowUtil.monitorWindowResize(this.props.state)
   }
 
   _run () {

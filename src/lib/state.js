@@ -13,7 +13,7 @@ const defaults = {
   height: 660,
 }
 
-const uiState = observable({
+const state = observable({
   defaults: asReference(defaults),
 
   isRunning: defaults.isRunning,
@@ -56,4 +56,4 @@ const uiState = observable({
   }),
 })
 
-export default uiState
+export default state

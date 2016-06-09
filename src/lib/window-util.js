@@ -3,10 +3,10 @@
 import { action } from 'mobx'
 
 export default {
-  monitorWindowResize (uiState) {
+  monitorWindowResize (state) {
     const $window = $(window)
     $window.on('resize', action('window:resize', () => {
-      uiState.updateWindowDimensions($window.width(), $window.height())
+      state.updateWindowDimensions($window.width(), $window.height())
     })).trigger('resize')
   },
 

@@ -11,7 +11,7 @@ export default class Header extends Component {
   }
 
   render () {
-    const { width, height, displayScale, defaults, isLoading, url } = this.props.uiState
+    const { width, height, displayScale, defaults, isLoading, url } = this.props.state
     const { showingViewportMenu } = this.state
 
     return (

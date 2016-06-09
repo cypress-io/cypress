@@ -3,8 +3,8 @@ import { action } from 'mobx'
 import runner from '../lib/runner'
 
 export default class IframeModel {
-  constructor (uiState) {
-    this.uiState = uiState
+  constructor (state) {
+    this.state = state
   }
 
   listen () {
@@ -26,7 +26,7 @@ export default class IframeModel {
   }
 
   @action reset () {
-    this.uiState.reset()
+    this.state.reset()
   }
 
   stopListening () {
@@ -34,24 +34,24 @@ export default class IframeModel {
   }
 
   @action _beforeRun = () => {
-    this.uiState.reset()
-    this.uiState.isRunning = true
+    this.state.reset()
+    this.state.isRunning = true
   }
 
   @action _afterRun = () => {
-    this.uiState.isRunning = false
+    this.state.isRunning = false
   }
 
   @action _updateViewport = (viewport) => {
-    this.uiState.width = viewport.viewportWidth
-    this.uiState.height = viewport.viewportHeight
+    this.state.width = viewport.viewportWidth
+    this.state.height = viewport.viewportHeight
   }
 
   @action _updateUrl = (url) => {
-    this.uiState.url = url
+    this.state.url = url
   }
 
   @action _updateLoading = (loading) => {
-    this.uiState.loading = loading
+    this.state.loading = loading
   }
 }
