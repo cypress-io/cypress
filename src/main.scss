@@ -2,3 +2,4 @@
 @import 'lib/mixins';
 @import "lib/vendor";
 @import "lib/components/*";
+@import '!(lib)*/**/*';

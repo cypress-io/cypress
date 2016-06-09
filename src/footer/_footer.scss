@@ -1,6 +1,6 @@
 .footer {
   height: $footer-height;
-  background-color: $light-gray;
+  background-color: #252831;
   position: fixed;
   width: 100%;
   border-top: 1px solid #DCDEE4;
@@ -8,4 +8,5 @@
   bottom: 0;
   font-size: 11.5px;
   line-height: $footer-height;
+  color: #eee;
 }
