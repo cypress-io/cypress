@@ -6,6 +6,10 @@ const headerHeight = 46
 const defaults = {
   isRunning: false,
 
+  messageTitle: null,
+  messageDescription: null,
+  messageType: '',
+
   url: '',
   isLoading: false,
 
@@ -18,6 +22,10 @@ const state = observable({
 
   isRunning: defaults.isRunning,
 
+  messageTitle: defaults.messageTitle,
+  messageDescription: defaults.messageDescription,
+  messageType: defaults.messageType,
+
   url: defaults.url,
   isLoading: defaults.isLoading,
 
@@ -28,12 +36,14 @@ const state = observable({
   _windowHeight: 0,
 
   @computed get scale () {
-    const containerHeight = this._windowHeight - headerHeight
-
-    if (this._windowWidth < this.width || containerHeight < this.height) {
-      return Math.min(this._windowWidth / this.width, containerHeight / this.height, 1)
+    if (this._windowWidth < this.width || this._containerHeight < this.height) {
+      return Math.min(this._windowWidth / this.width, this._containerHeight / this.height, 1)
     }
     return 1
+  },
+
+  @computed get _containerHeight () {
+    return this._windowHeight - headerHeight
   },
 
   @computed get marginLeft () {
@@ -42,6 +52,18 @@ const state = observable({
 
   @computed get displayScale () {
     return Math.floor(this.scale * 100)
+  },
+
+  @computed({ asStructure: true }) get messageStyles () {
+    const actualHeight = this.height * this.scale
+    const messageHeight = 33
+    const nudge = 10
+
+    if ((actualHeight + messageHeight + nudge) >= this._containerHeight) {
+      return { bottom: 0, opacity: '0.7' }
+    } else {
+      return { top: (actualHeight + headerHeight + nudge), opacity: '0.9' }
+    }
   },
 
   updateWindowDimensions: asReference(function (width, height) {

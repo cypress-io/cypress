@@ -1,0 +1,23 @@
+.message-container {
+  left: 0;
+  position: absolute;
+  text-align: center;
+  right: 0;
+}
+
+.message {
+  background-color: #111;
+  border-radius: 5px;
+  color: #FFF;
+  display: inline-block;
+  margin-bottom: 2px;
+  padding: 5px 10px;
+
+  &.warning {
+    background-color: $error;
+  }
+
+  .description {
+    color: #F5A327;
+  }
+}

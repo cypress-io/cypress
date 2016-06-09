@@ -4,6 +4,7 @@ import runner from '../lib/runner'
 
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
+import Message from '../message/message'
 
 const elementId = "__cypress-string"
 
@@ -49,6 +50,7 @@ export default class App extends Component {
       <div className="container">
         <Header {...this.props} />
         <Iframes {...this.props} />
+        <Message {...this.props} />
         {this._automationElement()}
       </div>
     )
