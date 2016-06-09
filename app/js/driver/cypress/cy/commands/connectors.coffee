@@ -244,6 +244,51 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
 
       thenFn.call(@, subject, options, fn)
 
+    each: (subject, options, fn) ->
+      if not _.isFunction(fn)
+        $Cypress.Utils.throwErrByPath("each.invalid_argument")
+
+      ## log out each as a command
+
+      if not subject
+        ## return early if we dont have what we need
+        return
+        # $Cypress.Utils.throwErrByPath("each.invalid_subject")
+
+      if "length" not of subject
+        $Cypress.Utils.throwErrByPath("each.non_array")
+
+      if subject.length is 0
+        return
+
+      els = $Cypress.Utils.getDomElements(subject)
+
+      ## if we have a next command then we need to
+      ## slice in this existing subject as its subject
+      ## due to the way we queue promises
+      next = @prop("current").get("next")
+      if next
+        checkSubject = (newSubject, args) =>
+          return if @prop("current") isnt next
+
+          ## find the new subject and splice it out
+          ## with our existing subject
+          index = _.indexOf(args, newSubject)
+          args.splice(index, 1, subject)
+
+          @off("next:subject:prepared", checkSubject)
+
+        @on("next:subject:prepared", checkSubject)
+
+      Promise
+      .each els, (el) =>
+        thenFn.call(@, $(el), options, fn)
+      # .then ->
+        # make this log smear from the start
+        # to the finish
+        # options.log.snapshot().end()
+      .return(subject)
+
   Cypress.addDualCommand
 
     then: ->
