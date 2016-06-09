@@ -276,6 +276,11 @@ $Cypress.register "XHR2", (Cypress, _) ->
       @getXhrServer().set(options)
 
     route: (args...) ->
+      ## TODO:
+      ## if we return a function which returns a promise
+      ## then we should be handling potential timeout issues
+      ## just like cy.then does
+
       ## method / url / response / options
       ## url / response / options
       ## options
@@ -291,104 +296,129 @@ $Cypress.register "XHR2", (Cypress, _) ->
       ## on our server
       options = o = @getXhrServer().getOptions()
 
-      switch
-        when _.isObject(args[0]) and not _.isRegExp(args[0])
-          ## we dont have a specified response
-          if not _.has(args[0], "response")
-            hasResponse = false
+      ## enable the entire routing definition to be a function
+      parseArgs = (args...) =>
+        switch
+          when _.isObject(args[0]) and not _.isRegExp(args[0])
+            ## we dont have a specified response
+            if not _.has(args[0], "response")
+              hasResponse = false
 
-          options = o = _.extend {}, options, args[0]
+            options = o = _.extend {}, options, args[0]
 
-        when args.length is 0
-          $Cypress.Utils.throwErrByPath "route.invalid_arguments"
+          when args.length is 0
+            $Cypress.Utils.throwErrByPath "route.invalid_arguments"
 
-        when args.length is 1
-          o.url = args[0]
-
-          hasResponse = false
-
-        when args.length is 2
-          ## if our url actually matches an http method
-          ## then we know the user doesn't want to stub this route
-          if _.isString(args[0]) and validHttpMethodsRe.test(args[0])
-            o.method = args[0]
-            o.url    = args[1]
+          when args.length is 1
+            o.url = args[0]
 
             hasResponse = false
-          else
-            o.url      = args[0]
-            o.response = args[1]
 
-        when args.length is 3
-          if validHttpMethodsRe.test(args[0]) or isUrlLikeArgs(args[1], args[2])
+          when args.length is 2
+            ## if our url actually matches an http method
+            ## then we know the user doesn't want to stub this route
+            if _.isString(args[0]) and validHttpMethodsRe.test(args[0])
+              o.method = args[0]
+              o.url    = args[1]
+
+              hasResponse = false
+            else
+              o.url      = args[0]
+              o.response = args[1]
+
+          when args.length is 3
+            if validHttpMethodsRe.test(args[0]) or isUrlLikeArgs(args[1], args[2])
+              o.method    = args[0]
+              o.url       = args[1]
+              o.response  = args[2]
+            else
+              o.url       = args[0]
+              o.response  = args[1]
+
+              _.extend o, args[2]
+
+          when args.length is 4
             o.method    = args[0]
             o.url       = args[1]
             o.response  = args[2]
-          else
-            o.url       = args[0]
-            o.response  = args[1]
 
-            _.extend o, args[2]
+            _.extend o, args[3]
 
-        when args.length is 4
-          o.method    = args[0]
-          o.url       = args[1]
-          o.response  = args[2]
+        if _.isString(o.method)
+          o.method = o.method.toUpperCase()
 
-          _.extend o, args[3]
+        _.defaults options, defaults
 
-      if _.isString(o.method)
-        o.method = o.method.toUpperCase()
+        if not options.url
+          $Cypress.Utils.throwErrByPath "route.url_missing"
 
-      _.defaults options, defaults
+        if not (_.isString(options.url) or _.isRegExp(options.url))
+          $Cypress.Utils.throwErrByPath "route.url_invalid"
 
-      if not options.url
-        $Cypress.Utils.throwErrByPath "route.url_missing"
+        if not validHttpMethodsRe.test(options.method)
+          $Cypress.Utils.throwErrByPath "route.method_invalid", {
+            args: { method: o.method }
+          }
 
-      if not (_.isString(options.url) or _.isRegExp(options.url))
-        $Cypress.Utils.throwErrByPath "route.url_invalid"
+        if hasResponse and not options.response?
+          $Cypress.Utils.throwErrByPath "route.response_invalid"
 
-      if not validHttpMethodsRe.test(options.method)
-        $Cypress.Utils.throwErrByPath "route.method_invalid", {
-          args: { method: o.method }
-        }
+        ## convert to wildcard regex
+        if options.url is "*"
+          options.originalUrl = "*"
+          options.url = /.*/
 
-      if hasResponse and not options.response?
-        $Cypress.Utils.throwErrByPath "route.response_invalid"
+        ## look ahead to see if this
+        ## command (route) has an alias?
+        if alias = @getNextAlias()
+          options.alias = alias
 
-      ## convert to wildcard regex
-      if options.url is "*"
-        options.originalUrl = "*"
-        options.url = /.*/
+        if _.isFunction(o.response)
+          getResponse = =>
+            o.response.call(@private("runnable").ctx, options)
 
-      ## look ahead to see if this
-      ## command (route) has an alias?
-      if alias = @getNextAlias()
-        options.alias = alias
+          ## allow route to return a promise
+          Promise.try(getResponse)
+          .then (resp) ->
+            options.response = resp
 
-      ## if our response is a string and
-      ## a reference to an alias
-      if _.isString(o.response) and aliasObj = @getAlias(o.response, "route")
-        ## reset the route's response to be the
-        ## aliases subject
-        options.response = aliasObj.subject
+            route()
+        else
+          route()
 
-      options.log = Cypress.Log.route
-        method:   options.method
-        url:      getUrl(options)
-        status:   options.status
-        response: options.response
-        alias:    options.alias
-        isStubbed: options.response?
-        numResponses: 0
-        onConsole: ->
-          Method:   options.method
-          URL:      getUrl(options)
-          Status:   options.status
-          Response: options.response
-          Alias:    options.alias
+      route = =>
+        ## if our response is a string and
+        ## a reference to an alias
+        if _.isString(o.response) and aliasObj = @getAlias(o.response, "route")
+          ## reset the route's response to be the
+          ## aliases subject
+          options.response = aliasObj.subject
 
-      @getXhrServer().route(options)
+        options.log = Cypress.Log.route
+          method:   options.method
+          url:      getUrl(options)
+          status:   options.status
+          response: options.response
+          alias:    options.alias
+          isStubbed: options.response?
+          numResponses: 0
+          onConsole: ->
+            Method:   options.method
+            URL:      getUrl(options)
+            Status:   options.status
+            Response: options.response
+            Alias:    options.alias
+
+        return @getXhrServer().route(options)
+
+      if _.isFunction(args[0])
+        getArgs = =>
+          args[0].call(@private("runnable").ctx)
+
+        Promise.try(getArgs)
+        .then(parseArgs)
+      else
+        parseArgs(args...)
 
   Cypress.Cy.extend
     getPendingRequests: ->
