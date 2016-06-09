@@ -52,6 +52,12 @@
     sendCommand: (id) ->
       @socket.emit("runner:console:log", id)
 
+    showSnapshot: (id) ->
+      @socket.emit("runner:show:snapshot", id)
+
+    hideSnapshot: (id) ->
+      @socket.emit("runner:hide:snapshot", id)
+
     restart: ->
       @socket.emit("runner:restart")
 

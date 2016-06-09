@@ -48,7 +48,7 @@
             ## we are now in a reverted state
             ## from the original
             @reverted = true
-            # iframe.commandEnter(command)
+            test.trigger("show:snapshot", command.id)
 
           Promise.delay(50).then ->
             command.trigger "revert:dom"
@@ -67,7 +67,7 @@
               @reverted = false
 
               ## and restore the dom to the original state
-              # iframe.commandExit(command)
+              test.trigger("hide:snapshot", command.id)
 
       @listenTo commandsView, "childview:childview:command:mouseenter", (iv, iv2, args) ->
         command = args.model

@@ -226,6 +226,12 @@
       @listenTo model, "display:command", (id) ->
         runner.sendCommand(id)
 
+      @listenTo model, "show:snapshot", (id) ->
+        runner.showSnapshot(id)
+
+      @listenTo model, "hide:snapshot", (id) ->
+        runner.hideSnapshot(id)
+
       ## we also can't use the normal backbone-chooser because
       ## we have unlimited nested / fragmented collections
       ## so we have to handle this logic ourselves
