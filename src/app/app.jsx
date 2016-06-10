@@ -5,6 +5,7 @@ import runner from '../lib/runner'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
+import NoAutomation from './no-automation'
 
 const elementId = "__cypress-string"
 
@@ -38,8 +39,10 @@ export default class App extends Component {
 
   render () {
     if (this.state.automationConnected === false) {
-      // available browsers are in this.props.config
-      return <div>Failed to connect!</div>
+      return <NoAutomation
+        browsers={this.props.config.browsers}
+        onLaunchBrowser={(browser) => runner.launchBrowser(browser)}
+      />
     }
 
     if (!this.state.automationEnsured) {

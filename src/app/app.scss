@@ -1,3 +1,28 @@
 .automation-string {
   display: none;
 }
+
+.automation-message {
+  padding: 150px 50px 20px;
+  text-align: center;
+
+  p {
+    color: #333;
+    font-size: 200%;
+
+    &.muted {
+      color: #aaa;
+      font-size: 120%;
+    }
+  }
+
+  .dropdown button i,
+  .dropdown-menu li i {
+    margin-right: 5px;
+  }
+}
+
+.helper-line {
+  margin-top: 50px;
+  text-align: center;
+}
