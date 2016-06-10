@@ -23,6 +23,18 @@ Get the deepest DOM element containing the text.
 
 ***
 
+# [cy.contains( *number* )](#section-number-usage)
+
+Get the deepest DOM element containing the number.
+
+***
+
+# [cy.contains( *regexp* )](#section-regular-expression-usage)
+
+Get the deepest DOM element containing the text matching the regular expression.
+
+***
+
 # [cy.contains( *selector*, *text* )](#section-selector-and-text-usage)
 
 Specify a selector to filter DOM elements containing the text. Cypress will **ignore** it's default preference for the specified selector. Using a selector allows you to return more *shallow* elements in the tree which contain the specific text.
@@ -44,7 +56,7 @@ Option | Default | Notes
 
 # Text Usage
 
-## Find the deepest element containing some text
+## Find the first element containing some text
 
 ```html
 <ul>
@@ -89,11 +101,10 @@ cy.get("form").contains("submit the form!").click()
 
 ***
 
-## Favor of `button` over other elements
+## Favor of `button` over other deeper elements
 
 ```html
 <form>
-  <input name="search" />
   <button>
     <i class="fa fa-search"></i>
     <span>Search</span>
@@ -112,7 +123,7 @@ cy.contains("Search").children("i").should("have.class", "fa-search")
 
 ***
 
-## Favor of `a` over other elements
+## Favor of `a` over other deeper elements
 
 ```html
 <nav>
@@ -138,7 +149,7 @@ cy.get("nav").contains("Sign Out").should("have.attr", "href", "/signout")
 
 ***
 
-## Favor of `label` over other elements
+## Favor of `label` over other deeper elements
 
 ```html
 <form>
@@ -194,6 +205,46 @@ cy.get("#main").contains("Jane Lane")
 ```
 
 ***
+
+# Number Usage
+
+## Find the first element containing some number
+
+```html
+<button class="btn btn-primary" type="button">
+  Messages <span class="badge">4</span>
+</button>
+```
+
+```javascript
+// even though the <span> is the deepest element that contains: 4
+// Cypress will automatically favor button elements higher in the chain
+
+// in this case the <button> is returned
+cy.contains("4")
+```
+
+***
+
+# Regular Expression Usage
+
+## Find the first element with text matching the regular expression
+
+```html
+<ul>
+  <li>apples</li>
+  <li>oranges</li>
+  <li>bananas</li>
+</ul>
+```
+
+```javascript
+// <li>bananas</li> is returned
+cy.contains(/^b\w+/)
+```
+
+***
+
 
 # Selector and Text Usage
 
