@@ -44,7 +44,7 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
       .timeout(options.timeout)
       .then (result) ->
         if options._log
-          _.extend(consoleOutput, result)
+          _.extend(consoleOutput, { Returned: result }) 
 
         return result if result.code is 0 or not options.failOnNonZeroExit
 
