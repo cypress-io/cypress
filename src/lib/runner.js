@@ -66,20 +66,17 @@ export default {
       let test = tests.get(testId)
       if (test) {
         logger.clearLog()
-        this._logError(test.err.stack)
+        logger.logError(test.err.stack)
       } else {
-        this._logError('No error found for test id', testId)
+        logger.logError('No error found for test id', testId)
       }
     })
 
     channel.on('runner:console:log', (logId) => {
-      let log = logs.get(logId)
-      if (log) {
+      this._withLog(logId, (log) => {
         logger.clearLog()
         logger.logFormatted(log)
-      } else {
-        this._logError('No log found for log id', logId)
-      }
+      })
     })
 
     _.each(testEvents, (event) => {
@@ -116,6 +113,16 @@ export default {
     channel.on('runner:abort', () => {
       // TODO: tell the driver not to fire 'test:after:hooks' event
       driver.abort()
+    })
+
+    channel.on('runner:show:snapshot', (id) => {
+      this._withLog(id, (log) => {
+        localBus.emit('show:snapshot', log.get('snapshots'), log.toJSON())
+      })
+    })
+
+    channel.on('runner:hide:snapshot', () => {
+      localBus.emit('hide:snapshot')
     })
 
     // when we actually unload then
@@ -192,7 +199,12 @@ export default {
     $Cypress.Cookies.setCy('unload', true)
   },
 
-  _logError (...args) {
-    logger.logError(...args)
-  },
+  _withLog (logId, cb) {
+    let log = logs.get(logId)
+    if (log) {
+      cb(log)
+    } else {
+      logger.logError('No log found for log id', logId)
+    }
+  }
 }

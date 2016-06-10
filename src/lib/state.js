@@ -71,6 +71,12 @@ const state = observable({
     this._windowHeight = height
   }),
 
+  clearMessage: asReference(function () {
+    this.messageTitle = defaults.messageTitle
+    this.messageDescription = defaults.messageDescription
+    this.messageType = defaults.messageType
+  }),
+
   reset: asReference(function () {
     _.each(defaults, (defaultValue, key) => {
       this[key] = defaultValue

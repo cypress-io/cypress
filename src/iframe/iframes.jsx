@@ -33,7 +33,10 @@ export default class Iframes extends Component {
     runner.start(this.props.config, specFile)
     runner.on('restart', this._run.bind(this))
 
-    this.iframeModel = new IframeModel(this.props.state)
+    this.iframeModel = new IframeModel(this.props.state, {
+      detachBody: this._detachBody,
+      setBody: this._setBody,
+    })
     this.iframeModel.listen()
     this._run()
     windowUtil.monitorWindowResize(this.props.state)
@@ -41,6 +44,7 @@ export default class Iframes extends Component {
 
   _run () {
     logger.clearLog()
+    // TODO: set and unset this.props.state.isRunning
     this._loadIframes(this.specFile).then(([specWindow, $autIframe]) => {
       runner.run(specWindow, $autIframe)
     })
@@ -56,7 +60,7 @@ export default class Iframes extends Component {
 
       const $container = $(this.refs.container).empty()
 
-      const $autIframe = $('<iframe>', {
+      const $autIframe = this.$autIframe = $('<iframe>', {
         id: `Your App: '${name}'`,
         class: 'aut-iframe',
       }).appendTo($container)
@@ -77,6 +81,18 @@ export default class Iframes extends Component {
         // view.calcWidth()
       })
     })
+  }
+
+  _detachBody = () => {
+    const body = this.$autIframe.contents().find('body')
+    body.find('script').remove()
+    return body.detach()
+  }
+
+  _setBody = (body) => {
+    const contents = this.$autIframe.contents()
+    contents.find('body').remove()
+    contents.find('html').append(body)
   }
 
   componentWillUnmount () {
