@@ -214,5 +214,5 @@ export default {
     } else {
       logger.logError('No log found for log id', logId)
     }
-  }
+  },
 }

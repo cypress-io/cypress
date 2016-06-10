@@ -3,10 +3,11 @@ import { action } from 'mobx'
 import runner from '../lib/runner'
 
 export default class IframeModel {
-  constructor (state, { detachBody, setBody }) {
+  constructor (state, { detachBody, setBody, highlightEl }) {
     this.state = state
     this.detachBody = detachBody
     this.setBody = setBody
+    this.highlightEl = highlightEl
 
     this.detachedId = null
     this.intervalId = null
@@ -95,10 +96,11 @@ export default class IframeModel {
 
       this.setBody(snapshot.state)
 
-    //   if el = command.getEl()
-    //     options     = command.pick('coords', 'highlightAttr', 'scrollBy')
-    //     options.dom = snapshot.state
-    //     @trigger 'highlight:el', el, options
+      if (log.$el) {
+        const options = _.pick(log, 'coords', 'highlightAttr', 'scrollBy')
+        options.dom = snapshot.state
+        this.highlightEl(log.$el, options)
+      }
     })
 
     if (snapshots.length > 1) {

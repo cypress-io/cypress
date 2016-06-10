@@ -4,7 +4,7 @@ import Promise from 'bluebird'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
-import blankContents from './blank-contents'
+import autIframe from './aut-iframe'
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
 import runner from '../lib/runner'
@@ -34,8 +34,9 @@ export default class Iframes extends Component {
     runner.on('restart', this._run.bind(this))
 
     this.iframeModel = new IframeModel(this.props.state, {
-      detachBody: this._detachBody,
-      setBody: this._setBody,
+      detachBody: autIframe.detachBody.bind(autIframe),
+      setBody: autIframe.setBody.bind(autIframe),
+      highlightEl: autIframe.highlightEl.bind(autIframe),
     })
     this.iframeModel.listen()
     this._run()
@@ -50,21 +51,14 @@ export default class Iframes extends Component {
   }
 
   // jQuery is a better fit for managing these iframes, since they need to get
-  // wiped out and reset on re-runs
+  // wiped out and reset on re-runs and the snapshots are from dom we don't control
   _loadIframes (specFile) {
     return new Promise((resolve) => {
-      const name = this.props.config.projectName
       // this path should come from the config
       const specSrc = `/__cypress/iframes/${specFile}`
 
       const $container = $(this.refs.container).empty()
-
-      const $autIframe = this.$autIframe = $('<iframe>', {
-        id: `Your App: '${name}'`,
-        class: 'aut-iframe',
-      }).appendTo($container)
-
-      $autIframe.contents().find('body').append(blankContents)
+      const $autIframe = autIframe.create(this.props.config).appendTo($container)
 
       const $specIframe = $('<iframe />', {
         id: `Your Spec: '${specSrc}'`,
@@ -79,18 +73,6 @@ export default class Iframes extends Component {
         resolve([$specIframe[0].contentWindow, $autIframe])
       })
     })
-  }
-
-  _detachBody = () => {
-    const body = this.$autIframe.contents().find('body')
-    body.find('script').remove()
-    return body.detach()
-  }
-
-  _setBody = (body) => {
-    const contents = this.$autIframe.contents()
-    contents.find('body').remove()
-    contents.find('html').append(body)
   }
 
   componentWillUnmount () {

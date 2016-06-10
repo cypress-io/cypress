@@ -19,7 +19,7 @@
     "arrow-parens": ["error", "always"],
     "arrow-spacing": "error",
     "block-spacing": "error",
-    "brace-style": "error",
+    "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
     "comma-dangle": ["error", "always-multiline"],
     "comma-spacing": "error",
     "curly": ["error", "multi-line", "consistent"],
