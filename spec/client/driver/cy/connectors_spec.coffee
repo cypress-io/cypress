@@ -802,3 +802,84 @@ describe "$Cypress.Cy Connectors Commands", ->
 
         #   @cy.wrap(val).its("toString")
 
+  context "#each", ->
+    it "can each a single element", ->
+      count = 0
+
+      @cy.get("#dom").each ->
+        count += 1
+      .then ->
+        expect(count).to.eq(1)
+
+    it "passes the existing subject downstream without side effects", ->
+      count = 0
+
+      $lis = @cy.$$("#list li")
+
+      expect($lis).to.have.length(3)
+
+      @cy.get("#list li").each ($li, i, arr) ->
+        expect(arr).to.be.instanceof($)
+        expect(i).to.eq(count)
+        count += 1
+        expect(arr.length).to.eq(3)
+
+        cy.wrap($li).should("have.class", "item")
+      .then ($lis) ->
+        expect(count).to.eq(3)
+        expect($lis).to.have.length(3)
+
+    it "awaits promises returned", ->
+      count = 0
+
+      start = new Date
+
+      @cy.get("#list li").each ($li, i, arr) ->
+        new Promise (resolve, reject) ->
+          _.delay ->
+            count += 1
+            resolve()
+          , 20
+      .then ($lis) ->
+        expect(count).to.eq(3)
+        expect(new Date - start).to.be.gt(60)
+
+    it "supports array like structures", ->
+      count = 0
+      arr = [1,2,3]
+
+      @cy.wrap(arr).each (num, i, a) ->
+        expect(a).to.eq(arr)
+        expect(i).to.eq(count)
+        count += 1
+        expect(num).to.eq(count)
+      .then (a) ->
+        expect(a).to.eq(arr)
+
+    it "ends early when returning false", ->
+      arr = [1,2,3]
+
+      ## after 2 calls return false
+      ## to end the loop early
+      fn = _.after 2, ->
+        return false
+
+      fn = @sandbox.spy(fn)
+
+      @cy.wrap(arr).each(fn)
+      .then (a) ->
+        expect(fn).to.be.calledTwice
+
+    it "works with nested eaches", ->
+      count = 0
+
+      @cy.get("#list li").each ($li, i, arr) ->
+        cy.wrap($li).parent().siblings("#asdf").find("li").each ($li2, i2, arr2) ->
+          count += 1
+        .then ($lis) ->
+          expect($lis.first()).to.have.text("asdf 1")
+          expect($lis).to.have.length(3)
+      .then ($lis) ->
+        expect($lis).to.have.length(3)
+        expect($lis.first()).to.have.text("li 0")
+        expect(count).to.eq(9)
