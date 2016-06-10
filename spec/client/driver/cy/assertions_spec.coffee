@@ -832,7 +832,11 @@ describe "$Cypress.Cy Assertion Commands", ->
         @cy.noop("foobar").should("contain", "oob")
 
       it "escapes quotes", ->
-        cy.get("#escape-quotes").should("contain", "shouldn't")
+        span = "<span id=\"escape-quotes\">shouldn't and can\"t</span>"
+
+        @cy.$$(span).appendTo @cy.$$("body")
+
+        @cy.get("#escape-quotes").should("contain", "shouldn't")
 
     describe "#match", ->
       it "calls super when provided a regex", ->
