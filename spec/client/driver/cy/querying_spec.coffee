@@ -1228,7 +1228,7 @@ describe "$Cypress.Cy Querying Commands", ->
       _.each [undefined, null], (val) ->
         it "throws when text is #{val}", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.eq("cy.contains() can only accept a string or number.")
+            expect(err.message).to.eq("cy.contains() can only accept a string, number or regular expression.")
             done()
 
           @cy.contains(val)

@@ -500,7 +500,7 @@ describe "$Cypress.Cy API", ->
       it "nested command should reference url as next property", ->
         @setup =>
           nested = @cy.commands.findWhere({name: "nested"})
-          expect(nested.get("next").name).to.eq "url"
+          expect(nested.get("next").get("name")).to.eq "url"
 
       it "null outs nestedIndex prior to restoring", (done) ->
         @setup()

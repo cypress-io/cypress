@@ -244,7 +244,7 @@ describe "$Cypress.Cy Traversal Commands", ->
 
     it "errors after timing out not finding element", (done) ->
       @cy.on "fail", (err) ->
-        expect(err.message).to.include "Expected to find element: 'span', but never found it. Queried from element: <li>"
+        expect(err.message).to.include "Expected to find element: 'span', but never found it. Queried from element: <li.item>"
         done()
 
       @cy.get("#list li:last").find("span")

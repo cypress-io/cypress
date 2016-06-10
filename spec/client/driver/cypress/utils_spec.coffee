@@ -225,7 +225,7 @@ describe "$Cypress.Utils API", ->
         lis = @cy.$$("li")
 
         str = $Cypress.Utils.stringifyElement(lis, "short")
-        expect(str).to.eq "[ <li>, #{lis.length - 1} more... ]"
+        expect(str).to.eq "[ <li.item>, #{lis.length - 1} more... ]"
 
       it "stringifies array of elements", ->
         appendButton = =>
