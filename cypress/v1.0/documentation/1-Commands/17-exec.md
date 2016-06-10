@@ -111,6 +111,6 @@ The command above will display in the command log as:
 
 When clicking on the `exec` command within the command log, the console outputs the following:
 
-<img width="758" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/15943067/3c396ad2-2e55-11e6-82be-47422d44f59c.png">
+<img width="758" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/15969867/e3ab646e-2eff-11e6-9199-987ca2f74025.png">
 
 ***
