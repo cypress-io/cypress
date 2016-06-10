@@ -83,7 +83,7 @@ There is currently no specific element that has focus. If you want to ensure foc
 
 ## cy.blur() timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window.
 
-If you see this error, you may want to ensure that the main Chrome window is currently focused. This means not being focused in debugger or any other window.
+If you see this error, you may want to ensure that the main browser window is currently focused. This means not being focused in debugger or any other window when the command is executed.
 
 ## cy.blur() can only be called on the focused element. Currently the focused element is a: 'el'
 

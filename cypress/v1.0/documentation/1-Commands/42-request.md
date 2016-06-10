@@ -46,6 +46,7 @@ Option | Default | Notes
 `url` | `null` | The URL to make the request.
 `body` | `null` | The Request Body to send along with the request.
 `headers` | `null` | Any additional headers to send. Accepts an object literal.
+`auth` | `null` | Any auth to send. Accepts an object literal.
 `cookies` | `false` | Whether to send the current browser cookies. Can also accept an object literal.
 `gzip` | `true` | Whether to accept the `gzip` encoding.
 `failOnStatus` | `true` | Whether to fail on response codes other than `2xx`.
