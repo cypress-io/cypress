@@ -93,12 +93,13 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         ## get whatever the previous commands return
         ## value is. this likely does not match the 'var current'
         ## command in the case of nested cy commands
-        subject = next.get("prev").get("subject")
+        s = next.get("prev").get("subject")
 
         ## find the new subject and splice it out
         ## with our existing subject
         index = _.indexOf(args, newSubject)
-        args.splice(index, 1, subject)
+        if index > -1
+          args.splice(index, 1, s)
 
         @off("next:subject:prepared", checkSubject)
 
@@ -111,9 +112,9 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         ret = null
 
       if ret? and invokedCyCommand and not ret.then
-        $Cypress.Utils.throwErrByPath("then.callback_mixes_sync_and_async", {
+        Cypress.Utils.throwErrByPath("then.callback_mixes_sync_and_async", {
           onFail: options._log
-          args: { value: $Cypress.Utils.stringify(ret) }
+          args: { value: Cypress.Utils.stringify(ret) }
         })
 
       return ret
@@ -128,7 +129,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       ## resolve with the existing subject
       return ret ? subject
     .catch Promise.TimeoutError, =>
-      $Cypress.Utils.throwErrByPath "invoke_its.timed_out", {
+      Cypress.Utils.throwErrByPath "invoke_its.timed_out", {
         onFail: options._log
         args: {
           cmd: name
@@ -162,30 +163,30 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         Subject: subject
 
     if not _.isString(fn)
-      $Cypress.Utils.throwErrByPath("invoke_its.invalid_1st_arg", {
+      Cypress.Utils.throwErrByPath("invoke_its.invalid_1st_arg", {
         onFail: options._log
         args: { cmd: name }
       })
 
     if name is "its" and args.length > 0
-      $Cypress.Utils.throwErrByPath("invoke_its.invalid_num_of_args", {
+      Cypress.Utils.throwErrByPath("invoke_its.invalid_num_of_args", {
         onFail: options._log
         args: { cmd: name }
       })
 
     fail = (prop) =>
-      $Cypress.Utils.throwErrByPath("invoke_its.invalid_property", {
+      Cypress.Utils.throwErrByPath("invoke_its.invalid_property", {
         onFail: options._log
         args: { prop, cmd: name }
       })
 
     failOnPreviousNullOrUndefinedValue = (previousProp, currentProp, value) =>
-      $Cypress.Utils.throwErrByPath("invoke_its.previous_prop_nonexistent", {
+      Cypress.Utils.throwErrByPath("invoke_its.previous_prop_nonexistent", {
         args: { previousProp, currentProp, value, cmd: name }
       })
 
     failOnCurrentNullOrUndefinedValue = (prop, value) =>
-      $Cypress.Utils.throwErrByPath("invoke_its.current_prop_nonexistent", {
+      Cypress.Utils.throwErrByPath("invoke_its.current_prop_nonexistent", {
         args: { prop, value, cmd: name }
       })
 
@@ -235,7 +236,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
             if _.isFunction(prop)
               prop.apply(actualSubject, args)
             else
-              $Cypress.Utils.throwErrByPath("invoke.invalid_type", {
+              Cypress.Utils.throwErrByPath("invoke.invalid_type", {
                 onFail: options._log
                 args: { prop: fn }
               })
@@ -286,30 +287,29 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     spread: (subject, options, fn) ->
       ## if this isnt an array blow up right here
       if not _.isArray(subject)
-        $Cypress.Utils.throwErrByPath("spread.invalid_type")
+        Cypress.Utils.throwErrByPath("spread.invalid_type")
 
       subject._spreadArray = true
 
       thenFn.call(@, subject, options, fn)
 
     each: (subject, options, fn) ->
-      if not _.isFunction(fn)
-        $Cypress.Utils.throwErrByPath("each.invalid_argument")
-
-      ## log out each as a command
+      if _.isUndefined(fn)
+        fn = options
+        options = {}
 
       if not subject
         ## return early if we dont have what we need
-        return
-        # $Cypress.Utils.throwErrByPath("each.invalid_subject")
+        return subject
+
+      if not _.isFunction(fn)
+        Cypress.Utils.throwErrByPath("each.invalid_argument")
 
       if "length" not of subject
-        $Cypress.Utils.throwErrByPath("each.non_array")
+        Cypress.Utils.throwErrByPath("each.non_array")
 
       if subject.length is 0
-        return
-
-      els = $Cypress.Utils.getDomElements(subject)
+        return subject
 
       ## if we have a next command then we need to
       ## slice in this existing subject as its subject
@@ -322,19 +322,38 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
           ## find the new subject and splice it out
           ## with our existing subject
           index = _.indexOf(args, newSubject)
-          args.splice(index, 1, subject)
+          if index > -1
+            args.splice(index, 1, subject)
 
           @off("next:subject:prepared", checkSubject)
 
         @on("next:subject:prepared", checkSubject)
 
+      endEarly = false
+
+      yieldItem = (el, index) =>
+        return if endEarly
+
+        if Cypress.Utils.hasElement(el)
+          el = $(el)
+
+        callback = ->
+          ## TODO: if the return value is false then return early
+          ret = fn.call(@, el, index, subject)
+
+          if ret is false
+            endEarly = true
+
+          return ret
+
+        thenFn.call(@, el, options, callback)
+
+      ## generate a real array since bluebird is finicky and
+      ## doesnt want an 'array-like' structure like jquery instances
+      ## need to take into account regular arrays here by first checking
+      ## if its an array instance
       Promise
-      .each els, (el) =>
-        thenFn.call(@, $(el), options, fn)
-      # .then ->
-        # make this log smear from the start
-        # to the finish
-        # options.log.snapshot().end()
+      .each(_.toArray(subject), yieldItem)
       .return(subject)
 
   Cypress.addDualCommand

@@ -801,3 +801,4 @@ describe "$Cypress.Cy Connectors Commands", ->
         #     done()
 
         #   @cy.wrap(val).its("toString")
+
