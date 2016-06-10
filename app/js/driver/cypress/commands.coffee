@@ -242,23 +242,13 @@ do ($Cypress, _) ->
     inject: (key, fn, type) ->
       _this = @
 
-      prepareSubject = (subject, args) ->
-        ## if we already have a subject
-        ## then replace the first argument
-        ## with the new subject.
-        ## i think this is now deprecated
-        ## based on the way args are passed
-        ## it will always be a new array of arguments
-        ## and therefore we dont have to deal with
-        ## the edge case of mutating args with subject
-        ## later.  however theres not enough tests
-        ## around this so we'll leave it in place for now.
-        if args.hasSubject
-          args.splice(0, 1, subject)
-        else
-          args.unshift(subject)
+      prepareSubject = (args) ->
+        subject = @prop("subject")
 
-        args.hasSubject or= true
+        args.unshift(subject)
+
+        @trigger("next:subject:prepared", subject, args)
+
         args
 
       wrap = (fn) ->
@@ -273,8 +263,7 @@ do ($Cypress, _) ->
 
           when "dual", "utility"
             _.wrap fn, (orig, args...) ->
-              subject = @prop("subject")
-              args = prepareSubject(subject, args)
+              args = prepareSubject.call(@, args)
 
               return orig.apply(@, args)
 
@@ -283,8 +272,7 @@ do ($Cypress, _) ->
               @ensureParent()
 
               ## push the subject into the args
-              subject = @prop("subject")
-              args = prepareSubject(subject, args)
+              args = prepareSubject.call(@, args)
 
               ret = orig.apply(@, args)
               return ret ? subject

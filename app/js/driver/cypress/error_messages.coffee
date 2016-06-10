@@ -107,6 +107,10 @@ $Cypress.ErrorMessages = do ($Cypress) ->
         https://on.cypress.io/element-cannot-be-interacted-with
       """
 
+    each:
+      invalid_argument: "#{cmd('each')} must be passed a callback function as its only argument."
+      non_array: "#{cmd('each')} can only operate on an array like subject."
+
     env:
       variables_missing: "Cypress.environmentVariables is not defined. Open an issue if you see this message."
 

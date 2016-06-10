@@ -345,7 +345,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
           expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
-  context "#type", ->
+  context.only "#type", ->
     it "does not change the subject", ->
       input = @cy.$$("input:first")
 
@@ -1116,6 +1116,62 @@ describe "$Cypress.Cy Actions Commands", ->
           @cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{rightarrow}d").then ($input) ->
             expect($input).to.have.value("fodo")
             done()
+
+      context "{uparrow}", ->
+        beforeEach ->
+          @cy.$$("#comments").val("foo\nbar\nbaz")
+
+        it "sets which and keyCode to 38 and does not fire keypress events", (done) ->
+          @cy.$$("#comments").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$$("#comments").on "keydown", (e) ->
+            expect(e.which).to.eq 38
+            expect(e.keyCode).to.eq 38
+            done()
+
+          @cy.get("#comments").type("{uparrow}").then ($input) ->
+            done()
+
+        it "does not fire textInput event", (done) ->
+          @cy.$$("#comments").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get("#comments").type("{uparrow}").then -> done()
+
+        it "does not fire input event", (done) ->
+          @cy.$$("#comments").on "input", (e) ->
+            done("input should not have fired")
+
+          @cy.get("#comments").type("{uparrow}").then -> done()
+
+      context "{downarrow}", ->
+        beforeEach ->
+          @cy.$$("#comments").val("foo\nbar\nbaz")
+
+        it "sets which and keyCode to 40 and does not fire keypress events", (done) ->
+          @cy.$$("#comments").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$$("#comments").on "keydown", (e) ->
+            expect(e.which).to.eq 40
+            expect(e.keyCode).to.eq 40
+            done()
+
+          @cy.get("#comments").type("{downarrow}").then ($input) ->
+            done()
+
+        it "does not fire textInput event", (done) ->
+          @cy.$$("#comments").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get("#comments").type("{downarrow}").then -> done()
+
+        it "does not fire input event", (done) ->
+          @cy.$$("#comments").on "input", (e) ->
+            done("input should not have fired")
+
+          @cy.get("#comments").type("{downarrow}").then -> done()
 
       context "{selectall}{del}", ->
         it "can select all the text and delete", ->
