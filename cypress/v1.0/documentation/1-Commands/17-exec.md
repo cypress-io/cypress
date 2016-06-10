@@ -11,8 +11,6 @@ We don't recommend executing commands that take a long time to exit. Cypress wil
 
 The current working directory is set to the project root (the directory that contains cypress.json).
 
-Cypress attempts to run the command using your system's default shell and load the appropriate shell profile. Currently, the most common unix shells are supported, including bash, zsh, and fish. The path to the shell and the profile loaded is included with the result of the command. If you find your shell is not supported or its profile is not loaded correctly, please file an issue.
-
 | | |
 |--- | --- |
 | **Returns** | an object with the exit `code`, the `stdout`, and the `stderr` |
@@ -54,7 +52,6 @@ cy
     //   code: 0,
     //   stdout: "Files successfully built",
     //   stderr: ""
-    //   shell: { shellPath: "/bin/bash", profilePath: "~/.bash_profile" }
     // }
   })
 ```
@@ -111,6 +108,6 @@ The command above will display in the command log as:
 
 When clicking on the `exec` command within the command log, the console outputs the following:
 
-<img width="758" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/15943067/3c396ad2-2e55-11e6-82be-47422d44f59c.png">
+<img width="758" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/15369509/e49c6b22-1d00-11e6-9984-5a888c01e3e7.png">
 
 ***
