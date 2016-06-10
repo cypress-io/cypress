@@ -225,7 +225,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
         @trigger "command:start", command
 
-        promise = @set(command, @commands.at(index - 1), @commands.at(index + 1)).then =>
+        promise = @set(command).then =>
           ## each successful command invocation should
           ## always reset the timeout for the current runnable
           ## unless it already has a state.  if it has a state
@@ -305,14 +305,9 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     #   fn._invokeImmediately = true
     #   fn
 
-    set: (command, prev, next) ->
-      command.set({prev: prev, next: next})
-
+    set: (command) ->
       @prop("current", command)
 
-      @invoke2(command)
-
-    invoke2: (command, args...) ->
       promise = if @prop("ready")
         Promise.resolve @prop("ready").promise
       else
@@ -323,15 +318,11 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
         @prop "nestedIndex", @prop("index")
 
-        ## allow the invoked arguments to be overridden by
-        ## passing them in explicitly
-        ## else just use the arguments the command was
-        ## originally created with
-        return if args.length then args else command.get("args")
+        command.get("args")
 
       ## allow promises to be used in the arguments
       ## and wait until they're all resolved
-      .all(args)
+      .all()
 
       .then (args) =>
         ## if the first argument is a function and it has an _invokeImmediately
@@ -455,7 +446,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## we're about to splice this into our commands
       ## and need to reset next + increment the index
       if _.isNumber(nestedIndex)
-        @commands.at(nestedIndex).set("next", obj)
         @prop("nestedIndex", nestedIndex += 1)
 
       ## we look at whether or not nestedIndex is a number, because if it

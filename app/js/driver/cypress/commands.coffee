@@ -129,6 +129,17 @@ do ($Cypress, _) ->
       cmd = @add(obj)
       @commands.splice(start, end, cmd)
 
+      prev = @at(start - 1)
+      next = @at(start + 1)
+
+      if prev
+        prev.set("next", cmd)
+        cmd.set("prev", prev)
+
+      if next
+        next.set("prev", cmd)
+        cmd.set("next", next)
+
       return cmd
 
     slice: ->
