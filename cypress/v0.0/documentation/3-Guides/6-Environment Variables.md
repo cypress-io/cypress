@@ -235,7 +235,7 @@ If your environment variables match a standard configuration key then instead of
 export CYPRESS_BASE_URL=http://localhost:8080
 
 ## the key 'foo' does not match a configuration key so
-## this just sets a regular environemtn variable in Cypress.env()
+## this just sets a regular environment variable in Cypress.env()
 export CYPRESS_FOO=bar
 ```
 
