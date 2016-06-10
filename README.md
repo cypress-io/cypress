@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.4.0
+- added cy.exec() example from kitchen-sink dep
+
 #### 0.3.3
 - fixes clearing 3rd party cookies after cy.visit
 
