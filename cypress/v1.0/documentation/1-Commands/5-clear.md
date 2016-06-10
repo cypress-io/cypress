@@ -74,6 +74,15 @@ When clicking on `clear` within the command log, the console outputs the followi
 
 ***
 
+# Errors
+
+## cy.clear() can only be called on textarea or :text.
+
+Ensure that the subject passed to `cy.clear()` is a `textarea` or an input of `type='text'`.
+
+###
+
+
 # Related
 
 - [type](https://on.cypress.io/api/type)

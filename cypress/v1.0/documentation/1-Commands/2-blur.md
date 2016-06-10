@@ -71,6 +71,26 @@ When clicking on the `blur` command within the command log, the console outputs 
 
 ***
 
+# Errors
+
+## cy.blur() can only be called on a single element. Your subject contained 'num' elements.
+
+`cy.blur()` is intended to cause only one element to lose focus. Ensure the subject passed to `cy.blur()` is one DOM element.
+
+## cy.blur() can only be called when there is a currently focused element.
+
+There is currently no specific element that has focus. If you want to ensure focus before blurring, try using `cy.focus()` on the element before `cy.blur()`
+
+## cy.blur() timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window.
+
+If you see this error, you may want to ensure that the main Chrome window is currently focused. This means not being focused in debugger or any other window.
+
+## cy.blur() can only be called on the focused element. Currently the focused element is a: 'el'
+
+If you want to ensure focus on a specific element before blurring, try using `cy.focus()` on the element before `cy.blur()`
+
+***
+
 # Related
 
 - [focused](https://on.cypress.io/api/focused)

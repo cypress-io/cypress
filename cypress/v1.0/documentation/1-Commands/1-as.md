@@ -58,6 +58,22 @@ Aliases of routes display in the routes instrument panel:
 
 ***
 
+# Errors
+
+## cy.as() cannot be passed an empty string.
+
+`cy.as()` requires a string as it's only argument. Ensure the argument passed is a string.
+
+## cy.as() can only accept a string.
+
+`cy.as()` requires a string as it's only argument. Ensure the argument passed is a string.
+
+## cy.as() cannot be aliased as: 'str'. This word is reserved.
+
+Some strings are not allowed as aliases since they are reserved words in Cypress. These words include: test, runnable, timeout, slow, skip, and inspect.
+
+***
+
 # Related
 
 - [get](https://on.cypress.io/api/get)
