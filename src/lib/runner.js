@@ -17,7 +17,8 @@ channel.on('connect', () => {
   channel.emit('runner:connected')
 })
 
-const socketEvents = 'run:start run:end fixture request history:entries exec domain:change'.split(' ')
+const dualEvents = 'run:start run:end'.split(' ')
+const socketEvents = 'fixture request history:entries exec domain:change'.split(' ')
 const testEvents = 'test:before:hooks test:after:hooks'.split(' ')
 const automationEvents = 'get:cookies get:cookie set:cookie clear:cookies clear:cookie'.split(' ')
 const runnerEvents = 'viewport config stop url:changed page:loading'.split(' ')
@@ -87,6 +88,13 @@ export default {
           test = _.extend({}, test, { err: test.err.toString() })
         }
         channel.emit(event, test)
+      })
+    })
+
+    _.each(dualEvents, (event) => {
+      driver.on(event, (...args) => {
+        localBus.emit(event, ...args)
+        channel.emit(event, ...args)
       })
     })
 

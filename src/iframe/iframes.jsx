@@ -44,7 +44,6 @@ export default class Iframes extends Component {
 
   _run () {
     logger.clearLog()
-    // TODO: set and unset this.props.state.isRunning
     this._loadIframes(this.specFile).then(([specWindow, $autIframe]) => {
       runner.run(specWindow, $autIframe)
     })
@@ -73,12 +72,11 @@ export default class Iframes extends Component {
       }).appendTo($container)
 
       $specIframe.prop('src', specSrc).one('load', () => {
+        // TODO: is this necessary?
         // make a reference between the iframes
         // @contentWindow.remote = view.$remote[0].contentWindow
 
         resolve([$specIframe[0].contentWindow, $autIframe])
-        // view.$el.show()
-        // view.calcWidth()
       })
     })
   }

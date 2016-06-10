@@ -14,8 +14,8 @@ export default class IframeModel {
   }
 
   listen () {
-    runner.on('before:run', this._beforeRun)
-    runner.on('after:run', this._afterRun)
+    runner.on('run:start', this._beforeRun)
+    runner.on('run:end', this._afterRun)
 
     runner.on('viewport', this._updateViewport)
     runner.on('config', (config) => {
