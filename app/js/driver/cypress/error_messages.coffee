@@ -44,7 +44,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     contains:
       empty_string: "#{cmd('contains')} cannot be passed an empty string."
-      invalid_argument: "#{cmd('contains')} can only accept a string or number."
+      invalid_argument: "#{cmd('contains')} can only accept a string, number or regular expression."
       length_option: "#{cmd('contains')} cannot be passed a length option because it will only ever return 1 element."
 
     cookies:
