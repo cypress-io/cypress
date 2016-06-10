@@ -77,6 +77,33 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     @prop("onInjectCommand", returnFalseIfThenable)
 
     @on("enqueue", enqueuedCommand)
+
+    ## this code helps juggle subjects forward
+    ## the same way that promises work
+    current = @prop("current")
+    next    = current.get("next")
+
+    ## if the next command is chained to us then when it eventually
+    ## runs we need to reset the subject to be the return value of the
+    ## previous command so the subject is continuously juggled forward
+    if next and next.get("chainerId") is current.get("chainerId")
+      checkSubject = (newSubject, args) =>
+        return if @prop("current") isnt next
+
+        ## get whatever the previous commands return
+        ## value is. this likely does not match the 'var current'
+        ## command in the case of nested cy commands
+        subject = next.get("prev").get("subject")
+
+        ## find the new subject and splice it out
+        ## with our existing subject
+        index = _.indexOf(args, newSubject)
+        args.splice(index, 1, subject)
+
+        @off("next:subject:prepared", checkSubject)
+
+      @on("next:subject:prepared", checkSubject)
+
     getRet = =>
       ret = fn.apply(@private("runnable").ctx, args)
 

@@ -3,7 +3,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
   context "#spread", ->
     it "spreads an array into individual arguments", ->
-      cy.noop([1,2,3]).spread (one, two, three) ->
+      @cy.noop([1,2,3]).spread (one, two, three) ->
         expect(one).to.eq(1)
         expect(two).to.eq(2)
         expect(three).to.eq(3)
@@ -11,7 +11,7 @@ describe "$Cypress.Cy Connectors Commands", ->
     it "passes timeout option to spread", ->
       @cy._timeout(50)
 
-      cy.noop([1,2,3]).spread {timeout: 150}, (one, two, three) ->
+      @cy.noop([1,2,3]).spread {timeout: 150}, (one, two, three) ->
         Promise.delay(100)
 
     describe "errors", ->
@@ -109,6 +109,52 @@ describe "$Cypress.Cy Connectors Commands", ->
         Promise.delay(10).then =>
           @cy
 
+    it "passes values to the next command", ->
+      @cy
+        .wrap({foo: "bar"}).then (obj) ->
+          obj.foo
+        .then (val) ->
+          expect(val).to.eq("bar")
+
+    it "does not throw when returning thenables with cy commands", ->
+      @cy
+        .wrap({foo: "bar"})
+        .then (obj) ->
+          new Promise (resolve) =>
+            @cy.wait(10)
+
+            resolve(obj.foo)
+
+    it "should pass the eventual resolved thenable value downstream", ->
+      @cy
+        .wrap({foo: "bar"})
+        .then (obj) ->
+          @cy
+          .wait(10)
+          .then ->
+            obj.foo
+          .then (value) ->
+            expect(value).to.eq("bar")
+
+            return value
+        .then (val) ->
+          expect(val).to.eq("bar")
+
+    it "should not pass the eventual resolve thenable value downstream because thens are not connected", ->
+      @cy
+        .wrap({foo: "bar"})
+        .then (obj) ->
+          @cy
+          .wait(10)
+          .then ->
+            obj.foo
+          .then (value) ->
+            expect(value).to.eq("bar")
+
+            return value
+      @cy.then (val) ->
+        expect(val).to.be.null
+
     [null, undefined].forEach (val) ->
       it "passes the existing subject if ret is: #{val}", ->
         @cy.wrap({foo: "bar"}).then (obj) ->
@@ -126,7 +172,6 @@ describe "$Cypress.Cy Connectors Commands", ->
 
         @Cypress.on "log", (@log) =>
           logs.push @log
-
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(1)
