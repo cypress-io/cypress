@@ -65,11 +65,31 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     cleanup = =>
       @prop("onInjectCommand", null)
 
+    cleanupEnqueue = =>
+      @off("enqueue", enqueuedCommand)
+      null
+
+    invokedCyCommand = false
+
+    enqueuedCommand = ->
+      invokedCyCommand = true
+
     @prop("onInjectCommand", returnFalseIfThenable)
 
+    @on("enqueue", enqueuedCommand)
     getRet = =>
       ret = fn.apply(@private("runnable").ctx, args)
-      if (ret is @ or ret is @chain()) then null else ret
+
+      if ret is @ or ret is @chain()
+        ret = null
+
+      if ret? and invokedCyCommand and not ret.then
+        $Cypress.Utils.throwErrByPath("then.callback_mixes_sync_and_async", {
+          onFail: options._log
+          args: { value: $Cypress.Utils.stringify(ret) }
+        })
+
+      return ret
 
     Promise
     .try(getRet)
@@ -89,6 +109,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
           func: fn.toString()
         }
       }
+    .finally(cleanupEnqueue)
 
   invokeFn = (subject, fn, args...) ->
     @ensureParent()

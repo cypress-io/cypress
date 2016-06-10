@@ -137,6 +137,42 @@ describe "$Cypress.Cy Connectors Commands", ->
         @cy.then {timeout: 150}, ->
           new Promise (resolve, reject) ->
 
+      it "throws when mixing up async + sync return values", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(@cy._events.enqueue).to.be.undefined
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(err.message).to.include "cy.then() failed because you are mixing up async and sync code."
+          done()
+
+        @cy.then ->
+          expect(@cy._events.enqueue).to.have.length(1)
+
+          @cy.wait(5000)
+
+          return "foo"
+
+      it "unbinds enqueue in the case of an error thrown", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(@cy._events.enqueue).to.be.undefined
+          expect(logs.length).to.eq(1)
+          done()
+
+        @cy.then ->
+          expect(@cy._events.enqueue).to.have.length(1)
+
+          throw new Error("foo")
+
     describe "yields to remote jQuery subject", ->
       beforeEach ->
         ## set the jquery path back to our

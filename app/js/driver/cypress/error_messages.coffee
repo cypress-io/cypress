@@ -291,6 +291,19 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       multiple_forms: "#{cmd('submit')} can only be called on a single form. Your subject contained {{num}} form elements."
       not_on_form: "#{cmd('submit')} can only be called on a <form>. Your subject {{word}} a: {{node}}"
 
+    then:
+      callback_mixes_sync_and_async: """
+        #{cmd('then')} failed because you are mixing up async and sync code.
+
+        In your callback function you invoked 1 or more cy commands but then returned a synchronous value.
+
+        Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
+
+        You likely forgot to properly chain the cy commands using another cy.then().
+
+        The value you synchronously returned was: '{{value}}'
+      """
+
     type:
       empty_string: "#{cmd('type')} cannot accept an empty String. You need to actually type something."
       invalid: "Special character sequence: '{{chars}}' is not recognized. Available sequences are: {{allChars}}"

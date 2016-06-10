@@ -345,7 +345,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
           expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
-  context.only "#type", ->
+  context "#type", ->
     it "does not change the subject", ->
       input = @cy.$$("input:first")
 
