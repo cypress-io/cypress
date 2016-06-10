@@ -274,7 +274,10 @@ do ($Cypress, _) ->
               ## push the subject into the args
               args = prepareSubject.call(@, args)
 
+              subject = args[0]
+
               ret = orig.apply(@, args)
+
               return ret ? subject
 
       $Cypress.Cy.prototype[key] = (args...) ->
