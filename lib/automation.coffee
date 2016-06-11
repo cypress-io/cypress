@@ -1,7 +1,8 @@
-_       = require("lodash")
-Promise = require("bluebird")
+_          = require("lodash")
+Promise    = require("bluebird")
+screenshot = require("./screenshot")
 
-cookieMiddleware = "get:cookies get:cookie set:cookie clear:cookie clear:cookies".split(" ")
+middlewareMesssages = "take:screenshot get:cookies get:cookie set:cookie clear:cookie clear:cookies".split(" ")
 
 charAfterColonRe = /:(.)/
 
@@ -9,8 +10,8 @@ charAfterColonRe = /:(.)/
 ## https://w3c.github.io/webdriver/webdriver-spec.html#cookies
 COOKIE_PROPERTIES = "name value path domain secure httpOnly expiry".split(" ")
 
-needsCookieMiddleware = (message) ->
-  message in cookieMiddleware
+needsMiddleware = (message) ->
+  message in middlewareMesssages
 
 normalizeCookies = (cookies) ->
   _.map(cookies, normalizeCookieProps)
@@ -36,7 +37,7 @@ normalizeCookieProps = (data) ->
 
   cookie
 
-module.exports = (namespace, socketIoCookie) ->
+module.exports = (namespace, socketIoCookie, screenshotFolder) ->
 
   isCypressNamespaced = (cookie) ->
     return cookie if not name = cookie?.name
@@ -84,7 +85,12 @@ module.exports = (namespace, socketIoCookie) ->
 
       Promise.map(cookies, clear)
 
-    handleCookies: (message, data, automate) ->
+    takeScreenshot: (message, data, automate) ->
+      automate(message, data)
+      .then (dataUrl) ->
+        screenshot.take(data, dataUrl, screenshotFolder)
+
+    applyMiddleware: (message, data, automate) ->
       Promise.try =>
         fn = message.replace charAfterColonRe, (match, p1) ->
           p1.toUpperCase()
@@ -108,8 +114,8 @@ module.exports = (namespace, socketIoCookie) ->
       })
 
     request: (message, data, automate) ->
-      if needsCookieMiddleware(message)
-        @handleCookies(message, data, automate)
+      if needsMiddleware(message)
+        @applyMiddleware(message, data, automate)
       else
         automate(message, data)
 
