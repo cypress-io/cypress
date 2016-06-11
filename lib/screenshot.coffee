@@ -18,7 +18,7 @@ module.exports = {
 
     pathToScreenshot = path.join(screenshotFolder, name)
 
-    fs.writeFileAsync(pathToScreenshot, buffer)
+    fs.outputFileAsync(pathToScreenshot, buffer)
     .then ->
       fs.statAsync(pathToScreenshot)
       .get("size")
