@@ -305,8 +305,16 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       if not _.isFunction(fn)
         Cypress.Utils.throwErrByPath("each.invalid_argument")
 
-      if "length" not of subject
-        Cypress.Utils.throwErrByPath("each.non_array")
+      nonArray = ->
+        Cypress.Utils.throwErrByPath("each.non_array", {
+          args: {subject: Cypress.Utils.stringify(subject)}
+        })
+
+      try
+        if "length" not of subject
+          nonArray()
+      catch e
+        nonArray()
 
       if subject.length is 0
         return subject

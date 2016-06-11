@@ -889,3 +889,75 @@ describe "$Cypress.Cy Connectors Commands", ->
         expect($lis).to.have.length(3)
         expect($lis.first()).to.have.text("li 0")
         expect(count).to.eq(9)
+
+    it "can operate on a single element", ->
+      count = 0
+
+      @cy.get("div:first").each ($div) ->
+        count += 1
+      .then ->
+        expect(count).to.eq(1)
+
+    describe "errors", ->
+      beforeEach ->
+        @allowErrors()
+
+        @Cypress.on "log", (@log) =>
+        @currentTest.timeout(200)
+
+      it "can time out", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @Cypress.on "fail", (err) =>
+          ## get + each
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include("cy.each() timed out after waiting '200ms'.\n\nYour callback function returned a promise which never resolved.")
+          done()
+
+        cy.get("ul").each ($ul) ->
+          new Promise (resolve) ->
+
+      it "throws when not passed a callback function", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @Cypress.on "fail", (err) =>
+          ## get + each
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include("cy.each() must be passed a callback function.")
+          done()
+
+        cy.get("ul").each({})
+
+      it "throws when not passed a number", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @Cypress.on "fail", (err) =>
+          ## get + each
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include("cy.each() can only operate on an array like subject. Your subject was: '100'")
+          done()
+
+        cy.wrap(100).each ->
+
+      it "throws when not passed an array like structure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @Cypress.on "fail", (err) =>
+          ## get + each
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include("cy.each() can only operate on an array like subject. Your subject was: '{}'")
+          done()
+
+        cy.wrap({}).each ->

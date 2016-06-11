@@ -108,8 +108,8 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       """
 
     each:
-      invalid_argument: "#{cmd('each')} must be passed a callback function as its only argument."
-      non_array: "#{cmd('each')} can only operate on an array like subject."
+      invalid_argument: "#{cmd('each')} must be passed a callback function."
+      non_array: "#{cmd('each')} can only operate on an array like subject. Your subject was: '{{subject}}'"
 
     env:
       variables_missing: "Cypress.environmentVariables is not defined. Open an issue if you see this message."
