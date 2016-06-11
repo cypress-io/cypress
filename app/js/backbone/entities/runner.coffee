@@ -69,6 +69,9 @@
         @listenTo @Cypress, "clear:cookies", (options, cb) =>
           @socket.emit "automation:request", "clear:cookies", options, cb
 
+        @listenTo @Cypress, "take:screenshot", (name, cb) =>
+          @socket.emit "automation:request", "take:screenshot", name, cb
+
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb
 

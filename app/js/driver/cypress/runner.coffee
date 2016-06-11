@@ -121,10 +121,13 @@ $Cypress.Runner = do ($Cypress, _) ->
           @emit "test", test
 
       @runner.on "fail", (runnable, err) =>
+        ## always set runnable err so we can tap into
+        ## taking a screenshot on error
+        runnable.err = err
+
         if $Cypress.isHeadless
           Cypress.trigger "mocha:fail", @wrap(runnable), @wrapErr(err)
         else
-          runnable.err = err
           @hookFailed(runnable, err) if runnable.type is "hook"
 
     wrapErr: (err) ->
