@@ -346,9 +346,9 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
           el = $(el)
 
         callback = ->
-          ## TODO: if the return value is false then return early
           ret = fn.call(@, el, index, subject)
 
+          ## if the return value is false then return early
           if ret is false
             endEarly = true
 
