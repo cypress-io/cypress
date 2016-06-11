@@ -40,9 +40,13 @@
           @socket.emit "mocha", "suite end", suite
 
         @listenTo @Cypress, "test:start", (test) =>
+          return if test.alreadyEmittedMocha
+
           @socket.emit "mocha", "test", test
 
         @listenTo @Cypress, "test:end", (test) =>
+          return if test.alreadyEmittedMocha
+
           @socket.emit "mocha", "test end", test
 
         @listenTo @Cypress, "mocha:pending", (test) =>

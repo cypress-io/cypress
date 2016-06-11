@@ -114,11 +114,14 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## emit the pending event instead of the test
       ## so we normalize the pending / test events
       @runner.on "pending", (test) ->
+        test.state = "pending"
+
         if $Cypress.isHeadless
+          ## do not double emit the 'test' event
+          test.alreadyEmittedMocha = true
           Cypress.trigger "mocha:pending", _this.wrap(test)
-        else
-          test.state = "pending"
-          @emit "test", test
+
+        @emit "test", test
 
       @runner.on "fail", (runnable, err) =>
         ## always set runnable err so we can tap into
@@ -126,9 +129,12 @@ $Cypress.Runner = do ($Cypress, _) ->
         runnable.err = err
 
         if $Cypress.isHeadless
+          ## do not double emit the 'test end' event
+          runnable.alreadyEmittedMocha = true
           Cypress.trigger "mocha:fail", @wrap(runnable), @wrapErr(err)
-        else
-          @hookFailed(runnable, err) if runnable.type is "hook"
+
+        if runnable.type is "hook"
+          @hookFailed(runnable, err)
 
     wrapErr: (err) ->
       _.pick err, "message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host", "uncaught", "actual", "expected", "showDiff"
@@ -138,7 +144,7 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## tests to an id-based object which prevents
       ## us from recursively iterating through every
       ## parent since we could just return the found test
-      r = _(runnable).pick "id", "title", "originalTitle", "root", "hookName", "err", "duration", "state", "failedFromHook", "timedOut", "async", "sync"
+      r = _(runnable).pick "id", "title", "originalTitle", "root", "hookName", "err", "duration", "state", "failedFromHook", "timedOut", "async", "sync", "alreadyEmittedMocha"
 
       if parent = runnable.parent
         ## recursively walk up the parent chain
@@ -225,6 +231,10 @@ $Cypress.Runner = do ($Cypress, _) ->
       test.duration = hook.duration
       test.hookName = @getHookName(hook)
       test.failedFromHook = true
+
+      if hook.alreadyEmittedMocha
+        test.alreadyEmittedMocha = true
+
       @Cypress.trigger "test:end", @wrap(test)
 
     total: ->
