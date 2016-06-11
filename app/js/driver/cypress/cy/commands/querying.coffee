@@ -208,6 +208,9 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       getPhrase = (type, negated) ->
         switch
+          when filter and subject
+            node = Cypress.Utils.stringifyElement(subject, "short")
+            "within the element: #{node} and with the selector: '#{filter}' "
           when filter
             "within the selector: '#{filter}' "
           when subject

@@ -1273,6 +1273,13 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.get("#edge-case-contains").find(".badge").contains(0)
 
+      it "throws when there is both a subject and a filter", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Expected to find content: 'foo' within the element: <div#edge-case-contains> and with the selector: 'ul' but never did."
+          done()
+
+        @cy.get("#edge-case-contains").contains("ul", "foo")
+
       it "throws after timing out while not trying to find an element that contains content", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.include "Expected not to find content: 'button' but continuously found it."
