@@ -56,6 +56,12 @@ automation = {
 
   verify: (data) ->
     Promise.resolve(true)
+
+  takeScreenshot: ->
+    new Promise (resolve) ->
+      win = Renderer.get("PROJECT")
+      win.capturePage (img) ->
+        resolve(img.toDataURL())
 }
 
 module.exports = {
@@ -75,6 +81,8 @@ module.exports = {
         invoke("clearCookie", data)
       when "is:automation:connected"
         invoke("verify", data)
+      when "take:screenshot"
+        invoke("takeScreenshot")
       else
         Promise.reject new Error("No handler registered for: '#{msg}'")
 }
