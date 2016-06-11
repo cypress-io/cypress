@@ -227,6 +227,9 @@ $Cypress.Runner = do ($Cypress, _) ->
       test.failedFromHook = true
       @Cypress.trigger "test:end", @wrap(test)
 
+    total: ->
+      @runner.suite.total()
+
     ## returns each runnable to the callback function
     ## if it matches the current grep
     ## subsequent runnable iterations are optimized

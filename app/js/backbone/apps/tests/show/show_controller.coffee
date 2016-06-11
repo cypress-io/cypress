@@ -44,15 +44,6 @@
 
         @statsRegion(runner)
 
-        ## in CI and when running headlessly we cannot
-        ## startup the specsRegion because this will cause
-        ## tests to timeout when there are thousands
-        ## this doesnt indicate a memory leak, i believe
-        ## its simply creates too many object references
-        ## and without any DOM optimizations it simply
-        ## creates hundreds of thousands of new nodes
-        return if config.get("isHeadless")
-
         @specsRegion(runner, iframe, spec)
 
         socket.emit "watch:test:file", id

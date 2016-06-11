@@ -93,11 +93,6 @@
         @listenTo @Cypress, "paused", (nextCmd) =>
           @trigger "paused", nextCmd
 
-        ## if we dont return here then InspectAll tests
-        ## will eventually hit the 4gb limit. This is due
-        ## to holding a reference to all of the commands
-        return if isHeadless
-
         @listenTo @Cypress, "log", (log) =>
           switch log.get("instrument")
             when "command"
@@ -323,12 +318,29 @@
         return runnable.id = id
 
       receivedRunner: (runner) ->
-        @trigger "before:add"
+        triggerAddEvents = true
+
+        total = runner.total()
+
+        ## if we're headless and have more than 200 tests
+        ## then dont trigger events and stop listening to log
+        if $Cypress.isHeadless and total > 200
+
+          ## if we dont return here then InspectAll tests
+          ## will eventually hit the 4gb limit. This is due
+          ## to holding a reference to all of the commands
+          @stopListening @Cypress, "log"
+
+          triggerAddEvents = false
+
+        @trigger("before:add", total)
 
         runnables = []
         ids = []
 
         triggerAddEvent = (runnable) =>
+          return if not triggerAddEvents
+
           @trigger("#{runnable.type}:add", runnable)
 
         getRunnables = (options = {}) =>

@@ -7,7 +7,9 @@
 
       testViewQueue = testQueue = null
 
-      numTestsKeptInMemory = App.request("app:config:entity").get("numTestsKeptInMemory")
+      config = App.request("app:config:entity")
+
+      numTestsKeptInMemory = config.get("numTestsKeptInMemory")
 
       ## hold onto every single runnable type (suite or test)
       container  = App.request "runnable:container:entity"
@@ -59,6 +61,21 @@
         ## move all the models over to previous run
         ## and reset all existing one
         container.reset()
+
+      @listenTo runner, "before:add", (total) ->
+        ## unbind all listeners so we dont display anything
+        ## if we're in headless mode and have more than 200 tests
+        ## in CI and when running headlessly we cannot
+        ## startup the specsRegion because this will cause
+        ## tests to timeout when there are thousands
+        ## this doesnt indicate a memory leak, i believe
+        ## its simply creates too many object references
+        ## and without any DOM optimizations it simply
+        ## creates hundreds of thousands of new nodes
+        if config.get("isHeadless") and total > 200
+          events = "after:add suite:add suite:end test:add test:start test:end".split(" ")
+          events.forEach (event) =>
+            @stopListening(runner, event)
 
       @listenTo runner, "after:add", ->
         ## removes any old models no longer in our run
