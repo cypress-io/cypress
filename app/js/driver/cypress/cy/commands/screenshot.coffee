@@ -2,7 +2,12 @@ $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
 
   Cypress.on "test:after:hooks", (test) ->
     if test.err and $Cypress.isHeadless
-      @_takeScreenshot(test.title)
+      ## give the UI some time to render the error
+      ## because we were noticing that errors were not
+      ## yet displayed in the UI when running headlessly
+      Promise.delay(50)
+      .then =>
+        @_takeScreenshot(test.title)
 
   Cypress.Cy.extend
     _takeScreenshot: (name, log, timeout) ->
