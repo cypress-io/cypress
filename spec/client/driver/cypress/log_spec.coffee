@@ -130,6 +130,14 @@ describe "$Cypress.Log API", ->
         expect(@log.get("visible")).to.be.false
         $el.remove()
 
+      it "converts raw dom elements to jquery instances", ->
+        el = $("<button>one</button").get(0)
+
+        @log.set($el: el)
+
+        expect(@log.get("$el")).to.be.an.instanceof($)
+        expect(@log.get("$el").get(0)).to.eq(el)
+
     describe "#constructor", ->
       it "snapshots if snapshot attr is true", ->
         createSnapshot = @sandbox.stub @Cypress, "createSnapshot"

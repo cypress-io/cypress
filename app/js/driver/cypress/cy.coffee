@@ -349,8 +349,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         if (ret is @ or ret is @chain()) then null else ret
 
       .then (subject) =>
-        ## if ret is a RAW DOM element then convert it back to be jquery
-
         ## if ret is a DOM element and its not an instance of our jQuery
         if subject and Cypress.Utils.hasElement(subject) and not Cypress.Utils.isInstanceOf(subject, $)
           ## set it back to our own jquery object

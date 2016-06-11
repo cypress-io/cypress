@@ -43,6 +43,12 @@ describe "$Cypress.Cy Connectors Commands", ->
           new Promise (resolve, reject) ->
 
   context "#then", ->
+    it "converts raw DOM elements", ->
+      div = @cy.$$("div:first").get(0)
+
+      cy.wrap(div).then ($div) ->
+        expect($div.get(0)).to.eq(div)
+
     it "mocha inserts 2 arguments to then: anonymous fn for invoking done(), and done reference itself", ->
       ## this puts tests in place to where if mocha
       ## ever updates and changes how it calls .then
