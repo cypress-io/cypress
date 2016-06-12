@@ -1,6 +1,6 @@
-_          = require("lodash")
-Promise    = require("bluebird")
-screenshot = require("./screenshot")
+_           = require("lodash")
+Promise     = require("bluebird")
+screenshots = require("./screenshots")
 
 middlewareMesssages = "take:screenshot get:cookies get:cookie set:cookie clear:cookie clear:cookies".split(" ")
 
@@ -37,7 +37,7 @@ normalizeCookieProps = (data) ->
 
   cookie
 
-module.exports = (namespace, socketIoCookie, screenshotFolder) ->
+module.exports = (namespace, socketIoCookie, screenshotsFolder) ->
 
   isCypressNamespaced = (cookie) ->
     return cookie if not name = cookie?.name
@@ -88,7 +88,7 @@ module.exports = (namespace, socketIoCookie, screenshotFolder) ->
     takeScreenshot: (message, data, automate) ->
       automate(message, data)
       .then (dataUrl) ->
-        screenshot.take(data, dataUrl, screenshotFolder)
+        screenshot.take(data, dataUrl, screenshotsFolder)
 
     applyMiddleware: (message, data, automate) ->
       Promise.try =>

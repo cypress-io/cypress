@@ -10,7 +10,7 @@ scaffold = require("./scaffold")
 cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
-folders = "fileServerFolder supportFolder fixturesFolder integrationFolder screenshotFolder unitFolder".split(" ")
+folders = "fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder unitFolder".split(" ")
 configKeys = "port reporter baseUrl execTimeout commandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory waitForAnimations animationDistanceThreshold watchForFileChanges viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder environmentVariables".split(" ")
 
 isCypressEnvLike = (key) ->
@@ -44,7 +44,7 @@ defaults = {
   supportFolder:     "cypress/support"
   fixturesFolder:    "cypress/fixtures"
   integrationFolder: "cypress/integration"
-  screenshotFolder:  "cypress/screenshots"
+  screenshotsFolder:  "cypress/screenshots"
   javascripts:    []
   namespace:      "__cypress"
 }

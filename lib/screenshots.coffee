@@ -10,13 +10,16 @@ dataUriToBuffer = require("data-uri-to-buffer")
 ## the same name will be written to the file system
 
 module.exports = {
-  take: (name, dataUrl, screenshotFolder) ->
+  link: (screenshotsFolder, artifactFolder) ->
+    fs.ensureSymlinkAsync(screenshotsFolder, artifactFolder, "dir")
+
+  take: (name, dataUrl, screenshotsFolder) ->
     buffer = dataUriToBuffer(dataUrl)
 
     ## join name + extension with '.'
     name = [name, mime.extension(buffer.type)].join(".")
 
-    pathToScreenshot = path.join(screenshotFolder, name)
+    pathToScreenshot = path.join(screenshotsFolder, name)
 
     fs.outputFileAsync(pathToScreenshot, buffer)
     .then ->
