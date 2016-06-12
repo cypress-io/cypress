@@ -5,7 +5,7 @@ $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
       ## give the UI some time to render the error
       ## because we were noticing that errors were not
       ## yet displayed in the UI when running headlessly
-      Promise.delay(50)
+      Promise.delay(75)
       .then =>
         @_takeScreenshot(test.title)
 
