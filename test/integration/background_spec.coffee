@@ -17,12 +17,16 @@ global.chrome = {
       addListener: ->
     }
   }
+  windows: {
+    getLastFocused: ->
+  }
   runtime: {
 
   }
   tabs: {
     query: ->
     executeScript: ->
+    captureVisibleTab: ->
   }
 }
 
@@ -416,4 +420,31 @@ describe "app/background", ->
 
         @server.emit("automation:request", 123, "is:automation:connected")
 
+    describe "take:screenshot", ->
+      beforeEach ->
+        @sandbox.stub(chrome.windows, "getLastFocused").yieldsAsync({id: 1})
+
+      afterEach ->
+        delete chrome.runtime.lastError
+
+      it "resolves with screenshot", (done) ->
+        @sandbox.stub(chrome.tabs, "captureVisibleTab").withArgs(1, {format: "png"}).yieldsAsync("foobarbaz")
+
+        @socket.on "automation:response", (id, obj = {}) ->
+          expect(id).to.eq(123)
+          expect(obj.response).to.eq("foobarbaz")
+          done()
+
+        @server.emit("automation:request", 123, "take:screenshot")
+
+      it "rejects with chrome.runtime.lastError", (done) ->
+        chrome.runtime.lastError = {message: "some error"}
+        @sandbox.stub(chrome.tabs, "captureVisibleTab").withArgs(1, {format: "png"}).yieldsAsync(undefined)
+
+        @socket.on "automation:response", (id, obj = {}) ->
+          expect(id).to.eq(123)
+          expect(obj.__error).to.eq("some error")
+          done()
+
+        @server.emit("automation:request", 123, "take:screenshot")
 

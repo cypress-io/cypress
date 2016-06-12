@@ -57,6 +57,8 @@ connect = (host, path, io) ->
         invoke("verify", id, data)
       when "focus:browser:window"
         invoke("focus", id)
+      when "take:screenshot"
+        invoke("takeScreenshot", id)
       else
         fail(id, {message: "No handler registered for: '#{msg}'"})
 
@@ -166,6 +168,21 @@ automation = {
 
   verify: (data, fn) ->
     @query(HOST, data)
+    .then(fn)
+
+  lastFocusedWindow: ->
+    new Promise (resolve) ->
+      chrome.windows.getLastFocused(resolve)
+
+  takeScreenshot: (fn) ->
+    @lastFocusedWindow()
+    .then (win) ->
+      new Promise (resolve, reject) ->
+        chrome.tabs.captureVisibleTab win.id, {format: "png"}, (dataUrl) ->
+          if dataUrl
+            resolve(dataUrl)
+          else
+            reject(chrome.runtime.lastError)
     .then(fn)
 }
 

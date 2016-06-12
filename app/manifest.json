@@ -5,7 +5,8 @@
     "cookies",
     "tabs",
     "http://*/*",
-    "https://*/*"
+    "https://*/*",
+    "<all_urls>"
   ],
   "icons": {
     "16":  "icons/icon_16x16.png",
