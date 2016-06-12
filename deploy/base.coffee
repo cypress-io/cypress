@@ -103,6 +103,7 @@ class Base
           copy("./lib/request.coffee",      "/src/lib/request.coffee")
           copy("./lib/routes.coffee",       "/src/lib/routes.coffee")
           copy("./lib/scaffold.coffee",     "/src/lib/scaffold.coffee")
+          copy("./lib/screenshots.coffee",  "/src/lib/screenshots.coffee")
           copy("./lib/server.coffee",       "/src/lib/server.coffee")
           copy("./lib/socket.coffee",       "/src/lib/socket.coffee")
           copy("./lib/updater.coffee",      "/src/lib/updater.coffee")
@@ -266,14 +267,14 @@ class Base
       runSequence "app:build", "app:minify", (err) ->
         if err then reject(err) else resolve()
 
-  createCyCache: (cookiesProject) ->
+  createCyCache: (automationsProject) ->
     cache.path = cache.path.replace("development", "production")
 
     # cache = path.join(@buildPathToAppResources(), ".cy", "production", "cache")
 
     cache.write({
       USER: {session_token: "abc123"}
-      PROJECTS: [cookiesProject]
+      PROJECTS: [automationsProject]
     })
 
   removeCyCache: ->
@@ -289,7 +290,13 @@ class Base
 
     Fixtures.scaffold()
 
-    cookies = Fixtures.projectPath("cookies")
+    automations = Fixtures.projectPath("automations")
+
+    verifyScreenshots = =>
+      ## the test should have created a png screenshot at this path...
+      screenshot = path.join(automations, "cypress", "screenshots", "foo", "bar", "baz.png")
+
+      fs.statAsync(screenshot)
 
     runProjectTest = =>
       new Promise (resolve, reject) =>
@@ -309,19 +316,20 @@ class Base
 
           env = _.omit(process.env, "CYPRESS_ENV")
 
-          sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{cookies}"], {stdio: "inherit", env: env}
+          sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{automations}"], {stdio: "inherit", env: env}
           sp.on "exit", (code) ->
             server.close()
-
-            Fixtures.remove()
 
             if code is 0
               resolve()
             else
               reject(new Error("running project tests failed with: '#{code}' errors."))
 
-    @createCyCache(cookies)
+    @createCyCache(automations)
     .then(runProjectTest)
+    .then(verifyScreenshots)
+    .then ->
+      Fixtures.remove()
     .then =>
       @removeCyCache()
 
