@@ -158,7 +158,7 @@ class Project extends EE
 
           link = ->
             if ca = process.env.CIRCLE_ARTIFACTS
-              screenshots.link(config.screenshotsFolder)
+              screenshots.copy(config.screenshotsFolder, ca)
 
           Promise.join(
             link()
