@@ -1,6 +1,6 @@
 {
   "name": "@cypress/core-extension",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Cypress Chrome Extension",
   "main": "index.js",
   "scripts": {
