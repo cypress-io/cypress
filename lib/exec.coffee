@@ -41,8 +41,9 @@ module.exports = {
 
           cmd = if shell.profilePath
             ## sourcing the profile can output un-needed garbage,
-            ## so suppress it by sending it to /dev/null
-            "source #{shell.profilePath} > /dev/null 2>&1 && #{options.cmd}"
+            ## so suppress it by sending it to /dev/null and ignore
+            ## any failures with this
+            "source #{shell.profilePath} > /dev/null 2>&1; #{options.cmd}"
           else
             options.cmd
 
