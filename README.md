@@ -36,6 +36,9 @@ npm run watch
 
 ## Changelog
 
+#### 0.3.0 - *(06/12/16)*
+- added take:screenshot
+
 #### 0.2.0 - *(05/22/16)*
 - notify on cookie change
 
