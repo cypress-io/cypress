@@ -1,4 +1,5 @@
 _         = require("lodash")
+os        = require("os")
 Promise   = require("bluebird")
 cookies   = require("./cookies")
 Renderer  = require("./renderer")
@@ -58,10 +59,20 @@ automation = {
     Promise.resolve(true)
 
   takeScreenshot: ->
+    ## we have to show our window and in linux
+    ## for the capturePage to fire
+    isLinux = os.platform() is "linux"
+
     new Promise (resolve) ->
       win = Renderer.get("PROJECT")
+
+      win.showInactive() if isLinux
+
       win.capturePage (img) ->
+        win.hide() if isLinux
+
         resolve(img.toDataURL())
+
 }
 
 module.exports = {
