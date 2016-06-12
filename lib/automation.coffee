@@ -88,7 +88,7 @@ module.exports = (namespace, socketIoCookie, screenshotsFolder) ->
     takeScreenshot: (message, data, automate) ->
       automate(message, data)
       .then (dataUrl) ->
-        screenshot.take(data, dataUrl, screenshotsFolder)
+        screenshots.take(data, dataUrl, screenshotsFolder)
 
     applyMiddleware: (message, data, automate) ->
       Promise.try =>
