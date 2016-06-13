@@ -100,7 +100,7 @@
 
     getCypressConfig: ->
       ## todo test cloning this to prevent env mutation
-      _.clone @pick "waitForAnimations", "animationDistanceThreshold", "commandTimeout", "pageLoadTimeout", "requestTimeout", "responseTimeout", "environmentVariables", "xhrUrl", "baseUrl", "viewportWidth", "viewportHeight", "execTimeout"
+      _.clone @pick "waitForAnimations", "animationDistanceThreshold", "commandTimeout", "pageLoadTimeout", "requestTimeout", "responseTimeout", "environmentVariables", "xhrUrl", "baseUrl", "viewportWidth", "viewportHeight", "execTimeout", "screenshotOnHeadlessFailure"
 
   App.reqres.setHandler "new:config:entity", (attrs = {}) ->
     new Entities.Config attrs

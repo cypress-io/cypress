@@ -149,7 +149,7 @@ class Socket
         automate = options.onAutomationRequest ? (message, data) =>
           @onAutomation(messages, message, data)
 
-        automation(config.namespace, socketIoCookie)
+        automation(config.namespace, socketIoCookie, config.screenshotsFolder)
         .request(message, data, automate)
 
       socket.on "automation:connected", =>

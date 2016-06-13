@@ -997,6 +997,21 @@ describe "$Cypress.Cy Querying Commands", ->
         expect($item).to.be.ok
         expect($item.get(0)).to.eq item.get(0)
 
+    it "finds text by regexp and restores contains", ->
+      contains = $.expr[":"].contains
+
+      cy.contains(/^asdf \d+/).then ($li) ->
+        expect($li).to.have.text("asdf 1")
+        expect($.expr[":"].contains).to.eq(contains)
+
+    it "returns elements found first when multiple siblings found", ->
+      cy.contains("li", "asdf").then ($li) ->
+        expect($li).to.have.text("asdf 1")
+
+    it "returns first ul when multiple uls", ->
+      cy.contains("ul", "jkl").then ($ul) ->
+        expect($ul.find("li:first")).to.have.text("jkl 1")
+
     describe "deprecated command options", ->
       beforeEach ->
         @allowErrors()
@@ -1213,7 +1228,7 @@ describe "$Cypress.Cy Querying Commands", ->
       _.each [undefined, null], (val) ->
         it "throws when text is #{val}", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.eq("cy.contains() can only accept a string or number.")
+            expect(err.message).to.eq("cy.contains() can only accept a string, number or regular expression.")
             done()
 
           @cy.contains(val)
@@ -1258,6 +1273,13 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.get("#edge-case-contains").find(".badge").contains(0)
 
+      it "throws when there is both a subject and a filter", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Expected to find content: 'foo' within the element: <div#edge-case-contains> and with the selector: 'ul' but never did."
+          done()
+
+        @cy.get("#edge-case-contains").contains("ul", "foo")
+
       it "throws after timing out while not trying to find an element that contains content", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.include "Expected not to find content: 'button' but continuously found it."
@@ -1293,3 +1315,21 @@ describe "$Cypress.Cy Querying Commands", ->
           done()
 
         @cy.contains("Nested Find").should("have.length", 2)
+
+      it "restores contains even when cy.get fails", (done) ->
+        contains = $.expr[":"].contains
+
+        cyExecute = @cy.execute
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include("Syntax error, unrecognized expression")
+          expect($.expr[":"].contains).to.eq(contains)
+          done()
+
+        execute = ->
+          cyExecute.call(@, "get", "aBad:jQuery^Selector", {})
+
+        @sandbox.stub(@cy, "execute", execute)
+
+        cy.contains(/^asdf \d+/)
+

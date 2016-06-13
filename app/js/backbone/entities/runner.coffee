@@ -40,9 +40,13 @@
           @socket.emit "mocha", "suite end", suite
 
         @listenTo @Cypress, "test:start", (test) =>
+          return if test.alreadyEmittedMocha
+
           @socket.emit "mocha", "test", test
 
         @listenTo @Cypress, "test:end", (test) =>
+          return if test.alreadyEmittedMocha
+
           @socket.emit "mocha", "test end", test
 
         @listenTo @Cypress, "mocha:pending", (test) =>
@@ -69,6 +73,9 @@
         @listenTo @Cypress, "clear:cookies", (options, cb) =>
           @socket.emit "automation:request", "clear:cookies", options, cb
 
+        @listenTo @Cypress, "take:screenshot", (name, cb) =>
+          @socket.emit "automation:request", "take:screenshot", name, cb
+
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb
 
@@ -89,11 +96,6 @@
 
         @listenTo @Cypress, "paused", (nextCmd) =>
           @trigger "paused", nextCmd
-
-        ## if we dont return here then InspectAll tests
-        ## will eventually hit the 4gb limit. This is due
-        ## to holding a reference to all of the commands
-        return if isHeadless
 
         @listenTo @Cypress, "log", (log) =>
           switch log.get("instrument")
@@ -320,12 +322,29 @@
         return runnable.id = id
 
       receivedRunner: (runner) ->
-        @trigger "before:add"
+        triggerAddEvents = true
+
+        total = runner.total()
+
+        ## if we're headless and have more than 200 tests
+        ## then dont trigger events and stop listening to log
+        if $Cypress.isHeadless and total > 200
+
+          ## if we dont return here then InspectAll tests
+          ## will eventually hit the 4gb limit. This is due
+          ## to holding a reference to all of the commands
+          @stopListening @Cypress, "log"
+
+          triggerAddEvents = false
+
+        @trigger("before:add", total)
 
         runnables = []
         ids = []
 
         triggerAddEvent = (runnable) =>
+          return if not triggerAddEvents
+
           @trigger("#{runnable.type}:add", runnable)
 
         getRunnables = (options = {}) =>

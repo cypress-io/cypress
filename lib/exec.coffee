@@ -1,37 +1,82 @@
 _       = require("underscore")
+str     = require("underscore.string")
 cp      = require("child_process")
 Promise = require("bluebird")
+
+exec = Promise.promisify(cp.exec)
+
+profiles = {
+  "~/.profile": /\/sh$/
+  "~/.bash_profile": /\/bash$/
+  "~/.cshrc": /\/csh$/
+  "~/.profile": /\/ksh$/
+  "~/.zshrc": /\/zsh$/
+  "~/.config/fish/config.fish": /\/fish$/
+}
+
+sourced = false
+
+getProfilePath = (shellPath) ->
+  for profilePath, regex of profiles
+    return profilePath if regex.test(shellPath)
+
+shell = null
+
+getShell = ->
+  return Promise.resolve(shell) if shell
+
+  exec("echo $SHELL").then (shell) ->
+    path = str.trim(shell)
+    shell = {
+      shellPath: path
+      profilePath: getProfilePath(path)
+    }
+    return shell
 
 module.exports = {
   run: (projectRoot, options) ->
     child = null
 
     run = ->
-      new Promise (resolve, reject) ->
-        ## this probably won't work on Windows
-        ## need to use something different than `sh -c` for Windows
-        spawnOpts = {
-          cwd: projectRoot
-          env: _.extend({}, process.env, options.env)
-        }
-        child = cp.spawn("sh", ["-c", options.cmd], spawnOpts)
-        output = {
-          stdout: ""
-          stderr: ""
-        }
+      getShell().then (shell) ->
 
-        child.stdout.on 'data', (data) ->
-          output.stdout += data.toString()
+        new Promise (resolve, reject) ->
 
-        child.stderr.on 'data', (data) ->
-          output.stderr += data.toString()
+          cmd = if shell.profilePath and not sourced
+            ## we only need to source once
+            sourced = true
 
-        child.on 'error', (err) ->
-          reject(err)
+            ## sourcing the profile can output un-needed garbage,
+            ## so suppress it by sending it to /dev/null and ignore
+            ## any failures with this
+            "source #{shell.profilePath} > /dev/null 2>&1; #{options.cmd}"
+          else
+            options.cmd
 
-        child.on 'close', (code) ->
-          output.code = code
-          resolve(output)
+          child = cp.spawn(cmd, {
+            cwd: projectRoot
+            env: _.extend({}, process.env, options.env)
+            shell: shell.shellPath ? true
+          })
+
+          output = {
+            shell: shell
+            stdout: ""
+            stderr: ""
+          }
+
+          child.stdout.on "data", (data) ->
+            output.stdout += data.toString()
+
+          child.stderr.on "data", (data) ->
+            output.stderr += data.toString()
+
+          child.on "error", (err) ->
+            reject(err)
+
+          child.on "close", (code) ->
+            output.code = code
+            resolve(output)
 
     Promise
     .try(run)

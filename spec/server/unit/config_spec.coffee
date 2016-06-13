@@ -174,6 +174,9 @@ describe "lib/config", ->
     it "numTestsKeptInMemory=50", ->
       @defaults "numTestsKeptInMemory", 50
 
+    it "screenshotOnHeadlessFailure=true", ->
+      @defaults "screenshotOnHeadlessFailure", true
+
     it "resets numTestsKeptInMemory to 0 when", ->
       cfg = config.mergeDefaults({}, {isHeadless: true})
 
@@ -261,6 +264,7 @@ describe "lib/config", ->
           requestTimeout:             { value: 5000, from: "default" },
           responseTimeout:            { value: 20000, from: "default" },
           execTimeout:                { value: 60000, from: "default" },
+          screenshotOnHeadlessFailure:{ value: true, from: "default" },
           numTestsKeptInMemory:       { value: 50, from: "default" },
           waitForAnimations:          { value: true, from: "default" },
           animationDistanceThreshold: { value: 5, from: "default" },
@@ -271,6 +275,7 @@ describe "lib/config", ->
           supportFolder:              { value: "cypress/support", from: "default" },
           fixturesFolder:             { value: "cypress/fixtures", from: "default" },
           integrationFolder:          { value: "cypress/integration", from: "default" },
+          screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
           environmentVariables:       { }
         })
 
@@ -306,6 +311,7 @@ describe "lib/config", ->
           numTestsKeptInMemory:       { value: 50, from: "default" },
           waitForAnimations:          { value: true, from: "default" },
           animationDistanceThreshold: { value: 5, from: "default" },
+          screenshotOnHeadlessFailure:{ value: true, from: "default" },
           watchForFileChanges:        { value: true, from: "default" },
           viewportWidth:              { value: 1000, from: "default" },
           viewportHeight:             { value: 660, from: "default" },
@@ -313,6 +319,7 @@ describe "lib/config", ->
           supportFolder:              { value: "cypress/support", from: "default" },
           fixturesFolder:             { value: "cypress/fixtures", from: "default" },
           integrationFolder:          { value: "cypress/integration", from: "default" },
+          screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
           environmentVariables:       {
             foo: {
               value: "foo"

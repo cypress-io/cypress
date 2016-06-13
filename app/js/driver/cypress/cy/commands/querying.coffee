@@ -2,6 +2,10 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
   priorityElement = "input[type='submit'], button, a, label"
 
+  $expr = $.expr[":"]
+
+  $contains = $expr.contains
+
   Cypress.addParentCommand
     get: (selector, options = {}) ->
       _.defaults options,
@@ -199,11 +203,14 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       @ensureNoCommandOptions(options)
 
-      $Cypress.Utils.throwErrByPath "contains.invalid_argument" if not (_.isString(text) or _.isFinite(text))
+      $Cypress.Utils.throwErrByPath "contains.invalid_argument" if not (_.isString(text) or _.isFinite(text) or _.isRegExp(text))
       $Cypress.Utils.throwErrByPath "contains.empty_string" if _.isBlank(text)
 
       getPhrase = (type, negated) ->
         switch
+          when filter and subject
+            node = Cypress.Utils.stringifyElement(subject, "short")
+            "within the element: #{node} and with the selector: '#{filter}' "
           when filter
             "within the selector: '#{filter}' "
           when subject
@@ -272,7 +279,12 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           $priorities = elements.filter $current.parents(priorityElement)
           if $priorities.length then $priorities.last() else $current
 
-      text = Cypress.Utils.escapeQuotes(text)
+      if _.isRegExp(text)
+        $expr.contains = (elem) ->
+          ## taken from jquery's normal contains method
+          text.test(elem.textContent or elem.innerText or $.text(elem))
+      else
+        text = Cypress.Utils.escapeQuotes(text)
 
       ## find elements by the :contains psuedo selector
       ## and any submit inputs with the attributeContainsWord selector
@@ -292,8 +304,6 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       do resolveElements = =>
         @execute("get", selector, getOpts).then ($elements) =>
           $el = switch
-            when $elements and $elements.length and filter
-              $elements.last()
             when $elements and $elements.length
               getFirstDeepestElement($elements)
             else
@@ -311,6 +321,10 @@ $Cypress.register "Querying", (Cypress, _, $) ->
                 when "existence"
                   err.longMessage = getErr(err)
           })
+        .finally ->
+          ## always restore contains in case
+          ## we used a regexp!
+          $expr.contains = $contains
 
   Cypress.addChildCommand
     within: (subject, options, fn) ->

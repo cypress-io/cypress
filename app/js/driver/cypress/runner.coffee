@@ -114,18 +114,27 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## emit the pending event instead of the test
       ## so we normalize the pending / test events
       @runner.on "pending", (test) ->
+        test.state = "pending"
+
         if $Cypress.isHeadless
+          ## do not double emit the 'test' event
+          test.alreadyEmittedMocha = true
           Cypress.trigger "mocha:pending", _this.wrap(test)
-        else
-          test.state = "pending"
-          @emit "test", test
+
+        @emit "test", test
 
       @runner.on "fail", (runnable, err) =>
+        ## always set runnable err so we can tap into
+        ## taking a screenshot on error
+        runnable.err = err
+
         if $Cypress.isHeadless
+          ## do not double emit the 'test end' event
+          runnable.alreadyEmittedMocha = true
           Cypress.trigger "mocha:fail", @wrap(runnable), @wrapErr(err)
-        else
-          runnable.err = err
-          @hookFailed(runnable, err) if runnable.type is "hook"
+
+        if runnable.type is "hook"
+          @hookFailed(runnable, err)
 
     wrapErr: (err) ->
       _.pick err, "message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host", "uncaught", "actual", "expected", "showDiff"
@@ -135,7 +144,7 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## tests to an id-based object which prevents
       ## us from recursively iterating through every
       ## parent since we could just return the found test
-      r = _(runnable).pick "id", "title", "originalTitle", "root", "hookName", "err", "duration", "state", "failedFromHook", "timedOut", "async", "sync"
+      r = _(runnable).pick "id", "title", "originalTitle", "root", "hookName", "err", "duration", "state", "failedFromHook", "timedOut", "async", "sync", "alreadyEmittedMocha"
 
       if parent = runnable.parent
         ## recursively walk up the parent chain
@@ -222,7 +231,14 @@ $Cypress.Runner = do ($Cypress, _) ->
       test.duration = hook.duration
       test.hookName = @getHookName(hook)
       test.failedFromHook = true
+
+      if hook.alreadyEmittedMocha
+        test.alreadyEmittedMocha = true
+
       @Cypress.trigger "test:end", @wrap(test)
+
+    total: ->
+      @runner.suite.total()
 
     ## returns each runnable to the callback function
     ## if it matches the current grep
@@ -401,6 +417,35 @@ $Cypress.Runner = do ($Cypress, _) ->
       @runner.hook = _.wrap @runner.hook, (orig, name, fn) ->
         hooks = @suite["_" + name]
 
+        waitForHooksToResolve = (event, test = {}, cb = ->) ->
+          ## coerce into an array
+          hooks = [].concat Cypress.invoke(event, _this.wrap(test))
+
+          hooks = _.filter hooks, (r) ->
+            ## get us out only promises
+            ## due to a bug in bluebird with
+            ## not being able to call {}.hasOwnProperty
+            ## https://github.com/petkaantonov/bluebird/issues/1104
+            ## TODO: think about applying this to the other areas
+            ## that use Cypress.invoke(...)
+            Cypress.Utils.isInstanceOf(r, Promise)
+
+          fn = _.wrap fn, (orig, args...) ->
+            Promise.all(hooks)
+            .catch (err) ->
+              ## this doesn't take into account hooks running prior to the
+              ## test - but this is the best we can do considering we don't
+              ## yet have test.callback (from mocha). so we just override
+              ## its fn to automatically throw. however this really shouldn't
+              ## ever even happen since the webapp prevents you from running
+              ## tests to begin with. but its here just in case.
+              test.fn = ->
+                throw err
+            .then ->
+              cb()
+
+              orig(args...)
+
         getAllSiblingTests = (suite) ->
           tests = []
           suite.eachTest (test) ->
@@ -444,40 +489,15 @@ $Cypress.Runner = do ($Cypress, _) ->
             ## not yet having built its tests/suites array and thus
             ## our @tests array is empty
 
-            ## coerce into an array
-            beforeHooks = [].concat Cypress.invoke("test:before:hooks", _this.wrap(_this.test ? {}))
-
-            beforeHooks = _.filter beforeHooks, (r) ->
-              ## get us out only promises
-              ## due to a bug in bluebird with
-              ## not being able to call {}.hasOwnProperty
-              ## https://github.com/petkaantonov/bluebird/issues/1104
-              ## TODO: think about applying this to the other areas
-              ## that use Cypress.invoke(...)
-              Cypress.Utils.isInstanceOf(r, Promise)
-
-            fn = _.wrap fn, (orig, args...) ->
-              Promise.all(beforeHooks)
-              .catch (err) ->
-                ## this doesn't take into account hooks running prior to the
-                ## test - but this is the best we can do considering we don't
-                ## yet have test.callback (from mocha). so we just override
-                ## its fn to automatically throw. however this really shouldn't
-                ## ever even happen since the webapp prevents you from running
-                ## tests to begin with. but its here just in case.
-                _this.test.fn = ->
-                  throw err
-              .then ->
-                orig(args...)
+            waitForHooksToResolve("test:before:hooks", _this.test)
 
         testAfterHooks = ->
           test = _this.test
 
           _this.test = null
 
-          Cypress.trigger "test:after:hooks", _this.wrap(test)
-
-          Cypress.restore()
+          waitForHooksToResolve "test:after:hooks", test, ->
+            Cypress.restore()
 
         switch name
           when "beforeAll"
@@ -495,9 +515,7 @@ $Cypress.Runner = do ($Cypress, _) ->
             ## make sure this test isnt the last test overall but also
             ## isnt the last test in our grep'd parent suite's tests array
             if @suite.root and (_this.test isnt _(_this.tests).last()) and (_this.test isnt _(tests).last())
-              fn = _.wrap fn, (orig, args...) ->
-                testAfterHooks().then ->
-                  orig(args...)
+              testAfterHooks()
 
           when "afterAll"
             ## find all of the grep'd _this tests which share
@@ -515,9 +533,7 @@ $Cypress.Runner = do ($Cypress, _) ->
               if (@suite.root and _this.test is _(_this.tests).last()) or
                 (@suite.parent?.root and _this.test is _(tests).last()) or
                   (not isLastSuite(@suite) and _this.test is _(tests).last())
-                fn = _.wrap fn, (orig, args...) ->
-                  testAfterHooks()
-                  orig(args...)
+                testAfterHooks()
 
         orig.call(@, name, fn)
 

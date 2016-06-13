@@ -207,6 +207,11 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
       return if not $el
 
+      if _.isElement($el)
+        ## wrap the element in jquery
+        ## if its just a plain element
+        return @set("$el", $($el))
+
       ## make sure all $el elements are visible!
       obj = {
         highlightAttr: @Cypress.highlightAttr

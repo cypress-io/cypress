@@ -22,6 +22,8 @@ states = {
 
 module.exports = class Tray
   constructor: ->
+    return if os.platform() is "linux"
+
     @currentState = 'default'
     @tray = new ElectronTray(null)
 

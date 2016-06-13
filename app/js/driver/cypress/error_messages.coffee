@@ -44,7 +44,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     contains:
       empty_string: "#{cmd('contains')} cannot be passed an empty string."
-      invalid_argument: "#{cmd('contains')} can only accept a string or number."
+      invalid_argument: "#{cmd('contains')} can only accept a string, number or regular expression."
       length_option: "#{cmd('contains')} cannot be passed a length option because it will only ever return 1 element."
 
     cookies:
@@ -107,6 +107,10 @@ $Cypress.ErrorMessages = do ($Cypress) ->
         https://on.cypress.io/element-cannot-be-interacted-with
       """
 
+    each:
+      invalid_argument: "#{cmd('each')} must be passed a callback function."
+      non_array: "#{cmd('each')} can only operate on an array like subject. Your subject was: '{{subject}}'"
+
     env:
       variables_missing: "Cypress.environmentVariables is not defined. Open an issue if you see this message."
 
@@ -114,7 +118,9 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       failed: "#{cmd('exec', '\'{{cmd}}\'')} failed with the following error: {{error}}"
       invalid_argument: "#{cmd('exec')} must be passed a non-empty string as its 1st argument. You passed: '{{cmd}}'."
       non_zero_exit: """
-        #{cmd('exec', '\'{{cmd}}\'')} failed because the command exited with a non-zero code. Pass {failOnNonZeroExit: false} for non-zero exits to not be treated as failures.
+        #{cmd('exec', '\'{{cmd}}\'')} failed because the command exited with a non-zero code.
+
+        Pass {failOnNonZeroExit: false} to ignore exit code failures.
 
         Information about the failure:
         Code: {{code}}
@@ -264,6 +270,9 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       url_invalid: "#{cmd('route')} was called with a invalid url. Url must be either a string or regular expression."
       url_missing: "#{cmd('route')} must be called with a url. It can be a string or regular expression."
 
+    screenshot:
+      timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
+
     select:
       disabled: "#{cmd('select')} failed because this element is currently disabled:\n\n{{node}}"
       invalid_element: "#{cmd('select')} can only be called on a <select>. Your subject is a: {{node}}"
@@ -286,6 +295,19 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     submit:
       multiple_forms: "#{cmd('submit')} can only be called on a single form. Your subject contained {{num}} form elements."
       not_on_form: "#{cmd('submit')} can only be called on a <form>. Your subject {{word}} a: {{node}}"
+
+    then:
+      callback_mixes_sync_and_async: """
+        #{cmd('then')} failed because you are mixing up async and sync code.
+
+        In your callback function you invoked 1 or more cy commands but then returned a synchronous value.
+
+        Cypress commands are asynchronous and it doesn't make sense to queue cy commands and yet return a synchronous value.
+
+        You likely forgot to properly chain the cy commands using another cy.then().
+
+        The value you synchronously returned was: '{{value}}'
+      """
 
     type:
       empty_string: "#{cmd('type')} cannot accept an empty String. You need to actually type something."

@@ -1205,6 +1205,88 @@ describe "$Cypress.Cy XHR Commands", ->
         .then ->
           @cy.private("window").$.post("/users", "name=brian")
 
+    it "can accept response as a function", ->
+      users = [{}, {}]
+      getUsers = -> users
+
+      @cy.route(/users/, getUsers)
+      .then ->
+        @expectOptionsToBe({
+          method: "GET"
+          status: 200
+          url: /users/
+          response: users
+        })
+
+    it "invokes response function with runnable.ctx", ->
+      ctx = @
+
+      users = [{}, {}]
+      getUsers = ->
+        expect(@).to.eq(ctx)
+
+      @cy.route(/users/, getUsers)
+
+    it "passes options as argument", ->
+      ctx = @
+
+      users = [{}, {}]
+      getUsers = (opts) ->
+        expect(opts).to.be.an("object")
+        expect(opts.method).to.eq("GET")
+
+      @cy.route(/users/, getUsers)
+
+    it "can accept response as a function which returns a promise", ->
+      users = [{}, {}]
+
+      getUsers = ->
+        new Promise (resolve, reject) ->
+          setTimeout ->
+            resolve(users)
+          , 10
+
+      @cy.route(/users/, getUsers)
+      .then ->
+        @expectOptionsToBe({
+          method: "GET"
+          status: 200
+          url: /users/
+          response: users
+        })
+
+    it "can accept a function which returns options", ->
+      users = [{}, {}]
+
+      getRoute = ->
+        {
+          method: "GET"
+          url: /users/
+          status: 201
+          response: -> Promise.resolve(users)
+        }
+
+      @cy.route(getRoute)
+      .then ->
+        @expectOptionsToBe({
+          method: "GET"
+          status: 201
+          url: /users/
+          response: users
+        })
+
+    it "invokes route function with runnable.ctx", ->
+      ctx = @
+
+      getUsers = ->
+        expect(@).to.eq(ctx)
+
+        {
+          url: /foo/
+        }
+
+      @cy.route(getUsers)
+
     it.skip "adds multiple routes to the responses array", ->
       @cy
         .route("foo", {})
@@ -1267,6 +1349,20 @@ describe "$Cypress.Cy XHR Commands", ->
             expect(xhr.responseBody).to.deep.eq {foo: "bar"}
             expect(xhr.responseBody).to.deep.eq @foo
 
+      it "can pass an alias when using a response function", ->
+        getFoo = ->
+          Promise.resolve("@foo")
+
+        @cy
+          .noop({foo: "bar"}).as("foo")
+          .route(/foo/, getFoo).as("getFoo")
+          .window().then (win) ->
+            win.$.getJSON("foo")
+            null
+          .wait("@getFoo").then (xhr) ->
+            expect(xhr.responseBody).to.deep.eq {foo: "bar"}
+            expect(xhr.responseBody).to.deep.eq @foo
+
       it "can alias a route without stubbing it", ->
         @cy
           .route(/ajax\/app/).as("getFoo")
@@ -1308,6 +1404,28 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy.route({
           url: {}
         })
+
+      it "url must be a string or regexp when a function", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.route() was called with a invalid url. Url must be either a string or regular expression."
+          done()
+
+        getUrl = ->
+          Promise.resolve({url: {}})
+
+        @cy.route(getUrl)
+
+      it "fails when functions reject", (done) ->
+        error = new Error
+
+        @cy.on "fail", (err) ->
+          expect(err).to.eq(error)
+          done()
+
+        getUrl = ->
+          Promise.reject(error)
+
+        @cy.route(getUrl)
 
       it "url must be one of get, put, post, delete, patch, head, options", (done) ->
         @cy.on "fail", (err) ->

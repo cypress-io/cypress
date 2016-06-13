@@ -3,7 +3,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
   context "#spread", ->
     it "spreads an array into individual arguments", ->
-      cy.noop([1,2,3]).spread (one, two, three) ->
+      @cy.noop([1,2,3]).spread (one, two, three) ->
         expect(one).to.eq(1)
         expect(two).to.eq(2)
         expect(three).to.eq(3)
@@ -11,7 +11,7 @@ describe "$Cypress.Cy Connectors Commands", ->
     it "passes timeout option to spread", ->
       @cy._timeout(50)
 
-      cy.noop([1,2,3]).spread {timeout: 150}, (one, two, three) ->
+      @cy.noop([1,2,3]).spread {timeout: 150}, (one, two, three) ->
         Promise.delay(100)
 
     describe "errors", ->
@@ -43,6 +43,12 @@ describe "$Cypress.Cy Connectors Commands", ->
           new Promise (resolve, reject) ->
 
   context "#then", ->
+    it "converts raw DOM elements", ->
+      div = @cy.$$("div:first").get(0)
+
+      cy.wrap(div).then ($div) ->
+        expect($div.get(0)).to.eq(div)
+
     it "mocha inserts 2 arguments to then: anonymous fn for invoking done(), and done reference itself", ->
       ## this puts tests in place to where if mocha
       ## ever updates and changes how it calls .then
@@ -109,6 +115,52 @@ describe "$Cypress.Cy Connectors Commands", ->
         Promise.delay(10).then =>
           @cy
 
+    it "passes values to the next command", ->
+      @cy
+        .wrap({foo: "bar"}).then (obj) ->
+          obj.foo
+        .then (val) ->
+          expect(val).to.eq("bar")
+
+    it "does not throw when returning thenables with cy commands", ->
+      @cy
+        .wrap({foo: "bar"})
+        .then (obj) ->
+          new Promise (resolve) =>
+            @cy.wait(10)
+
+            resolve(obj.foo)
+
+    it "should pass the eventual resolved thenable value downstream", ->
+      @cy
+        .wrap({foo: "bar"})
+        .then (obj) ->
+          @cy
+          .wait(10)
+          .then ->
+            obj.foo
+          .then (value) ->
+            expect(value).to.eq("bar")
+
+            return value
+        .then (val) ->
+          expect(val).to.eq("bar")
+
+    it "should not pass the eventual resolve thenable value downstream because thens are not connected", ->
+      @cy
+        .wrap({foo: "bar"})
+        .then (obj) ->
+          @cy
+          .wait(10)
+          .then ->
+            obj.foo
+          .then (value) ->
+            expect(value).to.eq("bar")
+
+            return value
+      @cy.then (val) ->
+        expect(val).to.be.null
+
     [null, undefined].forEach (val) ->
       it "passes the existing subject if ret is: #{val}", ->
         @cy.wrap({foo: "bar"}).then (obj) ->
@@ -127,7 +179,6 @@ describe "$Cypress.Cy Connectors Commands", ->
         @Cypress.on "log", (@log) =>
           logs.push @log
 
-
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
@@ -136,6 +187,42 @@ describe "$Cypress.Cy Connectors Commands", ->
 
         @cy.then {timeout: 150}, ->
           new Promise (resolve, reject) ->
+
+      it "throws when mixing up async + sync return values", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(@cy._events.enqueue).to.be.undefined
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(err.message).to.include "cy.then() failed because you are mixing up async and sync code."
+          done()
+
+        @cy.then ->
+          expect(@cy._events.enqueue).to.have.length(1)
+
+          @cy.wait(5000)
+
+          return "foo"
+
+      it "unbinds enqueue in the case of an error thrown", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(@cy._events.enqueue).to.be.undefined
+          expect(logs.length).to.eq(1)
+          done()
+
+        @cy.then ->
+          expect(@cy._events.enqueue).to.have.length(1)
+
+          throw new Error("foo")
 
     describe "yields to remote jQuery subject", ->
       beforeEach ->
@@ -720,3 +807,157 @@ describe "$Cypress.Cy Connectors Commands", ->
         #     done()
 
         #   @cy.wrap(val).its("toString")
+
+  context "#each", ->
+    it "can each a single element", ->
+      count = 0
+
+      @cy.get("#dom").each ->
+        count += 1
+      .then ->
+        expect(count).to.eq(1)
+
+    it "passes the existing subject downstream without side effects", ->
+      count = 0
+
+      $lis = @cy.$$("#list li")
+
+      expect($lis).to.have.length(3)
+
+      @cy.get("#list li").each ($li, i, arr) ->
+        expect(arr).to.be.instanceof($)
+        expect(i).to.eq(count)
+        count += 1
+        expect(arr.length).to.eq(3)
+
+        cy.wrap($li).should("have.class", "item")
+      .then ($lis) ->
+        expect(count).to.eq(3)
+        expect($lis).to.have.length(3)
+
+    it "awaits promises returned", ->
+      count = 0
+
+      start = new Date
+
+      @cy.get("#list li").each ($li, i, arr) ->
+        new Promise (resolve, reject) ->
+          _.delay ->
+            count += 1
+            resolve()
+          , 20
+      .then ($lis) ->
+        expect(count).to.eq(3)
+        expect(new Date - start).to.be.gt(60)
+
+    it "supports array like structures", ->
+      count = 0
+      arr = [1,2,3]
+
+      @cy.wrap(arr).each (num, i, a) ->
+        expect(a).to.eq(arr)
+        expect(i).to.eq(count)
+        count += 1
+        expect(num).to.eq(count)
+      .then (a) ->
+        expect(a).to.eq(arr)
+
+    it "ends early when returning false", ->
+      arr = [1,2,3]
+
+      ## after 2 calls return false
+      ## to end the loop early
+      fn = _.after 2, ->
+        return false
+
+      fn = @sandbox.spy(fn)
+
+      @cy.wrap(arr).each(fn)
+      .then (a) ->
+        expect(fn).to.be.calledTwice
+
+    it "works with nested eaches", ->
+      count = 0
+
+      @cy.get("#list li").each ($li, i, arr) ->
+        cy.wrap($li).parent().siblings("#asdf").find("li").each ($li2, i2, arr2) ->
+          count += 1
+        .then ($lis) ->
+          expect($lis.first()).to.have.text("asdf 1")
+          expect($lis).to.have.length(3)
+      .then ($lis) ->
+        expect($lis).to.have.length(3)
+        expect($lis.first()).to.have.text("li 0")
+        expect(count).to.eq(9)
+
+    it "can operate on a single element", ->
+      count = 0
+
+      @cy.get("div:first").each ($div) ->
+        count += 1
+      .then ->
+        expect(count).to.eq(1)
+
+    describe "errors", ->
+      beforeEach ->
+        @allowErrors()
+
+        @Cypress.on "log", (@log) =>
+        @currentTest.timeout(200)
+
+      it "can time out", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @Cypress.on "fail", (err) =>
+          ## get + each
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include("cy.each() timed out after waiting '200ms'.\n\nYour callback function returned a promise which never resolved.")
+          done()
+
+        cy.get("ul").each ($ul) ->
+          new Promise (resolve) ->
+
+      it "throws when not passed a callback function", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @Cypress.on "fail", (err) =>
+          ## get + each
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include("cy.each() must be passed a callback function.")
+          done()
+
+        cy.get("ul").each({})
+
+      it "throws when not passed a number", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @Cypress.on "fail", (err) =>
+          ## get + each
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include("cy.each() can only operate on an array like subject. Your subject was: '100'")
+          done()
+
+        cy.wrap(100).each ->
+
+      it "throws when not passed an array like structure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @Cypress.on "fail", (err) =>
+          ## get + each
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include("cy.each() can only operate on an array like subject. Your subject was: '{}'")
+          done()
+
+        cy.wrap({}).each ->

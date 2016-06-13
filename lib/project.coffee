@@ -16,6 +16,7 @@ scaffold  = require("./scaffold")
 Watchers  = require("./watchers")
 Reporter  = require("./reporter")
 settings  = require("./util/settings")
+screenshots = require("./screenshots")
 
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -155,7 +156,14 @@ class Project extends EE
           ## event, and then finally emit 'end'
           @server.end()
 
-          Promise.delay(1000).then =>
+          link = ->
+            if ca = process.env.CIRCLE_ARTIFACTS
+              screenshots.copy(config.screenshotsFolder, ca)
+
+          Promise.join(
+            link()
+            Promise.delay(1000)
+          ).then =>
             # console.log stats
             @emit("end", stats)
     })

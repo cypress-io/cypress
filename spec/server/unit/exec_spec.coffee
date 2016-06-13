@@ -6,7 +6,7 @@ exec = require("#{root}lib/exec")
 runCommand = (cmd, options = {}) ->
   _.defaults(options, {
     cmd: cmd
-    timeout: 1000
+    timeout: 3000
     env: {}
     failOnNonZeroExit: true
   })
