@@ -61,6 +61,9 @@ describe "lib/socket", ->
               set: ->
               getAll: ->
               remove: ->
+              onChanged: {
+                addListener: ->
+              }
             }
             runtime: {
 

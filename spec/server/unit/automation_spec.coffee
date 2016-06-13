@@ -1,10 +1,20 @@
 require("../spec_helper")
 
-automation = require("#{root}lib/automation")
+automation  = require("#{root}lib/automation")
+screenshots = require("#{root}lib/screenshots")
 
 describe "lib/automation", ->
   beforeEach ->
-    @automation = automation("__cypress", "__socket.io")
+    @automation = automation("__cypress", "__socket.io", "cypress/screenshots")
+
+  context ".request", ->
+    it "takes a screenshot", ->
+      dataUrl = "data:uri/foobarbaz"
+
+      @sandbox.stub(screenshots, "take").withArgs("foo", dataUrl, "cypress/screenshots").resolves({})
+      cb = @sandbox.stub().withArgs("take:screenshot", "foo").resolves(dataUrl)
+
+      @automation.request("take:screenshot", "foo", cb)
 
   context ".pushMessage", ->
     it "calls back with Cookie Removed", ->

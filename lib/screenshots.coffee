@@ -12,7 +12,11 @@ dataUriToBuffer = require("data-uri-to-buffer")
 module.exports = {
   copy: (src, dest) ->
     dest = path.join(dest, "screenshots")
-    fs.copyAsync(src, dest, {clobber: true})
+
+    fs
+    .copyAsync(src, dest, {clobber: true})
+    .catch {code: "ENOENT"}, ->
+      ## dont yell about ENOENT errors
 
   take: (name, dataUrl, screenshotsFolder) ->
     buffer = dataUriToBuffer(dataUrl)
