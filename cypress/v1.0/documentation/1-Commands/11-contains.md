@@ -366,17 +366,6 @@ When clicking on the `contains` command within the command log, the console outp
 
 ***
 
-# Errors
-
-## cy.contains() cannot be passed an empty string.
-
-Ensure that the argument passed to cy.contains is a string, number, or regular expression.
-
-## cy.contains() can only accept a string, number or regular expression.
-
-Ensure that the argument passed to cy.contains is a string, number, or regular expression.
-
-
 # Related
 
 - [get](https://on.cypress.io/api/get)

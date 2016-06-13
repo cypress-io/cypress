@@ -109,12 +109,6 @@ When clicking on `check` within the command log, the console outputs the followi
 
 ***
 
-# Errors
-
-## cy.check() can only be called on :checkbox and :radio.
-
-Ensure that the subject passed to `cy.check` is `type='checkbox'` or `type=radio`.
-
 # Related
 
 - [uncheck](https://on.cypress.io/api/uncheck)

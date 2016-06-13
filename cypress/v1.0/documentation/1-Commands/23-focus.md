@@ -71,9 +71,6 @@ When clicking on the `focus` command within the command log, the console outputs
 
 Ensure the element you are trying to call `cy.focus()` on is a [focusable element](https://www.w3.org/TR/html5/editing.html#focusable). Most commonly, you'll want to ensure that the element is not disabled although there are [other factors](https://www.w3.org/TR/html5/editing.html#focusable).
 
-## cy.focus() can only be called on a single element.
-
-Ensure that there is only one element as the current subject when using cy.focus()
 
 ## cy.focus() timed out because your browser did not receive any focus events. This is a known bug in Chrome when it is not the currently focused window.
 

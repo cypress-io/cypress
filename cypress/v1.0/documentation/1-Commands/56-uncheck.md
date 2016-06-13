@@ -95,14 +95,6 @@ When clicking on `uncheck` within the command log, the console outputs the follo
 
 ***
 
-# Errors
-
-## cy.uncheck() can only be called on :checkbox.
-
-Ensure that the subject passed to `cy.check` is `type='checkbox'`.
-
-***
-
 # Related
 
 - [check](https://on.cypress.io/api/check)

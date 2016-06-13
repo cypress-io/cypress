@@ -77,10 +77,6 @@ cy
 
 # Errors
 
-## cy.each() must be passed a callback function as its only argument.
-
-This error occurs when the argument passed to `cy.each()` is not a function.
-
 ## cy.each() can only operate on an array like subject.
 
 This error occurs when the subject passed to `cy.each()` does not have a `length` property. Ensure the subject passed to `cy.each()` is an array-like structure.

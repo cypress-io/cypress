@@ -233,7 +233,7 @@ When clicking on `click` within the command log, the console outputs the followi
 
 # Errors
 
-## cy.click() can only be called on a single element. Your subject contained 'num' elements. Pass {multiple: true} if you want to serially click each element.
+## cy.click() can only be called on a single element.
 
 If the subject passed to `cy.click()` are multiple elements, you need to write `cy.click({multiple: true})` to serially click each element one after another. Otherwise, ensure that your subject is only one element.
 
