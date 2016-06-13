@@ -11,12 +11,12 @@ export default class Header extends Component {
   }
 
   render () {
-    const { width, height, displayScale, defaults, isLoading, url } = this.props.state
+    const { width, height, displayScale, defaults, isLoading, url, highlightUrl } = this.props.state
     const { showingViewportMenu } = this.state
 
     return (
       <header>
-        <div className={cs('url-container', { loading: isLoading })}>
+        <div className={cs('url-container', { loading: isLoading, highlighted: highlightUrl })}>
           <div className='url'>{url}</div>
           <span className='loading-container'>
             ...loading <i className='fa fa-spinner fa-spin'></i>

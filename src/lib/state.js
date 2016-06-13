@@ -13,6 +13,7 @@ const defaults = {
   messageType: '',
 
   url: '',
+  highlightUrl: false,
   isLoading: false,
 
   width: 1000,
@@ -29,6 +30,7 @@ const state = observable({
   messageType: defaults.messageType,
 
   url: defaults.url,
+  highlightUrl: defaults.highlightUrl,
   isLoading: defaults.isLoading,
 
   width: defaults.width,

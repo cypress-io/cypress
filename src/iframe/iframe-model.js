@@ -74,6 +74,8 @@ export default class IframeModel {
       return this._clearSnapshots()
     }
 
+    this.state.highlightUrl = true
+
     if (!this.originalState) {
       this._storeOriginalState()
     }
@@ -116,6 +118,8 @@ export default class IframeModel {
 
   @action _clearSnapshots = () => {
     clearInterval(this.intervalId)
+
+    this.state.highlightUrl = false
 
     if (!this.originalState || !this.originalState.body) {
       return this._clearMessage()
