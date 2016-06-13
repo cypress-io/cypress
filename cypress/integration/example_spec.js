@@ -87,7 +87,29 @@ describe('Kitchen Sink', function(){
     it('cy.contains() - query DOM elements with matching content', function(){
 
       // https://on.cypress.io/api/contains
-      cy.get('.query-list').contains('bananas').should('have.class', 'third')
+      cy
+        .get('.query-list')
+          .contains('bananas').should('have.class', 'third')
+
+        // we can even pass a regexp to `cy.contains()`
+        .get('.query-list')
+          .contains(/^b\w+/).should('have.class', 'third')
+
+        // `cy.contains()` will return the first matched element
+        .get('.query-list')
+          .contains('apples').should('have.class', 'first')
+
+        // passing a selector to contains will return the parent
+        // selector containing the text
+        .get('#querying')
+          .contains('ul', 'oranges').should('have.class', 'query-list')
+
+        // `cy.contains()` will favor input[type='submit'],
+        // button, a, and label over deeper elements inside them
+        // this will not return the <span> inside the button,
+        // but the <button> itself
+        .get('.query-button')
+          .contains('Save Form').should('have.class', 'btn')
 
     })
 
@@ -228,7 +250,7 @@ describe('Kitchen Sink', function(){
         .type('fake@email.com').should('have.value', 'fake@email.com')
 
         // cy.type() may include special character sequences
-        .type('{leftarrow}{leftarrow}{del}{del}{selectall}{backspace}')
+        .type('{leftarrow}{rightarrow}{uparrow}{downarrow}{del}{selectall}{backspace}')
 
         // **** Type Options ****
         //
@@ -779,6 +801,24 @@ describe('Kitchen Sink', function(){
         })
     })
 
+    it('cy.exec() - execute a system command', function(){
+
+      // cy.exec allows you to execute a system command.
+      // so you can take actions necessary for your test,
+      // but outside the scope of Cypress.
+      //
+      // https://on.cypress.io/api/exec
+      cy
+        .exec('echo Jane Lane')
+          .its('stdout').should('contain', 'Jane Lane')
+
+        .exec('cat cypress.json')
+          .its('stderr').should('be.empty')
+
+        .exec('pwd')
+          .its('code').should('eq', 0)
+    })
+
     it('cy.focused() - get the DOM element that has focus', function(){
 
       // https://on.cypress.io/api/focused
@@ -789,6 +829,12 @@ describe('Kitchen Sink', function(){
         .get('.misc-form').find('#description').click()
         .focused().should('have.id', 'description')
 
+    })
+
+    it("cy.screenshot() - take a screenshot", function(){
+
+      // https://on.cypress.io/api/screenshot
+      cy.screenshot("my-image")
     })
 
     it('cy.wrap() - wrap an object', function(){
@@ -810,14 +856,25 @@ describe('Kitchen Sink', function(){
 
     // **** Connectors ****
     //
-    // Some commands are just used to manipulate
+    // Some commands are just used to manipulate elements,
     // properties or invoke functions on the current subject
+
+    it('cy.each() - iterate over an array of elements', function(){
+
+      // https://on.cypress.io/api/each
+
+      cy
+        .get('.connectors-each-ul>li')
+        .each(function($el, index, $list){
+          console.log($el, index, $list)
+        })
+    })
 
     it('cy.its() - get properties on the current subject', function(){
 
       // https://on.cypress.io/api/its
       cy
-        .get('.connectors-ul>li')
+        .get('.connectors-its-ul>li')
         // calls the 'length' property returning that value
           .its('length')
             .should('be.gt', 2)
