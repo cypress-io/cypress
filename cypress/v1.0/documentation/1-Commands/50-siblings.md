@@ -24,7 +24,7 @@ Get the siblings of each DOM element in the set of matched DOM elements filtered
 
 # Options
 
-Pass in an options object to change the default behavior of `cy.silbings`.
+Pass in an options object to change the default behavior of `cy.siblings`.
 
 **cy.siblings( *options* )**
 **cy.siblings( *selector*, *options* )**
