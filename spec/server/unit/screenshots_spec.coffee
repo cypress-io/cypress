@@ -19,7 +19,7 @@ describe "lib/screenshots", ->
   afterEach ->
     Fixtures.remove()
 
-  context.only ".take", ->
+  context ".take", ->
     it "outputs file and returns size and path", ->
       screenshots.take("foo/tweet", image, @cfg.screenshotsFolder)
       .then (obj) =>
