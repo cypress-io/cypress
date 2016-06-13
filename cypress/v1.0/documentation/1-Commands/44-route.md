@@ -191,7 +191,7 @@ cy
 
 # Options Usage
 
-## Pass in an obtions object
+## Pass in an options object
 
 ```javascript
 cy
