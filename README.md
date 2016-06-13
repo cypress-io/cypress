@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.5.0
+- added cy.screenshot
+
 #### 0.4.0
 - added cy.exec() example from kitchen-sink dep
 
