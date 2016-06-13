@@ -16,8 +16,8 @@ Sequence | Notes
 `{esc}` | Types the Escape key
 `{leftarrow}` | Moves cursor left
 `{rightarrow}` | Moves cursor right
-`{downarrow}` | Moves cursor down
-`{uparrow}` | Moves cursor up
+`{downarrow}` | Fires down event but does **not** move the cursor
+`{uparrow}` | Fires up event but does **not** move the cursor
 `{selectall}` | Selects all text by creating a `selection range`
 
 **The following events are fired during type:** `keydown`, `keypress`, `textInput`, `input`, `keyup`.
