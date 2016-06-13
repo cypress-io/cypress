@@ -54,11 +54,12 @@ export default class Iframes extends Component {
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
   _loadIframes (specFile) {
     return new Promise((resolve) => {
-      // this path should come from the config
+      // TODO: this path should come from the config
       const specSrc = `/__cypress/iframes/${specFile}`
 
       const $container = $(this.refs.container).empty()
       const $autIframe = autIframe.create(this.props.config).appendTo($container)
+      autIframe.showBlankContents()
 
       const $specIframe = $('<iframe />', {
         id: `Your Spec: '${specSrc}'`,

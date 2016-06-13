@@ -5,14 +5,15 @@ import { getElementBoxModelLayers, getHitBoxLayer, getOuterSize } from '../lib/d
 
 export default {
   create (config) {
-    const $iframe = this.$iframe = $('<iframe>', {
+    this.$iframe = $('<iframe>', {
       id: `Your App: '${config.projectName}'`,
       class: 'aut-iframe',
     })
+    return this.$iframe
+  },
 
-    $iframe.contents().find('body').append(blankContents)
-
-    return $iframe
+  showBlankContents () {
+    this.$iframe.contents().find('body').append(blankContents)
   },
 
   detachBody () {
