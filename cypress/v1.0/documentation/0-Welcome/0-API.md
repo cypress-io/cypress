@@ -123,6 +123,7 @@ Commands drive your tests in the browser like a real user would. They let you pe
 | [end](https://on.cypress.io/api/end) | End the command chain |
 | [exec](https://on.cypress.io/api/exec) | Execute a system command |
 | [focused](https://on.cypress.io/api/focused) | Get the DOM element that is focused |
+| [screenshot](https://on.cypress.io/api/screenshot) | Take a screenshot |
 | [wrap](https://on.cypress.io/api/wrap) | Wrap an object |
 
 # Utilities
