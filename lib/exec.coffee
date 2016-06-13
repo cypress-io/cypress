@@ -14,6 +14,8 @@ profiles = {
   "~/.config/fish/config.fish": /\/fish$/
 }
 
+sourced = false
+
 getProfilePath = (shellPath) ->
   for profilePath, regex of profiles
     return profilePath if regex.test(shellPath)
@@ -37,9 +39,13 @@ module.exports = {
 
     run = ->
       getShell().then (shell) ->
+
         new Promise (resolve, reject) ->
 
-          cmd = if shell.profilePath
+          cmd = if shell.profilePath and not sourced
+            ## we only need to source once
+            sourced = true
+
             ## sourcing the profile can output un-needed garbage,
             ## so suppress it by sending it to /dev/null and ignore
             ## any failures with this
