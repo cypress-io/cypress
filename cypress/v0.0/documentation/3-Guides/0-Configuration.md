@@ -40,7 +40,7 @@ Option | Default | Description
 `port` | `2020` | Port to use for Cypress
 `numTestsKeptInMemory` | `50` | The number of tests for which snapshots and command data are kept in memory. Reduce this number if you seeing extremely high memory consumption in your browser.
 `reporter` | `spec` | The [Mocha reporter](https://mochajs.org/#reporters) used during headless or CI runs
-`screenshotOnHeadlessFailure` | `false` | Whether to take a screenshot automatically on test failure when running headlessly or in CI
+`screenshotOnHeadlessFailure` | `true` | Whether to take a screenshot automatically on test failure when running headlessly or in CI
 `watchForFileChanges` | `true` | Whether Cypress will watch and restart tests on file changes
 
 ***
