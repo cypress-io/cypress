@@ -51,6 +51,7 @@ Pass in an options object to change the default behavior of `cy.contains`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry finding an element
 
 ***
 
@@ -221,7 +222,7 @@ cy.get("#main").contains("Jane Lane")
 // Cypress will automatically favor button elements higher in the chain
 
 // in this case the <button> is returned
-cy.contains("4")
+cy.contains(4)
 ```
 
 ***
