@@ -8,7 +8,7 @@ You can change the directory where screenshots are saved in your [configuration]
 | | |
 |--- | --- |
 | **Returns** | `null` |
-| **Timeout** | `cy.screenshot` will retry for the duration of the [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.screenshot` will wait for the duration of the [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
@@ -34,7 +34,7 @@ Pass in an options object to change the default behavior of `cy.screenshot`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry taking a screenshot
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait taking a screenshot
 
 ***
 
