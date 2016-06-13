@@ -44,13 +44,16 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
       .timeout(options.timeout)
       .then (result) ->
         if options._log
-          _.extend(consoleOutput, { Returned: result }) 
+          _.extend(consoleOutput, { Returned: _.omit(result, "shell") })
+
+          consoleOutput["Shell Used"] = result.shell
 
         return result if result.code is 0 or not options.failOnNonZeroExit
 
         output = ""
         output += "\nStdout:\n#{_.truncate(result.stdout, 200)}" if result.stdout
         output += "\nStderr:\n#{_.truncate(result.stderr, 200)}" if result.stderr
+
         $Cypress.Utils.throwErrByPath "exec.non_zero_exit", {
           onFail: options._log
           args: { cmd, output, code: result.code }

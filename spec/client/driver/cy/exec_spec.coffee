@@ -179,7 +179,7 @@ describe "$Cypress.Cy Exec Command", ->
           @respondWith({ code: 1 })
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.contain("cy.exec('ls') failed because the command exited with a non-zero code. Pass {failOnNonZeroExit: false} for non-zero exits to not be treated as failures.")
+            expect(err.message).to.contain("cy.exec('ls') failed because the command exited with a non-zero code.\n\nPass {failOnNonZeroExit: false} to ignore exit code failures.")
             expect(err.message).to.contain("Code: 1")
             done()
 
