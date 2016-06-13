@@ -1,7 +1,7 @@
 $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
 
   Cypress.on "test:after:hooks", (test) ->
-    if test.err and $Cypress.isHeadless
+    if test.err and $Cypress.isHeadless and Cypress.config("screenshotOnHeadlessFailure")
       ## give the UI some time to render the error
       ## because we were noticing that errors were not
       ## yet displayed in the UI when running headlessly
