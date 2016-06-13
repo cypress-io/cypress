@@ -268,6 +268,9 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       url_invalid: "#{cmd('route')} was called with a invalid url. Url must be either a string or regular expression."
       url_missing: "#{cmd('route')} must be called with a url. It can be a string or regular expression."
 
+    screenshot:
+      timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
+
     select:
       disabled: "#{cmd('select')} failed because this element is currently disabled:\n\n{{node}}"
       invalid_element: "#{cmd('select')} can only be called on a <select>. Your subject is a: {{node}}"

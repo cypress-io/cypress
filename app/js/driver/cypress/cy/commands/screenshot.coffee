@@ -41,13 +41,21 @@ $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
           $Cypress.Utils.throwErrByPath "screenshot.timed_out", {
             onFail: log
             args: {
-              cmd:     getCommandFromEvent(event)
               timeout: timeout
             }
           }
 
   Cypress.addParentCommand
     screenshot: (name, options = {}) ->
+      if _.isObject(name)
+        options = name
+        name = null
+
+      ## default to the runnables title if not set
+      name ?= @private("runnable").title
+
+      name = name.toString()
+
       _.defaults options, {
         log: true
         timeout: Cypress.config("responseTimeout")
@@ -61,12 +69,6 @@ $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
           onConsole: ->
             onConsole
         })
-
-      ## TODO: output where we saved this file
-      ## send this back to the client
-
-      # if not _.isString(name)
-      #   $Cypress.Utils.throwErrByPath("getCookie.invalid_argument", { onFail: options._log })
 
       @_takeScreenshot(name, options._log, options.timeout)
       .then (resp) ->
