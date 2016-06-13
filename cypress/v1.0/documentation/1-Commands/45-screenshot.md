@@ -1,26 +1,26 @@
 slug: screenshot
 excerpt: Take a screenshot
 
-Take a screenshot of the Command Log and the test runner (the app being tested). The screenshot will be stored within a `screenshots` folder in the main `cypress` directory.
+Take a screenshot of the Command Log and the test runner (the app being tested). The screenshot will be stored in `cypress/screenshots` by default.
 
 You can change the directory where screenshots are saved in your [configuration](https://on.cypress.io/guides/configuration#section-folders).
 
 | | |
 |--- | --- |
 | **Returns** | `null` |
-| **Timeout** | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the automation server to process this command. |
+| **Timeout** | `cy.screenshot` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the automation server to process this command. |
 
 ***
 
 # [cy.screenshot()](#section-usage)
 
-Take a screenshot of the Command Log and test runner and save as a `.png` within the `screenshots` folder in the main `cypress` directory. The filename will be the title of the test.
+Take a screenshot of the screen and save as a `.png` in `cypress/screenshots`. By default the filename will be the title of the test.
 
 ***
 
 # [cy.screenshot( *filename* )](#section-filename-usage)
 
-Take a screenshot of the Command Log and test runner and save as a `.png` within the `screenshots` folder in the main `cypress` directory. The filename will be the filename passed in as the argument.
+Take a screenshot of the screen and save as a `.png` in `cypress/screenshots`. The filename will be the filename passed in as the argument.
 
 ***
 
@@ -81,9 +81,17 @@ By default, screenshots will be saved in `cypress/screenshots`. You can change t
 
 ## Screenshots in CI
 
-When running in [Circle CI](https://circleci.com/), we will automatically export screenshots as artifacts. This makes them available directly in their web UI. If you're using Circle CI, you'll be able to see screenshots without doing anything. If you're using Travis, you'll need to upload artifacts to an s3 bucket.
+When running in [Circle CI](https://circleci.com/), we will automatically export screenshots as artifacts. This makes them available directly in their web UI. If you're using Circle CI, you'll be able to see screenshots without doing anything.
+
+If you're using Travis, you'll need to upload artifacts to an s3 bucket as per their [uploading artifacts doc](https://docs.travis-ci.com/user/uploading-artifacts/).
 
 ***
+
+## Understanding when a screenshot happens
+
+Taking a screenshot is an asynchronous action which takes around `100ms` to complete. By the time the screenshot is taken it's possible something in your application may have changed. It's important to realize that the screenshot may not reflect 100% of what your application looked like when the command was issued.
+
+For example - say this command times outs `cy.get("#element")`. This causes your test to fail. We'll then take a screenshot when the test fails but it's possible something in your application changes within the `100ms` timeframe. Hypothetically your app could render the element you were searching for. When this happens the screenshot may provide confusing results. It's unlikely but theoretically possible.
 
 ## No Command Log scrolling during screenshots
 
