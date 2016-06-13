@@ -16,7 +16,7 @@ Reload the page from the current URL.
 
 ***
 
-# [cy.reload( *forceReload* )](#section-usage)
+# [cy.reload( *forceReload* )](#section-force-reload-usage)
 
 Reload the current page, without using the cache if `forceReload` is true
 
@@ -44,6 +44,8 @@ cy
   .visit("http://localhost:3000/admin")
   .reload()
 ```
+
+# Force Reload Usage
 
 ***
 

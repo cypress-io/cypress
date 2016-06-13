@@ -231,6 +231,16 @@ When clicking on `click` within the command log, the console outputs the followi
 
 ***
 
+# Errors
+
+## cy.click() can only be called on a single element. Your subject contained 'num' elements. Pass {multiple: true} if you want to serially click each element.
+
+If the subject passed to `cy.click()` are multiple elements, you need to write `cy.click({multiple: true})` to serially click each element one after another. Otherwise, ensure that your subject is only one element.
+
+## cy.click() cannot be called on a <select> element. Use cy.select() command instead to change the value.
+
+In order to work with selecting `<select>` elements, [`cy.select()`](https://on.cypress.io/api/select) will afford better options than `cy.click()`.
+
 # Related
 
 - [dblclick](https://on.cypress.io/api/dblclick)

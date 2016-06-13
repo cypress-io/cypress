@@ -108,6 +108,12 @@ The command above will display in the command log as:
 
 When clicking on the `exec` command within the command log, the console outputs the following:
 
-<img width="758" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/15369509/e49c6b22-1d00-11e6-9984-5a888c01e3e7.png">
+<img width="758" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/15969867/e3ab646e-2eff-11e6-9199-987ca2f74025.png">
 
 ***
+
+# Errors
+
+## cy.exec() failed because the command exited with a non-zero code. Pass {failOnNonZeroExit: false} for non-zero exits to not be treated as failures.
+
+If you want expect the `cy.exec()` command to exit with a non-zero code, you must pass `{failOnNonZerExit: false}` as an option to your `cy.exec()` command.
