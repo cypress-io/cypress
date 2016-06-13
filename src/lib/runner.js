@@ -14,7 +14,7 @@ import state from './state'
 
 // TODO: loadModules should be default true
 const driver = $Cypress.create({ loadModules: true })
-const channel = window.channel = io.connect({ path: '/__socket.io' })
+const channel = io.connect({ path: '/__socket.io' })
 
 channel.on('connect', () => {
   channel.emit('runner:connected')
@@ -41,10 +41,6 @@ export default {
   },
 
   start (config, specSrc) {
-    // TODO: remove listeners before (re)starting
-    // localBus.removeAllListeners()
-    // driver.off()
-
     overrides.overloadMochaRunnerUncaught()
 
     driver.setConfig(_.pick(config, 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout'))
@@ -62,7 +58,7 @@ export default {
       channel.emit('reporter:log:add', log.toJSON(), (row) => {
         log.set('row', row)
 
-        // render it calling onRender
+        // TODO: render it calling onRender
       })
 
       log.on('state:changed', () => {
@@ -176,6 +172,12 @@ export default {
 
       driver.run(() => {})
     })
+  },
+
+  stop () {
+    localBus.removeAllListeners()
+    driver.off()
+    channel.off()
   },
 
   _reRun () {

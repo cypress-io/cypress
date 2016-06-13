@@ -39,10 +39,6 @@ export default class IframeModel {
     this.state.reset()
   }
 
-  stopListening () {
-    // TODO: tear down listeners
-  }
-
   @action _beforeRun = () => {
     this.state.reset()
     this.state.isRunning = true

@@ -76,6 +76,6 @@ export default class Iframes extends Component {
   }
 
   componentWillUnmount () {
-    this.iframeModel.stopListening()
+    runner.stop()
   }
 }
