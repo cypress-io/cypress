@@ -8,7 +8,7 @@ You can change the directory where screenshots are saved in your [configuration]
 | | |
 |--- | --- |
 | **Returns** | `null` |
-| **Timeout** | `cy.screenshot` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.screenshot` will retry for the duration of the [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
@@ -34,7 +34,7 @@ Pass in an options object to change the default behavior of `cy.screenshot`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry taking a screenshot
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry taking a screenshot
 
 ***
 
@@ -71,13 +71,19 @@ cy.screenshot("clickingOnNav")
 
 When running headlessly or in [Continuous Integration](https://on.cypress.io/guides/continuous-integration), Cypress will automatically take a screenshot when a test fails. You can optionally turn this off by setting `screenshotOnHeadlessFailure` to `false` in your [configuration](https://on.cypress.io/guides/configuration).
 
+***
+
 ## Default screenshots folder
 
 By default, screenshots will be saved in `cypress/screenshots`. You can change the directory where screenshots are saved in your [configuration](https://on.cypress.io/guides/configuration#section-folders).
 
+***
+
 ## Screenshots in CI
 
 When running in [Circle CI](https://circleci.com/), we will automatically export screenshots as artifacts. This makes them available directly in their web UI. If you're using Circle CI, you'll be able to see screenshots without doing anything. If you're using Travis, you'll need to upload artifacts to an s3 bucket.
+
+***
 
 ## No Command Log scrolling during screenshots
 
