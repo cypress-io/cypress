@@ -1748,7 +1748,7 @@ describe "Routes", ->
         # .expect(302)
         # .expect "location", /dashboard/
 
-    it.only "does not fail on a big cookie", ->
+    it "does not fail on a big cookie", ->
       nock(@baseUrl)
       .post("/login")
       .reply(200)
