@@ -65,7 +65,7 @@ Option | Default | Description
 ----- | ---- | ----
 `fixturesFolder`    | `cypress/fixtures`    | Where Cypress will look for fixture files
 `integrationFolder` | `cypress/integration` | Where Cypress will look for integration test files
-`screenshotFolder`     | `cypress/screenshots`     | Where Cypress will automatically save screenshots from [`cy.screenshot()`](https://on.cypress.io/api/screenshot) or during test failures when running headlessly.
+`screenshotsFolder`     | `cypress/screenshots`     | Where Cypress will automatically save screenshots from [`cy.screenshot()`](https://on.cypress.io/api/screenshot) or during test failures when running headlessly.
 `supportFolder`     | `cypress/support`     | Where Cypress will auto load support files
 
 ***
