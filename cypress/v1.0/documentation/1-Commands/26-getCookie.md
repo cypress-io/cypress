@@ -32,7 +32,7 @@ This object will have the following properties:
 
 Pass in an options object to change the default behavior of `cy.getCookie`.
 
-**[cy.getCookie( *name*, *options* )](#options-usage)**
+**cy.getCookie( *name*, *options* )**
 
 Option | Default | Notes
 --- | --- | ---
