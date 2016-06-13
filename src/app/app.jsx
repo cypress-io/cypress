@@ -1,65 +1,71 @@
+import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
+import automation from '../lib/automation'
 import runner from '../lib/runner'
 
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import NoAutomation from './no-automation'
+import AutomationDisconnected from './automation-disconnected'
 
-const elementId = "__cypress-string"
+const automationElementId = '__cypress-string'
 
+@observer
 export default class App extends Component {
-  constructor (props) {
-    super(props)
-
-    this.state = {
-      automationEnsured: false,
-      automationConnected: null,
-    }
-  }
-
   componentWillMount () {
-    const str = this.randomString = `${Math.random()}`
+    this.randomString = `${Math.random()}`
 
-    const connectionInfo = {
-      element: elementId,
-      string: str,
-    }
-
-    runner.ensureAutomation(connectionInfo)
-    .then((isConnected) => {
-      if (isConnected) {
-        this.setState({ automationEnsured: true, automationConnected: true })
-      } else {
-        this.setState({ automationConnected: false })
-      }
+    runner.ensureAutomation({
+      element: automationElementId,
+      string: this.randomString,
     })
   }
 
   render () {
-    if (this.state.automationConnected === false) {
-      return <NoAutomation
-        browsers={this.props.config.browsers}
-        onLaunchBrowser={(browser) => runner.launchBrowser(browser)}
-      />
+    switch (this.props.state.automation) {
+      case automation.CONNECTING:
+        return this._automationElement()
+      case automation.MISSING:
+        return this._noAutomation()
+      case automation.DISCONNECTED:
+        return this._automationDisconnected()
+      case automation.CONNECTED:
+      default:
+        return this._app()
     }
+  }
 
-    if (!this.state.automationEnsured) {
-      return this._automationElement()
-    }
+  _automationElement () {
+    return <div id={automationElementId} className='automation-string'>{this.randomString}</div>
+  }
 
+  _app () {
+    // for some reason the height: 100% div is needed
+    // or the header disappears randomly
     return (
-      <div className="container">
-        <Header {...this.props} />
-        <Iframes {...this.props} />
-        <Message {...this.props} />
-        {this._automationElement()}
+      <div className='container'>
+        <div style={{ height: '100%' }}>
+          <Header {...this.props} />
+          <Iframes {...this.props} />
+          <Message {...this.props} />
+          {this._automationElement()}
+        </div>
       </div>
     )
   }
 
-  _automationElement () {
-    return <div id={elementId} className="automation-string">{this.randomString}</div>
+  _noAutomation () {
+    return (
+      <NoAutomation
+        browsers={this.props.config.browsers}
+        onLaunchBrowser={(browser) => runner.launchBrowser(browser)}
+      />
+    )
+  }
+
+  _automationDisconnected () {
+    return <AutomationDisconnected onReload={runner.launchBrowser} />
   }
 }

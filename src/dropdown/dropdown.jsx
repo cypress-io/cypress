@@ -45,7 +45,7 @@ export default class Dropdown extends Component {
         {_.map(this.props.others, (item) => (
           <li
             key={item.key}
-            tabIndex="0"
+            tabIndex='0'
             onClick={() => this.props.onSelect(item)}
           >{this.props.renderItem(item)}</li>
         ))}

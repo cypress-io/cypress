@@ -1,8 +1,10 @@
 import _ from 'lodash'
 import { computed, observable, asReference } from 'mobx'
+import automation from './automation'
 
 const headerHeight = 46
 
+// used as initial values and in reset method to reset state between runs
 const defaults = {
   isRunning: false,
 
@@ -34,6 +36,8 @@ const state = observable({
 
   _windowWidth: 0,
   _windowHeight: 0,
+
+  automation: automation.CONNECTING,
 
   @computed get scale () {
     if (this._windowWidth < this.width || this._containerHeight < this.height) {

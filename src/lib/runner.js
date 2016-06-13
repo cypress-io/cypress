@@ -3,11 +3,14 @@
 import _ from 'lodash'
 import { EventEmitter } from 'events'
 import Promise from 'bluebird'
+import { action } from 'mobx'
 
+import automation from './automation'
 import logs from './logs'
 import logger from './logger'
 import tests from './tests'
 import overrides from './overrides'
+import state from './state'
 
 // TODO: loadModules should be default true
 const driver = $Cypress.create({ loadModules: true })
@@ -16,6 +19,7 @@ const channel = window.channel = io.connect({ path: '/__socket.io' })
 channel.on('connect', () => {
   channel.emit('runner:connected')
 })
+
 
 const dualEvents = 'run:start run:end'.split(' ')
 const socketEvents = 'fixture request history:entries exec domain:change'.split(' ')
@@ -28,9 +32,12 @@ const localBus = new EventEmitter()
 
 export default {
   ensureAutomation (connectionInfo) {
-    return new Promise((resolve) => {
-      channel.emit('is:automation:connected', connectionInfo, resolve)
-    })
+    channel.emit('is:automation:connected', connectionInfo, action('automationEnsured', (isConnected) => {
+      state.automation = isConnected ? automation.CONNECTED : automation.MISSING
+      channel.on('automation:disconnected', action('automationDisconnected', () => {
+        state.automation = automation.DISCONNECTED
+      }))
+    }))
   },
 
   start (config, specSrc) {
@@ -197,7 +204,7 @@ export default {
   },
 
   launchBrowser (browser) {
-    channel.emit('reload:browser', window.location.toString(), browser.name)
+    channel.emit('reload:browser', window.location.toString(), browser && browser.name)
   },
 
   // clear all the cypress specific cookies

@@ -73,7 +73,6 @@ header {
 }
 
 .menu {
-  display: inline-block;
   float: right;
 }
 
@@ -87,6 +86,7 @@ header {
     border: none;
     color: #888;
     outline: none;
+    padding: 0;
     text-shadow: 0 1px 1px #FFF;
 
     &:hover {
