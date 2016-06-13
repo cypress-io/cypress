@@ -82,16 +82,16 @@ describe "Login", ->
             cy
               .then ->
                 @ipc.handle("get:project:paths", null, [])
-              .get("header a").should ($a) ->
+              .get("nav a").should ($a) ->
                 expect($a).to.contain(@user.name)
 
           it "has login button enabled on logout", ->
             cy
               .then ->
                 @ipc.handle("get:project:paths", null, [])
-              .get("header a").contains("Jane").click()
+              .get("nav a").contains("Jane").click()
             cy
-              .contains("Logout").click().then ->
+              .contains("Log Out").click().then ->
                 @ipc.handle("log:out")
               .get("@loginBtn").should("not.be.disabled")
 
