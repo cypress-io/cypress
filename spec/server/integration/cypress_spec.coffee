@@ -192,10 +192,12 @@ describe "lib/cypress", ->
         Project.add(@todosPath)
       ])
       .then =>
-        cypress.start(["--run-project=#{@todosPath}"]).then =>
-          expect(api.updateProject).not.to.be.called
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
-          @expectExitWith(0)
+        cypress.start(["--run-project=#{@todosPath}"])
+      .delay(200)
+      .then =>
+        expect(api.updateProject).not.to.be.called
+        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
+        @expectExitWith(0)
 
     it "runs project headlessly and exits with exit code 10", ->
       headless.waitForTestsToFinishRunning.resolves({failures: 10})
@@ -206,7 +208,9 @@ describe "lib/cypress", ->
         Project.add(@todosPath)
       ])
       .then =>
-        cypress.start(["--run-project=#{@todosPath}"]).then =>
+        cypress.start(["--run-project=#{@todosPath}"])
+        .delay(200)
+        .then =>
           expect(api.updateProject).not.to.be.called
           expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
           @expectExitWith(10)
