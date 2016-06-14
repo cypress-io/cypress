@@ -154,7 +154,7 @@ module.exports = {
       ## handle both relative + absolute paths
       ## by simply resolving the path from projectRoot
       p = path.resolve(projectRoot, p)
-      glob(p)
+      glob(p, {nodir: true})
     .then(_.flatten)
     .map (filePath) =>
       @prepareForBrowser(filePath, projectRoot)
