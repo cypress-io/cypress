@@ -624,11 +624,9 @@ describe "lib/cypress", ->
       @sandbox.stub(ci, "getBranch").resolves("bem/ci")
       @sandbox.stub(ci, "getAuthor").resolves("brian")
       @sandbox.stub(ci, "getMessage").resolves("foo")
-      @sandbox.stub(headless, "runTests").resolves({
-        connection: null
-        renderer: null
-        stats: {failures: 10}
-      })
+      @sandbox.stub(headless, "createRenderer")
+      @sandbox.stub(headless, "waitForRendererToConnect")
+      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
 
       Promise.all([
         ## make sure we have no user object
@@ -654,6 +652,17 @@ describe "lib/cypress", ->
 
       cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
         expect(@updateCi).to.be.calledOnce
+        @expectExitWith(10)
+
+    it "runs project by specific absolute spec and exits with status 10", ->
+      @setup("todos")
+
+      @createCi.resolves("ci_guid-123")
+
+      @updateCi = @sandbox.stub(api, "updateCi").resolves()
+
+      cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci", "--spec=#{@todosPath}/tests/test2.coffee"]).then =>
+        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
         @expectExitWith(10)
 
     it "uses process.env.CYPRESS_PROJECT_ID", ->
