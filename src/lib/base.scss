@@ -5,12 +5,35 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
 }
 
 body {
-  width: 100%;
+  background-color: #F6F6F6;
+  color: #555;
+  font-size: 12px;
   height: 100%;
+  width: 100%;
 }
 
 body,
 input,
 textarea {
-  font-family: sans-serif;
+  font-family: "Muli", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+button {
+  background: #fff;
+  border: solid 1px #ccc;
+  border: none;
+  border-radius: 2px;
+  color: #4f4f4f;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-bottom: 0;
+  padding: 10px 16px;
+  text-align: center;
+  touch-action: manipulation;
+  vertical-align: middle;
+  white-space: nowrap;
+  user-select: none;
 }
