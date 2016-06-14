@@ -3,6 +3,24 @@ Cypress.Cookies.defaults({
 })
 
 describe "Automations", ->
+  context "XHR's", ->
+    it "can encodes + decodes headers", ->
+      getResp = ->
+        {
+          "test": "We’ll"
+        }
+
+      cy
+        .server()
+        .route(/api/, getResp()).as("getApi")
+        .visit("/index.html")
+        .window().then (win) ->
+          xhr = new win.XMLHttpRequest
+          xhr.open("GET", "/api/v1/foo/bar?a=42")
+          xhr.send()
+        .wait("@getApi")
+          .its("url").should("include", "api/v1")
+
   context "Screenshots", ->
     it "can take a screenshot", ->
       cy.screenshot("foo/bar/baz")

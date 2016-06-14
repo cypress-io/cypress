@@ -11,7 +11,7 @@ $Cypress.Server = do ($Cypress, _) ->
         val = transformer(val)
 
       key = "X-Cypress-" + _.capitalize(key)
-      xhr.setRequestHeader(key, val)
+      xhr.setRequestHeader(key, encodeURI(val))
 
   normalize = (val) ->
     val = val.replace needsDashRe, (match) ->

@@ -223,6 +223,9 @@ describe "Routes", ->
             expect(res.text).to.eq file
 
   context "ALL /__cypress/xhrs/*", ->
+    beforeEach ->
+      @setup()
+
     describe "delay", ->
       it "can set delay to 10ms", ->
         delay = @sandbox.spy(Promise, "delay")
@@ -310,6 +313,17 @@ describe "Routes", ->
           .expect(200)
           .expect("Content-Type", /text\/plain/)
           .expect("")
+
+      it "decodes responses", ->
+        response = encodeURI(JSON.stringify({
+          "test": "We’ll"
+        }))
+
+        supertest(@app)
+        .get("/__cypress/xhrs/users/1")
+        .set("x-cypress-response", response)
+        .expect(200)
+        .expect({test: "We’ll"})
 
       context "fixture", ->
         beforeEach ->

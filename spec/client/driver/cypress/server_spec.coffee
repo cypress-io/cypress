@@ -135,6 +135,30 @@ describe "$Cypress.Cy Server API", ->
       expect(@srh).to.be.calledWith("foo", "bar")
       expect(@srh).to.be.calledOn(@xhr)
 
+  context "#applyStubProperties", ->
+    beforeEach ->
+      @server = $Cypress.Server.create({
+        xhrUrl: "__cypress/xhrs/"
+      })
+      @srh  = @sandbox.spy(@window.XMLHttpRequest.prototype, "setRequestHeader")
+      @server.bindTo(@window)
+      @xhr = new @window.XMLHttpRequest
+      @xhr.open("GET", "/fixtures/ajax/app.json")
+      @proxy = @server.getProxyFor(@xhr)
+
+    it.only "encodes the http header value", ->
+      route = {
+        response: {"test": "We’ll"}
+      }
+
+      @sandbox.spy(@xhr, "setRequestHeader")
+
+      ## this function would previous throw unless
+      ## we decoded the value
+      @server.applyStubProperties(@xhr, route)
+
+      expect(@xhr.setRequestHeader).to.be.calledWith("X-Cypress-Response", "%7B%22test%22:%22We%E2%80%99ll%22%7D")
+
   context "#getResponseHeader", ->
     beforeEach ->
       @server = $Cypress.Server.create({
