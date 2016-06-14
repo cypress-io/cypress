@@ -199,6 +199,9 @@ These commands have not yet been released:
 
 ## Changelog
 
+#### 0.11.1
+- cypress ci accepts --spec argument
+
 #### 0.11.0
 - `cypress open` now accepts arguments
 - you can now pass the --config flag to `cypress run`, `ci`, and `open` which overrides `cypress.json` configuration values
