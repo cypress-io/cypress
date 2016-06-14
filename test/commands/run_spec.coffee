@@ -13,6 +13,10 @@ describe "Run", ->
       @parse("run --port 7878")
       expect(@spy).to.be.calledWith(undefined, {port: "7878"})
 
+    it "calls run with spec", ->
+      @parse("run myApp --spec cypress/integration/foo_spec.js")
+      expect(@spy).to.be.calledWith("myApp", {spec: "cypress/integration/foo_spec.js"})
+
     it "calls run with port with -p arg", ->
       @parse("run 1234 -p 8989")
       expect(@spy).to.be.calledWith("1234", {port: "8989"})

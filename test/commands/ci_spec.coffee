@@ -43,6 +43,10 @@ describe "Ci", ->
       @parse("ci -c watchForFileChanges=false,baseUrl=localhost")
       expect(@spy).to.be.calledWith(undefined, {config: "watchForFileChanges=false,baseUrl=localhost"})
 
+    it "calls run with spec", ->
+      @parse("ci myApp --spec cypress/integration/foo_spec.js")
+      expect(@spy).to.be.calledWith("myApp", {spec: "cypress/integration/foo_spec.js"})
+
   context "#constructor", ->
     beforeEach ->
       @spawn  = @sandbox.stub(utils, "spawn")

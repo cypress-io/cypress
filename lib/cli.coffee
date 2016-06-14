@@ -69,6 +69,7 @@ module.exports = ->
     .command("ci [key]")
     .usage("[key] [options]")
     .description("Runs Cypress in CI Mode")
+    .option("-s, --spec <spec>",         text("spec"))
     .option("-r, --reporter <reporter>", text("reporter"))
     .option("-p, --port <port>",         text("port"))
     .option("-e, --env <env vars>",      text("env"))
