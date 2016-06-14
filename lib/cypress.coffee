@@ -251,7 +251,8 @@ module.exports = {
       when "headless"
         ## run headlessly and exit
         @runElectron(mode, options)
-        .then(exit0)
+        .get("failures")
+        .then(exit)
         .catch(exitErr)
 
       when "headed"

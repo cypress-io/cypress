@@ -182,10 +182,10 @@ describe "lib/cypress", ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(headless, "waitForRendererToConnect")
       @sandbox.stub(headless, "createRenderer")
-      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
+      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 0})
       @sandbox.spy(api, "updateProject")
 
-    it "runs project headlessly and exits with status 0", ->
+    it "runs project headlessly and exits with exit code 0", ->
       Promise.all([
         user.set({name: "brian", session_token: "session-123"}),
 
@@ -196,6 +196,20 @@ describe "lib/cypress", ->
           expect(api.updateProject).not.to.be.called
           expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
           @expectExitWith(0)
+
+    it "runs project headlessly and exits with exit code 10", ->
+      headless.waitForTestsToFinishRunning.resolves({failures: 10})
+
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@todosPath)
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}"]).then =>
+          expect(api.updateProject).not.to.be.called
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
+          @expectExitWith(10)
 
     it "generates a project id if missing one", ->
       @sandbox.stub(api, "createProject").withArgs("pristine", "session-123").resolves("pristine-id-123")
@@ -550,7 +564,7 @@ describe "lib/cypress", ->
 
     describe "--port", ->
       beforeEach ->
-        headless.waitForTestsToFinishRunning.resolves({})
+        headless.waitForTestsToFinishRunning.resolves({failures: 0})
 
         Promise.all([
           user.set({name: "brian", session_token: "session-123"}),
@@ -579,7 +593,7 @@ describe "lib/cypress", ->
 
     describe "--env", ->
       beforeEach ->
-        headless.waitForTestsToFinishRunning.resolves({})
+        headless.waitForTestsToFinishRunning.resolves({failures: 0})
 
         Promise.all([
           user.set({name: "brian", session_token: "session-123"}),
