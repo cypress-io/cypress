@@ -17,29 +17,29 @@ export default class Login extends Component {
   render () {
     return (
       <div id='login'>
-        <h3>Cypress.io</h3>
-        <div className='well well-lg'>
-          <button
-            className={cs('btn btn-primary btn-login', {
-              disabled: this.state.isLoggingIn,
-            })}
-            onClick={this._login}
-            disabled={this.state.isLoggingIn}
-          >
-            <i className='fa fa-github'></i>{' '}
-            Log In with GitHub
-          </button>
-        </div>
+        <h3>Welcome to Cypress!</h3>
+        <p>Let's get a project setup to test in Cypress. It only takes a couple of minutes.</p>
+        <p>First, log in with your GitHub account.</p>
         {this._error()}
+        <button
+          className={cs('btn btn-primary btn-login', {
+            disabled: this.state.isLoggingIn,
+          })}
+          onClick={this._login}
+          disabled={this.state.isLoggingIn}
+        >
+          <i className='fa fa-github'></i>{' '}
+          Log In with GitHub
+        </button>
         {this.state.isLoggingIn ?
           <div className='login-spinner'>
-            <i className='fa fa-spinner fa-spin'></i>
+            <i className='fa fa-spinner fa-spin'></i>{' '}
             Logging in...
           </div>
         : null }
         <div className='helper-line'>
           <a className='helper-docs-link' onClick={this._openHelp}>
-            <i className='fa fa-question-circle'></i>
+            <i className='fa fa-question-circle'></i>{' '}
             Need help?
           </a>
         </div>
@@ -89,14 +89,14 @@ export default class Login extends Component {
     return (
       <div className='alert alert-danger'>
         <p>
-          <i className='fa fa-warning'></i>
+          <i className='fa fa-warning'></i>{' '}
           <strong>Can't Log In</strong>
         </p>
         <p>{error.message}</p>
         {error.statusCode === 401 ?
           <p>
             <a onClick={this._openAuthDoc}>
-              <i className='fa fa-question-circle'></i>
+              <i className='fa fa-question-circle'></i>{' '}
               Why am I not authorized?
             </a>
           </p>

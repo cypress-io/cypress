@@ -15,8 +15,8 @@ describe "Login", ->
     beforeEach ->
       @ipc.handle("get:current:user", null, {})
 
-    it "displays 'Cypress.io'", ->
-      cy.get("#login").contains("Cypress.io")
+    it "displays 'Cypress'", ->
+      cy.get("#login").contains("Cypress")
 
     it "has Github Login button", ->
       cy.get("#login").contains("button", "Log In with GitHub")
