@@ -26,6 +26,7 @@ defaults = {
   xhrRoute:       "/xhrs/"
   socketIoRoute:  "/__socket.io"
   socketIoCookie: "__socket.io"
+  ignoreTestFiles: "*.hot-update.js"
   commandTimeout:  4000
   pageLoadTimeout: 30000
   requestTimeout:  5000

@@ -139,17 +139,31 @@ describe "Routes", ->
             ])
 
     describe "ids with regular configuration", ->
-      beforeEach ->
+      it "returns test files as json ignoring *.hot-update.js", ->
         @setup({
           projectRoot: Fixtures.projectPath("ids")
         })
 
-      it "returns test files as json", ->
         supertest(@app)
         .get("/__cypress/files")
         .expect(200, [
           { name: "integration/bar.js" }
           { name: "integration/foo.coffee" }
+          { name: "integration/nested/tmp.js" }
+          { name: "integration/noop.coffee" }
+        ])
+
+      it "can ignore other files as well", ->
+        @setup({
+          projectRoot: Fixtures.projectPath("ids")
+          config: {
+            ignoreTestFiles: ["**/bar.js", "foo.coffee", "**/*.hot-update.js", "**/nested/*"]
+          }
+        })
+
+        supertest(@app)
+        .get("/__cypress/files")
+        .expect(200, [
           { name: "integration/noop.coffee" }
         ])
 

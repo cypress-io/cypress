@@ -3,6 +3,7 @@ str         = require("underscore.string")
 path        = require("path")
 glob        = require("glob")
 Promise     = require("bluebird")
+minimatch   = require("minimatch")
 cwd         = require("../cwd")
 api         = require("../api")
 user        = require("../user")
@@ -203,8 +204,24 @@ module.exports = {
       ## path between the integrationFolderPath + the file
       path.join("integration", path.relative(integrationFolderPath, file))
 
+    ignorePatterns = [].concat(config.ignoreTestFiles)
+
+    ## a function which returns true if the file does NOT match
+    ## all of our ignored patterns
+    doesNotMatchAllIgnoredPatterns = (file) ->
+      ## using {dot: true} here so that folders with a '.' in them are matched
+      ## as regular characters without needing an '.' in the
+      ## using {matchBase: true} here so that patterns without a globstar **
+      ## match against the basename of the file
+      _.every ignorePatterns, (pattern) ->
+        not minimatch(file, pattern, {dot: true, matchBase: true})
+
     ## grab all the js and coffee files
     glob("**/*.+(js|coffee)", options)
+
+    ## filter out anything that matches our
+    ## ignored test files glob
+    .filter(doesNotMatchAllIgnoredPatterns)
     .map (file) ->
       {name: prependIntegrationPath(file)}
 }

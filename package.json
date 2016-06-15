@@ -129,6 +129,7 @@
     "lodash": "4.12.0",
     "method-override": "^2.3.1",
     "mime": "1.2.11",
+    "minimatch": "^3.0.0",
     "minimist": "^1.1.2",
     "mocha": "2.4.5",
     "mocha-teamcity-reporter": "cypress-io/mocha-teamcity-reporter#6aaccab7a05a35aaa2b8856e961eec5a1856976b",
