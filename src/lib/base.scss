@@ -15,7 +15,35 @@ body {
 body,
 input,
 textarea {
-  font-family: "Muli", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Muli', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+p {
+  line-height: 1.8;
+  margin-bottom: 10px;
+}
+
+a {
+  color: #3380FF;
+  text-decoration: none;
+  outline: none;
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: #2363CC;
+    text-decoration: underline;
+    outline: inherit;
+  }
+}
+
+strong {
+  color: #222;
+  font-weight: bold;
+}
+
+em {
+  font-style: italic;
 }
 
 button {
@@ -36,4 +64,39 @@ button {
   vertical-align: middle;
   white-space: nowrap;
   user-select: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 300;
+  line-height: 1.1;
+}
+
+h4 {
+  font-size: 18px;
+}
+
+h4, h5, h6 {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+pre {
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  color: #333;
+  display: block;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1.05em;
+  letter-spacing: 0.5px;
+  margin: 0 0 10px;
+  overflow: auto;
+  padding: 9.5px;
+  line-height: 1.4;
+  word-break: break-all;
+  word-wrap: break-word;
+}
+
+.hidden {
+  display: none;
 }
