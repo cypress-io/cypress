@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { computed, observable } from 'mobx'
 
-export default class ProjectModel {
+export default class Project {
   @observable path = ''
 
   constructor (path) {

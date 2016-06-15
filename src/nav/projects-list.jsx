@@ -1,12 +1,12 @@
 import { action } from 'mobx'
 import React, { Component } from 'react'
 import AppGlobal from '../lib/app'
-import projectsCollection from '../projects/projects-collection'
+import Projects from '../projects/projects-store'
 
 export default class ProjectsList extends Component {
   componentWillMount () {
     AppGlobal.ipc('get:project:paths').then(action('get:project:paths', (projectPaths) => {
-      projectsCollection.setProjects(projectPaths)
+      Projects.setProjects(projectPaths)
     }))
   }
 
@@ -19,6 +19,7 @@ export default class ProjectsList extends Component {
           <span className="caret"></span>
         </a>
         <ul className="dropdown-menu">
+          {this._projects()}
           <li>
             <a href="#">
               <i className="fa fa-folder"></i>{" "}
@@ -35,5 +36,9 @@ export default class ProjectsList extends Component {
         </ul>
       </div>
     )
+  }
+
+  _projects () {
+    //
   }
 }

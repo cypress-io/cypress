@@ -2,15 +2,18 @@ import { useStrict } from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'
 
-import App from './app/app'
-import AppGlobal from './lib/app'
+import Application from './app/application'
+
+import App from './lib/app'
 import ipc from './lib/ipc'
 
 useStrict(true)
 
-AppGlobal.start = (mode) => {
-  ipc('get:options').then((options = {}) => {
+App.start = (mode) => {
+  ipc('get:options')
+  .then((options = {}) => {
     const el = document.getElementById('app')
+
     switch (mode) {
       case 'about':
         // render about
@@ -22,7 +25,7 @@ AppGlobal.start = (mode) => {
         // render updates
         break
       default:
-        render(<App options={options} />, el)
+        render(<Application options={options} />, el)
     }
   })
 }

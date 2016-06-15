@@ -21,13 +21,29 @@ $navbar-border-radius:             0;
 // Reset inverted navbar basics
 $navbar-inverse-color:               #f8f9fb;
 $navbar-inverse-bg:                  #252831;
-// $navbar-inverse-border:              darken($navbar-inverse-bg, 10%) !default;
+// $navbar-inverse-border:              darken($navbar-inverse-bg, 10%);
 
 // Inverted navbar links
 $navbar-inverse-link-color:          #e1e2e4;
-$navbar-inverse-link-hover-color:    #fff !default;
+$navbar-inverse-link-hover-color:    #fff;
 $navbar-inverse-link-hover-bg:       #3b414a;
 $navbar-inverse-link-active-bg:      #3b414a;
-$navbar-inverse-link-disabled-color: #444 !default;
+$navbar-inverse-link-disabled-color: #444;
 
 $navbar-inverse-brand-hover-bg:      #3b414a;
+
+//== Media queries breakpoints
+//
+//## Define the breakpoints at which your layout will change, adapting to different screen sizes.
+
+// Extra small screen / phone
+$screen-xs:                  0px;
+
+// Small screen / tablet
+$screen-sm:                  0px;
+
+// Medium screen / desktop
+$screen-md:                  1200px;
+
+// Large screen / wide desktop
+$screen-lg:                  1200px;

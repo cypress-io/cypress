@@ -6,13 +6,14 @@ import Layout from './layout'
 import ProjectNav from '../project-nav/project-nav'
 import Login from '../login/login'
 
-import AppGlobal from '../lib/app'
+import App from '../lib/app'
 import state from '../lib/state'
 
 @observer
-export default class App extends Component {
+export default class Application extends Component {
   componentWillMount () {
-    AppGlobal.ipc('get:current:user').then(action('get:current:user', (user) => {
+    App.ipc('get:current:user')
+    .then(action('get:current:user', (user) => {
       state.setUser(user)
     }))
   }

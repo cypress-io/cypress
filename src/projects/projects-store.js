@@ -1,15 +1,15 @@
 import _ from 'lodash'
 import { observable } from 'mobx'
-import ProjectModel from './project-model'
+import Project from './project-store'
 
-class ProjectsCollection {
+class Projects {
   @observable projects = []
 
   setProjects (projectPaths) {
     this.projects = _.map(projectPaths, (path) => (
-      new ProjectModel(path)
+      new Project(path)
     ))
   }
 }
 
-export default new ProjectsCollection()
+export default new Projects()

@@ -18,7 +18,7 @@ describe "Projects List", ->
           .fixture("user").then (@user) ->
             @ipc.handle("get:current:user", null, @user)
             @ipc.handle("get:project:paths", null, [])
-          .get("header a").should ($a) ->
+          .get("nav a").should ($a) ->
             expect($a).to.contain(@user.name)
 
       it "displays email instead of name", ->
@@ -28,7 +28,7 @@ describe "Projects List", ->
 
             @ipc.handle("get:current:user", null, @user)
             @ipc.handle("get:project:paths", null, [])
-          .get("header a").should ($a) ->
+          .get("nav a").should ($a) ->
             expect($a).to.contain(@user.email)
 
     describe "logout of user", ->
@@ -59,7 +59,7 @@ describe "Projects List", ->
             @ipc.handle("get:current:user", null, @user)
             @ipc.handle("get:project:paths", null, [])
 
-      it "displays empty view when no projects", ->
+      it.only "displays empty view when no projects", ->
         cy.get(".empty").contains("Add Project")
 
       it "displays help link", ->
