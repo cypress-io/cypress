@@ -122,15 +122,24 @@ do ($Cypress, _, $) ->
       ## OR GO THROUGH I18N
 
       returnFalse = =>
-        @stopListening @Cypress, "before:log", returnFalse
+        cleanup()
 
         return false
 
+      cleanup = =>
+        @prop("onBeforeLog", null)
+
       ## prevent any additional logs this is an implicit assertion
-      @listenTo @Cypress, "before:log", returnFalse
+      @prop("onBeforeLog", returnFalse)
 
       ## verify the $el exists and use our default error messages
-      $Cypress.Chai.expect($el).to.exist
+      ## TODO: always unbind if our expectation failed
+      try
+        $Cypress.Chai.expect($el).to.exist
+      catch err
+        cleanup()
+
+        throw err
 
     ensureNoCommandOptions: (options) ->
       _.each commandOptions, (opt) =>

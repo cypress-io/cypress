@@ -235,8 +235,8 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
             ## until we see page events
             return if log.get("name") isnt "assert"
 
-            ## when we do immediately stop listening to unbind
-            @stopListening @Cypress, "before:log", setCommandLog
+            ## when we do immediately unbind this function
+            @prop("onBeforeLog", null)
 
             insertNewLog = (log) ->
               cmd.log(log)
@@ -296,7 +296,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
             else
               insertNewLog(log)
 
-          @listenTo @Cypress, "before:log", setCommandLog
+          @prop("onBeforeLog", setCommandLog)
 
         ## send verify=true as the last arg
         assert.apply(@, args.concat(true))

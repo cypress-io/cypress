@@ -247,20 +247,20 @@ describe "$Cypress.Cy Assertion Commands", ->
           logs.push log
 
         @cy.on "fail", (err) ->
-          expect(logs.length).to.eq(5)
+          expect(logs.length).to.eq(6)
 
-          expect(logs[2].get("name")).to.eq("get")
-          expect(logs[2].get("state")).to.eq("failed")
-          expect(logs[2].get("error")).to.eq(err)
-
-          expect(logs[3].get("name")).to.eq("assert")
+          expect(logs[3].get("name")).to.eq("get")
           expect(logs[3].get("state")).to.eq("failed")
-          expect(logs[3].get("error").name).to.eq("AssertionError")
+          expect(logs[3].get("error")).to.eq(err)
+
+          expect(logs[4].get("name")).to.eq("assert")
+          expect(logs[4].get("state")).to.eq("failed")
+          expect(logs[4].get("error").name).to.eq("AssertionError")
 
           done()
 
         @cy
-          .root().should("exist")
+          .root().should("exist").and("contain", "foo")
           .get("button").should("have.length", "asdf")
 
       it "finishes failed assertions and does not log extra commands when cy.contains fails", (done) ->
