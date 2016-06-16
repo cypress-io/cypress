@@ -34,7 +34,7 @@ const Project = observer(() => {
 
   return (
     <div>
-      <ProjectNav />
+      <ProjectNav/>
       <FilesList />
     </div>
   )
