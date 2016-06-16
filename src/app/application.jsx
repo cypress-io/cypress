@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
 import Layout from './layout'
-import ProjectNav from '../project-nav/project-nav'
+import Project from '../project/project'
 import Login from '../login/login'
 
 import App from '../lib/app'
@@ -23,7 +23,7 @@ export default class Application extends Component {
 
     return (
       <Layout>
-        <ProjectNav />
+        <Project />
       </Layout>
     )
   }
