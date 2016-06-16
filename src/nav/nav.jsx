@@ -60,6 +60,9 @@ export default observer(() => {
                 visible={!hasProjects}
                 trigger={['hover']}
                 overlay={tooltip}
+                align={{
+                  points: ['bl', 'tl'], // align bottom left point of sourceNode with top left point of targetNode
+                }}
                 >
                 <a onClick={addProject} href="#">
                   <i className="fa fa-plus"></i>
