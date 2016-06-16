@@ -70,7 +70,7 @@ describe "Projects List", ->
         .fixture("user").then (@user) ->
           @ipc.handle("get:current:user", null, @user)
           @ipc.handle("get:project:paths", null, [])
-        .get(".empty").contains("Add Project")
+        .get(".empty")
 
     # it "add button has tooltip attrs", ->
     #   cy
