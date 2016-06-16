@@ -21,7 +21,7 @@
     "eslint": "^2.12.0",
     "eslint-plugin-react": "^5.1.1",
     "vinyl-fs": "^2.4.3",
-    "zunder": "^3.3.2"
+    "zunder": "^3.3.7"
   },
   "dependencies": {
     "react": "^15.1.0",
