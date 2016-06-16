@@ -291,6 +291,30 @@ describe "$Cypress.Cy Querying Commands", ->
           ## to 300 after successfully finished get method
           expect(@cy._timeout()).to.eq 300
 
+    describe "custom elements", ->
+      ## <foobar>custom element</foobar>
+
+      it "can get a custom element", ->
+        @cy.get("foobar").should("contain", "custom element")
+
+      it "can alias a custom element", ->
+        @cy
+          .get("foobar:last").as("foo")
+          .get("div:first")
+          .get("@foo").should("contain", "custom element")
+
+      it "can find a custom alias again when detached from DOM", ->
+        @cy
+          .get("foobar:last").as("foo")
+          .then ->
+            ## remove the existing foobar
+            @cy.$$("foobar").remove()
+
+            ## and cause it to be re-rendered
+            @cy.$$("body").append(@cy.$$("<foobar>asdf</foobar>"))
+
+          .get("@foo").should("contain", "asdf")
+
     describe "deprecated command options", ->
       beforeEach ->
         @allowErrors()
