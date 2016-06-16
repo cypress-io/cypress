@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import truncate from 'underscore.string/truncate'
 import { computed, observable } from 'mobx'
 
 export default class Project {
@@ -14,7 +15,20 @@ export default class Project {
   }
 
   @computed get name () {
-    return _.last(this.path.split('/'))
+    let splitName = _.last(this.path.split('/'))
+    return truncate(splitName, 20)
+  }
+
+  @computed get displayPath () {
+    const strLength = 30
+    let pathLength = this.path.length
+
+    if (pathLength > 30) {
+      let truncatedPath = this.path.slice((pathLength - 1) - strLength, pathLength)
+      return '...'.concat(truncatedPath)
+    } else {
+      return this.path
+    }
   }
 
   @computed get defaultBrowser () {

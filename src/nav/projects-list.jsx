@@ -57,9 +57,11 @@ export default class ProjectsList extends Component {
     } else {
       return (
         <a href="#">
-          <i className="fa fa-folder"></i>{" "}
-          { project.name }
-          <small>{ project.path }</small>
+          <div className='project-name'>
+            <i className="fa fa-folder"></i>{" "}
+            { project.name }
+          </div>
+          <div className='project-path'>{ project.displayPath }</div>
         </a>
       )
     }

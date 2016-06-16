@@ -34,7 +34,7 @@ describe "Projects List", ->
       cy.contains("a", "Need help?").click().then ->
         expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/installing-and-running/#section-adding-projects")
 
-  describe.only "lists projects", ->
+  describe "lists projects", ->
     beforeEach ->
       cy
         .fixture("user").then (@user) ->
@@ -50,11 +50,11 @@ describe "Projects List", ->
     it "each project shows it's project path", ->
       cy
         .get(".projects-list .dropdown-menu a").first()
-          .should("contain", @projects[0])
+          .should("contain", "/My-Fake-Project")
 
     it "each project has it's folder name", ->
       cy.get(".projects-list .dropdown-menu a")
-        .contains("", "My-Fake-Project")
+        .contains("", " My-Fake-Project")
 
     it "trigger 'open:project' on click of project", ->
       cy
@@ -120,7 +120,7 @@ describe "Projects List", ->
             @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-Fake-Project")
           .then ->
             expect(@App.ipc).to.be.calledWith("add:project")
-          .get(".projects-list button").should("contain", "My-Fake-Project")
+          .get(".projects-list a:first").should("contain", "My-Fake-Project")
 
       it "no longer shows empty projects view", ->
         cy
