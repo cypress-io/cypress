@@ -63,6 +63,15 @@ describe "Projects List", ->
           expect(@App.ipc).to.be.calledWith("open:project")
 
     it "add project within list", ->
+      cy
+        .contains("Projects").click()
+        .get(".add-project").click().then ->
+          expect(@App.ipc).to.be.calledWith("show:directory:dialog")
+
+    it "add button displays tooltip on hover", ->
+      cy
+        .get("nav a").not(".add-project").find(".fa-plus").parent().invoke("hover")
+        .get(".rc-tooltip").contains("Add Project").should("be.visible")
 
   describe "add project", ->
     beforeEach ->
@@ -72,14 +81,12 @@ describe "Projects List", ->
           @ipc.handle("get:project:paths", null, [])
         .get(".empty")
 
-    it.skip "add button displays tooltip on hover", ->
-      cy
-        .get("nav").find(".fa-plus")
-          .should("have.attr", "data-original-title")
-
     it "triggers ipc 'show:directory:dialog on nav +", ->
       cy.get("nav").find(".fa-plus").click().then ->
         expect(@App.ipc).to.be.calledWith("show:directory:dialog")
+
+    it "closes dropdown", ->
+      cy.get(".dropdown-menu").should("not.be.visible")
 
     describe "error thrown", ->
       beforeEach ->

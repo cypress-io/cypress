@@ -32,7 +32,7 @@ export default class ProjectsList extends Component {
 
   _onSelect = (project) => {
     if (project.add) {
-      this._addProject()
+      this.props.addProject(project)
     } else {
       action('project:selected', () => openProject(project))()
     }

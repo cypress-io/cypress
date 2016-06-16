@@ -49,38 +49,37 @@ export default observer(() => {
   const tooltip = hasProjects ? 'Add Project' : 'Choose a folder to begin testing'
 
   return (
-    <nav className="navbar navbar-inverse">
-      <div className="container-fluid">
-        <div className="collapse navbar-collapse">
-          <ul className="nav navbar-nav">
-            <ProjectsList />
+    <nav className='navbar navbar-inverse'>
+      <div className='container-fluid'>
+        <div className='collapse navbar-collapse'>
+          <ul className='nav navbar-nav'>
+            <ProjectsList addProject={addProject}/>
             <li>
               <Tooltip
-                placement="bottom"
+                placement='bottom'
                 visible={!hasProjects}
-                trigger={['hover']}
                 overlay={tooltip}
                 align={{
                   points: ['bl', 'tl'], // align bottom left point of sourceNode with top left point of targetNode
                 }}
                 >
-                <a onClick={addProject} href="#">
-                  <i className="fa fa-plus"></i>
+                <a onClick={addProject} href='#'>
+                  <i className='fa fa-plus'></i>
                 </a>
               </Tooltip>
             </li>
           </ul>
-          <ul className="nav navbar-nav navbar-right">
-            <li className="dropdown">
-              <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                <i className="fa fa-user"></i>{" "}
-                {state.user.displayName}{" "}
-                <span className="caret"></span>
+          <ul className='nav navbar-nav navbar-right'>
+            <li className='dropdown'>
+              <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
+                <i className='fa fa-user'></i>{' '}
+                {state.user.displayName}{' '}
+                <span className='caret'></span>
               </a>
-              <ul className="dropdown-menu">
-                <li><a href="#">Billing</a></li>
-                <li role="separator" className="divider"></li>
-                <li><a href="#" onClick={logout}>Log Out</a></li>
+              <ul className='dropdown-menu'>
+                <li><a href='#'>Billing</a></li>
+                <li role='separator' className='divider'></li>
+                <li><a href='#' onClick={logout}>Log Out</a></li>
               </ul>
             </li>
           </ul>
