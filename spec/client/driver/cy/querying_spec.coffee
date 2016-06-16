@@ -292,26 +292,26 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@cy._timeout()).to.eq 300
 
     describe "custom elements", ->
-      ## <foobar>custom element</foobar>
+      ## <foobarbazquux>custom element</foobarbazquux>
 
       it "can get a custom element", ->
-        @cy.get("foobar").should("contain", "custom element")
+        @cy.get("foobarbazquux").should("contain", "custom element")
 
       it "can alias a custom element", ->
         @cy
-          .get("foobar:last").as("foo")
+          .get("foobarbazquux:last").as("foo")
           .get("div:first")
           .get("@foo").should("contain", "custom element")
 
       it "can find a custom alias again when detached from DOM", ->
         @cy
-          .get("foobar:last").as("foo")
+          .get("foobarbazquux:last").as("foo")
           .then ->
-            ## remove the existing foobar
-            @cy.$$("foobar").remove()
+            ## remove the existing foobarbazquux
+            @cy.$$("foobarbazquux").remove()
 
             ## and cause it to be re-rendered
-            @cy.$$("body").append(@cy.$$("<foobar>asdf</foobar>"))
+            @cy.$$("body").append(@cy.$$("<foobarbazquux>asdf</foobarbazquux>"))
 
           .get("@foo").should("contain", "asdf")
 
