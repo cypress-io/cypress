@@ -47,9 +47,11 @@ module.exports = {
 
   getRendererArgs: (coords) ->
     common = {
-      width: 300
+      backgroundColor: '#dfe2e4'
+      width: 570
       height: 400
-      resizable: false
+      minWidth: 400
+      minHeight: 400
       type: "INDEX"
       onBlur: ->
         return if @webContents.isDevToolsOpened()
@@ -71,9 +73,9 @@ module.exports = {
   platformArgs: ->
     {
       darwin: {
-        show:        false
-        frame:       false
-        transparent: true
+        show:        true
+        frame:       true
+        transparent: false
       }
 
       linux: {
