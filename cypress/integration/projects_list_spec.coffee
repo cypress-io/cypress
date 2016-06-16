@@ -22,7 +22,7 @@ describe "Projects List", ->
       cy.get("projects-list").should("not.exist")
 
     it "opens tooltip on add button", ->
-      cy.get(".rc-tooltip").contains("Add")
+      cy.get(".rc-tooltip").contains("Choose a folder to begin testing")
 
     it "displays empty view when no projects", ->
       cy.get(".empty").contains("Add your first project")

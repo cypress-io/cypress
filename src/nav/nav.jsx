@@ -46,7 +46,7 @@ const addProject = () => {
 
 export default observer(() => {
   const hasProjects = !!projectsStore.projects.length
-  const tooltip = hasProjects ? 'Add project' : 'Add a friggin project first!'
+  const tooltip = hasProjects ? 'Add Project' : 'Choose a folder to begin testing'
 
   return (
     <nav className="navbar navbar-inverse">
