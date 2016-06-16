@@ -1,4 +1,4 @@
-import { observable } from 'mobx'
+import { computed, observable } from 'mobx'
 
 export default class User {
   @observable id
@@ -11,5 +11,9 @@ export default class User {
     this.name = user.name
     this.email = user.email
     this.session_token = user.session_token
+  }
+
+  @computed get displayName () {
+    return this.name || this.email
   }
 }

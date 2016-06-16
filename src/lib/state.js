@@ -1,6 +1,6 @@
 import { observable, asReference } from 'mobx'
 
-import User from '../lib/user-store'
+import User from '../lib/user-model'
 
 export default observable({
   user: null,

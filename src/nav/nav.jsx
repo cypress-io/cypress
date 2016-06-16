@@ -71,7 +71,7 @@ export default observer(() => {
             <li className="dropdown">
               <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                 <i className="fa fa-user"></i>{" "}
-                {state.user.name}{" "}
+                {state.user.displayName}{" "}
                 <span className="caret"></span>
               </a>
               <ul className="dropdown-menu">
