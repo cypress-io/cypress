@@ -1,15 +1,31 @@
+import _ from 'lodash'
 import React from 'react'
+import Hook from './hook'
 
-const Test = ({ indent, title }) => (
+const NoCommands = () => (
+  <div className='no-commands'>
+    No commands were issued in this test.
+  </div>
+)
+
+const Hooks = ({ model }) => (
+  <ul className='hooks-container'>
+    {_.map(model.hooks, (hook) => <Hook key={hook.id} model={hook} />)}
+  </ul>
+)
+
+const hasCommands = (hooks) => !!_.flatMap(hooks, 'commands').length
+
+const Test = ({ model }) => (
   <li className='test runnable passed'>
-    <div className='runnable-wrapper' style={{ paddingLeft: indent }}>
+    <div className='runnable-wrapper' style={{ paddingLeft: model.indent }}>
       <div className='runnable-content-region'>
         <div>
           <div className='runnable-state'>
             <span className='test-state'>
               <i className='fa'></i>
             </span>
-            <span className='test-title'>{title}</span>
+            <span className='test-title'>{model.title}</span>
           </div>
           <div className='runnable-controls'>
             <i className='fa fa-warning'></i>
@@ -78,32 +94,7 @@ const Test = ({ indent, title }) => (
           </div>
         </div>
         <div className='runnable-commands-region'>
-          <ul className='hooks-container'>
-            <li className='hook-item'>
-              <span className='hook-name'>
-              <i className='fa fa-caret-down'></i>
-              test
-              <span className='hook-failed hidden'>(failed)</span>
-                <i className='fa fa-ellipsis-h hidden'></i>
-              </span>
-              <ul className='commands-container'>
-                <li className='command-assertion-passed command-type-parent command-name-assert command-parent'>
-                  <div className='command-wrapper'>
-                    <span className='command-number'>
-                      <span>1</span>
-                    </span>
-                    <span className='command-method' style={{ paddingLeft: 0 }}>
-                      <span>assert</span>
-                    </span>
-                    <span className='command-message'>
-                      <span data-js='message'>expected: <strong>true</strong> to be true</span>
-                    </span>
-                    <span className='command-controls'></span>
-                  </div>
-                </li>
-              </ul>
-            </li>
-          </ul>
+          {hasCommands(model.hooks) ? <Hooks model={model} /> : <NoCommands />}
         </div>
       </div>
       <span className='hook'></span>

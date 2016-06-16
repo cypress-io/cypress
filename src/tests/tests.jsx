@@ -2,7 +2,7 @@ import _ from 'lodash'
 import React from 'react'
 import Runnable from './runnable'
 
-const Empty = (props) => (
+const Empty = ({ spec }) => (
   <div className='no-tests'>
     <h4>
       <i className='fa fa-warning'></i>
@@ -11,7 +11,7 @@ const Empty = (props) => (
         <i className='fa fa-question-circle'></i>
       </a>
     </h4>
-    <pre>{props.spec}</pre>
+    <pre>{spec}</pre>
     <ul>
       <li>Have you written any tests?</li>
       <li>Are there typo’s or syntax errors?</li>
@@ -21,9 +21,9 @@ const Empty = (props) => (
   </div>
 )
 
-const Runnables = (props) => (
+const Runnables = ({ tests }) => (
   <ul className='runnables'>
-    {_.map(props.tests, (runnable) => <Runnable key={runnable.id} {...runnable} />)}
+    {_.map(tests, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
   </ul>
 )
 
