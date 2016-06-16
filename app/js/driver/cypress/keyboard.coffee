@@ -203,10 +203,12 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       _.defaults options,
         delay: 10
         onEvent: ->
+        onBeforeEvent: ->
         onBeforeType: ->
         onTypeChange: ->
         onEnterPressed: ->
         onNoMatchingSpecialChars: ->
+        onBeforeSpecialCharAction: ->
 
       el = options.$el.get(0)
 
@@ -409,11 +411,15 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
           which: which
         }
 
+      args = [options.id, key, eventType, charCodeAt]
+
+      ## give the driver a chance to bail on this event
+      ## if we return false here
+      return if options.onBeforeEvent.apply(@, args) is false
+
       dispatched = el.dispatchEvent(event)
 
-      args = [options.id, key, eventType, dispatched]
-
-      args.push(charCodeAt) if charCodeAt
+      args.push(dispatched)
 
       options.onEvent.apply(@, args)
 
@@ -442,7 +448,11 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       if @simulateKey(el, "keydown", key, options)
         if @simulateKey(el, "keypress", key, options)
           if @simulateKey(el, "textInput", key, options)
-            fn.call(@) if fn
+
+            ## only call this function is we haven't been told to not to
+            if fn and options.onBeforeSpecialCharAction.call(@, options.id, options.key) isnt false
+              fn.call(@)
+
             @simulateKey(el, "input", key, options)
 
             ## store the afterKey value so we know

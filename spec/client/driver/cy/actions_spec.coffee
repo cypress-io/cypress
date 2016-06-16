@@ -431,20 +431,6 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get(":text:first").type("foo{enter}")
 
-    describe "input types where no extra formatting required", ->
-      _.each ["password", "email", "number", "search", "url", "tel"], (type) ->
-        it "accepts input [type=#{type}]", ->
-          input = @cy.$$("<input type='#{type}' id='input-type-#{type}' />")
-
-          @cy.$$("body").append(input)
-
-          @cy.get("#input-type-#{type}").type("1234").then ($input) ->
-            expect($input).to.have.value "1234"
-            expect($input.get(0)).to.eq input.get(0)
-
-    ## we will need extra tests and logic for input types date, time, month, & week
-    ## see issue https://github.com/cypress-io/cypress/issues/27
-
     it "waits until element stops animating", (done) ->
       retries = []
       input   = $("<input class='slidein' />")
@@ -490,6 +476,118 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get(":text:first").type("foo").then ->
         expect(clicks).to.eq(1)
         expect(retried).to.be.true
+
+    ## we will need extra tests and logic for input types date, time, month, & week
+    ## see issue https://github.com/cypress-io/cypress/issues/27
+    describe "input types where no extra formatting required", ->
+      _.each ["password", "email", "number", "search", "url", "tel"], (type) ->
+        it "accepts input [type=#{type}]", ->
+          input = @cy.$$("<input type='#{type}' id='input-type-#{type}' />")
+
+          @cy.$$("body").append(input)
+
+          @cy.get("#input-type-#{type}").type("1234").then ($input) ->
+            expect($input).to.have.value "1234"
+            expect($input.get(0)).to.eq input.get(0)
+
+    describe "tabindex", ->
+      beforeEach ->
+        @$div = @cy.$$("#tabindex")
+
+      it "receives keydown, keyup, keypress", ->
+        keydown  = false
+        keypress = false
+        keyup    = false
+
+        @$div.keydown ->
+          keydown = true
+
+        @$div.keypress ->
+          keypress = true
+
+        @$div.keyup ->
+          keyup = true
+
+        @cy.get("#tabindex").type("a").then ->
+          expect(keydown).to.be.true
+          expect(keypress).to.be.true
+          expect(keyup).to.be.true
+
+      it "does not receive textInput", ->
+        textInput = false
+
+        @$div.on "textInput", ->
+          textInput = true
+
+        @cy.get("#tabindex").type("f").then ->
+          expect(textInput).to.be.false
+
+      it "does not receive input", ->
+        input = false
+
+        @$div.on "input", ->
+          input = true
+
+        @cy.get("#tabindex").type("f").then ->
+          expect(input).to.be.false
+
+      it "does not receive change event", ->
+        innerText = @$div.text()
+
+        change = false
+
+        @$div.on "change", ->
+          change = true
+
+        @cy.get("#tabindex").type("foo{enter}").then ($el) ->
+          expect(change).to.be.false
+          expect($el.text()).to.eq(innerText)
+
+      it "does not change inner text", ->
+        innerText = @$div.text()
+
+        @cy.get("#tabindex").type("foo{leftarrow}{del}{rightarrow}{enter}").should("have.text", innerText)
+
+      it "receives focus", ->
+        focus = false
+
+        @$div.focus ->
+          focus = true
+
+        @cy.get("#tabindex").type("f").then ->
+          expect(focus).to.be.true
+
+      it "receives blur", ->
+        blur = false
+
+        @$div.blur ->
+          blur = true
+
+        @cy
+          .get("#tabindex").type("f")
+          .get("input:first").focus().then ->
+            expect(blur).to.be.true
+
+      it "receives keydown and keyup for other special characters and keypress for enter and regular characters", ->
+        keydowns = []
+        keyups = []
+        keypresses = []
+
+        @$div.keydown (e) ->
+          keydowns.push(e)
+
+        @$div.keypress (e) ->
+          keypresses.push(e)
+
+        @$div.keyup (e) ->
+          keyups.push(e)
+
+        @cy
+          .get("#tabindex").type("f{leftarrow}{rightarrow}{enter}")
+          .then ->
+            expect(keydowns).to.have.length(4)
+            expect(keypresses).to.have.length(2)
+            expect(keyups).to.have.length(4)
 
     describe "delay", ->
       beforeEach ->
