@@ -15,7 +15,8 @@ const logout = () => {
   }))
 }
 
-const addProject = () => {
+const addProject = (e) => {
+  if (e) { e.preventDefault() }
   let project
 
   App.ipc("show:directory:dialog")
@@ -77,9 +78,12 @@ export default observer(() => {
                 <span className='caret'></span>
               </a>
               <ul className='dropdown-menu'>
-                <li><a href='#'>Billing</a></li>
-                <li role='separator' className='divider'></li>
-                <li><a href='#' onClick={logout}>Log Out</a></li>
+                <li>
+                  <a href='#' onClick={logout}>
+                    <i className="fa fa-sign-out"></i>{' '}
+                    Log Out
+                  </a>
+                </li>
               </ul>
             </li>
           </ul>
