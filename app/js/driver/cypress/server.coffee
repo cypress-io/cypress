@@ -1,4 +1,4 @@
-$Cypress.Server = do ($Cypress, _) ->
+$Cypress.Server = do ($Cypress, _, minimatch) ->
 
   regularResourcesRe       = /\.(jsx?|coffee|html|less|s?css|svg)(\?.*)?$/
   isCypressHeaderRe        = /^X-Cypress-/i
@@ -57,6 +57,7 @@ $Cypress.Server = do ($Cypress, _) ->
     onAnyAbort: undefined
     onAnyRequest: undefined
     onAnyResponse: undefined
+    urlMatchingOptions: { matchBase: true }
     stripOrigin: _.identity
     getUrlOptions: _.identity
     whitelist: whitelist ## function whether to allow a request to go out (css/js/html/templates) etc
@@ -315,18 +316,32 @@ $Cypress.Server = do ($Cypress, _) ->
         is404: true
       }
 
-    xhrMatchesRoute: (xhr, route) ->
+    urlsMatch: (routePattern, fullyQualifiedUrl) ->
+      match = (str, pattern) =>
+        ## be nice to our users and prepend
+        ## pattern with "/" if it doesnt have one
+        ## and str does
+        if pattern[0] isnt "/" and str[0] is "/"
+          pattern = "/" + pattern
+
+        minimatch.js(str, pattern, @options.urlMatchingOptions)
+
       testRe = (url1, url2) ->
-        route.url.test(url1) or route.url.test(url2)
+        routePattern.test(url1) or routePattern.test(url2)
 
       testStr = (url1, url2) ->
-        route.url is url1 or route.url is url2
+        (routePattern is url1) or
+          (routePattern is url2) or
+            match(url1, routePattern) or
+              match(url2, routePattern)
 
-      xhr.method is route.method and
-        if _.isRegExp(route.url)
-          testRe(xhr.url, @options.stripOrigin(xhr.url))
-        else
-          testStr(xhr.url, @options.stripOrigin(xhr.url))
+      if _.isRegExp(routePattern)
+        testRe(fullyQualifiedUrl, @options.stripOrigin(fullyQualifiedUrl))
+      else
+        testStr(fullyQualifiedUrl, @options.stripOrigin(fullyQualifiedUrl))
+
+    xhrMatchesRoute: (xhr, route) ->
+      xhr.method is route.method and @urlsMatch(route.url, xhr.url)
 
     add: (xhr, attrs = {}) ->
       _.extend(xhr, attrs)

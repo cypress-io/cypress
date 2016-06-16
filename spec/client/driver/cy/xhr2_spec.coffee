@@ -596,7 +596,6 @@ describe "$Cypress.Cy XHR Commands", ->
             xhr.abort()
             null
 
-
     describe "request parsing", ->
       beforeEach ->
         @setup()

@@ -1,4 +1,4 @@
-window.$Cypress = do ($, _, Backbone, Promise) ->
+window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
   class $Cypress
     constructor: ->
@@ -157,6 +157,8 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
     Blob: window.blobUtil
 
     Promise: Promise
+
+    minimatch: minimatch.js
 
     _.extend $Cypress.prototype.$, _($).pick("Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 

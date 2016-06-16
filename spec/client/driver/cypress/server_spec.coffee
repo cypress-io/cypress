@@ -146,7 +146,7 @@ describe "$Cypress.Cy Server API", ->
       @xhr.open("GET", "/fixtures/ajax/app.json")
       @proxy = @server.getProxyFor(@xhr)
 
-    it.only "encodes the http header value", ->
+    it "encodes the http header value", ->
       route = {
         response: {"test": "We’ll"}
       }
@@ -244,6 +244,47 @@ describe "$Cypress.Cy Server API", ->
       ## http://localhost:3500/specs/api/cypress/server_spec -> http://localhost:3500/specs/api/cypress
       path = window.location.origin + window.location.pathname.split("/").slice(0, -1).join("/")
       @expectUrlToEq("foo/bar.html", "#{path}/foo/bar.html")
+
+  context "#urlsMatch", ->
+    beforeEach ->
+      @server = $Cypress.Server.create({
+        stripOrigin: (url) ->
+          location = $Cypress.Location.parse(url)
+          url.replace(location.origin, "")
+      })
+
+      @matches = (url1, url2) ->
+        expect(@server.urlsMatch(url1, url2)).to.be.true
+
+      @notMatches = (url1, url2) ->
+        expect(@server.urlsMatch(url1, url2)).to.be.false
+
+    it "matches fully qualified route", ->
+      @matches("http://localhost:2020/foo", "http://localhost:2020/foo")
+
+    it "matches absolute relative route", ->
+      @matches("/foo", "http://localhost:2020/foo")
+
+    it "prepends with forward slash on glob", ->
+      @matches("foo/bar", "http://localhost:2020/foo/bar")
+
+    it "uses default urlMatchingOptions", ->
+      ## test that matchBase is true by default
+      expect(@server.options.urlMatchingOptions).to.deep.eq({matchBase: true})
+
+      @matches("foo", "http://localhost:2020/a/b/c/foo")
+
+    it "prepends with forward slash", ->
+      @matches("foo/*", "http://localhost:2020/foo/123")
+
+    it "use glob stars", ->
+      @matches("/users/**", "https://localhost:2020/users/foo/bar?a=1")
+
+    it "use glob stars between url segments", ->
+      @matches("/users/*/comments/*", "http://localhost:2020/users/1/comments/2")
+
+    it "matches with regex", ->
+      @matches(/foo/, "http://localhost:2020/foo/bar/baz/123")
 
   context "XHR#abort", ->
     beforeEach ->
