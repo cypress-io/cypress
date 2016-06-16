@@ -25,7 +25,7 @@ describe "Projects List", ->
       cy.get(".rc-tooltip").contains("Add")
 
     it "displays empty view when no projects", ->
-      cy.get(".empty").contains("Add Project")
+      cy.get(".empty").contains("Add your first project")
 
     it "displays help link", ->
       cy.contains("a", "Need help?")

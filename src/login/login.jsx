@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import { action } from 'mobx'
 import React, { Component } from 'react'
-import AppGlobal from '../lib/app'
+import App from '../lib/app'
 import state from '../lib/state'
 
 export default class Login extends Component {
@@ -50,7 +50,7 @@ export default class Login extends Component {
   _login = () => {
     const alreadyOpen = (err) => err && err.alreadyOpen
 
-    AppGlobal.ipc("window:open", {
+    App.ipc("window:open", {
       position: "center",
       focus: true,
       width: 1000,
@@ -62,11 +62,11 @@ export default class Login extends Component {
     .then((code) => {
       // TODO: supposed to focus the window here!
       // i think this is for linux
-      // AppGlobal.execute "gui:focus"
+      // App.execute "gui:focus"
       this.setState({ isLoggingIn: true })
 
       // now actually log in
-      return AppGlobal.ipc("log:in", code)
+      return App.ipc("log:in", code)
     })
     .then(action('log:in', (user) => {
       state.setUser(user)
@@ -106,10 +106,10 @@ export default class Login extends Component {
   }
 
   _openHelp () {
-    AppGlobal.ipc('external:open', 'https://docs.cypress.io')
+    App.ipc('external:open', 'https://docs.cypress.io')
   }
 
   _openAuthDoc () {
-    AppGlobal.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running#section-your-email-has-not-been-authorized-')
+    App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running#section-your-email-has-not-been-authorized-')
   }
 }
