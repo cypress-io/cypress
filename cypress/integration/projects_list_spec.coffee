@@ -34,7 +34,7 @@ describe "Projects List", ->
       cy.contains("a", "Need help?").click().then ->
         expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/installing-and-running/#section-adding-projects")
 
-  describe "lists projects", ->
+  describe.only "lists projects", ->
     beforeEach ->
       cy
         .fixture("user").then (@user) ->
@@ -45,21 +45,21 @@ describe "Projects List", ->
     it "displays projects in list", ->
       cy
         .get(".empty").should("not.be.visible")
-        .get(".projects-list a:not(.add-project)").should("have.length", @projects.length)
+        .get(".projects-list .dropdown-menu a:not(.add-project)").should("have.length", @projects.length)
 
     it "each project shows it's project path", ->
       cy
-        .get(".projects-list a").first()
+        .get(".projects-list .dropdown-menu a").first()
           .should("contain", @projects[0])
 
     it "each project has it's folder name", ->
-      cy.get(".projects-list a")
+      cy.get(".projects-list .dropdown-menu a")
         .contains("", "My-Fake-Project")
 
     it "trigger 'open:project' on click of project", ->
       cy
         .contains("Projects").click()
-        .get(".projects-list a").first().click().should ->
+        .get(".projects-list .dropdown-menu a").first().click().should ->
           expect(@App.ipc).to.be.calledWith("open:project")
 
     it "add project within list", ->
@@ -72,18 +72,14 @@ describe "Projects List", ->
           @ipc.handle("get:project:paths", null, [])
         .get(".empty")
 
-    # it "add button has tooltip attrs", ->
-    #   cy
-    #     .get("nav").find(".fa-plus")
-    #       .should("have.attr", "data-original-title")
+    it.skip "add button displays tooltip on hover", ->
+      cy
+        .get("nav").find(".fa-plus")
+          .should("have.attr", "data-original-title")
 
     it "triggers ipc 'show:directory:dialog on nav +", ->
       cy.get("nav").find(".fa-plus").click().then ->
         expect(@App.ipc).to.be.calledWith("show:directory:dialog")
-
-    # it "triggers ipc 'show:directory:dialog on empty view +", ->
-    #   cy.get(".empty").find(".btn[data-js='add-project']").click().then ->
-    #     expect(@App.ipc).to.be.calledWith("show:directory:dialog")
 
     describe "error thrown", ->
       beforeEach ->
@@ -96,12 +92,6 @@ describe "Projects List", ->
           .get(".error")
             .should("be.visible")
             .and("contain", "something bad happened")
-
-      # it "goes back to projects view on dismiss", ->
-      #   cy
-      #     .contains(".btn", "Dismiss").click().then ->
-      #       @ipc.handle("get:project:paths", null, [])
-      #     .get(".empty").should("be.visible")
 
     describe "directory dialog dismissed", ->
       beforeEach ->
@@ -140,33 +130,7 @@ describe "Projects List", ->
             expect(@App.ipc).to.be.calledWith("add:project")
           .get(".empty").should("not.exist")
 
-      # it "displays project row with spinner", ->
-      #   @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-Fake-Project")
+      it.skip "displays project loading with spinner", ->
+        @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-Fake-Project")
 
-      #   cy.get(".project.loading").find(".fa-spin").should("be.visible")
-
-
-  # describe "remove project", ->
-  #   beforeEach ->
-  #     cy
-  #       .fixture("user").then (@user) ->
-  #         @ipc.handle("get:current:user", null, @user)
-  #       .fixture("projects").then (@projects) ->
-  #         @ipc.handle("get:project:paths", null, @projects)
-  #       .get("#projects-container>li").first()
-  #         .invoke("trigger", "contextmenu")
-
-  #   it "displays 'remove' link on right click", ->
-  #     cy
-  #       .get("a").contains("Remove project").should("be.visible")
-
-  #   it "triggers remove:project with path on right click", ->
-  #     cy
-  #       .get("a").contains("Remove project").click().then ->
-  #         expect(@App.ipc).to.be.calledWith("remove:project", @projects[0])
-
-  #   it "removes the project from the list", ->
-  #     cy
-  #       .get("#projects-container>li").should("have.length", @projects.length)
-  #       .get("a").contains("Remove project").click()
-  #       .get("#projects-container>li").should("have.length", @projects.length - 1)
+        cy.get(".project.loading").find(".fa-spin").should("be.visible")

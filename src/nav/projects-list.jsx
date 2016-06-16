@@ -20,6 +20,7 @@ export default class ProjectsList extends Component {
     return (
       <Dropdown
         className='projects-list'
+        icon='folder-open'
         chosen={chosen}
         others={other}
         onSelect={this._onSelect}

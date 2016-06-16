@@ -51,9 +51,9 @@ export default observer(() => {
   return (
     <nav className="navbar navbar-inverse">
       <div className="container-fluid">
-        <ProjectsList />
         <div className="collapse navbar-collapse">
           <ul className="nav navbar-nav">
+            <ProjectsList />
             <li>
               <Tooltip
                 placement="bottom"

@@ -11,14 +11,24 @@ class Dropdown extends Component {
 
   render () {
     return (
-      <div className={cs('dropdown', this.props.className, { open: this.state.open })}>
-        <button onClick={this._toggleOpen}>
-          {this.props.renderItem(this.props.chosen)}
+      <li className={cs('dropdown', this.props.className, { open: this.state.open })}>
+        <a onClick={this._toggleOpen}>
+          {this._icon()}{' '}
+          {this.props.renderItem(this.props.chosen)}{' '}
           {this._caret()}
-        </button>
+        </a>
         {this._items()}
-      </div>
+      </li>
     )
+  }
+
+  _icon () {
+    if (this.props.icon) {
+      return (
+        <i className={`fa fa-${this.props.icon}`}></i>
+      )
+    }
+
   }
 
   _caret () {
@@ -60,6 +70,7 @@ class Dropdown extends Component {
 
 Dropdown.propTypes = {
   className: PropTypes.string,
+  icon: PropTypes.string,
   chosen: PropTypes.object.isRequired,
   others: PropTypes.arrayOf(PropTypes.object).isRequired,
   onSelect: PropTypes.func.isRequired,
