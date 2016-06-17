@@ -26,7 +26,7 @@ Set a route matching the specific `url` which is not stubbed but can be waited o
 
 # [cy.route( *url*, *response* )](#section-url-and-response-usage)
 
-Set a route matching the `url` stubbed with the supplied `response`. This will match `GET` request methods. When stubbing the response for a route, [cy.server](https://on.cypress.io/api/server) must be started first.
+Set a route matching the `url` stubbed with the supplied `response`. This will match `GET` request methods.
 
 ***
 
@@ -38,7 +38,15 @@ Set a route matching the specific `method` and `url` which is not stubbed but ca
 
 # [cy.route( *method*, *url*, *response* )](#section-method-url-and-response-usage)
 
-Set a route matching the `method` and `url` stubbed with the supplied `response`. When stubbing the response for a route, [cy.server](https://on.cypress.io/api/server) must be started first.
+Set a route matching the `method` and `url` stubbed with the supplied `response`.
+
+***
+
+# [cy.route( *function* )](#section-function-usage)
+
+Set a route by returning an object literal from your callback function.
+
+Functions which return a promise will automatically be awaited.
 
 ***
 
@@ -116,6 +124,53 @@ cy
 
 ***
 
+## Url as a string glob
+
+As of `0.16.3` we now accept glob patterns. Under the hood Cypress is using [minimatch](https://github.com/isaacs/minimatch) to match glob patterns with URL's.
+
+This means you can take advantage of `*` and `**` support. This makes it **much** easier to route against dynamic segments without having to build up a complex `regex`.
+
+We expose [`Cypress.minimatch`](https://on.cypress.io/api/minimatch) as a function which you can use in your Dev Tools console to test routes. You can iterate much faster on a working pattern than guessing at why something isn't working.
+
+```javascript
+// match against any user id
+// /users/123/comments     <-- matches
+// /users/123/comments/465 <-- not matches
+cy
+  .server()
+  .route("/users/*/comments")
+```
+
+```javascript
+// use ** glob to match all segments
+// /posts/1            <-- matches
+// /posts/foo/bar/baz  <-- matches
+// /posts/quuz?a=b&1=2 <-- matches
+cy
+  .server()
+  .route("/posts/**")
+```
+
+***
+
+## Override Url options
+
+When we check `glob` patterns with `minimatch` by default we use `{ matchBase: true}`.
+
+You can override these options in `cy.server`.
+
+If you'd like to permanently override these options you can do so by setting [`Cypress.Server.defaults(...)`](https://on.cypress.io/api/api-server).
+
+```javascript
+cy
+  .server({
+    urlMatchingOptions: { matchBase: false, dot: true }
+  })
+  .route(...)
+```
+
+***
+
 ## Url as a RegExp
 
 When passing a RegExp as the `url`, the XHR's url will be tested against the regular expression and will apply if it passes.
@@ -171,6 +226,27 @@ $("form").submit(function(){
 1. The `GET /users` will match our 1st route and respond with a 200 status code and the array of users.
 2. The `POST /messages` will match our 2nd route and respond with a 200 status code with the message object.
 3. The `GET /updates` did not match any routes and its response automatically sent back a 404 status code with an empty response body.
+
+***
+
+## Matching origins and non origin URL's
+
+When Cypress matches up an outgoing XHR request to a `cy.route` it actually attempts to match it against both the fully qualified URL and then additionally without the URL's origin.
+
+```javascript
+cy.route("/users/*")
+```
+
+The following XHR's which were `xhr.open(...)` with these URLs would:
+
+**Match**
+- /users/1
+- http://localhost:2020/users/2
+- https://google.com/users/3
+
+**Not Match**
+- /users/4/foo
+- http://localhost:2020/users/5/foo
 
 ***
 
@@ -237,6 +313,43 @@ cy.route({
 
 ***
 
+# Function Usage
+
+## Set the routing options by a callback function
+
+```javascript
+cy.route(function(){
+  // ...do some custom logic here..
+
+  // and return an appropriate routing object here
+  return {
+    method: "POST",
+    url: "/users/*/comments",
+    response: this.commentsFixture
+  }
+})
+```
+
+## Functions which return promises are awaited
+
+```javascript
+cy.route(function(){
+  // a silly example of async return
+  return new Cypress.Promise(function(resolve){
+    // resolve this promise after 1 second
+    setTimeout(function(){
+      resolve({
+        method: "PUT"
+        url: "/posts/**"
+        response: "@postFixture"
+      })
+    }, 1000)
+  })
+})
+```
+
+***
+
 # Notes
 
 ## Understanding Stubbed vs Regular XHR's
@@ -289,12 +402,48 @@ cy
 
 ```javascript
 cy
-  .fixture("users").then(function(json){
-    cy.route("GET", /users/, json)
+  // route after receiving the fixture and
+  // working with the data
+  .fixture("users").then(function(users){
+
+    // work with the users array here
+    cy.route("GET", /users/, users[0])
   })
 ```
 
+You can also reference fixtures as strings directly in the response
+
+```javascript
+// we can link responses to fixtures simply
+// by passing the fixture string with an '@'
+// just like how you use aliases in
+// cy.get(...) and cy.wait(...)
+cy
+  .fixture("user").as("fxUser")
+  .route("POST", "/users/*", "@fxUser")
+```
+
 You can [read more about fixtures here.](https://on.cypress.io/api/fixture)
+
+***
+
+## Using Response Functions
+
+You can also use a function as a response which enables you to add logic surrounding the response.
+
+Functions which return promises will automatically be awaited.
+
+```javascript
+var commentsResponse = function(routeData){
+  //routeData is a reference to the current route's information
+
+  return {
+    data: someOtherFunction(routeData)
+  }
+}
+
+cy.route("POST", "/comments/**", commentsResponse)
+```
 
 ***
 

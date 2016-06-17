@@ -50,6 +50,7 @@ Option | Default | Notes
 --- | --- | ---
 `enable` | `true` | Pass `false` to disable existing route stubs
 `force404` | `false` | Forces requests that don't match your routes to be sent back `404`.
+`urlMatchingOptions` | `{ matchBase: true }` | The default options passed to `minimatch` when using glob strings to match URLs
 `whitelist` | function | Callback function that whitelists requests from ever being logged or stubbed. By default this matches against asset-like requests such as `.js`, `.jsx`, `.html`, and `.css`
 
 ***
