@@ -6,7 +6,6 @@ describe "Projects List", ->
         {@ipc, @App} = win
 
         @agents = cy.agents()
-
         @agents.spy(@App, "ipc")
 
         @ipc.handle("get:options", null, {})

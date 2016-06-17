@@ -7,6 +7,14 @@
   z-index: 10;
   bottom: 0;
   font-size: 10px;
-  line-height: $footer-height;
+  line-height: 18px;
   color: #eee;
+
+  a {
+    color: #eee;
+
+    &:hover {
+      color: #fff;
+    }
+  }
 }

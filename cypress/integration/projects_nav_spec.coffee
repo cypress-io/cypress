@@ -33,7 +33,6 @@ describe "Projects Nav", ->
           @ipc.handle("get:project:paths", null, @projects)
 
       cy
-        .contains("Projects").click()
         .get(".projects-list .dropdown-menu a")
           .contains(@firstProjectName).as("firstProject").click()
 
@@ -90,30 +89,42 @@ describe "Projects Nav", ->
           clientUrlDisplay: "http://localhost:2020"
         }
 
-        cy
-          .fixture("browsers").then (@browsers) ->
-            @config.browsers = @browsers
-            @ipc.handle("open:project", null, @config)
+      describe "browsers available", ->
+        beforeEach ->
+          cy
+            .fixture("browsers").then (@browsers) ->
+              @config.browsers = @browsers
+              @ipc.handle("open:project", null, @config)
 
-      it "lists browsers", ->
-        cy.get(".browsers-list")
+        it "lists browsers", ->
+          cy.get(".browsers-list")
 
-      it.skip "displays default browser name in chosen", ->
-        cy
-          .get(".browsers-list>a").first()
-            .should("contain", "Chrome")
+        it.skip "displays default browser name in chosen", ->
+          cy
+            .get(".browsers-list>a").first()
+              .should("contain", "Chrome")
 
-      it "displays default browser icon in chosen", ->
-        cy
-          .get(".browsers-list>a").first()
-            .find(".fa-chrome")
+        it "displays default browser icon in chosen", ->
+          cy
+            .get(".browsers-list>a").first()
+              .find(".fa-chrome")
 
-      it.skip "switch chosen browser", ->
-        cy
-          .get(".browsers-list>a").first().click()
-          .root().contains("Canary").click()
-          .get(".browsers-list>a").first()
-            .should("contains", "Canary")
+        it.skip "switch chosen browser", ->
+          cy
+            .get(".browsers-list>a").first().click()
+            .root().contains("Canary").click()
+            .get(".browsers-list>a").first()
+              .should("contains", "Canary")
+
+      describe "no browsers available", ->
+        beforeEach ->
+          @config.browsers = []
+          @ipc.handle("open:project", null, @config)
+
+        it "does not list browsers", ->
+          cy.get(".browsers-list").should("not.exist")
+
+        it.skip "displays error about no browsers", ->
 
     context "server running status", ->
       it "displays as Running on project open", ->
