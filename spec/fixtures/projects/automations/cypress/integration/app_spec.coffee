@@ -20,6 +20,8 @@ describe "Automations", ->
           xhr.send()
         .wait("@getApi")
           .its("url").should("include", "api/v1")
+        .then ->
+          Cypress.Cookies.clearCypressCookies()
 
   context "Screenshots", ->
     it "can take a screenshot", ->
