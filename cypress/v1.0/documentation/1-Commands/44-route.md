@@ -130,7 +130,7 @@ As of `0.16.3` we now accept glob patterns. Under the hood Cypress is using [min
 
 This means you can take advantage of `*` and `**` support. This makes it **much** easier to route against dynamic segments without having to build up a complex `regex`.
 
-We expose [`Cypress.minimatch`](https://on.cypress.io/api/minimatch) as a function which you can use in your Dev Tools console to test routes. You can iterate much faster on a working pattern than guessing at why something isn't working.
+We expose [`Cypress.minimatch`](https://on.cypress.io/api/cypress-minimatch) as a function which you can use in your Dev Tools console to test routes. You can iterate much faster on a working pattern than guessing at why something isn't working.
 
 ```javascript
 // match against any user id
