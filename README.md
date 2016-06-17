@@ -46,5 +46,8 @@ socket.getPathToClientSource()
 
 ## Changelog
 
+#### 0.2.0 - *(06/17/16)*
+- added socket.getClientVersion and socket.getClientSource methods
+
 #### 0.1.0 - *(04/29/16)*
 - initial release
