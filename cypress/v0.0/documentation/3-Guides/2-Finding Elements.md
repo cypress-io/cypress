@@ -188,7 +188,7 @@ cy
     .should("have.value", "foo")  // <-- and to have the value 'foo'
     .and("have.class", "radio")   // <-- and to have the class 'radio'
 
-  .parents("#foo")                // <--
+  .parents("#foo")
     .should("not.exist")          // <-- wait up to 4 seconds for this element NOT to be found
 ```
 
@@ -213,7 +213,7 @@ cy
     .should("have.value", "foo")   // <-- and to have the value 'foo'
     .and("have.class", "radio")    // <-- and to have the class 'radio'
 
-  .parents("#foo", {timeout: 2000}) // <--
+  .parents("#foo", {timeout: 2000})
     .should("not.exist")            // <-- wait up to 2 seconds for this element NOT to be found
 ```
 
