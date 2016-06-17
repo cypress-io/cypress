@@ -24,9 +24,14 @@ const launchBrowser = (project, browser, url) => {
   })
 }
 
+const closeProject = () => {
+  return App.ipc("close:project")
+}
+
 const openProject = (project) => {
   projectsStore.setChosen(project)
-  App.ipc('open:project', project.path)
+
+  return App.ipc('open:project', project.path)
   .then(action('open:project', (config) => {
     // this will set the available browsers on the project
     project.setBrowsers(config.browsers)
@@ -62,4 +67,5 @@ const openProject = (project) => {
 export {
   getProjects,
   openProject,
+  closeProject,
 }

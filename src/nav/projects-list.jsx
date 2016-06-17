@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import projectsStore from '../projects/projects-store'
 import Dropdown from '../dropdown/dropdown'
-import { getProjects, openProject } from '../projects/projects-api'
+import { getProjects, openProject, closeProject } from '../projects/projects-api'
 
 @observer
 export default class ProjectsList extends Component {
@@ -34,13 +34,21 @@ export default class ProjectsList extends Component {
     if (project.add) {
       this.props.addProject()
     } else {
-      if (projectsStore.chosen)
-        App.ipc("close:project")
-
-      // if there is already a project open,
-      // we need to close that project first
-      action('project:selected', () => openProject(project))()
+      if (projectsStore.chosen) {
+        action('close:project', () =>
+          closeProject()
+          .then(() => {
+            this._selectProject(project)
+          })
+        )()
+      } else {
+        this._selectProject(project)
+      }
     }
+  }
+
+  _selectProject = (project) => {
+    action('project:selected', () => openProject(project))()
   }
 
   _project = (project) => {

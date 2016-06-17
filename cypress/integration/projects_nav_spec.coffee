@@ -21,8 +21,11 @@ describe "Projects Nav", ->
     it "hides projects nav", ->
       cy.get(".navbar-default").should("not.exist")
 
-  describe "projects nav", ->
+  describe "selected project", ->
     beforeEach ->
+      @firstProjectName = "My-Fake-Project"
+      @lastProjectName = "project5"
+
       cy
         .fixture("user").then (@user) ->
           @ipc.handle("get:current:user", null, @user)
@@ -31,7 +34,8 @@ describe "Projects Nav", ->
 
       cy
         .contains("Projects").click()
-        .get(".projects-list .dropdown-menu a").first().click()
+        .get(".projects-list .dropdown-menu a")
+          .contains(@firstProjectName).as("firstProject").click()
 
     it "displays projects nav", ->
       cy
@@ -52,3 +56,31 @@ describe "Projects Nav", ->
 
       it "lists browsers", ->
         cy.get(".browsers-list")
+
+    context "switch project", ->
+      beforeEach ->
+        cy
+          .contains(@firstProjectName).click()
+          .get(".projects-list .dropdown-menu a")
+            .contains(@lastProjectName).as("lastProject").click()
+
+      it "displays projects nav", ->
+        cy
+          .get(".empty").should("not.be.visible")
+          .get(".navbar-default")
+
+      context "browsers dropdown", ->
+        beforeEach ->
+          @config = {
+            clientUrl: "http://localhost:2020",
+            clientUrlDisplay: "http://localhost:2020"
+          }
+
+          cy
+            .fixture("browsers").then (@browsers) ->
+              @config.browsers = @browsers
+              @ipc.handle("close:project", null, {})
+              @ipc.handle("open:project", null, @config)
+
+        it.only "lists browsers", ->
+          cy.get(".browsers-list")
