@@ -8,6 +8,7 @@ coffee    = require("coffee-script")
 str       = require("string-to-stream")
 Promise   = require("bluebird")
 _         = require("underscore")
+xhrs      = require("../lib/controllers/xhrs")
 
 [3500, 3501].forEach (port) ->
 
@@ -87,26 +88,8 @@ _         = require("underscore")
       res.type("pdf")
       res.send(bytes)
 
-  app.all "/__cypress/xhrs/*", (req, res, next) ->
-    resp   = req.get("x-cypress-response") or ""
-
-    respond = =>
-      res
-        .type("json")
-        .status(req.get("x-cypress-status"))
-
-      if _.isString(resp)
-        try
-          resp = JSON.parse(resp)
-
-      res.send(resp)
-
-    delay = ~~req.get("x-cypress-delay")
-
-    if delay > 0
-      Promise.delay(delay).then(respond)
-    else
-      respond()
+  app.all "/__cypress/xhrs/*", (req, res) ->
+    xhrs.handle(req, res)
 
   app.get "/", (req, res) ->
     res.render path.join(__dirname, "views", "index.html"), {

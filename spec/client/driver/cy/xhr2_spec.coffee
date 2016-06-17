@@ -65,6 +65,97 @@ describe "$Cypress.Cy XHR Commands", ->
       beforeEach ->
         @setup()
 
+      it "continues to be a defined properties", ->
+        @cy
+          .server()
+          .route({url: /foo/}).as("getFoo")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            xhr = new win.XMLHttpRequest
+            xhr.open("GET", "/foo")
+            expect(xhr.onload).to.be.a("function")
+            expect(xhr.onerror).to.be.a("function")
+            expect(xhr.onreadystatechange).to.be.a("function")
+
+      it "prevents infinite recursion", ->
+        onloaded = false
+        onreadystatechanged = false
+
+        @cy
+          .server()
+          .route({url: /foo/}).as("getFoo")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            handlers = ["onload", "onerror", "onreadystatechange"]
+
+            wrap = ->
+              handlers.forEach (handler) ->
+                bak = xhr[handler]
+
+                xhr[handler] = ->
+                  if _.isFunction(bak)
+                    bak.apply(xhr, arguments)
+
+            xhr = new win.XMLHttpRequest
+            xhr.addEventListener("readystatechange", wrap, false)
+            xhr.onreadystatechange = ->
+              throw new Error("NOOO")
+            xhr.onreadystatechange
+            xhr.onreadystatechange = ->
+              onreadystatechanged = true
+            xhr.open("GET", "/foo")
+            xhr.onload = ->
+              throw new Error("NOOO")
+            xhr.onload
+            xhr.onload = ->
+              onloaded = true
+            xhr.send()
+            null
+          .wait("@getFoo").then (xhr) ->
+            expect(onloaded).to.be.true
+            expect(onreadystatechanged).to.be.true
+            expect(xhr.status).to.eq(404)
+
+      it "works with jquery too", ->
+        failed = false
+        onloaded = false
+
+        @cy
+          .server()
+          .route({url: /foo/}).as("getFoo")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            handlers = ["onload", "onerror", "onreadystatechange"]
+
+            wrap = ->
+              xhr = @
+
+              handlers.forEach (handler) ->
+                bak = xhr[handler]
+
+                xhr[handler] = ->
+                  if _.isFunction(bak)
+                    bak.apply(xhr, arguments)
+
+            open = win.XMLHttpRequest.prototype.open
+
+            win.XMLHttpRequest.prototype.open = ->
+              @addEventListener("readystatechange", wrap, false)
+
+              open.apply(@, arguments)
+
+            xhr = win.$.get("/foo")
+            .fail ->
+              failed = true
+            .always ->
+              onloaded = true
+
+            null
+          .wait("@getFoo").then (xhr) ->
+            expect(failed).to.be.true
+            expect(onloaded).to.be.true
+            expect(xhr.status).to.eq(404)
+
       it "calls existing onload handlers", ->
         onloaded = false
 
@@ -504,7 +595,6 @@ describe "$Cypress.Cy XHR Commands", ->
             xhr.send()
             xhr.abort()
             null
-
 
     describe "request parsing", ->
       beforeEach ->

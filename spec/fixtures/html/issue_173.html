@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <link rel="icon" href="data:;base64,=">
+    <script type="text/javascript" src="/lib/public/js/iframe.js"></script>
+    <script type="text/javascript">
+      it("fails", function(){
+        cy.get("element_does_not_exist", {timeout: 200})
+      })
+
+      it("should be able to log", function(){
+        cy.get("body").should("contain", "issue 173")
+      })
+    </script>
+  </head>
+  <body>
+    issue 173
+  </body>
+</html>

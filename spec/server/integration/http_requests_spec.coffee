@@ -139,17 +139,31 @@ describe "Routes", ->
             ])
 
     describe "ids with regular configuration", ->
-      beforeEach ->
+      it "returns test files as json ignoring *.hot-update.js", ->
         @setup({
           projectRoot: Fixtures.projectPath("ids")
         })
 
-      it "returns test files as json", ->
         supertest(@app)
         .get("/__cypress/files")
         .expect(200, [
           { name: "integration/bar.js" }
           { name: "integration/foo.coffee" }
+          { name: "integration/nested/tmp.js" }
+          { name: "integration/noop.coffee" }
+        ])
+
+      it "can ignore other files as well", ->
+        @setup({
+          projectRoot: Fixtures.projectPath("ids")
+          config: {
+            ignoreTestFiles: ["**/bar.js", "foo.coffee", "**/*.hot-update.js", "**/nested/*"]
+          }
+        })
+
+        supertest(@app)
+        .get("/__cypress/files")
+        .expect(200, [
           { name: "integration/noop.coffee" }
         ])
 
@@ -223,6 +237,9 @@ describe "Routes", ->
             expect(res.text).to.eq file
 
   context "ALL /__cypress/xhrs/*", ->
+    beforeEach ->
+      @setup()
+
     describe "delay", ->
       it "can set delay to 10ms", ->
         delay = @sandbox.spy(Promise, "delay")
@@ -311,6 +328,17 @@ describe "Routes", ->
           .expect("Content-Type", /text\/plain/)
           .expect("")
 
+      it "decodes responses", ->
+        response = encodeURI(JSON.stringify({
+          "test": "We’ll"
+        }))
+
+        supertest(@app)
+        .get("/__cypress/xhrs/users/1")
+        .set("x-cypress-response", response)
+        .expect(200)
+        .expect({test: "We’ll"})
+
       context "fixture", ->
         beforeEach ->
           Fixtures.scaffold("todos")
@@ -394,6 +422,7 @@ describe "Routes", ->
 
   context "GET /__cypress/iframes/*", ->
     beforeEach ->
+      Fixtures.scaffold("automations")
       Fixtures.scaffold("todos")
       Fixtures.scaffold("no-server")
       Fixtures.scaffold("ids")
@@ -498,6 +527,26 @@ describe "Routes", ->
           .then (res) ->
             body = removeWhitespace(res.text)
             expect(body).to.eq contents
+
+    describe "automations", ->
+      beforeEach ->
+        @setup({
+          projectRoot: Fixtures.projectPath("automations")
+          config: {
+            integrationFolder: "cypress/integration"
+            supportFolder: "cypress/support"
+          }
+        })
+
+      it "omits support directories", ->
+        contents = removeWhitespace Fixtures.get("server/expected_automations_iframe.html")
+
+        supertest(@app)
+        .get("/__cypress/iframes/integration/app_spec.coffee")
+        .expect(200)
+        .then (res) ->
+          body = removeWhitespace(res.text)
+          expect(body).to.eq contents
 
     describe "ids", ->
       beforeEach ->

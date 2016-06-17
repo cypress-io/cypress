@@ -59,9 +59,15 @@ module.exports = {
               stdio: "inherit"
             })
 
+            ## must resolve with failures since
+            ## our outer headless run promise
+            ## is expecting that object structure
+            onClose = (code, signal) ->
+              resolve({failures: code})
+
             ## whenever our new child electron process
             ## closes then we pass this exit code on
-            electron.on("close", resolve)
+            electron.on("close", onClose)
 
         else
           ## just run the gui code directly here
@@ -251,7 +257,8 @@ module.exports = {
       when "headless"
         ## run headlessly and exit
         @runElectron(mode, options)
-        .then(exit0)
+        .get("failures")
+        .then(exit)
         .catch(exitErr)
 
       when "headed"
@@ -260,6 +267,7 @@ module.exports = {
       when "ci"
         ## run headlessly in ci mode and exit
         @runElectron(mode, options)
+        .get("failures")
         .then(exit)
         .catch(exitErr)
 

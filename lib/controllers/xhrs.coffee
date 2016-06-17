@@ -20,10 +20,13 @@ isValidJSON = (text) ->
 
 module.exports = {
   handle: (req, res, config, next) ->
-    delay    = ~~req.get("x-cypress-delay")
-    status   = req.get("x-cypress-status")   ? 200
-    headers  = req.get("x-cypress-headers")  ? null
-    response = req.get("x-cypress-response") ? ""
+    get = (val, def) ->
+      decodeURI(req.get(val) ? def)
+
+    delay    = ~~get("x-cypress-delay")
+    status   = get("x-cypress-status", 200)
+    headers  = get("x-cypress-headers", null)
+    response = get("x-cypress-response", "")
 
     respond = =>
       ## figure out the stream interface and pipe these

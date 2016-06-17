@@ -1,8 +1,9 @@
-$Cypress.Server = do ($Cypress, _) ->
+$Cypress.Server = do ($Cypress, _, minimatch) ->
 
   regularResourcesRe       = /\.(jsx?|coffee|html|less|s?css|svg)(\?.*)?$/
   isCypressHeaderRe        = /^X-Cypress-/i
   needsDashRe              = /([a-z][A-Z])/g
+  props                    = "onreadystatechange onload onerror".split(" ")
 
   setHeader = (xhr, key, val, transformer) ->
     if val?
@@ -10,7 +11,7 @@ $Cypress.Server = do ($Cypress, _) ->
         val = transformer(val)
 
       key = "X-Cypress-" + _.capitalize(key)
-      xhr.setRequestHeader(key, val)
+      xhr.setRequestHeader(key, encodeURI(val))
 
   normalize = (val) ->
     val = val.replace needsDashRe, (match) ->
@@ -56,6 +57,7 @@ $Cypress.Server = do ($Cypress, _) ->
     onAnyAbort: undefined
     onAnyRequest: undefined
     onAnyResponse: undefined
+    urlMatchingOptions: { matchBase: true }
     stripOrigin: _.identity
     getUrlOptions: _.identity
     whitelist: whitelist ## function whether to allow a request to go out (css/js/html/templates) etc
@@ -314,18 +316,32 @@ $Cypress.Server = do ($Cypress, _) ->
         is404: true
       }
 
-    xhrMatchesRoute: (xhr, route) ->
+    urlsMatch: (routePattern, fullyQualifiedUrl) ->
+      match = (str, pattern) =>
+        ## be nice to our users and prepend
+        ## pattern with "/" if it doesnt have one
+        ## and str does
+        if pattern[0] isnt "/" and str[0] is "/"
+          pattern = "/" + pattern
+
+        minimatch.js(str, pattern, @options.urlMatchingOptions)
+
       testRe = (url1, url2) ->
-        route.url.test(url1) or route.url.test(url2)
+        routePattern.test(url1) or routePattern.test(url2)
 
       testStr = (url1, url2) ->
-        route.url is url1 or route.url is url2
+        (routePattern is url1) or
+          (routePattern is url2) or
+            match(url1, routePattern) or
+              match(url2, routePattern)
 
-      xhr.method is route.method and
-        if _.isRegExp(route.url)
-          testRe(xhr.url, @options.stripOrigin(xhr.url))
-        else
-          testStr(xhr.url, @options.stripOrigin(xhr.url))
+      if _.isRegExp(routePattern)
+        testRe(fullyQualifiedUrl, @options.stripOrigin(fullyQualifiedUrl))
+      else
+        testStr(fullyQualifiedUrl, @options.stripOrigin(fullyQualifiedUrl))
+
+    xhrMatchesRoute: (xhr, route) ->
+      xhr.method is route.method and @urlsMatch(route.url, xhr.url)
 
     add: (xhr, attrs = {}) ->
       _.extend(xhr, attrs)
@@ -437,6 +453,102 @@ $Cypress.Server = do ($Cypress, _) ->
         if getServer().shouldApplyStub(route)
           url.actual = getServer().normalizeStubUrl(getServer().options.xhrUrl, url.actual)
 
+        timeStart = new Date
+
+        xhr = @
+        fns = {}
+        called = {}
+        overrides = {}
+        readyStates = {}
+
+        onLoadFn = ->
+          ## bail if we've already been called to prevent
+          ## infinite recursion
+          return if called.onload
+
+          called.onload = true
+
+          proxy._setDuration(timeStart)
+          proxy._setStatus()
+          proxy._setResponseHeaders()
+          proxy._setResponseBody()
+
+          if err = proxy._getFixtureError()
+            return getServer().options.onFixtureError(proxy, err)
+
+          ## catch synchronous errors caused
+          ## by the onload function
+          try
+            if _.isFunction(ol = fns.onload)
+              ol.apply(xhr, arguments)
+            getServer().options.onLoad(proxy, route)
+          catch err
+            getServer().options.onError(proxy, err)
+
+          if _.isFunction(getServer().options.onAnyResponse)
+            getServer().options.onAnyResponse(route, proxy)
+
+        onErrorFn = ->
+          ## bail if we've already been called to prevent
+          ## infinite recursion
+          return if called.onerror
+
+          called.onerror = true
+
+          ## its possible our real onerror handler
+          ## throws so we need to catch those errors too
+          try
+            if _.isFunction(oe = fns.onerror)
+              oe.apply(xhr, arguments)
+            getServer().options.onNetworkError(proxy)
+          catch err
+            getServer().options.onError(proxy, err)
+
+        onReadyStateFn = ->
+          ## bail if we've already been called with this
+          ## readyState to prevent infinite recursions
+          return if readyStates[@readyState]
+
+          readyStates[@readyState] = true
+
+          ## catch synchronous errors caused
+          ## by the onreadystatechange function
+          try
+            if _.isFunction(orst = fns.onreadystatechange)
+              orst.apply(xhr, arguments)
+          catch err
+            ## its failed stop sending the callack
+            xhr.onreadystatechange = null
+            getServer().options.onError(proxy, err)
+
+        overrides.onload             = onLoadFn
+        overrides.onerror            = onErrorFn
+        overrides.onreadystatechange = onReadyStateFn
+
+        props.forEach (prop) ->
+          ## if we currently have one of these properties then
+          ## back them up!
+          if fn = xhr[prop]
+            fns[prop] = fn
+
+          ## set the override now
+          xhr[prop] = overrides[prop]
+
+          ## and in the future if this is redefined
+          ## then just back it up
+          Object.defineProperty(xhr, prop, {
+            get: ->
+              bak = fns[prop]
+
+              if _.isFunction(bak)
+                fns[prop] = ->
+                  bak.apply(xhr, arguments)
+              else
+                overrides[prop]
+            set: (fn) ->
+              fns[prop] = fn
+          })
+
         ## change absolute url's to relative ones
         ## if they match our baseUrl / visited URL
         open.call(@, method, url.actual, async, username, password)
@@ -472,88 +584,6 @@ $Cypress.Server = do ($Cypress, _) ->
           ## call the onAnyRequest function
           ## after we've called getServer().options.onSend
           getServer().options.onAnyRequest(route, proxy)
-
-        timeStart = new Date
-
-        xhr = @
-        onload = null
-        onerror = null
-        onreadystatechange = null
-
-        onLoadFn = ->
-          proxy._setDuration(timeStart)
-          proxy._setStatus()
-          proxy._setResponseHeaders()
-          proxy._setResponseBody()
-
-          if err = proxy._getFixtureError()
-            return getServer().options.onFixtureError(proxy, err)
-
-          ## catch synchronous errors caused
-          ## by the onload function
-          try
-            if _.isFunction(onload)
-              onload.apply(xhr, arguments)
-            getServer().options.onLoad(proxy, route)
-          catch err
-            getServer().options.onError(proxy, err)
-
-          if _.isFunction(getServer().options.onAnyResponse)
-            getServer().options.onAnyResponse(route, proxy)
-
-        onErrorFn = ->
-          ## its possible our real onerror handler
-          ## throws so we need to catch those errors too
-          try
-            if _.isFunction(onerror)
-              onerror.apply(xhr, arguments)
-            getServer().options.onNetworkError(proxy)
-          catch err
-            getServer().options.onError(proxy, err)
-
-        onReadyStateFn = ->
-          checkFns()
-
-          ## catch synchronous errors caused
-          ## by the onreadystatechange function
-          try
-            if _.isFunction(onreadystatechange)
-              onreadystatechange.apply(xhr, arguments)
-          catch err
-            ## its failed stop sending the callack
-            xhr.onreadystatechange = null
-            getServer().options.onError(proxy, err)
-
-        checkFns = ->
-          ## back and restore if these
-          ## have been modified!
-          if xhr.onload isnt onLoadFn
-            onload = xhr.onload
-            xhr.onload = onLoadFn
-
-          if xhr.onerror isnt onErrorFn
-            onerror = xhr.onerror
-            xhr.onerror = onErrorFn
-
-          if xhr.onreadystatechange isnt onReadyStateFn
-            onreadystatechange = xhr.onreadystatechange
-            xhr.onreadystatechange = onReadyStateFn
-
-        onload = @onload
-        @onload = onLoadFn
-
-        onreadystatechange = @onreadystatechange
-        @onreadystatechange = onReadyStateFn
-
-        onerror = @onerror
-        @onerror = onErrorFn
-
-        ## wait 1 turn loop and verify
-        ## no listeners have been attached
-        ## **AFTER** xhr.send(...)
-        ## if they have then just restore
-        ## our own callback handlers
-        setImmediate(checkFns)
 
         return send.apply(@, arguments)
 

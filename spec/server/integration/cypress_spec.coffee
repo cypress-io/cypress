@@ -182,20 +182,38 @@ describe "lib/cypress", ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(headless, "waitForRendererToConnect")
       @sandbox.stub(headless, "createRenderer")
-      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
+      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 0})
       @sandbox.spy(api, "updateProject")
 
-    it "runs project headlessly and exits with status 0", ->
+    it "runs project headlessly and exits with exit code 0", ->
       Promise.all([
         user.set({name: "brian", session_token: "session-123"}),
 
         Project.add(@todosPath)
       ])
       .then =>
-        cypress.start(["--run-project=#{@todosPath}"]).then =>
+        cypress.start(["--run-project=#{@todosPath}"])
+      .delay(200)
+      .then =>
+        expect(api.updateProject).not.to.be.called
+        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
+        @expectExitWith(0)
+
+    it "runs project headlessly and exits with exit code 10", ->
+      headless.waitForTestsToFinishRunning.resolves({failures: 10})
+
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@todosPath)
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}"])
+        .delay(200)
+        .then =>
           expect(api.updateProject).not.to.be.called
           expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
-          @expectExitWith(0)
+          @expectExitWith(10)
 
     it "generates a project id if missing one", ->
       @sandbox.stub(api, "createProject").withArgs("pristine", "session-123").resolves("pristine-id-123")
@@ -550,7 +568,7 @@ describe "lib/cypress", ->
 
     describe "--port", ->
       beforeEach ->
-        headless.waitForTestsToFinishRunning.resolves({})
+        headless.waitForTestsToFinishRunning.resolves({failures: 0})
 
         Promise.all([
           user.set({name: "brian", session_token: "session-123"}),
@@ -579,7 +597,7 @@ describe "lib/cypress", ->
 
     describe "--env", ->
       beforeEach ->
-        headless.waitForTestsToFinishRunning.resolves({})
+        headless.waitForTestsToFinishRunning.resolves({failures: 0})
 
         Promise.all([
           user.set({name: "brian", session_token: "session-123"}),
@@ -624,11 +642,9 @@ describe "lib/cypress", ->
       @sandbox.stub(ci, "getBranch").resolves("bem/ci")
       @sandbox.stub(ci, "getAuthor").resolves("brian")
       @sandbox.stub(ci, "getMessage").resolves("foo")
-      @sandbox.stub(headless, "runTests").resolves({
-        connection: null
-        renderer: null
-        stats: {failures: 10}
-      })
+      @sandbox.stub(headless, "createRenderer")
+      @sandbox.stub(headless, "waitForRendererToConnect")
+      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
 
       Promise.all([
         ## make sure we have no user object
@@ -654,6 +670,17 @@ describe "lib/cypress", ->
 
       cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
         expect(@updateCi).to.be.calledOnce
+        @expectExitWith(10)
+
+    it "runs project by specific absolute spec and exits with status 10", ->
+      @setup("todos")
+
+      @createCi.resolves("ci_guid-123")
+
+      @updateCi = @sandbox.stub(api, "updateCi").resolves()
+
+      cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci", "--spec=#{@todosPath}/tests/test2.coffee"]).then =>
+        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
         @expectExitWith(10)
 
     it "uses process.env.CYPRESS_PROJECT_ID", ->
@@ -941,5 +968,5 @@ describe "lib/cypress", ->
       @sandbox.stub(cp, "spawn").withArgs(process.execPath, [".", "--runProject=foo/bar", "--disable-gpu"], {stdio: "inherit"}).returns(cpStub)
 
       cypress.runElectron("", {runProject: "foo/bar"})
-      .then (code) ->
-        expect(code).to.eq(10)
+      .then (stats) ->
+        expect(stats).to.deep.eq({failures: 10})

@@ -269,3 +269,8 @@ describe "$Cypress API", ->
   describe ".Promise", ->
     it "is a reference to underscore", ->
       expect(@Cypress.Promise).to.eq(window.Promise)
+
+  describe ".minimatch", ->
+    it "is a reference to minimatch function", ->
+      expect(@Cypress.minimatch("/foo/bar/baz", "/foo/**")).to.be.true
+

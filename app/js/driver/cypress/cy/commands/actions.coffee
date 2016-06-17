@@ -4,6 +4,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
   focusable = "a[href],link[href],button,input,select,textarea,[tabindex],[contenteditable]"
 
+  inputEvents = "textInput input".split(" ")
+
   delay = 50
 
   dispatchPrimedChangeEvents = ->
@@ -406,7 +408,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           _(dblclicks).invoke("cancel")
           throw err
 
-
     hover: (args) ->
       $Cypress.Utils.throwErrByPath("hover.not_implemented")
 
@@ -777,7 +778,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               obj.which = which if which
             obj
 
-        updateTable = (id, key, column, value, which) ->
+        updateTable = (id, key, column, which, value) ->
           row = getRow(id, key, which)
           row[column] = value or "preventedDefault"
 
@@ -804,7 +805,12 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         options._log.snapshot("before", {next: "after"})
 
-      if not options.$el.is(textLike)
+      isTextLike        = options.$el.is(textLike)
+      hasTabIndex       = options.$el.is("[tabindex]")
+
+      isTypeableButNotAnInput = hasTabIndex and not isTextLike
+
+      if not isTextLike and not hasTabIndex
         node = Cypress.Utils.stringifyElement(options.$el)
         $Cypress.Utils.throwErrByPath("type.not_on_text_field", {
           onFail: options._log
@@ -885,7 +891,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           dispatched = options.$el.get(0).dispatchEvent(change)
 
-          updateTable.call(@, id, null, "change", dispatched) if id and updateTable
+          if id and updateTable
+            updateTable.call(@, id, null, "change", null, dispatched)
 
           return dispatched
 
@@ -901,7 +908,22 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             ## for the delay being added to each keystroke
             @_timeout (totalKeys * options.delay), true
 
-          onEvent: =>
+          onBeforeSpecialCharAction: (id, key) ->
+            ## don't apply any special char actions such as
+            ## inserting new lines on {enter} or moving the
+            ## caret / range on left or right movements
+            if isTypeableButNotAnInput
+              return false
+
+          onBeforeEvent: (id, key, column, which) =>
+            ## if we are an element which isnt text like but we have
+            ## a tabindex then it can receive keyboard events but
+            ## should not fire input or textInput and should not fire
+            ## change events
+            if column in inputEvents and isTypeableButNotAnInput
+              return false
+
+          onEvent: (id, key, column, which, value) =>
             updateTable.apply(@, arguments) if updateTable
 
           ## fires only when the 'value'

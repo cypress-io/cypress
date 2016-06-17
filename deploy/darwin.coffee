@@ -26,6 +26,9 @@ class Darwin extends Base
   runProjectTest: ->
     @_runProjectTest()
 
+  runFailingProjectTest: ->
+    @_runFailingProjectTest()
+
   getBuildDest: (pathToBuild, platform) ->
     ## returns ./build/darwin
     path.join path.dirname(pathToBuild), platform

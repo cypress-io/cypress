@@ -38,6 +38,11 @@ class Linux extends Base
     .catch (err) =>
       @tryXvfb(@_runProjectTest)
 
+  runFailingProjectTest: ->
+    @_runFailingProjectTest()
+    .catch (err) =>
+      @tryXvfb(@_runFailingProjectTest)
+
   tryXvfb: (p) ->
     xvfb = new Xvfb()
     xvfb = Promise.promisifyAll(xvfb)
