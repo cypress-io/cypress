@@ -104,5 +104,5 @@ module.exports = {
           headless.run(options)
           .then (stats = {}) =>
             @reportStats(id, ciId, projectName, options.key, stats)
-            .return(stats.failures)
+            .return(stats)
 }
