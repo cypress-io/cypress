@@ -40,7 +40,7 @@
     background-color: #f7f8f9;
     cursor: pointer;
 
-    > .runnable-wrapper .runnable-controls i.fa-repeat {
+    > div > .runnable-wrapper .runnable-controls i.fa-repeat {
       visibility: visible !important;
     }
 
@@ -71,14 +71,14 @@
     }
   }
 
-  &.runnable-processing > .runnable-wrapper {
+  &.runnable-processing > div > .runnable-wrapper {
     .test-state i {
       @extend .#{$fa-css-prefix}-square-o;
       color: #888;
     }
   }
 
-  &.test.runnable-failed > .runnable-wrapper {
+  &.test.runnable-failed > div > .runnable-wrapper {
     border-left: 10px solid $fail;
 
     .fa-warning.has-command-failures {
@@ -86,27 +86,27 @@
     }
   }
 
-  &.suite.runnable-failed > .runnable-wrapper {
+  &.suite.runnable-failed > div > .runnable-wrapper {
     border-left: 10px solid $fail;
   }
 
-  &.suite.runnable-pending > .runnable-wrapper {
+  &.suite.runnable-pending > div > .runnable-wrapper {
     border-left: 10px solid lighten($pending, 25%);
   }
 
-  &.test.runnable-pending > .runnable-wrapper {
+  &.test.runnable-pending > div > .runnable-wrapper {
     border-left: 10px solid lighten($pending, 25%);
   }
 
-  &.test.runnable-passed > .runnable-wrapper {
+  &.test.runnable-passed > div > .runnable-wrapper {
     border-left: 10px solid $pass;
   }
 
-  &.suite.runnable-passed > .runnable-wrapper {
+  &.suite.runnable-passed > div > .runnable-wrapper {
     border-left: 10px solid $pass;
   }
 
-  &.runnable-failed > .runnable-wrapper {
+  &.runnable-failed > div > .runnable-wrapper {
     pre {
       color: $fail;
     }
@@ -130,14 +130,14 @@
     }
   }
 
-  &.runnable-passed > .runnable-wrapper {
+  &.runnable-passed > div > .runnable-wrapper {
     .test-state i {
       @extend .#{$fa-css-prefix}-check;
       color: $pass;
     }
   }
 
-  &.runnable-pending > .runnable-wrapper {
+  &.runnable-pending > div > .runnable-wrapper {
     .test-title {
       color: lighten($pending, 25%);
     }

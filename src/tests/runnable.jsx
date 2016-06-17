@@ -1,9 +1,10 @@
+import cs from 'classnames'
 import _ from 'lodash'
-import React from 'react'
+import React, { Component } from 'react'
 import Test from './test'
 
 const Suite = ({ model }) => (
-  <li className={`suite runnable runnable-${model.state}`}>
+  <div>
     <div className='runnable-wrapper' style={{ paddingLeft: model.indent }}>
       <div className='runnable-content-region'>
         <div>
@@ -24,11 +25,36 @@ const Suite = ({ model }) => (
         {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
       </ul>
     </div>
-  </li>
+  </div>
 )
 
-const Runnable = ({ model }) => (
-  model.type === 'test' ? <Test model={model} /> : <Suite model={model} />
-)
+class Runnable extends Component {
+  constructor (props) {
+    super(props)
+
+    this.state = { isHovering: false }
+  }
+
+  render () {
+    const { model } = this.props
+
+    return (
+      <li
+        className={cs(`${model.type} runnable runnable-${model.state}`, {
+          hover: this.state.isHovering,
+        })}
+        onMouseOver={this._hover(true)}
+        onMouseOut={this._hover(false)}
+      >
+      {model.type === 'test' ? <Test model={model} /> : <Suite model={model} />}
+    </li>
+    )
+  }
+
+  _hover = (shouldHover) => (e) => {
+    e.stopPropagation()
+    this.setState({ isHovering: shouldHover })
+  }
+}
 
 export default Runnable

@@ -18,7 +18,7 @@ const Hooks = ({ model }) => (
 const hasCommands = (hooks) => !!_.flatMap(hooks, 'commands').length
 
 const Test = ({ model }) => (
-  <li className={`test runnable runnable-${model.state}`}>
+  <div>
     <div className='runnable-wrapper' style={{ paddingLeft: model.indent }}>
       <div className='runnable-content-region'>
         <div>
@@ -102,7 +102,7 @@ const Test = ({ model }) => (
       </div>
       <pre className='test-error'>{model.error}</pre>
     </div>
-  </li>
+  </div>
 )
 
 export default Test
