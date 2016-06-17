@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import React from 'react'
 import Hook from './hook'
+import Tooltip from 'rc-tooltip'
 
 const NoCommands = () => (
   <div className='no-commands'>
@@ -17,7 +18,7 @@ const Hooks = ({ model }) => (
 const hasCommands = (hooks) => !!_.flatMap(hooks, 'commands').length
 
 const Test = ({ model }) => (
-  <li className='test runnable passed'>
+  <li className={`test runnable runnable-${model.state}`}>
     <div className='runnable-wrapper' style={{ paddingLeft: model.indent }}>
       <div className='runnable-content-region'>
         <div>
@@ -28,7 +29,9 @@ const Test = ({ model }) => (
             <span className='test-title'>{model.title}</span>
           </div>
           <div className='runnable-controls'>
-            <i className='fa fa-warning'></i>
+            <Tooltip placement='left' align={{ offset: [0, 0] }} overlay='One or more commands failed'>
+              <i className='fa fa-warning'></i>
+            </Tooltip>
           </div>
         </div>
       </div>

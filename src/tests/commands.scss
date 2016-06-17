@@ -58,7 +58,7 @@
     display: none;
   }
 
-  &>li {
+  > li {
     padding: 1px 9px 1px 5px;
     margin: 0;
 
@@ -81,259 +81,303 @@
       background-color: #FFB61C !important;
     }
   }
+}
 
-  .command-cloned, .command-event {
-    font-style: italic;
+.command-is-cloned,
+.command-is-event {
+  font-style: italic;
 
-    span {
-      color: #9a9aaa !important;
-    }
-
+  span {
+    color: #9a9aaa !important;
   }
 
-  .command-parent {
-    border-top: 1px solid #e3e3e3;
+}
 
-    &:hover {
-      border-top: 1px solid #eef1f4;
-    }
+.command-is-parent {
+  border-top: 1px solid #e3e3e3;
 
-    &:first-child {
-      border-top: 0;
-    }
-
+  &:hover {
+    border-top: 1px solid #eef1f4;
   }
 
-  .command-child {
-    .command-method {
-      &:before {
-        float: left;
-        content: "-";
-        margin-right: 2px;
-      }
-    }
+  &:first-child {
+    border-top: 0;
   }
 
-  .command-wrapper {
-    position: relative;
-    overflow: hidden;
-    color: #777;
+}
 
-    i.fa-ellipsis-h {
-      color: #fff;
-      background-color: #abaaaa;
-      border-radius: 3px;
-      padding: 0 4px;
-    }
-
-    .label {
-      font-weight: normal;
-      padding: 1px 4px;
-      border-radius: 5px;
-    }
-
-    .label-default {
-      background-color: #777;
-    }
-
-    .command-alias {
-      border-radius: 10px;
-      color: #777888;
-      padding: 0px 5px;
-      display: inline-block;
-
-      &.route {
-        background-color: lighten(#FFB61C, 25%);
-      }
-
-      &.dom {
-        background-color: darken(#D4EAFF, 3%);
-      }
-
-      &.primitive {
-        background-color: darken(#FFE0DE, 3%);
-      }
-    }
-  }
-
-  .command-number {
-    float: left;
-    width: 25px;
-    color: #bcbccc;
-    min-height: 1px; //used because some numbers are empty
-    text-align: right;
-    padding-right: 10px;
-  }
-
+.command-is-child {
   .command-method {
-    padding: 0 2px;
+    &:before {
+      float: left;
+      content: "-";
+      margin-right: 2px;
+    }
+  }
+}
+
+.command-wrapper {
+  position: relative;
+  overflow: hidden;
+  color: #777;
+
+  i.fa-ellipsis-h {
+    color: #fff;
+    background-color: #abaaaa;
+    border-radius: 3px;
+    padding: 0 4px;
+  }
+
+  .label {
+    font-weight: normal;
+    padding: 1px 4px;
+    border-radius: 5px;
+  }
+
+  .label-default {
+    background-color: #777;
+  }
+
+  .command-alias {
+    border-radius: 10px;
+    color: #777888;
+    padding: 0px 5px;
     display: inline-block;
-    text-transform: uppercase;
-    font-size: 11px;
-    float: left;
-    min-width: 80px;
-    font-weight: 600;
-    color: #565554;
-    position: relative;
-    top: 1px;
-  }
 
-  .command-pending {
-    padding-left: 3px;
-    border-left: 2px solid $pending;
-    background-color: lighten($pending, 40%);
+    &.route {
+      background-color: lighten(#FFB61C, 25%);
+    }
 
-    .command-number,
-    .command-method,
-    .command-message {
-      color: lighten($pending, 15%);
+    &.dom {
+      background-color: darken(#D4EAFF, 3%);
+    }
+
+    &.primitive {
+      background-color: darken(#FFE0DE, 3%);
     }
   }
+}
 
-  .command-failed {
-    padding-left: 3px;
-    border-left: 2px solid $fail;
-    background-color: lighten($fail, 30%);
+.command-number {
+  float: left;
+  width: 25px;
+  color: #bcbccc;
+  min-height: 1px; //used because some numbers are empty
+  text-align: right;
+  padding-right: 10px;
 
-    .command-number,
-    .command-method,
-    .command-message {
-      color: $fail;
-    }
+  i {
+    display: none;
   }
 
-  .command-name-xhr, .command-name-request {
-    .command-message {
-      .command-status {
-        font-weight: 700;
-        color: #565554;
-        margin-right: 3px;
-      }
-
-      .command-body {
-        color: #565554;
-      }
-
-      .fa-circle.successful {
-        color: $pending;
-      }
-
-      .fa-circle.aborted {
-        color: $fail;
-      }
-
-      .fa-circle.bad {
-        color: #F0AD4E;
-      }
-
-      .fa-circle.pending {
-        color: #AAA;
-      }
-    }
+  .command-state-pending & {
+    i { display: inline-block;; }
+    span { display: none; }
   }
+}
 
-  .command-name-assert {
-    .command-method {
-      span {
-        border-radius: 2px;
-        padding: 0 3px;
-        font-size: 11px;
-        display: inline-block;
-        height: 14px;
-        line-height: 16px;
-      }
-    }
-    .command-message {
+.command-method {
+  padding: 0 2px;
+  display: inline-block;
+  text-transform: uppercase;
+  font-size: 11px;
+  float: left;
+  min-width: 80px;
+  font-weight: 600;
+  color: #565554;
+  position: relative;
+  top: 1px;
+}
+
+.command-state-pending {
+  padding-left: 3px;
+  border-left: 2px solid $pending;
+  background-color: lighten($pending, 40%);
+
+  .command-number,
+  .command-method,
+  .command-message {
+    color: lighten($pending, 15%);
+  }
+}
+
+.command-state-failed {
+  padding-left: 3px;
+  border-left: 2px solid $fail;
+  background-color: lighten($fail, 30%);
+
+  .command-number,
+  .command-method,
+  .command-message {
+    color: $fail;
+  }
+}
+
+.command-name-xhr, .command-name-request {
+  .command-message {
+    .command-status {
+      font-weight: 700;
       color: #565554;
-
-      strong {
-        font-weight: 600;
-        margin: 0 3px;
-      }
+      margin-right: 3px;
     }
-  }
 
-  .command-assertion-pending {
-    & .command-method {
-      & span {
-        background-color: $pending;
-        color: white;
-
-      }
+    .command-body {
+      color: #565554;
     }
-    & .command-message {
+
+    .fa-circle.successful {
       color: $pending;
-
-      strong {
-        color: darken($pending, 10%);
-      }
     }
-  }
 
-  .command-assertion-failed {
-    & .command-method {
-      & span {
-        background-color: $fail;
-        color: white;
-
-      }
-    }
-    & .command-message {
+    .fa-circle.aborted {
       color: $fail;
+    }
 
-      strong {
-        color: darken($fail, 10%);
-      }
+    .fa-circle.bad {
+      color: #F0AD4E;
+    }
+
+    .fa-circle.pending {
+      color: #AAA;
     }
   }
+}
 
-  .command-assertion-passed {
-    & .command-method {
-      color: $pass;
-
-      span {
-        background-color: $pass;
-        color: white;
-      }
-    }
-    & .command-message {
-      color: darken($pass, 3%);
-
-      strong {
-        color: darken($pass, 10%);
-      }
+.command-name-assert {
+  .command-method {
+    span {
+      border-radius: 2px;
+      padding: 0 3px;
+      font-size: 11px;
+      display: inline-block;
+      height: 14px;
+      line-height: 16px;
     }
   }
 
   .command-message {
-    display: inline-block;
-    margin-left: 0;
-    width: 63%;
+    color: #565554;
+
+    strong {
+      font-weight: 600;
+      margin: 0 3px;
+    }
+  }
+}
+
+.command-assertion-pending {
+  & .command-method {
+    & span {
+      background-color: $pending;
+      color: white;
+
+    }
+  }
+  & .command-message {
+    color: $pending;
+
+    strong {
+      color: darken($pending, 10%);
+    }
+  }
+}
+
+.command-assertion-failed {
+  & .command-method {
+    & span {
+      background-color: $fail;
+      color: white;
+
+    }
+  }
+  & .command-message {
+    color: $fail;
+
+    strong {
+      color: darken($fail, 10%);
+    }
+  }
+}
+
+.command-assertion-passed {
+  & .command-method {
+    color: $pass;
+
+    span {
+      background-color: $pass;
+      color: white;
+    }
+  }
+  & .command-message {
+    color: darken($pass, 3%);
+
+    strong {
+      color: darken($pass, 10%);
+    }
+  }
+}
+
+.command-message {
+  display: inline-block;
+  margin-left: 0;
+  width: 63%;
+}
+
+.command-controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  i {
+    padding: 2px;
+    color: #3f7bA1;
   }
 
-  .command-controls {
-    position: absolute;
-    top: 0;
-    right: 0;
+  .command-alias {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 10px;
+    line-height: 1.5;
+  }
 
-    i {
-      padding: 2px;
-      color: #3f7bA1;
-    }
+  i:hover {
+    cursor: pointer;
+  }
 
-    .command-alias {
-      font-family: 'Open Sans', sans-serif;
-      font-size: 10px;
-      line-height: 1.5;
-    }
+  label {
+    font-size: 85%;
+  }
+}
 
-    i:hover {
-      cursor: pointer;
-    }
+.command-invisible {
+  display: none;
 
-    label {
-      font-size: 85%;
-    }
+  .command-is-invisible & {
+    display: inline-block;
+  }
+}
+
+.command-num-elements {
+  border-radius: 5px;
+  color: #fff;
+  display: none;
+  font-size: 85%;
+  line-height: 1;
+  padding: 1px 4px;
+  text-align: center;
+  vertical-align: baseline;
+  white-space: nowrap;
+
+  .command-has-num-elements.command-has-no-elements &,
+  .command-has-num-elements.command-has-multiple-elements & {
+    display: inline;
+  }
+
+  .command-has-no-elements & {
+    background-color: #CC4239;
+  }
+
+  .command-has-multiple-elements & {
+    background-color: #476fc9;
   }
 }
 

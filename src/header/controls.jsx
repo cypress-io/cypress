@@ -1,5 +1,5 @@
 import React from 'react'
-import Tooltip from 'react-tooltip'
+import Tooltip from 'rc-tooltip'
 
 export default (props) => {
   const config = props.isRunning ? {
@@ -12,15 +12,15 @@ export default (props) => {
 
   return (
     <div className='controls'>
-      <button label={config.label} data-tip data-for='tooltip'>
-        <i className={`fa fa-${config.icon}`}></i>
-      </button>
       <Tooltip
-        id='tooltip'
-        effect='solid'
-        place='bottom'
-        class='stop-start'
-      >{config.label}</Tooltip>
+        placement='left'
+        overlay={config.label}
+        align={{ offset: [5, 0] }}
+      >
+        <button>
+          <i className={`fa fa-${config.icon}`}></i>
+        </button>
+      </Tooltip>
     </div>
   )
 }

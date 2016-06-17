@@ -3,7 +3,7 @@ import React from 'react'
 import Test from './test'
 
 const Suite = ({ model }) => (
-  <li className='suite runnable passed'>
+  <li className={`suite runnable runnable-${model.state}`}>
     <div className='runnable-wrapper' style={{ paddingLeft: model.indent }}>
       <div className='runnable-content-region'>
         <div>

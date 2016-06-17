@@ -1,0 +1,11 @@
+@import '../../node_modules/rc-tooltip/assets/bootstrap';
+
+.rc-tooltip {
+  opacity: 1.0;
+}
+
+.rc-tooltip-inner {
+  border-radius: 3px;
+  min-height: 22px;
+  padding: 4px 8px;
+}
