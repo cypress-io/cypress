@@ -35,7 +35,7 @@ export default class ProjectNav extends Component {
             </ul>
             <ul className='nav navbar-nav navbar-right'>
               { this.browsers(project) }
-              <li className='dropdown'>
+              <li className='dropdown server-status'>
                 <a href='#' className='dropdown-toggle' data-toggle='dropdown'>
                   <i className='fa fa-circle green'></i>{' '}
                   Running{' '}
