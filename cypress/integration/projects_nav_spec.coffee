@@ -29,12 +29,26 @@ describe "Projects Nav", ->
         .fixture("projects").then (@projects) ->
           @ipc.handle("get:project:paths", null, @projects)
 
-       cy
+      cy
         .contains("Projects").click()
-        .get(".projects-list .dropdown-menu a").first().click().should ->
-          expect(@App.ipc).to.be.calledWith("open:project")
+        .get(".projects-list .dropdown-menu a").first().click()
 
     it "displays projects nav", ->
       cy
         .get(".empty").should("not.be.visible")
         .get(".navbar-default")
+
+    context "browsers dropdown", ->
+      beforeEach ->
+        @config = {
+          clientUrl: "http://localhost:2020",
+          clientUrlDisplay: "http://localhost:2020"
+        }
+
+        cy
+          .fixture("browsers").then (@browsers) ->
+            @config.browsers = @browsers
+            @ipc.handle("open:project", null, @config)
+
+      it "lists browsers", ->
+        cy.get(".browsers-list")

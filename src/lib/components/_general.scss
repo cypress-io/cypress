@@ -4,6 +4,7 @@
   bottom: 0;
   width: 100%;
   height: 100%;
+  background-color: #fff;
 }
 
 .helper-docs-append {
@@ -58,4 +59,12 @@
 
 .btn:focus {
   outline: 0 !important;
+}
+
+.fa.green {
+  color: $green-primary;
+}
+
+.fa.red {
+  color: $red-primary;
 }

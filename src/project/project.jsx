@@ -32,6 +32,8 @@ const Project = observer(() => {
 
   if (!projectsStore.projects.length) return <Empty />
 
+  if (!projectsStore.chosen) return null
+
   return (
     <div>
       <ProjectNav/>

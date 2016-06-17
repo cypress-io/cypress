@@ -1,12 +1,26 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component, PropTypes } from 'react'
+import { findDOMNode } from 'react-dom'
 
 class Dropdown extends Component {
   constructor (props) {
     super(props)
 
     this.state = { open: false }
+  }
+
+  componentDidMount () {
+    this.outsideClickHandler = (e) => {
+      if (!findDOMNode(this).contains(e.target)) {
+        this.setState({ open: false })
+      }
+    }
+    document.body.addEventListener('click', this.outsideClickHandler)
+  }
+
+  componentWillUnmount () {
+    document.body.removeEventListener('click', this.outsideClickHandler)
   }
 
   render () {

@@ -4,7 +4,7 @@ import Promise from 'bluebird'
 let msgs = {}
 
 const addMsg = (id, event, fn) => {
-  return msgs[id] = {
+  msgs[id] = {
     event,
     fn,
   }
@@ -64,8 +64,8 @@ const createIpc = () => {
 const ipc = window.ipc != null ? window.ipc : (window.ipc = createIpc())
 
 ipc.on("response", (event, obj = {}) => {
-  const msg = msgs[id]
   const { id, __error, data } = obj
+  const msg = msgs[id]
 
   // standard node callback implementation
   if (msg) {
@@ -108,7 +108,8 @@ const appIpc = (...args) => {
       // same time store this callback function
       // by id in msgs
       return new Promise((resolve, reject) => {
-        return addMsg(id, event, (err, data) => {
+        // if (event === 'get:options') debugger
+        addMsg(id, event, (err, data) => {
           // cleanup messages using promise interface
           // automatically
           removeMsgById(id)

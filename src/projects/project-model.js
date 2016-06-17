@@ -31,6 +31,14 @@ export default class Project {
     }
   }
 
+  @computed get otherBrowsers () {
+    return _.filter(this.browsers, { isChosen: false })
+  }
+
+  @computed get chosenBrowser () {
+    return _.find(this.browsers, { isChosen: true })
+  }
+
   @computed get defaultBrowser () {
     return _.find(this.browsers, { default: true }) || this.browsers[0]
   }

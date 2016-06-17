@@ -27,16 +27,16 @@ const launchBrowser = (project, browser, url) => {
 const openProject = (project) => {
   projectsStore.setChosen(project)
   App.ipc('open:project', project.path)
-  .spread((config) => {
+  .then(action('open:project', (config) => {
     // this will set the available browsers on the project
     project.setBrowsers(config.browsers)
-  })
+  }))
   .then(() => {
     // create a promise which listens for
     // project settings change events
     // and updates our project model
     const listenToProjectSettingsChange = () => {
-      App.ipc('on:project:settings:change')
+      return App.ipc('on:project:settings:change')
       .then((data = {}) => {
         project.reset()
         project.setBrowsers(data.config.browsers)
@@ -48,13 +48,13 @@ const openProject = (project) => {
 
         // recursively listen for more
         // change events!
-        listenToProjectSettingsChange()
+        return listenToProjectSettingsChange()
       })
     }
-    listenToProjectSettingsChange()
+    return listenToProjectSettingsChange()
   })
   .catch((err) => {
-    err
+    throw err
     // project.setError(err)
   })
 }
