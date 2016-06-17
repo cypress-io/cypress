@@ -76,7 +76,7 @@ const emptyTestHook = hook({
   name: 'test',
 })
 
-function runnable (type, { title, indent, hooks, children, state = 'passed' }) {
+function runnable (type, { title, indent, hooks, children, state = 'passed', error = null }) {
   return {
     type,
     id: _.uniqueId('r'),
@@ -85,6 +85,7 @@ function runnable (type, { title, indent, hooks, children, state = 'passed' }) {
     hooks,
     children,
     state,
+    error,
   }
 }
 
@@ -106,7 +107,7 @@ const tests = {
         test({ title: 'test in second level (1)', indent: 35, hooks: [beforeHook(0), assertTrue] }),
         test({ title: 'test in second level (2)', indent: 35, hooks: [beforeHook(0), assertTrue] }),
         suite({ title: 'third level (1) - in second level (1)', indent: 35, state: 'failed', children: [
-          test({ title: 'test in third level (1)', indent: 50, state: 'failed', hooks: [beforeHook(0, 1), getTest] }),
+          test({ title: 'test in third level (1)', indent: 50, state: 'failed', error: `CypressError: Timed out retrying: Expected to find element: 'h5', but never found it.`, hooks: [beforeHook(0, 1), getTest] }),
         ] }),
       ] }),
       suite({ title: 'second level (2)', indent: 20, state: 'processing', children: [

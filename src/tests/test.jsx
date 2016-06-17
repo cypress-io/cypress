@@ -100,8 +100,7 @@ const Test = ({ model }) => (
           {hasCommands(model.hooks) ? <Hooks model={model} /> : <NoCommands />}
         </div>
       </div>
-      <span className='hook'></span>
-      <pre className='test-error'></pre>
+      <pre className='test-error'>{model.error}</pre>
     </div>
   </li>
 )
