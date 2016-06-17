@@ -5,14 +5,14 @@ const header = {
   duration: 0.17,
 }
 
-function command ({ name, message, number = 0, event = false, state = 'passed', referencesAlias = null, numElements = null, alias = null, visible = true }) {
+function command ({ name, message, number = 0, event = false, type = 'parent', state = 'passed', referencesAlias = null, numElements = null, alias = null, visible = true }) {
   return {
     id: _.uniqueId('c'),
     name,
     message,
     number,
     event,
-    type: 'parent',
+    type,
     indent: 0,
     state,
     referencesAlias,
@@ -44,7 +44,7 @@ const levelCommands = [
   ],
   [
     command({ name: 'viewport', message: '700, 400', number: 3 }),
-    command({ name: 'wait', message: '10000', number: 4, state: 'pending' }),
+    command({ name: 'wait', message: '10000', number: 4, state: 'pending', type: 'child' }),
   ],
 ]
 
@@ -68,6 +68,7 @@ const getTest = hook({
     command({ name: 'get', message: '@input', number: 1, referencesAlias: 'input', numElements: 1 }),
     command({ name: 'get', message: '@button', number: 2, referencesAlias: 'button', numElements: 1 }),
     command({ name: 'get', message: 'p', number: 3, numElements: 3 }),
+    command({ name: 'first', message: '', number: 3, numElements: 1, type: 'child' }),
     command({ name: 'get', message: 'h5', number: 4, numElements: 0, state: 'failed' }),
   ],
 })
