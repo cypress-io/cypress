@@ -6,6 +6,11 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
   $contains = $expr.contains
 
+  restoreContains = ->
+    $expr.contains = $contains
+
+  Cypress.on "abort", restoreContains
+
   Cypress.addParentCommand
     get: (selector, options = {}) ->
       _.defaults options,
@@ -301,7 +306,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         ## throw here to cause the .catch to trigger
         throw new Error()
 
-      do resolveElements = =>
+      resolveElements = =>
         @execute("get", selector, getOpts).then ($elements) =>
           $el = switch
             when $elements and $elements.length
@@ -321,10 +326,13 @@ $Cypress.register "Querying", (Cypress, _, $) ->
                 when "existence"
                   err.longMessage = getErr(err)
           })
-        .finally ->
-          ## always restore contains in case
-          ## we used a regexp!
-          $expr.contains = $contains
+
+      Promise
+      .try(resolveElements)
+      .finally ->
+        ## always restore contains in case
+        ## we used a regexp!
+        restoreContains()
 
   Cypress.addChildCommand
     within: (subject, options, fn) ->

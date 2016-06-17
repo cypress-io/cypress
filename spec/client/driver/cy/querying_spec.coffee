@@ -291,6 +291,30 @@ describe "$Cypress.Cy Querying Commands", ->
           ## to 300 after successfully finished get method
           expect(@cy._timeout()).to.eq 300
 
+    it "cancels existing promises", (done) ->
+      logs = []
+
+      @Cypress.on "log", (log) ->
+        logs.push(log)
+
+      retrys = 0
+
+      abort = _.after 2, =>
+        @Cypress.abort()
+
+      @cy.on "cancel", ->
+        _.delay ->
+          expect(retrys).to.eq(2)
+          console.log logs
+          done()
+        , 500
+
+      @cy.on "retry", ->
+        retrys += 1
+        abort()
+
+      @cy.get("doesNotExist")
+
     describe "custom elements", ->
       ## <foobarbazquux>custom element</foobarbazquux>
 
@@ -1024,17 +1048,38 @@ describe "$Cypress.Cy Querying Commands", ->
     it "finds text by regexp and restores contains", ->
       contains = $.expr[":"].contains
 
-      cy.contains(/^asdf \d+/).then ($li) ->
+      @cy.contains(/^asdf \d+/).then ($li) ->
         expect($li).to.have.text("asdf 1")
         expect($.expr[":"].contains).to.eq(contains)
 
     it "returns elements found first when multiple siblings found", ->
-      cy.contains("li", "asdf").then ($li) ->
+      @cy.contains("li", "asdf").then ($li) ->
         expect($li).to.have.text("asdf 1")
 
     it "returns first ul when multiple uls", ->
-      cy.contains("ul", "jkl").then ($ul) ->
+      @cy.contains("ul", "jkl").then ($ul) ->
         expect($ul.find("li:first")).to.have.text("jkl 1")
+
+    it "cancels existing promises", (done) ->
+      get = @sandbox.spy(@cy.sync, "get")
+
+      retrys = 0
+
+      abort = _.after 2, =>
+        @Cypress.abort()
+
+      @cy.on "cancel", ->
+        _.delay ->
+          expect(get.callCount).to.be.within(2, 3)
+          expect(retrys).to.eq(2)
+          done()
+        , 50
+
+      @cy.on "retry", ->
+        retrys += 1
+        abort()
+
+      @cy.contains("DOES NOT CONTAIN THIS!")
 
     describe "deprecated command options", ->
       beforeEach ->
@@ -1356,4 +1401,20 @@ describe "$Cypress.Cy Querying Commands", ->
         @sandbox.stub(@cy, "execute", execute)
 
         cy.contains(/^asdf \d+/)
+
+      it "restores contains on abort", (done) ->
+        @timeout(1000)
+
+        contains = $.expr[":"].contains
+
+        @cy.on "cancel", ->
+          _.delay ->
+            expect($.expr[":"].contains).to.eq(contains)
+            done()
+          , 50
+
+        @cy.on "retry", _.after 2, ->
+          @Cypress.abort()
+
+        @cy.contains(/^does not contain asdfasdf at all$/)
 
