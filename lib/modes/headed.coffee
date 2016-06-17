@@ -22,14 +22,14 @@ module.exports = {
   onDrop: ->
 
   onClick: (bounds, win) ->
-    positioner = new Position(win)
+    # positioner = new Position(win)
 
-    coords = positioner.calculate("trayCenter", bounds)
+    # coords = positioner.calculate("trayCenter", bounds)
 
     ## store the coords on updater
-    Updater.setCoords(coords)
+    # Updater.setCoords(coords)
 
-    win.setPosition(coords.x, coords.y)
+    # win.setPosition(coords.x, coords.y)
 
     if win.isVisible()
       win.hide()
