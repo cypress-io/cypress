@@ -27,12 +27,25 @@ const Error = () => (
   </div>
 )
 
+const NoChosenProject = () => (
+  <div className='well-message'>
+    <h4>Choose a Project</h4>
+    <p>Choose an existing project to test.</p>
+    <p className='helper-docs-append'>
+      <a onClick={openHelp} className='helper-docs-link'>
+        <i className='fa fa-question-circle'></i>{' '}
+        Need help?
+      </a>
+    </p>
+  </div>
+)
+
 const Project = observer(() => {
   if (projectsStore.error) return <Error />
 
   if (!projectsStore.projects.length) return <Empty />
 
-  if (!projectsStore.chosen) return null
+  if (!projectsStore.chosen) return <NoChosenProject />
 
   return (
     <div>

@@ -17,6 +17,10 @@ class Dropdown extends Component {
       }
     }
     document.body.addEventListener('click', this.outsideClickHandler)
+
+    if (this.props.defaultState) {
+      this._toggleOpen()
+    }
   }
 
   componentWillUnmount () {
@@ -91,10 +95,12 @@ Dropdown.propTypes = {
   renderItem: PropTypes.func.isRequired,
   // property for unique value on each item that can be used as its key
   keyProperty: PropTypes.string.isRequired,
+  defaultState: PropTypes.string,
 }
 
 Dropdown.defaultProps = {
   className: '',
+  defaultState: 'closed',
 }
 
 export default Dropdown

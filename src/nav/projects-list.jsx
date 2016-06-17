@@ -12,7 +12,12 @@ export default class ProjectsList extends Component {
   }
 
   render () {
+    let defaultDropdownState = 'closed'
+
     if (!projectsStore.projects.length) return null
+    if (!projectsStore.chosen) {
+      defaultDropdownState = 'open'
+    }
 
     const chosen = projectsStore.chosen || { empty: true }
     const other = projectsStore.other.concat([{ add: true }])
@@ -26,6 +31,7 @@ export default class ProjectsList extends Component {
         onSelect={this._onSelect}
         renderItem={this._project}
         keyProperty='path'
+        defaultState={defaultDropdownState}
       />
     )
   }

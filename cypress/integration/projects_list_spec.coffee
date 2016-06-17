@@ -42,27 +42,37 @@ describe "Projects List", ->
         .fixture("projects").then (@projects) ->
           @ipc.handle("get:project:paths", null, @projects)
 
-    it "displays projects in list", ->
-      cy
-        .get(".empty").should("not.be.visible")
-        .get(".projects-list .dropdown-menu a:not(.add-project)").should("have.length", @projects.length)
+    describe "projects listed in dropdown", ->
+      it "displays projects in list", ->
+        cy
+          .get(".empty").should("not.be.visible")
+          .get(".projects-list .dropdown-menu a:not(.add-project)")
+            .should("have.length", @projects.length)
 
-    it "each project shows it's project path", ->
-      cy
-        .get(".projects-list .dropdown-menu a").first()
-          .should("contain", "/My-Fake-Project")
+      it "each project shows it's project path", ->
+        cy
+          .get(".projects-list .dropdown-menu a").first()
+            .should("contain", "/My-Fake-Project")
 
-    it "each project has it's folder name", ->
-      cy.get(".projects-list .dropdown-menu a")
-        .contains("", " My-Fake-Project")
+      it "each project has it's folder name", ->
+        cy.get(".projects-list .dropdown-menu a")
+          .contains("", " My-Fake-Project")
+
+    it "opens projects dropdown by default", ->
+      cy
+        .get(".projects-list .dropdown-menu")
+          .should("be.visible")
+
+    it "displays message about choosing project", ->
+      cy.get("h4").contains("Choose a Project")
 
     it "add project within list", ->
       cy
-        .contains("Projects").click()
+        .contains("Projects")
         .get(".add-project").click().then ->
           expect(@App.ipc).to.be.calledWith("show:directory:dialog")
 
-    it "add button displays tooltip on hover", ->
+    it.skip "add button displays tooltip on hover", ->
       cy
         .get("nav a").not(".add-project").find(".fa-plus").parent().invoke("hover")
         .get(".rc-tooltip").contains("Add Project").should("be.visible")
@@ -77,7 +87,6 @@ describe "Projects List", ->
           @ipc.handle("get:current:user", null, @user)
         .fixture("projects").then (@projects) ->
           @ipc.handle("get:project:paths", null, @projects)
-        .contains("Projects").click()
         .get(".projects-list .dropdown-menu a")
           .contains(@firstProjectName).as("firstProject")
         .get(".projects-list .dropdown-menu a")
@@ -108,7 +117,9 @@ describe "Projects List", ->
 
       it "displays new project in dropdown", ->
         cy
-          .get("@lastProject").click()
+          .get("@lastProject").click().then ->
+            @ipc.handle("close:project", null, {})
+            @ipc.handle("open:project", null, {browsers: []})
           .get(".projects-list>a").first()
             .should("contain", @lastProjectName)
 

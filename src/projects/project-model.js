@@ -44,8 +44,10 @@ export default class Project {
   }
 
   setBrowsers (browsers) {
-    this.browsers = browsers
-    this.setChosenBrowser(this.defaultBrowser)
+    if (browsers.length) {
+      this.browsers = browsers
+      this.setChosenBrowser(this.defaultBrowser)
+    }
   }
 
   setChosenBrowser (browser) {
