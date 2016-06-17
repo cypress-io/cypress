@@ -42,6 +42,7 @@ Option | Default | Description
 `reporter` | `spec` | The [Mocha reporter](https://mochajs.org/#reporters) used during headless or CI runs
 `screenshotOnHeadlessFailure` | `true` | Whether to take a screenshot automatically on test failure when running headlessly or in CI
 `watchForFileChanges` | `true` | Whether Cypress will watch and restart tests on file changes
+`ignoreTestFiles` | `*.hot-update.js` | A string or array of glob patterns for ignoring test files that would otherwise be shown in your tests list. Under the hood Cypress is using `minimatch` with the options: `{dot: true, matchBase: true}`. We suggest you using [http://globtester.com](http://globtester.com) to test what files would match.
 
 ***
 
