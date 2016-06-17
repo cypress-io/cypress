@@ -82,5 +82,5 @@ describe "Projects Nav", ->
               @ipc.handle("close:project", null, {})
               @ipc.handle("open:project", null, @config)
 
-        it.only "lists browsers", ->
+        it "lists browsers", ->
           cy.get(".browsers-list")
