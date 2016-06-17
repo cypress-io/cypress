@@ -152,7 +152,7 @@ describe "Projects List", ->
       beforeEach ->
         cy
           .get("nav").find(".fa-plus").click().then ->
-            @ipc.handle("show:directory:dialog", {message: "something bad happened"}, null)
+            @ipc.handle("show:directory:dialog", {name: "error", message: "something bad happened"}, null)
 
       it "displays error", ->
         cy

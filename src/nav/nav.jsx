@@ -17,9 +17,10 @@ const logout = () => {
 
 const addProject = (e) => {
   if (e) { e.preventDefault() }
+
   let project
 
-  App.ipc("show:directory:dialog")
+  return App.ipc("show:directory:dialog")
   .then(action('add:project', (dirPath) => {
      // if the user cancelled the dialog selection
      // dirPath will be undefined
@@ -32,12 +33,12 @@ const addProject = (e) => {
     // wait at least 750ms even if add:project
     // resolves faster to prevent the sudden flash
     // of loading content which is jarring
-    Promise.all([
+    return Promise.all([
       App.ipc("add:project", dirPath),
-      Promise.delay(750),
+      // Promise.delay(750),
     ])
     .then(action('project:loaded', () => {
-      project.isLoading = false
+      return project.isLoading = false
     }))
   }))
   .catch(action('add:project:err', (err) => {

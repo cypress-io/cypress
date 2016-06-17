@@ -20,3 +20,10 @@
     word-break: break-word;
   }
 }
+
+#app {
+  .alert-danger {
+    margin: 15px auto;
+    width: 400px;
+  }
+}
