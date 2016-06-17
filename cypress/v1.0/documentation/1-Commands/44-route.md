@@ -330,6 +330,8 @@ cy.route(function(){
 })
 ```
 
+***
+
 ## Functions which return promises are awaited
 
 ```javascript

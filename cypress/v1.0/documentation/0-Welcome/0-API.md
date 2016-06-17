@@ -68,6 +68,7 @@ Commands drive your tests in the browser like a real user would. They let you pe
 
 | Connectors | |
 | -------------------- | -- |
+| [each](https://on.cypress.io/api/each) | Iterate through each item in the current subject |
 | [its](https://on.cypress.io/api/its) | Get properties on the current subject |
 | [invoke](https://on.cypress.io/api/invoke) | Invoke the function on the current subject |
 | [spread](https://on.cypress.io/api/spread) | Spread an array as individual arguments to a callback function |
