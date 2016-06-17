@@ -56,12 +56,6 @@ describe "Projects List", ->
       cy.get(".projects-list .dropdown-menu a")
         .contains("", " My-Fake-Project")
 
-    it "trigger 'open:project' on click of project", ->
-      cy
-        .contains("Projects").click()
-        .get(".projects-list .dropdown-menu a").first().click().should ->
-          expect(@App.ipc).to.be.calledWith("open:project")
-
     it "add project within list", ->
       cy
         .contains("Projects").click()
@@ -72,6 +66,62 @@ describe "Projects List", ->
       cy
         .get("nav a").not(".add-project").find(".fa-plus").parent().invoke("hover")
         .get(".rc-tooltip").contains("Add Project").should("be.visible")
+
+  describe "click on project", ->
+    beforeEach ->
+      @firstProjectName = "My-Fake-Project"
+      @lastProjectName = "project5"
+
+      cy
+        .fixture("user").then (@user) ->
+          @ipc.handle("get:current:user", null, @user)
+        .fixture("projects").then (@projects) ->
+          @ipc.handle("get:project:paths", null, @projects)
+        .contains("Projects").click()
+        .get(".projects-list .dropdown-menu a")
+          .contains(@firstProjectName).as("firstProject")
+        .get(".projects-list .dropdown-menu a")
+          .contains(@lastProjectName).as("lastProject")
+
+    it "displays project in dropdown on click", ->
+      cy
+        .get("@firstProject").click()
+        .get(".projects-list>a").first()
+          .should("contain", @firstProjectName)
+
+    it "trigger 'open:project' on click of project", ->
+      cy
+        .get("@firstProject").click().should ->
+          expect(@App.ipc).to.be.calledWith("open:project")
+
+    it "doesn't trigger 'close:project' on first project select", ->
+      cy
+        .get("@firstProject").click().should ->
+          expect(@App.ipc).to.not.be.calledWith("close:project")
+
+    describe "switch project", ->
+      beforeEach ->
+        cy
+          .get("@firstProject").click().should ->
+            expect(@App.ipc).to.be.calledWith("open:project")
+          .root().contains(@firstProjectName).click()
+
+      it "displays new project in dropdown", ->
+        cy
+          .get("@lastProject").click()
+          .get(".projects-list>a").first()
+            .should("contain", @lastProjectName)
+
+      it "closes previously chosen project", ->
+        cy
+          .get("@lastProject").click().should ->
+            expect(@App.ipc).to.be.calledWith("close:project")
+            expect(@App.ipc).to.be.calledWith("open:project")
+
+      it "opens new project", ->
+        cy
+          .get("@lastProject").click().should ->
+            expect(@App.ipc).to.be.calledWith("open:project")
 
   describe "add project", ->
     beforeEach ->
@@ -141,3 +191,6 @@ describe "Projects List", ->
         @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-Fake-Project")
 
         cy.get(".project.loading").find(".fa-spin").should("be.visible")
+
+
+

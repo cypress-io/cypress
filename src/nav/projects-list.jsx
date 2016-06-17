@@ -34,6 +34,11 @@ export default class ProjectsList extends Component {
     if (project.add) {
       this.props.addProject()
     } else {
+      if (projectsStore.chosen)
+        App.ipc("close:project")
+
+      // if there is already a project open,
+      // we need to close that project first
       action('project:selected', () => openProject(project))()
     }
   }
