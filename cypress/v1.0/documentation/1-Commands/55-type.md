@@ -67,6 +67,25 @@ cy.get("textarea").type("Hello world")
 
 ***
 
+## Type into an element with `tabindex`
+
+```html
+<body>
+  <div id="el" tabindex="1">
+    this div can receive focus
+  </div>
+</body>
+```
+
+```javascript
+// this element will receive all of the appropriate
+// key events and focus / blur events but will not
+// have its value or text contents altered in any way
+cy.get("#el").type("foo")
+```
+
+***
+
 # Options Usage
 
 ## Force a click to happen prior to type
@@ -148,6 +167,8 @@ The following events will be fired based on what key was pressed identical to th
 `beforeinput` is *not* fired even though it is in the spec because no browser has adopted it.
 
 Additionally `change` events will be fired either when the `{enter}` key is pressed (and the value has changed since the last focus event), or whenever the element loses focus. This matches browser behavior.
+
+Events that should not fire on non input types such as elements with `tabindex` do not fire their `textInput` or `input` events. Only typing into elements which cause the actual value or text to change will fire those events.
 
 ***
 
