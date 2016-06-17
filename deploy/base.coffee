@@ -267,14 +267,14 @@ class Base
       runSequence "app:build", "app:minify", (err) ->
         if err then reject(err) else resolve()
 
-  createCyCache: (automationsProject) ->
+  createCyCache: (project) ->
     cache.path = cache.path.replace("development", "production")
 
     # cache = path.join(@buildPathToAppResources(), ".cy", "production", "cache")
 
     cache.write({
       USER: {session_token: "abc123"}
-      PROJECTS: [automationsProject]
+      PROJECTS: [project]
     })
 
   removeCyCache: ->
@@ -326,6 +326,43 @@ class Base
               reject(new Error("running project tests failed with: '#{code}' errors."))
 
     @createCyCache(automations)
+    .then(runProjectTest)
+    .then(verifyScreenshots)
+    .then ->
+      Fixtures.remove()
+    .then =>
+      @removeCyCache()
+
+  _runFailingProjectTest: ->
+    @log("#runFailingProjectTest")
+
+    Fixtures.scaffold()
+
+    failures = Fixtures.projectPath("failures")
+
+    verifyScreenshots = =>
+      ## the test should have created 3 png screenshots at this path...
+      screenshot1 = path.join(failures, "cypress", "screenshots", "failure1.png")
+      screenshot2 = path.join(failures, "cypress", "screenshots", "failure2.png")
+
+      Promise.all([
+        fs.statAsync(screenshot1)
+        fs.statAsync(screenshot2)
+      ])
+
+    runProjectTest = =>
+      new Promise (resolve, reject) =>
+        env = _.omit(process.env, "CYPRESS_ENV")
+
+        sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{failures}"], {stdio: "inherit", env: env}
+        sp.on "exit", (code) ->
+
+          if code is 2
+            resolve()
+          else
+            reject(new Error("running project tests failed with: '#{code}' errors."))
+
+    @createCyCache(failures)
     .then(runProjectTest)
     .then(verifyScreenshots)
     .then ->
@@ -387,6 +424,7 @@ class Base
     .then(@afterBuild)
     .then(@runSmokeTest)
     .then(@runProjectTest)
+    .then(@runFailingProjectTest)
     .then(@cleanupCy)
     .then(@codeSign) ## codesign after running smoke tests due to changing .cy
     .then(@verifyAppCanOpen)
