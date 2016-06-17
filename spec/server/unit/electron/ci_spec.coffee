@@ -233,6 +233,9 @@ describe "electron/ci", ->
       ci.run({key: "key-123"}).then ->
         expect(ci.reportStats).to.be.calledWith("id-123", "guid-abc", "projectName", "key-123", {passes: 10, failures: 2})
 
-    it "returns with the stats failures", ->
-      ci.run({}).then (failures) ->
-        expect(failures).to.eq 2
+    it "returns with the stats", ->
+      ci.run({}).then (stats) ->
+        expect(stats).to.deep.eq({
+          passes: 10
+          failures: 2
+        })
