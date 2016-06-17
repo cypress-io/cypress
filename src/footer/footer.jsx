@@ -6,13 +6,26 @@ const Footer = () => {
     <footer className='footer'>
       <div className='container-fluid'>
         <p className='text-center'>
-          <a href=''>Version 0.16.1</a>{' '}
+          <a onClick={startAboutWindow} href=''>Version 0.16.1</a>{' '}
           |{' '}
           <a onClick={openChangelog} href='#'>Changelog</a>
         </p>
       </div>
     </footer>
   )
+}
+
+const startAboutWindow = (e) => {
+  e.preventDefault()
+
+  return App.ipc("window:open", {
+    position: "center",
+    width: 300,
+    height: 230,
+    toolbar: false,
+    title: "About",
+    type: "ABOUT",
+  })
 }
 
 const openChangelog = () => (
