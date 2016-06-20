@@ -199,10 +199,7 @@ class CA
       fs.writeFileAsync(path.join(@keysFolder,  dest + ".key",        keyPrivatePem))
       fs.writeFileAsync(path.join(@keysFolder,  dest + ".public.key", keyPublicPem))
     ])
-    .return({
-      certPem:       certPem
-      keyPrivatePem: keyPrivatePem
-    })
+    .return([certPem, keyPrivatePem])
 
   getCACertPath: ->
     path.join(@certsFolder, "ca.pem")
