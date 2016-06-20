@@ -1,6 +1,7 @@
 import { useStrict } from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'
+import _ from 'lodash'
 
 import Application from './app/application'
 
@@ -12,6 +13,18 @@ useStrict(true)
 App.start = (mode) => {
   ipc('get:options')
   .then((options = {}) => {
+    const sendErr = function (err) {
+      return App.ipc("gui:error", _.pick(err, "name", "message", "stack"))
+    }
+
+    window.onerror = function (message, source, lineno, colno, err) {
+      return sendErr(err)
+    }
+
+    window.onunhandledrejection = function (evt) {
+      return sendErr(evt.reason)
+    }
+
     const el = document.getElementById('app')
 
     switch (mode) {
