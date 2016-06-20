@@ -39,7 +39,6 @@
   "devDependencies": {
     "@cypress/core-releaser": "0.1.6",
     "babel-eslint": "^6.0.4",
-    "bluebird": "^3.1.1",
     "bower": "^1.7.2",
     "eslint": "^2.12.0",
     "lodash": "^4.0.0",
