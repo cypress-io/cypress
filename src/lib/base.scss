@@ -15,7 +15,7 @@ body {
 body,
 input,
 textarea {
-  font-family: 'Muli', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: $muli;
 }
 
 p {
@@ -86,7 +86,7 @@ pre {
   border-radius: 2px;
   color: #333;
   display: block;
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: $open-sans;
   font-size: 1.05em;
   letter-spacing: 0.5px;
   margin: 0 0 10px;
@@ -95,6 +95,44 @@ pre {
   line-height: 1.4;
   word-break: break-all;
   word-wrap: break-word;
+}
+
+table {
+  background-color: transparent;
+  border-collapse: collapse;
+  border-spacing: 0;
+  max-width: 100%;
+  width: 100%;
+
+  > thead > tr > th,
+  > thead > tr > td,
+  > tbody > tr > th,
+  > tbody > tr > td,
+  > tfoot > tr > th,
+  > tfoot > tr > td {
+    border-top: 1px solid #ddd;
+    line-height: 1.42857;
+    padding: 5px;
+    vertical-align: top;
+  }
+
+  > thead > tr > th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #ddd;
+  }
+
+  > caption + thead > tr:first-child > th,
+  > caption + thead > tr:first-child > td,
+  > colgroup + thead > tr:first-child > th,
+  > colgroup + thead > tr:first-child > td,
+  > thead:first-child > tr:first-child > th,
+  > thead:first-child > tr:first-child > td {
+    border-top: 0;
+  }
+}
+
+th {
+  text-align: left;
 }
 
 .hidden {

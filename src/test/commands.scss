@@ -45,7 +45,7 @@
 }
 
 .commands-container {
-  font-family: Consolas, Monaco, 'Andale Mono', monospace;
+  font-family: $monospace;
 
   background-color: #eef1f4;
   padding: 0;
@@ -330,7 +330,7 @@
   }
 
   .command-alias {
-    font-family: 'Open Sans', sans-serif;
+    font-family: $open-sans;
     font-size: 10px;
     line-height: 1.5;
   }

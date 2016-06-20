@@ -33,8 +33,8 @@ const Test = ({ model }) => (
         </div>
       </div>
       <div className='runnable-instruments'>
-        <Agents />
-        <Routes />
+        <Agents model={model} />
+        <Routes model={model} />
         <div className='runnable-commands-region'>
           {hasCommands(model.hooks) ? <Hooks model={model} /> : <NoCommands />}
         </div>

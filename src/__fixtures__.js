@@ -77,7 +77,17 @@ const emptyTestHook = hook({
   name: 'test',
 })
 
-function runnable (type, { title, indent, hooks, children, state = 'passed', error = null }) {
+const agents = [
+  { id: 'ab', type: 'spy-1', functionName: 'someMethod', callCount: 1 },
+  { id: 'cd', type: 'spy-2', functionName: 'someOtherMethod', callCount: 0 },
+]
+
+const routes = [
+  { id: 'ab', method: 'GET', url: '/users$/', isStubbed: true, alias: 'getUsers', numResponses: 1 },
+  { id: 'cd', method: 'GET', url: '/orgs$/', isStubbed: false, alias: 'getOrgs', numResponses: 0 },
+]
+
+function runnable (type, { title, indent, hooks, children, state = 'passed', error = null, agents = [], routes = [] }) {
   return {
     type,
     id: _.uniqueId('r'),
@@ -87,6 +97,8 @@ function runnable (type, { title, indent, hooks, children, state = 'passed', err
     children,
     state,
     error,
+    agents,
+    routes,
   }
 }
 
@@ -102,13 +114,13 @@ const tests = {
   spec: ' / Users / chrisbreiding / Dev / cypress / _playground2 / cypress / integration / foo_spec.coffee',
   tests: [
     test({ title: 'has no commands', indent: 5, hooks: [emptyTestHook] }),
-    test({ title: 'test at top level', indent: 5, hooks: [assertTrue] }),
+    test({ title: 'test at top level', indent: 5, hooks: [assertTrue], routes }),
     suite({ title: 'top level', indent: 5, state: 'processing', children: [
       suite({ title: 'second level (1)', indent: 20, state: 'failed', children: [
         test({ title: 'test in second level (1)', indent: 35, hooks: [beforeHook(0), assertTrue] }),
         test({ title: 'test in second level (2)', indent: 35, hooks: [beforeHook(0), assertTrue] }),
         suite({ title: 'third level (1) - in second level (1)', indent: 35, state: 'failed', children: [
-          test({ title: 'test in third level (1)', indent: 50, state: 'failed', error: `CypressError: Timed out retrying: Expected to find element: 'h5', but never found it.`, hooks: [beforeHook(0, 1), getTest] }),
+          test({ title: 'test in third level (1)', indent: 50, state: 'failed', error: `CypressError: Timed out retrying: Expected to find element: 'h5', but never found it.`, hooks: [beforeHook(0, 1), getTest], agents }),
         ] }),
       ] }),
       suite({ title: 'second level (2)', indent: 20, state: 'processing', children: [

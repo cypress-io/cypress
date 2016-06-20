@@ -1,36 +1,52 @@
+import cs from 'classnames'
+import _ from 'lodash'
 import React from 'react'
 
-const Agent = () => (
-  <li className='hook-item'>
-    <span className='hook-name'>
-      <i className='fa fa-caret-right'></i>
-      Spies / Stubs / Mocks (<span data-js='total'>0</span>)
-      <i className='fa fa-ellipsis-h'></i>
-    </span>
-    <div className='agents-container hidden'>
-      <div className='tab-content'>
-        <div className='tab-pane active'>
-          <table className='table table-condensed'>
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Function</th>
-                <th># Calls</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </li>
+const Agent = ({ model }) => (
+  <tr className={model.callCount ? '' : 'no-calls'}>
+    <td>{model.type}</td>
+    <td>{model.functionName}</td>
+    <td className='call-count'>{model.callCount || '-'}</td>
+  </tr>
 )
 
-const Agents = () => (
-  <div className='runnable-agents-region'>
-    <div className='instruments-container' data-comment="hide if no agents">
+const AgentsList = ({ model }) => (
+  <tbody>
+    {_.map(model.agents, (agent) => <Agent key={agent.id} model={agent} />)}
+  </tbody>
+)
+
+const Agents = ({ model }) => (
+  <div
+    className={cs('runnable-agents-region', {
+      'no-agents': !model.agents.length,
+    })}
+  >
+    <div className='instruments-container'>
       <ul className='hooks-container'>
-        <Agent />
+        <li className='hook-item'>
+          <span className='hook-name'>
+            <i className='fa fa-caret-right'></i>
+            Spies / Stubs / Mocks ({model.agents.length})
+            <i className='fa fa-ellipsis-h'></i>
+          </span>
+          <div className='agents-container' data-comment='hidden className goes here'>
+            <div className='tab-content'>
+              <div className='tab-pane active'>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Type</th>
+                      <th>Function</th>
+                      <th># Calls</th>
+                    </tr>
+                  </thead>
+                  <AgentsList model={model} />
+                </table>
+              </div>
+            </div>
+          </div>
+        </li>
       </ul>
     </div>
   </div>
