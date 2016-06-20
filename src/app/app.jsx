@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import Header from '../header/header'
-import Tests from '../tests/tests'
+import Runnables from '../tests/runnables'
 
 import f from '../__fixtures__'
 
@@ -9,7 +9,7 @@ export default class extends Component {
     return (
       <div>
         <Header {...f.header} />
-        <Tests {...f.tests} />
+        <Runnables {...f.tests} />
       </div>
     )
   }

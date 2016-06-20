@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import React from 'react'
-import Runnable from './runnable'
+import Runnable from './runnable-and-suite'
 
-const Empty = ({ spec }) => (
+const NoTests = ({ spec }) => (
   <div className='no-tests'>
     <h4>
       <i className='fa fa-warning'></i>
@@ -21,18 +21,18 @@ const Empty = ({ spec }) => (
   </div>
 )
 
-const Runnables = ({ tests }) => (
+const RunnablesList = ({ tests }) => (
   <ul className='runnables'>
     {_.map(tests, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
   </ul>
 )
 
-const Tests = (props) => (
+const Runnables = (props) => (
   <div className='tests'>
     <div className='tests-wrap'>
-      {props.tests.length ? <Runnables {...props} /> : <Empty {...props} />}
+      {props.tests.length ? <RunnablesList {...props} /> : <NoTests {...props} />}
     </div>
   </div>
 )
 
-export default Tests
+export default Runnables
