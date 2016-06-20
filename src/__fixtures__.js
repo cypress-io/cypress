@@ -113,7 +113,7 @@ function suite (props) {
 const tests = {
   spec: ' / Users / chrisbreiding / Dev / cypress / _playground2 / cypress / integration / foo_spec.coffee',
   tests: [
-    test({ title: 'has no commands', indent: 5, hooks: [emptyTestHook] }),
+    test({ title: 'has no commands', indent: 5, hooks: [emptyTestHook], routes }),
     test({ title: 'test at top level', indent: 5, hooks: [assertTrue], routes }),
     suite({ title: 'top level', indent: 5, state: 'processing', children: [
       suite({ title: 'second level (1)', indent: 20, state: 'failed', children: [

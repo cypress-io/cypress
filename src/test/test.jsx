@@ -7,9 +7,11 @@ import Hooks from './hooks'
 import Routes from './routes'
 
 const NoCommands = () => (
-  <div className='no-commands'>
-    No commands were issued in this test.
-  </div>
+  <ul className='hooks-container'>
+    <li className='no-commands'>
+      No commands were issued in this test.
+    </li>
+  </ul>
 )
 
 const hasCommands = (hooks) => !!_.flatMap(hooks, 'commands').length

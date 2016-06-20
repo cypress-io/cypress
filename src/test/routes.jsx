@@ -6,7 +6,7 @@ import Tooltip from 'rc-tooltip'
 const formatUrl = (url) => url
 
 const Route = ({ model }) => (
-  <tr className={model.numResponses ? '' : 'no-responses'}>
+  <tr className={cs({ 'no-responses': !!model.numResponses })}>
     <td>{model.method}</td>
     <td>{formatUrl(model.url)}</td>
     <td>{model.isStubbed ? 'Yes' : 'No'}</td>

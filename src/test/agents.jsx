@@ -3,7 +3,7 @@ import _ from 'lodash'
 import React from 'react'
 
 const Agent = ({ model }) => (
-  <tr className={model.callCount ? '' : 'no-calls'}>
+  <tr className={cs({ 'no-calls': !!model.callCount })}>
     <td>{model.type}</td>
     <td>{model.functionName}</td>
     <td className='call-count'>{model.callCount || '-'}</td>
