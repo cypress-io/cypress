@@ -79,9 +79,9 @@ Sinon-as-Promised gives you the ability to stub methods that return Promises. To
 
 Cypress also bundles the following tools on the `Cypress` object. These can be used anywhere inside of your tests.
 
-- [Cypress._](https://on.cypress.io/api/cypress-underscore)(Underscore)
-- [Cypress.$](https://on.cypress.io/api/cypress-jquery)(jQuery)
-- [Cypress.minimatch](https://on.cypress.io/api/cypress-minimatch)(minimatch.js)
-- [Cypress.moment](https://on.cypress.io/api/cypress-moment)(moment.js)
-- [Cypress.Blob](https://on.cypress.io/api/cypress-blob)(blob utils)
+- [Cypress._](https://on.cypress.io/api/cypress-underscore) (Underscore)
+- [Cypress.$](https://on.cypress.io/api/cypress-jquery) (jQuery)
+- [Cypress.minimatch](https://on.cypress.io/api/cypress-minimatch) (minimatch.js)
+- [Cypress.moment](https://on.cypress.io/api/cypress-moment) (moment.js)
+- [Cypress.Blob](https://on.cypress.io/api/cypress-blob) (blob utils)
 - [Cypress.Promise](https://on.cypress.io/api/cypress-promise) (Bluebird)
