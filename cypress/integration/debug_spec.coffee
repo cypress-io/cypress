@@ -1,4 +1,4 @@
-describe "Debug Console", ->
+describe.skip "Debug Console", ->
   beforeEach ->
     cy
       .viewport(800, 400)

@@ -1,4 +1,4 @@
-describe "About", ->
+describe.skip "About", ->
   beforeEach ->
     cy
       .viewport(300, 230)

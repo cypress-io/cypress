@@ -1,4 +1,4 @@
-describe "Updates", ->
+describe.skip "Updates", ->
   beforeEach ->
     cy
       .viewport(300, 210)

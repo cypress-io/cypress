@@ -96,8 +96,13 @@ describe "Projects Nav", ->
               @config.browsers = @browsers
               @ipc.handle("open:project", null, @config)
 
-        it "lists browsers", ->
-          cy.get(".browsers-list")
+        it.skip "lists browsers", ->
+          cy
+            .get(".browsers-list").parent()
+            .find(".dropdown-menu").first().find("li").should("have.length", 2)
+            .then ($li) ->
+              expect($li.first()).to.contain("Chromium")
+              expect($li.last()).to.contain("Canary")
 
         it.skip "displays default browser name in chosen", ->
           cy
@@ -109,12 +114,77 @@ describe "Projects Nav", ->
             .get(".browsers-list>a").first()
               .find(".fa-chrome")
 
-        it.skip "switch chosen browser", ->
+        context.skip "switch browser", ->
+          beforeEach ->
+            cy
+              .get(".browsers-list>a").first().click()
+              .get(".dropdown-menu")
+                .contains("Chromium").click()
+
+          it "switches text in button on switching browser", ->
+            cy
+              .get(".browsers-list>a").first().contains("Chromium")
+
+          it "sends the 'launch:browser' event immediately", ->
+            cy.wrap(@App.ipc).should("be.calledWith", "launch:browser", {
+              browser: "chromium"
+              url: undefined
+            })
+
+          it "swaps the chosen browser into the dropdown", ->
+            cy
+              .get(".dropdown-menu").first().find("li").should("have.length", 2)
+              .then ($li) ->
+                expect($li.first()).to.contain("Chrome")
+                expect($li.last()).to.contain("Canary")
+
+        context.skip "relaunch browser", ->
+          beforeEach ->
+            cy
+              .get("@firstProject").click()
+
+          it "attaches 'on:launch:browser' after project opens", ->
+            cy.wrap(@App.ipc).should("be.calledWith", "on:launch:browser")
+
+          it "relaunchers browser when 'on:launch:browser' fires", ->
+            @ipc.handle("on:launch:browser", null, {
+              browser: "chromium"
+              url: "http://localhost:2020/__/#tests/foo_spec.js"
+            })
+
+            cy
+              .wrap(@App.ipc).should("be.calledWith", "launch:browser", {
+                browser: "chromium"
+                url: "http://localhost:2020/__/#tests/foo_spec.js"
+              })
+              .get(".browsers-list>a").first().contains("Chromium")
+
+
+      describe "only one browser available", ->
+        beforeEach ->
+          @config = {
+            clientUrl: "http://localhost:2020",
+            clientUrlDisplay: "http://localhost:2020"
+          }
+
+          @oneBrowser = [{
+            "name": "chrome",
+            "version": "50.0.2661.86",
+            "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            "majorVersion": "50"
+          }]
+
           cy
-            .get(".browsers-list>a").first().click()
-            .root().contains("Canary").click()
-            .get(".browsers-list>a").first()
-              .should("contains", "Canary")
+            .fixture("browsers").then ->
+              @config.browsers = @oneBrowser
+
+              @ipc.handle("open:project", null, @config)
+
+        context "displays no dropdown btn", ->
+          it "displays the first browser and 2 others in the dropdown", ->
+            cy
+              .get(".browsers-list")
+                .find(".dropdown-toggle").should("not.be.visible")
 
       describe "no browsers available", ->
         beforeEach ->
@@ -124,7 +194,17 @@ describe "Projects Nav", ->
         it "does not list browsers", ->
           cy.get(".browsers-list").should("not.exist")
 
-        it.skip "displays error about no browsers", ->
+        it.skip "displays browser error", ->
+          cy.contains("We couldn't find any Chrome browsers")
+
+        it.skip "displays download browser button", ->
+          cy.contains("Download Chrome")
+
+        describe.skip "download browser", ->
+          it "triggers external:open on click", ->
+            cy
+              .contains(".btn", "Download Chrome").click().then ->
+                expect(@App.ipc).to.be.calledWith("external:open", "https://www.google.com/chrome/browser/")
 
     context "server running status", ->
       it "displays as Running on project open", ->
