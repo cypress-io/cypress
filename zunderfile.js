@@ -7,6 +7,10 @@ function copyScripts (dir) {
     .pipe(gulp.dest(dir));
     gulp.src("bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js")
     .pipe(gulp.dest(dir));
+    gulp.src("bower_components/fira/woff/**/*")
+    .pipe(gulp.dest(dir + "/woff"));
+    gulp.src("bower_components/font-awesome/fonts/**")
+    .pipe(gulp.dest(dir + "/fonts"));
   }
 }
 
