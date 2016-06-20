@@ -1,20 +1,28 @@
 import { useStrict } from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'
+import { Router, Route, useRouterHistory, IndexRedirect } from 'react-router'
 import _ from 'lodash'
+import { createHashHistory } from 'history'
 
 import Application from './app/application'
+import Login from './login/login'
+import Projects from './projects/projects-list'
+import Project from './project/project'
+import SpecsList from './specs/specs-list'
+
+useStrict(true)
 
 import App from './lib/app'
 import ipc from './lib/ipc'
 
-useStrict(true)
+const history = useRouterHistory(createHashHistory)({ queryKey: false })
 
-App.start = (mode) => {
+App.start = () => {
   ipc('get:options')
   .then((options = {}) => {
     const sendErr = function (err) {
-      return App.ipc("gui:error", _.pick(err, "name", "message", "stack"))
+      return App.ipc('gui:error', _.pick(err, 'name', 'message', 'stack'))
     }
 
     window.onerror = function (message, source, lineno, colno, err) {
@@ -27,18 +35,23 @@ App.start = (mode) => {
 
     const el = document.getElementById('app')
 
-    switch (mode) {
-      case 'about':
-        // render about
-        break
-      case 'debug':
-        // render debug
-        break
-      case 'updates':
-        // render updates
-        break
-      default:
-        render(<Application options={options} />, el)
-    }
+    render(
+      <Router history={history}>
+        <Route path='/' component={Application} options={options}>
+          <IndexRedirect to='/projects' />
+          <Route path='/projects' component={Projects} />
+          <Route path='/projects/:id' component={Project}>
+            <IndexRedirect to='specs' />
+            <Route path='specs' component={SpecsList} />
+            {
+            // <Route path='builds' component={BuildsList} />
+            // <Route path='config' component={Config} />
+            }
+          </Route>
+          <Route path='/login' component={Login} />
+        </Route>
+      </Router>
+      , el
+    )
   })
 }

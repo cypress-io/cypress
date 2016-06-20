@@ -1,9 +1,14 @@
-describe.skip "Project Tests", ->
+describe "Project Tests", ->
   beforeEach ->
     @firstProjectName = "My-Fake-Project"
 
+    @config = {
+      clientUrl: "http://localhost:2020",
+      clientUrlDisplay: "http://localhost:2020"
+    }
+
     cy
-      .visit("/")
+      .visit("/#/projects/123-456")
       .window().then (win) ->
         {@ipc, @App} = win
 
@@ -18,8 +23,12 @@ describe.skip "Project Tests", ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
         @ipc.handle("get:project:paths", null, @projects)
-      .get(".projects-list .dropdown-menu a")
-        .contains(@firstProjectName).as("firstProject").click()
+      .fixture("browsers").then (@browsers) ->
+        @config.browsers = @browsers
+        @ipc.handle("open:project", null, @config)
+
+  it.only "navigates to project page", ->
+    cy.get("#project")
 
   describe "server error", ->
     beforeEach ->

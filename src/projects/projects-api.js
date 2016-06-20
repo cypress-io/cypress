@@ -3,8 +3,8 @@ import App from '../lib/app'
 import projectsStore from '../projects/projects-store'
 
 const getProjects = () => {
-  App.ipc('get:project:paths').then(action('get:project:paths', (projectPaths) => {
-    projectsStore.setProjects(projectPaths)
+  App.ipc('get:project:paths').then(action('get:project:paths', (projects) => {
+    projectsStore.setProjects(projects)
   }))
 }
 
@@ -29,7 +29,7 @@ const closeProject = () => {
 }
 
 const openProject = (project) => {
-  projectsStore.setChosen(project)
+  // projectsStore.setChosen(project)
 
   return App.ipc('open:project', project.path)
   .then(action('open:project', (config) => {

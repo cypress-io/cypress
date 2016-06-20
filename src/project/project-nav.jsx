@@ -7,7 +7,7 @@ import projectsStore from '../projects/projects-store'
 @observer
 export default class ProjectNav extends Component {
   render () {
-    const project = projectsStore.chosen
+    const project = this.props.project
 
     return (
       <nav className='navbar navbar-default'>
@@ -73,15 +73,15 @@ export default class ProjectNav extends Component {
   }
 
   _onSelect = (browser) => {
-    browser
+    this.props.project.setChosenBrowser(browser)
   }
 
   _browser = (browser) => {
     browser
     return (
       <span>
-        <i className={`fa fa-chrome`}></i>{' '}
-        { browser.name }
+        <i className={`fa fa-${browser.icon}`}></i>{' '}
+        { browser.displayName }
       </span>
     )
   }

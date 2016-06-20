@@ -3,14 +3,10 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import projectsStore from '../projects/projects-store'
 import Dropdown from '../dropdown/dropdown'
-import { getProjects, openProject, closeProject } from '../projects/projects-api'
+import { openProject, closeProject } from '../projects/projects-api'
 
 @observer
 export default class ProjectsList extends Component {
-  componentWillMount () {
-    getProjects()
-  }
-
   render () {
     let defaultDropdownState = 'closed'
 

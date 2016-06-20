@@ -1,15 +1,18 @@
 import _ from 'lodash'
 import truncate from 'underscore.string/truncate'
-import { computed, observable } from 'mobx'
+import { computed, observable, action } from 'mobx'
+import Browser from '../lib/browser-model'
 
 export default class Project {
+  @observable id
   @observable path = ''
   @observable isChosen = false
   @observable isLoading = false
   @observable browsers = []
   @observable error = null
 
-  constructor ({ path, isLoading }) {
+  constructor ({ id, path, isLoading }) {
+    this.id = id
     this.path = path
     this.isLoading = isLoading
   }
@@ -40,17 +43,19 @@ export default class Project {
   }
 
   @computed get defaultBrowser () {
-    return _.find(this.browsers, { default: true }) || this.browsers[0]
+    return this.browsers[0]
   }
 
   setBrowsers (browsers) {
     if (browsers.length) {
-      this.browsers = browsers
+      this.browsers = _.map(browsers, (browser) => {
+        return new Browser(browser)
+      })
       this.setChosenBrowser(this.defaultBrowser)
     }
   }
 
-  setChosenBrowser (browser) {
+  @action setChosenBrowser (browser) {
     _.each(this.browsers, (browser) => {
       browser.isChosen = false
     })

@@ -18,7 +18,7 @@ class Dropdown extends Component {
     }
     document.body.addEventListener('click', this.outsideClickHandler)
 
-    if (this.props.defaultState) {
+    if (this.props.defaultState === 'open') {
       this._toggleOpen()
     }
   }

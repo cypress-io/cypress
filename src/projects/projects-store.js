@@ -24,9 +24,9 @@ class Projects {
     return project
   }
 
-  setProjects (projectPaths) {
-    this.projects = _.map(projectPaths, (path) => (
-      new Project({ path })
+  setProjects (projects) {
+    this.projects = _.map(projects, (project) => (
+      new Project(project)
     ))
   }
 

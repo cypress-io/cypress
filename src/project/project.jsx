@@ -1,69 +1,51 @@
-import React from 'react'
+import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import App from '../lib/app'
+import _ from 'lodash'
+import { withRouter } from 'react-router'
 
 import projectsStore from '../projects/projects-store'
 
 import ProjectNav from '../project/project-nav'
-import FilesList from '../files/files-list'
 
-const Empty = () => (
-  <div className='empty'>
-    <h4>Add your first project</h4>
-    <p>To begin testing, click <i className='fa fa-plus'></i> above to choose a folder that has the resources of your project.</p>
-    <p>Often this is the root folder of a source controlled project.</p>
-    <Error />
-    <p className='helper-docs-append'>
-      <a onClick={openHelp} className='helper-docs-link'>
-        <i className='fa fa-question-circle'></i>{' '}
-        Need help?
-      </a>
+import { openProject } from '../projects/projects-api'
+
+const NoBrowsers = () => (
+  <div className='alert alert-danger error'>
+    <p>
+      <i className='fa fa-warning'></i>
+      <strong>Can't Launch Any Browsers</strong>
     </p>
+    <p>
+      We couldn't find any Chrome browsers to launch. To fix, please download Chrome.
+    </p>
+    <a className='btn btn-primary btn-sm'>
+      <i className='fa fa-chrome'></i>{' '}
+      Download Chrome
+    </a>
   </div>
 )
 
-const Error = observer(() => {
-  if (!projectsStore.error) return null
+@withRouter
+@observer
+class Project extends Component {
+  componentWillMount () {
+    this.project = _.find(projectsStore.projects, { id: this.props.params.id })
+    if (!this.project) {
+      return this.props.router.push('/projects')
+    }
+    openProject(this.project)
+  }
 
-  return (
-    <div className='alert alert-danger error'>
-      <p className='text-center'>
-        <i className='fa fa-exclamation-triangle'></i>{' '}
-        { projectsStore.error }
-      </p>
-    </div>
-  )
-})
+  render () {
+    if (!this.project.browsers.length) return <NoBrowsers />
 
-const NoChosenProject = () => (
-  <div className='well-message'>
-    <h4>Choose a Project</h4>
-    <p>Choose an existing project to test.</p>
-    <Error />
-    <p className='helper-docs-append'>
-      <a onClick={openHelp} className='helper-docs-link'>
-        <i className='fa fa-question-circle'></i>{' '}
-        Need help?
-      </a>
-    </p>
-  </div>
-)
-
-const Project = observer(() => {
-  if (!projectsStore.projects.length) return <Empty />
-
-  if (!projectsStore.chosen) return <NoChosenProject />
-
-  return (
-    <div>
-      <ProjectNav/>
-      <FilesList />
-    </div>
-  )
-})
-
-const openHelp = () => (
-  App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running/#section-adding-projects')
-)
+    return (
+      <div>
+        <ProjectNav project={this.project}/>
+        { this.props.children }
+      </div>
+    )
+  }
+}
 
 export default Project
