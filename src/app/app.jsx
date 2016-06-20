@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import Header from '../header/header'
-import Runnables from '../tests/runnables'
+import Runnables from '../runnables/runnables'
 
 import f from '../__fixtures__'
 

@@ -2,7 +2,7 @@ import _ from 'lodash'
 import React from 'react'
 import Command from './command'
 
-export default ({ model }) => (
+const Hook = ({ model }) => (
   <li className='hook-item'>
     <span className='hook-name'>
     <i className='fa fa-caret-down'></i>
@@ -15,3 +15,11 @@ export default ({ model }) => (
     </ul>
   </li>
 )
+
+const Hooks = ({ model }) => (
+  <ul className='hooks-container'>
+    {_.map(model.hooks, (hook) => <Hook key={hook.id} model={hook} />)}
+  </ul>
+)
+
+export default Hooks

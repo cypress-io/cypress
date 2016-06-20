@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
-import Test from './test'
+import Test from '../test/test'
 
 const Suite = ({ model }) => (
   <div>
