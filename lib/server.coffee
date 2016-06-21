@@ -6,7 +6,9 @@ cookie       = require("cookie")
 express      = require("express")
 Promise      = require("bluebird")
 httpProxy    = require("http-proxy")
+httpsProxy   = require("@cypress/core-https-proxy")
 allowDestroy = require("server-destroy")
+appData      = require("./util/app_data")
 cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
@@ -19,9 +21,10 @@ class Server
     if not (@ instanceof Server)
       return new Server
 
-    @_server = null
-    @_proxy  = null
-    @_socket = null
+    @_server     = null
+    @_socket     = null
+    @_wsProxy    = null
+    @_httpsProxy = null
 
   createExpressApp: (port, morgan) ->
     app = express()
@@ -72,8 +75,8 @@ class Server
 
   createServer: (port, socketIoRoute, app) ->
     new Promise (resolve, reject) =>
-      @_server = http.createServer(app)
-      @_proxy  = httpProxy.createProxyServer()
+      @_server  = http.createServer(app)
+      @_wsProxy = httpProxy.createProxyServer()
 
       allowDestroy(@_server)
 
@@ -85,12 +88,29 @@ class Server
           reject @portInUseErr(port)
 
       onUpgrade = (req, socket, head) =>
-        @proxyWebsockets(@_proxy, socketIoRoute, req, socket, head)
+        @proxyWebsockets(@_wsProxy, socketIoRoute, req, socket, head)
+
+      @_server.on "connect", (req, socket, head) =>
+
+        @_httpsProxy.connect(req, socket, head, {
+          onRequest: app
+        })
 
       @_server.on "upgrade", onUpgrade
 
       @_server.once "error", onError
 
+      Promise.join(
+        @_listen(port, onError),
+        httpsProxy.create(appData.path("proxy"), port)
+      )
+      .spread (srv, httpsProxy) =>
+        @_httpsProxy = httpsProxy
+
+        resolve(srv)
+
+  _listen: (port, onError) ->
+    new Promise (resolve) =>
       @_server.listen port, =>
         @isListening = true
         logger.info("Server listening", {port: port})
@@ -98,6 +118,28 @@ class Server
         @_server.removeListener "error", onError
 
         resolve(@_server)
+
+  _normalizeReqUrl: (server) ->
+    ## because socket.io removes all of our request
+    ## events, it forces the socket.io traffic to be
+    ## handled first.
+    ## however we need to basically do the same thing
+    ## it does and after we call into socket.io go
+    ## through and remove all request listeners
+    ## and change the req.url by slicing out the host
+    ## because the browser is in proxy mode
+    listeners = server.listeners("request").slice(0)
+    server.removeAllListeners("request")
+    server.on "request", (req, res) ->
+      ## backup the original proxied url
+      ## and slice out the host/origin
+      ## and only leave the path which is
+      ## how browsers would normally send
+      ## use their url
+      req.url = url.parse(req.url).path
+
+      for listener in listeners
+        listener.call(server, req, res)
 
   proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
     ## bail if this is our own namespaced socket.io request
@@ -147,5 +189,6 @@ class Server
   startWebsockets: (watchers, config, options) ->
     @_socket = Socket()
     @_socket.startListening(@_server, watchers, config, options)
+    @_normalizeReqUrl(@_server)
 
 module.exports = Server

@@ -93,6 +93,9 @@ module.exports = {
       ## by being the last one
       args.push("--user-data-dir=#{dir}")
 
+      if ps = options.proxyServer
+        args.push("--proxy-server=#{ps}")
+
       launcher()
       .call("launch", name, url, args)
       .then (i) ->
