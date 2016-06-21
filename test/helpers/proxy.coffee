@@ -25,14 +25,59 @@ onError = (err) ->
   console.log "ERROR", err
 
 onRequest = (req, res) ->
-  console.log "onRequest!!!!!!!!!"
+  console.log "onRequest!!!!!!!!!", req.url, req.headers, req.method
 
-  request(req.url)
+  hostPort = parseHostAndPort(req)
+
+  # req.pause()
+
+  opts = {
+    url: req.url
+    baseUrl: "https://" + hostPort.host + ":" + hostPort.port
+    method: req.method
+    headers: req.headers
+  }
+
+  req.pipe(request(opts))
   .on "error", ->
     console.log "**ERROR", req.url
     res.statusCode = 500
     res.end()
   .pipe(res)
+
+parseHostAndPort = (req, defaultPort) ->
+  host = req.headers.host
+
+  return null if not host
+
+  hostPort = parseHost(host, defaultPort)
+
+  ## this handles paths which include the full url. This could happen if it's a proxy
+  if m = req.url.match(/^http:\/\/([^\/]*)\/?(.*)$/)
+    parsedUrl = url.parse(req.url)
+    hostPort.host = parsedUrl.hostname
+    hostPort.port = parsedUrl.port
+    req.url = parsedUrl.path
+
+  hostPort
+
+parseHost = (hostString, defaultPort) ->
+  if m = hostString.match(/^http:\/\/(.*)/)
+    parsedUrl = url.parse(hostString)
+
+    return {
+      host: parsedUrl.hostname
+      port: parsedUrl.port
+    }
+
+  hostPort = hostString.split(':')
+  host     = hostPort[0]
+  port     = if hostPort.length is 2 then +hostPort[1] else defaultPort
+
+  return {
+    host: host
+    port: port
+  }
 
 onConnect = (req, socket, head) ->
   ## tell the client that the connection is established
@@ -136,11 +181,7 @@ onConnect = (req, socket, head) ->
     conn.on "error", onError
 
   onServerConnectData = (head) ->
-    console.log "onServerConnectData", head
-
     firstBytes = head[0]
-
-    console.log "firstBytes", firstBytes
 
     if firstBytes is 0x16 or firstBytes is 0x80 or firstBytes is 0x00
       {hostname} = url.parse("http://#{req.url}")
@@ -180,10 +221,11 @@ onConnect = (req, socket, head) ->
           makeConnection(port)
 
     else
+      throw new Error("@httpPort")
       makeConnection(@httpPort)
 
   if not head or head.length is 0
-    socket.once "data", onServerConnectData
+    socket.once "data", onConnect.bind(@, req, socket)
 
     socket.write "HTTP/1.1 200 OK\r\n"
 
@@ -191,10 +233,9 @@ onConnect = (req, socket, head) ->
       socket.write("Proxy-Connection: keep-alive\r\n")
       socket.write("Connection: keep-alive\r\n")
 
-    socket.write("\r\n")
-  else
-    socket.pause()
+    return socket.write("\r\n")
 
+  else
     onServerConnectData(head)
 
 prx = http.createServer()
