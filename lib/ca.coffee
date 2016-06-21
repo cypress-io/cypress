@@ -1,3 +1,4 @@
+_       = require("lodash")
 fs      = require("fs-extra")
 path    = require("path")
 Forge   = require("node-forge")
@@ -10,6 +11,7 @@ pki   = Forge.pki
 generateKeyPairAsync = Promise.promisify(pki.rsa.generateKeyPair)
 
 digitsFollowedByPeriodRe = /^[\d\.]+$/
+asterisksRe              = /\*/g
 
 CAattrs = [{
   name: "commonName",
@@ -169,7 +171,7 @@ class CA
     certServer.validity.notAfter = new Date
     certServer.validity.notAfter.setFullYear(certServer.validity.notBefore.getFullYear() + 2)
 
-    attrsServer = ServerAttrs.slice(0)
+    attrsServer = _.clone(ServerAttrs)
     attrsServer.unshift({
       name: "commonName",
       value: mainHost
@@ -181,9 +183,9 @@ class CA
       name: "subjectAltName",
       altNames: hosts.map (host) ->
         if host.match(digitsFollowedByPeriodRe)
-          return {type: 7, ip: host}
-
-        return {type: 2, value: host}
+          {type: 7, ip: host}
+        else
+          {type: 2, value: host}
     }]))
 
     certServer.sign(@CAkeys.privateKey, Forge.md.sha256.create())
@@ -192,12 +194,12 @@ class CA
     keyPrivatePem = pki.privateKeyToPem(keysServer.privateKey)
     keyPublicPem  = pki.publicKeyToPem(keysServer.publicKey)
 
-    dest = mainHost.replace(/\*/g, "_")
+    dest = mainHost.replace(asterisksRe, "_")
 
     Promise.all([
-      fs.writeFileAsync(path.join(@certsFolder, dest + ".pem",        certPem))
-      fs.writeFileAsync(path.join(@keysFolder,  dest + ".key",        keyPrivatePem))
-      fs.writeFileAsync(path.join(@keysFolder,  dest + ".public.key", keyPublicPem))
+      fs.writeFileAsync(path.join(@certsFolder, dest + ".pem"),        certPem)
+      fs.writeFileAsync(path.join(@keysFolder,  dest + ".key"),        keyPrivatePem)
+      fs.writeFileAsync(path.join(@keysFolder,  dest + ".public.key"), keyPublicPem)
     ])
     .return([certPem, keyPrivatePem])
 

@@ -7,7 +7,7 @@ srv = http.createServer (req, res) ->
 
   res.setHeader("Content-Type", "text/html")
   res.writeHead(200)
-  res.end("<html><body>http server</body></html")
+  res.end("<html><body>http server</body></html>")
 
 module.exports = {
   srv: srv

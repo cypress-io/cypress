@@ -19,7 +19,7 @@ srv = https.createServer options, (req, res) ->
 
   res.setHeader("Content-Type", "text/html")
   res.writeHead(200)
-  res.end("<html><body>https server</body></html")
+  res.end("<html><body>https server</body></html>")
 
 module.exports = {
   srv: srv

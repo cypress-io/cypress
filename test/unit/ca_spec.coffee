@@ -21,6 +21,13 @@ describe "lib/ca", ->
   afterEach ->
     fs.removeAsync(@dir)
 
+  context "#generateServerCertificateKeys", ->
+    it "generates certs for each host", ->
+      @ca.generateServerCertificateKeys("www.cypress.io")
+      .spread (certPem, keyPrivatePem) ->
+        expect(certPem).to.include("-----BEGIN CERTIFICATE-----")
+        expect(keyPrivatePem).to.include("-----BEGIN RSA PRIVATE KEY-----")
+
   context ".create", ->
     it "returns a new CA instance", ->
       expect(@ca).to.be.an.instanceof(CA)

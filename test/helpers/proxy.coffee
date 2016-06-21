@@ -12,10 +12,17 @@ CA        = require("../../lib/ca")
 Promise.promisifyAll(fs)
 
 ca = null
+httpsSrv = null
 httpsPort = null
 
 sslServers = {}
 sslSemaphores = {}
+
+onClientError = (err) ->
+  console.log "CLIENT ERROR", err
+
+onError = (err) ->
+  console.log "ERROR", err
 
 onRequest = (req, res) ->
   console.log "onRequest!!!!!!!!!"
@@ -89,14 +96,17 @@ onConnect = (req, socket, head) ->
       hosts = [hostname]
       delete data.hosts
 
-      # hosts.forEach (host) ->
-        # self.httpsServer.addContext(host, data)
-        # self.sslServers[host] = { port: self.httpsPort }
+      hosts.forEach (host) ->
+        console.log "ADD CONTEXT", host, data
+        httpsSrv.addContext(host, data)
+        # sslServers[host] = { port: httpsPort }
 
       # return cb(null, self.httpsPort)
 
+      return httpsPort
+
   onCertificateMissing = (certPaths) ->
-    hosts = certPaths.host #or [ctx.hostname]
+    hosts = certPaths.hosts #or [ctx.hostname]
 
     ca.generateServerCertificateKeys(hosts)
     .spread (certPEM, privateKeyPEM) ->
@@ -116,17 +126,17 @@ onConnect = (req, socket, head) ->
   makeConnection = (port) ->
     console.log "makeConnection", port
     conn = net.connect port, ->
+      console.log "connected to", port#, socket, conn, head
       socket.pipe(conn)
       conn.pipe(socket)
       socket.emit("data", head)
 
       return socket.resume()
 
-    conn.on "error", ->
-      ## do something on error
+    conn.on "error", onError
 
   onServerConnectData = (head) ->
-    socket.pause()
+    console.log "onServerConnectData", head
 
     firstBytes = head[0]
 
@@ -148,6 +158,7 @@ onConnect = (req, socket, head) ->
       sem.take ->
         leave = ->
           process.nextTick ->
+            console.log "leaving sem"
             sem.leave()
 
         if sslServer = sslServers[hostname]
@@ -182,11 +193,16 @@ onConnect = (req, socket, head) ->
 
     socket.write("\r\n")
   else
+    socket.pause()
+
     onServerConnectData(head)
 
-prx = http.createServer(onRequest)
+prx = http.createServer()
 
 prx.on("connect", onConnect)
+prx.on("request", onRequest)
+prx.on("clientError", onClientError)
+prx.on("error", onError)
 
 module.exports = {
   prx: prx
@@ -194,8 +210,11 @@ module.exports = {
   startHttpsSrv: ->
     new Promise (resolve) ->
       httpsSrv = https.createServer({})
+      httpsSrv.timeout = 0
       httpsSrv.on("connect", onConnect)
       httpsSrv.on("request", onRequest)
+      httpsSrv.on("clientError", onClientError)
+      httpsSrv.on("error", onError)
       httpsSrv.listen ->
         resolve([httpsSrv.address().port, httpsSrv])
 
@@ -209,8 +228,6 @@ module.exports = {
       @startHttpsSrv()
     .spread (port, httpsSrv) ->
       httpsPort = port
-
-      console.log(httpsPort)
 
       new Promise (resolve) ->
         prx.listen 3333, ->
