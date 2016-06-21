@@ -40,45 +40,40 @@
     background-color: #f7f8f9;
     cursor: pointer;
 
-    > div > .runnable-wrapper .runnable-controls i.fa-repeat {
+    > .runnable-wrapper .runnable-controls i.fa-repeat {
       visibility: visible !important;
     }
 
   }
 
   &.runnable-active {
-    .test-state i {
+    .runnable-state {
       @extend .#{$fa-css-prefix}-refresh;
       @extend .#{$fa-css-prefix}-spin;
     }
   }
 
-  .suite-state,
-  .test-state {
-    width: 12px;
+  .runnable-state {
     display: inline-block;
+    line-height: 18px;
     margin-right: 5px;
-    text-align: left;
+    width: 12px;
   }
 
-  .suite-state  {
-    margin-left: 1px;
-
-    i {
-      padding-left: 2px;
-      font-size: 14px;
-      color: #bbbcbd;
-    }
+  &.suite .collapsible-indicator  {
+    padding-left: 2px;
+    font-size: 14px;
+    color: #bbbcbd;
   }
 
-  &.runnable-processing > div > .runnable-wrapper {
-    .test-state i {
+  &.runnable-processing > .runnable-wrapper {
+    .runnable-state {
       @extend .#{$fa-css-prefix}-square-o;
       color: #888;
     }
   }
 
-  &.test.runnable-failed > div > .runnable-wrapper {
+  &.test.runnable-failed > .runnable-wrapper {
     border-left: 10px solid $fail;
 
     .fa-warning.has-command-failures {
@@ -86,19 +81,15 @@
     }
   }
 
-  &.suite.runnable-failed > div > .runnable-wrapper {
-    border-left: 10px solid $fail;
-  }
-
   &.suite.runnable-pending > div > .runnable-wrapper {
     border-left: 10px solid lighten($pending, 25%);
   }
 
-  &.test.runnable-pending > div > .runnable-wrapper {
+  &.test.runnable-pending > .runnable-wrapper {
     border-left: 10px solid lighten($pending, 25%);
   }
 
-  &.test.runnable-passed > div > .runnable-wrapper {
+  &.test.runnable-passed > .runnable-wrapper {
     border-left: 10px solid $pass;
   }
 
@@ -106,12 +97,10 @@
     border-left: 10px solid $pass;
   }
 
-  &.runnable-failed > div > .runnable-wrapper {
-    pre {
-      color: $fail;
-    }
+  &.suite.runnable-failed > div > .runnable-wrapper {
+    border-left: 10px solid $fail;
 
-    .suite-title i {
+    .collapsible-more {
       border-radius: 3px;
       background-color: $fail;
       color: #FFF;
@@ -119,30 +108,40 @@
       font-size: 10px;
       margin-left: 2px;
     }
+  }
 
-    .test-state i {
-      @extend .#{$fa-css-prefix}-times;
-      color: #E94B3B;
+  &.test.runnable-failed {
+    pre {
+      color: $fail;
     }
 
-    label {
-      text-transform: uppercase;
+    .runnable-state {
+      @extend .#{$fa-css-prefix}-times;
+      color: $fail;
     }
   }
 
-  &.runnable-passed > div > .runnable-wrapper {
-    .test-state i {
+  &.suite > div > .runnable-wrapper {
+    .runnable-title {
+      color: #111;
+      font-weight: 800;
+      font-size: 13px;
+    }
+  }
+
+  &.runnable-passed > .runnable-wrapper {
+    .runnable-state {
       @extend .#{$fa-css-prefix}-check;
       color: $pass;
     }
   }
 
-  &.runnable-pending > div > .runnable-wrapper {
-    .test-title {
+  &.runnable-pending > .runnable-wrapper {
+    .runnable-title {
       color: lighten($pending, 25%);
     }
 
-    .test-state i {
+    .runnable-state {
       @extend .#{$fa-css-prefix}-circle-o-notch;
       color: lighten($pending, 20%);
     }
@@ -154,37 +153,33 @@
   position: relative;
   overflow: hidden;
   border-left: 10px solid transparent;
-
-  .test-title,
-  .suite-title {
-    font-size: 12.5px;
-  }
-
-  .runnable-content-region {
-    overflow: auto;
-  }
 }
 
-.runnable-state {
-  width: 80%;
-  float: left;
+.runnable-title {
+  font-size: 12.5px;
+}
+
+.runnable-content-region {
+  overflow: auto;
+}
+
+.suite > div > .runnable-wrapper,
+.test .runnable-content-region {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+}
 
-  .suite-title {
-    color: #111;
-    font-weight: 800;
-    font-size: 13px;
-  }
+.test .runnable-content-region {
+  padding-right: 30px;
 }
 
 .runnable-controls {
-  width: 50px;
-  float: right;
-  text-align: right;
-  margin-right: 7px;
   overflow: hidden;
+  position: absolute;
+  right: 7px;
+  text-align: right;
+  top: 5px;
 
   label {
     padding: 2px 4px;
@@ -201,4 +196,11 @@
     }
   }
 
+}
+
+.test > .runnable-wrapper > .collapsible > .collapsible-header {
+  .collapsible-indicator,
+  .collapsible-more {
+    display: none;
+  }
 }

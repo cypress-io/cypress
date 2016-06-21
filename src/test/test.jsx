@@ -5,6 +5,7 @@ import Tooltip from 'rc-tooltip'
 import Agents from './agents'
 import Hooks from './hooks'
 import Routes from './routes'
+import Collapsible from '../collapsible/collapsible'
 
 const NoCommands = () => (
   <ul className='hooks-container'>
@@ -16,33 +17,33 @@ const NoCommands = () => (
 
 const hasCommands = (hooks) => !!_.flatMap(hooks, 'commands').length
 
-const Test = ({ model }) => (
-  <div>
-    <div className='runnable-wrapper' style={{ paddingLeft: model.indent }}>
-      <div className='runnable-content-region'>
-        <div>
-          <div className='runnable-state'>
-            <span className='test-state'>
-              <i className='fa'></i>
-            </span>
-            <span className='test-title'>{model.title}</span>
-          </div>
-          <div className='runnable-controls'>
-            <Tooltip placement='left' align={{ offset: [0, 0] }} overlay='One or more commands failed'>
-              <i className='fa fa-warning'></i>
-            </Tooltip>
-          </div>
-        </div>
-      </div>
-      <div className='runnable-instruments'>
-        <Agents model={model} />
-        <Routes model={model} />
-        <div className='runnable-commands-region'>
-          {hasCommands(model.hooks) ? <Hooks model={model} /> : <NoCommands />}
-        </div>
-      </div>
-      <pre className='test-error'>{model.error}</pre>
+const TestHeader = ({ model }) => (
+  <span>
+    <i className='runnable-state fa'></i>
+    <span className='runnable-title'>{model.title}</span>
+    <div className='runnable-controls'>
+      <Tooltip placement='left' align={{ offset: [0, 0] }} overlay='One or more commands failed'>
+        <i className='fa fa-warning'></i>
+      </Tooltip>
     </div>
+  </span>
+)
+
+const Test = ({ model }) => (
+  <div className='runnable-wrapper' style={{ paddingLeft: model.indent }}>
+    <Collapsible
+      header={<TestHeader model={model} />}
+      headerClass='runnable-content-region'
+      contentClass='runnable-instruments'
+      isOpen={model.state === 'failed'}
+    >
+      <Agents model={model} />
+      <Routes model={model} />
+      <div className='runnable-commands-region'>
+        {hasCommands(model.hooks) ? <Hooks model={model} /> : <NoCommands />}
+      </div>
+    </Collapsible>
+    <pre className='test-error'>{model.error}</pre>
   </div>
 )
 

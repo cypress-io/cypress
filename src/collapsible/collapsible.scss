@@ -1,0 +1,25 @@
+.collapsible-content {
+  display: none;
+
+  .is-open > & {
+    display: block;
+  }
+}
+
+.collapsible-more {
+  display: inline-block;
+  margin-left: 5px;
+
+  .is-open > .collapsible-header > & {
+    display: none;
+  }
+}
+
+.collapsible-indicator {
+  @extend .#{$fa-css-prefix}-caret-right;
+  margin-right: 5px;
+
+  .is-open > .collapsible-header > & {
+    @extend .#{$fa-css-prefix}-caret-down;
+  }
+}

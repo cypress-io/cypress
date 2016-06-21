@@ -1,9 +1,10 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import React from 'react'
+import Collapsible from '../collapsible/collapsible'
 
 const Agent = ({ model }) => (
-  <tr className={cs({ 'no-calls': !!model.callCount })}>
+  <tr className={cs({ 'no-calls': !model.callCount })}>
     <td>{model.type}</td>
     <td>{model.functionName}</td>
     <td className='call-count'>{model.callCount || '-'}</td>
@@ -25,27 +26,22 @@ const Agents = ({ model }) => (
     <div className='instruments-container'>
       <ul className='hooks-container'>
         <li className='hook-item'>
-          <span className='hook-name'>
-            <i className='fa fa-caret-right'></i>
-            Spies / Stubs / Mocks ({model.agents.length})
-            <i className='fa fa-ellipsis-h'></i>
-          </span>
-          <div className='agents-container' data-comment='hidden className goes here'>
-            <div className='tab-content'>
-              <div className='tab-pane active'>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Type</th>
-                      <th>Function</th>
-                      <th># Calls</th>
-                    </tr>
-                  </thead>
-                  <AgentsList model={model} />
-                </table>
-              </div>
-            </div>
-          </div>
+          <Collapsible
+            header={`Spies / Stubs / Mocks (${model.agents.length})`}
+            headerClass='hook-name'
+            contentClass='instrument-content'
+          >
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Function</th>
+                  <th># Calls</th>
+                </tr>
+              </thead>
+              <AgentsList model={model} />
+            </table>
+          </Collapsible>
         </li>
       </ul>
     </div>

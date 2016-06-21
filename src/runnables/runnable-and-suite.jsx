@@ -2,30 +2,24 @@ import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
 import Test from '../test/test'
+import Collapsible from '../collapsible/collapsible'
+
+const SuiteHeader = ({ model }) => (
+  <span className='runnable-title'>{model.title}</span>
+)
 
 const Suite = ({ model }) => (
-  <div>
-    <div className='runnable-wrapper' style={{ paddingLeft: model.indent }}>
-      <div className='runnable-content-region'>
-        <div>
-          <div className='runnable-state'>
-            <span className='suite-state'>
-              <i className='fa fa-caret-down'></i>
-            </span>
-            <span className='suite-title'>
-              {model.title}
-              <i className='fa fa-ellipsis-h hidden'></i>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div className='runnables-region'>
-      <ul className='runnables'>
-        {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
-      </ul>
-    </div>
-  </div>
+  <Collapsible
+    header={<SuiteHeader model={model} />}
+    headerClass='runnable-wrapper'
+    headerStyle={{ paddingLeft: model.indent }}
+    contentClass='runnables-region'
+    isOpen={true}
+  >
+    <ul className='runnables'>
+      {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
+    </ul>
+  </Collapsible>
 )
 
 class Runnable extends Component {

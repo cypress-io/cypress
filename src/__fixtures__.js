@@ -5,7 +5,7 @@ const header = {
   duration: 0.17,
 }
 
-function command ({ name, message, number = 0, event = false, type = 'parent', state = 'passed', referencesAlias = null, numElements = null, alias = null, visible = true }) {
+function command ({ name, message, number = 0, event = false, type = 'parent', state = 'passed', referencesAlias = null, numElements = null, alias = null, visible = true, aliasType = null }) {
   return {
     id: _.uniqueId('c'),
     name,
@@ -16,7 +16,7 @@ function command ({ name, message, number = 0, event = false, type = 'parent', s
     indent: 0,
     state,
     referencesAlias,
-    aliasType: referencesAlias || alias ? 'dom' : null,
+    aliasType: aliasType || (referencesAlias || alias ? 'dom' : null),
     alias,
     numElements,
     visible,
@@ -36,7 +36,7 @@ const levelCommands = [
   [
     command({ name: 'viewport', message: '500, 500', number: 1 }),
     command({ name: 'visit', message: '/test.html', number: 2 }),
-    command({ name: 'xhr', message: 'o GET 500 /users', event: true }),
+    command({ name: 'xhr', message: 'o GET 500 /users', event: true, alias: 'getUsers', aliasType: 'route' }),
   ],
   [
     command({ name: 'get', message: 'input', number: 3, alias: 'input' }),
@@ -116,11 +116,11 @@ const tests = {
     test({ title: 'has no commands', indent: 5, hooks: [emptyTestHook], routes }),
     test({ title: 'test at top level', indent: 5, hooks: [assertTrue], routes }),
     suite({ title: 'top level', indent: 5, state: 'processing', children: [
-      suite({ title: 'second level (1)', indent: 20, state: 'failed', children: [
-        test({ title: 'test in second level (1)', indent: 35, hooks: [beforeHook(0), assertTrue] }),
+      suite({ title: 'second level (1) with a nice long title that will overflow overflow overflow overflow overflow', indent: 20, state: 'failed', children: [
+        test({ title: 'test in second level (1) with a nice long title that will overflow overflow overflow overflow overflow', indent: 35, hooks: [beforeHook(0), assertTrue] }),
         test({ title: 'test in second level (2)', indent: 35, hooks: [beforeHook(0), assertTrue] }),
         suite({ title: 'third level (1) - in second level (1)', indent: 35, state: 'failed', children: [
-          test({ title: 'test in third level (1)', indent: 50, state: 'failed', error: `CypressError: Timed out retrying: Expected to find element: 'h5', but never found it.`, hooks: [beforeHook(0, 1), getTest], agents }),
+          test({ title: 'test in third level (1) with a nice long title that will overflow overflow overflow overflow overflow', indent: 50, state: 'failed', error: `CypressError: Timed out retrying: Expected to find element: 'h5', but never found it.`, hooks: [beforeHook(0, 1), getTest], agents }),
         ] }),
       ] }),
       suite({ title: 'second level (2)', indent: 20, state: 'processing', children: [
