@@ -43,7 +43,7 @@ describe "Projects Nav", ->
           .get(".navbar-default")
 
       describe "default page", ->
-        it.only "displays 'tests' nav as active", ->
+        it "displays 'tests' nav as active", ->
           cy
             .get(".navbar-default").contains("Tests")
               .should("have.class", "active")
@@ -165,7 +165,7 @@ describe "Projects Nav", ->
             cy
               .get(".server-status>a").contains("Running")
 
-          it.only "displays Stopped on stop click", ->
+          it "displays Stopped on stop click", ->
             cy
               .get(".server-status").click()
               .find(".dropdown-menu").contains("Stop").click()

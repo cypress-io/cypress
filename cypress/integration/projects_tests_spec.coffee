@@ -27,7 +27,7 @@ describe "Project Tests", ->
         @config.browsers = @browsers
         @ipc.handle("open:project", null, @config)
 
-  it.only "navigates to project page", ->
+  it "navigates to project page", ->
     cy.get("#project")
 
   describe "server error", ->

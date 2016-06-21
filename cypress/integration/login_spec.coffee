@@ -18,7 +18,7 @@ describe "Login", ->
     it "displays 'Cypress'", ->
       cy.get("#login").contains("Cypress")
 
-    it.only "has login url", ->
+    it "has login url", ->
       cy.location().its("hash").should("contain", "login")
 
     it "has Github Login button", ->
