@@ -17,8 +17,12 @@ onError = (err) ->
 
 class Server
   constructor: (@_ca, @_port) ->
+    @_onRequestHandler = null
 
   connect: (req, socket, head, options = {}) ->
+    if onReq = options.onRequest
+      @_onRequestHandler = onReq
+
     console.log "ON CONNECT!!!!!!!!!!!!!!!"
     console.log "URL", req.url
     console.log "HEADERS", req.headers
@@ -43,20 +47,20 @@ class Server
       @_onServerConnectData(req, socket, head)
 
   _onRequest: (req, res) ->
-    console.log "onRequest!!!!!!!!!", req.url, req.headers, req.method
-
     hostPort = parse.hostAndPort(req.url, req.headers, 443)
 
-    # req.pause()
+    req.url = url.format({
+      protocol: "https:"
+      hostname: hostPort.host
+      port:     hostPort.port
+    }) + req.url
 
-    opts = {
-      url: req.url
-      baseUrl: "https://" + hostPort.host + ":" + hostPort.port
-      method: req.method
-      headers: req.headers
-    }
+    if orh = @_onRequestHandler
+      return orh.call(@, req, res)
 
-    req.pipe(request(opts))
+    console.log "onRequest!!!!!!!!!", req.url, req.headers, req.method
+
+    req.pipe(request(req.url))
     .on "error", ->
       console.log "**ERROR", req.url
       res.statusCode = 500

@@ -39,6 +39,15 @@ describe "Proxy", ->
     .then (html) ->
       expect(html).to.include("https server")
 
+  it "yields the onRequest callback", ->
+    request({
+      strictSSL: false
+      url: "https://localhost:8443/replace"
+      proxy: "http://localhost:3333"
+    })
+    .then (html) ->
+      expect(html).to.include("replaced content")
+
   it "can boot the httpServer", ->
     request({
       strictSSL: false
@@ -47,3 +56,4 @@ describe "Proxy", ->
     })
     .then (html) ->
       expect(html).to.include("http server")
+

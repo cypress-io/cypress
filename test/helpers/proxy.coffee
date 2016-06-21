@@ -4,16 +4,33 @@ httpsProxy = require("../../lib/proxy")
 
 prx = null
 
-onConnect = (req, socket, head, proxy) ->
-  proxy.connect(req, socket, head)
-
-onRequest = (req, res) ->
+pipe = (req, res) ->
   req.pipe(request(req.url))
   .on "error", ->
-    console.log "**ERROR", req.url
-    res.statusCode = 500
+    console.log "**ERROR**", req.url
+    req.statusCode = 500
     res.end()
   .pipe(res)
+
+onConnect = (req, socket, head, proxy) ->
+  proxy.connect(req, socket, head, {
+    onRequest: (req, res) ->
+      console.log "ON REQUEST FROM OUTER PROXY", req.url, req.headers, req.method
+
+      if req.url.includes("replace")
+        write = res.write
+        res.write = (chunk) ->
+          chunk = new Buffer(chunk.toString().replace("https server", "replaced content"))
+
+          write.call(@, chunk)
+
+        pipe(req, res)
+      else
+        pipe(req, res)
+  })
+
+onRequest = (req, res) ->
+  pipe(req, res)
 
 module.exports = {
   start: ->
