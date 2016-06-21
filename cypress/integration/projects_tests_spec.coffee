@@ -18,7 +18,6 @@ describe "Project Tests", ->
 
         @agents.spy(@App, "ipc")
 
-
       .fixture("user").then (@user) ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
@@ -27,8 +26,8 @@ describe "Project Tests", ->
         @config.browsers = @browsers
         @ipc.handle("open:project", null, @config)
 
-  it "navigates to project page", ->
-    cy.get("#project")
+  it "navigates to project tests page", ->
+    cy.get("#tests-list-page")
 
   describe "server error", ->
     beforeEach ->

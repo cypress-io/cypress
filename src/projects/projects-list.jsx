@@ -1,8 +1,10 @@
+import _ from 'lodash'
 import App from '../lib/app'
 import React, { Component } from 'react'
-import projectsStore from '../projects/projects-store'
+import { Link } from 'react-router'
 import { observer } from 'mobx-react'
 
+import projectsStore from '../projects/projects-store'
 
 const Empty = () => (
   <div className='empty'>
@@ -34,22 +36,6 @@ const openHelp = () => (
   App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running/#section-adding-projects')
 )
 
-class Projects  extends Component {
-    // if (!projectsStore.projects.length) return
-
-  // if (!projectsStore.chosen) return <NoChosenProject />
-  render () {
-    if (!projectsStore.projects.length) return <Empty />
-
-    return <div>
-        <h4>Projects</h4>
-        { this._projects }
-      </div>
-  }
-}
-
-export default Projects
-
 // const NoChosenProject = () => (
 //   <div className='well-message'>
 //     <h4>Choose a Project</h4>
@@ -65,3 +51,39 @@ export default Projects
 // )
 
 
+export default class Projects extends Component {
+    // if (!projectsStore.projects.length) return
+
+  // if (!projectsStore.chosen) return <NoChosenProject />
+  render () {
+    if (!projectsStore.projects.length) return <Empty />
+
+    return <ul class='projects-list'>
+        { _.map(projectsStore.projects, (project) => (
+            this._project(project)
+        ))}
+      </ul>
+
+  }
+  _project = (project) => {
+    if (project.empty) {
+      return (
+        <span>Projects</span>
+      )
+    } else {
+      return (
+        <li>
+          <Link
+            to={`/projects/${project.id}`}
+            >
+            <div className='project-name'>
+              <i className="fa fa-folder"></i>{" "}
+              { project.name }
+            </div>
+            <div className='project-path'>{ project.displayPath }</div>
+          </Link>
+        </li>
+      )
+    }
+  }
+}

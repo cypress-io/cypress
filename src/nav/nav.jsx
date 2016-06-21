@@ -1,7 +1,6 @@
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React from 'react'
-import ProjectsList from './projects-list'
 import state from '../lib/state'
 import App from '../lib/app'
 import Tooltip from 'rc-tooltip'
@@ -55,21 +54,20 @@ export default observer(() => {
       <div className='container-fluid'>
         <div className='collapse navbar-collapse'>
           <ul className='nav navbar-nav'>
-            <ProjectsList addProject={addProject}/>
-            <li>
-              <Tooltip
-                placement='bottom'
-                visible={!hasProjects}
-                overlay={tooltip}
-                align={{
-                  points: ['bl', 'tl'], // align bottom left point of sourceNode with top left point of targetNode
-                }}
-                >
-                <a onClick={addProject} href='#'>
-                  <i className='fa fa-plus'></i>
-                </a>
-              </Tooltip>
-            </li>
+          <li>
+            <Tooltip
+              placement='bottom'
+              visible={!hasProjects}
+              overlay={tooltip}
+              align={{
+                points: ['bl', 'tl'], // align bottom left point of sourceNode with top left point of targetNode
+              }}
+              >
+              <a onClick={addProject} href='#'>
+                <i className='fa fa-plus'></i>
+              </a>
+            </Tooltip>
+          </li>
           </ul>
           <ul className='nav navbar-nav navbar-right'>
             <li className='dropdown'>

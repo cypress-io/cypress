@@ -1,7 +1,7 @@
 describe "Projects List", ->
   beforeEach ->
     cy
-      .visit("/")
+      .visit("/#/projects")
       .window().then (win) ->
         {@ipc, @App} = win
 
@@ -45,7 +45,7 @@ describe "Projects List", ->
       it "displays projects in list", ->
         cy
           .get(".empty").should("not.be.visible")
-          .get(".projects-list .dropdown-menu a:not(.add-project)")
+          .get(".projects-list")
             .should("have.length", @projects.length)
 
       it "each project shows it's project path", ->
