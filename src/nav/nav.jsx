@@ -5,6 +5,7 @@ import state from '../lib/state'
 import App from '../lib/app'
 import Tooltip from 'rc-tooltip'
 import Promise from 'bluebird'
+import { Link } from 'react-router'
 
 import projectsStore from '../projects/projects-store'
 
@@ -21,7 +22,7 @@ export default class Nav extends Component {
           <div className='collapse navbar-collapse'>
             <ul className='nav navbar-nav'>
             <li>
-              { this.addProjectButton()}
+              { this.leftNavButton()}
             </li>
             </ul>
             <ul className='nav navbar-nav navbar-right'>
@@ -59,27 +60,35 @@ export default class Nav extends Component {
     )
   }
 
-  addProjectButton = () => {
-    if (this.props.params.id) return null
+  leftNavButton = () => {
+    if (this.props.params.id) {
+      return (
+        <Link to="/projects">
+          <i className="fa fa-chevron-left"></i>{' '}
+          Back to Projects
+        </Link>
+      )
 
-    const hasProjects = !!projectsStore.projects.length
-    const tooltip = hasProjects ? 'Add Project' : 'Choose a folder to begin testing'
+    } else {
+      const hasProjects = !!projectsStore.projects.length
+      const tooltip = hasProjects ? 'Add Project' : 'Choose a folder to begin testing'
 
-    return (
-      <Tooltip
-        placement='bottom'
-        visible={!hasProjects}
-        overlay={tooltip}
-        align={{
-          points: ['bl', 'tl'], // align bottom left point of sourceNode with top left point of targetNode
-        }}
-        >
-        <a onClick={this._addProject} href='#'>
-          <i className='fa fa-plus'></i>{' '}
-          Add Project
-        </a>
-      </Tooltip>
-    )
+      return (
+        <Tooltip
+          placement='bottom'
+          visible={!hasProjects}
+          overlay={tooltip}
+          align={{
+            points: ['bl', 'tl'], // align bottom left point of sourceNode with top left point of targetNode
+          }}
+          >
+          <a onClick={this._addProject} href='#'>
+            <i className='fa fa-plus'></i>{' '}
+            Add Project
+          </a>
+        </Tooltip>
+      )
+    }
   }
 
   _logout = () => {

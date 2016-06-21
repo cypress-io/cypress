@@ -2,8 +2,6 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Dropdown from '../dropdown/dropdown'
 
-import projectsStore from '../projects/projects-store'
-
 @observer
 export default class ProjectNav extends Component {
   render () {
@@ -29,21 +27,6 @@ export default class ProjectNav extends Component {
             </ul>
             <ul className='nav navbar-nav navbar-right'>
               { this.browsers(project) }
-              <li className='dropdown server-status'>
-                <a href='#' className='dropdown-toggle' data-toggle='dropdown'>
-                  <i className='fa fa-circle green'></i>{' '}
-                  Running{' '}
-                  <span className='dropdown-caret'></span>
-                </a>
-                <ul className='dropdown-menu'>
-                  <li>
-                    <a href='#'>
-                      <i className='fa fa-circle red'></i>{' '}
-                      Stop
-                    </a>
-                  </li>
-                </ul>
-              </li>
             </ul>
           </div>
         </div>
