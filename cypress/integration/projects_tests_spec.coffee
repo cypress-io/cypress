@@ -29,6 +29,9 @@ describe "Project Tests", ->
   it "navigates to project tests page", ->
     cy.get("#tests-list-page")
 
+  it "does not display 'Add Project' button", ->
+    cy.contains("Add Project").should("not.exist")
+
   describe "server error", ->
     beforeEach ->
       @err = {

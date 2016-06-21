@@ -46,7 +46,7 @@ export default class Application extends Component {
     if (this._isLackingUser() || this._isLackingProjects()) return null
 
     return (
-      <Layout>
+      <Layout params={this.props.params}>
         {this.props.children}
       </Layout>
     )

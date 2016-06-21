@@ -22,12 +22,6 @@ export default class ProjectNav extends Component {
               </li>
               <li>
                 <a href='#'>
-                  <i className='fa fa-server'></i>{' '}
-                  Builds
-                </a>
-              </li>
-              <li>
-                <a href='#'>
                   <i className='fa fa-cog'></i>{' '}
                   Config
                 </a>
