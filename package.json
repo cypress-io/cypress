@@ -24,6 +24,7 @@
     "zunder": "^3.3.7"
   },
   "dependencies": {
+    "markdown-it": "^6.1.1",
     "rc-tooltip": "^3.3.5",
     "react": "^15.1.0",
     "react-dom": "^15.1.0"

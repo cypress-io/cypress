@@ -58,7 +58,7 @@ function beforeHook (...levels) {
 const assertTrue = hook({
   name: 'test',
   commands: [
-    command({ name: 'assert', message: 'expected [b]true[/b] to be true', number: 1 }),
+    command({ name: 'assert', message: 'expected: **true** to be true', number: 1 }),
   ],
 })
 

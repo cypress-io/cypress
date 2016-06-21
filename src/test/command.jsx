@@ -2,10 +2,13 @@ import _ from 'lodash'
 import cs from 'classnames'
 import React from 'react'
 import Tooltip from 'rc-tooltip'
+import Markdown from 'markdown-it'
+
+const md = new Markdown()
 
 const displayName = (model) => model.displayName || model.name
 const isParent = (model) => model.type === 'parent'
-const truncatedMessage = (message) => message ? _.truncate(message, { length: 100 }) : ''
+const formattedMessage = (message) => message ? md.renderInline(_.truncate(message, { length: 100 })) : ''
 const visibleMessage = (model) => {
   if (model.visible) return ''
 
@@ -47,7 +50,9 @@ export default ({ model }) => (
         <span>{model.event ? `(${displayName(model)})` :  displayName(model)}</span>
       </span>
       <span className='command-message'>
-        {model.referencesAlias ? <Alias model={model} /> : truncatedMessage(model.message)}
+        {model.referencesAlias ?
+          <Alias model={model} /> :
+          <span dangerouslySetInnerHTML={{ __html: formattedMessage(model.message) }} />}
       </span>
       <span className='command-controls'>
         <Tooltip placement='left' align={{ offset: [5, 0] }} overlay={`${model.message} aliased as: '${model.alias}'`}>
