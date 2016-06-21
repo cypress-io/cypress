@@ -1,3 +1,10 @@
-httpsServer = require("../test/helpers/https_server")
+CA     = require("./ca")
+Server = require("./server")
 
-httpsServer.start()
+module.exports = {
+  create: (dir) ->
+    CA.create(dir)
+    .then (ca) ->
+      Server.create(ca)
+
+}

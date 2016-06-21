@@ -10,8 +10,8 @@ pki   = Forge.pki
 
 generateKeyPairAsync = Promise.promisify(pki.rsa.generateKeyPair)
 
-digitsFollowedByPeriodRe = /^[\d\.]+$/
-asterisksRe              = /\*/g
+ipAddressRe = /^[\d\.]+$/
+asterisksRe = /\*/g
 
 CAattrs = [{
   name: "commonName",
@@ -182,7 +182,7 @@ class CA
     certServer.setExtensions(ServerExtensions.concat([{
       name: "subjectAltName",
       altNames: hosts.map (host) ->
-        if host.match(digitsFollowedByPeriodRe)
+        if host.match(ipAddressRe)
           {type: 7, ip: host}
         else
           {type: 2, value: host}
