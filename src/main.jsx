@@ -44,7 +44,6 @@ App.start = () => {
             <IndexRedirect to='specs' />
             <Route path='specs' component={SpecsList} />
             {
-            // <Route path='builds' component={BuildsList} />
             // <Route path='config' component={Config} />
             }
           </Route>

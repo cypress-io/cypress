@@ -41,40 +41,21 @@ describe "Projects List", ->
         .fixture("projects").then (@projects) ->
           @ipc.handle("get:project:paths", null, @projects)
 
-    describe "projects listed in dropdown", ->
+    describe "projects listed", ->
       it "displays projects in list", ->
         cy
           .get(".empty").should("not.be.visible")
-          .get(".projects-list")
+          .get(".projects-list>li")
             .should("have.length", @projects.length)
 
       it "each project shows it's project path", ->
         cy
-          .get(".projects-list .dropdown-menu a").first()
+          .get(".projects-list a").first()
             .should("contain", "/My-Fake-Project")
 
       it "each project has it's folder name", ->
-        cy.get(".projects-list .dropdown-menu a")
+        cy.get(".projects-list a")
           .contains("", " My-Fake-Project")
-
-    it "opens projects dropdown by default", ->
-      cy
-        .get(".projects-list .dropdown-menu")
-          .should("be.visible")
-
-    it "displays message about choosing project", ->
-      cy.get("h4").contains("Choose a Project")
-
-    it "add project within list", ->
-      cy
-        .contains("Projects")
-        .get(".add-project").click().then ->
-          expect(@App.ipc).to.be.calledWith("show:directory:dialog")
-
-    it.skip "add button displays tooltip on hover", ->
-      cy
-        .get("nav a").not(".add-project").find(".fa-plus").parent().invoke("hover")
-        .get(".rc-tooltip").contains("Add Project").should("be.visible")
 
   describe "click on project", ->
     beforeEach ->
@@ -86,67 +67,27 @@ describe "Projects List", ->
           @ipc.handle("get:current:user", null, @user)
         .fixture("projects").then (@projects) ->
           @ipc.handle("get:project:paths", null, @projects)
-        .get(".projects-list .dropdown-menu a")
+        .get(".projects-list a")
           .contains(@firstProjectName).as("firstProject")
-        .get(".projects-list .dropdown-menu a")
+        .get(".projects-list a")
           .contains(@lastProjectName).as("lastProject")
 
-    it "displays project in dropdown on click", ->
+    it "navigates to project page", ->
       cy
         .get("@firstProject").click()
-        .get(".projects-list>a").first()
-          .should("contain", @firstProjectName)
-
-    it "trigger 'open:project' on click of project", ->
-      cy
-        .get("@firstProject").click().should ->
-          expect(@App.ipc).to.be.calledWith("open:project")
-
-    it "doesn't trigger 'close:project' on first project select", ->
-      cy
-        .get("@firstProject").click().should ->
-          expect(@App.ipc).to.not.be.calledWith("close:project")
-
-    describe "switch project", ->
-      beforeEach ->
-        cy
-          .get("@firstProject").click().should ->
-            expect(@App.ipc).to.be.calledWith("open:project")
-          .root().contains(@firstProjectName).click()
-
-      it "displays new project in dropdown", ->
-        cy
-          .get("@lastProject").click().then ->
-            @ipc.handle("close:project", null, {})
-            @ipc.handle("open:project", null, {browsers: []})
-          .get(".projects-list>a").first()
-            .should("contain", @lastProjectName)
-
-      it "closes previously chosen project", ->
-        cy
-          .get("@lastProject").click().should ->
-            expect(@App.ipc).to.be.calledWith("close:project")
-            expect(@App.ipc).to.be.calledWith("open:project")
-
-      it "opens new project", ->
-        cy
-          .get("@lastProject").click().should ->
-            expect(@App.ipc).to.be.calledWith("open:project")
+        .location().its("hash").should("include", "123")
 
   describe "add project", ->
     beforeEach ->
       cy
         .fixture("user").then (@user) ->
           @ipc.handle("get:current:user", null, @user)
-          @ipc.handle("get:project:paths", null, [])
-        .get(".empty")
+        .fixture("projects").then (@projects) ->
+          @ipc.handle("get:project:paths", null, @projects)
 
     it "triggers ipc 'show:directory:dialog on nav +", ->
       cy.get("nav").find(".fa-plus").click().then ->
         expect(@App.ipc).to.be.calledWith("show:directory:dialog")
-
-    it "closes dropdown", ->
-      cy.get(".dropdown-menu").should("not.be.visible")
 
     describe "error thrown", ->
       beforeEach ->
@@ -167,7 +108,7 @@ describe "Projects List", ->
       it "does no action", ->
         @ipc.handle("show:directory:dialog", null, null)
 
-        cy.get(".empty").should("exist").then ->
+        cy.get(".projects-list").should("exist").then ->
             expect(@App.ipc).to.not.be.calledWith("add:project")
 
     describe "directory chosen", ->

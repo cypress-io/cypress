@@ -1,10 +1,12 @@
 import _ from 'lodash'
-import { computed, observable } from 'mobx'
+import { computed, observable, action } from 'mobx'
 import Project from './project-model'
 
 class Projects {
   @observable projects = []
   @observable error = null
+  @observable isLoading = false
+  @observable isLoaded = false
 
   @computed get chosen () {
     return _.find(this.projects, { isChosen: true })
@@ -24,10 +26,11 @@ class Projects {
     return project
   }
 
-  setProjects (projects) {
+  @action setProjects (projects) {
     this.projects = _.map(projects, (project) => (
       new Project(project)
     ))
+    this.isLoaded = true
   }
 
   setChosen (project) {

@@ -3,9 +3,9 @@ import App from '../lib/app'
 import projectsStore from '../projects/projects-store'
 
 const getProjects = () => {
-  App.ipc('get:project:paths').then(action('get:project:paths', (projects) => {
+  App.ipc('get:project:paths').then((projects) => {
     projectsStore.setProjects(projects)
-  }))
+  })
 }
 
 const launchBrowser = (project, browser, url) => {
@@ -29,13 +29,12 @@ const closeProject = () => {
 }
 
 const openProject = (project) => {
-  // projectsStore.setChosen(project)
-
+  project.loading(true)
   return App.ipc('open:project', project.path)
-  .then(action('open:project', (config) => {
-    // this will set the available browsers on the project
+  .then((config) => {
+    project.loading(false)
     project.setBrowsers(config.browsers)
-  }))
+  })
   .then(() => {
     // create a promise which listens for
     // project settings change events
@@ -58,10 +57,11 @@ const openProject = (project) => {
     }
     return listenToProjectSettingsChange()
   })
-  .catch((err) => {
-    throw err
+  .catch(action('project:err', (err) => {
+    project.loading(false)
+    project.err = err
     // project.setError(err)
-  })
+  }))
 }
 
 export {

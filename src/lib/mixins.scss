@@ -22,11 +22,11 @@
 
 @mixin list-columns($widths...) {
   $n: 1;
-  $var: "li>div:nth-child(" + $n + ")";
+  $var: "li>a>div:nth-child(" + $n + ")";
   @each $width in $widths {
     @include el-width($var, $width);
     $n: $n + 1;
-    $var: "li>div:nth-child(" + $n + ")";
+    $var: "li>a>div:nth-child(" + $n + ")";
   }
 }
 

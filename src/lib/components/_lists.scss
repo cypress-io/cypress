@@ -21,7 +21,13 @@ ul.list-header {
       text-decoration: none;
     }
 
-    &>div {
+    &>a {
+      float: left;
+      width: 100%;
+      display: inline-block;
+    }
+
+    &>div, &>a>div {
       @include text-overflow-custom;
       min-height: 1px;
       vertical-align: top;

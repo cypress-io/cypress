@@ -11,10 +11,6 @@ import projectsStore from '../projects/projects-store'
 
 @observer
 export default class Nav extends Component {
-  contextTypes: {
-    router: React.PropTypes.func
-  }
-
   render () {
     return (
       <nav className='navbar navbar-inverse'>
@@ -27,13 +23,13 @@ export default class Nav extends Component {
             </ul>
             <ul className='nav navbar-nav navbar-right'>
               <li>
-                <a href='#'>
+                <a onClick={this._openDocs} href='#'>
                   <i className='fa fa-graduation-cap'></i>{' '}
                   Docs
                 </a>
               </li>
               <li>
-                <a href='#'>
+                <a onClick={this._openChat} href='#'>
                   <i className='fa fa-comments'></i>{' '}
                   Chat
                 </a>
@@ -68,7 +64,6 @@ export default class Nav extends Component {
           Back to Projects
         </Link>
       )
-
     } else {
       const hasProjects = !!projectsStore.projects.length
       const tooltip = hasProjects ? 'Add Project' : 'Choose a folder to begin testing'
@@ -91,6 +86,14 @@ export default class Nav extends Component {
     }
   }
 
+  _openDocs = () => (
+    App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running/#section-adding-projects')
+  )
+
+  _openChat = () => (
+    App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running/#section-adding-projects')
+  )
+
   _logout = () => {
     App.ipc('log:out').then(action('log:out', () => {
       state.user = null
@@ -98,9 +101,7 @@ export default class Nav extends Component {
     }))
   }
 
-  _addProject = (e) => {
-    if (e) { e.preventDefault() }
-
+  _addProject = () => {
     let project
 
     return App.ipc("show:directory:dialog")
@@ -111,7 +112,6 @@ export default class Nav extends Component {
 
       // initially set our project to be loading state
       project = projectsStore.addProject(dirPath)
-      projectsStore.setChosen(project)
 
       // wait at least 750ms even if add:project
       // resolves faster to prevent the sudden flash

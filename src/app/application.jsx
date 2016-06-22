@@ -29,26 +29,28 @@ export default class Application extends Component {
   }
 
   _checkAuth () {
-    if (this._isLackingUser()) {
+    if (!this._userLoaded()) {
       this.props.router.push('/login')
     }
   }
 
-  _isLackingUser () {
-    return !state.user || !state.user.session_token
+  _userLoaded () {
+    return !!(state.user) && !!(state.user.session_token)
   }
 
-  _isLackingProjects () {
-    return !projectsStore.projects.length
+  _projectsLoaded () {
+    return projectsStore.isLoaded
   }
 
   render () {
-    if (this._isLackingUser() || this._isLackingProjects()) return null
-
-    return (
-      <Layout params={this.props.params}>
-        {this.props.children}
-      </Layout>
-    )
+    if (this._userLoaded() && this._projectsLoaded()) {
+      return (
+        <Layout params={this.props.params}>
+          {this.props.children}
+        </Layout>
+      )
+    } else {
+      return null
+    }
   }
 }

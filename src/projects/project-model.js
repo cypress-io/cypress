@@ -46,6 +46,10 @@ export default class Project {
     return this.browsers[0]
   }
 
+  @action loading (bool) {
+    this.isLoading = bool
+  }
+
   setBrowsers (browsers) {
     if (browsers.length) {
       this.browsers = _.map(browsers, (browser) => {

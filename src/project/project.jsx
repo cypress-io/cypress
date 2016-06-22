@@ -13,7 +13,7 @@ const NoBrowsers = () => (
   <div className='alert alert-danger error'>
     <p>
       <i className='fa fa-warning'></i>
-      <strong>Can't Launch Any Browsers</strong>
+      <strong>Can't Launch Any Browsers</strong>{' '}
     </p>
     <p>
       We couldn't find any Chrome browsers to launch. To fix, please download Chrome.
