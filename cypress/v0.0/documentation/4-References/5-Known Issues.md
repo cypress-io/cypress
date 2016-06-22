@@ -27,9 +27,20 @@ Some commands have not been implemented in Cypress. Some commands will be implem
 
 Oftentimes you can use [`cy.invoke`](https://on.cypress.io/api/invoke) or [`cy.wrap`](https://on.cypress.io/api/wrap) to trigger the event or execute the action in the DOM.
 
-**Example of right clicking on an element**
+**Example of right clicking on an element using jQuery**
 ```javascript
 cy.get("#nav").first().invoke("trigger", "contextmenu")
+```
+
+**Example of right clicking on an element without jQuery**
+```javascript
+// need to create the event to later dispatch
+var e = new Event('contextmenu', {bubbles: true, cancelable: true})
+
+cy
+  .get("#nav").first()(function($el){
+    $el[0].dispatchEvent(e)
+  })
 ```
 
 ***
