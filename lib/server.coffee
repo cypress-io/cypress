@@ -12,8 +12,8 @@ fs = Promise.promisifyAll(fs)
 sslServers    = {}
 sslSemaphores = {}
 
-onError = (err) ->
-  console.log "ON HTTPS PROXY ERROR", err.stack
+onError = (err, port) ->
+  console.log "ON HTTPS PROXY ERROR", port, err.stack
 
 class Server
   constructor: (@_ca, @_port) ->
@@ -68,6 +68,11 @@ class Server
     .pipe(res)
 
   _makeConnection: (socket, head, port) ->
+    if not port
+      err = new Error "missing port!"
+      console.log err.stack
+      throw err
+
     conn = net.connect port, ->
       socket.pipe(conn)
       conn.pipe(socket)
@@ -76,7 +81,8 @@ class Server
       socket.resume()
 
     ## TODO: handle error!
-    conn.on "error", onError
+    conn.on "error", (err) ->
+      onError(err, port)
 
   _onServerConnectData: (req, socket, head) ->
     firstBytes = head[0]
@@ -88,6 +94,7 @@ class Server
       {hostname} = url.parse("http://#{req.url}")
 
       if sslServer = sslServers[hostname]
+        console.log "SSL SERVER", sslServer
         return makeConnection(sslServer.port)
 
       wildcardhost = hostname.replace(/[^\.]+\./, "*.")
