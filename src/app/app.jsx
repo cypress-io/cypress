@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import Reporter from '@cypress/core-reporter'
 
 import automation from '../lib/automation'
 import runner from '../lib/runner'
@@ -46,6 +47,7 @@ export default class App extends Component {
     // or the header disappears randomly
     return (
       <div className='container'>
+        <Reporter />
         <div style={{ height: '100%' }}>
           <Header {...this.props} />
           <Iframes {...this.props} />
