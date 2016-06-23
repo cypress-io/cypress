@@ -36,9 +36,12 @@ cy.get("#nav").first().invoke("trigger", "contextmenu")
 ```javascript
 // need to create the event to later dispatch
 var e = new Event('contextmenu', {bubbles: true, cancelable: true})
+// set coordinates of click
+e.clientX = 451
+e.clientY = 68
 
 cy
-  .get("#nav").first()(function($el){
+  .get("#nav").first().then(function($el) {
     $el[0].dispatchEvent(e)
   })
 ```
