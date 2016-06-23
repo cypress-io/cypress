@@ -1,3 +1,4 @@
+_         = require("lodash")
 fs        = require("fs-extra")
 net       = require("net")
 url       = require("url")
@@ -18,12 +19,17 @@ onError = (err, port) ->
 class Server
   constructor: (@_ca, @_port) ->
     @_onRequestHandler = null
+    @_onUpgradeHandler = null
 
   connect: (req, socket, head, options = {}) ->
+    console.log "ON CONNECT!!!!!!!!!!!!!!!"
+
     if onReq = options.onRequest
       @_onRequestHandler = onReq
 
-    console.log "ON CONNECT!!!!!!!!!!!!!!!"
+    if onUpg = options.onUpgradeHandler
+      @_onUpgradeHandler = onUpg
+
     console.log "URL", req.url
     console.log "HEADERS", req.headers
     console.log "HEAD IS", head
@@ -42,11 +48,20 @@ class Server
       return socket.write("\r\n")
 
     else
+      if odc = options.onDirectConnection
+        ## if onDirectConnection return true
+        ## then dont proxy, just pass this through
+        if odc.call(@, req, socket, head) is true
+          return @_makeDirectConnection(req, socket, head)
+
       socket.pause()
 
       @_onServerConnectData(req, socket, head)
 
-  _onRequest: (req, res) ->
+  _onUpgrade: (fn, req, socket, head) ->
+    fn.call(@, req, socket, head)
+
+  _onRequest: (fn, req, res) ->
     hostPort = parse.hostAndPort(req.url, req.headers, 443)
 
     req.url = url.format({
@@ -55,8 +70,8 @@ class Server
       port:     hostPort.port
     }) + req.url
 
-    if orh = @_onRequestHandler
-      return orh.call(@, req, res)
+    if fn
+      return fn.call(@, req, res)
 
     console.log "onRequest!!!!!!!!!", req.url, req.headers, req.method
 
@@ -67,18 +82,30 @@ class Server
       res.end()
     .pipe(res)
 
-  _makeConnection: (socket, head, port) ->
+  _makeDirectConnection: (req, socket, head) ->
+
+    directUrl = url.parse("http://#{req.url}")
+
+    # @_makeConnection(socket, head, 2020, "localhost")
+    @_makeConnection(socket, head, directUrl.port, directUrl.hostname)
+
+  _makeConnection: (socket, head, port, hostname) ->
     if not port
       err = new Error "missing port!"
       console.log err.stack
       throw err
 
-    conn = net.connect port, ->
+    cb = ->
       socket.pipe(conn)
       conn.pipe(socket)
       socket.emit("data", head)
 
       socket.resume()
+
+    ## compact out hostname when undefined
+    args = _.compact([port, hostname, cb])
+
+    conn = net.connect.apply(net, args)
 
     ## TODO: handle error!
     conn.on "error", (err) ->
@@ -129,6 +156,7 @@ class Server
           makeConnection(port)
 
     else
+      console.log "making direct connection", req.url, req.headers, req.method
       makeConnection(@_port)
 
   _getCertificatePathsFor: (hostname) ->
@@ -174,10 +202,11 @@ class Server
 
       return @_sniPort
 
-  listen: ->
+  listen: (options = {}) ->
     new Promise (resolve) =>
       @_sniServer = https.createServer({})
-      @_sniServer.on "request", @_onRequest.bind(@)
+      @_sniServer.on "upgrade", @_onUpgrade.bind(@, options.onUpgrade)
+      @_sniServer.on "request", @_onRequest.bind(@, options.onRequest)
       @_sniServer.listen =>
         ## store the port of our current sniServer
         @_sniPort = @_sniServer.address().port

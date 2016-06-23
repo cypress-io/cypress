@@ -14,6 +14,9 @@ pipe = (req, res) ->
 
 onConnect = (req, socket, head, proxy) ->
   proxy.connect(req, socket, head, {
+    onDirectConnection: (req, socket, head) ->
+      req.url is "localhost:8444"
+
     onRequest: (req, res) ->
       console.log "ON REQUEST FROM OUTER PROXY", req.url, req.headers, req.method
 
@@ -33,12 +36,12 @@ onRequest = (req, res) ->
   pipe(req, res)
 
 module.exports = {
-  start: ->
+  start: (port) ->
     dir = path.join(process.cwd(), "ca")
 
     prx = http.createServer()
 
-    httpsProxy.create(dir)
+    httpsProxy.create(dir, port)
     .then (proxy) =>
       prx.on "request", onRequest
 
@@ -46,8 +49,8 @@ module.exports = {
         onConnect(req, socket, head, proxy)
 
       new Promise (resolve) ->
-        prx.listen 3333, ->
-          console.log "server listening on port: 3333"
+        prx.listen port, ->
+          console.log "server listening on port: #{port}"
           resolve(prx)
 
   stop: ->
