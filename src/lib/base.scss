@@ -1,22 +1,17 @@
-body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img,a img{border:none;}address,caption,cite,code,dfn,em,strong,th,var,optgroup{font-style:inherit;font-weight:inherit;}del,ins{text-decoration:none;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:baseline;}sub{vertical-align:baseline;}legend{color:#000;}
-
 * {
   box-sizing: border-box;
 }
 
-body {
+& {
   background-color: #F6F6F6;
   color: #555;
   font-size: 12px;
   min-width: 400px;
-  height: 100%;
-  width: 100%;
 }
 
-body,
 input,
 textarea {
-  font-family: $muli;
+  font-family: $reporter-muli;
 }
 
 p {
@@ -87,7 +82,7 @@ pre {
   border-radius: 2px;
   color: #333;
   display: block;
-  font-family: $open-sans;
+  font-family: $reporter-open-sans;
   font-size: 1.05em;
   letter-spacing: 0.5px;
   margin: 0 0 10px;

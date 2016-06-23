@@ -38,7 +38,7 @@
     }
 
     td {
-      font-family: $monospace;
+      font-family: $reporter-monospace;
       font-size: 11px;
     }
 
@@ -50,6 +50,6 @@
 
   .no-calls .call-count,
   .no-responses .response-count {
-    color: $fail;
+    color: $reporter-fail;
   }
 }

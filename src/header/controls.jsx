@@ -1,8 +1,11 @@
+import { observer } from 'mobx-react'
 import React from 'react'
 import Tooltip from 'rc-tooltip'
 
-export default (props) => {
-  const config = props.isRunning ? {
+import statsStore from './stats-store'
+
+export default observer(() => {
+  const config = statsStore.isRunning ? {
     label: 'Stop Running',
     icon: 'stop',
   } : {
@@ -23,4 +26,4 @@ export default (props) => {
       </Tooltip>
     </div>
   )
-}
+})

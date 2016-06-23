@@ -1,10 +1,5 @@
 import _ from 'lodash'
 
-const header = {
-  passed: 5,
-  duration: 0.17,
-}
-
 function command ({ name, message, number = 0, event = false, type = 'parent', state = 'passed', referencesAlias = null, numElements = null, alias = null, visible = true, aliasType = null }) {
   return {
     id: _.uniqueId('c'),
@@ -133,6 +128,5 @@ const tests = {
 }
 
 export default {
-  header,
   tests,
 }

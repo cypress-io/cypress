@@ -2,11 +2,11 @@
   bottom: 0;
   box-shadow: 0 1px 2px #aaa;
   left: 0;
-  min-width: $min-width;
+  min-width: $reporter-min-width;
   overflow: auto;
   position: absolute;
   right: 0;
-  top: $header-height;
+  top: $reporter-header-height;
 
   ::-webkit-scrollbar {
     width:  10px;

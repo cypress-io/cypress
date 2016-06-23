@@ -26,12 +26,12 @@
     }
 
     &.test-error {
-      background-color: darken($yellow-lightest, 5%);
-      border-left: 5px solid $fail;
+      background-color: darken($reporter-yellow-lightest, 5%);
+      border-left: 5px solid $reporter-fail;
 
       &:hover {
         cursor: pointer;
-        background-color: darken($yellow-lightest, 15%);
+        background-color: darken($reporter-yellow-lightest, 15%);
       }
     }
   }
@@ -74,7 +74,7 @@
   }
 
   &.test.runnable-failed > .runnable-wrapper {
-    border-left: 10px solid $fail;
+    border-left: 10px solid $reporter-fail;
 
     .fa-warning.has-command-failures {
       visibility: visible;
@@ -82,27 +82,27 @@
   }
 
   &.suite.runnable-pending > div > .runnable-wrapper {
-    border-left: 10px solid lighten($pending, 25%);
+    border-left: 10px solid lighten($reporter-pending, 25%);
   }
 
   &.test.runnable-pending > .runnable-wrapper {
-    border-left: 10px solid lighten($pending, 25%);
+    border-left: 10px solid lighten($reporter-pending, 25%);
   }
 
   &.test.runnable-passed > .runnable-wrapper {
-    border-left: 10px solid $pass;
+    border-left: 10px solid $reporter-pass;
   }
 
   &.suite.runnable-passed > div > .runnable-wrapper {
-    border-left: 10px solid $pass;
+    border-left: 10px solid $reporter-pass;
   }
 
   &.suite.runnable-failed > div > .runnable-wrapper {
-    border-left: 10px solid $fail;
+    border-left: 10px solid $reporter-fail;
 
     .collapsible-more {
       border-radius: 3px;
-      background-color: $fail;
+      background-color: $reporter-fail;
       color: #FFF;
       padding: 0 4px 0 3px;
       font-size: 10px;
@@ -112,12 +112,12 @@
 
   &.test.runnable-failed {
     pre {
-      color: $fail;
+      color: $reporter-fail;
     }
 
     .runnable-state {
       @extend .#{$fa-css-prefix}-times;
-      color: $fail;
+      color: $reporter-fail;
     }
   }
 
@@ -132,18 +132,18 @@
   &.runnable-passed > .runnable-wrapper {
     .runnable-state {
       @extend .#{$fa-css-prefix}-check;
-      color: $pass;
+      color: $reporter-pass;
     }
   }
 
   &.runnable-pending > .runnable-wrapper {
     .runnable-title {
-      color: lighten($pending, 25%);
+      color: lighten($reporter-pending, 25%);
     }
 
     .runnable-state {
       @extend .#{$fa-css-prefix}-circle-o-notch;
-      color: lighten($pending, 20%);
+      color: lighten($reporter-pending, 20%);
     }
   }
 }

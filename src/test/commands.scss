@@ -46,7 +46,7 @@
 }
 
 .commands-container {
-  font-family: $monospace;
+  font-family: $reporter-monospace;
 
   background-color: #eef1f4;
   padding: 0;
@@ -188,25 +188,25 @@
 
 .command-state-pending {
   padding-left: 3px;
-  border-left: 2px solid $pending;
-  background-color: lighten($pending, 40%);
+  border-left: 2px solid $reporter-pending;
+  background-color: lighten($reporter-pending, 40%);
 
   .command-number,
   .command-method,
   .command-message {
-    color: lighten($pending, 15%);
+    color: lighten($reporter-pending, 15%);
   }
 }
 
 .command-state-failed {
   padding-left: 3px;
-  border-left: 2px solid $fail;
-  background-color: lighten($fail, 30%);
+  border-left: 2px solid $reporter-fail;
+  background-color: lighten($reporter-fail, 30%);
 
   .command-number,
   .command-method,
   .command-message {
-    color: $fail;
+    color: $reporter-fail;
   }
 }
 
@@ -223,11 +223,11 @@
     }
 
     .fa-circle.successful {
-      color: $pending;
+      color: $reporter-pending;
     }
 
     .fa-circle.aborted {
-      color: $fail;
+      color: $reporter-fail;
     }
 
     .fa-circle.bad {
@@ -265,16 +265,16 @@
 .command-assertion-pending {
   & .command-method {
     & span {
-      background-color: $pending;
+      background-color: $reporter-pending;
       color: white;
 
     }
   }
   & .command-message {
-    color: $pending;
+    color: $reporter-pending;
 
     strong {
-      color: darken($pending, 10%);
+      color: darken($reporter-pending, 10%);
     }
   }
 }
@@ -282,34 +282,34 @@
 .command-assertion-failed {
   & .command-method {
     & span {
-      background-color: $fail;
+      background-color: $reporter-fail;
       color: white;
 
     }
   }
   & .command-message {
-    color: $fail;
+    color: $reporter-fail;
 
     strong {
-      color: darken($fail, 10%);
+      color: darken($reporter-fail, 10%);
     }
   }
 }
 
 .command-assertion-passed {
   & .command-method {
-    color: $pass;
+    color: $reporter-pass;
 
     span {
-      background-color: $pass;
+      background-color: $reporter-pass;
       color: white;
     }
   }
   & .command-message {
-    color: darken($pass, 3%);
+    color: darken($reporter-pass, 3%);
 
     strong {
-      color: darken($pass, 10%);
+      color: darken($reporter-pass, 10%);
     }
   }
 }
@@ -331,7 +331,7 @@
   }
 
   .command-alias {
-    font-family: $open-sans;
+    font-family: $reporter-open-sans;
     font-size: 10px;
     line-height: 1.5;
   }
