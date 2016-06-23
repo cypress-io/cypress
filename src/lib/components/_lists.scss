@@ -11,11 +11,12 @@ ul.list-header {
   padding-left: 0;
   background-color: transparent;
 
-  &>li {
+  .li {
     overflow: auto;
     border-bottom: 1px solid #eeeeee;
     display: block;
     vertical-align: top;
+    position: relative;
 
     a:hover {
       text-decoration: none;
@@ -24,10 +25,9 @@ ul.list-header {
     &>a {
       float: left;
       width: 100%;
-      display: inline-block;
     }
 
-    &>div, &>a>div {
+    .row-column-wrapper {
       @include text-overflow-custom;
       min-height: 1px;
       vertical-align: top;
@@ -37,10 +37,10 @@ ul.list-header {
         border-right: 0;
       }
 
-      &>div  {
-        padding: 4px 20px;
-      }
 
+    }
+    .row-column  {
+      padding: 4px 20px;
     }
 
     &:last-child>div>div {

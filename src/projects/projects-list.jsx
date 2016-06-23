@@ -1,10 +1,33 @@
 import _ from 'lodash'
 import App from '../lib/app'
 import React, { Component } from 'react'
-import { Link } from 'react-router'
 import { observer } from 'mobx-react'
+import { ContextMenu, MenuItem } from "react-contextmenu"
 
-import projectsStore from '../projects/projects-store'
+import Project from './projects-list-item/'
+
+import projectsStore from './projects-store'
+
+class MyContextMenu extends Component {
+  render () {
+    return (
+      <ContextMenu identifier="context-menu">
+        <MenuItem onClick={this.handleClick}>
+          <i className='fa fa-minus-circle red'></i>{' '}
+          Remove project
+        </MenuItem>
+      </ContextMenu>
+    )
+  }
+
+  handleClick (e, project) {
+    e, project
+
+    // projectsStore.removeProject()
+
+    // App.ipc("remove:project", project.get("path"))
+  }
+}
 
 @observer
 export default class Projects extends Component {
@@ -16,44 +39,17 @@ export default class Projects extends Component {
         { this._error() }
         <ul className='projects-list list-as-table'>
           { _.map(projectsStore.projects, (project) => (
-              this._project(project)
+            <li key={project.id} className='li'>
+              <Project project={project} />
+            </li>
           ))}
         </ul>
+        <MyContextMenu />
       </div>
     )
   }
 
-  _project = (project) => {
-    if (project.empty) {
-      return (
-        <span>Projects</span>
-      )
-    } else {
-      return (
-        <li key={project.id}>
-          <Link
-            to={`/projects/${project.id}`}
-            >
-            <div>
-              <div>
-                <div className='project-name'>
-                  <i className="fa fa-folder"></i>{" "}
-                  { project.name }{' '}
-                </div>
-
-                <div className='project-path'>{ project.displayPath }</div>
-              </div>
-            </div>
-            <div>
-              <i className="fa fa-chevron-right"></i>
-            </div>
-          </Link>
-        </li>
-      )
-    }
-  }
-
-  _empty = () => (
+  _empty () {
     <div className='empty'>
       <h4>Add your first project</h4>
       <p>To begin testing, click <i className='fa fa-plus'></i> above to choose a folder that has the resources of your project.</p>
@@ -66,9 +62,9 @@ export default class Projects extends Component {
         </a>
       </p>
     </div>
-  )
+  }
 
-  _error = () => {
+  _error () {
     if (!projectsStore.error) return null
 
     return (
@@ -81,12 +77,8 @@ export default class Projects extends Component {
     )
   }
 
-  _openHelp = () => (
+  _openHelp () {
     App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running/#section-adding-projects')
-  )
-
-  _removeProject = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
   }
+
 }

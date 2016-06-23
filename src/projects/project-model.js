@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import truncate from 'underscore.string/truncate'
 import { computed, observable, action } from 'mobx'
 import Browser from '../lib/browser-model'
 
@@ -19,7 +18,7 @@ export default class Project {
 
   @computed get name () {
     let splitName = _.last(this.path.split('/'))
-    return truncate(splitName, 20)
+    return _.truncate(splitName, 20)
   }
 
   @computed get displayPath () {

@@ -5,39 +5,43 @@
     color: #666;
   }
 
-  &>li>a {
-    width: 100%;
-    position: relative;
+  .react-context-menu-wrapper {
+    overflow: auto;
 
-    &:hover {
-      background-color: #fbfbfb;
-      .fa-chevron-right, .project-name {
-        color: #555;
+    &>a {
+      width: 100%;
+      float: left;
+
+      &:hover {
+        background-color: #fbfbfb;
+        .fa-chevron-right, .project-name {
+          color: #555;
+        }
+
+        .remove-link {
+          opacity: 1;
+        }
       }
+    }
+  }
 
-      .remove-link {
-        opacity: 1;
+  .row-column-wrapper {
+    &:last-child {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      width: 50px;
+
+      i {
+        position: absolute;
+        top: 37%;
+        right: 37%;
       }
     }
 
-    &>div {
-      &:last-child {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        width: 50px;
-
-        i {
-          position: absolute;
-          top: 37%;
-          right: 37%;
-        }
-      }
-
-      &>div {
-        padding: 10px 20px;
-      }
+    .row-column {
+      padding: 10px 20px;
     }
   }
 

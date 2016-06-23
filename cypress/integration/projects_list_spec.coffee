@@ -57,25 +57,41 @@ describe "Projects List", ->
         cy.get(".projects-list a")
           .contains("", " My-Fake-Project")
 
-  describe "click on project", ->
-    beforeEach ->
-      @firstProjectName = "My-Fake-Project"
-      @lastProjectName = "project5"
+      describe "click on project", ->
+        beforeEach ->
+          @firstProjectName = "My-Fake-Project"
 
-      cy
-        .fixture("user").then (@user) ->
-          @ipc.handle("get:current:user", null, @user)
-        .fixture("projects").then (@projects) ->
-          @ipc.handle("get:project:paths", null, @projects)
-        .get(".projects-list a")
-          .contains(@firstProjectName).as("firstProject")
-        .get(".projects-list a")
-          .contains(@lastProjectName).as("lastProject")
+          cy
+            .get(".projects-list a")
+              .contains(@firstProjectName).as("firstProject")
 
-    it "navigates to project page", ->
-      cy
-        .get("@firstProject").click()
-        .location().its("hash").should("include", "123")
+        it "navigates to project page", ->
+          cy
+            .get("@firstProject").click()
+            .location().its("hash").should("include", "123")
+
+      describe "right click on project", ->
+        beforeEach ->
+          @firstProjectName = "My-Fake-Project"
+          e = new Event('contextmenu', {bubbles: true, cancelable: true})
+          e.clientX = 451
+          e.clientY = 68
+
+          cy
+            .get(".projects-list li")
+              .contains(".react-context-menu-wrapper", @firstProjectName).as("firstProject")
+            .get("@firstProject").then ($el) ->
+              $el[0].dispatchEvent(e)
+
+        it "displays 'remove project' dropdown", ->
+          cy
+            .get(".react-context-menu").should("be.visible")
+
+        it.only "removes project on click of remove project", ->
+          cy
+            .get(".react-context-menu:visible")
+              .contains("Remove project").click({force: true})
+
 
   describe "add project", ->
     beforeEach ->
