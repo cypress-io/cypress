@@ -9,7 +9,6 @@ client      = require("./controllers/client")
 files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
 builds      = require("./controllers/builds")
-# reporter    = require("./controllers/reporter")
 
 module.exports = (app, config, getRemoteOrigin) ->
   ## routing for the actual specs which are processed automatically
@@ -45,20 +44,11 @@ module.exports = (app, config, getRemoteOrigin) ->
 
     res.sendFile(file, {etag: false})
 
-  # app.get config.reporterRoute, (req, res) ->
-  #   reporter.serve(req, res, config)
-  #
-  # app.get config.reporterRoute + "/*", (req, res) ->
-  #   reporter.handle(req, res)
-
   ## we've namespaced the initial sending down of our cypress
   ## app as '__'  this route shouldn't ever be used by servers
   ## and therefore should not conflict
   app.get config.clientRoute, (req, res) ->
-    res.render cwd("lib", "public", "index.html"), {
-      config:      JSON.stringify(config)
-      projectName: config.projectName
-    }
+    runner.serve(req, res, config)
 
   app.all "*", (req, res, next) ->
     proxy.handle(req, res, config, getRemoteOrigin, next)
