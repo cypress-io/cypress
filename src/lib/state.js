@@ -3,6 +3,7 @@ import { computed, observable, asReference } from 'mobx'
 import automation from './automation'
 
 const headerHeight = 46
+const reporterWidth = 450
 
 // used as initial values and in reset method to reset state between runs
 const defaults = {
@@ -42,10 +43,14 @@ const state = observable({
   automation: automation.CONNECTING,
 
   @computed get scale () {
-    if (this._windowWidth < this.width || this._containerHeight < this.height) {
-      return Math.min(this._windowWidth / this.width, this._containerHeight / this.height, 1)
+    if (this._containerWidth < this.width || this._containerHeight < this.height) {
+      return Math.min(this._containerWidth / this.width, this._containerHeight / this.height, 1)
     }
     return 1
+  },
+
+  @computed get _containerWidth () {
+    return this._windowWidth - reporterWidth
   },
 
   @computed get _containerHeight () {
@@ -53,7 +58,7 @@ const state = observable({
   },
 
   @computed get marginLeft () {
-    return (this._windowWidth / 2) - (this.width / 2)
+    return (this._containerWidth / 2) - (this.width / 2)
   },
 
   @computed get displayScale () {

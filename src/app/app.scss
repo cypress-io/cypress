@@ -1,13 +1,13 @@
 .reporter {
   right: auto;
-  width: 400px;
+  width: $reporter-width;
 }
 
 .runner {
   & {
     bottom: 0;
     box-shadow: inset 0 0 10px #555;
-    left: 400px;
+    left: $reporter-width;
     overflow: hidden;
     position: absolute;
     right: 0;
