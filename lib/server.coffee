@@ -17,6 +17,19 @@ Socket       = require("./socket")
 
 localHostOrIpAddressRe = /localhost|\.local|^[\d\.]+$/
 
+setProxiedUrl = (req) ->
+  ## bail if we've already proxied the url
+  return if req.proxiedUrl
+
+  ## backup the original proxied url
+  ## and slice out the host/origin
+  ## and only leave the path which is
+  ## how browsers would normally send
+  ## use their url
+  req.proxiedUrl = req.url
+
+  req.url = url.parse(req.url).path
+
 ## currently not making use of event emitter
 ## but may do so soon
 class Server
@@ -28,7 +41,7 @@ class Server
     @_socket     = null
     @_wsProxy    = null
     @_httpsProxy = null
-    @_remoteOrigin = "<root>"
+    @_remoteOrigin = null
     @_remoteHostAndPort = null
 
   createExpressApp: (port, morgan) ->
@@ -38,6 +51,12 @@ class Server
     app.set "port",        port
     app.set "view engine", "html"
     app.engine "html",     hbs.__express
+
+    ## handle the proxied url in case
+    ## we have not yet started our websocket server
+    app.use (req, res, next) ->
+      setProxiedUrl(req)
+      next()
 
     app.use require("cookie-parser")()
     app.use require("compression")()
@@ -170,27 +189,38 @@ class Server
     return obj
 
   _urlMatchesRemoteHostAndPort: (url) ->
+    ## take a shortcut here in the case
+    ## where remoteHostAndPort is null
+    return false if not @_remoteHostAndPort
+
     parsedUrl  = @_parseUrl(url)
 
     ## does the parsedUrl match the parsedHost?
     _.isEqual(parsedUrl, @_remoteHostAndPort)
 
   _onDomainChange: (fullyQualifiedUrl) =>
-      parsed = url.parse(fullyQualifiedUrl)
+    ## TODO: handle <root> here
+    if fullyQualifiedUrl is "<root>"
+      @_remoteOrigin = "<root>"
+      @_remoteHostAndPort = null
 
-      port = parsed.port ? if parsed.protocol is "https:" then 443 else 80
+      return
 
-      parsed.hash     = null
-      parsed.search   = null
-      parsed.query    = null
-      parsed.path     = null
-      parsed.pathname = null
+    parsed = url.parse(fullyQualifiedUrl)
 
-      @_remoteOrigin = url.format(parsed)
+    port = parsed.port ? if parsed.protocol is "https:" then 443 else 80
 
-      ## set an object with port, tld, and domain properties
-      ## as the remoteHostAndPort
-      @_remoteHostAndPort = @_parseUrl([parsed.hostname, port].join(":"))
+    parsed.hash     = null
+    parsed.search   = null
+    parsed.query    = null
+    parsed.path     = null
+    parsed.pathname = null
+
+    @_remoteOrigin = url.format(parsed)
+
+    ## set an object with port, tld, and domain properties
+    ## as the remoteHostAndPort
+    @_remoteHostAndPort = @_parseUrl([parsed.hostname, port].join(":"))
 
   _callRequestListeners: (server, listeners, req, res) ->
     for listener in listeners
@@ -208,14 +238,7 @@ class Server
     listeners = server.listeners("request").slice(0)
     server.removeAllListeners("request")
     server.on "request", (req, res) =>
-      ## backup the original proxied url
-      ## and slice out the host/origin
-      ## and only leave the path which is
-      ## how browsers would normally send
-      ## use their url
-      req.proxiedUrl = req.url
-
-      req.url = url.parse(req.url).path
+      setProxiedUrl(req)
 
       @_callRequestListeners(server, listeners, req, res)
 
