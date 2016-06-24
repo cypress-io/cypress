@@ -4,6 +4,23 @@ import React, { Component, PropTypes } from 'react'
 import { findDOMNode } from 'react-dom'
 
 class Dropdown extends Component {
+  static defaultProps = {
+    className: '',
+    defaultState: 'closed',
+  }
+
+  static propTypes = {
+    className: PropTypes.string,
+    icon: PropTypes.string,
+    chosen: PropTypes.object.isRequired,
+    others: PropTypes.arrayOf(PropTypes.object).isRequired,
+    onSelect: PropTypes.func.isRequired,
+    renderItem: PropTypes.func.isRequired,
+    // property for unique value on each item that can be used as its key
+    keyProperty: PropTypes.string.isRequired,
+    defaultState: PropTypes.string,
+  }
+
   constructor (props) {
     super(props)
 
@@ -84,23 +101,6 @@ class Dropdown extends Component {
     this.setState({ open: false })
     this.props.onSelect(item)
   }
-}
-
-Dropdown.propTypes = {
-  className: PropTypes.string,
-  icon: PropTypes.string,
-  chosen: PropTypes.object.isRequired,
-  others: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onSelect: PropTypes.func.isRequired,
-  renderItem: PropTypes.func.isRequired,
-  // property for unique value on each item that can be used as its key
-  keyProperty: PropTypes.string.isRequired,
-  defaultState: PropTypes.string,
-}
-
-Dropdown.defaultProps = {
-  className: '',
-  defaultState: 'closed',
 }
 
 export default Dropdown
