@@ -1,8 +1,4 @@
 @import 'lib/variables';
-
-.reporter {
-  @import 'lib/fonts';
-  @import 'lib/base';
-  @import 'lib/tooltip';
-  @import '!(lib)*/**/*';
-}
+@import 'lib/fonts';
+@import 'lib/base';
+@import '!(lib)*/**/*';

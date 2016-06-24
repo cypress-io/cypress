@@ -1,25 +1,27 @@
-.collapsible-content {
-  display: none;
-
-  .is-open > & {
-    display: block;
-  }
-}
-
-.collapsible-more {
-  display: inline-block;
-  margin-left: 5px;
-
-  .is-open > .collapsible-header > & {
+.reporter {
+  .collapsible-content {
     display: none;
   }
-}
 
-.collapsible-indicator {
-  @extend .#{$fa-css-prefix}-caret-right;
-  margin-right: 5px;
+  .is-open > .collapsible-content {
+    display: block;
+  }
 
-  .is-open > .collapsible-header > & {
+  .collapsible-more {
+    display: inline-block;
+    margin-left: 5px;
+  }
+
+  .is-open > .collapsible-header > .collapsible-more {
+    display: none;
+  }
+
+  .collapsible-indicator {
+    @extend .#{$fa-css-prefix}-caret-right;
+    margin-right: 5px;
+  }
+
+  .is-open > .collapsible-header > .collapsible-indicator {
     @extend .#{$fa-css-prefix}-caret-down;
   }
 }
