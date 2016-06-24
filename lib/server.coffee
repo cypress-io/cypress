@@ -7,12 +7,15 @@ express      = require("express")
 Promise      = require("bluebird")
 httpProxy    = require("http-proxy")
 httpsProxy   = require("@cypress/core-https-proxy")
+parseDomain  = require("parse-domain")
 allowDestroy = require("server-destroy")
 appData      = require("./util/app_data")
 cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
 Socket       = require("./socket")
+
+localHostOrIpAddressRe = /localhost|\.local|^[\d\.]+$/
 
 ## currently not making use of event emitter
 ## but may do so soon
@@ -25,6 +28,8 @@ class Server
     @_socket     = null
     @_wsProxy    = null
     @_httpsProxy = null
+    @_remoteOrigin = "<root>"
+    @_remoteHostAndPort = null
 
   createExpressApp: (port, morgan) ->
     app = express()
@@ -62,9 +67,12 @@ class Server
     e.portInUse = true
     e
 
-  open: (projectRoot, config = {}) ->
+  open: (config = {}) ->
     Promise.try =>
       app = @createExpressApp(config.port, config.morgan)
+
+      app.getRemoteOrigin = =>
+        @_remoteOrigin
 
       logger.setSettings(config)
 
@@ -90,10 +98,22 @@ class Server
       onUpgrade = (req, socket, head) =>
         @proxyWebsockets(@_wsProxy, socketIoRoute, req, socket, head)
 
-      @_server.on "connect", (req, socket, head) =>
+      callListeners = (req, res) =>
+        listeners = @_server.listeners("request").slice(0)
 
+        @_callRequestListeners(@_server, listeners, req, res)
+
+      onSniUpgrade = (req, socket, head) =>
+        upgrades = @_server.listeners("upgrade").slice(0)
+        for upgrade in upgrades
+          upgrade.call(@_server, req, socket, head)
+
+      @_server.on "connect", (req, socket, head) =>
         @_httpsProxy.connect(req, socket, head, {
-          onRequest: app
+          onDirectConnection: (req) =>
+            ## make a direct connection only if
+            ## our req url does not match the remote host + port
+            not @_urlMatchesRemoteHostAndPort(req.url)
         })
 
       @_server.on "upgrade", onUpgrade
@@ -102,7 +122,10 @@ class Server
 
       Promise.join(
         @_listen(port, onError),
-        httpsProxy.create(appData.path("proxy"), port)
+        httpsProxy.create(appData.path("proxy"), port, {
+          onRequest: callListeners
+          onUpgrade: onSniUpgrade
+        })
       )
       .spread (srv, httpsProxy) =>
         @_httpsProxy = httpsProxy
@@ -119,6 +142,60 @@ class Server
 
         resolve(@_server)
 
+  _parseUrl: (str) ->
+    [host, port] = str.split(":")
+
+    ## if we couldn't get a parsed domain
+    if not parsed = parseDomain(host, {
+      customTlds: localHostOrIpAddressRe
+    })
+
+      ## then just fall back to a dumb check
+      ## based on assumptions that the tld
+      ## is the last segment after the final
+      ## '.' and that the domain is the segment
+      ## before that
+      segments = host.split(".")
+
+      parsed = {
+        tld:    segments[segments.length - 1]
+        domain: segments[segments.length - 2]
+      }
+
+    obj = {}
+    obj.port   = port
+    obj.tld    = parsed.tld
+    obj.domain = parsed.domain
+
+    return obj
+
+  _urlMatchesRemoteHostAndPort: (url) ->
+    parsedUrl  = @_parseUrl(url)
+
+    ## does the parsedUrl match the parsedHost?
+    _.isEqual(parsedUrl, @_remoteHostAndPort)
+
+  _onDomainChange: (fullyQualifiedUrl) =>
+      parsed = url.parse(fullyQualifiedUrl)
+
+      port = parsed.port ? if parsed.protocol is "https:" then 443 else 80
+
+      parsed.hash     = null
+      parsed.search   = null
+      parsed.query    = null
+      parsed.path     = null
+      parsed.pathname = null
+
+      @_remoteOrigin = url.format(parsed)
+
+      ## set an object with port, tld, and domain properties
+      ## as the remoteHostAndPort
+      @_remoteHostAndPort = @_parseUrl([parsed.hostname, port].join(":"))
+
+  _callRequestListeners: (server, listeners, req, res) ->
+    for listener in listeners
+      listener.call(server, req, res)
+
   _normalizeReqUrl: (server) ->
     ## because socket.io removes all of our request
     ## events, it forces the socket.io traffic to be
@@ -130,16 +207,17 @@ class Server
     ## because the browser is in proxy mode
     listeners = server.listeners("request").slice(0)
     server.removeAllListeners("request")
-    server.on "request", (req, res) ->
+    server.on "request", (req, res) =>
       ## backup the original proxied url
       ## and slice out the host/origin
       ## and only leave the path which is
       ## how browsers would normally send
       ## use their url
+      req.proxiedUrl = req.url
+
       req.url = url.parse(req.url).path
 
-      for listener in listeners
-        listener.call(server, req, res)
+      @_callRequestListeners(server, listeners, req, res)
 
   proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
     ## bail if this is our own namespaced socket.io request
@@ -181,14 +259,19 @@ class Server
     Promise.join(
       @_close()
       @_socket?.close()
+      ## todo close @_httpsProxy
     )
 
   end: ->
     @_socket and @_socket.end()
 
-  startWebsockets: (watchers, config, options) ->
+  startWebsockets: (watchers, config, options = {}) ->
+    options.onDomainChange = =>
+      @_onDomainChange.apply(@, arguments)
+
     @_socket = Socket()
-    @_socket.startListening(@_server, watchers, config, options)
+    @_socket.startListening(@_server, watchers, config, options = {})
     @_normalizeReqUrl(@_server)
+    # handleListeners(@_server)
 
 module.exports = Server

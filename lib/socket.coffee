@@ -126,6 +126,7 @@ class Socket
       onConnect: ->
       onChromiumRun: ->
       onIsNewProject: ->
+      onDomainChange: ->
       onReloadBrowser: ->
       checkForAppErrors: ->
 

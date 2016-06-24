@@ -29,7 +29,7 @@ module.exports = {
       return res.redirect config.clientRoute
 
     getRemoteHost = (req) =>
-      @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"] ? config.baseUrl ? app.get("__cypress.remoteHost")
+      app.getRemoteOrigin()
 
     d = Domain.create()
 
@@ -390,13 +390,13 @@ module.exports = {
     #   else
     #     str
 
-    rewrite "[href^='//']", "attrs", conditionallyApplyFn("href", changeToAbsoluteRelative)
+    # rewrite "[href^='//']", "attrs", conditionallyApplyFn("href", changeToAbsoluteRelative)
 
-    rewrite "form[action^='//']", "attrs", conditionallyApplyFn("action", changeToAbsoluteRelative)
+    # rewrite "form[action^='//']", "attrs", conditionallyApplyFn("action", changeToAbsoluteRelative)
 
-    rewrite "form[action^='http']", "attrs", conditionallyApplyFn("action", removeRemoteHostOrMakeAbsoluteRelative)
+    # rewrite "form[action^='http']", "attrs", conditionallyApplyFn("action", removeRemoteHostOrMakeAbsoluteRelative)
 
-    rewrite "[href^='http']", "attrs", conditionallyApplyFn("href", removeRemoteHostOrMakeAbsoluteRelative)
+    # rewrite "[href^='http']", "attrs", conditionallyApplyFn("href", removeRemoteHostOrMakeAbsoluteRelative)
 
     ## only rewrite these script src tags if the origin matches our remote host
     ## or matches a domain which we have a cookie for. store a list of domains

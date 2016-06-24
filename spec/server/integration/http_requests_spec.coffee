@@ -31,23 +31,25 @@ describe "Routes", ->
     nock.enableNetConnect()
 
     @setup = (obj = {}) =>
-      @server = Server()
-
       ## get all the config defaults
       ## and allow us to override them
       ## for each test
       cfg = config.set(obj)
 
-      @app = @server.createExpressApp()
-      @server.createRoutes(@app, cfg)
+      Server().open(cfg)
+      .then (server) =>
+        @server = server
 
-      ## create a session which will store cookies
-      ## in between session requests :-)
-      @session = new (Session({app: @app}))
+        @srv = server.getHttpServer()
+
+        @session = new (Session({app: @srv}))
+
+        @proxy = "http://localhost:" + @srv.address().port
 
   afterEach ->
-    @session.destroy()
     nock.cleanAll()
+    @session.destroy()
+    @server.close()
 
   context "GET /", ->
     beforeEach ->
@@ -580,17 +582,18 @@ describe "Routes", ->
 
       @setup()
 
-    it "basic 200 html response", ->
+    it.only "basic 200 html response", ->
       nock(@baseUrl)
-        .get("/")
-        .reply 200, "hello from bar!", {
-          "Content-Type": "text/html"
-        }
+      .get("/")
+      .reply 200, "hello from bar!", {
+        "Content-Type": "text/html"
+      }
 
-      supertest(@app)
-        .get("/")
-        .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
-        .expect(200, "hello from bar!")
+      supertest(@srv)
+      .get("/")
+      .proxy(@proxy)
+      .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+      .expect(200, "hello from bar!")
 
     context "remoteHost", ->
       it "falls back to app __cypress.remoteHost property", ->
