@@ -12,15 +12,14 @@ describe "Proxy", ->
   beforeEach ->
     Promise.join(
       httpServer.start()
-      .then (@httpSrv) =>
 
       # mitmProxy.start()
 
-      httpsServer.start()
-      .then (@httpsSrv) =>
+      httpsServer.start(8443)
 
-      proxy.start()
-      .then (@prx) =>
+      httpsServer.start(8444)
+
+      proxy.start(3333)
     )
 
   afterEach ->
@@ -29,6 +28,12 @@ describe "Proxy", ->
       httpsServer.stop()
       proxy.stop()
     )
+
+  it "can call the httpsDirectly without a proxy", ->
+    request({
+      strictSSL: false
+      url: "https://localhost:8443"
+    })
 
   it "can boot the httpsServer", ->
     request({
@@ -47,6 +52,17 @@ describe "Proxy", ->
     })
     .then (html) ->
       expect(html).to.include("replaced content")
+
+  it "can pass directly through", ->
+    ## this will fail due to dynamic cert
+    ## generation when strict ssl is true
+    request({
+      strictSSL: false
+      url: "https://localhost:8444/replace"
+      proxy: "http://localhost:3333"
+    })
+    .then (html) ->
+      expect(html).to.include("https server")
 
   it "can boot the httpServer", ->
     request({

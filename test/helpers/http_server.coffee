@@ -2,8 +2,8 @@ http      = require("http")
 Promise   = require("bluebird")
 
 srv = http.createServer (req, res) ->
-  console.log "REQUEST URL:", req.url
-  console.log "REQUEST HEADERS:", req.headers
+  console.log "HTTP SERVER REQUEST URL:", req.url
+  console.log "HTTP SERVER REQUEST HEADERS:", req.headers
 
   res.setHeader("Content-Type", "text/html")
   res.writeHead(200)

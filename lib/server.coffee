@@ -18,18 +18,9 @@ onError = (err, port) ->
 
 class Server
   constructor: (@_ca, @_port) ->
-    @_onRequestHandler = null
-    @_onUpgradeHandler = null
 
   connect: (req, socket, head, options = {}) ->
     console.log "ON CONNECT!!!!!!!!!!!!!!!"
-
-    if onReq = options.onRequest
-      @_onRequestHandler = onReq
-
-    if onUpg = options.onUpgradeHandler
-      @_onUpgradeHandler = onUpg
-
     console.log "URL", req.url
     console.log "HEADERS", req.headers
     console.log "HEAD IS", head
@@ -219,10 +210,10 @@ class Server
     @_sniServer.close()
 
 module.exports = {
-  create: (ca, port) ->
+  create: (ca, port, options = {}) ->
     srv = new Server(ca, port)
 
     srv
-    .listen()
+    .listen(options)
     .return(srv)
 }

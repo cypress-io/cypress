@@ -16,20 +16,6 @@ onConnect = (req, socket, head, proxy) ->
   proxy.connect(req, socket, head, {
     onDirectConnection: (req, socket, head) ->
       req.url is "localhost:8444"
-
-    onRequest: (req, res) ->
-      console.log "ON REQUEST FROM OUTER PROXY", req.url, req.headers, req.method
-
-      if req.url.includes("replace")
-        write = res.write
-        res.write = (chunk) ->
-          chunk = new Buffer(chunk.toString().replace("https server", "replaced content"))
-
-          write.call(@, chunk)
-
-        pipe(req, res)
-      else
-        pipe(req, res)
   })
 
 onRequest = (req, res) ->
@@ -41,7 +27,23 @@ module.exports = {
 
     prx = http.createServer()
 
-    httpsProxy.create(dir, port)
+    httpsProxy.create(dir, port, {
+      onUpgrade: (req, socket, head) ->
+
+      onRequest: (req, res) ->
+        console.log "ON REQUEST FROM OUTER PROXY", req.url, req.headers, req.method
+
+        if req.url.includes("replace")
+          write = res.write
+          res.write = (chunk) ->
+            chunk = new Buffer(chunk.toString().replace("https server", "replaced content"))
+
+            write.call(@, chunk)
+
+          pipe(req, res)
+        else
+          pipe(req, res)
+    })
     .then (proxy) =>
       prx.on "request", onRequest
 

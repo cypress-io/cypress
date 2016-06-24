@@ -13,24 +13,33 @@ options = {
   cert: fs.readFileSync(path.join(__dirname, "certs", "server", "my-server.crt.pem"))
 }
 
-srv = https.createServer options, (req, res) ->
-  console.log "REQUEST URL:", req.url
-  console.log "REQUEST HEADERS:", req.headers
+onRequest = (req, res) ->
+  console.log "HTTPS SERVER REQUEST URL:", req.url
+  console.log "HTTPS SERVER REQUEST HEADERS:", req.headers
 
   res.setHeader("Content-Type", "text/html")
   res.writeHead(200)
   res.end("<html><body>https server</body></html>")
 
-module.exports = {
-  srv: srv
+servers = []
 
-  start: ->
+module.exports = {
+  start: (port) ->
     new Promise (resolve) ->
-      srv.listen 8443, ->
-        console.log "server listening on port: 8443"
+      srv = https.createServer(options, onRequest)
+
+      servers.push(srv)
+
+      srv.listen port, ->
+        console.log "server listening on port: #{port}"
         resolve(srv)
 
   stop: ->
-    new Promise (resolve) ->
-      srv.close(resolve)
+    stop = (srv) ->
+      new Promise (resolve) ->
+        srv.close(resolve)
+
+    Promise.map(servers, stop)
+    .then ->
+      servers = []
 }
