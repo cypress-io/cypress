@@ -17,7 +17,7 @@ describe "Projects List", ->
           @ipc.handle("get:current:user", null, @user)
           @ipc.handle("get:project:paths", null, [])
 
-    it "hides projects dropdown", ->
+    it "does not display projects list", ->
       cy.get("projects-list").should("not.exist")
 
     it "opens tooltip on add button", ->
@@ -87,11 +87,18 @@ describe "Projects List", ->
           cy
             .get(".react-context-menu").should("be.visible")
 
-        it.only "removes project on click of remove project", ->
+        it "removes project on click of remove project", ->
           cy
             .get(".react-context-menu:visible")
-              .contains("Remove project").click({force: true})
+              .contains("Remove project").click()
+                .should("not.exist")
+            .get("@firstProject").should("not.exist")
 
+        it "calls remove:project to ipc", ->
+          cy
+            .get(".react-context-menu:visible")
+              .contains("Remove project").click().should ->
+                expect(@App.ipc).to.be.calledWith("remove:project", "/Users/Jane/Projects/My-Fake-Project")
 
   describe "add project", ->
     beforeEach ->

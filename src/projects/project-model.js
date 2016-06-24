@@ -7,6 +7,7 @@ export default class Project {
   @observable path = ''
   @observable isChosen = false
   @observable isLoading = false
+  @observable isLoaded = false
   @observable browsers = []
   @observable error = null
 

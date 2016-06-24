@@ -40,6 +40,12 @@ class Projects {
     })
     project.isChosen = true
   }
+
+  @action removeProject (projectId) {
+    this.projects = _.filter(this.projects, (project) => {
+      return !(project.id === projectId)
+    })
+  }
 }
 
 export default new Projects()
