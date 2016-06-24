@@ -15,7 +15,7 @@ const automationElementId = '__cypress-string'
 
 @observer
 export default class App extends Component {
-  componentWillMount () {
+  componentDidMount () {
     this.randomString = `${Math.random()}`
 
     runner.ensureAutomation({
@@ -39,7 +39,11 @@ export default class App extends Component {
   }
 
   _automationElement () {
-    return <div id={automationElementId} className='automation-string'>{this.randomString}</div>
+    return (
+      <div id={automationElementId} style={{ display: 'none' }}>
+        {this.randomString}
+      </div>
+    )
   }
 
   _app () {
@@ -47,7 +51,7 @@ export default class App extends Component {
     // or the header disappears randomly
     return (
       <div>
-        <Reporter />
+        <Reporter runner={runner.reporterBus} />
         <div className='runner' style={{ height: '100%' }}>
           <Header {...this.props} />
           <Iframes {...this.props} />

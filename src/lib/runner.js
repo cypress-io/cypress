@@ -20,7 +20,6 @@ channel.on('connect', () => {
   channel.emit('runner:connected')
 })
 
-
 const dualEvents = 'run:start run:end'.split(' ')
 const socketEvents = 'fixture request history:entries exec domain:change'.split(' ')
 const testEvents = 'test:before:hooks test:after:hooks'.split(' ')
@@ -29,8 +28,12 @@ const runnerEvents = 'viewport config stop url:changed page:loading'.split(' ')
 const rerunEvents = 'runner:restart watched:file:changed'.split(' ')
 
 const localBus = new EventEmitter()
+// when detached, this will be the socket channel
+const reporterBus = new EventEmitter()
 
 export default {
+  reporterBus,
+
   ensureAutomation (connectionInfo) {
     channel.emit('is:automation:connected', connectionInfo, action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
@@ -55,14 +58,14 @@ export default {
 
     driver.on('log', (log) => {
       logs.add(log)
-      channel.emit('reporter:log:add', log.toJSON(), (row) => {
+      reporterBus.emit('reporter:log:add', log.toJSON(), (row) => {
         log.set('row', row)
 
         // TODO: render it calling onRender
       })
 
       log.on('state:changed', () => {
-        channel.emit('reporter:log:state:changed', log.toJSON())
+        reporterBus.emit('reporter:log:state:changed', log.toJSON())
       })
     })
 
@@ -90,14 +93,14 @@ export default {
         if (test.err) {
           test = _.extend({}, test, { err: test.err.toString() })
         }
-        channel.emit(event, test)
+        reporterBus.emit(event, test)
       })
     })
 
     _.each(dualEvents, (event) => {
       driver.on(event, (...args) => {
         localBus.emit(event, ...args)
-        channel.emit(event, ...args)
+        reporterBus.emit(event, ...args)
       })
     })
 
@@ -111,6 +114,10 @@ export default {
 
     driver.on('message', (msg, data, cb) => {
       channel.emit('client:request', msg, data, cb)
+    })
+
+    driver.on('test:end', (result) => {
+      reporterBus.emit('test:results:ready', result)
     })
 
     _.each(runnerEvents, (event) => {
@@ -150,7 +157,7 @@ export default {
     // that Cypress knows not to set any more
     // cookies
     $(window).on('beforeunload', () => {
-      channel.emit('restart:test:run')
+      reporterBus.emit('reporter:restart:test:run')
       this._clearAllCookies()
       this._setUnload()
     })
@@ -167,7 +174,7 @@ export default {
         // driver.skipToRunnable(runnable)
 
         // tell reporter to clear out logs for current runnable
-        channel.emit('reporter:reset:current:runnable:logs')
+        reporterBus.emit('reporter:reset:current:runnable:logs')
       }
 
       driver.run(() => {})
@@ -196,8 +203,8 @@ export default {
 
   _restart () {
     return new Promise((resolve) => {
-      channel.once('reporter:restarted', resolve)
-      channel.emit('reporter:restart:test:run')
+      reporterBus.once('reporter:restarted', resolve)
+      reporterBus.emit('reporter:restart:test:run')
     })
   },
 
