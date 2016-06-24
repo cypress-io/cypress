@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import React from 'react'
-import Tooltip from 'rc-tooltip'
 
 import Agents from './agents'
 import Hooks from './hooks'
@@ -22,9 +21,7 @@ const TestHeader = ({ model }) => (
     <i className='runnable-state fa'></i>
     <span className='runnable-title'>{model.title}</span>
     <div className='runnable-controls'>
-      <Tooltip placement='left' align={{ offset: [0, 0] }} overlay='One or more commands failed'>
-        <i className='fa fa-warning'></i>
-      </Tooltip>
+      <i className='fa fa-warning' title='One or more commands failed'></i>
     </div>
   </span>
 )

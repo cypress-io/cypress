@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import cs from 'classnames'
 import React from 'react'
-import Tooltip from 'rc-tooltip'
 import Markdown from 'markdown-it'
 
 const md = new Markdown()
@@ -18,9 +17,9 @@ const visibleMessage = (model) => {
 }
 
 const Alias = ({ model }) => (
-  <Tooltip placement='top' align={{ offset: [0, 5] }} overlay={`Found an alias for: '${model.referencesAlias}'`}>
-    <span className={`command-alias ${model.aliasType}`}>@{model.referencesAlias}</span>
-  </Tooltip>
+  <span className={`command-alias ${model.aliasType}`} title={`Found an alias for: '${model.referencesAlias}'`}>
+    @{model.referencesAlias}
+  </span>
 )
 
 export default ({ model }) => (
@@ -55,15 +54,13 @@ export default ({ model }) => (
           <span dangerouslySetInnerHTML={{ __html: formattedMessage(model.message) }} />}
       </span>
       <span className='command-controls'>
-        <Tooltip placement='left' align={{ offset: [5, 0] }} overlay={`${model.message} aliased as: '${model.alias}'`}>
-          <span className={`command-alias ${model.aliasType}`}>{model.alias}</span>
-        </Tooltip>
-        <Tooltip placement='left' align={{ offset: [5, 0] }} overlay={visibleMessage(model)}>
-          <i className='command-invisible fa fa-eye-slash'></i>
-        </Tooltip>
-        <Tooltip placement='left' align={{ offset: [5, 0] }} overlay={`${model.numElements} matched elements`}>
-          <span className='command-num-elements'>{model.numElements}</span>
-        </Tooltip>
+        <span className={`command-alias ${model.aliasType}`} title={`${model.message} aliased as: '${model.alias}'`}>
+          {model.alias}
+        </span>
+        <i className='command-invisible fa fa-eye-slash' title={visibleMessage(model)}></i>
+        <span className='command-num-elements' title={`${model.numElements} matched elements`}>
+          {model.numElements}
+        </span>
       </span>
     </div>
   </li>

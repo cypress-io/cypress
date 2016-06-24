@@ -1,7 +1,6 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import React from 'react'
-import Tooltip from 'rc-tooltip'
 import Collapsible from '../collapsible/collapsible'
 
 const formatUrl = (url) => url
@@ -12,9 +11,9 @@ const Route = ({ model }) => (
     <td>{formatUrl(model.url)}</td>
     <td>{model.isStubbed ? 'Yes' : 'No'}</td>
     <td>
-      <Tooltip placement='top' align={{ offset: [0, 5] }} overlay={`Aliased this route as: '${model.alias}'`}>
-        <span className='route-alias'>{model.alias}</span>
-      </Tooltip>
+      <span className='route-alias' title={`Aliased this route as: '${model.alias}'`}>
+        {model.alias}
+      </span>
     </td>
     <td className='response-count'>{model.numResponses || '-'}</td>
   </tr>
@@ -48,7 +47,7 @@ const Routes = ({ model }) => (
                   <th>Stubbed</th>
                   <th>Alias</th>
                   <th>
-                    <Tooltip placement='left' align={{ offset: [5, 0] }} overlay='Number of responses which matched this route'><span>#</span></Tooltip>
+                    <span title='Number of responses which matched this route'>#</span>
                   </th>
                 </tr>
               </thead>

@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react'
 import React from 'react'
-import Tooltip from 'rc-tooltip'
 
 import statsStore from './stats-store'
 
@@ -15,15 +14,9 @@ export default observer(() => {
 
   return (
     <div className='controls'>
-      <Tooltip
-        placement='left'
-        overlay={config.label}
-        align={{ offset: [5, 0] }}
-      >
-        <button>
-          <i className={`fa fa-${config.icon}`}></i>
-        </button>
-      </Tooltip>
+      <button title={config.label}>
+        <i className={`fa fa-${config.icon}`}></i>
+      </button>
     </div>
   )
 })
