@@ -9,7 +9,7 @@ import f from '../__fixtures__'
 
 export default class extends Component {
   componentWillMount () {
-    events.listen()
+    events.listen(this.props.runner)
   }
 
   render () {

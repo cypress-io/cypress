@@ -1,46 +1,45 @@
 import { action } from 'mobx'
-import adapter from './adapter'
 import testsStore from '../runnables/tests-store'
 import statsStore from '../header/stats-store'
 
 export default {
-  listen () {
-    adapter.on('reporter:log:add', action('log:add', (log) => {
+  listen (runner) {
+    runner.on('reporter:log:add', action('log:add', (log) => {
       testsStore.add(log)
     }))
 
-    adapter.on('reporter:log:state:changed', action('log:update', (log) => {
+    runner.on('reporter:log:state:changed', action('log:update', (log) => {
       testsStore.update(log)
     }))
 
-    adapter.on('reporter:reset:current:runnable:logs', action('reset:logs', () => {
+    runner.on('reporter:reset:current:runnable:logs', action('reset:logs', () => {
       testsStore.reset()
     }))
 
     // 'reporter:restarted', cb
     // 'reporter:restart:test:run'
 
-    adapter.on('before:run', action('before:run', () => {
+    runner.on('run:start', action('run:start', () => {
       statsStore.startRunning()
     }))
 
-    adapter.on('suite:start', action('suite:start', () => {
+    runner.on('test:before:hooks', action('test:before:hooks', () => {
       statsStore.startCounting()
     }))
 
-    adapter.on('after:run', action('after:run', () => {
+    runner.on('run:end', action('run:end', () => {
       statsStore.stop()
     }))
 
-    adapter.on('test:end', action('test:end', () => {
+    runner.on('test:after:hooks', action('test:after:hooks', () => {
       statsStore.updateTime()
     }))
 
-    adapter.on('test:results:ready', action('test:results:ready', ({ state }) => {
+    runner.on('test:results:ready', action('test:results:ready', ({ state }) => {
       statsStore.updateCount(state)
     }))
 
-    adapter.on('restart:test:run', action('restart:test:run', () => {
+    runner.on('reporter:restart:test:run', action('restart:test:run', () => {
       statsStore.reset()
     }))
   },
