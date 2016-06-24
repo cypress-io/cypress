@@ -6,8 +6,6 @@
   "scripts": {
     "start": "zunder watch",
     "server": "http-server ./dist -p 6060",
-    "build": "gulp build",
-    "dev": "gulp dev",
     "test": "npm run server & npm run dev",
     "postinstall": "bower i",
     "prerelease": "npm run build",
@@ -44,6 +42,7 @@
     "babel-eslint": "^6.0.4",
     "bower": "^1.7.2",
     "eslint": "^2.12.0",
+    "eslint-plugin-react": "^5.2.2",
     "lodash": "^4.0.0",
     "zunder": "^3.3.1"
   }
