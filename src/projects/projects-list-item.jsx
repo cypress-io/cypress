@@ -6,8 +6,15 @@ class Project extends Component {
   render () {
     let project = this.props.project
 
+    let loadingClassName
+
+    if (project.isLoading) {
+      loadingClassName = 'loading'
+    }
+
     return (
       <Link
+        className={`project ${loadingClassName}`}
         to={`/projects/${project.id}`}
         >
         <div className="row-column-wrapper">
