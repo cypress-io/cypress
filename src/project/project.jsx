@@ -28,11 +28,15 @@ const NoBrowsers = () => (
 @withRouter
 @observer
 class Project extends Component {
-  componentWillMount () {
-    this.project = _.find(projectsStore.projects, { id: this.props.params.id })
+  constructor (props) {
+    super(props)
+
+    this.project = _.find(projectsStore.projects, { id: props.params.id })
+
     if (!this.project) {
-      return this.props.router.push('/projects')
+      return props.router.push('/projects')
     }
+
     openProject(this.project)
   }
 

@@ -13,7 +13,9 @@ import state from '../lib/state'
 @withRouter
 @observer
 export default class Application extends Component {
-  componentWillMount () {
+  constructor (props) {
+    super(props)
+
     App.ipc('get:current:user')
     .then(action('get:current:user', (user) => {
       state.setUser(user)
