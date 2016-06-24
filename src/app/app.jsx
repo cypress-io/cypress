@@ -46,9 +46,9 @@ export default class App extends Component {
     // for some reason the height: 100% div is needed
     // or the header disappears randomly
     return (
-      <div className='container'>
+      <div>
         <Reporter />
-        <div style={{ height: '100%' }}>
+        <div className='runner' style={{ height: '100%' }}>
           <Header {...this.props} />
           <Iframes {...this.props} />
           <Message {...this.props} />

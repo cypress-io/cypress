@@ -1,54 +1,61 @@
-.container {
-  bottom: 0;
-  box-shadow: inset 0 0 10px #555;
-  left: 0;
-  overflow: hidden;
-  position: absolute;
-  right: 0;
-  top: 0;
-
-  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjOWU5ZTllIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiM4ODgiIHN0cm9rZS13aWR0aD0iMSI+PC9wYXRoPgo8L3N2Zz4=");
+.reporter {
+  right: auto;
+  width: 400px;
 }
 
-.automation-string {
-  display: none;
-}
+.runner {
+  & {
+    bottom: 0;
+    box-shadow: inset 0 0 10px #555;
+    left: 400px;
+    overflow: hidden;
+    position: absolute;
+    right: 0;
+    top: 0;
 
-.automation-message {
-  padding: 150px 50px 20px;
-  text-align: center;
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjOWU5ZTllIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiM4ODgiIHN0cm9rZS13aWR0aD0iMSI+PC9wYXRoPgo8L3N2Zz4=");
+  }
 
-  p {
-    color: #333;
-    font-size: 200%;
+  .automation-string {
+    display: none;
+  }
 
-    &.muted {
-      color: #aaa;
-      font-size: 120%;
+  .automation-message {
+    padding: 150px 50px 20px;
+    text-align: center;
+
+    p {
+      color: #333;
+      font-size: 200%;
+
+      &.muted {
+        color: #aaa;
+        font-size: 120%;
+      }
+    }
+
+    button {
+      margin: 20px 0 0;
+    }
+
+    .dropdown button i,
+    .dropdown-menu li i {
+      margin-right: 5px;
     }
   }
 
-  button {
-    margin: 20px 0 0;
+  .automation-disconnected button {
+    font-size: 18px;
+    line-height: 1.3;
+    padding: 10px 16px;
   }
 
-  .dropdown button i,
-  .dropdown-menu li i {
-    margin-right: 5px;
-  }
-}
+  .helper-line {
+    margin-top: 50px;
+    text-align: center;
 
-.automation-disconnected button {
-  font-size: 18px;
-  line-height: 1.3;
-  padding: 10px 16px;
-}
-
-.helper-line {
-  margin-top: 50px;
-  text-align: center;
-
-  i {
-    margin-right: 5px;
+    i {
+      margin-right: 5px;
+    }
   }
 }

@@ -1,24 +1,26 @@
-.size-container {
-  width: 100%;
-  height: 100%;
-  transform: scale(1);
-  transform-origin: 50% 0;
-}
+.runner {
+  .size-container {
+    width: 100%;
+    height: 100%;
+    transform: scale(1);
+    transform-origin: 50% 0;
+  }
 
-.aut-iframe {
-  background-color: #fff;
-  box-shadow: 0 6px 10px #555;
-  border: none;
-  display: block;
-  height: 100%;
-  overflow: auto;
-  width: 100%;
-}
+  .aut-iframe {
+    background-color: #fff;
+    box-shadow: 0 6px 10px #555;
+    border: none;
+    display: block;
+    height: 100%;
+    overflow: auto;
+    width: 100%;
+  }
 
-.spec-iframe {
-  border: none;
-  height: 0;
-  position: absolute;
-  visibility: hidden;
-  width: 0;
+  .spec-iframe {
+    border: none;
+    height: 0;
+    position: absolute;
+    visibility: hidden;
+    width: 0;
+  }
 }
