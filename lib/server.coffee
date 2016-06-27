@@ -15,6 +15,7 @@ errors       = require("./errors")
 logger       = require("./logger")
 Socket       = require("./socket")
 
+fullyQualifiedRe       = /^https?:\/\//
 localHostOrIpAddressRe = /localhost|\.local|^[\d\.]+$/
 
 setProxiedUrl = (req) ->
@@ -203,12 +204,11 @@ class Server
     log = (type, url) ->
       logger.log("Setting #{type}", value: url)
 
-    ## TODO: instead of <root> coming to us
-    ## we need to handle situations where
-    ## the url isn't fully qualified and
-    ## then force it to be <root>. therefore
-    ## <root> will never be exposed to the end user
-    if fullyQualifiedUrl is "<root>"
+    ## if this isn't a fully qualified url
+    ## or if this came to us as <root> in our tests
+    ## then we know to go back to our default domain
+    ## which is the localhost server
+    if not fullyQualifiedRe.test(fullyQualifiedUrl) or fullyQualifiedUrl is "<root>"
       @_remoteOrigin = "<root>"
       @_remoteHostAndPort = null
 

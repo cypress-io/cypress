@@ -70,7 +70,7 @@ describe "Routes", ->
           @server = server
 
           if initialUrl
-            @server._onDomainChange(initialUrl)
+            @server._onDomainSet(initialUrl)
 
           @srv = server.getHttpServer()
 
@@ -90,13 +90,25 @@ describe "Routes", ->
     @server.close()
 
   context "GET /", ->
-    it "redirects to config.clientRoute without a _remoteOrigin", ->
+    beforeEach ->
       @setup()
-      .then =>
-        @rp("http://localhost:2020/")
-        .then (res) ->
-          expect(res.statusCode).to.eq(302)
-          expect(res.headers.location).to.eq "/__/"
+
+    it "redirects to config.clientRoute without a _remoteOrigin", ->
+      @rp("http://localhost:2020/")
+      .then (res) ->
+        expect(res.statusCode).to.eq(302)
+        expect(res.headers.location).to.eq "/__/"
+
+    ## this tests a situation where we open our browser in another browser
+    ## without proxy mode set
+    it "redirects to config.clientRoute without a _remoteOrigin and without a proxy", ->
+      @rp({
+        url: "http://localhost:2020/"
+        proxy: null
+      })
+      .then (res) ->
+        expect(res.statusCode).to.eq(302)
+        expect(res.headers.location).to.eq "/__/"
 
     it "does not redirect with _remoteOrigin set", ->
       @setup("http://www.github.com")
@@ -1493,7 +1505,7 @@ describe "Routes", ->
       beforeEach ->
         Fixtures.scaffold()
 
-        @setup("<root>", {
+        @setup("/index.html", {
           projectRoot: Fixtures.projectPath("no-server")
           config: {
             fileServerFolder: "dev"
