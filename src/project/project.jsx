@@ -41,6 +41,8 @@ class Project extends Component {
   }
 
   render () {
+    if (this.project.isLoading) return null
+
     if (!this.project.browsers.length) return <NoBrowsers />
 
     return (

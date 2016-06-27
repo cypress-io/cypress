@@ -26,10 +26,15 @@ class Projects {
     return project
   }
 
+  @action loading (bool) {
+    this.isLoading = bool
+  }
+
   @action setProjects (projects) {
     this.projects = _.map(projects, (project) => (
       new Project(project)
     ))
+    this.isLoading = false
     this.isLoaded = true
   }
 

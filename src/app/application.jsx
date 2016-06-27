@@ -40,12 +40,8 @@ export default class Application extends Component {
     return !!(state.user) && !!(state.user.session_token)
   }
 
-  _projectsLoaded () {
-    return projectsStore.isLoaded
-  }
-
   render () {
-    if (this._userLoaded() && this._projectsLoaded()) {
+    if (this._userLoaded() && projectsStore.isLoaded) {
       return (
         <Layout params={this.props.params}>
           {this.props.children}

@@ -145,7 +145,7 @@ describe "Projects List", ->
           .then ->
             expect(@App.ipc).to.be.calledWith("add:project")
 
-      it "displays new project as chosen in dropdown", ->
+      it "displays new project in list", ->
         cy
           .then ->
             @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-Fake-Project")

@@ -3,6 +3,7 @@ import App from '../lib/app'
 import projectsStore from '../projects/projects-store'
 
 const getProjects = () => {
+  projectsStore.loading(true)
   App.ipc('get:project:paths').then((projects) => {
     projectsStore.setProjects(projects)
   })
@@ -32,10 +33,10 @@ const openProject = (project) => {
   project.loading(true)
   return App.ipc('open:project', project.path)
   .then((config) => {
-    project.loading(false)
     project.setBrowsers(config.browsers)
   })
   .then(() => {
+    project.loading(false)
     // create a promise which listens for
     // project settings change events
     // and updates our project model

@@ -7,7 +7,6 @@ export default class Project {
   @observable path = ''
   @observable isChosen = false
   @observable isLoading = false
-  @observable isLoaded = false
   @observable browsers = []
   @observable error = null
 
@@ -50,7 +49,7 @@ export default class Project {
     this.isLoading = bool
   }
 
-  setBrowsers (browsers) {
+  @action setBrowsers (browsers) {
     if (browsers.length) {
       this.browsers = _.map(browsers, (browser) => {
         return new Browser(browser)
