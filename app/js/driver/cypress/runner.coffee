@@ -419,7 +419,7 @@ $Cypress.Runner = do ($Cypress, _) ->
 
         waitForHooksToResolve = (event, test = {}, cb = ->) ->
           ## coerce into an array
-          hooks = [].concat Cypress.invoke(event, _this.wrap(test))
+          hooks = [].concat Cypress.invoke(event, _this.wrap(test), test)
 
           hooks = _.filter hooks, (r) ->
             ## get us out only promises

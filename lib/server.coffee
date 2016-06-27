@@ -199,29 +199,44 @@ class Server
     ## does the parsedUrl match the parsedHost?
     _.isEqual(parsedUrl, @_remoteHostAndPort)
 
-  _onDomainChange: (fullyQualifiedUrl) =>
-    ## TODO: handle <root> here
+  _onDomainSet: (fullyQualifiedUrl) =>
+    log = (type, url) ->
+      logger.log("Setting #{type}", value: url)
+
+    ## TODO: instead of <root> coming to us
+    ## we need to handle situations where
+    ## the url isn't fully qualified and
+    ## then force it to be <root>. therefore
+    ## <root> will never be exposed to the end user
     if fullyQualifiedUrl is "<root>"
       @_remoteOrigin = "<root>"
       @_remoteHostAndPort = null
 
-      return
+      log("remoteOrigin", @_remoteOrigin)
+      log("remoteHostAndPort", @_remoteHostAndPort)
 
-    parsed = url.parse(fullyQualifiedUrl)
+      "http://localhost:#{@_server.address().port}"
+    else
+      parsed = url.parse(fullyQualifiedUrl)
 
-    port = parsed.port ? if parsed.protocol is "https:" then 443 else 80
+      port = parsed.port ? if parsed.protocol is "https:" then 443 else 80
 
-    parsed.hash     = null
-    parsed.search   = null
-    parsed.query    = null
-    parsed.path     = null
-    parsed.pathname = null
+      parsed.hash     = null
+      parsed.search   = null
+      parsed.query    = null
+      parsed.path     = null
+      parsed.pathname = null
 
-    @_remoteOrigin = url.format(parsed)
+      @_remoteOrigin = url.format(parsed)
 
-    ## set an object with port, tld, and domain properties
-    ## as the remoteHostAndPort
-    @_remoteHostAndPort = @_parseUrl([parsed.hostname, port].join(":"))
+      ## set an object with port, tld, and domain properties
+      ## as the remoteHostAndPort
+      @_remoteHostAndPort = @_parseUrl([parsed.hostname, port].join(":"))
+
+      log("remoteOrigin", @_remoteOrigin)
+      log("remoteHostAndPort", @_remoteHostAndPort)
+
+      @_remoteOrigin
 
   _callRequestListeners: (server, listeners, req, res) ->
     for listener in listeners
@@ -290,11 +305,11 @@ class Server
     @_socket and @_socket.end()
 
   startWebsockets: (watchers, config, options = {}) ->
-    options.onDomainChange = =>
-      @_onDomainChange.apply(@, arguments)
+    options.onDomainSet = =>
+      @_onDomainSet.apply(@, arguments)
 
     @_socket = Socket()
-    @_socket.startListening(@_server, watchers, config, options = {})
+    @_socket.startListening(@_server, watchers, config, options)
     @_normalizeReqUrl(@_server)
     # handleListeners(@_server)
 

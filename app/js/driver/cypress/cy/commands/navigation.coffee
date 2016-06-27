@@ -2,6 +2,13 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
   commandCausingLoading = /^(visit|reload)$/
 
+  title = null
+  fn    = null
+
+  Cypress.on "test:before:hooks", (test, runnable) ->
+    title = runnable.title
+    fn    = runnable.fn?.toString()
+
   overrideRemoteLocationGetters = (cy, contentWindow) ->
     navigated = (attr, args) ->
       cy.urlChanged(null, {
@@ -307,8 +314,31 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
               resolve(win)
 
-          ## any existing global variables will get nuked after it navigates
-          $remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
+          new Promise (resolve) ->
+            Cypress.trigger("domain:set", url, resolve)
+          .then (origin) ->
+            ## hold onto our existing url
+            existing = new Uri(window.location.href)
+
+            ## if the origin currently matches
+            ## then go ahead and change the iframe's src
+            ## and we're good to go
+            if origin is existing.origin()
+              $remoteIframe.prop "src", url
+            else
+              ## tell our backend we're changing domains
+              new Promise (resolve) ->
+                Cypress.trigger("domain:change", title, fn, resolve)
+              .then ->
+                ## and now we must change the url to be the new
+                ## origin but include the test that we're currently on
+                newUri = new Uri(origin)
+                newUri
+                .setPath(existing.path())
+                .setQuery(existing.query())
+                .setAnchor(existing.anchor())
+
+                window.location.replace(newUri.toString())
 
         ## if we're visiting a page and we're not currently
         ## on about:blank then we need to nuke the window

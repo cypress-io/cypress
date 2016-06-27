@@ -16,6 +16,9 @@ errors        = require("./errors")
 logger        = require("./logger")
 automation    = require("./automation")
 
+runnableTitle = null
+runnableFn    = null
+
 retry = (fn) ->
   Promise.delay(25).then(fn)
 
@@ -124,9 +127,9 @@ class Socket
       onAutomationRequest: null
       onMocha: ->
       onConnect: ->
+      onDomainSet: ->
       onChromiumRun: ->
       onIsNewProject: ->
-      onDomainChange: ->
       onReloadBrowser: ->
       checkForAppErrors: ->
 
@@ -277,6 +280,23 @@ class Socket
         .then ->
           cb(true)
         .catch Promise.TimeoutError, (err) ->
+          cb(false)
+
+      socket.on "domain:set", (url, cb) ->
+        console.log "domain:set", url, options.onDomainSet.toString()
+        cb(options.onDomainSet(url))
+
+      socket.on "domain:change", (t, f, cb) ->
+        runnableTitle = t
+        runnableFn    = f
+
+        cb()
+
+      socket.on "get:current:runnable", (cb) ->
+        if (t = runnableTitle) and (f = runnableFn)
+          runnableTitle = runnableFn = null
+          cb({title: t, fn: f})
+        else
           cb(false)
 
   end: ->
