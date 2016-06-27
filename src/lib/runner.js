@@ -53,7 +53,7 @@ export default {
     channel.emit('watch:test:file', specSrc)
 
     driver.on('initialized', ({ runner }) => {
-      channel.emit('runnables:ready', runner.getNormalizedRunnables())
+      reporterBus.emit('runnables:ready', runner.getNormalizedRunnables())
     })
 
     driver.on('log', (log) => {
@@ -114,10 +114,6 @@ export default {
 
     driver.on('message', (msg, data, cb) => {
       channel.emit('client:request', msg, data, cb)
-    })
-
-    driver.on('test:end', (result) => {
-      reporterBus.emit('test:results:ready', result)
     })
 
     _.each(runnerEvents, (event) => {
