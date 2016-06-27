@@ -14,11 +14,13 @@
 
       &.project {
         &.loading {
+          pointer-events: none;
+
           &:hover {
             cursor: wait;
             background-color: #fff;
           }
-          .project-name, .project-path {
+          .project-name, .project-path, i {
             color: #ccc;
           }
         }

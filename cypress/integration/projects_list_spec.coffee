@@ -161,10 +161,10 @@ describe "Projects List", ->
             expect(@App.ipc).to.be.calledWith("add:project")
           .get(".empty").should("not.exist")
 
-      it.skip "displays project loading with spinner", ->
+      it "displays project loading", ->
         @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-Fake-Project")
 
-        cy.get(".project.loading").find(".fa-spin").should("be.visible")
+        cy.get(".project.loading").should("have.css", "pointer-events", "none")
 
 
 
