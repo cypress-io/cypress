@@ -8,6 +8,7 @@ import Promise from 'bluebird'
 import { Link } from 'react-router'
 
 import projectsStore from '../projects/projects-store'
+import { closeProject } from '../projects/projects-api'
 
 @observer
 export default class Nav extends Component {
@@ -59,7 +60,10 @@ export default class Nav extends Component {
   leftNavButton = () => {
     if (this.props.params.id) {
       return (
-        <Link to="/projects">
+        <Link
+          to="/projects"
+          onClick={this._closeProject}
+          >
           <i className="fa fa-chevron-left"></i>{' '}
           Back to Projects
         </Link>
@@ -99,6 +103,10 @@ export default class Nav extends Component {
       state.user = null
       App.ipc('clear:github:cookies')
     }))
+  }
+
+  _closeProject () {
+    closeProject()
   }
 
   _addProject = () => {
