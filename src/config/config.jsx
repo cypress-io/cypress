@@ -2,7 +2,55 @@ import React from 'react'
 
 export default () => {
   return (
-    <div>config</div>
+    <div id='config'>
+      <h5>Configuration</h5>
+      <pre className='config-vars'>
+        {`{`}
+          <div className='line'>
+            <span className='key'>port</span>
+            <span className='colon'>:</span>{' '}
+            <span className='default'>2020</span>
+            <span className='comma'>,</span>
+          </div>
+          <div className='line'>
+            <span className='key'>reporter</span>
+            <span className='colon'>:</span>{' '}
+            <span className='default'>'spec'</span>
+            <span className='comma'>,</span>
+          </div>
+          <div className='line'>
+            <span className='key'>baseUrl</span>
+            <span className='colon'>:</span>{' '}
+            <span className='default'>'http://localhost:8000'</span>
+            <span className='comma'>,</span>
+          </div>
+          <div className='line'>
+            <span className='key'>port</span>
+            <span className='colon'>:</span>{' '}
+            <span className='default'>2020</span>
+            <span className='comma'>,</span>
+          </div>
+          <div className='line'>
+            <span className='key'>port</span>
+            <span className='colon'>:</span>{' '}
+            <span className='default'>2020</span>
+            <span className='comma'>,</span>
+          </div>
+          <div className='line'>
+            <span className='key'>port</span>
+            <span className='colon'>:</span>{' '}
+            <span className='default'>2020</span>
+            <span className='comma'>,</span>
+          </div>
+          <div className='line'>
+            <span className='key'>port</span>
+            <span className='colon'>:</span>{' '}
+            <span className='default'>2020</span>
+            <span className='comma'>,</span>
+          </div>
+        {`}`}
+      </pre>
+    </div>
 
     // getSpan: (key, obj, comma) ->
     //   "<div class='line'><span class='key'>#{key}</span><span class='colon'>:</span> <span class='#{obj.from}' data-toggle='tooltip' title='\"#{obj.from}\"'>#{@getString(obj.value)}#{obj.value}#{@getString(obj.value)}</span>#{@getComma(comma)}</div>"
