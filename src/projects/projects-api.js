@@ -34,6 +34,7 @@ const openProject = (project) => {
   return App.ipc('open:project', project.path)
   .then((config) => {
     project.setBrowsers(config.browsers)
+    project.setResolvedConfig(config.resolved)
   })
   .then(() => {
     project.loading(false)
@@ -60,8 +61,7 @@ const openProject = (project) => {
   })
   .catch(action('project:err', (err) => {
     project.loading(false)
-    project.err = err
-    // project.setError(err)
+    project.setError(err)
   }))
 }
 

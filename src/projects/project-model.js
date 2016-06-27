@@ -8,6 +8,7 @@ export default class Project {
   @observable isChosen = false
   @observable isLoading = false
   @observable browsers = []
+  @observable resolvedConfig = {}
   @observable error = null
 
   constructor ({ id, path, isLoading }) {
@@ -63,6 +64,14 @@ export default class Project {
       browser.isChosen = false
     })
     browser.isChosen = true
+  }
+
+  @action setResolvedConfig (resolved) {
+    this.resolved = resolved
+  }
+
+  @action setError (err) {
+    this.error = err
   }
 
   setChosenBrowserByName (name) {
