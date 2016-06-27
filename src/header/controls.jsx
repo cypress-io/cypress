@@ -1,10 +1,8 @@
 import { observer } from 'mobx-react'
 import React from 'react'
 
-import statsStore from './stats-store'
-
-export default observer(() => {
-  const config = statsStore.isRunning ? {
+const Controls = observer(({ stats }) => {
+  const config = stats.isRunning ? {
     label: 'Stop Running',
     icon: 'stop',
   } : {
@@ -20,3 +18,5 @@ export default observer(() => {
     </div>
   )
 })
+
+export default Controls

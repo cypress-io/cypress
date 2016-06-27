@@ -1,11 +1,12 @@
 import cs from 'classnames'
 import _ from 'lodash'
+import { observer } from 'mobx-react'
 import React from 'react'
 import Collapsible from '../collapsible/collapsible'
 
 const formatUrl = (url) => url
 
-const Route = ({ model }) => (
+const Route = observer(({ model }) => (
   <tr className={cs({ 'no-responses': !model.numResponses })}>
     <td>{model.method}</td>
     <td>{formatUrl(model.url)}</td>
@@ -17,15 +18,15 @@ const Route = ({ model }) => (
     </td>
     <td className='response-count'>{model.numResponses || '-'}</td>
   </tr>
-)
+))
 
-const RoutesList = ({ routes }) => (
+const RoutesList = observer(({ routes }) => (
   <tbody>
     {_.map(routes, (route) => <Route key={route.id} model={route} />)}
   </tbody>
-)
+))
 
-const Routes = ({ model }) => (
+const Routes = observer(({ model }) => (
   <div
     className={cs('runnable-routes-region', {
       'no-routes': !model.routes.length,
@@ -58,6 +59,6 @@ const Routes = ({ model }) => (
       </ul>
     </div>
   </div>
-)
+))
 
 export default Routes

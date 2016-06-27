@@ -47,7 +47,7 @@ class StatsStore {
   }
 
   updateCount (type) {
-    ++this[type]
+    this[type] = this[type] + 1
   }
 
   stop () {

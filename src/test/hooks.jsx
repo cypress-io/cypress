@@ -1,9 +1,10 @@
 import _ from 'lodash'
+import { observer } from 'mobx-react'
 import React from 'react'
 import Command from './command'
 import Collapsible from '../collapsible/collapsible'
 
-const Hook = ({ model }) => (
+const Hook = observer(({ model }) => (
   <li className='hook-item'>
     <Collapsible
       header={model.name}
@@ -15,12 +16,12 @@ const Hook = ({ model }) => (
       </ul>
     </Collapsible>
   </li>
-)
+))
 
-const Hooks = ({ model }) => (
+const Hooks = observer(({ model }) => (
   <ul className='hooks-container'>
     {_.map(model.hooks, (hook) => <Hook key={hook.id} model={hook} />)}
   </ul>
-)
+))
 
 export default Hooks

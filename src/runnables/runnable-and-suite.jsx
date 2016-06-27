@@ -1,14 +1,16 @@
 import cs from 'classnames'
 import _ from 'lodash'
+import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+
 import Test from '../test/test'
 import Collapsible from '../collapsible/collapsible'
 
-const SuiteHeader = ({ model }) => (
+const SuiteHeader = observer(({ model }) => (
   <span className='runnable-title'>{model.title}</span>
-)
+))
 
-const Suite = ({ model }) => (
+const Suite = observer(({ model }) => (
   <Collapsible
     header={<SuiteHeader model={model} />}
     headerClass='runnable-wrapper'
@@ -20,8 +22,9 @@ const Suite = ({ model }) => (
       {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
     </ul>
   </Collapsible>
-)
+))
 
+@observer
 class Runnable extends Component {
   constructor (props) {
     super(props)

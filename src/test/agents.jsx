@@ -1,23 +1,24 @@
 import cs from 'classnames'
 import _ from 'lodash'
+import { observer } from 'mobx-react'
 import React from 'react'
 import Collapsible from '../collapsible/collapsible'
 
-const Agent = ({ model }) => (
+const Agent = observer(({ model }) => (
   <tr className={cs({ 'no-calls': !model.callCount })}>
     <td>{model.type}</td>
     <td>{model.functionName}</td>
     <td className='call-count'>{model.callCount || '-'}</td>
   </tr>
-)
+))
 
-const AgentsList = ({ model }) => (
+const AgentsList = observer(({ model }) => (
   <tbody>
     {_.map(model.agents, (agent) => <Agent key={agent.id} model={agent} />)}
   </tbody>
-)
+))
 
-const Agents = ({ model }) => (
+const Agents = observer(({ model }) => (
   <div
     className={cs('runnable-agents-region', {
       'no-agents': !model.agents.length,
@@ -46,6 +47,6 @@ const Agents = ({ model }) => (
       </ul>
     </div>
   </div>
-)
+))
 
 export default Agents

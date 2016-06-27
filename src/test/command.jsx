@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import cs from 'classnames'
+import { observer } from 'mobx-react'
 import React from 'react'
 import Markdown from 'markdown-it'
 
@@ -16,13 +17,13 @@ const visibleMessage = (model) => {
     'This element is not visible.'
 }
 
-const Alias = ({ model }) => (
+const Alias = observer(({ model }) => (
   <span className={`command-alias ${model.aliasType}`} title={`Found an alias for: '${model.referencesAlias}'`}>
     @{model.referencesAlias}
   </span>
-)
+))
 
-export default ({ model }) => (
+const Command = observer(({ model }) => (
   <li
     className={cs(
       `command-type-${model.type}`,
@@ -64,4 +65,6 @@ export default ({ model }) => (
       </span>
     </div>
   </li>
-)
+))
+
+export default Command

@@ -1,29 +1,48 @@
+import _ from 'lodash'
 import { observable } from 'mobx'
+import Log from './log-model'
 
-export default class Command {
-  @observable alias = null
-  @observable aliasType = null
-  @observable id
-  @observable name
-  @observable message
-  @observable number
-  @observable event = false
-  @observable type
-  @observable indent = 0
-  @observable state
-  @observable referencesAlias = null
+export default class Command extends Log {
+  @observable actual
+  @observable expected
+  @observable passed
+  @observable selector
+  // @observable $el
+  @observable highlightAttr
+  @observable numElements
+  @observable visible
 
   constructor (props) {
-    this.alias = props.alias
-    this.aliasType = props.aliasType
-    this.id = props.id
-    this.name = props.name
-    this.message = props.message
-    this.number = props.number
-    this.event = props.event
-    this.type = props.type
-    this.indent = props.indent
-    this.state = props.state
-    this.referencesAlias = props.referencesAlias
+    super(props)
+    this._setProps(props)
+  }
+
+  update (props) {
+    super.update(props)
+    this._setProps(props)
+  }
+
+  _setProps (props) {
+    this.actual = props.actual
+    this.expected = props.expected
+    this.passed = props.passed
+    this.selector = props.selector
+    // this.$el = props.$el
+    this.highlightAttr = props.highlightAttr
+    this.numElements = props.numElements
+    this.visible = props.visible
+  }
+
+  serialize () {
+    return _.extend(super.serialize(), {
+      actual: this.actual,
+      expected: this.expected,
+      passed: this.passed,
+      selector: this.selector,
+      // el: this.$el,
+      highlightAttr: this.highlightAttr,
+      numElements: this.numElements,
+      visible: this.visible,
+    })
   }
 }
