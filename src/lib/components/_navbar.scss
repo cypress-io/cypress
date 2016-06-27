@@ -1,9 +1,16 @@
 .navbar-default {
   background-color:#dfe2e4;
+
   .navbar-nav>li>a {
     font-size: 12px;
     color: #444;
+
+    &.active {
+      background-color: #cdd0d4;
+      color: #333;
+    }
   }
+
 }
 
 .navbar .container-fluid {

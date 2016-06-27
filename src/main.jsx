@@ -10,6 +10,7 @@ import Login from './login/login'
 import Projects from './projects/projects-list'
 import Project from './project/project'
 import SpecsList from './specs/specs-list'
+import Config from './config/config'
 
 useStrict(true)
 
@@ -42,10 +43,8 @@ App.start = () => {
           <Route path='/projects' component={Projects} />
           <Route path='/projects/:id' component={Project}>
             <IndexRedirect to='specs' />
+            <Route path='config' component={Config} />
             <Route path='specs' component={SpecsList} />
-            {
-            // <Route path='config' component={Config} />
-            }
           </Route>
           <Route path='/login' component={Login} />
         </Route>

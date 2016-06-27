@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Dropdown from '../dropdown/dropdown'
+import { Link } from 'react-router'
 
 @observer
 export default class ProjectNav extends Component {
@@ -13,16 +14,22 @@ export default class ProjectNav extends Component {
           <div className='collapse navbar-collapse'>
             <ul className='nav navbar-nav'>
               <li>
-                <a href='#'>
+                <Link
+                  to={`/projects/${project.id}/specs`}
+                  activeClassName="active"
+                  >
                   <i className='fa fa-code'></i>{' '}
                   Tests
-                </a>
+                </Link>
               </li>
               <li>
-                <a href='#'>
+                <Link
+                  to={`/projects/${project.id}/config`}
+                  activeClassName="active"
+                  >
                   <i className='fa fa-cog'></i>{' '}
                   Config
-                </a>
+                </Link>
               </li>
             </ul>
             <ul className='nav navbar-nav navbar-right'>

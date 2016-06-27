@@ -36,42 +36,31 @@ describe "Projects Nav", ->
         .get(".navbar-default")
 
     describe "default page", ->
-      it.skip "displays 'tests' nav as active", ->
+      it "displays 'tests' nav as active", ->
         cy
-          .get(".navbar-default").contains("Tests")
+          .get(".navbar-default").contains("a", "Tests")
             .should("have.class", "active")
 
       it "displays 'tests' page", ->
         cy
           .contains("Integration")
 
-    describe.skip "builds page", ->
+    describe "config page", ->
       beforeEach ->
         cy
           .get(".navbar-default")
-            .contains("Builds").as("buildsNav").click()
+            .contains("a", "Config").as("configNav").click()
 
-      it "highlights builds on click", ->
-        cy
-          .get("@buildsNav")
-            .should("have.class", "active")
-
-      it "displays builds page", ->
-        cy
-          .contains("h4", "Builds")
-
-    describe.skip "config page", ->
-      beforeEach ->
-        cy
-          .get(".navbar-default")
-            .contains("Config").as("configNav").click()
-
-      it "highlights builds on click", ->
+      it.skip "highlights config on click", ->
         cy
           .get("@configNav")
             .should("have.class", "active")
 
-      it "displays builds page", ->
+      it "navigates to config url", ->
+        cy
+          .location().its("hash").should("include", "config")
+
+      it "displays config page", ->
         cy
           .contains("h4", "Config")
 
@@ -222,23 +211,15 @@ describe "Projects Nav", ->
       cy.contains("Back to Projects").click().then ->
         expect(@App.ipc).to.be.calledWith("close:project")
 
-    # it "displays projects nav", ->
-    #   cy
-    #     .get(".empty").should("not.be.visible")
-    #     .get(".navbar-default")
+    describe "click on diff project", ->
+      beforeEach ->
+        cy
+          .contains("Back to Projects").click()
+          .get(".projects-list a")
+            .contains("project1").click().then ->
+              @ipc.handle("open:project", null, @config)
 
-    # context "browsers dropdown", ->
-    #   beforeEach ->
-    #     @config = {
-    #       clientUrl: "http://localhost:2020",
-    #       clientUrlDisplay: "http://localhost:2020"
-    #     }
-
-    #     cy
-    #       .fixture("browsers").then (@browsers) ->
-    #         @config.browsers = @browsers
-    #         @ipc.handle("close:project", null, {})
-    #         @ipc.handle("open:project", null, @config)
-
-    #   it "lists browsers", ->
-    #     cy.get(".browsers-list")
+      it "displays projects nav", ->
+        cy
+          .get(".empty").should("not.be.visible")
+          .get(".navbar-default")
