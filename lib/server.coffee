@@ -27,6 +27,7 @@ setProxiedUrl = (req) ->
   ## how browsers would normally send
   ## use their url
   req.proxiedUrl = req.url
+  logger.info "Setting proxied url", proxiedUrl: req.proxiedUrl
 
   req.url = url.parse(req.url).path
 

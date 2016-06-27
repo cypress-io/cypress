@@ -16,7 +16,6 @@ global.fs = fs = Promise.promisifyAll(global.fs)
 
 agent = require("superagent")
 
-require("superagent-proxy")(agent)
 require("chai")
 .use(require("sinon-chai"))
 
