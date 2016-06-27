@@ -19,7 +19,7 @@ htmlRe           = /(<html.*?>)/
 okStatusRe       = /^[2|3|4]\d+$/
 
 module.exports = {
-  handle: (req, res, config, app, next) ->
+  handle: (req, res, config, getRemoteOrigin, next) ->
     ## if we have an unload header it means
     ## our parent app has been navigated away
     ## directly and we need to automatically redirect
@@ -30,7 +30,7 @@ module.exports = {
     d = Domain.create()
 
     d.on 'error', (e) =>
-      @errorHandler(e, req, res, app.getRemoteOrigin())
+      @errorHandler(e, req, res, getRemoteOrigin())
 
     d.run =>
       ## 1. first check to see if this url contains a FQDN
@@ -40,7 +40,7 @@ module.exports = {
       ## 2. or use cookies
       ## 3. or use baseUrl
       ## 4. or finally fall back on app instance var
-      remoteOrigin = app.getRemoteOrigin()
+      remoteOrigin = getRemoteOrigin()
 
       logger.info "handling initial request", url: req.url, proxiedUrl: req.proxiedUrl, remoteOrigin: remoteOrigin
 

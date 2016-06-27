@@ -76,8 +76,8 @@ class Server
 
     return app
 
-  createRoutes: (app, config) ->
-    require("./routes")(app, config)
+  createRoutes: (app, config, getRemoteOrigin) ->
+    require("./routes")(app, config, getRemoteOrigin)
 
   getHttpServer: -> @_server
 
@@ -91,12 +91,12 @@ class Server
     Promise.try =>
       app = @createExpressApp(config.port, config.morgan)
 
-      app.getRemoteOrigin = =>
-        @_remoteOrigin
-
       logger.setSettings(config)
 
-      @createRoutes(app, config)
+      getRemoteOrigin = =>
+        @_remoteOrigin
+
+      @createRoutes(app, config, getRemoteOrigin)
 
       @createServer(config.port, config.socketIoRoute, app)
       .return(@)
