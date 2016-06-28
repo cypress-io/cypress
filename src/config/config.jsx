@@ -103,7 +103,8 @@ class Config extends Component {
     })
   }
 
-  _openHelp () {
+  _openHelp (e) {
+    e.preventDefault()
     App.ipc('external:open', 'https://on.cypress.io/guides/configuration')
   }
 }
