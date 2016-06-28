@@ -19,7 +19,7 @@ onRequest = (req, res) ->
 
   res.setHeader("Content-Type", "text/html")
   res.writeHead(200)
-  res.end("<html><body>https server</body></html>")
+  res.end("<html><head></head><body>https server</body></html>")
 
 servers = []
 
