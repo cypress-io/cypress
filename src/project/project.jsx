@@ -12,8 +12,8 @@ import { openProject } from '../projects/projects-api'
 const NoBrowsers = () => (
   <div className='alert alert-danger error'>
     <p>
-      <i className='fa fa-warning'></i>
-      <strong>Can't Launch Any Browsers</strong>{' '}
+      <i className='fa fa-warning'></i>{' '}
+      <strong>Can't Launch Any Browsers</strong>
     </p>
     <p>
       We couldn't find any Chrome browsers to launch. To fix, please download Chrome.
@@ -22,6 +22,13 @@ const NoBrowsers = () => (
       <i className='fa fa-chrome'></i>{' '}
       Download Chrome
     </a>
+  </div>
+)
+
+const PortInUse = () => (
+  <div>
+    <hr />
+    <p>To fix, stop the other running process or change the port in cypress.json</p>
   </div>
 )
 
@@ -43,12 +50,36 @@ class Project extends Component {
   render () {
     if (this.project.isLoading) return null
 
+    if (!(this.project.error === undefined)) return this._error()
+
     if (!this.project.browsers.length) return <NoBrowsers />
 
     return (
       <div>
         <ProjectNav project={this.project}/>
         { this.props.children }
+      </div>
+    )
+  }
+
+  _error = () => {
+    let err = this.project.error
+    let portInUse
+
+    if (err.portInUse) {
+      portInUse = <PortInUse />
+    }
+
+    return (
+      <div className='alert alert-danger error'>
+        <p>
+          <i className='fa fa-warning'></i>{' '}
+          <strong>Can't start server</strong>
+        </p>
+        <p>
+          { err.message.replace('\n', '<br /><br />') }
+        </p>
+        { portInUse }
       </div>
     )
   }

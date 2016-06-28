@@ -10,7 +10,7 @@ export default class Project {
   @observable isLoading = false
   @observable browsers = []
   @observable resolvedConfig = {}
-  @observable error = null
+  @observable error
 
   constructor (path) {
     this.id = md5(path)

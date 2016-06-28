@@ -108,7 +108,6 @@ const appIpc = (...args) => {
       // same time store this callback function
       // by id in msgs
       return new Promise((resolve, reject) => {
-        // if (event === 'get:options') debugger
         addMsg(id, event, (err, data) => {
           // cleanup messages using promise interface
           // automatically
