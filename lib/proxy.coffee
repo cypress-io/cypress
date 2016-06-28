@@ -7,4 +7,7 @@ module.exports = {
     .then (ca) ->
       Server.create(ca, port, options)
 
+  reset: ->
+    Server.reset()
+
 }

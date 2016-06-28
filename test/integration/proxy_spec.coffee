@@ -2,6 +2,7 @@ require("../spec_helper")
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
+path        = require("path")
 Promise     = require("bluebird")
 proxy       = require("../helpers/proxy")
 mitmProxy   = require("../helpers/mitm")
@@ -20,6 +21,7 @@ describe "Proxy", ->
       httpsServer.start(8444)
 
       proxy.start(3333)
+      .then (@proxy) =>
     )
 
   afterEach ->
@@ -28,6 +30,27 @@ describe "Proxy", ->
       httpsServer.stop()
       proxy.stop()
     )
+
+  it "can request the googles", ->
+    Promise.all([
+      request({
+        strictSSL: false
+        proxy: "http://localhost:3333"
+        url: "https://www.google.com"
+      })
+
+      request({
+        strictSSL: false
+        proxy: "http://localhost:3333"
+        url: "https://mail.google.com"
+      })
+
+      request({
+        strictSSL: false
+        proxy: "http://localhost:3333"
+        url: "https://google.com"
+      })
+    ])
 
   it "can call the httpsDirectly without a proxy", ->
     request({
@@ -72,4 +95,23 @@ describe "Proxy", ->
     })
     .then (html) ->
       expect(html).to.include("http server")
+
+  context "generating certificates", ->
+    it "reuses existing certificates", ->
+      request({
+        strictSSL: false
+        url: "https://localhost:8443/"
+        proxy: "http://localhost:3333"
+      })
+      .then =>
+        proxy.reset()
+
+        ## force this to reject if its called
+        @sandbox.stub(@proxy, "_generateMissingCertificates").rejects(new Error("should not call"))
+
+        request({
+          strictSSL: false
+          url: "https://localhost:8443/"
+          proxy: "http://localhost:3333"
+        })
 

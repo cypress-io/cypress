@@ -22,10 +22,13 @@ onRequest = (req, res) ->
   pipe(req, res)
 
 module.exports = {
-  start: (port) ->
-    dir = path.join(process.cwd(), "ca")
+  reset: ->
+    httpsProxy.reset()
 
+  start: (port) ->
     prx = http.createServer()
+
+    dir = path.join(process.cwd(), "ca")
 
     httpsProxy.create(dir, port, {
       onUpgrade: (req, socket, head) ->
@@ -53,7 +56,7 @@ module.exports = {
       new Promise (resolve) ->
         prx.listen port, ->
           console.log "server listening on port: #{port}"
-          resolve(prx)
+          resolve(proxy)
 
   stop: ->
     new Promise (resolve) ->

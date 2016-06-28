@@ -203,6 +203,14 @@ class CA
     ])
     .return([certPem, keyPrivatePem])
 
+  getCertificateKeysForHostname: (hostname) ->
+    dest = hostname.replace(asterisksRe, "_")
+
+    Promise.all([
+      fs.readFileAsync(path.join(@certsFolder, dest + ".pem"))
+      fs.readFileAsync(path.join(@keysFolder,  dest + ".key"))
+    ])
+
   getCACertPath: ->
     path.join(@certsFolder, "ca.pem")
 

@@ -13,19 +13,11 @@ fs = Promise.promisifyAll(fs)
 sslServers    = {}
 sslSemaphores = {}
 
-onError = (err, port) ->
-  console.log "ON HTTPS PROXY ERROR", port, err.stack
-
 class Server
   constructor: (@_ca, @_port) ->
+    @_onError = null
 
   connect: (req, socket, head, options = {}) ->
-    console.log "ON CONNECT!!!!!!!!!!!!!!!"
-    console.log "URL", req.url
-    console.log "HEADERS", req.headers
-    console.log "HEAD IS", head
-    console.log "HEAD LENGTH", head.length
-
     if not head or head.length is 0
       socket.once "data", (data) =>
         @connect(req, socket, data, options)
@@ -50,7 +42,8 @@ class Server
       @_onServerConnectData(req, socket, head)
 
   _onUpgrade: (fn, req, socket, head) ->
-    fn.call(@, req, socket, head)
+    if fn
+      fn.call(@, req, socket, head)
 
   _onRequest: (fn, req, res) ->
     hostPort = parse.hostAndPort(req.url, req.headers, 443)
@@ -64,28 +57,18 @@ class Server
     if fn
       return fn.call(@, req, res)
 
-    console.log "onRequest!!!!!!!!!", req.url, req.headers, req.method
-
     req.pipe(request(req.url))
     .on "error", ->
-      console.log "**ERROR", req.url
       res.statusCode = 500
       res.end()
     .pipe(res)
 
   _makeDirectConnection: (req, socket, head) ->
-
     directUrl = url.parse("http://#{req.url}")
 
-    # @_makeConnection(socket, head, 2020, "localhost")
     @_makeConnection(socket, head, directUrl.port, directUrl.hostname)
 
   _makeConnection: (socket, head, port, hostname) ->
-    if not port
-      err = new Error "missing port!"
-      console.log err.stack
-      throw err
-
     cb = ->
       socket.pipe(conn)
       conn.pipe(socket)
@@ -98,9 +81,9 @@ class Server
 
     conn = net.connect.apply(net, args)
 
-    ## TODO: handle error!
-    conn.on "error", (err) ->
-      onError(err, port)
+    conn.on "error", (err) =>
+      if @_onError
+        @_onError(err, socket, head, port)
 
   _onServerConnectData: (req, socket, head) ->
     firstBytes = head[0]
@@ -112,89 +95,61 @@ class Server
       {hostname} = url.parse("http://#{req.url}")
 
       if sslServer = sslServers[hostname]
-        console.log "SSL SERVER", sslServer
         return makeConnection(sslServer.port)
 
-      wildcardhost = hostname.replace(/[^\.]+\./, "*.")
-
-      sem = sslSemaphores[wildcardhost]
-
-      if not sem
-        sem = sslSemaphores[wildcardhost] = semaphore(1)
+      if not sem = sslSemaphores[hostname]
+        sem = sslSemaphores[hostname] = semaphore(1)
 
       sem.take =>
         leave = ->
           process.nextTick ->
-            console.log "leaving sem"
             sem.leave()
 
         if sslServer = sslServers[hostname]
           leave()
+
           return makeConnection(sslServer.port)
-
-        if sslServer = sslServers[wildcardhost]
-          leave()
-          sslServers[hostname] = {
-            port: sslServer
-          }
-
-          return makeConnection(sslServers[hostname].port)
 
         @_getPortFor(hostname)
         .then (port) ->
+          sslServers[hostname] = { port: port }
+
           leave()
 
           makeConnection(port)
 
     else
-      console.log "making direct connection", req.url, req.headers, req.method
       makeConnection(@_port)
 
+  _normalizeKeyAndCert: (certPem, privateKeyPem) ->
+    return {
+      key:  privateKeyPem
+      cert: certPem
+    }
+
   _getCertificatePathsFor: (hostname) ->
-    Promise.resolve({
-      keyFile: ""
-      certFile: ""
-      hosts: [hostname]
-    })
+    @_ca.getCertificateKeysForHostname(hostname)
+    .spread(@_normalizeKeyAndCert)
 
-  _generateMissingCertificates: (certPaths) ->
-    hosts = certPaths.hosts #or [ctx.hostname]
-
-    @_ca.generateServerCertificateKeys(hosts)
-    .spread (certPEM, privateKeyPEM) ->
-      return {
-        hosts:        hosts
-        keyFileData:  privateKeyPEM
-        certFileData: certPEM
-      }
+  _generateMissingCertificates: (hostname) ->
+    @_ca.generateServerCertificateKeys(hostname)
+    .spread(@_normalizeKeyAndCert)
 
   _getPortFor: (hostname) ->
     @_getCertificatePathsFor(hostname)
-    .then (certPaths) =>
-      Promise.props({
-        keyFileExists: fs.statAsync(certPaths.keyFile)
-        certFileExists: fs.statAsync(certPaths.certFile)
-      })
-      .catch (err) =>
-        @_generateMissingCertificates(certPaths)
-        .then (data = {}) ->
-          return {
-            key:   data.keyFileData
-            cert:  data.certFileData
-            hosts: data.hosts
-          }
-    .then (data = {}) =>
-      hosts = [hostname]
-      delete data.hosts
 
-      hosts.forEach (host) =>
-        @_sniServer.addContext(host, data)
-        sslServers[host] = { port: @_sniPort }
+    .catch (err) =>
+      @_generateMissingCertificates(hostname)
+
+    .then (data = {}) =>
+      @_sniServer.addContext(hostname, data)
 
       return @_sniPort
 
   listen: (options = {}) ->
     new Promise (resolve) =>
+      @_onError = options.onError
+
       @_sniServer = https.createServer({})
       @_sniServer.on "upgrade", @_onUpgrade.bind(@, options.onUpgrade)
       @_sniServer.on "request", @_onRequest.bind(@, options.onRequest)
@@ -207,9 +162,13 @@ class Server
   close: ->
     ## TODO: turn this into a promise
     ## and use allow-destroy
+    ## TODO: reset sslServers
     @_sniServer.close()
 
 module.exports = {
+  reset: ->
+    sslServers = {}
+
   create: (ca, port, options = {}) ->
     srv = new Server(ca, port)
 
