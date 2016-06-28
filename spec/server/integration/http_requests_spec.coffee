@@ -1,5 +1,7 @@
 require("../spec_helper")
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
 _             = require("lodash")
 rp            = require("request-promise")
 dns           = require("dns")
@@ -9,6 +11,7 @@ path          = require("path")
 str           = require("underscore.string")
 coffee        = require("coffee-script")
 Promise       = require("bluebird")
+httpsServer   = require("@cypress/core-https-proxy/test/helpers/https_server")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 files         = require("#{root}lib/controllers/files")
@@ -65,21 +68,31 @@ describe "Routes", ->
         rp(options)
 
       open = =>
-        Server().open(cfg)
-        .then (server) =>
-          @server = server
+        Promise.all([
+          ## open our https server
+          httpsServer.start(8443),
 
-          if initialUrl
-            @server._onDomainSet(initialUrl)
+          ## and open our cypress server
+          Server()
+          .open(cfg)
+          .then (server) =>
+            @server = server
 
-          @srv = server.getHttpServer()
+            if initialUrl
+              @server._onDomainSet(initialUrl)
 
-          @session = new (Session({app: @srv}))
+            @srv = server.getHttpServer()
 
-          @proxy = "http://localhost:" + @srv.address().port
+            @session = new (Session({app: @srv}))
+
+            @proxy = "http://localhost:" + @srv.address().port
+        ])
 
       if @server
-        @server.close()
+        Promise.join(
+          httpsServer.stop()
+          @server.close()
+        )
         .then(open)
       else
         open()
@@ -87,7 +100,11 @@ describe "Routes", ->
   afterEach ->
     nock.cleanAll()
     @session.destroy()
-    @server.close()
+
+    Promise.join(
+      @server.close()
+      httpsServer.stop()
+    )
 
   context "GET /", ->
     beforeEach ->
@@ -129,6 +146,14 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("<html></html>")
 
+    it "proxies through https", ->
+      @setup("https://localhost:8443")
+      .then =>
+        @rp("https://localhost:8443/")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.eq("<html><head></head><body>https server</body></html>")
+
   context "GET /__", ->
     beforeEach ->
       @setup({projectName: "foobarbaz"})
@@ -150,6 +175,14 @@ describe "Routes", ->
       .then (res) ->
         expect(res.statusCode).to.eq(200)
         expect(res.headers["x-powered-by"]).not.to.exist
+
+    it "proxies through https", ->
+      @setup("https://localhost:8443")
+      .then =>
+        @rp("https://localhost:8443/__")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.match(/App.start\(.+\)/)
 
   context "GET /__cypress/files", ->
     beforeEach ->
@@ -1442,6 +1475,23 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("<html><head></head></html>")
+
+      it "injects into https server", ->
+        contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")
+
+        @setup("https://localhost:8443")
+        .then =>
+          @rp({
+            url: "https://localhost:8443/"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            body = removeWhitespace(res.body)
+            expect(body).to.eq contents
 
     context "FQDN rewriting", ->
       beforeEach ->
