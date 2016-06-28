@@ -1,6 +1,10 @@
 .navbar-default {
   background-color:#dfe2e4;
 
+  &.navbar-fixed-top {
+    top:  40px;
+  }
+
   .navbar-nav>li>a {
     font-size: 12px;
     color: #444;

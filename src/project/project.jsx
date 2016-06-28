@@ -1,6 +1,6 @@
+import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import _ from 'lodash'
 import { withRouter } from 'react-router'
 
 import projectsStore from '../projects/projects-store'
@@ -57,7 +57,7 @@ class Project extends Component {
     return (
       <div>
         <ProjectNav project={this.project}/>
-        { this.props.children }
+        { React.cloneElement(this.props.children, { project: this.project }) }
       </div>
     )
   }

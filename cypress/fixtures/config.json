@@ -28,7 +28,9 @@
   "commandTimeout": 4000,
   "cypressHostUrl": "http://localhost:2020",
   "env": "development",
-  "environmentVariables": {},
+  "environmentVariables": {
+    
+  },
   "execTimeout": 60000,
   "fileServerFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink",
   "fixturesFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/fixtures",
@@ -36,7 +38,9 @@
   "integrationExampleName": "example_spec.js",
   "integrationFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/integration",
   "isHeadless": false,
-  "javascripts": [],
+  "javascripts": [
+    
+  ],
   "morgan": true,
   "namespace": "__cypress",
   "numTestsKeptInMemory": 50,
@@ -63,7 +67,24 @@
       "from": "default",
       "value": 4000
     },
-    "environmentVariables": {},
+    "environmentVariables": {
+      "fileServerFolder": {
+        "from": "default",
+        "value": ""
+      },
+      "fixturesFolder": {
+        "from": "default",
+        "value": "cypress/fixtures"
+      },
+      "integrationFolder": {
+        "from": "envFile",
+        "value": "cypress/integration/project"
+      },
+      "numTestsKeptInMemory": {
+        "from": "cli",
+        "value": 10
+      }
+    },
     "execTimeout": {
       "from": "default",
       "value": 60000

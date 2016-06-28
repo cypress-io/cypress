@@ -67,7 +67,7 @@ export default class Project {
   }
 
   @action setResolvedConfig (resolved) {
-    this.resolved = resolved
+    this.resolvedConfig = resolved
   }
 
   @action setError (err) {

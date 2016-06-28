@@ -14,7 +14,7 @@ import { closeProject } from '../projects/projects-api'
 export default class Nav extends Component {
   render () {
     return (
-      <nav className='navbar navbar-inverse'>
+      <nav className='navbar navbar-inverse navbar-fixed-top'>
         <div className='container-fluid'>
           <div className='collapse navbar-collapse'>
             <ul className='nav navbar-nav'>

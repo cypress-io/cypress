@@ -9,7 +9,7 @@ export default class ProjectNav extends Component {
     const project = this.props.project
 
     return (
-      <nav className='navbar navbar-default'>
+      <nav className='navbar navbar-default navbar-fixed-top'>
         <div className='container-fluid'>
           <div className='collapse navbar-collapse'>
             <ul className='nav navbar-nav'>

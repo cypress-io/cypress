@@ -2,59 +2,20 @@ html {
   position: relative;
   height: 100%;
   box-shadow: 5px 2px 2px #333;
-
-  // &.updates, &.debug, &.about, &.preferences {
-  //   background-color: #ECECEC;
-
-  //   body {
-  //     background-color: #ECECEC;
-  //     margin-bottom: 0;
-  //   }
-  // }
-
-  // &.app {
-
-  //   body {
-  //     margin-bottom: $footer-height;
-  //     padding-top: 12px;
-  //     border-radius: 5px;
-
-  //     &:before {
-  //       content: "";
-  //       height: 0;
-  //       width: 0;
-  //       border-width: 0 8px 8px 8px;
-  //       border-style: solid;
-  //       border-color: transparent transparent #eee transparent;
-  //       position: absolute;
-  //       top: 4px;
-  //       left: 50%;
-  //       transform: translateX(-50%);
-  //     }
-  //   }
-  // }
-
-  // &.login, &.project-show {
-  //   body:before {
-  //     border-bottom-color: #fff;
-  //   }
-  // }
 }
 
-/* Sticky footer styles
--------------------------------------------------- */
-// html {
-//   min-height: 100%;
-// }
 body {
-  /* Margin bottom by footer height */
-  margin-bottom: 60px;
+  // Margin bottom by footer height
+  padding-bottom: 18px;
+  // Margin bottom by nav heights
+  padding-top: 70px;
 }
+
 footer {
   position: absolute;
   bottom: 0;
   width: 100%;
-  /* Set the fixed height of the footer here */
+  // Set the fixed height of the footer here
   height: 60px;
   background-color: #f5f5f5;
 }

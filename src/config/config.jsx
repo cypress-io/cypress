@@ -1,90 +1,74 @@
-import React from 'react'
+import _ from 'lodash'
+import React, { Component } from 'react'
+import { observer } from 'mobx-react'
+import { withRouter } from 'react-router'
 
-export default () => {
-  return (
-    <div id='config'>
-      <h5>Configuration</h5>
-      <pre className='config-vars'>
-        {`{`}
-          <div className='line'>
-            <span className='key'>port</span>
+@withRouter
+@observer
+class Config extends Component {
+  constructor (props) {
+    super(props)
+
+    this.resolvedConfig = this.props.project.resolvedConfig
+  }
+
+  render () {
+    let config  = _.omit(this.resolvedConfig, 'environmentVariables')
+    let envVars = this.resolvedConfig.environmentVariables
+
+    return (
+      <div id='config'>
+        <h5>Configuration</h5>
+        <pre className='config-vars'>
+          { `{` }
+          { this._display(config, { comma: true }) }
+          <span className='envVars'>
+            <span className='key'>environmentVariables</span>
             <span className='colon'>:</span>{' '}
-            <span className='default'>2020</span>
-            <span className='comma'>,</span>
-          </div>
-          <div className='line'>
-            <span className='key'>reporter</span>
-            <span className='colon'>:</span>{' '}
-            <span className='default'>'spec'</span>
-            <span className='comma'>,</span>
-          </div>
-          <div className='line'>
-            <span className='key'>baseUrl</span>
-            <span className='colon'>:</span>{' '}
-            <span className='default'>'http://localhost:8000'</span>
-            <span className='comma'>,</span>
-          </div>
-          <div className='line'>
-            <span className='key'>port</span>
-            <span className='colon'>:</span>{' '}
-            <span className='default'>2020</span>
-            <span className='comma'>,</span>
-          </div>
-          <div className='line'>
-            <span className='key'>port</span>
-            <span className='colon'>:</span>{' '}
-            <span className='default'>2020</span>
-            <span className='comma'>,</span>
-          </div>
-          <div className='line'>
-            <span className='key'>port</span>
-            <span className='colon'>:</span>{' '}
-            <span className='default'>2020</span>
-            <span className='comma'>,</span>
-          </div>
-          <div className='line'>
-            <span className='key'>port</span>
-            <span className='colon'>:</span>{' '}
-            <span className='default'>2020</span>
-            <span className='comma'>,</span>
-          </div>
-        {`}`}
-      </pre>
-    </div>
+            { `{` }
+            { this._display(envVars) }
+            { `  }\n` }
+          </span>
+          { `}` }
+        </pre>
+      </div>
+    )
+  }
 
-    // getSpan: (key, obj, comma) ->
-    //   "<div class='line'><span class='key'>#{key}</span><span class='colon'>:</span> <span class='#{obj.from}' data-toggle='tooltip' title='\"#{obj.from}\"'>#{@getString(obj.value)}#{obj.value}#{@getString(obj.value)}</span>#{@getComma(comma)}</div>"
+          // { this._displayResolved(config, { comma: true }) }
 
-    // getString: (val) ->
-    //   if _.isString(val)
-    //     "'"
-    //   else
-    //     ""
+  _getSpan (key, obj, comma) {
+    return (
+      <div key={key} className='line'>
+        <span className='key'>{key}</span>
+        <span className='colon'>:</span>{' '}
+        <span className={obj.from} data-toggle='tooltip' title={obj.from}>
+          {this._getString(obj.value)}
+          {obj.value}
+          {this._getString(obj.value)}
+        </span>
+        {this._getComma(comma)}
+      </div>
+    )
+  }
 
-    // getComma: (bool) ->
-    //   if bool then "<span class='comma'>,</span>" else ""
+  _getString (val) {
+    return _.isString(val) ? "'" : ""
+  }
 
-    // need to set resolved config on project
-    // resolved = @options.config.get("resolved")
+  _getComma (bool) {
+    return bool ? <span className='comma'>,</span> : ''
+  }
 
-    // config  = _.omit resolved, "environmentVariables"
-    // envVars = resolved.environmentVariables
+  _display (obj, opts = {}) {
+    let keys = _.keys(obj)
+    let last = _.last(keys)
 
-    // {
-    //   length: @collection.length
-    //   config: config
-    //   envVars: envVars
-    //   displayResolved: (obj, opts = {}) =>
-    //     keys = _.keys(obj)
-    //     last = _.last(keys)
-
-    //     _.reduce keys, (memo, key) =>
-    //       val      = obj[key]
-    //       hasComma = opts.comma ? last isnt key
-
-    //       memo += (@getSpan(key, val, hasComma))
-
-    //     , ""
-    // }
-  )
+    return _.map(obj, (value, key) => {
+      let hasComma = opts.comma || last !== key
+      return this._getSpan(key, value, hasComma)
+    })
+  }
 }
+
+export default Config
