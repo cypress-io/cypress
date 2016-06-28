@@ -79,7 +79,7 @@ export default class Project {
     this.setChosenBrowser(browser)
   }
 
-  reset () {
-    this.error = null
+  @action reset () {
+    this.error = undefined
   }
 }
