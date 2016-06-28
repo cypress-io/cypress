@@ -31,6 +31,10 @@ const localBus = new EventEmitter()
 // when detached, this will be the socket channel
 const reporterBus = new EventEmitter()
 
+function toAndFromJson (obj) {
+  return JSON.parse(JSON.stringify(obj))
+}
+
 export default {
   reporterBus,
 
@@ -58,14 +62,10 @@ export default {
 
     driver.on('log', (log) => {
       logs.add(log)
-      reporterBus.emit('reporter:log:add', log.toJSON(), (row) => {
-        log.set('row', row)
-
-        // TODO: render it calling onRender
-      })
+      reporterBus.emit('reporter:log:add', toAndFromJson(log.toJSON()))
 
       log.on('state:changed', () => {
-        reporterBus.emit('reporter:log:state:changed', log.toJSON())
+        reporterBus.emit('reporter:log:state:changed', toAndFromJson(log.toJSON()))
       })
     })
 
