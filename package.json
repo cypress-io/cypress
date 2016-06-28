@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "main": "dist/app/app",
   "scripts": {
-    "build": "gulp build"
+    "build": "gulp build",
     "prepublish": "gulp build",
     "start": "gulp watch"
   },
