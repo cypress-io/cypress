@@ -10,7 +10,7 @@ import ProjectNav from '../project/project-nav'
 import { openProject } from '../projects/projects-api'
 
 const NoBrowsers = () => (
-  <div className='alert alert-danger error'>
+  <div className='full-alert alert alert-danger error'>
     <p>
       <i className='fa fa-warning'></i>{' '}
       <strong>Can't Launch Any Browsers</strong>
@@ -71,7 +71,7 @@ class Project extends Component {
     }
 
     return (
-      <div className='alert alert-danger error'>
+      <div className='full-alert alert alert-danger error'>
         <p>
           <i className='fa fa-warning'></i>{' '}
           <strong>Can't start server</strong>

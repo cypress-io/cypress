@@ -1,4 +1,10 @@
 #tests-list-page {
+  bottom: 18px;
+  top: 70px;
+  position: fixed;
+  overflow: auto;
+  margin-bottom: 0;
+  width: 100%;
 
   table tr:first-child td {
     border-top: 0;

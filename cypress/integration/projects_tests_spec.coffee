@@ -51,6 +51,16 @@ describe "Project Tests", ->
           expect(location.href).to.include("projects")
           expect(location.href).to.not.include("123-456")
 
+  describe "lists tests", ->
+    beforeEach ->
+      cy
+        .fixture("browsers").then (@browsers) ->
+          @config.browsers = @browsers
+          @ipc.handle("open:project", null, @config)
+
+    it "lists tests", ->
+      cy.contains("Integration")
+
   describe "server error", ->
     beforeEach ->
       @err = {

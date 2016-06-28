@@ -1,4 +1,8 @@
 .projects-list {
+  bottom: 18px;
+  top: 40px;
+  position: fixed;
+  overflow: auto;
   margin-bottom: 0;
 
   .fa-chevron-right {

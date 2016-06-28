@@ -16,7 +16,7 @@ export default class ProjectNav extends Component {
               <li>
                 <Link
                   to={`/projects/${project.id}/specs`}
-                  activeClassName="active"
+                  activeClassName='active'
                   >
                   <i className='fa fa-code'></i>{' '}
                   Tests
@@ -25,7 +25,7 @@ export default class ProjectNav extends Component {
               <li>
                 <Link
                   to={`/projects/${project.id}/config`}
-                  activeClassName="active"
+                  activeClassName='active'
                   >
                   <i className='fa fa-cog'></i>{' '}
                   Config

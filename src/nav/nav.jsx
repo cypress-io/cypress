@@ -4,11 +4,10 @@ import React, { Component } from 'react'
 import state from '../lib/state'
 import App from '../lib/app'
 import Tooltip from 'rc-tooltip'
-import Promise from 'bluebird'
 import { Link } from 'react-router'
 
 import projectsStore from '../projects/projects-store'
-import { closeProject } from '../projects/projects-api'
+import { closeProject, addProject } from '../projects/projects-api'
 
 @observer
 export default class Nav extends Component {
@@ -109,31 +108,7 @@ export default class Nav extends Component {
     closeProject()
   }
 
-  _addProject = () => {
-    let project
-
-    return App.ipc("show:directory:dialog")
-    .then(action('add:project', (dirPath) => {
-       // if the user cancelled the dialog selection
-       // dirPath will be undefined
-      if (!dirPath) return
-
-      // initially set our project to be loading state
-      project = projectsStore.addProject(dirPath)
-
-      // wait at least 750ms even if add:project
-      // resolves faster to prevent the sudden flash
-      // of loading content which is jarring
-      return Promise.all([
-        App.ipc("add:project", dirPath),
-        // Promise.delay(750),
-      ])
-      .then(action('project:loaded', () => {
-        return project.isLoading = false
-      }))
-    }))
-    .catch(action('add:project:err', (err) => {
-      projectsStore.error = err.message
-    }))
+  _addProject () {
+    addProject()
   }
 }

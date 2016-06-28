@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router'
+import { observer } from 'mobx-react'
 import { ContextMenuLayer } from "react-contextmenu"
 
+@observer
 class Project extends Component {
   render () {
     let project = this.props.project

@@ -1,5 +1,10 @@
 #config {
-  margin: 20px;
+  bottom: 18px;
+  top: 70px;
+  position: fixed;
+  overflow: auto;
+  margin-bottom: 0;
+  width: 100%;
 
   pre table {
     margin-bottom: 0;
@@ -74,4 +79,8 @@
     color: #A21313;
   }
 
+}
+
+.config-wrapper {
+  padding: 0 20px 20px;
 }

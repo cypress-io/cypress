@@ -17,11 +17,7 @@ class Projects {
   }
 
   addProject (path) {
-    const project = new Project({
-      path,
-      isLoading: true,
-    })
-
+    const project = new Project(path)
     this.projects.push(project)
     return project
   }
@@ -36,6 +32,10 @@ class Projects {
     ))
     this.isLoading = false
     this.isLoaded = true
+  }
+
+  @action setError (err) {
+    this.projects.error = err
   }
 
   setChosen (project) {
