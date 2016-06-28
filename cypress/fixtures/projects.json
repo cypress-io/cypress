@@ -1,34 +1,10 @@
 [
-  {
-    "id": "123-456",
-    "path": "/Users/Jane/Projects/My-Fake-Project"
-  },
-  {
-    "id": "123-457",
-    "path": "/Users/Jane/Projects/My-Other-Fake-Project"
-  },
-  {
-    "id": "123-458",
-    "path": "/Users/Jane/Projects/My-Long-Named-Fake-Project-To-Start-Testing-All-The-Things-In-Cypress"
-  },
-  {
-    "id": "123-459",
-    "path": "/Users/Jane/Dev/project1"
-  },
-  {
-    "id": "123-460",
-    "path": "/Users/Jane/Dev/project2"
-  },
-  {
-    "id": "123-461",
-    "path": "/Users/Jane/Dev/project3"
-  },
-  {
-    "id": "123-462",
-    "path": "/Users/Jane/Dev/project4"
-  },
-  {
-    "id": "123-463",
-    "path": "/Users/Jane/Dev/project5"
-  }
+  "/Users/Jane/Projects/My-Fake-Project",
+  "/Users/Jane/Projects/My-Other-Fake-Project",
+  "/Users/Jane/Projects/My-Long-Named-Fake-Project-To-Start-Testing-All-The-Things-In-Cypress",
+  "/Users/Jane/Projects/project1",
+  "/Users/Jane/Projects/project2",
+  "/Users/Jane/Projects/project3",
+  "/Users/Jane/Projects/project4",
+  "/Users/Jane/Projects/project5"
 ]

@@ -30,9 +30,9 @@ class Projects {
     this.isLoading = bool
   }
 
-  @action setProjects (projects) {
-    this.projects = _.map(projects, (project) => (
-      new Project(project)
+  @action setProjects (paths) {
+    this.projects = _.map(paths, (path) => (
+      new Project(path)
     ))
     this.isLoading = false
     this.isLoaded = true

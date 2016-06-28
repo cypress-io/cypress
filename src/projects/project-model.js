@@ -1,20 +1,20 @@
 import _ from 'lodash'
+import md5 from 'md5'
 import { computed, observable, action } from 'mobx'
 import Browser from '../lib/browser-model'
 
 export default class Project {
   @observable id
-  @observable path = ''
+  @observable path
   @observable isChosen = false
   @observable isLoading = false
   @observable browsers = []
   @observable resolvedConfig = {}
   @observable error = null
 
-  constructor ({ id, path, isLoading }) {
-    this.id = id
+  constructor (path) {
+    this.id = md5(path)
     this.path = path
-    this.isLoading = isLoading
   }
 
   @computed get name () {

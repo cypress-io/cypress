@@ -6,11 +6,7 @@ class Project extends Component {
   render () {
     let project = this.props.project
 
-    let loadingClassName
-
-    if (project.isLoading) {
-      loadingClassName = 'loading'
-    }
+    let loadingClassName = project.isLoading ? 'loading' : ''
 
     return (
       <Link

@@ -4,8 +4,8 @@ import projectsStore from '../projects/projects-store'
 
 const getProjects = () => {
   projectsStore.loading(true)
-  App.ipc('get:project:paths').then((projects) => {
-    projectsStore.setProjects(projects)
+  App.ipc('get:project:paths').then((paths) => {
+    projectsStore.setProjects(paths)
   })
 }
 
