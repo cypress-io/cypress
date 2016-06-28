@@ -1,12 +1,12 @@
-_         = require("lodash")
-fs        = require("fs-extra")
-net       = require("net")
-url       = require("url")
-# path    = require("path")
-https     = require("https")
-Promise   = require("bluebird")
-semaphore = require("semaphore")
-parse     = require("./util/parse")
+_            = require("lodash")
+fs           = require("fs-extra")
+net          = require("net")
+url          = require("url")
+https        = require("https")
+Promise      = require("bluebird")
+semaphore    = require("semaphore")
+allowDestroy = require("server-destroy")
+parse        = require("./util/parse")
 
 fs = Promise.promisifyAll(fs)
 
@@ -151,6 +151,9 @@ class Server
       @_onError = options.onError
 
       @_sniServer = https.createServer({})
+
+      allowDestroy(@_sniServer)
+
       @_sniServer.on "upgrade", @_onUpgrade.bind(@, options.onUpgrade)
       @_sniServer.on "request", @_onRequest.bind(@, options.onRequest)
       @_sniServer.listen =>
@@ -160,10 +163,13 @@ class Server
         resolve()
 
   close: ->
-    ## TODO: turn this into a promise
-    ## and use allow-destroy
-    ## TODO: reset sslServers
-    @_sniServer.close()
+    close = =>
+      new Promise (resolve) =>
+        @_sniServer.destroy(resolve)
+
+    close()
+    .finally ->
+      sslServers = {}
 
 module.exports = {
   reset: ->

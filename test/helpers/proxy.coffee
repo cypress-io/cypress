@@ -55,10 +55,13 @@ module.exports = {
 
       new Promise (resolve) ->
         prx.listen port, ->
+          prx.proxy = proxy
           console.log "server listening on port: #{port}"
           resolve(proxy)
 
   stop: ->
     new Promise (resolve) ->
       prx.close(resolve)
+    .then ->
+      prx.proxy.close()
 }

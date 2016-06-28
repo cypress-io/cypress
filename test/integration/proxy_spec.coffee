@@ -115,3 +115,24 @@ describe "Proxy", ->
           proxy: "http://localhost:3333"
         })
 
+  context "closing", ->
+    it "resets sslServers and can reopen", ->
+      request({
+        strictSSL: false
+        url: "https://localhost:8443/"
+        proxy: "http://localhost:3333"
+      })
+      .then =>
+        proxy.stop()
+      .then =>
+        proxy.start(3333)
+      .then =>
+        ## force this to reject if its called
+        @sandbox.stub(@proxy, "_generateMissingCertificates").rejects(new Error("should not call"))
+
+        request({
+          strictSSL: false
+          url: "https://localhost:8443/"
+          proxy: "http://localhost:3333"
+        })
+
