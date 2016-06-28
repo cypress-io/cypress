@@ -36,6 +36,9 @@ npm run watch
 
 ## Changelog
 
+#### 0.3.1 - *(06/28/16)*
+- remove querying by tab url
+
 #### 0.3.0 - *(06/12/16)*
 - added take:screenshot
 
