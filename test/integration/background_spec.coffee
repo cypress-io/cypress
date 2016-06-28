@@ -162,21 +162,21 @@ describe "app/background", ->
 
     it "resolves on the 1st tab", ->
       @sandbox.stub(chrome.tabs, "query")
-      .withArgs({url: "http://localhost:2020/*", windowType: "normal"})
+      .withArgs({windowType: "normal"})
       .yieldsAsync([tab1])
 
       @sandbox.stub(chrome.tabs, "executeScript")
       .withArgs(tab1.id, {code: @code})
       .yieldsAsync(["1234"])
 
-      background.query("http://localhost:2020", {
+      background.query({
         string: "1234"
         element: "__cypress-string"
       })
 
     it "resolves on the 2nd tab", ->
       @sandbox.stub(chrome.tabs, "query")
-      .withArgs({url: "http://localhost:2020/*", windowType: "normal"})
+      .withArgs({windowType: "normal"})
       .yieldsAsync([tab1, tab2])
 
       @sandbox.stub(chrome.tabs, "executeScript")
@@ -185,14 +185,14 @@ describe "app/background", ->
       .withArgs(tab2.id, {code: @code})
       .yieldsAsync(["1234"])
 
-      background.query("http://localhost:2020", {
+      background.query({
         string: "1234"
         element: "__cypress-string"
       })
 
     it "rejects if no tab matches", ->
       @sandbox.stub(chrome.tabs, "query")
-      .withArgs({url: "http://localhost:2020/*", windowType: "normal"})
+      .withArgs({windowType: "normal"})
       .yieldsAsync([tab1, tab2])
 
       @sandbox.stub(chrome.tabs, "executeScript")
@@ -201,7 +201,7 @@ describe "app/background", ->
       .withArgs(tab2.id, {code: @code})
       .yieldsAsync(["foobarbaz2"])
 
-      background.query("http://localhost:2020", {
+      background.query({
         string: "1234"
         element: "__cypress-string"
       })
@@ -216,7 +216,7 @@ describe "app/background", ->
       @sandbox.stub(chrome.tabs, "query")
       .yieldsAsync([])
 
-      background.query("http://localhost:2020", {
+      background.query({
         string: "1234"
         element: "__cypress-string"
       })

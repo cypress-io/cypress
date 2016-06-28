@@ -141,16 +141,12 @@ automation = {
       chrome.windows.update window.id, {focused: true}, ->
         fn()
 
-  query: (host, data) ->
-    ## query for tabs which match
-    ## our expected host
-    ## ie: http://localhost:2020/*
-    url  = host + "/*"
+  query: (data) ->
     code = "var s; (s = document.getElementById('#{data.element}')) && s.textContent"
 
     query = ->
       new Promise (resolve) ->
-        chrome.tabs.query({url: url, windowType: "normal"}, resolve)
+        chrome.tabs.query({windowType: "normal"}, resolve)
 
     queryTab = (tab) ->
       new Promise (resolve, reject) ->
@@ -167,7 +163,7 @@ automation = {
     .any()
 
   verify: (data, fn) ->
-    @query(HOST, data)
+    @query(data)
     .then(fn)
 
   lastFocusedWindow: ->
