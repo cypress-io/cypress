@@ -298,7 +298,7 @@ class Server
     Promise.join(
       @_close()
       @_socket?.close()
-      @_httpsProxy.close()
+      @_httpsProxy?.close()
     )
 
   end: ->

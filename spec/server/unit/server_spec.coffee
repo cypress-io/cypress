@@ -40,7 +40,7 @@ describe "lib/server", ->
       @sandbox.stub(@server, "createServer").resolves()
 
     it "resolves with server instance", ->
-      @server.open("/", @config)
+      @server.open(@config)
       .then (ret) =>
         expect(ret).to.eq(@server)
 
@@ -49,7 +49,7 @@ describe "lib/server", ->
 
       _.extend @config, {port: 54321, morgan: false}
 
-      @server.open("/", @config)
+      @server.open(@config)
       .then =>
         expect(@server.createExpressApp).to.be.calledWith(54321, false)
 
@@ -59,7 +59,7 @@ describe "lib/server", ->
       @sandbox.stub(@server, "createRoutes")
       @sandbox.stub(@server, "createExpressApp").returns(obj)
 
-      @server.open("/", @config)
+      @server.open(@config)
       .then =>
         expect(@server.createRoutes).to.be.calledWith(obj)
 
@@ -69,14 +69,14 @@ describe "lib/server", ->
       @sandbox.stub(@server, "createRoutes")
       @sandbox.stub(@server, "createExpressApp").returns(obj)
 
-      @server.open("/", @config)
+      @server.open(@config)
       .then =>
         expect(@server.createServer).to.be.calledWith(@config.port, @config.socketIoRoute, obj)
 
     it "calls logger.setSettings with config", ->
       @sandbox.spy(logger, "setSettings")
 
-      @server.open("/", @config)
+      @server.open(@config)
       .then (ret) =>
         expect(logger.setSettings).to.be.calledWith(@config)
 
@@ -126,7 +126,7 @@ describe "lib/server", ->
       @startListening = @sandbox.stub(Socket.prototype, "startListening")
 
     it "sets _socket and calls _socket#startListening", ->
-      @server.open("/", @config)
+      @server.open(@config)
       .then =>
         @server.startWebsockets(1, 2, 3)
 
@@ -137,12 +137,12 @@ describe "lib/server", ->
       expect(@server.close()).to.be.instanceof Promise
 
     it "calls close on this.server", ->
-      @server.open("/", @config)
+      @server.open(@config)
       .then =>
         @server.close()
 
     it "isListening=false", ->
-      @server.open("/", @config)
+      @server.open(@config)
       .then =>
         @server.close()
       .then =>
@@ -176,19 +176,20 @@ describe "lib/server", ->
       expect(noop).to.be.undefined
 
     it "calls proxy.ws with hostname + port", ->
+      @server._onDomainSet("https://www.google.com")
+
       req = {
         url: "/"
-        headers: {
-          cookie: "foo=bar; __cypress.remoteHost=https://www.google.com"
-        }
       }
 
       @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
 
       expect(@proxy.ws).to.be.calledWith(req, @socket, @head, {
+        secure: false
         target: {
           host: "www.google.com"
           port: null
+          protocol: "https:"
         }
       })
 
@@ -207,21 +208,57 @@ describe "lib/server", ->
       @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
       expect(@socket.end).to.be.called
 
-  context "#_onDomainChange", ->
+  context "#_onDomainSet", ->
     beforeEach ->
       @server = Server()
 
     it "sets port to 443 when omitted and https:", ->
-      @server._onDomainChange("https://staging.google.com/foo/bar")
-      expect(@server._remoteHostAndPort).to.eq("staging.google.com:443")
+      ret = @server._onDomainSet("https://staging.google.com/foo/bar")
+
+      expect(@server._remoteOrigin).to.eq("https://staging.google.com")
+      expect(@server._remoteHostAndPort).to.deep.eq({
+        port: "443"
+        domain: "google"
+        tld: "com"
+      })
+
+      expect(ret).to.eq(@server._remoteOrigin)
 
     it "sets port to 80 when omitted and http:", ->
-      @server._onDomainChange("http://staging.google.com/foo/bar")
-      expect(@server._remoteHostAndPort).to.eq("staging.google.com:80")
+      ret = @server._onDomainSet("http://staging.google.com/foo/bar")
+
+      expect(@server._remoteOrigin).to.eq("http://staging.google.com")
+      expect(@server._remoteHostAndPort).to.deep.eq({
+        port: "80"
+        domain: "google"
+        tld: "com"
+      })
+
+      expect(ret).to.eq(@server._remoteOrigin)
 
     it "sets host + port to localhost", ->
-      @server._onDomainChange("http://localhost:4200/a/b?q=1#asdf")
-      expect(@server._remoteHostAndPort).to.eq("localhost:4200")
+      ret = @server._onDomainSet("http://localhost:4200/a/b?q=1#asdf")
+
+      expect(@server._remoteOrigin).to.eq("http://localhost:4200")
+      expect(@server._remoteHostAndPort).to.deep.eq({
+        port: "4200"
+        domain: ""
+        tld: "localhost"
+      })
+
+      expect(ret).to.eq(@server._remoteOrigin)
+
+    it "sets <root> when not http url", ->
+      @server._server = {
+        address: -> {port: 9999}
+      }
+
+      ret = @server._onDomainSet("/index.html")
+
+      expect(@server._remoteOrigin).to.eq("<root>")
+      expect(@server._remoteHostAndPort).to.be.null
+
+      expect(ret).to.eq("http://localhost:9999")
 
   context "#_onDirectConnection", ->
     beforeEach ->

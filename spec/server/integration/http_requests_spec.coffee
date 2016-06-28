@@ -235,19 +235,19 @@ describe "Routes", ->
         @setup({
           projectRoot: Fixtures.projectPath("ids")
         })
-
-        @rp({
-          url: "http://localhost:2020/__cypress/files"
-          json: true
-        })
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.deep.eq([
-            { name: "integration/bar.js" }
-            { name: "integration/foo.coffee" }
-            { name: "integration/nested/tmp.js" }
-            { name: "integration/noop.coffee" }
-          ])
+        .then =>
+          @rp({
+            url: "http://localhost:2020/__cypress/files"
+            json: true
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.deep.eq([
+              { name: "integration/bar.js" }
+              { name: "integration/foo.coffee" }
+              { name: "integration/nested/tmp.js" }
+              { name: "integration/noop.coffee" }
+            ])
 
       it "can ignore other files as well", ->
         @setup({
@@ -256,16 +256,16 @@ describe "Routes", ->
             ignoreTestFiles: ["**/bar.js", "foo.coffee", "**/*.hot-update.js", "**/nested/*"]
           }
         })
-
-        @rp({
-          url: "http://localhost:2020/__cypress/files"
-          json: true
-        })
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.deep.eq([
-            { name: "integration/noop.coffee" }
-          ])
+        .then =>
+          @rp({
+            url: "http://localhost:2020/__cypress/files"
+            json: true
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.deep.eq([
+              { name: "integration/noop.coffee" }
+            ])
 
   context "GET /__cypress/tests", ->
     describe "todos", ->
