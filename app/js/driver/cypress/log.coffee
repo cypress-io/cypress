@@ -120,6 +120,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       .chain()
       .omit(_.isFunction)
       .omit("snapshots")
+      .extend({ url: (@get("url") || "").toString() })
       .value()
 
     set: (key, val) ->
