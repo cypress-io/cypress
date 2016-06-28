@@ -4,11 +4,12 @@ cwd         = require("./cwd")
 logger      = require("./logger")
 spec        = require("./controllers/spec_processor")
 xhrs        = require("./controllers/xhrs")
+client      = require("./controllers/client")
 files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
 builds      = require("./controllers/builds")
 
-module.exports = (app, config) ->
+module.exports = (app, config, getRemoteOrigin) ->
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
   app.get "/__cypress/tests", (req, res, next) ->
@@ -16,6 +17,9 @@ module.exports = (app, config) ->
     test = CacheBuster.strip(req.query.p)
 
     spec.handle(test, req, res, config, next)
+
+  app.get "/__cypress/socket.io.js", (req, res) ->
+    client.handle(req, res)
 
   ## routing for /files JSON endpoint
   app.get "/__cypress/files", (req, res) ->
@@ -46,7 +50,7 @@ module.exports = (app, config) ->
     }
 
   app.all "*", (req, res, next) ->
-    proxy.handle(req, res, config, app, next)
+    proxy.handle(req, res, config, getRemoteOrigin, next)
 
   ## when we experience uncaught errors
   ## during routing just log them out to

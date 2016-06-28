@@ -43,7 +43,7 @@ class Project extends EE
 
     @getConfig(options)
     .then (cfg) =>
-      @server.open(@projectRoot, cfg)
+      @server.open(cfg)
       .then =>
         ## store the cfg from
         ## opening the server

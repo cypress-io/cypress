@@ -14,8 +14,10 @@ appData          = require("../../lib/util/app_data")
 
 global.fs = fs = Promise.promisifyAll(global.fs)
 
-require('chai')
-.use(require('sinon-chai'))
+agent = require("superagent")
+
+require("chai")
+.use(require("sinon-chai"))
 
 mockery.enable({
   warnOnUnregistered: false

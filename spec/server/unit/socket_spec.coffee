@@ -23,7 +23,8 @@ describe "lib/socket", ->
     @todosPath = Fixtures.projectPath("todos")
     @server    = Server(@todosPath)
 
-    config.get(@todosPath).then (@cfg) =>
+    config.get(@todosPath)
+    .then (@cfg) =>
 
   afterEach ->
     Fixtures.remove()
@@ -33,7 +34,8 @@ describe "lib/socket", ->
     beforeEach (done) ->
       ## create a for realz socket.io connection
       ## so we can test server emit / client emit events
-      @server.open(@todosPath, @cfg).then =>
+      @server.open(@cfg)
+      .then =>
         @options = {}
         @watchers = {}
         @server.startWebsockets(@watchers, @cfg, @options)
@@ -153,7 +155,7 @@ describe "lib/socket", ->
           code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent"
 
           @sandbox.stub(chrome.tabs, "query")
-          .withArgs({url: "CHANGE_ME_HOST/*", windowType: "normal"})
+          .withArgs({windowType: "normal"})
           .yieldsAsync([{id: 1}])
 
           @sandbox.stub(chrome.tabs, "executeScript")
@@ -492,8 +494,11 @@ describe "lib/socket", ->
 
       @sandbox.stub(Socket.prototype, "createIo").returns(@io)
 
-      @server.startWebsockets({}, @cfg, {})
-      @socket = @server._socket
+      @server.open(@cfg)
+      .then =>
+        @server.startWebsockets({}, @cfg, {})
+
+        @socket = @server._socket
 
     context "#close", ->
       beforeEach ->

@@ -16,6 +16,9 @@ errors        = require("./errors")
 logger        = require("./logger")
 automation    = require("./automation")
 
+runnableTitle = null
+runnableFn    = null
+
 retry = (fn) ->
   Promise.delay(25).then(fn)
 
@@ -111,9 +114,12 @@ class Socket
           @io.to("automation").emit("automation:request", id, message, data)
 
   createIo: (server, path, cookie) ->
-    ## TODO: dont serve the client!
-    # socketIo(server, {path: path, destroyUpgrade: false, serveClient: false})
-    socketIo.server(server, {path: path, destroyUpgrade: false, cookie: cookie})
+    socketIo.server(server, {
+      path: path
+      destroyUpgrade: false
+      serveClient: false
+      cookie: cookie
+    })
 
   _startListening: (server, watchers, config, options) ->
     _.defaults options,
@@ -121,6 +127,7 @@ class Socket
       onAutomationRequest: null
       onMocha: ->
       onConnect: ->
+      onDomainSet: ->
       onChromiumRun: ->
       onIsNewProject: ->
       onReloadBrowser: ->
@@ -273,6 +280,23 @@ class Socket
         .then ->
           cb(true)
         .catch Promise.TimeoutError, (err) ->
+          cb(false)
+
+      socket.on "domain:set", (url, cb) ->
+        console.log "domain:set", url, options.onDomainSet.toString()
+        cb(options.onDomainSet(url))
+
+      socket.on "domain:change", (t, f, cb) ->
+        runnableTitle = t
+        runnableFn    = f
+
+        cb()
+
+      socket.on "get:current:runnable", (cb) ->
+        if (t = runnableTitle) and (f = runnableFn)
+          runnableTitle = runnableFn = null
+          cb({title: t, fn: f})
+        else
           cb(false)
 
   end: ->

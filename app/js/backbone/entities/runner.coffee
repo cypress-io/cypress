@@ -76,6 +76,12 @@
         @listenTo @Cypress, "take:screenshot", (name, cb) =>
           @socket.emit "automation:request", "take:screenshot", name, cb
 
+        @listenTo @Cypress, "domain:set", (url, cb) =>
+          @socket.emit "domain:set", url, cb
+
+        @listenTo @Cypress, "domain:change", (title, fn, cb) =>
+          @socket.emit "domain:change", title, fn, cb
+
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb
 

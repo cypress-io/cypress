@@ -29,7 +29,7 @@ module.exports =
     originUrl   = Url.parse(origin)
     redirectUrl = Url.parse(redirect)
 
-    _.each _.pick(redirectUrl, "protocol", "auth", "hostname", "port", "pathname"), (value, key) ->
+    _.each _.pick(redirectUrl, "protocol", "auth", "host", "path"), (value, key) ->
       if not value?
         redirectUrl[key] = originUrl[key]
 

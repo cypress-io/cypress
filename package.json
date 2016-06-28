@@ -94,7 +94,8 @@
   "dependencies": {
     "@cypress/core-desktop-gui": "0.2.2",
     "@cypress/core-example": "0.5.0",
-    "@cypress/core-extension": "0.3.0",
+    "@cypress/core-extension": "0.3.1",
+    "@cypress/core-https-proxy": "^0.1.0",
     "@cypress/core-icons": "0.4.1",
     "@cypress/core-launcher": "0.1.0",
     "@cypress/core-socket": "0.1.0",
@@ -139,6 +140,7 @@
     "node-webkit-updater": "cypress-io/node-webkit-updater#e74623726f381487f543e373e71515177a32daeb",
     "opn": "cypress-io/opn#2f4e9a216ca7bdb95dfae9d46d99ddf004b3cbb5",
     "ospath": "^1.1.0",
+    "parse-domain": "^0.2.1",
     "request": "2.72.0",
     "request-promise": "2.0.0",
     "requirejs": "2.1.15",

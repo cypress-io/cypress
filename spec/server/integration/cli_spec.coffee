@@ -60,13 +60,13 @@ describe "CLI Interface", ->
         expect(code).to.eq(0)
         done()
 
-    it "npm slurps up exit value and exits with 1 on failure", ->
+    it "npm slurps up exit value and exits with 1 on failure", (done) ->
       s = cp.exec("npm start -- --exit-with-code=10")
       s.on "close", (code) ->
         expect(code).to.eq(1)
         done()
 
-    it "npm passes on 0 exit code", ->
+    it "npm passes on 0 exit code", (done) ->
       s = cp.exec("npm start -- --exit-with-code=0")
       s.on "close", (code) ->
         expect(code).to.eq(0)
