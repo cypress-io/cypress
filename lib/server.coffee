@@ -143,6 +143,7 @@ class Server
 
       Promise.join(
         @_listen(port, onError),
+
         httpsProxy.create(appData.path("proxy"), port, {
           onRequest: callListeners
           onUpgrade: onSniUpgrade
@@ -202,7 +203,7 @@ class Server
 
   _onDomainSet: (fullyQualifiedUrl) =>
     log = (type, url) ->
-      logger.log("Setting #{type}", value: url)
+      logger.info("Setting #{type}", value: url)
 
     ## if this isn't a fully qualified url
     ## or if this came to us as <root> in our tests
@@ -215,7 +216,7 @@ class Server
       log("remoteOrigin", @_remoteOrigin)
       log("remoteHostAndPort", @_remoteHostAndPort)
 
-      "http://localhost:#{@_server.address().port}"
+      return "http://localhost:#{@_server.address().port}"
     else
       parsed = url.parse(fullyQualifiedUrl)
 
@@ -236,7 +237,7 @@ class Server
       log("remoteOrigin", @_remoteOrigin)
       log("remoteHostAndPort", @_remoteHostAndPort)
 
-      @_remoteOrigin
+      return @_remoteOrigin
 
   _callRequestListeners: (server, listeners, req, res) ->
     for listener in listeners
@@ -262,17 +263,16 @@ class Server
     ## bail if this is our own namespaced socket.io request
     return if req.url.startsWith(socketIoRoute)
 
-    ## parse the cookies to find our remoteHost
-    cookies = cookie.parse(req.headers.cookie ? "")
-
-    if remoteHost = cookies["__cypress.remoteHost"]
-      ## get the hostname + port from the remoteHost
-      {hostname, port} = url.parse(remoteHost)
+    if @_remoteHostAndPort and remoteOrigin = @_remoteOrigin
+      ## get the hostname + port from the remoteHostPort
+      {hostname, port, protocol} = url.parse(remoteOrigin)
 
       proxy.ws(req, socket, head, {
+        secure: false
         target: {
           host: hostname
           port: port
+          protocol: protocol
         }
       })
     else
@@ -298,7 +298,7 @@ class Server
     Promise.join(
       @_close()
       @_socket?.close()
-      ## todo close @_httpsProxy
+      @_httpsProxy.close()
     )
 
   end: ->
