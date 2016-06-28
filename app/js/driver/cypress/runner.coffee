@@ -148,7 +148,7 @@ $Cypress.Runner = do ($Cypress, _) ->
 
     ## TODO: need to take into account grepping for .only's
     normalize: (runnable) ->
-      obj = {title: runnable.title}
+      obj = {title: runnable.title, pending: runnable.pending}
 
       ## only add this property if we absolutely have to
       if r = runnable.root
