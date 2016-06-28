@@ -139,7 +139,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       if obj and obj.$el
         @setElAttrs()
 
-      @trigger "attrs:changed", @attributes
+      @trigger "state:changed", @attributes
 
       return @
 

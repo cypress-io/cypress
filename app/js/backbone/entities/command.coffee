@@ -1,6 +1,6 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
-  logAttrs = "event error state testId hookName type highlightAttr name displayName alias aliasType referencesAlias message numElements numRetries visible coords scrollBy viewportWidth viewportHeight url".split(" ")
+  logAttrs = "instrument event error state testId hookName type highlightAttr name displayName alias aliasType referencesAlias message numElements numRetries visible coords scrollBy viewportWidth viewportHeight url".split(" ")
 
   ## this is another good candidate for a mutator
   ## with stripping out the parent selector
@@ -235,15 +235,16 @@
       command = new Entities.Command log.pick.apply(log, logAttrs)
       command.log = log
 
-      command.listenTo log, "attrs:changed", (attrs) ->
+      command.listenTo log, "state:changed", (attrs) ->
         attrs = _.pick(attrs, logAttrs...)
         command.set(attrs)
 
-        attrs.id = command.id
+        attrs.instrument = log.get("instrument")
+        attrs.id = log.get("id")
 
         ## trigger this so we can get command attrs updates
         ## when in host / satellite mode
-        @trigger("command:attrs:changed", attrs)
+        @trigger("log:state:changed", attrs)
 
       return command
 

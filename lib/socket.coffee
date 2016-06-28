@@ -14,10 +14,31 @@ fixture       = require("./fixture")
 Request       = require("./request")
 errors        = require("./errors")
 logger        = require("./logger")
+launcher      = require("./launcher")
 automation    = require("./automation")
 
 runnableTitle = null
 runnableFn    = null
+
+autEvents = [
+  "reset:test:run"
+  "before:add"
+  "suite:add"
+  "test:add"
+  "after:add"
+  "runnables:ready"
+  "run:start"
+  "test:before:hooks"
+  "log:add"
+  "log:state:changed"
+  "paused"
+  "test:after:hooks"
+  "run:end"
+]
+
+reporterEvents = [
+  # "go:to:file"
+]
 
 retry = (fn) ->
   Promise.delay(25).then(fn)
@@ -84,6 +105,12 @@ class Socket
     .then(cb)
     .catch (err) ->
       cb({__error: err.message, timedout: err.timedout})
+
+  onAut: (event, data) ->
+    @io.to("reporter").emit(event, data)
+
+  onReporter: (event, data) ->
+    @io.to("runner", event, data)
 
   onAutomation: (messages, message, data) ->
     Promise.try =>
@@ -197,17 +224,28 @@ class Socket
         .catch (err) ->
           cb({__error: err.message, __name: err.name, __stack: err.stack})
 
-      socket.on "remote:connected", =>
-        logger.info "remote:connected"
+      socket.on "reporter:connected", =>
+        return if socket.inReporterRoom
 
-        return if socket.inRemoteRoom
+        socket.inReporterRoom = true
+        socket.join("reporter")
 
-        socket.inRemoteRoom = true
-        socket.join("remote")
+        ## TODO: what to do about reporter disconnections?
 
-        socket.on "remote:response", respond
+      socket.on "runner:connected", ->
+        return if socket.inRunnerRoom
 
-      socket.on "client:request", (message, data, cb) =>
+        socket.inRunnerRoom = true
+        socket.join("runner")
+
+        ## TODO: what to do about runner disconnections?
+
+      socket.on "adapter:connected", =>
+        logger.info "adapter:connected"
+
+        socket.on "adapter:response", respond
+
+      socket.on "adapter:request", (message, data, cb) =>
         ## if cb isnt a function then we know
         ## data is really the cb, so reassign it
         ## and set data to null
@@ -217,13 +255,13 @@ class Socket
 
         id = uuid.v4()
 
-        logger.info "client:request", id: id, msg: message, data: data
+        logger.info "adapter:request", id: id, msg: message, data: data
 
-        if _.keys(@io.sockets.adapter.rooms.remote).length > 0
+        if _.keys(@io.sockets.adapter.rooms.adapter).length > 0
           messages[id] = cb
-          @io.to("remote").emit "remote:request", id, message, data
+          @io.to("adapter").emit "adapter:request", id, message, data
         else
-          cb({__error: "Could not process '#{message}'. No remote servers connected."})
+          cb({__error: "Could not process '#{message}'. No adapter servers connected."})
 
       socket.on "run:tests:in:chromium", (src) ->
         options.onChromiumRun(src)
@@ -298,6 +336,19 @@ class Socket
           cb({title: t, fn: f})
         else
           cb(false)
+
+      socket.on "go:to:file", (p) ->
+        launcher.launch("chrome", "http://localhost:2020/__#" + p, {
+          host: "http://localhost:2020"
+        })
+
+      reporterEvents.forEach (event) =>
+        socket.on event, (data) =>
+          @onReporter(event, data)
+
+      autEvents.forEach (event) =>
+        socket.on event, (data) =>
+          @onAut(event, data)
 
   end: ->
     ## TODO: we need an 'ack' from this end

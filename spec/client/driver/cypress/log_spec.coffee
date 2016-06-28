@@ -37,8 +37,8 @@ describe "$Cypress.Log API", ->
       expect(@log.get("state")).to.eq "failed"
       expect(@log.get("error")).to.eq err
 
-    it "#error triggers attrs:changed", (done) ->
-      @log.on "attrs:changed", (attrs) ->
+    it "#error triggers state:changed", (done) ->
+      @log.on "state:changed", (attrs) ->
         expect(attrs.state).to.eq "failed"
         done()
 
@@ -48,8 +48,8 @@ describe "$Cypress.Log API", ->
       @log.end()
       expect(@log.get("state")).to.eq "passed"
 
-    it "#end triggers attrs:changed", (done) ->
-      @log.on "attrs:changed", (attrs) ->
+    it "#end triggers state:changed", (done) ->
+      @log.on "state:changed", (attrs) ->
         expect(attrs.state).to.eq "passed"
         done()
 
@@ -64,8 +64,8 @@ describe "$Cypress.Log API", ->
         @log.set {foo: "bar", baz: "quux"}
         expect(@log.attributes).to.deep.eq {foo: "bar", baz: "quux", state: "pending"}
 
-      it "triggers attrs:changed with attribues", (done) ->
-        @log.on "attrs:changed", (attrs) =>
+      it "triggers state:changed with attribues", (done) ->
+        @log.on "state:changed", (attrs) =>
           expect(attrs.foo).to.eq "bar"
           expect(attrs.baz).to.eq "quux"
           expect(attrs).to.deep.eq @log.attributes

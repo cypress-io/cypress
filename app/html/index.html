@@ -7,21 +7,25 @@
 
       <link href="/__cypress/static/img/favicon.ico" rel="icon">
 
-      <link rel="stylesheet" href="/__cypress/aut/app.css">
+      <link rel="stylesheet" href="/__cypress/static/css/cypress.css">
 
   </head>
   <body>
-    <div id="app"></div>
+    <div id="cy-wrapper">
+      <div id="nav-region"></div>
+      <div id="main-region"></div>
+    </div>
+    <div id="dialog-region"></div>
+    <div id="__cypress-string"></div>
 
     <script type="text/javascript" src="/__cypress/socket.io.js"></script>
     <script type="text/javascript" src="/__cypress/static/js/vendor.js"></script>
     <script type="text/javascript" src="/__cypress/static/js/cypress.js"></script>
-    <script type="text/javascript" src="/__cypress/aut/app.js"></script>
+    <script type="text/javascript" src="/__cypress/static/js/app.js"></script>
     <script type="text/javascript">
       $(function(){
         setTimeout(function(){
-          // dont know how to bootstrap React app
-          // App.start({{{config}}})
+          App.start({{{config}}})
         }, 0)
       });
     </script>

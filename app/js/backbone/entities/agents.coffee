@@ -22,8 +22,13 @@
       agent = new Entities.Agent log.pick.apply(log, attrs)
       agent.log = log
 
-      agent.listenTo log, "attrs:changed", (attrs) ->
-        agent.set attrs
+      # agent.listenTo log, "state:changed", (attrs) ->
+      #   agent.set(attrs)
+
+      #   attrs.instrument = log.get("instrument")
+      #   attrs.id = log.get("id")
+
+      #   agent.set attrs
 
       agent
 

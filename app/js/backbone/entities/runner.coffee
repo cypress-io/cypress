@@ -25,6 +25,7 @@
 
         _.each CypressEvents, (event) =>
           @listenTo @Cypress, event, (args...) =>
+            @socket.emit(event, args...)
             @trigger event, args...
 
         @listenTo @Cypress, "run:start", =>
@@ -83,7 +84,7 @@
           @socket.emit "domain:change", title, fn, cb
 
         @listenTo @Cypress, "message", (msg, data, cb) =>
-          @socket.emit "client:request", msg, data, cb
+          @socket.emit "adapter:request", msg, data, cb
 
         @listenTo @Cypress, "fixture", (fixture, cb) =>
           @socket.emit "fixture", fixture, cb
@@ -103,29 +104,52 @@
         @listenTo @Cypress, "paused", (nextCmd) =>
           @trigger "paused", nextCmd
 
+        @listenTo @Cypress, "test:before:hooks", (test) =>
+          @socket.emit "test:before:hooks", @transfer(test)
+
+        @listenTo @Cypress, "test:after:hooks", (test) =>
+          @socket.emit "test:after:hooks", @transfer(test)
+
+        @listenTo @Cypress, "domain:change", (title, fn, cb) =>
+          @socket.emit "domain:change", title, fn, cb
+
         @listenTo @Cypress, "log", (log) =>
-          switch log.get("instrument")
-            when "command"
-              id = _.uniqueId("command")
+          id         = _.uniqueId("l")
+          instrument = log.get("instrument")
 
-              c = @commands.add log
-              c.set "id", id
+          log.set({id: id, instrument: instrument})
 
-            when "route"
-              @routes.add log
+          json = @addLog(log).toJSON()
 
-            when "agent"
-              @agents.add log
+          json.id = id
+          json.instrument = instrument
 
-            else
-              throw new Error("Cypress.log() emitted an unknown instrument: #{log.get('instrument')}")
+          @socket.emit "log:add", json
+
+        @listenTo @commands, "log:state:changed", (attrs) ->
+          attrs = @transformEmitAttrs(attrs)
+          @socket.emit "log:state:changed", attrs
 
         @listenTo @socket, "test:changed", @reRun
+
+        @listenTo @socket, "existing:runnable", (runnable) ->
+          @set("existingRunnable", runnable)
 
         @listenTo @socket, "automation:push:message", (msg, data = {}) ->
           switch msg
             when "change:cookie"
               @Cypress.Cookies.log(data.message, data.cookie, data.removed)
+
+      addLog: (log) ->
+        switch log.get("instrument")
+          when "command"
+            @commands.add log
+          when "route"
+            @routes.add log
+          when "agent"
+            @agents.add log
+          else
+            throw new Error("Cypress.log() emitted an unknown instrument: #{log.get('instrument')}")
 
       start: (specPath) ->
         @Cypress.start()
@@ -188,7 +212,7 @@
           when _.isFunction(value)                          then false
           else true
 
-      transformRunnableArgs: (args) ->
+      transformRunnableArgs: (arg) ->
         ## pull off these direct properties
         props = ["title", "id", "root", "pending", "stopped", "state", "duration", "type"]
 
@@ -198,26 +222,25 @@
         ## fns to invoke
         fns = ["originalTitle", "fullTitle", "slow", "timeout"]
 
-        _(args).map (arg) =>
-          ## transfer direct props
-          obj = _(arg).pick props...
+        ## transfer direct props
+        obj = _(arg).pick props...
 
-          ## transfer parent props
-          if parent = arg.parent
-            obj.parent = _(parent).pick parentProps...
+        ## transfer parent props
+        if parent = arg.parent
+          obj.parent = _(parent).pick parentProps...
 
-          ## transfer the error as JSON
-          if err = arg.err
-            try
-              err.host = @Cypress.cy.$remoteIframe.prop("contentWindow").location.host
+        ## transfer the error as JSON
+        if err = arg.err
+          try
+            err.host = @Cypress.cy.$remoteIframe.prop("contentWindow").location.host
 
-            obj.err = JSON.stringify(err, ["message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host"])
+          obj.err = JSON.stringify(err, ["message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host"])
 
-          ## invoke the functions and set those as properties
-          _.each fns, (fn) ->
-            obj[fn] = _.result(arg, fn)
+        ## invoke the functions and set those as properties
+        _.each fns, (fn) ->
+          obj[fn] = _.result(arg, fn)
 
-          obj
+        obj
 
       resume: ->
         @trigger("resumed")
@@ -327,6 +350,13 @@
 
         return runnable.id = id
 
+      transfer: (test) ->
+        obj = @ids[test.id]
+
+        ## TODO: normalize the pending stuff here?
+        ## and add the err properties?
+        _.extend obj, _.pick(test, "state", "pending", "stopped", "duration")
+
       receivedRunner: (runner) ->
         triggerAddEvents = true
 
@@ -343,10 +373,46 @@
 
           triggerAddEvents = false
 
-        @trigger("before:add", total)
+        r = runner.getNormalizedRunnables()
+
+        @ids = runner.runnableIds
+
+        if e = @get("existingRunnable")
+          runnables = []
+
+          runner.getRunnables
+            onRunnable: (runnable) =>
+              runnables.push(runnable)
+
+          for runnable in runnables
+            if runnable.pending or runnable.type isnt "test"
+              ## move along if we arent even a test yet
+              continue
+
+            if (runnable.title isnt e.title) or (runnable.fn.toString() isnt e.fn)
+              runnable._SKIPPED = true
+              runnable.pending = true
+              ## delete the fn?
+              # delete runnable.fn
+            else
+              ## bail so we can stop now
+              return
+
+        d = new Date
+        @trigger "before:add"
+        @socket.emit "before:add"
+
+        @socket.emit "runnables:ready", r
+
+        return
 
         runnables = []
         ids = []
+
+        triggerAddEvent = (runnable) =>
+          @trigger("#{runnable.type}:add", runnable)
+          # @socket.emit("#{runnable.type}:add", @transformRunnableArgs(runnable))
+
 
         triggerAddEvent = (runnable) =>
           return if not triggerAddEvents
@@ -365,9 +431,9 @@
             onRunnable: (runnable) =>
               runnables.push(runnable) if options.pushRunnables
 
-              id = @createUniqueRunnableId(runnable, ids)
+              # id = @createUniqueRunnableId(runnable, ids)
 
-              ids.push(id)
+              ids.push(runnable.id)
 
               ## force our runner to ignore running this
               ## test if it doesnt have an id!
@@ -423,6 +489,7 @@
           getRunnables()
 
         @trigger "after:add"
+        @socket.emit "after:add"
 
         return @
 

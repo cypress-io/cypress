@@ -20,6 +20,7 @@ $Cypress.Runner = do ($Cypress, _) ->
     initialize: ->
       ## hold onto the runnables for faster lookup later
       @runnables = []
+      @runnableIds = {}
 
     listeners: ->
       ## bail if we've already set our listeners
@@ -138,6 +139,31 @@ $Cypress.Runner = do ($Cypress, _) ->
 
     wrapErr: (err) ->
       _.pick err, "message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host", "uncaught", "actual", "expected", "showDiff"
+
+    getNormalizedRunnables: ->
+      d = new Date
+      r = @normalize(@runner.suite)
+      console.log "FINISHED PROCESSING NORMALIZED RUNNABLES", new Date - d
+      return r
+
+    normalize: (runnable) ->
+      obj = {title: runnable.title}
+
+      ## only add this property if we absolutely have to
+      if r = runnable.root
+        obj.root = r
+
+      obj.id = id = _.uniqueId("r")
+
+      runnable.id = id
+      @runnableIds[id] = obj
+      @runnables.push(runnable)
+
+      _.each {tests: runnable.tests, suites: runnable.suites}, (runnables, key) =>
+        if runnable[key]
+          obj[key] = _.map(runnables, @normalize.bind(@))
+
+      obj
 
     wrap: (runnable) ->
       ## we need to optimize wrap by converting

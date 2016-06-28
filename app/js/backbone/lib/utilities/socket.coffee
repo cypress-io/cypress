@@ -21,15 +21,20 @@
         ## instead of the webapp
         channel.emit("app:connect", socketId) if socketId
 
-        channel.emit "is:automation:connected", obj, (bool) ->
-          ## once we get back our initial connection status
-          ## we need to listen for disconnected events
-          channel.on "automation:disconnected", ->
-            ## this is a big deal and we need to nuke
-            ## the client app
-            socket.onAutomationDisconnected()
+        channel.emit "get:current:runnable", (runnable) ->
+          if runnable
+            socket.trigger("existing:runnable", runnable)
 
-          socket.automationConnected(bool)
+          channel.emit "is:automation:connected", obj, (bool) ->
+            ## once we get back our initial connection status
+            ## we need to listen for disconnected events
+            channel.on "automation:disconnected", ->
+              ## this is a big deal and we need to nuke
+              ## the client app
+              socket.onAutomationDisconnected()
+
+            socket.automationConnected(bool)
+
 
       # channel.on "check:for:app:errors", ->
       #   console.log "check:for:app:errors"

@@ -9,7 +9,7 @@ client      = require("./controllers/client")
 files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
 builds      = require("./controllers/builds")
-runner      = require("./controllers/runner")
+reporter    = require("./controllers/reporter")
 
 module.exports = (app, config, getRemoteOrigin) ->
   ## routing for the actual specs which are processed automatically
@@ -25,12 +25,6 @@ module.exports = (app, config, getRemoteOrigin) ->
 
   app.get "/__cypress/aut/*", (req, res) ->
     aut.handle(req, res)
-
-  app.get "/__cypress/runner", (req, res) ->
-    runner.serve(req, res, config)
-
-  app.get "/__cypress/runner/*", (req, res) ->
-    runner.handle(req, res)
 
   ## routing for /files JSON endpoint
   app.get "/__cypress/files", (req, res) ->
@@ -50,6 +44,12 @@ module.exports = (app, config, getRemoteOrigin) ->
     file = path.join(config.projectRoot, req.params[0])
 
     res.sendFile(file, {etag: false})
+
+  app.get config.reporterRoute, (req, res) ->
+    reporter.serve(req, res, config)
+
+  app.get config.reporterRoute + "/*", (req, res) ->
+    reporter.handle(req, res)
 
   ## we've namespaced the initial sending down of our cypress
   ## app as '__'  this route shouldn't ever be used by servers

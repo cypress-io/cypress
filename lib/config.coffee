@@ -26,6 +26,7 @@ defaults = {
   xhrRoute:       "/xhrs/"
   socketIoRoute:  "/__socket.io"
   socketIoCookie: "__socket.io"
+  reporterRoute:  "/__cypress/reporter"
   ignoreTestFiles: "*.hot-update.js"
   commandTimeout:  4000
   pageLoadTimeout: 30000
@@ -220,6 +221,7 @@ module.exports = {
     _.extend obj,
       clientUrlDisplay: rootUrl
       clientUrl:        rootUrl + obj.clientRoute
+      reporterUrl:      rootUrl + obj.reporterRoute
       xhrUrl:           obj.namespace + obj.xhrRoute
 
     return obj
