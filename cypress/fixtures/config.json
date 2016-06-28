@@ -56,7 +56,7 @@
       "value": 5
     },
     "baseUrl": {
-      "from": "default",
+      "from": "config",
       "value": "http://localhost:8080"
     },
     "commandTimeout": {
@@ -77,12 +77,12 @@
       "value": "cypress/fixtures"
     },
     "integrationFolder": {
-      "from": "default",
-      "value": "cypress/integration"
+      "from": "envFile",
+      "value": "cypress/integration/project"
     },
     "numTestsKeptInMemory": {
-      "from": "default",
-      "value": 50
+      "from": "cli",
+      "value": 10
     },
     "pageLoadTimeout": {
       "from": "default",
@@ -93,8 +93,8 @@
       "value": 2020
     },
     "reporter": {
-      "from": "default",
-      "value": "spec"
+      "from": "env",
+      "value": "mocha"
     },
     "requestTimeout": {
       "from": "default",
