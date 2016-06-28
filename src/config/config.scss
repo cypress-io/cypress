@@ -1,9 +1,19 @@
 #config {
   margin: 20px;
 
+  pre table {
+    margin-bottom: 0;
+  }
+
   .config-keys {
+
     margin-bottom: 0;
     line-height: 16px;
+
+    &>td {
+      padding: 2px 8px;
+      font-size: 11px;
+    }
   }
 
   .config-vars {

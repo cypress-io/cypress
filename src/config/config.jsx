@@ -1,9 +1,8 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import { withRouter } from 'react-router'
+import App from '../lib/app'
 
-@withRouter
 @observer
 class Config extends Component {
   constructor (props) {
@@ -18,7 +17,12 @@ class Config extends Component {
 
     return (
       <div id='config'>
-        <h5>Configuration</h5>
+        <h5>
+          Resolved Configuration:{' '}
+          <a href="#" onClick={this.openHelp}>
+            <i className="fa fa-question-circle"></i>
+          </a>
+        </h5>
         <pre className='config-vars'>
           { `{` }
           { this._display(config, { comma: true }) }
@@ -31,11 +35,38 @@ class Config extends Component {
           </span>
           { `}` }
         </pre>
+        <h5>
+          Configuration Value Set:{' '}
+        </h5>
+        <pre>
+          <table className='table'>
+            <tbody>
+              <tr className='config-keys'>
+                <td><span className='default'>default</span></td>
+                <td>default</td>
+              </tr>
+              <tr className='config-keys'>
+                <td><span className='config'>config</span></td>
+                <td>cypress.json</td>
+              </tr>
+              <tr className='config-keys'>
+                <td><span className='envFile'>envFile</span></td>
+                <td>cypress.env.json</td>
+              </tr>
+              <tr className='config-keys'>
+                <td><span className='env'>env</span></td>
+                <td>environment variables</td>
+              </tr>
+              <tr className='config-keys'>
+                <td><span className='cli'>CLI</span></td>
+                <td>CLI arguments</td>
+              </tr>
+            </tbody>
+          </table>
+        </pre>
       </div>
     )
   }
-
-          // { this._displayResolved(config, { comma: true }) }
 
   _getSpan (key, obj, comma) {
     return (
@@ -68,6 +99,10 @@ class Config extends Component {
       let hasComma = opts.comma || last !== key
       return this._getSpan(key, value, hasComma)
     })
+  }
+
+  _openHelp () {
+    App.ipc('external:open', 'https://on.cypress.io/guides/configuration')
   }
 }
 
