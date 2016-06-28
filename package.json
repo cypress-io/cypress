@@ -1,10 +1,11 @@
 {
   "name": "@cypress/core-reporter",
   "version": "0.0.0",
-  "description": "",
-  "main": "index.js",
+  "main": "dist/app/app",
   "scripts": {
     "build": "gulp build"
+    "prepublish": "gulp build",
+    "start": "gulp watch"
   },
   "repository": {
     "type": "git",
@@ -17,27 +18,37 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-reporter#readme",
   "devDependencies": {
-    "@cypress/core-icons": "^0.4.1",
-    "bluebird": "^3.4.0",
+    "babel-eslint": "^6.0.4",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-react": "^6.5.0",
+    "babel-preset-stage-1": "^6.5.0",
+    "eslint": "^2.12.0",
+    "eslint-plugin-react": "^5.1.1",
     "gulp": "^3.9.1",
-    "gulp-bower": "0.0.13",
-    "gulp-cached": "^1.1.0",
-    "gulp-clean": "^0.3.2",
-    "gulp-coffee": "^2.3.2",
-    "gulp-concat": "^2.6.0",
-    "gulp-eco": "0.0.2",
-    "gulp-load-plugins": "^1.2.4",
+    "gulp-autoprefixer": "^3.1.0",
+    "gulp-babel": "^6.1.2",
     "gulp-plumber": "^1.1.0",
-    "gulp-print": "^2.0.1",
-    "gulp-remember": "^0.3.1",
-    "gulp-replace": "^0.5.4",
-    "gulp-sass": "^2.3.1",
-    "gulp-tap": "^0.1.3",
-    "gulp-uglify": "^1.5.3",
-    "http-server": "^0.9.0",
-    "js-yaml": "^3.6.1",
-    "lodash": "^4.13.1",
-    "node-sass-import-once": "^1.2.0",
-    "run-sequence": "^1.2.1"
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^2.3.2",
+    "gulp-watch": "^4.3.8",
+    "lodash": "^4.0.0",
+    "mobx": "^2.0.0",
+    "mobx-react": "^3.0.0",
+    "node-sass-globbing": "0.0.23",
+    "react": "^15.0.0",
+    "react-dom": "^15.0.0"
+  },
+  "dependencies": {
+    "classnames": "^2.2.5",
+    "markdown-it": "^6.1.1"
+  },
+  "peerDependencies": {
+    "lodash": "^4.0.0",
+    "mobx": "^2.0.0",
+    "mobx-react": "^3.0.0",
+    "react": "^15.0.0",
+    "react-dom": "^15.0.0"
   }
 }

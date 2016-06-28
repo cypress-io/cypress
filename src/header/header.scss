@@ -1,0 +1,86 @@
+.reporter {
+  header {
+    background-color: #f8f8f8;
+    box-shadow: 0 1px 3px #ccc;
+    height: $header-height;
+    min-width: $min-width;
+    overflow: visible;
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+  }
+
+  .stats {
+    float: left;
+    margin-bottom: 0;
+    padding: 0;
+
+    li {
+      float: left;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 26px;
+      list-style-type: none;
+      padding: 10px;
+
+      &.passed {
+        color: #23AE89;
+      }
+
+      &.failed {
+        color: #E94B3B;
+      }
+
+      &.pending {
+        color: #aaa;
+      }
+
+      i {
+        margin: 5px;
+      }
+    }
+
+    .duration {
+      border-left: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+  }
+
+  .controls {
+    float: right;
+
+    button {
+      background-color: #f8f8f8;
+      border-color: transparent;
+      border-radius: 0;
+      line-height: 26px;
+      outline: 0;
+
+      &:hover {
+        background-color: #e9e9e9;
+      }
+
+      &:active,
+      &:focus {
+        outline: 0
+      }
+    }
+
+    i {
+      font-size: 90%;
+      margin: 5px;
+
+      &.fa-repeat {
+        font-size: 112%;
+      }
+    }
+
+    .stop-start {
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+      text-align: center;
+    }
+  }
+}

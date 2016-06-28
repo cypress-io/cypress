@@ -1,0 +1,207 @@
+.reporter {
+  .runnables {
+    padding-left: 0;
+    user-select: none;
+  }
+
+  .runnable {
+    width: 100%;
+    color: #6c6c6c;
+    background-color: #fff;
+    overflow: auto;
+    line-height: 18px;
+    padding-left: 0;
+
+    pre {
+      margin-top: 2px;
+      margin-bottom: 0;
+      padding-bottom: 2px;
+      padding-top: 2px;
+      padding-left: 10px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      clear: both;
+
+      &:empty {
+        display: none;
+      }
+
+      &.test-error {
+        background-color: darken($yellow-lightest, 5%);
+        border-left: 5px solid $fail;
+
+        &:hover {
+          cursor: pointer;
+          background-color: darken($yellow-lightest, 15%);
+        }
+      }
+    }
+
+    &.hover {
+      background-color: #f7f8f9;
+      cursor: pointer;
+
+      > .runnable-wrapper .runnable-controls i.fa-repeat {
+        visibility: visible !important;
+      }
+
+    }
+
+    &.runnable-active {
+      .runnable-state {
+        @extend .#{$fa-css-prefix}-refresh;
+        @extend .#{$fa-css-prefix}-spin;
+      }
+    }
+
+    .runnable-state {
+      display: inline-block;
+      line-height: 18px;
+      margin-right: 5px;
+      width: 12px;
+    }
+
+    &.suite .collapsible-indicator  {
+      padding-left: 2px;
+      font-size: 14px;
+      color: #bbbcbd;
+    }
+
+    &.runnable-processing > .runnable-wrapper {
+      .runnable-state {
+        @extend .#{$fa-css-prefix}-square-o;
+        color: #888;
+      }
+    }
+
+    &.test.runnable-failed > .runnable-wrapper {
+      border-left: 10px solid $fail;
+
+      .fa-warning.has-command-failures {
+        visibility: visible;
+      }
+    }
+
+    &.suite.runnable-pending > div > .runnable-wrapper {
+      border-left: 10px solid lighten($pending, 25%);
+    }
+
+    &.test.runnable-pending > .runnable-wrapper {
+      border-left: 10px solid lighten($pending, 25%);
+    }
+
+    &.test.runnable-passed > .runnable-wrapper {
+      border-left: 10px solid $pass;
+    }
+
+    &.suite.runnable-passed > div > .runnable-wrapper {
+      border-left: 10px solid $pass;
+    }
+
+    &.suite.runnable-failed > div > .runnable-wrapper {
+      border-left: 10px solid $fail;
+
+      .collapsible-more {
+        border-radius: 3px;
+        background-color: $fail;
+        color: #FFF;
+        padding: 0 4px 0 3px;
+        font-size: 10px;
+        margin-left: 2px;
+      }
+    }
+
+    &.test.runnable-failed {
+      pre {
+        color: $fail;
+      }
+
+      .runnable-state {
+        @extend .#{$fa-css-prefix}-times;
+        color: $fail;
+      }
+    }
+
+    &.suite > div > .runnable-wrapper {
+      .runnable-title {
+        color: #111;
+        font-weight: 800;
+        font-size: 13px;
+      }
+    }
+
+    &.runnable-passed > .runnable-wrapper {
+      .runnable-state {
+        @extend .#{$fa-css-prefix}-check;
+        color: $pass;
+      }
+    }
+
+    &.runnable-pending > .runnable-wrapper {
+      .runnable-title {
+        color: lighten($pending, 25%);
+      }
+
+      .runnable-state {
+        @extend .#{$fa-css-prefix}-circle-o-notch;
+        color: lighten($pending, 20%);
+      }
+    }
+  }
+
+  .runnable-wrapper {
+    padding: 5px;
+    position: relative;
+    overflow: hidden;
+    border-left: 10px solid transparent;
+  }
+
+  .runnable-title {
+    font-size: 12.5px;
+  }
+
+  .runnable-content-region {
+    overflow: auto;
+  }
+
+  .suite > div > .runnable-wrapper,
+  .test .runnable-content-region {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .test .runnable-content-region {
+    padding-right: 30px;
+  }
+
+  .runnable-controls {
+    overflow: hidden;
+    position: absolute;
+    right: 7px;
+    text-align: right;
+    top: 5px;
+
+    label {
+      padding: 2px 4px;
+    }
+
+    i {
+      margin: 0 2px;
+      color: #999;
+      visibility: hidden;
+      font-size: 15px;
+    }
+  }
+
+  .test.runnable-failed .runnable-controls i {
+    visibility: visible;
+  }
+
+  .test > .runnable-wrapper > .collapsible > .collapsible-header {
+    .collapsible-indicator,
+    .collapsible-more {
+      display: none;
+    }
+  }
+}
