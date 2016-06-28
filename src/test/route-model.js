@@ -8,23 +8,28 @@ export default class Route extends Log {
   @observable numResponses = 0
   @observable response
   @observable status
+  @observable url
 
   constructor (props) {
     super(props)
-    this._setProps(props)
-  }
 
-  update (props) {
-    super.update(props)
-    this._setProps(props)
-  }
-
-  _setProps (props) {
     this.isStubbed = props.isStubbed
     this.method = props.method
     this.numResponses = props.numResponses
     this.response = props.response
     this.status = props.status
+    this.url = props.url
+  }
+
+  update (props) {
+    super.update(props)
+
+    this.isStubbed = props.isStubbed
+    this.method = props.method
+    this.numResponses = props.numResponses
+    this.response = props.response
+    this.status = props.status
+    this.url = props.url
   }
 
   serialize () {

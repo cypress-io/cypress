@@ -3,28 +3,27 @@ import { observable } from 'mobx'
 import Log from './log-model'
 
 export default class Command extends Log {
-  @observable actual
-  @observable expected
   @observable passed
   @observable selector
   // @observable $el
   @observable highlightAttr
   @observable numElements
-  @observable visible
+  @observable visible = true
 
   constructor (props) {
     super(props)
-    this._setProps(props)
+
+    this.passed = props.passed
+    this.selector = props.selector
+    // this.$el = props.$el
+    this.highlightAttr = props.highlightAttr
+    this.numElements = props.numElements
+    this.visible = props.visible
   }
 
   update (props) {
     super.update(props)
-    this._setProps(props)
-  }
 
-  _setProps (props) {
-    this.actual = props.actual
-    this.expected = props.expected
     this.passed = props.passed
     this.selector = props.selector
     // this.$el = props.$el
@@ -35,8 +34,6 @@ export default class Command extends Log {
 
   serialize () {
     return _.extend(super.serialize(), {
-      actual: this.actual,
-      expected: this.expected,
       passed: this.passed,
       selector: this.selector,
       // el: this.$el,

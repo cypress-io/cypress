@@ -9,20 +9,11 @@ export default class Log {
   @observable number
   @observable event = false
   @observable type
-  @observable indent = 0
   @observable state
   @observable referencesAlias = null
 
   constructor (props) {
     this.id = props.id
-    this._setProps(props)
-  }
-
-  update (props) {
-    this._setProps(props)
-  }
-
-  _setProps (props) {
     this.alias = props.alias
     this.aliasType = props.aliasType
     this.name = props.name
@@ -30,7 +21,18 @@ export default class Log {
     this.number = props.number
     this.event = props.event
     this.type = props.type
-    this.indent = props.indent
+    this.state = props.state
+    this.referencesAlias = props.referencesAlias
+  }
+
+  update (props) {
+    this.alias = props.alias
+    this.aliasType = props.aliasType
+    this.name = props.name
+    this.message = props.message
+    this.number = props.number
+    this.event = props.event
+    this.type = props.type
     this.state = props.state
     this.referencesAlias = props.referencesAlias
   }
@@ -44,9 +46,8 @@ export default class Log {
       message: this.message,
       number: this.number,
       event: this.event,
-      type: this.type,
-      indent: this.indent,
       state: this.state,
+      type: this.type,
       referencesAlias: this.referencesAlias,
     }
   }

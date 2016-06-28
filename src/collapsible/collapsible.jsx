@@ -8,6 +8,12 @@ class Collapsible extends Component {
     this.state = { isOpen: props.isOpen }
   }
 
+  componentDidUpdate (prevProps) {
+    if (this.props.isOpen != null && this.props.isOpen !== prevProps.isOpen) {
+      this.setState({ isOpen: this.props.isOpen })
+    }
+  }
+
   render () {
     return (
       <div className={cs('collapsible', { 'is-open': this.state.isOpen })}>

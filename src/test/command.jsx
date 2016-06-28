@@ -46,7 +46,7 @@ const Command = observer(({ model }) => (
         <i className='fa fa-spinner fa-spin'></i>
         <span>{model.number || ''}</span>
       </span>
-      <span className='command-method' style={{ paddingLeft: model.indent }}>
+      <span className='command-method'>
         <span>{model.event ? `(${displayName(model)})` :  displayName(model)}</span>
       </span>
       <span className='command-message'>

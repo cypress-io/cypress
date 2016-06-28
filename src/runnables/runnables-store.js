@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { observable } from 'mobx'
+import { autorun, observable } from 'mobx'
 
 import Agent from '../test/agent-model'
 import Command from '../test/command-model'
@@ -18,24 +18,28 @@ class RunnablesStore {
   @observable _logs = defaults._logs
 
   setRunnables (rootRunnable) {
-    this.runnables = this._createRunnableChildren(rootRunnable)
+    this.runnables = this._createRunnableChildren(rootRunnable, 0)
   }
 
-  _createRunnableChildren (runnable) {
-    return this._createRunnables(runnable.tests, 'test').concat(
-      this._createRunnables(runnable.suites, 'suite')
+  _createRunnableChildren (runnable, level) {
+    return this._createRunnables(runnable.tests, 'test', level).concat(
+      this._createRunnables(runnable.suites, 'suite', level)
     )
   }
 
-  _createRunnables (runnables, type) {
-    return _.map(runnables, (runnable) => this._createRunnable(runnable, type))
+  _createRunnables (runnables, type, level) {
+    return _.map(runnables, (runnable) => this._createRunnable(runnable, type, level))
   }
 
-  _createRunnable (props, type) {
-    const runnable = new Runnable(props, type)
+  _createRunnable (props, type, level) {
+    const runnable = new Runnable(props, type, level)
     this._runnables[runnable.id] = runnable
-    runnable.children = this._createRunnableChildren(props)
+    runnable.children = this._createRunnableChildren(props, ++level)
     return runnable
+  }
+
+  runnableFinished ({ id }) {
+    this._runnables[id].isRunning = false
   }
 
   addLog (log) {
@@ -43,7 +47,7 @@ class RunnablesStore {
       case 'command': {
         const command = new Command(log)
         this._logs[log.id] = command
-        this._runnables[log.testId].addCommand(command)
+        this._runnables[log.testId].addCommand(command, log.hookName)
         break
       }
       case 'agent': {

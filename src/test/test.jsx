@@ -1,6 +1,7 @@
-import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
+
+import { indent } from '../lib/util'
 
 import Agents from './agents'
 import Hooks from './hooks'
@@ -15,8 +16,6 @@ const NoCommands = observer(() => (
   </ul>
 ))
 
-const hasCommands = (hooks) => !!_.flatMap(hooks, 'commands').length
-
 const TestHeader = observer(({ model }) => (
   <span>
     <i className='runnable-state fa'></i>
@@ -28,7 +27,7 @@ const TestHeader = observer(({ model }) => (
 ))
 
 const Test = observer(({ model }) => (
-  <div className='runnable-wrapper' style={{ paddingLeft: model.indent }}>
+  <div className='runnable-wrapper' style={{ paddingLeft: indent(model.level) }}>
     <Collapsible
       header={<TestHeader model={model} />}
       headerClass='runnable-content-region'
@@ -38,7 +37,7 @@ const Test = observer(({ model }) => (
       <Agents model={model} />
       <Routes model={model} />
       <div className='runnable-commands-region'>
-        {hasCommands(model.hooks) ? <Hooks model={model} /> : <NoCommands />}
+        {model.commands.length ? <Hooks model={model} /> : <NoCommands />}
       </div>
     </Collapsible>
     <pre className='test-error'>{model.error}</pre>

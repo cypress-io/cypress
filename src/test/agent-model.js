@@ -8,15 +8,14 @@ export default class Agent extends Log {
 
   constructor (props) {
     super(props)
-    this._setProps(props)
+
+    this.callCount = props.callCount
+    this.functionName = props.functionName
   }
 
   update (props) {
     super.update(props)
-    this._setProps(props)
-  }
 
-  _setProps (props) {
     this.callCount = props.callCount
     this.functionName = props.functionName
   }

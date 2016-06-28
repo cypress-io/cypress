@@ -3,6 +3,8 @@ import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
+import { indent } from '../lib/util'
+
 import Test from '../test/test'
 import Collapsible from '../collapsible/collapsible'
 
@@ -14,7 +16,7 @@ const Suite = observer(({ model }) => (
   <Collapsible
     header={<SuiteHeader model={model} />}
     headerClass='runnable-wrapper'
-    headerStyle={{ paddingLeft: model.indent }}
+    headerStyle={{ paddingLeft: indent(model.level) }}
     contentClass='runnables-region'
     isOpen={true}
   >
