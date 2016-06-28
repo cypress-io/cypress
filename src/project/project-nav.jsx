@@ -1,9 +1,7 @@
 import React, { Component } from 'react'
-import { observer } from 'mobx-react'
 import Dropdown from '../dropdown/dropdown'
 import { Link } from 'react-router'
 
-@observer
 export default class ProjectNav extends Component {
   render () {
     const project = this.props.project
