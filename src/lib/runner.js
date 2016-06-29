@@ -58,7 +58,7 @@ export default {
     channel.emit('watch:test:file', specSrc)
 
     driver.on('initialized', ({ runner }) => {
-      reporterBus.emit('runnables:ready', runner.getNormalizedRunnables())
+      reporterBus.emit('runnables:ready', runner.normalizeAll())
     })
 
     driver.on('log', (log) => {
