@@ -1,5 +1,6 @@
+import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
-import React from 'react'
+import React, { Component } from 'react'
 
 import { indent } from '../lib/util'
 
@@ -26,23 +27,81 @@ const TestHeader = observer(({ model }) => (
   </span>
 ))
 
-// TODO: only open collapsible if test has been active for, say, 500ms
-const Test = observer(({ model }) => (
-  <div className='runnable-wrapper' style={{ paddingLeft: indent(model.level) }}>
-    <Collapsible
-      header={<TestHeader model={model} />}
-      headerClass='runnable-content-region'
-      contentClass='runnable-instruments'
-      isOpen={model.state === 'failed' || model.state === 'active'}
-    >
-      <Agents model={model} />
-      <Routes model={model} />
-      <div className='runnable-commands-region'>
-        {model.commands.length ? <Hooks model={model} /> : <NoCommands />}
+const LONG_RUNNING_THRESHOLD = 500
+
+@observer
+class Test extends Component {
+  // the purpose of the _isLongRunning property and the following several
+  // methods is to expand the test if the test's state is 'active'
+  // for more than the LONG_RUNNING_THRESHOLD
+  @observable _isLongRunning = false
+
+  componentWillMount () {
+    this._prevState = this.props.model.state
+
+    if (this._isActive()) {
+      this._startTimingActive()
+    }
+  }
+
+  componentWillReact () {
+    if (this._becameActive()) {
+      this._startTimingActive()
+    }
+
+    if (this._becameInactive()) {
+      clearTimeout(this._activeTimeout)
+      action('became:inactive', () => this._isLongRunning = false)()
+    }
+
+    this._prevState = this.props.model.state
+  }
+
+  _startTimingActive () {
+    this._activeTimeout = setTimeout(action('long:running', () => {
+      if (this._isActive()) {
+        this._isLongRunning = true
+      }
+    }), LONG_RUNNING_THRESHOLD)
+  }
+
+  _becameActive () {
+    return !this._wasActive() && this._isActive()
+  }
+
+  _becameInactive () {
+    return this._wasActive() && !this._isActive()
+  }
+
+  _wasActive () {
+    return this._prevState === 'active'
+  }
+
+  _isActive () {
+    return this.props.model.state === 'active'
+  }
+
+  render () {
+    const { model } = this.props
+
+    return (
+      <div className='runnable-wrapper' style={{ paddingLeft: indent(model.level) }}>
+        <Collapsible
+          header={<TestHeader model={model} />}
+          headerClass='runnable-content-region'
+          contentClass='runnable-instruments'
+          isOpen={model.state === 'failed' || this._isLongRunning}
+        >
+          <Agents model={model} />
+          <Routes model={model} />
+          <div className='runnable-commands-region'>
+            {model.commands.length ? <Hooks model={model} /> : <NoCommands />}
+          </div>
+        </Collapsible>
+        <pre className='test-error'>{model.error}</pre>
       </div>
-    </Collapsible>
-    <pre className='test-error'>{model.error}</pre>
-  </div>
-))
+    )
+  }
+}
 
 export default Test
