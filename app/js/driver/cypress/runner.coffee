@@ -1,12 +1,12 @@
 $Cypress.Runner = do ($Cypress, _) ->
 
+  defaultGrep = /.*/
   class $Runner
     constructor: (@Cypress, @runner) ->
       @initialize()
 
       @listeners()
       @override()
-      @getRunnables() if @runner.suite
 
     fail: (err, runnable) ->
       ## if runnable.state is passed then we've
@@ -19,6 +19,7 @@ $Cypress.Runner = do ($Cypress, _) ->
 
     initialize: ->
       ## hold onto the runnables for faster lookup later
+      @tests = []
       @runnables = []
       @runnableIds = {}
 
@@ -140,31 +141,100 @@ $Cypress.Runner = do ($Cypress, _) ->
     wrapErr: (err) ->
       _.pick err, "message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host", "uncaught", "actual", "expected", "showDiff"
 
-    getNormalizedRunnables: ->
+    matchesGrep: (runnable, grep) ->
+      ## we have optimized this iteration to the maximum.
+      ## we memoize the existential matchesGrep property
+      ## so we dont regex again needlessly when going
+      ## through tests which have already been set earlier
+      if (not runnable.matchesGrep?) or (not _.isEqual(runnable.grepRe, grep))
+        runnable.grepRe      = grep
+        runnable.matchesGrep = grep.test(runnable.fullTitle())
+
+      runnable.matchesGrep
+
+    normalizeAll: ->
+      ## TODO: remove the date perf checking here
       d = new Date
-      r = @normalize(@runner.suite)
+
+      tests         = {}
+      grep          = @grep()
+      grepIsDefault = _.isEqual(grep, defaultGrep)
+
+      obj = @normalize(@runner.suite, tests, grep, grepIsDefault)
+
+      @tests = _.values(tests)
+
+      ## TODO: remove console.log here
       console.log "FINISHED PROCESSING NORMALIZED RUNNABLES", new Date - d
-      return r
 
-    ## TODO: need to take into account grepping for .only's
-    normalize: (runnable) ->
-      obj = {title: runnable.title, pending: runnable.pending}
+      return obj
 
-      ## only add this property if we absolutely have to
-      if r = runnable.root
-        obj.root = r
+    normalize: (runnable, tests, grep, grepIsDefault) ->
 
-      obj.id = id = _.uniqueId("r")
+      normalize = (runnable) =>
+        runnable.id = _.uniqueId("r")
 
-      runnable.id = id
-      @runnableIds[id] = obj
-      @runnables.push(runnable)
+        ## tests have a runnable of 'test' whereas suites do not have a runnable property
+        runnable.type ?= "suite"
 
-      _.each {tests: runnable.tests, suites: runnable.suites}, (runnables, key) =>
-        if runnable[key]
-          obj[key] = _.map(runnables, @normalize.bind(@))
+        @runnableIds[runnable.id] = obj
+        @runnables.push(runnable)
 
-      obj
+        obj = {id: runnable.id, title: runnable.title}
+
+        ## only add this property if we absolutely have to
+        if r = runnable.root
+          obj.root = r
+
+        ## only add this property if we absolutely have to
+        if p = runnable.pending
+          obj.pending = p
+
+        return obj
+
+      push = (test) =>
+        tests[test.id] ?= test
+
+      obj = normalize(runnable)
+
+      ## if we have a default grep then avoid
+      ## grepping altogether and just push
+      ## tests into the array of tests
+      if grepIsDefault
+        if runnable.type is "test"
+          push(runnable)
+
+        ## and recursively iterate and normalize all other runnables
+        _.each {tests: runnable.tests, suites: runnable.suites}, (runnables, key) =>
+          if runnable[key]
+            obj[key] = _.map runnables, (runnable) =>
+              @normalize(runnable, tests, grep, grepIsDefault)
+      else
+        ## iterate through all tests and only push them in
+        ## if they match the current grep
+        obj.tests = _.reduce runnable.tests ? [], (memo, test) =>
+          ## only push in the test if it matches
+          ## our grep
+          if @matchesGrep(test, grep)
+            memo.push(normalize(test))
+            push(test)
+          memo
+        , []
+
+        ## and go through the suites
+        obj.suites = _.reduce runnable.suites ? [], (memo, suite) =>
+          ## but only add them if a single nested test
+          ## actually matches the grep
+          any = @anyTestInSuite suite, (test) =>
+            @matchesGrep(test, grep)
+
+          if any
+            memo.push(@normalize(suite, tests, grep, grepIsDefault))
+
+          memo
+        , []
+
+      return obj
 
     wrap: (runnable) ->
       ## we need to optimize wrap by converting
@@ -261,94 +331,6 @@ $Cypress.Runner = do ($Cypress, _) ->
     total: ->
       @runner.suite.total()
 
-    ## returns each runnable to the callback function
-    ## if it matches the current grep
-    ## subsequent runnable iterations are optimized
-    getRunnables: (options = {}) ->
-      ## reset our tests on each iteration
-      ## use this to hold onto the tests
-      ## that pass the current grep
-      @tests = []
-
-      ## when grep isnt /.*/, it means a user has written a .only
-      ## on a suite or a test, and in that case we dont want to
-      ## call onRunnable unless they match our grep.
-      _.defaults options,
-        grep: @grep()
-        iterate: true
-        pushRunnables: true
-        onRunnable: ->
-
-      ## if we already have runnables then just
-      ## prefer these instead of the deep iteration
-      ## this is simply faster performance
-      if @runnables.length
-        _.extend options,
-          iterate: false
-          pushRunnables: false
-
-        for runnable in @runnables
-          @process(runnable, options)
-
-        return null
-
-      else
-        ## go through the normal iteration off of the root suite
-        @iterateThroughRunnables(@runner.suite, options)
-
-    ## iterates through both the runnables tests + suites if it has any
-    iterateThroughRunnables: (runnable, options) ->
-      _.each [runnable.tests, runnable.suites], (array) =>
-        _.each array, (runnable) =>
-          @process runnable, options
-
-    ## generates an id for each runnable and then continues iterating
-    ## on children tests + suites
-    process: (runnable, options) ->
-      ## iterating on both the test and its parent (the suite)
-      ## bail if we're the root runnable
-      ## or we've already processed this tests parent
-      return if runnable.root
-
-      ## tests have a runnable of 'test' whereas suites do not have a runnable property
-      runnable.type ?= "suite"
-
-      ## hold onto all of the runnables in a flat array
-      ## so we can look this up much faster in the future
-      @runnables.push(runnable) if options.pushRunnables
-
-      ## we have optimized this iteration to the maximum.
-      ## we memoize the existential matchesGrep property
-      ## so we dont do N+1 ops
-      ## also if we are testing against a NEW grep then
-      ## nuke
-      matchesGrep = (runnable, grep) ->
-        ## we want to make sure this is the grep pattern we previously
-        ## matched against
-        if (not runnable.matchesGrep?) or (not _.isEqual(runnable.grepRe, grep))
-          runnable.grepRe      = grep
-          runnable.matchesGrep = grep.test(runnable.fullTitle())
-
-        runnable.matchesGrep
-
-      ## trigger the add events so our UI can begin displaying
-      ## the tests + suites
-      switch runnable.type
-        when "suite"
-          any = @anyTest runnable, (test) ->
-            matchesGrep(test, options.grep)
-
-          options.onRunnable(runnable) if any
-
-        when "test"
-          if matchesGrep(runnable, options.grep)
-            options.onRunnable(runnable)
-            @tests.push runnable
-
-      ## recursively apply to all tests / suites of this runnable
-      ## unless we've been told not to iterate (during optimized loop)
-      @iterateThroughRunnables(runnable, options) if options.iterate
-
     getTestByTitle: (title) ->
       @firstTest @runner.suite, (test) ->
         test.title is title
@@ -362,12 +344,12 @@ $Cypress.Runner = do ($Cypress, _) ->
 
     ## optimized iteration which loops through
     ## all tests until we explicitly return true
-    anyTest: (suite, fn) ->
+    anyTestInSuite: (suite, fn) ->
       for test in suite.tests
         return true if fn(test) is true
 
       for suite in suite.suites
-        return true if @anyTest(suite, fn) is true
+        return true if @anyTestInSuite(suite, fn) is true
 
       ## else return false
       return false
@@ -379,7 +361,7 @@ $Cypress.Runner = do ($Cypress, _) ->
         ## grab grep from the mocha runner
         ## or just set it to all in case
         ## there is a mocha regression
-        @runner._grep ?= /.*/
+        @runner._grep ?= defaultGrep
 
     ignore: (runnable) ->
       ## for mocha we just need to set
