@@ -22,7 +22,7 @@ channel.on('connect', () => {
 
 const driverToReporterEvents = 'paused'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
-const driverToSocketEvents = 'fixture request history:entries exec domain:change'.split(' ')
+const driverToSocketEvents = 'fixture request history:entries exec domain:set domain:change'.split(' ')
 const driverTestEvents = 'test:before:hooks test:after:hooks'.split(' ')
 const driverAutomationEvents = 'get:cookies get:cookie set:cookie clear:cookies clear:cookie'.split(' ')
 const driverToLocalEvents = 'viewport config stop url:changed page:loading'.split(' ')
