@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import Browsers from './browsers'
 import { Link } from 'react-router'
+import App from '../lib/app'
 
 export default class ProjectNav extends Component {
   render () {
@@ -31,11 +32,24 @@ export default class ProjectNav extends Component {
               </li>
             </ul>
             <ul className='nav navbar-nav navbar-right'>
+              <li onClick={this._launchBrowser}>
+                Launch Browser
+              </li>
               <Browsers project={project} />
             </ul>
           </div>
         </div>
       </nav>
     )
+  }
+
+  _launchBrowser () {
+    App.ipc('launch:browser', {
+      browser: 'chrome',
+      url: 'http://localhost:2020',
+    }, function (err, data) {
+      err, data
+      debugger
+    })
   }
 }
