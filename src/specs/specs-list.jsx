@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { getSpecs } from './specs-api'
-import specsStore from './specs-store'
+import specsCollection from './specs-collection'
 import { observer } from 'mobx-react'
 
 @observer
@@ -12,43 +12,57 @@ class Specs extends Component {
   }
 
   render () {
-    if (!specsStore.isLoaded) return null
+    if (!specsCollection.isLoaded) return null
 
     return (
-      <div id="tests-list-page">
-        <ul className="outer-files-container list-as-table">
-          <li className="folder">
-            <div>
-              <div>
-                <i className="fa fa-folder-open-o"></i>
-                Integration{" "}
-              </div>
-              <div>
-                <ul className="list-as-table">
-                  { _.map(specsStore.specs, (spec) => (
-                    <li key={spec.id} className='li'>
-                      { spec.id }
-                    </li>
-                  ))}
-                  <li className="file">
-                    <div>
-                      <div>
-                        <i className="fa fa-file-o"></i>
-                        Baz.coffee
-                      </div>
-                    </div>
-                    <div>
-                      <div>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </li>
+      <div id='tests-list-page'>
+        <ul className='outer-files-container list-as-table'>
+          { _.map(specsCollection.specs, (spec) => (
+            this.specItem(spec)
+          ))}
         </ul>
       </div>
     )
+  }
+
+  specItem (spec) {
+    if (spec.children.specs && spec.children.specs.length) {
+      return (
+        <li key={spec.id} className='folder'>
+          <div>
+            <div>
+              <i className='fa fa-folder-o'></i>
+              { spec.name }{' '}
+            </div>
+          </div>
+          <div>
+            <div>
+              <ul className='list-as-table'>
+                { _.map(spec.children.specs, (spec) => (
+                  this.specItem(spec)
+                ))}
+              </ul>
+            </div>
+          </div>
+        </li>
+      )
+    } else {
+      return (
+        <li key={spec.id} className='file'>
+          <a href='#'>
+            <div>
+              <div>
+                <i className='fa fa-file-o'></i>
+                { spec.name }
+              </div>
+            </div>
+            <div>
+              <div></div>
+            </div>
+          </a>
+        </li>
+      )
+    }
   }
 }
 

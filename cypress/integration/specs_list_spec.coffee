@@ -44,10 +44,11 @@ describe "Specs List", ->
         .fixture("browsers").then (@browsers) ->
           @config.browsers = @browsers
           @ipc.handle("open:project", null, @config)
-          @ipc.handle("get:specs", null, [{"id": "foo"}])
+        .fixture("specs").then (@specs) ->
+          @ipc.handle("get:specs", null, @specs)
 
     it "lists specs", ->
-      cy.contains("Integration")
+      cy.contains("integration")
 
   describe "server error", ->
     beforeEach ->

@@ -1,10 +1,15 @@
 import App from '../lib/app'
-import specsStore from '../specs/specs-store'
+import specsCollection from '../specs/specs-collection'
 
 const getSpecs = () => {
-  specsStore.loading(true)
-  App.ipc('get:specs').then((specs) => {
-    specsStore.setSpecs(specs)
+  specsCollection.loading(true)
+
+  App.ipc('get:specs')
+  .then((specs) => {
+    specsCollection.setSpecs(specs)
+  })
+  .catch((err) => {
+    err
   })
 }
 

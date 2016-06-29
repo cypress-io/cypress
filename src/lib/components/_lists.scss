@@ -10,6 +10,8 @@ ul.list-header {
   border-top: 0;
   padding-left: 0;
   background-color: transparent;
+  list-style-type: none;
+  overflow: auto;
 
   .li {
     overflow: auto;

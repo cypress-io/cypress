@@ -128,199 +128,217 @@
     cursor: pointer;
   }
 
-  .outer-files-container {
-    @include list-columns(100%);
-    margin-bottom: 0;
-  }
+   .outer-files-container {
+     @include list-columns(100%);
+     margin-bottom: 0;
+   }
 
-  .all-files-container {
-    margin-top: 60px;
-    margin-bottom: 40px;
-  }
+   .all-files-container {
+     margin-top: 60px;
+     margin-bottom: 40px;
+   }
 
-  .file.all-tests {
-    position: absolute;
-    top: 68px;
-    left: 20px;
-    border-bottom: 1px solid #3861bf;
+   .file.all-tests {
+     position: absolute;
+     top: 68px;
+     left: 20px;
+     border-bottom: 1px solid #3861bf;
 
-    &>div, &>div>div {
-      padding: 0;
+     &>div, &>div>div {
+       padding: 0;
+     }
+
+     i {
+       @extend .#{$fa-css-prefix}-play;
+     }
+   }
+
+   .file>a, .folder {
+     color: #69727e;
+
+     i {
+       color: #476fc9;
+       margin-right: 5px;
+     }
+   }
+
+   .folder {
+     font-weight: 500;
+     font-size: 14px;
+     color: #111;
+
+     i {
+       font-size: 14px;
+     }
+
+     &>div>div {
+       padding-bottom: 0;
+     }
+   }
+
+
+   .file>a {
+     font-weight: 300;
+     border-bottom: 1px dotted #eeeeee;
+     padding: 3px 0;
+
+     i {
+       font-size: 12px;
+     }
+
+     &:hover {
+       background-color: #f3f7ff;
+       cursor: pointer;
+     }
+   }
+
+   .list-as-table>.folder {
+    float: left;
+    width: 100%;
+
+     &>div>div:last-child {
+       padding: 1px 0;
+     }
+   }
+
+   .list-as-table>.file {
+    float: left;
+    width: 100%;
+
+      &>a {
+        float: left;
+        width: 100%;
+
+       &.all-tests {
+         &>div:first-child {
+
+         }
+
+         &>div:last-child {
+           display: none;
+         }
+       }
+
+       &:last-child {
+         border-bottom: 0;
+       }
+
+       &>div:first-child {
+         @include responsive-width(75%);
+       }
+
+       &>div:last-child {
+         @include responsive-width(25%);
+         text-align: right;
+         color: #bdc0c5;
+       }
+     }
     }
 
-    i {
-      @extend .#{$fa-css-prefix}-play;
-    }
-  }
+   .files-list-header {
+     @include list-columns(75%, 25%);
 
-  .file:not(.all-tests), .folder {
-    color: #69727e;
+     &>li>div:last-child {
+       text-align: right;
+     }
+   }
 
-    i {
-      color: #476fc9;
-      margin-right: 5px;
-    }
-  }
+   // need to refactor to be calculated using javascript
+   .outer-files-container.list-as-table>.folder,
+   .outer-files-container.list-as-table>.file>a {
+     &>div:first-child>div:first-child {
+       padding: 5px 20px;
+       background-color: #F9F9F9;
+       font-weight: 500;
+       letter-spacing: 0.5px;
+       text-transform: uppercase;
+       border-bottom: 1px solid #eee;
+       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+       color: #777;
 
-  .folder {
-    font-weight: bold;
-    font-size: 14px;
-    color: #111;
+       i {
+         display: none;
+         margin-right: 0;
+       }
 
-    i {
-      font-size: 14px;
-    }
+       &:after {
+         content: "tests"
+       }
+     }
 
-    &>div>div {
-      padding-bottom: 0;
-    }
-  }
+     &>div:last-child>div:last-child {
 
+       &>.list-as-table>.folder,
+       &>.list-as-table>.file>a {
 
-  .file:not(.all-tests) {
-    font-weight: 300;
-    border-bottom: 1px dotted #eeeeee;
+         &>div:first-child>div:first-child {
+           padding-left: 20px;
+         }
 
-    i {
-      font-size: 12px;
-    }
+         &>div:last-child>div:last-child {
 
-    &:hover {
-      background-color: #f3f7ff;
-      cursor: pointer;
-    }
-  }
+           &>.list-as-table>.folder,
+           &>.list-as-table>.file>a {
 
-  .list-as-table>.folder {
+             &>div:first-child>div:first-child {
+               padding-left: 40px;
+             }
 
-    &>div>div:last-child {
-      padding: 0;
-    }
-  }
+             &>div:last-child>div:last-child {
 
-  .list-as-table>.file:not(.all-tests) {
+               &>.list-as-table>.folder,
+               &>.list-as-table>.file>a {
 
-    &.all-tests {
-      &>div:first-child {
+                 &>div:first-child>div:first-child {
+                   padding-left: 60px;
+                 }
 
-      }
+                 &>div:last-child>div:last-child {
 
-      &>div:last-child {
-        display: none;
-      }
-    }
+                   &>.list-as-table>.folder,
+                   &>.list-as-table>.file>a {
 
-    &:last-child {
-      border-bottom: 0;
-    }
+                     &>div:first-child>div:first-child {
+                       padding-left: 80px;
+                     }
 
-    &>div:first-child {
-      @include responsive-width(75%);
-    }
+                     &>div:last-child>div:last-child {
 
-    &>div:last-child {
-      @include responsive-width(25%);
-      text-align: right;
-      color: #bdc0c5;
-    }
-  }
+                       &>.list-as-table>.folder,
+                       &>.list-as-table>.file>a {
 
-  .files-list-header {
-    @include list-columns(75%, 25%);
+                         &>div:first-child>div:first-child {
+                           padding-left: 100px;
+                         }
+                         &>div:last-child>div:last-child {
 
-    &>li>div:last-child {
-      text-align: right;
-    }
+                           &>.list-as-table>.folder,
+                           &>.list-as-table>.file>a {
 
-  }
+                             &>div:first-child>div:first-child {
+                               padding-left: 120px;
+                             }
+                           }
+                          }
 
-  // need to refactor to be calculated using javascript
-  .outer-files-container.list-as-table>.folder,
-  .outer-files-container.list-as-table>.file:not(.all-tests) {
+                       }
 
-    &>div>div:first-child {
-      padding: 5px 20px;
-      background-color: #F9F9F9;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      border-bottom: 1px solid #eee;
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      color: #777;
+                     }
 
-      i {
-        display: none;
-        margin-right: 0;
-      }
+                   }
 
-      &:after {
-        content: "tests"
-      }
-    }
+                 }
 
-    &>div>div:last-child {
+               }
 
-      &>.list-as-table>.folder,
-      &>.list-as-table>.file {
+             }
 
-        &>div>div:first-child {
-          padding-left: 20px;
-        }
+           }
 
-        &>div>div:last-child {
+         }
 
-          &>.list-as-table>.folder,
-          &>.list-as-table>.file {
+       }
 
-            &>div>div:first-child {
-              padding-left: 40px;
-            }
-
-            &>div>div:last-child {
-
-              &>.list-as-table>.folder,
-              &>.list-as-table>.file {
-
-                &>div>div:first-child {
-                  padding-left: 60px;
-                }
-
-                &>div>div:last-child {
-
-                  &>.list-as-table>.folder,
-                  &>.list-as-table>.file {
-
-                    &>div>div:first-child {
-                      padding-left: 80px;
-                    }
-
-                    &>div>div:last-child {
-
-                      &>.list-as-table>.folder,
-                      &>.list-as-table>.file {
-
-                        &>div>div:first-child {
-                          padding-left: 100px;
-                        }
-
-                      }
-
-                    }
-
-                  }
-
-                }
-
-              }
-
-            }
-
-          }
-
-        }
-
-      }
-
-    }
-  }
-}
+     }
+   }
+ }

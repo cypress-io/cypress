@@ -1,14 +1,11 @@
-import { observable, action } from 'mobx'
+import { observable } from 'mobx'
+import { SpecsCollection } from './specs-collection'
 
 export default class Spec {
-  @observable id
-  @observable isLoading = false
+  @observable name
+  @observable children = new SpecsCollection([])
 
   constructor (spec) {
-    this.id = spec.id
-  }
-
-  @action loading (bool) {
-    this.isLoading = bool
+    this.name = spec.name
   }
 }
