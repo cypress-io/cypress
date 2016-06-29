@@ -146,26 +146,13 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
           ## let our function know we've navigated
           navigated(attr, arguments)
 
-    ## think about moving this method out of Cypress
-    ## and into our app, since it kind of leaks the
-    ## remote + initial concerns, which could become
-    ## constants which our server sends us during
-    ## initial boot.
+    ## if we don't have a fully qualified url
+    ## then ensure the url starts with a leading slash
     @createInitialRemoteSrc = (url) ->
-      if not reHttp.test(url)
-        remoteHost = "<root>"
+      if @isFullyQualifiedUrl(url)
+        url
       else
-        url = new Uri(url)
-        remoteHost = url.origin()
-
-        ## strip out the origin because we cannot
-        ## request a cross domain frame, it has to be proxied
-        url = url.toString().replace(remoteHost, "")
-
-      ## setup the cookies for remoteHost + initial
-      $Cypress.Cookies.setInitialRequest(remoteHost)
-
-      return "/" + _.ltrim(url, "/")
+        "/" + _.ltrim(url, "/")
 
     @isFullyQualifiedUrl = (url) ->
       reHttp.test(url)

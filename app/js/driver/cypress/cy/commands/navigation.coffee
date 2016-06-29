@@ -324,7 +324,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             ## then go ahead and change the iframe's src
             ## and we're good to go
             if origin is existing.origin()
-              $remoteIframe.prop "src", url
+              $remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
             else
               ## tell our backend we're changing domains
               new Promise (resolve) ->
