@@ -20,12 +20,13 @@ channel.on('connect', () => {
   channel.emit('runner:connected')
 })
 
-const dualEvents = 'run:start run:end'.split(' ')
-const socketEvents = 'fixture request history:entries exec domain:change'.split(' ')
-const testEvents = 'test:before:hooks test:after:hooks'.split(' ')
-const automationEvents = 'get:cookies get:cookie set:cookie clear:cookies clear:cookie'.split(' ')
-const runnerEvents = 'viewport config stop url:changed page:loading'.split(' ')
-const rerunEvents = 'runner:restart watched:file:changed'.split(' ')
+const driverToReporterEvents = 'paused'.split(' ')
+const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
+const driverToSocketEvents = 'fixture request history:entries exec domain:change'.split(' ')
+const driverTestEvents = 'test:before:hooks test:after:hooks'.split(' ')
+const driverAutomationEvents = 'get:cookies get:cookie set:cookie clear:cookies clear:cookie'.split(' ')
+const driverToLocalEvents = 'viewport config stop url:changed page:loading'.split(' ')
+const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 
 const localBus = new EventEmitter()
 // when detached, this will be the socket channel
@@ -86,7 +87,13 @@ export default {
       })
     })
 
-    _.each(testEvents, (event) => {
+    _.each(driverToReporterEvents, (event) => {
+      driver.on(event, (...args) => {
+        reporterBus.emit(event, ...args)
+      })
+    })
+
+    _.each(driverTestEvents, (event) => {
       driver.on(event, (test) => {
         tests.add(test)
 
@@ -97,18 +104,18 @@ export default {
       })
     })
 
-    _.each(dualEvents, (event) => {
+    _.each(driverToLocalAndReporterEvents, (event) => {
       driver.on(event, (...args) => {
         localBus.emit(event, ...args)
         reporterBus.emit(event, ...args)
       })
     })
 
-    _.each(socketEvents, (event) => {
+    _.each(driverToSocketEvents, (event) => {
       driver.on(event, (...args) => channel.emit(event, ...args))
     })
 
-    _.each(automationEvents, (event) => {
+    _.each(driverAutomationEvents, (event) => {
       driver.on(event, (...args) => channel.emit('automation:request', event, ...args))
     })
 
@@ -116,18 +123,14 @@ export default {
       channel.emit('client:request', msg, data, cb)
     })
 
-    _.each(runnerEvents, (event) => {
+    _.each(driverToLocalEvents, (event) => {
       driver.on(event, (...args) => localBus.emit(event, ...args))
     })
 
-    _.each(rerunEvents, (event) => {
+    _.each(socketRerunEvents, (event) => {
       channel.on(event,  this._reRun.bind(this))
     })
-
-    channel.on('runner:abort', () => {
-      // TODO: tell the driver not to fire 'test:after:hooks' event
-      driver.abort()
-    })
+    reporterBus.on('runner:restart', this._reRun.bind(this))
 
     channel.on('runner:show:snapshot', (id) => {
       this._withLog(id, (log) => {
@@ -137,6 +140,19 @@ export default {
 
     channel.on('runner:hide:snapshot', () => {
       localBus.emit('hide:snapshot')
+    })
+
+    reporterBus.on('runner:resume', () => {
+      driver.trigger('resume:all')
+    })
+
+    reporterBus.on('runner:next', () => {
+      driver.trigger('resume:next')
+    })
+
+    reporterBus.on('runner:abort', () => {
+      // TODO: tell the driver not to fire 'test:after:hooks' event
+      driver.abort()
     })
 
     // when we actually unload then
