@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
 import { action } from 'mobx'
 
-import testsStore from '../runnables/runnables-store'
+import runnablesStore from '../runnables/runnables-store'
 import statsStore from '../header/stats-store'
 
 const localBus = new EventEmitter()
@@ -9,19 +9,21 @@ const localBus = new EventEmitter()
 export default {
   listen (runner) {
     runner.on('runnables:ready', action('runnables:ready', (rootRunnable) => {
-      testsStore.setRunnables(rootRunnable)
+      runnablesStore.setRunnables(rootRunnable)
     }))
 
     runner.on('reporter:log:add', action('log:add', (log) => {
-      testsStore.addLog(log)
+      runnablesStore.addLog(log)
     }))
 
     runner.on('reporter:log:state:changed', action('log:update', (log) => {
-      testsStore.updateLog(log)
+      runnablesStore.updateLog(log)
     }))
 
-    // 'reporter:restarted', cb
-    // 'reporter:restart:test:run'
+    runner.on('reporter:restart:test:run', action('restart:test:run', () => {
+      runnablesStore.reset()
+      runner.emit('reporter:restarted')
+    }))
 
     runner.on('run:start', action('run:start', () => {
       statsStore.startRunning()
@@ -29,11 +31,11 @@ export default {
 
     runner.on('test:before:hooks', action('test:before:hooks', (runnable) => {
       statsStore.startCounting()
-      testsStore.runnableStarted(runnable)
+      runnablesStore.runnableStarted(runnable)
     }))
 
     runner.on('test:after:hooks', action('test:after:hooks', (runnable) => {
-      testsStore.runnableFinished(runnable)
+      runnablesStore.runnableFinished(runnable)
       statsStore.updateCount(runnable.state)
       statsStore.updateTime()
     }))
@@ -47,7 +49,7 @@ export default {
     }))
 
     runner.on('reporter:reset:current:runnable:logs', action('reset:logs', () => {
-      testsStore.reset()
+      runnablesStore.reset()
     }))
 
     runner.on('reporter:restart:test:run', action('restart:test:run', () => {
