@@ -1,6 +1,54 @@
 $Cypress.Runner = do ($Cypress, _) ->
 
   defaultGrep = /.*/
+
+  # ## initial payload
+  # {
+  #   suites: [
+  #     {id: "r1"}, {id: "r4", suiteId: "r1"}
+  #   ]
+  #   tests: [
+  #     {id: "r2", title: "foo", suiteId: "r1"}
+  #   ]
+  # }
+
+  # ## normalized
+  # {
+  #   {
+  #     root: true
+  #     suites: []
+  #     tests: []
+  #   }
+  # }
+
+  # ## resetting state (get back from server)
+  # {
+  #   scrollTop: 100
+  #   tests: [
+  #     {id: "r2", title: "foo", suiteId: "r1", state: "passed", logs: {
+  #       routes: [
+  #         {}, {}
+  #       ]
+  #       spies: [
+  #       ]
+  #       commands: [
+  #         {}, {}, {}
+  #       ]
+  #     }}
+
+  #     {id: "r3", title: "bar", suiteId: "r1", state: "failed", logs: {
+  #       routes: [
+  #         {}, {}
+  #       ]
+  #       spies: [
+  #       ]
+  #       commands: [
+  #         {}, {}, {}
+  #       ]
+  #     }}
+  #   ]
+  # }
+
   class $Runner
     constructor: (@Cypress, @runner) ->
       @initialize()
