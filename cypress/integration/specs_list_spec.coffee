@@ -23,7 +23,7 @@ describe "Project Tests", ->
       .fixture("projects").then (@projects) ->
         @ipc.handle("get:project:paths", null, @projects)
 
-  it "navigates to project tests page", ->
+  it "navigates to project specs page", ->
     cy
       .fixture("browsers").then (@browsers) ->
         @config.browsers = @browsers
@@ -31,34 +31,18 @@ describe "Project Tests", ->
       .get("#tests-list-page")
       .location().its("hash").should("include", "specs")
 
-  describe "nav", ->
+  describe "no specs", ->
+
+  describe "first time onboarding specs", ->
+
+  describe "lists specs", ->
     beforeEach ->
       cy
         .fixture("browsers").then (@browsers) ->
           @config.browsers = @browsers
           @ipc.handle("open:project", null, @config)
 
-    it "does not display 'Add Project' button", ->
-      cy.contains("Add Project").should("not.exist")
-
-    it "displays Back button", ->
-      cy.contains("Back to Projects")
-
-    it "routes to projects on click of back button", ->
-      cy
-        .contains("Back to Projects").click()
-        .location().then (location) ->
-          expect(location.href).to.include("projects")
-          expect(location.href).to.not.include("123-456")
-
-  describe "lists tests", ->
-    beforeEach ->
-      cy
-        .fixture("browsers").then (@browsers) ->
-          @config.browsers = @browsers
-          @ipc.handle("open:project", null, @config)
-
-    it "lists tests", ->
+    it "lists specs", ->
       cy.contains("Integration")
 
   describe "server error", ->

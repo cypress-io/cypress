@@ -3,10 +3,9 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import { withRouter } from 'react-router'
 
+import App from '../lib/app'
 import projectsStore from '../projects/projects-store'
-
-import ProjectNav from '../project/project-nav'
-
+import ProjectNav from '../project-nav/project-nav'
 import { openProject } from '../projects/projects-api'
 
 const NoBrowsers = () => (
@@ -18,12 +17,17 @@ const NoBrowsers = () => (
     <p>
       We couldn't find any Chrome browsers to launch. To fix, please download Chrome.
     </p>
-    <a className='btn btn-primary btn-sm'>
+    <a onClick={downloadBrowser} className='btn btn-primary btn-sm'>
       <i className='fa fa-chrome'></i>{' '}
       Download Chrome
     </a>
   </div>
 )
+
+const downloadBrowser = function (e) {
+  e.preventDefault()
+  App.ipc('external:open', 'https://www.google.com/chrome/browser/desktop')
+}
 
 const PortInUse = () => (
   <div>

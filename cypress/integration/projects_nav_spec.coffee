@@ -15,25 +15,35 @@ describe "Projects Nav", ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
         @ipc.handle("get:project:paths", null, @projects)
+      .fixture("config").as("config")
 
   context "project nav", ->
     beforeEach ->
       cy
         .fixture("browsers").then (browsers) ->
-          @config = {
-            clientUrl: "http://localhost:2020",
-            clientUrlDisplay: "http://localhost:2020"
-          }
           @config.browsers = browsers
         .get(".projects-list a")
           .contains("My-Fake-Project").as("firstProject").click().then ->
             @ipc.handle("open:project", null, @config)
 
-
     it "displays projects nav", ->
       cy
         .get(".empty").should("not.be.visible")
         .get(".navbar-default")
+
+    describe "back button", ->
+      it "does not display 'Add Project' button", ->
+        cy.contains("Add Project").should("not.exist")
+
+      it "displays Back button", ->
+        cy.contains("Back to Projects")
+
+      it "routes to projects on click of back button", ->
+        cy
+          .contains("Back to Projects").click()
+          .location().then (location) ->
+            expect(location.href).to.include("projects")
+            expect(location.href).to.not.include("123-456")
 
     describe "default page", ->
       it "displays 'tests' nav as active", ->
@@ -51,7 +61,7 @@ describe "Projects Nav", ->
           .get(".navbar-default")
             .contains("a", "Config").as("configNav").click()
 
-      it.skip "highlights config on click", ->
+      it "highlights config on click", ->
         cy
           .get("@configNav")
             .should("have.class", "active")
@@ -62,15 +72,9 @@ describe "Projects Nav", ->
 
       it "displays config page", ->
         cy
-          .contains("h4", "Config")
+          .contains("h5", "Config")
 
   context "browsers dropdown", ->
-    beforeEach ->
-      @config = {
-        clientUrl: "http://localhost:2020",
-        clientUrlDisplay: "http://localhost:2020"
-      }
-
     describe "browsers available", ->
       beforeEach ->
         cy
@@ -109,12 +113,6 @@ describe "Projects Nav", ->
           cy
             .get(".browsers-list>a").first().contains("Chromium")
 
-        # it "sends the 'launch:browser' event immediately", ->
-        #   cy.wrap(@App.ipc).should("be.calledWith", "launch:browser", {
-        #     browser: "chromium"
-        #     url: undefined
-        #   })
-
         it "swaps the chosen browser into the dropdown", ->
           cy
             .get(".browsers-list").find(".dropdown-menu")
@@ -123,34 +121,8 @@ describe "Projects Nav", ->
               expect($li.first()).to.contain("Chrome")
               expect($li.last()).to.contain("Canary")
 
-      # context.skip "relaunch browser", ->
-      #   beforeEach ->
-      #     cy
-      #       .get("@firstProject").click()
-
-      #   it "attaches 'on:launch:browser' after project opens", ->
-      #     cy.wrap(@App.ipc).should("be.calledWith", "on:launch:browser")
-
-      #   it "relaunchers browser when 'on:launch:browser' fires", ->
-      #     @ipc.handle("on:launch:browser", null, {
-      #       browser: "chromium"
-      #       url: "http://localhost:2020/__/#tests/foo_spec.js"
-      #     })
-
-      #     cy
-      #       .wrap(@App.ipc).should("be.calledWith", "launch:browser", {
-      #         browser: "chromium"
-      #         url: "http://localhost:2020/__/#tests/foo_spec.js"
-      #       })
-      #       .get(".browsers-list>a").first().contains("Chromium")
-
     describe "only one browser available", ->
       beforeEach ->
-        @config = {
-          clientUrl: "http://localhost:2020",
-          clientUrlDisplay: "http://localhost:2020"
-        }
-
         @oneBrowser = [{
           "name": "chrome",
           "version": "50.0.2661.86",
@@ -188,21 +160,15 @@ describe "Projects Nav", ->
       it "displays download browser button", ->
         cy.contains("Download Chrome")
 
-      describe.skip "download browser", ->
+      describe "download browser", ->
         it "triggers external:open on click", ->
           cy
             .contains(".btn", "Download Chrome").click().then ->
-              expect(@App.ipc).to.be.calledWith("external:open", "https://www.google.com/chrome/browser/")
+              expect(@App.ipc).to.be.calledWith("external:open", "https://www.google.com/chrome/browser/desktop")
 
   context "switch project", ->
     beforeEach ->
       cy
-        .fixture("browsers").then (browsers) ->
-          @config = {
-            clientUrl: "http://localhost:2020",
-            clientUrlDisplay: "http://localhost:2020"
-          }
-          @config.browsers = browsers
         .get(".projects-list a")
           .contains("My-Fake-Project").as("firstProject").click().then ->
             @ipc.handle("open:project", null, @config)
