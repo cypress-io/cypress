@@ -140,6 +140,20 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
     text-align: left;
   }
 
+  label {
+    background-color: #333;
+    border-radius: .25em;
+    color: #fff;
+    display: inline;
+    font-size: 75%;
+    font-weight: bold;
+    line-height: 1;
+    padding: .2em .6em .3em;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+  }
+
   .hidden {
     display: none;
   }

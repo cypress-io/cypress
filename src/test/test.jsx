@@ -26,13 +26,14 @@ const TestHeader = observer(({ model }) => (
   </span>
 ))
 
+// TODO: only open collapsible if test has been active for, say, 500ms
 const Test = observer(({ model }) => (
   <div className='runnable-wrapper' style={{ paddingLeft: indent(model.level) }}>
     <Collapsible
       header={<TestHeader model={model} />}
       headerClass='runnable-content-region'
       contentClass='runnable-instruments'
-      isOpen={model.state === 'failed'}
+      isOpen={model.state === 'failed' || model.state === 'active'}
     >
       <Agents model={model} />
       <Routes model={model} />

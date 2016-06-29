@@ -1,6 +1,10 @@
+import { EventEmitter } from 'events'
 import { action } from 'mobx'
+
 import testsStore from '../runnables/runnables-store'
 import statsStore from '../header/stats-store'
+
+const localBus = new EventEmitter()
 
 export default {
   listen (runner) {
@@ -23,14 +27,19 @@ export default {
       statsStore.startRunning()
     }))
 
-    runner.on('test:before:hooks', action('test:before:hooks', () => {
+    runner.on('test:before:hooks', action('test:before:hooks', (runnable) => {
       statsStore.startCounting()
+      testsStore.runnableStarted(runnable)
     }))
 
     runner.on('test:after:hooks', action('test:after:hooks', (runnable) => {
       testsStore.runnableFinished(runnable)
       statsStore.updateCount(runnable.state)
       statsStore.updateTime()
+    }))
+
+    runner.on('paused', action('paused', (nextCommandName) => {
+      statsStore.pause(nextCommandName)
     }))
 
     runner.on('run:end', action('run:end', () => {
@@ -44,5 +53,26 @@ export default {
     runner.on('reporter:restart:test:run', action('restart:test:run', () => {
       statsStore.reset()
     }))
+
+    localBus.on('resume', action('resume', () => {
+      statsStore.resume()
+      runner.emit('runner:resume')
+    }))
+
+    localBus.on('next', action('next', () => {
+      runner.emit('runner:next')
+    }))
+
+    localBus.on('stop', action('stop', () => {
+      runner.emit('runner:abort')
+    }))
+
+    localBus.on('restart', action('restart', () => {
+      runner.emit('runner:restart')
+    }))
+  },
+
+  emit (event, ...args) {
+    localBus.emit(event, ...args)
   },
 }

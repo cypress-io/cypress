@@ -5,7 +5,9 @@ const defaults = {
   passed: 0,
   failed: 0,
   pending: 0,
+  isPaused: false,
   isRunning: false,
+  nextCommandName: null,
 
   _startTime: null,
   _currentTime: null,
@@ -15,7 +17,9 @@ class StatsStore {
   @observable passed = defaults.passed
   @observable failed = defaults.failed
   @observable pending = defaults.pending
+  @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
+  @observable nextCommandName = defaults.nextCommandName
 
   @observable _startTime = defaults._startTime
   @observable _currentTime = defaults._startTime
@@ -48,6 +52,16 @@ class StatsStore {
 
   updateCount (type) {
     this[type] = this[type] + 1
+  }
+
+  pause (nextCommandName) {
+    this.isPaused = true
+    this.nextCommandName = nextCommandName
+  }
+
+  resume () {
+    this.isPaused = false
+    this.nextCommandName = null
   }
 
   stop () {

@@ -18,6 +18,7 @@ class Hook {
 
 export default class Runnable {
   @observable id
+  @observable isActive = false
   @observable isPending
   @observable isRunning = true
   @observable type
@@ -38,6 +39,7 @@ export default class Runnable {
   }
 
   @computed get state () {
+    if (this._isTest && this.isActive) return 'active'
     if (this._isTest && this.isRunning) return 'processing'
 
     if (this.isPending || this._allChildrenPending) {

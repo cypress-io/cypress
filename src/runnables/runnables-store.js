@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { autorun, observable } from 'mobx'
+import { observable } from 'mobx'
 
 import Agent from '../test/agent-model'
 import Command from '../test/command-model'
@@ -38,7 +38,12 @@ class RunnablesStore {
     return runnable
   }
 
+  runnableStarted ({ id }) {
+    this._runnables[id].isActive = true
+  }
+
   runnableFinished ({ id }) {
+    this._runnables[id].isActive = false
     this._runnables[id].isRunning = false
   }
 
