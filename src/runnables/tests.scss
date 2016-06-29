@@ -7,19 +7,6 @@
     position: absolute;
     right: 0;
     top: $header-height;
-
-    ::-webkit-scrollbar {
-      width:  10px;
-      height: 10px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #999;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #DDD;
-    }
   }
 
   .tests-wrap {
