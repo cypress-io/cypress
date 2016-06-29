@@ -7,17 +7,20 @@ import Route from '../test/route-model'
 import Runnable from './runnable-model'
 
 const defaults = {
+  isReady: false,
   runnables: [],
   _runnables: {},
   _logs: {},
 }
 
 class RunnablesStore {
+  @observable isReady = defaults.isReady
   @observable runnables = defaults.runnables
   @observable _runnables = defaults._runnables
   @observable _logs = defaults._logs
 
   setRunnables (rootRunnable) {
+    this.isReady = true
     this.runnables = this._createRunnableChildren(rootRunnable, 0)
   }
 

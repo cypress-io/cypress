@@ -17,7 +17,7 @@ class App extends Component {
     return (
       <div className='reporter'>
         <Header />
-        <Runnables runnables={runnablesStore.runnables} />
+        <Runnables runnablesStore={runnablesStore} spec='t/b/d' />
       </div>
     )
   }

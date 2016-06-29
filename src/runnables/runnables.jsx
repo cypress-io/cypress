@@ -28,10 +28,16 @@ const RunnablesList = observer(({ runnables }) => (
   </ul>
 ))
 
-const Runnables = observer((props) => (
+function content ({ isReady, runnables }, spec) {
+  if (!isReady) return null
+
+  return runnables.length ? <RunnablesList runnables={runnables} /> : <NoTests spec={spec} />
+}
+
+const Runnables = observer(({ runnablesStore, spec }) => (
   <div className='tests'>
     <div className='tests-wrap'>
-      {props.runnables.length ? <RunnablesList {...props} /> : <NoTests {...props} />}
+      {content(runnablesStore, spec)}
     </div>
   </div>
 ))
