@@ -1,4 +1,4 @@
-describe "Project Tests", ->
+describe "Specs List", ->
   beforeEach ->
     @firstProjectName = "My-Fake-Project"
 
@@ -11,13 +11,9 @@ describe "Project Tests", ->
       .visit("/#/projects/e40991dc055454a2f3598752dec39abc")
       .window().then (win) ->
         {@ipc, @App} = win
-
         @agents = cy.agents()
-
         @ipc.handle("get:options", null, {})
-
         @agents.spy(@App, "ipc")
-
       .fixture("user").then (@user) ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
@@ -28,8 +24,15 @@ describe "Project Tests", ->
       .fixture("browsers").then (@browsers) ->
         @config.browsers = @browsers
         @ipc.handle("open:project", null, @config)
-      .get("#tests-list-page")
       .location().its("hash").should("include", "specs")
+
+  it "triggers get:specs", ->
+    cy
+      .fixture("browsers").then (@browsers) ->
+        @config.browsers = @browsers
+        @ipc.handle("open:project", null, @config)
+      .then ->
+        expect(@App.ipc).to.be.calledWith("get:specs")
 
   describe "no specs", ->
 
@@ -41,6 +44,7 @@ describe "Project Tests", ->
         .fixture("browsers").then (@browsers) ->
           @config.browsers = @browsers
           @ipc.handle("open:project", null, @config)
+          @ipc.handle("get:specs", null, [{"id": "foo"}])
 
     it "lists specs", ->
       cy.contains("Integration")

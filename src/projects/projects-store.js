@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { computed, observable, action } from 'mobx'
-import Project from './project-model'
+import Project from '../project/project-model'
 
 class Projects {
   @observable projects = []
