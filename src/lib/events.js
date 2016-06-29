@@ -37,7 +37,6 @@ export default {
     runner.on('test:after:hooks', action('test:after:hooks', (runnable) => {
       runnablesStore.runnableFinished(runnable)
       statsStore.updateCount(runnable.state)
-      statsStore.updateTime()
     }))
 
     runner.on('paused', action('paused', (nextCommandName) => {

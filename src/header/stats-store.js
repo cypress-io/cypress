@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { computed, observable } from 'mobx'
+import { action, computed, observable } from 'mobx'
 
 const defaults = {
   passed: 0,
@@ -37,16 +37,21 @@ class StatsStore {
   startCounting () {
     if (this._startTime) return
 
-    // TODO: use this if it can be smooth
-    // this._interval = setInterval(() => {
-    //   this._currentTime = Date.now()
-    // }, 16)
-
     this._startTime = Date.now()
-    this._currentTime = Date.now()
+    this._updateCurrentTime()
+
+    this._startTimer()
   }
 
-  updateTime () {
+  _startTimer () {
+    this._interval = setInterval(action('duration:interval', this._updateCurrentTime.bind(this)), 100)
+  }
+
+  _stopTimer () {
+    clearInterval(this._interval)
+  }
+
+  _updateCurrentTime () {
     this._currentTime = Date.now()
   }
 
@@ -55,6 +60,7 @@ class StatsStore {
   }
 
   pause (nextCommandName) {
+    this._stopTimer()
     this.isPaused = true
     this.nextCommandName = nextCommandName
   }
@@ -62,14 +68,17 @@ class StatsStore {
   resume () {
     this.isPaused = false
     this.nextCommandName = null
+    this._startTimer()
   }
 
   stop () {
-    this.updateTime()
+    this._stopTimer()
+    this._updateCurrentTime()
     this.isRunning = false
   }
 
   reset () {
+    this._stopTimer()
     _.each(defaults, (value, key) => {
       this[key] = value
     })
