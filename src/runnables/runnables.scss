@@ -146,6 +146,10 @@
         @extend .#{$fa-css-prefix}-circle-o-notch;
         color: lighten($pending, 20%);
       }
+
+      .runnable-commands-region {
+        display: none;
+      }
     }
   }
 
