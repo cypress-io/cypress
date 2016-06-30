@@ -53,7 +53,7 @@ export default class Runnable {
       return 'failed'
     } else if (this._anyChildrenProcessing) {
       return 'processing'
-    } else if (this._allChildrenPassed) {
+    } else if (this._allChildrenPassedOrPending) {
       return 'passed'
     } else {
       return 'processing'
@@ -81,12 +81,16 @@ export default class Runnable {
     return _.some(this._childStates, (state) => state === 'failed')
   }
 
-  @computed get _allChildrenPassed () {
-    return !this._childStates.length || _.every(this._childStates, (state) => state === 'passed')
+  @computed get _allChildrenPassedOrPending () {
+    return !this._childStates.length || _.every(this._childStates, (state) => (
+      state === 'passed' || state === 'pending'
+    ))
   }
 
   @computed get _allChildrenPending () {
-    return !!this._childStates.length && _.every(this._childStates, (state) => state === 'pending')
+    return !!this._childStates.length && _.every(this._childStates, (state) => (
+      state === 'pending'
+    ))
   }
 
   addAgent (agent) {
