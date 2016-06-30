@@ -199,6 +199,7 @@ after:add | Runner | Anyone | when all runnables have been added to the UI
 runnables:ready | Runner | Anyone | when all runnables have been reduced to basic objects
 run:start | Mocha | Cypress | when mocha runner triggers its 'start' event
 suite:start | Mocha | Cypress | when mocha runner fires its 'suite' event
+test:before:run | Cypress | Anyone | before any code has run for a particular test
 test:before:hooks | Cypress | Cypress | before any hooks for a test have started
 hook:start | Mocha | Cypress | when mocha runner fires its 'hook' event
 test:start | Mocha | Cypress | when mocha runner fires its 'test' event
@@ -210,6 +211,7 @@ mocha:fail | Mocha | Cypress | when mocha runner fires its 'fail' event
 test:end | Mocha | Cypress | when mocha runner fires its 'test end' event
 test:results:ready | Runner | Anyone | when we receive the 'test:end' event
 test:after:hooks | Cypress | Cypress | after all hooks have run for a test
+test:after:run | Cypress | Anyone | after any code has run for a test
 run:end | Mocha | Cypress | when mocha runner fires its 'end' event
 after:run | Runner | Anyone | after run has finished
 
