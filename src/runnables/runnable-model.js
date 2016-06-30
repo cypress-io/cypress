@@ -43,6 +43,10 @@ export default class Runnable {
     this.level = level
   }
 
+  @computed get error () {
+    return _(this.commands).map('error').compact().first()
+  }
+
   @computed get state () {
     if (this._isTest && this.isActive) return 'active'
     if (this._isTest && this.isRunning) return 'processing'

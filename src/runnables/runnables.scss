@@ -13,27 +13,25 @@
     padding-left: 0;
 
     pre {
-      margin-top: 2px;
+      background-color: darken($yellow-lightest, 5%);
+      border-left: 5px solid $fail;
+      clear: both;
+      color: $fail;
       margin-bottom: 0;
+      margin-top: 2px;
       padding-bottom: 2px;
-      padding-top: 2px;
       padding-left: 10px;
+      padding-top: 2px;
       white-space: pre-wrap;
       word-break: break-word;
-      clear: both;
 
       &:empty {
         display: none;
       }
 
-      &.test-error {
-        background-color: darken($yellow-lightest, 5%);
-        border-left: 5px solid $fail;
-
-        &:hover {
-          cursor: pointer;
-          background-color: darken($yellow-lightest, 15%);
-        }
+      &:hover {
+        cursor: pointer;
+        background-color: darken($yellow-lightest, 15%);
       }
     }
 
@@ -112,10 +110,6 @@
     }
 
     &.test.runnable-failed {
-      pre {
-        color: $fail;
-      }
-
       .runnable-state {
         @extend .#{$fa-css-prefix}-times;
         color: $fail;

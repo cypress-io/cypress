@@ -3,6 +3,7 @@ import { observable } from 'mobx'
 import Log from './log-model'
 
 export default class Command extends Log {
+  @observable error = null
   @observable event = false
   @observable number
   @observable numElements
@@ -11,6 +12,7 @@ export default class Command extends Log {
   constructor (props) {
     super(props)
 
+    this.error = props.error
     this.event = props.event
     this.number = props.number
     this.numElements = props.numElements
@@ -20,6 +22,7 @@ export default class Command extends Log {
   update (props) {
     super.update(props)
 
+    this.error = props.error
     this.event = props.event
     this.numElements = props.numElements
     this.visible = props.visible
@@ -27,6 +30,7 @@ export default class Command extends Log {
 
   serialize () {
     return _.extend(super.serialize(), {
+      error: this.error,
       event: this.event,
       number: this.number,
       numElements: this.numElements,
