@@ -5,6 +5,7 @@ class Hook {
   @observable id
   @observable name
   @observable commands = []
+  _currentNumber = 1
 
   constructor (props) {
     this.id = _.uniqueId('h')
@@ -12,6 +13,10 @@ class Hook {
   }
 
   addCommand (command) {
+    if (!command.event) {
+      command.number = this._currentNumber
+      this._currentNumber++
+    }
     this.commands.push(command)
   }
 }
