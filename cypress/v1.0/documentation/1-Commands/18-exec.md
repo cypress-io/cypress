@@ -92,6 +92,19 @@ cy
   .its("stdout").should("contain", "johndoe")
 ```
 
+## Write to a file to create a fixture from response body
+```javascript
+cy
+  .server()
+  .route("POST", "/comments").as("postComment")
+  .get(".add-comment").click()
+  .wait("@postComment").then(function(xhr){
+    cy
+      .exec("echo '" + JSON.stringify(xhr.responseBody) + "'>cypress/fixtures/comment.json")
+      .fixture("comment.json").should("deep.eq", xhr.responseBody)
+  })
+```
+
 ***
 
 # Command Log
