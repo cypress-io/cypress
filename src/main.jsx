@@ -23,6 +23,7 @@ App.start = () => {
   ipc('get:options')
   .then((options = {}) => {
     const sendErr = function (err) {
+      if (err) debugger
       return App.ipc('gui:error', _.pick(err, 'name', 'message', 'stack'))
     }
 

@@ -28,8 +28,10 @@ const startAboutWindow = (e) => {
   })
 }
 
-const openChangelog = () => (
-  App.ipc('external:open', 'https://on.cypress.io/changelog')
-)
+const openChangelog = (e) => {
+  e.preventDefault()
+
+  return App.ipc('external:open', 'https://on.cypress.io/changelog')
+}
 
 export default Footer
