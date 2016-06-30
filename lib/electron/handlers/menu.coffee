@@ -7,23 +7,45 @@ module.exports = {
 
     template = [
       {
-        label: "Cypress"
+        label: "File"
         submenu: [
           {
-            label: "Services"
-            role: "services"
+            label: "Close Window"
+            accelerator: "CmdOrCtrl+W"
+            role: "close"
+          }
+        ]
+      }
+    ]
+
+    if process.platform is "darwin"
+      name = "Cypress"
+      template.unshift({
+        label: name
+        submenu: [
+          {
+            label: "About " + name
+            role: "about"
           }
           {
             type: "separator"
           }
           {
-            label: "Hide Cypress"
-            accelerator: "CmdOrCtrl+H"
+            label: "Services"
+            role: "services"
+            submenu: []
+          }
+          {
+            type: "separator"
+          }
+          {
+            label: "Hide " + name
+            accelerator: "Command+H"
             role: "hide"
           }
           {
             label: "Hide Others"
-            accelerator: "Alt+CmdOrCtrl+H"
+            accelerator: "Command+Shift+H"
             role: "hideothers"
           }
           {
@@ -34,13 +56,13 @@ module.exports = {
             type: "separator"
           }
           {
-            label: "Quit Cypress"
-            accelerator: "CmdOrCtrl+Q"
-            role: "quit"
+            label: "Quit"
+            accelerator: "Command+Q"
+            click: =>
+              app.quit()
           }
         ]
-      }
-    ]
+      })
 
     if process.env["CYPRESS_ENV"] is "development"
       template.push(
