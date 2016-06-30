@@ -56,6 +56,10 @@ $Cypress.Runner = do ($Cypress, _) ->
       @listeners()
       @override()
 
+      ## this is used in tests since we provide
+      ## the tests immediately
+      @normalizeAll() if @runner.suite
+
     fail: (err, runnable) ->
       ## if runnable.state is passed then we've
       ## probably failed in an afterEach and need
@@ -200,12 +204,12 @@ $Cypress.Runner = do ($Cypress, _) ->
 
       runnable.matchesGrep
 
-    normalizeAll: ->
+    normalizeAll: (grep) ->
       ## TODO: remove the date perf checking here
       d = new Date
 
       tests         = {}
-      grep          = @grep()
+      grep         ?= @grep()
       grepIsDefault = _.isEqual(grep, defaultGrep)
 
       obj = @normalize(@runner.suite, tests, grep, grepIsDefault)

@@ -451,7 +451,7 @@ describe "$Cypress.Runner API", ->
 
       expect(@runner.runner._grep).to.eq re
 
-  context "#anyTest", ->
+  context "#anyTestInSuite", ->
     beforeEach ->
       runner = Fixtures.createRunnables {
         tests: ["root test 1"]
@@ -473,7 +473,7 @@ describe "$Cypress.Runner API", ->
       tests = []
 
       ## start from the root suite
-      @runner.anyTest @runner.runner.suite, (test) ->
+      @runner.anyTestInSuite @runner.runner.suite, (test) ->
         tests.push(test)
 
       allTests = _(tests).all (test) -> test.type is "test"
@@ -486,23 +486,23 @@ describe "$Cypress.Runner API", ->
         ## the second invocation
         return true
 
-      @runner.anyTest @runner.runner.suite, iterator
+      @runner.anyTestInSuite @runner.runner.suite, iterator
 
       expect(iterator.callCount).to.eq(2)
 
     it "returns true if any iterator returns true", ->
       iterator = _.after 2, -> return true
 
-      ret = @runner.anyTest @runner.runner.suite, iterator
+      ret = @runner.anyTestInSuite @runner.runner.suite, iterator
       expect(ret).to.be.true
 
     it "returns false if not any iterator returns true", ->
       iterator = -> return false
 
-      ret = @runner.anyTest @runner.runner.suite, iterator
+      ret = @runner.anyTestInSuite @runner.runner.suite, iterator
       expect(ret).to.be.false
 
-  context "#getRunnables", ->
+  context "#normalizeAll", ->
     beforeEach ->
       runner = Fixtures.createRunnables {
         tests: ["one"]
@@ -521,8 +521,8 @@ describe "$Cypress.Runner API", ->
       @runner = $Cypress.Runner.runner(@Cypress, runner)
 
     it "pushes runnable into runnables array", ->
-      ## 2 suites + 4 tests = 6 total
-      expect(@runner.runnables).to.have.length(6)
+      ## 2 suites + 4 tests + 1 root = 7 total
+      expect(@runner.runnables).to.have.length(7)
 
     it "pushes tests into tests array", ->
       ## 4 tests
@@ -534,49 +534,36 @@ describe "$Cypress.Runner API", ->
 
       @runner.grep(/four/)
 
-      @runner.getRunnables()
+      @runner.normalizeAll()
 
       ## only 1 test should have matched the grep
       expect(@runner.tests).to.have.length(1)
 
     it "sets runnable type", ->
       types = _.pluck @runner.runnables, "type"
-      expect(types).to.deep.eq ["test", "suite", "test", "test", "suite", "test"]
+      expect(types).to.deep.eq ["suite", "test", "suite", "test", "test", "suite", "test"]
 
-    it "calls options.onRunnable", ->
-      runnables = []
+    it "returns only matching tests + suites to the grep", ->
+      runnables = @runner.normalizeAll(/four/)
 
-      @runner.getRunnables
-        onRunnable: (runnable) ->
-          runnables.push(runnable)
+      expect(@runner.tests).to.have.length(1)
 
-      expect(runnables.length).to.eq(6)
+      titles = []
 
-    it "does not call options.onRunnable if no test in a suite matches grep", ->
-      runnables = []
+      getTitle = (runnable) ->
+        titles.push(runnable.title)
 
-      @runner.getRunnables
-        onRunnable: (runnable) ->
-          runnables.push(runnable)
-        grep: /four/
+        if t = runnable.tests
+          _.each(t, getTitle)
 
-      titles = _(runnables).pluck "title"
+        if s = runnable.suites
+          _.each(s, getTitle)
+
+      getTitle(runnables)
 
       expect(titles).to.deep.eq [
-        "suite 1", "suite 2", "suite 2, four"
+        "", "suite 1", "suite 2", "suite 2, four"
       ]
-
-    it "prefers .runnables on subsequent iterations", ->
-      ## grab the top 4 runnables
-      @runner.runnables = @runner.runnables.slice(0, 4)
-
-      runnables = []
-
-      @runner.getRunnables
-        onRunnable: (runnable) ->
-          runnables.push(runnable)
-
-      expect(runnables).to.have.length(4)
 
     context "runnable optimizations", ->
       beforeEach ->
@@ -585,19 +572,19 @@ describe "$Cypress.Runner API", ->
         ## run!
         @runner.runnables = []
 
-      it "never invokes #iterateThroughRunnables", ->
+      it.skip "never invokes #iterateThroughRunnables", ->
         @runner.runnables = []
-        @runner.getRunnables()
+        @runner.normalizeAll()
         iterateThroughRunnables = @sandbox.spy @runner, "iterateThroughRunnables"
-        @runner.getRunnables()
+        @runner.normalizeAll()
         expect(iterateThroughRunnables).not.to.be.called
 
-      it "does not continue to push into .runnables or mutate them", ->
+      it.skip "does not continue to push into .runnables or mutate them", ->
         @runner.runnables = []
-        @runner.getRunnables()
+        @runner.normalizeAll()
         runnables = @runner.runnables
         expect(runnables).to.have.length(6)
-        @runner.getRunnables()
+        @runner.normalizeAll()
         expect(@runner.runnables).to.have.length(6)
         expect(@runner.runnables).to.eq(runnables)
 
@@ -607,7 +594,7 @@ describe "$Cypress.Runner API", ->
         grep = /\w+/
         test = @sandbox.spy grep, "test"
 
-        @runner.getRunnables({grep: grep})
+        @runner.normalizeAll(grep)
 
         ## we have 4 tests, thats how many should have been grepp'd!
         expect(test.callCount).to.eq 4
@@ -617,11 +604,11 @@ describe "$Cypress.Runner API", ->
 
         grep = @runner.grep /\w+/
         test = @sandbox.spy @runner.runner._grep, "test"
-        @runner.getRunnables()
+        @runner.normalizeAll()
 
         grep2 = @runner.grep /.+/
         test2 = @sandbox.spy @runner.runner._grep, "test"
-        @runner.getRunnables()
+        @runner.normalizeAll()
 
         ## should grep each of the tests twice
         expect(test.callCount + test2.callCount).to.eq 8
