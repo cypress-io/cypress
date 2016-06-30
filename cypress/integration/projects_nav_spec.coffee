@@ -53,7 +53,9 @@ describe "Projects Nav", ->
 
       it "displays 'tests' page", ->
         cy
-          .contains("Integration")
+          .fixture("specs").then (@specs) ->
+            @ipc.handle("get:specs", null, @specs)
+          .contains("integration")
 
     describe "config page", ->
       beforeEach ->
