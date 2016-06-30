@@ -35,7 +35,7 @@ const Command = observer(({ model }) => (
         'command-is-parent': isParent(model),
         'command-is-child': !isParent(model),
         'command-is-alias': !!model.alias,
-        'command-is-invisible': !model.visible,
+        'command-is-invisible': model.visible != null && !model.visible,
         'command-has-num-elements': model.numElements != null,
         'command-has-no-elements': !model.numElements,
         'command-has-multiple-elements': model.numElements > 1,
