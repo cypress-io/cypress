@@ -73,44 +73,6 @@
       margin-right: 5px;
     }
 
-    .paused-label,
-    .play,
-    .stop,
-    .next {
-      display: none;
-    }
-
-    &.is-running {
-      .stop {
-        display: inline-block;
-      }
-
-      .restart {
-        display: none;
-      }
-    }
-
-    &.is-paused {
-      .stop,
-      .restart {
-        display: none;
-      }
-
-      .paused-label {
-        display: inline;
-      }
-
-      .play {
-        display: inline-block;
-      }
-    }
-
-    &.has-next {
-      .next {
-        display: inline-block;
-      }
-    }
-
     i {
       font-size: 90%;
       margin: 5px;

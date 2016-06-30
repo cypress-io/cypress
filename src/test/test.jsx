@@ -1,6 +1,7 @@
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import Tooltip from '../lib/tooltip'
 
 import { indent } from '../lib/util'
 
@@ -22,7 +23,9 @@ const TestHeader = observer(({ model }) => (
     <i className='runnable-state fa'></i>
     <span className='runnable-title'>{model.title}</span>
     <div className='runnable-controls'>
-      <i className='fa fa-warning' title='One or more commands failed'></i>
+      <Tooltip placement='left' align={{ offset: [0, 0] }} title='One or more commands failed'>
+        <i className='fa fa-warning'></i>
+      </Tooltip>
     </div>
   </span>
 ))

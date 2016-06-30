@@ -2,6 +2,7 @@ import _ from 'lodash'
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React from 'react'
+import Tooltip from '../lib/tooltip'
 import Markdown from 'markdown-it'
 
 const md = new Markdown()
@@ -18,9 +19,9 @@ const visibleMessage = (model) => {
 }
 
 const Alias = observer(({ model }) => (
-  <span className={`command-alias ${model.aliasType}`} title={`Found an alias for: '${model.referencesAlias}'`}>
-    @{model.referencesAlias}
-  </span>
+  <Tooltip placement='top' title={`Found an alias for: '${model.referencesAlias}'`}>
+    <span className={`command-alias ${model.aliasType}`}>@{model.referencesAlias}</span>
+  </Tooltip>
 ))
 
 const Command = observer(({ model }) => (
@@ -55,13 +56,15 @@ const Command = observer(({ model }) => (
           <span dangerouslySetInnerHTML={{ __html: formattedMessage(model.message) }} />}
       </span>
       <span className='command-controls'>
-        <span className={`command-alias ${model.aliasType}`} title={`${model.message} aliased as: '${model.alias}'`}>
-          {model.alias}
-        </span>
-        <i className='command-invisible fa fa-eye-slash' title={visibleMessage(model)}></i>
-        <span className='command-num-elements' title={`${model.numElements} matched elements`}>
-          {model.numElements}
-        </span>
+        <Tooltip placement='left' title={`${model.message} aliased as: '${model.alias}'`}>
+          <span className={`command-alias ${model.aliasType}`}>{model.alias}</span>
+        </Tooltip>
+        <Tooltip placement='left' title={visibleMessage(model)}>
+          <i className='command-invisible fa fa-eye-slash'></i>
+        </Tooltip>
+        <Tooltip placement='left' title={`${model.numElements} matched elements`}>
+          <span className='command-num-elements'>{model.numElements}</span>
+        </Tooltip>
       </span>
     </div>
   </li>

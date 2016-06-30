@@ -2,6 +2,7 @@ import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
+import Tooltip from '../lib/tooltip'
 import Collapsible from '../collapsible/collapsible'
 
 const formatUrl = (url) => url
@@ -12,9 +13,9 @@ const Route = observer(({ model }) => (
     <td>{formatUrl(model.url)}</td>
     <td>{model.isStubbed ? 'Yes' : 'No'}</td>
     <td>
-      <span className='route-alias' title={`Aliased this route as: '${model.alias}'`}>
-        {model.alias}
-      </span>
+      <Tooltip placement='top' title={`Aliased this route as: '${model.alias}'`}>
+        <span className='route-alias'>{model.alias}</span>
+      </Tooltip>
     </td>
     <td className='response-count'>{model.numResponses || '-'}</td>
   </tr>
@@ -48,7 +49,7 @@ const Routes = observer(({ model }) => (
                   <th>Stubbed</th>
                   <th>Alias</th>
                   <th>
-                    <span title='Number of responses which matched this route'>#</span>
+                    <Tooltip placement='left' title='Number of responses which matched this route'><span>#</span></Tooltip>
                   </th>
                 </tr>
               </thead>

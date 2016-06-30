@@ -42,7 +42,8 @@
   },
   "dependencies": {
     "classnames": "^2.2.5",
-    "markdown-it": "^6.1.1"
+    "markdown-it": "^6.1.1",
+    "rc-tooltip": "^3.3.5"
   },
   "peerDependencies": {
     "lodash": "^4.0.0",
