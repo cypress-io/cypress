@@ -10,9 +10,56 @@ module.exports = {
         label: "File"
         submenu: [
           {
+            label: "Add Project..."
+          }
+          {
+            type: "separator"
+          }
+          {
+            label: "Check for Updates"
+          }
+          {
+            label: "Changelog"
+          }
+          {
+            type: "separator"
+          }
+          {
+            label: "Log Out"
+          }
+          {
+            type: "separator"
+          }
+          {
             label: "Close Window"
             accelerator: "CmdOrCtrl+W"
             role: "close"
+          }
+        ]
+      }
+      {
+        label: "Window"
+        role: "window"
+        submenu: [
+          {
+            label: "Minimize"
+            accelerator: "CmdOrCtrl+M"
+            role: "minimize"
+          }
+        ]
+      }
+      {
+        label: "Help"
+        role: "help"
+        submenu: [
+          {
+            label: "Report an Issue.."
+          }
+          {
+            label: "Cypress Documentation"
+          }
+          {
+            label: "Cypress Chat"
           }
         ]
       }
@@ -58,11 +105,20 @@ module.exports = {
           {
             label: "Quit"
             accelerator: "Command+Q"
-            click: =>
-              app.quit()
           }
         ]
       })
+
+      windowMenu = template.find (m) =>
+        m.role is "window"
+
+      if windowMenu
+        windowMenu.submenu.push(
+          {
+            label: "Zoom"
+            role: "performZoom"
+          }
+        )
 
     if process.env["CYPRESS_ENV"] is "development"
       template.push(
