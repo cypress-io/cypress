@@ -26,11 +26,11 @@ export default class Browsers extends Component {
   }
 
   _browser = (browser) => {
-    browser
     return (
       <span>
         <i className={`fa fa-${browser.icon}`}></i>{' '}
-        { browser.displayName }
+        { browser.displayName }{' '}
+        { browser.majorVersion }
       </span>
     )
   }
