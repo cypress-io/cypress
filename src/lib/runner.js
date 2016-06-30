@@ -33,6 +33,7 @@ const localBus = new EventEmitter()
 const reporterBus = new EventEmitter()
 
 function toAndFromJson (obj) {
+  if (obj.error) obj.error = obj.error.toString()
   return JSON.parse(JSON.stringify(obj))
 }
 
