@@ -245,7 +245,13 @@ window.Fixtures = do ->
 
   createTests: (suite, tests = []) ->
     _.each tests, (test) ->
-      suite.addTest new Mocha.Test test, ->
+      if _.isObject(test)
+        name = test.name
+        fn = if test.pending then undefined else (->)
+
+        suite.addTest new Mocha.Test(name, fn)
+      else
+        suite.addTest new Mocha.Test test, ->
 
   createSuites: (suite, suites = {}) ->
     _.each suites, (obj, suiteName) =>

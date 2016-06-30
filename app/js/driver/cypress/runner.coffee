@@ -49,6 +49,15 @@ $Cypress.Runner = do ($Cypress, _) ->
   #   ]
   # }
 
+  fire = (event, test) ->
+    test._fired ?= {}
+    test._fired[event] = true
+
+    @Cypress.trigger(event, @wrap(test))
+
+  fired = (event, test) ->
+    !!(test._fired and test._fired[event])
+
   class $Runner
     constructor: (@Cypress, @runner) ->
       @initialize()
@@ -168,6 +177,9 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## emit the pending event instead of the test
       ## so we normalize the pending / test events
       @runner.on "pending", (test) ->
+        if not fired("test:before:run", test)
+          fire.call(_this, "test:before:run", test)
+
         test.state = "pending"
 
         if $Cypress.isHeadless
@@ -176,6 +188,13 @@ $Cypress.Runner = do ($Cypress, _) ->
           Cypress.trigger "mocha:pending", _this.wrap(test)
 
         @emit "test", test
+
+        ## if this is not the last test amongst its siblings
+        ## then go ahead and fire its test:after:run event
+        ## else this will not get called
+        tests = _this.getAllSiblingTests(test.parent)
+        if _(tests).last() isnt test
+          fire.call(_this, "test:after:run", test)
 
       @runner.on "fail", (runnable, err) =>
         ## always set runnable err so we can tap into
@@ -457,6 +476,18 @@ $Cypress.Runner = do ($Cypress, _) ->
     testInTests: (test) ->
       test in @tests
 
+    getAllSiblingTests: (suite) ->
+      tests = []
+      suite.eachTest (test) =>
+        ## iterate through each of our suites tests.
+        ## this will iterate through all nested tests
+        ## as well.  and then we add it only if its
+        ## in our grepp'd _this.tests array
+        if @testInTests(test)
+          tests.push test
+
+      tests
+
     override: ->
       ## bail if our runner doesnt have a hook
       ## useful in tests
@@ -501,18 +532,6 @@ $Cypress.Runner = do ($Cypress, _) ->
 
               orig(args...)
 
-        getAllSiblingTests = (suite) ->
-          tests = []
-          suite.eachTest (test) ->
-            ## iterate through each of our suites tests.
-            ## this will iterate through all nested tests
-            ## as well.  and then we add it only if its
-            ## in our grepp'd _this.tests array
-            if _this.testInTests(test)
-              tests.push test
-
-          tests
-
         ## we have to see if this is the last suite amongst
         ## its siblings.  but first we have to filter out
         ## suites which dont have a grep'd test in them
@@ -535,6 +554,9 @@ $Cypress.Runner = do ($Cypress, _) ->
           if not _this.test
             _this.test = _this.getTestFromHook(hook, suite)
 
+          if not fired("test:before:run", _this.test)
+            fire.call(_this, "test:before:run", _this.test)
+
           if not _this.test.hasFiredTestBeforeHooks
             _this.test.hasFiredTestBeforeHooks = true
 
@@ -552,6 +574,9 @@ $Cypress.Runner = do ($Cypress, _) ->
           _this.test = null
 
           waitForHooksToResolve "test:after:hooks", test, ->
+            if not fired("test:after:run", test)
+              fire.call(_this, "test:after:run", test)
+
             Cypress.restore()
 
         switch name
@@ -565,7 +590,7 @@ $Cypress.Runner = do ($Cypress, _) ->
           when "afterEach"
             ## find all of the grep'd _this tests which share
             ## the same parent suite as our current _this test
-            tests = getAllSiblingTests(_this.test.parent)
+            tests = _this.getAllSiblingTests(_this.test.parent)
 
             ## make sure this test isnt the last test overall but also
             ## isnt the last test in our grep'd parent suite's tests array
@@ -576,7 +601,7 @@ $Cypress.Runner = do ($Cypress, _) ->
             ## find all of the grep'd _this tests which share
             ## the same parent suite as our current _this test
             if _this.test
-              tests = getAllSiblingTests(_this.test.parent)
+              tests = _this.getAllSiblingTests(_this.test.parent)
 
               ## if we're the very last test in the entire _this.tests
               ## we wait until the root suite fires
