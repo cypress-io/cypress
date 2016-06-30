@@ -5,48 +5,67 @@ module.exports = {
   set: ->
     return if os.platform() isnt "darwin"
 
-    return if process.env["CYPRESS_ENV"] isnt "production"
-
     template = [
       {
-        label: "Edit"
+        label: "Cypress"
         submenu: [
           {
-            label: "Undo"
-            accelerator: "CmdOrCtrl+Z"
-            role: "undo"
-          }
-          {
-            label: "Redo"
-            accelerator: "Shift+CmdOrCtrl+Z"
-            role: "redo"
+            label: "Services"
+            role: "services"
           }
           {
             type: "separator"
           }
           {
-            label: "Cut"
-            accelerator: "CmdOrCtrl+X"
-            role: "cut"
+            label: "Hide Cypress"
+            accelerator: "CmdOrCtrl+H"
+            role: "hide"
           }
           {
-            label: "Copy"
-            accelerator: "CmdOrCtrl+C"
-            role: "copy"
+            label: "Hide Others"
+            accelerator: "Alt+CmdOrCtrl+H"
+            role: "hideothers"
           }
           {
-            label: "Paste"
-            accelerator: "CmdOrCtrl+V"
-            role: "paste"
+            label: "Show All"
+            role: "unhide"
           }
           {
-            label: "Select All"
-            accelerator: "CmdOrCtrl+A"
-            role: "selectall"
+            type: "separator"
+          }
+          {
+            label: "Quit Cypress"
+            accelerator: "CmdOrCtrl+Q"
+            role: "quit"
           }
         ]
       }
     ]
+
+    if process.env["CYPRESS_ENV"] is "development"
+      template.push(
+        {
+          label: "Developer Tools"
+          submenu: [
+            {
+              label: 'Reload'
+              accelerator: 'CmdOrCtrl+R'
+              click: (item, focusedWindow) =>
+                focusedWindow.reload() if (focusedWindow)
+            }
+            {
+              label: 'Toggle Developer Tools'
+              accelerator: do ->
+                if process.platform is 'darwin'
+                  'Alt+Command+I'
+                else
+                  'Ctrl+Shift+I'
+              click: (item, focusedWindow) =>
+                focusedWindow.toggleDevTools() if (focusedWindow)
+            }
+          ]
+        }
+      )
 
     menu = Menu.buildFromTemplate(template)
 
