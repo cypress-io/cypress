@@ -86,15 +86,10 @@ $Cypress.Cookies = do ($Cypress, _) ->
           Cookies.remove(key, {path: "/"})
 
     setInitial: ->
-      @setCy "initial", true
-
-    setInitialRequest: (remoteHost) ->
-      @setCy "remoteHost", remoteHost
-      @setInitial()
-      @
+      @setCy("initial", true)
 
     getRemoteHost: ->
-      @getCy "remoteHost"
+      @getCy("remoteHost")
 
     defaults: (obj = {}) ->
       ## merge obj into defaults
