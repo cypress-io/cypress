@@ -29,12 +29,12 @@ export default {
       statsStore.startRunning()
     }))
 
-    runner.on('test:before:hooks', action('test:before:hooks', (runnable) => {
+    runner.on('test:before:run', action('test:before:run', (runnable) => {
       statsStore.startCounting()
       runnablesStore.runnableStarted(runnable)
     }))
 
-    runner.on('test:after:hooks', action('test:after:hooks', (runnable) => {
+    runner.on('test:after:run', action('test:after:run', (runnable) => {
       runnablesStore.runnableFinished(runnable)
       statsStore.updateCount(runnable.state)
     }))
