@@ -28,9 +28,14 @@
         cursor: pointer;
       }
 
-      .hook-failed {
+      .hook-failed-message {
         color: #E94F5F;
+        display: none;
       }
+    }
+
+    .hook-failed .hook-failed-message {
+      display: inline;
     }
   }
 
