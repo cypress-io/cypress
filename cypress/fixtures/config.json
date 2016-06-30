@@ -38,6 +38,7 @@
   "integrationExampleName": "example_spec.js",
   "integrationFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/integration",
   "isHeadless": false,
+  "isNewProject": false,
   "javascripts": [
     
   ],

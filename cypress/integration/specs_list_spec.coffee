@@ -2,11 +2,6 @@ describe "Specs List", ->
   beforeEach ->
     @firstProjectName = "My-Fake-Project"
 
-    @config = {
-      clientUrl: "http://localhost:2020",
-      clientUrlDisplay: "http://localhost:2020"
-    }
-
     cy
       .visit("/#/projects/e40991dc055454a2f3598752dec39abc")
       .window().then (win) ->
@@ -18,6 +13,7 @@ describe "Specs List", ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
         @ipc.handle("get:project:paths", null, @projects)
+      .fixture("config").as("config")
 
   it "navigates to project specs page", ->
     cy
@@ -37,6 +33,17 @@ describe "Specs List", ->
   describe "no specs", ->
 
   describe "first time onboarding specs", ->
+    beforeEach ->
+      cy
+        .fixture("browsers").then (@browsers) ->
+          @config.browsers = @browsers
+          @config.isNewProject = true
+          @ipc.handle("open:project", null, @config)
+        .fixture("specs").then (@specs) ->
+          @ipc.handle("get:specs", null, @specs)
+
+    it.only "displays modal", ->
+      cy.contains("integration")
 
   describe "lists specs", ->
     beforeEach ->

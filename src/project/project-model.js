@@ -8,9 +8,12 @@ export default class Project {
   @observable path
   @observable isChosen = false
   @observable isLoading = false
+  @observable isNew = false
   @observable browsers = []
   @observable resolvedConfig = {}
   @observable error
+  @observable parentTestsFolderDisplay
+  @observable integrationExampleName
 
   constructor (path) {
     this.id = md5(path)
@@ -64,6 +67,12 @@ export default class Project {
       browser.isChosen = false
     })
     browser.isChosen = true
+  }
+
+  @action setOnBoardingConfig (config) {
+    this.isNew = config.isNewProject
+    this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
+    this.integrationExampleName = config.integrationExampleName
   }
 
   @action setResolvedConfig (resolved) {

@@ -62,6 +62,7 @@ const openProject = (project) => {
   project.loading(true)
   return App.ipc('open:project', project.path)
   .then((config) => {
+    project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
   })

@@ -7,6 +7,7 @@ import App from '../lib/app'
 import projectsStore from '../projects/projects-store'
 import ProjectNav from '../project-nav/project-nav'
 import { openProject } from '../projects/projects-api'
+import OnBoarding from "./onboarding"
 
 const NoBrowsers = () => (
   <div className='full-alert alert alert-danger error'>
@@ -62,6 +63,7 @@ class Project extends Component {
       <div>
         <ProjectNav project={this.project}/>
         { React.cloneElement(this.props.children, { project: this.project }) }
+        <OnBoarding project={this.project}/>
       </div>
     )
   }
