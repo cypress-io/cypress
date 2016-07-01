@@ -33,8 +33,9 @@ const localBus = new EventEmitter()
 const reporterBus = new EventEmitter()
 
 function toAndFromJson (obj) {
-  if (obj.error) obj.error = obj.error.toString()
-  return JSON.parse(JSON.stringify(obj))
+  const converted = JSON.parse(JSON.stringify(obj))
+  if (obj.error) converted.error = obj.error.toString()
+  return converted
 }
 
 export default {
@@ -71,17 +72,19 @@ export default {
       })
     })
 
-    channel.on('runner:console:error', (testId) => {
-      let test = tests.get(testId)
-      if (test) {
+    reporterBus.on('runner:console:error', (logId) => {
+      this._withLog(logId, (log) => {
         logger.clearLog()
-        logger.logError(test.err.stack)
-      } else {
-        logger.logError('No error found for test id', testId)
-      }
+        const error = log.get('error')
+        if (/(AssertionError|CypressError)/.test(error)) {
+          logger.logFormatted(log)
+        } else {
+          logger.logError(error.stack)
+        }
+      })
     })
 
-    channel.on('runner:console:log', (logId) => {
+    reporterBus.on('runner:console:log', (logId) => {
       this._withLog(logId, (log) => {
         logger.clearLog()
         logger.logFormatted(log)
