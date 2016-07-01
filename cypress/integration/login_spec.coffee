@@ -76,10 +76,10 @@ describe "Login", ->
                 @ipc.handle("log:in", null, @user)
                 @ipc.handle("get:current:user", null, @user)
 
-          it.only "triggers get:project:paths", ->
+          it.skip "triggers get:project:paths", ->
             expect(@App.ipc).to.be.calledWith("get:project:paths")
 
-          it "displays username in UI", ->
+          it.skip "displays username in UI", ->
             cy
               .then ->
                 @ipc.handle("get:project:paths", null, [])
