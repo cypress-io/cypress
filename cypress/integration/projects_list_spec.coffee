@@ -68,7 +68,7 @@ describe "Projects List", ->
         it "navigates to project page", ->
           cy
             .get("@firstProject").click()
-            .location().its("hash").should("include", "123")
+            .location().its("hash").should("include", "e40991dc055454a2f3598752dec39abc")
 
       describe "right click on project", ->
         beforeEach ->
@@ -162,7 +162,7 @@ describe "Projects List", ->
           .get(".empty").should("not.exist")
 
       it "displays project loading", ->
-        @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-Fake-Project")
+        @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
 
         cy.get(".project.loading").should("have.css", "pointer-events", "none")
 

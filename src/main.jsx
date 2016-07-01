@@ -23,7 +23,9 @@ App.start = () => {
   ipc('get:options')
   .then((options = {}) => {
     const sendErr = function (err) {
-      return App.ipc('gui:error', _.pick(err, 'name', 'message', 'stack'))
+      if (err) {
+        return App.ipc('gui:error', _.pick(err, 'name', 'message', 'stack'))
+      }
     }
 
     window.onerror = function (message, source, lineno, colno, err) {
@@ -46,8 +48,8 @@ App.start = () => {
             <Route path='config' component={Config} />
             <Route path='specs' component={SpecsList} />
           </Route>
-          <Route path='/login' component={Login} />
         </Route>
+        <Route path='/login' component={Login}/>
       </Router>
       , el
     )

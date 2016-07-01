@@ -9,29 +9,25 @@ import projectsStore from '../projects/projects-store'
 
 import App from '../lib/app'
 import state from '../lib/state'
-import Login from '../login/login'
 
 @withRouter
 @observer
 export default class Application extends Component {
   constructor (props) {
-    super(props)
-
     App.ipc('get:current:user')
     .then(action('get:current:user', (user) => {
       state.setUser(user)
-      if (user) {
+      if (this._userLoaded()) {
         getProjects()
+      } else {
+        this.props.router.push('/login')
       }
-      this._checkAuth()
     }))
+
+    super(props)
   }
 
   componentDidUpdate () {
-    this._checkAuth()
-  }
-
-  _checkAuth () {
     if (!this._userLoaded()) {
       this.props.router.push('/login')
     }
@@ -49,7 +45,7 @@ export default class Application extends Component {
         </Layout>
       )
     } else {
-      return <Login />
+      return null
     }
   }
 }

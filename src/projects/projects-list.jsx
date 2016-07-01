@@ -68,7 +68,7 @@ export default class Projects extends Component {
     if (!projectsStore.error) return null
 
     return (
-      <div className='alert alert-danger error'>
+      <div className='alert alert-danger error alert-in-projects'>
         <p className='text-center'>
           <i className='fa fa-exclamation-triangle'></i>{' '}
           { projectsStore.error }

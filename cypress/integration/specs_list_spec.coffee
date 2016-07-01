@@ -42,7 +42,7 @@ describe "Specs List", ->
         .fixture("specs").then (@specs) ->
           @ipc.handle("get:specs", null, @specs)
 
-    it.only "displays modal", ->
+    it "displays modal", ->
       cy.contains("integration")
 
   describe "lists specs", ->

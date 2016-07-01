@@ -35,7 +35,7 @@ class Projects {
   }
 
   @action setError (err) {
-    this.projects.error = err
+    this.error = err
   }
 
   setChosen (project) {

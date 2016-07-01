@@ -3,8 +3,10 @@ import { action } from 'mobx'
 import React, { Component } from 'react'
 import App from '../lib/app'
 import state from '../lib/state'
+import { observer } from 'mobx-react'
 
-export default class Login extends Component {
+@observer
+class Login extends Component {
   constructor (props) {
     super(props)
 
@@ -47,7 +49,8 @@ export default class Login extends Component {
     )
   }
 
-  _login = () => {
+  _login = (e) => {
+    e.preventDefault()
     const alreadyOpen = (err) => err && err.alreadyOpen
 
     App.ipc("window:open", {
@@ -112,3 +115,5 @@ export default class Login extends Component {
     App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running#section-your-email-has-not-been-authorized-')
   }
 }
+
+export default Login

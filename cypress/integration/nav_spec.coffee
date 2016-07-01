@@ -4,11 +4,8 @@ describe "Navigation", ->
       .visit("/")
       .window().then (win) ->
         {@ipc, @App} = win
-
         @agents = cy.agents()
-
         @agents.spy(@App, "ipc")
-
         @ipc.handle("get:options", null, {})
 
   context "with a current user", ->

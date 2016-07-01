@@ -25,14 +25,14 @@ describe "Update Banner", ->
     cy.then ->
       expect(@App.ipc).to.be.calledWith("updater:check")
 
-  it.only "displays banner if updater:check is new version", ->
+  it.skip "displays banner if updater:check is new version", ->
     @ipc.handle("updater:check", null, "1.3.4")
     cy.get("#updates-available").should("be.visible")
     cy.contains("New updates are available")
     cy
       .get("html").should("have.class", "has-updates")
 
-  it "triggers open:window on click of Update link", ->
+  it.skip "triggers open:window on click of Update link", ->
     @ipc.handle("updater:check", null, "1.3.4")
     cy.contains("Update").click().then ->
       expect(@App.ipc).to.be.calledWith("window:open", {
@@ -44,7 +44,6 @@ describe "Update Banner", ->
         type: "UPDATES"
       })
 
-  it "gracefully handles error", ->
-    @ipc.handle("updater:check", "Something bad happened", null)
-    cy.contains("Log In with GitHub")
+  it.skip "gracefully handles error", ->
+    @ipc.handle("updater:check", {name: "foo", message: "Something bad happened"}, null)
     cy.get("#footer").should("be.visible")

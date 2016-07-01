@@ -31,3 +31,12 @@
   text-align: center;
   padding: 60px 20px;
 }
+
+.alert-in-projects {
+  top: 40px;
+  position: relative;
+
+  + .projects-list {
+    top: 90px;
+  }
+}

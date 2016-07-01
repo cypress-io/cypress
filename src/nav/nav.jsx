@@ -108,7 +108,8 @@ export default class Nav extends Component {
     closeProject()
   }
 
-  _addProject () {
+  _addProject (e) {
+    e.preventDefault()
     addProject()
   }
 }

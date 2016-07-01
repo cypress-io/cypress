@@ -11,22 +11,22 @@ describe "Login", ->
   context "without a current user", ->
     beforeEach ->
       @ipc.handle("get:current:user", null, {})
+    describe "login display", ->
+      it "displays 'Cypress'", ->
+        cy.get("#login").contains("Cypress")
 
-    it "displays 'Cypress'", ->
-      cy.get("#login").contains("Cypress")
+      it "has login url", ->
+        cy.location().its("hash").should("contain", "login")
 
-    it "has login url", ->
-      cy.location().its("hash").should("contain", "login")
+      it "has Github Login button", ->
+        cy.get("#login").contains("button", "Log In with GitHub")
 
-    it "has Github Login button", ->
-      cy.get("#login").contains("button", "Log In with GitHub")
+      it "displays help link", ->
+        cy.contains("a", "Need help?")
 
-    it "displays help link", ->
-      cy.contains("a", "Need help?")
-
-    it "opens link to docs on click of help link", ->
-      cy.contains("a", "Need help?").click().then ->
-        expect(@App.ipc).to.be.calledWith("external:open", "https://docs.cypress.io")
+      it "opens link to docs on click of help link", ->
+        cy.contains("a", "Need help?").click().then ->
+          expect(@App.ipc).to.be.calledWith("external:open", "https://docs.cypress.io")
 
     describe "click 'Log In with GitHub'", ->
       beforeEach ->
@@ -74,11 +74,12 @@ describe "Login", ->
               .contains("Logging in...")
               .fixture("user").then (@user) ->
                 @ipc.handle("log:in", null, @user)
+                @ipc.handle("get:current:user", null, @user)
 
-          it "triggers get:project:paths", ->
+          it.only "triggers get:project:paths", ->
             expect(@App.ipc).to.be.calledWith("get:project:paths")
 
-          it.skip "displays username in UI", ->
+          it "displays username in UI", ->
             cy
               .then ->
                 @ipc.handle("get:project:paths", null, [])
