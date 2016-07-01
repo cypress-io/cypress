@@ -4,11 +4,8 @@ describe "Login", ->
       .visit("/")
       .window().then (win) ->
         {@ipc, @App} = win
-
         @agents = cy.agents()
-
         @agents.spy(@App, "ipc")
-
         @ipc.handle("get:options", null, {})
 
   context "without a current user", ->
@@ -51,7 +48,7 @@ describe "Login", ->
       it "does not lock up UI if login is clicked multiple times", ->
         cy
           .get("@loginBtn").click().click().then ->
-            @ipc.handle("window:open", {alreadyOpen: true}, null)
+            @ipc.handle("window:open", {name: "foo", message: "bar", alreadyOpen: true}, null)
           .get("#login").contains("button", "Log In with GitHub").should("not.be.disabled")
 
       context "on 'window:open' ipc response", ->
@@ -81,14 +78,14 @@ describe "Login", ->
           it "triggers get:project:paths", ->
             expect(@App.ipc).to.be.calledWith("get:project:paths")
 
-          it "displays username in UI", ->
+          it.skip "displays username in UI", ->
             cy
               .then ->
                 @ipc.handle("get:project:paths", null, [])
               .get("nav a").should ($a) ->
                 expect($a).to.contain(@user.name)
 
-          it "has login button enabled on logout", ->
+          it.skip "has login button enabled on logout", ->
             cy
               .then ->
                 @ipc.handle("get:project:paths", null, [])
@@ -103,7 +100,7 @@ describe "Login", ->
           it "displays error in ui", ->
             cy
               .fixture("user").then (@user) ->
-                @ipc.handle("log:in", {message: "There's an error"}, null)
+                @ipc.handle("log:in", {name: "foo", message: "There's an error"}, null)
               .get(".alert-danger")
                 .should("be.visible")
                 .contains("There's an error")
@@ -111,7 +108,7 @@ describe "Login", ->
           it "login button should be enabled", ->
             cy
               .fixture("user").then (@user) ->
-                @ipc.handle("log:in", {message: "There's an error"}, null)
+                @ipc.handle("log:in", {name: "foo", message: "There's an error"}, null)
               .get("@loginBtn").should("not.be.disabled")
 
 

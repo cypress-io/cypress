@@ -9,6 +9,7 @@ import projectsStore from '../projects/projects-store'
 
 import App from '../lib/app'
 import state from '../lib/state'
+import Login from '../login/login'
 
 @withRouter
 @observer
@@ -48,7 +49,7 @@ export default class Application extends Component {
         </Layout>
       )
     } else {
-      return null
+      return <Login />
     }
   }
 }

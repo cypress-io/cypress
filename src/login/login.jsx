@@ -65,7 +65,6 @@ export default class Login extends Component {
       // App.execute "gui:focus"
       this.setState({ isLoggingIn: true })
 
-      // now actually log in
       return App.ipc("log:in", code)
     })
     .then(action('log:in', (user) => {
