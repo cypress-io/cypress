@@ -79,6 +79,25 @@ describe "$Cypress.Runner API", ->
           expect(restore).to.be.called
           done()
 
+      it "calls test:after:hooks and test:after:run when uncaught err from hook", (done) ->
+        fn = _.after 3, -> done()
+
+        @Cypress.on "test:after:hooks", (test) ->
+          expect(test.title).to.eq("one")
+          fn()
+
+        @Cypress.on "test:after:run", (test) ->
+          expect(test.title).to.eq("one")
+          fn()
+
+        @Cypress.on "run:end", -> fn()
+
+        beforeEach = @runner.runner.suite._beforeEach[0]
+        beforeEach.fn = =>
+          @runner.runner.uncaught(new Error("this is uncaught!"))
+
+        @runner.run =>
+
     describe "runner.on('suite')", ->
       it "Cypress triggers suite:start", (done) ->
         @runner.runner.on "suite", (@suite) =>

@@ -49,14 +49,66 @@ $Cypress.Runner = do ($Cypress, _) ->
   #   ]
   # }
 
-  fire = (event, test) ->
+  waitForHooksToResolve = (ctx, event, test = {}) ->
+    ## get an array of event listeners
+    events = fire.call(ctx, event, test, {multiple: true})
+
+    events = _.filter events, (r) ->
+      ## get us out only promises
+      ## due to a bug in bluebird with
+      ## not being able to call {}.hasOwnProperty
+      ## https://github.com/petkaantonov/bluebird/issues/1104
+      ## TODO: think about applying this to the other areas
+      ## that use Cypress.invoke(...)
+      ctx.Cypress.Utils.isInstanceOf(r, Promise)
+
+    Promise.all(events)
+    .catch (err) ->
+      ## this doesn't take into account events running prior to the
+      ## test - but this is the best we can do considering we don't
+      ## yet have test.callback (from mocha). so we just override
+      ## its fn to automatically throw. however this really shouldn't
+      ## ever even happen since the webapp prevents you from running
+      ## tests to begin with. but its here just in case.
+      test.fn = ->
+        throw err
+
+  fire = (event, test, options = {}) ->
     test._fired ?= {}
     test._fired[event] = true
 
-    @Cypress.trigger(event, @wrap(test))
+    if options.multiple
+      [].concat(@Cypress.invoke(event, @wrap(test), test))
+    else
+      @Cypress.trigger(event, @wrap(test))
 
   fired = (event, test) ->
     !!(test._fired and test._fired[event])
+
+  testEvents = {
+    beforeRun: (ctx, test) ->
+      if not fired("test:before:run", test)
+        fire.call(ctx, "test:before:run", test)
+
+    beforeHooksAsync: (ctx, test) ->
+      ## there is a bug (but i believe its only in tests
+      ## which happens in Ended Early Integration Tests
+      ## where the test will be undefined due to the runner.suite
+      ## not yet having built its tests/suites array and thus
+      ## our @tests array is empty
+      Promise.try ->
+        if not fired("test:before:hooks", test)
+          waitForHooksToResolve(ctx, "test:before:hooks", test)
+
+    afterHooksAsync: (ctx, test) ->
+      Promise.try ->
+        if not fired("test:after:hooks", test)
+          waitForHooksToResolve(ctx, "test:after:hooks", test)
+
+    afterRun: (ctx, test) ->
+      if not fired("test:after:run", test)
+        fire.call(ctx, "test:after:run", test)
+  }
 
   class $Runner
     constructor: (@Cypress, @runner) ->
@@ -114,9 +166,33 @@ $Cypress.Runner = do ($Cypress, _) ->
 
       ## mocha has finished running the tests
       @runner.on "end", =>
-        Cypress.trigger "run:end"
+        ## end may have been caused by an uncaught error
+        ## that happened inside of a hook.
+        ##
+        ## when this happens mocha aborts the entire run
+        ## and does not do the usual cleanup so that means
+        ## we have to fire the test:after:hooks and
+        ## test:after:run events ourselves
+        end = =>
+          Cypress.trigger "run:end"
 
-        @restore()
+          @restore()
+
+        ## if we have a test and err
+        test = _this.test
+        err  = test and test.err
+
+        ## and this err is uncaught
+        if err and err.uncaught
+
+          ## fire all the events
+          testEvents.afterHooksAsync(_this, test)
+          .then ->
+            testEvents.afterRun(_this, test)
+
+            end()
+        else
+          end()
 
       @runner.on "suite", (suite) =>
         Cypress.trigger "suite:start", @wrap(suite)
@@ -361,6 +437,9 @@ $Cypress.Runner = do ($Cypress, _) ->
       @runnerListeners()
 
       @runner.run (failures) =>
+        ## TODO this functions is not correctly
+        ## synchronized with the 'end' event that
+        ## we manage because of uncaught hook errors
         fn(failures, @getTestResults()) if fn
 
     getTestResults: ->
@@ -503,35 +582,6 @@ $Cypress.Runner = do ($Cypress, _) ->
       @runner.hook = _.wrap @runner.hook, (orig, name, fn) ->
         hooks = @suite["_" + name]
 
-        waitForHooksToResolve = (event, test = {}, cb = ->) ->
-          ## coerce into an array
-          hooks = [].concat Cypress.invoke(event, _this.wrap(test), test)
-
-          hooks = _.filter hooks, (r) ->
-            ## get us out only promises
-            ## due to a bug in bluebird with
-            ## not being able to call {}.hasOwnProperty
-            ## https://github.com/petkaantonov/bluebird/issues/1104
-            ## TODO: think about applying this to the other areas
-            ## that use Cypress.invoke(...)
-            Cypress.Utils.isInstanceOf(r, Promise)
-
-          fn = _.wrap fn, (orig, args...) ->
-            Promise.all(hooks)
-            .catch (err) ->
-              ## this doesn't take into account hooks running prior to the
-              ## test - but this is the best we can do considering we don't
-              ## yet have test.callback (from mocha). so we just override
-              ## its fn to automatically throw. however this really shouldn't
-              ## ever even happen since the webapp prevents you from running
-              ## tests to begin with. but its here just in case.
-              test.fn = ->
-                throw err
-            .then ->
-              cb()
-
-              orig(args...)
-
         ## we have to see if this is the last suite amongst
         ## its siblings.  but first we have to filter out
         ## suites which dont have a grep'd test in them
@@ -554,30 +604,26 @@ $Cypress.Runner = do ($Cypress, _) ->
           if not _this.test
             _this.test = _this.getTestFromHook(hook, suite)
 
-          if not fired("test:before:run", _this.test)
-            fire.call(_this, "test:before:run", _this.test)
+          testEvents.beforeRun(_this, _this.test)
 
-          if not _this.test.hasFiredTestBeforeHooks
-            _this.test.hasFiredTestBeforeHooks = true
-
-            ## there is a bug (but i believe its only in tests
-            ## which happens in Ended Early Integration Tests
-            ## where the test will be undefined due to the runner.suite
-            ## not yet having built its tests/suites array and thus
-            ## our @tests array is empty
-
-            waitForHooksToResolve("test:before:hooks", _this.test)
+          fn = _.wrap fn, (orig, args...) ->
+            testEvents.beforeHooksAsync(_this, _this.test)
+            .then ->
+              orig(args...)
 
         testAfterHooks = ->
           test = _this.test
 
           _this.test = null
 
-          waitForHooksToResolve "test:after:hooks", test, ->
-            if not fired("test:after:run", test)
-              fire.call(_this, "test:after:run", test)
+          fn = _.wrap fn, (orig, args...) ->
+            testEvents.afterHooksAsync(_this, test)
+            .then ->
+              testEvents.afterRun(_this, test)
 
-            Cypress.restore()
+              Cypress.restore()
+
+              orig(args...)
 
         switch name
           when "beforeAll"
