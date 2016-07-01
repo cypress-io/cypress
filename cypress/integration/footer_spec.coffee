@@ -10,7 +10,6 @@ describe "Footer", ->
 
         @ipc.handle("get:options", null, {})
 
-
   it "does not display on login", ->
     cy.get("footer").should("not.be.visible")
 
@@ -28,17 +27,3 @@ describe "Footer", ->
       cy
         .get("a").contains("Changelog").click().then ->
           expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/changelog")
-
-    it "triggers window:open with About options", ->
-      @opts = {
-        position: "center"
-        width: 300
-        height: 230
-        toolbar: false
-        title: "About"
-        type: "ABOUT"
-      }
-
-      cy
-        .get("a").contains("Version").click().then ->
-          expect(@App.ipc).to.be.calledWithExactly("window:open", @opts)
