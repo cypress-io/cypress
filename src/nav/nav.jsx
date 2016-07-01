@@ -69,7 +69,7 @@ export default class Nav extends Component {
       )
     } else {
       const hasProjects = !!projectsStore.projects.length
-      const tooltip = hasProjects ? 'Add Project' : 'Choose a folder to begin testing'
+      const tooltip = hasProjects ? 'Add Project' : 'Click here'
 
       return (
         <Tooltip
@@ -77,7 +77,7 @@ export default class Nav extends Component {
           visible={!hasProjects}
           overlay={tooltip}
           align={{
-            points: ['bl', 'tl'], // align bottom left point of sourceNode with top left point of targetNode
+            // points: ['bl', 'tl'], // align bottom left point of sourceNode with top left point of targetNode
           }}
           >
           <a onClick={this._addProject} href='#'>

@@ -44,7 +44,7 @@ describe "Navigation", ->
         cy.contains("a", "Log Out").click().then ->
           expect(@App.ipc).to.be.calledWith("log:out")
 
-      it.only "displays login screen on logout", ->
+      it "displays login screen on logout", ->
         @ipc.handle("log:out", null, {})
         cy.contains("Jane Lane").click()
         cy.contains("a", "Log Out").click()

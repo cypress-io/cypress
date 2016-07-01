@@ -3,7 +3,7 @@ describe "Config", ->
     @firstProjectName = "My-Fake-Project"
 
     cy
-      .visit("/#/projects/e40991dc055454a2f3598752dec39abc/config")
+      .visit("/")
       .window().then (win) ->
         {@ipc, @App} = win
         @agents = cy.agents()
@@ -13,9 +13,12 @@ describe "Config", ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
         @ipc.handle("get:project:paths", null, @projects)
+      .get(".projects-list a")
+        .contains("My-Fake-Project").click()
       .fixture("browsers").as("browsers")
       .fixture("config").then (@config) ->
         @ipc.handle("open:project", null, @config)
+      .get("a").contains("Config").click()
 
   context "displays page", ->
     it "navigates to config page", ->

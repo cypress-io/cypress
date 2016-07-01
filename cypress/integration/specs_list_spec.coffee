@@ -3,7 +3,7 @@ describe "Specs List", ->
     @firstProjectName = "My-Fake-Project"
 
     cy
-      .visit("/#/projects/e40991dc055454a2f3598752dec39abc")
+      .visit("/")
       .window().then (win) ->
         {@ipc, @App} = win
         @agents = cy.agents()
@@ -13,6 +13,8 @@ describe "Specs List", ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
         @ipc.handle("get:project:paths", null, @projects)
+      .get(".projects-list a")
+        .contains("My-Fake-Project").click()
       .fixture("config").as("config")
 
   it "navigates to project specs page", ->
@@ -77,10 +79,10 @@ describe "Specs List", ->
     it.skip "word wraps long error message plus update bar", ->
       @longErrMessage = "Morbileorisus,portaacconsecteturac,vestibulumateros.Nullamquisrisusegeturnamollis ornare vel eu leo. Donec sed odio dui. Nullam quis risus eget urna mollis ornare vel eu leo. Etiam porta sem malesuada magna mollis euismod. Maecenas faucibus mollis interdum. Nullam id dolor id nibh ultricies vehicula ut id elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Vestibulum id ligula porta felis euismod semper. Vestibulum id ligula porta felis euismod semper.Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam id dolor id nibh ultricies vehicula ut id elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Donec id elit non mi porta gravida at eget metus. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras justo odio, dapibus ac facilisis in, egestas eget quam.Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod."
       @ipc.handle("updater:check", null, "1.3.4")
+      @ipc.handle("open:project", {name: @err.name, message: @longErrMessage}, null)
       cy.get("#updates-available").should("be.visible")
       cy.contains("New updates are available")
 
-      @ipc.handle("open:project", {name: @err.name, message: @longErrMessage}, {})
       cy
         .get(".error")
           .should("contain", @err.name)

@@ -51,8 +51,8 @@ export default class Projects extends Component {
     return (
       <div className='empty'>
         <h4>Add your first project</h4>
-        <p>To begin testing, click <i className='fa fa-plus'></i> above to choose a folder that has the resources of your project.</p>
-        <p>Often this is the root folder of a source controlled project.</p>
+        <p>To begin testing, click <strong><i className='fa fa-plus'></i> Add Project</strong> above.</p>
+        <p>Choose the folder with the resources of your project.</p>
         { this._error() }
         <p className='helper-docs-append'>
           <a onClick={this._openHelp} className='helper-docs-link'>

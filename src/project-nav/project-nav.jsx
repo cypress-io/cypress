@@ -32,9 +32,11 @@ export default class ProjectNav extends Component {
               </li>
             </ul>
             <ul className='nav navbar-nav navbar-right'>
-              <li onClick={this._launchBrowser}>
-                Launch Browser
-              </li>
+              {
+              // <li onClick={this._launchBrowser}>
+              //   Launch Browser
+              // </li>
+              }
               <Browsers project={project} />
             </ul>
           </div>
@@ -43,12 +45,12 @@ export default class ProjectNav extends Component {
     )
   }
 
-  _launchBrowser () {
-    App.ipc('launch:browser', {
-      browser: 'chrome',
-      url: 'http://localhost:2020',
-    }, function (err, data) {
-      err, data
-    })
-  }
+  // _launchBrowser () {
+  //   App.ipc('launch:browser', {
+  //     browser: 'chrome',
+  //     url: 'http://localhost:2020',
+  //   }, function (err, data) {
+  //     err, data
+  //   })
+  // }
 }

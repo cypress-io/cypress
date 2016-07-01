@@ -6,10 +6,6 @@
   margin-bottom: 0;
   width: 100%;
 
-  pre table {
-    margin-bottom: 0;
-  }
-
   .config-keys {
 
     margin-bottom: 0;
@@ -83,4 +79,8 @@
 
 .config-wrapper {
   padding: 0 20px 20px;
+
+  table tr:first-child td {
+    border-top: 0;
+  }
 }

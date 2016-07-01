@@ -85,7 +85,7 @@ describe "Login", ->
               .get("nav a").should ($a) ->
                 expect($a).to.contain(@user.name)
 
-          it.only "has login button enabled on logout", ->
+          it "has login button enabled on logout", ->
             cy
               .then ->
                 @ipc.handle("get:project:paths", null, [])

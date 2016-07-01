@@ -40,7 +40,7 @@ describe "Projects Nav", ->
 
       it "routes to projects on click of back button", ->
         cy
-          .contains("Back to Projects").click()
+          .contains("Back to Projects").click({force: true})
           .location().then (location) ->
             expect(location.href).to.include("projects")
             expect(location.href).to.not.include("123-456")
@@ -176,13 +176,13 @@ describe "Projects Nav", ->
             @ipc.handle("open:project", null, @config)
 
     it "closes project", ->
-      cy.contains("Back to Projects").click().then ->
+      cy.contains("Back to Projects").click({force: true}).then ->
         expect(@App.ipc).to.be.calledWith("close:project")
 
     describe "click on diff project", ->
       beforeEach ->
         cy
-          .contains("Back to Projects").click()
+          .contains("Back to Projects").click({force: true})
           .get(".projects-list a")
             .contains("project1").click().then ->
               @ipc.handle("open:project", null, @config)

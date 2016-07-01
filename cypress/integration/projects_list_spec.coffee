@@ -21,7 +21,7 @@ describe "Projects List", ->
       cy.get("projects-list").should("not.exist")
 
     it "opens tooltip on add button", ->
-      cy.get(".rc-tooltip").contains("Choose a folder to begin testing")
+      cy.get(".rc-tooltip").contains("Click here")
 
     it "displays empty view when no projects", ->
       cy.get(".empty").contains("Add your first project")
@@ -141,22 +141,22 @@ describe "Projects List", ->
       it "triggers ipc 'add:project' with directory", ->
         cy
           .then ->
-            @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-Fake-Project")
+            @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
           .then ->
             expect(@App.ipc).to.be.calledWith("add:project")
 
       it "displays new project in list", ->
         cy
           .then ->
-            @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-Fake-Project")
+            @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
           .then ->
             expect(@App.ipc).to.be.calledWith("add:project")
-          .get(".projects-list a:first").should("contain", "My-Fake-Project")
+          .get(".projects-list a:last").should("contain", "My-New-Project")
 
       it "no longer shows empty projects view", ->
         cy
           .then ->
-            @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-Fake-Project")
+            @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
           .then ->
             expect(@App.ipc).to.be.calledWith("add:project")
           .get(".empty").should("not.exist")
