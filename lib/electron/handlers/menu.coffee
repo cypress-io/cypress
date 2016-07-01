@@ -3,8 +3,6 @@ Menu = require("electron").Menu
 
 module.exports = {
   set: ->
-    return if os.platform() isnt "darwin"
-
     template = [
       {
         label: "File"
