@@ -434,16 +434,13 @@ $Cypress.Server = do ($Cypress, _, minimatch) ->
         ## FQDN:               http://www.google.com/responses/users.json
         ## relative:           partials/phones-list.html
         ## absolute-relative:  /app/partials/phones-list.html
-        originalUrl = getServer().getFullyQualifiedUrl(contentWindow, url)
-
-        ## resolve handling actual + display url's
-        url = getServer().options.getUrlOptions(originalUrl)
+        fullyQualifiedUrl = getServer().getFullyQualifiedUrl(contentWindow, url)
 
         ## decode the entire url.display to make
         ## it easier to do assertions
         proxy = getServer().add(@, {
           method: method
-          url: decodeURIComponent(url.display)
+          url: decodeURIComponent(fullyQualifiedUrl)
         })
 
         ## if this XHR matches a stubbed route then shift
@@ -451,7 +448,7 @@ $Cypress.Server = do ($Cypress, _, minimatch) ->
         ## headers for the response
         route = getServer().getRouteForXhr(@)
         if getServer().shouldApplyStub(route)
-          url.actual = getServer().normalizeStubUrl(getServer().options.xhrUrl, url.actual)
+          url = getServer().normalizeStubUrl(getServer().options.xhrUrl, fullyQualifiedUrl)
 
         timeStart = new Date
 
@@ -551,7 +548,7 @@ $Cypress.Server = do ($Cypress, _, minimatch) ->
 
         ## change absolute url's to relative ones
         ## if they match our baseUrl / visited URL
-        open.call(@, method, url.actual, async, username, password)
+        open.call(@, method, url, async, username, password)
 
       XHR.prototype.send = (requestBody) ->
         ## add header properties for the xhr's id

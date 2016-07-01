@@ -154,7 +154,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
           logs.push(log)
 
         @cy
-          .visit("fixtures/html/commands.html")
+          .visit("http://localhost:3500/fixtures/html/commands.html")
           .server()
           .route(/foo/, {}).as("getFoo")
           .then ->

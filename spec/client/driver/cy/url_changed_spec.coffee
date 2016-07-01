@@ -73,7 +73,7 @@ describe "$Cypress Url:Changed Events", ->
     context "pushState events", ->
       it "fires when pushState is invoked", ->
         @cy
-          .visit("fixtures/html/sinon.html")
+          .visit("http://localhost:3500/fixtures/html/sinon.html")
           .get("#pushState").click()
           .then ->
             ## sinon.html has code which pushes
@@ -83,7 +83,7 @@ describe "$Cypress Url:Changed Events", ->
     context "hashchange events", ->
       it "fires on hashchange event", ->
         @cy
-          .visit("fixtures/html/sinon.html")
+          .visit("http://localhost:3500/fixtures/html/sinon.html")
           .get("#hashchange").click()
           .then ->
             @urlIs "/fixtures/html/sinon.html#hashchange"

@@ -10,7 +10,7 @@
         beforeEach(function(){
           cy
             .server()
-            .visit("fixtures/html/app-errors.html")
+            .visit("http://localhost:3500/fixtures/html/app-errors.html")
             .get("body")
         })
 
@@ -20,7 +20,7 @@
 
         it("t1", function(done){
           cy
-            .visit("fixtures/html/app-errors.html")
+            .visit("http://localhost:3500/fixtures/html/app-errors.html")
             .get(".ref")
             .click()
             .should("have.class", "active")

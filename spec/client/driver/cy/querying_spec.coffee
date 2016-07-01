@@ -556,7 +556,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
       it "logs route aliases", ->
         @cy
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .server()
           .route(/users/, {}).as("getUsers")
           .window().then (win) ->
@@ -645,7 +645,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy
           .server()
           .route(/users/, {}).as("getUsers")
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
             win.$.get("/users")
           .get("@getUsers").then (obj) ->
@@ -696,7 +696,7 @@ describe "$Cypress.Cy Querying Commands", ->
           @cy
             .server()
             .route(/users/, {}).as("getUsers")
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .window().then (win) ->
               win.$.get("/users")
             .get("@getUsers").then (xhr) ->
@@ -706,13 +706,13 @@ describe "$Cypress.Cy Querying Commands", ->
           @cy
             .server()
             .route(/users/, {}).as("getUsers")
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .get("@getUsers").then (xhr) ->
               expect(xhr).to.be.null
 
         it "returns an array of xhrs", ->
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
@@ -725,7 +725,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
         it "returns the 1st xhr", ->
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
@@ -736,7 +736,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
         it "returns the 2nd xhr", ->
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
@@ -749,7 +749,7 @@ describe "$Cypress.Cy Querying Commands", ->
           @cy
             .server()
             .route(/users/, {}).as("getUsers")
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .window().then (win) ->
               win.$.get("/users", {num: 1})
               win.$.get("/users", {num: 2})
@@ -861,7 +861,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy
           .server()
           .route(/json/, {foo: "foo"}).as("getJSON")
-          .visit("/fixtures/html/xhr.html").then ->
+          .visit("http://localhost:3500/fixtures/html/xhr.html").then ->
             @cy.$$("#get-json").click =>
               @cy._timeout(1000)
 

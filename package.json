@@ -40,6 +40,7 @@
     "codecov": "^1.0.1",
     "coffee-coverage": "^1.0.1",
     "commander": "2.3.0",
+    "cors": "^2.7.1",
     "coveralls": "^2.11.8",
     "electron-osx-sign": "^0.3.0",
     "electron-packager": "7.0.1",

@@ -7,11 +7,11 @@
     <script type="text/javascript" src="/lib/public/js/iframe.js"></script>
     <script type="text/javascript">
       it("visits", function(){
-        cy.visit("timeout?ms=500", {timeout: 1000})
+        cy.visit("http://localhost:3500/timeout?ms=500", {timeout: 1000})
       })
 
       it("can fail visiting", function(){
-        cy.visit("timeout?ms=1000", {timeout: 500})
+        cy.visit("http://localhost:3500/timeout?ms=1000", {timeout: 500})
       })
     </script>
   </head>

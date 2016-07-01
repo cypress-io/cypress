@@ -47,7 +47,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         response = {foo: "foo"}
 
         @cy
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .server()
           .route("GET", /.*/, response).as("fetch")
           .window().then (win) ->
@@ -62,7 +62,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           null
 
         @cy
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .server({delay: 1000})
           .route(/users/, {}).as("getUsers")
           .wait("@getUsers.request").then (xhr) ->
@@ -80,7 +80,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         @cy
           .server()
           .route("GET", /.*/, {}).as("fetch")
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .wait("@fetch").then ->
             expect(@cy._timeout()).to.eq prevTimeout
 
@@ -104,7 +104,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           done()
 
         @cy
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .server({delay: 100})
           .route("GET", "*", {}).as("fetch")
           .window().then (win) ->
@@ -164,7 +164,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .window().then (win) ->
@@ -177,7 +177,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .route(/bar/, {}).as("bar")
@@ -191,7 +191,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .get("body").as("bar")
@@ -207,7 +207,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .route(/bar/, {}).as("bar")
@@ -226,7 +226,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             null
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {foo: "foo"}).as("foo")
             .route(/bar/, {bar: "bar"}).as("bar")
@@ -245,7 +245,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             null
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {foo: "foo"}).as("foo")
             .route(/bar/, {bar: "bar"}).as("bar")
@@ -264,7 +264,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             , 500
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .route(/bar/, {}).as("bar")
@@ -282,7 +282,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             , 500
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .get("body").as("bar")
@@ -307,7 +307,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             , 500
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {foo: "foo"}).as("foo")
             .route(/bar/, {bar: "bar"}).as("bar")
@@ -333,7 +333,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             , 500
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {foo: "foo"}).as("foo")
             .route(/bar/, {bar: "bar"}).as("bar")
@@ -358,7 +358,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             win.$.get("/users", {num: response})
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/users/, resp).as("getUsers")
             .wait(["@getUsers", "@getUsers", "@getUsers"])
@@ -380,7 +380,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             win.$.get("/users", {num: response})
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/users/, resp).as("getUsers")
             .wait("@getUsers")
@@ -403,7 +403,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             win.$.get("/users", {num: request})
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/users/, resp).as("getUsers")
             .wait("@getUsers.request")
@@ -417,7 +417,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route("*").as("response")
             .window().then (win) ->
@@ -433,7 +433,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route("*").as("response")
             .window().then (win) ->
@@ -450,7 +450,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route("/timeout?ms=0").as("foo")
             .route("/timeout?ms=5000").as("bar")
@@ -475,7 +475,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy
             .server({delay: 200})
             .route(/users/, {}).as("getUsers")
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .wait("@getUsers.request").then (xhr) ->
               expect(xhr.url).to.include "/users"
               expect(xhr.response).to.be.null
@@ -495,7 +495,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route("/timeout?ms=2001").as("getOne")
             .route("/timeout?ms=2002").as("getTwo")
@@ -517,7 +517,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route("/timeout?ms=1").as("getOne")
             .route("/timeout?ms=2").as("getTwo")
@@ -538,7 +538,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         resp2 = {bar: "bar"}
 
         @cy
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .server()
           .route(/users/, resp1).as("getUsers")
           .route(/posts/, resp2).as("getPosts")
@@ -560,7 +560,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           win.$.get("/users", {num: response})
 
         @cy
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .server()
           .route(/users/, resp).as("getUsers")
           .wait("@getUsers").then (xhr) ->
@@ -583,7 +583,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           win.$.get("/users", {num: response})
 
         @cy
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .server()
           .route(/users/, resp).as("getUsers")
           .wait(["@getUsers", "@getUsers", "@getUsers"]).spread (xhr1, xhr2, xhr3) ->
@@ -720,7 +720,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .route(/bar/, {}).as("getBar")
@@ -736,7 +736,7 @@ describe "$Cypress.Cy Waiting Commands", ->
       describe "alias argument", ->
         it "is a parent command", ->
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .window().then (win) ->
@@ -746,7 +746,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "passes as array of referencesAlias", ->
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .route(/bar/, {}).as("getBar")
@@ -758,7 +758,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "#onConsole waiting on 1 alias", ->
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .window().then (win) ->
@@ -772,7 +772,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "#onConsole waiting on multiple aliases", ->
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .route(/bar/, {}).as("getBar")

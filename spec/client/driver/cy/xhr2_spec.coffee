@@ -3,7 +3,7 @@
 
 #   it "logs all xhr requests", ->
 #     @cy
-#       .visit("fixtures/html/xhr.html")
+#       .visit("http://localhost:3500/fixtures/html/xhr.html")
 #       .window().then (win) ->
 #         win.$.ajax({
 #           url: "/fixtures/html/dom.html"
@@ -36,7 +36,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
   beforeEach ->
     @setup = =>
-      @Cypress.trigger "test:before:hooks", {id: 123}
+      @Cypress.trigger "test:before:hooks", {id: 123}, {}
 
       ## pass up our iframe so the server binds to the XHR
       ## this ends up being faster than doing a cy.visit in every test
@@ -290,7 +290,7 @@ describe "$Cypress.Cy XHR Commands", ->
             null
           .wait("@getFoo").then (xhr) ->
             expect(xhr.url).to.eq("http://localhost:3500/fixtures/html/foo")
-            expect(@open).to.be.calledWith("GET", "/fixtures/html/foo")
+            expect(@open).to.be.calledWith("GET", "foo")
 
       it "resolves relative urls correctly when base tag is present", ->
         @cy
@@ -308,7 +308,7 @@ describe "$Cypress.Cy XHR Commands", ->
             null
           .wait("@getFoo").then (xhr) ->
             expect(xhr.url).to.eq("http://localhost:3500/foo")
-            expect(@open).to.be.calledWith("GET", "/foo")
+            expect(@open).to.be.calledWith("GET", "foo")
 
       it "resolves relative urls correctly when base tag is present on nested routes", ->
         @cy
@@ -326,24 +326,22 @@ describe "$Cypress.Cy XHR Commands", ->
             null
           .wait("@getFoo").then (xhr) ->
             expect(xhr.url).to.eq("http://localhost:3500/nested/foo")
-            expect(@open).to.be.calledWith("GET", "/nested/foo")
+            expect(@open).to.be.calledWith("GET", "../foo")
 
-      it "transparently rewrites FQDN urls which match remote host", ->
+      it "allows cross origin requests to go out as necessary", ->
         @cy
           .server()
           .route(/foo/).as("getFoo")
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
-            ## trick cypress into thinking the remoteOrigin is location:9999
-            @sandbox.stub(@cy, "_getLocation").withArgs("origin").returns("http://localhost:9999")
             @cy.prop("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
             @cy.prop("server").bindTo(win)
-            win.$.get("http://localhost:9999/foo")
+            win.$.get("http://localhost:3501/foo")
             null
           .wait("@getFoo").then (xhr) ->
-            expect(xhr.url).to.eq("http://localhost:9999/foo")
-            expect(@open).to.be.calledWith("GET", "/foo")
+            expect(xhr.url).to.eq("http://localhost:3501/foo")
+            expect(@open).to.be.calledWith("GET", "http://localhost:3501/foo")
 
       it "rewrites FQDN url's for stubs", ->
         @cy
@@ -376,7 +374,7 @@ describe "$Cypress.Cy XHR Commands", ->
             null
           .wait("@getFoo").then (xhr) ->
             expect(xhr.url).to.eq("http://localhost:3500/foo")
-            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/foo")
+            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://localhost:3500/foo")
 
       it "rewrites 404's url's for stubs", ->
         @cy
@@ -396,7 +394,7 @@ describe "$Cypress.Cy XHR Commands", ->
           .then ->
             xhr = @cy.prop("responses")[0].xhr
             expect(xhr.url).to.eq("http://localhost:3500/foo")
-            expect(@open).to.be.calledWith("POST", "/__cypress/xhrs/foo")
+            expect(@open).to.be.calledWith("POST", "/__cypress/xhrs/http://localhost:3500/foo")
 
       it "rewrites urls with nested segments", ->
         @cy
@@ -416,9 +414,9 @@ describe "$Cypress.Cy XHR Commands", ->
           .then ->
             xhr = @cy.prop("responses")[0].xhr
             expect(xhr.url).to.eq("http://localhost:3500/fixtures/html/phones/phones.json")
-            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/fixtures/html/phones/phones.json")
+            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://localhost:3500/fixtures/html/phones/phones.json")
 
-      it "rewrites CORS to be absolute-relative", ->
+      it "does not rewrite CORS", ->
         @cy
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
@@ -431,7 +429,7 @@ describe "$Cypress.Cy XHR Commands", ->
           .then ->
             xhr = @cy.prop("requests")[0].xhr
             expect(xhr.url).to.eq("http://www.google.com/phones/phones.json")
-            expect(@open).to.be.calledWith("GET", "/http://www.google.com/phones/phones.json")
+            expect(@open).to.be.calledWith("GET", "http://www.google.com/phones/phones.json")
 
       it "can stub real CORS requests too", ->
         @cy
@@ -468,7 +466,7 @@ describe "$Cypress.Cy XHR Commands", ->
           .then ->
             xhr = @cy.prop("responses")[0].xhr
             expect(xhr.url).to.eq("http://localhost:3501/fixtures/ajax/app.json")
-            expect(@open).to.be.calledWith("GET", "/http://localhost:3501/fixtures/ajax/app.json")
+            expect(@open).to.be.calledWith("GET", "http://localhost:3501/fixtures/ajax/app.json")
 
       # it.only "can stub root requests to CORS", ->
       #   @cy
@@ -510,12 +508,12 @@ describe "$Cypress.Cy XHR Commands", ->
             null
           .wait("@getFoo").then (xhr) ->
             expect(xhr.url).to.eq("http://localhost:3500/foo")
-            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/foo")
+            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://localhost:3500/foo")
 
       it "decodes proxy urls", ->
         @cy
           .server()
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .route({
             url: /users/
             response: {}
@@ -531,12 +529,12 @@ describe "$Cypress.Cy XHR Commands", ->
             xhr = @cy.prop("responses")[0].xhr
             expect(xhr.url).to.eq("http://localhost:3500/users?q=(id eq 123)")
             url = encodeURI("users?q=(id eq 123)")
-            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/#{url}")
+            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://localhost:3500/#{url}")
 
       it "decodes proxy urls #2", ->
         @cy
           .server()
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .route(/accounts/, {}).as("getAccounts")
           .window().then (win) ->
             @cy.prop("server").restore()
@@ -549,7 +547,7 @@ describe "$Cypress.Cy XHR Commands", ->
             xhr = @cy.prop("responses")[0].xhr
             expect(xhr.url).to.eq("http://localhost:3500/accounts?page=1&$filter=(rowStatus+eq+1)&$orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true")
             url = "accounts?page=1&%24filter=(rowStatus+eq+1)&%24orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true"
-            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/#{url}")
+            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://localhost:3500/#{url}")
 
     describe "#onResponse", ->
       beforeEach ->
@@ -1063,19 +1061,19 @@ describe "$Cypress.Cy XHR Commands", ->
       it "can start server with no errors", ->
         @cy
           .server()
-          .visit("fixtures/html/sinon.html")
+          .visit("http://localhost:3500/fixtures/html/sinon.html")
 
       it "can add routes with no errors", ->
         @cy
           .server()
           .route(/foo/, {})
-          .visit("fixtures/html/sinon.html")
+          .visit("http://localhost:3500/fixtures/html/sinon.html")
 
       it "routes xhr requests", ->
         @cy
           .server()
           .route(/foo/, {foo: "bar"})
-          .visit("fixtures/html/sinon.html")
+          .visit("http://localhost:3500/fixtures/html/sinon.html")
           .window().then (w) ->
             w.$.get("/foo")
           .then (resp) ->
@@ -1085,7 +1083,7 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy
           .server()
           .route(/foo/, {foo: "bar"}).as("getFoo")
-          .visit("fixtures/html/sinon.html")
+          .visit("http://localhost:3500/fixtures/html/sinon.html")
           .window().then (w) ->
             w.$.get("/foo")
           .wait("@getFoo").then (xhr) ->
@@ -1095,7 +1093,7 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy
           .server()
           .route(/bar/, {bar: "baz"}).as("getBar")
-          .visit("fixtures/html/sinon.html")
+          .visit("http://localhost:3500/fixtures/html/sinon.html")
           .wait("@getBar").then (xhr) ->
             expect(xhr.responseText).to.eq JSON.stringify({bar: "baz"})
 
@@ -1838,11 +1836,11 @@ describe "$Cypress.Cy XHR Commands", ->
         .then ->
           expect(@cy.prop("bindServer")).to.be.a("function")
           expect(@cy.prop("bindRoutes")).to.be.a("array")
-        .visit("fixtures/html/sinon.html")
+        .visit("http://localhost:3500/fixtures/html/sinon.html")
         .then ->
           expect(@cy.prop("bindServer")).to.be.a("function")
           expect(@cy.prop("bindRoutes")).to.be.a("array")
-        .visit("fixtures/html/sinon.html")
+        .visit("http://localhost:3500/fixtures/html/sinon.html")
         .wait("@getFoo").its("url").should("include", "?some=data")
 
   context.skip "#cancel", ->

@@ -16,47 +16,7 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
 
   class $Location
     constructor: (remote) ->
-      ## need to handle <root> here
-      ## if its root then we need to strip the origin
-      ## to make the URL look relative
-      ## else just strip out the origin and replace
-      ## it with the remoteHost
-
-      remote = new Uri remote
-
-      ## if our URL has a FQDN in its
-      ## path http://localhost:2020/http://localhost:3000/about
-      ## then dont handle anything with the remoteHost
-      if fqdn = @getFqdn(remote)
-        remote = new Uri fqdn
-      else
-        ## get the remoteHost from our cookies
-        remoteHost = $Cypress.Cookies.getRemoteHost()
-
-        if remoteHost is "<root>"
-          remoteHost = new Uri ""
-        else
-          remoteHost = new Uri remoteHost
-
-        ## and just replace the current origin with
-        ## the remoteHost origin
-        remote.setProtocol remoteHost.protocol()
-        remote.setHost remoteHost.host()
-        remote.setPort remoteHost.port()
-
-      @remote = remote
-
-    getFqdn: (url) ->
-      url = new Uri url
-
-      ## strip off the initial leading slash
-      ## since path always begins with that
-      path = url.path().slice(1)
-
-      ## if this path matches http its a FQDN
-      ## and we can return it
-      if reHttp.test(path)
-        return path
+      @remote = new Uri remote
 
     getHash: ->
       if hash = @remote.anchor()
@@ -158,6 +118,9 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       reHttp.test(url)
 
     @missingProtocolAndHostIsLocalOrWww = (url) ->
+      if url not instanceof Uri
+        url = new Uri(url)
+
       str = url.toString()
 
       ## normalize the host for 'localhost'
@@ -240,8 +203,8 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       _.ltrim url.toString(), "/"
 
     @getRemoteUrl = (url, baseUrl) ->
-      ## if we have a root url and our url isnt full qualified
-      if baseUrl and not @isFullyQualifiedUrl(url)
+      ## if we have a root url and our url isnt full qualified or missing the protocol + host is local or www
+      if baseUrl and (not @isFullyQualifiedUrl(url) and not @missingProtocolAndHostIsLocalOrWww(url))
         ## prepend the root url to it
         url = @prependBaseUrl(url, baseUrl)
 
@@ -292,11 +255,6 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
 
     @create = (remote) ->
       location = new $Location(remote)
-      location.getObject()
-
-    @parse = (url) ->
-      location = new $Location(url)
-      location.remote = new Uri(url)
       location.getObject()
 
   return $Location

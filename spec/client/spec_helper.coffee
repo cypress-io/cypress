@@ -26,6 +26,16 @@ afterEach ->
   @sandbox.server?.queue = []
   @sandbox.server?.responses = []
 
+setDomain = (url, cb) ->
+  if not $Cypress.Location.isFullyQualifiedUrl(url)
+    ## when we've been given a non fully qualified url
+    ## then just callback with our local origin
+    url = new Uri(window.location.href)
+  else
+    url = new Uri(url)
+
+  cb(url.origin())
+
 stubSocketIo = ->
   window.io =
     connect: @sandbox.spy =>
@@ -106,6 +116,8 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
       ## trigger it in the command testing mode below?
       @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe
 
+      @Cypress.on "domain:set", setDomain
+
   after ->
     @$iframe.remove()
     @Cypress.stop()
@@ -184,9 +196,11 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       @Cypress.option("jQuery", $)
 
       if @currentTest
-        @Cypress.trigger "test:before:hooks", {id: 123}
+        @Cypress.trigger "test:before:hooks", {id: 123}, {}
         @Cypress.set(@currentTest)
         @currentTest.enableTimeouts(false)
+
+      @Cypress.on "domain:set", setDomain
 
       ## handle the fail event ourselves
       ## since we bypass our Runner instance

@@ -160,19 +160,19 @@
 #       it "can start server with no errors", ->
 #         @cy
 #           .server()
-#           .visit("fixtures/html/sinon.html")
+#           .visit("http://localhost:3500/fixtures/html/sinon.html")
 
 #       it "can add routes with no errors", ->
 #         @cy
 #           .server()
 #           .route(/foo/, {})
-#           .visit("fixtures/html/sinon.html")
+#           .visit("http://localhost:3500/fixtures/html/sinon.html")
 
 #       it "routes xhr requests", ->
 #         @cy
 #           .server()
 #           .route(/foo/, {foo: "bar"})
-#           .visit("fixtures/html/sinon.html")
+#           .visit("http://localhost:3500/fixtures/html/sinon.html")
 #           .window().then (w) ->
 #             w.$.get("/foo")
 #           .then (resp) ->
@@ -182,7 +182,7 @@
 #         @cy
 #           .server()
 #           .route(/foo/, {foo: "bar"}).as("getFoo")
-#           .visit("fixtures/html/sinon.html")
+#           .visit("http://localhost:3500/fixtures/html/sinon.html")
 #           .window().then (w) ->
 #             w.$.get("/foo")
 #           .wait("@getFoo").then (xhr) ->
@@ -192,7 +192,7 @@
 #         @cy
 #           .server()
 #           .route(/bar/, {bar: "baz"}).as("getBar")
-#           .visit("fixtures/html/sinon.html")
+#           .visit("http://localhost:3500/fixtures/html/sinon.html")
 #           .wait("@getBar").then (xhr) ->
 #             expect(xhr.responseText).to.eq JSON.stringify({bar: "baz"})
 
@@ -857,11 +857,11 @@
 #         .then ->
 #           expect(@cy.prop("bindServer")).to.be.a("function")
 #           expect(@cy.prop("bindRoutes")).to.be.a("array")
-#         .visit("fixtures/html/sinon.html")
+#         .visit("http://localhost:3500/fixtures/html/sinon.html")
 #         .then ->
 #           expect(@cy.prop("bindServer")).to.be.a("function")
 #           expect(@cy.prop("bindRoutes")).to.be.a("array")
-#         .visit("fixtures/html/sinon.html")
+#         .visit("http://localhost:3500/fixtures/html/sinon.html")
 #         .wait("@getFoo").its("url").should("include", "?some=data")
 
 #   context "#cancel", ->

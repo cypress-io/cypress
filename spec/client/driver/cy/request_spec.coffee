@@ -152,6 +152,16 @@ describe "$Cypress.Cy Request Commands", ->
               domain: "localhost"
             })
 
+        it "uses wwww urls", ->
+          @cy.request("www.foo.com").then ->
+            @expectOptionsToBe({
+              url: "http://www.foo.com/"
+              method: "GET"
+              gzip: true
+              cookies: true
+              domain: "localhost"
+            })
+
         it "prefixes with baseUrl when origin is empty", ->
           @sandbox.stub(@cy, "_getLocation").withArgs("origin").returns("")
           @Cypress.config("baseUrl", "http://localhost:8080/app")

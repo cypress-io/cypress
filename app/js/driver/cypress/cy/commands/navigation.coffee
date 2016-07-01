@@ -43,6 +43,9 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
     _href: (win, url) ->
       win.location.href = url
 
+    _replace: (win, url) ->
+      win.location.replace(url)
+
     submitting: (e, options = {}) ->
       ## even though our beforeunload event
       ## should be firing shortly, lets just
@@ -316,14 +319,14 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
           new Promise (resolve) ->
             Cypress.trigger("domain:set", url, resolve)
-          .then (origin) ->
+          .then (origin) =>
             ## hold onto our existing url
-            existing = new Uri(window.location.href)
+            existing = Cypress.Location.create(window.location.href)
 
             ## if the origin currently matches
             ## then go ahead and change the iframe's src
             ## and we're good to go
-            if origin is existing.origin()
+            if origin is existing.origin
               Cypress.Cookies.setInitial()
 
               $remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
@@ -331,7 +334,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
               ## tell our backend we're changing domains
               new Promise (resolve) ->
                 Cypress.trigger("domain:change", title, fn, resolve)
-              .then ->
+              .then =>
                 ## and now we must change the url to be the new
                 ## origin but include the test that we're currently on
                 newUri = new Uri(origin)
@@ -340,7 +343,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                 .setQuery(existing.query())
                 .setAnchor(existing.anchor())
 
-                window.location.replace(newUri.toString())
+                @_replace(window, newUri.toString())
 
         ## if we're visiting a page and we're not currently
         ## on about:blank then we need to nuke the window

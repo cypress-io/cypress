@@ -4,7 +4,7 @@ describe "$Cypress.Cy Location Commands", ->
   context "#url", ->
     it "returns the location href", ->
       @cy.url().then (url) ->
-        expect(url).to.eq "/fixtures/html/dom.html"
+        expect(url).to.eq "http://localhost:3500/fixtures/html/dom.html"
 
     it "eventually resolves", ->
       _.delay ->
@@ -12,7 +12,7 @@ describe "$Cypress.Cy Location Commands", ->
         win.location.href = "/foo/bar/baz.html"
       , 100
 
-      @cy.url().should("match", /baz/).and("eq", "/foo/bar/baz.html")
+      @cy.url().should("match", /baz/).and("eq", "http://localhost:3500/foo/bar/baz.html")
 
     describe "assertion verification", ->
       beforeEach ->
@@ -103,7 +103,7 @@ describe "$Cypress.Cy Location Commands", ->
           onConsole = @log.attributes.onConsole()
           expect(onConsole).to.deep.eq {
             Command: "url"
-            Returned: "/fixtures/html/dom.html"
+            Returned: "http://localhost:3500/fixtures/html/dom.html"
           }
 
   context "#hash", ->
@@ -219,7 +219,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     it "returns a specific key from location object", ->
       @cy.location("href").then (href) ->
-        expect(href).to.eq "/fixtures/html/dom.html"
+        expect(href).to.eq "http://localhost:3500/fixtures/html/dom.html"
 
     it "eventually resolves", ->
       _.delay ->
