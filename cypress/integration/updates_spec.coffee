@@ -2,7 +2,7 @@ describe.skip "Updates", ->
   beforeEach ->
     cy
       .viewport(300, 210)
-      .visit("/updates")
+      .visit("/#/updates")
       .window().then (win) ->
         {@ipc, @App} = win
 

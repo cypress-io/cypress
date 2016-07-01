@@ -1,16 +1,22 @@
-import { observable, asReference } from 'mobx'
+import { computed, observable } from 'mobx'
 
 import User from '../lib/user-model'
 
-export default observable({
-  user: null,
-  updateAvailable: false,
+class State {
+  @observable user = null
+  @observable updateAvailable = false
 
-  setUser: asReference(function (user) {
-    this.user = new User(user)
-  }),
+  @computed get hasUser () {
+    return !!this.user && !!this.user.session_token
+  }
 
-  updatesAvailable: (bool) => {
-    this.updateAvailabe = bool
-  },
-})
+  setUser (user) {
+    this.user = user && user.session_token ? new User(user) : null
+  }
+
+  updatesAvailable (bool) {
+    this.updateAvailable = bool
+  }
+}
+
+export default new State()

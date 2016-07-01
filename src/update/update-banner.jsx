@@ -1,11 +1,14 @@
+/* global $ */
+
 import React, { Component } from 'react'
+import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import state from '../lib/state'
 
 import App from '../lib/app'
 
 @observer
-class Update extends Component {
+class UpdateBanner extends Component {
   constructor (props) {
     super(props)
 
@@ -13,10 +16,6 @@ class Update extends Component {
   }
 
   componentDidMount () {
-    if (state.updateAvailable) {
-      $('html').addClass('has-updates')
-    }
-
     this.checkId = setInterval(this._checkForUpdate, (5 * 60 * 1000))
   }
 
@@ -29,11 +28,13 @@ class Update extends Component {
   render () {
     if (!state.updateAvailable) return null
 
+    $('html').addClass('has-updates')
+
     return (
       <div id='updates-available'>
       New updates are available
         <strong onClick={this._downloadUpdate}>
-          <i className='fa fa-download'></i>
+          <i className='fa fa-download'></i>{' '}
           Update
         </strong>
       </div>
@@ -42,10 +43,21 @@ class Update extends Component {
 
   _checkForUpdate () {
     App.ipc('updater:check')
-    .then((version) => {
-      state.updatesAvailable(!!(version))
+    .then(action('checked:updates', (version) => {
+      state.updatesAvailable(!!version)
+    }))
+  }
+
+  _downloadUpdate () {
+    App.ipc('window:open', {
+      position: "center",
+      width: 300,
+      height: 210,
+      toolbar: false,
+      title: "Updates",
+      type: "UPDATES",
     })
   }
 }
 
-export default Update
+export default UpdateBanner

@@ -74,19 +74,18 @@ describe "Login", ->
               .contains("Logging in...")
               .fixture("user").then (@user) ->
                 @ipc.handle("log:in", null, @user)
-                @ipc.handle("get:current:user", null, @user)
 
-          it.skip "triggers get:project:paths", ->
+          it "triggers get:project:paths", ->
             expect(@App.ipc).to.be.calledWith("get:project:paths")
 
-          it.skip "displays username in UI", ->
+          it "displays username in UI", ->
             cy
               .then ->
                 @ipc.handle("get:project:paths", null, [])
               .get("nav a").should ($a) ->
                 expect($a).to.contain(@user.name)
 
-          it.skip "has login button enabled on logout", ->
+          it.only "has login button enabled on logout", ->
             cy
               .then ->
                 @ipc.handle("get:project:paths", null, [])

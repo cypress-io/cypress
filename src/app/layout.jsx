@@ -2,14 +2,14 @@ import React from 'react'
 
 import Nav from '../nav/nav'
 import Footer from '../footer/footer'
-import Update from '../update/update'
+import UpdateBanner from '../update/update-banner'
 
 export default ({ params, children }) => {
   return (
     <div>
       <Nav params={params}/>
       {children}
-      <Update />
+      <UpdateBanner />
       <Footer />
     </div>
   )

@@ -97,10 +97,13 @@ export default class Nav extends Component {
     App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running/#section-adding-projects')
   )
 
-  _logout = () => {
-    App.ipc('log:out').then(action('log:out', () => {
-      state.user = null
-      App.ipc('clear:github:cookies')
+  _logout = (e) => {
+    e.preventDefault()
+
+    App.ipc('log:out')
+    .then(action('logged:out', () => {
+      state.setUser(null)
+      return App.ipc('clear:github:cookies')
     }))
   }
 
