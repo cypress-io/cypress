@@ -3,12 +3,14 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '../lib/tooltip'
 
+import events from '../lib/events'
 import { indent } from '../lib/util'
 
 import Agents from './agents'
 import Hooks from './hooks'
 import Routes from './routes'
 import Collapsible from '../collapsible/collapsible'
+import FlashOnClick from '../lib/flash-on-click'
 
 const NoCommands = observer(() => (
   <ul className='hooks-container'>
@@ -101,7 +103,12 @@ class Test extends Component {
             {model.commands.length ? <Hooks model={model} /> : <NoCommands />}
           </div>
         </Collapsible>
-        <pre className='test-error'>{model.error}</pre>
+        <FlashOnClick
+          message='Printed output to your console!'
+          onClick={() => events.emit('show:error', model.error.commandId)}
+        >
+          <pre className='test-error'>{model.error.message}</pre>
+      </FlashOnClick>
       </div>
     )
   }

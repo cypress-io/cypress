@@ -71,6 +71,14 @@ export default {
     localBus.on('restart', action('restart', () => {
       runner.emit('runner:restart')
     }))
+
+    localBus.on('show:command', (commandId) => {
+      runner.emit('runner:console:log', commandId)
+    })
+
+    localBus.on('show:error', (commandId) => {
+      runner.emit('runner:console:error', commandId)
+    })
   },
 
   emit (event, ...args) {

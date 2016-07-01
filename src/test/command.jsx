@@ -1,9 +1,12 @@
 import _ from 'lodash'
 import cs from 'classnames'
+import Markdown from 'markdown-it'
 import { observer } from 'mobx-react'
 import React from 'react'
+
+import events from '../lib/events'
 import Tooltip from '../lib/tooltip'
-import Markdown from 'markdown-it'
+import FlashOnClick from '../lib/flash-on-click'
 
 const md = new Markdown()
 
@@ -42,31 +45,36 @@ const Command = observer(({ model }) => (
       }
     )}
   >
-    <div className='command-wrapper'>
-      <span className='command-number'>
-        <i className='fa fa-spinner fa-spin'></i>
-        <span>{model.number || ''}</span>
-      </span>
-      <span className='command-method'>
-        <span>{model.event ? `(${displayName(model)})` :  displayName(model)}</span>
-      </span>
-      <span className='command-message'>
-        {model.referencesAlias ?
-          <Alias model={model} /> :
-          <span dangerouslySetInnerHTML={{ __html: formattedMessage(model.message) }} />}
-      </span>
-      <span className='command-controls'>
-        <Tooltip placement='left' title={`${model.message} aliased as: '${model.alias}'`}>
-          <span className={`command-alias ${model.aliasType}`}>{model.alias}</span>
-        </Tooltip>
-        <Tooltip placement='left' title={visibleMessage(model)}>
-          <i className='command-invisible fa fa-eye-slash'></i>
-        </Tooltip>
-        <Tooltip placement='left' title={`${model.numElements} matched elements`}>
-          <span className='command-num-elements'>{model.numElements}</span>
-        </Tooltip>
-      </span>
-    </div>
+    <FlashOnClick
+      message='Printed output to your console!'
+      onClick={() => events.emit('show:command', model.id)}
+    >
+      <div className='command-wrapper'>
+        <span className='command-number'>
+          <i className='fa fa-spinner fa-spin'></i>
+          <span>{model.number || ''}</span>
+        </span>
+        <span className='command-method'>
+          <span>{model.event ? `(${displayName(model)})` :  displayName(model)}</span>
+        </span>
+        <span className='command-message'>
+          {model.referencesAlias ?
+            <Alias model={model} /> :
+            <span dangerouslySetInnerHTML={{ __html: formattedMessage(model.message) }} />}
+        </span>
+        <span className='command-controls'>
+          <Tooltip placement='left' title={`${model.message} aliased as: '${model.alias}'`}>
+            <span className={`command-alias ${model.aliasType}`}>{model.alias}</span>
+          </Tooltip>
+          <Tooltip placement='left' title={visibleMessage(model)}>
+            <i className='command-invisible fa fa-eye-slash'></i>
+          </Tooltip>
+          <Tooltip placement='left' title={`${model.numElements} matched elements`}>
+            <span className='command-num-elements'>{model.numElements}</span>
+          </Tooltip>
+        </span>
+      </div>
+    </FlashOnClick>
   </li>
 ))
 

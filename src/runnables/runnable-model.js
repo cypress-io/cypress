@@ -26,7 +26,16 @@ export default class Runnable {
   }
 
   @computed get error () {
-    return _(this.commands).map('error').compact().first()
+    const command = _(this.commands)
+      .filter((command) => !!command.error)
+      .first()
+
+    if (!command) return {}
+
+    return {
+      commandId: command.id,
+      message: command.error,
+    }
   }
 
   @computed get state () {
