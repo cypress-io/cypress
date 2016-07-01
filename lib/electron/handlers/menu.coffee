@@ -143,6 +143,7 @@ module.exports = {
           {
             label: "Quit"
             accelerator: "Command+Q"
+            role: "quit"
           }
         ]
       })
