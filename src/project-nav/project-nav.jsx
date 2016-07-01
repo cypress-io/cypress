@@ -49,7 +49,6 @@ export default class ProjectNav extends Component {
       url: 'http://localhost:2020',
     }, function (err, data) {
       err, data
-      debugger
     })
   }
 }
