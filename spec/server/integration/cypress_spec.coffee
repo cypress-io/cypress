@@ -583,7 +583,7 @@ describe "lib/cypress", ->
         cypress.start(["--run-project=#{@todosPath}", "--port=5555"]).then =>
           expect(project.opened().cfg.port).to.eq(5555)
           expect(listen).to.be.calledWith(5555)
-          expect(open).to.be.calledWithMatch(@todosPath, {port: 5555})
+          expect(open).to.be.calledWithMatch({port: 5555})
           @expectExitWith(0)
 
       ## TODO: handle PORT_IN_USE short integration test
@@ -903,8 +903,7 @@ describe "lib/cypress", ->
           environmentVariables: { baz: "baz" }
         })
 
-        expect(open).to.be.calledWith(@todosPath)
-        cfg = open.getCall(0).args[1]
+        cfg = open.getCall(0).args[0]
 
         expect(cfg.fileServerFolder).to.eq(path.join(@todosPath, "foo"))
         expect(cfg.pageLoadTimeout).to.eq(1000)
