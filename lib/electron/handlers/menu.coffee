@@ -101,7 +101,7 @@ module.exports = {
       }
     ]
 
-    if process.platform is "darwin"
+    if os.platform() is "darwin"
       name = "Cypress"
       template.unshift({
         label: name
@@ -166,17 +166,17 @@ module.exports = {
               label: 'Reload'
               accelerator: 'CmdOrCtrl+R'
               click: (item, focusedWindow) =>
-                focusedWindow.reload() if (focusedWindow)
+                focusedWindow.reload() if focusedWindow
             }
             {
               label: 'Toggle Developer Tools'
               accelerator: do ->
-                if process.platform is 'darwin'
+                if os.platform() is 'darwin'
                   'Alt+Command+I'
                 else
                   'Ctrl+Shift+I'
               click: (item, focusedWindow) =>
-                focusedWindow.toggleDevTools() if (focusedWindow)
+                focusedWindow.toggleDevTools() if focusedWindow
             }
           ]
         }
