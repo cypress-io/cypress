@@ -305,9 +305,6 @@ class Socket
         options.onReloadBrowser(url, browser)
 
       socket.on "is:automation:connected", (data = {}, cb) =>
-        ## TODO: temporary hack to get runner working
-        return cb(true)
-
         isConnected = =>
           automationRequest("is:automation:connected", data)
 
