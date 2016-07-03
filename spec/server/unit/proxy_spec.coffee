@@ -9,65 +9,6 @@ Readable  = require("stream").Readable
 proxy     = require("#{root}lib/controllers/proxy")
 
 describe "lib/proxy", ->
-  context "#getOriginFromFqdnUrl", ->
-    beforeEach ->
-      @urlIs = (url, remoteHost, reqUrl) ->
-        @req = {url: url}
-        url = proxy.getOriginFromFqdnUrl(@req)
-        expect(url).to.eq remoteHost
-        expect(@req.url).to.eq reqUrl
-
-    it "returns origin from a FQDN url", ->
-      @urlIs "/http://www.google.com", "http://www.google.com", "/"
-
-    it "omits pathname, search, hash", ->
-      @urlIs "/http://www.google.com/my/path?foo=bar#hash/baz", "http://www.google.com", "/my/path?foo=bar#hash/baz"
-
-    it "does not alter req.url if not FQDN url", ->
-      @urlIs "/foo/bar?baz=quux#hash/foo", undefined, "/foo/bar?baz=quux#hash/foo"
-
-  context "#stripCookieParams", ->
-    it "doesnt require proper white space", ->
-      cookies = proxy.stripCookieParams(["user=brian;path=/;expires=123;HttpOnly"])
-      expect(cookies).to.deep.eq ["user=brian; path=/; expires=123; HttpOnly"]
-
-    it "strips Secure", ->
-      cookies = proxy.stripCookieParams(["user=brian; path=/; Secure"])
-      expect(cookies).to.deep.eq ["user=brian; path=/"]
-
-    it "strips secure", ->
-      cookies = proxy.stripCookieParams(["user=brian; path=/; secure"])
-      expect(cookies).to.deep.eq ["user=brian; path=/"]
-
-    it "strips Secure and does not strip HttpOnly", ->
-      cookies = proxy.stripCookieParams(["user=brian; path=/; Secure; HttpOnly"])
-      expect(cookies).to.deep.eq ["user=brian; path=/; HttpOnly"]
-
-  context "#mapHeaders", ->
-    it "rewrites x-xhr-referer", ->
-      req = {headers: {"x-xhr-referer": "http://localhost:2020"}}
-      headers = proxy.mapHeaders(req.headers, "http://localhost:2020", "http://localhost:8080")
-      expect(headers).to.deep.eq {"x-xhr-referer": "http://localhost:8080"}
-
-    it "is case insensitive", ->
-      req = {headers: {"X-XHR-REFERER": "http://LOCALHOST:2020"}}
-      headers = proxy.mapHeaders(req.headers, "http://localhost:2020", "http://localhost:8080")
-      expect(headers).to.deep.eq {"X-XHR-REFERER": "http://localhost:8080"}
-
-    it "rewrites multiple x-* headers", ->
-      req = {headers: {"x-xhr-referer": "http://localhost:2020", "x-host": "http://localhost:2020/foo"}}
-      headers = proxy.mapHeaders(req.headers, "http://localhost:2020", "http://localhost:8080")
-      expect(headers).to.deep.eq {"x-xhr-referer": "http://localhost:8080", "x-host": "http://localhost:8080/foo"}
-
-    it "rewrites referer header", ->
-      req = {headers: {"referer": "http://localhost:2020/foo"}}
-      headers = proxy.mapHeaders req.headers, "http://localhost:2020", "https://go.pardot.com"
-      expect(headers).to.deep.eq {"referer": "https://go.pardot.com/foo"}
-
-    it "rewrites origin header", ->
-      req = {headers: {"origin": "http://localhost:2020"}}
-      headers = proxy.mapHeaders req.headers, "http://localhost:2020", "https://go.pardot.com"
-      expect(headers).to.deep.eq {"origin": "https://go.pardot.com"}
 
 #   it "injects content", (done) ->
 #     readable = new Readable
