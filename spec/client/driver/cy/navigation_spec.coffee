@@ -345,7 +345,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
         ## wait until the last possible moment to stub Location.create
         @Cypress.on "domain:set", =>
-          uri = new Uri("http://localhost:3500/foo?bar=baz#/tests/integration/foo_spec.js")
+          uri = @Cypress.Location.create("http://localhost:3500/foo?bar=baz#/tests/integration/foo_spec.js")
 
           @sandbox.stub(@Cypress.Location, "create")
           .withArgs(href)
