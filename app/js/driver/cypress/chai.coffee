@@ -228,8 +228,8 @@ do ($Cypress, _, $, chai) ->
           message   = utils.getMessage(@, customArgs)
           actual    = utils.getActual(@, customArgs)
 
-          ## remove any single quotes between our [b] tags
-          message = message.replace /\[b\].*\[\\b\]/, (match) ->
+          ## remove any single quotes between our **
+          message = message.replace /\*\*.*\*\*/, (match) ->
             match.replace(/'/g, "")
 
           try
@@ -247,9 +247,9 @@ do ($Cypress, _, $, chai) ->
         _.reduce args, (memo, value, index) =>
           if _.isString(value)
             value = value
-              .replace(allWordsBetweenCurlyBraces,          "[b]$1[\\b]")
-              .replace(allWordsBetweenSingleQuotes,         "[b]$1[\\b]$2")
-              .replace(allPropertyWordsBetweenSingleQuotes, "[b]$1[\\b]")
+              .replace(allWordsBetweenCurlyBraces,          "**$1**")
+              .replace(allWordsBetweenSingleQuotes,         "**$1**$2")
+              .replace(allPropertyWordsBetweenSingleQuotes, "**$1**")
             memo.push value
           else
             memo.push value

@@ -1,8 +1,8 @@
 $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
-  bRe            = /(\[b\])(.+)(\[\\b\])/
-  bTagOpen       = /\[b\]/g
-  bTagClosed     = /\[\\b\]/g
+  bRe            = /(\*\*)(.+)(\*\*)/
+  bTagOpen       = /\*\*/g
+  bTagClosed     = /\*\*/g
   allButs        = /\bbut\b/g
   reExistance    = /exist/
   reEventually   = /^eventually/
