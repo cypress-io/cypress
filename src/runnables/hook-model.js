@@ -21,6 +21,8 @@ export default class Hook {
   }
 
   @computed get failed () {
-    return _.some(this.commands, (command) => !!command.error)
+    if (this.name === 'test') return false
+
+    return _.some(this.commands, (command) => !command.event && !!command.error)
   }
 }

@@ -27,7 +27,7 @@ export default class Runnable {
 
   @computed get error () {
     const command = _(this.commands)
-      .filter((command) => !!command.error)
+      .filter((command) => !command.event && !!command.error)
       .first()
 
     if (!command) return {}
@@ -63,29 +63,28 @@ export default class Runnable {
     return this.type === 'suite'
   }
 
-  @computed get _childStates () {
-    const children = this._isSuite ? this.children : this.commands
-    return _.map(children, 'state')
+  @computed get _children () {
+    return this._isSuite ? this.children : this.commands
   }
 
   @computed get _anyChildrenProcessing () {
-    return _.some(this._childStates, (state) => state === 'processing')
+    return _.some(this._children, ({ state }) => state === 'processing')
   }
 
   @computed get _anyChildrenFailed () {
-    return _.some(this._childStates, (state) => state === 'failed')
+    return _.some(this._children, ({ event, state }) => !event && state === 'failed')
   }
 
   @computed get _allChildrenPassedOrPending () {
-    return !this._childStates.length || _.every(this._childStates, (state) => (
-      state === 'passed' || state === 'pending'
-    ))
+    return !this._children.length || _.every(this._children, ({ event, state }) => {
+      return event || state === 'passed' || state === 'pending'
+    })
   }
 
   @computed get _allChildrenPending () {
-    return !!this._childStates.length && _.every(this._childStates, (state) => (
-      state === 'pending'
-    ))
+    return !!this._children.length && _.every(this._children, ({ event, state }) => {
+      return event || state === 'pending'
+    })
   }
 
   addAgent (agent) {
