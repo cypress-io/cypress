@@ -22,14 +22,14 @@ export default class Project {
 
   @computed get name () {
     let splitName = _.last(this.path.split('/'))
-    return _.truncate(splitName, 20)
+    return _.truncate(splitName, { length: 60 })
   }
 
   @computed get displayPath () {
-    const strLength = 30
+    const strLength = 75
     let pathLength = this.path.length
 
-    if (pathLength > 30) {
+    if (pathLength > strLength) {
       let truncatedPath = this.path.slice((pathLength - 1) - strLength, pathLength)
       return '...'.concat(truncatedPath)
     } else {
