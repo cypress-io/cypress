@@ -46,6 +46,7 @@
     "eslint": "^2.12.0",
     "eslint-plugin-react": "^5.2.2",
     "lodash": "^4.0.0",
+    "mobx-react-devtools": "^4.2.0",
     "zunder": "^3.3.1"
   }
 }
