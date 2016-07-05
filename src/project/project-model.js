@@ -69,13 +69,13 @@ export default class Project {
     browser.isChosen = true
   }
 
-  @action setOnBoardingConfig (config) {
+  setOnBoardingConfig (config) {
     this.isNew = config.isNewProject
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
     this.integrationExampleName = config.integrationExampleName
   }
 
-  @action setResolvedConfig (resolved) {
+  setResolvedConfig (resolved) {
     this.resolvedConfig = resolved
   }
 

@@ -5,15 +5,16 @@ import Promise from 'bluebird'
 
 const getProjects = () => {
   projectsStore.loading(true)
-  App.ipc('get:project:paths').then((paths) => {
+  App.ipc('get:project:paths')
+  .then(action('got:projects:paths', (paths) => {
     projectsStore.setProjects(paths)
-  })
+  }))
 }
 
 const addProject = () => {
   let project
   return App.ipc('show:directory:dialog')
-  .then(action('add:project', (path) => {
+  .then(action('directory:dialog:closed', (path) => {
      // if the user cancelled the dialog selection
      // path will be undefined
     if (!path) return
@@ -22,12 +23,8 @@ const addProject = () => {
     project = projectsStore.addProject(path)
     project.loading(true)
 
-    // wait at least 750ms even if add:project
-    // resolves faster to prevent the sudden flash
-    // of loading content which is jarring
     return Promise.all([
       App.ipc('add:project', path),
-      // Promise.delay(750),
     ])
     .then(() => {
       return project.loading(false)
@@ -61,11 +58,11 @@ const closeProject = () => {
 const openProject = (project) => {
   project.loading(true)
   return App.ipc('open:project', project.path)
-  .then((config) => {
+  .then(action('project:opened', (config) => {
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
-  })
+  }))
   .then(() => {
     project.loading(false)
     // create a promise which listens for
@@ -73,7 +70,7 @@ const openProject = (project) => {
     // and updates our project model
     const listenToProjectSettingsChange = () => {
       return App.ipc('on:project:settings:change')
-      .then((data = {}) => {
+      .then(action('project:config:changed', (data = {}) => {
         project.reset()
         project.setBrowsers(data.config.browsers)
 
@@ -85,11 +82,11 @@ const openProject = (project) => {
         // recursively listen for more
         // change events!
         return listenToProjectSettingsChange()
-      })
+      }))
     }
     return listenToProjectSettingsChange()
   })
-  .catch(action('project:err', (err) => {
+  .catch(action('project:open:errored', (err) => {
     project.loading(false)
     project.setError(err)
   }))
