@@ -1,12 +1,12 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import { withRouter } from 'react-router'
+import { withRouter, Link } from 'react-router'
 
 import App from '../lib/app'
 import projectsStore from '../projects/projects-store'
 import ProjectNav from '../project-nav/project-nav'
-import { openProject } from '../projects/projects-api'
+import { closeProject, openProject } from '../projects/projects-api'
 import OnBoarding from "./onboarding"
 
 const NoBrowsers = () => (
@@ -34,6 +34,14 @@ const PortInUse = () => (
   <div>
     <hr />
     <p>To fix, stop the other running process or change the port in cypress.json</p>
+    <Link
+      to='/projects'
+      onClick={closeProject}
+      className='btn btn-default btn-sm'
+    >
+      <i className="fa fa-chevron-left"></i>{' '}
+      Go Back to Projects
+    </Link>
   </div>
 )
 

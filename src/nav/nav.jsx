@@ -61,7 +61,7 @@ export default class Nav extends Component {
       return (
         <Link
           to="/projects"
-          onClick={this._closeProject}
+          onClick={closeProject}
           >
           <i className="fa fa-chevron-left"></i>{' '}
           Back to Projects
@@ -105,10 +105,6 @@ export default class Nav extends Component {
       state.setUser(null)
       return App.ipc('clear:github:cookies')
     }))
-  }
-
-  _closeProject () {
-    closeProject()
   }
 
   _addProject (e) {

@@ -13,12 +13,12 @@ describe "Specs List", ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
         @ipc.handle("get:project:paths", null, @projects)
-      .get(".projects-list a")
-        .contains("My-Fake-Project").click()
       .fixture("config").as("config")
 
   it "navigates to project specs page", ->
     cy
+      .get(".projects-list a")
+        .contains("My-Fake-Project").click()
       .fixture("browsers").then (@browsers) ->
         @config.browsers = @browsers
         @ipc.handle("open:project", null, @config)
@@ -26,6 +26,8 @@ describe "Specs List", ->
 
   it "triggers get:specs", ->
     cy
+      .get(".projects-list a")
+        .contains("My-Fake-Project").click()
       .fixture("browsers").then (@browsers) ->
         @config.browsers = @browsers
         @ipc.handle("open:project", null, @config)
@@ -37,6 +39,8 @@ describe "Specs List", ->
   describe "first time onboarding specs", ->
     beforeEach ->
       cy
+        .get(".projects-list a")
+          .contains("My-Fake-Project").click()
         .fixture("browsers").then (@browsers) ->
           @config.browsers = @browsers
           @config.isNewProject = true
@@ -50,6 +54,8 @@ describe "Specs List", ->
   describe "lists specs", ->
     beforeEach ->
       cy
+        .get(".projects-list a")
+          .contains("My-Fake-Project").click()
         .fixture("browsers").then (@browsers) ->
           @config.browsers = @browsers
           @ipc.handle("open:project", null, @config)
@@ -73,24 +79,38 @@ describe "Specs List", ->
     it "displays normal error message", ->
       @ipc.handle("open:project", @err, {})
       cy
+        .get(".projects-list a")
+          .contains("My-Fake-Project").click()
         .get(".error")
           .should("contain", @err.message)
-
-    it.skip "word wraps long error message plus update bar", ->
-      @longErrMessage = "Morbileorisus,portaacconsecteturac,vestibulumateros.Nullamquisrisusegeturnamollis ornare vel eu leo. Donec sed odio dui. Nullam quis risus eget urna mollis ornare vel eu leo. Etiam porta sem malesuada magna mollis euismod. Maecenas faucibus mollis interdum. Nullam id dolor id nibh ultricies vehicula ut id elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Vestibulum id ligula porta felis euismod semper. Vestibulum id ligula porta felis euismod semper.Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam id dolor id nibh ultricies vehicula ut id elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Donec id elit non mi porta gravida at eget metus. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras justo odio, dapibus ac facilisis in, egestas eget quam.Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod."
-      @ipc.handle("updater:check", null, "1.3.4")
-      @ipc.handle("open:project", {name: @err.name, message: @longErrMessage}, null)
-      cy.get("#updates-available").should("be.visible")
-      cy.contains("New updates are available")
-
-      cy
-        .get(".error")
-          .should("contain", @err.name)
-          .and("contain", @longErrMessage)
 
     it "displays Port in Use instructions on err", ->
       @ipc.handle("open:project", @err, {})
       cy
+        .get(".projects-list a")
+          .contains("My-Fake-Project").click()
         .get(".error")
           .and("contain", @err.message)
           .and("contain", "To fix")
+
+    it "word wraps long error message plus update bar", ->
+      @ipc.handle("updater:check", null, "1.3.4")
+      @longErrMessage = "Morbileorisus,portaacconsecteturac,vestibulumateros.Nullamquisrisusegeturnamollis ornare vel eu leo. Donec sed odio dui. Nullam quis risus eget urna mollis ornare vel eu leo. Etiam porta sem malesuada magna mollis euismod. Maecenas faucibus mollis interdum. Nullam id dolor id nibh ultricies vehicula ut id elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Vestibulum id ligula porta felis euismod semper. Vestibulum id ligula porta felis euismod semper.Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam id dolor id nibh ultricies vehicula ut id elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Donec id elit non mi porta gravida at eget metus. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras justo odio, dapibus ac facilisis in, egestas eget quam.Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod."
+      @ipc.handle("open:project", {name: "Error", message: @longErrMessage, stack: "[object Object]↵"}, {})
+      cy
+        .get(".projects-list a")
+          .contains("My-Fake-Project").click()
+        .get("#updates-available").should("be.visible")
+        .contains("New updates are available")
+
+      cy
+        .get(".error")
+          .and("contain", @longErrMessage)
+
+    it "closes project on click of 'go back to projects' button", ->
+      @ipc.handle("open:project", @err, {})
+      cy
+        .get(".projects-list a")
+          .contains("My-Fake-Project").click()
+        .get(".error").contains("Go Back to Projects").click().then ->
+          expect(@App.ipc).to.be.calledWith("close:project")
