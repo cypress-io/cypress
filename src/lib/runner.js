@@ -201,6 +201,7 @@ export default {
     localBus.removeAllListeners()
     driver.off()
     channel.off()
+    overrides.restore()
   },
 
   _reRun () {
