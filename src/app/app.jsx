@@ -13,9 +13,15 @@ import AutomationDisconnected from './automation-disconnected'
 
 const automationElementId = '__cypress-string'
 
+const InRunner = (props) => (
+  <div {...props} className={`runner ${props.className}`}>
+    {props.children}
+  </div>
+)
+
 @observer
 export default class App extends Component {
-  componentDidMount () {
+  componentWillMount () {
     this.randomString = `${Math.random()}`
 
     runner.ensureAutomation({
@@ -52,26 +58,32 @@ export default class App extends Component {
     return (
       <div>
         <Reporter runner={runner.reporterBus} />
-        <div className='runner' style={{ height: '100%' }}>
+        <InRunner className='container' style={{ height: '100%' }}>
           <Header {...this.props} />
           <Iframes {...this.props} />
           <Message {...this.props} />
           {this._automationElement()}
-        </div>
+        </InRunner>
       </div>
     )
   }
 
   _noAutomation () {
     return (
-      <NoAutomation
-        browsers={this.props.config.browsers}
-        onLaunchBrowser={(browser) => runner.launchBrowser(browser)}
-      />
+      <InRunner className='automation-failure'>
+        <NoAutomation
+          browsers={this.props.config.browsers}
+          onLaunchBrowser={(browser) => runner.launchBrowser(browser)}
+        />
+      </InRunner>
     )
   }
 
   _automationDisconnected () {
-    return <AutomationDisconnected onReload={runner.launchBrowser} />
+    return (
+      <InRunner className='automation-failure'>
+        <AutomationDisconnected onReload={runner.launchBrowser} />
+      </InRunner>
+    )
   }
 }
