@@ -33,9 +33,7 @@ export default class ProjectNav extends Component {
             </ul>
             <ul className='nav navbar-nav navbar-right'>
               {
-              // <li onClick={this._launchBrowser}>
-              //   Launch Browser
-              // </li>
+                this._launchBrowserBtn()
               }
               <Browsers project={project} />
             </ul>
@@ -45,12 +43,24 @@ export default class ProjectNav extends Component {
     )
   }
 
-  // _launchBrowser () {
-  //   App.ipc('launch:browser', {
-  //     browser: 'chrome',
-  //     url: 'http://localhost:2020',
-  //   }, function (err, data) {
-  //     err, data
-  //   })
-  // }
+  _launchBrowserBtn () {
+    // we want this to only run in development
+    if (window.env === 'development') {
+      return (
+        <li onClick={this._launchBrowser}>
+          <a href="#">Launch Browser</a>
+        </li>
+      )
+    }
+  }
+
+  _launchBrowser (e) {
+    e.preventDefault()
+    App.ipc('launch:browser', {
+      browser: 'chrome',
+      url: 'http://localhost:2020',
+    }, function (err, data) {
+      err, data
+    })
+  }
 }
