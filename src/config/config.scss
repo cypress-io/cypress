@@ -20,12 +20,12 @@
   .config-vars {
     font-size: 11px;
 
-    p {
-      margin-bottom: 0;
+    .envFile:hover, .env:hover, .config:hover, .cli:hover, .default:hover {
+      border-bottom: 1px dotted #777;
     }
 
-    [data-toggle=tooltip]:hover {
-      border-bottom: 1px dotted #777;
+    p {
+      margin-bottom: 0;
     }
 
     .key {

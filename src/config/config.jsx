@@ -2,6 +2,7 @@ import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import App from '../lib/app'
+import Tooltip from 'rc-tooltip'
 
 @observer
 class Config extends Component {
@@ -74,11 +75,15 @@ class Config extends Component {
       <div key={key} className='line'>
         <span className='key'>{key}</span>
         <span className='colon'>:</span>{' '}
-        <span className={obj.from} data-toggle='tooltip' title={obj.from}>
-          {this._getString(obj.value)}
-          {obj.value}
-          {this._getString(obj.value)}
-        </span>
+        <Tooltip
+          overlay={obj.from}
+        >
+          <span className={obj.from}>
+            {this._getString(obj.value)}
+            {obj.value}
+            {this._getString(obj.value)}
+          </span>
+        </Tooltip>
         {this._getComma(comma)}
       </div>
     )
