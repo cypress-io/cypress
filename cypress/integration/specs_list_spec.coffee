@@ -84,8 +84,15 @@ describe "Specs List", ->
         .fixture("specs").then (@specs) ->
           @ipc.handle("get:specs", null, @specs)
 
-    it "lists specs", ->
-      cy.contains("integration")
+    it "lists main folders of specs", ->
+      cy.contains(".folder", "integration")
+      cy.contains(".folder", "unit")
+
+    it "lists nested folders", ->
+      cy.get(".folder .folder").contains("accounts")
+
+    it "lists test specs", ->
+      cy.get(".file a").contains("app_spec.coffee")
 
   describe "server error", ->
     beforeEach ->
