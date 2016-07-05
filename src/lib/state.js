@@ -3,6 +3,7 @@ import { computed, observable } from 'mobx'
 import User from '../lib/user-model'
 
 class State {
+  @observable userLoaded = false
   @observable user = null
   @observable updateAvailable = false
 

@@ -1,7 +1,9 @@
 import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import { Component } from 'react'
+import React, { Component } from 'react'
 import { withRouter } from 'react-router'
+
+import DevTools from 'mobx-react-devtools'
 
 import { getProjects } from '../projects/projects-api'
 
@@ -16,22 +18,39 @@ export default class Application extends Component {
 
     App.ipc('get:current:user')
     .then(action('got:current:user', (user) => {
+      state.userLoaded = true
       state.setUser(user)
+
+      if (!user || !user.session_token) {
+        return this.props.router.push('/login')
+      }
     }))
 
     autorun(() => {
+      if (!state.userLoaded) return
+
       if (state.hasUser) {
         getProjects()
-        this.props.router.push('/')
+        return this.props.router.push('/')
       } else {
-        // hack to keep react happy about changing routes
-        // in the middle of rendering
-        setTimeout(() => this.props.router.push('/login'))
+        return this.props.router.push('/login')
       }
     })
   }
 
   render () {
-    return this.props.children
+    return (
+      <div>
+        { this.props.children }
+        { this._devTools() }
+      </div>
+    )
+  }
+
+  _devTools () {
+    if (window.env === 'development') {
+      // return null
+      return <DevTools position={{ bottom: 0, left: 20 }}/>
+    }
   }
 }
