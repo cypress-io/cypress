@@ -38,8 +38,6 @@ class Specs extends Component {
               <i className='fa fa-folder-o'></i>
               { spec.name }{' '}
             </div>
-          </div>
-          <div>
             <div>
               <ul className='list-as-table'>
                 { _.map(spec.children.specs, (spec) => (
