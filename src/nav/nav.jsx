@@ -77,7 +77,7 @@ export default class Nav extends Component {
           visible={!hasProjects}
           overlay={tooltip}
           align={{
-            // points: ['bl', 'tl'], // align bottom left point of sourceNode with top left point of targetNode
+            points: ['bc', 'tc'], // align bottom center point of sourceNode with top center point of targetNode
           }}
           >
           <a onClick={this._addProject} href='#'>
