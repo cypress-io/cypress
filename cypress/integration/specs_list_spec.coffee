@@ -35,6 +35,28 @@ describe "Specs List", ->
         expect(@App.ipc).to.be.calledWith("get:specs")
 
   describe "no specs", ->
+    beforeEach ->
+      cy
+        .get(".projects-list a")
+          .contains("My-Fake-Project").click()
+        .fixture("browsers").then (@browsers) ->
+          @config.browsers = @browsers
+          @ipc.handle("open:project", null, @config)
+        .fixture("specs").then (@specs) ->
+          @ipc.handle("get:specs", null, [])
+
+    it "displays empty message", ->
+      cy.contains("No files found")
+
+    it "displays project path", ->
+      cy.contains(@projects[0])
+
+    it "displays help link", ->
+      cy.contains("a", "Need help?")
+
+    it "opens link to docs on click of help link", ->
+      cy.contains("a", "Need help?").click().then ->
+        expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/writing-your-first-test#section-test-files")
 
   describe "first time onboarding specs", ->
     beforeEach ->

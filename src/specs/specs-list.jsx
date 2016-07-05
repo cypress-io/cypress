@@ -1,8 +1,10 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
+import { observer } from 'mobx-react'
+
+import App from '../lib/app'
 import { getSpecs } from './specs-api'
 import specsCollection from './specs-collection'
-import { observer } from 'mobx-react'
 
 @observer
 class Specs extends Component {
@@ -13,6 +15,8 @@ class Specs extends Component {
 
   render () {
     if (!specsCollection.isLoaded) return null
+
+    if (!specsCollection.specs.length) return this._empty()
 
     return (
       <div id='tests-list-page'>
@@ -63,6 +67,27 @@ class Specs extends Component {
         </li>
       )
     }
+  }
+
+  _empty () {
+    return (
+      <div id='tests-list-page'>
+        <div className="empty-well">
+          <h5>
+            No files found in
+            <code>{ this.props.project.path }</code>
+          </h5>
+            <a className='helper-docs-link' onClick={this._openHelp}>
+              <i className='fa fa-question-circle'></i>{' '}
+              Need help?
+            </a>
+        </div>
+      </div>
+    )
+  }
+
+  _openHelp () {
+    App.ipc('external:open', 'https://on.cypress.io/guides/writing-your-first-test#section-test-files')
   }
 }
 

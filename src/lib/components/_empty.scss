@@ -11,3 +11,18 @@
     margin-bottom: 5px;
   }
 }
+
+.empty-well {
+  padding: 25px 50px;
+  margin: 30px;
+  text-align: center;
+  font-style: italic;
+  background-color: #f7f7f7;
+  border-radius: 5px;
+  border: 1px dashed #ddd;
+
+  code:hover {
+    text-decoration: none !important;
+    cursor: inherit !important;
+  }
+}
