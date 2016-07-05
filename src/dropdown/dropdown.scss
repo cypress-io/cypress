@@ -49,10 +49,6 @@
     text-align: left;
     z-index: 1000;
 
-    .open & {
-      display: block;
-    }
-
     li {
       color: #333;
       cursor: pointer;
@@ -69,5 +65,9 @@
         color: #262626;
       }
     }
+  }
+
+  .open .dropdown-menu {
+    display: block;
   }
 }
