@@ -216,33 +216,40 @@
     }
   }
 
-  .command-name-xhr, .command-name-request {
-    .command-message {
-      .command-status {
-        font-weight: 700;
-        color: #565554;
-        margin-right: 3px;
-      }
+  .command-wrapper .fa-circle {
+    display: none;
+  }
 
-      .command-body {
-        color: #565554;
-      }
+  .command-name-xhr,
+  .command-name-request {
+    .command-status {
+      font-weight: 700;
+      color: #565554;
+      margin-right: 3px;
+    }
 
-      .fa-circle.successful {
-        color: $pending;
-      }
+    .command-body {
+      color: #565554;
+    }
 
-      .fa-circle.aborted {
-        color: $fail;
-      }
+    &.command-with-indicator .fa-circle {
+      display: inline-block;
+    }
 
-      .fa-circle.bad {
-        color: #F0AD4E;
-      }
+    .fa-circle.successful {
+      color: $pending;
+    }
 
-      .fa-circle.pending {
-        color: #AAA;
-      }
+    .fa-circle.aborted {
+      color: $fail;
+    }
+
+    .fa-circle.bad {
+      color: #F0AD4E;
+    }
+
+    .fa-circle.pending {
+      color: #AAA;
     }
   }
 
@@ -266,56 +273,56 @@
         margin: 0 3px;
       }
     }
-  }
 
-  .command-assertion-pending {
-    .command-method {
-      span {
-        background-color: $pending;
-        color: white;
+    &.command-state-pending {
+      .command-method {
+        span {
+          background-color: $pending;
+          color: white;
 
+        }
+      }
+      .command-message {
+        color: $pending;
+
+        strong {
+          color: darken($pending, 10%);
+        }
       }
     }
-    .command-message {
-      color: $pending;
 
-      strong {
-        color: darken($pending, 10%);
+    &.command-state-failed {
+      .command-method {
+        span {
+          background-color: $fail;
+          color: white;
+
+        }
+      }
+      .command-message {
+        color: $fail;
+
+        strong {
+          color: darken($fail, 10%);
+        }
       }
     }
-  }
 
-  .command-assertion-failed {
-    .command-method {
-      span {
-        background-color: $fail;
-        color: white;
+    &.command-state-passed {
+      .command-method {
+        color: $pass;
 
+        span {
+          background-color: $pass;
+          color: white;
+        }
       }
-    }
-    .command-message {
-      color: $fail;
+      .command-message {
+        color: darken($pass, 3%);
 
-      strong {
-        color: darken($fail, 10%);
-      }
-    }
-  }
-
-  .command-assertion-passed {
-    .command-method {
-      color: $pass;
-
-      span {
-        background-color: $pass;
-        color: white;
-      }
-    }
-    .command-message {
-      color: darken($pass, 3%);
-
-      strong {
-        color: darken($pass, 10%);
+        strong {
+          color: darken($pass, 10%);
+        }
       }
     }
   }

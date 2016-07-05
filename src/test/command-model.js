@@ -7,6 +7,8 @@ export default class Command extends Log {
   @observable event = false
   @observable number
   @observable numElements
+  @observable indicator
+  @observable displayMessage
   @observable visible = true
 
   constructor (props) {
@@ -16,6 +18,8 @@ export default class Command extends Log {
     this.event = props.event
     this.number = props.number
     this.numElements = props.numElements
+    this.indicator = props.indicator
+    this.displayMessage = props.displayMessage
     this.visible = props.visible
   }
 
@@ -25,6 +29,8 @@ export default class Command extends Log {
     this.error = props.error
     this.event = props.event
     this.numElements = props.numElements
+    this.indicator = props.indicator
+    this.displayMessage = props.displayMessage
     this.visible = props.visible
   }
 

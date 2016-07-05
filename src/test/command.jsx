@@ -10,6 +10,7 @@ import FlashOnClick from '../lib/flash-on-click'
 
 const md = new Markdown()
 
+// TODO: move to command model?
 const displayName = (model) => model.displayName || model.name
 const isParent = (model) => model.type === 'parent'
 const formattedMessage = (message) => message ? md.renderInline(_.truncate(message, { length: 100 })) : ''
@@ -27,6 +28,13 @@ const Alias = observer(({ model }) => (
   </Tooltip>
 ))
 
+const Message = observer(({ model }) => (
+  <span>
+    <i className={`fa fa-circle ${model.indicator}`}></i>
+    <span dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || model.message) }} />
+  </span>
+))
+
 const Command = observer(({ model }) => (
   <li
     className={cs(
@@ -42,6 +50,7 @@ const Command = observer(({ model }) => (
         'command-has-num-elements': model.numElements != null,
         'command-has-no-elements': !model.numElements,
         'command-has-multiple-elements': model.numElements > 1,
+        'command-with-indicator': !!model.indicator,
       }
     )}
   >
@@ -58,9 +67,7 @@ const Command = observer(({ model }) => (
           <span>{model.event ? `(${displayName(model)})` :  displayName(model)}</span>
         </span>
         <span className='command-message'>
-          {model.referencesAlias ?
-            <Alias model={model} /> :
-            <span dangerouslySetInnerHTML={{ __html: formattedMessage(model.message) }} />}
+          {model.referencesAlias ? <Alias model={model} /> : <Message model={model} />}
         </span>
         <span className='command-controls'>
           <Tooltip placement='left' title={`${model.message} aliased as: '${model.alias}'`}>
