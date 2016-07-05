@@ -47,13 +47,35 @@ class Dropdown extends Component {
   render () {
     return (
       <li className={cs('dropdown', this.props.className, { open: this.state.open })}>
-        <a onClick={this._toggleOpen}>
-          {this._icon()}{' '}
-          {this.props.renderItem(this.props.chosen)}{' '}
-          {this._caret()}
-        </a>
+        {this._button()}
         {this._items()}
       </li>
+    )
+  }
+
+  _button () {
+    if (this.props.others.length) {
+      return (
+        <a onClick={this._toggleOpen}>
+          {this._buttonContent()}
+        </a>
+      )
+    } else {
+      return (
+        <span>
+          {this._buttonContent()}
+        </span>
+      )
+    }
+  }
+
+  _buttonContent () {
+    return (
+      <span>
+        {this._icon()}{' '}
+        {this.props.renderItem(this.props.chosen)}{' '}
+        {this._caret()}
+      </span>
     )
   }
 

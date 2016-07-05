@@ -17,6 +17,8 @@
 
 }
 
+
+
 .navbar-right {
   margin-right: 0;
 }
@@ -56,6 +58,12 @@
   .nav.navbar-nav>li>a {
     line-height: 30px;
   }
+}
+
+.nav .dropdown>span {
+  line-height: 30px;
+  font-size: 12px;
+  padding-right: 12px;
 }
 
 .nav.navbar-nav.navbar-right>li>a {
