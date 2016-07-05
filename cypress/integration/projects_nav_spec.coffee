@@ -162,6 +162,11 @@ describe "Projects Nav", ->
       it "displays download browser button", ->
         cy.contains("Download Chrome")
 
+      it "closes project on click of 'go back to projects' button", ->
+        cy
+          .get(".error").contains("Go Back to Projects").click().then ->
+            expect(@App.ipc).to.be.calledWith("close:project")
+
       describe "download browser", ->
         it "triggers external:open on click", ->
           cy

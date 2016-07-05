@@ -8,6 +8,10 @@
 
   .btn-sm {
     margin-top: 10px;
+
+    + .btn-sm {
+      margin-left: 5px;
+    }
   }
 
   &.error p {

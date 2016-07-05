@@ -18,6 +18,14 @@ const NoBrowsers = () => (
     <p>
       We couldn't find any Chrome browsers to launch. To fix, please download Chrome.
     </p>
+    <Link
+      to='/projects'
+      onClick={closeProject}
+      className='btn btn-default btn-sm'
+    >
+      <i className="fa fa-chevron-left"></i>{' '}
+      Go Back to Projects
+    </Link>
     <a onClick={downloadBrowser} className='btn btn-primary btn-sm'>
       <i className='fa fa-chrome'></i>{' '}
       Download Chrome

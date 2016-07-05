@@ -124,6 +124,15 @@ describe "Projects List", ->
             .should("be.visible")
             .and("contain", "something bad happened")
 
+      it "hides error on dismiss click", ->
+        cy
+          .get(".error")
+            .should("be.visible")
+            .find(".close").click({force: true})
+          .get(".error")
+            .should("not.be.visible")
+
+
     describe "directory dialog dismissed", ->
       beforeEach ->
         cy.get("nav").find(".fa-plus").click()
