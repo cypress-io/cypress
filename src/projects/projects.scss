@@ -35,8 +35,8 @@
         }
       }
 
-      &:hover {
-        background-color: #fbfbfb;
+      &:hover, &:focus, &:active {
+        background-color: #f8f8f8;
         .fa-chevron-right, .project-name {
           color: #555;
         }
