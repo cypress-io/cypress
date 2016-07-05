@@ -51,7 +51,7 @@ export default {
   },
 
   start (config, specSrc) {
-    overrides.overloadMochaRunnerUncaught()
+    if (config.env === 'development') overrides.overloadMochaRunnerUncaught()
 
     driver.setConfig(_.pick(config, 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout'))
 
