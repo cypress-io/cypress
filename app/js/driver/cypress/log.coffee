@@ -35,7 +35,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
       _.defaults obj,
         event: false
-        onRender: ->
+        renderProps: -> {}
         onConsole: ->
           ret = if $Cypress.Utils.hasElement(current.get("subject"))
             $Cypress.Utils.getDomElements(current.get("subject"))
@@ -67,7 +67,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         alias:            undefined
         aliasType:        undefined
         message:          undefined
-        onRender: ->
+        renderProps: -> {}
         onConsole: ->
 
       obj.instrument = instrument

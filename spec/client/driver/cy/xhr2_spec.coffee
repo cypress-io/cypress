@@ -1821,6 +1821,68 @@ describe "$Cypress.Cy XHR Commands", ->
           expect(group.items[0]).to.be.a("string")
           expect(group.items[0].split("\n").length).to.gt(1)
 
+  context "renderProps", ->
+    beforeEach ->
+      @Cypress.on "log", (@log) =>
+
+      @setup()
+
+    describe "in any case", ->
+      beforeEach ->
+        @cy
+          .server()
+          .route(/foo/, {})
+          .window().then (win) ->
+            new Promise (resolve) ->
+              win.$.get("/foo").done(resolve)
+
+      it "sends correct displayMessage", ->
+        @cy.then ->
+          expect(@log.attributes.renderProps().displayMessage).to.equal("GET 200 /foo")
+
+    describe "when response is successful", ->
+      beforeEach ->
+        @cy
+          .server()
+          .route(/foo/, {})
+          .window().then (win) ->
+            new Promise (resolve) ->
+              win.$.get("/foo").done(resolve)
+
+      it "sends correct indicator", ->
+        @cy.then ->
+          expect(@log.attributes.renderProps().indicator).to.equal("successful")
+
+    describe "when response is pending", ->
+      beforeEach ->
+        @cy
+          .server()
+          .route({ url: "/foo", status: 0, response: {} })
+          .window().then (win) ->
+            win.$.get("/foo")
+            null
+
+      it "sends correct displayMessage", ->
+        @cy.then ->
+          expect(@log.attributes.renderProps().displayMessage).to.equal("GET --- /foo")
+
+      it "sends correct indicator", ->
+        @cy.then ->
+          expect(@log.attributes.renderProps().indicator).to.equal("pending")
+
+    describe "when response is outside 200 range", ->
+      beforeEach ->
+        @cy
+          .server()
+          .route({ url: "/foo", status: 500, response: {} })
+          .window().then (win) ->
+            new Promise (resolve) ->
+              win.$.get("/foo").fail -> resolve()
+
+      it "sends correct indicator", ->
+        @cy.then ->
+          expect(@log.attributes.renderProps().indicator).to.equal("bad")
+
   context.skip "Cypress.on(before:window:load)", ->
     beforeEach ->
       ## force us to start from blank window

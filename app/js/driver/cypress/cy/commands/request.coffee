@@ -132,22 +132,20 @@ $Cypress.register "Request", (Cypress, _, $) ->
             Returned: options.response
           }
 
-          onRender: ($row) ->
+          renderProps: ->
             status = switch
               when r = options.response
                 r.status
               else
-                klass = "pending"
+                indicator = "pending"
                 "---"
 
-            klass ?= if isOkStatusCodeRe.test(status) then "successful" else "bad"
+            indicator ?= if isOkStatusCodeRe.test(status) then "successful" else "bad"
 
-            $row.find(".command-message").html ->
-              [
-                "<i class='fa fa-circle #{klass}'></i>" + options.method,
-                status,
-                _.truncate(options.url, 25)
-              ].join(" ")
+            {
+              displayMessage: "#{options.method} #{status} #{_.truncate(options.url, 25)}"
+              indicator: indicator
+            }
         })
 
       ## need to remove the current timeout

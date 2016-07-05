@@ -453,19 +453,6 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
           else
             "parent"
 
-        onRender: ($row) ->
-          ## remove the numElements label
-          $row.find("[data-js=numElements]").remove()
-
-          klasses = "command-assertion-failed command-assertion-passed command-assertion-pending"
-          $row.removeClass(klasses).addClass("command-assertion-#{@state}")
-
-          ## if our message is too big
-          ## then scale the font size down
-          convertRowFontSize($row, @message)
-
-          ## converts [b] string tags into real elements
-          convertMessage($row, @message)
         onConsole: =>
           obj = {Command: "assert"}
 

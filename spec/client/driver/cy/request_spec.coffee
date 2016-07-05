@@ -417,6 +417,34 @@ describe "$Cypress.Cy Request Commands", ->
             }
           }
 
+      describe ".renderProps", ->
+
+        describe "in any case", ->
+          it "sends correct displayMessage", ->
+            @respondWith({ status: 201 })
+
+            @cy.request("http://localhost:8080/foo").then ->
+              expect(@log.attributes.renderProps().displayMessage).to.equal "GET 201 http://localhost:8080/foo"
+
+        describe "when response is successful", ->
+          it "sends correct indicator", ->
+            @respondWith({ status: 201 })
+
+            @cy.request("http://localhost:8080/foo").then ->
+              expect(@log.attributes.renderProps().indicator).to.equal "successful"
+
+        describe "when response is outside 200 range", ->
+          it "sends correct indicator", (done) ->
+            @allowErrors()
+            @cy.on "fail", (err) =>
+              expect(@log.attributes.renderProps().indicator).to.equal "bad"
+              done()
+            @respondWith({ status: 500 })
+
+            @cy.request("http://localhost:8080/foo")
+
+      it ".renderProps", ->
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
