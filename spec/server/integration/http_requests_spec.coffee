@@ -162,7 +162,7 @@ describe "Routes", ->
       @rp("http://localhost:2020/__")
       .then (res) ->
         expect(res.statusCode).to.eq(200)
-        expect(res.body).to.match(/App.start\(.+\)/)
+        expect(res.body).to.match(/Runner.start/)
 
     it "sets title to projectName", ->
       @rp("http://localhost:2020/__")
@@ -182,45 +182,23 @@ describe "Routes", ->
         @rp("https://localhost:8443/__")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.match(/App.start\(.+\)/)
+          expect(res.body).to.match(/Runner.start\(.+\)/)
 
-  context "GET /__cypress/reporter", ->
+  context "GET /__cypress/runner/*", ->
     beforeEach ->
-      @setup()
-
-    it "can get reporter.html", ->
-      supertest(@app)
-      .get("/__cypress/reporter")
-      .expect(200)
-      .expect(/App.start/)
+      @setup("http://localhost:8443")
 
     it "can get app.js", ->
-      supertest(@app)
-      .get("/__cypress/reporter/js/app.js")
-      .expect(200)
-      .expect(/dialog-region/)
-
-    it.only "can get cypress.css", ->
-      supertest(@app)
-      .get("/__cypress/reporter/css/cypress.css")
-      .expect(200)
-      .expect(/#cy/)
-
-  context "GET /__cypress/aut/*", ->
-    beforeEach ->
-      @setup()
-
-    it "can get app.js", ->
-      supertest(@app)
-      .get("/__cypress/aut/app.js")
-      .expect(200)
-      .expect(/React/)
+      @rp("http://localhost:8443/__cypress/runner/app.js")
+      .then (res) ->
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(/React/)
 
     it "can get app.css", ->
-      supertest(@app)
-      .get("/__cypress/aut/app.css")
-      .expect(200)
-      .expect(/aut-container/)
+      @rp("http://localhost:8443/__cypress/runner/app.css")
+      .then (res) ->
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(/spec-iframe/)
 
   context "GET /__cypress/files", ->
     beforeEach ->

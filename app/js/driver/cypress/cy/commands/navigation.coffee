@@ -339,9 +339,9 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                 ## origin but include the test that we're currently on
                 newUri = new Uri(origin)
                 newUri
-                .setPath(existing.path())
-                .setQuery(existing.query())
-                .setAnchor(existing.anchor())
+                .setPath(existing.pathname)
+                .setQuery(existing.search)
+                .setAnchor(existing.hash)
 
                 @_replace(window, newUri.toString())
 

@@ -10,7 +10,6 @@ trumpet       = require("trumpet")
 urlHelpers    = require("url")
 cwd           = require("../cwd")
 logger        = require("../logger")
-UrlHelpers    = require("../util/url_helpers")
 escapeRegExp  = require("../util/escape_regexp")
 send          = require("send")
 
@@ -57,17 +56,6 @@ module.exports = {
       @getContent(thr, req, res, remoteOrigin, config)
         .on "error", (e) => @errorHandler(e, req, res, remoteOrigin)
         .pipe(res)
-
-  getOriginFromFqdnUrl: (req) ->
-    ## if we find an origin from this req.url
-    ## then return it, and reset our req.url
-    ## after stripping out the origin and ensuring
-    ## our req.url starts with only 1 leading slash
-    if origin = UrlHelpers.getOriginFromFqdnUrl(req.url)
-      req.url = "/" + req.url.replace(origin, "").replace(/^\/+/, "")
-
-      ## return the origin
-      return origin
 
   getContent: (thr, req, res, remoteOrigin, config) ->
     switch remoteOrigin
