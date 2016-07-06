@@ -4,12 +4,13 @@ import { observable } from 'mobx'
 import Agent from '../test/agent-model'
 import Command from '../test/command-model'
 import Route from '../test/route-model'
-import Runnable from './runnable-model'
+import Suite from './suite-model'
+import Test from '../test/test-model'
 
 const defaults = {
   isReady: false,
   runnables: [],
-  _runnables: {},
+  _tests: {},
   _logs: {},
 
   attemptingShowSnapshot: false,
@@ -19,41 +20,53 @@ const defaults = {
 class RunnablesStore {
   @observable isReady = defaults.isReady
   @observable runnables = defaults.runnables
-  @observable _runnables = defaults._runnables
+  @observable _tests = defaults._tests
   @observable _logs = defaults._logs
 
   attemptingShowSnapshot: defaults.attemptingShowSnapshot
   showingSnapshot: defaults.showingSnapshot
 
   setRunnables (rootRunnable) {
-    this.isReady = true
     this.runnables = this._createRunnableChildren(rootRunnable, 0)
+    this.isReady = true
   }
 
-  _createRunnableChildren (runnable, level) {
-    return this._createRunnables(runnable.tests, 'test', level).concat(
-      this._createRunnables(runnable.suites, 'suite', level)
+  _createRunnableChildren (runnableProps, level) {
+    return this._createRunnables('test', runnableProps.tests, level).concat(
+      this._createRunnables('suite', runnableProps.suites, level)
     )
   }
 
-  _createRunnables (runnables, type, level) {
-    return _.map(runnables, (runnable) => this._createRunnable(runnable, type, level))
+  _createRunnables (type, runnables, level) {
+    return _.map(runnables, (runnableProps) => this._createRunnable(type, runnableProps, level))
   }
 
-  _createRunnable (props, type, level) {
-    const runnable = new Runnable(props, type, level)
-    this._runnables[runnable.id] = runnable
-    runnable.children = this._createRunnableChildren(props, ++level)
-    return runnable
+  _createRunnable (type, props, level) {
+    return type === 'suite' ? this._createSuite(props, level) : this._createTest(props, level)
+  }
+
+  _createSuite (props, level) {
+    const suite = new Suite(props, level)
+    suite.children = this._createRunnableChildren(props, ++level)
+    return suite
+  }
+
+  _createTest (props, level) {
+    const test = new Test(props, level)
+    this._tests[test.id] = test
+    return test
   }
 
   runnableStarted ({ id }) {
-    this._runnables[id].isActive = true
+    this._withTest(id, (test) => test.start())
   }
 
-  runnableFinished ({ id }) {
-    this._runnables[id].isActive = false
-    this._runnables[id].isRunning = false
+  runnableFinished (props) {
+    this._withTest(props.id, (test) => test.finish(props))
+  }
+
+  testById (id) {
+    return this._tests[id]
   }
 
   addLog (log) {
@@ -61,24 +74,31 @@ class RunnablesStore {
       case 'command': {
         const command = new Command(log)
         this._logs[log.id] = command
-        this._runnables[log.testId].addCommand(command, log.hookName)
+        this._withTest(log.testId, (test) => test.addCommand(command, log.hookName))
         break
       }
       case 'agent': {
         const agent = new Agent(log)
         this._logs[log.id] = agent
-        this._runnables[log.testId].addAgent(agent)
+        this._withTest(log.testId, (test) => test.addAgent(agent))
         break
       }
       case 'route': {
         const route = new Route(log)
         this._logs[log.id] = route
-        this._runnables[log.testId].addRoute(route)
+        this._withTest(log.testId, (test) => test.addRoute(route))
         break
       }
       default:
         throw new Error(`Attempted to add log for unknown instrument: ${log.instrument}`)
     }
+  }
+
+  _withTest (id, cb) {
+    // we get events for suites and tests, but only tests change during a run,
+    // so if the id isn't found in this._tests, we ignore it b/c it's a suite
+    const test = this._tests[id]
+    if (test) cb(test)
   }
 
   updateLog (log) {

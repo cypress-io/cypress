@@ -67,6 +67,7 @@ class Command extends Component {
         )}
       >
         <FlashOnClick
+          message='Printed output to your console!'
           onClick={() => events.emit('show:command', model.id)}
         >
           <div

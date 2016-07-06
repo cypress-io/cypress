@@ -47,10 +47,10 @@ const Test = observer(({ model }) => (
     </Collapsible>
     <FlashOnClick
       message='Printed output to your console!'
-      onClick={() => events.emit('show:error', model.error.commandId)}
+      onClick={() => events.emit('show:error', model.id)}
     >
-      <pre className='test-error'>{model.error.message}</pre>
-  </FlashOnClick>
+      <pre className='test-error'>{model.errorMessage}</pre>
+    </FlashOnClick>
   </div>
 ))
 

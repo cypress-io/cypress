@@ -20,6 +20,12 @@ export default class Hook {
     this.commands.push(command)
   }
 
+  commandMatchingError (error) {
+    return _(this.commands)
+      .filter(({ errorMessage }) => error === errorMessage)
+      .last()
+  }
+
   @computed get failed () {
     if (this.name === 'test') return false
 

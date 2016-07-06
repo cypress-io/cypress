@@ -1,132 +1,13 @@
-import _ from 'lodash'
-import { computed, observable } from 'mobx'
-
-import Hook from './hook-model'
+import { observable } from 'mobx'
 
 export default class Runnable {
   @observable id
-  @observable isActive = false
-  @observable isPending
-  @observable isRunning = true
-  @observable type
   @observable title
   @observable level
-  @observable children = []
-  @observable agents = []
-  @observable routes = []
-  @observable hooks = []
-  @observable commands = []
 
-  constructor (props, type, level) {
+  constructor (props, level) {
     this.id = props.id
-    this.isPending = props.pending
     this.title = props.title
-    this.type = type
     this.level = level
-  }
-
-  @computed get error () {
-    const command = _(this.commands)
-      .filter((command) => !command.event && !!command.error)
-      .first()
-
-    if (!command) return {}
-
-    return {
-      commandId: command.id,
-      message: command.error,
-    }
-  }
-
-  @computed get state () {
-    if (this._isTest && this.isActive) return 'active'
-    if (this._isTest && this.isRunning) return 'processing'
-
-    if (this.isPending || this._allChildrenPending) {
-      return 'pending'
-    } else if (this._anyChildrenFailed) {
-      return 'failed'
-    } else if (this._anyChildrenProcessing) {
-      return 'processing'
-    } else if (this._allChildrenPassedOrPending) {
-      return 'passed'
-    } else {
-      return 'processing'
-    }
-  }
-
-  @computed get isLongRunning () {
-    return this._isSuite ? false : this._anyChildrenLongRunning
-  }
-
-  @computed get _isTest () {
-    return this.type === 'test'
-  }
-
-  @computed get _isSuite () {
-    return this.type === 'suite'
-  }
-
-  @computed get _children () {
-    return this._isSuite ? this.children : this.commands
-  }
-
-  @computed get _anyChildrenProcessing () {
-    return _.some(this._children, ({ state }) => state === 'processing')
-  }
-
-  @computed get _anyChildrenFailed () {
-    return _.some(this._children, ({ event, state }) => !event && state === 'failed')
-  }
-
-  @computed get _allChildrenPassedOrPending () {
-    return !this._children.length || _.every(this._children, ({ event, state }) => {
-      return event || state === 'passed' || state === 'pending'
-    })
-  }
-
-  @computed get _allChildrenPending () {
-    return !!this._children.length && _.every(this._children, ({ event, state }) => {
-      return event || state === 'pending'
-    })
-  }
-
-  @computed get _anyChildrenLongRunning () {
-    return _.some(this._children, (child) => child.isLongRunning)
-  }
-
-  addAgent (agent) {
-    this.agents.push(agent)
-  }
-
-  addRoute (route) {
-    this.routes.push(route)
-  }
-
-  addCommand (command, hookName) {
-    const hook = this._findOrCreateHook(hookName)
-    this.commands.push(command)
-    hook.addCommand(command)
-  }
-
-  _findOrCreateHook (name) {
-    const hook = _.find(this.hooks, { name })
-    if (hook) return hook
-
-    const newHook = new Hook({ name })
-    this.hooks.push(newHook)
-    return newHook
-  }
-
-  serialize () {
-    return {
-      id: this.id,
-      type: this.type,
-      title: this.title,
-      children: _.map(this.children, (runnable) => runnable.serialize()),
-      agents: _.map(this.agents, (agent) => agent.serialize()),
-      routes: _.map(this.routes, (route) => route.serialize()),
-      hooks: _.map(this.hooks, (hook) => hook.serialize()),
-    }
   }
 }

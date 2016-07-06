@@ -4,7 +4,7 @@ import Log from './log-model'
 
 export default class Command extends Log {
   @observable displayMessage
-  @observable error = null
+  @observable errorMessage = null
   @observable event = false
   @observable isLongRunning = false
   @observable number
@@ -16,7 +16,7 @@ export default class Command extends Log {
     super(props)
 
     this.displayMessage = props.displayMessage
-    this.error = props.error
+    this.errorMessage = props.error
     this.event = props.event
     this.number = props.number
     this.numElements = props.numElements
@@ -28,7 +28,7 @@ export default class Command extends Log {
     super.update(props)
 
     this.displayMessage = props.displayMessage
-    this.error = props.error
+    this.errorMessage = props.error
     this.event = props.event
     this.numElements = props.numElements
     this.indicator = props.indicator
@@ -37,7 +37,7 @@ export default class Command extends Log {
 
   serialize () {
     return _.extend(super.serialize(), {
-      error: this.error,
+      error: this.errorMessage,
       event: this.event,
       number: this.number,
       numElements: this.numElements,

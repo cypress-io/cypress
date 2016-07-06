@@ -76,8 +76,15 @@ export default {
       runner.emit('runner:console:log', commandId)
     })
 
-    localBus.on('show:error', (commandId) => {
-      runner.emit('runner:console:error', commandId)
+    localBus.on('show:error', (testId) => {
+      const test = runnablesStore.testById(testId)
+      if (/(AssertionError|CypressError)/.test(test.errorMessage)) {
+        const command = test.commandMatchingError()
+        if (!command) return
+        runner.emit('runner:console:log', command.id)
+      } else {
+        runner.emit('runner:console:error', testId)
+      }
     })
 
     localBus.on('show:snapshot', (commandId) => {
