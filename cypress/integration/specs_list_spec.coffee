@@ -71,7 +71,8 @@ describe "Specs List", ->
           @ipc.handle("get:specs", null, @specs)
 
     it "displays modal", ->
-      cy.contains("integration")
+      cy
+        .contains(".modal", "To help you get started").should("be.visible")
 
   describe "lists specs", ->
     beforeEach ->

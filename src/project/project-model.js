@@ -10,6 +10,7 @@ export default class Project {
   @observable isLoading = false
   @observable isNew = false
   @observable browsers = []
+  @observable onBoardingModalOpen = false
   @observable resolvedConfig = {}
   @observable error
   @observable parentTestsFolderDisplay
@@ -51,6 +52,14 @@ export default class Project {
 
   @action loading (bool) {
     this.isLoading = bool
+  }
+
+  @action openModal () {
+    this.onBoardingModalOpen = true
+  }
+
+  @action closeModal () {
+    this.onBoardingModalOpen = false
   }
 
   @action setBrowsers (browsers) {

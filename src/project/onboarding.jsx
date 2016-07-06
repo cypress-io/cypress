@@ -1,14 +1,26 @@
 import React, { Component } from 'react'
+import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
+@observer
 class OnBoading extends Component {
+  constructor (props) {
+    super(props)
+
+    if (this.props.project.isNew) {
+      this.props.project.openModal()
+    }
+  }
+
   render () {
-    if (!this.props.project.isNew) return null
+    let closeModal = () => {
+      this.props.project.closeModal()
+    }
 
     return (
       <BootstrapModal
-        show={true}
-        onHide={this._onHide}
+        show={this.props.project.onBoardingModalOpen}
+        onHide={closeModal}
         backdrop='static'>
         <div className='modal-body'>
           <div className='empty-onboarding'>
