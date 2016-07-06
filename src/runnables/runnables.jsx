@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import React from 'react'
 import Runnable from './runnable-and-suite'
 
-const NoTests = observer(({ spec }) => (
+const NoTests = observer(({ specPath }) => (
   <div className='no-tests'>
     <h4>
       <i className='fa fa-warning'></i>
@@ -12,7 +12,7 @@ const NoTests = observer(({ spec }) => (
         <i className='fa fa-question-circle'></i>
       </a>
     </h4>
-    <pre>{spec}</pre>
+    <pre>{specPath.split('/').join(' / ')}</pre>
     <ul>
       <li>Have you written any tests?</li>
       <li>Are there typo’s or syntax errors?</li>
@@ -28,16 +28,16 @@ const RunnablesList = observer(({ runnables }) => (
   </ul>
 ))
 
-function content ({ isReady, runnables }, spec) {
+function content ({ isReady, runnables }, specPath) {
   if (!isReady) return null
 
-  return runnables.length ? <RunnablesList runnables={runnables} /> : <NoTests spec={spec} />
+  return runnables.length ? <RunnablesList runnables={runnables} /> : <NoTests specPath={specPath} />
 }
 
-const Runnables = observer(({ runnablesStore, spec }) => (
+const Runnables = observer(({ runnablesStore, specPath }) => (
   <div className='container'>
     <div className='wrap'>
-      {content(runnablesStore, spec)}
+      {content(runnablesStore, specPath)}
     </div>
   </div>
 ))

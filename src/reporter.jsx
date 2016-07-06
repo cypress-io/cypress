@@ -18,7 +18,7 @@ class Reporter extends Component {
     return (
       <div className='reporter' id={CONTAINER_ID}>
         <Header />
-        <Runnables runnablesStore={runnablesStore} spec='t/b/d' />
+        <Runnables runnablesStore={runnablesStore} specPath={this.props.specPath} />
       </div>
     )
   }
