@@ -335,7 +335,7 @@ $Cypress.Runner = do ($Cypress, _) ->
 
         ## only add this property if we absolutely have to
         if p = runnable.pending
-          obj.pending = p
+          obj.state = "pending"
 
         return obj
 
@@ -388,7 +388,7 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## tests to an id-based object which prevents
       ## us from recursively iterating through every
       ## parent since we could just return the found test
-      _(runnable).pick "id", "title", "originalTitle", "root", "hookName", "err", "duration", "state", "failedFromHook", "timedOut", "async", "sync", "alreadyEmittedMocha"
+      _(runnable).pick "id", "title", "root", "hookName", "err", "duration", "state", "failedFromHook", "timedOut", "alreadyEmittedMocha"
 
     restore: ->
       _.each [@runnables, @runner], (obj) =>
