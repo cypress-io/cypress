@@ -1,10 +1,18 @@
 import React, { Component } from 'react'
+import { findDOMNode } from 'react-dom'
 import { Link } from 'react-router'
 import { observer } from 'mobx-react'
 import { ContextMenuLayer } from "react-contextmenu"
 
 @observer
 class Project extends Component {
+  componentDidMount () {
+    if (this.props.project.isLoading) {
+      let link = findDOMNode(this.projectLink)
+      link.scrollIntoView()
+    }
+  }
+
   render () {
     let project = this.props.project
 
@@ -12,6 +20,7 @@ class Project extends Component {
 
     return (
       <Link
+        ref={(ref) => this.projectLink = ref}
         className={`project ${loadingClassName}`}
         to={`/projects/${project.id}`}
         >
