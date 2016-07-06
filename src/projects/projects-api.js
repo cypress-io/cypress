@@ -37,16 +37,16 @@ const addProject = () => {
 
 const launchBrowser = (project, browser, url) => {
   project.setChosenBrowserByName(browser)
-  // project.browserOpening()
+  project.browserOpening()
 
   App.ipc('launch:browser', { browser, url }, (err, data = {}) => {
     if (data.browserOpened) {
-      // project.browserOpened()
+      project.browserOpened()
     }
 
     if (data.browserClosed) {
       App.ipc.off('launch:browser')
-      // project.browserClosed()
+      project.browserClosed()
     }
   })
 }
@@ -76,11 +76,10 @@ const openProject = (project) => {
 
         // if we had an open browser then launch it again!
         if (data.browser) {
-          launchBrowser(project, data.browser)
+          action("launch:browser", launchBrowser(project, data.browser))
         }
 
-        // recursively listen for more
-        // change events!
+        // recursively listen for more change events!
         return listenToProjectSettingsChange()
       }))
     }

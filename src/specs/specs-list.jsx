@@ -77,7 +77,12 @@ class Specs extends Component {
       browser: this.props.project.defaultBrowser.name,
       specPath: spec,
     }, function (err, data) {
-      err, data
+      if (data.browserOpened) {
+        this.props.project.browserOpened()
+      } else if (data.browserClosed) {
+        App.ipc.off("launch:browser")
+        this.props.project.browserClosed()
+      }
     })
   }
 

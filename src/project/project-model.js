@@ -11,6 +11,7 @@ export default class Project {
   @observable isNew = false
   @observable browsers = []
   @observable onBoardingModalOpen = false
+  @observable browserState = "closed"
   @observable resolvedConfig = {}
   @observable error
   @observable parentTestsFolderDisplay
@@ -60,6 +61,18 @@ export default class Project {
 
   @action closeModal () {
     this.onBoardingModalOpen = false
+  }
+
+  @action browserOpening () {
+    this.browserState = "opening"
+  }
+
+  @action browserOpened () {
+    this.browserState = "opened"
+  }
+
+  @action browserClosed () {
+    this.browserState = "closed"
   }
 
   @action setBrowsers (browsers) {
