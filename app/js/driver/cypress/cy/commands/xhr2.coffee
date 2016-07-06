@@ -152,25 +152,23 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 ]
 
               consoleObj
-            onRender: ($row) ->
+            renderProps: ->
               status = switch
                 when xhr.aborted
-                  klass = "aborted"
+                  indicator = "aborted"
                   "(aborted)"
                 when xhr.status > 0
                   xhr.status
                 else
-                  klass = "pending"
+                  indicator = "pending"
                   "---"
 
-              klass ?= if /^2/.test(status) then "successful" else "bad"
+              indicator ?= if /^2/.test(status) then "successful" else "bad"
 
-              $row.find(".command-message").html ->
-                [
-                  "<i class='fa fa-circle #{klass}'></i>" + xhr.method,
-                  status,
-                  _.truncate(stripOrigin(xhr.url), 20)
-                ].join(" ")
+              {
+                displayMessage: "#{xhr.method} #{status} #{_.truncate(stripOrigin(xhr.url), 20)}"
+                indicator: indicator
+              }
           })
 
           log.snapshot("request")

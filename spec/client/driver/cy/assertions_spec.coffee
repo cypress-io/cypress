@@ -116,8 +116,8 @@ describe "$Cypress.Cy Assertion Commands", ->
 
             ## the messages should have been updated to reflect
             ## the current state of the <body> element
-            expect(logs[1].get("message")).to.eq("expected [b]<body#bar.foo>[\\b] to have class [b]foo[\\b]")
-            expect(logs[2].get("message")).to.eq("expected [b]<body#bar.foo>[\\b] to have id [b]bar[\\b]")
+            expect(logs[1].get("message")).to.eq("expected **<body#bar.foo>** to have class **foo**")
+            expect(logs[2].get("message")).to.eq("expected **<body#bar.foo>** to have id **bar**")
 
       it "logs assertions as children even if subject is different", ->
         logs = []
@@ -656,7 +656,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       assert = _.after 2, (obj) =>
         @chai.restore()
 
-        expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]href[\\b] attribute with the value [b]#[\\b], and the value was [b]#[\\b]"
+        expect(obj.get("message")).to.eq "expected **<a>** to have a **href** attribute with the value **#**, and the value was **#**"
         done()
 
       @cy.get("a:first").then ($a) ->
@@ -673,7 +673,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
       assert = _.after 2, (obj) =>
         @chai.restore()
-        expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]href[\\b] attribute with the value [b]asdf[\\b], but the value was [b]#[\\b]"
+        expect(obj.get("message")).to.eq "expected **<a>** to have a **href** attribute with the value **asdf**, but the value was **#**"
         done()
 
       @cy.get("a:first").then ($a) ->
@@ -689,7 +689,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       assert = _.after 1, (obj) =>
         @chai.restore()
 
-        expect(obj.get("message")).to.eq "expected [b]<button#button>[\\b] to be visible"
+        expect(obj.get("message")).to.eq "expected **<button#button>** to be visible"
         done()
 
       @cy.get("#button").then ($button) ->
@@ -741,7 +741,7 @@ describe "$Cypress.Cy Assertion Commands", ->
     describe "#patchAssert", ->
       it "wraps \#{this} and \#{exp} in \#{b}", (done) ->
         @onAssert (obj) ->
-          expect(obj.get("message")).to.eq "expected [b]foo[\\b] to equal [b]foo[\\b]"
+          expect(obj.get("message")).to.eq "expected **foo** to equal **foo**"
           done()
 
         @cy.then ->
@@ -757,7 +757,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       describe "jQuery elements", ->
         it "sets _obj to selector", (done) ->
           @onAssert (obj) ->
-            expect(obj.get("message")).to.eq "expected [b]<body>[\\b] to exist in the DOM"
+            expect(obj.get("message")).to.eq "expected **<body>** to exist in the DOM"
             done()
 
           @cy.get("body").then ($body) ->
@@ -766,7 +766,7 @@ describe "$Cypress.Cy Assertion Commands", ->
         describe "without selector", ->
           it "exists", (done) ->
             @onAssert (obj) ->
-              expect(obj.get("message")).to.eq "expected [b]<div>[\\b] to exist in the DOM"
+              expect(obj.get("message")).to.eq "expected **<div>** to exist in the DOM"
               done()
 
             ## prepend an empty div so it has no id or class
@@ -778,7 +778,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
           it "uses element name", (done) ->
             @onAssert (obj) ->
-              expect(obj.get("message")).to.eq "expected [b]<input>[\\b] to match [b]input[\\b]"
+              expect(obj.get("message")).to.eq "expected **<input>** to match **input**"
               done()
 
             ## prepend an empty div so it has no id or class
@@ -790,7 +790,7 @@ describe "$Cypress.Cy Assertion Commands", ->
         describe "property assertions", ->
           it "has property", (done) ->
             @onAssert (obj) ->
-              expect(obj.get("message")).to.eq "expected [b]<form#by-id>[\\b] to have a property [b]length[\\b]"
+              expect(obj.get("message")).to.eq "expected **<form#by-id>** to have a property **length**"
               done()
 
             @cy.get("form:first").should("have.property", "length")
@@ -870,7 +870,7 @@ describe "$Cypress.Cy Assertion Commands", ->
     describe "#exist", ->
       it "uses $el.selector in expectation", (done) ->
         @onAssert (log) ->
-          expect(log.get("message")).to.eq("expected [b]#does-not-exist[\\b] not to exist in the DOM")
+          expect(log.get("message")).to.eq("expected **#does-not-exist** not to exist in the DOM")
           done()
 
         @cy.get("#does-not-exist").should("not.exist")
@@ -888,7 +888,7 @@ describe "$Cypress.Cy Assertion Commands", ->
     describe "#have.length", ->
       it "formats _obj with cypress", (done) ->
         @onAssert (log) ->
-          expect(log.get("message")).to.eq("expected [b]<button#button>[\\b] to have a length of [b]1[\\b] and got [b]1[\\b]")
+          expect(log.get("message")).to.eq("expected **<button#button>** to have a length of **1** and got **1**")
           done()
 
         @cy.get("button:first").should("have.length", 1)
