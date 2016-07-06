@@ -6,6 +6,7 @@ export default class Command extends Log {
   @observable displayMessage
   @observable error = null
   @observable event = false
+  @observable isLongRunning = false
   @observable number
   @observable numElements
   @observable indicator

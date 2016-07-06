@@ -55,6 +55,10 @@ export default class Runnable {
     }
   }
 
+  @computed get isLongRunning () {
+    return this._isSuite ? false : this._anyChildrenLongRunning
+  }
+
   @computed get _isTest () {
     return this.type === 'test'
   }
@@ -85,6 +89,10 @@ export default class Runnable {
     return !!this._children.length && _.every(this._children, ({ event, state }) => {
       return event || state === 'pending'
     })
+  }
+
+  @computed get _anyChildrenLongRunning () {
+    return _.some(this._children, (child) => child.isLongRunning)
   }
 
   addAgent (agent) {

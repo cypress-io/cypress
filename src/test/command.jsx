@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
+import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
@@ -9,6 +10,7 @@ import Tooltip from '../lib/tooltip'
 import FlashOnClick from '../lib/flash-on-click'
 import runnablesStore from '../runnables/runnables-store'
 
+const LONG_RUNNING_THRESHOLD = 500
 const md = new Markdown()
 
 // TODO: move to command model?
@@ -65,7 +67,6 @@ class Command extends Component {
         )}
       >
         <FlashOnClick
-          message='Printed output to your console!'
           onClick={() => events.emit('show:command', model.id)}
         >
           <div
@@ -138,6 +139,56 @@ class Command extends Component {
         }
       }, 50)
     }
+  }
+
+  // the following several methods track if the command's state has been
+  // active for more than the LONG_RUNNING_THRESHOLD and set the model's
+  // isLongRunning flag to true, which propagates up to its test to
+  // auto-expand it
+  componentWillMount () {
+    this._prevState = this.props.model.state
+
+    if (this._isActive()) {
+      this._startTimingActive()
+    }
+  }
+
+  componentWillReact () {
+
+    if (this._becameActive()) {
+      this._startTimingActive()
+    }
+
+    if (this._becameInactive()) {
+      clearTimeout(this._activeTimeout)
+      action('became:inactive', () => this.props.model.isLongRunning = false)()
+    }
+
+    this._prevState = this.props.model.state
+  }
+
+  _startTimingActive () {
+    this._activeTimeout = setTimeout(action('became:long:running', () => {
+      if (this._isActive()) {
+        this.props.model.isLongRunning = true
+      }
+    }), LONG_RUNNING_THRESHOLD)
+  }
+
+  _becameActive () {
+    return !this._wasActive() && this._isActive()
+  }
+
+  _becameInactive () {
+    return this._wasActive() && !this._isActive()
+  }
+
+  _wasActive () {
+    return this._prevState === 'pending'
+  }
+
+  _isActive () {
+    return this.props.model.state === 'pending'
   }
 }
 
