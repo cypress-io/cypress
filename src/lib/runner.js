@@ -76,16 +76,14 @@ export default {
       })
     })
 
-    reporterBus.on('runner:console:error', (logId) => {
-      this._withLog(logId, (log) => {
+    reporterBus.on('runner:console:error', (testId) => {
+      let test = tests.get(testId)
+      if (test) {
         logger.clearLog()
-        const error = log.get('error')
-        if (/(AssertionError|CypressError)/.test(error)) {
-          logger.logFormatted(log)
-        } else {
-          logger.logError(error.stack)
-        }
-      })
+        logger.logError(test.err.stack)
+      } else {
+        logger.logError('No error found for test id', testId)
+      }
     })
 
     reporterBus.on('runner:console:log', (logId) => {
