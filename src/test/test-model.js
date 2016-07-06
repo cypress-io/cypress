@@ -40,10 +40,13 @@ export default class Test extends Runnable {
     this.isActive = true
   }
 
-  finish ({ state, err }) {
+  finish ({ state, err, hookName }) {
     this._state = state
     this.errorMessage = err
     this.isActive = false
+    if (hookName) {
+      _.find(this.hooks, { name: hookName }).failed = true
+    }
   }
 
   commandMatchingError () {
