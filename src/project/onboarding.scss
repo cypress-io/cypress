@@ -19,7 +19,7 @@
   h1 {
     text-align: center;
     color: $pass;
-    font-size: 19px;
+    font-size: 18.5px;
     margin: 0px 0 10px;
   }
 
@@ -65,13 +65,13 @@
     ul {
       list-style-type: none;
       margin-left: 0;
-      font-size: 14px;
+      font-size: 13.5px;
       -webkit-padding-start: 0;
 
 
       &>li {
         position: relative;
-        margin: 5px 0;
+        margin: 3px 0;
 
         &.app-code {
           color: #aaa;
@@ -109,7 +109,7 @@
       color: lighten($pass, 5%);
       content: "+";
       position: absolute;
-      top: 0px;
+      top: 0;
       left: 10px;
     }
 
@@ -117,7 +117,7 @@
       color: lighten($pass, 5%);
       content: "+";
       position: absolute;
-      top: 0px;
+      top: -2px;
       left: -40px;
     }
 
@@ -125,7 +125,7 @@
       color: lighten($pass, 5%);
       content: "+";
       position: absolute;
-      top: 0px;
+      top: -2px;
       left: -60px;
     }
   }

@@ -14,32 +14,16 @@ class OnBoading extends Component {
           <div className='empty-onboarding'>
             <h1>To help you get started...</h1>
             <p>
-              We've created a folder here:
-              <strong data-js='cypress-folder'>
-                <i className='fa fa-folder-o'></i>{' '}
-                {this.props.project.parentTestsFolderDisplay}
-              </strong>
-            </p>
-            <p>
-              In there you'll find some sample tests:
-              <strong data-js='example-file'>
+              We've added some folders and example tests to your project. Try running the
+              <strong>
                 <i className='fa fa-file-code-o'></i>{' '}
-                {this.props.project.integrationExampleName}
+                example_spec{' '}
               </strong>
-            </p>
-            <hr />
-            <p>
-              We've also created
-              <strong data-js='fixtures-folder'>
+              tests or add your own test file to
+              <strong>
                 <i className='fa fa-folder-o'></i>{' '}
-                fixtures{' '}
-              </strong>
-              and
-              <strong data-js='support-folder'>
-                <i className='fa fa-folder-o'></i>{' '}
-                support{' '}
-              </strong>
-              for you.
+                cypress/integration
+              </strong>.
             </p>
             <div className='folder-preview-onboarding'>
               <ul>
