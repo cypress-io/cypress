@@ -28,9 +28,9 @@ export default class Iframes extends Component {
   }
 
   componentDidMount () {
-    const specFile = this.specFile = windowUtil.specFile()
+    const specPath = this.specPath = windowUtil.specPath()
     // TODO: need to take headless mode into account
-    runner.start(this.props.config, specFile)
+    runner.start(this.props.config, specPath)
     runner.on('restart', this._run.bind(this))
 
     this.iframeModel = new IframeModel(this.props.state, {
@@ -45,17 +45,17 @@ export default class Iframes extends Component {
 
   _run () {
     logger.clearLog()
-    this._loadIframes(this.specFile).then(([specWindow, $autIframe]) => {
+    this._loadIframes(this.specPath).then(([specWindow, $autIframe]) => {
       runner.run(specWindow, $autIframe)
     })
   }
 
   // jQuery is a better fit for managing these iframes, since they need to get
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
-  _loadIframes (specFile) {
+  _loadIframes (specPath) {
     return new Promise((resolve) => {
       // TODO: this path should come from the config
-      const specSrc = `/__cypress/iframes/${specFile}`
+      const specSrc = `/__cypress/iframes/${specPath}`
 
       const $container = $(this.refs.container).empty()
       const $autIframe = autIframe.create(this.props.config).appendTo($container)

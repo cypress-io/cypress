@@ -4,6 +4,7 @@ import Reporter from '@cypress/core-reporter'
 
 import automation from '../lib/automation'
 import runner from '../lib/runner'
+import windowUtil from '../lib/window-util'
 
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
@@ -57,7 +58,7 @@ export default class App extends Component {
     // or the header disappears randomly
     return (
       <div>
-        <Reporter runner={runner.reporterBus} />
+        <Reporter runner={runner.reporterBus} specPath={this._specPath()} />
         <InRunner className='container' style={{ height: '100%' }}>
           <Header {...this.props} />
           <Iframes {...this.props} />
@@ -66,6 +67,10 @@ export default class App extends Component {
         </InRunner>
       </div>
     )
+  }
+
+  _specPath () {
+    return `${this.props.config.integrationFolder}/${windowUtil.specFile()}`
   }
 
   _noAutomation () {
