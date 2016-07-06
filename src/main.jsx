@@ -63,8 +63,8 @@ App.start = () => {
           <Route path='/projects' component={withUser(Projects)} />
           <Route path='/projects/:id' component={withUser(Project)}>
             <IndexRedirect to='specs' />
-            <Route path='config' component={withUser(Config)} />
-            <Route path='specs' component={withUser(SpecsList)} />
+            <Route path='config' component={Config} />
+            <Route path='specs' component={SpecsList} />
           </Route>
           <Route path='/login' component={Login}/>
         </Route>

@@ -15,42 +15,40 @@ export default class Nav extends Component {
     return (
       <nav className='navbar navbar-inverse navbar-fixed-top'>
         <div className='container-fluid'>
-          <div className='collapse navbar-collapse'>
-            <ul className='nav navbar-nav'>
+          <ul className='nav navbar-nav'>
             <li>
-              { this.leftNavButton()}
+              { this.leftNavButton() }
             </li>
-            </ul>
-            <ul className='nav navbar-nav navbar-right'>
-              <li>
-                <a onClick={this._openDocs} href='#'>
-                  <i className='fa fa-graduation-cap'></i>{' '}
-                  Docs
-                </a>
-              </li>
-              <li>
-                <a onClick={this._openChat} href='#'>
-                  <i className='fa fa-comments'></i>{' '}
-                  Chat
-                </a>
-              </li>
-              <li className='dropdown'>
-                <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
-                  <i className='fa fa-user'></i>{' '}
-                  {state.user.displayName}{' '}
-                  <span className='caret'></span>
-                </a>
-                <ul className='dropdown-menu'>
-                  <li>
-                    <a href='#' onClick={this._logout}>
-                      <i className="fa fa-sign-out"></i>{' '}
-                      Log Out
-                    </a>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
+          </ul>
+          <ul className='nav navbar-nav navbar-right'>
+            <li>
+              <a onClick={this._openDocs} href='#'>
+                <i className='fa fa-graduation-cap'></i>{' '}
+                Docs
+              </a>
+            </li>
+            <li>
+              <a onClick={this._openChat} href='#'>
+                <i className='fa fa-comments'></i>{' '}
+                Chat
+              </a>
+            </li>
+            <li className='dropdown'>
+              <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
+                <i className='fa fa-user'></i>{' '}
+                { state.user.displayName }{' '}
+                <span className='caret'></span>
+              </a>
+              <ul className='dropdown-menu'>
+                <li>
+                  <a href='#' onClick={this._logout}>
+                    <i className="fa fa-sign-out"></i>{' '}
+                    Log Out
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
         </div>
       </nav>
     )
