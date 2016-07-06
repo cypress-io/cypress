@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import { computed, observable } from 'mobx'
-import Runnable from '../runnables/runnable-model'
 
-import Hook from '../runnables/hook-model'
+import Runnable from '../runnables/runnable-model'
+import Hook from '../hooks/hook-model'
 
 export default class Test extends Runnable {
   @observable agents = []

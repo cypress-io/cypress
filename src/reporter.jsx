@@ -1,15 +1,15 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
-import { CONTAINER_ID } from '../lib/constants'
-import events from '../lib/events'
-import runnablesStore from '../runnables/runnables-store'
+import { CONTAINER_ID } from './lib/constants'
+import events from './lib/events'
+import runnablesStore from './runnables/runnables-store'
 
-import Header from '../header/header'
-import Runnables from '../runnables/runnables'
+import Header from './header/header'
+import Runnables from './runnables/runnables'
 
 @observer
-class App extends Component {
+class Reporter extends Component {
   componentWillMount () {
     events.listen(this.props.runner)
   }
@@ -24,4 +24,4 @@ class App extends Component {
   }
 }
 
-export default App
+export default Reporter

@@ -2,7 +2,7 @@ import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
-import Command from './command'
+import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
 
 const HookHeader = ({ name }) => (

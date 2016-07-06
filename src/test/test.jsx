@@ -5,9 +5,9 @@ import Tooltip from '../lib/tooltip'
 import events from '../lib/events'
 import { indent } from '../lib/util'
 
-import Agents from './agents'
-import Hooks from './hooks'
-import Routes from './routes'
+import Hooks from '../hooks/hooks'
+import Agents from '../instruments/agents'
+import Routes from '../instruments/routes'
 import Collapsible from '../collapsible/collapsible'
 import FlashOnClick from '../lib/flash-on-click'
 

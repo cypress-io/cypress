@@ -35,8 +35,8 @@ function content ({ isReady, runnables }, spec) {
 }
 
 const Runnables = observer(({ runnablesStore, spec }) => (
-  <div className='tests'>
-    <div className='tests-wrap'>
+  <div className='container'>
+    <div className='wrap'>
       {content(runnablesStore, spec)}
     </div>
   </div>

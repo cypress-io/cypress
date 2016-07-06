@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { observable } from 'mobx'
-import Log from './log-model'
+import Log from '../instruments/log-model'
 
 export default class Command extends Log {
   @observable displayMessage

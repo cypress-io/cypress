@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import { observable } from 'mobx'
 
-import Agent from '../test/agent-model'
-import Command from '../test/command-model'
-import Route from '../test/route-model'
+import Agent from '../instruments/agent-model'
+import Command from '../commands/command-model'
+import Route from '../instruments/route-model'
 import Suite from './suite-model'
 import Test from '../test/test-model'
 
