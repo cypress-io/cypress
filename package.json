@@ -44,8 +44,6 @@
     "cors": "^2.7.1",
     "coveralls": "^2.11.8",
     "electron-osx-sign": "^0.3.0",
-    "electron-packager": "7.0.1",
-    "electron-prebuilt": "1.0.2",
     "gitter-sidecar": "^1.2.3",
     "gulp": "3.8.8",
     "gulp-awspublish": "^3.0.1",
