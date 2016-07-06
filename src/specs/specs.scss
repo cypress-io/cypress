@@ -94,11 +94,11 @@
     &>div>div:first-child {
       padding: 5px 20px;
       background-color: #F9F9F9;
-      font-weight: 500;
-      letter-spacing: 0.5px;
+      font-weight: normal;
+      // letter-spacing: 0.5px;
       text-transform: uppercase;
       border-bottom: 1px solid #eee;
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      border-top: 1px solid #eee;
       color: #777;
 
       i {

@@ -6,7 +6,7 @@
   }
 
   .navbar-nav>li>a {
-    font-size: 12px;
+    font-size: 13px;
     color: #444;
 
     &.active {
@@ -17,8 +17,6 @@
 
 }
 
-
-
 .navbar-right {
   margin-right: 0;
 }
@@ -27,7 +25,7 @@
   padding: 0;
 
   .navbar-brand {
-    font-size: 15px;
+    font-size: 14px;
     margin-left: 0;
 
   }
@@ -57,15 +55,6 @@
   }
   .nav.navbar-nav>li>a {
     line-height: 30px;
+    font-size: 14px;
   }
-}
-
-.nav .dropdown>span {
-  line-height: 30px;
-  font-size: 12px;
-  padding-right: 12px;
-}
-
-.nav.navbar-nav.navbar-right>li>a {
-  font-size: 12px;
 }
