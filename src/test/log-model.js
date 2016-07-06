@@ -1,4 +1,4 @@
-import { observable } from 'mobx'
+import { asReference, observable } from 'mobx'
 
 export default class Log {
   @observable alias = null
@@ -9,7 +9,7 @@ export default class Log {
   @observable message
   @observable type
   @observable state
-  @observable referencesAlias = null
+  @observable referencesAlias = asReference(null)
 
   constructor (props) {
     this.id = props.id
@@ -31,6 +31,7 @@ export default class Log {
     this.message = props.message
     this.type = props.type
     this.state = props.state
+    this.referencesAlias = props.referencesAlias
     this.referencesAlias = props.referencesAlias
   }
 

@@ -11,6 +11,9 @@ const defaults = {
   runnables: [],
   _runnables: {},
   _logs: {},
+
+  attemptingShowSnapshot: false,
+  showingSnapshot: false,
 }
 
 class RunnablesStore {
@@ -18,6 +21,9 @@ class RunnablesStore {
   @observable runnables = defaults.runnables
   @observable _runnables = defaults._runnables
   @observable _logs = defaults._logs
+
+  attemptingShowSnapshot: defaults.attemptingShowSnapshot
+  showingSnapshot: defaults.showingSnapshot
 
   setRunnables (rootRunnable) {
     this.isReady = true

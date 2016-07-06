@@ -79,6 +79,14 @@ export default {
     localBus.on('show:error', (commandId) => {
       runner.emit('runner:console:error', commandId)
     })
+
+    localBus.on('show:snapshot', (commandId) => {
+      runner.emit('runner:show:snapshot', commandId)
+    })
+
+    localBus.on('hide:snapshot', (commandId) => {
+      runner.emit('runner:hide:snapshot', commandId)
+    })
   },
 
   emit (event, ...args) {
