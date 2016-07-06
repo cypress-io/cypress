@@ -81,13 +81,10 @@ module.exports = {
           console.log(err.message)
           errors.warning("DEV_NO_SERVER")
 
-        args = ["."].concat(argsUtil.toArray(options))
-
+        ## open the cypress electron wrapper shell app
         new Promise (resolve) ->
-          ## kick off the electron process and resolve the calling
-          ## promise code when this new child process closes
-          electron = cp.spawn("electron", args, { stdio: "inherit" })
-          electron.on("close", resolve)
+          cypressElectron = require("@cypress/core-electron")
+          cypressElectron.open(".", argsUtil.toArray(options), resolve)
 
   openProject: (options) ->
     ## this code actually starts a project
