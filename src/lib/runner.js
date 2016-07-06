@@ -140,13 +140,13 @@ export default {
     })
     reporterBus.on('runner:restart', this._reRun.bind(this))
 
-    channel.on('runner:show:snapshot', (id) => {
+    reporterBus.on('runner:show:snapshot', (id) => {
       this._withLog(id, (log) => {
         localBus.emit('show:snapshot', log.get('snapshots'), log.toJSON())
       })
     })
 
-    channel.on('runner:hide:snapshot', () => {
+    reporterBus.on('runner:hide:snapshot', () => {
       localBus.emit('hide:snapshot')
     })
 
