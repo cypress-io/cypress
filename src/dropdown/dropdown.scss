@@ -39,15 +39,6 @@
   }
 
   li {
-    color: #333;
-    cursor: pointer;
-    display: block;
-    font-weight: normal;
-    line-height: 1.4;
-    padding: 2px;
-    white-space: nowrap;
-    border-bottom: 1px solid #eee;
-
     &:last-of-type {
       border-bottom: 0;
     }
@@ -60,8 +51,14 @@
       color: #262626;
     }
 
-    &>a {
-      padding: 2px 10px;
+    &>span, &>a {
+      color: #333;
+      cursor: pointer;
+      display: block;
+      font-weight: normal;
+      line-height: 1.8;
+      padding: 3px 20px;
+      white-space: nowrap;
     }
   }
 }
