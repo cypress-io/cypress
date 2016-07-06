@@ -1,5 +1,3 @@
-/* global $ */
-
 import React, { Component } from 'react'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
@@ -20,7 +18,7 @@ class UpdateBanner extends Component {
   }
 
   componentWillUnmount () {
-    $('html').removeClass('has-updates')
+    document.getElementsByTagName('html')[0].classList.remove('has-updates')
 
     clearInterval(this.checkId)
   }
@@ -28,7 +26,7 @@ class UpdateBanner extends Component {
   render () {
     if (!state.updateAvailable) return null
 
-    $('html').addClass('has-updates')
+    document.getElementsByTagName('html')[0].classList.add('has-updates')
 
     return (
       <div id='updates-available'>
