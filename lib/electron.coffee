@@ -21,11 +21,11 @@ module.exports = {
       when opts.install
         @install()
       when pathToApp
-        @open(pathToApp)
+        @open(pathToApp, argv)
       else
         throw new Error("No path to your app was provided.")
 
-  open: (appPath) ->
+  open: (appPath, argv, cb) ->
     appPath = path.resolve(appPath)
     dest    = paths.getPathToResources("app")
 
@@ -34,9 +34,12 @@ module.exports = {
     .then ->
       fs.ensureSymlinkAsync(appPath, dest, "dir")
       .then ->
-        cp.spawn(paths.getPathToExec(), [], {stdio: "inherit"})
+        cp.spawn(paths.getPathToExec(), argv, {stdio: "inherit"})
         .on "close", (code) ->
-          process.exit(code)
+          if cb
+            cb(code)
+          else
+            process.exit(code)
 
     .catch (err) ->
       console.log(err.stack)
