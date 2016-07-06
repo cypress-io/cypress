@@ -94,6 +94,14 @@ describe "Specs List", ->
     it "lists test specs", ->
       cy.get(".file a").contains("app_spec.coffee")
 
+    it "triggers launch:browser on click of file", ->
+      cy
+        .get(".file a").contains("app_spec.coffee").click().then ->
+          expect(@App.ipc).to.be.calledWith("launch:browser", {
+              browser: "chrome"
+              specPath: "integration/app_spec.coffee"
+            })
+
   describe "server error", ->
     beforeEach ->
       @err = {

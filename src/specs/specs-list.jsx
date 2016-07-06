@@ -10,6 +10,7 @@ import specsCollection from './specs-collection'
 class Specs extends Component {
   constructor (props) {
     super(props)
+
     getSpecs(this.props.project)
   }
 
@@ -51,7 +52,7 @@ class Specs extends Component {
     } else {
       return (
         <li key={spec.id} className='file'>
-          <a href='#'>
+          <a href='#' onClick={this._selectSpec.bind(this)} data-spec={spec.id}>
             <div>
               <div>
                 <i className='fa fa-file-o'></i>
@@ -65,6 +66,19 @@ class Specs extends Component {
         </li>
       )
     }
+  }
+
+  _selectSpec (e) {
+    e.preventDefault()
+
+    let spec = e.currentTarget.getAttribute('data-spec')
+
+    App.ipc('launch:browser', {
+      browser: this.props.project.defaultBrowser.name,
+      specPath: spec,
+    }, function (err, data) {
+      err, data
+    })
   }
 
   _empty () {
@@ -84,7 +98,8 @@ class Specs extends Component {
     )
   }
 
-  _openHelp () {
+  _openHelp (e) {
+    e.preventDefault()
     App.ipc('external:open', 'https://on.cypress.io/guides/writing-your-first-test#section-test-files')
   }
 }
