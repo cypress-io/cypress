@@ -41,6 +41,7 @@
 .navbar-inverse {
   background-color: #252831;
   min-height: 40px;
+  z-index: 1040;
 
   .navbar-brand {
     height: 40px;
@@ -49,6 +50,7 @@
 
   .nav.navbar-nav:not(.navbar-right)>li>a {
     border: 1px solid #444a52;
+    border-left: 0;
     border-top: 0;
     border-bottom: 0;
 
