@@ -2,8 +2,9 @@ $Cypress.Runner = do ($Cypress, _) ->
 
   defaultGrep = /.*/
 
-  RUNNABLE_PROPS       = "id title root hookName err duration state failedFromHook timedOut alreadyEmittedMocha".split(" ")
-  RUNNABLE_COLLECTIONS = "routes agents commands"
+  ERROR_PROPS          = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
+  RUNNABLE_PROPS       = "id title root hookName err duration state failedFromHook alreadyEmittedMocha".split(" ")
+  RUNNABLE_COLLECTIONS = "routes agents commands".split(" ")
 
   # ## initial payload
   # {
@@ -157,6 +158,9 @@ $Cypress.Runner = do ($Cypress, _) ->
 
       @listenTo @Cypress, "stop", => @stop()
 
+      @listenTo @Cypress, "log", (log) =>
+        @addLogToTest(log)
+
       return @
 
     runnerListeners: ->
@@ -293,8 +297,17 @@ $Cypress.Runner = do ($Cypress, _) ->
         if runnable.type is "hook"
           @hookFailed(runnable, err)
 
+    addLogToTest: (log) ->
+      {testId, instrument} = log.pick("testId", "instrument")
+
+      if test = @testIds[testId]
+        ## pluralize the instrument
+        ## as a property on the runnable
+        a = test[instrument + "s"] ?= []
+        a.push(log.toJSON())
+
     wrapErr: (err) ->
-      _.pick err, "message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host", "uncaught", "actual", "expected", "showDiff"
+      @reduceProps(err, ERROR_PROPS)
 
     matchesGrep: (runnable, grep) ->
       ## we have optimized this iteration to the maximum.
@@ -423,10 +436,10 @@ $Cypress.Runner = do ($Cypress, _) ->
 
       return obj
 
-    reduceProps: (runnable, props) ->
+    reduceProps: (obj, props) ->
       _.reduce props, (memo, prop) ->
-        if _.has(runnable, prop)
-          memo[prop] = runnable[prop]
+        if _.has(obj, prop)
+          memo[prop] = obj[prop]
         memo
       , {}
 
