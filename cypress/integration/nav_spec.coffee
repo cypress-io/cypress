@@ -8,6 +8,29 @@ describe "Navigation", ->
         @agents.spy(@App, "ipc")
         @ipc.handle("get:options", null, {})
 
+  context "links", ->
+    beforeEach ->
+      cy
+        .fixture("user").then (@user) ->
+          @ipc.handle("get:current:user", null, @user)
+          @ipc.handle("get:project:paths", null, [])
+
+    it "displays link to docs", ->
+      cy.get("nav").contains("Docs")
+
+    it "opens link to docs on click", ->
+      cy
+        .get("nav").contains("Docs").click().then ->
+          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io")
+
+    it "displays link to chat", ->
+      cy.get("nav").contains("Chat")
+
+    it "opens link to chat on click", ->
+      cy
+        .get("nav").contains("Chat").click().then ->
+          expect(@App.ipc).to.be.calledWith("external:open", "https://gitter.im/cypress-io/cypress")
+
   context "with a current user", ->
     describe "username in header", ->
       it "displays user name", ->

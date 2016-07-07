@@ -29,6 +29,11 @@ describe "Config", ->
       cy
         .contains("a", "Config").should("have.class", "active")
 
+  context "display legend", ->
+    it "has legend in table", ->
+      cy.contains("Legend")
+      cy.get("table>tbody>tr").should("have.length", 5)
+
   context "displays config", ->
     it "wraps config line in proper classes", ->
       cy
@@ -38,6 +43,12 @@ describe "Config", ->
             .contains(":").should("have.class", "colon").end()
             .contains("5").should("have.class", "default").end()
             .contains(",").should("have.class", "comma")
+
+    it "opens help link on click", ->
+      cy
+        .get(".fa-question-circle").click().then ->
+          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/configuration")
+
 
   context "on:project:settings:change", ->
     beforeEach ->

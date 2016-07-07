@@ -48,7 +48,7 @@ class Config extends Component {
             </table>
           <h5>
             Resolved Configuration:{' '}
-            <a href="#" onClick={this.openHelp}>
+            <a href="#" onClick={this._openHelp}>
               <i className="fa fa-question-circle"></i>
             </a>
           </h5>
