@@ -4,6 +4,7 @@
   position: fixed;
   overflow: auto;
   margin-bottom: 0;
+  background-color: #fcfcfc;
 
   .fa-chevron-right {
     color: #666;
@@ -15,6 +16,7 @@
     &>a {
       width: 100%;
       float: left;
+      background-color: #fff;
 
       &.project {
         &.loading {
