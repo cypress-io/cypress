@@ -2,6 +2,9 @@ $Cypress.Runner = do ($Cypress, _) ->
 
   defaultGrep = /.*/
 
+  RUNNABLE_PROPS       = "id title root hookName err duration state failedFromHook timedOut alreadyEmittedMocha".split(" ")
+  RUNNABLE_COLLECTIONS = "routes agents commands"
+
   # ## initial payload
   # {
   #   suites: [
@@ -24,19 +27,18 @@ $Cypress.Runner = do ($Cypress, _) ->
   # ## resetting state (get back from server)
   # {
   #   scrollTop: 100
-  #   tests: [
-  #     {id: "r2", title: "foo", suiteId: "r1", state: "passed", logs: {
-  #       routes: [
+  #   tests: {
+  #     r2: {id: "r2", title: "foo", suiteId: "r1", state: "passed", err: "", routes: [
   #         {}, {}
   #       ]
-  #       spies: [
+  #       agents: [
   #       ]
   #       commands: [
   #         {}, {}, {}
   #       ]
   #     }}
-
-  #     {id: "r3", title: "bar", suiteId: "r1", state: "failed", logs: {
+  #
+  #     r3: {id: "r3", title: "bar", suiteId: "r1", state: "failed", logs: {
   #       routes: [
   #         {}, {}
   #       ]
@@ -76,6 +78,9 @@ $Cypress.Runner = do ($Cypress, _) ->
   fire = (event, test, options = {}) ->
     test._fired ?= {}
     test._fired[event] = true
+
+    ## dont fire anything again if we are skipped
+    return if test._SKIPPED
 
     if options.multiple
       [].concat(@Cypress.invoke(event, @wrap(test), test))
@@ -134,6 +139,7 @@ $Cypress.Runner = do ($Cypress, _) ->
       @id = 0
 
       ## hold onto the runnables for faster lookup later
+      @testIds = {}
       @tests = []
       @runnables = []
       @runnableIds = {}
@@ -301,11 +307,29 @@ $Cypress.Runner = do ($Cypress, _) ->
 
       runnable.matchesGrep
 
+    getTestsState: ->
+      id    = @test?.id
+      tests = {}
+
+      ## bail if we dont have a current test
+      return {} if not id
+
+      ## search through all of the tests
+      ## until we find the current test
+      ## and break then
+      for test in @tests
+        if test.id is id
+          break
+        else
+          tests[test.id] = @wrapAll(test)
+
+      return tests
+
     getId: ->
       ## increment the id counter
       "r" + (@id += 1)
 
-    normalizeAll: (initialState, grep) ->
+    normalizeAll: (initialTests = {}, grep) ->
       hasTests = false
 
       ## only loop until we find the first test
@@ -315,23 +339,28 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## if we dont have any tests then bail
       return if not hasTests
 
-      ## TODO: remove the date perf checking here
-      d = new Date
-
       tests         = {}
       grep         ?= @grep()
       grepIsDefault = _.isEqual(grep, defaultGrep)
 
-      obj = @normalize(@runner.suite, tests, grep, grepIsDefault)
+      obj = @normalize(@runner.suite, tests, initialTests, grep, grepIsDefault)
 
-      @tests = _.values(tests)
-
-      ## TODO: remove console.log here
-      console.log "FINISHED PROCESSING NORMALIZED RUNNABLES", new Date - d
+      @testIds = tests
+      @tests   = _.values(tests)
 
       return obj
 
-    normalize: (runnable, tests, grep, grepIsDefault) ->
+    skipToTest: (id) ->
+      for test in @tests
+        if test.id isnt id
+          test._SKIPPED = true
+          test.pending = true
+          ## delete the fn?
+        else
+          ## bail so we can stop now
+          return
+
+    normalize: (runnable, tests, initialTests, grep, grepIsDefault) ->
 
       normalize = (runnable) =>
         runnable.id = @getId()
@@ -342,13 +371,13 @@ $Cypress.Runner = do ($Cypress, _) ->
         @runnableIds[runnable.id] = obj
         @runnables.push(runnable)
 
-        obj = {id: runnable.id, title: runnable.title}
+        ## if this runnable is in our initial state
+        ## use its props else get them from the runnable
+        item = initialTests[runnable.id] ? runnable
 
-        ## only add this property if we absolutely have to
-        if r = runnable.root
-          obj.root = r
-
-        return obj
+        ## reduce this runnable down to its props
+        ## and collections
+        return @wrapAll(item)
 
       push = (test) =>
         tests[test.id] ?= test
@@ -366,7 +395,7 @@ $Cypress.Runner = do ($Cypress, _) ->
         _.each {tests: runnable.tests, suites: runnable.suites}, (runnables, key) =>
           if runnable[key]
             obj[key] = _.map runnables, (runnable) =>
-              @normalize(runnable, tests, grep, grepIsDefault)
+              @normalize(runnable, tests, initialTests, grep, grepIsDefault)
       else
         ## iterate through all tests and only push them in
         ## if they match the current grep
@@ -387,19 +416,33 @@ $Cypress.Runner = do ($Cypress, _) ->
             @matchesGrep(test, grep)
 
           if any
-            memo.push(@normalize(suite, tests, grep, grepIsDefault))
+            memo.push(@normalize(suite, tests, initialTests, grep, grepIsDefault))
 
           memo
         , []
 
       return obj
 
+    reduceProps: (runnable, props) ->
+      _.reduce props, (memo, prop) ->
+        if _.has(runnable, prop)
+          memo[prop] = runnable[prop]
+        memo
+      , {}
+
+    wrapAll: (runnable) ->
+      _.extend(
+        {}
+        @reduceProps(runnable, RUNNABLE_PROPS)
+        @reduceProps(runnable, RUNNABLE_COLLECTIONS)
+      )
+
     wrap: (runnable) ->
       ## we need to optimize wrap by converting
       ## tests to an id-based object which prevents
       ## us from recursively iterating through every
       ## parent since we could just return the found test
-      _(runnable).pick "id", "title", "root", "hookName", "err", "duration", "state", "failedFromHook", "timedOut", "alreadyEmittedMocha"
+      @reduceProps(runnable, RUNNABLE_PROPS)
 
     restore: ->
       _.each [@runnables, @runner], (obj) =>
@@ -564,7 +607,8 @@ $Cypress.Runner = do ($Cypress, _) ->
       @firstTest suite, (test) -> true
 
     testInTests: (test) ->
-      test in @tests
+      ## do a faster constant time lookup
+      @testIds[test.id]
 
     getAllSiblingTests: (suite) ->
       tests = []

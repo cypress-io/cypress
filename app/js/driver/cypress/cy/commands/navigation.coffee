@@ -2,12 +2,10 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
   commandCausingLoading = /^(visit|reload)$/
 
-  title = null
-  fn    = null
+  id = null
 
-  Cypress.on "test:before:hooks", (test, runnable) ->
-    title = runnable.title
-    fn    = runnable.fn?.toString()
+  Cypress.on "test:before:run", (test) ->
+    id = test.id
 
   overrideRemoteLocationGetters = (cy, contentWindow) ->
     navigated = (attr, args) ->
@@ -333,7 +331,15 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             else
               ## tell our backend we're changing domains
               new Promise (resolve) ->
-                Cypress.trigger("domain:change", title, fn, resolve)
+                ## TODO: add in other things we want to preserve
+                ## state for like scrollTop
+                state = {
+                  currentId: id
+                  tests:     Cypress.getTestsState()
+                  scrollTop: null
+                }
+
+                Cypress.trigger("domain:change", state, resolve)
               .then =>
                 ## and now we must change the url to be the new
                 ## origin but include the test that we're currently on

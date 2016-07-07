@@ -17,8 +17,7 @@ logger        = require("./logger")
 launcher      = require("./launcher")
 automation    = require("./automation")
 
-runnableTitle = null
-runnableFn    = null
+existingState = null
 
 runnerEvents = [
   "reporter:restart:test:run"
@@ -305,6 +304,9 @@ class Socket
         options.onReloadBrowser(url, browser)
 
       socket.on "is:automation:connected", (data = {}, cb) =>
+        ## TODO: remove this hack
+        return cb(true)
+
         isConnected = =>
           automationRequest("is:automation:connected", data)
 
@@ -328,18 +330,17 @@ class Socket
         console.log "domain:set", url, options.onDomainSet.toString()
         cb(options.onDomainSet(url))
 
-      socket.on "domain:change", (t, f, cb) ->
-        runnableTitle = t
-        runnableFn    = f
+      socket.on "domain:change", (state, cb) ->
+        existingState = state
 
         cb()
 
-      socket.on "get:current:runnable", (cb) ->
-        if (t = runnableTitle) and (f = runnableFn)
-          runnableTitle = runnableFn = null
-          cb({title: t, fn: f})
+      socket.on "get:existing:run:state", (cb) ->
+        if (s = existingState)
+          existingState = null
+          cb(s)
         else
-          cb(false)
+          cb()
 
       socket.on "go:to:file", (p) ->
         launcher.launch("chrome", "http://localhost:2020/__#" + p, {
