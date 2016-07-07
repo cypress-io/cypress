@@ -75,7 +75,7 @@ class Specs extends Component {
     let spec = e.currentTarget.getAttribute('data-spec')
     let project = this.props.project
 
-    launchBrowser(project, spec, project.defaultBrowser.name)
+    launchBrowser(project, spec, project.chosenBrowser.name)
   }
 
   _empty () {
