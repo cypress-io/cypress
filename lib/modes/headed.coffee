@@ -50,7 +50,7 @@ module.exports = {
       backgroundColor: '#dfe2e4'
       width: 570
       height: 400
-      minWidth: 400
+      minWidth: 431
       minHeight: 400
       type: "INDEX"
       onBlur: ->
