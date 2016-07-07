@@ -80,7 +80,7 @@ class Config extends Component {
         >
           <span className={obj.from}>
             {this._getString(obj.value)}
-            {obj.value}
+            {`${obj.value}`}
             {this._getString(obj.value)}
           </span>
         </Tooltip>

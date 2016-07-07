@@ -44,6 +44,12 @@ describe "Config", ->
             .contains("5").should("have.class", "default").end()
             .contains(",").should("have.class", "comma")
 
+    it "displays 'true' values", ->
+      cy.get(".line").contains("true")
+
+    it "displays 'null' values", ->
+      cy.get(".line").contains("null")
+
     it "opens help link on click", ->
       cy
         .get(".fa-question-circle").click().then ->

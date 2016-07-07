@@ -92,7 +92,7 @@
     },
     "fileServerFolder": {
       "from": "default",
-      "value": ""
+      "value": null
     },
     "fixturesFolder": {
       "from": "default",
