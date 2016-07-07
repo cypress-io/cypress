@@ -53,7 +53,7 @@ class Login extends Component {
     e.preventDefault()
     const alreadyOpen = (err) => err && err.alreadyOpen
 
-    App.ipc("window:open", {
+    return App.ipc("window:open", {
       position: "center",
       focus: true,
       width: 1000,
