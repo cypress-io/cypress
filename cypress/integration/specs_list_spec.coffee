@@ -97,7 +97,7 @@ describe "Specs List", ->
 
             expect(lastCallArgs[0]).to.eq "launch:browser"
             expect(lastCallArgs[1].browser).to.eq "chrome"
-            expect(lastCallArgs[1].spec).to.eq "_all"
+            expect(lastCallArgs[1].spec).to.eq "__all"
 
     it "lists main folders of specs", ->
       cy.contains(".folder", "integration")

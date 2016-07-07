@@ -79,7 +79,7 @@ class Specs extends Component {
 
     let project = this.props.project
 
-    launchBrowser(project, '_all', project.chosenBrowser.name)
+    launchBrowser(project, '__all', project.chosenBrowser.name)
   }
 
   _selectSpec (e) {
