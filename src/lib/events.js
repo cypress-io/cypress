@@ -1,13 +1,17 @@
 import { EventEmitter } from 'events'
 import { action } from 'mobx'
 
-import runnablesStore from '../runnables/runnables-store'
-import statsStore from '../header/stats-store'
-
 const localBus = new EventEmitter()
 
 export default {
+  init (runnablesStore, statsStore) {
+    this.runnablesStore = runnablesStore
+    this.statsStore = statsStore
+  },
+
   listen (runner) {
+    const { runnablesStore, statsStore } = this
+
     runner.on('runnables:ready', action('runnables:ready', (rootRunnable) => {
       runnablesStore.setRunnables(rootRunnable)
     }))

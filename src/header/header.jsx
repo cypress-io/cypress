@@ -1,15 +1,13 @@
 import { observer } from 'mobx-react'
 import React from 'react'
 
-import statsStore from './stats-store'
-
 import Controls from './controls'
 import Stats from './stats'
 
-const Header = observer(() => (
+const Header = observer((props) => (
   <header>
-    <Stats stats={statsStore} />
-    <Controls stats={statsStore} />
+    <Stats stats={props.statsStore} />
+    <Controls stats={props.statsStore} />
   </header>
 ))
 
