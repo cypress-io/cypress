@@ -5,17 +5,27 @@
     top:  40px;
   }
 
-  .navbar-nav>li>a {
-    font-size: 13px;
-    color: #444;
+  .navbar-nav {
+    &>.open {
+      &>a, &>a:hover, &>a:focus {
+        background-color: #cdd0d4;
+        color: #262626;
+      }
+    }
 
-    &.active {
-      background-color: #cdd0d4;
-      color: #333;
+    &>li>a {
+      font-size: 13px;
+      color: #444;
+
+      &.active, &:hover, &:focus {
+        background-color: #cdd0d4;
+        color: #262626;
+      }
     }
   }
 
 }
+
 
 .navbar-right {
   margin-right: 0;
