@@ -39,7 +39,7 @@ const launchBrowser = (project, spec, browser, url) => {
   project.setChosenBrowserByName(browser)
   project.browserOpening()
 
-  App.ipc('launch:browser', { browser, url }, (err, data = {}) => {
+  App.ipc('launch:browser', { browser, url, spec }, (err, data = {}) => {
     if (data.browserOpened) {
       project.browserOpened()
     }
@@ -96,4 +96,5 @@ export {
   openProject,
   closeProject,
   addProject,
+  launchBrowser,
 }

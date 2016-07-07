@@ -1,4 +1,4 @@
-describe "Update Banner", ->
+describe.skip "Update Banner", ->
   beforeEach ->
     cy
       .visit("/#/projects")
