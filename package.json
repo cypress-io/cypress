@@ -23,15 +23,12 @@
   "homepage": "https://github.com/cypress-io/cypress-core-desktop-gui",
   "dependencies": {
     "bluebird": "^3.4.0",
-    "bootstrap": "^3.3.6",
     "classnames": "^2.2.5",
-    "coffee-script": "^1.10.0",
     "history": "^2.0.0",
     "lodash": "^4.13.1",
     "md5": "^2.1.0",
     "mobx": "^2.2.2",
     "mobx-react": "^3.3.1",
-    "path": "^0.12.7",
     "rc-tooltip": "^3.3.5",
     "react": "^15.1.0",
     "react-bootstrap-modal": "^2.1.0",
@@ -45,7 +42,6 @@
     "bower": "^1.7.2",
     "eslint": "^2.12.0",
     "eslint-plugin-react": "^5.2.2",
-    "lodash": "^4.0.0",
     "mobx-react-devtools": "^4.2.0",
     "zunder": "^3.3.1"
   }
