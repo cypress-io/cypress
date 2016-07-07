@@ -5,7 +5,7 @@ import { observer } from 'mobx-react'
 import { ContextMenu, MenuItem } from "react-contextmenu"
 
 import Project from './projects-list-item/'
-
+import { closeProject } from './projects-api'
 import projectsStore from './projects-store'
 
 class MyContextMenu extends Component {
@@ -29,6 +29,11 @@ class MyContextMenu extends Component {
 
 @observer
 export default class Projects extends Component {
+  constructor (props) {
+    super(props)
+    closeProject()
+  }
+
   render () {
     if (!projectsStore.projects.length) return this._empty()
 
