@@ -87,13 +87,15 @@ export default class Nav extends Component {
     }
   }
 
-  _openDocs = () => (
-    App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running/#section-adding-projects')
-  )
+  _openDocs = (e) => {
+    e.preventDefault()
+    App.ipc('external:open', 'https://on.cypress.io')
+  }
 
-  _openChat = () => (
-    App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running/#section-adding-projects')
-  )
+  _openChat = (e) => {
+    e.preventDefault()
+    App.ipc('external:open', 'https://gitter.im/cypress-io/cypress')
+  }
 
   _logout = (e) => {
     e.preventDefault()
