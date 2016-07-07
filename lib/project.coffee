@@ -21,6 +21,8 @@ screenshots = require("./screenshots")
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
 
+multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
+
 class Project extends EE
   constructor: (projectRoot) ->
     if not (@ instanceof Project)
@@ -249,7 +251,10 @@ class Project extends EE
     "/" + path.join("integration", path.relative(integrationFolder, pathToSpec))
 
   getUrlBySpec: (clientUrl, specUrl) ->
-    [clientUrl, "#/tests", specUrl].join("")
+    replacer = (match, p1) ->
+      match.replace("//", "/")
+
+    [clientUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
     Promise.join(

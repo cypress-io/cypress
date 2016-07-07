@@ -49,9 +49,12 @@ module.exports = {
 
   opened: -> openProject
 
-  launch: (browser, url, options = {}) ->
+  launch: (browser, url, spec, options = {}) ->
     openProject.getConfig()
     .then (cfg) ->
+      if spec
+        url = openProject.getUrlBySpec(cfg.clientUrl, spec)
+
       url            ?= cfg.clientUrl
       openBrowser     = browser
       openBrowserOpts = options
