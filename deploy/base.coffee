@@ -7,7 +7,6 @@ cp           = require("child_process")
 path         = require("path")
 gulp         = require("gulp")
 glob         = require("glob")
-pkgr         = require("electron-packager")
 chalk        = require("chalk")
 expect       = require("chai").expect
 Promise      = require("bluebird")
@@ -22,7 +21,7 @@ cache        = require("../lib/cache")
 appData      = require("../lib/util/app_data")
 Fixtures     = require("../spec/server/helpers/fixtures")
 
-pkgr     = Promise.promisify(pkgr)
+# pkgr     = Promise.promisify(pkgr)
 fs       = Promise.promisifyAll(fs)
 zipName  = "cypress.zip"
 
