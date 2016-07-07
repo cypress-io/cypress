@@ -35,7 +35,7 @@ const addProject = () => {
   })
 }
 
-const launchBrowser = (project, browser, url) => {
+const launchBrowser = (project, spec, browser, url) => {
   project.setChosenBrowserByName(browser)
   project.browserOpening()
 

@@ -4,6 +4,7 @@ import { observer } from 'mobx-react'
 
 import App from '../lib/app'
 import { getSpecs } from './specs-api'
+import { launchBrowser } from '../projects/projects-api'
 import specsCollection from './specs-collection'
 
 @observer
@@ -72,18 +73,9 @@ class Specs extends Component {
     e.preventDefault()
 
     let spec = e.currentTarget.getAttribute('data-spec')
+    let project = this.props.project
 
-    App.ipc('launch:browser', {
-      browser: this.props.project.defaultBrowser.name,
-      specPath: spec,
-    }, function (err, data) {
-      if (data.browserOpened) {
-        this.props.project.browserOpened()
-      } else if (data.browserClosed) {
-        App.ipc.off("launch:browser")
-        this.props.project.browserClosed()
-      }
-    })
+    launchBrowser(project, spec, project.defaultBrowser.name)
   }
 
   _empty () {
