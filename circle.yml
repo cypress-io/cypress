@@ -9,7 +9,7 @@ dependencies:
 
 test:
   pre:
-    - npm run server:
+    - npm start:
         background: true
   override:
     - npm run build
