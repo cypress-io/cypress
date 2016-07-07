@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import { observable, action } from 'mobx'
-import md5 from 'md5'
 
 import Spec from './spec-model'
 
