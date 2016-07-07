@@ -1,6 +1,7 @@
 _         = require("lodash")
 Promise   = require("bluebird")
 extension = require("@cypress/core-extension")
+files     = require("../../controllers/files")
 config    = require("../../config")
 errors    = require("../../errors")
 cache     = require("../../cache")
@@ -101,6 +102,11 @@ module.exports = {
             .catch(reject)
 
           openProject.on "settings:changed", reboot
+
+  getSpecs: ->
+    openProject.getConfig()
+    .then (cfg) ->
+      files.getTestFiles(cfg)
 
   close: (options = {}) ->
     _.defaults options, {

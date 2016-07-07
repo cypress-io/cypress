@@ -175,6 +175,11 @@ handleEvent = (options, event, id, type, arg) ->
       .then(send)
       .catch(sendErr)
 
+    when "get:specs"
+      project.getSpecs()
+      .then(send)
+      .catch(sendErr)
+
     else
       throw new Error("No ipc event registered for: '#{type}'")
 
