@@ -6,6 +6,7 @@ import App from '../lib/app'
 import { getSpecs } from './specs-api'
 import { launchBrowser } from '../projects/projects-api'
 import specsCollection from './specs-collection'
+import Loader from 'react-loader'
 
 @observer
 class Specs extends Component {
@@ -16,7 +17,7 @@ class Specs extends Component {
   }
 
   render () {
-    if (!specsCollection.isLoaded) return null
+    if (specsCollection.isLoading) return <Loader color="#888" scale={0.5}/>
 
     if (!specsCollection.specs.length) return this._empty()
 

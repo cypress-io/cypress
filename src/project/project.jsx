@@ -8,6 +8,7 @@ import projectsStore from '../projects/projects-store'
 import ProjectNav from '../project-nav/project-nav'
 import { closeProject, openProject } from '../projects/projects-api'
 import OnBoarding from "./onboarding"
+import Loader from "react-loader"
 
 const NoBrowsers = () => (
   <div className='full-alert alert alert-danger error'>
@@ -69,7 +70,7 @@ class Project extends Component {
   }
 
   render () {
-    if (this.project.isLoading) return null
+    if (this.project.isLoading) return <Loader color="#888" scale={0.5}/>
 
     if (!(this.project.error === undefined)) return this._error()
 
