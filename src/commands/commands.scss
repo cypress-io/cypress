@@ -39,18 +39,6 @@
     }
   }
 
-  .command-console-message {
-    position: absolute;
-    height: 20px;
-    margin-top: -10px;
-    background-color: #555;
-    color: #fff;
-    text-align: center;
-    padding: 2px 5px;
-    border-radius: 5px;
-    display: none;
-  }
-
   .commands-container {
     font-family: $monospace;
 
@@ -84,6 +72,11 @@
         background-color: #FFB61C !important;
       }
     }
+  }
+
+  .command-scaled {
+    font-size: 85%;
+    line-height: 14px;
   }
 
   .command-is-cloned,

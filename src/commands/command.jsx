@@ -16,7 +16,8 @@ const md = new Markdown()
 // TODO: move to command model?
 const displayName = (model) => model.displayName || model.name
 const isParent = (model) => model.type === 'parent'
-const formattedMessage = (message) => message ? md.renderInline(_.truncate(message, { length: 100 })) : ''
+const truncatedMessage = (message) => _.truncate(message, { length: 100 })
+const formattedMessage = (message) => message ? md.renderInline(message) : ''
 const visibleMessage = (model) => {
   if (model.visible) return ''
 
@@ -38,7 +39,7 @@ const Aliases = observer(({ model }) => (
 const Message = observer(({ model }) => (
   <span>
     <i className={`fa fa-circle ${model.indicator}`}></i>
-    <span dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || model.message) }} />
+    <span dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || truncatedMessage(model.message)) }} />
   </span>
 ))
 
@@ -63,6 +64,7 @@ class Command extends Component {
             'command-has-no-elements': !model.numElements,
             'command-has-multiple-elements': model.numElements > 1,
             'command-with-indicator': !!model.indicator,
+            'command-scaled': model.displayMessage && model.displayMessage.length > 100,
           }
         )}
       >
