@@ -22,6 +22,10 @@ class Specs extends Component {
 
     return (
       <div id='tests-list-page'>
+        <a onClick={this._runAllSpecs.bind(this)} className="all-tests btn btn-primary btn-xs">
+          <i className="fa fa-play"></i>{' '}
+          Run All Tests
+        </a>
         <ul className='outer-files-container list-as-table'>
           { _.map(specsCollection.specs, (spec) => (
             this.specItem(spec)
@@ -67,6 +71,14 @@ class Specs extends Component {
         </li>
       )
     }
+  }
+
+  _runAllSpecs (e) {
+    e.preventDefault()
+
+    let project = this.props.project
+
+    launchBrowser(project, '_all', project.chosenBrowser.name)
   }
 
   _selectSpec (e) {

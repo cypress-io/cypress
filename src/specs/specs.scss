@@ -6,6 +6,13 @@
   margin-bottom: 0;
   width: 100%;
 
+  .all-tests {
+    position: absolute;
+    top: 4px;
+    right: 15px;
+
+  }
+
   table tr:first-child td {
     border-top: 0;
   }

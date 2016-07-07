@@ -85,6 +85,20 @@ describe "Specs List", ->
         .fixture("specs").then (@specs) ->
           @ipc.handle("get:specs", null, @specs)
 
+    context "run all specs", ->
+      it "displays run all specs button", ->
+        cy.contains(".btn", "Run All Tests")
+
+      it "triggers launch:browser on click of button", ->
+        cy
+          .contains(".btn", "Run All Tests").click().then ->
+            ln = @App.ipc.args.length
+            lastCallArgs = @App.ipc.args[ln-1]
+
+            expect(lastCallArgs[0]).to.eq "launch:browser"
+            expect(lastCallArgs[1].browser).to.eq "chrome"
+            expect(lastCallArgs[1].spec).to.eq "_all"
+
     it "lists main folders of specs", ->
       cy.contains(".folder", "integration")
       cy.contains(".folder", "unit")
@@ -98,7 +112,12 @@ describe "Specs List", ->
     it "triggers launch:browser on click of file", ->
       cy
         .get(".file a").contains("app_spec.coffee").click().then ->
-          expect(@App.ipc).to.be.calledWith("launch:browser")
+          ln = @App.ipc.args.length
+          lastCallArgs = @App.ipc.args[ln-1]
+
+          expect(lastCallArgs[0]).to.eq "launch:browser"
+          expect(lastCallArgs[1].browser).to.eq "chrome"
+          expect(lastCallArgs[1].spec).to.eq "integration/app_spec.coffee"
 
   describe "server error", ->
     beforeEach ->
