@@ -64,7 +64,22 @@ export default {
     channel.emit('watch:test:file', specSrc)
 
     driver.on('initialized', ({ runner }) => {
-      reporterBus.emit('runnables:ready', runner.normalizeAll())
+      // get the current runnable in case we reran mid-test due to a visit
+      // to a new domain
+      channel.emit('get:existing:run:state', (state = {}) => {
+        reporterBus.emit('runnables:ready', runner.normalizeAll(state.tests))
+
+        if (state.currentId) {
+          // if we have a currentId it means
+          // we need to tell the runner to skip
+          // ahead to that tests
+          runner.skipToTest(state.currentId)
+        }
+
+
+        driver.run(() => {})
+      })
+
     })
 
     driver.on('log', (log) => {
@@ -183,20 +198,6 @@ export default {
 
   run (specWindow, $autIframe) {
     driver.initialize(specWindow, $autIframe)
-
-    // get the current runnable in case we reran mid-test due to a visit
-    // to a new domain
-    channel.emit('get:current:runnable', (runnable) => {
-      if (runnable) {
-        // TODO: need this method implemented in driver
-        // driver.skipToRunnable(runnable)
-
-        // tell reporter to clear out logs for current runnable
-        reporterBus.emit('reporter:reset:current:runnable:logs')
-      }
-
-      driver.run(() => {})
-    })
   },
 
   stop () {
