@@ -131,6 +131,8 @@ $Cypress.Runner = do ($Cypress, _) ->
       runnable.callback(err)
 
     initialize: ->
+      @id = 0
+
       ## hold onto the runnables for faster lookup later
       @tests = []
       @runnables = []
@@ -299,7 +301,20 @@ $Cypress.Runner = do ($Cypress, _) ->
 
       runnable.matchesGrep
 
-    normalizeAll: (grep) ->
+    getId: ->
+      ## increment the id counter
+      "r" + (@id += 1)
+
+    normalizeAll: (initialState, grep) ->
+      hasTests = false
+
+      ## only loop until we find the first test
+      @firstTest @runner.suite, (test) ->
+        hasTests = true
+
+      ## if we dont have any tests then bail
+      return if not hasTests
+
       ## TODO: remove the date perf checking here
       d = new Date
 
@@ -319,7 +334,7 @@ $Cypress.Runner = do ($Cypress, _) ->
     normalize: (runnable, tests, grep, grepIsDefault) ->
 
       normalize = (runnable) =>
-        runnable.id = _.uniqueId("r")
+        runnable.id = @getId()
 
         ## tests have a runnable of 'test' whereas suites do not have a runnable property
         runnable.type ?= "suite"
@@ -332,10 +347,6 @@ $Cypress.Runner = do ($Cypress, _) ->
         ## only add this property if we absolutely have to
         if r = runnable.root
           obj.root = r
-
-        ## only add this property if we absolutely have to
-        if p = runnable.pending
-          obj.state = "pending"
 
         return obj
 
