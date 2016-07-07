@@ -5,7 +5,8 @@ import Promise from 'bluebird'
 
 const getProjects = () => {
   projectsStore.loading(true)
-  App.ipc('get:project:paths')
+
+  return App.ipc('get:project:paths')
   .then(action('got:projects:paths', (paths) => {
     projectsStore.setProjects(paths)
   }))
@@ -25,6 +26,7 @@ const addProject = () => {
 
     return Promise.all([
       App.ipc('add:project', path),
+      Promise.delay(750)
     ])
     .then(() => {
       return project.loading(false)
@@ -57,8 +59,19 @@ const closeProject = () => {
 
 const openProject = (project) => {
   project.loading(true)
-  return App.ipc('open:project', project.path)
-  .then(action('project:opened', (config) => {
+
+  // delay opening the project so
+  // we give the UI some time to render
+  // and not block due to sync require's
+  // in the main process
+  return Promise.delay(100)
+  .then(() => {
+    return Promise.all([
+      App.ipc('open:project', project.path),
+      Promise.delay(500)
+    ])
+  })
+  .spread(action('project:opened', (config) => {
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
