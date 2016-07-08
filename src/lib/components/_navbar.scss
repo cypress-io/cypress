@@ -1,5 +1,5 @@
 .navbar-default {
-  background-color:#dfe2e4;
+  background-color:#ececec;
   box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.20);
   border-color: #c8c8c8;
 
@@ -10,7 +10,7 @@
   .navbar-nav {
     &>.open {
       &>a, &>a:hover, &>a:focus {
-        background-color: #cdd0d4;
+        background-color: #dedede;
         color: #262626;
       }
     }
@@ -22,12 +22,12 @@
       line-height: 29px;
 
       &.active {
-        background-color: #cdd0d4;
+        background-color: #dedede;
         color: #262626;
       }
 
       &:hover, &:focus {
-        background-color: #eceff1;
+        background-color: #f3f3f3;
       }
     }
   }

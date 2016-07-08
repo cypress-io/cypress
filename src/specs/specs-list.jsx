@@ -42,7 +42,7 @@ class Specs extends Component {
         <li key={spec.id} className='folder'>
           <div>
             <div>
-              <i className='fa fa-folder-o'></i>
+              <i className='fa fa-folder-open-o'></i>
               { spec.name }{' '}
             </div>
             <div>

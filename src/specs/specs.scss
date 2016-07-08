@@ -44,19 +44,18 @@
     color: #7c7f84;
 
     i {
-      // color: #476fc9;
       margin-right: 5px;
     }
   }
 
   .folder {
-    font-weight: bold;
+    font-weight: 500;
     font-size: 14px;
-    color: #515152;
+    color: #636363;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
     i {
-      font-size: 14px;
+      font-size: 13px;
     }
 
     &>div>div {
@@ -74,7 +73,8 @@
 
 
     i {
-      font-size: 12px;
+      font-size: 13px;
+      margin-right: 6px;
     }
 
     &:hover {
