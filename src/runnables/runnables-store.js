@@ -54,6 +54,11 @@ class RunnablesStore {
   _createTest (props, level) {
     const test = new Test(props, level)
     this._tests[test.id] = test
+
+    _.each(props.agents, this.addLog.bind(this))
+    _.each(props.commands, this.addLog.bind(this))
+    _.each(props.routes, this.addLog.bind(this))
+
     return test
   }
 
