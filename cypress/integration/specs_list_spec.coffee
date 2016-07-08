@@ -31,7 +31,7 @@ describe "Specs List", ->
       .fixture("browsers").then (@browsers) ->
         @config.browsers = @browsers
         @ipc.handle("open:project", null, @config)
-      .then ->
+      .get(".navbar-default").then ->
         expect(@App.ipc).to.be.calledWith("get:specs")
 
   describe "no specs", ->

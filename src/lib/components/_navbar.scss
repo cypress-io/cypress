@@ -1,5 +1,7 @@
 .navbar-default {
   background-color:#dfe2e4;
+  box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.20);
+  border-color: #c8c8c8;
 
   &.navbar-fixed-top {
     top:  40px;
@@ -16,10 +18,16 @@
     &>li>a {
       font-size: 13px;
       color: #444;
+      padding: 1px 20px 0 20px;
+      line-height: 29px;
 
-      &.active, &:hover, &:focus {
+      &.active {
         background-color: #cdd0d4;
         color: #262626;
+      }
+
+      &:hover, &:focus {
+        background-color: #eceff1;
       }
     }
   }
@@ -49,6 +57,7 @@
 }
 
 .navbar-inverse {
+  box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.20);
   background-color: #252831;
   min-height: 40px;
   z-index: 1040;
@@ -58,8 +67,17 @@
     line-height: 30px;
   }
 
-  .nav.navbar-nav>li>a {
-    line-height: 30px;
-    font-size: 13px;
+  .nav.navbar-nav {
+    &>.open {
+      &>a, &>a:hover, &>a:focus {
+        background-color: #111;
+        color: #fff;
+      }
+    }
+
+    &>li>a {
+      line-height: 30px;
+      font-size: 13px;
+    }
   }
 }

@@ -3,10 +3,8 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import state from '../lib/state'
 import App from '../lib/app'
-import Tooltip from 'rc-tooltip'
 import { Link } from 'react-router'
 
-import projectsStore from '../projects/projects-store'
 import { closeProject, addProject } from '../projects/projects-api'
 
 @observer
@@ -66,23 +64,11 @@ export default class Nav extends Component {
         </Link>
       )
     } else {
-      const hasProjects = !!projectsStore.projects.length
-      const tooltip = hasProjects ? 'Add Project' : 'Click here'
-
       return (
-        <Tooltip
-          placement='bottom'
-          visible={!hasProjects}
-          overlay={tooltip}
-          align={{
-            points: ['bc', 'tc'], // align bottom center point of sourceNode with top center point of targetNode
-          }}
-          >
-          <a onClick={this._addProject} href='#'>
-            <i className='fa fa-plus'></i>{' '}
-            Add Project
-          </a>
-        </Tooltip>
+        <a onClick={this._addProject} href='#'>
+          <i className='fa fa-plus'></i>{' '}
+          Add Project
+        </a>
       )
     }
   }

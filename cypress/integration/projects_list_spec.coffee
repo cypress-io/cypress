@@ -20,9 +20,6 @@ describe "Projects List", ->
     it "does not display projects list", ->
       cy.get("projects-list").should("not.exist")
 
-    it "opens tooltip on add button", ->
-      cy.get(".rc-tooltip").contains("Click here")
-
     it "displays empty view when no projects", ->
       cy.get(".empty").contains("Add your first project")
 
