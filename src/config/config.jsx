@@ -20,33 +20,6 @@ class Config extends Component {
       <div id='config'>
         <div className='config-wrapper'>
           <h5>
-            Legend:{' '}
-          </h5>
-            <table className='table'>
-              <tbody>
-                <tr className='config-keys'>
-                  <td><span className='default'>default</span></td>
-                  <td>default values</td>
-                </tr>
-                <tr className='config-keys'>
-                  <td><span className='config'>config</span></td>
-                  <td>set from cypress.json</td>
-                </tr>
-                <tr className='config-keys'>
-                  <td><span className='envFile'>envFile</span></td>
-                  <td>set from cypress.env.json</td>
-                </tr>
-                <tr className='config-keys'>
-                  <td><span className='env'>env</span></td>
-                  <td>set from environment variables</td>
-                </tr>
-                <tr className='config-keys'>
-                  <td><span className='cli'>CLI</span></td>
-                  <td>set from CLI arguments</td>
-                </tr>
-              </tbody>
-            </table>
-          <h5>
             Resolved Configuration:{' '}
             <Tooltip
               overlay={'Click here to read about project config'}
@@ -56,7 +29,7 @@ class Config extends Component {
               </a>
             </Tooltip>
           </h5>
-          <pre className='config-vars'>
+          <div className='config-vars'>
             { `{` }
             { this._display(config, { comma: true }) }
             <span className='envVars'>
@@ -64,11 +37,39 @@ class Config extends Component {
               <span className='colon'>:</span>{' '}
               { `{` }
               { this._display(envVars) }
-              { `  }\n` }
             </span>
-            { `}` }
-          </pre>
-
+            <span className='line'>{`}`}</span>
+            <br />
+            { `\n}` }
+          </div>
+          <hr />
+          <h5>
+            Legend
+          </h5>
+          <table className='table'>
+            <tbody>
+              <tr className='config-keys'>
+                <td><span className='default'>default</span></td>
+                <td>default values</td>
+              </tr>
+              <tr className='config-keys'>
+                <td><span className='config'>config</span></td>
+                <td>set from cypress.json</td>
+              </tr>
+              <tr className='config-keys'>
+                <td><span className='envFile'>envFile</span></td>
+                <td>set from cypress.env.json</td>
+              </tr>
+              <tr className='config-keys'>
+                <td><span className='env'>env</span></td>
+                <td>set from environment variables</td>
+              </tr>
+              <tr className='config-keys'>
+                <td><span className='cli'>CLI</span></td>
+                <td>set from CLI arguments</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     )

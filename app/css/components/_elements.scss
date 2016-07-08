@@ -2,6 +2,7 @@ html {
   position: relative;
   height: 100%;
   box-shadow: 5px 2px 2px #333;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   &.updates, &.debug, &.about, &.preferences {
     background-color: #ECECEC;
@@ -15,6 +16,7 @@ html {
   &.app {
 
     body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
       margin-bottom: $footer-height;
       padding-top: 12px;
       border-radius: 5px;

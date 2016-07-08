@@ -61,7 +61,7 @@ class Specs extends Component {
           <a href='#' onClick={this._selectSpec.bind(this)} data-spec={spec.id}>
             <div>
               <div>
-                <i className='fa fa-file-o'></i>
+                <i className='fa fa-file-code-o'></i>
                 { spec.name }
               </div>
             </div>

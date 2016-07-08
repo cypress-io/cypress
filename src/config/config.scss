@@ -6,6 +6,14 @@
   margin-bottom: 0;
   width: 100%;
 
+  h5 {
+    margin-top: 20px;
+  }
+
+  .envBracket {
+    padding-left: 30px;
+  }
+
   .config-keys {
 
     margin-bottom: 0;
@@ -13,12 +21,13 @@
 
     &>td {
       padding: 2px 8px;
-      font-size: 12.5px;
+      font-size: 13px;
     }
   }
 
   .config-vars {
-    font-size: 12px;
+    font-size: 13px;
+    font-family: Consolas, Monaco, 'Andale Mono', monospace;
 
     .envFile:hover, .env:hover, .config:hover, .cli:hover, .default:hover {
       border-bottom: 1px dotted #777;
@@ -50,8 +59,9 @@
     }
   }
 
-  .envFile, .env, .config, .cli {
+  .envFile, .env, .config, .cli, .default {
     font-family: Consolas, Monaco, 'Andale Mono', monospace;
+
     padding: 2px;
   }
 
