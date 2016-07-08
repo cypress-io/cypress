@@ -105,16 +105,16 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
       ## if end was passed in
       ## go ahead and end
-      @end() if @get("end")
+      @end({silent: true}) if @get("end")
 
       if err = @get("error")
-        @error(err)
+        @error(err, {silent: true})
 
     get: (attr) ->
       @attributes[attr]
 
     unset: (key) ->
-      @set key, undefined
+      @set(key, undefined)
 
     invoke: (fn) ->
       ## ensure this is a callable function
@@ -135,20 +135,23 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
     toJSON: ->
       _(@attributes)
       .chain()
+      .omit("error")
       .omit(_.isFunction)
-      .omit("snapshots")
-      .extend({ error: @serializeError() })
+      .extend({ err: @serializeError() })
       .extend({ url: (@get("url") or "").toString() })
       .extend({ consoleProps: @invoke("consoleProps")  })
       .extend({ renderProps:  @invoke("renderProps") })
       .value()
 
-    set: (key, val) ->
+    set: (key, val, options) ->
       if _.isString(key)
         obj = {}
         obj[key] = val
       else
         obj = key
+        options = val
+
+      options ?= {}
 
       ## convert onConsole to consoleProps
       ## for backwards compatibility
@@ -175,7 +178,8 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
       ## TODO: only send the changed delta
       ## not the full set of attributes
-      @trigger("state:changed", @toJSON())
+      if options and options.silent isnt true
+        @Cypress.trigger("log:state:changed", @toJSON(), @)
 
       return @
 
@@ -204,7 +208,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## insert at index 'at' or whatever is the next position
       snapshots[options.at or snapshots.length] = obj
 
-      @set "snapshots", snapshots
+      @set("snapshots", snapshots)
 
       if next = options.next
         fn = @snapshot
@@ -217,18 +221,19 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
       return @
 
-    error: (err) ->
-      @set
+    error: (err, options) ->
+      @set({
         error: err
         state: "failed"
+      }, options)
 
       return @
 
-    end: ->
+    end: (options) ->
       @set({
         end: true
         state: "passed"
-      })
+      }, options)
 
       return @
 
@@ -248,7 +253,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       if _.isElement($el)
         ## wrap the element in jquery
         ## if its just a plain element
-        return @set("$el", $($el))
+        return @set("$el", $($el), {silent: true})
 
       ## make sure all $el elements are visible!
       obj = {
@@ -257,7 +262,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         visible:       $el.length is $el.filter(":visible").length
       }
 
-      @set obj
+      @set(obj, {silent: true})
 
     merge: (log) ->
       ## merges another logs attributes into

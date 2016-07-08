@@ -41,7 +41,7 @@ describe "$Cypress.Log API", ->
       expect(@log.get("error")).to.eq err
 
     it "#error triggers state:changed", (done) ->
-      @log.on "state:changed", (attrs) ->
+      @Cypress.on "log:state:changed", (attrs) ->
         expect(attrs.state).to.eq "failed"
         done()
 
@@ -52,7 +52,7 @@ describe "$Cypress.Log API", ->
       expect(@log.get("state")).to.eq "passed"
 
     it "#end triggers state:changed", (done) ->
-      @log.on "state:changed", (attrs) ->
+      @Cypress.on "log:state:changed", (attrs) ->
         expect(attrs.state).to.eq "passed"
         done()
 
@@ -77,7 +77,7 @@ describe "$Cypress.Log API", ->
           foo: "bar"
           url: ""
           state: "pending"
-          error: null
+          err: null
           consoleProps: { Command: undefined, a: "b" }
           renderProps: { c: "d" }
         })
@@ -92,7 +92,7 @@ describe "$Cypress.Log API", ->
           foo: "bar"
           url: ""
           state: "pending"
-          error: null
+          err: null
           consoleProps: {  }
           renderProps: {  }
         })
@@ -111,7 +111,7 @@ describe "$Cypress.Log API", ->
           foo: "bar"
           url: ""
           state: "pending"
-          error: null
+          err: null
           consoleProps: { Command: undefined, a: "b" }
           renderProps: {  }
         })
@@ -125,7 +125,7 @@ describe "$Cypress.Log API", ->
           id: @log.get("id")
           url: ""
           state: "failed"
-          error: {
+          err: {
             message: err.message
             name: err.name
             stack: err.stack
@@ -148,7 +148,7 @@ describe "$Cypress.Log API", ->
           id: @log.get("id")
           url: ""
           state: "failed"
-          error: {
+          err: {
             message: err.message
             name: err.name
             stack: err.stack
@@ -160,6 +160,14 @@ describe "$Cypress.Log API", ->
           }
           renderProps: {  }
         })
+
+      it "sets $el", ->
+        div = $("<div />")
+        @log.set("$el", div)
+
+        toJSON = @log.toJSON()
+
+        expect(toJSON.$el).to.eq(div)
 
     describe "#set", ->
       it "string", ->
@@ -175,11 +183,11 @@ describe "$Cypress.Log API", ->
           state: "pending"
         }
 
-      it "triggers state:changed with attribues", (done) ->
-        @log.on "state:changed", (attrs) =>
+      it "triggers log:state:changed with attribues", (done) ->
+        @Cypress.on "log:state:changed", (attrs, log) =>
           expect(attrs.foo).to.eq "bar"
           expect(attrs.baz).to.eq "quux"
-          expect(attrs).to.deep.eq @log.attributes
+          expect(log).to.eq(@log)
           done()
 
         @log.set {foo: "bar", baz: "quux"}
@@ -269,7 +277,7 @@ describe "$Cypress.Log API", ->
 
         err = new Error
 
-        new $Cypress.Log @Cypress, error: err
+        new $Cypress.Log(@Cypress, {error: err})
 
         expect(error).to.be.calledWith err
 

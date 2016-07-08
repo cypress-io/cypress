@@ -287,15 +287,15 @@ $Cypress.Runner = do ($Cypress, _) ->
       @runner.on "fail", (runnable, err) =>
         ## always set runnable err so we can tap into
         ## taking a screenshot on error
-        runnable.err = err
+        runnable.err = @wrapErr(err)
 
         if $Cypress.isHeadless
           ## do not double emit the 'test end' event
           runnable.alreadyEmittedMocha = true
-          Cypress.trigger "mocha:fail", @wrap(runnable), @wrapErr(err)
+          Cypress.trigger "mocha:fail", @wrap(runnable), runnable.err
 
         if runnable.type is "hook"
-          @hookFailed(runnable, err)
+          @hookFailed(runnable, runnable.err)
 
     addLogToTest: (log) ->
       {testId, instrument} = log
@@ -438,7 +438,7 @@ $Cypress.Runner = do ($Cypress, _) ->
 
     reduceProps: (obj, props) ->
       _.reduce props, (memo, prop) ->
-        if _.has(obj, prop)
+        if _.has(obj, prop) or obj[prop]
           memo[prop] = obj[prop]
         memo
       , {}
@@ -526,7 +526,7 @@ $Cypress.Runner = do ($Cypress, _) ->
 
     afterEachFailed: (test, err) ->
       test.state = "failed"
-      test.err = err
+      test.err = @wrapErr(err)
       @Cypress.trigger "test:end", @wrap(test)
 
     hookFailed: (hook, err) ->
