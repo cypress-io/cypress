@@ -378,7 +378,7 @@ $Cypress.Runner = do ($Cypress, _) ->
       normalize = (runnable) =>
         runnable.id = @getId()
 
-        ## tests have a runnable of 'test' whereas suites do not have a runnable property
+        ## tests have a type of 'test' whereas suites do not have a type property
         runnable.type ?= "suite"
 
         @runnableIds[runnable.id] = obj
