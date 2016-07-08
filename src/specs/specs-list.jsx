@@ -23,7 +23,7 @@ class Specs extends Component {
 
     return (
       <div id='tests-list-page'>
-        <a onClick={this._runAllSpecs.bind(this)} className="all-tests btn btn-primary btn-xs">
+        <a onClick={this._runAllSpecs.bind(this)} className="all-tests btn btn-link">
           <i className="fa fa-play"></i>{' '}
           Run All Tests
         </a>

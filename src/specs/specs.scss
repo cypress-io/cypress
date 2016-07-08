@@ -8,8 +8,15 @@
 
   .all-tests {
     position: absolute;
-    top: 4px;
-    right: 15px;
+    top: 0;
+    right: 0;
+    font-size: 13px;
+
+    i {
+      font-size: 11px;
+      position: relative;
+      top: -1px;
+    }
 
   }
 
