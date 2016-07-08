@@ -3,6 +3,13 @@
     "browser": true,
     "node": true
   },
+  "globals": {
+    "describe": true,
+    "context": true,
+    "beforeEach": true,
+    "it": true,
+    "expect": true,
+  },
   "parser": "babel-eslint",
   "parserOptions": {
     "ecmaVersion": 6,

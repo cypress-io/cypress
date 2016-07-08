@@ -5,7 +5,8 @@
   "scripts": {
     "build": "gulp build",
     "prepublish": "gulp build",
-    "start": "gulp watch"
+    "start": "gulp watch",
+    "test": "mocha dist/**/*.spec.js"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,8 @@
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-react": "^6.5.0",
     "babel-preset-stage-1": "^6.5.0",
+    "chai": "^3.5.0",
+    "enzyme": "^2.3.0",
     "eslint": "^2.12.0",
     "eslint-plugin-react": "^5.1.1",
     "gulp": "^3.9.1",
@@ -32,13 +35,19 @@
     "gulp-plumber": "^1.1.0",
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^2.3.2",
+    "gulp-spawn-mocha": "^2.2.2",
+    "gulp-util": "^3.0.7",
     "gulp-watch": "^4.3.8",
     "lodash": "^4.0.0",
     "mobx": "^2.0.0",
     "mobx-react": "^3.0.0",
+    "mocha": "^2.5.3",
     "node-sass-globbing": "0.0.23",
+    "proxyquire": "^1.7.10",
     "react": "^15.0.0",
-    "react-dom": "^15.0.0"
+    "react-addons-test-utils": "^15.0.0",
+    "react-dom": "^15.0.0",
+    "through": "^2.3.8"
   },
   "dependencies": {
     "classnames": "^2.2.5",
