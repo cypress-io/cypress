@@ -76,15 +76,14 @@ export default {
       })
     })
 
-    driver.on('log', (logObj, log) => {
-      logs.add(logObj)
-      reporterBus.emit('reporter:log:add', logObj)
+    driver.on('log', (log) => {
+      logs.add(log)
+      reporterBus.emit('reporter:log:add', log)
+    })
 
-      log.on('state:changed', (logObj) => {
-        // update the logs again so we never go stale
-        logs.add(logObj)
-        reporterBus.emit('reporter:log:state:changed', logObj)
-      })
+    driver.on('log:state:changed', (log) => {
+      logs.add(log)
+      reporterBus.emit('reporter:log:state:changed', log)
     })
 
     reporterBus.on('runner:console:error', (testId) => {
