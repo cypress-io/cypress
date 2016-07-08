@@ -48,9 +48,13 @@ class Config extends Component {
             </table>
           <h5>
             Resolved Configuration:{' '}
-            <a href="#" onClick={this._openHelp}>
-              <i className="fa fa-question-circle"></i>
-            </a>
+            <Tooltip
+              overlay={'Click here to read about project config'}
+            >
+              <a href='#' onClick={this._openHelp}>
+                <i className='fa fa-question-circle'></i>
+              </a>
+            </Tooltip>
           </h5>
           <pre className='config-vars'>
             { `{` }

@@ -18,6 +18,7 @@ describe "Config", ->
       .fixture("browsers").as("browsers")
       .fixture("config").then (@config) ->
         @ipc.handle("open:project", null, @config)
+      .get(".navbar-default")
       .get("a").contains("Config").click()
 
   context "displays page", ->
