@@ -15,17 +15,16 @@ export default {
     if (console.clear) console.clear()
   },
 
-  logFormatted (logInstance) {
-    const log = _.invoke(logInstance.attributes, 'onConsole', logInstance.attributes)
-    if (_.isEmpty(log)) return
+  logFormatted ({ consoleProps }) {
+    if (_.isEmpty(consoleProps)) return
 
-    this._logValues(log)
-    this._logGroups(log)
-    this._logTable(log)
+    this._logValues(consoleProps)
+    this._logGroups(consoleProps)
+    this._logTable(consoleProps)
   },
 
-  _logValues (log) {
-    const formattedLog = this._formatted(_.omit(log, 'groups', 'table'))
+  _logValues (consoleProps) {
+    const formattedLog = this._formatted(_.omit(consoleProps, 'groups', 'table'))
 
     _.each(formattedLog, (value, key) => {
       if (_.trim(value) === '' && value !== '' || _.isArray(value)) return
@@ -34,9 +33,9 @@ export default {
     })
   },
 
-  _formatted (log) {
-    const maxKeyLength = this._getMaxKeyLength(log)
-    return _.reduce(log, (memo, value, key) => {
+  _formatted (consoleProps) {
+    const maxKeyLength = this._getMaxKeyLength(consoleProps)
+    return _.reduce(consoleProps, (memo, value, key) => {
       const append = ': '
       key = _.chain(key + append).capitalize().padEnd(maxKeyLength + append.length, ' ').value()
       memo[key] = value
@@ -49,8 +48,8 @@ export default {
     return Math.max(...lengths)
   },
 
-  _logGroups (log) {
-    const groups = this._getGroups(log)
+  _logGroups (consoleProps) {
+    const groups = this._getGroups(consoleProps)
     _.each(groups, (group) => {
       console.groupCollapsed(group.name)
       _.each(group.items, (value, key) => {
@@ -64,19 +63,19 @@ export default {
     })
   },
 
-  _getGroups (log) {
-    const groups = _.result(log, 'groups')
+  _getGroups (consoleProps) {
+    const groups = _.result(consoleProps, 'groups')
     if (!groups) return
 
-    delete log.groups
+    delete consoleProps.groups
     return _.map(groups, (group) => {
       group.items = this._formatted(group.items)
       return group
     })
   },
 
-  _logTable (log) {
-    const table = this._getTable(log)
+  _logTable (consoleProps) {
+    const table = this._getTable(consoleProps)
     if (!table) return
 
     if (_.isArray(table)) {
@@ -88,11 +87,11 @@ export default {
     }
   },
 
-  _getTable (log) {
-    const table = _.result(log, 'table')
+  _getTable (consoleProps) {
+    const table = _.result(consoleProps, 'table')
     if (!table) return
 
-    delete log.table
+    delete consoleProps.table
     return table
   },
 }
