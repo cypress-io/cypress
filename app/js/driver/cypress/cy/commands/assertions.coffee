@@ -465,7 +465,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
           ## by default, the reporter will truncate a message to 100 chars
           ## this bypasses the truncation
           {
-            displayMessage: message
+            message: message
           }
 
       ## think about completely gutting the whole object toString

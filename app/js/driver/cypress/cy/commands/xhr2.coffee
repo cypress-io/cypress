@@ -166,7 +166,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
               indicator ?= if /^2/.test(status) then "successful" else "bad"
 
               {
-                displayMessage: "#{xhr.method} #{status} #{_.truncate(stripOrigin(xhr.url), 20)}"
+                message: "#{xhr.method} #{status} #{_.truncate(stripOrigin(xhr.url), 20)}"
                 indicator: indicator
               }
           })

@@ -1836,9 +1836,9 @@ describe "$Cypress.Cy XHR Commands", ->
             new Promise (resolve) ->
               win.$.get("/foo").done(resolve)
 
-      it "sends correct displayMessage", ->
+      it "sends correct message", ->
         @cy.then ->
-          expect(@log.attributes.renderProps().displayMessage).to.equal("GET 200 /foo")
+          expect(@log.attributes.renderProps().message).to.equal("GET 200 /foo")
 
     describe "when response is successful", ->
       beforeEach ->
@@ -1862,9 +1862,9 @@ describe "$Cypress.Cy XHR Commands", ->
             win.$.get("/foo")
             null
 
-      it "sends correct displayMessage", ->
+      it "sends correct message", ->
         @cy.then ->
-          expect(@log.attributes.renderProps().displayMessage).to.equal("GET --- /foo")
+          expect(@log.attributes.renderProps().message).to.equal("GET --- /foo")
 
       it "sends correct indicator", ->
         @cy.then ->
