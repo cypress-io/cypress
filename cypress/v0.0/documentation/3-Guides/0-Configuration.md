@@ -84,7 +84,7 @@ Option | Default | Description
 Option | Default | Description
 ----- | ---- | ----
 `viewportWidth` | `1000` | Default width in pixels for [`cy.viewport`](https://on.cypress.io/api/viewport)
-`viewportHeight` | `660` | Default hidth in pixels for  [`cy.viewport`](https://on.cypress.io/api/viewport)
+`viewportHeight` | `660` | Default height in pixels for  [`cy.viewport`](https://on.cypress.io/api/viewport)
 
 ***
 
