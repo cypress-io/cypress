@@ -89,7 +89,7 @@
 
   }
 
-  .command-is-parent {
+  .command-type-parent {
     border-top: 1px solid #e3e3e3;
 
     &:hover {
@@ -102,7 +102,7 @@
 
   }
 
-  .command-is-child {
+  .command-type-child {
     .command-method {
       &:before {
         float: left;
