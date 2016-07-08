@@ -32,16 +32,6 @@ const localBus = new EventEmitter()
 // when detached, this will be the socket channel
 const reporterBus = new EventEmitter()
 
-function serializeLog (log) {
-  // for now, simulate what it's like to serialize the log,
-  // since we'll have to when sending over web sockets
-  const serializedLog = JSON.parse(JSON.stringify(log.toJSON()))
-  const error = log.get('error')
-  if (error) serializedLog.error = error.toString()
-  const renderProps = log.get('renderProps')
-  return _.extend(serializedLog, renderProps && renderProps.apply(log.attributes))
-}
-
 export default {
   reporterBus,
 
@@ -82,12 +72,14 @@ export default {
 
     })
 
-    driver.on('log', (log) => {
-      logs.add(log)
-      reporterBus.emit('reporter:log:add', serializeLog(log))
+    driver.on('log', (logObj, log) => {
+      logs.add(logObj)
+      reporterBus.emit('reporter:log:add', logObj)
 
-      log.on('state:changed', () => {
-        reporterBus.emit('reporter:log:state:changed', serializeLog(log))
+      log.on('state:changed', (logObj) => {
+        // update the logs again so we never go stale
+        logs.add(logObj)
+        reporterBus.emit('reporter:log:state:changed', logObj)
       })
     })
 

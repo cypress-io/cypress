@@ -2,7 +2,7 @@ let logs = {}
 
 export default {
   add (log) {
-    logs[log.get('id')] = log
+    logs[log.id] = log
   },
 
   get (id) {
