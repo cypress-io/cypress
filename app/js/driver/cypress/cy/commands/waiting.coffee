@@ -156,7 +156,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
           if options._log
             options._log.set "consoleProps", -> {
-              "Waited For": @referencesAlias.join(", ")
+              "Waited For": (@referencesAlias || []).join(", ")
               "Returned": ret
             }
 
