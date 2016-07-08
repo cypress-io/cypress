@@ -31,6 +31,9 @@ describe "Projects Nav", ->
         .get(".empty").should("not.be.visible")
         .get(".navbar-default")
 
+    it "adds project name to title", ->
+      cy.title().should("eq", "Cypress: My-Fake-Project")
+
     describe "back button", ->
       it "does not display 'Add Project' button", ->
         cy.contains("Add Project").should("not.exist")
@@ -44,6 +47,11 @@ describe "Projects Nav", ->
           .location().then (location) ->
             expect(location.href).to.include("projects")
             expect(location.href).to.not.include("123-456")
+
+      it "removes project name from title", ->
+        cy
+          .contains("Back to Projects").click({force: true})
+          .title().should("eq", "Cypress")
 
     describe "default page", ->
       it "displays 'tests' nav as active", ->

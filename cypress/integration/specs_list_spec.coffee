@@ -34,6 +34,7 @@ describe "Specs List", ->
       .get(".navbar-default").then ->
         expect(@App.ipc).to.be.calledWith("get:specs")
 
+
   describe "no specs", ->
     beforeEach ->
       cy
