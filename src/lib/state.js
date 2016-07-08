@@ -1,4 +1,4 @@
-import { computed, observable } from 'mobx'
+import { computed, observable, action } from 'mobx'
 
 import User from '../lib/user-model'
 
@@ -12,7 +12,7 @@ class State {
     return !!this.user && !!this.user.session_token
   }
 
-  setUser (user) {
+  @action setUser (user) {
     this.user = user && user.session_token ? new User(user) : null
   }
 
