@@ -57,6 +57,12 @@ export default {
       // get the current runnable in case we reran mid-test due to a visit
       // to a new domain
       channel.emit('get:existing:run:state', (state = {}) => {
+        _.each(state.tests, (test) => {
+          tests.add(test)
+          _.each(['agents', 'commands', 'routes'], (type) => {
+            _.each(test[type], (log) => logs.add(log))
+          })
+        })
         reporterBus.emit('runnables:ready', runner.normalizeAll(state.tests))
 
         if (state.currentId) {
@@ -66,10 +72,8 @@ export default {
           runner.skipToTest(state.currentId)
         }
 
-
         driver.run(() => {})
       })
-
     })
 
     driver.on('log', (logObj, log) => {
@@ -110,9 +114,6 @@ export default {
       driver.on(event, (test) => {
         tests.add(test)
 
-        if (test.err) {
-          test = _.extend({}, test, { err: test.err.toString() })
-        }
         reporterBus.emit(event, test)
       })
     })
@@ -147,7 +148,8 @@ export default {
 
     reporterBus.on('runner:show:snapshot', (id) => {
       this._withLog(id, (log) => {
-        localBus.emit('show:snapshot', log.get('snapshots'), log.toJSON())
+        // TODO: need snapshots on log
+        // localBus.emit('show:snapshot', log.snapshots, log)
       })
     })
 
