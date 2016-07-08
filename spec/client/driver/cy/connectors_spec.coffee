@@ -489,7 +489,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
       it "logs obj with arguments", ->
         @cy.noop(@obj).invoke("attr", "numbers", [1,2,3]).then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command:  "invoke"
             Function: ".attr(numbers, [1, 2, 3])"
             "With Arguments": ["numbers", [1,2,3]]
@@ -497,18 +497,18 @@ describe "$Cypress.Cy Connectors Commands", ->
             Returned: {numbers: [1,2,3]}
           }
 
-      it "#onConsole as a function property without args", ->
+      it "#consoleProps as a function property without args", ->
         @cy.noop(@obj).invoke("bar").then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command:  "invoke"
             Function: ".bar()"
             On:       @obj
             Returned: "bar"
           }
 
-      it "#onConsole as a function property with args", ->
+      it "#consoleProps as a function property with args", ->
         @cy.noop(@obj).invoke("sum", 1, 2, 3).then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command:  "invoke"
             Function: ".sum(1, 2, 3)"
             "With Arguments": [1,2,3]
@@ -516,9 +516,9 @@ describe "$Cypress.Cy Connectors Commands", ->
             Returned: 6
           }
 
-      it "#onConsole as a function reduced property with args", ->
+      it "#consoleProps as a function reduced property with args", ->
         @cy.noop(@obj).invoke("math.sum", 1, 2, 3).then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command:  "invoke"
             Function: ".math.sum(1, 2, 3)"
             "With Arguments": [1,2,3]
@@ -526,10 +526,10 @@ describe "$Cypress.Cy Connectors Commands", ->
             Returned: 6
           }
 
-      it "#onConsole as a function on DOM element", ->
+      it "#consoleProps as a function on DOM element", ->
         @cy.get("button:first").invoke("hide").then ($btn) ->
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole).to.deep.eq {
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps).to.deep.eq {
             Command: "invoke"
             Function: ".hide()"
             On: $btn.get(0)
@@ -588,9 +588,9 @@ describe "$Cypress.Cy Connectors Commands", ->
 
         @cy.noop(undefined).its("attr", "src")
 
-      it "onConsole subject", (done) ->
+      it "consoleProps subject", (done) ->
         @cy.on "fail", (err) =>
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "its"
             Error: "CypressError: Timed out retrying: cy.its() errored because the property: 'baz' does not exist on your subject."
             Subject: {foo: "bar"}
@@ -724,9 +724,9 @@ describe "$Cypress.Cy Connectors Commands", ->
           _.each obj, (value, key) =>
             expect(@log.get(key)).to.deep.eq value
 
-      it "#onConsole as a regular property", ->
+      it "#consoleProps as a regular property", ->
         @cy.noop(@obj).its("num").then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command:  "its"
             Property: ".num"
             On:       @obj
@@ -751,7 +751,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
         @Cypress.on "fail", (err) =>
           expect(@log.get("error")).to.include(err)
-          expect(@log.attributes.onConsole().Property).to.eq(".foo.bar.baz")
+          expect(@log.attributes.consoleProps().Property).to.eq(".foo.bar.baz")
           done()
 
         @cy.wrap(obj).its("foo.bar.baz").should("eq", "baz")

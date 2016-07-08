@@ -22,7 +22,7 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
 
         options._log = Cypress.Log.command({
           message: _.truncate(cmd, 25)
-          onConsole: ->
+          consoleProps: ->
             consoleOutput
         })
 

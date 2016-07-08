@@ -31,7 +31,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
       if options.log isnt false
         options._log = Cypress.Log.command
-          onConsole: -> {
+          consoleProps: -> {
             "Waited For": "#{ms}ms before continuing"
             "Returned": subject
           }
@@ -155,7 +155,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
           ret = if responses.length is 1 then responses[0] else responses
 
           if options._log
-            options._log.set "onConsole", -> {
+            options._log.set "consoleProps", -> {
               "Waited For": @referencesAlias.join(", ")
               "Returned": ret
             }

@@ -221,10 +221,10 @@ describe "$Cypress.Cy Querying Commands", ->
             .root().then ($root) ->
               expect(@log.get("$el").get(0)).to.eq(form.get(0))
 
-      it "onConsole", ->
+      it "consoleProps", ->
         @cy.root().then ($root) ->
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole).to.deep.eq {
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps).to.deep.eq {
             Command: "root"
             Returned: $root.get(0)
           }
@@ -615,33 +615,33 @@ describe "$Cypress.Cy Querying Commands", ->
           _.each obj, (value, key) =>
             expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.get("body").then ($body) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "get"
             Selector: "body"
             Returned: $body.get(0)
             Elements: 1
           }
 
-      it "#onConsole with an alias", ->
+      it "#consoleProps with an alias", ->
         @cy.get("body").as("b").get("@b").then ($body) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "get"
             Alias: "@b"
             Returned: $body.get(0)
             Elements: 1
           }
 
-      it "#onConsole with a primitive alias", ->
+      it "#consoleProps with a primitive alias", ->
         @cy.noop({foo: "foo"}).as("obj").get("@obj").then (obj) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "get"
             Alias: "@obj"
             Returned: obj
           }
 
-      it "#onConsole with a route alias", ->
+      it "#consoleProps with a route alias", ->
         @cy
           .server()
           .route(/users/, {}).as("getUsers")
@@ -649,7 +649,7 @@ describe "$Cypress.Cy Querying Commands", ->
           .window().then (win) ->
             win.$.get("/users")
           .get("@getUsers").then (obj) ->
-            expect(@log.attributes.onConsole()).to.deep.eq {
+            expect(@log.attributes.consoleProps()).to.deep.eq {
               Command: "get"
               Alias: "@getUsers"
               Returned: obj
@@ -945,9 +945,9 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.get("state")).to.eq("failed")
           expect(@log.get("error")).to.eq err
           expect(@log.get("$el").get(0)).to.eq button.get(0)
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole.Returned).to.eq button.get(0)
-          expect(onConsole.Elements).to.eq button.length
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps.Returned).to.eq button.get(0)
+          expect(consoleProps.Elements).to.eq button.length
           done()
 
         @cy.get("#button").should("be.visible")
@@ -1278,10 +1278,10 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.get("message")).to.eq "div, Nested Find"
           expect(@log.get("$el")).to.eq $div
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.get("#complex-contains").contains("nested contains").then ($label) ->
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole).to.deep.eq {
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps).to.deep.eq {
             Command: "contains"
             Content: "nested contains"
             "Applied To": getFirstSubjectByName.call(@, "get").get(0)
@@ -1365,9 +1365,9 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.get("state")).to.eq("failed")
           expect(@log.get("error")).to.eq err
           expect(@log.get("$el").get(0)).to.eq button.get(0)
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole.Returned).to.eq button.get(0)
-          expect(onConsole.Elements).to.eq button.length
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps.Returned).to.eq button.get(0)
+          expect(consoleProps.Elements).to.eq button.length
           done()
 
         @cy.contains("button").should("not.exist")

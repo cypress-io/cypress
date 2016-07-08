@@ -127,7 +127,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
 
       if options.log
         options._log = Cypress.Log.command
-          onConsole: ->
+          consoleProps: ->
             obj = {}
             obj.Preset = preset if preset
             obj.Width  = width

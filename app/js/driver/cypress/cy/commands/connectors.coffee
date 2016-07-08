@@ -159,7 +159,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     options._log = Cypress.Log.command
       message: message
       $el: if Cypress.Utils.hasElement(subject) then subject else null
-      onConsole: ->
+      consoleProps: ->
         Subject: subject
 
     if not _.isString(fn)
@@ -251,7 +251,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
 
       if options._log
         options._log.set
-          onConsole: ->
+          consoleProps: ->
             obj = {}
 
             if name is "invoke"

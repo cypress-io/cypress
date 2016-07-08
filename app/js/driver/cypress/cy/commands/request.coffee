@@ -127,7 +127,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
       if options.log
         options._log = Cypress.Log.command({
           message: ""
-          onConsole: -> {
+          consoleProps: -> {
             Request: requestOpts
             Returned: options.response
           }

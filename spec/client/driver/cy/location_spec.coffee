@@ -98,10 +98,10 @@ describe "$Cypress.Cy Location Commands", ->
         @cy.url({log: false}).then ->
           expect(@log).to.be.undefined
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.url().then ->
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole).to.deep.eq {
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps).to.deep.eq {
             Command: "url"
             Returned: "http://localhost:3500/fixtures/html/dom.html"
           }
@@ -203,10 +203,10 @@ describe "$Cypress.Cy Location Commands", ->
         @cy.hash({log: false}).then ->
           expect(@log).to.be.undefined
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.hash().then ->
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole).to.deep.eq {
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps).to.deep.eq {
             Command: "hash"
             Returned: ""
           }
@@ -325,10 +325,10 @@ describe "$Cypress.Cy Location Commands", ->
           _.each obj, (value, key) =>
             expect(@log.get(key)).to.deep.eq value
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.location().then ->
-          onConsole = @log.attributes.onConsole()
+          consoleProps = @log.attributes.consoleProps()
 
-          expect(_(onConsole).keys()).to.deep.eq ["Command", "Returned"]
-          expect(onConsole.Command).to.eq "location"
-          expect(_(onConsole.Returned).keys()).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString"]
+          expect(_(consoleProps).keys()).to.deep.eq ["Command", "Returned"]
+          expect(consoleProps.Command).to.eq "location"
+          expect(_(consoleProps.Returned).keys()).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString"]

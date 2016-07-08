@@ -298,13 +298,13 @@ $Cypress.Runner = do ($Cypress, _) ->
           @hookFailed(runnable, err)
 
     addLogToTest: (log) ->
-      {testId, instrument} = log.pick("testId", "instrument")
+      {testId, instrument} = log
 
       if test = @testIds[testId]
         ## pluralize the instrument
         ## as a property on the runnable
         a = test[instrument + "s"] ?= []
-        a.push(log.toJSON())
+        a.push(log)
 
     wrapErr: (err) ->
       @reduceProps(err, ERROR_PROPS)

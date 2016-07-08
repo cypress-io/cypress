@@ -318,10 +318,10 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("select:first").select("de_dust2").then ->
           expect(@log.get("state")).to.eq("passed")
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.get("select:first").select("de_dust2").then ($select) ->
           coords = @cy.getCoordinates($select)
-          console = @log.attributes.onConsole()
+          console = @log.attributes.consoleProps()
           expect(console.Command).to.eq("select")
           expect(console.Selected).to.deep.eq ["de_dust2"]
           expect(console["Applied To"]).to.eq $select.get(0)
@@ -343,7 +343,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs deltaOptions", ->
         @cy.get("select:first").select("de_dust2", {force: true, timeout: 1000}).then ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
-          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
+          expect(@log.attributes.consoleProps().Options).to.deep.eq {force: true, timeout: 1000}
 
   context "#type", ->
     it "does not change the subject", ->
@@ -1901,13 +1901,13 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs deltaOptions", ->
         @cy.get(":text:first").type("foo", {force: true, timeout: 1000}).then ->
           expect(@log.get("message")).to.eq "foo, {force: true, timeout: 1000}"
-          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
+          expect(@log.attributes.consoleProps().Options).to.deep.eq {force: true, timeout: 1000}
 
-      context "#onConsole", ->
+      context "#consoleProps", ->
         it "has all of the regular options", ->
           @cy.get("input:first").type("foobar").then ($input) ->
             coords = @cy.getCoordinates($input)
-            console = @log.attributes.onConsole()
+            console = @log.attributes.consoleProps()
             expect(console.Command).to.eq("type")
             expect(console.Typed).to.eq("foobar")
             expect(console["Applied To"]).to.eq $input.get(0)
@@ -1916,7 +1916,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         it "has a table of keys", ->
           @cy.get(":text:first").type("foo{enter}b{leftarrow}{del}{enter}").then ->
-            table = @log.attributes.onConsole().table()
+            table = @log.attributes.consoleProps().table()
             console.table(table.data, table.columns)
             expect(table.columns).to.deep.eq [
               "typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change"
@@ -1937,7 +1937,7 @@ describe "$Cypress.Cy Actions Commands", ->
           @cy.$$(":text:first").keydown -> return false
 
           @cy.get(":text:first").type("f").then ->
-            table = @log.attributes.onConsole().table()
+            table = @log.attributes.consoleProps().table()
             console.table(table.data, table.columns)
             expect(table.data).to.deep.eq {
               1: {typed: "f", which: 70, keydown: "preventedDefault", keyup: true}
@@ -2389,7 +2389,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("input:first").clear({force: true, timeout: 1000}).then ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
 
-          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
+          expect(@log.attributes.consoleProps().Options).to.deep.eq {force: true, timeout: 1000}
 
   context "#check", ->
     it "does not change the subject", ->
@@ -2806,19 +2806,19 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("[name=colors][value=blue]").check().check().then ->
           expect(@log.get("state")).eq("passed")
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
           coords = @cy.getCoordinates($input)
-          console = @log.attributes.onConsole()
+          console = @log.attributes.consoleProps()
           expect(console.Command).to.eq "check"
           expect(console["Applied To"]).to.eq @log.get("$el").get(0)
           expect(console.Elements).to.eq 1
           expect(console.Coords).to.deep.eq coords
 
-      it "#onConsole when checkbox is already checked", ->
+      it "#consoleProps when checkbox is already checked", ->
         @cy.get("[name=colors][value=blue]").invoke("prop", "checked", true).check().then ($input) ->
           expect(@log.get("coords")).to.be.undefined
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "check"
             "Applied To": @log.get("$el").get(0)
             Elements: 1
@@ -2826,10 +2826,10 @@ describe "$Cypress.Cy Actions Commands", ->
             Options: undefined
           }
 
-      it "#onConsole when radio is already checked", ->
+      it "#consoleProps when radio is already checked", ->
         @cy.get("[name=gender][value=male]").check().check().then ($input) ->
           expect(@log.get("coords")).to.be.undefined
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "check"
             "Applied To": @log.get("$el").get(0)
             Elements: 1
@@ -2837,12 +2837,12 @@ describe "$Cypress.Cy Actions Commands", ->
             Options: undefined
           }
 
-      it "#onConsole when checkbox with value is already checked", ->
+      it "#consoleProps when checkbox with value is already checked", ->
         @cy.$$("[name=colors][value=blue]").prop("checked", true)
 
         @cy.get("[name=colors]").check("blue").then ($input) ->
           expect(@log.get("coords")).to.be.undefined
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "check"
             "Applied To": @log.get("$el").get(0)
             Elements: 1
@@ -2853,7 +2853,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs deltaOptions", ->
         @cy.get("[name=colors][value=blue]").check({force: true, timeout: 1000}).then ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
-          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
+          expect(@log.attributes.consoleProps().Options).to.deep.eq {force: true, timeout: 1000}
 
   context "#uncheck", ->
     it "does not change the subject", ->
@@ -3192,19 +3192,19 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("[name=colors][value=blue]").invoke("prop", "checked", false).uncheck().then ->
           expect(@log.get("state")).eq("passed")
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
           coords = @cy.getCoordinates($input)
-          console = @log.attributes.onConsole()
+          console = @log.attributes.consoleProps()
           expect(console.Command).to.eq "uncheck"
           expect(console["Applied To"]).to.eq @log.get("$el").get(0)
           expect(console.Elements).to.eq 1
           expect(console.Coords).to.deep.eq coords
 
-      it "#onConsole when checkbox is already unchecked", ->
+      it "#consoleProps when checkbox is already unchecked", ->
         @cy.get("[name=colors][value=blue]").invoke("prop", "checked", false).uncheck().then ($input) ->
           expect(@log.get("coords")).to.be.undefined
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "uncheck"
             "Applied To": @log.get("$el").get(0)
             Elements: 1
@@ -3212,11 +3212,11 @@ describe "$Cypress.Cy Actions Commands", ->
             Options: undefined
           }
 
-      it "#onConsole when checkbox with value is already unchecked", ->
+      it "#consoleProps when checkbox with value is already unchecked", ->
         @cy.get("[name=colors][value=blue]").invoke("prop", "checked", false)
         @cy.get("[name=colors]").uncheck("blue").then ($input) ->
           expect(@log.get("coords")).to.be.undefined
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "uncheck"
             "Applied To": @log.get("$el").get(0)
             Elements: 1
@@ -3227,7 +3227,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs deltaOptions", ->
         @cy.get("[name=colors][value=blue]").check().uncheck({force: true, timeout: 1000}).then ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
-          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
+          expect(@log.attributes.consoleProps().Options).to.deep.eq {force: true, timeout: 1000}
 
   context "#submit", ->
     it "does not change the subject when default actions is prevented", ->
@@ -3505,11 +3505,11 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("snapshots")[1].name).to.eq("after")
           expect(@log.get("snapshots")[1].state).to.be.an("object")
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.$$("form:first").submit -> return false
 
         @cy.get("form").first().submit().then ($form) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "submit"
             "Applied To": @log.get("$el").get(0)
             Elements: 1
@@ -3638,17 +3638,17 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("input:first").focused().then ($input) ->
           expect(@log.get("$el")).to.eq $input
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.get("input:first").focused().then ($input) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "focused"
             Returned: $input.get(0)
             Elements: 1
           }
 
-      it "#onConsole with null element", ->
+      it "#consoleProps with null element", ->
         @cy.focused().blur().focused().then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "focused"
             Returned: "--nothing--"
             Elements: 0
@@ -3831,9 +3831,9 @@ describe "$Cypress.Cy Actions Commands", ->
             expect(logs).to.have.length(4)
             expect(names).to.deep.eq ["get", "focus", "get", "focus"]
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.get("input:first").focus().then ($input) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "focus"
             "Applied To": $input.get(0)
           }
@@ -4118,9 +4118,9 @@ describe "$Cypress.Cy Actions Commands", ->
           .get("input:first").blur({force: true}).then ->
             expect(@log.get("message")).to.eq("{force: true}")
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.get("input:first").focus().blur().then ($input) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "blur"
             "Applied To": $input.get(0)
           }
@@ -4438,11 +4438,11 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button:first").dblclick().then ->
           expect(logs).to.have.length(1)
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @Cypress.on "log", (@log) =>
 
         @cy.get("button").first().dblclick().then ($button) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "dblclick"
             "Applied To": @log.get("$el").get(0)
             Elements: 1
@@ -5252,7 +5252,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("snapshots")[1].name).to.eq("after")
           expect(err.message).to.include "cy.click() failed because this element is being covered by another element"
 
-          console = @log.attributes.onConsole()
+          console = @log.attributes.consoleProps()
           expect(console["Tried to Click"]).to.eq btn.get(0)
           expect(console["But its Covered By"]).to.eq span.get(0)
 
@@ -5286,7 +5286,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("snapshots")[1].name).to.eq("after")
           expect(err.message).to.include "cy.click() failed because this element is being covered by another element"
 
-          console = @log.attributes.onConsole()
+          console = @log.attributes.consoleProps()
           expect(console["Tried to Click"]).to.eq btn.get(0)
           expect(console["But its Covered By"]).to.eq span.get(0)
 
@@ -5428,11 +5428,11 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs {multiple: true} options", ->
         @cy.get("span").invoke("slice", 0, 2).click({multiple: true, timeout: 1000}).then ->
           expect(@log.get("message")).to.eq "{multiple: true, timeout: 1000}"
-          expect(@log.attributes.onConsole().Options).to.deep.eq {multiple: true, timeout: 1000}
+          expect(@log.attributes.consoleProps().Options).to.deep.eq {multiple: true, timeout: 1000}
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.get("button").first().click().then ($button) ->
-          console   = @log.attributes.onConsole()
+          console   = @log.attributes.consoleProps()
           coords    = @cy.getCoordinates($button)
           logCoords = @log.get("coords")
           expect(logCoords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
@@ -5443,18 +5443,18 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(console.Coords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
           expect(console.Coords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1
 
-      it "#onConsole actual element clicked", ->
+      it "#consoleProps actual element clicked", ->
         btn  = $("<button>", id: "button-covered-in-span").prependTo(@cy.$$("body"))
         span = $("<span>span in button</span>").css(padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
 
         @cy.get("#button-covered-in-span").click().then ->
-          expect(@log.attributes.onConsole()["Actual Element Clicked"]).to.eq span.get(0)
+          expect(@log.attributes.consoleProps()["Actual Element Clicked"]).to.eq span.get(0)
 
-      it "#onConsole groups MouseDown", ->
+      it "#consoleProps groups MouseDown", ->
         @cy.$$("input:first").mousedown -> return false
 
         @cy.get("input:first").click().then ->
-          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+          expect(@log.attributes.consoleProps().groups()).to.deep.eq [
             {
               name: "MouseDown"
               items: {
@@ -5478,11 +5478,11 @@ describe "$Cypress.Cy Actions Commands", ->
             }
           ]
 
-      it "#onConsole groups MouseUp", ->
+      it "#consoleProps groups MouseUp", ->
         @cy.$$("input:first").mouseup -> return false
 
         @cy.get("input:first").click().then ->
-          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+          expect(@log.attributes.consoleProps().groups()).to.deep.eq [
             {
               name: "MouseDown"
               items: {
@@ -5506,11 +5506,11 @@ describe "$Cypress.Cy Actions Commands", ->
             }
           ]
 
-      it "#onConsole groups Click", ->
+      it "#consoleProps groups Click", ->
         @cy.$$("input:first").click -> return false
 
         @cy.get("input:first").click().then ->
-          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+          expect(@log.attributes.consoleProps().groups()).to.deep.eq [
             {
               name: "MouseDown"
               items: {
@@ -5534,7 +5534,7 @@ describe "$Cypress.Cy Actions Commands", ->
             }
           ]
 
-      it "#onConsole when no mouseup or click", ->
+      it "#consoleProps when no mouseup or click", ->
         btn = @cy.$$("button:first")
 
         btn.on "mousedown", ->
@@ -5542,7 +5542,7 @@ describe "$Cypress.Cy Actions Commands", ->
           $(@).remove()
 
         @cy.contains("button").click().then ->
-          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+          expect(@log.attributes.consoleProps().groups()).to.deep.eq [
             {
               name: "MouseDown"
               items: {
@@ -5552,7 +5552,7 @@ describe "$Cypress.Cy Actions Commands", ->
             }
           ]
 
-      it "#onConsole when no click", ->
+      it "#consoleProps when no click", ->
         btn = @cy.$$("button:first")
 
         btn.on "mouseup", ->
@@ -5560,7 +5560,7 @@ describe "$Cypress.Cy Actions Commands", ->
           $(@).remove()
 
         @cy.contains("button").click().then ->
-          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+          expect(@log.attributes.consoleProps().groups()).to.deep.eq [
             {
               name: "MouseDown"
               items: {
@@ -5591,4 +5591,4 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs deltaOptions", ->
         @cy.get("button:first").click({force: true, timeout: 1000}).then ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
-          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
+          expect(@log.attributes.consoleProps().Options).to.deep.eq {force: true, timeout: 1000}

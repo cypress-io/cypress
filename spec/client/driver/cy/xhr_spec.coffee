@@ -685,9 +685,9 @@
 #         @cy.route("*", {}).then ->
 #           expect(@log.get("url")).to.eq("*")
 
-#       it "#onConsole", ->
+#       it "#consoleProps", ->
 #         @cy.route("*", {foo: "bar"}).as("foo").then ->
-#           expect(@log.attributes.onConsole()).to.deep.eq {
+#           expect(@log.attributes.consoleProps()).to.deep.eq {
 #             Command: "route"
 #             Method: "GET"
 #             URL: "*"
@@ -806,7 +806,7 @@
 #           _.each obj, (value, key) =>
 #             expect(@log.get(key)).to.deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
-#         it "#onConsole", ->
+#         it "#consoleProps", ->
 
 #         it "ends", ->
 #           expect(@log.get("state")).to.eq("passed")

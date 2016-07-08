@@ -35,7 +35,7 @@ do ($Cypress, _) ->
           type: "parent"
           end: true
           snapshot: true
-          onConsole: ->
+          consoleProps: ->
             obj = {
               Event: "url updated"
               "New Url": url

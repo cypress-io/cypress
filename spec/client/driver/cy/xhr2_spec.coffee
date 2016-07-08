@@ -27,7 +27,7 @@
 
 #       it "can turn off logging"
 
-#       context "#onConsole", ->
+#       context "#consoleProps", ->
 
 #   context "#route", ->
 
@@ -1654,9 +1654,9 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy.route("*", {}).then ->
           expect(@log.get("url")).to.eq("*")
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.route("*", {foo: "bar"}).as("foo").then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "route"
             Method: "GET"
             URL: "*"
@@ -1696,7 +1696,7 @@ describe "$Cypress.Cy XHR Commands", ->
             .then ->
               expect(@route.get("numResponses")).to.eq 3
 
-  context "onConsole logs", ->
+  context "consoleProps logs", ->
     beforeEach ->
       @Cypress.on "log", (@log) =>
 
@@ -1711,7 +1711,7 @@ describe "$Cypress.Cy XHR Commands", ->
             new Promise (resolve) ->
               win.$.get("/foo").done(resolve)
           .then ->
-            expect(@log.attributes.onConsole().Stubbed).to.eq("Yes")
+            expect(@log.attributes.consoleProps().Stubbed).to.eq("Yes")
 
     describe "zero configuration / zero routes", ->
       beforeEach ->
@@ -1730,17 +1730,17 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy.then ->
           xhr = @cy.prop("responses")[0].xhr
 
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole.Duration).to.be.a("number")
-          expect(onConsole.Duration).to.be.gt(1)
-          expect(onConsole.Duration).to.be.lt(1000)
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps.Duration).to.be.a("number")
+          expect(consoleProps.Duration).to.be.gt(1)
+          expect(consoleProps.Duration).to.be.lt(1000)
 
       it "sends back regular 404", ->
         @cy.then ->
           xhr = @cy.prop("responses")[0].xhr
 
-          onConsole = _.pick @log.attributes.onConsole(), "Method", "Status", "URL", "XHR"
-          expect(onConsole).to.deep.eq({
+          consoleProps = _.pick @log.attributes.consoleProps(), "Method", "Status", "URL", "XHR"
+          expect(consoleProps).to.deep.eq({
             Method: "POST"
             Status: "404 (Not Found)"
             URL: "http://localhost:3500/foo"
@@ -1748,7 +1748,7 @@ describe "$Cypress.Cy XHR Commands", ->
           })
 
       it "says Stubbed: Yes when sent 404 back", ->
-        expect(@log.attributes.onConsole().Stubbed).to.eq("Yes")
+        expect(@log.attributes.consoleProps().Stubbed).to.eq("Yes")
 
     describe "whitelisting", ->
       it "does not send back 404s on whitelisted routes", ->
@@ -1770,8 +1770,8 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "sends back 404 when request doesnt match route", ->
         @cy.then ->
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole.Note).to.eq("This request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior.")
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps.Note).to.eq("This request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior.")
 
     describe "{force404: false}", ->
       beforeEach ->
@@ -1781,20 +1781,20 @@ describe "$Cypress.Cy XHR Commands", ->
             win.$.getJSON("/fixtures/ajax/app.json")
 
       it "says Stubbed: No when request isnt forced 404", ->
-        expect(@log.attributes.onConsole().Stubbed).to.eq("No")
+        expect(@log.attributes.consoleProps().Stubbed).to.eq("No")
 
       it "logs request + response headers", ->
         @cy.then ->
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole.Request.headers).to.be.an("object")
-          expect(onConsole.Response.headers).to.be.an("object")
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps.Request.headers).to.be.an("object")
+          expect(consoleProps.Response.headers).to.be.an("object")
 
       it "logs Method, Status, URL, and XHR", ->
         @cy.then ->
           xhr = @cy.prop("responses")[0].xhr
 
-          onConsole = _.pick @log.attributes.onConsole(), "Method", "Status", "URL", "XHR"
-          expect(onConsole).to.deep.eq({
+          consoleProps = _.pick @log.attributes.consoleProps(), "Method", "Status", "URL", "XHR"
+          expect(consoleProps).to.deep.eq({
             Method: "GET"
             URL: "http://localhost:3500/fixtures/ajax/app.json"
             Status: "200 (OK)"
@@ -1803,8 +1803,8 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "logs response", ->
         @cy.then ->
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole.Response.body).to.deep.eq({
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps.Response.body).to.deep.eq({
             some: "json"
             foo: {
               bar: "baz"
@@ -1813,9 +1813,9 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "sets groups Initiator", ->
         @cy.then ->
-          onConsole = @log.attributes.onConsole()
+          consoleProps = @log.attributes.consoleProps()
 
-          group = onConsole.groups()[0]
+          group = consoleProps.groups()[0]
           expect(group.name).to.eq("Initiator")
           expect(group.label).to.be.false
           expect(group.items[0]).to.be.a("string")

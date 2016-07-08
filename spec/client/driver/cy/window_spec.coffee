@@ -142,9 +142,9 @@ describe "$Cypress.Cy Window Commands", ->
           _.each obj, (value, key) =>
             expect(@log.get(key)).to.deep.eq value
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.window().then (win) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "window"
             Returned: win
           }
@@ -294,9 +294,9 @@ describe "$Cypress.Cy Window Commands", ->
           _.each obj, (value, key) =>
             expect(@log.get(key)).to.deep.eq value
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.document().then (win) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "document"
             Returned: win
           }
@@ -398,9 +398,9 @@ describe "$Cypress.Cy Window Commands", ->
           _.each obj, (value, key) =>
             expect(@log.get(key)).to.deep.eq value
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.title().then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "title"
             Returned: "DOM Fixture"
           }
@@ -625,18 +625,18 @@ describe "$Cypress.Cy Window Commands", ->
           expect(@log.get("viewportWidth")).to.eq(800)
           expect(@log.get("viewportHeight")).to.eq(600)
 
-      it ".onConsole with preset", ->
+      it ".consoleProps with preset", ->
         @cy.viewport("ipad-mini").then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "viewport"
             Preset: "ipad-mini"
             Width: 768
             Height: 1024
           }
 
-      it ".onConsole without preset", ->
+      it ".consoleProps without preset", ->
         @cy.viewport(1024, 768).then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "viewport"
             Width: 1024
             Height: 768

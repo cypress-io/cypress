@@ -695,9 +695,9 @@ describe "$Cypress.Cy Assertion Commands", ->
       @cy.get("#button").then ($button) ->
         expect($button).to.be.visible
 
-    it "#onConsole for regular objects", (done) ->
+    it "#consoleProps for regular objects", (done) ->
       @onAssert (obj) ->
-        expect(obj.attributes.onConsole()).to.deep.eq {
+        expect(obj.attributes.consoleProps()).to.deep.eq {
           Command: "assert"
           expected: 1
           actual: 1
@@ -709,9 +709,9 @@ describe "$Cypress.Cy Assertion Commands", ->
         .then ->
           expect(1).to.eq 1
 
-    it "#onConsole for DOM objects", (done) ->
+    it "#consoleProps for DOM objects", (done) ->
       @onAssert (obj) ->
-        expect(obj.attributes.onConsole()).to.deep.eq {
+        expect(obj.attributes.consoleProps()).to.deep.eq {
           Command: "assert"
           subject: getFirstSubjectByName.call(@, "get")
           Message: "expected <body> to match body"
@@ -722,11 +722,11 @@ describe "$Cypress.Cy Assertion Commands", ->
         .get("body").then ($body) ->
           expect($body).to.match "body"
 
-    it "#onConsole for errors", (done) ->
+    it "#consoleProps for errors", (done) ->
       @allowErrors()
 
       @onAssert (obj) ->
-        expect(obj.attributes.onConsole()).to.deep.eq {
+        expect(obj.attributes.consoleProps()).to.deep.eq {
           Command: "assert"
           expected: false
           actual: true

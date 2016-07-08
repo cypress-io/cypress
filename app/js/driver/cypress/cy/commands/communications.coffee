@@ -41,7 +41,7 @@ $Cypress.register "Communications", (Cypress, _, $, Promise) ->
           else
             if options._log
               options._log.set
-                onConsole: -> {
+                consoleProps: -> {
                   Message: msg
                   "Data Sent": data
                   "Data Returned": resp.response

@@ -23,7 +23,7 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
         args = _(args).without(null, undefined)
         args.join(", ")
 
-      onConsole = {
+      consoleProps = {
         Selector: getSelector()
         "Applied To": $Cypress.Utils.getDomElements(subject)
       }
@@ -31,13 +31,13 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
       if options.log isnt false
         options._log = Cypress.Log.command
           message: getSelector()
-          onConsole: -> onConsole
+          consoleProps: -> consoleProps
 
       setEl = ($el) ->
         return if options.log is false
 
-        onConsole.Returned = Cypress.Utils.getDomElements($el)
-        onConsole.Elements = $el?.length
+        consoleProps.Returned = Cypress.Utils.getDomElements($el)
+        consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})
 

@@ -22,7 +22,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       @ensureNoCommandOptions(options)
 
-      onConsole = {}
+      consoleProps = {}
 
       start = (aliasType) ->
         return if options.log is false
@@ -31,7 +31,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           message: selector
           referencesAlias: aliasObj?.alias
           aliasType: aliasType
-          onConsole: -> onConsole
+          consoleProps: -> consoleProps
 
       log = (value, aliasType = "dom") ->
         return if options.log is false
@@ -45,25 +45,25 @@ $Cypress.register "Querying", (Cypress, _, $) ->
             $el: value
             numRetries: options._retries
 
-        obj.onConsole = ->
+        obj.consoleProps = ->
           key = if aliasObj then "Alias" else "Selector"
-          onConsole[key] = selector
+          consoleProps[key] = selector
 
           switch aliasType
             when "dom"
-              _.extend onConsole,
+              _.extend consoleProps,
                 Returned: Cypress.Utils.getDomElements(value)
                 Elements: value?.length
 
             when "primitive"
-              _.extend onConsole,
+              _.extend consoleProps,
                 Returned: value
 
             when "route"
-              _.extend onConsole,
+              _.extend consoleProps,
                 Returned: value
 
-          return onConsole
+          return consoleProps
 
         options._log.set(obj)
 
@@ -127,8 +127,8 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       setEl = ($el) ->
         return if options.log is false
 
-        onConsole.Returned = Cypress.Utils.getDomElements($el)
-        onConsole.Elements = $el?.length
+        consoleProps.Returned = Cypress.Utils.getDomElements($el)
+        consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})
 
@@ -235,7 +235,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
               "Expected to find content: '#{text}' #{getPhrase(type, negated)}but never did."
 
       if options.log isnt false
-        onConsole = {
+        consoleProps = {
           Content: text
           "Applied To": Cypress.Utils.getDomElements(subject or @prop("withinSubject"))
         }
@@ -243,7 +243,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         options._log = Cypress.Log.command
           message: _.compact([filter, text])
           type: if subject then "child" else "parent"
-          onConsole: -> onConsole
+          consoleProps: -> consoleProps
 
       getOpts = _.extend _.clone(options),
         # error: getErr(text, phrase)
@@ -256,8 +256,8 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       setEl = ($el) ->
         return if options.log is false
 
-        onConsole.Returned = Cypress.Utils.getDomElements($el)
-        onConsole.Elements = $el?.length
+        consoleProps.Returned = Cypress.Utils.getDomElements($el)
+        consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})
 

@@ -62,17 +62,17 @@ $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
       }
 
       if options.log
-        onConsole = {}
+        consoleProps = {}
 
         options._log = Cypress.Log.command({
           message: name
-          onConsole: ->
-            onConsole
+          consoleProps: ->
+            consoleProps
         })
 
       @_takeScreenshot(name, options._log, options.timeout)
       .then (resp) ->
-        _.extend onConsole, {
+        _.extend consoleProps, {
           Saved: resp.path
           Size: resp.size
         }

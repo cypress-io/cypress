@@ -125,7 +125,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
             aliasType: "route"
             type:      "parent"
             event:     true
-            onConsole: =>
+            consoleProps: =>
               consoleObj = {
                 Alias:         alias
                 Method:        xhr.method
@@ -365,7 +365,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
           alias:    options.alias
           isStubbed: options.response?
           numResponses: 0
-          onConsole: ->
+          consoleProps: ->
             Method:   options.method
             URL:      getUrl(options)
             Status:   options.status

@@ -4,6 +4,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
   CypressErrorRe  = /(AssertionError|CypressError)/
   parentOrChildRe = /parent|child/
+  ERROR_PROPS     = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
 
   klassMethods = {
     agent: (Cypress, cy, obj = {}) ->
@@ -36,7 +37,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       _.defaults obj,
         event: false
         renderProps: -> {}
-        onConsole: ->
+        consoleProps: ->
           ret = if $Cypress.Utils.hasElement(current.get("subject"))
             $Cypress.Utils.getDomElements(current.get("subject"))
           else
@@ -68,12 +69,12 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         aliasType:        undefined
         message:          undefined
         renderProps: -> {}
-        onConsole: ->
+        consoleProps: -> {}
 
       obj.instrument = instrument
 
       log = new $Log Cypress, obj
-      log.wrapOnConsole()
+      log.wrapConsoleProps()
 
       onBeforeLog = cy.prop("onBeforeLog")
 
@@ -85,7 +86,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## set the log on the command
       cy.prop("current")?.log(log)
 
-      Cypress.trigger "log", log
+      Cypress.trigger("log", log.toJSON(), log)
 
       return log
   }
@@ -115,12 +116,31 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
     unset: (key) ->
       @set key, undefined
 
+    invoke: (fn) ->
+      ## ensure this is a callable function
+      ## and set its default to empty object literal
+      @get(fn)?() ? {}
+
+    serializeError: ->
+      if err = @get("error")
+        _.reduce ERROR_PROPS, (memo, prop) ->
+          if _.has(err, prop) or err[prop]
+            memo[prop] = err[prop]
+
+          memo
+        , {}
+      else
+        null
+
     toJSON: ->
       _(@attributes)
       .chain()
       .omit(_.isFunction)
       .omit("snapshots")
-      .extend({ url: (@get("url") || "").toString() })
+      .extend({ error: @serializeError() })
+      .extend({ url: (@get("url") or "").toString() })
+      .extend({ consoleProps: @invoke("consoleProps")  })
+      .extend({ renderProps:  @invoke("renderProps") })
       .value()
 
     set: (key, val) ->
@@ -129,6 +149,11 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         obj[key] = val
       else
         obj = key
+
+      ## convert onConsole to consoleProps
+      ## for backwards compatibility
+      if oc = obj.onConsole
+        obj.consoleProps = oc
 
       ## if we have an alias automatically
       ## figure out what type of alias it is
@@ -140,17 +165,17 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
       _.extend @attributes, obj
 
-      ## if we have an onConsole function
+      ## if we have an consoleProps function
       ## then re-wrap it
-      if obj and _.isFunction(obj.onConsole)
-        @wrapOnConsole()
+      if obj and _.isFunction(obj.consoleProps)
+        @wrapConsoleProps()
 
       if obj and obj.$el
         @setElAttrs()
 
       ## TODO: only send the changed delta
       ## not the full set of attributes
-      @trigger "state:changed", @attributes
+      @trigger("state:changed", @toJSON())
 
       return @
 
@@ -270,18 +295,18 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       if @_shouldAutoEnd()
         @snapshot().end()
 
-    wrapOnConsole: ->
+    wrapConsoleProps: ->
       _this = @
 
-      ## re-wrap onConsole to set Command + Error defaults
-      @attributes.onConsole = _.wrap @attributes.onConsole, (orig, args...) ->
+      ## re-wrap consoleProps to set Command + Error defaults
+      @attributes.consoleProps = _.wrap @attributes.consoleProps, (orig, args...) ->
 
         key = if _this.get("event") then "Event" else "Command"
 
         consoleObj = {}
         consoleObj[key] = _this.get("name")
 
-        ## merge in the other properties from onConsole
+        ## merge in the other properties from consoleProps
         _.extend consoleObj, orig.apply(@, args)
 
         ## TODO: right here we need to automatically

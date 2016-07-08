@@ -594,10 +594,10 @@ describe "$Cypress.Cy Navigation Commands", ->
         @cy.get("form#click-me").submit().then ->
           expect(@log.get("type")).to.eq "parent"
 
-      describe "#onConsole", ->
+      describe "#consoleProps", ->
         it "only has Event: 'page load'", ->
           @cy.get("form#click-me").submit().then ->
-            expect(@log.attributes.onConsole()).to.deep.eq {
+            expect(@log.attributes.consoleProps()).to.deep.eq {
               Event: "page load"
               Notes: "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
             }

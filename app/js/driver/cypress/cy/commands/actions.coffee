@@ -38,7 +38,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if options.log
         options._log = Cypress.Log.command
           $el: options.$el
-          onConsole: ->
+          consoleProps: ->
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
             Elements: options.$el.length
 
@@ -102,7 +102,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if options.log
         options._log = Cypress.Log.command
           $el: options.$el
-          onConsole: ->
+          consoleProps: ->
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
 
       ## http://www.w3.org/TR/html5/editing.html#specially-focusable
@@ -237,7 +237,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         options._log = Cypress.Log.command
           $el: options.$el
           message: deltaOptions
-          onConsole: ->
+          consoleProps: ->
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
 
       @ensureDom(options.$el, "blur", options._log)
@@ -365,7 +365,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         if options.log
           log = Cypress.Log.command
             $el: $el
-            onConsole: ->
+            consoleProps: ->
               "Applied To":   $Cypress.Utils.getDomElements($el)
               "Elements":     $el.length
 
@@ -507,9 +507,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             domEvents.click   = @Cypress.Mouse.click($elToClick, coords, win)
 
           if options._log
-            consoleObj = options._log.attributes.onConsole()
+            consoleObj = options._log.attributes.consoleProps()
 
-          onConsole = ->
+          consoleProps = ->
             consoleObj = _.defaults consoleObj ? {}, {
               "Applied To":   $Cypress.Utils.getDomElements($el)
               "Elements":     $el.length
@@ -550,7 +550,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               if options._log
                 ## because we snapshot and output a command per click
                 ## we need to manually snapshot + end them
-                options._log.set({coords: coords, onConsole: onConsole})
+                options._log.set({coords: coords, consoleProps: consoleProps})
 
               ## we need to split this up because we want the coordinates
               ## to mutate our passed in options._log but we dont necessary
@@ -608,7 +608,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               @ensureDescendents $el, $elToClick, options._log
             catch err
               if options._log
-                options._log.set onConsole: ->
+                options._log.set consoleProps: ->
                   obj = {}
                   obj["Tried to Click"]     = $Cypress.Utils.getDomElements($el)
                   obj["But its Covered By"] = $Cypress.Utils.getDomElements($elToClick)
@@ -792,7 +792,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         options._log = Cypress.Log.command
           message: [chars, deltaOptions]
           $el: options.$el
-          onConsole: ->
+          consoleProps: ->
             "Typed":      chars
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
             "Options":    deltaOptions
@@ -1020,7 +1020,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           options._log = Cypress.Log.command
             message: deltaOptions
             $el: $el
-            onConsole: ->
+            consoleProps: ->
               "Applied To": $Cypress.Utils.getDomElements($el)
               "Elements":   $el.length
               "Options":    deltaOptions
@@ -1065,7 +1065,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       @ensureDom(options.$el)
 
-      onConsole = {}
+      consoleProps = {}
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
@@ -1074,9 +1074,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         options._log = Cypress.Log.command
           message: deltaOptions
           $el: options.$el
-          onConsole: ->
-            ## merge into onConsole without mutating it
-            _.extend {}, onConsole,
+          consoleProps: ->
+            ## merge into consoleProps without mutating it
+            _.extend {}, consoleProps,
               "Applied To": $Cypress.Utils.getDomElements(options.$el)
               "Options":    deltaOptions
 
@@ -1176,7 +1176,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         {values, optionEls} = obj
 
         ## preserve the selected values
-        onConsole.Selected = values
+        consoleProps.Selected = values
 
         @execute("click", {
           $el: options.$el
@@ -1253,7 +1253,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         options._log.set({
           $el: $el
-          onConsole: ->
+          consoleProps: ->
             ret = if $el
               $Cypress.Utils.getDomElements($el)
             else
@@ -1405,7 +1405,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         if isElActionable
           matchingElements.push(el)
 
-        onConsole = {
+        consoleProps = {
           "Applied To":   $Cypress.Utils.getDomElements($el)
           "Elements":     $el.length
         }
@@ -1418,8 +1418,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           options._log = Cypress.Log.command
             message: deltaOptions
             $el: $el
-            onConsole: ->
-              _.extend onConsole, {
+            consoleProps: ->
+              _.extend consoleProps, {
                 Options: deltaOptions
               }
 
@@ -1442,7 +1442,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             @ensureVisibility $el, options._log
             if options._log
               inputType = if $el.is(":radio") then "radio" else "checkbox"
-              onConsole.Note = "This #{inputType} was already #{type}ed. No operation took place."
+              consoleProps.Note = "This #{inputType} was already #{type}ed. No operation took place."
               options._log.snapshot().end()
 
             return null
@@ -1450,7 +1450,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             ## set the coords only if we are actually
             ## going to go out and click this bad boy
             coords = @getCoordinates($el)
-            onConsole.Coords = coords
+            consoleProps.Coords = coords
             options._log.set "coords", coords
 
         ## if we didnt pass in any values or our

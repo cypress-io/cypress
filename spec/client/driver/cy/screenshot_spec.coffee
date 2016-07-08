@@ -208,8 +208,8 @@ describe "$Cypress.Cy Screenshot Commands", ->
             expect(@log.get("snapshots").length).to.eq(1)
             expect(@log.get("snapshots")[0]).to.be.an("object")
 
-        it "#onConsole", ->
+        it "#consoleProps", ->
           @cy.screenshot().then ->
-            c = @log.attributes.onConsole()
+            c = @log.attributes.consoleProps()
             expect(c["Saved"]).to.deep.eq "foo/bar.png"
             expect(c["Size"]).to.eq "100 kB"

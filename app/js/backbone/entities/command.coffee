@@ -116,7 +116,7 @@
       @log or throw new Error("Command is missing its log reference!")
 
     getConsoleDisplay: (fn) ->
-      obj = @triggerCommandCallback("onConsole", @getLog().attributes)
+      obj = @triggerCommandCallback("consoleProps", @getLog().attributes)
 
       return if _.isEmpty(obj)
 

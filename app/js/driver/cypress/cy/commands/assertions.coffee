@@ -453,7 +453,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
           else
             "parent"
 
-        onConsole: =>
+        consoleProps: =>
           obj = {Command: "assert"}
 
           _.extend obj, parseValueActualAndExpected(value, actual, expected)

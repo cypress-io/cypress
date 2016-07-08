@@ -59,7 +59,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         event: true
         end: true
         snapshot: true
-        onConsole: -> {
+        consoleProps: -> {
           "Originated From": e.target
         }
 
@@ -93,7 +93,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         message: "--waiting for new page to load---"
         event: true
         ## add a note here that loading nulled out the current subject?
-        onConsole: -> {
+        consoleProps: -> {
           "Notes": "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
         }
 
@@ -227,7 +227,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           Cypress.off "load", resolve
 
           ## need to set the attributes of 'go'
-          ## onConsole here with win
+          ## consoleProps here with win
 
           ## make sure we resolve our go function
           ## with the remove window (just like cy.visit)

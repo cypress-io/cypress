@@ -381,7 +381,7 @@ describe "$Cypress.Cy Request Commands", ->
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0]).to.be.an("object")
 
-      it ".onConsole", ->
+      it ".consoleProps", ->
         @respondWith({
           status: 201
           body: {id: 123}
@@ -396,7 +396,7 @@ describe "$Cypress.Cy Request Commands", ->
           method: "POST"
           body: {first: "brian"}
         }).then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "request"
             Request: {
               url: "http://localhost:8080/foo"

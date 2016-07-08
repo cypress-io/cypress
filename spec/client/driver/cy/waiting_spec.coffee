@@ -645,19 +645,19 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy.wait(10).then ->
             expect(@log.get("type")).to.eq "parent"
 
-        it "#onConsole", ->
+        it "#consoleProps", ->
           @cy.wait(10).then ->
-            expect(@log.attributes.onConsole()).to.deep.eq {
+            expect(@log.attributes.consoleProps()).to.deep.eq {
               Command: "wait"
               "Waited For": "10ms before continuing"
               "Returned": undefined
             }
 
-        it "#onConsole as a child", ->
+        it "#consoleProps as a child", ->
           btn = @cy.$$("button:first")
 
           @cy.get("button:first").wait(10).then ->
-            expect(@log.attributes.onConsole()).to.deep.eq {
+            expect(@log.attributes.consoleProps()).to.deep.eq {
               Command: "wait"
               "Waited For": "10ms before continuing"
               "Returned": btn
@@ -711,7 +711,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
           @cy.wait("@foo")
 
-        it "#onConsole multiple aliases", (done) ->
+        it "#consoleProps multiple aliases", (done) ->
           @Cypress.config("requestTimeout", 100)
 
           @cy.on "fail", (err) =>
@@ -731,7 +731,7 @@ describe "$Cypress.Cy Waiting Commands", ->
       describe "function argument errors", ->
         it ".log"
 
-        it "#onConsole"
+        it "#consoleProps"
 
       describe "alias argument", ->
         it "is a parent command", ->
@@ -756,7 +756,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             .wait(["@getFoo", "@getBar"]).then (xhrs) ->
               expect(@log.get("referencesAlias")).to.deep.eq ["getFoo", "getBar"]
 
-        it "#onConsole waiting on 1 alias", ->
+        it "#consoleProps waiting on 1 alias", ->
           @cy
             .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
@@ -764,13 +764,13 @@ describe "$Cypress.Cy Waiting Commands", ->
             .window().then (win) ->
               win.$.get("foo")
             .wait("@getFoo").then (xhr) ->
-              expect(@log.attributes.onConsole()).to.deep.eq {
+              expect(@log.attributes.consoleProps()).to.deep.eq {
                 Command: "wait"
                 "Waited For": "getFoo"
                 Returned: xhr
               }
 
-        it "#onConsole waiting on multiple aliases", ->
+        it "#consoleProps waiting on multiple aliases", ->
           @cy
             .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
@@ -780,14 +780,14 @@ describe "$Cypress.Cy Waiting Commands", ->
               win.$.get("foo")
               win.$.get("bar")
             .wait(["@getFoo", "@getBar"]).then (xhrs) ->
-              expect(@log.attributes.onConsole()).to.deep.eq {
+              expect(@log.attributes.consoleProps()).to.deep.eq {
                 Command: "wait"
                 "Waited For": "getFoo, getBar"
                 Returned: [xhrs[0], xhrs[1]] ## explictly create the array here
               }
 
       # describe "function argument", ->
-      #   it "#onConsole", ->
+      #   it "#consoleProps", ->
       #     retriedThreeTimes = false
 
       #     retry = _.after 3, ->
@@ -800,7 +800,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
       #     @cy
       #       .wait(fn).then ->
-      #         expect(@log.attributes.onConsole()).to.deep.eq {
+      #         expect(@log.attributes.consoleProps()).to.deep.eq {
       #           Command: "wait"
       #           "Waited For": _.str.clean(fn.toString())
       #           Retried: "3 times"
