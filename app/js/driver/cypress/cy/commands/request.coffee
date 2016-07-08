@@ -143,7 +143,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
             indicator ?= if isOkStatusCodeRe.test(status) then "successful" else "bad"
 
             {
-              displayMessage: "#{options.method} #{status} #{_.truncate(options.url, 25)}"
+              message: "#{options.method} #{status} #{_.truncate(options.url, 25)}"
               indicator: indicator
             }
         })
