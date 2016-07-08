@@ -97,6 +97,13 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         id: _.uniqueId("l")
         state: "pending"
 
+      trigger = =>
+        @Cypress.trigger("log:state:changed", @toJSON(), @)
+
+      ## only fire the log:state:changed event
+      ## as fast as every 16ms
+      @fireChangeEvent = _.debounce(trigger, 16)
+
       @set(obj)
 
       ## if snapshot was passed
@@ -143,15 +150,12 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       .extend({ renderProps:  @invoke("renderProps") })
       .value()
 
-    set: (key, val, options) ->
+    set: (key, val) ->
       if _.isString(key)
         obj = {}
         obj[key] = val
       else
         obj = key
-        options = val
-
-      options ?= {}
 
       ## convert onConsole to consoleProps
       ## for backwards compatibility
@@ -176,10 +180,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       if obj and obj.$el
         @setElAttrs()
 
-      ## TODO: only send the changed delta
-      ## not the full set of attributes
-      if options and options.silent isnt true
-        @Cypress.trigger("log:state:changed", @toJSON(), @)
+      @fireChangeEvent()
 
       return @
 
@@ -221,19 +222,19 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
       return @
 
-    error: (err, options) ->
+    error: (err) ->
       @set({
         error: err
         state: "failed"
-      }, options)
+      })
 
       return @
 
-    end: (options) ->
+    end: ->
       @set({
         end: true
         state: "passed"
-      }, options)
+      })
 
       return @
 

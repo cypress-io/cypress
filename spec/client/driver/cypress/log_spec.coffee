@@ -192,6 +192,29 @@ describe "$Cypress.Log API", ->
 
         @log.set {foo: "bar", baz: "quux"}
 
+      it "debouces log:state:changed and only fires once", (done) ->
+        count = 0
+
+        @Cypress.on "log:state:changed", (attrs, log) =>
+          count += 1
+
+          expect(attrs.foo).to.eq "quux"
+          expect(attrs.a).to.eq "b"
+          expect(attrs.c).to.eq "d"
+          expect(attrs.e).to.eq "f"
+          expect(log).to.eq(@log)
+
+        @log.set {foo: "bar", a: "b"}
+        @log.set {foo: "baz", c: "d"}
+
+        _.defer =>
+          @log.set {foo: "quux", e: "f"}
+
+        _.delay ->
+          expect(count).to.eq(1)
+          done()
+        , 30
+
     describe "#setElAttrs", ->
       beforeEach ->
         @$el = $("<div />").appendTo($("body"))
