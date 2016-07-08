@@ -1,9 +1,9 @@
 import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import { Component } from 'react'
 import { withRouter } from 'react-router'
 
-import DevTools from 'mobx-react-devtools'
+// import DevTools from 'mobx-react-devtools'
 
 import { getProjects } from '../projects/projects-api'
 
@@ -39,18 +39,13 @@ export default class Application extends Component {
   }
 
   render () {
-    return (
-      <div>
-        { this.props.children }
-        { this._devTools() }
-      </div>
-    )
+    return this.props.children
   }
 
-  _devTools () {
-    if (window.env === 'development') {
-      // return null
-      return <DevTools position={{ bottom: 0, left: 20 }}/>
-    }
-  }
+  // _devTools () {
+  //   if (window.env === 'development') {
+  //     // return null
+  //     return <DevTools position={{ bottom: 0, left: 20 }}/>
+  //   }
+  // }
 }

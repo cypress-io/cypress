@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import Browsers from './browsers'
 import { Link } from 'react-router'
-import App from '../lib/app'
 
 export default class ProjectNav extends Component {
   render () {
