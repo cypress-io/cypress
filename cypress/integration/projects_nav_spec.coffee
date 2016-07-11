@@ -175,7 +175,7 @@ describe "Projects Nav", ->
         it "disables browser dropdown", ->
           cy
             .get(".browsers-list>a").first()
-              .and("have.class", "disabled")
+              .should("have.class", "disabled")
 
         it "displays stop browser button", ->
           cy
@@ -194,11 +194,13 @@ describe "Projects Nav", ->
 
           it "re-enables browser dropdown", ->
             cy
+              .get(".close-browser").click()
               .get(".browsers-list>a").first()
-                .and("not.have.class", "disabled")
+                .should("not.have.class", "disabled")
 
           it "displays default browser icon", ->
             cy
+              .get(".close-browser").click()
               .get(".browsers-list>a").first()
                 .find(".fa-chrome")
 
