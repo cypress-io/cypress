@@ -29,9 +29,7 @@ export default class ProjectNav extends Component {
               </Link>
             </li>
           </ul>
-          <ul className='nav navbar-nav navbar-right'>
-            <Browsers project={project} />
-          </ul>
+          <Browsers project={project} />
         </div>
       </nav>
     )

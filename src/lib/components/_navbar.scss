@@ -34,6 +34,14 @@
         &:hover, &:focus {
           background-color: #f3f3f3;
         }
+
+        &.btn-link {
+          padding: 0;
+
+          &:hover {
+            background-color:#ececec;
+          }
+        }
       }
 
       &.dropdown>a {

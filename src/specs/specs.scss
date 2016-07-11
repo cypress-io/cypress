@@ -84,12 +84,24 @@
       pointer-events: none;
       background-color: #f5f9fb;
       color: #5c5e63;
+      text-decoration: none;
+
+      &:hover {
+        pointer-events: none;
+        background-color: #f5f9fb;
+        color: #5c5e63;
+        text-decoration: none;
+      }
     }
 
-    &:hover, &:focus {
+    &:hover {
       background-color: #f8f8f8;
       color: #38589c;
       cursor: pointer;
+      text-decoration: none;
+    }
+
+    &:focus {
       text-decoration: none;
     }
   }

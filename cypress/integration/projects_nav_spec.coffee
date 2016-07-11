@@ -145,7 +145,7 @@ describe "Projects Nav", ->
             .get(".browsers-list>a").first().find("i")
               .should("have.class", "fa fa-refresh fa-spin")
 
-        it.only "disables browser dropdown", ->
+        it "disables browser dropdown", ->
           cy
             .get(".browsers-list>a").first()
               .and("have.class", "disabled")
@@ -218,6 +218,8 @@ describe "Projects Nav", ->
           .get(".error").contains("Go Back to Projects").click().then ->
             expect(@App.ipc).to.be.calledWith("close:project")
 
+      it "sets project as browser closed on 'go back'", ->
+
       describe "download browser", ->
         it "triggers external:open on click", ->
           cy
@@ -234,6 +236,8 @@ describe "Projects Nav", ->
     it "closes project", ->
       cy.contains("Back to Projects").click({force: true}).then ->
         expect(@App.ipc).to.be.calledWith("close:project")
+
+    it "sets project as browser closed", ->
 
     describe "click on diff project", ->
       beforeEach ->

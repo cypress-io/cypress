@@ -16,6 +16,10 @@ class Projects {
     return _.filter(this.projects, (project) => !project.isChosen)
   }
 
+  getProjectById (projectId) {
+    return _.find(this.projects, { id: projectId })
+  }
+
   addProject (path) {
     const project = new Project(path)
     this.projects.push(project)

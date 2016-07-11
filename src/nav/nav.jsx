@@ -57,7 +57,7 @@ export default class Nav extends Component {
       return (
         <Link
           to="/projects"
-          onClick={closeProject}
+          onClick={this._closeProject.bind(this)}
           >
           <i className="fa fa-chevron-left"></i>{' '}
           Back to Projects
@@ -71,6 +71,11 @@ export default class Nav extends Component {
         </a>
       )
     }
+  }
+
+  _closeProject = () => {
+    let projectId = this.props.params.id
+    closeProject(projectId)
   }
 
   _openDocs = (e) => {

@@ -100,7 +100,7 @@ class Dropdown extends Component {
   }
 
   _caret () {
-    if (!this.props.others.length) return null
+    if (!this.props.others.length || this.props.disabled) return null
 
     return (
       <span>
@@ -115,7 +115,7 @@ class Dropdown extends Component {
   }
 
   _items () {
-    if (!this.props.others.length) return null
+    if (!this.props.others.length || this.props.disabled) return null
 
     return (
       <ul className='dropdown-menu'>

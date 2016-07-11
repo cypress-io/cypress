@@ -169,3 +169,5 @@ describe "Specs List", ->
           .contains("My-Fake-Project").click()
         .get(".error").contains("Go Back to Projects").click().then ->
           expect(@App.ipc).to.be.calledWith("close:project")
+
+    it "sets project as browser closed on 'go back'", ->

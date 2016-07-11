@@ -10,49 +10,65 @@ import { closeProject, openProject } from '../projects/projects-api'
 import OnBoarding from "./onboarding"
 import Loader from "react-loader"
 
-const NoBrowsers = () => (
-  <div className='full-alert alert alert-danger error'>
-    <p>
-      <i className='fa fa-warning'></i>{' '}
-      <strong>Can't Launch Any Browsers</strong>
-    </p>
-    <p>
-      We couldn't find any Chrome browsers to launch. To fix, please download Chrome.
-    </p>
-    <Link
-      to='/projects'
-      onClick={closeProject}
-      className='btn btn-default btn-sm'
-    >
-      <i className="fa fa-chevron-left"></i>{' '}
-      Go Back to Projects
-    </Link>
-    <a onClick={downloadBrowser} className='btn btn-primary btn-sm'>
-      <i className='fa fa-chrome'></i>{' '}
-      Download Chrome
-    </a>
-  </div>
-)
+const NoBrowsers = (props) => {
+
+  let _closeProject = function () {
+    closeProject(this.projectId)
+  }
+
+  return (
+    <div className='full-alert alert alert-danger error'>
+      <p>
+        <i className='fa fa-warning'></i>{' '}
+        <strong>Can't Launch Any Browsers</strong>
+      </p>
+      <p>
+        We couldn't find any Chrome browsers to launch. To fix, please download Chrome.
+      </p>
+      <Link
+        to='/projects'
+        projectId={props.projectId}
+        onClick={_closeProject}
+        className='btn btn-default btn-sm'
+      >
+        <i className="fa fa-chevron-left"></i>{' '}
+        Go Back to Projects
+      </Link>
+      <a onClick={downloadBrowser} className='btn btn-primary btn-sm'>
+        <i className='fa fa-chrome'></i>{' '}
+        Download Chrome
+      </a>
+    </div>
+  )
+}
 
 const downloadBrowser = function (e) {
   e.preventDefault()
   App.ipc('external:open', 'https://www.google.com/chrome/browser/desktop')
 }
 
-const PortInUse = () => (
-  <div>
-    <hr />
-    <p>To fix, stop the other running process or change the port in cypress.json</p>
-    <Link
-      to='/projects'
-      onClick={closeProject}
-      className='btn btn-default btn-sm'
-    >
-      <i className="fa fa-chevron-left"></i>{' '}
-      Go Back to Projects
-    </Link>
-  </div>
-)
+const PortInUse = (props) => {
+
+  let _closeProject = function () {
+    closeProject(this.projectId)
+  }
+
+  return (
+    <div>
+      <hr />
+      <p>To fix, stop the other running process or change the port in cypress.json</p>
+      <Link
+        to='/projects'
+        projectId={props.projectId}
+        onClick={_closeProject}
+        className='btn btn-default btn-sm'
+      >
+        <i className="fa fa-chevron-left"></i>{' '}
+        Go Back to Projects
+      </Link>
+    </div>
+  )
+}
 
 @withRouter
 @observer
@@ -80,7 +96,7 @@ class Project extends Component {
 
     if (!(this.project.error === undefined)) return this._error()
 
-    if (!this.project.browsers.length) return <NoBrowsers />
+    if (!this.project.browsers.length) return <NoBrowsers projectId={this.project.id}/>
 
     return (
       <div>
@@ -96,7 +112,7 @@ class Project extends Component {
     let portInUse
 
     if (err.portInUse) {
-      portInUse = <PortInUse />
+      portInUse = <PortInUse projectId={this.project.id}/>
     }
 
     return (
