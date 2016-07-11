@@ -12,7 +12,7 @@ export default {
   listen (runner) {
     const { runnablesStore, statsStore } = this
 
-    runner.on('runnables:ready', action('runnables:ready', (rootRunnable) => {
+    runner.on('runnables:ready', action('runnables:ready', (rootRunnable = {}) => {
       runnablesStore.setRunnables(rootRunnable)
     }))
 
