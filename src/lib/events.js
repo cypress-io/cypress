@@ -82,8 +82,8 @@ export default {
 
     localBus.on('show:error', (testId) => {
       const test = runnablesStore.testById(testId)
-      if (/(AssertionError|CypressError)/.test(test.errorMessage)) {
-        const command = test.commandMatchingError()
+      if (test.err.isCommandErr) {
+        const command = test.commandMatchingErr()
         if (!command) return
         runner.emit('runner:console:log', command.id)
       } else {

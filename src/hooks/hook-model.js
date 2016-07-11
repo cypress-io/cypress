@@ -21,9 +21,9 @@ export default class Hook {
     this.commands.push(command)
   }
 
-  commandMatchingError (error) {
+  commandMatchingErr (errToMatch) {
     return _(this.commands)
-      .filter(({ errorMessage }) => error === errorMessage)
+      .filter(({ err }) => err.displayMessage === errToMatch.displayMessage)
       .last()
   }
 }

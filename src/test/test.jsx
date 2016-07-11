@@ -45,14 +45,12 @@ const Test = observer(({ model }) => (
         {model.commands.length ? <Hooks model={model} /> : <NoCommands />}
       </div>
     </Collapsible>
-    {/*
     <FlashOnClick
       message='Printed output to your console!'
       onClick={() => events.emit('show:error', model.id)}
     >
-      <pre className='test-error'>{model.errorMessage}</pre>
+      <pre className='test-error'>{model.err.displayMessage}</pre>
     </FlashOnClick>
-    */}
   </div>
 ))
 

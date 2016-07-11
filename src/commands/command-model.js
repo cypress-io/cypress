@@ -1,10 +1,12 @@
 import _ from 'lodash'
 import { asStructure, observable } from 'mobx'
+
+import Err from '../lib/err-model'
 import Log from '../instruments/log-model'
 
 export default class Command extends Log {
   @observable renderProps = asStructure({})
-  // @observable errorMessage = null
+  @observable err = new Err({})
   @observable event = false
   @observable isLongRunning = false
   @observable number
@@ -14,7 +16,7 @@ export default class Command extends Log {
   constructor (props) {
     super(props)
 
-    // this.errorMessage = props.error
+    this.err.update(props.err)
     this.event = props.event
     this.number = props.number
     this.numElements = props.numElements
@@ -25,7 +27,7 @@ export default class Command extends Log {
   update (props) {
     super.update(props)
 
-    // this.errorMessage = props.error
+    this.err.update(props.err)
     this.event = props.event
     this.numElements = props.numElements
     this.renderProps = props.renderProps
@@ -34,7 +36,6 @@ export default class Command extends Log {
 
   serialize () {
     return _.extend(super.serialize(), {
-      // error: this.errorMessage,
       event: this.event,
       number: this.number,
       numElements: this.numElements,

@@ -1,13 +1,14 @@
 import _ from 'lodash'
 import { computed, observable } from 'mobx'
 
+import Err from '../lib/err-model'
 import Hook from '../hooks/hook-model'
 import Runnable from '../runnables/runnable-model'
 
 export default class Test extends Runnable {
   @observable agents = []
   @observable commands = []
-  // @observable error = asReference(null)
+  @observable err = new Err({})
   @observable hooks = []
   @observable isActive = false
   @observable routes = []
@@ -18,7 +19,7 @@ export default class Test extends Runnable {
     super(props, level)
 
     this._state = props.state
-    // this.error = props.err
+    this.err.update(props.err)
   }
 
   @computed get isLongRunning () {
@@ -49,16 +50,16 @@ export default class Test extends Runnable {
 
   finish ({ state, err, hookName }) {
     this._state = state
-    // this.error = err
+    this.err.update(err)
     this.isActive = false
     if (hookName) {
       _.find(this.hooks, { name: hookName }).failed = true
     }
   }
 
-  commandMatchingError () {
+  commandMatchingErr () {
     return _(this.hooks)
-      .map((hook) => hook.commandMatchingError(this.errorMessage))
+      .map((hook) => hook.commandMatchingErr(this.err))
       .compact()
       .last()
   }

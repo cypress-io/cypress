@@ -248,5 +248,7 @@ describe('<Command />', () => {
       component.find('FlashOnClick').simulate('click')
       expect(eventsStub.emit).to.have.been.calledWith('show:command', 'c1')
     })
+
+    // TODO: add hovering snapshot tests
   })
 })
