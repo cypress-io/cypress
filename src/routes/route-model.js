@@ -1,7 +1,7 @@
 import { observable } from 'mobx'
-import Log from './log-model'
+import Instrument from '../instruments/instrument-model'
 
-export default class Route extends Log {
+export default class Route extends Instrument {
   @observable isStubbed
   @observable method
   @observable numResponses = 0

@@ -1,7 +1,7 @@
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Children, cloneElement, Component } from 'react'
-import Tooltip from '../lib/tooltip'
+import Tooltip from '../tooltip/tooltip'
 
 @observer
 class FlashOnClick extends Component {

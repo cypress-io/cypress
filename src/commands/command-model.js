@@ -1,9 +1,9 @@
 import { asStructure, observable } from 'mobx'
 
 import Err from '../lib/err-model'
-import Log from '../instruments/log-model'
+import Instrument from '../instruments/instrument-model'
 
-export default class Command extends Log {
+export default class Command extends Instrument {
   @observable renderProps = asStructure({})
   @observable err = new Err({})
   @observable event = false

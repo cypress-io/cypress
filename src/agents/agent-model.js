@@ -1,7 +1,7 @@
 import { observable } from 'mobx'
-import Log from './log-model'
+import Instrument from '../instruments/instrument-model'
 
-export default class Agent extends Log {
+export default class Agent extends Instrument {
   @observable callCount = 0
   @observable functionName
 

@@ -1,13 +1,13 @@
 import { observer } from 'mobx-react'
 import React from 'react'
-import Tooltip from '../lib/tooltip'
+import Tooltip from '../tooltip/tooltip'
 
 import events from '../lib/events'
 import { indent } from '../lib/util'
 
 import Hooks from '../hooks/hooks'
-import Agents from '../instruments/agents'
-import Routes from '../instruments/routes'
+import Agents from '../agents/agents'
+import Routes from '../routes/routes'
 import Collapsible from '../collapsible/collapsible'
 import FlashOnClick from '../lib/flash-on-click'
 

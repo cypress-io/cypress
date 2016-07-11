@@ -6,7 +6,7 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
 import events from '../lib/events'
-import Tooltip from '../lib/tooltip'
+import Tooltip from '../tooltip/tooltip'
 import FlashOnClick from '../lib/flash-on-click'
 import runnablesStore from '../runnables/runnables-store'
 
