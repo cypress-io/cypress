@@ -111,6 +111,22 @@ module.exports = {
     .then (cfg) ->
       files.getTestFiles(cfg)
 
+  changeToSpec: (spec) ->
+    openProject.getConfig()
+    .then (cfg) ->
+      url = openProject.getUrlBySpec(cfg.clientUrl, spec)
+
+      ## TODO: the problem here is that we really need
+      ## an 'ack' event when changing the url because
+      ## the runner may not even be connected, which
+      ## in that case we need to open a new tab or
+      ## spawn a new browser instance!
+      openProject.changeToUrl(url)
+
+  getBrowsers: ->
+    ## always return an array of open browsers
+    Promise.resolve(_.compact([openBrowser]))
+
   closeBrowser: ->
     launcher.close()
 

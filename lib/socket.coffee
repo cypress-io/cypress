@@ -108,11 +108,11 @@ class Socket
     .catch (err) ->
       cb({__error: err.message, timedout: err.timedout})
 
-  onRunner: (event, data) ->
-    @io.to("reporter").emit(event, data)
+  toReporter: (event, data) ->
+    @io and @io.to("reporter").emit(event, data)
 
-  onReporter: (event, data) ->
-    @io.to("runner").emit(event, data)
+  toRunner: (event, data) ->
+    @io and @io.to("runner").emit(event, data)
 
   onAutomation: (messages, message, data) ->
     Promise.try =>
@@ -349,16 +349,19 @@ class Socket
 
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>
-          @onReporter(event, data)
+          @toRunner(event, data)
 
       runnerEvents.forEach (event) =>
         socket.on event, (data) =>
-          @onRunner(event, data)
+          @toReporter(event, data)
 
   end: ->
     ## TODO: we need an 'ack' from this end
     ## event from the other side
     @io and @io.emit("tests:finished")
+
+  changeToUrl: (url) ->
+    @toRunner("change:to:url", url)
 
   startListening: (server, watchers, config, options) ->
     if process.env["CYPRESS_ENV"] is "development"

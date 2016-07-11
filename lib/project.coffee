@@ -200,6 +200,9 @@ class Project extends EE
         checkIfBothMatch
       )
 
+  changeToUrl: (url) ->
+    @server.changeToUrl(url)
+
   setBrowsers: (browsers = []) ->
     @getConfig()
     .then (cfg) ->

@@ -85,6 +85,16 @@ handleEvent = (options, event, id, type, arg) ->
       })
       .catch(sendErr)
 
+    when "change:browser:spec"
+      project.changeToSpec(arg.spec)
+      .then(send)
+      .catch(sendErr)
+
+    when "get:open:browsers"
+      project.getBrowsers()
+      .then(send)
+      .catch(sendErr)
+
     when "window:open"
       Renderer.create(arg)
       .then(send)

@@ -304,6 +304,9 @@ class Server
   end: ->
     @_socket and @_socket.end()
 
+  changeToUrl: (url) ->
+    @_socket and @_socket.changeToUrl(url)
+
   startWebsockets: (watchers, config, options = {}) ->
     options.onDomainSet = =>
       @_onDomainSet.apply(@, arguments)
