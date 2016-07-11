@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { observable } from 'mobx'
+import { computed, observable } from 'mobx'
 
 import Agent from '../agents/agent-model'
 import Command from '../commands/command-model'
@@ -23,8 +23,12 @@ class RunnablesStore {
   @observable _tests = defaults._tests
   @observable _logs = defaults._logs
 
-  attemptingShowSnapshot: defaults.attemptingShowSnapshot
-  showingSnapshot: defaults.showingSnapshot
+  attemptingShowSnapshot = defaults.attemptingShowSnapshot
+  showingSnapshot = defaults.showingSnapshot
+
+  @computed get hasSingleTest () {
+    return _.keys(this._tests).length === 1
+  }
 
   setRunnables (rootRunnable) {
     this.runnables = this._createRunnableChildren(rootRunnable, 0)

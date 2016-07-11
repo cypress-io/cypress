@@ -4,6 +4,7 @@ import Tooltip from '../tooltip/tooltip'
 
 import events from '../lib/events'
 import { indent } from '../lib/util'
+import runnablesStore from '../runnables/runnables-store'
 
 import Hooks from '../hooks/hooks'
 import Agents from '../agents/agents'
@@ -37,7 +38,7 @@ const Test = observer(({ model }) => (
       header={<TestHeader model={model} />}
       headerClass='runnable-content-region'
       contentClass='runnable-instruments'
-      isOpen={model.state === 'failed' || model.isLongRunning}
+      isOpen={model.state === 'failed' || model.isLongRunning || runnablesStore.hasSingleTest}
     >
       <Agents model={model} />
       <Routes model={model} />
