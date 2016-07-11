@@ -181,7 +181,7 @@ describe "Projects Nav", ->
           cy
             .get(".close-browser").should("be.visible")
 
-        describe "close browser", ->
+        describe "stop browser", ->
           it "calls close:browser on click of stop button", ->
             cy
               .get(".close-browser").click().then ->
@@ -189,7 +189,39 @@ describe "Projects Nav", ->
 
           it "hides close button on click of stop", ->
             cy
-              .get(".close-browser").click().should("not.exist")
+              .get(".close-browser").click()
+                .should("not.exist")
+
+          it "re-enables browser dropdown", ->
+            cy
+              .get(".browsers-list>a").first()
+                .and("not.have.class", "disabled")
+
+          it "displays default browser icon", ->
+            cy
+              .get(".browsers-list>a").first()
+                .find(".fa-chrome")
+
+        describe "browser is closed manually", ->
+          it "hides close browser button", ->
+            cy
+              .get(".close-browser").should("be.visible").then ->
+                @ipc.handle("launch:browser", null, {browserClosed: true})
+              .get(".close-browser").should("not.be.visible")
+
+          it "re-enables browser dropdown", ->
+            cy
+              .get(".close-browser").should("be.visible").then ->
+                @ipc.handle("launch:browser", null, {browserClosed: true})
+              .get(".browsers-list>a").first()
+                .and("not.have.class", "disabled")
+
+          it "displays default browser icon", ->
+            cy
+              .get(".close-browser").should("be.visible").then ->
+                @ipc.handle("launch:browser", null, {browserClosed: true})
+              .get(".browsers-list>a").first()
+                .find(".fa-chrome")
 
     describe "only one browser available", ->
       beforeEach ->
