@@ -1,3 +1,5 @@
+/*global $*/
+
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
@@ -58,7 +60,7 @@ class Specs extends Component {
     } else {
       return (
         <li key={spec.id} className='file'>
-          <a href='#' onClick={this._selectSpec.bind(this)} data-spec={spec.id}>
+          <a href='#' onClick={this._selectSpec.bind(this, spec)}>
             <div>
               <div>
                 <i className='fa fa-file-code-o'></i>
@@ -82,13 +84,16 @@ class Specs extends Component {
     launchBrowser(project, '__all', project.chosenBrowser.name)
   }
 
-  _selectSpec (e) {
+  _selectSpec (spec, e) {
     e.preventDefault()
 
-    let spec = e.currentTarget.getAttribute('data-spec')
+    $('.file>a.active').removeClass('active')
+
+    e.currentTarget.classList.add('active')
+
     let project = this.props.project
 
-    launchBrowser(project, spec, project.chosenBrowser.name)
+    launchBrowser(project, spec.id, project.chosenBrowser.name)
   }
 
   _empty () {
