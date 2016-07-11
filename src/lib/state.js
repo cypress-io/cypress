@@ -1,69 +1,62 @@
 import _ from 'lodash'
-import { computed, observable, asReference } from 'mobx'
+import { computed, observable } from 'mobx'
 import automation from './automation'
 
 const headerHeight = 46
 const reporterWidth = 450
 
-// used as initial values and in reset method to reset state between runs
-const defaults = {
-  isRunning: false,
-
+const _defaults = {
   messageTitle: null,
   messageDescription: null,
   messageType: '',
-
-  url: '',
-  highlightUrl: false,
-  isLoading: false,
 
   width: 1000,
   height: 660,
 }
 
-const state = observable({
-  defaults: asReference(defaults),
+class State {
+  defaults = _defaults
 
-  isRunning: defaults.isRunning,
+  @observable isRunning = false
 
-  messageTitle: defaults.messageTitle,
-  messageDescription: defaults.messageDescription,
-  messageType: defaults.messageType,
+  @observable messageTitle = _defaults.messageTitle
+  @observable messageDescription = _defaults.messageDescription
+  @observable messageType = _defaults.messageType
 
-  url: defaults.url,
-  highlightUrl: defaults.highlightUrl,
-  isLoading: defaults.isLoading,
+  @observable url = ''
+  @observable highlightUrl = false
+  @observable isLoading = false
 
-  width: defaults.width,
-  height: defaults.height,
+  @observable width = _defaults.width
+  @observable height = _defaults.height
 
-  _windowWidth: 0,
-  _windowHeight: 0,
+  @observable _windowWidth = 0
+  @observable _windowHeight = 0
 
-  automation: automation.CONNECTING,
+  @observable automation = automation.CONNECTING
 
   @computed get scale () {
     if (this._containerWidth < this.width || this._containerHeight < this.height) {
       return Math.min(this._containerWidth / this.width, this._containerHeight / this.height, 1)
     }
     return 1
-  },
+  }
 
   @computed get _containerWidth () {
     return this._windowWidth - reporterWidth
-  },
+  }
 
   @computed get _containerHeight () {
     return this._windowHeight - headerHeight
-  },
+  }
 
   @computed get marginLeft () {
     return (this._containerWidth / 2) - (this.width / 2)
-  },
+  }
 
   @computed get displayScale () {
     return Math.floor(this.scale * 100)
-  },
+  }
 
   @computed({ asStructure: true }) get messageStyles () {
     const actualHeight = this.height * this.scale
@@ -75,24 +68,23 @@ const state = observable({
     } else {
       return { top: (actualHeight + headerHeight + nudge), opacity: '0.9' }
     }
-  },
+  }
 
-  updateWindowDimensions: asReference(function (width, height) {
+  updateDimensions (width, height) {
+    this.width = width
+    this.height = height
+  }
+
+  updateWindowDimensions (width, height) {
     this._windowWidth = width
     this._windowHeight = height
-  }),
+  }
 
-  clearMessage: asReference(function () {
-    this.messageTitle = defaults.messageTitle
-    this.messageDescription = defaults.messageDescription
-    this.messageType = defaults.messageType
-  }),
+  clearMessage () {
+    this.messageTitle = _defaults.messageTitle
+    this.messageDescription = _defaults.messageDescription
+    this.messageType = _defaults.messageType
+  }
+}
 
-  reset: asReference(function () {
-    _.each(defaults, (defaultValue, key) => {
-      this[key] = defaultValue
-    })
-  }),
-})
-
-export default state
+export default new State()

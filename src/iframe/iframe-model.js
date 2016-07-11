@@ -15,57 +15,46 @@ export default class IframeModel {
   }
 
   listen () {
-    runner.on('run:start', this._beforeRun)
-    runner.on('run:end', this._afterRun)
+    runner.on('run:start', action('run:start', this._beforeRun))
+    runner.on('run:end', action('run:start', this._afterRun))
 
-    runner.on('viewport', this._updateViewport)
-    runner.on('config', (config) => {
+    runner.on('viewport', action('viewport', this._updateViewport))
+    runner.on('config', action('config', (config) => {
       this._updateViewport(_.map(config, 'viewportHeight', 'viewportWidth'))
-    })
+    }))
 
-    runner.on('stop', () => {
-      this.reset()
-      this.stopListening()
-    })
+    runner.on('url:changed', action('url:changed', this._updateUrl))
+    runner.on('page:loading', action('page:loading', this._updateLoading))
 
-    runner.on('url:changed', this._updateUrl)
-    runner.on('page:loading', this._updateLoading)
-
-    runner.on('show:snapshot', this._setSnapshots)
-    runner.on('hide:snapshot', this._clearSnapshots)
+    runner.on('show:snapshot', action('show:snapshot', this._setSnapshots))
+    runner.on('hide:snapshot', action('hide:snapshot', this._clearSnapshots))
   }
 
-  @action reset () {
-    this.state.reset()
-  }
-
-  @action _beforeRun = () => {
-    this.state.reset()
+  _beforeRun = () => {
     this.state.isRunning = true
   }
 
-  @action _afterRun = () => {
+  _afterRun = () => {
     this.state.isRunning = false
   }
 
-  @action _updateViewport = (viewport) => {
-    this.state.width = viewport.viewportWidth
-    this.state.height = viewport.viewportHeight
+  _updateViewport = ({ viewportWidth, viewportHeight }) => {
+    this.state.updateDimensions(viewportWidth, viewportHeight)
   }
 
-  @action _updateUrl = (url) => {
+  _updateUrl = (url) => {
     this.state.url = url
   }
 
-  @action _updateLoading = (loading) => {
+  _updateLoading = (loading) => {
     this.state.loading = loading
   }
 
-  @action _clearMessage = () => {
+  _clearMessage = () => {
     this.state.clearMessage()
   }
 
-  @action _setSnapshots = (snapshots, log) => {
+  _setSnapshots = (snapshots, log) => {
     if (this.state.isRunning) {
       return this._testsRunningError()
     }
@@ -116,7 +105,7 @@ export default class IframeModel {
     revert(snapshots[0])
   }
 
-  @action _clearSnapshots = () => {
+  _clearSnapshots = () => {
     clearInterval(this.intervalId)
 
     this.state.highlightUrl = false
