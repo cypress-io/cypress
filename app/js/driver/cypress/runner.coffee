@@ -5,6 +5,7 @@ $Cypress.Runner = do ($Cypress, _) ->
   ERROR_PROPS          = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
   RUNNABLE_PROPS       = "id title root hookName err duration state failedFromHook alreadyEmittedMocha".split(" ")
   RUNNABLE_COLLECTIONS = "routes agents commands".split(" ")
+  IGNORE_LOG_ATTRS     = "snapshots".split(" ")
 
   # ## initial payload
   # {
@@ -301,6 +302,12 @@ $Cypress.Runner = do ($Cypress, _) ->
           @hookFailed(runnable, runnable.err)
 
     addLogToTest: (log) ->
+      log = _.omit(log, IGNORE_LOG_ATTRS)
+
+      ## TODO: handle proper stringification
+      if consoleProps = log.consoleProps
+        delete consoleProps.Returned
+
       {testId, instrument} = log
 
       if test = @testIds[testId]
