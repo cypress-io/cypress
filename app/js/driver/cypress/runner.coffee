@@ -82,7 +82,7 @@ $Cypress.Runner = do ($Cypress, _) ->
     test._fired[event] = true
 
     ## dont fire anything again if we are skipped
-    return if test._SKIPPED
+    return if test._ALREADY_RAN
 
     if options.multiple
       [].concat(@Cypress.invoke(event, @wrap(test), test))
@@ -270,7 +270,7 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## so we normalize the pending / test events
       @runner.on "pending", (test) ->
         ## do nothing if our test is skipped
-        return if test._SKIPPED
+        return if test._ALREADY_RAN
 
         if not fired("test:before:run", test)
           fire.call(_this, "test:before:run", test)
@@ -386,10 +386,10 @@ $Cypress.Runner = do ($Cypress, _) ->
 
       return obj
 
-    skipToTest: (id) ->
+    resumeAtTest: (id) ->
       for test in @tests
         if test.id isnt id
-          test._SKIPPED = true
+          test._ALREADY_RAN = true
           test.pending = true
           ## delete the fn?
         else

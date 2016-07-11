@@ -416,7 +416,7 @@
               continue
 
             if (runnable.title isnt e.title) or (runnable.fn.toString() isnt e.fn)
-              runnable._SKIPPED = true
+              runnable._ALREADY_RAN = true
               runnable.pending = true
               ## delete the fn?
               # delete runnable.fn
