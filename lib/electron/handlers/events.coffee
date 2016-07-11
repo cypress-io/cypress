@@ -81,6 +81,9 @@ handleEvent = (options, event, id, type, arg) ->
         onBrowserOpen: ->
           send({browserOpened: true})
         onBrowserClose: ->
+          ## ensure the state is correct
+          project.closeBrowser()
+
           send({browserClosed: true})
       })
       .catch(sendErr)
