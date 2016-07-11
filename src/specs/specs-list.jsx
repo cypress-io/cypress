@@ -1,12 +1,11 @@
-/*global $*/
-
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 
 import App from '../lib/app'
+import { clearActiveSpec } from '../lib/utils'
 import { getSpecs } from './specs-api'
-import { launchBrowser } from '../projects/projects-api'
+import { runSpec } from '../projects/projects-api'
 import specsCollection from './specs-collection'
 import Loader from 'react-loader'
 
@@ -44,7 +43,7 @@ class Specs extends Component {
         <li key={spec.id} className='folder'>
           <div>
             <div>
-              <i className='fa fa-folder-open-o'></i>
+              <i className='fa fa-folder-open-o fa-fw'></i>
               { spec.name }{' '}
             </div>
             <div>
@@ -63,7 +62,7 @@ class Specs extends Component {
           <a href='#' onClick={this._selectSpec.bind(this, spec)}>
             <div>
               <div>
-                <i className='fa fa-file-code-o'></i>
+                <i className='fa fa-file-code-o fa-fw'></i>
                 { spec.name }
               </div>
             </div>
@@ -79,21 +78,31 @@ class Specs extends Component {
   _runAllSpecs (e) {
     e.preventDefault()
 
+    clearActiveSpec()
+
+    let link = e.currentTarget
+
+    link.classList.add('active')
+    link.getElementsByTagName('i')[0].setAttribute('class', 'fa fa-wifi green fa-fw')
+
     let project = this.props.project
 
-    launchBrowser(project, '__all', project.chosenBrowser.name)
+    runSpec(project, '__all', project.chosenBrowser.name)
   }
 
   _selectSpec (spec, e) {
     e.preventDefault()
 
-    $('.file>a.active').removeClass('active')
+    clearActiveSpec()
 
-    e.currentTarget.classList.add('active')
+    let link = e.currentTarget
+
+    link.classList.add('active')
+    link.getElementsByTagName('i')[0].setAttribute('class', 'fa fa-wifi green fa-fw')
 
     let project = this.props.project
 
-    launchBrowser(project, spec.id, project.chosenBrowser.name)
+    runSpec(project, spec.id, project.chosenBrowser.name)
   }
 
   _empty () {

@@ -1,10 +1,8 @@
-/*global $*/
-
 import React, { Component } from 'react'
 import Dropdown from '../dropdown/dropdown'
 import { observer } from 'mobx-react'
-import Tooltip from 'rc-tooltip'
 
+import { clearActiveSpec } from '../lib/utils'
 import { closeBrowser } from '../projects/projects-api'
 
 @observer
@@ -61,7 +59,7 @@ export default class Browsers extends Component {
       prefixText = 'Running'
     } else {
       prefixText = ''
-      $('.file>a.active').removeClass('active')
+      clearActiveSpec()
     }
 
     return (

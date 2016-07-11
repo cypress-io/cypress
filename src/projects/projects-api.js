@@ -37,29 +37,41 @@ const addProject = () => {
   })
 }
 
-const launchBrowser = (project, spec, browser, url) => {
-  project.setChosenBrowserByName(browser)
-  project.browserOpening()
+const runSpec = (project, spec, browser, url) => {
+  let launchBrowser = () => {
+    project.setChosenBrowserByName(browser)
+    project.browserOpening()
 
-  return App.ipc('launch:browser', { browser, url, spec }, (err, data = {}) => {
-    if (data.browserOpened) {
-      project.browserOpened()
-    }
+    return App.ipc('launch:browser', { browser, url, spec }, (err, data = {}) => {
+      if (data.browserOpened) {
+        project.browserOpened()
+      }
 
-    if (data.browserClosed) {
-      project.browserClosed()
-      return App.ipc.off('launch:browser')
+      if (data.browserClosed) {
+        project.browserClosed()
+        return App.ipc.off('launch:browser')
+      }
+    })
+  }
+
+  return App.ipc('get:open:browsers')
+  .then((browsers = []) => {
+    if (browsers.length) {
+      return App.ipc('change:browser:spec', { spec })
+    } else {
+      return launchBrowser()
     }
   })
+
 }
 
 const closeBrowser = (projectId) => {
+  App.ipc('close:browser')
   if (projectId) {
     let project = projectsStore.getProjectById(projectId)
     project.browserClosed()
   }
   App.ipc.off('launch:browser')
-  return App.ipc('close:browser')
 }
 
 const closeProject = (projectId) => {
@@ -99,7 +111,7 @@ const openProject = (project) => {
 
         // if we had an open browser then launch it again!
         if (data.browser) {
-          action('launch:browser', launchBrowser(project, data.browser))
+          action('launch:browser', runSpec(project, data.browser))
         }
 
         // recursively listen for more change events!
@@ -119,6 +131,6 @@ export {
   openProject,
   closeProject,
   addProject,
-  launchBrowser,
+  runSpec,
   closeBrowser,
 }

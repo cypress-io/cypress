@@ -20,6 +20,19 @@
       text-decoration: none;
     }
 
+    &.active {
+      pointer-events: none;
+      color: #4c4e63;
+      text-decoration: none;
+
+      &:hover {
+        pointer-events: none;
+        color: #4c4e63;
+        text-decoration: none;
+
+      }
+    }
+
     i {
       font-size: 12px;
       position: relative;
@@ -82,15 +95,16 @@
 
     &.active {
       pointer-events: none;
-      background-color: #f5f9fb;
-      color: #5c5e63;
+      background-color: #F5FBF7;
+      color: #4c4e63;
       text-decoration: none;
 
       &:hover {
         pointer-events: none;
-        background-color: #f5f9fb;
-        color: #5c5e63;
+        background-color: #F5FBF7;
+        color: #4c4e63;
         text-decoration: none;
+
       }
     }
 
