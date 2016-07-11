@@ -20,16 +20,13 @@ class Config extends Component {
       <div id='config'>
         <div className='config-wrapper'>
           <h5>
-            Resolved Configuration:{' '}
-            <Tooltip
-              overlay={'Click here to read about project config'}
-            >
-              <a href='#' onClick={this._openHelp}>
-                <i className='fa fa-question-circle'></i>
-              </a>
-            </Tooltip>
+            Your project's configuration:{' '}
+            <a href='#' className='pull-right' onClick={this._openHelp}>
+              <i className='fa fa-question-circle'></i>{' '}
+              Learn more
+            </a>
           </h5>
-          <div className='config-vars'>
+          <pre className='config-vars'>
             { `{` }
             { this._display(config, { comma: true }) }
             <span className='envVars'>
@@ -41,8 +38,7 @@ class Config extends Component {
             <span className='line'>{`}`}</span>
             <br />
             { `\n}` }
-          </div>
-          <hr />
+          </pre>
           <h5>
             Legend
           </h5>

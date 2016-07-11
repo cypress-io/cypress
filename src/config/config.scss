@@ -8,6 +8,15 @@
 
   h5 {
     margin-top: 20px;
+    overflow: auto;
+    line-height: 19px;
+
+    a {
+      font-weight: normal;
+      font-size: 12px;
+      position: relative;
+      top: 2px;
+    }
   }
 
   .envBracket {
