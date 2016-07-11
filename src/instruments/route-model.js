@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { observable } from 'mobx'
 import Log from './log-model'
 
@@ -30,15 +29,5 @@ export default class Route extends Log {
     this.response = props.response
     this.status = props.status
     this.url = props.url
-  }
-
-  serialize () {
-    return _.extend(super.serialize(), {
-      isStubbed: this.isStubbed,
-      method: this.method,
-      numResponses: this.numResponses,
-      response: this.response,
-      status: this.status,
-    })
   }
 }

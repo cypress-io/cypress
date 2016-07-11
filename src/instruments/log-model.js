@@ -34,17 +34,4 @@ export default class Log {
     this.referencesAlias = props.referencesAlias
     this.referencesAlias = props.referencesAlias
   }
-
-  serialize () {
-    return {
-      alias: this.alias,
-      aliasType: this.aliasType,
-      id: this.id,
-      name: this.name,
-      message: this.message,
-      state: this.state,
-      type: this.type,
-      referencesAlias: this.referencesAlias,
-    }
-  }
 }

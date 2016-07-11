@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { asStructure, observable } from 'mobx'
 
 import Err from '../lib/err-model'
@@ -32,14 +31,5 @@ export default class Command extends Log {
     this.numElements = props.numElements
     this.renderProps = props.renderProps
     this.visible = props.visible
-  }
-
-  serialize () {
-    return _.extend(super.serialize(), {
-      event: this.event,
-      number: this.number,
-      numElements: this.numElements,
-      visible: this.visible,
-    })
   }
 }

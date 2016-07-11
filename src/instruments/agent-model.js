@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { observable } from 'mobx'
 import Log from './log-model'
 
@@ -18,12 +17,5 @@ export default class Agent extends Log {
 
     this.callCount = props.callCount
     this.functionName = props.functionName
-  }
-
-  serialize () {
-    return _.extend(super.serialize(), {
-      callCount: this.callCount,
-      functionName: this.functionName,
-    })
   }
 }
