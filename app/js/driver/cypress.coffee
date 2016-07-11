@@ -46,6 +46,9 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
       @runner.run(fn)
 
+    getStartTime: ->
+      @runner.getStartTime()
+
     getTestsState: ->
       @runner.getTestsState()
 

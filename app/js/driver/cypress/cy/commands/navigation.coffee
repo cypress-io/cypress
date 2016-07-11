@@ -336,6 +336,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                 state = {
                   currentId: id
                   tests:     Cypress.getTestsState()
+                  startTime: Cypress.getStartTime()
                   scrollTop: null
                 }
 

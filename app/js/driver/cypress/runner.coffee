@@ -1,4 +1,4 @@
-$Cypress.Runner = do ($Cypress, _) ->
+$Cypress.Runner = do ($Cypress, _, moment) ->
 
   defaultGrep = /.*/
 
@@ -145,6 +145,7 @@ $Cypress.Runner = do ($Cypress, _) ->
       @tests = []
       @runnables = []
       @runnableIds = {}
+      @startTime = null
 
     listeners: ->
       ## bail if we've already set our listeners
@@ -524,7 +525,15 @@ $Cypress.Runner = do ($Cypress, _) ->
       if re = options.grep
         @grep(re)
 
+    setStartTime: (iso) ->
+      @startTime = iso
+
+    getStartTime: ->
+      @startTime
+
     run: (fn) ->
+      @startTime ?= moment().toJSON()
+
       @runnerListeners()
 
       @runner.run (failures) =>
