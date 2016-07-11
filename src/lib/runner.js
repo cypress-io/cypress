@@ -77,6 +77,7 @@ export default {
         }
 
         driver.run(() => {})
+        reporterBus.emit('reporter:start:time', driver.getStartTime())
       })
     })
 
