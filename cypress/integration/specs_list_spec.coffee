@@ -215,8 +215,8 @@ describe "Specs List", ->
       cy
         .get(".projects-list a")
           .contains("My-Fake-Project").click()
-        # .get("#updates-available").should("be.visible")
-        # .contains("New updates are available")
+        .get("#updates-available").should("be.visible")
+        .contains("New updates are available")
 
       cy
         .get(".error")
