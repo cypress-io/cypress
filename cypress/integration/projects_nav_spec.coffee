@@ -82,7 +82,7 @@ describe "Projects Nav", ->
 
       it "displays config page", ->
         cy
-          .contains("h5", "Config")
+          .contains("h5", "configuration")
 
   context "browsers dropdown", ->
     describe "browsers available", ->
@@ -145,10 +145,9 @@ describe "Projects Nav", ->
             .get(".browsers-list>a").first().find("i")
               .should("have.class", "fa fa-refresh fa-spin")
 
-        it "disables browser dropdown", ->
+        it.only "disables browser dropdown", ->
           cy
             .get(".browsers-list>a").first()
-              .should("be.disabled")
               .and("have.class", "disabled")
 
       context "browser opened after choosing spec", ->
@@ -164,7 +163,7 @@ describe "Projects Nav", ->
                 }
               )
 
-        it.only "displays browser icon as opened", ->
+        it "displays browser icon as opened", ->
           cy
             .get(".browsers-list>a").first().find("i")
               .should("have.class", "fa fa-wifi")
@@ -172,7 +171,6 @@ describe "Projects Nav", ->
         it "disables browser dropdown", ->
           cy
             .get(".browsers-list>a").first()
-              .should("be.disabled")
               .and("have.class", "disabled")
 
 

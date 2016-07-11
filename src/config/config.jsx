@@ -37,7 +37,7 @@ class Config extends Component {
             </span>
             <span className='line'>{`}`}</span>
             <br />
-            { `\n}` }
+            { `}` }
           </pre>
           <h5>
             Legend

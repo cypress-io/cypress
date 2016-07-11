@@ -1,7 +1,7 @@
 #login {
   background-color: #232A34;
   text-align: center;
-  padding-top: 80px;
+  padding-top: 150px;
   position: fixed;
   top: 0;
   bottom: 0;
@@ -13,10 +13,12 @@
     color: #fff;
     margin-bottom: 15px;
     font-weight: 200;
+    font-size: 28px;
   }
 
   p {
     color: #bbb;
+    font-size: 16px;
   }
 
   .alert.alert-danger {
@@ -45,7 +47,8 @@
 
 .btn-login {
   line-height: 24px;
-  margin-top: 10px;
+  margin-top: 20px;
+  font-size: 16px;
 
   &:active, &:focus {
     outline: 0

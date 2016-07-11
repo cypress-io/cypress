@@ -1,6 +1,6 @@
 #tests-list-page {
   bottom: 18px;
-  top: 70px;
+  top: 77px;
   position: fixed;
   overflow: auto;
   margin-bottom: 0;
@@ -10,8 +10,10 @@
     position: absolute;
     top: 0;
     right: 2px;
-    font-size: 13px;
+    font-size: 14px;
     color: #637eb9;
+    padding-top: 5px;
+    padding-bottom: 5px;
 
     &:hover, &:focus {
       color: #38589c;
@@ -19,7 +21,7 @@
     }
 
     i {
-      font-size: 11px;
+      font-size: 12px;
       position: relative;
       top: -1px;
     }
@@ -50,7 +52,7 @@
 
   .folder {
     font-weight: 500;
-    font-size: 14px;
+    font-size: 15px;
     color: #636363;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
@@ -70,6 +72,7 @@
     padding: 4px 0;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #637eb9;
+    font-size: 15px;
 
 
     i {

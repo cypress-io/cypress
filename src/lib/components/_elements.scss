@@ -25,8 +25,12 @@ html, body {
   height: 100%;
 }
 
-h3, h4 {
+h3, h4, h5 {
   font-family: "Fira Sans";
+}
+
+h5 {
+  font-size: 15px;
 }
 
 a {

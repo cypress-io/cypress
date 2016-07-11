@@ -2,9 +2,10 @@
   background-color:#ececec;
   box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.20);
   border-color: #c8c8c8;
+  min-height: 35px;
 
   &.navbar-fixed-top {
-    top:  40px;
+    top: 40px;
   }
 
   .navbar-nav {
@@ -23,7 +24,7 @@
         font-size: 13px;
         color: #444;
         padding: 1px 20px 0 20px;
-        line-height: 29px;
+        line-height: 35px;
 
         &.active {
           background-color: #dedede;
@@ -87,7 +88,7 @@
 
     &>li>a {
       line-height: 30px;
-      font-size: 13px;
+      font-size: 14px;
     }
   }
 }
