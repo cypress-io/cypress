@@ -35,14 +35,9 @@ export default class Browsers extends Component {
     if (this.props.project.browserState === 'opened') {
       return (
         <li className='close-browser'>
-          <Tooltip
-            overlay='Close Browser'
-            placement='bottomRight'
-          >
-            <a href='#' className='btn-link' onClick={this._closeBrowser.bind(this)}>
-              <i className='fa fa-times red'></i>
-            </a>
-          </Tooltip>
+          <a href='#' className='btn-link' onClick={this._closeBrowser.bind(this)}>
+            <i className='fa fa-times red'></i>
+          </a>
         </li>
       )
     }
