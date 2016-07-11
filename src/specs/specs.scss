@@ -9,11 +9,11 @@
   .all-tests {
     position: absolute;
     top: 0;
-    right: 0;
+    right: 2px;
     font-size: 13px;
     color: #637eb9;
 
-    &:hover {
+    &:hover, &:focus {
       color: #38589c;
       text-decoration: none;
     }
@@ -77,7 +77,13 @@
       margin-right: 6px;
     }
 
-    &:hover {
+    &.active {
+      pointer-events: none;
+      background-color: #f5f9fb;
+      color: #5c5e63;
+    }
+
+    &:hover, &:focus {
       background-color: #f8f8f8;
       color: #38589c;
       cursor: pointer;
@@ -98,7 +104,7 @@
 
   .list-as-table>.file {
     &:last-child>a {
-      border-bottom: 0;
+      // border-bottom: 0;
     }
 
     &>div:first-child {
