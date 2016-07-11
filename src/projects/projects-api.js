@@ -59,7 +59,7 @@ const closeBrowser = (projectId) => {
     project.browserClosed()
   }
   App.ipc.off('launch:browser')
-  // return App.ipc('close:browser')
+  return App.ipc('close:browser')
 }
 
 const closeProject = (projectId) => {
