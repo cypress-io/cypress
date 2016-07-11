@@ -90,9 +90,9 @@ class Project extends Component {
   }
 
   render () {
-    if (this.project.isLoading) return <Loader color="#888" scale={0.5}/>
-
     document.title = `${this.project.name}`
+
+    if (this.project.isLoading) return <Loader color="#888" scale={0.5}/>
 
     if (!(this.project.error === undefined)) return this._error()
 
