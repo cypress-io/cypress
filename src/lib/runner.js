@@ -68,8 +68,8 @@ export default {
         if (state.currentId) {
           // if we have a currentId it means
           // we need to tell the runner to skip
-          // ahead to that tests
-          runner.skipToTest(state.currentId)
+          // ahead to that test
+          runner.resumeAtTest(state.currentId)
         }
 
         driver.run(() => {})
