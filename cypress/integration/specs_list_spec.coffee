@@ -92,12 +92,38 @@ describe "Specs List", ->
       it "triggers launch:browser on click of button", ->
         cy
           .contains(".btn", "Run All Tests").click().then ->
+            @ipc.handle("get:open:browsers", null, [])
+          .then ->
             ln = @App.ipc.args.length
             lastCallArgs = @App.ipc.args[ln-1]
 
             expect(lastCallArgs[0]).to.eq "launch:browser"
             expect(lastCallArgs[1].browser).to.eq "chrome"
             expect(lastCallArgs[1].spec).to.eq "__all"
+
+      it "triggers change:browser:spec if browser is open", ->
+        cy
+          .contains(".btn", "Run All Tests").click()
+          .fixture("browsers").then (@browsers) ->
+            @ipc.handle("get:open:browsers", null, ["chrome"])
+          .then ->
+            expect(@App.ipc).to.be.calledWithExactly("change:browser:spec", {
+              spec: "integration/app_spec.coffee"
+            })
+
+      describe "all specs running in browser", ->
+        beforeEach ->
+          cy
+            .contains(".btn", "Run All Tests").as("allSpecs")
+              .click().then ->
+                @ipc.handle("get:open:browsers", null, ["chrome"])
+                @ipc.handle("change:browser:spec", null, {})
+
+        it "updates spec icon", ->
+          cy.get("@allSpecs").find("i").should("have.class", "fa-wifi")
+
+        it "sets spec as active", ->
+          cy.get("@allSpecs").should("have.class", "active")
 
     it "lists main folders of specs", ->
       cy.contains(".folder", "integration")
