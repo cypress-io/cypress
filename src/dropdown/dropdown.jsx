@@ -6,7 +6,6 @@ import { findDOMNode } from 'react-dom'
 class Dropdown extends Component {
   static defaultProps = {
     className: '',
-    defaultState: 'closed',
   }
 
   static propTypes = {
@@ -18,7 +17,7 @@ class Dropdown extends Component {
     renderItem: PropTypes.func.isRequired,
     // property for unique value on each item that can be used as its key
     keyProperty: PropTypes.string.isRequired,
-    defaultState: PropTypes.string,
+    disabled: PropTypes.bool,
   }
 
   constructor (props) {
@@ -35,9 +34,20 @@ class Dropdown extends Component {
     }
     document.body.addEventListener('click', this.outsideClickHandler)
 
-    if (this.props.defaultState === 'open') {
-      this._toggleOpen()
+  }
+
+  componentDidUpdate () {
+    let icon
+
+    if (this.props.browserState === 'opening') {
+      icon = 'refresh fa-spin'
+    } else if (this.props.browserState === 'opened') {
+      icon = 'wifi green'
+    } else {
+      icon = 'chrome'
     }
+
+    findDOMNode(this).getElementsByTagName('i')[0].setAttribute('class', `fa fa-${icon}`)
   }
 
   componentWillUnmount () {
@@ -54,9 +64,11 @@ class Dropdown extends Component {
   }
 
   _button () {
+    let disabledClass = this.props.disabled ? 'disabled' : ''
+
     if (this.props.others.length) {
       return (
-        <a onClick={this._toggleOpen}>
+        <a onClick={this._toggleOpen} className={disabledClass}>
           {this._buttonContent()}
         </a>
       )
@@ -72,7 +84,6 @@ class Dropdown extends Component {
   _buttonContent () {
     return (
       <span>
-        {this._icon()}{' '}
         {this.props.renderItem(this.props.chosen)}{' '}
         {this._caret()}
       </span>

@@ -32,7 +32,7 @@ describe "Projects Nav", ->
         .get(".navbar-default")
 
     it "adds project name to title", ->
-      cy.title().should("eq", "Cypress: My-Fake-Project")
+      cy.title().should("eq", "My-Fake-Project")
 
     describe "back button", ->
       it "does not display 'Add Project' button", ->
@@ -94,23 +94,24 @@ describe "Projects Nav", ->
             .contains("My-Fake-Project").as("firstProject").click().then ->
               @ipc.handle("open:project", null, @config)
 
-      it "lists browsers", ->
-        cy
-          .get(".browsers-list").parent()
-          .find(".dropdown-menu").first().find("li").should("have.length", 2)
-          .should ($li) ->
-            expect($li.first()).to.contain("Chromium")
-            expect($li.last()).to.contain("Canary")
+      context "normal browser list behavior", ->
+        it "lists browsers", ->
+          cy
+            .get(".browsers-list").parent()
+            .find(".dropdown-menu").first().find("li").should("have.length", 2)
+            .should ($li) ->
+              expect($li.first()).to.contain("Chromium")
+              expect($li.last()).to.contain("Canary")
 
-      it "displays default browser name in chosen", ->
-        cy
-          .get(".browsers-list>a").first()
-            .should("contain", "Chrome")
+        it "displays default browser name in chosen", ->
+          cy
+            .get(".browsers-list>a").first()
+              .should("contain", "Chrome")
 
-      it "displays default browser icon in chosen", ->
-        cy
-          .get(".browsers-list>a").first()
-            .find(".fa-chrome")
+        it "displays default browser icon in chosen", ->
+          cy
+            .get(".browsers-list>a").first()
+              .find(".fa-chrome")
 
       context "switch browser", ->
         beforeEach ->
@@ -130,6 +131,50 @@ describe "Projects Nav", ->
             .should ($li) ->
               expect($li.first()).to.contain("Chrome")
               expect($li.last()).to.contain("Canary")
+
+      context "opening browser by choosing spec", ->
+        beforeEach ->
+          cy
+            .fixture("specs").then (@specs) ->
+              @ipc.handle("get:specs", null, @specs)
+          cy
+            .contains(".file", "app_spec").click()
+
+        it "displays browser icon as spinner", ->
+          cy
+            .get(".browsers-list>a").first().find("i")
+              .should("have.class", "fa fa-refresh fa-spin")
+
+        it "disables browser dropdown", ->
+          cy
+            .get(".browsers-list>a").first()
+              .should("be.disabled")
+              .and("have.class", "disabled")
+
+      context "browser opened after choosing spec", ->
+        beforeEach ->
+          cy
+            .fixture("specs").then (@specs) ->
+              @ipc.handle("get:specs", null, @specs)
+
+          cy
+            .contains(".file", "app_spec").click().then ->
+              @ipc.handle("launch:browser", null, {
+                  browserOpened: true
+                }
+              )
+
+        it.only "displays browser icon as opened", ->
+          cy
+            .get(".browsers-list>a").first().find("i")
+              .should("have.class", "fa fa-wifi")
+
+        it "disables browser dropdown", ->
+          cy
+            .get(".browsers-list>a").first()
+              .should("be.disabled")
+              .and("have.class", "disabled")
+
 
     describe "only one browser available", ->
       beforeEach ->

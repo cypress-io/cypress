@@ -9,25 +9,35 @@
 
   .navbar-nav {
     &>.open {
-      &>a, &>a:hover, &>a:focus {
+      &>a, &>a:hover {
         background-color: #dedede;
         color: #262626;
       }
     }
 
-    &>li>a {
-      font-size: 13px;
-      color: #444;
-      padding: 1px 20px 0 20px;
-      line-height: 29px;
+    &>li {
 
-      &.active {
-        background-color: #dedede;
-        color: #262626;
+
+
+      &>a {
+        font-size: 13px;
+        color: #444;
+        padding: 1px 20px 0 20px;
+        line-height: 29px;
+
+        &.active {
+          background-color: #dedede;
+          color: #262626;
+        }
+
+        &:hover, &:focus {
+          background-color: #f3f3f3;
+        }
       }
 
-      &:hover, &:focus {
-        background-color: #f3f3f3;
+      &.dropdown>a {
+        padding-left: 15px;
+        padding-right: 15px;
       }
     }
   }
