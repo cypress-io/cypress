@@ -34,7 +34,7 @@ export default class Browsers extends Component {
   _closeBrowserBtn = () => {
     if (this.props.project.browserState === 'opened') {
       return (
-        <li class='close-browser'>
+        <li className='close-browser'>
           <Tooltip
             overlay='Close Browser'
             placement='bottomRight'

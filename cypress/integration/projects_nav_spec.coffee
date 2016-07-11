@@ -113,6 +113,10 @@ describe "Projects Nav", ->
             .get(".browsers-list>a").first()
               .find(".fa-chrome")
 
+        it "does not display stop button", ->
+          cy
+            .get(".close-browser").should("not.exist")
+
       context "switch browser", ->
         beforeEach ->
           cy
@@ -173,6 +177,19 @@ describe "Projects Nav", ->
             .get(".browsers-list>a").first()
               .and("have.class", "disabled")
 
+        it "displays stop browser button", ->
+          cy
+            .get(".close-browser").should("be.visible")
+
+        describe "close browser", ->
+          it "calls close:browser on click of stop button", ->
+            cy
+              .get(".close-browser").click().then ->
+                expect(@App.ipc).to.be.calledWith("close:browser")
+
+          it "hides close button on click of stop", ->
+            cy
+              .get(".close-browser").click().should("not.exist")
 
     describe "only one browser available", ->
       beforeEach ->
