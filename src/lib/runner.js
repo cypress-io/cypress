@@ -141,6 +141,14 @@ export default {
       channel.emit('client:request', msg, data, cb)
     })
 
+    channel.on('change:to:url', (url) => {
+      // TODO: this won't do anything if we're
+      // currently on the same domain as url
+      // since we're not listening to hashchange
+      // events
+      window.location.href = url
+    })
+
     _.each(driverToLocalEvents, (event) => {
       driver.on(event, (...args) => localBus.emit(event, ...args))
     })
