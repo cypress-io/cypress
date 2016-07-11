@@ -48,8 +48,8 @@ module.exports = {
   getRendererArgs: (coords) ->
     common = {
       backgroundColor: '#dfe2e4'
-      width: 950
-      height: 600
+      width: 800
+      height: 550
       minWidth: 458
       minHeight: 400
       type: "INDEX"
