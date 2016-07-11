@@ -108,7 +108,7 @@ describe "Specs List", ->
             @ipc.handle("get:open:browsers", null, ["chrome"])
           .then ->
             expect(@App.ipc).to.be.calledWithExactly("change:browser:spec", {
-              spec: "integration/app_spec.coffee"
+              spec: "__all"
             })
 
       describe "all specs running in browser", ->
