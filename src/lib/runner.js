@@ -65,6 +65,10 @@ export default {
         })
         reporterBus.emit('runnables:ready', runner.normalizeAll(state.tests))
 
+        if (state.startTime) {
+          runner.setStartTime(state.startTime)
+        }
+
         if (state.currentId) {
           // if we have a currentId it means
           // we need to tell the runner to skip
