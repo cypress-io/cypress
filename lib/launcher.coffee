@@ -16,6 +16,7 @@ kill = (unbind) ->
   ## cleanup our running browser
   ## instance
   return if not instance
+
   if unbind
     instance.removeAllListeners()
   instance.kill()

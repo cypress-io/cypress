@@ -70,6 +70,11 @@ handleEvent = (options, event, id, type, arg) ->
     when "on:launch:browser"
       project.onRelaunch(send)
 
+    when "close:browser"
+      project.closeBrowser()
+      .then(send)
+      .catch(sendErr)
+
     when "launch:browser"
       # headless.createRenderer(arg, true)
       project.launch(arg.browser, arg.url, arg.spec, {

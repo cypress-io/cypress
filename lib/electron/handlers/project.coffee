@@ -111,6 +111,14 @@ module.exports = {
     .then (cfg) ->
       files.getTestFiles(cfg)
 
+  closeBrowser: ->
+    launcher.close()
+
+    openBrowser     = null
+    openBrowserOpts = null
+
+    Promise.resolve(null)
+
   close: (options = {}) ->
     _.defaults options, {
       sync: true
@@ -120,8 +128,6 @@ module.exports = {
       ## null these back out
       onRelaunch      = null
       openProject     = null
-      openBrowser     = null
-      openBrowserOpts = null
 
       Promise.resolve(null)
 
@@ -129,7 +135,7 @@ module.exports = {
       nullify()
     else
       Promise.all([
-        launcher.close()
+        @closeBrowser()
         openProject.close(options)
       ])
       .then(nullify)
