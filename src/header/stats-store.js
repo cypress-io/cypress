@@ -34,10 +34,10 @@ class StatsStore {
     this.isRunning = true
   }
 
-  startCounting () {
+  startCounting (startTimeString) {
     if (this._startTime) return
 
-    this._startTime = Date.now()
+    this._startTime = new Date(startTimeString)
     this._updateCurrentTime()
 
     this._startTimer()

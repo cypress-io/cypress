@@ -34,8 +34,11 @@ export default {
     }))
 
     runner.on('test:before:run', action('test:before:run', (runnable) => {
-      statsStore.startCounting()
       runnablesStore.runnableStarted(runnable)
+    }))
+
+    runner.on('reporter:start:time', action('start:time', (startTimeString) => {
+      statsStore.startCounting(startTimeString)
     }))
 
     runner.on('test:after:run', action('test:after:run', (runnable) => {
