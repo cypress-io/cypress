@@ -161,6 +161,9 @@ $Cypress.Runner = do ($Cypress, _) ->
       @listenTo @Cypress, "log", (log) =>
         @addLogToTest(log)
 
+      @listenTo @Cypress, "log:state:changed", (log) =>
+        @addLogToTest(log)
+
       return @
 
     runnerListeners: ->
@@ -303,8 +306,18 @@ $Cypress.Runner = do ($Cypress, _) ->
       if test = @testIds[testId]
         ## pluralize the instrument
         ## as a property on the runnable
-        a = test[instrument + "s"] ?= []
-        a.push(log)
+        logs = test[instrument + "s"] ?= []
+
+        found = _.find logs, (l) ->
+          l.id is log.id
+
+        ## if we have an existing log by
+        ## its id then merge in the changes
+        if found
+          _.extend(found, log)
+        else
+          ## else push it onto the logs
+          logs.push(log)
 
     wrapErr: (err) ->
       @reduceProps(err, ERROR_PROPS)
