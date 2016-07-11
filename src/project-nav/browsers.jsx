@@ -53,13 +53,18 @@ export default class Browsers extends Component {
   _browser = (browser) => {
     let prefixText
 
-    if (this.props.project.browserState === 'opening') {
-      prefixText = 'Opening'
-    } else if (this.props.project.browserState === 'opened') {
-      prefixText = 'Running'
-    } else {
-      prefixText = ''
-      clearActiveSpec()
+    switch (this.props.project.browserState) {
+      case 'opening':
+        prefixText = 'Opening'
+        break
+      case 'opened':
+        prefixText = 'Running'
+        break
+      default:
+        prefixText = ''
+        debugger
+        console.warn(this.props.project.browserState)
+        clearActiveSpec()
     }
 
     return (
