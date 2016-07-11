@@ -17,22 +17,19 @@
     }
 
     &>li {
-
-
-
       &>a {
         font-size: 13px;
         color: #444;
         padding: 1px 20px 0 20px;
         line-height: 35px;
 
+        &:hover, &:focus {
+          background-color: #f3f3f3;
+        }
+
         &.active {
           background-color: #dedede;
           color: #262626;
-        }
-
-        &:hover, &:focus {
-          background-color: #f3f3f3;
         }
 
         &.btn-link {
