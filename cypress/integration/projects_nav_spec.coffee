@@ -142,7 +142,8 @@ describe "Projects Nav", ->
             .fixture("specs").then (@specs) ->
               @ipc.handle("get:specs", null, @specs)
           cy
-            .contains(".file", "app_spec").click()
+            .contains(".file", "app_spec").click().then ->
+              @ipc.handle("get:open:browsers", null, [])
 
         it "displays browser icon as spinner", ->
           cy
@@ -162,6 +163,7 @@ describe "Projects Nav", ->
 
           cy
             .contains(".file", "app_spec").click().then ->
+              @ipc.handle("get:open:browsers", null, [])
               @ipc.handle("launch:browser", null, {
                   browserOpened: true
                 }

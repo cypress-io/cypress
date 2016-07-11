@@ -34,7 +34,6 @@ describe "Specs List", ->
       .get(".navbar-default").then ->
         expect(@App.ipc).to.be.calledWith("get:specs")
 
-
   describe "no specs", ->
     beforeEach ->
       cy
@@ -110,15 +109,50 @@ describe "Specs List", ->
     it "lists test specs", ->
       cy.get(".file a").contains("app_spec.coffee")
 
-    it "triggers launch:browser on click of file", ->
-      cy
-        .get(".file a").contains("app_spec.coffee").click().then ->
-          ln = @App.ipc.args.length
-          lastCallArgs = @App.ipc.args[ln-1]
+    describe "click on spec", ->
+      beforeEach ->
+        cy.get(".file a").contains("app_spec.coffee").as("firstSpec")
 
-          expect(lastCallArgs[0]).to.eq "launch:browser"
-          expect(lastCallArgs[1].browser).to.eq "chrome"
-          expect(lastCallArgs[1].spec).to.eq "integration/app_spec.coffee"
+      it "triggers get:open:browsers on click of file", ->
+        cy
+          .get("@firstSpec").click().then ->
+            expect(@App.ipc).to.be.calledWith("get:open:browsers")
+
+      it "triggers launch:browser if browser is not open", ->
+        cy
+          .get("@firstSpec").click().then ->
+            @ipc.handle("get:open:browsers", null, [])
+          .then ->
+            ln = @App.ipc.args.length
+            lastCallArgs = @App.ipc.args[ln-1]
+
+            expect(lastCallArgs[0]).to.eq "launch:browser"
+            expect(lastCallArgs[1].browser).to.eq "chrome"
+            expect(lastCallArgs[1].spec).to.eq "integration/app_spec.coffee"
+
+      it "triggers change:browser:spec if browser is open", ->
+        cy
+          .get("@firstSpec").click()
+          .fixture("browsers").then (@browsers) ->
+            @ipc.handle("get:open:browsers", null, ["chrome"])
+          .then ->
+            expect(@App.ipc).to.be.calledWithExactly("change:browser:spec", {
+              spec: "integration/app_spec.coffee"
+            })
+
+    describe "spec running in browser", ->
+      beforeEach ->
+        cy
+          .get(".file a").contains("a", "app_spec.coffee").as("firstSpec")
+            .click().then ->
+              @ipc.handle("get:open:browsers", null, ["chrome"])
+              @ipc.handle("change:browser:spec", null, {})
+
+      it "updates spec icon", ->
+        cy.get("@firstSpec").find("i").should("have.class", "fa-wifi")
+
+      it "sets spec as active", ->
+        cy.get("@firstSpec").should("have.class", "active")
 
   describe "server error", ->
     beforeEach ->
