@@ -6,6 +6,24 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
   parentOrChildRe = /parent|child/
   ERROR_PROPS     = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
 
+  triggerEvent = (Cypress, log, event) ->
+    ## bail if we never fired our initial log event
+    return if not log._hasInitiallyLogged
+
+    attrs = log.toJSON()
+
+    ## only trigger this event if our last stored
+    ## emitted attrs do not match the current toJSON
+    if not _.isEqual(log._emittedAttrs, attrs)
+      log._emittedAttrs = attrs
+
+      Cypress.trigger(event, attrs, log)
+
+  triggerInitial = (Cypress, log) ->
+    log._hasInitiallyLogged = true
+
+    triggerEvent(Cypress, log, "log")
+
   klassMethods = {
     agent: (Cypress, cy, obj = {}) ->
       _.defaults obj,
@@ -86,7 +104,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## set the log on the command
       cy.prop("current")?.log(log)
 
-      Cypress.trigger("log", log.toJSON(), log)
+      triggerInitial(Cypress, log)
 
       return log
   }
@@ -98,7 +116,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         state: "pending"
 
       trigger = =>
-        @Cypress.trigger("log:state:changed", @toJSON(), @)
+        triggerEvent(@Cypress, @, "log:state:changed")
 
       ## only fire the log:state:changed event
       ## as fast as every 16ms

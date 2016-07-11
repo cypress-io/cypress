@@ -40,10 +40,12 @@ describe "$Cypress.Log API", ->
       expect(@log.get("state")).to.eq "failed"
       expect(@log.get("error")).to.eq err
 
-    it "#error triggers state:changed", (done) ->
+    it "#error triggers log:state:changed", (done) ->
       @Cypress.on "log:state:changed", (attrs) ->
         expect(attrs.state).to.eq "failed"
         done()
+
+      @log._hasInitiallyLogged = true
 
       @log.error({})
 
@@ -51,12 +53,64 @@ describe "$Cypress.Log API", ->
       @log.end()
       expect(@log.get("state")).to.eq "passed"
 
-    it "#end triggers state:changed", (done) ->
+    it "#end triggers log:state:changed", (done) ->
       @Cypress.on "log:state:changed", (attrs) ->
         expect(attrs.state).to.eq "passed"
         done()
 
+      @log._hasInitiallyLogged = true
+
       @log.end()
+
+    it "does not emit log:state:changed until after first log event", ->
+      logged  = 0
+      changed = 0
+
+      @log.set("foo", "bar")
+
+      @Cypress.on "log", ->
+        logged += 1
+
+      @Cypress.on "log:state:changed", ->
+        changed += 1
+
+      Promise.delay(30)
+      .then =>
+        expect(logged).to.eq(0)
+        expect(changed).to.eq(0)
+
+        @log._hasInitiallyLogged = true
+
+        @log.set("bar", "baz")
+        @log.set("baz", "quux")
+
+        Promise.delay(30)
+        .then =>
+          expect(changed).to.eq(1)
+
+    it "only emits log:state:changed when attrs have actually changed", ->
+      logged  = 0
+      changed = 0
+
+      @log._hasInitiallyLogged = true
+
+      @Cypress.on "log", ->
+        logged += 1
+
+      @Cypress.on "log:state:changed", ->
+        changed += 1
+
+      @log.set("foo", "bar")
+
+      Promise.delay(30)
+      .then =>
+        expect(changed).to.eq(1)
+
+        @log.get("foo", "bar")
+
+        Promise.delay(30)
+        .then =>
+          expect(changed).to.eq(1)
 
     describe "#toJSON", ->
       it "serializes to object literal", ->
@@ -190,9 +244,10 @@ describe "$Cypress.Log API", ->
           expect(log).to.eq(@log)
           done()
 
-        @log.set {foo: "bar", baz: "quux"}
+        @log._hasInitiallyLogged = true
+        @log.set({foo: "bar", baz: "quux"})
 
-      it "debouces log:state:changed and only fires once", (done) ->
+      it "debounces log:state:changed and only fires once", ->
         count = 0
 
         @Cypress.on "log:state:changed", (attrs, log) =>
@@ -204,16 +259,17 @@ describe "$Cypress.Log API", ->
           expect(attrs.e).to.eq "f"
           expect(log).to.eq(@log)
 
-        @log.set {foo: "bar", a: "b"}
-        @log.set {foo: "baz", c: "d"}
+        @log._hasInitiallyLogged = true
+
+        @log.set({foo: "bar", a: "b"})
+        @log.set({foo: "baz", c: "d"})
 
         _.defer =>
           @log.set {foo: "quux", e: "f"}
 
-        _.delay ->
+        Promise.delay(30)
+        .then ->
           expect(count).to.eq(1)
-          done()
-        , 30
 
     describe "#setElAttrs", ->
       beforeEach ->
@@ -415,6 +471,25 @@ describe "$Cypress.Log API", ->
           warn = @sandbox.spy console, "warn"
           @Cypress.command({})
           expect(warn).to.be.calledWith "Cypress Warning: Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
+
+      describe "#log", ->
+        it "only emits log:state:changed if attrs have actually changed", (done) ->
+          logged  = 0
+          changed = 0
+
+          @Cypress.on "log", ->
+            logged += 1
+
+          @Cypress.on "log:state:changed", ->
+            changed += 1
+
+          log = @Cypress.Log.log("command", {})
+
+          _.delay ->
+            expect(logged).to.eq(1)
+            expect(changed).to.eq(0)
+            done()
+          , 30
 
       context "$Log.log", ->
         it "displays 0 argument", (done) ->
