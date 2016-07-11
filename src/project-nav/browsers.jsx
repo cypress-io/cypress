@@ -62,8 +62,6 @@ export default class Browsers extends Component {
         break
       default:
         prefixText = ''
-        debugger
-        console.warn(this.props.project.browserState)
         clearActiveSpec()
     }
 
