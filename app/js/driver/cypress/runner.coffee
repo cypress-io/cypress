@@ -269,6 +269,9 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## emit the pending event instead of the test
       ## so we normalize the pending / test events
       @runner.on "pending", (test) ->
+        ## do nothing if our test is skipped
+        return if test._SKIPPED
+
         if not fired("test:before:run", test)
           fire.call(_this, "test:before:run", test)
 
@@ -404,13 +407,14 @@ $Cypress.Runner = do ($Cypress, _) ->
         @runnableIds[runnable.id] = obj
         @runnables.push(runnable)
 
-        ## if this runnable is in our initial state
-        ## use its props else get them from the runnable
-        item = initialTests[runnable.id] ? runnable
+        ## if we have a runnable in the initial state
+        ## then merge in existing properties into the runnable
+        if i = initialTests[runnable.id]
+          _.extend(runnable, i)
 
         ## reduce this runnable down to its props
         ## and collections
-        return @wrapAll(item)
+        return @wrapAll(runnable)
 
       push = (test) =>
         tests[test.id] ?= test
