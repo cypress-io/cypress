@@ -5,10 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "zunder watch",
-    "server": "http-server ./dist -p 6060",
-    "test": "npm run server & npm run dev",
+    "build": "zunder build",
     "postinstall": "bower i",
-    "prerelease": "npm run build",
     "release": "releaser"
   },
   "repository": {
