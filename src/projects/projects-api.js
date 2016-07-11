@@ -26,7 +26,7 @@ const addProject = () => {
 
     return Promise.all([
       App.ipc('add:project', path),
-      Promise.delay(750)
+      Promise.delay(750),
     ])
     .then(() => {
       return project.loading(false)
@@ -41,19 +41,20 @@ const launchBrowser = (project, spec, browser, url) => {
   project.setChosenBrowserByName(browser)
   project.browserOpening()
 
-  App.ipc('launch:browser', { browser, url, spec }, (err, data = {}) => {
+  return App.ipc('launch:browser', { browser, url, spec }, (err, data = {}) => {
     if (data.browserOpened) {
       project.browserOpened()
     }
 
     if (data.browserClosed) {
-      App.ipc.off('launch:browser')
       project.browserClosed()
+      return App.ipc.off('launch:browser')
     }
   })
 }
 
 const closeProject = () => {
+  App.ipc.off('launch:browser')
   return App.ipc("close:project")
 }
 
@@ -68,7 +69,7 @@ const openProject = (project) => {
   .then(() => {
     return Promise.all([
       App.ipc('open:project', project.path),
-      Promise.delay(500)
+      Promise.delay(500),
     ])
   })
   .spread(action('project:opened', (config) => {
