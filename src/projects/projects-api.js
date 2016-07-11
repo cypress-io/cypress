@@ -38,8 +38,9 @@ const addProject = () => {
 }
 
 const runSpec = (project, spec, browser, url) => {
+  project.setChosenBrowserByName(browser)
+
   let launchBrowser = () => {
-    project.setChosenBrowserByName(browser)
     project.browserOpening()
 
     return App.ipc('launch:browser', { browser, url, spec }, (err, data = {}) => {
