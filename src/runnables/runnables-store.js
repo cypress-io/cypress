@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { computed, observable } from 'mobx'
+import { observable } from 'mobx'
 
 import Agent from '../agents/agent-model'
 import Command from '../commands/command-model'
@@ -8,10 +8,8 @@ import Suite from './suite-model'
 import Test from '../test/test-model'
 
 const defaults = {
+  hasSingleTest: false,
   isReady: false,
-  runnables: [],
-  _tests: {},
-  _logs: {},
 
   attemptingShowSnapshot: false,
   showingSnapshot: false,
@@ -19,19 +17,16 @@ const defaults = {
 
 class RunnablesStore {
   @observable isReady = defaults.isReady
-  @observable runnables = defaults.runnables
-  @observable _tests = defaults._tests
-  @observable _logs = defaults._logs
+  @observable runnables = []
+  @observable _tests = {}
+  @observable _logs = {}
 
   attemptingShowSnapshot = defaults.attemptingShowSnapshot
   showingSnapshot = defaults.showingSnapshot
 
-  @computed get hasSingleTest () {
-    return _.keys(this._tests).length === 1
-  }
-
   setRunnables (rootRunnable) {
     this.runnables = this._createRunnableChildren(rootRunnable, 0)
+    this.hasSingleTest = _.keys(this._tests).length === 1
     this.isReady = true
   }
 
@@ -118,6 +113,9 @@ class RunnablesStore {
     _.each(defaults, (value, key) => {
       this[key] = value
     })
+    this.runnables = []
+    this._tests = {}
+    this._logs = {}
   }
 }
 

@@ -26,6 +26,7 @@ export default {
 
     runner.on('reporter:restart:test:run', action('restart:test:run', () => {
       runnablesStore.reset()
+      statsStore.reset()
       runner.emit('reporter:restarted')
     }))
 
@@ -52,14 +53,6 @@ export default {
 
     runner.on('run:end', action('run:end', () => {
       statsStore.stop()
-    }))
-
-    runner.on('reporter:reset:current:runnable:logs', action('reset:logs', () => {
-      runnablesStore.reset()
-    }))
-
-    runner.on('reporter:restart:test:run', action('restart:test:run', () => {
-      statsStore.reset()
     }))
 
     localBus.on('resume', action('resume', () => {
