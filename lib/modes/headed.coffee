@@ -100,7 +100,7 @@ module.exports = {
       })
 
   ready: (options = {}) ->
-    tray = new Tray()
+    # tray = new Tray()
 
     menu.set()
 
@@ -116,14 +116,14 @@ module.exports = {
         ## exit the app immediately
         app.exit(0)
 
-      onOpenProject: =>
-        tray.setState("running")
+      # onOpenProject: =>
+      #   tray.setState("running")
 
-      onCloseProject: =>
-        tray.setState("default")
+      # onCloseProject: =>
+      #   tray.setState("default")
 
-      onError: (err) =>
-        tray.setState("error")
+      # onError: (err) =>
+      #   tray.setState("error")
 
     ready = =>
       ## TODO:
@@ -137,10 +137,10 @@ module.exports = {
         if options.updating
           Updater.install(options)
 
-        tray.display({
-          onClick: (e, bounds) =>
-            @onClick(bounds, win)
-        })
+        # tray.display({
+        #   onClick: (e, bounds) =>
+        #     @onClick(bounds, win)
+        # })
 
         return win
 
