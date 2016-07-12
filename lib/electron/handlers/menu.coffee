@@ -8,12 +8,6 @@ module.exports = {
         label: "File"
         submenu: [
           {
-            label: "Add Project..."
-          }
-          {
-            type: "separator"
-          }
-          {
             label: "Check for Updates"
           }
           {
@@ -149,13 +143,13 @@ module.exports = {
       windowMenu = template.find (m) =>
         m.role is "window"
 
-      if windowMenu
-        windowMenu.submenu.push(
-          {
-            label: "Zoom"
-            role: "performZoom"
-          }
-        )
+      # if windowMenu
+      #   windowMenu.submenu.push(
+      #     {
+      #       label: "Zoom"
+      #       role: "performZoom"
+      #     }
+      #   )
 
     if process.env["CYPRESS_ENV"] is "development"
       template.push(
