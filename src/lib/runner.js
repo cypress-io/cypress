@@ -65,6 +65,16 @@ export default {
         })
         reporterBus.emit('runnables:ready', runner.normalizeAll(state.tests))
 
+        // TODO: handle these new state properties
+        // to rebuild the num of test states
+        // - state.passed
+        // - state.failed
+        // - state.pending
+
+        if (state.numLogs) {
+          runner.setNumLogs(state.numLogs)
+        }
+
         if (state.startTime) {
           runner.setStartTime(state.startTime)
         }
