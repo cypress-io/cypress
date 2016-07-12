@@ -44,14 +44,12 @@ export default {
     }))
   },
 
-  start (config, specSrc) {
+  start (config) {
     if (config.env === 'development') overrides.overloadMochaRunnerUncaught()
 
     driver.setConfig(_.pick(config, 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout'))
 
     driver.start()
-
-    channel.emit('watch:test:file', specSrc)
 
     driver.on('initialized', ({ runner }) => {
       // get the current runnable in case we reran mid-test due to a visit
@@ -152,12 +150,10 @@ export default {
     })
 
     channel.on('change:to:url', (url) => {
-      // TODO: this won't do anything if we're
-      // currently on the same domain as url
-      // since we're not listening to hashchange
-      // events
       window.location.href = url
     })
+
+    $(window).on('hashchange', this._reRun.bind(this))
 
     _.each(driverToLocalEvents, (event) => {
       driver.on(event, (...args) => localBus.emit(event, ...args))
@@ -211,7 +207,8 @@ export default {
     })
   },
 
-  run (specWindow, $autIframe) {
+  run (specPath, specWindow, $autIframe) {
+    channel.emit('watch:test:file', specPath)
     driver.initialize(specWindow, $autIframe)
   },
 
