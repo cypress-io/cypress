@@ -8,15 +8,15 @@ const Stats = observer(({ stats }) => (
   <ul className='stats'>
     <li className='passed'>
       <i className='fa fa-check'></i>
-      <span className='num'>{count(stats.passed)}</span>
+      <span className='num'>{count(stats.numPassed)}</span>
     </li>
     <li className='failed'>
       <i className='fa fa-times'></i>
-      <span className='num'>{count(stats.failed)}</span>
+      <span className='num'>{count(stats.numFailed)}</span>
     </li>
     <li className='pending'>
       <i className='fa fa-circle-o-notch'></i>
-      <span className='num'>{count(stats.pending)}</span>
+      <span className='num'>{count(stats.numPending)}</span>
     </li>
     <li className='duration'>
       <span className='num'>{count(formatDuration(stats.duration))}</span>

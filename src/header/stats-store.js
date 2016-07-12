@@ -2,9 +2,9 @@ import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 
 const defaults = {
-  passed: 0,
-  failed: 0,
-  pending: 0,
+  numPassed: 0,
+  numFailed: 0,
+  numPending: 0,
   isPaused: false,
   isRunning: false,
   nextCommandName: null,
@@ -14,9 +14,9 @@ const defaults = {
 }
 
 class StatsStore {
-  @observable passed = defaults.passed
-  @observable failed = defaults.failed
-  @observable pending = defaults.pending
+  @observable numPassed = defaults.numPassed
+  @observable numFailed = defaults.numFailed
+  @observable numPending = defaults.numPending
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
   @observable nextCommandName = defaults.nextCommandName
@@ -34,10 +34,14 @@ class StatsStore {
     this.isRunning = true
   }
 
-  startCounting (startTimeString) {
+  start ({ startTime, numPassed = 0, numFailed = 0, numPending = 0 }) {
     if (this._startTime) return
 
-    this._startTime = new Date(startTimeString)
+    this.numPassed = numPassed
+    this.numFailed = numFailed
+    this.numPending = numPending
+
+    this._startTime = new Date(startTime)
     this._updateCurrentTime()
 
     this._startTimer()
@@ -56,7 +60,8 @@ class StatsStore {
   }
 
   updateCount (type) {
-    this[type] = this[type] + 1
+    const countKey = `num${_.capitalize(type)}`
+    this[countKey] = this[countKey] + 1
   }
 
   pause (nextCommandName) {
