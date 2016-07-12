@@ -45,7 +45,6 @@
     "mobx-react": "^3.0.0",
     "mocha": "^2.5.3",
     "node-sass-globbing": "0.0.23",
-    "proxyquire": "^1.7.10",
     "react": "^15.0.0",
     "react-addons-test-utils": "^15.0.0",
     "react-dom": "^15.0.0",

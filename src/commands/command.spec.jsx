@@ -1,14 +1,9 @@
 import { shallow } from 'enzyme'
 import _ from 'lodash'
-import proxyquire from 'proxyquire'
 import React from 'react'
 import sinon from 'sinon'
 
-const eventsStub = { emit: sinon.spy() }
-const commandModule = proxyquire('./command', { '../lib/events': eventsStub })
-
-const Command = commandModule.default
-const { Aliases, Message } = commandModule
+import Command, { Aliases, Message } from './command'
 
 const longText = Array(110).join('-')
 const withMarkdown = '**this** is _markdown_'
@@ -28,7 +23,19 @@ const model = (props) => {
   }, props)
 }
 
+const eventsStub = () => ({ emit: sinon.spy() })
+const runnablesStoreStub = () => ({
+  attemptingShowSnapshot: false,
+  showingSnapshot: false,
+})
+
 describe('<Command />', () => {
+  it('emits show:command when clicking on command', () => {
+    const events = eventsStub()
+    const component = shallow(<Command model={model()} events={events} />)
+    component.find('FlashOnClick').simulate('click')
+    expect(events.emit).to.have.been.calledWith('show:command', 'c1')
+  })
 
   context('class names', () => {
     it('renders with the type class', () => {
@@ -242,13 +249,107 @@ describe('<Command />', () => {
     })
   })
 
-  context('events', () => {
-    it('emits show:command when clicking on command', () => {
-      const component = shallow(<Command model={model()} />)
-      component.find('FlashOnClick').simulate('click')
-      expect(eventsStub.emit).to.have.been.calledWith('show:command', 'c1')
+  context.only('snapshots', () => {
+    let clock
+    let events
+    let runnablesStore
+    let commandWrapper
+
+    before(() => {
+      clock = sinon.useFakeTimers()
     })
 
-    // TODO: add hovering snapshot tests
+    beforeEach(() => {
+      events = eventsStub()
+      runnablesStore = runnablesStoreStub()
+      commandWrapper = shallow(<Command
+        model={model()}
+        events={events}
+        runnablesStore={runnablesStore}
+      />).find('.command-wrapper').first()
+    })
+
+    after(() => {
+      clock.restore()
+    })
+
+    describe('on mouse over', () => {
+      beforeEach(() => {
+        commandWrapper.simulate('mouseOver')
+      })
+
+      it('set attemptingShowSnapshot to true on mouse over', () => {
+        expect(runnablesStore.attemptingShowSnapshot).to.be.true
+      })
+
+      describe('and 50ms passes', () => {
+        beforeEach(() => {
+          clock.tick(50)
+        })
+
+        it('sets showingSnapshot to true', () => {
+          expect(runnablesStore.showingSnapshot).to.be.true
+        })
+
+        it('emits show:snapshot event with model id', () => {
+          expect(events.emit).to.have.been.calledWith('show:snapshot', 'c1')
+        })
+      })
+
+      describe('and mouse out happens', () => {
+        beforeEach(() => {
+          commandWrapper.simulate('mouseOut')
+        })
+
+        it('sets attemptingShowSnapshot to false', () => {
+          expect(runnablesStore.attemptingShowSnapshot).to.be.false
+        })
+
+        describe('and 50ms passes', () => {
+          beforeEach(() => {
+            clock.tick(50)
+          })
+
+          it('does not set showingSnapshot to true', () => {
+            expect(runnablesStore.showingSnapshot).to.be.false
+          })
+
+          it('does not emit show:snapshot event', () => {
+            expect(events.emit).not.to.have.been.called
+          })
+        })
+
+        describe('and 50ms passes without another mouse over', () => {
+          beforeEach(() => {
+            runnablesStore.showingSnapshot = true
+            clock.tick(50)
+          })
+
+          it('sets showingSnapshot to false', () => {
+            expect(runnablesStore.showingSnapshot).to.be.false
+          })
+
+          it('emits hide:snapshot with model id', () => {
+            expect(events.emit).to.have.been.calledWith('hide:snapshot', 'c1')
+          })
+        })
+
+        describe('and 50ms passes with another mouse over', () => {
+          beforeEach(() => {
+            runnablesStore.showingSnapshot = true
+            runnablesStore.attemptingShowSnapshot = true
+            clock.tick(50)
+          })
+
+          it('does not set showingSnapshot to false', () => {
+            expect(runnablesStore.showingSnapshot).to.be.true
+          })
+
+          it('does not emit hide:snapshot', () => {
+            expect(events.emit).not.to.have.been.called
+          })
+        })
+      })
+    })
   })
 })

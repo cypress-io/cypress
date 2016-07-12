@@ -67,7 +67,7 @@ class Command extends Component {
       >
         <FlashOnClick
           message='Printed output to your console!'
-          onClick={() => events.emit('show:command', model.id)}
+          onClick={() => this.props.events.emit('show:command', model.id)}
         >
           <div
             className='command-wrapper'
@@ -119,12 +119,14 @@ class Command extends Component {
   // 50ms, it won't show the snapshot at all. so we
   // optimize for both snapshot showing + restoring
   _snapshot (show) {
+    const { runnablesStore } = this.props
+
     if (show) {
       runnablesStore.attemptingShowSnapshot = true
 
       this._showTimeout = setTimeout(() => {
         runnablesStore.showingSnapshot = true
-        events.emit('show:snapshot', this.props.model.id)
+        this.props.events.emit('show:snapshot', this.props.model.id)
       }, 50)
     } else {
       runnablesStore.attemptingShowSnapshot = false
@@ -135,7 +137,7 @@ class Command extends Component {
         // we aren't trying to show a different snapshot
         if (runnablesStore.showingSnapshot && !runnablesStore.attemptingShowSnapshot) {
           runnablesStore.showingSnapshot = false
-          events.emit('hide:snapshot', this.props.model.id)
+          this.props.events.emit('hide:snapshot', this.props.model.id)
         }
       }, 50)
     }
@@ -148,18 +150,17 @@ class Command extends Component {
   componentWillMount () {
     this._prevState = this.props.model.state
 
-    if (this._isActive()) {
-      this._startTimingActive()
+    if (this._isPending()) {
+      this._startTimingPending()
     }
   }
 
   componentWillReact () {
-
-    if (this._becameActive()) {
-      this._startTimingActive()
+    if (this._becamePending()) {
+      this._startTimingPending()
     }
 
-    if (this._becameInactive()) {
+    if (this._becameNonPending()) {
       clearTimeout(this._activeTimeout)
       action('became:inactive', () => this.props.model.isLongRunning = false)()
     }
@@ -167,29 +168,34 @@ class Command extends Component {
     this._prevState = this.props.model.state
   }
 
-  _startTimingActive () {
+  _startTimingPending () {
     this._activeTimeout = setTimeout(action('became:long:running', () => {
-      if (this._isActive()) {
+      if (this._isPending()) {
         this.props.model.isLongRunning = true
       }
     }), LONG_RUNNING_THRESHOLD)
   }
 
-  _becameActive () {
-    return !this._wasActive() && this._isActive()
+  _becamePending () {
+    return !this._wasPending() && this._isPending()
   }
 
-  _becameInactive () {
-    return this._wasActive() && !this._isActive()
+  _becameNonPending () {
+    return this._wasPending() && !this._isPending()
   }
 
-  _wasActive () {
+  _wasPending () {
     return this._prevState === 'pending'
   }
 
-  _isActive () {
+  _isPending () {
     return this.props.model.state === 'pending'
   }
+}
+
+Command.defaultProps = {
+  events,
+  runnablesStore,
 }
 
 export { Aliases, Message }
