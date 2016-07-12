@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import Dropdown from '../dropdown/dropdown'
 import { observer } from 'mobx-react'
 
-import { clearActiveSpec } from '../lib/utils'
 import { closeBrowser } from '../projects/projects-api'
 
 @observer
@@ -62,7 +61,7 @@ export default class Browsers extends Component {
         break
       default:
         prefixText = ''
-        clearActiveSpec()
+        // clearActiveSpec()
     }
 
     return (

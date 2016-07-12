@@ -1,7 +1,9 @@
 import { action } from 'mobx'
-import App from '../lib/app'
-import projectsStore from '../projects/projects-store'
 import Promise from 'bluebird'
+
+import App from '../lib/app'
+import { clearActiveSpec } from '../lib/utils'
+import projectsStore from '../projects/projects-store'
 
 const getProjects = () => {
   projectsStore.loading(true)
@@ -49,6 +51,7 @@ const runSpec = (project, spec, browser, url) => {
       }
 
       if (data.browserClosed) {
+        clearActiveSpec()
         project.browserClosed()
         return App.ipc.off('launch:browser')
       }
@@ -68,10 +71,14 @@ const runSpec = (project, spec, browser, url) => {
 
 const closeBrowser = (projectId) => {
   App.ipc('close:browser')
+
+  clearActiveSpec()
+
   if (projectId) {
     let project = projectsStore.getProjectById(projectId)
     project.browserClosed()
   }
+
   App.ipc.off('launch:browser')
 }
 

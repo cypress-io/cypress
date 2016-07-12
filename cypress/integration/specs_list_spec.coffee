@@ -205,7 +205,7 @@ describe "Specs List", ->
         .get(".projects-list a")
           .contains("My-Fake-Project").click()
         .get(".error")
-          .and("contain", @err.message)
+          .should("contain", @err.message)
           .and("contain", "To fix")
 
     it "word wraps long error message plus update bar", ->
