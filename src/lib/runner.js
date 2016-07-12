@@ -65,12 +65,6 @@ export default {
         })
         reporterBus.emit('runnables:ready', runner.normalizeAll(state.tests))
 
-        // TODO: handle these new state properties
-        // to rebuild the num of test states
-        // - state.passed
-        // - state.failed
-        // - state.pending
-
         if (state.numLogs) {
           runner.setNumLogs(state.numLogs)
         }
@@ -87,7 +81,13 @@ export default {
         }
 
         driver.run(() => {})
-        reporterBus.emit('reporter:start:time', driver.getStartTime())
+
+        reporterBus.emit('reporter:start', {
+          startTime: driver.getStartTime(),
+          numPassed: state.passed,
+          numFailed: state.failed,
+          numPending: state.pending,
+        })
       })
     })
 
