@@ -249,7 +249,7 @@ describe('<Command />', () => {
     })
   })
 
-  context.only('snapshots', () => {
+  context('snapshots', () => {
     let clock
     let events
     let runnablesStore
