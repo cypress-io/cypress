@@ -25,7 +25,7 @@ export default class Header extends Component {
         <ul className='menu'>
           <li className={cs('viewport-info', { open: showingViewportMenu })}>
             <button onClick={this._toggleViewportMenu}>
-              <i className='fa fa-caret-down'></i>
+              <i className='fa fa-fw'></i>
               {width} x {height} <span className='viewport-scale'>({displayScale}%)</span>
             </button>
             <div className='viewport-menu'>

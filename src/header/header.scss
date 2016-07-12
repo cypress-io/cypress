@@ -96,13 +96,22 @@
       padding: 0;
       text-shadow: 0 1px 1px #FFF;
 
+      &:active {
+        box-shadow: none;
+      }
+
       &:hover {
         color :#333;
       }
 
       i {
-        margin-right: 5px;
+        @extend .#{$fa-css-prefix}-caret-down;
+        margin-right: 3px;
       }
+    }
+
+    &.open button i {
+      @extend .#{$fa-css-prefix}-caret-up;
     }
   }
 
