@@ -119,7 +119,7 @@ export default class IframeModel {
     // process on next tick so we don't restore the dom if we're
     // about to receive another 'show:snapshot' event, else that would
     // be a huge waste
-    setTimeout(() => {
+    setTimeout(action('clear:snapshots:next:tick', () => {
       // we want to only restore the dom if we haven't received
       // another snapshot by the time this function runs
       if (previousDetachedId !== this.detachedId) return
@@ -131,7 +131,7 @@ export default class IframeModel {
 
       this.originalState = null
       this.detachedId = null
-    })
+    }))
   }
 
   _testsRunningError () {

@@ -170,8 +170,7 @@ export default {
 
     reporterBus.on('runner:show:snapshot', (id) => {
       this._withLog(id, (log) => {
-        // TODO: need snapshots on log
-        // localBus.emit('show:snapshot', log.snapshots, log)
+        localBus.emit('show:snapshot', log.snapshots, log)
       })
     })
 
