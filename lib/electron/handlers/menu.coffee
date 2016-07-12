@@ -140,8 +140,8 @@ module.exports = {
         ]
       })
 
-      windowMenu = template.find (m) =>
-        m.role is "window"
+      # windowMenu = template.find (m) =>
+      #   m.role is "window"
 
       # if windowMenu
       #   windowMenu.submenu.push(
