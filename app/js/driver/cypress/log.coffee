@@ -190,6 +190,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## ensure attributes are an empty {}
       @attributes ?= {}
 
+      ## dont ever allow existing id's to be mutated
+      if @attributes.id
+        delete obj.id
+
       _.extend @attributes, obj
 
       ## if we have an consoleProps function
