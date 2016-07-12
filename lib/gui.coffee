@@ -7,13 +7,6 @@ module.exports = {
   getPathToIndex: ->
     file("index.html")
 
-  getPathToAbout: ->
-    file("about.html")
-
-  getPathToDebug: ->
-    file("debug.html")
-
   getPathToUpdates: ->
     file("updates.html")
-
 }

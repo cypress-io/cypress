@@ -98,11 +98,11 @@ export default class Project {
   }
 
   setResolvedConfig (resolved) {
-    this.resolvedConfig = resolved
+    return this.resolvedConfig = resolved
   }
 
   @action setError (err) {
-    this.error = err
+    return this.error = err
   }
 
   setChosenBrowserByName (name) {

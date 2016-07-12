@@ -13,6 +13,7 @@ import Project from './project/project'
 import SpecsList from './specs/specs-list'
 import Config from './config/config'
 import Layout from './app/layout'
+import Updates from './update/updates'
 
 useStrict(true)
 
@@ -37,22 +38,26 @@ const withUser = (ComponentClass) => {
   })
 }
 
+const handleErrors = () => {
+  const sendErr = function (err) {
+    if (err) {
+      return App.ipc('gui:error', _.pick(err, 'name', 'message', 'stack'))
+    }
+  }
+
+  window.onerror = function (message, source, lineno, colno, err) {
+    return sendErr(err)
+  }
+
+  window.onunhandledrejection = function (evt) {
+    return sendErr(evt.reason)
+  }
+}
+
 App.start = () => {
   ipc('get:options')
   .then((options = {}) => {
-    const sendErr = function (err) {
-      if (err) {
-        return App.ipc('gui:error', _.pick(err, 'name', 'message', 'stack'))
-      }
-    }
-
-    window.onerror = function (message, source, lineno, colno, err) {
-      return sendErr(err)
-    }
-
-    window.onunhandledrejection = function (evt) {
-      return sendErr(evt.reason)
-    }
+    handleErrors()
 
     const el = document.getElementById('app')
 
@@ -69,6 +74,20 @@ App.start = () => {
           <Route path='/login' component={Login}/>
         </Route>
       </Router>
+      , el
+    )
+  })
+}
+
+App.startUpdateApp = () => {
+  ipc('get:options')
+  .then((options = {}) => {
+    handleErrors()
+
+    const el = document.getElementById('updates')
+
+    render(
+      <Updates options={options}/>
       , el
     )
   })

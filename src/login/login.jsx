@@ -51,35 +51,36 @@ class Login extends Component {
 
   _login = (e) => {
     e.preventDefault()
+
     const alreadyOpen = (err) => {
       return err && err.alreadyOpen
     }
 
-    return App.ipc("window:open", {
-      position: "center",
+    return App.ipc('window:open', {
+      position: 'center',
       focus: true,
       width: 1000,
       height: 635,
       preload: false,
-      title: "Login",
-      type: "GITHUB_LOGIN",
+      title: 'Login',
+      type: 'GITHUB_LOGIN',
     })
     .then(action('login:window:opened', (code) => {
       // TODO: supposed to focus the window here!
       // i think this is for linux
-      // App.execute "gui:focus"
+      // App.execute 'gui:focus'
       this.setState({ isLoggingIn: true })
 
-      return App.ipc("log:in", code)
+      return App.ipc('log:in', code)
     }))
     .then(action('logged:in', (user) => {
-      state.setUser(user)
+      return state.setUser(user)
     }))
     .catch(alreadyOpen, (err) => {
       return // do nothing if we're already open!
     })
     .catch(action('error:at:login', (err) => {
-      this.setState({
+      return this.setState({
         isLoggingIn: false,
         error: err,
       })

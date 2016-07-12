@@ -24,7 +24,7 @@ class UpdateBanner extends Component {
   }
 
   render () {
-    if (!state.updateAvailable) return null
+    // if (!state.updateAvailable) return null
 
     document.getElementsByTagName('html')[0].classList.add('has-updates')
 

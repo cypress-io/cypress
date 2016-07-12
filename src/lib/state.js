@@ -13,7 +13,7 @@ class State {
   }
 
   @action setUser (user) {
-    this.user = user && user.session_token ? new User(user) : null
+    return this.user = user && user.session_token ? new User(user) : null
   }
 
   updatesAvailable (bool) {

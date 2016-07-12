@@ -10,7 +10,7 @@ const getProjects = () => {
 
   return App.ipc('get:project:paths')
   .then(action('got:projects:paths', (paths) => {
-    projectsStore.setProjects(paths)
+    return projectsStore.setProjects(paths)
   }))
 }
 
@@ -94,7 +94,7 @@ const openProject = (project) => {
   // we give the UI some time to render
   // and not block due to sync require's
   // in the main process
-  return Promise.delay(100)
+  Promise.delay(100)
   .then(() => {
     return Promise.all([
       App.ipc('open:project', project.path),
@@ -104,14 +104,15 @@ const openProject = (project) => {
   .spread(action('project:opened', (config) => {
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
-    project.setResolvedConfig(config.resolved)
+    return project.setResolvedConfig(config.resolved)
   }))
   .then(() => {
     project.loading(false)
     // create a promise which listens for
     // project settings change events
     // and updates our project model
-    const listenToProjectSettingsChange = () => {
+    let listenToProjectSettingsChange
+    return (listenToProjectSettingsChange = function () {
       return App.ipc('on:project:settings:change')
       .then(action('project:config:changed', (data = {}) => {
         project.reset()
@@ -125,12 +126,11 @@ const openProject = (project) => {
         // recursively listen for more change events!
         return listenToProjectSettingsChange()
       }))
-    }
-    return listenToProjectSettingsChange()
+    })()
   })
   .catch(action('project:open:errored', (err) => {
     project.loading(false)
-    project.setError(err)
+    return project.setError(err)
   }))
 }
 
