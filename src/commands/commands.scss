@@ -340,6 +340,7 @@
       font-family: $open-sans;
       font-size: 10px;
       line-height: 1.5;
+      margin-left: 5px;
     }
 
     i:hover {
@@ -353,7 +354,7 @@
 
   .command-invisible {
     display: none;
-    margin-left: 3px;
+    margin-left: 5px;
     margin-right: 0;
   }
 
@@ -367,6 +368,7 @@
     display: none;
     font-size: 85%;
     line-height: 1;
+    margin-left: 5px;
     padding: 1px 4px;
     text-align: center;
     vertical-align: baseline;
