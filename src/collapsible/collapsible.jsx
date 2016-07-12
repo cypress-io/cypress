@@ -18,7 +18,7 @@ class Collapsible extends Component {
     return (
       <div className={cs('collapsible', { 'is-open': this.state.isOpen })}>
         <div className={cs('collapsible-header', this.props.headerClass)} style={this.props.headerStyle} onClick={this._toggleOpen}>
-          <i className='collapsible-indicator fa'></i>
+          <i className='collapsible-indicator fa-fw fa'></i>
           {this.props.header}
           <i className='collapsible-more fa fa-ellipsis-h'></i>
         </div>
