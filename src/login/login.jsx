@@ -51,7 +51,9 @@ class Login extends Component {
 
   _login = (e) => {
     e.preventDefault()
-    const alreadyOpen = (err) => err && err.alreadyOpen
+    const alreadyOpen = (err) => {
+      return err && err.alreadyOpen
+    }
 
     return App.ipc("window:open", {
       position: "center",
@@ -73,7 +75,7 @@ class Login extends Component {
     .then(action('logged:in', (user) => {
       state.setUser(user)
     }))
-    .catch(alreadyOpen, () => {
+    .catch(alreadyOpen, (err) => {
       return // do nothing if we're already open!
     })
     .catch(action('error:at:login', (err) => {
