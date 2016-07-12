@@ -525,6 +525,15 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       if re = options.grep
         @grep(re)
 
+    countByTestState: (tests, state) ->
+      count = _.filter tests, (test, key) ->
+        test.state is state
+
+      count.length
+
+    setNumLogs: (num) ->
+      @Cypress.Log.setCounter(num)
+
     setStartTime: (iso) ->
       @startTime = iso
 

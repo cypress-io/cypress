@@ -52,6 +52,9 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
     getTestsState: ->
       @runner.getTestsState()
 
+    countByTestState: (tests, state) ->
+      @runner.countByTestState(tests, state)
+
     ## TODO: TEST THIS
     ## restore our on callback
     ## after the run completes

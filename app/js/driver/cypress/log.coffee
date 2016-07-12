@@ -6,6 +6,8 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
   parentOrChildRe = /parent|child/
   ERROR_PROPS     = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
 
+  counter = 0
+
   triggerEvent = (Cypress, log, event) ->
     ## bail if we never fired our initial log event
     return if not log._hasInitiallyLogged
@@ -112,7 +114,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
   class $Log
     constructor: (@Cypress, obj = {}) ->
       _.defaults obj,
-        id: _.uniqueId("l")
+        id: (counter += 1)
         state: "pending"
 
       trigger = =>
@@ -348,6 +350,19 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
           delete consoleObj.Snapshot
 
         return consoleObj
+
+    @countLogsByTests = (tests = {}) ->
+      _.chain(tests)
+      .map (test, key) ->
+        [].concat(test.agents, test.routes, test.commands)
+      .flatten()
+      .compact()
+      .pluck("id")
+      .max()
+      .value()
+
+    @setCounter = (num) ->
+      counter = num
 
     @create = (Cypress, cy) ->
       _.each klassMethods, (fn, key) ->

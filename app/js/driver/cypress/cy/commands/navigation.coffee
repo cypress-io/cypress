@@ -340,6 +340,11 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                   scrollTop: null
                 }
 
+                state.passed  = Cypress.countByTestState(state.tests, "passed")
+                state.failed  = Cypress.countByTestState(state.tests, "failed")
+                state.pending = Cypress.countByTestState(state.tests, "pending")
+                state.numLogs = Cypress.Log.countLogsByTests(state.tests)
+
                 Cypress.trigger("domain:change", state, resolve)
               .then =>
                 ## and now we must change the url to be the new
