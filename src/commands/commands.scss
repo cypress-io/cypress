@@ -380,6 +380,10 @@
   .command-has-num-elements.command-has-multiple-elements .command-num-elements {
     display: inline;
   }
+  
+  .command-name-assert.command-has-num-elements .command-num-elements {
+    display: none;
+  }
 
   .command-has-no-elements .command-num-elements {
     background-color: #CC4239;
