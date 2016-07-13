@@ -1,6 +1,6 @@
 .reporter {
   .hooks-container {
-    margin: 5px 10px 5px 5px;
+    margin: 5px 0 5px 5px;
     padding-left: 10px;
     border-left: 1px dotted #DDD;
 
@@ -380,7 +380,7 @@
   .command-has-num-elements.command-has-multiple-elements .command-num-elements {
     display: inline;
   }
-  
+
   .command-name-assert.command-has-num-elements .command-num-elements {
     display: none;
   }
