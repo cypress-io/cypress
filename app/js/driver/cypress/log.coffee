@@ -114,7 +114,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## set the log on the command
       cy.prop("current")?.log(log)
 
-      logs[log.id] = true
+      logs[obj.id] = true
 
       triggerInitial(Cypress, log)
 
