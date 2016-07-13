@@ -7,7 +7,8 @@
     "start": "zunder watch",
     "build": "zunder build",
     "postinstall": "bower i",
-    "release": "releaser"
+    "release": "releaser",
+    "test": "npm start & cypress run"
   },
   "repository": {
     "type": "git",
