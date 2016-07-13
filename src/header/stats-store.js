@@ -35,7 +35,7 @@ class StatsStore {
   }
 
   start ({ startTime, numPassed = 0, numFailed = 0, numPending = 0 }) {
-    if (this._startTime) return
+    if (this._startTime || !this.isRunning) return
 
     this.numPassed = numPassed
     this.numFailed = numFailed

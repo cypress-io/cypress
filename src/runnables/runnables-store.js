@@ -9,6 +9,7 @@ import Test from '../test/test-model'
 
 const defaults = {
   hasSingleTest: false,
+  hasTests: false,
   isReady: false,
 
   attemptingShowSnapshot: false,
@@ -26,8 +27,11 @@ class RunnablesStore {
 
   setRunnables (rootRunnable) {
     this.runnables = this._createRunnableChildren(rootRunnable, 0)
-    this.hasSingleTest = _.keys(this._tests).length === 1
     this.isReady = true
+
+    const numTests = _.keys(this._tests).length
+    this.hasTests = numTests > 0
+    this.hasSingleTest = numTests === 1
   }
 
   _createRunnableChildren (runnableProps, level) {

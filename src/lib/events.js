@@ -31,7 +31,9 @@ export default {
     }))
 
     runner.on('run:start', action('run:start', () => {
-      statsStore.startRunning()
+      if (runnablesStore.hasTests) {
+        statsStore.startRunning()
+      }
     }))
 
     runner.on('reporter:start', action('start', (startInfo) => {
