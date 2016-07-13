@@ -58,16 +58,18 @@ module.exports = {
         .pipe(res)
 
   getContent: (thr, req, res, remoteState, config) ->
-    switch remoteState.strategy
-      ## serve from the file system because
-      ## we are using cypress as our weberver
-      when "file"
-        @getFileContent(thr, req, res, remoteState, config)
+    ## serve from the file system because
+    ## we are using cypress as our weberver
+    ## only if we are on file strategy and
+    ## this request does indeed match the
+    ## remote origin
+    if remoteState.strategy is "file" and req.proxiedUrl.startsWith(remoteState.origin)
+      @getFileContent(thr, req, res, remoteState, config)
 
-      ## else go make an HTTP request to the
-      ## real server!
-      else
-        @getHttpContent(thr, req, res, remoteState)
+    ## else go make an HTTP request to the
+    ## real server!
+    else
+      @getHttpContent(thr, req, res, remoteState)
 
   getHttpContent: (thr, req, res, remoteState) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
@@ -183,7 +185,7 @@ module.exports = {
       console.log(e.stack)
       debugger
 
-    logger.info "error handling initial request", url: url, error: e
+    logger.info "error handling request", url: url, error: e
 
     if e
       res.set("x-cypress-error", e.message)
