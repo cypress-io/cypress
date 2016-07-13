@@ -8,9 +8,17 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
   counter = 0
 
+  logs = {}
+
+  abort = ->
+    logs = {}
+
   triggerEvent = (Cypress, log, event) ->
     ## bail if we never fired our initial log event
     return if not log._hasInitiallyLogged
+
+    ## bail if we've reset the logs due to a Cypress.abort
+    return if not logs[log.get("id")]
 
     attrs = log.toJSON()
 
@@ -105,6 +113,8 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
       ## set the log on the command
       cy.prop("current")?.log(log)
+
+      logs[log.id] = true
 
       triggerInitial(Cypress, log)
 
@@ -369,6 +379,9 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       counter = num
 
     @create = (Cypress, cy) ->
+      Cypress.off("abort", abort)
+      Cypress.on("abort", abort)
+
       _.each klassMethods, (fn, key) ->
         $Log[key] = _.partial(fn, Cypress, cy)
 
