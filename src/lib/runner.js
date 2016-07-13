@@ -47,6 +47,31 @@ export default {
   start (config) {
     if (config.env === 'development') overrides.overloadMochaRunnerUncaught()
 
+    channel.on('change:to:url', (url) => {
+      window.location.href = url
+    })
+
+    driver.on('message', (msg, data, cb) => {
+      channel.emit('client:request', msg, data, cb)
+    })
+
+    _.each(driverToSocketEvents, (event) => {
+      driver.on(event, (...args) => channel.emit(event, ...args))
+    })
+
+    _.each(driverAutomationEvents, (event) => {
+      driver.on(event, (...args) => channel.emit('automation:request', event, ...args))
+    })
+
+    return driver.setConfig(_.pick(config, 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'namespace', 'remote'))
+    .then(() => {
+      driver.start()
+
+      this.listeners(config)
+    })
+  },
+
+  listeners (config) {
     driver.on('initialized', ({ runner }) => {
       // get the current runnable in case we reran mid-test due to a visit
       // to a new domain
@@ -133,22 +158,6 @@ export default {
       })
     })
 
-    _.each(driverToSocketEvents, (event) => {
-      driver.on(event, (...args) => channel.emit(event, ...args))
-    })
-
-    _.each(driverAutomationEvents, (event) => {
-      driver.on(event, (...args) => channel.emit('automation:request', event, ...args))
-    })
-
-    driver.on('message', (msg, data, cb) => {
-      channel.emit('client:request', msg, data, cb)
-    })
-
-    channel.on('change:to:url', (url) => {
-      window.location.href = url
-    })
-
     $(window).on('hashchange', this._reRun.bind(this))
 
     _.each(driverToLocalEvents, (event) => {
@@ -183,10 +192,6 @@ export default {
       driver.abort()
     })
 
-    // TODO: due to config closure in Cypress.Cookies
-    // we need to wait until after setConfig resolves
-    // before binding to unload + beforeunload
-
     // when we actually unload then
     // nuke all of the cookies again
     // so we clear out unload
@@ -208,10 +213,6 @@ export default {
       this._clearAllCookies()
       this._setUnload()
     })
-
-    driver.setConfig(_.pick(config, 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'namespace', 'remote'))
-
-    driver.start()
   },
 
   run (specPath, specWindow, $autIframe) {

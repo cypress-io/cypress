@@ -36,16 +36,19 @@ export default class Iframes extends Component {
 
   componentDidMount () {
     // TODO: need to take headless mode into account
-    runner.start(this.props.config)
     runner.on('restart', this._run.bind(this))
 
-    this.iframeModel = new IframeModel(this.props.state, {
-      detachBody: autIframe.detachBody.bind(autIframe),
-      setBody: autIframe.setBody.bind(autIframe),
-      highlightEl: autIframe.highlightEl.bind(autIframe),
+    runner.start(this.props.config)
+    .then(() => {
+      this.iframeModel = new IframeModel(this.props.state, {
+        detachBody: autIframe.detachBody.bind(autIframe),
+        setBody: autIframe.setBody.bind(autIframe),
+        highlightEl: autIframe.highlightEl.bind(autIframe),
+      })
+      this.iframeModel.listen()
+      this._run()
     })
-    this.iframeModel.listen()
-    this._run()
+
   }
 
   _run () {
