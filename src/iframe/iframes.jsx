@@ -49,9 +49,11 @@ export default class Iframes extends Component {
   }
 
   _run () {
-    logger.clearLog()
     const specPath = windowUtil.specPath()
-    this._loadIframes(specPath).then(([specWindow, $autIframe]) => {
+    logger.clearLog()
+
+    this._loadIframes(specPath)
+    .then(([specWindow, $autIframe]) => {
       runner.run(specPath, specWindow, $autIframe)
     })
   }

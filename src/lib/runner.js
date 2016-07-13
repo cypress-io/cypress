@@ -47,10 +47,6 @@ export default {
   start (config) {
     if (config.env === 'development') overrides.overloadMochaRunnerUncaught()
 
-    driver.setConfig(_.pick(config, 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout'))
-
-    driver.start()
-
     driver.on('initialized', ({ runner }) => {
       // get the current runnable in case we reran mid-test due to a visit
       // to a new domain
@@ -205,6 +201,10 @@ export default {
       this._clearAllCookies()
       this._setUnload()
     })
+
+    driver.setConfig(_.pick(config, 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'remote'))
+
+    driver.start()
   },
 
   run (specPath, specWindow, $autIframe) {
