@@ -6,7 +6,7 @@
     "build": "gulp build",
     "prepublish": "gulp build",
     "start": "gulp watch",
-    "test": "mocha dist/**/*.spec.js"
+    "test": "mocha -r lib/test-setup.js dist/**/*.spec.js"
   },
   "repository": {
     "type": "git",
