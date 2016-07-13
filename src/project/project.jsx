@@ -10,7 +10,7 @@ import { closeProject, openProject } from '../projects/projects-api'
 import OnBoarding from "./onboarding"
 import Loader from "react-loader"
 
-const NoBrowsers = (props) => {
+const NoBrowsers = () => {
 
   let _closeProject = function () {
     closeProject(this.projectId)
@@ -27,7 +27,6 @@ const NoBrowsers = (props) => {
       </p>
       <Link
         to='/projects'
-        projectId={props.projectId}
         onClick={_closeProject}
         className='btn btn-default btn-sm'
       >
@@ -47,7 +46,7 @@ const downloadBrowser = function (e) {
   App.ipc('external:open', 'https://www.google.com/chrome/browser/desktop')
 }
 
-const PortInUse = (props) => {
+const PortInUse = () => {
 
   let _closeProject = function () {
     closeProject(this.projectId)
@@ -59,7 +58,6 @@ const PortInUse = (props) => {
       <p>To fix, stop the other running process or change the port in cypress.json</p>
       <Link
         to='/projects'
-        projectId={props.projectId}
         onClick={_closeProject}
         className='btn btn-default btn-sm'
       >
