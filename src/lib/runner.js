@@ -44,10 +44,8 @@ export default {
     }))
   },
 
-  start (config, specSrc) {
+  start (config) {
     if (config.env === 'development') overrides.overloadMochaRunnerUncaught()
-
-    channel.emit('watch:test:file', specSrc)
 
     driver.on('initialized', ({ runner }) => {
       // get the current runnable in case we reran mid-test due to a visit
@@ -60,12 +58,6 @@ export default {
           })
         })
         reporterBus.emit('runnables:ready', runner.normalizeAll(state.tests))
-
-        // TODO: handle these new state properties
-        // to rebuild the num of test states
-        // - state.passed
-        // - state.failed
-        // - state.pending
 
         if (state.numLogs) {
           runner.setNumLogs(state.numLogs)
@@ -83,7 +75,13 @@ export default {
         }
 
         driver.run(() => {})
-        reporterBus.emit('reporter:start:time', driver.getStartTime())
+
+        reporterBus.emit('reporter:start', {
+          startTime: driver.getStartTime(),
+          numPassed: state.passed,
+          numFailed: state.failed,
+          numPending: state.pending,
+        })
       })
     })
 
@@ -148,12 +146,10 @@ export default {
     })
 
     channel.on('change:to:url', (url) => {
-      // TODO: this won't do anything if we're
-      // currently on the same domain as url
-      // since we're not listening to hashchange
-      // events
       window.location.href = url
     })
+
+    $(window).on('hashchange', this._reRun.bind(this))
 
     _.each(driverToLocalEvents, (event) => {
       driver.on(event, (...args) => localBus.emit(event, ...args))
@@ -166,8 +162,7 @@ export default {
 
     reporterBus.on('runner:show:snapshot', (id) => {
       this._withLog(id, (log) => {
-        // TODO: need snapshots on log
-        // localBus.emit('show:snapshot', log.snapshots, log)
+        localBus.emit('show:snapshot', log.snapshots, log)
       })
     })
 
@@ -212,7 +207,8 @@ export default {
     driver.start()
   },
 
-  run (specWindow, $autIframe) {
+  run (specPath, specWindow, $autIframe) {
+    channel.emit('watch:test:file', specPath)
     driver.initialize(specWindow, $autIframe)
   },
 

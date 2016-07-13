@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { computed, observable } from 'mobx'
 import automation from './automation'
 
