@@ -39,13 +39,9 @@ If you get any errors doing the above commands, go through the [install instruct
 
 ## Testing
 
-1. Watch your files and run the gui in port `6060`.
-
 ```bash
 npm test
 ```
-
-2. Start the server within Cypress desktop app and navigate to [http://localhost:2020/](http://localhost:2020/).
 
 ## Debugging
 
