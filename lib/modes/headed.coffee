@@ -11,7 +11,7 @@ errors   = require("../errors")
 Updater  = require("../updater")
 logs     = require("../electron/handlers/logs")
 menu     = require("../electron/handlers/menu")
-Tray     = require("../electron/handlers/tray")
+# Tray     = require("../electron/handlers/tray")
 Events   = require("../electron/handlers/events")
 Renderer = require("../electron/handlers/renderer")
 
