@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 
 import { CONTAINER_ID } from './lib/constants'
 import events from './lib/events'
@@ -24,6 +24,14 @@ class Reporter extends Component {
       </div>
     )
   }
+}
+
+Reporter.propTypes = {
+  runner: PropTypes.shape({
+    emit: PropTypes.func.isRequired,
+    on: PropTypes.func.isRequired,
+  }).isRequired,
+  specPath: PropTypes.string.isRequired,
 }
 
 export default Reporter
