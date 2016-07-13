@@ -47,10 +47,6 @@ export default {
   start (config, specSrc) {
     if (config.env === 'development') overrides.overloadMochaRunnerUncaught()
 
-    driver.setConfig(_.pick(config, 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout'))
-
-    driver.start()
-
     channel.emit('watch:test:file', specSrc)
 
     driver.on('initialized', ({ runner }) => {
@@ -210,6 +206,10 @@ export default {
       this._clearAllCookies()
       this._setUnload()
     })
+
+    driver.setConfig(_.pick(config, 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'remote'))
+
+    driver.start()
   },
 
   run (specWindow, $autIframe) {
