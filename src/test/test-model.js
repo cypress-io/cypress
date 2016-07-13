@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { computed, observable } from 'mobx'
+import { action, autorun, computed, observable } from 'mobx'
 
 import Err from '../lib/err-model'
 import Hook from '../hooks/hook-model'
@@ -11,6 +11,7 @@ export default class Test extends Runnable {
   @observable err = new Err({})
   @observable hooks = []
   @observable isActive = false
+  @observable isLongRunning = false
   @observable routes = []
   @observable _state = null
   type = 'test'
@@ -20,9 +21,19 @@ export default class Test extends Runnable {
 
     this._state = props.state
     this.err.update(props.err)
+
+    autorun(() => {
+      // if at any point, a command goes long running, set isLongRunning
+      // to true until the test becomes inactive
+      if (!this.isActive) {
+        action('became:inactive', () => this.isLongRunning = false)()
+      } else if (this._hasLongRunningCommand) {
+        action('became:long:running', () => this.isLongRunning = true)()
+      }
+    })
   }
 
-  @computed get isLongRunning () {
+  @computed get _hasLongRunningCommand () {
     return _.some(this.commands, (command) => command.isLongRunning)
   }
 

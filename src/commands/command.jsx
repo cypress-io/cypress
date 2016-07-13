@@ -143,6 +143,9 @@ class Command extends Component {
     }
   }
 
+  // TODO: move isLongRunning logic into command-model since it has
+  // nothing to do with view
+
   // the following several methods track if the command's state has been
   // active for more than the LONG_RUNNING_THRESHOLD and set the model's
   // isLongRunning flag to true, which propagates up to its test to
