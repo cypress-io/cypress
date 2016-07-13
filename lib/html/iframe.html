@@ -5,6 +5,10 @@
     <title>{{title}}</title>
   </head>
   <body>
+    <script type="text/javascript">
+      document.domain = '{{domain}}';
+    </script>
+
     <script type="text/javascript" src="/__cypress/static/js/iframe.js"></script>
 
     {{#each javascripts}}

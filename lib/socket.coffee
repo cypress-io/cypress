@@ -327,7 +327,6 @@ class Socket
           cb(false)
 
       socket.on "domain:set", (url, cb) ->
-        console.log "domain:set", url, options.onDomainSet.toString()
         cb(options.onDomainSet(url))
 
       socket.on "domain:change", (state, cb) ->

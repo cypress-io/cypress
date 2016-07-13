@@ -15,6 +15,7 @@ errors       = require("./errors")
 logger       = require("./logger")
 Socket       = require("./socket")
 
+DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
 localHostOrIpAddressRe = /localhost|\.local|^[\d\.]+$/
 
@@ -43,8 +44,10 @@ class Server
     @_socket     = null
     @_wsProxy    = null
     @_httpsProxy = null
+    @_remoteProps = null
     @_remoteOrigin = null
-    @_remoteHostAndPort = null
+    @_remoteStrategy = null
+    @_remoteDomainName = DEFAULT_DOMAIN_NAME
 
   createExpressApp: (port, morgan) ->
     app = express()
@@ -77,8 +80,8 @@ class Server
 
     return app
 
-  createRoutes: (app, config, getRemoteOrigin) ->
-    require("./routes")(app, config, getRemoteOrigin)
+  createRoutes: (app, config, getRemoteState) ->
+    require("./routes")(app, config, getRemoteState)
 
   getHttpServer: -> @_server
 
@@ -94,10 +97,9 @@ class Server
 
       logger.setSettings(config)
 
-      getRemoteOrigin = =>
-        @_remoteOrigin
+      getRemoteState = => @_getRemoteState()
 
-      @createRoutes(app, config, getRemoteOrigin)
+      @createRoutes(app, config, getRemoteState)
 
       @createServer(config.port, config.socketIoRoute, app)
       .return(@)
@@ -134,7 +136,16 @@ class Server
           onDirectConnection: (req) =>
             ## make a direct connection only if
             ## our req url does not match the remote host + port
-            not @_urlMatchesRemoteHostAndPort(req.url)
+            dc = not @_urlMatchesRemoteHostAndPort(req.url)
+
+            if dc
+              str = "Making"
+            else
+              str = "Not making"
+
+            logger.info(str + " direction connection to: '#{req.url}'")
+
+            return dc
         })
 
       @_server.on "upgrade", onUpgrade
@@ -163,6 +174,31 @@ class Server
         @_server.removeListener "error", onError
 
         resolve(@_server)
+
+  _getRemoteState: ->
+    # {
+    #   origin: "http://localhost:2020"
+    #   strategy: "file"
+    #   domainName: "localhost"
+    #   port: 2020
+    #   tld: "localhost"
+    #   domain: ""
+    # }
+
+    # {
+    #   origin: "https://foo.google.com"
+    #   strategy: "http"
+    #   domainName: "google.com"
+    #   port: 443
+    #   tld: "com"
+    #   domain: "google"
+    # }
+
+    _.extend({},  @_remoteProps, {
+      origin:     @_remoteOrigin
+      strategy:   @_remoteStrategy
+      domainName: @_remoteDomainName
+    })
 
   _parseUrl: (str) ->
     [host, port] = str.split(":")
@@ -194,12 +230,12 @@ class Server
   _urlMatchesRemoteHostAndPort: (url) ->
     ## take a shortcut here in the case
     ## where remoteHostAndPort is null
-    return false if not @_remoteHostAndPort
+    return false if not @_remoteProps
 
     parsedUrl  = @_parseUrl(url)
 
     ## does the parsedUrl match the parsedHost?
-    _.isEqual(parsedUrl, @_remoteHostAndPort)
+    _.isEqual(parsedUrl, @_remoteProps)
 
   _onDomainSet: (fullyQualifiedUrl) =>
     log = (type, url) ->
@@ -210,13 +246,16 @@ class Server
     ## then we know to go back to our default domain
     ## which is the localhost server
     if not fullyQualifiedRe.test(fullyQualifiedUrl) or fullyQualifiedUrl is "<root>"
-      @_remoteOrigin = "<root>"
-      @_remoteHostAndPort = null
+      @_remoteOrigin = "http://#{DEFAULT_DOMAIN_NAME}:#{@_server.address().port}"
+      @_remoteStrategy = "file"
+      @_remoteDomainName = DEFAULT_DOMAIN_NAME
+      @_remoteProps = null
 
       log("remoteOrigin", @_remoteOrigin)
-      log("remoteHostAndPort", @_remoteHostAndPort)
+      log("remoteStrategy", @_remoteStrategy)
+      log("remoteHostAndPort", @_remoteProps)
+      log("remoteDocDomain", @_remoteDomainName)
 
-      return "http://localhost:#{@_server.address().port}"
     else
       parsed = url.parse(fullyQualifiedUrl)
 
@@ -230,14 +269,19 @@ class Server
 
       @_remoteOrigin = url.format(parsed)
 
+      @_remoteStrategy = "http"
+
       ## set an object with port, tld, and domain properties
       ## as the remoteHostAndPort
-      @_remoteHostAndPort = @_parseUrl([parsed.hostname, port].join(":"))
+      @_remoteProps = @_parseUrl([parsed.hostname, port].join(":"))
+
+      @_remoteDomainName = _.compact([@_remoteProps.domain, @_remoteProps.tld]).join(".")
 
       log("remoteOrigin", @_remoteOrigin)
-      log("remoteHostAndPort", @_remoteHostAndPort)
+      log("remoteHostAndPort", @_remoteProps)
+      log("remoteDocDomain", @_remoteDomainName)
 
-      return @_remoteOrigin
+    return @_getRemoteState()
 
   _callRequestListeners: (server, listeners, req, res) ->
     for listener in listeners
@@ -263,7 +307,7 @@ class Server
     ## bail if this is our own namespaced socket.io request
     return if req.url.startsWith(socketIoRoute)
 
-    if @_remoteHostAndPort and remoteOrigin = @_remoteOrigin
+    if @_remoteProps and remoteOrigin = @_remoteOrigin
       ## get the hostname + port from the remoteHostPort
       {hostname, port, protocol} = url.parse(remoteOrigin)
 

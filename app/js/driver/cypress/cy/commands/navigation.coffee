@@ -317,7 +317,9 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
           new Promise (resolve) ->
             Cypress.trigger("domain:set", url, resolve)
-          .then (origin) =>
+          .then (remote = {}) =>
+            {origin} = remote
+
             ## hold onto our existing url
             existing = Cypress.Location.create(window.location.href)
 

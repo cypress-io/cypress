@@ -216,7 +216,7 @@ describe "lib/server", ->
       ret = @server._onDomainSet("https://staging.google.com/foo/bar")
 
       expect(@server._remoteOrigin).to.eq("https://staging.google.com")
-      expect(@server._remoteHostAndPort).to.deep.eq({
+      expect(@server._remoteProps).to.deep.eq({
         port: "443"
         domain: "google"
         tld: "com"
@@ -228,7 +228,7 @@ describe "lib/server", ->
       ret = @server._onDomainSet("http://staging.google.com/foo/bar")
 
       expect(@server._remoteOrigin).to.eq("http://staging.google.com")
-      expect(@server._remoteHostAndPort).to.deep.eq({
+      expect(@server._remoteProps).to.deep.eq({
         port: "80"
         domain: "google"
         tld: "com"
@@ -240,7 +240,7 @@ describe "lib/server", ->
       ret = @server._onDomainSet("http://localhost:4200/a/b?q=1#asdf")
 
       expect(@server._remoteOrigin).to.eq("http://localhost:4200")
-      expect(@server._remoteHostAndPort).to.deep.eq({
+      expect(@server._remoteProps).to.deep.eq({
         port: "4200"
         domain: ""
         tld: "localhost"
@@ -256,7 +256,7 @@ describe "lib/server", ->
       ret = @server._onDomainSet("/index.html")
 
       expect(@server._remoteOrigin).to.eq("<root>")
-      expect(@server._remoteHostAndPort).to.be.null
+      expect(@server._remoteProps).to.be.null
 
       expect(ret).to.eq("http://localhost:9999")
 
@@ -266,7 +266,7 @@ describe "lib/server", ->
 
     describe "domain + subdomain", ->
       beforeEach ->
-        @server._remoteHostAndPort = @server._parseUrl("staging.google.com:443")
+        @server._remoteProps = @server._parseUrl("staging.google.com:443")
 
       it "does not match", ->
         expect(@server._urlMatchesRemoteHostAndPort("foo.bar:443")).to.be.false
@@ -285,7 +285,7 @@ describe "lib/server", ->
 
     describe "localhost", ->
       beforeEach ->
-        @server._remoteHostAndPort = @server._parseUrl("localhost:4200")
+        @server._remoteProps = @server._parseUrl("localhost:4200")
 
       it "does not match", ->
         expect(@server._urlMatchesRemoteHostAndPort("localhost:4201")).to.be.false
@@ -296,7 +296,7 @@ describe "lib/server", ->
 
     describe "local", ->
       beforeEach ->
-        @server._remoteHostAndPort = @server._parseUrl("brian.dev.local:80")
+        @server._remoteProps = @server._parseUrl("brian.dev.local:80")
 
       it "does not match", ->
         expect(@server._urlMatchesRemoteHostAndPort("brian.dev.local:443")).to.be.false
@@ -307,7 +307,7 @@ describe "lib/server", ->
 
     describe "ip address", ->
       beforeEach ->
-        @server._remoteHostAndPort = @server._parseUrl("192.168.5.10:80")
+        @server._remoteProps = @server._parseUrl("192.168.5.10:80")
 
       it "does not match", ->
         expect(@server._urlMatchesRemoteHostAndPort("192.168.5.10:443")).to.be.false

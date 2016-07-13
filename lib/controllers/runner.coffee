@@ -1,8 +1,12 @@
+_      = require("lodash")
 send   = require("send")
 runner = require("@cypress/core-runner")
 
 module.exports = {
-  serve: (req, res, config) ->
+  serve: (req, res, config, getRemoteState) ->
+    config = _.clone(config)
+    config.remote = getRemoteState()
+
     res.render runner.getPathToIndex(), {
       config:      JSON.stringify(config)
       projectName: config.projectName

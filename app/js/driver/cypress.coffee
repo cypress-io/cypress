@@ -11,14 +11,49 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
       window.Cypress = @
 
     setConfig: (config = {}) ->
-      {environmentVariables} = config
+      ## config.remote
+      # {
+      #   origin: "<root>""
+      #   domainName: "localhost"
+      #   port: 2020
+      #   tld: "localhost"
+      #   domain: ""
+      # }
 
-      config = _.omit(config, "environmentVariables")
+      # -- or --
 
-      $Cypress.EnvironmentVariables.create(@, environmentVariables)
-      $Cypress.Config.create(@, config)
+      # {
+      #   origin: "https://foo.google.com" or "<root>""
+      #   domainName: "google.com"
+      #   port: 443
+      #   tld: "com"
+      #   domain: "google"
+      # }
+      Promise.try =>
 
-      @trigger "config", config
+        setConfig = =>
+          document.domain = config.remote.domainName
+
+          {environmentVariables, remote} = config
+
+          config = _.omit(config, "environmentVariables", "remote")
+
+          $Cypress.EnvironmentVariables.create(@, environmentVariables)
+          $Cypress.Config.create(@, config)
+          $Cypress.Cookies.create(@, config.namespace, remote.domainName)
+
+          @trigger("config", config)
+
+        location = $Cypress.Location.create(window.location.href)
+
+        if not _.str.include(location.hostname, config.remote.domainName)
+          new Promise (resolve) =>
+            @trigger("domain:set", location.href, resolve)
+          .then (remote) ->
+            config.remote = remote
+            setConfig()
+        else
+          setConfig()
 
     initialize: (specWindow, $remoteIframe) ->
       ## push down the options

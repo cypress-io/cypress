@@ -80,7 +80,7 @@ module.exports = {
     .then (files) ->
       res.json files
 
-  handleIframe: (req, res, config) ->
+  handleIframe: (req, res, config, getRemoteState) ->
     test = req.params[0]
 
     iframePath = cwd("lib", "html", "iframe.html")
@@ -93,6 +93,7 @@ module.exports = {
       .then (js) =>
         res.render iframePath, {
           title:        @getTitle(test)
+          domain:       getRemoteState().domainName
           # stylesheets:  @getStylesheets(config)
           javascripts:  js
           specs:        specs

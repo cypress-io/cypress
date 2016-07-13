@@ -17,8 +17,15 @@ headRe           = /(<head.*?>)/
 htmlRe           = /(<html.*?>)/
 okStatusRe       = /^[2|3|4]\d+$/
 
+setCookie = (res, key, val, domainName) ->
+  res.cookie(key, val, {
+    domain: domainName
+  })
+
 module.exports = {
-  handle: (req, res, config, getRemoteOrigin, next) ->
+  handle: (req, res, config, getRemoteState, next) ->
+    logger.info("cookies are", req.cookies)
+
     ## if we have an unload header it means
     ## our parent app has been navigated away
     ## directly and we need to automatically redirect
@@ -26,62 +33,55 @@ module.exports = {
     if req.cookies["__cypress.unload"]
       return res.redirect config.clientRoute
 
+    remoteState = getRemoteState()
+
     d = Domain.create()
 
     d.on 'error', (e) =>
-      @errorHandler(e, req, res, getRemoteOrigin())
+      @errorHandler(e, req, res, remoteState)
 
     d.run =>
-      ## 1. first check to see if this url contains a FQDN
-      ## if it does then its been rewritten from an absolute-domain
-      ## into a absolute-path-relative link, and we should extract the
-      ## remoteOrigin from this URL
-      ## 2. or use cookies
-      ## 3. or use baseUrl
-      ## 4. or finally fall back on app instance var
-      remoteOrigin = getRemoteOrigin()
+      logger.info({"handling request", url: req.url, proxiedUrl: req.proxiedUrl, remoteState: remoteState})
 
-      logger.info "handling initial request", url: req.url, proxiedUrl: req.proxiedUrl, remoteOrigin: remoteOrigin
-
-      ## we must have the remoteOrigin which tell us where
+      ## we must have the remoteState.origin which tell us where
       ## we should request the initial HTML payload from
-      if not remoteOrigin
-        ## if we dont have a remoteOrigin that means we're initially
+      if not remoteState.origin
+        ## if we dont have a remoteState.origin that means we're initially
         ## requesting the cypress app and we need to redirect to the
         ## root path that serves the app
         return res.redirect(config.clientRoute)
 
       thr = through (d) -> @queue(d)
 
-      @getContent(thr, req, res, remoteOrigin, config)
-        .on "error", (e) => @errorHandler(e, req, res, remoteOrigin)
+      @getContent(thr, req, res, remoteState, config)
+        .on "error", (e) => @errorHandler(e, req, res, remoteState)
         .pipe(res)
 
-  getContent: (thr, req, res, remoteOrigin, config) ->
-    switch remoteOrigin
+  getContent: (thr, req, res, remoteState, config) ->
+    switch remoteState.strategy
       ## serve from the file system because
       ## we are using cypress as our weberver
-      when "<root>"
-        @getFileContent(thr, req, res, remoteOrigin, config)
+      when "file"
+        @getFileContent(thr, req, res, remoteState, config)
 
       ## else go make an HTTP request to the
       ## real server!
       else
-        @getHttpContent(thr, req, res, remoteOrigin)
+        @getHttpContent(thr, req, res, remoteState)
 
-  getHttpContent: (thr, req, res, remoteOrigin) ->
+  getHttpContent: (thr, req, res, remoteState) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
-    ## prepends req.url with remoteOrigin
+    ## prepends req.url with remoteState.origin
     remoteUrl = req.proxiedUrl
 
     isInitial = req.cookies["__cypress.initial"] is "true"
 
-    setCookies = (initial, remoteOrigin) =>
+    setCookies = (initial) =>
       ## dont set the cookies if we're not on the initial request
       return if req.cookies["__cypress.initial"] isnt "true"
 
-      res.cookie("__cypress.initial", initial)
+      setCookie(res, "__cypress.initial", initial, remoteState.domainName)
 
     opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
 
@@ -120,7 +120,7 @@ module.exports = {
         res.status(incomingRes.statusCode)
 
         if not okStatusRe.test incomingRes.statusCode
-          return @errorHandler(null, req, res, remoteOrigin)
+          return @errorHandler(null, req, res, remoteState)
 
         logger.info "received absolute file content"
 
@@ -128,9 +128,9 @@ module.exports = {
         setCookies(false)
 
         if req.cookies["__cypress.initial"] is "true"
-          # @rewrite(req, res, remoteOrigin)
+          # @rewrite(req, res)
           # res.isHtml = true
-          rq.pipe(@rewrite(req, res, remoteOrigin)).pipe(thr)
+          rq.pipe(@rewrite(req, res, remoteState)).pipe(thr)
         else
           rq.pipe(thr)
 
@@ -140,7 +140,7 @@ module.exports = {
 
     return thr
 
-  getFileContent: (thr, req, res, remoteOrigin, config) ->
+  getFileContent: (thr, req, res, remoteState, config) ->
     args = _.compact([
       config.fileServerFolder,
       req.url
@@ -157,13 +157,13 @@ module.exports = {
 
     logger.info "getting relative file content", file: file
 
-    res.cookie("__cypress.initial", false)
+    setCookie(res, "__cypress.initial", false, remoteState.domainName)
 
     sendOpts = {
       root: path.resolve(config.fileServerFolder)
       transform: (stream) =>
         if req.cookies["__cypress.initial"] is "true"
-          stream.pipe(@rewrite(req, res, remoteOrigin)).pipe(thr)
+          stream.pipe(@rewrite(req, res, remoteState)).pipe(thr)
         else
           stream.pipe(thr)
     }
@@ -174,7 +174,7 @@ module.exports = {
 
     send(req, urlHelpers.parse(req.url).pathname, sendOpts)
 
-  errorHandler: (e, req, res, remoteOrigin) ->
+  errorHandler: (e, req, res, remoteState) ->
     url = req.proxiedUrl
 
     ## disregard ENOENT errors (that means the file wasnt found)
@@ -200,6 +200,7 @@ module.exports = {
     htmlPath = cwd("lib", "html", "initial_500.html")
     res.status(500).render(htmlPath, {
       url: filePath
+      domain: remoteState.domainName
       fromFile: !!req.formattedUrl
     })
 
@@ -217,7 +218,7 @@ module.exports = {
     ## proxy the headers
     res.set(headers)
 
-  rewrite: (req, res, remoteOrigin) ->
+  rewrite: (req, res, remoteState) ->
     through = through
 
     tr = trumpet()
@@ -258,7 +259,7 @@ module.exports = {
     ## we still aren't handling pages which are missing their <head> tag
     ## for those we need to insert our own <head> tag
     rewrite "head", "html", (str) =>
-      str.replace(headRe, "$1 #{@getHeadContent()}")
+      str.replace(headRe, "$1 #{@getHeadContent(remoteState.domainName)}")
 
     # rewrite "html", "html", {method: "select"}, (str) =>
     #   ## if we are missing a <head> tag then
@@ -270,9 +271,10 @@ module.exports = {
 
     return tr
 
-  getHeadContent: ->
+  getHeadContent: (domain) ->
     "
       <script type='text/javascript'>
+        document.domain = '#{domain}';
         window.onerror = function(){
           parent.onerror.apply(parent, arguments);
         }

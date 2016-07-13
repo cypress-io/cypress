@@ -10,7 +10,7 @@ files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
 builds      = require("./controllers/builds")
 
-module.exports = (app, config, getRemoteOrigin) ->
+module.exports = (app, config, getRemoteState) ->
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
   app.get "/__cypress/tests", (req, res, next) ->
@@ -31,7 +31,7 @@ module.exports = (app, config, getRemoteOrigin) ->
 
   ## routing for the dynamic iframe html
   app.get "/__cypress/iframes/*", (req, res) ->
-    files.handleIframe(req, res, config)
+    files.handleIframe(req, res, config, getRemoteState)
 
   app.get "/__cypress/builds", (req, res, next) ->
     builds.handleBuilds(req, res, config, next)
@@ -52,10 +52,10 @@ module.exports = (app, config, getRemoteOrigin) ->
   ## and any other __cypress namespaced files so that the runner does
   ## not have to be aware of anything
   app.get config.clientRoute, (req, res) ->
-    runner.serve(req, res, config)
+    runner.serve(req, res, config, getRemoteState)
 
   app.all "*", (req, res, next) ->
-    proxy.handle(req, res, config, getRemoteOrigin, next)
+    proxy.handle(req, res, config, getRemoteState, next)
 
   ## when we experience uncaught errors
   ## during routing just log them out to
