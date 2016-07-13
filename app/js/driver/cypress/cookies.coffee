@@ -5,102 +5,115 @@ $Cypress.Cookies = do ($Cypress, _) ->
   isDebugging = false
   isDebuggingVerbose = false
 
-  ## TODO have app set this on cypress via config
-  namespace = "__cypress"
-
   preserved = {}
 
   defaults = {
     whitelist: null
   }
 
-  isNamespaced = (name) ->
-    _(name).startsWith(namespace)
+  $Cookies = (namespace, domain) ->
 
-  isWhitelisted = (cookie) ->
-    if w = defaults.whitelist
-      switch
-        when _.isString(w)
-          cookie.name is w
-        when _.isArray(w)
-          cookie.name in w
-        when _.isFunction(w)
-          w(cookie)
-        when _.isRegExp(w)
-          w.test(cookie.name)
-        else
-          false
+    isNamespaced = (name) ->
+      _(name).startsWith(namespace)
 
-  removePreserved = (name) ->
-    if preserved[name]
-      delete preserved[name]
+    isWhitelisted = (cookie) ->
+      if w = defaults.whitelist
+        switch
+          when _.isString(w)
+            cookie.name is w
+          when _.isArray(w)
+            cookie.name in w
+          when _.isFunction(w)
+            w(cookie)
+          when _.isRegExp(w)
+            w.test(cookie.name)
+          else
+            false
 
-  API = {
-    debug: (bool = true, options = {}) ->
-      _.defaults options, {
-        verbose: true
-      }
+    removePreserved = (name) ->
+      if preserved[name]
+        delete preserved[name]
 
-      isDebugging = bool
-      isDebuggingVerbose = bool and options.verbose
+    API = {
+      debug: (bool = true, options = {}) ->
+        _.defaults options, {
+          verbose: true
+        }
 
-    log: (message, cookie, removed) ->
-      return if not isDebugging
+        isDebugging = bool
+        isDebuggingVerbose = bool and options.verbose
 
-      m = if removed then "warn" else "info"
+      log: (message, cookie, removed) ->
+        return if not isDebugging
 
-      args = [_.truncate(message, 50)]
+        m = if removed then "warn" else "info"
 
-      if isDebuggingVerbose
-        args.push(cookie)
+        args = [_.truncate(message, 50)]
 
-      console[m].apply(console, args)
+        if isDebuggingVerbose
+          args.push(cookie)
 
-    getClearableCookies: (cookies = []) ->
-      _.filter cookies, (cookie) ->
-        not isWhitelisted(cookie) and not removePreserved(cookie.name)
+        console[m].apply(console, args)
 
-    _set: (name, value) ->
-      ## dont set anything if we've been
-      ## told to unload
-      return if @getCy("unload") is "true"
+      getClearableCookies: (cookies = []) ->
+        _.filter cookies, (cookie) ->
+          not isWhitelisted(cookie) and not removePreserved(cookie.name)
 
-      Cookies.set name, value, {path: "/"}
+      _set: (name, value, options = {}) ->
+        ## dont set anything if we've been
+        ## told to unload
+        return if @getCy("unload") is "true"
 
-    _get: (name) ->
-      Cookies.get(name)
+        _.defaults options, {
+          path: "/"
+        }
 
-    setCy: (name, value) ->
-      @_set("#{namespace}.#{name}", value)
+        Cookies.set(name, value, options)
 
-    getCy: (name) ->
-      @_get("#{namespace}.#{name}")
+      _get: (name) ->
+        Cookies.get(name)
 
-    preserveOnce: (keys...) ->
-      _.each keys, (key) ->
-        preserved[key] = true
+      setCy: (name, value, options = {}) ->
+        _.defaults(options, {
+          domain: domain
+        })
 
-    clearCypressCookies: ->
-      _.each Cookies.get(), (value, key) ->
-        if isNamespaced(key)
-          Cookies.remove(key, {path: "/"})
+        @_set("#{namespace}.#{name}", value, options)
 
-    setInitial: ->
-      @setCy("initial", true)
+      getCy: (name) ->
+        @_get("#{namespace}.#{name}")
 
-    getRemoteHost: ->
-      @getCy("remoteHost")
+      preserveOnce: (keys...) ->
+        _.each keys, (key) ->
+          preserved[key] = true
 
-    defaults: (obj = {}) ->
-      ## merge obj into defaults
-      _.extend defaults, obj
+      clearCypressCookies: ->
+        _.each Cookies.get(), (value, key) ->
+          if isNamespaced(key)
+            Cookies.remove(key, {
+              path: "/"
+              domain: domain
+            })
 
-  }
+      setInitial: ->
+        @setCy("initial", true)
 
-  _.each ["get", "set", "remove", "getAllCookies", "clearCookies"], (method) ->
-    API[method] = ->
-      $Cypress.Utils.throwErrByPath("cookies.removed_method", {
-        args: { method }
-      })
+      defaults: (obj = {}) ->
+        ## merge obj into defaults
+        _.extend defaults, obj
 
-  return API
+    }
+
+    _.each ["get", "set", "remove", "getAllCookies", "clearCookies"], (method) ->
+      API[method] = ->
+        $Cypress.Utils.throwErrByPath("cookies.removed_method", {
+          args: { method }
+        })
+
+    return API
+
+  $Cookies.create = (Cypress, namespace, domain) ->
+    ## set the $Cookies function onto the Cypress instance
+    Cypress.Cookies = $Cookies(namespace, domain)
+
+  return $Cookies
