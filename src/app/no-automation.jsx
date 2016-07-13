@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import React from 'react'
+
 import Dropdown from '../dropdown/dropdown'
+import RunnerWrap from './runner-wrap'
 
 const displayName = (name) => _.capitalize(name)
 
@@ -57,13 +59,15 @@ const browserPicker = (browsers, onLaunchBrowser) => {
 }
 
 export default ({ browsers, onLaunchBrowser }) => (
-  <div className='automation-message'>
-    <p>Whoops, we can't run your tests.</p>
-    {browsers.length ? browserPicker(browsers, onLaunchBrowser) : noBrowsers()}
-    <div className='helper-line'>
-      <a className='helper-docs-link' href='https://on.cypress.io/guides/browser-management' target='_blank'>
-        <i className='fa fa-question-circle'></i> Why am I seeing this message?
-      </a>
+  <RunnerWrap className='automation-failure'>
+    <div className='automation-message'>
+      <p>Whoops, we can't run your tests.</p>
+      {browsers.length ? browserPicker(browsers, onLaunchBrowser) : noBrowsers()}
+      <div className='helper-line'>
+        <a className='helper-docs-link' href='https://on.cypress.io/guides/browser-management' target='_blank'>
+          <i className='fa fa-question-circle'></i> Why am I seeing this message?
+        </a>
+      </div>
     </div>
-  </div>
+  </RunnerWrap>
 )

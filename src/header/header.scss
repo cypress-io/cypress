@@ -1,12 +1,15 @@
 .runner {
   header {
+    @extend %clearfix;
     background-color: #f8f8f8;
     box-shadow: 0 1px 5px #888;
     color: #888;
-    height: $header-height;
+    left: 0;
     line-height: 22px;
     padding: 10px;
-    position: relative;
+    position: absolute;
+    right: 0;
+    top: 0;
     z-index: 1;
 
     .aut-menu {
@@ -143,5 +146,13 @@
 
   .open .viewport-menu {
     display: block;
+  }
+
+  @media all and (max-width: 950px) {
+    .url-container {
+      float: none;
+      margin-bottom: 5px;
+      width: 100%;
+    }
   }
 }

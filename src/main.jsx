@@ -2,16 +2,19 @@ import { action, useStrict } from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'
 
-import state from './lib/state'
-import App from './app/app'
+import State from './lib/state'
+import Container from './app/container'
 
 useStrict(true)
 
 window.Runner = {
   start (el, config) {
+    const state = new State()
+    
     action('started', () => {
       state.updateDimensions(config.viewportWidth, config.viewportHeight)
     })()
-    render(<App config={config} state={state} />, el)
+
+    render(<Container config={config} state={state} />, el)
   },
 }

@@ -15,16 +15,23 @@ export default class Iframes extends Component {
   render () {
     const { width, height, scale, marginLeft } = this.props.state
 
-    return <div
-      ref='container'
-      className='size-container'
-      style={{
-        marginLeft,
-        height,
-        transform: `scale(${scale})`,
-        width,
-      }}
-    />
+    return (
+      <div
+        className='iframes-container'
+        style={{ top: this.props.state.headerHeight }}
+      >
+        <div
+          ref='container'
+          className='size-container'
+          style={{
+            marginLeft,
+            height,
+            transform: `scale(${scale})`,
+            width,
+          }}
+        />
+      </div>
+    )
   }
 
   componentDidMount () {
@@ -39,7 +46,6 @@ export default class Iframes extends Component {
     })
     this.iframeModel.listen()
     this._run()
-    windowUtil.monitorWindowResize(this.props.state)
   }
 
   _run () {

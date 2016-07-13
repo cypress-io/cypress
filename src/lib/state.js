@@ -1,9 +1,6 @@
 import { computed, observable } from 'mobx'
 import automation from './automation'
 
-const headerHeight = 46
-const reporterWidth = 450
-
 const _defaults = {
   messageTitle: null,
   messageDescription: null,
@@ -13,7 +10,7 @@ const _defaults = {
   height: 660,
 }
 
-class State {
+export default class State {
   defaults = _defaults
 
   @observable isRunning = false
@@ -29,6 +26,9 @@ class State {
   @observable width = _defaults.width
   @observable height = _defaults.height
 
+  @observable reporterWidth = 0
+  @observable headerHeight = 0
+
   @observable _windowWidth = 0
   @observable _windowHeight = 0
 
@@ -42,11 +42,11 @@ class State {
   }
 
   @computed get _containerWidth () {
-    return this._windowWidth - reporterWidth
+    return this._windowWidth - this.reporterWidth
   }
 
   @computed get _containerHeight () {
-    return this._windowHeight - headerHeight
+    return this._windowHeight - this.headerHeight
   }
 
   @computed get marginLeft () {
@@ -65,7 +65,7 @@ class State {
     if ((actualHeight + messageHeight + nudge) >= this._containerHeight) {
       return { bottom: 0, opacity: '0.7' }
     } else {
-      return { top: (actualHeight + headerHeight + nudge), opacity: '0.9' }
+      return { top: (actualHeight + this.headerHeight + nudge), opacity: '0.9' }
     }
   }
 
@@ -74,9 +74,11 @@ class State {
     this.height = height
   }
 
-  updateWindowDimensions (width, height) {
-    this._windowWidth = width
-    this._windowHeight = height
+  updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
+    this._windowWidth = windowWidth
+    this._windowHeight = windowHeight
+    this.reporterWidth = reporterWidth
+    this.headerHeight = headerHeight
   }
 
   clearMessage () {
@@ -85,5 +87,3 @@ class State {
     this.messageType = _defaults.messageType
   }
 }
-
-export default new State()

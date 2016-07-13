@@ -1,15 +1,4 @@
-/* global $ */
-
-import { action } from 'mobx'
-
 export default {
-  monitorWindowResize (state) {
-    const $window = $(window)
-    $window.on('resize', action('window:resize', () => {
-      state.updateWindowDimensions($window.width(), $window.height())
-    })).trigger('resize')
-  },
-
   specFile () {
     return this.specPath().replace(/(.*)\//, '')
   },

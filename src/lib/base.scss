@@ -119,3 +119,14 @@ body {
     border: 0;
   }
 }
+
+%clearfix {
+  &:before,
+  &:after {
+    content: "";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}

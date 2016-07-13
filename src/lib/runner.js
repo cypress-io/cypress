@@ -35,7 +35,7 @@ const reporterBus = new EventEmitter()
 export default {
   reporterBus,
 
-  ensureAutomation (connectionInfo) {
+  ensureAutomation (state, connectionInfo) {
     channel.emit('is:automation:connected', connectionInfo, action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
       channel.on('automation:disconnected', action('automationDisconnected', () => {

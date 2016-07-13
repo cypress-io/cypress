@@ -1,94 +1,77 @@
+/* global $ */
+
+import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
+import { findDOMNode } from 'react-dom'
 import Reporter from '@cypress/core-reporter'
 
-import automation from '../lib/automation'
-import runner from '../lib/runner'
 import windowUtil from '../lib/window-util'
+import State from '../lib/state'
 
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
-import NoAutomation from './no-automation'
-import AutomationDisconnected from './automation-disconnected'
-
-const automationElementId = '__cypress-string'
-
-const InRunner = (props) => (
-  <div {...props} className={`runner ${props.className}`}>
-    {props.children}
-  </div>
-)
+import RunnerWrap from './runner-wrap'
 
 @observer
-export default class App extends Component {
-  componentWillMount () {
-    this.randomString = `${Math.random()}`
-
-    runner.ensureAutomation({
-      element: automationElementId,
-      string: this.randomString,
-    })
-  }
-
+class App extends Component {
   render () {
-    switch (this.props.state.automation) {
-      case automation.CONNECTING:
-        return this._automationElement()
-      case automation.MISSING:
-        return this._noAutomation()
-      case automation.DISCONNECTED:
-        return this._automationDisconnected()
-      case automation.CONNECTED:
-      default:
-        return this._app()
-    }
-  }
-
-  _automationElement () {
-    return (
-      <div id={automationElementId} style={{ display: 'none' }}>
-        {this.randomString}
-      </div>
-    )
-  }
-
-  _app () {
     // for some reason the height: 100% div is needed
     // or the header disappears randomly
     return (
       <div>
-        <Reporter runner={runner.reporterBus} specPath={this._specPath()} />
-        <InRunner className='container' style={{ height: '100%' }}>
-          <Header {...this.props} />
+        <Reporter
+          ref='reporter'
+          runner={this.props.runner}
+          specPath={this._specPath()}
+        />
+        <RunnerWrap
+          className='container'
+          style={{ left: this.props.state.reporterWidth }}
+        >
+          <Header ref='header' {...this.props} />
           <Iframes {...this.props} />
           <Message {...this.props} />
-          {this._automationElement()}
-        </InRunner>
+          {this.props.children}
+        </RunnerWrap>
       </div>
     )
+  }
+
+  componentDidMount () {
+    this._monitorWindowResize()
   }
 
   _specPath () {
     return `${this.props.config.integrationFolder}/${windowUtil.specFile()}`
   }
 
-  _noAutomation () {
-    return (
-      <InRunner className='automation-failure'>
-        <NoAutomation
-          browsers={this.props.config.browsers}
-          onLaunchBrowser={(browser) => runner.launchBrowser(browser)}
-        />
-      </InRunner>
-    )
-  }
+  _monitorWindowResize () {
+    const state = this.props.state
 
-  _automationDisconnected () {
-    return (
-      <InRunner className='automation-failure'>
-        <AutomationDisconnected onReload={runner.launchBrowser} />
-      </InRunner>
-    )
+    const $window = $(window)
+    const $header = $(findDOMNode(this.refs.header))
+    const $reporter = $(findDOMNode(this.refs.reporter))
+
+    $window.on('resize', action('window:resize', () => {
+      state.updateWindowDimensions({
+        windowWidth: $window.width(),
+        windowHeight: $window.height(),
+        reporterWidth: $reporter.outerWidth(),
+        headerHeight: $header.outerHeight(),
+      })
+    })).trigger('resize')
   }
 }
+
+App.propTypes = {
+  config: PropTypes.object.isRequired,
+  runner: PropTypes.shape({
+    emit: PropTypes.func.isRequired,
+    on: PropTypes.func.isRequired,
+  }).isRequired,
+  state: PropTypes.instanceOf(State).isRequired,
+}
+
+export default App

@@ -1,6 +1,7 @@
 .reporter {
   right: auto;
-  width: $reporter-width;
+  min-width: $reporter-min-width;
+  width: 33%;
 
   .container {
     border-right: solid 1px #c7c7c7;
@@ -15,7 +16,7 @@
   & {
     bottom: 0;
     box-shadow: inset 0 0 10px #555;
-    left: $reporter-width;
+    left: $reporter-min-width;
     overflow: hidden;
     position: absolute;
     right: 0;
