@@ -28,10 +28,10 @@ export default class Iframes extends Component {
   }
 
   componentDidMount () {
-    const specPath = this.specPath = windowUtil.specPath()
+    const specPath = windowUtil.specPath()
     // TODO: need to take headless mode into account
     runner.start(this.props.config, specPath)
-    runner.on('restart', this._run.bind(this))
+    runner.on('restart', this._run.bind(this, specPath))
 
     this.iframeModel = new IframeModel(this.props.state, {
       detachBody: autIframe.detachBody.bind(autIframe),
@@ -39,13 +39,14 @@ export default class Iframes extends Component {
       highlightEl: autIframe.highlightEl.bind(autIframe),
     })
     this.iframeModel.listen()
-    this._run()
+    this._run(specPath)
     windowUtil.monitorWindowResize(this.props.state)
   }
 
-  _run () {
+  _run (specPath) {
     logger.clearLog()
-    this._loadIframes(this.specPath).then(([specWindow, $autIframe]) => {
+    this._loadIframes(specPath)
+    .then(([specWindow, $autIframe]) => {
       runner.run(specWindow, $autIframe)
     })
   }
