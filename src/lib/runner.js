@@ -183,6 +183,10 @@ export default {
       driver.abort()
     })
 
+    // TODO: due to config closure in Cypress.Cookies
+    // we need to wait until after setConfig resolves
+    // before binding to unload + beforeunload
+
     // when we actually unload then
     // nuke all of the cookies again
     // so we clear out unload
@@ -198,11 +202,14 @@ export default {
     // cookies
     $(window).on('beforeunload', () => {
       reporterBus.emit('reporter:restart:test:run')
+
+      // TODO: potentially move these two functions
+      // into 'unload' instead of 'beforeunload'
       this._clearAllCookies()
       this._setUnload()
     })
 
-    driver.setConfig(_.pick(config, 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'remote'))
+    driver.setConfig(_.pick(config, 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'namespace', 'remote'))
 
     driver.start()
   },
@@ -252,11 +259,11 @@ export default {
   // whenever our app starts
   // and additional when we stop running our tests
   _clearAllCookies () {
-    $Cypress.Cookies.clearCypressCookies()
+    driver.Cookies.clearCypressCookies()
   },
 
   _setUnload () {
-    $Cypress.Cookies.setCy('unload', true)
+    driver.Cookies.setCy('unload', true)
   },
 
   _withLog (logId, cb) {
