@@ -64,7 +64,10 @@ export default class Test extends Runnable {
     this.err.update(err)
     this.isActive = false
     if (hookName) {
-      _.find(this.hooks, { name: hookName }).failed = true
+      const hook = _.find(this.hooks, { name: hookName })
+      if (hook) {
+        hook.failed = true
+      }
     }
   }
 
