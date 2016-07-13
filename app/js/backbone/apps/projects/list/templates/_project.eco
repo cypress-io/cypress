@@ -1,9 +1,0 @@
-<h4>
-  <%= @name %>
-</h4>
-<small><%= @path %></small>
-<% if @loading: %>
-  <i class="fa fa-spinner fa-spin"></i>
-<% else: %>
-  <i class="fa fa-angle-right"></i>
-<% end %>
