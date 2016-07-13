@@ -2,11 +2,11 @@
   text-align: center;
   background-color: #D9EDF7;
   position: fixed;
-  bottom: 19px;
+  bottom: 20px;
   width: 100%;
   color: #3A87AD;
-  line-height: 26px;
-  font-size: 13px;
+  line-height: 35px;
+  font-size: 14px;
 
   strong {
     margin-left: 10px;
@@ -25,4 +25,14 @@
 
 html.updates {
   background-color: #ECECEC;
+}
+
+html.has-updates {
+  .helper-line {
+    bottom: 90px;
+  }
+
+  .alert {
+    margin-bottom: 90px;
+  }
 }

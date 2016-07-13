@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
+import Loader from 'react-loader'
 
 import App from '../lib/app'
 import updater from './update-model'
@@ -16,21 +17,21 @@ class Updates extends Component {
 
     updater.setVersion(props.options.version)
 
-    App.ipc("updater:run", (err, data = {}) => {
+    App.ipc('updater:run', (err, data = {}) => {
       switch (data.event) {
-        case "start":
-          return updater.setState("checking")
-        case "apply":
-          return updater.setState("applying")
-        case "error":
-          return updater.setState("error")
-        case "done":
-          return updater.setState("done")
-        case "none":
-          return updater.setState("none")
-        case "download":
+        case 'start':
+          return updater.setState('checking')
+        case 'apply':
+          return updater.setState('applying')
+        case 'error':
+          return updater.setState('error')
+        case 'done':
+          return updater.setState('done')
+        case 'none':
+          return updater.setState('none')
+        case 'download':
           updater.setNewVersion(data.version)
-          return updater.setState("downloading")
+          return updater.setState('downloading')
         default:
           return
       }
@@ -38,10 +39,12 @@ class Updates extends Component {
   }
 
   render () {
+    if (!updater.state) return <Loader color='#888' scale={0.5}/>
+
     return (
       <div>
         <p>
-          <a onClick={openChangelog} href="#">
+          <a onClick={openChangelog} href='#'>
             View Changelog
           </a>
         </p>
@@ -55,7 +58,7 @@ class Updates extends Component {
   _currentVersion = () => {
     if (updater.version) {
       return (
-        <p class="version">
+        <p className='version'>
           <b>Current Version:</b>{' '}
           <span>{ updater.version }</span>
         </p>
@@ -66,7 +69,7 @@ class Updates extends Component {
   _newVersion = () => {
     if (updater.newVersion) {
       return (
-        <p class="new-version">
+        <p className='new-version'>
           <b>New Version:</b>{' '}
           <span>{ updater.newVersion }</span>
         </p>
@@ -75,24 +78,48 @@ class Updates extends Component {
   }
 
   _state = () => {
-    if (updater.state) {
+
+    let errClass
+    if (updater.state === 'error') {
+      errClass = 'text-danger'
+    }
+
+    if (!!updater.state) {
       return (
-        <p class="state">
-          {
-          //   <% if not @finished: %>
-          //     <i class="fa fa-spinner fa-spin"></i>
-          //   <% end %>
-          //   <%= @stateFormatted %>
-          // </p>
-          // <% if @finished: %>
-          //   <div>
-          //     <button class="btn btn-default"><%= @buttonFormatted %></button>
-          //   </div>
-          // <% end %>
-          }
-        </p>
+        <div>
+          <p className={`state ${errClass}`}>
+            { this._notFinished() }{' '}
+            { updater.stateFormatted }
+          </p>
+          { this._finished() }
+        </div>
       )
     }
+  }
+
+  _notFinished = () => {
+    if (!updater.finished) {
+      return (
+        <i className='fa fa-spinner fa-spin'></i>
+      )
+    }
+  }
+
+  _finished = () => {
+    if (updater.finished) {
+      return (
+        <div>
+          <button onClick={this._closeWindow} className='btn btn-default'>
+            { updater.buttonFormatted }
+          </button>
+        </div>
+      )
+    }
+  }
+
+  _closeWindow (e) {
+    e.preventDefault()
+    App.ipc('window:close')
   }
 }
 

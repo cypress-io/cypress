@@ -1,8 +1,8 @@
-describe.skip "Updates", ->
+describe "Updates", ->
   beforeEach ->
     cy
       .viewport(300, 210)
-      .visit("/#/updates")
+      .visit("/updates.html")
       .window().then (win) ->
         {@ipc, @App} = win
 
@@ -16,15 +16,22 @@ describe.skip "Updates", ->
   it "has updates title", ->
     cy.title().should("include", "Updates")
 
+  it "displays loading spinner before updater:run is called", ->
+    cy.get(".loader").should("exist")
+
+  it "triggers updater:run", ->
+    expect(@App.ipc).to.be.calledWith("updater:run")
+
   it "links to Changelog", ->
+    @ipc.handle("updater:run", null, {event: "none"})
+
     cy.contains("a", "View Changelog").click().then ->
       expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/changelog")
 
   it "displays current version", ->
-    cy.get(".version").contains(@v)
+    @ipc.handle("updater:run", null, {event: "none"})
 
-  it "triggers updater:run", ->
-    expect(@App.ipc).to.be.calledWith("updater:run")
+    cy.get(".version").contains(@v)
 
   describe "updater:run start", ->
     it "displays check for updates msg", ->

@@ -2,6 +2,7 @@ import { computed, observable, action } from 'mobx'
 
 class Updater {
   @observable version
+  @observable state
   @observable finished = false
 
   @action setVersion (version) {
@@ -13,31 +14,55 @@ class Updater {
   }
 
   @action setState (state) {
-    this.state = state
+    switch (state) {
+      case 'error':
+      case 'done':
+      case 'none':
+        this.finished = true
+        this.state = state
+        break
+      default:
+        this.state = state
+    }
+
+    return this.state
   }
 
   @computed get stateFormatted () {
+    let result
+
     switch (this.state) {
       case 'checking':
-        'Checking for updates...'
+        result = 'Checking for updates...'
         break
       case 'downloading':
-        'Downloading updates...'
+        result = 'Downloading updates...'
         break
       case 'applying':
-        'Applying updates...'
+        result = 'Applying updates...'
         break
       case 'done':
-        'Updates ready'
+        result = 'Updates ready'
         break
       case 'none':
-        'No updates available'
+        result = 'No updates available'
         break
       case 'error':
-        'An error occurred updating'
+        result = 'An error occurred updating'
         break
       default:
-        return
+        result = ""
+    }
+
+    return result
+  }
+
+  @computed get buttonFormatted () {
+
+    if (this.state === 'done') {
+      return 'Restart'
+    } else {
+      return 'Done'
     }
   }
 }

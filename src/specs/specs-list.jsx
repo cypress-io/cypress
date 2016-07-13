@@ -1,13 +1,13 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
+import Loader from 'react-loader'
 
 import App from '../lib/app'
 import { clearActiveSpec } from '../lib/utils'
 import { getSpecs } from './specs-api'
 import { runSpec } from '../projects/projects-api'
 import specsCollection from './specs-collection'
-import Loader from 'react-loader'
 
 @observer
 class Specs extends Component {
