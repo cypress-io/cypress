@@ -9,6 +9,7 @@ cookies     = require("./cookies")
 logs        = require("./logs")
 Renderer    = require("./renderer")
 user        = require("../../user")
+logger      = require("../../logger")
 errors      = require("../../errors")
 Updater     = require("../../updater")
 Project     = require("../../project")
@@ -16,6 +17,7 @@ Project     = require("../../project")
 handleEvent = (options, event, id, type, arg) ->
   sendResponse = (data = {}) ->
     try
+      logger.info("sending ipc data", type: type, data: data)
       event.sender.send("response", data)
 
   sendErr = (err) ->
