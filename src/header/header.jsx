@@ -16,7 +16,12 @@ export default class Header extends Component {
 
     return (
       <header>
-        <div className={cs('url-container', { loading: isLoading, highlighted: highlightUrl })}>
+        <div
+          className={cs('url-container', {
+            loading: isLoading,
+            highlighted: highlightUrl,
+          })}
+        >
           <input className='url' value={url} readonly />
           <span className='loading-container'>
             ...loading <i className='fa fa-spinner fa-spin'></i>

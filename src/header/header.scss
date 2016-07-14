@@ -49,11 +49,18 @@
   }
 
   .loading-container {
+    background: #08c18d;
+    border-radius: 2px 18px 18px 2px;
     display: none;
+    font-size: 0.9em;
+    height: 26px;
+    line-height: 28px;
+    padding-left: 5px;
+    padding-right: 3px;
     position: absolute;
-    right: 4px;
-    top: 5px;
-    color: #AAA;
+    right: 0;
+    top: 0;
+    color: #f8f8f8;
 
     i {
       margin: 0 5px 0 2px;
@@ -75,6 +82,10 @@
     padding: 2px 10px;
     letter-spacing: 0.3px;
     width: 100%;
+  }
+
+  .loading .url {
+    padding-right: 87px;
   }
 
   .highlighted .url,
