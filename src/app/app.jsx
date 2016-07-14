@@ -66,7 +66,19 @@ class App extends Component {
 }
 
 App.propTypes = {
-  config: PropTypes.object.isRequired,
+  config: PropTypes.shape({
+    browsers: PropTypes.arrayOf(PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      majorVersion: PropTypes.string.isRequired,
+      version: PropTypes.string.isRequired,
+    })).isRequired,
+    env: PropTypes.string.isRequired,
+    integrationFolder: PropTypes.string.isRequired,
+    numTestsKeptInMemory: PropTypes.number.isRequired,
+    projectName: PropTypes.string.isRequired,
+    viewportHeight: PropTypes.number.isRequired,
+    viewportWidth: PropTypes.number.isRequired,
+  }).isRequired,
   runner: PropTypes.shape({
     emit: PropTypes.func.isRequired,
     on: PropTypes.func.isRequired,

@@ -10,7 +10,6 @@ import logs from './logs'
 import logger from './logger'
 import tests from './tests'
 import overrides from './overrides'
-import state from './state'
 
 // TODO: loadModules should be default true
 const driver = $Cypress.create({ loadModules: true })
