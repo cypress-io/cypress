@@ -52,27 +52,27 @@ export default class Project {
   }
 
   @action loading (bool) {
-    this.isLoading = bool
+    return this.isLoading = bool
   }
 
   @action openModal () {
-    this.onBoardingModalOpen = true
+    return this.onBoardingModalOpen = true
   }
 
   @action closeModal () {
-    this.onBoardingModalOpen = false
+    return this.onBoardingModalOpen = false
   }
 
   @action browserOpening () {
-    this.browserState = "opening"
+    return this.browserState = "opening"
   }
 
   @action browserOpened () {
-    this.browserState = "opened"
+    return this.browserState = "opened"
   }
 
   @action browserClosed () {
-    this.browserState = "closed"
+    return this.browserState = "closed"
   }
 
   @action setBrowsers (browsers) {
@@ -80,7 +80,7 @@ export default class Project {
       this.browsers = _.map(browsers, (browser) => {
         return new Browser(browser)
       })
-      this.setChosenBrowser(this.defaultBrowser)
+      return this.setChosenBrowser(this.defaultBrowser)
     }
   }
 
@@ -88,13 +88,13 @@ export default class Project {
     _.each(this.browsers, (browser) => {
       browser.isChosen = false
     })
-    browser.isChosen = true
+    return browser.isChosen = true
   }
 
   setOnBoardingConfig (config) {
     this.isNew = config.isNewProject
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
-    this.integrationExampleName = config.integrationExampleName
+    return this.integrationExampleName = config.integrationExampleName
   }
 
   setResolvedConfig (resolved) {
@@ -107,10 +107,10 @@ export default class Project {
 
   setChosenBrowserByName (name) {
     const browser = _.find(this.browsers, { name })
-    this.setChosenBrowser(browser)
+    return this.setChosenBrowser(browser)
   }
 
   @action reset () {
-    this.error = undefined
+    return this.error = undefined
   }
 }

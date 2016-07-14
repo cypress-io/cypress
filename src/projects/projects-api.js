@@ -70,16 +70,16 @@ const runSpec = (project, spec, browser, url) => {
 }
 
 const closeBrowser = (projectId) => {
-  App.ipc('close:browser')
-
   clearActiveSpec()
+
+  App.ipc('close:browser')
 
   if (projectId) {
     let project = projectsStore.getProjectById(projectId)
     project.browserClosed()
   }
 
-  App.ipc.off('launch:browser')
+  return App.ipc.off('launch:browser')
 }
 
 const closeProject = (projectId) => {
@@ -94,7 +94,7 @@ const openProject = (project) => {
   // we give the UI some time to render
   // and not block due to sync require's
   // in the main process
-  Promise.delay(100)
+  return Promise.delay(100)
   .then(() => {
     return Promise.all([
       App.ipc('open:project', project.path),
