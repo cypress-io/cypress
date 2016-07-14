@@ -22,7 +22,7 @@ export default class Header extends Component {
             highlighted: highlightUrl,
           })}
         >
-          <input className='url' value={url} readonly />
+          <input className='url' value={url} readonly onClick={this._openUrl} />
           <span className='loading-container'>
             ...loading <i className='fa fa-spinner fa-spin'></i>
           </span>
@@ -53,6 +53,10 @@ export default class Header extends Component {
         </ul>
       </header>
     )
+  }
+
+  _openUrl = () => {
+    window.open(this.props.state.url)
   }
 
   _toggleViewportMenu = () => {
