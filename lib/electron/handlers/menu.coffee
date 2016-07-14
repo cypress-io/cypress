@@ -1,6 +1,6 @@
 os   = require("os")
 Menu = require("electron").Menu
-BrowserWindow = require("electron").BrowserWindow
+shell = require("electron").shell
 
 module.exports = {
   set: ->
@@ -13,12 +13,8 @@ module.exports = {
           }
           {
             label: "Changelog"
-            click: (item, focusedWindow) =>
-              win = new BrowserWindow({width: 1400, height: 1000})
-              win.on 'closed', =>
-                win = null
-
-              win.loadURL("https://github.com/cypress-io/cypress/wiki/changelog")
+            click: () =>
+              shell.openExternal("https://on.cypress.io/changelog")
           }
           {
             type: "separator"
@@ -32,8 +28,7 @@ module.exports = {
           {
             label: "Close Window"
             accelerator: "CmdOrCtrl+W"
-            click: (item, focusedWindow) =>
-              focusedWindow.close() if focusedWindow
+            role: "close"
           }
         ]
       }
@@ -94,28 +89,18 @@ module.exports = {
             label: "Report an Issue.."
             click: (item, focusedWindow) =>
               win = new BrowserWindow({width: 1400, height: 1000})
-              win.on 'closed', =>
-                win = null
-
-              win.loadURL("https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A")
+              click: () =>
+                shell.openExternal("https://on.cypress.io/new-issue")
           }
           {
             label: "Cypress Documentation"
-            click: (item, focusedWindow) =>
-              win = new BrowserWindow({width: 1400, height: 1000})
-              win.on 'closed', =>
-                win = null
-
-              win.loadURL("https://docs.cypress.io/")
+            click: () =>
+              shell.openExternal("https://on.cypress.io")
           }
           {
             label: "Cypress Chat"
-            click: (item, focusedWindow) =>
-              win = new BrowserWindow({width: 1400, height: 1000})
-              win.on 'closed', =>
-                win = null
-
-              win.loadURL("https://gitter.im/cypress-io/cypress")
+            click: () =>
+              shell.openExternal("https://on.cypress.io/chat")
           }
         ]
       }
@@ -161,8 +146,9 @@ module.exports = {
           {
             label: "Quit"
             accelerator: "Command+Q"
-            click: (item, focusedWindow) =>
-              focusedWindow.close() if focusedWindow
+            role: "quit"
+            # click: (item, focusedWindow) =>
+            #   focusedWindow.close() if focusedWindow
           }
         ]
       })
