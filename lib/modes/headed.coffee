@@ -39,11 +39,7 @@ module.exports = {
   onRightClick: ->
 
   onWindowAllClosed: (app) ->
-    ## stop all the events
-    Events.stop()
-
-    ## exit when all windows are closed
-    app.exit(0)
+    process.exit(0)
 
   getRendererArgs: (coords) ->
     common = {

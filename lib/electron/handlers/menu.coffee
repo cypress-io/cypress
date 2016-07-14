@@ -87,17 +87,17 @@ module.exports = {
         submenu: [
           {
             label: "Report an Issue.."
-            click: () =>
+            click: ->
               shell.openExternal("https://on.cypress.io/new-issue")
           }
           {
             label: "Cypress Documentation"
-            click: () =>
+            click: ->
               shell.openExternal("https://on.cypress.io")
           }
           {
             label: "Cypress Chat"
-            click: () =>
+            click: ->
               shell.openExternal("https://on.cypress.io/chat")
           }
         ]
@@ -144,23 +144,12 @@ module.exports = {
           {
             label: "Quit"
             accelerator: "Command+Q"
-            role: "quit"
-            # click: (item, focusedWindow) =>
-            #   focusedWindow.close() if focusedWindow
+            #role: "quit" ## must upgrade to latest electron
+            click: (item, focusedWindow) =>
+              process.exit(0)
           }
         ]
       })
-
-      # windowMenu = template.find (m) =>
-      #   m.role is "window"
-
-      # if windowMenu
-      #   windowMenu.submenu.push(
-      #     {
-      #       label: "Zoom"
-      #       role: "performZoom"
-      #     }
-      #   )
 
     if process.env["CYPRESS_ENV"] is "development"
       template.push(
