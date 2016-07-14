@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
+import App from '../lib/app'
+
 @observer
 class OnBoading extends Component {
   constructor (props) {
@@ -21,18 +23,19 @@ class OnBoading extends Component {
       <BootstrapModal
         show={this.props.project.onBoardingModalOpen}
         onHide={closeModal}
-        backdrop='static'>
+        backdrop='static'
+        >
         <div className='modal-body'>
           <div className='empty-onboarding'>
             <h1>To help you get started...</h1>
             <p>
               We've added some folders and example tests to your project. Try running the
-              <strong>
+              <strong onClick={this._openExampleSpec.bind(this)}>
                 <i className='fa fa-file-code-o'></i>{' '}
-                example_spec{' '}
+                { this.props.project.integrationExampleName }{' '}
               </strong>
               tests or add your own test file to
-              <strong>
+              <strong onClick={this._openIntegrationFolder.bind(this)}>
                 <i className='fa fa-folder-o'></i>{' '}
                 cypress/integration
               </strong>.
@@ -72,7 +75,7 @@ class OnBoading extends Component {
                             <li>
                               <span>
                                 <i className='fa fa-file-code-o'></i>{' '}
-                                example_spec.js
+                                { this.props.project.integrationExampleName }
                               </span>
                             </li>
                           </ul>
@@ -98,6 +101,14 @@ class OnBoading extends Component {
         </div>
       </BootstrapModal>
     )
+  }
+
+  _openExampleSpec () {
+    App.ipc('open:finder', this.props.project.integrationExampleFile)
+  }
+
+  _openIntegrationFolder () {
+    App.ipc('open:finder', this.props.project.integrationFolder)
   }
 }
 

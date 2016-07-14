@@ -111,7 +111,9 @@ class Specs extends Component {
         <div className="empty-well">
           <h5>
             No files found in
-            <code>{ this.props.project.path }</code>
+            <code onClick={this._openIntegrationFolder.bind(this)}>
+              { this.props.project.integrationFolder }
+            </code>
           </h5>
             <a className='helper-docs-link' onClick={this._openHelp}>
               <i className='fa fa-question-circle'></i>{' '}
@@ -120,6 +122,10 @@ class Specs extends Component {
         </div>
       </div>
     )
+  }
+
+  _openIntegrationFolder () {
+    App.ipc('open:finder', this.props.project.integrationFolder)
   }
 
   _openHelp (e) {

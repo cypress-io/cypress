@@ -48,8 +48,13 @@ describe "Specs List", ->
     it "displays empty message", ->
       cy.contains("No files found")
 
-    it "displays project path", ->
-      cy.contains(@projects[0])
+    it "displays integration test folder path", ->
+      cy.contains(@config.integrationFolder)
+
+    it "triggers open:finder on click of text folder", ->
+      cy
+        .contains(@config.integrationFolder).click().then ->
+          expect(@App.ipc).to.be.calledWith("open:finder", @config.integrationFolder)
 
     it "displays help link", ->
       cy.contains("a", "Need help?")
@@ -73,6 +78,16 @@ describe "Specs List", ->
     it "displays modal", ->
       cy
         .contains(".modal", "To help you get started").should("be.visible")
+
+    it "triggers open:finder on click of example file", ->
+      cy
+        .get(".modal").contains("example_spec.js").click().then ->
+          expect(@App.ipc).to.be.calledWith("open:finder", @config.integrationExampleFile)
+
+    it "triggers open:finder on click of text folder", ->
+      cy
+        .get(".modal").contains("cypress/integration").click().then ->
+          expect(@App.ipc).to.be.calledWith("open:finder", @config.integrationFolder)
 
   describe "lists specs", ->
     beforeEach ->

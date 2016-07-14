@@ -93,7 +93,10 @@ export default class Project {
 
   setOnBoardingConfig (config) {
     this.isNew = config.isNewProject
+    this.integrationExampleFile = config.integrationExampleFile
+    this.integrationFolder = config.integrationFolder
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
+    this.fileServerFolder = config.fileServerFolder
     return this.integrationExampleName = config.integrationExampleName
   }
 
