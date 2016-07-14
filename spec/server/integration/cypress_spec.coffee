@@ -272,7 +272,7 @@ describe "lib/cypress", ->
         Project.add(@idsPath)
       ])
       .then =>
-        cypress.start(["--run-project=#{@idsPath}", "--spec=cypress/integration/bar.js"]).then =>
+        cypress.start(["--run-project=#{@idsPath}", "--spec=cypress/integration/bar.js", "--config", "port=2020"]).then =>
           expect(headless.createRenderer).to.be.calledWith("http://localhost:2020/__/#/tests/integration/bar.js")
           @expectExitWith(0)
 

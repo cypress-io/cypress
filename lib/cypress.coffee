@@ -89,7 +89,7 @@ module.exports = {
   openProject: (options) ->
     ## this code actually starts a project
     ## and is spawned from nodemon
-    require("./electron/handlers/project").open(options.project)
+    require("./electron/handlers/project").open(options.project, options)
 
   runServer: (options) ->
     args = {}
@@ -111,7 +111,7 @@ module.exports = {
       ignore: ["--ignore", "lib/public"]
       verbose: "--verbose"
       exts:   ["-e", "coffee,js"]
-      args:   ["--", "--mode", "openProject", "--project", options.project]
+      args:   ["--", "--config", "port=2020", "--mode", "openProject", "--project", options.project]
     })
 
     args = _.chain(args).values().flatten().value()

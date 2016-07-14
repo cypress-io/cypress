@@ -46,7 +46,16 @@ class Project extends EE
     @getConfig(options)
     .then (cfg) =>
       @server.open(cfg)
-      .then =>
+      .then (port) =>
+        ## if we didnt have a cfg.port
+        ## then get the port once we
+        ## open the server
+        if not cfg.port
+          cfg.port = port
+
+          ## and set all the urls again
+          cfg = config.setUrls(cfg)
+
         ## store the cfg from
         ## opening the server
         @cfg = cfg

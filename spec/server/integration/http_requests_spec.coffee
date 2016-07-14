@@ -73,19 +73,18 @@ describe "Routes", ->
           httpsServer.start(8443),
 
           ## and open our cypress server
-          Server()
-          .open(cfg)
-          .then (server) =>
-            @server = server
+          @server = Server()
 
+          @server.open(cfg)
+          .then (port) =>
             if initialUrl
               @server._onDomainSet(initialUrl)
 
-            @srv = server.getHttpServer()
+            @srv = @server.getHttpServer()
 
             @session = new (Session({app: @srv}))
 
-            @proxy = "http://localhost:" + @srv.address().port
+            @proxy = "http://localhost:" + port
         ])
 
       if @server
@@ -120,7 +119,7 @@ describe "Routes", ->
     ## without proxy mode set
     it "redirects to config.clientRoute without a _remoteOrigin and without a proxy", ->
       @rp({
-        url: "http://localhost:2020/"
+        url: @proxy
         proxy: null
       })
       .then (res) ->
@@ -1028,7 +1027,7 @@ describe "Routes", ->
         @setup("<root>")
         .then =>
           @rp({
-            url: "http://localhost:2020/foo/views/test/index.html"
+            url: @proxy + "/foo/views/test/index.html"
             headers: {
               "Cookie": "__cypress.initial=true"
             }
@@ -1043,7 +1042,7 @@ describe "Routes", ->
         @setup("<root>")
         .then =>
           @rp({
-            url: "http://localhost:2020/foo/views/test/index.html"
+            url: @proxy + "/foo/views/test/index.html"
             headers: {
               "Cookie": "__cypress.initial=true"
             }
@@ -1581,7 +1580,7 @@ describe "Routes", ->
         })
         .then =>
           @rp({
-            url: "http://localhost:2020/index.html"
+            url: @proxy + "/index.html"
             headers: {
               "Cookie": "__cypress.initial=true"
             }
@@ -1599,37 +1598,37 @@ describe "Routes", ->
         Fixtures.remove("no-server")
 
       it "sets etag", ->
-        @rp("http://localhost:2020/assets/app.css")
+        @rp(@proxy + "/assets/app.css")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("html { color: black; }")
           expect(res.headers["etag"]).to.be.a("string")
 
       it "sets last-modified", ->
-        @rp("http://localhost:2020/assets/app.css")
+        @rp(@proxy + "/assets/app.css")
         .then (res) =>
           expect(res.headers["last-modified"]).to.be.a("string")
 
       it "streams from file system", ->
-        @rp("http://localhost:2020/assets/app.css")
+        @rp(@proxy + "/assets/app.css")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("html { color: black; }")
 
       it "sets content-type", ->
-        @rp("http://localhost:2020/assets/app.css")
+        @rp(@proxy + "/assets/app.css")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.headers["content-type"]).to.match(/text\/css/)
 
       it "disregards anything past the pathname", ->
-        @rp("http://localhost:2020/assets/app.css?foo=bar#hash")
+        @rp(@proxy + "/assets/app.css?foo=bar#hash")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("html { color: black; }")
 
       it "can serve files with spaces in the path", ->
-        @rp("http://localhost:2020/a space/foo.txt")
+        @rp(@proxy + "/a space/foo.txt")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("foo")

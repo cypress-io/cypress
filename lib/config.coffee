@@ -17,6 +17,7 @@ isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
 defaults = {
+  port:           null
   morgan:         true
   baseUrl:        null
   socketId:       null
@@ -33,7 +34,6 @@ defaults = {
   requestTimeout:  5000
   responseTimeout: 20000
   execTimeout:     60000
-  port:            2020
   waitForAnimations: true
   animationDistanceThreshold: 5
   numTestsKeptInMemory: 50
@@ -134,7 +134,8 @@ module.exports = {
 
     config = @setResolvedConfigValues(config, defaults, resolved)
 
-    config = @setUrls(config)
+    if config.port
+      config = @setUrls(config)
 
     config = @setAbsolutePaths(config, defaults)
 

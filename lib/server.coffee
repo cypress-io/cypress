@@ -49,13 +49,12 @@ class Server
     @_remoteStrategy = null
     @_remoteDomainName = DEFAULT_DOMAIN_NAME
 
-  createExpressApp: (port, morgan) ->
+  createExpressApp: (morgan) ->
     app = express()
 
     ## set the cypress config from the cypress.json file
-    app.set "port",        port
-    app.set "view engine", "html"
-    app.engine "html",     hbs.__express
+    app.set("view engine", "html")
+    app.engine("html",     hbs.__express)
 
     ## handle the proxied url in case
     ## we have not yet started our websocket server
@@ -93,7 +92,7 @@ class Server
 
   open: (config = {}) ->
     Promise.try =>
-      app = @createExpressApp(config.port, config.morgan)
+      app = @createExpressApp(config.morgan)
 
       logger.setSettings(config)
 
@@ -102,7 +101,6 @@ class Server
       @createRoutes(app, config, getRemoteState)
 
       @createServer(config.port, config.socketIoRoute, app)
-      .return(@)
 
   createServer: (port, socketIoRoute, app) ->
     new Promise (resolve, reject) =>
@@ -152,28 +150,34 @@ class Server
 
       @_server.once "error", onError
 
-      Promise.join(
-        @_listen(port, onError),
-
+      @_listen(port, onError)
+      .then (port) =>
         httpsProxy.create(appData.path("proxy"), port, {
           onRequest: callListeners
           onUpgrade: onSniUpgrade
         })
-      )
-      .spread (srv, httpsProxy) =>
-        @_httpsProxy = httpsProxy
+        .then (httpsProxy) =>
+          @_httpsProxy = httpsProxy
 
-        resolve(srv)
+          resolve(port)
 
   _listen: (port, onError) ->
     new Promise (resolve) =>
-      @_server.listen port, =>
+      listener = =>
+        port = @_server.address().port
+
         @isListening = true
+
         logger.info("Server listening", {port: port})
 
         @_server.removeListener "error", onError
 
-        resolve(@_server)
+        resolve(port)
+
+      ## nuke port from our args if its falsy
+      args = _.compact([port, listener])
+
+      @_server.listen.apply(@_server, args)
 
   _getRemoteState: ->
     # {
