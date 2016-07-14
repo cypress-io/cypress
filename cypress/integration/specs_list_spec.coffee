@@ -125,17 +125,18 @@ describe "Specs List", ->
         it "sets spec as active", ->
           cy.get("@allSpecs").should("have.class", "active")
 
-    it "lists main folders of specs", ->
-      cy.contains(".folder", "integration")
-      cy.contains(".folder", "unit")
+    context "displays list of specs", ->
+      it "lists main folders of specs", ->
+        cy.contains(".folder", "integration")
+        cy.contains(".folder", "unit")
 
-    it "lists nested folders", ->
-      cy.get(".folder .folder").contains("accounts")
+      it "lists nested folders", ->
+        cy.get(".folder .folder").contains("accounts")
 
-    it "lists test specs", ->
-      cy.get(".file a").contains("app_spec.coffee")
+      it "lists test specs", ->
+        cy.get(".file a").contains("app_spec.coffee")
 
-    describe "click on spec", ->
+    context "click on spec", ->
       beforeEach ->
         cy.get(".file a").contains("app_spec.coffee").as("firstSpec")
 
@@ -179,6 +180,26 @@ describe "Specs List", ->
 
       it "sets spec as active", ->
         cy.get("@firstSpec").should("have.class", "active")
+
+    describe "switching specs", ->
+      beforeEach ->
+        cy
+          .get(".file").contains("a", "app_spec.coffee").as("firstSpec")
+            .click().then ->
+              @ipc.handle("get:open:browsers", null, ["chrome"])
+              @ipc.handle("change:browser:spec", null, {})
+          .get(".file").contains("a", "account_new_spec.coffee").as("secondSpec")
+            .click().then ->
+              @ipc.handle("get:open:browsers", null, ["chrome"])
+              @ipc.handle("change:browser:spec", null, {})
+
+      it "updates spec icon", ->
+        cy.get("@firstSpec").find("i").should("not.have.class", "fa-wifi")
+        cy.get("@secondSpec").find("i").should("have.class", "fa-wifi")
+
+      it "updates active spec", ->
+        cy.get("@firstSpec").should("not.have.class", "active")
+        cy.get("@secondSpec").should("have.class", "active")
 
   describe "server error", ->
     beforeEach ->
