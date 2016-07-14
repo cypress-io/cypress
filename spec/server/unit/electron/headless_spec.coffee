@@ -266,16 +266,16 @@ describe "electron/headless", ->
     beforeEach ->
       @sandbox.stub(@projectInstance, "getConfig").resolves({})
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(user, "ensureSession").resolves("abc-123")
+      @sandbox.stub(user, "ensureSession")
       @sandbox.stub(headless, "getId").returns(1234)
       @sandbox.stub(headless, "ensureAndOpenProjectByPath").resolves(@projectInstance)
       @sandbox.stub(headless, "waitForRendererToConnect").resolves()
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
       @sandbox.stub(headless, "createRenderer").resolves()
 
-    it "ensures user session", ->
+    it "no longer ensures user session", ->
       headless.run().then ->
-        expect(user.ensureSession).to.be.calledOnce
+        expect(user.ensureSession).not.to.be.called
 
     it "returns stats", ->
       headless.run().then (stats) ->

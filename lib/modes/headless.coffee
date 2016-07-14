@@ -169,11 +169,7 @@ module.exports = {
           @runTests(project, id, url, options.showHeadlessGui)
           .get("stats")
 
-    if options.ensureSession isnt false
-      ## make sure we have a current session
-      user.ensureSession().then(ready)
-    else
-      ready()
+    ready()
 
   run: (options) ->
     app = require("electron").app

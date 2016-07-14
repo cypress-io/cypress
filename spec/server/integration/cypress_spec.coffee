@@ -450,11 +450,15 @@ describe "lib/cypress", ->
         expect(Reporter.create).to.be.calledWith("dot")
         @expectExitWith(0)
 
-    it "logs error and exits when user isn't logged in", ->
-      user.set({})
+    it "runs tests even when user isn't logged in", ->
+      Promise.all([
+        user.set({}),
+
+        Project.add(@todosPath)
+      ])
       .then =>
         cypress.start(["--run-project=#{@todosPath}"]).then =>
-          @expectExitWithErr("NOT_LOGGED_IN")
+          @expectExitWith(0)
 
     it "logs error and exits when project could not be found at the path and was not chosen to be added to Cypress", ->
       @sandbox.stub(inquirer, "prompt").yieldsAsync({add: false})
