@@ -46,7 +46,7 @@ describe "Projects Nav", ->
           .contains("Back to Projects").click({force: true})
           .location().then (location) ->
             expect(location.href).to.include("projects")
-            expect(location.href).to.not.include("123-456")
+            expect(location.href).to.not.include("e40991dc055454a2f3598752dec39abc")
 
       it "removes project name from title", ->
         cy
