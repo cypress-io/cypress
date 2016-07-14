@@ -22,6 +22,12 @@ renameVisitToPageLoad = (obj) ->
     obj.pageLoadTimeout = v
     obj
 
+renameCommandTimeout = (obj) ->
+  if c = obj.commandTimeout
+    obj = _.omit(obj, "commandTimeout")
+    obj.defaultCommandTimeout = c
+    obj
+
 module.exports =
   _pathToFile: (projectRoot, file) ->
     path.join(projectRoot, file)
@@ -45,7 +51,7 @@ module.exports =
       @_logWriteErr(file, err)
 
   _applyRewriteRules: (obj = {}) ->
-    _.reduce [flattenCypress, renameVisitToPageLoad], (memo, fn) ->
+    _.reduce [flattenCypress, renameVisitToPageLoad, renameCommandTimeout], (memo, fn) ->
       if ret = fn(memo)
         return ret
       else
