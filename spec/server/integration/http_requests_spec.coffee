@@ -879,7 +879,7 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(302)
-          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Path=/")
+          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Domain=getbootstrap.com; Path=/")
           expect(res.headers["location"]).to.eq("/")
 
       ## this fixes improper url merge where we took query params
@@ -899,7 +899,7 @@ describe "Routes", ->
         })
         .then (res) =>
           expect(res.statusCode).to.eq(302)
-          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Path=/")
+          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Domain=getbootstrap.com; Path=/")
           expect(res.headers["location"]).to.eq("/css")
 
       it "does redirect with query params if location header includes them", ->
@@ -921,7 +921,7 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(302)
-          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Path=/")
+          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Domain=getbootstrap.com; Path=/")
           expect(res.headers["location"]).to.eq("/css?q=search")
 
       it "does redirect with query params to external domain if location header includes them", ->
@@ -943,7 +943,7 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(302)
-          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Path=/")
+          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Domain=getbootstrap.com; Path=/")
           expect(res.headers["location"]).to.eq("https://www.google.com/search?q=cypress")
 
       it "sets cookies and removes __cypress.initial when initial is originally false", ->
@@ -962,6 +962,7 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(302)
+          ## since this is not a cypress cookie we do not set the domain
           expect(res.headers["set-cookie"]).to.deep.eq(["foo=bar; Path=/"])
           expect(res.headers["location"]).to.eq("/css/")
 
@@ -983,7 +984,7 @@ describe "Routes", ->
             })
             .then (res) ->
               expect(res.statusCode).to.eq(code)
-              expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Path=/")
+              expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Domain=example.com; Path=/")
 
     context "error handling", ->
       beforeEach ->
@@ -1213,7 +1214,7 @@ describe "Routes", ->
 
           expect(res.headers["set-cookie"]).to.deep.eq [
             "userId=123; Path=/"
-            "__cypress.initial=false; Path=/"
+            "__cypress.initial=false; Domain=localhost; Path=/"
           ]
 
       it "appends cookies on redirects", ->
@@ -1236,7 +1237,7 @@ describe "Routes", ->
           expect(res.headers["location"]).to.eq("/dashboard")
           expect(res.headers["set-cookie"]).to.deep.eq [
             "userId=123; Path=/"
-            "__cypress.initial=true; Path=/"
+            "__cypress.initial=true; Domain=localhost; Path=/"
           ]
 
       it "forwards other headers from incoming responses", ->

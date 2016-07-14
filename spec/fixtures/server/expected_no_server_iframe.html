@@ -5,7 +5,17 @@
     <title>integration/test1.js</title>
   </head>
   <body>
-    <script type="text/javascript" src="/__cypress/static/js/iframe.js"></script>
+    <script type="text/javascript">
+      document.domain = 'localhost';
+
+      (function(parent) {
+        window.Cypress = parent.Cypress;
+        if (!Cypress) {
+          throw new Error("Tests cannot run without a reference to Cypress!");
+        }
+        return Cypress.window(window);
+      })(window.opener || window.parent);
+    </script>
 
       <script type="text/javascript" src="/__cypress/tests?p=helpers/includes.js-123"></script>
       <script type="text/javascript" src="/__cypress/tests?p=my-tests/test1.js-123"></script>

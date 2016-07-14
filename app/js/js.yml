@@ -54,9 +54,6 @@ app:
   - app/js/backbone/entities/**
   - app/js/backbone/apps/**
 
-iframe:
-  - app/js/driver/iframe.coffee
-
 sinon:
   - bower_components/sinon/index.js
 

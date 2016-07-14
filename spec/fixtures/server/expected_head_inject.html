@@ -1,6 +1,7 @@
 <html>
   <head prefix="og: foo">
     <script type='text/javascript'>
+      document.domain = 'google.com';
       window.onerror = function(){
         parent.onerror.apply(parent, arguments);
       }
