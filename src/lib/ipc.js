@@ -11,10 +11,12 @@ const addMsg = (id, event, fn) => {
 }
 
 const removeMsgsByEvent = (event) => {
-  return msgs = _(msgs).omit((msg) => msg.event === event)
+  return msgs = _.omitBy(msgs, (msg) => msg.event === event)
 }
 
-const removeMsgById = (id) => msgs = _(msgs).omit(`${id}`)
+const removeMsgById = (id) => {
+  return msgs = _.omit(msgs, `${id}`)
+}
 
 const createIpc = () => {
   console.warn("Missing 'ipc'. Polyfilling in development mode.") // eslint-disable-line no-console
@@ -129,6 +131,7 @@ const appIpc = (...args) => {
   return fn()
 }
 
-appIpc.off = (event) => removeMsgsByEvent(event)
+appIpc.offById = removeMsgById
+appIpc.off = removeMsgsByEvent
 
 export default appIpc
