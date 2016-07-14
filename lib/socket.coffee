@@ -158,12 +158,8 @@ class Socket
       onConnect: ->
       onDomainSet: ->
       onChromiumRun: ->
-      onIsNewProject: ->
       onReloadBrowser: ->
       checkForAppErrors: ->
-
-    ## promisify this function
-    options.onIsNewProject = Promise.method(options.onIsNewProject)
 
     messages = {}
 
@@ -295,10 +291,6 @@ class Socket
 
         open.opn(p, opts)
         .then -> cb()
-
-      socket.on "is:new:project", (cb) ->
-        options.onIsNewProject()
-        .then(cb)
 
       socket.on "reload:browser", (url, browser) ->
         options.onReloadBrowser(url, browser)

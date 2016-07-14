@@ -41,12 +41,17 @@ describe "lib/project", ->
 
   context "#getConfig", ->
     beforeEach ->
-      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({baz: "quux"})
+      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({baz: "quux", integrationFolder: "foo/bar/baz"})
+      @sandbox.stub(@project, "determineIsNewProject").withArgs("foo/bar/baz").resolves(false)
 
     it "calls config.get with projectRoot + options", ->
       @project.getConfig({foo: "bar"})
       .then (cfg) ->
-        expect(cfg).to.deep.eq({baz: "quux"})
+        expect(cfg).to.deep.eq({
+          integrationFolder: "foo/bar/baz"
+          isNewProject: false
+          baz: "quux"
+        })
 
     it "resolves if cfg is already set", ->
       @project.cfg = {foo: "bar"}
@@ -318,17 +323,6 @@ describe "lib/project", ->
       @project.watchSettingsAndStartWebsockets({}, c)
 
       expect(@project.server.startWebsockets).to.be.calledWith(@project.watchers, c)
-
-    it "passes onIsNewProject callback", ->
-      @sandbox.stub(@project, "determineIsNewProject")
-
-      @project.server.startWebsockets.yieldsTo("onIsNewProject")
-
-      @project.watchSettingsAndStartWebsockets({}, {
-        integrationFolder: "foo/bar/baz"
-      })
-
-      expect(@project.determineIsNewProject).to.be.calledWith("foo/bar/baz")
 
     it "passes onAutomationRequest callback", ->
       fn = @sandbox.stub()

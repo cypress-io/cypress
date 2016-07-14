@@ -135,10 +135,6 @@ class Project extends EE
 
       onAutomationRequest: options.onAutomationRequest
 
-      onIsNewProject: =>
-        ## return a boolean whether this is a new project or not
-        @determineIsNewProject(config.integrationFolder)
-
       onConnect: (id) =>
         @emit("socket:connected", id)
 
@@ -213,6 +209,12 @@ class Project extends EE
       Promise.resolve(c)
     else
       config.get(@projectRoot, options)
+      .then (cfg) =>
+        ## return a boolean whether this is a new project or not
+        @determineIsNewProject(cfg.integrationFolder)
+        .then (bool) ->
+          cfg.isNewProject = bool
+        .return(cfg)
 
   ensureSpecUrl: (spec) ->
     @getConfig()

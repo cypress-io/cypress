@@ -294,14 +294,6 @@ describe "lib/socket", ->
           expect(open.opn).to.be.calledWith(@cfg.parentTestsFolder, {})
           done()
 
-    context "on(is:new:project)", ->
-      it "calls onNewProject with config + cb", (done) ->
-        @options.onIsNewProject = @sandbox.stub().resolves(true)
-
-        @client.emit "is:new:project", (ret) =>
-          expect(ret).to.be.true
-          done()
-
     context "on(watch:test:file)", ->
       it "calls socket#watchTestFileByPath with config, filePath, watchers", (done) ->
         watchers = {}
