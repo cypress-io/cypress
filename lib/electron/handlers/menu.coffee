@@ -87,10 +87,8 @@ module.exports = {
         submenu: [
           {
             label: "Report an Issue.."
-            click: (item, focusedWindow) =>
-              win = new BrowserWindow({width: 1400, height: 1000})
-              click: () =>
-                shell.openExternal("https://on.cypress.io/new-issue")
+            click: () =>
+              shell.openExternal("https://on.cypress.io/new-issue")
           }
           {
             label: "Cypress Documentation"
