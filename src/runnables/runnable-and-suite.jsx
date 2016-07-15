@@ -12,19 +12,23 @@ const SuiteHeader = observer(({ model }) => (
   <span className='runnable-title'>{model.title}</span>
 ))
 
-const Suite = observer(({ model }) => (
-  <Collapsible
-    header={<SuiteHeader model={model} />}
-    headerClass='runnable-wrapper'
-    headerStyle={{ paddingLeft: indent(model.level) }}
-    contentClass='runnables-region'
-    isOpen={true}
-  >
-    <ul className='runnables'>
-      {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
-    </ul>
-  </Collapsible>
-))
+const Suite = observer(({ model }) => {
+  if (!model.shouldRender) return null
+
+  return (
+    <Collapsible
+      header={<SuiteHeader model={model} />}
+      headerClass='runnable-wrapper'
+      headerStyle={{ paddingLeft: indent(model.level) }}
+      contentClass='runnables-region'
+      isOpen={true}
+    >
+      <ul className='runnables'>
+        {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
+      </ul>
+    </Collapsible>
+  )
+})
 
 @observer
 class Runnable extends Component {

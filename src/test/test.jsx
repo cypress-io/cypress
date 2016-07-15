@@ -28,6 +28,8 @@ class Test extends Component {
   render () {
     const { model } = this.props
 
+    if (!model.shouldRender) return null
+
     return (
       <div
         className={cs('runnable-wrapper', { 'is-open': this._shouldBeOpen() })}
@@ -43,16 +45,7 @@ class Test extends Component {
             </Tooltip>
           </div>
         </div>
-        <div
-          className='runnable-instruments collapsible-content'
-          onClick={(e) => { e.stopPropagation() }}
-        >
-          <Agents model={model} />
-          <Routes model={model} />
-          <div className='runnable-commands-region'>
-            {model.commands.length ? <Hooks model={model} /> : <NoCommands />}
-          </div>
-        </div>
+        {this._contents()}
         <FlashOnClick
           message='Printed output to your console!'
           onClick={() => events.emit('show:error', model.id)}
@@ -63,11 +56,35 @@ class Test extends Component {
     )
   }
 
+  _contents () {
+    // performance optimization - don't render contents if not open
+    if (!this._shouldBeOpen()) return null
+
+    const { model } = this.props
+
+    return (
+      <div
+        className='runnable-instruments collapsible-content'
+        onClick={(e) => { e.stopPropagation() }}
+      >
+        <Agents model={model} />
+        <Routes model={model} />
+        <div className='runnable-commands-region'>
+          {model.commands.length ? <Hooks model={model} /> : <NoCommands />}
+        </div>
+      </div>
+    )
+  }
+
   _shouldBeOpen () {
-    // means isOpen has been explicitly set by the user clicking the test
+    // if this.isOpen is non-null, prefer that since the user has
+    // explicity chosen to open or close the test
     if (this.isOpen !== null) return this.isOpen
 
-    return this.props.model.state === 'failed' || this.props.model.isLongRunning || runnablesStore.hasSingleTest
+    // otherwise, look at reasons to auto-open the test
+    return this.props.model.state === 'failed'
+           || this.props.model.isLongRunning
+           || runnablesStore.hasSingleTest
   }
 
   @action _toggleOpen = () => {

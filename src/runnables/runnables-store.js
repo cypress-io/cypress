@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { observable } from 'mobx'
+import { action, observable } from 'mobx'
 
 import Agent from '../agents/agent-model'
 import Command from '../commands/command-model'
@@ -22,6 +22,8 @@ class RunnablesStore {
   @observable _tests = {}
   @observable _logs = {}
 
+  _runnablesQueue = []
+
   attemptingShowSnapshot = defaults.attemptingShowSnapshot
   showingSnapshot = defaults.showingSnapshot
 
@@ -32,6 +34,8 @@ class RunnablesStore {
     const numTests = _.keys(this._tests).length
     this.hasTests = numTests > 0
     this.hasSingleTest = numTests === 1
+
+    this._startRendering()
   }
 
   _createRunnableChildren (runnableProps, level) {
@@ -50,12 +54,14 @@ class RunnablesStore {
 
   _createSuite (props, level) {
     const suite = new Suite(props, level)
+    this._runnablesQueue.push(suite)
     suite.children = this._createRunnableChildren(props, ++level)
     return suite
   }
 
   _createTest (props, level) {
     const test = new Test(props, level)
+    this._runnablesQueue.push(test)
     this._tests[test.id] = test
 
     _.each(props.agents, this.addLog.bind(this))
@@ -63,6 +69,19 @@ class RunnablesStore {
     _.each(props.routes, this.addLog.bind(this))
 
     return test
+  }
+
+  // progressively renders the runnables instead of all of them being rendered
+  // at once. this prevents a noticeable lag in initial rendering when there
+  // is a large number of tests
+  _startRendering (index = 0) {
+    requestAnimationFrame(action('start:rendering', () => {
+      const runnable = this._runnablesQueue[index]
+      if (!runnable) return
+
+      runnable.shouldRender = true
+      this._startRendering(index + 1)
+    }))
   }
 
   runnableStarted ({ id }) {

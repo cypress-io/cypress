@@ -2,6 +2,7 @@ import { observable } from 'mobx'
 
 export default class Runnable {
   @observable id
+  @observable shouldRender = false
   @observable title
   @observable level
 
