@@ -7,7 +7,7 @@ urls =
   app:      "http://localhost:2020/app/#posts/1"
   search:   "http://localhost:2020/search?q=books"
   pathname: "http://localhost:2020/app/index.html"
-  local:    "http://127.0.0.1/foo/bar"
+  local:    "http://127.0.0.1:8080/foo/bar"
   stack:    "https://stackoverflow.com/"
 
 describe "$Cypress.Location API", ->
@@ -107,7 +107,7 @@ describe "$Cypress.Location API", ->
   context "#getOriginPolicy", ->
     it "handles ip addresses", ->
       str = @setup("local").getOriginPolicy()
-      expect(str).to.eq("http://127.0.0.1")
+      expect(str).to.eq("http://127.0.0.1:8080")
 
     it "handles 1 part localhost", ->
       str = @setup("users").getOriginPolicy()
@@ -124,7 +124,7 @@ describe "$Cypress.Location API", ->
   context ".create", ->
     it "returns an object literal", ->
       obj = $Cypress.Location.create(urls.cypress, urls.signin)
-      keys = ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString", "originPolicy"]
+      keys = ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString", "originPolicy", "superDomain"]
       expect(obj).to.have.keys(keys)
 
     it "can invoke toString function", ->

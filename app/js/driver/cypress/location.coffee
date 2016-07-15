@@ -57,25 +57,27 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       ## origin policy is comprised of
       ## protocol + superdomain
       ## and subdomain is not factored in
-      @getProtocol() + "//" + @getSuperDomain()
+      _.compact([
+        @getProtocol() + "//" + @getSuperDomain(),
+        @getPort()
+      ]).join(":")
 
     getSuperDomain: ->
-      host     = @getHost()
       hostname = @getHostName()
-      parts    = host.split(".")
+      parts    = hostname.split(".")
 
       ## if this is an ip address then
       ## just return it straight up
       if ipAddressRe.test(hostname)
-        return host
+        return hostname
 
       switch parts.length
         when 1
           ## localhost => localhost
-          host
+          hostname
         when 2
           ## stackoverflow.com => stackoverflow.com
-          host
+          hostname
         else
           ## mail.google.com => google.com
           ## cart.shopping.co.uk => shopping.co.uk
@@ -113,6 +115,7 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
         protocol: @getProtocol()
         search: @getSearch()
         originPolicy: @getOriginPolicy()
+        superDomain: @getSuperDomain()
         toString: _.bind(@getToString, @)
       }
 
