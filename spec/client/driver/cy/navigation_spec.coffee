@@ -349,11 +349,17 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       @sandbox.stub(@cy, "_getLocation").withArgs("href").returns("about:blank")
 
+      trigger = @sandbox.spy(@Cypress, "trigger")
+
       @cy
         ## we just mock the visits so ignore what
         ## is here
         .visit("http://www.foobar.com:3500")
         .visit("http://help.foobar.com:3500")
+        .then ->
+          ## we should never have to go across domains even though
+          ## we're visiting a subdomain
+          expect(trigger).not.to.be.calledWith("preserve:run:state")
 
     it "can visit relative pages on the same originPolicy", ->
       ## as long as we are already on the localhost:3500
