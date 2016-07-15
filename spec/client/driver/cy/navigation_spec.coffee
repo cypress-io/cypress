@@ -324,6 +324,37 @@ describe "$Cypress.Cy Navigation Commands", ->
         .visit("http://localhost:3500")
         .visit("http://localhost:3500")
 
+    it "can visit pages on different subdomain but same originPolicy", ->
+      ## make it seem like we're already on http://127.0.0.1:3500
+      one = @Cypress.Location.create("http://www.foobar.com:3500")
+      two = @Cypress.Location.create("http://help.foobar.com:3500")
+
+      @sandbox.stub(Cypress.Location, "createInitialRemoteSrc")
+      .withArgs("http://www.foobar.com:3500/")
+      .returns("http://localhost:3500/foo")
+      .withArgs("http://help.foobar.com:3500/")
+      .returns("http://localhost:3500/foo")
+
+      @sandbox.stub(@Cypress.Location, "create")
+      .withArgs(window.location.href)
+      .returns(one)
+      .withArgs("http://www.foobar.com:3500")
+      .returns(one)
+      .withArgs("http://www.foobar.com:3500/")
+      .returns(one)
+      .withArgs("http://help.foobar.com:3500")
+      .returns(two)
+      .withArgs("http://help.foobar.com:3500/")
+      .returns(two)
+
+      @sandbox.stub(@cy, "_getLocation").withArgs("href").returns("about:blank")
+
+      @cy
+        ## we just mock the visits so ignore what
+        ## is here
+        .visit("http://www.foobar.com:3500")
+        .visit("http://help.foobar.com:3500")
+
     it "can visit relative pages on the same originPolicy", ->
       ## as long as we are already on the localhost:3500
       ## domain this will work

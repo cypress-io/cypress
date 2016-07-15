@@ -7,6 +7,8 @@ urls =
   app:      "http://localhost:2020/app/#posts/1"
   search:   "http://localhost:2020/search?q=books"
   pathname: "http://localhost:2020/app/index.html"
+  local:    "http://127.0.0.1/foo/bar"
+  stack:    "https://stackoverflow.com/"
 
 describe "$Cypress.Location API", ->
   beforeEach ->
@@ -102,10 +104,27 @@ describe "$Cypress.Location API", ->
       str = @setup("signin").getToString()
       expect(str).to.eq("http://localhost:2020/signin")
 
+  context "#getOriginPolicy", ->
+    it "handles ip addresses", ->
+      str = @setup("local").getOriginPolicy()
+      expect(str).to.eq("http://127.0.0.1")
+
+    it "handles 1 part localhost", ->
+      str = @setup("users").getOriginPolicy()
+      expect(str).to.eq("http://localhost:2020")
+
+    it "handles 2 parts stack", ->
+      str = @setup("stack").getOriginPolicy()
+      expect(str).to.eq("https://stackoverflow.com")
+
+    it "handles subdomains google", ->
+      str = @setup("google").getOriginPolicy()
+      expect(str).to.eq("https://google.com")
+
   context ".create", ->
     it "returns an object literal", ->
       obj = $Cypress.Location.create(urls.cypress, urls.signin)
-      keys = ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString"]
+      keys = ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString", "originPolicy"]
       expect(obj).to.have.keys(keys)
 
     it "can invoke toString function", ->

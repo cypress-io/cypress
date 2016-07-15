@@ -60,15 +60,16 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       @getProtocol() + "//" + @getSuperDomain()
 
     getSuperDomain: ->
-      host  = @getHost()
-      parts = host.split(".")
+      host     = @getHost()
+      hostname = @getHostName()
+      parts    = host.split(".")
 
       ## if this is an ip address then
       ## just return it straight up
-      if ipAddressRe.test(host)
+      if ipAddressRe.test(hostname)
         return host
 
-      switch
+      switch parts.length
         when 1
           ## localhost => localhost
           host
@@ -78,7 +79,7 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
         else
           ## mail.google.com => google.com
           ## cart.shopping.co.uk => shopping.co.uk
-          host.split(".").slice(1).join(".")
+          parts.slice(1).join(".")
 
     getToString: ->
       ## created our own custom toString method
