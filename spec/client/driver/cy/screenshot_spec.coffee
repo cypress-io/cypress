@@ -156,7 +156,7 @@ describe "$Cypress.Cy Screenshot Commands", ->
           @Cypress.on "take:screenshot", (data, cb) ->
             cb({__error: "some err message", __name: "foo", __stack: "stack"})
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push @log
 
           @cy.on "fail", (err) =>
@@ -174,7 +174,7 @@ describe "$Cypress.Cy Screenshot Commands", ->
 
           logs = []
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push(log)
 
           @cy.on "fail", (err) =>
@@ -192,7 +192,7 @@ describe "$Cypress.Cy Screenshot Commands", ->
         beforeEach ->
           @respondWith({response: {path: "foo/bar.png", size: "100 kB"}})
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
 
         it "can turn off logging", ->
           @cy.screenshot("bar", {log: false}).then ->

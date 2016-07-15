@@ -20,7 +20,7 @@ describe "$Cypress.Cy Location Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -56,7 +56,7 @@ describe "$Cypress.Cy Location Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -67,7 +67,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           if @log.get("name") is "location"
             throw new Error("cy.location() should not have logged out.")
 
@@ -125,7 +125,7 @@ describe "$Cypress.Cy Location Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -161,7 +161,7 @@ describe "$Cypress.Cy Location Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -172,7 +172,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           if @log.get("name") is "location"
             throw new Error("cy.location() should not have logged out.")
 
@@ -235,7 +235,7 @@ describe "$Cypress.Cy Location Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -271,7 +271,7 @@ describe "$Cypress.Cy Location Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -282,7 +282,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       afterEach ->
         delete @log

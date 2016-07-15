@@ -90,12 +90,12 @@ describe "$Cypress.Cy Querying Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "can silence logging", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log) if log.name is "within"
 
         @cy.get("div:first").within({log: false}, ->).then ->
@@ -104,7 +104,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs immediately before resolving", (done) ->
         div = @cy.$$("div:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "within"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("")
@@ -126,7 +126,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -184,14 +184,14 @@ describe "$Cypress.Cy Querying Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "can turn off logging", ->
         @cy.root({log: false}).then ->
           expect(@log).to.be.undefined
 
       it "logs immediately before resolving", (done) ->
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "root"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("")
@@ -200,7 +200,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.root()
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.root().then ->
           expect(@log.get("snapshots").length).to.eq(1)
@@ -294,7 +294,7 @@ describe "$Cypress.Cy Querying Commands", ->
     it "cancels existing promises", (done) ->
       logs = []
 
-      @Cypress.on "log", (log) ->
+      @Cypress.on "log", (attrs, log) ->
         logs.push(log)
 
       retrys = 0
@@ -534,7 +534,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs elements length", ->
         buttons = @cy.$$("button")
@@ -569,7 +569,7 @@ describe "$Cypress.Cy Querying Commands", ->
             }
 
       it "logs primitive aliases", (done) ->
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           expect(log.pick("$el", "numRetries", "referencesAlias", "aliasType")).to.deep.eq {
             referencesAlias: "f"
             aliasType: "primitive"
@@ -581,7 +581,7 @@ describe "$Cypress.Cy Querying Commands", ->
           .get("@f")
 
       it "logs immediately before resolving", (done) ->
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           expect(log.pick("state", "referencesAlias", "aliasType")).to.deep.eq {
             state: "pending"
             referencesAlias: undefined
@@ -803,7 +803,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "throws once when incorrect sizzle selector", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) ->
@@ -897,7 +897,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("#button").should("be.visible")
 
       it "sets error command state", (done) ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.on "fail", (err) =>
           expect(@log.get("state")).to.eq "failed"
@@ -939,7 +939,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = @cy.$$("#button").hide()
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.on "fail", (err) =>
           expect(@log.get("state")).to.eq("failed")
@@ -1217,10 +1217,10 @@ describe "$Cypress.Cy Querying Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "contains"
             expect(log.pick("state", "type")).to.deep.eq {
               state: "pending"
@@ -1231,7 +1231,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("body").contains("foo")
 
       it "snapshots and ends after finding element", ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.contains("foo").then ->
           expect(@log.get("end")).to.be.true
@@ -1242,7 +1242,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "silences internal @cy.get() log", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push log
 
         ## GOOD: [ {name: get} , {name: contains} ]
@@ -1312,7 +1312,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs once on error", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push log
 
         @cy.on "fail", (err) ->
@@ -1359,7 +1359,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = @cy.$$("#button")
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.on "fail", (err) =>
           expect(@log.get("state")).to.eq("failed")
@@ -1375,7 +1375,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "throws when assertion is have.length > 1", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) ->

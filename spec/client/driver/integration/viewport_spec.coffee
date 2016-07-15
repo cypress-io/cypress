@@ -11,7 +11,7 @@ describe "Viewport", ->
     it "handles setting and reverting viewport", (done) ->
       logs = []
 
-      @Cypress.on "log", (log) ->
+      @Cypress.on "log", (attrs, log) ->
         logs.push(log)
 
       @Cypress.run (failures) ->

@@ -29,7 +29,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         logs = []
         @cy._timeout(50)
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
 
@@ -176,7 +176,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         logs = []
         @cy._timeout(50)
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -191,7 +191,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       it "throws when mixing up async + sync return values", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -211,7 +211,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       it "unbinds enqueue in the case of an error thrown", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -289,7 +289,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -325,7 +325,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         @cy.get("input:first").invoke("foo").should("eq", "bar")
 
       it "can still fail on invoke", (done) ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.on "fail", (err) =>
           @chai.restore()
@@ -345,7 +345,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -467,7 +467,7 @@ describe "$Cypress.Cy Connectors Commands", ->
           }
         }
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs $el if subject is element", ->
         @cy.get("button:first").invoke("hide").then ($el) ->
@@ -538,7 +538,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
     describe "errors", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
         @allowErrors()
         @currentTest.timeout(200)
 
@@ -571,7 +571,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -693,10 +693,10 @@ describe "$Cypress.Cy Connectors Commands", ->
         @obj.baz.quux = -> "quux"
         @obj.baz.lorem = "ipsum"
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "its"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq ".foo"
@@ -735,7 +735,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
     describe "errors", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @allowErrors()
         @currentTest.timeout(200)
@@ -902,13 +902,13 @@ describe "$Cypress.Cy Connectors Commands", ->
       beforeEach ->
         @allowErrors()
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
         @currentTest.timeout(200)
 
       it "can time out", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @Cypress.on "fail", (err) =>
@@ -923,7 +923,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       it "throws when not passed a callback function", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @Cypress.on "fail", (err) =>
@@ -937,7 +937,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       it "throws when not passed a number", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @Cypress.on "fail", (err) =>
@@ -951,7 +951,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       it "throws when not passed an array like structure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @Cypress.on "fail", (err) =>

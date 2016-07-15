@@ -210,7 +210,7 @@
 
 #       describe ".log", ->
 #         beforeEach ->
-#           @Cypress.on "log", (@log) =>
+#           @Cypress.on "log", (attrs, @log) =>
 
 #         it "provides specific #onFail", (done) ->
 #           @cy.on "fail", (err) =>
@@ -580,7 +580,7 @@
 #         @cy.route()
 
 #       it "sets err on log when caused by the XHR response", (done) ->
-#         @Cypress.on "log", (@log) =>
+#         @Cypress.on "log", (attrs, @log) =>
 
 #         @cy.on "fail", (err) =>
 #           expect(@log.get("error")).to.be.ok
@@ -606,7 +606,7 @@
 #           _this.Cypress.trigger.restore()
 #           orig.call(@, err)
 
-#         @Cypress.on "log", (@log) =>
+#         @Cypress.on "log", (attrs, @log) =>
 #           logs.push @log
 
 #         @cy.on "fail", (err) =>
@@ -650,7 +650,7 @@
 #       it "explodes if response alias cannot be found", (done) ->
 #         logs = []
 
-#         @Cypress.on "log", (@log) =>
+#         @Cypress.on "log", (attrs, @log) =>
 #           logs.push @log
 
 #         @cy.on "fail", (err) =>
@@ -675,7 +675,7 @@
 
 #     describe ".log", ->
 #       beforeEach ->
-#         @Cypress.on "log", (@log) =>
+#         @Cypress.on "log", (attrs, @log) =>
 
 #       it "has name of route", ->
 #         @cy.route("/foo", {}).then ->
@@ -782,7 +782,7 @@
 #         beforeEach ->
 #           logs = []
 
-#           @Cypress.on "log", (log) =>
+#           @Cypress.on "log", (attrs, log) =>
 #             logs.push(log)
 
 #           @cy

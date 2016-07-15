@@ -635,7 +635,7 @@ describe "$Cypress.Log API", ->
             return null
 
           it "preserves errors", (done) ->
-            @Cypress.on "log", (@logObj, @log) =>
+            @Cypress.on "log", (attrs, @logObj, @log) =>
 
             @cy.on "fail", (err) =>
               expect(@log.get("name")).to.eq "get"
@@ -646,7 +646,7 @@ describe "$Cypress.Log API", ->
             @cy.get("foo")
 
           it "#consoleProps for parent commands", (done) ->
-            @Cypress.on "log", (@logObj, @log) =>
+            @Cypress.on "log", (attrs, @logObj, @log) =>
 
             @cy.on "fail", (err) =>
               expect(@log.attributes.consoleProps()).to.deep.eq {
@@ -661,7 +661,7 @@ describe "$Cypress.Log API", ->
             @cy.get("foo")
 
           it "#consoleProps for dual commands as a parent", (done) ->
-            @Cypress.on "log", (@logObj, @log) =>
+            @Cypress.on "log", (attrs, @logObj, @log) =>
 
             @cy.on "fail", (err) =>
               expect(@log.attributes.consoleProps()).to.deep.eq {
@@ -674,7 +674,7 @@ describe "$Cypress.Log API", ->
               expect(true).to.be.false
 
           it "#consoleProps for dual commands as a child", (done) ->
-            @Cypress.on "log", (@logObj, @log) =>
+            @Cypress.on "log", (attrs, @logObj, @log) =>
 
             @cy.on "fail", (err) =>
               if @log.get("name") is "wait"
@@ -690,7 +690,7 @@ describe "$Cypress.Log API", ->
               expect(true).to.be.false
 
           it "#consoleProps for children commands", (done) ->
-            @Cypress.on "log", (@logObj, @log) =>
+            @Cypress.on "log", (attrs, @logObj, @log) =>
 
             @cy.on "fail", (err) =>
               if @log.get("name") is "contains"
@@ -708,7 +708,7 @@ describe "$Cypress.Log API", ->
             @cy.get("button").contains("asdfasdfasdfasdf")
 
           it "#consoleProps for nested children commands", (done) ->
-            @Cypress.on "log", (@logObj, @log) =>
+            @Cypress.on "log", (attrs, @logObj, @log) =>
 
             @cy.on "fail", (err) =>
               if @log.get("name") is "contains"

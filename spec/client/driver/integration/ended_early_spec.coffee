@@ -13,7 +13,7 @@ describe "Ended Early Integration Tests", ->
     it "does not emit a command log", (done) ->
       logs = []
 
-      @Cypress.on "log", (@log) =>
+      @Cypress.on "log", (attrs, @log) =>
         logs.push @log
 
       @Cypress.on "fail", (err) =>

@@ -95,10 +95,10 @@ describe "$Cypress.Cy Traversal Commands", ->
 
       describe ".log", ->
         beforeEach ->
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
 
         it "logs immediately before resolving", (done) ->
-          @Cypress.on "log", (log) ->
+          @Cypress.on "log", (attrs, log) ->
             if log.get("name") is name
               expect(log.pick("state")).to.deep.eq {
                 state: "pending"
@@ -191,7 +191,7 @@ describe "$Cypress.Cy Traversal Commands", ->
   it "does not log using first w/options", ->
     logs = []
 
-    @Cypress.on "log", (log) ->
+    @Cypress.on "log", (attrs, log) ->
       logs.push log
 
     @cy.get("button").first({log: false}).then ($button) ->
@@ -254,7 +254,7 @@ describe "$Cypress.Cy Traversal Commands", ->
 
       logs = []
 
-      @Cypress.on "log", (log) ->
+      @Cypress.on "log", (attrs, log) ->
         logs.push(log)
 
       @cy.on "fail", (err) ->
@@ -266,7 +266,7 @@ describe "$Cypress.Cy Traversal Commands", ->
     it "logs out $el when existing $el is found even on failure", (done) ->
       button = @cy.$$("#button").hide()
 
-      @Cypress.on "log", (@log) =>
+      @Cypress.on "log", (attrs, @log) =>
 
       @cy.on "fail", (err) =>
         expect(@log.get("state")).to.eq("failed")

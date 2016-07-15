@@ -713,7 +713,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @setup()
 
@@ -824,7 +824,7 @@ describe "$Cypress.Cy XHR Commands", ->
         beforeEach ->
           logs = []
 
-          @Cypress.on "log", (log) =>
+          @Cypress.on "log", (attrs, log) =>
             logs.push(log)
 
           @cy
@@ -869,7 +869,7 @@ describe "$Cypress.Cy XHR Commands", ->
       it "sets err on log when caused by code errors", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -891,7 +891,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
         e = new Error("onreadystatechange caused this error")
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -988,7 +988,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       describe ".log", ->
         beforeEach ->
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
 
         it "provides specific #onFail", (done) ->
           @cy.on "fail", (err) =>
@@ -1554,7 +1554,7 @@ describe "$Cypress.Cy XHR Commands", ->
       it "sets err on log when caused by the XHR response", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -1583,7 +1583,7 @@ describe "$Cypress.Cy XHR Commands", ->
           _this.Cypress.trigger.restore()
           orig.call(@, err)
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -1627,7 +1627,7 @@ describe "$Cypress.Cy XHR Commands", ->
       it "explodes if response alias cannot be found", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -1644,7 +1644,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "has name of route", ->
         @cy.route("/foo", {}).then ->
@@ -1698,7 +1698,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
   context "consoleProps logs", ->
     beforeEach ->
-      @Cypress.on "log", (@log) =>
+      @Cypress.on "log", (attrs, @log) =>
 
       @setup()
 
@@ -1823,7 +1823,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
   context "renderProps", ->
     beforeEach ->
-      @Cypress.on "log", (@log) =>
+      @Cypress.on "log", (attrs, @log) =>
 
       @setup()
 

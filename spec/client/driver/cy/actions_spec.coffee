@@ -105,7 +105,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(300)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -142,7 +142,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -270,7 +270,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "only logs once on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) ->
+        @Cypress.on "log", (attrs, @log) ->
           logs.push log
 
         @cy.on "fail", (err) ->
@@ -282,7 +282,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs out select", ->
         @cy.get("select:first").select("de_dust2").then ->
@@ -332,7 +332,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
         types = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           types.push(log) if log.get("name") is "select"
 
@@ -1590,7 +1590,7 @@ describe "$Cypress.Cy Actions Commands", ->
             e.preventDefault()
             events.push "submit"
 
-          @Cypress.on "log", (log) ->
+          @Cypress.on "log", (attrs, log) ->
             state = log.get("state")
 
             if state is "pending"
@@ -1770,7 +1770,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -1807,7 +1807,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -1818,7 +1818,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "passes in $el", ->
         @cy.get("input:first").type("foobar").then ($input) ->
@@ -1864,7 +1864,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
         types = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           types.push(log) if log.get("name") is "type"
 
@@ -1875,7 +1875,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs immediately before resolving", (done) ->
         input = @cy.$$(":text:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "type"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq input.get(0)
@@ -1992,7 +1992,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -2008,7 +2008,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -2024,7 +2024,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -2042,7 +2042,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -2055,7 +2055,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when special characters dont exist", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -2069,7 +2069,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when attemping to type tab", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -2082,7 +2082,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws on an empty string", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -2096,7 +2096,7 @@ describe "$Cypress.Cy Actions Commands", ->
         it "throws when trying to type: #{val}", (done) ->
           logs = []
 
-          @Cypress.on "log", (log) ->
+          @Cypress.on "log", (attrs, log) ->
             logs.push(log)
 
           @cy.on "fail", (err) =>
@@ -2183,7 +2183,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -2228,7 +2228,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -2264,7 +2264,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws if any subject isnt a textarea", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -2312,7 +2312,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -2326,7 +2326,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -2344,7 +2344,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -2356,12 +2356,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
         input = @cy.$$("input:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "clear"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq input.get(0)
@@ -2372,7 +2372,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "ends", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log) if log.get("name") is "clear"
 
         @cy.get("input").invoke("slice", 0, 2).clear().then ->
@@ -2522,7 +2522,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -2567,7 +2567,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -2638,7 +2638,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -2654,7 +2654,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -2673,7 +2673,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -2687,7 +2687,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -2705,7 +2705,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -2717,12 +2717,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
         chk = @cy.$$(":checkbox:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "check"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq chk.get(0)
@@ -2749,7 +2749,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
         checks = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           checks.push(log) if log.get("name") is "check"
 
@@ -2761,7 +2761,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
         radios = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           radios.push(log) if log.get("name") is "check"
 
@@ -2773,7 +2773,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
         checks = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           checks.push(log) if log.get("name") is "check"
 
@@ -2785,7 +2785,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
         radios = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           radios.push(log) if log.get("name") is "check"
 
@@ -2962,7 +2962,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -3009,7 +3009,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -3050,7 +3050,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -3068,7 +3068,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -3102,7 +3102,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -3117,7 +3117,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -3132,12 +3132,12 @@ describe "$Cypress.Cy Actions Commands", ->
       beforeEach ->
         @cy.$$("[name=colors][value=blue]").prop("checked", true)
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
         chk = @cy.$$(":checkbox:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "uncheck"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq chk.get(0)
@@ -3164,7 +3164,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
         unchecks = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           unchecks.push(log) if log.get("name") is "uncheck"
 
@@ -3176,7 +3176,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
         unchecks = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           unchecks.push(log) if log.get("name") is "uncheck"
 
@@ -3340,7 +3340,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -3385,7 +3385,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -3412,7 +3412,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when subject isnt a form", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -3453,7 +3453,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -3465,14 +3465,14 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "submit"
             @log = log
 
       it "logs immediately before resolving", ->
         form = @cy.$$("form:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "submit"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq form.get(0)
@@ -3571,7 +3571,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(300)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -3606,7 +3606,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -3618,7 +3618,7 @@ describe "$Cypress.Cy Actions Commands", ->
     describe ".log", ->
       beforeEach ->
         @cy.$$("input:first").get(0).focus()
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "is a parent command", ->
         @cy.get("body").focused().then ->
@@ -3746,7 +3746,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(300)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -3783,7 +3783,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -3794,12 +3794,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
         input = @cy.$$(":text:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "focus"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq input.get(0)
@@ -3808,7 +3808,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":text:first").focus()
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.get(":text:first").focus().then ->
           expect(@log.get("snapshots").length).to.eq(1)
@@ -3821,7 +3821,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs 2 focus event", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy
@@ -3884,7 +3884,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -4027,7 +4027,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(300)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -4066,7 +4066,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -4077,12 +4077,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
         input = @cy.$$(":text:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "blur"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq input.get(0)
@@ -4091,7 +4091,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":text:first").focus().blur()
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.get(":text:first").focus().blur().then ->
           expect(@log.get("snapshots").length).to.eq(1)
@@ -4104,7 +4104,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs 1 blur event", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy
@@ -4183,7 +4183,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$("button:first").click ->
           $(@).remove()
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.on "fail", (err) =>
           expect(@log.get("message")).to.eq("{force: true}")
@@ -4195,7 +4195,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -4367,7 +4367,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -4384,7 +4384,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -4399,7 +4399,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs immediately before resolving", (done) ->
         button = @cy.$$("button:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "dblclick"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq button.get(0)
@@ -4408,7 +4408,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button:first").dblclick()
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.get("button:first").dblclick().then ($button) ->
           expect(@log.get("snapshots").length).to.eq(1)
@@ -4421,7 +4421,7 @@ describe "$Cypress.Cy Actions Commands", ->
         button = -> $("<button class='dblclicks'>dblclick</button")
         @cy.$$("body").append(button()).append(button())
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           dblclicks.push(log) if log.get("name") is "dblclick"
 
         @cy.get("button.dblclicks").dblclick().then ($buttons) ->
@@ -4432,14 +4432,14 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs only 1 dblclick event", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log) if log.get("name") is "dblclick"
 
         @cy.get("button:first").dblclick().then ->
           expect(logs).to.have.length(1)
 
       it "#consoleProps", ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.get("button").first().dblclick().then ($button) ->
           expect(@log.attributes.consoleProps()).to.deep.eq {
@@ -4895,7 +4895,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy._timeout(200)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -4942,7 +4942,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -5182,7 +5182,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -5199,7 +5199,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -5215,7 +5215,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -5236,7 +5236,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         node = @Cypress.Utils.stringifyElement(span)
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -5270,7 +5270,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         node = @Cypress.Utils.stringifyElement(span)
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -5312,7 +5312,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when attempting to click a <select> element", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) ->
@@ -5325,7 +5325,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when provided invalid position", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) ->
@@ -5356,12 +5356,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
         button = @cy.$$("button:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "click"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq button.get(0)
@@ -5391,7 +5391,7 @@ describe "$Cypress.Cy Actions Commands", ->
         button = -> $("<button class='clicks'>click</button>")
         @cy.$$("body").append(button()).append(button())
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           clicks.push(log) if log.get("name") is "click"
 
         @cy.get("button.clicks").click({multiple: true}).then ($buttons) ->
@@ -5402,7 +5402,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs only 1 click event", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log) if log.get("name") is "click"
 
         @cy.get("button:first").click().then ->
@@ -5417,7 +5417,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "ends", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log) if log.get("name") is "click"
 
         @cy.get("button").invoke("slice", 0, 2).click({multiple: true}).then ->

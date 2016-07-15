@@ -604,7 +604,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "can turn off logging", ->
         cy.wait(10, {log: false}).then ->
@@ -701,7 +701,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         it "only logs once", (done) ->
           logs = []
 
-          @Cypress.on "log", (log) ->
+          @Cypress.on "log", (attrs, log) ->
             logs.push(log)
 
           @cy.on "fail", (err) ->
