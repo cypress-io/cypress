@@ -1,3 +1,5 @@
+uncaught = Mocha.Runner::uncaught
+
 before ->
   $Cypress.Chai.setGlobals(window)
 
@@ -10,12 +12,18 @@ before ->
 
 beforeEach ->
   ## allow our own cypress errors to bubble up!
-  stubSocketIo.call(@)
-  App.clearAllCookies()
-  App.config = App.request "new:config:entity", {}
-  App.config.setEnv("test")
-  App.execute "socket:start"
-  App.Utilities.Overrides.overloadMochaRunnerUncaught()
+  # stubSocketIo.call(@)
+  # App.config = App.request "new:config:entity", {}
+  # App.config.setEnv("test")
+  # App.execute "socket:start"
+  Mocha.Runner::uncaught = _.wrap uncaught, (orig, err) ->
+    ## debugger if this isnt an AssertionError or CypressError or a message err
+    ## because that means we prob f'd up something
+    if not /(AssertionError|CypressError)/.test(err.name) and not err.__isMessage and not /SilenceError/.test(err.message)
+      console.error(err.stack)
+      debugger
+
+    orig.call(@, err)
 
 afterEach ->
   @sandbox.restore()
@@ -30,17 +38,18 @@ setDomain = (url, cb) ->
   if not $Cypress.Location.isFullyQualifiedUrl(url)
     ## when we've been given a non fully qualified url
     ## then just callback with our local origin
-    url = new Uri(window.location.href)
+    # url = new Uri(window.location.href)
+    url = $Cypress.Location.create(window.location.href)
   else
-    url = new Uri(url)
+    url = $Cypress.Location.create(url)
 
-  cb(url.origin())
+  cb(_.pick(url, "origin"))
 
-stubSocketIo = ->
-  window.io =
-    connect: @sandbox.spy =>
-      on: @sandbox.stub()
-      emit: @sandbox.stub()
+# stubSocketIo = ->
+#   window.io =
+#     connect: @sandbox.spy =>
+#       on: @sandbox.stub()
+#       emit: @sandbox.stub()
 
 window.loadDom = (fixture) ->
   loadFixture(fixture).done (iframe) =>
@@ -86,6 +95,12 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
     ## load all of the modules
     @Cypress = $Cypress.create({loadModules: true})
 
+    @Cypress.runner = {
+      getStartTime:      @sandbox.stub()
+      getTestsState:     @sandbox.stub()
+      countByTestState:  @sandbox.stub()
+    }
+
     ## immediately create the chai instance so
     ## we get our custom properties but then
     ## restore it to keep things simple
@@ -103,6 +118,7 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
       @sandbox.stub(@Cypress.cy, "_automateCookies").resolves([])
 
       @Cypress.setConfig({
+        namespace: "__cypress"
         xhrUrl: "__cypress/xhrs/"
         commandTimeout: 2000
         pageLoadTimeout: 2001
@@ -111,12 +127,12 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
         waitForAnimations: true
         animationDistanceThreshold: 5
       })
+      .then =>
+        ## why do we use the initialize method here but only
+        ## trigger it in the command testing mode below?
+        @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe
 
-      ## why do we use the initialize method here but only
-      ## trigger it in the command testing mode below?
-      @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe
-
-      @Cypress.on "domain:set", setDomain
+        @Cypress.on("set:domain", setDomain)
 
   after ->
     @$iframe.remove()
@@ -139,6 +155,12 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
 
       ## load all of the modules
       @Cypress = $Cypress.create({loadModules: true})
+
+      @Cypress.runner = {
+        getStartTime:      @sandbox.stub()
+        getTestsState:     @sandbox.stub()
+        countByTestState:  @sandbox.stub()
+      }
 
       ## immediately create the chai instance so
       ## we get our custom properties but then
@@ -172,7 +194,12 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       ## never actually get applied
       @cy.bindWindowListeners @$iframe.prop("contentWindow")
 
+      location = @Cypress.Location.create(window.location.href)
+
+      ct = @currentTest
+
       @Cypress.setConfig({
+        namespace: "__cypress"
         xhrUrl: "__cypress/xhrs/"
         commandTimeout: 2000
         pageLoadTimeout: 2001
@@ -181,31 +208,35 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
         execTimeout: 2004
         waitForAnimations: true
         animationDistanceThreshold: 5
+        remote: {
+          origin: location.origin
+          domainName: "" ## do not set document.domain!
+        }
       })
+      .then =>
+        @Cypress.trigger "initialize", {$remoteIframe: @$iframe}
 
-      @Cypress.trigger "initialize", {$remoteIframe: @$iframe}
+        ## must call defaults manually because
+        ## this is naturally called in initialize
+        ## AFTER we instantiate our helper classes
+        # @Cypress.defaults()
 
-      ## must call defaults manually because
-      ## this is naturally called in initialize
-      ## AFTER we instantiate our helper classes
-      # @Cypress.defaults()
+        ## set the jquery engine to be our window so we dont have to juggle
+        ## the gazillions of edge cases caused by the remote $ elements being
+        ## juggled throughout our expectations
+        @Cypress.option("jQuery", $)
 
-      ## set the jquery engine to be our window so we dont have to juggle
-      ## the gazillions of edge cases caused by the remote $ elements being
-      ## juggled throughout our expectations
-      @Cypress.option("jQuery", $)
+        if ct
+          @Cypress.trigger "test:before:hooks", {id: 123}, {}
+          @Cypress.set(ct)
+          ct.enableTimeouts(false)
 
-      if @currentTest
-        @Cypress.trigger "test:before:hooks", {id: 123}, {}
-        @Cypress.set(@currentTest)
-        @currentTest.enableTimeouts(false)
+        @Cypress.on "set:domain", setDomain
 
-      @Cypress.on "domain:set", setDomain
-
-      ## handle the fail event ourselves
-      ## since we bypass our Runner instance
-      @Cypress.on "fail", (err) ->
-        console.error(err.stack)
+        ## handle the fail event ourselves
+        ## since we bypass our Runner instance
+        @Cypress.on "fail", (err) ->
+          console.error(err.stack)
 
     ## if we've changed the src by navigating
     ## away (aka cy.visit(...)) then we need
