@@ -75,7 +75,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       it "logs once on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push log
 
         @cy.on "fail", (err) ->
@@ -123,7 +123,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       afterEach ->
         delete @log
@@ -207,7 +207,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       it "only logs once on error", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -290,13 +290,13 @@ describe "$Cypress.Cy Navigation Commands", ->
         .visit("http://localhost:3500/timeout?ms=0").then ->
           expect(_href).not.to.be.called
 
-    it "calls domain:set with http:// when localhost", ->
+    it "calls set:domain with http:// when localhost", ->
       trigger = @sandbox.spy(@Cypress, "trigger")
 
       @cy
         .visit("localhost:3500/app")
         .then ->
-          expect(trigger).to.be.calledWith("domain:set", "http://localhost:3500/app")
+          expect(trigger).to.be.calledWith("set:domain", "http://localhost:3500/app")
 
     it "prepends with / when visiting locally", ->
       prop = @sandbox.spy(@cy.private("$remoteIframe"), "prop")
@@ -318,40 +318,67 @@ describe "$Cypress.Cy Navigation Commands", ->
         .then ->
           expect(setInitial).to.be.calledOnce
 
+    it "can visit pages on the same originPolicy", ->
+      @cy
+        .visit("http://localhost:3500")
+        .visit("http://localhost:3500")
+        .visit("http://localhost:3500")
+
+    it "can visit relative pages on the same originPolicy", ->
+      ## as long as we are already on the localhost:3500
+      ## domain this will work
+
+      @cy
+        .visit("http://localhost:3500/foo")
+        .visit("/foo")
+
     describe "when origins don't match", ->
       beforeEach ->
+        @Cypress.trigger "test:before:run", {id: 888}
+
         @sandbox.stub(@cy, "_replace")
+        @sandbox.stub(@Cypress, "getTestsState").returns([])
+        @sandbox.stub(@Cypress, "getStartTime").returns("12345")
+        @sandbox.stub(@Cypress.Log, "countLogsByTests").withArgs([]).returns(1)
+        @sandbox.stub(@Cypress, "countByTestState")
+          .withArgs([], "passed").returns(2)
+          .withArgs([], "failed").returns(3)
+          .withArgs([], "pending").returns(4)
 
-      it "triggers domain:change with title + fn", (done) ->
-        fn = -> "foobarbaz"
-
-        @Cypress.trigger "test:before:hooks", {}, {title: "foo", fn: fn}
-
-        @Cypress.on "domain:change", (title, fn, cb) ->
-          expect(title).to.eq("foo")
-          expect(fn).to.eq(fn.toString())
+      it "triggers preserve:run:state with title + fn", (done) ->
+        @Cypress.on "preserve:run:state", (state, cb) ->
+          expect(state).to.deep.eq({
+            currentId: 888
+            tests: []
+            startTime: "12345"
+            scrollTop: null
+            numLogs: 1
+            passed: 2
+            failed: 3
+            pending: 4
+          })
           done()
 
-        @cy
-          .visit("http://localhost:4200")
+        @cy.visit("http://localhost:4200")
 
       it "replaces window.location when origins don't match", (done) ->
         href = window.location.href
 
-        domainSet = @Cypress._events["domain:set"][0]
-
-        @Cypress.on "domain:change", (title, fn, cb) ->
+        @Cypress.on "preserve:run:state", (state, cb) ->
           cb()
 
-        ## wait until the last possible moment to stub Location.create
-        @Cypress.on "domain:set", =>
-          uri = @Cypress.Location.create("http://localhost:3500/foo?bar=baz#/tests/integration/foo_spec.js")
+        @sandbox.stub(@cy, "_getLocation").withArgs("href").returns("about:blank")
 
-          @sandbox.stub(@Cypress.Location, "create")
-          .withArgs(href)
-          .returns(uri)
+        remote = @Cypress.Location.create("http://localhost:4200")
+        uri    = @Cypress.Location.create("http://localhost:3500/foo?bar=baz#/tests/integration/foo_spec.js")
 
-          domainSet.apply(@, arguments)
+        @sandbox.stub(@Cypress.Location, "create")
+        .withArgs(href)
+        .returns(uri)
+        .withArgs("http://localhost:4200")
+        .returns(remote)
+        .withArgs("http://localhost:4200/")
+        .returns(remote)
 
         @cy._replace = (win, url) ->
           expect(win).to.eq(window)
@@ -419,14 +446,14 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "preserves url on subsequent visits", ->
         @cy.visit("http://localhost:3500/fixtures/html/sinon.html").get("button").then ->
           expect(@log.get("url")).to.eq "http://localhost:3500/fixtures/html/sinon.html"
 
       it "logs immediately before resolving", (done) ->
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           expect(log.pick("name", "message")).to.deep.eq {
             name: "visit"
             message: "localhost:4200/app/foo#/hash"
@@ -451,7 +478,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       it "can turn off logging", ->
         log = null
 
-        @Cypress.on "log", (l) ->
+        @Cypress.on "log", (attrs, l) ->
           log = l
 
         @cy.visit("http://localhost:3500/timeout?ms=0", {log: false}).then ->
@@ -473,7 +500,7 @@ describe "$Cypress.Cy Navigation Commands", ->
               cy$.apply(@, arguments)
 
       it "sets error command state", (done) ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.on "fail", (err) =>
           expect(@log.get("state")).to.eq "failed"
@@ -487,7 +514,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       it "logs once on error", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push log
 
         @failVisit()
@@ -517,7 +544,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       it "only logs once on error", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -526,6 +553,108 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy.visit("http://localhost:3500/timeout?ms=5000", {timeout: 500})
+
+      it "throws when attempting to visit a 2nd domain on different port", (done) ->
+        logs = []
+
+        @Cypress.on "log", (attrs, @log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(err.message).to.include("cannot visit a 2nd unique domain")
+          expect(logs.length).to.eq(2)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        @cy
+          .visit("http://localhost:3500")
+          .visit("http://localhost:3501")
+
+      it "throws when attempting to visit a 2nd domain on different protocol", (done) ->
+        logs = []
+
+        @Cypress.on "log", (attrs, @log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(err.message).to.include("cannot visit a 2nd unique domain")
+          expect(logs.length).to.eq(2)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        @cy
+          .visit("http://localhost:3500")
+          .visit("https://localhost:3500")
+
+      it "throws when attempting to visit a 2nd domain on different host", (done) ->
+        logs = []
+
+        @Cypress.on "log", (attrs, @log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(err.message).to.include("cannot visit a 2nd unique domain")
+          expect(logs.length).to.eq(2)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        @cy
+          .visit("http://localhost:3500")
+          .visit("http://google.com:3500")
+
+      it "throws attemping to visit 2 unique ip addresses", (done) ->
+        logs = []
+
+        ## make it seem like we're already on http://127.0.0.1:3500
+        one = @Cypress.Location.create("http://127.0.0.1:3500")
+        two = @Cypress.Location.create("http://126.0.0.1:3500")
+
+        @sandbox.stub(Cypress.Location, "createInitialRemoteSrc")
+        .withArgs("http://127.0.0.1:3500/")
+        .returns("http://localhost:3500/foo")
+        .withArgs("http://127.0.0.1:3500/")
+        .returns("http://localhost:3500/foo")
+
+        @sandbox.stub(@Cypress.Location, "create")
+        .withArgs(window.location.href)
+        .returns(one)
+        .withArgs("http://127.0.0.1:3500")
+        .returns(one)
+        .withArgs("http://127.0.0.1:3500/")
+        .returns(one)
+        .withArgs("http://126.0.0.1:3500")
+        .returns(two)
+        .withArgs("http://126.0.0.1:3500/")
+        .returns(two)
+
+        @sandbox.stub(@cy, "_getLocation").withArgs("href").returns("about:blank")
+
+        @Cypress.on "log", (attrs, @log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(err.message).to.include("cannot visit a 2nd unique domain")
+          expect(logs.length).to.eq(2)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        @cy
+          ## we just mock the visits so ignore what
+          ## is here
+          .visit("http://127.0.0.1:3500")
+          .visit("http://126.0.0.1:3500")
+
+      it "does not call set:domain when throws attemping to visit a 2nd domain", (done) ->
+        trigger = @sandbox.spy(@Cypress, "trigger")
+
+        @cy.on "fail", (err) =>
+          expect(trigger).to.be.calledWithMatch("set:domain", "http://localhost:3500")
+          expect(trigger).not.to.be.calledWithMatch("set:domain", "http://google.com:3500")
+          done()
+
+        @cy
+          .visit("http://localhost:3500")
+          .visit("http://google.com:3500")
 
   context "#loading", ->
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
@@ -575,12 +704,12 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "returns if current command is visit", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push log
 
         @cy.visit("http://localhost:3500/fixtures/html/xhr.html").then ->
@@ -609,7 +738,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       it "can time out", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push log
 
         @cy.once "fail", (err) ->
@@ -631,7 +760,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push log
 
         @cy.on "fail", (err) ->

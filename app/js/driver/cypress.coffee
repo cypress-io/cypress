@@ -32,7 +32,10 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
       Promise.try =>
 
         setConfig = =>
-          document.domain = config.remote.domainName
+          ## set domainName but allow us to turn
+          ## off this feature in testing
+          if d = config.remote.domainName
+            document.domain = d
 
           {environmentVariables, remote} = config
 

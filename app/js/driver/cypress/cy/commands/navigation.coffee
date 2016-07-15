@@ -2,9 +2,14 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
   commandCausingLoading = /^(visit|reload)$/
 
-  id = null
+  id                    = null
+  previousDomainVisited = false
 
   Cypress.on "test:before:run", (test) ->
+    ## continuously reset this
+    ## before each test run!
+    previousDomainVisited = false
+
     id = test.id
 
   overrideRemoteLocationGetters = (cy, contentWindow) ->
@@ -294,6 +299,19 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
       runnable      = @private("runnable")
 
       p = new Promise (resolve, reject) =>
+
+        cannotVisit2ndDomain = (origin) ->
+          try
+            $Cypress.Utils.throwErrByPath("visit.cannot_visit_2nd_domain", {
+              onFail: options._log
+              args: {
+                previousDomain: previousDomainVisited
+                attemptedDomain: origin
+              }
+            })
+          catch e
+            return reject(e)
+
         visit = (win, url, options) =>
           ## when the remote iframe's load event fires
           ## callback fn
@@ -315,22 +333,47 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
               resolve(win)
 
+          ## hold onto our existing url
+          existing = Cypress.Location.create(window.location.href)
+
+          ## in the case we are visiting a relative url
+          ## then prepend the existing origin to it
+          ## so we get the right remote url
+          if not Cypress.Location.isFullyQualifiedUrl(url)
+            remoteUrl = [existing.origin, url].join("/")
+
+          remote = Cypress.Location.create(remoteUrl ? url)
+
+          if previousDomainVisited and remote.originPolicy isnt existing.originPolicy
+            ## if we've already visited a new superDomain
+            ## then die else we'd be in a terrible endless loop
+            return cannotVisit2ndDomain(remote.origin)
+
           new Promise (resolve) ->
-            Cypress.trigger("domain:set", url, resolve)
+            Cypress.trigger("set:domain", url, resolve)
           .then (remote = {}) =>
             {origin} = remote
 
-            ## hold onto our existing url
-            existing = Cypress.Location.create(window.location.href)
+            remote = Cypress.Location.create(origin)
 
             ## if the origin currently matches
             ## then go ahead and change the iframe's src
             ## and we're good to go
-            if origin is existing.origin
+            # if origin is existing.origin
+            if remote.originPolicy is existing.originPolicy
+              previousDomainVisited = remote.origin
+
               Cypress.Cookies.setInitial()
 
               $remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
             else
+              ## if we've already visited a new superDomain
+              ## then die else we'd be in a terrible endless loop
+              if previousDomainVisited
+                return cannotVisit2ndDomain(remote.origin)
+
+              # Cypress.getScrollTop()
+              # .then (val) ->
               ## tell our backend we're changing domains
               new Promise (resolve) ->
                 ## TODO: add in other things we want to preserve
@@ -347,7 +390,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                 state.pending = Cypress.countByTestState(state.tests, "pending")
                 state.numLogs = Cypress.Log.countLogsByTests(state.tests)
 
-                Cypress.trigger("domain:change", state, resolve)
+                Cypress.trigger("preserve:run:state", state, resolve)
               .then =>
                 ## and now we must change the url to be the new
                 ## origin but include the test that we're currently on
@@ -358,6 +401,8 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                 .setAnchor(existing.hash)
 
                 @_replace(window, newUri.toString())
+
+        ## TODO: wrap this correctly in a promise
 
         ## if we're visiting a page and we're not currently
         ## on about:blank then we need to nuke the window

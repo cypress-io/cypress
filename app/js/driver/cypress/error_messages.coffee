@@ -325,6 +325,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"
 
     visit:
+      cannot_visit_2nd_domain: "#{cmd('visit')} cannot visit a 2nd unique domain during a single test run. The previous domain visited was: '{{previousDomain}}'. You're attempting to visit: '{{attemptedDomain}}'"
       invalid_1st_arg: "#{cmd('visit')} must be called with a string as its 1st argument"
       loading_failed: "#{cmd('visit')} failed to load the remote page: {{url}}"
 
