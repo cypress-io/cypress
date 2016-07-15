@@ -22,7 +22,7 @@ export default class Header extends Component {
             highlighted: highlightUrl,
           })}
         >
-          <input className='url' value={url} readonly onClick={this._openUrl} />
+          <input className='url' value={url} readOnly onClick={this._openUrl} />
           <span className='loading-container'>
             ...loading <i className='fa fa-spinner fa-spin'></i>
           </span>
