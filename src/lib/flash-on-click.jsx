@@ -17,8 +17,8 @@ class FlashOnClick extends Component {
     )
   }
 
-  @action _onClick = () => {
-    this.props.onClick()
+  @action _onClick = (e) => {
+    this.props.onClick(e)
     this._show = true
     setTimeout(action('hide:console:message', () => {
       this._show = false

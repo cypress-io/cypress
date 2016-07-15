@@ -48,7 +48,7 @@ class Test extends Component {
         {this._contents()}
         <FlashOnClick
           message='Printed output to your console!'
-          onClick={() => events.emit('show:error', model.id)}
+          onClick={this._onErrorClick}
         >
           <pre className='test-error'>{model.err.displayMessage}</pre>
         </FlashOnClick>
@@ -93,6 +93,11 @@ class Test extends Component {
     } else {
       this.isOpen = !this.isOpen
     }
+  }
+
+  _onErrorClick = (e) => {
+    e.stopPropagation()
+    events.emit('show:error', this.props.model.id)
   }
 }
 
