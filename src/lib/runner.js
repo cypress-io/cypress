@@ -66,11 +66,11 @@ export default {
     .then(() => {
       driver.start()
 
-      this.listeners(config)
+      this._addListeners()
     })
   },
 
-  listeners (config) {
+  _addListeners () {
     driver.on('initialized', ({ runner }) => {
       // get the current runnable in case we reran mid-test due to a visit
       // to a new domain
