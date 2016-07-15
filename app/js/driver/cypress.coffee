@@ -48,7 +48,7 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
         if not _.str.include(location.hostname, config.remote.domainName)
           new Promise (resolve) =>
-            @trigger("domain:set", location.href, resolve)
+            @trigger("set:domain", location.href, resolve)
           .then (remote) ->
             config.remote = remote
             setConfig()

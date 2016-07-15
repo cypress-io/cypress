@@ -318,10 +318,10 @@ class Socket
         .catch Promise.TimeoutError, (err) ->
           cb(false)
 
-      socket.on "domain:set", (url, cb) ->
+      socket.on "set:domain", (url, cb) ->
         cb(options.onDomainSet(url))
 
-      socket.on "domain:change", (state, cb) ->
+      socket.on "preserve:run:state", (state, cb) ->
         existingState = state
 
         cb()

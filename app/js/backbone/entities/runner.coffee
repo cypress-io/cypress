@@ -77,11 +77,11 @@
         @listenTo @Cypress, "take:screenshot", (name, cb) =>
           @socket.emit "automation:request", "take:screenshot", name, cb
 
-        @listenTo @Cypress, "domain:set", (url, cb) =>
-          @socket.emit "domain:set", url, cb
+        @listenTo @Cypress, "set:domain", (url, cb) =>
+          @socket.emit "set:domain", url, cb
 
-        @listenTo @Cypress, "domain:change", (title, fn, cb) =>
-          @socket.emit "domain:change", title, fn, cb
+        @listenTo @Cypress, "preserve:run:state", (title, fn, cb) =>
+          @socket.emit "preserve:run:state", title, fn, cb
 
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "adapter:request", msg, data, cb
@@ -110,8 +110,8 @@
         @listenTo @Cypress, "test:after:hooks", (test) =>
           @socket.emit "test:after:hooks", @transfer(test)
 
-        @listenTo @Cypress, "domain:change", (title, fn, cb) =>
-          @socket.emit "domain:change", title, fn, cb
+        @listenTo @Cypress, "preserve:run:state", (title, fn, cb) =>
+          @socket.emit "preserve:run:state", title, fn, cb
 
         @listenTo @Cypress, "log", (log) =>
           id         = _.uniqueId("l")

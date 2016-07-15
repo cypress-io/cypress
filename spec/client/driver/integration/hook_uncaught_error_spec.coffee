@@ -8,7 +8,7 @@ describe "Uncaught Hook Integration Tests", ->
     it "fires all the events", (done) ->
       fn = _.after 3, -> done()
 
-      @Cypress.on "domain:set", (url, cb) ->
+      @Cypress.on "set:domain", (url, cb) ->
         cb("http://localhost:3500")
 
       @Cypress.on "test:after:hooks", (test) ->
