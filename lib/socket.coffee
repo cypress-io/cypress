@@ -1,5 +1,4 @@
 _             = require("lodash")
-os            = require("os")
 fs            = require("fs-extra")
 str           = require("underscore.string")
 path          = require("path")
@@ -284,12 +283,7 @@ class Socket
         options.onMocha.apply(options, arguments)
 
       socket.on "open:finder", (p, cb = ->) ->
-        opts = {}
-
-        if os.platform() is "darwin"
-          opts.args = "-R"
-
-        open.opn(p, opts)
+        open.opn(p)
         .then -> cb()
 
       socket.on "reload:browser", (url, browser) ->

@@ -8,6 +8,7 @@ pgk         = require("./package")
 cookies     = require("./cookies")
 logs        = require("./logs")
 Renderer    = require("./renderer")
+open        = require("../../util/open")
 user        = require("../../user")
 logger      = require("../../logger")
 errors      = require("../../errors")
@@ -107,6 +108,11 @@ handleEvent = (options, event, id, type, arg) ->
 
     when "window:close"
       Renderer.getByWebContents(event.sender).destroy()
+
+    when "open:finder"
+      open.opn(arg)
+      .then(send)
+      .catch(sendErr)
 
     when "get:options"
       pgk(options)
