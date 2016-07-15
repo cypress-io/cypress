@@ -3,7 +3,7 @@ excerpt: Visit a remote url
 
 Visit a remote url. This will most likely be the first command you run. `cy.visit` resolves when the remote page fires its `load` event.
 
-Visit is prefixed with the `baseUrl` configured in in the [Network Options](https://on.cypress.io/guides/configuration#section-global).
+Visit is prefixed with the `baseUrl` configured in the [Network Options](https://on.cypress.io/guides/configuration#section-global).
 
 Using `baseUrl` is a great way to prevent repeating yourself in every `cy.visit`.
 
@@ -76,14 +76,16 @@ cy.visit("app/index.html")
 
 ## Visit is automatically prefixed with `baseUrl`.
 
-This is recommended. Simply configure `baseUrl` in the `cypress.json` file to prevent repeating yourself in every single `cy.visit(...)`. Read more about [`configuration`](https://on.cypress.io/guides/configuration).
+Simply configure `baseUrl` in the `cypress.json` file to prevent repeating yourself in every single `cy.visit(...)`. Read more about [`configuration`](https://on.cypress.io/guides/configuration).
 
 ```javascript
 // cypress.json
 {
   baseUrl: "http://localhost:3000/#/"
 }
+```
 
+```javascript
 // this will visit the complete url
 // http://localhost:3000/#/dashboard
 cy.visit("dashboard")
