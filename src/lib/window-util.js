@@ -1,4 +1,8 @@
 export default {
+  hasSpecFile () {
+    return !!location.hash
+  },
+
   specFile () {
     return this.specPath().replace(/(.*)\//, '')
   },

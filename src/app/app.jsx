@@ -12,13 +12,14 @@ import State from '../lib/state'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
+import NoSpec from './no-spec'
 import RunnerWrap from './runner-wrap'
 
 @observer
 class App extends Component {
   render () {
-    // for some reason the height: 100% div is needed
-    // or the header disappears randomly
+    if (!windowUtil.hasSpecFile()) return <NoSpec onHashChange={this._checkSpecFile} />
+
     return (
       <div>
         <Reporter
@@ -41,6 +42,12 @@ class App extends Component {
 
   componentDidMount () {
     this._monitorWindowResize()
+  }
+
+  _checkSpecFile = () => {
+    if (windowUtil.hasSpecFile()) {
+      this.forceUpdate()
+    }
   }
 
   _specPath () {
