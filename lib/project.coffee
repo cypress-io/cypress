@@ -177,9 +177,10 @@ class Project extends EE
 
   determineIsNewProject: (integrationFolder) ->
     ## logic to determine if new project
-    ## 1. there is only 1 file in 'integrationFolder'
-    ## 2. the file is called 'example_spec.js'
-    ## 3. the bytes of the file match lib/scaffold/example_spec.js
+    ## 1. there are no files in 'integrationFolder'
+    ## 2. there is only 1 file in 'integrationFolder'
+    ## 3. the file is called 'example_spec.js'
+    ## 4. the bytes of the file match lib/scaffold/example_spec.js
     nameIsDefault = (file) ->
       path.basename(file) is scaffold.integrationExampleName()
 
@@ -193,6 +194,9 @@ class Project extends EE
 
     glob("**/*", {cwd: integrationFolder, realpath: true})
     .then (files) ->
+      ## TODO: add tests for this
+      return true if files.length is 0
+
       return false if files.length isnt 1
 
       exampleSpec = files[0]
