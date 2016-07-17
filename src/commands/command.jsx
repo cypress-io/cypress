@@ -83,13 +83,13 @@ class Command extends Component {
               {model.referencesAlias ? <Aliases model={model} /> : <Message model={model} />}
             </span>
             <span className='command-controls'>
-              <Tooltip placement='left' title={`${model.message} aliased as: '${model.alias}'`}>
+              <Tooltip placement='top' title={`${model.message} aliased as: '${model.alias}'`}>
                 <span className={`command-alias ${model.aliasType}`}>{model.alias}</span>
               </Tooltip>
-              <Tooltip placement='left' title={visibleMessage(model)}>
+              <Tooltip placement='top' title={visibleMessage(model)}>
                 <i className='command-invisible fa fa-eye-slash'></i>
               </Tooltip>
-              <Tooltip placement='left' title={`${model.numElements} matched elements`}>
+              <Tooltip placement='top' title={`${model.numElements} matched elements`}>
                 <span className='command-num-elements'>{model.numElements}</span>
               </Tooltip>
             </span>

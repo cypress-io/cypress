@@ -17,28 +17,28 @@ const Controls = observer(({ stats }) => {
         <label className='paused-label'>Paused</label>
       </Maybe>
       <Maybe condition={stats.isPaused}>
-        <Tooltip placement='left' title='Resume'>
+        <Tooltip placement='bottom' title='Resume'>
           <button className='play' onClick={emit('resume')}>
             <i className='fa fa-play'></i>
           </button>
         </Tooltip>
       </Maybe>
       <Maybe condition={stats.isRunning && !stats.isPaused}>
-        <Tooltip placement='left' title='Stop Running'>
+        <Tooltip placement='bottom' title='Stop Running'>
           <button className='stop' onClick={emit('stop')}>
             <i className='fa fa-stop'></i>
           </button>
         </Tooltip>
       </Maybe>
       <Maybe condition={!stats.isRunning}>
-        <Tooltip placement='left' title='Run All Tests'>
+        <Tooltip placement='bottom' title='Run All Tests'>
           <button className='restart' onClick={emit('restart')}>
             <i className='fa fa-repeat'></i>
           </button>
         </Tooltip>
       </Maybe>
       <Maybe condition={!!stats.nextCommandName}>
-        <Tooltip placement='left' title={`Next: '${stats.nextCommandName}'`}>
+        <Tooltip placement='bottom' title={`Next: '${stats.nextCommandName}'`}>
           <button className='next' onClick={emit('next')}>
             <i className='fa fa-step-forward'></i>
           </button>

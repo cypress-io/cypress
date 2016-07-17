@@ -49,7 +49,7 @@ const Routes = observer(({ model }) => (
                   <th>Stubbed</th>
                   <th>Alias</th>
                   <th>
-                    <Tooltip placement='left' title='Number of responses which matched this route'><span>#</span></Tooltip>
+                    <Tooltip placement='top' title='Number of responses which matched this route'><span>#</span></Tooltip>
                   </th>
                 </tr>
               </thead>

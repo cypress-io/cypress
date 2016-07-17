@@ -1,11 +1,72 @@
-@import '../../node_modules/rc-tooltip/assets/bootstrap';
+$tooltip-color: #111;
+$arrow-size: 5px;
 
-.rc-tooltip {
-  opacity: 1.0;
+.tooltip {
+  background: $tooltip-color;
+  border-radius: 3px;
+  color: #FFF;
+  font-family: $muli;
+  font-size: 12px;
+  left: 0;
+  padding: 4px 6px;
+  top: 0;
+  z-index: 100;
 }
 
-.rc-tooltip-inner {
-  border-radius: 3px;
-  min-height: 22px;
-  padding: 4px 8px;
+.tooltip-arrow {
+  border-color: transparent;
+  border-style: solid;
+  height: 0;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 0;
+}
+
+.tooltip-top,
+.tooltip-top-start,
+.tooltip-top-end {
+  margin-bottom: $arrow-size;
+
+  .tooltip-arrow {
+    margin-bottom: -$arrow-size;
+    border-width: $arrow-size $arrow-size 0;
+    border-top-color: $tooltip-color;
+  }
+}
+
+.tooltip-right,
+.tooltip-right-start,
+.tooltip-right-end {
+  margin-left: $arrow-size;
+
+  .tooltip-arrow {
+    margin-left: -$arrow-size;
+    border-width: $arrow-size $arrow-size $arrow-size 0;
+    border-right-color: $tooltip-color;
+  }
+}
+
+.tooltip-left,
+.tooltip-left-start,
+.tooltip-left-end {
+  margin-right: $arrow-size;
+
+  .tooltip-arrow {
+    margin-right: -$arrow-size;
+    border-width: $arrow-size 0 $arrow-size $arrow-size;
+    border-left-color: $tooltip-color;
+  }
+}
+
+.tooltip-bottom,
+.tooltip-bottom-start,
+.tooltip-bottom-end {
+  margin-top: $arrow-size;
+
+  .tooltip-arrow {
+    margin-top: -$arrow-size;
+    border-width: 0 $arrow-size $arrow-size;
+    border-bottom-color: $tooltip-color;
+  }
 }
