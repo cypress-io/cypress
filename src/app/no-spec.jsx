@@ -9,8 +9,11 @@ class NoSpec extends Component {
   render () {
     return (
       <RunnerWrap className='no-spec'>
-        <h1>No spec specified</h1>
-        <p>Check the desktop app!</p>
+        <div className='no-spec-message'>
+          <p>Whoops, there is no test to run.</p>
+          <p className='muted'>Choose a test to run from the desktop application.</p>
+          <img src='' />
+        </div>
         {this.props.children}
       </RunnerWrap>
     )
