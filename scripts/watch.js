@@ -1,10 +1,11 @@
-var zunder = require('zunder')
+var z = require('zunder')
+var u = z.undertaker
 var setZunderConfig = require('./set-zunder-config')
 
-setZunderConfig(zunder)
+setZunderConfig(z)
 
-zunder.undertaker.parallel(
-  zunder.watchScripts,
-  zunder.watchStylesheets,
-  zunder.watchStaticAssets
+u.parallel(
+  z.watchScripts,
+  z.watchStylesheets,
+  z.watchStaticAssets
 )()

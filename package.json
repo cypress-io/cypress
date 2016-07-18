@@ -14,6 +14,7 @@
   "scripts": {
     "postinstall": "bower install",
     "build": "node ./scripts/build.js",
+    "clean": "rm -rf dist",
     "start": "node ./scripts/watch.js"
   },
   "devDependencies": {
@@ -22,7 +23,7 @@
     "eslint": "^2.11.1",
     "eslint-plugin-react": "^5.1.1",
     "vinyl-fs": "^2.4.3",
-    "zunder": "^3.3.10"
+    "zunder": "^3.3.11"
   },
   "dependencies": {
     "bluebird": "^3.4.0",
