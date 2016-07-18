@@ -49,18 +49,19 @@
   }
 
   .loading-container {
-    background: #08c18d;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    color: #555;
     border-radius: 2px 18px 18px 2px;
     display: none;
     font-size: 0.9em;
     height: 26px;
-    line-height: 28px;
+    line-height: 26px;
     padding-left: 5px;
     padding-right: 3px;
     position: absolute;
     right: 0;
     top: 0;
-    color: #f8f8f8;
 
     i {
       margin: 0 5px 0 2px;
