@@ -46,7 +46,7 @@ export default {
 
     runner.on('test:after:run', action('test:after:run', (runnable) => {
       runnablesStore.runnableFinished(runnable)
-      statsStore.updateCount(runnable.state)
+      statsStore.incrementCount(runnable.state)
     }))
 
     runner.on('paused', action('paused', (nextCommandName) => {

@@ -41,7 +41,7 @@ class StatsStore {
     this.numFailed = numFailed
     this.numPending = numPending
 
-    this._startTime = new Date(startTime)
+    this._startTime = new Date(startTime).getTime()
     this._updateCurrentTime()
 
     this._startTimer()
@@ -59,7 +59,7 @@ class StatsStore {
     this._currentTime = Date.now()
   }
 
-  updateCount (type) {
+  incrementCount (type) {
     const countKey = `num${_.capitalize(type)}`
     this[countKey] = this[countKey] + 1
   }
@@ -90,4 +90,5 @@ class StatsStore {
   }
 }
 
+export { StatsStore }
 export default new StatsStore()
