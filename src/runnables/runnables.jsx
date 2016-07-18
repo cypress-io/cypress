@@ -8,7 +8,11 @@ const NoTests = observer(({ specPath }) => (
     <h4>
       <i className='fa fa-warning'></i>
       Sorry, there's something wrong with this file:
-      <a href='https://on.cypress.io/theres-something-wrong-with-this-file' target='_blank'>
+      <a
+        href='https://on.cypress.io/theres-something-wrong-with-this-file'
+        target='_blank'
+        rel='noopener noreferrer'
+      >
         <i className='fa fa-question-circle'></i>
       </a>
     </h4>
