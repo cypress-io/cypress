@@ -40,7 +40,7 @@ class Test extends Component {
           <i className='runnable-state fa'></i>
           <span className='runnable-title'>{model.title}</span>
           <div className='runnable-controls'>
-            <Tooltip placement='top' visible={true} align={{ offset: [0, 0] }} title='One or more commands failed'>
+            <Tooltip placement='top' align={{ offset: [0, 0] }} title='One or more commands failed'>
               <i className='fa fa-warning'></i>
             </Tooltip>
           </div>

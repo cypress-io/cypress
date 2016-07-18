@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react'
+import _ from 'lodash'
+import React, { Children, cloneElement, Component, PropTypes } from 'react'
 import { action, asReference, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import Popper from 'popper.js'
@@ -61,13 +62,12 @@ class PortalPopper extends Component {
   }
 
   _getArrowStyle () {
-    const left = Math.round(this.arrowProps.left)
-    const top = Math.round(this.arrowProps.top)
-    const transform = `translate3d(${left}px, ${top}px, 0)`
+    const left = _.isNumber(this.arrowProps.left) ? Math.round(this.arrowProps.left) : null
+    const top = _.isNumber(this.arrowProps.top) ? Math.round(this.arrowProps.top) : null
 
     return {
-      transform,
-      WebkitTransform: transform,
+      left,
+      top,
     }
   }
 
@@ -93,16 +93,21 @@ class Tooltip extends Component {
     } : {}
 
     return (
-      <div ref='target' {...actionProps}>
-        {this.props.children}
+      <span>
+        {cloneElement(Children.only(this.props.children), {
+          ref: 'target',
+          ...actionProps,
+        })}
         {this._popper()}
-      </div>
+      </span>
     )
   }
 
   _popper () {
     if (this.props.visible !== true && (!this.show || this.props.visible === false)) return null
 
+    // TODO: this will break if visible is true on mount because
+    // this.refs.target will be null
     return <PortalPopper
       targetNode={this.refs.target}
       title={this.props.title}
@@ -118,7 +123,7 @@ class Tooltip extends Component {
 Tooltip.propTypes = {
   placement: PropTypes.string,
   title: PropTypes.string.isRequired,
-  visible: PropTypes.boolean,
+  visible: PropTypes.bool,
 }
 
 Tooltip.defaultProps = {

@@ -57,8 +57,7 @@
   "dependencies": {
     "classnames": "^2.2.5",
     "markdown-it": "^6.1.1",
-    "popper.js": "^0.5.2",
-    "rc-tooltip": "^3.3.5"
+    "popper.js": "^0.5.2"
   },
   "peerDependencies": {
     "lodash": "^4.0.0",
