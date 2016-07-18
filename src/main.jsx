@@ -59,11 +59,13 @@ App.start = () => {
   .then((options = {}) => {
     handleErrors()
 
+    state.setVersion(options.version)
+
     const el = document.getElementById('app')
 
     render(
       <Router history={history}>
-        <Route path='/' component={Application} options={options}>
+        <Route path='/' component={Application}>
           <IndexRedirect to='/projects' />
           <Route path='/projects' component={withUser(Projects)} />
           <Route path='/projects/:id' component={withUser(Project)}>
@@ -83,6 +85,8 @@ App.startUpdateApp = () => {
   ipc('get:options')
   .then((options = {}) => {
     handleErrors()
+
+    state.setVersion(options.version)
 
     const el = document.getElementById('updates')
 

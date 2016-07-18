@@ -8,7 +8,9 @@ describe "Footer", ->
         @agents = cy.agents()
         @agents.spy(@App, "ipc")
 
-        @ipc.handle("get:options", null, {})
+        @v = "1.78"
+
+        @ipc.handle("get:options", null, {version: @v})
 
   it "does not display on login", ->
     cy.get("footer").should("not.be.visible")
@@ -19,6 +21,9 @@ describe "Footer", ->
         .fixture("user").then (@user) ->
           @ipc.handle("get:current:user", null, @user)
           @ipc.handle("get:project:paths", null, [])
+
+    it "displays version sent from get:options", ->
+      cy.get("footer").contains(@v)
 
     it "displays after login", ->
       cy.get("footer").should("be.visible")

@@ -1,22 +1,26 @@
-import React from 'react'
+import React, { Component } from 'react'
+
 import App from '../lib/app'
+import state from '../lib/state'
 
-const Footer = () => {
-  return (
-    <footer className='footer'>
-      <div className='container-fluid'>
-        <p className='text-center'>
-          Version 0.16.1 |{' '}
-          <a onClick={openChangelog} href='#'>Changelog</a>
-        </p>
-      </div>
-    </footer>
-  )
+export default class Footer extends Component {
+
+  render () {
+    return (
+      <footer className='footer'>
+        <div className='container-fluid'>
+          <p className='text-center'>
+            Version { state.version } |{' '}
+            <a onClick={this._openChangelog} href='#'>Changelog</a>
+          </p>
+        </div>
+      </footer>
+    )
+  }
+
+  _openChangelog (e) {
+    e.preventDefault()
+    return App.ipc('external:open', 'https://on.cypress.io/changelog')
+  }
 }
 
-const openChangelog = (e) => {
-  e.preventDefault()
-  return App.ipc('external:open', 'https://on.cypress.io/changelog')
-}
-
-export default Footer

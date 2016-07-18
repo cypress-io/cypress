@@ -1,4 +1,3 @@
-import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import state from '../lib/state'
@@ -78,12 +77,12 @@ export default class Nav extends Component {
     closeProject(projectId)
   }
 
-  _openDocs = (e) => {
+  _openDocs (e) {
     e.preventDefault()
     App.ipc('external:open', 'https://on.cypress.io')
   }
 
-  _openChat = (e) => {
+  _openChat (e) {
     e.preventDefault()
     App.ipc('external:open', 'https://gitter.im/cypress-io/cypress')
   }

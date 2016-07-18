@@ -7,6 +7,7 @@ class State {
   @observable user = null
   @observable updateAvailable = false
   @observable modalOpen = false
+  @observable version
 
   @computed get hasUser () {
     return !!this.user && !!this.user.session_token
@@ -14,6 +15,10 @@ class State {
 
   @action setUser (user) {
     return this.user = user && user.session_token ? new User(user) : null
+  }
+
+  @action setVersion (version) {
+    this.version = version
   }
 
   updatesAvailable (bool) {
