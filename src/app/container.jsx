@@ -4,10 +4,12 @@ import React, { Component, PropTypes } from 'react'
 import automation from '../lib/automation'
 import runner from '../lib/runner'
 import State from '../lib/state'
+import windowUtil from '../lib/window-util'
 
 import App from './app'
 import AutomationDisconnected from './automation-disconnected'
 import NoAutomation from './no-automation'
+import NoSpec from './no-spec'
 
 const automationElementId = '__cypress-string'
 
@@ -32,7 +34,7 @@ class Container extends Component {
         return this._automationDisconnected()
       case automation.CONNECTED:
       default:
-        return this._app()
+        return windowUtil.hasSpecFile() ? this._app() : this._noSpec()
     }
   }
 
@@ -50,6 +52,20 @@ class Container extends Component {
         {this._automationElement()}
       </App>
     )
+  }
+
+  _noSpec () {
+    return (
+      <NoSpec onHashChange={this._checkSpecFile}>
+        {this._automationElement()}
+      </NoSpec>
+    )
+  }
+
+  _checkSpecFile = () => {
+    if (windowUtil.hasSpecFile()) {
+      this.forceUpdate()
+    }
   }
 
   _noAutomation () {

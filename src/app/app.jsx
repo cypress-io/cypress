@@ -12,14 +12,11 @@ import State from '../lib/state'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
-import NoSpec from './no-spec'
 import RunnerWrap from './runner-wrap'
 
 @observer
 class App extends Component {
   render () {
-    if (!windowUtil.hasSpecFile()) return <NoSpec onHashChange={this._checkSpecFile} />
-
     return (
       <div>
         <Reporter
@@ -44,12 +41,6 @@ class App extends Component {
     this._monitorWindowResize()
   }
 
-  _checkSpecFile = () => {
-    if (windowUtil.hasSpecFile()) {
-      this.forceUpdate()
-    }
-  }
-
   _specPath () {
     return `${this.props.config.integrationFolder}/${windowUtil.specFile()}`
   }
@@ -61,14 +52,20 @@ class App extends Component {
     const $header = $(findDOMNode(this.refs.header))
     const $reporter = $(findDOMNode(this.refs.reporter))
 
-    $window.on('resize', action('window:resize', () => {
+    this._onWindowResize = action('window:resize', () => {
       state.updateWindowDimensions({
         windowWidth: $window.width(),
         windowHeight: $window.height(),
         reporterWidth: $reporter.outerWidth(),
         headerHeight: $header.outerHeight(),
       })
-    })).trigger('resize')
+    })
+
+    $window.on('resize', this._onWindowResize).trigger('resize')
+  }
+
+  componentWillUnmount () {
+    $(window).off(this._onWindowResize)
   }
 }
 

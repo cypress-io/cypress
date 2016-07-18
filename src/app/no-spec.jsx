@@ -11,6 +11,7 @@ class NoSpec extends Component {
       <RunnerWrap className='no-spec'>
         <h1>No spec specified</h1>
         <p>Check the desktop app!</p>
+        {this.props.children}
       </RunnerWrap>
     )
   }

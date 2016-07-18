@@ -13,12 +13,12 @@ import windowUtil from '../lib/window-util'
 @observer
 export default class Iframes extends Component {
   render () {
-    const { width, height, scale, marginLeft } = this.props.state
+    const { width, height, scale, marginLeft, headerHeight } = this.props.state
 
     return (
       <div
         className='iframes-container'
-        style={{ top: this.props.state.headerHeight }}
+        style={{ top: headerHeight }}
       >
         <div
           ref='container'
