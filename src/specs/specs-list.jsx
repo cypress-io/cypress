@@ -5,18 +5,11 @@ import Loader from 'react-loader'
 
 import App from '../lib/app'
 import { clearActiveSpec } from '../lib/utils'
-import { getSpecs } from './specs-api'
 import { runSpec } from '../projects/projects-api'
 import specsCollection from './specs-collection'
 
 @observer
 class Specs extends Component {
-  constructor (props) {
-    super(props)
-
-    getSpecs(this.props.project)
-  }
-
   render () {
     if (specsCollection.isLoading) return <Loader color="#888" scale={0.5}/>
 

@@ -3,6 +3,8 @@ import md5 from 'md5'
 import { computed, observable, action } from 'mobx'
 import Browser from '../lib/browser-model'
 
+const strLength = 75
+
 export default class Project {
   @observable id
   @observable path
@@ -28,7 +30,6 @@ export default class Project {
   }
 
   @computed get displayPath () {
-    const strLength = 75
     let pathLength = this.path.length
 
     if (pathLength > strLength) {
@@ -91,7 +92,7 @@ export default class Project {
     return browser.isChosen = true
   }
 
-  setOnBoardingConfig (config) {
+  @action setOnBoardingConfig (config) {
     this.isNew = config.isNewProject
     this.integrationExampleFile = config.integrationExampleFile
     this.integrationFolder = config.integrationFolder
@@ -100,7 +101,7 @@ export default class Project {
     return this.integrationExampleName = config.integrationExampleName
   }
 
-  setResolvedConfig (resolved) {
+  @action setResolvedConfig (resolved) {
     return this.resolvedConfig = resolved
   }
 
@@ -113,7 +114,7 @@ export default class Project {
     return this.setChosenBrowser(browser)
   }
 
-  @action reset () {
+  @action clearError () {
     return this.error = undefined
   }
 }

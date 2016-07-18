@@ -1,9 +1,11 @@
+import once from 'lodash/once'
 import { action } from 'mobx'
 import Promise from 'bluebird'
 
 import App from '../lib/app'
 import { clearActiveSpec } from '../lib/utils'
 import projectsStore from '../projects/projects-store'
+import specsCollection from '../specs/specs-collection'
 
 const getProjects = () => {
   projectsStore.loading(true)
@@ -88,50 +90,51 @@ const closeProject = (projectId) => {
 }
 
 const openProject = (project) => {
-  project.loading(true)
 
-  // delay opening the project so
-  // we give the UI some time to render
-  // and not block due to sync require's
-  // in the main process
-  return Promise.delay(100)
-  .then(() => {
-    return Promise.all([
-      App.ipc('open:project', project.path),
-      Promise.delay(500),
-    ])
+  const setProjectError = action('project:open:errored', (err) => {
+    project.loading(false)
+    project.setError(err)
   })
-  .spread(action('project:opened', (config) => {
+
+  const changeConfig = (config) => {
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
-    return project.setResolvedConfig(config.resolved)
-  }))
-  .then(() => {
-    project.loading(false)
-    // create a promise which listens for
-    // project settings change events
-    // and updates our project model
-    let listenToProjectSettingsChange
-    return (listenToProjectSettingsChange = function () {
-      return App.ipc('on:project:settings:change')
-      .then(action('project:config:changed', (data = {}) => {
-        project.reset()
-        project.setBrowsers(data.config.browsers)
+    project.setResolvedConfig(config.resolved)
+  }
 
-        // if we had an open browser then launch it again!
-        if (data.browser) {
-          action('launch:browser', runSpec(project, data.browser))
+  const open = () => {
+    return new Promise((resolve) => {
+      resolve = once(resolve)
+
+      App.ipc("open:project", project.path, (err, data = {}) => {
+        project.clearError()
+
+        if (err) {
+          return setProjectError(err)
         }
 
-        // recursively listen for more change events!
-        return listenToProjectSettingsChange()
-      }))
-    })()
-  })
-  .catch(action('project:open:errored', (err) => {
+        if (data.config) {
+          action('config:changed', changeConfig(data.config))
+        }
+
+        if (data.specs) {
+          specsCollection.loading(true)
+          specsCollection.setSpecs(data.specs)
+        }
+
+        resolve()
+      })
+    })
+  }
+
+  return Promise.all([
+    open(),
+    Promise.delay(500),
+  ])
+  .then(() => {
     project.loading(false)
-    return project.setError(err)
-  }))
+  })
+  .catch(setProjectError)
 }
 
 export {

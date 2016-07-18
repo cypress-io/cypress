@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import Promise from 'bluebird'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import { withRouter, Link } from 'react-router'
@@ -80,7 +81,16 @@ class Project extends Component {
       return props.router.push('/projects')
     }
 
-    openProject(this.project)
+    // delay opening the project so
+    // we give the UI some time to render
+    // and not block due to sync require's
+    // in the main process
+    this.project.loading(true)
+
+    Promise.delay(100)
+    .then(() => {
+      openProject(this.project)
+    })
   }
 
   componentWillUnmount () {

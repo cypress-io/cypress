@@ -14,6 +14,7 @@ describe "Specs List", ->
       .fixture("projects").then (@projects) ->
         @ipc.handle("get:project:paths", null, @projects)
       .fixture("config").as("config")
+      .fixture("specs").as("specs")
 
   it "navigates to project specs page", ->
     cy
@@ -21,29 +22,21 @@ describe "Specs List", ->
         .contains("My-Fake-Project").click()
       .fixture("browsers").then (@browsers) ->
         @config.browsers = @browsers
-        @ipc.handle("open:project", null, @config)
+        @ipc.handle("open:project", null, { config: @config })
+      .then ->
+        @ipc.handle("open:project", null, { specs: @specs })
       .location().its("hash").should("include", "specs")
-
-  it "triggers get:specs", ->
-    cy
-      .get(".projects-list a")
-        .contains("My-Fake-Project").click()
-      .fixture("browsers").then (@browsers) ->
-        @config.browsers = @browsers
-        @ipc.handle("open:project", null, @config)
-      .get(".navbar-default").then ->
-        expect(@App.ipc).to.be.calledWith("get:specs")
 
   describe "no specs", ->
     beforeEach ->
       cy
         .get(".projects-list a")
           .contains("My-Fake-Project").click()
-        .fixture("browsers").then (@browsers) ->
-          @config.browsers = @browsers
-          @ipc.handle("open:project", null, @config)
-        .fixture("specs").then (@specs) ->
-          @ipc.handle("get:specs", null, [])
+          .fixture("browsers").then (@browsers) ->
+            @config.browsers = @browsers
+            @ipc.handle("open:project", null, { config: @config })
+          .then ->
+            @ipc.handle("open:project", null, { specs: [] })
 
     it "displays empty message", ->
       cy.contains("No files found")
@@ -71,9 +64,9 @@ describe "Specs List", ->
         .fixture("browsers").then (@browsers) ->
           @config.browsers = @browsers
           @config.isNewProject = true
-          @ipc.handle("open:project", null, @config)
-        .fixture("specs").then (@specs) ->
-          @ipc.handle("get:specs", null, @specs)
+          @ipc.handle("open:project", null, { config: @config })
+        .then ->
+          @ipc.handle("open:project", null, { specs: @specs })
 
     it "displays modal", ->
       cy
@@ -96,9 +89,10 @@ describe "Specs List", ->
           .contains("My-Fake-Project").click()
         .fixture("browsers").then (@browsers) ->
           @config.browsers = @browsers
-          @ipc.handle("open:project", null, @config)
-        .fixture("specs").then (@specs) ->
-          @ipc.handle("get:specs", null, @specs)
+          @ipc.handle("open:project", null, { config: @config })
+        .then ->
+          @ipc.handle("open:project", null, { specs: @specs })
+        .location().its("hash").should("include", "specs")
 
     context "run all specs", ->
       it "displays run all specs button", ->
@@ -188,6 +182,7 @@ describe "Specs List", ->
           .get(".file a").contains("a", "app_spec.coffee").as("firstSpec")
             .click().then ->
               @ipc.handle("get:open:browsers", null, ["chrome"])
+            .then ->
               @ipc.handle("change:browser:spec", null, {})
 
       it "updates spec icon", ->
@@ -195,6 +190,14 @@ describe "Specs List", ->
 
       it "sets spec as active", ->
         cy.get("@firstSpec").should("have.class", "active")
+
+      context "spec list updates", ->
+        beforeEach ->
+          @ipc.handle("open:project", null, { specs: @specs })
+
+        it "updates spec list on get:specs update", ->
+          cy.get("@firstSpec").should("not.have.class", "active")
+
 
     describe "switching specs", ->
       beforeEach ->
@@ -266,4 +269,14 @@ describe "Specs List", ->
         .get(".error").contains("Go Back to Projects").click().then ->
           expect(@App.ipc).to.be.calledWith("close:project")
 
-    it "sets project as browser closed on 'go back'", ->
+    it "still displays error after specs loading on config err", ->
+      @ipc.handle("open:project", @err, {})
+
+      cy
+        .get(".projects-list a")
+          .contains("My-Fake-Project").click()
+        .get(".error")
+          .should("contain", @err.message)
+        .then ->
+          @ipc.handle("open:project", null, { specs: @specs })
+
