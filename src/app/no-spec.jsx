@@ -12,7 +12,7 @@ class NoSpec extends Component {
         <div className='no-spec-message'>
           <p>Whoops, there is no test to run.</p>
           <p className='muted'>Choose a test to run from the desktop application.</p>
-          <img src='' />
+          <img src='/__cypress/runner/no-spec-instructions.png' />
         </div>
         {this.props.children}
       </RunnerWrap>
