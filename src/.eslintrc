@@ -1,17 +1,11 @@
 {
   "env": {
     "browser": true,
-    "node": true
+    "commonjs": true,
+    "mocha": true
   },
   "globals": {
-    "describe": true,
-    "context": true,
-    "before": true,
-    "beforeEach": true,
-    "after": true,
-    "afterEach": true,
-    "it": true,
-    "expect": true,
+    "expect": true
   },
   "parser": "babel-eslint",
   "parserOptions": {
@@ -22,6 +16,7 @@
     }
   },
   "plugins": [
+    "mocha",
     "react"
   ],
   "rules": {
@@ -105,6 +100,10 @@
 
     "react/jsx-uses-react": "error",
     "react/jsx-uses-vars": "error",
-    "react/react-in-jsx-scope": "error"
+    "react/react-in-jsx-scope": "error",
+
+    "mocha/handle-done-callback": "error",
+    "mocha/no-exclusive-tests": "error",
+    "mocha/no-global-tests": "error"
   }
 }
