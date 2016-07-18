@@ -45,14 +45,19 @@ describe "Projects List", ->
           .get(".projects-list>li")
             .should("have.length", @projects.length)
 
-      it "each project shows it's project path", ->
+      it "project shows it's project path", ->
         cy
           .get(".projects-list a").first()
             .should("contain", "/My-Fake-Project")
 
-      it "each project has it's folder name", ->
+      it "project has it's folder name", ->
         cy.get(".projects-list a")
           .contains("", " My-Fake-Project")
+
+      it "project displays chevron icon", ->
+        cy
+          .get(".projects-list a").first()
+            .find(".fa-chevron-right")
 
       describe "click on project", ->
         beforeEach ->
@@ -129,7 +134,6 @@ describe "Projects List", ->
           .get(".error")
             .should("not.be.visible")
 
-
     describe "directory dialog dismissed", ->
       beforeEach ->
         cy.get("nav").find(".fa-plus").click()
@@ -167,10 +171,17 @@ describe "Projects List", ->
             expect(@App.ipc).to.be.calledWith("add:project")
           .get(".empty").should("not.exist")
 
-      it "displays project loading", ->
+      it "disables clicking onto project while loading", ->
         @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
 
         cy.get(".project.loading").should("have.css", "pointer-events", "none")
+
+      it "displays project loading icon", ->
+        @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
+
+        cy
+          .get(".project.loading").find(".fa")
+            .should("have.class", "fa-spinner")
 
 
 

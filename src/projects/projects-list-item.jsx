@@ -34,10 +34,22 @@ class Project extends Component {
           </div>
         </div>
         <div className="row-column-wrapper">
-          <i className="fa fa-chevron-right"></i>
+          { this._icon() }
         </div>
       </Link>
     )
+  }
+
+  _icon = () => {
+    if (this.props.project.isLoading) {
+      return (
+        <i className="fa fa-spinner fa-pulse"></i>
+      )
+    } else {
+      return (
+        <i className="fa fa-chevron-right"></i>
+      )
+    }
   }
 }
 
