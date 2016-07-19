@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import state from '../lib/state'
 
+import state from '../lib/state'
+import updater from './update-model'
 import App from '../lib/app'
 
 @observer
@@ -47,14 +48,7 @@ class UpdateBanner extends Component {
   }
 
   _downloadUpdate () {
-    App.ipc('window:open', {
-      position: "center",
-      width: 300,
-      height: 210,
-      toolbar: false,
-      title: "Updates",
-      type: "UPDATES",
-    })
+    updater.openUpdateWindow()
   }
 }
 
