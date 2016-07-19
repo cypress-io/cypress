@@ -65,7 +65,7 @@ class App extends Component {
   }
 
   componentWillUnmount () {
-    $(window).off(this._onWindowResize)
+    $(window).off('resize', this._onWindowResize)
   }
 }
 
