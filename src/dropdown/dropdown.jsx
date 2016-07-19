@@ -42,7 +42,7 @@ class Dropdown extends Component {
     if (this.props.browserState === 'opening') {
       icon = 'refresh fa-spin'
     } else if (this.props.browserState === 'opened') {
-      icon = 'wifi green'
+      icon = 'tachometer'
     } else {
       icon = 'chrome'
     }

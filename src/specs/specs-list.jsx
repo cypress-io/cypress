@@ -73,7 +73,7 @@ class Specs extends Component {
 
   _fileIcon (spec) {
     if (spec.isChosen) {
-      return 'fa-wifi green'
+      return 'fa-exchange green'
     } else {
       return 'fa-file-code-o'
     }
