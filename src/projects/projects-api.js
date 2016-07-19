@@ -86,6 +86,11 @@ const closeBrowser = (projectId) => {
 
 const closeProject = (projectId) => {
   closeBrowser(projectId)
+
+  // unbind listeners
+  App.ipc.off('open:project')
+  App.ipc.off('get:specs')
+
   return App.ipc('close:project')
 }
 
@@ -128,7 +133,7 @@ const openProject = (project) => {
     project.loading(false)
     specsCollection.loading(true)
 
-    App.ipc("get:specs", (err, specs = []) => {
+    App.ipc('get:specs', (err, specs = []) => {
       if (err) {
         return setProjectError(err)
       }
