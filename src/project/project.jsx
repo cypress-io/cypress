@@ -81,15 +81,18 @@ class Project extends Component {
       return props.router.push('/projects')
     }
 
+    this.project.loading(true)
+
+  }
+
+  componentWillMount () {
     // delay opening the project so
     // we give the UI some time to render
     // and not block due to sync require's
     // in the main process
-    this.project.loading(true)
-
-    Promise.delay(100)
+    return Promise.delay(100)
     .then(() => {
-      openProject(this.project)
+      return openProject(this.project)
     })
   }
 
