@@ -22,9 +22,9 @@ describe "Specs List", ->
         .contains("My-Fake-Project").click()
       .fixture("browsers").then (@browsers) ->
         @config.browsers = @browsers
-        @ipc.handle("open:project", null, { config: @config })
+        @ipc.handle("open:project", null, @config)
       .then ->
-        @ipc.handle("open:project", null, { specs: @specs })
+        @ipc.handle("get:specs", null, @specs)
       .location().its("hash").should("include", "specs")
 
   describe "no specs", ->
@@ -34,9 +34,9 @@ describe "Specs List", ->
           .contains("My-Fake-Project").click()
           .fixture("browsers").then (@browsers) ->
             @config.browsers = @browsers
-            @ipc.handle("open:project", null, { config: @config })
+            @ipc.handle("open:project", null, @config)
           .then ->
-            @ipc.handle("open:project", null, { specs: [] })
+            @ipc.handle("get:specs", null, [])
 
     it "displays empty message", ->
       cy.contains("No files found")
@@ -64,9 +64,9 @@ describe "Specs List", ->
         .fixture("browsers").then (@browsers) ->
           @config.browsers = @browsers
           @config.isNewProject = true
-          @ipc.handle("open:project", null, { config: @config })
+          @ipc.handle("open:project", null, @config)
         .then ->
-          @ipc.handle("open:project", null, { specs: @specs })
+          @ipc.handle("get:specs", null, @specs)
 
     it "displays modal", ->
       cy
@@ -89,9 +89,9 @@ describe "Specs List", ->
           .contains("My-Fake-Project").click()
         .fixture("browsers").then (@browsers) ->
           @config.browsers = @browsers
-          @ipc.handle("open:project", null, { config: @config })
+          @ipc.handle("open:project", null, @config)
         .then ->
-          @ipc.handle("open:project", null, { specs: @specs })
+          @ipc.handle("get:specs", null, @specs)
         .location().its("hash").should("include", "specs")
 
     context "run all specs", ->
@@ -191,12 +191,12 @@ describe "Specs List", ->
       it "sets spec as active", ->
         cy.get("@firstSpec").should("have.class", "active")
 
-      context "spec list updates", ->
-        beforeEach ->
-          @ipc.handle("open:project", null, { specs: @specs })
+      # context "spec list updates", ->
+      #   beforeEach ->
+      #     @ipc.handle("open:project", null, { specs: @specs })
 
-        it "updates spec list on get:specs update", ->
-          cy.get("@firstSpec").should("not.have.class", "active")
+      #   it "updates spec list on get:specs update", ->
+      #     cy.get("@firstSpec").should("not.have.class", "active")
 
 
     describe "switching specs", ->
@@ -268,15 +268,4 @@ describe "Specs List", ->
           .contains("My-Fake-Project").click()
         .get(".error").contains("Go Back to Projects").click().then ->
           expect(@App.ipc).to.be.calledWith("close:project")
-
-    it "still displays error after specs loading on config err", ->
-      @ipc.handle("open:project", @err, {})
-
-      cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
-        .get(".error")
-          .should("contain", @err.message)
-        .then ->
-          @ipc.handle("open:project", null, { specs: @specs })
 
