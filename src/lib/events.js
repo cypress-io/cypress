@@ -101,4 +101,9 @@ export default {
   emit (event, ...args) {
     localBus.emit(event, ...args)
   },
+
+  // for testing purposes
+  __off () {
+    localBus.removeAllListeners()
+  },
 }

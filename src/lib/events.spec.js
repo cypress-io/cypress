@@ -1,0 +1,180 @@
+import sinon from 'sinon'
+
+import events from './events'
+
+const runnerStub = () => ({
+  on: sinon.stub(),
+  emit: sinon.spy(),
+})
+
+const runnablesStoreStub = () => ({
+  addLog: sinon.spy(),
+  reset: sinon.spy(),
+  runnableStarted: sinon.spy(),
+  runnableFinished: sinon.spy(),
+  setRunnables: sinon.spy(),
+  testById: sinon.stub(),
+  updateLog: sinon.spy(),
+})
+
+const statsStoreStub = () => ({
+  incrementCount: sinon.spy(),
+  pause: sinon.spy(),
+  reset: sinon.spy(),
+  resume: sinon.spy(),
+  start: sinon.spy(),
+  startRunning: sinon.spy(),
+  stop: sinon.spy(),
+})
+
+describe('events', () => {
+  let runnablesStore
+  let statsStore
+  let runner
+
+  beforeEach(() => {
+    events.__off()
+
+    runnablesStore = runnablesStoreStub()
+    statsStore = statsStoreStub()
+    events.init(runnablesStore, statsStore)
+    runner = runnerStub()
+    events.listen(runner)
+  })
+
+  context('from runner', () => {
+    it('sets runnables on runnables:ready', () => {
+      runner.on.withArgs('runnables:ready').callArgWith(1, 'root runnable')
+      expect(runnablesStore.setRunnables).to.have.been.calledWith('root runnable')
+    })
+
+    it('adds log on reporter:log:add', () => {
+      runner.on.withArgs('reporter:log:add').callArgWith(1, 'the log')
+      expect(runnablesStore.addLog).to.have.been.calledWith('the log')
+    })
+
+    it('updates log on reporter:log:state:changed', () => {
+      runner.on.withArgs('reporter:log:state:changed').callArgWith(1, 'the updated log')
+      expect(runnablesStore.updateLog).to.have.been.calledWith('the updated log')
+    })
+
+    it('resets runnables on reporter:restart:test:run', () => {
+      runner.on.withArgs('reporter:restart:test:run').callArgWith(1)
+      expect(runnablesStore.reset).to.have.been.called
+    })
+
+    it('resets stats on reporter:restart:test:run', () => {
+      runner.on.withArgs('reporter:restart:test:run').callArgWith(1)
+      expect(statsStore.reset).to.have.been.called
+    })
+
+    it('emits reporter:restarted on reporter:restart:test:run', () => {
+      runner.on.withArgs('reporter:restart:test:run').callArgWith(1)
+      expect(runner.emit).to.have.been.calledWith('reporter:restarted')
+    })
+
+    it('starts running stats on run:start if there are tests', () => {
+      runnablesStore.hasTests = true
+      runner.on.withArgs('run:start').callArgWith(1)
+      expect(statsStore.startRunning).to.have.been.called
+    })
+
+    it('does not start running stats on run:start if there are no tests', () => {
+      runnablesStore.hasTests = false
+      runner.on.withArgs('run:start').callArgWith(1)
+      expect(statsStore.startRunning).not.to.have.been.called
+    })
+
+    it('starts stats on reporter:start', () => {
+      runner.on.withArgs('reporter:start').callArgWith(1, 'start info')
+      expect(statsStore.start).to.have.been.calledWith('start info')
+    })
+
+    it('sends runnable started on test:before:run', () => {
+      runner.on.withArgs('test:before:run').callArgWith(1, 'the runnable')
+      expect(runnablesStore.runnableStarted).to.have.been.calledWith('the runnable')
+    })
+
+    it('sends runnable finished on test:after:run', () => {
+      runner.on.withArgs('test:after:run').callArgWith(1, 'the runnable')
+      expect(runnablesStore.runnableFinished).to.have.been.calledWith('the runnable')
+    })
+
+    it('increments the stats count on test:after:run', () => {
+      runner.on.withArgs('test:after:run').callArgWith(1, { state: 'passed' })
+      expect(statsStore.incrementCount).to.have.been.calledWith('passed')
+    })
+
+    it('pauses the stats on paused', () => {
+      runner.on.withArgs('paused').callArgWith(1, 'next command')
+      expect(statsStore.pause).to.have.been.calledWith('next command')
+    })
+
+    it('stops the stats on run:end', () => {
+      runner.on.withArgs('run:end').callArgWith(1)
+      expect(statsStore.stop).to.have.been.called
+    })
+  })
+
+  context('from local bus', () => {
+    it('resumes the stats on resume', () => {
+      events.emit('resume')
+      expect(statsStore.resume).to.have.been.called
+    })
+
+    it('emits runner:resume on resume', () => {
+      events.emit('resume')
+      expect(runner.emit).to.have.been.calledWith('runner:resume')
+    })
+
+    it('emits runner:next on next', () => {
+      events.emit('next')
+      expect(runner.emit).to.have.been.calledWith('runner:next')
+    })
+
+    it('emits runner:abort on stop', () => {
+      events.emit('stop')
+      expect(runner.emit).to.have.been.calledWith('runner:abort')
+    })
+
+    it('emits runner:restart on restart', () => {
+      events.emit('restart')
+      expect(runner.emit).to.have.been.calledWith('runner:restart')
+    })
+
+    it('emits runner:console:log on show:command', () => {
+      events.emit('show:command', 'command id')
+      expect(runner.emit).to.have.been.calledWith('runner:console:log', 'command id')
+    })
+
+    it('emits runner:console:log on show:error when it is a command error and there is a matching command', () => {
+      const test = { err: { isCommandErr: true }, commandMatchingErr: () => ({ id: 'matching command id' }) }
+      runnablesStore.testById.returns(test)
+      events.emit('show:error', 'test id')
+      expect(runner.emit).to.have.been.calledWith('runner:console:log', 'matching command id')
+    })
+
+    it('does not emit anything on show:error it is a command error but there not a matching command', () => {
+      const test = { err: { isCommandErr: true }, commandMatchingErr: () => null }
+      runnablesStore.testById.returns(test)
+      events.emit('show:error', 'test id')
+      expect(runner.emit).not.to.have.been.called
+    })
+
+    it('emits runner:console:error on show:error when it is not a command error', () => {
+      runnablesStore.testById.returns({ err: { isCommandErr: false } })
+      events.emit('show:error', 'test id')
+      expect(runner.emit).to.have.been.calledWith('runner:console:error', 'test id')
+    })
+
+    it('emits runner:show:snapshot on show:snapshot', () => {
+      events.emit('show:snapshot', 'command id')
+      expect(runner.emit).to.have.been.calledWith('runner:show:snapshot', 'command id')
+    })
+
+    it('emits runner:hide:snapshot on hide:snapshot', () => {
+      events.emit('hide:snapshot', 'command id')
+      expect(runner.emit).to.have.been.calledWith('runner:hide:snapshot', 'command id')
+    })
+  })
+})
