@@ -67,6 +67,10 @@ App.start = () => {
       console.log("menu item clicked", item)
     })
 
+    ipc("on:focus:tests", () => {
+      console.log("focus:tests")
+    })
+
     render(
       <Router history={history}>
         <Route path='/' component={Application}>
