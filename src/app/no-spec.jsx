@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import RunnerWrap from './runner-wrap'
 
+import runner from '../lib/runner'
+
 class NoSpec extends Component {
   componentWillMount () {
     window.addEventListener('hashchange', this._onHashChange)
@@ -12,6 +14,12 @@ class NoSpec extends Component {
         <div className='no-spec-message'>
           <p>Whoops, there is no test to run.</p>
           <p className='muted'>Choose a test to run from the desktop application.</p>
+          <p>
+            <button onClick={() => runner.focusTests()}>
+              <i className='fa fa-question-circle'></i>
+              View All Tests
+            </button>
+          </p>
           <img src='/__cypress/runner/no-spec-instructions.png' />
         </div>
         {this.props.children}

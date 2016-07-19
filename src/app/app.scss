@@ -30,7 +30,7 @@
 
   .automation-message,
   .no-spec-message {
-    padding: 150px 50px 20px;
+    padding: 100px 50px 20px;
     text-align: center;
 
     p {
@@ -45,6 +45,10 @@
 
     button {
       margin: 20px 0 0;
+
+      i {
+        margin-right: 5px;
+      }
     }
 
     .dropdown button i,
