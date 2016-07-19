@@ -53,6 +53,7 @@ export default class Iframes extends Component {
 
   _run () {
     const specPath = windowUtil.specPath()
+    this.props.runner.notifyRunningSpec(specPath)
     logger.clearLog()
 
     this._loadIframes(specPath)
@@ -88,6 +89,7 @@ export default class Iframes extends Component {
   }
 
   componentWillUnmount () {
+    this.props.runner.notifyRunningSpec(null)
     runner.stop()
   }
 }

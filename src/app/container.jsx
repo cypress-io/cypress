@@ -48,7 +48,7 @@ class Container extends Component {
 
   _app () {
     return (
-      <App {...this.props} runner={runner.reporterBus}>
+      <App {...this.props} runner={runner}>
         {this._automationElement()}
       </App>
     )

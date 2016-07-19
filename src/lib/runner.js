@@ -212,6 +212,7 @@ export default {
     // cookies
     $(window).on('beforeunload', () => {
       reporterBus.emit('reporter:restart:test:run')
+      this.notifyRunningSpec(null)
 
       // TODO: potentially move these two functions
       // into 'unload' instead of 'beforeunload'
@@ -255,6 +256,10 @@ export default {
 
   on (event, ...args) {
     localBus.on(event, ...args)
+  },
+
+  notifyRunningSpec (specFile) {
+    channel.emit('running:spec', specFile)
   },
 
   focusTests () {
