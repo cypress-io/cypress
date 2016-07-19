@@ -24,6 +24,6 @@ export default class Err {
 
     if (props.name) this.name = props.name
     if (props.message) this.message = props.message
-    if (props.stack) this.stack = props.name
+    if (props.stack) this.stack = props.stack
   }
 }
