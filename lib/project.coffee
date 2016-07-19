@@ -40,6 +40,7 @@ class Project extends EE
       type:         "opened"
       sync:         false
       report:       false
+      onFocusTests: ->
       onSettingsChanged: false
     }
 
@@ -143,6 +144,8 @@ class Project extends EE
       onReloadBrowser: options.onReloadBrowser
 
       onAutomationRequest: options.onAutomationRequest
+
+      onFocusTests: options.onFocusTests
 
       onConnect: (id) =>
         @emit("socket:connected", id)

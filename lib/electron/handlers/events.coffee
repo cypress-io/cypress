@@ -27,14 +27,19 @@ handleEvent = (options, bus, event, id, type, arg) ->
   send = (data) ->
     sendResponse({id: id, data: data})
 
+  onBus = (event) ->
+    bus.removeAllListeners(event)
+    bus.on(event, send)
+
   switch type
     when "on:menu:clicked"
-      bus.removeAllListeners("menu:item:clicked")
-      bus.on("menu:item:clicked", send)
+      onBus("menu:item:clicked")
 
     when "on:app:event"
-      bus.removeAllListeners("app:event")
-      bus.on("app:event", send)
+      onBus("app:events")
+
+    when "on:focus:tests"
+      onBus("focus:tests")
 
     when "gui:error"
       logs.error(arg)
@@ -190,8 +195,12 @@ handleEvent = (options, bus, event, id, type, arg) ->
         project.reboot()
         .then(open)
 
+      onFocusTests = ->
+        bus.emit("focus:tests")
+
       open = ->
         project.open(arg, options, {
+          onFocusTests: onFocusTests
           onSettingsChanged: onSettingsChanged
         })
         .then(getConfig)

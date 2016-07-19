@@ -156,6 +156,7 @@ class Socket
       onMocha: ->
       onConnect: ->
       onDomainSet: ->
+      onFocusTests: ->
       onChromiumRun: ->
       onReloadBrowser: ->
       checkForAppErrors: ->
@@ -288,6 +289,9 @@ class Socket
 
       socket.on "reload:browser", (url, browser) ->
         options.onReloadBrowser(url, browser)
+
+      socket.on "focus:tests", ->
+        options.onFocusTests()
 
       socket.on "is:automation:connected", (data = {}, cb) =>
         isConnected = =>
