@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
+import { action } from 'mobx'
 import Loader from 'react-loader'
 
 import App from '../lib/app'
@@ -50,12 +51,14 @@ class Specs extends Component {
         </li>
       )
     } else {
+      let activeClass = spec.isChosen ? 'active' : ''
+
       return (
         <li key={spec.id} className='file'>
-          <a href='#' onClick={this._selectSpec.bind(this, spec)}>
+          <a href='#' onClick={this._selectSpec.bind(this, spec.id)} className={activeClass}>
             <div>
               <div>
-                <i className='fa fa-file-code-o fa-fw'></i>
+                <i className={`fa fa-fw ${this._fileIcon(spec)}`}></i>
                 { spec.name }
               </div>
             </div>
@@ -65,6 +68,14 @@ class Specs extends Component {
           </a>
         </li>
       )
+    }
+  }
+
+  _fileIcon (spec) {
+    if (spec.isChosen) {
+      return 'fa-wifi green'
+    } else {
+      return 'fa-file-code'
     }
   }
 
@@ -83,19 +94,21 @@ class Specs extends Component {
     runSpec(project, '__all', project.chosenBrowser.name)
   }
 
-  _selectSpec (spec, e) {
+  _selectSpec (specId, e) {
     e.preventDefault()
 
-    clearActiveSpec()
+    action('spec:selected', specsCollection.setChosenSpec(specId))
 
-    let link = e.currentTarget
+    // clearActiveSpec()
 
-    link.classList.add('active')
-    link.getElementsByTagName('i')[0].setAttribute('class', 'fa fa-wifi green fa-fw')
+    // let link = e.currentTarget
+
+    // link.classList.add('active')
+    // link.getElementsByTagName('i')[0].setAttribute('class', 'fa fa-wifi green fa-fw')
 
     let project = this.props.project
 
-    runSpec(project, spec.id, project.chosenBrowser.name)
+    runSpec(project, specId, project.chosenBrowser.name)
   }
 
   _empty () {

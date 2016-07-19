@@ -20,6 +20,23 @@ export class SpecsCollection {
     this.isLoaded = true
   }
 
+  @action setChosenSpec (specId) {
+    function setChosen (specs) {
+      _.forEach(specs, (spec) => {
+        // we're a file if we have no child specs
+        if (!spec.children.specs.length && (spec.id === specId)) {
+          spec.isChosen = true
+        } else {
+          spec.isChosen = false
+          setChosen(spec.children.specs)
+        }
+      })
+    }
+
+    setChosen(this.specs)
+  }
+
+
   findByName (specs, path) {
     return _.find(specs, (spec) => (spec.name === path))
   }

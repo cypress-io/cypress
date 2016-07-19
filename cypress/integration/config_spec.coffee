@@ -57,7 +57,7 @@ describe "Config", ->
           expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/configuration")
 
 
-  context "on:project:settings:change", ->
+  context "on config changes", ->
     beforeEach ->
       cy
         .contains("Config")
@@ -66,20 +66,14 @@ describe "Config", ->
           @config.clientUrlDisplay = "http://localhost:8888"
           @config.browsers = @browsers
 
-          @ipc.handle("on:project:settings:change", null, {
-            config: @config
-            browser: null
-          })
+          @ipc.handle("open:project", null, @config)
 
       cy.contains("Config")
 
     it "displays updated config", ->
       @config.resolved.baseUrl.value = "http://localhost:7777"
 
-      @ipc.handle("on:project:settings:change", null, {
-        config: @config
-        browser: null
-      })
+      @ipc.handle("open:project", null, @config)
 
       cy.contains("http://localhost:7777")
 
@@ -95,15 +89,12 @@ describe "Config", ->
 
       @config.resolved.baseUrl.value = "http://localhost:7777"
 
-      @ipc.handle("on:project:settings:change", null, {
-        config: @config
-        browser: null
-      })
+      @ipc.handle("open:project", null, @config)
 
       cy
         .contains("http://localhost:7777")
         .then ->
-          @ipc.handle("on:project:settings:change", @err, null)
+          @ipc.handle("open:project", @err, null)
 
       cy.contains("Can't start server")
 

@@ -177,26 +177,42 @@ describe "Specs List", ->
             })
 
     describe "spec running in browser", ->
-      beforeEach ->
-        cy
-          .get(".file a").contains("a", "app_spec.coffee").as("firstSpec")
-            .click().then ->
-              @ipc.handle("get:open:browsers", null, ["chrome"])
-            .then ->
-              @ipc.handle("change:browser:spec", null, {})
+      context "choose shallow spec", ->
+        beforeEach ->
+          cy
+            .get(".file a").contains("a", "app_spec.coffee").as("firstSpec")
+              .click().then ->
+                @ipc.handle("get:open:browsers", null, ["chrome"])
+              .then ->
+                @ipc.handle("change:browser:spec", null, {})
 
-      it "updates spec icon", ->
-        cy.get("@firstSpec").find("i").should("have.class", "fa-wifi")
+        it "updates spec icon", ->
+          cy.get("@firstSpec").find("i").should("have.class", "fa-wifi")
 
-      it "sets spec as active", ->
-        cy.get("@firstSpec").should("have.class", "active")
+        it "sets spec as active", ->
+          cy.get("@firstSpec").should("have.class", "active")
 
-      # context "spec list updates", ->
-      #   beforeEach ->
-      #     @ipc.handle("open:project", null, { specs: @specs })
+      context "choose deeper nested spec", ->
+        beforeEach ->
+          cy
+            .get(".file a").contains("a", "baz_list_spec.coffee").as("deepSpec")
+              .click().then ->
+                @ipc.handle("get:open:browsers", null, ["chrome"])
+              .then ->
+                @ipc.handle("change:browser:spec", null, {})
 
-      #   it "updates spec list on get:specs update", ->
-      #     cy.get("@firstSpec").should("not.have.class", "active")
+        it "updates spec icon", ->
+          cy.get("@deepSpec").find("i").should("have.class", "fa-wifi")
+
+        it "sets spec as active", ->
+          cy.get("@deepSpec").should("have.class", "active")
+
+      context "spec list updates", ->
+        beforeEach ->
+          @ipc.handle("get:specs", null, @specs)
+
+        it "updates spec list on get:specs update", ->
+          cy.get("@firstSpec").should("not.have.class", "active")
 
 
     describe "switching specs", ->
