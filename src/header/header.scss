@@ -4,6 +4,7 @@
     box-shadow: 0 1px 3px #ccc;
     height: $header-height;
     min-width: $min-width;
+    outline: 0;
     overflow: visible;
     position: absolute;
     width: 100%;
@@ -16,13 +17,13 @@
       line-height: 26px;
       outline: 0;
 
-      &:hover {
+      &:hover,
+      &:focus {
         background-color: #e9e9e9;
       }
 
-      &:active,
-      &:focus {
-        outline: 0
+      &:active {
+        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
       }
     }
   }
