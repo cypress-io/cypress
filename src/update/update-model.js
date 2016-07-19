@@ -1,5 +1,7 @@
 import { computed, observable, action } from 'mobx'
 
+import App from '../lib/app'
+
 class Updater {
   @observable version
   @observable state
@@ -64,6 +66,17 @@ class Updater {
     } else {
       return 'Done'
     }
+  }
+
+  openUpdateWindow () {
+    return App.ipc('window:open', {
+      position: "center",
+      width: 300,
+      height: 210,
+      toolbar: false,
+      title: "Updates",
+      type: "UPDATES",
+    })
   }
 }
 

@@ -54,22 +54,19 @@ const handleErrors = () => {
   }
 }
 
+const setupState = (options) => {
+  state.setVersion(options.version)
+  state.listenForMenuClicks()
+}
+
 App.start = () => {
   ipc('get:options')
   .then((options = {}) => {
-    handleErrors()
 
-    state.setVersion(options.version)
+    handleErrors()
+    setupState(options)
 
     const el = document.getElementById('app')
-
-    ipc("on:menu:clicked", (err, item) => {
-      console.log("menu item clicked", item)
-    })
-
-    ipc("on:focus:tests", () => {
-      console.log("focus:tests")
-    })
 
     render(
       <Router history={history}>
@@ -92,9 +89,8 @@ App.start = () => {
 App.startUpdateApp = () => {
   ipc('get:options')
   .then((options = {}) => {
-    handleErrors()
 
-    state.setVersion(options.version)
+    handleErrors()
 
     const el = document.getElementById('updates')
 

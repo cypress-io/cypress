@@ -90,10 +90,7 @@ export default class Nav extends Component {
   _logout = (e) => {
     e.preventDefault()
 
-    state.setUser(null)
-
-    App.ipc('clear:github:cookies')
-    App.ipc('log:out')
+    state.logOut()
   }
 
   _addProject (e) {
