@@ -31,4 +31,5 @@ const Hooks = observer(({ model }) => (
   </ul>
 ))
 
+export { Hook, HookHeader }
 export default Hooks
