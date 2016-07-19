@@ -1,6 +1,0 @@
-<div class="empty-well">
-  <h2>
-    No files found in
-    <code><%= @path %></code>
-  </h2>
-</div>
