@@ -26,6 +26,7 @@ const driverTestEvents = 'test:before:run test:after:run'.split(' ')
 const driverAutomationEvents = 'get:cookies get:cookie set:cookie clear:cookies clear:cookie take:screenshot'.split(' ')
 const driverToLocalEvents = 'viewport config stop url:changed page:loading'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
+const reporterToSocketEvents = 'focus:tests'.split(' ')
 
 const localBus = new EventEmitter()
 // when detached, this will be the socket channel
@@ -64,6 +65,10 @@ export default {
 
     _.each(driverAutomationEvents, (event) => {
       driver.on(event, (...args) => channel.emit('automation:request', event, ...args))
+    })
+
+    _.each(reporterToSocketEvents, (event) => {
+      reporterBus.on(event, (...args) => channel.emit(event, ...args))
     })
 
     return driver.setConfig(_.pick(config, 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'namespace', 'remote'))
