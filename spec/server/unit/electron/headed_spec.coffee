@@ -30,32 +30,6 @@ describe "electron/headed", ->
 
       expect(headed.isMac()).to.be.false
 
-  context ".notify", ->
-    it "returns if not isMac", ->
-      @sandbox.stub(headed, "isMac").returns(false)
-
-      expect(headed.notify()).to.be.undefined
-
-    it "does not call notifier if user is logged in", ->
-      @sandbox.stub(headed, "isMac").returns(true)
-      @sandbox.stub(user, "ensureSession").resolves()
-      @sandbox.stub(notifier, "notify")
-
-      headed.notify().then ->
-        expect(notifier.notify).not.to.be.called
-
-    it "calls notifier if user isnt logged in", ->
-      @sandbox.stub(headed, "isMac").returns(true)
-      @sandbox.stub(user, "ensureSession").rejects(new Error)
-      @sandbox.stub(notifier, "notify")
-
-      headed.notify().then ->
-        expect(notifier.notify).to.be.calledWith({
-          title: "Cypress is now running..."
-          message: "Click the 'cy' icon in your tray to login."
-          icon: icons.getPathToIcon("icon_32x32@2x.png")
-        })
-
   context ".ready", ->
     beforeEach ->
       @win = {}

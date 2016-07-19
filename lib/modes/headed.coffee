@@ -5,13 +5,11 @@ image    = require("electron").nativeImage
 Promise  = require("bluebird")
 cyIcons  = require("@cypress/core-icons")
 Position = require("electron-positioner")
-notifier = require("node-notifier")
 user     = require("../user")
 errors   = require("../errors")
 Updater  = require("../updater")
 logs     = require("../electron/handlers/logs")
 menu     = require("../electron/handlers/menu")
-# Tray     = require("../electron/handlers/tray")
 Events   = require("../electron/handlers/events")
 Renderer = require("../electron/handlers/renderer")
 
@@ -82,69 +80,26 @@ module.exports = {
       }
     }[os.platform()]
 
-  notify: ->
-    ## bail if we aren't on mac
-    return if not @isMac()
-
-    user.ensureSession()
-    .catch ->
-      notifier.notify({
-        # subtitle:
-        title: "Cypress is now running..."
-        message: "Click the 'cy' icon in your tray to login."
-        icon: cyIcons.getPathToIcon("icon_32x32@2x.png")
-      })
-
   ready: (options = {}) ->
-    # tray = new Tray()
-
     menu.set()
 
-    _.defaults options,
-      onQuit: ->
-        ## TODO: fix this. if the debug window
-        ## is open and we attempt to quit
-        ## it will not be closed because
-        ## there is a memory reference
-        ## thus we have to remove it first
-        logs.off()
+    ## TODO:
+    ## handle right click to show context menu!
+    ## handle drop events for automatically adding projects!
+    ## use the same icon as the cloud app
+    Renderer.create(@getRendererArgs(options.coords))
+    .then (win) =>
+      Events.start(options)
 
-        ## exit the app immediately
-        app.exit(0)
+      if options.updating
+        Updater.install(options)
 
-      # onOpenProject: =>
-      #   tray.setState("running")
+      # tray.display({
+      #   onClick: (e, bounds) =>
+      #     @onClick(bounds, win)
+      # })
 
-      # onCloseProject: =>
-      #   tray.setState("default")
-
-      # onError: (err) =>
-      #   tray.setState("error")
-
-    ready = =>
-      ## TODO:
-      ## handle right click to show context menu!
-      ## handle drop events for automatically adding projects!
-      ## use the same icon as the cloud app
-      Renderer.create(@getRendererArgs(options.coords))
-      .then (win) =>
-        Events.start(options)
-
-        if options.updating
-          Updater.install(options)
-
-        # tray.display({
-        #   onClick: (e, bounds) =>
-        #     @onClick(bounds, win)
-        # })
-
-        return win
-
-    Promise.props({
-      ready: ready()
-      notify: @notify()
-    })
-    .get("ready")
+      return win
 
   run: (options) ->
     app.on "window-all-closed", =>
