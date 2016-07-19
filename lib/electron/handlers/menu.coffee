@@ -1,19 +1,26 @@
-os   = require("os")
-Menu = require("electron").Menu
+_     = require("lodash")
+os    = require("os")
+Menu  = require("electron").Menu
 shell = require("electron").shell
 
 module.exports = {
-  set: ->
+  set: (options = {}) ->
+    _.defaults(options, {
+      onUpdatesClicked: ->
+      onLogOutClicked: ->
+    })
+
     template = [
       {
         label: "File"
         submenu: [
           {
             label: "Check for Updates"
+            click: options.onUpdatesClicked
           }
           {
             label: "Changelog"
-            click: () =>
+            click: ->
               shell.openExternal("https://on.cypress.io/changelog")
           }
           {
@@ -21,6 +28,7 @@ module.exports = {
           }
           {
             label: "Log Out"
+            click: options.onLogOutClicked
           }
           {
             type: "separator"

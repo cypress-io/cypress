@@ -1,5 +1,6 @@
 _        = require("lodash")
 os       = require("os")
+EE       = require("events")
 app      = require("electron").app
 image    = require("electron").nativeImage
 Promise  = require("bluebird")
@@ -81,7 +82,17 @@ module.exports = {
     }[os.platform()]
 
   ready: (options = {}) ->
-    menu.set()
+    bus = new EE
+
+    ## TODO: potentially just pass an event emitter
+    ## instance here instead of callback functions
+    menu.set({
+      onUpdatesClicked: ->
+        bus.emit("menu:item:clicked", "check:for:updates")
+
+      onLogOutClicked: ->
+        bus.emit("menu:item:clicked", "log:out")
+    })
 
     ## TODO:
     ## handle right click to show context menu!
@@ -89,7 +100,7 @@ module.exports = {
     ## use the same icon as the cloud app
     Renderer.create(@getRendererArgs(options.coords))
     .then (win) =>
-      Events.start(options)
+      Events.start(options, bus)
 
       if options.updating
         Updater.install(options)

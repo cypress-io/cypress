@@ -15,7 +15,7 @@ errors      = require("../../errors")
 Updater     = require("../../updater")
 Project     = require("../../project")
 
-handleEvent = (options, event, id, type, arg) ->
+handleEvent = (options, bus, event, id, type, arg) ->
   sendResponse = (data = {}) ->
     try
       logger.info("sending ipc data", type: type, data: data)
@@ -28,6 +28,14 @@ handleEvent = (options, event, id, type, arg) ->
     sendResponse({id: id, data: data})
 
   switch type
+    when "on:menu:clicked"
+      bus.removeAllListeners("menu:item:clicked")
+      bus.on("menu:item:clicked", send)
+
+    when "on:app:event"
+      bus.removeAllListeners("app:event")
+      bus.on("app:event", send)
+
     when "gui:error"
       logs.error(arg)
       .then -> send(null)
@@ -212,8 +220,8 @@ module.exports = {
   stop: ->
     ipc.removeAllListeners()
 
-  start: (options) ->
+  start: (options, bus) ->
     ## curry left options
-    ipc.on "request", _.partial(@handleEvent, options)
+    ipc.on "request", _.partial(@handleEvent, options, bus)
 
 }
