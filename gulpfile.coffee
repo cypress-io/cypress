@@ -58,7 +58,6 @@ transform = (paths, options = {}) ->
       .pipe $.remember(cacheName)
 
       .pipe if options.concat then $.concat(options.concat + ".js", newLine: "; \r\n") else $.util.noop()
-      .pipe $.replace("//# sourceMappingURL=sidecar.js.map;", "")
 
       .pipe gulp.dest(options.destination)
 
