@@ -14,7 +14,7 @@ export default class Project {
   @observable browsers = []
   @observable onBoardingModalOpen = false
   @observable browserState = "closed"
-  @observable resolvedConfig = {}
+  @observable resolvedConfig
   @observable error
   @observable parentTestsFolderDisplay
   @observable integrationExampleName

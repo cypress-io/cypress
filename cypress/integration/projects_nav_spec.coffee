@@ -279,18 +279,38 @@ describe "Projects Nav", ->
             .contains(".btn", "Download Chrome").click().then ->
               expect(@App.ipc).to.be.calledWith("external:open", "https://www.google.com/chrome/browser/desktop")
 
+  context "unbind ipc listeners", ->
+    it "empty's App.ipc()", ->
+      obj = @App.ipc()
+
+      ## clear out all the ipc listeners
+      ## so we start from a clean slate
+      for key, value of obj
+        delete obj[key]
+
+      cy
+        .get(".projects-list a")
+        .contains("My-Fake-Project").as("firstProject").click()
+        .then ->
+          @ipc.handle("open:project", null, @config)
+          @ipc.handle("get:specs", null, [])
+
+      cy
+        .contains("Back to Projects").click({force: true})
+        .then ->
+          expect(@App.ipc()).to.be.empty
+
   context "switch project", ->
     beforeEach ->
       cy
         .get(".projects-list a")
           .contains("My-Fake-Project").as("firstProject").click().then ->
             @ipc.handle("open:project", null, @config)
+            @ipc.handle("get:specs", null, [])
 
     it "closes project", ->
       cy.contains("Back to Projects").click({force: true}).then ->
         expect(@App.ipc).to.be.calledWith("close:project")
-
-    it "sets project as browser closed", ->
 
     describe "click on diff project", ->
       beforeEach ->

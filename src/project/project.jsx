@@ -48,23 +48,10 @@ const downloadBrowser = function (e) {
 }
 
 const PortInUse = () => {
-
-  let _closeProject = function () {
-    closeProject(this.projectId)
-  }
-
   return (
     <div>
       <hr />
       <p>To fix, stop the other running process or change the port in cypress.json</p>
-      <Link
-        to='/projects'
-        onClick={_closeProject}
-        className='btn btn-default btn-sm'
-      >
-        <i className="fa fa-chevron-left"></i>{' '}
-        Go Back to Projects
-      </Link>
     </div>
   )
 }
@@ -136,6 +123,14 @@ class Project extends Component {
           { this._errorMessage(err.message) }
         </p>
         { portInUse }
+        <Link
+          to='/projects'
+          onClick={this._closeProject}
+          className='btn btn-default btn-sm'
+        >
+          <i className="fa fa-chevron-left"></i>{' '}
+          Go Back to Projects
+        </Link>
       </div>
     )
   }
@@ -150,6 +145,10 @@ class Project extends Component {
     return (
       <span dangerouslySetInnerHTML={createMarkup()} />
     )
+  }
+
+  _closeProject = function () {
+    closeProject(this.projectId)
   }
 }
 

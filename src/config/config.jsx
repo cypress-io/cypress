@@ -6,13 +6,9 @@ import Tooltip from 'rc-tooltip'
 
 @observer
 class Config extends Component {
-  constructor (props) {
-    super(props)
-
-    this.resolvedConfig = this.props.project.resolvedConfig
-  }
-
   render () {
+    this.resolvedConfig = this.props.project.resolvedConfig
+
     let config  = _.omit(this.resolvedConfig, 'environmentVariables')
     let envVars = this.resolvedConfig.environmentVariables
 
