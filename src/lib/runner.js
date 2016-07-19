@@ -46,6 +46,10 @@ export default {
   start (config) {
     if (config.env === 'development') overrides.overloadMochaRunnerUncaught()
 
+    if (config.socketId) {
+      channel.emit('app:connect', config.socketId)
+    }
+
     channel.on('change:to:url', (url) => {
       window.location.href = url
     })
