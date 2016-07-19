@@ -81,33 +81,43 @@ module.exports = {
     .catch {portInUse: true}, (err) ->
       errors.throw("PORT_IN_USE_LONG", err.port)
 
-  createRenderer: (url, showGui = false) ->
-    Renderer.create({
-      url:    url
-      width:  0
-      height: 0
-      show:   showGui
-      frame:  showGui
-      devTools: showGui
-      type:   "PROJECT"
-    })
-    .then (win) ->
-      if not showGui
-        ## there is a bug in electron linux
-        ## which causes the window to open even
-        ## should show is false so we must 'hide'
-        ## the window again and then set its size
-        win.hide()
+  setProxy: (proxyServer) ->
+    session = require("electron").session
 
-      win.webContents.on "new-window", (e, url, frameName, disposition, options) ->
-        ## force new windows to automatically open with show: false
-        ## this prevents window.open inside of javascript client code
-        ## to cause a new BrowserWindow instance to open
-        ## https://github.com/cypress-io/cypress/issues/123
-        options.show = false
+    new Promise (resolve) ->
+      session.defaultSession.setProxy({
+        proxyRules: proxyServer
+      }, resolve)
 
-      win.setSize(1280, 720)
-      win.center()
+  createRenderer: (url, proxyServer, showGui = false) ->
+    @setProxy(proxyServer)
+    .then ->
+      Renderer.create({
+        url:    url
+        width:  0
+        height: 0
+        show:   showGui
+        frame:  showGui
+        devTools: showGui
+        type:   "PROJECT"
+      })
+      .then (win) ->
+        if not showGui
+          ## there is a bug in electron linux
+          ## which causes the window to open even
+          ## should show is false so we must 'hide'
+          ## the window again and then set its size
+          win.hide()
+
+        win.webContents.on "new-window", (e, url, frameName, disposition, options) ->
+          ## force new windows to automatically open with show: false
+          ## this prevents window.open inside of javascript client code
+          ## to cause a new BrowserWindow instance to open
+          ## https://github.com/cypress-io/cypress/issues/123
+          options.show = false
+
+        win.setSize(1280, 720)
+        win.center()
 
   waitForRendererToConnect: (project, id) ->
     ## wait up to 10 seconds for the renderer
@@ -137,7 +147,7 @@ module.exports = {
       ## resolve the promise
       project.once "end", resolve
 
-  runTests: (project, id, url, gui) ->
+  runTests: (project, id, url, proxyServer, gui) ->
     ## we know we're done running headlessly
     ## when the renderer has connected and
     ## finishes running all of the tests.
@@ -146,7 +156,7 @@ module.exports = {
     Promise.props({
       connection: @waitForRendererToConnect(project, id)
       stats:      @waitForTestsToFinishRunning(project)
-      renderer:   @createRenderer(url, gui)
+      renderer:   @createRenderer(url, proxyServer, gui)
     })
 
   ready: (options = {}) ->
@@ -159,14 +169,18 @@ module.exports = {
       @ensureAndOpenProjectByPath(id, options)
 
       .then (project) =>
-        ## either get the url to the all specs
-        ## or if we've specificed one make sure
-        ## it exists
-        project.ensureSpecUrl(options.spec)
-        .then (url) =>
+        Promise.all([
+          project.getConfig(),
+
+          ## either get the url to the all specs
+          ## or if we've specificed one make sure
+          ## it exists
+          project.ensureSpecUrl(options.spec)
+        ])
+        .spread (config, url) =>
           console.log("\nTests should begin momentarily...\n")
 
-          @runTests(project, id, url, options.showHeadlessGui)
+          @runTests(project, id, url, config.clientUrlDisplay, options.showHeadlessGui)
           .get("stats")
 
     ready()

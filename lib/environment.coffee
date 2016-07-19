@@ -14,6 +14,13 @@ Error.stackTraceLimit = Infinity
 ## would not be available
 pkg = cwd("package.json")
 
+try
+  ## i wish we didn't have to do this but we have to append
+  ## these command line switches immediately
+  app = require("electron").app
+  app.commandLine.appendSwitch("disable-renderer-backgrounding", true)
+  app.commandLine.appendSwitch("ignore-certificate-errors", true)
+
 getEnv = ->
   ## instead of setting NODE_ENV we will
   ## use our own separate CYPRESS_ENV so
