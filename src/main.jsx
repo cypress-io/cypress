@@ -10,7 +10,7 @@ useStrict(true)
 window.Runner = {
   start (el, config) {
     const state = new State()
-    
+
     action('started', () => {
       state.updateDimensions(config.viewportWidth, config.viewportHeight)
     })()

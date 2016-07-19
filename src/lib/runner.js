@@ -34,13 +34,17 @@ const reporterBus = new EventEmitter()
 export default {
   reporterBus,
 
-  ensureAutomation (state, connectionInfo) {
+  init (state, connectionInfo) {
     channel.emit('is:automation:connected', connectionInfo, action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
       channel.on('automation:disconnected', action('automationDisconnected', () => {
         state.automation = automation.DISCONNECTED
       }))
     }))
+
+    channel.on('change:to:url', (url) => {
+      window.location.href = url
+    })
   },
 
   start (config) {
@@ -49,10 +53,6 @@ export default {
     if (config.socketId) {
       channel.emit('app:connect', config.socketId)
     }
-
-    channel.on('change:to:url', (url) => {
-      window.location.href = url
-    })
 
     driver.on('message', (msg, data, cb) => {
       channel.emit('client:request', msg, data, cb)

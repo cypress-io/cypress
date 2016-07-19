@@ -18,7 +18,7 @@ class Container extends Component {
   componentWillMount () {
     this.randomString = `${Math.random()}`
 
-    runner.ensureAutomation(this.props.state, {
+    runner.init(this.props.state, {
       element: automationElementId,
       string: this.randomString,
     })
