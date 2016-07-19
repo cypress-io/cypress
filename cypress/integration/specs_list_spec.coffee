@@ -209,11 +209,17 @@ describe "Specs List", ->
 
       context "spec list updates", ->
         beforeEach ->
-          @ipc.handle("get:specs", null, @specs)
+          cy
+            .get(".file a").contains("a", "app_spec.coffee").as("firstSpec")
+              .click().then ->
+                @ipc.handle("get:open:browsers", null, ["chrome"])
+              .then ->
+                @ipc.handle("change:browser:spec", null, {})
+              .then ->
+                @ipc.handle("get:specs", null, @specs)
 
         it "updates spec list on get:specs update", ->
           cy.get("@firstSpec").should("not.have.class", "active")
-
 
     describe "switching specs", ->
       beforeEach ->

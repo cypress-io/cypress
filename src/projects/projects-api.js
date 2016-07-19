@@ -3,7 +3,7 @@ import { action } from 'mobx'
 import Promise from 'bluebird'
 
 import App from '../lib/app'
-import { clearActiveSpec } from '../lib/utils'
+import { clearRunAllActiveSpec } from '../lib/utils'
 import projectsStore from '../projects/projects-store'
 import specsCollection from '../specs/specs-collection'
 
@@ -53,8 +53,9 @@ const runSpec = (project, spec, browser, url) => {
       }
 
       if (data.browserClosed) {
-        clearActiveSpec()
+        clearRunAllActiveSpec()
         project.browserClosed()
+        specsCollection.setChosenSpec('')
         return App.ipc.off('launch:browser')
       }
     })
@@ -72,7 +73,8 @@ const runSpec = (project, spec, browser, url) => {
 }
 
 const closeBrowser = (projectId) => {
-  clearActiveSpec()
+  clearRunAllActiveSpec()
+  specsCollection.setChosenSpec('')
 
   App.ipc('close:browser')
 
@@ -95,6 +97,7 @@ const closeProject = (projectId) => {
 }
 
 const openProject = (project) => {
+  specsCollection.loading(true)
 
   const setProjectError = action('project:open:errored', (err) => {
     project.loading(false)
@@ -131,7 +134,6 @@ const openProject = (project) => {
   ])
   .then(() => {
     project.loading(false)
-    specsCollection.loading(true)
 
     App.ipc('get:specs', (err, specs = []) => {
       if (err) {

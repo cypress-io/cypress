@@ -5,7 +5,7 @@ import { action } from 'mobx'
 import Loader from 'react-loader'
 
 import App from '../lib/app'
-import { clearActiveSpec } from '../lib/utils'
+import { clearRunAllActiveSpec } from '../lib/utils'
 import { runSpec } from '../projects/projects-api'
 import specsCollection from './specs-collection'
 
@@ -75,14 +75,14 @@ class Specs extends Component {
     if (spec.isChosen) {
       return 'fa-wifi green'
     } else {
-      return 'fa-file-code'
+      return 'fa-file-code-o'
     }
   }
 
   _runAllSpecs (e) {
     e.preventDefault()
 
-    clearActiveSpec()
+    action('spec:selected', specsCollection.setChosenSpec('__all'))
 
     let link = e.currentTarget
 
@@ -97,14 +97,9 @@ class Specs extends Component {
   _selectSpec (specId, e) {
     e.preventDefault()
 
+    clearRunAllActiveSpec()
+
     action('spec:selected', specsCollection.setChosenSpec(specId))
-
-    // clearActiveSpec()
-
-    // let link = e.currentTarget
-
-    // link.classList.add('active')
-    // link.getElementsByTagName('i')[0].setAttribute('class', 'fa fa-wifi green fa-fw')
 
     let project = this.props.project
 
