@@ -97,7 +97,7 @@ class Login extends Component {
           <i className='fa fa-warning'></i>{' '}
           <strong>Can't Log In</strong>
         </p>
-        <p>{error.message}</p>
+        <p>{this._errorMessage(error.message)}</p>
         {error.statusCode === 401 ?
           <p>
             <a onClick={this._openAuthDoc}>
@@ -107,6 +107,18 @@ class Login extends Component {
           </p>
         : null}
       </div>
+    )
+  }
+
+  _errorMessage (message) {
+    function createMarkup () {
+      return {
+        __html: message.replace('\n', '<br /><br />'),
+      }
+    }
+
+    return (
+      <span dangerouslySetInnerHTML={createMarkup()} />
     )
   }
 

@@ -133,10 +133,22 @@ class Project extends Component {
           <strong>Can't start server</strong>
         </p>
         <p>
-          { err.message.replace('\n', '<br /><br />') }
+          { this._errorMessage(err.message) }
         </p>
         { portInUse }
       </div>
+    )
+  }
+
+  _errorMessage (message) {
+    function createMarkup () {
+      return {
+        __html: message.replace('\n', '<br /><br />'),
+      }
+    }
+
+    return (
+      <span dangerouslySetInnerHTML={createMarkup()} />
     )
   }
 }

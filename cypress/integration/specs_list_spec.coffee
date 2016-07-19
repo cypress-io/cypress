@@ -260,6 +260,16 @@ describe "Specs List", ->
         .get(".error")
           .should("contain", @err.message)
 
+    it "displays error message with html escaped", ->
+      @err.message = "Error reading from: <span class='ansi-blur-gf'>/Users/cypress.json</span><br /><br /> <span class=ansi-yellow-fg'>SyntaxError</span>"
+      @ipc.handle("open:project", @err, {})
+      cy
+        .get(".projects-list a")
+          .contains("My-Fake-Project").click()
+        .get(".error")
+          .should("contain", "Error reading from: /Users/cypress.json")
+          .should("not.contain", "<span")
+
     it "displays Port in Use instructions on err", ->
       @ipc.handle("open:project", @err, {})
       cy

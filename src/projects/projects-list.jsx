@@ -79,9 +79,21 @@ export default class Projects extends Component {
         </button>
         <p className='text-center'>
           <i className='fa fa-exclamation-triangle'></i>{' '}
-          { projectsStore.error }
+          { this._errorMessage(projectsStore.error) }
         </p>
       </div>
+    )
+  }
+
+  _errorMessage (message) {
+    function createMarkup () {
+      return {
+        __html: message.replace('\n', '<br /><br />'),
+      }
+    }
+
+    return (
+      <span dangerouslySetInnerHTML={createMarkup()} />
     )
   }
 
