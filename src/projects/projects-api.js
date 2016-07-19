@@ -1,6 +1,7 @@
 import once from 'lodash/once'
 import { action } from 'mobx'
 import Promise from 'bluebird'
+import { hashHistory } from 'react-router'
 
 import App from '../lib/app'
 import { clearRunAllActiveSpec } from '../lib/utils'
@@ -92,6 +93,7 @@ const closeProject = (projectId) => {
   // unbind listeners
   App.ipc.off('open:project')
   App.ipc.off('get:specs')
+  App.ipc.off('on:focus:tests')
 
   return App.ipc('close:project')
 }
@@ -113,6 +115,10 @@ const openProject = (project) => {
   const open = () => {
     return new Promise((resolve) => {
       resolve = once(resolve)
+
+      App.ipc("on:focus:tests", () => {
+        hashHistory.push(`projects/${project.id}/specs`)
+      })
 
       App.ipc("open:project", project.path, (err, config = {}) => {
         project.clearError()

@@ -68,10 +68,6 @@ App.start = () => {
 
     const el = document.getElementById('app')
 
-    ipc("on:focus:tests", () => {
-      console.log("focus:tests")
-    })
-
     render(
       <Router history={history}>
         <Route path='/' component={Application}>
