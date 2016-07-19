@@ -63,6 +63,10 @@ App.start = () => {
 
     const el = document.getElementById('app')
 
+    ipc("on:menu:clicked", (err, item) => {
+      console.log("menu item clicked", item)
+    })
+
     render(
       <Router history={history}>
         <Route path='/' component={Application}>
