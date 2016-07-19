@@ -100,6 +100,12 @@ module.exports = {
     ## use the same icon as the cloud app
     Renderer.create(@getRendererArgs(options.coords))
     .then (win) =>
+      ## cause the browser window instance
+      ## to receive focus when we've been
+      ## told to focus on the tests!
+      options.onFocusTests = ->
+        win.focus()
+
       Events.start(options, bus)
 
       if options.updating

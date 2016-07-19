@@ -196,6 +196,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
         .then(open)
 
       onFocusTests = ->
+        if _.isFunction(options.onFocusTests)
+          options.onFocusTests()
+
         bus.emit("focus:tests")
 
       open = ->
