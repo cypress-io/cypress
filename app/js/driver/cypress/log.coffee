@@ -131,8 +131,8 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         triggerEvent(@Cypress, @, "log:state:changed")
 
       ## only fire the log:state:changed event
-      ## as fast as every 16ms
-      @fireChangeEvent = _.debounce(trigger, 16)
+      ## as fast as every 4ms
+      @fireChangeEvent = _.debounce(trigger, 4)
 
       @set(obj)
 
