@@ -106,21 +106,14 @@ const openProject = (project) => {
     return new Promise((resolve) => {
       resolve = once(resolve)
 
-      App.ipc("open:project", project.path, (err, data = {}) => {
+      App.ipc("open:project", project.path, (err, config = {}) => {
         project.clearError()
 
         if (err) {
           return setProjectError(err)
         }
 
-        if (data.config) {
-          action('config:changed', changeConfig(data.config))
-        }
-
-        if (data.specs) {
-          specsCollection.loading(true)
-          specsCollection.setSpecs(data.specs)
-        }
+        action('config:changed', changeConfig(config))
 
         resolve()
       })
@@ -133,6 +126,16 @@ const openProject = (project) => {
   ])
   .then(() => {
     project.loading(false)
+    specsCollection.loading(true)
+
+    App.ipc("get:specs", (err, specs = []) => {
+      if (err) {
+        return setProjectError(err)
+      }
+
+      specsCollection.setSpecs(specs)
+
+    })
   })
   .catch(setProjectError)
 }
