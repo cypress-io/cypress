@@ -96,6 +96,10 @@ export default {
     localBus.on('hide:snapshot', (commandId) => {
       runner.emit('runner:hide:snapshot', commandId)
     })
+
+    localBus.on('focus:tests', () => {
+      runner.emit('focus:tests')
+    })
   },
 
   emit (event, ...args) {

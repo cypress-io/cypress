@@ -176,5 +176,10 @@ describe('events', () => {
       events.emit('hide:snapshot', 'command id')
       expect(runner.emit).to.have.been.calledWith('runner:hide:snapshot', 'command id')
     })
+
+    it('emits focus:tests on focus:tests', () => {
+      events.emit('focus:tests')
+      expect(runner.emit).to.have.been.calledWith('focus:tests')
+    })
   })
 })

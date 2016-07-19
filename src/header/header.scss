@@ -8,6 +8,32 @@
     position: absolute;
     width: 100%;
     z-index: 1;
+
+    button {
+      background-color: #f8f8f8;
+      border-color: transparent;
+      border-radius: 0;
+      line-height: 26px;
+      outline: 0;
+
+      &:hover {
+        background-color: #e9e9e9;
+      }
+
+      &:active,
+      &:focus {
+        outline: 0
+      }
+    }
+  }
+
+  .focus-tests {
+    border-right: 1px solid #ddd;
+    float: left;
+
+    i {
+      margin-right: 5px;
+    }
   }
 
   .stats {
@@ -50,23 +76,6 @@
 
   .controls {
     float: right;
-
-    button {
-      background-color: #f8f8f8;
-      border-color: transparent;
-      border-radius: 0;
-      line-height: 26px;
-      outline: 0;
-
-      &:hover {
-        background-color: #e9e9e9;
-      }
-
-      &:active,
-      &:focus {
-        outline: 0
-      }
-    }
 
     .paused-label {
       background-color: #CC4239;
