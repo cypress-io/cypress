@@ -22,21 +22,12 @@ handleEvent = (options, event, id, type, arg) ->
       event.sender.send("response", data)
 
   sendErr = (err) ->
-    callback("onError", err)
     sendResponse({id: id, __error: errors.clone(err)})
 
   send = (data) ->
     sendResponse({id: id, data: data})
 
-  callback = (key, args...) ->
-    fn = options[key]
-    if _.isFunction(fn)
-      fn.apply(null, args)
-
   switch type
-    when "quit"
-      callback("onQuit")
-
     when "gui:error"
       logs.error(arg)
       .then -> send(null)
@@ -181,30 +172,36 @@ handleEvent = (options, event, id, type, arg) ->
       .catch(sendErr)
 
     when "open:project"
-      project.open(arg, options)
-      .call("getConfig")
-      .then(send)
-      .then ->
-        callback("onOpenProject")
-      .catch (err) ->
-        sendErr(err)
+      getConfig = ->
+        project.opened()
+        .getConfig()
+        .then(send)
+        .catch(sendErr)
+
+      onSettingsChanged = ->
+        project.reboot()
+        .then(open)
+
+      open = ->
+        project.open(arg, options, {
+          onSettingsChanged: onSettingsChanged
+        })
+        .then(getConfig)
+        .catch(sendErr)
+
+      ## initially open!
+      open()
 
     when "close:project"
       project.close()
       .then(send)
-      .then ->
-        callback("onCloseProject")
-      .catch(sendErr)
-
-    when "on:project:settings:change"
-      project.onSettingsChanged()
-      .then(send)
       .catch(sendErr)
 
     when "get:specs"
-      project.getSpecs()
-      .then(send)
-      .catch(sendErr)
+      project.getSpecChanges({
+        onChange: send
+        onError: sendErr
+      })
 
     else
       throw new Error("No ipc event registered for: '#{type}'")

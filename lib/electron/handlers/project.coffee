@@ -12,13 +12,13 @@ launcher  = require("../../launcher")
 onRelaunch      = null
 openProject     = null
 openBrowser     = null
+specIntervalId  = null
 openBrowserOpts = null
 
 module.exports = {
   open: (path, args = {}, options = {}) ->
     _.defaults options, {
       sync: true
-      changeEvents: true
       onReloadBrowser: (url, browser) =>
         @relaunch(url, browser)
     }
@@ -78,38 +78,43 @@ module.exports = {
       ## assume there are openBrowserOpts
       launcher.launch(b, url, openBrowserOpts)
 
-  onSettingsChanged: ->
-    Promise.try =>
-      if not openProject
-        errors.throw("NO_CURRENTLY_OPEN_PROJECT")
-      else
-        new Promise (resolve, reject) =>
-          reboot = =>
-            ## store if the browser is open
-            b = openBrowser
+  reboot: ->
+    @close({
+      sync: false
+      clearInterval: false
+    })
 
-            openProject
-            .getConfig()
-            .then (cfg) =>
-              @close()
-              .then =>
-                @open(cfg.projectRoot)
-            .then (p) ->
-              p.getConfig()
-            .then (cfg) ->
-              {
-                config: cfg
-                browser: b
-              }
-            .then(resolve)
-            .catch(reject)
+  getSpecChanges: (options = {}) ->
+    currentSpecs = null
 
-          openProject.on "settings:changed", reboot
+    _.defaults(options, {
+      onChange: ->
+      onError: ->
+    })
 
-  getSpecs: ->
-    openProject.getConfig()
-    .then (cfg) ->
-      files.getTestFiles(cfg)
+    sendIfChanged = (specs = []) ->
+      ## dont do anything if the specs haven't changed
+      console.log currentSpecs, specs, _.isEqual(specs, currentSpecs), Math.random()
+
+      return if _.isEqual(specs, currentSpecs)
+
+      currentSpecs = specs
+      options.onChange(specs)
+
+    checkForSpecUpdates = ->
+      get()
+      .then(sendIfChanged)
+      .catch(options.onError)
+
+    get = ->
+      openProject.getConfig()
+      .then (cfg) ->
+        files.getTestFiles(cfg)
+
+    specIntervalId = setInterval(checkForSpecUpdates, 2500)
+
+    ## immediately check the first time around
+    checkForSpecUpdates()
 
   changeToSpec: (spec) ->
     openProject.getConfig()
@@ -138,12 +143,17 @@ module.exports = {
   close: (options = {}) ->
     _.defaults options, {
       sync: true
+      clearInterval: true
     }
 
     nullify = ->
       ## null these back out
       onRelaunch      = null
       openProject     = null
+
+      if options.clearInterval
+        clearInterval(specIntervalId)
+        specIntervalId  = null
 
       Promise.resolve(null)
 

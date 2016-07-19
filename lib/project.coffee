@@ -40,7 +40,7 @@ class Project extends EE
       type:         "opened"
       sync:         false
       report:       false
-      changeEvents: false
+      onSettingsChanged: false
     }
 
     @getConfig(options)
@@ -112,10 +112,10 @@ class Project extends EE
       .spread (session, cfg) ->
         api.updateProject(id, options.type, cfg.projectName, session)
 
-  watchSettings: (changeEvents) ->
+  watchSettings: (onSettingsChanged) ->
     ## bail if we havent been told to
     ## watch anything
-    return if not changeEvents
+    return if not onSettingsChanged
 
     obj = {
       onChange: (filePath, stats) =>
@@ -124,15 +124,15 @@ class Project extends EE
         return if @generatedProjectIdTimestamp and
           (new Date - @generatedProjectIdTimestamp) < 1000
 
-        ## emit settings:changed whenever
-        ## our settings file changes
-        @emit("settings:changed")
+        ## call our callback function
+        ## when settings change!
+        onSettingsChanged.call(@)
     }
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
 
   watchSettingsAndStartWebsockets: (options = {}, config = {}) ->
-    @watchSettings(options.changeEvents)
+    @watchSettings(options.onSettingsChanged)
 
     ## if we've passed down reporter
     ## then record these via mocha reporter
