@@ -55,7 +55,7 @@ class Project extends EE
           cfg.port = port
 
           ## and set all the urls again
-          cfg = config.setUrls(cfg)
+          _.extend cfg, config.setUrls(cfg)
 
         ## store the cfg from
         ## opening the server
