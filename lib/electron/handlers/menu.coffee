@@ -15,13 +15,13 @@ module.exports = {
         label: "File"
         submenu: [
           {
-            label: "Check for Updates"
-            click: options.onUpdatesClicked
-          }
-          {
             label: "Changelog"
             click: ->
               shell.openExternal("https://on.cypress.io/changelog")
+          }
+          {
+            label: "Check for Updates"
+            click: options.onUpdatesClicked
           }
           {
             type: "separator"
