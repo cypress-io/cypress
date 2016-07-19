@@ -98,3 +98,18 @@ describe "Config", ->
 
       cy.contains("Can't start server")
 
+
+  context "on:focus:tests clicked", ->
+    beforeEach ->
+      cy
+        .contains("Config")
+
+    it "routes to specs page", ->
+      @ipc.handle("on:focus:tests")
+      cy
+        .location().then (location) ->
+          expect(location.href).to.include("projects")
+          expect(location.href).to.include("e40991dc055454a2f3598752dec39abc")
+          expect(location.href).to.include("specs")
+
+
