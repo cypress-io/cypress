@@ -141,6 +141,8 @@ const openProject = (project) => {
       specsCollection.setSpecs(specs)
 
     })
+
+    return null
   })
   .catch(setProjectError)
 }
