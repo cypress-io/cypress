@@ -28,23 +28,21 @@ module.exports = {
     ## store the currently open project
     openProject = Project(path)
 
-    ## open the project and return
-    ## the config for the project instance
-    Promise.all([
-      openProject.open(options)
-      launcher.getBrowsers()
-    ])
-    .spread (project, browsers) ->
+    launcher.getBrowsers()
+    .then (browsers = []) ->
       ## TODO: maybe if there are no
       ## browsers here we should just
       ## immediately close the server?
       ## but continue sending the config
-      Promise.all([
-        project.setBrowsers(browsers)
-        project.getConfig()
-        .then (cfg) ->
-          extension.setHostAndPath(cfg.clientUrlDisplay, cfg.socketIoRoute)
-      ])
+      options.browsers = browsers
+
+      ## open the project and return
+      ## the config for the project instance
+      openProject.open(options)
+    .then (project) ->
+      project.getConfig()
+      .then (cfg) ->
+        extension.setHostAndPath(cfg.clientUrlDisplay, cfg.socketIoRoute)
       .return(project)
 
   opened: -> openProject

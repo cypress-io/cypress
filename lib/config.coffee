@@ -108,7 +108,7 @@ module.exports = {
   mergeDefaults: (config = {}, options = {}) ->
     resolved = {}
 
-    _.extend config, _.pick(options, "morgan", "isHeadless", "socketId", "report")
+    _.extend config, _.pick(options, "morgan", "isHeadless", "socketId", "report", "browsers")
 
     _.each @whitelist(options), (val, key) ->
       resolved[key] = "cli"
