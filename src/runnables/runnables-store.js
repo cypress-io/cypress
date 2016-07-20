@@ -19,9 +19,9 @@ const defaults = {
 class RunnablesStore {
   @observable isReady = defaults.isReady
   @observable runnables = []
-  @observable _tests = {}
-  @observable _logs = {}
 
+  _tests = {}
+  _logs = {}
   _runnablesQueue = []
 
   attemptingShowSnapshot = defaults.attemptingShowSnapshot
@@ -139,6 +139,7 @@ class RunnablesStore {
     this.runnables = []
     this._tests = {}
     this._logs = {}
+    this._runnablesQueue = []
   }
 }
 
