@@ -5,7 +5,6 @@ export default class Route extends Instrument {
   @observable isStubbed
   @observable method
   @observable numResponses = 0
-  @observable status
   @observable url
 
   constructor (props) {
@@ -14,7 +13,6 @@ export default class Route extends Instrument {
     this.isStubbed = props.isStubbed
     this.method = props.method
     this.numResponses = props.numResponses
-    this.status = props.status
     this.url = props.url
   }
 
@@ -24,7 +22,6 @@ export default class Route extends Instrument {
     this.isStubbed = props.isStubbed
     this.method = props.method
     this.numResponses = props.numResponses
-    this.status = props.status
     this.url = props.url
   }
 }
