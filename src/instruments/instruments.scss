@@ -37,11 +37,6 @@
         font-family: $monospace;
         font-size: 11px;
       }
-
-      tbody tr:hover {
-        cursor: pointer;
-        background-color: darken(#f5f5f5, 8%);
-      }
     }
 
     .no-calls .call-count,
