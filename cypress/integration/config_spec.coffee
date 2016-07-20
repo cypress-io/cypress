@@ -99,7 +99,7 @@ describe "Config", ->
       it "displays errors", ->
         cy.contains("Can't start server")
 
-      it.only "displays config after error is fixed.", ->
+      it "displays config after error is fixed.", ->
         cy
           .contains("Can't start server").then ->
             @ipc.handle("open:project", null, @config)
