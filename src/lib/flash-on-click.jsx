@@ -1,6 +1,6 @@
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Children, cloneElement, Component } from 'react'
+import React, { Children, cloneElement, Component, PropTypes } from 'react'
 import Tooltip from '../tooltip/tooltip'
 
 @observer
@@ -24,6 +24,11 @@ class FlashOnClick extends Component {
       this._show = false
     }), 600)
   }
+}
+
+FlashOnClick.propTypes = {
+  message: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
 }
 
 export default FlashOnClick
