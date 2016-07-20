@@ -32,6 +32,5 @@ export default class Log {
     this.type = props.type
     this.state = props.state
     this.referencesAlias = props.referencesAlias
-    this.referencesAlias = props.referencesAlias
   }
 }
