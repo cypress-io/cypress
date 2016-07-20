@@ -5,12 +5,10 @@ import React from 'react'
 import Tooltip from '../tooltip/tooltip'
 import Collapsible from '../collapsible/collapsible'
 
-const formatUrl = (url) => url
-
 const Route = observer(({ model }) => (
   <tr className={cs({ 'no-responses': !model.numResponses })}>
     <td>{model.method}</td>
-    <td>{formatUrl(model.url)}</td>
+    <td>{model.url}</td>
     <td>{model.isStubbed ? 'Yes' : 'No'}</td>
     <td>
       <Tooltip placement='top' title={`Aliased this route as: '${model.alias}'`}>
@@ -21,9 +19,9 @@ const Route = observer(({ model }) => (
   </tr>
 ))
 
-const RoutesList = observer(({ routes }) => (
+const RoutesList = observer(({ model }) => (
   <tbody>
-    {_.map(routes, (route) => <Route key={route.id} model={route} />)}
+    {_.map(model.routes, (route) => <Route key={route.id} model={route} />)}
   </tbody>
 ))
 
@@ -53,7 +51,7 @@ const Routes = observer(({ model }) => (
                   </th>
                 </tr>
               </thead>
-              <RoutesList routes={model.routes} />
+              <RoutesList model={model} />
             </table>
           </Collapsible>
         </li>
@@ -62,4 +60,5 @@ const Routes = observer(({ model }) => (
   </div>
 ))
 
+export { Route, RoutesList }
 export default Routes
