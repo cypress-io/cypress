@@ -8,6 +8,7 @@ export class SpecsCollection {
   @observable error = null
   @observable isLoading = false
   @observable isLoaded = false
+  @observable allSpecsChosen = false
 
   @action loading (bool) {
     this.isLoading = bool
@@ -21,6 +22,12 @@ export class SpecsCollection {
   }
 
   @action setChosenSpec (specId) {
+    if (specId === '__all') {
+      this.allSpecsChosen = true
+    } else {
+      this.allSpecsChosen = false
+    }
+
     function setChosen (specs) {
       _.forEach(specs, (spec) => {
         // we're a file if we have no child specs

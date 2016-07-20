@@ -98,6 +98,11 @@ describe "Specs List", ->
       it "displays run all specs button", ->
         cy.contains(".btn", "Run All Tests")
 
+      it "has play icon", ->
+        cy
+          .contains(".btn", "Run All Tests")
+            .find("i").should("have.class", "fa-play")
+
       it "triggers launch:browser on click of button", ->
         cy
           .contains(".btn", "Run All Tests").click().then ->
@@ -129,7 +134,8 @@ describe "Specs List", ->
                 @ipc.handle("change:browser:spec", null, {})
 
         it "updates spec icon", ->
-          cy.get("@allSpecs").find("i").should("have.class", "fa-wifi")
+          cy.get("@allSpecs").find("i").should("have.class", "fa-exchange")
+          cy.get("@allSpecs").find("i").should("not.have.class", "fa-play")
 
         it "sets spec as active", ->
           cy.get("@allSpecs").should("have.class", "active")
@@ -187,7 +193,8 @@ describe "Specs List", ->
                 @ipc.handle("change:browser:spec", null, {})
 
         it "updates spec icon", ->
-          cy.get("@firstSpec").find("i").should("have.class", "fa-wifi")
+          cy.get("@firstSpec").find("i").should("have.class", "fa-exchange")
+          cy.get("@firstSpec").find("i").should("not.have.class", "fa-file-code-o")
 
         it "sets spec as active", ->
           cy.get("@firstSpec").should("have.class", "active")
@@ -202,7 +209,7 @@ describe "Specs List", ->
                 @ipc.handle("change:browser:spec", null, {})
 
         it "updates spec icon", ->
-          cy.get("@deepSpec").find("i").should("have.class", "fa-wifi")
+          cy.get("@deepSpec").find("i").should("have.class", "fa-exchange")
 
         it "sets spec as active", ->
           cy.get("@deepSpec").should("have.class", "active")
@@ -221,6 +228,42 @@ describe "Specs List", ->
         it "updates spec list on get:specs update", ->
           cy.get("@firstSpec").should("not.have.class", "active")
 
+      context "running spec updates", ->
+        beforeEach ->
+          cy
+            .get(".file a").contains("a", "app_spec.coffee").as("firstSpec")
+              .click().then ->
+                @ipc.handle("get:open:browsers", null, [])
+              .then ->
+                @ipc.handle("launch:browser", null, {browserOpened: true})
+
+        it "stays same when same spec", ->
+          cy
+            .then ->
+              @ipc.handle("running:spec", null, "integration/app_spec.coffee")
+            .get("@firstSpec").should("have.class", "active")
+
+        it "updates spec running when different spec", ->
+          cy
+            .then ->
+              @ipc.handle("running:spec", null, "unit/admin_users/admin/users/bar_list_spec.coffee")
+            .contains("a", "bar_list_spec").should("have.class", "active")
+
+        it "updates spec running when All Specs run", ->
+          cy
+            .then ->
+              @ipc.handle("running:spec", null, "__all")
+            .contains("a", "Run All Tests").should("have.class", "active")
+            .get("@firstSpec").should("not.have.class", "active")
+
+        it.only "de-selects all tests if no spec matches", ->
+          cy
+            .then ->
+              @ipc.handle("running:spec", null, null)
+            .contains("a", "Run All Tests").should("not.have.class", "active")
+            .get("@firstSpec").should("not.have.class", "active")
+
+
     describe "switching specs", ->
       beforeEach ->
         cy
@@ -234,8 +277,8 @@ describe "Specs List", ->
               @ipc.handle("change:browser:spec", null, {})
 
       it "updates spec icon", ->
-        cy.get("@firstSpec").find("i").should("not.have.class", "fa-wifi")
-        cy.get("@secondSpec").find("i").should("have.class", "fa-wifi")
+        cy.get("@firstSpec").find("i").should("not.have.class", "fa-exchange")
+        cy.get("@secondSpec").find("i").should("have.class", "fa-exchange")
 
       it "updates active spec", ->
         cy.get("@firstSpec").should("not.have.class", "active")

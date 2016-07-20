@@ -5,7 +5,6 @@ import { action } from 'mobx'
 import Loader from 'react-loader'
 
 import App from '../lib/app'
-import { clearRunAllActiveSpec } from '../lib/utils'
 import { runSpec } from '../projects/projects-api'
 import specsCollection from './specs-collection'
 
@@ -16,10 +15,12 @@ class Specs extends Component {
 
     if (!specsCollection.specs.length) return this._empty()
 
+    let allActiveClass = specsCollection.allSpecsChosen ? 'active' : ''
+
     return (
       <div id='tests-list-page'>
-        <a onClick={this._runAllSpecs.bind(this)} className="all-tests btn btn-link">
-          <i className="fa fa-play"></i>{' '}
+        <a onClick={this._runAllSpecs.bind(this)} className={`all-tests btn btn-link ${allActiveClass}`}>
+          <i className={`fa fa-fw ${this._allSpecsIcon(specsCollection.allSpecsChosen)}`}></i>{' '}
           Run All Tests
         </a>
         <ul className='outer-files-container list-as-table'>
@@ -58,7 +59,7 @@ class Specs extends Component {
           <a href='#' onClick={this._selectSpec.bind(this, spec.id)} className={activeClass}>
             <div>
               <div>
-                <i className={`fa fa-fw ${this._fileIcon(spec)}`}></i>
+                <i className={`fa fa-fw ${this._specIcon(spec.isChosen)}`}></i>
                 { spec.name }
               </div>
             </div>
@@ -71,8 +72,16 @@ class Specs extends Component {
     }
   }
 
-  _fileIcon (spec) {
-    if (spec.isChosen) {
+  _allSpecsIcon (bool) {
+    if (bool) {
+      return 'fa-exchange green'
+    } else {
+      return 'fa-play'
+    }
+  }
+
+  _specIcon (bool) {
+    if (bool) {
       return 'fa-exchange green'
     } else {
       return 'fa-file-code-o'
@@ -84,11 +93,6 @@ class Specs extends Component {
 
     action('spec:selected', specsCollection.setChosenSpec('__all'))
 
-    let link = e.currentTarget
-
-    link.classList.add('active')
-    link.getElementsByTagName('i')[0].setAttribute('class', 'fa fa-wifi green fa-fw')
-
     let project = this.props.project
 
     runSpec(project, '__all', project.chosenBrowser.name)
@@ -96,8 +100,6 @@ class Specs extends Component {
 
   _selectSpec (specId, e) {
     e.preventDefault()
-
-    clearRunAllActiveSpec()
 
     action('spec:selected', specsCollection.setChosenSpec(specId))
 

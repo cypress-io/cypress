@@ -4,7 +4,6 @@ import Promise from 'bluebird'
 import { hashHistory } from 'react-router'
 
 import App from '../lib/app'
-import { clearRunAllActiveSpec } from '../lib/utils'
 import projectsStore from '../projects/projects-store'
 import specsCollection from '../specs/specs-collection'
 
@@ -51,12 +50,18 @@ const runSpec = (project, spec, browser, url) => {
     return App.ipc('launch:browser', { browser, url, spec }, (err, data = {}) => {
       if (data.browserOpened) {
         project.browserOpened()
+
+        App.ipc('running:spec', (err, spec) => {
+          specsCollection.setChosenSpec(spec)
+        })
       }
 
       if (data.browserClosed) {
-        clearRunAllActiveSpec()
         project.browserClosed()
+
         specsCollection.setChosenSpec('')
+
+        App.ipc.off('running:spec')
         return App.ipc.off('launch:browser')
       }
     })
@@ -74,7 +79,6 @@ const runSpec = (project, spec, browser, url) => {
 }
 
 const closeBrowser = (projectId) => {
-  clearRunAllActiveSpec()
   specsCollection.setChosenSpec('')
 
   App.ipc('close:browser')
