@@ -256,7 +256,7 @@ describe "Specs List", ->
             .contains("a", "Run All Tests").should("have.class", "active")
             .get("@firstSpec").should("not.have.class", "active")
 
-        it.only "de-selects all tests if no spec matches", ->
+        it "de-selects all tests if no spec matches", ->
           cy
             .then ->
               @ipc.handle("running:spec", null, null)
