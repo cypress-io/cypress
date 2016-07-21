@@ -46,4 +46,5 @@ const Runnables = observer(({ runnablesStore, specPath }) => (
   </div>
 ))
 
+export { NoTests, RunnablesList }
 export default Runnables
