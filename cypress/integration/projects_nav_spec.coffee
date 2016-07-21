@@ -1,6 +1,5 @@
 describe "Projects Nav", ->
   beforeEach ->
-
     cy
       .visit("/")
       .window().then (win) ->
@@ -25,6 +24,7 @@ describe "Projects Nav", ->
         .get(".projects-list a")
           .contains("My-Fake-Project").as("firstProject").click().then ->
             @ipc.handle("open:project", null, @config)
+            return
 
     it "displays projects nav", ->
       cy
@@ -172,7 +172,7 @@ describe "Projects Nav", ->
         it "displays browser icon as opened", ->
           cy
             .get(".browsers-list>a").first().find("i")
-              .should("have.class", "fa fa-wifi")
+              .should("have.class", "fa fa-tachometer")
 
         it "disables browser dropdown", ->
           cy
@@ -298,7 +298,7 @@ describe "Projects Nav", ->
       cy
         .contains("Back to Projects").click({force: true})
         .then ->
-          expect(@App.ipc()).to.be.empty
+          expect(Cypress._.keys(@App.ipc()).length).to.eq(1)
 
   context "switch project", ->
     beforeEach ->

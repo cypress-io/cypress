@@ -21,6 +21,7 @@ class UpdateBanner extends Component {
   componentWillUnmount () {
     document.getElementsByTagName('html')[0].classList.remove('has-updates')
 
+    App.ipc.off('updater:check')
     clearInterval(this.checkId)
   }
 
@@ -41,6 +42,7 @@ class UpdateBanner extends Component {
   }
 
   _checkForUpdate () {
+    App.ipc.off('updater:check')
     App.ipc('updater:check')
     .then(action('checked:updates', (version) => {
       state.updatesAvailable(!!version)

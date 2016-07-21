@@ -88,6 +88,7 @@ const closeBrowser = (projectId) => {
     project.browserClosed()
   }
 
+  App.ipc.off('close:browser')
   return App.ipc.off('launch:browser')
 }
 
@@ -99,7 +100,8 @@ const closeProject = (projectId) => {
   App.ipc.off('get:specs')
   App.ipc.off('on:focus:tests')
 
-  return App.ipc('close:project')
+  App.ipc('close:project')
+  App.ipc.off('close:project')
 }
 
 const openProject = (project) => {
