@@ -531,6 +531,9 @@ describe "$Cypress.Cy Window Commands", ->
 
         @cy.viewport(199, 600)
 
+      it "does not throw when passed width equal to 200", ->
+        @cy.viewport(200, 600)
+
       it "throws when passed height greater than than 3000", (done) ->
         logs = []
 
@@ -543,6 +546,9 @@ describe "$Cypress.Cy Window Commands", ->
           done()
 
         @cy.viewport(1000, 3001)
+
+      it "does not throw when passed width equal to 3000", ->
+        @cy.viewport(200, 3000)
 
       it "throws when passed an empty string as width", (done) ->
         logs = []
