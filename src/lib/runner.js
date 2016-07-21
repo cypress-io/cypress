@@ -193,7 +193,6 @@ export default {
     })
 
     reporterBus.on('runner:abort', () => {
-      // TODO: tell the driver not to fire 'test:after:hooks' event
       driver.abort()
     })
 
@@ -212,10 +211,7 @@ export default {
     // cookies
     $(window).on('beforeunload', () => {
       reporterBus.emit('reporter:restart:test:run')
-      this.notifyRunningSpec(null)
 
-      // TODO: potentially move these two functions
-      // into 'unload' instead of 'beforeunload'
       this._clearAllCookies()
       this._setUnload()
     })
