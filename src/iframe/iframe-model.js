@@ -69,7 +69,7 @@ export default class IframeModel {
       this._storeOriginalState()
     }
 
-    this.detachedId = log.cid
+    this.detachedId = log.id
 
     this._updateViewport(log)
     this._updateUrl(log.url)
