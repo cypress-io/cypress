@@ -62,7 +62,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## why arent we listening to "defaults" here?
       ## instead we are manually hard coding them
       @listenTo @Cypress, "stop",       => @stop()
-      @listenTo @Cypress, "restore",    => @restore()
+      @listenTo @Cypress, "restore",    => @restore.apply(@, arguments)
       @listenTo @Cypress, "abort",      => @abort()
       @listenTo @Cypress, "test:after:hooks", (test) => @checkTestErr(test)
 
@@ -96,12 +96,16 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
       @Cypress.cy = null
 
-    restore: ->
+    restore: (options = {}) ->
+      _.defaults options, {
+        checkForEndedEarly: true
+      }
+
       ## if our index is above 0 but is below the commands.length
       ## then we know we've ended early due to a done() and
       ## we should throw a very specific error message
       index = @prop("index")
-      if index > 0 and index < @commands.length
+      if options.checkForEndedEarly and index > 0 and index < @commands.length
         @endedEarlyErr(index)
 
       @clearTimeout @prop("runId")

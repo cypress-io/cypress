@@ -168,7 +168,13 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
         @off()
 
-    abort: ->
+    abort: (options = {}) ->
+      ## dont check for ended early errors
+      ## when we abort
+      _.defaults options, {
+        checkForEndedEarly: false
+      }
+
       ## grab all the abort callbacks
       ## instead of triggering them
 
@@ -179,13 +185,13 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
       ## abort can be async so make sure
       ## we wait until they all resolve!
-      Promise.all(aborts).then => @restore()
+      Promise.all(aborts).then => @restore(options)
 
     ## restores cypress after each test run by
     ## removing the queue from the proto and
     ## removing additional own instance properties
-    restore: ->
-      restores = [].concat @invoke("restore")
+    restore: (options) ->
+      restores = [].concat @invoke("restore", options)
 
       restores = _.reject restores, (r) -> r is @cy
 
