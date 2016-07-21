@@ -36,6 +36,7 @@ export default class Iframes extends Component {
 
   componentDidMount () {
     // TODO: need to take headless mode into account
+    // may need to not display reporter if more than 200 tests
     runner.on('restart', this._run.bind(this))
 
     runner.start(this.props.config)
@@ -66,7 +67,7 @@ export default class Iframes extends Component {
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
   _loadIframes (specPath) {
     return new Promise((resolve) => {
-      // TODO: this path should come from the config
+      // TODO: config should have "iframeUrl": "/__cypress/iframes"
       const specSrc = `/__cypress/iframes/${specPath}`
 
       const $container = $(this.refs.container).empty()
@@ -79,10 +80,6 @@ export default class Iframes extends Component {
       }).appendTo($container)
 
       $specIframe.prop('src', specSrc).one('load', () => {
-        // TODO: is this necessary?
-        // make a reference between the iframes
-        // @contentWindow.remote = view.$remote[0].contentWindow
-
         resolve([$specIframe[0].contentWindow, $autIframe])
       })
     })
