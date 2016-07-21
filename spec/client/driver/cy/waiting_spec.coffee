@@ -69,6 +69,20 @@ describe "$Cypress.Cy Waiting Commands", ->
             expect(xhr.url).to.include "/users"
             expect(xhr.response).to.be.null
 
+      it "passes timeout option down to requestTimeout of wait", (done) ->
+        retry = _.after 3, _.once =>
+          @cy.private("window").$.get("/foo")
+
+        @cy.on "retry", (options) ->
+          expect(options.timeout).to.eq 900
+          done()
+
+        @cy
+          .server()
+          .route("GET", /.*/, {}).as("fetch")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .wait("@fetch", {timeout: 900})
+
       it "resets the timeout after waiting", ->
         prevTimeout = @cy._timeout()
 
@@ -94,7 +108,8 @@ describe "$Cypress.Cy Waiting Commands", ->
         @cy
           .server()
           .route("GET", "*", {}).as("fetch")
-          .wait("@fetch")
+          .wait("@fetch").then ->
+            expect(@cy._timeout()).to.eq 199
 
       it "waits for responseTimeout", (done) ->
         @Cypress.config("responseTimeout", 299)
@@ -111,6 +126,8 @@ describe "$Cypress.Cy Waiting Commands", ->
             win.$.get("/foo")
             null
           .wait("@fetch")
+
+
 
       describe "errors", ->
         beforeEach ->
