@@ -232,13 +232,13 @@ export default {
   _reRun () {
     // when we are re-running we first
     // need to abort cypress always
-    Promise.join(
-      driver.abort(),
-      this._restart()
-    )
+    driver.abort()
     .then(() => {
       logs.reset()
       tests.reset()
+      return this._restart()
+    })
+    .then(() => {
       localBus.emit('restart')
     })
   },
