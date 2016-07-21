@@ -1,9 +1,9 @@
 .runner {
   header {
-    @extend %clearfix;
     background-color: #f8f8f8;
     box-shadow: 0 1px 5px #888;
     color: #888;
+    display: flex;
     left: 0;
     line-height: 22px;
     padding: 10px;
@@ -11,41 +11,11 @@
     right: 0;
     top: 0;
     z-index: 1;
-
-    .aut-menu {
-      float: right;
-      margin-bottom: 0;
-      position: relative;
-      top: 1px;
-
-      .btn-link {
-        padding: 0 0;
-        color: #888;
-      }
-
-      > li {
-        border-right: 1px solid #ccc;
-        border-left: 1px solid #fff;
-        float: left;
-        height: 24px;
-        list-style: none;
-        padding: 0 10px;
-
-        &:last-child {
-          border-right: 0;
-        }
-
-        &:first-child {
-          border-left: 0;
-        }
-      }
-    }
   }
 
   .url-container {
-    float: left;
+    flex-grow: 2;
     position: relative;
-    width: 50%;
   }
 
   .loading-container {
@@ -103,12 +73,13 @@
   }
 
   .menu {
-    float: right;
+    margin-left: 15px;
+    text-align: right;
   }
 
   .viewport-info {
     margin-top: 1px;
-    margin-right: 15px;
+    margin-right: 5px;
     position: relative;
 
     button {
@@ -154,6 +125,7 @@
     padding: 7px 15px;
     position: absolute;
     right: 0;
+    text-align: left;
     top: 100%;
     width: 300px;
     z-index: 999;
@@ -169,10 +141,12 @@
   }
 
   @media all and (max-width: 950px) {
+    header {
+      flex-direction: column;
+    }
+
     .url-container {
-      float: none;
       margin-bottom: 5px;
-      width: 100%;
     }
   }
 }
