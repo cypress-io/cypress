@@ -120,10 +120,20 @@ export default {
       reporterBus.emit('reporter:log:add', log)
     })
 
+    // driver.on('log', (logId) => {
+    //   const displayProps = driver.getDisplayPropsForLog(logId)
+    //   reporterBus.emit('reporter:log:add', displayProps)
+    // })
+
     driver.on('log:state:changed', (log) => {
       logs.add(log)
       reporterBus.emit('reporter:log:state:changed', log)
     })
+
+    // driver.on('log:state:changed', (logId) => {
+    //   const displayProps = driver.getDisplayPropsForLog(logId)
+    //   reporterBus.emit('reporter:log:state:changed', displayProps)
+    // })
 
     reporterBus.on('runner:console:error', (testId) => {
       let test = tests.get(testId)
@@ -135,12 +145,28 @@ export default {
       }
     })
 
+    // reporterBus.on('runner:console:error', (testId) => {
+    //   const test = driver.getTest(testId)
+    //   if (test) {
+    //     logger.clearLog()
+    //     logger.logError(test.err.stack)
+    //   } else {
+    //     logger.logError('No error found for test id', testId)
+    //   }
+    // })
+
     reporterBus.on('runner:console:log', (logId) => {
       this._withLog(logId, (log) => {
         logger.clearLog()
         logger.logFormatted(log)
       })
     })
+
+    // reporterBus.on('runner:console:log', (logId) => {
+    //   const consoleProps = driver.getConsolePropsForLog(logId)
+    //   logger.clearLog()
+    //   logger.logFormatted(consoleProps)
+    // })
 
     _.each(driverToReporterEvents, (event) => {
       driver.on(event, (...args) => {
@@ -179,6 +205,12 @@ export default {
         localBus.emit('show:snapshot', log.snapshots, log)
       })
     })
+
+    // reporterBus.on('runner:show:snapshot', (id) => {
+    //   // what's the best way to get log url, viewport dimensions, and $el?
+    //   const snapshots = driver.getSnapshotsForLogById(id)
+    //   localBus.emit('show:snapshot', snapshots, id)
+    // })
 
     reporterBus.on('runner:hide:snapshot', () => {
       localBus.emit('hide:snapshot')
