@@ -55,7 +55,7 @@ class Command extends Component {
           {
             'command-is-event': !!model.event,
             'command-is-invisible': model.visible != null && !model.visible,
-            'command-has-num-elements': model.numElements != null,
+            'command-has-num-elements': model.state !== 'pending' && model.numElements != null,
             'command-has-no-elements': !model.numElements,
             'command-has-multiple-elements': model.numElements > 1,
             'command-with-indicator': !!model.renderProps.indicator,
