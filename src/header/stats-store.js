@@ -5,9 +5,6 @@ const defaults = {
   numPassed: 0,
   numFailed: 0,
   numPending: 0,
-  isPaused: false,
-  isRunning: false,
-  nextCommandName: null,
 
   _startTime: null,
   _currentTime: null,
@@ -17,9 +14,6 @@ class StatsStore {
   @observable numPassed = defaults.numPassed
   @observable numFailed = defaults.numFailed
   @observable numPending = defaults.numPending
-  @observable isPaused = defaults.isPaused
-  @observable isRunning = defaults.isRunning
-  @observable nextCommandName = defaults.nextCommandName
 
   @observable _startTime = defaults._startTime
   @observable _currentTime = defaults._startTime
@@ -30,12 +24,8 @@ class StatsStore {
     return this._currentTime - this._startTime
   }
 
-  startRunning () {
-    this.isRunning = true
-  }
-
   start ({ startTime, numPassed = 0, numFailed = 0, numPending = 0 }) {
-    if (this._startTime || !this.isRunning) return
+    if (this._startTime) return
 
     this.numPassed = numPassed
     this.numFailed = numFailed
@@ -64,22 +54,17 @@ class StatsStore {
     this[countKey] = this[countKey] + 1
   }
 
-  pause (nextCommandName) {
+  pause () {
     this._stopTimer()
-    this.isPaused = true
-    this.nextCommandName = nextCommandName
   }
 
   resume () {
-    this.isPaused = false
-    this.nextCommandName = null
     this._startTimer()
   }
 
   stop () {
     this._stopTimer()
     this._updateCurrentTime()
-    this.isRunning = false
   }
 
   reset () {

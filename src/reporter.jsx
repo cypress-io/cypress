@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react'
 import React, { Component, PropTypes } from 'react'
 
+import appState from './lib/app-state'
 import events from './lib/events'
 import runnablesStore from './runnables/runnables-store'
 import statsStore from './header/stats-store'
@@ -11,14 +12,19 @@ import Runnables from './runnables/runnables'
 @observer
 class Reporter extends Component {
   componentWillMount () {
-    this.props.events.init(this.props.runnablesStore, this.props.statsStore)
-    this.props.events.listen(this.props.runner)
+    const { appState, runnablesStore, runner, statsStore } = this.props
+    this.props.events.init({
+      appState,
+      runnablesStore,
+      statsStore,
+    })
+    this.props.events.listen(runner)
   }
 
   render () {
     return (
       <div className='reporter'>
-        <Header statsStore={this.props.statsStore} />
+        <Header appState={this.props.appState} statsStore={this.props.statsStore} />
         <Runnables runnablesStore={this.props.runnablesStore} specPath={this.props.specPath} />
       </div>
     )
@@ -34,6 +40,7 @@ Reporter.propTypes = {
 }
 
 Reporter.defaultProps = {
+  appState,
   events,
   runnablesStore,
   statsStore,

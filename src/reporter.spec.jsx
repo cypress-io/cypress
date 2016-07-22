@@ -7,12 +7,14 @@ import Reporter from './reporter'
 import Header from './header/header'
 import Runnables from './runnables/runnables'
 
+const appState = {}
 const runnablesStore = {}
 const statsStore = {}
 const getProps = (props) => {
   return _.extend({
     runner: { emit: () => {}, on: () => {} },
     specPath: 'the spec path',
+    appState,
     runnablesStore,
     statsStore,
   }, props)
@@ -27,7 +29,7 @@ describe('<Reporter />', () => {
   it('initializes the events with the runnables store and stats store', () => {
     const events = eventsStub()
     shallow(<Reporter {...getProps({ events })} />)
-    expect(events.init).to.have.been.calledWith(runnablesStore, statsStore)
+    expect(events.init).to.have.been.calledWith({ appState, runnablesStore, statsStore })
   })
 
   it('tells events to listen to runner', () => {

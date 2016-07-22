@@ -4,13 +4,14 @@ import { action } from 'mobx'
 const localBus = new EventEmitter()
 
 export default {
-  init (runnablesStore, statsStore) {
+  init ({ appState, runnablesStore, statsStore }) {
+    this.appState = appState
     this.runnablesStore = runnablesStore
     this.statsStore = statsStore
   },
 
   listen (runner) {
-    const { runnablesStore, statsStore } = this
+    const { appState, runnablesStore, statsStore } = this
 
     runner.on('runnables:ready', action('runnables:ready', (rootRunnable = {}) => {
       runnablesStore.setRunnables(rootRunnable)
@@ -25,6 +26,7 @@ export default {
     }))
 
     runner.on('reporter:restart:test:run', action('restart:test:run', () => {
+      appState.reset()
       runnablesStore.reset()
       statsStore.reset()
       runner.emit('reporter:restarted')
@@ -32,7 +34,7 @@ export default {
 
     runner.on('run:start', action('run:start', () => {
       if (runnablesStore.hasTests) {
-        statsStore.startRunning()
+        appState.startRunning()
       }
     }))
 
@@ -50,14 +52,17 @@ export default {
     }))
 
     runner.on('paused', action('paused', (nextCommandName) => {
-      statsStore.pause(nextCommandName)
+      appState.pause(nextCommandName)
+      statsStore.pause()
     }))
 
     runner.on('run:end', action('run:end', () => {
+      appState.stop()
       statsStore.stop()
     }))
 
     localBus.on('resume', action('resume', () => {
+      appState.resume()
       statsStore.resume()
       runner.emit('runner:resume')
     }))

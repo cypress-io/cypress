@@ -7,7 +7,7 @@ import Controls from './controls'
 import Stats from './stats'
 import Tooltip from '../tooltip/tooltip'
 
-const Header = observer(({ events, statsStore }) => (
+const Header = observer(({ appState, events, statsStore }) => (
   <header>
     <Tooltip placement='bottom' title='View All Tests'>
       <button className='focus-tests' onClick={() => events.emit('focus:tests')}>
@@ -15,7 +15,7 @@ const Header = observer(({ events, statsStore }) => (
       </button>
     </Tooltip>
     <Stats stats={statsStore} />
-    <Controls stats={statsStore} />
+    <Controls appState={appState} />
   </header>
 ))
 

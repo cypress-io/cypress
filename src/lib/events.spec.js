@@ -7,6 +7,14 @@ const runnerStub = () => ({
   emit: sinon.spy(),
 })
 
+const appStateStub = () => ({
+  startRunning: sinon.spy(),
+  pause: sinon.spy(),
+  reset: sinon.spy(),
+  resume: sinon.spy(),
+  stop: sinon.spy(),
+})
+
 const runnablesStoreStub = () => ({
   addLog: sinon.spy(),
   reset: sinon.spy(),
@@ -28,6 +36,7 @@ const statsStoreStub = () => ({
 })
 
 describe('events', () => {
+  let appState
   let runnablesStore
   let statsStore
   let runner
@@ -35,9 +44,11 @@ describe('events', () => {
   beforeEach(() => {
     events.__off()
 
+    appState = appStateStub()
     runnablesStore = runnablesStoreStub()
     statsStore = statsStoreStub()
-    events.init(runnablesStore, statsStore)
+    events.init({ appState, runnablesStore, statsStore })
+
     runner = runnerStub()
     events.listen(runner)
   })
@@ -68,6 +79,11 @@ describe('events', () => {
       expect(statsStore.reset).to.have.been.called
     })
 
+    it('resets appState on reporter:restart:test:run', () => {
+      runner.on.withArgs('reporter:restart:test:run').callArgWith(1)
+      expect(appState.reset).to.have.been.called
+    })
+
     it('emits reporter:restarted on reporter:restart:test:run', () => {
       runner.on.withArgs('reporter:restart:test:run').callArgWith(1)
       expect(runner.emit).to.have.been.calledWith('reporter:restarted')
@@ -76,13 +92,13 @@ describe('events', () => {
     it('starts running stats on run:start if there are tests', () => {
       runnablesStore.hasTests = true
       runner.on.withArgs('run:start').callArgWith(1)
-      expect(statsStore.startRunning).to.have.been.called
+      expect(appState.startRunning).to.have.been.called
     })
 
     it('does not start running stats on run:start if there are no tests', () => {
       runnablesStore.hasTests = false
       runner.on.withArgs('run:start').callArgWith(1)
-      expect(statsStore.startRunning).not.to.have.been.called
+      expect(appState.startRunning).not.to.have.been.called
     })
 
     it('starts stats on reporter:start', () => {
@@ -105,9 +121,19 @@ describe('events', () => {
       expect(statsStore.incrementCount).to.have.been.calledWith('passed')
     })
 
+    it('pauses the appState with next command name on paused', () => {
+      runner.on.withArgs('paused').callArgWith(1, 'next command')
+      expect(appState.pause).to.have.been.calledWith('next command')
+    })
+
     it('pauses the stats on paused', () => {
       runner.on.withArgs('paused').callArgWith(1, 'next command')
-      expect(statsStore.pause).to.have.been.calledWith('next command')
+      expect(statsStore.pause).to.have.been.called
+    })
+
+    it('stops the appState on run:end', () => {
+      runner.on.withArgs('run:end').callArgWith(1)
+      expect(appState.stop).to.have.been.called
     })
 
     it('stops the stats on run:end', () => {
@@ -117,6 +143,11 @@ describe('events', () => {
   })
 
   context('from local bus', () => {
+    it('resumes the appState on resume', () => {
+      events.emit('resume')
+      expect(appState.resume).to.have.been.called
+    })
+
     it('resumes the stats on resume', () => {
       events.emit('resume')
       expect(statsStore.resume).to.have.been.called

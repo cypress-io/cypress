@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import sinon from 'sinon'
 
 import statsStore, { StatsStore } from './stats-store'
@@ -7,23 +8,7 @@ describe('stats store', () => {
     expect(statsStore).to.be.instanceof(StatsStore)
   })
 
-  context('#startRunning', () => {
-    it('sets isRunning to true', () => {
-      const instance = new StatsStore()
-      instance.startRunning()
-      expect(instance.isRunning).to.be.true
-    })
-  })
-
   context('#start', () => {
-    describe('when not running', () => {
-      it('does nothing', () => {
-        const instance = new StatsStore()
-        instance.start({ numPassed: 1 })
-        expect(instance.numPassed).to.equal(0)
-      })
-    })
-
     describe('when running', () => {
       let clock
       let instance
@@ -31,7 +16,6 @@ describe('stats store', () => {
       beforeEach(() => {
         clock = sinon.useFakeTimers(new Date('2016-07-18').getTime())
         instance = new StatsStore()
-        instance.startRunning()
         instance.start({
           startTime: '2016-07-18',
           numPassed: 1,
@@ -73,6 +57,16 @@ describe('stats store', () => {
         expect(instance.duration).to.equal(100)
       })
 
+      it('picks up where it left off when paused then resumed', () => {
+        clock.tick(100)
+        instance.pause()
+        clock.tick(100)
+        expect(instance.duration).to.equal(100)
+        instance.resume()
+        clock.tick(100)
+        expect(instance.duration).to.equal(300)
+      })
+
       it('stops tracking duration when stopped', () => {
         clock.tick(100)
         instance.stop()
@@ -95,55 +89,6 @@ describe('stats store', () => {
     })
   })
 
-  context('#pause', () => {
-    let instance
-    beforeEach(() => {
-      instance = new StatsStore()
-      instance.pause('next command')
-    })
-
-    it('sets isPaused to true', () => {
-      expect(instance.isPaused).to.be.true
-    })
-
-    it('sets the nextCommandName', () => {
-      expect(instance.nextCommandName).to.equal('next command')
-    })
-  })
-
-  context('#resume', () => {
-    let instance
-    beforeEach(() => {
-      instance = new StatsStore()
-      instance.pause('next command')
-      instance.resume()
-    })
-
-    it('sets isPaused to false', () => {
-      expect(instance.isPaused).to.be.false
-    })
-
-    it('unsets the nextCommandName', () => {
-      expect(instance.nextCommandName).to.be.null
-    })
-  })
-
-  context('#stop', () => {
-    it('sets isRunning to false', () => {
-      const instance = new StatsStore()
-      instance.stop()
-      expect(instance.isRunning).to.be.false
-    })
-  })
-
-  context('#stop', () => {
-    it('sets isRunning to false', () => {
-      const instance = new StatsStore()
-      instance.stop()
-      expect(instance.isRunning).to.be.false
-    })
-  })
-
   context('#reset', () => {
     let instance
     beforeEach(() => {
@@ -151,7 +96,6 @@ describe('stats store', () => {
     })
 
     it('resets stats', () => {
-      instance.startRunning()
       instance.start({
         startTime: '2016-07-18',
         numPassed: 1,
@@ -164,17 +108,8 @@ describe('stats store', () => {
       expect(instance.numPending).to.equal(0)
     })
 
-    it('resets isRunning', () => {
-      instance.startRunning()
+    it('resets ', () => {
       instance.reset()
-      expect(instance.isRunning).to.be.false
-    })
-
-    it('resets isPaused and nextCommandName', () => {
-      instance.pause('next command')
-      instance.reset()
-      expect(instance.isPaused).to.be.false
-      expect(instance.nextCommandName).to.be.null
     })
   })
 })
