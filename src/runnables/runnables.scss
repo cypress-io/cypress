@@ -198,7 +198,6 @@
 
   .runnable-wrapper {
     padding: 5px 15px 5px 5px;
-    position: relative;
     overflow: hidden;
     border-left: 10px solid transparent;
   }
@@ -209,6 +208,7 @@
 
   .runnable-content-region {
     overflow: auto;
+    position: relative;
   }
 
   .suite > div > .runnable-wrapper,
@@ -225,9 +225,9 @@
   .runnable-controls {
     overflow: hidden;
     position: absolute;
-    right: 7px;
+    right: 0;
     text-align: right;
-    top: 5px;
+    top: 0;
 
     label {
       padding: 2px 4px;
