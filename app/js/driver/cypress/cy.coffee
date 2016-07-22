@@ -518,6 +518,11 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
     defer: (fn) ->
       @clearTimeout(@prop("timerId"))
+
+      ## do not queue up any new commands if
+      ## we've already been aborted!
+      return if @_aborted
+
       @prop "timerId", setImmediate _.bind(fn, @)
 
     hook: (name) ->
