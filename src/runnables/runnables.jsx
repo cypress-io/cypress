@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import { observer } from 'mobx-react'
-import React from 'react'
+import React, { Component } from 'react'
+
+import scroller from '../lib/scroller'
 import Runnable from './runnable-and-suite'
 
 const NoTests = observer(({ specPath }) => (
@@ -38,13 +40,24 @@ function content ({ isReady, runnables }, specPath) {
   return runnables.length ? <RunnablesList runnables={runnables} /> : <NoTests specPath={specPath} />
 }
 
-const Runnables = observer(({ runnablesStore, specPath }) => (
-  <div className='container'>
-    <div className='wrap'>
-      {content(runnablesStore, specPath)}
-    </div>
-  </div>
-))
+@observer
+class Runnables extends Component {
+  render () {
+    const { runnablesStore, specPath } = this.props
+
+    return (
+      <div ref='container' className='container'>
+        <div className='wrap'>
+          {content(runnablesStore, specPath)}
+        </div>
+      </div>
+    )
+  }
+
+  componentDidMount () {
+    scroller.setContainer(this.refs.container)
+  }
+}
 
 export { NoTests, RunnablesList }
 export default Runnables

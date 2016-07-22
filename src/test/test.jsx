@@ -7,6 +7,7 @@ import Tooltip from '../tooltip/tooltip'
 import events from '../lib/events'
 import { indent } from '../lib/util'
 import runnablesStore from '../runnables/runnables-store'
+import scroller from '../lib/scroller'
 
 import Hooks from '../hooks/hooks'
 import Agents from '../agents/agents'
@@ -25,6 +26,20 @@ const NoCommands = observer(() => (
 class Test extends Component {
   @observable isOpen = null
 
+  componentDidMount () {
+    this._scrollIntoView()
+  }
+
+  componentDidUpdate () {
+    this._scrollIntoView()
+  }
+
+  _scrollIntoView () {
+    if (this.props.model.shouldRender && this.props.model.isActive) {
+      scroller.scrollIntoView(this.refs.container, this.props.model.id)
+    }
+  }
+
   render () {
     const { model } = this.props
 
@@ -32,6 +47,7 @@ class Test extends Component {
 
     return (
       <div
+        ref='container'
         className={cs('runnable-wrapper', { 'is-open': this._shouldBeOpen() })}
         onClick={this._toggleOpen}
         style={{ paddingLeft: indent(model.level) }}
