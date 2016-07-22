@@ -11,7 +11,6 @@ import runnablesStore from '../runnables/runnables-store'
 
 const md = new Markdown()
 
-// TODO: move to command model?
 const displayName = (model) => model.displayName || model.name
 const nameClassName = (name) => name.replace(/(\s+)/g, '-')
 const truncatedMessage = (message) => _.truncate(message, { length: 100 })
