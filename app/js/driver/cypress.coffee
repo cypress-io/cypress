@@ -93,6 +93,18 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
     countByTestState: (tests, state) ->
       @runner.countByTestState(tests, state)
 
+    getDisplayPropsForLog: (log) ->
+      @runner.getDisplayPropsForLog(log)
+
+    getConsolePropsForLogById: (logId) ->
+      @runner.getConsolePropsForLogById(logId)
+
+    getSnapshotPropsForLogById: (logId) ->
+      @runner.getSnapshotPropsForLogById(logId)
+
+    getErrorByTestId: (testId) ->
+      @runner.getErrorByTestId(testId)
+
     ## TODO: TEST THIS
     ## restore our on callback
     ## after the run completes

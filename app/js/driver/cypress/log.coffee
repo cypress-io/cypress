@@ -5,6 +5,9 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
   CypressErrorRe  = /(AssertionError|CypressError)/
   parentOrChildRe = /parent|child/
   ERROR_PROPS     = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
+  SNAPSHOT_PROPS  = "id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight".split(" ")
+  DISPLAY_PROPS   = "id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible".split(" ")
+  BLACKLIST_PROPS = "snapshots".split(" ")
 
   counter = 0
 
@@ -27,7 +30,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
     if not _.isEqual(log._emittedAttrs, attrs)
       log._emittedAttrs = attrs
 
-      Cypress.trigger(event, attrs, log)
+      Cypress.trigger(event, log)
 
   triggerInitial = (Cypress, log) ->
     log._hasInitiallyLogged = true
@@ -153,10 +156,18 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
     unset: (key) ->
       @set(key, undefined)
 
-    invoke: (fn) ->
-      ## ensure this is a callable function
-      ## and set its default to empty object literal
-      @get(fn)?() ? {}
+    invoke: (key) ->
+      invoke = =>
+        ## ensure this is a callable function
+        ## and set its default to empty object literal
+        fn = @get(key)
+
+        if _.isFunction(fn)
+          fn()
+        else
+          fn
+
+      invoke() ? {}
 
     serializeError: ->
       if err = @get("error")
@@ -179,6 +190,48 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       .extend({ consoleProps: @invoke("consoleProps")  })
       .extend({ renderProps:  @invoke("renderProps") })
       .value()
+
+    toSerializedJSON: ->
+      hasWindow   = $Cypress.Utils.hasWindow
+      hasDocument = $Cypress.Utils.hasDocument
+      hasElement  = $Cypress.Utils.hasElement
+
+      isDomLike = (value) ->
+        hasWindow(value) or hasDocument(value) or hasElement(value)
+
+      stringify = (value, key) ->
+        return null if key in BLACKLIST_PROPS
+
+        switch
+          when isDomLike(value)
+            $Cypress.Utils.stringifyElement(value, "short")
+
+          when _.isArray(value)
+            _.map(value, stringify)
+
+          when _.isObject(value)
+            _.mapObject(value, stringify)
+
+          else
+            value
+
+      _.mapObject(@toJSON(), stringify)
+
+    getDisplayProps: ->
+      _(@attributes)
+      .chain()
+      .omit("error")
+      .omit(_.isFunction)
+      .extend({ err: @serializeError() })
+      .extend({ renderProps: @invoke("renderProps")})
+      .pick(DISPLAY_PROPS)
+      .value()
+
+    getConsoleProps: ->
+      @invoke("consoleProps")
+
+    getSnapshotProps: ->
+      _.pick(@attributes, SNAPSHOT_PROPS)
 
     set: (key, val) ->
       if _.isString(key)
@@ -314,7 +367,6 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       @set(log.attributes)
 
     reduceMemory: ->
-      @off()
       @attributes = _.omit @attributes, _.isObject
 
     _shouldAutoEnd: ->
@@ -358,7 +410,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
             Error: _this.getError(err)
 
         ## add note if no snapshot exists on command instruments
-        if _this.get("instrument") is "command" and not @snapshots
+        if _this.get("instrument") is "command" and not _this.get("snapshots")
           consoleObj.Snapshot = "The snapshot is missing. Displaying current state of the DOM."
         else
           delete consoleObj.Snapshot

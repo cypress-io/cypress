@@ -223,6 +223,78 @@ describe "$Cypress.Log API", ->
 
         expect(toJSON.$el).to.eq(div)
 
+    describe "#toSerializedJSON", ->
+      it "serializes simple properties over the wire", ->
+        div = $("<div />")
+
+        @log.set({
+          foo: "foo"
+          bar: true
+          $el: div
+          arr: [1,2,3]
+          snapshots: []
+          consoleProps: ->
+            {foo: "bar"}
+        })
+
+        expect(@log.get("snapshots")).to.be.an("array")
+
+        expect(@log.toSerializedJSON()).to.deep.eq({
+          $el: "<div>"
+          arr: [1,2,3]
+          bar: true
+          consoleProps: {
+            Command: undefined
+            foo: "bar"
+          }
+          err: null
+          foo: "foo"
+          highlightAttr: "data-cypress-el"
+          id: @log.get("id")
+          numElements: 1
+          renderProps: {}
+          snapshots: null
+          state: "pending"
+          url: ""
+          visible: false
+        })
+
+      it "serializes window", ->
+        @log.set({
+          consoleProps: ->
+            Returned: window
+        })
+
+        expect(@log.toSerializedJSON()).to.deep.eq({
+          consoleProps: {
+            Command: undefined
+            Returned: "<window>"
+          }
+          err: null
+          id: @log.get("id")
+          renderProps: {}
+          state: "pending"
+          url: ""
+        })
+
+      it "serializes document", ->
+        @log.set({
+          consoleProps: ->
+            Returned: document
+        })
+
+        expect(@log.toSerializedJSON()).to.deep.eq({
+          consoleProps: {
+            Command: undefined
+            Returned: "<document>"
+          }
+          err: null
+          id: @log.get("id")
+          renderProps: {}
+          state: "pending"
+          url: ""
+        })
+
     describe "#set", ->
       it "string", ->
         @log.set "foo", "bar"

@@ -92,8 +92,6 @@ module.exports = {
 
     sendIfChanged = (specs = []) ->
       ## dont do anything if the specs haven't changed
-      console.log currentSpecs, specs, _.isEqual(specs, currentSpecs), Math.random()
-
       return if _.isEqual(specs, currentSpecs)
 
       currentSpecs = specs

@@ -2,10 +2,9 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
   defaultGrep = /.*/
 
-  ERROR_PROPS          = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
-  RUNNABLE_PROPS       = "id title root hookName err duration state failedFromHook alreadyEmittedMocha".split(" ")
-  RUNNABLE_COLLECTIONS = "routes agents commands".split(" ")
-  IGNORE_LOG_ATTRS     = "snapshots".split(" ")
+  ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
+  RUNNABLE_LOGS    = "routes agents commands".split(" ")
+  RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook alreadyEmittedMocha".split(" ")
 
   # ## initial payload
   # {
@@ -119,7 +118,16 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
   class $Runner
     constructor: (@Cypress, @runner) ->
-      @initialize()
+      @id = 0
+
+      ## hold onto the runnables for faster lookup later
+      @tests = []
+      @testsById = {}
+      @testsQueue = []
+      @runnables = []
+      @runnablesById = {}
+      @logsById = {}
+      @startTime = null
 
       @listeners()
       @override()
@@ -137,16 +145,6 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
       runnable.callback(err)
 
-    initialize: ->
-      @id = 0
-
-      ## hold onto the runnables for faster lookup later
-      @testIds = {}
-      @tests = []
-      @runnables = []
-      @runnableIds = {}
-      @startTime = null
-
     listeners: ->
       ## bail if we've already set our listeners
       return if @setListeners
@@ -161,10 +159,10 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       @listenTo @Cypress, "stop", => @stop()
 
       @listenTo @Cypress, "log", (log) =>
-        @addLogToTest(log)
+        @addLog(log)
 
-      @listenTo @Cypress, "log:state:changed", (log) =>
-        @addLogToTest(log)
+      @listenTo @Cypress, "test:after:run", (test) =>
+        @addTestToQueue(test)
 
       return @
 
@@ -305,33 +303,49 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         if runnable.type is "hook"
           @hookFailed(runnable, runnable.err)
 
-    addLogToTest: (log) ->
-      log = _.omit(log, IGNORE_LOG_ATTRS)
+    addTestToQueue: (test) ->
+      if test = @testsById[test.id]
+        @testsQueue.push(test)
 
-      ## TODO: handle proper stringification
-      if consoleProps = log.consoleProps
-        delete consoleProps.Returned
+        numTestsKeptInMemory = @Cypress.config("numTestsKeptInMemory")
 
-      {testId, instrument} = log
+        @cleanupQueue(@testsQueue, numTestsKeptInMemory)
 
-      if test = @testIds[testId]
+    cleanupQueue: (queue, numTestsKeptInMemory) ->
+      if queue.length > numTestsKeptInMemory
+        test = queue.shift()
+        _.each RUNNABLE_LOGS, (logs) ->
+          _.invoke(logs[type], "reduceMemory")
+
+        @cleanupQueue(queue, numTestsKeptInMemory)
+
+    getDisplayPropsForLog: (log) ->
+      log.getDisplayProps()
+
+    getConsolePropsForLogById: (logId) ->
+      if log = @logsById[logId]
+        log.getConsoleProps()
+
+    getSnapshotPropsForLogById: (logId) ->
+      if log = @logsById[logId]
+        log.getSnapshotProps()
+
+    getErrorByTestId: (testId) ->
+      if test = @testsById[testId]
+        @wrapErr(test.err)
+
+    addLog: (log) ->
+      @logsById[log.get("id")] = log
+
+      {testId, instrument} = log.pick("testId", "instrument")
+
+      if test = @testsById[testId]
         ## pluralize the instrument
         ## as a property on the runnable
         logs = test[instrument + "s"] ?= []
 
-        found = _.find logs, (l) ->
-          l.id is log.id
-
-        ## if we have an existing log by
-        ## its id then merge in the changes
-        if found
-          _.extend(found, log)
-        else
-          ## else push it onto the logs
-          logs.push(log)
-
-    wrapErr: (err) ->
-      @reduceProps(err, ERROR_PROPS)
+        ## else push it onto the logs
+        logs.push(log)
 
     matchesGrep: (runnable, grep) ->
       ## we have optimized this iteration to the maximum.
@@ -358,7 +372,13 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         if test.id is id
           break
         else
-          tests[test.id] = @wrapAll(test)
+          test = @wrapAll(test)
+
+          _.each RUNNABLE_LOGS, (type) ->
+            if logs = test[type]
+              test[type] = _.invoke(logs, "toSerializedJSON")
+
+          tests[test.id] = test
 
       return tests
 
@@ -382,7 +402,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
       obj = @normalize(@runner.suite, tests, initialTests, grep, grepIsDefault)
 
-      @testIds = tests
+      @testsById = tests
       @tests   = _.values(tests)
 
       return obj
@@ -405,7 +425,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         ## tests have a type of 'test' whereas suites do not have a type property
         runnable.type ?= "suite"
 
-        @runnableIds[runnable.id] = obj
+        @runnablesById[runnable.id] = obj
         @runnables.push(runnable)
 
         ## if we have a runnable in the initial state
@@ -472,8 +492,11 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       _.extend(
         {}
         @reduceProps(runnable, RUNNABLE_PROPS)
-        @reduceProps(runnable, RUNNABLE_COLLECTIONS)
+        @reduceProps(runnable, RUNNABLE_LOGS)
       )
+
+    wrapErr: (err) ->
+      @reduceProps(err, ERROR_PROPS)
 
     wrap: (runnable) ->
       ## we need to optimize wrap by converting
@@ -485,8 +508,6 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
     restore: ->
       _.each [@runnables, @runner], (obj) =>
         @removeAllListeners(obj)
-
-      @initialize()
 
     stop: ->
       @stopListening()
@@ -663,7 +684,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
     testInTests: (test) ->
       ## do a faster constant time lookup
-      @testIds[test.id]
+      @testsById[test.id]
 
     getAllSiblingTests: (suite) ->
       tests = []

@@ -42,10 +42,11 @@
     "kendo-ui": "~2015.1.616",
     "jquery": "~2.1.4",
     "card": "1.0.2",
-    "blob-util": "git://github.com/nolanlawson/blob-util#14d8a70f5737bdaf9012fefb0554c30c05cfd583"
+    "blob-util": "git://github.com/nolanlawson/blob-util#14d8a70f5737bdaf9012fefb0554c30c05cfd583",
+    "underscore": "1.8.3"
   },
   "resolutions": {
     "jquery": "2.1.4",
-    "underscore": "1.7.0"
+    "underscore": "1.8.3"
   }
 }
