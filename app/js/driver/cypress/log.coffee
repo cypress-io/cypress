@@ -185,10 +185,11 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       .chain()
       .omit("error")
       .omit(_.isFunction)
-      .extend({ err: @serializeError() })
-      .extend({ url: (@get("url") or "").toString() })
-      .extend({ consoleProps: @invoke("consoleProps")  })
-      .extend({ renderProps:  @invoke("renderProps") })
+      .extend({
+        err:          @serializeError()
+        consoleProps: @invoke("consoleProps")
+        renderProps:  @invoke("renderProps")
+      })
       .value()
 
     toSerializedJSON: ->
@@ -222,8 +223,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       .chain()
       .omit("error")
       .omit(_.isFunction)
-      .extend({ err: @serializeError() })
-      .extend({ renderProps: @invoke("renderProps")})
+      .extend({
+        err:          @serializeError()
+        renderProps:  @invoke("renderProps")
+      })
       .pick(DISPLAY_PROPS)
       .value()
 
@@ -239,6 +242,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         obj[key] = val
       else
         obj = key
+
+      if "url" of obj
+        ## always stringify the url property
+        obj.url = (obj.url ? "").toString()
 
       ## convert onConsole to consoleProps
       ## for backwards compatibility
