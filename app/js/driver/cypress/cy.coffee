@@ -6,6 +6,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     sync: {}
 
     constructor: (@Cypress, specWindow) ->
+      @id = _.uniqueId("cy")
+
       @defaults()
       @listeners()
 
@@ -75,6 +77,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       promise = @prop("promise")
       promise?.cancel()
 
+      @_aborted = true
+
       ## ready can potentially be cancellable
       ## so we need cancel it (if it is)
       ready = @prop("ready")
@@ -108,7 +112,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       if options.checkForEndedEarly and index > 0 and index < @commands.length
         @endedEarlyErr(index)
 
-      @clearTimeout @prop("runId")
       @clearTimeout @prop("timerId")
 
       ## reset the commands to an empty array
@@ -220,6 +223,11 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       @_timeout(30000)
 
       run = =>
+        ## bail if we've been told to abort in case
+        ## an old command continues to run after
+        if @_aborted
+          return
+
         ## bail if we've changed runnables by the
         ## time this resolves
         return if @private("runnable") isnt runnable
@@ -421,7 +429,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       @trigger "cancel", @prop("current")
 
     enqueue: (key, fn, args, type, chainerId) ->
-      @clearTimeout @prop("runId")
+      @clearTimeout @prop("timerId")
 
       obj = {name: key, ctx: @, fn: fn, args: args, type: type, chainerId: chainerId}
 
@@ -463,7 +471,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## then we know we're processing regular commands
       ## and not splicing in the middle of our commands
       if not nestedIndex
-        @prop "runId", @defer(@run)
+        @defer(@run)
 
       return @
 
@@ -510,7 +518,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
     defer: (fn) ->
       @clearTimeout(@prop("timerId"))
-      # @prop "timerId", _.defer _.bind(fn, @)
       @prop "timerId", setImmediate _.bind(fn, @)
 
     hook: (name) ->

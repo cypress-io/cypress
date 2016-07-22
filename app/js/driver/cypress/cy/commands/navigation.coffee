@@ -402,12 +402,10 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
                 @_replace(window, newUri.toString())
 
-        ## TODO: wrap this correctly in a promise
-
         ## if we're visiting a page and we're not currently
         ## on about:blank then we need to nuke the window
         ## and after its nuked then visit the url
-        if @_getLocation("href") isnt "about:blank"
+        if @_getLocation("href", win) isnt "about:blank"
           $remoteIframe.one "load", =>
             visit(win, url, options)
 
@@ -417,7 +415,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           visit(win, url, options)
 
       p
-        .timeout(options.timeout)
-        .catch Promise.TimeoutError, (err) =>
-          $remoteIframe.off("load")
-          timedOutWaitingForPageLoad.call(@, options.timeout, options._log)
+      .timeout(options.timeout)
+      .catch Promise.TimeoutError, (err) =>
+        $remoteIframe.off("load")
+        timedOutWaitingForPageLoad.call(@, options.timeout, options._log)

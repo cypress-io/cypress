@@ -562,6 +562,17 @@ describe "$Cypress.Cy Navigation Commands", ->
 
         @cy.visit("http://localhost:3500/index.html")
 
+      it "captures errors when #_getLocation throws", (done) ->
+        e = new Error("foo")
+
+        @sandbox.stub(@cy, "_getLocation").throws(e)
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq("foo")
+          done()
+
+        @cy.visit("/foo")
+
       it "throws when url isnt a string", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.eq "cy.visit() must be called with a string as its 1st argument"
