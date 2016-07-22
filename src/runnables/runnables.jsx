@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
@@ -55,7 +56,9 @@ class Runnables extends Component {
   }
 
   componentDidMount () {
-    scroller.setContainer(this.refs.container)
+    scroller.setContainer(this.refs.container, action('user:scroll:deteced', () => {
+      this.props.appState.disableAutoScrolling()
+    }))
   }
 }
 

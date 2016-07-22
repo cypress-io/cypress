@@ -8,6 +8,7 @@ const getContainer = (props) => {
     clientHeight: 100,
     scrollHeight: 200,
     scrollTop: 0,
+    addEventListener: sinon.spy(),
   }, props)
 }
 

@@ -4,6 +4,7 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '../tooltip/tooltip'
 
+import appState from '../lib/app-state'
 import events from '../lib/events'
 import { indent } from '../lib/util'
 import runnablesStore from '../runnables/runnables-store'
@@ -35,7 +36,7 @@ class Test extends Component {
   }
 
   _scrollIntoView () {
-    if (this.props.model.shouldRender && this.props.model.isActive) {
+    if (appState.autoScrollingEnabled && this.props.model.shouldRender && this.props.model.isActive) {
       scroller.scrollIntoView(this.refs.container, this.props.model.id)
     }
   }

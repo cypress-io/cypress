@@ -2,12 +2,14 @@ import _ from 'lodash'
 import { observable } from 'mobx'
 
 const defaults = {
+  autoScrollingEnabled: true,
   isPaused: false,
   isRunning: false,
   nextCommandName: null,
 }
 
 class AppState {
+  @observable autoScrollingEnabled = defaults.autoScrollingEnabled
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
   @observable nextCommandName = defaults.nextCommandName
@@ -28,6 +30,14 @@ class AppState {
 
   stop () {
     this.isRunning = false
+  }
+
+  disableAutoScrolling () {
+    this.autoScrollingEnabled = false
+  }
+
+  toggleAutoScrolling () {
+    this.autoScrollingEnabled = !this.autoScrollingEnabled
   }
 
   reset () {

@@ -25,7 +25,11 @@ class Reporter extends Component {
     return (
       <div className='reporter'>
         <Header appState={this.props.appState} statsStore={this.props.statsStore} />
-        <Runnables runnablesStore={this.props.runnablesStore} specPath={this.props.specPath} />
+        <Runnables
+          appState={this.props.appState}
+          runnablesStore={this.props.runnablesStore}
+          specPath={this.props.specPath}
+        />
       </div>
     )
   }

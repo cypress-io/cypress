@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import sinon from 'sinon'
 
 import statsStore, { StatsStore } from './stats-store'
