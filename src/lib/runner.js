@@ -6,9 +6,7 @@ import Promise from 'bluebird'
 import { action } from 'mobx'
 
 import automation from './automation'
-import logs from './logs'
 import logger from './logger'
-import tests from './tests'
 import overrides from './overrides'
 
 // TODO: loadModules should be default true
@@ -81,12 +79,6 @@ export default {
       // get the current runnable in case we reran mid-test due to a visit
       // to a new domain
       channel.emit('get:existing:run:state', (state = {}) => {
-        _.each(state.tests, (test) => {
-          tests.add(test)
-          _.each(['agents', 'commands', 'routes'], (type) => {
-            _.each(test[type], (log) => logs.add(log))
-          })
-        })
         reporterBus.emit('runnables:ready', runner.normalizeAll(state.tests))
 
         if (state.numLogs) {
@@ -116,57 +108,30 @@ export default {
     })
 
     driver.on('log', (log) => {
-      logs.add(log)
-      reporterBus.emit('reporter:log:add', log)
+      const displayProps = driver.getDisplayPropsForLog(log)
+      reporterBus.emit('reporter:log:add', displayProps)
     })
-
-    // driver.on('log', (logId) => {
-    //   const displayProps = driver.getDisplayPropsForLog(logId)
-    //   reporterBus.emit('reporter:log:add', displayProps)
-    // })
 
     driver.on('log:state:changed', (log) => {
-      logs.add(log)
-      reporterBus.emit('reporter:log:state:changed', log)
+      const displayProps = driver.getDisplayPropsForLog(log)
+      reporterBus.emit('reporter:log:state:changed', displayProps)
     })
 
-    // driver.on('log:state:changed', (logId) => {
-    //   const displayProps = driver.getDisplayPropsForLog(logId)
-    //   reporterBus.emit('reporter:log:state:changed', displayProps)
-    // })
-
     reporterBus.on('runner:console:error', (testId) => {
-      let test = tests.get(testId)
-      if (test) {
+      const err = driver.getErrorByTestId(testId)
+      if (err) {
         logger.clearLog()
-        logger.logError(test.err.stack)
+        logger.logError(err.stack)
       } else {
         logger.logError('No error found for test id', testId)
       }
     })
 
-    // reporterBus.on('runner:console:error', (testId) => {
-    //   const test = driver.getTest(testId)
-    //   if (test) {
-    //     logger.clearLog()
-    //     logger.logError(test.err.stack)
-    //   } else {
-    //     logger.logError('No error found for test id', testId)
-    //   }
-    // })
-
     reporterBus.on('runner:console:log', (logId) => {
-      this._withLog(logId, (log) => {
-        logger.clearLog()
-        logger.logFormatted(log)
-      })
+      const consoleProps = driver.getConsolePropsForLogById(logId)
+      logger.clearLog()
+      logger.logFormatted(consoleProps)
     })
-
-    // reporterBus.on('runner:console:log', (logId) => {
-    //   const consoleProps = driver.getConsolePropsForLog(logId)
-    //   logger.clearLog()
-    //   logger.logFormatted(consoleProps)
-    // })
 
     _.each(driverToReporterEvents, (event) => {
       driver.on(event, (...args) => {
@@ -176,8 +141,6 @@ export default {
 
     _.each(driverTestEvents, (event) => {
       driver.on(event, (test) => {
-        tests.add(test)
-
         reporterBus.emit(event, test)
       })
     })
@@ -200,17 +163,13 @@ export default {
     })
     reporterBus.on('runner:restart', this._reRun.bind(this))
 
-    reporterBus.on('runner:show:snapshot', (id) => {
-      this._withLog(id, (log) => {
-        localBus.emit('show:snapshot', log.snapshots, log)
-      })
-    })
+    reporterBus.on('runner:show:snapshot', (logId) => {
+      const snapshotProps = driver.getSnapshotPropsForLogById(logId)
 
-    // reporterBus.on('runner:show:snapshot', (id) => {
-    //   // what's the best way to get log url, viewport dimensions, and $el?
-    //   const snapshots = driver.getSnapshotsForLogById(id)
-    //   localBus.emit('show:snapshot', snapshots, id)
-    // })
+      if (snapshotProps) {
+        localBus.emit('show:snapshot', snapshotProps)
+      }
+    })
 
     reporterBus.on('runner:hide:snapshot', () => {
       localBus.emit('hide:snapshot')
@@ -266,8 +225,6 @@ export default {
     // need to abort cypress always
     driver.abort()
     .then(() => {
-      logs.reset()
-      tests.reset()
       return this._restart()
     })
     .then(() => {
@@ -309,12 +266,4 @@ export default {
     driver.Cookies.setCy('unload', true)
   },
 
-  _withLog (logId, cb) {
-    let log = logs.get(logId)
-    if (log) {
-      cb(log)
-    } else {
-      logger.logError('No log found for log id', logId)
-    }
-  },
 }

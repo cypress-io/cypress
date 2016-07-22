@@ -15,7 +15,7 @@ export default {
     if (console.clear) console.clear()
   },
 
-  logFormatted ({ consoleProps }) {
+  logFormatted (consoleProps) {
     if (_.isEmpty(consoleProps)) return
 
     this._logValues(consoleProps)

@@ -54,10 +54,12 @@ export default class IframeModel {
     this.state.clearMessage()
   }
 
-  _setSnapshots = (snapshots, log) => {
+  _setSnapshots = (snapshotProps) => {
     if (this.state.isRunning) {
       return this._testsRunningError()
     }
+
+    const {snapshots} = snapshotProps
 
     if (!snapshots) {
       return this._clearSnapshots()
@@ -69,10 +71,10 @@ export default class IframeModel {
       this._storeOriginalState()
     }
 
-    this.detachedId = log.id
+    this.detachedId = snapshotProps.id
 
-    this._updateViewport(log)
-    this._updateUrl(log.url)
+    this._updateViewport(snapshotProps)
+    this._updateUrl(snapshotProps.url)
 
     clearInterval(this.intervalId)
 
@@ -83,14 +85,14 @@ export default class IframeModel {
 
       this.setBody(snapshot.state)
 
-      if (log.$el) {
-        const options = _.pick(log, 'coords', 'highlightAttr', 'scrollBy')
+      if (snapshotProps.$el) {
+        const options = _.pick(snapshotProps, 'coords', 'highlightAttr', 'scrollBy')
         options.dom = snapshot.state
-        this.highlightEl(log.$el, options)
+        this.highlightEl(snapshotProps.$el, options)
       }
     })
 
-    if (snapshots.length > 1) {
+    if (snapshots.length) {
       let i = 0
       this.intervalId = setInterval(() => {
         i += 1
