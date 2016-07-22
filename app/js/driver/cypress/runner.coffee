@@ -318,7 +318,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       if queue.length > numTestsKeptInMemory
         test = queue.shift()
         _.each RUNNABLE_LOGS, (logs) ->
-          _.each logs[type], (attrs) ->
+          _.each test[logs], (attrs) ->
             $Cypress.Log.reduceMemory(attrs)
 
         @cleanupQueue(queue, numTestsKeptInMemory)
