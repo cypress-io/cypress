@@ -158,8 +158,11 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
       @listenTo @Cypress, "stop", => @stop()
 
-      @listenTo @Cypress, "log", (log) =>
-        @addLog(log)
+      @listenTo @Cypress, "log", (attrs) =>
+        @addLog(attrs)
+
+      @listenTo @Cypress, "log:state:changed", (attrs) =>
+        @addLog(attrs)
 
       @listenTo @Cypress, "test:after:run", (test) =>
         @addTestToQueue(test)
@@ -315,37 +318,42 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       if queue.length > numTestsKeptInMemory
         test = queue.shift()
         _.each RUNNABLE_LOGS, (logs) ->
-          _.invoke(logs[type], "reduceMemory")
+          _.each logs[type], (attrs) ->
+            $Cypress.Log.reduceMemory(attrs)
 
         @cleanupQueue(queue, numTestsKeptInMemory)
 
-    getDisplayPropsForLog: (log) ->
-      log.getDisplayProps()
+    getDisplayPropsForLog: (attrs) ->
+      $Cypress.Log.getDisplayProps(attrs)
 
     getConsolePropsForLogById: (logId) ->
-      if log = @logsById[logId]
-        log.getConsoleProps()
+      if attrs = @logsById[logId]
+        $Cypress.Log.getConsoleProps(attrs)
 
     getSnapshotPropsForLogById: (logId) ->
-      if log = @logsById[logId]
-        log.getSnapshotProps()
+      if attrs = @logsById[logId]
+        $Cypress.Log.getSnapshotProps(attrs)
 
     getErrorByTestId: (testId) ->
       if test = @testsById[testId]
         @wrapErr(test.err)
 
-    addLog: (log) ->
-      @logsById[log.get("id")] = log
+    addLog: (attrs) ->
+      if existing = @logsById[attrs.id]
+        ## mutate the existing object
+        _.extend(existing, attrs)
+      else
+        @logsById[attrs.id] = attrs
 
-      {testId, instrument} = log.pick("testId", "instrument")
+        {testId, instrument} = attrs
 
-      if test = @testsById[testId]
-        ## pluralize the instrument
-        ## as a property on the runnable
-        logs = test[instrument + "s"] ?= []
+        if test = @testsById[testId]
+          ## pluralize the instrument
+          ## as a property on the runnable
+          logs = test[instrument + "s"] ?= []
 
-        ## else push it onto the logs
-        logs.push(log)
+          ## else push it onto the logs
+          logs.push(attrs)
 
     matchesGrep: (runnable, grep) ->
       ## we have optimized this iteration to the maximum.
@@ -376,7 +384,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
           _.each RUNNABLE_LOGS, (type) ->
             if logs = test[type]
-              test[type] = _.invoke(logs, "toSerializedJSON")
+              test[type] = _.map(logs, $Cypress.Log.toSerializedJSON)
 
           tests[test.id] = test
 
@@ -431,6 +439,10 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         ## if we have a runnable in the initial state
         ## then merge in existing properties into the runnable
         if i = initialTests[runnable.id]
+          _.each RUNNABLE_LOGS, (type) =>
+            _.each i[type], (l) =>
+              @logsById[l.id] = l
+
           _.extend(runnable, i)
 
         ## reduce this runnable down to its props

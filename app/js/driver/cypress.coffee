@@ -93,8 +93,8 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
     countByTestState: (tests, state) ->
       @runner.countByTestState(tests, state)
 
-    getDisplayPropsForLog: (log) ->
-      @runner.getDisplayPropsForLog(log)
+    getDisplayPropsForLog: (attrs) ->
+      @runner.getDisplayPropsForLog(attrs)
 
     getConsolePropsForLogById: (logId) ->
       @runner.getConsolePropsForLogById(logId)

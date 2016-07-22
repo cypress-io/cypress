@@ -30,7 +30,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
     if not _.isEqual(log._emittedAttrs, attrs)
       log._emittedAttrs = attrs
 
-      Cypress.trigger(event, log)
+      Cypress.trigger(event, attrs, log)
 
   triggerInitial = (Cypress, log) ->
     log._hasInitiallyLogged = true
@@ -192,50 +192,6 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       })
       .value()
 
-    toSerializedJSON: ->
-      hasWindow   = $Cypress.Utils.hasWindow
-      hasDocument = $Cypress.Utils.hasDocument
-      hasElement  = $Cypress.Utils.hasElement
-
-      isDomLike = (value) ->
-        hasWindow(value) or hasDocument(value) or hasElement(value)
-
-      stringify = (value, key) ->
-        return null if key in BLACKLIST_PROPS
-
-        switch
-          when isDomLike(value)
-            $Cypress.Utils.stringifyElement(value, "short")
-
-          when _.isArray(value)
-            _.map(value, stringify)
-
-          when _.isObject(value)
-            _.mapObject(value, stringify)
-
-          else
-            value
-
-      _.mapObject(@toJSON(), stringify)
-
-    getDisplayProps: ->
-      _(@attributes)
-      .chain()
-      .omit("error")
-      .omit(_.isFunction)
-      .extend({
-        err:          @serializeError()
-        renderProps:  @invoke("renderProps")
-      })
-      .pick(DISPLAY_PROPS)
-      .value()
-
-    getConsoleProps: ->
-      @invoke("consoleProps")
-
-    getSnapshotProps: ->
-      _.pick(@attributes, SNAPSHOT_PROPS)
-
     set: (key, val) ->
       if _.isString(key)
         obj = {}
@@ -373,9 +329,6 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## 2. merge in any other properties
       @set(log.attributes)
 
-    reduceMemory: ->
-      @attributes = _.omit @attributes, _.isObject
-
     _shouldAutoEnd: ->
       ## must be autoEnd
       ## and not already ended
@@ -424,6 +377,48 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
         return consoleObj
 
+    @reduceMemory = (attrs) ->
+      ## mutate attrs by nulling out
+      ## object properties
+      _.each attrs, (value, key) ->
+        if _.isObject(value)
+          attrs[key] = null
+
+    @toSerializedJSON = (attrs) ->
+      hasWindow   = $Cypress.Utils.hasWindow
+      hasDocument = $Cypress.Utils.hasDocument
+      hasElement  = $Cypress.Utils.hasElement
+
+      isDomLike = (value) ->
+        hasWindow(value) or hasDocument(value) or hasElement(value)
+
+      stringify = (value, key) ->
+        return null if key in BLACKLIST_PROPS
+
+        switch
+          when isDomLike(value)
+            $Cypress.Utils.stringifyElement(value, "short")
+
+          when _.isArray(value)
+            _.map(value, stringify)
+
+          when _.isObject(value)
+            _.mapObject(value, stringify)
+
+          else
+            value
+
+      _.mapObject(attrs, stringify)
+
+    @getDisplayProps = (attrs) =>
+      _.pick(attrs, DISPLAY_PROPS)
+
+    @getConsoleProps = (attrs) =>
+      attrs.consoleProps
+
+    @getSnapshotProps = (attrs) ->
+      _.pick(attrs, SNAPSHOT_PROPS)
+
     @countLogsByTests = (tests = {}) ->
       _.chain(tests)
       .map (test, key) ->
@@ -438,8 +433,8 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       counter = num
 
     @create = (Cypress, cy) ->
-      Cypress.off("abort", abort)
-      Cypress.on("abort", abort)
+      Cypress.off("abort", abort, $Log)
+      Cypress.on("abort", abort, $Log)
 
       _.each klassMethods, (fn, key) ->
         $Log[key] = _.partial(fn, Cypress, cy)
