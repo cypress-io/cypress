@@ -6,11 +6,11 @@
  - container scroll position:
  container.scrollHeight:
  - total container height (visible + not visible)
- element.offsetTop:
- - element distance from top of container
  element.clientHeight:
  - element height
  - includes padding, but not margin or border
+ element.offsetTop:
+ - element distance from top of container
 */
 
 export default {
@@ -19,55 +19,70 @@ export default {
   },
 
   scrollIntoView (element, id) {
-    const ableToScroll = this.container.scrollHeight - this.container.clientHeight
+    if (!this.container) {
+      throw new Error('A container must be set on the scroller with `scroller.setContainer(container)` before trying to scroll an element into view')
+    }
 
-    const halfViewportHeight = Math.floor(this.container.clientHeight / 2)
-    const halfElementHeight = Math.floor(element.clientHeight / 2)
-    const viewportToTopOfElement = halfViewportHeight - halfElementHeight
-    // try to center element vertically
-    let wantToScroll = element.offsetTop - viewportToTopOfElement
+    // aim to scroll just into view, so that the bottom of the element
+    // is at the bottom of the container
+    let scrollTopGoal = this._bottomToBottom(element)
     // can't have a negative scroll, so put it to the top
-    if (wantToScroll < 0) wantToScroll = 0
-
-    // if wantToScroll is less than ableToScroll, we've reached the end of the
-    // container, so put the scroll position all the way down
-    const scrollTopGoal = wantToScroll < ableToScroll ? wantToScroll : ableToScroll
+    if (scrollTopGoal < 0) scrollTopGoal = 0
 
     this._animateScoll(scrollTopGoal, element, id)
   },
 
   _animateScoll (scrollTopGoal, element, id) {
-    // we ran out of time trying to animate the last element, so immediately
-    // set the scroll position to its goal
-    if (this._lastScrollTopGoal && this._lastId !== id) this.container.scrollTop = this._lastScrollTopGoal
+    if (this._lastScrollTopGoal && this._lastId !== id) {
+      // we ran out of time trying to animate the last element, so immediately
+      // set the scroll position to its goal
+      this.container.scrollTop = this._lastScrollTopGoal
+    }
+
     clearInterval(this._interval)
     this._lastScrollTopGoal = scrollTopGoal
     this._lastId = id
 
     // should the scrollTop being ascending or descending to its goal
-    const ascending = this.container.scrollTop < scrollTopGoal
+    const isAscending = this.container.scrollTop < scrollTopGoal
 
-    this._interval = setInterval(() => {
-      // ableToScroll might have changed due to elements resizing, so get it again
+    const scroll = () => {
+      // might have changed due to elements resizing, so get it again
       const ableToScroll = this.container.scrollHeight - this.container.clientHeight
       const currentScrollTop = this.container.scrollTop
-      let nextScrollTop = ascending ? currentScrollTop + 10 : currentScrollTop - 10
-      if (element.clientHeight > this.container.clientHeight) {
-        // element is taller than viewport, align top of element with top of viewport
-        nextScrollTop = element.offsetTop
-      }
-      if (nextScrollTop > ableToScroll || (ascending ? currentScrollTop >= scrollTopGoal : currentScrollTop <= scrollTopGoal)) {
-        // we're about to overshoot or we somehow already overshot, go straight to the goal
-        nextScrollTop = scrollTopGoal
-      }
 
-      if (currentScrollTop === scrollTopGoal || scrollTopGoal > ableToScroll) {
-        // we made it or things have changed and we can't get to the goal, time to bail
+      let nextScrollTop = isAscending ? currentScrollTop + 10 : currentScrollTop - 10
+      const aboutToOvershoot = isAscending ? nextScrollTop >= scrollTopGoal : nextScrollTop <= scrollTopGoal
+      if (aboutToOvershoot) nextScrollTop = scrollTopGoal
+
+      if (
+        this._isFullyVisible(element)
+        || currentScrollTop === scrollTopGoal // we made it
+        || scrollTopGoal > ableToScroll // things have changed and we can't get to the goal
+      ) {
         clearInterval(this._interval)
         return
       }
 
       this.container.scrollTop = nextScrollTop
-    }, 16)
+    }
+
+    this._interval = setInterval(scroll, 16)
+    scroll()
+  },
+
+  _isFullyVisible (element) {
+    return element.offsetTop - this.container.scrollTop > 0
+           && this.container.scrollTop > this._bottomToBottom(element)
+  },
+
+  _bottomToBottom (element) {
+    return element.offsetTop + element.clientHeight - this.container.clientHeight
+  },
+
+  // for testing purposes
+  __reset () {
+    this._lastScrollTopGoal = null
+    this._lastId = null
   },
 }
