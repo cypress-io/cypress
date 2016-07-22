@@ -79,7 +79,8 @@ class Socket
     logger.info "watching test file", {path: testFilePath}
 
     ## remove the existing file by its path
-    watchers.remove(testFilePath)
+    if @testFilePath
+      watchers.remove(@testFilePath)
 
     ## store this location
     @testFilePath = testFilePath
