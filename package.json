@@ -107,7 +107,7 @@
     "bytes": "^2.4.0",
     "chalk": "^1.1.0",
     "chmodr": "^0.1.0",
-    "chokidar": "1.4.3",
+    "chokidar": "1.6.0",
     "coffee-script": "1.7.1",
     "coffeeify": "jnordberg/coffeeify#2f48b07fad1f3b4dbf58dd53bb84198d7066067a",
     "compression": "1.1.0",
