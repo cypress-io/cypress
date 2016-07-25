@@ -143,4 +143,49 @@ describe('scroller', () => {
     clock.tick(16)
     expect(container.scrollTop).to.equal(40)
   })
+
+  context('scrolling', () => {
+    it('listens to scroll event on container', () => {
+      const container = getContainer()
+      scroller.setContainer(container)
+      expect(container.addEventListener).to.have.been.calledWith('scroll')
+    })
+
+    it('calls onUserScroll callback if 3 or more user scroll events are detected within 50ms', () => {
+      const container = getContainer()
+      const onUserScroll = sinon.spy()
+      scroller.setContainer(container, onUserScroll)
+      container.addEventListener.callArg(1)
+      clock.tick(15)
+      container.addEventListener.callArg(1)
+      clock.tick(15)
+      container.addEventListener.callArg(1)
+      expect(onUserScroll).to.have.been.called
+    })
+
+    it('does nothing if 50ms passes before 3 user scroll events', () => {
+      const container = getContainer()
+      const onUserScroll = sinon.spy()
+      scroller.setContainer(container, onUserScroll)
+      container.addEventListener.callArg(1)
+      container.addEventListener.callArg(1)
+      clock.tick(50)
+      container.addEventListener.callArg(1)
+      expect(onUserScroll).not.to.have.been.called
+    })
+
+    it('does nothing for programmatic scroll events', () => {
+      const container = getContainer()
+      const onUserScroll = sinon.spy()
+      scroller.setContainer(container, onUserScroll)
+      scroller.scrollIntoView(getElement(), 1)
+      clock.tick(16)
+      container.addEventListener.callArg(1)
+      clock.tick(16)
+      container.addEventListener.callArg(1)
+      clock.tick(16)
+      container.addEventListener.callArg(1)
+      expect(onUserScroll).not.to.have.been.called
+    })
+  })
 })

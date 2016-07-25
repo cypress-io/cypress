@@ -20,23 +20,34 @@ export default {
     this._userScroll = true
     this._userScrollCount = 0
 
-    this._container.addEventListener('scroll', () => {
-      console.log('user scroll', this._userScroll)
-      if (this._userScroll) {
-        this._userScroll = true
-      } else {
-        this._userScrollCount++
-        if (this._trackUserScrolls) return
+    this._listenToScrolls(onUserScroll)
+  },
 
-        this._trackUserScrolls = setTimeout(() => {
-          this._trackUserScrolls = null
-          if (this._userScrollCount >= 3) {
-            console.log('user scrolled enough')
-            onUserScroll()
-          }
-          this._userScrollCount = 0
-        }, 500)
+  _listenToScrolls (onUserScroll) {
+    this._container.addEventListener('scroll', () => {
+
+      if (!this._userScroll) {
+        // programmatic scroll
+        this._userScroll = true
+        return
       }
+
+      // there can be false positives for user scrolls, so make sure we get 3
+      // or more scroll events within 50ms to count it as a user intending to scroll
+      this._userScrollCount++
+      if (this._userScrollCount >= 3) {
+        onUserScroll()
+        clearTimeout(this._countUserScrollsTimeout)
+        this._countUserScrollsTimeout = null
+        this._userScrollCount = 0
+        return
+      }
+      if (this._countUserScrollsTimeout) return
+
+      this._countUserScrollsTimeout = setTimeout(() => {
+        this._countUserScrollsTimeout = null
+        this._userScrollCount = 0
+      }, 50)
     })
   },
 
@@ -107,5 +118,10 @@ export default {
   __reset () {
     this._lastScrollTopGoal = null
     this._lastId = null
+    this._userScroll = true
+    this._userScrollCount = 0
+    clearInterval(this._interval)
+    clearTimeout(this._countUserScrollsTimeout)
+    this._countUserScrollsTimeout = null
   },
 }
