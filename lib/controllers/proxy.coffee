@@ -129,12 +129,15 @@ module.exports = {
         ## turn off __cypress.initial by setting false here
         setCookies(false)
 
-        if req.cookies["__cypress.initial"] is "true"
-          # @rewrite(req, res)
-          # res.isHtml = true
-          rq.pipe(@rewrite(req, res, remoteState)).pipe(thr)
-        else
-          rq.pipe(thr)
+        switch
+          when req.cookies["__cypress.initial"] is "true"
+            rq.pipe(@rewrite(req, res, remoteState, "initial")).pipe(thr)
+
+          when req.accepts(["text", "json", "image", "html"]) is "html"
+            rq.pipe(@rewrite(req, res, remoteState)).pipe(thr)
+
+          else
+            rq.pipe(thr)
 
     ## proxy the request body, content-type, headers
     ## to the new rq
@@ -164,10 +167,15 @@ module.exports = {
     sendOpts = {
       root: path.resolve(config.fileServerFolder)
       transform: (stream) =>
-        if req.cookies["__cypress.initial"] is "true"
-          stream.pipe(@rewrite(req, res, remoteState)).pipe(thr)
-        else
-          stream.pipe(thr)
+        switch
+          when req.cookies["__cypress.initial"] is "true"
+            stream.pipe(@rewrite(req, res, remoteState, "initial")).pipe(thr)
+
+          when req.accepts(["text", "json", "image", "html"]) is "html"
+            stream.pipe(@rewrite(req, res, remoteState)).pipe(thr)
+
+          else
+            stream.pipe(thr)
     }
 
     unless req.cookies["__cypress.initial"] is "true"
@@ -220,9 +228,7 @@ module.exports = {
     ## proxy the headers
     res.set(headers)
 
-  rewrite: (req, res, remoteState) ->
-    through = through
-
+  rewrite: (req, res, remoteState, type) ->
     tr = trumpet()
 
     rewrite = (selector, type, attr, fn) ->
@@ -261,7 +267,10 @@ module.exports = {
     ## we still aren't handling pages which are missing their <head> tag
     ## for those we need to insert our own <head> tag
     rewrite "head", "html", (str) =>
-      str.replace(headRe, "$1 #{@getHeadContent(remoteState.domainName)}")
+      if type is "initial"
+        str.replace(headRe, "$1 #{@getHeadContent(remoteState.domainName)}")
+      else
+        str.replace(headRe, "$1 #{@getDocumentDomainContent(remoteState.domainName)}")
 
     # rewrite "html", "html", {method: "select"}, (str) =>
     #   ## if we are missing a <head> tag then
@@ -272,6 +281,13 @@ module.exports = {
     #     str
 
     return tr
+
+  getDocumentDomainContent: (domain) ->
+    "
+      <script type='text/javascript'>
+        document.domain = '#{domain}';
+      </script>
+    "
 
   getHeadContent: (domain) ->
     "
