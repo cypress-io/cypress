@@ -27,6 +27,47 @@ do ($Cypress, _) ->
 
       previousWin = win
 
+      setCookie = (node) =>
+        ## TODO: need to figure out
+        ## if this is frame is going
+        ## to match our superDomain
+        if node.tagName is "IFRAME" and node.src
+          dd = (@Cypress.Cookies.getCy("injectDocumentDomains") ? "").split(",")
+
+          src = encodeURI(node.src)
+
+          ## we only want to hold onto uniq src values
+          ## and because we reset node.src back onto itself
+          ## we need to guard against an infinite loop
+          if src not in dd
+            dd = _.chain(dd).compact().concat(encodeURI(node.src)).value().join(",")
+
+            ## reset the src back to itself
+            ## so chrome cancels any pre-emptive
+            ## HTTP requests for the current iframe
+            node.src = node.src
+
+            @Cypress.Cookies.setCy("injectDocumentDomains", dd)
+
+      o = new MutationObserver (mutations) ->
+        mutations.forEach (m) ->
+          console.log m
+          switch m.type
+            when "attributes"
+              setCookie(m.target)
+            when "childList"
+              if nodes = m.addedNodes
+                nodes.forEach(setCookie)
+
+      config = {
+        childList: true
+        subtree: true
+        attributes: true
+        attributeFilter: ["src"]
+      }
+
+      o.observe(contentWindow.document, config)
+
       ## using the native submit method will not trigger a
       ## beforeunload event synchronously so we must bind
       ## to the submit event to know we're about to navigate away
