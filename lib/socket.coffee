@@ -317,6 +317,29 @@ class Socket
       socket.on "set:domain", (url, cb) ->
         cb(options.onDomainSet(url))
 
+      socket.on "resolve:domain", (url, cb) =>
+        ## TODO: optimize onRequest so we do not
+        ## even begin processing the body
+        ## the moment the headers come back immediately
+        ## respond
+        redirects = []
+
+        @onRequest(automationRequest, {
+          url: url
+          resolveWithFullResponse: false
+          followRedirect: (resp) ->
+            console.log "follow redirect", resp.headers
+            redirects.push(resp.headers["location"])
+
+            return true
+        }, (resp) ->
+          resp.url = _.last(redirects) ? url
+          ## we should set the cookies on the browser here
+          ## resp.headers["set-cookie"]
+          resp.redirects = redirects
+          cb(resp)
+        )
+
       socket.on "preserve:run:state", (state, cb) ->
         existingState = state
 

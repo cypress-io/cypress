@@ -298,6 +298,34 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
       $remoteIframe = @private("$remoteIframe")
       runnable      = @private("runnable")
 
+      resolveDomain = (url) ->
+        url = Cypress.Location.createInitialRemoteSrc(url)
+
+        new Promise (resolve) ->
+          Cypress.trigger("resolve:domain", url, resolve)
+
+      setDomain = (url) ->
+        new Promise (resolve) ->
+          Cypress.trigger("set:domain", url, resolve)
+
+      resolveAndSetDomainForUrl = (url) ->
+        strategy = Cypress.Location.getFetchStrategyForUrl(url)
+
+        if strategy is "http"
+          resolveDomain(url)
+          .then (resp = {}) ->
+            ## .then (resolvedUrl, statusCode, redirects, html, ok) ->
+            ## display redirects
+            ## display statusCode
+            ## potentially hand back the failure url?
+            ## so we can update the iframe directly?
+            if resp.status is 200
+              setDomain(resp.url)
+            else
+              debugger
+        else
+          setDomain(url)
+
       p = new Promise (resolve, reject) =>
 
         cannotVisit2ndDomain = (origin) ->
@@ -349,8 +377,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             ## then die else we'd be in a terrible endless loop
             return cannotVisit2ndDomain(remote.origin)
 
-          new Promise (resolve) ->
-            Cypress.trigger("set:domain", url, resolve)
+          resolveAndSetDomainForUrl(url)
           .then (remote = {}) =>
             {origin} = remote
 
@@ -365,7 +392,9 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
               Cypress.Cookies.setInitial()
 
-              $remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
+              url = Cypress.Location.createInitialRemoteSrc(url)
+
+              $remoteIframe.prop("src", url)
             else
               ## if we've already visited a new superDomain
               ## then die else we'd be in a terrible endless loop
