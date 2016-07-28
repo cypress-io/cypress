@@ -10,6 +10,7 @@ glob          = require("glob")
 path          = require("path")
 str           = require("underscore.string")
 coffee        = require("coffee-script")
+evilDns       = require("evil-dns")
 Promise       = require("bluebird")
 httpsServer   = require("@cypress/core-https-proxy/test/helpers/https_server")
 config        = require("#{root}lib/config")
@@ -97,6 +98,7 @@ describe "Routes", ->
         open()
 
   afterEach ->
+    evilDns.clear()
     nock.cleanAll()
     @session.destroy()
 
@@ -1509,6 +1511,125 @@ describe "Routes", ->
             body = removeWhitespace(res.body)
             expect(body).to.eq contents
 
+      it "works with host swapping", ->
+        contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")
+
+        evilDns.add("*.foobar.com", "127.0.0.1")
+
+        @setup("https://www.foobar.com:8443")
+        .then =>
+          @rp({
+            url: "https://www.foobar.com:8443/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            body = removeWhitespace(res.body)
+            expect(body).to.eq contents.replace("localhost", "foobar.com")
+
+      it "continues to inject on the same https superdomain but different subdomain", ->
+        contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")
+
+        evilDns.add("*.foobar.com", "127.0.0.1")
+
+        @setup("https://www.foobar.com:8443")
+        .then =>
+          @rp({
+            url: "https://docs.foobar.com:8443/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            body = removeWhitespace(res.body)
+            expect(body).to.eq contents.replace("localhost", "foobar.com")
+
+      it "injects document.domain on https requests to same superdomain but different subdomain", ->
+        contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")
+
+        evilDns.add("*.foobar.com", "127.0.0.1")
+
+        @setup("https://www.foobar.com:8443")
+        .then =>
+          @rp({
+            url: "https://docs.foobar.com:8443/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=false"
+              "Accept": "text/html"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            body = removeWhitespace(res.body)
+            expect(body).to.eq "<html><head> <script type='text/javascript'> document.domain = 'foobar.com'; </script></head><body>https server</body></html>"
+
+      it "injects document.domain on other http requests", ->
+        nock(@server._remoteOrigin)
+        .get("/iframe")
+        .reply 200, "<html><head></head></html>", {
+          "Content-Type": "text/html"
+        }
+
+        @rp({
+          url: "http://www.google.com/iframe"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          body = removeWhitespace(res.body)
+
+          expect(body).to.eq("<html><head> <script type='text/javascript'> document.domain = 'google.com'; </script></head></html>")
+
+      it "injects document.domain on matching super domains but different subdomain", ->
+        nock("http://mail.google.com")
+        .get("/iframe")
+        .reply 200, "<html><head></head></html>", {
+          "Content-Type": "text/html"
+        }
+
+        @rp({
+          url: "http://mail.google.com/iframe"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          body = removeWhitespace(res.body)
+
+          expect(body).to.eq("<html><head> <script type='text/javascript'> document.domain = 'google.com'; </script></head></html>")
+
+      it "does not inject document.domain on non http requests", ->
+        nock(@server._remoteOrigin)
+        .get("/json")
+        .reply 200, {
+          foo: "<html><head></head></html>"
+        }
+
+        @rp({
+          url: "http://www.google.com/json"
+          json: true
+          headers: {
+            "Cookie": "__cypress.initial=false"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.deep.eq({foo: "<html><head></head></html>"})
+
     context "FQDN rewriting", ->
       beforeEach ->
         @setup("http://www.google.com")
@@ -1632,6 +1753,31 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("foo")
+
+      it "injects document.domain on other http requests", ->
+        @rp({
+          url: @proxy + "/index.html"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.include("document.domain = 'localhost';")
+
+      it "does not inject document.domain on non http requests", ->
+        @rp({
+          url: @proxy + "/assets/foo.json"
+          json: true
+          headers: {
+            "Cookie": "__cypress.initial=false"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.deep.eq({contents: "<html><head></head></html>"})
 
     context "http file serving", ->
       beforeEach ->

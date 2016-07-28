@@ -269,49 +269,49 @@ describe "lib/server", ->
         @server._remoteProps = @server._parseUrl("staging.google.com:443")
 
       it "does not match", ->
-        expect(@server._urlMatchesRemoteHostAndPort("foo.bar:443")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("foo.bar:80")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("staging.google.com:80")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("staging.google2.com:443")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("staging.google.net:443")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("google.net:443")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("google.com:80")).to.be.false
+        expect(@server._urlMatchesOriginPolicy("foo.bar:443")).to.be.false
+        expect(@server._urlMatchesOriginPolicy("foo.bar:80")).to.be.false
+        expect(@server._urlMatchesOriginPolicy("staging.google.com:80")).to.be.false
+        expect(@server._urlMatchesOriginPolicy("staging.google2.com:443")).to.be.false
+        expect(@server._urlMatchesOriginPolicy("staging.google.net:443")).to.be.false
+        expect(@server._urlMatchesOriginPolicy("google.net:443")).to.be.false
+        expect(@server._urlMatchesOriginPolicy("google.com:80")).to.be.false
 
       it "matches", ->
-        expect(@server._urlMatchesRemoteHostAndPort("staging.google.com:443")).to.be.true
-        expect(@server._urlMatchesRemoteHostAndPort("google.com:443")).to.be.true
-        expect(@server._urlMatchesRemoteHostAndPort("foo.google.com:443")).to.be.true
-        expect(@server._urlMatchesRemoteHostAndPort("foo.bar.google.com:443")).to.be.true
+        expect(@server._urlMatchesOriginPolicy("staging.google.com:443")).to.be.true
+        expect(@server._urlMatchesOriginPolicy("google.com:443")).to.be.true
+        expect(@server._urlMatchesOriginPolicy("foo.google.com:443")).to.be.true
+        expect(@server._urlMatchesOriginPolicy("foo.bar.google.com:443")).to.be.true
 
     describe "localhost", ->
       beforeEach ->
         @server._remoteProps = @server._parseUrl("localhost:4200")
 
       it "does not match", ->
-        expect(@server._urlMatchesRemoteHostAndPort("localhost:4201")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("localhoss:4200")).to.be.false
+        expect(@server._urlMatchesOriginPolicy("localhost:4201")).to.be.false
+        expect(@server._urlMatchesOriginPolicy("localhoss:4200")).to.be.false
 
       it "matches", ->
-        expect(@server._urlMatchesRemoteHostAndPort("localhost:4200")).to.be.true
+        expect(@server._urlMatchesOriginPolicy("localhost:4200")).to.be.true
 
     describe "local", ->
       beforeEach ->
         @server._remoteProps = @server._parseUrl("brian.dev.local:80")
 
       it "does not match", ->
-        expect(@server._urlMatchesRemoteHostAndPort("brian.dev.local:443")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("brian.dev2.local:80")).to.be.false
+        expect(@server._urlMatchesOriginPolicy("brian.dev.local:443")).to.be.false
+        expect(@server._urlMatchesOriginPolicy("brian.dev2.local:80")).to.be.false
 
       it "matches", ->
-        expect(@server._urlMatchesRemoteHostAndPort("jennifer.dev.local:80")).to.be.true
+        expect(@server._urlMatchesOriginPolicy("jennifer.dev.local:80")).to.be.true
 
     describe "ip address", ->
       beforeEach ->
         @server._remoteProps = @server._parseUrl("192.168.5.10:80")
 
       it "does not match", ->
-        expect(@server._urlMatchesRemoteHostAndPort("192.168.5.10:443")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("193.168.5.10:80")).to.be.false
+        expect(@server._urlMatchesOriginPolicy("192.168.5.10:443")).to.be.false
+        expect(@server._urlMatchesOriginPolicy("193.168.5.10:80")).to.be.false
 
       it "matches", ->
-        expect(@server._urlMatchesRemoteHostAndPort("192.168.5.10:80")).to.be.true
+        expect(@server._urlMatchesOriginPolicy("192.168.5.10:80")).to.be.true

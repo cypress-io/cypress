@@ -133,8 +133,9 @@ class Server
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
             ## make a direct connection only if
-            ## our req url does not match the remote host + port
-            dc = not @_urlMatchesRemoteHostAndPort(req.url)
+            ## our req url does not match the origin policy
+            ## which is the superDomain + port
+            dc = not @_urlMatchesOriginPolicy(req.url)
 
             if dc
               str = "Making"
@@ -231,7 +232,7 @@ class Server
 
     return obj
 
-  _urlMatchesRemoteHostAndPort: (url) ->
+  _urlMatchesOriginPolicy: (url) ->
     ## take a shortcut here in the case
     ## where remoteHostAndPort is null
     return false if not @_remoteProps

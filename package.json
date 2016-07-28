@@ -16,7 +16,7 @@
     "test": "npm run test-server & chokidar 'spec/server/**/*' 'lib/**/*' -c 'npm run test-server' --polling --poll-interval=250 ",
     "test-cov": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover node_modules/.bin/_mocha -- --opts ./spec/server/mocha.opts",
     "test-cov-process": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover --include-pid",
-    "test-server": "NODE_ENV=test NODE_DEBUG=request CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,-nock.common,socket.io:* mocha --opts spec/server/mocha.opts",
+    "test-server": "CYPRESS_DEBUG=true NODE_ENV=test NODE_DEBUG=request CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,-nock.common,socket.io:* mocha --opts spec/server/mocha.opts",
     "test-server-debug": "NODE_ENV=test NODE_DEBUG=request CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,-nock.common,socket.io:* node-debug --hidden='(node_modules|bower_components)' --no-preload _mocha --opts spec/server/mocha.opts --watch",
     "codecov": "codecov",
     "coveralls": "cat ./coverage/lcov.info | coveralls"
@@ -45,6 +45,7 @@
     "cors": "^2.7.1",
     "coveralls": "^2.11.8",
     "electron-osx-sign": "^0.3.0",
+    "evil-dns": "^0.2.0",
     "gitter-sidecar": "^1.2.3",
     "gulp": "3.8.8",
     "gulp-awspublish": "^3.0.1",
