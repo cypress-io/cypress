@@ -1,6 +1,10 @@
 describe "$Cypress.Cy Navigation Commands", ->
   enterCommandTestingMode()
 
+  beforeEach ->
+    @Cypress.on "resolve:domain", (url, cb) ->
+      cb({status: 200, url: url})
+
   context "#reload", ->
     it "calls into window.location.reload", (done) ->
       fn = (arg) ->
@@ -158,7 +162,7 @@ describe "$Cypress.Cy Navigation Commands", ->
   context "#go", ->
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
       @cy
-        .visit("http://localhost:3500/fixtures/html/sinon.html")
+        .visit("/fixtures/html/sinon.html")
         .then =>
           timeout = @sandbox.spy Promise.prototype, "timeout"
           @Cypress.config("pageLoadTimeout", 456)
@@ -201,7 +205,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy
-          .visit("http://localhost:3500/fixtures/html/sinon.html")
+          .visit("/fixtures/html/sinon.html")
           .go("back", {timeout: 1})
 
       it "only logs once on error", (done) ->
@@ -216,7 +220,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy
-          .visit("http://localhost:3500/foo")
+          .visit("/foo")
           .go("back", {timeout: 1})
 
     describe ".log", ->
@@ -225,15 +229,15 @@ describe "$Cypress.Cy Navigation Commands", ->
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = @sandbox.spy Promise.prototype, "timeout"
       @Cypress.config("pageLoadTimeout", 1500)
-      @cy.visit("http://localhost:3500/foo").then ->
+      @cy.visit("/foo").then ->
         expect(timeout).to.be.calledWith(1500)
 
     it "resolves the subject to the remote iframe window", ->
-      @cy.visit("http://localhost:3500/foo").then (win) ->
+      @cy.visit("/foo").then (win) ->
         expect(win).to.eq $("iframe").prop("contentWindow")
 
     it "changes the src of the iframe to the initial src", ->
-      @cy.visit("http://localhost:3500/foo").then ->
+      @cy.visit("/foo").then ->
         src = $("iframe").attr("src")
         expect(src).to.eq "http://localhost:3500/foo"
 
@@ -250,7 +254,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       ctx = @
 
-      @cy.visit("http://localhost:3500/fixtures/html/sinon.html", {
+      @cy.visit("/fixtures/html/sinon.html", {
         onLoad: (contentWindow) ->
           expect(@).to.eq(ctx)
           expect(contentWindow.sinon).to.be.defined
@@ -262,7 +266,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       ctx = @
 
-      @cy.visit("http://localhost:3500/fixtures/html/sinon.html", {
+      @cy.visit("/fixtures/html/sinon.html", {
         onBeforeLoad: (contentWindow) ->
           expect(@).to.eq(ctx)
           expect(contentWindow.sinon).to.be.defined
@@ -270,16 +274,16 @@ describe "$Cypress.Cy Navigation Commands", ->
       })
 
     it "does not error without an onBeforeLoad callback", ->
-      @cy.visit("http://localhost:3500/fixtures/html/sinon.html").then ->
+      @cy.visit("/fixtures/html/sinon.html").then ->
         prev = @cy.prop("current").get("prev")
         expect(prev.get("args")).to.have.length(1)
 
     it "first navigates to about:blank if existing url isnt about:blank", ->
       @cy
         .window().as("win")
-        .visit("http://localhost:3500/timeout?ms=0").then ->
+        .visit("/timeout?ms=0").then ->
           @_href = @sandbox.spy @cy, "_href"
-        .visit("http://localhost:3500/timeout?ms=1").then ->
+        .visit("/timeout?ms=1").then ->
           expect(@_href).to.be.calledWith @win, "about:blank"
 
     it "does not navigate to about:blank if existing url is about:blank", ->
@@ -287,7 +291,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       _href = @sandbox.spy @cy, "_href"
 
       @cy
-        .visit("http://localhost:3500/timeout?ms=0").then ->
+        .visit("/timeout?ms=0").then ->
           expect(_href).not.to.be.called
 
     it "calls set:domain with http:// when localhost", ->
@@ -298,13 +302,13 @@ describe "$Cypress.Cy Navigation Commands", ->
         .then ->
           expect(trigger).to.be.calledWith("set:domain", "http://localhost:3500/app")
 
-    it "prepends with / when visiting locally", ->
+    it "prepends hostname when visiting locally", ->
       prop = @sandbox.spy(@cy.private("$remoteIframe"), "prop")
 
       @cy
         .visit("fixtures/html/sinon.html")
         .then ->
-          expect(prop).to.be.calledWith("src", "/fixtures/html/sinon.html")
+          expect(prop).to.be.calledWith("src", "http://localhost:3500/fixtures/html/sinon.html")
 
     it "sets initial when not needing to change domains", ->
       setInitial = @sandbox.spy(@Cypress.Cookies, "setInitial")
@@ -325,35 +329,26 @@ describe "$Cypress.Cy Navigation Commands", ->
         .visit("http://localhost:3500")
 
     it "can visit pages on different subdomain but same originPolicy", ->
-      ## make it seem like we're already on http://127.0.0.1:3500
+      $remoteIframe = @cy.private("$remoteIframe")
+
+      load = ->
+        $remoteIframe.trigger("load")
+
+      ## whenever we're told to change the src
+      ## just fire the load event directly on the $remoteIframe
+      @sandbox.stub(@cy, "_src", load)
+
+      ## make it seem like we're already on www.foobar.com:3500
       one = @Cypress.Location.create("http://www.foobar.com:3500")
       two = @Cypress.Location.create("http://help.foobar.com:3500")
 
-      @sandbox.stub(Cypress.Location, "createInitialRemoteSrc")
-      .withArgs("http://www.foobar.com:3500/")
-      .returns("http://localhost:3500/foo")
-      .withArgs("http://help.foobar.com:3500/")
-      .returns("http://localhost:3500/foo")
-
-      @sandbox.stub(@Cypress.Location, "create")
-      .withArgs(window.location.href)
-      .returns(one)
-      .withArgs("http://www.foobar.com:3500")
-      .returns(one)
-      .withArgs("http://www.foobar.com:3500/")
-      .returns(one)
-      .withArgs("http://help.foobar.com:3500")
-      .returns(two)
-      .withArgs("http://help.foobar.com:3500/")
-      .returns(two)
-
-      @sandbox.stub(@cy, "_getLocation").withArgs("href").returns("about:blank")
+      @sandbox.stub(@cy, "_existing")
+      .onCall(0).returns(one)
+      .onCall(1).returns(two)
 
       trigger = @sandbox.spy(@Cypress, "trigger")
 
       @cy
-        ## we just mock the visits so ignore what
-        ## is here
         .visit("http://www.foobar.com:3500")
         .visit("http://help.foobar.com:3500")
         .then ->
@@ -430,7 +425,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(@win.location[attr]).to.eq str
 
         @cy
-          .visit("http://localhost:3500/fixtures/html/sinon.html?foo=bar#dashboard?baz=quux")
+          .visit("/fixtures/html/sinon.html?foo=bar#dashboard?baz=quux")
           .window().as("win").then (win) ->
             ## ensure href always returns the full path
             ## so our tests guarantee that in fact we are
@@ -461,7 +456,7 @@ describe "$Cypress.Cy Navigation Commands", ->
     describe "history method overrides", ->
       beforeEach ->
         @cy
-          .visit("http://localhost:3500/fixtures/html/sinon.html")
+          .visit("/fixtures/html/sinon.html")
           .window().as("win")
           .then ->
             @urlChanged = @sandbox.spy @cy, "urlChanged"
@@ -486,7 +481,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         @Cypress.on "log", (attrs, @log) =>
 
       it "preserves url on subsequent visits", ->
-        @cy.visit("http://localhost:3500/fixtures/html/sinon.html").get("button").then ->
+        @cy.visit("/fixtures/html/sinon.html").get("button").then ->
           expect(@log.get("url")).to.eq "http://localhost:3500/fixtures/html/sinon.html"
 
       it "logs immediately before resolving", (done) ->
@@ -518,7 +513,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         @Cypress.on "log", (attrs, l) ->
           log = l
 
-        @cy.visit("http://localhost:3500/timeout?ms=0", {log: false}).then ->
+        @cy.visit("/timeout?ms=0", {log: false}).then ->
           expect(log).to.be.null
 
     describe "errors", ->
@@ -546,7 +541,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
         @failVisit()
 
-        @cy.visit("http://localhost:3500/index.html")
+        @cy.visit("/index.html")
 
       it "logs once on error", (done) ->
         logs = []
@@ -560,7 +555,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(logs).to.have.length(1)
           done()
 
-        @cy.visit("http://localhost:3500/index.html")
+        @cy.visit("/index.html")
 
       it "captures errors when #_getLocation throws", (done) ->
         e = new Error("foo")
@@ -585,7 +580,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(err.message).to.eq "Timed out after waiting '500ms' for your remote page to load."
           done()
 
-        @cy.visit("http://localhost:3500/timeout?ms=5000", {timeout: 500})
+        @cy.visit("/timeout?ms=5000", {timeout: 500})
 
       it "unbinds remoteIframe load event"
 
@@ -600,7 +595,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(@log.get("error")).to.eq(err)
           done()
 
-        @cy.visit("http://localhost:3500/timeout?ms=5000", {timeout: 500})
+        @cy.visit("/timeout?ms=5000", {timeout: 500})
 
       it "throws when attempting to visit a 2nd domain on different port", (done) ->
         logs = []
@@ -615,7 +610,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy
-          .visit("http://localhost:3500")
+          .visit("")
           .visit("http://localhost:3501")
 
       it "throws when attempting to visit a 2nd domain on different protocol", (done) ->
@@ -631,7 +626,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy
-          .visit("http://localhost:3500")
+          .visit("")
           .visit("https://localhost:3500")
 
       it "throws when attempting to visit a 2nd domain on different host", (done) ->
@@ -647,35 +642,25 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy
-          .visit("http://localhost:3500")
+          .visit("")
           .visit("http://google.com:3500")
 
       it "throws attemping to visit 2 unique ip addresses", (done) ->
+        $remoteIframe = @cy.private("$remoteIframe")
+
+        load = ->
+          $remoteIframe.trigger("load")
+
+        ## whenever we're told to change the src
+        ## just fire the load event directly on the $remoteIframe
+        @sandbox.stub(@cy, "_src", load)
+
         logs = []
 
         ## make it seem like we're already on http://127.0.0.1:3500
         one = @Cypress.Location.create("http://127.0.0.1:3500")
-        two = @Cypress.Location.create("http://126.0.0.1:3500")
-
-        @sandbox.stub(Cypress.Location, "createInitialRemoteSrc")
-        .withArgs("http://127.0.0.1:3500/")
-        .returns("http://localhost:3500/foo")
-        .withArgs("http://127.0.0.1:3500/")
-        .returns("http://localhost:3500/foo")
-
-        @sandbox.stub(@Cypress.Location, "create")
-        .withArgs(window.location.href)
+        @sandbox.stub(@cy, "_existing")
         .returns(one)
-        .withArgs("http://127.0.0.1:3500")
-        .returns(one)
-        .withArgs("http://127.0.0.1:3500/")
-        .returns(one)
-        .withArgs("http://126.0.0.1:3500")
-        .returns(two)
-        .withArgs("http://126.0.0.1:3500/")
-        .returns(two)
-
-        @sandbox.stub(@cy, "_getLocation").withArgs("href").returns("about:blank")
 
         @Cypress.on "log", (attrs, @log) =>
           logs.push @log
@@ -687,8 +672,6 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy
-          ## we just mock the visits so ignore what
-          ## is here
           .visit("http://127.0.0.1:3500")
           .visit("http://126.0.0.1:3500")
 
@@ -708,7 +691,7 @@ describe "$Cypress.Cy Navigation Commands", ->
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = @sandbox.spy Promise.prototype, "timeout"
       @Cypress.config("pageLoadTimeout", 1500)
-      @cy.visit("http://localhost:3500/foo").then ->
+      @cy.visit("/foo").then ->
         expect(timeout).to.be.calledWith(1500)
 
     it "does not reset the timeout", (done) ->
@@ -760,7 +743,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         @Cypress.on "log", (attrs, log) ->
           logs.push log
 
-        @cy.visit("http://localhost:3500/fixtures/html/xhr.html").then ->
+        @cy.visit("/fixtures/html/xhr.html").then ->
           expect(logs).to.have.length(1)
 
       it "is name: page load", ->

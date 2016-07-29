@@ -49,6 +49,12 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
     _replace: (win, url) ->
       win.location.replace(url)
 
+    _existing: ->
+      Cypress.Location.create(window.location.href)
+
+    _src: ($remoteIframe, url) ->
+      $remoteIframe.prop("src", url)
+
     submitting: (e, options = {}) ->
       ## even though our beforeunload event
       ## should be firing shortly, lets just
@@ -284,7 +290,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
       if options.log
         options._log = Cypress.Log.command()
 
-      baseUrl = @Cypress.config("baseUrl")
+      baseUrl = Cypress.config("baseUrl")
       url     = Cypress.Location.getRemoteUrl(url, baseUrl)
 
       ## backup the previous runnable timeout
@@ -308,25 +314,35 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         new Promise (resolve) ->
           Cypress.trigger("set:domain", url, resolve)
 
-      resolveAndSetDomainForUrl = (url) ->
-        strategy = Cypress.Location.getFetchStrategyForUrl(url)
-
-        if strategy is "http"
-          resolveDomain(url)
-          .then (resp = {}) ->
-            ## .then (resolvedUrl, statusCode, redirects, html, ok) ->
-            ## display redirects
-            ## display statusCode
-            ## potentially hand back the failure url?
-            ## so we can update the iframe directly?
-            if resp.status is 200
-              setDomain(resp.url)
-            else
-              debugger
-        else
-          setDomain(url)
-
       p = new Promise (resolve, reject) =>
+
+        resolveAndSetDomainForUrl = (url) ->
+          strategy = Cypress.Location.getFetchStrategyForUrl(url)
+
+          if strategy is "http"
+            resolveDomain(url)
+            .then (resp = {}) ->
+              ## .then (resolvedUrl, statusCode, redirects, html, ok) ->
+              ## display redirects
+              ## display statusCode
+              ## potentially hand back the failure url?
+              ## so we can update the iframe directly?
+              if resp.status is 200
+                setDomain(resp.url)
+              else
+                debugger
+            ## TODO: add .catch (err) ->
+            ## support here
+            ## and remove initial handling
+            ## from the proxy layer completely
+
+          else
+            ## TODO: double check this
+            ## file exists
+            # checkForLocalFile(url)
+            # .then ->
+            setDomain(url)
+            # .catch (err) ->
 
         cannotVisit2ndDomain = (origin) ->
           try
@@ -348,7 +364,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           $remoteIframe.one "load", =>
             @_timeout(prevTimeout)
             options.onLoad?.call(runnable.ctx, win)
-            if Cypress.cy.$$("[data-cypress-visit-error]").length
+            if @$$("[data-cypress-visit-error]").length
               try
                 $Cypress.Utils.throwErrByPath("visit.loading_failed", {
                   onFail: options._log
@@ -362,7 +378,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
               resolve(win)
 
           ## hold onto our existing url
-          existing = Cypress.Location.create(window.location.href)
+          existing = @_existing()
 
           ## in the case we are visiting a relative url
           ## then prepend the existing origin to it
@@ -394,7 +410,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
               url = Cypress.Location.createInitialRemoteSrc(url)
 
-              $remoteIframe.prop("src", url)
+              @_src($remoteIframe, url)
             else
               ## if we've already visited a new superDomain
               ## then die else we'd be in a terrible endless loop
