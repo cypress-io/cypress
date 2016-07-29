@@ -172,7 +172,7 @@ describe "Projects Nav", ->
         it "displays browser icon as opened", ->
           cy
             .get(".browsers-list>a").first().find("i")
-              .should("have.class", "fa fa-tachometer")
+              .should("have.class", "fa fa-check-circle-o")
 
         it "disables browser dropdown", ->
           cy

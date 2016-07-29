@@ -134,7 +134,7 @@ describe "Specs List", ->
                 @ipc.handle("change:browser:spec", null, {})
 
         it "updates spec icon", ->
-          cy.get("@allSpecs").find("i").should("have.class", "fa-exchange")
+          cy.get("@allSpecs").find("i").should("have.class", "fa-dot-circle-o")
           cy.get("@allSpecs").find("i").should("not.have.class", "fa-play")
 
         it "sets spec as active", ->
@@ -193,7 +193,7 @@ describe "Specs List", ->
                 @ipc.handle("change:browser:spec", null, {})
 
         it "updates spec icon", ->
-          cy.get("@firstSpec").find("i").should("have.class", "fa-exchange")
+          cy.get("@firstSpec").find("i").should("have.class", "fa-dot-circle-o")
           cy.get("@firstSpec").find("i").should("not.have.class", "fa-file-code-o")
 
         it "sets spec as active", ->
@@ -209,7 +209,7 @@ describe "Specs List", ->
                 @ipc.handle("change:browser:spec", null, {})
 
         it "updates spec icon", ->
-          cy.get("@deepSpec").find("i").should("have.class", "fa-exchange")
+          cy.get("@deepSpec").find("i").should("have.class", "fa-dot-circle-o")
 
         it "sets spec as active", ->
           cy.get("@deepSpec").should("have.class", "active")
@@ -277,8 +277,8 @@ describe "Specs List", ->
               @ipc.handle("change:browser:spec", null, {})
 
       it "updates spec icon", ->
-        cy.get("@firstSpec").find("i").should("not.have.class", "fa-exchange")
-        cy.get("@secondSpec").find("i").should("have.class", "fa-exchange")
+        cy.get("@firstSpec").find("i").should("not.have.class", "fa-dot-circle-o")
+        cy.get("@secondSpec").find("i").should("have.class", "fa-dot-circle-o")
 
       it "updates active spec", ->
         cy.get("@firstSpec").should("not.have.class", "active")
