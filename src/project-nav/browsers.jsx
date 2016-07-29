@@ -13,6 +13,7 @@ export default class Browsers extends Component {
 
     return (
       <ul className='nav navbar-nav navbar-right'>
+        {this._closeBrowserBtn()}
         <Dropdown
           className='browsers-list'
           disabled={project.browserState === 'opened' || project.browserState === 'opening'}
@@ -23,7 +24,6 @@ export default class Browsers extends Component {
           keyProperty='name'
           browserState={project.browserState}
         />
-        {this._closeBrowserBtn()}
       </ul>
     )
   }
@@ -33,7 +33,10 @@ export default class Browsers extends Component {
       return (
         <li className='close-browser'>
           <a href='#' className='btn-link' onClick={this._closeBrowser.bind(this)}>
-            <i className='fa fa-times red'></i>
+            <button className="btn btn-xs btn-danger">
+              <i className='fa fa-fw fa-times'></i>
+              Stop
+            </button>
           </a>
         </li>
       )

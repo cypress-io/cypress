@@ -74,7 +74,7 @@ class Specs extends Component {
 
   _allSpecsIcon (bool) {
     if (bool) {
-      return 'fa-exchange green'
+      return 'fa-dot-circle-o'
     } else {
       return 'fa-play'
     }
@@ -82,7 +82,7 @@ class Specs extends Component {
 
   _specIcon (bool) {
     if (bool) {
-      return 'fa-exchange green'
+      return 'fa-dot-circle-o'
     } else {
       return 'fa-file-code-o'
     }
