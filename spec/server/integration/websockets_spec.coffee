@@ -1,6 +1,9 @@
 require("../spec_helper")
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
 ws          = require("ws")
+httpsAgent  = require("https-proxy-agent")
 Promise     = require("bluebird")
 socketIo    = require("@cypress/core-socket")
 httpsServer = require("@cypress/core-https-proxy/test/helpers/https_server")
@@ -9,6 +12,7 @@ Server      = require("#{root}lib/server")
 Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
 cyPort  = 12345
+otherPort = 5555
 wsPort  = 20000
 wssPort = 8443
 
@@ -42,26 +46,6 @@ describe "Web Sockets", ->
     )
 
   context "proxying external websocket requests", ->
-    it "correctly proxies when remoteHost is set", (done) ->
-      @server._onDomainSet("http://localhost:#{wsPort}")
-
-      @ws.on "connection", (c) ->
-        c.on "message", (msg) ->
-          c.send "response:#{msg}"
-
-      client = new ws("ws://localhost:#{cyPort}", {
-        headers: {
-          Cookie: "__cypress.remoteHost=http://localhost:#{wsPort}"
-        }
-      })
-
-      client.on "message", (data) ->
-        expect(data).to.eq("response:foo")
-        done()
-
-      client.on "open", ->
-        client.send("foo")
-
     it "ends the socket connection without remoteHost", (done) ->
       @server._onDomainSet()
 
@@ -87,13 +71,58 @@ describe "Web Sockets", ->
       client.on "open", ->
         client.send("foo")
 
+    it "proxies http messages through http proxy", (done) ->
+      ## force node into legit proxy mode like a browser
+      agent = new httpsAgent("http://localhost:#{cyPort}")
+
+      @server._onDomainSet("http://localhost:#{wsPort}")
+
+      @ws.on "connection", (c) ->
+        c.on "message", (msg) ->
+          c.send "response:#{msg}"
+
+      client = new ws("ws://localhost:#{wsPort}", {
+        agent: agent
+      })
+
+      client.on "message", (data) ->
+        expect(data).to.eq("response:foo")
+        done()
+
+      client.on "open", ->
+        client.send("foo")
+
+    it "proxies https messages through http", (done) ->
+      ## force node into legit proxy mode like a browser
+      agent = new httpsAgent("http://localhost:#{cyPort}")
+
+      @server._onDomainSet("https://localhost:#{wssPort}")
+
+      @wss.on "connection", (c) ->
+        c.on "message", (msg) ->
+          c.send "response:#{msg}"
+
+      client = new ws("wss://localhost:#{wssPort}", {
+        agent: agent
+      })
+
+      client.on "message", (data) ->
+        expect(data).to.eq("response:foo")
+        done()
+
+      client.on "open", ->
+        client.send("foo")
+
   context "socket.io handling", ->
     beforeEach ->
       @server.startWebsockets({}, @cfg, {})
 
     context "http", ->
       beforeEach (done) ->
-        @wsClient = socketIo.client(@cfg.clientUrlDisplay, {path: @cfg.socketIoRoute})
+        @wsClient = socketIo.client(@cfg.clientUrlDisplay, {
+          path: @cfg.socketIoRoute
+          transports: ["websocket"]
+        })
         @wsClient.on "connect", -> done()
 
       afterEach ->
@@ -104,24 +133,48 @@ describe "Web Sockets", ->
           expect(data).to.deep.eq({foo: "bar"})
           done()
 
-    # context.only "https", ->
-    #   beforeEach (done) ->
-    #     @server._onDomainSet("https://localhost:#{wssPort}")
+    context "when http superDomain has been set", ->
+      beforeEach (done) ->
+        ## force node into legit proxy mode like a browser
+        agent = new httpsAgent("http://localhost:#{cyPort}")
 
-    #     process.env.HTTP_PROXY = "http://localhost:#{cyPort}"
-    #     process.env.http_proxy = "http://localhost:#{cyPort}"
+        @server._onDomainSet("http://localhost:#{otherPort}")
 
-    #     @wsClient = socketIo.client("https://localhost:#{wssPort}", {
-    #       path: @cfg.socketIoRoute
-    #     })
+        @wsClient = socketIo.client("http://localhost:#{otherPort}", {
+          agent: agent
+          path: @cfg.socketIoRoute
+          transports: ["websocket"]
+        })
+        @wsClient.on "connect", -> done()
 
-    #     @wsClient.on "connect", -> done()
+      afterEach ->
+        @wsClient.disconnect()
 
-    #   afterEach ->
-    #     @wsClient.disconnect()
+      it "continues to handle socket.io requests just fine", (done) ->
+        @wsClient.emit "fixture", "example.json", (data) ->
+          expect(data).to.deep.eq({foo: "bar"})
+          done()
 
-    #   it "continues to handle socket.io requests just fine", (done) ->
-    #     @wsClient.emit "fixture", "example.json", (data) ->
-    #       expect(data).to.deep.eq({foo: "bar"})
-    #       done()
+    context "when https superDomain has been set", ->
+      beforeEach (done) ->
+        ## force node into legit proxy mode like a browser
+        agent = new httpsAgent("http://localhost:#{cyPort}")
+
+        @server._onDomainSet("https://localhost:#{wssPort}")
+
+        ## must not use a direct websocket transport else we'll
+        ## never make it to the /__socket.io route
+        @wsClient = socketIo.client("https://localhost:#{wssPort}", {
+          agent: agent
+          path: @cfg.socketIoRoute
+        })
+        @wsClient.on "connect", -> done()
+
+      afterEach ->
+        @wsClient.disconnect()
+
+      it "continues to handle socket.io requests just fine", (done) ->
+        @wsClient.emit "fixture", "example.json", (data) ->
+          expect(data).to.deep.eq({foo: "bar"})
+          done()
 

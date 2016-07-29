@@ -10,6 +10,7 @@ trumpet       = require("trumpet")
 urlHelpers    = require("url")
 cwd           = require("../cwd")
 logger        = require("../logger")
+cors          = require("../util/cors")
 escapeRegExp  = require("../util/escape_regexp")
 send          = require("send")
 
@@ -79,6 +80,10 @@ module.exports = {
 
     isInitial = req.cookies["__cypress.initial"] is "true"
 
+    reqAcceptsHtmlAndMatchesOriginPolicy = ->
+      req.accepts(["text", "json", "image", "html"]) is "html" and
+        cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
+
     setCookies = (initial) =>
       ## dont set the cookies if we're not on the initial request
       return if req.cookies["__cypress.initial"] isnt "true"
@@ -133,7 +138,7 @@ module.exports = {
           when req.cookies["__cypress.initial"] is "true"
             rq.pipe(@rewrite(req, res, remoteState, "initial")).pipe(thr)
 
-          when req.accepts(["text", "json", "image", "html"]) is "html"
+          when reqAcceptsHtmlAndMatchesOriginPolicy()
             rq.pipe(@rewrite(req, res, remoteState)).pipe(thr)
 
           else

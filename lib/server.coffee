@@ -7,8 +7,8 @@ express      = require("express")
 Promise      = require("bluebird")
 httpProxy    = require("http-proxy")
 httpsProxy   = require("@cypress/core-https-proxy")
-parseDomain  = require("parse-domain")
 allowDestroy = require("server-destroy")
+cors         = require("./util/cors")
 appData      = require("./util/app_data")
 cwd          = require("./cwd")
 errors       = require("./errors")
@@ -17,7 +17,6 @@ Socket       = require("./socket")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
-localHostOrIpAddressRe = /localhost|\.local|^[\d\.]+$/
 
 setProxiedUrl = (req) ->
   ## bail if we've already proxied the url
@@ -135,7 +134,7 @@ class Server
             ## make a direct connection only if
             ## our req url does not match the origin policy
             ## which is the superDomain + port
-            dc = not @_urlMatchesOriginPolicy(req.url)
+            dc = not cors.urlMatchesOriginPolicyProps("https://" + req.url, @_remoteProps)
 
             if dc
               str = "Making"
@@ -185,62 +184,30 @@ class Server
     #   origin: "http://localhost:2020"
     #   strategy: "file"
     #   domainName: "localhost"
-    #   port: 2020
-    #   tld: "localhost"
-    #   domain: ""
+    #   props: {
+    #     port: 2020
+    #     tld: "localhost"
+    #     domain: ""
+    #   }
     # }
 
     # {
     #   origin: "https://foo.google.com"
     #   strategy: "http"
     #   domainName: "google.com"
-    #   port: 443
-    #   tld: "com"
-    #   domain: "google"
+    #   props: {
+    #     port: 443
+    #     tld: "com"
+    #     domain: "google"
+    #   }
     # }
 
-    _.extend({},  @_remoteProps, {
+    _.extend({},  {
+      props:      @_remoteProps
       origin:     @_remoteOrigin
       strategy:   @_remoteStrategy
       domainName: @_remoteDomainName
     })
-
-  _parseUrl: (str) ->
-    [host, port] = str.split(":")
-
-    ## if we couldn't get a parsed domain
-    if not parsed = parseDomain(host, {
-      customTlds: localHostOrIpAddressRe
-    })
-
-      ## then just fall back to a dumb check
-      ## based on assumptions that the tld
-      ## is the last segment after the final
-      ## '.' and that the domain is the segment
-      ## before that
-      segments = host.split(".")
-
-      parsed = {
-        tld:    segments[segments.length - 1]
-        domain: segments[segments.length - 2]
-      }
-
-    obj = {}
-    obj.port   = port
-    obj.tld    = parsed.tld
-    obj.domain = parsed.domain
-
-    return obj
-
-  _urlMatchesOriginPolicy: (url) ->
-    ## take a shortcut here in the case
-    ## where remoteHostAndPort is null
-    return false if not @_remoteProps
-
-    parsedUrl  = @_parseUrl(url)
-
-    ## does the parsedUrl match the parsedHost?
-    _.isEqual(parsedUrl, @_remoteProps)
 
   _onDomainSet: (fullyQualifiedUrl) =>
     log = (type, url) ->
@@ -264,8 +231,6 @@ class Server
     else
       parsed = url.parse(fullyQualifiedUrl)
 
-      port = parsed.port ? if parsed.protocol is "https:" then 443 else 80
-
       parsed.hash     = null
       parsed.search   = null
       parsed.query    = null
@@ -278,7 +243,7 @@ class Server
 
       ## set an object with port, tld, and domain properties
       ## as the remoteHostAndPort
-      @_remoteProps = @_parseUrl([parsed.hostname, port].join(":"))
+      @_remoteProps = cors.parseUrlIntoDomainTldPort(@_remoteOrigin)
 
       @_remoteDomainName = _.compact([@_remoteProps.domain, @_remoteProps.tld]).join(".")
 
@@ -314,7 +279,8 @@ class Server
 
     if @_remoteProps and remoteOrigin = @_remoteOrigin
       ## get the hostname + port from the remoteHostPort
-      {hostname, port, protocol} = url.parse(remoteOrigin)
+      {port}               = @_remoteProps
+      {hostname, protocol} = url.parse(remoteOrigin)
 
       proxy.ws(req, socket, head, {
         secure: false

@@ -1511,6 +1511,20 @@ describe "Routes", ->
             body = removeWhitespace(res.body)
             expect(body).to.eq contents
 
+      it "injects into https://www.google.com", ->
+        @setup("https://www.google.com")
+        .then =>
+          @rp({
+            url: "https://www.google.com/"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include("sinon.js")
+
       it "works with host swapping", ->
         contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")
 
@@ -1629,6 +1643,24 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
 
           expect(res.body).to.deep.eq({foo: "<html><head></head></html>"})
+
+      it "does not inject document.domain on http requests which do not match current superDomain", ->
+        nock("http://www.foobar.com")
+        .get("/")
+        .reply(200, "<html><head></head><body>hi</body></html>", {
+          "Content-Type": "text/html"
+        })
+
+        @rp({
+          url: "http://www.foobar.com"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.eq("<html><head></head><body>hi</body></html>")
 
     context "FQDN rewriting", ->
       beforeEach ->

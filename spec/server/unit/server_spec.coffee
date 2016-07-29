@@ -215,38 +215,44 @@ describe "lib/server", ->
     it "sets port to 443 when omitted and https:", ->
       ret = @server._onDomainSet("https://staging.google.com/foo/bar")
 
-      expect(@server._remoteOrigin).to.eq("https://staging.google.com")
-      expect(@server._remoteProps).to.deep.eq({
-        port: "443"
-        domain: "google"
-        tld: "com"
+      expect(ret).to.deep.eq({
+        origin: "https://staging.google.com"
+        strategy: "http"
+        domainName: "google.com"
+        props: {
+          port: "443"
+          domain: "google"
+          tld: "com"
+        }
       })
-
-      expect(ret).to.eq(@server._remoteOrigin)
 
     it "sets port to 80 when omitted and http:", ->
       ret = @server._onDomainSet("http://staging.google.com/foo/bar")
 
-      expect(@server._remoteOrigin).to.eq("http://staging.google.com")
-      expect(@server._remoteProps).to.deep.eq({
-        port: "80"
-        domain: "google"
-        tld: "com"
+      expect(ret).to.deep.eq({
+        origin: "http://staging.google.com"
+        strategy: "http"
+        domainName: "google.com"
+        props: {
+          port: "80"
+          domain: "google"
+          tld: "com"
+        }
       })
-
-      expect(ret).to.eq(@server._remoteOrigin)
 
     it "sets host + port to localhost", ->
       ret = @server._onDomainSet("http://localhost:4200/a/b?q=1#asdf")
 
-      expect(@server._remoteOrigin).to.eq("http://localhost:4200")
-      expect(@server._remoteProps).to.deep.eq({
-        port: "4200"
-        domain: ""
-        tld: "localhost"
+      expect(ret).to.deep.eq({
+        origin: "http://localhost:4200"
+        strategy: "http"
+        domainName: "localhost"
+        props: {
+          port: "4200"
+          domain: ""
+          tld: "localhost"
+        }
       })
-
-      expect(ret).to.eq(@server._remoteOrigin)
 
     it "sets <root> when not http url", ->
       @server._server = {
@@ -255,63 +261,9 @@ describe "lib/server", ->
 
       ret = @server._onDomainSet("/index.html")
 
-      expect(@server._remoteOrigin).to.eq("<root>")
-      expect(@server._remoteProps).to.be.null
-
-      expect(ret).to.eq("http://localhost:9999")
-
-  context "#_onDirectConnection", ->
-    beforeEach ->
-      @server = Server()
-
-    describe "domain + subdomain", ->
-      beforeEach ->
-        @server._remoteProps = @server._parseUrl("staging.google.com:443")
-
-      it "does not match", ->
-        expect(@server._urlMatchesOriginPolicy("foo.bar:443")).to.be.false
-        expect(@server._urlMatchesOriginPolicy("foo.bar:80")).to.be.false
-        expect(@server._urlMatchesOriginPolicy("staging.google.com:80")).to.be.false
-        expect(@server._urlMatchesOriginPolicy("staging.google2.com:443")).to.be.false
-        expect(@server._urlMatchesOriginPolicy("staging.google.net:443")).to.be.false
-        expect(@server._urlMatchesOriginPolicy("google.net:443")).to.be.false
-        expect(@server._urlMatchesOriginPolicy("google.com:80")).to.be.false
-
-      it "matches", ->
-        expect(@server._urlMatchesOriginPolicy("staging.google.com:443")).to.be.true
-        expect(@server._urlMatchesOriginPolicy("google.com:443")).to.be.true
-        expect(@server._urlMatchesOriginPolicy("foo.google.com:443")).to.be.true
-        expect(@server._urlMatchesOriginPolicy("foo.bar.google.com:443")).to.be.true
-
-    describe "localhost", ->
-      beforeEach ->
-        @server._remoteProps = @server._parseUrl("localhost:4200")
-
-      it "does not match", ->
-        expect(@server._urlMatchesOriginPolicy("localhost:4201")).to.be.false
-        expect(@server._urlMatchesOriginPolicy("localhoss:4200")).to.be.false
-
-      it "matches", ->
-        expect(@server._urlMatchesOriginPolicy("localhost:4200")).to.be.true
-
-    describe "local", ->
-      beforeEach ->
-        @server._remoteProps = @server._parseUrl("brian.dev.local:80")
-
-      it "does not match", ->
-        expect(@server._urlMatchesOriginPolicy("brian.dev.local:443")).to.be.false
-        expect(@server._urlMatchesOriginPolicy("brian.dev2.local:80")).to.be.false
-
-      it "matches", ->
-        expect(@server._urlMatchesOriginPolicy("jennifer.dev.local:80")).to.be.true
-
-    describe "ip address", ->
-      beforeEach ->
-        @server._remoteProps = @server._parseUrl("192.168.5.10:80")
-
-      it "does not match", ->
-        expect(@server._urlMatchesOriginPolicy("192.168.5.10:443")).to.be.false
-        expect(@server._urlMatchesOriginPolicy("193.168.5.10:80")).to.be.false
-
-      it "matches", ->
-        expect(@server._urlMatchesOriginPolicy("192.168.5.10:80")).to.be.true
+      expect(ret).to.deep.eq({
+        origin: "http://localhost:9999"
+        strategy: "file"
+        domainName: "localhost"
+        props: null
+      })
