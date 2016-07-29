@@ -93,17 +93,7 @@ html.has-updates {
 }
 
 .close-browser {
-    position: relative;
-    right: 12px;
-
-    a:hover {
-      i {
-        color: #af2736
-      }
-    }
-
-    i {
-      vertical-align: middle;
-
-    }
+  .btn {
+    margin-top: 7px;
+  }
 }
