@@ -350,6 +350,7 @@ class Socket
                   newUrl = _.last(redirects) ? url
 
                   details = {
+                    ## TODO: get a status code message here?
                     ok: /^2/.test(incomingRes.statusCode)
                     url: newUrl
                     status: incomingRes.statusCode
@@ -371,6 +372,9 @@ class Socket
               .pipe(stream.PassThrough())
 
             @onRequestStream(automationRequest, {
+              ## turn off gzip since we need to eventually
+              ## rewrite these contents
+              gzip: false
               url: url
               followRedirect: (incomingRes) ->
                 redirects.push(incomingRes.headers.location)

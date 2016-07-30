@@ -136,8 +136,6 @@ module.exports = {
             str.pipe(thr)
 
     if obj = buffers.take(remoteUrl)
-      req.pipe(obj.stream)
-
       onResponse(obj.stream, obj.response)
     else
       opts = {url: remoteUrl, followRedirect: false, strictSSL: false}

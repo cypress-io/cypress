@@ -8,6 +8,8 @@ Promise = require("bluebird")
 Cookie = tough.Cookie
 CookieJar = tough.CookieJar
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
 newCookieJar = ->
   j = new CookieJar(undefined, {looseMode: true})
 
@@ -26,8 +28,6 @@ newCookieJar = ->
   }
 
 flattenCookies = (cookies) ->
-  console.log "FLATTEN COOKIES", cookies
-
   _.reduce cookies, (memo, cookie) ->
     memo[cookie.name] = cookie.value
     memo
@@ -93,7 +93,6 @@ module.exports = {
   sendStream: (automation, options = {}) ->
     _.defaults options, {
       headers: {}
-      gzip: true
       jar: true
     }
 
@@ -104,8 +103,6 @@ module.exports = {
 
     _.extend options, {
       strictSSL: false
-      simple: false
-      resolveWithFullResponse: true
     }
 
     setCookies = (cookies) =>
