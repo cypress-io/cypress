@@ -11,6 +11,7 @@ urlHelpers    = require("url")
 cwd           = require("../cwd")
 logger        = require("../logger")
 cors          = require("../util/cors")
+buffers       = require("../util/buffers")
 escapeRegExp  = require("../util/escape_regexp")
 send          = require("send")
 
@@ -90,21 +91,7 @@ module.exports = {
 
       setCookie(res, "__cypress.initial", initial, remoteState.domainName)
 
-    opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
-
-    ## do not accept gzip if this is initial
-    ## since we have to rewrite html and we dont
-    ## want to go through the extra step of unzipping it
-    if isInitial
-      opts.gzip = false
-      delete req.headers["accept-encoding"]
-
-    rq = request(opts)
-
-    rq.on "error", (err) ->
-      thr.emit("error", err)
-
-    rq.on "response", (incomingRes) =>
+    onResponse = (str, incomingRes) =>
       @setResHeaders(req, res, incomingRes, isInitial)
 
       ## always proxy the cookies coming from the incomingRes
@@ -136,17 +123,43 @@ module.exports = {
 
         switch
           when req.cookies["__cypress.initial"] is "true"
-            rq.pipe(@rewrite(req, res, remoteState, "initial")).pipe(thr)
+            str
+            .pipe(@rewrite(req, res, remoteState, "initial"))
+            .pipe(thr)
 
           when reqAcceptsHtmlAndMatchesOriginPolicy()
-            rq.pipe(@rewrite(req, res, remoteState)).pipe(thr)
+            str
+            .pipe(@rewrite(req, res, remoteState))
+            .pipe(thr)
 
           else
-            rq.pipe(thr)
+            str.pipe(thr)
 
-    ## proxy the request body, content-type, headers
-    ## to the new rq
-    req.pipe(rq)
+    if obj = buffers.take(remoteUrl)
+      req.pipe(obj.stream)
+
+      onResponse(obj.stream, obj.response)
+    else
+      opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
+
+      ## do not accept gzip if this is initial
+      ## since we have to rewrite html and we dont
+      ## want to go through the extra step of unzipping it
+      if isInitial
+        opts.gzip = false
+        delete req.headers["accept-encoding"]
+
+      rq = request(opts)
+
+      rq.on "error", (err) ->
+        thr.emit("error", err)
+
+      rq.on "response", (incomingRes) ->
+        onResponse(rq, incomingRes)
+
+      ## proxy the request body, content-type, headers
+      ## to the new rq
+      req.pipe(rq)
 
     return thr
 

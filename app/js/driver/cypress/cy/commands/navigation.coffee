@@ -316,7 +316,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
       p = new Promise (resolve, reject) =>
 
-        resolveAndSetDomainForUrl = (url) ->
+        resolveUrl = (url) ->
           strategy = Cypress.Location.getFetchStrategyForUrl(url)
 
           if strategy is "http"
@@ -327,8 +327,8 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
               ## display statusCode
               ## potentially hand back the failure url?
               ## so we can update the iframe directly?
-              if resp.status is 200
-                setDomain(resp.url)
+              if resp.ok
+                resp.url
               else
                 debugger
             ## TODO: add .catch (err) ->
@@ -341,7 +341,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             ## file exists
             # checkForLocalFile(url)
             # .then ->
-            setDomain(url)
+            url
             # .catch (err) ->
 
         cannotVisit2ndDomain = (origin) ->
@@ -393,59 +393,61 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             ## then die else we'd be in a terrible endless loop
             return cannotVisit2ndDomain(remote.origin)
 
-          resolveAndSetDomainForUrl(url)
-          .then (remote = {}) =>
-            {origin} = remote
+          resolveUrl(url)
+          .then (url) =>
+            setDomain(url)
+            .then (remote = {}) =>
+              {origin, url} = remote
 
-            remote = Cypress.Location.create(origin)
+              remote = Cypress.Location.create(origin)
 
-            ## if the origin currently matches
-            ## then go ahead and change the iframe's src
-            ## and we're good to go
-            # if origin is existing.origin
-            if remote.originPolicy is existing.originPolicy
-              previousDomainVisited = remote.origin
+              ## if the origin currently matches
+              ## then go ahead and change the iframe's src
+              ## and we're good to go
+              # if origin is existing.origin
+              if remote.originPolicy is existing.originPolicy
+                previousDomainVisited = remote.origin
 
-              Cypress.Cookies.setInitial()
+                Cypress.Cookies.setInitial()
 
-              url = Cypress.Location.createInitialRemoteSrc(url)
+                url = Cypress.Location.createInitialRemoteSrc(url)
 
-              @_src($remoteIframe, url)
-            else
-              ## if we've already visited a new superDomain
-              ## then die else we'd be in a terrible endless loop
-              if previousDomainVisited
-                return cannotVisit2ndDomain(remote.origin)
+                @_src($remoteIframe, url)
+              else
+                ## if we've already visited a new superDomain
+                ## then die else we'd be in a terrible endless loop
+                if previousDomainVisited
+                  return cannotVisit2ndDomain(remote.origin)
 
-              # Cypress.getScrollTop()
-              # .then (val) ->
-              ## tell our backend we're changing domains
-              new Promise (resolve) ->
-                ## TODO: add in other things we want to preserve
-                ## state for like scrollTop
-                state = {
-                  currentId: id
-                  tests:     Cypress.getTestsState()
-                  startTime: Cypress.getStartTime()
-                  scrollTop: null
-                }
+                # Cypress.getScrollTop()
+                # .then (val) ->
+                ## tell our backend we're changing domains
+                new Promise (resolve) ->
+                  ## TODO: add in other things we want to preserve
+                  ## state for like scrollTop
+                  state = {
+                    currentId: id
+                    tests:     Cypress.getTestsState()
+                    startTime: Cypress.getStartTime()
+                    scrollTop: null
+                  }
 
-                state.passed  = Cypress.countByTestState(state.tests, "passed")
-                state.failed  = Cypress.countByTestState(state.tests, "failed")
-                state.pending = Cypress.countByTestState(state.tests, "pending")
-                state.numLogs = Cypress.Log.countLogsByTests(state.tests)
+                  state.passed  = Cypress.countByTestState(state.tests, "passed")
+                  state.failed  = Cypress.countByTestState(state.tests, "failed")
+                  state.pending = Cypress.countByTestState(state.tests, "pending")
+                  state.numLogs = Cypress.Log.countLogsByTests(state.tests)
 
-                Cypress.trigger("preserve:run:state", state, resolve)
-              .then =>
-                ## and now we must change the url to be the new
-                ## origin but include the test that we're currently on
-                newUri = new Uri(origin)
-                newUri
-                .setPath(existing.pathname)
-                .setQuery(existing.search)
-                .setAnchor(existing.hash)
+                  Cypress.trigger("preserve:run:state", state, resolve)
+                .then =>
+                  ## and now we must change the url to be the new
+                  ## origin but include the test that we're currently on
+                  newUri = new Uri(origin)
+                  newUri
+                  .setPath(existing.pathname)
+                  .setQuery(existing.search)
+                  .setAnchor(existing.hash)
 
-                @_replace(window, newUri.toString())
+                  @_replace(window, newUri.toString())
 
         ## if we're visiting a page and we're not currently
         ## on about:blank then we need to nuke the window

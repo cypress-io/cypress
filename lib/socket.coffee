@@ -3,9 +3,11 @@ fs            = require("fs-extra")
 str           = require("underscore.string")
 path          = require("path")
 uuid          = require("node-uuid")
+stream        = require("stream")
 Promise       = require("bluebird")
 socketIo      = require("@cypress/core-socket")
 open          = require("./util/open")
+buffers       = require("./util/buffers")
 pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
 exec          = require("./exec")
@@ -95,6 +97,9 @@ class Socket
     .then(cb)
     .catch (err) ->
       cb({__error: err.message})
+
+  onRequestStream: (automation, options) ->
+    Request.sendStream(automation, options)
 
   onFixture: (config, file, cb) ->
     fixture.get(config.fixturesFolder, file)
@@ -318,27 +323,80 @@ class Socket
         cb(options.onDomainSet(url))
 
       socket.on "resolve:domain", (url, cb) =>
-        ## TODO: optimize onRequest so we do not
-        ## even begin processing the body
-        ## the moment the headers come back immediately
-        ## respond
-        redirects = []
+        ## if we have a buffer for this url
+        ## then just respond with its details
+        ## so we are idempotant and do not make
+        ## another request
+        if obj = buffers.getByOriginalUrl(url)
+          ## reset the cookies from the existing stream's jar
+          Request.setJarCookies(obj.jar, automationRequest)
+          .then (c) ->
+            cb(obj.details)
+        else
+          redirects = []
 
-        @onRequest(automationRequest, {
-          url: url
-          resolveWithFullResponse: false
-          followRedirect: (resp) ->
-            console.log "follow redirect", resp.headers
-            redirects.push(resp.headers["location"])
+          error = (err) ->
+            cb({__error: err.message})
 
-            return true
-        }, (resp) ->
-          resp.url = _.last(redirects) ? url
-          ## we should set the cookies on the browser here
-          ## resp.headers["set-cookie"]
-          resp.redirects = redirects
-          cb(resp)
-        )
+          makeRequest = (url) =>
+            handleReqStream = (str) ->
+              pt = str
+              .on("error", error)
+              .on "response", (incomingRes) ->
+                jar = str.getJar()
+
+                Request.setJarCookies(jar, automationRequest)
+                .then (c) ->
+                  newUrl = _.last(redirects) ? url
+
+                  details = {
+                    ok: /^2/.test(incomingRes.statusCode)
+                    url: newUrl
+                    status: incomingRes.statusCode
+                    redirects: redirects
+                    cookies: c
+                  }
+
+                  buffers.set({
+                    url: newUrl
+                    jar: jar
+                    stream: pt
+                    details: details
+                    originalUrl: url
+                    response: incomingRes
+                  })
+
+                  cb(details)
+                .catch(error)
+              .pipe(stream.PassThrough())
+
+            @onRequestStream(automationRequest, {
+              url: url
+              followRedirect: (incomingRes) ->
+                redirects.push(incomingRes.headers.location)
+
+                return true
+            })
+            .then(handleReqStream)
+            .catch(error)
+
+          makeRequest(url)
+
+        # @onRequest(automationRequest, {
+        #   url: url
+        #   resolveWithFullResponse: false
+        #   followRedirect: (resp) ->
+        #     console.log "follow redirect", resp.headers
+        #     redirects.push(resp.headers["location"])
+
+        #     return true
+        # }, (resp) ->
+        #   resp.url = _.last(redirects) ? url
+        #   ## we should set the cookies on the browser here
+        #   ## resp.headers["set-cookie"]
+        #   resp.redirects = redirects
+        #   cb(resp)
+        # )
 
       socket.on "preserve:run:state", (state, cb) ->
         existingState = state

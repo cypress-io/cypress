@@ -1,9 +1,50 @@
 _       = require("lodash")
-urlUtil = require("url")
-request = require("request-promise")
+r       = require("request")
+rp      = require("request-promise")
+tough   = require("tough-cookie")
+moment  = require("moment")
+Promise = require("bluebird")
+
+Cookie = tough.Cookie
+CookieJar = tough.CookieJar
+
+newCookieJar = ->
+  j = new CookieJar(undefined, {looseMode: true})
+
+  ## match the same api signature as @request
+  {
+    _jar: j
+
+    setCookie: (cookieOrStr, uri, options) ->
+      j.setCookieSync(cookieOrStr, uri, options)
+
+    getCookieString: (uri) ->
+      j.getCookieStringSync(uri)
+
+    getCookies: (uri) ->
+      j.getCookiesSync(uri)
+  }
+
+flattenCookies = (cookies) ->
+  console.log "FLATTEN COOKIES", cookies
+
+  _.reduce cookies, (memo, cookie) ->
+    memo[cookie.name] = cookie.value
+    memo
+  , {}
+
+reduceCookieToArray = (c) ->
+  _.reduce c, (memo, val, key) ->
+    memo.push [key.trim(), val.trim()].join("=")
+    memo
+  , []
+
+createCookieString = (c) ->
+  reduceCookieToArray(c).join("; ")
 
 module.exports = {
   contentTypeIsJson: (response) ->
+    ## TODO: use https://github.com/jshttp/type-is for this
     response?.headers?["content-type"]?.includes("application/json")
 
   parseJsonBody: (body) ->
@@ -26,24 +67,40 @@ module.exports = {
 
     return response
 
-  reduceCookieToArray: (c) ->
-    _.reduce c, (memo, val, key) ->
-      memo.push [key.trim(), val.trim()].join("=")
-      memo
-    , []
+  setJarCookies: (jar, automation) ->
+    setCookie = (cookie) ->
+      cookie.name = cookie.key
 
-  createCookieString: (c) ->
-    @reduceCookieToArray(c).join("; ")
+      ## TODO: handle all these default properties
+      ## related to tough cookie store
+      cookie.expiry = moment().add(20, "years").unix()
 
-  extractDomain: (url) ->
-    ## parse the hostname from the url
-    urlUtil.parse(url).hostname
+      ## TODO: dont think we need these
+      cookie.httpOnly = false
+      cookie.secure = false
+      cookie.session = false
 
-  send: (automation, options = {}) ->
+      return if cookie.name and cookie.name.startsWith("__cypress")
+
+      automation("set:cookie", cookie)
+
+    Promise.try ->
+      store = jar.toJSON()
+
+      Promise
+      .map(store.cookies, setCookie)
+
+  sendStream: (automation, options = {}) ->
     _.defaults options, {
       headers: {}
       gzip: true
+      jar: true
     }
+
+    ## create a new jar instance
+    ## unless its falsy or already set
+    if options.jar is true
+      options.jar = newCookieJar()
 
     _.extend options, {
       strictSSL: false
@@ -51,14 +108,39 @@ module.exports = {
       resolveWithFullResponse: true
     }
 
-    flattenCookies = (cookies) ->
-      _.reduce cookies, (memo, cookie) ->
-        memo[cookie.name] = cookie.value
-        memo
-      , {}
+    setCookies = (cookies) =>
+      options.headers["Cookie"] = createCookieString(cookies)
+
+    send = =>
+      str = r(options)
+      str.getJar = -> options.jar._jar
+      str
+
+    automation("get:cookies", {url: options.url})
+    .then(flattenCookies)
+    .then(setCookies)
+    .then(send)
+
+  send: (automation, options = {}) ->
+    _.defaults options, {
+      headers: {}
+      gzip: true
+      jar: true
+    }
+
+    ## create a new jar instance
+    ## unless its falsy or already set
+    if options.jar is true
+      options.jar = r.jar()
+
+    _.extend options, {
+      strictSSL: false
+      simple: false
+      resolveWithFullResponse: true
+    }
 
     setCookies = (cookies) =>
-      options.headers["Cookie"] = @createCookieString(cookies)
+      options.headers["Cookie"] = createCookieString(cookies)
 
     send = =>
       ms = Date.now()
@@ -66,9 +148,11 @@ module.exports = {
       ## dont send in domain
       options = _.omit(options, "domain")
 
-      request(options)
+      rp(options)
       .then(@normalizeResponse.bind(@))
       .then (resp) ->
+        ## TODO: on response need to set the cookies
+        ## on the browser as well!
         resp.duration = Date.now() - ms
 
         return resp
@@ -82,7 +166,11 @@ module.exports = {
       else
         ## else go get the cookies first
         ## then make the request
-        automation("get:cookies", {domain: options.domain ? @extractDomain(options.url)})
+
+        ## TODO: we can simply use the 'url' property on the cookies API
+        ## which automatically pulls all of the cookies that would be
+        ## set for that url!
+        automation("get:cookies", {url: options.url})
         .then(flattenCookies)
         .then(setCookies)
         .then(send)
