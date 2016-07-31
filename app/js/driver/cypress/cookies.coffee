@@ -12,7 +12,6 @@ $Cypress.Cookies = do ($Cypress, _) ->
   }
 
   $Cookies = (namespace, domain) ->
-
     isNamespaced = (name) ->
       _(name).startsWith(namespace)
 
