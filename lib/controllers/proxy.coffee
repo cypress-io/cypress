@@ -45,9 +45,11 @@ module.exports = {
     d.run =>
       logger.info({"handling request", url: req.url, proxiedUrl: req.proxiedUrl, remoteState: remoteState})
 
-      ## we must have the remoteState.origin which tell us where
-      ## we should request the initial HTML payload from
-      if not remoteState.origin or (req.url is req.proxiedUrl)
+      ## when you access cypress from a browser which has not
+      ## had its proxy setup then req.url will match req.proxiedUrl
+      ## and we'll know to instantly redirect them to the correct
+      ## client route
+      if req.url is req.proxiedUrl
         ## if we dont have a remoteState.origin that means we're initially
         ## requesting the cypress app and we need to redirect to the
         ## root path that serves the app
