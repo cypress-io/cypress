@@ -111,12 +111,6 @@ describe "Routes", ->
     beforeEach ->
       @setup()
 
-    it "redirects to config.clientRoute without a _remoteOrigin", ->
-      @rp("http://localhost:2020/")
-      .then (res) ->
-        expect(res.statusCode).to.eq(302)
-        expect(res.headers.location).to.eq "/__/"
-
     ## this tests a situation where we open our browser in another browser
     ## without proxy mode set
     it "redirects to config.clientRoute without a _remoteOrigin and without a proxy", ->
@@ -146,6 +140,21 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("<html></html>")
+
+    it "does not redirect when visiting http site which isnt cypress server", ->
+      ## this tests the 'default' state of cypress when a server
+      ## is instantiated. i noticed that before you do your first
+      ## cy.visit() that all http sites would redirect which is
+      ## incorrect. we only want the cypress port to redirect initially
+
+      nock("http://www.momentjs.com")
+      .get("/")
+      .reply(200)
+
+      @rp("http://www.momentjs.com/")
+      .then (res) ->
+        expect(res.statusCode).to.eq(200)
+        expect(res.headers.location).not.to.eq "/__/"
 
     it "proxies through https", ->
       @setup("https://localhost:8443")
@@ -184,6 +193,15 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.match(/Runner.start\(.+\)/)
+
+    it "routes even without a proxy set", ->
+      @rp({
+        url: @proxy + "/__"
+        proxy: null
+      })
+      .then (res) ->
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(/Runner.start/)
 
   context "GET /__cypress/runner/*", ->
     beforeEach ->

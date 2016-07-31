@@ -43,10 +43,6 @@ class Server
     @_socket     = null
     @_wsProxy    = null
     @_httpsProxy = null
-    @_remoteProps = null
-    @_remoteOrigin = null
-    @_remoteStrategy = null
-    @_remoteDomainName = DEFAULT_DOMAIN_NAME
 
   createExpressApp: (morgan) ->
     app = express()
@@ -152,6 +148,12 @@ class Server
 
       @_listen(port, onError)
       .then (port) =>
+        ## once we open set the domain
+        ## to root by default
+        ## which prevents a situation where navigating
+        ## to http sites redirects to /__/ cypress
+        @_onDomainSet("<root>")
+
         httpsProxy.create(appData.path("proxy"), port, {
           onRequest: callListeners
           onUpgrade: onSniUpgrade
@@ -217,7 +219,7 @@ class Server
     ## or if this came to us as <root> in our tests
     ## then we know to go back to our default domain
     ## which is the localhost server
-    if not fullyQualifiedRe.test(fullyQualifiedUrl) or fullyQualifiedUrl is "<root>"
+    if fullyQualifiedUrl is "<root>" or not fullyQualifiedRe.test(fullyQualifiedUrl)
       @_remoteOrigin = "http://#{DEFAULT_DOMAIN_NAME}:#{@_server.address().port}"
       @_remoteStrategy = "file"
       @_remoteDomainName = DEFAULT_DOMAIN_NAME
