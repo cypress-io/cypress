@@ -74,6 +74,7 @@ module.exports = {
     setCookie = (cookie) ->
       cookie.name = cookie.key
 
+      ## TODO: fix this
       return if cookie.name and cookie.name.startsWith("__cypress")
 
       ## tough cookie provides javascript date
