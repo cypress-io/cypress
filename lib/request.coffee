@@ -128,7 +128,7 @@ module.exports = {
     ## create a new jar instance
     ## unless its falsy or already set
     if options.jar is true
-      options.jar = r.jar()
+      options.jar = newCookieJar()
 
     _.extend options, {
       strictSSL: false
@@ -147,12 +147,14 @@ module.exports = {
 
       rp(options)
       .then(@normalizeResponse.bind(@))
-      .then (resp) ->
-        ## TODO: on response need to set the cookies
-        ## on the browser as well!
+      .then (resp) =>
         resp.duration = Date.now() - ms
 
-        return resp
+        if options.jar
+          @setJarCookies(options.jar, automation)
+          .return(resp)
+        else
+          resp
 
     if c = options.cookies
       ## if we have a cookie object then just
