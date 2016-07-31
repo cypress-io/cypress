@@ -17,6 +17,9 @@ newCookieJar = ->
   {
     _jar: j
 
+    toJSON: ->
+      j.toJSON()
+
     setCookie: (cookieOrStr, uri, options) ->
       j.setCookieSync(cookieOrStr, uri, options)
 
@@ -71,16 +74,13 @@ module.exports = {
     setCookie = (cookie) ->
       cookie.name = cookie.key
 
-      ## TODO: handle all these default properties
-      ## related to tough cookie store
-      cookie.expiry = moment().add(20, "years").unix()
-
-      ## TODO: dont think we need these
-      cookie.httpOnly = false
-      cookie.secure = false
-      cookie.session = false
-
       return if cookie.name and cookie.name.startsWith("__cypress")
+
+      ## tough cookie provides javascript date
+      ## formatted expires
+      if e = cookie.expires
+        ## which we convert into unix time
+        cookie.expiry = moment(e).unix()
 
       automation("set:cookie", cookie)
 
@@ -110,7 +110,7 @@ module.exports = {
 
     send = =>
       str = r(options)
-      str.getJar = -> options.jar._jar
+      str.getJar = -> options.jar
       str
 
     automation("get:cookies", {url: options.url})
