@@ -10,6 +10,7 @@ httpsProxy   = require("@cypress/core-https-proxy")
 allowDestroy = require("server-destroy")
 cors         = require("./util/cors")
 appData      = require("./util/app_data")
+buffers      = require("./util/buffers")
 cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
@@ -86,6 +87,11 @@ class Server
     e
 
   open: (config = {}) ->
+    ## always reset any buffers
+    ## TODO: change buffers to be an instance
+    ## here and pass this dependency around
+    buffers.reset()
+
     Promise.try =>
       app = @createExpressApp(config.morgan)
 
