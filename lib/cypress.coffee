@@ -19,7 +19,10 @@ errors    = require("./errors")
 appData   = require("./util/app_data")
 argsUtil  = require("./util/args")
 
-exit = (code) ->
+exit = (code = 0) ->
+  ## TODO: we shouldn't have to do this
+  ## but cannot figure out how null is
+  ## being passed into exit
   process.exit(code)
 
 exit0 = ->
