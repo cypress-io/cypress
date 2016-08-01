@@ -397,7 +397,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           .then (url) =>
             setDomain(url)
             .then (remote = {}) =>
-              {origin, url} = remote
+              {origin} = remote
 
               remote = Cypress.Location.create(origin)
 
