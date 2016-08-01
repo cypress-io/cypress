@@ -92,4 +92,19 @@
       }
     }
   }
+
+  // TODO: when detached, this will have to be a different max-width
+  @media all and (max-width: 1430px) {
+    header button {
+      padding: 10px 12px;
+    }
+
+    .focus-tests span {
+      display: none;
+    }
+
+    .stats li {
+      padding: 10px 5px;
+    }
+  }
 }
