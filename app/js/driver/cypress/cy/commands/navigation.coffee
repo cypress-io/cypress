@@ -341,7 +341,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             ## file exists
             # checkForLocalFile(url)
             # .then ->
-            url
+            Promise.resolve(url)
             # .catch (err) ->
 
         cannotVisit2ndDomain = (origin) ->
