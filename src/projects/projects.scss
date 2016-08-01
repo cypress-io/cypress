@@ -87,8 +87,8 @@
 }
 
 html.has-updates {
-  .projects-list {
-    bottom: 44px;
+  .projects-list, #tests-list-page, #config {
+    bottom: 56px;
   }
 }
 
