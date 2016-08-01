@@ -10,7 +10,6 @@ paths   = require("./paths")
 fs    = Promise.promisifyAll(fs)
 pkgr  = Promise.promisify(pkgr)
 
-
 ## ensure we have an electronVersion set in package.json
 if not electronVersion = pkg.electronVersion
   throw new Error("Missing 'electronVersion' in ./package.json")
