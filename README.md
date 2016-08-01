@@ -6,6 +6,9 @@ It is a simple wrapper that `symlinks` while in development.
 
 ## Changelog
 
+#### 0.0.3 - *(08/01/16)*
+- fix dep being devDep
+
 #### 0.0.2 - *(07/06/16)*
 - accept args + cb on open
 
