@@ -4,7 +4,7 @@ import Promise from 'bluebird'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
-import autIframe from './aut-iframe'
+import AutIframe from './aut-iframe'
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
 import runner from '../lib/runner'
@@ -35,6 +35,10 @@ export default class Iframes extends Component {
   }
 
   componentDidMount () {
+    this.autIframe = new AutIframe(this.props.config)
+
+    runner.on('visit:failed', this.autIframe.showVisitFailure)
+
     // TODO: need to take headless mode into account
     // may need to not display reporter if more than 200 tests
     runner.on('restart', this._run.bind(this))
@@ -42,9 +46,9 @@ export default class Iframes extends Component {
     runner.start(this.props.config)
     .then(() => {
       this.iframeModel = new IframeModel(this.props.state, {
-        detachBody: autIframe.detachBody.bind(autIframe),
-        setBody: autIframe.setBody.bind(autIframe),
-        highlightEl: autIframe.highlightEl.bind(autIframe),
+        detachBody: this.autIframe.detachBody,
+        setBody: this.autIframe.setBody,
+        highlightEl: this.autIframe.highlightEl,
       })
       this.iframeModel.listen()
       this._run()
@@ -68,11 +72,11 @@ export default class Iframes extends Component {
   _loadIframes (specPath) {
     return new Promise((resolve) => {
       // TODO: config should have "iframeUrl": "/__cypress/iframes"
-      const specSrc = `/__cypress/iframes/${specPath}`
+      const specSrc = `/${this.props.config.namespace}/iframes/${specPath}`
 
       const $container = $(this.refs.container).empty()
-      const $autIframe = autIframe.create(this.props.config).appendTo($container)
-      autIframe.showBlankContents()
+      const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
+      this.autIframe.showBlankContents()
 
       const $specIframe = $('<iframe />', {
         id: `Your Spec: '${specSrc}'`,

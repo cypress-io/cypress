@@ -56,7 +56,7 @@ class Container extends Component {
 
   _noSpec () {
     return (
-      <NoSpec onHashChange={this._checkSpecFile}>
+      <NoSpec config={this.props.config} onHashChange={this._checkSpecFile}>
         {this._automationElement()}
       </NoSpec>
     )

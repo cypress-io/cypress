@@ -20,7 +20,7 @@ class NoSpec extends Component {
               View All Tests
             </button>
           </p>
-          <img src='/__cypress/runner/no-spec-instructions.png' />
+          <img src={`/${this.props.config.namespace}/runner/no-spec-instructions.png`} />
         </div>
         {this.props.children}
       </RunnerWrap>

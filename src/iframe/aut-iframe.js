@@ -2,33 +2,46 @@
 
 import blankContents from './blank-contents'
 import { getElementBoxModelLayers, getHitBoxLayer, getOuterSize } from '../lib/dimensions'
+import visitFailure from './visit-failure'
 
-export default {
-  create (config) {
+export default class AutIframe {
+  constructor (config) {
+    this.config = config
+  }
+
+  create () {
     this.$iframe = $('<iframe>', {
-      id: `Your App: '${config.projectName}'`,
+      id: `Your App: '${this.config.projectName}'`,
       class: 'aut-iframe',
     })
     return this.$iframe
-  },
+  }
 
   showBlankContents () {
-    this.$iframe.contents().find('body').append(blankContents)
-  },
+    this._showContents(blankContents(this.config))
+  }
 
-  detachBody () {
+  showVisitFailure = (props) => {
+    this._showContents(visitFailure(this.config, props))
+  }
+
+  _showContents (contents) {
+    this.$iframe.contents().find('body').append(contents)
+  }
+
+  detachBody = () => {
     const body = this.$iframe.contents().find('body')
     body.find('script').remove()
     return body.detach()
-  },
+  }
 
-  setBody (body) {
+  setBody = (body) => {
     const contents = this.$iframe.contents()
     contents.find('body').remove()
     contents.find('html').append(body)
-  },
+  }
 
-  highlightEl ($el, options = {}) {
+  highlightEl = ($el, options = {}) => {
     this.$iframe.contents().find('[data-highlight-el],[data-highlight-hitbox]').remove()
 
     let dom
@@ -72,5 +85,5 @@ export default {
         getHitBoxLayer(coords, dom).attr('data-highlight-hitbox', true)
       })
     }
-  },
+  }
 }
