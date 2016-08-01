@@ -429,7 +429,6 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                     currentId: id
                     tests:     Cypress.getTestsState()
                     startTime: Cypress.getStartTime()
-                    scrollTop: null
                   }
 
                   state.passed  = Cypress.countByTestState(state.tests, "passed")
@@ -437,7 +436,16 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                   state.pending = Cypress.countByTestState(state.tests, "pending")
                   state.numLogs = Cypress.Log.countLogsByTests(state.tests)
 
-                  Cypress.trigger("preserve:run:state", state, resolve)
+                  promises = Cypress.invoke("collect:run:state")
+
+                  Promise.all(promises)
+                  .then (a = []) ->
+                    ## merge all the states together holla'
+                    state = _.reduce a, (memo, obj) ->
+                      _.extend(memo, obj)
+                    , state
+
+                    Cypress.trigger("preserve:run:state", state, resolve)
                 .then =>
                   ## and now we must change the url to be the new
                   ## origin but include the test that we're currently on
