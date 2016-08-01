@@ -420,6 +420,8 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       _.pick(attrs, SNAPSHOT_PROPS)
 
     @countLogsByTests = (tests = {}) ->
+      return 0 if _.isEmpty(tests)
+
       _.chain(tests)
       .map (test, key) ->
         [].concat(test.agents, test.routes, test.commands)
