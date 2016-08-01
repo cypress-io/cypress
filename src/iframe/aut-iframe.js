@@ -18,11 +18,11 @@ export default class AutIframe {
   }
 
   showBlankContents () {
-    this._showContents(blankContents(this.config))
+    this._showContents(blankContents())
   }
 
   showVisitFailure = (props) => {
-    this._showContents(visitFailure(this.config, props))
+    this._showContents(visitFailure(props))
   }
 
   _showContents (contents) {
