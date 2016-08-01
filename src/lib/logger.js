@@ -27,7 +27,9 @@ export default {
     const formattedLog = this._formatted(_.omit(consoleProps, 'groups', 'table'))
 
     _.each(formattedLog, (value, key) => {
-      if (_.trim(value) === '' && value !== '' || _.isArray(value)) return
+      // don't log empty strings
+      // _.trim([]) returns '' but we want to log empty arrays, so account for that
+      if (_.trim(value) === '' && !_.isArray(value)) return
 
       this.log(`%c${key}`, 'font-weight: bold', value)
     })
