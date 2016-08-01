@@ -30,6 +30,7 @@
   .focus-tests {
     border-right: 1px solid #ddd;
     float: left;
+    font-weight: normal;
 
     i {
       margin-right: 5px;
@@ -102,6 +103,21 @@
         background-color: #e9e9e9;
         box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
       }
+    }
+  }
+
+  // TODO: when detached, this will have to be a different max-width
+  @media all and (max-width: 1430px) {
+    header button {
+      padding: 10px 12px;
+    }
+
+    .focus-tests span {
+      display: none;
+    }
+
+    .stats li {
+      padding: 10px 5px;
     }
   }
 }
