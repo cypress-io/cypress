@@ -2,14 +2,13 @@ import _ from 'lodash'
 import { observable } from 'mobx'
 
 const defaults = {
-  autoScrollingEnabled: true,
   isPaused: false,
   isRunning: false,
   nextCommandName: null,
 }
 
 class AppState {
-  @observable autoScrollingEnabled = defaults.autoScrollingEnabled
+  @observable autoScrollingEnabled = true
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
   @observable nextCommandName = defaults.nextCommandName
