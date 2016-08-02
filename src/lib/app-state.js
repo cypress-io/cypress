@@ -13,6 +13,8 @@ class AppState {
   @observable isRunning = defaults.isRunning
   @observable nextCommandName = defaults.nextCommandName
 
+  _resetAutoScrollingEnabledTo = true
+
   startRunning () {
     this.isRunning = true
   }
@@ -38,6 +40,7 @@ class AppState {
   }
 
   toggleAutoScrolling () {
+    this._resetAutoScrollingEnabledTo = !this.autoScrollingEnabled
     this.autoScrollingEnabled = !this.autoScrollingEnabled
   }
 
@@ -45,6 +48,7 @@ class AppState {
     _.each(defaults, (value, key) => {
       this[key] = value
     })
+    this.autoScrollingEnabled = this._resetAutoScrollingEnabledTo
   }
 }
 
