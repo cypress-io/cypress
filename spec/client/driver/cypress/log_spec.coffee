@@ -239,7 +239,7 @@ describe "$Cypress.Log API", ->
 
         expect(@log.get("snapshots")).to.be.an("array")
 
-        expect(@log.toSerializedJSON()).to.deep.eq({
+        expect(@Cypress.Log.toSerializedJSON(@log.toJSON())).to.deep.eq({
           $el: "<div>"
           arr: [1,2,3]
           bar: true
@@ -255,7 +255,6 @@ describe "$Cypress.Log API", ->
           renderProps: {}
           snapshots: null
           state: "pending"
-          url: ""
           visible: false
         })
 
@@ -265,7 +264,7 @@ describe "$Cypress.Log API", ->
             Returned: window
         })
 
-        expect(@log.toSerializedJSON()).to.deep.eq({
+        expect(@Cypress.Log.toSerializedJSON(@log.toJSON())).to.deep.eq({
           consoleProps: {
             Command: undefined
             Returned: "<window>"
@@ -274,7 +273,6 @@ describe "$Cypress.Log API", ->
           id: @log.get("id")
           renderProps: {}
           state: "pending"
-          url: ""
         })
 
       it "serializes document", ->
@@ -283,7 +281,7 @@ describe "$Cypress.Log API", ->
             Returned: document
         })
 
-        expect(@log.toSerializedJSON()).to.deep.eq({
+        expect(@Cypress.Log.toSerializedJSON(@log.toJSON())).to.deep.eq({
           consoleProps: {
             Command: undefined
             Returned: "<document>"
@@ -292,7 +290,32 @@ describe "$Cypress.Log API", ->
           id: @log.get("id")
           renderProps: {}
           state: "pending"
-          url: ""
+        })
+
+      it "serializes an array of elements", ->
+        img1 = $("<img />")
+        img2 = $("<img />")
+        imgs = img1.add(img2)
+
+        @log.set({
+          $el: imgs
+          consoleProps: ->
+            Returned: [img1, img2]
+        })
+
+        expect(@Cypress.Log.toSerializedJSON(@log.toJSON())).to.deep.eq({
+          consoleProps: {
+            Command: undefined
+            Returned: ["<img>", "<img>"]
+          }
+          $el: "[ <img>, 1 more... ]"
+          err: null
+          highlightAttr: "data-cypress-el"
+          id: @log.get("id")
+          numElements: 2
+          renderProps: {}
+          state: "pending"
+          visible: false
         })
 
     describe "#set", ->

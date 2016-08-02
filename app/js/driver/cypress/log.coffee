@@ -396,11 +396,11 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         return null if key in BLACKLIST_PROPS
 
         switch
-          when isDomLike(value)
-            $Cypress.Utils.stringifyElement(value, "short")
-
           when _.isArray(value)
             _.map(value, stringify)
+
+          when isDomLike(value)
+            $Cypress.Utils.stringifyElement(value, "short")
 
           when _.isObject(value)
             _.mapObject(value, stringify)
@@ -427,6 +427,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         [].concat(test.agents, test.routes, test.commands)
       .flatten()
       .compact()
+      .union([{id: 0}])
       .pluck("id")
       .max()
       .value()
