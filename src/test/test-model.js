@@ -10,7 +10,7 @@ export default class Test extends Runnable {
   @observable commands = []
   @observable err = new Err({})
   @observable hooks = []
-  @observable isActive = false
+  @observable isActive = null
   @observable isLongRunning = false
   @observable routes = []
   @observable _state = null
