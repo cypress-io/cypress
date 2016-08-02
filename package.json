@@ -29,9 +29,9 @@
     "bluebird": "^3.4.0",
     "@cypress/core-reporter": "0.0.0",
     "classnames": "^2.2.5",
-    "mobx": "^2.3.3",
-    "mobx-react": "^3.4.0",
-    "react": "^15.1.0",
-    "react-dom": "^15.1.0"
+    "mobx": "^2.3.6",
+    "mobx-react": "^3.5.3",
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0"
   }
 }
