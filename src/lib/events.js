@@ -4,14 +4,15 @@ import { action } from 'mobx'
 const localBus = new EventEmitter()
 
 export default {
-  init ({ appState, runnablesStore, statsStore }) {
+  init ({ appState, runnablesStore, statsStore, scroller }) {
     this.appState = appState
     this.runnablesStore = runnablesStore
     this.statsStore = statsStore
+    this.scroller = scroller
   },
 
   listen (runner) {
-    const { appState, runnablesStore, statsStore } = this
+    const { appState, runnablesStore, scroller, statsStore } = this
 
     runner.on('runnables:ready', action('runnables:ready', (rootRunnable = {}) => {
       runnablesStore.setRunnables(rootRunnable)
@@ -39,6 +40,8 @@ export default {
     }))
 
     runner.on('reporter:start', action('start', (startInfo) => {
+      appState.setAutoScrolling(startInfo.autoScrollingEnabled)
+      scroller.setScrollTop(startInfo.scrollTop)
       statsStore.start(startInfo)
     }))
 
@@ -60,6 +63,13 @@ export default {
       appState.stop()
       statsStore.stop()
     }))
+
+    runner.on('reporter:collect:run:state', (cb) => {
+      cb({
+        autoScrollingEnabled: this.appState.autoScrollingEnabled,
+        scrollTop: this.scroller.getScrollTop(),
+      })
+    })
 
     localBus.on('resume', action('resume', () => {
       appState.resume()

@@ -49,11 +49,23 @@ describe('app state', () => {
     })
   })
 
-  context('#disableAutoScrolling', () => {
-    it('toggles autoScrollingEnabled', () => {
+  context('#setAutoScrolling', () => {
+    it('sets autoScrollingEnabled to boolean specified', () => {
       const instance = new AppState()
-      instance.disableAutoScrolling()
+      instance.setAutoScrolling(false)
       expect(instance.autoScrollingEnabled).to.be.false
+    })
+
+    it('does nothing if argument is null', () => {
+      const instance = new AppState()
+      instance.setAutoScrolling(null)
+      expect(instance.autoScrollingEnabled).to.be.true
+    })
+
+    it('does nothing if argument is undefined', () => {
+      const instance = new AppState()
+      instance.setAutoScrolling()
+      expect(instance.autoScrollingEnabled).to.be.true
     })
   })
 

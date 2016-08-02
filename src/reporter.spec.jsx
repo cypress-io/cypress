@@ -9,6 +9,7 @@ import Runnables from './runnables/runnables'
 
 const appState = {}
 const runnablesStore = {}
+const scroller = {}
 const statsStore = {}
 const getProps = (props) => {
   return _.extend({
@@ -16,6 +17,7 @@ const getProps = (props) => {
     specPath: 'the spec path',
     appState,
     runnablesStore,
+    scroller,
     statsStore,
   }, props)
 }
@@ -26,10 +28,10 @@ const eventsStub = () => ({
 })
 
 describe('<Reporter />', () => {
-  it('initializes the events with the runnables store and stats store', () => {
+  it('initializes the events with the app state, runnables store, scroller, and stats store', () => {
     const events = eventsStub()
     shallow(<Reporter {...getProps({ events })} />)
-    expect(events.init).to.have.been.calledWith({ appState, runnablesStore, statsStore })
+    expect(events.init).to.have.been.calledWith({ appState, runnablesStore, scroller, statsStore })
   })
 
   it('tells events to listen to runner', () => {

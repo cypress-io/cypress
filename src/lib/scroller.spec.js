@@ -144,6 +144,42 @@ describe('scroller', () => {
     expect(container.scrollTop).to.equal(40)
   })
 
+  context('#getScrollTop', () => {
+    it('returns the current scrollTop for the container', () => {
+      scroller.setContainer(getContainer({ scrollTop: 123 }))
+      expect(scroller.getScrollTop()).to.equal(123)
+    })
+
+    it('returns 0 if the container is not set', () => {
+      expect(scroller.getScrollTop()).to.equal(0)
+    })
+  })
+
+  context('#setScrollTop', () => {
+    it('sets the scrollTop on the container', () => {
+      scroller.setContainer(getContainer({ scrollTop: 123 }))
+      scroller.setScrollTop(456)
+      expect(scroller.getScrollTop()).to.equal(456)
+    })
+
+    it('does nothing if container is not set', () => {
+      scroller.setScrollTop(456)
+      expect(scroller.getScrollTop()).to.equal(0)
+    })
+
+    it('does nothing if value is null', () => {
+      scroller.setContainer(getContainer({ scrollTop: 123 }))
+      scroller.setScrollTop(null)
+      expect(scroller.getScrollTop()).to.equal(123)
+    })
+
+    it('does nothing if value is undefined', () => {
+      scroller.setContainer(getContainer({ scrollTop: 123 }))
+      scroller.setScrollTop()
+      expect(scroller.getScrollTop()).to.equal(123)
+    })
+  })
+
   context('scrolling', () => {
     it('listens to scroll event on container', () => {
       const container = getContainer()

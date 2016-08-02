@@ -3,7 +3,6 @@ import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
-import scroller from '../lib/scroller'
 import Runnable from './runnable-and-suite'
 
 const NoTests = observer(({ specPath }) => (
@@ -56,9 +55,9 @@ class Runnables extends Component {
   }
 
   componentDidMount () {
-    scroller.setContainer(this.refs.container, action('user:scroll:detected', () => {
+    this.props.scroller.setContainer(this.refs.container, action('user:scroll:detected', () => {
       if (this.props.appState.isRunning) {
-        this.props.appState.disableAutoScrolling()
+        this.props.appState.setAutoScrolling(false)
       }
     }))
   }

@@ -12,6 +12,7 @@ const appStateStub = () => ({
   pause: sinon.spy(),
   reset: sinon.spy(),
   resume: sinon.spy(),
+  setAutoScrolling: sinon.spy(),
   stop: sinon.spy(),
 })
 
@@ -23,6 +24,11 @@ const runnablesStoreStub = () => ({
   setRunnables: sinon.spy(),
   testById: sinon.stub(),
   updateLog: sinon.spy(),
+})
+
+const scrollerStub = () => ({
+  getScrollTop: sinon.stub(),
+  setScrollTop: sinon.stub(),
 })
 
 const statsStoreStub = () => ({
@@ -38,6 +44,7 @@ const statsStoreStub = () => ({
 describe('events', () => {
   let appState
   let runnablesStore
+  let scroller
   let statsStore
   let runner
 
@@ -46,8 +53,9 @@ describe('events', () => {
 
     appState = appStateStub()
     runnablesStore = runnablesStoreStub()
+    scroller = scrollerStub()
     statsStore = statsStoreStub()
-    events.init({ appState, runnablesStore, statsStore })
+    events.init({ appState, runnablesStore, scroller, statsStore })
 
     runner = runnerStub()
     events.listen(runner)
@@ -102,8 +110,18 @@ describe('events', () => {
     })
 
     it('starts stats on reporter:start', () => {
-      runner.on.withArgs('reporter:start').callArgWith(1, 'start info')
-      expect(statsStore.start).to.have.been.calledWith('start info')
+      runner.on.withArgs('reporter:start').callArgWith(1, {})
+      expect(statsStore.start).to.have.been.calledWith({})
+    })
+
+    it('sets autoScrollingEnabled on the app state on reporter:start', () => {
+      runner.on.withArgs('reporter:start').callArgWith(1, { autoScrollingEnabled: false })
+      expect(appState.setAutoScrolling).to.have.been.calledWith(false)
+    })
+
+    it('sets scrollTop on the scroller on reporter:start', () => {
+      runner.on.withArgs('reporter:start').callArgWith(1, { scrollTop: 123 })
+      expect(scroller.setScrollTop).to.have.been.calledWith(123)
     })
 
     it('sends runnable started on test:before:run', () => {
@@ -139,6 +157,17 @@ describe('events', () => {
     it('stops the stats on run:end', () => {
       runner.on.withArgs('run:end').callArgWith(1)
       expect(statsStore.stop).to.have.been.called
+    })
+
+    it('calls callback with scrollTop and autoScrollingEnabled on reporter:collect:run:state', () => {
+      const callback = sinon.spy()
+      appState.autoScrollingEnabled = false
+      scroller.getScrollTop.returns(321)
+      runner.on.withArgs('reporter:collect:run:state').callArgWith(1, callback)
+      expect(callback).to.have.been.calledWith({
+        autoScrollingEnabled: false,
+        scrollTop: 321,
+      })
     })
   })
 

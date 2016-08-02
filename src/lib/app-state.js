@@ -32,8 +32,10 @@ class AppState {
     this.isRunning = false
   }
 
-  disableAutoScrolling () {
-    this.autoScrollingEnabled = false
+  setAutoScrolling (isEnabled) {
+    if (isEnabled != null) {
+      this.autoScrollingEnabled = isEnabled
+    }
   }
 
   toggleAutoScrolling () {

@@ -25,7 +25,6 @@ export default {
 
   _listenToScrolls (onUserScroll) {
     this._container.addEventListener('scroll', () => {
-
       if (!this._userScroll) {
         // programmatic scroll
         this._userScroll = true
@@ -114,8 +113,22 @@ export default {
     return element.offsetTop + element.clientHeight - this._container.clientHeight
   },
 
+  getScrollTop () {
+    return this._container ? this._container.scrollTop : 0
+  },
+
+  setScrollTop (scrollTop) {
+    if (this._container && scrollTop != null) {
+      this._container.scrollTop = scrollTop
+    }
+    if (!this._container) {
+      console.warn('tried to set scroll top before container was set') // eslint-disable-line no-console
+    }
+  },
+
   // for testing purposes
   __reset () {
+    this._container = null
     this._lastScrollTopGoal = null
     this._lastId = null
     this._userScroll = true
