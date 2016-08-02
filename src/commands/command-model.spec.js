@@ -3,7 +3,7 @@ import sinon from 'sinon'
 
 import Command from './command-model'
 
-const LONG_RUNNING_THRESHOLD = 500
+const LONG_RUNNING_THRESHOLD = 1000
 
 const model = (props) => {
   return _.extend({
