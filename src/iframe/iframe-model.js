@@ -59,10 +59,13 @@ export default class IframeModel {
       return this._testsRunningError()
     }
 
-    const {snapshots} = snapshotProps
+    const { snapshots } = snapshotProps
 
     if (!snapshots) {
-      return this._clearSnapshots()
+      this._clearSnapshots()
+      this.state.messageTitle = 'The snapshot is missing. Displaying current state of the DOM.'
+      this.state.messageType = 'warning'
+      return
     }
 
     this.state.highlightUrl = true
@@ -78,7 +81,7 @@ export default class IframeModel {
 
     clearInterval(this.intervalId)
 
-    const revert = action((snapshot) => {
+    const revert = action('revert:snapshot', (snapshot) => {
       this.state.messageTitle = 'DOM Snapshot'
       this.state.messageDescription = snapshot.name
       this.state.messageType = ''
