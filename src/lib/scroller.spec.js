@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import sinon from 'sinon'
 
-import scroller from './scroller'
+import scroller, { SCROLL_RATE } from './scroller'
 
 const getContainer = (props) => {
   return _.extend({
@@ -71,24 +71,24 @@ describe('scroller', () => {
     expect(container.scrollTop).to.equal(0)
   })
 
-  it('scrolls container 10 pixels towards goal immediately and every 16ms', () => {
+  it(`scrolls container ${SCROLL_RATE} pixels towards goal immediately and every 16ms`, () => {
     const container = getContainer()
     scroller.setContainer(container)
     scroller.scrollIntoView(getElement(), 1)
-    expect(container.scrollTop).to.equal(10)
+    expect(container.scrollTop).to.equal(SCROLL_RATE)
     clock.tick(16)
-    expect(container.scrollTop).to.equal(20)
+    expect(container.scrollTop).to.equal(SCROLL_RATE * 2)
     clock.tick(16)
-    expect(container.scrollTop).to.equal(30)
+    expect(container.scrollTop).to.equal(SCROLL_RATE * 3)
     clock.tick(16)
-    expect(container.scrollTop).to.equal(40)
+    expect(container.scrollTop).to.equal(SCROLL_RATE * 4)
   })
 
   it('stops scrolling once it reaches goal', () => {
     const container = getContainer({ scrollTop: 50 })
     scroller.setContainer(container)
     scroller.scrollIntoView(getElement(), 1)
-    expect(container.scrollTop).to.equal(60)
+    expect(container.scrollTop).to.equal(50 + SCROLL_RATE)
     clock.tick(16)
     expect(container.scrollTop).to.equal(70)
     clock.tick(16)
@@ -99,19 +99,19 @@ describe('scroller', () => {
     const container = getContainer({ scrollTop: 55 })
     scroller.setContainer(container)
     scroller.scrollIntoView(getElement(), 1)
-    expect(container.scrollTop).to.equal(65)
+    expect(container.scrollTop).to.equal(55 + SCROLL_RATE)
     container.scrollHeight = 100
     clock.tick(16)
-    expect(container.scrollTop).to.equal(65)
+    expect(container.scrollTop).to.equal(55 + SCROLL_RATE)
     clock.tick(16)
-    expect(container.scrollTop).to.equal(65)
+    expect(container.scrollTop).to.equal(55 + SCROLL_RATE)
   })
 
   it('stops scrolling and settles on goal if going to overshoot it', () => {
-    const container = getContainer({ scrollTop: 55 })
+    const container = getContainer({ scrollTop: 52 })
     scroller.setContainer(container)
     scroller.scrollIntoView(getElement(), 1)
-    expect(container.scrollTop).to.equal(65)
+    expect(container.scrollTop).to.equal(52 + SCROLL_RATE)
     clock.tick(16)
     expect(container.scrollTop).to.equal(70)
     clock.tick(16)
@@ -122,11 +122,11 @@ describe('scroller', () => {
     const container = getContainer()
     scroller.setContainer(container)
     scroller.scrollIntoView(getElement(), 1)
-    expect(container.scrollTop).to.equal(10)
+    expect(container.scrollTop).to.equal(SCROLL_RATE)
     clock.tick(16)
-    expect(container.scrollTop).to.equal(20)
+    expect(container.scrollTop).to.equal(SCROLL_RATE * 2)
     scroller.scrollIntoView(getElement({ offsetTop: 170 }), 2)
-    expect(container.scrollTop).to.equal(80)
+    expect(container.scrollTop).to.equal(85)
     clock.tick(16)
     expect(container.scrollTop).to.equal(90)
   })
@@ -135,13 +135,13 @@ describe('scroller', () => {
     const container = getContainer()
     scroller.setContainer(container)
     scroller.scrollIntoView(getElement(), 1)
-    expect(container.scrollTop).to.equal(10)
+    expect(container.scrollTop).to.equal(SCROLL_RATE)
     clock.tick(16)
-    expect(container.scrollTop).to.equal(20)
+    expect(container.scrollTop).to.equal(SCROLL_RATE * 2)
     scroller.scrollIntoView(getElement(), 1)
-    expect(container.scrollTop).to.equal(30)
+    expect(container.scrollTop).to.equal(SCROLL_RATE * 3)
     clock.tick(16)
-    expect(container.scrollTop).to.equal(40)
+    expect(container.scrollTop).to.equal(SCROLL_RATE * 4)
   })
 
   context('#getScrollTop', () => {

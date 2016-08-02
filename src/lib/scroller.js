@@ -13,7 +13,10 @@
  - element distance from top of container
 */
 
-export default {
+// rate of scrolling when animating. higher number is higher speed
+const SCROLL_RATE = 15
+
+class Scroller {
   setContainer (container, onUserScroll) {
     this._container = container
 
@@ -21,7 +24,7 @@ export default {
     this._userScrollCount = 0
 
     this._listenToScrolls(onUserScroll)
-  },
+  }
 
   _listenToScrolls (onUserScroll) {
     this._container.addEventListener('scroll', () => {
@@ -48,7 +51,7 @@ export default {
         this._userScrollCount = 0
       }, 50)
     })
-  },
+  }
 
   scrollIntoView (element, id) {
     if (!this._container) {
@@ -62,7 +65,7 @@ export default {
     if (scrollTopGoal < 0) scrollTopGoal = 0
 
     this._animateScoll(scrollTopGoal, element, id)
-  },
+  }
 
   _animateScoll (scrollTopGoal, element, id) {
     if (this._lastScrollTopGoal && this._lastId !== id) {
@@ -83,7 +86,7 @@ export default {
       const ableToScroll = this._container.scrollHeight - this._container.clientHeight
       const currentScrollTop = this._container.scrollTop
 
-      let nextScrollTop = isAscending ? currentScrollTop + 10 : currentScrollTop - 10
+      let nextScrollTop = isAscending ? currentScrollTop + SCROLL_RATE : currentScrollTop - SCROLL_RATE
       const aboutToOvershoot = isAscending ? nextScrollTop >= scrollTopGoal : nextScrollTop <= scrollTopGoal
       if (aboutToOvershoot) nextScrollTop = scrollTopGoal
 
@@ -102,20 +105,20 @@ export default {
 
     this._interval = setInterval(scroll, 16)
     scroll()
-  },
+  }
 
   _isFullyVisible (element) {
     return element.offsetTop - this._container.scrollTop > 0
            && this._container.scrollTop > this._bottomToBottom(element)
-  },
+  }
 
   _bottomToBottom (element) {
     return element.offsetTop + element.clientHeight - this._container.clientHeight
-  },
+  }
 
   getScrollTop () {
     return this._container ? this._container.scrollTop : 0
-  },
+  }
 
   setScrollTop (scrollTop) {
     if (this._container && scrollTop != null) {
@@ -124,7 +127,7 @@ export default {
     if (!this._container) {
       console.warn('tried to set scroll top before container was set') // eslint-disable-line no-console
     }
-  },
+  }
 
   // for testing purposes
   __reset () {
@@ -136,5 +139,8 @@ export default {
     clearInterval(this._interval)
     clearTimeout(this._countUserScrollsTimeout)
     this._countUserScrollsTimeout = null
-  },
+  }
 }
+
+export { SCROLL_RATE }
+export default new Scroller()
