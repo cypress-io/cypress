@@ -76,6 +76,10 @@ export default {
 
   _addListeners () {
     driver.on('initialized', ({ runner }) => {
+      driver.on('collect:run:state', () => new Promise((resolve) => {
+        reporterBus.emit('reporter:collect:run:state', resolve)
+      }))
+
       // get the current runnable in case we reran mid-test due to a visit
       // to a new domain
       channel.emit('get:existing:run:state', (state = {}) => {
@@ -103,6 +107,8 @@ export default {
           numPassed: state.passed,
           numFailed: state.failed,
           numPending: state.pending,
+          autoScrollingEnabled: state.autoScrollingEnabled,
+          scrollTop: state.scrollTop,
         })
       })
     })
