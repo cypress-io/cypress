@@ -30,12 +30,13 @@ const Controls = observer(({ events, appState }) => {
         </Tooltip>
       ))}
       {ifThen(!appState.isPaused, (
-        <Tooltip placement='bottom' title={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}>
+        <Tooltip placement='bottom' title={`Auto-scrolling ${appState.autoScrollingEnabled ? 'Enabled' : 'Disabled'}`}>
           <button
             className={cs('toggle-auto-scrolling', { 'auto-scrolling-enabled': appState.autoScrollingEnabled })}
             onClick={action('toggle:auto:scrolling', toggleAutoScrolling)}
           >
-            <i className='fa fa-arrow-circle-down fa-large'></i>
+            <i className='fa'></i>
+            <i className='fa fa-arrows-v'></i>
           </button>
         </Tooltip>
       ))}

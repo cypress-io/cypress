@@ -36,12 +36,12 @@ describe('<Controls />', () => {
 
     it('renders tooltip around toggle auto-scrolling button with right title when auto-scrolling is enabled', () => {
       const component = shallow(<Controls events={eventsStub()} appState={appStateStub()} />)
-      expect(component.find('.toggle-auto-scrolling').parent()).to.have.prop('title', 'Disable Auto-scrolling')
+      expect(component.find('.toggle-auto-scrolling').parent()).to.have.prop('title', 'Auto-scrolling Enabled')
     })
 
     it('renders tooltip around toggle auto-scrolling button with right title when auto-scrolling is disabled', () => {
       const component = shallow(<Controls events={eventsStub()} appState={appStateStub({ autoScrollingEnabled: false })} />)
-      expect(component.find('.toggle-auto-scrolling').parent()).to.have.prop('title', 'Enable Auto-scrolling')
+      expect(component.find('.toggle-auto-scrolling').parent()).to.have.prop('title', 'Auto-scrolling Disabled')
     })
 
     it('toggles appState.autoScrollingEnabled when auto-scrolling button is clicked', () => {
