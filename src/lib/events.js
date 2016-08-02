@@ -115,6 +115,12 @@ export default {
     localBus.on('focus:tests', () => {
       runner.emit('focus:tests')
     })
+
+    localBus.on('persist:state', () => {
+      runner.emit('persist:state', {
+        autoScrollingEnabled: appState.autoScrollingEnabled,
+      })
+    })
   },
 
   emit (event, ...args) {

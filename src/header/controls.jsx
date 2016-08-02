@@ -12,6 +12,10 @@ const ifThen = (condition, component) => (
 
 const Controls = observer(({ events, appState }) => {
   const emit = (event) => () => events.emit(event)
+  const toggleAutoScrolling = () => {
+    appState.toggleAutoScrolling()
+    events.emit('persist:state')
+  }
 
   return (
     <div className='controls'>
@@ -29,7 +33,7 @@ const Controls = observer(({ events, appState }) => {
         <Tooltip placement='bottom' title={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}>
           <button
             className={cs('toggle-auto-scrolling', { 'auto-scrolling-enabled': appState.autoScrollingEnabled })}
-            onClick={action('toggle:auto:scrolling', () => appState.toggleAutoScrolling())}
+            onClick={action('toggle:auto:scrolling', toggleAutoScrolling)}
           >
             <i className='fa fa-arrow-circle-down fa-large'></i>
           </button>

@@ -241,5 +241,13 @@ describe('events', () => {
       events.emit('focus:tests')
       expect(runner.emit).to.have.been.calledWith('focus:tests')
     })
+
+    it('emits persist:state on persist:state', () => {
+      appState.autoScrollingEnabled = false
+      events.emit('persist:state')
+      expect(runner.emit).to.have.been.calledWith('persist:state', {
+        autoScrollingEnabled: false,
+      })
+    })
   })
 })

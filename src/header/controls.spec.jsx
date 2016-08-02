@@ -51,6 +51,13 @@ describe('<Controls />', () => {
       expect(appState.toggleAutoScrolling).to.have.been.called
     })
 
+    it('emits persist:state event when auto-scrolling button is clicked', () => {
+      const events = eventsStub()
+      const component = shallow(<Controls events={events} appState={appStateStub()} />)
+      component.find('.toggle-auto-scrolling').simulate('click')
+      expect(events.emit).to.have.been.calledWith('persist:state')
+    })
+
     it('renders stop button', () => {
       const component = shallow(<Controls events={eventsStub()} appState={appStateStub()} />)
       expect(component.find('.stop')).to.exist
