@@ -45,13 +45,13 @@
     "gulp-watch": "^4.3.8",
     "jsdom": "^9.4.1",
     "lodash": "^4.0.0",
-    "mobx": "^2.0.0",
-    "mobx-react": "^3.0.0",
+    "mobx": "^2.3.6",
+    "mobx-react": "^3.5.3",
     "mocha": "^2.5.3",
     "node-sass-globbing": "0.0.23",
-    "react": "^15.0.0",
-    "react-addons-test-utils": "^15.0.0",
-    "react-dom": "^15.0.0",
+    "react": "^15.3.0",
+    "react-addons-test-utils": "^15.3.0",
+    "react-dom": "^15.3.0",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
     "through": "^2.3.8"
@@ -63,9 +63,9 @@
   },
   "peerDependencies": {
     "lodash": "^4.0.0",
-    "mobx": "^2.0.0",
-    "mobx-react": "^3.0.0",
-    "react": "^15.0.0",
-    "react-dom": "^15.0.0"
+    "mobx": "^2.3.6",
+    "mobx-react": "^3.5.3",
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0"
   }
 }
