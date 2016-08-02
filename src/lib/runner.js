@@ -193,6 +193,10 @@ export default {
       driver.abort()
     })
 
+    reporterBus.on('persist:state', (state) => {
+      channel.emit('persist:app:state', state)
+    })
+
     // when we actually unload then
     // nuke all of the cookies again
     // so we clear out unload
