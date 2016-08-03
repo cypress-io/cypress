@@ -29,6 +29,11 @@ class RunnablesStore {
   attemptingShowSnapshot = defaults.attemptingShowSnapshot
   showingSnapshot = defaults.showingSnapshot
 
+  constructor ({ appState, scroller }) {
+    this.appState = appState
+    this.scroller = scroller
+  }
+
   setRunnables (rootRunnable) {
     this.runnables = this._createRunnableChildren(rootRunnable, 0)
     this.isReady = true
@@ -90,15 +95,15 @@ class RunnablesStore {
   }
 
   _finishedInitialRendering () {
-    if (appState.isRunning) {
+    if (this.appState.isRunning) {
       // have an initial scrollTop set, meaning we reloaded from a domain change
       // so reset to the saved scrollTop
-      if (this._initialScrollTop) scroller.setScrollTop(this._initialScrollTop)
+      if (this._initialScrollTop) this.scroller.setScrollTop(this._initialScrollTop)
     } else {
       // finished before initial rendering complete, meaning some tests
       // didn't get a chance to get scrolled to
       // scroll to the end since that's the right place to be
-      if (appState.autoScrollingEnabled) scroller.scrollToEnd()
+      if (this.appState.autoScrollingEnabled) this.scroller.scrollToEnd()
     }
   }
 
@@ -165,4 +170,5 @@ class RunnablesStore {
   }
 }
 
-export default new RunnablesStore()
+export { RunnablesStore }
+export default new RunnablesStore({ appState, scroller })
