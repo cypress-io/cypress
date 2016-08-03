@@ -42,7 +42,9 @@ export default {
     runner.on('reporter:start', action('start', (startInfo) => {
       appState.setAutoScrolling(startInfo.autoScrollingEnabled)
       runnablesStore.setInitialScrollTop(startInfo.scrollTop)
-      statsStore.start(startInfo)
+      if (runnablesStore.hasTests) {
+        statsStore.start(startInfo)
+      }
     }))
 
     runner.on('test:before:run', action('test:before:run', (runnable) => {

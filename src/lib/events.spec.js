@@ -110,8 +110,15 @@ describe('events', () => {
     })
 
     it('starts stats on reporter:start', () => {
+      runnablesStore.hasTests = true
       runner.on.withArgs('reporter:start').callArgWith(1, {})
       expect(statsStore.start).to.have.been.calledWith({})
+    })
+
+    it('does not start stats if there are no tests on reporter:start', () => {
+      runnablesStore.hasTests = false
+      runner.on.withArgs('reporter:start').callArgWith(1, {})
+      expect(statsStore.start).not.to.have.been.called
     })
 
     it('sets autoScrollingEnabled on the app state on reporter:start', () => {
