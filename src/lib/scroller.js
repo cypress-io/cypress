@@ -91,6 +91,10 @@ class Scroller {
     }
   }
 
+  scrollToEnd () {
+    this.setScrollTop(this._container.scrollHeight - this._container.clientHeight)
+  }
+
   // for testing purposes
   __reset () {
     this._container = null

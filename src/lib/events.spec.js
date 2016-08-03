@@ -21,6 +21,7 @@ const runnablesStoreStub = () => ({
   reset: sinon.spy(),
   runnableStarted: sinon.spy(),
   runnableFinished: sinon.spy(),
+  setInitialScrollTop: sinon.stub(),
   setRunnables: sinon.spy(),
   testById: sinon.stub(),
   updateLog: sinon.spy(),
@@ -28,7 +29,6 @@ const runnablesStoreStub = () => ({
 
 const scrollerStub = () => ({
   getScrollTop: sinon.stub(),
-  setScrollTop: sinon.stub(),
 })
 
 const statsStoreStub = () => ({
@@ -119,9 +119,9 @@ describe('events', () => {
       expect(appState.setAutoScrolling).to.have.been.calledWith(false)
     })
 
-    it('sets scrollTop on the scroller on reporter:start', () => {
+    it('sets initial crollTop on the scroller on reporter:start', () => {
       runner.on.withArgs('reporter:start').callArgWith(1, { scrollTop: 123 })
-      expect(scroller.setScrollTop).to.have.been.calledWith(123)
+      expect(runnablesStore.setInitialScrollTop).to.have.been.calledWith(123)
     })
 
     it('sends runnable started on test:before:run', () => {

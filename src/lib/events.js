@@ -41,7 +41,7 @@ export default {
 
     runner.on('reporter:start', action('start', (startInfo) => {
       appState.setAutoScrolling(startInfo.autoScrollingEnabled)
-      scroller.setScrollTop(startInfo.scrollTop)
+      runnablesStore.setInitialScrollTop(startInfo.scrollTop)
       statsStore.start(startInfo)
     }))
 
@@ -66,8 +66,8 @@ export default {
 
     runner.on('reporter:collect:run:state', (cb) => {
       cb({
-        autoScrollingEnabled: this.appState.autoScrollingEnabled,
-        scrollTop: this.scroller.getScrollTop(),
+        autoScrollingEnabled: appState.autoScrollingEnabled,
+        scrollTop: scroller.getScrollTop(),
       })
     })
 

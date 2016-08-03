@@ -1,9 +1,11 @@
 import _ from 'lodash'
 import { action, observable } from 'mobx'
 
+import appState from '../lib/app-state'
 import Agent from '../agents/agent-model'
 import Command from '../commands/command-model'
 import Route from '../routes/route-model'
+import scroller from '../lib/scroller'
 import Suite from './suite-model'
 import Test from '../test/test-model'
 
@@ -77,11 +79,31 @@ class RunnablesStore {
   _startRendering (index = 0) {
     requestAnimationFrame(action('start:rendering', () => {
       const runnable = this._runnablesQueue[index]
-      if (!runnable) return
+      if (!runnable) {
+        this._finishedInitialRendering()
+        return
+      }
 
       runnable.shouldRender = true
       this._startRendering(index + 1)
     }))
+  }
+
+  _finishedInitialRendering () {
+    if (appState.isRunning) {
+      // have an initial scrollTop set, meaning we reloaded from a domain change
+      // so reset to the saved scrollTop
+      if (this._initialScrollTop) scroller.setScrollTop(this._initialScrollTop)
+    } else {
+      // finished before initial rendering complete, meaning some tests
+      // didn't get a chance to get scrolled to
+      // scroll to the end since that's the right place to be
+      if (appState.autoScrollingEnabled) scroller.scrollToEnd()
+    }
+  }
+
+  setInitialScrollTop (initialScrollTop) {
+    this._initialScrollTop = initialScrollTop
   }
 
   runnableStarted ({ id }) {
