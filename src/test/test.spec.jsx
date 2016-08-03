@@ -138,7 +138,7 @@ describe('<Test />', () => {
           model={model()}
           scroller={scroller}
           />)
-        expect(scroller.scrollIntoView).to.have.been.calledWith(component.ref('container').node, 't1')
+        expect(scroller.scrollIntoView).to.have.been.calledWith(component.ref('container').node)
       })
 
       it('does not scroll into view if auto-scrolling is disabled', () => {
@@ -201,7 +201,7 @@ describe('<Test />', () => {
         appState.isRunning = true
         testModel.isActive = true
         component.update()
-        expect(scroller.scrollIntoView).to.have.been.calledWith(component.ref('container').node, 't1')
+        expect(scroller.scrollIntoView).to.have.been.calledWith(component.ref('container').node)
       })
 
       it('does not scroll into view if auto-scrolling is disabled', () => {

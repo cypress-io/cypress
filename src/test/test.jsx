@@ -37,10 +37,10 @@ class Test extends Component {
 
   _scrollIntoView () {
     const { appState, model, scroller } = this.props
-    const { id, isActive, shouldRender } = model
+    const { isActive, shouldRender } = model
 
     if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && isActive != null) {
-      scroller.scrollIntoView(this.refs.container, id)
+      scroller.scrollIntoView(this.refs.container)
     }
   }
 

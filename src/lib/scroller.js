@@ -13,9 +13,6 @@
  - element distance from top of container
 */
 
-// rate of scrolling when animating. higher number is higher speed
-const SCROLL_RATE = 15
-
 class Scroller {
   setContainer (container, onUserScroll) {
     this._container = container
@@ -53,9 +50,13 @@ class Scroller {
     })
   }
 
-  scrollIntoView (element, id) {
+  scrollIntoView (element) {
     if (!this._container) {
       throw new Error('A container must be set on the scroller with `scroller.setContainer(container)` before trying to scroll an element into view')
+    }
+
+    if (this._isFullyVisible(element)) {
+      return
     }
 
     // aim to scroll just into view, so that the bottom of the element
@@ -64,47 +65,8 @@ class Scroller {
     // can't have a negative scroll, so put it to the top
     if (scrollTopGoal < 0) scrollTopGoal = 0
 
-    this._animateScoll(scrollTopGoal, element, id)
-  }
-
-  _animateScoll (scrollTopGoal, element, id) {
-    if (this._lastScrollTopGoal && this._lastId !== id) {
-      // we ran out of time trying to animate the last element, so immediately
-      // set the scroll position to its goal
-      this._container.scrollTop = this._lastScrollTopGoal
-    }
-
-    clearInterval(this._interval)
-    this._lastScrollTopGoal = scrollTopGoal
-    this._lastId = id
-
-    // should the scrollTop being ascending or descending to its goal
-    const isAscending = this._container.scrollTop < scrollTopGoal
-
-    const scroll = () => {
-      // might have changed due to elements resizing, so get it again
-      const ableToScroll = this._container.scrollHeight - this._container.clientHeight
-      const currentScrollTop = this._container.scrollTop
-
-      let nextScrollTop = isAscending ? currentScrollTop + SCROLL_RATE : currentScrollTop - SCROLL_RATE
-      const aboutToOvershoot = isAscending ? nextScrollTop >= scrollTopGoal : nextScrollTop <= scrollTopGoal
-      if (aboutToOvershoot) nextScrollTop = scrollTopGoal
-
-      if (
-        this._isFullyVisible(element)
-        || currentScrollTop === scrollTopGoal // we made it
-        || scrollTopGoal > ableToScroll // things have changed and we can't get to the goal
-      ) {
-        clearInterval(this._interval)
-        return
-      }
-
-      this._userScroll = false
-      this._container.scrollTop = nextScrollTop
-    }
-
-    this._interval = setInterval(scroll, 16)
-    scroll()
+    this._userScroll = false
+    this._container.scrollTop = scrollTopGoal
   }
 
   _isFullyVisible (element) {
@@ -132,15 +94,11 @@ class Scroller {
   // for testing purposes
   __reset () {
     this._container = null
-    this._lastScrollTopGoal = null
-    this._lastId = null
     this._userScroll = true
     this._userScrollCount = 0
-    clearInterval(this._interval)
     clearTimeout(this._countUserScrollsTimeout)
     this._countUserScrollsTimeout = null
   }
 }
 
-export { SCROLL_RATE }
 export default new Scroller()
