@@ -10,6 +10,7 @@ export default class Test extends Runnable {
   @observable commands = []
   @observable err = new Err({})
   @observable hooks = []
+  // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
   @observable isActive = null
   @observable isLongRunning = false
   @observable routes = []
