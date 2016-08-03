@@ -31,6 +31,7 @@ class AppState {
 
   stop () {
     this.isRunning = false
+    this._resetAutoScrolling()
   }
 
   setAutoScrolling (isEnabled) {
@@ -48,6 +49,10 @@ class AppState {
     _.each(defaults, (value, key) => {
       this[key] = value
     })
+    this._resetAutoScrolling()
+  }
+
+  _resetAutoScrolling () {
     this.autoScrollingEnabled = this._resetAutoScrollingEnabledTo
   }
 }

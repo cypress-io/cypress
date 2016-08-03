@@ -47,6 +47,13 @@ describe('app state', () => {
       instance.stop()
       expect(instance.isRunning).to.be.false
     })
+
+    it('resets autoScrollingEnabled', () => {
+      const instance = new AppState()
+      instance.setAutoScrolling(false)
+      instance.stop()
+      expect(instance.autoScrollingEnabled).to.be.true
+    })
   })
 
   context('#setAutoScrolling', () => {
