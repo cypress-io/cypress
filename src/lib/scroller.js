@@ -86,9 +86,6 @@ class Scroller {
     if (this._container && scrollTop != null) {
       this._container.scrollTop = scrollTop
     }
-    if (!this._container) {
-      console.warn('tried to set scroll top before container was set') // eslint-disable-line no-console
-    }
   }
 
   scrollToEnd () {
