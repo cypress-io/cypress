@@ -125,6 +125,7 @@
     "gulp-util": "^3.0.6",
     "hbs": "4.0.0",
     "http-proxy": "^1.13.2",
+    "http-status-codes": "^1.0.6",
     "inquirer": "^0.8.0",
     "js-beautify": "^1.5.10",
     "js-object-pretty-print": "^0.1.4",
