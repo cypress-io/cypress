@@ -156,7 +156,6 @@ class Socket
       onAutomationRequest: null
       onMocha: ->
       onConnect: ->
-      onDomainSet: ->
       onResolveUrl: ->
       onFocusTests: ->
       onChromiumRun: ->
@@ -314,9 +313,6 @@ class Socket
           cb(true)
         .catch Promise.TimeoutError, (err) ->
           cb(false)
-
-      socket.on "set:domain", (url, cb) ->
-        cb(options.onDomainSet(url))
 
       socket.on "resolve:url", (url, cb) =>
         options.onResolveUrl(url, automationRequest, cb)

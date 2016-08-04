@@ -2,7 +2,7 @@ describe "$Cypress.Cy Navigation Commands", ->
   enterCommandTestingMode()
 
   beforeEach ->
-    @Cypress.on "resolve:domain", (url, cb) ->
+    @Cypress.on "resolve:url", (url, cb) ->
       cb({status: 200, url: url})
 
   context "#reload", ->

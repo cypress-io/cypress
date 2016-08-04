@@ -139,9 +139,6 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
           ## let our function know we've navigated
           navigated(attr, arguments)
 
-    @getFetchStrategyForUrl = (url) ->
-      if @isFullyQualifiedUrl(url) then "http" else "file"
-
     ## if we don't have a fully qualified url
     ## then ensure the url starts with a leading slash
     @createInitialRemoteSrc = (url) ->

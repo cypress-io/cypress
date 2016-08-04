@@ -77,9 +77,6 @@
         @listenTo @Cypress, "take:screenshot", (name, cb) =>
           @socket.emit "automation:request", "take:screenshot", name, cb
 
-        @listenTo @Cypress, "set:domain", (url, cb) =>
-          @socket.emit "set:domain", url, cb
-
         @listenTo @Cypress, "preserve:run:state", (title, fn, cb) =>
           @socket.emit "preserve:run:state", title, fn, cb
 

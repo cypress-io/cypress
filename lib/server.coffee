@@ -456,9 +456,6 @@ class Server
     @_socket and @_socket.changeToUrl(url)
 
   startWebsockets: (watchers, config, options = {}) ->
-    options.onDomainSet = =>
-      @_onDomainSet.apply(@, arguments)
-
     options.onResolveUrl = (urlStr, automationRequest, cb) =>
       @_onResolveUrl(urlStr, automationRequest)
       .then(cb)
