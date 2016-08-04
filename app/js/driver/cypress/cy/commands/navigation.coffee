@@ -55,6 +55,30 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
     _src: ($remoteIframe, url) ->
       $remoteIframe.prop("src", url)
 
+    _resolveUrl: (url) ->
+      Cypress.triggerPromise("resolve:url", url)
+      .then (resp = {}) ->
+        ## .then (resolvedUrl, statusCode, redirects, html, ok) ->
+        ## display redirects
+        ## display statusCode
+        ## potentially hand back the failure url?
+        ## so we can update the iframe directly?
+        if resp.ok
+          resp.url
+        else
+          debugger
+        ## support here
+        ## and remove initial handling
+        ## from the proxy layer completely
+
+      # else
+      #   ## TODO: double check this
+      #   ## file exists
+      #   # checkForLocalFile(url)
+      #   # .then ->
+      #   Promise.resolve(url)
+      #   # .catch (err) ->
+
     submitting: (e, options = {}) ->
       ## even though our beforeunload event
       ## should be firing shortly, lets just
@@ -306,30 +330,6 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
       p = new Promise (resolve, reject) =>
 
-        resolveUrl = (url) ->
-          Cypress.triggerPromise("resolve:url", url)
-          .then (resp = {}) ->
-            ## .then (resolvedUrl, statusCode, redirects, html, ok) ->
-            ## display redirects
-            ## display statusCode
-            ## potentially hand back the failure url?
-            ## so we can update the iframe directly?
-            if resp.ok
-              resp.url
-            else
-              debugger
-            ## support here
-            ## and remove initial handling
-            ## from the proxy layer completely
-
-          # else
-          #   ## TODO: double check this
-          #   ## file exists
-          #   # checkForLocalFile(url)
-          #   # .then ->
-          #   Promise.resolve(url)
-          #   # .catch (err) ->
-
         cannotVisit2ndDomain = (origin) ->
           try
             $Cypress.Utils.throwErrByPath("visit.cannot_visit_2nd_domain", {
@@ -366,11 +366,14 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           ## hold onto our existing url
           existing = @_existing()
 
+          ## TODO: Cypress.Location.resolve(existing.origin, url)
+
           ## in the case we are visiting a relative url
           ## then prepend the existing origin to it
           ## so we get the right remote url
           if not Cypress.Location.isFullyQualifiedUrl(url)
-            remoteUrl = [existing.origin, url].join("/")
+            remoteUrl = Cypress.Location.join(existing.origin, url)
+            # remoteUrl = [existing.origin, url].join("/")
 
           remote = Cypress.Location.create(remoteUrl ? url)
 
@@ -379,7 +382,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             ## then die else we'd be in a terrible endless loop
             return cannotVisit2ndDomain(remote.origin)
 
-          resolveUrl(url)
+          @_resolveUrl(url)
           .then (url) =>
             remote = Cypress.Location.create(url)
 

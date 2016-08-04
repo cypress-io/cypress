@@ -34,16 +34,13 @@ afterEach ->
   @sandbox.server?.queue = []
   @sandbox.server?.responses = []
 
-setDomain = (url, cb) ->
-  if not $Cypress.Location.isFullyQualifiedUrl(url)
-    ## when we've been given a non fully qualified url
-    ## then just callback with our local origin
-    # url = new Uri(window.location.href)
-    url = $Cypress.Location.create(window.location.href)
-  else
-    url = $Cypress.Location.create(url)
+resolveUrl = (url, cb) ->
+  url = Cypress.Location.resolve(window.location.origin, url)
 
-  cb(_.pick(url, "origin"))
+  cb({
+    ok: true
+    url: url
+  })
 
 # stubSocketIo = ->
 #   window.io =
@@ -132,7 +129,7 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
         ## trigger it in the command testing mode below?
         @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe
 
-        @Cypress.on("set:domain", setDomain)
+        @Cypress.on("resolve:url", resolveUrl)
 
   after ->
     @$iframe.remove()
@@ -231,7 +228,7 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
           @Cypress.set(ct)
           ct.enableTimeouts(false)
 
-        @Cypress.on "set:domain", setDomain
+        @Cypress.on("resolve:url", resolveUrl)
 
         ## handle the fail event ourselves
         ## since we bypass our Runner instance

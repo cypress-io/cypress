@@ -1,10 +1,6 @@
 describe "$Cypress.Cy Navigation Commands", ->
   enterCommandTestingMode()
 
-  beforeEach ->
-    @Cypress.on "resolve:url", (url, cb) ->
-      cb({status: 200, url: url})
-
   context "#reload", ->
     it "calls into window.location.reload", (done) ->
       fn = (arg) ->
@@ -300,7 +296,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       @cy
         .visit("localhost:3500/app")
         .then ->
-          expect(trigger).to.be.calledWith("set:domain", "http://localhost:3500/app")
+          expect(trigger).to.be.calledWith("resolve:url", "http://localhost:3500/app")
 
     it "prepends hostname when visiting locally", ->
       prop = @sandbox.spy(@cy.private("$remoteIframe"), "prop")
@@ -383,7 +379,6 @@ describe "$Cypress.Cy Navigation Commands", ->
             currentId: 888
             tests: []
             startTime: "12345"
-            scrollTop: null
             numLogs: 1
             passed: 2
             failed: 3
@@ -675,12 +670,12 @@ describe "$Cypress.Cy Navigation Commands", ->
           .visit("http://127.0.0.1:3500")
           .visit("http://126.0.0.1:3500")
 
-      it "does not call set:domain when throws attemping to visit a 2nd domain", (done) ->
+      it "does not call resolve:url when throws attemping to visit a 2nd domain", (done) ->
         trigger = @sandbox.spy(@Cypress, "trigger")
 
         @cy.on "fail", (err) =>
-          expect(trigger).to.be.calledWithMatch("set:domain", "http://localhost:3500")
-          expect(trigger).not.to.be.calledWithMatch("set:domain", "http://google.com:3500")
+          expect(trigger).to.be.calledWithMatch("resolve:url", "http://localhost:3500")
+          expect(trigger).not.to.be.calledWithMatch("resolve:url", "http://google.com:3500")
           done()
 
         @cy
