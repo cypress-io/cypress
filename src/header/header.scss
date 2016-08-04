@@ -18,7 +18,7 @@
       outline: 0;
       padding: 10px 0;
       text-align: center;
-      transition: all 0.5s ease-in-out;
+      transition: width 0.5s ease-in-out;
       width: 50px;
 
       &:hover {
@@ -55,7 +55,7 @@
       line-height: 26px;
       list-style-type: none;
       padding: 10px;
-      transition: all 0.5s ease-in-out;
+      transition: padding 0.5s ease-in-out;
 
       &.passed {
         color: #23AE89;
