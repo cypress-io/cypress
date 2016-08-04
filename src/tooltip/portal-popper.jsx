@@ -29,19 +29,21 @@ class PortalPopper extends Component {
         className={`tooltip tooltip-${this.props.placement}`}
         style={this._getPopperStyle()}
       >
-        {this.props.title}
+        <span>{this.props.title}</span>
         <div ref='arrow' className='tooltip-arrow' style={this._getArrowStyle()} />
       </Portal>
     )
   }
 
   componentDidMount () {
-    this.popper = new Popper(this.props.getTargetNode(), this.refs.popper.domNode, {
+    this.popper = new this.props.Popper(this.props.getTargetNode(), this.refs.popper.domNode, {
       content: this.props.title,
       placement: this.props.placement,
       modifiersIgnored: ['applyStyle'],
       arrowElement: this.refs.arrow,
-    }).onUpdate(action('popper:updated', (data) => {
+    })
+
+    this.popper.onUpdate(action('popper:updated', (data) => {
       if (data.offsets.arrow) this.arrowProps = data.offsets.arrow
       if (data.offsets.popper) this.popperProps = data.offsets.popper
     }))
@@ -80,6 +82,10 @@ PortalPopper.propTypes = {
   placement: PropTypes.string.isRequired,
   getTargetNode: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
+}
+
+PortalPopper.defaultProps = {
+  Popper,
 }
 
 export default PortalPopper
