@@ -26,3 +26,25 @@ do ($Cypress, _) ->
         event.ctx = @cy
 
       Backbone.Events.trigger.apply(@, arguments)
+
+    triggerPromise: (args...) ->
+      new Promise (resolve, reject) =>
+
+        cb = (resp) ->
+          if _.has(resp, "__error")
+            e = resp.__error
+
+            if _.isString(e)
+              err = new Error(e)
+            else
+              err = new Error(e.message)
+              err.name  = e.name
+              err.stack = e.stack
+
+            reject(err)
+          else
+            resolve(resp)
+
+        args.push(cb)
+
+        @trigger.apply(@, args)
