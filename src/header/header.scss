@@ -16,6 +16,10 @@
       border-radius: 0;
       line-height: 26px;
       outline: 0;
+      padding: 10px 0;
+      text-align: center;
+      transition: all 0.5s ease-in-out;
+      width: 50px;
 
       &:hover {
         background-color: #e9e9e9;
@@ -31,6 +35,8 @@
     border-right: 1px solid #ddd;
     float: left;
     font-weight: normal;
+    padding: 10px 12px;
+    width: auto;
 
     i {
       margin-right: 5px;
@@ -49,6 +55,7 @@
       line-height: 26px;
       list-style-type: none;
       padding: 10px;
+      transition: all 0.5s ease-in-out;
 
       &.passed {
         color: #23AE89;
@@ -94,21 +101,24 @@
 
     .toggle-auto-scrolling {
       line-height: 25px;
-      padding-left: 6px;
-      padding-right: 6px;
-
-      i:first-child {
-        @extend .#{$fa-css-prefix}-toggle-off;
-      }
 
       i {
         font-size: 100%;
       }
 
+      i:first-child {
+        @extend .#{$fa-css-prefix}-circle-o;
+        color: #999;
+        font-size: 80%;
+        margin-right: 3px;
+        position: relative;
+        top: -1px;
+      }
+
       &.auto-scrolling-enabled {
         i:first-child {
-          @extend .#{$fa-css-prefix}-toggle-on;
-          color: $pass;
+          @extend .#{$fa-css-prefix}-circle;
+          color: #FFB61C;
         }
       }
     }
@@ -117,7 +127,7 @@
   // TODO: when detached, this will have to be a different max-width
   @media all and (max-width: 1430px) {
     header button {
-      padding: 10px 12px;
+      width: 40px;
     }
 
     .focus-tests span {
