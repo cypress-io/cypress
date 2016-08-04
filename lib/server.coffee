@@ -3,8 +3,10 @@ hbs          = require("hbs")
 url          = require("url")
 http         = require("http")
 cookie       = require("cookie")
+stream       = require("stream")
 express      = require("express")
 Promise      = require("bluebird")
+statuses     = require("http-status-codes")
 httpProxy    = require("http-proxy")
 httpsProxy   = require("@cypress/core-https-proxy")
 allowDestroy = require("server-destroy")
@@ -15,9 +17,11 @@ cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
 Socket       = require("./socket")
+Request      = require("./request")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
+isOkayStatusRe         = /^2/
 
 setProxiedUrl = (req) ->
   ## bail if we've already proxied the url
@@ -192,11 +196,7 @@ class Server
     #   origin: "http://localhost:2020"
     #   strategy: "file"
     #   domainName: "localhost"
-    #   props: {
-    #     port: 2020
-    #     tld: "localhost"
-    #     domain: ""
-    #   }
+    #   props: null
     # }
 
     # {
@@ -214,10 +214,135 @@ class Server
       props:      @_remoteProps
       origin:     @_remoteOrigin
       strategy:   @_remoteStrategy
+      visiting:   @_remoteVisitingUrl
       domainName: @_remoteDomainName
     })
 
-  _onDomainSet: (fullyQualifiedUrl) =>
+  _onResolveUrl: (urlStr, automationRequest) ->
+    handlingLocalFile = false
+    previousState = _.clone @_getRemoteState()
+
+    originalUrl = urlStr
+
+    console.log buffers.getByOriginalUrl(urlStr)
+
+    ## if we have a buffer for this url
+    ## then just respond with its details
+    ## so we are idempotant and do not make
+    ## another request
+    if obj = buffers.getByOriginalUrl(urlStr)
+      ## reset the cookies from the existing stream's jar
+      Request.setJarCookies(obj.jar, automationRequest)
+      .then (c) ->
+        return obj.details
+    else
+      new Promise (resolve) =>
+        redirects = []
+
+        if not fullyQualifiedRe.test(urlStr)
+          handlingLocalFile = true
+
+          @_remoteVisitingUrl = true
+
+          @_onDomainSet(urlStr)
+
+          urlStr = url.resolve(@_remoteOrigin, urlStr)
+
+        error = (err) ->
+          restorePreviousState()
+
+          resolve({__error: err.message})
+
+        getStatusText = (code) ->
+          try
+            statuses.getStatusText(code)
+          catch e
+            "Unknown Status Code"
+
+        handleReqStream = (str) =>
+          pt = str
+          .on("error", error)
+          .on "response", (incomingRes) =>
+            jar = str.getJar()
+
+            Request.setJarCookies(jar, automationRequest)
+            .then (c) =>
+              @_remoteVisitingUrl = false
+
+              newUrl = _.last(redirects) ? urlStr
+
+              isOkay = isOkayStatusRe.test(incomingRes.statusCode)
+
+              details = {
+                ## TODO: get a status code message here?
+                ok: isOkay
+                url: newUrl
+                status: incomingRes.statusCode
+                statusText: getStatusText(incomingRes.statusCode)
+                redirects: redirects
+                cookies: c
+              }
+
+              if isOkay
+                ## reset the domain to the new url if we're not
+                ## handling a local file
+                @_onDomainSet(newUrl) if not handlingLocalFile
+
+                buffers.set({
+                  url: newUrl
+                  jar: jar
+                  stream: pt
+                  details: details
+                  originalUrl: originalUrl
+                  response: incomingRes
+                })
+              else
+                restorePreviousState()
+
+              resolve(details)
+
+            .catch(error)
+          .pipe(stream.PassThrough())
+
+        restorePreviousState = =>
+          @_remoteProps        = previousState.props
+          @_remoteOrigin       = previousState.origin
+          @_remoteStrategy     = previousState.strategy
+          @_remoteDomainName   = previousState.domainName
+          @_remoteVisitingUrl  = previousState.visiting
+
+        mergeHost = (curr, next) ->
+          ## parse our next url
+          next = url.parse(next, true)
+
+          ## and if its missing its host
+          ## then take it from the current url
+          if not next.host
+            curr = url.parse(curr, true)
+
+            for prop in ["hostname", "port", "protocol"]
+              next[prop] = curr[prop]
+
+          next.format()
+
+        Request.sendStream(automationRequest, {
+          ## turn off gzip since we need to eventually
+          ## rewrite these contents
+          gzip: false
+          url: urlStr
+          followRedirect: (incomingRes) ->
+            next = incomingRes.headers.location
+
+            curr = _.last(redirects) ? urlStr
+
+            redirects.push(mergeHost(curr, next))
+
+            return true
+        })
+        .then(handleReqStream)
+        .catch(error)
+
+  _onDomainSet: (fullyQualifiedUrl) ->
     log = (type, url) ->
       logger.info("Setting #{type}", value: url)
 
@@ -333,6 +458,10 @@ class Server
   startWebsockets: (watchers, config, options = {}) ->
     options.onDomainSet = =>
       @_onDomainSet.apply(@, arguments)
+
+    options.onResolveUrl = (urlStr, automationRequest, cb) =>
+      @_onResolveUrl(urlStr, automationRequest)
+      .then(cb)
 
     @_socket = Socket()
     @_socket.startListening(@_server, watchers, config, options)

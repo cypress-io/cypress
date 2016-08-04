@@ -37,29 +37,23 @@ module.exports = {
 
     remoteState = getRemoteState()
 
-    d = Domain.create()
+    logger.info({"handling request", url: req.url, proxiedUrl: req.proxiedUrl, remoteState: remoteState})
 
-    d.on 'error', (e) =>
-      @errorHandler(e, req, res, remoteState)
+    ## when you access cypress from a browser which has not
+    ## had its proxy setup then req.url will match req.proxiedUrl
+    ## and we'll know to instantly redirect them to the correct
+    ## client route
+    if req.url is req.proxiedUrl and not remoteState.visiting
+      ## if we dont have a remoteState.origin that means we're initially
+      ## requesting the cypress app and we need to redirect to the
+      ## root path that serves the app
+      return res.redirect(config.clientRoute)
 
-    d.run =>
-      logger.info({"handling request", url: req.url, proxiedUrl: req.proxiedUrl, remoteState: remoteState})
+    thr = through (d) -> @queue(d)
 
-      ## when you access cypress from a browser which has not
-      ## had its proxy setup then req.url will match req.proxiedUrl
-      ## and we'll know to instantly redirect them to the correct
-      ## client route
-      if req.url is req.proxiedUrl
-        ## if we dont have a remoteState.origin that means we're initially
-        ## requesting the cypress app and we need to redirect to the
-        ## root path that serves the app
-        return res.redirect(config.clientRoute)
-
-      thr = through (d) -> @queue(d)
-
-      @getContent(thr, req, res, remoteState, config)
-        .on "error", (e) => @errorHandler(e, req, res, remoteState)
-        .pipe(res)
+    @getContent(thr, req, res, remoteState, config)
+      # .on "error", (e) => @errorHandler(e, req, res, remoteState)
+      .pipe(res)
 
   getContent: (thr, req, res, remoteState, config) ->
     ## serve from the file system because
@@ -67,7 +61,7 @@ module.exports = {
     ## only if we are on file strategy and
     ## this request does indeed match the
     ## remote origin
-    if remoteState.strategy is "file" and req.proxiedUrl.startsWith(remoteState.origin)
+    if remoteState.strategy is "file" and (req.proxiedUrl.startsWith(remoteState.origin) or remoteState.visiting)
       @getFileContent(thr, req, res, remoteState, config)
 
     ## else go make an HTTP request to the
@@ -115,13 +109,14 @@ module.exports = {
         ## set the status to whatever the incomingRes statusCode is
         res.status(incomingRes.statusCode)
 
-        if not okStatusRe.test incomingRes.statusCode
-          return @errorHandler(null, req, res, remoteState)
-
-        logger.info "received absolute file content"
-
         ## turn off __cypress.initial by setting false here
         setCookies(false)
+
+        if not okStatusRe.test incomingRes.statusCode
+          ## bail early, continue on with the stream'in
+          return str.pipe(thr)
+
+        logger.info "received request response"
 
         switch
           when req.cookies["__cypress.initial"] is "true"
@@ -142,6 +137,33 @@ module.exports = {
     else
       opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
 
+      httpRequestErr = (err) =>
+        status = err.status ? 500
+
+        logger.info("request failed", {url: remoteUrl, status: status, err: err.message})
+
+        text = """
+        Cypress errored attempting to make an http request to this url:
+
+        #{remoteUrl}
+
+
+
+        The error was:
+
+        #{err.message}
+
+
+
+        The stack trace was:
+
+        #{err.stack}
+        """
+
+        res
+        .status(status)
+        .send(text)
+
       ## do not accept gzip if this is initial
       ## since we have to rewrite html and we dont
       ## want to go through the extra step of unzipping it
@@ -151,8 +173,7 @@ module.exports = {
 
       rq = request(opts)
 
-      rq.on "error", (err) ->
-        thr.emit("error", err)
+      rq.on("error", httpRequestErr)
 
       rq.on "response", (incomingRes) ->
         onResponse(rq, incomingRes)
@@ -176,11 +197,26 @@ module.exports = {
     ## %20 with white space
     file = decodeURI urlHelpers.parse(path.join(args...)).pathname
 
-    req.formattedUrl = file
-
-    logger.info "getting relative file content", file: file
+    logger.info "getting static file content", file: file
 
     setCookie(res, "__cypress.initial", false, remoteState.domainName)
+
+    staticFileErr = (err) =>
+      status = err.status ? 500
+
+      logger.info("static file failed", {err: err.message, status: status})
+
+      text = """
+      Cypress errored trying to serve this file from your system:
+
+      #{file}
+
+      #{if status is 404 then "The file was not found." else ""}
+      """
+
+      res
+      .status(status)
+      .send(text)
 
     sendOpts = {
       root: path.resolve(config.fileServerFolder)
@@ -201,36 +237,7 @@ module.exports = {
       sendOpts.lastModified = true
 
     send(req, urlHelpers.parse(req.url).pathname, sendOpts)
-
-  errorHandler: (e, req, res, remoteState) ->
-    url = req.proxiedUrl
-
-    ## disregard ENOENT errors (that means the file wasnt found)
-    ## which is a perfectly acceptable error (we account for that)
-    if process.env["CYPRESS_ENV"] isnt "production" and e and e.code isnt "ENOENT"
-      console.log(e.stack)
-      debugger
-
-    logger.info "error handling request", url: url, error: e
-
-    if e
-      res.set("x-cypress-error", e.message)
-      res.set("x-cypress-stack", JSON.stringify(e.stack))
-
-    filePath = switch
-      when f = req.formattedUrl
-        "file://#{f}"
-      else
-        url
-
-    ## using req here to give us an opportunity to
-    ## write to req.formattedUrl
-    htmlPath = cwd("lib", "html", "initial_500.html")
-    res.status(500).render(htmlPath, {
-      url: filePath
-      domain: remoteState.domainName
-      fromFile: !!req.formattedUrl
-    })
+    .on("error", staticFileErr)
 
   setResHeaders: (req, res, incomingRes, isInitial) ->
     ## omit problematic headers

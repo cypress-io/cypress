@@ -1009,10 +1009,12 @@ describe "Routes", ->
       beforeEach ->
         @setup("http://www.github.com")
 
-      it "status code 500", ->
+      it "passes through status code + content", ->
         nock(@server._remoteOrigin)
         .get("/index.html")
-        .reply(500)
+        .reply(500, "server error", {
+          "Content-Type": "text/html"
+        })
 
         @rp({
           url: "http://www.github.com/index.html"
@@ -1022,29 +1024,27 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(500)
+          expect(res.body).to.eq("server error")
+          expect(res.headers["set-cookie"]).to.match(/__cypress.initial=false/)
 
-      ## allow nock to throw here
-      it "does not send back initial_500 content on error when initial is false"
+      it "sends back cypress content on actual request errors", ->
+        @rp("http://localhost:64644")
+        .then (res) ->
+          expect(res.statusCode).to.eq(500)
+          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
+          expect(res.body).to.include("http://localhost:64644")
+          expect(res.body).to.include("The error was:")
+          expect(res.body).to.include("connect ECONNREFUSED 127.0.0.1:64644")
+          expect(res.body).to.include("The stack trace was:")
+          expect(res.body).to.include("_exceptionWithHostPort")
+          expect(res.body).to.include("TCPConnectWrap.afterConnect")
 
-      it "sends back initial_500 content", ->
-        nock(@server._remoteOrigin)
-        .get("/index.html")
-        .reply(500, "FAIL WAIL")
-
-        @rp({
-          url: "http://www.github.com/index.html"
-          headers: {
-            "Cookie": "__cypress.initial=true"
+      it "sends back 404 when file does not exist locally", ->
+        @setup("<root>", {
+          config: {
+            fileServerFolder: "/Users/bmann/Dev/projects"
           }
         })
-        .then (res) =>
-          expect(res.statusCode).to.eq(500)
-          expect(res.body).to.include("<span data-cypress-visit-error></span>")
-          expect(res.body).to.include("<a href=\"#{@server._remoteOrigin}/index.html\" target=\"_blank\">#{@server._remoteOrigin}/index.html</a>")
-          expect(res.body).to.include("Did you forget to start your web server?")
-
-      it "sends back 500 when file does not exist locally", ->
-        @setup("<root>")
         .then =>
           @rp({
             url: @proxy + "/foo/views/test/index.html"
@@ -1053,57 +1053,10 @@ describe "Routes", ->
             }
           })
           .then (res) =>
-            expect(res.statusCode).to.eq(500)
-            expect(res.body).to.include("<span data-cypress-visit-error></span>")
-            expect(res.body).to.include("file://")
-            expect(res.body).to.include("This file could not be served from your file system.")
-
-      it "sets x-cypress-error and x-cypress-stack headers when file does not exist", ->
-        @setup("<root>")
-        .then =>
-          @rp({
-            url: @proxy + "/foo/views/test/index.html"
-            headers: {
-              "Cookie": "__cypress.initial=true"
-            }
-          })
-          .then (res) =>
-            expect(res.statusCode).to.eq(500)
-            expect(res.headers["x-cypress-error"]).to.match(/ENOENT: no such file or directory/)
-            expect(res.headers["x-cypress-stack"]).to.match(/ENOENT: no such file or directory/)
-
-      it "does not set x-cypress-error or x-cypress-stack when error is null", ->
-        nock(@server._remoteOrigin)
-        .get("/index.html")
-        .reply(500, "FAIL WAIL")
-
-        @rp({
-          url: "http://www.github.com/index.html"
-          headers: {
-            "Cookie": "__cypress.initial=true"
-          }
-        })
-        .then (res) =>
-          expect(res.statusCode).to.eq(500)
-          expect(res.headers).not.to.have.property("x-cypress-error")
-          expect(res.headers).not.to.have.property("x-cypress-stack")
-
-      it "does not send back initial 500 content on 4xx errors", ->
-        nock(@server._remoteOrigin)
-        .get("/index.html")
-        .reply(404, "404 not found", {
-          "Content-Type": "html/html"
-        })
-
-        @rp({
-          url: "http://www.github.com/index.html"
-          headers: {
-            "Cookie": "__cypress.initial=true"
-          }
-        })
-        .then (res) =>
-          expect(res.statusCode).to.eq(404)
-          expect(res.body).to.eq("404 not found")
+            expect(res.statusCode).to.eq(404)
+            expect(res.body).to.include("Cypress errored trying to serve this file from your system:")
+            expect(res.body).to.include("/Users/bmann/Dev/projects/foo/views/test/index.html")
+            expect(res.body).to.include("The file was not found.")
 
     context "headers", ->
       beforeEach ->
@@ -1738,7 +1691,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-    context "<root> file serving", ->
+    context "file requests", ->
       beforeEach ->
         Fixtures.scaffold()
 
@@ -1829,7 +1782,7 @@ describe "Routes", ->
 
           expect(res.body).to.deep.eq({contents: "<html><head></head></html>"})
 
-    context "http file serving", ->
+    context "http requests", ->
       beforeEach ->
         @setup("http://getbootstrap.com")
         .then =>

@@ -3,11 +3,9 @@ fs            = require("fs-extra")
 str           = require("underscore.string")
 path          = require("path")
 uuid          = require("node-uuid")
-stream        = require("stream")
 Promise       = require("bluebird")
 socketIo      = require("@cypress/core-socket")
 open          = require("./util/open")
-buffers       = require("./util/buffers")
 pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
 exec          = require("./exec")
@@ -98,9 +96,6 @@ class Socket
     .catch (err) ->
       cb({__error: err.message})
 
-  onRequestStream: (automation, options) ->
-    Request.sendStream(automation, options)
-
   onFixture: (config, file, cb) ->
     fixture.get(config.fixturesFolder, file)
     .then(cb)
@@ -162,6 +157,7 @@ class Socket
       onMocha: ->
       onConnect: ->
       onDomainSet: ->
+      onResolveUrl: ->
       onFocusTests: ->
       onChromiumRun: ->
       onReloadBrowser: ->
@@ -322,69 +318,8 @@ class Socket
       socket.on "set:domain", (url, cb) ->
         cb(options.onDomainSet(url))
 
-      socket.on "resolve:domain", (url, cb) =>
-        ## if we have a buffer for this url
-        ## then just respond with its details
-        ## so we are idempotant and do not make
-        ## another request
-        if obj = buffers.getByOriginalUrl(url)
-          ## reset the cookies from the existing stream's jar
-          Request.setJarCookies(obj.jar, automationRequest)
-          .then (c) ->
-            cb(obj.details)
-        else
-          redirects = []
-
-          error = (err) ->
-            cb({__error: err.message})
-
-          makeRequest = (url) =>
-            handleReqStream = (str) ->
-              pt = str
-              .on("error", error)
-              .on "response", (incomingRes) ->
-                jar = str.getJar()
-
-                Request.setJarCookies(jar, automationRequest)
-                .then (c) ->
-                  newUrl = _.last(redirects) ? url
-
-                  details = {
-                    ## TODO: get a status code message here?
-                    ok: /^2/.test(incomingRes.statusCode)
-                    url: newUrl
-                    status: incomingRes.statusCode
-                    redirects: redirects
-                    cookies: c
-                  }
-
-                  buffers.set({
-                    url: newUrl
-                    jar: jar
-                    stream: pt
-                    details: details
-                    originalUrl: url
-                    response: incomingRes
-                  })
-
-                  cb(details)
-                .catch(error)
-              .pipe(stream.PassThrough())
-
-            @onRequestStream(automationRequest, {
-              ## turn off gzip since we need to eventually
-              ## rewrite these contents
-              gzip: false
-              url: url
-              followRedirect: (incomingRes) ->
-                redirects.push(incomingRes.headers.location)
-
-                return true
-            })
-            .then(handleReqStream)
-            .catch(error)
-
-          makeRequest(url)
+      socket.on "resolve:url", (url, cb) =>
+        options.onResolveUrl(url, automationRequest, cb)
 
         # @onRequest(automationRequest, {
         #   url: url
