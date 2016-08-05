@@ -22,7 +22,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       event.sender.send("response", data)
 
   sendErr = (err) ->
-    sendResponse({id: id, __error: errors.clone(err)})
+    sendResponse({id: id, __error: errors.clone(err, {html: true})})
 
   send = (data) ->
     sendResponse({id: id, data: data})

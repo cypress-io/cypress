@@ -88,13 +88,20 @@ API = {
   throw: (type, arg) ->
     throw @get(type, arg)
 
-  clone: (err) ->
+  clone: (err, options = {}) ->
+    _.defaults options, {
+      html: false
+    }
+
     ## pull off these properties
     obj = _.pick(err, "type", "name", "stack", "fileName", "lineNumber", "columnNumber")
 
-    obj.message = ansi_up.ansi_to_html(err.message, {
-      use_classes: true
-    })
+    if options.html
+      obj.message = ansi_up.ansi_to_html(err.message, {
+        use_classes: true
+      })
+    else
+      obj.message = err.message
 
     ## and any own (custom) properties
     ## of the err object

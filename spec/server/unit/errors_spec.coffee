@@ -53,5 +53,5 @@ describe "lib/errors", ->
   context ".clone", ->
     it "converts err.message from ansi to html with span classes", ->
       err = new Error("foo" + chalk.blue("bar") + chalk.yellow("baz"))
-      obj = errors.clone(err)
+      obj = errors.clone(err, {html: true})
       expect(obj.message).to.eq('foo<span class="ansi-blue-fg">bar</span><span class="ansi-yellow-fg">baz</span>')

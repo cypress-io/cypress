@@ -50,7 +50,7 @@ describe "lib/electron/handlers/events", ->
 
     @expectSendErrCalledWith = (err) =>
       expect(@options.onError).to.be.calledWith(err)
-      expect(@send).to.be.calledWith("response", {id: @id, __error: errors.clone(err)})
+      expect(@send).to.be.calledWith("response", {id: @id, __error: errors.clone(err, {html: true})})
 
   context ".stop", ->
     it "calls ipc#removeAllListeners", ->
