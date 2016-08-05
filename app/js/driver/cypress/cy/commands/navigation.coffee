@@ -59,7 +59,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
       Cypress.triggerPromise("resolve:url", url)
       .then (resp = {}) ->
         if resp.ok
-          resp.url
+          resp
         else
           err = new Error
           err.gotResponse = true
@@ -299,8 +299,12 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         onBeforeLoad: ->
         onLoad: ->
 
+      consoleProps = {}
+
       if options.log
-        options._log = Cypress.Log.command()
+        options._log = Cypress.Log.command({
+          consoleProps: -> consoleProps
+        })
 
       baseUrl = Cypress.config("baseUrl")
       url     = Cypress.Location.getRemoteUrl(url, baseUrl)
@@ -374,7 +378,19 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             return cannotVisit2ndDomain(remote.origin)
 
           @_resolveUrl(url)
-          .then (url) =>
+          .then (resp = {}) =>
+            {url, originalUrl, cookies, redirects, filePath} = resp
+
+            if filePath
+              consoleProps["File Served"] = filePath
+            else
+              if url isnt originalUrl
+                consoleProps["Original Url"] = originalUrl
+
+            consoleProps["Resolved Url"]  = url
+            consoleProps["Redirects"]     = redirects
+            consoleProps["Cookies Set"]   = cookies
+
             remote = Cypress.Location.create(url)
 
             ## if the origin currently matches

@@ -511,6 +511,59 @@ describe "$Cypress.Cy Navigation Commands", ->
         @cy.visit("/timeout?ms=0", {log: false}).then ->
           expect(log).to.be.null
 
+      it "displays file attributes as consoleProps", ->
+        @sandbox.stub(@cy, "_resolveUrl").resolves({
+          ok: true
+          url: "http://localhost:3500/foo/bar"
+          filePath: "/path/to/foo/bar"
+          redirects: [1, 2]
+          cookies: [{}, {}]
+        })
+
+        @cy.visit("/foo").then ->
+          expect(@log.attributes.consoleProps()).to.deep.eq({
+            "Command": "visit"
+            "File Served": "/path/to/foo/bar"
+            "Resolved Url": "http://localhost:3500/foo/bar"
+            "Redirects": [1, 2]
+            "Cookies Set": [{}, {}]
+          })
+
+      it "displays http attributes as consoleProps", ->
+        @sandbox.stub(@cy, "_resolveUrl").resolves({
+          ok: true
+          url: "http://localhost:3500/foo"
+          originalUrl: "http://localhost:3500/foo"
+          redirects: [1, 2]
+          cookies: [{}, {}]
+        })
+
+        @cy.visit("http://localhost:3500/foo").then ->
+          expect(@log.attributes.consoleProps()).to.deep.eq({
+            "Command": "visit"
+            "Resolved Url": "http://localhost:3500/foo"
+            "Redirects": [1, 2]
+            "Cookies Set": [{}, {}]
+          })
+
+      it "displays originalUrl http attributes as consoleProps", ->
+        @sandbox.stub(@cy, "_resolveUrl").resolves({
+          ok: true
+          url: "http://localhost:3500/foo/bar"
+          originalUrl: "http://localhost:3500/foo"
+          redirects: [1, 2]
+          cookies: [{}, {}]
+        })
+
+        @cy.visit("http://localhost:3500/foo").then ->
+          expect(@log.attributes.consoleProps()).to.deep.eq({
+            "Command": "visit"
+            "Original Url": "http://localhost:3500/foo"
+            "Resolved Url": "http://localhost:3500/foo/bar"
+            "Redirects": [1, 2]
+            "Cookies Set": [{}, {}]
+          })
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
