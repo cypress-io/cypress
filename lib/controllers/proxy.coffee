@@ -199,6 +199,8 @@ module.exports = {
 
     logger.info "getting static file content", file: file
 
+    res.set("x-cypress-file-path", file)
+
     setCookie(res, "__cypress.initial", false, remoteState.domainName)
 
     staticFileErr = (err) =>

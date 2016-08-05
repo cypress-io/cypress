@@ -283,6 +283,11 @@ class Server
                 cookies: c
               }
 
+              ## does this response have this cypress header?
+              if fp = incomingRes.headers["x-cypress-file-path"]
+                ## if so we know this is a local file request
+                details.filePath = fp
+
               if isOkay
                 ## reset the domain to the new url if we're not
                 ## handling a local file
