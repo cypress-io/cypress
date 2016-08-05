@@ -162,7 +162,7 @@ describe "Server", ->
             filePath: Fixtures.projectPath("no-server/dev/sub/")
             status: 200
             statusText: "OK"
-            redirects: ["http://localhost:2000/sub/"]
+            redirects: ["301: http://localhost:2000/sub/"]
             cookies: []
           })
         .then =>
@@ -234,7 +234,7 @@ describe "Server", ->
           "Location": "/foo"
         }
         .get("/foo")
-        .reply 301, undefined, {
+        .reply 302, undefined, {
           "Location": "http://espn.go.com/"
         }
 
@@ -254,8 +254,8 @@ describe "Server", ->
             statusText: "OK"
             cookies: []
             redirects: [
-              "http://espn.com/foo"
-              "http://espn.go.com/"
+              "301: http://espn.com/foo"
+              "302: http://espn.go.com/"
             ]
           })
         .then =>
@@ -285,7 +285,7 @@ describe "Server", ->
           "Location": "/foo"
         }
         .get("/foo")
-        .reply 301, undefined, {
+        .reply 302, undefined, {
           "Location": "http://espn.go.com/"
         }
 
@@ -305,8 +305,8 @@ describe "Server", ->
             statusText: "OK"
             cookies: []
             redirects: [
-              "http://espn.com/foo"
-              "http://espn.go.com/"
+              "301: http://espn.com/foo"
+              "302: http://espn.go.com/"
             ]
           })
 
@@ -322,8 +322,8 @@ describe "Server", ->
               statusText: "OK"
               cookies: []
               redirects: [
-                "http://espn.com/foo"
-                "http://espn.go.com/"
+                "301: http://espn.com/foo"
+                "302: http://espn.go.com/"
               ]
             })
 
@@ -384,8 +384,8 @@ describe "Server", ->
               statusText: "OK"
               cookies: []
               redirects: [
-                "http://espn.com/foo"
-                "http://espn.go.com/"
+                "301: http://espn.com/foo"
+                "301: http://espn.go.com/"
               ]
             })
 
@@ -394,7 +394,7 @@ describe "Server", ->
       it "gracefully handles 500", ->
         nock("http://mlb.com")
         .get("/")
-        .reply 301, undefined, {
+        .reply 307, undefined, {
           "Location": "http://mlb.mlb.com/"
         }
 
@@ -413,7 +413,7 @@ describe "Server", ->
             status: 500
             statusText: "Server Error"
             cookies: []
-            redirects: ["http://mlb.mlb.com/"]
+            redirects: ["307: http://mlb.mlb.com/"]
           })
 
       it "gracefully handles http errors", ->

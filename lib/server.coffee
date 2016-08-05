@@ -236,6 +236,7 @@ class Server
     else
       new Promise (resolve) =>
         redirects = []
+        newUrl = null
 
         if not fullyQualifiedRe.test(urlStr)
           handlingLocalFile = true
@@ -267,7 +268,7 @@ class Server
             .then (c) =>
               @_remoteVisitingUrl = false
 
-              newUrl = _.last(redirects) ? urlStr
+              newUrl ?= urlStr
 
               isOkay = isOkayStatusRe.test(incomingRes.statusCode)
 
@@ -335,11 +336,14 @@ class Server
           gzip: false
           url: urlStr
           followRedirect: (incomingRes) ->
+            status = incomingRes.statusCode
             next = incomingRes.headers.location
 
-            curr = _.last(redirects) ? urlStr
+            curr = newUrl ? urlStr
 
-            redirects.push(mergeHost(curr, next))
+            newUrl = mergeHost(curr, next)
+
+            redirects.push([status, newUrl].join(": "))
 
             return true
         })
