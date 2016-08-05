@@ -224,8 +224,6 @@ class Server
 
     originalUrl = urlStr
 
-    console.log buffers.getByOriginalUrl(urlStr)
-
     ## if we have a buffer for this url
     ## then just respond with its details
     ## so we are idempotant and do not make

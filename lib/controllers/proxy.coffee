@@ -199,6 +199,21 @@ module.exports = {
 
     logger.info "getting static file content", file: file
 
+    onResponse = (str) =>
+      switch
+        when req.cookies["__cypress.initial"] is "true"
+          str.pipe(@rewrite(req, res, remoteState, "initial")).pipe(thr)
+
+        when req.accepts(["text", "json", "image", "html"]) is "html"
+          str.pipe(@rewrite(req, res, remoteState)).pipe(thr)
+
+        else
+          str.pipe(thr)
+
+
+    if obj = buffers.take(req.proxiedUrl)
+      return onResponse(obj.stream)
+
     res.set("x-cypress-file-path", file)
 
     setCookie(res, "__cypress.initial", false, remoteState.domainName)
@@ -222,16 +237,7 @@ module.exports = {
 
     sendOpts = {
       root: path.resolve(config.fileServerFolder)
-      transform: (stream) =>
-        switch
-          when req.cookies["__cypress.initial"] is "true"
-            stream.pipe(@rewrite(req, res, remoteState, "initial")).pipe(thr)
-
-          when req.accepts(["text", "json", "image", "html"]) is "html"
-            stream.pipe(@rewrite(req, res, remoteState)).pipe(thr)
-
-          else
-            stream.pipe(thr)
+      transform: onResponse
     }
 
     unless req.cookies["__cypress.initial"] is "true"

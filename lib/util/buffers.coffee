@@ -5,6 +5,8 @@ buffers = {}
 module.exports = {
   all: -> buffers
 
+  keys: -> _.keys(buffers)
+
   reset: ->
     buffers = {}
 

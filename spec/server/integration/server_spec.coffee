@@ -2,6 +2,7 @@ require("../spec_helper")
 
 _             = require("lodash")
 rp            = require("request-promise")
+buffers       = require("#{root}lib/util/buffers")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 Request       = require("#{root}lib/request")
@@ -94,6 +95,8 @@ describe "Server", ->
           expect(obj).to.deep.eq({
             ok: true
             url: "http://localhost:2000/index.html"
+            originalUrl: "/index.html"
+            filePath: Fixtures.projectPath("no-server/dev/index.html")
             status: 200
             statusText: "OK"
             redirects: []
@@ -112,17 +115,23 @@ describe "Server", ->
           expect(obj).to.deep.eq({
             ok: true
             url: "http://localhost:2000/index.html"
+            originalUrl: "/index.html"
+            filePath: Fixtures.projectPath("no-server/dev/index.html")
             status: 200
             statusText: "OK"
             redirects: []
             cookies: []
           })
 
+          expect(buffers.keys()).to.deep.eq(["http://localhost:2000/index.html"])
+        .then =>
           @server._onResolveUrl("/index.html", @automationRequest)
           .then (obj = {}) ->
             expect(obj).to.deep.eq({
               ok: true
               url: "http://localhost:2000/index.html"
+              originalUrl: "/index.html"
+              filePath: Fixtures.projectPath("no-server/dev/index.html")
               status: 200
               statusText: "OK"
               redirects: []
@@ -130,6 +139,18 @@ describe "Server", ->
             })
 
             expect(Request.sendStream).to.be.calledOnce
+        .then =>
+          @rp({
+            url: "http://localhost:2000/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) =>
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.include("document.domain")
+            expect(res.body).to.include("localhost")
+            expect(buffers.keys()).to.deep.eq([])
 
       it "can follow static file redirects", ->
         @server._onResolveUrl("/sub", @automationRequest)
@@ -137,6 +158,8 @@ describe "Server", ->
           expect(obj).to.deep.eq({
             ok: true
             url: "http://localhost:2000/sub/"
+            originalUrl: "/sub"
+            filePath: Fixtures.projectPath("no-server/dev/sub/")
             status: 200
             statusText: "OK"
             redirects: ["http://localhost:2000/sub/"]
@@ -161,6 +184,8 @@ describe "Server", ->
           expect(obj).to.deep.eq({
             ok: false
             url: "http://localhost:2000/does-not-exist"
+            originalUrl: "/does-not-exist"
+            filePath: Fixtures.projectPath("no-server/dev/does-not-exist")
             status: 404
             statusText: "Not Found"
             redirects: []
@@ -191,6 +216,7 @@ describe "Server", ->
           expect(obj).to.deep.eq({
             ok: true
             url: "http://getbootstrap.com/"
+            originalUrl: "http://getbootstrap.com/"
             status: 200
             statusText: "OK"
             redirects: []
@@ -223,6 +249,7 @@ describe "Server", ->
           expect(obj).to.deep.eq({
             ok: true
             url: "http://espn.go.com/"
+            originalUrl: "http://espn.com/"
             status: 200
             statusText: "OK"
             cookies: []
@@ -264,7 +291,7 @@ describe "Server", ->
 
         nock("http://espn.go.com")
         .get("/")
-        .reply 200, "content", {
+        .reply 200, "<html><head></head><body>espn</body></html>", {
           "Content-Type": "text/html"
         }
 
@@ -273,6 +300,7 @@ describe "Server", ->
           expect(obj).to.deep.eq({
             ok: true
             url: "http://espn.go.com/"
+            originalUrl: "http://espn.com/"
             status: 200
             statusText: "OK"
             cookies: []
@@ -282,11 +310,14 @@ describe "Server", ->
             ]
           })
 
+          expect(buffers.keys()).to.deep.eq(["http://espn.go.com/"])
+        .then =>
           @server._onResolveUrl("http://espn.com/", @automationRequest)
           .then (obj = {}) ->
             expect(obj).to.deep.eq({
               ok: true
               url: "http://espn.go.com/"
+              originalUrl: "http://espn.com/"
               status: 200
               statusText: "OK"
               cookies: []
@@ -297,6 +328,18 @@ describe "Server", ->
             })
 
             expect(Request.sendStream).to.be.calledOnce
+        .then =>
+          @rp({
+            url: "http://espn.go.com/"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) =>
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.include("document.domain")
+            expect(res.body).to.include("go.com")
+            expect(buffers.keys()).to.deep.eq([])
 
       it "does not buffer 'bad' responses", ->
         @sandbox.spy(Request, "sendStream")
@@ -324,6 +367,7 @@ describe "Server", ->
           expect(obj).to.deep.eq({
             ok: false
             url: "http://espn.com/"
+            originalUrl: "http://espn.com/"
             status: 404
             statusText: "Not Found"
             cookies: []
@@ -335,6 +379,7 @@ describe "Server", ->
             expect(obj).to.deep.eq({
               ok: true
               url: "http://espn.go.com/"
+              originalUrl: "http://espn.com/"
               status: 200
               statusText: "OK"
               cookies: []
@@ -364,6 +409,7 @@ describe "Server", ->
           expect(obj).to.deep.eq({
             ok: false
             url: "http://mlb.mlb.com/"
+            originalUrl: "http://mlb.com/"
             status: 500
             statusText: "Server Error"
             cookies: []
@@ -373,6 +419,99 @@ describe "Server", ->
       it "gracefully handles http errors", ->
         @server._onResolveUrl("http://localhost:64646", @automationRequest)
         .then (obj = {}) ->
+          err = obj.__error
+
+          expect(err.message).to.eq("connect ECONNREFUSED 127.0.0.1:64646")
+          expect(err.stack).to.include("Object.exports._errnoException")
+          expect(err.port).to.eq(64646)
+          expect(err.code).to.eq("ECONNREFUSED")
+
+    describe "both", ->
+      beforeEach ->
+        Fixtures.scaffold("no-server")
+
+        @setup({
+          projectRoot: Fixtures.projectPath("no-server")
+          config: {
+            port: 2000
+            fileServerFolder: "dev"
+          }
+        })
+
+      it "can go from file -> http -> file", ->
+        nock("http://www.google.com")
+        .get("/")
+        .reply 200, "content page", {
+          "Content-Type": "text/html"
+        }
+
+        @server._onResolveUrl("/index.html", @automationRequest)
+        .then (obj = {}) ->
           expect(obj).to.deep.eq({
-            __error: "connect ECONNREFUSED 127.0.0.1:64646"
+            ok: true
+            url: "http://localhost:2000/index.html"
+            originalUrl: "/index.html"
+            filePath: Fixtures.projectPath("no-server/dev/index.html")
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
           })
+        .then =>
+          @rp("http://localhost:2000/index.html")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+        .then =>
+          @server._onResolveUrl("http://www.google.com/", @automationRequest)
+        .then (obj = {}) ->
+          expect(obj).to.deep.eq({
+            ok: true
+            url: "http://www.google.com/"
+            originalUrl: "http://www.google.com/"
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
+          })
+        .then =>
+          @rp("http://www.google.com/")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+        .then =>
+          expect(@server._getRemoteState()).to.deep.eq({
+            origin: "http://www.google.com"
+            strategy: "http"
+            visiting: false
+            domainName: "google.com"
+            props: {
+              domain: "google"
+              tld: "com"
+              port: "80"
+            }
+          })
+        .then =>
+          @server._onResolveUrl("/index.html", @automationRequest)
+          .then (obj = {}) ->
+            expect(obj).to.deep.eq({
+              ok: true
+              url: "http://localhost:2000/index.html"
+              originalUrl: "/index.html"
+              filePath: Fixtures.projectPath("no-server/dev/index.html")
+              status: 200
+              statusText: "OK"
+              redirects: []
+              cookies: []
+            })
+        .then =>
+          @rp("http://localhost:2000/index.html")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+        .then =>
+          expect(@server._getRemoteState()).to.deep.eq({
+            origin: "http://localhost:2000"
+            strategy: "file"
+            visiting: false
+            domainName: "localhost"
+            props: null
+          })
+
