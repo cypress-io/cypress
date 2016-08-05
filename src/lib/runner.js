@@ -66,12 +66,11 @@ export default {
 
     reporterBus.on('focus:tests', this.focusTests)
 
-    return driver.setConfig(_.pick(config, 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote'))
-    .then(() => {
-      driver.start()
+    driver.setConfig(_.pick(config, 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote'))
 
-      this._addListeners()
-    })
+    driver.start()
+
+    this._addListeners()
   },
 
   _addListeners () {
