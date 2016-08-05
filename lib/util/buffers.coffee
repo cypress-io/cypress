@@ -1,29 +1,47 @@
-_ = require("lodash")
+_   = require("lodash")
+url = require("url")
 
-buffers = {}
+buffers = []
 
 module.exports = {
   all: -> buffers
 
-  keys: -> _.keys(buffers)
+  keys: -> _.map(buffers, "url")
 
   reset: ->
-    buffers = {}
+    buffers = []
 
   set: (obj = {}) ->
-    buffers[obj.url] = _.pick(obj, "url", "originalUrl", "jar", "stream", "response", "details")
+    buffers.push _.pick(obj, "url", "originalUrl", "jar", "stream", "response", "details")
 
-  getByOriginalUrl: (url) ->
-    _.find buffers, {originalUrl: url}
+  getByOriginalUrl: (str) ->
+    _.find(buffers, {originalUrl: str})
 
-  get: (url) ->
-    buffers[url]
+  get: (str) ->
+    find = (str) ->
+      _.find(buffers, {url: str})
 
-  take: (url) ->
-    buffer = @get(url)
+    b = find(str)
+
+    return b if b
+
+    parsed = url.parse(str)
+
+    ## if we're on https and we have a port
+    ## then attempt to find the buffer by
+    ## slicing off the port since our buffer
+    ## was likely stored without a port
+    if parsed.protocol is "https:" and parsed.port
+      parsed.host = parsed.host.split(":")[0]
+      parsed.port = null
+
+      find(parsed.format())
+
+  take: (str) ->
+    buffer = @get(str)
 
     if buffer
-      delete buffers[url]
+      buffers = _.without(buffers, buffer)
 
     return buffer
 

@@ -2,6 +2,9 @@ require("../spec_helper")
 
 _             = require("lodash")
 rp            = require("request-promise")
+Promise       = require("bluebird")
+evilDns       = require("evil-dns")
+httpsServer   = require("@cypress/core-https-proxy/test/helpers/https_server")
 buffers       = require("#{root}lib/util/buffers")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
@@ -49,25 +52,30 @@ describe "Server", ->
           rp(options)
 
         open = =>
-          ## open our https server
-          # httpsServer.start(8443),
+          Promise.all([
+            ## open our https server
+            httpsServer.start(8443),
 
-          ## and open our cypress server
-          @server = Server()
+            ## and open our cypress server
+            @server = Server()
 
-          @server.open(cfg)
-          .then (port) =>
-            if initialUrl
-              @server._onDomainSet(initialUrl)
+            @server.open(cfg)
+            .then (port) =>
+              if initialUrl
+                @server._onDomainSet(initialUrl)
 
-            @srv = @server.getHttpServer()
+              @srv = @server.getHttpServer()
 
-            # @session = new (Session({app: @srv}))
+              # @session = new (Session({app: @srv}))
 
-            @proxy = "http://localhost:" + port
+              @proxy = "http://localhost:" + port
+          ])
 
         if @server
-          @server.close()
+          Promise.join(
+            httpsServer.stop()
+            @server.close()
+          )
           .then(open)
         else
           open()
@@ -75,7 +83,12 @@ describe "Server", ->
     afterEach ->
       nock.cleanAll()
 
-      @server.close()
+      evilDns.clear()
+
+      Promise.join(
+        @server.close()
+        httpsServer.stop()
+      )
 
     describe "file", ->
       beforeEach ->
@@ -515,3 +528,325 @@ describe "Server", ->
             props: null
           })
 
+      it "can go from http -> file -> http", ->
+        nock("http://www.google.com")
+        .get("/")
+        .reply 200, "<html><head></head><body>google</body></html>", {
+          "Content-Type": "text/html"
+        }
+        .get("/")
+        .reply 200, "<html><head></head><body>google</body></html>", {
+          "Content-Type": "text/html"
+        }
+
+        @server._onResolveUrl("http://www.google.com/", @automationRequest)
+        .then (obj = {}) ->
+          expect(obj).to.deep.eq({
+            ok: true
+            url: "http://www.google.com/"
+            originalUrl: "http://www.google.com/"
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
+          })
+        .then =>
+          @rp({
+            url: "http://www.google.com/"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.include("document.domain")
+            expect(res.body).to.include("google.com")
+        .then =>
+          expect(@server._getRemoteState()).to.deep.eq({
+            origin: "http://www.google.com"
+            strategy: "http"
+            visiting: false
+            domainName: "google.com"
+            props: {
+              domain: "google"
+              tld: "com"
+              port: "80"
+            }
+          })
+        .then =>
+          @server._onResolveUrl("/index.html", @automationRequest)
+          .then (obj = {}) ->
+            expect(obj).to.deep.eq({
+              ok: true
+              url: "http://localhost:2000/index.html"
+              originalUrl: "/index.html"
+              filePath: Fixtures.projectPath("no-server/dev/index.html")
+              status: 200
+              statusText: "OK"
+              redirects: []
+              cookies: []
+            })
+        .then =>
+          @rp({
+            url: "http://localhost:2000/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.include("document.domain")
+            expect(res.body).to.include("localhost")
+        .then =>
+          expect(@server._getRemoteState()).to.deep.eq({
+            origin: "http://localhost:2000"
+            strategy: "file"
+            visiting: false
+            domainName: "localhost"
+            props: null
+          })
+        .then =>
+          @server._onResolveUrl("http://www.google.com/", @automationRequest)
+          .then (obj = {}) ->
+            expect(obj).to.deep.eq({
+              ok: true
+              url: "http://www.google.com/"
+              originalUrl: "http://www.google.com/"
+              status: 200
+              statusText: "OK"
+              redirects: []
+              cookies: []
+            })
+          .then =>
+            @rp({
+              url: "http://www.google.com/"
+              headers: {
+                "Cookie": "__cypress.initial=true"
+              }
+            })
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+              expect(res.body).to.include("document.domain")
+              expect(res.body).to.include("google.com")
+          .then =>
+            expect(@server._getRemoteState()).to.deep.eq({
+              origin: "http://www.google.com"
+              strategy: "http"
+              visiting: false
+              domainName: "google.com"
+              props: {
+                domain: "google"
+                tld: "com"
+                port: "80"
+              }
+            })
+
+      it "can go from https -> file -> https", ->
+        evilDns.add("*.foobar.com", "127.0.0.1")
+
+        @server._onResolveUrl("https://www.foobar.com:8443/", @automationRequest)
+        .then (obj = {}) ->
+          expect(obj).to.deep.eq({
+            ok: true
+            url: "https://www.foobar.com:8443/"
+            originalUrl: "https://www.foobar.com:8443/"
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
+          })
+        .then =>
+          @rp({
+            url: "https://www.foobar.com:8443/"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.include("document.domain")
+            expect(res.body).to.include("foobar.com")
+        .then =>
+          expect(@server._getRemoteState()).to.deep.eq({
+            origin: "https://www.foobar.com:8443"
+            strategy: "http"
+            visiting: false
+            domainName: "foobar.com"
+            props: {
+              domain: "foobar"
+              tld: "com"
+              port: "8443"
+            }
+          })
+        .then =>
+          @server._onResolveUrl("/index.html", @automationRequest)
+          .then (obj = {}) ->
+            expect(obj).to.deep.eq({
+              ok: true
+              url: "http://localhost:2000/index.html"
+              originalUrl: "/index.html"
+              filePath: Fixtures.projectPath("no-server/dev/index.html")
+              status: 200
+              statusText: "OK"
+              redirects: []
+              cookies: []
+            })
+        .then =>
+          @rp({
+            url: "http://localhost:2000/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.include("document.domain")
+            expect(res.body).to.include("localhost")
+        .then =>
+          expect(@server._getRemoteState()).to.deep.eq({
+            origin: "http://localhost:2000"
+            strategy: "file"
+            visiting: false
+            domainName: "localhost"
+            props: null
+          })
+        .then =>
+          @server._onResolveUrl("https://www.foobar.com:8443/", @automationRequest)
+          .then (obj = {}) ->
+            expect(obj).to.deep.eq({
+              ok: true
+              url: "https://www.foobar.com:8443/"
+              originalUrl: "https://www.foobar.com:8443/"
+              status: 200
+              statusText: "OK"
+              redirects: []
+              cookies: []
+            })
+          .then =>
+            @rp({
+              url: "https://www.foobar.com:8443/"
+              headers: {
+                "Cookie": "__cypress.initial=true"
+              }
+            })
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+              expect(res.body).to.include("document.domain")
+              expect(res.body).to.include("foobar.com")
+          .then =>
+            expect(@server._getRemoteState()).to.deep.eq({
+              origin: "https://www.foobar.com:8443"
+              strategy: "http"
+              visiting: false
+              domainName: "foobar.com"
+              props: {
+                domain: "foobar"
+                tld: "com"
+                port: "8443"
+              }
+            })
+
+      it "can go from https -> file -> https without a port", ->
+        @timeout(5000)
+
+        @server._onResolveUrl("https://www.apple.com/", @automationRequest)
+        .then (obj = {}) ->
+          expect(obj).to.deep.eq({
+            ok: true
+            url: "https://www.apple.com/"
+            originalUrl: "https://www.apple.com/"
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
+          })
+        .then =>
+          @rp({
+            url: "https://www.apple.com/"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.include("document.domain")
+            expect(res.body).to.include("apple.com")
+        .then =>
+          expect(@server._getRemoteState()).to.deep.eq({
+            origin: "https://www.apple.com"
+            strategy: "http"
+            visiting: false
+            domainName: "apple.com"
+            props: {
+              domain: "apple"
+              tld: "com"
+              port: "443"
+            }
+          })
+        .then =>
+          @server._onResolveUrl("/index.html", @automationRequest)
+          .then (obj = {}) ->
+            expect(obj).to.deep.eq({
+              ok: true
+              url: "http://localhost:2000/index.html"
+              originalUrl: "/index.html"
+              filePath: Fixtures.projectPath("no-server/dev/index.html")
+              status: 200
+              statusText: "OK"
+              redirects: []
+              cookies: []
+            })
+        .then =>
+          @rp({
+            url: "http://localhost:2000/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.include("document.domain")
+            expect(res.body).to.include("localhost")
+        .then =>
+          expect(@server._getRemoteState()).to.deep.eq({
+            origin: "http://localhost:2000"
+            strategy: "file"
+            visiting: false
+            domainName: "localhost"
+            props: null
+          })
+        .then =>
+          @server._onResolveUrl("https://www.apple.com/", @automationRequest)
+          .then (obj = {}) ->
+            expect(obj).to.deep.eq({
+              ok: true
+              url: "https://www.apple.com/"
+              originalUrl: "https://www.apple.com/"
+              status: 200
+              statusText: "OK"
+              redirects: []
+              cookies: []
+            })
+          .then =>
+            @rp({
+              url: "https://www.apple.com/"
+              headers: {
+                "Cookie": "__cypress.initial=true"
+              }
+            })
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+              expect(res.body).to.include("document.domain")
+              expect(res.body).to.include("apple.com")
+          .then =>
+            expect(@server._getRemoteState()).to.deep.eq({
+              origin: "https://www.apple.com"
+              strategy: "http"
+              visiting: false
+              domainName: "apple.com"
+              props: {
+                domain: "apple"
+                tld: "com"
+                port: "443"
+              }
+            })
