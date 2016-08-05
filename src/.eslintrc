@@ -1,7 +1,11 @@
 {
   "env": {
     "browser": true,
-    "node": true
+    "node": true,
+    "mocha": true
+  },
+  "globals": {
+    "expect": true
   },
   "parser": "babel-eslint",
   "parserOptions": {
@@ -12,6 +16,7 @@
     }
   },
   "plugins": [
+    "mocha",
     "react"
   ],
   "rules": {

@@ -4,9 +4,7 @@ var setZunderConfig = require('./set-zunder-config')
 
 setZunderConfig(z)
 
-u.parallel(
-  z.watchScripts,
-  z.watchTests,
-  z.watchStylesheets,
-  z.watchStaticAssets
+u.series(
+  z.applyTestEnv,
+  z.runTests
 )()
