@@ -13,50 +13,39 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
     setConfig: (config = {}) ->
       ## config.remote
       # {
-      #   origin: "<root>""
+      #   origin: "http://localhost:2020"
       #   domainName: "localhost"
-      #   port: 2020
-      #   tld: "localhost"
-      #   domain: ""
+      #   props: null
+      #   strategy: "file"
       # }
 
       # -- or --
 
       # {
-      #   origin: "https://foo.google.com" or "<root>""
+      #   origin: "https://foo.google.com"
       #   domainName: "google.com"
-      #   port: 443
-      #   tld: "com"
-      #   domain: "google"
+      #   strategy: "http"
+      #   props: {
+      #     port: 443
+      #     tld: "com"
+      #     domain: "google"
+      #   }
       # }
-      Promise.try =>
 
-        setConfig = =>
-          ## set domainName but allow us to turn
-          ## off this feature in testing
-          if d = config.remote.domainName
-            document.domain = d
+      ## set domainName but allow us to turn
+      ## off this feature in testing
+      if d = config.remote.domainName
+        document.domain = d
 
-          {environmentVariables, remote} = config
+      {environmentVariables, remote} = config
 
-          config = _.omit(config, "environmentVariables", "remote")
+      config = _.omit(config, "environmentVariables", "remote")
 
-          $Cypress.EnvironmentVariables.create(@, environmentVariables)
-          $Cypress.Config.create(@, config)
-          $Cypress.Cookies.create(@, config.namespace, remote.domainName)
+      $Cypress.EnvironmentVariables.create(@, environmentVariables)
+      $Cypress.Config.create(@, config)
+      $Cypress.Cookies.create(@, config.namespace, remote.domainName)
 
-          @trigger("config", config)
-
-        location = $Cypress.Location.create(window.location.href)
-
-        if not _.str.include(location.hostname, config.remote.domainName)
-          new Promise (resolve) =>
-            @trigger("set:domain", location.href, resolve)
-          .then (remote) ->
-            config.remote = remote
-            setConfig()
-        else
-          setConfig()
+      @trigger("config", config)
 
     initialize: (specWindow, $remoteIframe) ->
       ## push down the options
