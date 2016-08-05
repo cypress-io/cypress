@@ -15,7 +15,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     """
     #{phrase} '#{redirects.length}' #{word} to:
 
-    #{list}
+    #{list.join("\n")}
     """
 
   return {
@@ -376,7 +376,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
           The internal Cypress web server responded with:
 
-            > #{obj.status} - #{obj.statusText}
+            > #{obj.status}: #{obj.statusText}
 
           #{getRedirects(obj, "We were redirected")}
         """
@@ -388,7 +388,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
           The response we received from your web server was:
 
-            > #{obj.status} - #{obj.statusText}
+            > #{obj.status}: #{obj.statusText}
 
           This was considered a failure because the status code was not '2xx'.
 

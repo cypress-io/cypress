@@ -210,30 +210,30 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
           domainName: "" ## do not set document.domain!
         }
       })
-      .then =>
-        @Cypress.trigger "initialize", {$remoteIframe: @$iframe}
 
-        ## must call defaults manually because
-        ## this is naturally called in initialize
-        ## AFTER we instantiate our helper classes
-        # @Cypress.defaults()
+      @Cypress.trigger "initialize", {$remoteIframe: @$iframe}
 
-        ## set the jquery engine to be our window so we dont have to juggle
-        ## the gazillions of edge cases caused by the remote $ elements being
-        ## juggled throughout our expectations
-        @Cypress.option("jQuery", $)
+      ## must call defaults manually because
+      ## this is naturally called in initialize
+      ## AFTER we instantiate our helper classes
+      # @Cypress.defaults()
 
-        if ct
-          @Cypress.trigger "test:before:hooks", {id: 123}, {}
-          @Cypress.set(ct)
-          ct.enableTimeouts(false)
+      ## set the jquery engine to be our window so we dont have to juggle
+      ## the gazillions of edge cases caused by the remote $ elements being
+      ## juggled throughout our expectations
+      @Cypress.option("jQuery", $)
 
-        @Cypress.on("resolve:url", resolveUrl)
+      if ct
+        @Cypress.trigger "test:before:hooks", {id: 123}, {}
+        @Cypress.set(ct)
+        ct.enableTimeouts(false)
 
-        ## handle the fail event ourselves
-        ## since we bypass our Runner instance
-        @Cypress.on "fail", (err) ->
-          console.error(err.stack)
+      @Cypress.on("resolve:url", resolveUrl)
+
+      ## handle the fail event ourselves
+      ## since we bypass our Runner instance
+      @Cypress.on "fail", (err) ->
+        console.error(err.stack)
 
     ## if we've changed the src by navigating
     ## away (aka cy.visit(...)) then we need
