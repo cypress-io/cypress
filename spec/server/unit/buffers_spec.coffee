@@ -37,3 +37,30 @@ describe "lib/util/buffers", ->
       buffer = buffers.getByOriginalUrl("foo")
 
       expect(buffer).to.deep.eq(obj)
+
+  context "#take", ->
+    it "removes the found buffer", ->
+      obj = {url: "https://www.google.com/"}
+
+      buffers.set(obj)
+
+      expect(buffers.all()).to.have.length(1)
+
+      buffer = buffers.take("https://www.google.com:443/")
+
+      expect(buffer).to.deep.eq(obj)
+
+      expect(buffers.all()).to.have.length(0)
+
+    it "does not remove anything when not found", ->
+      obj = {url: "https://www.google.com/"}
+
+      buffers.set(obj)
+
+      expect(buffers.all()).to.have.length(1)
+
+      buffer = buffers.take("asdf")
+
+      expect(buffer).to.be.undefined
+
+      expect(buffers.all()).to.have.length(1)

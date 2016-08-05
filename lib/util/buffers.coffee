@@ -38,9 +38,7 @@ module.exports = {
       find(parsed.format())
 
   take: (str) ->
-    buffer = @get(str)
-
-    if buffer
+    if buffer = @get(str)
       buffers = _.without(buffers, buffer)
 
     return buffer
