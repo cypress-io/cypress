@@ -58,26 +58,14 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
     _resolveUrl: (url) ->
       Cypress.triggerPromise("resolve:url", url)
       .then (resp = {}) ->
-        ## .then (resolvedUrl, statusCode, redirects, html, ok) ->
-        ## display redirects
-        ## display statusCode
-        ## potentially hand back the failure url?
-        ## so we can update the iframe directly?
         if resp.ok
           resp.url
         else
-          debugger
-        ## support here
-        ## and remove initial handling
-        ## from the proxy layer completely
+          err = new Error
+          err.gotResponse = true
+          _.extend(err, resp)
 
-      # else
-      #   ## TODO: double check this
-      #   ## file exists
-      #   # checkForLocalFile(url)
-      #   # .then ->
-      #   Promise.resolve(url)
-      #   # .catch (err) ->
+          throw err
 
     submitting: (e, options = {}) ->
       ## even though our beforeunload event
@@ -330,6 +318,14 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
       p = new Promise (resolve, reject) =>
 
+        visitFailedByErr = (err, fn) ->
+          Cypress.trigger("visit:failed", err)
+
+          try
+            fn()
+          catch e
+            reject(e)
+
         cannotVisit2ndDomain = (origin) ->
           try
             $Cypress.Utils.throwErrByPath("visit.cannot_visit_2nd_domain", {
@@ -342,6 +338,9 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           catch e
             return reject(e)
 
+        gotResponse = (err) ->
+          err.gotResponse is true
+
         visit = (win, url, options) =>
           ## when the remote iframe's load event fires
           ## callback fn
@@ -350,18 +349,10 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           $remoteIframe.one "load", =>
             @_timeout(prevTimeout)
             options.onLoad?.call(runnable.ctx, win)
-            if @$$("[data-cypress-visit-error]").length
-              try
-                $Cypress.Utils.throwErrByPath("visit.loading_failed", {
-                  onFail: options._log
-                  args: { url }
-                })
-              catch e
-                reject(e)
-            else
-              options._log.set({url: url}).snapshot() if options._log
 
-              resolve(win)
+            options._log.set({url: url}).snapshot() if options._log
+
+            resolve(win)
 
           ## hold onto our existing url
           existing = @_existing()
@@ -441,7 +432,32 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                 .setAnchor(existing.hash)
 
                 @_replace(window, newUri.toString())
-          .catch(reject)
+          .catch gotResponse, (err) ->
+            visitFailedByErr err, ->
+              args = {
+                url:        err.originalUrl
+                path:       err.filePath
+                status:     err.status
+                statusText: err.statusText
+                redirects:  err.redirects
+              }
+
+              type = if err.filePath then "file" else "http"
+
+              $Cypress.Utils.throwErrByPath("visit.loading_#{type}_failed", {
+                onFail: options._log
+                args: args
+              })
+          .catch (err) ->
+            visitFailedByErr err, ->
+              $Cypress.Utils.throwErrByPath("visit.loading_network_failed", {
+                onFail: options._log
+                args: {
+                  url:   url
+                  error: err
+                  stack: err.stack
+                }
+              })
 
         ## if we're visiting a page and we're not currently
         ## on about:blank then we need to nuke the window

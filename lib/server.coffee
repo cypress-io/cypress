@@ -251,7 +251,7 @@ class Server
         error = (err) ->
           restorePreviousState()
 
-          resolve({__error: err.message})
+          resolve({__error: errors.clone(err)})
 
         getStatusText = (code) ->
           try
@@ -278,9 +278,10 @@ class Server
                 ok: isOkay
                 url: newUrl
                 status: incomingRes.statusCode
+                cookies: c
                 statusText: getStatusText(incomingRes.statusCode)
                 redirects: redirects
-                cookies: c
+                originalUrl: originalUrl
               }
 
               ## does this response have this cypress header?

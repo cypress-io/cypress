@@ -38,8 +38,9 @@ do ($Cypress, _) ->
               err = new Error(e)
             else
               err = new Error(e.message)
-              err.name  = e.name
-              err.stack = e.stack
+
+              for own prop, val of e
+                err[prop] = val
 
             reject(err)
           else
