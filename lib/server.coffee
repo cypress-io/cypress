@@ -418,10 +418,13 @@ class Server
     ## bail if this is our own namespaced socket.io request
     return if req.url.startsWith(socketIoRoute)
 
-    if @_remoteProps and remoteOrigin = @_remoteOrigin
-      ## get the hostname + port from the remoteHostPort
-      {port}               = @_remoteProps
-      {hostname, protocol} = url.parse(remoteOrigin)
+    if (host = req.headers.host) and @_remoteProps and (remoteOrigin = @_remoteOrigin)
+      ## get the port from @_remoteProps
+      ## get the protocol from remoteOrigin
+      ## get the hostname from host header
+      {port}     = @_remoteProps
+      {protocol} = url.parse(remoteOrigin)
+      {hostname} = url.parse("http://#{host}")
 
       proxy.ws(req, socket, head, {
         secure: false

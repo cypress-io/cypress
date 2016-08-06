@@ -4,6 +4,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 ws          = require("ws")
 httpsAgent  = require("https-proxy-agent")
+evilDns     = require("evil-dns")
 Promise     = require("bluebird")
 socketIo    = require("@cypress/core-socket")
 httpsServer = require("@cypress/core-https-proxy/test/helpers/https_server")
@@ -36,6 +37,8 @@ describe "Web Sockets", ->
 
   afterEach ->
     Fixtures.remove()
+
+    evilDns.clear()
 
     @ws.close()
     @wss.close()
@@ -103,6 +106,36 @@ describe "Web Sockets", ->
           c.send "response:#{msg}"
 
       client = new ws("wss://localhost:#{wssPort}", {
+        agent: agent
+      })
+
+      client.on "message", (data) ->
+        expect(data).to.eq("response:foo")
+        done()
+
+      client.on "open", ->
+        client.send("foo")
+
+    it "proxies through subdomain by using host header", (done) ->
+      ## we specifically only allow remote connections
+      ## to ws.foobar.com since that is where the websocket
+      ## server is mounted and this tests that we make
+      ## a connection to the right host instead of the
+      ## origin (which isnt ws.foobar.com)
+      nock.enableNetConnect("ws.foobar.com")
+
+      evilDns.add("ws.foobar.com", "127.0.0.1")
+
+      ## force node into legit proxy mode like a browser
+      agent = new httpsAgent("http://localhost:#{cyPort}")
+
+      @server._onDomainSet("https://foobar.com:#{wssPort}")
+
+      @wss.on "connection", (c) ->
+        c.on "message", (msg) ->
+          c.send "response:#{msg}"
+
+      client = new ws("wss://ws.foobar.com:#{wssPort}", {
         agent: agent
       })
 
