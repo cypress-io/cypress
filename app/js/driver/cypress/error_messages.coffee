@@ -341,8 +341,22 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"
 
     visit:
-      cannot_visit_2nd_domain: "#{cmd('visit')} cannot visit a 2nd unique domain during a single test run. The previous domain visited was: '{{previousDomain}}'. You're attempting to visit: '{{attemptedDomain}}'"
       invalid_1st_arg: "#{cmd('visit')} must be called with a string as its 1st argument"
+      cannot_visit_2nd_domain: """
+        #{cmd('visit')} failed because you are attempting to visit a second unique domain.
+
+        You may only visit a single unique domain per test.
+
+        Different subdomains are okay, but unique domains are not.
+
+        The previous domain you visited was: '{{previousDomain}}'
+
+        You're attempting to visit this new domain: '{{attemptedDomain}}'
+
+        You may need to restructure some of your code to prevent this from happening.
+
+        https://on.cypress.io/cannot-visit-second-unique-domain
+      """
       loading_network_failed: """
         #{cmd('visit')} failed trying to load:
 
