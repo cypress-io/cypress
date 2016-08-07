@@ -10,6 +10,7 @@ excerpt: Errors that require additional explanation are listed here.
 - :fa-angle-right: [cy.method() failed because the element is currently animating](#section-cy-method-failed-because-the-element-is-currently-animating)
 - :fa-angle-right: [Running Cypress in CI requires a secret project key](#section-running-cypress-in-ci-requires-a-secret-project-key)
 - :fa-angle-right: [The test has finished but Cypress still has commands in its queue](#section-the-test-has-finished-but-cypress-still-has-commands-in-its-queue)
+- :fa-angle-right: [cy.visit() failed because you're attempting to visit a second unique domain](#section-cy-visit-failed-because-youre-attempting-to-visit-a-second-unique-domain)
 
 ***
 
@@ -26,7 +27,7 @@ You'll typically receive this message due to:
 
 Check the console in your Developer Tools for JavaScript errors or warnings. If Cypress failed to compile a `.coffee` file, you will see the network request has a `500` status code in the Network tab.
 
-You'll also get this message if you've have an empty test file, and have not yet written any tests.
+You'll also get this message if you have an empty test file, and have not yet written any tests.
 
 ***
 
@@ -334,3 +335,9 @@ describe("another complex example using a forgotten 'return'", function(){
   })
 })
 ```
+
+***
+
+# cy.visit() failed because you're attempting to visit a second unique domain
+
+TBD.
