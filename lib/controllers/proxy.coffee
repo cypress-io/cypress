@@ -19,6 +19,9 @@ headRe           = /(<head.*?>)/
 htmlRe           = /(<html.*?>)/
 okStatusRe       = /^[2|3|4]\d+$/
 
+convertNewLinesToBr = (text) ->
+  text.split("\n").join("<br />")
+
 setCookie = (res, key, val, domainName) ->
   res.cookie(key, val, {
     domain: domainName
@@ -148,11 +151,9 @@ module.exports = {
         #{remoteUrl}
 
 
-
         The error was:
 
         #{err.message}
-
 
 
         The stack trace was:
@@ -162,7 +163,7 @@ module.exports = {
 
         res
         .status(status)
-        .send(text)
+        .send(convertNewLinesToBr(text))
 
       ## do not accept gzip if this is initial
       ## since we have to rewrite html and we dont
@@ -233,7 +234,7 @@ module.exports = {
 
       res
       .status(status)
-      .send(text)
+      .send(convertNewLinesToBr(text))
 
     sendOpts = {
       root: path.resolve(config.fileServerFolder)
