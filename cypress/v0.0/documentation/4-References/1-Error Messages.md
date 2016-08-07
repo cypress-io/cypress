@@ -10,7 +10,7 @@ excerpt: Errors that require additional explanation are listed here.
 - :fa-angle-right: [cy.method() failed because the element is currently animating](#section-cy-method-failed-because-the-element-is-currently-animating)
 - :fa-angle-right: [Running Cypress in CI requires a secret project key](#section-running-cypress-in-ci-requires-a-secret-project-key)
 - :fa-angle-right: [The test has finished but Cypress still has commands in its queue](#section-the-test-has-finished-but-cypress-still-has-commands-in-its-queue)
-- :fa-angle-right: [cy.visit() failed because you're attempting to visit a second unique domain](#section-cy-visit-failed-because-youre-attempting-to-visit-a-second-unique-domain)
+- :fa-angle-right: [cy.visit() failed because you're attempting to visit a second unique domain](#section-cy-visit-failed-because-you-are-attempting-to-visit-a-second-unique-domain)
 
 ***
 
@@ -338,6 +338,6 @@ describe("another complex example using a forgotten 'return'", function(){
 
 ***
 
-# cy.visit() failed because you're attempting to visit a second unique domain
+# cy.visit() failed because you are attempting to visit a second unique domain
 
 TBD.
