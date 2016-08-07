@@ -322,7 +322,9 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
       p = new Promise (resolve, reject) =>
 
-        visitFailedByErr = (err, fn) ->
+        visitFailedByErr = (err, url, fn) ->
+          err.url = url
+
           Cypress.trigger("visit:failed", err)
 
           try
@@ -449,7 +451,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
                 @_replace(window, newUri.toString())
           .catch gotResponse, (err) ->
-            visitFailedByErr err, ->
+            visitFailedByErr err, err.originalUrl, ->
               args = {
                 url:        err.originalUrl
                 path:       err.filePath
@@ -465,7 +467,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                 args: args
               })
           .catch (err) ->
-            visitFailedByErr err, ->
+            visitFailedByErr err, url, ->
               $Cypress.Utils.throwErrByPath("visit.loading_network_failed", {
                 onFail: options._log
                 args: {
