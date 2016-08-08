@@ -23,7 +23,9 @@ convertNewLinesToBr = (text) ->
   text.split("\n").join("<br />")
 
 setCookie = (res, key, val, domainName) ->
-  res.cookie(key, val, {
+  method = if val then "cookie" else "clearCookie"
+
+  res[method](key, val, {
     domain: domainName
   })
 

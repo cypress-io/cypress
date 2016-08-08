@@ -1025,7 +1025,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(500)
           expect(res.body).to.eq("server error")
-          expect(res.headers["set-cookie"]).to.match(/__cypress.initial=false/)
+          expect(res.headers["set-cookie"]).to.match(/__cypress.initial=;/)
 
       it "sends back cypress content on actual request errors", ->
         @rp("http://localhost:64644")
@@ -1090,7 +1090,7 @@ describe "Routes", ->
           })
           .then (res) =>
             expect(res.statusCode).to.eq(200)
-            expect(res.headers["set-cookie"]).to.match(/initial=false/)
+            expect(res.headers["set-cookie"]).to.match(/initial=;/)
 
       describe "when initial is false", ->
         it "does not reset initial or remoteHost", ->
@@ -1184,10 +1184,10 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          expect(res.headers["set-cookie"]).to.deep.eq [
-            "userId=123; Path=/"
-            "__cypress.initial=false; Domain=localhost; Path=/"
-          ]
+          setCookie = res.headers["set-cookie"]
+
+          expect(setCookie[0]).to.eq("userId=123; Path=/")
+          expect(setCookie[1]).to.eq("__cypress.initial=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT")
 
       it "appends cookies on redirects", ->
         nock(@server._remoteOrigin)
@@ -1443,7 +1443,7 @@ describe "Routes", ->
           @rp(res.headers["location"])
           .then (res) ->
             expect(res.statusCode).to.eq(200)
-            expect(res.headers["set-cookie"]).to.match(/initial=false/)
+            expect(res.headers["set-cookie"]).to.match(/initial=;/)
 
             body = removeWhitespace(res.body)
             expect(body).to.eq contents
@@ -1721,7 +1721,7 @@ describe "Routes", ->
             expect(res.body).to.match(/index.html content/)
             expect(res.body).to.match(/sinon.js/)
 
-            expect(res.headers["set-cookie"]).to.match(/initial=false/)
+            expect(res.headers["set-cookie"]).to.match(/initial=;/)
             expect(res.headers["etag"]).to.be.undefined
             expect(res.headers["last-modified"]).to.be.undefined
 
