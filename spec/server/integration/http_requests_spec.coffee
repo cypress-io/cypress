@@ -1485,6 +1485,13 @@ describe "Routes", ->
       it "injects into https://www.google.com", ->
         @setup("https://www.google.com")
         .then =>
+          @server.onRequest (req, res) ->
+            nock("https://www.google.com")
+            .get("/")
+            .reply 200, "<html><head></head><body>google</body></html>", {
+              "Content-Type": "text/html"
+            }
+
           @rp({
             url: "https://www.google.com/"
             headers: {

@@ -44,6 +44,7 @@ class Server
     if not (@ instanceof Server)
       return new Server
 
+    @_middleware = null
     @_server     = null
     @_socket     = null
     @_wsProxy    = null
@@ -58,8 +59,16 @@ class Server
 
     ## handle the proxied url in case
     ## we have not yet started our websocket server
-    app.use (req, res, next) ->
+    app.use (req, res, next) =>
       setProxiedUrl(req)
+
+      ## if we've defined some middlware
+      ## then call this. useful in tests
+      if m = @_middleware
+        m(req, res)
+
+      ## always continue on
+
       next()
 
     app.use require("cookie-parser")()
@@ -459,12 +468,24 @@ class Server
       @_socket?.close()
       @_httpsProxy?.close()
     )
+    .then =>
+      ## reset any middleware
+      @_middleware = null
 
   end: ->
     @_socket and @_socket.end()
 
   changeToUrl: (url) ->
     @_socket and @_socket.changeToUrl(url)
+
+  onRequest: (fn) ->
+    @_middleware = fn
+
+  onNextRequest: (fn) ->
+    @onRequest =>
+      fn.apply(@, arguments)
+
+      @_middleware = null
 
   startWebsockets: (watchers, config, options = {}) ->
     options.onResolveUrl = (urlStr, automationRequest, cb) =>
