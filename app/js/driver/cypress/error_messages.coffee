@@ -245,7 +245,17 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     navigation:
       loading_failed: "Loading the new page failed."
-      timed_out: "Timed out after waiting '{{ms}}ms' for your remote page to load."
+      timed_out: """
+        Timed out after waiting '{{ms}}ms' for your remote page to load.
+
+        Your page did not fire its 'load' event within '{{ms}}ms'.
+
+        You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
+
+        Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
+
+        When this 'load' event occurs, Cypress will continue running commands.
+      """
 
     ng:
       no_global: "Angular global (window.angular) was not found in your window. You cannot use #{cmd('ng')} methods without angular."
