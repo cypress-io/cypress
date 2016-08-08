@@ -649,7 +649,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include("cannot visit a 2nd unique domain")
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
           expect(logs.length).to.eq(2)
           expect(@log.get("error")).to.eq(err)
           done()
@@ -665,7 +665,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include("cannot visit a 2nd unique domain")
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
           expect(logs.length).to.eq(2)
           expect(@log.get("error")).to.eq(err)
           done()
@@ -681,7 +681,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include("cannot visit a 2nd unique domain")
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
           expect(logs.length).to.eq(2)
           expect(@log.get("error")).to.eq(err)
           done()
@@ -711,7 +711,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include("cannot visit a 2nd unique domain")
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
           expect(logs.length).to.eq(2)
           expect(@log.get("error")).to.eq(err)
           done()
@@ -755,6 +755,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(err.message).to.include("Common situations why this would fail:")
           expect(err.message).to.include("The stack trace for this error is:")
           expect(err.message).to.include("some stack props")
+          expect(err1.url).to.eq("foo.html") ## TODO: fix this
           expect(trigger).to.be.calledWith("visit:failed", err1)
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
@@ -771,6 +772,9 @@ describe "$Cypress.Cy Navigation Commands", ->
           statusText: "Not Found"
           redirects: []
         }
+
+        visitErrObj = _.clone(obj)
+        obj.url = obj.originalUrl
 
         ## TODO: fix this
         # @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "/foo.html").resolves(obj)
@@ -809,6 +813,9 @@ describe "$Cypress.Cy Navigation Commands", ->
           ]
         }
 
+        visitErrObj = _.clone(obj)
+        obj.url = obj.originalUrl
+
         ## TODO: fix this
         # @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "/bar").resolves(obj)
         @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "bar").resolves(obj)
@@ -845,6 +852,9 @@ describe "$Cypress.Cy Navigation Commands", ->
           redirects: []
         }
 
+        visitErrObj = _.clone(obj)
+        obj.url = obj.originalUrl
+
         @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
 
         trigger = @sandbox.spy(@Cypress, "trigger")
@@ -878,6 +888,9 @@ describe "$Cypress.Cy Navigation Commands", ->
             "301: https://gmail.com/"
           ]
         }
+
+        visitErrObj = _.clone(obj)
+        obj.url = obj.originalUrl
 
         @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
 
