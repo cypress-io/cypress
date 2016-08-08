@@ -43,6 +43,14 @@ export default {
     channel.on('change:to:url', (url) => {
       window.location.href = url
     })
+
+    channel.on('automation:push:message', (msg, data = {}) => {
+      switch(msg) {
+        case 'change:cookie':
+          driver.Cookies.log(data.message, data.cookie, data.removed)
+          break
+      }
+    })
   },
 
   start (config) {
