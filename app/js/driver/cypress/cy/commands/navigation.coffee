@@ -389,6 +389,12 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
               if url isnt originalUrl
                 consoleProps["Original Url"] = originalUrl
 
+            if options.log and redirects.length
+              indicateRedirects = ->
+                [originalUrl].concat(redirects).join(" -> ")
+
+              options._log.set({message: indicateRedirects()})
+
             consoleProps["Resolved Url"]  = url
             consoleProps["Redirects"]     = redirects
             consoleProps["Cookies Set"]   = cookies

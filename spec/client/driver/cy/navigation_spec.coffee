@@ -564,6 +564,20 @@ describe "$Cypress.Cy Navigation Commands", ->
             "Cookies Set": [{}, {}]
           })
 
+      it "indicates redirects in the message", ->
+        @sandbox.stub(@cy, "_resolveUrl").resolves({
+          ok: true
+          url: "http://localhost:3500/foo/bar"
+          originalUrl: "http://localhost:3500/foo"
+          redirects: [1, 2]
+          cookies: [{}, {}]
+        })
+
+        @cy.visit("http://localhost:3500/foo").then ->
+          expect(@log.get("message")).to.eq(
+            "http://localhost:3500/foo -> 1 -> 2"
+          )
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
