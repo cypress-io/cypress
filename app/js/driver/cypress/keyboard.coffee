@@ -396,15 +396,11 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
           otherKeys = false
 
       if otherKeys
-        modifiers = Cypress.Keyboard.modifiers
         _.extend event, {
-          altKey: modifiers.alt
-          ctrlKey: modifiers.ctrl
           location: 0
-          metaKey: modifiers.meta
           repeat: false
-          shiftKey: modifiers.shift
         }
+        @mixinModifiers(event)
 
       if keys
         _.extend event, {
@@ -493,4 +489,14 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       meta: false
       shift: false
     }
+
+    mixinModifiers: (event) ->
+      modifiers = Cypress.Keyboard.modifiers
+  
+      _.extend(event, {
+        altKey: modifiers.alt
+        ctrlKey: modifiers.ctrl
+        metaKey: modifiers.meta
+        shiftKey: modifiers.shift
+      })
   }

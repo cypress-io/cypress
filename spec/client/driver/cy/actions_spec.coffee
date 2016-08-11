@@ -5593,7 +5593,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
           expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
-  context.only "#setModifiers", ->
+  context "#setModifiers", ->
     describe "activating modifiers", ->
       it "sends keydown event for modifiers", (done) ->
         $doc = @cy.$$(@cy.private("document"))
@@ -5609,7 +5609,7 @@ describe "$Cypress.Cy Actions Commands", ->
           $doc.off("keydown")
           done()
 
-      it "maintains modifier for typing subsequent characters", (done) ->
+      it "maintains modifiers for typing subsequent characters", (done) ->
         $input = @cy.$$("input:text:first")
         event = null
         $input.on "keydown", (e)->
@@ -5622,6 +5622,30 @@ describe "$Cypress.Cy Actions Commands", ->
             expect(event.altKey).to.be.true
             @cy.setModifiers()
             $input.off "keydown"
+            done()
+
+      it "maintains modifiers for subsequent clicks", (done) ->
+        $button = @cy.$$("button:first")
+        mouseDownEvent = null
+        mouseUpEvent = null
+        clickEvent = null
+        $button.on "mousedown", (e)-> mouseDownEvent = e
+        $button.on "mouseup", (e)-> mouseUpEvent = e
+        $button.on "click", (e)-> clickEvent = e
+
+        @cy
+          .setModifiers(["meta", "alt"])
+          .get("button:first").click().then ->
+            expect(mouseDownEvent.metaKey).to.be.true
+            expect(mouseDownEvent.altKey).to.be.true
+            expect(mouseUpEvent.metaKey).to.be.true
+            expect(mouseUpEvent.altKey).to.be.true
+            expect(clickEvent.metaKey).to.be.true
+            expect(clickEvent.altKey).to.be.true
+            @cy.setModifiers()
+            $button.off "mousedown"
+            $button.off "mouseup"
+            $button.off "click"
             done()
 
       describe "changing modifiers", ->
