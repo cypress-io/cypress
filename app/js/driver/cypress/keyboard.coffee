@@ -38,6 +38,13 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       34:  222  ## " --- 222
     }
 
+    modifierCodeMap: {
+      alt: 18
+      ctrl: 17
+      meta: 91
+      shift: 16
+    }
+
     specialChars: {
       "{selectall}": (el, options) ->
         options.rng.bounds('all').select()
@@ -389,13 +396,14 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
           otherKeys = false
 
       if otherKeys
+        modifiers = Cypress.Keyboard.modifiers
         _.extend event, {
-          altKey: false
-          ctrlKey: false
+          altKey: modifiers.alt
+          ctrlKey: modifiers.ctrl
           location: 0
-          metaKey: false
+          metaKey: modifiers.meta
           repeat: false
-          shiftKey: false
+          shiftKey: modifiers.shift
         }
 
       if keys
@@ -425,6 +433,16 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
       return dispatched
 
+    simulateModifier: (el, eventType, modifier, window) ->
+      @simulateKey(el, eventType, null, {
+        beforeKey: ""
+        charCode: @modifierCodeMap[modifier]
+        id: _.uniqueId("char")
+        window: window
+        onBeforeEvent: ->
+        onEvent: ->
+      })
+
     updateValue: (rng, key) ->
       rng.text(key, "end")
 
@@ -449,7 +467,7 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         if @simulateKey(el, "keypress", key, options)
           if @simulateKey(el, "textInput", key, options)
 
-            ## only call this function is we haven't been told to not to
+            ## only call this function if we haven't been told not to
             if fn and options.onBeforeSpecialCharAction.call(@, options.id, options.key) isnt false
               fn.call(@)
 
@@ -468,4 +486,11 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       else
         allChars = _.keys(@specialChars).join(", ")
         options.onNoMatchingSpecialChars(chars, allChars)
+
+    modifiers: {
+      alt: false
+      ctrl: false
+      meta: false
+      shift: false
+    }
   }

@@ -1483,3 +1483,48 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             @verifyUpcomingAssertions(options.$el, options, {
               onRetry: verifyAssertions
             })
+
+  Cypress.addParentCommand
+    setModifiers: (modifiers = []) ->
+      validModifiers = "alt option ctrl control meta command cmd shift".split(" ")
+      ## TODO: add assertions
+      ## - modifiers is undefined or an array
+      ## - valid modifiers
+
+      if !_.isArray(modifiers)
+        $Cypress.Utils.throwErrByPath("setModifiers.invalid_argument", {
+          args: { arg: modifiers }
+        })
+
+      invalidModifiers = _.filter modifiers, (modifier) ->
+        !_.contains(validModifiers, modifier)
+      if invalidModifiers.length
+        $Cypress.Utils.throwErrByPath("setModifiers.invalid_modifiers", {
+          args: {
+            invalidModifiers: invalidModifiers.join(", ")
+            validModifiers: validModifiers.join(", ")
+          }
+        })
+
+      ## make modifiers array into an object for constant time lookups below
+      modObj = _.reduce(modifiers, (memo, modifier) ->
+        memo[modifier] = true
+        memo
+      , {})
+
+      previousModifiers = _.clone(Cypress.Keyboard.modifiers)
+      newModifiers = {
+        alt: modObj.alt or modObj.option or false
+        ctrl: modObj.ctrl or modObj.control or false
+        meta: modObj.meta or modObj.command or modObj.cmd or false
+        shift: modObj.shift or false
+      }
+
+      for modifier, newValue of newModifiers
+        Cypress.Keyboard.modifiers[modifier] = newValue
+        if previousModifiers[modifier] is false and newValue is true
+          ## modifier activated
+          Cypress.Keyboard.simulateModifier(@private("document"), "keydown", modifier, @private("window"))
+        else if previousModifiers[modifier] is true and newValue is false
+          ## modifier released
+          Cypress.Keyboard.simulateModifier(@private("document"), "keyup", modifier, @private("window"))

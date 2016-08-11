@@ -5592,3 +5592,126 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button:first").click({force: true, timeout: 1000}).then ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
           expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
+
+  context.only "#setModifiers", ->
+    describe "activating modifiers", ->
+      it "sends keydown event for modifiers", (done) ->
+        $doc = @cy.$$(@cy.private("document"))
+        event = null
+        $doc.on "keydown", (e)->
+          event = e
+
+        @cy.setModifiers(["shift", "ctrl"]).then ->
+          expect(event.shiftKey).to.be.true
+          expect(event.ctrlKey).to.be.true
+          expect(event.which).to.equal(16)
+          @cy.setModifiers()
+          $doc.off("keydown")
+          done()
+
+      it "maintains modifier for typing subsequent characters", (done) ->
+        $input = @cy.$$("input:text:first")
+        event = null
+        $input.on "keydown", (e)->
+          event = e
+
+        @cy
+          .setModifiers(["meta", "alt"])
+          .get("input:text:first").type("f").then ->
+            expect(event.metaKey).to.be.true
+            expect(event.altKey).to.be.true
+            @cy.setModifiers()
+            $input.off "keydown"
+            done()
+
+      describe "changing modifiers", ->
+        beforeEach ->
+          @$doc = @cy.$$(@cy.private("document"))
+          @cy.setModifiers(["command", "option"])
+
+        afterEach ->
+          @cy.setModifiers()
+          @$doc.off("keydown")
+
+        it "sends keydown event for new modifiers", (done) ->
+          event = null
+          @$doc.on "keydown", (e)->
+            event = e
+
+          @cy.setModifiers(["shift"]).then ->
+            expect(event.shiftKey).to.be.true
+            expect(event.which).to.equal(16)
+            done()
+
+        it "does not send keydown event for already activated modifiers", (done) ->
+          triggered = false
+          @$doc.on "keydown", (e)->
+            triggered = true if e.which is 18 or e.which is 17
+
+          @cy.setModifiers(["cmd", "alt"]).then ->
+            expect(triggered).to.be.false
+            done()
+
+        it "sends keyup event for absent modifiers that were previously activated", (done) ->
+          altReleased = false
+          metaReleased = false
+          @$doc.on "keyup", (e)->
+            altReleased = true if e.which is 18
+            metaReleased = true if e.which is 91
+
+          @cy.setModifiers(["shift"]).then ->
+            expect(altReleased).to.be.true
+            expect(metaReleased).to.be.true
+            done()
+
+      describe "clearing modifiers", ->
+        it "sends keyup event for all previously activated modifiers", (done) ->
+          $doc = @cy.$$(@cy.private("document"))
+          @cy.setModifiers(["command", "option"])
+
+          altReleased = false
+          ctrlReleased = false
+          metaReleased = false
+          shiftReleased = false
+          $doc.on "keyup", (e)->
+            altReleased = true if e.which is 18
+            ctrlReleased = true if e.which is 17
+            metaReleased = true if e.which is 91
+            shiftReleased = true if e.which is 16
+
+          @cy
+          .setModifiers(["alt", "ctrl", "meta", "shift"])
+          .setModifiers()
+          .then ->
+            expect(altReleased).to.be.true
+            expect(ctrlReleased).to.be.true
+            expect(metaReleased).to.be.true
+            expect(shiftReleased).to.be.true
+            $doc.off("keydown")
+            done()
+
+        beforeEach ->
+          @$doc = @cy.$$(@cy.private("document"))
+          @cy.setModifiers(["command", "option"])
+
+        afterEach ->
+          @cy.setModifiers()
+          @$doc.off("keydown")
+
+    describe "errors", ->
+      beforeEach ->
+        @allowErrors()
+
+      it "throws when argument is not an array or undefined", (done) ->
+        @cy.setModifiers("foo")
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.setModifiers() must be called without an argument or with an array"
+          done()
+
+      it "throws when invalid arguments are included", (done) ->
+        @cy.setModifiers(["shift", "foo"])
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.setModifiers() was called with invalid modifiers: foo"
+          done()
