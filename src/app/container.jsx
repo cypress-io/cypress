@@ -18,7 +18,7 @@ class Container extends Component {
   componentWillMount () {
     this.randomString = `${Math.random()}`
 
-    runner.init(this.props.state, {
+    this.props.runner.init(this.props.state, {
       element: automationElementId,
       string: this.randomString,
     })
@@ -34,7 +34,7 @@ class Container extends Component {
         return this._automationDisconnected()
       case automation.CONNECTED:
       default:
-        return windowUtil.hasSpecFile() ? this._app() : this._noSpec()
+        return this.props.windowUtil.hasSpecFile() ? this._app() : this._noSpec()
     }
   }
 
@@ -48,7 +48,7 @@ class Container extends Component {
 
   _app () {
     return (
-      <App {...this.props} runner={runner}>
+      <App {...this.props}>
         {this._automationElement()}
       </App>
     )
@@ -63,7 +63,7 @@ class Container extends Component {
   }
 
   _checkSpecFile = () => {
-    if (windowUtil.hasSpecFile()) {
+    if (this.props.windowUtil.hasSpecFile()) {
       this.forceUpdate()
     }
   }
@@ -71,13 +71,18 @@ class Container extends Component {
   _noAutomation () {
     return <NoAutomation
       browsers={this.props.config.browsers}
-      onLaunchBrowser={(browser) => runner.launchBrowser(browser)}
+      onLaunchBrowser={(browser) => this.props.runner.launchBrowser(browser)}
     />
   }
 
   _automationDisconnected () {
-    return <AutomationDisconnected onReload={runner.launchBrowser} />
+    return <AutomationDisconnected onReload={this.props.runner.launchBrowser} />
   }
+}
+
+Container.defaultProps = {
+  runner,
+  windowUtil,
 }
 
 Container.propTypes = {
@@ -85,4 +90,5 @@ Container.propTypes = {
   state: PropTypes.instanceOf(State),
 }
 
+export { automationElementId }
 export default Container
