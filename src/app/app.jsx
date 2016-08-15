@@ -42,13 +42,13 @@ class App extends Component {
   }
 
   _specPath () {
-    return `${this.props.config.integrationFolder}/${windowUtil.specFile()}`
+    return `${this.props.config.integrationFolder}/${this.props.windowUtil.specFile()}`
   }
 
   _monitorWindowResize () {
     const state = this.props.state
 
-    const $window = $(window)
+    const $window = $(this.props.window)
     const $header = $(findDOMNode(this.refs.header))
     const $reporter = $(findDOMNode(this.refs.reporter))
 
@@ -65,8 +65,13 @@ class App extends Component {
   }
 
   componentWillUnmount () {
-    $(window).off('resize', this._onWindowResize)
+    $(this.props.window).off('resize', this._onWindowResize)
   }
+}
+
+App.defaultProps = {
+  window,
+  windowUtil,
 }
 
 App.propTypes = {
