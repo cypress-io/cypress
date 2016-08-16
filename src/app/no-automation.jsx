@@ -34,7 +34,7 @@ const noBrowsers = () => (
 const browser = (browser) => (
   <span>
     <i className={`fa fa-${icon(browser.name)}`}></i>
-    <span data-js='browser-text'>Run {displayName(browser.name)} {browser.majorVersion}</span>
+    <span>Run {displayName(browser.name)} {browser.majorVersion}</span>
   </span>
 )
 
