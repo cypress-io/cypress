@@ -128,13 +128,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         .cancellable()
         .timeout(options.timeout)
         .then =>
-          if Cypress.cy.$$("[data-cypress-visit-error]").length
-            try
-              $Cypress.Utils.throwErrByPath("navigation.loading_failed", { onFail: options._log })
-            catch e
-              @fail(e)
-          else
-            options._log.set("message", "--page loaded--").snapshot().end()
+          options._log.set("message", "--page loaded--").snapshot().end()
 
           ## return null to prevent accidental chaining
           return null

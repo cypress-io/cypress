@@ -244,7 +244,6 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       timed_out: "Cypress command timeout of '{{ms}}ms' exceeded."
 
     navigation:
-      loading_failed: "Loading the new page failed."
       timed_out: """
         Timed out after waiting '{{ms}}ms' for your remote page to load.
 

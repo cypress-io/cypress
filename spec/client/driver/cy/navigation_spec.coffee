@@ -237,14 +237,6 @@ describe "$Cypress.Cy Navigation Commands", ->
         src = $("iframe").attr("src")
         expect(src).to.eq "http://localhost:3500/foo"
 
-    it "rejects the promise if data-cypress-visit-error is in the body"
-
-    it "rejects with error: ...something..."
-
-    it "extends the runnables timeout before visit"
-
-    it "resets the runnables timeout after visit"
-
     it "invokes onLoad callback", (done) ->
       cy = @cy
 
@@ -1011,36 +1003,5 @@ describe "$Cypress.Cy Navigation Commands", ->
         @cy.on "invoke:end", =>
           @cy.isReady(false, "testing")
           @cy.loading({timeout: 100})
-
-        @cy.noop({})
-
-      ## this goes through the same process as visit
-      ## where it errors if cypress sent back an error
-      it "errors if [cypress-error] was found", (done) ->
-        cy$ = @cy.$$
-
-        logs = []
-
-        @Cypress.on "log", (attrs, log) ->
-          logs.push log
-
-        @cy.on "fail", (err) ->
-          ## should only log once
-          expect(logs.length).to.eq 1
-          expect(err.message).to.eq "Loading the new page failed."
-          done()
-
-        ## act as if we have this node
-        error = @sandbox.stub @cy, "$$", (selector) ->
-          if selector is "[data-cypress-visit-error]"
-            error.restore()
-            return {length: 1}
-          else
-            cy$.apply(@, arguments)
-
-        @cy.on "invoke:end", =>
-          @cy.isReady(false, "testing")
-          @cy.loading()
-          @cy.isReady()
 
         @cy.noop({})
