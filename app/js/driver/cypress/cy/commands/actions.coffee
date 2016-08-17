@@ -809,12 +809,16 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         options._log.snapshot("before", {next: "after"})
 
-      isTextLike        = options.$el.is(textLike)
-      hasTabIndex       = options.$el.is("[tabindex]")
+      isBody      = options.$el.is("body")
+      isTextLike  = options.$el.is(textLike)
+      hasTabIndex = options.$el.is("[tabindex]")
 
-      isTypeableButNotAnInput = hasTabIndex and not isTextLike
+      ## TODO: tabindex can't be -1
+      ## TODO: can't be readonly
 
-      if not isTextLike and not hasTabIndex
+      isTypeableButNotAnInput = isBody or (hasTabIndex and not isTextLike)
+
+      if not isBody and not isTextLike and not hasTabIndex
         node = Cypress.Utils.stringifyElement(options.$el)
         $Cypress.Utils.throwErrByPath("type.not_on_text_field", {
           onFail: options._log

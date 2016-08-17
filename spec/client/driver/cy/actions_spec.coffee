@@ -477,6 +477,9 @@ describe "$Cypress.Cy Actions Commands", ->
         expect(clicks).to.eq(1)
         expect(retried).to.be.true
 
+    it "accepts body as subject", ->
+      expect(-> @cy.get("body").type("foo")).not.to.throw()
+
     ## we will need extra tests and logic for input types date, time, month, & week
     ## see issue https://github.com/cypress-io/cypress/issues/27
     describe "input types where no extra formatting required", ->
