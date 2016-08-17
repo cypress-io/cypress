@@ -1397,21 +1397,43 @@ describe "Routes", ->
           body = removeWhitespace(res.body)
           expect(body).to.eq contents
 
-      it.skip "injects even when head tag is missing", ->
+      it "injects even when head tag is missing", ->
         contents = removeWhitespace Fixtures.get("server/expected_no_head_tag_inject.html")
 
         nock(@server._remoteOrigin)
-          .get("/bar")
-          .reply 200, "<html> <body>hello from bar!</body> </html>",
-            "Content-Type": "text/html"
+        .get("/bar")
+        .reply 200, "<html> <body>hello from bar!</body> </html>",
+          "Content-Type": "text/html"
 
-        supertest(@srv)
-          .get("/bar")
-          .set("Cookie", "__cypress.initial=true")
-          .expect(200)
-          .then (res) ->
-            body = removeWhitespace(res.body)
-            expect(body).to.eq contents
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          body = removeWhitespace(res.body)
+          expect(body).to.eq contents
+
+      it "injects superdomain even when head tag is missing", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<html> <body>hello from bar!</body> </html>",
+          "Content-Type": "text/html"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.eq "<html> <head> <script type='text/javascript'> document.domain = 'google.com'; </script> </head> <body>hello from bar!</body> </html>"
 
       it "injects sinon content after following redirect", ->
         contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")
@@ -1448,7 +1470,7 @@ describe "Routes", ->
             body = removeWhitespace(res.body)
             expect(body).to.eq contents
 
-      it "does not inject when not initial", ->
+      it "does not inject when not initial and not text", ->
         nock(@server._remoteOrigin)
         .get("/bar")
         .reply 200, "<html><head></head></html>", {
@@ -1640,46 +1662,6 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("<html><head></head><body>hi</body></html>")
 
-    context "FQDN rewriting", ->
-      beforeEach ->
-        @setup("http://www.google.com")
-
-      it "does not rewrite html when initial", ->
-        nock(@server._remoteOrigin)
-        .get("/bar")
-        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
-          "Content-Type": "text/html"
-
-        @rp({
-          url: "http://www.google.com/bar"
-          headers: {
-            "Cookie": "__cypress.initial=true"
-          }
-        })
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
-          body = res.body
-          expect(body).to.eq "<html><body><a href='http://www.google.com'>google</a></body></html>"
-
-      it "does not rewrite html when not initial", ->
-        nock(@server._remoteOrigin)
-        .get("/bar")
-        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
-          "Content-Type": "text/html"
-
-        @rp({
-          url: "http://www.google.com/bar"
-          headers: {
-            "Cookie": "__cypress.initial=false"
-          }
-        })
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
-          body = res.body
-          expect(body).to.eq "<html><body><a href='http://www.google.com'>google</a></body></html>"
-
       it "rewrites <svg> without hanging", ->
         ## if this test finishes without timing out we know its all good
         contents = removeWhitespace Fixtures.get("server/err_response.html")
@@ -1697,6 +1679,48 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
+
+    context "FQDN rewriting", ->
+      beforeEach ->
+        @setup("http://www.google.com")
+
+      it "does not rewrite html when initial", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
+          "Content-Type": "text/html"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          body = res.body
+          expect(body).to.include "<a href='http://www.google.com'>google</a>"
+
+      it "does not rewrite html when not initial", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
+          "Content-Type": "text/html"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          body = res.body
+          expect(body).to.include "<a href='http://www.google.com'>google</a>"
 
     context "file requests", ->
       beforeEach ->

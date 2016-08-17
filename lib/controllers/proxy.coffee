@@ -16,6 +16,7 @@ escapeRegExp  = require("../util/escape_regexp")
 send          = require("send")
 
 headRe           = /(<head.*?>)/
+bodyRe           = /(<body.*?>)/
 htmlRe           = /(<html.*?>)/
 okStatusRe       = /^[2|3|4]\d+$/
 
@@ -267,6 +268,8 @@ module.exports = {
   rewrite: (req, res, remoteState, type) ->
     tr = trumpet()
 
+    hasInjectedHead = false
+
     rewrite = (selector, type, attr, fn) ->
       options = {}
 
@@ -300,21 +303,31 @@ module.exports = {
               @queue fn(buf.toString())
             ).pipe(stream)
 
-    ## we still aren't handling pages which are missing their <head> tag
-    ## for those we need to insert our own <head> tag
     rewrite "head", "html", (str) =>
-      if type is "initial"
-        str.replace(headRe, "$1 #{@getHeadContent(remoteState.domainName)}")
-      else
-        str.replace(headRe, "$1 #{@getDocumentDomainContent(remoteState.domainName)}")
+      return str if hasInjectedHead
 
-    # rewrite "html", "html", {method: "select"}, (str) =>
-    #   ## if we are missing a <head> tag then
-    #   ## dynamically insert one
-    #   if not headRe.test(str)
-    #     str.replace(htmlRe, "$1 <head> #{@getHeadContent()} </head>")
-    #   else
-    #     str
+      if headRe.test(str)
+        hasInjectedHead = true
+
+        if type is "initial"
+          str.replace(headRe, "$1 #{@getHeadContent(remoteState.domainName)}")
+        else
+          str.replace(headRe, "$1 #{@getDocumentDomainContent(remoteState.domainName)}")
+      else
+        str
+
+    rewrite "body", "html", (str) =>
+      return str if hasInjectedHead
+
+      if bodyRe.test(str)
+        hasInjectedHead = true
+
+        if type is "initial"
+          str.replace(bodyRe, "<head> #{@getHeadContent(remoteState.domainName)} </head> $1")
+        else
+          str.replace(bodyRe, "<head> #{@getDocumentDomainContent(remoteState.domainName)} </head> $1")
+      else
+        str
 
     return tr
 
