@@ -9,7 +9,6 @@ logger   = require("#{root}../lib/logger")
 Updater  = require("#{root}../lib/updater")
 headed   = require("#{root}../lib/modes/headed")
 menu     = require("#{root}../lib/electron/handlers/menu")
-Tray     = require("#{root}../lib/electron/handlers/tray")
 Events   = require("#{root}../lib/electron/handlers/events")
 Renderer = require("#{root}../lib/electron/handlers/renderer")
 
@@ -35,7 +34,6 @@ describe "electron/headed", ->
       @win = {}
 
       @sandbox.stub(menu, "set")
-      @sandbox.stub(Tray.prototype, "display")
       @sandbox.stub(Events, "start")
       @sandbox.stub(Updater, "install")
       @sandbox.stub(headed, "notify").resolves()
@@ -69,10 +67,6 @@ describe "electron/headed", ->
       headed.ready({}).then ->
         expect(menu.set).to.be.calledOnce
 
-    it "calls tray.display", ->
-      headed.ready({}).then ->
-        expect(Tray.prototype.display).to.be.calledOnce
-
     it "headed.notify", ->
       headed.ready({}).then ->
         expect(headed.notify).to.be.calledOnce
@@ -97,30 +91,6 @@ describe "electron/headed", ->
         headed.ready(opts).then ->
           opts.onQuit()
           expect(logger.off).to.be.calledOnce
-
-      it "sets tray state to running", ->
-        @sandbox.stub(Tray.prototype, "setState")
-
-        opts = {}
-        headed.ready(opts).then ->
-          opts.onOpenProject()
-          expect(Tray.prototype.setState).to.be.calledWith("running")
-
-      it "sets tray state to default", ->
-        @sandbox.stub(Tray.prototype, "setState")
-
-        opts = {}
-        headed.ready(opts).then ->
-          opts.onCloseProject()
-          expect(Tray.prototype.setState).to.be.calledWith("default")
-
-      it "sets tray state to error", ->
-        @sandbox.stub(Tray.prototype, "setState")
-
-        opts = {}
-        headed.ready(opts).then ->
-          opts.onError()
-          expect(Tray.prototype.setState).to.be.calledWith("error")
 
   context ".run", ->
     beforeEach ->

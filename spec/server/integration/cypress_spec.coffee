@@ -11,7 +11,6 @@ extension = require("@cypress/core-extension")
 Fixtures = require("../helpers/fixtures")
 pkg      = require("#{root}package.json")
 settings = require("#{root}lib/util/settings")
-Tray     = require("#{root}lib/electron/handlers/tray")
 Events   = require("#{root}lib/electron/handlers/events")
 project  = require("#{root}lib/electron/handlers/project")
 Renderer = require("#{root}lib/electron/handlers/renderer")
@@ -793,7 +792,6 @@ describe "lib/cypress", ->
       @sandbox.stub(headed, "notify").resolves()
       @sandbox.stub(Renderer, "create").resolves(@win)
       @sandbox.spy(Events, "start")
-      @sandbox.stub(Tray.prototype, "display")
       @sandbox.stub(electron.ipcMain, "on")
 
     afterEach ->
