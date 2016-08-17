@@ -61,8 +61,8 @@ describe "lib/electron/handlers/events", ->
       electron.ipcMain.on.yields("arg1", "arg2")
       handleEvent = @sandbox.stub(events, "handleEvent")
 
-      events.start({foo: "bar"})
-      expect(handleEvent).to.be.calledWith({foo: "bar"}, "arg1", "arg2")
+      events.start({foo: "bar"}, {})
+      expect(handleEvent).to.be.calledWith({foo: "bar"}, {}, "arg1", "arg2")
 
   context "no ipc event", ->
     it "throws", ->
@@ -349,13 +349,9 @@ describe "lib/electron/handlers/events", ->
         ## to prevent side effects
         project.close()
 
-      it.only "open project + returns config", ->
-        projectInstance = {
-          getConfig: @sandbox.stub().resolves({some: "config"})
-          setBrowsers: @sandbox.stub().resolves([])
-        }
-
-        @sandbox.stub(Project.prototype, "open").resolves(projectInstance)
+      it "open project + returns config", ->
+        @sandbox.stub(Project.prototype, "open")
+        @sandbox.stub(Project.prototype, "getConfig").resolves({some: "config"})
 
         @handleEvent("open:project", "path/to/project")
         .then =>
@@ -384,6 +380,7 @@ describe "lib/electron/handlers/events", ->
           @expectSendCalledWith(null)
 
       it "closes down open project and returns null", ->
+        @sandbox.stub(Project.prototype, "getConfig").resolves({})
         @sandbox.stub(Project.prototype, "open").withArgs({sync: true}).resolves()
 
         @handleEvent("open:project", "path/to/project")

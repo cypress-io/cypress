@@ -39,11 +39,11 @@ module.exports = {
       ## open the project and return
       ## the config for the project instance
       openProject.open(options)
-    .then (project) ->
-      project.getConfig()
+    .then ->
+      openProject.getConfig()
       .then (cfg) ->
         extension.setHostAndPath(cfg.clientUrlDisplay, cfg.socketIoRoute)
-      .return(project)
+    .return(openProject)
 
   opened: -> openProject
 

@@ -109,6 +109,9 @@ describe "electron/headless", ->
     ## TODO: write this test!
     it "binds onAutomationRequest to automation.perform"
 
+  context ".setProxy", ->
+    it "calls session.defaultSession.setProxy with proxyRules"
+
   context ".createRenderer", ->
     beforeEach ->
       @win = @sandbox.stub({
@@ -120,10 +123,12 @@ describe "electron/headless", ->
         }
       })
 
+      @sandbox.stub(headless, "setProxy").withArgs("http://localhost:1234").resolves()
+
       @create = @sandbox.stub(Renderer, "create").resolves(@win)
 
     it "calls Renderer.create with url + options", ->
-      headless.createRenderer("foo/bar/baz").then =>
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234").then =>
         expect(@create).to.be.calledWith({
           url: "foo/bar/baz"
           width: 0
@@ -135,13 +140,13 @@ describe "electron/headless", ->
         })
 
     it "calls win.hide + win.setSize on the resolved window", ->
-      headless.createRenderer("foo/bar/baz").then =>
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234").then =>
         expect(@win.hide).to.be.calledOnce
         expect(@win.setSize).to.be.calledWith(1280, 720)
         expect(@win.center).to.be.calledOnce
 
     it "can show window", ->
-      headless.createRenderer("foo/bar/baz", true).then =>
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234", true).then =>
         expect(@create).to.be.calledWith({
           url: "foo/bar/baz"
           width: 0
@@ -161,7 +166,7 @@ describe "electron/headless", ->
         {}, "foo", "bar", "baz", options
       )
 
-      headless.createRenderer("foo/bar/baz").then =>
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234").then =>
         expect(options.show).to.eq(false)
 
   context ".waitForRendererToConnect", ->
@@ -264,7 +269,7 @@ describe "electron/headless", ->
 
   context ".run", ->
     beforeEach ->
-      @sandbox.stub(@projectInstance, "getConfig").resolves({})
+      @sandbox.stub(@projectInstance, "getConfig").resolves({clientUrlDisplay: "http://localhost:12345"})
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureSession")
       @sandbox.stub(headless, "getId").returns(1234)
@@ -303,4 +308,4 @@ describe "electron/headless", ->
       @sandbox.stub(@projectInstance, "ensureSpecUrl").resolves("foo/bar")
 
       headless.run({showHeadlessGui: true}).then ->
-        expect(headless.createRenderer).to.be.calledWith("foo/bar", true)
+        expect(headless.createRenderer).to.be.calledWith("foo/bar", "http://localhost:12345", true)
