@@ -600,8 +600,6 @@ describe "lib/cypress", ->
 
     describe "--env", ->
       beforeEach ->
-        delete process.env.CYPRESS_DEBUG
-
         headless.waitForTestsToFinishRunning.resolves({failures: 0})
 
         Promise.all([
@@ -609,9 +607,6 @@ describe "lib/cypress", ->
 
           Project.add(@todosPath)
         ])
-
-      afterEach ->
-        process.env.CYPRESS_DEBUG = true
 
       it "can set specific environment variables", ->
         cypress.start([

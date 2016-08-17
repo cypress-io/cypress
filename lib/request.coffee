@@ -46,6 +46,10 @@ createCookieString = (c) ->
   reduceCookieToArray(c).join("; ")
 
 module.exports = {
+  reduceCookieToArray: reduceCookieToArray
+
+  createCookieString: createCookieString
+
   contentTypeIsJson: (response) ->
     ## TODO: use https://github.com/jshttp/type-is for this
     response?.headers?["content-type"]?.includes("application/json")

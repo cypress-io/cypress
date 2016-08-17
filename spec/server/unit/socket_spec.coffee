@@ -280,18 +280,9 @@ describe "lib/socket", ->
       beforeEach ->
         @sandbox.stub(open, "opn").resolves()
 
-      it "calls opn with path + opts on darwin", (done) ->
-        @sandbox.stub(os, "platform").returns("darwin")
-
+      it "calls opn with path", (done) ->
         @client.emit "open:finder", @cfg.parentTestsFolder, =>
-          expect(open.opn).to.be.calledWith(@cfg.parentTestsFolder, {args: "-R"})
-          done()
-
-      it "calls opn with path + no opts when not on darwin", (done) ->
-        @sandbox.stub(os, "platform").returns("linux")
-
-        @client.emit "open:finder", @cfg.parentTestsFolder, =>
-          expect(open.opn).to.be.calledWith(@cfg.parentTestsFolder, {})
+          expect(open.opn).to.be.calledWith(@cfg.parentTestsFolder)
           done()
 
     context "on(watch:test:file)", ->
@@ -378,7 +369,7 @@ describe "lib/socket", ->
       it "sends up cookies from automation(get:cookies)", (done) ->
         @oar = @options.onAutomationRequest = @sandbox.stub()
 
-        @oar.withArgs("get:cookies", {domain: "localhost"}).resolves([
+        @oar.withArgs("get:cookies", {url: "http://localhost:8080/status.json"}).resolves([
           {name: "__cypress.initial", value: "true"}
           {name: "foo", value: "bar"}
           {name: "baz", value: "quux"}
@@ -407,7 +398,7 @@ describe "lib/socket", ->
       it "extracts domain from the url when domain is omitted", (done) ->
         @oar = @options.onAutomationRequest = @sandbox.stub()
 
-        @oar.withArgs("get:cookies", {domain: "www.google.com"}).resolves([
+        @oar.withArgs("get:cookies", {url: "http://www.google.com:8080/status.json"}).resolves([
           {name: "__cypress.initial", value: "true"}
           {name: "foo", value: "bar"}
           {name: "baz", value: "quux"}
