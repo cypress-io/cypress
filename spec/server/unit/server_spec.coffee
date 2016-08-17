@@ -26,32 +26,33 @@ describe "lib/server", ->
       @use = @sandbox.spy(express.application, "use")
 
     it "instantiates express instance without morgan", ->
-      app = @server.createExpressApp(54321, false)
-      expect(app.get("port")).to.eq(54321)
+      app = @server.createExpressApp(false)
       expect(app.get("view engine")).to.eq("html")
       expect(@use).not.to.be.calledWith(morganFn)
 
     it "requires morgan if true", ->
-      @server.createExpressApp(54321, true)
+      @server.createExpressApp(true)
       expect(@use).to.be.calledWith(morganFn)
 
   context "#open", ->
     beforeEach ->
       @sandbox.stub(@server, "createServer").resolves()
 
-    it "resolves with server instance", ->
-      @server.open(@config)
-      .then (ret) =>
-        expect(ret).to.eq(@server)
-
-    it "calls #createExpressApp with port + morgan", ->
+    it "calls #createExpressApp with morgan", ->
       @sandbox.spy(@server, "createExpressApp")
 
       _.extend @config, {port: 54321, morgan: false}
 
       @server.open(@config)
       .then =>
-        expect(@server.createExpressApp).to.be.calledWith(54321, false)
+        expect(@server.createExpressApp).to.be.calledWith(false)
+
+    it "calls #createServer with port", ->
+      _.extend @config, {port: 54321}
+
+      @server.open(@config)
+      .then =>
+        expect(@server.createServer).to.be.calledWith(54321)
 
     it "calls #createRoutes with app + config", ->
       obj = {}
@@ -83,23 +84,23 @@ describe "lib/server", ->
   context "#createServer", ->
     beforeEach ->
       @port = 54321
-      @app  = @server.createExpressApp(@port, true)
+      @app  = @server.createExpressApp(true)
 
     it "isListening=true", ->
-      @server.createServer(@port, @app)
+      @server.createServer(@port, "", @app)
       .then =>
         expect(@server.isListening).to.be.true
 
-    it "resolves with http server instance", ->
-      @server.createServer(@port, @app)
-      .then (ret) =>
-        expect(ret).to.be.instanceof(http.Server)
+    it "resolves with http server port", ->
+      @server.createServer(@port, "", @app)
+      .then (port) =>
+        expect(port).to.eq(@port)
 
     context "errors", ->
       it "rejects with portInUse", ->
-        @server.createServer(@port, @app)
+        @server.createServer(@port, "", @app)
         .then =>
-          @server.createServer(@port, @app)
+          @server.createServer(@port, "", @app)
         .then ->
           throw new Error("should have failed but didn't")
         .catch (err) =>
@@ -180,6 +181,9 @@ describe "lib/server", ->
 
       req = {
         url: "/"
+        headers: {
+          host: "www.google.com"
+        }
       }
 
       @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
@@ -188,7 +192,7 @@ describe "lib/server", ->
         secure: false
         target: {
           host: "www.google.com"
-          port: null
+          port: "443"
           protocol: "https:"
         }
       })
@@ -219,6 +223,7 @@ describe "lib/server", ->
         origin: "https://staging.google.com"
         strategy: "http"
         domainName: "google.com"
+        visiting: undefined
         props: {
           port: "443"
           domain: "google"
@@ -233,6 +238,7 @@ describe "lib/server", ->
         origin: "http://staging.google.com"
         strategy: "http"
         domainName: "google.com"
+        visiting: undefined
         props: {
           port: "80"
           domain: "google"
@@ -247,6 +253,7 @@ describe "lib/server", ->
         origin: "http://localhost:4200"
         strategy: "http"
         domainName: "localhost"
+        visiting: undefined
         props: {
           port: "4200"
           domain: ""
@@ -266,4 +273,5 @@ describe "lib/server", ->
         strategy: "file"
         domainName: "localhost"
         props: null
+        visiting: undefined
       })
