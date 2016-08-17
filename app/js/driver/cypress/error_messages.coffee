@@ -289,10 +289,6 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     setCookie:
       invalid_arguments: "#{cmd('setCookie')} must be passed two string arguments for name and value."
 
-    setModifiers:
-      invalid_argument: "#{cmd('setModifiers')} must be called without an argument or with an array. You called it with: {{arg}}"
-      invalid_modifiers: "#{cmd('setModifiers')} was called with invalid modifiers: {{invalidModifiers}}. Valid modifiers are: {{validModifiers}}."
-
     spread:
       invalid_type: "#{cmd('spread')} requires the existing subject be an array."
 
