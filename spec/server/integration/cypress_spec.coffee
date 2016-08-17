@@ -41,7 +41,7 @@ describe "lib/cypress", ->
     ## spawning a separate process
     @sandbox.stub(cypress, "isCurrentlyRunningElectron").returns(true)
     @sandbox.stub(extension, "setHostAndPath").resolves()
-    @sandbox.stub(launcher, "getBrowsers").returns([])
+    @sandbox.stub(launcher, "getBrowsers").resolves([])
     @sandbox.stub(process, "exit")
     @sandbox.spy(errors, "log")
 
@@ -399,7 +399,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         cypress.start(["--run-project=#{@todosPath}", "--show-headless-gui"]).then =>
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all", true)
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all", "http://localhost:8888", true)
           @expectExitWith(0)
 
     it "turns on reporting", ->
@@ -600,6 +600,8 @@ describe "lib/cypress", ->
 
     describe "--env", ->
       beforeEach ->
+        delete process.env.CYPRESS_DEBUG
+
         headless.waitForTestsToFinishRunning.resolves({failures: 0})
 
         Promise.all([
@@ -607,6 +609,9 @@ describe "lib/cypress", ->
 
           Project.add(@todosPath)
         ])
+
+      afterEach ->
+        process.env.CYPRESS_DEBUG = true
 
       it "can set specific environment variables", ->
         cypress.start([
@@ -789,8 +794,8 @@ describe "lib/cypress", ->
     beforeEach ->
       @win = {}
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(headed, "notify").resolves()
       @sandbox.stub(Renderer, "create").resolves(@win)
+      @sandbox.stub(Server.prototype, "startWebsockets")
       @sandbox.spy(Events, "start")
       @sandbox.stub(electron.ipcMain, "on")
 
@@ -835,7 +840,7 @@ describe "lib/cypress", ->
         cypress.start([])
       .then =>
         options = Events.start.firstCall.args[0]
-        Events.handleEvent(options, {}, 123, "open:project", @todosPath)
+        Events.handleEvent(options, {}, {}, 123, "open:project", @todosPath)
       .delay(200)
       .then =>
         ## must delay here because sync isnt promise connected
@@ -858,10 +863,10 @@ describe "lib/cypress", ->
         cypress.start([])
       .then =>
         options = Events.start.firstCall.args[0]
-        Events.handleEvent(options, {}, 123, "open:project", @todosPath)
+        Events.handleEvent(options, {}, {}, 123, "open:project", @todosPath)
         .delay(200)
         .then =>
-          Events.handleEvent(options, {}, 123, "close:project")
+          Events.handleEvent(options, {}, {}, 123, "close:project")
       .delay(200)
       .then =>
         ## must delay here because sync isnt promise connected
@@ -893,13 +898,12 @@ describe "lib/cypress", ->
         cypress.start(["--port=2121", "--config", "pageLoadTimeout=1000", "--foo=bar", "--env=baz=baz"])
       .then =>
         options = Events.start.firstCall.args[0]
-        Events.handleEvent(options, {}, 123, "open:project", @todosPath)
+        Events.handleEvent(options, {}, {}, 123, "open:project", @todosPath)
       .then =>
         expect(getConfig).to.be.calledWithMatch({
           port: 2121
           pageLoadTimeout: 1000
           sync: true
-          changeEvents: true
           type: "opened"
           report: false
           environmentVariables: { baz: "baz" }
