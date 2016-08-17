@@ -23,12 +23,7 @@ describe "lib/electron/handlers/events", ->
     @id      = Math.random()
     @send    = @sandbox.spy()
     @cookies = {}
-    @options = {
-      onQuit: @sandbox.spy()
-      onOpenProject: @sandbox.spy()
-      onCloseProject: @sandbox.spy()
-      onError: @sandbox.spy()
-    }
+    @options = {}
     @event   = {
       sender: {
         send: @send
@@ -43,13 +38,12 @@ describe "lib/electron/handlers/events", ->
 
     ## setup default options and event and id
     ## as the first three arguments
-    @handleEvent = _.partial(events.handleEvent, @options, @event, @id)
+    @handleEvent = _.partial(events.handleEvent, @options, {}, @event, @id)
 
     @expectSendCalledWith = (data) =>
       expect(@send).to.be.calledWith("response", {id: @id, data: data})
 
     @expectSendErrCalledWith = (err) =>
-      expect(@options.onError).to.be.calledWith(err)
       expect(@send).to.be.calledWith("response", {id: @id, __error: errors.clone(err, {html: true})})
 
   context ".stop", ->
@@ -76,11 +70,6 @@ describe "lib/electron/handlers/events", ->
         @handleEvent("no:such:event")
 
       expect(fn).to.throw("No ipc event registered for: 'no:such:event'")
-
-  context "quit", ->
-    it "calls options.onQuit", ->
-      @handleEvent("quit")
-      expect(@options.onQuit).to.be.calledOnce
 
   context "dialog", ->
     describe "show:directory:dialog", ->
@@ -360,7 +349,7 @@ describe "lib/electron/handlers/events", ->
         ## to prevent side effects
         project.close()
 
-      it "open project + returns config", ->
+      it.only "open project + returns config", ->
         projectInstance = {
           getConfig: @sandbox.stub().resolves({some: "config"})
           setBrowsers: @sandbox.stub().resolves([])
@@ -370,8 +359,6 @@ describe "lib/electron/handlers/events", ->
 
         @handleEvent("open:project", "path/to/project")
         .then =>
-          expect(@options.onOpenProject).to.be.calledOnce
-
           @expectSendCalledWith({some: "config"})
 
       it "catches errors", ->
@@ -381,6 +368,10 @@ describe "lib/electron/handlers/events", ->
         @handleEvent("open:project", "path/to/project")
         .then =>
           @expectSendErrCalledWith(err)
+
+      it "reboots onSettingsChanged"
+
+      it "emits bus 'focus:tests' onFocustTests"
 
     describe "close:project", ->
       beforeEach ->
@@ -393,7 +384,7 @@ describe "lib/electron/handlers/events", ->
           @expectSendCalledWith(null)
 
       it "closes down open project and returns null", ->
-        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true, sync: true}).resolves()
+        @sandbox.stub(Project.prototype, "open").withArgs({sync: true}).resolves()
 
         @handleEvent("open:project", "path/to/project")
         .then =>
@@ -402,25 +393,7 @@ describe "lib/electron/handlers/events", ->
 
           @handleEvent("close:project")
           .then =>
-            expect(@options.onCloseProject).to.be.calledOnce
-
             ## it should store the opened project
             expect(project.opened()).to.be.null
 
             @expectSendCalledWith(null)
-
-    describe "on:project:settings:change", ->
-      it "resolves with obj", ->
-        obj = {foo: "bar"}
-
-        @sandbox.stub(project, "onSettingsChanged").resolves(obj)
-
-        @handleEvent("on:project:settings:change").then =>
-          @expectSendCalledWith(obj)
-
-      it "catches errors", ->
-        err = new Error("foo")
-        @sandbox.stub(project, "onSettingsChanged").rejects(err)
-
-        @handleEvent("on:project:settings:change").then =>
-          @expectSendErrCalledWith(err)

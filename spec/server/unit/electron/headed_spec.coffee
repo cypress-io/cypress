@@ -2,7 +2,6 @@ require("../../spec_helper")
 
 os       = require("os")
 icons    = require("@cypress/core-icons")
-notifier = require("node-notifier")
 electron = require("electron")
 user     = require("#{root}../lib/user")
 logger   = require("#{root}../lib/logger")
@@ -36,18 +35,7 @@ describe "electron/headed", ->
       @sandbox.stub(menu, "set")
       @sandbox.stub(Events, "start")
       @sandbox.stub(Updater, "install")
-      @sandbox.stub(headed, "notify").resolves()
       @sandbox.stub(Renderer, "create").resolves(@win)
-
-    it "sets options.onQuit", ->
-      opts = {}
-
-      headed.ready(opts).then ->
-        expect(opts.onQuit).to.be.a("function")
-
-    it "sets options.onOpenProject"
-    it "sets options.onCloseProject"
-    it "sets options.onError"
 
     it "calls Events.start with options", ->
       opts = {}
@@ -67,30 +55,9 @@ describe "electron/headed", ->
       headed.ready({}).then ->
         expect(menu.set).to.be.calledOnce
 
-    it "headed.notify", ->
-      headed.ready({}).then ->
-        expect(headed.notify).to.be.calledOnce
-
     it "resolves with win", ->
       headed.ready({}).then (win) =>
         expect(win).to.eq(@win)
-
-    context "option callbacks", ->
-      it "exits the app", ->
-        @sandbox.stub(electron.app, "exit")
-
-        opts = {}
-        headed.ready(opts).then ->
-          opts.onQuit()
-          expect(electron.app.exit).to.be.calledWith(0)
-
-      it "calls logs.off", ->
-        @sandbox.stub(logger, "off")
-
-        opts = {}
-        headed.ready(opts).then ->
-          opts.onQuit()
-          expect(logger.off).to.be.calledOnce
 
   context ".run", ->
     beforeEach ->

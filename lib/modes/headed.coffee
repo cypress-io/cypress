@@ -18,25 +18,6 @@ module.exports = {
   isMac: ->
     os.platform() is "darwin"
 
-  onDrop: ->
-
-  onClick: (bounds, win) ->
-    # positioner = new Position(win)
-
-    # coords = positioner.calculate("trayCenter", bounds)
-
-    ## store the coords on updater
-    # Updater.setCoords(coords)
-
-    # win.setPosition(coords.x, coords.y)
-
-    # if win.isVisible()
-    win.hide()
-    # else
-    #   win.show()
-
-  onRightClick: ->
-
   onWindowAllClosed: (app) ->
     process.exit(0)
 
@@ -110,11 +91,6 @@ module.exports = {
 
       if options.updating
         Updater.install(options)
-
-      # tray.display({
-      #   onClick: (e, bounds) =>
-      #     @onClick(bounds, win)
-      # })
 
       return win
 
