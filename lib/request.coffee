@@ -90,6 +90,8 @@ module.exports = {
 
       Promise
       .map(store.cookies, setCookie)
+      .filter (cookie) ->
+        not _.isEmpty(cookie)
 
   sendStream: (automation, options = {}) ->
     _.defaults options, {
@@ -107,6 +109,8 @@ module.exports = {
     }
 
     setCookies = (cookies) =>
+      return if _.isEmpty(cookies)
+
       options.headers["Cookie"] = createCookieString(cookies)
 
     send = =>
@@ -138,6 +142,8 @@ module.exports = {
     }
 
     setCookies = (cookies) =>
+      return if _.isEmpty(cookies)
+
       options.headers["Cookie"] = createCookieString(cookies)
 
     send = =>

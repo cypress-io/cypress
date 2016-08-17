@@ -16,7 +16,9 @@ describe "Server", ->
     beforeEach ->
       nock.enableNetConnect()
 
-      @automationRequest = @sandbox.stub().resolves([])
+      @automationRequest = @sandbox.stub()
+      .withArgs("get:cookies").resolves([])
+      .withArgs("set:cookie").resolves({})
 
       @setup = (initialUrl, obj = {}) =>
         if _.isObject(initialUrl)
@@ -761,6 +763,15 @@ describe "Server", ->
             cookies: []
           })
         .then =>
+          # @server.onRequest (req, res) ->
+          #   console.log "ON REQUEST!!!!!!!!!!!!!!!!!!!!!!"
+
+          #   nock("https://www.apple.com")
+          #   .get("/")
+          #   .reply 200, "<html><head></head><body>apple</body></html>", {
+          #     "Content-Type": "text/html"
+          #   }
+
           @rp({
             url: "https://www.apple.com/"
             headers: {
@@ -828,6 +839,13 @@ describe "Server", ->
               cookies: []
             })
           .then =>
+            # @server.onNextRequest (req, res) ->
+            #   nock("https://www.apple.com")
+            #   .get("/")
+            #   .reply 200, "<html><head></head><body>apple</body></html>", {
+            #     "Content-Type": "text/html"
+            #   }
+
             @rp({
               url: "https://www.apple.com/"
               headers: {
