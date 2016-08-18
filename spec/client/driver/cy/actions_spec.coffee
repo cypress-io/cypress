@@ -480,6 +480,13 @@ describe "$Cypress.Cy Actions Commands", ->
     it "accepts body as subject", ->
       expect(-> @cy.get("body").type("foo")).not.to.throw()
 
+    it "does not click when body is subject", ->
+      bodyClicked = false
+      @cy.$$("body").on "click", -> bodyClicked = true
+
+      @cy.get("body").type("foo").then ->
+        expect(bodyClicked).to.be.false
+
     ## we will need extra tests and logic for input types date, time, month, & week
     ## see issue https://github.com/cypress-io/cypress/issues/27
     describe "input types where no extra formatting required", ->
@@ -5754,7 +5761,6 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$("input:first").click -> return false
 
         @cy.get("input:first").type("{ctrl}{shift}", {release: false}).click().then ->
-          @cy.get("body").type("{ctrl}") ## clear modifiers
           expect(@log.attributes.onConsole().groups()).to.deep.eq [
             {
               name: "MouseDown"
@@ -5781,7 +5787,7 @@ describe "$Cypress.Cy Actions Commands", ->
               }
             }
           ]
-
+          @cy.get("body").type("{ctrl}") ## clear modifiers
 
       it "#onConsole when no mouseup or click", ->
         btn = @cy.$$("button:first")

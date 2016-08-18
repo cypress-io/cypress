@@ -975,10 +975,12 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         })
 
       @execute("focused", {log: false, verify: false}).then ($focused) =>
+        ## don't click the body b/c it doesn't need it and the
+        ## click will fail if it's too tall and its center is offscreen
         ## if we dont have a focused element
         ## or if we do and its not ourselves
         ## then issue the click
-        if not $focused or ($focused and $focused.get(0) isnt options.$el.get(0))
+        if not isBody and (not $focused or ($focused and $focused.get(0) isnt options.$el.get(0)))
           ## click the element first to simulate focus
           ## and typical user behavior in case the window
           ## is out of focus
