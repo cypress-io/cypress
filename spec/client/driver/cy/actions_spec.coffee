@@ -2122,22 +2122,24 @@ describe "$Cypress.Cy Actions Commands", ->
             expect(console.Coords.y).to.be.closeTo coords.y, 1
 
         it "has a table of keys", ->
-          @cy.get(":text:first").type("foo{enter}b{leftarrow}{del}{enter}").then ->
+          @cy.get(":text:first").type("{cmd}{option}foo{enter}b{leftarrow}{del}{enter}").then ->
             table = @log.attributes.onConsole().table()
             console.table(table.data, table.columns)
             expect(table.columns).to.deep.eq [
-              "typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change"
+              "typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "altKey", "ctrlKey", "metaKey", "shiftKey"
             ]
             expect(table.name).to.eq "Key Events Table"
             expect(table.data).to.deep.eq {
-              1: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
-              2: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
-              3: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
-              4: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true}
-              5: {typed: "b", which: 66, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
-              6: {typed: "{leftarrow}", which: 37, keydown: true, keyup: true}
-              7: {typed: "{del}", which: 46, keydown: true, input: true, keyup: true}
-              8: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true}
+              1: {typed: "<meta>", which: 91, keydown: true, altKey: false, ctrlKey: false, metaKey: true, shiftKey: false}
+              2: {typed: "<alt>", which: 18, keydown: true, altKey: true, ctrlKey: false, metaKey: true, shiftKey: false}
+              3: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true, altKey: true, ctrlKey: false, metaKey: true, shiftKey: false}
+              4: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true, altKey: true, ctrlKey: false, metaKey: true, shiftKey: false}
+              5: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true, altKey: true, ctrlKey: false, metaKey: true, shiftKey: false}
+              6: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true, altKey: true, ctrlKey: false, metaKey: true, shiftKey: false}
+              7: {typed: "b", which: 66, keydown: true, keypress: true, textInput: true, input: true, keyup: true, altKey: true, ctrlKey: false, metaKey: true, shiftKey: false}
+              8: {typed: "{leftarrow}", which: 37, keydown: true, keyup: true, altKey: true, ctrlKey: false, metaKey: true, shiftKey: false}
+              9: {typed: "{del}", which: 46, keydown: true, input: true, keyup: true, altKey: true, ctrlKey: false, metaKey: true, shiftKey: false}
+              10: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true, altKey: true, ctrlKey: false, metaKey: true, shiftKey: false}
             }
 
         it "has a table of keys with preventedDefault", ->
@@ -2147,7 +2149,7 @@ describe "$Cypress.Cy Actions Commands", ->
             table = @log.attributes.onConsole().table()
             console.table(table.data, table.columns)
             expect(table.data).to.deep.eq {
-              1: {typed: "f", which: 70, keydown: "preventedDefault", keyup: true}
+              1: {typed: "f", which: 70, keydown: "preventedDefault", keyup: true, altKey: false, ctrlKey: false, metaKey: false, shiftKey: false}
             }
 
     describe "errors", ->
@@ -5667,6 +5669,10 @@ describe "$Cypress.Cy Actions Commands", ->
               items: {
                 preventedDefault: true
                 stoppedPropagation: true
+                altKey: false
+                ctrlKey: false
+                metaKey: false
+                shiftKey: false
               }
             },
             {
@@ -5674,6 +5680,10 @@ describe "$Cypress.Cy Actions Commands", ->
               items: {
                 preventedDefault: false
                 stoppedPropagation: false
+                altKey: false
+                ctrlKey: false
+                metaKey: false
+                shiftKey: false
               }
             },
             {
@@ -5681,6 +5691,10 @@ describe "$Cypress.Cy Actions Commands", ->
               items: {
                 preventedDefault: false
                 stoppedPropagation: false
+                altKey: false
+                ctrlKey: false
+                metaKey: false
+                shiftKey: false
               }
             }
           ]
@@ -5695,6 +5709,10 @@ describe "$Cypress.Cy Actions Commands", ->
               items: {
                 preventedDefault: false
                 stoppedPropagation: false
+                altKey: false
+                ctrlKey: false
+                metaKey: false
+                shiftKey: false
               }
             },
             {
@@ -5702,6 +5720,10 @@ describe "$Cypress.Cy Actions Commands", ->
               items: {
                 preventedDefault: true
                 stoppedPropagation: true
+                altKey: false
+                ctrlKey: false
+                metaKey: false
+                shiftKey: false
               }
             },
             {
@@ -5709,6 +5731,10 @@ describe "$Cypress.Cy Actions Commands", ->
               items: {
                 preventedDefault: false
                 stoppedPropagation: false
+                altKey: false
+                ctrlKey: false
+                metaKey: false
+                shiftKey: false
               }
             }
           ]
@@ -5723,6 +5749,10 @@ describe "$Cypress.Cy Actions Commands", ->
               items: {
                 preventedDefault: false
                 stoppedPropagation: false
+                altKey: false
+                ctrlKey: false
+                metaKey: false
+                shiftKey: false
               }
             },
             {
@@ -5730,6 +5760,10 @@ describe "$Cypress.Cy Actions Commands", ->
               items: {
                 preventedDefault: false
                 stoppedPropagation: false
+                altKey: false
+                ctrlKey: false
+                metaKey: false
+                shiftKey: false
               }
             },
             {
@@ -5737,6 +5771,10 @@ describe "$Cypress.Cy Actions Commands", ->
               items: {
                 preventedDefault: true
                 stoppedPropagation: true
+                altKey: false
+                ctrlKey: false
+                metaKey: false
+                shiftKey: false
               }
             }
           ]
@@ -5755,6 +5793,10 @@ describe "$Cypress.Cy Actions Commands", ->
               items: {
                 preventedDefault: false
                 stoppedPropagation: false
+                altKey: false
+                ctrlKey: false
+                metaKey: false
+                shiftKey: false
               }
             }
           ]
@@ -5773,6 +5815,10 @@ describe "$Cypress.Cy Actions Commands", ->
               items: {
                 preventedDefault: false
                 stoppedPropagation: false
+                altKey: false
+                ctrlKey: false
+                metaKey: false
+                shiftKey: false
               }
             },
             {
@@ -5780,6 +5826,10 @@ describe "$Cypress.Cy Actions Commands", ->
               items: {
                 preventedDefault: false
                 stoppedPropagation: false
+                altKey: false
+                ctrlKey: false
+                metaKey: false
+                shiftKey: false
               }
             }
           ]

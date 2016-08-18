@@ -526,17 +526,14 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       return if @modifiers[modifier]
 
       @modifiers[modifier] = true
-      @simulateModifier(el, "keydown", modifier, options.window)
+      @simulateModifier(el, "keydown", modifier, options)
 
-    simulateModifier: (el, eventType, modifier, window) ->
-      @simulateKey(el, eventType, null, {
-        beforeKey: ""
+    simulateModifier: (el, eventType, modifier, options) ->
+      @simulateKey(el, eventType, null, _.extend(options, {
         charCode: @modifierCodeMap[modifier]
         id: _.uniqueId("char")
-        window: window
-        onBeforeEvent: ->
-        onEvent: ->
-      })
+        key: "<#{modifier}>"
+      }))
 
     mixinModifiers: (event) ->
       _.extend(event, {
@@ -550,6 +547,9 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       for modifier, isActivated of @modifiers
         @modifiers[modifier] = false
         if isActivated
-          @simulateModifier(el, "keyup", modifier, window)
-
+          @simulateModifier(el, "keyup", modifier, {
+            window: window
+            onBeforeEvent: ->
+            onEvent: ->
+          })
   }

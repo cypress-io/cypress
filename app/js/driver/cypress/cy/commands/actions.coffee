@@ -527,19 +527,19 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             consoleObj.groups = ->
               groups = [{
                 name: "MouseDown"
-                items: _(domEvents.mouseDown).pick("preventedDefault", "stoppedPropagation")
+                items: _(domEvents.mouseDown).pick("preventedDefault", "stoppedPropagation", "altKey", "ctrlKey", "metaKey", "shiftKey")
               }]
 
               if domEvents.mouseUp
                 groups.push({
                   name: "MouseUp"
-                  items: _(domEvents.mouseUp).pick("preventedDefault", "stoppedPropagation")
+                  items: _(domEvents.mouseUp).pick("preventedDefault", "stoppedPropagation", "altKey", "ctrlKey", "metaKey", "shiftKey")
                 })
 
               if domEvents.click
                 groups.push({
                   name: "Click"
-                  items: _(domEvents.click).pick("preventedDefault", "stoppedPropagation")
+                  items: _(domEvents.click).pick("preventedDefault", "stoppedPropagation", "altKey", "ctrlKey", "metaKey", "shiftKey")
                 })
 
               return groups
@@ -780,6 +780,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             if key
               obj.typed = key
               obj.which = which if which
+            Cypress.Keyboard.mixinModifiers(obj)
             obj
 
         updateTable = (id, key, column, which, value) ->
@@ -804,7 +805,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               {
                 name: "Key Events Table"
                 data: getTableData()
-                columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change"]
+                columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "altKey", "ctrlKey", "metaKey", "shiftKey"]
               }
 
         options._log.snapshot("before", {next: "after"})

@@ -36,10 +36,10 @@ $Cypress.Mouse = do ($Cypress, _, Promise) ->
 
       cancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
 
-      {
+      Cypress.Keyboard.mixinModifiers({
         preventedDefault: cancelled
         stoppedPropagation: !!mdownEvt._hasStoppedPropagation
-      }
+      })
 
     mouseUp: ($elToClick, coords, win) ->
       mupEvtProps = Cypress.Keyboard.mixinModifiers({
@@ -63,10 +63,10 @@ $Cypress.Mouse = do ($Cypress, _, Promise) ->
 
       cancelled = !$elToClick.get(0).dispatchEvent(mupEvt)
 
-      {
+      Cypress.Keyboard.mixinModifiers({
         preventedDefault: cancelled
         stoppedPropagation: !!mupEvt._hasStoppedPropagation
-      }
+      })
 
     click: ($elToClick, coords, win) ->
       clickEvtProps = Cypress.Keyboard.mixinModifiers({
@@ -90,8 +90,8 @@ $Cypress.Mouse = do ($Cypress, _, Promise) ->
 
       cancelled = !$elToClick.get(0).dispatchEvent(clickEvt)
 
-      {
+      Cypress.Keyboard.mixinModifiers({
         preventedDefault: cancelled
         stoppedPropagation: !!clickEvt._hasStoppedPropagation
-      }
+      })
   }
