@@ -100,17 +100,17 @@ describe "lib/config", ->
       @defaults = (prop, value, cfg = {}, options = {}) =>
         expect(config.mergeDefaults(cfg, options)[prop]).to.deep.eq(value)
 
-    it "port=2020", ->
-      @defaults "port", 2020
+    it "port=null", ->
+      @defaults "port", null
 
     it "autoOpen=false", ->
       @defaults "autoOpen", false
 
     it "clientUrl=http://localhost:2020/__/", ->
-      @defaults "clientUrl", "http://localhost:2020/__/"
+      @defaults "clientUrl", "http://localhost:2020/__/", {port: 2020}
 
     it "clientUrlDisplay=http://localhost:2020", ->
-      @defaults "clientUrlDisplay", "http://localhost:2020"
+      @defaults "clientUrlDisplay", "http://localhost:2020", {port: 2020}
 
     it "namespace=__cypress", ->
       @defaults "namespace", "__cypress"
@@ -284,6 +284,7 @@ describe "lib/config", ->
 
         obj = {
           baseUrl: "http://localhost:8080"
+          port: 2020
           env: {
             foo: "foo"
           }
@@ -300,7 +301,7 @@ describe "lib/config", ->
         cfg = config.mergeDefaults(obj, options)
 
         expect(cfg.resolved).to.deep.eq({
-          port:                       { value: 2020, from: "default" },
+          port:                       { value: 2020, from: "config" },
           reporter:                   { value: "spec", from: "default" },
           baseUrl:                    { value: "http://localhost:8080", from: "config" },
           commandTimeout:             { value: 4000, from: "default" },
