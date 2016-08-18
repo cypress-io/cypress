@@ -36,10 +36,14 @@ $Cypress.Mouse = do ($Cypress, _, Promise) ->
 
       cancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
 
-      Cypress.Keyboard.mixinModifiers({
+      props = {
         preventedDefault: cancelled
         stoppedPropagation: !!mdownEvt._hasStoppedPropagation
-      })
+      }
+
+      modifiers = Cypress.Keyboard.activeModifiers()
+      props.modifiers = modifiers.join(", ") if modifiers.length
+      props
 
     mouseUp: ($elToClick, coords, win) ->
       mupEvtProps = Cypress.Keyboard.mixinModifiers({
@@ -63,10 +67,14 @@ $Cypress.Mouse = do ($Cypress, _, Promise) ->
 
       cancelled = !$elToClick.get(0).dispatchEvent(mupEvt)
 
-      Cypress.Keyboard.mixinModifiers({
+      props = {
         preventedDefault: cancelled
         stoppedPropagation: !!mupEvt._hasStoppedPropagation
-      })
+      }
+
+      modifiers = Cypress.Keyboard.activeModifiers()
+      props.modifiers = modifiers.join(", ") if modifiers.length
+      props
 
     click: ($elToClick, coords, win) ->
       clickEvtProps = Cypress.Keyboard.mixinModifiers({
@@ -90,8 +98,12 @@ $Cypress.Mouse = do ($Cypress, _, Promise) ->
 
       cancelled = !$elToClick.get(0).dispatchEvent(clickEvt)
 
-      Cypress.Keyboard.mixinModifiers({
+      props = {
         preventedDefault: cancelled
         stoppedPropagation: !!clickEvt._hasStoppedPropagation
-      })
+      }
+
+      modifiers = Cypress.Keyboard.activeModifiers()
+      props.modifiers = modifiers.join(", ") if modifiers.length
+      props
   }

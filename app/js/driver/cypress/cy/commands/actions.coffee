@@ -527,19 +527,19 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             consoleObj.groups = ->
               groups = [{
                 name: "MouseDown"
-                items: _(domEvents.mouseDown).pick("preventedDefault", "stoppedPropagation", "altKey", "ctrlKey", "metaKey", "shiftKey")
+                items: _(domEvents.mouseDown).pick("preventedDefault", "stoppedPropagation", "modifiers")
               }]
 
               if domEvents.mouseUp
                 groups.push({
                   name: "MouseUp"
-                  items: _(domEvents.mouseUp).pick("preventedDefault", "stoppedPropagation", "altKey", "ctrlKey", "metaKey", "shiftKey")
+                  items: _(domEvents.mouseUp).pick("preventedDefault", "stoppedPropagation", "modifiers")
                 })
 
               if domEvents.click
                 groups.push({
                   name: "Click"
-                  items: _(domEvents.click).pick("preventedDefault", "stoppedPropagation", "altKey", "ctrlKey", "metaKey", "shiftKey")
+                  items: _(domEvents.click).pick("preventedDefault", "stoppedPropagation", "modifiers")
                 })
 
               return groups
@@ -777,10 +777,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         getRow = (id, key, which) ->
           table[id] or do ->
             table[id] = (obj = {})
+            modifiers = Cypress.Keyboard.activeModifiers()
+            obj.modifiers = modifiers.join(", ") if modifiers.length
             if key
               obj.typed = key
               obj.which = which if which
-            Cypress.Keyboard.mixinModifiers(obj)
             obj
 
         updateTable = (id, key, column, which, value) ->
@@ -805,7 +806,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               {
                 name: "Key Events Table"
                 data: getTableData()
-                columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "altKey", "ctrlKey", "metaKey", "shiftKey"]
+                columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "modifiers"]
               }
 
         options._log.snapshot("before", {next: "after"})

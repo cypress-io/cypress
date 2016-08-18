@@ -543,6 +543,12 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         shiftKey: @modifiers.shift
       })
 
+    activeModifiers: ->
+      _.reduce @modifiers, (memo, isActivated, modifier) ->
+        memo.push(modifier) if isActivated
+        memo
+      , []
+
     resetModifiers: (el, window) ->
       for modifier, isActivated of @modifiers
         @modifiers[modifier] = false
