@@ -79,8 +79,8 @@
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb
 
-        @listenTo @Cypress, "fixture", (fixture, cb) =>
-          @socket.emit "fixture", fixture, cb
+        @listenTo @Cypress, "fixture", (fixture, options, cb) =>
+          @socket.emit "fixture", fixture, options, cb
 
         @listenTo @Cypress, "request", (options, cb) =>
           @socket.emit "request", options, cb

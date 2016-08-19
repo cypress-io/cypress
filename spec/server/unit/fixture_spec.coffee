@@ -22,19 +22,12 @@ describe "lib/fixture", ->
     it "throws when file cannot be found", ->
       p = "does-not-exist.json"
 
-      fixture.get(p)
+      fixture.get(@fixturesFolder, p)
       .then ->
         throw new Error("should have failed but did not")
       .catch (err) =>
-        expect(err.message).to.eq "No fixture exists at: #{p}"
-
-  context "invalid extension", ->
-    it "throws", ->
-      fixture.get(@fixturesFolder, "foo.exe")
-      .then ->
-        throw new Error("should have failed but did not")
-      .catch (err) ->
-        expect(err.message).to.eq "Invalid fixture extension: '.exe'. Acceptable file extensions are: .json, .js, .coffee, .html, .txt, .png, .jpg, .jpeg, .gif, .tif, .tiff, .zip"
+        expect(err.message).to.include "No fixture exists at:"
+        expect(err.message).to.include p
 
   context "nested fixtures", ->
     it "can pass path to nested fixture", ->
@@ -228,6 +221,31 @@ describe "lib/fixture", ->
     it "returns text as string", ->
       fixture.get(@fixturesFolder, "message.txt").then (index) ->
         expect(index).to.eq "foobarbaz"
+
+  context "csv files", ->
+    it "returns text as string", ->
+      fixture.get(@fixturesFolder, "data.csv").then (index) ->
+        expect(index).to.eq """
+        Name,Occupation,Birth Year
+        Jane,Engineer,1976
+        John,Chef,1982
+
+        """
+
+  context "file with unknown extension", ->
+    it "returns text as string", ->
+      fixture.get(@fixturesFolder, "unknown_ext.yaml").then (index) ->
+        expect(index).to.eq """
+        - foo
+        - bar
+        - 
+
+        """
+
+  context "file with unknown extension and encoding specified", ->
+    it "returns text encoded as specified", ->
+      fixture.get(@fixturesFolder, "ascii.foo", {encoding: "ascii"}).then (index) ->
+        expect(index).to.eq "o#?\n"
 
   context "image files", ->
     it "returns png as string", ->
