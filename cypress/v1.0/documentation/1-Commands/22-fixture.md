@@ -18,6 +18,7 @@ If an extension is omitted, Cypress will attempt to resolve the fixture by order
 * `.coffee`
 * `.html`
 * `.txt`
+* `.csv`
 * `.png`
 * `.jpg`
 * `.jpeg`
@@ -48,6 +49,7 @@ Pass in an options object to change the default behavior of `cy.fixture`.
 Option | Default | Notes
 --- | --- | ---
 `timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.fixture` command to be processed
+`encoding` | `"utf8"` | Encoding used when reading the file when the extension is not one listed above (see [Encoding](#section-encoding)).
 
 ***
 
@@ -70,9 +72,18 @@ cy.fixture("admin")
 Cypress will search for files called `admin` and resolve the first one in this order:
 
 1. `{your project root}/cypress/fixtures/admin.json`
-2. `{your project root}/cypress/fixtures/admin.js`
-3. `{your project root}/cypress/fixtures/admin.coffee`
-
+1. `{your project root}/cypress/fixtures/admin.js`
+1. `{your project root}/cypress/fixtures/admin.coffee`
+1. `{your project root}/cypress/fixtures/admin.html`
+1. `{your project root}/cypress/fixtures/admin.txt`
+1. `{your project root}/cypress/fixtures/admin.csv`
+1. `{your project root}/cypress/fixtures/admin.png`
+1. `{your project root}/cypress/fixtures/admin.jpg`
+1. `{your project root}/cypress/fixtures/admin.jpeg`
+1. `{your project root}/cypress/fixtures/admin.gif`
+1. `{your project root}/cypress/fixtures/admin.tif`
+1. `{your project root}/cypress/fixtures/admin.tiff`
+1. `{your project root}/cypress/fixtures/admin.zip`
 ***
 
 ## Image fixtures will be sent as `base64`
@@ -110,6 +121,46 @@ Cypress will automatically validate your fixtures. If your `.json`, `.js`, or `.
 ## Formatting
 
 Cypress automatically formats your fixture files. That means you can paste in a single line of `json` and the next time Cypress serves this fixture, it will format / indent the `json` which makes it easier to read and debug.
+
+***
+
+## Encoding
+
+Cypress automatically determines the encoding for the following file types:
+
+* `.json`
+* `.js`
+* `.coffee`
+* `.html`
+* `.txt`
+* `.csv`
+* `.png`
+* `.jpg`
+* `.jpeg`
+* `.gif`
+* `.tif`
+* `.tiff`
+* `.zip`
+
+For other types of files, they will be read as "utf8" by default. You can specify a different encoding with the `encoding` option.
+
+```javascript
+cy.fixture("foo.bmp", {encoding: "base64"})
+```
+
+The following encodings are supported:
+
+* `ascii`
+* `base64`
+* `binary`
+* `hex`
+* `latin1`
+* `utf8`
+* `utf-8`
+* `ucs2`
+* `ucs-2`
+* `utf16le`
+* `utf-16le`
 
 ***
 
