@@ -37,6 +37,9 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
       if d = config.remote.domainName
         document.domain = d
 
+      if config.isHeadless
+        $Cypress.isHeadless = true
+
       {environmentVariables, remote} = config
 
       config = _.omit(config, "environmentVariables", "remote")
