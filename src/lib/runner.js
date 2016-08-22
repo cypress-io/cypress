@@ -68,13 +68,17 @@ export default {
       driver.on(event, (...args) => channel.emit(event, ...args))
     })
 
+    driver.on('mocha', (event, ...args) => {
+      channel.emit('mocha', event, ...args)
+    })
+
     _.each(driverAutomationEvents, (event) => {
       driver.on(event, (...args) => channel.emit('automation:request', event, ...args))
     })
 
     reporterBus.on('focus:tests', this.focusTests)
 
-    driver.setConfig(_.pick(config, 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote'))
+    driver.setConfig(_.pick(config, 'isHeadless', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'commandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote'))
 
     driver.start()
 
@@ -104,7 +108,7 @@ export default {
           // if we have a currentId it means
           // we need to tell the runner to skip
           // ahead to that test
-          runner.resumeAtTest(state.currentId)
+          runner.resumeAtTest(state.currentId, state.emissions)
         }
 
         driver.run(() => {})
