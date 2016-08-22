@@ -24,11 +24,19 @@ convertNewLinesToBr = (text) ->
   text.split("\n").join("<br />")
 
 setCookie = (res, key, val, domainName) ->
-  method = if val then "cookie" else "clearCookie"
-
-  res[method](key, val, {
+  ## cannot use res.clearCookie because domain
+  ## is not sent correctly
+  options = {
     domain: domainName
-  })
+  }
+
+  if not val
+    val = ""
+
+    ## force expires to be the epoch
+    options.expires = new Date(0)
+
+  res.cookie(key, val, options)
 
 module.exports = {
   handle: (req, res, config, getRemoteState, next) ->
