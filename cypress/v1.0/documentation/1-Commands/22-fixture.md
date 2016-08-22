@@ -40,16 +40,23 @@ Loads the fixture at the specified filepath within `cypress/fixtures`.
 
 ***
 
+# [cy.fixture( *fixture*, *encoding* )](#section-encoding)
+
+Loads the fixture at the specified filepath within `cypress/fixtures`, using the encoding specified when reading the file.
+
+***
+
 # Options
 
 Pass in an options object to change the default behavior of `cy.fixture`.
 
 **[cy.fixture( *fixture*, *options* )](#options-usage)**
 
+**[cy.fixture( *fixture*, *encoding*, *options* )](#options-usage)**
+
 Option | Default | Notes
 --- | --- | ---
 `timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.fixture` command to be processed
-`encoding` | `"utf8"` | Encoding used when reading the file when the extension is not one listed above (see [Encoding](#section-encoding)).
 
 ***
 
@@ -142,10 +149,10 @@ Cypress automatically determines the encoding for the following file types:
 * `.tiff`
 * `.zip`
 
-For other types of files, they will be read as "utf8" by default. You can specify a different encoding with the `encoding` option.
+For other types of files, they will be read as "utf8" by default. You can specify a different encoding by passing it as the second argument.
 
 ```javascript
-cy.fixture("foo.bmp", {encoding: "base64"})
+cy.fixture("foo.bmp", "base64")
 ```
 
 The following encodings are supported:
