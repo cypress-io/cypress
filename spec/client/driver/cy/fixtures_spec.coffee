@@ -28,6 +28,18 @@ describe "$Cypress.Cy Fixtures Commands", ->
       @cy.fixture("foo").as("foo").then ->
         expect(@foo).to.deep.eq {foo: "bar"}
 
+    it "can have encoding as second argument", ->
+      @respondWith({foo: "bar"})
+
+      @cy.fixture("foo", "ascii").then (obj) ->
+        expect(obj).to.deep.eq {foo: "bar"}
+
+    it "can have encoding as second argument and options as third argument", ->
+      @respondWith({foo: "bar"})
+
+      @cy.fixture("foo", "ascii", {timeout: 1000}).then (obj) ->
+        expect(obj).to.deep.eq {foo: "bar"}
+
     describe "cancellation", ->
       it "cancels promise", (done) ->
         ## respond after 50 ms

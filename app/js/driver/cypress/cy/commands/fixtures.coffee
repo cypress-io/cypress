@@ -17,7 +17,7 @@ $Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
     cache = {}
 
   Cypress.addParentCommand
-    fixture: (fx, options = {}) ->
+    fixture: (fx, args...) ->
       ## if we already have cached
       ## this fixture then just return it
 
@@ -28,6 +28,18 @@ $Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
         ## clone the object first to prevent
         ## accidentally mutating the one in the cache
         return Promise.resolve clone(resp)
+
+      options = {}
+
+      switch
+        when _.isObject(args[0])
+          options = args[0]
+
+        when _.isObject(args[1])
+          options = args[1]
+
+        when _.isString(args[0])
+          options.encoding = args[0]
 
       _.defaults options, {
         timeout: Cypress.config("responseTimeout")
