@@ -4,7 +4,13 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
   ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
   RUNNABLE_LOGS    = "routes agents commands".split(" ")
-  RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook alreadyEmittedMocha".split(" ")
+  RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook".split(" ")
+
+  triggerMocha = (Cypress, event, args...) ->
+    ## dont trigger mocha events if we are not headless
+    return if not $Cypress.isHeadless
+
+    Cypress.trigger("mocha", event, args...)
 
   # ## initial payload
   # {
@@ -127,6 +133,10 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       @runnables = []
       @runnablesById = {}
       @logsById = {}
+      @emissions = {
+        started: {}
+        ended:   {}
+      }
       @startTime = null
 
       @listeners()
@@ -182,6 +192,10 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       @runner.on "start", ->
         Cypress.trigger "run:start"
 
+        return if Cypress._RESUMED_AT_TEST
+
+        triggerMocha(Cypress, "start")
+
       ## mocha has finished running the tests
       @runner.on "end", =>
         ## end may have been caused by an uncaught error
@@ -193,6 +207,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         ## test:after:run events ourselves
         end = =>
           Cypress.trigger "run:end"
+          triggerMocha(Cypress, "end")
 
           @restore()
 
@@ -213,13 +228,21 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
           end()
 
       @runner.on "suite", (suite) =>
-        Cypress.trigger "suite:start", @wrap(suite)
+        return if @emissions.started[suite.id]
+
+        @emissions.started[suite.id] = true
+
+        triggerMocha(Cypress, "suite", @wrapParents(suite))
 
       @runner.on "suite end", (suite) =>
-        Cypress.trigger "suite:end", @wrap(suite)
-
         _.each suite.ctx, (value, key) ->
           delete suite.ctx[key]
+
+        return if @emissions.ended[suite.id]
+
+        @emissions.ended[suite.id] = true
+
+        triggerMocha(Cypress, "suite end", @wrapParents(suite))
 
       @runner.on "hook", (hook) =>
         hookName = @getHookName(hook)
@@ -240,7 +263,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         hook.ctx.currentTest = test
 
         Cypress.set(hook, hookName)
-        Cypress.trigger "hook:start", @wrap(hook)
+        triggerMocha(Cypress, "hook", @wrapParents(hook))
 
       @runner.on "hook end", (hook) =>
         hookName = @getHookName(hook)
@@ -253,19 +276,28 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         if hookName is "before each" and test = hook.ctx.currentTest
           Cypress.set(test, "test")
 
-        Cypress.trigger "hook:end", @wrap(hook)
+        triggerMocha(Cypress, "hook end", @wrapParents(hook))
 
       @runner.on "test", (test) =>
         @test = test
 
         Cypress.set(test, "test")
-        Cypress.trigger "test:start", @wrap(test)
+
+        return if @emissions.started[test.id]
+
+        @emissions.started[test.id] = true
+
+        triggerMocha(Cypress, "test", @wrapParents(test))
 
       @runner.on "test end", (test) =>
-        Cypress.trigger "test:end", @wrap(test)
+        return if @emissions.ended[test.id]
+
+        @emissions.ended[test.id] = true
+
+        triggerMocha(Cypress, "test end", @wrapParents(test))
 
       @runner.on "pass", (test) =>
-        Cypress.trigger "mocha:pass", @wrap(test)
+        triggerMocha(Cypress, "pass", @wrapParents(test))
 
       ## if a test is pending mocha will only
       ## emit the pending event instead of the test
@@ -279,10 +311,10 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
         test.state = "pending"
 
-        if $Cypress.isHeadless
-          ## do not double emit the 'test' event
+        if not test.alreadyEmittedMocha
+          ## do not double emit this event
           test.alreadyEmittedMocha = true
-          Cypress.trigger "mocha:pending", _this.wrap(test)
+          triggerMocha(Cypress, "pending", _this.wrapParents(test))
 
         @emit "test", test
 
@@ -298,10 +330,10 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         ## taking a screenshot on error
         runnable.err = @wrapErr(err)
 
-        if $Cypress.isHeadless
-          ## do not double emit the 'test end' event
+        if not runnable.alreadyEmittedMocha
+          ## do not double emit this event
           runnable.alreadyEmittedMocha = true
-          Cypress.trigger "mocha:fail", @wrap(runnable), runnable.err
+          triggerMocha(Cypress, "fail", @wrapParents(runnable), runnable.err)
 
         if runnable.type is "hook"
           @hookFailed(runnable, runnable.err)
@@ -366,6 +398,9 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
       runnable.matchesGrep
 
+    getEmissions: ->
+      @emissions
+
     getTestsState: ->
       id    = @test?.id
       tests = {}
@@ -415,12 +450,15 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
       return obj
 
-    resumeAtTest: (id) ->
+    resumeAtTest: (id, emissions = {}) ->
+      @Cypress._RESUMED_AT_TEST = id
+
+      @emissions = emissions
+
       for test in @tests
         if test.id isnt id
           test._ALREADY_RAN = true
           test.pending = true
-          ## delete the fn?
         else
           ## bail so we can stop now
           return
@@ -509,6 +547,14 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
     wrapErr: (err) ->
       @reduceProps(err, ERROR_PROPS)
+
+    wrapParents: (runnable) ->
+      r = @wrap(runnable)
+
+      if parent = runnable.parent
+        r.parent = @wrapParents(parent)
+
+      return r
 
     wrap: (runnable) ->
       ## we need to optimize wrap by converting
@@ -602,7 +648,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
     afterEachFailed: (test, err) ->
       test.state = "failed"
       test.err = @wrapErr(err)
-      @Cypress.trigger "test:end", @wrap(test)
+      triggerMocha(@Cypress, "test end", @wrapParents(test))
 
     hookFailed: (hook, err) ->
       ## finds the test by returning the first test from
@@ -617,8 +663,8 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
       if hook.alreadyEmittedMocha
         test.alreadyEmittedMocha = true
-
-      @Cypress.trigger "test:end", @wrap(test)
+      else
+        triggerMocha(@Cypress, "test end", @wrapParents(test))
 
     total: ->
       @runner.suite.total()

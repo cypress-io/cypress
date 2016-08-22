@@ -82,6 +82,9 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
     getTestsState: ->
       @runner.getTestsState()
 
+    getEmissions: ->
+      @runner.getEmissions()
+
     countByTestState: (tests, state) ->
       @runner.countByTestState(tests, state)
 

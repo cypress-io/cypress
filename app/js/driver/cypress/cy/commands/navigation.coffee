@@ -423,6 +423,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                   currentId: id
                   tests:     Cypress.getTestsState()
                   startTime: Cypress.getStartTime()
+                  emissions: Cypress.getEmissions()
                 }
 
                 state.passed  = Cypress.countByTestState(state.tests, "passed")
