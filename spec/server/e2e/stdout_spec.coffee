@@ -18,11 +18,11 @@ describe "mocha reporter's stdout", ->
   beforeEach ->
     Fixtures.scaffold()
 
-    @visitsPath = Fixtures.projectPath("visits")
+    @e2ePath = Fixtures.projectPath("e2e")
 
     user.set({name: "brian", session_token: "session-123"})
     .then =>
-      Project.add(@visitsPath)
+      Project.add(@e2ePath)
 
   afterEach ->
     Fixtures.remove()
@@ -30,12 +30,12 @@ describe "mocha reporter's stdout", ->
   it "displays errors from failures", ->
     @timeout(20000)
 
-    cp.execAsync("node index.js --run-project=#{@visitsPath} --spec=cypress/integration/failing_spec.coffee --port=2020", {env: env})
+    cp.execAsync("node index.js --run-project=#{@e2ePath} --spec=cypress/integration/failing_spec.coffee --port=2020", {env: env})
     .then (stdout) ->
       stdout = stdout
       .replace(/\(\d{2,4}ms\)/g, "(123ms)")
       .replace(/coffee-\d{3}/g, "coffee-456")
-      .replace(/(.+)\.projects\/visits\/does-not-exist\.html/, "/foo/bar/.projects/visits/does-not-exist.html")
+      .replace(/(.+)\.projects\/e2e\/does-not-exist\.html/, "/foo/bar/.projects/e2e/does-not-exist.html")
 
       expect(stdout).to.include("""
 Tests should begin momentarily...
@@ -64,7 +64,7 @@ does-not-exist.html
 
 We failed looking for this file at the path:
 
-/foo/bar/.projects/visits/does-not-exist.html
+/foo/bar/.projects/e2e/does-not-exist.html
 
 The internal Cypress web server responded with:
 
@@ -75,7 +75,7 @@ The internal Cypress web server responded with:
   it "does not duplicate suites or tests between visits", ->
     @timeout(30000)
 
-    cp.execAsync("node index.js --run-project=#{@visitsPath} --spec=cypress/integration/passing_spec.coffee --port=2020", {env: env})
+    cp.execAsync("node index.js --run-project=#{@e2ePath} --spec=cypress/integration/passing_spec.coffee --port=2020", {env: env})
     .then (stdout) ->
       stdout = stdout
       .replace(/\(\d{2,4}ms\)/g, "(123ms)")
