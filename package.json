@@ -14,6 +14,7 @@
     "release": "gulp release",
     "postinstall": "bower install",
     "test": "npm run test-server & chokidar 'spec/server/**/*' 'lib/**/*' -c 'npm run test-server' --polling --poll-interval=250 ",
+    "test-e2e": "CYPRESS_DEBUG=true NODE_ENV=test NODE_DEBUG=request CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=socket.io:* mocha spec/server/e2e --compilers coffee:coffee-script/register",
     "test-cov": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover node_modules/.bin/_mocha -- --opts ./spec/server/mocha.opts",
     "test-cov-process": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover --include-pid",
     "test-server": "CYPRESS_DEBUG=true NODE_ENV=test NODE_DEBUG=request CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,-nock.common,socket.io:* mocha --opts spec/server/mocha.opts",
