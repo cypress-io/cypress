@@ -14,7 +14,7 @@ fs = Promise.promisifyAll(fs)
 
 env = _.omit(process.env, "CYPRESS_DEBUG")
 
-describe "mocha reporter's stdout", ->
+describe "e2e stdout", ->
   beforeEach ->
     Fixtures.scaffold()
 
@@ -27,11 +27,10 @@ describe "mocha reporter's stdout", ->
   afterEach ->
     Fixtures.remove()
 
-  it "displays errors from failures", ->
+  it "displays errors from failures", (done) ->
     @timeout(20000)
 
-    cp.execAsync("node index.js --run-project=#{@e2ePath} --spec=cypress/integration/failing_spec.coffee --port=2020", {env: env})
-    .then (stdout) ->
+    exec = cp.exec "node index.js --run-project=#{@e2ePath} --spec=cypress/integration/failing_spec.coffee --port=2020", {env: env}, (err, stdout, stderr) ->
       stdout = stdout
       .replace(/\(\d{2,4}ms\)/g, "(123ms)")
       .replace(/coffee-\d{3}/g, "coffee-456")
@@ -71,6 +70,10 @@ The internal Cypress web server responded with:
   > 404: Not Found
 
 """)
+
+    exec.on "close", (code) ->
+      expect(code).to.eq(2)
+      done()
 
   it "does not duplicate suites or tests between visits", ->
     @timeout(30000)

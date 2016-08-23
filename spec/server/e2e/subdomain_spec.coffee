@@ -7,7 +7,6 @@ morgan   = require("morgan")
 parser   = require("cookie-parser")
 express  = require("express")
 Promise  = require("bluebird")
-evilDns  = require("evil-dns")
 Fixtures = require("../helpers/fixtures")
 user     = require("#{root}lib/user")
 cypress  = require("#{root}lib/cypress")
@@ -72,11 +71,9 @@ stopServer = ->
   new Promise (resolve) ->
     srv.close(resolve)
 
-describe.only "e2e subdomain", ->
+describe "e2e subdomain", ->
   beforeEach ->
     Fixtures.scaffold()
-
-    # evilDns.add("*.foobar.com", "127.0.0.1")
 
     @e2ePath = Fixtures.projectPath("e2e")
 
@@ -90,8 +87,6 @@ describe.only "e2e subdomain", ->
 
   afterEach ->
     Fixtures.remove()
-
-    # evilDns.clear()
 
     stopServer()
 
