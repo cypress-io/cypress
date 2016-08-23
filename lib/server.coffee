@@ -6,6 +6,7 @@ cookie       = require("cookie")
 stream       = require("stream")
 express      = require("express")
 Promise      = require("bluebird")
+evilDns      = require("evil-dns")
 statuses     = require("http-status-codes")
 httpProxy    = require("http-proxy")
 httpsProxy   = require("@cypress/core-https-proxy")
@@ -112,9 +113,15 @@ class Server
 
       getRemoteState = => @_getRemoteState()
 
+      @createHosts(config.hosts)
+
       @createRoutes(app, config, getRemoteState)
 
       @createServer(config.port, config.socketIoRoute, app)
+
+  createHosts: (hosts = {}) ->
+    _.each hosts, (ip, host) ->
+      evilDns.add(host, ip)
 
   createServer: (port, socketIoRoute, app) ->
     new Promise (resolve, reject) =>
@@ -458,6 +465,8 @@ class Server
   _close: ->
     new Promise (resolve) =>
       logger.unsetSettings()
+
+      evilDns.clear()
 
       ## bail early we dont have a server or we're not
       ## currently listening
