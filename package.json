@@ -4,8 +4,7 @@
   "main": "dist/reporter",
   "scripts": {
     "build": "gulp build",
-    "postinstall": "bower install",
-    "prepublish": "gulp build",
+    "prepublish": "bower install && gulp build",
     "release": "releaser",
     "start": "gulp watch",
     "test": "mocha -r lib/test-setup.js dist/**/*.spec.js"
