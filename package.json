@@ -1,6 +1,6 @@
 {
   "name": "@cypress/core-reporter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "dist/reporter",
   "scripts": {
     "build": "gulp build",
