@@ -4,7 +4,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
   bTagOpen       = /\[b\]/g
   bTagClosed     = /\[\\b\]/g
   allButs        = /\bbut\b/g
-  reExistance    = /exist/
+  reExistence    = /exist/
   reEventually   = /^eventually/
   reHaveLength   = /length/
 
@@ -104,7 +104,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       throwAndLogErr(err)
 
     ## are we doing a length assertion?
-    if reHaveLength.test(chainers) or reExistance.test(chainers)
+    if reHaveLength.test(chainers) or reExistence.test(chainers)
       exp.isCheckingExistence = true
 
     applyChainer = (memo, value) ->

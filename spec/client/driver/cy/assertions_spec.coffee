@@ -492,7 +492,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.wrap("foo").should("match", "foo")
 
-      it "does not log ensureElExistance errors", (done) ->
+      it "does not log ensureElExistence errors", (done) ->
         logs = []
 
         @Cypress.on "log", (@log) =>

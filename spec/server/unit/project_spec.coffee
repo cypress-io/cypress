@@ -354,7 +354,7 @@ describe "lib/project", ->
 
     beforeEach ->
       @project         = Project("path/to/project")
-      @verifyExistance = @sandbox.stub(Project.prototype, "verifyExistance").resolves()
+      @verifyExistence = @sandbox.stub(Project.prototype, "verifyExistence").resolves()
 
     it "resolves with process.env.CYPRESS_PROJECT_ID if set", ->
       process.env.CYPRESS_PROJECT_ID = "123"
@@ -362,12 +362,12 @@ describe "lib/project", ->
       @project.getProjectId().then (id) ->
         expect(id).to.eq("123")
 
-    it "calls verifyExistance", ->
+    it "calls verifyExistence", ->
       @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
 
       @project.getProjectId()
       .then =>
-        expect(@verifyExistance).to.be.calledOnce
+        expect(@verifyExistence).to.be.calledOnce
 
     it "returns the project id from settings", ->
       @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
