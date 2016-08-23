@@ -36,3 +36,9 @@ npm start
 ## Runs all tests
 npm test
 ```
+
+
+## Changelog
+
+#### 0.1.0 - *(08/23/16)*
+- initial release
