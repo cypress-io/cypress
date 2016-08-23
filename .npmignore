@@ -1,3 +1,4 @@
 /src
 /app
 /static
+*.spec.*

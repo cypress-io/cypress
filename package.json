@@ -6,6 +6,7 @@
     "build": "gulp build",
     "postinstall": "bower install",
     "prepublish": "gulp build",
+    "release": "releaser",
     "start": "gulp watch",
     "test": "mocha -r lib/test-setup.js dist/**/*.spec.js"
   },
@@ -20,6 +21,7 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-reporter#readme",
   "devDependencies": {
+    "@cypress/core-releaser": "^0.1.8",
     "babel-eslint": "^6.0.4",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
