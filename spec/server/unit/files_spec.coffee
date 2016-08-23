@@ -2,8 +2,10 @@ require("../spec_helper")
 
 Promise        = require("bluebird")
 human          = require("human-interval")
-config         = require("#{root}lib/config")
+path           = require("path")
+
 api            = require("#{root}lib/api")
+config         = require("#{root}lib/config")
 user           = require("#{root}lib/user")
 filesUtil      = require("#{root}lib/controllers/files")
 files          = require("#{root}lib/files")
@@ -113,7 +115,7 @@ describe "lib/controllers/files", ->
           projectName: "foobar"
         })
 
-describe.only "lib/files", ->
+describe "lib/files", ->
   beforeEach ->
     FixturesHelper.scaffold()
 
@@ -125,26 +127,48 @@ describe.only "lib/files", ->
   afterEach ->
     FixturesHelper.remove()
 
-  it "returns text as string", ->
-    files.readFile(@projectRoot, "tests/_fixtures/message.txt").then (index) ->
-      expect(index).to.eq "foobarbaz"
+  context "#readFile", ->
 
-  it "returns uses utf8 by default", ->
-    files.readFile(@projectRoot, "tests/_fixtures/ascii.foo").then (index) ->
-      expect(index).to.eq "\n"
+    it "returns text as string", ->
+      files.readFile(@projectRoot, "tests/_fixtures/message.txt").then (contents) ->
+        expect(contents).to.eq "foobarbaz"
 
-  it "returns uses encoding specified in options", ->
-    files.readFile(@projectRoot, "tests/_fixtures/ascii.foo", {encoding: "ascii"}).then (index) ->
-      expect(index).to.eq "o#?\n"
+    it "returns uses utf8 by default", ->
+      files.readFile(@projectRoot, "tests/_fixtures/ascii.foo").then (contents) ->
+        expect(contents).to.eq "\n"
 
-  it "parses json to valid JS object", ->
-    files.readFile(@projectRoot, "tests/_fixtures/users.json").then (users) ->
-      expect(users).to.eql [
-        {
-          id: 1
-          name: "brian"
-        },{
-          id: 2
-          name: "jennifer"
-        }
-      ]
+    it "uses encoding specified in options", ->
+      files.readFile(@projectRoot, "tests/_fixtures/ascii.foo", {encoding: "ascii"}).then (contents) ->
+        expect(contents).to.eq "o#?\n"
+
+    it "parses json to valid JS object", ->
+      files.readFile(@projectRoot, "tests/_fixtures/users.json").then (contents) ->
+        expect(contents).to.eql [
+          {
+            id: 1
+            name: "brian"
+          },{
+            id: 2
+            name: "jennifer"
+          }
+        ]
+
+  context.only "#writeFile", ->
+
+    it "writes the file's contents", ->
+      files.writeFile(@projectRoot, ".projects/write_file.txt", "foo").then =>
+        files.readFile(@projectRoot, ".projects/write_file.txt").then (contents) ->
+          expect(contents).to.equal("foo")
+
+    it "uses encoding specified in options", ->
+      files.writeFile(@projectRoot, ".projects/write_file.txt", "", {encoding: "ascii"}).then =>
+        files.readFile(@projectRoot, ".projects/write_file.txt").then (contents) ->
+          expect(contents).to.equal("�")
+
+    it "overwrites existing file without issue", ->
+      files.writeFile(@projectRoot, ".projects/write_file.txt", "foo").then =>
+        files.readFile(@projectRoot, ".projects/write_file.txt").then (contents) =>
+          expect(contents).to.equal("foo")
+          files.writeFile(@projectRoot, ".projects/write_file.txt", "bar").then =>
+            files.readFile(@projectRoot, ".projects/write_file.txt").then (contents) ->
+              expect(contents).to.equal("bar")

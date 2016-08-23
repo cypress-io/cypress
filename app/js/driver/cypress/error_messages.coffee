@@ -132,6 +132,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       unexpected_error:  "#{cmd('{{cmd}}', '"{{file}}"')} failed with the following error: {{error}}"
       existent: "#{cmd('readFile', '"{{file}}"')} failed because the file exists when expected not to exist."
       invalid_argument: "#{cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: '{{file}}'."
+      invalid_contents: "#{cmd('writeFile')} must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: '{{contents}}'."
       nonexistent: "#{cmd('readFile', '"{{file}}"')} failed because the file does not exist."
       timed_out: "#{cmd('{{cmd}}', '"{{file}}"')} timed out after waiting {{timeout}}ms."
 

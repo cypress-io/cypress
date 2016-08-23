@@ -84,6 +84,13 @@ class Socket
       ## TODO: change to user errors.clone() when merging with 0.17.0
       cb({__error: { message: err.message, code: err.code }})
 
+  onWriteFile: (config, file, contents, options, cb) ->
+    files.writeFile(config.projectRoot, file, contents, options)
+    .then(cb)
+    .catch (err) ->
+      ## TODO: change to user errors.clone() when merging with 0.17.0
+      cb({__error: { message: err.message, code: err.code }})
+
   onExec: (projectRoot, options, cb) ->
     exec.run(projectRoot, options)
     .then(cb)
@@ -240,6 +247,9 @@ class Socket
 
       socket.on "read:file", (file, options, cb) =>
         @onReadFile(config, file, options, cb)
+
+      socket.on "write:file", (file, contents, options, cb) =>
+        @onWriteFile(config, file, contents, options, cb)
 
       socket.on "exec", (options, cb) =>
         @onExec(config.projectRoot, options, cb)

@@ -13,4 +13,8 @@ module.exports = {
       fs.readFileAsync
 
     readFn(filePath, options.encoding or "utf8")
+
+  writeFile: (projectRoot, file, contents, options = {}) ->
+    filePath = path.join(projectRoot, file)
+    fs.outputFileAsync(filePath, contents, options.encoding or "utf8")
 }

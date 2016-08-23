@@ -8,6 +8,15 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
         else
           resolve(resp)
 
+
+  writeFile = (file, contents, options) =>
+    new Promise (resolve, reject) ->
+      Cypress.trigger "write:file", file, contents, options, (resp = {}) ->
+        if err = resp.__error
+          reject(err)
+        else
+          resolve(resp)
+
   Cypress.addParentCommand
     readFile: (file, encoding, options = {}) ->
       if _.isObject(encoding)
@@ -26,7 +35,7 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
       if not file or not _.isString(file)
         $Cypress.Utils.throwErrByPath("files.invalid_argument", {
           onFail: options._log,
-          args: { cmd: "readFile", file: file ? '' }
+          args: { cmd: "readFile", file }
         })
 
       do verifyAssertions = =>
@@ -37,7 +46,7 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
           else
             $Cypress.Utils.throwErrByPath("files.unexpected_error", {
               onFail: options._log,
-              args: { cmd: "readFile", file: file ? '', error: err.message }
+              args: { cmd: "readFile", file, error: err.message }
             })
         .then (contents) =>
           @verifyUpcomingAssertions(contents, options, {
@@ -53,3 +62,52 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
                 err.displayMessage = $Cypress.Utils.errMessageByPath("files.nonexistent", { file })
             onRetry: verifyAssertions
           })
+
+    writeFile: (fileName, contents, encoding, options = {}) ->
+      if _.isObject(encoding)
+        options = encoding
+        encoding = null
+
+      _.defaults options,
+        encoding: encoding ? "utf8"
+        log: true
+
+      if options.log
+        options._log = Cypress.Log.command({
+          message: fileName
+          ## TODO: update when merging with 0.17.0
+          onConsole: ->
+            {
+              "File Name": fileName
+              "Contents": contents
+            }
+        })
+
+      if not fileName or not _.isString(fileName)
+        $Cypress.Utils.throwErrByPath("files.invalid_argument", {
+          onFail: options._log,
+          args: { cmd: "writeFile", file: fileName }
+        })
+
+      if not contents or not (_.isString(contents) or _.isObject(contents))
+        $Cypress.Utils.throwErrByPath("files.invalid_contents", {
+          onFail: options._log,
+          args: { contents: contents }
+        })
+
+      if _.isObject(contents)
+        contents = JSON.stringify(contents, null, 2)
+
+      writeFile(fileName, contents, _.pick(options, "encoding"))
+      .then ->
+        contents
+      .catch Promise.TimeoutError, (err) ->
+        $Cypress.Utils.throwErrByPath "files.timed_out", {
+          onFail: options._log
+          args: { cmd: "writeFile", file: fileName, timeout: options.timeout }
+        }
+      .catch (err) ->
+        $Cypress.Utils.throwErrByPath("files.unexpected_error", {
+          onFail: options._log
+          args: { cmd: "writeFile", file: fileName, error: err.message }
+        })

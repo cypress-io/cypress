@@ -9,7 +9,7 @@ describe "$Cypress.Cy Files Commands", ->
 
     it "triggers 'read:file' with the right options", (done)->
       @Cypress.on "read:file", (file, options, cb) ->
-        expect(file).to.eql("foo.json")
+        expect(file).to.equal("foo.json")
         expect(options).to.eql({ encoding: "utf8" })
         cb("contents")
         done()
@@ -64,7 +64,7 @@ describe "$Cypress.Cy Files Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.readFile() must be passed a non-empty string as its 1st argument. You passed: ''.")
+          expect(err.message).to.eq("cy.readFile() must be passed a non-empty string as its 1st argument. You passed: 'undefined'.")
           done()
 
         @cy.readFile()
@@ -83,6 +83,21 @@ describe "$Cypress.Cy Files Commands", ->
           done()
 
         @cy.readFile(2)
+
+      it "throws when file argument is an empty string", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(err.message).to.eq("cy.readFile() must be passed a non-empty string as its 1st argument. You passed: ''.")
+          done()
+
+        @cy.readFile("")
 
       it "throws when there is an error reading the file", (done) ->
         @respondWith({ __error: { code: "EISDIR", message: "EISDIR: illegal operation on a directory, read" } })
@@ -157,3 +172,164 @@ describe "$Cypress.Cy Files Commands", ->
           done()
 
         @cy.readFile("foo.json").should("equal", "contents")
+
+  describe "#writeFile", ->
+    beforeEach ->
+      @respondWith = (response, timeout = 10) =>
+        @Cypress.once "write:file", (file, contents, options, cb) ->
+          _.delay (-> cb(response)), timeout
+
+    it "triggers 'write:file' with the right options", (done)->
+      @Cypress.on "write:file", (file, contents, options, cb) ->
+        expect(file).to.equal("foo.txt")
+        expect(contents).to.equal("contents")
+        expect(options).to.eql({ encoding: "utf8" })
+        cb("contents")
+        done()
+
+      @cy.writeFile("foo.txt", "contents")
+
+    it "can take encoding as third argument", (done)->
+      @Cypress.on "write:file", (file, contents, options, cb) ->
+        expect(options).to.eql({ encoding: "ascii" })
+        cb("contents")
+        done()
+
+      @cy.writeFile("foo.txt", "contents", "ascii")
+
+    it "sets the contents as the subject", ->
+      @respondWith("contents")
+
+      @cy.writeFile("foo.txt", "contents").then (subject) ->
+        expect(subject).to.equal("contents")
+
+    it "can write a string", ->
+      @respondWith("contents")
+
+      @cy.writeFile("foo.txt", "contents")
+
+    it "can write an array as json", ->
+      @respondWith("contents")
+
+      @cy.writeFile("foo.json", [])
+
+    it "can write an object as json", ->
+      @respondWith("contents")
+
+      @cy.writeFile("foo.json", {})
+
+    describe ".log", ->
+      it "can turn off logging", ->
+        @respondWith("contents")
+
+        @Cypress.on "log", (@log) =>
+
+        @cy.writeFile("foo.txt", "contents", { log: false }).then ->
+          expect(@log).to.be.undefined
+
+      it "logs immediately before resolving", ->
+        @respondWith("contents")
+
+        @Cypress.on "log", (@log) =>
+          expect(@log.get("state")).to.eq("pending")
+          expect(@log.get("message")).to.eq("foo.txt", "contents")
+
+        @cy.writeFile("foo.txt", "contents").then =>
+          throw new Error("failed to log before resolving") unless @log
+
+    describe "errors", ->
+
+      beforeEach ->
+        @allowErrors()
+
+      it "throws when file name argument is absent", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(err.message).to.eq("cy.writeFile() must be passed a non-empty string as its 1st argument. You passed: 'undefined'.")
+          done()
+
+        @cy.writeFile()
+
+      it "throws when file name argument is not a string", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(err.message).to.eq("cy.writeFile() must be passed a non-empty string as its 1st argument. You passed: '2'.")
+          done()
+
+        @cy.writeFile(2)
+
+      it "throws when contents argument is absent", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(err.message).to.eq("cy.writeFile() must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: 'undefined'.")
+          done()
+
+        @cy.writeFile("foo.txt")
+
+      it "throws when contents argument is an empty string", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(err.message).to.eq("cy.writeFile() must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: ''.")
+          done()
+
+        @cy.writeFile("foo.txt", "")
+
+      it "throws when contents argument is not a string, object, or array", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(err.message).to.eq("cy.writeFile() must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: '2'.")
+          done()
+
+        @cy.writeFile("foo.txt", 2)
+
+      it "throws when there is an error writing the file", (done) ->
+        @respondWith({ __error: { code: "WHOKNOWS", message: "WHOKNOWS: unable to write file" } })
+
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(err.message).to.eq("cy.writeFile(\"foo.txt\") failed with the following error: WHOKNOWS: unable to write file")
+          done()
+
+        @cy.writeFile("foo.txt", "contents")
