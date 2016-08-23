@@ -15,10 +15,12 @@
     "postinstall": "bower install",
     "build": "node ./scripts/build.js",
     "clean": "rm -rf dist",
+    "release": "releaser",
     "start": "node ./scripts/watch.js",
     "test": "node ./scripts/test.js"
   },
   "devDependencies": {
+    "@cypress/core-releaser": "^0.1.8",
     "babel-eslint": "^6.0.4",
     "bower": "^1.7.9",
     "chai": "^3.5.0",
