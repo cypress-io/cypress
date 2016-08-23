@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "bluebird": "^3.4.0",
-    "@cypress/core-reporter": "0.1.1",
+    "@cypress/core-reporter": "0.1.2",
     "classnames": "^2.2.5",
     "mobx": "^2.3.6",
     "mobx-react": "^3.5.3",
