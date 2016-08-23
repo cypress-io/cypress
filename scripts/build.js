@@ -6,6 +6,7 @@ setZunderConfig(z)
 
 u.series(
   z.applyProdEnv,
+  z.cleanDev,
   u.parallel(
     z.buildDevScripts,
     z.buildDevStylesheets,
