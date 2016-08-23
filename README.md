@@ -16,5 +16,8 @@ npm start
 
 ## Changelog
 
+#### 0.1.2 - *(08/23/16)*
+- change file names: app.js -> runner.js & app.css -> runner.scss
+
 #### 0.1.0 - *(08/23/16)*
 - initial release
