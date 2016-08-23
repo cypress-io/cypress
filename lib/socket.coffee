@@ -10,6 +10,7 @@ open          = require("./util/open")
 pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
 exec          = require("./exec")
+files         = require("./files")
 fixture       = require("./fixture")
 Request       = require("./request")
 errors        = require("./errors")
@@ -75,6 +76,13 @@ class Socket
     .then(cb)
     .catch (err) ->
       cb({__error: err.message})
+
+  onReadFile: (config, file, options, cb) ->
+    files.readFile(config.projectRoot, file, options)
+    .then(cb)
+    .catch (err) ->
+      ## TODO: change to user errors.clone() when merging with 0.17.0
+      cb({__error: { message: err.message, code: err.code }})
 
   onExec: (projectRoot, options, cb) ->
     exec.run(projectRoot, options)
@@ -229,6 +237,9 @@ class Socket
 
       socket.on "fixture", (fixturePath, cb) =>
         @onFixture(config, fixturePath, cb)
+
+      socket.on "read:file", (file, options, cb) =>
+        @onReadFile(config, file, options, cb)
 
       socket.on "exec", (options, cb) =>
         @onExec(config.projectRoot, options, cb)

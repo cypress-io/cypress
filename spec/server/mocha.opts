@@ -1,5 +1,4 @@
-spec/server/unit
-spec/server/integration
+spec/server/unit/files*
 --recursive
 --reporter spec
 --compilers coffee:coffee-script/register

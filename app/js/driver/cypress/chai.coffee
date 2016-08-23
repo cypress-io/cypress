@@ -149,7 +149,11 @@ do ($Cypress, _, $, chai) ->
             obj = @_obj
 
             if not cy or not ($Cypress.Utils.isInstanceOf(obj, $) or $Cypress.Utils.hasElement(obj))
-              _super.apply(@, arguments)
+              try
+                _super.apply(@, arguments)
+              catch e
+                e.type = "existence"
+                throw e
             else
               if not obj.length
                 @_obj = null

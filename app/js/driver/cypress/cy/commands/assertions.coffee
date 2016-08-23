@@ -168,13 +168,30 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
       options.assertions ?= []
 
+      _.defaults callbacks, {
+        ensureExistenceFor: "dom"
+      }
+
+      ensureExistence = =>
+        ## by default, ensure existence for dom subjects,
+        ## but not non-dom subjects
+        switch callbacks.ensureExistenceFor
+          when "dom"
+            $el = determineEl(options.$el, subject)
+            return if not $Cypress.Utils.isInstanceOf($el, $)
+
+            @ensureElExistence($el)
+
+          when "subject"
+            @ensureExistence(subject)
+
       determineEl = ($el, subject) ->
         ## prefer $el unless it is strickly undefined
         if not _.isUndefined($el) then $el else subject
 
       onPassFn = =>
         if _.isFunction(callbacks.onPass)
-          callbacks.onPass.call(@, cmds)
+          callbacks.onPass.call(@, cmds, options.assertions)
         else
           subject
 
@@ -188,7 +205,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
         ## ensure the error is about existence not about
         ## the downstream assertion.
         try
-          @ensureElExistance determineEl(options.$el, subject)
+          ensureExistence()
         catch e2
           err = e2
 
@@ -216,8 +233,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       ## bail if we have no assertions
       if not cmds.length
         return Promise
-          .try =>
-            @ensureElExistance determineEl(options.$el, subject)
+          .try(ensureExistence)
           .then(onPassFn)
           .catch(onFailFn)
 
