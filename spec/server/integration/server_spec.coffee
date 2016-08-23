@@ -211,6 +211,28 @@ describe "Server", ->
           .then (res) ->
             expect(res.statusCode).to.eq(404)
 
+      it "handles urls with hashes", ->
+        @server._onResolveUrl("/index.html#/foo/bar", @automationRequest)
+        .then (obj = {}) =>
+          expect(obj).to.deep.eq({
+            ok: true
+            url: "http://localhost:2000/index.html"
+            originalUrl: "/index.html"
+            filePath: Fixtures.projectPath("no-server/dev/index.html")
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
+          })
+
+          expect(buffers.keys()).to.deep.eq(["http://localhost:2000/index.html"])
+        .then =>
+          @rp("http://localhost:2000/index.html")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(buffers.keys()).to.deep.eq([])
+
     describe "http", ->
       beforeEach ->
         @setup({
@@ -440,6 +462,33 @@ describe "Server", ->
           expect(err.stack).to.include("Object.exports._errnoException")
           expect(err.port).to.eq(64646)
           expect(err.code).to.eq("ECONNREFUSED")
+
+      it "handles url hashes", ->
+        nock("http://getbootstrap.com")
+        .get("/")
+        .reply(200, "content page", {
+          "Content-Type": "text/html"
+        })
+
+        @server._onResolveUrl("http://getbootstrap.com/#/foo", @automationRequest)
+        .then (obj = {}) ->
+          expect(obj).to.deep.eq({
+            ok: true
+            url: "http://getbootstrap.com/"
+            originalUrl: "http://getbootstrap.com/"
+            status: 200
+            statusText: "OK"
+            redirects: []
+            cookies: []
+          })
+
+          expect(buffers.keys()).to.deep.eq(["http://getbootstrap.com/"])
+        .then =>
+          @rp("http://getbootstrap.com/")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(buffers.keys()).to.deep.eq([])
 
     describe "both", ->
       beforeEach ->
