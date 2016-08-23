@@ -60,5 +60,5 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
           onFail: (err) ->
             if err.type is "existence"
               node = $Cypress.Utils.stringifyElement(subject, "short")
-              err.longMessage += " Queried from element: #{node}"
+              err.displayMessage += " Queried from element: #{node}"
         })
