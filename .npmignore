@@ -1,4 +1,10 @@
+/bower_components
+/lib
 /src
-/app
 /static
+
+bower.json
+circle.yaml
+gulpfile.js
+*.log
 *.spec.*
