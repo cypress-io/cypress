@@ -6,3 +6,9 @@ describe "failing_spec", ->
       throw new Error("foo")
 
   it "doesnt fail", ->
+
+  context "hooks", ->
+    beforeEach ->
+      cy.visit("/does-not-exist.html")
+
+    it "fails", ->
