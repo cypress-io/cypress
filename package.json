@@ -33,7 +33,7 @@
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
     "vinyl-fs": "^2.4.3",
-    "zunder": "^3.4.3"
+    "zunder": "^3.4.4"
   },
   "dependencies": {
     "bluebird": "^3.4.0",
