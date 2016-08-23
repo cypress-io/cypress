@@ -238,13 +238,6 @@ class Server
     handlingLocalFile = false
     previousState = _.clone @_getRemoteState()
 
-    ## nuke any hashes from our url since
-    ## those those are client only and do
-    ## not apply to http requests
-    urlStr = url.parse(urlStr)
-    urlStr.hash = null
-    urlStr = urlStr.format()
-
     originalUrl = urlStr
 
     ## if we have a buffer for this url

@@ -368,14 +368,27 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
           remote = Cypress.Location.create(remoteUrl ? url)
 
+          ## store the existing hash now since
+          ## we'll need to apply it later
+          existingHash = remote.hash ? ""
+
           if previousDomainVisited and remote.originPolicy isnt existing.originPolicy
             ## if we've already visited a new superDomain
             ## then die else we'd be in a terrible endless loop
             return cannotVisit2ndDomain(remote.origin)
 
+          if existingHash
+            ## strip out the existing hash if we have one
+            ## before telling our backend to resolve this url
+            url = url.replace(existingHash, "")
+
           @_resolveUrl(url)
           .then (resp = {}) =>
             {url, originalUrl, cookies, redirects, filePath} = resp
+
+            ## reapply the existing hash
+            url         += existingHash
+            originalUrl += existingHash
 
             if filePath
               consoleProps["File Served"] = filePath
