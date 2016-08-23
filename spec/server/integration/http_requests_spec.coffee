@@ -1528,10 +1528,10 @@ describe "Routes", ->
       it "works with host swapping", ->
         contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")
 
-        evilDns.add("*.foobar.com", "127.0.0.1")
-
         @setup("https://www.foobar.com:8443")
         .then =>
+          evilDns.add("*.foobar.com", "127.0.0.1")
+
           @rp({
             url: "https://www.foobar.com:8443/index.html"
             headers: {
@@ -1547,10 +1547,10 @@ describe "Routes", ->
       it "continues to inject on the same https superdomain but different subdomain", ->
         contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")
 
-        evilDns.add("*.foobar.com", "127.0.0.1")
-
         @setup("https://www.foobar.com:8443")
         .then =>
+          evilDns.add("*.foobar.com", "127.0.0.1")
+
           @rp({
             url: "https://docs.foobar.com:8443/index.html"
             headers: {
@@ -1566,10 +1566,10 @@ describe "Routes", ->
       it "injects document.domain on https requests to same superdomain but different subdomain", ->
         contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")
 
-        evilDns.add("*.foobar.com", "127.0.0.1")
-
         @setup("https://www.foobar.com:8443")
         .then =>
+          evilDns.add("*.foobar.com", "127.0.0.1")
+
           @rp({
             url: "https://docs.foobar.com:8443/index.html"
             headers: {
