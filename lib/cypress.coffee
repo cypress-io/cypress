@@ -84,7 +84,11 @@ module.exports = {
         ## open the cypress electron wrapper shell app
         new Promise (resolve) ->
           cypressElectron = require("@cypress/core-electron")
-          cypressElectron.open(".", argsUtil.toArray(options), resolve)
+          fn = (code) ->
+            ## juggle up the failures since our outer
+            ## promise is expecting this object structure
+            resolve({failures: code})
+          cypressElectron.open(".", argsUtil.toArray(options), fn)
 
   openProject: (options) ->
     ## this code actually starts a project
