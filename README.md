@@ -6,6 +6,9 @@ It is a simple wrapper that `symlinks` while in development.
 
 ## Changelog
 
+#### 0.0.4 - *(08/24/16)*
+- fixed bug with paths during linux install
+
 #### 0.0.3 - *(08/01/16)*
 - fix dep being devDep
 
