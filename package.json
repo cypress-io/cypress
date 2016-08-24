@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/cypress-io/cypress",
   "devDependencies": {
-    "@cypress/core-electron": "0.0.3",
+    "@cypress/core-electron": "0.0.4",
     "body-parser": "1.12.4",
     "chai": "2.1.0",
     "chai-as-promised": "^4.2.0",
