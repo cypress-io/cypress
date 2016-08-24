@@ -6,6 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "./bin/cypress-electron",
+    "test": "mocha --compilers coffee:coffee-script/register",
     "postinstall": "./bin/cypress-electron --install",
     "release": "releaser"
   },
@@ -24,7 +25,9 @@
   "homepage": "https://github.com/cypress-io/cypress-core-electron#readme",
   "devDependencies": {
     "@cypress/core-icons": "^0.4.1",
-    "@cypress/core-releaser": "^0.1.8"
+    "@cypress/core-releaser": "^0.1.8",
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2"
   },
   "dependencies": {
     "bluebird": "^3.4.1",
