@@ -1,10 +1,19 @@
 require("../spec_helper")
 
+_        = require("lodash")
 path     = require("path")
 config   = require("#{root}lib/config")
 settings = require("#{root}lib/util/settings")
 
 describe "lib/config", ->
+  beforeEach ->
+    @env = process.env
+
+    process.env = _.omit(process.env, "CYPRESS_DEBUG")
+
+  afterEach ->
+    process.env = @env
+
   context ".get", ->
     beforeEach ->
       @sandbox.stub(settings, "readEnv").withArgs("path/to/project").resolves({foo: "bar"})
@@ -257,6 +266,7 @@ describe "lib/config", ->
 
         expect(cfg.resolved).to.deep.eq({
           port:                       { value: 1234, from: "cli" },
+          hosts:                      { value: {}, from: "default" }
           reporter:                   { value: "json", from: "cli" },
           baseUrl:                    { value: null, from: "default" },
           commandTimeout:             { value: 4000, from: "default" },
@@ -302,6 +312,7 @@ describe "lib/config", ->
 
         expect(cfg.resolved).to.deep.eq({
           port:                       { value: 2020, from: "config" },
+          hosts:                      { value: {}, from: "default" }
           reporter:                   { value: "spec", from: "default" },
           baseUrl:                    { value: "http://localhost:8080", from: "config" },
           commandTimeout:             { value: 4000, from: "default" },

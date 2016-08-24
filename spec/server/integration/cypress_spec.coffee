@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+_        = require("lodash")
 os       = require("os")
 cp       = require("child_process")
 path     = require("path")
@@ -600,6 +601,10 @@ describe "lib/cypress", ->
 
     describe "--env", ->
       beforeEach ->
+        @env = process.env
+
+        process.env = _.omit(process.env, "CYPRESS_DEBUG")
+
         headless.waitForTestsToFinishRunning.resolves({failures: 0})
 
         Promise.all([
@@ -607,6 +612,9 @@ describe "lib/cypress", ->
 
           Project.add(@todosPath)
         ])
+
+      afterEach ->
+        process.env = @env
 
       it "can set specific environment variables", ->
         cypress.start([

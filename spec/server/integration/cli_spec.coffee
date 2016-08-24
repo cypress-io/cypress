@@ -14,6 +14,8 @@ parse = (str) ->
   ## from npm logs
   _(str.split("\n")).compact().reject(anyLineWithCaret).value().join("\n")
 
+env = _.omit(process.env, "CYPRESS_DEBUG")
+
 describe "CLI Interface", ->
   beforeEach ->
     ## set the timeout high due to
@@ -21,14 +23,14 @@ describe "CLI Interface", ->
     @currentTest.timeout(20000)
 
   it "writes out ping value and exits", (done) ->
-    cp.exec "npm start -- --smoke-test --ping=12345", (err, stdout, stderr) ->
+    cp.exec "npm start -- --smoke-test --ping=12345", {env: env}, (err, stdout, stderr) ->
       done(err) if err
 
       expect(parse(stdout)).to.eq("12345")
       done()
 
   it "writes out package.json and exits", (done) ->
-    cp.exec "npm start -- --return-pkg", (err, stdout, stderr) ->
+    cp.exec "npm start -- --return-pkg", {env: env}, (err, stdout, stderr) ->
       done(err) if err
 
       pkg = JSON.parse(parse(stdout))
