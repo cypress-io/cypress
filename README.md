@@ -16,11 +16,18 @@ npm install
 ```
 
 ```bash
-## Watch all project files and build as necessary
-## Runs a dev server (generally localhost:8000, but could be different - check the output in the console)
+## Runs a dev server (localhost:8000 if free, but could be different - check the output in the console)
+## Watches all project files
+## - runs *.js and *.jsx through babel and bundles with browserify into single runner.js in dist
+## - runs associated unit test of file saved and outputs to terminal
+## - compiles *.scss files to single runner.css in dist
 npm start
 ```
 
+```bash
+## Runs all tests
+npm test
+```
 
 ## Changelog
 
