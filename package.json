@@ -29,7 +29,6 @@
     "sinon": "^1.17.4",
     "sinon-as-promised": "^4.0.0",
     "sinon-chai": "^2.8.0",
-    "ssl-root-cas": "^1.1.10",
     "supertest": "^1.2.0",
     "supertest-as-promised": "^3.1.0"
   },
@@ -39,6 +38,7 @@
     "fs-extra": "^0.30.0",
     "node-forge": "^0.6.39",
     "semaphore": "^1.0.5",
-    "server-destroy": "^1.0.1"
+    "server-destroy": "^1.0.1",
+    "ssl-root-cas": "^1.1.10"
   }
 }
