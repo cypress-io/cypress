@@ -4,9 +4,10 @@ _            = require("lodash")
 os           = require("os")
 path         = require("path")
 uuid         = require("node-uuid")
+Promise      = require("bluebird")
 socketIo     = require("@cypress/core-socket")
 extension    = require("@cypress/core-extension")
-Promise      = require("bluebird")
+httpsAgent   = require("https-proxy-agent")
 open         = require("#{root}lib/util/open")
 config       = require("#{root}lib/config")
 Socket       = require("#{root}lib/socket")
@@ -50,7 +51,14 @@ describe "lib/socket", ->
 
         {clientUrlDisplay, socketIoRoute} = @cfg
 
-        @client = socketIo.client(clientUrlDisplay, {path: socketIoRoute})
+        ## force node into legit proxy mode like a browser
+        agent = new httpsAgent("http://localhost:#{@cfg.port}")
+
+        @client = socketIo.client(clientUrlDisplay, {
+          agent: agent
+          path: socketIoRoute
+          transports: ["websocket"]
+        })
 
     afterEach ->
       @client.disconnect()
