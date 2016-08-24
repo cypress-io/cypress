@@ -37,6 +37,12 @@ describe "e2e visit", ->
   it "passes", ->
     @timeout(20000)
 
+    ## this tests that hashes are applied during a visit
+    ## which forces the browser to scroll to the div
+    ## additionally this tests that jquery.js is not truncated
+    ## due to __cypress.initial cookies not being cleared by
+    ## the hash.html response
+
     cypress.start(["--run-project=#{@e2ePath}", "--spec=cypress/integration/visit_spec.coffee"])
     .then ->
       expect(process.exit).to.be.calledWith(0)

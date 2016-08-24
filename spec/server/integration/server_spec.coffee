@@ -118,9 +118,16 @@ describe "Server", ->
             cookies: []
           })
         .then =>
-          @rp("http://localhost:2000/index.html")
+          @rp({
+            url: "http://localhost:2000/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
           .then (res) ->
             expect(res.statusCode).to.eq(200)
+            expect(res.headers["etag"]).not.to.exist
+            expect(res.headers["set-cookie"]).to.match(/initial=;/)
 
       it "buffers the response", ->
         @sandbox.spy(Request, "sendStream")
@@ -245,6 +252,7 @@ describe "Server", ->
         nock("http://getbootstrap.com")
         .get("/")
         .reply 200, "content page", {
+          "X-Foo-Bar": "true"
           "Content-Type": "text/html"
         }
 
@@ -260,9 +268,16 @@ describe "Server", ->
             cookies: []
           })
         .then =>
-          @rp("http://getbootstrap.com/")
+          @rp({
+            url: "http://getbootstrap.com/"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
           .then (res) ->
             expect(res.statusCode).to.eq(200)
+            expect(res.headers["set-cookie"]).to.match(/initial=;/)
+            expect(res.headers["x-foo-bar"]).to.eq("true")
 
       it "can follow multiple http redirects", ->
         nock("http://espn.com")

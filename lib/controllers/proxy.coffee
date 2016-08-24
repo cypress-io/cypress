@@ -222,13 +222,13 @@ module.exports = {
         else
           str.pipe(thr)
 
+    res.set("x-cypress-file-path", file)
+
+    if req.cookies["__cypress.initial"] is "true"
+      setCookie(res, "__cypress.initial", false, remoteState.domainName)
 
     if obj = buffers.take(req.proxiedUrl)
       return onResponse(obj.stream)
-
-    res.set("x-cypress-file-path", file)
-
-    setCookie(res, "__cypress.initial", false, remoteState.domainName)
 
     staticFileErr = (err) =>
       status = err.status ? 500
@@ -252,7 +252,7 @@ module.exports = {
       transform: onResponse
     }
 
-    unless req.cookies["__cypress.initial"] is "true"
+    if req.cookies["__cypress.initial"] isnt "true"
       sendOpts.etag = true
       sendOpts.lastModified = true
 
