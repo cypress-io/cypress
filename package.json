@@ -38,7 +38,7 @@
     "fs-extra": "^0.30.0",
     "node-forge": "^0.6.39",
     "semaphore": "^1.0.5",
-    "server-destroy": "^1.0.1",
+    "server-destroy-vvo": "1.0.1",
     "ssl-root-cas": "^1.1.10"
   }
 }
