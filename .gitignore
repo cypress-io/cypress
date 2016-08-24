@@ -3,3 +3,4 @@ build
 node_modules
 *.log
 .publish
+cypress/screenshots
