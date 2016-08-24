@@ -6,7 +6,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
   context "#fixture", ->
     beforeEach ->
       @respondWith = (resp, timeout = 10) =>
-        @Cypress.once "fixture", (data, cb) ->
+        @Cypress.once "fixture", (data, options, cb) ->
           _.delay ->
             cb(resp)
           , timeout
@@ -27,6 +27,18 @@ describe "$Cypress.Cy Fixtures Commands", ->
 
       @cy.fixture("foo").as("foo").then ->
         expect(@foo).to.deep.eq {foo: "bar"}
+
+    it "can have encoding as second argument", ->
+      @respondWith({foo: "bar"})
+
+      @cy.fixture("foo", "ascii").then (obj) ->
+        expect(obj).to.deep.eq {foo: "bar"}
+
+    it "can have encoding as second argument and options as third argument", ->
+      @respondWith({foo: "bar"})
+
+      @cy.fixture("foo", "ascii", {timeout: 1000}).then (obj) ->
+        expect(obj).to.deep.eq {foo: "bar"}
 
     describe "cancellation", ->
       it "cancels promise", (done) ->
@@ -81,7 +93,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
           expect(@log.get("name")).to.eq "fixture"
-          expect(@log.get("message")).to.eq "foo, {timeout: 50}"
+          expect(@log.get("message")).to.eq "foo, {timeout: 50, encoding: utf8}"
           expect(err.message).to.eq("cy.fixture() timed out waiting '50ms' to receive a fixture. No fixture was ever sent by the server.")
           done()
 
@@ -151,4 +163,3 @@ describe "$Cypress.Cy Fixtures Commands", ->
 
             cy.fixture("foo").then (obj3) ->
               expect(obj3).not.to.have.property("lorem")
-

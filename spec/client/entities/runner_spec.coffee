@@ -40,7 +40,7 @@ describe "Runner Entity", ->
     it "listens to Cypress.fixture", ->
       emit = @sandbox.stub @runner.socket, "emit"
       fn = @sandbox.stub()
-      @Cypress.trigger "fixture", "users/admin", fn
+      @Cypress.trigger "fixture", "users/admin", {}, fn
       expect(emit).to.be.calledWith "fixture", "users/admin", fn
 
     it "listens to Cypress.request", ->

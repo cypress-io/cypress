@@ -70,8 +70,8 @@ class Socket
     .catch (err) ->
       cb({__error: err.message})
 
-  onFixture: (config, file, cb) ->
-    fixture.get(config.fixturesFolder, file)
+  onFixture: (config, file, options, cb) ->
+    fixture.get(config.fixturesFolder, file, options)
     .then(cb)
     .catch (err) ->
       cb({__error: err.message})
@@ -227,8 +227,8 @@ class Socket
       socket.on "request", (options, cb) =>
         @onRequest(automationRequest, options, cb)
 
-      socket.on "fixture", (fixturePath, cb) =>
-        @onFixture(config, fixturePath, cb)
+      socket.on "fixture", (fixturePath, options, cb) =>
+        @onFixture(config, fixturePath, options, cb)
 
       socket.on "exec", (options, cb) =>
         @onExec(config.projectRoot, options, cb)

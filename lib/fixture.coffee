@@ -12,7 +12,7 @@ cwd       = require("./cwd")
 
 fs = Promise.promisifyAll(fs)
 
-extensions = ".json .js .coffee .html .txt .png .jpg .jpeg .gif .tif .tiff .zip".split(" ")
+extensions = ".json .js .coffee .html .txt .csv .png .jpg .jpeg .gif .tif .tiff .zip".split(" ")
 
 queue = {}
 
@@ -20,14 +20,14 @@ lastCharacterIsNewLine = (str) ->
   str[str.length - 1] is "\n"
 
 module.exports = {
-  get: ->
-    p       = path.join.apply(path, arguments)
+  get: (fixturesFolder, filePath, options = {}) ->
+    p       = path.join(fixturesFolder, filePath)
     fixture = path.basename(p)
 
     ## if we have an extension go
     ## ahead adn read in the file
     if ext = path.extname(p)
-      @parseFile(p, fixture, ext)
+      @parseFile(p, fixture, ext, options)
     else
       ## change this to first glob for
       ## the files, and if nothing is found
@@ -42,14 +42,14 @@ module.exports = {
           .catch ->
             tryParsingFile(index + 1)
           .then ->
-            @parseFile(p + ext, fixture, ext)
+            @parseFile(p + ext, fixture, ext, options)
 
       Promise.resolve tryParsingFile(0)
 
   fileExists: (p) ->
     fs.statAsync(p).bind(@)
 
-  parseFile: (p, fixture, ext) ->
+  parseFile: (p, fixture, ext, options) ->
     if queue[p]
       Promise.delay(1).then =>
         @parseFile(p, fixture, ext)
@@ -64,7 +64,7 @@ module.exports = {
           ## TODO: move this to lib/errors
           throw new Error("No fixture exists at: #{p}")
         .then ->
-          @parseFileByExtension(p, fixture, ext)
+          @parseFileByExtension(p, fixture, ext, options)
         .then (ret) ->
           cleanup()
 
@@ -74,7 +74,7 @@ module.exports = {
 
           throw err
 
-  parseFileByExtension: (p, fixture, ext) ->
+  parseFileByExtension: (p, fixture, ext, options) ->
     ext ?= path.extname(fixture)
 
     switch ext
@@ -82,11 +82,10 @@ module.exports = {
       when ".js"     then @parseJs(p, fixture)
       when ".coffee" then @parseCoffee(p, fixture)
       when ".html"   then @parseHtml(p, fixture)
-      when ".txt"    then @parseText(p, fixture)
       when ".png", ".jpg", ".jpeg", ".gif", ".tif", ".tiff", ".zip"
-        @parseBase64(p, fixture)
+        @parse(p, fixture, "base64")
       else
-        throw new Error("Invalid fixture extension: '#{ext}'. Acceptable file extensions are: #{extensions.join(", ")}")
+        @parse(p, fixture, options.encoding)
 
   parseJson: (p, fixture) ->
     fs.readFileAsync(p, "utf8")
@@ -160,12 +159,7 @@ module.exports = {
 
         fs.writeFileAsync(p, html).return(html)
 
-  parseText: (p, fixture) ->
-    fs.readFileAsync(p, "utf8")
+  parse: (p, fixture, encoding = "utf8") ->
+    fs.readFileAsync(p, encoding)
       .bind(@)
-
-  parseBase64: (p, fixture) ->
-    fs.readFileAsync(p, "base64")
-      .bind(@)
-
 }
