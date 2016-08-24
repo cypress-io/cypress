@@ -5,7 +5,7 @@ url          = require("url")
 https        = require("https")
 Promise      = require("bluebird")
 semaphore    = require("semaphore")
-allowDestroy = require("server-destroy")
+allowDestroy = require("server-destroy-vvo")
 parse        = require("./util/parse")
 
 fs = Promise.promisifyAll(fs)
