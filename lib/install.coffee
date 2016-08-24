@@ -35,7 +35,7 @@ module.exports = {
 
   move: (src, dest) ->
     ## src  is ./tmp/Cypress-darwin-x64
-    ## dest is ./dist
+    ## dest is ./dist/Cypress
     fs.moveAsync(src, dest, {clobber: true})
     .then ->
       ## remove the tmp folder now
@@ -63,7 +63,7 @@ module.exports = {
       appPaths[0]
     .then (appPath) =>
       ## and now move the tmp into dist
-      @move(appPath, "dist")
+      @move(appPath, paths.getPathToDist())
     .then =>
       @removeEmptyApp()
 

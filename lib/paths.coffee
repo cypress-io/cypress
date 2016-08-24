@@ -1,18 +1,20 @@
 os   = require("os")
 path = require("path")
 
+distPath = "dist/Cypress"
+
 execPath = {
-  darwin:  "dist/Cypress.app/Contents/MacOS/Cypress"
-  freebsd: "dist/Cypress"
-  linux:   "dist/Cypress"
+  darwin:  "Cypress.app/Contents/MacOS/Cypress"
+  freebsd: "Cypress"
+  linux:   "Cypress"
   # win32:   "dist/Cypress.exe"
 }
 
 resourcesPath = {
-  darwin:  "dist/Cypress.app/Contents/Resources"
-  freebsd: "dist/Cypress/resources"
-  linux:   "dist/Cypress/resources"
-  # win32:   "dist/Cypress/resources"
+  darwin:  "Cypress.app/Contents/Resources"
+  freebsd: "resources"
+  linux:   "resources"
+  # win32:   "resources"
 }
 
 unknownPlatformErr = ->
@@ -22,19 +24,24 @@ normalize = (paths...) ->
   path.join(__dirname, "..", paths...)
 
 module.exports = {
+  getPathToDist: (paths...) ->
+    paths = [distPath].concat(paths)
+
+    normalize(paths...)
+
   getPathToExec: ->
     p = execPath[os.platform()] ? unknownPlatformErr()
 
-    normalize(p)
+    @getPathToDist(p)
 
   getPathToResources: (paths...) ->
     p = resourcesPath[os.platform()] ? unknownPlatformErr()
 
     p = [].concat(p, paths)
 
-    normalize(p...)
+    @getPathToDist(p...)
 
   getPathToVersion: ->
-    normalize("dist", "version")
+    @getPathToDist("version")
 
 }
