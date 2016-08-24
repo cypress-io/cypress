@@ -16,10 +16,10 @@ describe "$Cypress.Cy Ensure Extensions", ->
 
       expect(fn).to.throw("cy.foo() failed because this element you are chaining off of has become detached or removed from the DOM:\n\n<button>foo</button>\n\nhttps://on.cypress.io/element-has-detached-from-dom")
 
-  context "#ensureElExistance", ->
+  context "#ensureElExistence", ->
     it "always unbinds before:log if assertion fails", ->
       fn = =>
-        @cy.ensureElExistance($())
+        @cy.ensureElExistence($())
 
       expect(fn).to.throw("to exist in the DOM")
       expect(@cy.prop("onBeforeLog")).to.be.null

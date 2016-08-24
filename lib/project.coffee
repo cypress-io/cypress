@@ -299,7 +299,7 @@ class Project extends EE
     .then(@writeProjectId)
 
   getProjectId: ->
-    @verifyExistance()
+    @verifyExistence()
     .then =>
       if id = process.env.CYPRESS_PROJECT_ID
         {projectId: id}
@@ -311,7 +311,7 @@ class Project extends EE
 
       errors.throw("NO_PROJECT_ID", @projectRoot)
 
-  verifyExistance: ->
+  verifyExistence: ->
     fs
     .statAsync(@projectRoot)
     .return(@)
@@ -334,7 +334,7 @@ class Project extends EE
 
   @removeIds = (p) ->
     Project(p)
-    .verifyExistance()
+    .verifyExistence()
     .call("getConfig")
     .then (cfg) ->
       ## remove all of the ids for the test files found in the integrationFolder

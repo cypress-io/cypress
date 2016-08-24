@@ -131,7 +131,7 @@ do ($Cypress, _, $, chai) ->
                     else
                       "Not enough elements found. Found '#{len1}', expected '#{len2}'."
 
-                  e1.longMessage = getLongLengthMessage(obj.length, length)
+                  e1.displayMessage = getLongLengthMessage(obj.length, length)
                   throw e1
 
                 e2 = $Cypress.Utils.cypressErr($Cypress.Utils.errMessageByPath("chai.length_invalid_argument", { length }))
@@ -149,7 +149,11 @@ do ($Cypress, _, $, chai) ->
             obj = @_obj
 
             if not cy or not ($Cypress.Utils.isInstanceOf(obj, $) or $Cypress.Utils.hasElement(obj))
-              _super.apply(@, arguments)
+              try
+                _super.apply(@, arguments)
+              catch e
+                e.type = "existence"
+                throw e
             else
               if not obj.length
                 @_obj = null
@@ -176,7 +180,7 @@ do ($Cypress, _, $, chai) ->
                   else
                     "Expected to find element: '#{obj.selector}', but never found it."
 
-                e1.longMessage = getLongExistsMessage(obj)
+                e1.displayMessage = getLongExistsMessage(obj)
                 throw e1
 
       listeners: ->
