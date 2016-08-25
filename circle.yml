@@ -6,7 +6,7 @@ test:
   pre:
     - npm run build
 
-  override:
-    - npm run test-cov
-    - npm run codecov
-    - npm run coveralls
+  # override:
+  #   - npm run test-cov
+  #   - npm run codecov
+  #   - npm run coveralls
