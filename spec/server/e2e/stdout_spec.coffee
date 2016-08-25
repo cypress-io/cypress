@@ -76,7 +76,7 @@ The internal Cypress web server responded with:
       done()
 
   it "does not duplicate suites or tests between visits", ->
-    @timeout(30000)
+    @timeout(60000)
 
     cp.execAsync("node index.js --run-project=#{@e2ePath} --spec=cypress/integration/passing_spec.coffee --port=2020", {env: env})
     .then (stdout) ->
