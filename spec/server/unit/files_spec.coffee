@@ -1,22 +1,27 @@
 require("../spec_helper")
 
-Promise = require("bluebird")
-human   = require("human-interval")
-api     = require("#{root}lib/api")
-user    = require("#{root}lib/user")
-files   = require("#{root}lib/controllers/files")
+Promise        = require("bluebird")
+human          = require("human-interval")
+path           = require("path")
+
+api            = require("#{root}lib/api")
+config         = require("#{root}lib/config")
+user           = require("#{root}lib/user")
+filesUtil      = require("#{root}lib/controllers/files")
+files          = require("#{root}lib/files")
+FixturesHelper = require("#{root}/spec/server/helpers/fixtures")
 
 describe "lib/controllers/files", ->
   beforeEach ->
     @clock = @sandbox.useFakeTimers("setInterval", "clearInterval")
 
   afterEach ->
-    files.reset()
+    filesUtil.reset()
 
   context "setInterval", ->
     beforeEach ->
       @sandbox.stub(global, "setInterval")
-      files.interval()
+      filesUtil.interval()
 
     it "calls check every 10 minutes", ->
       args = setInterval.getCall(0).args
@@ -29,25 +34,25 @@ describe "lib/controllers/files", ->
       @sandbox.stub(api,  "sendUsage")
 
     it "is no op if numRuns isnt > 0", ->
-      expect(files.getStats().numRuns).to.eq(0)
-      expect(files.check()).to.be.undefined
+      expect(filesUtil.getStats().numRuns).to.eq(0)
+      expect(filesUtil.check()).to.be.undefined
 
     it "sends numRuns, exampleSpec, allSpecs + session to api.sendUsage", ->
       user.ensureSession.resolves("session-123")
       api.sendUsage.resolves()
 
-      files.increment("foo", {projectName: "foobar"})
-      files.increment("__all")
-      files.increment("integration/example_spec.js")
+      filesUtil.increment("foo", {projectName: "foobar"})
+      filesUtil.increment("__all")
+      filesUtil.increment("integration/example_spec.js")
 
-      expect(files.getStats()).to.deep.eq({
+      expect(filesUtil.getStats()).to.deep.eq({
         numRuns: 3
         allSpecs: true
         exampleSpec: true
         projectName: "foobar"
       })
 
-      files.check()
+      filesUtil.check()
       .then ->
         expect(api.sendUsage).to.be.calledWith(3, true, true, "foobar", "session-123")
 
@@ -55,16 +60,16 @@ describe "lib/controllers/files", ->
       user.ensureSession.resolves("session-123")
       api.sendUsage.resolves()
 
-      files.increment("foo", {projectName: "foobar"})
+      filesUtil.increment("foo", {projectName: "foobar"})
 
-      expect(files.getStats()).to.deep.eq({
+      expect(filesUtil.getStats()).to.deep.eq({
         numRuns: 1
         allSpecs: false
         exampleSpec: false
         projectName: "foobar"
       })
 
-      files.check()
+      filesUtil.check()
       .then ->
         expect(api.sendUsage).to.be.calledWith(1, false, false, "foobar", "session-123")
 
@@ -72,12 +77,12 @@ describe "lib/controllers/files", ->
       user.ensureSession.resolves("session-123")
       api.sendUsage.resolves()
 
-      files.increment("foo")
-      files.increment("integration/example_spec.js")
+      filesUtil.increment("foo")
+      filesUtil.increment("integration/example_spec.js")
 
-      files.check()
+      filesUtil.check()
       .then ->
-        expect(files.getStats()).to.deep.eq({
+        expect(filesUtil.getStats()).to.deep.eq({
           numRuns: 0
           allSpecs: false
           exampleSpec: false
@@ -87,9 +92,9 @@ describe "lib/controllers/files", ->
     it "swallows errors ensuring session", ->
       user.ensureSession.rejects(new Error)
 
-      files.increment("foo")
+      filesUtil.increment("foo")
 
-      files.check()
+      filesUtil.check()
       .then ->
         expect(api.sendUsage).not.to.be.called
 
@@ -97,15 +102,73 @@ describe "lib/controllers/files", ->
       user.ensureSession.resolves("session-123")
       api.sendUsage.rejects(new Error)
 
-      files.increment("foo", {projectName: "foobar"})
-      files.increment("__all")
-      files.increment("integration/example_spec.js")
+      filesUtil.increment("foo", {projectName: "foobar"})
+      filesUtil.increment("__all")
+      filesUtil.increment("integration/example_spec.js")
 
-      files.check()
+      filesUtil.check()
       .then ->
-        expect(files.getStats()).to.deep.eq({
+        expect(filesUtil.getStats()).to.deep.eq({
           numRuns: 3
           allSpecs: true
           exampleSpec: true
           projectName: "foobar"
         })
+
+describe "lib/files", ->
+  beforeEach ->
+    FixturesHelper.scaffold()
+
+    @todosPath = FixturesHelper.projectPath("todos")
+
+    config.get(@todosPath).then (cfg) =>
+      {@projectRoot} = cfg
+
+  afterEach ->
+    FixturesHelper.remove()
+
+  context "#readFile", ->
+
+    it "returns text as string", ->
+      files.readFile(@projectRoot, "tests/_fixtures/message.txt").then (contents) ->
+        expect(contents).to.eq "foobarbaz"
+
+    it "returns uses utf8 by default", ->
+      files.readFile(@projectRoot, "tests/_fixtures/ascii.foo").then (contents) ->
+        expect(contents).to.eq "\n"
+
+    it "uses encoding specified in options", ->
+      files.readFile(@projectRoot, "tests/_fixtures/ascii.foo", {encoding: "ascii"}).then (contents) ->
+        expect(contents).to.eq "o#?\n"
+
+    it "parses json to valid JS object", ->
+      files.readFile(@projectRoot, "tests/_fixtures/users.json").then (contents) ->
+        expect(contents).to.eql [
+          {
+            id: 1
+            name: "brian"
+          },{
+            id: 2
+            name: "jennifer"
+          }
+        ]
+
+  context "#writeFile", ->
+
+    it "writes the file's contents", ->
+      files.writeFile(@projectRoot, ".projects/write_file.txt", "foo").then =>
+        files.readFile(@projectRoot, ".projects/write_file.txt").then (contents) ->
+          expect(contents).to.equal("foo")
+
+    it "uses encoding specified in options", ->
+      files.writeFile(@projectRoot, ".projects/write_file.txt", "", {encoding: "ascii"}).then =>
+        files.readFile(@projectRoot, ".projects/write_file.txt").then (contents) ->
+          expect(contents).to.equal("�")
+
+    it "overwrites existing file without issue", ->
+      files.writeFile(@projectRoot, ".projects/write_file.txt", "foo").then =>
+        files.readFile(@projectRoot, ".projects/write_file.txt").then (contents) =>
+          expect(contents).to.equal("foo")
+          files.writeFile(@projectRoot, ".projects/write_file.txt", "bar").then =>
+            files.readFile(@projectRoot, ".projects/write_file.txt").then (contents) ->
+              expect(contents).to.equal("bar")

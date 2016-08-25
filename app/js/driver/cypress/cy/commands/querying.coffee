@@ -324,7 +324,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
                   if err.expected > 1
                     $Cypress.Utils.throwErrByPath "contains.length_option", { onFail: options._log }
                 when "existence"
-                  err.longMessage = getErr(err)
+                  err.displayMessage = getErr(err)
           })
 
       Promise

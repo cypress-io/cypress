@@ -110,17 +110,7 @@ do ($Cypress, _, $) ->
 
       return subject
 
-    ensureElExistance: ($el) ->
-      ## dont throw if this isnt even a DOM object
-      return if not $Cypress.Utils.isInstanceOf($el, $)
-
-      ## ensure that we either had some assertions
-      ## or that the element existed
-      return if $el and $el.length
-
-      ## TODO: REFACTOR THIS TO CALL THE CHAI-OVERRIDES DIRECTLY
-      ## OR GO THROUGH I18N
-
+    ensureExistence: (subject) ->
       returnFalse = =>
         cleanup()
 
@@ -135,11 +125,24 @@ do ($Cypress, _, $) ->
       ## verify the $el exists and use our default error messages
       ## TODO: always unbind if our expectation failed
       try
-        $Cypress.Chai.expect($el).to.exist
+        $Cypress.Chai.expect(subject).to.exist
       catch err
         cleanup()
 
         throw err
+
+    ensureElExistence: ($el) ->
+      ## dont throw if this isnt even a DOM object
+      # return if not $Cypress.Utils.isInstanceOf($el, $)
+
+      ## ensure that we either had some assertions
+      ## or that the element existed
+      return if $el and $el.length
+
+      ## TODO: REFACTOR THIS TO CALL THE CHAI-OVERRIDES DIRECTLY
+      ## OR GO THROUGH I18N
+
+      @ensureExistence($el)
 
     ensureNoCommandOptions: (options) ->
       _.each commandOptions, (opt) =>
