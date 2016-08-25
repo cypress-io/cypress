@@ -5,7 +5,7 @@ user     = require("#{root}lib/user")
 cypress  = require("#{root}lib/cypress")
 Project  = require("#{root}lib/project")
 
-describe.only "e2e xhr", ->
+describe "e2e xhr", ->
   beforeEach ->
     Fixtures.scaffold()
 

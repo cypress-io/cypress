@@ -1,23 +1,9 @@
 require("../spec_helper")
 
-_        = require("lodash")
-fs       = require("fs-extra")
-http     = require("http")
-morgan   = require("morgan")
-parser   = require("cookie-parser")
-express  = require("express")
-Promise  = require("bluebird")
 Fixtures = require("../helpers/fixtures")
 user     = require("#{root}lib/user")
 cypress  = require("#{root}lib/cypress")
 Project  = require("#{root}lib/project")
-
-app = express()
-
-srv = http.Server(app)
-
-app.use(morgan("dev"))
-app.use(parser())
 
 describe "e2e visit", ->
   beforeEach ->
