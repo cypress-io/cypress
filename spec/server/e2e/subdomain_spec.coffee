@@ -28,7 +28,7 @@ getIndex = ->
   <body>
     <ul>
       <li>
-        <a href="http://help.foobar.com:2222">switch to http://help.foobar.com</a>
+        <a href="http://help.foobar.com:2292">switch to http://help.foobar.com</a>
       </li>
     </ul>
   </body>
@@ -52,8 +52,8 @@ app.get "*", (req, res) ->
 
   getHtml = ->
     switch h = req.get("host")
-      when "www.foobar.com:2222"  then getIndex()
-      when "help.foobar.com:2222" then getHelp()
+      when "www.foobar.com:2292"  then getIndex()
+      when "help.foobar.com:2292" then getHelp()
       else
         throw new Error("Host: '#{h}' not recognized")
 
@@ -63,8 +63,8 @@ fs = Promise.promisifyAll(fs)
 
 startServer = ->
   new Promise (resolve) ->
-    srv.listen 2222, ->
-      console.log "listening on 2222"
+    srv.listen 2292, ->
+      console.log "listening on 2292"
       resolve()
 
 stopServer = ->

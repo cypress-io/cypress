@@ -22,10 +22,10 @@ servers = [
 ]
 
 counts = {
-  "localhost:2220": 0
-  "localhost:2221": 0
-  "localhost:2222": 0
-  "localhost:2223": 0
+  "localhost:2290": 0
+  "localhost:2291": 0
+  "localhost:2292": 0
+  "localhost:2293": 0
 }
 
 app.use(morgan("dev"))
@@ -44,35 +44,35 @@ app.get "*", (req, res) ->
   counts[host] += 1
 
   switch host
-    when "localhost:2220"
+    when "localhost:2290"
       res
-      .cookie("2220", true, {
+      .cookie("2290", true, {
         path: "/cookies/one"
       })
-      .redirect("http://localhost:2221/")
+      .redirect("http://localhost:2291/")
 
-    when "localhost:2221"
+    when "localhost:2291"
       res
-      .cookie("2221", true, {
+      .cookie("2291", true, {
         path: "/cookies/two"
       })
-      .redirect("http://localhost:2222/")
+      .redirect("http://localhost:2292/")
 
-    when "localhost:2222"
+    when "localhost:2292"
       res
       .set('Content-Type', 'text/html')
-      .cookie("2222", true, {
+      .cookie("2292", true, {
         path: "/cookies/three"
       })
       .send("<html><head></head><body>hi</body></html>")
 
-    when "localhost:2223"
+    when "localhost:2293"
       res
-      .cookie("2223", true, {
+      .cookie("2293", true, {
         httpOnly: true
         maxAge: 60000
       })
-      .cookie("2223-session", true)
+      .cookie("2293-session", true)
       .send({})
 
 fs = Promise.promisifyAll(fs)
@@ -84,7 +84,7 @@ startServers = ->
         console.log "listening on port: #{port}"
         resolve()
 
-  Promise.map([2220, 2221, 2222, 2223], start)
+  Promise.map([2290, 2291, 2292, 2293], start)
 
 stopServers = ->
   stop = (server) ->

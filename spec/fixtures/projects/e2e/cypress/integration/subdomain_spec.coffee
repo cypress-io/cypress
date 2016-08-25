@@ -1,15 +1,15 @@
 describe "subdomains", ->
   beforeEach ->
-    cy.visit("http://www.foobar.com:2222")
+    cy.visit("http://www.foobar.com:2292")
 
-  it "can swap to help.foobar.com:2222", ->
+  it "can swap to help.foobar.com:2292", ->
     cy
       .get("a").click()
       .get("h1").should("contain", "Help")
 
   it "can directly visit a subdomain in another test", ->
     cy
-      .visit("http://help.foobar.com:2222")
+      .visit("http://help.foobar.com:2292")
       .get("h1").should("contain", "Help")
       .document().then (document) ->
         ## set cookies that are just on this subdomain

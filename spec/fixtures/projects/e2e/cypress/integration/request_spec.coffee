@@ -3,17 +3,17 @@ describe "redirects + requests", ->
     oneMinuteFromNow = Cypress.moment().add(1, "minute").unix()
 
     cy
-      .request("http://localhost:2223/")
-      .request("http://localhost:2223/cookies")
+      .request("http://localhost:2293/")
+      .request("http://localhost:2293/cookies")
         .its("body").should("deep.eq", {
-          "2223": "true"
-          "2223-session": "true"
+          "2293": "true"
+          "2293-session": "true"
         })
       .getCookies().then (cookies) ->
         console.log cookies
 
         expect(cookies[0].domain).to.eq("localhost")
-        expect(cookies[0].name).to.eq("2223")
+        expect(cookies[0].name).to.eq("2293")
         expect(cookies[0].value).to.eq("true")
         expect(cookies[0].httpOnly).to.eq(true)
         expect(cookies[0].path).to.eq("/")
@@ -22,7 +22,7 @@ describe "redirects + requests", ->
 
         expect(cookies[1]).to.deep.eq({
           domain: "localhost"
-          name: "2223-session"
+          name: "2293-session"
           value: "true"
           httpOnly: false
           path: "/"
@@ -31,19 +31,19 @@ describe "redirects + requests", ->
 
   it "visits idempotant", ->
     cy
-      .visit("http://localhost:2220")
+      .visit("http://localhost:2290")
       .url()
-        .should("eq", "http://localhost:2222/")
-      .request("http://localhost:2220/cookies/one")
-        .its("body").should("deep.eq", {"2220": "true"})
-      .request("http://localhost:2221/cookies/two")
-        .its("body").should("deep.eq", {"2221": "true"})
-      .request("http://localhost:2222/cookies/three")
-        .its("body").should("deep.eq", {"2222": "true"})
-      .request("http://localhost:2222/counts")
+        .should("eq", "http://localhost:2292/")
+      .request("http://localhost:2290/cookies/one")
+        .its("body").should("deep.eq", {"2290": "true"})
+      .request("http://localhost:2291/cookies/two")
+        .its("body").should("deep.eq", {"2291": "true"})
+      .request("http://localhost:2292/cookies/three")
+        .its("body").should("deep.eq", {"2292": "true"})
+      .request("http://localhost:2292/counts")
         .its("body").should("deep.eq", {
-          "localhost:2220": 1
-          "localhost:2221": 1
-          "localhost:2222": 1
-          "localhost:2223": 1 ## from the previous test
+          "localhost:2290": 1
+          "localhost:2291": 1
+          "localhost:2292": 1
+          "localhost:2293": 1 ## from the previous test
         })
