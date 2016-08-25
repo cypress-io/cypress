@@ -619,7 +619,7 @@ describe "Routes", ->
 
   context "GET /__cypress/iframes/*", ->
     beforeEach ->
-      Fixtures.scaffold("automations")
+      Fixtures.scaffold("e2e")
       Fixtures.scaffold("todos")
       Fixtures.scaffold("no-server")
       Fixtures.scaffold("ids")
@@ -722,10 +722,10 @@ describe "Routes", ->
           body = removeWhitespace(res.body)
           expect(body).to.eq contents
 
-    describe "automations", ->
+    describe "e2e", ->
       beforeEach ->
         @setup({
-          projectRoot: Fixtures.projectPath("automations")
+          projectRoot: Fixtures.projectPath("e2e")
           config: {
             integrationFolder: "cypress/integration"
             supportFolder: "cypress/support"
@@ -733,7 +733,7 @@ describe "Routes", ->
         })
 
       it "omits support directories", ->
-        contents = removeWhitespace Fixtures.get("server/expected_automations_iframe.html")
+        contents = removeWhitespace Fixtures.get("server/expected_e2e_iframe.html")
 
         @rp("http://localhost:2020/__cypress/iframes/integration/app_spec.coffee")
         .then (res) ->
