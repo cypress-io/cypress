@@ -30,7 +30,7 @@ describe "e2e stdout", ->
   it "displays errors from failures", (done) ->
     @timeout(20000)
 
-    exec = cp.exec "node index.js --run-project=#{@e2ePath} --spec=cypress/integration/failing_spec.coffee --port=2020", {env: env}, (err, stdout, stderr) ->
+    exec = cp.exec "node index.js --run-project=#{@e2ePath} --spec=cypress/integration/stdout_failing_spec.coffee --port=2020", {env: env}, (err, stdout, stderr) ->
       stdout = stdout
       .replace(/\(\d{2,4}ms\)/g, "(123ms)")
       .replace(/coffee-\d{3}/g, "coffee-456")
@@ -41,7 +41,7 @@ Tests should begin momentarily...
 
 
 
-  failing_spec
+  stdout_failing_spec
 \r    ✓ passes
 \r    1) fails
 \r    ✓ doesnt fail
@@ -52,11 +52,11 @@ Tests should begin momentarily...
   2 passing (123ms)
   2 failing
 
-  1) failing_spec fails:
+  1) stdout_failing_spec fails:
      Error: foo
-      at Context.<anonymous> (http://localhost:2020/__cypress/tests?p=cypress/integration/failing_spec.coffee-456:6:15)
+      at Context.<anonymous> (http://localhost:2020/__cypress/tests?p=cypress/integration/stdout_failing_spec.coffee-456:6:15)
 
-  2) failing_spec hooks "before each" hook:
+  2) stdout_failing_spec hooks "before each" hook:
      CypressError: cy.visit() failed trying to load:
 
 does-not-exist.html
@@ -78,7 +78,7 @@ The internal Cypress web server responded with:
   it "does not duplicate suites or tests between visits", ->
     @timeout(60000)
 
-    cp.execAsync("node index.js --run-project=#{@e2ePath} --spec=cypress/integration/passing_spec.coffee --port=2020", {env: env})
+    cp.execAsync("node index.js --run-project=#{@e2ePath} --spec=cypress/integration/stdout_passing_spec.coffee --port=2020", {env: env})
     .then (stdout) ->
       stdout = stdout
       .replace(/\(\d{2,4}ms\)/g, "(123ms)")
@@ -89,7 +89,7 @@ The internal Cypress web server responded with:
 
 
 
-        passing_spec
+        stdout_passing_spec
           file
 \r      ✓ visits file (123ms)
           google

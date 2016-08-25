@@ -1,4 +1,4 @@
-describe "passing_spec", ->
+describe "stdout_passing_spec", ->
   context "file", ->
     it "visits file", ->
       cy.visit("/index.html")
