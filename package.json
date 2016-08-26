@@ -34,6 +34,7 @@
     "coffee-script": "^1.10.0",
     "electron-packager": "^7.2.0",
     "fs-extra": "^0.30.0",
+    "lodash": "^4.15.0",
     "minimist": "^1.2.0"
   }
 }

@@ -9,8 +9,11 @@ install  = require("./install")
 fs = Promise.promisifyAll(fs)
 
 module.exports = {
-  install: ->
-    install.run()
+  installIfNeeded: ->
+    install.check()
+
+  install:  ->
+    install.package.apply(install, arguments)
 
   cli: (argv = []) ->
     opts = minimist(argv)
@@ -19,7 +22,7 @@ module.exports = {
 
     switch
       when opts.install
-        @install()
+        @installIfNeeded()
       when pathToApp
         @open(pathToApp, argv)
       else

@@ -1,3 +1,4 @@
+_       = require("lodash")
 os      = require("os")
 fs      = require("fs-extra")
 path    = require("path")
@@ -45,8 +46,16 @@ module.exports = {
     ## nuke the temporary blank /app
     fs.removeAsync(paths.getPathToResources("app"))
 
-  install: ->
-    pkgr({
+  packageAndExit: ->
+    @package()
+    .then =>
+      @removeEmptyApp()
+    .then ->
+      process.exit()
+
+  package: (options = {}) ->
+    _.defaults(options, {
+      dist: paths.getPathToDist()
       dir: "app"
       out: "tmp"
       name: "Cypress"
@@ -59,16 +68,12 @@ module.exports = {
       icon: icons.getPathToIcon("cypress.icns")
     })
 
+    pkgr(options)
     .then (appPaths) ->
       appPaths[0]
     .then (appPath) =>
       ## and now move the tmp into dist
-      @move(appPath, paths.getPathToDist())
-    .then =>
-      @removeEmptyApp()
-
-    .then ->
-      process.exit()
+      @move(appPath, options.dist)
 
     .catch (err) ->
       console.log(err.stack)
@@ -80,8 +85,8 @@ module.exports = {
       @checkExecExistence()
     )
 
-  run: ->
+  check: ->
     @ensure()
     .bind(@)
-    .catch(@install)
+    .catch(@packageAndExit)
 }
