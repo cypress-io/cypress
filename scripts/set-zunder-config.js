@@ -1,6 +1,6 @@
 module.exports = function setZunderConfig (zunder) {
   zunder.setConfig({
-    resolutions: ['react', 'react-dom', 'mobx', 'mobx-react'],
+    resolutions: ['react', 'react-dom', 'mobx', 'mobx-react', 'lodash'],
     scriptName: 'runner.js',
     stylesheetName: 'runner.css',
     staticGlobs: {

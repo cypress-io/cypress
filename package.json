@@ -38,6 +38,7 @@
     "bluebird": "^3.4.0",
     "classnames": "^2.2.5",
     "font-awesome": "^4.6.3",
+    "lodash": "^4.15.0",
     "mobx": "^2.3.6",
     "mobx-react": "^3.5.3",
     "react": "^15.3.0",
