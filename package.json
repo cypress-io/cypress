@@ -71,6 +71,7 @@
     "gulp-uglify": "^1.2.0",
     "https-proxy-agent": "^1.0.0",
     "human-interval": "^0.1.5",
+    "image-size": "^0.5.0",
     "istanbul": "^0.4.2",
     "js-yaml": "3.1.0",
     "mkdirp": "^0.5.1",
