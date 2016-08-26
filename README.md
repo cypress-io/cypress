@@ -57,5 +57,8 @@ npm test
 
 ## Changelog
 
+#### 0.1.3 - *(08/26/16)*
+- get font-awesome from npm instead of bower
+
 #### 0.1.0 - *(08/23/16)*
 - initial release
