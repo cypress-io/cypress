@@ -2,6 +2,7 @@
 
 const autoprefixer = require('gulp-autoprefixer')
 const babel = require('gulp-babel')
+const del = require('del')
 const fs = require('fs')
 const gulp = require('gulp')
 const gulpif = require('gulp-if')
@@ -30,16 +31,21 @@ const stylesheetsGlob = 'src/**/*.scss'
 const scriptsGlob = 'src/**/*.+(js|jsx)'
 
 
-function buildStylesheets () {
+const buildStylesheets = (isProd) => () => {
   gutil.log('build stylesheets')
   let firstTime = true
+  const sassOpts = isProd ? {
+    importer: sassGlobbing,
+    outputStyle: 'compressed',
+  } : {
+    importer: sassGlobbing,
+    sourceComments: true,
+    outputStyle: 'expanded',
+  }
+
   return gulp.src('src/main.scss')
     .pipe(plumber(handleError))
-    .pipe(sass({
-      importer: sassGlobbing,
-      sourceComments: true,
-      outputStyle: 'expanded',
-    }))
+    .pipe(sass(sassOpts))
     .pipe(autoprefixer({ browsers: ['last 2 versions'], cascade: false }))
     .pipe(rename('reporter.css'))
     .pipe(gulp.dest('dist'))
@@ -52,7 +58,8 @@ function buildStylesheets () {
     })
 }
 
-gulp.task('build-stylesheets', buildStylesheets)
+gulp.task('build-stylesheets', buildStylesheets(false))
+gulp.task('build-stylesheets-prod', ['clean'], buildStylesheets(true))
 
 gulp.task('watch-stylesheets', ['build-stylesheets'], () => {
   return watch(stylesheetsGlob, buildStylesheets)
@@ -109,6 +116,10 @@ gulp.task('build-scripts', () => {
   return buildScripts([scriptsGlob])
 })
 
+gulp.task('build-scripts-prod', ['clean'], () => {
+  return buildScripts([scriptsGlob])
+})
+
 gulp.task('watch-scripts', ['build-scripts'], () => {
   return watch(scriptsGlob, (file) => {
     const specFile = getSpecFile(file)
@@ -120,6 +131,7 @@ gulp.task('watch-scripts', ['build-scripts'], () => {
   })
 })
 
+gulp.task('clean', () => del('dist'))
 
 gulp.task('watch', ['watch-scripts', 'watch-stylesheets'])
-gulp.task('build', ['build-scripts', 'build-stylesheets'])
+gulp.task('build', ['build-scripts-prod', 'build-stylesheets-prod'])
