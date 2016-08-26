@@ -45,9 +45,11 @@ export default {
     })
 
     channel.on('automation:push:message', (msg, data = {}) => {
-      switch(msg) {
+      switch (msg) {
         case 'change:cookie':
           driver.Cookies.log(data.message, data.cookie, data.removed)
+          break
+        default:
           break
       }
     })
@@ -82,10 +84,23 @@ export default {
 
     driver.start()
 
-    this._addListeners()
+    this._addListeners(config)
   },
 
-  _addListeners () {
+  _runDriver (runner, state) {
+    driver.run(() => {})
+
+    reporterBus.emit('reporter:start', {
+      startTime: driver.getStartTime(),
+      numPassed: state.passed,
+      numFailed: state.failed,
+      numPending: state.pending,
+      autoScrollingEnabled: state.autoScrollingEnabled,
+      scrollTop: state.scrollTop,
+    })
+  },
+
+  _addListeners (config) {
     driver.on('initialized', ({ runner }) => {
       driver.on('collect:run:state', () => new Promise((resolve) => {
         reporterBus.emit('reporter:collect:run:state', resolve)
@@ -94,7 +109,12 @@ export default {
       // get the current runnable in case we reran mid-test due to a visit
       // to a new domain
       channel.emit('get:existing:run:state', (state = {}) => {
-        reporterBus.emit('runnables:ready', runner.normalizeAll(state.tests))
+        const runnables = runner.normalizeAll(state.tests)
+        const run = () => {
+          this._runDriver(runner, state)
+        }
+
+        reporterBus.emit('runnables:ready', runnables)
 
         if (state.numLogs) {
           runner.setNumLogs(state.numLogs)
@@ -111,16 +131,11 @@ export default {
           runner.resumeAtTest(state.currentId, state.emissions)
         }
 
-        driver.run(() => {})
-
-        reporterBus.emit('reporter:start', {
-          startTime: driver.getStartTime(),
-          numPassed: state.passed,
-          numFailed: state.failed,
-          numPending: state.pending,
-          autoScrollingEnabled: state.autoScrollingEnabled,
-          scrollTop: state.scrollTop,
-        })
+        if (config.isHeadless) {
+          channel.emit('set:runnables', runnables, run)
+        } else {
+          run()
+        }
       })
     })
 
