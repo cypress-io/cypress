@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.1.4 - *(08/26/16)*
+- minify prod css
+
 #### 0.1.3 - *(08/26/16)*
 - get font-awesome from npm instead of bower
 
