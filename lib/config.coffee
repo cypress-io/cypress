@@ -196,7 +196,7 @@ module.exports = {
 
     ptfd = obj.parentTestsFolder = path.dirname(obj.integrationFolder)
 
-    prd = path.dirname(obj.projectRoot)
+    prd = path.dirname(obj.projectRoot ? "")
 
     obj.parentTestsFolderDisplay = path.relative(prd, ptfd)
 
