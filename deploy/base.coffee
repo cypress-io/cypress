@@ -13,6 +13,7 @@ Promise      = require("bluebird")
 obfuscator   = require("obfuscator")
 runSequence  = require("run-sequence")
 cypressIcons = require("@cypress/core-icons")
+cypressElectron = require("@cypress/core-electron")
 log          = require("./log")
 meta         = require("./meta")
 pkg          = require("../package.json")
@@ -95,8 +96,8 @@ class Base
           copy("./lib/fixture.coffee",      "/src/lib/fixture.coffee")
           copy("./lib/ids.coffee",          "/src/lib/ids.coffee")
           copy("./lib/konfig.coffee",       "/src/lib/konfig.coffee")
-          copy("./lib/logger.coffee",       "/src/lib/logger.coffee")
           copy("./lib/launcher.coffee",     "/src/lib/launcher.coffee")
+          copy("./lib/logger.coffee",       "/src/lib/logger.coffee")
           copy("./lib/project.coffee",      "/src/lib/project.coffee")
           copy("./lib/reporter.coffee",     "/src/lib/reporter.coffee")
           copy("./lib/request.coffee",      "/src/lib/request.coffee")
@@ -210,31 +211,12 @@ class Base
 
     fs.readJsonAsync(@distDir("package.json"))
     .then (json) =>
-      pkgr({
+      cypressElectron.install({
         dir: @distDir()
-        out: meta.buildDir
-        name: pkg.productName or pkg.name
+        dist: @buildPathToApp()
         platform: @osName
-        arch: "x64"
-        asar: false
-        prune: true
-        overwrite: true
-        version: pkg.devDependencies["electron-prebuilt"]
-        icon: cypressIcons.getPathToIcon("cypress.icns")
         "app-version": json.version
       })
-
-  renameBuild: (pathToBuilds = []) ->
-    @log("#renameBuild")
-
-    src = pathToBuilds[0]
-
-    ## grab the platform between 'Cypress-darwin-x64'
-    platform = path.basename(src).split("-").slice(1, 2).join("")
-    dest     = @getBuildDest(src, platform)
-
-    fs.ensureDirAsync(dest).then ->
-      fs.moveAsync(src, dest, {clobber: true}).return(dest)
 
   uploadFixtureToS3: ->
     @log("#uploadFixtureToS3")
@@ -260,7 +242,7 @@ class Base
     log.apply(@, arguments)
 
   gulpBuild: ->
-    @log "gulpBuild"
+    @log("#gulpBuild")
 
     new Promise (resolve, reject) ->
       runSequence "app:build", "app:minify", (err) ->
@@ -394,8 +376,6 @@ class Base
     .then(@npmInstall)
     .then(@npmInstall)
     .then(@elBuilder)
-    .then(@renameBuild)
-    .then(@afterBuild)
     .then(@runSmokeTest)
     .then(@runProjectTest)
     .then(@runFailingProjectTest)
