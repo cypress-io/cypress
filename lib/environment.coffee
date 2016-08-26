@@ -1,5 +1,6 @@
 require("./util/http_overrides")
 
+os      = require("os")
 fs      = require("fs-extra")
 cwd     = require("./cwd")
 Promise = require("bluebird")
@@ -20,6 +21,9 @@ try
   app = require("electron").app
   app.commandLine.appendSwitch("disable-renderer-backgrounding", true)
   app.commandLine.appendSwitch("ignore-certificate-errors", true)
+
+  if os.platform() is "linux"
+    app.disableHardwareAcceleration()
 
 getEnv = ->
   ## instead of setting NODE_ENV we will

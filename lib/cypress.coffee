@@ -10,7 +10,6 @@ require("./environment")
 ## mode.
 
 _         = require("lodash")
-os        = require("os")
 cp        = require("child_process")
 path      = require("path")
 Promise   = require("bluebird")
@@ -36,9 +35,6 @@ module.exports = {
   isCurrentlyRunningElectron: ->
     !!(process.versions and process.versions.electron)
 
-  isLinuxAndHasNotDisabledGpu: (options) ->
-    process.env["CYPRESS_ENV"] isnt "test" and os.platform() is "linux" and "--disable-gpu" not in process.argv
-
   runElectron: (mode, options) ->
     ## wrap all of this in a promise to force the
     ## promise interface - even if it doesn't matter
@@ -49,30 +45,9 @@ module.exports = {
       ## like in production and we shouldn't spawn a new
       ## process
       if @isCurrentlyRunningElectron()
-        if @isLinuxAndHasNotDisabledGpu()
-          return new Promise (resolve) ->
-            args = ["."].concat(argsUtil.toArray(options))
-            args.push("--disable-gpu")
-
-            ## respawn the same process except with --disable-gpu
-            electron = cp.spawn(process.execPath, args, {
-              stdio: "inherit"
-            })
-
-            ## must resolve with failures since
-            ## our outer headless run promise
-            ## is expecting that object structure
-            onClose = (code, signal) ->
-              resolve({failures: code})
-
-            ## whenever our new child electron process
-            ## closes then we pass this exit code on
-            electron.on("close", onClose)
-
-        else
-          ## just run the gui code directly here
-          ## and pass our options directly to main
-          require("./electron")(mode, options);
+        ## just run the gui code directly here
+        ## and pass our options directly to main
+        require("./electron")(mode, options);
       else
         ## sanity check to ensure we're running
         ## the local dev server. dont crash just

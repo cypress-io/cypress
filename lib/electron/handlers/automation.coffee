@@ -66,11 +66,7 @@ automation = {
     new Promise (resolve) ->
       win = Renderer.get("PROJECT")
 
-      win.showInactive() if isLinux
-
       win.capturePage (img) ->
-        win.hide() if isLinux
-
         resolve(img.toDataURL())
 
 }
