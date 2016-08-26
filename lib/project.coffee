@@ -138,7 +138,7 @@ class Project extends EE
     ## if we've passed down reporter
     ## then record these via mocha reporter
     if config.report
-      reporter = Reporter.create(config.reporter)
+      reporter = Reporter.create(config.reporter, config.projectRoot)
 
     @server.startWebsockets(@watchers, config, {
       onReloadBrowser: options.onReloadBrowser
@@ -150,13 +150,14 @@ class Project extends EE
       onConnect: (id) =>
         @emit("socket:connected", id)
 
-      onMocha: (event, args...) =>
+      onSetRunnables: reporter?.setRunnables
+
+      onMocha: (event, runnable) =>
         ## bail if we dont have a
         ## reporter instance
         return if not reporter
 
-        args = [event].concat(args)
-        reporter.emit.apply(reporter, args)
+        reporter.emit(event, runnable)
 
         if event is "end"
           stats = reporter.stats()

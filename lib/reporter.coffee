@@ -1,19 +1,16 @@
 _     = require("lodash")
 Mocha = require("mocha")
 chalk = require("chalk")
+path  = require("path")
 
 STATS = "suites tests passes pending failures start end duration".split(" ")
 
-createSuite = (obj) ->
+createSuite = (obj, parent) ->
   suite = new Mocha.Suite(obj.title, {})
-
-  if p = obj.parent
-    suite.parent = createSuite(p)
-
+  suite.parent = parent if parent
   return suite
 
-createRunnable = (obj) ->
-  ## recursively create parent suites
+createRunnable = (obj, parent) ->
   runnable = new Mocha.Runnable(obj.title, ->)
   runnable.timedOut = obj.timedOut
   runnable.async    = obj.async
@@ -21,45 +18,77 @@ createRunnable = (obj) ->
   runnable.duration = obj.duration
   runnable.state    = obj.state
 
-  if p = obj.parent
-    runnable.parent = createSuite(p)
+  runnable.parent = parent if parent
 
   return runnable
 
-createErr = (test, err) ->
-  [createRunnable(test), err]
+mergeRunnable = (testProps, runnables) ->
+  _.extend(runnables[testProps.id], testProps)
+
+createHook = (props, runnables) ->
+  createRunnable(props, runnables[props.id])
+
+createErr = (test, runnables) ->
+  [createRunnable(test, runnables[test.id]), test.err]
 
 events = {
   "start":     true
   "end":       true
-  "suite":     createSuite
-  "suite end": createSuite
-  "test":      createRunnable
-  "test end":  createRunnable
-  "hook":      createRunnable
-  "hook end":  createRunnable
-  "pass":      createRunnable
-  "pending":   createRunnable
+  "suite":     mergeRunnable
+  "suite end": mergeRunnable
+  "test":      mergeRunnable
+  "test end":  mergeRunnable
+  "hook":      createHook
+  "hook end":  createHook
+  "pass":      mergeRunnable
+  "pending":   mergeRunnable
   "fail":      createErr
 }
 
+reporters = {
+  teamcity: "mocha-teamcity-reporter"
+  junit: "mocha-junit-reporter"
+}
+
 class Reporter
-  constructor: (reporterName = "spec") ->
+  constructor: (reporterName = "spec", projectRoot) ->
     if not (@ instanceof Reporter)
       return new Reporter(reporterName)
 
     @reporterName = reporterName
 
-    if reporterName is "teamcity"
-      reporter = require("mocha-teamcity-reporter")
+    if r = reporters[@reporterName]
+      reporter = require(r)
     else
       reporter = @reporterName
+
+    if @reporterName is "junit"
+      process.env.MOCHA_FILE ||= path.join(projectRoot, "test-result.xml")
 
     @mocha    = new Mocha({reporter: reporter})
     @runner   = new Mocha.Runner(@mocha.suite)
     @reporter = new @mocha._reporter(@runner, {})
 
+    @runnables = {}
+
     @runner.ignoreLeaks = true
+
+  setRunnables: (rootRunnable) =>
+    @_createRunnable(rootRunnable, "suite")
+
+  _createRunnable: (runnableProps, type, parent) =>
+    runnable = if type is "suite"
+      suite = createSuite(runnableProps, parent)
+      suite.suites = _.map runnableProps.suites, (suiteProps) =>
+        @_createRunnable(suiteProps, "suite", suite)
+      suite.tests = _.map runnableProps.tests, (testProps) =>
+        @_createRunnable(testProps, "test", suite)
+      suite
+    else
+      createRunnable(runnableProps, parent)
+
+    @runnables[runnableProps.id] = runnable
+    return runnable
 
   emit: (event, args...) ->
     if args = @parseArgs(event, args)
@@ -68,18 +97,17 @@ class Reporter
   parseArgs: (event, args) ->
     ## make sure this event is in our events hash
     if e = events[event]
-
       if _.isFunction(e)
         ## transform the arguments if
         ## there is an event.fn callback
-        args = e.apply(@, args)
+        args = e.apply(@, args.concat(@runnables))
 
       [event].concat(args)
 
   stats: ->
     _.extend {reporter: @reporterName}, _.pick(@reporter.stats, STATS)
 
-  @create = (reporterName) ->
-    new Reporter(reporterName)
+  @create = (reporterName, projectRoot) ->
+    new Reporter(reporterName, projectRoot)
 
 module.exports = Reporter
