@@ -1,4 +1,4 @@
-describe "failing_spec", ->
+describe "stdout_failing_spec", ->
   it "passes", ->
 
   it "fails", ->

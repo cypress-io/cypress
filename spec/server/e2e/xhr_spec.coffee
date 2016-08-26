@@ -5,7 +5,7 @@ user     = require("#{root}lib/user")
 cypress  = require("#{root}lib/cypress")
 Project  = require("#{root}lib/project")
 
-describe "e2e visit", ->
+describe "e2e xhr", ->
   beforeEach ->
     Fixtures.scaffold()
 
@@ -23,12 +23,6 @@ describe "e2e visit", ->
   it "passes", ->
     @timeout(20000)
 
-    ## this tests that hashes are applied during a visit
-    ## which forces the browser to scroll to the div
-    ## additionally this tests that jquery.js is not truncated
-    ## due to __cypress.initial cookies not being cleared by
-    ## the hash.html response
-
-    cypress.start(["--run-project=#{@e2ePath}", "--spec=cypress/integration/visit_spec.coffee"])
+    cypress.start(["--run-project=#{@e2ePath}", "--spec=cypress/integration/xhr_spec.coffee"])
     .then ->
       expect(process.exit).to.be.calledWith(0)
