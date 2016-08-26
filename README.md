@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.1.3 - *(08/26/16)*
+- get font-awesome from npm instead of bower
+
 #### 0.1.2 - *(08/23/16)*
 - change file names: app.js -> runner.js & app.css -> runner.scss
 
