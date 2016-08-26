@@ -1,5 +1,7 @@
 module.exports = function setZunderConfig (zunder) {
   zunder.setConfig({
+    cacheBust: false,
+    prodDir: 'dist',
     resolutions: ['react', 'react-dom', 'mobx', 'mobx-react', 'lodash'],
     scriptName: 'runner.js',
     stylesheetName: 'runner.css',

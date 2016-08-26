@@ -13,7 +13,6 @@
   "homepage": "https://github.com/cypress-io/cypress-core-runner#readme",
   "scripts": {
     "build": "node ./scripts/build.js",
-    "clean": "rm -rf dist",
     "release": "releaser",
     "start": "node ./scripts/watch.js",
     "test": "node ./scripts/test.js"
@@ -31,7 +30,7 @@
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
     "vinyl-fs": "^2.4.3",
-    "zunder": "^3.4.4"
+    "zunder": "^3.4.5"
   },
   "dependencies": {
     "@cypress/core-reporter": "0.1.4",
