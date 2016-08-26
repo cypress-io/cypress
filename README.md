@@ -6,6 +6,9 @@ It is a simple wrapper that `symlinks` while in development.
 
 ## Changelog
 
+#### 0.1.0 - *(08/26/16)*
+- accept install options
+
 #### 0.0.4 - *(08/24/16)*
 - fixed bug with paths during linux install
 
