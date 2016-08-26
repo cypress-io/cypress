@@ -12,7 +12,6 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-runner#readme",
   "scripts": {
-    "postinstall": "bower install",
     "build": "node ./scripts/build.js",
     "clean": "rm -rf dist",
     "release": "releaser",
@@ -22,7 +21,6 @@
   "devDependencies": {
     "@cypress/core-releaser": "^0.1.8",
     "babel-eslint": "^6.0.4",
-    "bower": "^1.7.9",
     "chai": "^3.5.0",
     "chai-enzyme": "^0.5.0",
     "enzyme": "^2.4.1",
@@ -36,9 +34,10 @@
     "zunder": "^3.4.4"
   },
   "dependencies": {
-    "bluebird": "^3.4.0",
     "@cypress/core-reporter": "0.1.2",
+    "bluebird": "^3.4.0",
     "classnames": "^2.2.5",
+    "font-awesome": "^4.6.3",
     "mobx": "^2.3.6",
     "mobx-react": "^3.5.3",
     "react": "^15.3.0",

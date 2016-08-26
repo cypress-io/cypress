@@ -5,7 +5,7 @@ module.exports = function setZunderConfig (zunder) {
     stylesheetName: 'runner.css',
     staticGlobs: {
       'static/**': '',
-      'bower_components/font-awesome/fonts/**': '/fonts',
+      'node_modules/font-awesome/fonts/**': '/fonts',
       'node_modules/@cypress/core-reporter/dist/reporter.css': '',
     },
   })
