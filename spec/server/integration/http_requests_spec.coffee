@@ -207,17 +207,23 @@ describe "Routes", ->
     beforeEach ->
       @setup("http://localhost:8443")
 
-    it "can get app.js", ->
-      @rp("http://localhost:8443/__cypress/runner/app.js")
+    it "can get runner.js", ->
+      @rp("http://localhost:8443/__cypress/runner/runner.js")
       .then (res) ->
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(/React/)
 
-    it "can get app.css", ->
-      @rp("http://localhost:8443/__cypress/runner/app.css")
+    it "can get runner.css", ->
+      @rp("http://localhost:8443/__cypress/runner/runner.css")
       .then (res) ->
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(/spec-iframe/)
+
+    it "can get reporter.css", ->
+      @rp("http://localhost:8443/__cypress/runner/reporter.css")
+      .then (res) ->
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(/command-name-assert/)
 
   context "GET /__cypress/files", ->
     beforeEach ->
