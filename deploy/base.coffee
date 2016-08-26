@@ -289,44 +289,21 @@ class Base
 
     Fixtures.scaffold()
 
-    automations = Fixtures.projectPath("automations")
-
-    verifyScreenshots = =>
-      ## the test should have created a png screenshot at this path...
-      screenshot = path.join(automations, "cypress", "screenshots", "foo", "bar", "baz.png")
-
-      fs.statAsync(screenshot)
+    e2e = Fixtures.projectPath("e2e")
 
     runProjectTest = =>
       new Promise (resolve, reject) =>
-        express = require("express")
-        parser  = require("cookie-parser")
+        env = _.omit(process.env, "CYPRESS_ENV")
 
-        app = express()
+        sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{e2e}", "--spec=cypress/integration/simple_passing_spec.coffee"], {stdio: "inherit", env: env}
+        sp.on "exit", (code) ->
+          if code is 0
+            resolve()
+          else
+            reject(new Error("running project tests failed with: '#{code}' errors."))
 
-        app.use(parser())
-
-        app.get "/foo", (req, res) ->
-          console.log "cookies", req.cookies
-          res.send(req.cookies)
-
-        server = app.listen 2121, =>
-          console.log "listening on 2121"
-
-          env = _.omit(process.env, "CYPRESS_ENV")
-
-          sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{automations}"], {stdio: "inherit", env: env}
-          sp.on "exit", (code) ->
-            server.close()
-
-            if code is 0
-              resolve()
-            else
-              reject(new Error("running project tests failed with: '#{code}' errors."))
-
-    @createCyCache(automations)
+    @createCyCache(e2e)
     .then(runProjectTest)
-    .then(verifyScreenshots)
     .then ->
       Fixtures.remove()
     .then =>
@@ -337,12 +314,11 @@ class Base
 
     Fixtures.scaffold()
 
-    failures = Fixtures.projectPath("failures")
+    e2e = Fixtures.projectPath("e2e")
 
     verifyScreenshots = =>
-      ## the test should have created 3 png screenshots at this path...
-      screenshot1 = path.join(failures, "cypress", "screenshots", "failure1.png")
-      screenshot2 = path.join(failures, "cypress", "screenshots", "failure2.png")
+      screenshot1 = path.join(e2e, "cypress", "screenshots", "fails1.png")
+      screenshot2 = path.join(e2e, "cypress", "screenshots", "fails2.png")
 
       Promise.all([
         fs.statAsync(screenshot1)
@@ -353,15 +329,14 @@ class Base
       new Promise (resolve, reject) =>
         env = _.omit(process.env, "CYPRESS_ENV")
 
-        sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{failures}"], {stdio: "inherit", env: env}
+        sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{e2e}", "--spec=cypress/integration/simple_failing_spec.coffee"], {stdio: "inherit", env: env}
         sp.on "exit", (code) ->
-
           if code is 2
             resolve()
           else
             reject(new Error("running project tests failed with: '#{code}' errors."))
 
-    @createCyCache(failures)
+    @createCyCache(e2e)
     .then(runProjectTest)
     .then(verifyScreenshots)
     .then ->
