@@ -1,7 +1,7 @@
 {
   "name": "@cypress/core-electron",
   "version": "0.2.0",
-  "electronVersion": "1.3.4",
+  "electronVersion": "1.2.8",
   "description": "Cypress electron wrapper shell",
   "main": "index.js",
   "scripts": {
