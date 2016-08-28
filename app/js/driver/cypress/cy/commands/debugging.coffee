@@ -102,16 +102,19 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
         })
 
       previous = @prop("current").get("prev")
+      subject  = @prop("subject")
 
-      ###
-      cy.debug provides the previous command and the current subject below:
-      ###
+      console.log "\n%c------------------------ Debug Info ------------------------", "font-weight: bold;"
+      console.log "Command Name:    ", previous and previous.get("name")
+      console.log "Command Args:    ", previous and previous.get("args")
+      console.log "Current Subject: ", subject
 
-      console.log "\n%c------------------------Cypress Debug Info------------------------", "font-weight: bold;"
-      console.log "Previous Command Name: ", previous and previous.get("name")
-      console.log "Previous Command Args: ", previous and previous.get("args")
-      console.log "Current Subject:       ", @prop("subject")
-      debugger
+      `
+        ////// HOVER OVER TO INSPECT THE CURRENT SUBJECT //////
+        subject
+        ///////////////////////////////////////////////////////
+
+        debugger`
 
       ## return the subject
-      @prop("subject")
+      subject
