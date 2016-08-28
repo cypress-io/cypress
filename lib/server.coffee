@@ -100,6 +100,13 @@ class Server
     e.portInUse = true
     e
 
+  resetState: ->
+    buffers.reset()
+
+    ## clear out the previous domain
+    ## and reset to the initial state
+    @_onDomainSet("<root>")
+
   open: (config = {}) ->
     ## always reset any buffers
     ## TODO: change buffers to be an instance
