@@ -265,7 +265,7 @@ export default {
   },
 
   notifyRunningSpec (specFile) {
-    channel.emit('running:spec', specFile)
+    channel.emit('spec:changed', specFile)
   },
 
   focusTests () {
