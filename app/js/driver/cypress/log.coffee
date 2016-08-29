@@ -117,7 +117,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## set the log on the command
       cy.prop("current")?.log(log)
 
-      logs[obj.id] = true
+      $Log.addToLogs(log)
 
       triggerInitial(Cypress, log)
 
@@ -376,6 +376,11 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
           delete consoleObj.Snapshot
 
         return consoleObj
+
+    @addToLogs: (log) ->
+      id = log.get("id")
+
+      logs[id] = true
 
     @reduceMemory = (attrs) ->
       ## mutate attrs by nulling out
