@@ -631,7 +631,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         it "does not immediately end", ->
           log = null
 
-          @Cypress.on "log", (l) =>
+          @Cypress.on "log", (attrs, l) =>
             log = l
             expect(log.get("state")).not.to.eq "passed"
 
@@ -641,7 +641,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         it "does not immediately snapshot", ->
           log = null
 
-          @Cypress.on "log", (l) =>
+          @Cypress.on "log", (attrs, l) =>
             log = l
             if log.get("name") is "wait"
               expect(@log.get("snapshots")).not.to.be.ok
