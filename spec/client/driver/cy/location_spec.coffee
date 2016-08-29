@@ -215,7 +215,7 @@ describe "$Cypress.Cy Location Commands", ->
     it "returns the location object", ->
       @cy.location().then (loc) ->
         keys = _.keys loc
-        expect(keys).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString"]
+        expect(keys).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "originPolicy", "superDomain", "toString"]
 
     it "returns a specific key from location object", ->
       @cy.location("href").then (href) ->
@@ -331,4 +331,4 @@ describe "$Cypress.Cy Location Commands", ->
 
           expect(_(consoleProps).keys()).to.deep.eq ["Command", "Returned"]
           expect(consoleProps.Command).to.eq "location"
-          expect(_(consoleProps.Returned).keys()).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString"]
+          expect(_(consoleProps.Returned).keys()).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "originPolicy", "superDomain", "toString"]
