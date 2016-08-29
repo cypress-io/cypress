@@ -19,27 +19,27 @@ class Login extends Component {
   render () {
     return (
       <div id='login'>
-        <h3>Welcome to Cypress!</h3>
-        <p>Let's get a project setup to test in Cypress. It only takes a couple of minutes.</p>
-        <p>First, log in with your GitHub account.</p>
-        {this._error()}
-        <button
-          className={cs('btn btn-primary btn-login', {
-            disabled: this.state.isLoggingIn,
-          })}
-          onClick={this._login}
-          disabled={this.state.isLoggingIn}
-        >
-          <i className='fa fa-github'></i>{' '}
-          Log In with GitHub
-        </button>
-        {this.state.isLoggingIn ?
-          <div className='login-spinner'>
-            <i className='fa fa-spinner fa-spin'></i>{' '}
-            Logging in...
-          </div>
-        : null }
-        <div className='helper-line'>
+        <div className='login-img-wrapper'>
+          <img src='/img/cypress-inverse.png' />
+        </div>
+        <div className='login-content'>
+          {this._error()}
+          <button
+            className={cs('btn btn-login btn-block', {
+              disabled: this.state.isLoggingIn,
+            })}
+            onClick={this._login}
+            disabled={this.state.isLoggingIn}
+          >
+            <i className='fa fa-github'></i>{' '}
+            Log In with GitHub
+          </button>
+          {this.state.isLoggingIn ?
+            <div className='login-spinner'>
+              <i className='fa fa-spinner fa-spin'></i>{' '}
+              Logging in...
+            </div>
+          : null }
           <a className='helper-docs-link' onClick={this._openHelp}>
             <i className='fa fa-question-circle'></i>{' '}
             Need help?

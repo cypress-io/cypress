@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "start": "zunder watch",
-    "build": "zunder build",
     "postinstall": "bower i",
     "release": "releaser",
     "test": "npm start & cypress run"
@@ -21,6 +20,7 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-desktop-gui",
   "dependencies": {
+    "@cypress/core-icons": "^0.5.0",
     "bluebird": "^3.4.0",
     "classnames": "^2.2.5",
     "history": "^2.0.0",
@@ -42,6 +42,7 @@
     "bower": "^1.7.2",
     "eslint": "^2.12.0",
     "eslint-plugin-react": "^5.2.2",
+    "gulp-concat": "^2.6.0",
     "mobx-react-devtools": "^4.2.0",
     "zunder": "^3.3.1"
   }

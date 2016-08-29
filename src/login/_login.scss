@@ -1,7 +1,7 @@
 #login {
   background-color: #232A34;
   text-align: center;
-  padding-top: 150px;
+  padding-top: 100px;
   position: fixed;
   top: 0;
   bottom: 0;
@@ -24,14 +24,14 @@
   .alert.alert-danger {
     background-color: #e06666;
     border: 0;
-    margin: 15px auto 5px;
-    width: 350px;
-    border-radius: 5px;
-    padding: 5px;
+    margin: 0px auto 15px;
+    width: 100%;
+    padding: 10px;
     font-size: 13px;
 
     p {
       color: #eee;
+      line-height: 20px;
     }
 
     a {
@@ -39,23 +39,52 @@
       color: #eee;
       border-bottom: 1px dashed #fff;
       font-size: 13px;
-
     }
   }
+}
 
+.login-img-wrapper {
+  width: 200px;
+  margin: 40px auto 20px;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.login-content {
+  width: 300px;
+  margin: 0 auto;
+  padding: 20px;
+  overflow: auto;
+  background-color: #fafafa;
+  border-radius: 6px;
+
+  a {
+    color: #3B94D9;
+  }
 }
 
 .btn-login {
   line-height: 24px;
-  margin-top: 20px;
   font-size: 16px;
+  background-color: #333;
+  border-radius: 0;
+  margin-bottom: 10px;
+  font-weight: 500;
+
+  &:hover {
+    background-color: #242424;
+    color: white;
+  }
 
   &:active, &:focus {
     outline: 0
   }
 
   i {
-    font-size: 18px;
+    font-size: 20px;
     position: relative;
     top: 1px;
     padding-right: 3px;
@@ -63,5 +92,10 @@
 }
 
 .login-spinner {
-  margin-top: 20px;
+  margin: 10px 0;
+  color: #777;
 }
+
+
+
+

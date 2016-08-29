@@ -11,15 +11,23 @@ describe "Login", ->
   context "without a current user", ->
     beforeEach ->
       @ipc.handle("get:current:user", null, {})
+
     describe "login display", ->
-      it "displays 'Cypress'", ->
-        cy.get("#login").contains("Cypress")
+      it "displays Cypress logo", ->
+        cy
+          .get("#login")
+            .find("img")
+              .should("have.attr", "src")
+              .and("include", "cypress-inverse")
 
       it "has login url", ->
-        cy.location().its("hash").should("contain", "login")
+        cy
+          .location().its("hash")
+            .should("contain", "login")
 
       it "has Github Login button", ->
-        cy.get("#login").contains("button", "Log In with GitHub")
+        cy
+          .get("#login").contains("button", "Log In with GitHub")
 
       it "displays help link", ->
         cy.contains("a", "Need help?")
@@ -30,7 +38,9 @@ describe "Login", ->
 
     describe "click 'Log In with GitHub'", ->
       beforeEach ->
-        cy.get("#login").contains("button", "Log In with GitHub").as("loginBtn")
+        cy
+          .get("#login")
+            .contains("button", "Log In with GitHub").as("loginBtn")
 
       it "triggers ipc 'window:open' on click", ->
         cy
