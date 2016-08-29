@@ -51,7 +51,7 @@ const runSpec = (project, spec, browser, url) => {
       if (data.browserOpened) {
         project.browserOpened()
 
-        // App.ipc('running:spec', (err, spec) => {
+        // App.ipc('on:running:spec', (err, spec) => {
         //   specsCollection.setChosenSpec(spec)
         // })
       }
@@ -61,7 +61,7 @@ const runSpec = (project, spec, browser, url) => {
 
         specsCollection.setChosenSpec('')
 
-        // App.ipc.off('running:spec')
+        // App.ipc.off('on:running:spec')
         return App.ipc.off('launch:browser')
       }
     })

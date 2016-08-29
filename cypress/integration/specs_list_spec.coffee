@@ -240,26 +240,26 @@ describe "Specs List", ->
         it "stays same when same spec", ->
           cy
             .then ->
-              @ipc.handle("running:spec", null, "integration/app_spec.coffee")
+              @ipc.handle("on:running:spec", null, "integration/app_spec.coffee")
             .get("@firstSpec").should("have.class", "active")
 
         it "updates spec running when different spec", ->
           cy
             .then ->
-              @ipc.handle("running:spec", null, "unit/admin_users/admin/users/bar_list_spec.coffee")
+              @ipc.handle("on:running:spec", null, "unit/admin_users/admin/users/bar_list_spec.coffee")
             .contains("a", "bar_list_spec").should("have.class", "active")
 
         it "updates spec running when All Specs run", ->
           cy
             .then ->
-              @ipc.handle("running:spec", null, "__all")
+              @ipc.handle("on:running:spec", null, "__all")
             .contains("a", "Run All Tests").should("have.class", "active")
             .get("@firstSpec").should("not.have.class", "active")
 
         it "de-selects all tests if no spec matches", ->
           cy
             .then ->
-              @ipc.handle("running:spec", null, null)
+              @ipc.handle("on:running:spec", null, null)
             .contains("a", "Run All Tests").should("not.have.class", "active")
             .get("@firstSpec").should("not.have.class", "active")
 
