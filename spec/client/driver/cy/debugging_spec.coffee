@@ -20,8 +20,8 @@ describe "$Cypress.Cy Debugging Commands", ->
 
       @cy.title({log: false}).debug().then ->
         # prints bar to console.log
-        expect(log).to.be.calledWithMatch("Previous Command Name: ", "title")
-        expect(log).to.be.calledWithMatch("Previous Command Args: ")
+        expect(log).to.be.calledWithMatch("Command Name: ", "title")
+        expect(log).to.be.calledWithMatch("Command Args: ")
 
         ## get the 3rd call to console.log (which is for args)
         ## and drill into the options object to ensure that
@@ -34,6 +34,6 @@ describe "$Cypress.Cy Debugging Commands", ->
 
       @cy.debug().then ->
         expect(log).to.be.calledWithMatch("Current Subject: ", undefined)
-        expect(log).to.be.calledWithMatch("Previous Command Name: ", undefined)
+        expect(log).to.be.calledWithMatch("Command Name: ", undefined)
 
 
