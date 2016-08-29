@@ -122,7 +122,7 @@ describe "$Cypress API", ->
     it "calls #restore with {checkForEndedEarly: false}", (done) ->
       restore = @sandbox.spy @Cypress, "restore"
 
-      @Cypress.on "restore", (options) ->
+      @Cypress.on "restore", _.once (options) ->
         expect(options).to.deep.eq({checkForEndedEarly: false})
         done()
 
