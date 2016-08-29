@@ -118,6 +118,7 @@
     "coffee-script": "1.7.1",
     "coffeeify": "jnordberg/coffeeify#2f48b07fad1f3b4dbf58dd53bb84198d7066067a",
     "compression": "1.1.0",
+    "concat-stream": "^1.5.1",
     "cookie": "^0.2.3",
     "cookie-parser": "^1.3.3",
     "data-uri-to-buffer": "0.0.4",
@@ -165,7 +166,6 @@
     "through": "2.3.6",
     "tough-cookie": "2.3.0",
     "trash": "^1.4.1",
-    "trumpet": "cypress-io/node-trumpet#5cff514b3e4eb73cded2a4a6df1654ca157ce8b7",
     "underscore": "1.6.0",
     "underscore.string": "2.3.3",
     "winston": "^0.9.0"

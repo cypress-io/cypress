@@ -100,6 +100,7 @@ describe "Routes", ->
   afterEach ->
     evilDns.clear()
     nock.cleanAll()
+    Fixtures.remove()
     @session.destroy()
 
     Promise.join(
@@ -139,7 +140,9 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("<html></html>")
+          expect(res.body).to.include("<html>")
+          expect(res.body).to.include("document.domain = 'github.com'")
+          expect(res.body).to.include("</html>")
 
     it "does not redirect when visiting http site which isnt cypress server", ->
       ## this tests the 'default' state of cypress when a server
@@ -234,10 +237,6 @@ describe "Routes", ->
       Fixtures.scaffold("todos")
       Fixtures.scaffold("ids")
 
-    afterEach ->
-      Fixtures.remove("todos")
-      Fixtures.remove("ids")
-
     describe "todos with specific configuration", ->
       beforeEach ->
         @setup({
@@ -325,9 +324,6 @@ describe "Routes", ->
           }
         })
 
-      afterEach ->
-        Fixtures.remove("todos")
-
       it "processes sub/sub_test.coffee spec", ->
         file = Fixtures.get("projects/todos/tests/sub/sub_test.coffee")
         file = coffee.compile(file)
@@ -357,9 +353,6 @@ describe "Routes", ->
             javascripts: ["helpers/includes.js"]
           }
         })
-
-      afterEach ->
-        Fixtures.remove("no-server")
 
       it "processes my-tests/test1.js spec", ->
         file = Fixtures.get("projects/no-server/my-tests/test1.js")
@@ -529,9 +522,6 @@ describe "Routes", ->
             }
           })
 
-        afterEach ->
-          Fixtures.remove("todos")
-
         it "returns fixture contents", ->
           @rp({
             url: "http://localhost:2020/__cypress/xhrs/bar"
@@ -636,10 +626,6 @@ describe "Routes", ->
 
     afterEach ->
       files.reset()
-
-      Fixtures.remove("todos")
-      Fixtures.remove("no-server")
-      Fixtures.remove("ids")
 
     describe "usage", ->
       beforeEach ->
@@ -799,22 +785,20 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("hello from bar!")
+          expect(res.body).to.include("hello from bar!")
 
     context "gzip", ->
       beforeEach ->
         @setup("http://www.github.com")
 
-      it "does not send accept-encoding headers when initial=true", ->
+      it "unzips, injects, and then rezips initial content", ->
         nock(@server._remoteOrigin)
         .get("/gzip")
-        .matchHeader "accept-encoding", (val) ->
-          val isnt "gzip"
-        # .replyWithFile 200, Fixtures.path("server/gzip.html.gz"), {
-        #   "Content-Type": "text/html"
-        #   "Content-Encoding": "gzip"
-        # }
-        .reply(200)
+        .matchHeader("accept-encoding", /gzip/)
+        .replyWithFile(200, Fixtures.path("server/gzip.html.gz"), {
+          "Content-Type": "text/html"
+          "Content-Encoding": "gzip"
+        })
 
         @rp({
           url: "http://www.github.com/gzip"
@@ -825,29 +809,13 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
+          expect(res.body).to.include("<html>")
+          expect(res.body).to.include("gzip")
+          expect(res.body).to.include("Cypress.")
+          expect(res.body).to.include("document.domain = 'github.com'")
+          expect(res.body).to.include("</html>")
 
-      it "does send accept-encoding headers when initial=false", ->
-        nock(@server._remoteOrigin)
-        .get("/gzip")
-        .matchHeader("accept-encoding", /gzip/)
-        .reply(200)
-
-        @rp({
-          url: "http://www.github.com/gzip"
-          gzip: true
-          headers: {
-            "Cookie": "__cypress.initial=false"
-          }
-        })
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
-      ## okay so the reason this test is valuable is the following:
-      ## superagent WILL automatically decode the requests if content-encoding: gzip
-      ## if our response was NOT a gzip, then it would explode
-      ## because its properly gzipped then our response is unzipped and we get the
-      ## normal string content.
-      it "does not UNZIP gzipped responses when streaming back the response", ->
+      it "unzips, injects, and then rezips regular http content", ->
         nock(@server._remoteOrigin)
         .get("/gzip")
         .matchHeader("accept-encoding", /gzip/)
@@ -861,11 +829,35 @@ describe "Routes", ->
           gzip: true
           headers: {
             "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
           }
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("<html>gzip</html>")
+          expect(res.body).to.include("<html>")
+          expect(res.body).to.include("gzip")
+          expect(res.body).to.include("document.domain = 'github.com'")
+          expect(res.body).to.include("</html>")
+
+      it "does not inject on regular gzip'd content", ->
+        nock(@server._remoteOrigin)
+        .get("/gzip")
+        .matchHeader("accept-encoding", /gzip/)
+        .replyWithFile(200, Fixtures.path("server/gzip.html.gz"), {
+          "Content-Type": "application/javascript"
+          "Content-Encoding": "gzip"
+        })
+
+        @rp({
+          url: "http://www.github.com/gzip"
+          gzip: true
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.include("<html>")
+          expect(res.body).to.include("gzip")
+          expect(res.body).not.to.include("document.domain = 'github.com'")
+          expect(res.body).to.include("</html>")
 
     context "304 Not Modified", ->
       beforeEach ->
@@ -1137,7 +1129,7 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("foo")
+          expect(res.body).to.include("foo")
           expect(res.headers["transfer-encoding"]).to.eq("chunked")
           expect(res.headers).not.to.have.property("content-length")
 
@@ -1157,7 +1149,7 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("foo")
+          expect(res.body).to.include("foo")
           expect(res.headers["transfer-encoding"]).to.eq("chunked")
           expect(res.headers).not.to.have.property("content-length")
 
@@ -1257,7 +1249,7 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("hello from bar!")
+          expect(res.body).to.include("hello from bar!")
 
       it "omits x-frame-options", ->
         nock(@server._remoteOrigin)
@@ -1427,6 +1419,76 @@ describe "Routes", ->
           body = removeWhitespace(res.body)
           expect(body).to.eq contents
 
+      it "injects when head is capitalized", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<HTML> <HEAD>hello from bar!</HEAD> </HTML>",
+          "Content-Type": "text/html"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include "<HTML> <HEAD> <script type='text/javascript'> document.domain = 'google.com';"
+
+      it "injects when body is capitalized", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<HTML> <BODY>hello from bar!</BODY> </HTML>",
+          "Content-Type": "text/html"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include "</script> </head> <BODY>hello from bar!</BODY> </HTML>"
+
+      it "injects when both head + body are missing", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<HTML>hello from bar!</HTML>",
+          "Content-Type": "text/html"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include "<HTML> <head> <script"
+          expect(res.body).to.include "</head>hello from bar!</HTML>"
+
+      it "injects even when html + head + body are missing", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<div>hello from bar!</div>",
+          "Content-Type": "text/html"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include "<head> <script"
+          expect(res.body).to.include "</head><div>hello from bar!</div>"
+
       it "injects superdomain even when head tag is missing", ->
         nock(@server._remoteOrigin)
         .get("/bar")
@@ -1479,6 +1541,46 @@ describe "Routes", ->
 
             body = removeWhitespace(res.body)
             expect(body).to.eq contents
+
+      it "injects performantly on a huge amount of elements over http", ->
+        Fixtures.scaffold()
+
+        nock(@server._remoteOrigin)
+        .get("/elements.html")
+        .replyWithFile(200, Fixtures.projectPath("e2e/elements.html"), {
+          "Content-Type": "text/html"
+        })
+
+        @rp({
+          url: "http://www.google.com/elements.html"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) =>
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include("document.domain = 'google.com';")
+
+      it "injects performantly on a huge amount of elements over file", ->
+        Fixtures.scaffold()
+
+        @setup("/index.html", {
+          projectRoot: Fixtures.projectPath("e2e")
+        })
+        .then =>
+
+          @rp({
+            url: @proxy + "/elements.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) =>
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include("document.domain = 'localhost';")
 
       it "does not inject when not initial and not text", ->
         nock(@server._remoteOrigin)
@@ -1758,9 +1860,6 @@ describe "Routes", ->
             expect(res.headers["set-cookie"]).to.match(/initial=;/)
             expect(res.headers["etag"]).to.be.undefined
             expect(res.headers["last-modified"]).to.be.undefined
-
-      afterEach ->
-        Fixtures.remove("no-server")
 
       it "sets etag", ->
         @rp(@proxy + "/assets/app.css")

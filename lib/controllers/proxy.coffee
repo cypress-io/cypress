@@ -1,12 +1,13 @@
 _             = require("lodash")
 fs            = require("fs")
-request       = require("request")
 mime          = require("mime")
 path          = require("path")
-Domain        = require("domain")
-through       = require("through")
+zlib          = require("zlib")
 jsUri         = require("jsuri")
-trumpet       = require("trumpet")
+concat        = require("concat-stream")
+request       = require("request")
+through       = require("through")
+through2      = require("through2")
 urlHelpers    = require("url")
 cwd           = require("../cwd")
 logger        = require("../logger")
@@ -15,9 +16,9 @@ buffers       = require("../util/buffers")
 escapeRegExp  = require("../util/escape_regexp")
 send          = require("send")
 
-headRe           = /(<head.*?>)/
-bodyRe           = /(<body.*?>)/
-htmlRe           = /(<html.*?>)/
+headRe           = /(<head.*?>)/i
+bodyRe           = /(<body.*?>)/i
+htmlRe           = /(<html.*?>)/i
 okStatusRe       = /^[2|3|4]\d+$/
 
 convertNewLinesToBr = (text) ->
@@ -132,19 +133,40 @@ module.exports = {
 
         logger.info "received request response"
 
-        switch
-          when req.cookies["__cypress.initial"] is "true"
-            str
-            .pipe(@rewrite(req, res, remoteState, "initial"))
-            .pipe(thr)
+        @concatStream str, thr, (body, cb) =>
+          encoding = incomingRes.headers["content-encoding"]
 
-          when reqAcceptsHtmlAndMatchesOriginPolicy()
-            str
-            .pipe(@rewrite(req, res, remoteState))
-            .pipe(thr)
+          rewrite = (body) =>
+            body = body.toString()
 
+            switch
+              when req.cookies["__cypress.initial"] is "true"
+                @rewrite(body, remoteState, "initial")
+
+              when reqAcceptsHtmlAndMatchesOriginPolicy()
+                @rewrite(body, remoteState)
+
+              else
+                body
+
+          ## if we're gzipped that means we need to unzip
+          ## this content first, inject, and the rezip
+          if encoding and encoding.includes("gzip")
+            zlib.gunzip body, (err, unzipped) ->
+              if err
+                httpRequestErr(err)
+              else
+                ## get the body as a string now
+                body = rewrite(unzipped)
+
+                ## zip it back up
+                zlib.gzip body, (err, zipped) ->
+                  if err
+                    httpRequestErr(err)
+                  else
+                    cb(zipped)
           else
-            str.pipe(thr)
+            cb rewrite(body)
 
     if obj = buffers.take(remoteUrl)
       onResponse(obj.stream, obj.response)
@@ -176,13 +198,6 @@ module.exports = {
         .status(status)
         .send(convertNewLinesToBr(text))
 
-      ## do not accept gzip if this is initial
-      ## since we have to rewrite html and we dont
-      ## want to go through the extra step of unzipping it
-      if isInitial
-        opts.gzip = false
-        delete req.headers["accept-encoding"]
-
       rq = request(opts)
 
       rq.on("error", httpRequestErr)
@@ -212,15 +227,16 @@ module.exports = {
     logger.info "getting static file content", file: file
 
     onResponse = (str) =>
-      switch
-        when req.cookies["__cypress.initial"] is "true"
-          str.pipe(@rewrite(req, res, remoteState, "initial")).pipe(thr)
+      @concatThrough str, thr, (body) =>
+        switch
+          when req.cookies["__cypress.initial"] is "true"
+            body = @rewrite(body, remoteState, "initial")
 
-        when req.accepts(["text", "json", "image", "html"]) is "html"
-          str.pipe(@rewrite(req, res, remoteState)).pipe(thr)
+          when req.accepts(["text", "json", "image", "html"]) is "html"
+            body = @rewrite(body, remoteState)
 
-        else
-          str.pipe(thr)
+        return body
+      .pipe(thr)
 
     res.set("x-cypress-file-path", file)
 
@@ -273,71 +289,49 @@ module.exports = {
     ## proxy the headers
     res.set(headers)
 
-  rewrite: (req, res, remoteState, type) ->
-    tr = trumpet()
+  concatStream: (str, thr, fn) ->
+    str.pipe concat (body) ->
 
-    hasInjectedHead = false
+      fn body, (html) ->
+        thr.end(html)
 
-    rewrite = (selector, type, attr, fn) ->
-      options = {}
+  concatThrough: (str, thr, fn) ->
+    buffer = ""
 
-      switch
-        when _.isFunction(attr)
-          fn   = attr
-          attr = null
+    tstr = (fn) ->
+      through2 (chunk, enc, cb) ->
+        buffer += chunk.toString()
 
-        when _.isPlainObject(attr)
-          options = attr
+        cb()
+      .on "end", ->
+        fn(buffer)
 
-      options.method ?= "selectAll"
+    str.pipe tstr (body) ->
+      thr.end fn(body)
 
-      tr[options.method] selector, (elem) ->
-        switch type
-          when "attrs"
-            elem.getAttributes (attrs) ->
-              fn(elem, attrs)
+  rewrite: (html, remoteState, type) ->
+    rewrite = (re, str) ->
+      html.replace(re, str)
 
-          when "attr"
-            elem.getAttribute attr, (val) ->
-              elem.setAttribute attr, fn(val)
-
-          when "removeAttr"
-            elem.removeAttribute(attr)
-
-          when "html"
-            options.outer ?= true
-            stream = elem.createStream({outer: options.outer})
-            stream.pipe(through (buf) ->
-              @queue fn(buf.toString())
-            ).pipe(stream)
-
-    rewrite "head", "html", (str) =>
-      return str if hasInjectedHead
-
-      if headRe.test(str)
-        hasInjectedHead = true
-
-        if type is "initial"
-          str.replace(headRe, "$1 #{@getHeadContent(remoteState.domainName)}")
+    htmlToInject = do =>
+      switch type
+        when "initial"
+          @getHeadContent(remoteState.domainName)
         else
-          str.replace(headRe, "$1 #{@getDocumentDomainContent(remoteState.domainName)}")
+          @getDocumentDomainContent(remoteState.domainName)
+
+    switch
+      when headRe.test(html)
+        rewrite(headRe, "$1 #{htmlToInject}")
+
+      when bodyRe.test(html)
+        rewrite(bodyRe, "<head> #{htmlToInject} </head> $1")
+
+      when htmlRe.test(html)
+        rewrite(htmlRe, "$1 <head> #{htmlToInject} </head>")
+
       else
-        str
-
-    rewrite "body", "html", (str) =>
-      return str if hasInjectedHead
-
-      if bodyRe.test(str)
-        hasInjectedHead = true
-
-        if type is "initial"
-          str.replace(bodyRe, "<head> #{@getHeadContent(remoteState.domainName)} </head> $1")
-        else
-          str.replace(bodyRe, "<head> #{@getDocumentDomainContent(remoteState.domainName)} </head> $1")
-      else
-        str
-
-    return tr
+        "<head> #{htmlToInject} </head>" + html
 
   getDocumentDomainContent: (domain) ->
     "
