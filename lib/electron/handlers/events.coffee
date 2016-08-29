@@ -192,6 +192,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
         project.reboot()
         .then(open)
 
+      onSpecChanged = (spec) ->
+        send({specChanged: spec})
+
       onFocusTests = ->
         if _.isFunction(options.onFocusTests)
           options.onFocusTests()
@@ -201,6 +204,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       open = ->
         project.open(arg, options, {
           onFocusTests: onFocusTests
+          onSpecChanged: onSpecChanged
           onSettingsChanged: onSettingsChanged
         })
         .then(getConfig)

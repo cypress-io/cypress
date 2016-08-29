@@ -150,6 +150,8 @@ class Project extends EE
 
       onFocusTests: options.onFocusTests
 
+      onSpecChanged: options.onSpecChanged
+
       onConnect: (id) =>
         @emit("socket:connected", id)
 
