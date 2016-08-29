@@ -207,18 +207,18 @@ describe "$Cypress.Location API", ->
     it "handles urls without a host", ->
       url = @normalizeUrl("index.html")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-      expect(url).to.eq "/index.html"
+      expect(url).to.eq "http://localhost:3500/index.html"
 
     it "does not insert trailing slash without a host", ->
       url = $Cypress.Location.createInitialRemoteSrc("index.html")
-      expect(url).to.eq "/index.html"
+      expect(url).to.eq "http://localhost:3500/index.html"
 
     it "handles no host + query params", ->
       url = @normalizeUrl("timeout?ms=1000")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-      expect(url).to.eq "/timeout?ms=1000"
+      expect(url).to.eq "http://localhost:3500/timeout?ms=1000"
 
     it "does not strip off path", ->
       url = @normalizeUrl("fixtures/html/sinon.html")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-      expect(url).to.eq "/fixtures/html/sinon.html"
+      expect(url).to.eq "http://localhost:3500/fixtures/html/sinon.html"
