@@ -33,7 +33,7 @@
     "zunder": "^3.4.5"
   },
   "dependencies": {
-    "@cypress/core-reporter": "0.1.4",
+    "@cypress/core-reporter": "0.1.5",
     "bluebird": "^3.4.0",
     "classnames": "^2.2.5",
     "font-awesome": "^4.6.3",
