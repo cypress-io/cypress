@@ -51,7 +51,7 @@ describe "Navigation", ->
           .get("nav a").should ($a) ->
             expect($a).to.contain(@user.email)
 
-    describe.only "logout of user", ->
+    describe "logout of user", ->
       beforeEach ->
         cy
           .fixture("user").then (@user) ->
