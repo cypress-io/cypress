@@ -12,7 +12,7 @@ excerpt: Walkthrough writing your first test
 
 # Folder Structure
 
-After adding a new project project, Cypress will automatically scaffold out a suggested folder structure. By default it will create:
+After adding a new project, Cypress will automatically scaffold out a suggested folder structure. By default it will create:
 
 ```text
 /cypress
