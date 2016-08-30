@@ -37,7 +37,7 @@
     "react-router": "^2.4.1"
   },
   "devDependencies": {
-    "@cypress/core-releaser": "0.1.6",
+    "@cypress/core-releaser": "0.1.8",
     "babel-eslint": "^6.0.4",
     "bower": "^1.7.2",
     "eslint": "^2.12.0",
