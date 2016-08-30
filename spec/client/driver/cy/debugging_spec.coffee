@@ -18,16 +18,11 @@ describe "$Cypress.Cy Debugging Commands", ->
     it "logs previous command", ->
       log = @sandbox.spy(console, "log")
 
-      @cy.title({log: false}).debug().then ->
+      @cy.wrap({}).debug().then ->
         # prints bar to console.log
-        expect(log).to.be.calledWithMatch("Command Name: ", "title")
-        expect(log).to.be.calledWithMatch("Command Args: ")
-
-        ## get the 3rd call to console.log (which is for args)
-        ## and drill into the options object to ensure that
-        ## it has log false
-        args = log.getCall(2).args[1]
-        expect(args[0].log).to.be.false
+        expect(log).to.be.calledWithMatch("Command Name: ", "wrap")
+        expect(log).to.be.calledWithMatch("Command Args: ", [{}])
+        expect(log).to.be.calledWithMatch("Current Subject: ", {})
 
     it "logs undefined on being parent", ->
       log = @sandbox.spy(console, "log")
@@ -36,4 +31,12 @@ describe "$Cypress.Cy Debugging Commands", ->
         expect(log).to.be.calledWithMatch("Current Subject: ", undefined)
         expect(log).to.be.calledWithMatch("Command Name: ", undefined)
 
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (attrs, @log) =>
 
+      it "can turn off logging", ->
+        @cy
+          .wrap([], {log: false})
+          .debug({log: false}).then ->
+            expect(@log).to.be.undefined
