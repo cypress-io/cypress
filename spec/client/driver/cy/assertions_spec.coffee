@@ -73,7 +73,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "works with regular objects", ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         obj = {}
@@ -92,7 +92,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "logs two assertions", ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         _.delay =>
@@ -116,13 +116,13 @@ describe "$Cypress.Cy Assertion Commands", ->
 
             ## the messages should have been updated to reflect
             ## the current state of the <body> element
-            expect(logs[1].get("message")).to.eq("expected [b]<body#bar.foo>[\\b] to have class [b]foo[\\b]")
-            expect(logs[2].get("message")).to.eq("expected [b]<body#bar.foo>[\\b] to have id [b]bar[\\b]")
+            expect(logs[1].get("message")).to.eq("expected **<body#bar.foo>** to have class **foo**")
+            expect(logs[2].get("message")).to.eq("expected **<body#bar.foo>** to have id **bar**")
 
       it "logs assertions as children even if subject is different", ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         _.delay =>
@@ -196,7 +196,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "resolves all 3 assertions", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "assert"
             logs.push(log)
 
@@ -210,7 +210,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
     describe "have.text", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "resolves the assertion", ->
         @cy.get("#list li").eq(0).should("have.text", "li 0").then ->
@@ -222,7 +222,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
     describe "have.length", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "allows valid string numbers", ->
         length = @cy.$$("button").length
@@ -243,7 +243,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push log
 
         @cy.on "fail", (err) ->
@@ -268,7 +268,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push log
 
         @cy.on "fail", (err) ->
@@ -288,7 +288,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
     describe "have.class", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "snapshots and ends the assertion after retrying", ->
         @cy.on "retry", _.after 3, =>
@@ -342,7 +342,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "logs 'should' when non available chainer", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -371,7 +371,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "throws when the subject isnt in the DOM", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.$$("button:first").click ->
@@ -409,7 +409,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "throws when should('have.length') isnt a number", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         ## we specifically turn off logging have.length validation errors
@@ -432,7 +432,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "eventually.have.length is deprecated", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -453,7 +453,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "does not additionally log when .should is the current command", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -474,7 +474,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "logs and immediately fails on custom match assertions", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -495,7 +495,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "does not log ensureElExistance errors", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -513,7 +513,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -534,7 +534,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "is type child", ->
         @cy.get("button").should("match", "button").then ->
@@ -566,7 +566,7 @@ describe "$Cypress.Cy Assertion Commands", ->
   context "#assert", ->
     before ->
       @onAssert = (fn) =>
-        @Cypress.on "log", (obj) =>
+        @Cypress.on "log", (attrs, obj) =>
           if obj.get("name") is "assert"
             ## restore so we dont create an endless loop
             ## due to Cypress.assert being called again
@@ -594,7 +594,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
       logs = []
 
-      @Cypress.on "log", (log) ->
+      @Cypress.on "log", (attrs, log) ->
         logs.push log
 
       @cy.on "fail", =>
@@ -649,14 +649,14 @@ describe "$Cypress.Cy Assertion Commands", ->
     it "replaces instances of word: 'but' with 'and' for passing assertion", (done) ->
       ## chai jquery adds 2 assertions here so
       ## we bind to the 2nd one
-      @Cypress.on "log", (log) ->
+      @Cypress.on "log", (attrs, log) ->
         if log.get("name") is "assert"
           assert(log)
 
       assert = _.after 2, (obj) =>
         @chai.restore()
 
-        expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]href[\\b] attribute with the value [b]#[\\b], and the value was [b]#[\\b]"
+        expect(obj.get("message")).to.eq "expected **<a>** to have a **href** attribute with the value **#**, and the value was **#**"
         done()
 
       @cy.get("a:first").then ($a) ->
@@ -667,13 +667,13 @@ describe "$Cypress.Cy Assertion Commands", ->
 
       ## chai jquery adds 2 assertions here so
       ## we bind to the 2nd one
-      @Cypress.on "log", (obj) ->
+      @Cypress.on "log", (attrs, obj) ->
         if obj.get("name") is "assert"
           assert(obj)
 
       assert = _.after 2, (obj) =>
         @chai.restore()
-        expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]href[\\b] attribute with the value [b]asdf[\\b], but the value was [b]#[\\b]"
+        expect(obj.get("message")).to.eq "expected **<a>** to have a **href** attribute with the value **asdf**, but the value was **#**"
         done()
 
       @cy.get("a:first").then ($a) ->
@@ -682,22 +682,22 @@ describe "$Cypress.Cy Assertion Commands", ->
     it "does not replace 'button' with 'andton'", (done) ->
       ## chai jquery adds 2 assertions here so
       ## we bind to the 2nd one
-      @Cypress.on "log", (obj) ->
+      @Cypress.on "log", (attrs, obj) ->
         if obj.get("name") is "assert"
           assert(obj)
 
       assert = _.after 1, (obj) =>
         @chai.restore()
 
-        expect(obj.get("message")).to.eq "expected [b]<button#button>[\\b] to be visible"
+        expect(obj.get("message")).to.eq "expected **<button#button>** to be visible"
         done()
 
       @cy.get("#button").then ($button) ->
         expect($button).to.be.visible
 
-    it "#onConsole for regular objects", (done) ->
+    it "#consoleProps for regular objects", (done) ->
       @onAssert (obj) ->
-        expect(obj.attributes.onConsole()).to.deep.eq {
+        expect(obj.attributes.consoleProps()).to.deep.eq {
           Command: "assert"
           expected: 1
           actual: 1
@@ -709,9 +709,9 @@ describe "$Cypress.Cy Assertion Commands", ->
         .then ->
           expect(1).to.eq 1
 
-    it "#onConsole for DOM objects", (done) ->
+    it "#consoleProps for DOM objects", (done) ->
       @onAssert (obj) ->
-        expect(obj.attributes.onConsole()).to.deep.eq {
+        expect(obj.attributes.consoleProps()).to.deep.eq {
           Command: "assert"
           subject: getFirstSubjectByName.call(@, "get")
           Message: "expected <body> to match body"
@@ -722,11 +722,11 @@ describe "$Cypress.Cy Assertion Commands", ->
         .get("body").then ($body) ->
           expect($body).to.match "body"
 
-    it "#onConsole for errors", (done) ->
+    it "#consoleProps for errors", (done) ->
       @allowErrors()
 
       @onAssert (obj) ->
-        expect(obj.attributes.onConsole()).to.deep.eq {
+        expect(obj.attributes.consoleProps()).to.deep.eq {
           Command: "assert"
           expected: false
           actual: true
@@ -741,7 +741,7 @@ describe "$Cypress.Cy Assertion Commands", ->
     describe "#patchAssert", ->
       it "wraps \#{this} and \#{exp} in \#{b}", (done) ->
         @onAssert (obj) ->
-          expect(obj.get("message")).to.eq "expected [b]foo[\\b] to equal [b]foo[\\b]"
+          expect(obj.get("message")).to.eq "expected **foo** to equal **foo**"
           done()
 
         @cy.then ->
@@ -757,7 +757,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       describe "jQuery elements", ->
         it "sets _obj to selector", (done) ->
           @onAssert (obj) ->
-            expect(obj.get("message")).to.eq "expected [b]<body>[\\b] to exist in the DOM"
+            expect(obj.get("message")).to.eq "expected **<body>** to exist in the DOM"
             done()
 
           @cy.get("body").then ($body) ->
@@ -766,7 +766,7 @@ describe "$Cypress.Cy Assertion Commands", ->
         describe "without selector", ->
           it "exists", (done) ->
             @onAssert (obj) ->
-              expect(obj.get("message")).to.eq "expected [b]<div>[\\b] to exist in the DOM"
+              expect(obj.get("message")).to.eq "expected **<div>** to exist in the DOM"
               done()
 
             ## prepend an empty div so it has no id or class
@@ -778,7 +778,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
           it "uses element name", (done) ->
             @onAssert (obj) ->
-              expect(obj.get("message")).to.eq "expected [b]<input>[\\b] to match [b]input[\\b]"
+              expect(obj.get("message")).to.eq "expected **<input>** to match **input**"
               done()
 
             ## prepend an empty div so it has no id or class
@@ -790,7 +790,7 @@ describe "$Cypress.Cy Assertion Commands", ->
         describe "property assertions", ->
           it "has property", (done) ->
             @onAssert (obj) ->
-              expect(obj.get("message")).to.eq "expected [b]<form#by-id>[\\b] to have a property [b]length[\\b]"
+              expect(obj.get("message")).to.eq "expected **<form#by-id>** to have a property **length**"
               done()
 
             @cy.get("form:first").should("have.property", "length")
@@ -805,7 +805,7 @@ describe "$Cypress.Cy Assertion Commands", ->
   context "chai overrides", ->
     before ->
       @onAssert = (fn) =>
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             ## restore so we dont create an endless loop
             ## due to Cypress.assert being called again
@@ -870,7 +870,7 @@ describe "$Cypress.Cy Assertion Commands", ->
     describe "#exist", ->
       it "uses $el.selector in expectation", (done) ->
         @onAssert (log) ->
-          expect(log.get("message")).to.eq("expected [b]#does-not-exist[\\b] not to exist in the DOM")
+          expect(log.get("message")).to.eq("expected **#does-not-exist** not to exist in the DOM")
           done()
 
         @cy.get("#does-not-exist").should("not.exist")
@@ -888,7 +888,7 @@ describe "$Cypress.Cy Assertion Commands", ->
     describe "#have.length", ->
       it "formats _obj with cypress", (done) ->
         @onAssert (log) ->
-          expect(log.get("message")).to.eq("expected [b]<button#button>[\\b] to have a length of [b]1[\\b] and got [b]1[\\b]")
+          expect(log.get("message")).to.eq("expected **<button#button>** to have a length of **1** and got **1**")
           done()
 
         @cy.get("button:first").should("have.length", 1)

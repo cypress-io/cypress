@@ -1,3 +1,5 @@
+uncaught = Mocha.Runner::uncaught
+
 before ->
   $Cypress.Chai.setGlobals(window)
 
@@ -10,12 +12,18 @@ before ->
 
 beforeEach ->
   ## allow our own cypress errors to bubble up!
-  stubSocketIo.call(@)
-  App.clearAllCookies()
-  App.config = App.request "new:config:entity", {}
-  App.config.setEnv("test")
-  App.execute "socket:start"
-  App.Utilities.Overrides.overloadMochaRunnerUncaught()
+  # stubSocketIo.call(@)
+  # App.config = App.request "new:config:entity", {}
+  # App.config.setEnv("test")
+  # App.execute "socket:start"
+  Mocha.Runner::uncaught = _.wrap uncaught, (orig, err) ->
+    ## debugger if this isnt an AssertionError or CypressError or a message err
+    ## because that means we prob f'd up something
+    if not /(AssertionError|CypressError)/.test(err.name) and not err.__isMessage and not /SilenceError/.test(err.message)
+      console.error(err.stack)
+      debugger
+
+    orig.call(@, err)
 
 afterEach ->
   @sandbox.restore()
@@ -26,11 +34,19 @@ afterEach ->
   @sandbox.server?.queue = []
   @sandbox.server?.responses = []
 
-stubSocketIo = ->
-  window.io =
-    connect: @sandbox.spy =>
-      on: @sandbox.stub()
-      emit: @sandbox.stub()
+resolveUrl = (url, cb) ->
+  url = Cypress.Location.resolve(window.location.origin, url)
+
+  cb({
+    ok: true
+    url: url
+  })
+
+# stubSocketIo = ->
+#   window.io =
+#     connect: @sandbox.spy =>
+#       on: @sandbox.stub()
+#       emit: @sandbox.stub()
 
 window.loadDom = (fixture) ->
   loadFixture(fixture).done (iframe) =>
@@ -76,6 +92,12 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
     ## load all of the modules
     @Cypress = $Cypress.create({loadModules: true})
 
+    @Cypress.runner = {
+      getStartTime:      @sandbox.stub()
+      getTestsState:     @sandbox.stub()
+      countByTestState:  @sandbox.stub()
+    }
+
     ## immediately create the chai instance so
     ## we get our custom properties but then
     ## restore it to keep things simple
@@ -93,6 +115,7 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
       @sandbox.stub(@Cypress.cy, "_automateCookies").resolves([])
 
       @Cypress.setConfig({
+        namespace: "__cypress"
         xhrUrl: "__cypress/xhrs/"
         commandTimeout: 2000
         pageLoadTimeout: 2001
@@ -101,10 +124,12 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
         waitForAnimations: true
         animationDistanceThreshold: 5
       })
+      .then =>
+        ## why do we use the initialize method here but only
+        ## trigger it in the command testing mode below?
+        @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe
 
-      ## why do we use the initialize method here but only
-      ## trigger it in the command testing mode below?
-      @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe
+        @Cypress.on("resolve:url", resolveUrl)
 
   after ->
     @$iframe.remove()
@@ -127,6 +152,12 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
 
       ## load all of the modules
       @Cypress = $Cypress.create({loadModules: true})
+
+      @Cypress.runner = {
+        getStartTime:      @sandbox.stub()
+        getTestsState:     @sandbox.stub()
+        countByTestState:  @sandbox.stub()
+      }
 
       ## immediately create the chai instance so
       ## we get our custom properties but then
@@ -160,7 +191,12 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       ## never actually get applied
       @cy.bindWindowListeners @$iframe.prop("contentWindow")
 
+      location = @Cypress.Location.create(window.location.href)
+
+      ct = @currentTest
+
       @Cypress.setConfig({
+        namespace: "__cypress"
         xhrUrl: "__cypress/xhrs/"
         commandTimeout: 2000
         pageLoadTimeout: 2001
@@ -169,6 +205,10 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
         execTimeout: 2004
         waitForAnimations: true
         animationDistanceThreshold: 5
+        remote: {
+          origin: location.origin
+          domainName: "" ## do not set document.domain!
+        }
       })
 
       @Cypress.trigger "initialize", {$remoteIframe: @$iframe}
@@ -183,10 +223,12 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       ## juggled throughout our expectations
       @Cypress.option("jQuery", $)
 
-      if @currentTest
-        @Cypress.trigger "test:before:hooks", {id: 123}
-        @Cypress.set(@currentTest)
-        @currentTest.enableTimeouts(false)
+      if ct
+        @Cypress.trigger "test:before:hooks", {id: 123}, {}
+        @Cypress.set(ct)
+        ct.enableTimeouts(false)
+
+      @Cypress.on("resolve:url", resolveUrl)
 
       ## handle the fail event ourselves
       ## since we bypass our Runner instance
@@ -245,7 +287,13 @@ window.Fixtures = do ->
 
   createTests: (suite, tests = []) ->
     _.each tests, (test) ->
-      suite.addTest new Mocha.Test test, ->
+      if _.isObject(test)
+        name = test.name
+        fn = if test.pending then undefined else (->)
+
+        suite.addTest new Mocha.Test(name, fn)
+      else
+        suite.addTest new Mocha.Test test, ->
 
   createSuites: (suite, suites = {}) ->
     _.each suites, (obj, suiteName) =>

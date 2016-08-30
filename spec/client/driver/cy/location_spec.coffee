@@ -4,7 +4,7 @@ describe "$Cypress.Cy Location Commands", ->
   context "#url", ->
     it "returns the location href", ->
       @cy.url().then (url) ->
-        expect(url).to.eq "/fixtures/html/dom.html"
+        expect(url).to.eq "http://localhost:3500/fixtures/html/dom.html"
 
     it "eventually resolves", ->
       _.delay ->
@@ -12,7 +12,7 @@ describe "$Cypress.Cy Location Commands", ->
         win.location.href = "/foo/bar/baz.html"
       , 100
 
-      @cy.url().should("match", /baz/).and("eq", "/foo/bar/baz.html")
+      @cy.url().should("match", /baz/).and("eq", "http://localhost:3500/foo/bar/baz.html")
 
     describe "assertion verification", ->
       beforeEach ->
@@ -20,7 +20,7 @@ describe "$Cypress.Cy Location Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -56,7 +56,7 @@ describe "$Cypress.Cy Location Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -67,7 +67,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           if @log.get("name") is "location"
             throw new Error("cy.location() should not have logged out.")
 
@@ -98,12 +98,12 @@ describe "$Cypress.Cy Location Commands", ->
         @cy.url({log: false}).then ->
           expect(@log).to.be.undefined
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.url().then ->
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole).to.deep.eq {
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps).to.deep.eq {
             Command: "url"
-            Returned: "/fixtures/html/dom.html"
+            Returned: "http://localhost:3500/fixtures/html/dom.html"
           }
 
   context "#hash", ->
@@ -125,7 +125,7 @@ describe "$Cypress.Cy Location Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -161,7 +161,7 @@ describe "$Cypress.Cy Location Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -172,7 +172,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           if @log.get("name") is "location"
             throw new Error("cy.location() should not have logged out.")
 
@@ -203,10 +203,10 @@ describe "$Cypress.Cy Location Commands", ->
         @cy.hash({log: false}).then ->
           expect(@log).to.be.undefined
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.hash().then ->
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole).to.deep.eq {
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps).to.deep.eq {
             Command: "hash"
             Returned: ""
           }
@@ -215,11 +215,11 @@ describe "$Cypress.Cy Location Commands", ->
     it "returns the location object", ->
       @cy.location().then (loc) ->
         keys = _.keys loc
-        expect(keys).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString"]
+        expect(keys).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "originPolicy", "superDomain", "toString"]
 
     it "returns a specific key from location object", ->
       @cy.location("href").then (href) ->
-        expect(href).to.eq "/fixtures/html/dom.html"
+        expect(href).to.eq "http://localhost:3500/fixtures/html/dom.html"
 
     it "eventually resolves", ->
       _.delay ->
@@ -235,7 +235,7 @@ describe "$Cypress.Cy Location Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -271,7 +271,7 @@ describe "$Cypress.Cy Location Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -282,7 +282,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       afterEach ->
         delete @log
@@ -325,10 +325,10 @@ describe "$Cypress.Cy Location Commands", ->
           _.each obj, (value, key) =>
             expect(@log.get(key)).to.deep.eq value
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.location().then ->
-          onConsole = @log.attributes.onConsole()
+          consoleProps = @log.attributes.consoleProps()
 
-          expect(_(onConsole).keys()).to.deep.eq ["Command", "Returned"]
-          expect(onConsole.Command).to.eq "location"
-          expect(_(onConsole.Returned).keys()).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString"]
+          expect(_(consoleProps).keys()).to.deep.eq ["Command", "Returned"]
+          expect(consoleProps.Command).to.eq "location"
+          expect(_(consoleProps.Returned).keys()).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "originPolicy", "superDomain", "toString"]

@@ -11,14 +11,44 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
       window.Cypress = @
 
     setConfig: (config = {}) ->
-      {environmentVariables} = config
+      ## config.remote
+      # {
+      #   origin: "http://localhost:2020"
+      #   domainName: "localhost"
+      #   props: null
+      #   strategy: "file"
+      # }
 
-      config = _.omit(config, "environmentVariables")
+      # -- or --
+
+      # {
+      #   origin: "https://foo.google.com"
+      #   domainName: "google.com"
+      #   strategy: "http"
+      #   props: {
+      #     port: 443
+      #     tld: "com"
+      #     domain: "google"
+      #   }
+      # }
+
+      ## set domainName but allow us to turn
+      ## off this feature in testing
+      if d = config.remote?.domainName
+        document.domain = d
+
+      if config.isHeadless
+        $Cypress.isHeadless = true
+
+      {environmentVariables, remote} = config
+
+      config = _.omit(config, "environmentVariables", "remote")
 
       $Cypress.EnvironmentVariables.create(@, environmentVariables)
       $Cypress.Config.create(@, config)
+      $Cypress.Cookies.create(@, config.namespace, d)
 
-      @trigger "config", config
+      @trigger("config", config)
 
     initialize: (specWindow, $remoteIframe) ->
       ## push down the options
@@ -45,6 +75,30 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
       @Utils.throwErrByPath("miscellaneous.no_runner") if not @runner
 
       @runner.run(fn)
+
+    getStartTime: ->
+      @runner.getStartTime()
+
+    getTestsState: ->
+      @runner.getTestsState()
+
+    getEmissions: ->
+      @runner.getEmissions()
+
+    countByTestState: (tests, state) ->
+      @runner.countByTestState(tests, state)
+
+    getDisplayPropsForLog: (attrs) ->
+      @runner.getDisplayPropsForLog(attrs)
+
+    getConsolePropsForLogById: (logId) ->
+      @runner.getConsolePropsForLogById(logId)
+
+    getSnapshotPropsForLogById: (logId) ->
+      @runner.getSnapshotPropsForLogById(logId)
+
+    getErrorByTestId: (testId) ->
+      @runner.getErrorByTestId(testId)
 
     ## TODO: TEST THIS
     ## restore our on callback
@@ -121,7 +175,13 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
         @off()
 
-    abort: ->
+    abort: (options = {}) ->
+      ## dont check for ended early errors
+      ## when we abort
+      _.defaults options, {
+        checkForEndedEarly: false
+      }
+
       ## grab all the abort callbacks
       ## instead of triggering them
 
@@ -132,13 +192,13 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
       ## abort can be async so make sure
       ## we wait until they all resolve!
-      Promise.all(aborts).then => @restore()
+      Promise.all(aborts).then => @restore(options)
 
     ## restores cypress after each test run by
     ## removing the queue from the proto and
     ## removing additional own instance properties
-    restore: ->
-      restores = [].concat @invoke("restore")
+    restore: (options) ->
+      restores = [].concat @invoke("restore", options)
 
       restores = _.reject restores, (r) -> r is @cy
 

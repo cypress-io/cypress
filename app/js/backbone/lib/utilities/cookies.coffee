@@ -18,6 +18,8 @@
         ## that Cypress knows not to set any more
         ## cookies
         $(window).on "beforeunload", =>
+          App.request("socket:entity").emit("restart:test:run")
+
           @clearAllCookies()
           @setUnload()
 

@@ -51,7 +51,7 @@ describe "$Cypress.Cy Local Storage Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "ends immediately", ->
         @cy.clearLocalStorage().then ->

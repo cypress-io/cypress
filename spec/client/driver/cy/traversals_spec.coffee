@@ -95,10 +95,10 @@ describe "$Cypress.Cy Traversal Commands", ->
 
       describe ".log", ->
         beforeEach ->
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
 
         it "logs immediately before resolving", (done) ->
-          @Cypress.on "log", (log) ->
+          @Cypress.on "log", (attrs, log) ->
             if log.get("name") is name
               expect(log.pick("state")).to.deep.eq {
                 state: "pending"
@@ -121,7 +121,7 @@ describe "$Cypress.Cy Traversal Commands", ->
             arg = if _.isUndefined(arg) then "" else arg.toString()
             expect(@log.get("message")).to.eq arg
 
-        it "#onConsole", ->
+        it "#consoleProps", ->
           @cy.get("#list")[name](arg).then ($el) ->
             obj = {Command: name}
             obj.Selector = [].concat(arg).join(", ") unless _.isFunction(arg)
@@ -134,7 +134,7 @@ describe "$Cypress.Cy Traversal Commands", ->
               Elements: $el.length
             }
 
-            expect(@log.attributes.onConsole()).to.deep.eq obj
+            expect(@log.attributes.consoleProps()).to.deep.eq obj
 
   it "eventually resolves", ->
     _.delay ->
@@ -191,7 +191,7 @@ describe "$Cypress.Cy Traversal Commands", ->
   it "does not log using first w/options", ->
     logs = []
 
-    @Cypress.on "log", (log) ->
+    @Cypress.on "log", (attrs, log) ->
       logs.push log
 
     @cy.get("button").first({log: false}).then ($button) ->
@@ -254,7 +254,7 @@ describe "$Cypress.Cy Traversal Commands", ->
 
       logs = []
 
-      @Cypress.on "log", (log) ->
+      @Cypress.on "log", (attrs, log) ->
         logs.push(log)
 
       @cy.on "fail", (err) ->
@@ -266,15 +266,15 @@ describe "$Cypress.Cy Traversal Commands", ->
     it "logs out $el when existing $el is found even on failure", (done) ->
       button = @cy.$$("#button").hide()
 
-      @Cypress.on "log", (@log) =>
+      @Cypress.on "log", (attrs, @log) =>
 
       @cy.on "fail", (err) =>
         expect(@log.get("state")).to.eq("failed")
         expect(@log.get("error")).to.eq err
         expect(@log.get("$el").get(0)).to.eq button.get(0)
-        onConsole = @log.attributes.onConsole()
-        expect(onConsole.Returned).to.eq button.get(0)
-        expect(onConsole.Elements).to.eq button.length
+        consoleProps = @log.attributes.consoleProps()
+        expect(consoleProps.Returned).to.eq button.get(0)
+        expect(consoleProps.Elements).to.eq button.length
         done()
 
       @cy.get("#dom").find("#button").should("be.visible")

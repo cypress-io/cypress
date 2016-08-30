@@ -9,8 +9,12 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
       p2.toUpperCase()
 
   mergeDefaults = (obj) ->
+    ## we always want to be able to see and influence cookies
+    ## on our superdomain
+    {superDomain} = Cypress.Location.create(window.location.href)
+
     merge = (o) ->
-      _.defaults o, {domain: window.location.hostname}
+      _.defaults o, {domain: superDomain}
 
     if _.isArray(obj)
       _.map(obj, merge)
@@ -85,7 +89,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
         options._log = Cypress.Log.command({
           message: name
           displayName: "get cookie"
-          onConsole: ->
+          consoleProps: ->
             obj = {}
 
             if c = options.cookie
@@ -116,7 +120,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
         options._log = Cypress.Log.command({
           message: ""
           displayName: "get cookies"
-          onConsole: ->
+          consoleProps: ->
             obj = {}
 
             if c = options.cookies
@@ -150,7 +154,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
         options._log = Cypress.Log.command({
           message: [name, value]
           displayName: "set cookie"
-          onConsole: ->
+          consoleProps: ->
             obj = {}
 
             if c = options.cookie
@@ -178,7 +182,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
         options._log = Cypress.Log.command({
           message: name
           displayName: "clear cookie"
-          onConsole: ->
+          consoleProps: ->
             obj = {}
 
             obj["Returned"] = "null"
@@ -212,7 +216,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
         options._log = Cypress.Log.command({
           message: ""
           displayName: "clear cookies"
-          onConsole: ->
+          consoleProps: ->
             obj = {}
 
             obj["Returned"] = "null"

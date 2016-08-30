@@ -21,13 +21,13 @@ $Cypress.register "XHR2", (Cypress, _) ->
     options.originalUrl or options.url
 
   unavailableErr = ->
-    $Cypress.Utils.throwErrByPath("server.unavailable")
+    Cypress.Utils.throwErrByPath("server.unavailable")
 
   getDisplayName = (route) ->
     if route and route.response? then "xhr stub" else "xhr"
 
   stripOrigin = (url) ->
-    location = Cypress.Location.parse(url)
+    location = Cypress.Location.create(url)
     url.replace(location.origin, "")
 
   setRequest = (xhr, alias) ->
@@ -105,41 +105,6 @@ $Cypress.register "XHR2", (Cypress, _) ->
         testId: testId
         xhrUrl: @Cypress.config("xhrUrl")
         stripOrigin: stripOrigin
-        getUrlOptions: (url) =>
-          ## resolve handling if the origin is either legitimately CORS
-          ## such as the case with 'http://www.google.com' or if this
-          ## is a FQDN that happens to match our remote origin.
-          requestOrigin = Cypress.Location.parse(url).origin
-          currentOrigin = Cypress.Location.parse(window.location.href).origin
-          remoteOrigin  = @_getLocation("origin")
-
-          switch
-            ## when our request's origin matches our current origin
-            ## then swap out the request origin to be the remote origin
-            when requestOrigin is currentOrigin
-              {
-                actual:  stripOrigin(url)
-                display: Cypress.Location.resolve(remoteOrigin or currentOrigin, stripOrigin(url))
-              }
-
-            ## when the request's origin is actually to our remote's
-            ## origin then we know that the user has probably hard
-            ## coded the AJAX requests to be FQDN to what their expected
-            ## host is
-            when requestOrigin is remoteOrigin
-              {
-                actual: stripOrigin(url)
-                display: url
-              }
-
-            ## this is a legit CORS request and we need to
-            ## rewrite its url to be absolute-relative so it
-            ## is correctly proxied
-            else
-              {
-                actual: "/" + url
-                display: url
-              }
 
         ## shouldnt these stubs be called routes?
         ## rename everything related to stubs => routes
@@ -160,7 +125,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
             aliasType: "route"
             type:      "parent"
             event:     true
-            onConsole: =>
+            consoleProps: =>
               consoleObj = {
                 Alias:         alias
                 Method:        xhr.method
@@ -187,25 +152,23 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 ]
 
               consoleObj
-            onRender: ($row) ->
+            renderProps: ->
               status = switch
                 when xhr.aborted
-                  klass = "aborted"
+                  indicator = "aborted"
                   "(aborted)"
                 when xhr.status > 0
                   xhr.status
                 else
-                  klass = "pending"
+                  indicator = "pending"
                   "---"
 
-              klass ?= if /^2/.test(status) then "successful" else "bad"
+              indicator ?= if /^2/.test(status) then "successful" else "bad"
 
-              $row.find(".command-message").html ->
-                [
-                  "<i class='fa fa-circle #{klass}'></i>" + xhr.method,
-                  status,
-                  _.truncate(stripOrigin(xhr.url), 20)
-                ].join(" ")
+              {
+                message: "#{xhr.method} #{status} #{_.truncate(stripOrigin(xhr.url), 20)}"
+                indicator: indicator
+              }
           })
 
           log.snapshot("request")
@@ -402,7 +365,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
           alias:    options.alias
           isStubbed: options.response?
           numResponses: 0
-          onConsole: ->
+          consoleProps: ->
             Method:   options.method
             URL:      getUrl(options)
             Status:   options.status

@@ -4,9 +4,10 @@ _            = require("lodash")
 os           = require("os")
 path         = require("path")
 uuid         = require("node-uuid")
+Promise      = require("bluebird")
 socketIo     = require("@cypress/core-socket")
 extension    = require("@cypress/core-extension")
-Promise      = require("bluebird")
+httpsAgent   = require("https-proxy-agent")
 open         = require("#{root}lib/util/open")
 config       = require("#{root}lib/config")
 Socket       = require("#{root}lib/socket")
@@ -23,7 +24,8 @@ describe "lib/socket", ->
     @todosPath = Fixtures.projectPath("todos")
     @server    = Server(@todosPath)
 
-    config.get(@todosPath).then (@cfg) =>
+    config.get(@todosPath)
+    .then (@cfg) =>
 
   afterEach ->
     Fixtures.remove()
@@ -33,7 +35,8 @@ describe "lib/socket", ->
     beforeEach (done) ->
       ## create a for realz socket.io connection
       ## so we can test server emit / client emit events
-      @server.open(@todosPath, @cfg).then =>
+      @server.open(@cfg)
+      .then =>
         @options = {}
         @watchers = {}
         @server.startWebsockets(@watchers, @cfg, @options)
@@ -48,7 +51,14 @@ describe "lib/socket", ->
 
         {clientUrlDisplay, socketIoRoute} = @cfg
 
-        @client = socketIo.client(clientUrlDisplay, {path: socketIoRoute})
+        ## force node into legit proxy mode like a browser
+        agent = new httpsAgent("http://localhost:#{@cfg.port}")
+
+        @client = socketIo.client(clientUrlDisplay, {
+          agent: agent
+          path: socketIoRoute
+          transports: ["websocket"]
+        })
 
     afterEach ->
       @client.disconnect()
@@ -153,7 +163,7 @@ describe "lib/socket", ->
           code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent"
 
           @sandbox.stub(chrome.tabs, "query")
-          .withArgs({url: "CHANGE_ME_HOST/*", windowType: "normal"})
+          .withArgs({windowType: "normal"})
           .yieldsAsync([{id: 1}])
 
           @sandbox.stub(chrome.tabs, "executeScript")
@@ -278,26 +288,9 @@ describe "lib/socket", ->
       beforeEach ->
         @sandbox.stub(open, "opn").resolves()
 
-      it "calls opn with path + opts on darwin", (done) ->
-        @sandbox.stub(os, "platform").returns("darwin")
-
+      it "calls opn with path", (done) ->
         @client.emit "open:finder", @cfg.parentTestsFolder, =>
-          expect(open.opn).to.be.calledWith(@cfg.parentTestsFolder, {args: "-R"})
-          done()
-
-      it "calls opn with path + no opts when not on darwin", (done) ->
-        @sandbox.stub(os, "platform").returns("linux")
-
-        @client.emit "open:finder", @cfg.parentTestsFolder, =>
-          expect(open.opn).to.be.calledWith(@cfg.parentTestsFolder, {})
-          done()
-
-    context "on(is:new:project)", ->
-      it "calls onNewProject with config + cb", (done) ->
-        @options.onIsNewProject = @sandbox.stub().resolves(true)
-
-        @client.emit "is:new:project", (ret) =>
-          expect(ret).to.be.true
+          expect(open.opn).to.be.calledWith(@cfg.parentTestsFolder)
           done()
 
     context "on(watch:test:file)", ->
@@ -384,7 +377,7 @@ describe "lib/socket", ->
       it "sends up cookies from automation(get:cookies)", (done) ->
         @oar = @options.onAutomationRequest = @sandbox.stub()
 
-        @oar.withArgs("get:cookies", {domain: "localhost"}).resolves([
+        @oar.withArgs("get:cookies", {url: "http://localhost:8080/status.json"}).resolves([
           {name: "__cypress.initial", value: "true"}
           {name: "foo", value: "bar"}
           {name: "baz", value: "quux"}
@@ -413,7 +406,7 @@ describe "lib/socket", ->
       it "extracts domain from the url when domain is omitted", (done) ->
         @oar = @options.onAutomationRequest = @sandbox.stub()
 
-        @oar.withArgs("get:cookies", {domain: "www.google.com"}).resolves([
+        @oar.withArgs("get:cookies", {url: "http://www.google.com:8080/status.json"}).resolves([
           {name: "__cypress.initial", value: "true"}
           {name: "foo", value: "bar"}
           {name: "baz", value: "quux"}
@@ -492,8 +485,11 @@ describe "lib/socket", ->
 
       @sandbox.stub(Socket.prototype, "createIo").returns(@io)
 
-      @server.startWebsockets({}, @cfg, {})
-      @socket = @server._socket
+      @server.open(@cfg)
+      .then =>
+        @server.startWebsockets({}, @cfg, {})
+
+        @socket = @server._socket
 
     context "#close", ->
       beforeEach ->
@@ -632,7 +628,7 @@ describe "lib/socket", ->
           @socket.onTestFileChange(@cfg.integrationFolder, "original/path", "foo/bar.js").then =>
             expect(@io.emit).not.to.be.called
 
-        it "emits 'test:changed' with original/path", ->
+        it "emits 'watched:file:changed' with original/path", ->
           p = Fixtures.project("todos") + "/tests/test1.js"
           @socket.onTestFileChange(@cfg.integrationFolder, "original/path", p).then =>
-            expect(@io.emit).to.be.calledWith("test:changed", {file: "original/path"})
+            expect(@io.emit).to.be.calledWith("watched:file:changed", {file: "original/path"})

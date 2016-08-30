@@ -7,14 +7,12 @@ urls =
   app:      "http://localhost:2020/app/#posts/1"
   search:   "http://localhost:2020/search?q=books"
   pathname: "http://localhost:2020/app/index.html"
-  origin:   "http://localhost:2020/http://localhost:3000/about"
+  local:    "http://127.0.0.1:8080/foo/bar"
+  stack:    "https://stackoverflow.com/"
 
 describe "$Cypress.Location API", ->
   beforeEach ->
-    @setup = (remote, remoteHost) =>
-      if remoteHost
-        @sandbox.stub($Cypress.Cookies, "getRemoteHost").returns(remoteHost)
-
+    @setup = (remote) =>
       new $Cypress.Location(urls[remote])
 
   it "class is defined", ->
@@ -31,107 +29,107 @@ describe "$Cypress.Location API", ->
 
   context "#getHref", ->
     it "returns the full url", ->
-      str = @setup("signin", "http://localhost:8000").getHref()
-      expect(str).to.eq "http://localhost:8000/signin"
-
-    it "does not apply origin if <root> is the remoteHost", ->
-      str = @setup("users", "<root>").getHref()
-      expect(str).to.eq "/users/1"
+      str = @setup("signin").getHref()
+      expect(str).to.eq "http://localhost:2020/signin"
 
     it "does not apply a leading slash after removing query params", ->
-      str = @setup("ember", "http://localhost:3000").getHref()
-      expect(str).to.eq "http://localhost:3000/index.html#/posts"
-
-    it "applies default origin to ember", ->
-      str = @setup("ember", "http://ember.com").getHref()
-      expect(str).to.eq "http://ember.com/index.html#/posts"
-
-    it "identifies origin based urls", ->
-      str = @setup("origin").getHref()
-      expect(str).to.eq "http://localhost:3000/about"
-
-    it "ignores remoteHost", ->
-      str = @setup("origin", "http://ember.com").getHref()
-      expect(str).to.eq "http://localhost:3000/about"
+      str = @setup("ember").getHref()
+      expect(str).to.eq "http://localhost:2020/index.html#/posts"
 
   context "#getHost", ->
     it "returns port if port is present", ->
-      str = @setup("signin", "http://localhost:8000").getHost()
-      expect(str).to.eq "localhost:8000"
+      str = @setup("signin").getHost()
+      expect(str).to.eq("localhost:2020")
 
     it "omits port if port is blank", ->
-      str = @setup("google", "http://www.google.com").getHost()
-      expect(str).to.eq "www.google.com"
+      str = @setup("google").getHost()
+      expect(str).to.eq("www.google.com")
 
   context "#getHostName", ->
     it "returns host without port", ->
-      str = @setup("signin", "http://localhost:3000").getHostName()
-      expect(str).to.eq "localhost"
+      str = @setup("signin").getHostName()
+      expect(str).to.eq("localhost")
 
   context "#getOrigin", ->
     it "returns the origin including port", ->
-      str = @setup("signin", "http://localhost:8000").getOrigin()
-      expect(str).to.eq "http://localhost:8000"
+      str = @setup("signin").getOrigin()
+      expect(str).to.eq("http://localhost:2020")
 
     it "returns the origin without port", ->
-      str = @setup("google", "https://www.google.com").getOrigin()
-      expect(str).to.eq "https://www.google.com"
+      str = @setup("google").getOrigin()
+      expect(str).to.eq("https://www.google.com")
 
   context "#getPathName", ->
     it "returns the path", ->
       str = @setup("signin").getPathName()
-      expect(str).to.eq "/signin"
+      expect(str).to.eq("/signin")
 
     it "returns a / with no path", ->
       str = @setup("google").getPathName()
-      expect(str).to.eq "/"
+      expect(str).to.eq("/")
 
     it "returns the full pathname without a host", ->
       str = @setup("pathname").getPathName()
-      expect(str).to.eq "/app/index.html"
+      expect(str).to.eq("/app/index.html")
 
   context "#getPort", ->
     it "returns the port", ->
-      str = @setup("signin", "http://localhost:8000").getPort()
-      expect(str).to.eq "8000"
+      str = @setup("signin").getPort()
+      expect(str).to.eq("2020")
 
     it "returns empty string if port is blank", ->
-      str = @setup("google", "http://www.google.com").getPort()
-      expect(str).to.eq ""
+      str = @setup("google").getPort()
+      expect(str).to.eq("")
 
   context "#getProtocol", ->
     it "returns the http protocol", ->
-      str = @setup("signin", "http://localhost:2020").getProtocol()
-      expect(str).to.eq "http:"
+      str = @setup("signin").getProtocol()
+      expect(str).to.eq("http:")
 
     it "returns the https protocol", ->
-      str = @setup("google", "https://www.google.com").getProtocol()
-      expect(str).to.eq "https:"
+      str = @setup("google").getProtocol()
+      expect(str).to.eq("https:")
 
   context "#getSearch", ->
     it "returns the search params with ? prepended", ->
       str = @setup("search").getSearch()
-      expect(str).to.eq "?q=books"
+      expect(str).to.eq("?q=books")
 
     it "returns an empty string with no seach params", ->
       str = @setup("google").getSearch()
-      expect(str).to.eq ""
+      expect(str).to.eq("")
 
   context "#getToString", ->
     it "returns the toString function", ->
-      str = @setup("signin", "http://localhost:8000").getToString()
-      expect(str).to.eq "http://localhost:8000/signin"
+      str = @setup("signin").getToString()
+      expect(str).to.eq("http://localhost:2020/signin")
+
+  context "#getOriginPolicy", ->
+    it "handles ip addresses", ->
+      str = @setup("local").getOriginPolicy()
+      expect(str).to.eq("http://127.0.0.1:8080")
+
+    it "handles 1 part localhost", ->
+      str = @setup("users").getOriginPolicy()
+      expect(str).to.eq("http://localhost:2020")
+
+    it "handles 2 parts stack", ->
+      str = @setup("stack").getOriginPolicy()
+      expect(str).to.eq("https://stackoverflow.com")
+
+    it "handles subdomains google", ->
+      str = @setup("google").getOriginPolicy()
+      expect(str).to.eq("https://google.com")
 
   context ".create", ->
     it "returns an object literal", ->
       obj = $Cypress.Location.create(urls.cypress, urls.signin)
-      keys = ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString"]
+      keys = ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString", "originPolicy", "superDomain"]
       expect(obj).to.have.keys(keys)
 
     it "can invoke toString function", ->
-      @sandbox.stub($Cypress.Cookies, "getRemoteHost").returns("http://localhost:8000")
       obj = $Cypress.Location.create(urls.signin)
-      expect(obj.toString()).to.eq "http://localhost:8000/signin"
+      expect(obj.toString()).to.eq("http://localhost:2020/signin")
 
   context ".normalizeUrl", ->
     beforeEach ->
@@ -188,47 +186,39 @@ describe "$Cypress.Location API", ->
 
   context ".createInitialRemoteSrc", ->
     beforeEach ->
-      @setInitialRequest = @sandbox.spy $Cypress.Cookies, "setInitialRequest"
       @normalizeUrl = (url) ->
         $Cypress.Location.normalizeUrl(url)
 
     it "does not append trailing slash on a sub directory", ->
       url = @normalizeUrl("http://localhost:4200/app")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-
-      expect(url).to.eq "/app"
+      expect(url).to.eq "http://localhost:4200/app"
 
     it "does not append a trailing slash to url with hash", ->
       url = @normalizeUrl("http://localhost:4000/#/home")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-      expect(@setInitialRequest).to.be.calledWith "http://localhost:4000"
-      expect(url).to.eq "/#/home"
+      expect(url).to.eq "http://localhost:4000/#/home"
 
     it "does not append a trailing slash to protocol-less url with hash", ->
       url = @normalizeUrl("www.github.com/#/home")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-      expect(@setInitialRequest).to.be.calledWith "http://www.github.com"
-      expect(url).to.eq "/#/home"
+      expect(url).to.eq "http://www.github.com/#/home"
 
     it "handles urls without a host", ->
       url = @normalizeUrl("index.html")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-      expect(@setInitialRequest).to.be.calledWith "<root>"
-      expect(url).to.eq "/index.html"
+      expect(url).to.eq "http://localhost:3500/index.html"
 
     it "does not insert trailing slash without a host", ->
       url = $Cypress.Location.createInitialRemoteSrc("index.html")
-      expect(@setInitialRequest).to.be.calledWith "<root>"
-      expect(url).to.eq "/index.html"
+      expect(url).to.eq "http://localhost:3500/index.html"
 
     it "handles no host + query params", ->
       url = @normalizeUrl("timeout?ms=1000")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-      expect(@setInitialRequest).to.be.calledWith "<root>"
-      expect(url).to.eq "/timeout?ms=1000"
+      expect(url).to.eq "http://localhost:3500/timeout?ms=1000"
 
     it "does not strip off path", ->
       url = @normalizeUrl("fixtures/html/sinon.html")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-      expect(@setInitialRequest).to.be.calledWith "<root>"
-      expect(url).to.eq "/fixtures/html/sinon.html"
+      expect(url).to.eq "http://localhost:3500/fixtures/html/sinon.html"

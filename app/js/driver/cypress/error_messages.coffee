@@ -2,6 +2,22 @@ $Cypress.ErrorMessages = do ($Cypress) ->
   cmd = (command, args = "") ->
     "cy.#{command}(#{args})"
 
+  getRedirects = (obj, phrase) ->
+    redirects = obj.redirects ? []
+
+    return "" if not redirects.length
+
+    word = $Cypress.Utils.plural(redirects.length, "times", "time")
+
+    list = _.map redirects, (redirect) ->
+      "  - #{redirect}"
+
+    """
+    #{phrase} '#{redirects.length}' #{word} to:
+
+    #{list.join("\n")}
+    """
+
   return {
     add:
       type_missing: "Cypress.add(key, fn, type) must include a type!"
@@ -228,8 +244,17 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       timed_out: "Cypress command timeout of '{{ms}}ms' exceeded."
 
     navigation:
-      loading_failed: "Loading the new page failed."
-      timed_out: "Timed out after waiting '{{ms}}ms' for your remote page to load."
+      timed_out: """
+        Timed out after waiting '{{ms}}ms' for your remote page to load.
+
+        Your page did not fire its 'load' event within '{{ms}}ms'.
+
+        You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
+
+        Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
+
+        When this 'load' event occurs, Cypress will continue running commands.
+      """
 
     ng:
       no_global: "Angular global (window.angular) was not found in your window. You cannot use #{cmd('ng')} methods without angular."
@@ -326,7 +351,72 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     visit:
       invalid_1st_arg: "#{cmd('visit')} must be called with a string as its 1st argument"
-      loading_failed: "#{cmd('visit')} failed to load the remote page: {{url}}"
+      cannot_visit_2nd_domain: """
+        #{cmd('visit')} failed because you are attempting to visit a second unique domain.
+
+        You may only visit a single unique domain per test.
+
+        Different subdomains are okay, but unique domains are not.
+
+        The previous domain you visited was: '{{previousDomain}}'
+
+        You're attempting to visit this new domain: '{{attemptedDomain}}'
+
+        You may need to restructure some of your code to prevent this from happening.
+
+        https://on.cypress.io/cannot-visit-second-unique-domain
+      """
+      loading_network_failed: """
+        #{cmd('visit')} failed trying to load:
+
+        {{url}}
+
+        We attempted to make an http request to this URL but the request immediately failed without a response.
+
+        We received this error at the network level:
+
+          > {{error}}
+
+        Common situations why this would fail:
+          - you don't have internet access
+          - you forgot to run / boot your web server
+          - your web server isn't accessible
+          - you have weird network configuration settings on your computer
+
+        The stack trace for this error is:
+
+        {{stack}}
+      """
+      loading_file_failed: (obj) ->
+        """
+          #{cmd('visit')} failed trying to load:
+
+          #{obj.url}
+
+          We failed looking for this file at the path:
+
+          #{obj.path}
+
+          The internal Cypress web server responded with:
+
+            > #{obj.status}: #{obj.statusText}
+
+          #{getRedirects(obj, "We were redirected")}
+        """
+      loading_http_failed: (obj) ->
+        """
+          #{cmd('visit')} failed trying to load:
+
+          #{obj.url}
+
+          The response we received from your web server was:
+
+            > #{obj.status}: #{obj.statusText}
+
+          This was considered a failure because the status code was not '2xx'.
+
+          #{getRedirects(obj, "This http request was redirected")}
+        """
 
     wait:
       alias_invalid: "'{{prop}}' is not a valid alias property. Are you trying to ask for the first request? If so write @{{str}}.request"

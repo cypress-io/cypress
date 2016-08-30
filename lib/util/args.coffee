@@ -5,7 +5,7 @@ coerce   = require("./coerce")
 config   = require("../config")
 cwd      = require("../cwd")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci updating ping coords key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci updating ping coords key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode hosts".split(" ")
 whitelist = whitelist.concat(config.getConfigKeys())
 
 parseCoords = (coords) ->
@@ -65,6 +65,10 @@ module.exports = {
       ## take the last two arguments that were unknown
       ## and apply them to both appPath + execPath
       [options.appPath, options.execPath] = options._.slice(-2)
+
+    if hosts = options.hosts
+      backup("hosts", options)
+      options.hosts = parseNestedValues(hosts)
 
     if options.coords
       backup("coords", options)

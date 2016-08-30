@@ -24,7 +24,7 @@
       route     = new Entities.Route log.pick.apply(log, attrs)
       route.log = log
 
-      route.listenTo log, "attrs:changed", (attrs) ->
+      route.listenTo log, "state:changed", (attrs) ->
         route.set attrs
 
       route

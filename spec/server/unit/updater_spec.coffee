@@ -3,14 +3,12 @@ require("../spec_helper")
 delete global.fs
 
 tar         = require("tar-fs")
-mock        = require("mock-fs")
 Updater     = require("#{root}lib/updater")
 Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
 describe "lib/updater", ->
   afterEach ->
     Updater.setCoords(null)
-    mock.restore()
 
   context "interface", ->
     it "returns an updater instance", ->
@@ -19,9 +17,7 @@ describe "lib/updater", ->
 
   context "#getPackage", ->
     beforeEach ->
-      mock({
-        "package.json": JSON.stringify(foo: "bar")
-      })
+      @sandbox.stub(fs, "readJsonSync").returns({foo: "bar"})
 
       @updater = Updater({})
 
@@ -333,9 +329,7 @@ describe "lib/updater", ->
 
     beforeEach ->
       ## force a lower package.json version
-      mock({
-        "package.json": JSON.stringify(version: "0.0.1")
-      })
+      @sandbox.stub(fs, "readJsonSync").returns({version: "0.0.1"})
 
       ## force a manifest.json response here to be a slightly higher version
       nock("http://download.cypress.io")
@@ -357,7 +351,6 @@ describe "lib/updater", ->
         }
         .get("/dist.cypress.io/0.0.2/cypress.zip")
         .reply 200, ->
-          mock.restore()
           fs.createReadStream Fixtures.path("nw/cypress.zip")
 
     # it "runs", ->

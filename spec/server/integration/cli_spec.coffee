@@ -14,6 +14,8 @@ parse = (str) ->
   ## from npm logs
   _(str.split("\n")).compact().reject(anyLineWithCaret).value().join("\n")
 
+env = _.omit(process.env, "CYPRESS_DEBUG")
+
 describe "CLI Interface", ->
   beforeEach ->
     ## set the timeout high due to
@@ -21,14 +23,14 @@ describe "CLI Interface", ->
     @currentTest.timeout(20000)
 
   it "writes out ping value and exits", (done) ->
-    cp.exec "npm start -- --smoke-test --ping=12345", (err, stdout, stderr) ->
+    cp.exec "npm start -- --smoke-test --ping=12345", {env: env}, (err, stdout, stderr) ->
       done(err) if err
 
       expect(parse(stdout)).to.eq("12345")
       done()
 
   it "writes out package.json and exits", (done) ->
-    cp.exec "npm start -- --return-pkg", (err, stdout, stderr) ->
+    cp.exec "npm start -- --return-pkg", {env: env}, (err, stdout, stderr) ->
       done(err) if err
 
       pkg = JSON.parse(parse(stdout))
@@ -60,13 +62,13 @@ describe "CLI Interface", ->
         expect(code).to.eq(0)
         done()
 
-    it "npm slurps up exit value and exits with 1 on failure", ->
+    it "npm slurps up exit value and exits with 1 on failure", (done) ->
       s = cp.exec("npm start -- --exit-with-code=10")
       s.on "close", (code) ->
         expect(code).to.eq(1)
         done()
 
-    it "npm passes on 0 exit code", ->
+    it "npm passes on 0 exit code", (done) ->
       s = cp.exec("npm start -- --exit-with-code=0")
       s.on "close", (code) ->
         expect(code).to.eq(0)

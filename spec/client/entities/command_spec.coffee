@@ -38,7 +38,7 @@ describe "Command Entities", ->
         expect(@command.get(key)).to.eq value
 
 
-    it "listens to attrs:changed and sets whitelisted changed attributes", ->
+    it "listens to state:changed and sets whitelisted changed attributes", ->
       @log     = new $Cypress.Log @Cypress
       @log.set {
         state: "pending"

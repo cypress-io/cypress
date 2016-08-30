@@ -119,7 +119,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
 
     describe "log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "sets aliasType to 'primitive'", ->
         @cy.wrap({}).as("obj").then ->
@@ -132,7 +132,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
       it "aliases previous command / non event / matching chainerId", ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @Cypress.addParentCommand "foo", =>
@@ -150,11 +150,11 @@ describe "$Cypress.Cy Aliasing Commands", ->
       it "does not match alias when the alias has already been applied", ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy
-          .visit("fixtures/html/commands.html")
+          .visit("http://localhost:3500/fixtures/html/commands.html")
           .server()
           .route(/foo/, {}).as("getFoo")
           .then ->

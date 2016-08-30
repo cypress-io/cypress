@@ -16,6 +16,7 @@ kill = (unbind) ->
   ## cleanup our running browser
   ## instance
   return if not instance
+
   if unbind
     instance.removeAllListeners()
   instance.kill()
@@ -92,6 +93,9 @@ module.exports = {
       ## this overrides any previous user-data-dir args
       ## by being the last one
       args.push("--user-data-dir=#{dir}")
+
+      if ps = options.proxyServer
+        args.push("--proxy-server=#{ps}")
 
       launcher()
       .call("launch", name, url, args)

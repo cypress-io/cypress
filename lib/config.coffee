@@ -11,12 +11,14 @@ cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
 folders = "fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder unitFolder".split(" ")
-configKeys = "port reporter baseUrl execTimeout commandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables".split(" ")
+configKeys = "port reporter baseUrl execTimeout commandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables hosts".split(" ")
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
 defaults = {
+  port:           null
+  hosts:          null
   morgan:         true
   baseUrl:        null
   socketId:       null
@@ -26,13 +28,13 @@ defaults = {
   xhrRoute:       "/xhrs/"
   socketIoRoute:  "/__socket.io"
   socketIoCookie: "__socket.io"
+  reporterRoute:  "/__cypress/reporter"
   ignoreTestFiles: "*.hot-update.js"
   commandTimeout:  4000
   pageLoadTimeout: 30000
   requestTimeout:  5000
   responseTimeout: 20000
   execTimeout:     60000
-  port:            2020
   waitForAnimations: true
   animationDistanceThreshold: 5
   numTestsKeptInMemory: 50
@@ -107,7 +109,7 @@ module.exports = {
   mergeDefaults: (config = {}, options = {}) ->
     resolved = {}
 
-    _.extend config, _.pick(options, "morgan", "isHeadless", "socketId", "report")
+    _.extend config, _.pick(options, "morgan", "isHeadless", "socketId", "report", "browsers")
 
     _.each @whitelist(options), (val, key) ->
       resolved[key] = "cli"
@@ -133,7 +135,8 @@ module.exports = {
 
     config = @setResolvedConfigValues(config, defaults, resolved)
 
-    config = @setUrls(config)
+    if config.port
+      config = @setUrls(config)
 
     config = @setAbsolutePaths(config, defaults)
 
@@ -193,7 +196,7 @@ module.exports = {
 
     ptfd = obj.parentTestsFolder = path.dirname(obj.integrationFolder)
 
-    prd = path.dirname(obj.projectRoot)
+    prd = path.dirname(obj.projectRoot ? "")
 
     obj.parentTestsFolderDisplay = path.relative(prd, ptfd)
 
@@ -220,6 +223,7 @@ module.exports = {
     _.extend obj,
       clientUrlDisplay: rootUrl
       clientUrl:        rootUrl + obj.clientRoute
+      reporterUrl:      rootUrl + obj.reporterRoute
       xhrUrl:           obj.namespace + obj.xhrRoute
 
     return obj

@@ -119,11 +119,15 @@ describe "$Cypress API", ->
         expect(aborted).to.be.true
         done()
 
-    it "calls #restore", ->
+    it "calls #restore with {checkForEndedEarly: false}", (done) ->
       restore = @sandbox.spy @Cypress, "restore"
 
+      @Cypress.on "restore", _.once (options) ->
+        expect(options).to.deep.eq({checkForEndedEarly: false})
+        done()
+
       @Cypress.abort().then ->
-        expect(restore).to.be.calledOnce
+        expect(restore).to.be.calledWith({checkForEndedEarly: false})
 
   describe "#initialize", ->
     beforeEach ->

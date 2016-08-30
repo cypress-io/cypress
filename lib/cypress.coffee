@@ -10,7 +10,6 @@ require("./environment")
 ## mode.
 
 _         = require("lodash")
-os        = require("os")
 cp        = require("child_process")
 path      = require("path")
 Promise   = require("bluebird")
@@ -39,9 +38,6 @@ module.exports = {
   isCurrentlyRunningElectron: ->
     !!(process.versions and process.versions.electron)
 
-  isLinuxAndHasNotDisabledGpu: (options) ->
-    process.env["CYPRESS_ENV"] isnt "test" and os.platform() is "linux" and "--disable-gpu" not in process.argv
-
   runElectron: (mode, options) ->
     ## wrap all of this in a promise to force the
     ## promise interface - even if it doesn't matter
@@ -52,30 +48,9 @@ module.exports = {
       ## like in production and we shouldn't spawn a new
       ## process
       if @isCurrentlyRunningElectron()
-        if @isLinuxAndHasNotDisabledGpu()
-          return new Promise (resolve) ->
-            args = ["."].concat(argsUtil.toArray(options))
-            args.push("--disable-gpu")
-
-            ## respawn the same process except with --disable-gpu
-            electron = cp.spawn(process.execPath, args, {
-              stdio: "inherit"
-            })
-
-            ## must resolve with failures since
-            ## our outer headless run promise
-            ## is expecting that object structure
-            onClose = (code, signal) ->
-              resolve({failures: code})
-
-            ## whenever our new child electron process
-            ## closes then we pass this exit code on
-            electron.on("close", onClose)
-
-        else
-          ## just run the gui code directly here
-          ## and pass our options directly to main
-          require("./electron")(mode, options);
+        ## just run the gui code directly here
+        ## and pass our options directly to main
+        require("./electron")(mode, options);
       else
         ## sanity check to ensure we're running
         ## the local dev server. dont crash just
@@ -84,18 +59,19 @@ module.exports = {
           console.log(err.message)
           errors.warning("DEV_NO_SERVER")
 
-        args = ["."].concat(argsUtil.toArray(options))
-
+        ## open the cypress electron wrapper shell app
         new Promise (resolve) ->
-          ## kick off the electron process and resolve the calling
-          ## promise code when this new child process closes
-          electron = cp.spawn("electron", args, { stdio: "inherit" })
-          electron.on("close", resolve)
+          cypressElectron = require("@cypress/core-electron")
+          fn = (code) ->
+            ## juggle up the failures since our outer
+            ## promise is expecting this object structure
+            resolve({failures: code})
+          cypressElectron.open(".", argsUtil.toArray(options), fn)
 
   openProject: (options) ->
     ## this code actually starts a project
     ## and is spawned from nodemon
-    require("./project")(options.project).open()
+    require("./electron/handlers/project").open(options.project, options)
 
   runServer: (options) ->
     args = {}
@@ -117,7 +93,7 @@ module.exports = {
       ignore: ["--ignore", "lib/public"]
       verbose: "--verbose"
       exts:   ["-e", "coffee,js"]
-      args:   ["--", "--mode", "openProject", "--project", options.project]
+      args:   ["--", "--config", "port=2020", "--mode", "openProject", "--project", options.project]
     })
 
     args = _.chain(args).values().flatten().value()
@@ -128,7 +104,9 @@ module.exports = {
     ## default cypress web app client
     if options.autoOpen
       _.delay ->
-        require("./launcher").launch("chrome", "http://localhost:2020/__")
+        require("./launcher").launch("chrome", "http://localhost:2020/__", {
+          proxyServer: "http://localhost:2020"
+        })
       , 2000
 
     if options.debug

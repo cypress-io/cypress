@@ -26,32 +26,33 @@ describe "lib/server", ->
       @use = @sandbox.spy(express.application, "use")
 
     it "instantiates express instance without morgan", ->
-      app = @server.createExpressApp(54321, false)
-      expect(app.get("port")).to.eq(54321)
+      app = @server.createExpressApp(false)
       expect(app.get("view engine")).to.eq("html")
       expect(@use).not.to.be.calledWith(morganFn)
 
     it "requires morgan if true", ->
-      @server.createExpressApp(54321, true)
+      @server.createExpressApp(true)
       expect(@use).to.be.calledWith(morganFn)
 
   context "#open", ->
     beforeEach ->
       @sandbox.stub(@server, "createServer").resolves()
 
-    it "resolves with server instance", ->
-      @server.open("/", @config)
-      .then (ret) =>
-        expect(ret).to.eq(@server)
-
-    it "calls #createExpressApp with port + morgan", ->
+    it "calls #createExpressApp with morgan", ->
       @sandbox.spy(@server, "createExpressApp")
 
       _.extend @config, {port: 54321, morgan: false}
 
-      @server.open("/", @config)
+      @server.open(@config)
       .then =>
-        expect(@server.createExpressApp).to.be.calledWith(54321, false)
+        expect(@server.createExpressApp).to.be.calledWith(false)
+
+    it "calls #createServer with port", ->
+      _.extend @config, {port: 54321}
+
+      @server.open(@config)
+      .then =>
+        expect(@server.createServer).to.be.calledWith(54321)
 
     it "calls #createRoutes with app + config", ->
       obj = {}
@@ -59,7 +60,7 @@ describe "lib/server", ->
       @sandbox.stub(@server, "createRoutes")
       @sandbox.stub(@server, "createExpressApp").returns(obj)
 
-      @server.open("/", @config)
+      @server.open(@config)
       .then =>
         expect(@server.createRoutes).to.be.calledWith(obj)
 
@@ -69,37 +70,37 @@ describe "lib/server", ->
       @sandbox.stub(@server, "createRoutes")
       @sandbox.stub(@server, "createExpressApp").returns(obj)
 
-      @server.open("/", @config)
+      @server.open(@config)
       .then =>
         expect(@server.createServer).to.be.calledWith(@config.port, @config.socketIoRoute, obj)
 
     it "calls logger.setSettings with config", ->
       @sandbox.spy(logger, "setSettings")
 
-      @server.open("/", @config)
+      @server.open(@config)
       .then (ret) =>
         expect(logger.setSettings).to.be.calledWith(@config)
 
   context "#createServer", ->
     beforeEach ->
       @port = 54321
-      @app  = @server.createExpressApp(@port, true)
+      @app  = @server.createExpressApp(true)
 
     it "isListening=true", ->
-      @server.createServer(@port, @app)
+      @server.createServer(@port, "", @app)
       .then =>
         expect(@server.isListening).to.be.true
 
-    it "resolves with http server instance", ->
-      @server.createServer(@port, @app)
-      .then (ret) =>
-        expect(ret).to.be.instanceof(http.Server)
+    it "resolves with http server port", ->
+      @server.createServer(@port, "", @app)
+      .then (port) =>
+        expect(port).to.eq(@port)
 
     context "errors", ->
       it "rejects with portInUse", ->
-        @server.createServer(@port, @app)
+        @server.createServer(@port, "", @app)
         .then =>
-          @server.createServer(@port, @app)
+          @server.createServer(@port, "", @app)
         .then ->
           throw new Error("should have failed but didn't")
         .catch (err) =>
@@ -126,7 +127,7 @@ describe "lib/server", ->
       @startListening = @sandbox.stub(Socket.prototype, "startListening")
 
     it "sets _socket and calls _socket#startListening", ->
-      @server.open("/", @config)
+      @server.open(@config)
       .then =>
         @server.startWebsockets(1, 2, 3)
 
@@ -137,12 +138,12 @@ describe "lib/server", ->
       expect(@server.close()).to.be.instanceof Promise
 
     it "calls close on this.server", ->
-      @server.open("/", @config)
+      @server.open(@config)
       .then =>
         @server.close()
 
     it "isListening=false", ->
-      @server.open("/", @config)
+      @server.open(@config)
       .then =>
         @server.close()
       .then =>
@@ -176,19 +177,23 @@ describe "lib/server", ->
       expect(noop).to.be.undefined
 
     it "calls proxy.ws with hostname + port", ->
+      @server._onDomainSet("https://www.google.com")
+
       req = {
         url: "/"
         headers: {
-          cookie: "foo=bar; __cypress.remoteHost=https://www.google.com"
+          host: "www.google.com"
         }
       }
 
       @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
 
       expect(@proxy.ws).to.be.calledWith(req, @socket, @head, {
+        secure: false
         target: {
           host: "www.google.com"
-          port: null
+          port: "443"
+          protocol: "https:"
         }
       })
 
@@ -206,3 +211,67 @@ describe "lib/server", ->
       @socket.writable = true
       @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
       expect(@socket.end).to.be.called
+
+  context "#_onDomainSet", ->
+    beforeEach ->
+      @server = Server()
+
+    it "sets port to 443 when omitted and https:", ->
+      ret = @server._onDomainSet("https://staging.google.com/foo/bar")
+
+      expect(ret).to.deep.eq({
+        origin: "https://staging.google.com"
+        strategy: "http"
+        domainName: "google.com"
+        visiting: undefined
+        props: {
+          port: "443"
+          domain: "google"
+          tld: "com"
+        }
+      })
+
+    it "sets port to 80 when omitted and http:", ->
+      ret = @server._onDomainSet("http://staging.google.com/foo/bar")
+
+      expect(ret).to.deep.eq({
+        origin: "http://staging.google.com"
+        strategy: "http"
+        domainName: "google.com"
+        visiting: undefined
+        props: {
+          port: "80"
+          domain: "google"
+          tld: "com"
+        }
+      })
+
+    it "sets host + port to localhost", ->
+      ret = @server._onDomainSet("http://localhost:4200/a/b?q=1#asdf")
+
+      expect(ret).to.deep.eq({
+        origin: "http://localhost:4200"
+        strategy: "http"
+        domainName: "localhost"
+        visiting: undefined
+        props: {
+          port: "4200"
+          domain: ""
+          tld: "localhost"
+        }
+      })
+
+    it "sets <root> when not http url", ->
+      @server._server = {
+        address: -> {port: 9999}
+      }
+
+      ret = @server._onDomainSet("/index.html")
+
+      expect(ret).to.deep.eq({
+        origin: "http://localhost:9999"
+        strategy: "file"
+        domainName: "localhost"
+        props: null
+        visiting: undefined
+      })

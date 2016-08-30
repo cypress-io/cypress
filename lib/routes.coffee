@@ -3,12 +3,14 @@ CacheBuster = require("./util/cache_buster")
 cwd         = require("./cwd")
 logger      = require("./logger")
 spec        = require("./controllers/spec_processor")
+runner      = require("./controllers/runner")
 xhrs        = require("./controllers/xhrs")
+client      = require("./controllers/client")
 files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
 builds      = require("./controllers/builds")
 
-module.exports = (app, config) ->
+module.exports = (app, config, getRemoteState) ->
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
   app.get "/__cypress/tests", (req, res, next) ->
@@ -17,13 +19,19 @@ module.exports = (app, config) ->
 
     spec.handle(test, req, res, config, next)
 
+  app.get "/__cypress/socket.io.js", (req, res) ->
+    client.handle(req, res)
+
+  app.get "/__cypress/runner/*", (req, res) ->
+    runner.handle(req, res)
+
   ## routing for /files JSON endpoint
   app.get "/__cypress/files", (req, res) ->
     files.handleFiles(req, res, config)
 
   ## routing for the dynamic iframe html
   app.get "/__cypress/iframes/*", (req, res) ->
-    files.handleIframe(req, res, config)
+    files.handleIframe(req, res, config, getRemoteState)
 
   app.get "/__cypress/builds", (req, res, next) ->
     builds.handleBuilds(req, res, config, next)
@@ -39,14 +47,15 @@ module.exports = (app, config) ->
   ## we've namespaced the initial sending down of our cypress
   ## app as '__'  this route shouldn't ever be used by servers
   ## and therefore should not conflict
+  ## ---
+  ## TODO: we should additionally send config for the socket.io route, etc
+  ## and any other __cypress namespaced files so that the runner does
+  ## not have to be aware of anything
   app.get config.clientRoute, (req, res) ->
-    res.render cwd("lib", "public", "index.html"), {
-      config:      JSON.stringify(config)
-      projectName: config.projectName
-    }
+    runner.serve(req, res, config, getRemoteState)
 
   app.all "*", (req, res, next) ->
-    proxy.handle(req, res, config, app, next)
+    proxy.handle(req, res, config, getRemoteState, next)
 
   ## when we experience uncaught errors
   ## during routing just log them out to

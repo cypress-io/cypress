@@ -41,12 +41,17 @@ describe "lib/project", ->
 
   context "#getConfig", ->
     beforeEach ->
-      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({baz: "quux"})
+      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({baz: "quux", integrationFolder: "foo/bar/baz"})
+      @sandbox.stub(@project, "determineIsNewProject").withArgs("foo/bar/baz").resolves(false)
 
     it "calls config.get with projectRoot + options", ->
       @project.getConfig({foo: "bar"})
       .then (cfg) ->
-        expect(cfg).to.deep.eq({baz: "quux"})
+        expect(cfg).to.deep.eq({
+          integrationFolder: "foo/bar/baz"
+          isNewProject: false
+          baz: "quux"
+        })
 
     it "resolves if cfg is already set", ->
       @project.cfg = {foo: "bar"}
@@ -63,11 +68,6 @@ describe "lib/project", ->
       @sandbox.stub(@project, "scaffold").resolves()
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(@project.server, "open").resolves()
-
-    it "sets changeEvents to false by default", ->
-      opts = {}
-      @project.open(opts).then ->
-        expect(opts.changeEvents).to.be.false
 
     it "sets updateProject to false by default", ->
       opts = {}
@@ -270,40 +270,40 @@ describe "lib/project", ->
       @watch = @sandbox.stub(@project.watchers, "watch")
 
     it "sets onChange event when {changeEvents: true}", (done) ->
-      @project.watchSettingsAndStartWebsockets({changeEvents: true})
+      @project.watchSettingsAndStartWebsockets({onSettingsChanged: done})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
-
-      @project.on "settings:changed", done
 
       expect(obj.onChange).to.be.a("function")
       obj.onChange()
 
     it "does not call watch when {changeEvents: false}", ->
-      @project.watchSettingsAndStartWebsockets({changeEvents: false})
+      @project.watchSettingsAndStartWebsockets({onSettingsChanged: undefined})
 
       expect(@watch).not.to.be.called
 
-    it "does not emit settings:changed when generatedProjectIdTimestamp is less than 1 second", ->
+    it "does not call onSettingsChanged when generatedProjectIdTimestamp is less than 1 second", ->
       @project.generatedProjectIdTimestamp = timestamp = new Date
 
       emit = @sandbox.spy(@project, "emit")
 
-      @project.watchSettingsAndStartWebsockets({changeEvents: true})
+      stub = @sandbox.stub()
+
+      @project.watchSettingsAndStartWebsockets({onSettingsChanged: stub})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
       obj.onChange()
 
-      expect(emit).not.to.be.called
+      expect(stub).not.to.be.called
 
       ## subtract 1 second from our timestamp
       timestamp.setSeconds(timestamp.getSeconds() - 1)
 
       obj.onChange()
 
-      expect(emit).to.be.calledWith("settings:changed")
+      expect(stub).to.be.calledOnce
 
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->
@@ -318,17 +318,6 @@ describe "lib/project", ->
       @project.watchSettingsAndStartWebsockets({}, c)
 
       expect(@project.server.startWebsockets).to.be.calledWith(@project.watchers, c)
-
-    it "passes onIsNewProject callback", ->
-      @sandbox.stub(@project, "determineIsNewProject")
-
-      @project.server.startWebsockets.yieldsTo("onIsNewProject")
-
-      @project.watchSettingsAndStartWebsockets({}, {
-        integrationFolder: "foo/bar/baz"
-      })
-
-      expect(@project.determineIsNewProject).to.be.calledWith("foo/bar/baz")
 
     it "passes onAutomationRequest callback", ->
       fn = @sandbox.stub()
@@ -475,6 +464,8 @@ describe "lib/project", ->
   context "#ensureSpecUrl", ->
     beforeEach ->
       @project2 = Project(@idsPath)
+
+      settings.write(@idsPath, {port: 2020})
 
     it "returns fully qualified url when spec exists", ->
       @project2.ensureSpecUrl("cypress/integration/bar.js")

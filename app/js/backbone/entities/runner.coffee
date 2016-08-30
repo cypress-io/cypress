@@ -24,8 +24,9 @@
         @stats     = App.request "stats:entity", @
 
         _.each CypressEvents, (event) =>
-          @listenTo @Cypress, event, (args...) =>
-            @trigger event, args...
+          @listenTo @Cypress, event, (runnable) =>
+            @socket.emit(event, @transferFlattened(runnable))
+            @trigger(event, runnable)
 
         @listenTo @Cypress, "run:start", =>
           @socket.emit "mocha", "start"
@@ -76,8 +77,11 @@
         @listenTo @Cypress, "take:screenshot", (name, cb) =>
           @socket.emit "automation:request", "take:screenshot", name, cb
 
+        @listenTo @Cypress, "preserve:run:state", (title, fn, cb) =>
+          @socket.emit "preserve:run:state", title, fn, cb
+
         @listenTo @Cypress, "message", (msg, data, cb) =>
-          @socket.emit "client:request", msg, data, cb
+          @socket.emit "adapter:request", msg, data, cb
 
         @listenTo @Cypress, "fixture", (fixture, cb) =>
           @socket.emit "fixture", fixture, cb
@@ -97,29 +101,57 @@
         @listenTo @Cypress, "paused", (nextCmd) =>
           @trigger "paused", nextCmd
 
+        @listenTo @Cypress, "test:before:hooks", (test) =>
+          @socket.emit "test:before:hooks", @transfer(test)
+
+        @listenTo @Cypress, "test:after:hooks", (test) =>
+          @socket.emit "test:after:hooks", @transfer(test)
+
+        @listenTo @Cypress, "preserve:run:state", (title, fn, cb) =>
+          @socket.emit "preserve:run:state", title, fn, cb
+
         @listenTo @Cypress, "log", (log) =>
-          switch log.get("instrument")
-            when "command"
-              id = _.uniqueId("command")
+          id         = _.uniqueId("l")
+          instrument = log.get("instrument")
 
-              c = @commands.add log
-              c.set "id", id
+          log.set({id: id, instrument: instrument})
 
-            when "route"
-              @routes.add log
+          json = @addLog(log).toJSON()
 
-            when "agent"
-              @agents.add log
+          json.id = id
+          json.instrument = instrument
 
-            else
-              throw new Error("Cypress.log() emitted an unknown instrument: #{log.get('instrument')}")
+          @socket.emit "log:add", json
 
-        @listenTo @socket, "test:changed", @reRun
+        @listenTo @commands, "log:state:changed", (attrs) ->
+          attrs = @transformEmitAttrs(attrs)
+          @socket.emit "log:state:changed", attrs
+
+        @listenTo @socket, "watched:file:changed", @reRun
+
+        @listenTo @socket, "existing:runnable", (runnable) ->
+          @set("existingRunnable", runnable)
+
+        @listenTo @socket, "runner:restart", =>
+          @reRun(@specPath)
+
+        @listenTo @socket, "runner:abort", @abort
 
         @listenTo @socket, "automation:push:message", (msg, data = {}) ->
           switch msg
             when "change:cookie"
               @Cypress.Cookies.log(data.message, data.cookie, data.removed)
+
+      addLog: (log) ->
+        switch log.get("instrument")
+          when "command"
+            @commands.add log
+          when "route"
+            @routes.add log
+          when "agent"
+            @agents.add log
+          else
+            throw new Error("Cypress.log() emitted an unknown instrument: #{log.get('instrument')}")
 
       start: (specPath) ->
         @Cypress.start()
@@ -182,7 +214,7 @@
           when _.isFunction(value)                          then false
           else true
 
-      transformRunnableArgs: (args) ->
+      transformRunnableArgs: (arg) ->
         ## pull off these direct properties
         props = ["title", "id", "root", "pending", "stopped", "state", "duration", "type"]
 
@@ -192,26 +224,25 @@
         ## fns to invoke
         fns = ["originalTitle", "fullTitle", "slow", "timeout"]
 
-        _(args).map (arg) =>
-          ## transfer direct props
-          obj = _(arg).pick props...
+        ## transfer direct props
+        obj = _(arg).pick props...
 
-          ## transfer parent props
-          if parent = arg.parent
-            obj.parent = _(parent).pick parentProps...
+        ## transfer parent props
+        if parent = arg.parent
+          obj.parent = _(parent).pick parentProps...
 
-          ## transfer the error as JSON
-          if err = arg.err
-            try
-              err.host = @Cypress.cy.$remoteIframe.prop("contentWindow").location.host
+        ## transfer the error as JSON
+        if err = arg.err
+          try
+            err.host = @Cypress.cy.$remoteIframe.prop("contentWindow").location.host
 
-            obj.err = JSON.stringify(err, ["message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host"])
+          obj.err = JSON.stringify(err, ["message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host"])
 
-          ## invoke the functions and set those as properties
-          _.each fns, (fn) ->
-            obj[fn] = _.result(arg, fn)
+        ## invoke the functions and set those as properties
+        _.each fns, (fn) ->
+          obj[fn] = _.result(arg, fn)
 
-          obj
+        obj
 
       resume: ->
         @trigger("resumed")
@@ -244,9 +275,15 @@
         ## always reload the iframe
         @reRun @specPath
 
+      # restart: ->
+      #   ## always reload the iframe
+      #   @reRun @specPath
+
       restart: ->
-        ## always reload the iframe
-        @reRun @specPath
+        new Promise (resolve) =>
+          @listenToOnce(@socket, "reporter:restarted", resolve)
+
+          @socket.emit("restart:test:run")
 
       logResults: (test) ->
         @trigger "test:results:ready", test
@@ -259,14 +296,18 @@
 
         ## when we are re-running we first
         ## need to abort cypress always
-        @Cypress.abort().then =>
-          ## start the abort process since we're about
-          ## to load up in case we're running any tests
-          ## right this moment
+        Promise.join(
+          @abort()
+          @restart()
+        )
+        .then =>
+        ## start the abort process since we're about
+        ## to load up in case we're running any tests
+        ## right this moment
 
-          ## tells different areas of the app to prepare
-          ## for the resetting of the test run
-          @trigger "reset:test:run"
+        ## tells different areas of the app to prepare
+        ## for the resetting of the test run
+        # @trigger "restart:test:run"
 
           @triggerLoadSpecFrame(specPath, options)
 
@@ -321,6 +362,19 @@
 
         return runnable.id = id
 
+      transfer: (runnable) ->
+        return if not runnable
+
+        obj = @ids[runnable.id]
+
+        ## TODO: normalize the pending stuff here?
+        ## and add the err properties?
+        _.extend obj, _.pick(runnable, "state", "pending", "stopped", "duration")
+
+      transferFlattened: (runnable) ->
+        if r = @transfer(runnable)
+          _.omit(r, "tests", "suites")
+
       receivedRunner: (runner) ->
         triggerAddEvents = true
 
@@ -337,10 +391,51 @@
 
           triggerAddEvents = false
 
-        @trigger("before:add", total)
+        r = runner.getNormalizedRunnables()
+
+        @ids = runner.runnableIds
+
+        runnables = []
+
+        ## TODO: the only reason we need to do this
+        ## is so that 'test:after:hooks' fires correctly
+        ## due to needing to hold onto the state for
+        ## the driver runnables
+        runner.getRunnables
+          onRunnable: (runnable) =>
+            runnables.push(runnable)
+
+        ## TODO: move into driver
+        if e = @get("existingRunnable")
+          for runnable in runnables
+            if runnable.pending or runnable.type isnt "test"
+              ## move along if we arent even a test yet
+              continue
+
+            if (runnable.title isnt e.title) or (runnable.fn.toString() isnt e.fn)
+              runnable._ALREADY_RAN = true
+              runnable.pending = true
+              ## delete the fn?
+              # delete runnable.fn
+            else
+              ## bail so we can stop now
+              return
+
+        d = new Date
+        @trigger "before:add"
+        @socket.emit "before:add"
+
+        @socket.emit "runnables:ready", r
+
+        return
 
         runnables = []
         ids = []
+
+        triggerAddEvent = (runnable) =>
+          @trigger("#{runnable.type}:add", runnable)
+          # @socket.emit("#{runnable.type}:add", @transformRunnableArgs(runnable))
+
 
         triggerAddEvent = (runnable) =>
           return if not triggerAddEvents
@@ -359,9 +454,9 @@
             onRunnable: (runnable) =>
               runnables.push(runnable) if options.pushRunnables
 
-              id = @createUniqueRunnableId(runnable, ids)
+              # id = @createUniqueRunnableId(runnable, ids)
 
-              ids.push(id)
+              ids.push(runnable.id)
 
               ## force our runner to ignore running this
               ## test if it doesnt have an id!
@@ -417,6 +512,7 @@
           getRunnables()
 
         @trigger "after:add"
+        @socket.emit "after:add"
 
         return @
 

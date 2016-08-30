@@ -160,19 +160,19 @@
 #       it "can start server with no errors", ->
 #         @cy
 #           .server()
-#           .visit("fixtures/html/sinon.html")
+#           .visit("http://localhost:3500/fixtures/html/sinon.html")
 
 #       it "can add routes with no errors", ->
 #         @cy
 #           .server()
 #           .route(/foo/, {})
-#           .visit("fixtures/html/sinon.html")
+#           .visit("http://localhost:3500/fixtures/html/sinon.html")
 
 #       it "routes xhr requests", ->
 #         @cy
 #           .server()
 #           .route(/foo/, {foo: "bar"})
-#           .visit("fixtures/html/sinon.html")
+#           .visit("http://localhost:3500/fixtures/html/sinon.html")
 #           .window().then (w) ->
 #             w.$.get("/foo")
 #           .then (resp) ->
@@ -182,7 +182,7 @@
 #         @cy
 #           .server()
 #           .route(/foo/, {foo: "bar"}).as("getFoo")
-#           .visit("fixtures/html/sinon.html")
+#           .visit("http://localhost:3500/fixtures/html/sinon.html")
 #           .window().then (w) ->
 #             w.$.get("/foo")
 #           .wait("@getFoo").then (xhr) ->
@@ -192,7 +192,7 @@
 #         @cy
 #           .server()
 #           .route(/bar/, {bar: "baz"}).as("getBar")
-#           .visit("fixtures/html/sinon.html")
+#           .visit("http://localhost:3500/fixtures/html/sinon.html")
 #           .wait("@getBar").then (xhr) ->
 #             expect(xhr.responseText).to.eq JSON.stringify({bar: "baz"})
 
@@ -210,7 +210,7 @@
 
 #       describe ".log", ->
 #         beforeEach ->
-#           @Cypress.on "log", (@log) =>
+#           @Cypress.on "log", (attrs, @log) =>
 
 #         it "provides specific #onFail", (done) ->
 #           @cy.on "fail", (err) =>
@@ -580,7 +580,7 @@
 #         @cy.route()
 
 #       it "sets err on log when caused by the XHR response", (done) ->
-#         @Cypress.on "log", (@log) =>
+#         @Cypress.on "log", (attrs, @log) =>
 
 #         @cy.on "fail", (err) =>
 #           expect(@log.get("error")).to.be.ok
@@ -606,7 +606,7 @@
 #           _this.Cypress.trigger.restore()
 #           orig.call(@, err)
 
-#         @Cypress.on "log", (@log) =>
+#         @Cypress.on "log", (attrs, @log) =>
 #           logs.push @log
 
 #         @cy.on "fail", (err) =>
@@ -650,7 +650,7 @@
 #       it "explodes if response alias cannot be found", (done) ->
 #         logs = []
 
-#         @Cypress.on "log", (@log) =>
+#         @Cypress.on "log", (attrs, @log) =>
 #           logs.push @log
 
 #         @cy.on "fail", (err) =>
@@ -675,7 +675,7 @@
 
 #     describe ".log", ->
 #       beforeEach ->
-#         @Cypress.on "log", (@log) =>
+#         @Cypress.on "log", (attrs, @log) =>
 
 #       it "has name of route", ->
 #         @cy.route("/foo", {}).then ->
@@ -685,9 +685,9 @@
 #         @cy.route("*", {}).then ->
 #           expect(@log.get("url")).to.eq("*")
 
-#       it "#onConsole", ->
+#       it "#consoleProps", ->
 #         @cy.route("*", {foo: "bar"}).as("foo").then ->
-#           expect(@log.attributes.onConsole()).to.deep.eq {
+#           expect(@log.attributes.consoleProps()).to.deep.eq {
 #             Command: "route"
 #             Method: "GET"
 #             URL: "*"
@@ -782,7 +782,7 @@
 #         beforeEach ->
 #           logs = []
 
-#           @Cypress.on "log", (log) =>
+#           @Cypress.on "log", (attrs, log) =>
 #             logs.push(log)
 
 #           @cy
@@ -806,7 +806,7 @@
 #           _.each obj, (value, key) =>
 #             expect(@log.get(key)).to.deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
-#         it "#onConsole", ->
+#         it "#consoleProps", ->
 
 #         it "ends", ->
 #           expect(@log.get("state")).to.eq("passed")
@@ -857,11 +857,11 @@
 #         .then ->
 #           expect(@cy.prop("bindServer")).to.be.a("function")
 #           expect(@cy.prop("bindRoutes")).to.be.a("array")
-#         .visit("fixtures/html/sinon.html")
+#         .visit("http://localhost:3500/fixtures/html/sinon.html")
 #         .then ->
 #           expect(@cy.prop("bindServer")).to.be.a("function")
 #           expect(@cy.prop("bindRoutes")).to.be.a("array")
-#         .visit("fixtures/html/sinon.html")
+#         .visit("http://localhost:3500/fixtures/html/sinon.html")
 #         .wait("@getFoo").its("url").should("include", "?some=data")
 
 #   context "#cancel", ->

@@ -3,14 +3,40 @@ hbs          = require("hbs")
 url          = require("url")
 http         = require("http")
 cookie       = require("cookie")
+stream       = require("stream")
 express      = require("express")
 Promise      = require("bluebird")
+evilDns      = require("evil-dns")
+statuses     = require("http-status-codes")
 httpProxy    = require("http-proxy")
-allowDestroy = require("server-destroy")
+httpsProxy   = require("@cypress/core-https-proxy")
+allowDestroy = require("server-destroy-vvo")
+cors         = require("./util/cors")
+appData      = require("./util/app_data")
+buffers      = require("./util/buffers")
 cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
 Socket       = require("./socket")
+Request      = require("./request")
+
+DEFAULT_DOMAIN_NAME    = "localhost"
+fullyQualifiedRe       = /^https?:\/\//
+isOkayStatusRe         = /^2/
+
+setProxiedUrl = (req) ->
+  ## bail if we've already proxied the url
+  return if req.proxiedUrl
+
+  ## backup the original proxied url
+  ## and slice out the host/origin
+  ## and only leave the path which is
+  ## how browsers would normally send
+  ## use their url
+  req.proxiedUrl = req.url
+  logger.info "Setting proxied url", proxiedUrl: req.proxiedUrl
+
+  req.url = url.parse(req.url).path
 
 ## currently not making use of event emitter
 ## but may do so soon
@@ -19,17 +45,32 @@ class Server
     if not (@ instanceof Server)
       return new Server
 
-    @_server = null
-    @_proxy  = null
-    @_socket = null
+    @_middleware = null
+    @_server     = null
+    @_socket     = null
+    @_wsProxy    = null
+    @_httpsProxy = null
 
-  createExpressApp: (port, morgan) ->
+  createExpressApp: (morgan) ->
     app = express()
 
     ## set the cypress config from the cypress.json file
-    app.set "port",        port
-    app.set "view engine", "html"
-    app.engine "html",     hbs.__express
+    app.set("view engine", "html")
+    app.engine("html",     hbs.__express)
+
+    ## handle the proxied url in case
+    ## we have not yet started our websocket server
+    app.use (req, res, next) =>
+      setProxiedUrl(req)
+
+      ## if we've defined some middlware
+      ## then call this. useful in tests
+      if m = @_middleware
+        m(req, res)
+
+      ## always continue on
+
+      next()
 
     app.use require("cookie-parser")()
     app.use require("compression")()
@@ -48,8 +89,8 @@ class Server
 
     return app
 
-  createRoutes: (app, config) ->
-    require("./routes")(app, config)
+  createRoutes: (app, config, getRemoteState) ->
+    require("./routes")(app, config, getRemoteState)
 
   getHttpServer: -> @_server
 
@@ -59,21 +100,41 @@ class Server
     e.portInUse = true
     e
 
-  open: (projectRoot, config = {}) ->
+  resetState: ->
+    buffers.reset()
+
+    if @_remoteProps
+      ## clear out the previous domain
+      ## and reset to the initial state
+      @_onDomainSet("<root>")
+
+  open: (config = {}) ->
+    ## always reset any buffers
+    ## TODO: change buffers to be an instance
+    ## here and pass this dependency around
+    buffers.reset()
+
     Promise.try =>
-      app = @createExpressApp(config.port, config.morgan)
+      app = @createExpressApp(config.morgan)
 
       logger.setSettings(config)
 
-      @createRoutes(app, config)
+      getRemoteState = => @_getRemoteState()
+
+      @createHosts(config.hosts)
+
+      @createRoutes(app, config, getRemoteState)
 
       @createServer(config.port, config.socketIoRoute, app)
-      .return(@)
+
+  createHosts: (hosts = {}) ->
+    _.each hosts, (ip, host) ->
+      evilDns.add(host, ip)
 
   createServer: (port, socketIoRoute, app) ->
     new Promise (resolve, reject) =>
-      @_server = http.createServer(app)
-      @_proxy  = httpProxy.createProxyServer()
+      @_server  = http.createServer(app)
+      @_wsProxy = httpProxy.createProxyServer()
 
       allowDestroy(@_server)
 
@@ -85,35 +146,323 @@ class Server
           reject @portInUseErr(port)
 
       onUpgrade = (req, socket, head) =>
-        @proxyWebsockets(@_proxy, socketIoRoute, req, socket, head)
+        @proxyWebsockets(@_wsProxy, socketIoRoute, req, socket, head)
+
+      callListeners = (req, res) =>
+        listeners = @_server.listeners("request").slice(0)
+
+        @_callRequestListeners(@_server, listeners, req, res)
+
+      onSniUpgrade = (req, socket, head) =>
+        upgrades = @_server.listeners("upgrade").slice(0)
+        for upgrade in upgrades
+          upgrade.call(@_server, req, socket, head)
+
+      @_server.on "connect", (req, socket, head) =>
+        @_httpsProxy.connect(req, socket, head, {
+          onDirectConnection: (req) =>
+            ## make a direct connection only if
+            ## our req url does not match the origin policy
+            ## which is the superDomain + port
+            dc = not cors.urlMatchesOriginPolicyProps("https://" + req.url, @_remoteProps)
+
+            if dc
+              str = "Making"
+            else
+              str = "Not making"
+
+            logger.info(str + " direction connection to: '#{req.url}'")
+
+            return dc
+        })
 
       @_server.on "upgrade", onUpgrade
 
       @_server.once "error", onError
 
-      @_server.listen port, =>
+      @_listen(port, onError)
+      .then (port) =>
+        ## once we open set the domain
+        ## to root by default
+        ## which prevents a situation where navigating
+        ## to http sites redirects to /__/ cypress
+        @_onDomainSet("<root>")
+
+        httpsProxy.create(appData.path("proxy"), port, {
+          onRequest: callListeners
+          onUpgrade: onSniUpgrade
+        })
+        .then (httpsProxy) =>
+          @_httpsProxy = httpsProxy
+
+          resolve(port)
+
+  _listen: (port, onError) ->
+    new Promise (resolve) =>
+      listener = =>
+        port = @_server.address().port
+
         @isListening = true
+
         logger.info("Server listening", {port: port})
 
         @_server.removeListener "error", onError
 
-        resolve(@_server)
+        resolve(port)
+
+      ## nuke port from our args if its falsy
+      args = _.compact([port, listener])
+
+      @_server.listen.apply(@_server, args)
+
+  _getRemoteState: ->
+    # {
+    #   origin: "http://localhost:2020"
+    #   strategy: "file"
+    #   domainName: "localhost"
+    #   props: null
+    # }
+
+    # {
+    #   origin: "https://foo.google.com"
+    #   strategy: "http"
+    #   domainName: "google.com"
+    #   props: {
+    #     port: 443
+    #     tld: "com"
+    #     domain: "google"
+    #   }
+    # }
+
+    _.extend({},  {
+      props:      @_remoteProps
+      origin:     @_remoteOrigin
+      strategy:   @_remoteStrategy
+      visiting:   @_remoteVisitingUrl
+      domainName: @_remoteDomainName
+    })
+
+  _onResolveUrl: (urlStr, automationRequest) ->
+    handlingLocalFile = false
+    previousState = _.clone @_getRemoteState()
+
+    ## nuke any hashes from our url since
+    ## those those are client only and do
+    ## not apply to http requests
+    urlStr = url.parse(urlStr)
+    urlStr.hash = null
+    urlStr = urlStr.format()
+
+    originalUrl = urlStr
+
+    ## if we have a buffer for this url
+    ## then just respond with its details
+    ## so we are idempotant and do not make
+    ## another request
+    if obj = buffers.getByOriginalUrl(urlStr)
+      ## reset the cookies from the existing stream's jar
+      Request.setJarCookies(obj.jar, automationRequest)
+      .then (c) ->
+        return obj.details
+    else
+      new Promise (resolve) =>
+        redirects = []
+        newUrl = null
+
+        if not fullyQualifiedRe.test(urlStr)
+          handlingLocalFile = true
+
+          @_remoteVisitingUrl = true
+
+          @_onDomainSet(urlStr)
+
+          urlStr = url.resolve(@_remoteOrigin, urlStr)
+
+        error = (err) ->
+          restorePreviousState()
+
+          resolve({__error: errors.clone(err)})
+
+        getStatusText = (code) ->
+          try
+            statuses.getStatusText(code)
+          catch e
+            "Unknown Status Code"
+
+        handleReqStream = (str) =>
+          pt = str
+          .on("error", error)
+          .on "response", (incomingRes) =>
+            jar = str.getJar()
+
+            Request.setJarCookies(jar, automationRequest)
+            .then (c) =>
+              @_remoteVisitingUrl = false
+
+              newUrl ?= urlStr
+
+              isOkay = isOkayStatusRe.test(incomingRes.statusCode)
+
+              details = {
+                ## TODO: get a status code message here?
+                ok: isOkay
+                url: newUrl
+                status: incomingRes.statusCode
+                cookies: c
+                statusText: getStatusText(incomingRes.statusCode)
+                redirects: redirects
+                originalUrl: originalUrl
+              }
+
+              ## does this response have this cypress header?
+              if fp = incomingRes.headers["x-cypress-file-path"]
+                ## if so we know this is a local file request
+                details.filePath = fp
+
+              if isOkay
+                ## reset the domain to the new url if we're not
+                ## handling a local file
+                @_onDomainSet(newUrl) if not handlingLocalFile
+
+                buffers.set({
+                  url: newUrl
+                  jar: jar
+                  stream: pt
+                  details: details
+                  originalUrl: originalUrl
+                  response: incomingRes
+                })
+              else
+                restorePreviousState()
+
+              resolve(details)
+
+            .catch(error)
+          .pipe(stream.PassThrough())
+
+        restorePreviousState = =>
+          @_remoteProps        = previousState.props
+          @_remoteOrigin       = previousState.origin
+          @_remoteStrategy     = previousState.strategy
+          @_remoteDomainName   = previousState.domainName
+          @_remoteVisitingUrl  = previousState.visiting
+
+        mergeHost = (curr, next) ->
+          ## parse our next url
+          next = url.parse(next, true)
+
+          ## and if its missing its host
+          ## then take it from the current url
+          if not next.host
+            curr = url.parse(curr, true)
+
+            for prop in ["hostname", "port", "protocol"]
+              next[prop] = curr[prop]
+
+          next.format()
+
+        Request.sendStream(automationRequest, {
+          ## turn off gzip since we need to eventually
+          ## rewrite these contents
+          gzip: false
+          url: urlStr
+          followRedirect: (incomingRes) ->
+            status = incomingRes.statusCode
+            next = incomingRes.headers.location
+
+            curr = newUrl ? urlStr
+
+            newUrl = mergeHost(curr, next)
+
+            redirects.push([status, newUrl].join(": "))
+
+            return true
+        })
+        .then(handleReqStream)
+        .catch(error)
+
+  _onDomainSet: (fullyQualifiedUrl) ->
+    log = (type, url) ->
+      logger.info("Setting #{type}", value: url)
+
+    ## if this isn't a fully qualified url
+    ## or if this came to us as <root> in our tests
+    ## then we know to go back to our default domain
+    ## which is the localhost server
+    if fullyQualifiedUrl is "<root>" or not fullyQualifiedRe.test(fullyQualifiedUrl)
+      @_remoteOrigin = "http://#{DEFAULT_DOMAIN_NAME}:#{@_server.address().port}"
+      @_remoteStrategy = "file"
+      @_remoteDomainName = DEFAULT_DOMAIN_NAME
+      @_remoteProps = null
+
+      log("remoteOrigin", @_remoteOrigin)
+      log("remoteStrategy", @_remoteStrategy)
+      log("remoteHostAndPort", @_remoteProps)
+      log("remoteDocDomain", @_remoteDomainName)
+
+    else
+      parsed = url.parse(fullyQualifiedUrl)
+
+      parsed.hash     = null
+      parsed.search   = null
+      parsed.query    = null
+      parsed.path     = null
+      parsed.pathname = null
+
+      @_remoteOrigin = url.format(parsed)
+
+      @_remoteStrategy = "http"
+
+      ## set an object with port, tld, and domain properties
+      ## as the remoteHostAndPort
+      @_remoteProps = cors.parseUrlIntoDomainTldPort(@_remoteOrigin)
+
+      @_remoteDomainName = _.compact([@_remoteProps.domain, @_remoteProps.tld]).join(".")
+
+      log("remoteOrigin", @_remoteOrigin)
+      log("remoteHostAndPort", @_remoteProps)
+      log("remoteDocDomain", @_remoteDomainName)
+
+    return @_getRemoteState()
+
+  _callRequestListeners: (server, listeners, req, res) ->
+    for listener in listeners
+      listener.call(server, req, res)
+
+  _normalizeReqUrl: (server) ->
+    ## because socket.io removes all of our request
+    ## events, it forces the socket.io traffic to be
+    ## handled first.
+    ## however we need to basically do the same thing
+    ## it does and after we call into socket.io go
+    ## through and remove all request listeners
+    ## and change the req.url by slicing out the host
+    ## because the browser is in proxy mode
+    listeners = server.listeners("request").slice(0)
+    server.removeAllListeners("request")
+    server.on "request", (req, res) =>
+      setProxiedUrl(req)
+
+      @_callRequestListeners(server, listeners, req, res)
 
   proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
     ## bail if this is our own namespaced socket.io request
     return if req.url.startsWith(socketIoRoute)
 
-    ## parse the cookies to find our remoteHost
-    cookies = cookie.parse(req.headers.cookie ? "")
-
-    if remoteHost = cookies["__cypress.remoteHost"]
-      ## get the hostname + port from the remoteHost
-      {hostname, port} = url.parse(remoteHost)
+    if (host = req.headers.host) and @_remoteProps and (remoteOrigin = @_remoteOrigin)
+      ## get the port from @_remoteProps
+      ## get the protocol from remoteOrigin
+      ## get the hostname from host header
+      {port}     = @_remoteProps
+      {protocol} = url.parse(remoteOrigin)
+      {hostname} = url.parse("http://#{host}")
 
       proxy.ws(req, socket, head, {
+        secure: false
         target: {
           host: hostname
           port: port
+          protocol: protocol
         }
       })
     else
@@ -124,6 +473,8 @@ class Server
   _close: ->
     new Promise (resolve) =>
       logger.unsetSettings()
+
+      evilDns.clear()
 
       ## bail early we dont have a server or we're not
       ## currently listening
@@ -139,13 +490,35 @@ class Server
     Promise.join(
       @_close()
       @_socket?.close()
+      @_httpsProxy?.close()
     )
+    .then =>
+      ## reset any middleware
+      @_middleware = null
 
   end: ->
     @_socket and @_socket.end()
 
-  startWebsockets: (watchers, config, options) ->
+  changeToUrl: (url) ->
+    @_socket and @_socket.changeToUrl(url)
+
+  onRequest: (fn) ->
+    @_middleware = fn
+
+  onNextRequest: (fn) ->
+    @onRequest =>
+      fn.apply(@, arguments)
+
+      @_middleware = null
+
+  startWebsockets: (watchers, config, options = {}) ->
+    options.onResolveUrl = (urlStr, automationRequest, cb) =>
+      @_onResolveUrl(urlStr, automationRequest)
+      .then(cb)
+
     @_socket = Socket()
     @_socket.startListening(@_server, watchers, config, options)
+    @_normalizeReqUrl(@_server)
+    # handleListeners(@_server)
 
 module.exports = Server

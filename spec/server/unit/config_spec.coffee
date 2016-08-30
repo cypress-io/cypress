@@ -1,10 +1,19 @@
 require("../spec_helper")
 
+_        = require("lodash")
 path     = require("path")
 config   = require("#{root}lib/config")
 settings = require("#{root}lib/util/settings")
 
 describe "lib/config", ->
+  beforeEach ->
+    @env = process.env
+
+    process.env = _.omit(process.env, "CYPRESS_DEBUG")
+
+  afterEach ->
+    process.env = @env
+
   context ".get", ->
     beforeEach ->
       @sandbox.stub(settings, "readEnv").withArgs("path/to/project").resolves({foo: "bar"})
@@ -100,17 +109,17 @@ describe "lib/config", ->
       @defaults = (prop, value, cfg = {}, options = {}) =>
         expect(config.mergeDefaults(cfg, options)[prop]).to.deep.eq(value)
 
-    it "port=2020", ->
-      @defaults "port", 2020
+    it "port=null", ->
+      @defaults "port", null
 
     it "autoOpen=false", ->
       @defaults "autoOpen", false
 
     it "clientUrl=http://localhost:2020/__/", ->
-      @defaults "clientUrl", "http://localhost:2020/__/"
+      @defaults "clientUrl", "http://localhost:2020/__/", {port: 2020}
 
     it "clientUrlDisplay=http://localhost:2020", ->
-      @defaults "clientUrlDisplay", "http://localhost:2020"
+      @defaults "clientUrlDisplay", "http://localhost:2020", {port: 2020}
 
     it "namespace=__cypress", ->
       @defaults "namespace", "__cypress"
@@ -257,6 +266,7 @@ describe "lib/config", ->
 
         expect(cfg.resolved).to.deep.eq({
           port:                       { value: 1234, from: "cli" },
+          hosts:                      { value: null, from: "default" }
           reporter:                   { value: "json", from: "cli" },
           baseUrl:                    { value: null, from: "default" },
           commandTimeout:             { value: 4000, from: "default" },
@@ -284,6 +294,7 @@ describe "lib/config", ->
 
         obj = {
           baseUrl: "http://localhost:8080"
+          port: 2020
           env: {
             foo: "foo"
           }
@@ -300,7 +311,8 @@ describe "lib/config", ->
         cfg = config.mergeDefaults(obj, options)
 
         expect(cfg.resolved).to.deep.eq({
-          port:                       { value: 2020, from: "default" },
+          port:                       { value: 2020, from: "config" },
+          hosts:                      { value: null, from: "default" }
           reporter:                   { value: "spec", from: "default" },
           baseUrl:                    { value: "http://localhost:8080", from: "config" },
           commandTimeout:             { value: 4000, from: "default" },

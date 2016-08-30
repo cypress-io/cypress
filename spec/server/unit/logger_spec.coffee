@@ -20,9 +20,11 @@ describe "lib/logger", ->
     appData.remove()
 
   it "has 1 transport", ->
-    expect(logger.transports).to.have.keys("all")
+    expect(logger.transports).to.include.keys("all")
 
   it "logs to all", (done) ->
+    done = _.once(done)
+
     logger.on "logging", (transport, level, msg, data) ->
       expect(level).to.eq("info")
       expect(msg).to.eq("foo!")

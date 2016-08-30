@@ -127,7 +127,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
 
       if options.log
         options._log = Cypress.Log.command
-          onConsole: ->
+          consoleProps: ->
             obj = {}
             obj.Preset = preset if preset
             obj.Width  = width
@@ -143,7 +143,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
 
       widthAndHeightAreWithinBounds = (width, height) ->
         _.all [width, height], (val) ->
-          val > 200 and val < 3000
+          val >= 200 and val <= 3000
 
       switch
         when _.isString(presetOrWidth) and _.isBlank(presetOrWidth)

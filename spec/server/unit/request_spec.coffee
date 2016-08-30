@@ -54,31 +54,34 @@ describe "lib/request", ->
 
       init = @sandbox.spy rp.Request.prototype, "init"
       nock("http://www.github.com")
-        .get("/foo")
-        .reply 200, "hello", {
-          "Content-Type": "text/html"
-        }
+      .get("/foo")
+      .reply 200, "hello", {
+        "Content-Type": "text/html"
+      }
 
-      Request.send(@fn, {url: "http://www.github.com/foo"}).then ->
+      Request.send(@fn, {url: "http://www.github.com/foo"})
+      .then ->
         expect(init).to.be.calledWithMatch({strictSSL: false})
 
     it "sets simple=false", (done) ->
       nock("http://www.github.com")
-        .get("/foo")
-        .reply 500, ""
+      .get("/foo")
+      .reply(500, "")
 
       ## should not bomb on 500
       ## because simple = false
-      Request.send(@fn, {url: "http://www.github.com/foo"}).then -> done()
+      Request.send(@fn, {url: "http://www.github.com/foo"})
+      .then -> done()
 
     it "sets resolveWithFullResponse=true", ->
       nock("http://www.github.com")
-        .get("/foo")
-        .reply 200, "hello", {
-          "Content-Type": "text/html"
-        }
+      .get("/foo")
+      .reply 200, "hello", {
+        "Content-Type": "text/html"
+      }
 
-      Request.send(@fn, {url: "http://www.github.com/foo"}).then (resp) ->
+      Request.send(@fn, {url: "http://www.github.com/foo"})
+      .then (resp) ->
         expect(resp).to.have.keys("status", "body", "headers", "duration")
 
         expect(resp.status).to.eq(200)
@@ -87,12 +90,12 @@ describe "lib/request", ->
 
     it "sends Cookie header, and body", ->
       nock("http://localhost:8080")
-        .matchHeader("Cookie", "foo=bar; baz=quux")
-        .post("/users", {
-          first: "brian"
-          last: "mann"
-        })
-        .reply(200, {id: 1})
+      .matchHeader("Cookie", "foo=bar; baz=quux")
+      .post("/users", {
+        first: "brian"
+        last: "mann"
+      })
+      .reply(200, {id: 1})
 
       Request.send(@fn, {
         url: "http://localhost:8080/users"
@@ -103,7 +106,8 @@ describe "lib/request", ->
           first: "brian"
           last: "mann"
         }
-      }).then (resp) ->
+      })
+      .then (resp) ->
         expect(resp.status).to.eq(200)
         expect(resp.body.id).to.eq(1)
 
@@ -116,7 +120,8 @@ describe "lib/request", ->
       })
       .reply(200, {id: 1})
 
-      @fn.withArgs("get:cookies", {domain: "localhost"}).resolves([
+      @fn.withArgs("get:cookies", {url: "http://localhost:8080/users"})
+      .resolves([
         {name: "foo", value: "bar"}
         {name: "baz", value: "quux"}
       ])
@@ -131,7 +136,8 @@ describe "lib/request", ->
           first: "brian"
           last: "mann"
         }
-      }).then (resp) ->
+      })
+      .then (resp) ->
         expect(resp.status).to.eq(200)
         expect(resp.body.id).to.eq(1)
 
@@ -144,7 +150,8 @@ describe "lib/request", ->
       })
       .reply(200, {id: 1})
 
-      @fn.withArgs("get:cookies", {domain: "github.com"}).resolves([
+      @fn.withArgs("get:cookies", {url: "http://github.com:8080/users"})
+      .resolves([
         {name: "foo", value: "bar"}
         {name: "baz", value: "quux"}
       ])
@@ -158,44 +165,48 @@ describe "lib/request", ->
           first: "brian"
           last: "mann"
         }
-      }).then (resp) ->
+      })
+      .then (resp) ->
         expect(resp.status).to.eq(200)
         expect(resp.body.id).to.eq(1)
 
     it "parses response body as json if content-type application/json response headers", ->
       nock("http://localhost:8080")
-        .get("/status.json")
-        .reply(200, JSON.stringify({status: "ok"}), {
-          "Content-Type": "application/json"
-        })
+      .get("/status.json")
+      .reply(200, JSON.stringify({status: "ok"}), {
+        "Content-Type": "application/json"
+      })
 
       Request.send(@fn, {
         url: "http://localhost:8080/status.json"
-      }).then (resp) ->
+      })
+      .then (resp) ->
         expect(resp.body).to.deep.eq({status: "ok"})
 
     it "revives from parsing bad json", ->
       nock("http://localhost:8080")
-        .get("/status.json")
-        .reply(200, "{bad: 'json'}", {
-          "Content-Type": "application/json"
-        })
+      .get("/status.json")
+      .reply(200, "{bad: 'json'}", {
+        "Content-Type": "application/json"
+      })
 
       Request.send(@fn, {
         url: "http://localhost:8080/status.json"
-      }).then (resp) ->
+      })
+      .then (resp) ->
         expect(resp.body).to.eq("{bad: 'json'}")
 
     it "sets duration on response", ->
       nock("http://localhost:8080")
-        .get("/foo")
-        .reply(200, "123", {
-          "Content-Type": "text/plain"
-        })
+      .get("/foo")
+      .reply(200, "123", {
+        "Content-Type": "text/plain"
+      })
 
       Request.send(@fn, {
         url: "http://localhost:8080/foo"
-      }).then (resp) ->
+      })
+      .then (resp) ->
         expect(resp.duration).to.be.a("Number")
         expect(resp.duration).to.be.gt(0)
 

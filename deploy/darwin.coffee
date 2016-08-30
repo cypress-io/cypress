@@ -29,23 +29,6 @@ class Darwin extends Base
   runFailingProjectTest: ->
     @_runFailingProjectTest()
 
-  getBuildDest: (pathToBuild, platform) ->
-    ## returns ./build/darwin
-    path.join path.dirname(pathToBuild), platform
-
-  afterBuild: (pathToBuild) ->
-    @log("#afterBuild")
-
-    @modifyPlist(pathToBuild)
-
-  modifyPlist: (pathToBuild) ->
-    pathToPlist = path.join(pathToBuild, "Cypress.app", "Contents", "Info.plist")
-
-    fs.readFileAsync(pathToPlist, "utf8").then (contents) ->
-      obj = plist.parse(contents)
-      obj.LSUIElement = 1
-      fs.writeFileAsync(pathToPlist, plist.build(obj))
-
   codeSign: ->
     @log("#codeSign")
 

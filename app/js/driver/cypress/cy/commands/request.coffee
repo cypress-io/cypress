@@ -86,8 +86,8 @@ $Cypress.register "Request", (Cypress, _, $) ->
       ## or the baseUrl
       ## or just using the options.url if its FQDN
       ## origin may return an empty string if we haven't visited anything yet
-      origin = @_getLocation("origin") or @Cypress.config("baseUrl")
-      options.url = Cypress.Location.getRemoteUrl options.url, origin
+      originOrBase = @_getLocation("origin") or @Cypress.config("baseUrl")
+      options.url = Cypress.Location.getRemoteUrl(options.url, originOrBase)
 
       ## if options.url isnt FQDN then we need to throw here
       ## if we made a request prior to a visit then it needs
@@ -127,27 +127,25 @@ $Cypress.register "Request", (Cypress, _, $) ->
       if options.log
         options._log = Cypress.Log.command({
           message: ""
-          onConsole: -> {
+          consoleProps: -> {
             Request: requestOpts
             Returned: options.response
           }
 
-          onRender: ($row) ->
+          renderProps: ->
             status = switch
               when r = options.response
                 r.status
               else
-                klass = "pending"
+                indicator = "pending"
                 "---"
 
-            klass ?= if isOkStatusCodeRe.test(status) then "successful" else "bad"
+            indicator ?= if isOkStatusCodeRe.test(status) then "successful" else "bad"
 
-            $row.find(".command-message").html ->
-              [
-                "<i class='fa fa-circle #{klass}'></i>" + options.method,
-                status,
-                _.truncate(options.url, 25)
-              ].join(" ")
+            {
+              message: "#{options.method} #{status} #{_.truncate(options.url, 25)}"
+              indicator: indicator
+            }
         })
 
       ## need to remove the current timeout

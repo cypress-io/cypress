@@ -29,7 +29,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         logs = []
         @cy._timeout(50)
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
 
@@ -176,7 +176,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         logs = []
         @cy._timeout(50)
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -191,7 +191,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       it "throws when mixing up async + sync return values", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -211,7 +211,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       it "unbinds enqueue in the case of an error thrown", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -289,7 +289,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -325,7 +325,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         @cy.get("input:first").invoke("foo").should("eq", "bar")
 
       it "can still fail on invoke", (done) ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.on "fail", (err) =>
           @chai.restore()
@@ -345,7 +345,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -467,7 +467,7 @@ describe "$Cypress.Cy Connectors Commands", ->
           }
         }
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs $el if subject is element", ->
         @cy.get("button:first").invoke("hide").then ($el) ->
@@ -489,7 +489,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
       it "logs obj with arguments", ->
         @cy.noop(@obj).invoke("attr", "numbers", [1,2,3]).then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command:  "invoke"
             Function: ".attr(numbers, [1, 2, 3])"
             "With Arguments": ["numbers", [1,2,3]]
@@ -497,18 +497,18 @@ describe "$Cypress.Cy Connectors Commands", ->
             Returned: {numbers: [1,2,3]}
           }
 
-      it "#onConsole as a function property without args", ->
+      it "#consoleProps as a function property without args", ->
         @cy.noop(@obj).invoke("bar").then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command:  "invoke"
             Function: ".bar()"
             On:       @obj
             Returned: "bar"
           }
 
-      it "#onConsole as a function property with args", ->
+      it "#consoleProps as a function property with args", ->
         @cy.noop(@obj).invoke("sum", 1, 2, 3).then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command:  "invoke"
             Function: ".sum(1, 2, 3)"
             "With Arguments": [1,2,3]
@@ -516,9 +516,9 @@ describe "$Cypress.Cy Connectors Commands", ->
             Returned: 6
           }
 
-      it "#onConsole as a function reduced property with args", ->
+      it "#consoleProps as a function reduced property with args", ->
         @cy.noop(@obj).invoke("math.sum", 1, 2, 3).then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command:  "invoke"
             Function: ".math.sum(1, 2, 3)"
             "With Arguments": [1,2,3]
@@ -526,10 +526,10 @@ describe "$Cypress.Cy Connectors Commands", ->
             Returned: 6
           }
 
-      it "#onConsole as a function on DOM element", ->
+      it "#consoleProps as a function on DOM element", ->
         @cy.get("button:first").invoke("hide").then ($btn) ->
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole).to.deep.eq {
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps).to.deep.eq {
             Command: "invoke"
             Function: ".hide()"
             On: $btn.get(0)
@@ -538,7 +538,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
     describe "errors", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
         @allowErrors()
         @currentTest.timeout(200)
 
@@ -571,7 +571,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -588,9 +588,9 @@ describe "$Cypress.Cy Connectors Commands", ->
 
         @cy.noop(undefined).its("attr", "src")
 
-      it "onConsole subject", (done) ->
+      it "consoleProps subject", (done) ->
         @cy.on "fail", (err) =>
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "its"
             Error: "CypressError: Timed out retrying: cy.its() errored because the property: 'baz' does not exist on your subject."
             Subject: {foo: "bar"}
@@ -693,10 +693,10 @@ describe "$Cypress.Cy Connectors Commands", ->
         @obj.baz.quux = -> "quux"
         @obj.baz.lorem = "ipsum"
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "its"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq ".foo"
@@ -724,9 +724,9 @@ describe "$Cypress.Cy Connectors Commands", ->
           _.each obj, (value, key) =>
             expect(@log.get(key)).to.deep.eq value
 
-      it "#onConsole as a regular property", ->
+      it "#consoleProps as a regular property", ->
         @cy.noop(@obj).its("num").then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command:  "its"
             Property: ".num"
             On:       @obj
@@ -735,7 +735,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
     describe "errors", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @allowErrors()
         @currentTest.timeout(200)
@@ -751,7 +751,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
         @Cypress.on "fail", (err) =>
           expect(@log.get("error")).to.include(err)
-          expect(@log.attributes.onConsole().Property).to.eq(".foo.bar.baz")
+          expect(@log.attributes.consoleProps().Property).to.eq(".foo.bar.baz")
           done()
 
         @cy.wrap(obj).its("foo.bar.baz").should("eq", "baz")
@@ -902,13 +902,13 @@ describe "$Cypress.Cy Connectors Commands", ->
       beforeEach ->
         @allowErrors()
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
         @currentTest.timeout(200)
 
       it "can time out", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @Cypress.on "fail", (err) =>
@@ -923,7 +923,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       it "throws when not passed a callback function", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @Cypress.on "fail", (err) =>
@@ -937,7 +937,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       it "throws when not passed a number", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @Cypress.on "fail", (err) =>
@@ -951,7 +951,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       it "throws when not passed an array like structure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @Cypress.on "fail", (err) =>

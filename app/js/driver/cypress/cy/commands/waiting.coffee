@@ -31,7 +31,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
       if options.log isnt false
         options._log = Cypress.Log.command
-          onConsole: -> {
+          consoleProps: -> {
             "Waited For": "#{ms}ms before continuing"
             "Returned": subject
           }
@@ -74,9 +74,11 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
           type
         }
 
+
         args = arguments
 
         @_retry ->
+          args.options = _.omit(options, "timeout")
           checkForXhr.apply(@, args)
         , options
 
@@ -146,7 +148,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
           ## we may get back an xhr value instead
           ## of a promise, so we have to wrap this
           ## in another promise :-(
-          xhr = Promise.resolve waitForXhr.call(@, str, _.omit(options, "error", "timeout"))
+          xhr = Promise.resolve waitForXhr.call(@, str, _.omit(options, "error"))
           xhrs.push(xhr)
           xhr
         .then (responses) ->
@@ -155,8 +157,8 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
           ret = if responses.length is 1 then responses[0] else responses
 
           if options._log
-            options._log.set "onConsole", -> {
-              "Waited For": @referencesAlias.join(", ")
+            options._log.set "consoleProps", -> {
+              "Waited For": (@referencesAlias || []).join(", ")
               "Returned": ret
             }
 

@@ -90,12 +90,12 @@ describe "$Cypress.Cy Querying Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "can silence logging", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log) if log.name is "within"
 
         @cy.get("div:first").within({log: false}, ->).then ->
@@ -104,7 +104,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs immediately before resolving", (done) ->
         div = @cy.$$("div:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "within"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("")
@@ -126,7 +126,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -184,14 +184,14 @@ describe "$Cypress.Cy Querying Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "can turn off logging", ->
         @cy.root({log: false}).then ->
           expect(@log).to.be.undefined
 
       it "logs immediately before resolving", (done) ->
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "root"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("")
@@ -200,7 +200,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.root()
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.root().then ->
           expect(@log.get("snapshots").length).to.eq(1)
@@ -221,10 +221,10 @@ describe "$Cypress.Cy Querying Commands", ->
             .root().then ($root) ->
               expect(@log.get("$el").get(0)).to.eq(form.get(0))
 
-      it "onConsole", ->
+      it "consoleProps", ->
         @cy.root().then ($root) ->
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole).to.deep.eq {
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps).to.deep.eq {
             Command: "root"
             Returned: $root.get(0)
           }
@@ -294,7 +294,7 @@ describe "$Cypress.Cy Querying Commands", ->
     it "cancels existing promises", (done) ->
       logs = []
 
-      @Cypress.on "log", (log) ->
+      @Cypress.on "log", (attrs, log) ->
         logs.push(log)
 
       retrys = 0
@@ -534,7 +534,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs elements length", ->
         buttons = @cy.$$("button")
@@ -556,7 +556,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
       it "logs route aliases", ->
         @cy
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .server()
           .route(/users/, {}).as("getUsers")
           .window().then (win) ->
@@ -569,7 +569,7 @@ describe "$Cypress.Cy Querying Commands", ->
             }
 
       it "logs primitive aliases", (done) ->
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           expect(log.pick("$el", "numRetries", "referencesAlias", "aliasType")).to.deep.eq {
             referencesAlias: "f"
             aliasType: "primitive"
@@ -581,7 +581,7 @@ describe "$Cypress.Cy Querying Commands", ->
           .get("@f")
 
       it "logs immediately before resolving", (done) ->
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           expect(log.pick("state", "referencesAlias", "aliasType")).to.deep.eq {
             state: "pending"
             referencesAlias: undefined
@@ -615,41 +615,41 @@ describe "$Cypress.Cy Querying Commands", ->
           _.each obj, (value, key) =>
             expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.get("body").then ($body) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "get"
             Selector: "body"
             Returned: $body.get(0)
             Elements: 1
           }
 
-      it "#onConsole with an alias", ->
+      it "#consoleProps with an alias", ->
         @cy.get("body").as("b").get("@b").then ($body) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "get"
             Alias: "@b"
             Returned: $body.get(0)
             Elements: 1
           }
 
-      it "#onConsole with a primitive alias", ->
+      it "#consoleProps with a primitive alias", ->
         @cy.noop({foo: "foo"}).as("obj").get("@obj").then (obj) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "get"
             Alias: "@obj"
             Returned: obj
           }
 
-      it "#onConsole with a route alias", ->
+      it "#consoleProps with a route alias", ->
         @cy
           .server()
           .route(/users/, {}).as("getUsers")
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
             win.$.get("/users")
           .get("@getUsers").then (obj) ->
-            expect(@log.attributes.onConsole()).to.deep.eq {
+            expect(@log.attributes.consoleProps()).to.deep.eq {
               Command: "get"
               Alias: "@getUsers"
               Returned: obj
@@ -696,7 +696,7 @@ describe "$Cypress.Cy Querying Commands", ->
           @cy
             .server()
             .route(/users/, {}).as("getUsers")
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .window().then (win) ->
               win.$.get("/users")
             .get("@getUsers").then (xhr) ->
@@ -706,13 +706,13 @@ describe "$Cypress.Cy Querying Commands", ->
           @cy
             .server()
             .route(/users/, {}).as("getUsers")
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .get("@getUsers").then (xhr) ->
               expect(xhr).to.be.null
 
         it "returns an array of xhrs", ->
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
@@ -725,7 +725,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
         it "returns the 1st xhr", ->
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
@@ -736,7 +736,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
         it "returns the 2nd xhr", ->
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
@@ -749,7 +749,7 @@ describe "$Cypress.Cy Querying Commands", ->
           @cy
             .server()
             .route(/users/, {}).as("getUsers")
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .window().then (win) ->
               win.$.get("/users", {num: 1})
               win.$.get("/users", {num: 2})
@@ -803,7 +803,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "throws once when incorrect sizzle selector", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) ->
@@ -861,7 +861,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy
           .server()
           .route(/json/, {foo: "foo"}).as("getJSON")
-          .visit("/fixtures/html/xhr.html").then ->
+          .visit("http://localhost:3500/fixtures/html/xhr.html").then ->
             @cy.$$("#get-json").click =>
               @cy._timeout(1000)
 
@@ -897,7 +897,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("#button").should("be.visible")
 
       it "sets error command state", (done) ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.on "fail", (err) =>
           expect(@log.get("state")).to.eq "failed"
@@ -939,15 +939,15 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = @cy.$$("#button").hide()
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.on "fail", (err) =>
           expect(@log.get("state")).to.eq("failed")
           expect(@log.get("error")).to.eq err
           expect(@log.get("$el").get(0)).to.eq button.get(0)
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole.Returned).to.eq button.get(0)
-          expect(onConsole.Elements).to.eq button.length
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps.Returned).to.eq button.get(0)
+          expect(consoleProps.Elements).to.eq button.length
           done()
 
         @cy.get("#button").should("be.visible")
@@ -1217,10 +1217,10 @@ describe "$Cypress.Cy Querying Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "contains"
             expect(log.pick("state", "type")).to.deep.eq {
               state: "pending"
@@ -1231,7 +1231,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("body").contains("foo")
 
       it "snapshots and ends after finding element", ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.contains("foo").then ->
           expect(@log.get("end")).to.be.true
@@ -1242,7 +1242,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "silences internal @cy.get() log", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push log
 
         ## GOOD: [ {name: get} , {name: contains} ]
@@ -1278,10 +1278,10 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.get("message")).to.eq "div, Nested Find"
           expect(@log.get("$el")).to.eq $div
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @cy.get("#complex-contains").contains("nested contains").then ($label) ->
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole).to.deep.eq {
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps).to.deep.eq {
             Command: "contains"
             Content: "nested contains"
             "Applied To": getFirstSubjectByName.call(@, "get").get(0)
@@ -1312,7 +1312,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs once on error", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push log
 
         @cy.on "fail", (err) ->
@@ -1359,15 +1359,15 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = @cy.$$("#button")
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.on "fail", (err) =>
           expect(@log.get("state")).to.eq("failed")
           expect(@log.get("error")).to.eq err
           expect(@log.get("$el").get(0)).to.eq button.get(0)
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole.Returned).to.eq button.get(0)
-          expect(onConsole.Elements).to.eq button.length
+          consoleProps = @log.attributes.consoleProps()
+          expect(consoleProps.Returned).to.eq button.get(0)
+          expect(consoleProps.Elements).to.eq button.length
           done()
 
         @cy.contains("button").should("not.exist")
@@ -1375,7 +1375,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "throws when assertion is have.length > 1", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) ->

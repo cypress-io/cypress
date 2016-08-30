@@ -1,8 +1,8 @@
 $Cypress.register "Location", (Cypress, _, $) ->
 
   Cypress.Cy.extend
-    _getLocation: (key) ->
-      remoteUrl = @private("window").location.toString()
+    _getLocation: (key, win) ->
+      remoteUrl = (win ? @private("window")).location.toString()
       location  = Cypress.Location.create(remoteUrl)
 
       if key

@@ -9,7 +9,7 @@ do ($Cypress, _) ->
         end: true
         snapshot: true
         error: err
-        onConsole: ->
+        consoleProps: ->
           obj = {}
           ## if type isnt parent then we know its dual or child
           ## and we can add Applied To if there is a prev command

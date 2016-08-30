@@ -16,6 +16,7 @@
   }
 
   #cy-sidebar {
+    display: none;
     -webkit-transition: width 0.05s ease;
     transition: width 0.05s ease;
     width: 200px;

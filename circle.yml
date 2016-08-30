@@ -1,12 +1,12 @@
 machine:
   node:
-    version: 5.10.0
+    version: 6.1.0
 
 test:
   pre:
     - npm run build
 
-  override:
-    - npm run test-cov
-    - npm run codecov
-    - npm run coveralls
+  # override:
+  #   - npm run test-cov
+  #   - npm run codecov
+  #   - npm run coveralls

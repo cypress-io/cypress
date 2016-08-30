@@ -47,7 +47,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         response = {foo: "foo"}
 
         @cy
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .server()
           .route("GET", /.*/, response).as("fetch")
           .window().then (win) ->
@@ -62,12 +62,26 @@ describe "$Cypress.Cy Waiting Commands", ->
           null
 
         @cy
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .server({delay: 1000})
           .route(/users/, {}).as("getUsers")
           .wait("@getUsers.request").then (xhr) ->
             expect(xhr.url).to.include "/users"
             expect(xhr.response).to.be.null
+
+      it "passes timeout option down to requestTimeout of wait", (done) ->
+        retry = _.after 3, _.once =>
+          @cy.private("window").$.get("/foo")
+
+        @cy.on "retry", (options) ->
+          expect(options.timeout).to.eq 900
+          done()
+
+        @cy
+          .server()
+          .route("GET", /.*/, {}).as("fetch")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .wait("@fetch", {timeout: 900})
 
       it "resets the timeout after waiting", ->
         prevTimeout = @cy._timeout()
@@ -80,7 +94,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         @cy
           .server()
           .route("GET", /.*/, {}).as("fetch")
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .wait("@fetch").then ->
             expect(@cy._timeout()).to.eq prevTimeout
 
@@ -94,7 +108,8 @@ describe "$Cypress.Cy Waiting Commands", ->
         @cy
           .server()
           .route("GET", "*", {}).as("fetch")
-          .wait("@fetch")
+          .wait("@fetch").then ->
+            expect(@cy._timeout()).to.eq 199
 
       it "waits for responseTimeout", (done) ->
         @Cypress.config("responseTimeout", 299)
@@ -104,13 +119,15 @@ describe "$Cypress.Cy Waiting Commands", ->
           done()
 
         @cy
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .server({delay: 100})
           .route("GET", "*", {}).as("fetch")
           .window().then (win) ->
             win.$.get("/foo")
             null
           .wait("@fetch")
+
+
 
       describe "errors", ->
         beforeEach ->
@@ -164,7 +181,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .window().then (win) ->
@@ -177,7 +194,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .route(/bar/, {}).as("bar")
@@ -191,7 +208,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .get("body").as("bar")
@@ -207,7 +224,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .route(/bar/, {}).as("bar")
@@ -226,7 +243,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             null
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {foo: "foo"}).as("foo")
             .route(/bar/, {bar: "bar"}).as("bar")
@@ -245,7 +262,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             null
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {foo: "foo"}).as("foo")
             .route(/bar/, {bar: "bar"}).as("bar")
@@ -264,7 +281,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             , 500
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .route(/bar/, {}).as("bar")
@@ -282,7 +299,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             , 500
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .get("body").as("bar")
@@ -307,7 +324,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             , 500
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {foo: "foo"}).as("foo")
             .route(/bar/, {bar: "bar"}).as("bar")
@@ -333,7 +350,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             , 500
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {foo: "foo"}).as("foo")
             .route(/bar/, {bar: "bar"}).as("bar")
@@ -358,7 +375,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             win.$.get("/users", {num: response})
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/users/, resp).as("getUsers")
             .wait(["@getUsers", "@getUsers", "@getUsers"])
@@ -380,7 +397,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             win.$.get("/users", {num: response})
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/users/, resp).as("getUsers")
             .wait("@getUsers")
@@ -403,7 +420,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             win.$.get("/users", {num: request})
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/users/, resp).as("getUsers")
             .wait("@getUsers.request")
@@ -417,7 +434,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route("*").as("response")
             .window().then (win) ->
@@ -433,7 +450,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route("*").as("response")
             .window().then (win) ->
@@ -450,7 +467,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route("/timeout?ms=0").as("foo")
             .route("/timeout?ms=5000").as("bar")
@@ -475,7 +492,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy
             .server({delay: 200})
             .route(/users/, {}).as("getUsers")
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .wait("@getUsers.request").then (xhr) ->
               expect(xhr.url).to.include "/users"
               expect(xhr.response).to.be.null
@@ -495,7 +512,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route("/timeout?ms=2001").as("getOne")
             .route("/timeout?ms=2002").as("getTwo")
@@ -517,7 +534,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route("/timeout?ms=1").as("getOne")
             .route("/timeout?ms=2").as("getTwo")
@@ -538,7 +555,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         resp2 = {bar: "bar"}
 
         @cy
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .server()
           .route(/users/, resp1).as("getUsers")
           .route(/posts/, resp2).as("getPosts")
@@ -560,7 +577,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           win.$.get("/users", {num: response})
 
         @cy
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .server()
           .route(/users/, resp).as("getUsers")
           .wait("@getUsers").then (xhr) ->
@@ -583,7 +600,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           win.$.get("/users", {num: response})
 
         @cy
-          .visit("/fixtures/html/xhr.html")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
           .server()
           .route(/users/, resp).as("getUsers")
           .wait(["@getUsers", "@getUsers", "@getUsers"]).spread (xhr1, xhr2, xhr3) ->
@@ -604,7 +621,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "can turn off logging", ->
         cy.wait(10, {log: false}).then ->
@@ -614,7 +631,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         it "does not immediately end", ->
           log = null
 
-          @Cypress.on "log", (l) =>
+          @Cypress.on "log", (attrs, l) =>
             log = l
             expect(log.get("state")).not.to.eq "passed"
 
@@ -624,7 +641,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         it "does not immediately snapshot", ->
           log = null
 
-          @Cypress.on "log", (l) =>
+          @Cypress.on "log", (attrs, l) =>
             log = l
             if log.get("name") is "wait"
               expect(@log.get("snapshots")).not.to.be.ok
@@ -645,19 +662,19 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy.wait(10).then ->
             expect(@log.get("type")).to.eq "parent"
 
-        it "#onConsole", ->
+        it "#consoleProps", ->
           @cy.wait(10).then ->
-            expect(@log.attributes.onConsole()).to.deep.eq {
+            expect(@log.attributes.consoleProps()).to.deep.eq {
               Command: "wait"
               "Waited For": "10ms before continuing"
               "Returned": undefined
             }
 
-        it "#onConsole as a child", ->
+        it "#consoleProps as a child", ->
           btn = @cy.$$("button:first")
 
           @cy.get("button:first").wait(10).then ->
-            expect(@log.attributes.onConsole()).to.deep.eq {
+            expect(@log.attributes.consoleProps()).to.deep.eq {
               Command: "wait"
               "Waited For": "10ms before continuing"
               "Returned": btn
@@ -701,7 +718,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         it "only logs once", (done) ->
           logs = []
 
-          @Cypress.on "log", (log) ->
+          @Cypress.on "log", (attrs, log) ->
             logs.push(log)
 
           @cy.on "fail", (err) ->
@@ -711,7 +728,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
           @cy.wait("@foo")
 
-        it "#onConsole multiple aliases", (done) ->
+        it "#consoleProps multiple aliases", (done) ->
           @Cypress.config("requestTimeout", 100)
 
           @cy.on "fail", (err) =>
@@ -720,7 +737,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .route(/bar/, {}).as("getBar")
@@ -731,12 +748,12 @@ describe "$Cypress.Cy Waiting Commands", ->
       describe "function argument errors", ->
         it ".log"
 
-        it "#onConsole"
+        it "#consoleProps"
 
       describe "alias argument", ->
         it "is a parent command", ->
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .window().then (win) ->
@@ -746,7 +763,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "passes as array of referencesAlias", ->
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .route(/bar/, {}).as("getBar")
@@ -756,23 +773,23 @@ describe "$Cypress.Cy Waiting Commands", ->
             .wait(["@getFoo", "@getBar"]).then (xhrs) ->
               expect(@log.get("referencesAlias")).to.deep.eq ["getFoo", "getBar"]
 
-        it "#onConsole waiting on 1 alias", ->
+        it "#consoleProps waiting on 1 alias", ->
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .window().then (win) ->
               win.$.get("foo")
             .wait("@getFoo").then (xhr) ->
-              expect(@log.attributes.onConsole()).to.deep.eq {
+              expect(@log.attributes.consoleProps()).to.deep.eq {
                 Command: "wait"
                 "Waited For": "getFoo"
                 Returned: xhr
               }
 
-        it "#onConsole waiting on multiple aliases", ->
+        it "#consoleProps waiting on multiple aliases", ->
           @cy
-            .visit("/fixtures/html/xhr.html")
+            .visit("http://localhost:3500/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .route(/bar/, {}).as("getBar")
@@ -780,14 +797,14 @@ describe "$Cypress.Cy Waiting Commands", ->
               win.$.get("foo")
               win.$.get("bar")
             .wait(["@getFoo", "@getBar"]).then (xhrs) ->
-              expect(@log.attributes.onConsole()).to.deep.eq {
+              expect(@log.attributes.consoleProps()).to.deep.eq {
                 Command: "wait"
                 "Waited For": "getFoo, getBar"
                 Returned: [xhrs[0], xhrs[1]] ## explictly create the array here
               }
 
       # describe "function argument", ->
-      #   it "#onConsole", ->
+      #   it "#consoleProps", ->
       #     retriedThreeTimes = false
 
       #     retry = _.after 3, ->
@@ -800,7 +817,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
       #     @cy
       #       .wait(fn).then ->
-      #         expect(@log.attributes.onConsole()).to.deep.eq {
+      #         expect(@log.attributes.consoleProps()).to.deep.eq {
       #           Command: "wait"
       #           "Waited For": _.str.clean(fn.toString())
       #           Retried: "3 times"

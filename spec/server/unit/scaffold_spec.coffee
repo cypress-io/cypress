@@ -116,7 +116,7 @@ describe "lib/scaffold", ->
           //   var log = Cypress.Log.command({
           //     name: "login",
           //     message: [email, password],
-          //     onConsole: function(){
+          //     consoleProps: function(){
           //       return {
           //         email: email,
           //         password: password

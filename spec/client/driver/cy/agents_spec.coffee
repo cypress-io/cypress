@@ -20,7 +20,7 @@ describe "$Cypress.Cy Agents Commands", ->
 
       describe ".log", ->
         beforeEach ->
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
 
           @cy.noop({})
 
@@ -46,7 +46,7 @@ describe "$Cypress.Cy Agents Commands", ->
           spy("foo", "baz")
           expect(@agent.get("callCount")).to.eq 2
 
-        context "#onConsole", ->
+        context "#consoleProps", ->
 
     describe ".log", ->
       it "logs even without cy current", ->
@@ -54,7 +54,7 @@ describe "$Cypress.Cy Agents Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push log
 
         spy("foo")

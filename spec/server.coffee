@@ -20,6 +20,7 @@ xhrs      = require("../lib/controllers/xhrs")
   app.set "view engine", "html"
   app.engine "html", hbs.__express
 
+  app.use require("cors")()
   app.use require("compression")()
   app.use require("morgan")(format: "dev")
   app.use require("body-parser")()

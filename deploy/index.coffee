@@ -63,7 +63,8 @@ deploy = {
     if v = options.version
       release(v)
     else
-      ask.whichRelease(meta.distDir).then(release)
+      ask.whichRelease(meta.distDir)
+      .then(release)
 
   deploy: ->
     ## read off the argv

@@ -4,13 +4,13 @@ describe "Runner Entity", ->
     @Cypress  = @runner.Cypress
 
   context "#initialize", ->
-    it "listens to test:changed events and calls reRun", ->
+    it "listens to watched:file:changed events and calls reRun", ->
       reRun = @sandbox.stub @runner, "reRun"
 
       ## need to reinitialize due to function reference
       @runner.initialize()
       socket = App.request "socket:entity"
-      socket.trigger "test:changed", "entities/user_spec.coffee"
+      socket.trigger "watched:file:changed", "entities/user_spec.coffee"
 
       expect(reRun).to.be.calledWith "entities/user_spec.coffee"
 
@@ -299,10 +299,10 @@ describe "Runner Entity", ->
       @runner.reRun "app_spec.coffee"
       expect(@abort).to.be.calledOnce
 
-    it "triggers 'reset:test:run'", ->
+    it "triggers 'restart:test:run'", ->
       trigger = @sandbox.spy(@runner, "trigger")
       @runner.reRun("app_spec.coffee").then ->
-        expect(trigger).to.be.calledWith "reset:test:run"
+        expect(trigger).to.be.calledWith "restart:test:run"
 
     it "calls triggerLoadSpecFrame with specPath and options", ->
       triggerLoadSpecFrame = @sandbox.stub(@runner, "triggerLoadSpecFrame")

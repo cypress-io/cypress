@@ -1,11 +1,13 @@
+_              = require("lodash")
 fs             = require("fs-extra")
 tar            = require("tar-fs")
 path           = require("path")
-Promise        = require("bluebird")
-_              = require("lodash")
 glob           = require("glob")
-chmodr         = require("chmodr")
 trash          = require("trash")
+chmodr         = require("chmodr")
+semver         = require("semver")
+request        = require("request")
+Promise        = require("bluebird")
 NwUpdater      = require("node-webkit-updater")
 cwd            = require("./cwd")
 konfig         = require("./konfig")
@@ -15,6 +17,29 @@ argsUtil       = require("./util/args")
 trash  = Promise.promisify(trash)
 chmodr = Promise.promisify(chmodr)
 coords = null
+
+NwUpdater.prototype.checkNewVersion = (cb) ->
+  gotManifest = (err, req, data) ->
+    if err
+      return cb(err)
+
+    if req.statusCode < 200 or req.statusCode > 299
+      return cb(new Error(req.statusCode))
+
+    try
+      data = JSON.parse(data)
+    catch e
+      return cb(e)
+
+    try
+      ## semver may throw here on invalid version
+      newVersion = semver.gt(data.version, @manifest.version)
+    catch e
+      newVersion = false
+
+    cb(null, newVersion, data)
+
+  request.get(@manifest.manifestUrl, gotManifest.bind(@))
 
 class Updater
   constructor: (callbacks) ->

@@ -1,0 +1,11 @@
+FOLDER="$1"
+
+CYPRESS_DEBUG=true \
+NODE_ENV=test \
+NODE_DEBUG=request \
+CYPRESS_ENV=test \
+BLUEBIRD_DEBUG=1 \
+DEBUG=nock.*,-nock.common,socket.io:* \
+mocha spec/server/$FOLDER \
+--recursive \
+--compilers coffee:coffee-script/register

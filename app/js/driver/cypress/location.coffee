@@ -13,50 +13,11 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
   reWww = /^www/
 
   reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
+  ipAddressRe = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
 
   class $Location
     constructor: (remote) ->
-      ## need to handle <root> here
-      ## if its root then we need to strip the origin
-      ## to make the URL look relative
-      ## else just strip out the origin and replace
-      ## it with the remoteHost
-
-      remote = new Uri remote
-
-      ## if our URL has a FQDN in its
-      ## path http://localhost:2020/http://localhost:3000/about
-      ## then dont handle anything with the remoteHost
-      if fqdn = @getFqdn(remote)
-        remote = new Uri fqdn
-      else
-        ## get the remoteHost from our cookies
-        remoteHost = $Cypress.Cookies.getRemoteHost()
-
-        if remoteHost is "<root>"
-          remoteHost = new Uri ""
-        else
-          remoteHost = new Uri remoteHost
-
-        ## and just replace the current origin with
-        ## the remoteHost origin
-        remote.setProtocol remoteHost.protocol()
-        remote.setHost remoteHost.host()
-        remote.setPort remoteHost.port()
-
-      @remote = remote
-
-    getFqdn: (url) ->
-      url = new Uri url
-
-      ## strip off the initial leading slash
-      ## since path always begins with that
-      path = url.path().slice(1)
-
-      ## if this path matches http its a FQDN
-      ## and we can return it
-      if reHttp.test(path)
-        return path
+      @remote = new Uri remote
 
     getHash: ->
       if hash = @remote.anchor()
@@ -92,6 +53,36 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
     getSearch: ->
       @remote.query()
 
+    getOriginPolicy: ->
+      ## origin policy is comprised of
+      ## protocol + superdomain
+      ## and subdomain is not factored in
+      _.compact([
+        @getProtocol() + "//" + @getSuperDomain(),
+        @getPort()
+      ]).join(":")
+
+    getSuperDomain: ->
+      hostname = @getHostName()
+      parts    = hostname.split(".")
+
+      ## if this is an ip address then
+      ## just return it straight up
+      if ipAddressRe.test(hostname)
+        return hostname
+
+      switch parts.length
+        when 1
+          ## localhost => localhost
+          hostname
+        when 2
+          ## stackoverflow.com => stackoverflow.com
+          hostname
+        else
+          ## mail.google.com => google.com
+          ## cart.shopping.co.uk => shopping.co.uk
+          parts.slice(1).join(".")
+
     getToString: ->
       ## created our own custom toString method
       ## to fix some bugs with jsUri's implementation
@@ -123,6 +114,8 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
         port: @getPort()
         protocol: @getProtocol()
         search: @getSearch()
+        originPolicy: @getOriginPolicy()
+        superDomain: @getSuperDomain()
         toString: _.bind(@getToString, @)
       }
 
@@ -146,31 +139,23 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
           ## let our function know we've navigated
           navigated(attr, arguments)
 
-    ## think about moving this method out of Cypress
-    ## and into our app, since it kind of leaks the
-    ## remote + initial concerns, which could become
-    ## constants which our server sends us during
-    ## initial boot.
+    ## if we don't have a fully qualified url
+    ## then ensure the url starts with a leading slash
     @createInitialRemoteSrc = (url) ->
-      if not reHttp.test(url)
-        remoteHost = "<root>"
+      if @isFullyQualifiedUrl(url)
+        url
       else
-        url = new Uri(url)
-        remoteHost = url.origin()
-
-        ## strip out the origin because we cannot
-        ## request a cross domain frame, it has to be proxied
-        url = url.toString().replace(remoteHost, "")
-
-      ## setup the cookies for remoteHost + initial
-      $Cypress.Cookies.setInitialRequest(remoteHost)
-
-      return "/" + _.ltrim(url, "/")
+        a = document.createElement("a")
+        a.href = "/" + _.ltrim(url, "/")
+        a.href
 
     @isFullyQualifiedUrl = (url) ->
       reHttp.test(url)
 
     @missingProtocolAndHostIsLocalOrWww = (url) ->
+      if url not instanceof Uri
+        url = new Uri(url)
+
       str = url.toString()
 
       ## normalize the host for 'localhost'
@@ -253,8 +238,8 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       _.ltrim url.toString(), "/"
 
     @getRemoteUrl = (url, baseUrl) ->
-      ## if we have a root url and our url isnt full qualified
-      if baseUrl and not @isFullyQualifiedUrl(url)
+      ## if we have a root url and our url isnt full qualified or missing the protocol + host is local or www
+      if baseUrl and (not @isFullyQualifiedUrl(url) and not @missingProtocolAndHostIsLocalOrWww(url))
         ## prepend the root url to it
         url = @prependBaseUrl(url, baseUrl)
 
@@ -294,22 +279,13 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       ## if to is absolute relative '/foo'
       if @isAbsoluteRelative(to)
         ## get origin from 'from'
-        origin = @parse(from).origin
+        origin = @create(from).origin
         @join(origin, to)
       else
         @join(from, to)
 
-    # @create = (current, remote, defaultOrigin) ->
-    #   location = new $Location(current, remote, defaultOrigin)
-    #   location.getObject()
-
     @create = (remote) ->
       location = new $Location(remote)
-      location.getObject()
-
-    @parse = (url) ->
-      location = new $Location(url)
-      location.remote = new Uri(url)
       location.getObject()
 
   return $Location

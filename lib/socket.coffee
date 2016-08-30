@@ -1,5 +1,4 @@
 _             = require("lodash")
-os            = require("os")
 fs            = require("fs-extra")
 str           = require("underscore.string")
 path          = require("path")
@@ -14,7 +13,33 @@ fixture       = require("./fixture")
 Request       = require("./request")
 errors        = require("./errors")
 logger        = require("./logger")
+launcher      = require("./launcher")
 automation    = require("./automation")
+
+existingState = null
+
+runnerEvents = [
+  "reporter:restart:test:run"
+  "runnables:ready"
+  "run:start"
+  "test:before:hooks"
+  "reporter:log:add"
+  "reporter:log:state:changed"
+  "paused"
+  "test:after:hooks"
+  "run:end"
+]
+
+reporterEvents = [
+  # "go:to:file"
+  "runner:restart"
+  "runner:abort"
+  "runner:console:log"
+  "runner:console:error"
+  "runner:show:snapshot"
+  "runner:hide:snapshot"
+  "reporter:restarted"
+]
 
 retry = (fn) ->
   Promise.delay(25).then(fn)
@@ -37,7 +62,7 @@ class Socket
 
     fs.statAsync(filePath)
     .then =>
-      @io.emit "test:changed", {file: originalFilePath}
+      @io.emit "watched:file:changed", {file: originalFilePath}
     .catch(->)
 
   watchTestFileByPath: (config, originalFilePath, watchers, cb = ->) ->
@@ -54,7 +79,8 @@ class Socket
     logger.info "watching test file", {path: testFilePath}
 
     ## remove the existing file by its path
-    watchers.remove(testFilePath)
+    if @testFilePath
+      watchers.remove(@testFilePath)
 
     ## store this location
     @testFilePath = testFilePath
@@ -81,6 +107,12 @@ class Socket
     .then(cb)
     .catch (err) ->
       cb({__error: err.message, timedout: err.timedout})
+
+  toReporter: (event, data) ->
+    @io and @io.to("reporter").emit(event, data)
+
+  toRunner: (event, data) ->
+    @io and @io.to("runner").emit(event, data)
 
   onAutomation: (messages, message, data) ->
     Promise.try =>
@@ -111,9 +143,12 @@ class Socket
           @io.to("automation").emit("automation:request", id, message, data)
 
   createIo: (server, path, cookie) ->
-    ## TODO: dont serve the client!
-    # socketIo(server, {path: path, destroyUpgrade: false, serveClient: false})
-    socketIo.server(server, {path: path, destroyUpgrade: false, cookie: cookie})
+    socketIo.server(server, {
+      path: path
+      destroyUpgrade: false
+      serveClient: false
+      cookie: cookie
+    })
 
   _startListening: (server, watchers, config, options) ->
     _.defaults options,
@@ -121,13 +156,12 @@ class Socket
       onAutomationRequest: null
       onMocha: ->
       onConnect: ->
+      onResolveUrl: ->
+      onFocusTests: ->
+      onSpecChanged: ->
       onChromiumRun: ->
-      onIsNewProject: ->
       onReloadBrowser: ->
       checkForAppErrors: ->
-
-    ## promisify this function
-    options.onIsNewProject = Promise.method(options.onIsNewProject)
 
     messages = {}
 
@@ -171,6 +205,7 @@ class Socket
             ## TODO: if all of our clients have also disconnected
             ## then don't warn anything
             errors.warning("AUTOMATION_SERVER_DISCONNECTED")
+            ## TODO: no longer emit this, just close the browser and display message in reporter
             @io.emit("automation:disconnected")
 
         socket.on "automation:push:request", (msg, data, cb = ->) =>
@@ -190,17 +225,28 @@ class Socket
         .catch (err) ->
           cb({__error: err.message, __name: err.name, __stack: err.stack})
 
-      socket.on "remote:connected", =>
-        logger.info "remote:connected"
+      socket.on "reporter:connected", =>
+        return if socket.inReporterRoom
 
-        return if socket.inRemoteRoom
+        socket.inReporterRoom = true
+        socket.join("reporter")
 
-        socket.inRemoteRoom = true
-        socket.join("remote")
+        ## TODO: what to do about reporter disconnections?
 
-        socket.on "remote:response", respond
+      socket.on "runner:connected", ->
+        return if socket.inRunnerRoom
 
-      socket.on "client:request", (message, data, cb) =>
+        socket.inRunnerRoom = true
+        socket.join("runner")
+
+        ## TODO: what to do about runner disconnections?
+
+      socket.on "adapter:connected", =>
+        logger.info "adapter:connected"
+
+        socket.on "adapter:response", respond
+
+      socket.on "adapter:request", (message, data, cb) =>
         ## if cb isnt a function then we know
         ## data is really the cb, so reassign it
         ## and set data to null
@@ -210,16 +256,16 @@ class Socket
 
         id = uuid.v4()
 
-        logger.info "client:request", id: id, msg: message, data: data
+        logger.info "adapter:request", id: id, msg: message, data: data
 
-        if _.keys(@io.sockets.adapter.rooms.remote).length > 0
+        if _.keys(@io.sockets.adapter.rooms.adapter).length > 0
           messages[id] = cb
-          @io.to("remote").emit "remote:request", id, message, data
+          @io.to("adapter").emit "adapter:request", id, message, data
         else
-          cb({__error: "Could not process '#{message}'. No remote servers connected."})
+          cb({__error: "Could not process '#{message}'. No adapter servers connected."})
 
-      socket.on "run:tests:in:chromium", (src) ->
-        options.onChromiumRun(src)
+      socket.on "spec:changed", (spec) ->
+        options.onSpecChanged(spec)
 
       socket.on "watch:test:file", (filePath, cb) =>
         @watchTestFileByPath(config, filePath, watchers, cb)
@@ -240,20 +286,14 @@ class Socket
         options.onMocha.apply(options, arguments)
 
       socket.on "open:finder", (p, cb = ->) ->
-        opts = {}
-
-        if os.platform() is "darwin"
-          opts.args = "-R"
-
-        open.opn(p, opts)
+        open.opn(p)
         .then -> cb()
-
-      socket.on "is:new:project", (cb) ->
-        options.onIsNewProject()
-        .then(cb)
 
       socket.on "reload:browser", (url, browser) ->
         options.onReloadBrowser(url, browser)
+
+      socket.on "focus:tests", ->
+        options.onFocusTests()
 
       socket.on "is:automation:connected", (data = {}, cb) =>
         isConnected = =>
@@ -275,10 +315,57 @@ class Socket
         .catch Promise.TimeoutError, (err) ->
           cb(false)
 
+      socket.on "resolve:url", (url, cb) =>
+        options.onResolveUrl(url, automationRequest, cb)
+
+        # @onRequest(automationRequest, {
+        #   url: url
+        #   resolveWithFullResponse: false
+        #   followRedirect: (resp) ->
+        #     console.log "follow redirect", resp.headers
+        #     redirects.push(resp.headers["location"])
+
+        #     return true
+        # }, (resp) ->
+        #   resp.url = _.last(redirects) ? url
+        #   ## we should set the cookies on the browser here
+        #   ## resp.headers["set-cookie"]
+        #   resp.redirects = redirects
+        #   cb(resp)
+        # )
+
+      socket.on "preserve:run:state", (state, cb) ->
+        existingState = state
+
+        cb()
+
+      socket.on "get:existing:run:state", (cb) ->
+        if (s = existingState)
+          existingState = null
+          cb(s)
+        else
+          cb()
+
+      socket.on "go:to:file", (p) ->
+        launcher.launch("chrome", "http://localhost:2020/__#" + p, {
+          host: "http://localhost:2020"
+        })
+
+      reporterEvents.forEach (event) =>
+        socket.on event, (data) =>
+          @toRunner(event, data)
+
+      runnerEvents.forEach (event) =>
+        socket.on event, (data) =>
+          @toReporter(event, data)
+
   end: ->
     ## TODO: we need an 'ack' from this end
     ## event from the other side
     @io and @io.emit("tests:finished")
+
+  changeToUrl: (url) ->
+    @toRunner("change:to:url", url)
 
   startListening: (server, watchers, config, options) ->
     if process.env["CYPRESS_ENV"] is "development"

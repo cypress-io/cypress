@@ -6,9 +6,13 @@ do ($Cypress, _, $, chai) ->
 
   ## grab all words between single quotes except
   ## when the single quote word is the LAST word
-  allWordsBetweenSingleQuotes = /('.*?')(.+)/g
+  allButLastWordsBetweenSingleQuotes = /('.*?')(.+)/g
 
+  allSingleQuotes = /'/g
+  allEscapedSingleQuotes = /\\'/g
+  allQuoteMarkers = /__quote__/g
   allWordsBetweenCurlyBraces  = /(#{.+?})/g
+  allQuadStars = /\*\*\*\*/g
 
   chai.use (chai, utils) ->
 
@@ -228,9 +232,14 @@ do ($Cypress, _, $, chai) ->
           message   = utils.getMessage(@, customArgs)
           actual    = utils.getActual(@, customArgs)
 
-          ## remove any single quotes between our [b] tags
-          message = message.replace /\[b\].*\[\\b\]/, (match) ->
-            match.replace(/'/g, "")
+          ## remove any single quotes between our **, preserving escaped quotes
+          ## and if an empty string, put the quotes back
+          message = message.replace /\*\*.*\*\*/, (match) ->
+            match
+              .replace(allEscapedSingleQuotes, "__quote__") # preserve escaped quotes
+              .replace(allSingleQuotes, "")
+              .replace(allQuoteMarkers, "'") ## put escaped quotes back
+              .replace(allQuadStars, "**''**") ## fix empty strings that end up as ****
 
           try
             orig.apply(@, args)
@@ -247,9 +256,10 @@ do ($Cypress, _, $, chai) ->
         _.reduce args, (memo, value, index) =>
           if _.isString(value)
             value = value
-              .replace(allWordsBetweenCurlyBraces,          "[b]$1[\\b]")
-              .replace(allWordsBetweenSingleQuotes,         "[b]$1[\\b]$2")
-              .replace(allPropertyWordsBetweenSingleQuotes, "[b]$1[\\b]")
+              .replace(allWordsBetweenCurlyBraces,          "**$1**")
+              .replace(allEscapedSingleQuotes,              "__quote__")
+              .replace(allButLastWordsBetweenSingleQuotes,  "**$1**$2")
+              .replace(allPropertyWordsBetweenSingleQuotes, "**$1**")
             memo.push value
           else
             memo.push value

@@ -21,6 +21,8 @@ screenshots = require("./screenshots")
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
 
+multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
+
 class Project extends EE
   constructor: (projectRoot) ->
     if not (@ instanceof Project)
@@ -38,13 +40,23 @@ class Project extends EE
       type:         "opened"
       sync:         false
       report:       false
-      changeEvents: false
+      onFocusTests: ->
+      onSettingsChanged: false
     }
 
     @getConfig(options)
     .then (cfg) =>
-      @server.open(@projectRoot, cfg)
-      .then =>
+      @server.open(cfg)
+      .then (port) =>
+        ## if we didnt have a cfg.port
+        ## then get the port once we
+        ## open the server
+        if not cfg.port
+          cfg.port = port
+
+          ## and set all the urls again
+          _.extend cfg, config.setUrls(cfg)
+
         ## store the cfg from
         ## opening the server
         @cfg = cfg
@@ -89,6 +101,9 @@ class Project extends EE
       @watchers?.close()
     )
 
+  resetState: ->
+    @server.resetState()
+
   updateProject: (id, options = {}) ->
     Promise.try =>
       ## bail if sync isnt true
@@ -101,10 +116,10 @@ class Project extends EE
       .spread (session, cfg) ->
         api.updateProject(id, options.type, cfg.projectName, session)
 
-  watchSettings: (changeEvents) ->
+  watchSettings: (onSettingsChanged) ->
     ## bail if we havent been told to
     ## watch anything
-    return if not changeEvents
+    return if not onSettingsChanged
 
     obj = {
       onChange: (filePath, stats) =>
@@ -113,15 +128,15 @@ class Project extends EE
         return if @generatedProjectIdTimestamp and
           (new Date - @generatedProjectIdTimestamp) < 1000
 
-        ## emit settings:changed whenever
-        ## our settings file changes
-        @emit("settings:changed")
+        ## call our callback function
+        ## when settings change!
+        onSettingsChanged.call(@)
     }
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
 
   watchSettingsAndStartWebsockets: (options = {}, config = {}) ->
-    @watchSettings(options.changeEvents)
+    @watchSettings(options.onSettingsChanged)
 
     ## if we've passed down reporter
     ## then record these via mocha reporter
@@ -133,9 +148,9 @@ class Project extends EE
 
       onAutomationRequest: options.onAutomationRequest
 
-      onIsNewProject: =>
-        ## return a boolean whether this is a new project or not
-        @determineIsNewProject(config.integrationFolder)
+      onFocusTests: options.onFocusTests
+
+      onSpecChanged: options.onSpecChanged
 
       onConnect: (id) =>
         @emit("socket:connected", id)
@@ -170,9 +185,10 @@ class Project extends EE
 
   determineIsNewProject: (integrationFolder) ->
     ## logic to determine if new project
-    ## 1. there is only 1 file in 'integrationFolder'
-    ## 2. the file is called 'example_spec.js'
-    ## 3. the bytes of the file match lib/scaffold/example_spec.js
+    ## 1. there are no files in 'integrationFolder'
+    ## 2. there is only 1 file in 'integrationFolder'
+    ## 3. the file is called 'example_spec.js'
+    ## 4. the bytes of the file match lib/scaffold/example_spec.js
     nameIsDefault = (file) ->
       path.basename(file) is scaffold.integrationExampleName()
 
@@ -186,6 +202,9 @@ class Project extends EE
 
     glob("**/*", {cwd: integrationFolder, realpath: true})
     .then (files) ->
+      ## TODO: add tests for this
+      return true if files.length is 0
+
       return false if files.length isnt 1
 
       exampleSpec = files[0]
@@ -198,6 +217,9 @@ class Project extends EE
         checkIfBothMatch
       )
 
+  changeToUrl: (url) ->
+    @server.changeToUrl(url)
+
   setBrowsers: (browsers = []) ->
     @getConfig()
     .then (cfg) ->
@@ -208,6 +230,12 @@ class Project extends EE
       Promise.resolve(c)
     else
       config.get(@projectRoot, options)
+      .then (cfg) =>
+        ## return a boolean whether this is a new project or not
+        @determineIsNewProject(cfg.integrationFolder)
+        .then (bool) ->
+          cfg.isNewProject = bool
+        .return(cfg)
 
   ensureSpecUrl: (spec) ->
     @getConfig()
@@ -249,7 +277,10 @@ class Project extends EE
     "/" + path.join("integration", path.relative(integrationFolder, pathToSpec))
 
   getUrlBySpec: (clientUrl, specUrl) ->
-    [clientUrl, "#/tests", specUrl].join("")
+    replacer = (match, p1) ->
+      match.replace("//", "/")
+
+    [clientUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
     Promise.join(

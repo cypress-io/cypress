@@ -1,6 +1,7 @@
 describe "$Cypress.Runner API", ->
   beforeEach ->
     @Cypress = $Cypress.create()
+    @Cypress.setConfig({numTestsKeptInMemory: 50, isHeadless: true})
 
   context ".create", ->
 
@@ -79,12 +80,31 @@ describe "$Cypress.Runner API", ->
           expect(restore).to.be.called
           done()
 
+      it "calls test:after:hooks and test:after:run when uncaught err from hook", (done) ->
+        fn = _.after 3, -> done()
+
+        @Cypress.on "test:after:hooks", (test) ->
+          expect(test.title).to.eq("one")
+          fn()
+
+        @Cypress.on "test:after:run", (test) ->
+          expect(test.title).to.eq("one")
+          fn()
+
+        @Cypress.on "run:end", -> fn()
+
+        beforeEach = @runner.runner.suite._beforeEach[0]
+        beforeEach.fn = =>
+          @runner.runner.uncaught(new Error("this is uncaught!"))
+
+        @runner.run =>
+
     describe "runner.on('suite')", ->
       it "Cypress triggers suite:start", (done) ->
         @runner.runner.on "suite", (@suite) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "suite:start", @runner.wrap(@suite)
+          expect(@trigger).to.be.calledWith "mocha", "suite", @runner.wrapParents(@suite)
           done()
 
     describe "runner.on('suite end')", ->
@@ -92,7 +112,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "suite end", (@suite) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "suite:end", @runner.wrap(@suite)
+          expect(@trigger).to.be.calledWith "mocha", "suite end", @runner.wrapParents(@suite)
           done()
 
     describe "runner.on('hook')", ->
@@ -100,7 +120,8 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "hook", (@hook) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "hook:start", _.omit(@runner.wrap(@hook), "duration")
+          debugger
+          expect(@trigger).to.be.calledWithMatch "mocha", "hook", @runner.wrapParents(@hook)
           done()
 
       it "calls Cypress.set with the test + hookName", (done) ->
@@ -146,7 +167,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "hook end", (@hook) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "hook:end", @runner.wrap(@hook)
+          expect(@trigger).to.be.calledWithMatch "mocha", "hook end", @runner.wrapParents(@hook)
           done()
 
       it "does not call Cypress.set if hook isnt before each", (done) ->
@@ -184,7 +205,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "test", (@test) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "test:start", _.omit(@runner.wrap(@test), "duration", "state")
+          expect(@trigger).to.be.calledWithMatch "mocha", "test", @runner.wrapParents(@test)
           done()
 
       it "sets this.test", (done) ->
@@ -209,7 +230,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "test", (@test) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "test:end", @runner.wrap(@test)
+          expect(@trigger).to.be.calledWithMatch "mocha", "test end", @runner.wrapParents(@test)
           done()
 
     describe "runner.on('pending')", ->
@@ -220,7 +241,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "pending", (@test) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "test:start", @runner.wrap(@test)
+          expect(@trigger).to.be.calledWithMatch "mocha", "test", @runner.wrapParents(@test)
           done()
 
     describe "runner.on('fail')", ->
@@ -231,7 +252,9 @@ describe "$Cypress.Runner API", ->
           throw err
 
         @runner.run ->
-          expect(test.err).to.eq err
+          expect(test.err.message).to.eq err.message
+          expect(test.err.name).to.eq err.name
+          expect(test.err.stack).to.eq err.stack
           done()
 
       it "calls hookFailed if test.type is hook", (done) ->
@@ -266,7 +289,7 @@ describe "$Cypress.Runner API", ->
       ## we're additionally testing that Cypress
       ## fires this test:end event since thats
       ## how we actually get our test!
-      @Cypress.on "test:end", (@relatedTest) =>
+      @Cypress.on "test:after:run", (@relatedTest) =>
 
       @runner.run -> done()
 
@@ -368,10 +391,10 @@ describe "$Cypress.Runner API", ->
 
         @runner = $Cypress.Runner.runner(@Cypress, runner)
 
-        trigger = @sandbox.spy @Cypress, "trigger"
+        invoke = @sandbox.stub(@Cypress, "invoke").returns([])
 
         @runner.run ->
-          calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
+          calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
           expect(calls.length).to.eq(2)
           done()
 
@@ -387,7 +410,7 @@ describe "$Cypress.Runner API", ->
           @Cypress.on "test:before:hooks", (@curTest) =>
 
           @runner.grep /two/
-          @runner.getRunnables()
+          @runner.normalizeAll()
           @runner.run =>
             expect(@curTest.title).to.eq "two"
             done()
@@ -396,10 +419,160 @@ describe "$Cypress.Runner API", ->
           @Cypress.on "test:before:hooks", (@curTest) =>
 
           @runner.grep /ten/
-          @runner.getRunnables()
+          @runner.normalizeAll()
           @runner.run =>
             expect(@curTest.title).to.eq "suite 4, ten"
             done()
+
+      describe "pending tests", ->
+        context "2 pending tests", ->
+          beforeEach ->
+            runner = Fixtures.createRunnables
+              tests: [
+                {name: "one", pending: true}
+                {name: "two", pending: true}
+              ]
+
+            @runner = $Cypress.Runner.runner(@Cypress, runner)
+
+          it "fires test:before:run twice", (done) ->
+            trigger = @sandbox.spy(@Cypress, "trigger")
+
+            @runner.run ->
+              calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:before:run"
+              expect(calls.length).to.eq(2)
+              done()
+
+          it "fires test:after:run twice", (done) ->
+            trigger = @sandbox.stub(@Cypress, "trigger").returns([])
+
+            @runner.run ->
+              calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:after:run"
+              expect(calls.length).to.eq(2)
+              done()
+
+          ## only once because before(fn) code still gets executed  on pending tests
+          it "fires test:before:hooks once", (done) ->
+            invoke = @sandbox.spy(@Cypress, "invoke")
+
+            @runner.run ->
+              calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
+              expect(calls.length).to.eq(1)
+              done()
+
+          ## only once because after(fn) code still gets executed on pending tests
+          it "fires test:after:hooks once", (done) ->
+            invoke = @sandbox.stub(@Cypress, "invoke").returns([])
+
+            @runner.run ->
+              calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
+              expect(calls.length).to.eq(1)
+              done()
+
+        context "1 pending test as a sandwich", ->
+          beforeEach ->
+            runner = Fixtures.createRunnables
+              tests: [
+                "one"
+                {name: "two", pending: true}
+                "three"
+              ]
+
+            @runner = $Cypress.Runner.runner(@Cypress, runner)
+
+          it "fires test:before:run thrice", (done) ->
+            trigger = @sandbox.spy(@Cypress, "trigger")
+
+            @runner.run ->
+              calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:before:run"
+              expect(calls.length).to.eq(3)
+              done()
+
+          it "fires test:after:hooks thrice", (done) ->
+            trigger = @sandbox.stub(@Cypress, "trigger").returns([])
+
+            @runner.run ->
+              calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:after:run"
+              expect(calls.length).to.eq(3)
+              done()
+
+          ## only twice because pending tests in the middle are completely skipped
+          it "fires test:before:hooks twice", (done) ->
+            invoke = @sandbox.spy(@Cypress, "invoke")
+
+            @runner.run ->
+              calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
+              expect(calls.length).to.eq(2)
+              done()
+
+          ## only twice because pending tests in the middle are completely skipped
+          it "fires test:after:hooks twice", (done) ->
+            invoke = @sandbox.stub(@Cypress, "invoke").returns([])
+
+            @runner.run ->
+              calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
+              expect(calls.length).to.eq(2)
+              done()
+
+        context "pending tests with non-pending tests after", ->
+          beforeEach ->
+            runner = Fixtures.createRunnables
+              tests: [
+                {name: "one", pending: true}
+                "two"
+              ]
+              suites:
+                "suite 1":
+                  tests: ["three", {name: "four", pending: true} ]
+                "suite 2":
+                  tests: ["five"]
+
+            @runner = $Cypress.Runner.runner(@Cypress, runner)
+
+          it "fires test:before:run five times", (done) ->
+            trigger = @sandbox.spy(@Cypress, "trigger")
+
+            @runner.run ->
+              calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:before:run"
+              expect(calls.length).to.eq(5)
+              done()
+
+          it "fires test:after:hooks five times", (done) ->
+            trigger = @sandbox.stub(@Cypress, "trigger").returns([])
+
+            @runner.run ->
+              calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:after:run"
+              expect(calls.length).to.eq(5)
+              done()
+
+          it "fires test:before:hooks four times", (done) ->
+            invoke = @sandbox.spy(@Cypress, "invoke")
+
+            @runner.run ->
+              calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
+              titles = _(calls).map (call) -> call.args[1].title
+              expect(calls.length).to.eq(4)
+
+              ## this may seem strange but it is correct. only pending tests
+              ## on the book ends will get their test:before:hooks called since
+              ## thats the only time code can actually run on a pending test
+              expect(titles).to.deep.eq(["one", "two", "three", "five"])
+              done()
+
+          ## only twice because pending tests in the middle are completely skipped
+          it "fires test:after:hooks four times", (done) ->
+            invoke = @sandbox.stub(@Cypress, "invoke").returns([])
+
+            @runner.run ->
+              calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
+              titles = _(calls).map (call) -> call.args[1].title
+
+              ## this may seem strange but it is correct. only pending tests
+              ## on the book ends will get their test:after:hooks called since
+              ## thats the only time code can actually run on a pending test
+              expect(calls.length).to.eq(4)
+              expect(titles).to.deep.eq(["two", "three", "four", "five"])
+              done()
 
     describe "one test", ->
       beforeEach ->
@@ -430,10 +603,10 @@ describe "$Cypress.Runner API", ->
         @runner.run()
 
       it "triggers 'test:after:hooks' only once", (done) ->
-        trigger = @sandbox.spy @Cypress, "trigger"
+        invoke = @sandbox.stub(@Cypress, "invoke").returns([])
 
         @runner.run ->
-          calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
+          calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
           expect(calls).to.have.length(1)
           done()
 
@@ -451,7 +624,7 @@ describe "$Cypress.Runner API", ->
 
       expect(@runner.runner._grep).to.eq re
 
-  context "#anyTest", ->
+  context "#anyTestInSuite", ->
     beforeEach ->
       runner = Fixtures.createRunnables {
         tests: ["root test 1"]
@@ -473,7 +646,7 @@ describe "$Cypress.Runner API", ->
       tests = []
 
       ## start from the root suite
-      @runner.anyTest @runner.runner.suite, (test) ->
+      @runner.anyTestInSuite @runner.runner.suite, (test) ->
         tests.push(test)
 
       allTests = _(tests).all (test) -> test.type is "test"
@@ -486,23 +659,23 @@ describe "$Cypress.Runner API", ->
         ## the second invocation
         return true
 
-      @runner.anyTest @runner.runner.suite, iterator
+      @runner.anyTestInSuite @runner.runner.suite, iterator
 
       expect(iterator.callCount).to.eq(2)
 
     it "returns true if any iterator returns true", ->
       iterator = _.after 2, -> return true
 
-      ret = @runner.anyTest @runner.runner.suite, iterator
+      ret = @runner.anyTestInSuite @runner.runner.suite, iterator
       expect(ret).to.be.true
 
     it "returns false if not any iterator returns true", ->
       iterator = -> return false
 
-      ret = @runner.anyTest @runner.runner.suite, iterator
+      ret = @runner.anyTestInSuite @runner.runner.suite, iterator
       expect(ret).to.be.false
 
-  context "#getRunnables", ->
+  context "#normalizeAll", ->
     beforeEach ->
       runner = Fixtures.createRunnables {
         tests: ["one"]
@@ -521,8 +694,8 @@ describe "$Cypress.Runner API", ->
       @runner = $Cypress.Runner.runner(@Cypress, runner)
 
     it "pushes runnable into runnables array", ->
-      ## 2 suites + 4 tests = 6 total
-      expect(@runner.runnables).to.have.length(6)
+      ## 2 suites + 4 tests + 1 root = 7 total
+      expect(@runner.runnables).to.have.length(7)
 
     it "pushes tests into tests array", ->
       ## 4 tests
@@ -534,49 +707,36 @@ describe "$Cypress.Runner API", ->
 
       @runner.grep(/four/)
 
-      @runner.getRunnables()
+      @runner.normalizeAll()
 
       ## only 1 test should have matched the grep
       expect(@runner.tests).to.have.length(1)
 
     it "sets runnable type", ->
       types = _.pluck @runner.runnables, "type"
-      expect(types).to.deep.eq ["test", "suite", "test", "test", "suite", "test"]
+      expect(types).to.deep.eq ["suite", "test", "suite", "test", "test", "suite", "test"]
 
-    it "calls options.onRunnable", ->
-      runnables = []
+    it "returns only matching tests + suites to the grep", ->
+      runnables = @runner.normalizeAll(/four/)
 
-      @runner.getRunnables
-        onRunnable: (runnable) ->
-          runnables.push(runnable)
+      expect(@runner.tests).to.have.length(1)
 
-      expect(runnables.length).to.eq(6)
+      titles = []
 
-    it "does not call options.onRunnable if no test in a suite matches grep", ->
-      runnables = []
+      getTitle = (runnable) ->
+        titles.push(runnable.title)
 
-      @runner.getRunnables
-        onRunnable: (runnable) ->
-          runnables.push(runnable)
-        grep: /four/
+        if t = runnable.tests
+          _.each(t, getTitle)
 
-      titles = _(runnables).pluck "title"
+        if s = runnable.suites
+          _.each(s, getTitle)
+
+      getTitle(runnables)
 
       expect(titles).to.deep.eq [
-        "suite 1", "suite 2", "suite 2, four"
+        "", "suite 1", "suite 2", "suite 2, four"
       ]
-
-    it "prefers .runnables on subsequent iterations", ->
-      ## grab the top 4 runnables
-      @runner.runnables = @runner.runnables.slice(0, 4)
-
-      runnables = []
-
-      @runner.getRunnables
-        onRunnable: (runnable) ->
-          runnables.push(runnable)
-
-      expect(runnables).to.have.length(4)
 
     context "runnable optimizations", ->
       beforeEach ->
@@ -585,19 +745,19 @@ describe "$Cypress.Runner API", ->
         ## run!
         @runner.runnables = []
 
-      it "never invokes #iterateThroughRunnables", ->
+      it.skip "never invokes #iterateThroughRunnables", ->
         @runner.runnables = []
-        @runner.getRunnables()
+        @runner.normalizeAll()
         iterateThroughRunnables = @sandbox.spy @runner, "iterateThroughRunnables"
-        @runner.getRunnables()
+        @runner.normalizeAll()
         expect(iterateThroughRunnables).not.to.be.called
 
-      it "does not continue to push into .runnables or mutate them", ->
+      it.skip "does not continue to push into .runnables or mutate them", ->
         @runner.runnables = []
-        @runner.getRunnables()
+        @runner.normalizeAll()
         runnables = @runner.runnables
         expect(runnables).to.have.length(6)
-        @runner.getRunnables()
+        @runner.normalizeAll()
         expect(@runner.runnables).to.have.length(6)
         expect(@runner.runnables).to.eq(runnables)
 
@@ -607,7 +767,7 @@ describe "$Cypress.Runner API", ->
         grep = /\w+/
         test = @sandbox.spy grep, "test"
 
-        @runner.getRunnables({grep: grep})
+        @runner.normalizeAll(grep)
 
         ## we have 4 tests, thats how many should have been grepp'd!
         expect(test.callCount).to.eq 4
@@ -617,11 +777,11 @@ describe "$Cypress.Runner API", ->
 
         grep = @runner.grep /\w+/
         test = @sandbox.spy @runner.runner._grep, "test"
-        @runner.getRunnables()
+        @runner.normalizeAll()
 
         grep2 = @runner.grep /.+/
         test2 = @sandbox.spy @runner.runner._grep, "test"
-        @runner.getRunnables()
+        @runner.normalizeAll()
 
         ## should grep each of the tests twice
         expect(test.callCount + test2.callCount).to.eq 8

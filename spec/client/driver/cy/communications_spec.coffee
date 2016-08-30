@@ -62,7 +62,7 @@ describe "$Cypress.Cy Communications Commands", ->
         @cy.message("create:user")
 
       it "sets error command state", (done) ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @Cypress.on "message", (msg, data, cb) ->
           cb({__error: "some err message"})
@@ -81,7 +81,7 @@ describe "$Cypress.Cy Communications Commands", ->
         @Cypress.on "message", (msg, data, cb) ->
           cb({__error: "some err message"})
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -94,10 +94,10 @@ describe "$Cypress.Cy Communications Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately", (done) ->
-          @Cypress.on "log", (log) ->
+          @Cypress.on "log", (attrs, log) ->
             expect(log.pick("name", "message", "state")).to.deep.eq {
               name: "message"
               message: "create:user, {foo: bar}"
@@ -121,12 +121,12 @@ describe "$Cypress.Cy Communications Commands", ->
           _.each obj, (value, key) =>
             expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
-      it "#onConsole", ->
+      it "#consoleProps", ->
         @Cypress.on "message", (msg, data, cb) ->
           cb(response: {baz: "quux"}, __logs: [1,2,3])
 
         @cy.message("create:user", {foo: "bar"}).then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          expect(@log.attributes.consoleProps()).to.deep.eq {
             Command: "message"
             Message: "create:user"
             Logs: [1,2,3]

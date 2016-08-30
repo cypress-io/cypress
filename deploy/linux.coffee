@@ -26,13 +26,6 @@ class Linux extends Base
   codeSign: ->
     Promise.resolve()
 
-  getBuildDest: (pathToBuild, platform) ->
-    ## returns ./build/linux/Cypress
-    path.join path.dirname(pathToBuild), platform, "Cypress"
-
-  afterBuild: (pathToBuilds) ->
-    return Promise.resolve()
-
   runProjectTest: ->
     @_runProjectTest()
     .catch (err) =>
