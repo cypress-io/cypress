@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.5.1
+- bump kitchen sink to 0.4.1
+
 #### 0.5.0
 - added cy.screenshot
 
