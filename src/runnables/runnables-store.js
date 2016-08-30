@@ -156,7 +156,11 @@ class RunnablesStore {
   }
 
   updateLog (log) {
-    this._logs[log.id].update(log)
+    const found = this._logs[log.id]
+
+    if (found) {
+      found.update(log)
+    }
   }
 
   reset () {
