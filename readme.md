@@ -55,6 +55,9 @@ LGPL
 
 ## Changelog
 
+#### 0.3.1 - *(08/30/16)*
+- fix for incorrect references in index.html
+
 #### 0.3.0 - *(08/30/16)*
 - new UI, migrated to react
 
