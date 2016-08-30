@@ -1,6 +1,6 @@
 {
   "name": "@cypress/core-example",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Interal Cypress repo for managing https://example.cypress.io",
   "main": "index.js",
   "scripts": {
