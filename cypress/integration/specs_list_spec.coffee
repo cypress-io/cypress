@@ -214,20 +214,6 @@ describe "Specs List", ->
         it "sets spec as active", ->
           cy.get("@deepSpec").should("have.class", "active")
 
-      context "spec list updates", ->
-        beforeEach ->
-          cy
-            .get(".file a").contains("a", "app_spec.coffee").as("firstSpec")
-              .click().then ->
-                @ipc.handle("get:open:browsers", null, ["chrome"])
-              .then ->
-                @ipc.handle("change:browser:spec", null, {})
-              .then ->
-                @ipc.handle("get:specs", null, @specs)
-
-        it "updates spec list on get:specs update", ->
-          cy.get("@firstSpec").should("not.have.class", "active")
-
       context "running spec updates", ->
         beforeEach ->
           cy
@@ -236,33 +222,6 @@ describe "Specs List", ->
                 @ipc.handle("get:open:browsers", null, [])
               .then ->
                 @ipc.handle("launch:browser", null, {browserOpened: true})
-
-        it "stays same when same spec", ->
-          cy
-            .then ->
-              @ipc.handle("on:running:spec", null, "integration/app_spec.coffee")
-            .get("@firstSpec").should("have.class", "active")
-
-        it "updates spec running when different spec", ->
-          cy
-            .then ->
-              @ipc.handle("on:running:spec", null, "unit/admin_users/admin/users/bar_list_spec.coffee")
-            .contains("a", "bar_list_spec").should("have.class", "active")
-
-        it "updates spec running when All Specs run", ->
-          cy
-            .then ->
-              @ipc.handle("on:running:spec", null, "__all")
-            .contains("a", "Run All Tests").should("have.class", "active")
-            .get("@firstSpec").should("not.have.class", "active")
-
-        it "de-selects all tests if no spec matches", ->
-          cy
-            .then ->
-              @ipc.handle("on:running:spec", null, null)
-            .contains("a", "Run All Tests").should("not.have.class", "active")
-            .get("@firstSpec").should("not.have.class", "active")
-
 
     describe "switching specs", ->
       beforeEach ->
@@ -283,6 +242,33 @@ describe "Specs List", ->
       it "updates active spec", ->
         cy.get("@firstSpec").should("not.have.class", "active")
         cy.get("@secondSpec").should("have.class", "active")
+
+  describe "spec list updates", ->
+    beforeEach ->
+      cy
+        .get(".projects-list a")
+          .contains("My-Fake-Project").click()
+        .fixture("browsers").then (@browsers) ->
+          @config.browsers = @browsers
+          @ipc.handle("open:project", null, @config)
+        .then ->
+          @ipc.handle("get:specs", null, @specs)
+        .location().its("hash").should("include", "specs")
+
+    it "updates spec list selected on specChanged", ->
+      cy
+        .contains("a", "app_spec.coffee").as("firstSpec")
+        .then ->
+          @config.specChanged = "integration/app_spec.coffee"
+          @ipc.handle("open:project", null, @config)
+        .get("@firstSpec").should("have.class", "active")
+        .then ->
+          @config.specChanged = "integration/accounts/account_new_spec.coffee"
+          @ipc.handle("open:project", null, @config)
+        .get("@firstSpec").should("not.have.class", "active")
+      cy
+        .contains("a", "account_new_spec.coffee")
+          .should("have.class", "active")
 
   describe "server error", ->
     beforeEach ->
