@@ -47,6 +47,6 @@
     "gulp-concat": "^2.6.0",
     "jquery": "3.1.0",
     "mobx-react-devtools": "^4.2.0",
-    "zunder": "^3.3.1"
+    "zunder": "^3.4.5"
   }
 }
