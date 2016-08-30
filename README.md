@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.5.3
+- updated example spec
+
 #### 0.5.2
 - removed committed screenshots
 
