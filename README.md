@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.5.2
+- removed committed screenshots
+
 #### 0.5.1
 - bump kitchen sink to 0.4.1
 
