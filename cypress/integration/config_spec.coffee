@@ -94,7 +94,7 @@ describe "Config", ->
         cy
           .contains("http://localhost:7777")
           .then ->
-            @ipc.handle("open:project", @err, null)
+            @ipc.handle("open:project", @err, {})
 
       it "displays errors", ->
         cy.contains("Can't start server")
