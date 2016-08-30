@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.1.6 - *(08/30/16)*
+- bump reporter
+
 #### 0.1.5 - *(08/30/16)*
 - bump node, spec:changed event
 
