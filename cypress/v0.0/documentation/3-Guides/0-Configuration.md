@@ -50,7 +50,7 @@ Option | Default | Description
 
 Option | Default | Description
 ----- | ---- | ----
-`commandTimeout` | `4000` | Time, in milliseconds, to wait until most DOM based commands are considered timed out
+`defaultCommandTimeout` | `4000` | Time, in milliseconds, to wait until most DOM based commands are considered timed out
 `execTimeout` | `60000` | Time, in milliseconds, to wait for a system command to finish executing during [`cy.exec`](https://on.cypress.io/api/exec) command
 `pageLoadTimeout` | `30000` | Time, in milliseconds, to wait until [`cy.visit`](https://on.cypress.io/api/visit), [`cy.go`](https://on.cypress.io/api/go), [`cy.reload`](https://on.cypress.io/api/reload), or a page load times out
 `requestTimeout` | `5000` | Time, in milliseconds, to wait for an XHR request during [`cy.wait`](wait) command
