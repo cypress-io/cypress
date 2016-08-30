@@ -249,7 +249,7 @@ describe "$Cypress.Cy Server API", ->
     beforeEach ->
       @server = $Cypress.Server.create({
         stripOrigin: (url) ->
-          location = $Cypress.Location.parse(url)
+          location = $Cypress.Location.create(url)
           url.replace(location.origin, "")
       })
 
