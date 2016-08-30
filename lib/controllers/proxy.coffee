@@ -92,7 +92,12 @@ module.exports = {
 
     isInitial = req.cookies["__cypress.initial"] is "true"
 
-    reqAcceptsHtmlAndMatchesOriginPolicy = ->
+    reqAcceptsHtmlAndMatchesOriginPolicyAndResContentTypeIsHtml = (respHeaders) ->
+      contentType = respHeaders["content-type"]
+
+      ## bail if our response headers are not text/html
+      return if not (contentType and contentType.includes("text/html"))
+
       req.accepts(["text", "json", "image", "html"]) is "html" and
         cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
 
@@ -133,40 +138,53 @@ module.exports = {
 
         logger.info "received request response"
 
-        @concatStream str, thr, (body, cb) =>
-          encoding = incomingRes.headers["content-encoding"]
+        wantsInjection = do ->
+          switch
+            when req.cookies["__cypress.initial"] is "true"
+              "full"
 
-          rewrite = (body) =>
-            body = body.toString()
+            when reqAcceptsHtmlAndMatchesOriginPolicyAndResContentTypeIsHtml(incomingRes.headers)
+              "partial"
 
-            switch
-              when req.cookies["__cypress.initial"] is "true"
-                @rewrite(body, remoteState, "initial")
+            else
+              false
 
-              when reqAcceptsHtmlAndMatchesOriginPolicy()
-                @rewrite(body, remoteState)
+        ## if there is nothing to inject then just
+        ## bypass the stream buffer and pipe this back
+        if not wantsInjection
+          str.pipe(thr)
+        else
+          @concatStream str, thr, (body, cb) =>
+            encoding = incomingRes.headers["content-encoding"]
 
-              else
-                body
+            rewrite = (body) =>
+              body = body.toString()
 
-          ## if we're gzipped that means we need to unzip
-          ## this content first, inject, and the rezip
-          if encoding and encoding.includes("gzip")
-            zlib.gunzip body, (err, unzipped) ->
-              if err
-                httpRequestErr(err)
-              else
-                ## get the body as a string now
-                body = rewrite(unzipped)
+              switch wantsInjection
+                when "full"
+                  @rewrite(body, remoteState, "initial")
 
-                ## zip it back up
-                zlib.gzip body, (err, zipped) ->
-                  if err
-                    httpRequestErr(err)
-                  else
-                    cb(zipped)
-          else
-            cb rewrite(body)
+                when "partial"
+                  @rewrite(body, remoteState)
+
+            ## if we're gzipped that means we need to unzip
+            ## this content first, inject, and the rezip
+            if encoding and encoding.includes("gzip")
+              zlib.gunzip body, (err, unzipped) ->
+                if err
+                  httpRequestErr(err)
+                else
+                  ## get the body as a string now
+                  body = rewrite(unzipped)
+
+                  ## zip it back up
+                  zlib.gzip body, (err, zipped) ->
+                    if err
+                      httpRequestErr(err)
+                    else
+                      cb(zipped)
+            else
+              cb rewrite(body)
 
     if obj = buffers.take(remoteUrl)
       onResponse(obj.stream, obj.response)
@@ -226,17 +244,39 @@ module.exports = {
 
     logger.info "getting static file content", file: file
 
+    ext = path.extname(file)
+
+    ## ext will be blank when requesting a folder
+    ## which could serve an index.html file
+    isHtml = ext is ".html" or ext is ""
+
+    wantsInjection = do ->
+      switch
+        when req.cookies["__cypress.initial"] is "true"
+          "full"
+
+        when isHtml and req.accepts(["text", "json", "image", "html"]) is "html"
+          "partial"
+
+        else
+          false
+
     onResponse = (str) =>
-      @concatThrough str, thr, (body) =>
-        switch
-          when req.cookies["__cypress.initial"] is "true"
-            body = @rewrite(body, remoteState, "initial")
+      ## if the files extname isnt html or the __cypress.initial
+      ## isnt true then bypass concatThrough and just pipe directly
+      if not wantsInjection
+        str.pipe(thr)
+      else
+        @concatThrough str, thr, (body) =>
+          switch wantsInjection
+            when "full"
+              body = @rewrite(body, remoteState, "initial")
 
-          when req.accepts(["text", "json", "image", "html"]) is "html"
-            body = @rewrite(body, remoteState)
+            when "partial"
+              body = @rewrite(body, remoteState)
 
-        return body
-      .pipe(thr)
+          return body
+        .pipe(thr)
 
     res.set("x-cypress-file-path", file)
 

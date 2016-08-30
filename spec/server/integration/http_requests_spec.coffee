@@ -1354,6 +1354,103 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("OK")
 
+    context "images", ->
+      beforeEach ->
+        Fixtures.scaffold()
+
+      it "passes the bytes through without injection on http servers", ->
+        image = Fixtures.projectPath("e2e/static/javascript-logo.png")
+
+        Promise.all([
+          fs.statAsync(image).get("size")
+          fs.readFileAsync(image, "utf8")
+          @setup("http://localhost:8881")
+        ])
+        .spread (size, bytes, setup) =>
+          nock(@server._remoteOrigin)
+          .get("/javascript-logo.png")
+          .replyWithFile(200, image, {
+            "Content-Type": "image/png"
+          })
+
+          @rp({
+            url: "http://localhost:8881/javascript-logo.png"
+            headers: {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).not.to.include("<script")
+
+            console.log("**********LENGTH", res.body.length, size)
+
+            expect(res.body).to.eq(bytes)
+
+      it "passes the bytes through without injection on http servers with gzip", ->
+        image  = Fixtures.projectPath("e2e/static/javascript-logo.png")
+        zipped = Fixtures.projectPath("e2e/static/javascript-logo.png.gz")
+
+        Promise.all([
+          fs.statAsync(image).get("size")
+          fs.readFileAsync(image, "utf8")
+          @setup("http://localhost:8881")
+        ])
+        .spread (size, bytes, setup) =>
+          nock(@server._remoteOrigin)
+          .get("/javascript-logo.png")
+          .replyWithFile(200, zipped, {
+            "Content-Type": "image/png"
+            "Content-Encoding": "gzip"
+          })
+
+          @rp({
+            url: "http://localhost:8881/javascript-logo.png"
+            gzip: true
+            headers: {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).not.to.include("<script")
+
+            expect(res.body).to.eq(bytes)
+
+    context "woff", ->
+      beforeEach ->
+        Fixtures.scaffold()
+
+      it "passes the bytes through without injection", ->
+        font = Fixtures.projectPath("e2e/static/FiraSans-Regular.woff")
+
+        Promise.all([
+          fs.statAsync(font).get("size")
+          fs.readFileAsync(font, "utf8")
+          @setup("http://localhost:8881")
+        ])
+        .spread (size, bytes, setup) =>
+          nock(@server._remoteOrigin)
+          .get("/font.woff")
+          .replyWithFile(200, font, {
+            "Content-Type": "application/font-woff; charset=utf-8"
+          })
+
+          @rp({
+            url: "http://localhost:8881/font.woff"
+            headers: {
+              "Accept": "*/*"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).not.to.include("<script")
+
+            expect(res.body).to.eq(bytes)
+
     context "content injection", ->
       beforeEach ->
         @setup("http://www.google.com")
@@ -1908,6 +2005,30 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include("document.domain = 'localhost';")
+
+      it "injects document.domain on other http requests to root", ->
+        @rp({
+          url: @proxy + "/sub/"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.include("document.domain = 'localhost';")
+
+      it "does not inject injects document.domain on 301 redirects to folders", ->
+        @rp({
+          url: @proxy + "/sub"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(301)
+          expect(res.body).not.to.include("document.domain = 'localhost';")
 
       it "does not inject document.domain on non http requests", ->
         @rp({

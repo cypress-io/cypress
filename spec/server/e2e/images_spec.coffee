@@ -20,15 +20,15 @@ app.use(express.static(e2ePath))
 
 startServer = ->
   new Promise (resolve) ->
-    srv.listen 3434, ->
-      console.log "listening on 3434"
+    srv.listen 3636, ->
+      console.log "listening on 3636"
       resolve()
 
 stopServer = ->
   new Promise (resolve) ->
     srv.close(resolve)
 
-describe "e2e visit", ->
+describe "e2e images", ->
   beforeEach ->
     Fixtures.scaffold()
 
@@ -48,12 +48,9 @@ describe "e2e visit", ->
   it "passes", ->
     @timeout(20000)
 
-    ## this tests that hashes are applied during a visit
-    ## which forces the browser to scroll to the div
-    ## additionally this tests that jquery.js is not truncated
-    ## due to __cypress.initial cookies not being cleared by
-    ## the hash.html response
+    ## this tests that images are correctly proxied and that we are not
+    ## accidentally modifying their bytes in the stream
 
-    cypress.start(["--run-project=#{e2ePath}", "--spec=cypress/integration/visit_spec.coffee"])
+    cypress.start(["--run-project=#{e2ePath}", "--spec=cypress/integration/images_spec.coffee"])
     .then ->
       expect(process.exit).to.be.calledWith(0)
