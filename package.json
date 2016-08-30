@@ -38,14 +38,14 @@
   "devDependencies": {
     "@cypress/core-releaser": "0.1.8",
     "babel-eslint": "^6.0.4",
-    "bootstrap-sass": "^3.3.5",
+    "bootstrap-sass": "3.3.5",
     "bower": "^1.7.2",
     "eslint": "^2.12.0",
     "eslint-plugin-react": "^5.2.2",
     "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
-    "font-awesome": "^4.6.1",
+    "font-awesome": "4.6.1",
     "gulp-concat": "^2.6.0",
-    "jquery": "^3.1.0",
+    "jquery": "3.1.0",
     "mobx-react-devtools": "^4.2.0",
     "zunder": "^3.3.1"
   }
