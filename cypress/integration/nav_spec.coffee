@@ -51,7 +51,7 @@ describe "Navigation", ->
           .get("nav a").should ($a) ->
             expect($a).to.contain(@user.email)
 
-    describe "logout of user", ->
+    describe.only "logout of user", ->
       beforeEach ->
         cy
           .fixture("user").then (@user) ->
@@ -60,10 +60,12 @@ describe "Navigation", ->
 
       it "shows dropdown on click of user name", ->
         cy.contains("Jane Lane").click()
+        cy.screenshot()
         cy.contains("Log Out").should("be.visible")
 
       it "triggers logout on click of logout", ->
         cy.contains("Jane Lane").click()
+        cy.screenshot()
         cy.contains("a", "Log Out").click().then ->
           expect(@App.ipc).to.be.calledWith("log:out")
 
@@ -71,4 +73,5 @@ describe "Navigation", ->
         @ipc.handle("log:out", null, {})
         cy.contains("Jane Lane").click()
         cy.contains("a", "Log Out").click()
+        cy.screenshot()
         cy.contains(".btn", "Log In with GitHub")
