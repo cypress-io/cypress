@@ -55,6 +55,9 @@ LGPL
 
 ## Changelog
 
+#### 0.3.0 - *(08/30/16)*
+- new UI, migrated to react
+
 #### 0.2.2
 - renamed Login -> Log In
 
