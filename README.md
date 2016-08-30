@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.1.5 - *(08/30/16)*
+- bump node, spec:changed event
+
 #### 0.1.4 - *(08/26/16)*
 - minify prod css
 
