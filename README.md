@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.1.7 - *(08/30/16)*
+- build prod before publishing
+
 #### 0.1.6 - *(08/30/16)*
 - bump reporter
 
