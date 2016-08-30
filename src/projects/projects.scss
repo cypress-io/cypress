@@ -1,0 +1,99 @@
+.projects-list {
+  bottom: 18px;
+  top: 40px;
+  position: fixed;
+  overflow: auto;
+  margin-bottom: 0;
+  background-color: #fcfcfc;
+
+  .fa-chevron-right {
+    color: #666;
+  }
+
+  .react-context-menu-wrapper {
+    overflow: auto;
+
+    &>a {
+      width: 100%;
+      float: left;
+      background-color: #fff;
+
+      &.project {
+        &.loading {
+          pointer-events: none;
+
+          &:hover {
+            cursor: wait;
+            background-color: #fff;
+          }
+          .project-name, .project-path, i {
+            color: #ccc;
+          }
+        }
+
+        &.loaded:hover {
+          cursor: pointer;
+          background-color: #EEE;
+        }
+      }
+
+      &:hover, &:focus, &:active {
+        background-color: #f8f8f8;
+        .fa-chevron-right, .project-name {
+          color: #555;
+        }
+
+        .remove-link {
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+
+  .row-column-wrapper {
+    &:last-child {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      width: 50px;
+
+      i {
+        position: absolute;
+        top: 37%;
+        right: 37%;
+      }
+    }
+
+    .row-column {
+      padding: 10px 20px;
+    }
+  }
+
+  .project-name {
+    color: #666;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 22px;
+  }
+
+  .project-path {
+    color: #8e8e8e;
+    font-size: 12px;
+    font-style: italic;
+    line-height: 22px;
+  }
+}
+
+html.has-updates {
+  .projects-list, #tests-list-page, #config {
+    bottom: 56px;
+  }
+}
+
+.close-browser {
+  .btn {
+    margin-top: 7px;
+  }
+}

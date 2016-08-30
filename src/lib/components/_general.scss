@@ -1,0 +1,80 @@
+#app {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  overflow: auto;
+}
+
+.content-wrapper {
+  overflow: auto;
+}
+
+.helper-docs-append {
+  margin-top: 10px;
+  a {
+    cursor: pointer;
+  }
+}
+
+.helper-line {
+  text-align: center;
+  font-weight: normal;
+  position: absolute;
+  width: 100%;
+  bottom: 10px;
+  left: 0;
+
+  a {
+    color: #999;
+    display: block;
+    font-size: 14px;
+    padding: 10px 0;
+
+    &:hover {
+      cursor: pointer;
+      color: #ccc;
+    }
+  }
+
+  &>span {
+    display: inline-block;
+    position: relative;
+    font-size: 13px;
+
+    &:before,
+    &:after {
+      content: "";
+      position: absolute;
+      border-bottom: 1px solid #cdd1d9;
+      top: 50%;
+      width: 35px;
+    }
+    &:before {
+      right: 100%;
+      margin-right: 10px;
+    }
+    &:after {
+      left: 100%;
+      margin-left: 10px;
+    }
+
+  }
+
+}
+
+.btn:focus {
+  outline: 0 !important;
+}
+
+.fa.green {
+  color: #028863;
+}
+
+.fa.blue {
+  color: #3454c1;
+}
+
+.fa.red {
+  color: $red-primary;
+}

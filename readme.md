@@ -1,4 +1,4 @@
-## Cypress Gui [![CircleCI](https://circleci.com/gh/cypress-io/cypress-core-desktop-gui.svg?style=shield&circle-token=2d68c0ace2f8c89ce0ddbf3f14776764f9f70d0f)](https://circleci.com/gh/cypress-io/cypress-core-desktop-gui)
+## Cypress Gui [![CircleCI](https://circleci.com/gh/cypress-io/cypress-core-desktop-gui.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-core-desktop-gui)
 
 This repository contains the source code for the Cypress Desktop App Gui.
 
@@ -39,13 +39,9 @@ If you get any errors doing the above commands, go through the [install instruct
 
 ## Testing
 
-1. Watch your files and run the gui in port `6060`.
-
 ```bash
 npm test
 ```
-
-2. Start the server within Cypress desktop app and navigate to [http://localhost:2020/](http://localhost:2020/).
 
 ## Debugging
 

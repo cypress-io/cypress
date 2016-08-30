@@ -1,6 +1,6 @@
 machine:
   node:
-    version: 5.10.0
+    version: 6.1.0
 
 dependencies:
   override:
@@ -9,8 +9,7 @@ dependencies:
 
 test:
   pre:
-    - npm run server:
+    - npm start:
         background: true
   override:
-    - npm run build
     - cypress ci

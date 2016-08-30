@@ -8,47 +8,27 @@ describe "Footer", ->
         @agents = cy.agents()
         @agents.spy(@App, "ipc")
 
-        @ipc.handle("get:options", null, {})
-        @ipc.handle("get:current:user", null, {})
+        @v = "1.78"
 
-  it "footer displays on app start", ->
-    cy.get("#footer").should("be.visible")
+        @ipc.handle("get:options", null, {version: @v})
 
-  context "update banner", ->
-    it "does not display update banner when no update available", ->
-      @ipc.handle("updater:check", null, false)
+  it "does not display on login", ->
+    cy.get("footer").should("not.be.visible")
 
+  describe "footer displays in app", ->
+    beforeEach ->
       cy
-        .get("#updates-available").should("not.exist")
-        .get("html").should("not.have.class", "has-updates")
+        .fixture("user").then (@user) ->
+          @ipc.handle("get:current:user", null, @user)
+          @ipc.handle("get:project:paths", null, [])
 
-    it "checks for update on show", ->
-      expect(@App.ipc).to.be.calledWith("updater:check")
+    it "displays version sent from get:options", ->
+      cy.get("footer").contains(@v)
 
-    it "displays banner if updater:check if new version", ->
-      @ipc.handle("updater:check", null, "1.3.4")
-      cy.get("#updates-available").should("be.visible")
-      cy.contains("New updates are available")
+    it "displays after login", ->
+      cy.get("footer").should("be.visible")
+
+    it "opens link to changelog on click of changelog", ->
       cy
-        .get("html").should("have.class", "has-updates")
-        .window().then (win) ->
-          win.App.updater.updatesAvailable(false)
-        .get("html").should("not.have.class", "has-updates")
-
-    it "triggers open:window on click of Update link", ->
-      @ipc.handle("updater:check", null, "1.3.4")
-      cy.contains("Update").click().then ->
-        expect(@App.ipc).to.be.calledWith("window:open", {
-          position: "center"
-          width: 300
-          height: 210
-          toolbar: false
-          title: "Updates"
-          type: "UPDATES"
-        })
-
-    it "gracefully handles error", ->
-      @ipc.handle("updater:check", "Something bad happened", null)
-      cy.contains("Log In with GitHub")
-      cy.get("#footer").should("be.visible")
-
+        .get("a").contains("Changelog").click().then ->
+          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/changelog")

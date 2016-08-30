@@ -48,3 +48,19 @@ describe "App", ->
         message: "foo"
         stack: err.stack
       })
+
+  context "on:menu:clicked", ->
+    it "calls log:out", ->
+      @ipc.handle("on:menu:clicked", null, "log:out")
+      expect(@App.ipc).to.be.calledWith("log:out")
+
+    it "checks for updates", ->
+      @ipc.handle("on:menu:clicked", null, 'check:for:updates')
+      expect(@App.ipc).to.be.calledWithExactly("window:open", {
+        position: "center",
+        width: 300,
+        height: 210,
+        toolbar: false,
+        title: "Updates",
+        type: "UPDATES",
+      })
