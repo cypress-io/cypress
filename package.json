@@ -100,7 +100,7 @@
     "xvfb-maybe": "^0.1.3"
   },
   "dependencies": {
-    "@cypress/core-desktop-gui": "0.2.2",
+    "@cypress/core-desktop-gui": "0.3.0",
     "@cypress/core-example": "0.5.3",
     "@cypress/core-extension": "0.3.1",
     "@cypress/core-https-proxy": "0.1.3",
