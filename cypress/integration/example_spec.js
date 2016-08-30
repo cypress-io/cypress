@@ -8,7 +8,6 @@
 // Feel free to modify this spec in your
 // own application as a jumping off point
 
-
 // **** Test Structure ****
 //
 // Cypress has adopted Mocha's bdd syntax.
@@ -18,9 +17,6 @@
 describe('Kitchen Sink', function(){
 
   beforeEach(function(){
-
-
-
     // **** Resetting State Before Each Test ****
     //
     // Visiting our app before each test
@@ -31,14 +27,12 @@ describe('Kitchen Sink', function(){
     // By default Cypress also automatically
     // clears the Local Storage and Cookies
     // before each test.
-
   })
 
   it('cy.should - assert that <title> is correct', function(){
 
     // https://on.cypress.io/api/visit
     cy.visit('https://example.cypress.io')
-
 
     // **** Making Assertions ****
     //
@@ -54,7 +48,6 @@ describe('Kitchen Sink', function(){
     cy.title().should('include', 'Kitchen Sink')
     //   ↲               ↲            ↲
     // subject        chainer      value
-
   })
 
   context('Querying', function(){
@@ -77,11 +70,9 @@ describe('Kitchen Sink', function(){
       // We can get DOM elements by class
       cy.get('.query-btn').should('contain', 'Button')
 
-
       cy.get('#querying .well>button:first').should('contain', 'Button')
       //              ↲
       // we can CSS selectors just like jQuery
-
     })
 
     it('cy.contains() - query DOM elements with matching content', function(){
@@ -110,7 +101,6 @@ describe('Kitchen Sink', function(){
         // but the <button> itself
         .get('.query-button')
           .contains('Save Form').should('have.class', 'btn')
-
     })
 
     it('cy.within() - query DOM elements within a specific element', function(){
@@ -120,9 +110,7 @@ describe('Kitchen Sink', function(){
         cy
           .get('input:first').should('have.attr', 'placeholder', 'Email')
           .get('input:last').should('have.attr', 'placeholder', 'Password')
-
       })
-
     })
 
     it('cy.root() - query the root DOM element', function(){
@@ -135,9 +123,7 @@ describe('Kitchen Sink', function(){
         // In this within, the root is now the ul DOM element
         cy.root().should('have.class', 'query-ul')
       })
-
     })
-
   })
 
   context('Traversal', function(){
@@ -155,28 +141,24 @@ describe('Kitchen Sink', function(){
 
       // https://on.cypress.io/api/children
       cy.get('.traversal-breadcrumb').children('.active').should('contain', 'Data')
-
     })
 
     it('cy.closest() - get closest ancestor DOM element', function(){
 
       // https://on.cypress.io/api/closest
       cy.get('.traversal-badge').closest('ul').should('have.class', 'list-group')
-
     })
 
     it('cy.eq() - get a DOM element at a specific index', function(){
 
       // https://on.cypress.io/api/eq
       cy.get('.traversal-list>li').eq(1).should('contain', 'siamese')
-
     })
 
     it('cy.filter() - get DOM elements that match the selector', function(){
 
       // https://on.cypress.io/api/filter
       cy.get('.traversal-nav>li').filter('.active').should('contain', 'About')
-
     })
 
     it('cy.find() - get descendant DOM elements of the selector', function(){
@@ -189,45 +171,37 @@ describe('Kitchen Sink', function(){
 
       // https://on.cypress.io/api/first
       cy.get('.traversal-table td').first().should('contain', '1')
-
     })
 
     it('cy.last() - get last DOM element', function(){
 
       // https://on.cypress.io/api/last
       cy.get('.traversal-buttons .btn').last().should('contain', 'Submit')
-
     })
 
     it('cy.next() - get next sibling DOM element', function(){
 
       // https://on.cypress.io/api/next
       cy.get('.traversal-ul').contains('apples').next().should('contain', 'oranges')
-
     })
 
     it('cy.not() - remove DOM elements from set of DOM elements', function(){
 
       // https://on.cypress.io/api/not
       cy.get('.traversal-disabled .btn').not('[disabled]').should('not.contain', 'Disabled')
-
     })
 
     it('cy.parents() - get parents DOM element from set of DOM elements', function(){
 
       // https://on.cypress.io/api/parents
       cy.get('.traversal-cite').parents().should('match', 'blockquote')
-
     })
 
     it('cy.siblings() - get all sibling DOM elements from set of DOM elements', function(){
 
       // https://on.cypress.io/api/siblings
       cy.get('.traversal-pills .active').siblings().should('have.length', 2)
-
     })
-
-
   })
 
   context('Actions', function(){
@@ -270,7 +244,6 @@ describe('Kitchen Sink', function(){
         // like whether the input is visible or disabled
         .type('disabled error checking', {force: true})
           .should('have.value', 'disabled error checking')
-
     })
 
     it('cy.focus() - focus on a DOM element', function(){
@@ -280,7 +253,6 @@ describe('Kitchen Sink', function(){
         .get('.action-focus').focus()
         .should('have.class', 'focus')
           .prev().should('have.attr', 'style', 'color: orange;')
-
     })
 
     it('cy.blur() - blur off a DOM element', function(){
@@ -290,7 +262,6 @@ describe('Kitchen Sink', function(){
         .get('.action-blur').type('I\'m about to blur').blur()
         .should('have.class', 'error')
           .prev().should('have.attr', 'style', 'color: red;')
-
     })
 
 
@@ -302,7 +273,6 @@ describe('Kitchen Sink', function(){
           .should('have.value', 'We are going to clear this text')
         .clear()
           .should('have.value', '')
-
     })
 
     it('cy.submit() - submit a form', function(){
@@ -313,7 +283,6 @@ describe('Kitchen Sink', function(){
           .find('[type="text"]').type('HALFOFF')
         .get('.action-form').submit()
           .next().should('contain', 'Your form has been submitted!')
-
     })
 
     it('cy.click() - click on a DOM element', function(){
@@ -370,7 +339,6 @@ describe('Kitchen Sink', function(){
       // like whether the element is visible, clickable or disabled
       // this button below is covered by another element.
       cy.get('.action-opacity>.btn').click({force: true})
-
     })
 
     it('cy.dblclick() - double click on a DOM element', function(){
@@ -382,7 +350,6 @@ describe('Kitchen Sink', function(){
       cy
         .get('.action-div').dblclick().should('not.be.visible')
         .get('.action-input-hidden').should('be.visible')
-
     })
 
     it('cy.check() - check a checkbox or radio element', function(){
@@ -412,7 +379,6 @@ describe('Kitchen Sink', function(){
       //
         .get('.action-multiple-checkboxes [type="checkbox"]').check(['checkbox1', 'checkbox2']).should('be.checked')
 
-
       // **** Check Options ****
       //
       // cy.check() accepts options that control checking
@@ -424,7 +390,6 @@ describe('Kitchen Sink', function(){
           .check({force: true}).should('be.checked')
 
         .get('.action-radios [type="radio"]').check('radio3', {force: true}).should('be.checked')
-
     })
 
 
@@ -468,7 +433,6 @@ describe('Kitchen Sink', function(){
       // this checkbox below is disabled.
         .get('.action-check [disabled]')
           .uncheck({force: true}).should('not.be.checked')
-
     })
 
     it('cy.select() - select an option in a <select> element', function(){
@@ -486,10 +450,7 @@ describe('Kitchen Sink', function(){
 
       // Select the options with matching values
       cy.get('.action-select-multiple').select(['fr-apples', 'fr-oranges', 'fr-bananas'])
-
     })
-
-
   })
 
   context('Window', function(){
@@ -506,21 +467,18 @@ describe('Kitchen Sink', function(){
 
       // https://on.cypress.io/api/window
       cy.window().should('have.property', 'top')
-
     })
 
     it('cy.document() - get the document object', function(){
 
       // https://on.cypress.io/api/document
       cy.document().should('have.property', 'charset').and('eq', 'UTF-8')
-
     })
 
     it('cy.title() - get the title', function(){
 
       // https://on.cypress.io/api/title
       cy.title().should('include', 'Kitchen Sink')
-
     })
   })
 
@@ -595,9 +553,7 @@ describe('Kitchen Sink', function(){
 
       // The viewport will be reset back to the default dimensions
       // in between tests (the  default is set in cypress.json)
-
     })
-
   })
 
   context('Location', function(){
@@ -614,7 +570,6 @@ describe('Kitchen Sink', function(){
 
       // https://on.cypress.io/api/hash
       cy.hash().should('be.empty')
-
     })
 
     it('cy.location() - get window.location', function(){
@@ -631,16 +586,13 @@ describe('Kitchen Sink', function(){
         expect(location.protocol).to.eq('https:')
         expect(location.search).to.be.empty
       })
-
     })
 
     it('cy.url() - get the current URL', function(){
 
       // https://on.cypress.io/api/url
       cy.url().should('eq', 'https://example.cypress.io/commands/location')
-
     })
-
   })
 
   context('Navigation', function(){
@@ -664,14 +616,12 @@ describe('Kitchen Sink', function(){
       cy.go('back')
       cy.location().its('pathname').should('not.include', 'navigation')
 
-
       cy.go('forward')
       cy.location().its('pathname').should('include', 'navigation')
 
       // equivalent to clicking back
       cy.go(-1)
       cy.location().its('pathname').should('not.include', 'navigation')
-
 
       // equivalent to clicking forward
       cy.go(1)
@@ -680,20 +630,17 @@ describe('Kitchen Sink', function(){
     })
 
     it('cy.reload() - reload the page', function(){
-
       // https://on.cypress.io/api/reload
       cy.reload()
 
       // reload the page without using the cache
       cy.reload(true)
-
     })
 
     it('cy.visit() - visit a remote url', function(){
 
-      // Visit any url
+      // Visit any sub-domain of your current domain
       // https://on.cypress.io/api/visit
-      cy.visit('http://www.warnerbros.com/archive/spacejam/movie/jam.htm')
 
       // Pass options to the visit
       cy.visit('https://example.cypress.io/commands/navigation', {
@@ -706,7 +653,6 @@ describe('Kitchen Sink', function(){
         }
       })
     })
-
   })
 
   context('Assertions', function(){
@@ -723,7 +669,6 @@ describe('Kitchen Sink', function(){
         cy
           .get('.assertion-table')
             .find('tbody tr:last').should('have.class', 'success')
-
       })
 
       it('cy.and - chain multiple assertions together', function(){
@@ -734,7 +679,6 @@ describe('Kitchen Sink', function(){
             .should('have.class', 'active')
             .and('have.attr', 'href')
             .and('include', 'cypress.io')
-
       })
 
     })
@@ -771,11 +715,8 @@ describe('Kitchen Sink', function(){
               'And even more text from third p'
             ])
         })
-
       })
-
     })
-
   })
 
   context('Misc', function(){
@@ -797,7 +738,6 @@ describe('Kitchen Sink', function(){
 
             // queries the entire table again
             .contains("Charles").click()
-
         })
     })
 
@@ -828,7 +768,6 @@ describe('Kitchen Sink', function(){
 
         .get('.misc-form').find('#description').click()
         .focused().should('have.id', 'description')
-
     })
 
     it("cy.screenshot() - take a screenshot", function(){
@@ -844,7 +783,6 @@ describe('Kitchen Sink', function(){
         .wrap({foo: 'bar'})
           .should('have.property', 'foo')
           .and('include', 'bar')
-
     })
 
   })
@@ -892,7 +830,6 @@ describe('Kitchen Sink', function(){
         // call the jquery method 'show' on the 'div.container'
         .invoke('show')
           .should('be.visible')
-
     })
 
     it('cy.spread() - spread an array as individual arguments to a callback function', function(){
@@ -905,7 +842,6 @@ describe('Kitchen Sink', function(){
         expect(bar).to.eq('bar')
         expect(baz).to.eq('baz')
       })
-
     })
 
     it('cy.then() - invoke a callback function with the current subject', function(){
@@ -917,9 +853,7 @@ describe('Kitchen Sink', function(){
         expect($lis.eq(1)).to.contain('Feed the cat')
         expect($lis.eq(2)).to.contain('Write JavaScript')
       })
-
     })
-
   })
 
   context('Aliasing', function(){
@@ -952,9 +886,7 @@ describe('Kitchen Sink', function(){
         .get('@firstBtn')
           .should('have.class', 'btn-success')
           .and('contain', 'Changed')
-
     })
-
   })
 
   context('Waiting', function(){
@@ -979,14 +911,11 @@ describe('Kitchen Sink', function(){
         .wait(1000)
         .get(".wait-input3").type('Wait 1000ms after typing')
         .wait(1000)
-
     })
-
     //
     // Waiting for a specific resource to resolve
     // is covered within the cy.route() test below
     //
-
   })
 
   context('Network Requests', function(){
@@ -1031,14 +960,13 @@ describe('Kitchen Sink', function(){
         // any route commands will now inherit the above options
         // from the server. anything we pass specifically
         // to route will override the defaults though.
-
     })
 
     it('cy.request() - make an XHR request', function(){
 
       // https://on.cypress.io/api/request
       cy
-        .request('http://jsonplaceholder.typicode.com/comments').then(function(response){
+        .request('https://jsonplaceholder.typicode.com/comments').then(function(response){
           expect(response.status).to.eq(200)
           expect(response.body).to.have.length(500)
           expect(response).to.have.property('headers')
@@ -1068,7 +996,6 @@ describe('Kitchen Sink', function(){
         // https://on.cypress.io/api/wait
         .wait('@getComment').its('status').should('eq', 200)
 
-
       // **** POST comment route ****
       //
       // Specify the route to listen to method 'POST'
@@ -1086,7 +1013,6 @@ describe('Kitchen Sink', function(){
           expect(xhr.requestHeaders).to.have.property('Content-Type')
           expect(xhr.responseBody).to.have.property('name', 'Using POST in cy.route()')
         })
-
 
       // **** Stubbed PUT comment route ****
       //
@@ -1109,9 +1035,7 @@ describe('Kitchen Sink', function(){
 
         // our 404 statusCode logic in scripts.js executed
         .get('.network-put-comment').should('contain', message)
-
     })
-
   })
 
   context('Fixtures', function(){
@@ -1166,7 +1090,6 @@ describe('Kitchen Sink', function(){
         .wait('@getComment').its('responseBody')
           .should('have.property', 'name')
             .and('include', 'Using fixtures to represent data')
-
     })
 
   })
@@ -1229,9 +1152,7 @@ describe('Kitchen Sink', function(){
           expect(ls.getItem('prop2')).to.be.null
           expect(ls.getItem('prop3')).to.eq('magenta')
         })
-
     })
-
   })
 
   context('Cookies', function(){
@@ -1277,7 +1198,6 @@ describe('Kitchen Sink', function(){
           expect(cookies[0]).to.have.property('secure', false)
           expect(cookies[0]).to.have.property('domain')
           expect(cookies[0]).to.have.property('path')
-
         })
     })
 
@@ -1330,7 +1250,6 @@ describe('Kitchen Sink', function(){
         .clearCookies()
 
         .getCookies().should('be.empty')
-
     })
 
   })
@@ -1351,13 +1270,12 @@ describe('Kitchen Sink', function(){
       cy
         // use the _.chain, _.pluck, _.first, and _.value functions
         // https://on.cypress.io/api/cypress-underscore
-        .request('http://jsonplaceholder.typicode.com/users').then(function(response){
+        .request('https://jsonplaceholder.typicode.com/users').then(function(response){
           var _ = Cypress._
           var ids = _.chain(response.body).pluck('id').first(3).value()
 
           expect(ids).to.deep.eq([1, 2, 3])
         })
-
     })
 
     it('Cypress.$(selector) - call a jQuery method', function(){
@@ -1370,7 +1288,6 @@ describe('Kitchen Sink', function(){
           .should('not.have.class', 'active')
         .click()
           .should('have.class', 'active')
-
     })
 
 
@@ -1383,7 +1300,6 @@ describe('Kitchen Sink', function(){
       cy
         .get('.utility-moment').contains('3:38 PM')
           .should('have.class', 'badge')
-
     })
 
     it('Cypress.Blob.method() - blob utilties and base64 string conversion', function(){
@@ -1405,7 +1321,6 @@ describe('Kitchen Sink', function(){
           })
           .get('.utility-blob img').click().should('have.attr', 'src', dataUrl)
       })
-
     })
 
     it('new Cypress.Promise(function) - instantiate a bluebird promise', function(){
@@ -1435,7 +1350,6 @@ describe('Kitchen Sink', function(){
             expect(waited).to.be.true
           })
         })
-
     })
 
   })
@@ -1464,10 +1378,8 @@ describe('Kitchen Sink', function(){
       expect(myConfig).to.have.property('pageLoadTimeout', 30000)
       expect(myConfig).to.have.property('waitForAnimations', true)
 
-
       // *** get a single configuration option **
       expect(Cypress.config('pageLoadTimeout')).to.eq(30000)
-
 
       // *** set a single configuration option **
       //
@@ -1478,9 +1390,7 @@ describe('Kitchen Sink', function(){
       expect(Cypress.config('pageLoadTimeout')).to.eq(20000)
 
       Cypress.config('pageLoadTimeout', 30000)
-
     })
-
   })
 
   context('Cypress.env()', function(){
@@ -1513,7 +1423,6 @@ describe('Kitchen Sink', function(){
       // get all environment variable
       expect(Cypress.env()).to.have.property('host', 'veronica.dev.local')
       expect(Cypress.env()).to.have.property('api_server', 'http://localhost:8888/api/v2/')
-
     })
   })
 
@@ -1539,7 +1448,6 @@ describe('Kitchen Sink', function(){
       cy.setCookie('fakeCookie', '123ABC')
       cy.clearCookie('fakeCookie')
       cy.setCookie('fakeCookie', '123ABC')
-
     })
 
     it('Cypress.Cookies.preserveOnce() - preserve cookies by key', function(){
@@ -1551,7 +1459,6 @@ describe('Kitchen Sink', function(){
       // the next test starts
       cy.setCookie('lastCookie', '789XYZ')
       Cypress.Cookies.preserveOnce('lastCookie')
-
     })
 
     it('Cypress.Cookies.defaults() - set defaults for all cookies', function(){
@@ -1561,9 +1468,7 @@ describe('Kitchen Sink', function(){
       Cypress.Cookies.defaults({
         whitelist: 'session_id'
       })
-
     })
-
   })
 
   context('Cypress.Dom', function(){
@@ -1585,9 +1490,7 @@ describe('Kitchen Sink', function(){
       // our first paragraph has css class 'hidden'
       expect(Cypress.Dom.isHidden(hiddenP)).to.be.true
       expect(Cypress.Dom.isHidden(visibleP)).to.be.false
-
     })
-
   })
 
   context('Cypress.Server', function(){
@@ -1603,7 +1506,6 @@ describe('Kitchen Sink', function(){
     // https://on.cypress.io/api/api-server
 
     it('Cypress.Server.defaults() - change default config of server', function(){
-
       Cypress.Server.defaults({
         delay: 0,
         force404: false,
@@ -1611,9 +1513,6 @@ describe('Kitchen Sink', function(){
           // handle custom logic for whitelisting
         }
       })
-
     })
-
   })
-
 })
