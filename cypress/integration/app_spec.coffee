@@ -2,16 +2,18 @@ describe "App", ->
   beforeEach ->
     cy
       .visit("/")
-      .window().then (win) ->
-        {@ipc, @App} = win
-
-        @agents = cy.agents()
-
-        @agents.spy(@App, "ipc")
-
-        @ipc.handle("get:options", null, {})
 
   context "window.onerror", ->
+    beforeEach ->
+      cy
+        .window().then (win) ->
+          {@ipc, @App} = win
+
+          @agents = cy.agents()
+          @agents.spy(@App, "ipc")
+
+          @ipc.handle("get:options", null, {})
+
     it "attaches to window.onerror", ->
       cy.window().then (win) ->
         cy.wrap(win.onerror).should("be.a", "function")
@@ -50,6 +52,16 @@ describe "App", ->
       })
 
   context "on:menu:clicked", ->
+    beforeEach ->
+      cy
+        .window().then (win) ->
+          {@ipc, @App} = win
+
+          @agents = cy.agents()
+          @agents.spy(@App, "ipc")
+
+          @ipc.handle("get:options", null, {})
+
     it "calls log:out", ->
       @ipc.handle("on:menu:clicked", null, "log:out")
       expect(@App.ipc).to.be.calledWith("log:out")
@@ -64,3 +76,18 @@ describe "App", ->
         title: "Updates",
         type: "UPDATES",
       })
+
+  context "on updates being applied", ->
+    beforeEach ->
+      cy
+        .window().then (win) ->
+          {@ipc, @App} = win
+
+          @agents = cy.agents()
+          @agents.spy(@App, "ipc")
+
+          @ipc.handle("get:options", null, {"updating": true})
+
+    it "shows updates being applied view", ->
+      cy.get("#updates-applied").contains("Applying updates")
+

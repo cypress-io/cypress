@@ -68,6 +68,24 @@ App.start = () => {
 
     const el = document.getElementById('app')
 
+    // if we are updating then do not start the app
+    // start the updates being applied app so the
+    // user knows its still a-happen-ning
+    if (options.updating) {
+      return render(
+        <div id="updates-applied">
+          <h3>
+            <p>Cypress.io</p>
+          </h3>
+          <p>
+            <i className="fa fa-spinner fa-spin"></i>{' '}
+            Applying updates and restarting...
+          </p>
+        </div>
+        , el
+      )
+    }
+
     render(
       <Router history={history}>
         <Route path='/' component={Application}>
