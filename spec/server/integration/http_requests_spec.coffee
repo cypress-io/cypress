@@ -2203,6 +2203,31 @@ describe "Routes", ->
         expect(res.headers["location"]).to.match(/dashboard/)
         expect(res.headers["set-cookie"]).to.match(/initial=true/)
 
+    it "does not alter request headers", ->
+      nock(@server._remoteOrigin)
+      .matchHeader("x-csrf-token", "abc-123")
+      .post("/login", {
+        username: "brian@cypress.io"
+        password: "foobar"
+      })
+      .reply(200, "OK")
+
+      @rp({
+        method: "POST"
+        url: "http://localhost:8000/login"
+        form: {
+          username: "brian@cypress.io"
+          password: "foobar"
+        }
+        headers: {
+          "X-CSRF-Token": "abc-123"
+        }
+      })
+      .then (res) ->
+        expect(res.statusCode).to.eq(200)
+
+        expect(res.body).to.eq("OK")
+
     it "does not fail on a big cookie", ->
       nock(@server._remoteOrigin)
       .post("/login")
