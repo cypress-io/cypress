@@ -74,7 +74,7 @@
   margin-bottom: 10px;
   font-weight: 500;
 
-  &:hover {
+  &:hover, &:focus {
     background-color: #242424;
     color: white;
   }
