@@ -101,6 +101,9 @@ class Project extends EE
       @watchers?.close()
     )
 
+  resetState: ->
+    @server.resetState()
+
   updateProject: (id, options = {}) ->
     Promise.try =>
       ## bail if sync isnt true
@@ -146,6 +149,8 @@ class Project extends EE
       onAutomationRequest: options.onAutomationRequest
 
       onFocusTests: options.onFocusTests
+
+      onSpecChanged: options.onSpecChanged
 
       onConnect: (id) =>
         @emit("socket:connected", id)

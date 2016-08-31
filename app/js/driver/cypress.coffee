@@ -34,7 +34,7 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
       ## set domainName but allow us to turn
       ## off this feature in testing
-      if d = config.remote.domainName
+      if d = config.remote?.domainName
         document.domain = d
 
       if config.isHeadless
@@ -46,7 +46,7 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
       $Cypress.EnvironmentVariables.create(@, environmentVariables)
       $Cypress.Config.create(@, config)
-      $Cypress.Cookies.create(@, config.namespace, remote.domainName)
+      $Cypress.Cookies.create(@, config.namespace, d)
 
       @trigger("config", config)
 

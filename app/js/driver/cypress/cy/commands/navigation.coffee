@@ -396,7 +396,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
               if url isnt originalUrl
                 consoleProps["Original Url"] = originalUrl
 
-            if options.log and redirects.length
+            if options.log and redirects and redirects.length
               indicateRedirects = ->
                 [originalUrl].concat(redirects).join(" -> ")
 

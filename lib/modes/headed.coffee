@@ -21,7 +21,7 @@ module.exports = {
   onWindowAllClosed: (app) ->
     process.exit(0)
 
-  getRendererArgs: (coords) ->
+  getRendererArgs: ->
     common = {
       backgroundColor: '#dfe2e4'
       width: 800
@@ -38,13 +38,6 @@ module.exports = {
     }
 
     _.extend(common, @platformArgs())
-
-    ## if we have coordinates automatically add them
-    if coords
-      ## and also set show to true
-      _.extend(common, coords, {show: true})
-
-    return common
 
   platformArgs: ->
     {
@@ -75,11 +68,7 @@ module.exports = {
         bus.emit("menu:item:clicked", "log:out")
     })
 
-    ## TODO:
-    ## handle right click to show context menu!
-    ## handle drop events for automatically adding projects!
-    ## use the same icon as the cloud app
-    Renderer.create(@getRendererArgs(options.coords))
+    Renderer.create(@getRendererArgs())
     .then (win) =>
       ## cause the browser window instance
       ## to receive focus when we've been

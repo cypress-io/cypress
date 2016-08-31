@@ -149,9 +149,6 @@ handleEvent = (options, bus, event, id, type, arg) ->
       win.once "closed", ->
         upd.cancel()
 
-    when "get:about:logo:src"
-      send(cyIcons.getPathToIcon("icon_32x32@2x.png"))
-
     when "get:logs"
       logs.get()
       .then(send)
@@ -195,6 +192,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
         project.reboot()
         .then(open)
 
+      onSpecChanged = (spec) ->
+        send({specChanged: spec})
+
       onFocusTests = ->
         if _.isFunction(options.onFocusTests)
           options.onFocusTests()
@@ -204,6 +204,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       open = ->
         project.open(arg, options, {
           onFocusTests: onFocusTests
+          onSpecChanged: onSpecChanged
           onSettingsChanged: onSettingsChanged
         })
         .then(getConfig)

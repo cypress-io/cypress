@@ -209,12 +209,6 @@ describe "lib/electron/handlers/events", ->
         @handleEvent("updater:run")
         @expectSendCalledWith({event: "download", version: "0.14.0"})
 
-  context "logo src", ->
-    describe "get:about:logo:src", ->
-      it "returns path to icon", ->
-        @handleEvent("get:about:logo:src")
-        @expectSendCalledWith(icons.getPathToIcon("icon_32x32@2x.png"))
-
   context "log events", ->
     describe "get:logs", ->
       it "returns array of logs", ->

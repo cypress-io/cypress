@@ -32,7 +32,7 @@ stopServer = ->
   new Promise (resolve) ->
     srv.close(resolve)
 
-describe.only "e2e cookies", ->
+describe "e2e cookies", ->
   beforeEach ->
     Fixtures.scaffold()
 

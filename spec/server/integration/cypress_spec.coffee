@@ -964,17 +964,3 @@ describe "lib/cypress", ->
     it "runs headed and does not exit", ->
       cypress.start().then ->
         expect(headed.ready).to.be.calledOnce
-
-  context "when running electron in linux", ->
-    beforeEach ->
-      @sandbox.stub(cypress, "isLinuxAndHasNotDisabledGpu").returns(true)
-
-    it "captures exit code from re-spawned electron process", ->
-      cpStub = @sandbox.stub({on: ->})
-      cpStub.on.withArgs("close").yieldsAsync(10)
-
-      @sandbox.stub(cp, "spawn").withArgs(process.execPath, [".", "--runProject=foo/bar", "--disable-gpu"], {stdio: "inherit"}).returns(cpStub)
-
-      cypress.runElectron("", {runProject: "foo/bar"})
-      .then (stats) ->
-        expect(stats).to.deep.eq({failures: 10})

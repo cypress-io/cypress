@@ -1,0 +1,4244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Kitchen Sink | Cypress Example">
+  <meta name="author" content="Cypress.io">
+  <meta name="copyright" content="Cypress.io Copyright (c) 2016">
+
+  <title>Cypress.io: Kitchen Sink</title>
+
+</head>
+
+<body>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/fixtures">Fixtures</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Cypress API <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/cypress-api/config">config</a></li>
+              <li><a href="/cypress-api/env">env</a></li>
+              <li><a href="/cypress-api/commands">Commands</a></li>
+              <li><a href="/cypress-api/cookies">Cookies</a></li>
+              <li><a href="/cypress-api/dom">Dom</a></li>
+              <li><a href="/cypress-api/server">Server</a></li>
+            </ul>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Kitchen Sink</h1>
+      <p>This is an example app used to showcase Cypress.io testing. For a full reference of our documentation, go to <a href="https://docs.cypress.io" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Commands</h2>
+          <p>Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/commands/querying">Querying</a>
+            <ul>
+              <li><a href="/commands/querying">get</a></li>
+              <li><a href="/commands/querying">contains</a></li>
+              <li><a href="/commands/querying">within</a></li>
+              <li><a href="/commands/querying">root</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/traversal">Traversal</a>
+            <ul>
+              <li><a href="/commands/traversal">children</a></li>
+              <li><a href="/commands/traversal">closest</a></li>
+              <li><a href="/commands/traversal">eq</a></li>
+              <li><a href="/commands/traversal">filter</a></li>
+              <li><a href="/commands/traversal">find</a></li>
+              <li><a href="/commands/traversal">first</a></li>
+              <li><a href="/commands/traversal">last</a></li>
+              <li><a href="/commands/traversal">next</a></li>
+              <li><a href="/commands/traversal">not</a></li>
+              <li><a href="/commands/traversal">parent</a></li>
+              <li><a href="/commands/traversal">parents</a></li>
+              <li><a href="/commands/traversal">siblings</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/actions">Actions</a>
+            <ul>
+              <li><a href="/commands/actions">type</a></li>
+              <li><a href="/commands/actions">focus</a></li>
+              <li><a href="/commands/actions">blur</a></li>
+              <li><a href="/commands/actions">clear</a></li>
+              <li><a href="/commands/actions">submit</a></li>
+              <li><a href="/commands/actions">click</a></li>
+              <li><a href="/commands/actions">dblclick</a></li>
+              <li><a href="/commands/actions">check</a></li>
+              <li><a href="/commands/actions">uncheck</a></li>
+              <li><a href="/commands/actions">select</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/window">Window</a>
+            <ul>
+              <li><a href="/commands/window">window</a></li>
+              <li><a href="/commands/window">document</a></li>
+              <li><a href="/commands/window">title</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/viewport">Viewport</a>
+            <ul>
+              <li><a href="/commands/viewport">viewport</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/location">Location</a>
+            <ul>
+              <li><a href="/commands/location">hash</a></li>
+              <li><a href="/commands/location">location</a></li>
+              <li><a href="/commands/location">url</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/navigation">Navigation</a>
+            <ul>
+              <li><a href="/commands/navigation">go</a></li>
+              <li><a href="/commands/navigation">reload</a></li>
+              <li><a href="/commands/navigation">visit</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/assertions">Assertions</a>
+            <ul>
+              <li>Implicit Assertions</li>
+              <li><a href="/commands/assertions">should</a></li>
+              <li><a href="/commands/assertions">and</a></li>
+              <li>Explicit Assertions</li>
+              <li><a href="/commands/assertions">expect</a></li>
+              <li><a href="/commands/assertions">assert</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/misc">Misc</a>
+            <ul>
+              <li><a href="/commands/misc">end</a></li>
+              <li><a href="/commands/misc">exec</a></li>
+              <li><a href="/commands/misc">focused</a></li>
+              <li><a href="/commands/misc">screenshot</a></li>
+              <li><a href="/commands/misc">wrap</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/connectors">Connectors</a>
+            <ul>
+              <li><a href="/commands/connectors">each</a></li>
+              <li><a href="/commands/connectors">its</a></li>
+              <li><a href="/commands/connectors">invoke</a></li>
+              <li><a href="/commands/connectors">spread</a></li>
+              <li><a href="/commands/connectors">then</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/aliasing">Aliasing</a>
+            <ul>
+              <li><a href="/commands/aliasing">as</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/waiting">Waiting</a>
+            <ul>
+              <li><a href="/commands/waiting">wait</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/network-requests">Network Requests</a>
+            <ul>
+              <li><a href="/commands/network-requests">server</a></li>
+              <li><a href="/commands/network-requests">request</a></li>
+              <li><a href="/commands/network-requests">route</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/fixtures">Fixtures</a>
+            <ul>
+              <li><a href="/commands/fixtures">fixture</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/local-storage">Local Storage</a>
+            <ul>
+              <li><a href="/commands/local-storage">clearLocalStorage</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/cookies">Cookies</a>
+            <ul>
+              <li><a href="/commands/cookies">clearCookies</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Utilities</h2>
+          <p>Utilities give you access to methods from other commonly used libraries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <ul>
+              <li><a href="/cypress-api/utilities">Underscore</a></li>
+              <li><a href="/cypress-api/utilities">jQuery</a></li>
+              <li><a href="/cypress-api/utilities">moment</a></li>
+              <li><a href="/cypress-api/utilities">Blob</a></li>
+              <li><a href="/cypress-api/utilities">Promise</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Cypress API</h2>
+          <p>The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/cypress-api/config">config</a>
+            <ul>
+              <li><a href="/cypress-api/config">config</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/env">env</a>
+            <ul>
+              <li><a href="/cypress-api/env">env</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/commands">Commands</a>
+            <ul>
+              <li><a href="/cypress-api/commands">addChildCommand</a></li>
+              <li><a href="/cypress-api/commands">addDualCommand</a></li>
+              <li><a href="/cypress-api/commands">addParentCommand</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/cookies">Cookies</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Cookies.set</a></li>
+              <li><a href="/cypress-api/commands">Cookies.get</a></li>
+              <li><a href="/cypress-api/commands">Cookies.remove</a></li>
+              <li><a href="/cypress-api/commands">Cookies.debug</a></li>
+              <li><a href="/cypress-api/commands">Cookies.preserveOnce</a></li>
+              <li><a href="/cypress-api/commands">Cookies.default</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/dom">Dom</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Dom.isHidden</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/server">Server</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Server.default</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/fixtures">Fixtures</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Cypress API <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/cypress-api/config">config</a></li>
+              <li><a href="/cypress-api/env">env</a></li>
+              <li><a href="/cypress-api/commands">Commands</a></li>
+              <li><a href="/cypress-api/cookies">Cookies</a></li>
+              <li><a href="/cypress-api/dom">Dom</a></li>
+              <li><a href="/cypress-api/server">Server</a></li>
+            </ul>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Kitchen Sink</h1>
+      <p>This is an example app used to showcase Cypress.io testing. For a full reference of our documentation, go to <a href="https://docs.cypress.io" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Commands</h2>
+          <p>Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/commands/querying">Querying</a>
+            <ul>
+              <li><a href="/commands/querying">get</a></li>
+              <li><a href="/commands/querying">contains</a></li>
+              <li><a href="/commands/querying">within</a></li>
+              <li><a href="/commands/querying">root</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/traversal">Traversal</a>
+            <ul>
+              <li><a href="/commands/traversal">children</a></li>
+              <li><a href="/commands/traversal">closest</a></li>
+              <li><a href="/commands/traversal">eq</a></li>
+              <li><a href="/commands/traversal">filter</a></li>
+              <li><a href="/commands/traversal">find</a></li>
+              <li><a href="/commands/traversal">first</a></li>
+              <li><a href="/commands/traversal">last</a></li>
+              <li><a href="/commands/traversal">next</a></li>
+              <li><a href="/commands/traversal">not</a></li>
+              <li><a href="/commands/traversal">parent</a></li>
+              <li><a href="/commands/traversal">parents</a></li>
+              <li><a href="/commands/traversal">siblings</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/actions">Actions</a>
+            <ul>
+              <li><a href="/commands/actions">type</a></li>
+              <li><a href="/commands/actions">focus</a></li>
+              <li><a href="/commands/actions">blur</a></li>
+              <li><a href="/commands/actions">clear</a></li>
+              <li><a href="/commands/actions">submit</a></li>
+              <li><a href="/commands/actions">click</a></li>
+              <li><a href="/commands/actions">dblclick</a></li>
+              <li><a href="/commands/actions">check</a></li>
+              <li><a href="/commands/actions">uncheck</a></li>
+              <li><a href="/commands/actions">select</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/window">Window</a>
+            <ul>
+              <li><a href="/commands/window">window</a></li>
+              <li><a href="/commands/window">document</a></li>
+              <li><a href="/commands/window">title</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/viewport">Viewport</a>
+            <ul>
+              <li><a href="/commands/viewport">viewport</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/location">Location</a>
+            <ul>
+              <li><a href="/commands/location">hash</a></li>
+              <li><a href="/commands/location">location</a></li>
+              <li><a href="/commands/location">url</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/navigation">Navigation</a>
+            <ul>
+              <li><a href="/commands/navigation">go</a></li>
+              <li><a href="/commands/navigation">reload</a></li>
+              <li><a href="/commands/navigation">visit</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/assertions">Assertions</a>
+            <ul>
+              <li>Implicit Assertions</li>
+              <li><a href="/commands/assertions">should</a></li>
+              <li><a href="/commands/assertions">and</a></li>
+              <li>Explicit Assertions</li>
+              <li><a href="/commands/assertions">expect</a></li>
+              <li><a href="/commands/assertions">assert</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/misc">Misc</a>
+            <ul>
+              <li><a href="/commands/misc">end</a></li>
+              <li><a href="/commands/misc">exec</a></li>
+              <li><a href="/commands/misc">focused</a></li>
+              <li><a href="/commands/misc">screenshot</a></li>
+              <li><a href="/commands/misc">wrap</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/connectors">Connectors</a>
+            <ul>
+              <li><a href="/commands/connectors">each</a></li>
+              <li><a href="/commands/connectors">its</a></li>
+              <li><a href="/commands/connectors">invoke</a></li>
+              <li><a href="/commands/connectors">spread</a></li>
+              <li><a href="/commands/connectors">then</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/aliasing">Aliasing</a>
+            <ul>
+              <li><a href="/commands/aliasing">as</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/waiting">Waiting</a>
+            <ul>
+              <li><a href="/commands/waiting">wait</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/network-requests">Network Requests</a>
+            <ul>
+              <li><a href="/commands/network-requests">server</a></li>
+              <li><a href="/commands/network-requests">request</a></li>
+              <li><a href="/commands/network-requests">route</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/fixtures">Fixtures</a>
+            <ul>
+              <li><a href="/commands/fixtures">fixture</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/local-storage">Local Storage</a>
+            <ul>
+              <li><a href="/commands/local-storage">clearLocalStorage</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/cookies">Cookies</a>
+            <ul>
+              <li><a href="/commands/cookies">clearCookies</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Utilities</h2>
+          <p>Utilities give you access to methods from other commonly used libraries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <ul>
+              <li><a href="/cypress-api/utilities">Underscore</a></li>
+              <li><a href="/cypress-api/utilities">jQuery</a></li>
+              <li><a href="/cypress-api/utilities">moment</a></li>
+              <li><a href="/cypress-api/utilities">Blob</a></li>
+              <li><a href="/cypress-api/utilities">Promise</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Cypress API</h2>
+          <p>The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/cypress-api/config">config</a>
+            <ul>
+              <li><a href="/cypress-api/config">config</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/env">env</a>
+            <ul>
+              <li><a href="/cypress-api/env">env</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/commands">Commands</a>
+            <ul>
+              <li><a href="/cypress-api/commands">addChildCommand</a></li>
+              <li><a href="/cypress-api/commands">addDualCommand</a></li>
+              <li><a href="/cypress-api/commands">addParentCommand</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/cookies">Cookies</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Cookies.set</a></li>
+              <li><a href="/cypress-api/commands">Cookies.get</a></li>
+              <li><a href="/cypress-api/commands">Cookies.remove</a></li>
+              <li><a href="/cypress-api/commands">Cookies.debug</a></li>
+              <li><a href="/cypress-api/commands">Cookies.preserveOnce</a></li>
+              <li><a href="/cypress-api/commands">Cookies.default</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/dom">Dom</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Dom.isHidden</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/server">Server</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Server.default</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/fixtures">Fixtures</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Cypress API <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/cypress-api/config">config</a></li>
+              <li><a href="/cypress-api/env">env</a></li>
+              <li><a href="/cypress-api/commands">Commands</a></li>
+              <li><a href="/cypress-api/cookies">Cookies</a></li>
+              <li><a href="/cypress-api/dom">Dom</a></li>
+              <li><a href="/cypress-api/server">Server</a></li>
+            </ul>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Kitchen Sink</h1>
+      <p>This is an example app used to showcase Cypress.io testing. For a full reference of our documentation, go to <a href="https://docs.cypress.io" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Commands</h2>
+          <p>Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/commands/querying">Querying</a>
+            <ul>
+              <li><a href="/commands/querying">get</a></li>
+              <li><a href="/commands/querying">contains</a></li>
+              <li><a href="/commands/querying">within</a></li>
+              <li><a href="/commands/querying">root</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/traversal">Traversal</a>
+            <ul>
+              <li><a href="/commands/traversal">children</a></li>
+              <li><a href="/commands/traversal">closest</a></li>
+              <li><a href="/commands/traversal">eq</a></li>
+              <li><a href="/commands/traversal">filter</a></li>
+              <li><a href="/commands/traversal">find</a></li>
+              <li><a href="/commands/traversal">first</a></li>
+              <li><a href="/commands/traversal">last</a></li>
+              <li><a href="/commands/traversal">next</a></li>
+              <li><a href="/commands/traversal">not</a></li>
+              <li><a href="/commands/traversal">parent</a></li>
+              <li><a href="/commands/traversal">parents</a></li>
+              <li><a href="/commands/traversal">siblings</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/actions">Actions</a>
+            <ul>
+              <li><a href="/commands/actions">type</a></li>
+              <li><a href="/commands/actions">focus</a></li>
+              <li><a href="/commands/actions">blur</a></li>
+              <li><a href="/commands/actions">clear</a></li>
+              <li><a href="/commands/actions">submit</a></li>
+              <li><a href="/commands/actions">click</a></li>
+              <li><a href="/commands/actions">dblclick</a></li>
+              <li><a href="/commands/actions">check</a></li>
+              <li><a href="/commands/actions">uncheck</a></li>
+              <li><a href="/commands/actions">select</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/window">Window</a>
+            <ul>
+              <li><a href="/commands/window">window</a></li>
+              <li><a href="/commands/window">document</a></li>
+              <li><a href="/commands/window">title</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/viewport">Viewport</a>
+            <ul>
+              <li><a href="/commands/viewport">viewport</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/location">Location</a>
+            <ul>
+              <li><a href="/commands/location">hash</a></li>
+              <li><a href="/commands/location">location</a></li>
+              <li><a href="/commands/location">url</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/navigation">Navigation</a>
+            <ul>
+              <li><a href="/commands/navigation">go</a></li>
+              <li><a href="/commands/navigation">reload</a></li>
+              <li><a href="/commands/navigation">visit</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/assertions">Assertions</a>
+            <ul>
+              <li>Implicit Assertions</li>
+              <li><a href="/commands/assertions">should</a></li>
+              <li><a href="/commands/assertions">and</a></li>
+              <li>Explicit Assertions</li>
+              <li><a href="/commands/assertions">expect</a></li>
+              <li><a href="/commands/assertions">assert</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/misc">Misc</a>
+            <ul>
+              <li><a href="/commands/misc">end</a></li>
+              <li><a href="/commands/misc">exec</a></li>
+              <li><a href="/commands/misc">focused</a></li>
+              <li><a href="/commands/misc">screenshot</a></li>
+              <li><a href="/commands/misc">wrap</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/connectors">Connectors</a>
+            <ul>
+              <li><a href="/commands/connectors">each</a></li>
+              <li><a href="/commands/connectors">its</a></li>
+              <li><a href="/commands/connectors">invoke</a></li>
+              <li><a href="/commands/connectors">spread</a></li>
+              <li><a href="/commands/connectors">then</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/aliasing">Aliasing</a>
+            <ul>
+              <li><a href="/commands/aliasing">as</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/waiting">Waiting</a>
+            <ul>
+              <li><a href="/commands/waiting">wait</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/network-requests">Network Requests</a>
+            <ul>
+              <li><a href="/commands/network-requests">server</a></li>
+              <li><a href="/commands/network-requests">request</a></li>
+              <li><a href="/commands/network-requests">route</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/fixtures">Fixtures</a>
+            <ul>
+              <li><a href="/commands/fixtures">fixture</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/local-storage">Local Storage</a>
+            <ul>
+              <li><a href="/commands/local-storage">clearLocalStorage</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/cookies">Cookies</a>
+            <ul>
+              <li><a href="/commands/cookies">clearCookies</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Utilities</h2>
+          <p>Utilities give you access to methods from other commonly used libraries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <ul>
+              <li><a href="/cypress-api/utilities">Underscore</a></li>
+              <li><a href="/cypress-api/utilities">jQuery</a></li>
+              <li><a href="/cypress-api/utilities">moment</a></li>
+              <li><a href="/cypress-api/utilities">Blob</a></li>
+              <li><a href="/cypress-api/utilities">Promise</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Cypress API</h2>
+          <p>The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/cypress-api/config">config</a>
+            <ul>
+              <li><a href="/cypress-api/config">config</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/env">env</a>
+            <ul>
+              <li><a href="/cypress-api/env">env</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/commands">Commands</a>
+            <ul>
+              <li><a href="/cypress-api/commands">addChildCommand</a></li>
+              <li><a href="/cypress-api/commands">addDualCommand</a></li>
+              <li><a href="/cypress-api/commands">addParentCommand</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/cookies">Cookies</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Cookies.set</a></li>
+              <li><a href="/cypress-api/commands">Cookies.get</a></li>
+              <li><a href="/cypress-api/commands">Cookies.remove</a></li>
+              <li><a href="/cypress-api/commands">Cookies.debug</a></li>
+              <li><a href="/cypress-api/commands">Cookies.preserveOnce</a></li>
+              <li><a href="/cypress-api/commands">Cookies.default</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/dom">Dom</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Dom.isHidden</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/server">Server</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Server.default</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/fixtures">Fixtures</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Cypress API <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/cypress-api/config">config</a></li>
+              <li><a href="/cypress-api/env">env</a></li>
+              <li><a href="/cypress-api/commands">Commands</a></li>
+              <li><a href="/cypress-api/cookies">Cookies</a></li>
+              <li><a href="/cypress-api/dom">Dom</a></li>
+              <li><a href="/cypress-api/server">Server</a></li>
+            </ul>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Kitchen Sink</h1>
+      <p>This is an example app used to showcase Cypress.io testing. For a full reference of our documentation, go to <a href="https://docs.cypress.io" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Commands</h2>
+          <p>Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/commands/querying">Querying</a>
+            <ul>
+              <li><a href="/commands/querying">get</a></li>
+              <li><a href="/commands/querying">contains</a></li>
+              <li><a href="/commands/querying">within</a></li>
+              <li><a href="/commands/querying">root</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/traversal">Traversal</a>
+            <ul>
+              <li><a href="/commands/traversal">children</a></li>
+              <li><a href="/commands/traversal">closest</a></li>
+              <li><a href="/commands/traversal">eq</a></li>
+              <li><a href="/commands/traversal">filter</a></li>
+              <li><a href="/commands/traversal">find</a></li>
+              <li><a href="/commands/traversal">first</a></li>
+              <li><a href="/commands/traversal">last</a></li>
+              <li><a href="/commands/traversal">next</a></li>
+              <li><a href="/commands/traversal">not</a></li>
+              <li><a href="/commands/traversal">parent</a></li>
+              <li><a href="/commands/traversal">parents</a></li>
+              <li><a href="/commands/traversal">siblings</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/actions">Actions</a>
+            <ul>
+              <li><a href="/commands/actions">type</a></li>
+              <li><a href="/commands/actions">focus</a></li>
+              <li><a href="/commands/actions">blur</a></li>
+              <li><a href="/commands/actions">clear</a></li>
+              <li><a href="/commands/actions">submit</a></li>
+              <li><a href="/commands/actions">click</a></li>
+              <li><a href="/commands/actions">dblclick</a></li>
+              <li><a href="/commands/actions">check</a></li>
+              <li><a href="/commands/actions">uncheck</a></li>
+              <li><a href="/commands/actions">select</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/window">Window</a>
+            <ul>
+              <li><a href="/commands/window">window</a></li>
+              <li><a href="/commands/window">document</a></li>
+              <li><a href="/commands/window">title</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/viewport">Viewport</a>
+            <ul>
+              <li><a href="/commands/viewport">viewport</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/location">Location</a>
+            <ul>
+              <li><a href="/commands/location">hash</a></li>
+              <li><a href="/commands/location">location</a></li>
+              <li><a href="/commands/location">url</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/navigation">Navigation</a>
+            <ul>
+              <li><a href="/commands/navigation">go</a></li>
+              <li><a href="/commands/navigation">reload</a></li>
+              <li><a href="/commands/navigation">visit</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/assertions">Assertions</a>
+            <ul>
+              <li>Implicit Assertions</li>
+              <li><a href="/commands/assertions">should</a></li>
+              <li><a href="/commands/assertions">and</a></li>
+              <li>Explicit Assertions</li>
+              <li><a href="/commands/assertions">expect</a></li>
+              <li><a href="/commands/assertions">assert</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/misc">Misc</a>
+            <ul>
+              <li><a href="/commands/misc">end</a></li>
+              <li><a href="/commands/misc">exec</a></li>
+              <li><a href="/commands/misc">focused</a></li>
+              <li><a href="/commands/misc">screenshot</a></li>
+              <li><a href="/commands/misc">wrap</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/connectors">Connectors</a>
+            <ul>
+              <li><a href="/commands/connectors">each</a></li>
+              <li><a href="/commands/connectors">its</a></li>
+              <li><a href="/commands/connectors">invoke</a></li>
+              <li><a href="/commands/connectors">spread</a></li>
+              <li><a href="/commands/connectors">then</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/aliasing">Aliasing</a>
+            <ul>
+              <li><a href="/commands/aliasing">as</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/waiting">Waiting</a>
+            <ul>
+              <li><a href="/commands/waiting">wait</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/network-requests">Network Requests</a>
+            <ul>
+              <li><a href="/commands/network-requests">server</a></li>
+              <li><a href="/commands/network-requests">request</a></li>
+              <li><a href="/commands/network-requests">route</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/fixtures">Fixtures</a>
+            <ul>
+              <li><a href="/commands/fixtures">fixture</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/local-storage">Local Storage</a>
+            <ul>
+              <li><a href="/commands/local-storage">clearLocalStorage</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/cookies">Cookies</a>
+            <ul>
+              <li><a href="/commands/cookies">clearCookies</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Utilities</h2>
+          <p>Utilities give you access to methods from other commonly used libraries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <ul>
+              <li><a href="/cypress-api/utilities">Underscore</a></li>
+              <li><a href="/cypress-api/utilities">jQuery</a></li>
+              <li><a href="/cypress-api/utilities">moment</a></li>
+              <li><a href="/cypress-api/utilities">Blob</a></li>
+              <li><a href="/cypress-api/utilities">Promise</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Cypress API</h2>
+          <p>The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/cypress-api/config">config</a>
+            <ul>
+              <li><a href="/cypress-api/config">config</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/env">env</a>
+            <ul>
+              <li><a href="/cypress-api/env">env</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/commands">Commands</a>
+            <ul>
+              <li><a href="/cypress-api/commands">addChildCommand</a></li>
+              <li><a href="/cypress-api/commands">addDualCommand</a></li>
+              <li><a href="/cypress-api/commands">addParentCommand</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/cookies">Cookies</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Cookies.set</a></li>
+              <li><a href="/cypress-api/commands">Cookies.get</a></li>
+              <li><a href="/cypress-api/commands">Cookies.remove</a></li>
+              <li><a href="/cypress-api/commands">Cookies.debug</a></li>
+              <li><a href="/cypress-api/commands">Cookies.preserveOnce</a></li>
+              <li><a href="/cypress-api/commands">Cookies.default</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/dom">Dom</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Dom.isHidden</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/server">Server</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Server.default</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/fixtures">Fixtures</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Cypress API <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/cypress-api/config">config</a></li>
+              <li><a href="/cypress-api/env">env</a></li>
+              <li><a href="/cypress-api/commands">Commands</a></li>
+              <li><a href="/cypress-api/cookies">Cookies</a></li>
+              <li><a href="/cypress-api/dom">Dom</a></li>
+              <li><a href="/cypress-api/server">Server</a></li>
+            </ul>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Kitchen Sink</h1>
+      <p>This is an example app used to showcase Cypress.io testing. For a full reference of our documentation, go to <a href="https://docs.cypress.io" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Commands</h2>
+          <p>Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/commands/querying">Querying</a>
+            <ul>
+              <li><a href="/commands/querying">get</a></li>
+              <li><a href="/commands/querying">contains</a></li>
+              <li><a href="/commands/querying">within</a></li>
+              <li><a href="/commands/querying">root</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/traversal">Traversal</a>
+            <ul>
+              <li><a href="/commands/traversal">children</a></li>
+              <li><a href="/commands/traversal">closest</a></li>
+              <li><a href="/commands/traversal">eq</a></li>
+              <li><a href="/commands/traversal">filter</a></li>
+              <li><a href="/commands/traversal">find</a></li>
+              <li><a href="/commands/traversal">first</a></li>
+              <li><a href="/commands/traversal">last</a></li>
+              <li><a href="/commands/traversal">next</a></li>
+              <li><a href="/commands/traversal">not</a></li>
+              <li><a href="/commands/traversal">parent</a></li>
+              <li><a href="/commands/traversal">parents</a></li>
+              <li><a href="/commands/traversal">siblings</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/actions">Actions</a>
+            <ul>
+              <li><a href="/commands/actions">type</a></li>
+              <li><a href="/commands/actions">focus</a></li>
+              <li><a href="/commands/actions">blur</a></li>
+              <li><a href="/commands/actions">clear</a></li>
+              <li><a href="/commands/actions">submit</a></li>
+              <li><a href="/commands/actions">click</a></li>
+              <li><a href="/commands/actions">dblclick</a></li>
+              <li><a href="/commands/actions">check</a></li>
+              <li><a href="/commands/actions">uncheck</a></li>
+              <li><a href="/commands/actions">select</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/window">Window</a>
+            <ul>
+              <li><a href="/commands/window">window</a></li>
+              <li><a href="/commands/window">document</a></li>
+              <li><a href="/commands/window">title</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/viewport">Viewport</a>
+            <ul>
+              <li><a href="/commands/viewport">viewport</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/location">Location</a>
+            <ul>
+              <li><a href="/commands/location">hash</a></li>
+              <li><a href="/commands/location">location</a></li>
+              <li><a href="/commands/location">url</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/navigation">Navigation</a>
+            <ul>
+              <li><a href="/commands/navigation">go</a></li>
+              <li><a href="/commands/navigation">reload</a></li>
+              <li><a href="/commands/navigation">visit</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/assertions">Assertions</a>
+            <ul>
+              <li>Implicit Assertions</li>
+              <li><a href="/commands/assertions">should</a></li>
+              <li><a href="/commands/assertions">and</a></li>
+              <li>Explicit Assertions</li>
+              <li><a href="/commands/assertions">expect</a></li>
+              <li><a href="/commands/assertions">assert</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/misc">Misc</a>
+            <ul>
+              <li><a href="/commands/misc">end</a></li>
+              <li><a href="/commands/misc">exec</a></li>
+              <li><a href="/commands/misc">focused</a></li>
+              <li><a href="/commands/misc">screenshot</a></li>
+              <li><a href="/commands/misc">wrap</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/connectors">Connectors</a>
+            <ul>
+              <li><a href="/commands/connectors">each</a></li>
+              <li><a href="/commands/connectors">its</a></li>
+              <li><a href="/commands/connectors">invoke</a></li>
+              <li><a href="/commands/connectors">spread</a></li>
+              <li><a href="/commands/connectors">then</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/aliasing">Aliasing</a>
+            <ul>
+              <li><a href="/commands/aliasing">as</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/waiting">Waiting</a>
+            <ul>
+              <li><a href="/commands/waiting">wait</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/network-requests">Network Requests</a>
+            <ul>
+              <li><a href="/commands/network-requests">server</a></li>
+              <li><a href="/commands/network-requests">request</a></li>
+              <li><a href="/commands/network-requests">route</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/fixtures">Fixtures</a>
+            <ul>
+              <li><a href="/commands/fixtures">fixture</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/local-storage">Local Storage</a>
+            <ul>
+              <li><a href="/commands/local-storage">clearLocalStorage</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/cookies">Cookies</a>
+            <ul>
+              <li><a href="/commands/cookies">clearCookies</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Utilities</h2>
+          <p>Utilities give you access to methods from other commonly used libraries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <ul>
+              <li><a href="/cypress-api/utilities">Underscore</a></li>
+              <li><a href="/cypress-api/utilities">jQuery</a></li>
+              <li><a href="/cypress-api/utilities">moment</a></li>
+              <li><a href="/cypress-api/utilities">Blob</a></li>
+              <li><a href="/cypress-api/utilities">Promise</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Cypress API</h2>
+          <p>The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/cypress-api/config">config</a>
+            <ul>
+              <li><a href="/cypress-api/config">config</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/env">env</a>
+            <ul>
+              <li><a href="/cypress-api/env">env</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/commands">Commands</a>
+            <ul>
+              <li><a href="/cypress-api/commands">addChildCommand</a></li>
+              <li><a href="/cypress-api/commands">addDualCommand</a></li>
+              <li><a href="/cypress-api/commands">addParentCommand</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/cookies">Cookies</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Cookies.set</a></li>
+              <li><a href="/cypress-api/commands">Cookies.get</a></li>
+              <li><a href="/cypress-api/commands">Cookies.remove</a></li>
+              <li><a href="/cypress-api/commands">Cookies.debug</a></li>
+              <li><a href="/cypress-api/commands">Cookies.preserveOnce</a></li>
+              <li><a href="/cypress-api/commands">Cookies.default</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/dom">Dom</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Dom.isHidden</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/server">Server</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Server.default</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/fixtures">Fixtures</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Cypress API <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/cypress-api/config">config</a></li>
+              <li><a href="/cypress-api/env">env</a></li>
+              <li><a href="/cypress-api/commands">Commands</a></li>
+              <li><a href="/cypress-api/cookies">Cookies</a></li>
+              <li><a href="/cypress-api/dom">Dom</a></li>
+              <li><a href="/cypress-api/server">Server</a></li>
+            </ul>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Kitchen Sink</h1>
+      <p>This is an example app used to showcase Cypress.io testing. For a full reference of our documentation, go to <a href="https://docs.cypress.io" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Commands</h2>
+          <p>Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/commands/querying">Querying</a>
+            <ul>
+              <li><a href="/commands/querying">get</a></li>
+              <li><a href="/commands/querying">contains</a></li>
+              <li><a href="/commands/querying">within</a></li>
+              <li><a href="/commands/querying">root</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/traversal">Traversal</a>
+            <ul>
+              <li><a href="/commands/traversal">children</a></li>
+              <li><a href="/commands/traversal">closest</a></li>
+              <li><a href="/commands/traversal">eq</a></li>
+              <li><a href="/commands/traversal">filter</a></li>
+              <li><a href="/commands/traversal">find</a></li>
+              <li><a href="/commands/traversal">first</a></li>
+              <li><a href="/commands/traversal">last</a></li>
+              <li><a href="/commands/traversal">next</a></li>
+              <li><a href="/commands/traversal">not</a></li>
+              <li><a href="/commands/traversal">parent</a></li>
+              <li><a href="/commands/traversal">parents</a></li>
+              <li><a href="/commands/traversal">siblings</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/actions">Actions</a>
+            <ul>
+              <li><a href="/commands/actions">type</a></li>
+              <li><a href="/commands/actions">focus</a></li>
+              <li><a href="/commands/actions">blur</a></li>
+              <li><a href="/commands/actions">clear</a></li>
+              <li><a href="/commands/actions">submit</a></li>
+              <li><a href="/commands/actions">click</a></li>
+              <li><a href="/commands/actions">dblclick</a></li>
+              <li><a href="/commands/actions">check</a></li>
+              <li><a href="/commands/actions">uncheck</a></li>
+              <li><a href="/commands/actions">select</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/window">Window</a>
+            <ul>
+              <li><a href="/commands/window">window</a></li>
+              <li><a href="/commands/window">document</a></li>
+              <li><a href="/commands/window">title</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/viewport">Viewport</a>
+            <ul>
+              <li><a href="/commands/viewport">viewport</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/location">Location</a>
+            <ul>
+              <li><a href="/commands/location">hash</a></li>
+              <li><a href="/commands/location">location</a></li>
+              <li><a href="/commands/location">url</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/navigation">Navigation</a>
+            <ul>
+              <li><a href="/commands/navigation">go</a></li>
+              <li><a href="/commands/navigation">reload</a></li>
+              <li><a href="/commands/navigation">visit</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/assertions">Assertions</a>
+            <ul>
+              <li>Implicit Assertions</li>
+              <li><a href="/commands/assertions">should</a></li>
+              <li><a href="/commands/assertions">and</a></li>
+              <li>Explicit Assertions</li>
+              <li><a href="/commands/assertions">expect</a></li>
+              <li><a href="/commands/assertions">assert</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/misc">Misc</a>
+            <ul>
+              <li><a href="/commands/misc">end</a></li>
+              <li><a href="/commands/misc">exec</a></li>
+              <li><a href="/commands/misc">focused</a></li>
+              <li><a href="/commands/misc">screenshot</a></li>
+              <li><a href="/commands/misc">wrap</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/connectors">Connectors</a>
+            <ul>
+              <li><a href="/commands/connectors">each</a></li>
+              <li><a href="/commands/connectors">its</a></li>
+              <li><a href="/commands/connectors">invoke</a></li>
+              <li><a href="/commands/connectors">spread</a></li>
+              <li><a href="/commands/connectors">then</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/aliasing">Aliasing</a>
+            <ul>
+              <li><a href="/commands/aliasing">as</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/waiting">Waiting</a>
+            <ul>
+              <li><a href="/commands/waiting">wait</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/network-requests">Network Requests</a>
+            <ul>
+              <li><a href="/commands/network-requests">server</a></li>
+              <li><a href="/commands/network-requests">request</a></li>
+              <li><a href="/commands/network-requests">route</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/fixtures">Fixtures</a>
+            <ul>
+              <li><a href="/commands/fixtures">fixture</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/local-storage">Local Storage</a>
+            <ul>
+              <li><a href="/commands/local-storage">clearLocalStorage</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/cookies">Cookies</a>
+            <ul>
+              <li><a href="/commands/cookies">clearCookies</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Utilities</h2>
+          <p>Utilities give you access to methods from other commonly used libraries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <ul>
+              <li><a href="/cypress-api/utilities">Underscore</a></li>
+              <li><a href="/cypress-api/utilities">jQuery</a></li>
+              <li><a href="/cypress-api/utilities">moment</a></li>
+              <li><a href="/cypress-api/utilities">Blob</a></li>
+              <li><a href="/cypress-api/utilities">Promise</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Cypress API</h2>
+          <p>The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/cypress-api/config">config</a>
+            <ul>
+              <li><a href="/cypress-api/config">config</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/env">env</a>
+            <ul>
+              <li><a href="/cypress-api/env">env</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/commands">Commands</a>
+            <ul>
+              <li><a href="/cypress-api/commands">addChildCommand</a></li>
+              <li><a href="/cypress-api/commands">addDualCommand</a></li>
+              <li><a href="/cypress-api/commands">addParentCommand</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/cookies">Cookies</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Cookies.set</a></li>
+              <li><a href="/cypress-api/commands">Cookies.get</a></li>
+              <li><a href="/cypress-api/commands">Cookies.remove</a></li>
+              <li><a href="/cypress-api/commands">Cookies.debug</a></li>
+              <li><a href="/cypress-api/commands">Cookies.preserveOnce</a></li>
+              <li><a href="/cypress-api/commands">Cookies.default</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/dom">Dom</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Dom.isHidden</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/server">Server</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Server.default</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/fixtures">Fixtures</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Cypress API <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/cypress-api/config">config</a></li>
+              <li><a href="/cypress-api/env">env</a></li>
+              <li><a href="/cypress-api/commands">Commands</a></li>
+              <li><a href="/cypress-api/cookies">Cookies</a></li>
+              <li><a href="/cypress-api/dom">Dom</a></li>
+              <li><a href="/cypress-api/server">Server</a></li>
+            </ul>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Kitchen Sink</h1>
+      <p>This is an example app used to showcase Cypress.io testing. For a full reference of our documentation, go to <a href="https://docs.cypress.io" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Commands</h2>
+          <p>Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/commands/querying">Querying</a>
+            <ul>
+              <li><a href="/commands/querying">get</a></li>
+              <li><a href="/commands/querying">contains</a></li>
+              <li><a href="/commands/querying">within</a></li>
+              <li><a href="/commands/querying">root</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/traversal">Traversal</a>
+            <ul>
+              <li><a href="/commands/traversal">children</a></li>
+              <li><a href="/commands/traversal">closest</a></li>
+              <li><a href="/commands/traversal">eq</a></li>
+              <li><a href="/commands/traversal">filter</a></li>
+              <li><a href="/commands/traversal">find</a></li>
+              <li><a href="/commands/traversal">first</a></li>
+              <li><a href="/commands/traversal">last</a></li>
+              <li><a href="/commands/traversal">next</a></li>
+              <li><a href="/commands/traversal">not</a></li>
+              <li><a href="/commands/traversal">parent</a></li>
+              <li><a href="/commands/traversal">parents</a></li>
+              <li><a href="/commands/traversal">siblings</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/actions">Actions</a>
+            <ul>
+              <li><a href="/commands/actions">type</a></li>
+              <li><a href="/commands/actions">focus</a></li>
+              <li><a href="/commands/actions">blur</a></li>
+              <li><a href="/commands/actions">clear</a></li>
+              <li><a href="/commands/actions">submit</a></li>
+              <li><a href="/commands/actions">click</a></li>
+              <li><a href="/commands/actions">dblclick</a></li>
+              <li><a href="/commands/actions">check</a></li>
+              <li><a href="/commands/actions">uncheck</a></li>
+              <li><a href="/commands/actions">select</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/window">Window</a>
+            <ul>
+              <li><a href="/commands/window">window</a></li>
+              <li><a href="/commands/window">document</a></li>
+              <li><a href="/commands/window">title</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/viewport">Viewport</a>
+            <ul>
+              <li><a href="/commands/viewport">viewport</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/location">Location</a>
+            <ul>
+              <li><a href="/commands/location">hash</a></li>
+              <li><a href="/commands/location">location</a></li>
+              <li><a href="/commands/location">url</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/navigation">Navigation</a>
+            <ul>
+              <li><a href="/commands/navigation">go</a></li>
+              <li><a href="/commands/navigation">reload</a></li>
+              <li><a href="/commands/navigation">visit</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/assertions">Assertions</a>
+            <ul>
+              <li>Implicit Assertions</li>
+              <li><a href="/commands/assertions">should</a></li>
+              <li><a href="/commands/assertions">and</a></li>
+              <li>Explicit Assertions</li>
+              <li><a href="/commands/assertions">expect</a></li>
+              <li><a href="/commands/assertions">assert</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/misc">Misc</a>
+            <ul>
+              <li><a href="/commands/misc">end</a></li>
+              <li><a href="/commands/misc">exec</a></li>
+              <li><a href="/commands/misc">focused</a></li>
+              <li><a href="/commands/misc">screenshot</a></li>
+              <li><a href="/commands/misc">wrap</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/connectors">Connectors</a>
+            <ul>
+              <li><a href="/commands/connectors">each</a></li>
+              <li><a href="/commands/connectors">its</a></li>
+              <li><a href="/commands/connectors">invoke</a></li>
+              <li><a href="/commands/connectors">spread</a></li>
+              <li><a href="/commands/connectors">then</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/aliasing">Aliasing</a>
+            <ul>
+              <li><a href="/commands/aliasing">as</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/waiting">Waiting</a>
+            <ul>
+              <li><a href="/commands/waiting">wait</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/network-requests">Network Requests</a>
+            <ul>
+              <li><a href="/commands/network-requests">server</a></li>
+              <li><a href="/commands/network-requests">request</a></li>
+              <li><a href="/commands/network-requests">route</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/fixtures">Fixtures</a>
+            <ul>
+              <li><a href="/commands/fixtures">fixture</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/local-storage">Local Storage</a>
+            <ul>
+              <li><a href="/commands/local-storage">clearLocalStorage</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/cookies">Cookies</a>
+            <ul>
+              <li><a href="/commands/cookies">clearCookies</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Utilities</h2>
+          <p>Utilities give you access to methods from other commonly used libraries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <ul>
+              <li><a href="/cypress-api/utilities">Underscore</a></li>
+              <li><a href="/cypress-api/utilities">jQuery</a></li>
+              <li><a href="/cypress-api/utilities">moment</a></li>
+              <li><a href="/cypress-api/utilities">Blob</a></li>
+              <li><a href="/cypress-api/utilities">Promise</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Cypress API</h2>
+          <p>The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/cypress-api/config">config</a>
+            <ul>
+              <li><a href="/cypress-api/config">config</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/env">env</a>
+            <ul>
+              <li><a href="/cypress-api/env">env</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/commands">Commands</a>
+            <ul>
+              <li><a href="/cypress-api/commands">addChildCommand</a></li>
+              <li><a href="/cypress-api/commands">addDualCommand</a></li>
+              <li><a href="/cypress-api/commands">addParentCommand</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/cookies">Cookies</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Cookies.set</a></li>
+              <li><a href="/cypress-api/commands">Cookies.get</a></li>
+              <li><a href="/cypress-api/commands">Cookies.remove</a></li>
+              <li><a href="/cypress-api/commands">Cookies.debug</a></li>
+              <li><a href="/cypress-api/commands">Cookies.preserveOnce</a></li>
+              <li><a href="/cypress-api/commands">Cookies.default</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/dom">Dom</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Dom.isHidden</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/server">Server</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Server.default</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/fixtures">Fixtures</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Cypress API <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/cypress-api/config">config</a></li>
+              <li><a href="/cypress-api/env">env</a></li>
+              <li><a href="/cypress-api/commands">Commands</a></li>
+              <li><a href="/cypress-api/cookies">Cookies</a></li>
+              <li><a href="/cypress-api/dom">Dom</a></li>
+              <li><a href="/cypress-api/server">Server</a></li>
+            </ul>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Kitchen Sink</h1>
+      <p>This is an example app used to showcase Cypress.io testing. For a full reference of our documentation, go to <a href="https://docs.cypress.io" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Commands</h2>
+          <p>Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/commands/querying">Querying</a>
+            <ul>
+              <li><a href="/commands/querying">get</a></li>
+              <li><a href="/commands/querying">contains</a></li>
+              <li><a href="/commands/querying">within</a></li>
+              <li><a href="/commands/querying">root</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/traversal">Traversal</a>
+            <ul>
+              <li><a href="/commands/traversal">children</a></li>
+              <li><a href="/commands/traversal">closest</a></li>
+              <li><a href="/commands/traversal">eq</a></li>
+              <li><a href="/commands/traversal">filter</a></li>
+              <li><a href="/commands/traversal">find</a></li>
+              <li><a href="/commands/traversal">first</a></li>
+              <li><a href="/commands/traversal">last</a></li>
+              <li><a href="/commands/traversal">next</a></li>
+              <li><a href="/commands/traversal">not</a></li>
+              <li><a href="/commands/traversal">parent</a></li>
+              <li><a href="/commands/traversal">parents</a></li>
+              <li><a href="/commands/traversal">siblings</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/actions">Actions</a>
+            <ul>
+              <li><a href="/commands/actions">type</a></li>
+              <li><a href="/commands/actions">focus</a></li>
+              <li><a href="/commands/actions">blur</a></li>
+              <li><a href="/commands/actions">clear</a></li>
+              <li><a href="/commands/actions">submit</a></li>
+              <li><a href="/commands/actions">click</a></li>
+              <li><a href="/commands/actions">dblclick</a></li>
+              <li><a href="/commands/actions">check</a></li>
+              <li><a href="/commands/actions">uncheck</a></li>
+              <li><a href="/commands/actions">select</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/window">Window</a>
+            <ul>
+              <li><a href="/commands/window">window</a></li>
+              <li><a href="/commands/window">document</a></li>
+              <li><a href="/commands/window">title</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/viewport">Viewport</a>
+            <ul>
+              <li><a href="/commands/viewport">viewport</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/location">Location</a>
+            <ul>
+              <li><a href="/commands/location">hash</a></li>
+              <li><a href="/commands/location">location</a></li>
+              <li><a href="/commands/location">url</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/navigation">Navigation</a>
+            <ul>
+              <li><a href="/commands/navigation">go</a></li>
+              <li><a href="/commands/navigation">reload</a></li>
+              <li><a href="/commands/navigation">visit</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/assertions">Assertions</a>
+            <ul>
+              <li>Implicit Assertions</li>
+              <li><a href="/commands/assertions">should</a></li>
+              <li><a href="/commands/assertions">and</a></li>
+              <li>Explicit Assertions</li>
+              <li><a href="/commands/assertions">expect</a></li>
+              <li><a href="/commands/assertions">assert</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/misc">Misc</a>
+            <ul>
+              <li><a href="/commands/misc">end</a></li>
+              <li><a href="/commands/misc">exec</a></li>
+              <li><a href="/commands/misc">focused</a></li>
+              <li><a href="/commands/misc">screenshot</a></li>
+              <li><a href="/commands/misc">wrap</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/connectors">Connectors</a>
+            <ul>
+              <li><a href="/commands/connectors">each</a></li>
+              <li><a href="/commands/connectors">its</a></li>
+              <li><a href="/commands/connectors">invoke</a></li>
+              <li><a href="/commands/connectors">spread</a></li>
+              <li><a href="/commands/connectors">then</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/aliasing">Aliasing</a>
+            <ul>
+              <li><a href="/commands/aliasing">as</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/waiting">Waiting</a>
+            <ul>
+              <li><a href="/commands/waiting">wait</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/network-requests">Network Requests</a>
+            <ul>
+              <li><a href="/commands/network-requests">server</a></li>
+              <li><a href="/commands/network-requests">request</a></li>
+              <li><a href="/commands/network-requests">route</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/fixtures">Fixtures</a>
+            <ul>
+              <li><a href="/commands/fixtures">fixture</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/local-storage">Local Storage</a>
+            <ul>
+              <li><a href="/commands/local-storage">clearLocalStorage</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/cookies">Cookies</a>
+            <ul>
+              <li><a href="/commands/cookies">clearCookies</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Utilities</h2>
+          <p>Utilities give you access to methods from other commonly used libraries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <ul>
+              <li><a href="/cypress-api/utilities">Underscore</a></li>
+              <li><a href="/cypress-api/utilities">jQuery</a></li>
+              <li><a href="/cypress-api/utilities">moment</a></li>
+              <li><a href="/cypress-api/utilities">Blob</a></li>
+              <li><a href="/cypress-api/utilities">Promise</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Cypress API</h2>
+          <p>The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/cypress-api/config">config</a>
+            <ul>
+              <li><a href="/cypress-api/config">config</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/env">env</a>
+            <ul>
+              <li><a href="/cypress-api/env">env</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/commands">Commands</a>
+            <ul>
+              <li><a href="/cypress-api/commands">addChildCommand</a></li>
+              <li><a href="/cypress-api/commands">addDualCommand</a></li>
+              <li><a href="/cypress-api/commands">addParentCommand</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/cookies">Cookies</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Cookies.set</a></li>
+              <li><a href="/cypress-api/commands">Cookies.get</a></li>
+              <li><a href="/cypress-api/commands">Cookies.remove</a></li>
+              <li><a href="/cypress-api/commands">Cookies.debug</a></li>
+              <li><a href="/cypress-api/commands">Cookies.preserveOnce</a></li>
+              <li><a href="/cypress-api/commands">Cookies.default</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/dom">Dom</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Dom.isHidden</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/server">Server</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Server.default</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/fixtures">Fixtures</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Cypress API <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/cypress-api/config">config</a></li>
+              <li><a href="/cypress-api/env">env</a></li>
+              <li><a href="/cypress-api/commands">Commands</a></li>
+              <li><a href="/cypress-api/cookies">Cookies</a></li>
+              <li><a href="/cypress-api/dom">Dom</a></li>
+              <li><a href="/cypress-api/server">Server</a></li>
+            </ul>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Kitchen Sink</h1>
+      <p>This is an example app used to showcase Cypress.io testing. For a full reference of our documentation, go to <a href="https://docs.cypress.io" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Commands</h2>
+          <p>Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/commands/querying">Querying</a>
+            <ul>
+              <li><a href="/commands/querying">get</a></li>
+              <li><a href="/commands/querying">contains</a></li>
+              <li><a href="/commands/querying">within</a></li>
+              <li><a href="/commands/querying">root</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/traversal">Traversal</a>
+            <ul>
+              <li><a href="/commands/traversal">children</a></li>
+              <li><a href="/commands/traversal">closest</a></li>
+              <li><a href="/commands/traversal">eq</a></li>
+              <li><a href="/commands/traversal">filter</a></li>
+              <li><a href="/commands/traversal">find</a></li>
+              <li><a href="/commands/traversal">first</a></li>
+              <li><a href="/commands/traversal">last</a></li>
+              <li><a href="/commands/traversal">next</a></li>
+              <li><a href="/commands/traversal">not</a></li>
+              <li><a href="/commands/traversal">parent</a></li>
+              <li><a href="/commands/traversal">parents</a></li>
+              <li><a href="/commands/traversal">siblings</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/actions">Actions</a>
+            <ul>
+              <li><a href="/commands/actions">type</a></li>
+              <li><a href="/commands/actions">focus</a></li>
+              <li><a href="/commands/actions">blur</a></li>
+              <li><a href="/commands/actions">clear</a></li>
+              <li><a href="/commands/actions">submit</a></li>
+              <li><a href="/commands/actions">click</a></li>
+              <li><a href="/commands/actions">dblclick</a></li>
+              <li><a href="/commands/actions">check</a></li>
+              <li><a href="/commands/actions">uncheck</a></li>
+              <li><a href="/commands/actions">select</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/window">Window</a>
+            <ul>
+              <li><a href="/commands/window">window</a></li>
+              <li><a href="/commands/window">document</a></li>
+              <li><a href="/commands/window">title</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/viewport">Viewport</a>
+            <ul>
+              <li><a href="/commands/viewport">viewport</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/location">Location</a>
+            <ul>
+              <li><a href="/commands/location">hash</a></li>
+              <li><a href="/commands/location">location</a></li>
+              <li><a href="/commands/location">url</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/navigation">Navigation</a>
+            <ul>
+              <li><a href="/commands/navigation">go</a></li>
+              <li><a href="/commands/navigation">reload</a></li>
+              <li><a href="/commands/navigation">visit</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/assertions">Assertions</a>
+            <ul>
+              <li>Implicit Assertions</li>
+              <li><a href="/commands/assertions">should</a></li>
+              <li><a href="/commands/assertions">and</a></li>
+              <li>Explicit Assertions</li>
+              <li><a href="/commands/assertions">expect</a></li>
+              <li><a href="/commands/assertions">assert</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/misc">Misc</a>
+            <ul>
+              <li><a href="/commands/misc">end</a></li>
+              <li><a href="/commands/misc">exec</a></li>
+              <li><a href="/commands/misc">focused</a></li>
+              <li><a href="/commands/misc">screenshot</a></li>
+              <li><a href="/commands/misc">wrap</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/connectors">Connectors</a>
+            <ul>
+              <li><a href="/commands/connectors">each</a></li>
+              <li><a href="/commands/connectors">its</a></li>
+              <li><a href="/commands/connectors">invoke</a></li>
+              <li><a href="/commands/connectors">spread</a></li>
+              <li><a href="/commands/connectors">then</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/aliasing">Aliasing</a>
+            <ul>
+              <li><a href="/commands/aliasing">as</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/waiting">Waiting</a>
+            <ul>
+              <li><a href="/commands/waiting">wait</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/network-requests">Network Requests</a>
+            <ul>
+              <li><a href="/commands/network-requests">server</a></li>
+              <li><a href="/commands/network-requests">request</a></li>
+              <li><a href="/commands/network-requests">route</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/fixtures">Fixtures</a>
+            <ul>
+              <li><a href="/commands/fixtures">fixture</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/local-storage">Local Storage</a>
+            <ul>
+              <li><a href="/commands/local-storage">clearLocalStorage</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/cookies">Cookies</a>
+            <ul>
+              <li><a href="/commands/cookies">clearCookies</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Utilities</h2>
+          <p>Utilities give you access to methods from other commonly used libraries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <ul>
+              <li><a href="/cypress-api/utilities">Underscore</a></li>
+              <li><a href="/cypress-api/utilities">jQuery</a></li>
+              <li><a href="/cypress-api/utilities">moment</a></li>
+              <li><a href="/cypress-api/utilities">Blob</a></li>
+              <li><a href="/cypress-api/utilities">Promise</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Cypress API</h2>
+          <p>The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/cypress-api/config">config</a>
+            <ul>
+              <li><a href="/cypress-api/config">config</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/env">env</a>
+            <ul>
+              <li><a href="/cypress-api/env">env</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/commands">Commands</a>
+            <ul>
+              <li><a href="/cypress-api/commands">addChildCommand</a></li>
+              <li><a href="/cypress-api/commands">addDualCommand</a></li>
+              <li><a href="/cypress-api/commands">addParentCommand</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/cookies">Cookies</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Cookies.set</a></li>
+              <li><a href="/cypress-api/commands">Cookies.get</a></li>
+              <li><a href="/cypress-api/commands">Cookies.remove</a></li>
+              <li><a href="/cypress-api/commands">Cookies.debug</a></li>
+              <li><a href="/cypress-api/commands">Cookies.preserveOnce</a></li>
+              <li><a href="/cypress-api/commands">Cookies.default</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/dom">Dom</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Dom.isHidden</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/server">Server</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Server.default</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/fixtures">Fixtures</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Cypress API <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/cypress-api/config">config</a></li>
+              <li><a href="/cypress-api/env">env</a></li>
+              <li><a href="/cypress-api/commands">Commands</a></li>
+              <li><a href="/cypress-api/cookies">Cookies</a></li>
+              <li><a href="/cypress-api/dom">Dom</a></li>
+              <li><a href="/cypress-api/server">Server</a></li>
+            </ul>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Kitchen Sink</h1>
+      <p>This is an example app used to showcase Cypress.io testing. For a full reference of our documentation, go to <a href="https://docs.cypress.io" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Commands</h2>
+          <p>Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/commands/querying">Querying</a>
+            <ul>
+              <li><a href="/commands/querying">get</a></li>
+              <li><a href="/commands/querying">contains</a></li>
+              <li><a href="/commands/querying">within</a></li>
+              <li><a href="/commands/querying">root</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/traversal">Traversal</a>
+            <ul>
+              <li><a href="/commands/traversal">children</a></li>
+              <li><a href="/commands/traversal">closest</a></li>
+              <li><a href="/commands/traversal">eq</a></li>
+              <li><a href="/commands/traversal">filter</a></li>
+              <li><a href="/commands/traversal">find</a></li>
+              <li><a href="/commands/traversal">first</a></li>
+              <li><a href="/commands/traversal">last</a></li>
+              <li><a href="/commands/traversal">next</a></li>
+              <li><a href="/commands/traversal">not</a></li>
+              <li><a href="/commands/traversal">parent</a></li>
+              <li><a href="/commands/traversal">parents</a></li>
+              <li><a href="/commands/traversal">siblings</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/actions">Actions</a>
+            <ul>
+              <li><a href="/commands/actions">type</a></li>
+              <li><a href="/commands/actions">focus</a></li>
+              <li><a href="/commands/actions">blur</a></li>
+              <li><a href="/commands/actions">clear</a></li>
+              <li><a href="/commands/actions">submit</a></li>
+              <li><a href="/commands/actions">click</a></li>
+              <li><a href="/commands/actions">dblclick</a></li>
+              <li><a href="/commands/actions">check</a></li>
+              <li><a href="/commands/actions">uncheck</a></li>
+              <li><a href="/commands/actions">select</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/window">Window</a>
+            <ul>
+              <li><a href="/commands/window">window</a></li>
+              <li><a href="/commands/window">document</a></li>
+              <li><a href="/commands/window">title</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/viewport">Viewport</a>
+            <ul>
+              <li><a href="/commands/viewport">viewport</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/location">Location</a>
+            <ul>
+              <li><a href="/commands/location">hash</a></li>
+              <li><a href="/commands/location">location</a></li>
+              <li><a href="/commands/location">url</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/navigation">Navigation</a>
+            <ul>
+              <li><a href="/commands/navigation">go</a></li>
+              <li><a href="/commands/navigation">reload</a></li>
+              <li><a href="/commands/navigation">visit</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/assertions">Assertions</a>
+            <ul>
+              <li>Implicit Assertions</li>
+              <li><a href="/commands/assertions">should</a></li>
+              <li><a href="/commands/assertions">and</a></li>
+              <li>Explicit Assertions</li>
+              <li><a href="/commands/assertions">expect</a></li>
+              <li><a href="/commands/assertions">assert</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/misc">Misc</a>
+            <ul>
+              <li><a href="/commands/misc">end</a></li>
+              <li><a href="/commands/misc">exec</a></li>
+              <li><a href="/commands/misc">focused</a></li>
+              <li><a href="/commands/misc">screenshot</a></li>
+              <li><a href="/commands/misc">wrap</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/connectors">Connectors</a>
+            <ul>
+              <li><a href="/commands/connectors">each</a></li>
+              <li><a href="/commands/connectors">its</a></li>
+              <li><a href="/commands/connectors">invoke</a></li>
+              <li><a href="/commands/connectors">spread</a></li>
+              <li><a href="/commands/connectors">then</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/aliasing">Aliasing</a>
+            <ul>
+              <li><a href="/commands/aliasing">as</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/waiting">Waiting</a>
+            <ul>
+              <li><a href="/commands/waiting">wait</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/network-requests">Network Requests</a>
+            <ul>
+              <li><a href="/commands/network-requests">server</a></li>
+              <li><a href="/commands/network-requests">request</a></li>
+              <li><a href="/commands/network-requests">route</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/fixtures">Fixtures</a>
+            <ul>
+              <li><a href="/commands/fixtures">fixture</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/local-storage">Local Storage</a>
+            <ul>
+              <li><a href="/commands/local-storage">clearLocalStorage</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/cookies">Cookies</a>
+            <ul>
+              <li><a href="/commands/cookies">clearCookies</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Utilities</h2>
+          <p>Utilities give you access to methods from other commonly used libraries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <ul>
+              <li><a href="/cypress-api/utilities">Underscore</a></li>
+              <li><a href="/cypress-api/utilities">jQuery</a></li>
+              <li><a href="/cypress-api/utilities">moment</a></li>
+              <li><a href="/cypress-api/utilities">Blob</a></li>
+              <li><a href="/cypress-api/utilities">Promise</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Cypress API</h2>
+          <p>The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/cypress-api/config">config</a>
+            <ul>
+              <li><a href="/cypress-api/config">config</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/env">env</a>
+            <ul>
+              <li><a href="/cypress-api/env">env</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/commands">Commands</a>
+            <ul>
+              <li><a href="/cypress-api/commands">addChildCommand</a></li>
+              <li><a href="/cypress-api/commands">addDualCommand</a></li>
+              <li><a href="/cypress-api/commands">addParentCommand</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/cookies">Cookies</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Cookies.set</a></li>
+              <li><a href="/cypress-api/commands">Cookies.get</a></li>
+              <li><a href="/cypress-api/commands">Cookies.remove</a></li>
+              <li><a href="/cypress-api/commands">Cookies.debug</a></li>
+              <li><a href="/cypress-api/commands">Cookies.preserveOnce</a></li>
+              <li><a href="/cypress-api/commands">Cookies.default</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/dom">Dom</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Dom.isHidden</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/server">Server</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Server.default</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/fixtures">Fixtures</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Cypress API <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/cypress-api/config">config</a></li>
+              <li><a href="/cypress-api/env">env</a></li>
+              <li><a href="/cypress-api/commands">Commands</a></li>
+              <li><a href="/cypress-api/cookies">Cookies</a></li>
+              <li><a href="/cypress-api/dom">Dom</a></li>
+              <li><a href="/cypress-api/server">Server</a></li>
+            </ul>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Kitchen Sink</h1>
+      <p>This is an example app used to showcase Cypress.io testing. For a full reference of our documentation, go to <a href="https://docs.cypress.io" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Commands</h2>
+          <p>Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/commands/querying">Querying</a>
+            <ul>
+              <li><a href="/commands/querying">get</a></li>
+              <li><a href="/commands/querying">contains</a></li>
+              <li><a href="/commands/querying">within</a></li>
+              <li><a href="/commands/querying">root</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/traversal">Traversal</a>
+            <ul>
+              <li><a href="/commands/traversal">children</a></li>
+              <li><a href="/commands/traversal">closest</a></li>
+              <li><a href="/commands/traversal">eq</a></li>
+              <li><a href="/commands/traversal">filter</a></li>
+              <li><a href="/commands/traversal">find</a></li>
+              <li><a href="/commands/traversal">first</a></li>
+              <li><a href="/commands/traversal">last</a></li>
+              <li><a href="/commands/traversal">next</a></li>
+              <li><a href="/commands/traversal">not</a></li>
+              <li><a href="/commands/traversal">parent</a></li>
+              <li><a href="/commands/traversal">parents</a></li>
+              <li><a href="/commands/traversal">siblings</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/actions">Actions</a>
+            <ul>
+              <li><a href="/commands/actions">type</a></li>
+              <li><a href="/commands/actions">focus</a></li>
+              <li><a href="/commands/actions">blur</a></li>
+              <li><a href="/commands/actions">clear</a></li>
+              <li><a href="/commands/actions">submit</a></li>
+              <li><a href="/commands/actions">click</a></li>
+              <li><a href="/commands/actions">dblclick</a></li>
+              <li><a href="/commands/actions">check</a></li>
+              <li><a href="/commands/actions">uncheck</a></li>
+              <li><a href="/commands/actions">select</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/window">Window</a>
+            <ul>
+              <li><a href="/commands/window">window</a></li>
+              <li><a href="/commands/window">document</a></li>
+              <li><a href="/commands/window">title</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/viewport">Viewport</a>
+            <ul>
+              <li><a href="/commands/viewport">viewport</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/location">Location</a>
+            <ul>
+              <li><a href="/commands/location">hash</a></li>
+              <li><a href="/commands/location">location</a></li>
+              <li><a href="/commands/location">url</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/navigation">Navigation</a>
+            <ul>
+              <li><a href="/commands/navigation">go</a></li>
+              <li><a href="/commands/navigation">reload</a></li>
+              <li><a href="/commands/navigation">visit</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/assertions">Assertions</a>
+            <ul>
+              <li>Implicit Assertions</li>
+              <li><a href="/commands/assertions">should</a></li>
+              <li><a href="/commands/assertions">and</a></li>
+              <li>Explicit Assertions</li>
+              <li><a href="/commands/assertions">expect</a></li>
+              <li><a href="/commands/assertions">assert</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/misc">Misc</a>
+            <ul>
+              <li><a href="/commands/misc">end</a></li>
+              <li><a href="/commands/misc">exec</a></li>
+              <li><a href="/commands/misc">focused</a></li>
+              <li><a href="/commands/misc">screenshot</a></li>
+              <li><a href="/commands/misc">wrap</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/connectors">Connectors</a>
+            <ul>
+              <li><a href="/commands/connectors">each</a></li>
+              <li><a href="/commands/connectors">its</a></li>
+              <li><a href="/commands/connectors">invoke</a></li>
+              <li><a href="/commands/connectors">spread</a></li>
+              <li><a href="/commands/connectors">then</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/aliasing">Aliasing</a>
+            <ul>
+              <li><a href="/commands/aliasing">as</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/waiting">Waiting</a>
+            <ul>
+              <li><a href="/commands/waiting">wait</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/network-requests">Network Requests</a>
+            <ul>
+              <li><a href="/commands/network-requests">server</a></li>
+              <li><a href="/commands/network-requests">request</a></li>
+              <li><a href="/commands/network-requests">route</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/fixtures">Fixtures</a>
+            <ul>
+              <li><a href="/commands/fixtures">fixture</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/local-storage">Local Storage</a>
+            <ul>
+              <li><a href="/commands/local-storage">clearLocalStorage</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/cookies">Cookies</a>
+            <ul>
+              <li><a href="/commands/cookies">clearCookies</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Utilities</h2>
+          <p>Utilities give you access to methods from other commonly used libraries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <ul>
+              <li><a href="/cypress-api/utilities">Underscore</a></li>
+              <li><a href="/cypress-api/utilities">jQuery</a></li>
+              <li><a href="/cypress-api/utilities">moment</a></li>
+              <li><a href="/cypress-api/utilities">Blob</a></li>
+              <li><a href="/cypress-api/utilities">Promise</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Cypress API</h2>
+          <p>The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/cypress-api/config">config</a>
+            <ul>
+              <li><a href="/cypress-api/config">config</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/env">env</a>
+            <ul>
+              <li><a href="/cypress-api/env">env</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/commands">Commands</a>
+            <ul>
+              <li><a href="/cypress-api/commands">addChildCommand</a></li>
+              <li><a href="/cypress-api/commands">addDualCommand</a></li>
+              <li><a href="/cypress-api/commands">addParentCommand</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/cookies">Cookies</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Cookies.set</a></li>
+              <li><a href="/cypress-api/commands">Cookies.get</a></li>
+              <li><a href="/cypress-api/commands">Cookies.remove</a></li>
+              <li><a href="/cypress-api/commands">Cookies.debug</a></li>
+              <li><a href="/cypress-api/commands">Cookies.preserveOnce</a></li>
+              <li><a href="/cypress-api/commands">Cookies.default</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/dom">Dom</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Dom.isHidden</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/server">Server</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Server.default</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/fixtures">Fixtures</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Cypress API <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/cypress-api/config">config</a></li>
+              <li><a href="/cypress-api/env">env</a></li>
+              <li><a href="/cypress-api/commands">Commands</a></li>
+              <li><a href="/cypress-api/cookies">Cookies</a></li>
+              <li><a href="/cypress-api/dom">Dom</a></li>
+              <li><a href="/cypress-api/server">Server</a></li>
+            </ul>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Kitchen Sink</h1>
+      <p>This is an example app used to showcase Cypress.io testing. For a full reference of our documentation, go to <a href="https://docs.cypress.io" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Commands</h2>
+          <p>Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/commands/querying">Querying</a>
+            <ul>
+              <li><a href="/commands/querying">get</a></li>
+              <li><a href="/commands/querying">contains</a></li>
+              <li><a href="/commands/querying">within</a></li>
+              <li><a href="/commands/querying">root</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/traversal">Traversal</a>
+            <ul>
+              <li><a href="/commands/traversal">children</a></li>
+              <li><a href="/commands/traversal">closest</a></li>
+              <li><a href="/commands/traversal">eq</a></li>
+              <li><a href="/commands/traversal">filter</a></li>
+              <li><a href="/commands/traversal">find</a></li>
+              <li><a href="/commands/traversal">first</a></li>
+              <li><a href="/commands/traversal">last</a></li>
+              <li><a href="/commands/traversal">next</a></li>
+              <li><a href="/commands/traversal">not</a></li>
+              <li><a href="/commands/traversal">parent</a></li>
+              <li><a href="/commands/traversal">parents</a></li>
+              <li><a href="/commands/traversal">siblings</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/actions">Actions</a>
+            <ul>
+              <li><a href="/commands/actions">type</a></li>
+              <li><a href="/commands/actions">focus</a></li>
+              <li><a href="/commands/actions">blur</a></li>
+              <li><a href="/commands/actions">clear</a></li>
+              <li><a href="/commands/actions">submit</a></li>
+              <li><a href="/commands/actions">click</a></li>
+              <li><a href="/commands/actions">dblclick</a></li>
+              <li><a href="/commands/actions">check</a></li>
+              <li><a href="/commands/actions">uncheck</a></li>
+              <li><a href="/commands/actions">select</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/window">Window</a>
+            <ul>
+              <li><a href="/commands/window">window</a></li>
+              <li><a href="/commands/window">document</a></li>
+              <li><a href="/commands/window">title</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/viewport">Viewport</a>
+            <ul>
+              <li><a href="/commands/viewport">viewport</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/location">Location</a>
+            <ul>
+              <li><a href="/commands/location">hash</a></li>
+              <li><a href="/commands/location">location</a></li>
+              <li><a href="/commands/location">url</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/navigation">Navigation</a>
+            <ul>
+              <li><a href="/commands/navigation">go</a></li>
+              <li><a href="/commands/navigation">reload</a></li>
+              <li><a href="/commands/navigation">visit</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/assertions">Assertions</a>
+            <ul>
+              <li>Implicit Assertions</li>
+              <li><a href="/commands/assertions">should</a></li>
+              <li><a href="/commands/assertions">and</a></li>
+              <li>Explicit Assertions</li>
+              <li><a href="/commands/assertions">expect</a></li>
+              <li><a href="/commands/assertions">assert</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/misc">Misc</a>
+            <ul>
+              <li><a href="/commands/misc">end</a></li>
+              <li><a href="/commands/misc">exec</a></li>
+              <li><a href="/commands/misc">focused</a></li>
+              <li><a href="/commands/misc">screenshot</a></li>
+              <li><a href="/commands/misc">wrap</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/connectors">Connectors</a>
+            <ul>
+              <li><a href="/commands/connectors">each</a></li>
+              <li><a href="/commands/connectors">its</a></li>
+              <li><a href="/commands/connectors">invoke</a></li>
+              <li><a href="/commands/connectors">spread</a></li>
+              <li><a href="/commands/connectors">then</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/aliasing">Aliasing</a>
+            <ul>
+              <li><a href="/commands/aliasing">as</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/waiting">Waiting</a>
+            <ul>
+              <li><a href="/commands/waiting">wait</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/network-requests">Network Requests</a>
+            <ul>
+              <li><a href="/commands/network-requests">server</a></li>
+              <li><a href="/commands/network-requests">request</a></li>
+              <li><a href="/commands/network-requests">route</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/fixtures">Fixtures</a>
+            <ul>
+              <li><a href="/commands/fixtures">fixture</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/local-storage">Local Storage</a>
+            <ul>
+              <li><a href="/commands/local-storage">clearLocalStorage</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/cookies">Cookies</a>
+            <ul>
+              <li><a href="/commands/cookies">clearCookies</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Utilities</h2>
+          <p>Utilities give you access to methods from other commonly used libraries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <ul>
+              <li><a href="/cypress-api/utilities">Underscore</a></li>
+              <li><a href="/cypress-api/utilities">jQuery</a></li>
+              <li><a href="/cypress-api/utilities">moment</a></li>
+              <li><a href="/cypress-api/utilities">Blob</a></li>
+              <li><a href="/cypress-api/utilities">Promise</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Cypress API</h2>
+          <p>The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/cypress-api/config">config</a>
+            <ul>
+              <li><a href="/cypress-api/config">config</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/env">env</a>
+            <ul>
+              <li><a href="/cypress-api/env">env</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/commands">Commands</a>
+            <ul>
+              <li><a href="/cypress-api/commands">addChildCommand</a></li>
+              <li><a href="/cypress-api/commands">addDualCommand</a></li>
+              <li><a href="/cypress-api/commands">addParentCommand</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/cookies">Cookies</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Cookies.set</a></li>
+              <li><a href="/cypress-api/commands">Cookies.get</a></li>
+              <li><a href="/cypress-api/commands">Cookies.remove</a></li>
+              <li><a href="/cypress-api/commands">Cookies.debug</a></li>
+              <li><a href="/cypress-api/commands">Cookies.preserveOnce</a></li>
+              <li><a href="/cypress-api/commands">Cookies.default</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/dom">Dom</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Dom.isHidden</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/server">Server</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Server.default</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/fixtures">Fixtures</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Cypress API <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/cypress-api/config">config</a></li>
+              <li><a href="/cypress-api/env">env</a></li>
+              <li><a href="/cypress-api/commands">Commands</a></li>
+              <li><a href="/cypress-api/cookies">Cookies</a></li>
+              <li><a href="/cypress-api/dom">Dom</a></li>
+              <li><a href="/cypress-api/server">Server</a></li>
+            </ul>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Kitchen Sink</h1>
+      <p>This is an example app used to showcase Cypress.io testing. For a full reference of our documentation, go to <a href="https://docs.cypress.io" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Commands</h2>
+          <p>Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/commands/querying">Querying</a>
+            <ul>
+              <li><a href="/commands/querying">get</a></li>
+              <li><a href="/commands/querying">contains</a></li>
+              <li><a href="/commands/querying">within</a></li>
+              <li><a href="/commands/querying">root</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/traversal">Traversal</a>
+            <ul>
+              <li><a href="/commands/traversal">children</a></li>
+              <li><a href="/commands/traversal">closest</a></li>
+              <li><a href="/commands/traversal">eq</a></li>
+              <li><a href="/commands/traversal">filter</a></li>
+              <li><a href="/commands/traversal">find</a></li>
+              <li><a href="/commands/traversal">first</a></li>
+              <li><a href="/commands/traversal">last</a></li>
+              <li><a href="/commands/traversal">next</a></li>
+              <li><a href="/commands/traversal">not</a></li>
+              <li><a href="/commands/traversal">parent</a></li>
+              <li><a href="/commands/traversal">parents</a></li>
+              <li><a href="/commands/traversal">siblings</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/actions">Actions</a>
+            <ul>
+              <li><a href="/commands/actions">type</a></li>
+              <li><a href="/commands/actions">focus</a></li>
+              <li><a href="/commands/actions">blur</a></li>
+              <li><a href="/commands/actions">clear</a></li>
+              <li><a href="/commands/actions">submit</a></li>
+              <li><a href="/commands/actions">click</a></li>
+              <li><a href="/commands/actions">dblclick</a></li>
+              <li><a href="/commands/actions">check</a></li>
+              <li><a href="/commands/actions">uncheck</a></li>
+              <li><a href="/commands/actions">select</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/window">Window</a>
+            <ul>
+              <li><a href="/commands/window">window</a></li>
+              <li><a href="/commands/window">document</a></li>
+              <li><a href="/commands/window">title</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/viewport">Viewport</a>
+            <ul>
+              <li><a href="/commands/viewport">viewport</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/location">Location</a>
+            <ul>
+              <li><a href="/commands/location">hash</a></li>
+              <li><a href="/commands/location">location</a></li>
+              <li><a href="/commands/location">url</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/navigation">Navigation</a>
+            <ul>
+              <li><a href="/commands/navigation">go</a></li>
+              <li><a href="/commands/navigation">reload</a></li>
+              <li><a href="/commands/navigation">visit</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/assertions">Assertions</a>
+            <ul>
+              <li>Implicit Assertions</li>
+              <li><a href="/commands/assertions">should</a></li>
+              <li><a href="/commands/assertions">and</a></li>
+              <li>Explicit Assertions</li>
+              <li><a href="/commands/assertions">expect</a></li>
+              <li><a href="/commands/assertions">assert</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/misc">Misc</a>
+            <ul>
+              <li><a href="/commands/misc">end</a></li>
+              <li><a href="/commands/misc">exec</a></li>
+              <li><a href="/commands/misc">focused</a></li>
+              <li><a href="/commands/misc">screenshot</a></li>
+              <li><a href="/commands/misc">wrap</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/connectors">Connectors</a>
+            <ul>
+              <li><a href="/commands/connectors">each</a></li>
+              <li><a href="/commands/connectors">its</a></li>
+              <li><a href="/commands/connectors">invoke</a></li>
+              <li><a href="/commands/connectors">spread</a></li>
+              <li><a href="/commands/connectors">then</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/aliasing">Aliasing</a>
+            <ul>
+              <li><a href="/commands/aliasing">as</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/waiting">Waiting</a>
+            <ul>
+              <li><a href="/commands/waiting">wait</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/network-requests">Network Requests</a>
+            <ul>
+              <li><a href="/commands/network-requests">server</a></li>
+              <li><a href="/commands/network-requests">request</a></li>
+              <li><a href="/commands/network-requests">route</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/fixtures">Fixtures</a>
+            <ul>
+              <li><a href="/commands/fixtures">fixture</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/local-storage">Local Storage</a>
+            <ul>
+              <li><a href="/commands/local-storage">clearLocalStorage</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/cookies">Cookies</a>
+            <ul>
+              <li><a href="/commands/cookies">clearCookies</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Utilities</h2>
+          <p>Utilities give you access to methods from other commonly used libraries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <ul>
+              <li><a href="/cypress-api/utilities">Underscore</a></li>
+              <li><a href="/cypress-api/utilities">jQuery</a></li>
+              <li><a href="/cypress-api/utilities">moment</a></li>
+              <li><a href="/cypress-api/utilities">Blob</a></li>
+              <li><a href="/cypress-api/utilities">Promise</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Cypress API</h2>
+          <p>The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/cypress-api/config">config</a>
+            <ul>
+              <li><a href="/cypress-api/config">config</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/env">env</a>
+            <ul>
+              <li><a href="/cypress-api/env">env</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/commands">Commands</a>
+            <ul>
+              <li><a href="/cypress-api/commands">addChildCommand</a></li>
+              <li><a href="/cypress-api/commands">addDualCommand</a></li>
+              <li><a href="/cypress-api/commands">addParentCommand</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/cookies">Cookies</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Cookies.set</a></li>
+              <li><a href="/cypress-api/commands">Cookies.get</a></li>
+              <li><a href="/cypress-api/commands">Cookies.remove</a></li>
+              <li><a href="/cypress-api/commands">Cookies.debug</a></li>
+              <li><a href="/cypress-api/commands">Cookies.preserveOnce</a></li>
+              <li><a href="/cypress-api/commands">Cookies.default</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/dom">Dom</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Dom.isHidden</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/server">Server</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Server.default</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">cypress.io</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/commands/querying">Querying</a></li>
+              <li><a href="/commands/traversal">Traversal</a></li>
+              <li><a href="/commands/actions">Actions</a></li>
+              <li><a href="/commands/window">Window</a></li>
+              <li><a href="/commands/viewport">Viewport</a></li>
+              <li><a href="/commands/location">Location</a></li>
+              <li><a href="/commands/navigation">Navigation</a></li>
+              <li><a href="/commands/assertions">Assertions</a></li>
+              <li><a href="/commands/misc">Misc</a></li>
+              <li><a href="/commands/connectors">Connectors</a></li>
+              <li><a href="/commands/aliasing">Aliasing</a></li>
+              <li><a href="/commands/waiting">Waiting</a></li>
+              <li><a href="/commands/network-requests">Network Requests</a></li>
+              <li><a href="/commands/fixtures">Fixtures</a></li>
+              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/cookies">Cookies</a></li>
+            </ul>
+          </li>
+          <li><a href="/utilities">Utilities</a></li>
+          <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Cypress API <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/cypress-api/config">config</a></li>
+              <li><a href="/cypress-api/env">env</a></li>
+              <li><a href="/cypress-api/commands">Commands</a></li>
+              <li><a href="/cypress-api/cookies">Cookies</a></li>
+              <li><a href="/cypress-api/dom">Dom</a></li>
+              <li><a href="/cypress-api/server">Server</a></li>
+            </ul>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="banner">
+    <div class="container">
+      <h1>Kitchen Sink</h1>
+      <p>This is an example app used to showcase Cypress.io testing. For a full reference of our documentation, go to <a href="https://docs.cypress.io" target="_blank">docs.cypress.io</a>
+      </p>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Commands</h2>
+          <p>Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/commands/querying">Querying</a>
+            <ul>
+              <li><a href="/commands/querying">get</a></li>
+              <li><a href="/commands/querying">contains</a></li>
+              <li><a href="/commands/querying">within</a></li>
+              <li><a href="/commands/querying">root</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/traversal">Traversal</a>
+            <ul>
+              <li><a href="/commands/traversal">children</a></li>
+              <li><a href="/commands/traversal">closest</a></li>
+              <li><a href="/commands/traversal">eq</a></li>
+              <li><a href="/commands/traversal">filter</a></li>
+              <li><a href="/commands/traversal">find</a></li>
+              <li><a href="/commands/traversal">first</a></li>
+              <li><a href="/commands/traversal">last</a></li>
+              <li><a href="/commands/traversal">next</a></li>
+              <li><a href="/commands/traversal">not</a></li>
+              <li><a href="/commands/traversal">parent</a></li>
+              <li><a href="/commands/traversal">parents</a></li>
+              <li><a href="/commands/traversal">siblings</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/actions">Actions</a>
+            <ul>
+              <li><a href="/commands/actions">type</a></li>
+              <li><a href="/commands/actions">focus</a></li>
+              <li><a href="/commands/actions">blur</a></li>
+              <li><a href="/commands/actions">clear</a></li>
+              <li><a href="/commands/actions">submit</a></li>
+              <li><a href="/commands/actions">click</a></li>
+              <li><a href="/commands/actions">dblclick</a></li>
+              <li><a href="/commands/actions">check</a></li>
+              <li><a href="/commands/actions">uncheck</a></li>
+              <li><a href="/commands/actions">select</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/window">Window</a>
+            <ul>
+              <li><a href="/commands/window">window</a></li>
+              <li><a href="/commands/window">document</a></li>
+              <li><a href="/commands/window">title</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/viewport">Viewport</a>
+            <ul>
+              <li><a href="/commands/viewport">viewport</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/location">Location</a>
+            <ul>
+              <li><a href="/commands/location">hash</a></li>
+              <li><a href="/commands/location">location</a></li>
+              <li><a href="/commands/location">url</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/navigation">Navigation</a>
+            <ul>
+              <li><a href="/commands/navigation">go</a></li>
+              <li><a href="/commands/navigation">reload</a></li>
+              <li><a href="/commands/navigation">visit</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/assertions">Assertions</a>
+            <ul>
+              <li>Implicit Assertions</li>
+              <li><a href="/commands/assertions">should</a></li>
+              <li><a href="/commands/assertions">and</a></li>
+              <li>Explicit Assertions</li>
+              <li><a href="/commands/assertions">expect</a></li>
+              <li><a href="/commands/assertions">assert</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/misc">Misc</a>
+            <ul>
+              <li><a href="/commands/misc">end</a></li>
+              <li><a href="/commands/misc">exec</a></li>
+              <li><a href="/commands/misc">focused</a></li>
+              <li><a href="/commands/misc">screenshot</a></li>
+              <li><a href="/commands/misc">wrap</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/connectors">Connectors</a>
+            <ul>
+              <li><a href="/commands/connectors">each</a></li>
+              <li><a href="/commands/connectors">its</a></li>
+              <li><a href="/commands/connectors">invoke</a></li>
+              <li><a href="/commands/connectors">spread</a></li>
+              <li><a href="/commands/connectors">then</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/aliasing">Aliasing</a>
+            <ul>
+              <li><a href="/commands/aliasing">as</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/waiting">Waiting</a>
+            <ul>
+              <li><a href="/commands/waiting">wait</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/network-requests">Network Requests</a>
+            <ul>
+              <li><a href="/commands/network-requests">server</a></li>
+              <li><a href="/commands/network-requests">request</a></li>
+              <li><a href="/commands/network-requests">route</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/fixtures">Fixtures</a>
+            <ul>
+              <li><a href="/commands/fixtures">fixture</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/local-storage">Local Storage</a>
+            <ul>
+              <li><a href="/commands/local-storage">clearLocalStorage</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/commands/cookies">Cookies</a>
+            <ul>
+              <li><a href="/commands/cookies">clearCookies</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Utilities</h2>
+          <p>Utilities give you access to methods from other commonly used libraries.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <ul>
+              <li><a href="/cypress-api/utilities">Underscore</a></li>
+              <li><a href="/cypress-api/utilities">jQuery</a></li>
+              <li><a href="/cypress-api/utilities">moment</a></li>
+              <li><a href="/cypress-api/utilities">Blob</a></li>
+              <li><a href="/cypress-api/utilities">Promise</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="banner-alt">
+    <div class="container">
+      <div class="row">
+        <div id="utilities" class="col-xs-12">
+          <h2>Cypress API</h2>
+          <p>The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="home-list">
+          <li>
+            <a href="/cypress-api/config">config</a>
+            <ul>
+              <li><a href="/cypress-api/config">config</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/env">env</a>
+            <ul>
+              <li><a href="/cypress-api/env">env</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/commands">Commands</a>
+            <ul>
+              <li><a href="/cypress-api/commands">addChildCommand</a></li>
+              <li><a href="/cypress-api/commands">addDualCommand</a></li>
+              <li><a href="/cypress-api/commands">addParentCommand</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/cookies">Cookies</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Cookies.set</a></li>
+              <li><a href="/cypress-api/commands">Cookies.get</a></li>
+              <li><a href="/cypress-api/commands">Cookies.remove</a></li>
+              <li><a href="/cypress-api/commands">Cookies.debug</a></li>
+              <li><a href="/cypress-api/commands">Cookies.preserveOnce</a></li>
+              <li><a href="/cypress-api/commands">Cookies.default</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/dom">Dom</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Dom.isHidden</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/cypress-api/server">Server</a>
+            <ul>
+              <li><a href="/cypress-api/commands">Server.default</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

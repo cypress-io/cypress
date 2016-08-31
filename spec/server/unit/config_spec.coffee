@@ -266,7 +266,7 @@ describe "lib/config", ->
 
         expect(cfg.resolved).to.deep.eq({
           port:                       { value: 1234, from: "cli" },
-          hosts:                      { value: {}, from: "default" }
+          hosts:                      { value: null, from: "default" }
           reporter:                   { value: "json", from: "cli" },
           baseUrl:                    { value: null, from: "default" },
           commandTimeout:             { value: 4000, from: "default" },
@@ -312,7 +312,7 @@ describe "lib/config", ->
 
         expect(cfg.resolved).to.deep.eq({
           port:                       { value: 2020, from: "config" },
-          hosts:                      { value: {}, from: "default" }
+          hosts:                      { value: null, from: "default" }
           reporter:                   { value: "spec", from: "default" },
           baseUrl:                    { value: "http://localhost:8080", from: "config" },
           commandTimeout:             { value: 4000, from: "default" },

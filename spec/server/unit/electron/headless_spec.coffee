@@ -115,7 +115,6 @@ describe "electron/headless", ->
   context ".createRenderer", ->
     beforeEach ->
       @win = @sandbox.stub({
-        hide: ->
         setSize: ->
         center: ->
         webContents: {
@@ -139,9 +138,8 @@ describe "electron/headless", ->
           type: "PROJECT"
         })
 
-    it "calls win.hide + win.setSize on the resolved window", ->
+    it "calls win.setSize on the resolved window", ->
       headless.createRenderer("foo/bar/baz", "http://localhost:1234").then =>
-        expect(@win.hide).to.be.calledOnce
         expect(@win.setSize).to.be.calledWith(1280, 720)
         expect(@win.center).to.be.calledOnce
 
@@ -156,8 +154,6 @@ describe "electron/headless", ->
           devTools: true
           type: "PROJECT"
         })
-
-        expect(@win.hide).not.to.be.called
 
     it "sets options.show = false on new-window", ->
       options = {show: true}

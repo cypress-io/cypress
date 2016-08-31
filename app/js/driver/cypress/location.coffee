@@ -279,14 +279,10 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       ## if to is absolute relative '/foo'
       if @isAbsoluteRelative(to)
         ## get origin from 'from'
-        origin = @parse(from).origin
+        origin = @create(from).origin
         @join(origin, to)
       else
         @join(from, to)
-
-    # @create = (current, remote, defaultOrigin) ->
-    #   location = new $Location(current, remote, defaultOrigin)
-    #   location.getObject()
 
     @create = (remote) ->
       location = new $Location(remote)

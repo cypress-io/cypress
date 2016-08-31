@@ -115,7 +115,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "throws when go times out", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Timed out after waiting '1ms' for your remote page to load."
+          expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
           done()
 
         @cy
@@ -197,7 +197,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "throws when go times out", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Timed out after waiting '1ms' for your remote page to load."
+          expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
           done()
 
         @cy
@@ -357,6 +357,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         @Cypress.trigger "test:before:run", {id: 888}
 
         @sandbox.stub(@cy, "_replace")
+        @sandbox.stub(@Cypress, "getEmissions").returns([])
         @sandbox.stub(@Cypress, "getTestsState").returns([])
         @sandbox.stub(@Cypress, "getStartTime").returns("12345")
         @sandbox.stub(@Cypress.Log, "countLogsByTests").withArgs([]).returns(1)
@@ -370,6 +371,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(state).to.deep.eq({
             currentId: 888
             tests: []
+            emissions: []
             startTime: "12345"
             numLogs: 1
             passed: 2
@@ -608,7 +610,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(1)
-          expect(err.message).to.eq "Timed out after waiting '200ms' for your remote page to load."
+          expect(err.message).to.include "Your page did not fire its 'load' event within '200ms'."
           expect(@log.get("error")).to.eq(err)
           done()
 
@@ -997,7 +999,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         @cy.once "fail", (err) ->
           ## should only log once
           expect(logs.length).to.eq 1
-          expect(err.message).to.eq "Timed out after waiting '100ms' for your remote page to load."
+          expect(err.message).to.include "Your page did not fire its 'load' event within '100ms'."
           done()
 
         @cy.on "invoke:end", =>

@@ -566,7 +566,7 @@ describe "$Cypress.Cy Assertion Commands", ->
   context "#assert", ->
     before ->
       @onAssert = (fn) =>
-        @Cypress.on "log", (obj) =>
+        @Cypress.on "log", (attrs, obj) =>
           if obj.get("name") is "assert"
             ## restore so we dont create an endless loop
             ## due to Cypress.assert being called again
@@ -667,7 +667,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
       ## chai jquery adds 2 assertions here so
       ## we bind to the 2nd one
-      @Cypress.on "log", (obj) ->
+      @Cypress.on "log", (attrs, obj) ->
         if obj.get("name") is "assert"
           assert(obj)
 
@@ -682,7 +682,7 @@ describe "$Cypress.Cy Assertion Commands", ->
     it "does not replace 'button' with 'andton'", (done) ->
       ## chai jquery adds 2 assertions here so
       ## we bind to the 2nd one
-      @Cypress.on "log", (obj) ->
+      @Cypress.on "log", (attrs, obj) ->
         if obj.get("name") is "assert"
           assert(obj)
 

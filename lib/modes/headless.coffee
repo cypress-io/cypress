@@ -102,13 +102,6 @@ module.exports = {
         type:   "PROJECT"
       })
       .then (win) ->
-        if not showGui
-          ## there is a bug in electron linux
-          ## which causes the window to open even
-          ## should show is false so we must 'hide'
-          ## the window again and then set its size
-          win.hide()
-
         win.webContents.on "new-window", (e, url, frameName, disposition, options) ->
           ## force new windows to automatically open with show: false
           ## this prevents window.open inside of javascript client code

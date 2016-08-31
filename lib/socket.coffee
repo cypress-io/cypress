@@ -172,6 +172,7 @@ class Socket
       onConnect: ->
       onResolveUrl: ->
       onFocusTests: ->
+      onSpecChanged: ->
       onChromiumRun: ->
       onReloadBrowser: ->
       checkForAppErrors: ->
@@ -277,8 +278,8 @@ class Socket
         else
           cb({__error: "Could not process '#{message}'. No adapter servers connected."})
 
-      socket.on "run:tests:in:chromium", (src) ->
-        options.onChromiumRun(src)
+      socket.on "spec:changed", (spec) ->
+        options.onSpecChanged(spec)
 
       socket.on "watch:test:file", (filePath, cb) =>
         @watchTestFileByPath(config, filePath, watchers, cb)

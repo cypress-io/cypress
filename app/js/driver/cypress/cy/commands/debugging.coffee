@@ -43,9 +43,9 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
   Cypress.addUtilityCommand
     ## pause should indefinitely pause until the user
     ## presses a key or clicks in the UI to continue
-    pause: (options = {}) ->
+    pause: (subject, options = {}) ->
       ## bail if we're headless
-      return @prop("subject") if $Cypress.isHeadless
+      return subject if $Cypress.isHeadless
 
       _.defaults options, {log: true}
 
@@ -90,9 +90,9 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
         ## set onResume function
         onResume(fn, timeout)
 
-      return @prop("subject")
+      return subject
 
-    debug: (options = {}) ->
+    debug: (subject, options = {}) ->
       _.defaults options, {log: true}
 
       if options.log
@@ -103,15 +103,16 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
 
       previous = @prop("current").get("prev")
 
-      ###
-      cy.debug provides the previous command and the current subject below:
-      ###
+      console.log "\n%c------------------------ Debug Info ------------------------", "font-weight: bold;"
+      console.log "Command Name:    ", previous and previous.get("name")
+      console.log "Command Args:    ", previous and previous.get("args")
+      console.log "Current Subject: ", subject
 
-      console.log "\n%c------------------------Cypress Debug Info------------------------", "font-weight: bold;"
-      console.log "Previous Command Name: ", previous and previous.get("name")
-      console.log "Previous Command Args: ", previous and previous.get("args")
-      console.log "Current Subject:       ", @prop("subject")
-      debugger
+      `
+        ////// HOVER OVER TO INSPECT THE CURRENT SUBJECT //////
+        subject
+        ///////////////////////////////////////////////////////
 
-      ## return the subject
-      @prop("subject")
+        debugger`
+
+      return subject

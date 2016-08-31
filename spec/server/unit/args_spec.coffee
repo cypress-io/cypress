@@ -25,14 +25,6 @@ describe "lib/util/args", ->
       options = @setup("--run-project", "/baz")
       expect(options.projectPath).to.eq projectPath
 
-  context "--coords", ->
-    it "sets x and y", ->
-      options = @setup("--coords=800x600")
-      expect(options.coords).to.deep.eq({
-        x: 800
-        y: 600
-      })
-
   context "--port", ->
     it "converts to Number", ->
       options = @setup("--port", "8080")
@@ -68,24 +60,24 @@ describe "lib/util/args", ->
 
   context ".toArray", ->
     beforeEach ->
-      @obj = {coords: {x: 1, y: 2}, _coords: "1x2", project: "foo/bar"}
+      @obj = {hosts: {"*.foobar.com": "127.0.0.1"}, _hosts: "*.foobar.com=127.0.0.1", project: "foo/bar"}
 
     it "rejects values which have an cooresponding underscore'd key", ->
-      expect(argsUtil.toArray(@obj)).to.deep.eq(["--project=foo/bar", "--coords=1x2"])
+      expect(argsUtil.toArray(@obj)).to.deep.eq(["--project=foo/bar", "--hosts=*.foobar.com=127.0.0.1"])
 
   context ".toObject", ->
     beforeEach ->
       ## make sure it works with both --env=foo=bar and --config foo=bar
-      @obj = @setup("--get-key", "--coords=1x2", "--env=foo=bar,baz=quux", "--config", "requestTimeout=1234,responseTimeout=9876")
+      @obj = @setup("--get-key", "--hosts=*.foobar.com=127.0.0.1", "--env=foo=bar,baz=quux", "--config", "requestTimeout=1234,responseTimeout=9876")
 
-    it "backs up coords + environmentVariables", ->
+    it "backs up hosts + environmentVariables", ->
       expect(@obj).to.deep.eq({
         _: []
         env: process.env.NODE_ENV
         "get-key": true
         getKey: true
-        _coords: "1x2"
-        coords: {x: 1, y: 2}
+        _hosts: "*.foobar.com=127.0.0.1"
+        hosts: {"*.foobar.com": "127.0.0.1"}
         _environmentVariables: "foo=bar,baz=quux"
         environmentVariables: {
           foo: "bar"
@@ -103,8 +95,8 @@ describe "lib/util/args", ->
     it "can transpose back to an array", ->
       expect(argsUtil.toArray(@obj)).to.deep.eq([
         "--getKey=true"
-        "--coords=1x2"
         "--config=requestTimeout=1234,responseTimeout=9876"
+        "--hosts=*.foobar.com=127.0.0.1"
         "--requestTimeout=1234"
         "--responseTimeout=9876"
         "--environmentVariables=foo=bar,baz=quux"
@@ -120,7 +112,6 @@ describe "lib/util/args", ->
         "/Applications/Cypress.app"
         "/Applications/Cypress.app"
         "--updating"
-        "--coords=1287x30"
       ]
 
       expect(argsUtil.toObject(argv)).to.deep.eq({
@@ -133,8 +124,6 @@ describe "lib/util/args", ->
         appPath: "/Applications/Cypress.app"
         execPath: "/Applications/Cypress.app"
         updating: true
-        _coords: "1287x30"
-        coords: {x: 1287, y: 30}
       })
 
     it "does not slurp up appPath + execPath if updating and these are already present in args", ->
@@ -145,7 +134,6 @@ describe "lib/util/args", ->
         "--app-path=a"
         "--exec-path=e"
         "--updating"
-        "--coords=1287x30"
       ]
 
       expect(argsUtil.toObject(argv)).to.deep.eq({
@@ -160,7 +148,5 @@ describe "lib/util/args", ->
         "app-path": "a"
         "exec-path": "e"
         updating: true
-        _coords: "1287x30"
-        coords: {x: 1287, y: 30}
       })
 

@@ -3,15 +3,10 @@ require("../spec_helper")
 delete global.fs
 
 tar         = require("tar-fs")
-mock        = require("mock-fs")
 Updater     = require("#{root}lib/updater")
 Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
 describe "lib/updater", ->
-  afterEach ->
-    Updater.setCoords(null)
-    mock.restore()
-
   context "interface", ->
     it "returns an updater instance", ->
       u = Updater({})
@@ -19,9 +14,7 @@ describe "lib/updater", ->
 
   context "#getPackage", ->
     beforeEach ->
-      mock({
-        "package.json": JSON.stringify(foo: "bar")
-      })
+      @sandbox.stub(fs, "readJsonSync").returns({foo: "bar"})
 
       @updater = Updater({})
 
@@ -42,17 +35,6 @@ describe "lib/updater", ->
       client  = u.getClient()
       client2 = u.getClient()
       expect(client).to.eq(client2)
-
-  context "#getCoords", ->
-    beforeEach ->
-      @updater = Updater({})
-
-    it "returns undefined without coords", ->
-      expect(@updater.getCoords()).to.be.undefined
-
-    it "returns --coords=800x600", ->
-      Updater.setCoords {x: 800, y: 600}
-      expect(@updater.getCoords()).to.eq "--coords=800x600"
 
   context "#getArgs", ->
     beforeEach ->
@@ -207,12 +189,6 @@ describe "lib/updater", ->
         @updater.runInstaller("/Users/bmann/newApp")
         expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating"], {})
 
-      it "passes along App.coords if they exist", ->
-        Updater.setCoords {x: 600, y: 1200}
-        c = @updater.client
-        @updater.runInstaller("/Users/bmann/newApp")
-        expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating", "--coords=600x1200"], {})
-
     describe "#copyCyDataTo", ->
       beforeEach ->
         fs.outputJsonAsync(".cy/cache", {foo: "bar"}).then ->
@@ -284,8 +260,6 @@ describe "lib/updater", ->
         @argsObj = {
           appPath:  "/Users/bmann/app_path"
           execPath: "/Users/bmann/app_exec_path"
-          _coords: "1x2"
-          coords: {x: 1, y: 2}
         }
 
         @sandbox.stub(@updater.client, "getAppPath").returns("foo")
@@ -308,7 +282,7 @@ describe "lib/updater", ->
 
       it "calls client.run with execPath + args", ->
         @updater.install(@argsObj).then =>
-          expect(@run).to.be.calledWith(@argsObj.execPath, ["--coords=1x2"])
+          expect(@run).to.be.calledWith(@argsObj.execPath, [])
 
       context "args", ->
         beforeEach ->
@@ -333,9 +307,7 @@ describe "lib/updater", ->
 
     beforeEach ->
       ## force a lower package.json version
-      mock({
-        "package.json": JSON.stringify(version: "0.0.1")
-      })
+      @sandbox.stub(fs, "readJsonSync").returns({version: "0.0.1"})
 
       ## force a manifest.json response here to be a slightly higher version
       nock("http://download.cypress.io")
@@ -357,7 +329,6 @@ describe "lib/updater", ->
         }
         .get("/dist.cypress.io/0.0.2/cypress.zip")
         .reply 200, ->
-          mock.restore()
           fs.createReadStream Fixtures.path("nw/cypress.zip")
 
     # it "runs", ->

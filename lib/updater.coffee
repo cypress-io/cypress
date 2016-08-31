@@ -16,7 +16,6 @@ argsUtil       = require("./util/args")
 
 trash  = Promise.promisify(trash)
 chmodr = Promise.promisify(chmodr)
-coords = null
 
 NwUpdater.prototype.checkNewVersion = (cb) ->
   gotManifest = (err, req, data) ->
@@ -54,15 +53,10 @@ class Updater
     if process.env["CYPRESS_ENV"] isnt "production"
       @patchAppPath()
 
-  getCoords: ->
-    return if not c = coords
-
-    "--coords=#{c.x}x#{c.y}"
-
   getArgs: ->
     c = @getClient()
 
-    _.compact ["--app-path=" + c.getAppPath(), "--exec-path=" + c.getAppExec(), "--updating", @getCoords()]
+    _.compact ["--app-path=" + c.getAppPath(), "--exec-path=" + c.getAppExec(), "--updating"]
 
   patchAppPath: ->
     @getClient().getAppPath = -> cwd()
@@ -126,7 +120,7 @@ class Updater
       .on "finish", resolve
 
   runInstaller: (newAppPath) ->
-    ## get the --updating args + --coords args
+    ## get the --updating args
     args = @getArgs()
 
     logger.info "running installer from tmp", destination: newAppPath, args: args
@@ -208,9 +202,6 @@ class Updater
         @trigger("none")
 
     return @
-
-  @setCoords = (c) ->
-    coords = c
 
   @install = (options) ->
     Updater().install(options)

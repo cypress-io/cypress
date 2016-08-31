@@ -18,6 +18,7 @@ isCypressEnvLike = (key) ->
 
 defaults = {
   port:           null
+  hosts:          null
   morgan:         true
   baseUrl:        null
   socketId:       null
@@ -49,7 +50,6 @@ defaults = {
   integrationFolder: "cypress/integration"
   screenshotsFolder:  "cypress/screenshots"
   javascripts:    []
-  hosts:          {}
   namespace:      "__cypress"
 }
 
@@ -196,7 +196,7 @@ module.exports = {
 
     ptfd = obj.parentTestsFolder = path.dirname(obj.integrationFolder)
 
-    prd = path.dirname(obj.projectRoot)
+    prd = path.dirname(obj.projectRoot ? "")
 
     obj.parentTestsFolderDisplay = path.relative(prd, ptfd)
 

@@ -131,6 +131,9 @@ module.exports = {
   closeBrowser: ->
     launcher.close()
 
+    if openProject
+      openProject.resetState()
+
     openBrowser     = null
     openBrowserOpts = null
 

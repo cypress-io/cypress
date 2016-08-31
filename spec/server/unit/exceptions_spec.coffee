@@ -2,7 +2,6 @@ require("../spec_helper")
 
 delete global.fs
 
-mock          = require("mock-fs")
 winston       = require("winston")
 api           = require("#{root}lib/api")
 user          = require("#{root}lib/user")
@@ -13,9 +12,6 @@ Routes        = require("#{root}lib/util/routes")
 Settings      = require("#{root}lib/util/settings")
 
 describe "lib/exceptions", ->
-  afterEach ->
-    mock.restore()
-
   context ".getSession", ->
     it "returns session from cache", ->
       @sandbox.stub(user, "get").resolves({session_token: "abc-123"})
@@ -62,9 +58,9 @@ describe "lib/exceptions", ->
 
   context ".getVersion", ->
     it "returns version from package.json", ->
-      mock({
-        "package.json": JSON.stringify(version: "0.1.2")
-      })
+      @sandbox.stub(fs, "readJsonAsync")
+      .withArgs("./package.json")
+      .resolves({version: "0.1.2"})
 
       exception.getVersion().then (v) ->
         expect(v).to.eq("0.1.2")
@@ -74,9 +70,10 @@ describe "lib/exceptions", ->
       @sandbox.stub(cache, "read").resolves({foo: "foo"})
       @sandbox.stub(logger, "getLogs").resolves([])
       @err = new Error
-      mock({
-        "package.json": JSON.stringify(version: "0.1.2")
-      })
+
+      @sandbox.stub(fs, "readJsonAsync")
+      .withArgs("./package.json")
+      .resolves({version: "0.1.2"})
 
     it "sets err", ->
       exception.getBody(@err).then (body) ->
