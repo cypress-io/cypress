@@ -8,6 +8,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
   delay = 50
 
+  Cypress.on "test:before:run", ->
+    Cypress.Keyboard.resetModifiers(@private("document"), @private("window"))
+
   dispatchPrimedChangeEvents = ->
     ## if we have a changeEvent, dispatch it
     if changeEvent = @prop("changeEvent")
@@ -524,19 +527,19 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             consoleObj.groups = ->
               groups = [{
                 name: "MouseDown"
-                items: _(domEvents.mouseDown).pick("preventedDefault", "stoppedPropagation")
+                items: _(domEvents.mouseDown).pick("preventedDefault", "stoppedPropagation", "modifiers")
               }]
 
               if domEvents.mouseUp
                 groups.push({
                   name: "MouseUp"
-                  items: _(domEvents.mouseUp).pick("preventedDefault", "stoppedPropagation")
+                  items: _(domEvents.mouseUp).pick("preventedDefault", "stoppedPropagation", "modifiers")
                 })
 
               if domEvents.click
                 groups.push({
                   name: "Click"
-                  items: _(domEvents.click).pick("preventedDefault", "stoppedPropagation")
+                  items: _(domEvents.click).pick("preventedDefault", "stoppedPropagation", "modifiers")
                 })
 
               return groups
@@ -761,6 +764,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         verify: true
         force: false
         delay: 10
+        release: true
 
       @ensureDom(options.$el)
 
@@ -773,6 +777,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         getRow = (id, key, which) ->
           table[id] or do ->
             table[id] = (obj = {})
+            modifiers = Cypress.Keyboard.activeModifiers()
+            obj.modifiers = modifiers.join(", ") if modifiers.length
             if key
               obj.typed = key
               obj.which = which if which
@@ -800,17 +806,21 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               {
                 name: "Key Events Table"
                 data: getTableData()
-                columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change"]
+                columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "modifiers"]
               }
 
         options._log.snapshot("before", {next: "after"})
 
-      isTextLike        = options.$el.is(textLike)
-      hasTabIndex       = options.$el.is("[tabindex]")
+      isBody      = options.$el.is("body")
+      isTextLike  = options.$el.is(textLike)
+      hasTabIndex = options.$el.is("[tabindex]")
 
-      isTypeableButNotAnInput = hasTabIndex and not isTextLike
+      ## TODO: tabindex can't be -1
+      ## TODO: can't be readonly
 
-      if not isTextLike and not hasTabIndex
+      isTypeableButNotAnInput = isBody or (hasTabIndex and not isTextLike)
+
+      if not isBody and not isTextLike and not hasTabIndex
         node = Cypress.Utils.stringifyElement(options.$el)
         $Cypress.Utils.throwErrByPath("type.not_on_text_field", {
           onFail: options._log
@@ -897,10 +907,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           return dispatched
 
         @Cypress.Keyboard.type({
-          $el:    options.$el
-          chars:  options.chars
-          delay:  options.delay
-          window: @private("window")
+          $el:     options.$el
+          chars:   options.chars
+          delay:   options.delay
+          release: options.release
+          window:  @private("window")
 
           onBeforeType: (totalKeys) =>
             ## for the total number of keys we're about to
@@ -963,26 +974,32 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         })
 
-      @execute("focused", {log: false, verify: false}).then ($focused) =>
-        ## if we dont have a focused element
-        ## or if we do and its not ourselves
-        ## then issue the click
-        if not $focused or ($focused and $focused.get(0) isnt options.$el.get(0))
-          ## click the element first to simulate focus
-          ## and typical user behavior in case the window
-          ## is out of focus
-          @execute("click", {
-            $el: options.$el
-            log: false
-            verify: false
-            _log: options._log
-            force: options.force
-            timeout: options.timeout
-            interval: options.interval
-          }).then =>
-            type()
-        else
-          @_waitForAnimations(options.$el, options).then(type)
+      handleFocused = =>
+        ## if it's the body, don't need to worry about focus
+        return type() if isBody
+
+        @execute("focused", {log: false, verify: false}).then ($focused) =>
+          ## if we dont have a focused element
+          ## or if we do and its not ourselves
+          ## then issue the click
+          if not $focused or ($focused and $focused.get(0) isnt options.$el.get(0))
+            ## click the element first to simulate focus
+            ## and typical user behavior in case the window
+            ## is out of focus
+            @execute("click", {
+              $el: options.$el
+              log: false
+              verify: false
+              _log: options._log
+              force: options.force
+              timeout: options.timeout
+              interval: options.interval
+            }).then =>
+              type()
+          else
+            @_waitForAnimations(options.$el, options).then(type)
+
+      handleFocused()
       .then =>
         @_timeout(delay, true)
 

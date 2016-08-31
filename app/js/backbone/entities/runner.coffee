@@ -83,8 +83,14 @@
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "adapter:request", msg, data, cb
 
-        @listenTo @Cypress, "fixture", (fixture, cb) =>
-          @socket.emit "fixture", fixture, cb
+        @listenTo @Cypress, "fixture", (fixture, options, cb) =>
+          @socket.emit "fixture", fixture, options, cb
+
+        @listenTo @Cypress, "read:file", (file, options, cb) =>
+          @socket.emit "read:file", file, options, cb
+
+        @listenTo @Cypress, "write:file", (file, contents, options, cb) =>
+          @socket.emit "write:file", file, contents, options, cb
 
         @listenTo @Cypress, "request", (options, cb) =>
           @socket.emit "request", options, cb

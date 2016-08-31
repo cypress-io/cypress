@@ -9,6 +9,7 @@ open          = require("./util/open")
 pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
 exec          = require("./exec")
+files         = require("./files")
 fixture       = require("./fixture")
 Request       = require("./request")
 errors        = require("./errors")
@@ -96,11 +97,25 @@ class Socket
     .catch (err) ->
       cb({__error: err.message})
 
-  onFixture: (config, file, cb) ->
-    fixture.get(config.fixturesFolder, file)
+  onFixture: (config, file, options, cb) ->
+    fixture.get(config.fixturesFolder, file, options)
     .then(cb)
     .catch (err) ->
       cb({__error: err.message})
+
+  onReadFile: (config, file, options, cb) ->
+    files.readFile(config.projectRoot, file, options)
+    .then(cb)
+    .catch (err) ->
+      ## TODO: change to user errors.clone() when merging with 0.17.0
+      cb({__error: { message: err.message, code: err.code }})
+
+  onWriteFile: (config, file, contents, options, cb) ->
+    files.writeFile(config.projectRoot, file, contents, options)
+    .then(cb)
+    .catch (err) ->
+      ## TODO: change to user errors.clone() when merging with 0.17.0
+      cb({__error: { message: err.message, code: err.code }})
 
   onExec: (projectRoot, options, cb) ->
     exec.run(projectRoot, options)
@@ -273,8 +288,14 @@ class Socket
       socket.on "request", (options, cb) =>
         @onRequest(automationRequest, options, cb)
 
-      socket.on "fixture", (fixturePath, cb) =>
-        @onFixture(config, fixturePath, cb)
+      socket.on "fixture", (fixturePath, options, cb) =>
+        @onFixture(config, fixturePath, options, cb)
+
+      socket.on "read:file", (file, options, cb) =>
+        @onReadFile(config, file, options, cb)
+
+      socket.on "write:file", (file, contents, options, cb) =>
+        @onWriteFile(config, file, contents, options, cb)
 
       socket.on "exec", (options, cb) =>
         @onExec(config.projectRoot, options, cb)

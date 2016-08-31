@@ -44,8 +44,8 @@ do ($Cypress, _, Promise) ->
 
         getErrMessage = (err) ->
           switch
-            when err and err.longMessage
-              err.longMessage
+            when err and err.displayMessage
+              err.displayMessage
             when err and err.message
               err.message
             else
