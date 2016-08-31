@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.1.8 - *(08/31/16)*
+- defaultCommandTimeout config + socket events
+
 #### 0.1.7 - *(08/30/16)*
 - build prod before publishing
 
