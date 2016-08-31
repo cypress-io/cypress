@@ -69,6 +69,9 @@ LGPL
 
 ## Changelog
 
+#### 0.3.4 - *(08/31/16)*
+- fix github focus button
+
 #### 0.3.3 - *(08/30/16)*
 - added applying updates view
 
