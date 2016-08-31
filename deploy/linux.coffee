@@ -14,6 +14,9 @@ vagrant.debug = true
   vagrant[cmd] = vagrant._runWithArgs(cmd)
 
 class Linux extends Base
+  buildPathForElectron: ->
+    @buildPathToApp()
+
   buildPathToApp: ->
     path.join @buildPathToAppFolder(), "Cypress"
 

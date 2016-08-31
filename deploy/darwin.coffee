@@ -11,6 +11,9 @@ sign  = Promise.promisify(sign)
 fs    = Promise.promisifyAll(fs)
 
 class Darwin extends Base
+  buildPathForElectron: ->
+    @buildPathToAppFolder()
+
   buildPathToApp: ->
     path.join @buildPathToAppFolder(), "Cypress.app"
 

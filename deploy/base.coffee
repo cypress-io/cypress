@@ -213,7 +213,7 @@ class Base
     .then (json) =>
       cypressElectron.install({
         dir: @distDir()
-        dist: @buildPathToApp()
+        dist: @buildPathForElectron()
         platform: @osName
         "app-version": json.version
       })
