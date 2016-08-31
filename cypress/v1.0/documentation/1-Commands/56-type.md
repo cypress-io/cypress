@@ -334,7 +334,9 @@ Events that were `defaultPrevented` may prevent other events from firing and tho
 
 Additionally events that cause a `change` event to fire (such as typing `{enter}` will display that these caused a change event.
 
-![Cypress cy.type key events table](http://cl.ly/bnOS/cy-type-key-events-table.png)
+Any modifiers activated for the event are listed.
+
+![Cypress cy.type key events table](https://cloud.githubusercontent.com/assets/1157043/18144246/b44df61c-6f93-11e6-8553-96b1b347db4b.png)
 
 ***
 
