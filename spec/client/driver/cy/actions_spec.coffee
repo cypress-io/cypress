@@ -477,6 +477,16 @@ describe "$Cypress.Cy Actions Commands", ->
         expect(clicks).to.eq(1)
         expect(retried).to.be.true
 
+    it "accepts body as subject", ->
+      expect(-> @cy.get("body").type("foo")).not.to.throw()
+
+    it "does not click when body is subject", ->
+      bodyClicked = false
+      @cy.$$("body").on "click", -> bodyClicked = true
+
+      @cy.get("body").type("foo").then ->
+        expect(bodyClicked).to.be.false
+
     ## we will need extra tests and logic for input types date, time, month, & week
     ## see issue https://github.com/cypress-io/cypress/issues/27
     describe "input types where no extra formatting required", ->
@@ -1325,6 +1335,210 @@ describe "$Cypress.Cy Actions Commands", ->
           @cy.get("#input-types [contenteditable]").invoke("text", "foo").type("bar{enter}baz{enter}quux").then ($div) ->
             expect($div).to.have.text("foobar\nbaz\nquux")
 
+    describe "modifiers", ->
+
+      describe "activating modifiers", ->
+
+        it "sends keydown event for modifiers in order", (done) ->
+          $input = @cy.$$("input:text:first")
+          events = []
+          $input.on "keydown", (e) ->
+            events.push(e)
+
+          @cy.get("input:text:first").type("{shift}{ctrl}").then ->
+            expect(events[0].shiftKey).to.be.true
+            expect(events[0].which).to.equal(16)
+
+            expect(events[1].ctrlKey).to.be.true
+            expect(events[1].which).to.equal(17)
+
+            $input.off("keydown")
+            done()
+
+        it "maintains modifiers for subsequent characters", (done) ->
+          $input = @cy.$$("input:text:first")
+          events = []
+          $input.on "keydown", (e) ->
+            events.push(e)
+
+          @cy.get("input:text:first").type("{command}{control}ok").then ->
+            expect(events[2].metaKey).to.be.true
+            expect(events[2].ctrlKey).to.be.true
+            expect(events[2].which).to.equal(79)
+
+            expect(events[3].metaKey).to.be.true
+            expect(events[3].ctrlKey).to.be.true
+            expect(events[3].which).to.equal(75)
+
+            $input.off("keydown")
+            done()
+
+        it "does not maintain modifiers for subsequent type commands", (done) ->
+          $input = @cy.$$("input:text:first")
+          events = []
+          $input.on "keydown", (e) ->
+            events.push(e)
+
+          @cy
+          .get("input:text:first")
+          .type("{command}{control}")
+          .type("ok")
+          .then ->
+            expect(events[2].metaKey).to.be.false
+            expect(events[2].ctrlKey).to.be.false
+            expect(events[2].which).to.equal(79)
+
+            expect(events[3].metaKey).to.be.false
+            expect(events[3].ctrlKey).to.be.false
+            expect(events[3].which).to.equal(75)
+
+            $input.off("keydown")
+            done()
+
+        it "does not maintain modifiers for subsequent click commands", (done) ->
+          $button = @cy.$$("button:first")
+          mouseDownEvent = null
+          mouseUpEvent = null
+          clickEvent = null
+          $button.on "mousedown", (e)-> mouseDownEvent = e
+          $button.on "mouseup", (e)-> mouseUpEvent = e
+          $button.on "click", (e)-> clickEvent = e
+
+          @cy
+            .get("input:text:first")
+            .type("{cmd}{option}")
+            .get("button:first").click().then ->
+              expect(mouseDownEvent.metaKey).to.be.false
+              expect(mouseDownEvent.altKey).to.be.false
+
+              expect(mouseUpEvent.metaKey).to.be.false
+              expect(mouseUpEvent.altKey).to.be.false
+
+              expect(clickEvent.metaKey).to.be.false
+              expect(clickEvent.altKey).to.be.false
+
+              $button.off "mousedown"
+              $button.off "mouseup"
+              $button.off "click"
+              done()
+
+        it "sends keyup event for activated modifiers when typing is finished", (done) ->
+          $input = @cy.$$("input:text:first")
+          events = []
+          $input.on "keyup", (e) ->
+            events.push(e)
+
+          @cy
+          .get("input:text:first")
+            .type("{alt}{ctrl}{meta}{shift}ok")
+          .then ->
+            # first keyups should be for the chars typed, "ok"
+            expect(events[0].which).to.equal(79)
+            expect(events[1].which).to.equal(75)
+
+            expect(events[2].which).to.equal(18)
+            expect(events[3].which).to.equal(17)
+            expect(events[4].which).to.equal(91)
+            expect(events[5].which).to.equal(16)
+
+            $input.off("keyup")
+            done()
+
+      describe "release: false", ->
+
+        it "maintains modifiers for subsequent type commands", (done) ->
+          $input = @cy.$$("input:text:first")
+          events = []
+          $input.on "keydown", (e) ->
+            events.push(e)
+
+          @cy
+          .get("input:text:first")
+          .type("{command}{control}", { release: false })
+          .type("ok")
+          .then ->
+            expect(events[2].metaKey).to.be.true
+            expect(events[2].ctrlKey).to.be.true
+            expect(events[2].which).to.equal(79)
+
+            expect(events[3].metaKey).to.be.true
+            expect(events[3].ctrlKey).to.be.true
+            expect(events[3].which).to.equal(75)
+
+            $input.off("keydown")
+            done()
+
+        it "maintains modifiers for subsequent click commands", (done) ->
+          $button = @cy.$$("button:first")
+          mouseDownEvent = null
+          mouseUpEvent = null
+          clickEvent = null
+          $button.on "mousedown", (e)-> mouseDownEvent = e
+          $button.on "mouseup", (e)-> mouseUpEvent = e
+          $button.on "click", (e)-> clickEvent = e
+
+          @cy
+            .get("input:text:first")
+            .type("{meta}{alt}", { release: false })
+            .get("button:first").click().then ->
+              expect(mouseDownEvent.metaKey).to.be.true
+              expect(mouseDownEvent.altKey).to.be.true
+
+              expect(mouseUpEvent.metaKey).to.be.true
+              expect(mouseUpEvent.altKey).to.be.true
+
+              expect(clickEvent.metaKey).to.be.true
+              expect(clickEvent.altKey).to.be.true
+
+              $button.off "mousedown"
+              $button.off "mouseup"
+              $button.off "click"
+              done()
+
+        it "resets modifiers before next test", ->
+          $input = @cy.$$("input:text:first")
+          events = []
+          $input.on "keyup", (e) ->
+            events.push(e)
+
+          @cy
+          .get("input:text:first")
+          .type("{alt}{ctrl}", { release: false })
+          .then ->
+            @Cypress.trigger "test:before:hooks", ->
+              expect(events[0].which).to.equal(18)
+              expect(events[1].which).to.equal(17)
+
+              $input.off("keyup")
+              done()
+
+      describe "changing modifiers", ->
+        beforeEach ->
+          @$input = @cy.$$("input:text:first")
+          @cy.get("input:text:first").type("{command}{option}", { release: false })
+
+        afterEach ->
+          @$input.off("keydown")
+
+        it "sends keydown event for new modifiers", (done) ->
+          event = null
+          @$input.on "keydown", (e)->
+            event = e
+
+          @cy.get("input:text:first").type("{shift}").then ->
+            expect(event.shiftKey).to.be.true
+            expect(event.which).to.equal(16)
+            done()
+
+        it "does not send keydown event for already activated modifiers", (done) ->
+          triggered = false
+          @$input.on "keydown", (e)->
+            triggered = true if e.which is 18 or e.which is 17
+
+          @cy.get("input:text:first").type("{cmd}{alt}").then ->
+            expect(triggered).to.be.false
+            done()
+
     describe "click events", ->
       it "passes timeout and interval down to click", (done) ->
         input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$$("body"))
@@ -1915,22 +2129,31 @@ describe "$Cypress.Cy Actions Commands", ->
             expect(console.Coords.y).to.be.closeTo coords.y, 1
 
         it "has a table of keys", ->
-          @cy.get(":text:first").type("foo{enter}b{leftarrow}{del}{enter}").then ->
+          @cy.get(":text:first").type("{cmd}{option}foo{enter}b{leftarrow}{del}{enter}").then ->
             table = @log.attributes.consoleProps().table()
             console.table(table.data, table.columns)
             expect(table.columns).to.deep.eq [
-              "typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change"
+              "typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "modifiers"
             ]
             expect(table.name).to.eq "Key Events Table"
             expect(table.data).to.deep.eq {
+              1: {typed: "<meta>", which: 91, keydown: true, modifiers: "meta"}
+              2: {typed: "<alt>", which: 18, keydown: true, modifiers: "alt, meta"}
+              3: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"}
+              4: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"}
+              5: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"}
+              6: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true, modifiers: "alt, meta"}
+              7: {typed: "b", which: 66, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"}
+              8: {typed: "{leftarrow}", which: 37, keydown: true, keyup: true, modifiers: "alt, meta"}
+              9: {typed: "{del}", which: 46, keydown: true, input: true, keyup: true, modifiers: "alt, meta"}
+              10: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true, modifiers: "alt, meta"}
+            }
+
+        it "has no modifiers when there are none activated", ->
+          @cy.get(":text:first").type("f").then ->
+            table = @log.attributes.onConsole().table()
+            expect(table.data).to.deep.eq {
               1: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
-              2: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
-              3: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
-              4: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true}
-              5: {typed: "b", which: 66, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
-              6: {typed: "{leftarrow}", which: 37, keydown: true, keyup: true}
-              7: {typed: "{del}", which: 46, keydown: true, input: true, keyup: true}
-              8: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true}
             }
 
         it "has a table of keys with preventedDefault", ->
@@ -2060,7 +2283,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq 2
-          allChars = _.keys(@Cypress.Keyboard.specialChars).join(", ")
+          allChars = _.keys(@Cypress.Keyboard.specialChars).concat(_.keys(@Cypress.Keyboard.modifierChars)).join(", ")
           expect(err.message).to.eq "Special character sequence: '{bar}' is not recognized. Available sequences are: #{allChars}"
           done()
 
@@ -5533,6 +5756,38 @@ describe "$Cypress.Cy Actions Commands", ->
               }
             }
           ]
+
+      it "#consoleProps groups have activated modifiers", ->
+        @cy.$$("input:first").click -> return false
+
+        @cy.get("input:first").type("{ctrl}{shift}", {release: false}).click().then ->
+          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+            {
+              name: "MouseDown"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+                modifiers: "ctrl, shift"
+              }
+            },
+            {
+              name: "MouseUp"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+                modifiers: "ctrl, shift"
+              }
+            },
+            {
+              name: "Click"
+              items: {
+                preventedDefault: true
+                stoppedPropagation: true
+                modifiers: "ctrl, shift"
+              }
+            }
+          ]
+          @cy.get("body").type("{ctrl}") ## clear modifiers
 
       it "#consoleProps when no mouseup or click", ->
         btn = @cy.$$("button:first")

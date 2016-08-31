@@ -56,7 +56,7 @@ $Cypress.register "Angular", (Cypress, _, $, Promise) ->
           @verifyUpcomingAssertions(getEl($elements), options, {
             onRetry: resolveElements
             onFail: (err) ->
-              err.longMessage = "Could not find element for binding: '#{binding}'."
+              err.displayMessage = "Could not find element for binding: '#{binding}'."
           })
 
     _findByNgAttr: (name, attr, el, options) ->
