@@ -11,7 +11,7 @@ cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
 folders = "fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder unitFolder".split(" ")
-configKeys = "port reporter baseUrl execTimeout commandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables hosts".split(" ")
+configKeys = "port reporter baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables hosts".split(" ")
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
@@ -30,11 +30,11 @@ defaults = {
   socketIoCookie: "__socket.io"
   reporterRoute:  "/__cypress/reporter"
   ignoreTestFiles: "*.hot-update.js"
-  commandTimeout:  4000
-  pageLoadTimeout: 30000
-  requestTimeout:  5000
-  responseTimeout: 20000
-  execTimeout:     60000
+  defaultCommandTimeout: 4000
+  requestTimeout:        5000
+  responseTimeout:       20000
+  pageLoadTimeout:       30000
+  execTimeout:           60000
   waitForAnimations: true
   animationDistanceThreshold: 5
   numTestsKeptInMemory: 50

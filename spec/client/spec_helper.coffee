@@ -117,7 +117,7 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
       @Cypress.setConfig({
         namespace: "__cypress"
         xhrUrl: "__cypress/xhrs/"
-        commandTimeout: 2000
+        defaultCommandTimeout: 2000
         pageLoadTimeout: 2001
         requestTimeout: 2002
         responseTimeout: 2003
@@ -198,7 +198,7 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       @Cypress.setConfig({
         namespace: "__cypress"
         xhrUrl: "__cypress/xhrs/"
-        commandTimeout: 2000
+        defaultCommandTimeout: 2000
         pageLoadTimeout: 2001
         requestTimeout: 2002
         responseTimeout: 2003

@@ -144,8 +144,8 @@ describe "lib/config", ->
     it "env=CYPRESS_ENV", ->
       @defaults "env", process.env["CYPRESS_ENV"]
 
-    it "commandTimeout=4000", ->
-      @defaults "commandTimeout", 4000
+    it "defaultCommandTimeout=4000", ->
+      @defaults "defaultCommandTimeout", 4000
 
     it "pageLoadTimeout=30000", ->
       @defaults "pageLoadTimeout", 30000
@@ -269,7 +269,7 @@ describe "lib/config", ->
           hosts:                      { value: null, from: "default" }
           reporter:                   { value: "json", from: "cli" },
           baseUrl:                    { value: null, from: "default" },
-          commandTimeout:             { value: 4000, from: "default" },
+          defaultCommandTimeout:      { value: 4000, from: "default" },
           pageLoadTimeout:            { value: 30000, from: "default" },
           requestTimeout:             { value: 5000, from: "default" },
           responseTimeout:            { value: 20000, from: "default" },
@@ -315,7 +315,7 @@ describe "lib/config", ->
           hosts:                      { value: null, from: "default" }
           reporter:                   { value: "spec", from: "default" },
           baseUrl:                    { value: "http://localhost:8080", from: "config" },
-          commandTimeout:             { value: 4000, from: "default" },
+          defaultCommandTimeout:      { value: 4000, from: "default" },
           pageLoadTimeout:            { value: 30000, from: "default" },
           requestTimeout:             { value: 5000, from: "default" },
           responseTimeout:            { value: 20000, from: "default" },

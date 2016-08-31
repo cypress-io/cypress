@@ -156,11 +156,11 @@ describe "$Cypress.Cy API", ->
         @cy._setRunnable(obj, "test")
         expect(obj.startedAt).to.be.a("date")
 
-      it "sets runnable timeout to config.commandTimeout", ->
+      it "sets runnable timeout to config.defaultCommandTimeout", ->
         @test.enableTimeouts(false)
         t = @test
         timeout = @sandbox.spy t, "timeout"
-        @Cypress.config("commandTimeout", 1000)
+        @Cypress.config("defaultCommandTimeout", 1000)
         @cy._setRunnable(t)
         expect(timeout).to.be.calledWith 1000
         expect(t._timeout).to.eq 1000
