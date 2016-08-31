@@ -75,8 +75,7 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
       if options.log
         options._log = Cypress.Log.command({
           message: fileName
-          ## TODO: update when merging with 0.17.0
-          onConsole: ->
+          consoleProps: ->
             {
               "File Name": fileName
               "Contents": contents

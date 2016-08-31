@@ -2151,7 +2151,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         it "has no modifiers when there are none activated", ->
           @cy.get(":text:first").type("f").then ->
-            table = @log.attributes.onConsole().table()
+            table = @log.attributes.consoleProps().table()
             expect(table.data).to.deep.eq {
               1: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
             }
@@ -5761,7 +5761,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$("input:first").click -> return false
 
         @cy.get("input:first").type("{ctrl}{shift}", {release: false}).click().then ->
-          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+          expect(@log.attributes.consoleProps().groups()).to.deep.eq [
             {
               name: "MouseDown"
               items: {
