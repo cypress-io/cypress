@@ -1,6 +1,20 @@
-## Cypress Gui [![CircleCI](https://circleci.com/gh/cypress-io/cypress-core-desktop-gui.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-core-desktop-gui)
+# Cypress Core Desktop Gui [![CircleCI](https://circleci.com/gh/cypress-io/cypress-core-desktop-gui.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-core-desktop-gui)
 
-This repository contains the source code for the Cypress Desktop App Gui.
+![core-desktop-gui](https://cloud.githubusercontent.com/assets/1271364/18134339/0fab0644-6f6c-11e6-8816-5d4528de6108.png)
+
+The desktop GUI is the desktop application [installed](https://on.cypress.io/guides/installing-and-running#section-installing) to the user's OS using the `cypress install` command from the [Cypress CLI](https://github.com/cypress-io/cypress-cli) or through [direct download](http://download.cypress.io/desktop).
+
+The desktop GUI has the following responsibilities:
+
+- Allowing users to login through GitHub.
+- Allowing users to add projects to be tested in Cypress.
+- Displaying existing projects and allowing the removal of projects.
+- Initializing the server to run on a specific project.
+- Allowing users to choose a specific browser to run tests within.
+- Displaying the resolved configuration of a running project.
+- Displaying the list of tests of a running project.
+- Initializing the run of a specific test file or all tests chosen by the user.
+- Notifying users of updates to Cypress and initializing update process.
 
 ## Installing
 
