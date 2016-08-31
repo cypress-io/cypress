@@ -19,7 +19,7 @@ channel.on('connect', () => {
 
 const driverToReporterEvents = 'paused'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
-const driverToSocketEvents = 'fixture request history:entries exec resolve:url preserve:run:state'.split(' ')
+const driverToSocketEvents = 'fixture request history:entries exec resolve:url preserve:run:state read:file write:file'.split(' ')
 const driverTestEvents = 'test:before:run test:after:run'.split(' ')
 const driverAutomationEvents = 'get:cookies get:cookie set:cookie clear:cookies clear:cookie take:screenshot'.split(' ')
 const driverToLocalEvents = 'viewport config stop url:changed page:loading visit:failed'.split(' ')
