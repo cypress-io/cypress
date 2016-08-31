@@ -89,5 +89,6 @@ describe "App", ->
           @ipc.handle("get:options", null, {"updating": true})
 
     it "shows updates being applied view", ->
-      cy.get("#updates-applied").contains("Applying updates")
-
+      cy
+        .get("#login").contains("Applying updates")
+        .get("img").should("have.attr", "src", "img/cypress-inverse.png")

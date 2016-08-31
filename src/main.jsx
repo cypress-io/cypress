@@ -13,6 +13,7 @@ import Project from './project/project'
 import SpecsList from './specs/specs-list'
 import Config from './config/config'
 import Layout from './app/layout'
+import ApplyingUpdates from './applying_updates/applying_updates'
 import Updates from './update/updates'
 
 useStrict(true)
@@ -59,6 +60,32 @@ const setupState = (options) => {
   state.listenForMenuClicks()
 }
 
+const getInitialRender = (updating) => {
+  // if we are updating then do not start the app
+  // start the updates being applied app so the
+  // user knows its still a-happen-ning
+  if (updating) {
+    return (
+      <ApplyingUpdates />
+    )
+  }
+
+  return (
+    <Router history={history}>
+      <Route path='/' component={Application}>
+        <IndexRedirect to='/projects' />
+        <Route path='/projects' component={withUser(Projects)} />
+        <Route path='/projects/:id' component={withUser(Project)}>
+          <IndexRedirect to='specs' />
+          <Route path='config' component={Config} />
+          <Route path='specs' component={SpecsList} />
+        </Route>
+        <Route path='/login' component={Login}/>
+      </Route>
+    </Router>
+  )
+}
+
 App.start = () => {
   ipc('get:options')
   .then((options = {}) => {
@@ -68,39 +95,7 @@ App.start = () => {
 
     const el = document.getElementById('app')
 
-    // if we are updating then do not start the app
-    // start the updates being applied app so the
-    // user knows its still a-happen-ning
-    if (options.updating) {
-      return render(
-        <div id="updates-applied">
-          <h3>
-            <p>Cypress.io</p>
-          </h3>
-          <p>
-            <i className="fa fa-spinner fa-spin"></i>{' '}
-            Applying updates and restarting...
-          </p>
-        </div>
-        , el
-      )
-    }
-
-    render(
-      <Router history={history}>
-        <Route path='/' component={Application}>
-          <IndexRedirect to='/projects' />
-          <Route path='/projects' component={withUser(Projects)} />
-          <Route path='/projects/:id' component={withUser(Project)}>
-            <IndexRedirect to='specs' />
-            <Route path='config' component={Config} />
-            <Route path='specs' component={SpecsList} />
-          </Route>
-          <Route path='/login' component={Login}/>
-        </Route>
-      </Router>
-      , el
-    )
+    render(getInitialRender(options.updating), el)
   })
 }
 
@@ -112,9 +107,6 @@ App.startUpdateApp = () => {
 
     const el = document.getElementById('updates')
 
-    render(
-      <Updates options={options}/>
-      , el
-    )
+    render(<Updates options={options}/>, el)
   })
 }
