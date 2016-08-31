@@ -153,7 +153,7 @@ describe "lib/files", ->
           }
         ]
 
-  context.only "#writeFile", ->
+  context "#writeFile", ->
 
     it "writes the file's contents", ->
       files.writeFile(@projectRoot, ".projects/write_file.txt", "foo").then =>

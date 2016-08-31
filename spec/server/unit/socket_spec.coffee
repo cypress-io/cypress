@@ -316,7 +316,7 @@ describe "lib/socket", ->
       it "calls socket#onFixture", (done) ->
         onFixture = @sandbox.stub(@socket, "onFixture").yieldsAsync("bar")
 
-        @client.emit "fixture", "foo", (resp) =>
+        @client.emit "fixture", "foo", {}, (resp) =>
           expect(resp).to.eq("bar")
 
           ## ensure onFixture was called with those same arguments
@@ -328,7 +328,7 @@ describe "lib/socket", ->
       it "returns the fixture object", ->
         cb = @sandbox.spy()
 
-        @socket.onFixture(@cfg, "foo", cb).then ->
+        @socket.onFixture(@cfg, "foo", {}, cb).then ->
           expect(cb).to.be.calledWith [
             {"json": true}
           ]
@@ -336,10 +336,10 @@ describe "lib/socket", ->
       it "errors when fixtures fails", ->
         cb = @sandbox.spy()
 
-        @socket.onFixture(@cfg, "invalid.exe", cb).then ->
+        @socket.onFixture(@cfg, "does-not-exist.txt", {}, cb).then ->
           obj = cb.getCall(0).args[0]
           expect(obj).to.have.property("__error")
-          expect(obj.__error).to.eq "Invalid fixture extension: '.exe'. Acceptable file extensions are: .json, .js, .coffee, .html, .txt, .png, .jpg, .jpeg, .gif, .tif, .tiff, .zip"
+          expect(obj.__error).to.include "No fixture exists at:"
 
     context "on(request)", ->
       it "calls socket#onRequest", (done) ->
