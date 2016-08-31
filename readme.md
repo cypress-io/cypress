@@ -55,6 +55,9 @@ LGPL
 
 ## Changelog
 
+#### 0.3.2 - *(08/30/16)*
+- fixes dist dir and updates.html
+
 #### 0.3.1 - *(08/30/16)*
 - fix for incorrect references in index.html
 
