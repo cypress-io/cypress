@@ -1,6 +1,6 @@
 {
   "name": "@cypress/core-runner",
-  "version": "0.1.4",
+  "version": "0.1.7",
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -13,6 +13,7 @@
   "homepage": "https://github.com/cypress-io/cypress-core-runner#readme",
   "scripts": {
     "build": "node ./scripts/build.js",
+    "prepublish": "npm run build",
     "release": "releaser",
     "start": "node ./scripts/watch.js",
     "test": "node ./scripts/test.js"
@@ -33,7 +34,7 @@
     "zunder": "^3.4.5"
   },
   "dependencies": {
-    "@cypress/core-reporter": "0.1.4",
+    "@cypress/core-reporter": "0.1.5",
     "bluebird": "^3.4.0",
     "classnames": "^2.2.5",
     "font-awesome": "^4.6.3",
