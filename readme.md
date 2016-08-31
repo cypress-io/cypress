@@ -55,6 +55,9 @@ LGPL
 
 ## Changelog
 
+#### 0.3.3 - *(08/30/16)*
+- added applying updates view
+
 #### 0.3.2 - *(08/30/16)*
 - fixes dist dir and updates.html
 
