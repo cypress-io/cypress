@@ -88,9 +88,9 @@ After installing, you will need to login to Cypress. Login requires a [Github](h
 - Click "Log In with GitHub".
 - Authorize GitHub access to your account.
 
-![Log In to Cypress](https://cloud.githubusercontent.com/assets/1271364/16814989/30657fc2-4906-11e6-9b49-6c8da39ce14d.png)
+![Log In to Cypress](https://cloud.githubusercontent.com/assets/1271364/18134962/38a6c3d8-6f6e-11e6-998b-9884496cb898.png)
 
-## Your email: `john.doe@gmail.com` has not been authorized.
+## Your email: `jane.doe@gmail.com` has not been authorized.
 
 While in beta, the Cypress team has to whitelist the email address associated with your GitHub account in order for you to use Cypress.
 
