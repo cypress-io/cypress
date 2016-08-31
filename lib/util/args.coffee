@@ -5,12 +5,8 @@ coerce   = require("./coerce")
 config   = require("../config")
 cwd      = require("../cwd")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci updating ping coords key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode hosts".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci updating ping key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode hosts".split(" ")
 whitelist = whitelist.concat(config.getConfigKeys())
-
-parseCoords = (coords) ->
-  [x, y] = _.map(coords.split("x"), parseFloat)
-  {x: x, y: y}
 
 parseNestedValues = (vals) ->
   ## convert foo=bar,version=1.2.3 to
@@ -69,10 +65,6 @@ module.exports = {
     if hosts = options.hosts
       backup("hosts", options)
       options.hosts = parseNestedValues(hosts)
-
-    if options.coords
-      backup("coords", options)
-      options.coords = parseCoords(options.coords)
 
     if envs = options.environmentVariables
       backup("environmentVariables", options)
