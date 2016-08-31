@@ -1539,6 +1539,28 @@ describe "$Cypress.Cy Actions Commands", ->
             expect(triggered).to.be.false
             done()
 
+    describe "case-insensitivity", ->
+
+      it "special chars are case-insensitive", ->
+        @cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{DeL}").then ($input) ->
+          expect($input).to.have.value("ba")
+
+      it "modifiers are case-insensitive", (done) ->
+        $input = @cy.$$("input:text:first")
+        alt = false
+        $input.on "keydown", (e) ->
+          alt = true if e.altKey
+
+        @cy.get("input:text:first").type("{aLt}").then ->
+          expect(alt).to.be.true
+
+          $input.off("keydown")
+          done()
+
+      it "letters are case-sensitive", ->
+        @cy.get("input:text:first").type("FoO").then ($input) ->
+          expect($input).to.have.value("FoO")
+
     describe "click events", ->
       it "passes timeout and interval down to click", (done) ->
         input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$$("body"))
