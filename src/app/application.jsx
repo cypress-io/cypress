@@ -3,8 +3,6 @@ import { observer } from 'mobx-react'
 import { Component } from 'react'
 import { withRouter } from 'react-router'
 
-// import DevTools from 'mobx-react-devtools'
-
 import { getProjects } from '../projects/projects-api'
 
 import App from '../lib/app'
@@ -41,11 +39,4 @@ export default class Application extends Component {
   render () {
     return this.props.children
   }
-
-  // _devTools () {
-  //   if (window.env === 'development') {
-  //     // return null
-  //     return <DevTools position={{ bottom: 0, left: 20 }}/>
-  //   }
-  // }
 }
