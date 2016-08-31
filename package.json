@@ -4,6 +4,7 @@
   "description": "Desktop GUI for managing Cypress projects.",
   "main": "index.js",
   "scripts": {
+    "build": "zunder build-prod",
     "start": "zunder watch",
     "release": "releaser",
     "test": "npm start & cypress run"
