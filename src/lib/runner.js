@@ -45,9 +45,11 @@ export default {
     })
 
     channel.on('automation:push:message', (msg, data = {}) => {
-      switch(msg) {
+      switch (msg) {
         case 'change:cookie':
           driver.Cookies.log(data.message, data.cookie, data.removed)
+          break
+        default:
           break
       }
     })
