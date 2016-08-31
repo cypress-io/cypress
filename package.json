@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "zunder build-prod",
-    "start": "zunder watch",
+    "start": "rm -rf dist && zunder watch",
     "release": "releaser",
     "test": "npm start & cypress run"
   },
