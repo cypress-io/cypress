@@ -192,7 +192,7 @@ To support this, the `body` can be used as the subject (even though it's not a f
 
 ```javascript
 // konami code!
-cy.get("body").type("{uparrow}{uparrow}{downarrow}{downarrow}{leftarrow}{rightarrow}{leftarrow}{rightarrow}ba{enter}")
+cy.get("body").type("{uparrow}{uparrow}{downarrow}{downarrow}{leftarrow}{rightarrow}{leftarrow}{rightarrow}ba")
 
 ```
 
