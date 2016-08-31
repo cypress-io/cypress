@@ -54,6 +54,10 @@ describe "e2e visit", ->
     ## due to __cypress.initial cookies not being cleared by
     ## the hash.html response
 
+    ## additionally this tests that xhr request headers + body
+    ## can reach the backend without being modified or changed
+    ## by the cypress proxy in any way
+
     cypress.start(["--run-project=#{e2ePath}", "--spec=cypress/integration/visit_spec.coffee"])
     .then ->
       expect(process.exit).to.be.calledWith(0)
