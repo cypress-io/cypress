@@ -426,8 +426,6 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
               if previousDomainVisited
                 return cannotVisit2ndDomain(remote.origin)
 
-              # Cypress.getScrollTop()
-              # .then (val) ->
               ## tell our backend we're changing domains
               new Promise (resolve) ->
                 ## TODO: add in other things we want to preserve
