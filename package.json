@@ -25,28 +25,25 @@
   ],
   "devDependencies": {
     "@cypress/core-releaser": "^0.1.8",
+    "@cypress/core-reporter": "0.1.5",
     "babel-eslint": "^6.0.4",
+    "bluebird": "^3.4.0",
     "chai": "^3.5.0",
     "chai-enzyme": "^0.5.0",
+    "classnames": "^2.2.5",
     "enzyme": "^2.4.1",
     "eslint": "^2.11.1",
     "eslint-plugin-mocha": "^4.3.0",
     "eslint-plugin-react": "^5.1.1",
-    "jsdom": "^9.4.1",
-    "sinon": "^1.17.5",
-    "sinon-chai": "^2.8.0",
-    "vinyl-fs": "^2.4.3",
-    "zunder": "^3.4.5"
-  },
-  "dependencies": {
-    "@cypress/core-reporter": "0.1.5",
-    "bluebird": "^3.4.0",
-    "classnames": "^2.2.5",
     "font-awesome": "^4.6.3",
+    "jsdom": "^9.4.1",
     "lodash": "^4.15.0",
     "mobx": "^2.3.6",
     "mobx-react": "^3.5.3",
     "react": "^15.3.0",
-    "react-dom": "^15.3.0"
+    "react-dom": "^15.3.0",
+    "sinon": "^1.17.5",
+    "sinon-chai": "^2.8.0",
+    "zunder": "^3.4.5"
   }
 }
