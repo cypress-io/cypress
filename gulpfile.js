@@ -29,6 +29,7 @@ function isArray (value) {
 
 const stylesheetsGlob = 'src/**/*.scss'
 const scriptsGlob = 'src/**/*.+(js|jsx)'
+const noSpecsGlob = '!src/**/*.spec.+(js|jsx)'
 
 
 const buildStylesheets = (isProd) => () => {
@@ -58,10 +59,10 @@ const buildStylesheets = (isProd) => () => {
     })
 }
 
-gulp.task('build-stylesheets', ['clean'], buildStylesheets(false))
+gulp.task('build-stylesheets-dev', ['clean'], buildStylesheets(false))
 gulp.task('build-stylesheets-prod', ['clean'], buildStylesheets(true))
 
-gulp.task('watch-stylesheets', ['build-stylesheets'], () => {
+gulp.task('watch-stylesheets', ['build-stylesheets-dev'], () => {
   return watch(stylesheetsGlob, buildStylesheets)
 })
 
@@ -112,15 +113,15 @@ function buildScripts (globOrFile) {
     .pipe(gulp.dest(dest))
 }
 
-gulp.task('build-scripts', ['clean'], () => {
+gulp.task('build-scripts-dev', ['clean'], () => {
   return buildScripts([scriptsGlob])
 })
 
 gulp.task('build-scripts-prod', ['clean'], () => {
-  return buildScripts([scriptsGlob])
+  return buildScripts([scriptsGlob, noSpecsGlob])
 })
 
-gulp.task('watch-scripts', ['build-scripts'], () => {
+gulp.task('watch-scripts', ['build-scripts-dev'], () => {
   return watch(scriptsGlob, (file) => {
     const specFile = getSpecFile(file)
     return buildScripts(file)
@@ -134,5 +135,5 @@ gulp.task('watch-scripts', ['build-scripts'], () => {
 gulp.task('clean', () => del('dist'))
 
 gulp.task('watch', ['watch-scripts', 'watch-stylesheets'])
-gulp.task('build-dev', ['build-scripts', 'build-stylesheets'])
+gulp.task('build-dev', ['build-scripts-dev', 'build-stylesheets-dev'])
 gulp.task('build-prod', ['build-scripts-prod', 'build-stylesheets-prod'])
