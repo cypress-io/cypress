@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.5.4
+- renamed commandTimeout -> defaultCommandTimeout
+
 #### 0.5.3
 - updated example spec
 
