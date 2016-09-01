@@ -58,7 +58,7 @@ const buildStylesheets = (isProd) => () => {
     })
 }
 
-gulp.task('build-stylesheets', buildStylesheets(false))
+gulp.task('build-stylesheets', ['clean'], buildStylesheets(false))
 gulp.task('build-stylesheets-prod', ['clean'], buildStylesheets(true))
 
 gulp.task('watch-stylesheets', ['build-stylesheets'], () => {
@@ -112,7 +112,7 @@ function buildScripts (globOrFile) {
     .pipe(gulp.dest(dest))
 }
 
-gulp.task('build-scripts', () => {
+gulp.task('build-scripts', ['clean'], () => {
   return buildScripts([scriptsGlob])
 })
 
@@ -134,4 +134,5 @@ gulp.task('watch-scripts', ['build-scripts'], () => {
 gulp.task('clean', () => del('dist'))
 
 gulp.task('watch', ['watch-scripts', 'watch-stylesheets'])
-gulp.task('build', ['build-scripts-prod', 'build-stylesheets-prod'])
+gulp.task('build-dev', ['build-scripts', 'build-stylesheets'])
+gulp.task('build-prod', ['build-scripts-prod', 'build-stylesheets-prod'])

@@ -3,11 +3,12 @@
   "version": "0.1.5",
   "main": "dist/reporter",
   "scripts": {
-    "build": "gulp build",
-    "prepublish": "gulp build",
+    "build-dev": "gulp build-dev",
+    "build-prod": "gulp build-prod",
+    "prepublish": "npm run build-prod",
     "release": "releaser",
     "start": "gulp watch",
-    "test": "mocha -r lib/test-setup.js dist/**/*.spec.js"
+    "test": "npm run build-prod && mocha -r lib/test-setup.js dist/**/*.spec.js"
   },
   "repository": {
     "type": "git",
