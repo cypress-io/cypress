@@ -135,5 +135,6 @@ gulp.task('watch-scripts', ['build-scripts-dev'], () => {
 gulp.task('clean', () => del('dist'))
 
 gulp.task('watch', ['watch-scripts', 'watch-stylesheets'])
+gulp.task('build-test', ['build-scripts-dev'])
 gulp.task('build-dev', ['build-scripts-dev', 'build-stylesheets-dev'])
 gulp.task('build-prod', ['build-scripts-prod', 'build-stylesheets-prod'])

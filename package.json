@@ -8,7 +8,7 @@
     "prepublish": "npm run build-prod",
     "release": "releaser",
     "start": "gulp watch",
-    "test": "npm run build-prod && mocha -r lib/test-setup.js dist/**/*.spec.js"
+    "test": "gulp build-test && mocha -r lib/test-setup.js dist/**/*.spec.js"
   },
   "repository": {
     "type": "git",
