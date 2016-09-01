@@ -94,9 +94,11 @@ Commands drive your tests in the browser like a real user would. They let you pe
 | -------------------- | -- |
 | [as](https://on.cypress.io/api/as) | Alias a route or DOM element for use later. |
 
-| Fixtures | |
+| Files | |
 | -------------------- | -- |
-| [fixture](https://on.cypress.io/api/fixture) | Load a fixture to represent data |
+| [fixture](https://on.cypress.io/api/fixture) | Load a fixture file to represent data |
+| [readFile](https://on.cypress.io/api/readFile) | Read a file's contents |
+| [writeFile](https://on.cypress.io/api/writeFile) | Write to a file with the specified contents |
 
 | Viewport | |
 | -------------------- | -- |
