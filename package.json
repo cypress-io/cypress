@@ -1,7 +1,7 @@
 {
   "name": "@cypress/core-runner",
   "version": "0.1.8",
-  "main": "index.js",
+  "main": "lib/runner.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cypress-io/cypress-core-runner.git"
@@ -19,6 +19,10 @@
     "start": "node ./scripts/watch.js",
     "test": "node ./scripts/test.js"
   },
+  "files": [
+    "dist",
+    "lib/runner.js"
+  ],
   "devDependencies": {
     "@cypress/core-releaser": "^0.1.8",
     "babel-eslint": "^6.0.4",
