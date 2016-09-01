@@ -45,7 +45,7 @@ Option | Default | Notes
 cy
   .writeFile("path/to/message.txt", "Hello World")
   .then(function (text) {
-    expect(text).to.equal("Hello World") //passes
+    expect(text).to.equal("Hello World") // true
   })
 ```
 

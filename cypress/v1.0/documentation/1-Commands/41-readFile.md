@@ -47,7 +47,7 @@ For any file other than JSON, the contents of the file are returned.
 // Hello World
 
 cy.readFile("path/to/message.txt").then(function (text) {
-  expect(text).to.equal("Hello World")   // passes
+  expect(text).to.equal("Hello World")   // true
 })
 ```
 
