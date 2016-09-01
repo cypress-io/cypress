@@ -20,6 +20,15 @@ Sequence | Notes
 `{uparrow}` | Fires up event but does **not** move the cursor
 `{selectall}` | Selects all text by creating a `selection range`
 
+Text may also include these modifier character sequences:
+
+Sequence | Notes
+--- | ---
+`{alt}` | Activates the `altKey` modifier. Aliases: `{option}`
+`{ctrl}` | Activates the `ctrlKey` modifier. Aliases: `{control}`
+`{meta}` | Activates the `metaKey` modifier. Aliases: `{command}`, `{cmd}`
+`{shift}` | Activates the `shiftKey` modifier
+
 **The following events are fired during type:** `keydown`, `keypress`, `textInput`, `input`, `keyup`.
 
 `beforeinput` is *not* fired even though it is in the spec because no browser has adopted it.
@@ -108,6 +117,91 @@ cy.get("input[type=text]").type("Test all the things", {force: true})
 
 ***
 
+# Key combinations / Modifiers
+
+Using special character sequences (see table at top of page), it's possible to activate modifier keys and type key combinations, such as `CTRL + R` or `SHIFT + ALT + Q`. The modifier(s) remain activated for the duration of the `cy.type()` command, and are released when all subsequent character are typed, unless `{release: false}` is passed as an option (see below for more details). A `keydown` event is fired when a modifier is activated and a `keyup` event is fired when it is released.
+
+## Type the key combination `SHIFT + ALT + Q`
+
+```javascript
+// this is the same as a user holding down SHIFT and ALT, then pressing Q
+cy.get("input").type("{shift}{alt}Q")
+```
+
+## Hold down `CONTROL` and type a word
+
+```javascript
+// all characters after {ctrl} will have `ctrlKey` set to `true` on their key events
+cy.get("input").type("{ctrl}test")
+```
+
+## Release behavior
+
+By default, modifiers are released after each type command.
+
+```javascript
+// `ctrlKey` will be true for each event while 'test' is typed
+// but false while 'everything' is typed
+cy.get("input").type("{ctrl}test").type("everything")
+```
+
+To keep a modifier activated between commands, specify `{release: false}` in the options.
+
+```javascript
+// `altKey` will be true while typing 'foo'
+cy.get("input").type("{alt}foo", {release: false})
+// `altKey` will also be true during the click event
+cy.get("button").click()
+```
+
+Modifiers are automatically released between tests, even with `{release: false}`.
+
+```javascript
+it("has modifiers activated", function () {
+  // `altKey` will be true while typing 'foo'
+  cy.get("input").type("{alt}foo", {release: false})
+})
+
+it("does not have modifiers activated", function () {
+  // `altKey` will be false while typing 'bar'
+  cy.get("input").type("bar")
+})
+```
+
+To manually release modifiers within a test after using `{release: false}`, use another `type` command and the modifier will be released after it.
+
+```javascript
+// `altKey` will be true while typing 'foo'
+cy.get("input").type("{alt}foo", {release: false})
+// `altKey` will be true during the click event
+cy.get("button").click()
+// `altKey` will be released after this command
+cy.get("input").type("{alt}")
+// `altKey` will be false during this click event
+cy.get("button").click()
+```
+
+## Global shortcuts / modifiers
+
+`cy.type()` requires a focusable element as the subject, since it's usually unintended to type into something that's not a text field. There are a couple cases where it's valid to "type" into something other than a text field:
+
+* Keyboard shortcuts where the listener is on the `document` or `body`
+* Holding modifier keys and clicking an arbitrary element.
+
+To support this, the `body` can be used as the subject (even though it's not a focusable element).
+
+```javascript
+// konami code!
+cy.get("body").type("{uparrow}{uparrow}{downarrow}{downarrow}{leftarrow}{rightarrow}{leftarrow}{rightarrow}ba")
+
+```
+
+```javascript
+// execute a SHIFT + click on the first <li>
+// {release: false} is necessary or SHIFT will be released after the type command
+cy.get("body").type("{shift}", {release: false}).get("li:first").click()
+```
+
 # Known Issues
 
 ## Native input[type=date,datetime,datetime-local,month,year,color]
@@ -125,12 +219,6 @@ Tabbing will be implemented as a separate command as `cy.tab` and support things
 ## Typing directly into the document
 
 Currently Cypress requires you type directly into an element, but there is a use case for just "typing" as a user would but not into a focused element. Your app may implement this for things like keyboard shortcuts, where you bind to the `KeyboardEvents` on the document. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you need this to be fixed.
-
-***
-
-## Key Combinations do not work
-
-`cy.type` does not yet have the ability to specify key combinations like `CTRL + R` or `SHIFT + ALT + Q`. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you need this to be fixed.
 
 ***
 
@@ -246,7 +334,9 @@ Events that were `defaultPrevented` may prevent other events from firing and tho
 
 Additionally events that cause a `change` event to fire (such as typing `{enter}` will display that these caused a change event.
 
-![Cypress cy.type key events table](http://cl.ly/bnOS/cy-type-key-events-table.png)
+Any modifiers activated for the event are listed.
+
+![Cypress cy.type key events table](https://cloud.githubusercontent.com/assets/1157043/18144246/b44df61c-6f93-11e6-8553-96b1b347db4b.png)
 
 ***
 
