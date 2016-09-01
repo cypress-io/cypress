@@ -1,4 +1,4 @@
-slug: readfile-2
+slug: readfile
 excerpt: Read a file's contents
 
 Reads a file and returns its contents. JSON is automatically parsed into JavaScript.
@@ -38,26 +38,25 @@ Option | Default | Notes
 
 # Usage
 
-## Read the `message.txt` file
+## Read a `txt` file
 
 For any file other than JSON, the contents of the file are returned.
 
 ```javascript
-// message.txt contains the contents:
+// message.txt contains:
 // Hello World
 
 cy.readFile("path/to/message.txt").then(function (text) {
-  // text will equal "Hello World"
-  expect(text).to.equal("Hello World")
+  expect(text).to.equal("Hello World")   // passes
 })
 ```
 
-## Read the `data.json` file
+## Read a `json` file
 
 For JSON, the contents are parsed into JavaScript and returned.
 
 ```javascript
-// data.json contains the contents:
+// data.json contains:
 // {
 //   "name": "Eliza",
 //   "email": "eliza@example.com"
@@ -109,7 +108,7 @@ The following encodings are supported:
 By default, `cy.readFile` asserts that the file exists and will fail if it does not exist. It will retry reading the file if it does not initially exist until the file exists or the command times out.
 
 ```javascript
-// will fail after the command timeout passes
+// will fail after the defaultCommandTimeout is reached
 cy.readFile('does-not-exist.yaml')
 ```
 
@@ -118,7 +117,7 @@ cy.readFile('does-not-exist.yaml')
 You can assert that a file does not exist like so:
 
 ```javascript
-// will pass because the file does not exist
+// will pass if the file does not exist
 cy.readFile('does-not-exist.yaml').should("not.exist")
 ```
 
@@ -139,3 +138,10 @@ The command above will display in the command log as:
 When clicking on the `readFile` command within the command log, the console outputs the following:
 
 <img width="689" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/17934460/089e0652-69e6-11e6-9f00-7eb282be0d27.png">
+
+***
+
+# Related
+
+- [writeFile](https://on.cypress.io/api/writeFile)
+- [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)

@@ -1,7 +1,7 @@
-slug: writefile-2
-excerpt: Write a file with the specified contents
+slug: writefile
+excerpt: Write to a file with the specified contents
 
-Writes a file with the specified contents. JavaScript arrays and objects are stringified and formatted into text. If the path to the file does not exist, it will be created. If the file already exists, it will be over-written.
+Writes to a file with the specified contents. JavaScript arrays and objects are stringified and formatted into text. If the path to the file does not exist, the file and it's path will be created. If the file already exists, it will be over-written.
 
 | | |
 |--- | --- |
@@ -12,13 +12,13 @@ Writes a file with the specified contents. JavaScript arrays and objects are str
 
 # [cy.writeFile( *filePath*, *contents* )](#section-usage)
 
-Writes the file to the `filePath` with the `contents`. The `filePath` is relative to the project's root. `contents` must be a string, an array, or an object.
+Writes to the `filePath` with the `contents`. The `filePath` is relative to the project's root. `contents` must be a string, an array, or an object.
 
 ***
 
 # [cy.writeFile( *filePath*, *contents*, *encoding* )](#section-specify-encoding)
 
-Writes the file to the `filePath` with the `contents` in the `encoding`. The `filePath` is relative to the project's root. `contents` must be a string, an array, or an object.
+Writes to the `filePath` with the `contents` using the `encoding`. The `filePath` is relative to the project's root. `contents` must be a string, an array, or an object.
 
 ***
 
@@ -38,16 +38,15 @@ Option | Default | Notes
 
 # Usage
 
-## Write some text to the `message.txt` file
+## Write some text to a `txt` file
 
 ```javascript
-// {projectRoot}/path/to/message.txt will be created with the text "Hello World"
+// {projectRoot}/path/to/message.txt will be created with the contents "Hello World"
 cy
   .writeFile("path/to/message.txt", "Hello World")
   .then(function (text) {
-    // text will equal "Hello World"
-    expect(text).to.equal("Hello World")
-})
+    expect(text).to.equal("Hello World") //passes
+  })
 ```
 
 ## Write JSON to a file
@@ -70,7 +69,7 @@ cy
     //   email: "eliza@example.com"
     // }
     expect(user.name).to.equal("Eliza")
-})
+  })
 ```
 
 ## Specify encoding
@@ -78,7 +77,7 @@ cy
 Specify the encoding with the third argument.
 
 ```javascript
-// {projectRoot}/path/to/message.txt will be created with the text "Hello World"
+// {projectRoot}/path/to/message.txt will be created with the contents "Hello World"
 // the encoding will be "ascii"
 cy.writeFile("path/to/ascii.txt", "Hello World", "ascii"))
 ```
@@ -114,3 +113,8 @@ The command above will display in the command log as:
 When clicking on the `writeFile` command within the command log, the console outputs the following:
 
 <img width="452" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/17936161/df7e6bf8-69eb-11e6-8ef2-a90113dece9b.png">
+
+# Related
+
+- [readFile](https://on.cypress.io/api/readFile)
+- [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
