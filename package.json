@@ -22,6 +22,7 @@
   "homepage": "https://github.com/cypress-io/cypress-core-reporter#readme",
   "devDependencies": {
     "@cypress/core-releaser": "^0.1.8",
+    "classnames": "^2.2.5",
     "babel-eslint": "^6.0.4",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
@@ -35,6 +36,7 @@
     "eslint": "^2.12.0",
     "eslint-plugin-mocha": "^4.0.0",
     "eslint-plugin-react": "^5.1.1",
+    "font-awesome": "^4.6.3",
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^3.1.0",
     "gulp-babel": "^6.1.2",
@@ -47,10 +49,12 @@
     "gulp-watch": "^4.3.8",
     "jsdom": "^9.4.1",
     "lodash": "^4.0.0",
+    "markdown-it": "^6.1.1",
     "mobx": "^2.3.6",
     "mobx-react": "^3.5.3",
     "mocha": "^2.5.3",
     "node-sass-globbing": "0.0.23",
+    "popper.js": "^0.5.2",
     "react": "^15.3.0",
     "react-addons-test-utils": "^15.3.0",
     "react-dom": "^15.3.0",
@@ -58,13 +62,9 @@
     "sinon-chai": "^2.8.0",
     "through": "^2.3.8"
   },
-  "dependencies": {
+  "peerDependencies": {
     "classnames": "^2.2.5",
     "font-awesome": "^4.6.3",
-    "markdown-it": "^6.1.1",
-    "popper.js": "^0.5.2"
-  },
-  "peerDependencies": {
     "lodash": "^4.0.0",
     "mobx": "^2.3.6",
     "mobx-react": "^3.5.3",
