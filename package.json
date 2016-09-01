@@ -20,6 +20,9 @@
     "url": "https://github.com/cypress-io/cypress-core-reporter/issues"
   },
   "homepage": "https://github.com/cypress-io/cypress-core-reporter#readme",
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@cypress/core-releaser": "^0.1.8",
     "classnames": "^2.2.5",
