@@ -133,7 +133,7 @@ cy.get("input").type("{shift}{alt}Q")
 ## Hold down `CONTROL` and type a word
 
 ```javascript
-// all characters after {ctrl} will have `ctrlKey` set to `true` on their key events
+// all characters after {ctrl} will have 'ctrlKey' set to 'true' on their key events
 cy.get("input").type("{ctrl}test")
 ```
 
@@ -144,7 +144,7 @@ cy.get("input").type("{ctrl}test")
 By default, modifiers are released after each type command.
 
 ```javascript
-// `ctrlKey` will be true for each event while 'test' is typed
+// 'ctrlKey' will be true for each event while 'test' is typed
 // but false while 'everything' is typed
 cy.get("input").type("{ctrl}test").type("everything")
 ```
@@ -152,9 +152,9 @@ cy.get("input").type("{ctrl}test").type("everything")
 To keep a modifier activated between commands, specify `{release: false}` in the options.
 
 ```javascript
-// `altKey` will be true while typing 'foo'
+// 'altKey' will be true while typing 'foo'
 cy.get("input").type("{alt}foo", {release: false})
-// `altKey` will also be true during the click event
+// 'altKey' will also be true during the click event
 cy.get("button").click()
 ```
 
@@ -162,12 +162,12 @@ Modifiers are automatically released between tests, even with `{release: false}`
 
 ```javascript
 it("has modifiers activated", function () {
-  // `altKey` will be true while typing 'foo'
+  // 'altKey' will be true while typing 'foo'
   cy.get("input").type("{alt}foo", {release: false})
 })
 
 it("does not have modifiers activated", function () {
-  // `altKey` will be false while typing 'bar'
+  // 'altKey' will be false while typing 'bar'
   cy.get("input").type("bar")
 })
 ```
@@ -175,13 +175,13 @@ it("does not have modifiers activated", function () {
 To manually release modifiers within a test after using `{release: false}`, use another `type` command and the modifier will be released after it.
 
 ```javascript
-// `altKey` will be true while typing 'foo'
+// 'altKey' will be true while typing 'foo'
 cy.get("input").type("{alt}foo", {release: false})
-// `altKey` will be true during the click event
+// 'altKey' will be true during the click event
 cy.get("button").click()
-// `altKey` will be released after this command
+// 'altKey' will be released after this command
 cy.get("input").type("{alt}")
-// `altKey` will be false during this click event
+// 'altKey' will be false during this click event
 cy.get("button").click()
 ```
 
