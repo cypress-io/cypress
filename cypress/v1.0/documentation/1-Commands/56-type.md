@@ -128,12 +128,16 @@ Using special character sequences (see table at top of page), it's possible to a
 cy.get("input").type("{shift}{alt}Q")
 ```
 
+***
+
 ## Hold down `CONTROL` and type a word
 
 ```javascript
 // all characters after {ctrl} will have `ctrlKey` set to `true` on their key events
 cy.get("input").type("{ctrl}test")
 ```
+
+***
 
 ## Release behavior
 
@@ -181,6 +185,8 @@ cy.get("input").type("{alt}")
 cy.get("button").click()
 ```
 
+***
+
 ## Global shortcuts / modifiers
 
 `cy.type()` requires a focusable element as the subject, since it's usually unintended to type into something that's not a text field. There are a couple cases where it's valid to "type" into something other than a text field:
@@ -201,6 +207,8 @@ cy.get("body").type("{uparrow}{uparrow}{downarrow}{downarrow}{leftarrow}{rightar
 // {release: false} is necessary or SHIFT will be released after the type command
 cy.get("body").type("{shift}", {release: false}).get("li:first").click()
 ```
+
+***
 
 # Known Issues
 

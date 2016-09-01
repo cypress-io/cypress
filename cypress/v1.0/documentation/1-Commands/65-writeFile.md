@@ -1,4 +1,4 @@
-slug: writeFile
+slug: writefile-2
 excerpt: Write a file with the specified contents
 
 Writes a file with the specified contents. JavaScript arrays and objects are stringified and formatted into text. If the path to the file does not exist, it will be created. If the file already exists, it will be over-written.
@@ -42,9 +42,11 @@ Option | Default | Notes
 
 ```javascript
 // {projectRoot}/path/to/message.txt will be created with the text "Hello World"
-cy.writeFile("path/to/message.txt", "Hello World").then(function (text) {
-  // text will equal "Hello World"
-  expect(text).to.equal("Hello World")
+cy
+  .writeFile("path/to/message.txt", "Hello World")
+  .then(function (text) {
+    // text will equal "Hello World"
+    expect(text).to.equal("Hello World")
 })
 ```
 
@@ -59,13 +61,15 @@ JavaScript arrays and objects are stringified and formatted into text.
 //   "email": "eliza@example.com"
 // }
 
-cy.writeFile("path/to/data.json", { name: "Eliza", email: "eliza@example.com" }).then(function (user) {
-  // user will equal:
-  // {
-  //   name: "Eliza",
-  //   email: "eliza@example.com"
-  // }
-  expect(user.name).to.equal("Eliza")
+cy
+  .writeFile("path/to/data.json", { name: "Eliza", email: "eliza@example.com" })
+  .then(function (user) {
+    // user will equal:
+    // {
+    //   name: "Eliza",
+    //   email: "eliza@example.com"
+    // }
+    expect(user.name).to.equal("Eliza")
 })
 ```
 
