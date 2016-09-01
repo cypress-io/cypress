@@ -97,8 +97,8 @@ Commands drive your tests in the browser like a real user would. They let you pe
 | Files | |
 | -------------------- | -- |
 | [fixture](https://on.cypress.io/api/fixture) | Load a fixture file to represent data |
-| [readFile](https://on.cypress.io/api/readFile) | Read a file's contents |
-| [writeFile](https://on.cypress.io/api/writeFile) | Write to a file with the specified contents |
+| [readFile](https://on.cypress.io/api/readfile) | Read a file's contents |
+| [writeFile](https://on.cypress.io/api/writefile) | Write to a file with the specified contents |
 
 | Viewport | |
 | -------------------- | -- |
