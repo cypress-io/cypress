@@ -12,8 +12,9 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-runner#readme",
   "scripts": {
-    "build": "node ./scripts/build.js",
-    "prepublish": "npm run build",
+    "build-dev": "node ./scripts/build-dev.js",
+    "build-prod": "node ./scripts/build-prod.js",
+    "prepublish": "npm run build-prod",
     "release": "releaser",
     "start": "node ./scripts/watch.js",
     "test": "node ./scripts/test.js"
