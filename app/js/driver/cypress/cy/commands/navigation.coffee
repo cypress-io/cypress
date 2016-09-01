@@ -415,8 +415,6 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             if remote.originPolicy is existing.originPolicy
               previousDomainVisited = remote.origin
 
-              Cypress.Cookies.setInitial()
-
               url = Cypress.Location.createInitialRemoteSrc(url)
 
               @_src($remoteIframe, url)

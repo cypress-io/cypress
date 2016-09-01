@@ -110,7 +110,7 @@ module.exports = {
 
       setCookie(res, "__cypress.initial", value, remoteState.domainName)
 
-    onResponse = (str, incomingRes) =>
+    onResponse = (str, incomingRes, wantsInjection) =>
       @setResHeaders(req, res, incomingRes, isInitial)
 
       ## always proxy the cookies coming from the incomingRes
@@ -132,7 +132,7 @@ module.exports = {
         ## set the status to whatever the incomingRes statusCode is
         res.status(incomingRes.statusCode)
 
-        wantsInjection = do ->
+        wantsInjection ?= do ->
           return false if not resContentTypeIsHtmlAndMatchesOriginPolicy(incomingRes.headers)
 
           if isInitial then "full" else "partial"
@@ -184,7 +184,7 @@ module.exports = {
               cb rewrite(body)
 
     if obj = buffers.take(remoteUrl)
-      onResponse(obj.stream, obj.response)
+      onResponse(obj.stream, obj.response, "full")
     else
       opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
 
@@ -250,12 +250,18 @@ module.exports = {
     isHtml = [".html", ".htm", ""].some (str) ->
       ext is str
 
-    wantsInjection = do ->
-      return false if not isHtml
+    onResponse = (str, wantsInjection) =>
+      if remoteState.visiting
+        wantsInjection = false
 
-      if isInitial then "full" else "partial"
+      wantsInjection ?= do ->
+        return false if not isHtml
 
-    onResponse = (str) =>
+        if isInitial then "full" else "partial"
+
+      if isInitial and wantsInjection
+        setCookie(res, "__cypress.initial", false, remoteState.domainName)
+
       ## if the files extname isnt html or the __cypress.initial
       ## isnt true then bypass concatThrough and just pipe directly
       if not wantsInjection
@@ -274,11 +280,8 @@ module.exports = {
 
     res.set("x-cypress-file-path", file)
 
-    if isInitial and wantsInjection
-      setCookie(res, "__cypress.initial", false, remoteState.domainName)
-
     if obj = buffers.take(req.proxiedUrl)
-      return onResponse(obj.stream)
+      return onResponse(obj.stream, "full")
 
     staticFileErr = (err) =>
       status = err.status ? 500

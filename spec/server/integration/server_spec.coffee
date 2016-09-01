@@ -118,16 +118,14 @@ describe "Server", ->
             cookies: []
           })
         .then =>
-          @rp({
-            url: "http://localhost:2000/index.html"
-            headers: {
-              "Cookie": "__cypress.initial=true"
-            }
-          })
+          @rp("http://localhost:2000/index.html")
           .then (res) ->
             expect(res.statusCode).to.eq(200)
             expect(res.headers["etag"]).not.to.exist
-            expect(res.headers["set-cookie"]).to.match(/initial=;/)
+            expect(res.headers["set-cookie"]).not.to.match(/initial=;/)
+            expect(res.body).to.include("index.html content")
+            expect(res.body).to.include("document.domain = 'localhost'")
+            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script>\n  </head>")
 
       it "buffers the response", ->
         @sandbox.spy(Request, "sendStream")
@@ -162,16 +160,12 @@ describe "Server", ->
 
             expect(Request.sendStream).to.be.calledOnce
         .then =>
-          @rp({
-            url: "http://localhost:2000/index.html"
-            headers: {
-              "Cookie": "__cypress.initial=true"
-            }
-          })
+          @rp("http://localhost:2000/index.html")
           .then (res) =>
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("localhost")
+            expect(res.body).to.include("Cypress")
             expect(buffers.keys()).to.deep.eq([])
 
       it "can follow static file redirects", ->
@@ -251,7 +245,7 @@ describe "Server", ->
       it "can serve http requests", ->
         nock("http://getbootstrap.com")
         .get("/")
-        .reply 200, "content page", {
+        .reply 200, "<html>content</html>", {
           "X-Foo-Bar": "true"
           "Content-Type": "text/html"
         }
@@ -268,16 +262,14 @@ describe "Server", ->
             cookies: []
           })
         .then =>
-          @rp({
-            url: "http://getbootstrap.com/"
-            headers: {
-              "Cookie": "__cypress.initial=true"
-            }
-          })
+          @rp("http://getbootstrap.com/")
           .then (res) ->
             expect(res.statusCode).to.eq(200)
-            expect(res.headers["set-cookie"]).to.match(/initial=;/)
+            expect(res.headers["set-cookie"]).not.to.match(/initial=;/)
             expect(res.headers["x-foo-bar"]).to.eq("true")
+            expect(res.body).to.include("content")
+            expect(res.body).to.include("document.domain = 'getbootstrap.com'")
+            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script> </head>content</html>")
 
       it "can follow multiple http redirects", ->
         nock("http://espn.com")
@@ -316,9 +308,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("content")
             expect(res.body).to.include("document.domain = 'go.com'")
-
-            ## TODO: this should have cypress injected in it!
-            # expect(res.body).to.include("Cypress")
+            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script> </head>content</html>")
 
             expect(@server._getRemoteState()).to.deep.eq({
               origin: "http://espn.go.com"
@@ -385,16 +375,12 @@ describe "Server", ->
 
             expect(Request.sendStream).to.be.calledOnce
         .then =>
-          @rp({
-            url: "http://espn.go.com/"
-            headers: {
-              "Cookie": "__cypress.initial=true"
-            }
-          })
+          @rp("http://espn.go.com/")
           .then (res) =>
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("go.com")
+            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script></head><body>espn</body></html>")
             expect(buffers.keys()).to.deep.eq([])
 
       it "does not buffer 'bad' responses", ->
@@ -621,16 +607,12 @@ describe "Server", ->
             cookies: []
           })
         .then =>
-          @rp({
-            url: "http://www.google.com/"
-            headers: {
-              "Cookie": "__cypress.initial=true"
-            }
-          })
+          @rp("http://www.google.com/")
           .then (res) ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("google.com")
+            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script></head><body>google</body></html>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             origin: "http://www.google.com"
@@ -657,16 +639,12 @@ describe "Server", ->
               cookies: []
             })
         .then =>
-          @rp({
-            url: "http://localhost:2000/index.html"
-            headers: {
-              "Cookie": "__cypress.initial=true"
-            }
-          })
+          @rp("http://localhost:2000/index.html")
           .then (res) ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("localhost")
+            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script>\n  </head>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             origin: "http://localhost:2000"
@@ -688,16 +666,12 @@ describe "Server", ->
               cookies: []
             })
           .then =>
-            @rp({
-              url: "http://www.google.com/"
-              headers: {
-                "Cookie": "__cypress.initial=true"
-              }
-            })
+            @rp("http://www.google.com/")
             .then (res) ->
               expect(res.statusCode).to.eq(200)
               expect(res.body).to.include("document.domain")
               expect(res.body).to.include("google.com")
+              expect(res.body).to.include("Cypress.onBeforeLoad(window); </script></head><body>google</body></html>")
           .then =>
             expect(@server._getRemoteState()).to.deep.eq({
               origin: "http://www.google.com"
@@ -726,16 +700,12 @@ describe "Server", ->
             cookies: []
           })
         .then =>
-          @rp({
-            url: "https://www.foobar.com:8443/"
-            headers: {
-              "Cookie": "__cypress.initial=true"
-            }
-          })
+          @rp("https://www.foobar.com:8443/")
           .then (res) ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("foobar.com")
+            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script></head><body>https server</body></html>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             origin: "https://www.foobar.com:8443"
@@ -762,16 +732,12 @@ describe "Server", ->
               cookies: []
             })
         .then =>
-          @rp({
-            url: "http://localhost:2000/index.html"
-            headers: {
-              "Cookie": "__cypress.initial=true"
-            }
-          })
+          @rp("http://localhost:2000/index.html")
           .then (res) ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("localhost")
+            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script>\n  </head>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             origin: "http://localhost:2000"
@@ -793,16 +759,12 @@ describe "Server", ->
               cookies: []
             })
           .then =>
-            @rp({
-              url: "https://www.foobar.com:8443/"
-              headers: {
-                "Cookie": "__cypress.initial=true"
-              }
-            })
+            @rp("https://www.foobar.com:8443/")
             .then (res) ->
               expect(res.statusCode).to.eq(200)
               expect(res.body).to.include("document.domain")
               expect(res.body).to.include("foobar.com")
+              expect(res.body).to.include("Cypress.onBeforeLoad(window); </script></head><body>https server</body></html>")
           .then =>
             expect(@server._getRemoteState()).to.deep.eq({
               origin: "https://www.foobar.com:8443"
@@ -840,16 +802,12 @@ describe "Server", ->
           #     "Content-Type": "text/html"
           #   }
 
-          @rp({
-            url: "https://www.apple.com/"
-            headers: {
-              "Cookie": "__cypress.initial=true"
-            }
-          })
+          @rp("https://www.apple.com/")
           .then (res) ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("apple.com")
+            expect(res.body).to.include("Cypress")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             origin: "https://www.apple.com"
@@ -876,16 +834,12 @@ describe "Server", ->
               cookies: []
             })
         .then =>
-          @rp({
-            url: "http://localhost:2000/index.html"
-            headers: {
-              "Cookie": "__cypress.initial=true"
-            }
-          })
+          @rp("http://localhost:2000/index.html")
           .then (res) ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("localhost")
+            expect(res.body).to.include("Cypress.onBeforeLoad(window); </script>\n  </head>")
         .then =>
           expect(@server._getRemoteState()).to.deep.eq({
             origin: "http://localhost:2000"
@@ -914,16 +868,12 @@ describe "Server", ->
             #     "Content-Type": "text/html"
             #   }
 
-            @rp({
-              url: "https://www.apple.com/"
-              headers: {
-                "Cookie": "__cypress.initial=true"
-              }
-            })
+            @rp("https://www.apple.com/")
             .then (res) ->
               expect(res.statusCode).to.eq(200)
               expect(res.body).to.include("document.domain")
               expect(res.body).to.include("apple.com")
+              expect(res.body).to.include("Cypress")
           .then =>
             expect(@server._getRemoteState()).to.deep.eq({
               origin: "https://www.apple.com"
