@@ -21,7 +21,7 @@ describe "e2e files", ->
     Fixtures.remove()
 
   it "passes", ->
-    @timeout(20000)
+    @timeout(30000)
 
     cypress.start(["--run-project=#{@e2ePath}", "--spec=cypress/integration/files_spec.coffee"])
     .then ->

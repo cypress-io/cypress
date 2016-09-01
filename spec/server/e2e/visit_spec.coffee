@@ -46,7 +46,7 @@ describe "e2e visit", ->
     stopServer()
 
   it "passes", ->
-    @timeout(20000)
+    @timeout(30000)
 
     ## this tests that hashes are applied during a visit
     ## which forces the browser to scroll to the div

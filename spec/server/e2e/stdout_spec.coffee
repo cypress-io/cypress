@@ -28,7 +28,7 @@ describe "e2e stdout", ->
     Fixtures.remove()
 
   it "displays errors from failures", (done) ->
-    @timeout(20000)
+    @timeout(30000)
 
     exec = cp.exec "node index.js --run-project=#{@e2ePath} --spec=cypress/integration/stdout_failing_spec.coffee --port=2020", {env: env}, (err, stdout, stderr) ->
       stdout = stdout

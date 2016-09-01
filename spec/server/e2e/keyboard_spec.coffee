@@ -21,7 +21,7 @@ describe "e2e keyboard", ->
     Fixtures.remove()
 
   it "passes", ->
-    @timeout(20000)
+    @timeout(30000)
 
     cypress.start(["--run-project=#{@e2ePath}", "--spec=cypress/integration/keyboard_spec.coffee"])
     .then ->

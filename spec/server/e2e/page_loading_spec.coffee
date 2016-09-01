@@ -70,7 +70,7 @@ describe "e2e page_loading", ->
     stopServer()
 
   it "passes", ->
-    @timeout(20000)
+    @timeout(30000)
 
     ## this tests that __cypress.initial is set correctly whilst navigating
     ## between pages, or during cy.reload

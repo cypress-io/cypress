@@ -54,7 +54,7 @@ describe "e2e iframes", ->
     stopServer()
 
   it "passes", ->
-    @timeout(20000)
+    @timeout(30000)
 
     cypress.start(["--run-project=#{e2ePath}", "--spec=cypress/integration/iframe_spec.coffee"])
     .then ->

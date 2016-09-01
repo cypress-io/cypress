@@ -113,7 +113,7 @@ describe "e2e requests", ->
     stopServers()
 
   it "passes", ->
-    @timeout(20000)
+    @timeout(30000)
 
     cypress.start(["--run-project=#{@e2ePath}", "--spec=cypress/integration/request_spec.coffee"])
     .then ->

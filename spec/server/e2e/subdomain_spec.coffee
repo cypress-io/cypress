@@ -91,7 +91,7 @@ describe "e2e subdomain", ->
     stopServer()
 
   it "passes", ->
-    @timeout(20000)
+    @timeout(30000)
 
     cypress.start(["--run-project=#{@e2ePath}", "--hosts=*.foobar.com=127.0.0.1", "--spec=cypress/integration/subdomain_spec.coffee"])
     .then ->

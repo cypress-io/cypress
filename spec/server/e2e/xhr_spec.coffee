@@ -60,7 +60,7 @@ describe "e2e xhr", ->
     stopServer()
 
   it "passes", ->
-    @timeout(20000)
+    @timeout(30000)
 
     cypress.start(["--run-project=#{@e2ePath}", "--spec=cypress/integration/xhr_spec.coffee"])
     .then ->

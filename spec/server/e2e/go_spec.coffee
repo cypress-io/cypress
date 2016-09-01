@@ -50,7 +50,7 @@ describe "e2e go", ->
     stopServer()
 
   it "passes", ->
-    @timeout(20000)
+    @timeout(30000)
 
     ## this tests that history changes work as intended
     ## there have been regressions in electron which would

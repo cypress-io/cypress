@@ -32,7 +32,7 @@ describe "e2e config", ->
     # Fixtures.remove()
 
   it "fails", (done) ->
-    @timeout(20000)
+    @timeout(30000)
 
     ## this tests that config is applied correctly
     ## from modified cypress.json

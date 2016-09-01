@@ -46,7 +46,7 @@ describe "e2e images", ->
     stopServer()
 
   it "passes", ->
-    @timeout(20000)
+    @timeout(30000)
 
     ## this tests that images are correctly proxied and that we are not
     ## accidentally modifying their bytes in the stream
