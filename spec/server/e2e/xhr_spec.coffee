@@ -27,6 +27,9 @@ app.post "/login", (req, res) ->
     headers: req.headers
   })
 
+app.post "/html", (req, res) ->
+  res.json({content: "<html>content</html>"})
+
 startServer = ->
   new Promise (resolve) ->
     srv.listen 1919, ->

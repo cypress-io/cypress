@@ -165,7 +165,9 @@ describe "Routes", ->
         @rp("https://localhost:8443/")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("<html><head></head><body>https server</body></html>")
+          expect(res.body).not.to.include("Cypress")
+          expect(res.body).to.include("document.domain = 'localhost'")
+          expect(res.body).to.include("<body>https server</body>")
 
   context "GET /__", ->
     beforeEach ->
@@ -1173,9 +1175,10 @@ describe "Routes", ->
       it "appends to previous cookies from incoming responses", ->
         nock(@server._remoteOrigin)
         .get("/login")
-        .reply 200, "OK", {
+        .reply(200, "<html></html>", {
           "set-cookie" : "userId=123; Path=/"
-        }
+          "content-type": "text/html"
+        })
 
         @rp({
           url: "http://localhost:8080/login"
@@ -1339,7 +1342,7 @@ describe "Routes", ->
         .get("/foo")
         .matchHeader("host",   "localhost:8080")
         .matchHeader("origin", "http://localhost:8080")
-        .reply(200, "OK", {
+        .reply(200, "<html>origin</html>", {
           "Content-Type": "text/html"
         })
 
@@ -1352,7 +1355,9 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("OK")
+          expect(res.body).to.include("origin")
+          expect(res.body).to.include("document.domain = 'localhost'")
+          expect(res.body).not.to.include("Cypress")
 
     context "images", ->
       beforeEach ->
@@ -1679,11 +1684,11 @@ describe "Routes", ->
 
             expect(res.body).to.include("document.domain = 'localhost';")
 
-      it "does not inject when not initial and not text", ->
+      it "does not inject when not initial and not html", ->
         nock(@server._remoteOrigin)
         .get("/bar")
         .reply 200, "<html><head></head></html>", {
-          "Content-Type": "text/html"
+          "Content-Type": "text/plain"
         }
 
         @rp({
@@ -1871,6 +1876,25 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("<html><head></head><body>hi</body></html>")
 
+      it "does not inject anything when not text/html response content-type even when __cypress.initial=true", ->
+        nock(@server._remoteOrigin)
+        .get("/json")
+        .reply(200, {foo: "bar"})
+
+        @rp({
+          url: "http://www.google.com/json"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+            "Accept": "application/json"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.eq(JSON.stringify({foo: "bar"}))
+
+          ## it should not be telling us to turn this off either
+          expect(res.headers["set-cookie"]).not.to.match(/initial/)
+
       it "rewrites <svg> without hanging", ->
         ## if this test finishes without timing out we know its all good
         contents = removeWhitespace Fixtures.get("server/err_response.html")
@@ -1947,6 +1971,7 @@ describe "Routes", ->
             url: @proxy + "/index.html"
             headers: {
               "Cookie": "__cypress.initial=true"
+              "Accept": "text/html"
             }
           })
           .then (res) ->
@@ -2042,6 +2067,21 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
 
           expect(res.body).to.deep.eq({contents: "<html><head></head></html>"})
+
+      it "does not inject anything when not text/html response content-type even when __cypress.initial=true", ->
+        @rp({
+          url: @proxy + "/assets/foo.json"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+            "Accept": "application/json"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.deep.eq(JSON.stringify({contents: "<html><head></head></html>"}, null, 2))
+
+          ## it should not be telling us to turn this off either
+          expect(res.headers["set-cookie"]).not.to.match(/initial/)
 
     context "http requests", ->
       beforeEach ->

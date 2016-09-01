@@ -292,7 +292,7 @@ describe "Server", ->
 
         nock("http://espn.go.com")
         .get("/")
-        .reply 200, "content", {
+        .reply 200, "<html>content</html>", {
           "Content-Type": "text/html"
         }
 
@@ -314,7 +314,11 @@ describe "Server", ->
           @rp("http://espn.go.com/")
           .then (res) =>
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.eq("content")
+            expect(res.body).to.include("content")
+            expect(res.body).to.include("document.domain = 'go.com'")
+
+            ## TODO: this should have cypress injected in it!
+            # expect(res.body).to.include("Cypress")
 
             expect(@server._getRemoteState()).to.deep.eq({
               origin: "http://espn.go.com"
