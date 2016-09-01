@@ -70,7 +70,7 @@ describe "e2e page_loading", ->
     stopServer()
 
   it "passes", ->
-    @timeout(2000000)
+    @timeout(20000)
 
     ## this tests that __cypress.initial is set correctly whilst navigating
     ## between pages, or during cy.reload
@@ -78,6 +78,6 @@ describe "e2e page_loading", ->
     ## set we send an XHR which should not inject because its requested for JSON
     ## but that another XHR which is requested for html should inject
 
-    cypress.start(["--run-project=#{@e2ePath}", "--show-headless-gui", "--spec=cypress/integration/page_loading_spec.coffee"])
+    cypress.start(["--run-project=#{@e2ePath}", "--spec=cypress/integration/page_loading_spec.coffee"])
     .then ->
       expect(process.exit).to.be.calledWith(0)

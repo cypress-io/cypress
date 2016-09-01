@@ -56,6 +56,6 @@ describe "e2e go", ->
     ## there have been regressions in electron which would
     ## otherwise cause these tests to fail
 
-    cypress.start(["--run-project=#{@e2ePath}", "--show-headless-gui", "--spec=cypress/integration/go_spec.coffee"])
+    cypress.start(["--run-project=#{@e2ePath}", "--spec=cypress/integration/go_spec.coffee"])
     .then ->
       expect(process.exit).to.be.calledWith(0)
