@@ -6,7 +6,10 @@ test:
   pre:
     - npm run build
 
-  # override:
+  override:
+    - npm run test-unit-once
+    - npm run test-integration-once
+    - npm run test-e2e-once
   #   - npm run test-cov
   #   - npm run codecov
   #   - npm run coveralls
