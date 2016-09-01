@@ -13,7 +13,7 @@ Get the DOM element containing the text. DOM elements can contain *more* than th
 | | |
 |--- | --- |
 | **Returns** | the deepest DOM element containing the text  |
-| **Timeout** | `cy.contains` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.contains` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
@@ -51,7 +51,7 @@ Pass in an options object to change the default behavior of `cy.contains`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry finding an element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry finding an element
 
 ***
 

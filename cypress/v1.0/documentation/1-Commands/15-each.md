@@ -12,7 +12,7 @@ You can stop the loop early by returning `false` in the callback function.
 | | |
 |--- | --- |
 | **Returns** | the original array subject given to `cy.each()` |
-| **Timeout** | `cy.each` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.each` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 

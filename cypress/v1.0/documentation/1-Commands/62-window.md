@@ -6,7 +6,7 @@ Get the global `window` object of the remote application [visited](https://on.cy
 | | |
 |--- | --- |
 | **Returns** | the `window` object |
-| **Timeout** | `cy.window` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.window` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 

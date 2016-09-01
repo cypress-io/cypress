@@ -45,12 +45,12 @@ Sets multiple configuration options.
 ```javascript
 // cypress.json
 {
-  "commandTimeout": 10000
+  "defaultCommandTimeout": 10000
 }
 ```
 
 ```javascript
-Cypress.config() // => {commandTimeout: 10000, pageLoadTimeout: 30000, ...}
+Cypress.config() // => {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ...}
 ```
 
 ***
@@ -106,18 +106,18 @@ Cypress.config("viewportWidth") // => 800
 ```javascript
 // cypress.json
 {
-  "commandTimeout": 4000,
+  "defaultCommandTimeout": 4000,
   "pageLoadTimeout": 30000,
 }
 ```
 
 ```javascript
 Cypress.config({
-  commandTimeout: 10000,
+  defaultCommandTimeout: 10000,
   viewportHeight: 900
 })
 
-Cypress.config() // => {commandTimeout: 10000, viewportHeight: 900, ...}
+Cypress.config() // => {defaultCommandTimeout: 10000, viewportHeight: 900, ...}
 ```
 
 ***

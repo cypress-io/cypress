@@ -6,7 +6,7 @@ Writes a file with the specified contents. JavaScript arrays and objects are str
 | | |
 |--- | --- |
 | **Returns** | the contents written to the file |
-| **Timeout** | `cy.writeFile` will wait for the duration of [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the server to write the file. |
+| **Timeout** | `cy.writeFile` will wait for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the server to write the file. |
 
 ***
 
@@ -32,7 +32,7 @@ Pass in an options object to change the default behavior of `cy.writeFile`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.writeFile` command to be processed
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.writeFile` command to be processed
 
 ***
 
