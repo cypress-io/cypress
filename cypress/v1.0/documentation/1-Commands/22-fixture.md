@@ -36,13 +36,13 @@ If an extension is omitted, Cypress will attempt to resolve the fixture by order
 
 # [cy.fixture( *fixture* )](#section-single-fixture-usage)
 
-Loads the fixture at the specified filepath within `cypress/fixtures`.
+Loads the fixture at the specified filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#section-folders), which defaults to `cypress/fixtures`.
 
 ***
 
 # [cy.fixture( *fixture*, *encoding* )](#section-encoding)
 
-Loads the fixture at the specified filepath within `cypress/fixtures`, using the encoding specified when reading the file.
+Loads the fixture at the specified filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#section-folders), which defaults to `cypress/fixtures`, using the encoding specified when reading the file.
 
 ***
 
@@ -76,21 +76,22 @@ cy.fixture("users.json")
 cy.fixture("admin")
 ```
 
-Cypress will search for files called `admin` and resolve the first one in this order:
+When no extension is passed to `cy.fixture`, Cypress will search for files with the specified name within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#section-folders), which defaults to `cypress/fixtures`, and resolve the first one. The above example would resolve in the following order:
 
-1. `{your project root}/cypress/fixtures/admin.json`
-1. `{your project root}/cypress/fixtures/admin.js`
-1. `{your project root}/cypress/fixtures/admin.coffee`
-1. `{your project root}/cypress/fixtures/admin.html`
-1. `{your project root}/cypress/fixtures/admin.txt`
-1. `{your project root}/cypress/fixtures/admin.csv`
-1. `{your project root}/cypress/fixtures/admin.png`
-1. `{your project root}/cypress/fixtures/admin.jpg`
-1. `{your project root}/cypress/fixtures/admin.jpeg`
-1. `{your project root}/cypress/fixtures/admin.gif`
-1. `{your project root}/cypress/fixtures/admin.tif`
-1. `{your project root}/cypress/fixtures/admin.tiff`
-1. `{your project root}/cypress/fixtures/admin.zip`
+1. `{fixturesFolder}/admin.json`
+2. `{fixturesFolder}/admin.js`
+3. `{fixturesFolder}/admin.coffee`
+4. `{fixturesFolder}/admin.html`
+5. `{fixturesFolder}/admin.txt`
+6. `{fixturesFolder}/admin.csv`
+7. `{fixturesFolder}/admin.png`
+8. `{fixturesFolder}/admin.jpg`
+9. `{fixturesFolder}/admin.jpeg`
+10. `{fixturesFolder}/admin.gif`
+11. `{fixturesFolder}/admin.tif`
+12. `{fixturesFolder}/admin.tiff`
+13. `{fixturesFolder}/admin.zip`
+
 ***
 
 ## Image fixtures will be sent as `base64`
@@ -111,7 +112,7 @@ cy.fixture("images/logo.png").then(function(logo){
 
 You can nest fixtures within folders and reference them by defining the path to the file:
 
-`{your project root}/cypress/fixtures/users/admin.json`
+`{fixturesFolder}/users/admin.json`
 
 ```javascript
 cy.fixture("users/admin.json")
@@ -121,13 +122,13 @@ cy.fixture("users/admin.json")
 
 ## Validation
 
-Cypress will automatically validate your fixtures. If your `.json`, `.js`, or `.coffee`  files contain syntax errors, they will automatically be shown in the Command Log.
+Cypress will automatically validate your fixtures. If your `.json`, `.js`, or `.coffee` files contain syntax errors, they will automatically be shown in the Command Log.
 
 ***
 
 ## Formatting
 
-Cypress automatically formats your fixture files. That means you can paste in a single line of `json` and the next time Cypress serves this fixture, it will format / indent the `json` which makes it easier to read and debug.
+Cypress automatically formats your fixture files. That means you can paste in a single line of `json` and the next time Cypress serves this fixture, it will format / indent the `json`, which makes it easier to read and debug.
 
 ***
 
@@ -149,7 +150,7 @@ Cypress automatically determines the encoding for the following file types:
 * `.tiff`
 * `.zip`
 
-For other types of files, they will be read as "utf8" by default. You can specify a different encoding by passing it as the second argument.
+For other types of files, they will be read as `utf8` by default. You can specify a different encoding by passing it as the [second argument](https://on.cypress.io/api/fixture#section--cy-fixture-fixture-encoding-section-encoding-).
 
 ```javascript
 cy.fixture("foo.bmp", "base64")
@@ -184,7 +185,7 @@ cy.route("GET", /users/, "fixture:users") // this works
 cy.route("GET", /users/, "fx:users")      // this also works
 ```
 
-This saves you from having to explicitly load the fixture first (like in Example #2).
+This saves you from having to explicitly load the fixture first (like in [Example #2](https://on.cypress.io/api/fixture#section-example-2-)).
 
 ## Example 2:
 
@@ -195,7 +196,7 @@ cy
   })
 ```
 
-However if you still need access to the fixture data, instead of yielding the fixture's data in Example #2, we can make use of [aliasing](https://on.cypress.io/guides/using-aliases).
+However if you still need access to the fixture data, instead of yielding the fixture's data in [Example #2](https://on.cypress.io/api/fixture#section-example-2-), we can make use of [aliasing](https://on.cypress.io/guides/using-aliases).
 
 ## Example 3:
 
@@ -226,5 +227,5 @@ This is useful when asserting about values in the fixture object, or perhaps if 
 
 # Related
 
-- [route](https://on.cypress.io/api/route).
-- [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures).
+- [route](https://on.cypress.io/api/route)
+- [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
