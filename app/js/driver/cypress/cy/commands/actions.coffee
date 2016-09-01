@@ -8,7 +8,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
   delay = 50
 
-  Cypress.on "test:before:hooks", ->
+  Cypress.on "test:before:run", ->
     Cypress.Keyboard.resetModifiers(@private("document"), @private("window"))
 
   dispatchPrimedChangeEvents = ->

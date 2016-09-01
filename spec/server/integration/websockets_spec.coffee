@@ -162,7 +162,7 @@ describe "Web Sockets", ->
         @wsClient.disconnect()
 
       it "continues to handle socket.io requests just fine", (done) ->
-        @wsClient.emit "fixture", "example.json", (data) ->
+        @wsClient.emit "fixture", "example.json", {}, (data) ->
           expect(data).to.deep.eq({foo: "bar"})
           done()
 
@@ -184,7 +184,7 @@ describe "Web Sockets", ->
         @wsClient.disconnect()
 
       it "continues to handle socket.io requests just fine", (done) ->
-        @wsClient.emit "fixture", "example.json", (data) ->
+        @wsClient.emit "fixture", "example.json", {}, (data) ->
           expect(data).to.deep.eq({foo: "bar"})
           done()
 
@@ -207,7 +207,7 @@ describe "Web Sockets", ->
         @wsClient.disconnect()
 
       it "continues to handle socket.io requests just fine", (done) ->
-        @wsClient.emit "fixture", "example.json", (data) ->
+        @wsClient.emit "fixture", "example.json", {}, (data) ->
           expect(data).to.deep.eq({foo: "bar"})
           done()
 

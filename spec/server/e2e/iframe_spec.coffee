@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+path       = require("path")
 http       = require("http")
 morgan     = require("morgan")
 express    = require("express")
@@ -9,6 +10,8 @@ user       = require("#{root}lib/user")
 cypress    = require("#{root}lib/cypress")
 Project    = require("#{root}lib/project")
 
+e2ePath = Fixtures.projectPath("e2e")
+
 app = express()
 
 srv = http.Server(app)
@@ -17,40 +20,31 @@ app.use(morgan("dev"))
 app.use(bodyParser.json())
 
 app.get "/", (req, res) ->
-  res.send("<html>hi there</html>")
+  res.send("<html>outer content<iframe src='/iframe'></html>")
 
-app.post "/login", (req, res) ->
-  ## respond with JSON with exactly what the
-  ## request body was and all of the request headers
-  res.json({
-    body: req.body
-    headers: req.headers
-  })
-
-app.post "/html", (req, res) ->
-  res.json({content: "<html>content</html>"})
+app.get "/iframe", (req, res) ->
+  ## send the iframe contents
+  res.sendFile(path.join(e2ePath, "static", "iframe", "index.html"))
 
 startServer = ->
   new Promise (resolve) ->
-    srv.listen 1919, ->
-      console.log "listening on 1919"
+    srv.listen 1616, ->
+      console.log "listening on 1616"
       resolve()
 
 stopServer = ->
   new Promise (resolve) ->
     srv.close(resolve)
 
-describe "e2e xhr", ->
+describe "e2e iframes", ->
   beforeEach ->
     Fixtures.scaffold()
-
-    @e2ePath = Fixtures.projectPath("e2e")
 
     @sandbox.stub(process, "exit")
 
     user.set({name: "brian", session_token: "session-123"})
     .then =>
-      Project.add(@e2ePath)
+      Project.add(e2ePath)
     .then =>
       startServer()
 
@@ -62,6 +56,6 @@ describe "e2e xhr", ->
   it "passes", ->
     @timeout(20000)
 
-    cypress.start(["--run-project=#{@e2ePath}", "--spec=cypress/integration/xhr_spec.coffee"])
+    cypress.start(["--run-project=#{e2ePath}", "--spec=cypress/integration/iframe_spec.coffee"])
     .then ->
       expect(process.exit).to.be.calledWith(0)

@@ -415,8 +415,6 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             if remote.originPolicy is existing.originPolicy
               previousDomainVisited = remote.origin
 
-              Cypress.Cookies.setInitial()
-
               url = Cypress.Location.createInitialRemoteSrc(url)
 
               @_src($remoteIframe, url)
@@ -426,8 +424,6 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
               if previousDomainVisited
                 return cannotVisit2ndDomain(remote.origin)
 
-              # Cypress.getScrollTop()
-              # .then (val) ->
               ## tell our backend we're changing domains
               new Promise (resolve) ->
                 ## TODO: add in other things we want to preserve

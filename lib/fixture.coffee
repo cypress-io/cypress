@@ -25,7 +25,7 @@ module.exports = {
     fixture = path.basename(p)
 
     ## if we have an extension go
-    ## ahead adn read in the file
+    ## ahead and read in the file
     if ext = path.extname(p)
       @parseFile(p, fixture, ext, options)
     else
@@ -39,10 +39,10 @@ module.exports = {
           throw new Error("No fixture file found with an acceptable extension. Searched in: #{p}")
 
         @fileExists(p + ext)
-          .catch ->
-            tryParsingFile(index + 1)
-          .then ->
-            @parseFile(p + ext, fixture, ext, options)
+        .catch ->
+          tryParsingFile(index + 1)
+        .then ->
+          @parseFile(p + ext, fixture, ext, options)
 
       Promise.resolve tryParsingFile(0)
 
@@ -60,19 +60,19 @@ module.exports = {
         delete queue[p]
 
       @fileExists(p)
-        .catch (err) ->
-          ## TODO: move this to lib/errors
-          throw new Error("No fixture exists at: #{p}")
-        .then ->
-          @parseFileByExtension(p, fixture, ext, options)
-        .then (ret) ->
-          cleanup()
+      .catch (err) ->
+        ## TODO: move this to lib/errors
+        throw new Error("No fixture exists at: #{p}")
+      .then ->
+        @parseFileByExtension(p, fixture, ext, options)
+      .then (ret) ->
+        cleanup()
 
-          return ret
-        .catch (err) ->
-          cleanup()
+        return ret
+      .catch (err) ->
+        cleanup()
 
-          throw err
+        throw err
 
   parseFileByExtension: (p, fixture, ext, options) ->
     ext ?= path.extname(fixture)
@@ -89,43 +89,43 @@ module.exports = {
 
   parseJson: (p, fixture) ->
     fs.readFileAsync(p, "utf8")
-      .bind(@)
-      .then (str) ->
-        ## format the json
-        formatted = formatter.formatJson(str, "  ")
+    .bind(@)
+    .then (str) ->
+      ## format the json
+      formatted = formatter.formatJson(str, "  ")
 
-        ## if we didnt change then return the str
-        if formatted is str
-          return str
-        else
-          ## if last character is a new line
-          ## then append this to the formatted str
-          if lastCharacterIsNewLine(str)
-            formatted += "\n"
-          ## write the file back even if there were errors
-          ## so we write back the formatted version of the str
-          fs.writeFileAsync(p, formatted).return(formatted)
-      .then(jsonlint.parse)
-      .catch (err) ->
-        throw new Error("'#{fixture}' is not valid JSON.\n#{err.message}")
+      ## if we didnt change then return the str
+      if formatted is str
+        return str
+      else
+        ## if last character is a new line
+        ## then append this to the formatted str
+        if lastCharacterIsNewLine(str)
+          formatted += "\n"
+        ## write the file back even if there were errors
+        ## so we write back the formatted version of the str
+        fs.writeFileAsync(p, formatted).return(formatted)
+    .then(jsonlint.parse)
+    .catch (err) ->
+      throw new Error("'#{fixture}' is not valid JSON.\n#{err.message}")
 
   parseJs: (p, fixture) ->
     fs.readFileAsync(p, "utf8")
-      .bind(@)
-      .then (str) ->
-        try
-          obj = eval("(" + str + ")")
-        catch e
-          err = check(str, fixture)
-          throw err if err
-          throw e
+    .bind(@)
+    .then (str) ->
+      try
+        obj = eval("(" + str + ")")
+      catch e
+        err = check(str, fixture)
+        throw err if err
+        throw e
 
-        return obj
-      .then (obj) ->
-        str = pretty(obj, 2)
-        fs.writeFileAsync(p, str).return(obj)
-      .catch (err) ->
-        throw new Error("'#{fixture}' is not a valid JavaScript object.#{err.toString()}")
+      return obj
+    .then (obj) ->
+      str = pretty(obj, 2)
+      fs.writeFileAsync(p, str).return(obj)
+    .catch (err) ->
+      throw new Error("'#{fixture}' is not a valid JavaScript object.#{err.toString()}")
 
   parseCoffee: (p, fixture) ->
     dc = process.env.NODE_DISABLE_COLORS
@@ -133,33 +133,33 @@ module.exports = {
     process.env.NODE_DISABLE_COLORS = "0"
 
     fs.readFileAsync(p, "utf8")
-      .bind(@)
-      .then (str) ->
-        str = coffee.compile(str, {bare: true})
-        eval(str)
-      .then (obj) ->
-        str = pretty(obj, 2)
-        fs.writeFileAsync(p, str).return(obj)
-      .catch (err) ->
-        throw new Error("'#{fixture} is not a valid CoffeeScript object.\n#{err.toString()}")
-      .finally ->
-        process.env.NODE_DISABLE_COLORS = dc
+    .bind(@)
+    .then (str) ->
+      str = coffee.compile(str, {bare: true})
+      eval(str)
+    .then (obj) ->
+      str = pretty(obj, 2)
+      fs.writeFileAsync(p, str).return(obj)
+    .catch (err) ->
+      throw new Error("'#{fixture} is not a valid CoffeeScript object.\n#{err.toString()}")
+    .finally ->
+      process.env.NODE_DISABLE_COLORS = dc
 
   parseHtml: (p, fixture) ->
     fs.readFileAsync(p, "utf8")
-      .bind(@)
-      .then (str) ->
-        html = beautify str, {
-          indent_size: 2
-          extra_liners: []
-        }
+    .bind(@)
+    .then (str) ->
+      html = beautify str, {
+        indent_size: 2
+        extra_liners: []
+      }
 
-        if lastCharacterIsNewLine(str)
-          html += "\n"
+      if lastCharacterIsNewLine(str)
+        html += "\n"
 
-        fs.writeFileAsync(p, html).return(html)
+      fs.writeFileAsync(p, html).return(html)
 
   parse: (p, fixture, encoding = "utf8") ->
     fs.readFileAsync(p, encoding)
-      .bind(@)
+    .bind(@)
 }

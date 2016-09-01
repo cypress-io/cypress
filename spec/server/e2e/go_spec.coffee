@@ -8,35 +8,39 @@ user     = require("#{root}lib/user")
 cypress  = require("#{root}lib/cypress")
 Project  = require("#{root}lib/project")
 
-e2ePath = Fixtures.projectPath("e2e")
-
 app = express()
 
 srv = http.Server(app)
 
 app.use(morgan("dev"))
 
-app.use(express.static(e2ePath))
+app.get "/first", (req, res) ->
+  res.send("<html><h1>first</h1><a href='/second'>second</a></html>")
+
+app.get "/second", (req, res) ->
+  res.send("<html><h1>second</h1></html>")
 
 startServer = ->
   new Promise (resolve) ->
-    srv.listen 3434, ->
-      console.log "listening on 3434"
+    srv.listen 1818, ->
+      console.log "listening on 1818"
       resolve()
 
 stopServer = ->
   new Promise (resolve) ->
     srv.close(resolve)
 
-describe "e2e visit", ->
+describe "e2e go", ->
   beforeEach ->
     Fixtures.scaffold()
+
+    @e2ePath = Fixtures.projectPath("e2e")
 
     @sandbox.stub(process, "exit")
 
     user.set({name: "brian", session_token: "session-123"})
     .then =>
-      Project.add(e2ePath)
+      Project.add(@e2ePath)
     .then =>
       startServer()
 
@@ -48,16 +52,10 @@ describe "e2e visit", ->
   it "passes", ->
     @timeout(20000)
 
-    ## this tests that hashes are applied during a visit
-    ## which forces the browser to scroll to the div
-    ## additionally this tests that jquery.js is not truncated
-    ## due to __cypress.initial cookies not being cleared by
-    ## the hash.html response
+    ## this tests that history changes work as intended
+    ## there have been regressions in electron which would
+    ## otherwise cause these tests to fail
 
-    ## additionally this tests that xhr request headers + body
-    ## can reach the backend without being modified or changed
-    ## by the cypress proxy in any way
-
-    cypress.start(["--run-project=#{e2ePath}", "--spec=cypress/integration/visit_spec.coffee"])
+    cypress.start(["--run-project=#{@e2ePath}", "--spec=cypress/integration/go_spec.coffee"])
     .then ->
       expect(process.exit).to.be.calledWith(0)

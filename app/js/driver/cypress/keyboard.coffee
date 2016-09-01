@@ -299,7 +299,12 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
           catch
             resetBounds()
 
-      keys = options.chars.split(charsBetweenCurlyBraces)
+      keys = options.chars.split(charsBetweenCurlyBraces).map (chars) ->
+        if charsBetweenCurlyBraces.test(chars)
+          ## allow special chars and modifiers to be case-insensitive
+          chars.toLowerCase()
+        else
+          chars
 
       options.onBeforeType @countNumIndividualKeyStrokes(keys)
 

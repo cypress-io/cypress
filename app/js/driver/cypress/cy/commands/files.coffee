@@ -46,6 +46,8 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
           else
             $Cypress.Utils.throwErrByPath("files.unexpected_error", {
               onFail: options._log,
+              ## TODO: same thing here let's provide the absolute
+              ## path to the file instead of the relative
               args: { cmd: "readFile", file, error: err.message }
             })
         .then (contents) =>
@@ -77,6 +79,11 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
           message: fileName
           consoleProps: ->
             {
+              ## TODO:
+              ## this should probably be the absolute path to
+              ## the file that was written instead of the relative
+              ## which we'll need to get back from the server
+              ## as the response over websockets
               "File Name": fileName
               "Contents": contents
             }
@@ -98,6 +105,7 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
         contents = JSON.stringify(contents, null, 2)
 
       writeFile(fileName, contents, _.pick(options, "encoding"))
+      ## TODO: this can just be .return(contents)
       .then ->
         contents
       .catch Promise.TimeoutError, (err) ->

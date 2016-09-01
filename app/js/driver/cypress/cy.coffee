@@ -544,7 +544,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     _setRunnable: (runnable, hookName) ->
       runnable.startedAt = new Date
 
-      if _.isFinite(timeout = @Cypress.config("commandTimeout"))
+      if _.isFinite(timeout = @Cypress.config("defaultCommandTimeout"))
         runnable.timeout timeout
 
       @hook(hookName)

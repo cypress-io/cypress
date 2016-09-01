@@ -92,22 +92,25 @@ module.exports = {
 
     isInitial = req.cookies["__cypress.initial"] is "true"
 
-    reqAcceptsHtmlAndMatchesOriginPolicyAndResContentTypeIsHtml = (respHeaders) ->
+    resContentTypeIsHtmlAndMatchesOriginPolicy = (respHeaders) ->
       contentType = respHeaders["content-type"]
 
       ## bail if our response headers are not text/html
       return if not (contentType and contentType.includes("text/html"))
 
-      req.accepts(["text", "json", "image", "html"]) is "html" and
-        cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
+      cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
 
-    setCookies = (initial) =>
+    setCookies = (value, wantsInjection) =>
+      ## dont modify any cookies if we're trying to clear
+      ## the initial cookie and we're not injecting anything
+      return if (not value) and (not wantsInjection)
+
       ## dont set the cookies if we're not on the initial request
-      return if req.cookies["__cypress.initial"] isnt "true"
+      return if not isInitial
 
-      setCookie(res, "__cypress.initial", initial, remoteState.domainName)
+      setCookie(res, "__cypress.initial", value, remoteState.domainName)
 
-    onResponse = (str, incomingRes) =>
+    onResponse = (str, incomingRes, wantsInjection) =>
       @setResHeaders(req, res, incomingRes, isInitial)
 
       ## always proxy the cookies coming from the incomingRes
@@ -129,25 +132,19 @@ module.exports = {
         ## set the status to whatever the incomingRes statusCode is
         res.status(incomingRes.statusCode)
 
+        wantsInjection ?= do ->
+          return false if not resContentTypeIsHtmlAndMatchesOriginPolicy(incomingRes.headers)
+
+          if isInitial then "full" else "partial"
+
         ## turn off __cypress.initial by setting false here
-        setCookies(false)
+        setCookies(false, wantsInjection)
 
         if not okStatusRe.test incomingRes.statusCode
           ## bail early, continue on with the stream'in
           return str.pipe(thr)
 
         logger.info "received request response"
-
-        wantsInjection = do ->
-          switch
-            when req.cookies["__cypress.initial"] is "true"
-              "full"
-
-            when reqAcceptsHtmlAndMatchesOriginPolicyAndResContentTypeIsHtml(incomingRes.headers)
-              "partial"
-
-            else
-              false
 
         ## if there is nothing to inject then just
         ## bypass the stream buffer and pipe this back
@@ -187,7 +184,7 @@ module.exports = {
               cb rewrite(body)
 
     if obj = buffers.take(remoteUrl)
-      onResponse(obj.stream, obj.response)
+      onResponse(obj.stream, obj.response, "full")
     else
       opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
 
@@ -246,22 +243,25 @@ module.exports = {
 
     ext = path.extname(file)
 
+    isInitial = req.cookies["__cypress.initial"] is "true"
+
     ## ext will be blank when requesting a folder
     ## which could serve an index.html file
-    isHtml = ext is ".html" or ext is ""
+    isHtml = [".html", ".htm", ""].some (str) ->
+      ext is str
 
-    wantsInjection = do ->
-      switch
-        when req.cookies["__cypress.initial"] is "true"
-          "full"
+    onResponse = (str, wantsInjection) =>
+      if remoteState.visiting
+        wantsInjection = false
 
-        when isHtml and req.accepts(["text", "json", "image", "html"]) is "html"
-          "partial"
+      wantsInjection ?= do ->
+        return false if not isHtml
 
-        else
-          false
+        if isInitial then "full" else "partial"
 
-    onResponse = (str) =>
+      if isInitial and wantsInjection
+        setCookie(res, "__cypress.initial", false, remoteState.domainName)
+
       ## if the files extname isnt html or the __cypress.initial
       ## isnt true then bypass concatThrough and just pipe directly
       if not wantsInjection
@@ -280,11 +280,8 @@ module.exports = {
 
     res.set("x-cypress-file-path", file)
 
-    if req.cookies["__cypress.initial"] is "true"
-      setCookie(res, "__cypress.initial", false, remoteState.domainName)
-
     if obj = buffers.take(req.proxiedUrl)
-      return onResponse(obj.stream)
+      return onResponse(obj.stream, "full")
 
     staticFileErr = (err) =>
       status = err.status ? 500
@@ -308,7 +305,7 @@ module.exports = {
       transform: onResponse
     }
 
-    if req.cookies["__cypress.initial"] isnt "true"
+    if not isInitial
       sendOpts.etag = true
       sendOpts.lastModified = true
 
