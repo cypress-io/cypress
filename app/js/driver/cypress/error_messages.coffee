@@ -145,6 +145,8 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       timed_out: "#{cmd('exec', '\'{{cmd}}\'')} timed out after waiting {{timeout}}ms."
 
     files:
+      ## TODO: these should likely be multi lines. Whenever we display error messages we always
+      ## space them out which makes them easier to read in the GUI + headlessly
       unexpected_error:  "#{cmd('{{cmd}}', '"{{file}}"')} failed with the following error: {{error}}"
       existent: "#{cmd('readFile', '"{{file}}"')} failed because the file exists when expected not to exist."
       invalid_argument: "#{cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: '{{file}}'."
