@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.5.5
+- do not postinstall
+
 #### 0.5.4
 - renamed commandTimeout -> defaultCommandTimeout
 
