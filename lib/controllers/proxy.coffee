@@ -77,7 +77,11 @@ module.exports = {
       ## bail if our response headers are not text/html
       return if not (contentType and contentType.includes("text/html"))
 
-      cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
+      switch remoteState.strategy
+        when "http"
+          cors.urlMatchesOriginPolicyProps(remoteUrl, remoteState.props)
+        when "file"
+          remoteUrl.startsWith(remoteState.origin)
 
     setCookies = (value, wantsInjection) =>
       ## dont modify any cookies if we're trying to clear
@@ -90,14 +94,21 @@ module.exports = {
       setCookie(res, "__cypress.initial", value, remoteState.domainName)
 
     onResponse = (str, incomingRes, wantsInjection) =>
+      headers = incomingRes.headers
+
+      wantsInjection ?= do ->
+        return false if not resContentTypeIsHtmlAndMatchesOriginPolicy(headers)
+
+        if isInitial then "full" else "partial"
+
       @setResHeaders(req, res, incomingRes, wantsInjection)
 
       ## always proxy the cookies coming from the incomingRes
-      if cookies = incomingRes.headers["set-cookie"]
+      if cookies = headers["set-cookie"]
         res.append("Set-Cookie", cookies)
 
       if /^30(1|2|3|7|8)$/.test(incomingRes.statusCode)
-        newUrl = incomingRes.headers.location
+        newUrl = headers.location
 
         ## set cookies to initial=true
         setCookies(true)
@@ -111,13 +122,12 @@ module.exports = {
         ## set the status to whatever the incomingRes statusCode is
         res.status(incomingRes.statusCode)
 
-        wantsInjection ?= do ->
-          return false if not resContentTypeIsHtmlAndMatchesOriginPolicy(incomingRes.headers)
-
-          if isInitial then "full" else "partial"
-
         ## turn off __cypress.initial by setting false here
         setCookies(false, wantsInjection)
+
+        if headers["x-cypress-file-server-error"]
+          filePath = headers["x-cypress-file-path"]
+          return httpRequestErr({status: res.statusCode}, filePath)
 
         if not okStatusRe.test incomingRes.statusCode
           ## bail early, continue on with the stream'in
@@ -134,14 +144,14 @@ module.exports = {
             @rewrite(body.toString(), remoteState, wantsInjection)
 
           injection = concat (body) =>
-            encoding = incomingRes.headers["content-encoding"]
+            encoding = headers["content-encoding"]
 
             ## if we're gzipped that means we need to unzip
             ## this content first, inject, and the rezip
             if encoding and encoding.includes("gzip")
               zlib.gunzipAsync(body)
               .then(rewrite)
-              .then(gzlib.gzipAsync)
+              .then(zlib.gzipAsync)
               .then(thr.end)
               .catch(httpRequestErr)
             else
@@ -160,16 +170,18 @@ module.exports = {
       else
         opts.url = remoteUrl
 
-      httpRequestErr = (err) =>
+      httpRequestErr = (err, filePath) =>
         status = err.status ? 500
 
-        html = networkFailures.get(err, opts.url, status, remoteState.strategy)
+        url = filePath ? remoteUrl
+
+        html = networkFailures.get(err, url, status, remoteState.strategy)
 
         logger.info("request failed", {url: remoteUrl, status: status, err: err.message})
 
-        res
-        .status(status)
-        .send(html)
+        res.status(status)
+
+        thr.end(html)
 
       rq = request(opts)
 

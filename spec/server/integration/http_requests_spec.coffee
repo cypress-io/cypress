@@ -1050,12 +1050,7 @@ describe "Routes", ->
           }
         })
         .then =>
-          @rp({
-            url: @proxy + "/foo/views/test/index.html"
-            headers: {
-              "Cookie": "__cypress.initial=true"
-            }
-          })
+          @rp(@proxy + "/foo/views/test/index.html")
           .then (res) =>
             expect(res.statusCode).to.eq(404)
             expect(res.body).to.include("Cypress errored trying to serve this file from your system:")
@@ -1319,20 +1314,15 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")
 
-      it "does cache when not initial response", ->
+      it "does cache requesting resource without injection", ->
         nock(@server._remoteOrigin)
         .get("/")
         .reply 200, "hello from bar!", {
-          "Content-Type": "text/html"
+          "Content-Type": "text/plain"
           "Cache-Control": "max-age=86400"
         }
 
-        @rp({
-          url: "http://localhost:8080/"
-          headers: {
-            "Cookie": "__cypress.initial=false"
-          }
-        })
+        @rp("http://localhost:8080/")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.headers["cache-control"]).to.eq("max-age=86400")
@@ -1980,8 +1970,9 @@ describe "Routes", ->
             expect(res.body).to.match(/sinon.js/)
 
             expect(res.headers["set-cookie"]).to.match(/initial=;/)
-            expect(res.headers["etag"]).to.be.undefined
-            expect(res.headers["last-modified"]).to.be.undefined
+            expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")
+            expect(res.headers["etag"]).to.exist
+            expect(res.headers["last-modified"]).to.exist
 
       it "sets etag", ->
         @rp(@proxy + "/assets/app.css")
@@ -2018,6 +2009,11 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("foo")
+
+      it "sets x-cypress-file-path headers", ->
+        @rp(@proxy + "/assets/app.css")
+        .then (res) =>
+          expect(res.headers).to.have.property("x-cypress-file-path", Fixtures.projectPath("no-server") + "/dev/assets/app.css")
 
       it "injects document.domain on other http requests", ->
         @rp({

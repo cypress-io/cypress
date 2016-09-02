@@ -5,6 +5,7 @@ http    = require("http")
 path    = require("path")
 send    = require("send")
 compact = require("lodash.compact")
+errors  = require("./errors")
 
 onRequest = (req, res, fileServerFolder) ->
   args = compact([
@@ -24,6 +25,10 @@ onRequest = (req, res, fileServerFolder) ->
   send(req, url.parse(req.url).pathname, {
     root: path.resolve(fileServerFolder)
   })
+  .on "error", (err) ->
+    res.setHeader("x-cypress-file-server-error", true)
+    res.statusCode = err.status
+    res.end()
   .pipe(res)
 
 module.exports = {
@@ -36,6 +41,9 @@ module.exports = {
         resolve({
           port: ->
             srv.address().port
+
+          address: ->
+            "http://localhost:" + @port()
 
           close: ->
             new Promise (resolve) ->

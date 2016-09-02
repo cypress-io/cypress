@@ -71,6 +71,8 @@ describe "Server", ->
               # @session = new (Session({app: @srv}))
 
               @proxy = "http://localhost:" + port
+
+              @fileServer = @server._fileServer.address()
           ])
 
         if @server
@@ -121,8 +123,9 @@ describe "Server", ->
           @rp("http://localhost:2000/index.html")
           .then (res) ->
             expect(res.statusCode).to.eq(200)
-            expect(res.headers["etag"]).not.to.exist
+            expect(res.headers["etag"]).to.exist
             expect(res.headers["set-cookie"]).not.to.match(/initial=;/)
+            expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")
             expect(res.body).to.include("index.html content")
             expect(res.body).to.include("document.domain = 'localhost'")
             expect(res.body).to.include("Cypress.onBeforeLoad(window); </script>\n  </head>")
@@ -191,6 +194,7 @@ describe "Server", ->
               strategy: "file"
               visiting: false
               domainName: "localhost"
+              fileServer: @fileServer
               props: null
             })
 
@@ -211,6 +215,9 @@ describe "Server", ->
           @rp("http://localhost:2000/does-not-exist")
           .then (res) ->
             expect(res.statusCode).to.eq(404)
+            expect(res.body).to.include("Cypress errored trying to serve this file from your system:")
+            expect(res.body).to.include("does-not-exist")
+            expect(res.body).to.include("The file was not found")
 
       it "handles urls with hashes", ->
         @server._onResolveUrl("/index.html#/foo/bar", @automationRequest)
@@ -248,6 +255,7 @@ describe "Server", ->
         .reply 200, "<html>content</html>", {
           "X-Foo-Bar": "true"
           "Content-Type": "text/html"
+          "Cache-Control": "public, max-age=3600"
         }
 
         @server._onResolveUrl("http://getbootstrap.com/", @automationRequest)
@@ -267,6 +275,7 @@ describe "Server", ->
             expect(res.statusCode).to.eq(200)
             expect(res.headers["set-cookie"]).not.to.match(/initial=;/)
             expect(res.headers["x-foo-bar"]).to.eq("true")
+            expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")
             expect(res.body).to.include("content")
             expect(res.body).to.include("document.domain = 'getbootstrap.com'")
             expect(res.body).to.include("Cypress.onBeforeLoad(window); </script> </head>content</html>")
@@ -315,6 +324,7 @@ describe "Server", ->
               strategy: "http"
               visiting: false
               domainName: "go.com"
+              fileServer: null
               props: {
                 domain: "go"
                 tld: "com"
@@ -552,6 +562,7 @@ describe "Server", ->
             strategy: "http"
             visiting: false
             domainName: "google.com"
+            fileServer: null
             props: {
               domain: "google"
               tld: "com"
@@ -581,6 +592,7 @@ describe "Server", ->
             strategy: "file"
             visiting: false
             domainName: "localhost"
+            fileServer: @fileServer
             props: null
           })
 
@@ -619,6 +631,7 @@ describe "Server", ->
             strategy: "http"
             visiting: false
             domainName: "google.com"
+            fileServer: null
             props: {
               domain: "google"
               tld: "com"
@@ -651,6 +664,7 @@ describe "Server", ->
             strategy: "file"
             visiting: false
             domainName: "localhost"
+            fileServer: @fileServer
             props: null
           })
         .then =>
@@ -678,6 +692,7 @@ describe "Server", ->
               strategy: "http"
               visiting: false
               domainName: "google.com"
+              fileServer: null
               props: {
                 domain: "google"
                 tld: "com"
@@ -712,6 +727,7 @@ describe "Server", ->
             strategy: "http"
             visiting: false
             domainName: "foobar.com"
+            fileServer: null
             props: {
               domain: "foobar"
               tld: "com"
@@ -744,6 +760,7 @@ describe "Server", ->
             strategy: "file"
             visiting: false
             domainName: "localhost"
+            fileServer: @fileServer
             props: null
           })
         .then =>
@@ -770,6 +787,7 @@ describe "Server", ->
               origin: "https://www.foobar.com:8443"
               strategy: "http"
               visiting: false
+              fileServer: null
               domainName: "foobar.com"
               props: {
                 domain: "foobar"
@@ -814,6 +832,7 @@ describe "Server", ->
             strategy: "http"
             visiting: false
             domainName: "apple.com"
+            fileServer: null
             props: {
               domain: "apple"
               tld: "com"
@@ -846,6 +865,7 @@ describe "Server", ->
             strategy: "file"
             visiting: false
             domainName: "localhost"
+            fileServer: @fileServer
             props: null
           })
         .then =>
@@ -879,6 +899,7 @@ describe "Server", ->
               origin: "https://www.apple.com"
               strategy: "http"
               visiting: false
+              fileServer: null
               domainName: "apple.com"
               props: {
                 domain: "apple"

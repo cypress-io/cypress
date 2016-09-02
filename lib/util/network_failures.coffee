@@ -19,7 +19,7 @@ module.exports = {
     #{err.stack}
     """
 
-  file: (err, url, status) ->
+  file: (url, status) ->
     """
     Cypress errored trying to serve this file from your system:
 
@@ -31,5 +31,5 @@ module.exports = {
   get: (err, url, status, strategy) ->
     switch strategy
       when "http" then @http(err, url)
-      when "file" then @file(err, url, status)
+      when "file" then @file(url, status)
 }

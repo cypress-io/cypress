@@ -44,7 +44,7 @@ stopServer = ->
   new Promise (resolve) ->
     srv.close(resolve)
 
-describe.only "e2e cache", ->
+describe "e2e cache", ->
   beforeEach ->
     Fixtures.scaffold()
 
