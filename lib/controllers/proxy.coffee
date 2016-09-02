@@ -184,15 +184,15 @@ module.exports = {
 
     return thr
 
-  setResHeaders: (req, res, incomingRes, isInitial) ->
+  setResHeaders: (req, res, incomingRes, wantsInjection) ->
     ## omit problematic headers
     headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length", "content-security-policy"
 
-    ## do not cache the initial responses, no matter what
+    ## do not cache when we inject content into responses
     ## later on we should switch to an etag system so we dont
     ## have to download the remote http responses if the etag
     ## hasnt changed
-    if isInitial
+    if wantsInjection
       headers["cache-control"] = "no-cache, no-store, must-revalidate"
 
     ## proxy the headers
