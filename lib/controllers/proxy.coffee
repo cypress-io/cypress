@@ -12,6 +12,7 @@ urlHelpers    = require("url")
 cwd           = require("../cwd")
 logger        = require("../logger")
 cors          = require("../util/cors")
+inject        = require("../util/inject")
 buffers       = require("../util/buffers")
 escapeRegExp  = require("../util/escape_regexp")
 send          = require("send")
@@ -155,14 +156,7 @@ module.exports = {
             encoding = incomingRes.headers["content-encoding"]
 
             rewrite = (body) =>
-              body = body.toString()
-
-              switch wantsInjection
-                when "full"
-                  @rewrite(body, remoteState, "initial")
-
-                when "partial"
-                  @rewrite(body, remoteState)
+              @rewrite(body.toString(), remoteState, wantsInjection)
 
             ## if we're gzipped that means we need to unzip
             ## this content first, inject, and the rezip
@@ -268,14 +262,7 @@ module.exports = {
         str.pipe(thr)
       else
         @concatThrough str, thr, (body) =>
-          switch wantsInjection
-            when "full"
-              body = @rewrite(body, remoteState, "initial")
-
-            when "partial"
-              body = @rewrite(body, remoteState)
-
-          return body
+          @rewrite(body, remoteState, wantsInjection)
         .pipe(thr)
 
     res.set("x-cypress-file-path", file)
@@ -346,16 +333,16 @@ module.exports = {
     str.pipe tstr (body) ->
       thr.end fn(body)
 
-  rewrite: (html, remoteState, type) ->
+  rewrite: (html, remoteState, wantsInjection) ->
     rewrite = (re, str) ->
       html.replace(re, str)
 
     htmlToInject = do =>
-      switch type
-        when "initial"
-          @getHeadContent(remoteState.domainName)
-        else
-          @getDocumentDomainContent(remoteState.domainName)
+      switch wantsInjection
+        when "full"
+          inject.full(remoteState.domainName)
+        when "partial"
+          inject.partial(remoteState.domainName)
 
     switch
       when headRe.test(html)
@@ -369,29 +356,4 @@ module.exports = {
 
       else
         "<head> #{htmlToInject} </head>" + html
-
-  getDocumentDomainContent: (domain) ->
-    "
-      <script type='text/javascript'>
-        document.domain = '#{domain}';
-      </script>
-    "
-
-  getHeadContent: (domain) ->
-    "
-      <script type='text/javascript'>
-        document.domain = '#{domain}';
-        window.onerror = function(){
-          parent.onerror.apply(parent, arguments);
-        }
-      </script>
-      <script type='text/javascript' src='/__cypress/static/js/sinon.js'></script>
-      <script type='text/javascript'>
-        var Cypress = parent.Cypress;
-        if (!Cypress){
-          throw new Error('Cypress must exist in the parent window!');
-        };
-        Cypress.onBeforeLoad(window);
-      </script>
-    "
 }
