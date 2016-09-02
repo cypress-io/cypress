@@ -1,29 +1,22 @@
 _             = require("lodash")
-fs            = require("fs")
-mime          = require("mime")
-path          = require("path")
 zlib          = require("zlib")
-jsUri         = require("jsuri")
 concat        = require("concat-stream")
 request       = require("request")
 through       = require("through")
-through2      = require("through2")
-urlHelpers    = require("url")
+Promise       = require("bluebird")
 cwd           = require("../cwd")
 logger        = require("../logger")
 cors          = require("../util/cors")
 inject        = require("../util/inject")
 buffers       = require("../util/buffers")
-escapeRegExp  = require("../util/escape_regexp")
-send          = require("send")
+networkFailures = require("../util/network_failures")
 
 headRe           = /(<head.*?>)/i
 bodyRe           = /(<body.*?>)/i
 htmlRe           = /(<html.*?>)/i
 okStatusRe       = /^[2|3|4]\d+$/
 
-convertNewLinesToBr = (text) ->
-  text.split("\n").join("<br />")
+zlib = Promise.promisifyAll(zlib)
 
 setCookie = (res, key, val, domainName) ->
   ## cannot use res.clearCookie because domain
@@ -67,25 +60,10 @@ module.exports = {
 
     thr = through (d) -> @queue(d)
 
-    @getContent(thr, req, res, remoteState, config)
-      # .on "error", (e) => @errorHandler(e, req, res, remoteState)
-      .pipe(res)
+    @getHttpContent(thr, req, res, remoteState, config)
+    .pipe(res)
 
-  getContent: (thr, req, res, remoteState, config) ->
-    ## serve from the file system because
-    ## we are using cypress as our weberver
-    ## only if we are on file strategy and
-    ## this request does indeed match the
-    ## remote origin
-    if remoteState.strategy is "file" and (req.proxiedUrl.startsWith(remoteState.origin) or remoteState.visiting)
-      @getFileContent(thr, req, res, remoteState, config)
-
-    ## else go make an HTTP request to the
-    ## real server!
-    else
-      @getHttpContent(thr, req, res, remoteState)
-
-  getHttpContent: (thr, req, res, remoteState) ->
+  getHttpContent: (thr, req, res, remoteState, config) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
     ## prepends req.url with remoteState.origin
@@ -112,7 +90,7 @@ module.exports = {
       setCookie(res, "__cypress.initial", value, remoteState.domainName)
 
     onResponse = (str, incomingRes, wantsInjection) =>
-      @setResHeaders(req, res, incomingRes, isInitial)
+      @setResHeaders(req, res, incomingRes, wantsInjection)
 
       ## always proxy the cookies coming from the incomingRes
       if cookies = incomingRes.headers["set-cookie"]
@@ -152,60 +130,46 @@ module.exports = {
         if not wantsInjection
           str.pipe(thr)
         else
-          @concatStream str, thr, (body, cb) =>
-            encoding = incomingRes.headers["content-encoding"]
+          rewrite = (body) =>
+            @rewrite(body.toString(), remoteState, wantsInjection)
 
-            rewrite = (body) =>
-              @rewrite(body.toString(), remoteState, wantsInjection)
+          injection = concat (body) =>
+            encoding = incomingRes.headers["content-encoding"]
 
             ## if we're gzipped that means we need to unzip
             ## this content first, inject, and the rezip
             if encoding and encoding.includes("gzip")
-              zlib.gunzip body, (err, unzipped) ->
-                if err
-                  httpRequestErr(err)
-                else
-                  ## get the body as a string now
-                  body = rewrite(unzipped)
-
-                  ## zip it back up
-                  zlib.gzip body, (err, zipped) ->
-                    if err
-                      httpRequestErr(err)
-                    else
-                      cb(zipped)
+              zlib.gunzipAsync(body)
+              .then(rewrite)
+              .then(gzlib.gzipAsync)
+              .then(thr.end)
+              .catch(httpRequestErr)
             else
-              cb rewrite(body)
+              thr.end rewrite(body)
+
+          str.pipe(injection)
 
     if obj = buffers.take(remoteUrl)
       onResponse(obj.stream, obj.response, "full")
     else
-      opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
+      # opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
+      opts = {followRedirect: false, strictSSL: false}
+
+      if remoteState.strategy is "file" and req.proxiedUrl.startsWith(remoteState.origin)
+        opts.url = req.proxiedUrl.replace(remoteState.origin, remoteState.fileServer)
+      else
+        opts.url = remoteUrl
 
       httpRequestErr = (err) =>
         status = err.status ? 500
 
+        html = networkFailures.get(err, opts.url, status, remoteState.strategy)
+
         logger.info("request failed", {url: remoteUrl, status: status, err: err.message})
-
-        text = """
-        Cypress errored attempting to make an http request to this url:
-
-        #{remoteUrl}
-
-
-        The error was:
-
-        #{err.message}
-
-
-        The stack trace was:
-
-        #{err.stack}
-        """
 
         res
         .status(status)
-        .send(convertNewLinesToBr(text))
+        .send(html)
 
       rq = request(opts)
 
@@ -220,85 +184,6 @@ module.exports = {
 
     return thr
 
-  getFileContent: (thr, req, res, remoteState, config) ->
-    args = _.compact([
-      config.fileServerFolder,
-      req.url
-    ])
-
-    ## strip off any query params from our req's url
-    ## since we're pulling this from the file system
-    ## it does not understand query params
-    ## and make sure we decode the uri which swaps out
-    ## %20 with white space
-    file = decodeURI urlHelpers.parse(path.join(args...)).pathname
-
-    logger.info "getting static file content", file: file
-
-    ext = path.extname(file)
-
-    isInitial = req.cookies["__cypress.initial"] is "true"
-
-    ## ext will be blank when requesting a folder
-    ## which could serve an index.html file
-    isHtml = [".html", ".htm", ""].some (str) ->
-      ext is str
-
-    onResponse = (str, wantsInjection) =>
-      if remoteState.visiting
-        wantsInjection = false
-
-      wantsInjection ?= do ->
-        return false if not isHtml
-
-        if isInitial then "full" else "partial"
-
-      if isInitial and wantsInjection
-        setCookie(res, "__cypress.initial", false, remoteState.domainName)
-
-      ## if the files extname isnt html or the __cypress.initial
-      ## isnt true then bypass concatThrough and just pipe directly
-      if not wantsInjection
-        str.pipe(thr)
-      else
-        @concatThrough str, thr, (body) =>
-          @rewrite(body, remoteState, wantsInjection)
-        .pipe(thr)
-
-    res.set("x-cypress-file-path", file)
-
-    if obj = buffers.take(req.proxiedUrl)
-      return onResponse(obj.stream, "full")
-
-    staticFileErr = (err) =>
-      status = err.status ? 500
-
-      logger.info("static file failed", {err: err.message, status: status})
-
-      text = """
-      Cypress errored trying to serve this file from your system:
-
-      #{file}
-
-      #{if status is 404 then "The file was not found." else ""}
-      """
-
-      res
-      .status(status)
-      .send(convertNewLinesToBr(text))
-
-    sendOpts = {
-      root: path.resolve(config.fileServerFolder)
-      transform: onResponse
-    }
-
-    if not isInitial
-      sendOpts.etag = true
-      sendOpts.lastModified = true
-
-    send(req, urlHelpers.parse(req.url).pathname, sendOpts)
-    .on("error", staticFileErr)
-
   setResHeaders: (req, res, incomingRes, isInitial) ->
     ## omit problematic headers
     headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length", "content-security-policy"
@@ -312,26 +197,6 @@ module.exports = {
 
     ## proxy the headers
     res.set(headers)
-
-  concatStream: (str, thr, fn) ->
-    str.pipe concat (body) ->
-
-      fn body, (html) ->
-        thr.end(html)
-
-  concatThrough: (str, thr, fn) ->
-    buffer = ""
-
-    tstr = (fn) ->
-      through2 (chunk, enc, cb) ->
-        buffer += chunk.toString()
-
-        cb()
-      .on "end", ->
-        fn(buffer)
-
-    str.pipe tstr (body) ->
-      thr.end fn(body)
 
   rewrite: (html, remoteState, wantsInjection) ->
     rewrite = (re, str) ->
