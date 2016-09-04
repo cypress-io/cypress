@@ -20,3 +20,45 @@ describe "subdomains", ->
         document.cookie = "foo=bar"
       .getCookies().then (cookies) ->
         expect(cookies.length).to.eq(3)
+
+  it "issue: #207: does not duplicate or hostOnly cookies as a domain cookie", ->
+    cy
+      .visit("http://session.foobar.com:2292")
+      .getCookies().should("have.length", 1)
+      .window().then (win) ->
+        new Cypress.Promise (resolve) ->
+          xhr = new win.XMLHttpRequest
+          xhr.open("GET", "/cookies")
+          xhr.send()
+          xhr.onload = ->
+            resolve(JSON.parse(xhr.response).cookie)
+      .then (cookie) ->
+        ## there should have been only a single secret-session
+        ## request cookie sent on this XHR request
+        occurences = Cypress._.compact(cookie.split("secret-session"))
+        expect(occurences).to.have.length(1)
+
+  it "corrects sets domain based cookies", ->
+    cy
+      .visit("http://domain.foobar.com:2292")
+      .getCookies().should("have.length", 1)
+      .getCookie("nomnom").should("deep.eq", {
+        domain: ".foobar.com"
+        name: "nomnom"
+        value: "good"
+        path: "/"
+        secure: false
+        httpOnly: false
+      })
+      .window().then (win) ->
+        new Cypress.Promise (resolve) ->
+          xhr = new win.XMLHttpRequest
+          xhr.withCredentials = true
+          xhr.open("GET", "http://www.foobar.com:2292/cookies")
+          xhr.send()
+          xhr.onload = ->
+            resolve(JSON.parse(xhr.response).cookie)
+      .then (cookie) ->
+        ## only a single nomnom cookie should have been sent
+        ## since we set a domain cookie that matches this request
+        expect(cookie).to.eq("nomnom=good")

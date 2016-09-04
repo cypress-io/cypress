@@ -2,10 +2,12 @@ require("../spec_helper")
 
 _        = require("lodash")
 fs       = require("fs-extra")
+cors     = require("cors")
 http     = require("http")
 morgan   = require("morgan")
 parser   = require("cookie-parser")
 express  = require("express")
+session  = require("express-session")
 Promise  = require("bluebird")
 Fixtures = require("../helpers/fixtures")
 user     = require("#{root}lib/user")
@@ -35,25 +37,56 @@ getIndex = ->
   </html>
   """
 
-getHelp = ->
+getText = (text) ->
   """
   <!DOCTYPE html>
   <html>
   <head>
   </head>
   <body>
-    <h1>Help</h1>
+    <h1>#{text}</h1>
   </body>
   </html>
   """
 
-app.get "*", (req, res) ->
+applySession = session({
+  name: "secret-session"
+  secret: "secret"
+  cookie: {
+    sameSite: true
+  }
+})
+
+app.get "/cookies*", cors({origin: true, credentials: true}), (req, res) ->
+  res.json({
+    cookie: req.headers["cookie"]
+    parsed: req.cookie
+  })
+
+app.get "*", (req, res, next) ->
   res.set('Content-Type', 'text/html');
 
-  getHtml = ->
+  getHtml = =>
     switch h = req.get("host")
-      when "www.foobar.com:2292"  then getIndex()
-      when "help.foobar.com:2292" then getHelp()
+      when "www.foobar.com:2292"
+        getIndex()
+
+      when "help.foobar.com:2292"
+        getText("Help")
+
+      when "session.foobar.com:2292"
+        applySession(req, res, next)
+
+        getText("Session")
+
+      when "domain.foobar.com:2292"
+        res.cookie("nomnom", "good", {
+          name: "domain-cookie"
+          domain: ".foobar.com"
+        })
+
+        getText("Domain")
+
       else
         throw new Error("Host: '#{h}' not recognized")
 
