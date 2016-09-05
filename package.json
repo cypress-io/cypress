@@ -12,6 +12,7 @@
     "release": "releaser"
   },
   "files": [
+    "app",
     "dist",
     "lib",
     "theme"
