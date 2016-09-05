@@ -36,6 +36,9 @@ npm run watch
 
 ## Changelog
 
+#### 0.3.3 - *(09/05/16)*
+- include missing app folder in release
+
 #### 0.3.2 - *(09/05/16)*
 - reject tabs which dont start with http
 
