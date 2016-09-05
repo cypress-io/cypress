@@ -1,9 +1,10 @@
-_       = require("lodash")
-r       = require("request")
-rp      = require("request-promise")
-tough   = require("tough-cookie")
-moment  = require("moment")
-Promise = require("bluebird")
+_         = require("lodash")
+r         = require("request")
+rp        = require("request-promise")
+tough     = require("tough-cookie")
+moment    = require("moment")
+Promise   = require("bluebird")
+extension = require("@cypress/core-extension")
 
 Cookie = tough.Cookie
 CookieJar = tough.CookieJar
@@ -92,6 +93,18 @@ module.exports = {
       #   creation: '2016-09-04T18:48:06.882Z',
       #   lastAccessed: '2016-09-04T18:48:06.882Z',
       #   name: 'secret-session' }
+      #
+      # { key: '2293-session',
+      #   value: 'true',
+      #   domain: 'localhost',
+      #   path: '/',
+      #   hostOnly: true,
+      #   creation: '2016-09-05T03:03:20.780Z',
+      #   lastAccessed: '2016-09-05T03:03:20.780Z',
+      #   name: '2293-session' }
+
+      ## lets construct the url ourselves right now
+      cookie.url = extension.getCookieUrl(cookie)
 
       ## https://github.com/SalesforceEng/tough-cookie#setcookiecookieorstring-currenturl-options-cberrcookie
       ## a host only cookie is when domain was not explictly

@@ -9,7 +9,9 @@ module.exports = {
 
   set: (cookies, props = {}) ->
     cookies = @promisify(cookies)
-    props.url = extension.getCookieUrl(props)
+
+    ## only get the url if its not already set
+    props.url ?= extension.getCookieUrl(props)
 
     cookies.setAsync(props)
 

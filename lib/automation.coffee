@@ -8,7 +8,7 @@ charAfterColonRe = /:(.)/
 
 ## match the w3c webdriver spec on return cookies
 ## https://w3c.github.io/webdriver/webdriver-spec.html#cookies
-COOKIE_PROPERTIES = "name value path domain secure httpOnly expiry".split(" ")
+COOKIE_PROPERTIES = "url name value path domain secure httpOnly expiry".split(" ")
 
 needsMiddleware = (message) ->
   message in middlewareMesssages
@@ -20,7 +20,11 @@ normalizeCookieProps = (data) ->
   return data if not data
 
   ## pick off only these specific cookie properties
-  cookie = _.pick(data, COOKIE_PROPERTIES)
+  ## only if they are defined
+  cookie = _.chain(data, COOKIE_PROPERTIES)
+  .pick(COOKIE_PROPERTIES)
+  .omitBy(_.isUndefined)
+  .value()
 
   ## when sending cookie data we need to convert
   ## expiry to expirationDate
