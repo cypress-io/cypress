@@ -134,8 +134,11 @@ module.exports = {
       ## is the one that matches our id!
       project.on "socket:connected", fn
 
-  waitForTestsToFinishRunning: (project) ->
+  waitForTestsToFinishRunning: (project, gui) ->
     new Promise (resolve, reject) ->
+      ## dont ever end if we're in 'gui' debugging mode
+      return if gui
+
       ## when our project fires its end event
       ## resolve the promise
       project.once "end", resolve
@@ -148,7 +151,7 @@ module.exports = {
     ## to gracefully handle this in promise land
     Promise.props({
       connection: @waitForRendererToConnect(project, id)
-      stats:      @waitForTestsToFinishRunning(project)
+      stats:      @waitForTestsToFinishRunning(project, gui)
       renderer:   @createRenderer(url, proxyServer, gui)
     })
 
