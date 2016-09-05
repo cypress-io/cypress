@@ -67,7 +67,28 @@ tab2 = {
   "selected": true,
   "status": "complete",
   "title": "foobar",
-  "url": "http://localhost:2020/__/#tests",
+  "url": "https://localhost:2020/__/#tests",
+  "width": 1920,
+  "windowId": 1
+}
+
+tab3 = {
+  "active": true,
+  "audible": false,
+  "favIconUrl": "http://localhost:2020/__cypress/static/img/favicon.ico",
+  "height": 553,
+  "highlighted": true,
+  "id": 2,
+  "incognito": false,
+  "index": 1,
+  "mutedInfo": {
+    "muted": false
+  },
+  "pinned": false,
+  "selected": true,
+  "status": "complete",
+  "title": "foobar",
+  "url": "about:blank",
   "width": 1920,
   "windowId": 1
 }
@@ -189,6 +210,20 @@ describe "app/background", ->
         string: "1234"
         element: "__cypress-string"
       })
+
+    it "filters out tabs that don't start with http", ->
+      @sandbox.stub(chrome.tabs, "query")
+      .yieldsAsync([tab3])
+
+      background.query({
+        string: "1234"
+        element: "__cypress-string"
+      })
+      .then ->
+        throw new Error("should have failed")
+      .catch (err) ->
+        ## we good if this hits
+        expect(err).to.be.instanceof(Promise.RangeError)
 
     it "rejects if no tab matches", ->
       @sandbox.stub(chrome.tabs, "query")

@@ -6,6 +6,8 @@ Promise = require("bluebird")
 HOST = "CHANGE_ME_HOST"
 PATH = "CHANGE_ME_PATH"
 
+httpRe = /^http/
+
 firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null
@@ -157,6 +159,12 @@ automation = {
             reject(new Error)
 
     query()
+    .filter (tab) ->
+      ## the tab's url must begin with
+      ## http or https so that we filter out
+      ## about:blank and chrome:// urls
+      ## which will throw errors!
+      httpRe.test(tab.url)
     .then (tabs) ->
       ## generate array of promises
       map(tabs, queryTab)
