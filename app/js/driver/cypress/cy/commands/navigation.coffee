@@ -459,7 +459,10 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                 .setQuery(existing.search)
                 .setAnchor(existing.hash)
 
-                @_replace(window, newUri.toString())
+                ## replace is broken in electron so switching
+                ## to href for now
+                # @_replace(window, newUri.toString())
+                @_href(window, newUri.toString())
           .catch gotResponse, (err) ->
             visitFailedByErr err, err.originalUrl, ->
               args = {
@@ -487,17 +490,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                 }
               })
 
-        ## if we're visiting a page and we're not currently
-        ## on about:blank then we need to nuke the window
-        ## and after its nuked then visit the url
-        if @_getLocation("href", win) isnt "about:blank"
-          $remoteIframe.one "load", =>
-            visit(win, url, options)
-
-          @_href(win, "about:blank")
-
-        else
-          visit(win, url, options)
+        visit(win, url, options)
 
       p
       .timeout(options.timeout)
