@@ -36,6 +36,9 @@ npm run watch
 
 ## Changelog
 
+#### 0.3.2 - *(09/05/16)*
+- reject tabs which dont start with http
+
 #### 0.3.1 - *(06/28/16)*
 - remove querying by tab url
 
