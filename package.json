@@ -4,13 +4,18 @@
   "description": "Cypress Chrome Extension",
   "main": "index.js",
   "scripts": {
-    "start": "npm run build",
+    "start": "npm run build && npm run watch",
     "watch": "gulp watch",
     "build": "gulp build",
     "test": "NODE_ENV=test mocha",
     "prerelease": "npm run build",
     "release": "releaser"
   },
+  "files": [
+    "dist",
+    "lib",
+    "theme"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cypress-io/cypress-core-extension.git"
