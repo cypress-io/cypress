@@ -1,11 +1,12 @@
 export default (props) => {
   const getStatus = () => {
-    const {status, statusText} = props
+    const { status, statusText, contentType } = props
 
-    if (!status)
+    if (!status) {
       return ''
+    }
 
-    return `<p>${status} - ${statusText}</p>`
+    return `<p>${status} - ${statusText} (${contentType})</p>`
   }
 
   return `
