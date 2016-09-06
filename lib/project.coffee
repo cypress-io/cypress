@@ -141,7 +141,7 @@ class Project extends EE
     ## if we've passed down reporter
     ## then record these via mocha reporter
     if config.report
-      reporter = Reporter.create(config.reporter, config.projectRoot)
+      reporter = Reporter.create(config.reporter, config.reporterOptions, config.projectRoot)
 
     @server.startWebsockets(@watchers, config, {
       onReloadBrowser: options.onReloadBrowser

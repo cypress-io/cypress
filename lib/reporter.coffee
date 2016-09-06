@@ -51,7 +51,7 @@ reporters = {
 }
 
 class Reporter
-  constructor: (reporterName = "spec", projectRoot) ->
+  constructor: (reporterName = "spec", reporterOptions = {}, projectRoot) ->
     if not (@ instanceof Reporter)
       return new Reporter(reporterName)
 
@@ -63,11 +63,14 @@ class Reporter
       reporter = @reporterName
 
     if @reporterName is "junit"
-      process.env.MOCHA_FILE ||= path.join(projectRoot, "test-result.xml")
+      ## TODO: how should we handle other options for arbitrary
+      ## reporters that may need a path scoped to the project?
+      mochaFile = reporterOptions.mochaFile or "test-result.xml"
+      reporterOptions.mochaFile = path.join(projectRoot, mochaFile)
 
     @mocha    = new Mocha({reporter: reporter})
     @runner   = new Mocha.Runner(@mocha.suite)
-    @reporter = new @mocha._reporter(@runner, {})
+    @reporter = new @mocha._reporter(@runner, {reporterOptions})
 
     @runnables = {}
 
@@ -107,7 +110,7 @@ class Reporter
   stats: ->
     _.extend {reporter: @reporterName}, _.pick(@reporter.stats, STATS)
 
-  @create = (reporterName, projectRoot) ->
-    new Reporter(reporterName, projectRoot)
+  @create = (reporterName, reporterOptions, projectRoot) ->
+    new Reporter(reporterName, reporterOptions, projectRoot)
 
 module.exports = Reporter

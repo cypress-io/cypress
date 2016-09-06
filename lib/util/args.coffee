@@ -45,6 +45,7 @@ module.exports = {
         "env":         "environmentVariables"
         "show-headless-gui":"showHeadlessGui"
         "exit-with-code": "exitWithCode"
+        "reporter-options": "reporterOptions"
       }
     })
 
@@ -69,6 +70,10 @@ module.exports = {
     if envs = options.environmentVariables
       backup("environmentVariables", options)
       options.environmentVariables = parseNestedValues(envs)
+
+    if ro = options.reporterOptions
+      backup("reporterOptions", options)
+      options.reporterOptions = parseNestedValues(ro)
 
     if c = options.config
       backup("config", options)
