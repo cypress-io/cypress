@@ -2,7 +2,7 @@
   "name": "@cypress/core-desktop-gui",
   "version": "0.3.4",
   "description": "Desktop GUI for managing Cypress projects.",
-  "main": "index.js",
+  "main": "lib/gui.js",
   "scripts": {
     "build-dev": "zunder build-dev",
     "build-prod": "zunder build-prod",
@@ -22,8 +22,10 @@
     "url": "https://github.com/cypress-io/cypress-core-desktop-gui/issues"
   },
   "homepage": "https://github.com/cypress-io/cypress-core-desktop-gui",
-  "dependencies": {
-  },
+  "files": [
+    "dist",
+    "lib"
+  ],
   "devDependencies": {
     "@cypress/core-icons": "^0.5.0",
     "@cypress/core-releaser": "0.1.8",
