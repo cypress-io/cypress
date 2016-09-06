@@ -95,7 +95,7 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
           args: { cmd: "writeFile", file: fileName }
         })
 
-      if not contents or not (_.isString(contents) or _.isObject(contents))
+      if not (_.isString(contents) or _.isObject(contents))
         $Cypress.Utils.throwErrByPath("files.invalid_contents", {
           onFail: options._log,
           args: { contents: contents }

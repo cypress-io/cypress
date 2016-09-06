@@ -290,21 +290,6 @@ describe "$Cypress.Cy Files Commands", ->
 
         @cy.writeFile("foo.txt")
 
-      it "throws when contents argument is an empty string", (done) ->
-        logs = []
-
-        @Cypress.on "log", (@log) =>
-          logs.push(log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
-          expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.writeFile() must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: ''.")
-          done()
-
-        @cy.writeFile("foo.txt", "")
-
       it "throws when contents argument is not a string, object, or array", (done) ->
         logs = []
 
