@@ -111,7 +111,10 @@ describe "$Cypress.Cy Files Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.readFile(\"foo\") failed with the following error: EISDIR: illegal operation on a directory, read")
+          expect(err.message).to.eq """cy.readFile(\"foo\") failed with the following error:
+
+            > "EISDIR: illegal operation on a directory, read"
+          """
           done()
 
         @cy.readFile("foo")
@@ -329,7 +332,10 @@ describe "$Cypress.Cy Files Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.writeFile(\"foo.txt\") failed with the following error: WHOKNOWS: unable to write file")
+          expect(err.message).to.eq """cy.writeFile(\"foo.txt\") failed with the following error:
+
+            > "WHOKNOWS: unable to write file"
+          """
           done()
 
         @cy.writeFile("foo.txt", "contents")

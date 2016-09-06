@@ -135,7 +135,7 @@ describe "$Cypress.Cy Exec Command", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.exec('ls') failed with the following error: exec failed")
+          expect(err.message).to.eq("cy.exec('ls') failed with the following error:\n\n> \"exec failed\"")
           done()
 
         @cy.exec("ls")
