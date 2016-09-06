@@ -4,10 +4,13 @@
   "description": "Desktop GUI for managing Cypress projects.",
   "main": "index.js",
   "scripts": {
-    "build": "zunder build-prod",
-    "start": "rm -rf dist && zunder watch",
+    "build-dev": "zunder build-dev",
+    "build-prod": "zunder build-prod",
+    "prod": "zunder build-prod && zunder serve-prod",
+    "server": "zunder serve-prod --port 8000",
+    "start": "zunder watch",
     "release": "releaser",
-    "test": "npm start & cypress run"
+    "test": "npm run build-prod && npm run server & cypress run"
   },
   "repository": {
     "type": "git",
@@ -48,6 +51,6 @@
     "gulp-concat": "^2.6.0",
     "jquery": "3.1.0",
     "mobx-react-devtools": "^4.2.0",
-    "zunder": "^3.4.5"
+    "zunder": "^3.4.10"
   }
 }
