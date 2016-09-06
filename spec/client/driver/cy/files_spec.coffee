@@ -25,24 +25,24 @@ describe "$Cypress.Cy Files Commands", ->
       @cy.readFile("foo.json", "ascii")
 
     it "sets the contents as the subject", ->
-        @respondWith("contents")
+        @respondWith({ contents: "contents" })
 
         @cy.readFile('foo.json').then (subject) ->
           expect(subject).to.equal("contents")
 
     describe ".log", ->
       it "can turn off logging", ->
-        @respondWith("contents")
+        @respondWith({ contents: "contents" })
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.readFile('foo.json', { log: false }).then ->
           expect(@log).to.be.undefined
 
       it "logs immediately before resolving", ->
-        @respondWith("contents")
+        @respondWith({ contents: "contents" })
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           expect(@log.get("state")).to.eq("pending")
           expect(@log.get("message")).to.eq("foo.json")
 
@@ -57,7 +57,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "throws when file argument is absent", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -72,7 +72,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "throws when file argument is not a string", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -87,7 +87,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "throws when file argument is an empty string", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -100,36 +100,46 @@ describe "$Cypress.Cy Files Commands", ->
         @cy.readFile("")
 
       it "throws when there is an error reading the file", (done) ->
-        @respondWith({ __error: { code: "EISDIR", message: "EISDIR: illegal operation on a directory, read" } })
+        @respondWith({ __error: { code: "EISDIR", message: "EISDIR: illegal operation on a directory, read", filePath: "/path/to/foo" } })
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.readFile(\"foo\") failed with the following error: EISDIR: illegal operation on a directory, read")
+          expect(err.message).to.eq """cy.readFile(\"foo\") failed while trying to read the file at the following path:
+
+            /path/to/foo
+
+          The following error occurred:
+
+            > "EISDIR: illegal operation on a directory, read"
+          """
           done()
 
         @cy.readFile("foo")
 
       it "has implicit existence assertion and throws a specific error when file does not exist", (done) ->
         @Cypress.on "read:file", (file, options, cb) ->
-          cb({ __error: { code: "ENOENT", message: "ENOENT: no such file or directory, open 'foo.json'" } })
+          cb({ __error: { code: "ENOENT", message: "ENOENT: no such file or directory, open 'foo.json'", filePath: "/path/to/foo.json" } })
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("Timed out retrying: cy.readFile(\"foo.json\") failed because the file does not exist.")
+          expect(err.message).to.eq("""Timed out retrying: cy.readFile(\"foo.json\") failed because the file does not exist at the following path:
+
+            /path/to/foo.json
+          """)
           @Cypress.off "read:file"
           done()
 
@@ -137,18 +147,21 @@ describe "$Cypress.Cy Files Commands", ->
 
       it "throws a specific error when file exists when it shouldn't", (done) ->
         @Cypress.on "read:file", (file, options, cb) ->
-          cb("contents")
+          cb({ contents: "contents", filePath: "/path/to/foo.json" })
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("Timed out retrying: cy.readFile(\"foo.json\") failed because the file exists when expected not to exist.")
+          expect(err.message).to.eq("""Timed out retrying: cy.readFile(\"foo.json\") failed because the file exists when expected not to exist at the following path:
+
+            /path/to/foo.json
+          """)
           @Cypress.off "read:file"
           done()
 
@@ -156,11 +169,11 @@ describe "$Cypress.Cy Files Commands", ->
 
       it "passes through assertion error when not about existence", ->
         @Cypress.on "read:file", (file, options, cb) ->
-          cb("contents")
+          cb({ contents: "contents", filePath: "/path/to/foo.json" })
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -198,39 +211,39 @@ describe "$Cypress.Cy Files Commands", ->
       @cy.writeFile("foo.txt", "contents", "ascii")
 
     it "sets the contents as the subject", ->
-      @respondWith("contents")
+      @respondWith({ contents: "contents" })
 
       @cy.writeFile("foo.txt", "contents").then (subject) ->
         expect(subject).to.equal("contents")
 
     it "can write a string", ->
-      @respondWith("contents")
+      @respondWith({ contents: "contents" })
 
       @cy.writeFile("foo.txt", "contents")
 
     it "can write an array as json", ->
-      @respondWith("contents")
+      @respondWith({ contents: "contents" })
 
       @cy.writeFile("foo.json", [])
 
     it "can write an object as json", ->
-      @respondWith("contents")
+      @respondWith({ contents: "contents" })
 
       @cy.writeFile("foo.json", {})
 
     describe ".log", ->
       it "can turn off logging", ->
-        @respondWith("contents")
+        @respondWith({ contents: "contents" })
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.writeFile("foo.txt", "contents", { log: false }).then ->
           expect(@log).to.be.undefined
 
       it "logs immediately before resolving", ->
-        @respondWith("contents")
+        @respondWith({ contents: "contents" })
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           expect(@log.get("state")).to.eq("pending")
           expect(@log.get("message")).to.eq("foo.txt", "contents")
 
@@ -245,7 +258,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "throws when file name argument is absent", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -260,7 +273,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "throws when file name argument is not a string", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -275,7 +288,7 @@ describe "$Cypress.Cy Files Commands", ->
       it "throws when contents argument is absent", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -287,25 +300,10 @@ describe "$Cypress.Cy Files Commands", ->
 
         @cy.writeFile("foo.txt")
 
-      it "throws when contents argument is an empty string", (done) ->
-        logs = []
-
-        @Cypress.on "log", (@log) =>
-          logs.push(log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
-          expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.writeFile() must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: ''.")
-          done()
-
-        @cy.writeFile("foo.txt", "")
-
       it "throws when contents argument is not a string, object, or array", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -318,18 +316,26 @@ describe "$Cypress.Cy Files Commands", ->
         @cy.writeFile("foo.txt", 2)
 
       it "throws when there is an error writing the file", (done) ->
-        @respondWith({ __error: { code: "WHOKNOWS", message: "WHOKNOWS: unable to write file" } })
+        @respondWith({ __error: { code: "WHOKNOWS", message: "WHOKNOWS: unable to write file", filePath: "/path/to/foo.txt" } })
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.writeFile(\"foo.txt\") failed with the following error: WHOKNOWS: unable to write file")
+          expect(err.message).to.eq """cy.writeFile(\"foo.txt\") failed while trying to write the file at the following path:
+
+            /path/to/foo.txt
+
+          The following error occurred:
+
+            > "WHOKNOWS: unable to write file"
+          """
+
           done()
 
         @cy.writeFile("foo.txt", "contents")

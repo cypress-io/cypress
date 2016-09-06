@@ -27,9 +27,12 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
         encoding: encoding ? "utf8"
         log: true
 
+      consoleProps = {}
+
       if options.log
         options._log = Cypress.Log.command({
           message: file
+          consoleProps: -> consoleProps
         })
 
       if not file or not _.isString(file)
@@ -42,15 +45,19 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
         readFile(file, _.pick(options, "encoding"))
         .catch (err) =>
           if err.code is 'ENOENT'
-            return null
+            return {
+              contents: null
+              filePath: err.filePath
+            }
           else
             $Cypress.Utils.throwErrByPath("files.unexpected_error", {
               onFail: options._log,
-              ## TODO: same thing here let's provide the absolute
-              ## path to the file instead of the relative
-              args: { cmd: "readFile", file, error: err.message }
+              args: { cmd: "readFile", action: "read", file, filePath: err.filePath, error: err.message }
             })
-        .then (contents) =>
+        .then ({ contents, filePath }) =>
+          consoleProps["File Path"] = filePath
+          consoleProps["Contents"] = contents
+
           @verifyUpcomingAssertions(contents, options, {
             ensureExistenceFor: "subject"
             onFail: (err) ->
@@ -58,10 +65,14 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
 
               if contents?
                 ## file exists but it shouldn't
-                err.displayMessage = $Cypress.Utils.errMessageByPath("files.existent", { file })
+                err.displayMessage = $Cypress.Utils.errMessageByPath("files.existent", {
+                  file, filePath
+                })
               else
                 ## file doesn't exist but it should
-                err.displayMessage = $Cypress.Utils.errMessageByPath("files.nonexistent", { file })
+                err.displayMessage = $Cypress.Utils.errMessageByPath("files.nonexistent", {
+                  file, filePath
+                })
             onRetry: verifyAssertions
           })
 
@@ -74,19 +85,12 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
         encoding: encoding ? "utf8"
         log: true
 
+      consoleProps = {}
+
       if options.log
         options._log = Cypress.Log.command({
           message: fileName
-          consoleProps: ->
-            {
-              ## TODO:
-              ## this should probably be the absolute path to
-              ## the file that was written instead of the relative
-              ## which we'll need to get back from the server
-              ## as the response over websockets
-              "File Name": fileName
-              "Contents": contents
-            }
+          consoleProps: -> consoleProps
         })
 
       if not fileName or not _.isString(fileName)
@@ -95,7 +99,7 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
           args: { cmd: "writeFile", file: fileName }
         })
 
-      if not contents or not (_.isString(contents) or _.isObject(contents))
+      if not (_.isString(contents) or _.isObject(contents))
         $Cypress.Utils.throwErrByPath("files.invalid_contents", {
           onFail: options._log,
           args: { contents: contents }
@@ -105,9 +109,11 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
         contents = JSON.stringify(contents, null, 2)
 
       writeFile(fileName, contents, _.pick(options, "encoding"))
-      ## TODO: this can just be .return(contents)
-      .then ->
-        contents
+      .then ({ contents, filePath }) ->
+        consoleProps["File Path"] = filePath
+        consoleProps["Contents"] = contents
+
+        return contents
       .catch Promise.TimeoutError, (err) ->
         $Cypress.Utils.throwErrByPath "files.timed_out", {
           onFail: options._log
@@ -116,5 +122,5 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
       .catch (err) ->
         $Cypress.Utils.throwErrByPath("files.unexpected_error", {
           onFail: options._log
-          args: { cmd: "writeFile", file: fileName, error: err.message }
+          args: { cmd: "writeFile", action: "write", file: fileName, filePath: err.filePath, error: err.message }
         })

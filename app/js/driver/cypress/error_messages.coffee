@@ -131,7 +131,10 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       variables_missing: "Cypress.environmentVariables is not defined. Open an issue if you see this message."
 
     exec:
-      failed: "#{cmd('exec', '\'{{cmd}}\'')} failed with the following error: {{error}}"
+      failed: """#{cmd('exec', '\'{{cmd}}\'')} failed with the following error:
+
+          > "{{error}}"
+      """
       invalid_argument: "#{cmd('exec')} must be passed a non-empty string as its 1st argument. You passed: '{{cmd}}'."
       non_zero_exit: """
         #{cmd('exec', '\'{{cmd}}\'')} failed because the command exited with a non-zero code.
@@ -145,13 +148,24 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       timed_out: "#{cmd('exec', '\'{{cmd}}\'')} timed out after waiting {{timeout}}ms."
 
     files:
-      ## TODO: these should likely be multi lines. Whenever we display error messages we always
-      ## space them out which makes them easier to read in the GUI + headlessly
-      unexpected_error:  "#{cmd('{{cmd}}', '"{{file}}"')} failed with the following error: {{error}}"
-      existent: "#{cmd('readFile', '"{{file}}"')} failed because the file exists when expected not to exist."
+      unexpected_error:  """#{cmd('{{cmd}}', '"{{file}}"')} failed while trying to {{action}} the file at the following path:
+
+        {{filePath}}
+
+      The following error occurred:
+
+        > "{{error}}"
+      """
+      existent: """#{cmd('readFile', '"{{file}}"')} failed because the file exists when expected not to exist at the following path:
+
+        {{filePath}}
+      """
       invalid_argument: "#{cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: '{{file}}'."
       invalid_contents: "#{cmd('writeFile')} must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: '{{contents}}'."
-      nonexistent: "#{cmd('readFile', '"{{file}}"')} failed because the file does not exist."
+      nonexistent: """#{cmd('readFile', '"{{file}}"')} failed because the file does not exist at the following path:
+
+        {{filePath}}
+      """
       timed_out: "#{cmd('{{cmd}}', '"{{file}}"')} timed out after waiting {{timeout}}ms."
 
     fill:
