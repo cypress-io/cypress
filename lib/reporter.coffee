@@ -63,10 +63,14 @@ class Reporter
       reporter = @reporterName
 
     if @reporterName is "junit"
-      ## TODO: how should we handle other options for arbitrary
-      ## reporters that may need a path scoped to the project?
-      mochaFile = reporterOptions.mochaFile or "test-result.xml"
-      reporterOptions.mochaFile = path.join(projectRoot, mochaFile)
+      reporterOptions.mochaFile = reporterOptions.mochaFile or "{{projectRoot}}/test-result.xml"
+
+    ## any reporter option could be a path, which we need to ensure is rooted
+    ## in the project, so we have the user prepend {{projectRoot}} to any
+    ## paths in the reporter options
+    _.each reporterOptions, (value, key) ->
+      if _.isString(value)
+        reporterOptions[key] = value.replace("{{projectRoot}}", projectRoot)
 
     @mocha    = new Mocha({reporter: reporter})
     @runner   = new Mocha.Runner(@mocha.suite)
