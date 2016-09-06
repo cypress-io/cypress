@@ -107,3 +107,14 @@ describe "e2e visit", ->
     exec.on "close", (code) ->
       expect(code).to.eq(1)
       done()
+
+  it "fails when content type isnt html", (done) ->
+    @timeout(30000)
+
+    exec = cp.exec "node index.js --run-project=#{e2ePath} --spec=cypress/integration/visit_non_html_content_type_failing_spec.coffee", {env: env}, (err, stdout, stderr) ->
+      expect(stdout).to.include("The content-type of the response we received from this local file was:")
+      expect(stdout).to.include("> text/plain")
+
+    exec.on "close", (code) ->
+      expect(code).to.eq(1)
+      done()

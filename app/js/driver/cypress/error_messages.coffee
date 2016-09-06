@@ -427,6 +427,24 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
           #{getRedirects(obj, "This http request was redirected")}
         """
+      loading_invalid_content_type: (obj) ->
+        phrase = if obj.path then "this local file" else "your web server"
+
+        """
+          #{cmd('visit')} failed trying to load:
+
+          #{obj.url}
+
+          The content-type of the response we received from #{phrase} was:
+
+            > #{obj.contentType}
+
+          This was considered a failure because responses must have content-type: 'text/html'
+
+          However, you can likely use #{cmd('request')} instead of #{cmd('visit')}.
+
+          #{cmd('request')} will automatically get and set cookies and enable you to parse responses.
+        """
 
     wait:
       alias_invalid: "'{{prop}}' is not a valid alias property. Are you trying to ask for the first request? If so write @{{str}}.request"

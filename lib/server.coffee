@@ -12,6 +12,7 @@ httpProxy    = require("http-proxy")
 httpsProxy   = require("@cypress/core-https-proxy")
 allowDestroy = require("server-destroy-vvo")
 cors         = require("./util/cors")
+headers      = require("./util/headers")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
 cwd          = require("./cwd")
@@ -317,11 +318,14 @@ class Server
 
               newUrl ?= urlStr
 
-              isOkay = isOkayStatusRe.test(incomingRes.statusCode)
+              isOkay      = isOkayStatusRe.test(incomingRes.statusCode)
+              contentType = headers.getContentType(incomingRes)
+              isHtml      = contentType is "text/html"
 
               details = {
-                ## TODO: get a status code message here?
-                ok: isOkay
+                isOk:   isOkay
+                isHtml: isHtml
+                contentType: contentType
                 url: newUrl
                 status: incomingRes.statusCode
                 cookies: c
@@ -335,7 +339,7 @@ class Server
                 ## if so we know this is a local file request
                 details.filePath = fp
 
-              if isOkay
+              if isOkay and isHtml
                 ## reset the domain to the new url if we're not
                 ## handling a local file
                 @_onDomainSet(newUrl) if not handlingLocalFile
