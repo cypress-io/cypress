@@ -148,14 +148,24 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       timed_out: "#{cmd('exec', '\'{{cmd}}\'')} timed out after waiting {{timeout}}ms."
 
     files:
-      unexpected_error:  """#{cmd('{{cmd}}', '"{{file}}"')} failed with the following error:
+      unexpected_error:  """#{cmd('{{cmd}}', '"{{file}}"')} failed while trying to {{action}} the file at the following path:
 
-          > "{{error}}"
+        {{filePath}}
+
+      The following error occurred:
+
+        > "{{error}}"
       """
-      existent: "#{cmd('readFile', '"{{file}}"')} failed because the file exists when expected not to exist."
+      existent: """#{cmd('readFile', '"{{file}}"')} failed because the file exists when expected not to exist at the following path:
+
+        {{filePath}}
+      """
       invalid_argument: "#{cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: '{{file}}'."
       invalid_contents: "#{cmd('writeFile')} must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: '{{contents}}'."
-      nonexistent: "#{cmd('readFile', '"{{file}}"')} failed because the file does not exist."
+      nonexistent: """#{cmd('readFile', '"{{file}}"')} failed because the file does not exist at the following path:
+
+        {{filePath}}
+      """
       timed_out: "#{cmd('{{cmd}}', '"{{file}}"')} timed out after waiting {{timeout}}ms."
 
     fill:
