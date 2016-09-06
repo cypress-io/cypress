@@ -6,5 +6,7 @@ setZunderConfig(z)
 
 u.series(
   z.applyTestEnv,
+  z.cleanTests,
+  z.buildDevScripts,
   z.runTests
 )()
