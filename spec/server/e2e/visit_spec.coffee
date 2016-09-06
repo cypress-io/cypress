@@ -1,14 +1,20 @@
 require("../spec_helper")
 
+_        = require("lodash")
+cp       = require("child_process")
 http     = require("http")
 morgan   = require("morgan")
 express  = require("express")
+Promise  = require("bluebird")
 Fixtures = require("../helpers/fixtures")
 user     = require("#{root}lib/user")
 cypress  = require("#{root}lib/cypress")
 Project  = require("#{root}lib/project")
 
+cp = Promise.promisifyAll(cp)
 e2ePath = Fixtures.projectPath("e2e")
+
+env = _.omit(process.env, "CYPRESS_DEBUG")
 
 app = express()
 
@@ -17,6 +23,9 @@ srv = http.Server(app)
 app.use(morgan("dev"))
 
 app.use(express.static(e2ePath))
+
+app.get "/fail", (req, res) ->
+  res.sendStatus(500)
 
 startServer = ->
   new Promise (resolve) ->
@@ -61,3 +70,40 @@ describe "e2e visit", ->
     cypress.start(["--run-project=#{e2ePath}", "--spec=cypress/integration/visit_spec.coffee"])
     .then ->
       expect(process.exit).to.be.calledWith(0)
+
+  it "fails when network connection immediately fails", (done) ->
+    @timeout(30000)
+
+    exec = cp.exec "node index.js --run-project=#{e2ePath} --spec=cypress/integration/visit_http_network_error_failing_spec.coffee", {env: env}, (err, stdout, stderr) ->
+      expect(stdout).to.include("http://localhost:16795")
+      expect(stdout).to.include("We attempted to make an http request to this URL but the request immediately failed without a response.")
+      expect(stdout).to.include("> Error: connect ECONNREFUSED 127.0.0.1:16795")
+
+    exec.on "close", (code) ->
+      expect(code).to.eq(1)
+      done()
+
+  it "fails when server responds with 500", (done) ->
+    @timeout(30000)
+
+    exec = cp.exec "node index.js --run-project=#{e2ePath} --spec=cypress/integration/visit_http_500_response_failing_spec.coffee", {env: env}, (err, stdout, stderr) ->
+      expect(stdout).to.include("http://localhost:3434/fail")
+      expect(stdout).to.include("The response we received from your web server was:")
+      expect(stdout).to.include("> 500: Server Error")
+
+    exec.on "close", (code) ->
+      expect(code).to.eq(1)
+      done()
+
+  it "fails when file server responds with 404", (done) ->
+    @timeout(30000)
+
+    exec = cp.exec "node index.js --run-project=#{e2ePath} --spec=cypress/integration/visit_file_404_response_failing_spec.coffee", {env: env}, (err, stdout, stderr) ->
+      expect(stdout).to.include(Fixtures.projectPath("e2e/static/does-not-exist.html"))
+      expect(stdout).to.include("We failed looking for this file at the path:")
+      expect(stdout).to.include("The internal Cypress web server responded with:")
+      expect(stdout).to.include("> 404: Not Found")
+
+    exec.on "close", (code) ->
+      expect(code).to.eq(1)
+      done()
