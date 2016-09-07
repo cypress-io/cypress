@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.6.0
+- new cy commands
+
 #### 0.5.5
 - do not postinstall
 
