@@ -20,6 +20,8 @@
     "test-integration-once": "./spec/server/helpers/run integration",
     "test-e2e": "./spec/server/helpers/watch test-e2e-once",
     "test-e2e-once": "./spec/server/helpers/run e2e",
+    "test-e2e-chrome": "./spec/server/helpers/watch test-e2e-chrome-once",
+    "test-e2e-chrome-once": "./spec/server/helpers/run e2e chrome",
     "test-cov": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 xvfb-maybe istanbul cover node_modules/.bin/_mocha -- --opts ./spec/server/mocha.opts",
     "test-cov-process": "NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover --include-pid",
     "test-debug": "NODE_ENV=test NODE_DEBUG=request CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,-nock.common,socket.io:* node-debug --hidden='(node_modules|bower_components)' --no-preload _mocha --opts spec/server/mocha.opts --watch",
