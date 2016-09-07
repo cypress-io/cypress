@@ -36,6 +36,9 @@ npm run watch
 
 ## Changelog
 
+#### 0.3.4 - *(09/07/16)*
+- do not set cookie url when already present
+
 #### 0.3.3 - *(09/05/16)*
 - include missing app folder in release
 
