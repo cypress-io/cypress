@@ -1,25 +1,5 @@
-require("../spec_helper")
-
-_        = require("lodash")
-fs       = require("fs-extra")
-http     = require("http")
-morgan   = require("morgan")
 parser   = require("cookie-parser")
-express  = require("express")
-Promise  = require("bluebird")
-Fixtures = require("../helpers/fixtures")
-user     = require("#{root}lib/user")
-cypress  = require("#{root}lib/cypress")
-Project  = require("#{root}lib/project")
-
-app = express()
-
-servers = [
-  http.Server(app)
-  http.Server(app)
-  http.Server(app)
-  http.Server(app)
-]
+e2e      = require("../helpers/e2e")
 
 counts = {
   "localhost:2290": 0
@@ -28,93 +8,71 @@ counts = {
   "localhost:2293": 0
 }
 
-app.use(morgan("dev"))
-app.use(parser())
+onServer = (app) ->
+  app.use(parser())
 
-app.get "/cookies*", (req, res) ->
-  res.json(req.cookies)
+  app.get "/cookies*", (req, res) ->
+    res.json(req.cookies)
 
-app.get "/counts", (req, res) ->
-  res.json(counts)
+  app.get "/counts", (req, res) ->
+    res.json(counts)
 
-app.get "*", (req, res) ->
+  app.get "*", (req, res) ->
+    host = req.get("host")
 
-  host = req.get("host")
+    counts[host] += 1
 
-  counts[host] += 1
+    switch host
+      when "localhost:2290"
+        res
+        .cookie("2290", true, {
+          path: "/cookies/one"
+        })
+        .redirect("http://localhost:2291/")
 
-  switch host
-    when "localhost:2290"
-      res
-      .cookie("2290", true, {
-        path: "/cookies/one"
-      })
-      .redirect("http://localhost:2291/")
+      when "localhost:2291"
+        res
+        .cookie("2291", true, {
+          path: "/cookies/two"
+        })
+        .redirect("http://localhost:2292/")
 
-    when "localhost:2291"
-      res
-      .cookie("2291", true, {
-        path: "/cookies/two"
-      })
-      .redirect("http://localhost:2292/")
+      when "localhost:2292"
+        res
+        .set('Content-Type', 'text/html')
+        .cookie("2292", true, {
+          path: "/cookies/three"
+        })
+        .send("<html><head></head><body>hi</body></html>")
 
-    when "localhost:2292"
-      res
-      .set('Content-Type', 'text/html')
-      .cookie("2292", true, {
-        path: "/cookies/three"
-      })
-      .send("<html><head></head><body>hi</body></html>")
-
-    when "localhost:2293"
-      res
-      .cookie("2293", true, {
-        httpOnly: true
-        maxAge: 60000
-      })
-      .cookie("2293-session", true)
-      .send({})
-
-fs = Promise.promisifyAll(fs)
-
-startServers = ->
-  start = (port, i) ->
-    new Promise (resolve) ->
-      servers[i].listen port, ->
-        console.log "listening on port: #{port}"
-        resolve()
-
-  Promise.map([2290, 2291, 2292, 2293], start)
-
-stopServers = ->
-  stop = (server) ->
-    new Promise (resolve) ->
-      server.close(resolve)
-
-  Promise.map(servers, stop)
+      when "localhost:2293"
+        res
+        .cookie("2293", true, {
+          httpOnly: true
+          maxAge: 60000
+        })
+        .cookie("2293-session", true)
+        .send({})
 
 describe "e2e requests", ->
-  beforeEach ->
-    Fixtures.scaffold()
-
-    @e2ePath = Fixtures.projectPath("e2e")
-
-    @sandbox.stub(process, "exit")
-
-    user.set({name: "brian", session_token: "session-123"})
-    .then =>
-      Project.add(@e2ePath)
-    .then =>
-      startServers()
-
-  afterEach ->
-    Fixtures.remove()
-
-    stopServers()
+  e2e.setup({
+    servers: [{
+      port: 2290
+      onServer: onServer
+    },{
+      port: 2291
+      onServer: onServer
+    },{
+      port: 2292
+      onServer: onServer
+    },{
+      port: 2293
+      onServer: onServer
+    }]
+  })
 
   it "passes", ->
-    @timeout(30000)
-
-    cypress.start(["--run-project=#{@e2ePath}", "--spec=cypress/integration/request_spec.coffee"])
-    .then ->
-      expect(process.exit).to.be.calledWith(0)
+    e2e.start(@, {
+      spec: "request_spec.coffee"
+      expectedExitCode: 0
+    })

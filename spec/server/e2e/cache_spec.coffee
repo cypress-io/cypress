@@ -1,69 +1,38 @@
-require("../spec_helper")
-
 fs         = require("fs")
 path       = require("path")
-http       = require("http")
-morgan     = require("morgan")
 express    = require("express")
 Fixtures   = require("../helpers/fixtures")
-user       = require("#{root}lib/user")
-cypress    = require("#{root}lib/cypress")
-Project    = require("#{root}lib/project")
+e2e        = require("../helpers/e2e")
 
 replacerRe = /(<h1>)\w+(<\/h1>)/
 
 e2ePath = Fixtures.projectPath("e2e")
 
-app = express()
+onServer = (app) ->
+  app.post "/write/:text", (req, res) ->
+    file = path.join(e2ePath, "index.html")
 
-srv = http.Server(app)
+    fs.readFile file, "utf8", (err, str) ->
+      ## replace the word between <h1>...</h1>
+      str = str.replace(replacerRe, "$1#{req.params.text}$2")
 
-app.use(morgan("dev"))
-app.use(express.static(e2ePath, {
-  ## force caching to happen
-  maxAge: 3600000
-}))
-
-app.post "/write/:text", (req, res) ->
-  file = path.join(e2ePath, "index.html")
-
-  fs.readFile file, "utf8", (err, str) ->
-    ## replace the word between <h1>...</h1>
-    str = str.replace(replacerRe, "$1#{req.params.text}$2")
-
-    fs.writeFile file, str, (err) ->
-      res.sendStatus(200)
-
-startServer = ->
-  new Promise (resolve) ->
-    srv.listen 1515, ->
-      console.log "listening on 1515"
-      resolve()
-
-stopServer = ->
-  new Promise (resolve) ->
-    srv.close(resolve)
+      fs.writeFile file, str, (err) ->
+        res.sendStatus(200)
 
 describe "e2e cache", ->
-  beforeEach ->
-    Fixtures.scaffold()
-
-    @sandbox.stub(process, "exit")
-
-    user.set({name: "brian", session_token: "session-123"})
-    .then =>
-      Project.add(e2ePath)
-    .then =>
-      startServer()
-
-  afterEach ->
-    Fixtures.remove()
-
-    stopServer()
+  e2e.setup({
+    servers: {
+      port: 1515
+      onServer: onServer
+      static: {
+        ## force caching to happen
+        maxAge: 3600000
+      }
+    }
+  })
 
   it "passes", ->
-    @timeout(30000)
-
-    cypress.start(["--run-project=#{e2ePath}", "--spec=cypress/integration/cache_spec.coffee"])
-    .then ->
-      expect(process.exit).to.be.calledWith(0)
+    e2e.start(@, {
+      spec: "cache_spec.coffee"
+      expectedExitCode: 0
+    })
