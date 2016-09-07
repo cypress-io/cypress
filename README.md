@@ -57,6 +57,9 @@ npm test
 
 ## Changelog
 
+#### 0.1.6 - *(09/07/16)*
+- cleanup npm dist
+
 #### 0.1.5 - *(08/30/16)*
 - bump node, guard against logs which cannot be found
 
