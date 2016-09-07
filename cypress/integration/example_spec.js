@@ -226,6 +226,12 @@ describe('Kitchen Sink', function(){
         // cy.type() may include special character sequences
         .type('{leftarrow}{rightarrow}{uparrow}{downarrow}{del}{selectall}{backspace}')
 
+        // cy.type() may additionally include key modifiers
+        .type('{alt}{option}')        //these are equivalent
+        .type('{ctrl}{control}')      //these are equivalent
+        .type('{meta}{command}{cmd}') //these are equivalent
+        .type('{shift}')
+
         // **** Type Options ****
         //
         // cy.type() accepts options that control typing
@@ -236,7 +242,8 @@ describe('Kitchen Sink', function(){
         // in some situations if the application under
         // test is not able to handle rapid firing events.
         // (generally due to the app not properly throttling events)
-        .type('slow.typing@email.com', {delay: 100}).should('have.value', 'slow.typing@email.com')
+        .type('slow.typing@email.com', {delay: 100})
+          .should('have.value', 'slow.typing@email.com')
 
         .get('.action-disabled')
 
@@ -1038,17 +1045,20 @@ describe('Kitchen Sink', function(){
     })
   })
 
-  context('Fixtures', function(){
+  context('Files', function(){
     beforeEach(function(){
-      cy.visit('https://example.cypress.io/commands/fixtures')
+      cy.visit('https://example.cypress.io/commands/files')
     })
-    // **** Fixtures ****
+    // **** Files ****
     //
-    // Instead of writing a response inline you can
-    // connect a response with a fixture file
-    // located in _fixtures folder.
+    // Use files to represent data
+    // or read / write files in your project
 
     it('cy.fixture() - load a fixture', function(){
+
+      // Instead of writing a response inline you can
+      // connect a response with a fixture file
+      // located in fixtures folder.
 
       cy.server()
 
@@ -1090,6 +1100,47 @@ describe('Kitchen Sink', function(){
         .wait('@getComment').its('responseBody')
           .should('have.property', 'name')
             .and('include', 'Using fixtures to represent data')
+    })
+
+    it('cy.readFile() - read a files contents', function(){
+
+      // You can read a file and returns its contents
+      // The filePath is relative to your project's root.
+
+      cy
+        // https://on.cypress.io/api/readfile
+        .readFile('app/commands/actions.html')
+        .then(function (html) {
+          expect(html).to.include('<!DOCTYPE html>')
+        })
+
+    })
+
+    it('cy.writeFile() - write to a file', function(){
+
+      // You can write to a file with the specified contents
+      // If the path to the file does not exist, the file
+      // and it's path will be created.
+      // If the file already exists, it will be over-written.
+
+      cy
+        // Use a response from a request to automatically
+        // generate a fixture file for use later
+        .request('https://jsonplaceholder.typicode.com/users').then(function(response){
+          // https://on.cypress.io/api/writefile
+          cy.writeFile('cypress/fixtures/users.json', response.body)
+        })
+        .fixture('users').then(function(users){
+          expect(users[0].name).to.exist
+        })
+
+      cy
+        // JavaScript arrays and objects are stringified and formatted into text.
+        .writeFile('cypress/fixtures/profile.json', { id: 8739, name: 'Jane', email: 'jane@example.com'})
+        .fixture('profile').then(function(profile){
+          expect(profile.name).to.eq('Jane')
+        })
+
     })
 
   })
