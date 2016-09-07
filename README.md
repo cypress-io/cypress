@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.1.10 - *(09/07/16)*
+- bump core reporter
+
 #### 0.1.9 - *(09/07/16)*
 - nuke iframe contents, added content type, cleanup npm dist
 
