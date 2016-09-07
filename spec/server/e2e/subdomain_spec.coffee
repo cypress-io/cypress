@@ -1,98 +1,94 @@
-require("../spec_helper")
 
-_        = require("lodash")
-fs       = require("fs-extra")
-http     = require("http")
-morgan   = require("morgan")
+cors     = require("cors")
 parser   = require("cookie-parser")
-express  = require("express")
-Promise  = require("bluebird")
-Fixtures = require("../helpers/fixtures")
-user     = require("#{root}lib/user")
-cypress  = require("#{root}lib/cypress")
-Project  = require("#{root}lib/project")
+session  = require("express-session")
+e2e      = require("../helpers/e2e")
 
-app = express()
+onServer = (app) ->
+  app.use(parser())
 
-srv = http.Server(app)
+  getIndex = ->
+    """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    </head>
+    <body>
+      <ul>
+        <li>
+          <a href="http://help.foobar.com:2292">switch to http://help.foobar.com</a>
+        </li>
+      </ul>
+    </body>
+    </html>
+    """
 
-app.use(morgan("dev"))
-app.use(parser())
+  getText = (text) ->
+    """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    </head>
+    <body>
+      <h1>#{text}</h1>
+    </body>
+    </html>
+    """
 
-getIndex = ->
-  """
-  <!DOCTYPE html>
-  <html>
-  <head>
-  </head>
-  <body>
-    <ul>
-      <li>
-        <a href="http://help.foobar.com:2292">switch to http://help.foobar.com</a>
-      </li>
-    </ul>
-  </body>
-  </html>
-  """
+  applySession = session({
+    name: "secret-session"
+    secret: "secret"
+    cookie: {
+      sameSite: true
+    }
+  })
 
-getHelp = ->
-  """
-  <!DOCTYPE html>
-  <html>
-  <head>
-  </head>
-  <body>
-    <h1>Help</h1>
-  </body>
-  </html>
-  """
+  app.get "/cookies*", cors({origin: true, credentials: true}), (req, res) ->
+    res.json({
+      cookie: req.headers["cookie"]
+      parsed: req.cookie
+    })
 
-app.get "*", (req, res) ->
-  res.set('Content-Type', 'text/html');
+  app.get "*", (req, res, next) ->
+    res.set('Content-Type', 'text/html');
 
-  getHtml = ->
-    switch h = req.get("host")
-      when "www.foobar.com:2292"  then getIndex()
-      when "help.foobar.com:2292" then getHelp()
-      else
-        throw new Error("Host: '#{h}' not recognized")
+    getHtml = =>
+      switch h = req.get("host")
+        when "www.foobar.com:2292"
+          getIndex()
 
-  res.send(getHtml())
+        when "help.foobar.com:2292"
+          getText("Help")
 
-fs = Promise.promisifyAll(fs)
+        when "session.foobar.com:2292"
+          applySession(req, res, next)
 
-startServer = ->
-  new Promise (resolve) ->
-    srv.listen 2292, ->
-      console.log "listening on 2292"
-      resolve()
+          getText("Session")
 
-stopServer = ->
-  new Promise (resolve) ->
-    srv.close(resolve)
+        when "domain.foobar.com:2292"
+          res.cookie("nomnom", "good", {
+            name: "domain-cookie"
+            domain: ".foobar.com"
+          })
+
+          getText("Domain")
+
+        else
+          throw new Error("Host: '#{h}' not recognized")
+
+    res.send(getHtml())
 
 describe "e2e subdomain", ->
-  beforeEach ->
-    Fixtures.scaffold()
-
-    @e2ePath = Fixtures.projectPath("e2e")
-
-    @sandbox.stub(process, "exit")
-
-    user.set({name: "brian", session_token: "session-123"})
-    .then =>
-      Project.add(@e2ePath)
-    .then =>
-      startServer()
-
-  afterEach ->
-    Fixtures.remove()
-
-    stopServer()
+  e2e.setup({
+    servers: {
+      port: 2292
+      onServer: onServer
+    }
+  })
 
   it "passes", ->
-    @timeout(20000)
-
-    cypress.start(["--run-project=#{@e2ePath}", "--hosts=*.foobar.com=127.0.0.1", "--spec=cypress/integration/subdomain_spec.coffee"])
-    .then ->
-      expect(process.exit).to.be.calledWith(0)
+    e2e.start(@, {
+      spec: "subdomain_spec.coffee"
+      hosts: "*.foobar.com=127.0.0.1"
+      expectedExitCode: 0
+    })

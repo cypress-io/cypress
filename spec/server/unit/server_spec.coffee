@@ -64,7 +64,7 @@ describe "lib/server", ->
       .then =>
         expect(@server.createRoutes).to.be.calledWith(obj)
 
-    it "calls #createServer with port + app", ->
+    it "calls #createServer with port + fileServerFolder + socketIoRoute + app", ->
       obj = {}
 
       @sandbox.stub(@server, "createRoutes")
@@ -72,7 +72,7 @@ describe "lib/server", ->
 
       @server.open(@config)
       .then =>
-        expect(@server.createServer).to.be.calledWith(@config.port, @config.socketIoRoute, obj)
+        expect(@server.createServer).to.be.calledWith(@config.port, @config.fileServerFolder, @config.socketIoRoute, obj)
 
     it "calls logger.setSettings with config", ->
       @sandbox.spy(logger, "setSettings")
@@ -224,6 +224,7 @@ describe "lib/server", ->
         strategy: "http"
         domainName: "google.com"
         visiting: undefined
+        fileServer: null
         props: {
           port: "443"
           domain: "google"
@@ -239,6 +240,7 @@ describe "lib/server", ->
         strategy: "http"
         domainName: "google.com"
         visiting: undefined
+        fileServer: null
         props: {
           port: "80"
           domain: "google"
@@ -254,6 +256,7 @@ describe "lib/server", ->
         strategy: "http"
         domainName: "localhost"
         visiting: undefined
+        fileServer: null
         props: {
           port: "4200"
           domain: ""
@@ -266,12 +269,17 @@ describe "lib/server", ->
         address: -> {port: 9999}
       }
 
+      @server._fileServer = {
+        port: -> 9998
+      }
+
       ret = @server._onDomainSet("/index.html")
 
       expect(ret).to.deep.eq({
         origin: "http://localhost:9999"
         strategy: "file"
         domainName: "localhost"
+        fileServer: "http://localhost:9998"
         props: null
         visiting: undefined
       })

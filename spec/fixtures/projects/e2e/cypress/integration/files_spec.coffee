@@ -8,6 +8,6 @@ describe "files", ->
   context "cy.writeFile", ->
     it "writes the file to the filesystem, overwriting existing file", ->
       cy
-        .writeFile("static/foo.txt", "foo")
+        .writeFile("static/foo.txt", "")
         .writeFile("static/foo.txt", "bar")
         .readFile("static/foo.txt").should("equal", "bar")

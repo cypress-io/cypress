@@ -1,36 +1,16 @@
-require("../spec_helper")
-
-_        = require("lodash")
-fs       = require("fs-extra")
-cp       = require("child_process")
-Promise  = require("bluebird")
-Fixtures = require("../helpers/fixtures")
-user     = require("#{root}lib/user")
-cypress  = require("#{root}lib/cypress")
-Project  = require("#{root}lib/project")
-
-cp = Promise.promisifyAll(cp)
-fs = Promise.promisifyAll(fs)
-
-env = _.omit(process.env, "CYPRESS_DEBUG")
+e2e = require("../helpers/e2e")
 
 describe "e2e stdout", ->
-  beforeEach ->
-    Fixtures.scaffold()
+  e2e.setup()
 
-    @e2ePath = Fixtures.projectPath("e2e")
-
-    user.set({name: "brian", session_token: "session-123"})
-    .then =>
-      Project.add(@e2ePath)
-
-  afterEach ->
-    Fixtures.remove()
-
-  it "displays errors from failures", (done) ->
-    @timeout(20000)
-
-    exec = cp.exec "node index.js --run-project=#{@e2ePath} --spec=cypress/integration/stdout_failing_spec.coffee --port=2020", {env: env}, (err, stdout, stderr) ->
+  it "displays errors from failures", ->
+    e2e.exec(@, {
+      port: 2020
+      spec: "stdout_failing_spec.coffee"
+      expectedExitCode: 2
+    })
+    .get("stdout")
+    .then (stdout) ->
       stdout = stdout
       .replace(/\(\d{2,4}ms\)/g, "(123ms)")
       .replace(/coffee-\d{3}/g, "coffee-456")
@@ -71,14 +51,13 @@ The internal Cypress web server responded with:
 
 """)
 
-    exec.on "close", (code) ->
-      expect(code).to.eq(2)
-      done()
-
   it "does not duplicate suites or tests between visits", ->
-    @timeout(60000)
-
-    cp.execAsync("node index.js --run-project=#{@e2ePath} --spec=cypress/integration/stdout_passing_spec.coffee --port=2020", {env: env})
+    e2e.exec(@, {
+      spec: "stdout_passing_spec.coffee"
+      timeout: 60000
+      expectedExitCode: 0
+    })
+    .get("stdout")
     .then (stdout) ->
       stdout = stdout
       .replace(/\(\d{2,4}ms\)/g, "(123ms)")

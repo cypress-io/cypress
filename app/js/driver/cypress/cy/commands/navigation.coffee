@@ -58,14 +58,26 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
     _resolveUrl: (url) ->
       Cypress.triggerPromise("resolve:url", url)
       .then (resp = {}) ->
-        if resp.ok
-          resp
-        else
-          err = new Error
-          err.gotResponse = true
-          _.extend(err, resp)
+        switch
+          ## if we didn't even get an OK response
+          ## then immediately die
+          when not resp.isOk
+            err = new Error
+            err.gotResponse = true
+            _.extend(err, resp)
 
-          throw err
+            throw err
+
+          when not resp.isHtml
+            ## throw invalid contentType error
+            err = new Error
+            err.invalidContentType = true
+            _.extend(err, resp)
+
+            throw err
+
+          else
+            resp
 
     submitting: (e, options = {}) ->
       ## even though our beforeunload event
@@ -341,6 +353,9 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         gotResponse = (err) ->
           err.gotResponse is true
 
+        gotInvalidContentType = (err) ->
+          err.invalidContentType is true
+
         visit = (win, url, options) =>
           ## when the remote iframe's load event fires
           ## callback fn
@@ -459,20 +474,31 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                 .setQuery(existing.search)
                 .setAnchor(existing.hash)
 
-                @_replace(window, newUri.toString())
-          .catch gotResponse, (err) ->
+                ## replace is broken in electron so switching
+                ## to href for now
+                # @_replace(window, newUri.toString())
+                @_href(window, newUri.toString())
+          .catch gotResponse, gotInvalidContentType, (err) ->
             visitFailedByErr err, err.originalUrl, ->
               args = {
-                url:        err.originalUrl
-                path:       err.filePath
-                status:     err.status
-                statusText: err.statusText
-                redirects:  err.redirects
+                url:         err.originalUrl
+                path:        err.filePath
+                status:      err.status
+                statusText:  err.statusText
+                redirects:   err.redirects
+                contentType: err.contentType
               }
 
-              type = if err.filePath then "file" else "http"
+              msg = switch
+                when err.gotResponse
+                  type = if err.filePath then "file" else "http"
 
-              $Cypress.Utils.throwErrByPath("visit.loading_#{type}_failed", {
+                  "visit.loading_#{type}_failed"
+
+                when err.invalidContentType
+                  "visit.loading_invalid_content_type"
+
+              $Cypress.Utils.throwErrByPath(msg, {
                 onFail: options._log
                 args: args
               })
@@ -487,17 +513,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                 }
               })
 
-        ## if we're visiting a page and we're not currently
-        ## on about:blank then we need to nuke the window
-        ## and after its nuked then visit the url
-        if @_getLocation("href", win) isnt "about:blank"
-          $remoteIframe.one "load", =>
-            visit(win, url, options)
-
-          @_href(win, "about:blank")
-
-        else
-          visit(win, url, options)
+        visit(win, url, options)
 
       p
       .timeout(options.timeout)

@@ -93,14 +93,6 @@ compileJs = (source, options) ->
 
     Promise.all(tasks)
 
-minify = (source, destination) ->
-  gulp.src(source)
-    .pipe($.print())
-    .pipe($.uglify({
-      preserveComments: "some"
-    }))
-    .pipe(gulp.dest(destination))
-
 getAppJsOpts = ->
   destination: "lib/public/js"
   basePath: "app/js"
@@ -188,10 +180,6 @@ gulp.task "build", deploy.build
 gulp.task "deploy", deploy.deploy
 
 gulp.task "app",        ["app:build", "app:watch"]
-
-gulp.task "app:minify", ->
-  ## dont minify cypress or sinon
-  minify("lib/public/js/!(cypress|sinon).js", "lib/public/js")
 
 gulp.task "app:build",  ["bower"], (cb) ->
   runSequence ["app:css", "app:img", "app:fonts", "app:js", "app:html"], cb

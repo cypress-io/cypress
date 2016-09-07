@@ -164,7 +164,7 @@ describe "lib/socket", ->
 
           @sandbox.stub(chrome.tabs, "query")
           .withArgs({windowType: "normal"})
-          .yieldsAsync([{id: 1}])
+          .yieldsAsync([{id: 1, url: "http://localhost"}])
 
           @sandbox.stub(chrome.tabs, "executeScript")
           .withArgs(1, {code: code})

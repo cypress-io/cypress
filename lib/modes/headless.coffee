@@ -64,6 +64,8 @@ module.exports = {
           reject errors.get("PROJECT_DOES_NOT_EXIST")
 
   openProject: (id, options) ->
+    wantsExternalBrowser = !!options.browser
+
     ## now open the project to boot the server
     ## putting our web client app in headless mode
     ## - NO  display server logs (via morgan)
@@ -75,7 +77,7 @@ module.exports = {
       report:       true
       isHeadless:   true
       ## TODO: get session into automation.perform
-      onAutomationRequest: automation.perform
+      onAutomationRequest: if wantsExternalBrowser then null else automation.perform
 
     })
     .catch {portInUse: true}, (err) ->
@@ -112,44 +114,55 @@ module.exports = {
         win.setSize(1280, 720)
         win.center()
 
-  waitForRendererToConnect: (project, id) ->
+  waitForRendererToConnect: (openProject, id) ->
     ## wait up to 10 seconds for the renderer
     ## to connect or die
-    @waitForSocketConnection(project, id)
+    @waitForSocketConnection(openProject, id)
     .timeout(10000)
     .catch Promise.TimeoutError, (err) ->
       errors.throw("TESTS_DID_NOT_START")
 
-  waitForSocketConnection: (project, id) ->
+  waitForSocketConnection: (openProject, id) ->
     new Promise (resolve, reject) ->
       fn = (socketId) ->
         if socketId is id
           ## remove the event listener if we've connected
-          project.removeListener "socket:connected", fn
+          openProject.removeListener "socket:connected", fn
 
           ## resolve the promise
           resolve()
 
       ## when a socket connects verify this
       ## is the one that matches our id!
-      project.on "socket:connected", fn
+      openProject.on "socket:connected", fn
 
-  waitForTestsToFinishRunning: (project) ->
+  waitForTestsToFinishRunning: (openProject, gui) ->
     new Promise (resolve, reject) ->
-      ## when our project fires its end event
-      ## resolve the promise
-      project.once "end", resolve
+      ## dont ever end if we're in 'gui' debugging mode
+      return if gui
 
-  runTests: (project, id, url, proxyServer, gui) ->
+      ## when our openProject fires its end event
+      ## resolve the promise
+      openProject.once "end", resolve
+
+  runTests: (openProject, id, url, proxyServer, gui, browser) ->
     ## we know we're done running headlessly
     ## when the renderer has connected and
     ## finishes running all of the tests.
     ## we're using an event emitter interface
     ## to gracefully handle this in promise land
+
+    getRenderer = =>
+      ## if we have a browser then just physically launch it
+      if browser
+        project.launch(browser, url, null, {proxyServer: proxyServer})
+      else
+        @createRenderer(url, proxyServer, gui)
+
     Promise.props({
-      connection: @waitForRendererToConnect(project, id)
-      stats:      @waitForTestsToFinishRunning(project)
-      renderer:   @createRenderer(url, proxyServer, gui)
+      connection: @waitForRendererToConnect(openProject, id)
+      stats:      @waitForTestsToFinishRunning(openProject, gui)
+      renderer:   getRenderer()
     })
 
   ready: (options = {}) ->
@@ -161,19 +174,19 @@ module.exports = {
       ## project instance
       @ensureAndOpenProjectByPath(id, options)
 
-      .then (project) =>
+      .then (openProject) =>
         Promise.all([
-          project.getConfig(),
+          openProject.getConfig(),
 
           ## either get the url to the all specs
           ## or if we've specificed one make sure
           ## it exists
-          project.ensureSpecUrl(options.spec)
+          openProject.ensureSpecUrl(options.spec)
         ])
         .spread (config, url) =>
           console.log("\nTests should begin momentarily...\n")
 
-          @runTests(project, id, url, config.clientUrlDisplay, options.showHeadlessGui)
+          @runTests(openProject, id, url, config.clientUrlDisplay, options.showHeadlessGui, options.browser)
           .get("stats")
 
     ready()

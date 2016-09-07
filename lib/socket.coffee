@@ -107,13 +107,13 @@ class Socket
     files.readFile(config.projectRoot, file, options)
     .then(cb)
     .catch (err) ->
-      cb({__error: { message: err.message, code: err.code }})
+      cb({__error: { message: err.message, code: err.code, filePath: err.filePath }})
 
   onWriteFile: (config, file, contents, options, cb) ->
     files.writeFile(config.projectRoot, file, contents, options)
     .then(cb)
     .catch (err) ->
-      cb({__error: { message: err.message, code: err.code }})
+      cb({__error: { message: err.message, code: err.code, filePath: err.filePath }})
 
   onExec: (projectRoot, options, cb) ->
     exec.run(projectRoot, options)

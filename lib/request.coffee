@@ -1,9 +1,10 @@
-_       = require("lodash")
-r       = require("request")
-rp      = require("request-promise")
-tough   = require("tough-cookie")
-moment  = require("moment")
-Promise = require("bluebird")
+_         = require("lodash")
+r         = require("request")
+rp        = require("request-promise")
+tough     = require("tough-cookie")
+moment    = require("moment")
+Promise   = require("bluebird")
+extension = require("@cypress/core-extension")
 
 Cookie = tough.Cookie
 CookieJar = tough.CookieJar
@@ -80,6 +81,39 @@ module.exports = {
 
       ## TODO: fix this
       return if cookie.name and cookie.name.startsWith("__cypress")
+
+      ## tough-cookie will return us a cookie that looks like this....
+      # { key: 'secret-session',
+      #   value: 's%3AxMYoMAXnnMN2pzjYKJx21Id9zjQOaPsT.aKJv1mlfNlCEtrPUjgt48KX0c7xNiB%2Bb0fLijmi48dY',
+      #   domain: 'session.foobar.com',
+      #   path: '/',
+      #   httpOnly: true,
+      #   extensions: [ 'SameSite=Strict' ],
+      #   hostOnly: true,
+      #   creation: '2016-09-04T18:48:06.882Z',
+      #   lastAccessed: '2016-09-04T18:48:06.882Z',
+      #   name: 'secret-session' }
+      #
+      # { key: '2293-session',
+      #   value: 'true',
+      #   domain: 'localhost',
+      #   path: '/',
+      #   hostOnly: true,
+      #   creation: '2016-09-05T03:03:20.780Z',
+      #   lastAccessed: '2016-09-05T03:03:20.780Z',
+      #   name: '2293-session' }
+
+      ## lets construct the url ourselves right now
+      cookie.url = extension.getCookieUrl(cookie)
+
+      ## https://github.com/SalesforceEng/tough-cookie#setcookiecookieorstring-currenturl-options-cberrcookie
+      ## a host only cookie is when domain was not explictly
+      ## set in the Set-Cookie header and instead was implied.
+      ## when this is the case we need to remove the domain
+      ## property else our cookie will incorrectly be set
+      ## as a domain cookie
+      if ho = cookie.hostOnly
+        cookie = _.omit(cookie, "domain")
 
       ## tough cookie provides javascript date
       ## formatted expires

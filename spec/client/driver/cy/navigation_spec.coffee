@@ -266,22 +266,6 @@ describe "$Cypress.Cy Navigation Commands", ->
         prev = @cy.prop("current").get("prev")
         expect(prev.get("args")).to.have.length(1)
 
-    it "first navigates to about:blank if existing url isnt about:blank", ->
-      @cy
-        .window().as("win")
-        .visit("/timeout?ms=0").then ->
-          @_href = @sandbox.spy @cy, "_href"
-        .visit("/timeout?ms=1").then ->
-          expect(@_href).to.be.calledWith @win, "about:blank"
-
-    it "does not navigate to about:blank if existing url is about:blank", ->
-      @sandbox.stub(@cy, "_getLocation").returns("about:blank")
-      _href = @sandbox.spy @cy, "_href"
-
-      @cy
-        .visit("/timeout?ms=0").then ->
-          expect(_href).not.to.be.called
-
     it "calls resolve:url with http:// when localhost", ->
       trigger = @sandbox.spy(@Cypress, "trigger")
 
@@ -298,7 +282,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         .then ->
           expect(prop).to.be.calledWith("src", "http://localhost:3500/fixtures/html/sinon.html")
 
-    it "sets initial when not needing to change domains", ->
+    it "does not set initial ever", ->
       setInitial = @sandbox.spy(@Cypress.Cookies, "setInitial")
 
       ## do not fire any beforeunload listeners
@@ -308,7 +292,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       @cy
         .visit("/foo")
         .then ->
-          expect(setInitial).to.be.calledOnce
+          expect(setInitial).not.to.be.called
 
     it "can visit pages on the same originPolicy", ->
       @cy
@@ -356,7 +340,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       beforeEach ->
         @Cypress.trigger "test:before:run", {id: 888}
 
-        @sandbox.stub(@cy, "_replace")
+        @sandbox.stub(@cy, "_href")
         @sandbox.stub(@Cypress, "getEmissions").returns([])
         @sandbox.stub(@Cypress, "getTestsState").returns([])
         @sandbox.stub(@Cypress, "getStartTime").returns("12345")
@@ -401,7 +385,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         .withArgs("http://localhost:4200/")
         .returns(remote)
 
-        @cy._replace = (win, url) ->
+        @cy._href = (win, url) ->
           expect(win).to.eq(window)
           expect(url).to.eq("http://localhost:4200/foo?bar=baz#/tests/integration/foo_spec.js")
           done()
@@ -507,7 +491,9 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays file attributes as consoleProps", ->
         @sandbox.stub(@cy, "_resolveUrl").resolves({
-          ok: true
+          isOk: true
+          isHtml: true
+          contentType: "text/html"
           url: "http://localhost:3500/foo/bar"
           filePath: "/path/to/foo/bar"
           redirects: [1, 2]
@@ -525,7 +511,9 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays http attributes as consoleProps", ->
         @sandbox.stub(@cy, "_resolveUrl").resolves({
-          ok: true
+          isOk: true
+          isHtml: true
+          contentType: "text/html"
           url: "http://localhost:3500/foo"
           originalUrl: "http://localhost:3500/foo"
           redirects: [1, 2]
@@ -542,7 +530,9 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays originalUrl http attributes as consoleProps", ->
         @sandbox.stub(@cy, "_resolveUrl").resolves({
-          ok: true
+          isOk: true
+          isHtml: true
+          contentType: "text/html"
           url: "http://localhost:3500/foo/bar"
           originalUrl: "http://localhost:3500/foo"
           redirects: [1, 2]
@@ -560,7 +550,9 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "indicates redirects in the message", ->
         @sandbox.stub(@cy, "_resolveUrl").resolves({
-          ok: true
+          isOk: true
+          isHtml: true
+          contentType: "text/html"
           url: "http://localhost:3500/foo/bar"
           originalUrl: "http://localhost:3500/foo"
           redirects: [1, 2]
@@ -615,17 +607,6 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy.visit("/timeout?ms=5000", {timeout: 200})
-
-      it "captures errors when #_getLocation throws", (done) ->
-        e = new Error("foo")
-
-        @sandbox.stub(@cy, "_getLocation").throws(e)
-
-        @cy.on "fail", (err) ->
-          expect(err.message).to.eq("foo")
-          done()
-
-        @cy.visit("/foo")
 
       it "throws when url isnt a string", (done) ->
         @cy.on "fail", (err) ->
@@ -759,7 +740,9 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays loading_file_failed when _resolveUrl resp is not ok", (done) ->
         obj = {
-          ok: false
+          isOk: false
+          isHtml: true
+          contentType: "text/html"
           originalUrl: "/foo.html"
           filePath: "/path/to/foo.html"
           status: 404
@@ -797,7 +780,9 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays loading_file_failed redirects when _resolveUrl resp is not ok", (done) ->
         obj = {
-          ok: false
+          isOk: false
+          isHtml: true
+          contentType: "text/html"
           originalUrl: "/bar"
           filePath: "/path/to/bar/"
           status: 404
@@ -839,7 +824,9 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays loading_http_failed when _resolveUrl resp is not ok", (done) ->
         obj = {
-          ok: false
+          isOk: false
+          isHtml: true
+          contentType: "text/html"
           originalUrl: "https://google.com/foo"
           status: 500
           statusText: "Server Error"
@@ -873,7 +860,9 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays loading_http_failed redirects when _resolveUrl resp is not ok", (done) ->
         obj = {
-          ok: false
+          isOk: false
+          isHtml: true
+          contentType: "text/html"
           originalUrl: "https://google.com/foo"
           status: 401
           statusText: "Unauthorized"
@@ -904,6 +893,81 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(err.message).to.include("This http request was redirected '2' times to:")
           expect(err.message).to.include("  - 302: https://google.com/bar/")
           expect(err.message).to.include("  - 301: https://gmail.com/")
+          expect(trigger).to.be.calledWithMatch("visit:failed", obj)
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        @cy.visit("https://google.com/foo")
+
+      it "displays loading_invalid_content_type when isHtml is false on http requests", (done) ->
+        obj = {
+          isOk: true
+          isHtml: false
+          contentType: "application/json"
+          originalUrl: "https://google.com/foo"
+          status: 200
+          statusText: "OK"
+        }
+
+        visitErrObj = _.clone(obj)
+        obj.url = obj.originalUrl
+
+        @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
+
+        trigger = @sandbox.spy(@Cypress, "trigger")
+
+        logs = []
+
+        @Cypress.on "log", (attrs, @log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(err.message).to.include("cy.visit() failed trying to load:")
+          expect(err.message).to.include("https://google.com/foo")
+          expect(err.message).to.include("The content-type of the response we received from your web server was:")
+          expect(err.message).to.include("  > application/json")
+          expect(err.message).to.include("This was considered a failure because responses must have content-type: 'text/html'")
+          expect(err.message).to.include("However, you can likely use cy.request() instead of cy.visit().")
+          expect(err.message).to.include("cy.request() will automatically get and set cookies and enable you to parse responses.")
+          expect(trigger).to.be.calledWithMatch("visit:failed", obj)
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        @cy.visit("https://google.com/foo")
+
+      it "displays loading_invalid_content_type when isHtml is false on file requests", (done) ->
+        obj = {
+          isOk: true
+          isHtml: false
+          filePath: "/path/to/bar/"
+          contentType: "application/json"
+          originalUrl: "https://google.com/foo"
+          status: 200
+          statusText: "OK"
+        }
+
+        visitErrObj = _.clone(obj)
+        obj.url = obj.originalUrl
+
+        @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "https://google.com/foo").resolves(obj)
+
+        trigger = @sandbox.spy(@Cypress, "trigger")
+
+        logs = []
+
+        @Cypress.on "log", (attrs, @log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(err.message).to.include("cy.visit() failed trying to load:")
+          expect(err.message).to.include("https://google.com/foo")
+          expect(err.message).to.include("The content-type of the response we received from this local file was:")
+          expect(err.message).to.include("  > application/json")
+          expect(err.message).to.include("This was considered a failure because responses must have content-type: 'text/html'")
+          expect(err.message).to.include("However, you can likely use cy.request() instead of cy.visit().")
+          expect(err.message).to.include("cy.request() will automatically get and set cookies and enable you to parse responses.")
           expect(trigger).to.be.calledWithMatch("visit:failed", obj)
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)

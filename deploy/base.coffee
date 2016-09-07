@@ -93,6 +93,7 @@ class Base
           copy("./lib/errors.coffee",       "/src/lib/errors.coffee")
           copy("./lib/exception.coffee",    "/src/lib/exception.coffee")
           copy("./lib/exec.coffee",         "/src/lib/exec.coffee")
+          copy("./lib/file_server.coffee",  "/src/lib/file_server.coffee")
           copy("./lib/files.coffee",        "/src/lib/files.coffee")
           copy("./lib/fixture.coffee",      "/src/lib/fixture.coffee")
           copy("./lib/ids.coffee",          "/src/lib/ids.coffee")
@@ -246,7 +247,7 @@ class Base
     @log("#gulpBuild")
 
     new Promise (resolve, reject) ->
-      runSequence "app:build", "app:minify", (err) ->
+      runSequence "app:build", (err) ->
         if err then reject(err) else resolve()
 
   createCyCache: (project) ->

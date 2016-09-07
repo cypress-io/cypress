@@ -1,11 +1,10 @@
 e2e = require("../helpers/e2e")
 
-describe "e2e files", ->
-
+describe.skip "e2e window.open", ->
   e2e.setup()
 
   it "passes", ->
     e2e.start(@, {
-      spec: "files_spec.coffee"
+      spec: "window_open_spec.coffee"
       expectedExitCode: 0
     })

@@ -18,7 +18,7 @@ describe "redirects + requests", ->
         expect(cookies[0].httpOnly).to.eq(true)
         expect(cookies[0].path).to.eq("/")
         expect(cookies[0].secure).to.eq(false)
-        expect(cookies[0].expiry).to.be.closeTo(oneMinuteFromNow, 1)
+        expect(cookies[0].expiry).to.be.closeTo(oneMinuteFromNow, 5)
 
         expect(cookies[1]).to.deep.eq({
           domain: "localhost"

@@ -56,7 +56,7 @@ module.exports = {
       url            ?= cfg.clientUrl
       openBrowser     = browser
       openBrowserOpts = options
-      options.proxyServer = cfg.clientUrlDisplay
+      options.proxyServer ?= cfg.clientUrlDisplay
 
       launcher.launch(browser, url, options)
 

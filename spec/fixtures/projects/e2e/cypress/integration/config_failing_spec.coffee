@@ -3,7 +3,7 @@ describe "config", ->
   ## this test ensures that defaultCommandTimeout should
   ## lower from the default '4000' to '1000' thus causing
   ## this test to bomb
-  it.only "times out looking for a missing element", ->
+  it "times out looking for a missing element", ->
     append = (id) ->
       el = Cypress.$("<span id='#{id}'>#{id}<span>")
 

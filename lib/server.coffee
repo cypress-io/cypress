@@ -12,6 +12,7 @@ httpProxy    = require("http-proxy")
 httpsProxy   = require("@cypress/core-https-proxy")
 allowDestroy = require("server-destroy-vvo")
 cors         = require("./util/cors")
+headers      = require("./util/headers")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
 cwd          = require("./cwd")
@@ -19,6 +20,7 @@ errors       = require("./errors")
 logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
+fileServer   = require("./file_server")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
@@ -49,6 +51,7 @@ class Server
     @_server     = null
     @_socket     = null
     @_wsProxy    = null
+    @_fileServer = null
     @_httpsProxy = null
 
   createExpressApp: (morgan) ->
@@ -125,13 +128,13 @@ class Server
 
       @createRoutes(app, config, getRemoteState)
 
-      @createServer(config.port, config.socketIoRoute, app)
+      @createServer(config.port, config.fileServerFolder, config.socketIoRoute, app)
 
   createHosts: (hosts = {}) ->
     _.each hosts, (ip, host) ->
       evilDns.add(host, ip)
 
-  createServer: (port, socketIoRoute, app) ->
+  createServer: (port, fileServerFolder, socketIoRoute, app) ->
     new Promise (resolve, reject) =>
       @_server  = http.createServer(app)
       @_wsProxy = httpProxy.createProxyServer()
@@ -182,20 +185,28 @@ class Server
 
       @_listen(port, onError)
       .then (port) =>
-        ## once we open set the domain
-        ## to root by default
-        ## which prevents a situation where navigating
-        ## to http sites redirects to /__/ cypress
-        @_onDomainSet("<root>")
+        Promise.all([
+          httpsProxy.create(appData.path("proxy"), port, {
+            onRequest: callListeners
+            onUpgrade: onSniUpgrade
+          }),
 
-        httpsProxy.create(appData.path("proxy"), port, {
-          onRequest: callListeners
-          onUpgrade: onSniUpgrade
-        })
-        .then (httpsProxy) =>
+          fileServer.create(fileServerFolder)
+        ])
+        .spread (httpsProxy, fileServer) =>
           @_httpsProxy = httpsProxy
+          @_fileServer = fileServer
+
+          ## once we open set the domain
+          ## to root by default
+          ## which prevents a situation where navigating
+          ## to http sites redirects to /__/ cypress
+          @_onDomainSet("<root>")
 
           resolve(port)
+
+  _port: ->
+    @_server?.address().port
 
   _listen: (port, onError) ->
     new Promise (resolve) =>
@@ -218,6 +229,7 @@ class Server
   _getRemoteState: ->
     # {
     #   origin: "http://localhost:2020"
+    #   fileServer:
     #   strategy: "file"
     #   domainName: "localhost"
     #   props: null
@@ -240,6 +252,7 @@ class Server
       strategy:   @_remoteStrategy
       visiting:   @_remoteVisitingUrl
       domainName: @_remoteDomainName
+      fileServer: @_remoteFileServer
     })
 
   _onResolveUrl: (urlStr, automationRequest) ->
@@ -276,7 +289,11 @@ class Server
 
           @_onDomainSet(urlStr)
 
-          urlStr = url.resolve(@_remoteOrigin, urlStr)
+          ## TODO: instead of joining remoteOrigin here
+          ## we can simply join our fileServer origin
+          ## and bypass all the remoteState.visiting shit
+          urlFile = url.resolve(@_remoteFileServer, urlStr)
+          urlStr  = url.resolve(@_remoteOrigin, urlStr)
 
         error = (err) ->
           restorePreviousState()
@@ -301,11 +318,14 @@ class Server
 
               newUrl ?= urlStr
 
-              isOkay = isOkayStatusRe.test(incomingRes.statusCode)
+              isOkay      = isOkayStatusRe.test(incomingRes.statusCode)
+              contentType = headers.getContentType(incomingRes)
+              isHtml      = contentType is "text/html"
 
               details = {
-                ## TODO: get a status code message here?
-                ok: isOkay
+                isOk:   isOkay
+                isHtml: isHtml
+                contentType: contentType
                 url: newUrl
                 status: incomingRes.statusCode
                 cookies: c
@@ -319,7 +339,7 @@ class Server
                 ## if so we know this is a local file request
                 details.filePath = fp
 
-              if isOkay
+              if isOkay and isHtml
                 ## reset the domain to the new url if we're not
                 ## handling a local file
                 @_onDomainSet(newUrl) if not handlingLocalFile
@@ -344,6 +364,7 @@ class Server
           @_remoteProps        = previousState.props
           @_remoteOrigin       = previousState.origin
           @_remoteStrategy     = previousState.strategy
+          @_remoteFileServer   = previousState.fileServer
           @_remoteDomainName   = previousState.domainName
           @_remoteVisitingUrl  = previousState.visiting
 
@@ -365,7 +386,7 @@ class Server
           ## turn off gzip since we need to eventually
           ## rewrite these contents
           gzip: false
-          url: urlStr
+          url: urlFile ? urlStr
           followRedirect: (incomingRes) ->
             status = incomingRes.statusCode
             next = incomingRes.headers.location
@@ -390,8 +411,9 @@ class Server
     ## then we know to go back to our default domain
     ## which is the localhost server
     if fullyQualifiedUrl is "<root>" or not fullyQualifiedRe.test(fullyQualifiedUrl)
-      @_remoteOrigin = "http://#{DEFAULT_DOMAIN_NAME}:#{@_server.address().port}"
+      @_remoteOrigin = "http://#{DEFAULT_DOMAIN_NAME}:#{@_port()}"
       @_remoteStrategy = "file"
+      @_remoteFileServer = "http://#{DEFAULT_DOMAIN_NAME}:#{@_fileServer.port()}"
       @_remoteDomainName = DEFAULT_DOMAIN_NAME
       @_remoteProps = null
 
@@ -399,6 +421,7 @@ class Server
       log("remoteStrategy", @_remoteStrategy)
       log("remoteHostAndPort", @_remoteProps)
       log("remoteDocDomain", @_remoteDomainName)
+      log("remoteFileServer", @_remoteFileServer)
 
     else
       parsed = url.parse(fullyQualifiedUrl)
@@ -412,6 +435,8 @@ class Server
       @_remoteOrigin = url.format(parsed)
 
       @_remoteStrategy = "http"
+
+      @_remoteFileServer = null
 
       ## set an object with port, tld, and domain properties
       ## as the remoteHostAndPort
@@ -490,6 +515,7 @@ class Server
     Promise.join(
       @_close()
       @_socket?.close()
+      @_fileServer?.close()
       @_httpsProxy?.close()
     )
     .then =>
