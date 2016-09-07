@@ -24,8 +24,8 @@
     "lib/runner.js"
   ],
   "devDependencies": {
-    "@cypress/core-releaser": "^0.1.8",
-    "@cypress/core-reporter": "0.1.5",
+    "@cypress/core-releaser": "0.1.8",
+    "@cypress/core-reporter": "0.1.6",
     "babel-eslint": "^6.0.4",
     "bluebird": "^3.4.0",
     "chai": "^3.5.0",
