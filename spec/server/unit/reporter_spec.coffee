@@ -16,52 +16,71 @@ describe "lib/reporter", ->
       expect(reporter.reporterName).to.eq("teamcity")
       expect(teamCityFn).to.be.calledWith(reporter.runner)
 
+    it "can create mocha-junit-reporter", ->
+      junitFn = @sandbox.stub()
+      mockery.registerMock("mocha-junit-reporter", junitFn)
+
+      reporter = Reporter.create("junit")
+
+      expect(reporter.reporterName).to.eq("junit")
+      expect(junitFn).to.be.calledWith(reporter.runner)
+
   context "createSuite", ->
     beforeEach ->
-      @testObj = {
-        id: '002',
-        title: 'should focus on the todo input field [002]',
-        originalTitle: 'should focus on the todo input field ',
-        duration: 4,
-        state: 'failed',
-        timedOut: false,
-        async: 0,
-        sync: true,
-        parent: {
-          id: '001',
-          title: 'When page is initially opened [001]',
-          originalTitle: 'When page is initially opened ',
-          root: false,
-          parent: {
-            id: '000',
-            title: 'TodoMVC - React [000]',
-            originalTitle: 'TodoMVC - React ',
-            root: false,
-            parent: {
-              title: '', root: true
-            }
+      @root = {
+        id: 'r1'
+        root: true
+        title: ''
+        tests: []
+        suites: [
+          {
+            id: '000'
+            title: 'TodoMVC - React [000]'
+            tests: []
+            suites: [
+              {
+                id: '001'
+                title: 'When page is initially opened [001]'
+                tests: [
+                  {
+                    id: '002'
+                    title: 'should focus on the todo input field [002]'
+                    duration: 4
+                    state: 'failed'
+                    timedOut: false
+                    async: 0
+                    sync: true
+                  }
+                ]
+                suites: []
+              }
+            ]
           }
-        }
+        ]
       }
 
+      @testObj = @root.suites[0].suites[0].tests[0]
+
+      @reporter.setRunnables(@root)
+
       @errorObj = {
-        message: 'expected true to be false',
-        name: 'AssertionError',
-        stack: 'AssertionError: expected true to be false',
-        actual: true,
-        expected: false,
+        message: 'expected true to be false'
+        name: 'AssertionError'
+        stack: 'AssertionError: expected true to be false'
+        actual: true
+        expected: false
         showDiff: false
       }
 
     it "recursively creates suites for fullTitle", ->
-      args = @reporter.parseArgs("fail", [@testObj, @errorObj])
+      args = @reporter.parseArgs("fail", [@testObj])
       expect(args[0]).to.eq("fail")
 
       title = "TodoMVC - React [000] When page is initially opened [001] should focus on the todo input field [002]"
       expect(args[1].fullTitle()).to.eq title
 
     it "adds failures to stats", ->
-      @reporter.emit("fail", @testObj, @errorObj)
+      @reporter.emit("fail", @testObj)
 
       expect(@reporter.stats()).to.deep.eq({
         reporter: "spec"

@@ -28,8 +28,10 @@ mergeRunnable = (testProps, runnables) ->
 createHook = (props, runnables) ->
   createRunnable(props, runnables[props.id])
 
-createErr = (test, runnables) ->
-  [createRunnable(test, runnables[test.id]), test.err]
+mergeErr = (test, runnables) ->
+  runnable = runnables[test.id]
+  runnable.err = test.err
+  [runnable, test.err]
 
 events = {
   "start":     true
@@ -42,7 +44,7 @@ events = {
   "hook end":  createHook
   "pass":      mergeRunnable
   "pending":   mergeRunnable
-  "fail":      createErr
+  "fail":      mergeErr
 }
 
 reporters = {

@@ -29,6 +29,7 @@ describe "lib/project", ->
 
   afterEach ->
     Fixtures.remove()
+    @project?.close()
 
   it "requires a projectRoot", ->
     fn = -> Project()
