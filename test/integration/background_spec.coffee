@@ -317,6 +317,10 @@ describe "app/background", ->
         .yieldsAsync(
           {name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false}
         )
+        .withArgs({url: "https://www.google.com", name: "session", value: "key"})
+        .yieldsAsync(
+          {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: false}
+        )
         .withArgs({name: "foo", value: "bar", secure: true, domain: "localhost", path: "/foo", url: "https://localhost/foo"})
         .yieldsAsync(null)
 
@@ -330,6 +334,14 @@ describe "app/background", ->
           done()
 
         @server.emit("automation:request", 123, "set:cookie", {domain: "google.com", name: "session", secure: false, value: "key", path: "/"})
+
+      it "does not set url when already present", (done) ->
+        @socket.on "automation:response", (id, obj = {}) ->
+          expect(id).to.eq(123)
+          expect(obj.response).to.deep.eq({name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: false})
+          done()
+
+        @server.emit("automation:request", 123, "set:cookie", {url: "https://www.google.com", name: "session", value: "key"})
 
       it "rejects with chrome.runtime.lastError", (done) ->
         @socket.on "automation:response", (id, obj = {}) ->
