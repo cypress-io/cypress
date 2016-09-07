@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.1.9 - *(09/07/16)*
+- nuke iframe contents, added content type, cleanup npm dist
+
 #### 0.1.8 - *(08/31/16)*
 - defaultCommandTimeout config + socket events
 
