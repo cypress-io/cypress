@@ -62,17 +62,22 @@ class Reporter
     else
       reporter = @reporterName
 
-    if @reporterName is "junit"
-      reporterOptions.mochaFile = reporterOptions.mochaFile or "{{projectRoot}}/test-result.xml"
+    ## TODO: keep mocha from printing out "reporter not found" by checking first:
+    # require("mocha/lib/reporters/#{reporter}")
 
-    ## any reporter option could be a path, which we need to ensure is rooted
-    ## in the project, so we have the user prepend {{projectRoot}} to any
-    ## paths in the reporter options
-    _.each reporterOptions, (value, key) ->
-      if _.isString(value)
-        reporterOptions[key] = value.replace("{{projectRoot}}", projectRoot)
-
-    @mocha    = new Mocha({reporter: reporter})
+    ## see if specified reporter is a built-in mocha one
+    ## if not it's likely one the user has installed
+    try
+      @mocha = new Mocha({reporter: reporter})
+    catch err
+      if /invalid reporter/i.test(err)
+        try
+          reporter = require(path.join(projectRoot, "node_modules", reporter))
+        catch err
+          reporter = require(path.join(projectRoot, reporter))
+        @mocha = new Mocha({reporter: reporter})
+      else
+        throw err
     @runner   = new Mocha.Runner(@mocha.suite)
     @reporter = new @mocha._reporter(@runner, {reporterOptions})
 
@@ -86,10 +91,10 @@ class Reporter
   _createRunnable: (runnableProps, type, parent) =>
     runnable = if type is "suite"
       suite = createSuite(runnableProps, parent)
-      suite.suites = _.map runnableProps.suites, (suiteProps) =>
-        @_createRunnable(suiteProps, "suite", suite)
       suite.tests = _.map runnableProps.tests, (testProps) =>
         @_createRunnable(testProps, "test", suite)
+      suite.suites = _.map runnableProps.suites, (suiteProps) =>
+        @_createRunnable(suiteProps, "suite", suite)
       suite
     else
       createRunnable(runnableProps, parent)

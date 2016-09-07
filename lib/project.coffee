@@ -15,11 +15,14 @@ Server    = require("./server")
 scaffold  = require("./scaffold")
 Watchers  = require("./watchers")
 Reporter  = require("./reporter")
+cwd       = require("./cwd")
 settings  = require("./util/settings")
 screenshots = require("./screenshots")
 
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
+
+localCwd = cwd()
 
 multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
@@ -46,6 +49,8 @@ class Project extends EE
 
     @getConfig(options)
     .then (cfg) =>
+      process.chdir(@projectRoot)
+
       @server.open(cfg)
       .then (port) =>
         ## if we didnt have a cfg.port
@@ -100,6 +105,8 @@ class Project extends EE
       @server?.close(),
       @watchers?.close()
     )
+    .then ->
+      process.chdir(localCwd)
 
   resetState: ->
     @server.resetState()
