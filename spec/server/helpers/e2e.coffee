@@ -112,7 +112,7 @@ module.exports = {
 
     cypress.start(args)
     .then ->
-      if code = options.expectedExitCode
+      if (code = options.expectedExitCode)?
         expect(process.exit).to.be.calledWith(code)
 
   exec: (ctx, options = {}) ->
