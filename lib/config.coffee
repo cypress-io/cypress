@@ -24,7 +24,7 @@ defaults = {
   socketId:       null
   isHeadless:     false
   reporter:       "spec"
-  reporterOptions: {}
+  reporterOptions: null
   clientRoute:    "/__/"
   xhrRoute:       "/xhrs/"
   socketIoRoute:  "/__socket.io"
