@@ -3,6 +3,8 @@ Mocha = require("mocha")
 chalk = require("chalk")
 path  = require("path")
 
+mochaReporters = require("mocha/lib/reporters")
+
 STATS = "suites tests passes pending failures start end duration".split(" ")
 
 createSuite = (obj, parent) ->
@@ -61,25 +63,20 @@ class Reporter
 
     if r = reporters[@reporterName]
       reporter = require(r)
-    else
+    else if r = mochaReporters[@reporterName]
       reporter = @reporterName
+    else
+      ## it's likely a custom reporter
+      ## that is local (./custom-reporter.js)
+      ## or one installed by the user through npm
+      try
+        ## try local
+        reporter = require(path.join(projectRoot, @reporterName))
+      catch err
+        ## try npm. if this fails, we're out of options, so let it throw
+        reporter = require(path.join(projectRoot, "node_modules", @reporterName))
 
-    ## TODO: keep mocha from printing out "reporter not found" by checking first:
-    # require("mocha/lib/reporters/#{reporter}")
-
-    ## see if specified reporter is a built-in mocha one
-    ## if not it's likely one the user has installed
-    try
-      @mocha = new Mocha({reporter: reporter})
-    catch err
-      if /invalid reporter/i.test(err)
-        try
-          reporter = require(path.join(projectRoot, "node_modules", reporter))
-        catch err
-          reporter = require(path.join(projectRoot, reporter))
-        @mocha = new Mocha({reporter: reporter})
-      else
-        throw err
+    @mocha    = new Mocha({reporter: reporter})
     @runner   = new Mocha.Runner(@mocha.suite)
     @reporter = new @mocha._reporter(@runner, {reporterOptions})
 
