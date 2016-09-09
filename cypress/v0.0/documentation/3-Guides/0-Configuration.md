@@ -39,7 +39,8 @@ Option | Default | Description
 `env` | `{}` | [Environment Variables](https://on.cypress.io/guides/environment-variables)
 `port` |  | Port to use for Cypress
 `numTestsKeptInMemory` | `50` | The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are seeing extremely high memory consumption in your browser.
-`reporter` | `spec` | The [Mocha reporter](https://mochajs.org/#reporters) used during headless or CI runs
+`reporter` | `spec` | The [reporter](https://on.cypress.io/guides/reporters) used during headless or CI runs
+`reporterOptions` | `null` | The [reporter options](https://on.cypress.io/guides/reporters#section-reporter-options) used. Supported options depend on the reporter.
 `screenshotOnHeadlessFailure` | `true` | Whether to take a screenshot automatically on test failure when running headlessly or in CI
 `watchForFileChanges` | `true` | Whether Cypress will watch and restart tests on file changes
 `ignoreTestFiles` | `*.hot-update.js` | A string or array of glob patterns for ignoring test files that would otherwise be shown in your tests list. Under the hood Cypress is using `minimatch` with the options: `{dot: true, matchBase: true}`. We suggest you using [http://globtester.com](http://globtester.com) to test what files would match.

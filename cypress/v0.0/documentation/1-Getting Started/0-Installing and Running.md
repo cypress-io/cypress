@@ -137,7 +137,7 @@ cypress run
 Additionally you can specify:
 
 - a single test file
-- a specific reporter
+- [a specific reporter and reporter options](https://on.cypress.io/guides/reporters)
 - a different port
 - environment variables
 
