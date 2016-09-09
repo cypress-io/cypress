@@ -20,10 +20,7 @@ createRunnable = (obj, parent) ->
 
   if body
     fn = ->
-      ###
-      cypress strips the function's body, please open
-      an issue if you want to see the function's body
-      ###
+    fn.toString = -> body
 
   runnable = new Mocha.Test(obj.title, fn)
   runnable.timedOut = obj.timedOut
