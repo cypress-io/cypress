@@ -226,6 +226,30 @@ In a real browser, preventing mousedown on a form field will prevent it from rec
 
 ***
 
+## Modifier effects
+
+In a real browser, if a user holds `SHIFT` and types `a`, a capital `A` will be typed into the input. Currently, Cypress does not simulate that behavior.
+
+Modifiers are simulated by setting their corresponding values to `true` for key and click events. So, for example, activating the `{shift}` modifier will set `event.shiftKey` to true for any key events, such as `keydown`.
+
+```javascript
+// app code
+document.querySelector("input:first").addEventListener("keydown", function (e) {
+  // e.shiftKey will be true
+})
+
+// in test
+cy.get("input:first").type("{shift}a")
+```
+
+In the example above, a lowercase `a` will be typed, because that's the literal character specified. To type a capital `A`, you can use `cy.type("{shift}A")` (or simply `cy.type("A")` if you don't care about the `shiftKey` property on any key events).
+
+This holds true for other special key combinations as well (that may be OS-specific). For example, on OSX, typing `ALT + SHIFT + K` creates the special character ``. Like with capitalization, `cy.type()` will not output ``, but simply the letter `k`.
+
+[Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you need modifier effects to be implemented.
+
+***
+
 # Notes
 
 ## Mimic user typing behavior
