@@ -8,16 +8,17 @@ pkg       = require("../package.json")
 updater({pkg: pkg, updateCheckInterval: human("one hour")}).notify()
 
 parseOpts = (opts) ->
-  _.pick(opts, "spec", "reporter", "path", "destination", "port", "env", "cypressVersion", "config")
+  _.pick(opts, "spec", "reporter", "reporterOptions", "path", "destination", "port", "env", "cypressVersion", "config")
 
 descriptions = {
-  destination: "destination path to extract and install Cypress to"
-  spec:        "runs a specific spec file. defaults to 'all'"
-  reporter:    "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'"
-  port:        "runs Cypress on a specific port. overrides any value in cypress.json. defaults to '2020'"
-  env:         "sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json"
-  config:      "sets configuration values. separate multiple values with a comma. overrides any value in cypress.json."
-  version:     "installs a specific version of Cypress"
+  destination:     "destination path to extract and install Cypress to"
+  spec:            "runs a specific spec file. defaults to 'all'"
+  reporter:        "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'"
+  reporterOptions: "options for the mocha reporter. defaults to 'null'"
+  port:            "runs Cypress on a specific port. overrides any value in cypress.json. defaults to '2020'"
+  env:             "sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json"
+  config:          "sets configuration values. separate multiple values with a comma. overrides any value in cypress.json."
+  version:         "installs a specific version of Cypress"
 }
 
 text = (d) ->
@@ -57,11 +58,12 @@ module.exports = ->
     .command("run [project]")
     .usage("[project] [options]")
     .description("Runs Cypress Tests Headlessly")
-    .option("-s, --spec <spec>",         text("spec"))
-    .option("-r, --reporter <reporter>", text("reporter"))
-    .option("-p, --port <port>",         text("port"))
-    .option("-e, --env <env>",           text("env"))
-    .option("-c, --config <config>",     text("config"))
+    .option("-s, --spec <spec>",                         text("spec"))
+    .option("-r, --reporter <reporter>",                 text("reporter"))
+    .option("-o, --reporter-options <reporter-options>", text("reporterOptions"))
+    .option("-p, --port <port>",                         text("port"))
+    .option("-e, --env <env>",                           text("env"))
+    .option("-c, --config <config>",                     text("config"))
     .action (project, opts) ->
       require("./commands/run")(project, parseOpts(opts))
 
@@ -69,11 +71,12 @@ module.exports = ->
     .command("ci [key]")
     .usage("[key] [options]")
     .description("Runs Cypress in CI Mode")
-    .option("-s, --spec <spec>",         text("spec"))
-    .option("-r, --reporter <reporter>", text("reporter"))
-    .option("-p, --port <port>",         text("port"))
-    .option("-e, --env <env vars>",      text("env"))
-    .option("-c, --config <config>",     text("config"))
+    .option("-s, --spec <spec>",                         text("spec"))
+    .option("-r, --reporter <reporter>",                 text("reporter"))
+    .option("-o, --reporter-options <reporter-options>", text("reporterOptions"))
+    .option("-p, --port <port>",                         text("port"))
+    .option("-e, --env <env vars>",                      text("env"))
+    .option("-c, --config <config>",                     text("config"))
     .action (key, opts) ->
       require("./commands/ci")(key, parseOpts(opts))
 

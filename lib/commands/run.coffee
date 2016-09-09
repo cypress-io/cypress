@@ -8,10 +8,11 @@ class Run
       return new Run(project, options)
 
     _.defaults options,
-      key:      null
-      spec:     null
-      reporter: null
-      project:  path.resolve(process.cwd(), project)
+      key:             null
+      spec:            null
+      reporter:        null
+      reporterOptions: null
+      project:         path.resolve(process.cwd(), project)
 
     @run(options)
 
@@ -35,6 +36,10 @@ class Run
     ## if we have a specific reporter push that into the args
     if options.reporter
       args.push("--reporter", options.reporter)
+
+    ## if we have a specific reporter push that into the args
+    if options.reporterOptions
+      args.push("--reporter-options", options.reporterOptions)
 
     ## if we have a key assume we're in CI mode
     if options.key

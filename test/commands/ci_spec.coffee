@@ -17,6 +17,10 @@ describe "Ci", ->
       @parse("ci abc123 --reporter junit")
       expect(@spy).to.be.calledWith("abc123", {reporter: "junit"})
 
+    it.only "calls ci with reporter options", ->
+      @parse("ci abc123 --reporter-options mochaFile=result.xml")
+      expect(@spy).to.be.calledWith("abc123", {reporterOptions: "mochaFile=result.xml"})
+
     it "calls with no key", ->
       @parse("ci")
       expect(@spy).to.be.calledWith(undefined)

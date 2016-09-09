@@ -97,6 +97,11 @@ cypress run --reporter json
 ```
 
 ```bash
+## specify options for the mocha reporter
+cypress run --reporter-options mochaFile=result.xml,toConsole=true
+```
+
+```bash
 ## specify a spec to run instead of running all the tests
 cypress run --spec cypress/integration/app_spec.js
 ```
