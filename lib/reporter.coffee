@@ -10,15 +10,28 @@ STATS = "suites tests passes pending failures start end duration".split(" ")
 createSuite = (obj, parent) ->
   suite = new Mocha.Suite(obj.title, {})
   suite.parent = parent if parent
+  if obj.file
+    console.log('has file:', obj.file)
+  suite.file = obj.file
   return suite
 
 createRunnable = (obj, parent) ->
-  runnable = new Mocha.Runnable(obj.title, ->)
+  {body} = obj
+
+  if body
+    fn = ->
+      ###
+      cypress strips the function's body, please open
+      an issue if you want to see the function's body
+      ###
+
+  runnable = new Mocha.Test(obj.title, fn)
   runnable.timedOut = obj.timedOut
   runnable.async    = obj.async
   runnable.sync     = obj.sync
   runnable.duration = obj.duration
   runnable.state    = obj.state
+  runnable.body     ?= body
 
   runnable.parent = parent if parent
 
@@ -60,6 +73,12 @@ class Reporter
       return new Reporter(reporterName)
 
     @reporterName = reporterName
+    @projectRoot = projectRoot
+    @reporterOptions = reporterOptions
+
+  setRunnables: (rootRunnable) =>
+    @runnables = {}
+    rootRunnable = @_createRunnable(rootRunnable, "suite")
 
     if r = reporters[@reporterName]
       reporter = require(r)
@@ -71,21 +90,17 @@ class Reporter
       ## or one installed by the user through npm
       try
         ## try local
-        reporter = require(path.join(projectRoot, @reporterName))
+        reporter = require(path.join(@projectRoot, @reporterName))
       catch err
         ## try npm. if this fails, we're out of options, so let it throw
-        reporter = require(path.join(projectRoot, "node_modules", @reporterName))
+        reporter = require(path.join(@projectRoot, "node_modules", @reporterName))
 
-    @mocha    = new Mocha({reporter: reporter})
-    @runner   = new Mocha.Runner(@mocha.suite)
-    @reporter = new @mocha._reporter(@runner, {reporterOptions})
-
-    @runnables = {}
+    @mocha = new Mocha({reporter: reporter})
+    @mocha.suite = rootRunnable
+    @runner = new Mocha.Runner(rootRunnable)
+    @reporter = new @mocha._reporter(@runner, {reporterOptions: @reporterOptions})
 
     @runner.ignoreLeaks = true
-
-  setRunnables: (rootRunnable) =>
-    @_createRunnable(rootRunnable, "suite")
 
   _createRunnable: (runnableProps, type, parent) =>
     runnable = if type is "suite"

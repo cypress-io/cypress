@@ -4,7 +4,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
   ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
   RUNNABLE_LOGS    = "routes agents commands".split(" ")
-  RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook".split(" ")
+  RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook body".split(" ")
 
   triggerMocha = (Cypress, event, args...) ->
     ## dont trigger mocha events if we are not headless
