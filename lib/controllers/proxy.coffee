@@ -129,10 +129,6 @@ module.exports = {
           filePath = headers["x-cypress-file-path"]
           return httpRequestErr({status: res.statusCode}, filePath)
 
-        if not okStatusRe.test incomingRes.statusCode
-          ## bail early, continue on with the stream'in
-          return str.pipe(thr)
-
         logger.info "received request response"
 
         ## if there is nothing to inject then just

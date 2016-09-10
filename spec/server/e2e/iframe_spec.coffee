@@ -11,9 +11,15 @@ onServer = (app) ->
   app.get "/", (req, res) ->
     res.send("<html>outer content<iframe src='/iframe'></html>")
 
+  app.get "/500", (req, res) ->
+    res.send("<html>outer content<iframe src='/iframe_500'></html>")
+
   app.get "/iframe", (req, res) ->
     ## send the iframe contents
     res.sendFile(path.join(e2ePath, "static", "iframe", "index.html"))
+
+  app.get "/iframe_500", (req, res) ->
+    res.status(500).sendFile(path.join(e2ePath, "static", "iframe", "index.html"))
 
 describe "e2e iframes", ->
   e2e.setup({
@@ -27,4 +33,5 @@ describe "e2e iframes", ->
     e2e.start(@, {
       spec: "iframe_spec.coffee"
       expectedExitCode: 0
+      debug: true
     })

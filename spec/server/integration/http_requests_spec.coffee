@@ -1028,7 +1028,8 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(500)
-          expect(res.body).to.eq("server error")
+          expect(res.body).to.include("server error")
+          expect(res.body).to.include("document.domain = 'github.com'")
           expect(res.headers["set-cookie"]).to.match(/__cypress.initial=;/)
 
       it "sends back cypress content on actual request errors", ->
@@ -1728,6 +1729,22 @@ describe "Routes", ->
             expect(res.statusCode).to.eq(200)
 
             expect(res.body).to.include("sinon.js")
+
+      it "injects even on 5xx responses", ->
+        @setup("https://www.google.com")
+        .then =>
+          @server.onRequest (req, res) ->
+            nock("https://www.google.com")
+            .get("/")
+            .reply 500, "<html><head></head><body>google</body></html>", {
+              "Content-Type": "text/html"
+            }
+
+          @rp("https://www.google.com/")
+          .then (res) ->
+            expect(res.statusCode).to.eq(500)
+
+            expect(res.body).to.include("document.domain = 'google.com'")
 
       it "works with host swapping", ->
         contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")
