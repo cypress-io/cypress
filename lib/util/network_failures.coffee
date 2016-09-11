@@ -28,8 +28,21 @@ module.exports = {
     #{if status is 404 then "The file was not found." else ""}
     """
 
+  wrap: (contents) ->
+    """
+    <!DOCTYPE html>
+    <html>
+    <body>
+      #{convertNewLinesToBr(contents)}
+    </body>
+    </html>
+    """
+
   get: (err, url, status, strategy) ->
-    switch strategy
-      when "http" then @http(err, url)
-      when "file" then @file(url, status)
+    contents =
+      switch strategy
+        when "http" then @http(err, url)
+        when "file" then @file(url, status)
+
+    @wrap(contents)
 }
