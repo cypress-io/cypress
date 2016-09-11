@@ -1,3 +1,4 @@
+fs         = require("fs")
 path       = require("path")
 bodyParser = require("body-parser")
 Fixtures   = require("../helpers/fixtures")
@@ -9,10 +10,31 @@ onServer = (app) ->
   app.use(bodyParser.json())
 
   app.get "/", (req, res) ->
-    res.send("<html>outer content<iframe src='/iframe'></html>")
+    res.send("<html>outer content<iframe src='/iframe'></iframe></html>")
 
   app.get "/500", (req, res) ->
-    res.send("<html>outer content<iframe src='/iframe_500'></html>")
+    res.send("<html>outer content<iframe src='/iframe_500'></iframe></html>")
+
+  app.get "/gzip_500", (req, res) ->
+    buf = fs.readFileSync(Fixtures.path("server/gzip-bad.html.gz"))
+
+    res.set({
+      "content-type": "text/html"
+      "content-encoding": "gzip"
+    })
+    .send(buf)
+
+  app.get "/req", (req, res) ->
+    res.send("<html>outer content<a href='/page/does-not-exist'>link</a><iframe src='http://err.foo.com:1616/gzip_500'></iframe></html>")
+
+  app.get "/origin", (req, res) ->
+    res.send("<html>outer content<iframe src='http://www.bar.com/simple'></iframe></html>")
+
+  app.get "/cross", (req, res) ->
+    res.send("<html>outer content<iframe src='http://www.bar.com:1616/simple'></iframe></html>")
+
+  app.get "/simple", (req, res) ->
+    res.send("<html>simple</html>")
 
   app.get "/iframe", (req, res) ->
     ## send the iframe contents
@@ -31,7 +53,7 @@ describe "e2e iframes", ->
 
   it "passes", ->
     e2e.start(@, {
+      hosts: "*.foo.com=127.0.0.1,*.bar.com=127.0.0.1"
       spec: "iframe_spec.coffee"
       expectedExitCode: 0
-      debug: true
     })

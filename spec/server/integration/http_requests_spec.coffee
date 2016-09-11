@@ -1032,7 +1032,41 @@ describe "Routes", ->
           expect(res.body).to.include("document.domain = 'github.com'")
           expect(res.headers["set-cookie"]).to.match(/__cypress.initial=;/)
 
+      it "sends back cypress content on request errors which match origin", ->
+        nock("http://app.github.com")
+        .get("/")
+        .replyWithError("ECONNREFUSED")
+
+        @rp("http://app.github.com/")
+        .then (res) ->
+          expect(res.statusCode).to.eq(500)
+          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
+          expect(res.body).to.include("http://app.github.com")
+          expect(res.body).to.include("The error was:")
+          expect(res.body).to.include("ECONNREFUSED")
+          expect(res.body).to.include("The stack trace was:")
+          expect(res.body).to.include("<html>\n<head> <script")
+          expect(res.body).to.include("</script> </head> <body>")
+          expect(res.body).to.include("document.domain = 'github.com';") ## should continue to inject
+
       it "sends back cypress content on actual request errors", ->
+        @setup("http://localhost:64644")
+        .then =>
+          @rp("http://localhost:64644")
+        .then (res) ->
+          expect(res.statusCode).to.eq(500)
+          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
+          expect(res.body).to.include("http://localhost:64644")
+          expect(res.body).to.include("The error was:")
+          expect(res.body).to.include("connect ECONNREFUSED 127.0.0.1:64644")
+          expect(res.body).to.include("The stack trace was:")
+          expect(res.body).to.include("_exceptionWithHostPort")
+          expect(res.body).to.include("TCPConnectWrap.afterConnect")
+          expect(res.body).to.include("<html>\n<head> <script")
+          expect(res.body).to.include("</script> </head> <body>")
+          expect(res.body).to.include("document.domain = 'localhost';") ## should continue to inject
+
+      it "sends back cypress content without injection on http errors when no matching origin", ->
         @rp("http://localhost:64644")
         .then (res) ->
           expect(res.statusCode).to.eq(500)
@@ -1043,6 +1077,9 @@ describe "Routes", ->
           expect(res.body).to.include("The stack trace was:")
           expect(res.body).to.include("_exceptionWithHostPort")
           expect(res.body).to.include("TCPConnectWrap.afterConnect")
+          expect(res.body).not.to.include("<html>\n<head> <script")
+          expect(res.body).not.to.include("</script> </head> <body>")
+          expect(res.body).not.to.include("document.domain") ## should not inject because
 
       it "sends back 404 when file does not exist locally", ->
         @setup("<root>", {
@@ -1057,6 +1094,49 @@ describe "Routes", ->
             expect(res.body).to.include("Cypress errored trying to serve this file from your system:")
             expect(res.body).to.include("/Users/bmann/Dev/projects/foo/views/test/index.html")
             expect(res.body).to.include("The file was not found.")
+            expect(res.body).to.include("<html>\n<head> <script")
+            expect(res.body).to.include("</script> </head> <body>")
+            expect(res.body).to.include("document.domain = 'localhost';") ## should continue to inject
+
+      it "does not inject on file server errors when origin does not match", ->
+        @setup("<root>", {
+          config: {
+            fileServerFolder: "/Users/bmann/Dev/projects"
+          }
+        })
+        .then =>
+          nock("http://www.github.com")
+          .get("/index.html")
+          .reply(500, "server error", {
+            "Content-Type": "text/html"
+          })
+
+          @rp("http://www.github.com/index.html")
+          .then (res) =>
+            expect(res.statusCode).to.eq(500)
+            expect(res.body).to.eq("server error")
+
+      it "handles decoding gzip failures", ->
+        nock(@server._remoteOrigin)
+        .get("/index.html")
+        .replyWithFile(200, Fixtures.path("server/gzip-bad.html.gz"), {
+          "Content-Type": "text/html"
+          "Content-Encoding": "gzip"
+        })
+
+        @rp("http://www.github.com/index.html")
+        .then (res) ->
+          expect(res.statusCode).to.eq(500)
+          expect(res.headers).not.to.have.property("content-encoding")
+          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
+          expect(res.body).to.include("http://www.github.com/index.html")
+          expect(res.body).to.include("The error was:")
+          expect(res.body).to.include("incorrect header check")
+          expect(res.body).to.include("The stack trace was:")
+          expect(res.body).to.include("at Zlib._handle.onerror")
+          expect(res.body).to.include("<html>\n<head> <script")
+          expect(res.body).to.include("</script> </head> <body>")
+          expect(res.body).to.include("document.domain = 'github.com';") ## should continue to inject
 
     context "headers", ->
       beforeEach ->
@@ -1348,6 +1428,7 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include("origin")
           expect(res.body).to.include("document.domain = 'localhost'")
+
           expect(res.body).not.to.include("Cypress")
 
     context "images", ->
@@ -2031,6 +2112,12 @@ describe "Routes", ->
         @rp(@proxy + "/assets/app.css")
         .then (res) =>
           expect(res.headers).to.have.property("x-cypress-file-path", Fixtures.projectPath("no-server") + "/dev/assets/app.css")
+
+      it "sets x-cypress-file-server-error headers on error", ->
+        @rp(@proxy + "/does-not-exist.html")
+        .then (res) =>
+          expect(res.statusCode).to.eq(404)
+          expect(res.headers).to.have.property("x-cypress-file-server-error", "true")
 
       it "injects document.domain on other http requests", ->
         @rp({

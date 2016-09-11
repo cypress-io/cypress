@@ -6,53 +6,66 @@ Cypress.onBeforeLoad = ->
 
   onBeforeLoad.apply(@, arguments)
 
+ensureWeCanTalkToTheIframe = ($iframe) ->
+  h1 = $iframe.contents().find("h1")
+
+  expect(h1.length).to.eq(1)
+
+  expect($iframe.get(0).contentWindow.foo).to.eq("bar")
+
+  ## onBeforeLoad should only be called once
+  ## on the initial visit and not for the iframe
+  ##
+  ## the reason this number is still 1 instead of 2
+  ## is that when we visit back to <root> cypress will
+  ## reload this spec thus nuking the state
+  expect(count).to.eq(1)
+
 describe "iframes", ->
   it "can access nested iframes over http server", ->
     cy
       .visit("http://localhost:1616")
-      .get("iframe").then ($iframe) ->
-        h1 = $iframe.contents().find("h1")
-
-        expect(h1.length).to.eq(1)
-
-        expect($iframe.get(0).contentWindow.foo).to.eq("bar")
-
-        ## onBeforeLoad should only be called once
-        ## on the initial visit and not for the iframe
-        expect(count).to.eq(1)
+      .get("iframe").then(ensureWeCanTalkToTheIframe)
 
   it "can access iframes over file server", ->
     cy
       .visit("/outer.html")
-      .get("iframe").then ($iframe) ->
-        h1 = $iframe.contents().find("h1")
+      .get("iframe").then(ensureWeCanTalkToTheIframe)
 
-        expect(h1.length).to.eq(1)
-
-        expect($iframe.get(0).contentWindow.foo).to.eq("bar")
-
-        ## onBeforeLoad should only be called once
-        ## on the initial visit and not for the iframe
-        ##
-        ## the reason this number is still 1 instead of 2
-        ## is that when we visit back to <root> cypress will
-        ## reload this spec thus nuking the state
-        expect(count).to.eq(1)
+  it "does not throw on cross origin iframes", ->
+    cy
+      .visit("http://www.foo.com:1616/cross")
+      .get("iframe")
 
   it "continues to inject even on 5xx responses", ->
     cy
       .visit("http://localhost:1616/500")
+      .get("iframe").then(ensureWeCanTalkToTheIframe)
+
+  it "injects on file server 4xx errors", ->
+    cy
+      .visit("/outer_404.html")
       .get("iframe").then ($iframe) ->
-        h1 = $iframe.contents().find("h1")
+        br = $iframe.contents().find("br")
 
-        expect(h1.length).to.eq(1)
+        expect(br.length).to.eq(4)
 
-        expect($iframe.get(0).contentWindow.foo).to.eq("bar")
-
-        ## onBeforeLoad should only be called once
-        ## on the initial visit and not for the iframe
-        ##
-        ## the reason this number is still 1 instead of 2
-        ## is that when we visit back to <root> cypress will
-        ## reload this spec thus nuking the state
         expect(count).to.eq(1)
+      .get("a").click()
+      .get("body").then ($body) ->
+        expect($body).to.contain("Cypress errored trying to serve this file")
+        expect($body).to.contain("page/does-not-exist")
+        expect($body).to.contain("The file was not found.")
+
+  it "injects on http request errors", ->
+    cy
+      .visit("http://www.foo.com:1616/req")
+      .get("iframe").then ($iframe) ->
+        br = $iframe.contents().find("br")
+
+        expect(br.length).to.be.gt(1)
+
+        expect(count).to.eq(1)
+      .get("a").click()
+      .get("body").then ($body) ->
+        expect($body).to.contain("Cannot GET /page/does-not-exist")

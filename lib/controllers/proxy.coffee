@@ -11,10 +11,11 @@ inject        = require("../util/inject")
 buffers       = require("../util/buffers")
 networkFailures = require("../util/network_failures")
 
-headRe           = /(<head.*?>)/i
-bodyRe           = /(<body.*?>)/i
-htmlRe           = /(<html.*?>)/i
-okStatusRe       = /^[2|3|4]\d+$/
+headRe      = /(<head.*?>)/i
+bodyRe      = /(<body.*?>)/i
+htmlRe      = /(<html.*?>)/i
+okStatusRe  = /^[2|3|4]\d+$/
+redirectRe  = /^30(1|2|3|7|8)$/
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -71,6 +72,8 @@ module.exports = {
 
     isInitial = req.cookies["__cypress.initial"] is "true"
 
+    wantsInjection = null
+
     resContentTypeIsHtmlAndMatchesOriginPolicy = (respHeaders) ->
       contentType = respHeaders["content-type"]
 
@@ -83,7 +86,7 @@ module.exports = {
         when "file"
           remoteUrl.startsWith(remoteState.origin)
 
-    setCookies = (value, wantsInjection) =>
+    setCookies = (value) =>
       ## dont modify any cookies if we're trying to clear
       ## the initial cookie and we're not injecting anything
       return if (not value) and (not wantsInjection)
@@ -93,8 +96,66 @@ module.exports = {
 
       setCookie(res, "__cypress.initial", value, remoteState.domainName)
 
-    onResponse = (str, incomingRes, wantsInjection) =>
-      headers = incomingRes.headers
+    getErrorHtml = (err, filePath) =>
+      status = err.status ? 500
+
+      logger.info("request failed", {url: remoteUrl, status: status, err: err.message})
+
+      url = filePath ? remoteUrl
+
+      networkFailures.get(err, url, status, remoteState.strategy)
+
+    setBody = (str, statusCode, headers) =>
+      ## set the status to whatever the incomingRes statusCode is
+      res.status(statusCode)
+
+      ## turn off __cypress.initial by setting false here
+      setCookies(false, wantsInjection)
+
+      logger.info "received request response"
+
+      ## if there is nothing to inject then just
+      ## bypass the stream buffer and pipe this back
+      if not wantsInjection
+        str.pipe(thr)
+      else
+        rewrite = (body) =>
+          @rewrite(body.toString(), remoteState, wantsInjection)
+
+        injection = concat (body) =>
+          encoding = headers["content-encoding"]
+
+          ## if we're gzipped that means we need to unzip
+          ## this content first, inject, and the rezip
+          if encoding and encoding.includes("gzip")
+            zlib.gunzipAsync(body)
+            .then(rewrite)
+            .then(zlib.gzipAsync)
+            .then(thr.end)
+            .catch(endWithResponseErr)
+          else
+            thr.end rewrite(body)
+
+        str.pipe(injection)
+
+    endWithResponseErr = (err) ->
+      status = err.status ? 500
+
+      res.removeHeader("Content-Encoding")
+
+      str = through (d) -> @queue(d)
+
+      onResponse(str, {
+        statusCode: status
+        headers: {
+          "content-type": "text/html"
+        }
+      })
+
+      str.end(getErrorHtml(err))
+
+    onResponse = (str, incomingRes) =>
+      {headers, statusCode} = incomingRes
 
       wantsInjection ?= do ->
         return false if not resContentTypeIsHtmlAndMatchesOriginPolicy(headers)
@@ -107,56 +168,30 @@ module.exports = {
       if cookies = headers["set-cookie"]
         res.append("Set-Cookie", cookies)
 
-      if /^30(1|2|3|7|8)$/.test(incomingRes.statusCode)
+      if redirectRe.test(statusCode)
         newUrl = headers.location
 
         ## set cookies to initial=true
         setCookies(true)
 
-        logger.info "redirecting to new url", status: incomingRes.statusCode, url: newUrl
+        logger.info "redirecting to new url", status: statusCode, url: newUrl
 
         ## finally redirect our user agent back to our domain
         ## by making this an absolute-path-relative redirect
-        res.redirect(incomingRes.statusCode, newUrl)
+        res.redirect(statusCode, newUrl)
       else
-        ## set the status to whatever the incomingRes statusCode is
-        res.status(incomingRes.statusCode)
-
-        ## turn off __cypress.initial by setting false here
-        setCookies(false, wantsInjection)
-
         if headers["x-cypress-file-server-error"]
           filePath = headers["x-cypress-file-path"]
-          return httpRequestErr({status: res.statusCode}, filePath)
-
-        logger.info "received request response"
-
-        ## if there is nothing to inject then just
-        ## bypass the stream buffer and pipe this back
-        if not wantsInjection
-          str.pipe(thr)
+          wantsInjection or= "partial"
+          str = through (d) -> @queue(d)
+          setBody(str, statusCode, headers)
+          str.end(getErrorHtml({status: statusCode}, filePath))
         else
-          rewrite = (body) =>
-            @rewrite(body.toString(), remoteState, wantsInjection)
-
-          injection = concat (body) =>
-            encoding = headers["content-encoding"]
-
-            ## if we're gzipped that means we need to unzip
-            ## this content first, inject, and the rezip
-            if encoding and encoding.includes("gzip")
-              zlib.gunzipAsync(body)
-              .then(rewrite)
-              .then(zlib.gzipAsync)
-              .then(thr.end)
-              .catch(httpRequestErr)
-            else
-              thr.end rewrite(body)
-
-          str.pipe(injection)
+          setBody(str, statusCode, headers)
 
     if obj = buffers.take(remoteUrl)
-      onResponse(obj.stream, obj.response, "full")
+      wantsInjection = "full"
+      onResponse(obj.stream, obj.response)
     else
       # opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
       opts = {followRedirect: false, strictSSL: false}
@@ -166,22 +201,9 @@ module.exports = {
       else
         opts.url = remoteUrl
 
-      httpRequestErr = (err, filePath) =>
-        status = err.status ? 500
-
-        url = filePath ? remoteUrl
-
-        html = networkFailures.get(err, url, status, remoteState.strategy)
-
-        logger.info("request failed", {url: remoteUrl, status: status, err: err.message})
-
-        res.status(status)
-
-        thr.end(html)
-
       rq = request(opts)
 
-      rq.on("error", httpRequestErr)
+      rq.on("error", endWithResponseErr)
 
       rq.on "response", (incomingRes) ->
         onResponse(rq, incomingRes)
