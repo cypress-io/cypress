@@ -1,11 +1,11 @@
 _             = require("lodash")
 zlib          = require("zlib")
 concat        = require("concat-stream")
-request       = require("request")
 through       = require("through")
 Promise       = require("bluebird")
 cwd           = require("../cwd")
 logger        = require("../logger")
+request       = require("../request")
 cors          = require("../util/cors")
 inject        = require("../util/inject")
 buffers       = require("../util/buffers")
@@ -101,9 +101,9 @@ module.exports = {
 
       logger.info("request failed", {url: remoteUrl, status: status, err: err.message})
 
-      url = filePath ? remoteUrl
+      urlStr = filePath ? remoteUrl
 
-      networkFailures.get(err, url, status, remoteState.strategy)
+      networkFailures.get(err, urlStr, status, remoteState.strategy)
 
     setBody = (str, statusCode, headers) =>
       ## set the status to whatever the incomingRes statusCode is
@@ -201,7 +201,7 @@ module.exports = {
       else
         opts.url = remoteUrl
 
-      rq = request(opts)
+      rq = request.create(opts)
 
       rq.on("error", endWithResponseErr)
 

@@ -1431,6 +1431,44 @@ describe "Routes", ->
 
           expect(res.body).not.to.include("Cypress")
 
+      it "issue #222 - correctly sets http host headers", ->
+        matches = (url, fn) =>
+          @setup(url)
+          .then =>
+            @server.onRequest(fn)
+
+            @rp(url)
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.eq("{}")
+
+        matches "http://localhost:8080/app.css", ->
+          nock("http://localhost:8080")
+          .matchHeader("host", "localhost:8080")
+          .get("/app.css")
+          .reply(200, "{}", {
+            "Content-Type": "text/css"
+          })
+
+        .then ->
+          matches "http://127.0.0.1:80/app.css", ->
+            nock("http://127.0.0.1:80")
+            .matchHeader("host", "127.0.0.1")
+            .get("/app.css")
+            .reply(200, "{}", {
+              "Content-Type": "text/css"
+            })
+
+        .then ->
+          matches "https://www.google.com:443/app.css", ->
+            nock("https://www.google.com")
+            .matchHeader("host", "www.google.com")
+            .get("/app.css")
+            .reply(200, "{}", {
+              "Content-Type": "text/css"
+            })
+
+
     context "images", ->
       beforeEach ->
         Fixtures.scaffold()
