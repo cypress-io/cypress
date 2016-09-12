@@ -23,6 +23,7 @@ do ($Cypress, _, $, chai) ->
     lengthProto  = chai.Assertion::__methods.length.method
     containProto = chai.Assertion::__methods.contain.method
     existProto   = Object.getOwnPropertyDescriptor(chai.Assertion::, "exist").get
+    visibleProto = Object.getOwnPropertyDescriptor(chai.Assertion::, "visible").get
     getMessage   = utils.getMessage
 
     class $Chai
@@ -147,6 +148,15 @@ do ($Cypress, _, $, chai) ->
             return ->
               _super.apply(@, arguments)
 
+        chai.Assertion.overwriteProperty "visible", (_super) ->
+          return ->
+            try
+              _super.apply(@, arguments)
+            catch e
+              reason = $Cypress.Dom.getReasonElIsHidden(@_obj)
+              e.message += "\n\n" + reason
+              throw e
+
         chai.Assertion.overwriteProperty "exist", (_super) ->
           return ->
             cy = _this.Cypress.cy
@@ -223,6 +233,7 @@ do ($Cypress, _, $, chai) ->
         chai.Assertion::__methods.contain.method = containProto
 
         Object.defineProperty(chai.Assertion::, "exist", {get: existProto})
+        Object.defineProperty(chai.Assertion::, "visible", {get: visibleProto})
 
       patchAssert: ->
         _this = @

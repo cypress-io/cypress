@@ -813,6 +813,11 @@ describe "$Cypress.Cy Assertion Commands", ->
             fn.call(@, log)
 
     beforeEach ->
+      ## create two here because there was a bug where
+      ## we were not correctly restoring assertions
+      ## during construction
+      @chai = $Cypress.Chai.create(@Cypress, {})
+      @chai = $Cypress.Chai.create(@Cypress, {})
       @chai = $Cypress.Chai.create(@Cypress, {})
 
     afterEach ->
@@ -866,6 +871,21 @@ describe "$Cypress.Cy Assertion Commands", ->
 
       it "does not affect DOM element matching", ->
         @cy.get("body").should("match", "body")
+
+    describe "#visible", ->
+      it "adds the explanation why an element is invisible", (done) ->
+        @onAssert (log) ->
+          err = log.get("_error")
+          expect(err.message).to.eq("expected '<div#invisible>' to be visible")
+          expect(log.get("message")).to.eq("expected **<div#invisible>** to be visible")
+
+          ## we append to the message after the log happens
+          setTimeout ->
+            expect(err.message).to.eq("expected '<div#invisible>' to be visible\n\nThis element is not visible because it has CSS property: 'display: none'")
+            done()
+          , 10
+
+        @cy.get("#invisible").should("be.visible")
 
     describe "#exist", ->
       it "uses $el.selector in expectation", (done) ->
