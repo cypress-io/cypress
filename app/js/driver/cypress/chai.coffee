@@ -27,6 +27,7 @@ do ($Cypress, _, $, chai) ->
 
     class $Chai
       constructor: (@Cypress, specWindow) ->
+        @restoreAsserts()
         @override()
         @listeners()
 
