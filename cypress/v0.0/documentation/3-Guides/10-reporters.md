@@ -36,8 +36,8 @@ cypress run --reporter json
 Cypress supports the following reporters:
 
 * [Mocha's built-in reporters](https://mochajs.org/#reporters).
-* `teamcity`
-* `junit`
+* [`teamcity`](https://github.com/cypress-io/mocha-teamcity-reporter)
+* [`junit`](https://github.com/michaelleeallen/mocha-junit-reporter)
 * Custom reporters ([see below](#section-custom-reporters))
 
 ***
