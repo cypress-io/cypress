@@ -52,12 +52,10 @@
     "gulp-watch": "^4.3.8",
     "jsdom": "^9.4.1",
     "lodash": "^4.0.0",
-    "markdown-it": "^6.1.1",
     "mobx": "^2.3.6",
     "mobx-react": "^3.5.3",
     "mocha": "^2.5.3",
     "node-sass-globbing": "0.0.23",
-    "popper.js": "^0.5.2",
     "react": "^15.3.0",
     "react-addons-test-utils": "^15.3.0",
     "react-dom": "^15.3.0",
@@ -73,5 +71,9 @@
     "mobx-react": "^3.5.3",
     "react": "^15.3.0",
     "react-dom": "^15.3.0"
+  },
+  "dependencies": {
+    "markdown-it": "^6.1.1",
+    "popper.js": "^0.5.2"
   }
 }
