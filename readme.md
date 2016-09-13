@@ -69,6 +69,9 @@ LGPL
 
 ## Changelog
 
+#### 0.3.5 - *(09/13/16)*
+- previously chosen browser is saved per user and selected by default
+
 #### 0.3.4 - *(08/31/16)*
 - fix github focus button
 
