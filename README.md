@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.1.12 - *(09/13/16)*
+- correctly interpolate contentType
+
 #### 0.1.11 - *(09/13/16)*
 - fix for null contentType
 
