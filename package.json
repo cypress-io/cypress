@@ -1,6 +1,6 @@
 {
   "name": "@cypress/core-runner",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "main": "lib/runner.js",
   "repository": {
     "type": "git",
