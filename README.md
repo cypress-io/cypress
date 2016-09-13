@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.1.13 - *(09/13/16)*
+- build prod version of reporter
+
 #### 0.1.12 - *(09/13/16)*
 - correctly interpolate contentType
 
