@@ -31,6 +31,21 @@ npm test
 
 ## Changelog
 
+#### 0.1.13 - *(09/13/16)*
+- build prod version of reporter
+
+#### 0.1.12 - *(09/13/16)*
+- correctly interpolate contentType
+
+#### 0.1.11 - *(09/13/16)*
+- fix for null contentType
+
+#### 0.1.10 - *(09/07/16)*
+- bump core reporter
+
+#### 0.1.9 - *(09/07/16)*
+- nuke iframe contents, added content type, cleanup npm dist
+
 #### 0.1.8 - *(08/31/16)*
 - defaultCommandTimeout config + socket events
 

@@ -26,7 +26,7 @@ export default class AutIframe {
   }
 
   _showContents (contents) {
-    this.$iframe.contents().find('body').append(contents)
+    this.$iframe.contents().find('body').html(contents)
   }
 
   detachBody = () => {
