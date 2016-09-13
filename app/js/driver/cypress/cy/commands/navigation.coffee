@@ -4,6 +4,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
   id                    = null
   previousDomainVisited = false
+  hasVisitedAboutBlank  = false
 
   Cypress.on "test:before:run", (test) ->
     ## continuously reset this
@@ -11,6 +12,11 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
     previousDomainVisited = false
 
     id = test.id
+
+  Cypress.on "test:before:hooks", ->
+    ## make sure we reset that we haven't
+    ## visited about blank again
+    hasVisitedAboutBlank = false
 
   overrideRemoteLocationGetters = (cy, contentWindow) ->
     navigated = (attr, args) ->
@@ -356,12 +362,23 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         gotInvalidContentType = (err) ->
           err.invalidContentType is true
 
+        bothUrlsMatchAndRemoteHasHash = (current, remote) ->
+          ## the remote has a hash
+          ## or the last char of href
+          ## is a hash
+          (remote.hash or remote.href.slice(-1) is "#") and
+
+            ## both must have the same origin
+            (current.origin is remote.origin) and
+
+              ## both must have the same pathname
+              (current.pathname is remote.pathname) and
+
+                ## both must have the same query params
+                (current.search is remote.search)
+
         visit = (win, url, options) =>
-          ## when the remote iframe's load event fires
-          ## callback fn
-          ## TODO: why are we using $remoteIframe load event here
-          ## instead of Cypress.on("load")?
-          $remoteIframe.one "load", =>
+          onLoad = =>
             @_timeout(prevTimeout)
             options.onLoad?.call(runnable.ctx, win)
 
@@ -391,6 +408,16 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             ## if we've already visited a new superDomain
             ## then die else we'd be in a terrible endless loop
             return cannotVisit2ndDomain(remote.origin)
+
+          current = Cypress.Location.create(win.location.href)
+
+          ## if all that is changing is the hash then we know
+          ## the browser won't actually make a new http request
+          ## for this, and so we need to resolve onLoad immediately
+          ## and bypass the actual visit resolution stuff
+          if bothUrlsMatchAndRemoteHasHash(current, remote)
+            @_src($remoteIframe, remote.href)
+            return onLoad()
 
           if existingHash
             ## strip out the existing hash if we have one
@@ -431,6 +458,10 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
               previousDomainVisited = remote.origin
 
               url = Cypress.Location.createInitialRemoteSrc(url)
+
+              ## when the remote iframe's load event fires
+              ## callback fn
+              $remoteIframe.one("load", onLoad)
 
               @_src($remoteIframe, url)
             else
@@ -513,7 +544,20 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
                 }
               })
 
-        visit(win, url, options)
+        ## if we've visiting for the first time during
+        ## a test then we want to first visit about:blank
+        ## so that we nuke the previous state. subsequent
+        ## visits will not navigate to about:blank so that
+        ## our history entries are intact
+        if not hasVisitedAboutBlank
+          hasVisitedAboutBlank = true
+
+          $remoteIframe.one "load", =>
+            visit(win, url, options)
+
+          @_href(win, "about:blank")
+        else
+          visit(win, url, options)
 
       p
       .timeout(options.timeout)
