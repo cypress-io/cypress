@@ -103,19 +103,20 @@ describe "Projects Nav", ->
               expect($li.first()).to.contain("Chromium")
               expect($li.last()).to.contain("Canary")
 
-        it "displays default browser name in chosen", ->
-          cy
-            .get(".browsers-list>a").first()
-              .should("contain", "Chrome")
-
-        it "displays default browser icon in chosen", ->
-          cy
-            .get(".browsers-list>a").first()
-              .find(".fa-chrome")
-
         it "does not display stop button", ->
           cy
             .get(".close-browser").should("not.exist")
+
+        describe "default browser", ->
+          it "displays default browser name in chosen", ->
+            cy
+              .get(".browsers-list>a").first()
+                .should("contain", "Chrome")
+
+          it "displays default browser icon in chosen", ->
+            cy
+              .get(".browsers-list>a").first()
+                .find(".fa-chrome")
 
       context "switch browser", ->
         beforeEach ->
@@ -123,6 +124,9 @@ describe "Projects Nav", ->
             .get(".browsers-list>a").first().click()
             .get(".browsers-list").find(".dropdown-menu")
               .contains("Chromium").click()
+
+        afterEach ->
+          cy.clearLocalStorage()
 
         it "switches text in button on switching browser", ->
           cy
@@ -135,6 +139,9 @@ describe "Projects Nav", ->
             .should ($li) ->
               expect($li.first()).to.contain("Chrome")
               expect($li.last()).to.contain("Canary")
+
+        it "saves chosen browser in local storage", ->
+          expect(localStorage.getItem("chosenBrowser")).to.eq("chromium")
 
       context "opening browser by choosing spec", ->
         beforeEach ->
@@ -226,6 +233,29 @@ describe "Projects Nav", ->
                 @ipc.handle("launch:browser", null, {browserClosed: true})
               .get(".browsers-list>a").first()
                 .find(".fa-chrome")
+
+    describe "local storage saved browser", ->
+      beforeEach ->
+        localStorage.setItem("chosenBrowser", "chromium")
+        cy
+          .fixture("browsers").then (@browsers) ->
+            @config.browsers = @browsers
+          .get(".projects-list a")
+            .contains("My-Fake-Project").as("firstProject").click().then ->
+              @ipc.handle("open:project", null, @config)
+
+      afterEach ->
+        cy.clearLocalStorage()
+
+      it "displays local storage browser name in chosen", ->
+        cy
+          .get(".browsers-list>a").first()
+            .should("contain", "Chromium")
+
+      it "displays local storage browser icon in chosen", ->
+        cy
+          .get(".browsers-list>a").first()
+            .find(".fa-chrome")
 
     describe "only one browser available", ->
       beforeEach ->

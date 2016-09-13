@@ -81,7 +81,14 @@ export default class Project {
       this.browsers = _.map(browsers, (browser) => {
         return new Browser(browser)
       })
-      return this.setChosenBrowser(this.defaultBrowser)
+      // if they already have a browser chosen
+      // that's been saved in localStorage, then select that
+      // otherwise just do the default.
+      if (localStorage.getItem('chosenBrowser')) {
+        this.setChosenBrowserByName(localStorage.getItem('chosenBrowser'))
+      } else {
+        return this.setChosenBrowser(this.defaultBrowser)
+      }
     }
   }
 
@@ -89,6 +96,7 @@ export default class Project {
     _.each(this.browsers, (browser) => {
       browser.isChosen = false
     })
+    localStorage.setItem('chosenBrowser', browser.name)
     return browser.isChosen = true
   }
 
