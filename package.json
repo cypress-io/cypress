@@ -109,7 +109,7 @@
     "@cypress/core-https-proxy": "0.1.3",
     "@cypress/core-icons": "0.4.1",
     "@cypress/core-launcher": "0.1.0",
-    "@cypress/core-runner": "0.1.10",
+    "@cypress/core-runner": "0.1.11",
     "@cypress/core-socket": "0.2.0",
     "ansi_up": "^1.3.0",
     "bluebird": "3.3.3",
