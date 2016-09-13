@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.1.11 - *(09/13/16)*
+- fix for null contentType
+
 #### 0.1.10 - *(09/07/16)*
 - bump core reporter
 
