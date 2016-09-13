@@ -7,6 +7,7 @@ setZunderConfig(z)
 u.series(
   z.applyDevEnv,
   z.cleanDev,
+  z.cleanTests,
   u.parallel(
     z.watchScripts,
     z.watchTests,
