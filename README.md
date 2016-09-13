@@ -57,6 +57,9 @@ npm test
 
 ## Changelog
 
+#### 0.1.7 - *(09/13/16)*
+- ensure direct dependencies get installed
+
 #### 0.1.6 - *(09/07/16)*
 - cleanup npm dist
 
