@@ -6,7 +6,7 @@ export default (props) => {
       return ''
     }
 
-    return '(${contentType})'
+    return `(${contentType})`
   }
 
   const getStatus = () => {
