@@ -30,6 +30,7 @@ export default class Iframes extends Component {
             width,
           }}
         />
+        <div className='cover' />
       </div>
     )
   }

@@ -1,11 +1,22 @@
-.reporter {
-  right: auto;
+.is-resizing-reporter {
+  cursor: col-resize;
+}
+
+.reporter-wrap {
   min-width: $reporter-min-width;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  top: 0;
   width: 33%;
 
-  .container {
-    border-right: solid 1px #c7c7c7;
+  .is-reporter-sized & {
+    min-width: 0;
   }
+}
+
+.reporter .container {
+  border-right: solid 1px #c7c7c7;
 }
 
 .runner {
@@ -71,4 +82,14 @@
       margin-right: 5px;
     }
   }
+}
+
+.runner-resizer {
+  opacity: 0.5;
+  bottom: 0;
+  cursor: col-resize;
+  margin-left: -5px;
+  position: absolute;
+  top: 0;
+  width: 10px;
 }

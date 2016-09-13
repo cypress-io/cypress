@@ -31,6 +31,13 @@ const createProps = () => ({
 })
 
 describe('<App />', () => {
+  it('renders the reporter wrap with the reporter width', () => {
+    const props = createProps()
+    props.state.reporterWidth = 600
+    const component = shallow(<App {...props} />)
+    expect(component.find('.reporter-wrap').prop('style').width).to.equal(600)
+  })
+
   it('renders the <Reporter /> with the reporter bus', () => {
     const props = createProps()
     const component = shallow(<App {...props} />)
@@ -46,7 +53,7 @@ describe('<App />', () => {
 
   it('renders the runner wrap with `left` set as the width of the reporter', () => {
     const props = createProps()
-    props.state.reporterWidth = 400
+    props.state.absoluteReporterWidth = 400
     const component = shallow(<App {...props} />)
     expect(component.find('RunnerWrap').prop('style').left).to.equal(400)
   })
@@ -73,5 +80,60 @@ describe('<App />', () => {
       </App>
     )
     expect(component.find('.some-child')).to.exist
+  })
+
+  it('renders the <Resizer /> with the state', () => {
+    const props = createProps()
+    const component = shallow(<App {...props} />)
+    expect(component.find('Resizer')).to.have.prop('state', props.state)
+  })
+
+  describe('resizing reporter', () => {
+    it('renders without is-resizing-reporter class by default', () => {
+      const component = shallow(<App {...createProps()} />)
+      expect(component).not.to.have.className('is-resizing-reporter')
+    })
+
+    it('renders with is-resizing-reporter class when resizing reporter', () => {
+      const component = shallow(<App {...createProps()} />)
+      component.find('Resizer').prop('onResizeStart')()
+      component.update()
+      expect(component).to.have.className('is-resizing-reporter')
+    })
+
+    it('removes is-resizing-reporter when resizing ends', () => {
+      const component = shallow(<App {...createProps()} />)
+      component.find('Resizer').prop('onResizeStart')()
+      component.update()
+      component.find('Resizer').prop('onResizeEnd')()
+      component.update()
+      expect(component).not.to.have.className('is-resizing-reporter')
+    })
+
+    it('renders without is-reporter-sized class when there is no explicitly-set reporter width', () => {
+      const component = shallow(<App {...createProps()} />)
+      expect(component).not.to.have.className('is-reporter-sized')
+    })
+
+    it('renders with is-reporter-sized class when there is an explicitly-set reporter width', () => {
+      const props = createProps()
+      props.state.reporterWidth = 600
+      const component = shallow(<App {...props} />)
+      expect(component).to.have.className('is-reporter-sized')
+    })
+
+    it('sets the reporter width when reporter is resized', () => {
+      const props = createProps()
+      const component = shallow(<App {...props} />)
+      component.find('Resizer').prop('onResize')(450)
+      expect(props.state.reporterWidth).to.equal(450)
+    })
+
+    it('sets the absolute reporter width when reporter is resized', () => {
+      const props = createProps()
+      const component = shallow(<App {...props} />)
+      component.find('Resizer').prop('onResize')(520)
+      expect(props.state.absoluteReporterWidth).to.equal(520)
+    })
   })
 })

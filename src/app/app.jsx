@@ -1,6 +1,7 @@
 /* global $ */
 
-import { action } from 'mobx'
+import cs from 'classnames'
+import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, PropTypes } from 'react'
 import { findDOMNode } from 'react-dom'
@@ -12,27 +13,45 @@ import State from '../lib/state'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
+import Resizer from './resizer'
 import RunnerWrap from './runner-wrap'
 
 @observer
 class App extends Component {
+  @observable isResizingReporter = false
+
   render () {
     return (
-      <div>
-        <Reporter
-          ref='reporter'
-          runner={this.props.runner.reporterBus}
-          specPath={this._specPath()}
-        />
+      <div className={cs({
+        'is-resizing-reporter': this.isResizingReporter,
+        'is-reporter-sized': this.props.state.reporterWidth != null,
+      })}>
+        <div
+          ref='reporterWrap'
+          className='reporter-wrap'
+          style={{ width: this.props.state.reporterWidth }}
+        >
+          <Reporter
+            runner={this.props.runner.reporterBus}
+            specPath={this._specPath()}
+          />
+        </div>
         <RunnerWrap
           className='container'
-          style={{ left: this.props.state.reporterWidth }}
+          style={{ left: this.props.state.absoluteReporterWidth }}
         >
           <Header ref='header' {...this.props} />
           <Iframes {...this.props} />
           <Message {...this.props} />
           {this.props.children}
         </RunnerWrap>
+        <Resizer
+          style={{ left: this.props.state.absoluteReporterWidth }}
+          state={this.props.state}
+          onResizeStart={this._onReporterResizeStart}
+          onResize={this._onReporterResize}
+          onResizeEnd={this._onReporterResizeEnd}
+        />
       </div>
     )
   }
@@ -50,18 +69,31 @@ class App extends Component {
 
     const $window = $(this.props.window)
     const $header = $(findDOMNode(this.refs.header))
-    const $reporter = $(findDOMNode(this.refs.reporter))
+    const $reporterWrap = $(this.refs.reporterWrap)
 
     this._onWindowResize = action('window:resize', () => {
       state.updateWindowDimensions({
         windowWidth: $window.width(),
         windowHeight: $window.height(),
-        reporterWidth: $reporter.outerWidth(),
+        reporterWidth: $reporterWrap.outerWidth(),
         headerHeight: $header.outerHeight(),
       })
     })
 
     $window.on('resize', this._onWindowResize).trigger('resize')
+  }
+
+  _onReporterResizeStart = () => {
+    this.isResizingReporter = true
+  }
+
+  _onReporterResize = (reporterWidth) => {
+    this.props.state.reporterWidth = reporterWidth
+    this.props.state.absoluteReporterWidth = reporterWidth
+  }
+
+  _onReporterResizeEnd = () => {
+    this.isResizingReporter = false
   }
 
   componentWillUnmount () {
