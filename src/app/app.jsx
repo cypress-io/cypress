@@ -32,7 +32,7 @@ class App extends Component {
           style={{ width: this.props.state.reporterWidth }}
         >
           <Reporter
-            runner={this.props.runner.reporterBus}
+            runner={this.props.eventManager.reporterBus}
             specPath={this._specPath()}
           />
         </div>
@@ -120,7 +120,7 @@ App.propTypes = {
     viewportHeight: PropTypes.number.isRequired,
     viewportWidth: PropTypes.number.isRequired,
   }).isRequired,
-  runner: PropTypes.shape({
+  eventManager: PropTypes.shape({
     notifyRunningSpec: PropTypes.func.isRequired,
     reporterBus: PropTypes.shape({
       emit: PropTypes.func.isRequired,

@@ -17,7 +17,7 @@ const createProps = () => ({
     viewportHeight: 800,
     viewportWidth: 500,
   },
-  runner: {
+  eventManager: {
     notifyRunningSpec: sinon.spy(),
     reporterBus: {
       emit: sinon.spy(),
@@ -41,7 +41,7 @@ describe('<App />', () => {
   it('renders the <Reporter /> with the reporter bus', () => {
     const props = createProps()
     const component = shallow(<App {...props} />)
-    expect(component.find('Reporter')).to.have.prop('runner', props.runner.reporterBus)
+    expect(component.find('Reporter')).to.have.prop('runner', props.eventManager.reporterBus)
   })
 
   it('renders the <Reporter /> with the spec path', () => {

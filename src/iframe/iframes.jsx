@@ -7,7 +7,7 @@ import React, { Component } from 'react'
 import AutIframe from './aut-iframe'
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
-import runner from '../lib/runner'
+import eventManager from '../lib/event-manager'
 import windowUtil from '../lib/window-util'
 
 @observer
@@ -38,13 +38,13 @@ export default class Iframes extends Component {
   componentDidMount () {
     this.autIframe = new AutIframe(this.props.config)
 
-    runner.on('visit:failed', this.autIframe.showVisitFailure)
+    eventManager.on('visit:failed', this.autIframe.showVisitFailure)
 
     // TODO: need to take headless mode into account
     // may need to not display reporter if more than 200 tests
-    runner.on('restart', this._run.bind(this))
+    eventManager.on('restart', this._run.bind(this))
 
-    runner.start(this.props.config)
+    eventManager.start(this.props.config)
 
     this.iframeModel = new IframeModel(this.props.state, {
       detachBody: this.autIframe.detachBody,
@@ -58,12 +58,12 @@ export default class Iframes extends Component {
 
   _run () {
     const specPath = windowUtil.specPath()
-    this.props.runner.notifyRunningSpec(specPath)
+    this.props.eventManager.notifyRunningSpec(specPath)
     logger.clearLog()
 
     this._loadIframes(specPath)
     .then(([specWindow, $autIframe]) => {
-      runner.run(specPath, specWindow, $autIframe)
+      eventManager.run(specPath, specWindow, $autIframe)
     })
   }
 
@@ -90,7 +90,7 @@ export default class Iframes extends Component {
   }
 
   componentWillUnmount () {
-    this.props.runner.notifyRunningSpec(null)
-    runner.stop()
+    this.props.eventManager.notifyRunningSpec(null)
+    eventManager.stop()
   }
 }

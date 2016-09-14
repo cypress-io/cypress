@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import RunnerWrap from './runner-wrap'
 
-import runner from '../lib/runner'
+import eventManager from '../lib/event-manager'
 
 class NoSpec extends Component {
   componentWillMount () {
@@ -15,7 +15,7 @@ class NoSpec extends Component {
           <p>Whoops, there is no test to run.</p>
           <p className='muted'>Choose a test to run from the desktop application.</p>
           <p>
-            <button onClick={() => runner.focusTests()}>
+            <button onClick={() => eventManager.focusTests()}>
               <i className='fa fa-chevron-left'></i>
               View All Tests
             </button>

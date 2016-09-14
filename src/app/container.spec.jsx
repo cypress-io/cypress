@@ -21,7 +21,7 @@ const createProps = () => ({
     viewportHeight: 0,
     viewportWidth: 0,
   },
-  runner: {
+  eventManager: {
     init: sinon.spy(),
     launchBrowser: sinon.spy(),
     notifyRunningSpec: () => {},
@@ -37,13 +37,13 @@ const createProps = () => ({
 })
 
 describe('<Container />', () => {
-  it('initializes the runner when mounted', () => {
+  it('initializes the event manager when mounted', () => {
     const props = createProps()
     mount(<Container {...props} />)
-    expect(props.runner.init).to.have.been.called
-    expect(props.runner.init.firstCall.args[0]).to.equal(props.state)
-    expect(props.runner.init.firstCall.args[1].element).to.equal(automationElementId)
-    expect(props.runner.init.firstCall.args[1].string).to.be.a('string')
+    expect(props.eventManager.init).to.have.been.called
+    expect(props.eventManager.init.firstCall.args[0]).to.equal(props.state)
+    expect(props.eventManager.init.firstCall.args[1].element).to.equal(automationElementId)
+    expect(props.eventManager.init.firstCall.args[1].string).to.be.a('string')
   })
 
   describe('when automation is connecting', () => {
@@ -81,7 +81,7 @@ describe('<Container />', () => {
 
     it('launches the browser when onLaunchBrowser prop is called', () => {
       component.find(NoAutomation).prop('onLaunchBrowser')('chrome')
-      expect(props.runner.launchBrowser).to.have.been.calledWith('chrome')
+      expect(props.eventManager.launchBrowser).to.have.been.calledWith('chrome')
     })
   })
 
@@ -105,7 +105,7 @@ describe('<Container />', () => {
 
     it('launches the browser when onReload prop is called', () => {
       component.find(AutomationDisconnected).prop('onReload')('chrome')
-      expect(props.runner.launchBrowser).to.have.been.calledWith('chrome')
+      expect(props.eventManager.launchBrowser).to.have.been.calledWith('chrome')
     })
   })
 
