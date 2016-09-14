@@ -9,6 +9,7 @@ urls =
   pathname: "http://localhost:2020/app/index.html"
   local:    "http://127.0.0.1:8080/foo/bar"
   stack:    "https://stackoverflow.com/"
+  trailHash:"http://localhost:3500/index.html?foo=bar#"
 
 describe "$Cypress.Location API", ->
   beforeEach ->
@@ -27,6 +28,11 @@ describe "$Cypress.Location API", ->
       str = @setup("signin").getHash()
       expect(str).to.eq ""
 
+    it "returns empty when only hash is present", ->
+      ## its weird, but this matches current browser behavior
+      str = @setup("hash").getHash()
+      expect(str).to.eq("")
+
   context "#getHref", ->
     it "returns the full url", ->
       str = @setup("signin").getHref()
@@ -35,6 +41,10 @@ describe "$Cypress.Location API", ->
     it "does not apply a leading slash after removing query params", ->
       str = @setup("ember").getHref()
       expect(str).to.eq "http://localhost:2020/index.html#/posts"
+
+    it "includes hash even when hash is empty", ->
+      str = @setup("trailHash").getHref()
+      expect(str).to.eq(urls.trailHash)
 
   context "#getHost", ->
     it "returns port if port is present", ->

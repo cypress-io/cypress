@@ -1,6 +1,7 @@
 _         = require("lodash")
 r         = require("request")
 rp        = require("request-promise")
+url       = require("url")
 tough     = require("tough-cookie")
 moment    = require("moment")
 Promise   = require("bluebird")
@@ -50,6 +51,28 @@ module.exports = {
   reduceCookieToArray: reduceCookieToArray
 
   createCookieString: createCookieString
+
+  create: (strOrOpts, promise) ->
+    switch
+      when _.isString(strOrOpts)
+        opts = {
+          url: strOrOpts
+        }
+      else
+        opts = strOrOpts
+
+    opts.url = url.parse(opts.url)
+
+    ## parse port into a legit number
+    ## to fix issue with request
+    ## https://github.com/cypress-io/cypress/issues/222
+    if p = opts.url.port
+      opts.url.port = _.toNumber(p)
+
+    if promise
+      rp(opts)
+    else
+      r(opts)
 
   contentTypeIsJson: (response) ->
     ## TODO: use https://github.com/jshttp/type-is for this
@@ -152,7 +175,7 @@ module.exports = {
       options.headers["Cookie"] = createCookieString(cookies)
 
     send = =>
-      str = r(options)
+      str = @create(options)
       str.getJar = -> options.jar
       str
 
@@ -190,7 +213,7 @@ module.exports = {
       ## dont send in domain
       options = _.omit(options, "domain")
 
-      rp(options)
+      @create(options, true)
       .then(@normalizeResponse.bind(@))
       .then (resp) =>
         resp.duration = Date.now() - ms

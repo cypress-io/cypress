@@ -336,11 +336,43 @@ describe "$Cypress.Cy Navigation Commands", ->
         .visit("http://localhost:3500/foo")
         .visit("/foo")
 
+    describe "when only hashes are changing", ->
+      it "short circuits the visit if the page will not refresh", ->
+        count = 0
+        urls = []
+
+        @cy.private("$remoteIframe").on "load", =>
+          urls.push @cy.private("window").location.href
+
+          count += 1
+
+        @cy
+          ## about:blank yes (1)
+          .visit("/hash.html?foo#bar") ## yes (2)
+          .visit("/hash.html?foo#foo") ## no (2)
+          .visit("/hash.html?bar#bar") ## yes (3)
+          .visit("/index.html?bar#bar") ## yes (4)
+          .visit("/index.html?baz#bar") ## yes (5)
+          .visit("/index.html#bar") ## yes (6)
+          .visit("/index.html") ## yes (7)
+          .visit("/index.html#baz") ## no (7)
+          .visit("/index.html#") ## no (7)
+          .then ->
+            expect(count).to.eq(7)
+            expect(urls).to.deep.eq([
+              "about:blank"
+              "http://localhost:3500/hash.html?foo#bar"
+              "http://localhost:3500/hash.html?bar#bar"
+              "http://localhost:3500/index.html?bar#bar"
+              "http://localhost:3500/index.html?baz#bar"
+              "http://localhost:3500/index.html#bar"
+              "http://localhost:3500/index.html"
+            ])
+
     describe "when origins don't match", ->
       beforeEach ->
         @Cypress.trigger "test:before:run", {id: 888}
 
-        @sandbox.stub(@cy, "_href")
         @sandbox.stub(@Cypress, "getEmissions").returns([])
         @sandbox.stub(@Cypress, "getTestsState").returns([])
         @sandbox.stub(@Cypress, "getStartTime").returns("12345")
@@ -374,10 +406,13 @@ describe "$Cypress.Cy Navigation Commands", ->
 
         @sandbox.stub(@cy, "_getLocation").withArgs("href").returns("about:blank")
 
-        remote = @Cypress.Location.create("http://localhost:4200")
-        uri    = @Cypress.Location.create("http://localhost:3500/foo?bar=baz#/tests/integration/foo_spec.js")
+        current = @Cypress.Location.create("about:blank")
+        remote  = @Cypress.Location.create("http://localhost:4200")
+        uri     = @Cypress.Location.create("http://localhost:3500/foo?bar=baz#/tests/integration/foo_spec.js")
 
         @sandbox.stub(@Cypress.Location, "create")
+        .withArgs("about:blank")
+        .returns(current)
         .withArgs(href)
         .returns(uri)
         .withArgs("http://localhost:4200")
@@ -385,10 +420,18 @@ describe "$Cypress.Cy Navigation Commands", ->
         .withArgs("http://localhost:4200/")
         .returns(remote)
 
+        _href = @cy._href
+        count = 0
+
         @cy._href = (win, url) ->
-          expect(win).to.eq(window)
-          expect(url).to.eq("http://localhost:4200/foo?bar=baz#/tests/integration/foo_spec.js")
-          done()
+          count += 1
+
+          if count is 1
+            _href.apply(@, arguments)
+          else
+            expect(win).to.eq(window)
+            expect(url).to.eq("http://localhost:4200/foo?bar=baz#/tests/integration/foo_spec.js")
+            done()
 
         @cy.visit("http://localhost:4200")
 

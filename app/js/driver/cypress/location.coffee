@@ -9,6 +9,35 @@
 ## attach to global
 $Cypress.Location = do ($Cypress, _, Uri) ->
 
+  Uri.prototype.toString = ->
+    ## created our own custom toString method
+    ## to fix some bugs with jsUri's implementation
+    s = @origin()
+
+    if path = @path()
+      s += path
+
+    if query = @query()
+      s += "?" if not _.str.include(query, "?")
+
+      s += query
+
+    if anchor = @anchor()
+      s += "#" if not _.str.include(anchor, "#")
+
+      s += anchor
+    else
+      {source} = @uriParts
+
+      ## if the last character of the
+      ## source is a hash append this
+      ## since jsuri will return an
+      ## empty @remote.anchor()
+      if source.slice(-1) is "#"
+        s += "#"
+
+    return s
+
   reHttp = /^https?:\/\//
   reWww = /^www/
 
@@ -84,24 +113,7 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
           parts.slice(1).join(".")
 
     getToString: ->
-      ## created our own custom toString method
-      ## to fix some bugs with jsUri's implementation
-      s = @remote.origin()
-
-      if path = @remote.path()
-        s += path
-
-      if query = @remote.query()
-        s += "?" if not _.str.include(query, "?")
-
-        s += query
-
-      if anchor = @remote.anchor()
-        s += "#" if not _.str.include(anchor, "#")
-
-        s += anchor
-
-      return s
+      @remote.toString()
 
     getObject: ->
       {
