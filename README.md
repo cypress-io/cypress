@@ -36,6 +36,9 @@ npm run watch
 
 ## Changelog
 
+#### 0.3.5 - *(09/13/16)*
+- getPathToRoot, force websocket connection only
+
 #### 0.3.4 - *(09/07/16)*
 - do not set cookie url when already present
 
