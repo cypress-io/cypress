@@ -18,12 +18,12 @@ import RunnerWrap from './runner-wrap'
 
 @observer
 class App extends Component {
-  @observable isResizingReporter = false
+  @observable isReporterResizing = false
 
   render () {
     return (
       <div className={cs({
-        'is-resizing-reporter': this.isResizingReporter,
+        'is-reporter-resizing': this.isReporterResizing,
         'is-reporter-sized': this.props.state.reporterWidth != null,
       })}>
         <div
@@ -84,7 +84,7 @@ class App extends Component {
   }
 
   _onReporterResizeStart = () => {
-    this.isResizingReporter = true
+    this.isReporterResizing = true
   }
 
   _onReporterResize = (reporterWidth) => {
@@ -93,7 +93,7 @@ class App extends Component {
   }
 
   _onReporterResizeEnd = () => {
-    this.isResizingReporter = false
+    this.isReporterResizing = false
   }
 
   componentWillUnmount () {
