@@ -19,6 +19,7 @@ const createProps = () => ({
   },
   eventManager: {
     notifyRunningSpec: sinon.spy(),
+    persistState: sinon.spy(),
     reporterBus: {
       emit: sinon.spy(),
       on: sinon.spy(),
@@ -94,22 +95,6 @@ describe('<App />', () => {
       expect(component).not.to.have.className('is-reporter-resizing')
     })
 
-    it('renders with is-reporter-resizing class when resizing reporter', () => {
-      const component = shallow(<App {...createProps()} />)
-      component.find('Resizer').prop('onResizeStart')()
-      component.update()
-      expect(component).to.have.className('is-reporter-resizing')
-    })
-
-    it('removes is-reporter-resizing when resizing ends', () => {
-      const component = shallow(<App {...createProps()} />)
-      component.find('Resizer').prop('onResizeStart')()
-      component.update()
-      component.find('Resizer').prop('onResizeEnd')()
-      component.update()
-      expect(component).not.to.have.className('is-reporter-resizing')
-    })
-
     it('renders without is-reporter-sized class when there is no explicitly-set reporter width', () => {
       const component = shallow(<App {...createProps()} />)
       expect(component).not.to.have.className('is-reporter-sized')
@@ -122,18 +107,42 @@ describe('<App />', () => {
       expect(component).to.have.className('is-reporter-sized')
     })
 
-    it('sets the reporter width when reporter is resized', () => {
+    it('renders with is-reporter-resizing class when resizing reporter', () => {
+      const component = shallow(<App {...createProps()} />)
+      component.find('Resizer').prop('onResizeStart')()
+      component.update()
+      expect(component).to.have.className('is-reporter-resizing')
+    })
+
+    it('sets the reporter width as reporter is resized', () => {
       const props = createProps()
       const component = shallow(<App {...props} />)
       component.find('Resizer').prop('onResize')(450)
       expect(props.state.reporterWidth).to.equal(450)
     })
 
-    it('sets the absolute reporter width when reporter is resized', () => {
+    it('sets the absolute reporter width as reporter is resized', () => {
       const props = createProps()
       const component = shallow(<App {...props} />)
       component.find('Resizer').prop('onResize')(520)
       expect(props.state.absoluteReporterWidth).to.equal(520)
+    })
+
+    it('removes is-reporter-resizing when resizing ends', () => {
+      const component = shallow(<App {...createProps()} />)
+      component.find('Resizer').prop('onResizeStart')()
+      component.update()
+      component.find('Resizer').prop('onResizeEnd')()
+      component.update()
+      expect(component).not.to.have.className('is-reporter-resizing')
+    })
+
+    it('persists the reporter width when resizing ends', () => {
+      const props = createProps()
+      const component = shallow(<App {...props} />)
+      component.find('Resizer').prop('onResize')(300)
+      component.find('Resizer').prop('onResizeEnd')()
+      expect(props.eventManager.persistState).to.have.been.calledWith({ reporterWidth: 300 })
     })
   })
 })

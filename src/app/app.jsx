@@ -94,6 +94,9 @@ class App extends Component {
 
   _onReporterResizeEnd = () => {
     this.isReporterResizing = false
+    this.props.eventManager.persistState({
+      reporterWidth: this.props.state.reporterWidth,
+    })
   }
 
   componentWillUnmount () {
