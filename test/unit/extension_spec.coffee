@@ -30,6 +30,10 @@ describe "Extension", ->
     it "returns path to theme", ->
       expect(extension.getPathToTheme()).to.eq(cwd + "/theme")
 
+  context ".getPathToRoot", ->
+    it "returns path to root", ->
+      expect(extension.getPathToRoot()).to.eq(cwd)
+
   context ".setHostAndPath", ->
     beforeEach ->
       @src  = path.join(cwd, "test", "helpers", "background_src.js")
