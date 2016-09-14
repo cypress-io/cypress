@@ -13,12 +13,12 @@
       background-color: #f8f8f8;
       border-color: transparent;
       border-radius: 0;
+      display: none;
       line-height: 26px;
       outline: 0;
       padding: 10px 0;
       text-align: center;
-      transition: width 0.5s ease-in-out;
-      width: 50px;
+      width: 40px;
 
       &:hover {
         background-color: #e9e9e9;
@@ -35,7 +35,11 @@
     float: left;
     font-weight: normal;
     padding: 10px 12px;
-    width: auto;
+    width: auto !important;
+
+    span {
+      display: none;
+    }
 
     i {
       margin-right: 5px;
@@ -48,13 +52,13 @@
     padding: 0;
 
     li {
+      display: none;
       float: left;
       font-size: 16px;
       font-weight: 500;
       line-height: 26px;
       list-style-type: none;
-      padding: 10px;
-      transition: padding 0.5s ease-in-out;
+      padding: 10px 5px;
 
       &.passed {
         color: #23AE89;
@@ -123,18 +127,40 @@
     }
   }
 
-  // TODO: when detached, this will have to be a different max-width
-  @media all and (max-width: 1430px) {
+  // utilizing element size queries: https://github.com/marcj/css-element-queries
+  &[min-width~="200px"] {
+    .stats {
+      .passed,
+      .failed,
+      .pending {
+        display: inline-block;
+      }
+    }
+  }
+
+  &[min-width~="300px"] {
+    .stats .duration {
+      display: inline-block;
+    }
+  }
+
+  &[min-width~="400px"] {
     header button {
-      width: 40px;
+      display: inline-block;
+    }
+  }
+
+  &[min-width~="500px"] {
+    header button {
+      width: 50px;
     }
 
     .focus-tests span {
-      display: none;
+      display: inline;
     }
 
     .stats li {
-      padding: 10px 5px;
+      padding: 10px;
     }
   }
 }

@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react'
 import React, { Component, PropTypes } from 'react'
+import EQ from 'css-element-queries/src/ElementQueries'
 
 import appState from './lib/app-state'
 import events from './lib/events'
@@ -35,6 +36,10 @@ class Reporter extends Component {
         />
       </div>
     )
+  }
+
+  componentDidMount () {
+    EQ.init()
   }
 }
 
