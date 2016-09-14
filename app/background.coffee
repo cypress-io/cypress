@@ -41,7 +41,7 @@ connect = (host, path, io) ->
 
   ## cannot use required socket here due
   ## to bug in socket io client with browserify
-  client = io.connect(host, {path: path})
+  client = io.connect(host, {path: path, transports: ["websocket"]})
 
   client.on "automation:request", (id, msg, data) ->
     switch msg
