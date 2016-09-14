@@ -63,7 +63,7 @@ gulp.task('build-stylesheets-dev', ['clean'], buildStylesheets(false))
 gulp.task('build-stylesheets-prod', ['clean'], buildStylesheets(true))
 
 gulp.task('watch-stylesheets', ['build-stylesheets-dev'], () => {
-  return watch(stylesheetsGlob, buildStylesheets)
+  return watch(stylesheetsGlob, buildStylesheets(false))
 })
 
 function getSpecFile (file) {
