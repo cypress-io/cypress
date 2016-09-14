@@ -14,6 +14,9 @@ module.exports = {
   getPathToTheme: ->
     path.join(__dirname, "..", "theme")
 
+  getPathToRoot: ->
+    path.join(__dirname, "..")
+
   setHostAndPath: (host, path) ->
     src  = @getPathToExtension("background_src.js")
     dest = @getPathToExtension("background.js")
