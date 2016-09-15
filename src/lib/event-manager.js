@@ -219,8 +219,8 @@ export default {
       driver.abort()
     })
 
-    reporterBus.on('persist:state', (state) => {
-      this.persistState(state)
+    reporterBus.on('save:state', (state) => {
+      this.saveState(state)
     })
 
     // when we actually unload then
@@ -302,7 +302,7 @@ export default {
     driver.Cookies.setCy('unload', true)
   },
 
-  persistState (state) {
-    channel.emit('persist:app:state', state)
+  saveState (state) {
+    channel.emit('save:app:state', state)
   },
 }

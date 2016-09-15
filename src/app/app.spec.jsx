@@ -19,7 +19,7 @@ const createProps = () => ({
   },
   eventManager: {
     notifyRunningSpec: sinon.spy(),
-    persistState: sinon.spy(),
+    saveState: sinon.spy(),
     reporterBus: {
       emit: sinon.spy(),
       on: sinon.spy(),
@@ -137,12 +137,12 @@ describe('<App />', () => {
       expect(component).not.to.have.className('is-reporter-resizing')
     })
 
-    it('persists the reporter width when resizing ends', () => {
+    it('saves the reporter width when resizing ends', () => {
       const props = createProps()
       const component = shallow(<App {...props} />)
       component.find('Resizer').prop('onResize')(300)
       component.find('Resizer').prop('onResizeEnd')()
-      expect(props.eventManager.persistState).to.have.been.calledWith({ reporterWidth: 300 })
+      expect(props.eventManager.saveState).to.have.been.calledWith({ reporterWidth: 300 })
     })
   })
 })
