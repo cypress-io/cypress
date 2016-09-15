@@ -14,7 +14,7 @@ const Controls = observer(({ events, appState }) => {
   const emit = (event) => () => events.emit(event)
   const toggleAutoScrolling = () => {
     appState.toggleAutoScrolling()
-    events.emit('persist:state')
+    events.emit('save:state')
   }
 
   return (
