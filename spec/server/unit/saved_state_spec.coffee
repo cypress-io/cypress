@@ -9,7 +9,8 @@ fs = Promise.promisifyAll(fs)
 describe "lib/saved_state", ->
 
   beforeEach ->
-    fs.unlinkAsync(savedState.path)
+    fs.unlinkAsync(savedState.path).catch ->
+      ## ignore error if file didn't exist in the first place
 
   context "#set", ->
     it "creates the state.json file if non-existent", ->
@@ -38,26 +39,36 @@ describe "lib/saved_state", ->
         }
 
   context "#get", ->
-    beforeEach ->
-      savedState.set({
-        foo: "foo"
-        bar: "bar"
-      })
+    describe.only "when no state has yet been saved", ->
+      it "returns an empty object if no key is specified", ->
+        savedState.get().then (state) ->
+          expect(state).to.eql {}
 
-    it "returns the value for the specified key", ->
-      savedState.get("foo").then (value) ->
-        expect(value).to.equal("foo")
+      it "returns undefined for a non-existent key", ->
+        savedState.get("nope").then (value) ->
+          expect(value).to.be.undefined
 
-    it "returns all state if no key is specified", ->
-      savedState.get().then (state) ->
-        expect(state).to.eql {
-          bar: "bar"
+    describe "when state has been saved", ->
+      beforeEach ->
+        savedState.set({
           foo: "foo"
-        }
+          bar: "bar"
+        })
 
-    it "returns undefined for a non-existent key", ->
-      savedState.get("nope").then (value) ->
-        expect(value).to.be.undefined
+      it "returns the value for the specified key", ->
+        savedState.get("foo").then (value) ->
+          expect(value).to.equal("foo")
+
+      it "returns all state if no key is specified", ->
+        savedState.get().then (state) ->
+          expect(state).to.eql {
+            bar: "bar"
+            foo: "foo"
+          }
+
+      it "returns undefined for a non-existent key", ->
+        savedState.get("nope").then (value) ->
+          expect(value).to.be.undefined
 
   context ".path", ->
     it "returns the full path to the state.json file", ->
