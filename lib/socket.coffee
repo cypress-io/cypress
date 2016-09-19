@@ -16,6 +16,7 @@ errors        = require("./errors")
 logger        = require("./logger")
 launcher      = require("./launcher")
 automation    = require("./automation")
+savedState    = require("./saved_state")
 
 existingState = null
 
@@ -374,6 +375,9 @@ class Socket
         launcher.launch("chrome", "http://localhost:2020/__#" + p, {
           host: "http://localhost:2020"
         })
+
+      socket.on "save:app:state", (state) ->
+        savedState.set(state)
 
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>
