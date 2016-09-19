@@ -1,9 +1,8 @@
 # Cypress Documentation
 
-This is the source code for Cypress's Documentation, Guides, and API.
+The code for Cypress's Documentation, Guides, and API.
 
 * https://docs.cypress.io
-* https://www.pivotaltracker.com/n/projects/1514636
 
 ## Introduction
 
