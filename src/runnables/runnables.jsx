@@ -57,7 +57,7 @@ class Runnables extends Component {
   componentDidMount () {
     this.props.scroller.setContainer(this.refs.container, action('user:scroll:detected', () => {
       if (this.props.appState.isRunning) {
-        this.props.appState.setAutoScrolling(false)
+        this.props.appState.temporarilySetAutoScrolling(false)
       }
     }))
   }

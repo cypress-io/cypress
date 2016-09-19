@@ -1,3 +1,4 @@
+import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, PropTypes } from 'react'
 import EQ from 'css-element-queries/src/ElementQueries'
@@ -14,7 +15,12 @@ import Runnables from './runnables/runnables'
 @observer
 class Reporter extends Component {
   componentWillMount () {
-    const { appState, runnablesStore, runner, scroller, statsStore } = this.props
+    const { appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore } = this.props
+
+    action('set:scrolling', () => {
+      appState.setAutoScrolling(autoScrollingEnabled)
+    })()
+
     this.props.events.init({
       appState,
       runnablesStore,
@@ -44,6 +50,7 @@ class Reporter extends Component {
 }
 
 Reporter.propTypes = {
+  autoScrollingEnabled: PropTypes.bool,
   runner: PropTypes.shape({
     emit: PropTypes.func.isRequired,
     on: PropTypes.func.isRequired,

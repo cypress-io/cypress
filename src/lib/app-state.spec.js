@@ -50,29 +50,46 @@ describe('app state', () => {
 
     it('resets autoScrollingEnabled', () => {
       const instance = new AppState()
-      instance.setAutoScrolling(false)
+      instance.temporarilySetAutoScrolling(false)
       instance.stop()
       expect(instance.autoScrollingEnabled).to.be.true
     })
   })
 
-  context('#setAutoScrolling', () => {
+  context('#temporarilySetAutoScrolling', () => {
     it('sets autoScrollingEnabled to boolean specified', () => {
       const instance = new AppState()
-      instance.setAutoScrolling(false)
+      instance.temporarilySetAutoScrolling(false)
       expect(instance.autoScrollingEnabled).to.be.false
     })
 
     it('does nothing if argument is null', () => {
       const instance = new AppState()
-      instance.setAutoScrolling(null)
+      instance.temporarilySetAutoScrolling(null)
       expect(instance.autoScrollingEnabled).to.be.true
     })
 
     it('does nothing if argument is undefined', () => {
       const instance = new AppState()
-      instance.setAutoScrolling()
+      instance.temporarilySetAutoScrolling()
       expect(instance.autoScrollingEnabled).to.be.true
+    })
+  })
+
+  context('#setAutoScrolling', () => {
+    it('sets autoScrollingEnabled', () => {
+      const instance = new AppState()
+      instance.setAutoScrolling(false)
+      expect(instance.autoScrollingEnabled).to.be.false
+      instance.setAutoScrolling(true)
+      expect(instance.autoScrollingEnabled).to.be.true
+    })
+
+    it('sets reset value for autoScrollingEnabled', () => {
+      const instance = new AppState()
+      instance.setAutoScrolling(false)
+      instance.reset()
+      expect(instance.autoScrollingEnabled).to.be.false
     })
   })
 
@@ -84,12 +101,19 @@ describe('app state', () => {
       instance.toggleAutoScrolling()
       expect(instance.autoScrollingEnabled).to.be.true
     })
+
+    it('sets reset value for autoScrollingEnabled', () => {
+      const instance = new AppState()
+      instance.toggleAutoScrolling()
+      instance.reset()
+      expect(instance.autoScrollingEnabled).to.be.false
+    })
   })
 
   context('#reset', () => {
     it('resets autoScrollingEnabled when it has not been toggled', () => {
       const instance = new AppState()
-      instance.setAutoScrolling(false)
+      instance.temporarilySetAutoScrolling(false)
       instance.reset()
       expect(instance.autoScrollingEnabled).to.be.true
     })

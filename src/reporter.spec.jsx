@@ -13,6 +13,7 @@ const scroller = {}
 const statsStore = {}
 const getProps = (props) => {
   return _.extend({
+    autoScrollingEnabled: true,
     runner: { emit: () => {}, on: () => {} },
     specPath: 'the spec path',
     appState,
@@ -32,6 +33,15 @@ describe('<Reporter />', () => {
     const events = eventsStub()
     shallow(<Reporter {...getProps({ events })} />)
     expect(events.init).to.have.been.calledWith({ appState, runnablesStore, scroller, statsStore })
+  })
+
+  it('sets appState.autoScrollingEnabled', () => {
+    const props = getProps({
+      appState: { setAutoScrolling: sinon.spy() },
+      autoScrollingEnabled: false,
+    })
+    shallow(<Reporter {...props} />)
+    expect(appState.setAutoScrolling).to.have.been.calledWith(false)
   })
 
   it('tells events to listen to runner', () => {

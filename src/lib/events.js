@@ -40,7 +40,7 @@ export default {
     }))
 
     runner.on('reporter:start', action('start', (startInfo) => {
-      appState.setAutoScrolling(startInfo.autoScrollingEnabled)
+      appState.temporarilySetAutoScrolling(startInfo.autoScrollingEnabled)
       runnablesStore.setInitialScrollTop(startInfo.scrollTop)
       if (runnablesStore.hasTests) {
         statsStore.start(startInfo)
