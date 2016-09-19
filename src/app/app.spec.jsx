@@ -16,6 +16,7 @@ const createProps = () => ({
     projectName: '',
     viewportHeight: 800,
     viewportWidth: 500,
+    state: {},
   },
   eventManager: {
     notifyRunningSpec: sinon.spy(),
@@ -50,6 +51,13 @@ describe('<App />', () => {
     props.config.integrationFolder = 'path/to/int'
     const component = shallow(<App {...props} />)
     expect(component.find('Reporter')).to.have.prop('specPath', 'path/to/int/some-spec.js')
+  })
+
+  it('renders the <Reporter /> with the autoScrollingEnabled flag', () => {
+    const props = createProps()
+    props.config.state.autoScrollingEnabled = true
+    const component = shallow(<App {...props} />)
+    expect(component.find('Reporter')).to.have.prop('autoScrollingEnabled', true)
   })
 
   it('renders the runner wrap with `left` set as the width of the reporter', () => {

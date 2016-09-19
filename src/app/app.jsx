@@ -34,6 +34,7 @@ class App extends Component {
           <Reporter
             runner={this.props.eventManager.reporterBus}
             specPath={this._specPath()}
+            autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
           />
         </div>
         <RunnerWrap
