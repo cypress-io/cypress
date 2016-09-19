@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.1.14 - *(09/19/16)*
+- prevent snapshot from cycling when there's only one
+
 #### 0.1.13 - *(09/13/16)*
 - build prod version of reporter
 
