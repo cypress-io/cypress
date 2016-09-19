@@ -8,6 +8,8 @@ const _defaults = {
 
   width: 1000,
   height: 660,
+
+  reporterWidth: null,
 }
 
 export default class State {
@@ -28,7 +30,7 @@ export default class State {
 
   // if null, the default CSS handles it
   // if non-null, the user has set it by resizing
-  @observable reporterWidth = null
+  @observable reporterWidth = _defaults.reporterWidth
   // what the dom reports, always in pixels
   @observable absoluteReporterWidth = 0
   @observable headerHeight = 0
@@ -37,6 +39,10 @@ export default class State {
   @observable windowHeight = 0
 
   @observable automation = automation.CONNECTING
+
+  constructor (reporterWidth = _defaults.reporterWidth) {
+    this.reporterWidth = reporterWidth
+  }
 
   @computed get scale () {
     if (this._containerWidth < this.width || this._containerHeight < this.height) {
