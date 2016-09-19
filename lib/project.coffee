@@ -18,6 +18,7 @@ Reporter  = require("./reporter")
 cwd       = require("./cwd")
 settings  = require("./util/settings")
 screenshots = require("./screenshots")
+savedState  = require("./saved_state")
 
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -65,6 +66,9 @@ class Project extends EE
         ## store the cfg from
         ## opening the server
         @cfg = cfg
+
+        options.onSavedStateChanged = =>
+          @_setSavedState(@cfg)
 
         ## sync but do not block
         @sync(options)
@@ -159,6 +163,8 @@ class Project extends EE
 
       onSpecChanged: options.onSpecChanged
 
+      onSavedStateChanged: options.onSavedStateChanged
+
       onConnect: (id) =>
         @emit("socket:connected", id)
 
@@ -234,16 +240,25 @@ class Project extends EE
       cfg.browsers = browsers
 
   getConfig: (options = {}) ->
-    if c = @cfg
-      Promise.resolve(c)
-    else
-      config.get(@projectRoot, options)
-      .then (cfg) =>
-        ## return a boolean whether this is a new project or not
-        @determineIsNewProject(cfg.integrationFolder)
-        .then (bool) ->
-          cfg.isNewProject = bool
-        .return(cfg)
+    getConfig = =>
+      if c = @cfg
+        Promise.resolve(c)
+      else
+        config.get(@projectRoot, options)
+        .then (cfg) =>
+          ## return a boolean whether this is a new project or not
+          @determineIsNewProject(cfg.integrationFolder)
+          .then (bool) ->
+            cfg.isNewProject = bool
+          .return(cfg)
+
+    getConfig().then (cfg) =>
+      @_setSavedState(cfg)
+
+  _setSavedState: (cfg) ->
+    savedState.get().then (state) ->
+      cfg.state = state
+      cfg
 
   ensureSpecUrl: (spec) ->
     @getConfig()

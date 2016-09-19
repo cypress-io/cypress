@@ -39,7 +39,7 @@ describe "lib/saved_state", ->
         }
 
   context "#get", ->
-    describe.only "when no state has yet been saved", ->
+    describe "when no state has yet been saved", ->
       it "returns an empty object if no key is specified", ->
         savedState.get().then (state) ->
           expect(state).to.eql {}

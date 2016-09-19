@@ -177,6 +177,7 @@ class Socket
       onChromiumRun: ->
       onReloadBrowser: ->
       checkForAppErrors: ->
+      onSavedStateChanged: ->
 
     messages = {}
 
@@ -377,7 +378,8 @@ class Socket
         })
 
       socket.on "save:app:state", (state) ->
-        savedState.set(state)
+        savedState.set(state).then ->
+          options.onSavedStateChanged()
 
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>
