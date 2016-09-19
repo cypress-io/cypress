@@ -95,7 +95,7 @@ export default class IframeModel {
       }
     })
 
-    if (snapshots.length) {
+    if (snapshots.length > 1) {
       let i = 0
       this.intervalId = setInterval(() => {
         i += 1
