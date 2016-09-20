@@ -66,9 +66,9 @@ describe('stats store', () => {
         expect(instance.duration).to.equal(300)
       })
 
-      it('stops tracking duration when stopped', () => {
+      it('stops tracking duration when ended', () => {
         clock.tick(100)
-        instance.stop()
+        instance.end()
         clock.tick(100)
         expect(instance.duration).to.equal(100)
       })

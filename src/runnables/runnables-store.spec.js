@@ -137,6 +137,13 @@ describe('runnables store', () => {
       instance.setRunnables({})
       expect(scroller.scrollToEnd).not.to.have.been.called
     })
+
+    it('does nothing when app is stopped and auto-scrolling is enabled', () => {
+      appState.isRunning = false
+      appState.isStopped = true
+      instance.setRunnables({})
+      expect(scroller.scrollToEnd).not.to.have.been.called
+    })
   })
 
   context('#runnableStarted', () => {

@@ -13,6 +13,7 @@ const appStateStub = () => ({
   reset: sinon.spy(),
   resume: sinon.spy(),
   setAutoScrolling: sinon.spy(),
+  end: sinon.spy(),
   stop: sinon.spy(),
 })
 
@@ -38,7 +39,7 @@ const statsStoreStub = () => ({
   resume: sinon.spy(),
   start: sinon.spy(),
   startRunning: sinon.spy(),
-  stop: sinon.spy(),
+  end: sinon.spy(),
 })
 
 describe('events', () => {
@@ -156,14 +157,14 @@ describe('events', () => {
       expect(statsStore.pause).to.have.been.called
     })
 
-    it('stops the appState on run:end', () => {
+    it('ends the appState on run:end', () => {
       runner.on.withArgs('run:end').callArgWith(1)
-      expect(appState.stop).to.have.been.called
+      expect(appState.end).to.have.been.called
     })
 
-    it('stops the stats on run:end', () => {
+    it('ends the stats on run:end', () => {
       runner.on.withArgs('run:end').callArgWith(1)
-      expect(statsStore.stop).to.have.been.called
+      expect(statsStore.end).to.have.been.called
     })
 
     it('calls callback with scrollTop and autoScrollingEnabled on reporter:collect:run:state', () => {
@@ -197,6 +198,11 @@ describe('events', () => {
     it('emits runner:next on next', () => {
       events.emit('next')
       expect(runner.emit).to.have.been.calledWith('runner:next')
+    })
+
+    it('stops the appState on stop', () => {
+      events.emit('stop')
+      expect(appState.stop).to.have.been.called
     })
 
     it('emits runner:abort on stop', () => {

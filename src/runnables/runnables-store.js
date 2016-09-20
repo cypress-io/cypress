@@ -100,10 +100,12 @@ class RunnablesStore {
       // so reset to the saved scrollTop
       if (this._initialScrollTop) this.scroller.setScrollTop(this._initialScrollTop)
     } else {
-      // finished before initial rendering complete, meaning some tests
-      // didn't get a chance to get scrolled to
+      // finished running before initial rendering complete (but wasn't manually
+      // stopped), meaning some tests didn't get a chance to get scrolled to
       // scroll to the end since that's the right place to be
-      if (this.appState.autoScrollingEnabled) this.scroller.scrollToEnd()
+      if (this.appState.autoScrollingEnabled && !this.appState.isStopped) {
+        this.scroller.scrollToEnd()
+      }
     }
   }
 

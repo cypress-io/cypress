@@ -13,10 +13,12 @@ class AppState {
   @observable isRunning = defaults.isRunning
   @observable nextCommandName = defaults.nextCommandName
 
+  isStopped = false
   _resetAutoScrollingEnabledTo = true
 
   startRunning () {
     this.isRunning = true
+    this.isStopped = false
   }
 
   pause (nextCommandName) {
@@ -30,6 +32,10 @@ class AppState {
   }
 
   stop () {
+    this.isStopped = true
+  }
+
+  end () {
     this.isRunning = false
     this._resetAutoScrolling()
   }

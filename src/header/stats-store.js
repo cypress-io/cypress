@@ -62,7 +62,7 @@ class StatsStore {
     this._startTimer()
   }
 
-  stop () {
+  end () {
     this._stopTimer()
     this._updateCurrentTime()
   }

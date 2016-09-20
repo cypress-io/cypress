@@ -62,8 +62,8 @@ export default {
     }))
 
     runner.on('run:end', action('run:end', () => {
-      appState.stop()
-      statsStore.stop()
+      appState.end()
+      statsStore.end()
     }))
 
     runner.on('reporter:collect:run:state', (cb) => {
@@ -84,6 +84,7 @@ export default {
     }))
 
     localBus.on('stop', action('stop', () => {
+      appState.stop()
       runner.emit('runner:abort')
     }))
 

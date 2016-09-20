@@ -11,6 +11,13 @@ describe('app state', () => {
       instance.startRunning()
       expect(instance.isRunning).to.be.true
     })
+
+    it('sets isStopped to false', () => {
+      const instance = new AppState()
+      instance.isStopped = true
+      instance.startRunning()
+      expect(instance.isStopped).to.be.false
+    })
   })
 
   context('#pause', () => {
@@ -42,16 +49,24 @@ describe('app state', () => {
   })
 
   context('#stop', () => {
-    it('sets isRunning to false', () => {
+    it('sets isStopped to true', () => {
       const instance = new AppState()
       instance.stop()
+      expect(instance.isStopped).to.be.true
+    })
+  })
+
+  context('#end', () => {
+    it('sets isRunning to false', () => {
+      const instance = new AppState()
+      instance.end()
       expect(instance.isRunning).to.be.false
     })
 
     it('resets autoScrollingEnabled', () => {
       const instance = new AppState()
       instance.setAutoScrolling(false)
-      instance.stop()
+      instance.end()
       expect(instance.autoScrollingEnabled).to.be.true
     })
   })
