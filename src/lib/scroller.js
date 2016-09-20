@@ -13,6 +13,8 @@
  - element distance from top of container
 */
 
+const PADDING = 100
+
 class Scroller {
   setContainer (container, onUserScroll) {
     this._container = container
@@ -60,10 +62,12 @@ class Scroller {
     }
 
     // aim to scroll just into view, so that the bottom of the element
-    // is at the bottom of the container
-    let scrollTopGoal = this._bottomToBottom(element)
+    // is just above the bottom of the container
+    let scrollTopGoal = this._aboveBottom(element)
     // can't have a negative scroll, so put it to the top
-    if (scrollTopGoal < 0) scrollTopGoal = 0
+    if (scrollTopGoal < 0) {
+      scrollTopGoal = 0
+    }
 
     this._userScroll = false
     this._container.scrollTop = scrollTopGoal
@@ -71,11 +75,14 @@ class Scroller {
 
   _isFullyVisible (element) {
     return element.offsetTop - this._container.scrollTop > 0
-           && this._container.scrollTop > this._bottomToBottom(element)
+           && this._container.scrollTop > this._aboveBottom(element)
   }
 
-  _bottomToBottom (element) {
-    return element.offsetTop + element.clientHeight - this._container.clientHeight
+  _aboveBottom (element) {
+    // add padding, since commands expanding and collapsing can mess with
+    // the offset, causing the running command to be half cut off
+    // https://github.com/cypress-io/cypress/issues/228
+    return element.offsetTop + element.clientHeight - this._container.clientHeight + PADDING
   }
 
   getScrollTop () {

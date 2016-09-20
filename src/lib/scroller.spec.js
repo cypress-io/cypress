@@ -1,12 +1,12 @@
 import _ from 'lodash'
 import sinon from 'sinon'
 
-import scroller, { SCROLL_RATE } from './scroller'
+import scroller from './scroller'
 
 const getContainer = (props) => {
   return _.extend({
-    clientHeight: 100,
-    scrollHeight: 200,
+    clientHeight: 400,
+    scrollHeight: 900,
     scrollTop: 0,
     addEventListener: sinon.spy(),
   }, props)
@@ -35,28 +35,28 @@ describe('scroller', () => {
   })
 
   it('throws an error if attempting to scroll an element before setting a container', () => {
-    expect(() => scroller.scrollIntoView({}, 1)).to.throw(/container must be set/)
+    expect(() => scroller.scrollIntoView({})).to.throw(/container must be set/)
   })
 
   it('does not scroll if near top and scrolling would result in negative scroll', () => {
     const container = getContainer()
     scroller.setContainer(container)
-    scroller.scrollIntoView(getElement({ offsetTop: 0 }), 1)
+    scroller.scrollIntoView(getElement({ offsetTop: 0 }))
     expect(container.scrollTop).to.equal(0)
   })
 
   it('does not scroll if already full visible', () => {
     const container = getContainer()
     scroller.setContainer(container)
-    scroller.scrollIntoView(getElement({ offsetTop: 80 }), 1)
+    scroller.scrollIntoView(getElement({ offsetTop: 80 }))
     expect(container.scrollTop).to.equal(0)
   })
 
   it('scrolls to the goal', () => {
     const container = getContainer({ scrollTop: 50 })
     scroller.setContainer(container)
-    scroller.scrollIntoView(getElement(), 1)
-    expect(container.scrollTop).to.equal(70)
+    scroller.scrollIntoView(getElement({ offsetTop: 600 }))
+    expect(container.scrollTop).to.equal(320)
   })
 
   context('#getScrollTop', () => {
@@ -129,7 +129,7 @@ describe('scroller', () => {
       const container = getContainer()
       const onUserScroll = sinon.spy()
       scroller.setContainer(container, onUserScroll)
-      scroller.scrollIntoView(getElement(), 1)
+      scroller.scrollIntoView(getElement({ offsetTop: 600 }))
       clock.tick(16)
       container.addEventListener.callArg(1)
       clock.tick(16)
