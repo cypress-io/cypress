@@ -46,4 +46,7 @@ do ($Cypress, _) ->
       ## now remove it after we clone
       $el.removeAttr(@highlightAttr) if $el?.removeAttr
 
-      return body
+      ## preserve classes on the <html> tag
+      htmlClasses = @cy.$$("html")[0].className
+
+      return {body, htmlClasses}
