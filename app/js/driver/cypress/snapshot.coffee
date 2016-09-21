@@ -1,17 +1,34 @@
 do ($Cypress, _) ->
 
+  reduceText = (arr, fn) ->
+    _.reduce arr, ((memo, item) -> memo += fn(item)), ""
+
   $Cypress.extend
     highlightAttr: "data-cypress-el"
+
+    ## careful renaming or removing this method, the runner depends on it
+    getStylesString: ->
+      reduceText @cy.private("document").styleSheets, (stylesheet) ->
+        reduceText stylesheet.cssRules, (rule) ->
+          rule.cssText
 
     createSnapshot: ($el) ->
       ## create a unique selector for this el
       $el.attr(@highlightAttr, true) if $el?.attr
 
-      ## throw error here if @cy is undefined!
+      ## TODO: throw error here if @cy is undefined!
 
-      ## clone the body and strip out any script tags
       body = @cy.$$("body").clone()
-      body.find("script,iframe,link[rel='stylesheet']").remove()
+
+      ## extract all CSS into a string
+      styles = @getStylesString()
+
+      ## remove tags we don't want in body
+      body.find("script,iframe,link[rel='stylesheet'],style").remove()
+
+      ## put all the extracted CSS in the body, because that's all
+      ## that gets swapped out when restoring a snapshot
+      body.append("<style>#{styles}</style>")
 
       ## here we need to figure out if we're in a remote manual environment
       ## if so we need to stringify the DOM:
