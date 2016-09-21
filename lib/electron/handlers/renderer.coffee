@@ -79,6 +79,9 @@ module.exports = {
       }
     }
 
+    if args.show is false
+      args.webPreferences.offscreen = true
+
     args.url ?= getUrl(options.type)
 
     urlChanged = (url, resolve) ->

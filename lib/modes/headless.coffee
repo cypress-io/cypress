@@ -1,12 +1,21 @@
+_          = require("lodash")
 chalk      = require("chalk")
+stream     = require("stream")
 Promise    = require("bluebird")
 inquirer   = require("inquirer")
+ffmpeg     = require("fluent-ffmpeg")
+ffmpegPath = require("@ffmpeg-installer/ffmpeg").path
 user       = require("../user")
 errors     = require("../errors")
 Project    = require("../project")
 project    = require("../electron/handlers/project")
 Renderer   = require("../electron/handlers/renderer")
 automation = require("../electron/handlers/automation")
+
+ffmpeg.setFfmpegPath(ffmpegPath)
+
+recording       = null
+recordingStream = stream.PassThrough()
 
 module.exports = {
   getId: ->
@@ -64,6 +73,7 @@ module.exports = {
           reject errors.get("PROJECT_DOES_NOT_EXIST")
 
   openProject: (id, options) ->
+    # wantsExternalBrowser = true
     wantsExternalBrowser = !!options.browser
 
     ## now open the project to boot the server
@@ -96,23 +106,94 @@ module.exports = {
     .then ->
       Renderer.create({
         url:    url
-        width:  0
-        height: 0
+        width:  1280
+        height: 720
         show:   showGui
         frame:  showGui
         devTools: showGui
         type:   "PROJECT"
       })
-      .then (win) ->
-        win.webContents.on "new-window", (e, url, frameName, disposition, options) ->
-          ## force new windows to automatically open with show: false
-          ## this prevents window.open inside of javascript client code
-          ## to cause a new BrowserWindow instance to open
-          ## https://github.com/cypress-io/cypress/issues/123
-          options.show = false
+    .then (win) ->
+      ## should we even record?
+      recording = new Promise (resolve, reject) ->
+        ffmpeg({
+          source: recordingStream
+          priority: 20
+        })
+        .inputFormat("image2pipe")
+        .inputOptions("-use_wallclock_as_timestamps 1")
+        .videoCodec("libx264")
+        .outputOptions("-preset ultrafast")
+        ## TODO: change the name of the file here
+        ## and take into account the config passed here
+        .save("osx.mp4")
+        .on "start", (line) ->
+          console.log "spawned ffmpeg", line
+        .on "codecData", (data) ->
+          console.log "codec data", data
+        .on "error", (err, stdout, stderr) ->
+          ## TODO: call into lib/errors here
+          console.log "ffmpeg failed", err
+          reject(err)
+        .on "end", ->
+          console.log "ffmpeg succeeded"
+          resolve()
 
-        win.setSize(1280, 720)
-        win.center()
+      ## set framerate only once because if we
+      ## set the framerate earlier it gets reset
+      ## back to 60fps for some reason (bug?)
+      setFrameRate = _.once ->
+        win.webContents.setFrameRate(20)
+
+      win.webContents.on "paint", (event, dirty, image) ->
+        setFrameRate()
+
+        img = image.toJPEG(100)
+
+        recordingStream.write(img)
+
+      win.webContents.on "new-window", (e, url, frameName, disposition, options) ->
+        ## force new windows to automatically open with show: false
+        ## this prevents window.open inside of javascript client code
+        ## to cause a new BrowserWindow instance to open
+        ## https://github.com/cypress-io/cypress/issues/123
+        options.show = false
+
+      win.center()
+
+  ## recordDesktopCapture: ->
+
+  ## recordElectronFrames: ->
+
+  postProcessRecording: ->
+    Promise.try ->
+      return if not recording
+
+      postProcess = ->
+        new Promise (resolve, reject) ->
+          ffmpeg()
+          .input("osx.mp4")
+          .videoCodec("libx264")
+          .outputOptions([
+            "-preset fast"
+            "-crf 32"
+          ])
+          .save("osx_compressed.mp4")
+          .on "start", (line) ->
+            console.log "spawned ffmpeg 2", line
+          .on "codecData", (data) ->
+            console.log "codec data 2", data
+          .on "error", (err, stdout, stderr) ->
+            console.log "ffmpeg failed 2", err
+          .on "end", ->
+            console.log "ffmpeg succeeded 2"
+            resolve()
+
+      ## return if we're not recording
+      recordingStream.end()
+
+      Promise.resolve(recording)
+      .then(postProcess)
 
   waitForRendererToConnect: (openProject, id) ->
     ## wait up to 10 seconds for the renderer
@@ -137,13 +218,18 @@ module.exports = {
       openProject.on "socket:connected", fn
 
   waitForTestsToFinishRunning: (openProject, gui) ->
-    new Promise (resolve, reject) ->
+    new Promise (resolve, reject) =>
       ## dont ever end if we're in 'gui' debugging mode
       return if gui
 
+      onEnd = (failures) =>
+        @postProcessRecording()
+        .then ->
+          resolve(failures)
+
       ## when our openProject fires its end event
       ## resolve the promise
-      openProject.once "end", resolve
+      openProject.once("end", onEnd)
 
   runTests: (openProject, id, url, proxyServer, gui, browser) ->
     ## we know we're done running headlessly
