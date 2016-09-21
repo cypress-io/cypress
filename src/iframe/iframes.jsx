@@ -46,9 +46,9 @@ export default class Iframes extends Component {
     runner.start(this.props.config)
 
     this.iframeModel = new IframeModel(this.props.state, {
-      detachBody: this.autIframe.detachBody,
+      detachDom: this.autIframe.detachDom,
       removeHeadStyles: this.autIframe.removeHeadStyles,
-      setBody: this.autIframe.setBody,
+      restoreDom: this.autIframe.restoreDom,
       highlightEl: this.autIframe.highlightEl,
     })
     this.iframeModel.listen()

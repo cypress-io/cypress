@@ -33,22 +33,28 @@ export default class AutIframe {
     return this.$iframe.contents()
   }
 
-  detachBody = () => {
-    const $body = this._contents().find('body')
+  detachDom = () => {
+    const contents = this._contents()
+    const $body = contents.find('body')
     const styles = Cypress.getStylesString()
     $body.find('script,link[rel="stylesheet"],style').remove()
     $body.append(`<style>${styles}</style>`)
-    return $body.detach()
+    return {
+      body: $body.detach(),
+      htmlClasses: contents.find('html')[0].className,
+    }
   }
 
   removeHeadStyles = () => {
     this._contents().find('head').find('link[rel="stylesheet"],style').remove()
   }
 
-  setBody = (body) => {
+  restoreDom = (body, htmlClasses) => {
     const contents = this._contents()
     contents.find('body').remove()
-    contents.find('html').append(body)
+    const $html = contents.find('html')
+    $html[0].className = htmlClasses
+    $html.append(body)
   }
 
   highlightEl = ($el, options = {}) => {
