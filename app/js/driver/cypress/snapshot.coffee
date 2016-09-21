@@ -9,11 +9,14 @@ do ($Cypress, _) ->
     ## careful renaming or removing this method, the runner depends on it
     getStylesString: ->
       reduceText @cy.private("document").styleSheets, (stylesheet) ->
-        ## TODO: when we support Firefox, it may throw a SecurityError
-        ## if the stylesheets is cross-domain, so we need to handle that
+        ## some browsers may throw a SecurityError if the stylesheet is cross-domain
         ## https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet#Notes
-        reduceText stylesheet.cssRules, (rule) ->
-          rule.cssText
+        ## for others, it will just be null
+        try
+          reduceText stylesheet.cssRules, (rule) ->
+            rule.cssText
+        catch e
+          return ""
 
     createSnapshot: ($el) ->
       ## create a unique selector for this el
