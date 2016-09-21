@@ -9,6 +9,9 @@ do ($Cypress, _) ->
     ## careful renaming or removing this method, the runner depends on it
     getStylesString: ->
       reduceText @cy.private("document").styleSheets, (stylesheet) ->
+        ## TODO: when we support Firefox, it may throw a SecurityError
+        ## if the stylesheets is cross-domain, so we need to handle that
+        ## https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet#Notes
         reduceText stylesheet.cssRules, (rule) ->
           rule.cssText
 
