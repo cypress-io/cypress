@@ -3,9 +3,10 @@ import { action } from 'mobx'
 import runner from '../lib/runner'
 
 export default class IframeModel {
-  constructor (state, { detachBody, setBody, highlightEl }) {
+  constructor (state, { detachBody, removeHeadStyles, setBody, highlightEl }) {
     this.state = state
     this.detachBody = detachBody
+    this.removeHeadStyles = removeHeadStyles
     this.setBody = setBody
     this.highlightEl = highlightEl
 
@@ -151,5 +152,7 @@ export default class IframeModel {
       viewportWidth: this.state.width,
       viewportHeight: this.state.height,
     }
+
+    this.removeHeadStyles()
   }
 }
