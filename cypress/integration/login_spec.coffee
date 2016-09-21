@@ -85,13 +85,13 @@ describe "Login", ->
               .fixture("user").then (@user) ->
                 @ipc.handle("log:in", null, @user)
 
-          it "triggers get:project:paths", ->
-            expect(@App.ipc).to.be.calledWith("get:project:paths")
+          it "triggers get:projects", ->
+            expect(@App.ipc).to.be.calledWith("get:projects")
 
           it "displays username in UI", ->
             cy
               .then ->
-                @ipc.handle("get:project:paths", null, [])
+                @ipc.handle("get:projects", null, [])
               .get("nav a").should ($a) ->
                 expect($a).to.contain(@user.name)
 
@@ -99,7 +99,7 @@ describe "Login", ->
             it "goes back to login on logout", ->
               cy
                 .then ->
-                  @ipc.handle("get:project:paths", null, [])
+                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click()
@@ -108,7 +108,7 @@ describe "Login", ->
             it "has login button enabled on logout", ->
               cy
                 .then ->
-                  @ipc.handle("get:project:paths", null, [])
+                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click()
@@ -118,7 +118,7 @@ describe "Login", ->
             it "calls clear:github:cookies", ->
               cy
                 .then ->
-                  @ipc.handle("get:project:paths", null, [])
+                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click().then ->
@@ -127,7 +127,7 @@ describe "Login", ->
             it "calls log:out", ->
               cy
                 .then ->
-                  @ipc.handle("get:project:paths", null, [])
+                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click().then ->

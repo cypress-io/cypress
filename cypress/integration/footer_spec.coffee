@@ -20,7 +20,7 @@ describe "Footer", ->
       cy
         .fixture("user").then (@user) ->
           @ipc.handle("get:current:user", null, @user)
-          @ipc.handle("get:project:paths", null, [])
+          @ipc.handle("get:projects", null, [])
 
     it "displays version sent from get:options", ->
       cy.get("footer").contains(@v)

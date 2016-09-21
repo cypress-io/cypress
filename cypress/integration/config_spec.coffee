@@ -12,7 +12,7 @@ describe "Config", ->
       .fixture("user").then (@user) ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
-        @ipc.handle("get:project:paths", null, @projects)
+        @ipc.handle("get:projects", null, @projects)
       .get(".projects-list a")
         .contains("My-Fake-Project").click()
       .fixture("browsers").as("browsers")

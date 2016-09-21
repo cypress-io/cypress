@@ -15,7 +15,7 @@ describe "Projects List", ->
       cy
         .fixture("user").then (@user) ->
           @ipc.handle("get:current:user", null, @user)
-          @ipc.handle("get:project:paths", null, [])
+          @ipc.handle("get:projects", null, [])
 
     it "does not display projects list", ->
       cy.get("projects-list").should("not.exist")
@@ -36,7 +36,7 @@ describe "Projects List", ->
         .fixture("user").then (@user) ->
           @ipc.handle("get:current:user", null, @user)
         .fixture("projects").then (@projects) ->
-          @ipc.handle("get:project:paths", null, @projects)
+          @ipc.handle("get:projects", null, @projects)
 
     describe "projects listed", ->
       it "displays projects in list", ->
@@ -70,7 +70,7 @@ describe "Projects List", ->
         it "navigates to project page", ->
           cy
             .get("@firstProject").click()
-            .location().its("hash").should("include", "e40991dc055454a2f3598752dec39abc")
+            .location().its("hash").should("include", @projects[0].id)
 
       describe "right click on project", ->
         beforeEach ->
@@ -108,7 +108,7 @@ describe "Projects List", ->
         .fixture("user").then (@user) ->
           @ipc.handle("get:current:user", null, @user)
         .fixture("projects").then (@projects) ->
-          @ipc.handle("get:project:paths", null, @projects)
+          @ipc.handle("get:projects", null, @projects)
 
     it "triggers ipc 'show:directory:dialog on nav +", ->
       cy.get("nav").find(".fa-plus").click().then ->

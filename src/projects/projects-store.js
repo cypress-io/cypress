@@ -21,7 +21,11 @@ class Projects {
   }
 
   addProject (path) {
-    const project = new Project(path)
+    let projectToAdd = {
+      path,
+    }
+
+    const project = new Project(projectToAdd)
     this.projects.push(project)
     return project
   }
@@ -30,9 +34,9 @@ class Projects {
     this.isLoading = bool
   }
 
-  @action setProjects (paths) {
-    this.projects = _.map(paths, (path) => (
-      new Project(path)
+  @action setProjects (projects) {
+    this.projects = _.map(projects, (project) => (
+      new Project(project)
     ))
     this.isLoading = false
     this.isLoaded = true

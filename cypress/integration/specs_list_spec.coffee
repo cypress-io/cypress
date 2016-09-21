@@ -12,7 +12,7 @@ describe "Specs List", ->
       .fixture("user").then (@user) ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
-        @ipc.handle("get:project:paths", null, @projects)
+        @ipc.handle("get:projects", null, @projects)
       .fixture("config").as("config")
       .fixture("specs").as("specs")
 

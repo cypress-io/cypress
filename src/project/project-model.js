@@ -19,9 +19,16 @@ export default class Project {
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
 
-  constructor (path) {
-    this.id = md5(path)
-    this.path = path
+  constructor (project) {
+    // if the project has been setup, it may
+    // have a generated ID already, otherwise make
+    // an arbitrary one for the list.
+    if (project.id) {
+      this.id = project.id
+    } else {
+      this.id = md5(project.path)
+    }
+    this.path = project.path
   }
 
   @computed get name () {

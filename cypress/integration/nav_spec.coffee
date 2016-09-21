@@ -13,7 +13,7 @@ describe "Navigation", ->
       cy
         .fixture("user").then (@user) ->
           @ipc.handle("get:current:user", null, @user)
-          @ipc.handle("get:project:paths", null, [])
+          @ipc.handle("get:projects", null, [])
 
     it "displays link to docs", ->
       cy.get("nav").contains("Docs")
@@ -37,7 +37,7 @@ describe "Navigation", ->
         cy
           .fixture("user").then (@user) ->
             @ipc.handle("get:current:user", null, @user)
-            @ipc.handle("get:project:paths", null, [])
+            @ipc.handle("get:projects", null, [])
           .get("nav a").should ($a) ->
             expect($a).to.contain(@user.name)
 
@@ -47,7 +47,7 @@ describe "Navigation", ->
             @user.name = null
 
             @ipc.handle("get:current:user", null, @user)
-            @ipc.handle("get:project:paths", null, [])
+            @ipc.handle("get:projects", null, [])
           .get("nav a").should ($a) ->
             expect($a).to.contain(@user.email)
 
@@ -56,7 +56,7 @@ describe "Navigation", ->
         cy
           .fixture("user").then (@user) ->
             @ipc.handle("get:current:user", null, @user)
-            @ipc.handle("get:project:paths", null, [])
+            @ipc.handle("get:projects", null, [])
 
       it "shows dropdown on click of user name", ->
         cy.contains("Jane Lane").click()

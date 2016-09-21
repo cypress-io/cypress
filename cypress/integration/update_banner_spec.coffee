@@ -12,7 +12,7 @@ describe "Update Banner", ->
       .fixture("user").then (@user) ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
-        @ipc.handle("get:project:paths", null, @projects)
+        @ipc.handle("get:projects", null, @projects)
 
   it "does not display update banner when no update available", ->
     @ipc.handle("updater:check", null, false)

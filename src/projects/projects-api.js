@@ -10,9 +10,9 @@ import specsCollection from '../specs/specs-collection'
 const getProjects = () => {
   projectsStore.loading(true)
 
-  return App.ipc('get:project:paths')
-  .then(action('got:projects:paths', (paths) => {
-    return projectsStore.setProjects(paths)
+  return App.ipc('get:projects')
+  .then(action('got:projects:paths', (projects) => {
+    return projectsStore.setProjects(projects)
   }))
 }
 
