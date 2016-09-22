@@ -66,18 +66,18 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
     patchRunnerFail: ->
       ## matching the current Mocha.Runner.prototype.fail except
       ## changing the logic for determing whether this is a valid err
-      Mocha.Runner::fail = _.wrap runnerFail, (orig, test, err) ->
+      Mocha.Runner::fail = _.wrap runnerFail, (orig, runnable, err) ->
         ## if this isnt a correct error object then just bail
         ## and call the original function
         if Object.prototype.toString.call(err) isnt "[object Error]"
-          return orig.call(@, test, err)
+          return orig.call(@, runnable, err)
 
         ## else replicate the normal mocha functionality
         ++@failures
 
-        test.state = "failed"
+        runnable.state = "failed"
 
-        @emit("fail", test, err)
+        @emit("fail", runnable, err)
 
     patchRunnableRun: ->
       _this = @
