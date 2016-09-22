@@ -16,7 +16,11 @@ class State {
   }
 
   @action setUser (user) {
-    return this.user = user && user.session_token ? new User(user) : null
+    if (user.id) {
+      return this.user = new User(user)
+    } else {
+      return this.user = {}
+    }
   }
 
   @action setVersion (version) {
@@ -36,7 +40,7 @@ class State {
   }
 
   logOut () {
-    this.setUser(null)
+    this.setUser({})
 
     App.ipc('clear:github:cookies')
     App.ipc('log:out')

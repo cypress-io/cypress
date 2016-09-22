@@ -7,10 +7,12 @@ export default class User {
   @observable session_token
 
   constructor (user) {
-    this.id = user.id
-    this.name = user.name
-    this.email = user.email
-    this.session_token = user.session_token
+    if (user.id) {
+      this.id = user.id
+      this.name = user.name
+      this.email = user.email
+      this.session_token = user.session_token
+    }
   }
 
   @computed get displayName () {

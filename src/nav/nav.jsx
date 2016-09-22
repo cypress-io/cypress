@@ -14,7 +14,7 @@ export default class Nav extends Component {
         <div className='container-fluid'>
           <ul className='nav navbar-nav'>
             <li>
-              { this.leftNavButton() }
+              { this._leftNavButton() }
             </li>
           </ul>
           <ul className='nav navbar-nav navbar-right'>
@@ -30,28 +30,15 @@ export default class Nav extends Component {
                 Chat
               </a>
             </li>
-            <li className='dropdown'>
-              <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
-                <i className='fa fa-user'></i>{' '}
-                { state.user.displayName }{' '}
-                <span className='caret'></span>
-              </a>
-              <ul className='dropdown-menu'>
-                <li>
-                  <a href='#' onClick={this._logout}>
-                    <i className="fa fa-sign-out"></i>{' '}
-                    Log Out
-                  </a>
-                </li>
-              </ul>
-            </li>
+            { this._userStateButton() }
+
           </ul>
         </div>
       </nav>
     )
   }
 
-  leftNavButton = () => {
+  _leftNavButton = () => {
     if (this.props.params.id) {
       return (
         <Link
@@ -68,6 +55,37 @@ export default class Nav extends Component {
           <i className='fa fa-plus'></i>{' '}
           Add Project
         </a>
+      )
+    }
+  }
+
+  _userStateButton = () => {
+    if (state.hasUser) {
+      return (
+        <li className='dropdown'>
+          <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
+            <i className='fa fa-user'></i>{' '}
+            { state.user.displayName }{' '}
+            <span className='caret'></span>
+          </a>
+          <ul className='dropdown-menu'>
+            <li>
+              <a href='#' onClick={this._logout}>
+                <i className="fa fa-sign-out"></i>{' '}
+                Log Out
+              </a>
+            </li>
+          </ul>
+        </li>
+      )
+    } else {
+      return (
+        <li>
+          <Link to='/login'>
+            <i className='fa fa-sign-in'></i>{' '}
+            Log In
+          </Link>
+        </li>
       )
     }
   }

@@ -19,20 +19,20 @@ export default class Application extends Component {
       state.userLoaded = true
       state.setUser(user)
 
-      if (!user || !user.session_token) {
-        return this.props.router.push('/login')
-      }
+      // if (!user || !user.session_token) {
+      //   return this.props.router.push('/login')
+      // }
     }))
 
     autorun(() => {
       if (!state.userLoaded) return
 
-      if (state.hasUser) {
-        getProjects()
-        return this.props.router.push('/')
-      } else {
-        return this.props.router.push('/login')
-      }
+      getProjects()
+      return this.props.router.push('/')
+      // if (state.hasUser) {
+      // } else {
+      //   return this.props.router.push('/login')
+      // }
     })
   }
 
