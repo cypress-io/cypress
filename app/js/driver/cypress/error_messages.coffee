@@ -248,7 +248,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       orphan: "#{cmd('{{cmd}}')} is a child command which operates on an existing subject.  Child commands must be called after a parent command."
       outside_test: """
         Cypress cannot execute commands outside a running test.
-        This usually happens when you accidentally write commands outside an it(...) test.
+        This usually happens when you accidentally write commands outside an 'it(...)' test.
         If that is the case, just move these commands inside an 'it(...)' test.
         Check your test file for errors.\n
         https://on.cypress.io/cannot-execute-commands-outside-test
