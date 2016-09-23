@@ -2,6 +2,7 @@ import React from 'react'
 import { Router, Route, useRouterHistory, IndexRedirect } from 'react-router'
 import { observer } from 'mobx-react'
 import { createHashHistory } from 'history'
+import DevTools, { setLogEnabled, setUpdatesEnabled, setGraphEnabled } from 'mobx-react-devtools'
 
 import Layout from './app/layout'
 
@@ -24,12 +25,23 @@ const withUser = (ComponentClass) => {
       return (
         <Layout params={props.params}>
           <ComponentClass {...props} />
+          {devTools()}
         </Layout>
       )
     } else {
       return null
     }
   })
+}
+
+const devTools = () => {
+  if ((window.env === 'development') || (window.env === 'test')) {
+    setLogEnabled(true)
+    setUpdatesEnabled(true)
+    setGraphEnabled(false)
+
+    return <DevTools position={{ bottom: 0, left: 20 }}/>
+  }
 }
 
 const makeRoutes = (updating) => {
