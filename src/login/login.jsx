@@ -1,10 +1,13 @@
-import cs from 'classnames'
-import { action } from 'mobx'
 import React, { Component } from 'react'
+import { withRouter } from 'react-router'
+import { action, autorun } from 'mobx'
+import { observer } from 'mobx-react'
+import cs from 'classnames'
+
 import App from '../lib/app'
 import state from '../lib/state'
-import { observer } from 'mobx-react'
 
+@withRouter
 @observer
 class Login extends Component {
   constructor (props) {
@@ -14,6 +17,12 @@ class Login extends Component {
       isLoggingIn: false,
       error: null,
     }
+
+    autorun(() => {
+      if (state.hasUser) {
+        return this.props.router.push('/')
+      }
+    })
   }
 
   render () {

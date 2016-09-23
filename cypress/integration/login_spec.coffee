@@ -96,24 +96,24 @@ describe "Login", ->
                 expect($a).to.contain(@user.name)
 
           context "log out", ->
-            it "goes back to login on logout", ->
+            it "displays login button on logout", ->
               cy
                 .then ->
                   @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click()
-                .get("#login")
+                .get(".nav").contains("Log In")
 
-            it "has login button enabled on logout", ->
+            it "has login button enabled after logout and re log in", ->
               cy
                 .then ->
                   @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click()
+                .get(".nav").contains("Log In").click()
                 .get("@loginBtn").should("not.be.disabled")
-
 
             it "calls clear:github:cookies", ->
               cy
