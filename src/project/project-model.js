@@ -31,22 +31,6 @@ export default class Project {
     this.path = project.path
   }
 
-  @computed get name () {
-    let splitName = _.last(this.path.split('/'))
-    return _.truncate(splitName, { length: 60 })
-  }
-
-  @computed get displayPath () {
-    let pathLength = this.path.length
-
-    if (pathLength > strLength) {
-      let truncatedPath = this.path.slice((pathLength - 1) - strLength, pathLength)
-      return '...'.concat(truncatedPath)
-    } else {
-      return this.path
-    }
-  }
-
   @computed get otherBrowsers () {
     return _.filter(this.browsers, { isChosen: false })
   }
