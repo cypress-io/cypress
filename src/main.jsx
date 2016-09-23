@@ -1,4 +1,4 @@
-import { useStrict } from 'mobx'
+import { useStrict, toJS } from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'
 import _ from 'lodash'
@@ -35,12 +35,20 @@ const setupState = (options) => {
   state.listenForMenuClicks()
 }
 
+const setupDevVars = () => {
+  if (window.env === 'test' || window.env === 'development') {
+    window.toJS = toJS
+  }
+}
+
 App.start = () => {
   ipc('get:options')
   .then((options = {}) => {
 
     handleErrors()
     setupState(options)
+
+    setupDevVars()
 
     const el = document.getElementById('app')
 
@@ -54,8 +62,11 @@ App.startUpdateApp = () => {
 
     handleErrors()
 
+    setupDevVars()
+
     const el = document.getElementById('updates')
 
     render(<Updates options={options}/>, el)
   })
 }
+
