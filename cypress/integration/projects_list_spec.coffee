@@ -104,6 +104,18 @@ describe "Projects List", ->
                 .contains("Remove project").click().should ->
                   expect(@App.ipc).to.be.calledWith("remove:project", "/Users/Jane/Projects/My-Fake-Project")
 
+      describe "project statuses in list", ->
+        beforeEach ->
+          cy
+            .fixture("projects_statuses").then (@projects_statuses) ->
+              @ipc.handle("get:projects:statuses", null, @projects_statuses)
+
+        it.only "displays projects in list", ->
+          cy
+            .get(".empty").should("not.be.visible")
+            .get(".projects-list>li")
+              .should("have.length", @projects.length)
+
     describe "add project", ->
       beforeEach ->
         cy

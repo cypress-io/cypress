@@ -35,11 +35,21 @@ class Projects {
   }
 
   @action setProjects (projects) {
+    // pull out cached local storage project statuses
+
     this.projects = _.map(projects, (project) => (
       new Project(project)
     ))
     this.isLoading = false
     this.isLoaded = true
+  }
+
+  @action setProjectStatuses (projects) {
+    //cache in local storage
+
+    this.projects = _.map(this.projects, (project) => {
+      return _.extend({}, project, _.find(projects, { id: project.id }))
+    })
   }
 
   @action setError (err) {

@@ -11,8 +11,14 @@ const getProjects = () => {
   projectsStore.loading(true)
 
   return App.ipc('get:projects')
-  .then(action('got:projects:paths', (projects) => {
-    return projectsStore.setProjects(projects)
+  .then(action('got:projects', (projects) => {
+
+    projectsStore.setProjects(projects)
+
+    return App.ipc('get:projects:statuses', (err, projects = []) => {
+      // this might never be called
+      projectsStore.setProjectStatuses(projects)
+    })
   }))
 }
 
