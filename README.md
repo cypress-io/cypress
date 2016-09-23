@@ -57,6 +57,10 @@ npm test
 
 ## Changelog
 
+#### 0.2.0 - *(09/23/16)*
+- handle being resized to any width
+- fix issues with scrolling cutting off commands
+
 #### 0.1.7 - *(09/13/16)*
 - ensure direct dependencies get installed
 
