@@ -5,12 +5,6 @@ describe "$Cypress.Cy Snapshot Extension", ->
     beforeEach ->
       @el = $("<span id='snapshot'>snapshot</span>").appendTo @cy.$$("body")
 
-    it "does not clone iframes", ->
-      $("<iframe id='test-iframe' />").appendTo(@cy.$$("body"))
-
-      {body} = @Cypress.createSnapshot(@el)
-      expect(body.find("iframe")).not.to.exist
-
     it "does not clone scripts", ->
       $("<script type='text/javascript' />").appendTo(@cy.$$("body"))
 
@@ -46,3 +40,42 @@ describe "$Cypress.Cy Snapshot Extension", ->
     it "removes data-cypress-el attr", ->
       @Cypress.createSnapshot(@el)
       expect(@el.attr("data-cypress-el")).to.be.undefined
+
+    context "iframes", ->
+
+      it "replaces with placeholders that have src in content", ->
+        $("<iframe src='generic.html' />").appendTo(@cy.$$("body"))
+
+        {body} = @Cypress.createSnapshot(@el)
+        expect(body.find("iframe").length).to.equal(1)
+        expect(body.find("iframe")[0].src).to.include("generic.html")
+
+      it "placeholders have same id", ->
+        $("<iframe id='foo-bar' />").appendTo(@cy.$$("body"))
+
+        {body} = @Cypress.createSnapshot(@el)
+        expect(body.find("iframe")[0].id).to.equal("foo-bar")
+
+      it "placeholders have same classes", ->
+        $("<iframe class='foo bar' />").appendTo(@cy.$$("body"))
+
+        {body} = @Cypress.createSnapshot(@el)
+        expect(body.find("iframe")[0].className).to.equal("foo bar")
+
+      it "placeholders have inline styles", ->
+        $("<iframe style='margin: 40px' />").appendTo(@cy.$$("body"))
+
+        {body} = @Cypress.createSnapshot(@el)
+        expect(body.find("iframe").css("margin")).to.equal("40px")
+
+      it "placeholders have width set to outer width", ->
+        $("<iframe style='width: 40px; padding: 20px; border: solid 5px' />").appendTo(@cy.$$("body"))
+
+        {body} = @Cypress.createSnapshot(@el)
+        expect(body.find("iframe").css("width")).to.equal("90px")
+
+      it "placeholders have height set to outer height", ->
+        $("<iframe style='height: 40px; padding: 10px; border: solid 5px' />").appendTo(@cy.$$("body"))
+
+        {body} = @Cypress.createSnapshot(@el)
+        expect(body.find("iframe").css("height")).to.equal("70px")

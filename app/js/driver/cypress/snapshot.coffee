@@ -77,6 +77,7 @@ do ($Cypress, _) ->
       ## iframes don't have proper styles applied
       @cy.$$("iframe").each (idx, iframe) =>
         props = {
+          id: iframe.id
           class: iframe.className
           style: iframe.style.cssText
         }
