@@ -1,4 +1,4 @@
-/* global $ */
+/* global $, Cypress */
 
 import blankContents from './blank-contents'
 import { getElementBoxModelLayers, getHitBoxLayer, getOuterSize } from '../lib/dimensions'
@@ -26,30 +26,46 @@ export default class AutIframe {
   }
 
   _showContents (contents) {
-    this.$iframe.contents().find('body').html(contents)
+    this._contents().find('body').html(contents)
   }
 
-  detachBody = () => {
-    const body = this.$iframe.contents().find('body')
-    body.find('script').remove()
-    return body.detach()
+  _contents () {
+    return this.$iframe.contents()
   }
 
-  setBody = (body) => {
-    const contents = this.$iframe.contents()
+  detachDom = () => {
+    const contents = this._contents()
+    const $body = contents.find('body')
+    const styles = Cypress.getStylesString()
+    $body.find('script,link[rel="stylesheet"],style').remove()
+    $body.append(`<style>${styles}</style>`)
+    return {
+      body: $body.detach(),
+      htmlClasses: contents.find('html')[0].className,
+    }
+  }
+
+  removeHeadStyles = () => {
+    this._contents().find('head').find('link[rel="stylesheet"],style').remove()
+  }
+
+  restoreDom = (body, htmlClasses) => {
+    const contents = this._contents()
     contents.find('body').remove()
-    contents.find('html').append(body)
+    const $html = contents.find('html')
+    $html[0].className = htmlClasses
+    $html.append(body)
   }
 
   highlightEl = ($el, options = {}) => {
-    this.$iframe.contents().find('[data-highlight-el],[data-highlight-hitbox]').remove()
+    this._contents().find('[data-highlight-el],[data-highlight-hitbox]').remove()
 
     let dom
     if (options.dom) {
       dom = options.dom
       $el = options.dom.find(`[${options.highlightAttr}]`)
     } else {
-      dom = this.$iframe.contents().find('body')
+      dom = this._contents().find('body')
     }
 
     // scroll the top of the element into view

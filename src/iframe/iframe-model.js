@@ -3,10 +3,11 @@ import { action } from 'mobx'
 import runner from '../lib/runner'
 
 export default class IframeModel {
-  constructor (state, { detachBody, setBody, highlightEl }) {
+  constructor (state, { detachDom, removeHeadStyles, restoreDom, highlightEl }) {
     this.state = state
-    this.detachBody = detachBody
-    this.setBody = setBody
+    this.detachDom = detachDom
+    this.removeHeadStyles = removeHeadStyles
+    this.restoreDom = restoreDom
     this.highlightEl = highlightEl
 
     this.detachedId = null
@@ -86,7 +87,7 @@ export default class IframeModel {
       this.state.messageDescription = snapshot.name
       this.state.messageType = ''
 
-      this.setBody(snapshot.state)
+      this.restoreDom(snapshot.state, snapshot.htmlClasses)
 
       if (snapshotProps.$el) {
         const options = _.pick(snapshotProps, 'coords', 'highlightAttr', 'scrollBy')
@@ -131,7 +132,7 @@ export default class IframeModel {
 
       this._updateViewport(this.originalState)
       this._updateUrl(this.originalState.url)
-      this.setBody(this.originalState.body)
+      this.restoreDom(this.originalState.body, this.originalState.htmlClasses)
       this._clearMessage()
 
       this.originalState = null
@@ -145,11 +146,16 @@ export default class IframeModel {
   }
 
   _storeOriginalState () {
+    const { body, htmlClasses } = this.detachDom()
+
     this.originalState = {
-      body: this.detachBody(),
+      body,
+      htmlClasses,
       url: this.state.url,
       viewportWidth: this.state.width,
       viewportHeight: this.state.height,
     }
+
+    this.removeHeadStyles()
   }
 }
