@@ -28,7 +28,7 @@ export default class Application extends Component {
       if (!state.userLoaded) return
 
       getProjects()
-      return this.props.router.push('/')
+      // return this.props.router.push('/')
       // if (state.hasUser) {
       // } else {
       //   return this.props.router.push('/login')
