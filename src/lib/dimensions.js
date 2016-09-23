@@ -3,9 +3,9 @@
 import _ from 'lodash'
 
 const resetStyles = `
-  border: none;
-  margin: 0;
-  padding: 0;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 `
 
 function getHitBoxLayer (coords, body) {
