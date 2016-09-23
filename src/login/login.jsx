@@ -77,6 +77,7 @@ class Login extends Component {
       return state.setUser(user)
     }))
     .catch(alreadyOpen, (err) => {
+      err
       return // do nothing if we're already open!
     })
     .catch(action('error:at:login', (err) => {
