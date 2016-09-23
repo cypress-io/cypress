@@ -40,15 +40,21 @@ class AppState {
     this._resetAutoScrolling()
   }
 
-  setAutoScrolling (isEnabled) {
+  temporarilySetAutoScrolling (isEnabled) {
     if (isEnabled != null) {
       this.autoScrollingEnabled = isEnabled
     }
   }
 
   toggleAutoScrolling () {
-    this._resetAutoScrollingEnabledTo = !this.autoScrollingEnabled
-    this.autoScrollingEnabled = !this.autoScrollingEnabled
+    this.setAutoScrolling(!this.autoScrollingEnabled)
+  }
+
+  setAutoScrolling (isEnabled) {
+    if (isEnabled != null) {
+      this._resetAutoScrollingEnabledTo = isEnabled
+      this.autoScrollingEnabled = isEnabled
+    }
   }
 
   reset () {

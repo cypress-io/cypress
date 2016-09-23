@@ -12,8 +12,8 @@ const appStateStub = () => ({
   pause: sinon.spy(),
   reset: sinon.spy(),
   resume: sinon.spy(),
-  setAutoScrolling: sinon.spy(),
   end: sinon.spy(),
+  temporarilySetAutoScrolling: sinon.spy(),
   stop: sinon.spy(),
 })
 
@@ -124,7 +124,7 @@ describe('events', () => {
 
     it('sets autoScrollingEnabled on the app state on reporter:start', () => {
       runner.on.withArgs('reporter:start').callArgWith(1, { autoScrollingEnabled: false })
-      expect(appState.setAutoScrolling).to.have.been.calledWith(false)
+      expect(appState.temporarilySetAutoScrolling).to.have.been.calledWith(false)
     })
 
     it('sets initial crollTop on the scroller on reporter:start', () => {
@@ -255,10 +255,10 @@ describe('events', () => {
       expect(runner.emit).to.have.been.calledWith('focus:tests')
     })
 
-    it('emits persist:state on persist:state', () => {
+    it('emits save:state on save:state', () => {
       appState.autoScrollingEnabled = false
-      events.emit('persist:state')
-      expect(runner.emit).to.have.been.calledWith('persist:state', {
+      events.emit('save:state')
+      expect(runner.emit).to.have.been.calledWith('save:state', {
         autoScrollingEnabled: false,
       })
     })

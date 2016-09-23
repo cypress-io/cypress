@@ -73,6 +73,7 @@
     "react-dom": "^15.3.0"
   },
   "dependencies": {
+    "css-element-queries": "^0.3.2",
     "markdown-it": "^6.1.1",
     "popper.js": "^0.5.2"
   }

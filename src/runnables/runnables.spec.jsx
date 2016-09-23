@@ -8,7 +8,7 @@ import Runnables, { NoTests, RunnablesList } from './runnables'
 const appStateStub = (props) => {
   return _.extend({
     isRunning: true,
-    setAutoScrolling: sinon.spy(),
+    temporarilySetAutoScrolling: sinon.spy(),
   }, props)
 }
 
@@ -81,7 +81,7 @@ describe('<Runnables />', () => {
       />
     )
     scroller.setContainer.callArg(1)
-    expect(appState.setAutoScrolling).to.have.been.calledWith(false)
+    expect(appState.temporarilySetAutoScrolling).to.have.been.calledWith(false)
   })
 
   it('does nothing when user scrolls and app is not running', () => {
@@ -96,7 +96,7 @@ describe('<Runnables />', () => {
       />
     )
     scroller.setContainer.callArg(1)
-    expect(appState.setAutoScrolling).not.to.have.been.called
+    expect(appState.temporarilySetAutoScrolling).not.to.have.been.called
   })
 
   context('<RunnablesList />', () => {
