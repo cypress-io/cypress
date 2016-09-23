@@ -42,20 +42,9 @@ class Project extends Component {
         </div>
         <div className='row-column-wrapper'>
           <div className='row-column'>
-            <div className='project-owner'>
-              { this._projectOwner() }
-            </div>
-          </div>
-        </div>
-        <div className='row-column-wrapper'>
-          <div className='row-column'>
             <div className='project-status'>
               { this._projectStatus() }
             </div>
-          </div>
-        </div>
-        <div className='row-column-wrapper'>
-          <div className='row-column'>
             <div className='project-time'>
               { this._projectTime() }
             </div>
@@ -82,7 +71,7 @@ class Project extends Component {
   _public () {
     if (this.props.project.public) {
       return (
-        <span className='label label-info'>Public</span>
+        <span className='label label-warning'>Public</span>
       )
     }
   }
@@ -118,7 +107,7 @@ class Project extends Component {
     const status = this.props.project.status
     if (!status) return
 
-    const statuses = { passing: 'check-circle', failing: 'exclamation-circle', running: 'circle-o-notch fa-spin' }
+    const statuses = { passing: 'check-circle', failing: 'exclamation-circle', running: 'refresh fa-spin' }
 
     const iconClass = statuses[status] || ''
 
@@ -136,12 +125,12 @@ class Project extends Component {
     if (!lastRan) return
 
     if (this.props.project.status === 'running') {
-      return "Running..."
+      return "Now..."
     }
 
     return (
       <span>
-        Ran {moment(lastRan).fromNow()}
+        {moment(lastRan).fromNow()}
       </span>
     )
   }

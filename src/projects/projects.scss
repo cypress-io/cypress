@@ -5,7 +5,7 @@
   overflow: auto;
   margin-bottom: 0;
   background-color: #fafafa;
-  @include list-columns(40%, 23%, 14%, 17%, 5%);
+  @include list-columns(75%, 20%, 5%);
 
   .fa-chevron-right {
     color: #666;
@@ -77,8 +77,10 @@
     font-size: 16px;
     font-weight: 500;
     line-height: 22px;
+    position: relative;
+    top:5px;
 
-    .label.label-info {
+    .label {
       font-size: 9px;
       position: relative;
       top: -2px;
@@ -101,7 +103,8 @@
 
   .project-status {
     font-size: 14px;
-    color: #444;
+    color: #555;
+    font-weight: 500;
 
     .passing i {
       color: #39c598;
@@ -117,7 +120,7 @@
   }
 
   .project-time {
-    font-size: 11px;
+    font-size: 12px;
     color: #888;
     font-style: italic;
   }

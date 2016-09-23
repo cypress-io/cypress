@@ -7,12 +7,13 @@ import DevTools, { setLogEnabled, setUpdatesEnabled, setGraphEnabled } from 'mob
 import Layout from './app/layout'
 
 import Application from './app/application'
+import ApplyingUpdates from './applying_updates/applying_updates'
+import Builds from './builds/builds-list'
+import Config from './config/config'
 import Login from './login/login'
 import Projects from './projects/projects-list'
 import Project from './project/project'
 import SpecsList from './specs/specs-list'
-import Config from './config/config'
-import ApplyingUpdates from './applying_updates/applying_updates'
 
 import state from './lib/state'
 import projectsStore from './projects/projects-store'
@@ -61,8 +62,9 @@ const makeRoutes = (updating) => {
         <Route path='/projects' component={withUser(Projects)} />
         <Route path='/projects/:id' component={withUser(Project)}>
           <IndexRedirect to='specs' />
-          <Route path='config' component={Config} />
           <Route path='specs' component={SpecsList} />
+          <Route path='builds' component={Builds} />
+          <Route path='config' component={Config} />
         </Route>
         <Route path='/login' component={Login}/>
       </Route>

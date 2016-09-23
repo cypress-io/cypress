@@ -65,6 +65,25 @@ describe "Projects Nav", ->
             @ipc.handle("get:specs", null, @specs)
           .contains("integration")
 
+    describe "builds page", ->
+      beforeEach ->
+        cy
+          .get(".navbar-default")
+            .contains("a", "Builds").as("buildsNav").click()
+
+      it "highlights builds on click", ->
+        cy
+          .get("@buildsNav")
+            .should("have.class", "active")
+
+      it "navigates to builds url", ->
+        cy
+          .location().its("hash").should("include", "builds")
+
+      it "displays builds page", ->
+        cy
+          .contains("h5", "Builds")
+
     describe "config page", ->
       beforeEach ->
         cy

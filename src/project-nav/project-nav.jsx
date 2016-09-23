@@ -21,6 +21,15 @@ export default class ProjectNav extends Component {
             </li>
             <li>
               <Link
+                to={`/projects/${project.id}/builds`}
+                activeClassName='active'
+                >
+                <i className='fa fa-list-ul'></i>{' '}
+                Builds
+              </Link>
+            </li>
+            <li>
+              <Link
                 to={`/projects/${project.id}/config`}
                 activeClassName='active'
                 >
