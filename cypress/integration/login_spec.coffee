@@ -1,7 +1,7 @@
 describe "Login", ->
   beforeEach ->
     cy
-      .visit("/")
+      .visit("/#login")
       .window().then (win) ->
         {@ipc, @App} = win
         @agents = cy.agents()
