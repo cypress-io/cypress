@@ -29,8 +29,11 @@ do ($Cypress, _) ->
       ## extract all CSS into a string
       styles = @getStylesString()
 
+      ## replaces iframes with placeholders
+      @_replaceIframes(body)
+
       ## remove tags we don't want in body
-      body.find("script,iframe,link[rel='stylesheet'],style").remove()
+      body.find("script,link[rel='stylesheet'],style").remove()
 
       ## put all the extracted CSS in the body, because that's all
       ## that gets swapped out when restoring a snapshot
@@ -56,3 +59,44 @@ do ($Cypress, _) ->
       htmlClasses = @cy.$$("html")[0].className
 
       return {body, htmlClasses}
+
+    _replaceIframes: (body) ->
+      ## remove iframes because we don't want extra requests made, JS run, etc
+      ## when restoring a snapshot
+      ## replace them so the lack of them doesn't cause layout issues
+      ## use <iframe>s as the placeholders because iframes are inline, replaced
+      ## elements (https://developer.mozilla.org/en-US/docs/Web/CSS/Replaced_element)
+      ## so it's hard to simulate their box model
+      ## attach class names and inline styles, so that CSS styles are applied
+      ## as they would be on the user's page, but override some
+      ## styles so it looks like a placeholder
+
+      ## need to only replace the iframes in the cloned body, so grab those
+      $iframes = body.find("iframe")
+      ## but query from the actual document, since the cloned body
+      ## iframes don't have proper styles applied
+      @cy.$$("iframe").each (idx, iframe) =>
+        props = {
+          id: iframe.id
+          class: iframe.className
+          style: iframe.style.cssText
+        }
+
+        $iframe = @cy.$$(iframe)
+        $placeholder = @cy.$$("<iframe />", props).css({
+          background: "#f8f8f8"
+          border: "solid 1px #a3a3a3"
+          boxSizing: "border-box"
+          padding: "20px"
+          width: $iframe.outerWidth()
+          height: $iframe.outerHeight()
+        })
+
+        $iframes.eq(idx).replaceWith($placeholder)
+        contents = """
+          <style>
+            p { color: #888; font-family: sans-serif; line-height: 1.5; }
+          </style>
+          <p>&lt;iframe&gt; placeholder for #{iframe.src}</p>
+        """
+        $placeholder[0].src = "data:text/html;charset=utf-8,#{encodeURI(contents)}"
