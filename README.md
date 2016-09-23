@@ -31,6 +31,10 @@ npm test
 
 ## Changelog
 
+#### 0.1.15 - *(09/23/16)*
+- reset action hit box box model styles
+- improve snapshot css handling
+
 #### 0.1.14 - *(09/19/16)*
 - prevent snapshot from cycling when there's only one
 
