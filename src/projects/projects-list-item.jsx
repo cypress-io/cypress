@@ -1,11 +1,12 @@
 import _ from 'lodash'
+import moment from 'moment'
 import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
 import { Link } from 'react-router'
 import { observer } from 'mobx-react'
-import { ContextMenuLayer } from "react-contextmenu"
+import { ContextMenuLayer } from 'react-contextmenu'
 
-const strLength = 75
+const strLength = 45
 
 @observer
 class Project extends Component {
@@ -27,25 +28,47 @@ class Project extends Component {
         className={`project ${loadingClassName}`}
         to={`/projects/${project.id}`}
         >
-        <div className="row-column-wrapper">
-          <div className="row-column">
+        <div className='row-column-wrapper'>
+          <div className='row-column'>
             <div className='project-name'>
-              <i className="fa fa-folder"></i>{" "}
-              { this._projectName()}
+              <i className='fa fa-folder'></i>{' '}
+              { this._projectName() }
+              { this._public() }
             </div>
             <div className='project-path'>
               { this._displayPath() }
             </div>
           </div>
         </div>
-        <div className="row-column-wrapper">
+        <div className='row-column-wrapper'>
+          <div className='row-column'>
+            <div className='project-owner'>
+              { this._projectOwner() }
+            </div>
+          </div>
+        </div>
+        <div className='row-column-wrapper'>
+          <div className='row-column'>
+            <div className='project-status'>
+              { this._projectStatus() }
+            </div>
+          </div>
+        </div>
+        <div className='row-column-wrapper'>
+          <div className='row-column'>
+            <div className='project-time'>
+              { this._projectTime() }
+            </div>
+          </div>
+        </div>
+        <div className='row-column-wrapper'>
           { this._icon() }
         </div>
       </Link>
     )
   }
 
-  _projectName = () => {
+  _projectName () {
     let project = this.props.project
 
     if (project.name) {
@@ -56,7 +79,30 @@ class Project extends Component {
     }
   }
 
-  _displayPath = () => {
+  _public () {
+    if (this.props.project.public) {
+      return (
+        <span className='label label-info'>Public</span>
+      )
+    }
+  }
+
+  _projectOwner () {
+    let project = this.props.project
+
+    if (!project.orgName) return
+
+    let iconClass = project.defaultOrg ? 'user' : 'building'
+
+    return (
+      <span>
+        <i className={`fa fa-${iconClass}`}></i>{' '}
+        {project.orgName}
+      </span>
+    )
+  }
+
+  _displayPath () {
     let path = this.props.project.path
     let pathLength = path.length
 
@@ -68,19 +114,51 @@ class Project extends Component {
     }
   }
 
-  _icon = () => {
+  _projectStatus () {
+    const status = this.props.project.status
+    if (!status) return
+
+    const statuses = { passing: 'check-circle', failing: 'exclamation-circle', running: 'circle-o-notch fa-spin' }
+
+    const iconClass = statuses[status] || ''
+
+    return (
+      <span className={`${status}`}>
+        <i className={`fa fa-${iconClass}`}></i>{' '}
+        {_.startCase(status)}
+      </span>
+    )
+  }
+
+  _projectTime () {
+    const lastRan = this.props.project.lastRan
+
+    if (!lastRan) return
+
+    if (this.props.project.status === 'running') {
+      return "Running..."
+    }
+
+    return (
+      <span>
+        Ran {moment(lastRan).fromNow()}
+      </span>
+    )
+  }
+
+  _icon () {
     if (this.props.project.isLoading) {
       return (
-        <i className="fa fa-spinner fa-pulse"></i>
+        <i className='fa fa-spinner fa-pulse'></i>
       )
     } else {
       return (
-        <i className="fa fa-chevron-right"></i>
+        <i className='fa fa-chevron-right'></i>
       )
     }
   }
 }
 
-export default ContextMenuLayer("context-menu", (props) => {
+export default ContextMenuLayer('context-menu', (props) => {
   return props.project
 })(Project)

@@ -5,6 +5,7 @@
   overflow: auto;
   margin-bottom: 0;
   background-color: #fafafa;
+  @include list-columns(40%, 23%, 14%, 17%, 5%);
 
   .fa-chevron-right {
     color: #666;
@@ -76,6 +77,14 @@
     font-size: 16px;
     font-weight: 500;
     line-height: 22px;
+
+    .label.label-info {
+      font-size: 9px;
+      position: relative;
+      top: -2px;
+      margin-left: 5px;
+
+    }
   }
 
   .project-path {
@@ -83,6 +92,34 @@
     font-size: 12px;
     font-style: italic;
     line-height: 22px;
+  }
+
+  .project-owner {
+    font-size: 13px;
+    color: #666;
+  }
+
+  .project-status {
+    font-size: 14px;
+    color: #444;
+
+    .passing i {
+      color: #39c598;
+    }
+
+    .failing i {
+      color: #ea6675;
+    }
+
+    .running i {
+      color: #5793d1;
+    }
+  }
+
+  .project-time {
+    font-size: 11px;
+    color: #888;
+    font-style: italic;
   }
 }
 

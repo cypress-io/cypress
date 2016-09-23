@@ -110,11 +110,26 @@ describe "Projects List", ->
             .fixture("projects_statuses").then (@projects_statuses) ->
               @ipc.handle("get:projects:statuses", null, @projects_statuses)
 
-        it.only "displays projects in list", ->
+        it "displays projects in list", ->
           cy
             .get(".empty").should("not.be.visible")
             .get(".projects-list>li")
               .should("have.length", @projects.length)
+
+        it "displays public label", ->
+          cy
+            .get(".projects-list>li").first()
+            .contains("Public")
+
+        it "displays owner", ->
+          cy
+            .get(".projects-list>li").first()
+            .contains(@projects_statuses[0].orgName)
+
+        it "displays status", ->
+          cy
+            .get(".projects-list>li").first()
+            .contains("Passing")
 
     describe "add project", ->
       beforeEach ->
