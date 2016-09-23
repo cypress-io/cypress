@@ -1,6 +1,6 @@
 e2e = require("../helpers/e2e")
 
-describe.only "e2e only spec", ->
+describe "e2e only spec", ->
   e2e.setup()
 
   it "failing", ->
