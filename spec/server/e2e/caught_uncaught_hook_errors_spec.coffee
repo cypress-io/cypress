@@ -28,7 +28,7 @@ describe "e2e caught and uncaught hooks errors", ->
 
   it "failing1", ->
     e2e.exec(@, {
-      spec: "caught_hook_error_failing_spec.coffee"
+      spec: "hook_caught_error_failing_spec.coffee"
       expectedExitCode: 1
     })
     .get("stdout")
@@ -48,7 +48,7 @@ describe "e2e caught and uncaught hooks errors", ->
 
   it "failing2", ->
     e2e.exec(@, {
-      spec: "uncaught_hook_error_failing_spec.coffee"
+      spec: "hook_uncaught_error_failing_spec.coffee"
       expectedExitCode: 1
     })
     .get("stdout")
@@ -70,7 +70,7 @@ describe "e2e caught and uncaught hooks errors", ->
 
   it "failing3", ->
     e2e.start(@, {
-      spec: "uncaught_hook_error_events_failing_spec.coffee"
+      spec: "hook_uncaught_error_events_failing_spec.coffee"
       expectedExitCode: 1
     })
     .then ->
