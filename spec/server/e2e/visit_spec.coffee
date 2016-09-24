@@ -1,8 +1,6 @@
 Fixtures = require("../helpers/fixtures")
 e2e      = require("../helpers/e2e")
 
-e2ePath = Fixtures.projectPath("e2e")
-
 onServer = (app) ->
   app.get "/fail", (req, res) ->
     res.sendStatus(500)
