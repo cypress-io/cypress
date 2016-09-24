@@ -1,17 +1,17 @@
 ## this should run
-it "t1", ->
+it "t1a", ->
 
 ## these 3 should be skipped
-describe "s1", ->
+describe "s1a", ->
   beforeEach ->
     cy.get(".does-not-exist", {timeout: 100})
 
-  it "t2", ->
-  it "t3", ->
-  it "t4", ->
+  it "t2a", ->
+  it "t3a", ->
+  it "t4a", ->
 
 ## these 3 should run
-describe "s2", ->
-  it "t5", ->
-  it "t6", ->
-  it "t7", ->
+describe "s2a", ->
+  it "t5a", ->
+  it "t6a", ->
+  it "t7a", ->
