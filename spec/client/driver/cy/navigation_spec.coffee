@@ -651,6 +651,30 @@ describe "$Cypress.Cy Navigation Commands", ->
 
         @cy.visit("/timeout?ms=5000", {timeout: 200})
 
+      it "cancels resolve url promise on timeout", (done) ->
+        Cypress.on "collect:run:state", ->
+          done(new Error("should not have tried to swap domains"))
+
+        r = @sandbox.spy(@cy, "_resolveUrl")
+
+        Cypress.off("resolve:url")
+
+        Cypress.on "resolve:url", (args, cb) ->
+          ## resolve after 150ms
+          Promise.delay(150)
+          .then ->
+            cb({isOk: true, isHtml: true, url: "http://some.new-domain.com"})
+          .then ->
+            p = r.getCall(0).returnValue
+
+            ## make sure our _resolveUrl promise
+            ## has been rejected via TimeoutError
+            expect(p.isRejected()).to.be.true
+
+            done()
+
+        @cy.visit("/", {timeout: 100})
+
       it "throws when url isnt a string", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.eq "cy.visit() must be called with a string as its 1st argument"
