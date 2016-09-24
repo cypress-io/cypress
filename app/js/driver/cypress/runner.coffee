@@ -293,6 +293,8 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
         @emissions.ended[test.id] = true
 
+        Cypress.checkForEndedEarly()
+
         triggerMocha(Cypress, "test end", @wrapParents(test))
 
       @runner.on "pass", (test) =>

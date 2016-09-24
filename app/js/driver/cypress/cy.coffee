@@ -100,18 +100,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
       @Cypress.cy = null
 
-    restore: (options = {}) ->
-      _.defaults options, {
-        checkForEndedEarly: true
-      }
-
-      ## if our index is above 0 but is below the commands.length
-      ## then we know we've ended early due to a done() and
-      ## we should throw a very specific error message
-      index = @prop("index")
-      if options.checkForEndedEarly and index > 0 and index < @commands.length
-        @endedEarlyErr(index)
-
+    restore: ->
       @clearTimeout @prop("timerId")
 
       ## reset the commands to an empty array
@@ -134,6 +123,14 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     ## global options applicable to all cy instances
     ## and restores
     options: (options = {}) ->
+
+    checkForEndedEarly: ->
+      ## if our index is above 0 but is below the commands.length
+      ## then we know we've ended early due to a done() and
+      ## we should throw a very specific error message
+      index = @prop("index")
+      if index > 0 and index < @commands.length
+        @endedEarlyErr(index)
 
     nullSubject: ->
       @prop("subject", null)
