@@ -1068,6 +1068,16 @@ describe "$Cypress.Cy Navigation Commands", ->
 
         win.location.href = "about:blank"
 
+    it "sets initial=true on beforeunload", ->
+      Cookies.remove("__cypress.initial")
+
+      expect(Cookies.get("__cypress.initial")).to.be.undefined
+
+      ## this navigates us to a new page so
+      ## we should be setting the initial cookie
+      @cy.get("a:first").click().then ->
+        expect(Cookies.get("__cypress.initial")).to.eq("true")
+
     it "clears current cy subject", ->
       input = @cy.$$("form#click-me input[type=submit]")
 
