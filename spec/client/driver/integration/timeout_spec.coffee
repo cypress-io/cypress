@@ -5,10 +5,6 @@ describe "Timeout Integration Tests", ->
     beforeEach ->
       @Cypress.chai.restore()
 
-    it "has disabled all runnable timeouts", ->
-      enableTimeouts = @Cypress.mocha.mocha.options.enableTimeouts
-      expect(enableTimeouts).to.be.false
-
     it "does not time out after visiting", (done) ->
       @timeout(5000)
 
