@@ -87,7 +87,7 @@ describe "e2e visit", ->
       expect(stdout).to.include("The content-type of the response we received from this local file was:")
       expect(stdout).to.include("> text/plain")
 
-  it.only "fails when visit times out", ->
+  it "fails when visit times out", ->
     e2e.exec(@, {
       spec: "visit_http_timeout_failing_spec.coffee"
       expectedExitCode: 2
