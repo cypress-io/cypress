@@ -11,6 +11,5 @@ describe "e2e viewport", ->
   it "passes", ->
     e2e.start(@, {
       spec: "viewport_spec.coffee"
-      debug: true
       expectedExitCode: 0
     })

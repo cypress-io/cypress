@@ -6,7 +6,6 @@ describe "e2e form submissions", ->
   it "passing", ->
     e2e.start(@, {
       spec: "form_submission_passing_spec.coffee"
-      debug: true
       expectedExitCode: 0
     })
 
