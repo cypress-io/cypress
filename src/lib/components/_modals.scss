@@ -1,3 +1,15 @@
 .modal {
   display: block;
 }
+
+.modal-body.os-dialog {
+  background-color: #ededed;
+
+  hr {
+    border-top: 1px solid #c0c0bf;
+  }
+
+  form .control-label {
+    padding-right: 0;
+  }
+}

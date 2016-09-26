@@ -20,9 +20,42 @@ class SetupProject extends Component {
         onHide={this.props.onHide}
         backdrop='static'
         >
-        <div className='modal-body'>
-          <form onSubmit={this.props.onConfirm}>
-          foobar
+        <div className='modal-body os-dialog'>
+          <form
+            className="form-horizontal"
+            onSubmit={this.props.onConfirm}>
+            <div className="form-group">
+              <label for="projectName" className="col-sm-4 control-label">
+                Project Name:
+              </label>
+              <div className="col-sm-8">
+                <input type="text" className="form-control" id="projectName" />
+              </div>
+            </div>
+            <div className="form-group">
+              <label for="projectName" className="col-sm-4 control-label">
+                Account:
+              </label>
+              <div className="col-sm-8">
+                <input type="text" className="form-control" id="projectName" />
+              </div>
+            </div>
+            <div className="form-group">
+              <div className="col-sm-offset-4 col-sm-8">
+                <div className="checkbox">
+                  <label>
+                    <input type="checkbox"/> Make Builds Private
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="form-group">
+              <div className="col-sm-offset-4 col-sm-8">
+                <button type="submit" className="btn btn-primary btn-sm">
+                  Setup Project
+                </button>
+              </div>
+            </div>
           </form>
         </div>
       </BootstrapModal>

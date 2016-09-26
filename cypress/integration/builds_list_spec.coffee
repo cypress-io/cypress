@@ -60,6 +60,11 @@ describe "Builds List", ->
       it "displays empty message", ->
         cy.contains("Run your first")
 
+      it "opens setup project window", ->
+        cy
+          .get(".btn").contains("Setup Project for CI").click()
+
+
     describe "permissions error", ->
       beforeEach ->
         @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 401}, null)
