@@ -3,20 +3,20 @@ do ($Cypress, _) ->
   reduceText = (arr, fn) ->
     _.reduce arr, ((memo, item) -> memo += fn(item)), ""
 
+  getCssRulesString = (stylesheet) ->
+    ## some browsers may throw a SecurityError if the stylesheet is cross-domain
+    ## https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet#Notes
+    ## for others, it will just be null
+    return try
+      if rules = stylesheet.rules or stylesheet.cssRules
+        reduceText rules, (rule) -> rule.cssText
+      else
+        null
+    catch e
+      null
+
   $Cypress.extend
     highlightAttr: "data-cypress-el"
-
-    ## careful renaming or removing this method, the runner depends on it
-    getStylesString: ->
-      reduceText @cy.private("document").styleSheets, (stylesheet) ->
-        ## some browsers may throw a SecurityError if the stylesheet is cross-domain
-        ## https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet#Notes
-        ## for others, it will just be null
-        try
-          reduceText stylesheet.cssRules, (rule) ->
-            rule.cssText
-        catch e
-          return ""
 
     createSnapshot: ($el) ->
       ## create a unique selector for this el
@@ -26,18 +26,17 @@ do ($Cypress, _) ->
 
       body = @cy.$$("body").clone()
 
-      ## extract all CSS into a string
-      styles = @getStylesString()
+      ## for the head and body, get an array of all CSS,
+      ## whether it's links or style tags
+      ## if it's same-origin, it will get the actual styles as a string
+      ## it it's cross-domain, it will get a reference to the link's href
+      {headStyles, bodyStyles} = @getStyles()
 
       ## replaces iframes with placeholders
       @_replaceIframes(body)
 
       ## remove tags we don't want in body
       body.find("script,link[rel='stylesheet'],style").remove()
-
-      ## put all the extracted CSS in the body, because that's all
-      ## that gets swapped out when restoring a snapshot
-      body.append("<style>#{styles}</style>")
 
       ## here we need to figure out if we're in a remote manual environment
       ## if so we need to stringify the DOM:
@@ -58,7 +57,33 @@ do ($Cypress, _) ->
       ## preserve classes on the <html> tag
       htmlClasses = @cy.$$("html")[0].className
 
-      return {body, htmlClasses}
+      return {body, htmlClasses, headStyles, bodyStyles}
+
+    ## careful renaming or removing this method, the runner depends on it
+    getStyles: ->
+      @_stylesheets = @_indexedStylesheets()
+
+      return {
+        headStyles: @_getStylesFor("head")
+        bodyStyles: @_getStylesFor("body")
+      }
+
+    _getStylesFor: (location) ->
+      _.map @cy.$$(location).find("link[rel='stylesheet'],style"), (stylesheet) =>
+        if stylesheet.href
+          ## if there's an href, it's a link tag
+          ## return the CSS rules as a string, or, if cross-domain,
+          ## a reference to the stylesheet's href
+          getCssRulesString(@_stylesheets[stylesheet.href]) or {href: stylesheet.href}
+        else
+          ## otherwise, it's a style tag, and we can just grab its content
+          @cy.$$(stylesheet).text()
+
+    _indexedStylesheets: ->
+      _.reduce @cy.private("document").styleSheets, (memo, stylesheet) ->
+        memo[stylesheet.href] = stylesheet
+        return memo
+      , {}
 
     _replaceIframes: (body) ->
       ## remove iframes because we don't want extra requests made, JS run, etc

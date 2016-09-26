@@ -25,7 +25,7 @@ describe "$Cypress.Log API", ->
       }
 
     it "#snapshot", ->
-      createSnapshot = @sandbox.stub @Cypress, "createSnapshot"
+      createSnapshot = @sandbox.stub(@Cypress, "createSnapshot").returns({})
 
       div = $("<div />")
       @log.set "$el", div
@@ -439,7 +439,7 @@ describe "$Cypress.Log API", ->
 
     describe "#constructor", ->
       it "snapshots if snapshot attr is true", ->
-        createSnapshot = @sandbox.stub @Cypress, "createSnapshot"
+        createSnapshot = @sandbox.stub(@Cypress, "createSnapshot").returns({})
 
         new $Cypress.Log @Cypress, snapshot: true
 
@@ -464,7 +464,7 @@ describe "$Cypress.Log API", ->
     describe "#wrapConsoleProps", ->
       it "automatically adds Command with name", ->
         @log.set("name", "foo")
-        @log.set("snapshots", [{name: null, state: {}}])
+        @log.set("snapshots", [{name: null, body: {}}])
         @log.set("consoleProps", -> {bar: "baz"})
         @log.wrapConsoleProps()
         expect(@log.attributes.consoleProps()).to.deep.eq {

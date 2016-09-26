@@ -17,20 +17,65 @@ describe "$Cypress.Cy Snapshot Extension", ->
       {body} = @Cypress.createSnapshot(@el)
       expect(body.find("link")).not.to.exist
 
-    it "clones styles from head and body into single <style /> in body", ->
-      $("<style>body { background: red; }</style>").appendTo(@cy.$$("head"))
-      $("<style>body { color: blue }</style>").appendTo(@cy.$$("body"))
+    it "does not clone style tags", ->
+      $("<style>.foo { color: blue }</style>").appendTo(@cy.$$("body"))
 
-      style = @Cypress.createSnapshot(@el).body.find("style")
-      expect(style.length).to.equal(1)
-      expect(style.text()).to.contain("body { background: red; }")
-      expect(style.text()).to.contain("body { color: blue; }")
+      {body} = @Cypress.createSnapshot(@el)
+      expect(body.find("style")).not.to.exist
 
-    it "preserves styles on the <html> tag", ->
+    it "preserves classes on the <html> tag", ->
       @cy.$$("html").addClass("foo bar")
 
       {htmlClasses} = @Cypress.createSnapshot(@el)
       expect(htmlClasses).to.equal("foo bar")
+
+    it "provides contents of style tags in head", ->
+      $("<style>.foo { color: red }</style>").appendTo(@cy.$$("head"))
+
+      {headStyles} = @Cypress.createSnapshot(@el)
+      expect(headStyles[0]).to.include(".foo { color: red }")
+
+    it "provides contents of local stylesheet links in head", (done) ->
+      $("<link rel='stylesheet' href='generic_styles.css' />").appendTo(@cy.$$("head"))
+
+      setTimeout ->
+        ## need to wait a tick for appended stylesheet to take affect
+        {headStyles} = @Cypress.createSnapshot(@el)
+        expect(headStyles[0]).to.include(".foo { color: green; }")
+        done()
+
+    it "provides object with href of external stylesheets in head", (done) ->
+      $("<link rel='stylesheet' href='http://localhost:3501/fixtures/html/generic_styles.css' />").appendTo(@cy.$$("head"))
+
+      setTimeout ->
+        ## need to wait a tick for appended stylesheet to take affect
+        {headStyles} = @Cypress.createSnapshot(@el)
+        expect(headStyles[0]).to.eql({href: "http://localhost:3501/fixtures/html/generic_styles.css"})
+        done()
+
+    it "provides contents of style tags in body", ->
+      $("<style>.foo { color: red }</style>").appendTo(@cy.$$("body"))
+
+      {bodyStyles} = @Cypress.createSnapshot(@el)
+      expect(bodyStyles[bodyStyles.length - 1]).to.include(".foo { color: red }")
+
+    it "provides contents of local stylesheet links in body", (done) ->
+      $("<link rel='stylesheet' href='generic_styles.css' />").appendTo(@cy.$$("body"))
+
+      setTimeout ->
+        ## need to wait a tick for appended stylesheet to take affect
+        {bodyStyles} = @Cypress.createSnapshot(@el)
+        expect(bodyStyles[bodyStyles.length - 1]).to.include(".foo { color: green; }")
+        done()
+
+    it "provides object with href of external stylesheets in body", (done) ->
+      $("<link rel='stylesheet' href='http://localhost:3501/fixtures/html/generic_styles.css' />").appendTo(@cy.$$("body"))
+
+      setTimeout ->
+        ## need to wait a tick for appended stylesheet to take affect
+        {bodyStyles} = @Cypress.createSnapshot(@el)
+        expect(bodyStyles[bodyStyles.length - 1]).to.eql({href: "http://localhost:3501/fixtures/html/generic_styles.css"})
+        done()
 
     it "sets data-cypress-el attr", ->
       attr = @sandbox.spy @el, "attr"
