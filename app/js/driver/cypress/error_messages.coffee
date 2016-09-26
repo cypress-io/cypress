@@ -366,6 +366,25 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       tab: "{tab} isn't a supported character sequence. You'll want to use the command #{cmd('tab')}, which is not ready yet, but when it is done that's what you'll use."
       wrong_type: "#{cmd('type')} can only accept a String or Number. You passed in: '{{chars}}'"
 
+    uncaught:
+      cross_origin_script: """
+        Script error.
+
+        Cypress detected that an uncaught error was thrown from a cross origin script.
+
+        We cannot provide you the stack trace, line number, or file where this error occured.
+
+        Check your Developer Tools Console for the actual error - it should be printed there.
+
+        It's possible to enable debugging these scripts by adding the 'crossorigin' attribute and setting a CORS header.
+
+        https://on.cypress.io/cross-origin-script-error
+      """
+      error: (obj) ->
+        {msg, source, lineno} = obj
+
+        msg + if source and lineno then " (#{source}:#{lineno})" else ""
+
     viewport:
       bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."
       dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 200px and 3000px."

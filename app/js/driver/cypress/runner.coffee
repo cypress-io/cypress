@@ -131,7 +131,6 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       @testsById = {}
       @testsQueue = []
       @runnables = []
-      @runnablesById = {}
       @logsById = {}
       @emissions = {
         started: {}
@@ -293,6 +292,8 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         return if @emissions.ended[test.id]
 
         @emissions.ended[test.id] = true
+
+        Cypress.checkForEndedEarly()
 
         triggerMocha(Cypress, "test end", @wrapParents(test))
 
@@ -471,7 +472,6 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         ## tests have a type of 'test' whereas suites do not have a type property
         runnable.type ?= "suite"
 
-        @runnablesById[runnable.id] = obj
         @runnables.push(runnable)
 
         ## if we have a runnable in the initial state

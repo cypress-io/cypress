@@ -72,3 +72,44 @@ describe "xhrs", ->
         ## the fil server sends us back json and the proxy will
         ## not inject into json
         expect(resp).to.deep.eq({content: "<html>content</html>"})
+
+  it "works prior to visit", ->
+    cy.server()
+
+  describe "server with 1 visit", ->
+    before ->
+      cy.visit("/xhr.html")
+
+    beforeEach ->
+      cy
+        .server()
+        .route(/users/, [{}, {}]).as("getUsers")
+
+    it "response body", ->
+      cy
+        .get("#fetch").click()
+        .wait("@getUsers").then (xhr) ->
+          expect(xhr.url).to.include("/users")
+          expect(xhr.responseBody).to.deep.eq([{}, {}])
+
+    it "request body", ->
+      cy
+        .route("POST", /users/, {name: "b"}).as("createUser")
+        .get("#create").click()
+        .wait("@createUser").its("requestBody").should("deep.eq", {some: "data"})
+
+    it "aborts", ->
+      cy
+        .route({
+          method: "POST",
+          url: /users/,
+          response: {name: "b"},
+          delay: 200
+        }).as("createUser")
+        .get("#create").click()
+        .then ->
+          ## simulate an open request which should become
+          ## aborted (usually due to moving to next test)
+          Cypress.trigger("test:before:hooks", {id: 123})
+
+        .wait("@createUser").its("aborted").should("be.true")
