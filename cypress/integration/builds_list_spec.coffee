@@ -57,7 +57,16 @@ describe "Builds List", ->
             @ipc.handle("get:builds", null, [])
 
       it "displays empty message", ->
-        cy.contains("No Builds")
+        cy.contains("Run your first")
+
+    describe "permissions error", ->
+      beforeEach ->
+        cy
+          .then ->
+            @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 401}, null)
+
+      it "displays permissions message", ->
+        cy.contains("have permission")
 
     describe "list builds", ->
       beforeEach ->

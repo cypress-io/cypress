@@ -12,7 +12,7 @@ const getBuilds = () => {
     buildsCollection.setBuilds(builds)
   }))
   .catch((err) => {
-    err
+    buildsCollection.setError(err)
   })
 }
 

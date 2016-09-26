@@ -21,6 +21,13 @@ export class BuildsCollection {
     this.isLoading = false
     this.isLoaded = true
   }
+
+  @action setError (err) {
+    this.error = err
+
+    this.isLoading = false
+    this.isLoaded = true
+  }
 }
 
 export default new BuildsCollection()
