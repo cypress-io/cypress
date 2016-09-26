@@ -8,8 +8,9 @@ class LoginMessage extends Component {
     return (
       <div id='builds-list-page'>
         <div className="empty">
-          <h4>You Need to Login</h4>
-          <p>Aenean lacinia bibendum nulla sed consectetur.</p>
+          <h4>Log in to see Builds</h4>
+          <p>Aenean lacinia bibendum nulla sed consectetur. Nullam id dolor id nibh ut id elit.</p>
+          <p>Praesent commodo cursus magna, vel scelerisque nisl <a href="">ultricies vehicula</a>.</p>
           <div>
             <Link
               className='btn btn-black'

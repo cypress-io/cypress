@@ -63,7 +63,7 @@ describe "Builds List", ->
       it "opens setup project window", ->
         cy
           .get(".btn").contains("Setup Project for CI").click()
-
+          .get(".modal").should("be.visible")
 
     describe "permissions error", ->
       beforeEach ->
@@ -72,7 +72,16 @@ describe "Builds List", ->
           .get(".nav a").contains("Builds").click()
 
       it "displays permissions message", ->
-        cy.contains("have permission")
+        cy.contains("Request access")
+
+      context "request access", ->
+        beforeEach ->
+          cy
+            .get(".btn").contains("Request Access").click()
+
+        it "opens modal on click of request access", ->
+          cy
+            .get(".modal").should("be.visible")
 
     describe "list builds", ->
       beforeEach ->
@@ -103,5 +112,5 @@ describe "Builds List", ->
           .find("a").contains("Builds").click()
 
       it "shows login screen", ->
-        cy.contains('You Need to Login')
+        cy.contains('Log in to see Builds')
 

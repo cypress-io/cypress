@@ -1,39 +1,56 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 
-import App from '../lib/app'
+import RequestAccess from "./request-access-modal"
 
 @observer
 class PermissionMessage extends Component {
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      requestAccessModalOpen: false,
+    }
+  }
+
   render () {
     return (
       <div id='builds-list-page'>
         <div className="empty">
           <h4>
-            You don't have permission to view the builds
+            Request access to see the builds
           </h4>
-          <p>Porta Amet Euismod Dolor <strong><i className='fa fa-plus'></i> Euismod</strong> Tellus Vehicula Vestibulum Venenatis Euismod.</p>
-          <p>Adipiscing Nibh Magna Ridiculus Inceptos.</p>
+          <p>This is a private project created by someone else.</p>
+          <p>The project owner must give you access to see the builds.</p>
           <button
             className='btn btn-primary'
-            onClick='/login'
+            onClick={this._showSetupProjectModal}
             >
             <i className='fa fa-paper-plane'></i>{' '}
             Request Access
           </button>
-          <p className='helper-docs-append'>
-            <a onClick={this._openHelp} className='helper-docs-link'>
-              <i className='fa fa-question-circle'></i>{' '}
-              Need help?
-            </a>
-          </p>
         </div>
+        <RequestAccess
+          show={this.state.requestAccessModalOpen}
+          onConfirm={this._requestAccess}
+          onHide={this._hideRequestAccessModal}
+        />
       </div>
     )
   }
 
-  _openHelp () {
-    App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running/#section-adding-projects')
+  _hideSetupProjectModal () {
+    this.setState({ requestAccessModalOpen: false })
+  }
+
+  _showSetupProjectModal = (e) => {
+    e.preventDefault()
+    this.setState({ requestAccessModalOpen: true })
+  }
+
+  _requestAccess = (e) => {
+    e.preventDefault()
+    // debugger
   }
 }
 
