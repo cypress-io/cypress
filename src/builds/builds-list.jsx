@@ -73,7 +73,7 @@ class Builds extends Component {
           </button>
         </div>
         <SetupProject
-          projectId={this.props.params.id}
+          project={this.props.project}
           show={this.state.setupProjectModalOpen}
           onConfirm={this._setupProject}
           onHide={this._hideSetupProjectModal}

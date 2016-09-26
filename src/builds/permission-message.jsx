@@ -32,7 +32,6 @@ class PermissionMessage extends Component {
         </div>
         <RequestAccess
           show={this.state.requestAccessModalOpen}
-          onConfirm={this._requestAccess}
           onHide={this._hideRequestAccessModal}
         />
       </div>
@@ -46,11 +45,6 @@ class PermissionMessage extends Component {
   _showSetupProjectModal = (e) => {
     e.preventDefault()
     this.setState({ requestAccessModalOpen: true })
-  }
-
-  _requestAccess = (e) => {
-    e.preventDefault()
-    // debugger
   }
 }
 

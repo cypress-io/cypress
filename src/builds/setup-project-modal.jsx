@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
@@ -7,7 +8,7 @@ import BootstrapModal from 'react-bootstrap-modal'
 @observer
 class SetupProject extends Component {
   static propTypes = {
-    projectId: React.PropTypes.bool.string,
+    project: React.PropTypes.bool.object,
     show: React.PropTypes.bool.isRequired,
     onHide: React.PropTypes.func.isRequired,
     onConfirm: React.PropTypes.func.isRequired,
@@ -25,15 +26,19 @@ class SetupProject extends Component {
             className="form-horizontal"
             onSubmit={this.props.onConfirm}>
             <div className="form-group">
-              <label for="projectName" className="col-sm-4 control-label">
+              <label htmlFor="projectName" className="col-sm-4 control-label">
                 Project Name:
               </label>
               <div className="col-sm-8">
-                <input type="text" className="form-control" id="projectName" />
+                <input
+                  type="text"
+                  className="form-control"
+                  id="projectName"
+                  defaultValue={this._projectName()}/>
               </div>
             </div>
             <div className="form-group">
-              <label for="projectName" className="col-sm-4 control-label">
+              <label htmlFor="projectName" className="col-sm-4 control-label">
                 Account:
               </label>
               <div className="col-sm-8">
@@ -60,6 +65,17 @@ class SetupProject extends Component {
         </div>
       </BootstrapModal>
     )
+  }
+
+  _projectName = () => {
+    let project = this.props.project
+
+    if (project.name) {
+      return (project.name)
+    } else {
+      let splitName = _.last(project.path.split('/'))
+      return _.truncate(splitName, { length: 60 })
+    }
   }
 }
 

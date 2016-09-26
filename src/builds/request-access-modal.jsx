@@ -9,7 +9,6 @@ class RequestAccess extends Component {
   static propTypes = {
     show: React.PropTypes.bool.isRequired,
     onHide: React.PropTypes.func.isRequired,
-    onConfirm: React.PropTypes.func.isRequired,
   }
 
   render () {
