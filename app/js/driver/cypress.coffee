@@ -103,6 +103,9 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
     checkForEndedEarly: ->
       @cy.checkForEndedEarly()
 
+    onUncaughtException: ->
+      @cy.onUncaughtException.apply(@cy, arguments)
+
     ## TODO: TEST THIS
     ## restore our on callback
     ## after the run completes
