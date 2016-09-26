@@ -9,6 +9,7 @@ describe "Builds List", ->
         @agents = cy.agents()
         @ipc.handle("get:options", null, {})
         @agents.spy(@App, "ipc")
+      .fixture("builds").as("builds")
 
   context "displays page", ->
     beforeEach ->
@@ -22,8 +23,10 @@ describe "Builds List", ->
         .fixture("browsers").as("browsers")
         .fixture("config").then (@config) ->
           @ipc.handle("open:project", null, @config)
+        .fixture("specs").as("specs").then ->
+          @ipc.handle("get:specs", null, @specs)
         .get(".navbar-default")
-        .get("a").contains("Build").click()
+        .find("a").contains("Builds").click()
 
     it "navigates to builds page", ->
       cy
@@ -47,32 +50,30 @@ describe "Builds List", ->
           @ipc.handle("open:project", null, @config)
         .fixture("specs").as("specs").then ->
           @ipc.handle("get:specs", null, @specs)
-        .get(".navbar-default")
-        .get("a").contains("Build").click()
 
     describe "no builds", ->
       beforeEach ->
+        @ipc.handle("get:builds", null, [])
         cy
-          .then ->
-            @ipc.handle("get:builds", null, [])
+          .get(".nav a").contains("Builds").click()
 
       it "displays empty message", ->
         cy.contains("Run your first")
 
     describe "permissions error", ->
       beforeEach ->
+        @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 401}, null)
         cy
-          .then ->
-            @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 401}, null)
+          .get(".nav a").contains("Builds").click()
 
       it "displays permissions message", ->
         cy.contains("have permission")
 
     describe "list builds", ->
       beforeEach ->
+        @ipc.handle("get:builds", null, @builds)
         cy
-          .fixture("builds").then (@builds) ->
-            @ipc.handle("get:builds", null, @builds)
+          .get(".nav a").contains("Builds").click()
 
       it "lists builds", ->
         cy
@@ -91,8 +92,10 @@ describe "Builds List", ->
           .fixture("browsers").as("browsers")
           .fixture("config").then (@config) ->
             @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
           .get(".navbar-default")
-          .get("a").contains("Build").click()
+          .find("a").contains("Builds").click()
 
       it "shows login screen", ->
         cy.contains('You Need to Login')

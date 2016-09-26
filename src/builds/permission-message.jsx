@@ -18,8 +18,8 @@ class PermissionMessage extends Component {
             className='btn btn-primary'
             onClick='/login'
             >
-            <i className='fa fa-wrench'></i>{' '}
-            Setup Project for CI
+            <i className='fa fa-paper-plane'></i>{' '}
+            Request Access
           </button>
           <p className='helper-docs-append'>
             <a onClick={this._openHelp} className='helper-docs-link'>

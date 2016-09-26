@@ -34,7 +34,7 @@ class Login extends Component {
         <div className='login-content'>
           {this._error()}
           <button
-            className={cs('btn btn-login btn-block', {
+            className={cs('btn btn-login btn-black btn-block', {
               disabled: this.state.isLoggingIn,
             })}
             onClick={this._login}

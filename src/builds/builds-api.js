@@ -8,7 +8,6 @@ const getBuilds = () => {
 
   return App.ipc('get:builds')
   .then(action('got:builds', (builds) => {
-
     buildsCollection.setBuilds(builds)
   }))
   .catch((err) => {

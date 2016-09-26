@@ -3,7 +3,7 @@ import md5 from 'md5'
 import { computed, observable, action } from 'mobx'
 import Browser from '../lib/browser-model'
 
-const strLength = 75
+// const strLength = 75
 
 export default class Project {
   @observable id

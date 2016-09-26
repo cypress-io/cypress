@@ -11,9 +11,18 @@ import { getBuilds } from './builds-api'
 import Build from './builds-list-item'
 import LoginMessage from './login-message'
 import PermissionMessage from './permission-message'
+import SetupProject from "./setup-project"
 
 @observer
 class Builds extends Component {
+  constructor (props) {
+    super(props)
+
+    this.state = {
+      setupProjectModalOpen: false,
+    }
+  }
+
 
   componentWillMount () {
     getBuilds()
@@ -21,7 +30,6 @@ class Builds extends Component {
 
   render () {
     if (!state.hasUser) return <LoginMessage />
-
 
     // TODO: if (noProjectId) return <SetupInCi/>
 
@@ -56,6 +64,13 @@ class Builds extends Component {
           </h4>
           <p>Porta Amet Euismod Dolor <strong><i className='fa fa-plus'></i> Euismod</strong> Tellus Vehicula Vestibulum Venenatis Euismod.</p>
           <p>Adipiscing Nibh Magna Ridiculus Inceptos.</p>
+          <button
+            className='btn btn-primary'
+            onClick={this._showSetupProjectModal}
+            >
+            <i className='fa fa-wrench'></i>{' '}
+            Setup Project for CI
+          </button>
           <p className='helper-docs-append'>
             <a onClick={this._openHelp} className='helper-docs-link'>
               <i className='fa fa-question-circle'></i>{' '}
@@ -63,8 +78,18 @@ class Builds extends Component {
             </a>
           </p>
         </div>
+        <SetupProject
+          projectId={this.props.params.id}
+          show={this.state.setupProjectModalOpen}
+          onConfirm={this._setupProject}
+          onHide={this._hideSetupProjectModal}
+        />
       </div>
     )
+  }
+
+  _hideSetupProjectModal () {
+    this.setState({ setupProjectModalOpen: false })
   }
 
   _error () {
@@ -96,6 +121,15 @@ class Builds extends Component {
 
   _openHelp () {
     App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running/#section-adding-projects')
+  }
+
+  _showSetupProjectModal = (e) => {
+    e.preventDefault()
+    this.setState({ setupProjectModalOpen: true })
+  }
+
+  _setupProject = (e) => {
+    // debugger
   }
 }
 

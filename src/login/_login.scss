@@ -69,20 +69,8 @@
 .btn-login {
   line-height: 24px;
   font-size: 16px;
-  background-color: #333;
   border-radius: 0;
   margin-bottom: 10px;
-  font-weight: 500;
-  color: white;
-
-  &:hover, &:focus {
-    background-color: #242424;
-    color: white;
-  }
-
-  &:active, &:focus {
-    outline: 0
-  }
 
   i {
     font-size: 20px;

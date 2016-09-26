@@ -8,6 +8,7 @@ export class BuildsCollection {
   @observable error = null
   @observable isLoading = false
   @observable isLoaded = false
+  @observable setupProjectModalOpen = false
 
   @action loading (bool) {
     this.isLoading = bool
@@ -27,6 +28,14 @@ export class BuildsCollection {
 
     this.isLoading = false
     this.isLoaded = true
+  }
+
+  @action openModal () {
+    return this.setupProjectModalOpen = true
+  }
+
+  @action closeModal () {
+    return this.setupProjectModalOpen = false
   }
 }
 
