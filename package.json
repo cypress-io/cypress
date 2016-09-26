@@ -15,7 +15,7 @@
     "build-dev": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
     "prepublish": "npm run build-prod",
-    "release": "releaser",
+    "release": "node ./scripts/check-reporter.js && releaser",
     "start": "node ./scripts/watch.js",
     "test": "node ./scripts/test.js"
   },
