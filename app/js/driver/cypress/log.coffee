@@ -280,6 +280,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
     error: (err) ->
       @set({
+        end: true
         error: err
         state: "failed"
       })
@@ -287,6 +288,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       return @
 
     end: ->
+      ## dont set back to passed
+      ## if we've already ended
+      return if @get("end")
+
       @set({
         end: true
         state: "passed"
