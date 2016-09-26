@@ -121,7 +121,7 @@ describe "Projects List", ->
             .get(".projects-list>li").first()
             .contains("Public")
 
-        it "displays owner", ->
+        it.skip "displays owner", ->
           cy
             .get(".projects-list>li").first()
             .contains(@projects_statuses[0].orgName)

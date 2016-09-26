@@ -7,6 +7,10 @@ import App from '../lib/app'
 import projectsStore from '../projects/projects-store'
 import specsCollection from '../specs/specs-collection'
 
+import { getSpecs } from '../specs/specs-api'
+import { getBuilds } from '../builds/builds-api'
+
+
 const getProjects = () => {
   projectsStore.loading(true)
 
@@ -20,6 +24,9 @@ const getProjects = () => {
       projectsStore.setProjectStatuses(projects)
     })
   }))
+  .catch((err) => {
+    err
+  })
 }
 
 const addProject = () => {
@@ -153,14 +160,8 @@ const openProject = (project) => {
   .then(() => {
     project.loading(false)
 
-    App.ipc('get:specs', (err, specs = []) => {
-      if (err) {
-        return setProjectError(err)
-      }
 
-      specsCollection.setSpecs(specs)
-
-    })
+    getSpecs(setProjectError)
 
     return null
   })
