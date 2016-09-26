@@ -40,46 +40,6 @@ class Builds extends Component {
     )
   }
 
-  specItem (spec) {
-    if (spec.children.specs && spec.children.specs.length) {
-      return (
-        <li key={spec.id} className='folder'>
-          <div>
-            <div>
-              <i className='fa fa-folder-open-o fa-fw'></i>
-              { spec.name }{' '}
-            </div>
-            <div>
-              <ul className='list-as-table'>
-                { _.map(spec.children.specs, (spec) => (
-                  this.specItem(spec)
-                ))}
-              </ul>
-            </div>
-          </div>
-        </li>
-      )
-    } else {
-      let activeClass = spec.isChosen ? 'active' : ''
-
-      return (
-        <li key={spec.id} className='file'>
-          <a href='#' onClick={this._selectSpec.bind(this, spec.id)} className={activeClass}>
-            <div>
-              <div>
-                <i className={`fa fa-fw ${this._specIcon(spec.isChosen)}`}></i>
-                { spec.name }
-              </div>
-            </div>
-            <div>
-              <div></div>
-            </div>
-          </a>
-        </li>
-      )
-    }
-  }
-
   _empty () {
     return (
       <div id='builds-list-page'>
@@ -91,11 +51,6 @@ class Builds extends Component {
       </div>
     )
   }
-
-  // _openHelp (e) {
-  //   e.preventDefault()
-  //   App.ipc('external:open', 'https://on.cypress.io/guides/writing-your-first-test#section-test-files')
-  // }
 }
 
 export default Builds
