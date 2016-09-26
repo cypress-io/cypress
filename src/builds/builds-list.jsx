@@ -20,6 +20,8 @@ class Builds extends Component {
   render () {
     if (!state.hasUser) return <LoginMessage />
 
+    // TODO: if (noProjectId) return <SetupInCi/>
+
     if (buildsCollection.isLoading) return <Loader color="#888" scale={0.5}/>
 
     if (!buildsCollection.builds.length) return this._empty()
