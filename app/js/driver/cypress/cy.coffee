@@ -327,6 +327,10 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## also reset recentlyReady back to null
       @prop("recentlyReady", null)
 
+      ## and forcibly move the index needle to the
+      ## end in case we have after / afterEach hooks
+      ## which need to run
+      @prop("index", @commands.length)
 
       return err
 
