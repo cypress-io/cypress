@@ -88,7 +88,7 @@ class Project extends Component {
   }
 
   render () {
-    document.title = `${this.project.name}`
+    document.title = `${this._projectName()}`
 
     if (this.project.isLoading) return <Loader color="#888" scale={0.5}/>
 
@@ -103,6 +103,17 @@ class Project extends Component {
         <OnBoarding project={this.project}/>
       </div>
     )
+  }
+
+  _projectName () {
+    let project = this.project
+
+    if (project.name) {
+      return (project.name)
+    } else {
+      let splitName = _.last(project.path.split('/'))
+      return _.truncate(splitName, { length: 60 })
+    }
   }
 
   _error = () => {
