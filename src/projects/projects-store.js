@@ -35,7 +35,7 @@ class Projects {
   }
 
   @action setProjects (projects) {
-    // pull out cached local storage project statuses
+    // TODO: pull out cached local storage project statuses
 
     this.projects = _.map(projects, (project) => (
       new Project(project)
