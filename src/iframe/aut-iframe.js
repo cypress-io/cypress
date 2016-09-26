@@ -1,5 +1,6 @@
 /* global $, Cypress */
 
+import _ from 'lodash'
 import blankContents from './blank-contents'
 import { getElementBoxModelLayers, getHitBoxLayer, getOuterSize } from '../lib/dimensions'
 import visitFailure from './visit-failure'
@@ -35,26 +36,93 @@ export default class AutIframe {
 
   detachDom = () => {
     const contents = this._contents()
+    const { headStyles, bodyStyles } = Cypress.getStyles()
     const $body = contents.find('body')
-    const styles = Cypress.getStylesString()
     $body.find('script,link[rel="stylesheet"],style').remove()
-    $body.append(`<style>${styles}</style>`)
     return {
       body: $body.detach(),
       htmlClasses: contents.find('html')[0].className,
+      headStyles,
+      bodyStyles,
     }
   }
 
-  removeHeadStyles = () => {
-    this._contents().find('head').find('link[rel="stylesheet"],style').remove()
-  }
-
-  restoreDom = (body, htmlClasses) => {
+  restoreDom = ({ body, htmlClasses, headStyles, bodyStyles }) => {
     const contents = this._contents()
-    contents.find('body').remove()
+
     const $html = contents.find('html')
     $html[0].className = htmlClasses
+
+    this._replaceHeadStyles(headStyles)
+
+    // remove the old body and replace with restored one
+    contents.find('body').remove()
+    this._insertBodyStyles(body, bodyStyles)
     $html.append(body)
+  }
+
+  _replaceHeadStyles (styles) {
+    const $head = this._contents().find('head')
+    const existingStyles = $head.find('link[rel="stylesheet"],style')
+
+    _.each(styles, (style, index) => {
+      if (style.href) {
+        // make a best effort at not disturbing <link> stylesheets
+        // if possible by checking to see if the existing head has a
+        // stylesheet with the same href in the same position
+        this._replaceLink($head, existingStyles[index], style)
+      } else {
+        // for <style> tags, just replace them completely since the contents
+        // could be different and it shouldn't cause a FOUC since
+        // there's no http request involved
+        this._replaceStyle($head, existingStyles[index], style)
+      }
+    })
+
+    // remove any extra stylesheets
+    if (existingStyles.length > styles.length) {
+      existingStyles.slice(styles.length).remove()
+    }
+  }
+
+  _replaceLink ($head, existingStyle, style) {
+    const linkTag = this._linkTag(style)
+
+    if (!existingStyle) {
+      // no existing style at this index, so no more styles at all in
+      // the head, so just append it
+      $head.append(linkTag)
+      return
+    }
+
+    if (existingStyle.href !== style.href) {
+      $(existingStyle).replaceWith(linkTag)
+    }
+  }
+
+  _replaceStyle ($head, existingStyle, style) {
+    const styleTag = this._styleTag(style)
+    if (existingStyle) {
+      $(existingStyle).replaceWith(styleTag)
+    } else {
+      // no existing style at this index, so no more styles at all in
+      // the head, so just append it
+      $head.append(styleTag)
+    }
+  }
+
+  _insertBodyStyles ($body, styles) {
+    _.each(styles, (style) => {
+      $body.append(style.href ? this._linkTag(style) : this._styleTag(style))
+    })
+  }
+
+  _linkTag (style) {
+    return `<link rel="stylesheet" href="${style.href}" />`
+  }
+
+  _styleTag (style) {
+    return `<style>${style}</style>`
   }
 
   highlightEl = ($el, options = {}) => {

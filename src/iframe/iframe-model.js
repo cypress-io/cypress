@@ -87,11 +87,11 @@ export default class IframeModel {
       this.state.messageDescription = snapshot.name
       this.state.messageType = ''
 
-      this.restoreDom(snapshot.state, snapshot.htmlClasses)
+      this.restoreDom(snapshot)
 
       if (snapshotProps.$el) {
         const options = _.pick(snapshotProps, 'coords', 'highlightAttr', 'scrollBy')
-        options.dom = snapshot.state
+        options.dom = snapshot.body
         this.highlightEl(snapshotProps.$el, options)
       }
     })
@@ -132,7 +132,7 @@ export default class IframeModel {
 
       this._updateViewport(this.originalState)
       this._updateUrl(this.originalState.url)
-      this.restoreDom(this.originalState.body, this.originalState.htmlClasses)
+      this.restoreDom(this.originalState)
       this._clearMessage()
 
       this.originalState = null
@@ -146,16 +146,16 @@ export default class IframeModel {
   }
 
   _storeOriginalState () {
-    const { body, htmlClasses } = this.detachDom()
+    const { body, htmlClasses, headStyles, bodyStyles } = this.detachDom()
 
     this.originalState = {
       body,
       htmlClasses,
+      headStyles,
+      bodyStyles,
       url: this.state.url,
       viewportWidth: this.state.width,
       viewportHeight: this.state.height,
     }
-
-    this.removeHeadStyles()
   }
 }
