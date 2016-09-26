@@ -114,7 +114,7 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
     set: (runnable, hookName) ->
       $Cypress.Cy.set(@, runnable, hookName)
 
-    window: (specWindow) ->
+    onSpecWindow: (specWindow) ->
       cy     = $Cypress.Cy.create(@, specWindow)
       chai   = $Cypress.Chai.create(@, specWindow)
       mocha  = $Cypress.Mocha.create(@, specWindow)
