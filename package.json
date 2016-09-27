@@ -1,0 +1,29 @@
+{
+  "name": "cypress-monorepo",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "node index.js --exec 'npm install, npm run build'",
+    "start": "node index.js",
+    "dev": "node index.js --exec 'npm run dev'",
+    "test": "node index.js --exec 'npm test'"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "bluebird": "^3.4.5",
+    "lerna": "2.0.0-beta.26"
+  },
+  "dependencies": {
+    "app-module-path": "^1.1.0",
+    "chalk": "^1.1.3",
+    "glob": "^7.0.6",
+    "minimist": "^1.2.0"
+  }
+}
+
+
+// npm run test -- --only core-runner,core-reporter
+
+// npm run install -- lodash core-reporter
