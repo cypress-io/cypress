@@ -93,8 +93,6 @@ class Builds extends Component {
 
   _setupProject = (e) => {
     e.preventDefault()
-
-    // debugger
   }
 }
 
