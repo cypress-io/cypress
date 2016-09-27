@@ -34,6 +34,22 @@ describe "Projects List", ->
         cy.contains("a", "Need help?").click().then ->
           expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/installing-and-running/#section-adding-projects")
 
+    describe "project statuses from localStorage load", ->
+      beforeEach ->
+        cy
+          .fixture("projects_statuses").then (@projects_statuses) ->
+            localStorage.setItem("projects", JSON.stringify(@projects_statuses))
+          .fixture("projects").then (@projects) ->
+            @ipc.handle("get:projects", null, @projects)
+
+      afterEach ->
+        cy.clearLocalStorage()
+
+      it "has status in projects list", ->
+        cy
+          .get(".projects-list>li").first()
+          .contains("Public")
+
     describe "lists projects", ->
       beforeEach ->
         cy
@@ -61,7 +77,7 @@ describe "Projects List", ->
             .get(".projects-list a").first()
               .find(".fa-chevron-right")
 
-        describe "click on project", ->
+        context "click on project", ->
           beforeEach ->
             @firstProjectName = "My-Fake-Project"
 
@@ -74,7 +90,7 @@ describe "Projects List", ->
               .get("@firstProject").click()
               .location().its("hash").should("include", @projects[0].id)
 
-        describe "right click on project", ->
+        context "right click on project", ->
           beforeEach ->
             @firstProjectName = "My-Fake-Project"
             e = new Event('contextmenu', {bubbles: true, cancelable: true})

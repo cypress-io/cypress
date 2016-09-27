@@ -40,6 +40,13 @@ class Projects {
     this.projects = _.map(projects, (project) => (
       new Project(project)
     ))
+
+    // get the projects off of localStorage (with statuses)
+    // and set them up so we don't have to wait for data from server
+    this.projects = _.map(this.projects, (project) => {
+      return _.extend({}, project, _.find(JSON.parse(localStorage.getItem('projects')), { id: project.id }))
+    })
+
     this.isLoading = false
     this.isLoaded = true
   }
@@ -50,6 +57,8 @@ class Projects {
     this.projects = _.map(this.projects, (project) => {
       return _.extend({}, project, _.find(projects, { id: project.id }))
     })
+
+    localStorage.setItem('projects', JSON.stringify(this.projects))
   }
 
   @action setError (err) {
