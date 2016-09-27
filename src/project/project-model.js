@@ -18,6 +18,7 @@ export default class Project {
   @observable error
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
+  @observable projectId
 
   constructor (project) {
     // if the project has been setup, it may
@@ -89,6 +90,12 @@ export default class Project {
     })
     localStorage.setItem('chosenBrowser', browser.name)
     return browser.isChosen = true
+  }
+
+  @action setProjectId (id) {
+    // we need to know if the server has setup an id
+    // and that it isn't just present on the front-end
+    this.projectId = id
   }
 
   @action setOnBoardingConfig (config) {

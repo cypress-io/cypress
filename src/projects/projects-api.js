@@ -121,6 +121,7 @@ const openProject = (project) => {
 
   const changeConfig = (config) => {
     project.setOnBoardingConfig(config)
+    project.setProjectId(config.projectId)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
   }
