@@ -8,8 +8,6 @@ import projectsStore from '../projects/projects-store'
 import specsCollection from '../specs/specs-collection'
 
 import { getSpecs } from '../specs/specs-api'
-import { getBuilds } from '../builds/builds-api'
-
 
 const getProjects = () => {
   projectsStore.loading(true)
