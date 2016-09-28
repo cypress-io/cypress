@@ -10,7 +10,8 @@ describe "s1b", ->
   it "t3b", ->
   it "t4b", ->
 
-## these 3 should also be skipped on uncaught hook error
+## these 3 should run because we override mocha's
+## default handling of uncaught errors
 describe "s2b", ->
   it "t5b", ->
   it "t6b", ->

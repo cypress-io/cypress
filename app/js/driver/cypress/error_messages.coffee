@@ -380,6 +380,16 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
         https://on.cypress.io/cross-origin-script-error
       """
+      error_in_hook: (obj) ->
+        msg = "Because this error occured during a '#{obj.hookName}' hook we are skipping "
+
+        if t = obj.parentTitle
+          msg += "the remaining tests in the current suite: '#{_.truncate(t, 10)}'"
+        else
+          msg += "all of the remaining tests."
+
+        msg
+
       error: (obj) ->
         {msg, source, lineno} = obj
 
