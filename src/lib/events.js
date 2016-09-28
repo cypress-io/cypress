@@ -115,6 +115,14 @@ export default {
       runner.emit('runner:hide:snapshot', commandId)
     })
 
+    localBus.on('pin:snapshot', (commandId) => {
+      runner.emit('runner:pin:snapshot', commandId)
+    })
+
+    localBus.on('unpin:snapshot', (commandId) => {
+      runner.emit('runner:unpin:snapshot', commandId)
+    })
+
     localBus.on('focus:tests', () => {
       runner.emit('focus:tests')
     })

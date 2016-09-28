@@ -5,6 +5,7 @@ const defaults = {
   isPaused: false,
   isRunning: false,
   nextCommandName: null,
+  pinnedSnapshotId: null,
 }
 
 class AppState {
@@ -12,6 +13,7 @@ class AppState {
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
   @observable nextCommandName = defaults.nextCommandName
+  @observable pinnedSnapshotId = defaults.pinnedSnapshotId
 
   isStopped = false
   _resetAutoScrollingEnabledTo = true

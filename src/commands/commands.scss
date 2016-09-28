@@ -49,29 +49,29 @@
     &:empty {
       display: none;
     }
+  }
 
-    > li {
-      padding: 1px 9px 1px 5px;
-      margin: 0;
+  .command {
+    cursor: pointer;
+    padding: 1px 1px 1px 5px;
+    margin: 0;
 
-      &:hover {
-        background-color: #E0E5E7;
-        cursor: pointer;
-        box-shadow: 0 1px 2px #ccc inset;
-      }
+    &:hover {
+      background-color: #E0E5E7;
+      box-shadow: 0 1px 2px #ccc inset;
+    }
 
-      &:hover .command-controls i.fa-pause {
-        visibility: visible;
-      }
+    &:hover .command-controls i.fa-pause {
+      visibility: visible;
+    }
 
-      &.active {
-        background-color: #E1E1E1 !important;
-        box-shadow: 0 1px 6px #ccc inset;
-      }
+    &.active {
+      background-color: #E1E1E1 !important;
+      box-shadow: 0 1px 6px #ccc inset;
+    }
 
-      &.highlight {
-        background-color: #FFB61C !important;
-      }
+    &.highlight {
+      background-color: #FFB61C !important;
     }
   }
 
@@ -99,7 +99,6 @@
     &:first-child {
       border-top: 0;
     }
-
   }
 
   .command-type-child {
@@ -391,6 +390,59 @@
 
   .command-has-multiple-elements .command-num-elements {
     background-color: #476fc9;
+  }
+
+  .command-pin {
+    background: none;
+    display: none;
+    float: left;
+    line-height: 1;
+    margin-right: 10px;
+    outline: none;
+    padding: 2px 0 0;
+    text-align: right;
+    width: 15px;
+
+    i {
+      color: #999;
+    }
+
+    &:hover i {
+      color: #476fc9 !important;
+    }
+  }
+
+  .command-is-pinned,
+  .command:hover {
+    .command-number {
+      display: none;
+    }
+
+    .command-pin {
+      display: block;
+    }
+  }
+
+  .command-is-pinned {
+    &,
+    &:hover {
+      background-color: #c7cfd2;
+      box-shadow: 0 1px 2px #aaa inset;      
+    }
+
+    .command-pin i {
+      color: #333;
+    }
+  }
+
+  .command-other-pinned {
+    .command-number {
+      display: block !important;
+    }
+
+    .command-pin {
+      display: none !important;
+    }
   }
 
   .no-commands {

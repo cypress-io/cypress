@@ -250,6 +250,16 @@ describe('events', () => {
       expect(runner.emit).to.have.been.calledWith('runner:hide:snapshot', 'command id')
     })
 
+    it('emits runner:pin:snapshot on pin:snapshot', () => {
+      events.emit('pin:snapshot', 'command id')
+      expect(runner.emit).to.have.been.calledWith('runner:pin:snapshot', 'command id')
+    })
+
+    it('emits runner:unpin:snapshot on unpin:snapshot', () => {
+      events.emit('unpin:snapshot', 'command id')
+      expect(runner.emit).to.have.been.calledWith('runner:unpin:snapshot', 'command id')
+    })
+
     it('emits focus:tests on focus:tests', () => {
       events.emit('focus:tests')
       expect(runner.emit).to.have.been.calledWith('focus:tests')

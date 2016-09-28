@@ -160,5 +160,12 @@ describe('app state', () => {
       instance.reset()
       expect(instance.nextCommandName).to.be.null
     })
+
+    it('sets pinnedSnapshotId to null', () => {
+      const instance = new AppState()
+      instance.pinnedSnapshotId = 'c4'
+      instance.reset()
+      expect(instance.pinnedSnapshotId).to.be.null
+    })
   })
 })

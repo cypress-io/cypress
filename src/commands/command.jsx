@@ -1,9 +1,11 @@
 import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
+import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
+import appState from '../lib/app-state'
 import events from '../lib/events'
 import Tooltip from '../tooltip/tooltip'
 import FlashOnClick from '../lib/flash-on-click'
@@ -48,6 +50,7 @@ class Command extends Component {
     return (
       <li
         className={cs(
+          'command',
           `command-name-${nameClassName(model.name)}`,
           `command-state-${model.state}`,
           `command-type-${model.type}`,
@@ -57,24 +60,29 @@ class Command extends Component {
             'command-has-num-elements': model.state !== 'pending' && model.numElements != null,
             'command-has-no-elements': !model.numElements,
             'command-has-multiple-elements': model.numElements > 1,
+            'command-other-pinned': this._isOtherCommandPinned(),
+            'command-is-pinned': this._isPinned(),
             'command-with-indicator': !!model.renderProps.indicator,
             'command-scaled': model.renderProps.message && model.renderProps.message.length > 100,
           }
         )}
+        onMouseOver={() => this._snapshot(true)}
+        onMouseOut={() => this._snapshot(false)}
       >
         <FlashOnClick
           message='Printed output to your console!'
           onClick={() => this.props.events.emit('show:command', model.id)}
         >
-          <div
-            className='command-wrapper'
-            onMouseOver={() => this._snapshot(true)}
-            onMouseOut={() => this._snapshot(false)}
-          >
+          <div className='command-wrapper'>
             <span className='command-number'>
               <i className='fa fa-spinner fa-spin'></i>
               <span>{model.number || ''}</span>
             </span>
+            <Tooltip placement='top' title={this._isPinned() ? 'Unpin snapshot' : 'Pin snapshot'}>
+              <button className='command-pin' onClick={this._togglePinning}>
+                <i className='fa fa-thumb-tack'></i>
+              </button>
+            </Tooltip>
             <span className='command-method'>
               <span>{model.event ? `(${displayName(model)})` :  displayName(model)}</span>
             </span>
@@ -96,6 +104,29 @@ class Command extends Component {
         </FlashOnClick>
       </li>
     )
+  }
+
+  _isPinned () {
+    return this.props.appState.pinnedSnapshotId === this.props.model.id
+  }
+
+  _isOtherCommandPinned () {
+    const pinnedId = this.props.appState.pinnedSnapshotId
+    return pinnedId != null && pinnedId !== this.props.model.id
+  }
+
+  @action _togglePinning = (e) => {
+    e.stopPropagation()
+
+    const { id } = this.props.model
+
+    if (this._isPinned()) {
+      this.props.appState.pinnedSnapshotId = null
+      this.props.events.emit('unpin:snapshot', id)
+    } else {
+      this.props.appState.pinnedSnapshotId = id
+      this.props.events.emit('pin:snapshot', id)
+    }
   }
 
   // snapshot rules
@@ -142,6 +173,7 @@ class Command extends Component {
 }
 
 Command.defaultProps = {
+  appState,
   events,
   runnablesStore,
 }
