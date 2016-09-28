@@ -85,10 +85,10 @@ class Builds extends Component {
       <div id='builds-list-page'>
         <div className="empty">
           <h4>
-            Run your first build in CI
+            Getting Started with CI
           </h4>
-          <p>Porta Amet Euismod Dolor <strong><i className='fa fa-plus'></i> Euismod</strong> Tellus Vehicula Vestibulum Venenatis Euismod.</p>
-          <p>Adipiscing Nibh Magna Ridiculus Inceptos.</p>
+          <p>Run Cypress tests on any <a href='#'>Continous Integration provider</a>.</p>
+          <p>Then see each build's data, screenshots, and video recording.</p>
           <button
             className='btn btn-primary'
             onClick={this._showSetupProjectModal}
@@ -112,7 +112,7 @@ class Builds extends Component {
       <div id='builds-list-page'>
         <div className="empty">
           <h4>
-            No builds found
+            No Builds Found
           </h4>
           <p>Porta Amet Euismod Dolor <strong><i className='fa fa-plus'></i> Euismod</strong> Tellus Vehicula Vestibulum Venenatis Euismod.</p>
           <p>Adipiscing Nibh Magna Ridiculus Inceptos.</p>

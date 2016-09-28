@@ -22,7 +22,7 @@ class RequestAccess extends Component {
           <div className='empty-onboarding'>
             <h3>Request Sent</h3>
             <p>
-              An email has been sent to the project owner to request access to this project's builds.
+              An email will be sent to the project owner to request access to this project's builds.
             </p>
             <BootstrapModal.Dismiss className='btn btn-success'>
               OK, got it!

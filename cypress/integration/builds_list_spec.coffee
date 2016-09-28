@@ -82,7 +82,7 @@ describe "Builds List", ->
             .get(".nav a").contains("Builds").click()
 
         it "displays empty message", ->
-          cy.contains("Run your first")
+          cy.contains("Getting Started with CI")
 
         it "opens setup project window", ->
           cy
@@ -100,7 +100,7 @@ describe "Builds List", ->
             .get(".nav a").contains("Builds").click()
 
         it "displays empty message", ->
-          cy.contains("No builds found")
+          cy.contains("No Builds Found")
 
     describe "list builds", ->
       beforeEach ->

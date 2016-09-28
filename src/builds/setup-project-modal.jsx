@@ -22,6 +22,8 @@ class SetupProject extends Component {
         backdrop='static'
         >
         <div className='modal-body os-dialog'>
+          <h4>Setup Project for CI</h4>
+          <p className='text-muted'>After configuring your project's settings, we will generate a secret key to be used during your CI run.</p>
           <form
             className='form-horizontal'
             onSubmit={this.props.onConfirm}>
@@ -57,7 +59,6 @@ class SetupProject extends Component {
                   <label>
                     <input type='checkbox'/>Make Builds Private
                   </label>
-                  <small className='text-muted'>{' '}This requires a paid account with Cypress</small>
                 </div>
               </div>
             </div>
