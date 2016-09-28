@@ -97,6 +97,7 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
       getStartTime:      @sandbox.stub()
       getTestsState:     @sandbox.stub()
       countByTestState:  @sandbox.stub()
+      stopListening: ->
     }
 
     ## immediately create the chai instance so
@@ -125,12 +126,12 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
         waitForAnimations: true
         animationDistanceThreshold: 5
       })
-      .then =>
-        ## why do we use the initialize method here but only
-        ## trigger it in the command testing mode below?
-        @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe
 
-        @Cypress.on("resolve:url", resolveUrl)
+      ## why do we use the initialize method here but only
+      ## trigger it in the command testing mode below?
+      @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe
+
+      @Cypress.on("resolve:url", resolveUrl)
 
   after ->
     @$iframe.remove()
