@@ -62,7 +62,7 @@ export default class State {
     const messageHeight = 33
     const nudge = 10
 
-    if ((actualHeight + messageHeight + nudge) >= this._containerHeight) {
+    if ((actualHeight + messageHeight + (nudge * 2)) >= this._containerHeight) {
       return { bottom: 0, opacity: '0.7' }
     } else {
       return { top: (actualHeight + this.headerHeight + nudge), opacity: '0.9' }

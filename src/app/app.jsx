@@ -30,7 +30,7 @@ class App extends Component {
         >
           <Header ref='header' {...this.props} />
           <Iframes {...this.props} />
-          <Message {...this.props} />
+          <Message state={this.props.state} />
           {this.props.children}
         </RunnerWrap>
       </div>
