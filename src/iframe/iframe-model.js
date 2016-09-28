@@ -3,16 +3,14 @@ import { action } from 'mobx'
 import runner from '../lib/runner'
 
 export default class IframeModel {
-  constructor (state, { detachDom, removeHeadStyles, restoreDom, highlightEl }) {
+  constructor ({ state, detachDom, removeHeadStyles, restoreDom, highlightEl }) {
     this.state = state
     this.detachDom = detachDom
     this.removeHeadStyles = removeHeadStyles
     this.restoreDom = restoreDom
     this.highlightEl = highlightEl
 
-    this.detachedId = null
-    this.intervalId = null
-    this.originalState = null
+    this._reset()
   }
 
   listen () {
@@ -29,10 +27,15 @@ export default class IframeModel {
 
     runner.on('show:snapshot', action('show:snapshot', this._setSnapshots))
     runner.on('hide:snapshot', action('hide:snapshot', this._clearSnapshots))
+
+    runner.on('pin:snapshot', action('pin:snapshot', this._pinSnapshot))
+    runner.on('unpin:snapshot', action('unpin:snapshot', this._unpinSnapshot))
   }
 
   _beforeRun = () => {
     this.state.isRunning = true
+    this._reset()
+    this._clearMessage()
   }
 
   _afterRun = () => {
@@ -56,6 +59,8 @@ export default class IframeModel {
   }
 
   _setSnapshots = (snapshotProps) => {
+    if (this.isSnapshotPinned) return
+
     if (this.state.isRunning) {
       return this._testsRunningError()
     }
@@ -99,6 +104,8 @@ export default class IframeModel {
     if (snapshots.length > 1) {
       let i = 0
       this.intervalId = setInterval(() => {
+        if (this.isSnapshotPinned) return
+
         i += 1
         if (!snapshots[i]) {
           i = 0
@@ -112,6 +119,8 @@ export default class IframeModel {
   }
 
   _clearSnapshots = () => {
+    if (this.isSnapshotPinned) return
+
     clearInterval(this.intervalId)
 
     this.state.highlightUrl = false
@@ -140,6 +149,24 @@ export default class IframeModel {
     }))
   }
 
+  _pinSnapshot = (snapshotProps) => {
+    const { snapshots } = snapshotProps
+
+    if (this.state.isRunning || !snapshots) {
+      return
+    }
+
+    this.isSnapshotPinned = true
+    this.state.messageTitle = 'DOM Snapshot (pinned)'
+    this.state.messageType = 'info'
+  }
+
+  _unpinSnapshot = () => {
+    this.isSnapshotPinned = false
+    this.state.messageTitle = 'DOM Snapshot'
+    this.state.messageType = ''
+  }
+
   _testsRunningError () {
     this.state.messageTitle = 'Cannot show Snapshot while tests are running'
     this.state.messageType = 'warning'
@@ -157,5 +184,12 @@ export default class IframeModel {
       viewportWidth: this.state.width,
       viewportHeight: this.state.height,
     }
+  }
+
+  _reset () {
+    this.detachedId = null
+    this.intervalId = null
+    this.originalState = null
+    this.isSnapshotPinned = false
   }
 }

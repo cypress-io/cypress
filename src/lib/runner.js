@@ -182,16 +182,28 @@ export default {
     })
     reporterBus.on('runner:restart', this._reRun.bind(this))
 
-    reporterBus.on('runner:show:snapshot', (logId) => {
+    function sendEventIfSnapshotProps (logId, event) {
       const snapshotProps = driver.getSnapshotPropsForLogById(logId)
 
       if (snapshotProps) {
-        localBus.emit('show:snapshot', snapshotProps)
+        localBus.emit(event, snapshotProps)
       }
+    }
+
+    reporterBus.on('runner:show:snapshot', (logId) => {
+      sendEventIfSnapshotProps(logId, 'show:snapshot')
     })
 
     reporterBus.on('runner:hide:snapshot', () => {
       localBus.emit('hide:snapshot')
+    })
+
+    reporterBus.on('runner:pin:snapshot', (logId) => {
+      sendEventIfSnapshotProps(logId, 'pin:snapshot')
+    })
+
+    reporterBus.on('runner:unpin:snapshot', () => {
+      localBus.emit('unpin:snapshot')
     })
 
     reporterBus.on('runner:resume', () => {
