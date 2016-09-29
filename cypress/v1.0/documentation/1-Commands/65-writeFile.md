@@ -72,6 +72,21 @@ cy
   })
 ```
 
+## Write response data to a fixture file
+
+```javascript
+cy
+  .request('https://jsonplaceholder.typicode.com/users')
+  .then(function(response){
+    cy.writeFile('cypress/fixtures/users.json', response.body)
+  })
+  // our fixture file is now generated and can be used
+  .fixture('users')
+  .then(function(users){
+    expect(users[0].name).to.exist
+  })
+```
+
 ## Specify encoding
 
 Specify the encoding with the third argument.
