@@ -384,7 +384,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
         msg = "Because this error occured during a '#{obj.hookName}' hook we are skipping "
 
         if t = obj.parentTitle
-          msg += "the remaining tests in the current suite: '#{_.truncate(t, 10)}'"
+          msg += "the remaining tests in the current suite: '#{_.truncate(t, 20)}'"
         else
           msg += "all of the remaining tests."
 
