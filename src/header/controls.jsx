@@ -2,9 +2,9 @@ import cs from 'classnames'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React from 'react'
+import Tooltip from '@cypress/react-tooltip'
 
 import events from '../lib/events'
-import Tooltip from '../tooltip/tooltip'
 
 const ifThen = (condition, component) => (
   condition ? component : null

@@ -1,11 +1,11 @@
 import { observer } from 'mobx-react'
 import React from 'react'
+import Tooltip from '@cypress/react-tooltip'
 
 import events from '../lib/events'
 
 import Controls from './controls'
 import Stats from './stats'
-import Tooltip from '../tooltip/tooltip'
 
 const Header = observer(({ appState, events, statsStore }) => (
   <header>

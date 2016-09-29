@@ -4,10 +4,10 @@ import Markdown from 'markdown-it'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import Tooltip from '@cypress/react-tooltip'
 
 import appState from '../lib/app-state'
 import events from '../lib/events'
-import Tooltip from '../tooltip/tooltip'
 import FlashOnClick from '../lib/flash-on-click'
 import runnablesStore from '../runnables/runnables-store'
 

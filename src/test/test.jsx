@@ -2,7 +2,7 @@ import cs from 'classnames'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import Tooltip from '../tooltip/tooltip'
+import Tooltip from '@cypress/react-tooltip'
 
 import appState from '../lib/app-state'
 import events from '../lib/events'

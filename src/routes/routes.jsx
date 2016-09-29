@@ -2,7 +2,8 @@ import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
-import Tooltip from '../tooltip/tooltip'
+import Tooltip from '@cypress/react-tooltip'
+
 import Collapsible from '../collapsible/collapsible'
 
 const Route = observer(({ model }) => (

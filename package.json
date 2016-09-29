@@ -25,6 +25,7 @@
   ],
   "devDependencies": {
     "@cypress/core-releaser": "^0.1.8",
+    "@cypress/react-tooltip": "0.1.0",
     "classnames": "^2.2.5",
     "babel-eslint": "^6.0.4",
     "babel-plugin-add-module-exports": "^0.2.1",
@@ -64,6 +65,7 @@
     "through": "^2.3.8"
   },
   "peerDependencies": {
+    "@cypress/react-tooltip": "0.1.0",
     "classnames": "^2.2.5",
     "font-awesome": "^4.6.3",
     "lodash": "^4.0.0",
@@ -74,7 +76,6 @@
   },
   "dependencies": {
     "css-element-queries": "^0.3.2",
-    "markdown-it": "^6.1.1",
-    "popper.js": "^0.5.2"
+    "markdown-it": "^6.1.1"
   }
 }
