@@ -22,7 +22,7 @@ There are known problems installing on Linux for:
 By default Cypress expects your CI provider to have:
 
 - [Node installed](https://github.com/creationix/nvm)
-- [XVFB installed](https://csshyamsundar.wordpress.com/2011/07/07/installing-xvfb-on-ubuntu/)
+- [XVFB installed](http://tobyho.com/2015/01/09/headless-browser-testing-xvfb/)
 
 In addition, you should install the following libraries:
 
