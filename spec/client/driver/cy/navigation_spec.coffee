@@ -145,14 +145,14 @@ describe "$Cypress.Cy Navigation Commands", ->
               beforeunload = true
               expect(@log.get("snapshots").length).to.eq(1)
               expect(@log.get("snapshots")[0].name).to.eq("before")
-              expect(@log.get("snapshots")[0].state).to.be.an("object")
+              expect(@log.get("snapshots")[0].body).to.be.an("object")
               return undefined
 
           .reload().then ->
             expect(beforeunload).to.be.true
             expect(@log.get("snapshots").length).to.eq(2)
             expect(@log.get("snapshots")[1].name).to.eq("after")
-            expect(@log.get("snapshots")[1].state).to.be.an("object")
+            expect(@log.get("snapshots")[1].body).to.be.an("object")
             done()
 
   context "#go", ->

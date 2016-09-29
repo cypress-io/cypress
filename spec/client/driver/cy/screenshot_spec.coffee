@@ -200,7 +200,7 @@ describe "$Cypress.Cy Screenshot Commands", ->
 
         it "ends immediately", ->
           @cy.screenshot().then ->
-            expect(@log.get("end")).to.be.true
+            expect(@log.get("ended")).to.be.true
             expect(@log.get("state")).to.eq("passed")
 
         it "snapshots immediately", ->

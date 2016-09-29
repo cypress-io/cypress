@@ -745,7 +745,7 @@
 #             .wait(["@getFoo", "@getFoo", "@getFoo"]).then  ->
 #               _.each logs, (log) ->
 #                 expect(log.get("name")).to.eq("xhr")
-#                 expect(log.get("end")).to.be.true
+#                 expect(log.get("ended")).to.be.true
 
 #         it "updates log immediately whenever an xhr is aborted", ->
 #           snapshot = null

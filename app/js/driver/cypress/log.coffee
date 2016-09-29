@@ -282,7 +282,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
     error: (err) ->
       @set({
-        end: true
+        ended: true
         error: err
         state: "failed"
       })
@@ -292,10 +292,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
     end: ->
       ## dont set back to passed
       ## if we've already ended
-      return if @get("end")
+      return if @get("ended")
 
       @set({
-        end: true
+        ended: true
         state: "passed"
       })
 
@@ -348,7 +348,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## and not an event
       ## and a command
       @get("autoEnd") isnt false and
-        @get("end") isnt true and
+        @get("ended") isnt true and
           @get("event") is false and
             @get("instrument") is "command"
 

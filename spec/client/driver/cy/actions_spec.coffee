@@ -123,7 +123,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -296,7 +296,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$("select:first").change =>
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0].name).to.eq("before")
-          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          expect(@log.get("snapshots")[0].body).to.be.an("object")
           done()
 
         @cy.get("select:first").select("de_dust2").then ($select) ->
@@ -305,7 +305,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("select:first").select("de_dust2").then ($select) ->
           expect(@log.get("snapshots").length).to.eq(2)
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(@log.get("snapshots")[1].state).to.be.an("object")
+          expect(@log.get("snapshots")[1].body).to.be.an("object")
 
       it "is not immediately ended", (done) ->
         @cy.$$("select:first").click =>
@@ -2024,7 +2024,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -2072,7 +2072,7 @@ describe "$Cypress.Cy Actions Commands", ->
         expectToHaveValueAndCoords = =>
           cmd = @cy.commands.findWhere({name: "type"})
           log = cmd.get("logs")[0]
-          txt = log.get("snapshots")[1].state.find("#comments")
+          txt = log.get("snapshots")[1].body.find("#comments")
           expect(txt).to.have.value("foobarbaz")
           expect(log.get("coords")).to.be.ok
 
@@ -2086,7 +2086,7 @@ describe "$Cypress.Cy Actions Commands", ->
         expectToHaveValueAndNoCoords = =>
           cmd = @cy.commands.findWhere({name: "type"})
           log = cmd.get("logs")[0]
-          txt = log.get("snapshots")[1].state.find("#comments")
+          txt = log.get("snapshots")[1].body.find("#comments")
           expect(txt).to.have.value("foobarbaz")
           expect(log.get("coords")).not.to.be.ok
 
@@ -2123,7 +2123,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$(":text:first").keydown =>
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0].name).to.eq("before")
-          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          expect(@log.get("snapshots")[0].body).to.be.an("object")
           done()
 
         @cy.get(":text:first").type("foo")
@@ -2132,7 +2132,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":text:first").type("foo").then ->
           expect(@log.get("snapshots").length).to.eq(2)
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(@log.get("snapshots")[1].state).to.be.an("object")
+          expect(@log.get("snapshots")[1].body).to.be.an("object")
 
       it "logs deltaOptions", ->
         @cy.get(":text:first").type("foo", {force: true, timeout: 1000}).then ->
@@ -2446,7 +2446,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually passes the assertion on multiple inputs", ->
         @cy.$$("input").keyup ->
@@ -2623,7 +2623,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("input").invoke("slice", 0, 2).clear().then ->
           _.each logs, (log) ->
             expect(log.get("state")).to.eq("passed")
-            expect(log.get("end")).to.be.true
+            expect(log.get("ended")).to.be.true
 
       it "snapshots after clicking", ->
         @cy.get("input:first").clear().then ($input) ->
@@ -2785,7 +2785,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually passes the assertion on multiple :checkboxs", ->
         @cy.$$(":checkbox").click ->
@@ -2979,7 +2979,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$(":checkbox:first").change =>
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0].name).to.eq("before")
-          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          expect(@log.get("snapshots")[0].body).to.be.an("object")
           done()
 
         @cy.get(":checkbox:first").check()
@@ -2988,7 +2988,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":checkbox:first").check().then ->
           expect(@log.get("snapshots").length).to.eq(2)
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(@log.get("snapshots")[1].state).to.be.an("object")
+          expect(@log.get("snapshots")[1].body).to.be.an("object")
 
       it "logs only 1 check event on click of 1 checkbox", ->
         logs = []
@@ -3225,7 +3225,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually passes the assertion on multiple :checkboxs", ->
         @cy.$$(":checkbox").prop("checked", true).click ->
@@ -3394,7 +3394,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$(":checkbox:first").change =>
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0].name).to.eq("before")
-          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          expect(@log.get("snapshots")[0].body).to.be.an("object")
           done()
 
         @cy.get(":checkbox:first").invoke("prop", "checked", true).uncheck()
@@ -3403,7 +3403,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":checkbox:first").invoke("prop", "checked", true).uncheck().then ->
           expect(@log.get("snapshots").length).to.eq(2)
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(@log.get("snapshots")[1].state).to.be.an("object")
+          expect(@log.get("snapshots")[1].body).to.be.an("object")
 
       it "logs only 1 uncheck event", ->
         logs = []
@@ -3607,7 +3607,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.$$("form:first").submit -> return false
@@ -3737,7 +3737,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$("form").first().submit =>
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0].name).to.eq("before")
-          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          expect(@log.get("snapshots")[0].body).to.be.an("object")
           done()
 
         @cy.get("form").first().submit()
@@ -3748,7 +3748,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("form").first().submit().then ($form) ->
           expect(@log.get("snapshots").length).to.eq(2)
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(@log.get("snapshots")[1].state).to.be.an("object")
+          expect(@log.get("snapshots")[1].body).to.be.an("object")
 
       it "#consoleProps", ->
         @cy.$$("form:first").submit -> return false
@@ -3832,7 +3832,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -3871,7 +3871,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "ends immediately", ->
         @cy.focused().then ->
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
           expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
@@ -4009,7 +4009,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -4292,7 +4292,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -5159,7 +5159,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually passes the assertion on multiple buttons", ->
         @cy.$$("button").click ->
@@ -5618,7 +5618,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$("button:first").click =>
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0].name).to.eq("before")
-          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          expect(@log.get("snapshots")[0].body).to.be.an("object")
           done()
 
         @cy.get("button:first").click()
@@ -5627,7 +5627,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button:first").click().then ($button) ->
           expect(@log.get("snapshots").length).to.eq(2)
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(@log.get("snapshots")[1].state).to.be.an("object")
+          expect(@log.get("snapshots")[1].body).to.be.an("object")
 
       it "returns only the $el for the element of the subject that was clicked", ->
         clicks = []
@@ -5668,7 +5668,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button").invoke("slice", 0, 2).click({multiple: true}).then ->
           _.each logs, (log) ->
             expect(log.get("state")).to.eq("passed")
-            expect(log.get("end")).to.be.true
+            expect(log.get("ended")).to.be.true
 
       it "logs {multiple: true} options", ->
         @cy.get("span").invoke("slice", 0, 2).click({multiple: true, timeout: 1000}).then ->
