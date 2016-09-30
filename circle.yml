@@ -9,11 +9,11 @@ test:
   override:
     ## run 'test-unit-once' and 'test-integration-once'
     ## on the 1st container
-    - case $CIRCLE_NODE_INDEX in 0) npm run test-unit-once ;; esac:
-    - case $CIRCLE_NODE_INDEX in 0) npm run test-integration-once ;; esac:
+    - case $CIRCLE_NODE_INDEX in 0) npm run test-unit-once ;; esac
+    - case $CIRCLE_NODE_INDEX in 0) npm run test-integration-once ;; esac
 
     ## run 'test-e2e-once' on the 2nd container
-    - case $CIRCLE_NODE_INDEX in 1) npm run test-e2e-once ;; esac:
+    - case $CIRCLE_NODE_INDEX in 1) npm run test-e2e-once ;; esac
 
   #   - npm run test-cov
   #   - npm run codecov
