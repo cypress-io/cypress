@@ -8,7 +8,7 @@ const resetStyles = `
   padding: 0 !important;
 `
 
-function getHitBoxLayer (coords, body) {
+function addHitBoxLayer (coords, body) {
   if (body == null) {
     body = $('body')
   }
@@ -57,7 +57,7 @@ function getHitBoxLayer (coords, body) {
   return box.appendTo(body)
 }
 
-function getElementBoxModelLayers (el, body) {
+function addElementBoxModelLayers (el, body) {
   if (body == null) {
     body = $('body')
   }
@@ -245,7 +245,7 @@ function getOuterSize (el) {
 }
 
 export {
-  getElementBoxModelLayers,
-  getHitBoxLayer,
+  addElementBoxModelLayers,
+  addHitBoxLayer,
   getOuterSize,
 }

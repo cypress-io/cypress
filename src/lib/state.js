@@ -5,6 +5,7 @@ const _defaults = {
   messageTitle: null,
   messageDescription: null,
   messageType: '',
+  messageControls: null,
 
   width: 1000,
   height: 660,
@@ -18,6 +19,12 @@ export default class State {
   @observable messageTitle = _defaults.messageTitle
   @observable messageDescription = _defaults.messageDescription
   @observable messageType = _defaults.messageType
+  @observable messageControls = _defaults.messageControls
+
+  @observable snapshot = {
+    showingHighlights: true,
+    state: null,
+  }
 
   @observable url = ''
   @observable highlightUrl = false
@@ -63,9 +70,14 @@ export default class State {
     const nudge = 10
 
     if ((actualHeight + messageHeight + (nudge * 2)) >= this._containerHeight) {
-      return { bottom: 0, opacity: '0.7' }
+      return { state: 'stationary' }
     } else {
-      return { top: (actualHeight + this.headerHeight + nudge), opacity: '0.9' }
+      return {
+        state: 'attached',
+        styles: {
+          top: (actualHeight + this.headerHeight + nudge),
+        },
+      }
     }
   }
 

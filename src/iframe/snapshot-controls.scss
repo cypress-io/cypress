@@ -1,0 +1,55 @@
+.runner {
+  .snapshot-controls {
+    button {
+      background: none;
+      border: none;
+      border-radius: 0;
+      color: #4f4f4f;
+      line-height: $message-height;
+      outline: none;
+      padding: 0 10px;
+      text-align: center;
+      vertical-align: baseline;
+
+      &:hover {
+        background-color: #e9e9e9;
+      }
+
+      &:active {
+        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+      }
+    }
+
+    span:first-child button:first-child {
+      border-top-left-radius: 5px;
+      border-bottom-left-radius: 5px;
+    }
+
+    span:last-child button:last-child {
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px;
+    }
+
+    &.showing-selection .toggle-selection {
+      background-color: #e9e9e9;
+      box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    }
+
+    .snapshot-state-picker {
+      border-left: solid 1px #d3d3d3;
+      display: inline-block;
+      padding-left: 8px;
+
+      span {
+        display: inline-block;
+        height: $message-height;
+        line-height: $message-height;
+        margin-right: 4px;
+      }
+
+      button {
+        padding: 0 6px;
+      }
+    }
+  }
+}

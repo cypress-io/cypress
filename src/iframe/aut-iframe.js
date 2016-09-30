@@ -2,7 +2,7 @@
 
 import _ from 'lodash'
 import blankContents from './blank-contents'
-import { getElementBoxModelLayers, getHitBoxLayer, getOuterSize } from '../lib/dimensions'
+import { addElementBoxModelLayers, addHitBoxLayer, getOuterSize } from '../lib/dimensions'
 import visitFailure from './visit-failure'
 
 export default class AutIframe {
@@ -125,15 +125,13 @@ export default class AutIframe {
     return `<style>${style}</style>`
   }
 
-  highlightEl = ($el, options = {}) => {
-    this._contents().find('[data-highlight-el],[data-highlight-hitbox]').remove()
+  highlightEl = ({ body }, { $el, coords, highlightAttr, scrollBy }) => {
+    this.removeHighlights()
 
-    let dom
-    if (options.dom) {
-      dom = options.dom
-      $el = options.dom.find(`[${options.highlightAttr}]`)
+    if (body) {
+      $el = body.find(`[${highlightAttr}]`)
     } else {
-      dom = this._contents().find('body')
+      body = this._contents().find('body')
     }
 
     // scroll the top of the element into view
@@ -142,7 +140,6 @@ export default class AutIframe {
       // if we have a scrollBy on our command
       // then we need to additional scroll the window
       // by these offsets
-      const scrollBy = options.scrollBy
       if (scrollBy) {
         this.$iframe.prop('contentWindow').scrollBy(scrollBy.x, scrollBy.y)
       }
@@ -150,8 +147,8 @@ export default class AutIframe {
 
     $el.each((__, el) => {
       el = $(el)
-      // bail if our el no longer exists in the parent dom
-      if (!$.contains(dom[0], el[0])) return
+      // bail if our el no longer exists in the parent body
+      if (!$.contains(body[0], el[0])) return
 
       // switch to using outerWidth + outerHeight
       // because we want to highlight our element even
@@ -160,14 +157,17 @@ export default class AutIframe {
       // dont show anything if our element displaces nothing
       if (dimensions.width === 0 || dimensions.height === 0) return
 
-      getElementBoxModelLayers(el, dom).attr('data-highlight-el', true)
+      addElementBoxModelLayers(el, body).attr('data-highlight-el', true)
     })
 
-    const coords = options.coords
     if (coords) {
       requestAnimationFrame(() => {
-        getHitBoxLayer(coords, dom).attr('data-highlight-hitbox', true)
+        addHitBoxLayer(coords, body).attr('data-highlight-hitbox', true)
       })
     }
+  }
+
+  removeHighlights = () => {
+    this._contents().find('[data-highlight-el],[data-highlight-hitbox]').remove()
   }
 }

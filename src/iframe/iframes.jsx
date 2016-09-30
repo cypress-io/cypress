@@ -5,6 +5,8 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
 import AutIframe from './aut-iframe'
+import SnapshotControls from './snapshot-controls'
+
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
 import runner from '../lib/runner'
@@ -51,10 +53,17 @@ export default class Iframes extends Component {
       removeHeadStyles: this.autIframe.removeHeadStyles,
       restoreDom: this.autIframe.restoreDom,
       highlightEl: this.autIframe.highlightEl,
+      snapshotControls: (snapshotProps) => (
+        <SnapshotControls
+          runner={runner}
+          snapshotProps={snapshotProps}
+          state={this.props.state}
+          onToggleHighlights={this._toggleHighlights}
+        />
+      ),
     })
     this.iframeModel.listen()
     this._run()
-
   }
 
   _run () {
@@ -88,6 +97,17 @@ export default class Iframes extends Component {
         resolve([$specIframe[0].contentWindow, $autIframe])
       })
     })
+  }
+
+  _toggleHighlights = (snapshotProps) => {
+    this.props.state.snapshot.showingHighlights = !this.props.state.snapshot.showingHighlights
+
+    if (this.props.state.snapshot.showingHighlights) {
+      // TODO: this will need to use state.currentSnapshot or whatever
+      this.autIframe.highlightEl(snapshotProps.snapshots[0], snapshotProps)
+    } else {
+      this.autIframe.removeHighlights()
+    }
   }
 
   componentWillUnmount () {

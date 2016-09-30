@@ -202,9 +202,7 @@ export default {
       sendEventIfSnapshotProps(logId, 'pin:snapshot')
     })
 
-    reporterBus.on('runner:unpin:snapshot', () => {
-      localBus.emit('unpin:snapshot')
-    })
+    reporterBus.on('runner:unpin:snapshot', this._unpinSnapshot.bind(this))
 
     reporterBus.on('runner:resume', () => {
       driver.trigger('resume:all')
@@ -284,6 +282,15 @@ export default {
 
   focusTests () {
     channel.emit('focus:tests')
+  },
+
+  snapshotUnpinned () {
+    this._unpinSnapshot()
+    reporterBus.emit('reporter:snapshot:unpinned')
+  },
+
+  _unpinSnapshot () {
+    localBus.emit('unpin:snapshot')
   },
 
   launchBrowser (browser) {

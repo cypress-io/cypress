@@ -3,12 +3,13 @@ import { action } from 'mobx'
 import runner from '../lib/runner'
 
 export default class IframeModel {
-  constructor ({ state, detachDom, removeHeadStyles, restoreDom, highlightEl }) {
+  constructor ({ state, detachDom, removeHeadStyles, restoreDom, highlightEl, snapshotControls }) {
     this.state = state
     this.detachDom = detachDom
     this.removeHeadStyles = removeHeadStyles
     this.restoreDom = restoreDom
     this.highlightEl = highlightEl
+    this.snapshotControls = snapshotControls
 
     this._reset()
   }
@@ -87,19 +88,7 @@ export default class IframeModel {
 
     clearInterval(this.intervalId)
 
-    const revert = action('revert:snapshot', (snapshot) => {
-      this.state.messageTitle = 'DOM Snapshot'
-      this.state.messageDescription = snapshot.name
-      this.state.messageType = ''
-
-      this.restoreDom(snapshot)
-
-      if (snapshotProps.$el) {
-        const options = _.pick(snapshotProps, 'coords', 'highlightAttr', 'scrollBy')
-        options.dom = snapshot.body
-        this.highlightEl(snapshotProps.$el, options)
-      }
-    })
+    const revert = action('revert:snapshot', this._showSnapshot)
 
     if (snapshots.length > 1) {
       let i = 0
@@ -111,11 +100,23 @@ export default class IframeModel {
           i = 0
         }
 
-        revert(snapshots[i])
+        revert(snapshots[i], snapshotProps)
       }, 800)
     }
 
-    revert(snapshots[0])
+    revert(snapshots[0], snapshotProps)
+  }
+
+  _showSnapshot = (snapshot, snapshotProps) => {
+    this.state.messageTitle = 'DOM Snapshot'
+    this.state.messageDescription = snapshot.name
+    this.state.messageType = ''
+
+    this.restoreDom(snapshot)
+
+    if (snapshotProps.$el) {
+      this.highlightEl(snapshot, snapshotProps)
+    }
   }
 
   _clearSnapshots = () => {
@@ -152,19 +153,23 @@ export default class IframeModel {
   _pinSnapshot = (snapshotProps) => {
     const { snapshots } = snapshotProps
 
-    if (this.state.isRunning || !snapshots) {
+    if (!snapshots || !snapshots.length) {
       return
     }
 
+    clearInterval(this.intervalId)
+
     this.isSnapshotPinned = true
     this.state.messageTitle = 'DOM Snapshot (pinned)'
-    this.state.messageType = 'info'
+    this.state.messageControls = this.snapshotControls(snapshotProps)
   }
 
   _unpinSnapshot = () => {
     this.isSnapshotPinned = false
     this.state.messageTitle = 'DOM Snapshot'
-    this.state.messageType = ''
+    this.state.messageControls = null
+    this.state.snapshot.showingHighlights = true
+    this._clearSnapshots()
   }
 
   _testsRunningError () {

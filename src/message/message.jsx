@@ -7,12 +7,26 @@ export default observer(({ state }) => {
 
   const title = state.messageDescription ? `${state.messageTitle}: ` : state.messageTitle
 
+  function controls () {
+    if (!state.messageControls) return null
+
+    return (
+      <div className='message-controls'>
+        {state.messageControls}
+      </div>
+    )
+  }
+
   return (
-    <div className='message-container' style={state.messageStyles}>
-      <p className={cs('message', state.messageType)}>
+    <div
+      className={`message-container message-${state.messageStyles.state}`}
+      style={state.messageStyles.styles}
+    >
+      <div className={cs('message', state.messageType)}>
         <span className='title'>{title}</span>
         <span className='description'>{state.messageDescription}</span>
-      </p>
+      </div>
+      {controls()}
     </div>
   )
 })
