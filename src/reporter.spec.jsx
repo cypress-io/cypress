@@ -7,7 +7,6 @@ import Reporter from './reporter'
 import Header from './header/header'
 import Runnables from './runnables/runnables'
 
-const appState = {}
 const runnablesStore = {}
 const scroller = {}
 const statsStore = {}
@@ -16,7 +15,9 @@ const getProps = (props) => {
     autoScrollingEnabled: true,
     runner: { emit: () => {}, on: () => {} },
     specPath: 'the spec path',
-    appState,
+    appState: {
+      setAutoScrolling: sinon.spy(),
+    },
     runnablesStore,
     scroller,
     statsStore,
@@ -31,8 +32,14 @@ const eventsStub = () => ({
 describe('<Reporter />', () => {
   it('initializes the events with the app state, runnables store, scroller, and stats store', () => {
     const events = eventsStub()
-    shallow(<Reporter {...getProps({ events })} />)
-    expect(events.init).to.have.been.calledWith({ appState, runnablesStore, scroller, statsStore })
+    const props = getProps({ events })
+    shallow(<Reporter {...props} />)
+    expect(events.init).to.have.been.calledWith({
+      appState: props.appState,
+      runnablesStore,
+      scroller,
+      statsStore,
+    })
   })
 
   it('sets appState.autoScrollingEnabled', () => {
@@ -41,7 +48,7 @@ describe('<Reporter />', () => {
       autoScrollingEnabled: false,
     })
     shallow(<Reporter {...props} />)
-    expect(appState.setAutoScrolling).to.have.been.calledWith(false)
+    expect(props.appState.setAutoScrolling).to.have.been.calledWith(false)
   })
 
   it('tells events to listen to runner', () => {
