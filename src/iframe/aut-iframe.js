@@ -176,7 +176,7 @@ export default class AutIframe {
       // if it only has margin and zero content height / width
       const dimensions = getOuterSize(el)
       // dont show anything if our element displaces nothing
-      if (dimensions.width === 0 || dimensions.height === 0) return
+      if (dimensions.width === 0 || dimensions.height === 0 || el.css('display') === 'none') return
 
       getElementBoxModelLayers(el, dom).attr('data-highlight-el', true)
     })
