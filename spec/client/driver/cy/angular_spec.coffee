@@ -126,6 +126,32 @@ describe "$Cypress.Cy Angular Commands", ->
 
           @cy.ng("repeater", "phone in phones")
 
+      describe "log", ->
+        beforeEach ->
+          @chai = $Cypress.Chai.create(@Cypress, {})
+
+        afterEach ->
+          @chai.restore()
+
+        it "does not incorrectly merge 2nd assertion into 1st", ->
+          logs = []
+
+          span = @cy.$$(".name")
+
+          @Cypress.on "log", (attrs, log) ->
+            if log.get("name") is "assert"
+              logs.push(log)
+
+          @cy
+            .ng("repeater", "foo in foos").should("have.length", 2)
+            .url().should("include", ":")
+            .then =>
+              @chai.restore()
+
+              expect(logs).to.have.length(2)
+              expect(logs[0].get("state")).to.eq("passed")
+              expect(logs[1].get("state")).to.eq("passed")
+
     context "find by model", ->
       ngPrefixes = {query: 'ng-', query2: 'ng_', query3: 'data-ng-', query4: 'x-ng-'}
 
