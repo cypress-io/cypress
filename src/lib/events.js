@@ -73,6 +73,10 @@ export default {
       })
     })
 
+    runner.on('reporter:snapshot:unpinned', action('snapshot:unpinned', () => {
+      appState.pinnedSnapshotId = null
+    }))
+
     localBus.on('resume', action('resume', () => {
       appState.resume()
       statsStore.resume()

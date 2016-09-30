@@ -177,6 +177,12 @@ describe('events', () => {
         scrollTop: 321,
       })
     })
+
+    it('nullifies the appState pinned snapshot id on reporter:snapshot:unpinned', () => {
+      appState.pinnedSnapshotId = 'c1'
+      runner.on.withArgs('reporter:snapshot:unpinned').callArgWith(1)
+      expect(appState.pinnedSnapshotId).to.be.null
+    })
   })
 
   context('from local bus', () => {
