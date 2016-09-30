@@ -146,11 +146,11 @@ export default class IframeModel {
   }
 
   _storeOriginalState () {
-    const { body, htmlClasses, headStyles, bodyStyles } = this.detachDom()
+    const { body, htmlAttrs, headStyles, bodyStyles } = this.detachDom()
 
     this.originalState = {
       body,
-      htmlClasses,
+      htmlAttrs,
       headStyles,
       bodyStyles,
       url: this.state.url,

@@ -37,21 +37,26 @@ export default class AutIframe {
   detachDom = () => {
     const contents = this._contents()
     const { headStyles, bodyStyles } = Cypress.getStyles()
+    const htmlAttrs = _.transform(contents.find('html')[0].attributes, (memo, attr) => {
+      if (attr.specified) {
+        memo[attr.name] = attr.value
+      }
+    }, {})
     const $body = contents.find('body')
     $body.find('script,link[rel="stylesheet"],style').remove()
     return {
       body: $body.detach(),
-      htmlClasses: contents.find('html')[0].className,
+      htmlAttrs,
       headStyles,
       bodyStyles,
     }
   }
 
-  restoreDom = ({ body, htmlClasses, headStyles, bodyStyles }) => {
+  restoreDom = ({ body, htmlAttrs, headStyles, bodyStyles }) => {
     const contents = this._contents()
 
     const $html = contents.find('html')
-    $html[0].className = htmlClasses
+    this._replaceHtmlAttrs($html, htmlAttrs)
 
     this._replaceHeadStyles(headStyles)
 
@@ -59,6 +64,19 @@ export default class AutIframe {
     contents.find('body').remove()
     this._insertBodyStyles(body, bodyStyles)
     $html.append(body)
+  }
+
+  _replaceHtmlAttrs ($html, htmlAttrs) {
+    // remove all attributes
+    const oldAttrs = _.map($html[0].attributes, (attr) => attr.name)
+    _.each(oldAttrs, (attr) => {
+      $html.removeAttr(attr)
+    })
+
+    // set the ones specified
+    _.each(htmlAttrs, (value, key) => {
+      $html.attr(key, value)
+    })
   }
 
   _replaceHeadStyles (styles) {
