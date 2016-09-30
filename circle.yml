@@ -7,12 +7,17 @@ test:
     - npm run build
 
   override:
-    - npm run test-unit-once:
+    ## run 'test-unit-once' and 'test-integration-once'
+    ## on the 1st container
+    - case $CIRCLE_NODE_INDEX in 0) npm run test-unit-once ;; esac:
         parallel: true
-    - npm run test-integration-once:
+    - case $CIRCLE_NODE_INDEX in 0) npm run test-integration-once ;; esac:
         parallel: true
-    - npm run test-e2e-once:
+
+    ## run 'test-e2e-once' on the 2nd container
+    - case $CIRCLE_NODE_INDEX in 1) npm run test-e2e-once ;; esac:
         parallel: true
+
   #   - npm run test-cov
   #   - npm run codecov
   #   - npm run coveralls
