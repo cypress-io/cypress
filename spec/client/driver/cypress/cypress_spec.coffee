@@ -119,15 +119,11 @@ describe "$Cypress API", ->
         expect(aborted).to.be.true
         done()
 
-    it "calls #restore with {checkForEndedEarly: false}", (done) ->
+    it "calls #restore", ->
       restore = @sandbox.spy @Cypress, "restore"
 
-      @Cypress.on "restore", _.once (options) ->
-        expect(options).to.deep.eq({checkForEndedEarly: false})
-        done()
-
       @Cypress.abort().then ->
-        expect(restore).to.be.calledWith({checkForEndedEarly: false})
+        expect(restore).to.be.calledOnce
 
   describe "#initialize", ->
     beforeEach ->
@@ -220,12 +216,12 @@ describe "$Cypress API", ->
       @Cypress.config({foo: "baz", bar: "baz"})
       expect(@Cypress.config()).to.deep.eq({foo: "baz", bar: "baz"})
 
-  describe "#window", ->
+  describe "#onSpecWindow", ->
     beforeEach ->
       _.each ["Cy", "Chai", "Mocha", "Runner"], (klass) =>
         @sandbox.stub(@Cypress[klass], "create").returns(klass)
 
-      @Cypress.window({})
+      @Cypress.onSpecWindow({})
 
     it "creates cy", ->
       expect(@Cypress.Cy.create).to.be.calledWith(@Cypress, {})

@@ -40,6 +40,14 @@ describe "$Cypress.Log API", ->
       expect(@log.get("state")).to.eq "failed"
       expect(@log.get("error")).to.eq err
 
+    it "#error sets ended true and cannot be set back to passed", ->
+      err = new Error
+      @log.error(err)
+      expect(@log.get("ended")).to.be.true
+      @log.end()
+      expect(@log.get("state")).to.eq "failed"
+      expect(@log.get("error")).to.eq err
+
     it "#error triggers log:state:changed", (done) ->
       @Cypress.on "log:state:changed", (attrs) ->
         expect(attrs.state).to.eq "failed"
@@ -183,6 +191,7 @@ describe "$Cypress.Log API", ->
         expect(@log.toJSON()).to.deep.eq({
           id: @log.get("id")
           state: "failed"
+          ended: true
           err: {
             message: err.message
             name: err.name
@@ -206,6 +215,7 @@ describe "$Cypress.Log API", ->
         expect(@log.toJSON()).to.deep.eq({
           id: @log.get("id")
           state: "failed"
+          ended: true
           err: {
             message: err.message
             name: err.name

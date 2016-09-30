@@ -171,7 +171,7 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       @Cypress.start()
 
       ## instantiate @cy directly here which simulates
-      ## what Cypress.window() does under the hood. we want
+      ## what Cypress.onSpecWindow() does under the hood. we want
       ## to test cy in isolation here away from the Mocha
       ## and Runner and Chai overrides
       @cy = $Cypress.Cy.create(@Cypress, {})

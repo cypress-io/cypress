@@ -66,7 +66,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## why arent we listening to "defaults" here?
       ## instead we are manually hard coding them
       @listenTo @Cypress, "stop",       => @stop()
-      @listenTo @Cypress, "restore",    => @restore.apply(@, arguments)
+      @listenTo @Cypress, "restore",    => @restore()
       @listenTo @Cypress, "abort",      => @abort()
       @listenTo @Cypress, "test:after:hooks", (test) => @checkTestErr(test)
 
