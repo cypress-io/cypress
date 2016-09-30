@@ -162,19 +162,21 @@ export default class IframeModel {
 
     this.isSnapshotPinned = true
     this.restoreDom(snapshots[0])
-    this.state.messageTitle = 'DOM Snapshot (pinned)'
-    this.state.messageDescription = snapshots[0].name
+    this.state.messageTitle = 'DOM Snapshot'
+    this.state.messageDescription = 'pinned'
     this.state.messageControls = this.snapshotControls(snapshotProps)
   }
 
   _setMissingSnapshotMessage () {
     this.state.messageTitle = 'The snapshot is missing. Displaying current state of the DOM.'
+    this.state.messageDescription = ''
     this.state.messageType = 'warning'
   }
 
   _unpinSnapshot = () => {
     this.isSnapshotPinned = false
     this.state.messageTitle = 'DOM Snapshot'
+    this.state.messageDescription = ''
     this.state.messageControls = null
     this.state.snapshot.showingHighlights = true
     this.state.snapshot.stateIndex = 0

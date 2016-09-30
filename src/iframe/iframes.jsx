@@ -114,7 +114,6 @@ export default class Iframes extends Component {
   _changeSnapshotState = (snapshotProps, index) => {
     const snapshot = snapshotProps.snapshots[index]
     this.props.state.snapshot.stateIndex = index
-    this.props.state.messageDescription = snapshot.name
     this.autIframe.restoreDom(snapshot)
     if (!this.props.state.snapshot.showingHighlights) {
       this.autIframe.removeHighlights()
