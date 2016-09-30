@@ -32,6 +32,7 @@ A fixture in Cypress is a fixed set of data located in a file that is used as a 
 | `.json` |
 | `.png` |
 | `.txt` |
+| `.csv` |
 | `.tif` |
 | `.tiff` |
 | `.zip` |
