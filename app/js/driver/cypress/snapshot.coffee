@@ -54,10 +54,14 @@ do ($Cypress, _) ->
       ## now remove it after we clone
       $el.removeAttr(@highlightAttr) if $el?.removeAttr
 
-      ## preserve classes on the <html> tag
-      htmlClasses = @cy.$$("html")[0].className
+      ## preserve attributes on the <html> tag
+      htmlAttrs = _.reduce @cy.$$("html")[0].attributes, (memo, attr) ->
+        if attr.specified
+          memo[attr.name] = attr.value
+        memo
+      , {}
 
-      return {body, htmlClasses, headStyles, bodyStyles}
+      return {body, htmlAttrs, headStyles, bodyStyles}
 
     ## careful renaming or removing this method, the runner depends on it
     getStyles: ->

@@ -24,10 +24,17 @@ describe "$Cypress.Cy Snapshot Extension", ->
       expect(body.find("style")).not.to.exist
 
     it "preserves classes on the <html> tag", ->
-      @cy.$$("html").addClass("foo bar")
+      $html = @cy.$$("html")
+      $html.addClass("foo bar")
+      $html[0].id = "baz"
+      $html.css("margin", "10px")
 
-      {htmlClasses} = @Cypress.createSnapshot(@el)
-      expect(htmlClasses).to.equal("foo bar")
+      {htmlAttrs} = @Cypress.createSnapshot(@el)
+      expect(htmlAttrs).to.eql({
+        class: "foo bar"
+        id: "baz"
+        style: "margin: 10px;"
+      })
 
     it "provides contents of style tags in head", ->
       $("<style>.foo { color: red }</style>").appendTo(@cy.$$("head"))

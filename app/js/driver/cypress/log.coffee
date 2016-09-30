@@ -252,12 +252,12 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         at: null
         next: null
 
-      {body, htmlClasses, headStyles, bodyStyles} = @Cypress.createSnapshot(@get("$el"))
+      {body, htmlAttrs, headStyles, bodyStyles} = @Cypress.createSnapshot(@get("$el"))
 
       obj = {
         name: name
         body: body
-        htmlClasses: htmlClasses
+        htmlAttrs: htmlAttrs
         headStyles: headStyles
         bodyStyles: bodyStyles
       }

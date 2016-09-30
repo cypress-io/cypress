@@ -515,7 +515,14 @@ describe "$Cypress.Log API", ->
 
     describe "#snapshot", ->
       beforeEach ->
-        @sandbox.stub(@Cypress, "createSnapshot").returns({})
+        @sandbox.stub(@Cypress, "createSnapshot").returns({
+          body: "body"
+          htmlAttrs: {
+            class: "foo"
+          }
+          headStyles: ["body { background: red }"]
+          bodyStyles: ["body { margin: 10px }"]
+        })
 
       it "can set multiple snapshots", ->
         @log.snapshot()
@@ -558,6 +565,28 @@ describe "$Cypress.Log API", ->
         expect(snapshots[0].name).to.eq("before")
         expect(snapshots[1].name).to.eq("after")
         expect(snapshots[2].name).to.eq("third")
+
+      it "includes html attributes", ->
+        @log.snapshot()
+        snapshots = @log.get("snapshots")
+        expect(snapshots[0].htmlAttrs).to.eql({
+          class: "foo"
+        })
+
+      it "includes head styles", ->
+        @log.snapshot()
+        snapshots = @log.get("snapshots")
+        expect(snapshots[0].headStyles).to.eql(["body { background: red }"])
+
+      it "includes body", ->
+        @log.snapshot()
+        snapshots = @log.get("snapshots")
+        expect(snapshots[0].body).to.equal("body")
+
+      it "includes body styles", ->
+        @log.snapshot()
+        snapshots = @log.get("snapshots")
+        expect(snapshots[0].bodyStyles).to.eql(["body { margin: 10px }"])
 
   describe "class methods", ->
     enterCommandTestingMode()
