@@ -190,6 +190,7 @@ describe "$Cypress.Log API", ->
           }
           consoleProps: {  }
           renderProps: {  }
+          ended: true
         })
 
       it "defaults consoleProps with error stack", ->
@@ -216,6 +217,7 @@ describe "$Cypress.Log API", ->
             foo: "bar"
           }
           renderProps: {  }
+          ended: true
         })
 
       it "sets $el", ->
