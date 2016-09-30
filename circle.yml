@@ -4,7 +4,8 @@ machine:
 
 test:
   pre:
-    - npm run build
+    - npm run build:
+        parallel: true
 
   override:
     ## run 'test-unit-once' and 'test-integration-once'
