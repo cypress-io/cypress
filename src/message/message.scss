@@ -1,5 +1,7 @@
 .runner {
   .message-container {
+    display: flex;
+    justify-content: center;
     left: 0;
     padding-bottom: 10px;
     position: absolute;
@@ -22,7 +24,6 @@
   .message,
   .message-controls {
     border-radius: 5px;
-    display: inline-block;
     height: $message-height;
     line-height: $message-height;
   }

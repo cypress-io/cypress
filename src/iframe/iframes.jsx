@@ -58,7 +58,8 @@ export default class Iframes extends Component {
           runner={runner}
           snapshotProps={snapshotProps}
           state={this.props.state}
-          onToggleHighlights={this._toggleHighlights}
+          onToggleHighlights={this._toggleSnapshotHighlights}
+          onStateChange={this._changeSnapshotState}
         />
       ),
     })
@@ -99,13 +100,23 @@ export default class Iframes extends Component {
     })
   }
 
-  _toggleHighlights = (snapshotProps) => {
+  _toggleSnapshotHighlights = (snapshotProps) => {
     this.props.state.snapshot.showingHighlights = !this.props.state.snapshot.showingHighlights
 
     if (this.props.state.snapshot.showingHighlights) {
-      // TODO: this will need to use state.currentSnapshot or whatever
-      this.autIframe.highlightEl(snapshotProps.snapshots[0], snapshotProps)
+      const snapshot = snapshotProps.snapshots[this.props.state.snapshot.stateIndex]
+      this.autIframe.highlightEl(snapshot, snapshotProps)
     } else {
+      this.autIframe.removeHighlights()
+    }
+  }
+
+  _changeSnapshotState = (snapshotProps, index) => {
+    const snapshot = snapshotProps.snapshots[index]
+    this.props.state.snapshot.stateIndex = index
+    this.props.state.messageDescription = snapshot.name
+    this.autIframe.restoreDom(snapshot)
+    if (!this.props.state.snapshot.showingHighlights) {
       this.autIframe.removeHighlights()
     }
   }

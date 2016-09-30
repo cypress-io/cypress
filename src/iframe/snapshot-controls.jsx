@@ -14,13 +14,13 @@ class SnapshotControls extends Component {
           'showing-selection': this.props.state.snapshot.showingHighlights,
         })}
       >
-        <Tooltip title='Unpin'>
-          <button className='unpin' onClick={this._unpin}>
-            <i className='fa fa-thumb-tack' />
-          </button>
-        </Tooltip>
         {this._selectionToggle()}
         {this._states()}
+        <Tooltip title='Unpin'>
+          <button className='unpin' onClick={this._unpin}>
+            <i className='fa fa-close' />
+          </button>
+        </Tooltip>
       </span>
     )
   }
@@ -31,7 +31,7 @@ class SnapshotControls extends Component {
     const showingHighlights = this.props.state.snapshot.showingHighlights
 
     return (
-      <Tooltip title={`${showingHighlights ? 'Hide' : 'Show'} highlights`}>
+      <Tooltip title={`${showingHighlights ? 'Showing' : 'Hiding'} highlights`}>
         <button className='toggle-selection' onClick={this._toggleHighlights}>
           <i className='fa fa-object-group' />
         </button>
@@ -48,7 +48,14 @@ class SnapshotControls extends Component {
       <span className='snapshot-state-picker'>
         <span>State:</span>
         {_.map(snapshots, (snapshot, index) => (
-          <button key={snapshot.name || index} href="#">
+          <button
+            className={cs({
+              'state-is-selected': this.props.state.snapshot.stateIndex === index,
+            })}
+            key={snapshot.name || index}
+            href="#"
+            onClick={this._changeState(index)}
+          >
             {snapshot.name || index + 1}
           </button>
         ))}
@@ -63,6 +70,10 @@ class SnapshotControls extends Component {
   @action _toggleHighlights = () => {
     this.props.onToggleHighlights(this.props.snapshotProps)
   }
+
+  _changeState = (index) => action('change:snapshot:state', () => {
+    this.props.onStateChange(this.props.snapshotProps, index)
+  })
 }
 
 export default SnapshotControls

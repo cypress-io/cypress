@@ -23,7 +23,7 @@ export default class State {
 
   @observable snapshot = {
     showingHighlights: true,
-    state: null,
+    stateIndex: 0,
   }
 
   @observable url = ''

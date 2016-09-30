@@ -68,10 +68,9 @@ export default class IframeModel {
 
     const { snapshots } = snapshotProps
 
-    if (!snapshots) {
+    if (!snapshots || !snapshots.length) {
       this._clearSnapshots()
-      this.state.messageTitle = 'The snapshot is missing. Displaying current state of the DOM.'
-      this.state.messageType = 'warning'
+      this._setMissingSnapshotMessage()
       return
     }
 
@@ -154,14 +153,23 @@ export default class IframeModel {
     const { snapshots } = snapshotProps
 
     if (!snapshots || !snapshots.length) {
+      runner.snapshotUnpinned()
+      this._setMissingSnapshotMessage()
       return
     }
 
     clearInterval(this.intervalId)
 
     this.isSnapshotPinned = true
+    this.restoreDom(snapshots[0])
     this.state.messageTitle = 'DOM Snapshot (pinned)'
+    this.state.messageDescription = snapshots[0].name
     this.state.messageControls = this.snapshotControls(snapshotProps)
+  }
+
+  _setMissingSnapshotMessage () {
+    this.state.messageTitle = 'The snapshot is missing. Displaying current state of the DOM.'
+    this.state.messageType = 'warning'
   }
 
   _unpinSnapshot = () => {
@@ -169,6 +177,7 @@ export default class IframeModel {
     this.state.messageTitle = 'DOM Snapshot'
     this.state.messageControls = null
     this.state.snapshot.showingHighlights = true
+    this.state.snapshot.stateIndex = 0
     this._clearSnapshots()
   }
 
