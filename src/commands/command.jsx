@@ -123,6 +123,7 @@ class Command extends Component {
     if (this._isPinned()) {
       this.props.appState.pinnedSnapshotId = null
       this.props.events.emit('unpin:snapshot', id)
+      this._snapshot(true)
     } else {
       this.props.appState.pinnedSnapshotId = id
       this.props.events.emit('pin:snapshot', id)

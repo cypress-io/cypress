@@ -249,12 +249,21 @@ describe('<Command />', () => {
       let events
       let clickEvent
       let component
+      let runnablesStore
 
       beforeEach(() => {
         appState = appStateStub()
         events = eventsStub()
         clickEvent = { stopPropagation: sinon.spy() }
-        component = shallow(<Command model={model()} events={events} appState={appState} />)
+        runnablesStore = runnablesStoreStub()
+        component = shallow(
+          <Command
+            model={model()}
+            events={events}
+            appState={appState}
+            runnablesStore={runnablesStore}
+          />
+        )
         component.find('Tooltip').first().find('.command-pin').simulate('click', clickEvent)
       })
 
@@ -281,6 +290,10 @@ describe('<Command />', () => {
 
         it('emits the unpin:snapshot event with the model id', () => {
           expect(events.emit).to.have.been.calledWith('unpin:snapshot', 'c1')
+        })
+
+        it('attempts to show the snapshot', () => {
+          expect(runnablesStore.attemptingShowSnapshot).to.be.true
         })
       })
     })
