@@ -10,13 +10,10 @@ test:
     ## run 'test-unit-once' and 'test-integration-once'
     ## on the 1st container
     - case $CIRCLE_NODE_INDEX in 0) npm run test-unit-once ;; esac:
-        parallel: true
     - case $CIRCLE_NODE_INDEX in 0) npm run test-integration-once ;; esac:
-        parallel: true
 
     ## run 'test-e2e-once' on the 2nd container
     - case $CIRCLE_NODE_INDEX in 1) npm run test-e2e-once ;; esac:
-        parallel: true
 
   #   - npm run test-cov
   #   - npm run codecov
