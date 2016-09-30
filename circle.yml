@@ -7,9 +7,12 @@ test:
     - npm run build
 
   override:
-    - npm run test-unit-once
-    - npm run test-integration-once
-    - npm run test-e2e-once
+    - npm run test-unit-once:
+        parallel: true
+    - npm run test-integration-once:
+        parallel: true
+    - npm run test-e2e-once:
+        parallel: true
   #   - npm run test-cov
   #   - npm run codecov
   #   - npm run coveralls
