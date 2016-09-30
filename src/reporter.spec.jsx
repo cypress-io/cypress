@@ -58,6 +58,20 @@ describe('<Reporter />', () => {
     expect(events.listen).to.have.been.calledWith(props.runner)
   })
 
+  it('renders with is-running class when running', () => {
+    const props = getProps()
+    props.appState.isRunning = true
+    const component = shallow(<Reporter {...props} />)
+    expect(component).to.have.className('is-running')
+  })
+
+  it('renders without is-running class when not running', () => {
+    const props = getProps()
+    props.appState.isRunning = false
+    const component = shallow(<Reporter {...props} />)
+    expect(component).not.to.have.className('is-running')
+  })
+
   it('renders the header with the stats store', () => {
     const component = shallow(<Reporter {...getProps()} />)
     expect(component.find(Header)).to.have.prop('statsStore', statsStore)

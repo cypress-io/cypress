@@ -427,7 +427,7 @@
     &,
     &:hover {
       background-color: #c7cfd2;
-      box-shadow: 0 1px 2px #aaa inset;      
+      box-shadow: 0 1px 2px #aaa inset;
     }
 
     .command-pin i {
@@ -435,6 +435,7 @@
     }
   }
 
+  &.is-running .command,
   .command-other-pinned {
     .command-number {
       display: block !important;
