@@ -168,7 +168,8 @@ class Project extends EE
       onConnect: (id) =>
         @emit("socket:connected", id)
 
-      onSetRunnables: reporter?.setRunnables
+      onSetRunnables: (runnables) ->
+        reporter?.setRunnables(runnables)
 
       onMocha: (event, runnable) =>
         ## bail if we dont have a

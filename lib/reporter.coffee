@@ -37,6 +37,9 @@ createRunnable = (obj, parent) ->
 mergeRunnable = (testProps, runnables) ->
   _.extend(runnables[testProps.id], testProps)
 
+safelyMergeRunnable = (testProps, runnables) ->
+  _.extend({}, mergeRunnable(testProps, runnables))
+
 createHook = (props, runnables) ->
   createRunnable(props, runnables[props.id])
 
@@ -52,8 +55,8 @@ events = {
   "suite end": mergeRunnable
   "test":      mergeRunnable
   "test end":  mergeRunnable
-  "hook":      createHook
-  "hook end":  createHook
+  "hook":      safelyMergeRunnable
+  "hook end":  safelyMergeRunnable
   "pass":      mergeRunnable
   "pending":   mergeRunnable
   "fail":      mergeErr
@@ -73,7 +76,7 @@ class Reporter
     @projectRoot = projectRoot
     @reporterOptions = reporterOptions
 
-  setRunnables: (rootRunnable) =>
+  setRunnables: (rootRunnable) ->
     @runnables = {}
     rootRunnable = @_createRunnable(rootRunnable, "suite")
 
@@ -99,16 +102,19 @@ class Reporter
 
     @runner.ignoreLeaks = true
 
-  _createRunnable: (runnableProps, type, parent) =>
-    runnable = if type is "suite"
-      suite = createSuite(runnableProps, parent)
-      suite.tests = _.map runnableProps.tests, (testProps) =>
-        @_createRunnable(testProps, "test", suite)
-      suite.suites = _.map runnableProps.suites, (suiteProps) =>
-        @_createRunnable(suiteProps, "suite", suite)
-      suite
-    else
-      createRunnable(runnableProps, parent)
+  _createRunnable: (runnableProps, type, parent) ->
+    runnable = switch type
+      when "suite"
+        suite = createSuite(runnableProps, parent)
+        suite.tests = _.map runnableProps.tests, (testProps) =>
+          @_createRunnable(testProps, "test", suite)
+        suite.suites = _.map runnableProps.suites, (suiteProps) =>
+          @_createRunnable(suiteProps, "suite", suite)
+        suite
+      when "test"
+        createRunnable(runnableProps, parent)
+      else
+        throw new Error("Unknown runnable type: '#{type}'")
 
     @runnables[runnableProps.id] = runnable
     return runnable
