@@ -16,6 +16,7 @@ errors        = require("./errors")
 logger        = require("./logger")
 launcher      = require("./launcher")
 automation    = require("./automation")
+savedState    = require("./saved_state")
 
 existingState = null
 
@@ -167,6 +168,7 @@ class Socket
     _.defaults options,
       socketId: null
       onAutomationRequest: null
+      onSetRunnables: ->
       onMocha: ->
       onConnect: ->
       onResolveUrl: ->
@@ -175,6 +177,7 @@ class Socket
       onChromiumRun: ->
       onReloadBrowser: ->
       checkForAppErrors: ->
+      onSavedStateChanged: ->
 
     messages = {}
 
@@ -301,6 +304,10 @@ class Socket
       socket.on "app:connect", (socketId) ->
         options.onConnect(socketId, socket)
 
+      socket.on "set:runnables", (runnables, cb) =>
+        options.onSetRunnables(runnables)
+        cb()
+
       socket.on "mocha", =>
         options.onMocha.apply(options, arguments)
 
@@ -369,6 +376,10 @@ class Socket
         launcher.launch("chrome", "http://localhost:2020/__#" + p, {
           host: "http://localhost:2020"
         })
+
+      socket.on "save:app:state", (state) ->
+        savedState.set(state).then ->
+          options.onSavedStateChanged()
 
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>

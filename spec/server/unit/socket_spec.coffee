@@ -16,6 +16,7 @@ Watchers     = require("#{root}lib/watchers")
 automation   = require("#{root}lib/automation")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
 exec         = require("#{root}lib/exec")
+savedState   = require("#{root}lib/saved_state")
 
 describe "lib/socket", ->
   beforeEach ->
@@ -37,7 +38,9 @@ describe "lib/socket", ->
       ## so we can test server emit / client emit events
       @server.open(@cfg)
       .then =>
-        @options = {}
+        @options = {
+          onSavedStateChanged: @sandbox.spy()
+        }
         @watchers = {}
         @server.startWebsockets(@watchers, @cfg, @options)
         @socket = @server._socket
@@ -451,7 +454,7 @@ describe "lib/socket", ->
           expect(obj).to.have.property("__error", "Error: connect ECONNREFUSED 127.0.0.1:1111")
 
     context "on(exec)", ->
-      it "calls exit#run with project root and options", (done) ->
+      it "calls exec#run with project root and options", (done) ->
         run = @sandbox.stub(exec, "run").returns(Promise.resolve("Desktop Music Pictures"))
 
         @client.emit "exec", { cmd: "ls" }, (resp) =>
@@ -467,6 +470,20 @@ describe "lib/socket", ->
         @client.emit "exec", { cmd: "lsd" }, (resp) =>
           expect(resp.__error).to.equal("command not found: lsd")
           expect(resp.timedout).to.be.true
+          done()
+
+    context "on(save:app:state)", ->
+      beforeEach ->
+        @setState = @sandbox.stub(savedState, "set").returns(Promise.resolve())
+
+      it "calls savedState#set with the state", ->
+        @client.emit "save:app:state", { reporterWidth: 500 }, =>
+          expect(@setState).to.be.calledWith({ reporterWidth: 500 })
+          done()
+
+      it "calls onSavedStateChanged", ->
+        @client.emit "save:app:state", { reporterWidth: 235 }, =>
+          expect(@options.onSavedStateChanged).to.have.been.called
           done()
 
   context "unit", ->

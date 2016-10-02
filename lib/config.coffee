@@ -11,7 +11,7 @@ cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
 folders = "fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder unitFolder".split(" ")
-configKeys = "port reporter baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables hosts".split(" ")
+configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables hosts".split(" ")
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
@@ -24,6 +24,7 @@ defaults = {
   socketId:       null
   isHeadless:     false
   reporter:       "spec"
+  reporterOptions: null
   clientRoute:    "/__/"
   xhrRoute:       "/xhrs/"
   socketIoRoute:  "/__socket.io"

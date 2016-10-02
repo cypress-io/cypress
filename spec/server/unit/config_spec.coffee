@@ -268,6 +268,7 @@ describe "lib/config", ->
           port:                       { value: 1234, from: "cli" },
           hosts:                      { value: null, from: "default" }
           reporter:                   { value: "json", from: "cli" },
+          reporterOptions:            { value: null, from: "default" },
           baseUrl:                    { value: null, from: "default" },
           defaultCommandTimeout:      { value: 4000, from: "default" },
           pageLoadTimeout:            { value: 30000, from: "default" },
@@ -314,6 +315,7 @@ describe "lib/config", ->
           port:                       { value: 2020, from: "config" },
           hosts:                      { value: null, from: "default" }
           reporter:                   { value: "spec", from: "default" },
+          reporterOptions:            { value: null, from: "default" },
           baseUrl:                    { value: "http://localhost:8080", from: "config" },
           defaultCommandTimeout:      { value: 4000, from: "default" },
           pageLoadTimeout:            { value: 30000, from: "default" },

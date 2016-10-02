@@ -101,6 +101,12 @@ module.exports = {
     if options.debug
       args.push("--show-headless-gui")
 
+    if options.reporter
+      args.push("--reporter=#{options.reporter}")
+
+    if options.reporterOptions
+      args.push("--reporter-options=#{options.reporterOptions}")
+
     if browser = env.BROWSER
       args.push("--browser=#{browser}")
 
