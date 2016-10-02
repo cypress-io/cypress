@@ -176,3 +176,9 @@ npm start -- --silent &
 ```text
 cypress ci
 ```
+
+***
+
+# Related
+
+- [Reporters](https://on.cypress.io/guides/reporters)

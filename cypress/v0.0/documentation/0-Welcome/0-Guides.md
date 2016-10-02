@@ -32,6 +32,7 @@ excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 | [Using Aliases](https://on.cypress.io/guides/using-aliases) | Represent an object as alias |
 | [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures) | Mock data in fixtures |
 | [Bundled Tools](https://on.cypress.io/guides/bundled-tools) | What is Cypress built on |
+| [Reporters](https://on.cypress.io/guides/reporters) | Customize test results with reporters |
 
 | References | |
 | -------------------- | -- |
