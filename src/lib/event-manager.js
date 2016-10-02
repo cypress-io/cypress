@@ -131,7 +131,7 @@ export default {
           runner.resumeAtTest(state.currentId, state.emissions)
         }
 
-        if (config.isHeadless) {
+        if (config.isHeadless && !state.currentId) {
           channel.emit('set:runnables', runnables, run)
         } else {
           run()
