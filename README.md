@@ -31,6 +31,16 @@ npm test
 
 ## Changelog
 
+#### 0.1.16 - *(09/26/16)*
+- publish with correct (prod) version of reporter
+
+#### 0.1.15 - *(09/23/16)*
+- reset action hit box box model styles
+- improve snapshot css handling
+
+#### 0.1.14 - *(09/19/16)*
+- prevent snapshot from cycling when there's only one
+
 #### 0.1.13 - *(09/13/16)*
 - build prod version of reporter
 

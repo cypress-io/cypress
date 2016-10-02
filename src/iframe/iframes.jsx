@@ -47,8 +47,9 @@ export default class Iframes extends Component {
     eventManager.start(this.props.config)
 
     this.iframeModel = new IframeModel(this.props.state, {
-      detachBody: this.autIframe.detachBody,
-      setBody: this.autIframe.setBody,
+      detachDom: this.autIframe.detachDom,
+      removeHeadStyles: this.autIframe.removeHeadStyles,
+      restoreDom: this.autIframe.restoreDom,
       highlightEl: this.autIframe.highlightEl,
     })
     this.iframeModel.listen()

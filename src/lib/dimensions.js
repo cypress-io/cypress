@@ -2,6 +2,12 @@
 
 import _ from 'lodash'
 
+const resetStyles = `
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+`
+
 function getHitBoxLayer (coords, body) {
   if (body == null) {
     body = $('body')
@@ -19,28 +25,34 @@ function getHitBoxLayer (coords, body) {
   const dotTop  = height / 2 - dotHeight / 2
   const dotLeft = width / 2 - dotWidth / 2
 
-  const box = $('<div>', { style: `
-    position: absolute;
-    top: ${top}px;
-    left: ${left}px;
-    width: ${width}px;
-    height: ${height}px;
-    background-color: red;
-    border-radius: 5px;
-    box-shadow: 0 0 5px #333;
-    z-index: 2147483647;
-  ` })
-  const wrapper = $('<div>', { style: 'position: relative' }).appendTo(box)
-  $('<div>', { style: `
-    position: absolute;
-    top: ${dotTop}px;
-    left: ${dotLeft}px;
-    height: ${dotHeight}px;
-    width: ${dotWidth}px;
-    height: ${dotHeight}px;
-    background-color: pink;
-    border-radius: 5px;
-  ` }).appendTo(wrapper)
+  const box = $('<div>', {
+    style: `
+      ${resetStyles}
+      position: absolute;
+      top: ${top}px;
+      left: ${left}px;
+      width: ${width}px;
+      height: ${height}px;
+      background-color: red;
+      border-radius: 5px;
+      box-shadow: 0 0 5px #333;
+      z-index: 2147483647;
+    `,
+  })
+  const wrapper = $('<div>', { style: `${resetStyles} position: relative` }).appendTo(box)
+  $('<div>', {
+    style: `
+      ${resetStyles}
+      position: absolute;
+      top: ${dotTop}px;
+      left: ${dotLeft}px;
+      height: ${dotHeight}px;
+      width: ${dotWidth}px;
+      height: ${dotHeight}px;
+      background-color: pink;
+      border-radius: 5px;
+  `,
+  }).appendTo(wrapper)
 
   return box.appendTo(body)
 }
@@ -223,7 +235,6 @@ function getMargin (el, dir) {
 function getTotalFor (directions, dimensions) {
   return _.reduce(directions, (memo, direction) => memo + dimensions[direction], 0)
 }
-
 
 function getOuterSize (el) {
   return {
