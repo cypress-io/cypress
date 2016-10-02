@@ -2,7 +2,7 @@ import { observer } from 'mobx-react'
 import React, { Component, PropTypes } from 'react'
 
 import automation from '../lib/automation'
-import runner from '../lib/runner'
+import eventManager from '../lib/event-manager'
 import State from '../lib/state'
 import windowUtil from '../lib/window-util'
 
@@ -18,7 +18,7 @@ class Container extends Component {
   componentWillMount () {
     this.randomString = `${Math.random()}`
 
-    this.props.runner.init(this.props.state, {
+    this.props.eventManager.init(this.props.state, {
       element: automationElementId,
       string: this.randomString,
     })
@@ -71,17 +71,17 @@ class Container extends Component {
   _noAutomation () {
     return <NoAutomation
       browsers={this.props.config.browsers}
-      onLaunchBrowser={(browser) => this.props.runner.launchBrowser(browser)}
+      onLaunchBrowser={(browser) => this.props.eventManager.launchBrowser(browser)}
     />
   }
 
   _automationDisconnected () {
-    return <AutomationDisconnected onReload={this.props.runner.launchBrowser} />
+    return <AutomationDisconnected onReload={this.props.eventManager.launchBrowser} />
   }
 }
 
 Container.defaultProps = {
-  runner,
+  eventManager,
   windowUtil,
 }
 

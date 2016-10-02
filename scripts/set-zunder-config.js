@@ -10,6 +10,5 @@ module.exports = function setZunderConfig (zunder) {
       'node_modules/font-awesome/fonts/**': '/fonts',
       'node_modules/@cypress/core-reporter/dist/reporter.css': '',
     },
-    testDir: 'dist',
   })
 }

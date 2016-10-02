@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { action } from 'mobx'
-import runner from '../lib/runner'
+import eventManager from '../lib/event-manager'
 
 export default class IframeModel {
   constructor (state, { detachDom, removeHeadStyles, restoreDom, highlightEl }) {
@@ -16,19 +16,19 @@ export default class IframeModel {
   }
 
   listen () {
-    runner.on('run:start', action('run:start', this._beforeRun))
-    runner.on('run:end', action('run:start', this._afterRun))
+    eventManager.on('run:start', action('run:start', this._beforeRun))
+    eventManager.on('run:end', action('run:start', this._afterRun))
 
-    runner.on('viewport', action('viewport', this._updateViewport))
-    runner.on('config', action('config', (config) => {
+    eventManager.on('viewport', action('viewport', this._updateViewport))
+    eventManager.on('config', action('config', (config) => {
       this._updateViewport(_.map(config, 'viewportHeight', 'viewportWidth'))
     }))
 
-    runner.on('url:changed', action('url:changed', this._updateUrl))
-    runner.on('page:loading', action('page:loading', this._updateLoading))
+    eventManager.on('url:changed', action('url:changed', this._updateUrl))
+    eventManager.on('page:loading', action('page:loading', this._updateLoading))
 
-    runner.on('show:snapshot', action('show:snapshot', this._setSnapshots))
-    runner.on('hide:snapshot', action('hide:snapshot', this._clearSnapshots))
+    eventManager.on('show:snapshot', action('show:snapshot', this._setSnapshots))
+    eventManager.on('hide:snapshot', action('hide:snapshot', this._clearSnapshots))
   }
 
   _beforeRun = () => {

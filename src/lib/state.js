@@ -8,6 +8,8 @@ const _defaults = {
 
   width: 1000,
   height: 660,
+
+  reporterWidth: null,
 }
 
 export default class State {
@@ -26,13 +28,21 @@ export default class State {
   @observable width = _defaults.width
   @observable height = _defaults.height
 
-  @observable reporterWidth = 0
+  // if null, the default CSS handles it
+  // if non-null, the user has set it by resizing
+  @observable reporterWidth = _defaults.reporterWidth
+  // what the dom reports, always in pixels
+  @observable absoluteReporterWidth = 0
   @observable headerHeight = 0
 
-  @observable _windowWidth = 0
-  @observable _windowHeight = 0
+  @observable windowWidth = 0
+  @observable windowHeight = 0
 
   @observable automation = automation.CONNECTING
+
+  constructor (reporterWidth = _defaults.reporterWidth) {
+    this.reporterWidth = reporterWidth
+  }
 
   @computed get scale () {
     if (this._containerWidth < this.width || this._containerHeight < this.height) {
@@ -42,11 +52,11 @@ export default class State {
   }
 
   @computed get _containerWidth () {
-    return this._windowWidth - this.reporterWidth
+    return this.windowWidth - this.absoluteReporterWidth
   }
 
   @computed get _containerHeight () {
-    return this._windowHeight - this.headerHeight
+    return this.windowHeight - this.headerHeight
   }
 
   @computed get marginLeft () {
@@ -75,9 +85,9 @@ export default class State {
   }
 
   updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
-    this._windowWidth = windowWidth
-    this._windowHeight = windowHeight
-    this.reporterWidth = reporterWidth
+    this.windowWidth = windowWidth
+    this.windowHeight = windowHeight
+    this.absoluteReporterWidth = reporterWidth
     this.headerHeight = headerHeight
   }
 
