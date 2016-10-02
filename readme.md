@@ -204,6 +204,9 @@ These commands have not yet been released:
 
 ## Changelog
 
+#### 0.12.0
+- added cli arg for passing reporterOptions
+
 #### 0.11.1
 - cypress ci accepts --spec argument
 
