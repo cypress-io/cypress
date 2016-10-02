@@ -269,6 +269,14 @@ describe "$Cypress.Runner API", ->
           expect(hookFailed).to.be.calledWith
           done()
 
+  context "#getHookName", ->
+    beforeEach ->
+      @runner = $Cypress.Runner.runner(@Cypress, {})
+      @hook = {title: '"before each" hook for "t2a"'}
+
+    it "matches only the first quotes", ->
+      expect(@runner.getHookName(@hook)).to.eq("before each")
+
   context "#hookFailed", ->
     beforeEach (done) ->
       runner = Fixtures.createRunnables

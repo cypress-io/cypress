@@ -1,7 +1,7 @@
 $Cypress.Runner = do ($Cypress, _, moment) ->
 
   defaultGrep     = /.*/
-  betweenQuotesRe = /\"(.+)\"/
+  betweenQuotesRe = /\"(.+?)\"/
 
   ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
   RUNNABLE_LOGS    = "routes agents commands".split(" ")
