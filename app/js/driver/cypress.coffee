@@ -101,7 +101,7 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
       @runner.getErrorByTestId(testId)
 
     checkForEndedEarly: ->
-      @cy.checkForEndedEarly()
+      @cy and @cy.checkForEndedEarly()
 
     onUncaughtException: ->
       @cy.onUncaughtException.apply(@cy, arguments)
