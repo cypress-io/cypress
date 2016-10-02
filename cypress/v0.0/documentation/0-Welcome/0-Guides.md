@@ -26,7 +26,7 @@ excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 | [Issuing Commands](https://on.cypress.io/guides/issuing-commands) | Issue actions to be performed in your test |
 | [Finding Elements](https://on.cypress.io/guides/finding-elements) | Traverse the DOM, find elements, make assertions |
 | [Making Assertions](https://on.cypress.io/guides/making-assertions) | Set expectations for the behavior |
-| [Network Requests](https://on.cypress.io/guides/network-request-xhr) | Handle AJAX/XHR Requests |
+| [Network Requests](https://on.cypress.io/guides/network-requests-xhr) | Handle AJAX/XHR Requests |
 | [Continous Integration](https://on.cypress.io/guides/continuous-integration) | Integrate with CI Providers |
 | [Environment Variables](https://on.cypress.io/guides/environment-variables) | Set environment variables |
 | [Using Aliases](https://on.cypress.io/guides/using-aliases) | Represent an object as alias |
