@@ -595,7 +595,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy
           .get("body").as("b")
           .get("@b").then ->
-            expect(@log.get("end")).to.be.true
+            expect(@log.get("ended")).to.be.true
             expect(@log.get("state")).to.eq("passed")
             expect(@log.get("snapshots").length).to.eq(1)
             expect(@log.get("snapshots")[0]).to.be.an("object")
@@ -1234,7 +1234,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @Cypress.on "log", (attrs, @log) =>
 
         @cy.contains("foo").then ->
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
           expect(@log.get("state")).to.eq("passed")
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0]).to.be.an("object")

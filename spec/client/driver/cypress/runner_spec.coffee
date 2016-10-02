@@ -717,7 +717,7 @@ describe "$Cypress.Runner API", ->
       expect(types).to.deep.eq ["suite", "test", "suite", "test", "test", "suite", "test"]
 
     it "returns only matching tests + suites to the grep", ->
-      runnables = @runner.normalizeAll(/four/)
+      runnables = @runner.normalizeAll({}, /four/)
 
       expect(@runner.tests).to.have.length(1)
 
@@ -767,7 +767,7 @@ describe "$Cypress.Runner API", ->
         grep = /\w+/
         test = @sandbox.spy grep, "test"
 
-        @runner.normalizeAll(grep)
+        @runner.normalizeAll({}, grep)
 
         ## we have 4 tests, thats how many should have been grepp'd!
         expect(test.callCount).to.eq 4
@@ -830,12 +830,6 @@ describe "$Cypress.Runner API", ->
 
       @runner.run =>
         expect(@removeAllListeners).to.be.calledOnce
-        done()
-
-    it "resets runnables", (done) ->
-
-      @runner.run =>
-        expect(@runner.runnables).to.deep.eq []
         done()
 
   context "#abort", ->
@@ -948,9 +942,9 @@ describe "$Cypress.Runner API", ->
 
     it "sets err to err", ->
       @runner.afterEachFailed(@_test, @err)
-      expect(@_test.err).to.eq @err
+      expect(@_test.err).to.deep.eq @runner.wrapErr(@err)
 
     it "triggers test:end", ->
       trigger = @sandbox.spy @Cypress, "trigger"
       @runner.afterEachFailed(@_test, @err)
-      expect(trigger).to.be.calledWith "test:end", @_test
+      expect(trigger).to.be.calledWith "mocha", "test end", @_test

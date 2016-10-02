@@ -1,5 +1,7 @@
 $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
+  crossOriginScriptRe = /^script error/i
+
   class $Cy
     ## does this need to be moved
     ## to an instance property?
@@ -64,7 +66,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## why arent we listening to "defaults" here?
       ## instead we are manually hard coding them
       @listenTo @Cypress, "stop",       => @stop()
-      @listenTo @Cypress, "restore",    => @restore.apply(@, arguments)
+      @listenTo @Cypress, "restore",    => @restore()
       @listenTo @Cypress, "abort",      => @abort()
       @listenTo @Cypress, "test:after:hooks", (test) => @checkTestErr(test)
 
@@ -100,18 +102,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
       @Cypress.cy = null
 
-    restore: (options = {}) ->
-      _.defaults options, {
-        checkForEndedEarly: true
-      }
-
-      ## if our index is above 0 but is below the commands.length
-      ## then we know we've ended early due to a done() and
-      ## we should throw a very specific error message
-      index = @prop("index")
-      if options.checkForEndedEarly and index > 0 and index < @commands.length
-        @endedEarlyErr(index)
-
+    restore: ->
       @clearTimeout @prop("timerId")
 
       ## reset the commands to an empty array
@@ -134,6 +125,14 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     ## global options applicable to all cy instances
     ## and restores
     options: (options = {}) ->
+
+    checkForEndedEarly: ->
+      ## if our index is above 0 but is below the commands.length
+      ## then we know we've ended early due to a done() and
+      ## we should throw a very specific error message
+      index = @prop("index")
+      if index > 0 and index < @commands.length
+        @endedEarlyErr(index)
 
     nullSubject: ->
       @prop("subject", null)
@@ -237,7 +236,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
         @trigger "command:start", command
 
-        promise = @set(command).then =>
+        promise = @set(command)
+        .then =>
           ## each successful command invocation should
           ## always reset the timeout for the current runnable
           ## unless it already has a state.  if it has a state
@@ -273,15 +273,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
           return err
 
         .catch (err) =>
-          @fail(err)
+          @onFail(err)
 
-          ## reset the nestedIndex back to null
-          @prop("nestedIndex", null)
-
-          ## also reset recentlyReady back to null
-          @prop("recentlyReady", null)
-
-          return err
         ## signify we are at the end of the chain and do not
         ## continue chaining anymore
         # promise.done()
@@ -293,6 +286,53 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## automatically defer running each command in succession
       ## so each command is async
       @defer(run)
+
+    onUncaughtException: (msg, source, lineno, colno, err) ->
+      current = @prop("current")
+
+      ## reset the msg on a cross origin script error
+      ## since no details are accessible
+      if crossOriginScriptRe.test(msg)
+        msg = $Cypress.Utils.errMessageByPath("uncaught.cross_origin_script")
+
+      createErrFromMsg = ->
+        new Error $Cypress.Utils.errMessageByPath("uncaught.error", { msg, source, lineno })
+
+      ## if we have the 5th argument it means we're in a super
+      ## modern browser making this super simple to work with.
+      err ?= createErrFromMsg()
+
+      err.name = "Uncaught " + err.name
+
+      err.onFail = ->
+        if log = current and current.getLastLog()
+          log.error(err)
+
+      @onFail(err)
+      ## TODO: if this is a hook then we know mocha
+      ## will abort everything on uncaught exceptions
+      ## so we need to explain that to the user
+
+      ## per the onerror docs
+      ## https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
+      ## When the function returns true, this prevents the firing of the default event handler.
+      return true
+
+    onFail: (err) ->
+      @fail(err)
+
+      ## reset the nestedIndex back to null
+      @prop("nestedIndex", null)
+
+      ## also reset recentlyReady back to null
+      @prop("recentlyReady", null)
+
+      ## and forcibly move the index needle to the
+      ## end in case we have after / afterEach hooks
+      ## which need to run
+      @prop("index", @commands.length)
+
+      return err
 
     clearTimeout: (id) ->
       clearImmediate(id) if id
@@ -362,7 +402,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
       .then (subject) =>
         ## if ret is a DOM element and its not an instance of our jQuery
-        if subject and Cypress.Utils.hasElement(subject) and not Cypress.Utils.isInstanceOf(subject, $)
+        if subject and $Cypress.Utils.hasElement(subject) and not $Cypress.Utils.isInstanceOf(subject, $)
           ## set it back to our own jquery object
           ## to prevent it from being passed downstream
           subject = @$$(subject)

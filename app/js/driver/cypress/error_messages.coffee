@@ -248,7 +248,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       orphan: "#{cmd('{{cmd}}')} is a child command which operates on an existing subject.  Child commands must be called after a parent command."
       outside_test: """
         Cypress cannot execute commands outside a running test.
-        This usually happens when you accidentally write commands outside an it(...) test.
+        This usually happens when you accidentally write commands outside an 'it(...)' test.
         If that is the case, just move these commands inside an 'it(...)' test.
         Check your test file for errors.\n
         https://on.cypress.io/cannot-execute-commands-outside-test
@@ -365,6 +365,35 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       not_on_text_field: "#{cmd('type')} can only be called on textarea or :text. Your subject is a: {{node}}"
       tab: "{tab} isn't a supported character sequence. You'll want to use the command #{cmd('tab')}, which is not ready yet, but when it is done that's what you'll use."
       wrong_type: "#{cmd('type')} can only accept a String or Number. You passed in: '{{chars}}'"
+
+    uncaught:
+      cross_origin_script: """
+        Script error.
+
+        Cypress detected that an uncaught error was thrown from a cross origin script.
+
+        We cannot provide you the stack trace, line number, or file where this error occured.
+
+        Check your Developer Tools Console for the actual error - it should be printed there.
+
+        It's possible to enable debugging these scripts by adding the 'crossorigin' attribute and setting a CORS header.
+
+        https://on.cypress.io/cross-origin-script-error
+      """
+      error_in_hook: (obj) ->
+        msg = "Because this error occured during a '#{obj.hookName}' hook we are skipping "
+
+        if t = obj.parentTitle
+          msg += "the remaining tests in the current suite: '#{_.truncate(t, 20)}'"
+        else
+          msg += "all of the remaining tests."
+
+        msg
+
+      error: (obj) ->
+        {msg, source, lineno} = obj
+
+        msg + if source and lineno then " (#{source}:#{lineno})" else ""
 
     viewport:
       bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."

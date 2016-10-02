@@ -100,6 +100,12 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
     getErrorByTestId: (testId) ->
       @runner.getErrorByTestId(testId)
 
+    checkForEndedEarly: ->
+      @cy and @cy.checkForEndedEarly()
+
+    onUncaughtException: ->
+      @cy.onUncaughtException.apply(@cy, arguments)
+
     ## TODO: TEST THIS
     ## restore our on callback
     ## after the run completes
@@ -111,7 +117,7 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
     set: (runnable, hookName) ->
       $Cypress.Cy.set(@, runnable, hookName)
 
-    window: (specWindow) ->
+    onSpecWindow: (specWindow) ->
       cy     = $Cypress.Cy.create(@, specWindow)
       chai   = $Cypress.Chai.create(@, specWindow)
       mocha  = $Cypress.Mocha.create(@, specWindow)
@@ -175,13 +181,7 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
         @off()
 
-    abort: (options = {}) ->
-      ## dont check for ended early errors
-      ## when we abort
-      _.defaults options, {
-        checkForEndedEarly: false
-      }
-
+    abort: ->
       ## grab all the abort callbacks
       ## instead of triggering them
 
@@ -192,13 +192,13 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
       ## abort can be async so make sure
       ## we wait until they all resolve!
-      Promise.all(aborts).then => @restore(options)
+      Promise.all(aborts).then => @restore()
 
     ## restores cypress after each test run by
     ## removing the queue from the proto and
     ## removing additional own instance properties
-    restore: (options) ->
-      restores = [].concat @invoke("restore", options)
+    restore: ->
+      restores = [].concat @invoke("restore")
 
       restores = _.reject restores, (r) -> r is @cy
 

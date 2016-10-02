@@ -9,14 +9,10 @@ require("./environment")
 ## essentially do it all again when we boot the correct
 ## mode.
 
-_         = require("lodash")
-cp        = require("child_process")
-path      = require("path")
-Promise   = require("bluebird")
-logger    = require("./logger")
-errors    = require("./errors")
-appData   = require("./util/app_data")
-argsUtil  = require("./util/args")
+_       = require("lodash")
+cp      = require("child_process")
+path    = require("path")
+Promise = require("bluebird")
 
 exit = (code = 0) ->
   ## TODO: we shouldn't have to do this
@@ -31,7 +27,7 @@ exitErr = (err) ->
   ## log errors to the console
   ## and potentially raygun
   ## and exit with 1
-  errors.log(err)
+  require("./errors").log(err)
   .then -> exit(1)
 
 module.exports = {
@@ -50,14 +46,14 @@ module.exports = {
       if @isCurrentlyRunningElectron()
         ## just run the gui code directly here
         ## and pass our options directly to main
-        require("./electron")(mode, options);
+        require("./electron")(mode, options)
       else
         ## sanity check to ensure we're running
         ## the local dev server. dont crash just
         ## log a warning
         require("./api").ping().catch (err) ->
           console.log(err.message)
-          errors.warning("DEV_NO_SERVER")
+          require("./errors").warning("DEV_NO_SERVER")
 
         ## open the cypress electron wrapper shell app
         new Promise (resolve) ->
@@ -66,7 +62,7 @@ module.exports = {
             ## juggle up the failures since our outer
             ## promise is expecting this object structure
             resolve({failures: code})
-          cypressElectron.open(".", argsUtil.toArray(options), fn)
+          cypressElectron.open(".", require("./util/args").toArray(options), fn)
 
   openProject: (options) ->
     ## this code actually starts a project
@@ -115,12 +111,12 @@ module.exports = {
       require("opn")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
 
   start: (argv = []) ->
-    logger.info("starting desktop app", args: argv)
+    require("./logger").info("starting desktop app", args: argv)
 
     ## make sure we have the appData folder
-    appData.ensure()
+    require("./util/app_data").ensure()
     .then =>
-      options = argsUtil.toObject(argv)
+      options = require("./util/args").toObject(argv)
 
       ## else determine the mode by
       ## the passed in arguments / options

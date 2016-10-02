@@ -2,7 +2,6 @@ _       = require("lodash")
 chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
-logger  = require("./logger")
 
 exceptions = "CI_CANNOT_COMMUNICATE".split(" ")
 
@@ -83,7 +82,7 @@ API = {
       if process.env["CYPRESS_ENV"] is "production"
         ## log this error to raygun since its not
         ## a known error
-        logger.createException(err).catch(->)
+        require("./logger").createException(err).catch(->)
 
   throw: (type, arg) ->
     throw @get(type, arg)

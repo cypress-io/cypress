@@ -49,3 +49,4 @@ do ($Cypress, _) ->
         args.push(cb)
 
         @trigger.apply(@, args)
+      .cancellable()

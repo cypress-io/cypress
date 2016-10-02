@@ -332,6 +332,8 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
       $remoteIframe = @private("$remoteIframe")
       runnable      = @private("runnable")
 
+      v = null
+
       p = new Promise (resolve, reject) =>
 
         visitFailedByErr = (err, url, fn) ->
@@ -553,14 +555,15 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           hasVisitedAboutBlank = true
 
           $remoteIframe.one "load", =>
-            visit(win, url, options)
+            v = visit(win, url, options)
 
           @_href(win, "about:blank")
         else
-          visit(win, url, options)
+          v = visit(win, url, options)
 
       p
       .timeout(options.timeout)
       .catch Promise.TimeoutError, (err) =>
+        v and v.cancel?()
         $remoteIframe.off("load")
         timedOutWaitingForPageLoad.call(@, options.timeout, options._log)

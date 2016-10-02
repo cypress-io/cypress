@@ -187,7 +187,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
         it "ends immediately", ->
           @cy.getCookies().then ->
-            expect(@log.get("end")).to.be.true
+            expect(@log.get("ended")).to.be.true
             expect(@log.get("state")).to.eq("passed")
 
         it "snapshots immediately", ->
@@ -347,7 +347,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
         it "ends immediately", ->
           @cy.getCookie("foo").then ->
-            expect(@log.get("end")).to.be.true
+            expect(@log.get("ended")).to.be.true
             expect(@log.get("state")).to.eq("passed")
 
         it "has correct message", ->
@@ -533,7 +533,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
         it "ends immediately", ->
           @cy.setCookie("foo", "bar").then ->
-            expect(@log.get("end")).to.be.true
+            expect(@log.get("ended")).to.be.true
             expect(@log.get("state")).to.eq("passed")
 
         it "snapshots immediately", ->
@@ -683,7 +683,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
         it "ends immediately", ->
           @cy.clearCookie("foo").then ->
-            expect(@log.get("end")).to.be.true
+            expect(@log.get("ended")).to.be.true
             expect(@log.get("state")).to.eq("passed")
 
         it "snapshots immediately", ->
@@ -925,7 +925,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
         it "ends immediately", ->
           @cy.clearCookies().then ->
-            expect(@log.get("end")).to.be.true
+            expect(@log.get("ended")).to.be.true
             expect(@log.get("state")).to.eq("passed")
 
         it "snapshots immediately", ->

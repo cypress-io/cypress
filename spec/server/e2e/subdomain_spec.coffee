@@ -1,4 +1,3 @@
-
 cors     = require("cors")
 parser   = require("cookie-parser")
 session  = require("express-session")

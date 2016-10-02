@@ -1,14 +1,22 @@
 Fixtures = require("../helpers/fixtures")
 e2e      = require("../helpers/e2e")
 
-e2ePath = Fixtures.projectPath("e2e")
-
 onServer = (app) ->
   app.get "/fail", (req, res) ->
     res.sendStatus(500)
 
+  app.get "/timeout", (req, res) ->
+    ms = req.query.ms ? 0
+
+    setTimeout ->
+      res.send("<html>timeout: <span>#{ms}</span></html>")
+    , ms
+
 describe "e2e visit", ->
   e2e.setup({
+    settings: {
+      pageLoadTimeout: 1000
+    }
     servers: {
       port: 3434
       static: true
@@ -76,3 +84,13 @@ describe "e2e visit", ->
     .then (stdout) ->
       expect(stdout).to.include("The content-type of the response we received from this local file was:")
       expect(stdout).to.include("> text/plain")
+
+  it "fails when visit times out", ->
+    e2e.exec(@, {
+      spec: "visit_http_timeout_failing_spec.coffee"
+      expectedExitCode: 2
+    })
+    .get("stdout")
+    .then (stdout) ->
+      expect(stdout).to.include("Your page did not fire its 'load' event within '1000ms'.")
+      expect(stdout).to.include("Your page did not fire its 'load' event within '500ms'.")

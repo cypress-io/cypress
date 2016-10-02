@@ -1,6 +1,7 @@
 $Cypress.Runner = do ($Cypress, _, moment) ->
 
-  defaultGrep = /.*/
+  defaultGrep     = /.*/
+  betweenQuotesRe = /\"(.+)\"/
 
   ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
   RUNNABLE_LOGS    = "routes agents commands".split(" ")
@@ -131,7 +132,6 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       @testsById = {}
       @testsQueue = []
       @runnables = []
-      @runnablesById = {}
       @logsById = {}
       @emissions = {
         started: {}
@@ -294,6 +294,8 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
         @emissions.ended[test.id] = true
 
+        Cypress.checkForEndedEarly()
+
         triggerMocha(Cypress, "test end", @wrap(test))
 
       @runner.on "pass", (test) =>
@@ -326,6 +328,16 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
           fire.call(_this, "test:after:run", test)
 
       @runner.on "fail", (runnable, err) =>
+        isHook = runnable.type is "hook"
+
+        if isHook
+          parentTitle = runnable.parent.title
+          hookName    = @getHookName(runnable)
+
+          ## append a friendly message to the error indicating
+          ## we're skipping the remaining tests in this suite
+          err.message += "\n\n" + @Cypress.Utils.errMessageByPath("uncaught.error_in_hook", {parentTitle, hookName})
+
         ## always set runnable err so we can tap into
         ## taking a screenshot on error
         runnable.err = @wrapErr(err)
@@ -335,8 +347,8 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
           runnable.alreadyEmittedMocha = true
           triggerMocha(Cypress, "fail", @wrap(runnable), runnable.err)
 
-        if runnable.type is "hook"
-          @hookFailed(runnable, runnable.err)
+        if isHook
+          @hookFailed(runnable, runnable.err, hookName)
 
     addTestToQueue: (test) ->
       if test = @testsById[test.id]
@@ -471,7 +483,6 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         ## tests have a type of 'test' whereas suites do not have a type property
         runnable.type ?= "suite"
 
-        @runnablesById[runnable.id] = obj
         @runnables.push(runnable)
 
         ## if we have a runnable in the initial state
@@ -634,7 +645,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
     getHookName: (hook) ->
       ## find the name of the hook by parsing its
       ## title and pulling out whats between the quotes
-      name = hook.title.match(/\"(.+)\"/)
+      name = hook.title.match(betweenQuotesRe)
       name and name[1]
 
     afterEachFailed: (test, err) ->
@@ -642,7 +653,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       test.err = @wrapErr(err)
       triggerMocha(@Cypress, "test end", @wrap(test))
 
-    hookFailed: (hook, err) ->
+    hookFailed: (hook, err, hookName) ->
       ## finds the test by returning the first test from
       ## the parent or looping through the suites until
       ## it finds the first test
@@ -650,7 +661,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       test.err = err
       test.state = "failed"
       test.duration = hook.duration
-      test.hookName = @getHookName(hook)
+      test.hookName = hookName
       test.failedFromHook = true
 
       if hook.alreadyEmittedMocha
