@@ -108,11 +108,11 @@ const openProject = (project) => {
     project.setError(err)
   })
 
-  const changeConfig = (config) => {
+  const changeConfig = action('config:changed', (config) => {
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
-  }
+  })
 
   const open = () => {
     return new Promise((resolve) => {
@@ -133,7 +133,7 @@ const openProject = (project) => {
           return setProjectError(err)
         }
 
-        action('config:changed', changeConfig(config))
+        changeConfig(config)
 
         resolve()
       })
