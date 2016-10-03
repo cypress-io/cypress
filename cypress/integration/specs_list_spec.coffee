@@ -65,7 +65,6 @@ describe "Specs List", ->
           @config.browsers = @browsers
           @config.isNewProject = true
           @ipc.handle("open:project", null, @config)
-          @ipc.handle("get:specs", null, @specs)
 
     it "displays modal", ->
       cy
