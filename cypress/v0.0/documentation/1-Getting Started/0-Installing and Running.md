@@ -130,7 +130,7 @@ While you'll find yourself working primarily in the GUI, it is helpful to be abl
 
 Once you have the [Cypress CLI Tool](https://github.com/cypress-io/cypress-cli) installed, you can simply execute:
 
-```bash
+```shell
 cypress run
 ```
 

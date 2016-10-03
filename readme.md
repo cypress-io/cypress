@@ -24,7 +24,7 @@ To make changes to our documentation:
 
 ### Working Locally
 
-```bash
+```shell
 npm install
 ```
 
@@ -32,12 +32,12 @@ You will need to login with your Readme.io credentials before working. You may s
 
 Login with your Cypress readme.io account credentials.
 
-```bash
+```shell
 export README_EMAIL=<readmeio_account_email>
 export README_PASSWORD=<readmeio_account_password>
 ```
 
-```bash
+```shell
 # add a new command
 npm run add-command <command-name>
 # see what add-command will do without changing files
@@ -49,7 +49,7 @@ npm run remove-command <command-name>
 npm run remove-command <command-name> -- --dry-run
 ```
 
-```bash
+```shell
 # modify local files
 <hack hack hack>
 
