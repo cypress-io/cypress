@@ -1,6 +1,6 @@
 describe "Config", ->
   beforeEach ->
-    # @firstProjectName = "My-Fake-Project"
+    @firstProjectName = "My-Fake-Project"
 
     cy
       .visit("/")
