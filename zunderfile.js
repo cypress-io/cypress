@@ -1,7 +1,7 @@
 var gulp = require("gulp")
 var concat = require('gulp-concat')
 var zunder = require("zunder")
-var setZunderConfig = require('./set-zunder-config')
+var setZunderConfig = require('./scripts/set-zunder-config')
 
 setZunderConfig(zunder)
 
