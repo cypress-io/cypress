@@ -36,8 +36,8 @@ cypress run --reporter json
 Cypress supports the following reporters:
 
 * [Mocha's built-in reporters](https://mochajs.org/#reporters).
-* [`Teamcity`](https://github.com/cypress-io/mocha-teamcity-reporter)
-* [`JUnit`](https://github.com/michaelleeallen/mocha-junit-reporter)
+* [`teamcity`](https://github.com/cypress-io/mocha-teamcity-reporter)
+* [`junit`](https://github.com/michaelleeallen/mocha-junit-reporter)
 * Custom reporters ([see below](#section-custom-reporters))
 
 ***
@@ -51,11 +51,11 @@ Cypress supports custom reporters, whether local to your project or installed th
 Say you have the following directory structure:
 
 ```txt
-- my-project
-| - cypress
-| - src
-| - reporters
-|   | - custom.js
+> my-project
+  > cypress
+  > src
+  > reporters
+    - custom.js
 ```
 
 Specify the path to your custom reporter to use it:
@@ -81,9 +81,8 @@ cypress run --reporter reporters/custom.js
 
 If you have installed a custom reporter through npm, specify the package name:
 
-`cypress.json`:
-
 ```javascript
+// cypress.json
 {
   "reporter": "mochawesome"
 }
@@ -96,9 +95,13 @@ Command line:
 cypress run --reporter mochawesome
 ```
 
-### Peer Dependencies
-
-You need to install any peer dependencies the reporter requires, even if they're bundled with Cypress. For example, [mochawesome](https://github.com/adamgruber/mochawesome) requires `mocha` as a peer dependency. You will need to install mocha as a dev dependency of your own project for it to work (`npm install mocha --save-dev`).
+[block:callout]
+{
+  "type": "info",
+  "title": "Peer Dependencies",
+  "body": "You need to install any peer dependencies the reporter requires, even if they're bundled with Cypress. For example, [mochawesome](https://github.com/adamgruber/mochawesome) requires `mocha` as a peer dependency. You will need to install mocha as a dev dependency of your own project for it to work (`npm install mocha --save-dev`)."
+}
+[/block]
 
 ***
 
@@ -106,9 +109,9 @@ You need to install any peer dependencies the reporter requires, even if they're
 
 Some reporters accept options to customize their behavior. These can be specified in your `cypress.json` or via the command line:
 
-`cypress.json`:
 
 ```javascript
+// cypress.json
 {
   "reporter": "junit",
   "reporterOptions": {
