@@ -111,6 +111,10 @@ export default class IframeModel {
     this.state.messageDescription = snapshot.name
     this.state.messageType = ''
 
+    this._restoreDom(snapshot, snapshotProps)
+  }
+
+  _restoreDom (snapshot, snapshotProps) {
     this.restoreDom(snapshot)
 
     if (snapshotProps.$el) {
@@ -161,11 +165,16 @@ export default class IframeModel {
     clearInterval(this.intervalId)
 
     this.isSnapshotPinned = true
-    this.restoreDom(snapshots[0])
+
+    this.state.snapshot.showingHighlights = true
+    this.state.snapshot.stateIndex = 0
+
     this.state.messageTitle = 'DOM Snapshot'
     this.state.messageDescription = 'pinned'
     this.state.messageType = 'info'
     this.state.messageControls = this.snapshotControls(snapshotProps)
+
+    this._restoreDom(snapshots[0], snapshotProps)
   }
 
   _setMissingSnapshotMessage () {
@@ -179,8 +188,6 @@ export default class IframeModel {
     this.state.messageTitle = 'DOM Snapshot'
     this.state.messageDescription = ''
     this.state.messageControls = null
-    this.state.snapshot.showingHighlights = true
-    this.state.snapshot.stateIndex = 0
     this._clearSnapshots()
   }
 
