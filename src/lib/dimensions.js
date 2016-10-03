@@ -236,7 +236,6 @@ function getTotalFor (directions, dimensions) {
   return _.reduce(directions, (memo, direction) => memo + dimensions[direction], 0)
 }
 
-
 function getOuterSize (el) {
   return {
     width: el.outerWidth(true),

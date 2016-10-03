@@ -30,4 +30,19 @@
     visibility: hidden;
     width: 0;
   }
+
+  // when the reporter is being resized, cover the iframe or else
+  // mouseover events stop firing if the user mouses over the iframe
+  .cover {
+    bottom: 0;
+    display: none;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+
+  .is-reporter-resizing & .cover {
+    display: block;
+  }
 }

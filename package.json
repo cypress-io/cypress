@@ -1,6 +1,6 @@
 {
   "name": "@cypress/core-runner",
-  "version": "0.1.16",
+  "version": "0.2.0",
   "main": "lib/runner.js",
   "repository": {
     "type": "git",
@@ -45,6 +45,6 @@
     "react-dom": "^15.3.0",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
-    "zunder": "^3.4.5"
+    "zunder": "^3.4.12"
   }
 }
