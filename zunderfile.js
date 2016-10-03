@@ -1,19 +1,9 @@
 var gulp = require("gulp")
 var concat = require('gulp-concat')
 var zunder = require("zunder")
-var cyIcons = require('@cypress/core-icons')
+var setZunderConfig = require('./set-zunder-config')
 
-var staticGlobs = {
-  'node_modules/fira/woff/**/*': '/woff',
-  'node_modules/font-awesome/fonts/*.+(eot|svg|ttf|woff|woff2|otf)': '/fonts',
-}
-staticGlobs[cyIcons.getPathToLogo('cypress-inverse.png')] = '/img'
-
-zunder.setConfig({
-  prodDir: 'dist',
-  staticGlobs: staticGlobs
-})
-
+setZunderConfig(zunder)
 
 function copyScripts (dir) {
   return function () {
@@ -28,4 +18,5 @@ function copyScripts (dir) {
 }
 
 zunder.on("before:watch", copyScripts(zunder.config.devDir))
+zunder.on("before:build-dev", copyScripts(zunder.config.devDir))
 zunder.on("before:build-prod", copyScripts(zunder.config.prodDir))
