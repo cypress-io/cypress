@@ -70,19 +70,18 @@ class Command extends Component {
         onMouseOut={() => this._snapshot(false)}
       >
         <FlashOnClick
-          message='Printed output to your console!'
-          onClick={() => this.props.events.emit('show:command', model.id)}
+          message='Pinned snapshot and printed output to your console!'
+          onClick={this._onClick}
+          shouldShowMessage={this._shouldShowClickMessage}
         >
           <div className='command-wrapper'>
             <span className='command-number'>
               <i className='fa fa-spinner fa-spin'></i>
               <span>{model.number || ''}</span>
             </span>
-            <Tooltip placement='top' title={this._isPinned() ? 'Unpin snapshot' : 'Pin snapshot'}>
-              <button className='command-pin' onClick={this._togglePinning}>
-                <i className='fa fa-thumb-tack'></i>
-              </button>
-            </Tooltip>
+            <span className='command-pin'>
+              <i className='fa fa-thumb-tack'></i>
+            </span>
             <span className='command-method'>
               <span>{model.event ? `(${displayName(model)})` :  displayName(model)}</span>
             </span>
@@ -115,8 +114,12 @@ class Command extends Component {
     return pinnedId != null && pinnedId !== this.props.model.id
   }
 
-  @action _togglePinning = (e) => {
-    e.stopPropagation()
+  _shouldShowClickMessage = () => {
+    return !this.props.appState.isRunning && this._isPinned()
+  }
+
+  @action _onClick = () => {
+    if (this.props.appState.isRunning) return
 
     const { id } = this.props.model
 
@@ -127,6 +130,7 @@ class Command extends Component {
     } else {
       this.props.appState.pinnedSnapshotId = id
       this.props.events.emit('pin:snapshot', id)
+      this.props.events.emit('show:command', this.props.model.id)
     }
   }
 

@@ -35,13 +35,6 @@ const runnablesStoreStub = () => ({
 })
 
 describe('<Command />', () => {
-  it('emits show:command when clicking on command', () => {
-    const events = eventsStub()
-    const component = shallow(<Command model={model()} events={events} />)
-    component.find('FlashOnClick').simulate('click')
-    expect(events.emit).to.have.been.calledWith('show:command', 'c1')
-  })
-
   context('class names', () => {
     it('renders with the type class', () => {
       const component = shallow(<Command model={model()} />)
@@ -218,83 +211,69 @@ describe('<Command />', () => {
 
       it('renders a tooltip for the alias', () => {
         const component = shallow(<Command model={model()} />)
-        expect(component.find('Tooltip').at(1).find('.command-alias')).to.exist
+        expect(component.find('Tooltip').at(0).find('.command-alias')).to.exist
       })
 
       it('renders the alias tooltip with the right title', () => {
         const component = shallow(<Command model={model({ alias: 'fooAlias' })} />)
-        expect(component.find('Tooltip').at(1)).to.have.prop('title', "The message aliased as: 'fooAlias'")
+        expect(component.find('Tooltip').at(0)).to.have.prop('title', "The message aliased as: 'fooAlias'")
       })
     })
   })
 
-  context('pinning', () => {
-    it('renders a tooltip for the pin button', () => {
-      const component = shallow(<Command model={model()} />)
-      expect(component.find('Tooltip').first().find('.command-pin')).to.exist
+  context('clicking', () => {
+    let appState
+    let events
+    let component
+    let runnablesStore
+
+    beforeEach(() => {
+      appState = appStateStub()
+      events = eventsStub()
+      runnablesStore = runnablesStoreStub()
+      component = shallow(
+        <Command
+          model={model()}
+          events={events}
+          appState={appState}
+          runnablesStore={runnablesStore}
+        />
+      )
+      component.find('FlashOnClick').simulate('click')
     })
 
-    it('renders the tooltip with the right title when the command is pinned', () => {
-      const component = shallow(<Command model={model()} appState={appStateStub({ pinnedSnapshotId: 'c1' })} />)
-      expect(component.find('Tooltip').first()).to.have.prop('title', 'Unpin snapshot')
+    it('sets the pinned snapshot id to the model id', () => {
+      expect(appState.pinnedSnapshotId).to.equal('c1')
     })
 
-    it('renders the tooltip with the right title when the command is not pinned', () => {
-      const component = shallow(<Command model={model()} />)
-      expect(component.find('Tooltip').first()).to.have.prop('title', 'Pin snapshot')
+    it('emits the pin:snapshot event with the model id', () => {
+      expect(events.emit).to.have.been.calledWith('pin:snapshot', 'c1')
     })
 
-    describe('clicking pin button', () => {
-      let appState
-      let events
-      let clickEvent
-      let component
-      let runnablesStore
+    it('emits show:command', () => {
+      expect(events.emit).to.have.been.calledWith('show:command', 'c1')
+    })
 
+    describe('clicking pin button again', () => {
       beforeEach(() => {
-        appState = appStateStub()
-        events = eventsStub()
-        clickEvent = { stopPropagation: sinon.spy() }
-        runnablesStore = runnablesStoreStub()
-        component = shallow(
-          <Command
-            model={model()}
-            events={events}
-            appState={appState}
-            runnablesStore={runnablesStore}
-          />
-        )
-        component.find('Tooltip').first().find('.command-pin').simulate('click', clickEvent)
+        events.emit.reset()
+        component.find('FlashOnClick').simulate('click')
       })
 
-      it('stops propagation', () => {
-        expect(clickEvent.stopPropagation).to.have.been.called
+      it('sets the pinned snapshot id to null', () => {
+        expect(appState.pinnedSnapshotId).to.be.null
       })
 
-      it('sets the pinned snapshot id to the model id', () => {
-        expect(appState.pinnedSnapshotId).to.equal('c1')
+      it('emits the unpin:snapshot event with the model id', () => {
+        expect(events.emit).to.have.been.calledWith('unpin:snapshot', 'c1')
       })
 
-      it('emits the pin:snapshot event with the model id', () => {
-        expect(events.emit).to.have.been.calledWith('pin:snapshot', 'c1')
+      it('attempts to show the snapshot', () => {
+        expect(runnablesStore.attemptingShowSnapshot).to.be.true
       })
 
-      describe('clicking pin button again', () => {
-        beforeEach(() => {
-          component.find('Tooltip').first().find('.command-pin').simulate('click', clickEvent)
-        })
-
-        it('sets the pinned snapshot id to null', () => {
-          expect(appState.pinnedSnapshotId).to.be.null
-        })
-
-        it('emits the unpin:snapshot event with the model id', () => {
-          expect(events.emit).to.have.been.calledWith('unpin:snapshot', 'c1')
-        })
-
-        it('attempts to show the snapshot', () => {
-          expect(runnablesStore.attemptingShowSnapshot).to.be.true
-        })
+      it('doesn not emit show:command', () => {
+        expect(events.emit).not.to.have.been.calledWith('show:command', 'c1')
       })
     })
   })
@@ -302,12 +281,12 @@ describe('<Command />', () => {
   context('invisible indicator', () => {
     it('renders a tooltip for the invisible indicator', () => {
       const component = shallow(<Command model={model({ visible: false })} />)
-      expect(component.find('Tooltip').at(2).find('.command-invisible')).to.exist
+      expect(component.find('Tooltip').at(1).find('.command-invisible')).to.exist
     })
 
     it('renders the invisible indicator tooltip with the right title', () => {
       const component = shallow(<Command model={model({ visible: false })} />)
-      expect(component.find('Tooltip').at(2)).to.have.prop('title', 'This element is not visible.')
+      expect(component.find('Tooltip').at(1)).to.have.prop('title', 'This element is not visible.')
     })
   })
 
@@ -319,12 +298,12 @@ describe('<Command />', () => {
 
     it('renders a tooltip for the number of elements', () => {
       const component = shallow(<Command model={model({ numElements: 3 })} />)
-      expect(component.find('Tooltip').at(3).find('.command-num-elements')).to.exist
+      expect(component.find('Tooltip').at(2).find('.command-num-elements')).to.exist
     })
 
     it('renders the number of elements tooltip with the right title', () => {
       const component = shallow(<Command model={model({ numElements: 3 })} />)
-      expect(component.find('Tooltip').at(3)).to.have.prop('title', '3 matched elements')
+      expect(component.find('Tooltip').at(2)).to.have.prop('title', '3 matched elements')
     })
   })
 
@@ -334,9 +313,9 @@ describe('<Command />', () => {
       expect(component.find('FlashOnClick')).to.exist
     })
 
-    it('the <FlashOnClick /> has a console print message', () => {
+    it('the <FlashOnClick /> has a pinned snapshot and console print message', () => {
       const component = shallow(<Command model={model()} />)
-      expect(component.find('FlashOnClick')).to.have.prop('message', 'Printed output to your console!')
+      expect(component.find('FlashOnClick')).to.have.prop('message', 'Pinned snapshot and printed output to your console!')
     })
 
     it('renders the number', () => {

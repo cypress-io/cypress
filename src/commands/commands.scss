@@ -53,7 +53,7 @@
 
   .command {
     cursor: pointer;
-    padding: 1px 1px 1px 5px;
+    padding: 1px 5px;
     margin: 0;
 
     &:hover {
@@ -393,9 +393,10 @@
   }
 
   .command-pin {
-    background: none;
+    color: #999;
     display: none;
     float: left;
+    font-size: 14px;
     line-height: 1;
     margin-right: 10px;
     outline: none;
@@ -404,12 +405,7 @@
     width: 15px;
 
     i {
-      color: #999;
-      margin-right: 0;
-    }
-
-    &:hover i {
-      color: #476fc9 !important;
+      margin-right :0;
     }
   }
 
@@ -425,14 +421,21 @@
   }
 
   .command-is-pinned {
+    background: lighten($pinned, 40%);
+    border-left: 2px solid $pinned;
+    padding-left: 3px;
+
     &,
     &:hover {
-      background-color: #c7cfd2;
-      box-shadow: 0 1px 2px #aaa inset;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) inset;
     }
 
-    .command-pin i {
-      color: #333;
+    &:hover {
+      background: lighten($pinned, 38%);
+    }
+
+    .command-pin {
+      color: $pinned;
     }
   }
 

@@ -19,16 +19,23 @@ class FlashOnClick extends Component {
 
   @action _onClick = (e) => {
     this.props.onClick(e)
+    if (!this.props.shouldShowMessage()) return
+
     this._show = true
     setTimeout(action('hide:console:message', () => {
       this._show = false
-    }), 600)
+    }), 800)
   }
 }
 
 FlashOnClick.propTypes = {
   message: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
+  shouldShowMessage: PropTypes.func,
+}
+
+FlashOnClick.defaultProps = {
+  shouldShowMessage: () => true,
 }
 
 export default FlashOnClick
