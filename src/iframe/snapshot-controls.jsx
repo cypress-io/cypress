@@ -31,7 +31,7 @@ class SnapshotControls extends Component {
     const showingHighlights = this.props.state.snapshot.showingHighlights
 
     return (
-      <Tooltip title={`${showingHighlights ? 'Showing' : 'Hiding'} highlights`}>
+      <Tooltip title={`${showingHighlights ? 'Hide' : 'Show'} Highlights`}>
         <button className='toggle-selection' onClick={this._toggleHighlights}>
           <i className='fa fa-object-group' />
         </button>
@@ -46,7 +46,6 @@ class SnapshotControls extends Component {
 
     return (
       <span className='snapshot-state-picker'>
-        <span>State:</span>
         {_.map(snapshots, (snapshot, index) => (
           <button
             className={cs({

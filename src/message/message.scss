@@ -33,12 +33,34 @@
     color: #FFF;
     padding: 0 10px;
 
-    &.warning {
-      background-color: $error;
+    .description {
+      color: #F5A327;
+    }
+  }
+
+  .message-type-warning .message {
+    background-color: $error;
+  }
+
+  .message-has-description .message .title:after {
+    content: ': ';
+  }
+
+  .message-type-info {
+    &.message-type-info .message .title:after {
+      content: '';
     }
 
     .description {
-      color: #F5A327;
+      &:before {
+        content: ' (';
+      }
+
+      &:after {
+        content: ')';
+      }
+
+      color: #cf9ef1;
     }
   }
 

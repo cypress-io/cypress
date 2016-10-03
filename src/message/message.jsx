@@ -5,8 +5,6 @@ import React from 'react'
 export default observer(({ state }) => {
   if (!state.messageTitle) return null
 
-  const title = state.messageDescription ? `${state.messageTitle}: ` : state.messageTitle
-
   function controls () {
     if (!state.messageControls) return null
 
@@ -19,11 +17,16 @@ export default observer(({ state }) => {
 
   return (
     <div
-      className={`message-container message-${state.messageStyles.state}`}
+      className={cs(
+        'message-container',
+        `message-${state.messageStyles.state}`,
+        `message-type-${state.messageType}`,
+        { 'message-has-description': !!state.messageDescription },
+      )}
       style={state.messageStyles.styles}
     >
-      <div className={cs('message', state.messageType)}>
-        <span className='title'>{title}</span>
+      <div className='message'>
+        <span className='title'>{state.messageTitle}</span>
         <span className='description'>{state.messageDescription}</span>
       </div>
       {controls()}

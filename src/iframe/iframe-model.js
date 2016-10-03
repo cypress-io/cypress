@@ -153,7 +153,7 @@ export default class IframeModel {
     const { snapshots } = snapshotProps
 
     if (!snapshots || !snapshots.length) {
-      runner.snapshotUnpinned()
+      eventManager.snapshotUnpinned()
       this._setMissingSnapshotMessage()
       return
     }
@@ -164,6 +164,7 @@ export default class IframeModel {
     this.restoreDom(snapshots[0])
     this.state.messageTitle = 'DOM Snapshot'
     this.state.messageDescription = 'pinned'
+    this.state.messageType = 'info'
     this.state.messageControls = this.snapshotControls(snapshotProps)
   }
 
