@@ -64,7 +64,7 @@ class SnapshotControls extends Component {
   }
 
   _unpin = () => {
-    this.props.runner.snapshotUnpinned()
+    this.props.eventManager.snapshotUnpinned()
   }
 
   @action _toggleHighlights = () => {

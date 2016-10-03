@@ -56,7 +56,7 @@ export default class Iframes extends Component {
       highlightEl: this.autIframe.highlightEl,
       snapshotControls: (snapshotProps) => (
         <SnapshotControls
-          runner={runner}
+          eventManager={eventManager}
           snapshotProps={snapshotProps}
           state={this.props.state}
           onToggleHighlights={this._toggleSnapshotHighlights}
