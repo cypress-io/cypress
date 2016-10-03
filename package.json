@@ -2,12 +2,15 @@
   "name": "@cypress/core-desktop-gui",
   "version": "0.3.5",
   "description": "Desktop GUI for managing Cypress projects.",
-  "main": "index.js",
+  "main": "lib/gui.js",
   "scripts": {
-    "build": "zunder build-prod",
-    "start": "rm -rf dist && zunder watch",
+    "build-dev": "zunder build-dev",
+    "build-prod": "zunder build-prod",
+    "prod": "zunder build-prod && zunder serve-prod",
+    "server": "zunder serve-prod --port 8000",
+    "start": "zunder watch",
     "release": "releaser",
-    "test": "npm start & cypress run"
+    "test": "npm run build-prod && npm run server & cypress run"
   },
   "repository": {
     "type": "git",
@@ -19,35 +22,37 @@
     "url": "https://github.com/cypress-io/cypress-core-desktop-gui/issues"
   },
   "homepage": "https://github.com/cypress-io/cypress-core-desktop-gui",
-  "dependencies": {
+  "files": [
+    "dist",
+    "lib"
+  ],
+  "devDependencies": {
     "@cypress/core-icons": "^0.5.0",
+    "@cypress/core-releaser": "0.1.8",
+    "babel-eslint": "^6.0.4",
     "bluebird": "^3.4.0",
+    "bootstrap-sass": "3.3.5",
+    "bower": "^1.7.2",
     "classnames": "^2.2.5",
+    "eslint": "^2.12.0",
+    "eslint-plugin-react": "^5.2.2",
+    "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
+    "font-awesome": "4.6.1",
+    "gulp-concat": "^2.6.0",
     "history": "^2.0.0",
+    "jquery": "3.1.0",
     "lodash": "^4.13.1",
     "md5": "^2.1.0",
     "mobx": "^2.2.2",
     "mobx-react": "^3.3.1",
+    "mobx-react-devtools": "^4.2.0",
     "rc-tooltip": "^3.3.5",
     "react": "^15.1.0",
     "react-bootstrap-modal": "^2.1.0",
     "react-contextmenu": "^1.6.2",
     "react-dom": "^15.1.0",
     "react-loader": "^2.4.0",
-    "react-router": "^2.4.1"
-  },
-  "devDependencies": {
-    "@cypress/core-releaser": "0.1.8",
-    "babel-eslint": "^6.0.4",
-    "bootstrap-sass": "3.3.5",
-    "bower": "^1.7.2",
-    "eslint": "^2.12.0",
-    "eslint-plugin-react": "^5.2.2",
-    "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
-    "font-awesome": "4.6.1",
-    "gulp-concat": "^2.6.0",
-    "jquery": "3.1.0",
-    "mobx-react-devtools": "^4.2.0",
-    "zunder": "^3.4.5"
+    "react-router": "^2.4.1",
+    "zunder": "^3.4.10"
   }
 }
