@@ -1,4 +1,4 @@
-describe.only "Config", ->
+describe "Config", ->
   beforeEach ->
     @firstProjectName = "My-Fake-Project"
 
