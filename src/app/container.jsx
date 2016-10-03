@@ -69,10 +69,12 @@ class Container extends Component {
   }
 
   _noAutomation () {
-    return <NoAutomation
-      browsers={this.props.config.browsers}
-      onLaunchBrowser={(browser) => this.props.eventManager.launchBrowser(browser)}
-    />
+    return (
+      <NoAutomation
+        browsers={this.props.config.browsers}
+        onLaunchBrowser={(browser) => this.props.eventManager.launchBrowser(browser)}
+      />
+    )
   }
 
   _automationDisconnected () {

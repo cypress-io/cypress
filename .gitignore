@@ -6,3 +6,4 @@ dist*
 build
 cypress.env.json
 tmp
+*.orig
