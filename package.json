@@ -6,7 +6,7 @@
   "scripts": {
     "build-dev": "zunder build-dev",
     "build-prod": "node ./scripts/build-prod.js",
-    "prod": "zunder build-prod && zunder serve-prod",
+    "prod": "npm run build-prod && npm run server",
     "server": "zunder serve-prod --port 8000",
     "start": "zunder watch",
     "prepublish": "npm run build-prod",
