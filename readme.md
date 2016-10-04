@@ -69,6 +69,9 @@ LGPL
 
 ## Changelog
 
+#### 0.3.6 - *(10/03/16)*
+- deploy proper prod files, fix mobx action undefined values
+
 #### 0.3.5 - *(09/13/16)*
 - previously chosen browser is saved per user and selected by default
 

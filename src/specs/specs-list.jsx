@@ -91,7 +91,7 @@ class Specs extends Component {
   _runAllSpecs (e) {
     e.preventDefault()
 
-    action('spec:selected', specsCollection.setChosenSpec('__all'))
+    specsCollection.setChosenSpec('__all')
 
     let project = this.props.project
 
@@ -101,7 +101,7 @@ class Specs extends Component {
   _selectSpec (specId, e) {
     e.preventDefault()
 
-    action('spec:selected', specsCollection.setChosenSpec(specId))
+    specsCollection.setChosenSpec(specId)
 
     let project = this.props.project
 

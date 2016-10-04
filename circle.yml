@@ -9,7 +9,8 @@ dependencies:
 
 test:
   pre:
-    - npm start:
+    - npm run build-prod
+    - npm run server:
         background: true
   override:
     - cypress ci
