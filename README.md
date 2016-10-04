@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.0 - *(10/03/16)*
+- snapshot pinning
+
 #### 0.2.0 - *(10/02/16)*
 - enable resizing the reporter and persisting local app settings
 
