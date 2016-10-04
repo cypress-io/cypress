@@ -1,9 +1,6 @@
-import $ from 'jquery'
 import React from 'react'
 import { mount } from 'enzyme'
 import sinon from 'sinon'
-
-global.$ = $
 
 import Resizer from './resizer'
 
