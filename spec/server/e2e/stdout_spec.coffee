@@ -12,7 +12,7 @@ describe "e2e stdout", ->
     .get("stdout")
     .then (stdout) ->
       stdout = stdout
-      .replace(/\(\d{1,4}ms\)/g, "(123ms)")
+      .replace(/\(\d{1,4}m?s\)/g, "(123ms)")
       .replace(/coffee-\d{3}/g, "coffee-456")
       .replace(/(.+)\.projects\/e2e\/does-not-exist\.html/, "/foo/bar/.projects/e2e/does-not-exist.html")
 
