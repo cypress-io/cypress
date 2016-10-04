@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.2 - *(10/04/16)*
+- fix flash of reverted state when toggling snapshot pinning off
+
 #### 0.3.1 - *(10/04/16)*
 - fix issue with snapshot controls
 
