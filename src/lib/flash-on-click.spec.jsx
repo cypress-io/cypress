@@ -50,8 +50,8 @@ describe('<FlashOnClick />', () => {
       expect(component.find('Tooltip')).to.have.prop('visible', true)
     })
 
-    it('hides the tooltip after 600ms', () => {
-      clock.tick(600)
+    it('hides the tooltip after 800ms', () => {
+      clock.tick(800)
       expect(component.update().find('Tooltip')).to.have.prop('visible', false)
     })
   })
