@@ -384,7 +384,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             @_timeout(prevTimeout)
             options.onLoad?.call(runnable.ctx, win)
 
-            options._log.set({url: url}).snapshot() if options._log
+            options._log.set({url: url}) if options._log
 
             resolve(win)
 

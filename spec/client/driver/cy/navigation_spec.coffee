@@ -523,6 +523,11 @@ describe "$Cypress.Cy Navigation Commands", ->
           _.each obj, (value, key) =>
             expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
+      it "snapshots once", ->
+        @cy.visit("/index.html").then ->
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
+
       it "can turn off logging", ->
         log = null
 
