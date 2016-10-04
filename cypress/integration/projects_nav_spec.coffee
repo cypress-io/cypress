@@ -68,6 +68,7 @@ describe "Projects Nav", ->
     describe "builds page", ->
       beforeEach ->
         cy
+          .fixture("builds").as("builds")
           .get(".navbar-default")
             .contains("a", "Builds").as("buildsNav").click()
 
@@ -80,7 +81,8 @@ describe "Projects Nav", ->
         cy
           .location().its("hash").should("include", "builds")
 
-      it "displays builds page", ->
+      it.only "displays builds page", ->
+        @ipc.handle("get:builds", null, @builds)
         cy
           .contains("h5", "Builds")
 
