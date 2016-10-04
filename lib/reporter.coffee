@@ -38,14 +38,12 @@ mergeRunnable = (testProps, runnables) ->
   _.extend(runnables[testProps.id], testProps)
 
 safelyMergeRunnable = (testProps, runnables) ->
-  _.extend({}, mergeRunnable(testProps, runnables))
-
-createHook = (props, runnables) ->
-  createRunnable(props, runnables[props.id])
+  _.extend({}, runnables[testProps.id], testProps)
 
 mergeErr = (test, runnables) ->
   runnable = runnables[test.id]
   runnable.err = test.err
+  runnable = _.extend({}, runnable, {title: test.title})
   [runnable, test.err]
 
 events = {
