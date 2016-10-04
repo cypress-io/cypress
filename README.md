@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.1 - *(10/04/16)*
+- fix issue with snapshot controls
+
 #### 0.3.0 - *(10/03/16)*
 - snapshot pinning
 
