@@ -188,7 +188,6 @@ export default class IframeModel {
     this.state.messageTitle = 'DOM Snapshot'
     this.state.messageDescription = ''
     this.state.messageControls = null
-    this._clearSnapshots()
   }
 
   _testsRunningError () {

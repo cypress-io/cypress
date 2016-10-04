@@ -207,9 +207,7 @@ export default {
       sendEventIfSnapshotProps(logId, 'show:snapshot')
     })
 
-    reporterBus.on('runner:hide:snapshot', () => {
-      localBus.emit('hide:snapshot')
-    })
+    reporterBus.on('runner:hide:snapshot', this._hideSnapshot.bind(this))
 
     reporterBus.on('runner:pin:snapshot', (logId) => {
       sendEventIfSnapshotProps(logId, 'pin:snapshot')
@@ -299,11 +297,16 @@ export default {
 
   snapshotUnpinned () {
     this._unpinSnapshot()
+    this._hideSnapshot()
     reporterBus.emit('reporter:snapshot:unpinned')
   },
 
   _unpinSnapshot () {
     localBus.emit('unpin:snapshot')
+  },
+
+  _hideSnapshot () {
+    localBus.emit('hide:snapshot')
   },
 
   launchBrowser (browser) {
