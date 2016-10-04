@@ -57,6 +57,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.0 - *(10/03/16)*
+- snapshot pinning
+
 #### 0.2.0 - *(09/23/16)*
 - handle being resized to any width
 - fix issues with scrolling cutting off commands
