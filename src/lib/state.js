@@ -1,4 +1,4 @@
-import { computed, observable } from 'mobx'
+import { asReference, computed, observable } from 'mobx'
 import automation from './automation'
 
 const _defaults = {
@@ -21,7 +21,7 @@ export default class State {
   @observable messageTitle = _defaults.messageTitle
   @observable messageDescription = _defaults.messageDescription
   @observable messageType = _defaults.messageType
-  @observable messageControls = _defaults.messageControls
+  @observable messageControls = asReference(_defaults.messageControls)
 
   @observable snapshot = {
     showingHighlights: true,
