@@ -70,6 +70,11 @@ describe "Specs List", ->
       cy
         .contains(".modal", "To help you get started").should("be.visible")
 
+    it "can dismiss the modal", ->
+      cy
+        .contains("OK, got it!").click()
+        .get(".modal").should("not.be.visible")
+
     it "triggers open:finder on click of example file", ->
       cy
         .get(".modal").contains("example_spec.js").click().then ->
