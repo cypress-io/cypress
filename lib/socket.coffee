@@ -92,8 +92,8 @@ class Socket
     })
     .then(cb)
 
-  onRequest: (automation, options, cb) ->
-    Request.send(automation, options)
+  onRequest: (headers, automation, options, cb) ->
+    Request.send(headers, automation, options)
     .then(cb)
     .catch (err) ->
       cb({__error: err.message})
@@ -189,6 +189,10 @@ class Socket
 
     @io.on "connection", (socket) =>
       logger.info "socket connected"
+
+      ## cache the headers so we can access
+      ## them at any time
+      headers = socket.request?.headers ? {}
 
       respond = (id, resp) ->
         if message = messages[id]
@@ -287,7 +291,7 @@ class Socket
         @watchTestFileByPath(config, filePath, watchers, cb)
 
       socket.on "request", (options, cb) =>
-        @onRequest(automationRequest, options, cb)
+        @onRequest(headers, automationRequest, options, cb)
 
       socket.on "fixture", (fixturePath, options, cb) =>
         @onFixture(config, fixturePath, options, cb)
@@ -342,23 +346,7 @@ class Socket
           cb(false)
 
       socket.on "resolve:url", (url, cb) =>
-        options.onResolveUrl(url, automationRequest, cb)
-
-        # @onRequest(automationRequest, {
-        #   url: url
-        #   resolveWithFullResponse: false
-        #   followRedirect: (resp) ->
-        #     console.log "follow redirect", resp.headers
-        #     redirects.push(resp.headers["location"])
-
-        #     return true
-        # }, (resp) ->
-        #   resp.url = _.last(redirects) ? url
-        #   ## we should set the cookies on the browser here
-        #   ## resp.headers["set-cookie"]
-        #   resp.redirects = redirects
-        #   cb(resp)
-        # )
+        options.onResolveUrl(url, headers, automationRequest, cb)
 
       socket.on "preserve:run:state", (state, cb) ->
         existingState = state

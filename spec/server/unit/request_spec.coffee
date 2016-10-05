@@ -59,7 +59,7 @@ describe "lib/request", ->
         "Content-Type": "text/html"
       }
 
-      Request.send(@fn, {url: "http://www.github.com/foo"})
+      Request.send({}, @fn, {url: "http://www.github.com/foo"})
       .then ->
         expect(init).to.be.calledWithMatch({strictSSL: false})
 
@@ -70,7 +70,7 @@ describe "lib/request", ->
 
       ## should not bomb on 500
       ## because simple = false
-      Request.send(@fn, {url: "http://www.github.com/foo"})
+      Request.send({}, @fn, {url: "http://www.github.com/foo"})
       .then -> done()
 
     it "sets resolveWithFullResponse=true", ->
@@ -80,7 +80,7 @@ describe "lib/request", ->
         "Content-Type": "text/html"
       }
 
-      Request.send(@fn, {url: "http://www.github.com/foo"})
+      Request.send({}, @fn, {url: "http://www.github.com/foo"})
       .then (resp) ->
         expect(resp).to.have.keys("status", "body", "headers", "duration")
 
@@ -97,7 +97,7 @@ describe "lib/request", ->
       })
       .reply(200, {id: 1})
 
-      Request.send(@fn, {
+      Request.send({}, @fn, {
         url: "http://localhost:8080/users"
         method: "POST"
         cookies: {foo: "bar", baz: "quux"}
@@ -126,7 +126,7 @@ describe "lib/request", ->
         {name: "baz", value: "quux"}
       ])
 
-      Request.send(@fn, {
+      Request.send({}, @fn, {
         url: "http://localhost:8080/users"
         method: "POST"
         cookies: true
@@ -156,7 +156,7 @@ describe "lib/request", ->
         {name: "baz", value: "quux"}
       ])
 
-      Request.send(@fn, {
+      Request.send({}, @fn, {
         url: "http://github.com:8080/users"
         method: "POST"
         cookies: true
@@ -177,7 +177,7 @@ describe "lib/request", ->
         "Content-Type": "application/json"
       })
 
-      Request.send(@fn, {
+      Request.send({}, @fn, {
         url: "http://localhost:8080/status.json"
       })
       .then (resp) ->
@@ -190,7 +190,7 @@ describe "lib/request", ->
         "Content-Type": "application/json"
       })
 
-      Request.send(@fn, {
+      Request.send({}, @fn, {
         url: "http://localhost:8080/status.json"
       })
       .then (resp) ->
@@ -203,12 +203,27 @@ describe "lib/request", ->
         "Content-Type": "text/plain"
       })
 
-      Request.send(@fn, {
+      Request.send({}, @fn, {
         url: "http://localhost:8080/foo"
       })
       .then (resp) ->
         expect(resp.duration).to.be.a("Number")
         expect(resp.duration).to.be.gt(0)
+
+    it "sends up user-agent headers", ->
+      nock("http://localhost:8080")
+      .matchHeader("User-Agent", "foobarbaz")
+      .get("/foo")
+      .reply(200, "derp")
+
+      headers = {}
+      headers["user-agent"] = "foobarbaz"
+
+      Request.send(headers, @fn, {
+        url: "http://localhost:8080/foo"
+      })
+      .then (resp) ->
+        expect(resp.body).to.eq("derp")
 
     context "bad headers", ->
       beforeEach (done) ->
@@ -222,7 +237,7 @@ describe "lib/request", ->
         @srv.close()
 
       it "recovers from bad headers", ->
-        Request.send(@fn, {
+        Request.send({}, @fn, {
           url: "http://localhost:9988/foo"
           headers: {
             "x-text": "אבגד"
@@ -234,7 +249,7 @@ describe "lib/request", ->
           expect(err.message).to.eq "TypeError: The header content contains invalid characters"
 
       it "handles weird content in the body just fine", ->
-        Request.send(@fn, {
+        Request.send({}, @fn, {
           url: "http://localhost:9988/foo"
           json: true
           body: {

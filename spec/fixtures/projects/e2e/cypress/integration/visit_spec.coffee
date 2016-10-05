@@ -60,3 +60,28 @@ describe "visits", ->
             origin + "/index.html#bar"
             origin + "/index.html"
           ])
+
+  context "issue #230: User Agent headers", ->
+    beforeEach ->
+      cy.visit("http://localhost:3434/agent.html")
+
+    it "submits user agent on cy.visit", ->
+      cy.get("#agent").invoke("text").then (text) ->
+        ua = JSON.parse(text)
+
+        expect(navigator.userAgent).to.deep.eq(ua.source)
+
+    it "submits user agent on page load", ->
+      cy
+        .get("a").click()
+        .get("#agent").invoke("text").then (text) ->
+          ua = JSON.parse(text)
+
+          expect(navigator.userAgent).to.deep.eq(ua.source)
+
+    it "submits user agent on cy.request", ->
+      cy
+        .request("http://localhost:3434/agent.json")
+        .its("body")
+        .then (body) ->
+          expect(navigator.userAgent).to.deep.eq(body.agent.source)

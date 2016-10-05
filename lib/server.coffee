@@ -12,7 +12,7 @@ httpProxy    = require("http-proxy")
 httpsProxy   = require("@cypress/core-https-proxy")
 allowDestroy = require("server-destroy-vvo")
 cors         = require("./util/cors")
-headers      = require("./util/headers")
+headersUtil  = require("./util/headers")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
 cwd          = require("./cwd")
@@ -255,7 +255,7 @@ class Server
       fileServer: @_remoteFileServer
     })
 
-  _onResolveUrl: (urlStr, automationRequest) ->
+  _onResolveUrl: (urlStr, headers, automationRequest) ->
     handlingLocalFile = false
     previousState = _.clone @_getRemoteState()
 
@@ -319,7 +319,7 @@ class Server
               newUrl ?= urlStr
 
               isOkay      = isOkayStatusRe.test(incomingRes.statusCode)
-              contentType = headers.getContentType(incomingRes)
+              contentType = headersUtil.getContentType(incomingRes)
               isHtml      = contentType is "text/html"
 
               details = {
@@ -382,7 +382,7 @@ class Server
 
           next.format()
 
-        Request.sendStream(automationRequest, {
+        Request.sendStream(headers, automationRequest, {
           ## turn off gzip since we need to eventually
           ## rewrite these contents
           gzip: false
@@ -538,8 +538,8 @@ class Server
       @_middleware = null
 
   startWebsockets: (watchers, config, options = {}) ->
-    options.onResolveUrl = (urlStr, automationRequest, cb) =>
-      @_onResolveUrl(urlStr, automationRequest)
+    options.onResolveUrl = (urlStr, headers, automationRequest, cb) =>
+      @_onResolveUrl(urlStr, headers, automationRequest)
       .then(cb)
 
     @_socket = Socket()

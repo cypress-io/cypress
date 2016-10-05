@@ -1,7 +1,29 @@
-Fixtures = require("../helpers/fixtures")
-e2e      = require("../helpers/e2e")
+useragent = require("express-useragent")
+Fixtures  = require("../helpers/fixtures")
+e2e       = require("../helpers/e2e")
 
 onServer = (app) ->
+  app.get "/agent.json", (req, res) ->
+    source = req.headers["user-agent"] ? ""
+
+    ua = useragent.parse(source)
+
+    res.send({agent: ua})
+
+  app.get "/agent.html", (req, res) ->
+    source = req.headers["user-agent"] ? ""
+
+    ua = useragent.parse(source)
+
+    res.send("""
+      <html>
+        <a href='/agent.html'>agent</a>
+        <div id="agent">
+          #{JSON.stringify(ua)}
+        </div>
+      </html
+    """)
+
   app.get "/fail", (req, res) ->
     res.sendStatus(500)
 

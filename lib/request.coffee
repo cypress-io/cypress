@@ -154,11 +154,14 @@ module.exports = {
       .filter (cookie) ->
         not _.isEmpty(cookie)
 
-  sendStream: (automation, options = {}) ->
+  sendStream: (headers, automation, options = {}) ->
     _.defaults options, {
       headers: {}
       jar: true
     }
+
+    if ua = headers["user-agent"]
+      options.headers["User-Agent"] = ua
 
     ## create a new jar instance
     ## unless its falsy or already set
@@ -184,12 +187,15 @@ module.exports = {
     .then(setCookies)
     .then(send)
 
-  send: (automation, options = {}) ->
+  send: (headers, automation, options = {}) ->
     _.defaults options, {
       headers: {}
       gzip: true
       jar: true
     }
+
+    if ua = headers["user-agent"]
+      options.headers["User-Agent"] = ua
 
     ## create a new jar instance
     ## unless its falsy or already set

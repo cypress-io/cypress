@@ -346,7 +346,7 @@ describe "lib/socket", ->
 
     context "on(request)", ->
       it "calls socket#onRequest", (done) ->
-        onRequest = @sandbox.stub(@socket, "onRequest").callsArgWithAsync(2, "bar")
+        onRequest = @sandbox.stub(@socket, "onRequest").callsArgWithAsync(3, "bar")
 
         @client.emit "request", "foo", (resp) ->
           expect(resp).to.eq("bar")
@@ -354,7 +354,7 @@ describe "lib/socket", ->
           ## ensure onRequest was called with those same arguments
           ## therefore we have verified the socket binding and
           ## the call into onRequest with the proper arguments
-          expect(onRequest.getCall(0).args[1]).to.eq("foo")
+          expect(onRequest.getCall(0).args[2]).to.eq("foo")
           done()
 
       it "returns the request object", ->
@@ -371,7 +371,7 @@ describe "lib/socket", ->
           cookies: {foo: "bar"}
         }
 
-        @socket.onRequest(cb1, req, cb2).then ->
+        @socket.onRequest({}, cb1, req, cb2).then ->
           expect(cb2).to.be.calledWithMatch {
             status: 200
             body: {status: "ok"}
@@ -449,7 +449,7 @@ describe "lib/socket", ->
           cookies: false
         }
 
-        @socket.onRequest(cb1, req, cb2).then ->
+        @socket.onRequest({}, cb1, req, cb2).then ->
           obj = cb2.getCall(0).args[0]
           expect(obj).to.have.property("__error", "Error: connect ECONNREFUSED 127.0.0.1:1111")
 

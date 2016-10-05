@@ -53,6 +53,7 @@
     "coveralls": "^2.11.8",
     "electron-osx-sign": "^0.3.0",
     "express-session": "^1.14.1",
+    "express-useragent": "^1.0.4",
     "gitter-sidecar": "^1.2.3",
     "gulp": "3.8.8",
     "gulp-awspublish": "^3.0.1",

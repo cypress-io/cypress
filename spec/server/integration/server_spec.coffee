@@ -107,7 +107,7 @@ describe "Server", ->
         })
 
       it "can serve static assets", ->
-        @server._onResolveUrl("/index.html", @automationRequest)
+        @server._onResolveUrl("/index.html", {}, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOk: true
@@ -133,7 +133,7 @@ describe "Server", ->
             expect(res.body).to.include("Cypress.onBeforeLoad(window); </script>\n  </head>")
 
       it "sends back the content type", ->
-        @server._onResolveUrl("/assets/foo.json", @automationRequest)
+        @server._onResolveUrl("/assets/foo.json", {}, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOk: true
@@ -151,7 +151,7 @@ describe "Server", ->
       it "buffers the response", ->
         @sandbox.spy(Request, "sendStream")
 
-        @server._onResolveUrl("/index.html", @automationRequest)
+        @server._onResolveUrl("/index.html", {}, @automationRequest)
         .then (obj = {}) =>
           expect(obj).to.deep.eq({
             isOk: true
@@ -168,7 +168,7 @@ describe "Server", ->
 
           expect(buffers.keys()).to.deep.eq(["http://localhost:2000/index.html"])
         .then =>
-          @server._onResolveUrl("/index.html", @automationRequest)
+          @server._onResolveUrl("/index.html", {}, @automationRequest)
           .then (obj = {}) ->
             expect(obj).to.deep.eq({
               isOk: true
@@ -194,7 +194,7 @@ describe "Server", ->
             expect(buffers.keys()).to.deep.eq([])
 
       it "can follow static file redirects", ->
-        @server._onResolveUrl("/sub", @automationRequest)
+        @server._onResolveUrl("/sub", {}, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOk: true
@@ -223,7 +223,7 @@ describe "Server", ->
             })
 
       it "gracefully handles 404", ->
-        @server._onResolveUrl("/does-not-exist", @automationRequest)
+        @server._onResolveUrl("/does-not-exist", {}, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOk: false
@@ -246,7 +246,7 @@ describe "Server", ->
             expect(res.body).to.include("The file was not found")
 
       it "handles urls with hashes", ->
-        @server._onResolveUrl("/index.html#/foo/bar", @automationRequest)
+        @server._onResolveUrl("/index.html#/foo/bar", {}, @automationRequest)
         .then (obj = {}) =>
           expect(obj).to.deep.eq({
             isOk: true
@@ -279,6 +279,7 @@ describe "Server", ->
 
       it "can serve http requests", ->
         nock("http://getbootstrap.com")
+        .matchHeader("User-Agent", "foobarbaz")
         .get("/")
         .reply(200, "<html>content</html>", {
           "X-Foo-Bar": "true"
@@ -286,7 +287,10 @@ describe "Server", ->
           "Cache-Control": "public, max-age=3600"
         })
 
-        @server._onResolveUrl("http://getbootstrap.com/", @automationRequest)
+        headers = {}
+        headers["user-agent"] = "foobarbaz"
+
+        @server._onResolveUrl("http://getbootstrap.com/", headers, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOk: true
@@ -315,7 +319,7 @@ describe "Server", ->
         .get("/user.json")
         .reply(200, {})
 
-        @server._onResolveUrl("http://getbootstrap.com/user.json", @automationRequest)
+        @server._onResolveUrl("http://getbootstrap.com/user.json", {}, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOk: true
@@ -346,7 +350,7 @@ describe "Server", ->
           "Content-Type": "text/html"
         }
 
-        @server._onResolveUrl("http://espn.com/", @automationRequest)
+        @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOk: true
@@ -402,7 +406,7 @@ describe "Server", ->
           "Content-Type": "text/html"
         }
 
-        @server._onResolveUrl("http://espn.com/", @automationRequest)
+        @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
         .then (obj = {}) =>
           expect(obj).to.deep.eq({
             isOk: true
@@ -421,7 +425,7 @@ describe "Server", ->
 
           expect(buffers.keys()).to.deep.eq(["http://espn.go.com/"])
         .then =>
-          @server._onResolveUrl("http://espn.com/", @automationRequest)
+          @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
           .then (obj = {}) ->
             expect(obj).to.deep.eq({
               isOk: true
@@ -469,7 +473,7 @@ describe "Server", ->
           "Content-Type": "text/html"
         }
 
-        @server._onResolveUrl("http://espn.com/", @automationRequest)
+        @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
         .then (obj = {}) =>
           expect(obj).to.deep.eq({
             isOk: false
@@ -483,7 +487,7 @@ describe "Server", ->
             redirects: []
           })
 
-          @server._onResolveUrl("http://espn.com/", @automationRequest)
+          @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
           .then (obj = {}) ->
             expect(obj).to.deep.eq({
               isOk: true
@@ -515,7 +519,7 @@ describe "Server", ->
           "Content-Type": "text/html"
         }
 
-        @server._onResolveUrl("http://mlb.com/", @automationRequest)
+        @server._onResolveUrl("http://mlb.com/", {}, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOk: false
@@ -530,7 +534,7 @@ describe "Server", ->
           })
 
       it "gracefully handles http errors", ->
-        @server._onResolveUrl("http://localhost:64646", @automationRequest)
+        @server._onResolveUrl("http://localhost:64646", {}, @automationRequest)
         .then (obj = {}) ->
           err = obj.__error
 
@@ -546,7 +550,7 @@ describe "Server", ->
           "Content-Type": "text/html"
         })
 
-        @server._onResolveUrl("http://getbootstrap.com/#/foo", @automationRequest)
+        @server._onResolveUrl("http://getbootstrap.com/#/foo", {}, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOk: true
@@ -587,7 +591,7 @@ describe "Server", ->
           "Content-Type": "text/html"
         }
 
-        @server._onResolveUrl("/index.html", @automationRequest)
+        @server._onResolveUrl("/index.html", {}, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOk: true
@@ -606,7 +610,7 @@ describe "Server", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
         .then =>
-          @server._onResolveUrl("http://www.google.com/", @automationRequest)
+          @server._onResolveUrl("http://www.google.com/", {}, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOk: true
@@ -637,7 +641,7 @@ describe "Server", ->
             }
           })
         .then =>
-          @server._onResolveUrl("/index.html", @automationRequest)
+          @server._onResolveUrl("/index.html", {}, @automationRequest)
           .then (obj = {}) ->
             expect(obj).to.deep.eq({
               isOk: true
@@ -676,7 +680,7 @@ describe "Server", ->
           "Content-Type": "text/html"
         }
 
-        @server._onResolveUrl("http://www.google.com/", @automationRequest)
+        @server._onResolveUrl("http://www.google.com/", {}, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOk: true
@@ -710,7 +714,7 @@ describe "Server", ->
             }
           })
         .then =>
-          @server._onResolveUrl("/index.html", @automationRequest)
+          @server._onResolveUrl("/index.html", {}, @automationRequest)
           .then (obj = {}) ->
             expect(obj).to.deep.eq({
               isOk: true
@@ -741,7 +745,7 @@ describe "Server", ->
             props: null
           })
         .then =>
-          @server._onResolveUrl("http://www.google.com/", @automationRequest)
+          @server._onResolveUrl("http://www.google.com/", {}, @automationRequest)
           .then (obj = {}) ->
             expect(obj).to.deep.eq({
               isOk: true
@@ -778,7 +782,7 @@ describe "Server", ->
       it "can go from https -> file -> https", ->
         evilDns.add("*.foobar.com", "127.0.0.1")
 
-        @server._onResolveUrl("https://www.foobar.com:8443/", @automationRequest)
+        @server._onResolveUrl("https://www.foobar.com:8443/", {}, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOk: true
@@ -812,7 +816,7 @@ describe "Server", ->
             }
           })
         .then =>
-          @server._onResolveUrl("/index.html", @automationRequest)
+          @server._onResolveUrl("/index.html", {}, @automationRequest)
           .then (obj = {}) ->
             expect(obj).to.deep.eq({
               isOk: true
@@ -843,7 +847,7 @@ describe "Server", ->
             props: null
           })
         .then =>
-          @server._onResolveUrl("https://www.foobar.com:8443/", @automationRequest)
+          @server._onResolveUrl("https://www.foobar.com:8443/", {}, @automationRequest)
           .then (obj = {}) ->
             expect(obj).to.deep.eq({
               isOk: true
@@ -880,7 +884,7 @@ describe "Server", ->
       it "can go from https -> file -> https without a port", ->
         @timeout(5000)
 
-        @server._onResolveUrl("https://www.apple.com/", @automationRequest)
+        @server._onResolveUrl("https://www.apple.com/", {}, @automationRequest)
         .then (obj = {}) ->
           expect(obj).to.deep.eq({
             isOk: true
@@ -923,7 +927,7 @@ describe "Server", ->
             }
           })
         .then =>
-          @server._onResolveUrl("/index.html", @automationRequest)
+          @server._onResolveUrl("/index.html", {}, @automationRequest)
           .then (obj = {}) ->
             expect(obj).to.deep.eq({
               isOk: true
@@ -954,7 +958,7 @@ describe "Server", ->
             props: null
           })
         .then =>
-          @server._onResolveUrl("https://www.apple.com/", @automationRequest)
+          @server._onResolveUrl("https://www.apple.com/", {}, @automationRequest)
           .then (obj = {}) ->
             expect(obj).to.deep.eq({
               isOk: true
