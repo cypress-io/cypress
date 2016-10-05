@@ -69,6 +69,9 @@ LGPL
 
 ## Changelog
 
+#### 0.3.7 - *(10/05/16)*
+- shrinkwrap to prevent breaking dep change
+
 #### 0.3.6 - *(10/03/16)*
 - deploy proper prod files, fix mobx action undefined values
 
