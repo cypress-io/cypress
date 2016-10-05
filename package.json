@@ -13,6 +13,7 @@
   "license": "ISC",
   "devDependencies": {
     "bluebird": "^3.4.5",
+    "coffee-script": "^1.11.1",
     "lerna": "2.0.0-beta.26"
   },
   "dependencies": {
@@ -22,8 +23,3 @@
     "minimist": "^1.2.0"
   }
 }
-
-
-// npm run test -- --only core-runner,core-reporter
-
-// npm run install -- lodash core-reporter
