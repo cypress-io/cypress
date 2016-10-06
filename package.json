@@ -1,7 +1,6 @@
 {
   "name": "cypress-monorepo",
   "version": "0.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "postinstall": "node index.js --exec 'npm install, npm run build'",
@@ -15,9 +14,7 @@
     "bluebird": "^3.4.5",
     "coffee-script": "^1.11.1",
     "eslint": "^3.7.1",
-    "lerna": "2.0.0-beta.26",
-    "lodash": "^4.16.3",
-    "yargs": "^6.0.0"
+    "lodash": "^4.16.3"
   },
   "dependencies": {
     "app-module-path": "^1.1.0",

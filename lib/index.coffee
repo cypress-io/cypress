@@ -7,7 +7,7 @@ minimist = require("minimist")
 
 globAsync   = Promise.promisify(glob)
 
-DEFAULT_DIR = path.resolve("packages", "@cypress", "*")
+DEFAULT_DIR = path.resolve("packages", "*")
 
 module.exports = {
   getDirs: (dir) ->
@@ -45,5 +45,5 @@ module.exports = {
         @exec(e)
 
       else
-        require("@cypress/core-server").start(options)
+        require("core-app").start(options)
 }

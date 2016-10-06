@@ -2,7 +2,7 @@
 
 const { snakeCase } = require('lodash')
 const { execSync } = require('child_process')
-const argv = require('yargs').argv
+const argv = require('minimist')(process.argv.slice(2))
 
 const remote = snakeCase(argv._[0])
 const command = `git pull -s subtree ${remote} master`

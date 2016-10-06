@@ -2,7 +2,7 @@
 
 const { snakeCase } = require('lodash')
 const { execSync } = require('child_process')
-const argv = require('yargs').argv
+const argv = require('minimist')(process.argv.slice(2))
 
 const from = argv.from
 const to = argv.to
