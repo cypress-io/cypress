@@ -1,0 +1,6 @@
+{
+  "cypress": {
+    "integrationFolder": "my-tests",
+    "fileServerFolder": "dev"
+  }
+}

@@ -1,0 +1,11 @@
+<div>
+  <div>
+    <i class="fa fa-file-o"></i>
+    <%= @name %>
+  </div>
+</div>
+<div>
+  <div>
+    <!-- 2 days ago -->
+  </div>
+</div>

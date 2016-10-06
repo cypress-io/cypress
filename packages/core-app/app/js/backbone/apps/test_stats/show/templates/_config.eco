@@ -1,0 +1,51 @@
+<div id="pause-controls" role="group">
+  <% if @paused: %>
+    <label class="label label-danger">Paused</label>
+  <% end %>
+  <div class="btn-group btn-group-lg">
+    <% if @paused: %>
+      <button data-js-play type="button" class="btn btn-default" data-toggle="tooltip" title="Resume">
+        <i class="fa fa-play"></i>
+      </button>
+    <% else: %>
+      <% if @running: %>
+        <button data-js-stop type="button" class="btn btn-default" data-toggle="tooltip" title="Stop Running">
+          <i class="fa fa-stop"></i>
+        </button>
+      <% end %>
+    <% end %>
+    <% if @ended: %>
+      <button data-js-restart type="button" class="btn btn-default" data-toggle="tooltip" title="Run All Tests">
+        <i class="fa fa-repeat"></i>
+      </button>
+    <% end %>
+    <% if @nextCmd: %>
+      <button data-js-next type="button" class="btn btn-default" data-toggle="tooltip" title="Next: '<%= @nextCmd %>'">
+        <i class="fa fa-step-forward"></i>
+      </button>
+    <% end %>
+  </div>
+</div>
+
+
+<!-- <div id="runner-config" class="dropdown">
+  <button class="btn btn-link" data-toggle="dropdown">
+    <i class="fa fa-cloud"></i>
+    <i class="fa fa-caret-down"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-right" role="menu">
+    <li class="dropdown-header">Sauce Labs</li>
+    <li>
+      <a href="#" data-js="sauce:labs">
+        <i class="fa fa-play-circle"></i>
+        Run
+      </a>
+    </li>
+    <li>
+      <a href="#">
+        <i class="fa fa-wrench"></i>
+        Configuration
+      </a>
+    </li>
+  </ul>
+</div> -->

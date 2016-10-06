@@ -1,0 +1,58 @@
+<div class="<%= @status %>">
+  <div>
+    #<%= @buildId %>
+  </div>
+</div>
+<div>
+  <div>
+    <div>
+      <i class="fa fa-code-fork fa-rotate-90"></i>
+      <%= @branch %>
+      <i class="fa fa-user"></i>
+      <%= @author %>
+    </div>
+    <div class="msg">
+      <%= @message %>
+    </div>
+  </div>
+</div>
+<div>
+  <div>
+    <i class="fa fa-clock-o"></i> started
+    <%= moment(@created_at).fromNow() %>
+  </div>
+</div>
+<div>
+  <div>
+    <i class="fa fa-hourglass-end"></i> ran for
+    <%= moment.duration(@duration).humanize() %>
+  </div>
+</div>
+<div>
+  <div class="td-border-left os-block">
+    <i class="fa fa-<%= @osNameFormatted %>"></i>
+    <%= @os_version %>
+  </div>
+</div>
+<div>
+  <div>
+    <i class="fa fa-<%= @browserNameFormatted %>"></i>
+    <%= @browser_version %>
+  </div>
+</div>
+<div>
+  <div class="td-border-left">
+    <% if @passed > 0: %>
+      Pass
+      <span class="label label-success"><%= @passed %></span>
+    <% end %>
+  </div>
+</div>
+<div>
+  <div>
+    <% if @failed > 0: %>
+      Fail
+      <span class="label label-danger"><%= @failed %></span>
+    <% end %>
+  </div>
+</div>

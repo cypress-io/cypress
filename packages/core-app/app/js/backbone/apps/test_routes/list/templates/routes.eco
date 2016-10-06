@@ -1,0 +1,27 @@
+<ul class="hooks-container">
+  <li class="hook-item">
+    <span class="hook-name">
+      <i class="fa fa-caret-right"></i>
+      Routes (<span data-js='total'></span>)
+      <i class="fa fa-ellipsis-h"></i>
+    </span>
+    <div class="server-container hidden">
+      <div class="tab-content">
+        <div class="tab-pane active">
+          <table class="table table-condensed">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Url</th>
+                <th>Stubbed</th>
+                <th>Alias</th>
+                <th title="Number of responses which matched this route">#</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </li>
+</ul>

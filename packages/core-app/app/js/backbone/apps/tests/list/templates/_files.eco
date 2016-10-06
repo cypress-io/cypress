@@ -1,0 +1,68 @@
+<div id="options-region">
+  <div class="btn-group">
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fa fa-cog"></i>
+        View Configuration
+        <span class="caret"></span>
+      </button>
+      <div class="dropdown-menu dropdown-menu-right">
+        <div class="config-explanation">
+          Your project's configuration:
+          <a href="https://on.cypress.io/guides/configuration" target="_blank">
+            <i class="fa fa-info-circle"></i>
+            Learn more
+          </a>
+        </div>
+<pre class="config-vars">
+{
+<%- @displayResolved(@config, {comma: true}) %><span class="envVars"><span class="key">environmentVariables</span><span class="colon">:</span> {<%- @displayResolved(@envVars) %>  }</span>
+}
+</pre>
+        <table class="table">
+          <tr class="config-keys">
+            <td><span class="default">default</span></td>
+            <td>default values</td>
+          </tr>
+          <tr class="config-keys">
+            <td><span class="config">config</span></td>
+            <td>set from cypress.json</td>
+          </tr>
+          <tr class="config-keys">
+            <td><span class="envFile">envFile</span></td>
+            <td>set from cypress.env.json</td>
+          </tr>
+          <tr class="config-keys">
+            <td><span class="env">env</span></td>
+            <td>set from environment variables</td>
+          </tr>
+          <tr class="config-keys">
+            <td><span class="cli">CLI</span></td>
+            <td>set from CLI arguments</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+<!--     <div class="btn-group" role="group">
+      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Health Check
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right health-check">
+        <p><strong>Health Check</strong> is determined by <code>baseUrl</code>.
+
+        <li>
+          <i class="fa fa-check-circle green"></i>
+          <span class="url">http://localhost:8080</span>
+          <span class="msg">Website if available</span>
+        </li>
+        <li>
+          <i class="fa fa-close red"></i>
+          <span class="url">http://localhost:6464</span>
+          <span class="msg">Website if unavailable</span>
+        </li>
+      </ul>
+    </div> -->
+  </div>
+</div>
+<ul class="outer-files-container list-as-table"></ul>

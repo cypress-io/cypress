@@ -1,0 +1,10 @@
+<div class="runnable-wrapper">
+  <div class="runnable-content-region"></div>
+  <div class="runnable-instruments">
+    <div class="runnable-agents-region"></div>
+    <div class="runnable-routes-region"></div>
+    <div class="runnable-commands-region"></div>
+  </div>
+  <span class="hook"></span>
+  <pre class="test-error"></pre>
+</div>

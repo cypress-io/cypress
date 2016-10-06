@@ -1,0 +1,12 @@
+.title-bar {
+  overflow: auto;
+  width: 100%;
+
+  h1, h2 {
+    float: left;
+  }
+
+  .controls {
+    float: right;
+  }
+}

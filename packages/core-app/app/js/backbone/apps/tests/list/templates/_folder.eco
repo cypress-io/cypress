@@ -1,0 +1,9 @@
+<div>
+  <div>
+    <i class="fa fa-folder-open-o"></i>
+    <%= @name %>
+  </div>
+  <div>
+    <ul class="list-as-table"></ul>
+  </div>
+</div>

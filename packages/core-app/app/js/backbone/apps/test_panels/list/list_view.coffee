@@ -1,0 +1,26 @@
+@App.module "TestPanelsApp.List", (List, App, Backbone, Marionette, $, _) ->
+
+  class List.Panel extends App.Views.ItemView
+    template: "test_panels/list/_panel"
+
+    events:
+      "click" : "clicked"
+
+    modelEvents:
+      "change:chosen" : "chosenChanged"
+
+    onBeforeRender: ->
+      @chosenChanged @model, @model.isChosen()
+
+    clicked: (e) ->
+      e.preventDefault()
+      @model.toggleChoose()
+
+    chosenChanged: (model, value, options) ->
+      @$el.toggleClass("active", value)
+
+  class List.Panels extends App.Views.CollectionView
+    tagName: "ul"
+    id: "cy-test-panels"
+    className: "cy-vnavigation"
+    childView: List.Panel

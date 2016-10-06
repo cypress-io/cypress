@@ -1,0 +1,7 @@
+<div class="well well-lg">
+  <h4>
+    <i class="fa fa-warning"></i>
+    Sorry, couldn't find any builds.<br />
+    When you run your tests in CI they will show up here.
+  </h4>
+</div>

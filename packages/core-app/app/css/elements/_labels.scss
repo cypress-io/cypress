@@ -1,0 +1,42 @@
+.label-default {
+  background-color: #C3C3C3;
+}
+.label-default[href]:hover,
+.label-default[href]:focus {
+  background-color: #C3C3C3;
+}
+// .label-primary {
+//   background-color: #337ab7;
+// }
+// .label-primary[href]:hover,
+// .label-primary[href]:focus {
+//   background-color: #286090;
+// }
+.label-success {
+  background-color: #1CB77E;
+}
+.label-success[href]:hover,
+.label-success[href]:focus {
+  background-color: #1CB77E;
+}
+.label-info {
+  background-color: #94C1FA;
+}
+.label-info[href]:hover,
+.label-info[href]:focus {
+  background-color: #94C1FA;
+}
+// .label-warning {
+//   background-color: #f0ad4e;
+// }
+// .label-warning[href]:hover,
+// .label-warning[href]:focus {
+//   background-color: #ec971f;
+// }
+.label-danger {
+  background-color: #CC4239;
+}
+.label-danger[href]:hover,
+.label-danger[href]:focus {
+  background-color: #CC4239;
+}

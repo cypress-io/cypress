@@ -1,0 +1,50 @@
+<div class="extension-message">
+  <p>Whoops, we can't run your tests.</p>
+  <% if @browsers.length is 0: %>
+    <p class="muted">
+      <small>
+        We couldn't find any supported browsers capable of running Cypress on your machine.
+      </small>
+    </p>
+    <a href="https://www.google.com/chrome/browser/desktop" target="_blank" class="btn btn-primary btn-lg">
+      <i class="fa fa-chrome"></i>
+      Download Chrome
+    </a>
+  <% else: %>
+    <p class="muted">
+      <small>This browser was not launched through Cypress. Tests cannot run.</small>
+    </p>
+    <div class="btn-group browser-selector">
+      <button type="button" data-js="run-browser" data-browser="<%= @name %>" class="btn btn-primary btn-lg">
+        <i data-js="browser-icon" class="fa fa-<%= @icon %>"></i>
+        <span data-js="browser-text">Run <%= @displayName %> <%= @majorVersion %></span>
+      </button>
+      <% if @browsers.length > 1: %>
+        <button type="button" class="btn btn-primary dropdown-toggle btn-lg" data-toggle="dropdown">
+          <span class="caret"></span>
+          <span class="sr-only">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu">
+          <% for browser in @browsers: %>
+            <% if not browser.chosen: %>
+              <li>
+                <a href="#" data-js="run-browser" data-browser="<%= browser.name %>">
+                  <i class="fa fa-<%= browser.icon %>"></i>
+                  Run
+                  <%= browser.displayName %>
+                  <%= browser.majorVersion %>
+                </a>
+              </li>
+            <% end %>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+<div class="helper-line">
+  <a class="helper-docs-link" href="https://on.cypress.io/guides/browser-management" target="_blank">
+    <i class="fa fa-question-circle"></i>
+    Why am I seeing this message?
+  </a>
+</div>

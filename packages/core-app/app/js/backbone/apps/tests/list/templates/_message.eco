@@ -1,0 +1,4 @@
+<div class="alert alert-warning">
+  <p class="center">
+  <i class="fa fa-exclamation-triangle"></i> We couldn't connect to the Cypress chrome extension. You can navigate around but we won't be able to run any tests.</p>
+</div>

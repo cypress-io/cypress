@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <script type="text/javascript">
+      document.domain = '{{domain}}';
+
+      (function(parent) {
+        var Cypress = window.Cypress = parent.Cypress;
+        if (!Cypress) {
+          throw new Error("Tests cannot run without a reference to Cypress!");
+        }
+        return Cypress.onSpecWindow(window);
+      })(window.opener || window.parent);
+    </script>
+
+    {{#each javascripts}}
+      <script type="text/javascript" src="{{{this}}}"></script>
+    {{/each}}
+
+    {{#each specs}}
+      <script type="text/javascript" src="{{{this}}}"></script>
+    {{/each}}
+  </body>
+</html>

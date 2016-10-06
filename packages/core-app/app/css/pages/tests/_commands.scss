@@ -1,0 +1,367 @@
+.hooks-container {
+  margin: 5px 10px 5px 5px;
+  padding-left: 10px;
+  border-left: 1px dotted #DDD;
+
+  .hook-item {
+    margin-bottom: 5px;
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+
+  i {
+    margin-right: 3px;
+  }
+
+  .hook-name {
+    text-transform: uppercase;
+    color: #959595;
+    font-size: 11px;
+
+    &:hover {
+      border-bottom: 1px dotted #959595;
+      color: #333;
+      cursor: pointer;
+    }
+
+    .hook-failed {
+      color: #E94F5F;
+    }
+  }
+}
+
+.well {
+  margin-bottom: 0;
+}
+
+.command-console-message {
+  position: absolute;
+  height: 20px;
+  margin-top: -10px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 2px 5px;
+  border-radius: 5px;
+  display: none;
+}
+
+.commands-container {
+  font-family: Consolas, Monaco, 'Andale Mono', monospace;
+
+  background-color: #eef1f4;
+  padding: 0;
+  // padding-bottom: 4px;
+
+  &:empty {
+    display: none;
+  }
+
+  &>li {
+    padding: 1px 9px 1px 5px;
+    margin: 0;
+
+    &:hover {
+      background-color: #E0E5E7;
+      cursor: pointer;
+      box-shadow: 0 1px 2px #ccc inset;
+    }
+
+    &:hover .command-controls i.fa-pause {
+      visibility: visible;
+    }
+
+    &.active {
+      background-color: #E1E1E1 !important;
+      box-shadow: 0 1px 6px #ccc inset;
+    }
+
+    &.highlight {
+      background-color: #FFB61C !important;
+    }
+  }
+
+  .command-cloned, .command-event {
+    font-style: italic;
+
+    span {
+      color: #9a9aaa !important;
+    }
+
+  }
+
+  .command-parent {
+    border-top: 1px solid #e3e3e3;
+    // padding-top: 4px;
+    // margin-top: 4px;
+
+    &:hover {
+      border-top: 1px solid #eef1f4;
+    }
+
+    &:first-child {
+      border-top: 0;
+    }
+
+  }
+
+  .command-child {
+    .command-method {
+      &:before {
+        // position: absolute;
+        float: left;
+        content: "-";
+        margin-right: 2px;
+      }
+      // &:before {
+      //   border-left: 1px dotted #999;
+      //   border-bottom: 1px dotted #999;
+      //   position: absolute;
+      //   width: 10px;
+      //   height: 11px;
+      //   content: "-";
+      //   margin-left: -8px;
+      // }
+    }
+  }
+
+  .command-wrapper {
+    position: relative;
+    overflow: hidden;
+    color: #777;
+
+    i.fa-ellipsis-h {
+      color: #fff;
+      background-color: #abaaaa;
+      border-radius: 3px;
+      padding: 0 4px;
+    }
+
+    .label {
+      font-weight: normal;
+      padding: 1px 4px;
+      border-radius: 5px;
+    }
+
+    .label-default {
+      background-color: #777;
+    }
+
+    .command-alias {
+      border-radius: 10px;
+      color: #777888;
+      padding: 0px 5px;
+      display: inline-block;
+
+      &.route {
+        background-color: lighten(#FFB61C, 25%);
+      }
+
+      &.dom {
+        background-color: darken(#D4EAFF, 3%);
+      }
+
+      &.primitive {
+        background-color: darken(#FFE0DE, 3%);
+      }
+    }
+  }
+
+  .command-number {
+    float: left;
+    width: 25px;
+    color: #bcbccc;
+    min-height: 1px; //used because some numbers are empty
+    text-align: right;
+    padding-right: 10px;
+  }
+
+  .command-method {
+    padding: 0 2px;
+    display: inline-block;
+    text-transform: uppercase;
+    font-size: 11px;
+    float: left;
+    min-width: 80px;
+    font-weight: 600;
+    color: #565554;
+    position: relative;
+    top: 1px;
+    // @include text-overflow;
+  }
+
+  .command-pending {
+    padding-left: 3px;
+    border-left: 2px solid $pending;
+    background-color: lighten($pending, 40%);
+
+    .command-number,
+    .command-method,
+    .command-message {
+      color: lighten($pending, 15%);
+    }
+  }
+
+  .command-failed {
+    padding-left: 3px;
+    border-left: 2px solid $fail;
+    background-color: lighten($fail, 30%);
+
+    .command-number,
+    .command-method,
+    .command-message {
+      color: $fail;
+    }
+    // border-radius: 5px;
+    // float: left;
+    // padding: 0 4px;
+    // font-size: 10px;
+    // text-transform: uppercase;
+    // position: absolute;
+    // top: 0;
+    // right: 20px;
+  }
+
+  .command-name-xhr, .command-name-request {
+    .command-message {
+      .command-status {
+        font-weight: 700;
+        color: #565554;
+        margin-right: 3px;
+      }
+
+      .command-body {
+        color: #565554;
+      }
+
+      .fa-circle.successful {
+        color: $pending;
+      }
+
+      .fa-circle.aborted {
+        color: $fail;
+      }
+
+      .fa-circle.bad {
+        color: #F0AD4E;
+      }
+
+      .fa-circle.pending {
+        color: #AAA;
+      }
+    }
+  }
+
+  .command-name-assert {
+    .command-method {
+      span {
+        border-radius: 2px;
+        padding: 0 3px;
+        font-size: 11px;
+        display: inline-block;
+        height: 14px;
+        line-height: 16px;
+      }
+    }
+    .command-message {
+      color: #565554;
+
+      strong {
+        font-weight: 600;
+        margin: 0 3px;
+      }
+    }
+  }
+
+  .command-assertion-pending {
+    & .command-method {
+      & span {
+        background-color: $pending;
+        color: white;
+
+      }
+    }
+    & .command-message {
+      color: $pending;
+
+      strong {
+        color: darken($pending, 10%);
+      }
+    }
+  }
+
+  .command-assertion-failed {
+    & .command-method {
+      & span {
+        background-color: $fail;
+        color: white;
+
+      }
+    }
+    & .command-message {
+      color: $fail;
+
+      strong {
+        color: darken($fail, 10%);
+      }
+    }
+  }
+
+  .command-assertion-passed {
+    & .command-method {
+      color: $pass;
+
+      span {
+        background-color: $pass;
+        color: white;
+      }
+    }
+    & .command-message {
+      color: darken($pass, 3%);
+
+      strong {
+        color: darken($pass, 10%);
+      }
+    }
+  }
+
+
+  .command-message {
+    display: inline-block;
+    margin-left: 0;
+    width: 63%;
+  }
+
+  .command-controls {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    i {
+      padding: 2px;
+      color: #3f7bA1;
+      // visibility: hidden;
+    }
+
+    .command-alias {
+      font-family: 'Open Sans', sans-serif;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    i:hover {
+      cursor: pointer;
+    }
+
+    label {
+      font-size: 85%;
+    }
+
+    // .fa-pause {
+    //   font-size: 11px;
+    //   margin-right: 2px;
+    // }
+  }
+}

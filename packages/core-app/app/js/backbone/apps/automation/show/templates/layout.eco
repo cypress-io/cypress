@@ -1,0 +1,13 @@
+<div class="extension-message">
+  <p>Whoops, the Cypress Chrome extension has disconnected.</p>
+  <p class="muted"><small>Cypress cannot run tests without this extension.</small></p>
+  <button class="btn btn-primary btn-lg">
+    <i class="fa fa-refresh"></i> Reload the Browser
+  </button>
+</div>
+<div class="helper-line">
+  <a class="helper-docs-link" href="https://on.cypress.io/guides/browser-management" target="_blank">
+    <i class="fa fa-question-circle"></i>
+    Why am I seeing this message?
+  </a>
+</div>

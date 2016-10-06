@@ -1,0 +1,39 @@
+.form-footer {
+  overflow: auto;
+  background-color: #f9fafd;
+  padding: 20px;
+  border-top: 1px solid #eee;
+}
+
+.upload-container {
+  background-color: #fbfbfc;
+  border: 1px solid #eee;
+  padding: 20px;
+  overflow: auto;
+  margin-top: 20px;
+
+  &>span {
+    float: left;
+    line-height: 32px;
+    font-weight: 500;
+    color: #828b98;
+  }
+
+  button {
+    float: right;
+  }
+}
+
+.search-bar {
+  position: relative;
+
+  input {
+    padding-left: 30px;
+  }
+
+  i {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+  }
+}
