@@ -75,7 +75,7 @@ module.exports = {
   options: (ctx, options = {}) ->
     _.defaults(options, {
       project: e2ePath
-      timeout: if options.debug then 3000000 else 30000
+      timeout: if options.debug then 3000000 else 45000
     })
 
     ctx.timeout(options.timeout)
