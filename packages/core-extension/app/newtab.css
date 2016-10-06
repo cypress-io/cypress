@@ -1,0 +1,30 @@
+body {
+  background-color: #ddd;
+  color: #555;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;}
+
+h1 {
+  color: #48484B;
+}
+
+.wrapper {
+  width: 600px;
+  margin: 100px auto;
+}
+
+.img-wrapper {
+  text-align: center;
+}
+
+p, ul, a {
+  font-size: 18px;
+  line-height: 27px;
+}
+
+a {
+  color: #0061AB;
+}
+
+img {
+  height: 70px;
+}
