@@ -1,0 +1,105 @@
+#config {
+  bottom: 18px;
+  top: 77px;
+  position: fixed;
+  overflow: auto;
+  margin-bottom: 0;
+  width: 100%;
+
+  h5 {
+    margin-top: 20px;
+    overflow: hidden;
+    line-height: 19px;
+
+    a {
+      font-weight: normal;
+      font-size: 12px;
+      position: relative;
+      top: 2px;
+    }
+  }
+
+  .envBracket {
+    padding-left: 30px;
+  }
+
+  .config-keys {
+
+    margin-bottom: 0;
+    line-height: 16px;
+
+    &>td {
+      padding: 2px 8px;
+      font-size: 13px;
+    }
+  }
+
+  .config-vars {
+    font-size: 13px;
+    font-family: Consolas, Monaco, 'Andale Mono', monospace;
+
+    .envFile:hover, .env:hover, .config:hover, .cli:hover, .default:hover {
+      border-bottom: 1px dotted #777;
+    }
+
+    p {
+      margin-bottom: 0;
+    }
+
+    .key {
+      color: #666;
+    }
+
+    .comma, .colon, {
+      color: #888;
+    }
+
+    .line {
+      margin-left: 15px;
+      color: #000;
+    }
+
+    .envVars {
+      margin-left: 15px;
+
+      .line {
+        margin-left: 30px;
+      }
+    }
+  }
+
+  .envFile, .env, .config, .cli, .default {
+    font-family: Consolas, Monaco, 'Andale Mono', monospace;
+
+    padding: 2px;
+  }
+
+  .envFile {
+    background-color: #fdf3e3;
+    color: #7B4804;
+  }
+
+  .env {
+    background-color: #dafff4;
+    color: #045431;
+  }
+
+  .config {
+    background-color: #cdedff;
+    color: #0C5263;
+  }
+
+  .cli {
+    background-color: #fce7e9;
+    color: #A21313;
+  }
+
+}
+
+.config-wrapper {
+  padding: 0 20px;
+
+  table tr:first-child td {
+    border-top: 0;
+  }
+}

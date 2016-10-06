@@ -1,0 +1,48 @@
+#updates-available {
+  text-align: center;
+  background-color: #D9EDF7;
+  position: fixed;
+  bottom: 20px;
+  width: 100%;
+  color: #3A87AD;
+  line-height: 35px;
+  font-size: 14px;
+
+  strong {
+    margin-left: 10px;
+
+    &:hover {
+      color: darken(#3A87AD, 15%);
+      cursor: pointer;
+    }
+  }
+}
+
+#updates {
+  text-align: center;
+  padding: 40px 0;
+}
+
+html.updates {
+  background-color: #ECECEC;
+}
+
+html.has-updates {
+  .helper-line {
+    bottom: 90px;
+  }
+
+  .alert {
+    margin-bottom: 90px;
+  }
+}
+
+
+#updates-applied {
+  padding-top: 175px;
+  text-align: center;
+
+  h3 {
+    margin-bottom: 20px;
+  }
+}
