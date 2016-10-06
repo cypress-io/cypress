@@ -1,0 +1,82 @@
+.runner {
+  .snapshot-controls {
+    display: flex;
+    @extend %clearfix;
+
+    > span {
+      float: left;
+    }
+
+    button {
+      background: none;
+      border: none;
+      border-radius: 0;
+      color: #4f4f4f;
+      line-height: $message-height;
+      outline: none;
+      padding: 0 10px;
+      text-align: center;
+      vertical-align: baseline;
+
+      &:hover {
+        background-color: #e9e9e9;
+      }
+
+      &:active {
+        @include button-active;
+      }
+    }
+
+    span:first-child button:first-child {
+      border-top-left-radius: 5px;
+      border-bottom-left-radius: 5px;
+    }
+
+    span:last-child button:last-child {
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px;
+    }
+
+    &.showing-selection .toggle-selection {
+      @include button-active;
+    }
+
+    .snapshot-state-picker {
+      border-left: solid 1px #d3d3d3;
+      border-right: solid 1px #d3d3d3;
+      display: flex;
+      padding: 0 8px;
+
+      span {
+        height: $message-height;
+        line-height: $message-height + 2;
+        margin-right: 4px;
+      }
+
+      button {
+        border: solid 1px #e3e3e3;
+        border-left: none;
+        height: $message-height - 8;
+        line-height: $message-height - 8;
+        margin-top: 4px;
+        min-width: $message-height;
+        padding: 0 8px;
+
+        &:first-of-type {
+          border-left: solid 1px #e3e3e3;
+          border-top-left-radius: 3px;
+          border-bottom-left-radius: 3px;
+        }
+
+        &:last-of-type {
+          border-top-right-radius: 3px;
+          border-bottom-right-radius: 3px;
+        }
+
+        &.state-is-selected {
+          @include button-active;
+        }
+      }
+    }
+  }
+}
