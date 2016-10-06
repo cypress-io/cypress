@@ -1,0 +1,81 @@
+{
+  "name": "@cypress/core-reporter",
+  "version": "0.3.0",
+  "main": "dist/reporter",
+  "scripts": {
+    "build-dev": "gulp build-dev",
+    "build-prod": "gulp build-prod",
+    "prepublish": "npm run build-prod",
+    "release": "releaser",
+    "start": "gulp watch",
+    "test": "gulp build-test && mocha -r lib/test-setup.js dist/**/*.spec.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress-core-reporter.git"
+  },
+  "author": "Brian Mann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress-core-reporter/issues"
+  },
+  "homepage": "https://github.com/cypress-io/cypress-core-reporter#readme",
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@cypress/core-releaser": "^0.1.8",
+    "@cypress/react-tooltip": "^0.1.1",
+    "classnames": "^2.2.5",
+    "babel-eslint": "^6.0.4",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-react": "^6.5.0",
+    "babel-preset-stage-1": "^6.5.0",
+    "chai": "^3.5.0",
+    "chai-enzyme": "^0.5.0",
+    "del": "^2.2.2",
+    "enzyme": "^2.3.0",
+    "eslint": "^2.12.0",
+    "eslint-plugin-mocha": "^4.0.0",
+    "eslint-plugin-react": "^5.1.1",
+    "font-awesome": "^4.6.3",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.0",
+    "gulp-babel": "^6.1.2",
+    "gulp-if": "^2.0.1",
+    "gulp-plumber": "^1.1.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^2.3.2",
+    "gulp-spawn-mocha": "^2.2.2",
+    "gulp-util": "^3.0.7",
+    "gulp-watch": "^4.3.8",
+    "jsdom": "^9.4.1",
+    "lodash": "^4.0.0",
+    "mobx": "^2.3.6",
+    "mobx-react": "^3.5.3",
+    "mocha": "^2.5.3",
+    "node-sass-globbing": "0.0.23",
+    "react": "^15.3.0",
+    "react-addons-test-utils": "^15.3.0",
+    "react-dom": "^15.3.0",
+    "sinon": "^1.17.4",
+    "sinon-chai": "^2.8.0",
+    "through": "^2.3.8"
+  },
+  "peerDependencies": {
+    "@cypress/react-tooltip": "^0.1.1",
+    "classnames": "^2.2.5",
+    "font-awesome": "^4.6.3",
+    "lodash": "^4.0.0",
+    "mobx": "^2.3.6",
+    "mobx-react": "^3.5.3",
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0"
+  },
+  "dependencies": {
+    "css-element-queries": "^0.3.2",
+    "markdown-it": "^6.1.1"
+  }
+}

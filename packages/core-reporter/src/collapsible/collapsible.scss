@@ -1,0 +1,27 @@
+.reporter {
+  .collapsible-content {
+    display: none;
+  }
+
+  .is-open > .collapsible-content {
+    display: block;
+  }
+
+  .collapsible-more {
+    display: inline-block;
+    margin-left: 5px;
+  }
+
+  .is-open > .collapsible-header > .collapsible-more {
+    display: none;
+  }
+
+  .collapsible-indicator {
+    @extend .#{$fa-css-prefix}-caret-right;
+    margin-right: 3px;
+  }
+
+  .is-open > .collapsible-header > .collapsible-indicator {
+    @extend .#{$fa-css-prefix}-caret-down;
+  }
+}

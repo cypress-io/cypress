@@ -1,0 +1,254 @@
+.reporter {
+  .container {
+    bottom: 0;
+    box-shadow: 0 1px 2px #aaa;
+    left: 0;
+    overflow: auto;
+    padding-bottom: 40px;
+    position: absolute;
+    right: 0;
+    top: $header-height;
+  }
+
+  .wrap {
+    box-shadow: 0 1px 2px #aaa;
+    overflow: auto;
+    padding-left: 0;
+    width: 100%;
+  }
+
+  .no-tests {
+    background-color: #f5f5f5;
+    border: 1px solid #e3e3e3;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+    min-height: 20px;
+    padding: 24px;
+
+    h4 > i {
+      margin-right: 5px;
+    }
+
+    a {
+      float: right;
+    }
+
+    pre {
+      background: #fcf8e3;
+    }
+
+    ul {
+      color: #777;
+      font-size: 13px;
+      padding-left: 20px;
+    }
+
+    li {
+      line-height: 1.6;
+      list-style: decimal inside;
+    }
+  }
+
+  .runnables {
+    padding-left: 0;
+    user-select: none;
+  }
+
+  .runnable {
+    width: 100%;
+    color: #6c6c6c;
+    background-color: #fff;
+    overflow: auto;
+    line-height: 18px;
+    padding-left: 0;
+
+    pre {
+      background-color: darken($yellow-lightest, 5%);
+      border-left: 5px solid $fail;
+      clear: both;
+      color: $fail;
+      margin-bottom: 0;
+      margin-top: 2px;
+      padding-bottom: 2px;
+      padding-left: 10px;
+      padding-top: 2px;
+      white-space: pre-wrap;
+      word-break: break-word;
+
+      &:empty {
+        display: none;
+      }
+
+      &:hover {
+        cursor: pointer;
+        background-color: darken($yellow-lightest, 15%);
+      }
+    }
+
+    &.hover {
+      background-color: #f7f8f9;
+      cursor: pointer;
+
+      > .runnable-wrapper .runnable-controls i.fa-repeat {
+        visibility: visible !important;
+      }
+
+    }
+
+    &.runnable-active {
+      .runnable-state {
+        @extend .#{$fa-css-prefix}-refresh;
+        @extend .#{$fa-css-prefix}-spin;
+      }
+    }
+
+    .runnable-state {
+      display: inline-block;
+      line-height: 18px;
+      margin-right: 5px;
+      width: 12px;
+    }
+
+    &.suite .collapsible-indicator  {
+      padding-left: 2px;
+      font-size: 14px;
+      color: #bbbcbd;
+    }
+
+    &.runnable-processing > .runnable-wrapper {
+      .runnable-state {
+        @extend .#{$fa-css-prefix}-square-o;
+        color: #888;
+      }
+    }
+
+    &.test.runnable-failed > .runnable-wrapper {
+      border-left: 10px solid $fail;
+
+      .fa-warning.has-command-failures {
+        visibility: visible;
+      }
+    }
+
+    &.suite.runnable-pending > div > .runnable-wrapper {
+      border-left: 10px solid lighten($pending, 25%);
+    }
+
+    &.test.runnable-pending > .runnable-wrapper {
+      border-left: 10px solid lighten($pending, 25%);
+    }
+
+    &.test.runnable-passed > .runnable-wrapper {
+      border-left: 10px solid $pass;
+    }
+
+    &.suite.runnable-passed > div > .runnable-wrapper {
+      border-left: 10px solid $pass;
+    }
+
+    &.suite.runnable-failed > div > .runnable-wrapper {
+      border-left: 10px solid $fail;
+
+      .collapsible-more {
+        border-radius: 3px;
+        background-color: $fail;
+        color: #FFF;
+        padding: 0 4px 0 3px;
+        font-size: 10px;
+        margin-left: 2px;
+      }
+    }
+
+    &.test.runnable-failed {
+      .runnable-state {
+        @extend .#{$fa-css-prefix}-times;
+        color: $fail;
+      }
+    }
+
+    &.suite > div > .runnable-wrapper {
+      .runnable-title {
+        color: #111;
+        font-weight: 800;
+        font-size: 13px;
+      }
+    }
+
+    &.runnable-passed > .runnable-wrapper {
+      .runnable-state {
+        @extend .#{$fa-css-prefix}-check;
+        color: $pass;
+      }
+    }
+
+    &.runnable-pending > .runnable-wrapper {
+      .runnable-title {
+        color: lighten($pending, 25%);
+      }
+
+      .runnable-state {
+        @extend .#{$fa-css-prefix}-circle-o-notch;
+        color: lighten($pending, 20%);
+      }
+
+      .runnable-commands-region {
+        display: none;
+      }
+    }
+  }
+
+  .runnable-wrapper {
+    padding: 5px 15px 5px 5px;
+    overflow: hidden;
+    border-left: 10px solid transparent;
+  }
+
+  .runnable-title {
+    font-size: 12.5px;
+  }
+
+  .runnable-content-region {
+    overflow: auto;
+    position: relative;
+  }
+
+  .suite > div > .runnable-wrapper,
+  .test .runnable-content-region {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .test .runnable-content-region {
+    padding-right: 30px;
+  }
+
+  .runnable-controls {
+    overflow: hidden;
+    position: absolute;
+    right: 0;
+    text-align: right;
+    top: 0;
+
+    label {
+      padding: 2px 4px;
+    }
+
+    i {
+      margin: 0 2px;
+      color: #999;
+      visibility: hidden;
+      font-size: 15px;
+    }
+  }
+
+  .test.runnable-failed .runnable-controls i {
+    visibility: visible;
+  }
+
+  .test > .runnable-wrapper > .collapsible > .collapsible-header {
+    .collapsible-indicator,
+    .collapsible-more {
+      display: none;
+    }
+  }
+}

@@ -1,0 +1,166 @@
+.reporter {
+  header {
+    background-color: #f8f8f8;
+    box-shadow: 0 1px 3px #ccc;
+    height: $header-height;
+    outline: 0;
+    overflow: visible;
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+
+    button {
+      background-color: #f8f8f8;
+      border-color: transparent;
+      border-radius: 0;
+      display: none;
+      line-height: 26px;
+      outline: 0;
+      padding: 10px 0;
+      text-align: center;
+      width: 40px;
+
+      &:hover {
+        background-color: #e9e9e9;
+      }
+
+      &:active {
+        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+      }
+    }
+  }
+
+  .focus-tests {
+    border-right: 1px solid #ddd;
+    float: left;
+    font-weight: normal;
+    padding: 10px 12px;
+    width: auto !important;
+
+    span {
+      display: none;
+    }
+
+    i {
+      margin-right: 5px;
+    }
+  }
+
+  .stats {
+    float: left;
+    margin-bottom: 0;
+    padding: 0;
+
+    li {
+      display: none;
+      float: left;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 26px;
+      list-style-type: none;
+      padding: 10px 5px;
+
+      &.passed {
+        color: #23AE89;
+      }
+
+      &.failed {
+        color: #E94B3B;
+      }
+
+      &.pending {
+        color: #aaa;
+      }
+
+      i {
+        margin: 5px;
+      }
+    }
+
+    .duration {
+      border-left: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+  }
+
+  .controls {
+    float: right;
+
+    .paused-label {
+      background-color: #CC4239;
+      margin-right: 5px;
+    }
+
+    i {
+      font-size: 90%;
+      margin: 5px;
+
+      &.fa-repeat {
+        font-size: 112%;
+      }
+    }
+
+    .toggle-auto-scrolling {
+      line-height: 25px;
+
+      i {
+        font-size: 100%;
+      }
+
+      i:first-child {
+        @extend .#{$fa-css-prefix}-circle-o;
+        color: #999;
+        font-size: 80%;
+        margin-right: 3px;
+        position: relative;
+        top: -1px;
+      }
+
+      &.auto-scrolling-enabled {
+        i:first-child {
+          @extend .#{$fa-css-prefix}-circle;
+          color: #FFB61C;
+        }
+      }
+    }
+  }
+
+  // utilizing element size queries: https://github.com/marcj/css-element-queries
+  &[min-width~="200px"] {
+    .stats {
+      .passed,
+      .failed,
+      .pending {
+        display: inline-block;
+      }
+    }
+  }
+
+  &[min-width~="300px"] {
+    .stats .duration {
+      display: inline-block;
+    }
+  }
+
+  &[min-width~="400px"] {
+    header button {
+      display: inline-block;
+    }
+  }
+
+  &[min-width~="500px"] {
+    header button {
+      width: 50px;
+    }
+
+    .focus-tests span {
+      display: inline;
+    }
+
+    .stats li {
+      padding: 10px;
+    }
+  }
+}
