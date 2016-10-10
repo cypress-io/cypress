@@ -1,4 +1,4 @@
-$Cypress.register "Navigation", (Cypress, _, $, Promise) ->
+$Cypress.register "Navigation", (Cypress, _, $, Promise, moment, UrlParse) ->
 
   commandCausingLoading = /^(visit|reload)$/
 
@@ -318,8 +318,10 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           consoleProps: -> consoleProps
         })
 
-      baseUrl = Cypress.config("baseUrl")
-      url     = Cypress.Location.getRemoteUrl(url, baseUrl)
+      url = Cypress.Location.normalize(url)
+
+      if baseUrl = Cypress.config("baseUrl")
+        url = Cypress.Location.qualifyWithBaseUrl(baseUrl, url)
 
       ## backup the previous runnable timeout
       ## and the hook's previous timeout
@@ -397,8 +399,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           ## then prepend the existing origin to it
           ## so we get the right remote url
           if not Cypress.Location.isFullyQualifiedUrl(url)
-            remoteUrl = Cypress.Location.join(existing.origin, url)
-            # remoteUrl = [existing.origin, url].join("/")
+            remoteUrl = Cypress.Location.fullyQualifyUrl(url)
 
           remote = Cypress.Location.create(remoteUrl ? url)
 
@@ -459,7 +460,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             if remote.originPolicy is existing.originPolicy
               previousDomainVisited = remote.origin
 
-              url = Cypress.Location.createInitialRemoteSrc(url)
+              url = Cypress.Location.fullyQualifyUrl(url)
 
               ## when the remote iframe's load event fires
               ## callback fn
@@ -501,11 +502,11 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
               .then =>
                 ## and now we must change the url to be the new
                 ## origin but include the test that we're currently on
-                newUri = new Uri(remote.origin)
+                newUri = new UrlParse(remote.origin)
                 newUri
-                .setPath(existing.pathname)
-                .setQuery(existing.search)
-                .setAnchor(existing.hash)
+                .set("pathname", existing.pathname)
+                .set("query",    existing.search)
+                .set("hash",     existing.hash)
 
                 ## replace is broken in electron so switching
                 ## to href for now

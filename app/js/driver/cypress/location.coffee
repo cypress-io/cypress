@@ -1,42 +1,13 @@
 ## TODO:
 ## 1. test these method implementations using encoded characters
 ## look at the spec to figure out whether we SHOULD be decoding them
-## or leaving them as encoded.  also look at Uri to see what it does
+## or leaving them as encoded.  also look at UrlParse to see what it does
 ##
 ## 2. there is a bug when handling about:blank which borks it and
 ## turns it into about://blank
 
 ## attach to global
-$Cypress.Location = do ($Cypress, _, Uri) ->
-
-  Uri.prototype.toString = ->
-    ## created our own custom toString method
-    ## to fix some bugs with jsUri's implementation
-    s = @origin()
-
-    if path = @path()
-      s += path
-
-    if query = @query()
-      s += "?" if not _.str.include(query, "?")
-
-      s += query
-
-    if anchor = @anchor()
-      s += "#" if not _.str.include(anchor, "#")
-
-      s += anchor
-    else
-      {source} = @uriParts
-
-      ## if the last character of the
-      ## source is a hash append this
-      ## since jsuri will return an
-      ## empty @remote.anchor()
-      if source.slice(-1) is "#"
-        s += "#"
-
-    return s
+$Cypress.Location = do ($Cypress, _, UrlParse) ->
 
   reHttp = /^https?:\/\//
   reWww = /^www/
@@ -46,13 +17,10 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
 
   class $Location
     constructor: (remote) ->
-      @remote = new Uri remote
+      @remote = new UrlParse remote
 
     getHash: ->
-      if hash = @remote.anchor()
-        "#" + hash
-      else
-        ""
+      @remote.hash
 
     getHref: ->
       @getToString()
@@ -62,25 +30,25 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
     ## that is the hostname, and then, if the port of the URL is nonempty,
     ## a ':', and the port of the URL.
     getHost: ->
-      _([@remote.host(), @remote.port()]).compact().join(":")
+      @remote.host
 
     getHostName: ->
-      @remote.host()
+      @remote.hostname
 
     getOrigin: ->
-      @remote.origin()
+      @remote.origin
 
     getProtocol: ->
-      @remote.protocol() + ":"
+      @remote.protocol
 
     getPathName: ->
-      @remote.path() or "/"
+      @remote.pathname or "/"
 
     getPort: ->
-      @remote.port()
+      @remote.port
 
     getSearch: ->
-      @remote.query()
+      @remote.query
 
     getOriginPolicy: ->
       ## origin policy is comprised of
@@ -151,42 +119,8 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
           ## let our function know we've navigated
           navigated(attr, arguments)
 
-    ## if we don't have a fully qualified url
-    ## then ensure the url starts with a leading slash
-    @createInitialRemoteSrc = (url) ->
-      if @isFullyQualifiedUrl(url)
-        url
-      else
-        a = document.createElement("a")
-        a.href = "/" + _.ltrim(url, "/")
-        a.href
-
     @isFullyQualifiedUrl = (url) ->
       reHttp.test(url)
-
-    @missingProtocolAndHostIsLocalOrWww = (url) ->
-      if url not instanceof Uri
-        url = new Uri(url)
-
-      str = url.toString()
-
-      ## normalize the host for 'localhost'
-      ## and then check if we are missing
-      ## http and our host is
-      ## localhost / 127.0.0.1 / 0.0.0.0
-      return false if not (reLocalHost.test(str) or reWww.test(str) or @isUrlLike(str))
-
-      switch url.protocol()
-        when ""
-          return true
-        when "localhost"
-          ## port will be contained in host()
-          ## host will be contained in protocol()
-          url.setPort url.host()
-          url.setHost url.protocol()
-          return true
-        else
-          return false
 
     @isUrlLike = (url) ->
       ## beta.cypress.io
@@ -196,22 +130,18 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       url = url.split("/")[0].split(".")
       url.length is 3 or url.length is 4
 
-    @handleRelativeUrl = (url) ->
-      ## Uri will assume the host incorrectly
-      ## when we omit a protocol and simply provide
-      ## the 'path' as the string
-      ## so we have to shift this back to the path
-      ## to properly handle query params later
-      ## and also juggle path potentially just being
-      ## a forward slash
-      url = new Uri(url)
-      p = url.path()
-      p = if p isnt "/" then p else ""
-      url.setPath(url.host() + p)
-      url.setHost("")
-      url
+    @fullyQualifyUrl = (url) ->
+      return url if @isFullyQualifiedUrl(url)
 
-    @normalizeUrl = (url) ->
+      existing = new UrlParse(window.location.href)
+
+      ## always normalize against our existing origin
+      ## as the baseUrl so that we do not accidentally
+      ## have relative url's
+      url = new UrlParse(url, existing.origin)
+      url.toString()
+
+    @normalize = (url) ->
       ## A properly formed URL will always have a trailing
       ## slash at the end of it
       ## http://localhost:8000/
@@ -228,40 +158,28 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       ## or a trailing slash
       ## index.html NOT index.html/ or /index.html
       ##
-      url = _.ltrim(url, "/")
-
       if reHttp.test(url) or reWww.test(url) or reLocalHost.test(url) or @isUrlLike(url)
-        url = new Uri(url)
+        ## if we're missing a protocol then go
+        ## ahead and append it
+        if not reHttp.test(url)
+          url = "http://" + url
+
+        url = new UrlParse(url)
+
+        if not url.pathname
+          url.set("pathname", "/")
+
+        url.toString()
       else
-        url = @handleRelativeUrl(url)
+        url
 
-      ## automatically insert http:// if url host
-      ## is localhost, 0.0.0.0, or 127.0.0.1
-      ## and there isnt a protocol
-      if @missingProtocolAndHostIsLocalOrWww(url)
-        url.setProtocol "http"
-
-      ## if we have a protocol but we dont
-      ## have a path, then ensure there is a
-      ## trailing slash at the end of the host
-      if url.protocol() and not url.path()
-        url.addTrailingSlash()
-
-      _.ltrim url.toString(), "/"
-
-    @getRemoteUrl = (url, baseUrl) ->
-      ## if we have a root url and our url isnt full qualified or missing the protocol + host is local or www
-      if baseUrl and (not @isFullyQualifiedUrl(url) and not @missingProtocolAndHostIsLocalOrWww(url))
+    @qualifyWithBaseUrl = (baseUrl, url) ->
+      ## if we have a root url and our url isnt full qualified
+      if baseUrl and (not @isFullyQualifiedUrl(url))
         ## prepend the root url to it
-        url = @prependBaseUrl(url, baseUrl)
+        url = @join(baseUrl, url)
 
-      return @normalizeUrl(url)
-
-    @prependBaseUrl = (url, baseUrl) ->
-      ## prepends the baseUrl to the url and
-      ## joins by / after trimming url for leading
-      ## forward slashes
-      [_.trim(baseUrl, "/"), _.trim(url, "/")].join("/")
+      @fullyQualifyUrl(url)
 
     @isAbsoluteRelative = (segment) ->
       ## does this start with a forward slash?
