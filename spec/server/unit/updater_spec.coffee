@@ -2,7 +2,9 @@ require("../spec_helper")
 
 delete global.fs
 
+os          = require("os")
 tar         = require("tar-fs")
+cwd         = require("#{root}lib/cwd")
 Updater     = require("#{root}lib/updater")
 Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
@@ -40,11 +42,33 @@ describe "lib/updater", ->
     beforeEach ->
       @updater = Updater({})
       @updater.getClient()
-      @sandbox.stub(@updater.client, "getAppPath").returns("foo")
       @sandbox.stub(@updater.client, "getAppExec").returns("bar")
 
     it "compacts null values", ->
+      @sandbox.stub(@updater.client, "getAppPath").returns("foo")
       expect(@updater.getArgs()).to.deep.eq ["--app-path=foo", "--exec-path=bar", "--updating"]
+
+    it "changes cwd to be the original + then restores", ->
+      tmp = os.tmpDir()
+
+      ## manually change process.cwd
+      process.chdir(tmp)
+
+      localCwd = cwd()
+
+      fn = ->
+        process.cwd() + "/baz"
+
+      @sandbox.stub(@updater.client, "getAppPath", fn)
+
+      args = @updater.getArgs()
+
+      expect(args).to.deep.eq(["--app-path=#{localCwd + "/baz"}", "--exec-path=bar", "--updating"])
+
+      expect(args[0]).not.to.include(tmp)
+
+      expect(process.cwd()).to.include(tmp)
+      expect(process.cwd()).not.to.include(localCwd)
 
   context ".run", ->
     beforeEach ->

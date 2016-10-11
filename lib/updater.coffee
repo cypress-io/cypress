@@ -17,6 +17,9 @@ argsUtil       = require("./util/args")
 trash  = Promise.promisify(trash)
 chmodr = Promise.promisify(chmodr)
 
+## backup the original cwd
+localCwd = cwd()
+
 NwUpdater.prototype.checkNewVersion = (cb) ->
   gotManifest = (err, req, data) ->
     if err
@@ -56,7 +59,19 @@ class Updater
   getArgs: ->
     c = @getClient()
 
-    _.compact ["--app-path=" + c.getAppPath(), "--exec-path=" + c.getAppExec(), "--updating"]
+    ## get a reference to current cwd
+    currentCwd = process.cwd()
+
+    ## change to the original local cwd
+    ## in case we have a project open
+    process.chdir(localCwd)
+
+    args = _.compact ["--app-path=" + c.getAppPath(), "--exec-path=" + c.getAppExec(), "--updating"]
+
+    ## now restore back to what it was
+    process.chdir(currentCwd)
+
+    return args
 
   patchAppPath: ->
     @getClient().getAppPath = -> cwd()
