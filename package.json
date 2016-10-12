@@ -12,13 +12,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@cypress/npm-run-all": "^3.1.0",
-    "blessed": "^0.1.81",
+    "@cypress/npm-run-all": "^4.0.0",
     "bluebird": "^3.4.5",
     "coffee-script": "^1.11.1",
     "eslint": "^3.7.1",
-    "lodash": "^4.16.3",
-    "through": "^2.3.8"
+    "lodash": "^4.16.3"
   },
   "dependencies": {
     "app-module-path": "^1.1.0",

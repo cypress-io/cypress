@@ -1,5 +1,3 @@
-blessed = require("blessed")
-
 cp       = require("child_process")
 path     = require("path")
 glob     = require("glob")
@@ -13,10 +11,19 @@ globAsync   = Promise.promisify(glob)
 
 DEFAULT_DIR = path.resolve("packages", "*")
 
-createStream = (onWrite) ->
-  through (data) ->
-    onWrite(data.toString())
-    @queue(data)
+getPackages = (cmd, dirs) ->
+  return dirs if cmd is "install"
+
+  dirs.filter (dir) ->
+    packageJson = require(path.resolve(dir, "package"))
+    return !!packageJson.scripts[cmd]
+
+setTerminalTitle = (title) ->
+  process.stdout.write(
+    String.fromCharCode(27) + "]0;" + title + String.fromCharCode(7)
+  )
+
+colors = "black red green yellow blue magenta cyan white gray".split(" ")
 
 module.exports = {
   getDirs: (dir) ->
@@ -25,87 +32,31 @@ module.exports = {
     globAsync(dir)
 
   exec: (cmd) ->
-    cmds = cmd.split(",")
+    setTerminalTitle("run:all:#{cmd}")
 
     @getDirs()
     .then (dirs) ->
-      screen = blessed.screen({
-        smartCSR: true
-      })
-
-      screen.title = "run:all:#{cmd}";
-
-      screen.key ['escape', 'q', 'C-c'], (ch, key) ->
-        process.exit(0)
-
-      packages = dirs.filter (dir) ->
-        packageJson = require(path.resolve(dir, "package"))
-        return packageJson.scripts[cmd]
-
-      boxWidth = 100 / packages.length
-
-      logs = packages.map (dir, index) ->
+      tasks = getPackages(cmd, dirs).map (dir, index) ->
         packageName = dir.replace(path.resolve("packages") + "/", "")
-
-        content = ""
-
-        box = blessed.log({
-          border: 'line'
-          content: content
-          label: "#{packageName}:#{cmd}"
-          left: "#{index * boxWidth}%"
-          height: '100%'
-          parent: screen
-          top: 0
-          width: "#{boxWidth}%"
-
-          scrollable: true
-          keys: true
-          vi: true
-          alwaysScroll: true
-          scrollbar: {
-            ch: ' '
-            inverse: true
-          }
-        })
-
-        box.key ['escape', 'q', 'C-c'], (ch, key) ->
-          process.exit(0)
-
-        return {
-          box: box,
-          dir: dir,
-          stdout: createStream (message) ->
-            content += message
-            box.setContent(content)
-            screen.render()
-          stderr: createStream (message) ->
-            content += message
-            box.setContent(content)
-            screen.render()
-        }
-
-      screen.render()
-
-      tasks = logs.map (log) ->
         return {
           command: cmd
           options: {
-            cwd: log.dir
-            stdout: log.stdout
-            stderr: log.stderr
+            cwd: dir
+            label: {
+              name: "#{packageName}:#{cmd}"
+              color: colors[index]
+            }
           }
         }
 
       runAll(tasks, {
         continueOnError: true
         parallel: true
-        # stdout: process.stdout
-        # stderr: process.stderr
+        stdout: process.stdout
+        stderr: process.stderr
       })
       .catch (err) ->
-        ## TODO: handle this better
-        console.log(err)
+        console.error(err)
 
   start: (argv = []) ->
     options = minimist(argv)
@@ -122,9 +73,11 @@ module.exports = {
 ###
 
 work out script running UX
-- stderr
 - report proper exit code
-- individual control of each pane/task
+- preserve coloring of individual output
+  * nodemon's colors are coming through, so see what it does
+- bring back panes
+  * need to be able to scroll
 work out build dependencies
 - e.g. runner waits on reporter
 - any other examples? if not, just deal with runner/reporter
