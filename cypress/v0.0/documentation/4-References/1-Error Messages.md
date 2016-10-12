@@ -11,6 +11,7 @@ excerpt: Errors that require additional explanation are listed here.
 - :fa-angle-right: [Running Cypress in CI requires a secret project key](#section-running-cypress-in-ci-requires-a-secret-project-key)
 - :fa-angle-right: [The test has finished but Cypress still has commands in its queue](#section-the-test-has-finished-but-cypress-still-has-commands-in-its-queue)
 - :fa-angle-right: [cy.visit() failed because you're attempting to visit a second unique domain](#section-cy-visit-failed-because-you-are-attempting-to-visit-a-second-unique-domain)
+- :fa-angle-right: [Cypress detected a cross origin error happened on page load](#section-cypress-detected-a-cross-origin-error-happened-on-page-load)
 
 ***
 
@@ -341,3 +342,38 @@ describe("another complex example using a forgotten 'return'", function(){
 # cy.visit() failed because you are attempting to visit a second unique domain
 
 TBD.
+
+***
+
+# Cypress detected a cross origin error happened on page load
+
+[block:callout]
+{
+  "type": "info",
+  "title": "This is a simple overview...",
+  "body": "For a more thorough explanation of Cypress's Web Security model, [please read our dedicated guide to it](https://on.cypress.io/guides/web-security)."
+}
+[/block]
+
+This error means that your application navigated to a superdomain that Cypress was not bound to.
+
+Initially when you `cy.visit` Cypress changes the url to match what you are visiting. This enables Cypress to communicate with your appliation to control it, and bypasses all same-origin security policies built into the browsers.
+
+When your application navigates to a superdomain outside of the current origin-policy Cypress is unable to communicate with it, and thus fails.
+
+There are generally fairly simple workarounds for these common situations:
+
+1. Don't click `<a>` links that navigate you outside of your apps. Likely this isn't worth testing anyway. You should ask yourself: *What's the point of clicking and going to another app?* Likely all you care about is that the `href` attribute matches what you expect. So simply make an assertion about that.
+
+2. You are testing a page that uses `Single sign-on (SSO)`. In this case your webserver is likely redirecting you between superdomains, and thus you receive this error message. You can likely get around this redirect problem by using [`cy.request`](https://on.cypress.io/api/request) and manually handling the session yourself.
+
+If you find yourself stuck and cannot work around these issues you can just set this in your `cypress.json` file:
+
+```javascript
+// cypress.json
+{
+  chromeWebSecurity: false
+}
+```
+
+But before doing so you should really understand and [read about the reasoning here](https://on.cypress.io/guides/web-security).
