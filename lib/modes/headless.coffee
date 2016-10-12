@@ -91,7 +91,7 @@ module.exports = {
         proxyRules: proxyServer
       }, resolve)
 
-  createRenderer: (url, proxyServer, showGui = false) ->
+  createRenderer: (url, proxyServer, showGui = false, chromeWebSecurity) ->
     @setProxy(proxyServer)
     .then ->
       Renderer.create({
@@ -101,6 +101,7 @@ module.exports = {
         show:   showGui
         frame:  showGui
         devTools: showGui
+        chromeWebSecurity: chromeWebSecurity
         type:   "PROJECT"
       })
       .then (win) ->
@@ -145,7 +146,7 @@ module.exports = {
       ## resolve the promise
       openProject.once "end", resolve
 
-  runTests: (openProject, id, url, proxyServer, gui, browser) ->
+  runTests: (openProject, id, url, proxyServer, gui, browser, chromeWebSecurity) ->
     ## we know we're done running headlessly
     ## when the renderer has connected and
     ## finishes running all of the tests.
@@ -157,7 +158,7 @@ module.exports = {
       if browser
         project.launch(browser, url, null, {proxyServer: proxyServer})
       else
-        @createRenderer(url, proxyServer, gui)
+        @createRenderer(url, proxyServer, gui, chromeWebSecurity)
 
     Promise.props({
       connection: @waitForRendererToConnect(openProject, id)
@@ -186,7 +187,7 @@ module.exports = {
         .spread (config, url) =>
           console.log("\nTests should begin momentarily...\n")
 
-          @runTests(openProject, id, url, config.clientUrlDisplay, options.showHeadlessGui, options.browser)
+          @runTests(openProject, id, url, config.clientUrlDisplay, options.showHeadlessGui, options.browser, config.chromeWebSecurity)
           .get("stats")
 
     ready()

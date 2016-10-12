@@ -1152,3 +1152,27 @@ describe "$Cypress.Cy Navigation Commands", ->
           @cy.loading({timeout: 100})
 
         @cy.noop({})
+
+      it "captures cross origin failures", (done) ->
+        logs = []
+
+        @Cypress.on "log", (attrs, log) ->
+          logs.push(log)
+
+        @cy.once "fail", (err) ->
+          log = logs[0]
+
+          expect(err.message).to.include("Cypress detected a cross origin error happened on page load")
+          expect(logs.length).to.eq(1)
+          expect(log.get("name")).to.eq("page load")
+          expect(log.get("state")).to.eq("failed")
+          expect(log.get("error")).to.eq(err)
+          done()
+
+        @cy
+          .window({log: false}).then (win) ->
+            win.location.href = "http://localhost:3501/fixtures/html/dom.html"
+
+            null
+          .wait(2000)
+

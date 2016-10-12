@@ -160,6 +160,19 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise, moment, UrlParse) ->
             ## must directly fail here else we potentially
             ## get unhandled promise exception
             @fail(e)
+        .catch (err) =>
+          try
+            {originPolicy} = Cypress.Location.create(window.location.href)
+
+            Cypress.Utils.throwErrByPath("navigation.cross_origin", {
+              onFail: options._log
+              args: {
+                message: err.message
+                originPolicy: originPolicy
+              }
+            })
+          catch e
+            @fail(e)
 
   Cypress.addParentCommand
     reload: (args...) ->

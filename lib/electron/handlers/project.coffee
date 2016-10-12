@@ -57,6 +57,7 @@ module.exports = {
       openBrowser     = browser
       openBrowserOpts = options
       options.proxyServer ?= cfg.clientUrlDisplay
+      options.chromeWebSecurity = cfg.chromeWebSecurity
 
       launcher.launch(browser, url, options)
 
