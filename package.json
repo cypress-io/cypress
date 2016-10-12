@@ -6,15 +6,19 @@
     "postinstall": "node index.js --exec 'npm install, npm run build'",
     "start": "node index.js",
     "dev": "node index.js --exec 'npm run dev'",
-    "test": "node index.js --exec 'npm test'"
+    "test": "node index.js --exec 'npm test'",
+    "all": "node index.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@cypress/npm-run-all": "^3.1.0",
+    "blessed": "^0.1.81",
     "bluebird": "^3.4.5",
     "coffee-script": "^1.11.1",
     "eslint": "^3.7.1",
-    "lodash": "^4.16.3"
+    "lodash": "^4.16.3",
+    "through": "^2.3.8"
   },
   "dependencies": {
     "app-module-path": "^1.1.0",
