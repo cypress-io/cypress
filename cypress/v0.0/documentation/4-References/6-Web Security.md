@@ -275,6 +275,12 @@ Not working for you? Don't know how to set your token? If you still need to be a
 
 ## Javascript Redirects
 
+When we say *JavaScript Redirects* we are talking about any kind of code that does this:
+
+```javascript
+window.location.href = "http://some.superdomain.com"
+```
+
 This is probably the hardest situation to deal with because it's usually happening due to another cause.
 
 Perhaps you're not logged in, and you'll need to handle that setup elsewhere?
