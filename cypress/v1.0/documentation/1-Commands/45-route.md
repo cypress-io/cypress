@@ -5,7 +5,7 @@ excerpt: Route responses to matching requests
 {
   "type": "info",
   "body": "[Read about Network Requests first.](https://on.cypress.io/guides/network-requests-xhr)",
-  "title": "New to Cypess?"
+  "title": "New to Cypress?"
 }
 [/block]
 

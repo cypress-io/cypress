@@ -5,7 +5,7 @@ excerpt: Alias a route or DOM element for use later.
 {
   "type": "info",
   "body": "[Read about Using Aliases first.](https://on.cypress.io/guides/using-aliases)",
-  "title": "New to Cypess?"
+  "title": "New to Cypress?"
 }
 [/block]
 

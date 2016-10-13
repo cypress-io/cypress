@@ -248,7 +248,7 @@ cy.find("input", {timeout: 10000}).should("have.value", "foo").and("have.class",
 {
   "type": "info",
   "body": "Read about [Making Assertions](https://on.cypress.io/guides/making-assertions) and where they come from.",
-  "title": "New to Cypess?"
+  "title": "New to Cypress?"
 }
 [/block]
 

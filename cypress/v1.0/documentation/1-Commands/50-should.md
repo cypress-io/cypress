@@ -5,7 +5,7 @@ excerpt: Make an assertion about the current subject
 {
   "type": "info",
   "body": "[Read about making assertions first.](https://on.cypress.io/guides/making-assertions)",
-  "title": "New to Cypess?"
+  "title": "New to Cypress?"
 }
 [/block]
 

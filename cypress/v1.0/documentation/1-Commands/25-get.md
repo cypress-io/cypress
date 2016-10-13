@@ -24,7 +24,7 @@ Finds one or more DOM elements based on the selector.
 {
   "type": "info",
   "body": "[Read about using aliases first.](https://on.cypress.io/guides/using-aliases)",
-  "title": "New to Cypess?"
+  "title": "New to Cypress?"
 }
 [/block]
 

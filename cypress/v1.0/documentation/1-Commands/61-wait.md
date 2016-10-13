@@ -24,7 +24,7 @@ Wait until the matching [aliased](https://on.cypress.io/guides/using-aliases) XH
 {
   "type": "info",
   "body": "Read about [Network Requests](https://on.cypress.io/guides/network-requests-xhr) and [Aliasing](https://on.cypress.io/guides/using-aliases) first.",
-  "title": "New to Cypess?"
+  "title": "New to Cypress?"
 }
 [/block]
 

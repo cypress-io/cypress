@@ -5,7 +5,7 @@ excerpt: Load a fixture to represent data
 {
   "type": "info",
   "body": "[Read about Creating Fixtures first.](https://on.cypress.io/guides/creating-fixtures)",
-  "title": "New to Cypess?"
+  "title": "New to Cypress?"
 }
 [/block]
 

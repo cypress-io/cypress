@@ -9,7 +9,7 @@ This document covers the API for consuming your environment variables *in your t
 {
   "type": "info",
   "body": "[Read about environment variables first.](https://on.cypress.io/guides/environment-variables)",
-  "title": "New to Cypess?"
+  "title": "New to Cypress?"
 }
 [/block]
 

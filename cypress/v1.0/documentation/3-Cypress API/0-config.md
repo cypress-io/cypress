@@ -10,7 +10,7 @@ This document covers the API for consuming your configuration options *in your t
 {
   "type": "info",
   "body": "[Read about configuration first.](https://on.cypress.io/guides/configuration)",
-  "title": "New to Cypess?"
+  "title": "New to Cypress?"
 }
 [/block]
 

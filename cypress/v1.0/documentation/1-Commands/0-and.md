@@ -5,7 +5,7 @@ excerpt: Chain multiple assertions together
 {
   "type": "info",
   "body": "[Read about Making Assertions first.](https://on.cypress.io/guides/making-assertions)",
-  "title": "New to Cypess?"
+  "title": "New to Cypress?"
 }
 [/block]
 
