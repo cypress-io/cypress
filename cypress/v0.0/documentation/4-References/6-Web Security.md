@@ -298,10 +298,9 @@ To start, you will need to understand that **not all browsers expose a way to tu
 
 Still here? That's cool, let's disable web security!
 
-**Set `chromeWebSecurity` to `false in `cypress.json` and we'll take care of the rest.**
+**Set `chromeWebSecurity` to `false` in `cypress.json` and we'll take care of the rest.**
 
-```javascript
-// cypress.json
+```json
 {
   chromeWebSecurity: false
 }
