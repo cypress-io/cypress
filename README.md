@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.3 - *(10/13/16)*
+- bump reporter version
+
 #### 0.3.2 - *(10/04/16)*
 - fix flash of reverted state when toggling snapshot pinning off
 
