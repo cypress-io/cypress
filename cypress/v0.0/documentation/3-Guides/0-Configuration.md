@@ -7,6 +7,7 @@ excerpt: Configure global, network, folder, viewport, and animation options
   - [Global](#section-global)
   - [Timeouts](#section-timeouts)
   - [Folders](#section-folders)
+  - [Browser](#section-browser)
   - [Web Server](#section-web-server)
   - [Viewport](#section-viewport)
   - [Animation](#section-animation)
@@ -69,6 +70,14 @@ Option | Default | Description
 `integrationFolder` | `cypress/integration` | Where Cypress will look for integration test files
 `screenshotsFolder`     | `cypress/screenshots`     | Where Cypress will automatically save screenshots from [`cy.screenshot()`](https://on.cypress.io/api/screenshot) or during test failures when running headlessly.
 `supportFolder`     | `cypress/support`     | Where Cypress will auto load support files
+
+***
+
+## Browser
+
+Option | Default | Description
+----- | ---- | ----
+`chromeWebSecurity`    | true    | Whether Chome Web Security for `same-origin policy` and `insecure mixed content` is enabled. [Read more about this here.](https://on.cypress.io/guides/web-security)
 
 ***
 
