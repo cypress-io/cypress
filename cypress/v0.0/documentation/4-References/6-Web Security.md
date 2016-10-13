@@ -22,7 +22,7 @@ Browsers adhere to a strict [`same-origin policy`](https://developer.mozilla.org
 
 Because Cypress' internal architecture is different from that of Selenium, Cypress must be able to directly communicate with your remote application at all times. Unfortunately, browsers naturally try to prevent how Cypress works.
 
-To get around these restrictions, Cypress implements some strategies involving `JavaScript` code, the browser's internal APIs, and `network proxying` to **play by the rules** of `same-origin policy`. It is our goal to fully automate your application without needing to modify any application code - and we are *mostly* able to do this.
+To get around these restrictions, Cypress implements some strategies involving `JavaScript` code, the browser's `internal APIs`, and `network proxying` to **play by the rules** of `same-origin policy`. It is our goal to fully automate your application without needing to modify any application code - and we are *mostly* able to do this.
 
 **Examples of what Cypress does under the hood:**
 
