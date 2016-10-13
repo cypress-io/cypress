@@ -5,7 +5,7 @@ excerpt: Our API provides commands and utilities to drive your tests in the brow
 {
   "type": "info",
   "body": "Read through our [Guides](https://on.cypress.io/guides/guides) first.",
-  "title": "New to Cypess?"
+  "title": "New to Cypress?"
 }
 [/block]
 
