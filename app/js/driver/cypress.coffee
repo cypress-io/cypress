@@ -135,6 +135,7 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
       @cy.silenceConsole(contentWindow) if $Cypress.isHeadless
       @cy.bindWindowListeners(contentWindow)
+      @cy._setWindowDocumentProps(contentWindow)
 
       @trigger("before:window:load", contentWindow)
 

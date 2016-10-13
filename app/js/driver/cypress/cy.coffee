@@ -31,7 +31,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## if setting iframe props failed
         ## dont do anything else because
         ## we are in trouble
-        if @_setRemoteIframeProps($remoteIframe)
+        if @_setWindowDocumentProps($remoteIframe.prop("contentWindow"))
 
           @urlChanged(null, {log: false})
           @pageLoading(false)
@@ -577,13 +577,10 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     chain: ->
       @prop("chain")
 
-    _setRemoteIframeProps: ($iframe) ->
-      @private "$remoteIframe", $iframe
-      @private "window", $iframe.prop("contentWindow")
-
+    _setWindowDocumentProps: (contentWindow) ->
       try
-        ## attempt to set document
-        @private "document", $iframe.prop("contentDocument")
+        @private("window",   contentWindow)
+        @private("document", contentWindow.document)
       catch e
         ## catch errors associated to cross origin iframes
         if ready = @prop("ready")
@@ -591,10 +588,15 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         else
           @fail(e)
 
-        ## indicate setting iframe props failed
+        ## indicate setting window/doc props failed
         return false
 
-      return @
+      return true
+
+    _setRemoteIframeProps: ($iframe) ->
+      @private "$remoteIframe", $iframe
+
+      return @_setWindowDocumentProps($iframe.prop("contentWindow"))
 
     _setRunnable: (runnable, hookName) ->
       runnable.startedAt = new Date

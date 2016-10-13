@@ -15,6 +15,28 @@ onServer = (app) ->
   app.get "/500", (req, res) ->
     res.send("<html>outer content<iframe src='/iframe_500'></iframe></html>")
 
+  app.get "/sync_iframe", (req, res) ->
+    res.send("""
+      <html>
+        outer contents
+        <iframe src='/timeout'></iframe>
+      </html>
+    """)
+
+  app.get "/insert_iframe", (req, res) ->
+    res.send("""
+      <html>
+        <script type='text/javascript'>
+          window.insert = function(){
+            var i = document.createElement("iframe")
+            i.src = "/timeout"
+            document.body.appendChild(i)
+          }
+        </script>
+        <button onclick='insert()'>insert iframe</button>
+      </html>
+    """)
+
   app.get "/gzip_500", (req, res) ->
     buf = fs.readFileSync(Fixtures.path("server/gzip-bad.html.gz"))
 
@@ -42,6 +64,11 @@ onServer = (app) ->
 
   app.get "/iframe_500", (req, res) ->
     res.status(500).sendFile(path.join(e2ePath, "static", "iframe", "index.html"))
+
+  app.get "/timeout", (req, res) ->
+    setTimeout ->
+      res.send("<html>timeout</html>")
+    , 2000
 
 describe "e2e iframes", ->
   e2e.setup({

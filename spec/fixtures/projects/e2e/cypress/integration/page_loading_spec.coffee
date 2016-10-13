@@ -47,3 +47,9 @@ describe "page_loading", ->
 
           expect(resp2).to.include("document.domain = 'localhost'")
           expect(resp2).to.include("content")
+
+  describe "issue #258: opener is undefined during snapshot", ->
+    it "causes the xhr to be aborted while in flight", ->
+      cy
+        .visit("http://localhost:1717/form")
+        .get("form").submit()

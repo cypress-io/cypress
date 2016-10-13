@@ -20,6 +20,28 @@ onServer = (app) ->
       res.send("<html><h1>slow</h1></html>")
     , 2000
 
+  app.get "/form", (req, res) ->
+    res.send("""
+      <html>
+        <iframe src="http://localhost:17170/index.html"></iframe>
+        <form action="/redirected-to"></form>
+      </html>
+    """)
+
+  app.get "/redirected-to", (req, res) ->
+    res.send("""
+      <html>
+        <h1>I AM THE NEW PAGE</h1>
+        <script src="http://localhost:17170/static/jquery.js"></script>
+        <script>
+          $.get('/cypress.json')
+          $.get('/cypress.json')
+          $.get('/cypress.json')
+          $.get('/cypress.json')
+        </script>
+      </html>
+    """)
+
   app.post "/json", (req, res) ->
     res.json({
       body: req.body
@@ -30,10 +52,13 @@ onServer = (app) ->
 
 describe "e2e page_loading", ->
   e2e.setup({
-    servers: {
+    servers: [{
       port: 1717
       onServer: onServer
-    }
+    }, {
+      port: 17170
+      static: true
+    }]
   })
 
   it "passes", ->
