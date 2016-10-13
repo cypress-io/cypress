@@ -25,7 +25,7 @@
   ],
   "devDependencies": {
     "@cypress/core-releaser": "0.1.8",
-    "@cypress/core-reporter": "0.3.0",
+    "@cypress/core-reporter": "0.3.1",
     "@cypress/react-tooltip": "0.1.1",
     "babel-eslint": "^6.0.4",
     "bluebird": "^3.4.0",
