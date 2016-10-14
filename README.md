@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.4 - *(10/13/16)*
+- re-release to rebuild reporter
+
 #### 0.3.3 - *(10/13/16)*
 - bump reporter version
 
