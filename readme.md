@@ -69,6 +69,9 @@ LGPL
 
 ## Changelog
 
+#### 0.3.8 - *(10/13/16)*
+- explain how to manually update cypress during update fail
+
 #### 0.3.7 - *(10/05/16)*
 - shrinkwrap to prevent breaking dep change
 
