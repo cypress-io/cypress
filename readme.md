@@ -69,6 +69,9 @@ LGPL
 
 ## Changelog
 
+#### 0.3.10 - *(10/14/16)*
+- missing lib folder
+
 #### 0.3.9 - *(10/14/16)*
 - fixed errors with undefined values being called
 
