@@ -33,7 +33,7 @@ export default class Nav extends Component {
             <li className='dropdown'>
               <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
                 <i className='fa fa-user'></i>{' '}
-                {this._userDisplayName}{' '}
+                {this._userDisplayName()}{' '}
                 <span className='caret'></span>
               </a>
               <ul className='dropdown-menu'>
