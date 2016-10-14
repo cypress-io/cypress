@@ -118,10 +118,10 @@ automation = {
         ## only get the url if its not already set
         props.url ?= @getUrl(props)
         chrome.cookies.set props, (details) ->
-          if details
-            resolve(details)
-          else
-            if err = chrome.runtime.lastError
+          switch
+            when details
+              resolve(details)
+            when err = chrome.runtime.lastError
               reject(err)
             else
               ## the cookie callback could be null such as the
