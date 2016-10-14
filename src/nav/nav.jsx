@@ -33,7 +33,7 @@ export default class Nav extends Component {
             <li className='dropdown'>
               <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
                 <i className='fa fa-user'></i>{' '}
-                { state.user.displayName }{' '}
+                {this._userDisplayName}{' '}
                 <span className='caret'></span>
               </a>
               <ul className='dropdown-menu'>
@@ -49,6 +49,14 @@ export default class Nav extends Component {
         </div>
       </nav>
     )
+  }
+
+  _userDisplayName = () => {
+    // there is a situation where state.user could be undefined
+    // perhaps this is happening very quickly on log out???
+    if (state.user) {
+      return state.user.displayName
+    }
   }
 
   leftNavButton = () => {
