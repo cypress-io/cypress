@@ -38,7 +38,7 @@ describe "Update Banner", ->
       expect(@App.ipc).to.be.calledWith("window:open", {
         position: "center"
         width: 300
-        height: 210
+        height: 240
         toolbar: false
         title: "Updates"
         type: "UPDATES"

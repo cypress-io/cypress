@@ -1,7 +1,7 @@
 describe "Updates", ->
   beforeEach ->
     cy
-      .viewport(300, 210)
+      .viewport(300, 240)
       .visit("/updates.html")
       .window().then (win) ->
         {@ipc, @App} = win
@@ -47,6 +47,7 @@ describe "Updates", ->
     it "displays error msg", ->
       @ipc.handle("updater:run", null, {event: "error"})
       cy.contains("An error occurred updating")
+      cy.contains("You can manually update Cypress by running 'cypress install' from your terminal or by downloading it again.")
 
     it "triggers window:close on click of close btn", ->
       @ipc.handle("updater:run", null, {event: "error"})
