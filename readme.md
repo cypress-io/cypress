@@ -69,6 +69,9 @@ LGPL
 
 ## Changelog
 
+#### 0.3.9 - *(10/14/16)*
+- fixed errors with undefined values being called
+
 #### 0.3.8 - *(10/13/16)*
 - explain how to manually update cypress during update fail
 
