@@ -142,7 +142,11 @@ module.exports = {
         when cookie.maxAge?
           ## when we have maxAge
           ## prefer that
-          cookie.expiry = cookie.maxAge
+          ## unix returns us time in seconds
+          ## from the epoc + we add that
+          ## to maxAge since thats relative seconds
+          ## from now
+          cookie.expiry = moment().unix() + cookie.maxAge
         when ex = cookie.expires
           ## tough cookie provides javascript date
           ## formatted expires

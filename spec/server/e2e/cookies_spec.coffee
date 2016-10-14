@@ -17,7 +17,8 @@ onServer = (app) ->
   app.get "/expirationMaxAge", (req, res) ->
     res.cookie("shouldExpire", "now", {
       ## express maxAge is relative to current time
-      maxAge: -1000
+      ## in seconds
+      maxAge: 0
     })
 
     res.send("<html></html>")
