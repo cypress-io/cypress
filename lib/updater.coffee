@@ -100,12 +100,12 @@ class Updater
   install: (argsObj = {}) ->
     c = @getClient()
 
+    argsObj = @normalizeArgs(argsObj)
+
     {appPath, execPath} = argsObj
 
     ## slice out updating, execPath, and appPath args
     argsObj = _.omit(argsObj, "updating", "execPath", "appPath")
-
-    args = @normalizeArgs(args)
 
     args = argsUtil.toArray(argsObj)
 

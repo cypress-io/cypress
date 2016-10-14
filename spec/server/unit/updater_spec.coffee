@@ -351,6 +351,8 @@ describe "lib/updater", ->
           execPath: "/Users/bmann/app_exec_path"
         }
 
+        @normalizedArgs = @updater.normalizeArgs(@argsObj)
+
         @sandbox.stub(@updater.client, "getAppPath").returns("foo")
         @sandbox.stub(@updater, "copyTmpToAppPath").resolves()
 
@@ -359,11 +361,11 @@ describe "lib/updater", ->
 
       it "trashes current appPath", ->
         @updater.install(@argsObj).then =>
-          expect(@trash).to.be.calledWith("/Users/bmann/app_path")
+          expect(@trash).to.be.calledWith(@normalizedArgs.appPath)
 
       it "calls #copyTmpToAppPath with tmp + appPath", ->
         @updater.install(@argsObj).then =>
-          expect(@updater.copyTmpToAppPath).to.be.calledWith "foo", @argsObj.appPath
+          expect(@updater.copyTmpToAppPath).to.be.calledWith "foo", @normalizedArgs.appPath
 
       it "calls process.exit", ->
         @updater.install(@argsObj).then =>
@@ -382,9 +384,11 @@ describe "lib/updater", ->
             "getKey": true
           }
 
+          @normalizedArgs = @updater.normalizeArgs(@argsObj)
+
         it "uses args object", ->
           @updater.install(@argsObj).then =>
-            expect(@run).to.be.calledWith("exec", ["--getKey=true"])
+            expect(@run).to.be.calledWith(@normalizedArgs.execPath, ["--getKey=true"])
 
   context "integration", ->
     before ->
