@@ -32,13 +32,13 @@ normalizeCookieProps = (data) ->
   ## and when receiving cookie data we need to convert
   ## expirationDate to expiry and always remove url
   switch
-    when e = data.expiry
+    when data.expiry?
       delete cookie.expiry
-      cookie.expirationDate = e
-    when e = data.expirationDate
+      cookie.expirationDate = data.expiry
+    when data.expirationDate?
       delete cookie.expirationDate
       delete cookie.url
-      cookie.expiry = e
+      cookie.expiry = cookie.expirationDate
 
   cookie
 

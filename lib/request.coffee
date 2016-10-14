@@ -138,11 +138,15 @@ module.exports = {
       if ho = cookie.hostOnly
         cookie = _.omit(cookie, "domain")
 
-      ## tough cookie provides javascript date
-      ## formatted expires
-      if e = cookie.expires
-        ## which we convert into unix time
-        cookie.expiry = moment(e).unix()
+      switch
+        when cookie.maxAge?
+          ## when we have maxAge
+          ## prefer that
+          cookie.expiry = cookie.maxAge
+        when ex = cookie.expires
+          ## tough cookie provides javascript date
+          ## formatted expires
+          cookie.expiry = moment(ex).unix()
 
       automation("set:cookie", cookie)
 

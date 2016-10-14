@@ -1,3 +1,4 @@
+moment   = require("moment")
 parser   = require("cookie-parser")
 e2e      = require("../helpers/e2e")
 
@@ -7,6 +8,26 @@ onServer = (app) ->
   app.get "/foo", (req, res) ->
     console.log "cookies", req.cookies
     res.send(req.cookies)
+
+  app.get "/set", (req, res) ->
+    res.cookie("shouldExpire", "now")
+
+    res.send("<html></html>")
+
+  app.get "/expirationMaxAge", (req, res) ->
+    res.cookie("shouldExpire", "now", {
+      ## express maxAge is relative to current time
+      maxAge: -1000
+    })
+
+    res.send("<html></html>")
+
+  app.get "/expirationExpires", (req, res) ->
+    res.cookie("shouldExpire", "now", {
+      expires: moment().subtract(1, "day").toDate()
+    })
+
+    res.send("<html></html>")
 
 describe "e2e cookies", ->
   e2e.setup({
