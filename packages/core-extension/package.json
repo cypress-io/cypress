@@ -4,11 +4,11 @@
   "description": "Cypress Chrome Extension",
   "main": "index.js",
   "scripts": {
-    "start": "npm run build && npm run watch",
-    "watch": "gulp watch",
-    "build": "gulp build",
+    "watch-dev": "gulp watch",
+    "build-dev": "gulp build",
+    "build-prod": "gulp build",
     "test": "NODE_ENV=test mocha",
-    "prerelease": "npm run build",
+    "prerelease": "npm run build-prod",
     "release": "releaser"
   },
   "files": [

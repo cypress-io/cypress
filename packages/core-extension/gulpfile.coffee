@@ -1,3 +1,5 @@
+require("app-module-path").addPath("../../")
+
 fs         = require("fs-extra")
 pkg        = require("./package.json")
 gulp       = require("gulp")
@@ -5,7 +7,6 @@ clean      = require("gulp-clean")
 rename     = require("gulp-rename")
 runSeq     = require("run-sequence")
 source     = require("vinyl-source-stream")
-socket     = require("packages/core-socket")
 icons      = require("@cypress/core-icons")
 Promise    = require("bluebird")
 coffeeify  = require("coffeeify")
@@ -13,7 +14,7 @@ browserify = require("browserify")
 ext        = require("./")
 
 gulp.task "copy:socket:client", ->
-  gulp.src(socket.getPathToClientSource())
+  gulp.src(require("packages/core-socket").getPathToClientSource())
   .pipe(gulp.dest("dist"))
 
 gulp.task "clean", ->
