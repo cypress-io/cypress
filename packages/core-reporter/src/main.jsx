@@ -69,4 +69,5 @@ Reporter.defaultProps = {
   statsStore,
 }
 
+window.Reporter = Reporter
 export default Reporter

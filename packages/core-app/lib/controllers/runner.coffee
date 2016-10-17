@@ -1,6 +1,6 @@
 _      = require("lodash")
 send   = require("send")
-runner = require("@cypress/core-runner")
+runner = require("packages/core-runner")
 
 module.exports = {
   serve: (req, res, config, getRemoteState) ->

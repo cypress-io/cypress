@@ -3,7 +3,7 @@ fs        = require("fs-extra")
 path      = require("path")
 Promise   = require("bluebird")
 launcher  = require("@cypress/core-launcher")
-extension = require("@cypress/core-extension")
+extension = require("packages/core-extension")
 appData   = require("./util/app_data")
 
 fs              = Promise.promisifyAll(fs)

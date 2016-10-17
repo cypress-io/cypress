@@ -5,7 +5,9 @@ chalk    = require("chalk")
 Promise  = require("bluebird")
 minimist = require("minimist")
 runAll   = require("@cypress/npm-run-all")
-through = require("through")
+through  = require("through")
+
+coreApp = require("packages/core-app")
 
 globAsync   = Promise.promisify(glob)
 
@@ -23,7 +25,7 @@ setTerminalTitle = (title) ->
     String.fromCharCode(27) + "]0;" + title + String.fromCharCode(7)
   )
 
-colors = "black red green yellow blue magenta cyan white gray".split(" ")
+colors = "green yellow blue magenta cyan white gray bgGreen bgYellow bgBlue bgMagenta bgCyan bgWhite".split(" ")
 
 module.exports = {
   getDirs: (dir) ->
@@ -34,12 +36,17 @@ module.exports = {
   exec: (cmd) ->
     setTerminalTitle("run:all:#{cmd}")
 
+    runCommand = if cmd isnt "install" or cmd isnt "test"
+      "run #{cmd}"
+    else
+      cmd
+
     @getDirs()
     .then (dirs) ->
       tasks = getPackages(cmd, dirs).map (dir, index) ->
         packageName = dir.replace(path.resolve("packages") + "/", "")
         return {
-          command: cmd
+          command: runCommand
           options: {
             cwd: dir
             label: {
@@ -66,7 +73,7 @@ module.exports = {
         @exec(e)
 
       else
-        require("core-app").start(options)
+        coreApp.start()
 }
 
 
@@ -78,11 +85,8 @@ work out script running UX
   * nodemon's colors are coming through, so see what it does
 - bring back panes
   * need to be able to scroll
-work out build dependencies
-- e.g. runner waits on reporter
-- any other examples? if not, just deal with runner/reporter
 wire up interdependencies correctly
-- @cypress/core-runner -> core-runner
+- @cypress/core-runner -> packages/core-runner
 handle deployment
 core-app -> core-server
 more some core-app stuff into root

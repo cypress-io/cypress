@@ -15,9 +15,9 @@
     "build-dev": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
     "prepublish": "npm run build-prod",
-    "release": "node ./scripts/check-reporter.js && releaser",
-    "start": "node ./scripts/watch.js",
-    "test": "node ./scripts/test.js"
+    "release": "releaser",
+    "test": "node ./scripts/test.js",
+    "watch-dev": "node ./scripts/watch.js"
   },
   "files": [
     "dist",
@@ -25,7 +25,6 @@
   ],
   "devDependencies": {
     "@cypress/core-releaser": "0.1.8",
-    "@cypress/core-reporter": "0.3.0",
     "@cypress/react-tooltip": "0.1.1",
     "babel-eslint": "^6.0.4",
     "bluebird": "^3.4.0",
@@ -45,6 +44,6 @@
     "react-dom": "^15.3.0",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
-    "zunder": "^3.4.12"
+    "zunder": "^3.5.0"
   }
 }

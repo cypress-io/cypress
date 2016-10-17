@@ -1,6 +1,6 @@
 require("../../spec_helper")
 
-extension = require("@cypress/core-extension")
+extension = require("packages/core-extension")
 Fixtures = require("../../helpers/fixtures")
 project  = require("#{root}../lib/electron/handlers/project")
 Project  = require("#{root}../lib/project")

@@ -10,7 +10,7 @@ child_process = require("child_process")
 runSequence   = require("run-sequence")
 importOnce    = require("node-sass-import-once")
 cyIcons       = require("@cypress/core-icons")
-deploy        = require("./deploy")
+# deploy        = require("./deploy")
 
 fs = Promise.promisifyAll(fs)
 
@@ -170,14 +170,14 @@ gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", -> require("./spec/server.coffee")
 
-gulp.task "release", deploy.release
+# gulp.task "release", deploy.release
 
-gulp.task "deploy:fixture", ->
-  require("./lib/deploy")().fixture()
+# gulp.task "deploy:fixture", ->
+#   require("./lib/deploy")().fixture()
 
-gulp.task "build", deploy.build
+# gulp.task "build", deploy.build
 
-gulp.task "deploy", deploy.deploy
+# gulp.task "deploy", deploy.deploy
 
 gulp.task "app",        ["app:build", "app:watch"]
 

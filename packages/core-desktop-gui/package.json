@@ -8,7 +8,7 @@
     "build-prod": "node ./scripts/build-prod.js",
     "prod": "npm run build-prod && npm run server",
     "server": "zunder serve-prod --port 8000",
-    "start": "zunder watch",
+    "watch-dev": "zunder watch",
     "prepublish": "npm run build-prod",
     "release": "releaser",
     "test": "npm run build-prod && npm run server & cypress run"

@@ -1,11 +1,10 @@
-/* global $ */
+/* global $, Reporter */
 
 import cs from 'classnames'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, PropTypes } from 'react'
 import { findDOMNode } from 'react-dom'
-import Reporter from '@cypress/core-reporter'
 
 import windowUtil from '../lib/window-util'
 import State from '../lib/state'

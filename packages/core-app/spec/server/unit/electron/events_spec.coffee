@@ -2,7 +2,7 @@ require("../../spec_helper")
 
 _        = require("lodash")
 icons    = require("@cypress/core-icons")
-extension = require("@cypress/core-extension")
+extension = require("packages/core-extension")
 electron = require("electron")
 cache    = require("#{root}../lib/cache")
 logger   = require("#{root}../lib/logger")

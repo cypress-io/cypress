@@ -11,11 +11,7 @@ module.exports = function setZunderConfig (zunder) {
     ],
     prodDir: 'dist',
     resolutions: commonScripts,
-    scriptName: 'runner.js',
-    stylesheetName: 'runner.css',
-    staticGlobs: {
-      'static/**': '',
-      'node_modules/font-awesome/fonts/**': '/fonts'
-    },
+    scriptName: 'reporter.js',
+    stylesheetName: 'reporter.css',
   })
 }

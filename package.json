@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "main": "index.js",
   "scripts": {
-    "postinstall": "node index.js --exec 'npm install, npm run build'",
+    "postinstall": "npm run all install",
     "start": "node index.js",
-    "dev": "node index.js --exec 'npm run dev'",
-    "test": "node index.js --exec 'npm test'",
+    "watch-dev": "node run all watch-dev",
+    "test": "node run all test",
     "all": "node index.js"
   },
   "author": "",

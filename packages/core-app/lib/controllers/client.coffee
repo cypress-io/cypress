@@ -1,4 +1,4 @@
-socketIo = require("@cypress/core-socket")
+socketIo = require("packages/core-socket")
 
 ## hold onto the client source + version in memory
 clientSource  = socketIo.getClientSource()

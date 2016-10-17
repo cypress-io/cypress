@@ -5,7 +5,7 @@ url       = require("url")
 tough     = require("tough-cookie")
 moment    = require("moment")
 Promise   = require("bluebird")
-extension = require("@cypress/core-extension")
+extension = require("packages/core-extension")
 
 Cookie = tough.Cookie
 CookieJar = tough.CookieJar

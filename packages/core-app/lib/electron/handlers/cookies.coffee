@@ -1,6 +1,6 @@
 _         = require("lodash")
 Promise   = require("bluebird")
-extension = require("@cypress/core-extension")
+extension = require("packages/core-extension")
 
 module.exports = {
   get: (cookies, filter = {}) ->

@@ -2,7 +2,7 @@ require("../spec_helper")
 
 _          = require("lodash")
 http       = require("http")
-socket     = require("@cypress/core-socket")
+socket     = require("packages/core-socket")
 Promise    = require("bluebird")
 background = require("../../app/background")
 
