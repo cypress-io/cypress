@@ -34,10 +34,10 @@ module.exports = {
   exec: (cmd) ->
     setTerminalTitle("run:all:#{cmd}")
 
-    runCommand = if cmd isnt "install" or cmd isnt "test"
-      "run #{cmd}"
-    else
+    runCommand = if cmd is "install" or cmd is "test"
       cmd
+    else
+      "run #{cmd}"
 
     @getDirs()
     .then (dirs) ->
