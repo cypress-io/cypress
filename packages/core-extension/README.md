@@ -36,6 +36,9 @@ npm run watch
 
 ## Changelog
 
+#### 0.3.6 - *(10/13/16)*
+- fix #266, handle null set cookie details
+
 #### 0.3.5 - *(09/13/16)*
 - getPathToRoot, force websocket connection only
 

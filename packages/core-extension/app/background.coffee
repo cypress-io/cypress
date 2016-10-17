@@ -85,11 +85,13 @@ automation = {
     clear = (cookie) =>
       new Promise (resolve, reject) =>
         url = @getUrl(cookie)
-        chrome.cookies.remove {url: url, name: cookie.name}, (details) ->
+        props = {url: url, name: cookie.name}
+        chrome.cookies.remove props, (details) ->
           if details
             resolve(cookie)
           else
-            reject(chrome.runtime.lastError)
+            err = new Error("Removing cookie failed for: #{JSON.stringify(props)}")
+            reject(chrome.runtime.lastError ? err)
 
     @getAll(filter)
     .map(clear)
@@ -116,10 +118,15 @@ automation = {
         ## only get the url if its not already set
         props.url ?= @getUrl(props)
         chrome.cookies.set props, (details) ->
-          if details
-            resolve(details)
-          else
-            reject(chrome.runtime.lastError)
+          switch
+            when details
+              resolve(details)
+            when err = chrome.runtime.lastError
+              reject(err)
+            else
+              ## the cookie callback could be null such as the
+              ## case when expirationDate is before now
+              resolve(null)
 
     set()
     .then(fn)

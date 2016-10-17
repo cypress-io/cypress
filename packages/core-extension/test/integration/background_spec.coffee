@@ -351,6 +351,16 @@ describe "app/background", ->
 
         @server.emit("automation:request", 123, "set:cookie", {name: "foo", value: "bar", domain: "localhost", secure: true, path: "/foo"})
 
+      it "resolves with null when chrome.runtime.lastError is undefined", (done) ->
+        delete chrome.runtime.lastError
+
+        @socket.on "automation:response", (id, obj = {}) ->
+          expect(id).to.eq(123)
+          expect(obj.response).to.eq(null)
+          done()
+
+        @server.emit("automation:request", 123, "set:cookie", {name: "foo", value: "bar", domain: "localhost", secure: true, path: "/foo"})
+
     describe "clear:cookies", ->
       beforeEach ->
         chrome.runtime.lastError = {message: "some error"}
@@ -396,6 +406,16 @@ describe "app/background", ->
         @socket.on "automation:response", (id, obj = {}) ->
           expect(id).to.eq(123)
           expect(obj.__error).to.eq("some error")
+          done()
+
+        @server.emit("automation:request", 123, "clear:cookies", {domain: "cdn.github.com"})
+
+      it "rejects with custom error when chrome.runtime.lastError is undefined", (done) ->
+        delete chrome.runtime.lastError
+
+        @socket.on "automation:response", (id, obj = {}) ->
+          expect(id).to.eq(123)
+          expect(obj.__error).to.eq("Removing cookie failed for: #{JSON.stringify({url: "http://cdn.github.com/assets", name: "shouldThrow"})}")
           done()
 
         @server.emit("automation:request", 123, "clear:cookies", {domain: "cdn.github.com"})
