@@ -7,8 +7,6 @@ minimist = require("minimist")
 runAll   = require("@cypress/npm-run-all")
 through  = require("through")
 
-coreApp = require("packages/core-app")
-
 globAsync   = Promise.promisify(glob)
 
 DEFAULT_DIR = path.resolve("packages", "*")
@@ -73,7 +71,7 @@ module.exports = {
         @exec(e)
 
       else
-        coreApp.start()
+        require("packages/core-app").start()
 }
 
 
