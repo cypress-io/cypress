@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@cypress/npm-run-all": "^4.0.0",
+    "@cypress/npm-run-all": "^4.0.1",
     "bluebird": "^3.4.5",
     "coffee-script": "^1.11.1",
     "eslint": "^3.7.1",
