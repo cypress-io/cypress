@@ -57,6 +57,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.1 - *(10/13/16)*
+- ensure command.renderProps is an object
+
 #### 0.3.0 - *(10/03/16)*
 - snapshot pinning
 

@@ -23,7 +23,7 @@ export default class Command extends Instrument {
     this.event = props.event
     this.number = props.number
     this.numElements = props.numElements
-    this.renderProps = props.renderProps
+    this.renderProps = props.renderProps || {}
     this.visible = props.visible
 
     this._checkLongRunning()
@@ -35,7 +35,7 @@ export default class Command extends Instrument {
     this.err.update(props.err)
     this.event = props.event
     this.numElements = props.numElements
-    this.renderProps = props.renderProps
+    this.renderProps = props.renderProps || {}
     this.visible = props.visible
 
     this._checkLongRunning()
