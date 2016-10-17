@@ -89,12 +89,16 @@ class Updates extends Component {
         <div>
           <p className={`state ${errClass}`}>
             { this._notFinished() }{' '}
-            { updater.stateFormatted }
+            <span dangerouslySetInnerHTML={this._getHtmlState()} />
           </p>
           { this._finished() }
         </div>
       )
     }
+  }
+
+  _getHtmlState = () => {
+    return { __html: updater.stateFormatted.split('\n').join("<br />") }
   }
 
   _notFinished = () => {

@@ -71,7 +71,7 @@ describe "App", ->
       expect(@App.ipc).to.be.calledWithExactly("window:open", {
         position: "center",
         width: 300,
-        height: 210,
+        height: 240,
         toolbar: false,
         title: "Updates",
         type: "UPDATES",

@@ -50,7 +50,7 @@ class Updater {
         result = 'No updates available'
         break
       case 'error':
-        result = 'An error occurred updating'
+        result = 'An error occurred updating: \nYou can manually update Cypress by running \'cypress install\' from your terminal or by downloading it again.'
         break
       default:
         result = ""
@@ -72,7 +72,7 @@ class Updater {
     return App.ipc('window:open', {
       position: "center",
       width: 300,
-      height: 210,
+      height: 240,
       toolbar: false,
       title: "Updates",
       type: "UPDATES",
