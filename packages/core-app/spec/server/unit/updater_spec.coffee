@@ -5,6 +5,7 @@ delete global.fs
 os          = require("os")
 tar         = require("tar-fs")
 cwd         = require("#{root}lib/cwd")
+home        = require("home-or-tmp")
 Updater     = require("#{root}lib/updater")
 Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
@@ -37,6 +38,70 @@ describe "lib/updater", ->
       client  = u.getClient()
       client2 = u.getClient()
       expect(client).to.eq(client2)
+
+  context "#normalizeArgs", ->
+    beforeEach ->
+      @env = process.env.CYPRESS_ENV
+
+      process.env.CYPRESS_ENV = "production"
+
+      @updater = Updater({})
+      @updater.getClient()
+
+    afterEach ->
+      process.env.CYPRESS_ENV = @env
+
+    it "resets appPath + execPath on OSX", ->
+      @sandbox.stub(os, "platform").returns("darwin")
+
+      expect(@updater.normalizeArgs({
+        appPath:  "/Users/bmann/Dev"
+        execPath: "/Users/bmann/Dev"
+      })).to.deep.eq({
+        appPath: "/Applications/Cypress.app"
+        execPath: "/Applications/Cypress.app"
+      })
+
+    it "does not reset appPath + execPath on OSX", ->
+      @sandbox.stub(os, "platform").returns("darwin")
+
+      expect(@updater.normalizeArgs({
+        appPath:  "/foo/Cypress.app"
+        execPath: "/foo/Cypress.app"
+      })).to.deep.eq({
+        appPath: "/foo/Cypress.app"
+        execPath: "/foo/Cypress.app"
+      })
+
+    it "resets appPath + execPath on linux", ->
+      @sandbox.stub(os, "platform").returns("linux")
+      @sandbox.stub(@updater, "getHome").returns("/home/vagrant")
+
+      expect(@updater.normalizeArgs({
+        appPath:  "/Users/bmann/Dev"
+        execPath: "/Users/bmann/Dev"
+      })).to.deep.eq({
+        appPath:  "/home/vagrant/.cypress/Cypress"
+        execPath: "/home/vagrant/.cypress/Cypress/Cypress"
+      })
+
+    it "does not reset appPath + execPath on linux", ->
+      @sandbox.stub(os, "platform").returns("linux")
+
+      expect(@updater.normalizeArgs({
+        appPath:  "/foo/Cypress"
+        execPath: "/foo/Cypress/Cypress"
+      })).to.deep.eq({
+        appPath: "/foo/Cypress"
+        execPath: "/foo/Cypress/Cypress"
+      })
+
+  context "#getHome", ->
+    beforeEach ->
+      @updater = Updater({})
+
+    it "returns home-or-tmp", ->
+      expect(@updater.getHome()).to.eq(home)
 
   context "#getArgs", ->
     beforeEach ->
@@ -286,6 +351,8 @@ describe "lib/updater", ->
           execPath: "/Users/bmann/app_exec_path"
         }
 
+        @normalizedArgs = @updater.normalizeArgs(@argsObj)
+
         @sandbox.stub(@updater.client, "getAppPath").returns("foo")
         @sandbox.stub(@updater, "copyTmpToAppPath").resolves()
 
@@ -294,11 +361,11 @@ describe "lib/updater", ->
 
       it "trashes current appPath", ->
         @updater.install(@argsObj).then =>
-          expect(@trash).to.be.calledWith("/Users/bmann/app_path")
+          expect(@trash).to.be.calledWith(@normalizedArgs.appPath)
 
       it "calls #copyTmpToAppPath with tmp + appPath", ->
         @updater.install(@argsObj).then =>
-          expect(@updater.copyTmpToAppPath).to.be.calledWith "foo", @argsObj.appPath
+          expect(@updater.copyTmpToAppPath).to.be.calledWith "foo", @normalizedArgs.appPath
 
       it "calls process.exit", ->
         @updater.install(@argsObj).then =>
@@ -317,9 +384,11 @@ describe "lib/updater", ->
             "getKey": true
           }
 
+          @normalizedArgs = @updater.normalizeArgs(@argsObj)
+
         it "uses args object", ->
           @updater.install(@argsObj).then =>
-            expect(@run).to.be.calledWith("exec", ["--getKey=true"])
+            expect(@run).to.be.calledWith(@normalizedArgs.execPath, ["--getKey=true"])
 
   context "integration", ->
     before ->

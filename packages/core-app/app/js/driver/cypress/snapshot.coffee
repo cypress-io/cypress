@@ -1,4 +1,4 @@
-do ($Cypress, _) ->
+do ($Cypress, _, $) ->
 
   reduceText = (arr, fn) ->
     _.reduce arr, ((memo, item) -> memo += fn(item)), ""
@@ -104,21 +104,43 @@ do ($Cypress, _) ->
       $iframes = body.find("iframe")
       ## but query from the actual document, since the cloned body
       ## iframes don't have proper styles applied
+
       @cy.$$("iframe").each (idx, iframe) =>
+        $iframe = $(iframe)
+
+        remove = ->
+          $iframes.eq(idx).remove()
+
+        ## if we don't have access to window
+        ## then just remove this $iframe...
+        try
+          if not $iframe.prop("contentWindow")
+            return remove()
+        catch e
+          return remove()
+
         props = {
           id: iframe.id
           class: iframe.className
           style: iframe.style.cssText
         }
 
-        $iframe = @cy.$$(iframe)
-        $placeholder = @cy.$$("<iframe />", props).css({
+        dimensions = (fn) ->
+          ## jquery may throw here if we accidentally
+          ## pass an old iframe reference where the
+          ## document + window properties are unavailable
+          try
+            $iframe[fn]()
+          catch e
+            0
+
+        $placeholder = $("<iframe />", props).css({
           background: "#f8f8f8"
           border: "solid 1px #a3a3a3"
           boxSizing: "border-box"
           padding: "20px"
-          width: $iframe.outerWidth()
-          height: $iframe.outerHeight()
+          width: dimensions("outerWidth")
+          height: dimensions("outerHeight")
         })
 
         $iframes.eq(idx).replaceWith($placeholder)
