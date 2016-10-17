@@ -10,6 +10,7 @@ urls =
   local:    "http://127.0.0.1:8080/foo/bar"
   stack:    "https://stackoverflow.com/"
   trailHash:"http://localhost:3500/index.html?foo=bar#"
+  email:    "http://localhost:3500/?email=brian@cypress.io"
 
 describe "$Cypress.Location API", ->
   beforeEach ->
@@ -131,6 +132,10 @@ describe "$Cypress.Location API", ->
       str = @setup("google").getOriginPolicy()
       expect(str).to.eq("https://google.com")
 
+    it "issue: #255 two domains in the url", ->
+      str = @setup("email").getOriginPolicy()
+      expect(str).to.eq("http://localhost:3500")
+
   context ".create", ->
     it "returns an object literal", ->
       obj = $Cypress.Location.create(urls.cypress, urls.signin)
@@ -141,28 +146,28 @@ describe "$Cypress.Location API", ->
       obj = $Cypress.Location.create(urls.signin)
       expect(obj.toString()).to.eq("http://localhost:2020/signin")
 
-  context ".normalizeUrl", ->
+  context ".normalize", ->
     beforeEach ->
       @url = (source, expected) ->
-        url = $Cypress.Location.normalizeUrl(source)
+        url = $Cypress.Location.normalize(source)
         expect(url).to.eq(expected)
 
     describe "http urls", ->
-      it "trims url", ->
-        @url "/http://github.com/foo/", "http://github.com/foo/"
+      it "does not trim url", ->
+        @url "http://github.com/foo/", "http://github.com/foo/"
 
       it "adds trailing slash to host", ->
         @url "https://localhost:4200", "https://localhost:4200/"
 
-      it "does not add trailing slash without path and hash", ->
+      it "does not mutate hash when setting path to slash", ->
         @url "http://0.0.0.0:3000#foo/bar", "http://0.0.0.0:3000/#foo/bar"
 
-      it "does not add trailing slash with path", ->
+      it "does not mutate path when it exists", ->
         @url "http://localhost:3000/foo/bar", "http://localhost:3000/foo/bar"
 
     describe "http-less urls", ->
       it "trims url", ->
-        @url "/index.html/", "index.html"
+        @url "/index.html/", "/index.html/"
 
       it "does not add trailing slash with query params", ->
         @url "timeout?ms=1000", "timeout?ms=1000"
@@ -170,10 +175,10 @@ describe "$Cypress.Location API", ->
       it "does not strip path segments", ->
         @url "fixtures/html/sinon.html", "fixtures/html/sinon.html"
 
-      it "formats urls with domains", ->
+      it "formats urls with protocols", ->
         @url "beta.cypress.io", "http://beta.cypress.io/"
 
-      it "formats urls with domains and query params", ->
+      it "formats urls with protocols and query params", ->
         @url "beta.cypress.io?foo=bar", "http://beta.cypress.io/?foo=bar"
 
       it "formats urls with 3 segments and path", ->
@@ -194,41 +199,41 @@ describe "$Cypress.Location API", ->
       it "keeps path / query params / hash around", ->
         @url "localhost:4200/foo/bar?quux=asdf#/main", "http://localhost:4200/foo/bar?quux=asdf#/main"
 
-  context ".createInitialRemoteSrc", ->
+  context ".fullyQualifyUrl", ->
     beforeEach ->
-      @normalizeUrl = (url) ->
-        $Cypress.Location.normalizeUrl(url)
+      @normalize = (url) ->
+        $Cypress.Location.normalize(url)
 
     it "does not append trailing slash on a sub directory", ->
-      url = @normalizeUrl("http://localhost:4200/app")
-      url = $Cypress.Location.createInitialRemoteSrc(url)
+      url = @normalize("http://localhost:4200/app")
+      url = $Cypress.Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:4200/app"
 
     it "does not append a trailing slash to url with hash", ->
-      url = @normalizeUrl("http://localhost:4000/#/home")
-      url = $Cypress.Location.createInitialRemoteSrc(url)
+      url = @normalize("http://localhost:4000/#/home")
+      url = $Cypress.Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:4000/#/home"
 
     it "does not append a trailing slash to protocol-less url with hash", ->
-      url = @normalizeUrl("www.github.com/#/home")
-      url = $Cypress.Location.createInitialRemoteSrc(url)
+      url = @normalize("www.github.com/#/home")
+      url = $Cypress.Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://www.github.com/#/home"
 
     it "handles urls without a host", ->
-      url = @normalizeUrl("index.html")
-      url = $Cypress.Location.createInitialRemoteSrc(url)
+      url = @normalize("index.html")
+      url = $Cypress.Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:3500/index.html"
 
     it "does not insert trailing slash without a host", ->
-      url = $Cypress.Location.createInitialRemoteSrc("index.html")
+      url = $Cypress.Location.fullyQualifyUrl("index.html")
       expect(url).to.eq "http://localhost:3500/index.html"
 
     it "handles no host + query params", ->
-      url = @normalizeUrl("timeout?ms=1000")
-      url = $Cypress.Location.createInitialRemoteSrc(url)
+      url = @normalize("timeout?ms=1000")
+      url = $Cypress.Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:3500/timeout?ms=1000"
 
     it "does not strip off path", ->
-      url = @normalizeUrl("fixtures/html/sinon.html")
-      url = $Cypress.Location.createInitialRemoteSrc(url)
+      url = @normalize("fixtures/html/sinon.html")
+      url = $Cypress.Location.fullyQualifyUrl(url)
       expect(url).to.eq "http://localhost:3500/fixtures/html/sinon.html"

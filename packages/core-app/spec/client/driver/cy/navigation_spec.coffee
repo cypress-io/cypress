@@ -336,6 +336,11 @@ describe "$Cypress.Cy Navigation Commands", ->
         .visit("http://localhost:3500/foo")
         .visit("/foo")
 
+    it "can visit relative pages with domain like query params", ->
+      @cy
+        .visit("http://localhost:3500/bar")
+        .visit("http://localhost:3500/foo?email=brian@cypress.io")
+
     describe "when only hashes are changing", ->
       it "short circuits the visit if the page will not refresh", ->
         count = 0
@@ -793,16 +798,14 @@ describe "$Cypress.Cy Navigation Commands", ->
 
         @cy.on "fail", (err) =>
           expect(err.message).to.include("cy.visit() failed trying to load:")
-          ## TODO: fix this
-          # expect(err.message).to.include("/foo.html")
-          expect(err.message).to.include("foo.html")
+          expect(err.message).to.include("/foo.html")
           expect(err.message).to.include("We attempted to make an http request")
           expect(err.message).to.include("We received this error at the network level:")
           expect(err.message).to.include("connect ECONNREFUSED 127.0.0.1:64646")
           expect(err.message).to.include("Common situations why this would fail:")
           expect(err.message).to.include("The stack trace for this error is:")
           expect(err.message).to.include("some stack props")
-          expect(err1.url).to.eq("foo.html") ## TODO: fix this
+          expect(err1.url).to.include("/foo.html")
           expect(trigger).to.be.calledWith("visit:failed", err1)
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
@@ -825,9 +828,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         visitErrObj = _.clone(obj)
         obj.url = obj.originalUrl
 
-        ## TODO: fix this
-        # @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "/foo.html").resolves(obj)
-        @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "foo.html").resolves(obj)
+        @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "/foo.html").resolves(obj)
 
         trigger = @sandbox.spy(@Cypress, "trigger")
 
@@ -867,9 +868,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         visitErrObj = _.clone(obj)
         obj.url = obj.originalUrl
 
-        ## TODO: fix this
-        # @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "/bar").resolves(obj)
-        @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "bar").resolves(obj)
+        @sandbox.stub(@Cypress, "triggerPromise").withArgs("resolve:url", "/bar").resolves(obj)
 
         trigger = @sandbox.spy(@Cypress, "trigger")
 
@@ -1153,3 +1152,27 @@ describe "$Cypress.Cy Navigation Commands", ->
           @cy.loading({timeout: 100})
 
         @cy.noop({})
+
+      it "captures cross origin failures", (done) ->
+        logs = []
+
+        @Cypress.on "log", (attrs, log) ->
+          logs.push(log)
+
+        @cy.once "fail", (err) ->
+          log = logs[0]
+
+          expect(err.message).to.include("Cypress detected a cross origin error happened on page load")
+          expect(logs.length).to.eq(1)
+          expect(log.get("name")).to.eq("page load")
+          expect(log.get("state")).to.eq("failed")
+          expect(log.get("error")).to.eq(err)
+          done()
+
+        @cy
+          .window({log: false}).then (win) ->
+            win.location.href = "http://localhost:3501/fixtures/html/dom.html"
+
+            null
+          .wait(2000)
+

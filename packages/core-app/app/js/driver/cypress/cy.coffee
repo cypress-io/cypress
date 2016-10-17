@@ -28,18 +28,21 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       @_setRemoteIframeProps($remoteIframe)
 
       $remoteIframe.on "load", =>
-        @_setRemoteIframeProps($remoteIframe)
+        ## if setting iframe props failed
+        ## dont do anything else because
+        ## we are in trouble
+        if @_setRemoteIframeProps($remoteIframe)
 
-        @urlChanged(null, {log: false})
-        @pageLoading(false)
+          @urlChanged(null, {log: false})
+          @pageLoading(false)
 
-        ## we reapply window listeners on load even though we
-        ## applied them already during onBeforeLoad. the reason
-        ## is that after load javascript has finished being evaluated
-        ## and we may need to override things like alert + confirm again
-        @bindWindowListeners @private("window")
-        @isReady(true, "load")
-        @Cypress.trigger("load")
+          ## we reapply window listeners on load even though we
+          ## applied them already during onBeforeLoad. the reason
+          ## is that after load javascript has finished being evaluated
+          ## and we may need to override things like alert + confirm again
+          @bindWindowListeners @private("window")
+          @isReady(true, "load")
+          @Cypress.trigger("load")
 
       ## anytime initialize is called we immediately
       ## set cy to be ready to invoke commands
@@ -577,7 +580,19 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     _setRemoteIframeProps: ($iframe) ->
       @private "$remoteIframe", $iframe
       @private "window", $iframe.prop("contentWindow")
-      @private "document", $iframe.prop("contentDocument")
+
+      try
+        ## attempt to set document
+        @private "document", $iframe.prop("contentDocument")
+      catch e
+        ## catch errors associated to cross origin iframes
+        if ready = @prop("ready")
+          ready.reject(e)
+        else
+          @fail(e)
+
+        ## indicate setting iframe props failed
+        return false
 
       return @
 

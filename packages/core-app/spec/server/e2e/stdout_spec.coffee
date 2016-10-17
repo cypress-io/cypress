@@ -41,7 +41,7 @@ Tests should begin momentarily...
   2) stdout_failing_spec failing hook "before each" hook for "is failing":
      CypressError: cy.visit() failed trying to load:
 
-does-not-exist.html
+/does-not-exist.html
 
 We failed looking for this file at the path:
 

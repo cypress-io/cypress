@@ -135,6 +135,7 @@ describe "electron/headless", ->
           show: false
           frame: false
           devTools: false
+          chromeWebSecurity: undefined
           type: "PROJECT"
         })
 
@@ -144,7 +145,7 @@ describe "electron/headless", ->
         expect(@win.center).to.be.calledOnce
 
     it "can show window", ->
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234", true).then =>
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234", true, false).then =>
         expect(@create).to.be.calledWith({
           url: "foo/bar/baz"
           width: 0
@@ -152,6 +153,7 @@ describe "electron/headless", ->
           show: true
           frame: true
           devTools: true
+          chromeWebSecurity: false
           type: "PROJECT"
         })
 

@@ -79,6 +79,9 @@ module.exports = {
       }
     }
 
+    if options.chromeWebSecurity is false
+      args.webPreferences.webSecurity = false
+
     args.url ?= getUrl(options.type)
 
     urlChanged = (url, resolve) ->

@@ -85,3 +85,10 @@ describe "visits", ->
         .its("body")
         .then (body) ->
           expect(navigator.userAgent).to.deep.eq(body.agent.source)
+
+  context "issue #255: url with like two domain", ->
+    it "passes", ->
+      cy
+        .visit("http://localhost:3434/index.html")
+        .visit("http://localhost:3434/jquery.html?email=brian@cypress.io")
+
