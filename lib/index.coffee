@@ -1,5 +1,7 @@
 cp       = require("child_process")
 path     = require("path")
+
+AsciiTable = require("ascii-table")
 glob     = require("glob")
 chalk    = require("chalk")
 Promise  = require("bluebird")
@@ -55,13 +57,21 @@ module.exports = {
         }
 
       runAll(tasks, {
-        continueOnError: true
         parallel: true
         stdout: process.stdout
         stderr: process.stderr
       })
       .catch (err) ->
-        console.error(err)
+        results = AsciiTable.factory({
+          heading: ["package", "exit code"]
+          rows: err.results.map (result) ->
+            [result.name.replace(":#{cmd}", ""), result.code]
+        }).toString()
+
+        console.error(chalk.red("\nOne or more tasks failed running 'npm run all #{cmd}'. Results:\n"))
+        console.error(results)
+
+        process.exit(1)
 
   start: (argv = []) ->
     options = minimist(argv)
@@ -77,23 +87,26 @@ module.exports = {
 
 ###
 
-work out script running UX
-- report proper exit code
-- preserve coloring of individual output
-  * nodemon's colors are coming through, so see what it does
-- bring back panes
-  * need to be able to scroll
-wire up interdependencies correctly
-- @cypress/core-runner -> packages/core-runner
-handle deployment
-core-app -> core-server
-more some core-app stuff into root
-tests?
+run a task for an individual repo
+clean task (probably per repo the 'npm run all clean')
+remove node_modules task (clean install)
+starting app
+deployment
+break up core-app
+- root of monorepo
+- core-server
+- core-driver
+tests
 - unit/integration in each package
 - e2e should be in root
 running all tests
 - needs to be sequential?
 - unit tests in parallel?
 - how are errors reporter?
+work out script running UX
+- preserve coloring of individual output
+  * nodemon's colors are coming through, so see what it does
+- bring back panes
+  * need to be able to scroll
 
 ###

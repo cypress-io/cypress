@@ -13,6 +13,7 @@
   "license": "ISC",
   "devDependencies": {
     "@cypress/npm-run-all": "^4.0.1",
+    "ascii-table": "0.0.9",
     "bluebird": "^3.4.5",
     "coffee-script": "^1.11.1",
     "eslint": "^3.7.1",
