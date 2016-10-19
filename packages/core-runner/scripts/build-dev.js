@@ -4,8 +4,6 @@ var setZunderConfig = require('./set-zunder-config')
 
 setZunderConfig(z)
 
-foo.bar()
-
 u.series(
   z.applyDevEnv,
   z.cleanDev,
