@@ -1,6 +1,19 @@
 describe "$Cypress.Cy Snapshot Extension", ->
   enterCommandTestingMode()
 
+  context "invalid snapshot html", ->
+    beforeEach ->
+      @loadDom("html/invalid_html").then =>
+        @setup({replaceIframeContents: false})
+        @Cypress.set @currentTest
+
+    it "can spapshot html with invalid attributes", ->
+      {htmlAttrs} = @Cypress.createSnapshot(@el)
+
+      expect(htmlAttrs).to.eql({
+        foo: "bar"
+      })
+
   context "snapshot el", ->
     beforeEach ->
       @el = $("<span id='snapshot'>snapshot</span>").appendTo @cy.$$("body")
