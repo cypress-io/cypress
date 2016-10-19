@@ -8,11 +8,9 @@ setZunderConfig(z)
 u.series(
   z.applyProdEnv,
   z.cleanProd,
-  u.parallel(
-    z.buildDevHtml,
-    z.buildDevScripts,
-    z.buildProdStylesheets,
-    z.buildProdStaticAssets,
-    copyScripts(z.config.prodDir)
-  )
+  z.buildDevHtml,
+  z.buildDevScripts,
+  z.buildProdStylesheets,
+  z.buildProdStaticAssets,
+  copyScripts(z.config.prodDir)
 )()

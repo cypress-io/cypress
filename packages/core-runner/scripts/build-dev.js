@@ -4,12 +4,12 @@ var setZunderConfig = require('./set-zunder-config')
 
 setZunderConfig(z)
 
+foo.bar()
+
 u.series(
   z.applyDevEnv,
   z.cleanDev,
-  u.parallel(
-    z.buildDevScripts,
-    z.buildDevStylesheets,
-    z.buildDevStaticAssets
-  )
+  z.buildDevScripts,
+  z.buildDevStylesheets,
+  z.buildDevStaticAssets
 )()
