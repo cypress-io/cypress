@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "NODE_ENV=test mocha --watch",
-    "test-ci": "NODE_ENV=test mocha",
+    "test": "NODE_ENV=test mocha",
+    "test-watch": "NODE_ENV=test mocha --watch",
     "release": "releaser"
   },
   "repository": {
