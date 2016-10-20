@@ -7,7 +7,7 @@
     "watch-dev": "gulp watch",
     "build-dev": "gulp build",
     "build-prod": "gulp build",
-    "test": "NODE_ENV=test mocha",
+    "test": "NODE_ENV=test mocha --require test-setup.js",
     "prerelease": "npm run build-prod",
     "release": "releaser"
   },
