@@ -36,6 +36,7 @@ class Runner {
   uncaught () {}
 }
 
+global.Reporter = () => null
 global.Mocha = { Runnable, Runner }
 global.$Cypress = { create: () => {} }
 global.io = { connect: () => { return { emit: () => {}, on: () => {} } } }

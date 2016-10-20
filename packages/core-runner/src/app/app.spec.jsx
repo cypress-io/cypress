@@ -43,21 +43,21 @@ describe('<App />', () => {
   it('renders the <Reporter /> with the reporter bus', () => {
     const props = createProps()
     const component = shallow(<App {...props} />)
-    expect(component.find('Reporter')).to.have.prop('runner', props.eventManager.reporterBus)
+    expect(component.find(global.Reporter)).to.have.prop('runner', props.eventManager.reporterBus)
   })
 
   it('renders the <Reporter /> with the spec path', () => {
     const props = createProps()
     props.config.integrationFolder = 'path/to/int'
     const component = shallow(<App {...props} />)
-    expect(component.find('Reporter')).to.have.prop('specPath', 'path/to/int/some-spec.js')
+    expect(component.find(global.Reporter)).to.have.prop('specPath', 'path/to/int/some-spec.js')
   })
 
   it('renders the <Reporter /> with the autoScrollingEnabled flag', () => {
     const props = createProps()
     props.config.state.autoScrollingEnabled = true
     const component = shallow(<App {...props} />)
-    expect(component.find('Reporter')).to.have.prop('autoScrollingEnabled', true)
+    expect(component.find(global.Reporter)).to.have.prop('autoScrollingEnabled', true)
   })
 
   it('renders the runner wrap with `left` set as the width of the reporter', () => {
