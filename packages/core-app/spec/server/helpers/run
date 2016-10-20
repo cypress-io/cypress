@@ -10,4 +10,5 @@ DEBUG=nock.*,-nock.common,socket.io:* \
 BROWSER=$BROWSER \
 mocha spec/server/$FOLDER \
 --recursive \
---compilers coffee:coffee-script/register
+--compilers coffee:coffee-script/register \
+--require spec/server/helpers/setup.js
