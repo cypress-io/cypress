@@ -2,6 +2,9 @@
 
 ## Changelog
 
+#### 0.1.4 - *(10/21/16)*
+- add server destroy to https helper
+
 #### 0.1.3 - *(08/24/16)*
 - ref fork
 
