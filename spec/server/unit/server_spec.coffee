@@ -50,9 +50,14 @@ describe "lib/server", ->
     it "calls #createServer with port", ->
       _.extend @config, {port: 54321}
 
+      obj = {}
+
+      @sandbox.stub(@server, "createRoutes")
+      @sandbox.stub(@server, "createExpressApp").returns(obj)
+
       @server.open(@config)
       .then =>
-        expect(@server.createServer).to.be.calledWith(54321)
+        expect(@server.createServer).to.be.calledWith(obj, @config)
 
     it "calls #createRoutes with app + config", ->
       obj = {}
@@ -72,7 +77,7 @@ describe "lib/server", ->
 
       @server.open(@config)
       .then =>
-        expect(@server.createServer).to.be.calledWith(@config.port, @config.fileServerFolder, @config.socketIoRoute, obj)
+        expect(@server.createServer).to.be.calledWith(obj, @config)
 
     it "calls logger.setSettings with config", ->
       @sandbox.spy(logger, "setSettings")
@@ -87,20 +92,20 @@ describe "lib/server", ->
       @app  = @server.createExpressApp(true)
 
     it "isListening=true", ->
-      @server.createServer(@port, "", @app)
+      @server.createServer(@app, {port: @port})
       .then =>
         expect(@server.isListening).to.be.true
 
     it "resolves with http server port", ->
-      @server.createServer(@port, "", @app)
+      @server.createServer(@app, {port: @port})
       .then (port) =>
         expect(port).to.eq(@port)
 
     context "errors", ->
       it "rejects with portInUse", ->
-        @server.createServer(@port, "", @app)
+        @server.createServer(@app, {port: @port})
         .then =>
-          @server.createServer(@port, "", @app)
+          @server.createServer(@app, {port: @port})
         .then ->
           throw new Error("should have failed but didn't")
         .catch (err) =>

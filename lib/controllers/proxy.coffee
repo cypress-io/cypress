@@ -5,7 +5,6 @@ through       = require("through")
 Promise       = require("bluebird")
 cwd           = require("../cwd")
 logger        = require("../logger")
-request       = require("../request")
 cors          = require("../util/cors")
 inject        = require("../util/inject")
 buffers       = require("../util/buffers")
@@ -35,7 +34,7 @@ setCookie = (res, key, val, domainName) ->
   res.cookie(key, val, options)
 
 module.exports = {
-  handle: (req, res, config, getRemoteState, next) ->
+  handle: (req, res, config, getRemoteState, request) ->
     logger.info("cookies are", req.cookies)
 
     ## if we have an unload header it means
@@ -61,10 +60,10 @@ module.exports = {
 
     thr = through (d) -> @queue(d)
 
-    @getHttpContent(thr, req, res, remoteState, config)
+    @getHttpContent(thr, req, res, remoteState, config, request)
     .pipe(res)
 
-  getHttpContent: (thr, req, res, remoteState, config) ->
+  getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
     ## prepends req.url with remoteState.origin

@@ -11,7 +11,6 @@ cwd           = require("./cwd")
 exec          = require("./exec")
 files         = require("./files")
 fixture       = require("./fixture")
-Request       = require("./request")
 errors        = require("./errors")
 logger        = require("./logger")
 launcher      = require("./launcher")
@@ -92,12 +91,6 @@ class Socket
     })
     .then(cb)
 
-  onRequest: (headers, automation, options, cb) ->
-    Request.send(headers, automation, options)
-    .then(cb)
-    .catch (err) ->
-      cb({__error: err.message})
-
   onFixture: (config, file, options, cb) ->
     fixture.get(config.fixturesFolder, file, options)
     .then(cb)
@@ -171,6 +164,7 @@ class Socket
       onSetRunnables: ->
       onMocha: ->
       onConnect: ->
+      onRequest: ->
       onResolveUrl: ->
       onFocusTests: ->
       onSpecChanged: ->
@@ -290,9 +284,6 @@ class Socket
       socket.on "watch:test:file", (filePath, cb) =>
         @watchTestFileByPath(config, filePath, watchers, cb)
 
-      socket.on "request", (options, cb) =>
-        @onRequest(headers, automationRequest, options, cb)
-
       socket.on "fixture", (fixturePath, options, cb) =>
         @onFixture(config, fixturePath, options, cb)
 
@@ -346,7 +337,16 @@ class Socket
           cb(false)
 
       socket.on "resolve:url", (url, cb) =>
-        options.onResolveUrl(url, headers, automationRequest, cb)
+        options.onResolveUrl(url, headers, automationRequest)
+        .then(cb)
+        .catch (err) ->
+          cb({__error: errors.clone(err)})
+
+      socket.on "request", (params, cb) =>
+        options.onRequest(headers, automationRequest, params)
+        .then(cb)
+        .catch (err) ->
+          cb({__error: errors.clone(err)})
 
       socket.on "preserve:run:state", (state, cb) ->
         existingState = state

@@ -47,6 +47,7 @@ class Server
     if not (@ instanceof Server)
       return new Server
 
+    @_request    = null
     @_middleware = null
     @_server     = null
     @_socket     = null
@@ -92,8 +93,8 @@ class Server
 
     return app
 
-  createRoutes: (app, config, getRemoteState) ->
-    require("./routes")(app, config, getRemoteState)
+  createRoutes: ->
+    require("./routes").apply(null, arguments)
 
   getHttpServer: -> @_server
 
@@ -112,30 +113,36 @@ class Server
       @_onDomainSet("<root>")
 
   open: (config = {}) ->
-    ## always reset any buffers
-    ## TODO: change buffers to be an instance
-    ## here and pass this dependency around
-    buffers.reset()
-
     Promise.try =>
+      ## always reset any buffers
+      ## TODO: change buffers to be an instance
+      ## here and pass this dependency around
+      buffers.reset()
+
       app = @createExpressApp(config.morgan)
 
       logger.setSettings(config)
+
+      ## generate our request instance
+      ## and set the responseTimeout
+      @_request = Request({timeout: config.responseTimeout})
 
       getRemoteState = => @_getRemoteState()
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, getRemoteState)
+      @createRoutes(app, config, @_request, getRemoteState)
 
-      @createServer(config.port, config.fileServerFolder, config.socketIoRoute, app)
+      @createServer(app, config, @_request)
 
   createHosts: (hosts = {}) ->
     _.each hosts, (ip, host) ->
       evilDns.add(host, ip)
 
-  createServer: (port, fileServerFolder, socketIoRoute, app) ->
+  createServer: (app, config, request) ->
     new Promise (resolve, reject) =>
+      {port, fileServerFolder, socketIoRoute} = config
+
       @_server  = http.createServer(app)
       @_wsProxy = httpProxy.createProxyServer()
 
@@ -255,7 +262,12 @@ class Server
       fileServer: @_remoteFileServer
     })
 
+  _onRequest: (headers, automationRequest, options) ->
+    @_request.send(headers, automationRequest, options)
+
   _onResolveUrl: (urlStr, headers, automationRequest) ->
+    request = @_request
+
     handlingLocalFile = false
     previousState = _.clone @_getRemoteState()
 
@@ -274,7 +286,7 @@ class Server
     ## another request
     if obj = buffers.getByOriginalUrl(urlStr)
       ## reset the cookies from the existing stream's jar
-      Request.setJarCookies(obj.jar, automationRequest)
+      request.setJarCookies(obj.jar, automationRequest)
       .then (c) ->
         return obj.details
     else
@@ -312,7 +324,7 @@ class Server
           .on "response", (incomingRes) =>
             jar = str.getJar()
 
-            Request.setJarCookies(jar, automationRequest)
+            request.setJarCookies(jar, automationRequest)
             .then (c) =>
               @_remoteVisitingUrl = false
 
@@ -382,7 +394,7 @@ class Server
 
           next.format()
 
-        Request.sendStream(headers, automationRequest, {
+        request.sendStream(headers, automationRequest, {
           ## turn off gzip since we need to eventually
           ## rewrite these contents
           gzip: false
@@ -538,9 +550,8 @@ class Server
       @_middleware = null
 
   startWebsockets: (watchers, config, options = {}) ->
-    options.onResolveUrl = (urlStr, headers, automationRequest, cb) =>
-      @_onResolveUrl(urlStr, headers, automationRequest)
-      .then(cb)
+    options.onResolveUrl = @_onResolveUrl.bind(@)
+    options.onRequest    = @_onRequest.bind(@)
 
     @_socket = Socket()
     @_socket.startListening(@_server, watchers, config, options)
