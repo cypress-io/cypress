@@ -138,7 +138,14 @@ module.exports = {
         str.pipe(injection)
 
     endWithResponseErr = (err) ->
-      status = err.status ? 500
+      ## use res.statusCode if we have one
+      ## in the case of an ESOCKETTIMEDOUT
+      ## and we have the incomingRes headers
+      checkResStatus = ->
+        if res.headersSent
+          res.statusCode
+
+      status = err.status ? checkResStatus() ? 500
 
       if not res.headersSent
         res.removeHeader("Content-Encoding")
