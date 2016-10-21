@@ -20,6 +20,9 @@ $Cypress.register "Request", (Cypress, _, $) ->
   request = (options) =>
     Cypress.triggerPromise("request", options)
 
+  responseFailed = (err) ->
+    err.triggerPromise is true
+
   argIsHttpMethod = (str) ->
     _.isString(str) and validHttpMethodsRe.test str.toUpperCase()
 
@@ -171,7 +174,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
           onFail: options._log
           args: { timeout: options.timeout }
         }
-      .catch (err) ->
+      .catch responseFailed, (err) ->
         body = if b = requestOpts.body
           "Body: #{Cypress.Utils.stringify(b)}"
         else
@@ -193,3 +196,4 @@ $Cypress.register "Request", (Cypress, _, $) ->
             headers
           }
         })
+
