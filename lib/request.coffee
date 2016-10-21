@@ -1,11 +1,12 @@
-_         = require("lodash")
-r         = require("request")
-rp        = require("request-promise")
-url       = require("url")
-tough     = require("tough-cookie")
-moment    = require("moment")
-Promise   = require("bluebird")
-extension = require("@cypress/core-extension")
+_          = require("lodash")
+r          = require("request")
+rp         = require("request-promise")
+url        = require("url")
+tough      = require("tough-cookie")
+moment     = require("moment")
+Promise    = require("bluebird")
+extension  = require("@cypress/core-extension")
+automation = require("./automation")
 
 Cookie = tough.Cookie
 CookieJar = tough.CookieJar
@@ -26,10 +27,10 @@ newCookieJar = ->
       j.setCookieSync(cookieOrStr, uri, options)
 
     getCookieString: (uri) ->
-      j.getCookieStringSync(uri)
+      j.getCookieStringSync(uri, {expire: false})
 
     getCookies: (uri) ->
-      j.getCookiesSync(uri)
+      j.getCookiesSync(uri, {expire: false})
   }
 
 flattenCookies = (cookies) ->
@@ -98,7 +99,7 @@ module.exports = {
 
     return response
 
-  setJarCookies: (jar, automation) ->
+  setJarCookies: (jar, automationFn) ->
     setCookie = (cookie) ->
       cookie.name = cookie.key
 
@@ -152,15 +153,22 @@ module.exports = {
           ## formatted expires
           cookie.expiry = moment(ex).unix()
 
-      automation("set:cookie", cookie)
+      automationFn("set:cookie", cookie)
+      .then ->
+        ## the automation may return us null in
+        ## the case an expired cookie is removed
+        automation.normalizeCookieProps(cookie)
 
     Promise.try ->
       store = jar.toJSON()
 
-      Promise
-      .map(store.cookies, setCookie)
-      .filter (cookie) ->
-        not _.isEmpty(cookie)
+      ## this likely needs
+      ## to be an 'each' not a map
+      ## since we need to set cookies
+      ## in sequence and not all at once
+      ## because cookies could have colliding
+      ## values which need to be set in order
+      Promise.each(store.cookies, setCookie)
 
   sendStream: (headers, automation, options = {}) ->
     _.defaults options, {

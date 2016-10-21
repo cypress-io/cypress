@@ -89,3 +89,16 @@ context "cookies", ->
       .getCookie("shouldExpire").should("exist")
       .visit("http://localhost:2121/expirationExpires")
       .getCookie("shouldExpire").should("not.exist")
+
+  it "issue: #224 sets expired cookies between redirects", ->
+    cy
+      .visit("http://localhost:2121/set")
+      .getCookie("shouldExpire").should("exist")
+      .visit("http://localhost:2121/expirationRedirect")
+      .url().should("include", "/logout")
+      .getCookie("shouldExpire").should("not.exist")
+
+      .visit("http://localhost:2121/set")
+      .getCookie("shouldExpire").should("exist")
+      .request("http://localhost:2121/expirationRedirect")
+      .getCookie("shouldExpire").should("not.exist")
