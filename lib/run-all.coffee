@@ -27,6 +27,8 @@ getPackages = (cmd, dirs) ->
     return !!packageJson.scripts[cmd]
 
 mapTasks = (cmd, dirs) ->
+  colors = "green yellow blue magenta cyan white gray bgGreen bgYellow bgBlue bgMagenta bgCyan bgWhite".split(" ")
+
   runCommand = switch cmd
     when "install", "test" then cmd
     else "run #{cmd}"
@@ -44,8 +46,12 @@ mapTasks = (cmd, dirs) ->
       }
     }
 
-colors = "green yellow blue magenta cyan white gray bgGreen bgYellow bgBlue bgMagenta bgCyan bgWhite".split(" ")
+stderrOutput = ""
+collectStderr = through (data) ->
+  stderrOutput += data.toString()
+  @queue(data)
 
+collectStderr.pipe(process.stderr)
 
 module.exports = (cmd) ->
   setTerminalTitle("run:all:#{cmd}")
@@ -57,7 +63,7 @@ module.exports = (cmd) ->
     runAll(tasks, {
       parallel: true
       stdout: process.stdout
-      stderr: process.stderr
+      stderr: collectStderr
     })
   .then ->
     console.log(chalk.green("\nAll tasks completed successfully"))
@@ -70,7 +76,11 @@ module.exports = (cmd) ->
         [result.name.replace(":#{cmd}", ""), result.code]
     }).toString()
 
-    console.error(chalk.red("\nOne or more tasks failed running 'npm run all #{cmd}'. Results:\n"))
+    console.error(chalk.red("\nOne or more tasks failed running 'npm run all #{cmd}'."))
+    console.error("\nResults:\n")
     console.error(results)
+
+    console.error("\nstderr:\n")
+    console.error(stderrOutput)
 
     process.exit(1)
