@@ -140,7 +140,8 @@ module.exports = {
     endWithResponseErr = (err) ->
       status = err.status ? 500
 
-      res.removeHeader("Content-Encoding")
+      if not res.headersSent
+        res.removeHeader("Content-Encoding")
 
       str = through (d) -> @queue(d)
 
@@ -190,6 +191,17 @@ module.exports = {
 
     if obj = buffers.take(remoteUrl)
       wantsInjection = "full"
+
+      ## if we already have an error
+      ## on our stream just immediately
+      ## end with this
+      if err = obj.stream.error
+        endWithResponseErr(err)
+      else
+        ## else listen for the error even which
+        ## could happen at any time
+        obj.stream.on("error", endWithResponseErr)
+
       onResponse(obj.stream, obj.response)
     else
       # opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
@@ -214,6 +226,8 @@ module.exports = {
     return thr
 
   setResHeaders: (req, res, incomingRes, wantsInjection) ->
+    return if res.headersSent
+
     ## omit problematic headers
     headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length", "content-security-policy"
 

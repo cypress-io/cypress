@@ -290,7 +290,7 @@ class Server
       .then (c) ->
         return obj.details
     else
-      new Promise (resolve) =>
+      p = new Promise (resolve, reject) =>
         redirects = []
         newUrl = null
 
@@ -308,9 +308,12 @@ class Server
           urlStr  = url.resolve(@_remoteOrigin, urlStr)
 
         error = (err) ->
-          restorePreviousState()
+          ## only restore the previous state
+          ## if our promise is still pending
+          if p.isPending()
+            restorePreviousState()
 
-          resolve({__error: errors.clone(err)})
+          reject(err)
 
         getStatusText = (code) ->
           try
@@ -322,6 +325,16 @@ class Server
           pt = str
           .on("error", error)
           .on "response", (incomingRes) =>
+            str.removeListener("error", error)
+            str.on "error", (err) ->
+              ## if we have listeners on our
+              ## passthru stream just emit error
+              if pt.listeners("error").length
+                pt.emit("error", err)
+              else
+                ## else store the error for later
+                pt.error = err
+
             jar = str.getJar()
 
             request.setJarCookies(jar, automationRequest)

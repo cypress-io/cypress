@@ -329,6 +329,10 @@ $Cypress.ErrorMessages = do ($Cypress) ->
           URL: {{url}}
           {{body}}
           {{headers}}
+
+        The stack trace for this error is:
+
+        {{stack}}
       """
       status_invalid: "#{cmd('request')} failed because the response had the status code: {{status}}"
       timed_out: "#{cmd('request')} timed out waiting {{timeout}}ms for a response. No response ever occured."
@@ -449,7 +453,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
         {{url}}
 
-        We attempted to make an http request to this URL but the request immediately failed without a response.
+        We attempted to make an http request to this URL but the request failed without a response.
 
         We received this error at the network level:
 
