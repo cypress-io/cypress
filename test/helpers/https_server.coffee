@@ -1,8 +1,9 @@
-fs         = require("fs")
-path       = require("path")
-https      = require("https")
-Promise    = require("bluebird")
-sslRootCas = require('ssl-root-cas')
+fs           = require("fs")
+path         = require("path")
+https        = require("https")
+Promise      = require("bluebird")
+sslRootCas   = require('ssl-root-cas')
+allowDestroy = require("server-destroy-vvo")
 
 sslRootCas
 .inject()
@@ -28,6 +29,8 @@ module.exports = {
     new Promise (resolve) ->
       srv = https.createServer(options, onRequest)
 
+      allowDestroy(srv)
+
       servers.push(srv)
 
       srv.listen port, ->
@@ -37,7 +40,7 @@ module.exports = {
   stop: ->
     stop = (srv) ->
       new Promise (resolve) ->
-        srv.close(resolve)
+        srv.destroy(resolve)
 
     Promise.map(servers, stop)
     .then ->
