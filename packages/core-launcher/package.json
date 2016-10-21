@@ -4,8 +4,6 @@
   "description": "Internal lib for spawning browser processes",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test mocha --watch",
-    "test-ci": "NODE_ENV=test mocha",
     "release": "releaser"
   },
   "repository": {
