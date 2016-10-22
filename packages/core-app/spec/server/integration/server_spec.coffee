@@ -8,7 +8,6 @@ httpsServer   = require("@cypress/core-https-proxy/test/helpers/https_server")
 buffers       = require("#{root}lib/util/buffers")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
-Request       = require("#{root}lib/request")
 Fixtures      = require("#{root}spec/server/helpers/fixtures")
 
 describe "Server", ->
@@ -149,7 +148,7 @@ describe "Server", ->
           })
 
       it "buffers the response", ->
-        @sandbox.spy(Request, "sendStream")
+        @sandbox.spy(@server._request, "sendStream")
 
         @server._onResolveUrl("/index.html", {}, @automationRequest)
         .then (obj = {}) =>
@@ -169,7 +168,7 @@ describe "Server", ->
           expect(buffers.keys()).to.deep.eq(["http://localhost:2000/index.html"])
         .then =>
           @server._onResolveUrl("/index.html", {}, @automationRequest)
-          .then (obj = {}) ->
+          .then (obj = {}) =>
             expect(obj).to.deep.eq({
               isOk: true
               isHtml: true
@@ -183,7 +182,7 @@ describe "Server", ->
               cookies: []
             })
 
-            expect(Request.sendStream).to.be.calledOnce
+            expect(@server._request.sendStream).to.be.calledOnce
         .then =>
           @rp("http://localhost:2000/index.html")
           .then (res) =>
@@ -388,7 +387,7 @@ describe "Server", ->
             })
 
       it "buffers the http response", ->
-        @sandbox.spy(Request, "sendStream")
+        @sandbox.spy(@server._request, "sendStream")
 
         nock("http://espn.com")
         .get("/")
@@ -426,7 +425,7 @@ describe "Server", ->
           expect(buffers.keys()).to.deep.eq(["http://espn.go.com/"])
         .then =>
           @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
-          .then (obj = {}) ->
+          .then (obj = {}) =>
             expect(obj).to.deep.eq({
               isOk: true
               isHtml: true
@@ -442,7 +441,7 @@ describe "Server", ->
               ]
             })
 
-            expect(Request.sendStream).to.be.calledOnce
+            expect(@server._request.sendStream).to.be.calledOnce
         .then =>
           @rp("http://espn.go.com/")
           .then (res) =>
@@ -453,7 +452,7 @@ describe "Server", ->
             expect(buffers.keys()).to.deep.eq([])
 
       it "does not buffer 'bad' responses", ->
-        @sandbox.spy(Request, "sendStream")
+        @sandbox.spy(@server._request, "sendStream")
 
         nock("http://espn.com")
         .get("/")
@@ -488,7 +487,7 @@ describe "Server", ->
           })
 
           @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
-          .then (obj = {}) ->
+          .then (obj = {}) =>
             expect(obj).to.deep.eq({
               isOk: true
               isHtml: true
@@ -504,7 +503,7 @@ describe "Server", ->
               ]
             })
 
-            expect(Request.sendStream).to.be.calledTwice
+            expect(@server._request.sendStream).to.be.calledTwice
 
       it "gracefully handles 500", ->
         nock("http://mlb.com")
@@ -535,9 +534,7 @@ describe "Server", ->
 
       it "gracefully handles http errors", ->
         @server._onResolveUrl("http://localhost:64646", {}, @automationRequest)
-        .then (obj = {}) ->
-          err = obj.__error
-
+        .catch (err) ->
           expect(err.message).to.eq("connect ECONNREFUSED 127.0.0.1:64646")
           expect(err.stack).to.include("Object.exports._errnoException")
           expect(err.port).to.eq(64646)

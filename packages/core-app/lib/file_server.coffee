@@ -1,11 +1,12 @@
 ## TODO: move this to packages/core-file-server
 
-url     = require("url")
-http    = require("http")
-path    = require("path")
-send    = require("send")
-compact = require("lodash.compact")
-errors  = require("./errors")
+url          = require("url")
+http         = require("http")
+path         = require("path")
+send         = require("send")
+compact      = require("lodash.compact")
+allowDestroy = require("server-destroy-vvo")
+errors       = require("./errors")
 
 onRequest = (req, res, fileServerFolder) ->
   args = compact([
@@ -37,6 +38,8 @@ module.exports = {
       srv = http.createServer (req, res) ->
         onRequest(req, res, fileServerFolder)
 
+      allowDestroy(srv)
+
       srv.listen ->
         resolve({
           port: ->
@@ -47,6 +50,6 @@ module.exports = {
 
           close: ->
             new Promise (resolve) ->
-              srv.close(resolve)
+              srv.destroy(resolve)
       })
 }

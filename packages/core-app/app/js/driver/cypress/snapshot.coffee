@@ -54,10 +54,18 @@ do ($Cypress, _, $) ->
       ## now remove it after we clone
       $el.removeAttr(@highlightAttr) if $el?.removeAttr
 
+      tmpHtmlEl = document.createElement("html")
+
       ## preserve attributes on the <html> tag
       htmlAttrs = _.reduce @cy.$$("html")[0].attributes, (memo, attr) ->
         if attr.specified
-          memo[attr.name] = attr.value
+          try
+            ## if we can successfully set the attribute
+            ## then set it on memo because its possible
+            ## the attribute is completely invalid
+            tmpHtmlEl.setAttribute(attr.name, attr.value)
+            memo[attr.name] = attr.value
+
         memo
       , {}
 

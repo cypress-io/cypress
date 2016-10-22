@@ -5,6 +5,9 @@ e2e      = require("../helpers/e2e")
 onServer = (app) ->
   app.use(parser())
 
+  app.get "/logout", (req, res) ->
+    res.send("<html>logged out</html>")
+
   app.get "/foo", (req, res) ->
     console.log "cookies", req.cookies
     res.send(req.cookies)
@@ -13,6 +16,15 @@ onServer = (app) ->
     res.cookie("shouldExpire", "now")
 
     res.send("<html></html>")
+
+  app.get "/expirationRedirect", (req, res) ->
+    res.cookie("shouldExpire", "now", {
+      ## express maxAge is relative to current time
+      ## in seconds
+      maxAge: 0
+    })
+
+    res.redirect("/logout")
 
   app.get "/expirationMaxAge", (req, res) ->
     res.cookie("shouldExpire", "now", {

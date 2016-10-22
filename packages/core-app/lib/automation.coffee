@@ -42,7 +42,7 @@ normalizeCookieProps = (data) ->
 
   cookie
 
-module.exports = (namespace, socketIoCookie, screenshotsFolder) ->
+automation = (namespace, socketIoCookie, screenshotsFolder) ->
 
   isCypressNamespaced = (cookie) ->
     return cookie if not name = cookie?.name
@@ -131,3 +131,8 @@ module.exports = (namespace, socketIoCookie, screenshotsFolder) ->
         else
           throw new Error("Automation push message: '#{message}' not recognized.")
   }
+
+automation.normalizeCookieProps = normalizeCookieProps
+automation.normalizeCookies     = normalizeCookies
+
+module.exports = automation

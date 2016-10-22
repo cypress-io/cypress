@@ -42,6 +42,8 @@ do ($Cypress, _) ->
               for own prop, val of e
                 err[prop] = val
 
+            err.triggerPromise = true
+
             reject(err)
           else
             resolve(resp)

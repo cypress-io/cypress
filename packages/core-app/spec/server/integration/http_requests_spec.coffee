@@ -1468,7 +1468,6 @@ describe "Routes", ->
               "Content-Type": "text/css"
             })
 
-
     context "images", ->
       beforeEach ->
         Fixtures.scaffold()
@@ -2323,6 +2322,45 @@ describe "Routes", ->
       #   supertest(@srv)
       #   .get("/www.cdnjs.com/backbone.js")
       #   .expect(200)
+
+    context "without finishing responses", ->
+      beforeEach (done) ->
+        @setup("http://localhost:5959", {
+          config: {
+            responseTimeout: 50
+          }
+        })
+        .then =>
+          @srv = http.createServer (req, res) =>
+            @onRequest?.call(@, req, res)
+
+          @srv.listen =>
+            @port = @srv.address().port
+
+            done()
+
+      afterEach ->
+        @srv.close()
+
+      it "gracefully handles responses without headers", ->
+        @onRequest = (req, res) ->
+
+        @rp("http://localhost:#{@port}/")
+        .then (res) ->
+          expect(res.statusCode).to.eq(500)
+
+          expect(res.body).to.include("Cypress errored attempting to make an http request to this url")
+
+      it "gracefully handles responses with headers + incomplete body", ->
+        @onRequest = (req, res) ->
+          res.writeHead(401)
+          res.write("foo\n")
+
+        @rp("http://localhost:#{@port}/")
+        .then (res) ->
+          expect(res.statusCode).to.eq(401)
+
+          expect(res.body).to.include("Cypress errored attempting to make an http request to this url")
 
   context "POST *", ->
     beforeEach ->

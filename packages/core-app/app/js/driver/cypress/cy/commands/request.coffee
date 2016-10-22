@@ -18,8 +18,10 @@ $Cypress.register "Request", (Cypress, _, $) ->
   }
 
   request = (options) =>
-    new Promise (resolve) ->
-      Cypress.trigger "request", options, resolve
+    Cypress.triggerPromise("request", options)
+
+  responseFailed = (err) ->
+    err.triggerPromise is true
 
   argIsHttpMethod = (str) ->
     _.isString(str) and validHttpMethodsRe.test str.toUpperCase()
@@ -155,42 +157,43 @@ $Cypress.register "Request", (Cypress, _, $) ->
       @_clearTimeout()
 
       request(requestOpts)
-        .timeout(options.timeout)
-        .then (response) =>
-          options.response = response
+      .timeout(options.timeout)
+      .then (response) =>
+        options.response = response
 
-          if err = response.__error
-            body = if b = requestOpts.body
-              "Body: #{Cypress.Utils.stringify(b)}"
-            else
-              ""
-
-            headers = if h = requestOpts.headers
-              "Headers: #{Cypress.Utils.stringify(h)}"
-            else
-              ""
-
-            $Cypress.Utils.throwErrByPath("request.loading_failed", {
-              onFail: options._log
-              args: {
-                error: err
-                method: requestOpts.method
-                url: requestOpts.url
-                body
-                headers
-              }
-            })
-
-          ## bomb if we should fail on non 2xx status code
-          if options.failOnStatus and not isOkStatusCodeRe.test(response.status)
-            $Cypress.Utils.throwErrByPath("request.status_invalid", {
-              onFail: options._log
-              args: { status: response.status }
-            })
-
-          return response
-        .catch Promise.TimeoutError, (err) =>
-          $Cypress.Utils.throwErrByPath "request.timed_out", {
+        ## bomb if we should fail on non 2xx status code
+        if options.failOnStatus and not isOkStatusCodeRe.test(response.status)
+          $Cypress.Utils.throwErrByPath("request.status_invalid", {
             onFail: options._log
-            args: { timeout: options.timeout }
+            args: { status: response.status }
+          })
+
+        return response
+      .catch Promise.TimeoutError, (err) =>
+        $Cypress.Utils.throwErrByPath "request.timed_out", {
+          onFail: options._log
+          args: { timeout: options.timeout }
+        }
+      .catch responseFailed, (err) ->
+        body = if b = requestOpts.body
+          "Body: #{Cypress.Utils.stringify(b)}"
+        else
+          ""
+
+        headers = if h = requestOpts.headers
+          "Headers: #{Cypress.Utils.stringify(h)}"
+        else
+          ""
+
+        $Cypress.Utils.throwErrByPath("request.loading_failed", {
+          onFail: options._log
+          args: {
+            error: err.message
+            stack: err.stack
+            method: requestOpts.method
+            url: requestOpts.url
+            body
+            headers
           }
+        })
+
