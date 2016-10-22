@@ -33,8 +33,8 @@ defaults = {
   ignoreTestFiles: "*.hot-update.js"
   defaultCommandTimeout: 4000
   requestTimeout:        5000
-  responseTimeout:       20000
-  pageLoadTimeout:       30000
+  responseTimeout:       30000
+  pageLoadTimeout:       60000
   execTimeout:           60000
   chromeWebSecurity: true
   waitForAnimations: true
