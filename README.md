@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.6.2
+- bump kitchen sink default config values
+
 #### 0.6.1
 - prevent file server from caching
 
