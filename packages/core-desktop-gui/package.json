@@ -10,8 +10,7 @@
     "server": "zunder serve-prod --port 8000",
     "watch-dev": "zunder watch",
     "prepublish": "npm run build-prod",
-    "release": "releaser",
-    "test": "npm run build-prod && npm run server & cypress run"
+    "release": "releaser"
   },
   "repository": {
     "type": "git",
@@ -35,6 +34,7 @@
     "bootstrap-sass": "3.3.5",
     "bower": "^1.7.2",
     "classnames": "^2.2.5",
+    "cypress-cli": "^0.12.0",
     "eslint": "^2.12.0",
     "eslint-plugin-react": "^5.2.2",
     "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
@@ -56,6 +56,6 @@
     "react-dom": "^15.1.0",
     "react-loader": "^2.4.0",
     "react-router": "^2.4.1",
-    "zunder": "^3.5.4"
+    "zunder": "^3.5.5"
   }
 }

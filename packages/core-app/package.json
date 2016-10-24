@@ -13,7 +13,7 @@
     "deploy": "gulp deploy",
     "release": "gulp release",
     "postinstall": "bower install",
-    "test": "npm run test-unit-once && npm run test-integration-once && npm run test-e2e-once",
+    "test-once": "npm run test-unit-once && npm run test-integration-once && npm run test-e2e-once",
     "test-unit": "./spec/server/helpers/watch test-unit-once",
     "test-unit-once": "./spec/server/helpers/run unit",
     "test-integration": "./spec/server/helpers/watch test-integration-once",

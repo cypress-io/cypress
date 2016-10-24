@@ -7,7 +7,7 @@ module.exports = {
 
     switch
       when cmd = options._[0]
-        runAll(cmd)
+        runAll(cmd, options)
 
       else
         require("packages/core-app").start()
@@ -17,7 +17,9 @@ module.exports = {
 ###
 
 run a task for an individual repo
-clean task (probably per repo the 'npm run all clean')
+clean task (probably per repo then 'npm run all clean')
+handle task not existing in any repo
+handle aliases (install -> i, test -> t)
 remove node_modules task (clean install)
 starting app
 deployment

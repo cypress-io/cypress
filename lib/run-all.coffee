@@ -53,7 +53,7 @@ collectStderr = through (data) ->
 
 collectStderr.pipe(process.stderr)
 
-module.exports = (cmd) ->
+module.exports = (cmd, options) ->
   setTerminalTitle("run:all:#{cmd}")
 
   getDirs()
@@ -61,7 +61,7 @@ module.exports = (cmd) ->
     mapTasks(cmd, dirs)
   .then (tasks) ->
     runAll(tasks, {
-      parallel: true
+      parallel: if options.serial then false else true
       stdout: process.stdout
       stderr: collectStderr
     })

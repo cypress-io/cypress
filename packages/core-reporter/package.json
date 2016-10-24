@@ -7,7 +7,8 @@
     "build-prod": "node ./scripts/build-prod.js",
     "prepublish": "npm run build-prod",
     "release": "releaser",
-    "test": "node ./scripts/test.js",
+    "test-once": "npm run test-unit-once",
+    "test-unit-once": "node ./scripts/test.js",
     "watch-dev": "node ./scripts/watch.js"
   },
   "repository": {
@@ -47,6 +48,6 @@
     "react-dom": "^15.3.0",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
-    "zunder": "^3.5.4"
+    "zunder": "^3.5.5"
   }
 }
