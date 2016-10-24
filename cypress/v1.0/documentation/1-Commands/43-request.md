@@ -1,7 +1,7 @@
 slug: request
-excerpt: Make XHR request
+excerpt: Make HTTP request
 
-Use `cy.request` to make XHR requests. Great for talking to an external endpoint before, during, or after your tests for seeding, querying records, or API testing.
+Use `cy.request` to make HTTP requests. Great for talking to an external endpoint before, during, or after your tests for seeding, querying records, or API testing.
 
 | | |
 |--- | --- |
@@ -70,7 +70,7 @@ beforeEach(function(){
 
 ***
 
-## Send the new subject to an XHR's response on request
+## Send the new subject to an HTTP's response on request
 
 ```javascript
 // the response object is an object literal
@@ -120,13 +120,13 @@ cy
 
 ## Why don't I see the XHR in the Network Tab of the Chrome Dev Tools?
 
-Cypress does not actually make the request out of the browser. So you will not see the request inside of the Chrome Dev Tools.
+Cypress does not actually make an XHR request out of the browser, it makes a simple HTTP request. So you will not see the request inside of the Chrome Dev Tools.
 
 ***
 
 ## CORS is bypassed
 
-Normally when the browser detects a cross-origin XHR request, it will send an `OPTIONS` preflight check to ensure the server allows cross-origin requests. `cy.request` bypasses CORS entirely.
+Normally when the browser detects a cross-origin HTTP request, it will send an `OPTIONS` preflight check to ensure the server allows cross-origin requests. `cy.request` bypasses CORS entirely.
 
 ```javascript
 // we can make requests to any external server, no problem.

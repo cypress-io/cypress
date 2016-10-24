@@ -62,7 +62,7 @@ Commands drive your tests in the browser like a real user would. They let you pe
 
 | Network Requests | |
 | -------------------- | -- |
-| [request](https://on.cypress.io/api/request) | Make XHR request |
+| [request](https://on.cypress.io/api/request) | Make HTTP request |
 | [route](https://on.cypress.io/api/route) | Route responses to matching requests |
 | [server](https://on.cypress.io/api/server) | Control the behavior of network requests and responses |
 
