@@ -1,3 +1,4 @@
+_ = require("lodash")
 path = require("path")
 AsciiTable = require("ascii-table")
 glob = require("glob")
@@ -8,33 +9,48 @@ through = require("through")
 
 globAsync = Promise.promisify(glob)
 
-DEFAULT_DIR = path.resolve("packages", "*")
-
 setTerminalTitle = (title) ->
   process.stdout.write(
     String.fromCharCode(27) + "]0;" + title + String.fromCharCode(7)
   )
 
-getDirs = (dir) ->
-  dir ?= DEFAULT_DIR
-  globAsync(dir)
+packageNameFromPath = (fullPath) ->
+  fullPath.replace(path.resolve("packages") + "/", "")
 
-getPackages = (cmd, dirs) ->
+getDirs = () ->
+  packagesDir = path.resolve("packages", "*")
+  globAsync(packagesDir)
+
+filterDirsByPackage = (dirs, packages) ->
+  return dirs unless packages
+
+  return dirs.filter (dir) ->
+    packageName = packageNameFromPath(dir)
+    return _.includes(packages, packageName)
+
+filterDirsByCmd = (dirs, cmd) ->
   return dirs if cmd is "install"
 
   dirs.filter (dir) ->
     packageJson = require(path.resolve(dir, "package"))
     return !!packageJson.scripts[cmd]
 
-mapTasks = (cmd, dirs) ->
+checkDirsLength = (dirs, errMessage) ->
+  return dirs if dirs.length
+
+  err = new Error(errMessage)
+  err.noPackages = true
+  throw err
+
+mapTasks = (cmd, packages) ->
   colors = "green yellow blue magenta cyan white gray bgGreen bgYellow bgBlue bgMagenta bgCyan bgWhite".split(" ")
 
   runCommand = switch cmd
     when "install", "test" then cmd
     else "run #{cmd}"
 
-  getPackages(cmd, dirs).map (dir, index) ->
-    packageName = dir.replace(path.resolve("packages") + "/", "")
+  packages.map (dir, index) ->
+    packageName = packageNameFromPath(dir)
     return {
       command: runCommand
       options: {
@@ -53,10 +69,26 @@ collectStderr = through (data) ->
 
 collectStderr.pipe(process.stderr)
 
+noPackagesError = (err) -> err.noPackages
+resultsError = (err) -> !!err.results
+
 module.exports = (cmd, options) ->
   setTerminalTitle("run:all:#{cmd}")
 
+  packagesFilter = options.package or options.packages
+
   getDirs()
+  .then (dirs) ->
+    filterDirsByPackage(dirs, packagesFilter)
+  .then (dirs) ->
+    checkDirsLength(dirs, "No packages were found with the filter '#{packagesFilter}'")
+  .then (dirs) ->
+    filterDirsByCmd(dirs, cmd)
+  .then (dirs) ->
+    errMessage = "No packages were found with the task '#{cmd}'"
+    if packagesFilter
+      errMessage += " and the filter '#{packagesFilter}'"
+    checkDirsLength(dirs, errMessage)
   .then (dirs) ->
     mapTasks(cmd, dirs)
   .then (tasks) ->
@@ -65,11 +97,15 @@ module.exports = (cmd, options) ->
       stdout: process.stdout
       stderr: collectStderr
     })
+
   .then ->
     console.log(chalk.green("\nAll tasks completed successfully"))
-  .catch (err) ->
-    throw err unless err.results
 
+  .catch noPackagesError, (err) ->
+    console.error(chalk.red("\n#{err.message}"))
+    process.exit(1)
+
+  .catch resultsError, (err) ->
     results = AsciiTable.factory({
       heading: ["package", "exit code"]
       rows: err.results.map (result) ->
