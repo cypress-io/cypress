@@ -54,9 +54,9 @@ Option | Default | Description
 ----- | ---- | ----
 `defaultCommandTimeout` | `4000` | Time, in milliseconds, to wait until most DOM based commands are considered timed out
 `execTimeout` | `60000` | Time, in milliseconds, to wait for a system command to finish executing during [`cy.exec`](https://on.cypress.io/api/exec) command
-`pageLoadTimeout` | `30000` | Time, in milliseconds, to wait until [`cy.visit`](https://on.cypress.io/api/visit), [`cy.go`](https://on.cypress.io/api/go), [`cy.reload`](https://on.cypress.io/api/reload), or a page load times out
+`pageLoadTimeout` | `60000` | Time, in milliseconds, to wait until [`cy.visit`](https://on.cypress.io/api/visit), [`cy.go`](https://on.cypress.io/api/go), [`cy.reload`](https://on.cypress.io/api/reload), or a page load times out
 `requestTimeout` | `5000` | Time, in milliseconds, to wait for an XHR request during [`cy.wait`](wait) command
-`responseTimeout` | `20000` | Time, in milliseconds, to wait until a response for [`cy.request`](https://on.cypress.io/api/request), [`cy.wait`](https://on.cypress.io/api/wait), [`cy.fixture`](https://on.cypress.io/api/fixture), [`cy.getCookie`](https://on.cypress.io/api/getcookie), [`cy.getCookies`](https://on.cypress.io/api/getcookies), [`cy.setCookie`](https://on.cypress.io/api/setcookie), [`cy.clearCookie`](https://on.cypress.io/api/clearcookie) and [`cy.clearCookies`](https://on.cypress.io/api/clearcookies), and [`cy.screenshot`](https://on.cypress.io/api/screenshot) commands
+`responseTimeout` | `30000` | Time, in milliseconds, to wait until a response for [`cy.request`](https://on.cypress.io/api/request), [`cy.wait`](https://on.cypress.io/api/wait), [`cy.fixture`](https://on.cypress.io/api/fixture), [`cy.getCookie`](https://on.cypress.io/api/getcookie), [`cy.getCookies`](https://on.cypress.io/api/getcookies), [`cy.setCookie`](https://on.cypress.io/api/setcookie), [`cy.clearCookie`](https://on.cypress.io/api/clearcookie) and [`cy.clearCookies`](https://on.cypress.io/api/clearcookies), and [`cy.screenshot`](https://on.cypress.io/api/screenshot) commands
 
 ***
 
@@ -148,8 +148,8 @@ Keys are automatically camel cased, and we will automatically convert values int
 
 ```shell
 ## both of these are valid
-export CYPRESS_pageLoadTimeout=10000
-export CYPRESS_PAGE_LOAD_TIMEOUT=10000
+export CYPRESS_pageLoadTimeout=100000
+export CYPRESS_PAGE_LOAD_TIMEOUT=100000
 ```
 
 [block:callout]
