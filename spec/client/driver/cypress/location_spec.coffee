@@ -1,4 +1,5 @@
 urls =
+  blank:    "about:blank"
   cypress:  "http://0.0.0.0:2020/__/#/tests/app.coffee"
   signin:   "http://localhost:2020/signin"
   users:    "http://localhost:2020/users/1"
@@ -69,6 +70,10 @@ describe "$Cypress.Location API", ->
     it "returns the origin without port", ->
       str = @setup("google").getOrigin()
       expect(str).to.eq("https://www.google.com")
+
+    it "returns the origin as null for about:blank", ->
+      origin = @setup("blank").getOrigin()
+      expect(origin).to.eq(null)
 
   context "#getPathName", ->
     it "returns the path", ->

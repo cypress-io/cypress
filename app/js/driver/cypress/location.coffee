@@ -36,7 +36,11 @@ $Cypress.Location = do ($Cypress, _, UrlParse) ->
       @remote.hostname
 
     getOrigin: ->
-      @remote.origin
+      ## https://github.com/unshiftio/url-parse/issues/38
+      if @remote.origin is "null"
+        null
+      else
+        @remote.origin
 
     getProtocol: ->
       @remote.protocol
