@@ -31,7 +31,6 @@ export default class Nav extends Component {
               </a>
             </li>
             { this._userStateButton() }
-
           </ul>
         </div>
       </nav>

@@ -68,7 +68,7 @@ export default class Project {
     return this.browserState = "closed"
   }
 
-  @action setBrowsers (browsers) {
+  @action setBrowsers (browsers = []) {
     if (browsers.length) {
       this.browsers = _.map(browsers, (browser) => {
         return new Browser(browser)

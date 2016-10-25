@@ -69,6 +69,18 @@ LGPL
 
 ## Changelog
 
+#### 0.3.10 - *(10/14/16)*
+- missing lib folder
+
+#### 0.3.9 - *(10/14/16)*
+- fixed errors with undefined values being called
+
+#### 0.3.8 - *(10/13/16)*
+- explain how to manually update cypress during update fail
+
+#### 0.3.7 - *(10/05/16)*
+- shrinkwrap to prevent breaking dep change
+
 #### 0.3.6 - *(10/03/16)*
 - deploy proper prod files, fix mobx action undefined values
 
