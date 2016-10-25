@@ -116,6 +116,10 @@ module.exports = {
   changeToSpec: (spec) ->
     openProject.getConfig()
     .then (cfg) ->
+      ## always reset the state when swapping specs
+      ## so that our document.domain is reset back to <root>
+      openProject.resetState()
+
       url = openProject.getUrlBySpec(cfg.clientUrl, spec)
 
       ## TODO: the problem here is that we really need
