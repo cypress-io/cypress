@@ -138,6 +138,21 @@ cy
 
 ***
 
+## Cookies are automatically sent and received
+
+If the HTTP request being made is sending cookies, they are sent in the request. Additionally, if a server reponds with cookies, these are automatically set on the browser.
+
+To disable sending and receiving cookies in the request, set `cookies: false` in the request's options.
+
+```javascript
+// we can make requests to any external server, no problem.
+cy
+  // cookies are not sent or received and set in the browser
+  .request("users/1.json", {cookies: false})
+```
+
+***
+
 ## Rules for resolving a relative request url
 
 If you provide a non fully qualified domain name (FQDN), Cypress will make its best guess as to which host you want the request to go to.
