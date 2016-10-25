@@ -9,6 +9,9 @@
     "prod": "npm run build-prod && npm run server",
     "server": "zunder serve-prod --port 8000",
     "watch-dev": "zunder watch",
+    "clean": "zunder clean",
+    "clean-deps": "rm -rf node_modules",
+    "clean-all": "npm run clean && npm run clean-deps",
     "prepublish": "npm run build-prod",
     "release": "releaser"
   },

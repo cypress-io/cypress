@@ -10,6 +10,9 @@
     "test-once": "npm run test-unit-once",
     "test-unit-once": "NODE_ENV=test mocha --require test-setup.js",
     "prerelease": "npm run build-prod",
+    "clean": "gulp clean",
+    "clean-deps": "rm -rf node_modules",
+    "clean-all": "npm run clean && npm run clean-deps",
     "release": "releaser"
   },
   "files": [

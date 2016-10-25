@@ -4,6 +4,8 @@
   "description": "Internal lib for spawning browser processes",
   "main": "index.js",
   "scripts": {
+    "clean-deps": "rm -rf node_modules",
+    "clean-all": "npm run clean-deps",
     "release": "releaser"
   },
   "repository": {

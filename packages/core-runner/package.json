@@ -14,6 +14,9 @@
   "scripts": {
     "build-dev": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
+    "clean": "zunder clean",
+    "clean-deps": "rm -rf node_modules",
+    "clean-all": "npm run clean && npm run clean-deps",
     "prepublish": "npm run build-prod",
     "release": "releaser",
     "test-once": "npm run test-unit-once",

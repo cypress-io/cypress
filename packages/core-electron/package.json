@@ -9,6 +9,8 @@
     "test-once": "npm run test-unit-once",
     "test-unit-once": "mocha --compilers coffee:coffee-script/register",
     "postinstall": "./bin/cypress-electron --install",
+    "clean-deps": "rm -rf node_modules",
+    "clean-all": "npm run clean-deps",
     "release": "releaser"
   },
   "bin": {
