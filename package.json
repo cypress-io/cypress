@@ -13,7 +13,7 @@
     "all": "node index.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@cypress/npm-run-all": "^4.0.2",
     "ascii-table": "0.0.9",
