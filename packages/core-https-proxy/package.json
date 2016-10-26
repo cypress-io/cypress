@@ -9,8 +9,7 @@
     "test-once": "npm run test-unit-once",
     "test-unit-once": "NODE_ENV=test mocha",
     "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean-deps",
-    "release": "releaser"
+    "clean-all": "npm run clean-deps"
   },
   "repository": {
     "type": "git",
@@ -23,7 +22,6 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-https-proxy#readme",
   "devDependencies": {
-    "@cypress/core-releaser": "^0.1.8",
     "chai": "^3.5.0",
     "http-mitm-proxy": "^0.5.1",
     "mocha": "^2.5.3",

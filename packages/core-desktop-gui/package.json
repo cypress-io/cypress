@@ -6,14 +6,12 @@
   "scripts": {
     "build-dev": "zunder build-dev",
     "build-prod": "node ./scripts/build-prod.js",
-    "prod": "npm run build-prod && npm run server",
+    "run-prod": "npm run build-prod && npm run server",
     "server": "zunder serve-prod --port 8000",
     "watch-dev": "zunder watch",
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean && npm run clean-deps",
-    "prepublish": "npm run build-prod",
-    "release": "releaser"
+    "clean-all": "npm run clean && npm run clean-deps"
   },
   "repository": {
     "type": "git",
@@ -31,7 +29,6 @@
   ],
   "devDependencies": {
     "@cypress/core-icons": "^0.5.0",
-    "@cypress/core-releaser": "0.1.8",
     "babel-eslint": "^6.0.4",
     "bluebird": "^3.4.0",
     "bootstrap-sass": "3.3.5",

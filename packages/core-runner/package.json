@@ -17,8 +17,6 @@
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "clean-all": "npm run clean && npm run clean-deps",
-    "prepublish": "npm run build-prod",
-    "release": "releaser",
     "test-once": "npm run test-unit-once",
     "test-unit-once": "node ./scripts/test.js",
     "watch-dev": "node ./scripts/watch.js"
@@ -28,7 +26,6 @@
     "lib/runner.js"
   ],
   "devDependencies": {
-    "@cypress/core-releaser": "0.1.8",
     "@cypress/react-tooltip": "0.1.1",
     "babel-eslint": "^6.0.4",
     "bluebird": "^3.4.0",

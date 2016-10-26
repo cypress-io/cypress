@@ -5,11 +5,9 @@
   "scripts": {
     "build-dev": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
-    "prepublish": "npm run build-prod",
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "clean-all": "npm run clean && npm run clean-deps",
-    "release": "releaser",
     "test-once": "npm run test-unit-once",
     "test-unit-once": "node ./scripts/test.js",
     "watch-dev": "node ./scripts/watch.js"
@@ -29,7 +27,6 @@
     "lib/reporter.js"
   ],
   "devDependencies": {
-    "@cypress/core-releaser": "^0.1.8",
     "@cypress/react-tooltip": "^0.1.1",
     "classnames": "^2.2.5",
     "babel-eslint": "^6.0.4",

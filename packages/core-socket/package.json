@@ -8,8 +8,7 @@
     "test-once": "npm run test-unit-once",
     "test-unit-once": "NODE_ENV=test mocha",
     "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean-deps",
-    "release": "releaser"
+    "clean-all": "npm run clean-deps"
   },
   "repository": {
     "type": "git",
@@ -26,7 +25,6 @@
     "socket.io-client": "1.4.5"
   },
   "devDependencies": {
-    "@cypress/core-releaser": "0.1.7",
     "chai": "^3.5.0",
     "mocha": "^2.4.5"
   }
