@@ -16,7 +16,6 @@ module.exports = {
 
 ###
 
-handle aliases (install -> i, test -> t)
 starting app
 deployment
 break up core-app

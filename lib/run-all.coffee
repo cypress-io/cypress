@@ -29,11 +29,13 @@ filterDirsByPackage = (dirs, packages) ->
     return _.includes(packages, packageName)
 
 filterDirsByCmd = (dirs, cmd) ->
-  return dirs if cmd is "install"
-
-  dirs.filter (dir) ->
-    packageJson = require(path.resolve(dir, "package"))
-    return !!packageJson.scripts[cmd]
+  switch cmd
+    when "install", "i"
+      return dirs
+    else
+      dirs.filter (dir) ->
+        packageJson = require(path.resolve(dir, "package"))
+        return !!packageJson.scripts[cmd]
 
 checkDirsLength = (dirs, errMessage) ->
   return dirs if dirs.length
@@ -46,7 +48,7 @@ mapTasks = (cmd, packages) ->
   colors = "green yellow blue magenta cyan white gray bgGreen bgYellow bgBlue bgMagenta bgCyan bgWhite".split(" ")
 
   runCommand = switch cmd
-    when "install", "test" then cmd
+    when "install", "i", "test", "t" then cmd
     else "run #{cmd}"
 
   packages.map (dir, index) ->
