@@ -1,29 +1,23 @@
 # Cypress Core Extension
 
-## Installing
-
-```bash
-npm install @cypress/core-extension
-```
-
 ## Developing
 
-**Install**
+### Building
 
 ```bash
-npm install
+npm run build-prod
 ```
 
-**Building**
+### Watching
 
 ```bash
-npm run build
+npm run watch-dev
 ```
 
-**Watching**
+### Testing
 
 ```bash
-npm run watch
+npm run test-once
 ```
 
 1. Open Chrome

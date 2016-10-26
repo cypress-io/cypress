@@ -16,56 +16,46 @@ The desktop GUI has the following responsibilities:
 - Initializing the run of a specific test file or all tests chosen by the user.
 - Notifying users of updates to Cypress and initializing update process.
 
-## Installing
+
+## Development
+
+### Building
+
+#### For development
 
 ```bash
-npm install @cypress/core-desktop-gui
+npm run build-dev
 ```
 
-## Developing
-
-To run the GUI in dev mode, you need to run the [Cypress App](https://github.com/cypress-io/cypress-app).
-
-- Navigate to `cypress-app` and run the following commands:
+#### For production
 
 ```bash
-npm i
-npm start
+npm run build-prod
 ```
 
-The GUI should now be in your taskbar. Click in the taskbar to open it.
-
-In your console, you will probably see the following error:
+### Watching
 
 ```bash
-Error: connect ECONNREFUSED 127.0.0.1:1234
- > It looks like you're not running the local api server in development. This may cause problems running the GUI.
+npm run watch-dev
 ```
 
-In order to access the api to do things like logging into the GUI, we need to run the [Cypress API](https://github.com/cypress-io/cypress-api). Navigate to `cypress-api` and run the following commands:
+### Testing
 
 ```bash
-npm i
-npm start
+npm test-once
 ```
 
-If you get any errors doing the above commands, go through the [install instructions](https://github.com/cypress-io/cypress-api) of the cypress-api app.
-
-## Testing
-
-```bash
-npm test
-```
-
-## Debugging
+### Debugging
 
 If you want to see the `ipc` events which are pending from Cypress tests:
 
 - Switch to 'Your App' frame
 - App.ipc() <-- returns you object with pending events
 
+
 ## License
 LGPL
+
 
 ## Changelog
 

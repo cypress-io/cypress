@@ -1,4 +1,12 @@
+# Cypress Core Extension
 
+## Developing
+
+**Testing**
+
+```bash
+npm run test-once
+```
 
 ## Changelog
 

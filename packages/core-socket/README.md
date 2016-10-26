@@ -2,16 +2,11 @@
 
 This is a shared lib for holding both the `socket.io` server and client.
 
-## Install
-
-```bash
-npm install --save @cypress/core-socket
-```
 
 ## Usage
 
 ```javascript
-var socket = require("@cypress/core-socket")
+var socket = require("packages/core-socket")
 
 // returns
 {
@@ -25,12 +20,12 @@ var socket = require("@cypress/core-socket")
 ```
 
 ```javascript
-var socket = require("@cypress/core-socket")
+var socket = require("packages/core-socket")
 
 // server usage
 var srv = require("http").createServer()
 var io = socket.server(srv)
-io.on("connection", function(){});
+io.on("connection", function(){})
 
 // client usage
 var client = socket.client("http://localhost:2020")
@@ -41,6 +36,21 @@ client.on("disconnect", function(){})
 // path usage
 socket.getPathToClientSource()
 // returns your/path/to/node_modules/socket.io-client/socket.io.js0
+```
+
+
+## Development
+
+### Watching
+
+```bash
+npm test
+```
+
+### Testing
+
+```bash
+npm test-once
 ```
 
 

@@ -17,41 +17,37 @@ The reporter shows the running results of the tests. It includes the following:
   * any failures/errors
 - Toggle-able auto-scrolling of command log
 
-## Installation
-
-```bash
-npm install @cypress/core-reporter --save
-```
-
-## Usage
-
-```javascript
-import Reporter from 'reporter'
-
-<Reporter
-  runner={/* event emitter */}
-  specPath={/* path to spec file */}
-/>
-```
 
 ## Development
 
-```bash
-## Install project dependencies
-npm install
-```
+### Building
+
+#### For development
 
 ```bash
-## Watches all project files
-## - runs *.js and *.jsx through babel and outputs individually to dist
-## - runs associated unit test of file saved and outputs to terminal
-## - compiles *.scss files to single reporter.css in dist
-npm start
+npm run build-dev
 ```
 
+#### For production
+
 ```bash
-## Runs all tests
-npm test
+npm run build-prod
+```
+
+### Watching
+
+- Runs `*.js` and `*.jsx` through babel and bundles with browserify into single `dist/reporter.js`
+- Runs associated unit test of file saved and outputs to terminal
+- Compiles `*.scss` files to single `dist/reporter.css`
+
+```bash
+npm run watch-dev
+```
+
+### Testing
+
+```bash
+npm test-once
 ```
 
 
