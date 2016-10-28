@@ -4,7 +4,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
   bTagOpen       = /\*\*/g
   bTagClosed     = /\*\*/g
   allButs        = /\bbut\b/g
-  reExistance    = /exist/
+  reExistence    = /exist/
   reEventually   = /^eventually/
   reHaveLength   = /length/
 
@@ -104,7 +104,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       throwAndLogErr(err)
 
     ## are we doing a length assertion?
-    if reHaveLength.test(chainers) or reExistance.test(chainers)
+    if reHaveLength.test(chainers) or reExistence.test(chainers)
       exp.isCheckingExistence = true
 
     applyChainer = (memo, value) ->
@@ -153,6 +153,86 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
       return subject
 
+  assertFn = (passed, message, value, actual, expected, error, verifying = false) ->
+    ## if this is a jquery object and its true
+    ## then remove all the 'but's and replace with 'and'
+    ## also just think about slicing off everything after a comma?
+    message = message.split(allButs).join("and") if message and passed
+
+    obj = parseValueActualAndExpected(value, actual, expected)
+
+    if Cypress.Utils.hasElement(value)
+      obj.$el = value
+
+    functionHadArguments = (current) ->
+      fn = current and current.get("args") and current.get("args")[0]
+      fn and _.isFunction(fn) and fn.length > 0
+
+    isAssertionType = (cmd) ->
+      cmd and cmd.is("assertion")
+
+    current = @prop("current")
+
+    ## if we are simply verifying the upcoming
+    ## assertions then do not immediately end or snapshot
+    ## else do
+    if verifying
+      obj._error = error
+    else
+      obj.end = true
+      obj.snapshot = true
+      obj.error = error
+
+    isChildLike = (subject, current) =>
+      (value is subject) or
+        ## if our current command is an assertion type
+        isAssertionType(current) or
+          ## are we currently verifying assertions?
+          @prop("upcomingAssertions")?.length > 0 or
+            ## did the function have arguments
+            functionHadArguments(current)
+
+    _.extend obj,
+      name:     "assert"
+      # end:      true
+      # snapshot: true
+      message:  message
+      passed:   passed
+      selector: value?.selector
+      type: (current, subject) ->
+        ## if our current command has arguments assume
+        ## we are an assertion that's involving the current
+        ## subject or our value is the current subject
+        if isChildLike(subject, current)
+          "child"
+        else
+          "parent"
+
+      consoleProps: =>
+        obj = {Command: "assert"}
+
+        _.extend obj, parseValueActualAndExpected(value, actual, expected)
+
+        _.extend obj,
+          Message: message.replace(bTagOpen, "").replace(bTagClosed, "")
+
+      renderProps: ->
+        ## by default, the reporter will truncate a message to 100 chars
+        ## this bypasses the truncation
+        {
+          message: message
+        }
+
+    ## think about completely gutting the whole object toString
+    ## which chai does by default, its so ugly and worthless
+
+    if error
+      error.onFail = (err) ->
+
+    Cypress.Log.command obj
+
+    return Cypress
+
   Cypress.addAssertionCommand
     should: ->
       shouldFn.apply(@, arguments)
@@ -168,13 +248,30 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
       options.assertions ?= []
 
+      _.defaults callbacks, {
+        ensureExistenceFor: "dom"
+      }
+
+      ensureExistence = =>
+        ## by default, ensure existence for dom subjects,
+        ## but not non-dom subjects
+        switch callbacks.ensureExistenceFor
+          when "dom"
+            $el = determineEl(options.$el, subject)
+            return if not $Cypress.Utils.isInstanceOf($el, $)
+
+            @ensureElExistence($el)
+
+          when "subject"
+            @ensureExistence(subject)
+
       determineEl = ($el, subject) ->
         ## prefer $el unless it is strickly undefined
         if not _.isUndefined($el) then $el else subject
 
       onPassFn = =>
         if _.isFunction(callbacks.onPass)
-          callbacks.onPass.call(@, cmds)
+          callbacks.onPass.call(@, cmds, options.assertions)
         else
           subject
 
@@ -188,7 +285,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
         ## ensure the error is about existence not about
         ## the downstream assertion.
         try
-          @ensureElExistance determineEl(options.$el, subject)
+          ensureExistence()
         catch e2
           err = e2
 
@@ -216,8 +313,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       ## bail if we have no assertions
       if not cmds.length
         return Promise
-          .try =>
-            @ensureElExistance determineEl(options.$el, subject)
+          .try(ensureExistence)
           .then(onPassFn)
           .catch(onFailFn)
 
@@ -226,7 +322,6 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       cmdHasFunctionArg = (cmd) ->
         _.isFunction(cmd.get("args")[0])
 
-      assert = @assert
       @assert = (args...) ->
         do (cmd = cmds[i]) =>
           setCommandLog = (log) =>
@@ -299,7 +394,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
           @prop("onBeforeLog", setCommandLog)
 
         ## send verify=true as the last arg
-        assert.apply(@, args.concat(true))
+        assertFn.apply(@, args.concat(true))
 
       fns = @_injectAssertionFns(cmds)
 
@@ -324,7 +419,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
         ## no matter what we need to
         ## restore the assertions
-        @assert = assert
+        @assert = assertFn
 
       Promise
         .reduce(fns, assertions, subject)
@@ -398,82 +493,4 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
       assertions
 
-    assert: (passed, message, value, actual, expected, error, verifying = false) ->
-      ## if this is a jquery object and its true
-      ## then remove all the 'but's and replace with 'and'
-      ## also just think about slicing off everything after a comma?
-      message = message.split(allButs).join("and") if message and passed
-
-      obj = parseValueActualAndExpected(value, actual, expected)
-
-      if Cypress.Utils.hasElement(value)
-        obj.$el = value
-
-      functionHadArguments = (current) ->
-        fn = current and current.get("args") and current.get("args")[0]
-        fn and _.isFunction(fn) and fn.length > 0
-
-      isAssertionType = (cmd) ->
-        cmd and cmd.is("assertion")
-
-      current = @prop("current")
-
-      ## if we are simply verifying the upcoming
-      ## assertions then do not immediately end or snapshot
-      ## else do
-      if verifying
-        obj._error = error
-      else
-        obj.end = true
-        obj.snapshot = true
-        obj.error = error
-
-      isChildLike = (subject, current) =>
-        (value is subject) or
-          ## if our current command is an assertion type
-          isAssertionType(current) or
-            ## are we currently verifying assertions?
-            @prop("upcomingAssertions")?.length > 0 or
-              ## did the function have arguments
-              functionHadArguments(current)
-
-      _.extend obj,
-        name:     "assert"
-        # end:      true
-        # snapshot: true
-        message:  message
-        passed:   passed
-        selector: value?.selector
-        type: (current, subject) ->
-          ## if our current command has arguments assume
-          ## we are an assertion that's involving the current
-          ## subject or our value is the current subject
-          if isChildLike(subject, current)
-            "child"
-          else
-            "parent"
-
-        consoleProps: =>
-          obj = {Command: "assert"}
-
-          _.extend obj, parseValueActualAndExpected(value, actual, expected)
-
-          _.extend obj,
-            Message: message.replace(bTagOpen, "").replace(bTagClosed, "")
-
-        renderProps: ->
-          ## by default, the reporter will truncate a message to 100 chars
-          ## this bypasses the truncation
-          {
-            message: message
-          }
-
-      ## think about completely gutting the whole object toString
-      ## which chai does by default, its so ugly and worthless
-
-      if error
-        error.onFail = (err) ->
-
-      Cypress.Log.command obj
-
-      return Cypress
+    assert: assertFn

@@ -105,7 +105,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(300)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -123,7 +123,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -142,7 +142,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -270,7 +270,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "only logs once on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) ->
+        @Cypress.on "log", (attrs, @log) ->
           logs.push log
 
         @cy.on "fail", (err) ->
@@ -282,7 +282,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs out select", ->
         @cy.get("select:first").select("de_dust2").then ->
@@ -296,7 +296,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$("select:first").change =>
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0].name).to.eq("before")
-          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          expect(@log.get("snapshots")[0].body).to.be.an("object")
           done()
 
         @cy.get("select:first").select("de_dust2").then ($select) ->
@@ -305,7 +305,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("select:first").select("de_dust2").then ($select) ->
           expect(@log.get("snapshots").length).to.eq(2)
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(@log.get("snapshots")[1].state).to.be.an("object")
+          expect(@log.get("snapshots")[1].body).to.be.an("object")
 
       it "is not immediately ended", (done) ->
         @cy.$$("select:first").click =>
@@ -332,7 +332,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
         types = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           types.push(log) if log.get("name") is "select"
 
@@ -476,6 +476,16 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get(":text:first").type("foo").then ->
         expect(clicks).to.eq(1)
         expect(retried).to.be.true
+
+    it "accepts body as subject", ->
+      expect(-> @cy.get("body").type("foo")).not.to.throw()
+
+    it "does not click when body is subject", ->
+      bodyClicked = false
+      @cy.$$("body").on "click", -> bodyClicked = true
+
+      @cy.get("body").type("foo").then ->
+        expect(bodyClicked).to.be.false
 
     ## we will need extra tests and logic for input types date, time, month, & week
     ## see issue https://github.com/cypress-io/cypress/issues/27
@@ -1325,6 +1335,232 @@ describe "$Cypress.Cy Actions Commands", ->
           @cy.get("#input-types [contenteditable]").invoke("text", "foo").type("bar{enter}baz{enter}quux").then ($div) ->
             expect($div).to.have.text("foobar\nbaz\nquux")
 
+    describe "modifiers", ->
+
+      describe "activating modifiers", ->
+
+        it "sends keydown event for modifiers in order", (done) ->
+          $input = @cy.$$("input:text:first")
+          events = []
+          $input.on "keydown", (e) ->
+            events.push(e)
+
+          @cy.get("input:text:first").type("{shift}{ctrl}").then ->
+            expect(events[0].shiftKey).to.be.true
+            expect(events[0].which).to.equal(16)
+
+            expect(events[1].ctrlKey).to.be.true
+            expect(events[1].which).to.equal(17)
+
+            $input.off("keydown")
+            done()
+
+        it "maintains modifiers for subsequent characters", (done) ->
+          $input = @cy.$$("input:text:first")
+          events = []
+          $input.on "keydown", (e) ->
+            events.push(e)
+
+          @cy.get("input:text:first").type("{command}{control}ok").then ->
+            expect(events[2].metaKey).to.be.true
+            expect(events[2].ctrlKey).to.be.true
+            expect(events[2].which).to.equal(79)
+
+            expect(events[3].metaKey).to.be.true
+            expect(events[3].ctrlKey).to.be.true
+            expect(events[3].which).to.equal(75)
+
+            $input.off("keydown")
+            done()
+
+        it "does not maintain modifiers for subsequent type commands", (done) ->
+          $input = @cy.$$("input:text:first")
+          events = []
+          $input.on "keydown", (e) ->
+            events.push(e)
+
+          @cy
+          .get("input:text:first")
+          .type("{command}{control}")
+          .type("ok")
+          .then ->
+            expect(events[2].metaKey).to.be.false
+            expect(events[2].ctrlKey).to.be.false
+            expect(events[2].which).to.equal(79)
+
+            expect(events[3].metaKey).to.be.false
+            expect(events[3].ctrlKey).to.be.false
+            expect(events[3].which).to.equal(75)
+
+            $input.off("keydown")
+            done()
+
+        it "does not maintain modifiers for subsequent click commands", (done) ->
+          $button = @cy.$$("button:first")
+          mouseDownEvent = null
+          mouseUpEvent = null
+          clickEvent = null
+          $button.on "mousedown", (e)-> mouseDownEvent = e
+          $button.on "mouseup", (e)-> mouseUpEvent = e
+          $button.on "click", (e)-> clickEvent = e
+
+          @cy
+            .get("input:text:first")
+            .type("{cmd}{option}")
+            .get("button:first").click().then ->
+              expect(mouseDownEvent.metaKey).to.be.false
+              expect(mouseDownEvent.altKey).to.be.false
+
+              expect(mouseUpEvent.metaKey).to.be.false
+              expect(mouseUpEvent.altKey).to.be.false
+
+              expect(clickEvent.metaKey).to.be.false
+              expect(clickEvent.altKey).to.be.false
+
+              $button.off "mousedown"
+              $button.off "mouseup"
+              $button.off "click"
+              done()
+
+        it "sends keyup event for activated modifiers when typing is finished", (done) ->
+          $input = @cy.$$("input:text:first")
+          events = []
+          $input.on "keyup", (e) ->
+            events.push(e)
+
+          @cy
+          .get("input:text:first")
+            .type("{alt}{ctrl}{meta}{shift}ok")
+          .then ->
+            # first keyups should be for the chars typed, "ok"
+            expect(events[0].which).to.equal(79)
+            expect(events[1].which).to.equal(75)
+
+            expect(events[2].which).to.equal(18)
+            expect(events[3].which).to.equal(17)
+            expect(events[4].which).to.equal(91)
+            expect(events[5].which).to.equal(16)
+
+            $input.off("keyup")
+            done()
+
+      describe "release: false", ->
+
+        it "maintains modifiers for subsequent type commands", (done) ->
+          $input = @cy.$$("input:text:first")
+          events = []
+          $input.on "keydown", (e) ->
+            events.push(e)
+
+          @cy
+          .get("input:text:first")
+          .type("{command}{control}", { release: false })
+          .type("ok")
+          .then ->
+            expect(events[2].metaKey).to.be.true
+            expect(events[2].ctrlKey).to.be.true
+            expect(events[2].which).to.equal(79)
+
+            expect(events[3].metaKey).to.be.true
+            expect(events[3].ctrlKey).to.be.true
+            expect(events[3].which).to.equal(75)
+
+            $input.off("keydown")
+            done()
+
+        it "maintains modifiers for subsequent click commands", (done) ->
+          $button = @cy.$$("button:first")
+          mouseDownEvent = null
+          mouseUpEvent = null
+          clickEvent = null
+          $button.on "mousedown", (e)-> mouseDownEvent = e
+          $button.on "mouseup", (e)-> mouseUpEvent = e
+          $button.on "click", (e)-> clickEvent = e
+
+          @cy
+            .get("input:text:first")
+            .type("{meta}{alt}", { release: false })
+            .get("button:first").click().then ->
+              expect(mouseDownEvent.metaKey).to.be.true
+              expect(mouseDownEvent.altKey).to.be.true
+
+              expect(mouseUpEvent.metaKey).to.be.true
+              expect(mouseUpEvent.altKey).to.be.true
+
+              expect(clickEvent.metaKey).to.be.true
+              expect(clickEvent.altKey).to.be.true
+
+              $button.off "mousedown"
+              $button.off "mouseup"
+              $button.off "click"
+              done()
+
+        it "resets modifiers before next test", ->
+          $input = @cy.$$("input:text:first")
+          events = []
+          $input.on "keyup", (e) ->
+            events.push(e)
+
+          @cy
+          .get("input:text:first")
+          .type("{alt}{ctrl}", { release: false })
+          .then ->
+            @Cypress.trigger "test:before:hooks", ->
+              expect(events[0].which).to.equal(18)
+              expect(events[1].which).to.equal(17)
+
+              $input.off("keyup")
+              done()
+
+      describe "changing modifiers", ->
+        beforeEach ->
+          @$input = @cy.$$("input:text:first")
+          @cy.get("input:text:first").type("{command}{option}", { release: false })
+
+        afterEach ->
+          @$input.off("keydown")
+
+        it "sends keydown event for new modifiers", (done) ->
+          event = null
+          @$input.on "keydown", (e)->
+            event = e
+
+          @cy.get("input:text:first").type("{shift}").then ->
+            expect(event.shiftKey).to.be.true
+            expect(event.which).to.equal(16)
+            done()
+
+        it "does not send keydown event for already activated modifiers", (done) ->
+          triggered = false
+          @$input.on "keydown", (e)->
+            triggered = true if e.which is 18 or e.which is 17
+
+          @cy.get("input:text:first").type("{cmd}{alt}").then ->
+            expect(triggered).to.be.false
+            done()
+
+    describe "case-insensitivity", ->
+
+      it "special chars are case-insensitive", ->
+        @cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{DeL}").then ($input) ->
+          expect($input).to.have.value("ba")
+
+      it "modifiers are case-insensitive", (done) ->
+        $input = @cy.$$("input:text:first")
+        alt = false
+        $input.on "keydown", (e) ->
+          alt = true if e.altKey
+
+        @cy.get("input:text:first").type("{aLt}").then ->
+          expect(alt).to.be.true
+
+          $input.off("keydown")
+          done()
+
+      it "letters are case-sensitive", ->
+        @cy.get("input:text:first").type("FoO").then ($input) ->
+          expect($input).to.have.value("FoO")
+
     describe "click events", ->
       it "passes timeout and interval down to click", (done) ->
         input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$$("body"))
@@ -1590,7 +1826,7 @@ describe "$Cypress.Cy Actions Commands", ->
             e.preventDefault()
             events.push "submit"
 
-          @Cypress.on "log", (log) ->
+          @Cypress.on "log", (attrs, log) ->
             state = log.get("state")
 
             if state is "pending"
@@ -1770,7 +2006,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -1788,7 +2024,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -1807,7 +2043,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -1818,7 +2054,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "passes in $el", ->
         @cy.get("input:first").type("foobar").then ($input) ->
@@ -1836,7 +2072,7 @@ describe "$Cypress.Cy Actions Commands", ->
         expectToHaveValueAndCoords = =>
           cmd = @cy.commands.findWhere({name: "type"})
           log = cmd.get("logs")[0]
-          txt = log.get("snapshots")[1].state.find("#comments")
+          txt = log.get("snapshots")[1].body.find("#comments")
           expect(txt).to.have.value("foobarbaz")
           expect(log.get("coords")).to.be.ok
 
@@ -1850,7 +2086,7 @@ describe "$Cypress.Cy Actions Commands", ->
         expectToHaveValueAndNoCoords = =>
           cmd = @cy.commands.findWhere({name: "type"})
           log = cmd.get("logs")[0]
-          txt = log.get("snapshots")[1].state.find("#comments")
+          txt = log.get("snapshots")[1].body.find("#comments")
           expect(txt).to.have.value("foobarbaz")
           expect(log.get("coords")).not.to.be.ok
 
@@ -1864,7 +2100,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
         types = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           types.push(log) if log.get("name") is "type"
 
@@ -1875,7 +2111,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs immediately before resolving", (done) ->
         input = @cy.$$(":text:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "type"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq input.get(0)
@@ -1887,7 +2123,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$(":text:first").keydown =>
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0].name).to.eq("before")
-          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          expect(@log.get("snapshots")[0].body).to.be.an("object")
           done()
 
         @cy.get(":text:first").type("foo")
@@ -1896,7 +2132,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":text:first").type("foo").then ->
           expect(@log.get("snapshots").length).to.eq(2)
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(@log.get("snapshots")[1].state).to.be.an("object")
+          expect(@log.get("snapshots")[1].body).to.be.an("object")
 
       it "logs deltaOptions", ->
         @cy.get(":text:first").type("foo", {force: true, timeout: 1000}).then ->
@@ -1915,22 +2151,31 @@ describe "$Cypress.Cy Actions Commands", ->
             expect(console.Coords.y).to.be.closeTo coords.y, 1
 
         it "has a table of keys", ->
-          @cy.get(":text:first").type("foo{enter}b{leftarrow}{del}{enter}").then ->
+          @cy.get(":text:first").type("{cmd}{option}foo{enter}b{leftarrow}{del}{enter}").then ->
             table = @log.attributes.consoleProps().table()
             console.table(table.data, table.columns)
             expect(table.columns).to.deep.eq [
-              "typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change"
+              "typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change", "modifiers"
             ]
             expect(table.name).to.eq "Key Events Table"
             expect(table.data).to.deep.eq {
+              1: {typed: "<meta>", which: 91, keydown: true, modifiers: "meta"}
+              2: {typed: "<alt>", which: 18, keydown: true, modifiers: "alt, meta"}
+              3: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"}
+              4: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"}
+              5: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"}
+              6: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true, modifiers: "alt, meta"}
+              7: {typed: "b", which: 66, keydown: true, keypress: true, textInput: true, input: true, keyup: true, modifiers: "alt, meta"}
+              8: {typed: "{leftarrow}", which: 37, keydown: true, keyup: true, modifiers: "alt, meta"}
+              9: {typed: "{del}", which: 46, keydown: true, input: true, keyup: true, modifiers: "alt, meta"}
+              10: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true, modifiers: "alt, meta"}
+            }
+
+        it "has no modifiers when there are none activated", ->
+          @cy.get(":text:first").type("f").then ->
+            table = @log.attributes.consoleProps().table()
+            expect(table.data).to.deep.eq {
               1: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
-              2: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
-              3: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
-              4: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true}
-              5: {typed: "b", which: 66, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
-              6: {typed: "{leftarrow}", which: 37, keydown: true, keyup: true}
-              7: {typed: "{del}", which: 46, keydown: true, input: true, keyup: true}
-              8: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true}
             }
 
         it "has a table of keys with preventedDefault", ->
@@ -1992,7 +2237,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -2008,7 +2253,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -2024,7 +2269,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -2042,7 +2287,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -2055,12 +2300,12 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when special characters dont exist", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq 2
-          allChars = _.keys(@Cypress.Keyboard.specialChars).join(", ")
+          allChars = _.keys(@Cypress.Keyboard.specialChars).concat(_.keys(@Cypress.Keyboard.modifierChars)).join(", ")
           expect(err.message).to.eq "Special character sequence: '{bar}' is not recognized. Available sequences are: #{allChars}"
           done()
 
@@ -2069,7 +2314,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when attemping to type tab", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -2082,7 +2327,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws on an empty string", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -2096,7 +2341,7 @@ describe "$Cypress.Cy Actions Commands", ->
         it "throws when trying to type: #{val}", (done) ->
           logs = []
 
-          @Cypress.on "log", (log) ->
+          @Cypress.on "log", (attrs, log) ->
             logs.push(log)
 
           @cy.on "fail", (err) =>
@@ -2183,7 +2428,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -2201,7 +2446,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually passes the assertion on multiple inputs", ->
         @cy.$$("input").keyup ->
@@ -2228,7 +2473,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -2264,7 +2509,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws if any subject isnt a textarea", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -2312,7 +2557,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -2326,7 +2571,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -2344,7 +2589,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -2356,12 +2601,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
         input = @cy.$$("input:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "clear"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq input.get(0)
@@ -2372,13 +2617,13 @@ describe "$Cypress.Cy Actions Commands", ->
       it "ends", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log) if log.get("name") is "clear"
 
         @cy.get("input").invoke("slice", 0, 2).clear().then ->
           _.each logs, (log) ->
             expect(log.get("state")).to.eq("passed")
-            expect(log.get("end")).to.be.true
+            expect(log.get("ended")).to.be.true
 
       it "snapshots after clicking", ->
         @cy.get("input:first").clear().then ($input) ->
@@ -2522,7 +2767,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -2540,7 +2785,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually passes the assertion on multiple :checkboxs", ->
         @cy.$$(":checkbox").click ->
@@ -2567,7 +2812,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -2638,7 +2883,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -2654,7 +2899,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -2673,7 +2918,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -2687,7 +2932,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -2705,7 +2950,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -2717,12 +2962,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
         chk = @cy.$$(":checkbox:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "check"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq chk.get(0)
@@ -2734,7 +2979,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$(":checkbox:first").change =>
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0].name).to.eq("before")
-          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          expect(@log.get("snapshots")[0].body).to.be.an("object")
           done()
 
         @cy.get(":checkbox:first").check()
@@ -2743,13 +2988,13 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":checkbox:first").check().then ->
           expect(@log.get("snapshots").length).to.eq(2)
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(@log.get("snapshots")[1].state).to.be.an("object")
+          expect(@log.get("snapshots")[1].body).to.be.an("object")
 
       it "logs only 1 check event on click of 1 checkbox", ->
         logs = []
         checks = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           checks.push(log) if log.get("name") is "check"
 
@@ -2761,7 +3006,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
         radios = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           radios.push(log) if log.get("name") is "check"
 
@@ -2773,7 +3018,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
         checks = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           checks.push(log) if log.get("name") is "check"
 
@@ -2785,7 +3030,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
         radios = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           radios.push(log) if log.get("name") is "check"
 
@@ -2962,7 +3207,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -2980,7 +3225,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually passes the assertion on multiple :checkboxs", ->
         @cy.$$(":checkbox").prop("checked", true).click ->
@@ -3009,7 +3254,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -3050,7 +3295,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -3068,7 +3313,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -3102,7 +3347,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -3117,7 +3362,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -3132,12 +3377,12 @@ describe "$Cypress.Cy Actions Commands", ->
       beforeEach ->
         @cy.$$("[name=colors][value=blue]").prop("checked", true)
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
         chk = @cy.$$(":checkbox:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "uncheck"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq chk.get(0)
@@ -3149,7 +3394,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$(":checkbox:first").change =>
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0].name).to.eq("before")
-          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          expect(@log.get("snapshots")[0].body).to.be.an("object")
           done()
 
         @cy.get(":checkbox:first").invoke("prop", "checked", true).uncheck()
@@ -3158,13 +3403,13 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":checkbox:first").invoke("prop", "checked", true).uncheck().then ->
           expect(@log.get("snapshots").length).to.eq(2)
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(@log.get("snapshots")[1].state).to.be.an("object")
+          expect(@log.get("snapshots")[1].body).to.be.an("object")
 
       it "logs only 1 uncheck event", ->
         logs = []
         unchecks = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           unchecks.push(log) if log.get("name") is "uncheck"
 
@@ -3176,7 +3421,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
         unchecks = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
           unchecks.push(log) if log.get("name") is "uncheck"
 
@@ -3340,7 +3585,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -3362,7 +3607,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.$$("form:first").submit -> return false
@@ -3385,7 +3630,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -3412,7 +3657,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when subject isnt a form", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -3453,7 +3698,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -3465,14 +3710,14 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "submit"
             @log = log
 
       it "logs immediately before resolving", ->
         form = @cy.$$("form:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "submit"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq form.get(0)
@@ -3492,7 +3737,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$("form").first().submit =>
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0].name).to.eq("before")
-          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          expect(@log.get("snapshots")[0].body).to.be.an("object")
           done()
 
         @cy.get("form").first().submit()
@@ -3503,7 +3748,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("form").first().submit().then ($form) ->
           expect(@log.get("snapshots").length).to.eq(2)
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(@log.get("snapshots")[1].state).to.be.an("object")
+          expect(@log.get("snapshots")[1].body).to.be.an("object")
 
       it "#consoleProps", ->
         @cy.$$("form:first").submit -> return false
@@ -3571,7 +3816,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(300)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -3587,7 +3832,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -3606,7 +3851,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -3618,7 +3863,7 @@ describe "$Cypress.Cy Actions Commands", ->
     describe ".log", ->
       beforeEach ->
         @cy.$$("input:first").get(0).focus()
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "is a parent command", ->
         @cy.get("body").focused().then ->
@@ -3626,7 +3871,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "ends immediately", ->
         @cy.focused().then ->
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
           expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
@@ -3746,7 +3991,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(300)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -3764,7 +4009,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -3783,7 +4028,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -3794,12 +4039,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
         input = @cy.$$(":text:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "focus"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq input.get(0)
@@ -3808,7 +4053,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":text:first").focus()
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.get(":text:first").focus().then ->
           expect(@log.get("snapshots").length).to.eq(1)
@@ -3821,7 +4066,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs 2 focus event", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy
@@ -3884,7 +4129,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -4027,7 +4272,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @currentTest.timeout(300)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -4047,7 +4292,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -4066,7 +4311,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -4077,12 +4322,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
         input = @cy.$$(":text:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "blur"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq input.get(0)
@@ -4091,7 +4336,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":text:first").focus().blur()
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.get(":text:first").focus().blur().then ->
           expect(@log.get("snapshots").length).to.eq(1)
@@ -4104,7 +4349,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs 1 blur event", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy
@@ -4183,7 +4428,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$("button:first").click ->
           $(@).remove()
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.on "fail", (err) =>
           expect(@log.get("message")).to.eq("{force: true}")
@@ -4195,7 +4440,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -4367,7 +4612,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -4384,7 +4629,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -4399,7 +4644,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs immediately before resolving", (done) ->
         button = @cy.$$("button:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "dblclick"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq button.get(0)
@@ -4408,7 +4653,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button:first").dblclick()
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.get("button:first").dblclick().then ($button) ->
           expect(@log.get("snapshots").length).to.eq(1)
@@ -4421,7 +4666,7 @@ describe "$Cypress.Cy Actions Commands", ->
         button = -> $("<button class='dblclicks'>dblclick</button")
         @cy.$$("body").append(button()).append(button())
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           dblclicks.push(log) if log.get("name") is "dblclick"
 
         @cy.get("button.dblclicks").dblclick().then ($buttons) ->
@@ -4432,14 +4677,14 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs only 1 dblclick event", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log) if log.get("name") is "dblclick"
 
         @cy.get("button:first").dblclick().then ->
           expect(logs).to.have.length(1)
 
       it "#consoleProps", ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.get("button").first().dblclick().then ($button) ->
           expect(@log.attributes.consoleProps()).to.deep.eq {
@@ -4895,7 +5140,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy._timeout(200)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -4914,7 +5159,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually passes the assertion on multiple buttons", ->
         @cy.$$("button").click ->
@@ -4942,7 +5187,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -5182,7 +5427,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs once when not dom subject", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -5199,7 +5444,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -5215,7 +5460,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -5236,7 +5481,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         node = @Cypress.Utils.stringifyElement(span)
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -5270,7 +5515,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         node = @Cypress.Utils.stringifyElement(span)
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -5312,7 +5557,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when attempting to click a <select> element", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) ->
@@ -5325,7 +5570,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when provided invalid position", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) ->
@@ -5356,12 +5601,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately before resolving", (done) ->
         button = @cy.$$("button:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "click"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq button.get(0)
@@ -5373,7 +5618,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$$("button:first").click =>
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0].name).to.eq("before")
-          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          expect(@log.get("snapshots")[0].body).to.be.an("object")
           done()
 
         @cy.get("button:first").click()
@@ -5382,7 +5627,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button:first").click().then ($button) ->
           expect(@log.get("snapshots").length).to.eq(2)
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(@log.get("snapshots")[1].state).to.be.an("object")
+          expect(@log.get("snapshots")[1].body).to.be.an("object")
 
       it "returns only the $el for the element of the subject that was clicked", ->
         clicks = []
@@ -5391,7 +5636,7 @@ describe "$Cypress.Cy Actions Commands", ->
         button = -> $("<button class='clicks'>click</button>")
         @cy.$$("body").append(button()).append(button())
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           clicks.push(log) if log.get("name") is "click"
 
         @cy.get("button.clicks").click({multiple: true}).then ($buttons) ->
@@ -5402,7 +5647,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs only 1 click event", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log) if log.get("name") is "click"
 
         @cy.get("button:first").click().then ->
@@ -5417,13 +5662,13 @@ describe "$Cypress.Cy Actions Commands", ->
       it "ends", ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log) if log.get("name") is "click"
 
         @cy.get("button").invoke("slice", 0, 2).click({multiple: true}).then ->
           _.each logs, (log) ->
             expect(log.get("state")).to.eq("passed")
-            expect(log.get("end")).to.be.true
+            expect(log.get("ended")).to.be.true
 
       it "logs {multiple: true} options", ->
         @cy.get("span").invoke("slice", 0, 2).click({multiple: true, timeout: 1000}).then ->
@@ -5533,6 +5778,38 @@ describe "$Cypress.Cy Actions Commands", ->
               }
             }
           ]
+
+      it "#consoleProps groups have activated modifiers", ->
+        @cy.$$("input:first").click -> return false
+
+        @cy.get("input:first").type("{ctrl}{shift}", {release: false}).click().then ->
+          expect(@log.attributes.consoleProps().groups()).to.deep.eq [
+            {
+              name: "MouseDown"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+                modifiers: "ctrl, shift"
+              }
+            },
+            {
+              name: "MouseUp"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+                modifiers: "ctrl, shift"
+              }
+            },
+            {
+              name: "Click"
+              items: {
+                preventedDefault: true
+                stoppedPropagation: true
+                modifiers: "ctrl, shift"
+              }
+            }
+          ]
+          @cy.get("body").type("{ctrl}") ## clear modifiers
 
       it "#consoleProps when no mouseup or click", ->
         btn = @cy.$$("button:first")

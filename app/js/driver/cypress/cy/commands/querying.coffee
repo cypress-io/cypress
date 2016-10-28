@@ -86,8 +86,8 @@ $Cypress.register "Querying", (Cypress, _, $) ->
               ## within our subject then filter out
               ## anything not currently in the DOM
               if not @_contains(subject)
-                subject = subject.filter (index, el) ->
-                  cy._contains(el)
+                subject = subject.filter (index, el) =>
+                  @_contains(el)
 
                 ## if we have nothing left
                 ## just go replay the commands
@@ -324,7 +324,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
                   if err.expected > 1
                     $Cypress.Utils.throwErrByPath "contains.length_option", { onFail: options._log }
                 when "existence"
-                  err.longMessage = getErr(err)
+                  err.displayMessage = getErr(err)
           })
 
       Promise

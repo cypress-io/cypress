@@ -16,6 +16,7 @@ kill = (unbind) ->
   ## cleanup our running browser
   ## instance
   return if not instance
+
   if unbind
     instance.removeAllListeners()
   instance.kill()
@@ -45,6 +46,8 @@ defaultArgs = [
   "--disable-translate"
   "--disable-new-profile-management"
   "--disable-new-avatar-menu"
+  "--allow-insecure-localhost"
+  "--reduce-security-for-testing"
 
   ## the following come frome chromedriver
   ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
@@ -95,6 +98,10 @@ module.exports = {
 
       if ps = options.proxyServer
         args.push("--proxy-server=#{ps}")
+
+      if options.chromeWebSecurity is false
+        args.push("--disable-web-security")
+        args.push("--allow-running-insecure-content")
 
       launcher()
       .call("launch", name, url, args)

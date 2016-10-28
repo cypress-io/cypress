@@ -7,9 +7,9 @@ $Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
   clone = (obj) ->
     JSON.parse(JSON.stringify(obj))
 
-  fixture = (fixture) =>
+  fixture = (fixture, options) =>
     new Promise (resolve) ->
-      Cypress.trigger "fixture", fixture, resolve
+      Cypress.trigger "fixture", fixture, options, resolve
 
   ## reset the cache whenever we
   ## completely stop
@@ -17,7 +17,7 @@ $Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
     cache = {}
 
   Cypress.addParentCommand
-    fixture: (fx, options = {}) ->
+    fixture: (fx, args...) ->
       ## if we already have cached
       ## this fixture then just return it
 
@@ -29,15 +29,28 @@ $Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
         ## accidentally mutating the one in the cache
         return Promise.resolve clone(resp)
 
+      options = {}
+
+      switch
+        when _.isObject(args[0])
+          options = args[0]
+
+        when _.isObject(args[1])
+          options = args[1]
+
+        when _.isString(args[0])
+          options.encoding = args[0]
+
       _.defaults options, {
         timeout: Cypress.config("responseTimeout")
+        encoding: 'utf8'
       }
 
       ## need to remove the current timeout
       ## because we're handling timeouts ourselves
       @_clearTimeout()
 
-      fixture(fx)
+      fixture(fx, options)
       .timeout(options.timeout)
       .then (response) =>
         if err = response.__error

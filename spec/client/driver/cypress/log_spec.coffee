@@ -25,7 +25,7 @@ describe "$Cypress.Log API", ->
       }
 
     it "#snapshot", ->
-      createSnapshot = @sandbox.stub @Cypress, "createSnapshot"
+      createSnapshot = @sandbox.stub(@Cypress, "createSnapshot").returns({})
 
       div = $("<div />")
       @log.set "$el", div
@@ -40,10 +40,22 @@ describe "$Cypress.Log API", ->
       expect(@log.get("state")).to.eq "failed"
       expect(@log.get("error")).to.eq err
 
-    it "#error triggers state:changed", (done) ->
+    it "#error sets ended true and cannot be set back to passed", ->
+      err = new Error
+      @log.error(err)
+      expect(@log.get("ended")).to.be.true
+      @log.end()
+      expect(@log.get("state")).to.eq "failed"
+      expect(@log.get("error")).to.eq err
+
+    it "#error triggers log:state:changed", (done) ->
       @Cypress.on "log:state:changed", (attrs) ->
         expect(attrs.state).to.eq "failed"
         done()
+
+      $Cypress.Log.addToLogs(@log)
+
+      @log._hasInitiallyLogged = true
 
       @log.error({})
 
@@ -51,12 +63,70 @@ describe "$Cypress.Log API", ->
       @log.end()
       expect(@log.get("state")).to.eq "passed"
 
-    it "#end triggers state:changed", (done) ->
+    it "#end triggers log:state:changed", (done) ->
       @Cypress.on "log:state:changed", (attrs) ->
         expect(attrs.state).to.eq "passed"
         done()
 
+      $Cypress.Log.addToLogs(@log)
+
+      @log._hasInitiallyLogged = true
+
       @log.end()
+
+    it "does not emit log:state:changed until after first log event", ->
+      logged  = 0
+      changed = 0
+
+      @log.set("foo", "bar")
+
+      @Cypress.on "log", ->
+        logged += 1
+
+      @Cypress.on "log:state:changed", ->
+        changed += 1
+
+      Promise.delay(30)
+      .then =>
+        expect(logged).to.eq(0)
+        expect(changed).to.eq(0)
+
+        $Cypress.Log.addToLogs(@log)
+
+        @log._hasInitiallyLogged = true
+
+        @log.set("bar", "baz")
+        @log.set("baz", "quux")
+
+        Promise.delay(30)
+        .then =>
+          expect(changed).to.eq(1)
+
+    it "only emits log:state:changed when attrs have actually changed", ->
+      logged  = 0
+      changed = 0
+
+      $Cypress.Log.addToLogs(@log)
+
+      @log._hasInitiallyLogged = true
+
+      @Cypress.on "log", ->
+        logged += 1
+
+      @Cypress.on "log:state:changed", ->
+        changed += 1
+
+      @log.set("foo", "bar")
+
+      Promise.delay(30)
+      .then =>
+        expect(changed).to.eq(1)
+
+        @log.get("foo", "bar")
+
+        Promise.delay(30)
+        .then =>
+          expect(changed).to.eq(1)
 
     describe "#toJSON", ->
       it "serializes to object literal", ->
@@ -75,7 +145,6 @@ describe "$Cypress.Log API", ->
         expect(@log.toJSON()).to.deep.eq({
           id: @log.get("id")
           foo: "bar"
-          url: ""
           state: "pending"
           err: null
           consoleProps: { Command: undefined, a: "b" }
@@ -90,7 +159,6 @@ describe "$Cypress.Log API", ->
         expect(@log.toJSON()).to.deep.eq({
           id: @log.get("id")
           foo: "bar"
-          url: ""
           state: "pending"
           err: null
           consoleProps: {  }
@@ -109,7 +177,6 @@ describe "$Cypress.Log API", ->
         expect(@log.toJSON()).to.deep.eq({
           id: @log.get("id")
           foo: "bar"
-          url: ""
           state: "pending"
           err: null
           consoleProps: { Command: undefined, a: "b" }
@@ -123,8 +190,8 @@ describe "$Cypress.Log API", ->
 
         expect(@log.toJSON()).to.deep.eq({
           id: @log.get("id")
-          url: ""
           state: "failed"
+          ended: true
           err: {
             message: err.message
             name: err.name
@@ -132,6 +199,7 @@ describe "$Cypress.Log API", ->
           }
           consoleProps: {  }
           renderProps: {  }
+          ended: true
         })
 
       it "defaults consoleProps with error stack", ->
@@ -146,8 +214,8 @@ describe "$Cypress.Log API", ->
 
         expect(@log.toJSON()).to.deep.eq({
           id: @log.get("id")
-          url: ""
           state: "failed"
+          ended: true
           err: {
             message: err.message
             name: err.name
@@ -159,6 +227,7 @@ describe "$Cypress.Log API", ->
             foo: "bar"
           }
           renderProps: {  }
+          ended: true
         })
 
       it "sets $el", ->
@@ -168,6 +237,101 @@ describe "$Cypress.Log API", ->
         toJSON = @log.toJSON()
 
         expect(toJSON.$el).to.eq(div)
+
+    describe "#toSerializedJSON", ->
+      it "serializes simple properties over the wire", ->
+        div = $("<div />")
+
+        @log.set({
+          foo: "foo"
+          bar: true
+          $el: div
+          arr: [1,2,3]
+          snapshots: []
+          consoleProps: ->
+            {foo: "bar"}
+        })
+
+        expect(@log.get("snapshots")).to.be.an("array")
+
+        expect(@Cypress.Log.toSerializedJSON(@log.toJSON())).to.deep.eq({
+          $el: "<div>"
+          arr: [1,2,3]
+          bar: true
+          consoleProps: {
+            Command: undefined
+            foo: "bar"
+          }
+          err: null
+          foo: "foo"
+          highlightAttr: "data-cypress-el"
+          id: @log.get("id")
+          numElements: 1
+          renderProps: {}
+          snapshots: null
+          state: "pending"
+          visible: false
+        })
+
+      it "serializes window", ->
+        @log.set({
+          consoleProps: ->
+            Returned: window
+        })
+
+        expect(@Cypress.Log.toSerializedJSON(@log.toJSON())).to.deep.eq({
+          consoleProps: {
+            Command: undefined
+            Returned: "<window>"
+          }
+          err: null
+          id: @log.get("id")
+          renderProps: {}
+          state: "pending"
+        })
+
+      it "serializes document", ->
+        @log.set({
+          consoleProps: ->
+            Returned: document
+        })
+
+        expect(@Cypress.Log.toSerializedJSON(@log.toJSON())).to.deep.eq({
+          consoleProps: {
+            Command: undefined
+            Returned: "<document>"
+          }
+          err: null
+          id: @log.get("id")
+          renderProps: {}
+          state: "pending"
+        })
+
+      it "serializes an array of elements", ->
+        img1 = $("<img />")
+        img2 = $("<img />")
+        imgs = img1.add(img2)
+
+        @log.set({
+          $el: imgs
+          consoleProps: ->
+            Returned: [img1, img2]
+        })
+
+        expect(@Cypress.Log.toSerializedJSON(@log.toJSON())).to.deep.eq({
+          consoleProps: {
+            Command: undefined
+            Returned: ["<img>", "<img>"]
+          }
+          $el: "[ <img>, 1 more... ]"
+          err: null
+          highlightAttr: "data-cypress-el"
+          id: @log.get("id")
+          numElements: 2
+          renderProps: {}
+          state: "pending"
+          visible: false
+        })
 
     describe "#set", ->
       it "string", ->
@@ -190,9 +354,12 @@ describe "$Cypress.Log API", ->
           expect(log).to.eq(@log)
           done()
 
-        @log.set {foo: "bar", baz: "quux"}
+        $Cypress.Log.addToLogs(@log)
 
-      it "debouces log:state:changed and only fires once", (done) ->
+        @log._hasInitiallyLogged = true
+        @log.set({foo: "bar", baz: "quux"})
+
+      it "debounces log:state:changed and only fires once", ->
         count = 0
 
         @Cypress.on "log:state:changed", (attrs, log) =>
@@ -204,16 +371,18 @@ describe "$Cypress.Log API", ->
           expect(attrs.e).to.eq "f"
           expect(log).to.eq(@log)
 
-        @log.set {foo: "bar", a: "b"}
-        @log.set {foo: "baz", c: "d"}
+        $Cypress.Log.addToLogs(@log)
 
-        _.defer =>
-          @log.set {foo: "quux", e: "f"}
+        @log._hasInitiallyLogged = true
 
-        _.delay ->
+        @log.set({foo: "bar", a: "b"})
+        @log.set({foo: "baz", c: "d"})
+
+        @log.set {foo: "quux", e: "f"}
+
+        Promise.delay(100)
+        .then ->
           expect(count).to.eq(1)
-          done()
-        , 30
 
     describe "#setElAttrs", ->
       beforeEach ->
@@ -282,7 +451,7 @@ describe "$Cypress.Log API", ->
 
     describe "#constructor", ->
       it "snapshots if snapshot attr is true", ->
-        createSnapshot = @sandbox.stub @Cypress, "createSnapshot"
+        createSnapshot = @sandbox.stub(@Cypress, "createSnapshot").returns({})
 
         new $Cypress.Log @Cypress, snapshot: true
 
@@ -307,7 +476,7 @@ describe "$Cypress.Log API", ->
     describe "#wrapConsoleProps", ->
       it "automatically adds Command with name", ->
         @log.set("name", "foo")
-        @log.set("snapshots", [{name: null, state: {}}])
+        @log.set("snapshots", [{name: null, body: {}}])
         @log.set("consoleProps", -> {bar: "baz"})
         @log.wrapConsoleProps()
         expect(@log.attributes.consoleProps()).to.deep.eq {
@@ -356,7 +525,14 @@ describe "$Cypress.Log API", ->
 
     describe "#snapshot", ->
       beforeEach ->
-        @sandbox.stub(@Cypress, "createSnapshot").returns({})
+        @sandbox.stub(@Cypress, "createSnapshot").returns({
+          body: "body"
+          htmlAttrs: {
+            class: "foo"
+          }
+          headStyles: ["body { background: red }"]
+          bodyStyles: ["body { margin: 10px }"]
+        })
 
       it "can set multiple snapshots", ->
         @log.snapshot()
@@ -400,6 +576,28 @@ describe "$Cypress.Log API", ->
         expect(snapshots[1].name).to.eq("after")
         expect(snapshots[2].name).to.eq("third")
 
+      it "includes html attributes", ->
+        @log.snapshot()
+        snapshots = @log.get("snapshots")
+        expect(snapshots[0].htmlAttrs).to.eql({
+          class: "foo"
+        })
+
+      it "includes head styles", ->
+        @log.snapshot()
+        snapshots = @log.get("snapshots")
+        expect(snapshots[0].headStyles).to.eql(["body { background: red }"])
+
+      it "includes body", ->
+        @log.snapshot()
+        snapshots = @log.get("snapshots")
+        expect(snapshots[0].body).to.equal("body")
+
+      it "includes body styles", ->
+        @log.snapshot()
+        snapshots = @log.get("snapshots")
+        expect(snapshots[0].bodyStyles).to.eql(["body { margin: 10px }"])
+
   describe "class methods", ->
     enterCommandTestingMode()
 
@@ -415,6 +613,25 @@ describe "$Cypress.Log API", ->
           warn = @sandbox.spy console, "warn"
           @Cypress.command({})
           expect(warn).to.be.calledWith "Cypress Warning: Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
+
+      describe "#log", ->
+        it "only emits log:state:changed if attrs have actually changed", (done) ->
+          logged  = 0
+          changed = 0
+
+          @Cypress.on "log", ->
+            logged += 1
+
+          @Cypress.on "log:state:changed", ->
+            changed += 1
+
+          log = @Cypress.Log.log("command", {})
+
+          _.delay ->
+            expect(logged).to.eq(1)
+            expect(changed).to.eq(0)
+            done()
+          , 30
 
       context "$Log.log", ->
         it "displays 0 argument", (done) ->
@@ -560,7 +777,7 @@ describe "$Cypress.Log API", ->
             return null
 
           it "preserves errors", (done) ->
-            @Cypress.on "log", (@logObj, @log) =>
+            @Cypress.on "log", (attrs, @log) =>
 
             @cy.on "fail", (err) =>
               expect(@log.get("name")).to.eq "get"
@@ -571,7 +788,7 @@ describe "$Cypress.Log API", ->
             @cy.get("foo")
 
           it "#consoleProps for parent commands", (done) ->
-            @Cypress.on "log", (@logObj, @log) =>
+            @Cypress.on "log", (attrs, @log) =>
 
             @cy.on "fail", (err) =>
               expect(@log.attributes.consoleProps()).to.deep.eq {
@@ -586,7 +803,7 @@ describe "$Cypress.Log API", ->
             @cy.get("foo")
 
           it "#consoleProps for dual commands as a parent", (done) ->
-            @Cypress.on "log", (@logObj, @log) =>
+            @Cypress.on "log", (attrs, @log) =>
 
             @cy.on "fail", (err) =>
               expect(@log.attributes.consoleProps()).to.deep.eq {
@@ -599,7 +816,7 @@ describe "$Cypress.Log API", ->
               expect(true).to.be.false
 
           it "#consoleProps for dual commands as a child", (done) ->
-            @Cypress.on "log", (@logObj, @log) =>
+            @Cypress.on "log", (attrs, @log) =>
 
             @cy.on "fail", (err) =>
               if @log.get("name") is "wait"
@@ -615,7 +832,7 @@ describe "$Cypress.Log API", ->
               expect(true).to.be.false
 
           it "#consoleProps for children commands", (done) ->
-            @Cypress.on "log", (@logObj, @log) =>
+            @Cypress.on "log", (attrs, @log) =>
 
             @cy.on "fail", (err) =>
               if @log.get("name") is "contains"
@@ -633,7 +850,7 @@ describe "$Cypress.Log API", ->
             @cy.get("button").contains("asdfasdfasdfasdf")
 
           it "#consoleProps for nested children commands", (done) ->
-            @Cypress.on "log", (@logObj, @log) =>
+            @Cypress.on "log", (attrs, @log) =>
 
             @cy.on "fail", (err) =>
               if @log.get("name") is "contains"

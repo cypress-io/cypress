@@ -1,10 +1,17 @@
-$Cypress.Runner = do ($Cypress, _) ->
+$Cypress.Runner = do ($Cypress, _, moment) ->
 
-  defaultGrep = /.*/
+  defaultGrep     = /.*/
+  betweenQuotesRe = /\"(.+?)\"/
 
-  ERROR_PROPS          = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
-  RUNNABLE_PROPS       = "id title root hookName err duration state failedFromHook alreadyEmittedMocha".split(" ")
-  RUNNABLE_COLLECTIONS = "routes agents commands".split(" ")
+  ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
+  RUNNABLE_LOGS    = "routes agents commands".split(" ")
+  RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook body".split(" ")
+
+  triggerMocha = (Cypress, event, args...) ->
+    ## dont trigger mocha events if we are not headless
+    return if not $Cypress.isHeadless
+
+    Cypress.trigger("mocha", event, args...)
 
   # ## initial payload
   # {
@@ -81,7 +88,7 @@ $Cypress.Runner = do ($Cypress, _) ->
     test._fired[event] = true
 
     ## dont fire anything again if we are skipped
-    return if test._SKIPPED
+    return if test._ALREADY_RAN
 
     if options.multiple
       [].concat(@Cypress.invoke(event, @wrap(test), test))
@@ -118,7 +125,19 @@ $Cypress.Runner = do ($Cypress, _) ->
 
   class $Runner
     constructor: (@Cypress, @runner) ->
-      @initialize()
+      @id = 0
+
+      ## hold onto the runnables for faster lookup later
+      @tests = []
+      @testsById = {}
+      @testsQueue = []
+      @runnables = []
+      @logsById = {}
+      @emissions = {
+        started: {}
+        ended:   {}
+      }
+      @startTime = null
 
       @listeners()
       @override()
@@ -136,15 +155,6 @@ $Cypress.Runner = do ($Cypress, _) ->
 
       runnable.callback(err)
 
-    initialize: ->
-      @id = 0
-
-      ## hold onto the runnables for faster lookup later
-      @testIds = {}
-      @tests = []
-      @runnables = []
-      @runnableIds = {}
-
     listeners: ->
       ## bail if we've already set our listeners
       return if @setListeners
@@ -158,8 +168,14 @@ $Cypress.Runner = do ($Cypress, _) ->
 
       @listenTo @Cypress, "stop", => @stop()
 
-      @listenTo @Cypress, "log", (log) =>
-        @addLogToTest(log)
+      @listenTo @Cypress, "log", (attrs) =>
+        @addLog(attrs)
+
+      @listenTo @Cypress, "log:state:changed", (attrs) =>
+        @addLog(attrs)
+
+      @listenTo @Cypress, "test:after:run", (test) =>
+        @addTestToQueue(test)
 
       return @
 
@@ -176,6 +192,10 @@ $Cypress.Runner = do ($Cypress, _) ->
       @runner.on "start", ->
         Cypress.trigger "run:start"
 
+        return if Cypress._RESUMED_AT_TEST
+
+        triggerMocha(Cypress, "start")
+
       ## mocha has finished running the tests
       @runner.on "end", =>
         ## end may have been caused by an uncaught error
@@ -187,6 +207,7 @@ $Cypress.Runner = do ($Cypress, _) ->
         ## test:after:run events ourselves
         end = =>
           Cypress.trigger "run:end"
+          triggerMocha(Cypress, "end")
 
           @restore()
 
@@ -207,13 +228,21 @@ $Cypress.Runner = do ($Cypress, _) ->
           end()
 
       @runner.on "suite", (suite) =>
-        Cypress.trigger "suite:start", @wrap(suite)
+        return if @emissions.started[suite.id]
+
+        @emissions.started[suite.id] = true
+
+        triggerMocha(Cypress, "suite", @wrap(suite))
 
       @runner.on "suite end", (suite) =>
-        Cypress.trigger "suite:end", @wrap(suite)
-
         _.each suite.ctx, (value, key) ->
           delete suite.ctx[key]
+
+        return if @emissions.ended[suite.id]
+
+        @emissions.ended[suite.id] = true
+
+        triggerMocha(Cypress, "suite end", @wrap(suite))
 
       @runner.on "hook", (hook) =>
         hookName = @getHookName(hook)
@@ -234,7 +263,7 @@ $Cypress.Runner = do ($Cypress, _) ->
         hook.ctx.currentTest = test
 
         Cypress.set(hook, hookName)
-        Cypress.trigger "hook:start", @wrap(hook)
+        triggerMocha(Cypress, "hook", @wrap(hook))
 
       @runner.on "hook end", (hook) =>
         hookName = @getHookName(hook)
@@ -247,33 +276,47 @@ $Cypress.Runner = do ($Cypress, _) ->
         if hookName is "before each" and test = hook.ctx.currentTest
           Cypress.set(test, "test")
 
-        Cypress.trigger "hook:end", @wrap(hook)
+        triggerMocha(Cypress, "hook end", @wrap(hook))
 
       @runner.on "test", (test) =>
         @test = test
 
         Cypress.set(test, "test")
-        Cypress.trigger "test:start", @wrap(test)
+
+        return if @emissions.started[test.id]
+
+        @emissions.started[test.id] = true
+
+        triggerMocha(Cypress, "test", @wrap(test))
 
       @runner.on "test end", (test) =>
-        Cypress.trigger "test:end", @wrap(test)
+        return if @emissions.ended[test.id]
+
+        @emissions.ended[test.id] = true
+
+        Cypress.checkForEndedEarly()
+
+        triggerMocha(Cypress, "test end", @wrap(test))
 
       @runner.on "pass", (test) =>
-        Cypress.trigger "mocha:pass", @wrap(test)
+        triggerMocha(Cypress, "pass", @wrap(test))
 
       ## if a test is pending mocha will only
       ## emit the pending event instead of the test
       ## so we normalize the pending / test events
       @runner.on "pending", (test) ->
+        ## do nothing if our test is skipped
+        return if test._ALREADY_RAN
+
         if not fired("test:before:run", test)
           fire.call(_this, "test:before:run", test)
 
         test.state = "pending"
 
-        if $Cypress.isHeadless
-          ## do not double emit the 'test' event
+        if not test.alreadyEmittedMocha
+          ## do not double emit this event
           test.alreadyEmittedMocha = true
-          Cypress.trigger "mocha:pending", _this.wrap(test)
+          triggerMocha(Cypress, "pending", _this.wrap(test))
 
         @emit "test", test
 
@@ -285,29 +328,76 @@ $Cypress.Runner = do ($Cypress, _) ->
           fire.call(_this, "test:after:run", test)
 
       @runner.on "fail", (runnable, err) =>
+        isHook = runnable.type is "hook"
+
+        if isHook
+          parentTitle = runnable.parent.title
+          hookName    = @getHookName(runnable)
+
+          ## append a friendly message to the error indicating
+          ## we're skipping the remaining tests in this suite
+          err.message += "\n\n" + @Cypress.Utils.errMessageByPath("uncaught.error_in_hook", {parentTitle, hookName})
+
         ## always set runnable err so we can tap into
         ## taking a screenshot on error
         runnable.err = @wrapErr(err)
 
-        if $Cypress.isHeadless
-          ## do not double emit the 'test end' event
+        if not runnable.alreadyEmittedMocha
+          ## do not double emit this event
           runnable.alreadyEmittedMocha = true
-          Cypress.trigger "mocha:fail", @wrap(runnable), runnable.err
+          triggerMocha(Cypress, "fail", @wrap(runnable), runnable.err)
 
-        if runnable.type is "hook"
-          @hookFailed(runnable, runnable.err)
+        if isHook
+          @hookFailed(runnable, runnable.err, hookName)
 
-    addLogToTest: (log) ->
-      {testId, instrument} = log
+    addTestToQueue: (test) ->
+      if test = @testsById[test.id]
+        @testsQueue.push(test)
 
-      if test = @testIds[testId]
-        ## pluralize the instrument
-        ## as a property on the runnable
-        a = test[instrument + "s"] ?= []
-        a.push(log)
+        numTestsKeptInMemory = @Cypress.config("numTestsKeptInMemory")
 
-    wrapErr: (err) ->
-      @reduceProps(err, ERROR_PROPS)
+        @cleanupQueue(@testsQueue, numTestsKeptInMemory)
+
+    cleanupQueue: (queue, numTestsKeptInMemory) ->
+      if queue.length > numTestsKeptInMemory
+        test = queue.shift()
+        _.each RUNNABLE_LOGS, (logs) ->
+          _.each test[logs], (attrs) ->
+            $Cypress.Log.reduceMemory(attrs)
+
+        @cleanupQueue(queue, numTestsKeptInMemory)
+
+    getDisplayPropsForLog: (attrs) ->
+      $Cypress.Log.getDisplayProps(attrs)
+
+    getConsolePropsForLogById: (logId) ->
+      if attrs = @logsById[logId]
+        $Cypress.Log.getConsoleProps(attrs)
+
+    getSnapshotPropsForLogById: (logId) ->
+      if attrs = @logsById[logId]
+        $Cypress.Log.getSnapshotProps(attrs)
+
+    getErrorByTestId: (testId) ->
+      if test = @testsById[testId]
+        @wrapErr(test.err)
+
+    addLog: (attrs) ->
+      if existing = @logsById[attrs.id]
+        ## mutate the existing object
+        _.extend(existing, attrs)
+      else
+        @logsById[attrs.id] = attrs
+
+        {testId, instrument} = attrs
+
+        if test = @testsById[testId]
+          ## pluralize the instrument
+          ## as a property on the runnable
+          logs = test[instrument + "s"] ?= []
+
+          ## else push it onto the logs
+          logs.push(attrs)
 
     matchesGrep: (runnable, grep) ->
       ## we have optimized this iteration to the maximum.
@@ -319,6 +409,9 @@ $Cypress.Runner = do ($Cypress, _) ->
         runnable.matchesGrep = grep.test(runnable.fullTitle())
 
       runnable.matchesGrep
+
+    getEmissions: ->
+      @emissions
 
     getTestsState: ->
       id    = @test?.id
@@ -334,7 +427,13 @@ $Cypress.Runner = do ($Cypress, _) ->
         if test.id is id
           break
         else
-          tests[test.id] = @wrapAll(test)
+          test = @wrapAll(test)
+
+          _.each RUNNABLE_LOGS, (type) ->
+            if logs = test[type]
+              test[type] = _.map(logs, $Cypress.Log.toSerializedJSON)
+
+          tests[test.id] = test
 
       return tests
 
@@ -358,17 +457,20 @@ $Cypress.Runner = do ($Cypress, _) ->
 
       obj = @normalize(@runner.suite, tests, initialTests, grep, grepIsDefault)
 
-      @testIds = tests
+      @testsById = tests
       @tests   = _.values(tests)
 
       return obj
 
-    skipToTest: (id) ->
+    resumeAtTest: (id, emissions = {}) ->
+      @Cypress._RESUMED_AT_TEST = id
+
+      @emissions = emissions
+
       for test in @tests
         if test.id isnt id
-          test._SKIPPED = true
+          test._ALREADY_RAN = true
           test.pending = true
-          ## delete the fn?
         else
           ## bail so we can stop now
           return
@@ -381,16 +483,20 @@ $Cypress.Runner = do ($Cypress, _) ->
         ## tests have a type of 'test' whereas suites do not have a type property
         runnable.type ?= "suite"
 
-        @runnableIds[runnable.id] = obj
         @runnables.push(runnable)
 
-        ## if this runnable is in our initial state
-        ## use its props else get them from the runnable
-        item = initialTests[runnable.id] ? runnable
+        ## if we have a runnable in the initial state
+        ## then merge in existing properties into the runnable
+        if i = initialTests[runnable.id]
+          _.each RUNNABLE_LOGS, (type) =>
+            _.each i[type], (l) =>
+              @logsById[l.id] = l
+
+          _.extend(runnable, i)
 
         ## reduce this runnable down to its props
         ## and collections
-        return @wrapAll(item)
+        return @wrapAll(runnable)
 
       push = (test) =>
         tests[test.id] ?= test
@@ -447,8 +553,11 @@ $Cypress.Runner = do ($Cypress, _) ->
       _.extend(
         {}
         @reduceProps(runnable, RUNNABLE_PROPS)
-        @reduceProps(runnable, RUNNABLE_COLLECTIONS)
+        @reduceProps(runnable, RUNNABLE_LOGS)
       )
+
+    wrapErr: (err) ->
+      @reduceProps(err, ERROR_PROPS)
 
     wrap: (runnable) ->
       ## we need to optimize wrap by converting
@@ -460,8 +569,6 @@ $Cypress.Runner = do ($Cypress, _) ->
     restore: ->
       _.each [@runnables, @runner], (obj) =>
         @removeAllListeners(obj)
-
-      @initialize()
 
     stop: ->
       @stopListening()
@@ -500,7 +607,24 @@ $Cypress.Runner = do ($Cypress, _) ->
       if re = options.grep
         @grep(re)
 
+    countByTestState: (tests, state) ->
+      count = _.filter tests, (test, key) ->
+        test.state is state
+
+      count.length
+
+    setNumLogs: (num) ->
+      @Cypress.Log.setCounter(num)
+
+    setStartTime: (iso) ->
+      @startTime = iso
+
+    getStartTime: ->
+      @startTime
+
     run: (fn) ->
+      @startTime ?= moment().toJSON()
+
       @runnerListeners()
 
       @runner.run (failures) =>
@@ -521,15 +645,15 @@ $Cypress.Runner = do ($Cypress, _) ->
     getHookName: (hook) ->
       ## find the name of the hook by parsing its
       ## title and pulling out whats between the quotes
-      name = hook.title.match(/\"(.+)\"/)
+      name = hook.title.match(betweenQuotesRe)
       name and name[1]
 
     afterEachFailed: (test, err) ->
       test.state = "failed"
       test.err = @wrapErr(err)
-      @Cypress.trigger "test:end", @wrap(test)
+      triggerMocha(@Cypress, "test end", @wrap(test))
 
-    hookFailed: (hook, err) ->
+    hookFailed: (hook, err, hookName) ->
       ## finds the test by returning the first test from
       ## the parent or looping through the suites until
       ## it finds the first test
@@ -537,13 +661,13 @@ $Cypress.Runner = do ($Cypress, _) ->
       test.err = err
       test.state = "failed"
       test.duration = hook.duration
-      test.hookName = @getHookName(hook)
+      test.hookName = hookName
       test.failedFromHook = true
 
       if hook.alreadyEmittedMocha
         test.alreadyEmittedMocha = true
-
-      @Cypress.trigger "test:end", @wrap(test)
+      else
+        triggerMocha(@Cypress, "test end", @wrap(test))
 
     total: ->
       @runner.suite.total()
@@ -621,7 +745,7 @@ $Cypress.Runner = do ($Cypress, _) ->
 
     testInTests: (test) ->
       ## do a faster constant time lookup
-      @testIds[test.id]
+      @testsById[test.id]
 
     getAllSiblingTests: (suite) ->
       tests = []

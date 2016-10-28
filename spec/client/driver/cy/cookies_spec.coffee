@@ -137,7 +137,7 @@ describe "$Cypress.Cy Cookie Commands", ->
           @Cypress.on "get:cookies", (data, cb) ->
             cb({__error: "some err message", __name: "foo", __stack: "stack"})
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push @log
 
           @cy.on "fail", (err) =>
@@ -155,7 +155,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
           logs = []
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push(log)
 
           @cy.on "fail", (err) =>
@@ -179,7 +179,7 @@ describe "$Cypress.Cy Cookie Commands", ->
                ]
              })
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
 
         it "can turn off logging", ->
           @cy.getCookies({log: false}).then ->
@@ -187,7 +187,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
         it "ends immediately", ->
           @cy.getCookies().then ->
-            expect(@log.get("end")).to.be.true
+            expect(@log.get("ended")).to.be.true
             expect(@log.get("state")).to.eq("passed")
 
         it "snapshots immediately", ->
@@ -277,7 +277,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
           logs = []
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push(log)
 
           @cy.on "fail", (err) =>
@@ -298,7 +298,7 @@ describe "$Cypress.Cy Cookie Commands", ->
             expect(data).to.deep.eq({domain: "localhost", name: "foo"})
             cb({__error: "some err message", __name: "foo", __stack: "stack"})
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push @log
 
           @cy.on "fail", (err) =>
@@ -314,7 +314,7 @@ describe "$Cypress.Cy Cookie Commands", ->
         it "requires a string name", (done) ->
           logs = []
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push @log
 
           @cy.on "fail", (err) =>
@@ -339,7 +339,7 @@ describe "$Cypress.Cy Cookie Commands", ->
             if data.name is "bar"
               cb({response: null})
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
 
         it "can turn off logging", ->
           @cy.getCookie("foo", {log: false}).then ->
@@ -347,7 +347,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
         it "ends immediately", ->
           @cy.getCookie("foo").then ->
-            expect(@log.get("end")).to.be.true
+            expect(@log.get("ended")).to.be.true
             expect(@log.get("state")).to.eq("passed")
 
         it "has correct message", ->
@@ -453,7 +453,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
           logs = []
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push(log)
 
           @cy.on "fail", (err) =>
@@ -474,7 +474,7 @@ describe "$Cypress.Cy Cookie Commands", ->
             expect(data).to.deep.eq({domain: "localhost", name: "foo", value: "bar", path: "/", secure: false, httpOnly: false, expiry: 12345})
             cb({__error: "some err message", __name: "foo", __stack: "stack"})
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push @log
 
           @cy.on "fail", (err) =>
@@ -490,7 +490,7 @@ describe "$Cypress.Cy Cookie Commands", ->
         it "requires a string name", (done) ->
           logs = []
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push @log
 
           @cy.on "fail", (err) =>
@@ -504,7 +504,7 @@ describe "$Cypress.Cy Cookie Commands", ->
         it "requires a string value", (done) ->
           logs = []
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push @log
 
           @cy.on "fail", (err) =>
@@ -525,7 +525,7 @@ describe "$Cypress.Cy Cookie Commands", ->
               }
             })
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
 
         it "can turn off logging", ->
           @cy.setCookie("foo", "bar", {log: false}).then ->
@@ -533,7 +533,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
         it "ends immediately", ->
           @cy.setCookie("foo", "bar").then ->
-            expect(@log.get("end")).to.be.true
+            expect(@log.get("ended")).to.be.true
             expect(@log.get("state")).to.eq("passed")
 
         it "snapshots immediately", ->
@@ -613,7 +613,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
           logs = []
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push(log)
 
           @cy.on "fail", (err) =>
@@ -634,7 +634,7 @@ describe "$Cypress.Cy Cookie Commands", ->
             expect(data).to.deep.eq({domain: "localhost", name: "foo"})
             cb({__error: "some err message", __name: "foo", __stack: "stack"})
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push @log
 
           @cy.on "fail", (err) =>
@@ -650,7 +650,7 @@ describe "$Cypress.Cy Cookie Commands", ->
         it "requires a string name", (done) ->
           logs = []
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push @log
 
           @cy.on "fail", (err) =>
@@ -675,7 +675,7 @@ describe "$Cypress.Cy Cookie Commands", ->
             if data.name is "bar"
               cb({response: null})
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
 
         it "can turn off logging", ->
           @cy.clearCookie("foo", {log: false}).then ->
@@ -683,7 +683,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
         it "ends immediately", ->
           @cy.clearCookie("foo").then ->
-            expect(@log.get("end")).to.be.true
+            expect(@log.get("ended")).to.be.true
             expect(@log.get("state")).to.eq("passed")
 
         it "snapshots immediately", ->
@@ -843,7 +843,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
           logs = []
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push(log)
 
           @cy.on "fail", (err) =>
@@ -863,7 +863,7 @@ describe "$Cypress.Cy Cookie Commands", ->
           @Cypress.on "get:cookies", (data, cb) ->
             cb({__error: "some err message", __name: "foo", __stack: "stack"})
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push @log
 
           @cy.on "fail", (err) =>
@@ -888,7 +888,7 @@ describe "$Cypress.Cy Cookie Commands", ->
           @Cypress.on "clear:cookies", (data, cb) ->
             cb({__error: "some err message", __name: "foo", __stack: "stack"})
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
             logs.push @log
 
           @cy.on "fail", (err) =>
@@ -917,7 +917,7 @@ describe "$Cypress.Cy Cookie Commands", ->
               name: "foo"
             }]})
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
 
         it "can turn off logging", ->
           @cy.clearCookies({log: false}).then ->
@@ -925,7 +925,7 @@ describe "$Cypress.Cy Cookie Commands", ->
 
         it "ends immediately", ->
           @cy.clearCookies().then ->
-            expect(@log.get("end")).to.be.true
+            expect(@log.get("ended")).to.be.true
             expect(@log.get("state")).to.eq("passed")
 
         it "snapshots immediately", ->
@@ -951,7 +951,7 @@ describe "$Cypress.Cy Cookie Commands", ->
             expect(data).to.deep.eq({domain: "localhost"})
             cb({response: []})
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
 
         it "#consoleProps", ->
           @cy.clearCookies().then (cookies) ->
@@ -971,7 +971,7 @@ describe "$Cypress.Cy Cookie Commands", ->
             expect(data).to.deep.eq([{name: "foo", domain: "localhost"}])
             cb({response: []})
 
-          @Cypress.on "log", (@log) =>
+          @Cypress.on "log", (attrs, @log) =>
 
         it "#consoleProps", ->
           @cy.clearCookies().then (cookies) ->

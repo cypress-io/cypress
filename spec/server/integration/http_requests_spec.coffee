@@ -10,6 +10,7 @@ glob          = require("glob")
 path          = require("path")
 str           = require("underscore.string")
 coffee        = require("coffee-script")
+evilDns       = require("evil-dns")
 Promise       = require("bluebird")
 httpsServer   = require("@cypress/core-https-proxy/test/helpers/https_server")
 config        = require("#{root}lib/config")
@@ -73,19 +74,18 @@ describe "Routes", ->
           httpsServer.start(8443),
 
           ## and open our cypress server
-          Server()
-          .open(cfg)
-          .then (server) =>
-            @server = server
+          @server = Server()
 
+          @server.open(cfg)
+          .then (port) =>
             if initialUrl
               @server._onDomainSet(initialUrl)
 
-            @srv = server.getHttpServer()
+            @srv = @server.getHttpServer()
 
             @session = new (Session({app: @srv}))
 
-            @proxy = "http://localhost:" + @srv.address().port
+            @proxy = "http://localhost:" + port
         ])
 
       if @server
@@ -98,7 +98,9 @@ describe "Routes", ->
         open()
 
   afterEach ->
+    evilDns.clear()
     nock.cleanAll()
+    Fixtures.remove()
     @session.destroy()
 
     Promise.join(
@@ -110,17 +112,11 @@ describe "Routes", ->
     beforeEach ->
       @setup()
 
-    it "redirects to config.clientRoute without a _remoteOrigin", ->
-      @rp("http://localhost:2020/")
-      .then (res) ->
-        expect(res.statusCode).to.eq(302)
-        expect(res.headers.location).to.eq "/__/"
-
     ## this tests a situation where we open our browser in another browser
     ## without proxy mode set
     it "redirects to config.clientRoute without a _remoteOrigin and without a proxy", ->
       @rp({
-        url: "http://localhost:2020/"
+        url: @proxy
         proxy: null
       })
       .then (res) ->
@@ -144,7 +140,24 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("<html></html>")
+          expect(res.body).to.include("<html>")
+          expect(res.body).to.include("document.domain = 'github.com'")
+          expect(res.body).to.include("</html>")
+
+    it "does not redirect when visiting http site which isnt cypress server", ->
+      ## this tests the 'default' state of cypress when a server
+      ## is instantiated. i noticed that before you do your first
+      ## cy.visit() that all http sites would redirect which is
+      ## incorrect. we only want the cypress port to redirect initially
+
+      nock("http://www.momentjs.com")
+      .get("/")
+      .reply(200)
+
+      @rp("http://www.momentjs.com/")
+      .then (res) ->
+        expect(res.statusCode).to.eq(200)
+        expect(res.headers.location).not.to.eq "/__/"
 
     it "proxies through https", ->
       @setup("https://localhost:8443")
@@ -152,7 +165,9 @@ describe "Routes", ->
         @rp("https://localhost:8443/")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("<html><head></head><body>https server</body></html>")
+          expect(res.body).not.to.include("Cypress")
+          expect(res.body).to.include("document.domain = 'localhost'")
+          expect(res.body).to.include("<body>https server</body>")
 
   context "GET /__", ->
     beforeEach ->
@@ -184,30 +199,45 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.match(/Runner.start\(.+\)/)
 
+    it "routes even without a proxy set", ->
+      @rp({
+        url: @proxy + "/__"
+        proxy: null
+      })
+      .then (res) ->
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(/Runner.start/)
+
   context "GET /__cypress/runner/*", ->
     beforeEach ->
       @setup("http://localhost:8443")
 
-    it "can get app.js", ->
-      @rp("http://localhost:8443/__cypress/runner/app.js")
+    it "can get runner.js", ->
+      @rp("http://localhost:8443/__cypress/runner/runner.js")
       .then (res) ->
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(/React/)
 
-    it "can get app.css", ->
-      @rp("http://localhost:8443/__cypress/runner/app.css")
+    it "can get runner.css", ->
+      @rp("http://localhost:8443/__cypress/runner/runner.css")
       .then (res) ->
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(/spec-iframe/)
+        ## there should not be debug lines in .css files
+        expect(res.body).not.to.match(/line \d/)
+
+    it "can get reporter.css", ->
+      @rp("http://localhost:8443/__cypress/runner/reporter.css")
+      .then (res) ->
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.match(/command-name-assert/)
+        ## there should not be debug lines in .css files
+        expect(res.body).not.to.match(/line \d/)
 
   context "GET /__cypress/files", ->
     beforeEach ->
       Fixtures.scaffold("todos")
       Fixtures.scaffold("ids")
-
-    afterEach ->
-      Fixtures.remove("todos")
-      Fixtures.remove("ids")
 
     describe "todos with specific configuration", ->
       beforeEach ->
@@ -296,9 +326,6 @@ describe "Routes", ->
           }
         })
 
-      afterEach ->
-        Fixtures.remove("todos")
-
       it "processes sub/sub_test.coffee spec", ->
         file = Fixtures.get("projects/todos/tests/sub/sub_test.coffee")
         file = coffee.compile(file)
@@ -328,9 +355,6 @@ describe "Routes", ->
             javascripts: ["helpers/includes.js"]
           }
         })
-
-      afterEach ->
-        Fixtures.remove("no-server")
 
       it "processes my-tests/test1.js spec", ->
         file = Fixtures.get("projects/no-server/my-tests/test1.js")
@@ -500,9 +524,6 @@ describe "Routes", ->
             }
           })
 
-        afterEach ->
-          Fixtures.remove("todos")
-
         it "returns fixture contents", ->
           @rp({
             url: "http://localhost:2020/__cypress/xhrs/bar"
@@ -600,17 +621,13 @@ describe "Routes", ->
 
   context "GET /__cypress/iframes/*", ->
     beforeEach ->
-      Fixtures.scaffold("automations")
+      Fixtures.scaffold("e2e")
       Fixtures.scaffold("todos")
       Fixtures.scaffold("no-server")
       Fixtures.scaffold("ids")
 
     afterEach ->
       files.reset()
-
-      Fixtures.remove("todos")
-      Fixtures.remove("no-server")
-      Fixtures.remove("ids")
 
     describe "usage", ->
       beforeEach ->
@@ -703,10 +720,10 @@ describe "Routes", ->
           body = removeWhitespace(res.body)
           expect(body).to.eq contents
 
-    describe "automations", ->
+    describe "e2e", ->
       beforeEach ->
         @setup({
-          projectRoot: Fixtures.projectPath("automations")
+          projectRoot: Fixtures.projectPath("e2e")
           config: {
             integrationFolder: "cypress/integration"
             supportFolder: "cypress/support"
@@ -714,7 +731,7 @@ describe "Routes", ->
         })
 
       it "omits support directories", ->
-        contents = removeWhitespace Fixtures.get("server/expected_automations_iframe.html")
+        contents = removeWhitespace Fixtures.get("server/expected_e2e_iframe.html")
 
         @rp("http://localhost:2020/__cypress/iframes/integration/app_spec.coffee")
         .then (res) ->
@@ -770,22 +787,20 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("hello from bar!")
+          expect(res.body).to.include("hello from bar!")
 
     context "gzip", ->
       beforeEach ->
         @setup("http://www.github.com")
 
-      it "does not send accept-encoding headers when initial=true", ->
+      it "unzips, injects, and then rezips initial content", ->
         nock(@server._remoteOrigin)
         .get("/gzip")
-        .matchHeader "accept-encoding", (val) ->
-          val isnt "gzip"
-        # .replyWithFile 200, Fixtures.path("server/gzip.html.gz"), {
-        #   "Content-Type": "text/html"
-        #   "Content-Encoding": "gzip"
-        # }
-        .reply(200)
+        .matchHeader("accept-encoding", /gzip/)
+        .replyWithFile(200, Fixtures.path("server/gzip.html.gz"), {
+          "Content-Type": "text/html"
+          "Content-Encoding": "gzip"
+        })
 
         @rp({
           url: "http://www.github.com/gzip"
@@ -796,29 +811,13 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
+          expect(res.body).to.include("<html>")
+          expect(res.body).to.include("gzip")
+          expect(res.body).to.include("Cypress.")
+          expect(res.body).to.include("document.domain = 'github.com'")
+          expect(res.body).to.include("</html>")
 
-      it "does send accept-encoding headers when initial=false", ->
-        nock(@server._remoteOrigin)
-        .get("/gzip")
-        .matchHeader("accept-encoding", /gzip/)
-        .reply(200)
-
-        @rp({
-          url: "http://www.github.com/gzip"
-          gzip: true
-          headers: {
-            "Cookie": "__cypress.initial=false"
-          }
-        })
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
-      ## okay so the reason this test is valuable is the following:
-      ## superagent WILL automatically decode the requests if content-encoding: gzip
-      ## if our response was NOT a gzip, then it would explode
-      ## because its properly gzipped then our response is unzipped and we get the
-      ## normal string content.
-      it "does not UNZIP gzipped responses when streaming back the response", ->
+      it "unzips, injects, and then rezips regular http content", ->
         nock(@server._remoteOrigin)
         .get("/gzip")
         .matchHeader("accept-encoding", /gzip/)
@@ -832,11 +831,35 @@ describe "Routes", ->
           gzip: true
           headers: {
             "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
           }
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("<html>gzip</html>")
+          expect(res.body).to.include("<html>")
+          expect(res.body).to.include("gzip")
+          expect(res.body).to.include("document.domain = 'github.com'")
+          expect(res.body).to.include("</html>")
+
+      it "does not inject on regular gzip'd content", ->
+        nock(@server._remoteOrigin)
+        .get("/gzip")
+        .matchHeader("accept-encoding", /gzip/)
+        .replyWithFile(200, Fixtures.path("server/gzip.html.gz"), {
+          "Content-Type": "application/javascript"
+          "Content-Encoding": "gzip"
+        })
+
+        @rp({
+          url: "http://www.github.com/gzip"
+          gzip: true
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.include("<html>")
+          expect(res.body).to.include("gzip")
+          expect(res.body).not.to.include("document.domain = 'github.com'")
+          expect(res.body).to.include("</html>")
 
     context "304 Not Modified", ->
       beforeEach ->
@@ -879,7 +902,7 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(302)
-          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Path=/")
+          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Domain=getbootstrap.com; Path=/")
           expect(res.headers["location"]).to.eq("/")
 
       ## this fixes improper url merge where we took query params
@@ -899,7 +922,7 @@ describe "Routes", ->
         })
         .then (res) =>
           expect(res.statusCode).to.eq(302)
-          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Path=/")
+          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Domain=getbootstrap.com; Path=/")
           expect(res.headers["location"]).to.eq("/css")
 
       it "does redirect with query params if location header includes them", ->
@@ -921,7 +944,7 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(302)
-          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Path=/")
+          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Domain=getbootstrap.com; Path=/")
           expect(res.headers["location"]).to.eq("/css?q=search")
 
       it "does redirect with query params to external domain if location header includes them", ->
@@ -943,7 +966,7 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(302)
-          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Path=/")
+          expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Domain=getbootstrap.com; Path=/")
           expect(res.headers["location"]).to.eq("https://www.google.com/search?q=cypress")
 
       it "sets cookies and removes __cypress.initial when initial is originally false", ->
@@ -962,6 +985,7 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(302)
+          ## since this is not a cypress cookie we do not set the domain
           expect(res.headers["set-cookie"]).to.deep.eq(["foo=bar; Path=/"])
           expect(res.headers["location"]).to.eq("/css/")
 
@@ -983,16 +1007,18 @@ describe "Routes", ->
             })
             .then (res) ->
               expect(res.statusCode).to.eq(code)
-              expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Path=/")
+              expect(res.headers["set-cookie"]).to.include("__cypress.initial=true; Domain=example.com; Path=/")
 
     context "error handling", ->
       beforeEach ->
         @setup("http://www.github.com")
 
-      it "status code 500", ->
+      it "passes through status code + content", ->
         nock(@server._remoteOrigin)
         .get("/index.html")
-        .reply(500)
+        .reply(500, "server error", {
+          "Content-Type": "text/html"
+        })
 
         @rp({
           url: "http://www.github.com/index.html"
@@ -1002,88 +1028,115 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(500)
+          expect(res.body).to.include("server error")
+          expect(res.body).to.include("document.domain = 'github.com'")
+          expect(res.headers["set-cookie"]).to.match(/__cypress.initial=;/)
 
-      ## allow nock to throw here
-      it "does not send back initial_500 content on error when initial is false"
+      it "sends back cypress content on request errors which match origin", ->
+        nock("http://app.github.com")
+        .get("/")
+        .replyWithError("ECONNREFUSED")
 
-      it "sends back initial_500 content", ->
-        nock(@server._remoteOrigin)
-        .get("/index.html")
-        .reply(500, "FAIL WAIL")
+        @rp("http://app.github.com/")
+        .then (res) ->
+          expect(res.statusCode).to.eq(500)
+          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
+          expect(res.body).to.include("http://app.github.com")
+          expect(res.body).to.include("The error was:")
+          expect(res.body).to.include("ECONNREFUSED")
+          expect(res.body).to.include("The stack trace was:")
+          expect(res.body).to.include("<html>\n<head> <script")
+          expect(res.body).to.include("</script> </head> <body>")
+          expect(res.body).to.include("document.domain = 'github.com';") ## should continue to inject
 
-        @rp({
-          url: "http://www.github.com/index.html"
-          headers: {
-            "Cookie": "__cypress.initial=true"
+      it "sends back cypress content on actual request errors", ->
+        @setup("http://localhost:64644")
+        .then =>
+          @rp("http://localhost:64644")
+        .then (res) ->
+          expect(res.statusCode).to.eq(500)
+          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
+          expect(res.body).to.include("http://localhost:64644")
+          expect(res.body).to.include("The error was:")
+          expect(res.body).to.include("connect ECONNREFUSED 127.0.0.1:64644")
+          expect(res.body).to.include("The stack trace was:")
+          expect(res.body).to.include("_exceptionWithHostPort")
+          expect(res.body).to.include("TCPConnectWrap.afterConnect")
+          expect(res.body).to.include("<html>\n<head> <script")
+          expect(res.body).to.include("</script> </head> <body>")
+          expect(res.body).to.include("document.domain = 'localhost';") ## should continue to inject
+
+      it "sends back cypress content without injection on http errors when no matching origin", ->
+        @rp("http://localhost:64644")
+        .then (res) ->
+          expect(res.statusCode).to.eq(500)
+          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
+          expect(res.body).to.include("http://localhost:64644")
+          expect(res.body).to.include("The error was:")
+          expect(res.body).to.include("connect ECONNREFUSED 127.0.0.1:64644")
+          expect(res.body).to.include("The stack trace was:")
+          expect(res.body).to.include("_exceptionWithHostPort")
+          expect(res.body).to.include("TCPConnectWrap.afterConnect")
+          expect(res.body).not.to.include("<html>\n<head> <script")
+          expect(res.body).not.to.include("</script> </head> <body>")
+          expect(res.body).not.to.include("document.domain") ## should not inject because
+
+      it "sends back 404 when file does not exist locally", ->
+        @setup("<root>", {
+          config: {
+            fileServerFolder: "/Users/bmann/Dev/projects"
           }
         })
-        .then (res) =>
-          expect(res.statusCode).to.eq(500)
-          expect(res.body).to.include("<span data-cypress-visit-error></span>")
-          expect(res.body).to.include("<a href=\"#{@server._remoteOrigin}/index.html\" target=\"_blank\">#{@server._remoteOrigin}/index.html</a>")
-          expect(res.body).to.include("Did you forget to start your web server?")
-
-      it "sends back 500 when file does not exist locally", ->
-        @setup("<root>")
         .then =>
-          @rp({
-            url: "http://localhost:2020/foo/views/test/index.html"
-            headers: {
-              "Cookie": "__cypress.initial=true"
-            }
+          @rp(@proxy + "/foo/views/test/index.html")
+          .then (res) =>
+            expect(res.statusCode).to.eq(404)
+            expect(res.body).to.include("Cypress errored trying to serve this file from your system:")
+            expect(res.body).to.include("/Users/bmann/Dev/projects/foo/views/test/index.html")
+            expect(res.body).to.include("The file was not found.")
+            expect(res.body).to.include("<html>\n<head> <script")
+            expect(res.body).to.include("</script> </head> <body>")
+            expect(res.body).to.include("document.domain = 'localhost';") ## should continue to inject
+
+      it "does not inject on file server errors when origin does not match", ->
+        @setup("<root>", {
+          config: {
+            fileServerFolder: "/Users/bmann/Dev/projects"
+          }
+        })
+        .then =>
+          nock("http://www.github.com")
+          .get("/index.html")
+          .reply(500, "server error", {
+            "Content-Type": "text/html"
           })
+
+          @rp("http://www.github.com/index.html")
           .then (res) =>
             expect(res.statusCode).to.eq(500)
-            expect(res.body).to.include("<span data-cypress-visit-error></span>")
-            expect(res.body).to.include("file://")
-            expect(res.body).to.include("This file could not be served from your file system.")
+            expect(res.body).to.eq("server error")
 
-      it "sets x-cypress-error and x-cypress-stack headers when file does not exist", ->
-        @setup("<root>")
-        .then =>
-          @rp({
-            url: "http://localhost:2020/foo/views/test/index.html"
-            headers: {
-              "Cookie": "__cypress.initial=true"
-            }
-          })
-          .then (res) =>
-            expect(res.statusCode).to.eq(500)
-            expect(res.headers["x-cypress-error"]).to.match(/ENOENT: no such file or directory/)
-            expect(res.headers["x-cypress-stack"]).to.match(/ENOENT: no such file or directory/)
-
-      it "does not set x-cypress-error or x-cypress-stack when error is null", ->
+      it "handles decoding gzip failures", ->
         nock(@server._remoteOrigin)
         .get("/index.html")
-        .reply(500, "FAIL WAIL")
-
-        @rp({
-          url: "http://www.github.com/index.html"
-          headers: {
-            "Cookie": "__cypress.initial=true"
-          }
+        .replyWithFile(200, Fixtures.path("server/gzip-bad.html.gz"), {
+          "Content-Type": "text/html"
+          "Content-Encoding": "gzip"
         })
-        .then (res) =>
+
+        @rp("http://www.github.com/index.html")
+        .then (res) ->
           expect(res.statusCode).to.eq(500)
-          expect(res.headers).not.to.have.property("x-cypress-error")
-          expect(res.headers).not.to.have.property("x-cypress-stack")
-
-      it "does not send back initial 500 content on 4xx errors", ->
-        nock(@server._remoteOrigin)
-        .get("/index.html")
-        .reply(404, "404 not found", {
-          "Content-Type": "html/html"
-        })
-
-        @rp({
-          url: "http://www.github.com/index.html"
-          headers: {
-            "Cookie": "__cypress.initial=true"
-          }
-        })
-        .then (res) =>
-          expect(res.statusCode).to.eq(404)
-          expect(res.body).to.eq("404 not found")
+          expect(res.headers).not.to.have.property("content-encoding")
+          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
+          expect(res.body).to.include("http://www.github.com/index.html")
+          expect(res.body).to.include("The error was:")
+          expect(res.body).to.include("incorrect header check")
+          expect(res.body).to.include("The stack trace was:")
+          expect(res.body).to.include("at Zlib._handle.onerror")
+          expect(res.body).to.include("<html>\n<head> <script")
+          expect(res.body).to.include("</script> </head> <body>")
+          expect(res.body).to.include("document.domain = 'github.com';") ## should continue to inject
 
     context "headers", ->
       beforeEach ->
@@ -1117,7 +1170,7 @@ describe "Routes", ->
           })
           .then (res) =>
             expect(res.statusCode).to.eq(200)
-            expect(res.headers["set-cookie"]).to.match(/initial=false/)
+            expect(res.headers["set-cookie"]).to.match(/initial=;/)
 
       describe "when initial is false", ->
         it "does not reset initial or remoteHost", ->
@@ -1154,7 +1207,7 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("foo")
+          expect(res.body).to.include("foo")
           expect(res.headers["transfer-encoding"]).to.eq("chunked")
           expect(res.headers).not.to.have.property("content-length")
 
@@ -1174,7 +1227,7 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("foo")
+          expect(res.body).to.include("foo")
           expect(res.headers["transfer-encoding"]).to.eq("chunked")
           expect(res.headers).not.to.have.property("content-length")
 
@@ -1198,9 +1251,10 @@ describe "Routes", ->
       it "appends to previous cookies from incoming responses", ->
         nock(@server._remoteOrigin)
         .get("/login")
-        .reply 200, "OK", {
+        .reply(200, "<html></html>", {
           "set-cookie" : "userId=123; Path=/"
-        }
+          "content-type": "text/html"
+        })
 
         @rp({
           url: "http://localhost:8080/login"
@@ -1211,10 +1265,10 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          expect(res.headers["set-cookie"]).to.deep.eq [
-            "userId=123; Path=/"
-            "__cypress.initial=false; Path=/"
-          ]
+          setCookie = res.headers["set-cookie"]
+
+          expect(setCookie[0]).to.eq("userId=123; Path=/")
+          expect(setCookie[1]).to.eq("__cypress.initial=; Domain=localhost; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT")
 
       it "appends cookies on redirects", ->
         nock(@server._remoteOrigin)
@@ -1236,7 +1290,7 @@ describe "Routes", ->
           expect(res.headers["location"]).to.eq("/dashboard")
           expect(res.headers["set-cookie"]).to.deep.eq [
             "userId=123; Path=/"
-            "__cypress.initial=true; Path=/"
+            "__cypress.initial=true; Domain=localhost; Path=/"
           ]
 
       it "forwards other headers from incoming responses", ->
@@ -1274,7 +1328,7 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("hello from bar!")
+          expect(res.body).to.include("hello from bar!")
 
       it "omits x-frame-options", ->
         nock(@server._remoteOrigin)
@@ -1341,20 +1395,15 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")
 
-      it "does cache when not initial response", ->
+      it "does cache requesting resource without injection", ->
         nock(@server._remoteOrigin)
         .get("/")
         .reply 200, "hello from bar!", {
-          "Content-Type": "text/html"
+          "Content-Type": "text/plain"
           "Cache-Control": "max-age=86400"
         }
 
-        @rp({
-          url: "http://localhost:8080/"
-          headers: {
-            "Cookie": "__cypress.initial=false"
-          }
-        })
+        @rp("http://localhost:8080/")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.headers["cache-control"]).to.eq("max-age=86400")
@@ -1364,7 +1413,7 @@ describe "Routes", ->
         .get("/foo")
         .matchHeader("host",   "localhost:8080")
         .matchHeader("origin", "http://localhost:8080")
-        .reply(200, "OK", {
+        .reply(200, "<html>origin</html>", {
           "Content-Type": "text/html"
         })
 
@@ -1377,7 +1426,144 @@ describe "Routes", ->
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq("OK")
+          expect(res.body).to.include("origin")
+          expect(res.body).to.include("document.domain = 'localhost'")
+
+          expect(res.body).not.to.include("Cypress")
+
+      it "issue #222 - correctly sets http host headers", ->
+        matches = (url, fn) =>
+          @setup(url)
+          .then =>
+            @server.onRequest(fn)
+
+            @rp(url)
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.eq("{}")
+
+        matches "http://localhost:8080/app.css", ->
+          nock("http://localhost:8080")
+          .matchHeader("host", "localhost:8080")
+          .get("/app.css")
+          .reply(200, "{}", {
+            "Content-Type": "text/css"
+          })
+
+        .then ->
+          matches "http://127.0.0.1:80/app.css", ->
+            nock("http://127.0.0.1:80")
+            .matchHeader("host", "127.0.0.1")
+            .get("/app.css")
+            .reply(200, "{}", {
+              "Content-Type": "text/css"
+            })
+
+        .then ->
+          matches "https://www.google.com:443/app.css", ->
+            nock("https://www.google.com")
+            .matchHeader("host", "www.google.com")
+            .get("/app.css")
+            .reply(200, "{}", {
+              "Content-Type": "text/css"
+            })
+
+    context "images", ->
+      beforeEach ->
+        Fixtures.scaffold()
+
+      it "passes the bytes through without injection on http servers", ->
+        image = Fixtures.projectPath("e2e/static/javascript-logo.png")
+
+        Promise.all([
+          fs.statAsync(image).get("size")
+          fs.readFileAsync(image, "utf8")
+          @setup("http://localhost:8881")
+        ])
+        .spread (size, bytes, setup) =>
+          nock(@server._remoteOrigin)
+          .get("/javascript-logo.png")
+          .replyWithFile(200, image, {
+            "Content-Type": "image/png"
+          })
+
+          @rp({
+            url: "http://localhost:8881/javascript-logo.png"
+            headers: {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).not.to.include("<script")
+
+            console.log("**********LENGTH", res.body.length, size)
+
+            expect(res.body).to.eq(bytes)
+
+      it "passes the bytes through without injection on http servers with gzip", ->
+        image  = Fixtures.projectPath("e2e/static/javascript-logo.png")
+        zipped = Fixtures.projectPath("e2e/static/javascript-logo.png.gz")
+
+        Promise.all([
+          fs.statAsync(image).get("size")
+          fs.readFileAsync(image, "utf8")
+          @setup("http://localhost:8881")
+        ])
+        .spread (size, bytes, setup) =>
+          nock(@server._remoteOrigin)
+          .get("/javascript-logo.png")
+          .replyWithFile(200, zipped, {
+            "Content-Type": "image/png"
+            "Content-Encoding": "gzip"
+          })
+
+          @rp({
+            url: "http://localhost:8881/javascript-logo.png"
+            gzip: true
+            headers: {
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).not.to.include("<script")
+
+            expect(res.body).to.eq(bytes)
+
+    context "woff", ->
+      beforeEach ->
+        Fixtures.scaffold()
+
+      it "passes the bytes through without injection", ->
+        font = Fixtures.projectPath("e2e/static/FiraSans-Regular.woff")
+
+        Promise.all([
+          fs.statAsync(font).get("size")
+          fs.readFileAsync(font, "utf8")
+          @setup("http://localhost:8881")
+        ])
+        .spread (size, bytes, setup) =>
+          nock(@server._remoteOrigin)
+          .get("/font.woff")
+          .replyWithFile(200, font, {
+            "Content-Type": "application/font-woff; charset=utf-8"
+          })
+
+          @rp({
+            url: "http://localhost:8881/font.woff"
+            headers: {
+              "Accept": "*/*"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).not.to.include("<script")
+
+            expect(res.body).to.eq(bytes)
 
     context "content injection", ->
       beforeEach ->
@@ -1424,21 +1610,113 @@ describe "Routes", ->
           body = removeWhitespace(res.body)
           expect(body).to.eq contents
 
-      it.skip "injects even when head tag is missing", ->
+      it "injects even when head tag is missing", ->
         contents = removeWhitespace Fixtures.get("server/expected_no_head_tag_inject.html")
 
         nock(@server._remoteOrigin)
-          .get("/bar")
-          .reply 200, "<html> <body>hello from bar!</body> </html>",
-            "Content-Type": "text/html"
+        .get("/bar")
+        .reply 200, "<html> <body>hello from bar!</body> </html>",
+          "Content-Type": "text/html"
 
-        supertest(@srv)
-          .get("/bar")
-          .set("Cookie", "__cypress.initial=true")
-          .expect(200)
-          .then (res) ->
-            body = removeWhitespace(res.body)
-            expect(body).to.eq contents
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          body = removeWhitespace(res.body)
+          expect(body).to.eq contents
+
+      it "injects when head is capitalized", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<HTML> <HEAD>hello from bar!</HEAD> </HTML>",
+          "Content-Type": "text/html"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include "<HTML> <HEAD> <script type='text/javascript'> document.domain = 'google.com';"
+
+      it "injects when body is capitalized", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<HTML> <BODY>hello from bar!</BODY> </HTML>",
+          "Content-Type": "text/html"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include "</script> </head> <BODY>hello from bar!</BODY> </HTML>"
+
+      it "injects when both head + body are missing", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<HTML>hello from bar!</HTML>",
+          "Content-Type": "text/html"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include "<HTML> <head> <script"
+          expect(res.body).to.include "</head>hello from bar!</HTML>"
+
+      it "injects even when html + head + body are missing", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<div>hello from bar!</div>",
+          "Content-Type": "text/html"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include "<head> <script"
+          expect(res.body).to.include "</head><div>hello from bar!</div>"
+
+      it "injects superdomain even when head tag is missing", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<html> <body>hello from bar!</body> </html>",
+          "Content-Type": "text/html"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.eq "<html> <head> <script type='text/javascript'> document.domain = 'google.com'; </script> </head> <body>hello from bar!</body> </html>"
 
       it "injects sinon content after following redirect", ->
         contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")
@@ -1470,16 +1748,56 @@ describe "Routes", ->
           @rp(res.headers["location"])
           .then (res) ->
             expect(res.statusCode).to.eq(200)
-            expect(res.headers["set-cookie"]).to.match(/initial=false/)
+            expect(res.headers["set-cookie"]).to.match(/initial=;/)
 
             body = removeWhitespace(res.body)
             expect(body).to.eq contents
 
-      it "does not inject when not initial", ->
+      it "injects performantly on a huge amount of elements over http", ->
+        Fixtures.scaffold()
+
+        nock(@server._remoteOrigin)
+        .get("/elements.html")
+        .replyWithFile(200, Fixtures.projectPath("e2e/elements.html"), {
+          "Content-Type": "text/html"
+        })
+
+        @rp({
+          url: "http://www.google.com/elements.html"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) =>
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include("document.domain = 'google.com';")
+
+      it "injects performantly on a huge amount of elements over file", ->
+        Fixtures.scaffold()
+
+        @setup("/index.html", {
+          projectRoot: Fixtures.projectPath("e2e")
+        })
+        .then =>
+
+          @rp({
+            url: @proxy + "/elements.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) =>
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include("document.domain = 'localhost';")
+
+      it "does not inject when not initial and not html", ->
         nock(@server._remoteOrigin)
         .get("/bar")
         .reply 200, "<html><head></head></html>", {
-          "Content-Type": "text/html"
+          "Content-Type": "text/plain"
         }
 
         @rp({
@@ -1509,36 +1827,153 @@ describe "Routes", ->
             body = removeWhitespace(res.body)
             expect(body).to.eq contents
 
-    context "FQDN rewriting", ->
-      beforeEach ->
-        @setup("http://www.google.com")
+      it "injects into https://www.google.com", ->
+        @setup("https://www.google.com")
+        .then =>
+          @server.onRequest (req, res) ->
+            nock("https://www.google.com")
+            .get("/")
+            .reply 200, "<html><head></head><body>google</body></html>", {
+              "Content-Type": "text/html"
+            }
 
-      it "does not rewrite html when initial", ->
+          @rp({
+            url: "https://www.google.com/"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include("sinon.js")
+
+      it "injects even on 5xx responses", ->
+        @setup("https://www.google.com")
+        .then =>
+          @server.onRequest (req, res) ->
+            nock("https://www.google.com")
+            .get("/")
+            .reply 500, "<html><head></head><body>google</body></html>", {
+              "Content-Type": "text/html"
+            }
+
+          @rp("https://www.google.com/")
+          .then (res) ->
+            expect(res.statusCode).to.eq(500)
+
+            expect(res.body).to.include("document.domain = 'google.com'")
+
+      it "works with host swapping", ->
+        contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")
+
+        @setup("https://www.foobar.com:8443")
+        .then =>
+          evilDns.add("*.foobar.com", "127.0.0.1")
+
+          @rp({
+            url: "https://www.foobar.com:8443/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            body = removeWhitespace(res.body)
+            expect(body).to.eq contents.replace("localhost", "foobar.com")
+
+      it "continues to inject on the same https superdomain but different subdomain", ->
+        contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")
+
+        @setup("https://www.foobar.com:8443")
+        .then =>
+          evilDns.add("*.foobar.com", "127.0.0.1")
+
+          @rp({
+            url: "https://docs.foobar.com:8443/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=true"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            body = removeWhitespace(res.body)
+            expect(body).to.eq contents.replace("localhost", "foobar.com")
+
+      it "injects document.domain on https requests to same superdomain but different subdomain", ->
+        contents = removeWhitespace Fixtures.get("server/expected_https_inject.html")
+
+        @setup("https://www.foobar.com:8443")
+        .then =>
+          evilDns.add("*.foobar.com", "127.0.0.1")
+
+          @rp({
+            url: "https://docs.foobar.com:8443/index.html"
+            headers: {
+              "Cookie": "__cypress.initial=false"
+              "Accept": "text/html"
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            body = removeWhitespace(res.body)
+            expect(body).to.eq "<html><head> <script type='text/javascript'> document.domain = 'foobar.com'; </script></head><body>https server</body></html>"
+
+      it "injects document.domain on other http requests", ->
         nock(@server._remoteOrigin)
-        .get("/bar")
-        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
+        .get("/iframe")
+        .reply 200, "<html><head></head></html>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
-          url: "http://www.google.com/bar"
+          url: "http://www.google.com/iframe"
           headers: {
-            "Cookie": "__cypress.initial=true"
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
           }
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = res.body
-          expect(body).to.eq "<html><body><a href='http://www.google.com'>google</a></body></html>"
+          body = removeWhitespace(res.body)
 
-      it "does not rewrite html when not initial", ->
-        nock(@server._remoteOrigin)
-        .get("/bar")
-        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
+          expect(body).to.eq("<html><head> <script type='text/javascript'> document.domain = 'google.com'; </script></head></html>")
+
+      it "injects document.domain on matching super domains but different subdomain", ->
+        nock("http://mail.google.com")
+        .get("/iframe")
+        .reply 200, "<html><head></head></html>", {
           "Content-Type": "text/html"
+        }
 
         @rp({
-          url: "http://www.google.com/bar"
+          url: "http://mail.google.com/iframe"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          body = removeWhitespace(res.body)
+
+          expect(body).to.eq("<html><head> <script type='text/javascript'> document.domain = 'google.com'; </script></head></html>")
+
+      it "does not inject document.domain on non http requests", ->
+        nock(@server._remoteOrigin)
+        .get("/json")
+        .reply 200, {
+          foo: "<html><head></head></html>"
+        }
+
+        @rp({
+          url: "http://www.google.com/json"
+          json: true
           headers: {
             "Cookie": "__cypress.initial=false"
           }
@@ -1546,8 +1981,44 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = res.body
-          expect(body).to.eq "<html><body><a href='http://www.google.com'>google</a></body></html>"
+          expect(res.body).to.deep.eq({foo: "<html><head></head></html>"})
+
+      it "does not inject document.domain on http requests which do not match current superDomain", ->
+        nock("http://www.foobar.com")
+        .get("/")
+        .reply(200, "<html><head></head><body>hi</body></html>", {
+          "Content-Type": "text/html"
+        })
+
+        @rp({
+          url: "http://www.foobar.com"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.eq("<html><head></head><body>hi</body></html>")
+
+      it "does not inject anything when not text/html response content-type even when __cypress.initial=true", ->
+        nock(@server._remoteOrigin)
+        .get("/json")
+        .reply(200, {foo: "bar"})
+
+        @rp({
+          url: "http://www.google.com/json"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+            "Accept": "application/json"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.eq(JSON.stringify({foo: "bar"}))
+
+          ## it should not be telling us to turn this off either
+          expect(res.headers["set-cookie"]).not.to.match(/initial/)
 
       it "rewrites <svg> without hanging", ->
         ## if this test finishes without timing out we know its all good
@@ -1567,7 +2038,49 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-    context "<root> file serving", ->
+    context "FQDN rewriting", ->
+      beforeEach ->
+        @setup("http://www.google.com")
+
+      it "does not rewrite html when initial", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
+          "Content-Type": "text/html"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          body = res.body
+          expect(body).to.include "<a href='http://www.google.com'>google</a>"
+
+      it "does not rewrite html when not initial", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
+          "Content-Type": "text/html"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          body = res.body
+          expect(body).to.include "<a href='http://www.google.com'>google</a>"
+
+    context "file requests", ->
       beforeEach ->
         Fixtures.scaffold()
 
@@ -1580,9 +2093,10 @@ describe "Routes", ->
         })
         .then =>
           @rp({
-            url: "http://localhost:2020/index.html"
+            url: @proxy + "/index.html"
             headers: {
               "Cookie": "__cypress.initial=true"
+              "Accept": "text/html"
             }
           })
           .then (res) ->
@@ -1590,50 +2104,123 @@ describe "Routes", ->
             expect(res.body).to.match(/index.html content/)
             expect(res.body).to.match(/sinon.js/)
 
-            expect(res.headers["set-cookie"]).to.match(/initial=false/)
-            expect(res.headers["etag"]).to.be.undefined
-            expect(res.headers["last-modified"]).to.be.undefined
-
-      afterEach ->
-        Fixtures.remove("no-server")
+            expect(res.headers["set-cookie"]).to.match(/initial=;/)
+            expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")
+            expect(res.headers["etag"]).to.exist
+            expect(res.headers["last-modified"]).to.exist
 
       it "sets etag", ->
-        @rp("http://localhost:2020/assets/app.css")
+        @rp(@proxy + "/assets/app.css")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("html { color: black; }")
           expect(res.headers["etag"]).to.be.a("string")
 
       it "sets last-modified", ->
-        @rp("http://localhost:2020/assets/app.css")
+        @rp(@proxy + "/assets/app.css")
         .then (res) =>
           expect(res.headers["last-modified"]).to.be.a("string")
 
       it "streams from file system", ->
-        @rp("http://localhost:2020/assets/app.css")
+        @rp(@proxy + "/assets/app.css")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("html { color: black; }")
 
       it "sets content-type", ->
-        @rp("http://localhost:2020/assets/app.css")
+        @rp(@proxy + "/assets/app.css")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.headers["content-type"]).to.match(/text\/css/)
 
       it "disregards anything past the pathname", ->
-        @rp("http://localhost:2020/assets/app.css?foo=bar#hash")
+        @rp(@proxy + "/assets/app.css?foo=bar#hash")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("html { color: black; }")
 
       it "can serve files with spaces in the path", ->
-        @rp("http://localhost:2020/a space/foo.txt")
+        @rp(@proxy + "/a space/foo.txt")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.eq("foo")
 
-    context "http file serving", ->
+      it "sets x-cypress-file-path headers", ->
+        @rp(@proxy + "/assets/app.css")
+        .then (res) =>
+          expect(res.headers).to.have.property("x-cypress-file-path", Fixtures.projectPath("no-server") + "/dev/assets/app.css")
+
+      it "sets x-cypress-file-server-error headers on error", ->
+        @rp(@proxy + "/does-not-exist.html")
+        .then (res) =>
+          expect(res.statusCode).to.eq(404)
+          expect(res.headers).to.have.property("x-cypress-file-server-error", "true")
+
+      it "injects document.domain on other http requests", ->
+        @rp({
+          url: @proxy + "/index.html"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.include("document.domain = 'localhost';")
+
+      it "injects document.domain on other http requests to root", ->
+        @rp({
+          url: @proxy + "/sub/"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.include("document.domain = 'localhost';")
+
+      it "does not inject injects document.domain on 301 redirects to folders", ->
+        @rp({
+          url: @proxy + "/sub"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(301)
+          expect(res.body).not.to.include("document.domain = 'localhost';")
+
+      it "does not inject document.domain on non http requests", ->
+        @rp({
+          url: @proxy + "/assets/foo.json"
+          json: true
+          headers: {
+            "Cookie": "__cypress.initial=false"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.deep.eq({contents: "<html><head></head></html>"})
+
+      it "does not inject anything when not text/html response content-type even when __cypress.initial=true", ->
+        @rp({
+          url: @proxy + "/assets/foo.json"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+            "Accept": "application/json"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.deep.eq(JSON.stringify({contents: "<html><head></head></html>"}, null, 2))
+
+          ## it should not be telling us to turn this off either
+          expect(res.headers["set-cookie"]).not.to.match(/initial/)
+
+    context "http requests", ->
       beforeEach ->
         @setup("http://getbootstrap.com")
         .then =>
@@ -1736,6 +2323,45 @@ describe "Routes", ->
       #   .get("/www.cdnjs.com/backbone.js")
       #   .expect(200)
 
+    context "without finishing responses", ->
+      beforeEach (done) ->
+        @setup("http://localhost:5959", {
+          config: {
+            responseTimeout: 50
+          }
+        })
+        .then =>
+          @srv = http.createServer (req, res) =>
+            @onRequest?.call(@, req, res)
+
+          @srv.listen =>
+            @port = @srv.address().port
+
+            done()
+
+      afterEach ->
+        @srv.close()
+
+      it "gracefully handles responses without headers", ->
+        @onRequest = (req, res) ->
+
+        @rp("http://localhost:#{@port}/")
+        .then (res) ->
+          expect(res.statusCode).to.eq(500)
+
+          expect(res.body).to.include("Cypress errored attempting to make an http request to this url")
+
+      it "gracefully handles responses with headers + incomplete body", ->
+        @onRequest = (req, res) ->
+          res.writeHead(401)
+          res.write("foo\n")
+
+        @rp("http://localhost:#{@port}/")
+        .then (res) ->
+          expect(res.statusCode).to.eq(401)
+
+          expect(res.body).to.include("Cypress errored attempting to make an http request to this url")
+
   context "POST *", ->
     beforeEach ->
       @setup("http://localhost:8000")
@@ -1792,6 +2418,31 @@ describe "Routes", ->
         expect(res.statusCode).to.eq(302)
         expect(res.headers["location"]).to.match(/dashboard/)
         expect(res.headers["set-cookie"]).to.match(/initial=true/)
+
+    it "does not alter request headers", ->
+      nock(@server._remoteOrigin)
+      .matchHeader("x-csrf-token", "abc-123")
+      .post("/login", {
+        username: "brian@cypress.io"
+        password: "foobar"
+      })
+      .reply(200, "OK")
+
+      @rp({
+        method: "POST"
+        url: "http://localhost:8000/login"
+        form: {
+          username: "brian@cypress.io"
+          password: "foobar"
+        }
+        headers: {
+          "X-CSRF-Token": "abc-123"
+        }
+      })
+      .then (res) ->
+        expect(res.statusCode).to.eq(200)
+
+        expect(res.body).to.eq("OK")
 
     it "does not fail on a big cookie", ->
       nock(@server._remoteOrigin)

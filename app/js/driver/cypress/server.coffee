@@ -245,6 +245,11 @@ $Cypress.Server = do ($Cypress, _, minimatch) ->
     applyStubProperties: (xhr, route) ->
       responser = if _.isObject(route.response) then JSON.stringify else null
 
+      ## add header properties for the xhr's id
+      ## and the testId
+      setHeader(xhr, "id", xhr.id)
+      # setHeader(xhr, "testId", getServer().options.testId)
+
       setHeader(xhr, "status",   route.status)
       setHeader(xhr, "response", route.response, responser)
       setHeader(xhr, "matched",  route.url + "")
@@ -551,11 +556,6 @@ $Cypress.Server = do ($Cypress, _, minimatch) ->
         open.call(@, method, url, async, username, password)
 
       XHR.prototype.send = (requestBody) ->
-        ## add header properties for the xhr's id
-        ## and the testId
-        setHeader(@, "id", @id)
-        setHeader(@, "testId", getServer().options.testId)
-
         ## if there is an existing route for this
         ## XHR then add those properties into it
         ## only if route isnt explicitly false

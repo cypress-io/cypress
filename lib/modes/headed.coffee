@@ -1,17 +1,16 @@
 _        = require("lodash")
 os       = require("os")
+EE       = require("events")
 app      = require("electron").app
 image    = require("electron").nativeImage
 Promise  = require("bluebird")
 cyIcons  = require("@cypress/core-icons")
 Position = require("electron-positioner")
-notifier = require("node-notifier")
 user     = require("../user")
 errors   = require("../errors")
 Updater  = require("../updater")
 logs     = require("../electron/handlers/logs")
 menu     = require("../electron/handlers/menu")
-Tray     = require("../electron/handlers/tray")
 Events   = require("../electron/handlers/events")
 Renderer = require("../electron/handlers/renderer")
 
@@ -19,37 +18,14 @@ module.exports = {
   isMac: ->
     os.platform() is "darwin"
 
-  onDrop: ->
-
-  onClick: (bounds, win) ->
-    # positioner = new Position(win)
-
-    # coords = positioner.calculate("trayCenter", bounds)
-
-    ## store the coords on updater
-    # Updater.setCoords(coords)
-
-    # win.setPosition(coords.x, coords.y)
-
-    # if win.isVisible()
-    win.hide()
-    # else
-    #   win.show()
-
-  onRightClick: ->
-
   onWindowAllClosed: (app) ->
-    ## stop all the events
-    Events.stop()
+    process.exit(0)
 
-    ## exit when all windows are closed
-    app.exit(0)
-
-  getRendererArgs: (coords) ->
+  getRendererArgs: ->
     common = {
       backgroundColor: '#dfe2e4'
-      width: 570
-      height: 400
+      width: 800
+      height: 550
       minWidth: 458
       minHeight: 400
       type: "INDEX"
@@ -62,13 +38,6 @@ module.exports = {
     }
 
     _.extend(common, @platformArgs())
-
-    ## if we have coordinates automatically add them
-    if coords
-      ## and also set show to true
-      _.extend(common, coords, {show: true})
-
-    return common
 
   platformArgs: ->
     {
@@ -86,69 +55,33 @@ module.exports = {
       }
     }[os.platform()]
 
-  notify: ->
-    ## bail if we aren't on mac
-    return if not @isMac()
-
-    user.ensureSession()
-    .catch ->
-      notifier.notify({
-        # subtitle:
-        title: "Cypress is now running..."
-        message: "Click the 'cy' icon in your tray to login."
-        icon: cyIcons.getPathToIcon("icon_32x32@2x.png")
-      })
-
   ready: (options = {}) ->
-    tray = new Tray()
+    bus = new EE
 
-    menu.set()
+    ## TODO: potentially just pass an event emitter
+    ## instance here instead of callback functions
+    menu.set({
+      onUpdatesClicked: ->
+        bus.emit("menu:item:clicked", "check:for:updates")
 
-    _.defaults options,
-      onQuit: ->
-        ## TODO: fix this. if the debug window
-        ## is open and we attempt to quit
-        ## it will not be closed because
-        ## there is a memory reference
-        ## thus we have to remove it first
-        logs.off()
-
-        ## exit the app immediately
-        app.exit(0)
-
-      onOpenProject: =>
-        tray.setState("running")
-
-      onCloseProject: =>
-        tray.setState("default")
-
-      onError: (err) =>
-        tray.setState("error")
-
-    ready = =>
-      ## TODO:
-      ## handle right click to show context menu!
-      ## handle drop events for automatically adding projects!
-      ## use the same icon as the cloud app
-      Renderer.create(@getRendererArgs(options.coords))
-      .then (win) =>
-        Events.start(options)
-
-        if options.updating
-          Updater.install(options)
-
-        tray.display({
-          onClick: (e, bounds) =>
-            @onClick(bounds, win)
-        })
-
-        return win
-
-    Promise.props({
-      ready: ready()
-      notify: @notify()
+      onLogOutClicked: ->
+        bus.emit("menu:item:clicked", "log:out")
     })
-    .get("ready")
+
+    Renderer.create(@getRendererArgs())
+    .then (win) =>
+      ## cause the browser window instance
+      ## to receive focus when we've been
+      ## told to focus on the tests!
+      options.onFocusTests = ->
+        win.focus()
+
+      Events.start(options, bus)
+
+      if options.updating
+        Updater.install(options)
+
+      return win
 
   run: (options) ->
     app.on "window-all-closed", =>

@@ -11,14 +11,44 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
       window.Cypress = @
 
     setConfig: (config = {}) ->
-      {environmentVariables} = config
+      ## config.remote
+      # {
+      #   origin: "http://localhost:2020"
+      #   domainName: "localhost"
+      #   props: null
+      #   strategy: "file"
+      # }
 
-      config = _.omit(config, "environmentVariables")
+      # -- or --
+
+      # {
+      #   origin: "https://foo.google.com"
+      #   domainName: "google.com"
+      #   strategy: "http"
+      #   props: {
+      #     port: 443
+      #     tld: "com"
+      #     domain: "google"
+      #   }
+      # }
+
+      ## set domainName but allow us to turn
+      ## off this feature in testing
+      if d = config.remote?.domainName
+        document.domain = d
+
+      if config.isHeadless
+        $Cypress.isHeadless = true
+
+      {environmentVariables, remote} = config
+
+      config = _.omit(config, "environmentVariables", "remote")
 
       $Cypress.EnvironmentVariables.create(@, environmentVariables)
       $Cypress.Config.create(@, config)
+      $Cypress.Cookies.create(@, config.namespace, d)
 
-      @trigger "config", config
+      @trigger("config", config)
 
     initialize: (specWindow, $remoteIframe) ->
       ## push down the options
@@ -46,8 +76,35 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
       @runner.run(fn)
 
+    getStartTime: ->
+      @runner.getStartTime()
+
     getTestsState: ->
       @runner.getTestsState()
+
+    getEmissions: ->
+      @runner.getEmissions()
+
+    countByTestState: (tests, state) ->
+      @runner.countByTestState(tests, state)
+
+    getDisplayPropsForLog: (attrs) ->
+      @runner.getDisplayPropsForLog(attrs)
+
+    getConsolePropsForLogById: (logId) ->
+      @runner.getConsolePropsForLogById(logId)
+
+    getSnapshotPropsForLogById: (logId) ->
+      @runner.getSnapshotPropsForLogById(logId)
+
+    getErrorByTestId: (testId) ->
+      @runner.getErrorByTestId(testId)
+
+    checkForEndedEarly: ->
+      @cy and @cy.checkForEndedEarly()
+
+    onUncaughtException: ->
+      @cy.onUncaughtException.apply(@cy, arguments)
 
     ## TODO: TEST THIS
     ## restore our on callback
@@ -60,7 +117,7 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
     set: (runnable, hookName) ->
       $Cypress.Cy.set(@, runnable, hookName)
 
-    window: (specWindow) ->
+    onSpecWindow: (specWindow) ->
       cy     = $Cypress.Cy.create(@, specWindow)
       chai   = $Cypress.Chai.create(@, specWindow)
       mocha  = $Cypress.Mocha.create(@, specWindow)
@@ -78,6 +135,7 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
       @cy.silenceConsole(contentWindow) if $Cypress.isHeadless
       @cy.bindWindowListeners(contentWindow)
+      @cy._setWindowDocumentProps(contentWindow)
 
       @trigger("before:window:load", contentWindow)
 

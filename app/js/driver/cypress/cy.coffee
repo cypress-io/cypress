@@ -1,11 +1,15 @@
 $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
+  crossOriginScriptRe = /^script error/i
+
   class $Cy
     ## does this need to be moved
     ## to an instance property?
     sync: {}
 
     constructor: (@Cypress, specWindow) ->
+      @id = _.uniqueId("cy")
+
       @defaults()
       @listeners()
 
@@ -24,18 +28,21 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       @_setRemoteIframeProps($remoteIframe)
 
       $remoteIframe.on "load", =>
-        @_setRemoteIframeProps($remoteIframe)
+        ## if setting iframe props failed
+        ## dont do anything else because
+        ## we are in trouble
+        if @_setWindowDocumentProps($remoteIframe.prop("contentWindow"))
 
-        @urlChanged(null, {log: false})
-        @pageLoading(false)
+          @urlChanged(null, {log: false})
+          @pageLoading(false)
 
-        ## we reapply window listeners on load even though we
-        ## applied them already during onBeforeLoad. the reason
-        ## is that after load javascript has finished being evaluated
-        ## and we may need to override things like alert + confirm again
-        @bindWindowListeners @private("window")
-        @isReady(true, "load")
-        @Cypress.trigger("load")
+          ## we reapply window listeners on load even though we
+          ## applied them already during onBeforeLoad. the reason
+          ## is that after load javascript has finished being evaluated
+          ## and we may need to override things like alert + confirm again
+          @bindWindowListeners @private("window")
+          @isReady(true, "load")
+          @Cypress.trigger("load")
 
       ## anytime initialize is called we immediately
       ## set cy to be ready to invoke commands
@@ -75,6 +82,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       promise = @prop("promise")
       promise?.cancel()
 
+      @_aborted = true
+
       ## ready can potentially be cancellable
       ## so we need cancel it (if it is)
       ready = @prop("ready")
@@ -97,14 +106,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       @Cypress.cy = null
 
     restore: ->
-      ## if our index is above 0 but is below the commands.length
-      ## then we know we've ended early due to a done() and
-      ## we should throw a very specific error message
-      index = @prop("index")
-      if index > 0 and index < @commands.length
-        @endedEarlyErr(index)
-
-      @clearTimeout @prop("runId")
       @clearTimeout @prop("timerId")
 
       ## reset the commands to an empty array
@@ -127,6 +128,14 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     ## global options applicable to all cy instances
     ## and restores
     options: (options = {}) ->
+
+    checkForEndedEarly: ->
+      ## if our index is above 0 but is below the commands.length
+      ## then we know we've ended early due to a done() and
+      ## we should throw a very specific error message
+      index = @prop("index")
+      if index > 0 and index < @commands.length
+        @endedEarlyErr(index)
 
     nullSubject: ->
       @prop("subject", null)
@@ -216,6 +225,11 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       @_timeout(30000)
 
       run = =>
+        ## bail if we've been told to abort in case
+        ## an old command continues to run after
+        if @_aborted
+          return
+
         ## bail if we've changed runnables by the
         ## time this resolves
         return if @private("runnable") isnt runnable
@@ -225,7 +239,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
         @trigger "command:start", command
 
-        promise = @set(command).then =>
+        promise = @set(command)
+        .then =>
           ## each successful command invocation should
           ## always reset the timeout for the current runnable
           ## unless it already has a state.  if it has a state
@@ -261,15 +276,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
           return err
 
         .catch (err) =>
-          @fail(err)
+          @onFail(err)
 
-          ## reset the nestedIndex back to null
-          @prop("nestedIndex", null)
-
-          ## also reset recentlyReady back to null
-          @prop("recentlyReady", null)
-
-          return err
         ## signify we are at the end of the chain and do not
         ## continue chaining anymore
         # promise.done()
@@ -281,6 +289,53 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## automatically defer running each command in succession
       ## so each command is async
       @defer(run)
+
+    onUncaughtException: (msg, source, lineno, colno, err) ->
+      current = @prop("current")
+
+      ## reset the msg on a cross origin script error
+      ## since no details are accessible
+      if crossOriginScriptRe.test(msg)
+        msg = $Cypress.Utils.errMessageByPath("uncaught.cross_origin_script")
+
+      createErrFromMsg = ->
+        new Error $Cypress.Utils.errMessageByPath("uncaught.error", { msg, source, lineno })
+
+      ## if we have the 5th argument it means we're in a super
+      ## modern browser making this super simple to work with.
+      err ?= createErrFromMsg()
+
+      err.name = "Uncaught " + err.name
+
+      err.onFail = ->
+        if log = current and current.getLastLog()
+          log.error(err)
+
+      @onFail(err)
+      ## TODO: if this is a hook then we know mocha
+      ## will abort everything on uncaught exceptions
+      ## so we need to explain that to the user
+
+      ## per the onerror docs
+      ## https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
+      ## When the function returns true, this prevents the firing of the default event handler.
+      return true
+
+    onFail: (err) ->
+      @fail(err)
+
+      ## reset the nestedIndex back to null
+      @prop("nestedIndex", null)
+
+      ## also reset recentlyReady back to null
+      @prop("recentlyReady", null)
+
+      ## and forcibly move the index needle to the
+      ## end in case we have after / afterEach hooks
+      ## which need to run
+      @prop("index", @commands.length)
+
+      return err
 
     clearTimeout: (id) ->
       clearImmediate(id) if id
@@ -350,7 +405,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
       .then (subject) =>
         ## if ret is a DOM element and its not an instance of our jQuery
-        if subject and Cypress.Utils.hasElement(subject) and not Cypress.Utils.isInstanceOf(subject, $)
+        if subject and $Cypress.Utils.hasElement(subject) and not $Cypress.Utils.isInstanceOf(subject, $)
           ## set it back to our own jquery object
           ## to prevent it from being passed downstream
           subject = @$$(subject)
@@ -417,7 +472,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       @trigger "cancel", @prop("current")
 
     enqueue: (key, fn, args, type, chainerId) ->
-      @clearTimeout @prop("runId")
+      @clearTimeout @prop("timerId")
 
       obj = {name: key, ctx: @, fn: fn, args: args, type: type, chainerId: chainerId}
 
@@ -459,7 +514,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## then we know we're processing regular commands
       ## and not splicing in the middle of our commands
       if not nestedIndex
-        @prop "runId", @defer(@run)
+        @defer(@run)
 
       return @
 
@@ -506,7 +561,11 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
     defer: (fn) ->
       @clearTimeout(@prop("timerId"))
-      # @prop "timerId", _.defer _.bind(fn, @)
+
+      ## do not queue up any new commands if
+      ## we've already been aborted!
+      return if @_aborted
+
       @prop "timerId", setImmediate _.bind(fn, @)
 
     hook: (name) ->
@@ -518,17 +577,31 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     chain: ->
       @prop("chain")
 
+    _setWindowDocumentProps: (contentWindow) ->
+      try
+        @private("window",   contentWindow)
+        @private("document", contentWindow.document)
+      catch e
+        ## catch errors associated to cross origin iframes
+        if ready = @prop("ready")
+          ready.reject(e)
+        else
+          @fail(e)
+
+        ## indicate setting window/doc props failed
+        return false
+
+      return true
+
     _setRemoteIframeProps: ($iframe) ->
       @private "$remoteIframe", $iframe
-      @private "window", $iframe.prop("contentWindow")
-      @private "document", $iframe.prop("contentDocument")
 
-      return @
+      return @_setWindowDocumentProps($iframe.prop("contentWindow"))
 
     _setRunnable: (runnable, hookName) ->
       runnable.startedAt = new Date
 
-      if _.isFinite(timeout = @Cypress.config("commandTimeout"))
+      if _.isFinite(timeout = @Cypress.config("defaultCommandTimeout"))
         runnable.timeout timeout
 
       @hook(hookName)

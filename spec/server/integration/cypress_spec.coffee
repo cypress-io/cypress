@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+_        = require("lodash")
 os       = require("os")
 cp       = require("child_process")
 path     = require("path")
@@ -11,7 +12,6 @@ extension = require("@cypress/core-extension")
 Fixtures = require("../helpers/fixtures")
 pkg      = require("#{root}package.json")
 settings = require("#{root}lib/util/settings")
-Tray     = require("#{root}lib/electron/handlers/tray")
 Events   = require("#{root}lib/electron/handlers/events")
 project  = require("#{root}lib/electron/handlers/project")
 Renderer = require("#{root}lib/electron/handlers/renderer")
@@ -42,7 +42,7 @@ describe "lib/cypress", ->
     ## spawning a separate process
     @sandbox.stub(cypress, "isCurrentlyRunningElectron").returns(true)
     @sandbox.stub(extension, "setHostAndPath").resolves()
-    @sandbox.stub(launcher, "getBrowsers").returns([])
+    @sandbox.stub(launcher, "getBrowsers").resolves([])
     @sandbox.stub(process, "exit")
     @sandbox.spy(errors, "log")
 
@@ -272,7 +272,7 @@ describe "lib/cypress", ->
         Project.add(@idsPath)
       ])
       .then =>
-        cypress.start(["--run-project=#{@idsPath}", "--spec=cypress/integration/bar.js"]).then =>
+        cypress.start(["--run-project=#{@idsPath}", "--spec=cypress/integration/bar.js", "--config", "port=2020"]).then =>
           expect(headless.createRenderer).to.be.calledWith("http://localhost:2020/__/#/tests/integration/bar.js")
           @expectExitWith(0)
 
@@ -400,7 +400,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         cypress.start(["--run-project=#{@todosPath}", "--show-headless-gui"]).then =>
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all", true)
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all", "http://localhost:8888", true)
           @expectExitWith(0)
 
     it "turns on reporting", ->
@@ -450,11 +450,15 @@ describe "lib/cypress", ->
         expect(Reporter.create).to.be.calledWith("dot")
         @expectExitWith(0)
 
-    it "logs error and exits when user isn't logged in", ->
-      user.set({})
+    it "runs tests even when user isn't logged in", ->
+      Promise.all([
+        user.set({}),
+
+        Project.add(@todosPath)
+      ])
       .then =>
         cypress.start(["--run-project=#{@todosPath}"]).then =>
-          @expectExitWithErr("NOT_LOGGED_IN")
+          @expectExitWith(0)
 
     it "logs error and exits when project could not be found at the path and was not chosen to be added to Cypress", ->
       @sandbox.stub(inquirer, "prompt").yieldsAsync({add: false})
@@ -597,6 +601,10 @@ describe "lib/cypress", ->
 
     describe "--env", ->
       beforeEach ->
+        @env = process.env
+
+        process.env = _.omit(process.env, "CYPRESS_DEBUG")
+
         headless.waitForTestsToFinishRunning.resolves({failures: 0})
 
         Promise.all([
@@ -604,6 +612,9 @@ describe "lib/cypress", ->
 
           Project.add(@todosPath)
         ])
+
+      afterEach ->
+        process.env = @env
 
       it "can set specific environment variables", ->
         cypress.start([
@@ -786,10 +797,9 @@ describe "lib/cypress", ->
     beforeEach ->
       @win = {}
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(headed, "notify").resolves()
       @sandbox.stub(Renderer, "create").resolves(@win)
+      @sandbox.stub(Server.prototype, "startWebsockets")
       @sandbox.spy(Events, "start")
-      @sandbox.stub(Tray.prototype, "display")
       @sandbox.stub(electron.ipcMain, "on")
 
     afterEach ->
@@ -833,7 +843,7 @@ describe "lib/cypress", ->
         cypress.start([])
       .then =>
         options = Events.start.firstCall.args[0]
-        Events.handleEvent(options, {}, 123, "open:project", @todosPath)
+        Events.handleEvent(options, {}, {}, 123, "open:project", @todosPath)
       .delay(200)
       .then =>
         ## must delay here because sync isnt promise connected
@@ -856,10 +866,10 @@ describe "lib/cypress", ->
         cypress.start([])
       .then =>
         options = Events.start.firstCall.args[0]
-        Events.handleEvent(options, {}, 123, "open:project", @todosPath)
+        Events.handleEvent(options, {}, {}, 123, "open:project", @todosPath)
         .delay(200)
         .then =>
-          Events.handleEvent(options, {}, 123, "close:project")
+          Events.handleEvent(options, {}, {}, 123, "close:project")
       .delay(200)
       .then =>
         ## must delay here because sync isnt promise connected
@@ -891,13 +901,12 @@ describe "lib/cypress", ->
         cypress.start(["--port=2121", "--config", "pageLoadTimeout=1000", "--foo=bar", "--env=baz=baz"])
       .then =>
         options = Events.start.firstCall.args[0]
-        Events.handleEvent(options, {}, 123, "open:project", @todosPath)
+        Events.handleEvent(options, {}, {}, 123, "open:project", @todosPath)
       .then =>
         expect(getConfig).to.be.calledWithMatch({
           port: 2121
           pageLoadTimeout: 1000
           sync: true
-          changeEvents: true
           type: "opened"
           report: false
           environmentVariables: { baz: "baz" }
@@ -955,17 +964,3 @@ describe "lib/cypress", ->
     it "runs headed and does not exit", ->
       cypress.start().then ->
         expect(headed.ready).to.be.calledOnce
-
-  context "when running electron in linux", ->
-    beforeEach ->
-      @sandbox.stub(cypress, "isLinuxAndHasNotDisabledGpu").returns(true)
-
-    it "captures exit code from re-spawned electron process", ->
-      cpStub = @sandbox.stub({on: ->})
-      cpStub.on.withArgs("close").yieldsAsync(10)
-
-      @sandbox.stub(cp, "spawn").withArgs(process.execPath, [".", "--runProject=foo/bar", "--disable-gpu"], {stdio: "inherit"}).returns(cpStub)
-
-      cypress.runElectron("", {runProject: "foo/bar"})
-      .then (stats) ->
-        expect(stats).to.deep.eq({failures: 10})

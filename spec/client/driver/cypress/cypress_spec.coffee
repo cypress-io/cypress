@@ -216,12 +216,12 @@ describe "$Cypress API", ->
       @Cypress.config({foo: "baz", bar: "baz"})
       expect(@Cypress.config()).to.deep.eq({foo: "baz", bar: "baz"})
 
-  describe "#window", ->
+  describe "#onSpecWindow", ->
     beforeEach ->
       _.each ["Cy", "Chai", "Mocha", "Runner"], (klass) =>
         @sandbox.stub(@Cypress[klass], "create").returns(klass)
 
-      @Cypress.window({})
+      @Cypress.onSpecWindow({})
 
     it "creates cy", ->
       expect(@Cypress.Cy.create).to.be.calledWith(@Cypress, {})

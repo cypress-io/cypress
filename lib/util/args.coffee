@@ -5,12 +5,8 @@ coerce   = require("./coerce")
 config   = require("../config")
 cwd      = require("../cwd")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci updating ping coords key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci updating ping key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode hosts browser".split(" ")
 whitelist = whitelist.concat(config.getConfigKeys())
-
-parseCoords = (coords) ->
-  [x, y] = _.map(coords.split("x"), parseFloat)
-  {x: x, y: y}
 
 parseNestedValues = (vals) ->
   ## convert foo=bar,version=1.2.3 to
@@ -49,6 +45,7 @@ module.exports = {
         "env":         "environmentVariables"
         "show-headless-gui":"showHeadlessGui"
         "exit-with-code": "exitWithCode"
+        "reporter-options": "reporterOptions"
       }
     })
 
@@ -66,13 +63,17 @@ module.exports = {
       ## and apply them to both appPath + execPath
       [options.appPath, options.execPath] = options._.slice(-2)
 
-    if options.coords
-      backup("coords", options)
-      options.coords = parseCoords(options.coords)
+    if hosts = options.hosts
+      backup("hosts", options)
+      options.hosts = parseNestedValues(hosts)
 
     if envs = options.environmentVariables
       backup("environmentVariables", options)
       options.environmentVariables = parseNestedValues(envs)
+
+    if ro = options.reporterOptions
+      backup("reporterOptions", options)
+      options.reporterOptions = parseNestedValues(ro)
 
     if c = options.config
       backup("config", options)

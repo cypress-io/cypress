@@ -14,6 +14,9 @@ vagrant.debug = true
   vagrant[cmd] = vagrant._runWithArgs(cmd)
 
 class Linux extends Base
+  buildPathForElectron: ->
+    @buildPathToApp()
+
   buildPathToApp: ->
     path.join @buildPathToAppFolder(), "Cypress"
 
@@ -25,13 +28,6 @@ class Linux extends Base
 
   codeSign: ->
     Promise.resolve()
-
-  getBuildDest: (pathToBuild, platform) ->
-    ## returns ./build/linux/Cypress
-    path.join path.dirname(pathToBuild), platform, "Cypress"
-
-  afterBuild: (pathToBuilds) ->
-    return Promise.resolve()
 
   runProjectTest: ->
     @_runProjectTest()

@@ -1,5 +1,4 @@
 _             = require("lodash")
-os            = require("os")
 fs            = require("fs-extra")
 str           = require("underscore.string")
 path          = require("path")
@@ -10,12 +9,13 @@ open          = require("./util/open")
 pathHelpers   = require("./util/path_helpers")
 cwd           = require("./cwd")
 exec          = require("./exec")
+files         = require("./files")
 fixture       = require("./fixture")
-Request       = require("./request")
 errors        = require("./errors")
 logger        = require("./logger")
 launcher      = require("./launcher")
 automation    = require("./automation")
+savedState    = require("./saved_state")
 
 existingState = null
 
@@ -80,7 +80,8 @@ class Socket
     logger.info "watching test file", {path: testFilePath}
 
     ## remove the existing file by its path
-    watchers.remove(testFilePath)
+    if @testFilePath
+      watchers.remove(@testFilePath)
 
     ## store this location
     @testFilePath = testFilePath
@@ -90,17 +91,23 @@ class Socket
     })
     .then(cb)
 
-  onRequest: (automation, options, cb) ->
-    Request.send(automation, options)
+  onFixture: (config, file, options, cb) ->
+    fixture.get(config.fixturesFolder, file, options)
     .then(cb)
     .catch (err) ->
       cb({__error: err.message})
 
-  onFixture: (config, file, cb) ->
-    fixture.get(config.fixturesFolder, file)
+  onReadFile: (config, file, options, cb) ->
+    files.readFile(config.projectRoot, file, options)
     .then(cb)
     .catch (err) ->
-      cb({__error: err.message})
+      cb({__error: { message: err.message, code: err.code, filePath: err.filePath }})
+
+  onWriteFile: (config, file, contents, options, cb) ->
+    files.writeFile(config.projectRoot, file, contents, options)
+    .then(cb)
+    .catch (err) ->
+      cb({__error: { message: err.message, code: err.code, filePath: err.filePath }})
 
   onExec: (projectRoot, options, cb) ->
     exec.run(projectRoot, options)
@@ -108,11 +115,11 @@ class Socket
     .catch (err) ->
       cb({__error: err.message, timedout: err.timedout})
 
-  onRunner: (event, data) ->
-    @io.to("reporter").emit(event, data)
+  toReporter: (event, data) ->
+    @io and @io.to("reporter").emit(event, data)
 
-  onReporter: (event, data) ->
-    @io.to("runner").emit(event, data)
+  toRunner: (event, data) ->
+    @io and @io.to("runner").emit(event, data)
 
   onAutomation: (messages, message, data) ->
     Promise.try =>
@@ -154,16 +161,17 @@ class Socket
     _.defaults options,
       socketId: null
       onAutomationRequest: null
+      onSetRunnables: ->
       onMocha: ->
       onConnect: ->
-      onDomainSet: ->
+      onRequest: ->
+      onResolveUrl: ->
+      onFocusTests: ->
+      onSpecChanged: ->
       onChromiumRun: ->
-      onIsNewProject: ->
       onReloadBrowser: ->
       checkForAppErrors: ->
-
-    ## promisify this function
-    options.onIsNewProject = Promise.method(options.onIsNewProject)
+      onSavedStateChanged: ->
 
     messages = {}
 
@@ -175,6 +183,10 @@ class Socket
 
     @io.on "connection", (socket) =>
       logger.info "socket connected"
+
+      ## cache the headers so we can access
+      ## them at any time
+      headers = socket.request?.headers ? {}
 
       respond = (id, resp) ->
         if message = messages[id]
@@ -266,17 +278,20 @@ class Socket
         else
           cb({__error: "Could not process '#{message}'. No adapter servers connected."})
 
-      socket.on "run:tests:in:chromium", (src) ->
-        options.onChromiumRun(src)
+      socket.on "spec:changed", (spec) ->
+        options.onSpecChanged(spec)
 
       socket.on "watch:test:file", (filePath, cb) =>
         @watchTestFileByPath(config, filePath, watchers, cb)
 
-      socket.on "request", (options, cb) =>
-        @onRequest(automationRequest, options, cb)
+      socket.on "fixture", (fixturePath, options, cb) =>
+        @onFixture(config, fixturePath, options, cb)
 
-      socket.on "fixture", (fixturePath, cb) =>
-        @onFixture(config, fixturePath, cb)
+      socket.on "read:file", (file, options, cb) =>
+        @onReadFile(config, file, options, cb)
+
+      socket.on "write:file", (file, contents, options, cb) =>
+        @onWriteFile(config, file, contents, options, cb)
 
       socket.on "exec", (options, cb) =>
         @onExec(config.projectRoot, options, cb)
@@ -284,29 +299,24 @@ class Socket
       socket.on "app:connect", (socketId) ->
         options.onConnect(socketId, socket)
 
+      socket.on "set:runnables", (runnables, cb) =>
+        options.onSetRunnables(runnables)
+        cb()
+
       socket.on "mocha", =>
         options.onMocha.apply(options, arguments)
 
       socket.on "open:finder", (p, cb = ->) ->
-        opts = {}
-
-        if os.platform() is "darwin"
-          opts.args = "-R"
-
-        open.opn(p, opts)
+        open.opn(p)
         .then -> cb()
-
-      socket.on "is:new:project", (cb) ->
-        options.onIsNewProject()
-        .then(cb)
 
       socket.on "reload:browser", (url, browser) ->
         options.onReloadBrowser(url, browser)
 
-      socket.on "is:automation:connected", (data = {}, cb) =>
-        ## TODO: remove this hack
-        return cb(true)
+      socket.on "focus:tests", ->
+        options.onFocusTests()
 
+      socket.on "is:automation:connected", (data = {}, cb) =>
         isConnected = =>
           automationRequest("is:automation:connected", data)
 
@@ -326,11 +336,19 @@ class Socket
         .catch Promise.TimeoutError, (err) ->
           cb(false)
 
-      socket.on "domain:set", (url, cb) ->
-        console.log "domain:set", url, options.onDomainSet.toString()
-        cb(options.onDomainSet(url))
+      socket.on "resolve:url", (url, cb) =>
+        options.onResolveUrl(url, headers, automationRequest)
+        .then(cb)
+        .catch (err) ->
+          cb({__error: errors.clone(err)})
 
-      socket.on "domain:change", (state, cb) ->
+      socket.on "request", (params, cb) =>
+        options.onRequest(headers, automationRequest, params)
+        .then(cb)
+        .catch (err) ->
+          cb({__error: errors.clone(err)})
+
+      socket.on "preserve:run:state", (state, cb) ->
         existingState = state
 
         cb()
@@ -347,18 +365,25 @@ class Socket
           host: "http://localhost:2020"
         })
 
+      socket.on "save:app:state", (state) ->
+        savedState.set(state).then ->
+          options.onSavedStateChanged()
+
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>
-          @onReporter(event, data)
+          @toRunner(event, data)
 
       runnerEvents.forEach (event) =>
         socket.on event, (data) =>
-          @onRunner(event, data)
+          @toReporter(event, data)
 
   end: ->
     ## TODO: we need an 'ack' from this end
     ## event from the other side
     @io and @io.emit("tests:finished")
+
+  changeToUrl: (url) ->
+    @toRunner("change:to:url", url)
 
   startListening: (server, watchers, config, options) ->
     if process.env["CYPRESS_ENV"] is "development"

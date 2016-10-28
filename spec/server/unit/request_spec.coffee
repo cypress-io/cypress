@@ -3,9 +3,11 @@ require("../spec_helper")
 http    = require("http")
 Request = require("#{root}lib/request")
 
+request = Request({timeout: 100})
+
 describe "lib/request", ->
   it "is defined", ->
-    expect(Request).to.be.an("object")
+    expect(request).to.be.an("object")
 
   context "#reduceCookieToArray", ->
     it "converts object to array of key values", ->
@@ -14,7 +16,7 @@ describe "lib/request", ->
         baz: "quux"
       }
 
-      expect(Request.reduceCookieToArray(obj)).to.deep.eq(["foo=bar", "baz=quux"])
+      expect(request.reduceCookieToArray(obj)).to.deep.eq(["foo=bar", "baz=quux"])
 
   context "#createCookieString", ->
     it "joins array by '; '", ->
@@ -23,16 +25,16 @@ describe "lib/request", ->
         baz: "quux"
       }
 
-      expect(Request.createCookieString(obj)).to.eq("foo=bar; baz=quux")
+      expect(request.createCookieString(obj)).to.eq("foo=bar; baz=quux")
 
   context "#normalizeResponse", ->
     it "sets status to statusCode and deletes statusCode", ->
-      expect(Request.normalizeResponse({statusCode: 404})).to.deep.eq({
+      expect(request.normalizeResponse({statusCode: 404})).to.deep.eq({
         status: 404
       })
 
     it "picks out status body and headers", ->
-      expect(Request.normalizeResponse({
+      expect(request.normalizeResponse({
         foo: "bar"
         req: {}
         originalHeaders: {}
@@ -50,35 +52,37 @@ describe "lib/request", ->
       @fn = @sandbox.stub()
 
     it "sets strictSSL=false", ->
-      rp = require("request-promise")
+      init = @sandbox.spy(request.rp.Request.prototype, "init")
 
-      init = @sandbox.spy rp.Request.prototype, "init"
       nock("http://www.github.com")
-        .get("/foo")
-        .reply 200, "hello", {
-          "Content-Type": "text/html"
-        }
+      .get("/foo")
+      .reply 200, "hello", {
+        "Content-Type": "text/html"
+      }
 
-      Request.send(@fn, {url: "http://www.github.com/foo"}).then ->
+      request.send({}, @fn, {url: "http://www.github.com/foo"})
+      .then ->
         expect(init).to.be.calledWithMatch({strictSSL: false})
 
     it "sets simple=false", (done) ->
       nock("http://www.github.com")
-        .get("/foo")
-        .reply 500, ""
+      .get("/foo")
+      .reply(500, "")
 
       ## should not bomb on 500
       ## because simple = false
-      Request.send(@fn, {url: "http://www.github.com/foo"}).then -> done()
+      request.send({}, @fn, {url: "http://www.github.com/foo"})
+      .then -> done()
 
     it "sets resolveWithFullResponse=true", ->
       nock("http://www.github.com")
-        .get("/foo")
-        .reply 200, "hello", {
-          "Content-Type": "text/html"
-        }
+      .get("/foo")
+      .reply 200, "hello", {
+        "Content-Type": "text/html"
+      }
 
-      Request.send(@fn, {url: "http://www.github.com/foo"}).then (resp) ->
+      request.send({}, @fn, {url: "http://www.github.com/foo"})
+      .then (resp) ->
         expect(resp).to.have.keys("status", "body", "headers", "duration")
 
         expect(resp.status).to.eq(200)
@@ -87,14 +91,14 @@ describe "lib/request", ->
 
     it "sends Cookie header, and body", ->
       nock("http://localhost:8080")
-        .matchHeader("Cookie", "foo=bar; baz=quux")
-        .post("/users", {
-          first: "brian"
-          last: "mann"
-        })
-        .reply(200, {id: 1})
+      .matchHeader("Cookie", "foo=bar; baz=quux")
+      .post("/users", {
+        first: "brian"
+        last: "mann"
+      })
+      .reply(200, {id: 1})
 
-      Request.send(@fn, {
+      request.send({}, @fn, {
         url: "http://localhost:8080/users"
         method: "POST"
         cookies: {foo: "bar", baz: "quux"}
@@ -103,7 +107,8 @@ describe "lib/request", ->
           first: "brian"
           last: "mann"
         }
-      }).then (resp) ->
+      })
+      .then (resp) ->
         expect(resp.status).to.eq(200)
         expect(resp.body.id).to.eq(1)
 
@@ -116,12 +121,13 @@ describe "lib/request", ->
       })
       .reply(200, {id: 1})
 
-      @fn.withArgs("get:cookies", {domain: "localhost"}).resolves([
+      @fn.withArgs("get:cookies", {url: "http://localhost:8080/users"})
+      .resolves([
         {name: "foo", value: "bar"}
         {name: "baz", value: "quux"}
       ])
 
-      Request.send(@fn, {
+      request.send({}, @fn, {
         url: "http://localhost:8080/users"
         method: "POST"
         cookies: true
@@ -131,7 +137,8 @@ describe "lib/request", ->
           first: "brian"
           last: "mann"
         }
-      }).then (resp) ->
+      })
+      .then (resp) ->
         expect(resp.status).to.eq(200)
         expect(resp.body.id).to.eq(1)
 
@@ -144,12 +151,13 @@ describe "lib/request", ->
       })
       .reply(200, {id: 1})
 
-      @fn.withArgs("get:cookies", {domain: "github.com"}).resolves([
+      @fn.withArgs("get:cookies", {url: "http://github.com:8080/users"})
+      .resolves([
         {name: "foo", value: "bar"}
         {name: "baz", value: "quux"}
       ])
 
-      Request.send(@fn, {
+      request.send({}, @fn, {
         url: "http://github.com:8080/users"
         method: "POST"
         cookies: true
@@ -158,46 +166,77 @@ describe "lib/request", ->
           first: "brian"
           last: "mann"
         }
-      }).then (resp) ->
+      })
+      .then (resp) ->
         expect(resp.status).to.eq(200)
         expect(resp.body.id).to.eq(1)
 
+    it "catches errors", ->
+      nock.enableNetConnect()
+
+      request.send({}, @fn, {
+        url: "http://localhost:1111/foo"
+        cookies: false
+      })
+      .then ->
+        throw new Error("should have failed but didnt")
+      .catch (err) ->
+        expect(err.message).to.eq("Error: connect ECONNREFUSED 127.0.0.1:1111")
+
     it "parses response body as json if content-type application/json response headers", ->
       nock("http://localhost:8080")
-        .get("/status.json")
-        .reply(200, JSON.stringify({status: "ok"}), {
-          "Content-Type": "application/json"
-        })
+      .get("/status.json")
+      .reply(200, JSON.stringify({status: "ok"}), {
+        "Content-Type": "application/json"
+      })
 
-      Request.send(@fn, {
+      request.send({}, @fn, {
         url: "http://localhost:8080/status.json"
-      }).then (resp) ->
+      })
+      .then (resp) ->
         expect(resp.body).to.deep.eq({status: "ok"})
 
     it "revives from parsing bad json", ->
       nock("http://localhost:8080")
-        .get("/status.json")
-        .reply(200, "{bad: 'json'}", {
-          "Content-Type": "application/json"
-        })
+      .get("/status.json")
+      .reply(200, "{bad: 'json'}", {
+        "Content-Type": "application/json"
+      })
 
-      Request.send(@fn, {
+      request.send({}, @fn, {
         url: "http://localhost:8080/status.json"
-      }).then (resp) ->
+      })
+      .then (resp) ->
         expect(resp.body).to.eq("{bad: 'json'}")
 
     it "sets duration on response", ->
       nock("http://localhost:8080")
-        .get("/foo")
-        .reply(200, "123", {
-          "Content-Type": "text/plain"
-        })
+      .get("/foo")
+      .reply(200, "123", {
+        "Content-Type": "text/plain"
+      })
 
-      Request.send(@fn, {
+      request.send({}, @fn, {
         url: "http://localhost:8080/foo"
-      }).then (resp) ->
+      })
+      .then (resp) ->
         expect(resp.duration).to.be.a("Number")
         expect(resp.duration).to.be.gt(0)
+
+    it "sends up user-agent headers", ->
+      nock("http://localhost:8080")
+      .matchHeader("User-Agent", "foobarbaz")
+      .get("/foo")
+      .reply(200, "derp")
+
+      headers = {}
+      headers["user-agent"] = "foobarbaz"
+
+      request.send(headers, @fn, {
+        url: "http://localhost:8080/foo"
+      })
+      .then (resp) ->
+        expect(resp.body).to.eq("derp")
 
     context "bad headers", ->
       beforeEach (done) ->
@@ -211,7 +250,7 @@ describe "lib/request", ->
         @srv.close()
 
       it "recovers from bad headers", ->
-        Request.send(@fn, {
+        request.send({}, @fn, {
           url: "http://localhost:9988/foo"
           headers: {
             "x-text": "אבגד"
@@ -223,7 +262,7 @@ describe "lib/request", ->
           expect(err.message).to.eq "TypeError: The header content contains invalid characters"
 
       it "handles weird content in the body just fine", ->
-        Request.send(@fn, {
+        request.send({}, @fn, {
           url: "http://localhost:9988/foo"
           json: true
           body: {

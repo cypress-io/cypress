@@ -8,7 +8,7 @@ charAfterColonRe = /:(.)/
 
 ## match the w3c webdriver spec on return cookies
 ## https://w3c.github.io/webdriver/webdriver-spec.html#cookies
-COOKIE_PROPERTIES = "name value path domain secure httpOnly expiry".split(" ")
+COOKIE_PROPERTIES = "url name value path domain secure httpOnly expiry".split(" ")
 
 needsMiddleware = (message) ->
   message in middlewareMesssages
@@ -20,24 +20,29 @@ normalizeCookieProps = (data) ->
   return data if not data
 
   ## pick off only these specific cookie properties
-  cookie = _.pick(data, COOKIE_PROPERTIES)
+  ## only if they are defined
+  cookie = _.chain(data, COOKIE_PROPERTIES)
+  .pick(COOKIE_PROPERTIES)
+  .omitBy(_.isUndefined)
+  .value()
 
   ## when sending cookie data we need to convert
   ## expiry to expirationDate
   ## ...
   ## and when receiving cookie data we need to convert
-  ## expirationDate to expiry
+  ## expirationDate to expiry and always remove url
   switch
-    when e = data.expiry
+    when data.expiry?
       delete cookie.expiry
-      cookie.expirationDate = e
-    when e = data.expirationDate
+      cookie.expirationDate = data.expiry
+    when data.expirationDate?
       delete cookie.expirationDate
-      cookie.expiry = e
+      delete cookie.url
+      cookie.expiry = data.expirationDate
 
   cookie
 
-module.exports = (namespace, socketIoCookie, screenshotsFolder) ->
+automation = (namespace, socketIoCookie, screenshotsFolder) ->
 
   isCypressNamespaced = (cookie) ->
     return cookie if not name = cookie?.name
@@ -126,3 +131,8 @@ module.exports = (namespace, socketIoCookie, screenshotsFolder) ->
         else
           throw new Error("Automation push message: '#{message}' not recognized.")
   }
+
+automation.normalizeCookieProps = normalizeCookieProps
+automation.normalizeCookies     = normalizeCookies
+
+module.exports = automation

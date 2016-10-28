@@ -1,10 +1,19 @@
 require("../spec_helper")
 
+_        = require("lodash")
 path     = require("path")
 config   = require("#{root}lib/config")
 settings = require("#{root}lib/util/settings")
 
 describe "lib/config", ->
+  beforeEach ->
+    @env = process.env
+
+    process.env = _.omit(process.env, "CYPRESS_DEBUG")
+
+  afterEach ->
+    process.env = @env
+
   context ".get", ->
     beforeEach ->
       @sandbox.stub(settings, "readEnv").withArgs("path/to/project").resolves({foo: "bar"})
@@ -100,17 +109,17 @@ describe "lib/config", ->
       @defaults = (prop, value, cfg = {}, options = {}) =>
         expect(config.mergeDefaults(cfg, options)[prop]).to.deep.eq(value)
 
-    it "port=2020", ->
-      @defaults "port", 2020
+    it "port=null", ->
+      @defaults "port", null
 
     it "autoOpen=false", ->
       @defaults "autoOpen", false
 
     it "clientUrl=http://localhost:2020/__/", ->
-      @defaults "clientUrl", "http://localhost:2020/__/"
+      @defaults "clientUrl", "http://localhost:2020/__/", {port: 2020}
 
     it "clientUrlDisplay=http://localhost:2020", ->
-      @defaults "clientUrlDisplay", "http://localhost:2020"
+      @defaults "clientUrlDisplay", "http://localhost:2020", {port: 2020}
 
     it "namespace=__cypress", ->
       @defaults "namespace", "__cypress"
@@ -135,17 +144,17 @@ describe "lib/config", ->
     it "env=CYPRESS_ENV", ->
       @defaults "env", process.env["CYPRESS_ENV"]
 
-    it "commandTimeout=4000", ->
-      @defaults "commandTimeout", 4000
+    it "defaultCommandTimeout=4000", ->
+      @defaults "defaultCommandTimeout", 4000
 
-    it "pageLoadTimeout=30000", ->
-      @defaults "pageLoadTimeout", 30000
+    it "pageLoadTimeout=60000", ->
+      @defaults "pageLoadTimeout", 60000
 
     it "requestTimeout=5000", ->
       @defaults "requestTimeout", 5000
 
-    it "responseTimeout=20000", ->
-      @defaults "responseTimeout", 20000
+    it "responseTimeout=30000", ->
+      @defaults "responseTimeout", 30000
 
     it "execTimeout=60000", ->
       @defaults "execTimeout", 60000
@@ -257,18 +266,21 @@ describe "lib/config", ->
 
         expect(cfg.resolved).to.deep.eq({
           port:                       { value: 1234, from: "cli" },
+          hosts:                      { value: null, from: "default" }
           reporter:                   { value: "json", from: "cli" },
+          reporterOptions:            { value: null, from: "default" },
           baseUrl:                    { value: null, from: "default" },
-          commandTimeout:             { value: 4000, from: "default" },
-          pageLoadTimeout:            { value: 30000, from: "default" },
+          defaultCommandTimeout:      { value: 4000, from: "default" },
+          pageLoadTimeout:            { value: 60000, from: "default" },
           requestTimeout:             { value: 5000, from: "default" },
-          responseTimeout:            { value: 20000, from: "default" },
+          responseTimeout:            { value: 30000, from: "default" },
           execTimeout:                { value: 60000, from: "default" },
           screenshotOnHeadlessFailure:{ value: true, from: "default" },
           numTestsKeptInMemory:       { value: 50, from: "default" },
           waitForAnimations:          { value: true, from: "default" },
           animationDistanceThreshold: { value: 5, from: "default" },
           watchForFileChanges:        { value: true, from: "default" },
+          chromeWebSecurity:          { value: true, from: "default" },
           viewportWidth:              { value: 1000, from: "default" },
           viewportHeight:             { value: 660, from: "default" },
           fileServerFolder:           { value: "", from: "default" },
@@ -284,6 +296,7 @@ describe "lib/config", ->
 
         obj = {
           baseUrl: "http://localhost:8080"
+          port: 2020
           env: {
             foo: "foo"
           }
@@ -300,19 +313,22 @@ describe "lib/config", ->
         cfg = config.mergeDefaults(obj, options)
 
         expect(cfg.resolved).to.deep.eq({
-          port:                       { value: 2020, from: "default" },
+          port:                       { value: 2020, from: "config" },
+          hosts:                      { value: null, from: "default" }
           reporter:                   { value: "spec", from: "default" },
+          reporterOptions:            { value: null, from: "default" },
           baseUrl:                    { value: "http://localhost:8080", from: "config" },
-          commandTimeout:             { value: 4000, from: "default" },
-          pageLoadTimeout:            { value: 30000, from: "default" },
+          defaultCommandTimeout:      { value: 4000, from: "default" },
+          pageLoadTimeout:            { value: 60000, from: "default" },
           requestTimeout:             { value: 5000, from: "default" },
-          responseTimeout:            { value: 20000, from: "default" },
+          responseTimeout:            { value: 30000, from: "default" },
           execTimeout:                { value: 60000, from: "default" },
           numTestsKeptInMemory:       { value: 50, from: "default" },
           waitForAnimations:          { value: true, from: "default" },
           animationDistanceThreshold: { value: 5, from: "default" },
           screenshotOnHeadlessFailure:{ value: true, from: "default" },
           watchForFileChanges:        { value: true, from: "default" },
+          chromeWebSecurity:          { value: true, from: "default" },
           viewportWidth:              { value: 1000, from: "default" },
           viewportHeight:             { value: 660, from: "default" },
           fileServerFolder:           { value: "", from: "default" },

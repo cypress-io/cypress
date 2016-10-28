@@ -2,6 +2,22 @@ $Cypress.ErrorMessages = do ($Cypress) ->
   cmd = (command, args = "") ->
     "cy.#{command}(#{args})"
 
+  getRedirects = (obj, phrase) ->
+    redirects = obj.redirects ? []
+
+    return "" if not redirects.length
+
+    word = $Cypress.Utils.plural(redirects.length, "times", "time")
+
+    list = _.map redirects, (redirect) ->
+      "  - #{redirect}"
+
+    """
+    #{phrase} '#{redirects.length}' #{word} to:
+
+    #{list.join("\n")}
+    """
+
   return {
     add:
       type_missing: "Cypress.add(key, fn, type) must include a type!"
@@ -115,7 +131,10 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       variables_missing: "Cypress.environmentVariables is not defined. Open an issue if you see this message."
 
     exec:
-      failed: "#{cmd('exec', '\'{{cmd}}\'')} failed with the following error: {{error}}"
+      failed: """#{cmd('exec', '\'{{cmd}}\'')} failed with the following error:
+
+          > "{{error}}"
+      """
       invalid_argument: "#{cmd('exec')} must be passed a non-empty string as its 1st argument. You passed: '{{cmd}}'."
       non_zero_exit: """
         #{cmd('exec', '\'{{cmd}}\'')} failed because the command exited with a non-zero code.
@@ -127,6 +146,27 @@ $Cypress.ErrorMessages = do ($Cypress) ->
         {{output}}
       """
       timed_out: "#{cmd('exec', '\'{{cmd}}\'')} timed out after waiting {{timeout}}ms."
+
+    files:
+      unexpected_error:  """#{cmd('{{cmd}}', '"{{file}}"')} failed while trying to {{action}} the file at the following path:
+
+        {{filePath}}
+
+      The following error occurred:
+
+        > "{{error}}"
+      """
+      existent: """#{cmd('readFile', '"{{file}}"')} failed because the file exists when expected not to exist at the following path:
+
+        {{filePath}}
+      """
+      invalid_argument: "#{cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: '{{file}}'."
+      invalid_contents: "#{cmd('writeFile')} must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: '{{contents}}'."
+      nonexistent: """#{cmd('readFile', '"{{file}}"')} failed because the file does not exist at the following path:
+
+        {{filePath}}
+      """
+      timed_out: "#{cmd('{{cmd}}', '"{{file}}"')} timed out after waiting {{timeout}}ms."
 
     fill:
       invalid_1st_arg: "#{cmd('fill')} must be passed an object literal as its 1st argument"
@@ -208,7 +248,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       orphan: "#{cmd('{{cmd}}')} is a child command which operates on an existing subject.  Child commands must be called after a parent command."
       outside_test: """
         Cypress cannot execute commands outside a running test.
-        This usually happens when you accidentally write commands outside an it(...) test.
+        This usually happens when you accidentally write commands outside an 'it(...)' test.
         If that is the case, just move these commands inside an 'it(...)' test.
         Check your test file for errors.\n
         https://on.cypress.io/cannot-execute-commands-outside-test
@@ -228,8 +268,42 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       timed_out: "Cypress command timeout of '{{ms}}ms' exceeded."
 
     navigation:
-      loading_failed: "Loading the new page failed."
-      timed_out: "Timed out after waiting '{{ms}}ms' for your remote page to load."
+      cross_origin: """
+        Cypress detected a cross origin error happened on page load:
+
+          > {{message}}
+
+        Before the page load, you were bound to the origin policy:
+          > {{originPolicy}}
+
+        A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
+
+        This typically happens in one of three ways:
+
+        1. You clicked an <a> that routed you outside of your application
+        2. You submitted a form and your server redirected you outside of your application
+        3. You used a javascript redirect to a page outside of your application
+
+        Cypress does not allow you to change superdomains within a single test.
+
+        You may need to restructure some of your test code to avoid this problem.
+
+        Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your 'cypress.json' file.
+
+        https://on.cypress.io/cross-origin-violation
+
+      """
+      timed_out: """
+        Timed out after waiting '{{ms}}ms' for your remote page to load.
+
+        Your page did not fire its 'load' event within '{{ms}}ms'.
+
+        You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
+
+        Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
+
+        When this 'load' event occurs, Cypress will continue running commands.
+      """
 
     ng:
       no_global: "Angular global (window.angular) was not found in your window. You cannot use #{cmd('ng')} methods without angular."
@@ -255,6 +329,10 @@ $Cypress.ErrorMessages = do ($Cypress) ->
           URL: {{url}}
           {{body}}
           {{headers}}
+
+        The stack trace for this error is:
+
+        {{stack}}
       """
       status_invalid: "#{cmd('request')} failed because the response had the status code: {{status}}"
       timed_out: "#{cmd('request')} timed out waiting {{timeout}}ms for a response. No response ever occured."
@@ -317,6 +395,35 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       tab: "{tab} isn't a supported character sequence. You'll want to use the command #{cmd('tab')}, which is not ready yet, but when it is done that's what you'll use."
       wrong_type: "#{cmd('type')} can only accept a String or Number. You passed in: '{{chars}}'"
 
+    uncaught:
+      cross_origin_script: """
+        Script error.
+
+        Cypress detected that an uncaught error was thrown from a cross origin script.
+
+        We cannot provide you the stack trace, line number, or file where this error occured.
+
+        Check your Developer Tools Console for the actual error - it should be printed there.
+
+        It's possible to enable debugging these scripts by adding the 'crossorigin' attribute and setting a CORS header.
+
+        https://on.cypress.io/cross-origin-script-error
+      """
+      error_in_hook: (obj) ->
+        msg = "Because this error occured during a '#{obj.hookName}' hook we are skipping "
+
+        if t = obj.parentTitle
+          msg += "the remaining tests in the current suite: '#{_.truncate(t, 20)}'"
+        else
+          msg += "all of the remaining tests."
+
+        msg
+
+      error: (obj) ->
+        {msg, source, lineno} = obj
+
+        msg + if source and lineno then " (#{source}:#{lineno})" else ""
+
     viewport:
       bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."
       dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 200px and 3000px."
@@ -326,7 +433,90 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     visit:
       invalid_1st_arg: "#{cmd('visit')} must be called with a string as its 1st argument"
-      loading_failed: "#{cmd('visit')} failed to load the remote page: {{url}}"
+      cannot_visit_2nd_domain: """
+        #{cmd('visit')} failed because you are attempting to visit a second unique domain.
+
+        You may only visit a single unique domain per test.
+
+        Different subdomains are okay, but unique domains are not.
+
+        The previous domain you visited was: '{{previousDomain}}'
+
+        You're attempting to visit this new domain: '{{attemptedDomain}}'
+
+        You may need to restructure some of your code to prevent this from happening.
+
+        https://on.cypress.io/cannot-visit-second-unique-domain
+      """
+      loading_network_failed: """
+        #{cmd('visit')} failed trying to load:
+
+        {{url}}
+
+        We attempted to make an http request to this URL but the request failed without a response.
+
+        We received this error at the network level:
+
+          > {{error}}
+
+        Common situations why this would fail:
+          - you don't have internet access
+          - you forgot to run / boot your web server
+          - your web server isn't accessible
+          - you have weird network configuration settings on your computer
+
+        The stack trace for this error is:
+
+        {{stack}}
+      """
+      loading_file_failed: (obj) ->
+        """
+          #{cmd('visit')} failed trying to load:
+
+          #{obj.url}
+
+          We failed looking for this file at the path:
+
+          #{obj.path}
+
+          The internal Cypress web server responded with:
+
+            > #{obj.status}: #{obj.statusText}
+
+          #{getRedirects(obj, "We were redirected")}
+        """
+      loading_http_failed: (obj) ->
+        """
+          #{cmd('visit')} failed trying to load:
+
+          #{obj.url}
+
+          The response we received from your web server was:
+
+            > #{obj.status}: #{obj.statusText}
+
+          This was considered a failure because the status code was not '2xx'.
+
+          #{getRedirects(obj, "This http request was redirected")}
+        """
+      loading_invalid_content_type: (obj) ->
+        phrase = if obj.path then "this local file" else "your web server"
+
+        """
+          #{cmd('visit')} failed trying to load:
+
+          #{obj.url}
+
+          The content-type of the response we received from #{phrase} was:
+
+            > #{obj.contentType}
+
+          This was considered a failure because responses must have content-type: 'text/html'
+
+          However, you can likely use #{cmd('request')} instead of #{cmd('visit')}.
+
+          #{cmd('request')} will automatically get and set cookies and enable you to parse responses.
+        """
 
     wait:
       alias_invalid: "'{{prop}}' is not a valid alias property. Are you trying to ask for the first request? If so write @{{str}}.request"

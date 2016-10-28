@@ -2,16 +2,14 @@ require("../spec_helper")
 
 delete global.fs
 
+os          = require("os")
 tar         = require("tar-fs")
-mock        = require("mock-fs")
+cwd         = require("#{root}lib/cwd")
+home        = require("home-or-tmp")
 Updater     = require("#{root}lib/updater")
 Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
 describe "lib/updater", ->
-  afterEach ->
-    Updater.setCoords(null)
-    mock.restore()
-
   context "interface", ->
     it "returns an updater instance", ->
       u = Updater({})
@@ -19,9 +17,7 @@ describe "lib/updater", ->
 
   context "#getPackage", ->
     beforeEach ->
-      mock({
-        "package.json": JSON.stringify(foo: "bar")
-      })
+      @sandbox.stub(fs, "readJsonSync").returns({foo: "bar"})
 
       @updater = Updater({})
 
@@ -43,26 +39,101 @@ describe "lib/updater", ->
       client2 = u.getClient()
       expect(client).to.eq(client2)
 
-  context "#getCoords", ->
+  context "#normalizeArgs", ->
+    beforeEach ->
+      @env = process.env.CYPRESS_ENV
+
+      process.env.CYPRESS_ENV = "production"
+
+      @updater = Updater({})
+      @updater.getClient()
+
+    afterEach ->
+      process.env.CYPRESS_ENV = @env
+
+    it "resets appPath + execPath on OSX", ->
+      @sandbox.stub(os, "platform").returns("darwin")
+
+      expect(@updater.normalizeArgs({
+        appPath:  "/Users/bmann/Dev"
+        execPath: "/Users/bmann/Dev"
+      })).to.deep.eq({
+        appPath: "/Applications/Cypress.app"
+        execPath: "/Applications/Cypress.app"
+      })
+
+    it "does not reset appPath + execPath on OSX", ->
+      @sandbox.stub(os, "platform").returns("darwin")
+
+      expect(@updater.normalizeArgs({
+        appPath:  "/foo/Cypress.app"
+        execPath: "/foo/Cypress.app"
+      })).to.deep.eq({
+        appPath: "/foo/Cypress.app"
+        execPath: "/foo/Cypress.app"
+      })
+
+    it "resets appPath + execPath on linux", ->
+      @sandbox.stub(os, "platform").returns("linux")
+      @sandbox.stub(@updater, "getHome").returns("/home/vagrant")
+
+      expect(@updater.normalizeArgs({
+        appPath:  "/Users/bmann/Dev"
+        execPath: "/Users/bmann/Dev"
+      })).to.deep.eq({
+        appPath:  "/home/vagrant/.cypress/Cypress"
+        execPath: "/home/vagrant/.cypress/Cypress/Cypress"
+      })
+
+    it "does not reset appPath + execPath on linux", ->
+      @sandbox.stub(os, "platform").returns("linux")
+
+      expect(@updater.normalizeArgs({
+        appPath:  "/foo/Cypress"
+        execPath: "/foo/Cypress/Cypress"
+      })).to.deep.eq({
+        appPath: "/foo/Cypress"
+        execPath: "/foo/Cypress/Cypress"
+      })
+
+  context "#getHome", ->
     beforeEach ->
       @updater = Updater({})
 
-    it "returns undefined without coords", ->
-      expect(@updater.getCoords()).to.be.undefined
-
-    it "returns --coords=800x600", ->
-      Updater.setCoords {x: 800, y: 600}
-      expect(@updater.getCoords()).to.eq "--coords=800x600"
+    it "returns home-or-tmp", ->
+      expect(@updater.getHome()).to.eq(home)
 
   context "#getArgs", ->
     beforeEach ->
       @updater = Updater({})
       @updater.getClient()
-      @sandbox.stub(@updater.client, "getAppPath").returns("foo")
       @sandbox.stub(@updater.client, "getAppExec").returns("bar")
 
     it "compacts null values", ->
+      @sandbox.stub(@updater.client, "getAppPath").returns("foo")
       expect(@updater.getArgs()).to.deep.eq ["--app-path=foo", "--exec-path=bar", "--updating"]
+
+    it "changes cwd to be the original + then restores", ->
+      tmp = os.tmpDir()
+
+      ## manually change process.cwd
+      process.chdir(tmp)
+
+      localCwd = cwd()
+
+      fn = ->
+        process.cwd() + "/baz"
+
+      @sandbox.stub(@updater.client, "getAppPath", fn)
+
+      args = @updater.getArgs()
+
+      expect(args).to.deep.eq(["--app-path=#{localCwd + "/baz"}", "--exec-path=bar", "--updating"])
+
+      expect(args[0]).not.to.include(tmp)
+
+      expect(process.cwd()).to.include(tmp)
+      expect(process.cwd()).not.to.include(localCwd)
 
   context ".run", ->
     beforeEach ->
@@ -207,12 +278,6 @@ describe "lib/updater", ->
         @updater.runInstaller("/Users/bmann/newApp")
         expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating"], {})
 
-      it "passes along App.coords if they exist", ->
-        Updater.setCoords {x: 600, y: 1200}
-        c = @updater.client
-        @updater.runInstaller("/Users/bmann/newApp")
-        expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating", "--coords=600x1200"], {})
-
     describe "#copyCyDataTo", ->
       beforeEach ->
         fs.outputJsonAsync(".cy/cache", {foo: "bar"}).then ->
@@ -284,9 +349,9 @@ describe "lib/updater", ->
         @argsObj = {
           appPath:  "/Users/bmann/app_path"
           execPath: "/Users/bmann/app_exec_path"
-          _coords: "1x2"
-          coords: {x: 1, y: 2}
         }
+
+        @normalizedArgs = @updater.normalizeArgs(@argsObj)
 
         @sandbox.stub(@updater.client, "getAppPath").returns("foo")
         @sandbox.stub(@updater, "copyTmpToAppPath").resolves()
@@ -296,11 +361,11 @@ describe "lib/updater", ->
 
       it "trashes current appPath", ->
         @updater.install(@argsObj).then =>
-          expect(@trash).to.be.calledWith("/Users/bmann/app_path")
+          expect(@trash).to.be.calledWith(@normalizedArgs.appPath)
 
       it "calls #copyTmpToAppPath with tmp + appPath", ->
         @updater.install(@argsObj).then =>
-          expect(@updater.copyTmpToAppPath).to.be.calledWith "foo", @argsObj.appPath
+          expect(@updater.copyTmpToAppPath).to.be.calledWith "foo", @normalizedArgs.appPath
 
       it "calls process.exit", ->
         @updater.install(@argsObj).then =>
@@ -308,7 +373,7 @@ describe "lib/updater", ->
 
       it "calls client.run with execPath + args", ->
         @updater.install(@argsObj).then =>
-          expect(@run).to.be.calledWith(@argsObj.execPath, ["--coords=1x2"])
+          expect(@run).to.be.calledWith(@argsObj.execPath, [])
 
       context "args", ->
         beforeEach ->
@@ -319,9 +384,11 @@ describe "lib/updater", ->
             "getKey": true
           }
 
+          @normalizedArgs = @updater.normalizeArgs(@argsObj)
+
         it "uses args object", ->
           @updater.install(@argsObj).then =>
-            expect(@run).to.be.calledWith("exec", ["--getKey=true"])
+            expect(@run).to.be.calledWith(@normalizedArgs.execPath, ["--getKey=true"])
 
   context "integration", ->
     before ->
@@ -333,9 +400,7 @@ describe "lib/updater", ->
 
     beforeEach ->
       ## force a lower package.json version
-      mock({
-        "package.json": JSON.stringify(version: "0.0.1")
-      })
+      @sandbox.stub(fs, "readJsonSync").returns({version: "0.0.1"})
 
       ## force a manifest.json response here to be a slightly higher version
       nock("http://download.cypress.io")
@@ -357,7 +422,6 @@ describe "lib/updater", ->
         }
         .get("/dist.cypress.io/0.0.2/cypress.zip")
         .reply 200, ->
-          mock.restore()
           fs.createReadStream Fixtures.path("nw/cypress.zip")
 
     # it "runs", ->

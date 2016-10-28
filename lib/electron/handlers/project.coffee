@@ -12,13 +12,13 @@ launcher  = require("../../launcher")
 onRelaunch      = null
 openProject     = null
 openBrowser     = null
+specIntervalId  = null
 openBrowserOpts = null
 
 module.exports = {
   open: (path, args = {}, options = {}) ->
     _.defaults options, {
       sync: true
-      changeEvents: true
       onReloadBrowser: (url, browser) =>
         @relaunch(url, browser)
     }
@@ -28,24 +28,22 @@ module.exports = {
     ## store the currently open project
     openProject = Project(path)
 
-    ## open the project and return
-    ## the config for the project instance
-    Promise.all([
-      openProject.open(options)
-      launcher.getBrowsers()
-    ])
-    .spread (project, browsers) ->
+    launcher.getBrowsers()
+    .then (browsers = []) ->
       ## TODO: maybe if there are no
       ## browsers here we should just
       ## immediately close the server?
       ## but continue sending the config
-      Promise.all([
-        project.setBrowsers(browsers)
-        project.getConfig()
-        .then (cfg) ->
-          extension.setHostAndPath(cfg.clientUrlDisplay, cfg.socketIoRoute)
-      ])
-      .return(project)
+      options.browsers = browsers
+
+      ## open the project and return
+      ## the config for the project instance
+      openProject.open(options)
+    .then ->
+      openProject.getConfig()
+      .then (cfg) ->
+        extension.setHostAndPath(cfg.clientUrlDisplay, cfg.socketIoRoute)
+    .return(openProject)
 
   opened: -> openProject
 
@@ -58,7 +56,8 @@ module.exports = {
       url            ?= cfg.clientUrl
       openBrowser     = browser
       openBrowserOpts = options
-      options.proxyServer = cfg.clientUrlDisplay
+      options.proxyServer ?= cfg.clientUrlDisplay
+      options.chromeWebSecurity = cfg.chromeWebSecurity
 
       launcher.launch(browser, url, options)
 
@@ -78,50 +77,87 @@ module.exports = {
       ## assume there are openBrowserOpts
       launcher.launch(b, url, openBrowserOpts)
 
-  onSettingsChanged: ->
-    Promise.try =>
-      if not openProject
-        errors.throw("NO_CURRENTLY_OPEN_PROJECT")
-      else
-        new Promise (resolve, reject) =>
-          reboot = =>
-            ## store if the browser is open
-            b = openBrowser
+  reboot: ->
+    @close({
+      sync: false
+      clearInterval: false
+    })
 
-            openProject
-            .getConfig()
-            .then (cfg) =>
-              @close()
-              .then =>
-                @open(cfg.projectRoot)
-            .then (p) ->
-              p.getConfig()
-            .then (cfg) ->
-              {
-                config: cfg
-                browser: b
-              }
-            .then(resolve)
-            .catch(reject)
+  getSpecChanges: (options = {}) ->
+    currentSpecs = null
 
-          openProject.on "settings:changed", reboot
+    _.defaults(options, {
+      onChange: ->
+      onError: ->
+    })
 
-  getSpecs: ->
+    sendIfChanged = (specs = []) ->
+      ## dont do anything if the specs haven't changed
+      return if _.isEqual(specs, currentSpecs)
+
+      currentSpecs = specs
+      options.onChange(specs)
+
+    checkForSpecUpdates = ->
+      get()
+      .then(sendIfChanged)
+      .catch(options.onError)
+
+    get = ->
+      openProject.getConfig()
+      .then (cfg) ->
+        files.getTestFiles(cfg)
+
+    specIntervalId = setInterval(checkForSpecUpdates, 2500)
+
+    ## immediately check the first time around
+    checkForSpecUpdates()
+
+  changeToSpec: (spec) ->
     openProject.getConfig()
     .then (cfg) ->
-      files.getTestFiles(cfg)
+      ## always reset the state when swapping specs
+      ## so that our document.domain is reset back to <root>
+      openProject.resetState()
+
+      url = openProject.getUrlBySpec(cfg.clientUrl, spec)
+
+      ## TODO: the problem here is that we really need
+      ## an 'ack' event when changing the url because
+      ## the runner may not even be connected, which
+      ## in that case we need to open a new tab or
+      ## spawn a new browser instance!
+      openProject.changeToUrl(url)
+
+  getBrowsers: ->
+    ## always return an array of open browsers
+    Promise.resolve(_.compact([openBrowser]))
+
+  closeBrowser: ->
+    launcher.close()
+
+    if openProject
+      openProject.resetState()
+
+    openBrowser     = null
+    openBrowserOpts = null
+
+    Promise.resolve(null)
 
   close: (options = {}) ->
     _.defaults options, {
       sync: true
+      clearInterval: true
     }
 
     nullify = ->
       ## null these back out
       onRelaunch      = null
       openProject     = null
-      openBrowser     = null
-      openBrowserOpts = null
+
+      if options.clearInterval
+        clearInterval(specIntervalId)
+        specIntervalId  = null
 
       Promise.resolve(null)
 
@@ -129,7 +165,7 @@ module.exports = {
       nullify()
     else
       Promise.all([
-        launcher.close()
+        @closeBrowser()
         openProject.close(options)
       ])
       .then(nullify)

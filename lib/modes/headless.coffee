@@ -64,6 +64,8 @@ module.exports = {
           reject errors.get("PROJECT_DOES_NOT_EXIST")
 
   openProject: (id, options) ->
+    wantsExternalBrowser = !!options.browser
+
     ## now open the project to boot the server
     ## putting our web client app in headless mode
     ## - NO  display server logs (via morgan)
@@ -75,78 +77,93 @@ module.exports = {
       report:       true
       isHeadless:   true
       ## TODO: get session into automation.perform
-      onAutomationRequest: automation.perform
+      onAutomationRequest: if wantsExternalBrowser then null else automation.perform
 
     })
     .catch {portInUse: true}, (err) ->
       errors.throw("PORT_IN_USE_LONG", err.port)
 
-  createRenderer: (url, showGui = false) ->
-    Renderer.create({
-      url:    url
-      width:  0
-      height: 0
-      show:   showGui
-      frame:  showGui
-      devTools: showGui
-      type:   "PROJECT"
-    })
-    .then (win) ->
-      if not showGui
-        ## there is a bug in electron linux
-        ## which causes the window to open even
-        ## should show is false so we must 'hide'
-        ## the window again and then set its size
-        win.hide()
+  setProxy: (proxyServer) ->
+    session = require("electron").session
 
-      win.webContents.on "new-window", (e, url, frameName, disposition, options) ->
-        ## force new windows to automatically open with show: false
-        ## this prevents window.open inside of javascript client code
-        ## to cause a new BrowserWindow instance to open
-        ## https://github.com/cypress-io/cypress/issues/123
-        options.show = false
+    new Promise (resolve) ->
+      session.defaultSession.setProxy({
+        proxyRules: proxyServer
+      }, resolve)
 
-      win.setSize(1280, 720)
-      win.center()
+  createRenderer: (url, proxyServer, showGui = false, chromeWebSecurity) ->
+    @setProxy(proxyServer)
+    .then ->
+      Renderer.create({
+        url:    url
+        width:  0
+        height: 0
+        show:   showGui
+        frame:  showGui
+        devTools: showGui
+        chromeWebSecurity: chromeWebSecurity
+        type:   "PROJECT"
+      })
+      .then (win) ->
+        win.webContents.on "new-window", (e, url, frameName, disposition, options) ->
+          ## force new windows to automatically open with show: false
+          ## this prevents window.open inside of javascript client code
+          ## to cause a new BrowserWindow instance to open
+          ## https://github.com/cypress-io/cypress/issues/123
+          options.show = false
 
-  waitForRendererToConnect: (project, id) ->
+        win.setSize(1280, 720)
+        win.center()
+
+  waitForRendererToConnect: (openProject, id) ->
     ## wait up to 10 seconds for the renderer
     ## to connect or die
-    @waitForSocketConnection(project, id)
+    @waitForSocketConnection(openProject, id)
     .timeout(10000)
     .catch Promise.TimeoutError, (err) ->
       errors.throw("TESTS_DID_NOT_START")
 
-  waitForSocketConnection: (project, id) ->
+  waitForSocketConnection: (openProject, id) ->
     new Promise (resolve, reject) ->
       fn = (socketId) ->
         if socketId is id
           ## remove the event listener if we've connected
-          project.removeListener "socket:connected", fn
+          openProject.removeListener "socket:connected", fn
 
           ## resolve the promise
           resolve()
 
       ## when a socket connects verify this
       ## is the one that matches our id!
-      project.on "socket:connected", fn
+      openProject.on "socket:connected", fn
 
-  waitForTestsToFinishRunning: (project) ->
+  waitForTestsToFinishRunning: (openProject, gui) ->
     new Promise (resolve, reject) ->
-      ## when our project fires its end event
-      ## resolve the promise
-      project.once "end", resolve
+      ## dont ever end if we're in 'gui' debugging mode
+      return if gui
 
-  runTests: (project, id, url, gui) ->
+      ## when our openProject fires its end event
+      ## resolve the promise
+      openProject.once "end", resolve
+
+  runTests: (openProject, id, url, proxyServer, gui, browser, chromeWebSecurity) ->
     ## we know we're done running headlessly
     ## when the renderer has connected and
     ## finishes running all of the tests.
     ## we're using an event emitter interface
     ## to gracefully handle this in promise land
+
+    getRenderer = =>
+      ## if we have a browser then just physically launch it
+      if browser
+        project.launch(browser, url, null, {proxyServer: proxyServer})
+      else
+        @createRenderer(url, proxyServer, gui, chromeWebSecurity)
+
     Promise.props({
-      connection: @waitForRendererToConnect(project, id)
-      stats:      @waitForTestsToFinishRunning(project)
-      renderer:   @createRenderer(url, gui)
+      connection: @waitForRendererToConnect(openProject, id)
+      stats:      @waitForTestsToFinishRunning(openProject, gui)
+      renderer:   getRenderer()
     })
 
   ready: (options = {}) ->
@@ -158,22 +175,22 @@ module.exports = {
       ## project instance
       @ensureAndOpenProjectByPath(id, options)
 
-      .then (project) =>
-        ## either get the url to the all specs
-        ## or if we've specificed one make sure
-        ## it exists
-        project.ensureSpecUrl(options.spec)
-        .then (url) =>
+      .then (openProject) =>
+        Promise.all([
+          openProject.getConfig(),
+
+          ## either get the url to the all specs
+          ## or if we've specificed one make sure
+          ## it exists
+          openProject.ensureSpecUrl(options.spec)
+        ])
+        .spread (config, url) =>
           console.log("\nTests should begin momentarily...\n")
 
-          @runTests(project, id, url, options.showHeadlessGui)
+          @runTests(openProject, id, url, config.clientUrlDisplay, options.showHeadlessGui, options.browser, config.chromeWebSecurity)
           .get("stats")
 
-    if options.ensureSession isnt false
-      ## make sure we have a current session
-      user.ensureSession().then(ready)
-    else
-      ready()
+    ready()
 
   run: (options) ->
     app = require("electron").app

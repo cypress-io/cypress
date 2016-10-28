@@ -26,32 +26,38 @@ describe "lib/server", ->
       @use = @sandbox.spy(express.application, "use")
 
     it "instantiates express instance without morgan", ->
-      app = @server.createExpressApp(54321, false)
-      expect(app.get("port")).to.eq(54321)
+      app = @server.createExpressApp(false)
       expect(app.get("view engine")).to.eq("html")
       expect(@use).not.to.be.calledWith(morganFn)
 
     it "requires morgan if true", ->
-      @server.createExpressApp(54321, true)
+      @server.createExpressApp(true)
       expect(@use).to.be.calledWith(morganFn)
 
   context "#open", ->
     beforeEach ->
       @sandbox.stub(@server, "createServer").resolves()
 
-    it "resolves with server instance", ->
-      @server.open(@config)
-      .then (ret) =>
-        expect(ret).to.eq(@server)
-
-    it "calls #createExpressApp with port + morgan", ->
+    it "calls #createExpressApp with morgan", ->
       @sandbox.spy(@server, "createExpressApp")
 
       _.extend @config, {port: 54321, morgan: false}
 
       @server.open(@config)
       .then =>
-        expect(@server.createExpressApp).to.be.calledWith(54321, false)
+        expect(@server.createExpressApp).to.be.calledWith(false)
+
+    it "calls #createServer with port", ->
+      _.extend @config, {port: 54321}
+
+      obj = {}
+
+      @sandbox.stub(@server, "createRoutes")
+      @sandbox.stub(@server, "createExpressApp").returns(obj)
+
+      @server.open(@config)
+      .then =>
+        expect(@server.createServer).to.be.calledWith(obj, @config)
 
     it "calls #createRoutes with app + config", ->
       obj = {}
@@ -63,7 +69,7 @@ describe "lib/server", ->
       .then =>
         expect(@server.createRoutes).to.be.calledWith(obj)
 
-    it "calls #createServer with port + app", ->
+    it "calls #createServer with port + fileServerFolder + socketIoRoute + app", ->
       obj = {}
 
       @sandbox.stub(@server, "createRoutes")
@@ -71,7 +77,7 @@ describe "lib/server", ->
 
       @server.open(@config)
       .then =>
-        expect(@server.createServer).to.be.calledWith(@config.port, @config.socketIoRoute, obj)
+        expect(@server.createServer).to.be.calledWith(obj, @config)
 
     it "calls logger.setSettings with config", ->
       @sandbox.spy(logger, "setSettings")
@@ -83,23 +89,23 @@ describe "lib/server", ->
   context "#createServer", ->
     beforeEach ->
       @port = 54321
-      @app  = @server.createExpressApp(@port, true)
+      @app  = @server.createExpressApp(true)
 
     it "isListening=true", ->
-      @server.createServer(@port, @app)
+      @server.createServer(@app, {port: @port})
       .then =>
         expect(@server.isListening).to.be.true
 
-    it "resolves with http server instance", ->
-      @server.createServer(@port, @app)
-      .then (ret) =>
-        expect(ret).to.be.instanceof(http.Server)
+    it "resolves with http server port", ->
+      @server.createServer(@app, {port: @port})
+      .then (port) =>
+        expect(port).to.eq(@port)
 
     context "errors", ->
       it "rejects with portInUse", ->
-        @server.createServer(@port, @app)
+        @server.createServer(@app, {port: @port})
         .then =>
-          @server.createServer(@port, @app)
+          @server.createServer(@app, {port: @port})
         .then ->
           throw new Error("should have failed but didn't")
         .catch (err) =>
@@ -180,6 +186,9 @@ describe "lib/server", ->
 
       req = {
         url: "/"
+        headers: {
+          host: "www.google.com"
+        }
       }
 
       @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
@@ -188,7 +197,7 @@ describe "lib/server", ->
         secure: false
         target: {
           host: "www.google.com"
-          port: null
+          port: "443"
           protocol: "https:"
         }
       })
@@ -215,103 +224,67 @@ describe "lib/server", ->
     it "sets port to 443 when omitted and https:", ->
       ret = @server._onDomainSet("https://staging.google.com/foo/bar")
 
-      expect(@server._remoteOrigin).to.eq("https://staging.google.com")
-      expect(@server._remoteHostAndPort).to.deep.eq({
-        port: "443"
-        domain: "google"
-        tld: "com"
+      expect(ret).to.deep.eq({
+        origin: "https://staging.google.com"
+        strategy: "http"
+        domainName: "google.com"
+        visiting: undefined
+        fileServer: null
+        props: {
+          port: "443"
+          domain: "google"
+          tld: "com"
+        }
       })
-
-      expect(ret).to.eq(@server._remoteOrigin)
 
     it "sets port to 80 when omitted and http:", ->
       ret = @server._onDomainSet("http://staging.google.com/foo/bar")
 
-      expect(@server._remoteOrigin).to.eq("http://staging.google.com")
-      expect(@server._remoteHostAndPort).to.deep.eq({
-        port: "80"
-        domain: "google"
-        tld: "com"
+      expect(ret).to.deep.eq({
+        origin: "http://staging.google.com"
+        strategy: "http"
+        domainName: "google.com"
+        visiting: undefined
+        fileServer: null
+        props: {
+          port: "80"
+          domain: "google"
+          tld: "com"
+        }
       })
-
-      expect(ret).to.eq(@server._remoteOrigin)
 
     it "sets host + port to localhost", ->
       ret = @server._onDomainSet("http://localhost:4200/a/b?q=1#asdf")
 
-      expect(@server._remoteOrigin).to.eq("http://localhost:4200")
-      expect(@server._remoteHostAndPort).to.deep.eq({
-        port: "4200"
-        domain: ""
-        tld: "localhost"
+      expect(ret).to.deep.eq({
+        origin: "http://localhost:4200"
+        strategy: "http"
+        domainName: "localhost"
+        visiting: undefined
+        fileServer: null
+        props: {
+          port: "4200"
+          domain: ""
+          tld: "localhost"
+        }
       })
-
-      expect(ret).to.eq(@server._remoteOrigin)
 
     it "sets <root> when not http url", ->
       @server._server = {
         address: -> {port: 9999}
       }
 
+      @server._fileServer = {
+        port: -> 9998
+      }
+
       ret = @server._onDomainSet("/index.html")
 
-      expect(@server._remoteOrigin).to.eq("<root>")
-      expect(@server._remoteHostAndPort).to.be.null
-
-      expect(ret).to.eq("http://localhost:9999")
-
-  context "#_onDirectConnection", ->
-    beforeEach ->
-      @server = Server()
-
-    describe "domain + subdomain", ->
-      beforeEach ->
-        @server._remoteHostAndPort = @server._parseUrl("staging.google.com:443")
-
-      it "does not match", ->
-        expect(@server._urlMatchesRemoteHostAndPort("foo.bar:443")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("foo.bar:80")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("staging.google.com:80")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("staging.google2.com:443")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("staging.google.net:443")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("google.net:443")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("google.com:80")).to.be.false
-
-      it "matches", ->
-        expect(@server._urlMatchesRemoteHostAndPort("staging.google.com:443")).to.be.true
-        expect(@server._urlMatchesRemoteHostAndPort("google.com:443")).to.be.true
-        expect(@server._urlMatchesRemoteHostAndPort("foo.google.com:443")).to.be.true
-        expect(@server._urlMatchesRemoteHostAndPort("foo.bar.google.com:443")).to.be.true
-
-    describe "localhost", ->
-      beforeEach ->
-        @server._remoteHostAndPort = @server._parseUrl("localhost:4200")
-
-      it "does not match", ->
-        expect(@server._urlMatchesRemoteHostAndPort("localhost:4201")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("localhoss:4200")).to.be.false
-
-      it "matches", ->
-        expect(@server._urlMatchesRemoteHostAndPort("localhost:4200")).to.be.true
-
-    describe "local", ->
-      beforeEach ->
-        @server._remoteHostAndPort = @server._parseUrl("brian.dev.local:80")
-
-      it "does not match", ->
-        expect(@server._urlMatchesRemoteHostAndPort("brian.dev.local:443")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("brian.dev2.local:80")).to.be.false
-
-      it "matches", ->
-        expect(@server._urlMatchesRemoteHostAndPort("jennifer.dev.local:80")).to.be.true
-
-    describe "ip address", ->
-      beforeEach ->
-        @server._remoteHostAndPort = @server._parseUrl("192.168.5.10:80")
-
-      it "does not match", ->
-        expect(@server._urlMatchesRemoteHostAndPort("192.168.5.10:443")).to.be.false
-        expect(@server._urlMatchesRemoteHostAndPort("193.168.5.10:80")).to.be.false
-
-      it "matches", ->
-        expect(@server._urlMatchesRemoteHostAndPort("192.168.5.10:80")).to.be.true
+      expect(ret).to.deep.eq({
+        origin: "http://localhost:9999"
+        strategy: "file"
+        domainName: "localhost"
+        fileServer: "http://localhost:9998"
+        props: null
+        visiting: undefined
+      })

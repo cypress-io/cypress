@@ -17,7 +17,12 @@ $Cypress.register "LocalStorage", (Cypress, _, $) ->
     return remote
 
   Cypress.on "test:before:hooks", ->
-    clearLocalStorage.call(@, [])
+    try
+      ## this may fail if the current
+      ## window is bound to another origin
+      clearLocalStorage.call(@, [])
+    catch
+      null
 
   Cypress.addParentCommand
 

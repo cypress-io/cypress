@@ -38,6 +38,13 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       34:  222  ## " --- 222
     }
 
+    modifierCodeMap: {
+      alt: 18
+      ctrl: 17
+      meta: 91
+      shift: 16
+    }
+
     specialChars: {
       "{selectall}": (el, options) ->
         options.rng.bounds('all').select()
@@ -196,6 +203,20 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         @ensureKey(el, null, options)
     }
 
+    modifierChars: {
+      "{alt}": "alt"
+      "{option}": "alt"
+
+      "{ctrl}": "ctrl"
+      "{control}": "ctrl"
+
+      "{meta}": "meta"
+      "{command}": "meta"
+      "{cmd}": "meta"
+
+      "{shift}": "shift"
+    }
+
     boundsAreEqual: (bounds) ->
       bounds[0] is bounds[1]
 
@@ -278,7 +299,12 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
           catch
             resetBounds()
 
-      keys = options.chars.split(charsBetweenCurlyBraces)
+      keys = options.chars.split(charsBetweenCurlyBraces).map (chars) ->
+        if charsBetweenCurlyBraces.test(chars)
+          ## allow special chars and modifiers to be case-insensitive
+          chars.toLowerCase()
+        else
+          chars
 
       options.onBeforeType @countNumIndividualKeyStrokes(keys)
 
@@ -299,15 +325,21 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
           ## after typing be sure to clear all ranges
           if sel = options.window.getSelection()
             sel.removeAllRanges()
+
+          unless options.release is false
+            @resetModifiers(el, options.window)
         .catch Promise.CancellationError, (err) ->
           _(promises).invoke("cancel")
           throw err
 
     countNumIndividualKeyStrokes: (keys) ->
-      _.reduce keys, (memo, chars) ->
-        ## chars in curly braces count as 1 keystroke
-        if charsBetweenCurlyBraces.test(chars)
+      _.reduce keys, (memo, chars) =>
+        ## special chars count as 1 keystroke
+        if @isSpecialChar(chars)
           memo + 1
+        ## modifiers don't count as keystrokes
+        else if @isModifier(chars)
+          memo
         else
           memo + chars.length
       , 0
@@ -316,9 +348,26 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       options = _.clone(options)
       options.rng = rng
 
-      if charsBetweenCurlyBraces.test(chars)
+      if @isSpecialChar(chars)
         p = Promise
           .resolve @handleSpecialChars(el, chars, options)
+          .delay(options.delay)
+          .cancellable()
+        promises.push(p)
+        p
+      else if @isModifier(chars)
+        p = Promise
+          .resolve @handleModifier(el, chars, options)
+          .delay(options.delay)
+          .cancellable()
+        promises.push(p)
+        p
+      else if charsBetweenCurlyBraces.test(chars)
+        ## between curly braces, but not a valid special
+        ## char or modifier
+        allChars = _.keys(@specialChars).concat(_.keys(@modifierChars)).join(", ")
+        p = Promise
+          .resolve options.onNoMatchingSpecialChars(chars, allChars)
           .delay(options.delay)
           .cancellable()
         promises.push(p)
@@ -390,13 +439,10 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
       if otherKeys
         _.extend event, {
-          altKey: false
-          ctrlKey: false
           location: 0
-          metaKey: false
           repeat: false
-          shiftKey: false
         }
+        @mixinModifiers(event)
 
       if keys
         _.extend event, {
@@ -449,7 +495,7 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         if @simulateKey(el, "keypress", key, options)
           if @simulateKey(el, "textInput", key, options)
 
-            ## only call this function is we haven't been told to not to
+            ## only call this function if we haven't been told not to
             if fn and options.onBeforeSpecialCharAction.call(@, options.id, options.key) isnt false
               fn.call(@)
 
@@ -461,11 +507,60 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
       @simulateKey(el, "keyup", key, options)
 
+    isSpecialChar: (chars) ->
+      !!@specialChars[chars]
+
     handleSpecialChars: (el, chars, options) ->
-      if fn = @specialChars[chars]
-        options.key = chars
-        fn.call(@, el, options)
-      else
-        allChars = _.keys(@specialChars).join(", ")
-        options.onNoMatchingSpecialChars(chars, allChars)
+      options.key = chars
+      @specialChars[chars].call(@, el, options)
+
+    modifiers: {
+      alt: false
+      ctrl: false
+      meta: false
+      shift: false
+    }
+
+    isModifier: (chars) ->
+      !!@modifierChars[chars]
+
+    handleModifier: (el, chars, options) ->
+      modifier = @modifierChars[chars]
+
+      ## do nothing if already activated
+      return if @modifiers[modifier]
+
+      @modifiers[modifier] = true
+      @simulateModifier(el, "keydown", modifier, options)
+
+    simulateModifier: (el, eventType, modifier, options) ->
+      @simulateKey(el, eventType, null, _.extend(options, {
+        charCode: @modifierCodeMap[modifier]
+        id: _.uniqueId("char")
+        key: "<#{modifier}>"
+      }))
+
+    mixinModifiers: (event) ->
+      _.extend(event, {
+        altKey: @modifiers.alt
+        ctrlKey: @modifiers.ctrl
+        metaKey: @modifiers.meta
+        shiftKey: @modifiers.shift
+      })
+
+    activeModifiers: ->
+      _.reduce @modifiers, (memo, isActivated, modifier) ->
+        memo.push(modifier) if isActivated
+        memo
+      , []
+
+    resetModifiers: (el, window) ->
+      for modifier, isActivated of @modifiers
+        @modifiers[modifier] = false
+        if isActivated
+          @simulateModifier(el, "keyup", modifier, {
+            window: window
+            onBeforeEvent: ->
+            onEvent: ->
+          })
   }

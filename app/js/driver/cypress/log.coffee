@@ -5,6 +5,37 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
   CypressErrorRe  = /(AssertionError|CypressError)/
   parentOrChildRe = /parent|child/
   ERROR_PROPS     = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
+  SNAPSHOT_PROPS  = "id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight".split(" ")
+  DISPLAY_PROPS   = "id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible".split(" ")
+  BLACKLIST_PROPS = "snapshots".split(" ")
+
+  counter = 0
+
+  logs = {}
+
+  abort = ->
+    logs = {}
+
+  triggerEvent = (Cypress, log, event) ->
+    ## bail if we never fired our initial log event
+    return if not log._hasInitiallyLogged
+
+    ## bail if we've reset the logs due to a Cypress.abort
+    return if not logs[log.get("id")]
+
+    attrs = log.toJSON()
+
+    ## only trigger this event if our last stored
+    ## emitted attrs do not match the current toJSON
+    if not _.isEqual(log._emittedAttrs, attrs)
+      log._emittedAttrs = attrs
+
+      Cypress.trigger(event, attrs, log)
+
+  triggerInitial = (Cypress, log) ->
+    log._hasInitiallyLogged = true
+
+    triggerEvent(Cypress, log, "log")
 
   klassMethods = {
     agent: (Cypress, cy, obj = {}) ->
@@ -86,7 +117,9 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## set the log on the command
       cy.prop("current")?.log(log)
 
-      Cypress.trigger("log", log.toJSON(), log)
+      $Log.addToLogs(log)
+
+      triggerInitial(Cypress, log)
 
       return log
   }
@@ -94,15 +127,15 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
   class $Log
     constructor: (@Cypress, obj = {}) ->
       _.defaults obj,
-        id: _.uniqueId("l")
+        id: (counter += 1)
         state: "pending"
 
       trigger = =>
-        @Cypress.trigger("log:state:changed", @toJSON(), @)
+        triggerEvent(@Cypress, @, "log:state:changed")
 
       ## only fire the log:state:changed event
-      ## as fast as every 16ms
-      @fireChangeEvent = _.debounce(trigger, 16)
+      ## as fast as every 4ms
+      @fireChangeEvent = _.debounce(trigger, 4)
 
       @set(obj)
 
@@ -123,10 +156,18 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
     unset: (key) ->
       @set(key, undefined)
 
-    invoke: (fn) ->
-      ## ensure this is a callable function
-      ## and set its default to empty object literal
-      @get(fn)?() ? {}
+    invoke: (key) ->
+      invoke = =>
+        ## ensure this is a callable function
+        ## and set its default to empty object literal
+        fn = @get(key)
+
+        if _.isFunction(fn)
+          fn()
+        else
+          fn
+
+      invoke() ? {}
 
     serializeError: ->
       if err = @get("error")
@@ -144,10 +185,11 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       .chain()
       .omit("error")
       .omit(_.isFunction)
-      .extend({ err: @serializeError() })
-      .extend({ url: (@get("url") or "").toString() })
-      .extend({ consoleProps: @invoke("consoleProps")  })
-      .extend({ renderProps:  @invoke("renderProps") })
+      .extend({
+        err:          @serializeError()
+        consoleProps: @invoke("consoleProps")
+        renderProps:  @invoke("renderProps")
+      })
       .value()
 
     set: (key, val) ->
@@ -156,6 +198,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         obj[key] = val
       else
         obj = key
+
+      if "url" of obj
+        ## always stringify the url property
+        obj.url = (obj.url ? "").toString()
 
       ## convert onConsole to consoleProps
       ## for backwards compatibility
@@ -169,6 +215,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
       ## ensure attributes are an empty {}
       @attributes ?= {}
+
+      ## dont ever allow existing id's to be mutated
+      if @attributes.id
+        delete obj.id
 
       _.extend @attributes, obj
 
@@ -202,7 +252,15 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         at: null
         next: null
 
-      obj = {name: name, state: @Cypress.createSnapshot @get("$el")}
+      {body, htmlAttrs, headStyles, bodyStyles} = @Cypress.createSnapshot(@get("$el"))
+
+      obj = {
+        name: name
+        body: body
+        htmlAttrs: htmlAttrs
+        headStyles: headStyles
+        bodyStyles: bodyStyles
+      }
 
       snapshots = @get("snapshots") ? []
 
@@ -224,6 +282,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
     error: (err) ->
       @set({
+        ended: true
         error: err
         state: "failed"
       })
@@ -231,8 +290,12 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       return @
 
     end: ->
+      ## dont set back to passed
+      ## if we've already ended
+      return if @get("ended")
+
       @set({
-        end: true
+        ended: true
         state: "passed"
       })
 
@@ -279,17 +342,13 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## 2. merge in any other properties
       @set(log.attributes)
 
-    reduceMemory: ->
-      @off()
-      @attributes = _.omit @attributes, _.isObject
-
     _shouldAutoEnd: ->
       ## must be autoEnd
       ## and not already ended
       ## and not an event
       ## and a command
       @get("autoEnd") isnt false and
-        @get("end") isnt true and
+        @get("ended") isnt true and
           @get("event") is false and
             @get("instrument") is "command"
 
@@ -324,14 +383,80 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
             Error: _this.getError(err)
 
         ## add note if no snapshot exists on command instruments
-        if _this.get("instrument") is "command" and not @snapshots
+        if _this.get("instrument") is "command" and not _this.get("snapshots")
           consoleObj.Snapshot = "The snapshot is missing. Displaying current state of the DOM."
         else
           delete consoleObj.Snapshot
 
         return consoleObj
 
+    @addToLogs: (log) ->
+      id = log.get("id")
+
+      logs[id] = true
+
+    @reduceMemory = (attrs) ->
+      ## mutate attrs by nulling out
+      ## object properties
+      _.each attrs, (value, key) ->
+        if _.isObject(value)
+          attrs[key] = null
+
+    @toSerializedJSON = (attrs) ->
+      hasWindow   = $Cypress.Utils.hasWindow
+      hasDocument = $Cypress.Utils.hasDocument
+      hasElement  = $Cypress.Utils.hasElement
+
+      isDomLike = (value) ->
+        hasWindow(value) or hasDocument(value) or hasElement(value)
+
+      stringify = (value, key) ->
+        return null if key in BLACKLIST_PROPS
+
+        switch
+          when _.isArray(value)
+            _.map(value, stringify)
+
+          when isDomLike(value)
+            $Cypress.Utils.stringifyElement(value, "short")
+
+          when _.isObject(value)
+            _.mapObject(value, stringify)
+
+          else
+            value
+
+      _.mapObject(attrs, stringify)
+
+    @getDisplayProps = (attrs) =>
+      _.pick(attrs, DISPLAY_PROPS)
+
+    @getConsoleProps = (attrs) =>
+      attrs.consoleProps
+
+    @getSnapshotProps = (attrs) ->
+      _.pick(attrs, SNAPSHOT_PROPS)
+
+    @countLogsByTests = (tests = {}) ->
+      return 0 if _.isEmpty(tests)
+
+      _.chain(tests)
+      .map (test, key) ->
+        [].concat(test.agents, test.routes, test.commands)
+      .flatten()
+      .compact()
+      .union([{id: 0}])
+      .pluck("id")
+      .max()
+      .value()
+
+    @setCounter = (num) ->
+      counter = num
+
     @create = (Cypress, cy) ->
+      Cypress.off("abort", abort, $Log)
+      Cypress.on("abort", abort, $Log)
+
       _.each klassMethods, (fn, key) ->
         $Log[key] = _.partial(fn, Cypress, cy)
 

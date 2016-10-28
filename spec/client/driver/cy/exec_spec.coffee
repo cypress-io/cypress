@@ -33,7 +33,7 @@ describe "$Cypress.Cy Exec Command", ->
       it "can turn off logging", ->
         @respondWith(okResponse)
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.exec('ls', { log: false }).then ->
           expect(@log).to.be.undefined
@@ -41,7 +41,7 @@ describe "$Cypress.Cy Exec Command", ->
       it "logs immediately before resolving", ->
         @respondWith(okResponse)
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           expect(@log.get("state")).to.eq("pending")
           expect(@log.get("message")).to.eq("ls")
 
@@ -81,7 +81,7 @@ describe "$Cypress.Cy Exec Command", ->
       it "throws when cmd is absent", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -96,7 +96,7 @@ describe "$Cypress.Cy Exec Command", ->
       it "throws when cmd isn't a string", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -111,7 +111,7 @@ describe "$Cypress.Cy Exec Command", ->
       it "throws when cmd is an empty string", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -128,14 +128,14 @@ describe "$Cypress.Cy Exec Command", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.exec('ls') failed with the following error: exec failed")
+          expect(err.message).to.eq("cy.exec('ls') failed with the following error:\n\n> \"exec failed\"")
           done()
 
         @cy.exec("ls")
@@ -145,7 +145,7 @@ describe "$Cypress.Cy Exec Command", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -162,7 +162,7 @@ describe "$Cypress.Cy Exec Command", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>

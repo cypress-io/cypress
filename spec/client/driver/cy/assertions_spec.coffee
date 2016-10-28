@@ -73,7 +73,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "works with regular objects", ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         obj = {}
@@ -92,7 +92,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "logs two assertions", ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         _.delay =>
@@ -122,7 +122,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "logs assertions as children even if subject is different", ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         _.delay =>
@@ -196,7 +196,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "resolves all 3 assertions", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "assert"
             logs.push(log)
 
@@ -210,7 +210,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
     describe "have.text", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "resolves the assertion", ->
         @cy.get("#list li").eq(0).should("have.text", "li 0").then ->
@@ -218,11 +218,11 @@ describe "$Cypress.Cy Assertion Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
     describe "have.length", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "allows valid string numbers", ->
         length = @cy.$$("button").length
@@ -243,7 +243,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push log
 
         @cy.on "fail", (err) ->
@@ -268,7 +268,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push log
 
         @cy.on "fail", (err) ->
@@ -288,7 +288,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
     describe "have.class", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "snapshots and ends the assertion after retrying", ->
         @cy.on "retry", _.after 3, =>
@@ -298,7 +298,7 @@ describe "$Cypress.Cy Assertion Commands", ->
           @chai.restore()
 
           expect(@log.get("name")).to.eq("assert")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
           expect(@log.get("state")).to.eq("passed")
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0]).to.be.an("object")
@@ -342,7 +342,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "logs 'should' when non available chainer", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -371,7 +371,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "throws when the subject isnt in the DOM", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.$$("button:first").click ->
@@ -409,7 +409,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "throws when should('have.length') isnt a number", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         ## we specifically turn off logging have.length validation errors
@@ -432,7 +432,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "eventually.have.length is deprecated", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -453,7 +453,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "does not additionally log when .should is the current command", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -474,7 +474,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "logs and immediately fails on custom match assertions", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -492,10 +492,10 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.wrap("foo").should("match", "foo")
 
-      it "does not log ensureElExistance errors", (done) ->
+      it "does not log ensureElExistence errors", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -513,7 +513,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -534,7 +534,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "is type child", ->
         @cy.get("button").should("match", "button").then ->
@@ -566,7 +566,7 @@ describe "$Cypress.Cy Assertion Commands", ->
   context "#assert", ->
     before ->
       @onAssert = (fn) =>
-        @Cypress.on "log", (obj) =>
+        @Cypress.on "log", (attrs, obj) =>
           if obj.get("name") is "assert"
             ## restore so we dont create an endless loop
             ## due to Cypress.assert being called again
@@ -594,7 +594,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
       logs = []
 
-      @Cypress.on "log", (log) ->
+      @Cypress.on "log", (attrs, log) ->
         logs.push log
 
       @cy.on "fail", =>
@@ -606,7 +606,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
     it "ends immediately", (done) ->
       @onAssert (log) ->
-        expect(log.get("end")).to.be.true
+        expect(log.get("ended")).to.be.true
         expect(log.get("state")).to.eq("passed")
         done()
 
@@ -649,7 +649,7 @@ describe "$Cypress.Cy Assertion Commands", ->
     it "replaces instances of word: 'but' with 'and' for passing assertion", (done) ->
       ## chai jquery adds 2 assertions here so
       ## we bind to the 2nd one
-      @Cypress.on "log", (log) ->
+      @Cypress.on "log", (attrs, log) ->
         if log.get("name") is "assert"
           assert(log)
 
@@ -667,7 +667,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
       ## chai jquery adds 2 assertions here so
       ## we bind to the 2nd one
-      @Cypress.on "log", (obj) ->
+      @Cypress.on "log", (attrs, obj) ->
         if obj.get("name") is "assert"
           assert(obj)
 
@@ -682,7 +682,7 @@ describe "$Cypress.Cy Assertion Commands", ->
     it "does not replace 'button' with 'andton'", (done) ->
       ## chai jquery adds 2 assertions here so
       ## we bind to the 2nd one
-      @Cypress.on "log", (obj) ->
+      @Cypress.on "log", (attrs, obj) ->
         if obj.get("name") is "assert"
           assert(obj)
 
@@ -805,7 +805,7 @@ describe "$Cypress.Cy Assertion Commands", ->
   context "chai overrides", ->
     before ->
       @onAssert = (fn) =>
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             ## restore so we dont create an endless loop
             ## due to Cypress.assert being called again
@@ -813,6 +813,11 @@ describe "$Cypress.Cy Assertion Commands", ->
             fn.call(@, log)
 
     beforeEach ->
+      ## create two here because there was a bug where
+      ## we were not correctly restoring assertions
+      ## during construction
+      @chai = $Cypress.Chai.create(@Cypress, {})
+      @chai = $Cypress.Chai.create(@Cypress, {})
       @chai = $Cypress.Chai.create(@Cypress, {})
 
     afterEach ->
@@ -866,6 +871,21 @@ describe "$Cypress.Cy Assertion Commands", ->
 
       it "does not affect DOM element matching", ->
         @cy.get("body").should("match", "body")
+
+    describe "#visible", ->
+      it "adds the explanation why an element is invisible", (done) ->
+        @onAssert (log) ->
+          err = log.get("_error")
+          expect(err.message).to.eq("expected '<div#invisible>' to be visible")
+          expect(log.get("message")).to.eq("expected **<div#invisible>** to be visible")
+
+          ## we append to the message after the log happens
+          setTimeout ->
+            expect(err.message).to.eq("expected '<div#invisible>' to be visible\n\nThis element is not visible because it has CSS property: 'display: none'")
+            done()
+          , 10
+
+        @cy.get("#invisible").should("be.visible")
 
     describe "#exist", ->
       it "uses $el.selector in expectation", (done) ->

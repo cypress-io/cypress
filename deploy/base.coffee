@@ -13,6 +13,7 @@ Promise      = require("bluebird")
 obfuscator   = require("obfuscator")
 runSequence  = require("run-sequence")
 cypressIcons = require("@cypress/core-icons")
+cypressElectron = require("@cypress/core-electron")
 log          = require("./log")
 meta         = require("./meta")
 pkg          = require("../package.json")
@@ -92,15 +93,18 @@ class Base
           copy("./lib/errors.coffee",       "/src/lib/errors.coffee")
           copy("./lib/exception.coffee",    "/src/lib/exception.coffee")
           copy("./lib/exec.coffee",         "/src/lib/exec.coffee")
+          copy("./lib/file_server.coffee",  "/src/lib/file_server.coffee")
+          copy("./lib/files.coffee",        "/src/lib/files.coffee")
           copy("./lib/fixture.coffee",      "/src/lib/fixture.coffee")
           copy("./lib/ids.coffee",          "/src/lib/ids.coffee")
           copy("./lib/konfig.coffee",       "/src/lib/konfig.coffee")
-          copy("./lib/logger.coffee",       "/src/lib/logger.coffee")
           copy("./lib/launcher.coffee",     "/src/lib/launcher.coffee")
+          copy("./lib/logger.coffee",       "/src/lib/logger.coffee")
           copy("./lib/project.coffee",      "/src/lib/project.coffee")
           copy("./lib/reporter.coffee",     "/src/lib/reporter.coffee")
           copy("./lib/request.coffee",      "/src/lib/request.coffee")
           copy("./lib/routes.coffee",       "/src/lib/routes.coffee")
+          copy("./lib/saved_state.coffee",  "/src/lib/saved_state.coffee")
           copy("./lib/scaffold.coffee",     "/src/lib/scaffold.coffee")
           copy("./lib/screenshots.coffee",  "/src/lib/screenshots.coffee")
           copy("./lib/server.coffee",       "/src/lib/server.coffee")
@@ -210,31 +214,12 @@ class Base
 
     fs.readJsonAsync(@distDir("package.json"))
     .then (json) =>
-      pkgr({
+      cypressElectron.install({
         dir: @distDir()
-        out: meta.buildDir
-        name: pkg.productName or pkg.name
+        dist: @buildPathForElectron()
         platform: @osName
-        arch: "x64"
-        asar: false
-        prune: true
-        overwrite: true
-        version: pkg.devDependencies["electron-prebuilt"]
-        icon: cypressIcons.getPathToIcon("cypress.icns")
         "app-version": json.version
       })
-
-  renameBuild: (pathToBuilds = []) ->
-    @log("#renameBuild")
-
-    src = pathToBuilds[0]
-
-    ## grab the platform between 'Cypress-darwin-x64'
-    platform = path.basename(src).split("-").slice(1, 2).join("")
-    dest     = @getBuildDest(src, platform)
-
-    fs.ensureDirAsync(dest).then ->
-      fs.moveAsync(src, dest, {clobber: true}).return(dest)
 
   uploadFixtureToS3: ->
     @log("#uploadFixtureToS3")
@@ -260,10 +245,10 @@ class Base
     log.apply(@, arguments)
 
   gulpBuild: ->
-    @log "gulpBuild"
+    @log("#gulpBuild")
 
     new Promise (resolve, reject) ->
-      runSequence "app:build", "app:minify", (err) ->
+      runSequence "app:build", (err) ->
         if err then reject(err) else resolve()
 
   createCyCache: (project) ->
@@ -289,44 +274,21 @@ class Base
 
     Fixtures.scaffold()
 
-    automations = Fixtures.projectPath("automations")
-
-    verifyScreenshots = =>
-      ## the test should have created a png screenshot at this path...
-      screenshot = path.join(automations, "cypress", "screenshots", "foo", "bar", "baz.png")
-
-      fs.statAsync(screenshot)
+    e2e = Fixtures.projectPath("e2e")
 
     runProjectTest = =>
       new Promise (resolve, reject) =>
-        express = require("express")
-        parser  = require("cookie-parser")
+        env = _.omit(process.env, "CYPRESS_ENV")
 
-        app = express()
+        sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{e2e}", "--spec=cypress/integration/simple_passing_spec.coffee"], {stdio: "inherit", env: env}
+        sp.on "exit", (code) ->
+          if code is 0
+            resolve()
+          else
+            reject(new Error("running project tests failed with: '#{code}' errors."))
 
-        app.use(parser())
-
-        app.get "/foo", (req, res) ->
-          console.log "cookies", req.cookies
-          res.send(req.cookies)
-
-        server = app.listen 2121, =>
-          console.log "listening on 2121"
-
-          env = _.omit(process.env, "CYPRESS_ENV")
-
-          sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{automations}"], {stdio: "inherit", env: env}
-          sp.on "exit", (code) ->
-            server.close()
-
-            if code is 0
-              resolve()
-            else
-              reject(new Error("running project tests failed with: '#{code}' errors."))
-
-    @createCyCache(automations)
+    @createCyCache(e2e)
     .then(runProjectTest)
-    .then(verifyScreenshots)
     .then ->
       Fixtures.remove()
     .then =>
@@ -337,12 +299,11 @@ class Base
 
     Fixtures.scaffold()
 
-    failures = Fixtures.projectPath("failures")
+    e2e = Fixtures.projectPath("e2e")
 
     verifyScreenshots = =>
-      ## the test should have created 3 png screenshots at this path...
-      screenshot1 = path.join(failures, "cypress", "screenshots", "failure1.png")
-      screenshot2 = path.join(failures, "cypress", "screenshots", "failure2.png")
+      screenshot1 = path.join(e2e, "cypress", "screenshots", "fails1.png")
+      screenshot2 = path.join(e2e, "cypress", "screenshots", "fails2.png")
 
       Promise.all([
         fs.statAsync(screenshot1)
@@ -353,15 +314,14 @@ class Base
       new Promise (resolve, reject) =>
         env = _.omit(process.env, "CYPRESS_ENV")
 
-        sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{failures}"], {stdio: "inherit", env: env}
+        sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{e2e}", "--spec=cypress/integration/simple_failing_spec.coffee"], {stdio: "inherit", env: env}
         sp.on "exit", (code) ->
-
           if code is 2
             resolve()
           else
             reject(new Error("running project tests failed with: '#{code}' errors."))
 
-    @createCyCache(failures)
+    @createCyCache(e2e)
     .then(runProjectTest)
     .then(verifyScreenshots)
     .then ->
@@ -419,8 +379,6 @@ class Base
     .then(@npmInstall)
     .then(@npmInstall)
     .then(@elBuilder)
-    .then(@renameBuild)
-    .then(@afterBuild)
     .then(@runSmokeTest)
     .then(@runProjectTest)
     .then(@runFailingProjectTest)

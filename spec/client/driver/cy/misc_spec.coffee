@@ -52,17 +52,17 @@ describe "$Cypress.Cy Misc Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "logs immediately", (done) ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           expect(@log.get("message")).to.eq "{}"
           expect(@log.get("name")).to.eq "wrap"
           expect(@log.get("end")).not.to.be.ok
           done()
 
         @cy.wrap({}).then =>
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0]).to.be.an("object")
 

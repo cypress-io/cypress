@@ -58,11 +58,15 @@ $Cypress.Utils = do ($Cypress, _) ->
       err
 
     errMessageByPath: (errPath, args) ->
-      errMessage = @getObjValueByPath $Cypress.ErrorMessages, errPath
-      throw new Error "Error message path '#{errPath}' does not exist" if not errMessage
-      _.reduce args, (message, argValue, argKey) ->
-        message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), argValue)
-      , errMessage
+      if not errMessage = @getObjValueByPath $Cypress.ErrorMessages, errPath
+        throw new Error "Error message path '#{errPath}' does not exist"
+
+      if _.isFunction(errMessage)
+        errMessage(args)
+      else
+        _.reduce args, (message, argValue, argKey) ->
+          message.replace(new RegExp("\{\{#{argKey}\}\}", "g"), argValue)
+        , errMessage
 
     normalizeObjWithLength: (obj) ->
       ## underscore shits the bed if our object has a 'length'

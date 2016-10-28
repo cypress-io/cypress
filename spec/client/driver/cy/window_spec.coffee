@@ -16,7 +16,7 @@ describe "$Cypress.Cy Window Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -32,7 +32,7 @@ describe "$Cypress.Cy Window Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "retry", _.after 2, =>
@@ -58,7 +58,7 @@ describe "$Cypress.Cy Window Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -81,7 +81,7 @@ describe "$Cypress.Cy Window Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -92,14 +92,14 @@ describe "$Cypress.Cy Window Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "can turn off logging", ->
         @cy.window({log: false}).then ->
           expect(@log).to.be.undefined
 
       it "logs immediately before resolving", (done) ->
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           expect(log.get("state")).to.eq("pending")
           expect(log.get("snapshot")).not.to.be.ok
           done()
@@ -114,7 +114,7 @@ describe "$Cypress.Cy Window Commands", ->
       it "can be aliased", ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy
@@ -168,7 +168,7 @@ describe "$Cypress.Cy Window Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -184,7 +184,7 @@ describe "$Cypress.Cy Window Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "retry", _.after 2, =>
@@ -210,7 +210,7 @@ describe "$Cypress.Cy Window Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy.on "fail", (err) =>
@@ -233,7 +233,7 @@ describe "$Cypress.Cy Window Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -244,14 +244,14 @@ describe "$Cypress.Cy Window Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "can turn off logging", ->
         @cy.document({log: false}).then ->
           expect(@log).to.be.undefined
 
       it "logs immediately before resolving", (done) ->
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           expect(log.get("state")).to.eq("pending")
           expect(log.get("snapshots")).not.to.be.ok
           done()
@@ -266,7 +266,7 @@ describe "$Cypress.Cy Window Commands", ->
       it "can be aliased", ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push log
 
         @cy
@@ -352,7 +352,7 @@ describe "$Cypress.Cy Window Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
@@ -364,7 +364,7 @@ describe "$Cypress.Cy Window Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           if @log.get("name") is "get"
             throw new Error("cy.get() should not have logged out.")
 
@@ -375,7 +375,7 @@ describe "$Cypress.Cy Window Commands", ->
       it "logs immediately before resolving", (done) ->
         input = @cy.$$(":text:first")
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "title"
             expect(log.get("state")).to.eq("pending")
             done()
@@ -383,7 +383,7 @@ describe "$Cypress.Cy Window Commands", ->
         @cy.title()
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
         @cy.title().then ->
           expect(@log.get("snapshots").length).to.eq(1)
@@ -482,7 +482,7 @@ describe "$Cypress.Cy Window Commands", ->
       it "throws with passed invalid preset", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) ->
@@ -495,7 +495,7 @@ describe "$Cypress.Cy Window Commands", ->
       it "throws when passed a string as height", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) ->
@@ -508,7 +508,7 @@ describe "$Cypress.Cy Window Commands", ->
       it "throws when passed negative numbers", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) ->
@@ -521,7 +521,7 @@ describe "$Cypress.Cy Window Commands", ->
       it "throws when passed width less than 200", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) ->
@@ -531,10 +531,13 @@ describe "$Cypress.Cy Window Commands", ->
 
         @cy.viewport(199, 600)
 
+      it "does not throw when passed width equal to 200", ->
+        @cy.viewport(200, 600)
+
       it "throws when passed height greater than than 3000", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) ->
@@ -544,10 +547,13 @@ describe "$Cypress.Cy Window Commands", ->
 
         @cy.viewport(1000, 3001)
 
+      it "does not throw when passed width equal to 3000", ->
+        @cy.viewport(200, 3000)
+
       it "throws when passed an empty string as width", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) ->
@@ -560,7 +566,7 @@ describe "$Cypress.Cy Window Commands", ->
       it "throws when passed an invalid orientation on a preset", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", (err) ->
@@ -574,7 +580,7 @@ describe "$Cypress.Cy Window Commands", ->
         it "throws when passed the invalid: '#{val}' as width", (done) ->
           logs = []
 
-          @Cypress.on "log", (log) ->
+          @Cypress.on "log", (attrs, log) ->
             logs.push(log)
 
           @cy.on "fail", (err) ->
@@ -586,7 +592,7 @@ describe "$Cypress.Cy Window Commands", ->
 
     context ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       afterEach ->
         @log = null

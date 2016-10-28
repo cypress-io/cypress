@@ -1,24 +1,42 @@
 _             = require("lodash")
-fs            = require("fs")
-request       = require("request")
-mime          = require("mime")
-path          = require("path")
-Domain        = require("domain")
+zlib          = require("zlib")
+concat        = require("concat-stream")
 through       = require("through")
-jsUri         = require("jsuri")
-trumpet       = require("trumpet")
-urlHelpers    = require("url")
+Promise       = require("bluebird")
 cwd           = require("../cwd")
 logger        = require("../logger")
-escapeRegExp  = require("../util/escape_regexp")
-send          = require("send")
+cors          = require("../util/cors")
+inject        = require("../util/inject")
+buffers       = require("../util/buffers")
+networkFailures = require("../util/network_failures")
 
-headRe           = /(<head.*?>)/
-htmlRe           = /(<html.*?>)/
-okStatusRe       = /^[2|3|4]\d+$/
+headRe      = /(<head.*?>)/i
+bodyRe      = /(<body.*?>)/i
+htmlRe      = /(<html.*?>)/i
+okStatusRe  = /^[2|3|4]\d+$/
+redirectRe  = /^30(1|2|3|7|8)$/
+
+zlib = Promise.promisifyAll(zlib)
+
+setCookie = (res, key, val, domainName) ->
+  ## cannot use res.clearCookie because domain
+  ## is not sent correctly
+  options = {
+    domain: domainName
+  }
+
+  if not val
+    val = ""
+
+    ## force expires to be the epoch
+    options.expires = new Date(0)
+
+  res.cookie(key, val, options)
 
 module.exports = {
-  handle: (req, res, config, getRemoteOrigin, next) ->
+  handle: (req, res, config, getRemoteState, request) ->
+    logger.info("cookies are", req.cookies)
+
     ## if we have an unload header it means
     ## our parent app has been navigated away
     ## directly and we need to automatically redirect
@@ -26,264 +44,231 @@ module.exports = {
     if req.cookies["__cypress.unload"]
       return res.redirect config.clientRoute
 
-    d = Domain.create()
+    remoteState = getRemoteState()
 
-    d.on 'error', (e) =>
-      @errorHandler(e, req, res, getRemoteOrigin())
+    logger.info({"handling request", url: req.url, proxiedUrl: req.proxiedUrl, remoteState: remoteState})
 
-    d.run =>
-      ## 1. first check to see if this url contains a FQDN
-      ## if it does then its been rewritten from an absolute-domain
-      ## into a absolute-path-relative link, and we should extract the
-      ## remoteOrigin from this URL
-      ## 2. or use cookies
-      ## 3. or use baseUrl
-      ## 4. or finally fall back on app instance var
-      remoteOrigin = getRemoteOrigin()
+    ## when you access cypress from a browser which has not
+    ## had its proxy setup then req.url will match req.proxiedUrl
+    ## and we'll know to instantly redirect them to the correct
+    ## client route
+    if req.url is req.proxiedUrl and not remoteState.visiting
+      ## if we dont have a remoteState.origin that means we're initially
+      ## requesting the cypress app and we need to redirect to the
+      ## root path that serves the app
+      return res.redirect(config.clientRoute)
 
-      logger.info "handling initial request", url: req.url, proxiedUrl: req.proxiedUrl, remoteOrigin: remoteOrigin
+    thr = through (d) -> @queue(d)
 
-      ## we must have the remoteOrigin which tell us where
-      ## we should request the initial HTML payload from
-      if not remoteOrigin
-        ## if we dont have a remoteOrigin that means we're initially
-        ## requesting the cypress app and we need to redirect to the
-        ## root path that serves the app
-        return res.redirect(config.clientRoute)
+    @getHttpContent(thr, req, res, remoteState, config, request)
+    .pipe(res)
 
-      thr = through (d) -> @queue(d)
-
-      @getContent(thr, req, res, remoteOrigin, config)
-        .on "error", (e) => @errorHandler(e, req, res, remoteOrigin)
-        .pipe(res)
-
-  getContent: (thr, req, res, remoteOrigin, config) ->
-    switch remoteOrigin
-      ## serve from the file system because
-      ## we are using cypress as our weberver
-      when "<root>"
-        @getFileContent(thr, req, res, remoteOrigin, config)
-
-      ## else go make an HTTP request to the
-      ## real server!
-      else
-        @getHttpContent(thr, req, res, remoteOrigin)
-
-  getHttpContent: (thr, req, res, remoteOrigin) ->
+  getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
-    ## prepends req.url with remoteOrigin
+    ## prepends req.url with remoteState.origin
     remoteUrl = req.proxiedUrl
 
     isInitial = req.cookies["__cypress.initial"] is "true"
 
-    setCookies = (initial, remoteOrigin) =>
+    wantsInjection = null
+
+    resContentTypeIsHtmlAndMatchesOriginPolicy = (respHeaders) ->
+      contentType = respHeaders["content-type"]
+
+      ## bail if our response headers are not text/html
+      return if not (contentType and contentType.includes("text/html"))
+
+      switch remoteState.strategy
+        when "http"
+          cors.urlMatchesOriginPolicyProps(remoteUrl, remoteState.props)
+        when "file"
+          remoteUrl.startsWith(remoteState.origin)
+
+    setCookies = (value) =>
+      ## dont modify any cookies if we're trying to clear
+      ## the initial cookie and we're not injecting anything
+      return if (not value) and (not wantsInjection)
+
       ## dont set the cookies if we're not on the initial request
-      return if req.cookies["__cypress.initial"] isnt "true"
+      return if not isInitial
 
-      res.cookie("__cypress.initial", initial)
+      setCookie(res, "__cypress.initial", value, remoteState.domainName)
 
-    opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
+    getErrorHtml = (err, filePath) =>
+      status = err.status ? 500
 
-    ## do not accept gzip if this is initial
-    ## since we have to rewrite html and we dont
-    ## want to go through the extra step of unzipping it
-    if isInitial
-      opts.gzip = false
-      delete req.headers["accept-encoding"]
+      logger.info("request failed", {url: remoteUrl, status: status, err: err.message})
 
-    rq = request(opts)
+      urlStr = filePath ? remoteUrl
 
-    rq.on "error", (err) ->
-      thr.emit("error", err)
+      networkFailures.get(err, urlStr, status, remoteState.strategy)
 
-    rq.on "response", (incomingRes) =>
-      @setResHeaders(req, res, incomingRes, isInitial)
+    setBody = (str, statusCode, headers) =>
+      ## set the status to whatever the incomingRes statusCode is
+      res.status(statusCode)
+
+      ## turn off __cypress.initial by setting false here
+      setCookies(false, wantsInjection)
+
+      logger.info "received request response"
+
+      ## if there is nothing to inject then just
+      ## bypass the stream buffer and pipe this back
+      if not wantsInjection
+        str.pipe(thr)
+      else
+        rewrite = (body) =>
+          @rewrite(body.toString(), remoteState, wantsInjection)
+
+        injection = concat (body) =>
+          encoding = headers["content-encoding"]
+
+          ## if we're gzipped that means we need to unzip
+          ## this content first, inject, and the rezip
+          if encoding and encoding.includes("gzip")
+            zlib.gunzipAsync(body)
+            .then(rewrite)
+            .then(zlib.gzipAsync)
+            .then(thr.end)
+            .catch(endWithResponseErr)
+          else
+            thr.end rewrite(body)
+
+        str.pipe(injection)
+
+    endWithResponseErr = (err) ->
+      ## use res.statusCode if we have one
+      ## in the case of an ESOCKETTIMEDOUT
+      ## and we have the incomingRes headers
+      checkResStatus = ->
+        if res.headersSent
+          res.statusCode
+
+      status = err.status ? checkResStatus() ? 500
+
+      if not res.headersSent
+        res.removeHeader("Content-Encoding")
+
+      str = through (d) -> @queue(d)
+
+      onResponse(str, {
+        statusCode: status
+        headers: {
+          "content-type": "text/html"
+        }
+      })
+
+      str.end(getErrorHtml(err))
+
+    onResponse = (str, incomingRes) =>
+      {headers, statusCode} = incomingRes
+
+      wantsInjection ?= do ->
+        return false if not resContentTypeIsHtmlAndMatchesOriginPolicy(headers)
+
+        if isInitial then "full" else "partial"
+
+      @setResHeaders(req, res, incomingRes, wantsInjection)
 
       ## always proxy the cookies coming from the incomingRes
-      if cookies = incomingRes.headers["set-cookie"]
+      if cookies = headers["set-cookie"]
         res.append("Set-Cookie", cookies)
 
-      if /^30(1|2|3|7|8)$/.test(incomingRes.statusCode)
-        newUrl = incomingRes.headers.location
+      if redirectRe.test(statusCode)
+        newUrl = headers.location
 
         ## set cookies to initial=true
         setCookies(true)
 
-        logger.info "redirecting to new url", status: incomingRes.statusCode, url: newUrl
+        logger.info "redirecting to new url", status: statusCode, url: newUrl
 
         ## finally redirect our user agent back to our domain
         ## by making this an absolute-path-relative redirect
-        res.redirect(incomingRes.statusCode, newUrl)
+        res.redirect(statusCode, newUrl)
       else
-        ## set the status to whatever the incomingRes statusCode is
-        res.status(incomingRes.statusCode)
-
-        if not okStatusRe.test incomingRes.statusCode
-          return @errorHandler(null, req, res, remoteOrigin)
-
-        logger.info "received absolute file content"
-
-        ## turn off __cypress.initial by setting false here
-        setCookies(false)
-
-        if req.cookies["__cypress.initial"] is "true"
-          # @rewrite(req, res, remoteOrigin)
-          # res.isHtml = true
-          rq.pipe(@rewrite(req, res, remoteOrigin)).pipe(thr)
+        if headers["x-cypress-file-server-error"]
+          filePath = headers["x-cypress-file-path"]
+          wantsInjection or= "partial"
+          str = through (d) -> @queue(d)
+          setBody(str, statusCode, headers)
+          str.end(getErrorHtml({status: statusCode}, filePath))
         else
-          rq.pipe(thr)
+          setBody(str, statusCode, headers)
 
-    ## proxy the request body, content-type, headers
-    ## to the new rq
-    req.pipe(rq)
+    if obj = buffers.take(remoteUrl)
+      wantsInjection = "full"
+
+      ## if we already have an error
+      ## on our stream just immediately
+      ## end with this
+      if err = obj.stream.error
+        endWithResponseErr(err)
+      else
+        ## else listen for the error even which
+        ## could happen at any time
+        obj.stream.on("error", endWithResponseErr)
+
+      onResponse(obj.stream, obj.response)
+    else
+      # opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
+      opts = {followRedirect: false, strictSSL: false}
+
+      if remoteState.strategy is "file" and req.proxiedUrl.startsWith(remoteState.origin)
+        opts.url = req.proxiedUrl.replace(remoteState.origin, remoteState.fileServer)
+      else
+        opts.url = remoteUrl
+
+      rq = request.create(opts)
+
+      rq.on("error", endWithResponseErr)
+
+      rq.on "response", (incomingRes) ->
+        onResponse(rq, incomingRes)
+
+      ## proxy the request body, content-type, headers
+      ## to the new rq
+      req.pipe(rq)
 
     return thr
 
-  getFileContent: (thr, req, res, remoteOrigin, config) ->
-    args = _.compact([
-      config.fileServerFolder,
-      req.url
-    ])
+  setResHeaders: (req, res, incomingRes, wantsInjection) ->
+    return if res.headersSent
 
-    ## strip off any query params from our req's url
-    ## since we're pulling this from the file system
-    ## it does not understand query params
-    ## and make sure we decode the uri which swaps out
-    ## %20 with white space
-    file = decodeURI urlHelpers.parse(path.join(args...)).pathname
-
-    req.formattedUrl = file
-
-    logger.info "getting relative file content", file: file
-
-    res.cookie("__cypress.initial", false)
-
-    sendOpts = {
-      root: path.resolve(config.fileServerFolder)
-      transform: (stream) =>
-        if req.cookies["__cypress.initial"] is "true"
-          stream.pipe(@rewrite(req, res, remoteOrigin)).pipe(thr)
-        else
-          stream.pipe(thr)
-    }
-
-    unless req.cookies["__cypress.initial"] is "true"
-      sendOpts.etag = true
-      sendOpts.lastModified = true
-
-    send(req, urlHelpers.parse(req.url).pathname, sendOpts)
-
-  errorHandler: (e, req, res, remoteOrigin) ->
-    url = req.proxiedUrl
-
-    ## disregard ENOENT errors (that means the file wasnt found)
-    ## which is a perfectly acceptable error (we account for that)
-    if process.env["CYPRESS_ENV"] isnt "production" and e and e.code isnt "ENOENT"
-      console.log(e.stack)
-      debugger
-
-    logger.info "error handling initial request", url: url, error: e
-
-    if e
-      res.set("x-cypress-error", e.message)
-      res.set("x-cypress-stack", JSON.stringify(e.stack))
-
-    filePath = switch
-      when f = req.formattedUrl
-        "file://#{f}"
-      else
-        url
-
-    ## using req here to give us an opportunity to
-    ## write to req.formattedUrl
-    htmlPath = cwd("lib", "html", "initial_500.html")
-    res.status(500).render(htmlPath, {
-      url: filePath
-      fromFile: !!req.formattedUrl
-    })
-
-  setResHeaders: (req, res, incomingRes, isInitial) ->
     ## omit problematic headers
     headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length", "content-security-policy"
 
-    ## do not cache the initial responses, no matter what
+    ## do not cache when we inject content into responses
     ## later on we should switch to an etag system so we dont
     ## have to download the remote http responses if the etag
     ## hasnt changed
-    if isInitial
+    if wantsInjection
       headers["cache-control"] = "no-cache, no-store, must-revalidate"
 
     ## proxy the headers
     res.set(headers)
 
-  rewrite: (req, res, remoteOrigin) ->
-    through = through
+  rewrite: (html, remoteState, wantsInjection) ->
+    rewrite = (re, str) ->
+      html.replace(re, str)
 
-    tr = trumpet()
+    htmlToInject = do =>
+      switch wantsInjection
+        when "full"
+          inject.full(remoteState.domainName)
+        when "partial"
+          inject.partial(remoteState.domainName)
 
-    rewrite = (selector, type, attr, fn) ->
-      options = {}
+    switch
+      when headRe.test(html)
+        rewrite(headRe, "$1 #{htmlToInject}")
 
-      switch
-        when _.isFunction(attr)
-          fn   = attr
-          attr = null
+      when bodyRe.test(html)
+        rewrite(bodyRe, "<head> #{htmlToInject} </head> $1")
 
-        when _.isPlainObject(attr)
-          options = attr
+      when htmlRe.test(html)
+        rewrite(htmlRe, "$1 <head> #{htmlToInject} </head>")
 
-      options.method ?= "selectAll"
-
-      tr[options.method] selector, (elem) ->
-        switch type
-          when "attrs"
-            elem.getAttributes (attrs) ->
-              fn(elem, attrs)
-
-          when "attr"
-            elem.getAttribute attr, (val) ->
-              elem.setAttribute attr, fn(val)
-
-          when "removeAttr"
-            elem.removeAttribute(attr)
-
-          when "html"
-            options.outer ?= true
-            stream = elem.createStream({outer: options.outer})
-            stream.pipe(through (buf) ->
-              @queue fn(buf.toString())
-            ).pipe(stream)
-
-    ## we still aren't handling pages which are missing their <head> tag
-    ## for those we need to insert our own <head> tag
-    rewrite "head", "html", (str) =>
-      str.replace(headRe, "$1 #{@getHeadContent()}")
-
-    # rewrite "html", "html", {method: "select"}, (str) =>
-    #   ## if we are missing a <head> tag then
-    #   ## dynamically insert one
-    #   if not headRe.test(str)
-    #     str.replace(htmlRe, "$1 <head> #{@getHeadContent()} </head>")
-    #   else
-    #     str
-
-    return tr
-
-  getHeadContent: ->
-    "
-      <script type='text/javascript'>
-        window.onerror = function(){
-          parent.onerror.apply(parent, arguments);
-        }
-      </script>
-      <script type='text/javascript' src='/__cypress/static/js/sinon.js'></script>
-      <script type='text/javascript'>
-        var Cypress = parent.Cypress;
-        if (!Cypress){
-          throw new Error('Cypress must exist in the parent window!');
-        };
-        Cypress.onBeforeLoad(window);
-      </script>
-    "
+      else
+        "<head> #{htmlToInject} </head>" + html
 }

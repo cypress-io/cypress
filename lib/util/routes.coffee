@@ -1,6 +1,6 @@
-_       = require("lodash")
-Uri     = require("jsuri")
-konfig  = require("../konfig")
+_        = require("lodash")
+UrlParse = require("url-parse")
+konfig   = require("../konfig")
 
 api_url = konfig("api_url")
 
@@ -22,26 +22,20 @@ routes = {
   exceptions:    "exceptions"
 }
 
-addQueryParams = (url, params) ->
-  _.reduce params, (memo, value, key) ->
-    memo.addQueryParam(key, value)
-    memo
-  , url
-
 parseArgs = (url, args = []) ->
   _.each args, (value) ->
     switch
       when _.isObject(value)
-        addQueryParams(url, value)
+        url.set("query", _.extend(url.query, value))
 
       when _.isString(value)
-        url.setPath url.path().replace(":id", value)
+        url.set("pathname", url.pathname.replace(":id", value))
 
   return url
 
 Routes = _.reduce routes, (memo, value, key) ->
   memo[key] = (args...) ->
-    url = new Uri(api_url).setPath(value)
+    url = new UrlParse(api_url, true).set("pathname", value)
     url = parseArgs(url, args) if args.length
     url.toString()
   memo

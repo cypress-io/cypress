@@ -36,7 +36,7 @@ createFile = (name, level, opts = {}) ->
 
 transports = [createFile("all", null, {handleExceptions: true})]
 
-if process.env["CYPRESS_DEBUG"]
+if process.env.CYPRESS_DEBUG
   transports.push(new (winston.transports.Console)())
 
 logger = new (winston.Logger)({

@@ -2,7 +2,6 @@ _       = require("lodash")
 chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
-logger  = require("./logger")
 
 exceptions = "CI_CANNOT_COMMUNICATE".split(" ")
 
@@ -83,18 +82,25 @@ API = {
       if process.env["CYPRESS_ENV"] is "production"
         ## log this error to raygun since its not
         ## a known error
-        logger.createException(err).catch(->)
+        require("./logger").createException(err).catch(->)
 
   throw: (type, arg) ->
     throw @get(type, arg)
 
-  clone: (err) ->
+  clone: (err, options = {}) ->
+    _.defaults options, {
+      html: false
+    }
+
     ## pull off these properties
     obj = _.pick(err, "type", "name", "stack", "fileName", "lineNumber", "columnNumber")
 
-    obj.message = ansi_up.ansi_to_html(err.message, {
-      use_classes: true
-    })
+    if options.html
+      obj.message = ansi_up.ansi_to_html(err.message, {
+        use_classes: true
+      })
+    else
+      obj.message = err.message
 
     ## and any own (custom) properties
     ## of the err object

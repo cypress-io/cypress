@@ -9,17 +9,15 @@ require("./environment")
 ## essentially do it all again when we boot the correct
 ## mode.
 
-_         = require("lodash")
-os        = require("os")
-cp        = require("child_process")
-path      = require("path")
-Promise   = require("bluebird")
-logger    = require("./logger")
-errors    = require("./errors")
-appData   = require("./util/app_data")
-argsUtil  = require("./util/args")
+_       = require("lodash")
+cp      = require("child_process")
+path    = require("path")
+Promise = require("bluebird")
 
-exit = (code) ->
+exit = (code = 0) ->
+  ## TODO: we shouldn't have to do this
+  ## but cannot figure out how null is
+  ## being passed into exit
   process.exit(code)
 
 exit0 = ->
@@ -29,15 +27,12 @@ exitErr = (err) ->
   ## log errors to the console
   ## and potentially raygun
   ## and exit with 1
-  errors.log(err)
+  require("./errors").log(err)
   .then -> exit(1)
 
 module.exports = {
   isCurrentlyRunningElectron: ->
     !!(process.versions and process.versions.electron)
-
-  isLinuxAndHasNotDisabledGpu: (options) ->
-    process.env["CYPRESS_ENV"] isnt "test" and os.platform() is "linux" and "--disable-gpu" not in process.argv
 
   runElectron: (mode, options) ->
     ## wrap all of this in a promise to force the
@@ -49,47 +44,30 @@ module.exports = {
       ## like in production and we shouldn't spawn a new
       ## process
       if @isCurrentlyRunningElectron()
-        if @isLinuxAndHasNotDisabledGpu()
-          return new Promise (resolve) ->
-            args = ["."].concat(argsUtil.toArray(options))
-            args.push("--disable-gpu")
-
-            ## respawn the same process except with --disable-gpu
-            electron = cp.spawn(process.execPath, args, {
-              stdio: "inherit"
-            })
-
-            ## must resolve with failures since
-            ## our outer headless run promise
-            ## is expecting that object structure
-            onClose = (code, signal) ->
-              resolve({failures: code})
-
-            ## whenever our new child electron process
-            ## closes then we pass this exit code on
-            electron.on("close", onClose)
-
-        else
-          ## just run the gui code directly here
-          ## and pass our options directly to main
-          require("./electron")(mode, options);
+        ## just run the gui code directly here
+        ## and pass our options directly to main
+        require("./electron")(mode, options)
       else
         ## sanity check to ensure we're running
         ## the local dev server. dont crash just
         ## log a warning
         require("./api").ping().catch (err) ->
           console.log(err.message)
-          errors.warning("DEV_NO_SERVER")
+          require("./errors").warning("DEV_NO_SERVER")
 
         ## open the cypress electron wrapper shell app
         new Promise (resolve) ->
           cypressElectron = require("@cypress/core-electron")
-          cypressElectron.open(".", argsUtil.toArray(options), resolve)
+          fn = (code) ->
+            ## juggle up the failures since our outer
+            ## promise is expecting this object structure
+            resolve({failures: code})
+          cypressElectron.open(".", require("./util/args").toArray(options), fn)
 
   openProject: (options) ->
     ## this code actually starts a project
     ## and is spawned from nodemon
-    require("./electron/handlers/project").open(options.project)
+    require("./electron/handlers/project").open(options.project, options)
 
   runServer: (options) ->
     args = {}
@@ -111,7 +89,7 @@ module.exports = {
       ignore: ["--ignore", "lib/public"]
       verbose: "--verbose"
       exts:   ["-e", "coffee,js"]
-      args:   ["--", "--mode", "openProject", "--project", options.project]
+      args:   ["--", "--config", "port=2020", "--mode", "openProject", "--project", options.project]
     })
 
     args = _.chain(args).values().flatten().value()
@@ -133,12 +111,12 @@ module.exports = {
       require("opn")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
 
   start: (argv = []) ->
-    logger.info("starting desktop app", args: argv)
+    require("./logger").info("starting desktop app", args: argv)
 
     ## make sure we have the appData folder
-    appData.ensure()
+    require("./util/app_data").ensure()
     .then =>
-      options = argsUtil.toObject(argv)
+      options = require("./util/args").toObject(argv)
 
       ## else determine the mode by
       ## the passed in arguments / options

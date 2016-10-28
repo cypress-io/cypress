@@ -12,6 +12,7 @@ config       = require("#{root}lib/config")
 scaffold     = require("#{root}lib/scaffold")
 Project      = require("#{root}lib/project")
 settings     = require("#{root}lib/util/settings")
+savedState   = require("#{root}lib/saved_state")
 
 describe "lib/project", ->
   beforeEach ->
@@ -29,6 +30,7 @@ describe "lib/project", ->
 
   afterEach ->
     Fixtures.remove()
+    @project?.close()
 
   it "requires a projectRoot", ->
     fn = -> Project()
@@ -41,19 +43,28 @@ describe "lib/project", ->
 
   context "#getConfig", ->
     beforeEach ->
-      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({baz: "quux"})
+      @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({baz: "quux", integrationFolder: "foo/bar/baz"})
+      @sandbox.stub(@project, "determineIsNewProject").withArgs("foo/bar/baz").resolves(false)
 
-    it "calls config.get with projectRoot + options", ->
+    it "calls config.get with projectRoot + options + saved state", ->
+      @sandbox.stub(savedState, "get").returns(Promise.resolve({ reporterWidth: 225 }))
       @project.getConfig({foo: "bar"})
       .then (cfg) ->
-        expect(cfg).to.deep.eq({baz: "quux"})
+        expect(cfg).to.deep.eq({
+          integrationFolder: "foo/bar/baz"
+          isNewProject: false
+          baz: "quux"
+          state: {
+            reporterWidth: 225
+          }
+        })
 
     it "resolves if cfg is already set", ->
       @project.cfg = {foo: "bar"}
 
       @project.getConfig()
       .then (cfg) ->
-        expect(cfg).to.deep.eq({foo: "bar"})
+        expect(cfg).to.deep.eq({foo: "bar", state: {}})
 
   context "#open", ->
     beforeEach ->
@@ -63,11 +74,6 @@ describe "lib/project", ->
       @sandbox.stub(@project, "scaffold").resolves()
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(@project.server, "open").resolves()
-
-    it "sets changeEvents to false by default", ->
-      opts = {}
-      @project.open(opts).then ->
-        expect(opts.changeEvents).to.be.false
 
     it "sets updateProject to false by default", ->
       opts = {}
@@ -115,6 +121,18 @@ describe "lib/project", ->
     it "does not wait on updateProject", ->
       @project.updateProject.resolves(Promise.delay(10000))
       @project.open()
+
+    it "updates config.state when saved state changes", ->
+      getSavedState = @sandbox.stub(savedState, "get").returns(Promise.resolve({}))
+      options = {}
+      @project.open(options)
+      .then ->
+        getSavedState.returns(Promise.resolve({ autoScrollingEnabled: false }))
+        options.onSavedStateChanged()
+      .then =>
+        @project.getConfig()
+      .then (config) ->
+        expect(config.state).to.eql({ autoScrollingEnabled: false })
 
     it.skip "watches cypress.json", ->
       @server.open().bind(@).then ->
@@ -270,40 +288,40 @@ describe "lib/project", ->
       @watch = @sandbox.stub(@project.watchers, "watch")
 
     it "sets onChange event when {changeEvents: true}", (done) ->
-      @project.watchSettingsAndStartWebsockets({changeEvents: true})
+      @project.watchSettingsAndStartWebsockets({onSettingsChanged: done})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
-
-      @project.on "settings:changed", done
 
       expect(obj.onChange).to.be.a("function")
       obj.onChange()
 
     it "does not call watch when {changeEvents: false}", ->
-      @project.watchSettingsAndStartWebsockets({changeEvents: false})
+      @project.watchSettingsAndStartWebsockets({onSettingsChanged: undefined})
 
       expect(@watch).not.to.be.called
 
-    it "does not emit settings:changed when generatedProjectIdTimestamp is less than 1 second", ->
+    it "does not call onSettingsChanged when generatedProjectIdTimestamp is less than 1 second", ->
       @project.generatedProjectIdTimestamp = timestamp = new Date
 
       emit = @sandbox.spy(@project, "emit")
 
-      @project.watchSettingsAndStartWebsockets({changeEvents: true})
+      stub = @sandbox.stub()
+
+      @project.watchSettingsAndStartWebsockets({onSettingsChanged: stub})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
       obj.onChange()
 
-      expect(emit).not.to.be.called
+      expect(stub).not.to.be.called
 
       ## subtract 1 second from our timestamp
       timestamp.setSeconds(timestamp.getSeconds() - 1)
 
       obj.onChange()
 
-      expect(emit).to.be.calledWith("settings:changed")
+      expect(stub).to.be.calledOnce
 
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->
@@ -318,17 +336,6 @@ describe "lib/project", ->
       @project.watchSettingsAndStartWebsockets({}, c)
 
       expect(@project.server.startWebsockets).to.be.calledWith(@project.watchers, c)
-
-    it "passes onIsNewProject callback", ->
-      @sandbox.stub(@project, "determineIsNewProject")
-
-      @project.server.startWebsockets.yieldsTo("onIsNewProject")
-
-      @project.watchSettingsAndStartWebsockets({}, {
-        integrationFolder: "foo/bar/baz"
-      })
-
-      expect(@project.determineIsNewProject).to.be.calledWith("foo/bar/baz")
 
     it "passes onAutomationRequest callback", ->
       fn = @sandbox.stub()
@@ -354,7 +361,7 @@ describe "lib/project", ->
 
     beforeEach ->
       @project         = Project("path/to/project")
-      @verifyExistance = @sandbox.stub(Project.prototype, "verifyExistance").resolves()
+      @verifyExistence = @sandbox.stub(Project.prototype, "verifyExistence").resolves()
 
     it "resolves with process.env.CYPRESS_PROJECT_ID if set", ->
       process.env.CYPRESS_PROJECT_ID = "123"
@@ -362,12 +369,12 @@ describe "lib/project", ->
       @project.getProjectId().then (id) ->
         expect(id).to.eq("123")
 
-    it "calls verifyExistance", ->
+    it "calls verifyExistence", ->
       @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
 
       @project.getProjectId()
       .then =>
-        expect(@verifyExistance).to.be.calledOnce
+        expect(@verifyExistence).to.be.calledOnce
 
     it "returns the project id from settings", ->
       @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
@@ -475,6 +482,8 @@ describe "lib/project", ->
   context "#ensureSpecUrl", ->
     beforeEach ->
       @project2 = Project(@idsPath)
+
+      settings.write(@idsPath, {port: 2020})
 
     it "returns fully qualified url when spec exists", ->
       @project2.ensureSpecUrl("cypress/integration/bar.js")

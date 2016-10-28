@@ -9,8 +9,12 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
       p2.toUpperCase()
 
   mergeDefaults = (obj) ->
+    ## we always want to be able to see and influence cookies
+    ## on our superdomain
+    {superDomain} = Cypress.Location.create(window.location.href)
+
     merge = (o) ->
-      _.defaults o, {domain: window.location.hostname}
+      _.defaults o, {domain: superDomain}
 
     if _.isArray(obj)
       _.map(obj, merge)

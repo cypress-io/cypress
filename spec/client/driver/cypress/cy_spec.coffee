@@ -67,7 +67,7 @@ describe "$Cypress.Cy API", ->
 
       it "restore", ->
         restore = @sandbox.stub @cy, "restore"
-        @Cypress.trigger "restore"
+        @Cypress.trigger("restore")
         expect(restore).to.be.calledOnce
 
       it "abort", ->
@@ -114,15 +114,6 @@ describe "$Cypress.Cy API", ->
         @Cypress.trigger("restore")
         expect(reset).to.be.calledOnce
 
-      it "calls endedEarlyErr if index > 0 and < queue.length", ->
-        endedEarlyErr = @sandbox.stub @cy, "endedEarlyErr"
-        @cy.prop("index", 2)
-        @cy.commands.splice(0, 1, {})
-        @cy.commands.splice(1, 2, {})
-        @cy.commands.splice(2, 3, {})
-        @cy.restore()
-        expect(endedEarlyErr).to.be.calledOnce
-
     describe "#abort", ->
       beforeEach ->
         @cy = $Cypress.Cy.create(@Cypress, @specWindow)
@@ -131,6 +122,20 @@ describe "$Cypress.Cy API", ->
       it "returns a promise", ->
         abort = @cy.abort()
         expect(abort).to.be.instanceof Promise
+
+    describe "#checkForEndedEarly", ->
+      beforeEach ->
+        @cy = $Cypress.Cy.create(@Cypress, @specWindow)
+        null
+
+      it "calls endedEarlyErr if index > 0 and < queue.length", ->
+        endedEarlyErr = @sandbox.stub @cy, "endedEarlyErr"
+        @cy.prop("index", 2)
+        @cy.commands.splice(0, 1, {})
+        @cy.commands.splice(1, 2, {})
+        @cy.commands.splice(2, 3, {})
+        @cy.checkForEndedEarly()
+        expect(endedEarlyErr).to.be.calledOnce
 
     describe "#_setRunnable", ->
       beforeEach ->
@@ -147,11 +152,11 @@ describe "$Cypress.Cy API", ->
         @cy._setRunnable(obj, "test")
         expect(obj.startedAt).to.be.a("date")
 
-      it "sets runnable timeout to config.commandTimeout", ->
+      it "sets runnable timeout to config.defaultCommandTimeout", ->
         @test.enableTimeouts(false)
         t = @test
         timeout = @sandbox.spy t, "timeout"
-        @Cypress.config("commandTimeout", 1000)
+        @Cypress.config("defaultCommandTimeout", 1000)
         @cy._setRunnable(t)
         expect(timeout).to.be.calledWith 1000
         expect(t._timeout).to.eq 1000

@@ -1,29 +1,34 @@
-os   = require("os")
-Menu = require("electron").Menu
+_     = require("lodash")
+os    = require("os")
+Menu  = require("electron").Menu
+shell = require("electron").shell
 
 module.exports = {
-  set: ->
+  set: (options = {}) ->
+    _.defaults(options, {
+      onUpdatesClicked: ->
+      onLogOutClicked: ->
+    })
+
     template = [
       {
         label: "File"
         submenu: [
           {
-            label: "Add Project..."
-          }
-          {
-            type: "separator"
+            label: "Changelog"
+            click: ->
+              shell.openExternal("https://on.cypress.io/changelog")
           }
           {
             label: "Check for Updates"
-          }
-          {
-            label: "Changelog"
+            click: options.onUpdatesClicked
           }
           {
             type: "separator"
           }
           {
             label: "Log Out"
+            click: options.onLogOutClicked
           }
           {
             type: "separator"
@@ -90,12 +95,18 @@ module.exports = {
         submenu: [
           {
             label: "Report an Issue.."
+            click: ->
+              shell.openExternal("https://on.cypress.io/new-issue")
           }
           {
             label: "Cypress Documentation"
+            click: ->
+              shell.openExternal("https://on.cypress.io")
           }
           {
             label: "Cypress Chat"
+            click: ->
+              shell.openExternal("https://on.cypress.io/chat")
           }
         ]
       }
@@ -141,21 +152,12 @@ module.exports = {
           {
             label: "Quit"
             accelerator: "Command+Q"
-            role: "quit"
+            #role: "quit" ## must upgrade to latest electron
+            click: (item, focusedWindow) =>
+              process.exit(0)
           }
         ]
       })
-
-      windowMenu = template.find (m) =>
-        m.role is "window"
-
-      if windowMenu
-        windowMenu.submenu.push(
-          {
-            label: "Zoom"
-            role: "performZoom"
-          }
-        )
 
     if process.env["CYPRESS_ENV"] is "development"
       template.push(

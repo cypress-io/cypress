@@ -4,10 +4,12 @@ _            = require("lodash")
 os           = require("os")
 path         = require("path")
 uuid         = require("node-uuid")
+Promise      = require("bluebird")
 socketIo     = require("@cypress/core-socket")
 extension    = require("@cypress/core-extension")
-Promise      = require("bluebird")
+httpsAgent   = require("https-proxy-agent")
 open         = require("#{root}lib/util/open")
+errors       = require("#{root}lib/errors")
 config       = require("#{root}lib/config")
 Socket       = require("#{root}lib/socket")
 Server       = require("#{root}lib/server")
@@ -15,6 +17,7 @@ Watchers     = require("#{root}lib/watchers")
 automation   = require("#{root}lib/automation")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
 exec         = require("#{root}lib/exec")
+savedState   = require("#{root}lib/saved_state")
 
 describe "lib/socket", ->
   beforeEach ->
@@ -36,7 +39,9 @@ describe "lib/socket", ->
       ## so we can test server emit / client emit events
       @server.open(@cfg)
       .then =>
-        @options = {}
+        @options = {
+          onSavedStateChanged: @sandbox.spy()
+        }
         @watchers = {}
         @server.startWebsockets(@watchers, @cfg, @options)
         @socket = @server._socket
@@ -50,7 +55,14 @@ describe "lib/socket", ->
 
         {clientUrlDisplay, socketIoRoute} = @cfg
 
-        @client = socketIo.client(clientUrlDisplay, {path: socketIoRoute})
+        ## force node into legit proxy mode like a browser
+        agent = new httpsAgent("http://localhost:#{@cfg.port}")
+
+        @client = socketIo.client(clientUrlDisplay, {
+          agent: agent
+          path: socketIoRoute
+          transports: ["websocket"]
+        })
 
     afterEach ->
       @client.disconnect()
@@ -156,7 +168,7 @@ describe "lib/socket", ->
 
           @sandbox.stub(chrome.tabs, "query")
           .withArgs({windowType: "normal"})
-          .yieldsAsync([{id: 1}])
+          .yieldsAsync([{id: 1, url: "http://localhost"}])
 
           @sandbox.stub(chrome.tabs, "executeScript")
           .withArgs(1, {code: code})
@@ -280,26 +292,9 @@ describe "lib/socket", ->
       beforeEach ->
         @sandbox.stub(open, "opn").resolves()
 
-      it "calls opn with path + opts on darwin", (done) ->
-        @sandbox.stub(os, "platform").returns("darwin")
-
+      it "calls opn with path", (done) ->
         @client.emit "open:finder", @cfg.parentTestsFolder, =>
-          expect(open.opn).to.be.calledWith(@cfg.parentTestsFolder, {args: "-R"})
-          done()
-
-      it "calls opn with path + no opts when not on darwin", (done) ->
-        @sandbox.stub(os, "platform").returns("linux")
-
-        @client.emit "open:finder", @cfg.parentTestsFolder, =>
-          expect(open.opn).to.be.calledWith(@cfg.parentTestsFolder, {})
-          done()
-
-    context "on(is:new:project)", ->
-      it "calls onNewProject with config + cb", (done) ->
-        @options.onIsNewProject = @sandbox.stub().resolves(true)
-
-        @client.emit "is:new:project", (ret) =>
-          expect(ret).to.be.true
+          expect(open.opn).to.be.calledWith(@cfg.parentTestsFolder)
           done()
 
     context "on(watch:test:file)", ->
@@ -325,7 +320,7 @@ describe "lib/socket", ->
       it "calls socket#onFixture", (done) ->
         onFixture = @sandbox.stub(@socket, "onFixture").yieldsAsync("bar")
 
-        @client.emit "fixture", "foo", (resp) =>
+        @client.emit "fixture", "foo", {}, (resp) =>
           expect(resp).to.eq("bar")
 
           ## ensure onFixture was called with those same arguments
@@ -337,7 +332,7 @@ describe "lib/socket", ->
       it "returns the fixture object", ->
         cb = @sandbox.spy()
 
-        @socket.onFixture(@cfg, "foo", cb).then ->
+        @socket.onFixture(@cfg, "foo", {}, cb).then ->
           expect(cb).to.be.calledWith [
             {"json": true}
           ]
@@ -345,122 +340,32 @@ describe "lib/socket", ->
       it "errors when fixtures fails", ->
         cb = @sandbox.spy()
 
-        @socket.onFixture(@cfg, "invalid.exe", cb).then ->
+        @socket.onFixture(@cfg, "does-not-exist.txt", {}, cb).then ->
           obj = cb.getCall(0).args[0]
           expect(obj).to.have.property("__error")
-          expect(obj.__error).to.eq "Invalid fixture extension: '.exe'. Acceptable file extensions are: .json, .js, .coffee, .html, .txt, .png, .jpg, .jpeg, .gif, .tif, .tiff, .zip"
+          expect(obj.__error).to.include "No fixture exists at:"
 
     context "on(request)", ->
       it "calls socket#onRequest", (done) ->
-        onRequest = @sandbox.stub(@socket, "onRequest").callsArgWithAsync(2, "bar")
+        @sandbox.stub(@options, "onRequest").resolves({foo: "bar"})
 
         @client.emit "request", "foo", (resp) ->
-          expect(resp).to.eq("bar")
-
-          ## ensure onRequest was called with those same arguments
-          ## therefore we have verified the socket binding and
-          ## the call into onRequest with the proper arguments
-          expect(onRequest.getCall(0).args[1]).to.eq("foo")
-          done()
-
-      it "returns the request object", ->
-        nock("http://localhost:8080")
-        .matchHeader("Cookie", "foo=bar")
-        .get("/status.json")
-        .reply(200, {status: "ok"})
-
-        cb1 = @sandbox.spy()
-        cb2 = @sandbox.spy()
-
-        req = {
-          url: "http://localhost:8080/status.json"
-          cookies: {foo: "bar"}
-        }
-
-        @socket.onRequest(cb1, req, cb2).then ->
-          expect(cb2).to.be.calledWithMatch {
-            status: 200
-            body: {status: "ok"}
-          }
-
-      it "sends up cookies from automation(get:cookies)", (done) ->
-        @oar = @options.onAutomationRequest = @sandbox.stub()
-
-        @oar.withArgs("get:cookies", {domain: "localhost"}).resolves([
-          {name: "__cypress.initial", value: "true"}
-          {name: "foo", value: "bar"}
-          {name: "baz", value: "quux"}
-        ])
-
-        nock("http://localhost:8080")
-        .matchHeader("Cookie", "foo=bar; baz=quux")
-        .get("/status.json")
-        .reply(200, {status: "ok"})
-
-        req = {
-          url: "http://localhost:8080/status.json"
-          cookies: true
-          domain: "localhost"
-        }
-
-        @client.emit "request", req, (resp) ->
-          expect(resp.body).to.deep.eq({status: "ok"})
-          expect(resp.status).to.eq(200)
-          expect(resp.headers).to.deep.eq({
-            "content-type": "application/json"
-          })
+          expect(resp).to.deep.eq({foo: "bar"})
 
           done()
 
-      it "extracts domain from the url when domain is omitted", (done) ->
-        @oar = @options.onAutomationRequest = @sandbox.stub()
+      it "catches errors and clones them", (done) ->
+        err = new Error("foo bar baz")
 
-        @oar.withArgs("get:cookies", {domain: "www.google.com"}).resolves([
-          {name: "__cypress.initial", value: "true"}
-          {name: "foo", value: "bar"}
-          {name: "baz", value: "quux"}
-        ])
+        @sandbox.stub(@options, "onRequest").rejects(err)
 
-        nock("http://www.google.com:8080")
-        .matchHeader("Cookie", "foo=bar; baz=quux")
-        .get("/status.json")
-        .reply(200, {status: "ok"})
-
-        req = {
-          url: "http://www.google.com:8080/status.json"
-          cookies: true
-        }
-
-        @client.emit "request", req, (resp) ->
-          expect(resp.body).to.deep.eq({status: "ok"})
-          expect(resp.status).to.eq(200)
-          expect(resp.headers).to.deep.eq({
-            "content-type": "application/json"
-          })
+        @client.emit "request", "foo", (resp) ->
+          expect(resp).to.deep.eq({__error: errors.clone(err)})
 
           done()
-
-      it "errors when request fails", ->
-        nock.enableNetConnect()
-
-        nock("http://localhost:8080")
-        .get("/status.json")
-        .reply(200, {status: "ok"})
-
-        cb1 = @sandbox.spy()
-        cb2 = @sandbox.spy()
-
-        req = {
-          url: "http://localhost:1111/foo"
-          cookies: false
-        }
-
-        @socket.onRequest(cb1, req, cb2).then ->
-          obj = cb2.getCall(0).args[0]
-          expect(obj).to.have.property("__error", "Error: connect ECONNREFUSED 127.0.0.1:1111")
 
     context "on(exec)", ->
-      it "calls exit#run with project root and options", (done) ->
+      it "calls exec#run with project root and options", (done) ->
         run = @sandbox.stub(exec, "run").returns(Promise.resolve("Desktop Music Pictures"))
 
         @client.emit "exec", { cmd: "ls" }, (resp) =>
@@ -476,6 +381,20 @@ describe "lib/socket", ->
         @client.emit "exec", { cmd: "lsd" }, (resp) =>
           expect(resp.__error).to.equal("command not found: lsd")
           expect(resp.timedout).to.be.true
+          done()
+
+    context "on(save:app:state)", ->
+      beforeEach ->
+        @setState = @sandbox.stub(savedState, "set").returns(Promise.resolve())
+
+      it "calls savedState#set with the state", ->
+        @client.emit "save:app:state", { reporterWidth: 500 }, =>
+          expect(@setState).to.be.calledWith({ reporterWidth: 500 })
+          done()
+
+      it "calls onSavedStateChanged", ->
+        @client.emit "save:app:state", { reporterWidth: 235 }, =>
+          expect(@options.onSavedStateChanged).to.have.been.called
           done()
 
   context "unit", ->

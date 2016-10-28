@@ -20,7 +20,7 @@ describe "$Cypress.Cy Location Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -37,7 +37,7 @@ describe "$Cypress.Cy Location Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -56,7 +56,7 @@ describe "$Cypress.Cy Location Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -67,7 +67,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           if @log.get("name") is "location"
             throw new Error("cy.location() should not have logged out.")
 
@@ -76,7 +76,7 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "ends immediately", ->
         @cy.url().then ->
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
           expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
@@ -125,7 +125,7 @@ describe "$Cypress.Cy Location Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -142,7 +142,7 @@ describe "$Cypress.Cy Location Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -161,7 +161,7 @@ describe "$Cypress.Cy Location Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -172,7 +172,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           if @log.get("name") is "location"
             throw new Error("cy.location() should not have logged out.")
 
@@ -181,7 +181,7 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "ends immediately", ->
         @cy.hash().then ->
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
           expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
@@ -215,7 +215,7 @@ describe "$Cypress.Cy Location Commands", ->
     it "returns the location object", ->
       @cy.location().then (loc) ->
         keys = _.keys loc
-        expect(keys).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString"]
+        expect(keys).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "originPolicy", "superDomain", "toString"]
 
     it "returns a specific key from location object", ->
       @cy.location("href").then (href) ->
@@ -235,7 +235,7 @@ describe "$Cypress.Cy Location Commands", ->
         @currentTest.timeout(100)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
-        @Cypress.on "log", (log) =>
+        @Cypress.on "log", (attrs, log) =>
           if log.get("name") is "assert"
             @log = log
 
@@ -252,7 +252,7 @@ describe "$Cypress.Cy Location Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -271,7 +271,7 @@ describe "$Cypress.Cy Location Commands", ->
       it "does not log an additional log on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           logs.push(log)
 
         @cy.on "fail", ->
@@ -282,14 +282,14 @@ describe "$Cypress.Cy Location Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       afterEach ->
         delete @log
 
       it "ends immediately", ->
         @cy.location("href").then ->
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
           expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
@@ -331,4 +331,4 @@ describe "$Cypress.Cy Location Commands", ->
 
           expect(_(consoleProps).keys()).to.deep.eq ["Command", "Returned"]
           expect(consoleProps.Command).to.eq "location"
-          expect(_(consoleProps.Returned).keys()).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString"]
+          expect(_(consoleProps.Returned).keys()).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "originPolicy", "superDomain", "toString"]

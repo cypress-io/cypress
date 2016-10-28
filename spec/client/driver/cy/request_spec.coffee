@@ -336,7 +336,7 @@ describe "$Cypress.Cy Request Commands", ->
         ## respond after 50 ms
         @respondWith({}, 50)
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           @cmd = @cy.commands.first()
           @Cypress.abort()
 
@@ -352,7 +352,7 @@ describe "$Cypress.Cy Request Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
 
       it "can turn off logging", ->
         @respondWith({status: 200})
@@ -366,7 +366,7 @@ describe "$Cypress.Cy Request Commands", ->
       it "logs immediately before resolving", (done) ->
         @respondWith({status: 200})
 
-        @Cypress.on "log", (log) ->
+        @Cypress.on "log", (attrs, log) ->
           if log.get("name") is "request"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("message")).to.eq("")
@@ -452,7 +452,7 @@ describe "$Cypress.Cy Request Commands", ->
       it "throws when no url is passed", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -470,7 +470,7 @@ describe "$Cypress.Cy Request Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -485,7 +485,7 @@ describe "$Cypress.Cy Request Commands", ->
       it "throws when url isnt a string", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -502,7 +502,7 @@ describe "$Cypress.Cy Request Commands", ->
       it "throws when auth is truthy but not an object", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -520,7 +520,7 @@ describe "$Cypress.Cy Request Commands", ->
       it "throws when cookies is truthy but not an object", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -538,7 +538,7 @@ describe "$Cypress.Cy Request Commands", ->
       it "throws when headers is truthy but not an object", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -556,7 +556,7 @@ describe "$Cypress.Cy Request Commands", ->
       it "throws on invalid method", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -574,7 +574,7 @@ describe "$Cypress.Cy Request Commands", ->
       it "throws when gzip is not boolean", (done) ->
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -594,7 +594,7 @@ describe "$Cypress.Cy Request Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -611,7 +611,7 @@ describe "$Cypress.Cy Request Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>
@@ -709,7 +709,7 @@ describe "$Cypress.Cy Request Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
         @cy.on "fail", (err) =>

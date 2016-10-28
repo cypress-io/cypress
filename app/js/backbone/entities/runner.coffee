@@ -77,17 +77,20 @@
         @listenTo @Cypress, "take:screenshot", (name, cb) =>
           @socket.emit "automation:request", "take:screenshot", name, cb
 
-        @listenTo @Cypress, "domain:set", (url, cb) =>
-          @socket.emit "domain:set", url, cb
-
-        @listenTo @Cypress, "domain:change", (title, fn, cb) =>
-          @socket.emit "domain:change", title, fn, cb
+        @listenTo @Cypress, "preserve:run:state", (title, fn, cb) =>
+          @socket.emit "preserve:run:state", title, fn, cb
 
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "adapter:request", msg, data, cb
 
-        @listenTo @Cypress, "fixture", (fixture, cb) =>
-          @socket.emit "fixture", fixture, cb
+        @listenTo @Cypress, "fixture", (fixture, options, cb) =>
+          @socket.emit "fixture", fixture, options, cb
+
+        @listenTo @Cypress, "read:file", (file, options, cb) =>
+          @socket.emit "read:file", file, options, cb
+
+        @listenTo @Cypress, "write:file", (file, contents, options, cb) =>
+          @socket.emit "write:file", file, contents, options, cb
 
         @listenTo @Cypress, "request", (options, cb) =>
           @socket.emit "request", options, cb
@@ -110,8 +113,8 @@
         @listenTo @Cypress, "test:after:hooks", (test) =>
           @socket.emit "test:after:hooks", @transfer(test)
 
-        @listenTo @Cypress, "domain:change", (title, fn, cb) =>
-          @socket.emit "domain:change", title, fn, cb
+        @listenTo @Cypress, "preserve:run:state", (title, fn, cb) =>
+          @socket.emit "preserve:run:state", title, fn, cb
 
         @listenTo @Cypress, "log", (log) =>
           id         = _.uniqueId("l")
@@ -416,7 +419,7 @@
               continue
 
             if (runnable.title isnt e.title) or (runnable.fn.toString() isnt e.fn)
-              runnable._SKIPPED = true
+              runnable._ALREADY_RAN = true
               runnable.pending = true
               ## delete the fn?
               # delete runnable.fn

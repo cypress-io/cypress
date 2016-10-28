@@ -1,6 +1,7 @@
 describe "$Cypress.Runner API", ->
   beforeEach ->
     @Cypress = $Cypress.create()
+    @Cypress.setConfig({numTestsKeptInMemory: 50, isHeadless: true})
 
   context ".create", ->
 
@@ -103,7 +104,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "suite", (@suite) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "suite:start", @runner.wrap(@suite)
+          expect(@trigger).to.be.calledWith "mocha", "suite", @runner.wrap(@suite)
           done()
 
     describe "runner.on('suite end')", ->
@@ -111,7 +112,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "suite end", (@suite) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "suite:end", @runner.wrap(@suite)
+          expect(@trigger).to.be.calledWith "mocha", "suite end", @runner.wrap(@suite)
           done()
 
     describe "runner.on('hook')", ->
@@ -119,7 +120,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "hook", (@hook) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "hook:start", _.omit(@runner.wrap(@hook), "duration")
+          expect(@trigger).to.be.calledWithMatch "mocha", "hook", @runner.wrap(@hook)
           done()
 
       it "calls Cypress.set with the test + hookName", (done) ->
@@ -165,7 +166,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "hook end", (@hook) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "hook:end", @runner.wrap(@hook)
+          expect(@trigger).to.be.calledWithMatch "mocha", "hook end", @runner.wrap(@hook)
           done()
 
       it "does not call Cypress.set if hook isnt before each", (done) ->
@@ -203,7 +204,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "test", (@test) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "test:start", _.omit(@runner.wrap(@test), "duration", "state")
+          expect(@trigger).to.be.calledWithMatch "mocha", "test", @runner.wrap(@test)
           done()
 
       it "sets this.test", (done) ->
@@ -228,7 +229,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "test", (@test) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "test:end", @runner.wrap(@test)
+          expect(@trigger).to.be.calledWithMatch "mocha", "test end", @runner.wrap(@test)
           done()
 
     describe "runner.on('pending')", ->
@@ -239,7 +240,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "pending", (@test) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "test:start", @runner.wrap(@test)
+          expect(@trigger).to.be.calledWithMatch "mocha", "test", @runner.wrap(@test)
           done()
 
     describe "runner.on('fail')", ->
@@ -250,7 +251,9 @@ describe "$Cypress.Runner API", ->
           throw err
 
         @runner.run ->
-          expect(test.err).to.eq err
+          expect(test.err.message).to.eq err.message
+          expect(test.err.name).to.eq err.name
+          expect(test.err.stack).to.eq err.stack
           done()
 
       it "calls hookFailed if test.type is hook", (done) ->
@@ -264,6 +267,14 @@ describe "$Cypress.Runner API", ->
         @runner.run ->
           expect(hookFailed).to.be.calledWith
           done()
+
+  context "#getHookName", ->
+    beforeEach ->
+      @runner = $Cypress.Runner.runner(@Cypress, {})
+      @hook = {title: '"before each" hook for "t2a"'}
+
+    it "matches only the first quotes", ->
+      expect(@runner.getHookName(@hook)).to.eq("before each")
 
   context "#hookFailed", ->
     beforeEach (done) ->
@@ -285,7 +296,7 @@ describe "$Cypress.Runner API", ->
       ## we're additionally testing that Cypress
       ## fires this test:end event since thats
       ## how we actually get our test!
-      @Cypress.on "test:end", (@relatedTest) =>
+      @Cypress.on "test:after:run", (@relatedTest) =>
 
       @runner.run -> done()
 
@@ -713,7 +724,7 @@ describe "$Cypress.Runner API", ->
       expect(types).to.deep.eq ["suite", "test", "suite", "test", "test", "suite", "test"]
 
     it "returns only matching tests + suites to the grep", ->
-      runnables = @runner.normalizeAll(/four/)
+      runnables = @runner.normalizeAll({}, /four/)
 
       expect(@runner.tests).to.have.length(1)
 
@@ -763,7 +774,7 @@ describe "$Cypress.Runner API", ->
         grep = /\w+/
         test = @sandbox.spy grep, "test"
 
-        @runner.normalizeAll(grep)
+        @runner.normalizeAll({}, grep)
 
         ## we have 4 tests, thats how many should have been grepp'd!
         expect(test.callCount).to.eq 4
@@ -826,12 +837,6 @@ describe "$Cypress.Runner API", ->
 
       @runner.run =>
         expect(@removeAllListeners).to.be.calledOnce
-        done()
-
-    it "resets runnables", (done) ->
-
-      @runner.run =>
-        expect(@runner.runnables).to.deep.eq []
         done()
 
   context "#abort", ->
@@ -944,9 +949,9 @@ describe "$Cypress.Runner API", ->
 
     it "sets err to err", ->
       @runner.afterEachFailed(@_test, @err)
-      expect(@_test.err).to.eq @err
+      expect(@_test.err).to.deep.eq @runner.wrapErr(@err)
 
     it "triggers test:end", ->
       trigger = @sandbox.spy @Cypress, "trigger"
       @runner.afterEachFailed(@_test, @err)
-      expect(trigger).to.be.calledWith "test:end", @_test
+      expect(trigger).to.be.calledWith "mocha", "test end", @_test
