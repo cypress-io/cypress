@@ -27,7 +27,7 @@ By default Cypress expects your CI provider to have:
 In addition, you should install the following libraries:
 
 ```shell
-apt-get install libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3
+apt-get install libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1
 ```
 
 Every CI service has these dependencies installed, and therefore Cypress should run on every single service. However if you're running your own `Jenkins` server, you'll likely need to install what is listed above.
