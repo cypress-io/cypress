@@ -4,11 +4,19 @@ path        = require("path")
 gutil       = require("gulp-util")
 Stream      = require("stream")
 coffee      = require("coffee-script")
+babelify    = require("babelify")
 browserify  = require("browserify")
-coffeeify   = require("coffeeify")
+cjsxify     = require("cjsxify")
 Domain      = require("domain")
 Snockets    = require("snockets")
 requirejs   = require("requirejs")
+
+pluginAddModuleExports = require("babel-plugin-add-module-exports")
+presetLatest = require("babel-preset-latest")
+presetReact = require("babel-preset-react")
+
+isTestFile = (filePath, integrationFolder) ->
+  filePath.indexOf(integrationFolder) > -1
 
 module.exports = {
   handle: (spec, req, res, config, next) ->
@@ -25,21 +33,42 @@ module.exports = {
       spec
     )
 
-    options =
-      baseUrl: config.projectRoot
-      name: filePath
-      out: "main.js"
+    domain = Domain.create()
 
-    if config.requirejs
-      requirejs.optimize options, (buildResponse) ->
-        ## need to wrap these contents with almond so we dont
-        ## have to add the require.js script tag (which is huge)
-        contents = fs.readFileSync(options.out, 'utf8')
+    domain.on 'error', ->
+      gutil.beep()
+      next arguments...
 
-        ## also we need to delete options.out since requirejs
-        ## generates this
-        debugger
+    domain.run =>
+      contentsStream = if isTestFile(filePath, config.integrationFolder)
+        @streamTestFile(filePath, res)
+      else
+        @streamNonTestFile(filePath, res)
 
+      contentsStream.pipe(res)
+
+  streamTestFile: (filePath) ->
+    return browserify({
+      entries: [filePath]
+      extensions: [".js", ".jsx", ".coffee", ".cjsx"]
+    })
+    .transform(cjsxify)
+    .transform(babelify, {
+      plugins: [pluginAddModuleExports],
+      presets: [presetLatest, presetReact],
+    })
+    ## necessary for enzyme
+    ## https://github.com/airbnb/enzyme/blob/master/docs/guides/browserify.md
+    .external([
+      'react/addons'
+      'react/lib/ReactContext'
+      'react/lib/ExecutionEnvironment'
+    ])
+    ## TODO: handle errors gracefully, exposed in UI
+    .on('error', (err) -> console.error('Browserify error:', err))
+    .bundle()
+
+  streamNonTestFile: (filePath) ->
     snockets = new Snockets()
 
     ## dependencies returns an array of objects for all of the dependencies
@@ -59,28 +88,6 @@ module.exports = {
     stream.push(contents)
     stream.push(null)
 
-    domain = Domain.create()
-    domain.on 'error', ->
-      gutil.beep()
-      next arguments...
-    domain.run =>
-      if opts = config.browserify
-        @browserify(opts, stream)
-        .pipe(res)
-      # if opts = config.requirejs
-        # @requirejs(opts, stream)
-        # .pipe(res)
-      else
-        stream.pipe(res)
-
-  browserify: (opts, fileStream) ->
-    browserify([fileStream], opts)
-    .transform({}, coffeeify)
-    .bundle()
-
-  # requirejs: (opts, fileStream) ->
-  #   requirejs opts, (buildResponse) ->
-  #     debugger
-
+    return stream
 
 }
