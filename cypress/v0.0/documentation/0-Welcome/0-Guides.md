@@ -27,7 +27,7 @@ excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 | [Finding Elements](https://on.cypress.io/guides/finding-elements) | Traverse the DOM, find elements, make assertions |
 | [Making Assertions](https://on.cypress.io/guides/making-assertions) | Set expectations for the behavior |
 | [Network Requests](https://on.cypress.io/guides/network-requests-xhr) | Handle AJAX/XHR Requests |
-| [Continous Integration](https://on.cypress.io/guides/continuous-integration) | Integrate with CI Providers |
+| [Continuous Integration](https://on.cypress.io/guides/continuous-integration) | Integrate with CI Providers |
 | [Environment Variables](https://on.cypress.io/guides/environment-variables) | Set environment variables |
 | [Using Aliases](https://on.cypress.io/guides/using-aliases) | Represent an object as alias |
 | [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures) | Mock data in fixtures |

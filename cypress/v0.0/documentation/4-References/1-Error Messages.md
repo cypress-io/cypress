@@ -198,13 +198,13 @@ You can globally disable animation error checking, or increase the threshold by 
 
 # Running Cypress in CI requires a secret project key
 
-You may receive this error when trying to run Cypress tests in Continous Integration. This means that you did not pass a specific key to: `cypress ci` in your CI configuration file.
+You may receive this error when trying to run Cypress tests in Continuous Integration. This means that you did not pass a specific key to: `cypress ci` in your CI configuration file.
 
 Since no key was passed, Cypress then checks for any environment variable with the name `CYPRESS_CI_KEY`, but still didn't find any.
 
 You can get your project's secret key by running the terminal command: `cypress get:key`
 
-Then [add the key to your config file or as an environment variable](https://on.cypress.io/guides/continous-integration#section-acquire-a-cypress-secret-key).
+Then [add the key to your config file or as an environment variable](https://on.cypress.io/guides/continuous-integration#section-acquire-a-cypress-secret-key).
 
 ***
 
