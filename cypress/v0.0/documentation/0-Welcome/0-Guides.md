@@ -4,7 +4,7 @@ excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 [block:callout]
 {
   "type": "info",
-  "body": "[Watch our talk at Nodevember 2015.](https://youtu.be/yq99BvSe1AQ)",
+  "body": "[Explore talks, blogs, and podcasts about testing in Cypress.](https://www.cypress.io/explore)",
   "title": "Want to see Cypress in action?"
 }
 [/block]
