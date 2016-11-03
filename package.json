@@ -52,7 +52,7 @@
     "mobx-react-devtools": "^4.2.0",
     "rc-tooltip": "^3.3.5",
     "react": "^15.1.0",
-    "react-bootstrap-modal": "2.1.0",
+    "react-bootstrap-modal": "3.0.1",
     "react-contextmenu": "^1.6.2",
     "react-dom": "^15.1.0",
     "react-loader": "^2.4.0",
