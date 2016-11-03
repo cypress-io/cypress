@@ -106,6 +106,30 @@ For instance, with [Travis CI](https://docs.travis-ci.com/user/customizing-the-b
 
 ***
 
+# Optimizing CI
+
+Most CI providers allow caching of directories and dependencies between builds. This allows you to save the state of Cypress, thereforce making the builds run faster.
+
+## Example of caching Cypress in Travis CI in `travis.yml`
+
+```yml
+cache:
+  directories:
+    - /home/travis/.cypress/Cypress
+```
+
+## Example of caching Cypress in CircleCI's `circle.yml`
+
+```yml
+dependencies:
+  cache_directories:
+    - /home/ubuntu/nvm/versions/node/v6.2.2/bin/cypress
+    - /home/ubuntu/nvm/versions/node/v6.2.2/lib/node_modules/cypress-cli
+    - /home/ubuntu/.cypress/Cypress
+```
+
+***
+
 # Environment variables
 
 ## Cypress CI Key
