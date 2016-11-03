@@ -12,6 +12,9 @@ excerpt: Run Cypress in any CI provider
   - [Cypress CI Key](#section-cypress-ci-key)
   - [Cypress Version](#section-cypress-version)
   - [Cypress Project Id](#section-cypress-project-id)
+- :fa-angle-right: [Optimizing CI](#section-optimizing-ci)
+  - [Example of caching Cypress in Travis CI](#section-example-of-caching-cypress-in-travis-ci-in-travis-yml-)
+  - [Example of caching Cypress in CircleCI](#section-example-of-caching-cypress-in-circleci-s-circle-yml-)
 - :fa-angle-right: [Examples](#section-examples)
   - [CircleCI](#section-circleci)
   - [Travis CI](#section-travis-ci)
@@ -106,30 +109,6 @@ For instance, with [Travis CI](https://docs.travis-ci.com/user/customizing-the-b
 
 ***
 
-# Optimizing CI
-
-Most CI providers allow caching of directories and dependencies between builds. This allows you to save the state of Cypress, thereforce making the builds run faster.
-
-## Example of caching Cypress in Travis CI in `travis.yml`
-
-```yml
-cache:
-  directories:
-    - /home/travis/.cypress/Cypress
-```
-
-## Example of caching Cypress in CircleCI's `circle.yml`
-
-```yml
-dependencies:
-  cache_directories:
-    - /home/ubuntu/nvm/versions/node/v6.2.2/bin/cypress
-    - /home/ubuntu/nvm/versions/node/v6.2.2/lib/node_modules/cypress-cli
-    - /home/ubuntu/.cypress/Cypress
-```
-
-***
-
 # Environment variables
 
 ## Cypress CI Key
@@ -169,6 +148,30 @@ You can specify a specific project ID in CI by setting an Environment Variable: 
 
 **Example of Env Variable in Travis CI**
 ![screen shot 2016-03-28 at 11 32 50 am](https://cloud.githubusercontent.com/assets/1271364/14081563/5e2ede20-f4d9-11e5-9e3f-38d052e8f104.png)
+
+***
+
+# Optimizing CI
+
+Most CI providers allow caching of directories and dependencies between builds. This allows you to save the state of Cypress, thereforce making the builds run faster.
+
+## Example of caching Cypress in Travis CI in `travis.yml`
+
+```yaml
+cache:
+  directories:
+    - /home/travis/.cypress/Cypress
+```
+
+## Example of caching Cypress in CircleCI's `circle.yml`
+
+```yaml
+dependencies:
+  cache_directories:
+    - /home/ubuntu/nvm/versions/node/v6.2.2/bin/cypress
+    - /home/ubuntu/nvm/versions/node/v6.2.2/lib/node_modules/cypress-cli
+    - /home/ubuntu/.cypress/Cypress
+```
 
 ***
 
