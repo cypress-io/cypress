@@ -3,7 +3,9 @@ excerpt: Run Cypress in any CI provider
 
 # Contents
 
-- :fa-angle-right: [Supported Services](#section-supported-services)
+- :fa-angle-right: [What's Supported?](#section-whats-supported)
+- :fa-angle-right: [Dependencies](#section-dependencies)
+- :fa-angle-right: [Troubleshooting](#section-troubleshooting)
 - :fa-angle-right: [Running in CI](#section-running-in-ci)
   - [Add your project to your CI provider](#section-add-you-project-to-your-ci-provider)
   - [Acquire a Cypress secret key](#section-acquire-a-cypress-secret-key)
@@ -22,7 +24,7 @@ excerpt: Run Cypress in any CI provider
 
 ***
 
-# Supported Services
+# What's Supported?
 
 Cypress should run on **all** CI providers. We currently have seen Cypress working on the following providers:
 
@@ -31,8 +33,32 @@ Cypress should run on **all** CI providers. We currently have seen Cypress worki
 - CircleCI
 - CodeShip
 - GitLab
+- Docker
 
-If you're running on your own `Jenkins` server you may have to install some other dependencies [which are documented here](https://on.cypress.io/guides/troubleshooting).
+If you're running on your own `Jenkins` server or `Docker` you will have to install some other dependencies [which are documented here](#section-dependencies).
+
+***
+
+# Dependencies
+
+If you're using a hosted CI service such as `Travis` or `CircleCI` then you don't have to install anything.
+
+If you're hosting your own `Jenkins` server, or you're using `Docker`, you'll need to install some 3rd party libs to run Cypress.
+
+```shell
+apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1
+```
+
+***
+
+# Troubleshooting
+
+When executing `cypress run` or `cypress ci`, if you see no output you are likely missing a dependency and you'll need to invoke the binary directly to get the error. This is a longstanding known issue which we're aware of and are working towards resolving.
+
+```shell
+## invoke the Cypress binary directly
+/home/travis/.cypress/Cypress/Cypress
+```
 
 ***
 
