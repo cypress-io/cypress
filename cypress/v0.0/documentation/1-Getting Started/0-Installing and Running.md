@@ -71,7 +71,7 @@ You can download Cypress directly [here.](http://download.cypress.io/desktop)
 [block:callout]
 {
   "type": "danger",
-  "body": "The vast majority of the time, Cypress will install correctly. But if you're on Linux you [might have to install some other dependencies](https://on.cypress.io/guides/troubleshooting#section-installation).",
+  "body": "The vast majority of the time, Cypress will install correctly. But if you're on Linux you [might have to install some other dependencies](https://on.cypress.io/guides/continuous-integration#section-dependencies).",
   "title": "Woops, I got an error installing"
 }
 [/block]
