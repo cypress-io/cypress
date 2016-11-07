@@ -252,7 +252,15 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         at: null
         next: null
 
-      obj = {name: name, state: @Cypress.createSnapshot @get("$el")}
+      {body, htmlAttrs, headStyles, bodyStyles} = @Cypress.createSnapshot(@get("$el"))
+
+      obj = {
+        name: name
+        body: body
+        htmlAttrs: htmlAttrs
+        headStyles: headStyles
+        bodyStyles: bodyStyles
+      }
 
       snapshots = @get("snapshots") ? []
 
@@ -274,6 +282,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
     error: (err) ->
       @set({
+        ended: true
         error: err
         state: "failed"
       })
@@ -281,8 +290,12 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       return @
 
     end: ->
+      ## dont set back to passed
+      ## if we've already ended
+      return if @get("ended")
+
       @set({
-        end: true
+        ended: true
         state: "passed"
       })
 
@@ -335,7 +348,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## and not an event
       ## and a command
       @get("autoEnd") isnt false and
-        @get("end") isnt true and
+        @get("ended") isnt true and
           @get("event") is false and
             @get("instrument") is "command"
 

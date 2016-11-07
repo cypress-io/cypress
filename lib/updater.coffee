@@ -1,8 +1,10 @@
 _              = require("lodash")
+os             = require("os")
 fs             = require("fs-extra")
 tar            = require("tar-fs")
 path           = require("path")
 glob           = require("glob")
+home           = require("home-or-tmp")
 trash          = require("trash")
 chmodr         = require("chmodr")
 semver         = require("semver")
@@ -16,6 +18,12 @@ argsUtil       = require("./util/args")
 
 trash  = Promise.promisify(trash)
 chmodr = Promise.promisify(chmodr)
+
+## backup the original cwd
+localCwd = cwd()
+
+osxAppRe   = /\.app$/
+linuxAppRe = /Cypress$/i
 
 NwUpdater.prototype.checkNewVersion = (cb) ->
   gotManifest = (err, req, data) ->
@@ -56,7 +64,19 @@ class Updater
   getArgs: ->
     c = @getClient()
 
-    _.compact ["--app-path=" + c.getAppPath(), "--exec-path=" + c.getAppExec(), "--updating"]
+    ## get a reference to current cwd
+    currentCwd = process.cwd()
+
+    ## change to the original local cwd
+    ## in case we have a project open
+    process.chdir(localCwd)
+
+    args = _.compact ["--app-path=" + c.getAppPath(), "--exec-path=" + c.getAppExec(), "--updating"]
+
+    ## now restore back to what it was
+    process.chdir(currentCwd)
+
+    return args
 
   patchAppPath: ->
     @getClient().getAppPath = -> cwd()
@@ -80,6 +100,8 @@ class Updater
   install: (argsObj = {}) ->
     c = @getClient()
 
+    argsObj = @normalizeArgs(argsObj)
+
     {appPath, execPath} = argsObj
 
     ## slice out updating, execPath, and appPath args
@@ -97,6 +119,48 @@ class Updater
 
         ## and now quit this process
         process.exit(0)
+
+  normalizeArgs: (args = {}) ->
+    ## argsObj should look like this
+    ##
+    ## OSX:
+    ## {
+    ##   updating: true
+    ##   appPath:  "/Applications/Cypress.app"
+    ##   execPath: "/Applications/Cypress.app"
+    ## }
+    ##
+    ## Linux:
+    ## {
+    ##   updating: true
+    ##   appPath:  "/home/vagrant/.cypress/Cypress"
+    ##   execPath: "/home/vagrant/.cypress/Cypress/Cypress"
+    ## }
+    ##
+    ## there was a bug in Cypress in the 0.17.x range
+    ## which due to changing process.cwd() we messed
+    ## up the app-path + exec-path and were accidentally
+    ## trying to trash 3 levels above the users project!
+    ## so let's detect that and fix it right here with
+    ## the defaults.
+    ##
+    {appPath, execPath} = args
+
+    switch os.platform()
+      when "darwin"
+        if not osxAppRe.test(appPath)
+          args.appPath = args.execPath = "/Applications/Cypress.app"
+
+      when "linux"
+        if not linuxAppRe.test(appPath)
+          p = path.join(@getHome(), ".cypress", "Cypress")
+
+          args.appPath = p
+          args.execPath = path.join(p, "Cypress")
+
+    return args
+
+  getHome: -> home
 
   copyTmpToAppPath: (tmp, appPath) ->
     new Promise (resolve, reject) ->

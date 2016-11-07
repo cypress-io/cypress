@@ -12,6 +12,7 @@ config       = require("#{root}lib/config")
 scaffold     = require("#{root}lib/scaffold")
 Project      = require("#{root}lib/project")
 settings     = require("#{root}lib/util/settings")
+savedState   = require("#{root}lib/saved_state")
 
 describe "lib/project", ->
   beforeEach ->
@@ -29,6 +30,7 @@ describe "lib/project", ->
 
   afterEach ->
     Fixtures.remove()
+    @project?.close()
 
   it "requires a projectRoot", ->
     fn = -> Project()
@@ -44,13 +46,17 @@ describe "lib/project", ->
       @sandbox.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({baz: "quux", integrationFolder: "foo/bar/baz"})
       @sandbox.stub(@project, "determineIsNewProject").withArgs("foo/bar/baz").resolves(false)
 
-    it "calls config.get with projectRoot + options", ->
+    it "calls config.get with projectRoot + options + saved state", ->
+      @sandbox.stub(savedState, "get").returns(Promise.resolve({ reporterWidth: 225 }))
       @project.getConfig({foo: "bar"})
       .then (cfg) ->
         expect(cfg).to.deep.eq({
           integrationFolder: "foo/bar/baz"
           isNewProject: false
           baz: "quux"
+          state: {
+            reporterWidth: 225
+          }
         })
 
     it "resolves if cfg is already set", ->
@@ -58,7 +64,7 @@ describe "lib/project", ->
 
       @project.getConfig()
       .then (cfg) ->
-        expect(cfg).to.deep.eq({foo: "bar"})
+        expect(cfg).to.deep.eq({foo: "bar", state: {}})
 
   context "#open", ->
     beforeEach ->
@@ -115,6 +121,18 @@ describe "lib/project", ->
     it "does not wait on updateProject", ->
       @project.updateProject.resolves(Promise.delay(10000))
       @project.open()
+
+    it "updates config.state when saved state changes", ->
+      getSavedState = @sandbox.stub(savedState, "get").returns(Promise.resolve({}))
+      options = {}
+      @project.open(options)
+      .then ->
+        getSavedState.returns(Promise.resolve({ autoScrollingEnabled: false }))
+        options.onSavedStateChanged()
+      .then =>
+        @project.getConfig()
+      .then (config) ->
+        expect(config.state).to.eql({ autoScrollingEnabled: false })
 
     it.skip "watches cypress.json", ->
       @server.open().bind(@).then ->

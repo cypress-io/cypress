@@ -32,7 +32,7 @@ describe "$Cypress.Cy Window Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "retry", _.after 2, =>
@@ -184,7 +184,7 @@ describe "$Cypress.Cy Window Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "retry", _.after 2, =>

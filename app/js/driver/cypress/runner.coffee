@@ -1,10 +1,11 @@
 $Cypress.Runner = do ($Cypress, _, moment) ->
 
-  defaultGrep = /.*/
+  defaultGrep     = /.*/
+  betweenQuotesRe = /\"(.+?)\"/
 
   ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
   RUNNABLE_LOGS    = "routes agents commands".split(" ")
-  RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook".split(" ")
+  RUNNABLE_PROPS   = "id title root hookName err duration state failedFromHook body".split(" ")
 
   triggerMocha = (Cypress, event, args...) ->
     ## dont trigger mocha events if we are not headless
@@ -131,7 +132,6 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       @testsById = {}
       @testsQueue = []
       @runnables = []
-      @runnablesById = {}
       @logsById = {}
       @emissions = {
         started: {}
@@ -232,7 +232,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
         @emissions.started[suite.id] = true
 
-        triggerMocha(Cypress, "suite", @wrapParents(suite))
+        triggerMocha(Cypress, "suite", @wrap(suite))
 
       @runner.on "suite end", (suite) =>
         _.each suite.ctx, (value, key) ->
@@ -242,7 +242,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
         @emissions.ended[suite.id] = true
 
-        triggerMocha(Cypress, "suite end", @wrapParents(suite))
+        triggerMocha(Cypress, "suite end", @wrap(suite))
 
       @runner.on "hook", (hook) =>
         hookName = @getHookName(hook)
@@ -263,7 +263,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         hook.ctx.currentTest = test
 
         Cypress.set(hook, hookName)
-        triggerMocha(Cypress, "hook", @wrapParents(hook))
+        triggerMocha(Cypress, "hook", @wrap(hook))
 
       @runner.on "hook end", (hook) =>
         hookName = @getHookName(hook)
@@ -276,7 +276,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         if hookName is "before each" and test = hook.ctx.currentTest
           Cypress.set(test, "test")
 
-        triggerMocha(Cypress, "hook end", @wrapParents(hook))
+        triggerMocha(Cypress, "hook end", @wrap(hook))
 
       @runner.on "test", (test) =>
         @test = test
@@ -287,17 +287,19 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
         @emissions.started[test.id] = true
 
-        triggerMocha(Cypress, "test", @wrapParents(test))
+        triggerMocha(Cypress, "test", @wrap(test))
 
       @runner.on "test end", (test) =>
         return if @emissions.ended[test.id]
 
         @emissions.ended[test.id] = true
 
-        triggerMocha(Cypress, "test end", @wrapParents(test))
+        Cypress.checkForEndedEarly()
+
+        triggerMocha(Cypress, "test end", @wrap(test))
 
       @runner.on "pass", (test) =>
-        triggerMocha(Cypress, "pass", @wrapParents(test))
+        triggerMocha(Cypress, "pass", @wrap(test))
 
       ## if a test is pending mocha will only
       ## emit the pending event instead of the test
@@ -314,7 +316,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         if not test.alreadyEmittedMocha
           ## do not double emit this event
           test.alreadyEmittedMocha = true
-          triggerMocha(Cypress, "pending", _this.wrapParents(test))
+          triggerMocha(Cypress, "pending", _this.wrap(test))
 
         @emit "test", test
 
@@ -326,6 +328,16 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
           fire.call(_this, "test:after:run", test)
 
       @runner.on "fail", (runnable, err) =>
+        isHook = runnable.type is "hook"
+
+        if isHook
+          parentTitle = runnable.parent.title
+          hookName    = @getHookName(runnable)
+
+          ## append a friendly message to the error indicating
+          ## we're skipping the remaining tests in this suite
+          err.message += "\n\n" + @Cypress.Utils.errMessageByPath("uncaught.error_in_hook", {parentTitle, hookName})
+
         ## always set runnable err so we can tap into
         ## taking a screenshot on error
         runnable.err = @wrapErr(err)
@@ -333,10 +345,10 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         if not runnable.alreadyEmittedMocha
           ## do not double emit this event
           runnable.alreadyEmittedMocha = true
-          triggerMocha(Cypress, "fail", @wrapParents(runnable), runnable.err)
+          triggerMocha(Cypress, "fail", @wrap(runnable), runnable.err)
 
-        if runnable.type is "hook"
-          @hookFailed(runnable, runnable.err)
+        if isHook
+          @hookFailed(runnable, runnable.err, hookName)
 
     addTestToQueue: (test) ->
       if test = @testsById[test.id]
@@ -471,7 +483,6 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         ## tests have a type of 'test' whereas suites do not have a type property
         runnable.type ?= "suite"
 
-        @runnablesById[runnable.id] = obj
         @runnables.push(runnable)
 
         ## if we have a runnable in the initial state
@@ -547,14 +558,6 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
     wrapErr: (err) ->
       @reduceProps(err, ERROR_PROPS)
-
-    wrapParents: (runnable) ->
-      r = @wrap(runnable)
-
-      if parent = runnable.parent
-        r.parent = @wrapParents(parent)
-
-      return r
 
     wrap: (runnable) ->
       ## we need to optimize wrap by converting
@@ -642,15 +645,15 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
     getHookName: (hook) ->
       ## find the name of the hook by parsing its
       ## title and pulling out whats between the quotes
-      name = hook.title.match(/\"(.+)\"/)
+      name = hook.title.match(betweenQuotesRe)
       name and name[1]
 
     afterEachFailed: (test, err) ->
       test.state = "failed"
       test.err = @wrapErr(err)
-      triggerMocha(@Cypress, "test end", @wrapParents(test))
+      triggerMocha(@Cypress, "test end", @wrap(test))
 
-    hookFailed: (hook, err) ->
+    hookFailed: (hook, err, hookName) ->
       ## finds the test by returning the first test from
       ## the parent or looping through the suites until
       ## it finds the first test
@@ -658,13 +661,13 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       test.err = err
       test.state = "failed"
       test.duration = hook.duration
-      test.hookName = @getHookName(hook)
+      test.hookName = hookName
       test.failedFromHook = true
 
       if hook.alreadyEmittedMocha
         test.alreadyEmittedMocha = true
       else
-        triggerMocha(@Cypress, "test end", @wrapParents(test))
+        triggerMocha(@Cypress, "test end", @wrap(test))
 
     total: ->
       @runner.suite.total()

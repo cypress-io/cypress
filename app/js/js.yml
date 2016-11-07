@@ -9,10 +9,10 @@ vendor:
   - bower_components/backbone/backbone.js
   - bower_components/underscore.string/lib/underscore.string.js
   - bower_components/underscore.inflection/lib/underscore.inflection.js
-  - bower_components/jsuri/Uri.js
   - bower_components/js-cookie/src/js.cookie.js
   - bower_components/moment/moment.js
   - bower_components/blob-util/dist/blob-util.js
+  - app/js/vendor/url-parse.js
   - app/js/vendor/minimatch.js
   - app/js/vendor/bililiteRange.js
   - app/js/config/**

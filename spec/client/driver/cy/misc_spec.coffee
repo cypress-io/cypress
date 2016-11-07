@@ -62,7 +62,7 @@ describe "$Cypress.Cy Misc Commands", ->
           done()
 
         @cy.wrap({}).then =>
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0]).to.be.an("object")
 

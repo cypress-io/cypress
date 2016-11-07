@@ -82,6 +82,9 @@ module.exports = {
     if args.show is false
       args.webPreferences.offscreen = true
 
+    if options.chromeWebSecurity is false
+      args.webPreferences.webSecurity = false
+
     args.url ?= getUrl(options.type)
 
     urlChanged = (url, resolve) ->

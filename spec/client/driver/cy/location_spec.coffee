@@ -37,7 +37,7 @@ describe "$Cypress.Cy Location Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -76,7 +76,7 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "ends immediately", ->
         @cy.url().then ->
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
           expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
@@ -142,7 +142,7 @@ describe "$Cypress.Cy Location Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -181,7 +181,7 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "ends immediately", ->
         @cy.hash().then ->
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
           expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
@@ -252,7 +252,7 @@ describe "$Cypress.Cy Location Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -289,7 +289,7 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "ends immediately", ->
         @cy.location("href").then ->
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
           expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->

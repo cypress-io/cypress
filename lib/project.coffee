@@ -15,11 +15,15 @@ Server    = require("./server")
 scaffold  = require("./scaffold")
 Watchers  = require("./watchers")
 Reporter  = require("./reporter")
+cwd       = require("./cwd")
 settings  = require("./util/settings")
 screenshots = require("./screenshots")
+savedState  = require("./saved_state")
 
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
+
+localCwd = cwd()
 
 multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
@@ -46,6 +50,8 @@ class Project extends EE
 
     @getConfig(options)
     .then (cfg) =>
+      process.chdir(@projectRoot)
+
       @server.open(cfg)
       .then (port) =>
         ## if we didnt have a cfg.port
@@ -60,6 +66,9 @@ class Project extends EE
         ## store the cfg from
         ## opening the server
         @cfg = cfg
+
+        options.onSavedStateChanged = =>
+          @_setSavedState(@cfg)
 
         ## sync but do not block
         @sync(options)
@@ -100,6 +109,8 @@ class Project extends EE
       @server?.close(),
       @watchers?.close()
     )
+    .then ->
+      process.chdir(localCwd)
 
   resetState: ->
     @server.resetState()
@@ -141,7 +152,7 @@ class Project extends EE
     ## if we've passed down reporter
     ## then record these via mocha reporter
     if config.report
-      reporter = Reporter.create(config.reporter)
+      reporter = Reporter.create(config.reporter, config.reporterOptions, config.projectRoot)
 
     @server.startWebsockets(@watchers, config, {
       onReloadBrowser: options.onReloadBrowser
@@ -152,16 +163,20 @@ class Project extends EE
 
       onSpecChanged: options.onSpecChanged
 
+      onSavedStateChanged: options.onSavedStateChanged
+
       onConnect: (id) =>
         @emit("socket:connected", id)
 
-      onMocha: (event, args...) =>
+      onSetRunnables: (runnables) ->
+        reporter?.setRunnables(runnables)
+
+      onMocha: (event, runnable) =>
         ## bail if we dont have a
         ## reporter instance
         return if not reporter
 
-        args = [event].concat(args)
-        reporter.emit.apply(reporter, args)
+        reporter.emit(event, runnable)
 
         if event is "end"
           stats = reporter.stats()
@@ -226,16 +241,25 @@ class Project extends EE
       cfg.browsers = browsers
 
   getConfig: (options = {}) ->
-    if c = @cfg
-      Promise.resolve(c)
-    else
-      config.get(@projectRoot, options)
-      .then (cfg) =>
-        ## return a boolean whether this is a new project or not
-        @determineIsNewProject(cfg.integrationFolder)
-        .then (bool) ->
-          cfg.isNewProject = bool
-        .return(cfg)
+    getConfig = =>
+      if c = @cfg
+        Promise.resolve(c)
+      else
+        config.get(@projectRoot, options)
+        .then (cfg) =>
+          ## return a boolean whether this is a new project or not
+          @determineIsNewProject(cfg.integrationFolder)
+          .then (bool) ->
+            cfg.isNewProject = bool
+          .return(cfg)
+
+    getConfig().then (cfg) =>
+      @_setSavedState(cfg)
+
+  _setSavedState: (cfg) ->
+    savedState.get().then (state) ->
+      cfg.state = state
+      cfg
 
   ensureSpecUrl: (spec) ->
     @getConfig()

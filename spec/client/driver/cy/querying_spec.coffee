@@ -595,7 +595,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy
           .get("body").as("b")
           .get("@b").then ->
-            expect(@log.get("end")).to.be.true
+            expect(@log.get("ended")).to.be.true
             expect(@log.get("state")).to.eq("passed")
             expect(@log.get("snapshots").length).to.eq(1)
             expect(@log.get("snapshots")[0]).to.be.an("object")
@@ -887,11 +887,27 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.get("div:first").should("not.be.visible")
 
+      it "does not include message about why element was not visible", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).not.to.include "why this element is not visible"
+          done()
+
+        @cy.get("div:first").should("not.be.visible")
+
       it "throws after timing out trying to find a visible element", (done) ->
         @cy.$$("#button").hide()
 
         @cy.on "fail", (err) ->
           expect(err.message).to.include "expected '<button#button>' to be visible"
+          done()
+
+        @cy.get("#button").should("be.visible")
+
+      it "includes a message about why the element was not visible", (done) ->
+        @cy.$$("#button").hide()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "element is not visible because"
           done()
 
         @cy.get("#button").should("be.visible")
@@ -1234,7 +1250,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @Cypress.on "log", (attrs, @log) =>
 
         @cy.contains("foo").then ->
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
           expect(@log.get("state")).to.eq("passed")
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0]).to.be.an("object")
@@ -1417,4 +1433,3 @@ describe "$Cypress.Cy Querying Commands", ->
           @Cypress.abort()
 
         @cy.contains(/^does not contain asdfasdf at all$/)
-

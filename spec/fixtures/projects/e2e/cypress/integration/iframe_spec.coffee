@@ -22,6 +22,15 @@ ensureWeCanTalkToTheIframe = ($iframe) ->
   expect(count).to.eq(1)
 
 describe "iframes", ->
+  it "can snapshot iframes which arent loaded", ->
+    ## snapshotting after the click should insert
+    ## an iframe which isnt yet loaded so when we
+    ## snapshot the h1 we ensure it doesnt fail
+    cy
+      .visit("http://www.foo.com:1616/insert_iframe")
+      .get("button").click()
+      .get("iframe")
+
   it "can access nested iframes over http server", ->
     cy
       .visit("http://localhost:1616")

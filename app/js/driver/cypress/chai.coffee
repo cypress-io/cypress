@@ -153,8 +153,10 @@ do ($Cypress, _, $, chai) ->
             try
               _super.apply(@, arguments)
             catch e
-              reason = $Cypress.Dom.getReasonElIsHidden(@_obj)
-              e.message += "\n\n" + reason
+              ## add reason hidden unless we expect the element to be hidden
+              if (e.message or "").indexOf("not to be") is -1
+                reason = $Cypress.Dom.getReasonElIsHidden(@_obj)
+                e.message += "\n\n" + reason
               throw e
 
         chai.Assertion.overwriteProperty "exist", (_super) ->

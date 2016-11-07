@@ -25,7 +25,7 @@ describe "$Cypress.Log API", ->
       }
 
     it "#snapshot", ->
-      createSnapshot = @sandbox.stub @Cypress, "createSnapshot"
+      createSnapshot = @sandbox.stub(@Cypress, "createSnapshot").returns({})
 
       div = $("<div />")
       @log.set "$el", div
@@ -37,6 +37,14 @@ describe "$Cypress.Log API", ->
     it "#error", ->
       err = new Error
       @log.error(err)
+      expect(@log.get("state")).to.eq "failed"
+      expect(@log.get("error")).to.eq err
+
+    it "#error sets ended true and cannot be set back to passed", ->
+      err = new Error
+      @log.error(err)
+      expect(@log.get("ended")).to.be.true
+      @log.end()
       expect(@log.get("state")).to.eq "failed"
       expect(@log.get("error")).to.eq err
 
@@ -183,6 +191,7 @@ describe "$Cypress.Log API", ->
         expect(@log.toJSON()).to.deep.eq({
           id: @log.get("id")
           state: "failed"
+          ended: true
           err: {
             message: err.message
             name: err.name
@@ -190,6 +199,7 @@ describe "$Cypress.Log API", ->
           }
           consoleProps: {  }
           renderProps: {  }
+          ended: true
         })
 
       it "defaults consoleProps with error stack", ->
@@ -205,6 +215,7 @@ describe "$Cypress.Log API", ->
         expect(@log.toJSON()).to.deep.eq({
           id: @log.get("id")
           state: "failed"
+          ended: true
           err: {
             message: err.message
             name: err.name
@@ -216,6 +227,7 @@ describe "$Cypress.Log API", ->
             foo: "bar"
           }
           renderProps: {  }
+          ended: true
         })
 
       it "sets $el", ->
@@ -439,7 +451,7 @@ describe "$Cypress.Log API", ->
 
     describe "#constructor", ->
       it "snapshots if snapshot attr is true", ->
-        createSnapshot = @sandbox.stub @Cypress, "createSnapshot"
+        createSnapshot = @sandbox.stub(@Cypress, "createSnapshot").returns({})
 
         new $Cypress.Log @Cypress, snapshot: true
 
@@ -464,7 +476,7 @@ describe "$Cypress.Log API", ->
     describe "#wrapConsoleProps", ->
       it "automatically adds Command with name", ->
         @log.set("name", "foo")
-        @log.set("snapshots", [{name: null, state: {}}])
+        @log.set("snapshots", [{name: null, body: {}}])
         @log.set("consoleProps", -> {bar: "baz"})
         @log.wrapConsoleProps()
         expect(@log.attributes.consoleProps()).to.deep.eq {
@@ -513,7 +525,14 @@ describe "$Cypress.Log API", ->
 
     describe "#snapshot", ->
       beforeEach ->
-        @sandbox.stub(@Cypress, "createSnapshot").returns({})
+        @sandbox.stub(@Cypress, "createSnapshot").returns({
+          body: "body"
+          htmlAttrs: {
+            class: "foo"
+          }
+          headStyles: ["body { background: red }"]
+          bodyStyles: ["body { margin: 10px }"]
+        })
 
       it "can set multiple snapshots", ->
         @log.snapshot()
@@ -556,6 +575,28 @@ describe "$Cypress.Log API", ->
         expect(snapshots[0].name).to.eq("before")
         expect(snapshots[1].name).to.eq("after")
         expect(snapshots[2].name).to.eq("third")
+
+      it "includes html attributes", ->
+        @log.snapshot()
+        snapshots = @log.get("snapshots")
+        expect(snapshots[0].htmlAttrs).to.eql({
+          class: "foo"
+        })
+
+      it "includes head styles", ->
+        @log.snapshot()
+        snapshots = @log.get("snapshots")
+        expect(snapshots[0].headStyles).to.eql(["body { background: red }"])
+
+      it "includes body", ->
+        @log.snapshot()
+        snapshots = @log.get("snapshots")
+        expect(snapshots[0].body).to.equal("body")
+
+      it "includes body styles", ->
+        @log.snapshot()
+        snapshots = @log.get("snapshots")
+        expect(snapshots[0].bodyStyles).to.eql(["body { margin: 10px }"])
 
   describe "class methods", ->
     enterCommandTestingMode()

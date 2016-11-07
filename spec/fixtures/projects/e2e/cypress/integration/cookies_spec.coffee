@@ -78,3 +78,27 @@ context "cookies", ->
       .setCookie("asdf", "jkl")
       .request("http://localhost:2121/foo")
         .its("body").should("deep.eq", {foo1: "1", asdf: "jkl"})
+
+  it "handles expired cookies", ->
+    cy
+      .visit("http://localhost:2121/set")
+      .getCookie("shouldExpire").should("exist")
+      .visit("http://localhost:2121/expirationMaxAge")
+      .getCookie("shouldExpire").should("not.exist")
+      .visit("http://localhost:2121/set")
+      .getCookie("shouldExpire").should("exist")
+      .visit("http://localhost:2121/expirationExpires")
+      .getCookie("shouldExpire").should("not.exist")
+
+  it "issue: #224 sets expired cookies between redirects", ->
+    cy
+      .visit("http://localhost:2121/set")
+      .getCookie("shouldExpire").should("exist")
+      .visit("http://localhost:2121/expirationRedirect")
+      .url().should("include", "/logout")
+      .getCookie("shouldExpire").should("not.exist")
+
+      .visit("http://localhost:2121/set")
+      .getCookie("shouldExpire").should("exist")
+      .request("http://localhost:2121/expirationRedirect")
+      .getCookie("shouldExpire").should("not.exist")

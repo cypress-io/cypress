@@ -10,7 +10,7 @@ describe "lib/util/routes", ->
     expect(Routes.signin({code: "abc"})).to.eq "http://localhost:1234/signin?code=abc"
 
   it "api", ->
-    expect(Routes.api()).to.eq "http://localhost:1234"
+    expect(Routes.api()).to.eq "http://localhost:1234/"
 
   it "auth", ->
     expect(Routes.auth()).to.eq "http://localhost:1234/v1/auth"

@@ -9,6 +9,7 @@ socketIo     = require("@cypress/core-socket")
 extension    = require("@cypress/core-extension")
 httpsAgent   = require("https-proxy-agent")
 open         = require("#{root}lib/util/open")
+errors       = require("#{root}lib/errors")
 config       = require("#{root}lib/config")
 Socket       = require("#{root}lib/socket")
 Server       = require("#{root}lib/server")
@@ -16,6 +17,7 @@ Watchers     = require("#{root}lib/watchers")
 automation   = require("#{root}lib/automation")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
 exec         = require("#{root}lib/exec")
+savedState   = require("#{root}lib/saved_state")
 
 describe "lib/socket", ->
   beforeEach ->
@@ -37,7 +39,9 @@ describe "lib/socket", ->
       ## so we can test server emit / client emit events
       @server.open(@cfg)
       .then =>
-        @options = {}
+        @options = {
+          onSavedStateChanged: @sandbox.spy()
+        }
         @watchers = {}
         @server.startWebsockets(@watchers, @cfg, @options)
         @socket = @server._socket
@@ -343,115 +347,25 @@ describe "lib/socket", ->
 
     context "on(request)", ->
       it "calls socket#onRequest", (done) ->
-        onRequest = @sandbox.stub(@socket, "onRequest").callsArgWithAsync(2, "bar")
+        @sandbox.stub(@options, "onRequest").resolves({foo: "bar"})
 
         @client.emit "request", "foo", (resp) ->
-          expect(resp).to.eq("bar")
-
-          ## ensure onRequest was called with those same arguments
-          ## therefore we have verified the socket binding and
-          ## the call into onRequest with the proper arguments
-          expect(onRequest.getCall(0).args[1]).to.eq("foo")
-          done()
-
-      it "returns the request object", ->
-        nock("http://localhost:8080")
-        .matchHeader("Cookie", "foo=bar")
-        .get("/status.json")
-        .reply(200, {status: "ok"})
-
-        cb1 = @sandbox.spy()
-        cb2 = @sandbox.spy()
-
-        req = {
-          url: "http://localhost:8080/status.json"
-          cookies: {foo: "bar"}
-        }
-
-        @socket.onRequest(cb1, req, cb2).then ->
-          expect(cb2).to.be.calledWithMatch {
-            status: 200
-            body: {status: "ok"}
-          }
-
-      it "sends up cookies from automation(get:cookies)", (done) ->
-        @oar = @options.onAutomationRequest = @sandbox.stub()
-
-        @oar.withArgs("get:cookies", {url: "http://localhost:8080/status.json"}).resolves([
-          {name: "__cypress.initial", value: "true"}
-          {name: "foo", value: "bar"}
-          {name: "baz", value: "quux"}
-        ])
-
-        nock("http://localhost:8080")
-        .matchHeader("Cookie", "foo=bar; baz=quux")
-        .get("/status.json")
-        .reply(200, {status: "ok"})
-
-        req = {
-          url: "http://localhost:8080/status.json"
-          cookies: true
-          domain: "localhost"
-        }
-
-        @client.emit "request", req, (resp) ->
-          expect(resp.body).to.deep.eq({status: "ok"})
-          expect(resp.status).to.eq(200)
-          expect(resp.headers).to.deep.eq({
-            "content-type": "application/json"
-          })
+          expect(resp).to.deep.eq({foo: "bar"})
 
           done()
 
-      it "extracts domain from the url when domain is omitted", (done) ->
-        @oar = @options.onAutomationRequest = @sandbox.stub()
+      it "catches errors and clones them", (done) ->
+        err = new Error("foo bar baz")
 
-        @oar.withArgs("get:cookies", {url: "http://www.google.com:8080/status.json"}).resolves([
-          {name: "__cypress.initial", value: "true"}
-          {name: "foo", value: "bar"}
-          {name: "baz", value: "quux"}
-        ])
+        @sandbox.stub(@options, "onRequest").rejects(err)
 
-        nock("http://www.google.com:8080")
-        .matchHeader("Cookie", "foo=bar; baz=quux")
-        .get("/status.json")
-        .reply(200, {status: "ok"})
-
-        req = {
-          url: "http://www.google.com:8080/status.json"
-          cookies: true
-        }
-
-        @client.emit "request", req, (resp) ->
-          expect(resp.body).to.deep.eq({status: "ok"})
-          expect(resp.status).to.eq(200)
-          expect(resp.headers).to.deep.eq({
-            "content-type": "application/json"
-          })
+        @client.emit "request", "foo", (resp) ->
+          expect(resp).to.deep.eq({__error: errors.clone(err)})
 
           done()
-
-      it "errors when request fails", ->
-        nock.enableNetConnect()
-
-        nock("http://localhost:8080")
-        .get("/status.json")
-        .reply(200, {status: "ok"})
-
-        cb1 = @sandbox.spy()
-        cb2 = @sandbox.spy()
-
-        req = {
-          url: "http://localhost:1111/foo"
-          cookies: false
-        }
-
-        @socket.onRequest(cb1, req, cb2).then ->
-          obj = cb2.getCall(0).args[0]
-          expect(obj).to.have.property("__error", "Error: connect ECONNREFUSED 127.0.0.1:1111")
 
     context "on(exec)", ->
-      it "calls exit#run with project root and options", (done) ->
+      it "calls exec#run with project root and options", (done) ->
         run = @sandbox.stub(exec, "run").returns(Promise.resolve("Desktop Music Pictures"))
 
         @client.emit "exec", { cmd: "ls" }, (resp) =>
@@ -467,6 +381,20 @@ describe "lib/socket", ->
         @client.emit "exec", { cmd: "lsd" }, (resp) =>
           expect(resp.__error).to.equal("command not found: lsd")
           expect(resp.timedout).to.be.true
+          done()
+
+    context "on(save:app:state)", ->
+      beforeEach ->
+        @setState = @sandbox.stub(savedState, "set").returns(Promise.resolve())
+
+      it "calls savedState#set with the state", ->
+        @client.emit "save:app:state", { reporterWidth: 500 }, =>
+          expect(@setState).to.be.calledWith({ reporterWidth: 500 })
+          done()
+
+      it "calls onSavedStateChanged", ->
+        @client.emit "save:app:state", { reporterWidth: 235 }, =>
+          expect(@options.onSavedStateChanged).to.have.been.called
           done()
 
   context "unit", ->

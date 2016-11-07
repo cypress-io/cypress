@@ -60,3 +60,46 @@ describe "visits", ->
             origin + "/index.html#bar"
             origin + "/index.html"
           ])
+
+  context "issue #230: User Agent headers", ->
+    beforeEach ->
+      cy.visit("http://localhost:3434/agent.html")
+
+    it "submits user agent on cy.visit", ->
+      cy.get("#agent").invoke("text").then (text) ->
+        ua = JSON.parse(text)
+
+        expect(navigator.userAgent).to.deep.eq(ua.source)
+
+    it "submits user agent on page load", ->
+      cy
+        .get("a").click()
+        .get("#agent").invoke("text").then (text) ->
+          ua = JSON.parse(text)
+
+          expect(navigator.userAgent).to.deep.eq(ua.source)
+
+    it "submits user agent on cy.request", ->
+      cy
+        .request("http://localhost:3434/agent.json")
+        .its("body")
+        .then (body) ->
+          expect(navigator.userAgent).to.deep.eq(body.agent.source)
+
+  context "issue #255: url with like two domain", ->
+    it "passes", ->
+      cy
+        .visit("http://localhost:3434/index.html")
+        .visit("http://localhost:3434/jquery.html?email=brian@cypress.io")
+
+  context "issue #272: responses which are never ended still send valid html", ->
+    it "handles no response errors on the initial visit", ->
+      cy
+        .visit("http://localhost:3434/response_never_finishes")
+        .contains("Cypress errored attempting to make an http request to this url")
+
+    it "handles no response errors when not initially visiting", ->
+      cy
+        .visit("http://localhost:3434/index.html")
+        .visit("http://localhost:3434/response_never_finishes")
+        .contains("Cypress errored attempting to make an http request to this url")

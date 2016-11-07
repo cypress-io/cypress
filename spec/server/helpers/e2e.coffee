@@ -75,7 +75,7 @@ module.exports = {
   options: (ctx, options = {}) ->
     _.defaults(options, {
       project: e2ePath
-      timeout: if options.debug then 3000000 else 30000
+      timeout: if options.debug then 3000000 else 45000
     })
 
     ctx.timeout(options.timeout)
@@ -100,6 +100,12 @@ module.exports = {
 
     if options.debug
       args.push("--show-headless-gui")
+
+    if options.reporter
+      args.push("--reporter=#{options.reporter}")
+
+    if options.reporterOptions
+      args.push("--reporter-options=#{options.reporterOptions}")
 
     if browser = env.BROWSER
       args.push("--browser=#{browser}")

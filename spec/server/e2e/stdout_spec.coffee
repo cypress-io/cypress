@@ -7,12 +7,12 @@ describe "e2e stdout", ->
     e2e.exec(@, {
       port: 2020
       spec: "stdout_failing_spec.coffee"
-      expectedExitCode: 2
+      expectedExitCode: 3
     })
     .get("stdout")
     .then (stdout) ->
       stdout = stdout
-      .replace(/\(\d{2,4}ms\)/g, "(123ms)")
+      .replace(/\(\d{1,4}m?s\)/g, "(123ms)")
       .replace(/coffee-\d{3}/g, "coffee-456")
       .replace(/(.+)\.projects\/e2e\/does-not-exist\.html/, "/foo/bar/.projects/e2e/does-not-exist.html")
 
@@ -25,21 +25,23 @@ Tests should begin momentarily...
 \r    ✓ passes
 \r    1) fails
 \r    ✓ doesnt fail
-    hooks
-\r      2) "before each" hook
+    failing hook
+\r      2) "before each" hook for "is failing"
+    passing hook
+\r      3) is failing
 
 
   2 passing (123ms)
-  2 failing
+  3 failing
 
   1) stdout_failing_spec fails:
      Error: foo
       at Context.<anonymous> (http://localhost:2020/__cypress/tests?p=cypress/integration/stdout_failing_spec.coffee-456:6:15)
 
-  2) stdout_failing_spec hooks "before each" hook:
+  2) stdout_failing_spec failing hook "before each" hook for "is failing":
      CypressError: cy.visit() failed trying to load:
 
-does-not-exist.html
+/does-not-exist.html
 
 We failed looking for this file at the path:
 
@@ -49,7 +51,11 @@ The internal Cypress web server responded with:
 
   > 404: Not Found
 
+
+
+Because this error occured during a 'before each' hook we are skipping the remaining tests in the current suite: 'failing hook'
 """)
+      expect(stdout).to.include("3) stdout_failing_spec passing hook is failing:")
 
   it "does not duplicate suites or tests between visits", ->
     e2e.exec(@, {

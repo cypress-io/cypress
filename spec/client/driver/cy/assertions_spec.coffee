@@ -218,7 +218,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
 
     describe "have.length", ->
       beforeEach ->
@@ -298,7 +298,7 @@ describe "$Cypress.Cy Assertion Commands", ->
           @chai.restore()
 
           expect(@log.get("name")).to.eq("assert")
-          expect(@log.get("end")).to.be.true
+          expect(@log.get("ended")).to.be.true
           expect(@log.get("state")).to.eq("passed")
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0]).to.be.an("object")
@@ -606,7 +606,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
     it "ends immediately", (done) ->
       @onAssert (log) ->
-        expect(log.get("end")).to.be.true
+        expect(log.get("ended")).to.be.true
         expect(log.get("state")).to.eq("passed")
         done()
 

@@ -104,6 +104,7 @@ class Base
           copy("./lib/reporter.coffee",     "/src/lib/reporter.coffee")
           copy("./lib/request.coffee",      "/src/lib/request.coffee")
           copy("./lib/routes.coffee",       "/src/lib/routes.coffee")
+          copy("./lib/saved_state.coffee",  "/src/lib/saved_state.coffee")
           copy("./lib/scaffold.coffee",     "/src/lib/scaffold.coffee")
           copy("./lib/screenshots.coffee",  "/src/lib/screenshots.coffee")
           copy("./lib/server.coffee",       "/src/lib/server.coffee")

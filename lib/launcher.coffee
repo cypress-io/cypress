@@ -99,6 +99,10 @@ module.exports = {
       if ps = options.proxyServer
         args.push("--proxy-server=#{ps}")
 
+      if options.chromeWebSecurity is false
+        args.push("--disable-web-security")
+        args.push("--allow-running-insecure-content")
+
       launcher()
       .call("launch", name, url, args)
       .then (i) ->

@@ -738,7 +738,7 @@ describe "$Cypress.Cy XHR Commands", ->
               snapshots = @log.get("snapshots")
               expect(snapshots.length).to.eq(1)
               expect(snapshots[0].name).to.eq("request")
-              expect(snapshots[0].state).to.be.an("object")
+              expect(snapshots[0].body).to.be.an("object")
 
         it "does not end xhr requests when the associated command ends", ->
           logs = null
@@ -767,7 +767,7 @@ describe "$Cypress.Cy XHR Commands", ->
             .wait(["@getFoo", "@getFoo", "@getFoo"]).then  ->
               _.each logs, (log) ->
                 expect(log.get("name")).to.eq("xhr")
-                expect(log.get("end")).to.be.true
+                expect(log.get("ended")).to.be.true
 
         it "updates log immediately whenever an xhr is aborted", ->
           snapshot = null
@@ -793,9 +793,9 @@ describe "$Cypress.Cy XHR Commands", ->
               expect(xhrs[0].get("error").name).to.eq("AbortError")
               expect(xhrs[0].get("snapshots").length).to.eq(2)
               expect(xhrs[0].get("snapshots")[0].name).to.eq("request")
-              expect(xhrs[0].get("snapshots")[0].state).to.be.a("object")
+              expect(xhrs[0].get("snapshots")[0].body).to.be.a("object")
               expect(xhrs[0].get("snapshots")[1].name).to.eq("aborted")
-              expect(xhrs[0].get("snapshots")[1].state).to.be.a("object")
+              expect(xhrs[0].get("snapshots")[1].body).to.be.a("object")
 
               expect(@cy.prop("requests").length).to.eq(2)
 
@@ -857,9 +857,9 @@ describe "$Cypress.Cy XHR Commands", ->
         it "snapshots again", ->
           expect(@log.get("snapshots").length).to.eq(2)
           expect(@log.get("snapshots")[0].name).to.eq("request")
-          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          expect(@log.get("snapshots")[0].body).to.be.an("object")
           expect(@log.get("snapshots")[1].name).to.eq("response")
-          expect(@log.get("snapshots")[1].state).to.be.an("object")
+          expect(@log.get("snapshots")[1].body).to.be.an("object")
 
     describe "errors", ->
       beforeEach ->

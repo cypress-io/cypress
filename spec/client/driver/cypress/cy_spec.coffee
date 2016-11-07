@@ -67,8 +67,8 @@ describe "$Cypress.Cy API", ->
 
       it "restore", ->
         restore = @sandbox.stub @cy, "restore"
-        @Cypress.trigger "restore", {checkForEndedEarly: false}
-        expect(restore).to.be.calledWith({checkForEndedEarly: false})
+        @Cypress.trigger("restore")
+        expect(restore).to.be.calledOnce
 
       it "abort", ->
         abort = @sandbox.stub @cy, "abort"
@@ -114,24 +114,6 @@ describe "$Cypress.Cy API", ->
         @Cypress.trigger("restore")
         expect(reset).to.be.calledOnce
 
-      it "calls endedEarlyErr if index > 0 and < queue.length", ->
-        endedEarlyErr = @sandbox.stub @cy, "endedEarlyErr"
-        @cy.prop("index", 2)
-        @cy.commands.splice(0, 1, {})
-        @cy.commands.splice(1, 2, {})
-        @cy.commands.splice(2, 3, {})
-        @cy.restore()
-        expect(endedEarlyErr).to.be.calledOnce
-
-      it "does not call endedEarlyErr if options.checkForEndedEarly is false", ->
-        endedEarlyErr = @sandbox.stub @cy, "endedEarlyErr"
-        @cy.prop("index", 2)
-        @cy.commands.splice(0, 1, {})
-        @cy.commands.splice(1, 2, {})
-        @cy.commands.splice(2, 3, {})
-        @cy.restore({checkForEndedEarly: false})
-        expect(endedEarlyErr).not.to.be.called
-
     describe "#abort", ->
       beforeEach ->
         @cy = $Cypress.Cy.create(@Cypress, @specWindow)
@@ -140,6 +122,20 @@ describe "$Cypress.Cy API", ->
       it "returns a promise", ->
         abort = @cy.abort()
         expect(abort).to.be.instanceof Promise
+
+    describe "#checkForEndedEarly", ->
+      beforeEach ->
+        @cy = $Cypress.Cy.create(@Cypress, @specWindow)
+        null
+
+      it "calls endedEarlyErr if index > 0 and < queue.length", ->
+        endedEarlyErr = @sandbox.stub @cy, "endedEarlyErr"
+        @cy.prop("index", 2)
+        @cy.commands.splice(0, 1, {})
+        @cy.commands.splice(1, 2, {})
+        @cy.commands.splice(2, 3, {})
+        @cy.checkForEndedEarly()
+        expect(endedEarlyErr).to.be.calledOnce
 
     describe "#_setRunnable", ->
       beforeEach ->

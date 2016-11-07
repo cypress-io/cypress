@@ -5,7 +5,6 @@ through       = require("through")
 Promise       = require("bluebird")
 cwd           = require("../cwd")
 logger        = require("../logger")
-request       = require("../request")
 cors          = require("../util/cors")
 inject        = require("../util/inject")
 buffers       = require("../util/buffers")
@@ -35,7 +34,7 @@ setCookie = (res, key, val, domainName) ->
   res.cookie(key, val, options)
 
 module.exports = {
-  handle: (req, res, config, getRemoteState, next) ->
+  handle: (req, res, config, getRemoteState, request) ->
     logger.info("cookies are", req.cookies)
 
     ## if we have an unload header it means
@@ -61,10 +60,10 @@ module.exports = {
 
     thr = through (d) -> @queue(d)
 
-    @getHttpContent(thr, req, res, remoteState, config)
+    @getHttpContent(thr, req, res, remoteState, config, request)
     .pipe(res)
 
-  getHttpContent: (thr, req, res, remoteState, config) ->
+  getHttpContent: (thr, req, res, remoteState, config, request) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
     ## prepends req.url with remoteState.origin
@@ -139,9 +138,17 @@ module.exports = {
         str.pipe(injection)
 
     endWithResponseErr = (err) ->
-      status = err.status ? 500
+      ## use res.statusCode if we have one
+      ## in the case of an ESOCKETTIMEDOUT
+      ## and we have the incomingRes headers
+      checkResStatus = ->
+        if res.headersSent
+          res.statusCode
 
-      res.removeHeader("Content-Encoding")
+      status = err.status ? checkResStatus() ? 500
+
+      if not res.headersSent
+        res.removeHeader("Content-Encoding")
 
       str = through (d) -> @queue(d)
 
@@ -191,6 +198,17 @@ module.exports = {
 
     if obj = buffers.take(remoteUrl)
       wantsInjection = "full"
+
+      ## if we already have an error
+      ## on our stream just immediately
+      ## end with this
+      if err = obj.stream.error
+        endWithResponseErr(err)
+      else
+        ## else listen for the error even which
+        ## could happen at any time
+        obj.stream.on("error", endWithResponseErr)
+
       onResponse(obj.stream, obj.response)
     else
       # opts = {url: remoteUrl, followRedirect: false, strictSSL: false}
@@ -215,6 +233,8 @@ module.exports = {
     return thr
 
   setResHeaders: (req, res, incomingRes, wantsInjection) ->
+    return if res.headersSent
+
     ## omit problematic headers
     headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length", "content-security-policy"
 

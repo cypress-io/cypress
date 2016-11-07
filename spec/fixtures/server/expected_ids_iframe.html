@@ -9,11 +9,11 @@
       document.domain = 'localhost';
 
       (function(parent) {
-        window.Cypress = parent.Cypress;
+        var Cypress = window.Cypress = parent.Cypress;
         if (!Cypress) {
           throw new Error("Tests cannot run without a reference to Cypress!");
         }
-        return Cypress.window(window);
+        return Cypress.onSpecWindow(window);
       })(window.opener || window.parent);
     </script>
 

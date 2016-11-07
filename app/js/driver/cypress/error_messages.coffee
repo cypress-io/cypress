@@ -248,7 +248,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       orphan: "#{cmd('{{cmd}}')} is a child command which operates on an existing subject.  Child commands must be called after a parent command."
       outside_test: """
         Cypress cannot execute commands outside a running test.
-        This usually happens when you accidentally write commands outside an it(...) test.
+        This usually happens when you accidentally write commands outside an 'it(...)' test.
         If that is the case, just move these commands inside an 'it(...)' test.
         Check your test file for errors.\n
         https://on.cypress.io/cannot-execute-commands-outside-test
@@ -268,6 +268,31 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       timed_out: "Cypress command timeout of '{{ms}}ms' exceeded."
 
     navigation:
+      cross_origin: """
+        Cypress detected a cross origin error happened on page load:
+
+          > {{message}}
+
+        Before the page load, you were bound to the origin policy:
+          > {{originPolicy}}
+
+        A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
+
+        This typically happens in one of three ways:
+
+        1. You clicked an <a> that routed you outside of your application
+        2. You submitted a form and your server redirected you outside of your application
+        3. You used a javascript redirect to a page outside of your application
+
+        Cypress does not allow you to change superdomains within a single test.
+
+        You may need to restructure some of your test code to avoid this problem.
+
+        Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in your 'cypress.json' file.
+
+        https://on.cypress.io/cross-origin-violation
+
+      """
       timed_out: """
         Timed out after waiting '{{ms}}ms' for your remote page to load.
 
@@ -304,6 +329,10 @@ $Cypress.ErrorMessages = do ($Cypress) ->
           URL: {{url}}
           {{body}}
           {{headers}}
+
+        The stack trace for this error is:
+
+        {{stack}}
       """
       status_invalid: "#{cmd('request')} failed because the response had the status code: {{status}}"
       timed_out: "#{cmd('request')} timed out waiting {{timeout}}ms for a response. No response ever occured."
@@ -366,6 +395,35 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       tab: "{tab} isn't a supported character sequence. You'll want to use the command #{cmd('tab')}, which is not ready yet, but when it is done that's what you'll use."
       wrong_type: "#{cmd('type')} can only accept a String or Number. You passed in: '{{chars}}'"
 
+    uncaught:
+      cross_origin_script: """
+        Script error.
+
+        Cypress detected that an uncaught error was thrown from a cross origin script.
+
+        We cannot provide you the stack trace, line number, or file where this error occured.
+
+        Check your Developer Tools Console for the actual error - it should be printed there.
+
+        It's possible to enable debugging these scripts by adding the 'crossorigin' attribute and setting a CORS header.
+
+        https://on.cypress.io/cross-origin-script-error
+      """
+      error_in_hook: (obj) ->
+        msg = "Because this error occured during a '#{obj.hookName}' hook we are skipping "
+
+        if t = obj.parentTitle
+          msg += "the remaining tests in the current suite: '#{_.truncate(t, 20)}'"
+        else
+          msg += "all of the remaining tests."
+
+        msg
+
+      error: (obj) ->
+        {msg, source, lineno} = obj
+
+        msg + if source and lineno then " (#{source}:#{lineno})" else ""
+
     viewport:
       bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."
       dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 200px and 3000px."
@@ -395,7 +453,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
         {{url}}
 
-        We attempted to make an http request to this URL but the request immediately failed without a response.
+        We attempted to make an http request to this URL but the request failed without a response.
 
         We received this error at the network level:
 
