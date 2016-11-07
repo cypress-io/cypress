@@ -36,13 +36,13 @@ module.exports = {
     fs.statAsync(appPath)
     .then ->
       fs.ensureSymlinkAsync(appPath, dest, "dir")
-      .then ->
-        cp.spawn(paths.getPathToExec(), argv, {stdio: "inherit"})
-        .on "close", (code) ->
-          if cb
-            cb(code)
-          else
-            process.exit(code)
+    .then ->
+      cp.spawn(paths.getPathToExec(), argv, {stdio: "inherit"})
+      .on "close", (code) ->
+        if cb
+          cb(code)
+        else
+          process.exit(code)
 
     .catch (err) ->
       console.log(err.stack)
