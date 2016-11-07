@@ -140,6 +140,7 @@
     "gulp-util": "^3.0.6",
     "hbs": "4.0.0",
     "home-or-tmp": "^2.0.0",
+    "http-accept": "^0.1.6",
     "http-proxy": "^1.13.2",
     "http-status-codes": "^1.0.6",
     "inquirer": "^0.8.0",
