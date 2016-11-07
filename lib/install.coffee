@@ -2,14 +2,11 @@ _       = require("lodash")
 os      = require("os")
 fs      = require("fs-extra")
 path    = require("path")
-pkgr    = require("electron-packager")
-icons   = require("@cypress/core-icons")
 Promise = require("bluebird")
 pkg     = require("../package.json")
 paths   = require("./paths")
 
-fs    = Promise.promisifyAll(fs)
-pkgr  = Promise.promisify(pkgr)
+fs = Promise.promisifyAll(fs)
 
 ## ensure we have an electronVersion set in package.json
 if not electronVersion = pkg.electronVersion
@@ -54,6 +51,11 @@ module.exports = {
       process.exit()
 
   package: (options = {}) ->
+    pkgr    = require("electron-packager")
+    icons   = require("@cypress/core-icons")
+
+    pkgr    = Promise.promisify(pkgr)
+
     _.defaults(options, {
       dist: paths.getPathToDist()
       dir: "app"
