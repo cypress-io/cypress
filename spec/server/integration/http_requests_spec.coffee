@@ -162,7 +162,12 @@ describe "Routes", ->
     it "proxies through https", ->
       @setup("https://localhost:8443")
       .then =>
-        @rp("https://localhost:8443/")
+        @rp({
+          url: "https://localhost:8443/"
+          headers: {
+            "Accept": "text/html, application/xhtml+xml, */*"
+          }
+        })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).not.to.include("Cypress")
@@ -831,7 +836,7 @@ describe "Routes", ->
           gzip: true
           headers: {
             "Cookie": "__cypress.initial=false"
-            "Accept": "text/html"
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
           }
         })
         .then (res) ->
@@ -1037,7 +1042,12 @@ describe "Routes", ->
         .get("/")
         .replyWithError("ECONNREFUSED")
 
-        @rp("http://app.github.com/")
+        @rp({
+          url: "http://app.github.com/"
+          headers: {
+            "Accept": "text/html, application/xhtml+xml, */*"
+          }
+        })
         .then (res) ->
           expect(res.statusCode).to.eq(500)
           expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
@@ -1052,7 +1062,12 @@ describe "Routes", ->
       it "sends back cypress content on actual request errors", ->
         @setup("http://localhost:64644")
         .then =>
-          @rp("http://localhost:64644")
+          @rp({
+            url: "http://localhost:64644"
+            headers: {
+              "Accept": "text/html, application/xhtml+xml, */*"
+            }
+          })
         .then (res) ->
           expect(res.statusCode).to.eq(500)
           expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
@@ -1067,7 +1082,12 @@ describe "Routes", ->
           expect(res.body).to.include("document.domain = 'localhost';") ## should continue to inject
 
       it "sends back cypress content without injection on http errors when no matching origin", ->
-        @rp("http://localhost:64644")
+        @rp({
+          url: "http://localhost:64644"
+          headers: {
+            "Accept": "text/html, application/xhtml+xml, */*"
+          }
+        })
         .then (res) ->
           expect(res.statusCode).to.eq(500)
           expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
@@ -1124,7 +1144,12 @@ describe "Routes", ->
           "Content-Encoding": "gzip"
         })
 
-        @rp("http://www.github.com/index.html")
+        @rp({
+          url: "http://www.github.com/index.html"
+          headers: {
+            "Accept": "text/html, application/xhtml+xml, */*"
+          }
+        })
         .then (res) ->
           expect(res.statusCode).to.eq(500)
           expect(res.headers).not.to.have.property("content-encoding")
@@ -1422,6 +1447,7 @@ describe "Routes", ->
           headers: {
             "Cookie": "__cypress.initial=false"
             "Origin": "http://localhost:8080"
+            "Accept": "text/html, application/xhtml+xml, */*"
           }
         })
         .then (res) ->
@@ -1564,6 +1590,28 @@ describe "Routes", ->
             expect(res.body).not.to.include("<script")
 
             expect(res.body).to.eq(bytes)
+
+    context "svg", ->
+      beforeEach ->
+        @setup("http://www.google.com")
+
+      it "rewrites <svg> without hanging", ->
+        ## if this test finishes without timing out we know its all good
+        contents = removeWhitespace Fixtures.get("server/err_response.html")
+
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, contents,
+          "Content-Type": "text/html; charset=utf-8"
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
 
     context "content injection", ->
       beforeEach ->
@@ -1710,7 +1758,7 @@ describe "Routes", ->
           url: "http://www.google.com/bar"
           headers: {
             "Cookie": "__cypress.initial=false"
-            "Accept": "text/html"
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
           }
         })
         .then (res) ->
@@ -1766,7 +1814,7 @@ describe "Routes", ->
           url: "http://www.google.com/elements.html"
           headers: {
             "Cookie": "__cypress.initial=true"
-            "Accept": "text/html"
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
           }
         })
         .then (res) =>
@@ -1858,7 +1906,12 @@ describe "Routes", ->
               "Content-Type": "text/html"
             }
 
-          @rp("https://www.google.com/")
+          @rp({
+            url: "https://www.google.com/"
+            headers: {
+              "Accept": "text/html, application/xhtml+xml, */*"
+            }
+          })
           .then (res) ->
             expect(res.statusCode).to.eq(500)
 
@@ -1913,7 +1966,7 @@ describe "Routes", ->
             url: "https://docs.foobar.com:8443/index.html"
             headers: {
               "Cookie": "__cypress.initial=false"
-              "Accept": "text/html"
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
             }
           })
           .then (res) ->
@@ -1933,7 +1986,7 @@ describe "Routes", ->
           url: "http://www.google.com/iframe"
           headers: {
             "Cookie": "__cypress.initial=false"
-            "Accept": "text/html"
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
           }
         })
         .then (res) ->
@@ -1954,7 +2007,7 @@ describe "Routes", ->
           url: "http://mail.google.com/iframe"
           headers: {
             "Cookie": "__cypress.initial=false"
-            "Accept": "text/html"
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
           }
         })
         .then (res) ->
@@ -1994,7 +2047,7 @@ describe "Routes", ->
           url: "http://www.foobar.com"
           headers: {
             "Cookie": "__cypress.initial=false"
-            "Accept": "text/html"
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
           }
         })
         .then (res) ->
@@ -2020,23 +2073,53 @@ describe "Routes", ->
           ## it should not be telling us to turn this off either
           expect(res.headers["set-cookie"]).not.to.match(/initial/)
 
-      it "rewrites <svg> without hanging", ->
-        ## if this test finishes without timing out we know its all good
-        contents = removeWhitespace Fixtures.get("server/err_response.html")
-
+      it "does not inject into x-requested-with request headers", ->
         nock(@server._remoteOrigin)
-        .get("/bar")
-        .reply 200, contents,
-          "Content-Type": "text/html; charset=utf-8"
+        .get("/iframe")
+        .reply 200, "<html><head></head></html>", {
+          "Content-Type": "text/html"
+        }
 
         @rp({
-          url: "http://www.google.com/bar"
+          url: "http://www.google.com/iframe"
           headers: {
-            "Cookie": "__cypress.initial=true"
+            "Cookie": "__cypress.initial=false"
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            "X-Requested-With": "XMLHttpRequest"
           }
         })
         .then (res) ->
           expect(res.statusCode).to.eq(200)
+
+          body = removeWhitespace(res.body)
+
+          expect(body).to.eq("<html><head></head></html>")
+
+      ["text/html", "application/xhtml+xml", "text/plain, application/xhtml+xml", "", null].forEach (type) ->
+        it "does not inject unless both text/html and application/xhtml+xml is requested: tried to accept: #{type}", ->
+          nock(@server._remoteOrigin)
+          .get("/iframe")
+          .reply 200, "<html><head></head></html>", {
+            "Content-Type": "text/html"
+          }
+
+          headers = {
+            "Cookie": "__cypress.initial=false"
+          }
+
+          if type?
+            headers["Accept"] = type
+
+          @rp({
+            url: "http://www.google.com/iframe"
+            headers: headers
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+            body = removeWhitespace(res.body)
+
+            expect(body).to.eq("<html><head></head></html>")
 
     context "FQDN rewriting", ->
       beforeEach ->
@@ -2052,7 +2135,7 @@ describe "Routes", ->
           url: "http://www.google.com/bar"
           headers: {
             "Cookie": "__cypress.initial=true"
-            "Accept": "text/html"
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
           }
         })
         .then (res) ->
@@ -2071,7 +2154,7 @@ describe "Routes", ->
           url: "http://www.google.com/bar"
           headers: {
             "Cookie": "__cypress.initial=false"
-            "Accept": "text/html"
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
           }
         })
         .then (res) ->
@@ -2096,7 +2179,7 @@ describe "Routes", ->
             url: @proxy + "/index.html"
             headers: {
               "Cookie": "__cypress.initial=true"
-              "Accept": "text/html"
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
             }
           })
           .then (res) ->
@@ -2161,7 +2244,7 @@ describe "Routes", ->
           url: @proxy + "/index.html"
           headers: {
             "Cookie": "__cypress.initial=false"
-            "Accept": "text/html"
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
           }
         })
         .then (res) ->
@@ -2173,7 +2256,7 @@ describe "Routes", ->
           url: @proxy + "/sub/"
           headers: {
             "Cookie": "__cypress.initial=false"
-            "Accept": "text/html"
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
           }
         })
         .then (res) ->
@@ -2185,7 +2268,7 @@ describe "Routes", ->
           url: @proxy + "/sub"
           headers: {
             "Cookie": "__cypress.initial=false"
-            "Accept": "text/html"
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
           }
         })
         .then (res) ->
