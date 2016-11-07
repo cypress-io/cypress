@@ -10,8 +10,8 @@ scaffold = require("./scaffold")
 cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
-folders = "fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder unitFolder".split(" ")
-configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges chromeWebSecurity viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables hosts".split(" ")
+folders = "fileServerFolder fixturesFolder integrationFolder screenshotsFolder unitFolder".split(" ")
+configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges chromeWebSecurity viewportWidth viewportHeight fileServerFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables hosts supportScripts".split(" ")
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
@@ -47,16 +47,18 @@ defaults = {
   viewportHeight: 660
   fileServerFolder: ""
   # unitFolder:        "cypress/unit"
-  supportFolder:     "cypress/support"
+  supportScripts: "cypress/support/index.+(js|jsx|coffee|cjsx)"
   fixturesFolder:    "cypress/fixtures"
   integrationFolder: "cypress/integration"
   screenshotsFolder:  "cypress/screenshots"
-  javascripts:    []
   namespace:      "__cypress"
+
+  ## deprecated
+  javascripts: []
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
-  _.reduce folders, (memo, folder) ->
+  converted = _.reduce folders, (memo, folder) ->
     val = obj[folder]
     if val?
       ## if this folder has been specifically turned off
@@ -71,6 +73,14 @@ convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
 
     return memo
   , {}
+
+  if supportScripts = obj.supportScripts
+    converted.supportScripts = if _.isArray(supportScripts)
+      _.map supportScripts, (script) -> path.resolve(projectRoot, script)
+    else
+      path.resolve(projectRoot, supportScripts)
+
+  return converted
 
 module.exports = {
   getConfigKeys: -> configKeys

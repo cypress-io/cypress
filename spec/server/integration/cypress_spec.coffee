@@ -29,6 +29,8 @@ Server   = require("#{root}lib/server")
 Reporter = require("#{root}lib/reporter")
 launcher = require("#{root}lib/launcher")
 
+supportFolder = "cypress/support"
+
 describe "lib/cypress", ->
   beforeEach ->
     cache.removeSync()
@@ -334,17 +336,19 @@ describe "lib/cypress", ->
         Project.add(@pristinePath)
       ])
       .then =>
-        fs.statAsync(@cfg.supportFolder)
+        fs.statAsync(supportFolder)
         .then ->
           throw new Error("supportFolder should not exist!")
         .catch =>
           cypress.start(["--run-project=#{@pristinePath}"])
         .then =>
-          fs.statAsync(@cfg.supportFolder)
+          fs.statAsync(supportFolder)
         .then =>
-          fs.statAsync path.join(@cfg.supportFolder, "commands.js")
+          fs.statAsync path.join(supportFolder, "index.js")
         .then =>
-          fs.statAsync path.join(@cfg.supportFolder, "defaults.js")
+          fs.statAsync path.join(supportFolder, "commands.js")
+        .then =>
+          fs.statAsync path.join(supportFolder, "defaults.js")
 
     it "removes fixtures when they exist and fixturesFolder is false", (done) ->
       Promise.all([
@@ -365,29 +369,6 @@ describe "lib/cypress", ->
         cypress.start(["--run-project=#{@idsPath}"])
       .then =>
         fs.statAsync(@cfg.fixturesFolder)
-        .then ->
-          throw new Error("fixturesFolder should not exist!")
-        .catch -> done()
-
-    it "removes support when they exist and supportFolder is false", (done) ->
-      Promise.all([
-        user.set({session_token: "session-123"}),
-
-        config.get(@idsPath).then (@cfg) =>
-
-        Project.add(@idsPath)
-      ])
-      .then =>
-        fs.statAsync(@cfg.supportFolder)
-      .then =>
-        settings.read(@idsPath)
-      .then (json) =>
-        json.supportFolder = false
-        settings.write(@idsPath, json)
-      .then =>
-        cypress.start(["--run-project=#{@idsPath}"])
-      .then =>
-        fs.statAsync(@cfg.supportFolder)
         .then ->
           throw new Error("fixturesFolder should not exist!")
         .catch -> done()

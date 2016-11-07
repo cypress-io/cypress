@@ -21,6 +21,7 @@ module.exports = {
   support: (folder, options) ->
     @verifyScaffolding folder, options, =>
       Promise.join(
+        @copy("index.js", folder)
         @copy("defaults.js", folder)
         @copy("commands.js", folder)
       )
@@ -62,16 +63,16 @@ module.exports = {
       .catch ->
 
     else
-      ## we want to build out the supportFolder + and example file
-      ## but only create the example file if the supportFolder doesnt
+      ## we want to build out the folder + and example files
+      ## but only create the example files if the folder doesn't
       ## exist
       ##
       ## this allows us to automatically insert the folder on existing
       ## projects (whenever they are booted) but allows the user to delete
-      ## the support file and not have it re-generated each time
+      ## the file and not have it re-generated each time
       ##
       ## this is ideal because users who are upgrading to newer cypress version
-      ## will still get the folder support enabled but existing users wont be
+      ## will still get the files scaffolded but existing users won't be
       ## annoyed by new example files coming into their projects unnecessarily
       fs.statAsync(folder)
       .catch =>

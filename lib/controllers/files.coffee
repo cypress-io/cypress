@@ -136,10 +136,10 @@ module.exports = {
     if test is "__all" then "All Tests" else test
 
   getJavascripts: (config) ->
-    {projectRoot, javascripts, supportFolder} = config
+    {projectRoot, supportScripts, javascripts} = config
 
-    ## automatically add in our support folder and any javascripts
-    files = [].concat path.join(supportFolder, "**", "*"), javascripts
+    ## automatically add in support scripts and any javascripts
+    files = [].concat supportScripts, javascripts
 
     ## TODO: there shouldn't be any reason
     ## why we need to re-map these. its due
@@ -150,8 +150,8 @@ module.exports = {
 
     Promise
     .map paths, (p) ->
-      ## does the path include a globstar?
-      return p if not p.includes("*")
+      ## is the path a glob?
+      return p if not glob.hasMagic(p)
 
       ## handle both relative + absolute paths
       ## by simply resolving the path from projectRoot
@@ -175,11 +175,7 @@ module.exports = {
       "*"
     )
 
-    supportFolderPath = path.join(
-      config.supportFolder,
-      "**",
-      "*"
-    )
+    supportScriptsPath = path.resolve(config.supportScripts)
 
     ## map all of the javascripts to the project root
     ## TODO: think about moving this into config
@@ -188,12 +184,16 @@ module.exports = {
     javascriptsPath = _.map config.javascripts, (js) ->
       path.join(config.projectRoot, js)
 
-    ## ignore _fixtures + _support + javascripts
+    ## ignore fixtures + javascripts
     options = {
       sort:     true
       realpath: true
       cwd:      integrationFolderPath
-      ignore:   [].concat(javascriptsPath, supportFolderPath, fixturesFolderPath)
+      ignore:   [].concat(
+        javascriptsPath,
+        supportScriptsPath,
+        fixturesFolderPath
+      )
     }
 
     ## integrationFolderPath: /Users/bmann/Dev/my-project/cypress/integration
@@ -218,7 +218,7 @@ module.exports = {
         not minimatch(file, pattern, {dot: true, matchBase: true})
 
     ## grab all the js and coffee files
-    glob("**/*.+(js|coffee)", options)
+    glob("**/*.+(js|jsx|coffee|cjsx)", options)
 
     ## filter out anything that matches our
     ## ignored test files glob

@@ -320,9 +320,7 @@ class Project extends EE
 
       ## ensure support dir is created
       ## and example support file if dir doesnt exist
-      scaffold.support(config.supportFolder, {
-        remove: config.supportFolderRemove
-      })
+      scaffold.support("cypress/support")
     )
 
   writeProjectId: (id) ->

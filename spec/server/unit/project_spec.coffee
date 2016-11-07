@@ -267,7 +267,7 @@ describe "lib/project", ->
       @sandbox.stub(scaffold, "fixture").resolves()
       @sandbox.stub(scaffold, "support").resolves()
 
-      @obj = {projectRoot: "pr", fixturesFolder: "ff", supportFolder: "sf", integrationFolder: "if"}
+      @obj = {projectRoot: "pr", fixturesFolder: "ff", integrationFolder: "if"}
 
     it "calls scaffold.integration with integrationFolder", ->
       @project.scaffold(@obj).then =>
@@ -277,9 +277,9 @@ describe "lib/project", ->
       @project.scaffold(@obj).then =>
         expect(scaffold.fixture).to.be.calledWith(@obj.fixturesFolder)
 
-    it "calls support.scaffold with supportFolder", ->
+    it "calls support.scaffold with cypress/support", ->
       @project.scaffold(@obj).then =>
-        expect(scaffold.support).to.be.calledWith(@obj.supportFolder)
+        expect(scaffold.support).to.be.calledWith("cypress/support")
 
   context "#watchSettings", ->
     beforeEach ->

@@ -284,7 +284,7 @@ describe "lib/config", ->
           viewportWidth:              { value: 1000, from: "default" },
           viewportHeight:             { value: 660, from: "default" },
           fileServerFolder:           { value: "", from: "default" },
-          supportFolder:              { value: "cypress/support", from: "default" },
+          supportScripts:             { value: "cypress/support/index.+(js|jsx|coffee|cjsx)", from: "default" },
           fixturesFolder:             { value: "cypress/fixtures", from: "default" },
           integrationFolder:          { value: "cypress/integration", from: "default" },
           screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
@@ -332,7 +332,7 @@ describe "lib/config", ->
           viewportWidth:              { value: 1000, from: "default" },
           viewportHeight:             { value: 660, from: "default" },
           fileServerFolder:           { value: "", from: "default" },
-          supportFolder:              { value: "cypress/support", from: "default" },
+          supportScripts:             { value: "cypress/support/index.+(js|jsx|coffee|cjsx)", from: "default" },
           fixturesFolder:             { value: "cypress/fixtures", from: "default" },
           integrationFolder:          { value: "cypress/integration", from: "default" },
           screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
@@ -492,22 +492,20 @@ describe "lib/config", ->
     it "sets special Remove property to true when folder is false", ->
       obj = {
         projectRoot: "/path/to/project"
-        fixturesFolder: "f"
-        supportFolder: false
+        fixturesFolder: false
       }
 
       defaults = {
-        supportFolder: "cypress/support"
+        fixturesFolder: "f"
       }
 
       expect(config.setAbsolutePaths(obj, defaults)).to.deep.eq({
         projectRoot: "/path/to/project"
         fixturesFolder: "/path/to/project/f"
-        supportFolder: "/path/to/project/cypress/support" ## default
-        supportFolderRemove: true
+        fixturesFolderRemove: true
       })
 
-    ["fileServerFolder", "supportFolder", "fixturesFolder", "integrationFolder", "unitFolder"].forEach (folder) ->
+    ["fileServerFolder", "fixturesFolder", "integrationFolder", "unitFolder"].forEach (folder) ->
 
       it "converts relative #{folder} to absolute path", ->
         obj = {

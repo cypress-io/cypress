@@ -10,6 +10,8 @@ Fixtures   = require("#{root}/spec/server/helpers/fixtures")
 
 glob = Promise.promisify(glob)
 
+supportFolder = "cypress/support"
+
 describe "lib/scaffold", ->
   beforeEach ->
     Fixtures.scaffold()
@@ -59,43 +61,34 @@ describe "lib/scaffold", ->
     beforeEach ->
       pristinePath = Fixtures.projectPath("pristine")
 
-      config.get(pristinePath).then (cfg) =>
-        {@supportFolder} = cfg
-
-    it "is noop when removal is true and there is no folder", ->
-      scaffold.support(@supportFolder, {remove: true})
-      .then =>
-        fs.statAsync(@supportFolder)
-        .then ->
-          throw new Error("should have failed but didnt")
-        .catch ->
+      @resolvedSupportFolder = path.resolve(pristinePath, supportFolder)
 
     it "removes supportFolder + contents when existing", ->
-      scaffold.support(@supportFolder)
+      scaffold.support(@resolvedSupportFolder)
       .then =>
-        scaffold.support(@supportFolder, {remove: true})
+        scaffold.support(@resolvedSupportFolder, {remove: true})
       .then =>
-        fs.statAsync(@supportFolder)
+        fs.statAsync(@resolvedSupportFolder)
         .then ->
           throw new Error("should have failed but didnt")
         .catch ->
 
     it "does not create any files if supportFolder already exists", ->
       ## create the supportFolder ourselves manually
-      fs.ensureDirAsync(@supportFolder)
+      fs.ensureDirAsync(@resolvedSupportFolder)
       .then =>
         ## now scaffold
-        scaffold.support(@supportFolder)
+        scaffold.support(@resolvedSupportFolder)
       .then =>
-        glob("**/*", {cwd: @supportFolder})
+        glob("**/*", {cwd: @resolvedSupportFolder})
       .then (files) ->
         ## ensure no files exist
         expect(files.length).to.eq(0)
 
-    it "creates both supportFolder and commands.js and defaults.js when supportFolder does not exist", ->
+    it "creates both supportFolder and commands.js, defaults.js, and index.js when supportFolder does not exist", ->
       ## todos has a _support folder so let's first nuke it and then scaffold
-      scaffold.support(@supportFolder).then =>
-        fs.readFileAsync(@supportFolder + "/commands.js", "utf8").then (str) =>
+      scaffold.support(@resolvedSupportFolder).then =>
+        fs.readFileAsync(@resolvedSupportFolder + "/commands.js", "utf8").then (str) =>
           expect(str).to.eq """
           // ***********************************************
           // This example commands.js shows you how to
@@ -138,25 +131,48 @@ describe "lib/scaffold", ->
           // })
           """
 
-          fs.readFileAsync(@supportFolder + "/defaults.js", "utf8").then (str) ->
+          fs.readFileAsync(@resolvedSupportFolder + "/defaults.js", "utf8").then (str) =>
+            expect(str).to.eq """
+            // ***********************************************
+            // This example defaults.js shows you how to
+            // customize the internal behavior of Cypress.
+            //
+            // The defaults.js file is a great place to
+            // override defaults used throughout all tests.
+            //
+            // ***********************************************
+            //
+            // Cypress.Server.defaults({
+            //   delay: 500,
+            //   whitelist: function(xhr){}
+            // })
+
+            // Cypress.Cookies.defaults({
+            //   whitelist: ["session_id", "remember_token"]
+            // })
+            """
+
+            fs.readFileAsync(@resolvedSupportFolder + "/index.js", "utf8").then (str) =>
               expect(str).to.eq """
               // ***********************************************
-              // This example defaults.js shows you how to
-              // customize the internal behavior of Cypress.
+              // This example support/index.js is loaded before
+              // any other test files
               //
-              // The defaults.js file is a great place to
-              // override defaults used throughout all tests.
+              // You can change the location of this file with
+              // the 'supportScripts' configuration option
               //
+              // You can read more here:
+              // https://on.cypress.io/api/configuration
               // ***********************************************
-              //
-              // Cypress.Server.defaults({
-              //   delay: 500,
-              //   whitelist: function(xhr){}
-              // })
 
-              // Cypress.Cookies.defaults({
-              //   whitelist: ["session_id", "remember_token"]
-              // })
+              // import the commands.js file and the defaults.js file
+              import './commands'
+              import './defaults'
+
+              // You can alternatively use CommonJS:
+              // require("./commands")
+              // require("./defaults")
+
               """
 
   context ".fixture", ->
