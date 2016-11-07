@@ -6,6 +6,9 @@ It is a simple wrapper that `symlinks` while in development.
 
 ## Changelog
 
+#### 0.3.0 - *(11/07/16)*
+- bump electron
+
 #### 0.2.1 - *(08/26/16)*
 - downgrade electron, bump node
 
