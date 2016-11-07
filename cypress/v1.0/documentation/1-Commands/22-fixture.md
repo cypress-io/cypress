@@ -205,7 +205,7 @@ cy
   .fixture("users").as("usersJSON")
   .route("GET", /users/, "@usersJSON")
 
-  ...later on...
+  // ...later on...
 
   .then(function(){
     // we have access to this.usersJSON since it was aliased
@@ -213,7 +213,36 @@ cy
   })
 ```
 
-Using an alias provides the benefit of terseness and readability, yet still allows you access to the aliased object later on for direct manipulation.
+Using an alias provides the benefit of terseness and readability.
+
+## Example 4:
+
+```javascript
+describe('Users Page', function(){
+  beforeEach(function(){
+    cy.fixture("users").as("users")
+  })
+
+  it("displays all users in a list", function(){
+    cy
+      .route("GET", /users/, "@users")
+      .visit("/users")
+      .get(".users-list>li").should("have.length", @users.length)
+  })
+
+
+  it("displays empty message when no users", function(){
+    this.users = []
+
+    cy
+      .route("GET", /users/, "@users")
+      .visit("/users")
+      .get(".empty").should("include", "There are no users.")
+  })
+})
+```
+
+Using an alias allows you access to the aliased object later on for direct manipulation.
 
 This is useful when asserting about values in the fixture object, or perhaps if you need to change its values prior to handing it off to a [`cy.route`](https://on.cypress.io/api/route).
 
