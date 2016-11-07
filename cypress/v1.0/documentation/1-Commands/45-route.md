@@ -406,11 +406,14 @@ cy
 cy
   // route after receiving the fixture and
   // working with the data
-  .fixture("users").then(function(users){
+  .fixture("user").then(function(user){
+    user.firstName = "Jennifer"
 
     // work with the users array here
-    cy.route("GET", /users/, users[0])
+    cy.route("GET", "user/123", user)
   })
+  .visit("/users")
+  .get(".user").should("include", "Jennifer")
 ```
 
 You can also reference fixtures as strings directly in the response
