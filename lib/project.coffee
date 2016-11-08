@@ -190,11 +190,8 @@ class Project extends EE
             if ca = process.env.CIRCLE_ARTIFACTS
               screenshots.copy(config.screenshotsFolder, ca)
 
-          Promise.join(
-            link()
-            Promise.delay(1000)
-          ).then =>
-            # console.log stats
+          Promise.resolve(link)
+          .then =>
             @emit("end", stats)
     })
 
