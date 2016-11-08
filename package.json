@@ -39,7 +39,7 @@
   },
   "homepage": "https://github.com/cypress-io/cypress",
   "devDependencies": {
-    "@cypress/core-electron": "0.2.1",
+    "@cypress/core-electron": "0.3.0",
     "body-parser": "1.12.4",
     "chai": "2.1.0",
     "chai-as-promised": "^4.2.0",
@@ -164,6 +164,8 @@
     "opn": "cypress-io/opn#2f4e9a216ca7bdb95dfae9d46d99ddf004b3cbb5",
     "ospath": "^1.1.0",
     "parse-domain": "^0.2.1",
+    "progress": "^1.1.8",
+    "randomstring": "^1.1.5",
     "request": "2.74.0",
     "request-promise": "2.0.0",
     "requirejs": "2.1.15",
