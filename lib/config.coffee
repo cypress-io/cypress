@@ -10,7 +10,7 @@ scaffold = require("./scaffold")
 cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
-folders = "fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder unitFolder".split(" ")
+folders = "fileServerFolder videosFolder supportFolder fixturesFolder integrationFolder screenshotsFolder unitFolder".split(" ")
 configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges chromeWebSecurity viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables hosts".split(" ")
 
 isCypressEnvLike = (key) ->
@@ -36,6 +36,8 @@ defaults = {
   responseTimeout:       30000
   pageLoadTimeout:       60000
   execTimeout:           60000
+  videoRecording:    true
+  videoCompression:  32
   chromeWebSecurity: true
   waitForAnimations: true
   animationDistanceThreshold: 5
@@ -47,6 +49,7 @@ defaults = {
   viewportHeight: 660
   fileServerFolder: ""
   # unitFolder:        "cypress/unit"
+  videosFolder:      "cypress/videos"
   supportFolder:     "cypress/support"
   fixturesFolder:    "cypress/fixtures"
   integrationFolder: "cypress/integration"
