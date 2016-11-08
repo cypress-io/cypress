@@ -1,26 +1,36 @@
 _          = require("lodash")
+fs         = require("fs-extra")
+path       = require("path")
 chalk      = require("chalk")
-stream     = require("stream")
 Promise    = require("bluebird")
 inquirer   = require("inquirer")
-ffmpeg     = require("fluent-ffmpeg")
-ffmpegPath = require("@ffmpeg-installer/ffmpeg").path
+random     = require("randomstring")
 user       = require("../user")
+ffmpeg     = require("../ffmpeg")
 errors     = require("../errors")
 Project    = require("../project")
+progress   = require("../progress_bar")
 project    = require("../electron/handlers/project")
 Renderer   = require("../electron/handlers/renderer")
 automation = require("../electron/handlers/automation")
 
-ffmpeg.setFfmpegPath(ffmpegPath)
-
-recording       = null
-recordingStream = stream.PassThrough()
+fs = Promise.promisifyAll(fs)
 
 module.exports = {
   getId: ->
     ## return a random id
-    Math.random()
+    random.generate({
+      length: 5
+      capitalization: "lowercase"
+    })
+
+  setProxy: (proxyServer) ->
+    session = require("electron").session
+
+    new Promise (resolve) ->
+      session.defaultSession.setProxy({
+        proxyRules: proxyServer
+      }, resolve)
 
   ensureAndOpenProjectByPath: (id, options) ->
     ## verify we have a project at this path
@@ -31,7 +41,8 @@ module.exports = {
     open = =>
       @openProject(id, options)
 
-    Project.exists(projectPath).then (bool) =>
+    Project.exists(projectPath)
+    .then (bool) =>
       ## if we have this project then lets
       ## immediately open it!
       return open() if bool
@@ -93,15 +104,16 @@ module.exports = {
     .catch {portInUse: true}, (err) ->
       errors.throw("PORT_IN_USE_LONG", err.port)
 
-  setProxy: (proxyServer) ->
-    session = require("electron").session
+  createRecording: (name) ->
+    outputDir = path.dirname(name)
 
-    new Promise (resolve) ->
-      session.defaultSession.setProxy({
-        proxyRules: proxyServer
-      }, resolve)
+    fs.ensureDirAsync(outputDir)
+    .then ->
+      console.log("\nStarted video recording: #{chalk.blue(name)}")
 
-  createRenderer: (url, proxyServer, showGui = false, chromeWebSecurity) ->
+      ffmpeg.start(name)
+
+  createRenderer: (url, proxyServer, showGui = false, chromeWebSecurity, write) ->
     @setProxy(proxyServer)
     .then ->
       Renderer.create({
@@ -115,43 +127,18 @@ module.exports = {
         type:   "PROJECT"
       })
     .then (win) ->
-      ## should we even record?
-      recording = new Promise (resolve, reject) ->
-        ffmpeg({
-          source: recordingStream
-          priority: 20
-        })
-        .inputFormat("image2pipe")
-        .inputOptions("-use_wallclock_as_timestamps 1")
-        .videoCodec("libx264")
-        .outputOptions("-preset ultrafast")
-        ## TODO: change the name of the file here
-        ## and take into account the config passed here
-        .save("osx.mp4")
-        .on "start", (line) ->
-          console.log "spawned ffmpeg", line
-        .on "codecData", (data) ->
-          console.log "codec data", data
-        .on "error", (err, stdout, stderr) ->
-          ## TODO: call into lib/errors here
-          console.log "ffmpeg failed", err
-          reject(err)
-        .on "end", ->
-          console.log "ffmpeg succeeded"
-          resolve()
-
       ## set framerate only once because if we
       ## set the framerate earlier it gets reset
       ## back to 60fps for some reason (bug?)
       setFrameRate = _.once ->
         win.webContents.setFrameRate(20)
 
-      win.webContents.on "paint", (event, dirty, image) ->
-        setFrameRate()
+      ## should we even record?
+      if write
+        win.webContents.on "paint", (event, dirty, image) ->
+          setFrameRate()
 
-        img = image.toJPEG(100)
-
-        recordingStream.write(img)
+          write(image.toJPEG(100))
 
       win.webContents.on "new-window", (e, url, frameName, disposition, options) ->
         ## force new windows to automatically open with show: false
@@ -162,39 +149,25 @@ module.exports = {
 
       win.center()
 
-  ## recordDesktopCapture: ->
+  postProcessRecording: (end, name, cname, videoCompression) ->
+    divider = Array(100).join("=")
 
-  ## recordElectronFrames: ->
+    console.log("\n" + divider + "\n")
 
-  postProcessRecording: ->
-    Promise.try ->
-      return if not recording
+    bar = progress.create("Post Processing Video")
 
-      postProcess = ->
-        new Promise (resolve, reject) ->
-          ffmpeg()
-          .input("osx.mp4")
-          .videoCodec("libx264")
-          .outputOptions([
-            "-preset fast"
-            "-crf 32"
-          ])
-          .save("osx_compressed.mp4")
-          .on "start", (line) ->
-            console.log "spawned ffmpeg 2", line
-          .on "codecData", (data) ->
-            console.log "codec data 2", data
-          .on "error", (err, stdout, stderr) ->
-            console.log "ffmpeg failed 2", err
-          .on "end", ->
-            console.log "ffmpeg succeeded 2"
-            resolve()
+    onProgress = (float) ->
+      bar.tickTotal(float)
 
-      ## return if we're not recording
-      recordingStream.end()
-
-      Promise.resolve(recording)
-      .then(postProcess)
+    ## once this ended promises resolves
+    ## then begin processing the file
+    end()
+    .then ->
+      ffmpeg.process(name, cname, videoCompression, onProgress)
+    .catch (err) ->
+      ## TODO: log that post processing failed but
+      ## not letting this fail the actual run
+      console.log err
 
   waitForRendererToConnect: (openProject, id) ->
     ## wait up to 10 seconds for the renderer
@@ -218,65 +191,99 @@ module.exports = {
       ## is the one that matches our id!
       openProject.on "socket:connected", fn
 
-  waitForTestsToFinishRunning: (openProject, gui) ->
+  waitForTestsToFinishRunning: (openProject, gui, end, name, cname, videoCompression) ->
     new Promise (resolve, reject) =>
       ## dont ever end if we're in 'gui' debugging mode
       return if gui
 
       onEnd = (failures) =>
-        @postProcessRecording()
-        .then ->
+        console.log "onEnd called!", failures
+
+        finish = ->
           resolve(failures)
+
+        if end
+          @postProcessRecording(end, name, cname, videoCompression)
+          .then(finish)
+          ## TODO: add a catch here
+        else
+          finish()
 
       ## when our openProject fires its end event
       ## resolve the promise
       openProject.once("end", onEnd)
 
-  runTests: (openProject, id, url, proxyServer, gui, browser, chromeWebSecurity) ->
+  runTests: (options = {}) ->
+    {openProject, id, url, proxyServer, gui, browser, webSecurity, videosFolder, videoRecording, videoCompression} = options
+
     ## we know we're done running headlessly
     ## when the renderer has connected and
     ## finishes running all of the tests.
     ## we're using an event emitter interface
     ## to gracefully handle this in promise land
 
-    getRenderer = =>
-      ## if we have a browser then just physically launch it
-      if browser
-        project.launch(browser, url, null, {proxyServer: proxyServer})
-      else
-        @createRenderer(url, proxyServer, gui, chromeWebSecurity)
+    ## if we've been told to record and we're not spawning a headed browser
+    if videoRecording and not browser
+      id2       = @getId()
+      name      = path.join(videosFolder, id2 + ".mp4")
+      cname     = path.join(videosFolder, id2 + "-compressed.mp4")
 
-    Promise.props({
-      connection: @waitForRendererToConnect(openProject, id)
-      stats:      @waitForTestsToFinishRunning(openProject, gui)
-      renderer:   getRenderer()
-    })
+      recording = @createRecording(name)
+
+    Promise.resolve(recording)
+    .then (props = {}) =>
+      ## extract the started + ended promises from recording
+      {start, end, write} = props
+
+      getRenderer = =>
+        ## if we have a browser then just physically launch it
+        if browser
+          project.launch(browser, url, null, {proxyServer: proxyServer})
+        else
+          @createRenderer(url, proxyServer, gui, webSecurity, write)
+
+      ## make sure we start the recording first
+      ## before doing anything
+      Promise.resolve(start)
+      .then =>
+        Promise.props({
+          connection: @waitForRendererToConnect(openProject, id)
+          stats:      @waitForTestsToFinishRunning(openProject, gui, end, name, cname, videoCompression)
+          renderer:   getRenderer()
+        })
 
   ready: (options = {}) ->
-    ready = =>
-      id = @getId()
+    id = @getId()
 
-      ## verify this is an added project
-      ## and then open it, returning our
-      ## project instance
-      @ensureAndOpenProjectByPath(id, options)
+    ## verify this is an added project
+    ## and then open it, returning our
+    ## project instance
+    @ensureAndOpenProjectByPath(id, options)
+    .then (openProject) =>
+      Promise.all([
+        openProject.getConfig(),
 
-      .then (openProject) =>
-        Promise.all([
-          openProject.getConfig(),
+        ## either get the url to the all specs
+        ## or if we've specificed one make sure
+        ## it exists
+        openProject.ensureSpecUrl(options.spec)
+      ])
+      .spread (config, url) =>
+        console.log("\nTests should begin momentarily...\n")
 
-          ## either get the url to the all specs
-          ## or if we've specificed one make sure
-          ## it exists
-          openProject.ensureSpecUrl(options.spec)
-        ])
-        .spread (config, url) =>
-          console.log("\nTests should begin momentarily...\n")
-
-          @runTests(openProject, id, url, config.clientUrlDisplay, options.showHeadlessGui, options.browser, config.chromeWebSecurity)
-          .get("stats")
-
-    ready()
+        @runTests({
+          id:               id
+          url:              url
+          openProject:      openProject
+          proxyServer:      config.clientUrlDisplay
+          webSecurity:      config.chromeWebSecurity
+          videosFolder:     config.videosFolder
+          videoRecording:   config.videoRecording
+          videoCompression: config.videoCompression
+          gui:              options.showHeadlessGui
+          browser:          options.browser
+        })
+        .get("stats")
 
   run: (options) ->
     app = require("electron").app
@@ -291,4 +298,5 @@ module.exports = {
     ])
     .then =>
       @ready(options)
+
 }
