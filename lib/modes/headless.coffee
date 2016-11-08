@@ -197,8 +197,6 @@ module.exports = {
       return if gui
 
       onEnd = (failures) =>
-        console.log "onEnd called!", failures
-
         finish = ->
           resolve(failures)
 
