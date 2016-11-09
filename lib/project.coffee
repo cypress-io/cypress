@@ -191,7 +191,11 @@ class Project extends EE
               screenshots.copy(config.screenshotsFolder, ca)
 
           Promise.resolve(link)
-          .then =>
+          .then ->
+            screenshots.get(config.screenshotsFolder)
+          .then (arr) =>
+            stats.screenshots = arr
+
             @emit("end", stats)
     })
 

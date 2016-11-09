@@ -6,10 +6,13 @@ Promise    = require("bluebird")
 inquirer   = require("inquirer")
 random     = require("randomstring")
 user       = require("../user")
+stats      = require("../stats")
 ffmpeg     = require("../ffmpeg")
 errors     = require("../errors")
 Project    = require("../project")
 progress   = require("../progress_bar")
+terminal   = require("../util/terminal")
+humanTime  = require("../util/human_time")
 project    = require("../electron/handlers/project")
 Renderer   = require("../electron/handlers/renderer")
 automation = require("../electron/handlers/automation")
@@ -109,7 +112,7 @@ module.exports = {
 
     fs.ensureDirAsync(outputDir)
     .then ->
-      console.log("\nStarted video recording: #{chalk.blue(name)}")
+      console.log("\nStarted video recording: #{chalk.blue(name)}\n")
 
       ffmpeg.start(name)
 
@@ -150,14 +153,13 @@ module.exports = {
       win.center()
 
   postProcessRecording: (end, name, cname, videoCompression) ->
-    divider = Array(100).join("=")
-
-    console.log("\n" + divider + "\n")
-
-    bar = progress.create("Post Processing Video")
+    # bar = progress.create("Post Processing Video")
+    console.log("\nStarting processing video: ", chalk.cyan("Compressing to #{videoCompression}"))
 
     onProgress = (float) ->
-      bar.tickTotal(float)
+      if float is 1
+        console.log("Finished processing video: ", chalk.cyan(name) + "\n")
+      # bar.tickTotal(float)
 
     ## once this ended promises resolves
     ## then begin processing the file
@@ -196,9 +198,28 @@ module.exports = {
       ## dont ever end if we're in 'gui' debugging mode
       return if gui
 
-      onEnd = (failures) =>
+      onEnd = (obj) =>
+        if end
+          obj.video = name
+
+        color = if obj.failures then "red" else "green"
+
+        terminal.divider("Tests Finished", {color: color})
+
+        console.log("")
+
+        stats.display({
+          duration:    humanTime(obj.duration)
+          tests:       obj.tests
+          passes:      obj.passes
+          pending:     obj.pending
+          failures:    obj.failures
+          screenshots: obj.screenshots.length
+          video:       !!obj.video
+        })
+
         finish = ->
-          resolve(failures)
+          resolve(obj)
 
         if end
           @postProcessRecording(end, name, cname, videoCompression)
@@ -234,6 +255,8 @@ module.exports = {
       {start, end, write} = props
 
       getRenderer = =>
+        terminal.divider("Tests Starting", {color: "yellow"})
+
         ## if we have a browser then just physically launch it
         if browser
           project.launch(browser, url, null, {proxyServer: proxyServer})
@@ -267,8 +290,6 @@ module.exports = {
         openProject.ensureSpecUrl(options.spec)
       ])
       .spread (config, url) =>
-        console.log("\nTests should begin momentarily...\n")
-
         @runTests({
           id:               id
           url:              url

@@ -47,17 +47,16 @@ module.exports = {
       # console.log "codec data", data
     .on "error", (err, stdout, stderr) ->
       ## TODO: call into lib/errors here
-      console.log "ffmpeg failed", err
+      # console.log "ffmpeg failed", err
       ended.reject(err)
     .on "end", ->
-      console.log "ffmpeg succeeded"
+      # console.log "ffmpeg succeeded"
       ended.resolve()
 
     return {
       end:     end
       start:   started.promise
       write:   write
-      # ended:   ended.promise
     }
 
   process: (name, cname, videoCompression, onProgress = ->) ->
@@ -85,12 +84,12 @@ module.exports = {
 
         onProgress(progressed / total)
       .on "error", (err, stdout, stderr) ->
-        console.log "ffmpeg failed 2", err
+        # console.log "ffmpeg failed 2", err
         reject(err)
       .on "end", ->
         ## we are done progressing
         onProgress(1)
-        console.log "ffmpeg succeeded 2"
+        # console.log "ffmpeg succeeded 2"
 
         ## rename and obliterate the original
         fs.moveAsync(cname, name, {

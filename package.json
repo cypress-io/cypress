@@ -164,6 +164,7 @@
     "opn": "cypress-io/opn#2f4e9a216ca7bdb95dfae9d46d99ddf004b3cbb5",
     "ospath": "^1.1.0",
     "parse-domain": "^0.2.1",
+    "pluralize": "^3.0.0",
     "progress": "^1.1.8",
     "randomstring": "^1.1.5",
     "request": "2.74.0",

@@ -1,8 +1,12 @@
 fs              = require("fs-extra")
 mime            = require("mime")
 path            = require("path")
+glob            = require("glob")
 bytes           = require("bytes")
+Promise         = require("bluebird")
 dataUriToBuffer = require("data-uri-to-buffer")
+
+glob = Promise.promisify(glob)
 
 ## TODO: when we parallelize these builds we'll need
 ## a semaphore to access the file system when we write
@@ -17,6 +21,9 @@ module.exports = {
     .copyAsync(src, dest, {clobber: true})
     .catch {code: "ENOENT"}, ->
       ## dont yell about ENOENT errors
+
+  get: (screenshotsFolder) ->
+    glob(screenshotsFolder, {nodir: true})
 
   take: (name, dataUrl, screenshotsFolder) ->
     buffer = dataUriToBuffer(dataUrl)
