@@ -2,11 +2,11 @@ _     = require("lodash")
 chalk = require("chalk")
 
 TRANSLATION = {
-  duration:     "Duration"
   tests:        "Tests"
   passes:       "Passes"
   failures:     "Failures"
   pending:      "Pending"
+  duration:     "Duration"
   screenshots:  "Screenshots Taken"
   video:        "Video Recorded"
 }
@@ -16,17 +16,17 @@ LENS =  _.map TRANSLATION, (val, key) -> val.length
 MAX  = Math.max(LENS...)
 
 module.exports = {
-  format: (val, key) ->
-    word = TRANSLATION[key] + ":"
+  format: (color, val, key) ->
+    word = "  - " + TRANSLATION[key] + ":"
 
-    key = _.padEnd(word, MAX + 2)
+    key = _.padEnd(word, MAX + 6)
 
-    chalk.white(key) + chalk.blue(val)
+    chalk.white(key) + chalk[color](val)
 
-  display: (stats = {}) ->
+  display: (color, stats = {}) ->
     stats = _.pick(stats, KEYS)
 
     _.each stats, (val, key) =>
-      console.log(@format(val, key))
+      console.log(@format(color ,val, key))
 
 }

@@ -112,7 +112,7 @@ module.exports = {
 
     fs.ensureDirAsync(outputDir)
     .then ->
-      console.log("\nStarted video recording: #{chalk.blue(name)}\n")
+      console.log("\nStarted video recording: #{chalk.cyan(name)}\n")
 
       ffmpeg.start(name)
 
@@ -152,13 +152,66 @@ module.exports = {
 
       win.center()
 
+  displayStats: (obj = {}) ->
+    bgColor = if obj.failures then "bgRed" else "bgGreen"
+    color   = if obj.failures then "red"   else "green"
+
+    console.log("")
+
+    terminal.header("Tests Finished", {
+      # preBreak: true
+      # postBreak: true
+      color: [bgColor, "black"]
+    })
+
+    console.log("")
+    # console.log("")
+
+    # terminal.header("Stats", {
+    #   preBreak: true
+    #   color: ["bgBlue", "black"]
+    # })
+
+    # console.log("")
+
+    stats.display(color, {
+      tests:       obj.tests
+      passes:      obj.passes
+      pending:     obj.pending
+      failures:    obj.failures
+      duration:    humanTime(obj.duration)
+      screenshots: obj.screenshots and obj.screenshots.length
+      video:       !!obj.video
+    })
+
+  displayScreenshots: (screenshots = []) ->
+    console.log("")
+    console.log("")
+
+    terminal.header("Screenshots", {color: ["bgYellow", "black"]})
+
+    console.log("")
+
+    screenshots.forEach (screenshot) ->
+      console.log("  - " + screenshot)
+
   postProcessRecording: (end, name, cname, videoCompression) ->
+    console.log("")
+    console.log("")
+
+    terminal.header("Video", {
+      # preBreak: true
+      color: ["bgCyan", "black"]
+    })
+
+    console.log("")
+
     # bar = progress.create("Post Processing Video")
-    console.log("\nStarting processing video: ", chalk.cyan("Compressing to #{videoCompression}"))
+    console.log("  - Started processing:  ", chalk.cyan("Compressing to #{videoCompression}"))
 
     onProgress = (float) ->
       if float is 1
-        console.log("Finished processing video: ", chalk.cyan(name) + "\n")
+        console.log("  - Finished processing: ", chalk.cyan(name) + "\n")
       # bar.tickTotal(float)
 
     ## once this ended promises resolves
@@ -202,21 +255,12 @@ module.exports = {
         if end
           obj.video = name
 
-        color = if obj.failures then "red" else "green"
+        @displayStats(obj)
 
-        terminal.divider("Tests Finished", {color: color})
+        s = obj.screenshots
 
-        console.log("")
-
-        stats.display({
-          duration:    humanTime(obj.duration)
-          tests:       obj.tests
-          passes:      obj.passes
-          pending:     obj.pending
-          failures:    obj.failures
-          screenshots: obj.screenshots.length
-          video:       !!obj.video
-        })
+        if s and s.length
+          @displayScreenshots(s)
 
         finish = ->
           resolve(obj)
@@ -255,7 +299,7 @@ module.exports = {
       {start, end, write} = props
 
       getRenderer = =>
-        terminal.divider("Tests Starting", {color: "yellow"})
+        terminal.header("Tests Starting", {color: ["bgWhite", "black"]})
 
         ## if we have a browser then just physically launch it
         if browser

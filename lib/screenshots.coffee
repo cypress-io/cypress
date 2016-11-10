@@ -23,6 +23,9 @@ module.exports = {
       ## dont yell about ENOENT errors
 
   get: (screenshotsFolder) ->
+    ## find all files in all nested dirs
+    screenshotsFolder = path.join(screenshotsFolder, "**", "*")
+
     glob(screenshotsFolder, {nodir: true})
 
   take: (name, dataUrl, screenshotsFolder) ->
