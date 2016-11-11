@@ -3,6 +3,7 @@ fs = require("fs-extra")
 path = require("path")
 ReadableStream = require("stream").Readable
 
+_ = require("lodash")
 through = require("through")
 Promise = require("bluebird")
 str = require("underscore.string")
@@ -86,10 +87,28 @@ module.exports = {
     }
 
   error: (err) ->
+    if not err or not _.isObject(err)
+      err = {
+        name: "Uncaught Error"
+        message: ""
+        stack: err
+      }
+
+    err.stack = (err.stack or err.annotated or err.message or "")
+      ## \n doesn't come through properly so preserve it so the
+      ## runner can do the right thing
+      .replace(/\n/g, '{newline}')
+      ## babel adds syntax highlighting for the console in the form of
+      ## [90m that need to be stripped out or they appear in the error message
+      .replace(/\[\d{1,3}m/g, '')
+
     """
     (function () {
-      console.log("#{err.message}")
-      console.log("#{err.stack.replace(/\n/g, '\\\n')}")
+      Cypress.trigger("bundle:error", {
+        name: "#{err.name}",
+        message: "#{err.message}",
+        stack: "#{err.stack}"
+      })
     }())
     """
 
