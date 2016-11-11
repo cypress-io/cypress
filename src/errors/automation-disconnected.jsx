@@ -1,5 +1,5 @@
 import React from 'react'
-import RunnerWrap from './runner-wrap'
+import RunnerWrap from '../app/runner-wrap'
 
 export default ({ onReload }) => (
   <RunnerWrap className='automation-failure'>

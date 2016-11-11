@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
-import RunnerWrap from './runner-wrap'
-
+import RunnerWrap from '../app/runner-wrap'
 import eventManager from '../lib/event-manager'
 
 class NoSpec extends Component {

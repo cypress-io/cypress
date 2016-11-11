@@ -2,7 +2,7 @@ import _ from 'lodash'
 import React from 'react'
 
 import Dropdown from '../dropdown/dropdown'
-import RunnerWrap from './runner-wrap'
+import RunnerWrap from '../app/runner-wrap'
 
 const displayName = (name) => _.capitalize(name)
 
