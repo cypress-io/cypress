@@ -10,6 +10,7 @@ import Reporter from '@cypress/core-reporter'
 import windowUtil from '../lib/window-util'
 import State from '../lib/state'
 
+import BundleError from '../errors/bundle-error'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
@@ -46,6 +47,10 @@ class App extends Component {
           <Message state={this.props.state} />
           {this.props.children}
         </RunnerWrap>
+        <BundleError
+          specPath={this._specPath()}
+          state={this.props.state}
+        />
         <Resizer
           style={{ left: this.props.state.absoluteReporterWidth }}
           state={this.props.state}

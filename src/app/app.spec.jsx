@@ -2,6 +2,7 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
 
+import BundleError from '../errors/bundle-error'
 import Message from '../message/message'
 import State from '../lib/state'
 
@@ -25,6 +26,7 @@ const createProps = () => ({
       emit: sinon.spy(),
       on: sinon.spy(),
     },
+    on: sinon.spy(),
   },
   state: new State(),
   windowUtil: {
@@ -95,6 +97,12 @@ describe('<App />', () => {
     const props = createProps()
     const component = shallow(<App {...props} />)
     expect(component.find('Resizer')).to.have.prop('state', props.state)
+  })
+
+  it('renders the <BundleError /> with the state', () => {
+    const props = createProps()
+    const component = shallow(<App {...props} />)
+    expect(component.find(BundleError)).to.have.prop('state', props.state)
   })
 
   describe('resizing reporter', () => {

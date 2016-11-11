@@ -1,6 +1,7 @@
 /* global $ */
 
 import Promise from 'bluebird'
+import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
@@ -41,10 +42,11 @@ export default class Iframes extends Component {
     this.autIframe = new AutIframe(this.props.config)
 
     eventManager.on('visit:failed', this.autIframe.showVisitFailure)
+    eventManager.on('bundle:error', this._setBundleError)
 
     // TODO: need to take headless mode into account
     // may need to not display reporter if more than 200 tests
-    eventManager.on('restart', this._run.bind(this))
+    eventManager.on('restart', this._run)
 
     eventManager.start(this.props.config)
 
@@ -68,10 +70,15 @@ export default class Iframes extends Component {
     this._run()
   }
 
-  _run () {
+  @action _setBundleError = (err) => {
+    this.props.state.bundleError = err
+  }
+
+  _run = () => {
     const specPath = windowUtil.specPath()
     this.props.eventManager.notifyRunningSpec(specPath)
     logger.clearLog()
+    this._setBundleError(null)
 
     this._loadIframes(specPath)
     .then(([specWindow, $autIframe]) => {

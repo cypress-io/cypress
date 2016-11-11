@@ -33,7 +33,7 @@
     "chai-enzyme": "^0.5.0",
     "classnames": "^2.2.5",
     "enzyme": "^2.4.1",
-    "eslint": "^2.11.1",
+    "eslint": "^3.10.0",
     "eslint-plugin-mocha": "^4.3.0",
     "eslint-plugin-react": "^5.1.1",
     "font-awesome": "^4.6.3",
