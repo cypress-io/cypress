@@ -45,7 +45,6 @@
     "chai-as-promised": "^4.2.0",
     "chai-jquery": "^2.0.0",
     "chokidar-cli": "^1.2.0",
-    "cjsxify": "^0.3.0",
     "cloudflare-cli": "^1.5.2",
     "codecov": "^1.0.1",
     "coffee-coverage": "^1.0.1",
@@ -182,6 +181,7 @@
     "underscore": "1.6.0",
     "underscore.string": "2.3.3",
     "url-parse": "^1.1.4",
+    "watchify": "^3.7.0",
     "winston": "^0.9.0"
   }
 }

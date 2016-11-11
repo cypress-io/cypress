@@ -43,10 +43,11 @@ setProxiedUrl = (req) ->
 ## currently not making use of event emitter
 ## but may do so soon
 class Server
-  constructor: ->
+  constructor: (watchers) ->
     if not (@ instanceof Server)
-      return new Server
+      return new Server(watchers)
 
+    @watchers = watchers
     @_request    = null
     @_middleware = null
     @_server     = null
@@ -131,7 +132,7 @@ class Server
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState)
+      @createRoutes(app, config, @_request, getRemoteState, @watchers)
 
       @createServer(app, config, @_request)
 

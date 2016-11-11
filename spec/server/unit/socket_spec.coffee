@@ -299,13 +299,12 @@ describe "lib/socket", ->
 
     context "on(watch:test:file)", ->
       it "calls socket#watchTestFileByPath with config, filePath, watchers", (done) ->
-        watchers = {}
-
-        @sandbox.stub(@socket, "watchTestFileByPath").yieldsAsync()
+        @sandbox.stub(@socket, "watchTestFileByPath")
 
         @client.emit "watch:test:file", "path/to/file", =>
-          expect(@socket.watchTestFileByPath).to.be.calledWith(@cfg, "path/to/file", watchers)
+          expect(@socket.watchTestFileByPath).to.be.calledWith(@cfg, "path/to/file", @watchers)
           done()
+
 
     context "on(app:connect)", ->
       it "calls options.onConnect with socketId and socket", (done) ->
@@ -442,74 +441,32 @@ describe "lib/socket", ->
 
       it "returns undefined if config.watchForFileChanges is false", ->
         @cfg.watchForFileChanges = false
-        cb = @sandbox.spy()
-        @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers, cb)
-        expect(cb).to.be.calledOnce
+        result = @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers)
+        expect(result).to.be.undefined
 
       it "returns undefined if #testFilePath matches arguments", ->
-        @socket.testFilePath = @filePath
-        cb = @sandbox.spy()
-        @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers, cb)
-        expect(cb).to.be.calledOnce
+        @socket.testFilePath = "cypress/integration/test1.js"
+        result = @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers)
+        expect(result).to.be.undefined
 
-      it "closes existing watchedTestFile", ->
-        remove = @sandbox.stub(@watchers, "remove")
-        @socket.watchedTestFile = "test1.js"
+      it "closes existing watched test file", ->
+        remove = @sandbox.stub(@watchers, "removeBundle")
+        @socket.testFilePath = "test1.js"
         @socket.watchTestFileByPath(@cfg, "test1.js", @watchers).then ->
           expect(remove).to.be.calledWithMatch("test1.js")
 
       it "sets #testFilePath", ->
         @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers).then =>
-          expect(@socket.testFilePath).to.eq @filePath
+          expect(@socket.testFilePath).to.eq "cypress/integration/test1.js"
 
       it "can normalizes leading slash", ->
         @socket.watchTestFileByPath(@cfg, "/integration/test1.js", @watchers).then =>
-          expect(@socket.testFilePath).to.eq @filePath
+          expect(@socket.testFilePath).to.eq "cypress/integration/test1.js"
 
-      it "watches file by path", (done) ->
-        socket = @socket
-
-        ## chokidar may take 100ms to pick up the file changes
-        ## so we just override onTestFileChange and whenever
-        ## its invoked we finish the test
-        onTestFileChange = @sandbox.stub @socket, "onTestFileChange", ->
-          expect(@).to.eq(socket)
-          done()
-
+      it "watches file by path", ->
+        @sandbox.stub(@watchers, "watchBundle").returns(Promise.resolve())
         @socket.watchTestFileByPath(@cfg, "integration/test2.coffee", @watchers)
-        .then =>
-          fs.writeFileAsync(@socket.testsDir + "/test2.coffee", "foooooooooo")
-
-      describe "ids project", ->
-        beforeEach ->
-          @idsPath = Fixtures.projectPath("ids")
-          @server  = Server(@idsPath)
-
-          config.get(@idsPath).then (@idCfg) =>
-
-        it "joins on integration test files", ->
-          @socket.testsDir = @idCfg.integrationFolder
-
-          cfg = {integrationFolder: @idCfg.integrationFolder}
-
-          @socket.watchTestFileByPath(cfg, "integration/foo.coffee", @watchers)
-          .then =>
-            expect(@socket.testFilePath).to.eq path.join(@idCfg.integrationFolder, "foo.coffee")
-
-        it "watches file by path for integration folder", (done) ->
-          file = path.join(@idCfg.integrationFolder, "bar.js")
-
-          @sandbox.stub @socket, "onTestFileChange", =>
-            expect(@socket.onTestFileChange).to.be.calledWith(
-              @idCfg.integrationFolder,
-              "integration/bar.js",
-              file
-            )
-            done()
-
-          @socket.watchTestFileByPath(@idCfg, "integration/bar.js", @watchers)
-          .then =>
-            fs.writeFileAsync(file, "foooooooooo")
+        expect(@watchers.watchBundle).to.be.calledWith("cypress/integration/test2.coffee", @cfg)
 
     context "#startListening", ->
       it "sets #testsDir", ->

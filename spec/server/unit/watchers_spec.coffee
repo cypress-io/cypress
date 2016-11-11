@@ -3,36 +3,71 @@ require("../spec_helper")
 _        = require("lodash")
 chokidar = require("chokidar")
 Watchers = require("#{root}lib/watchers")
+bundle = require("#{root}lib/util/bundle")
 
 describe "lib/watchers", ->
   beforeEach ->
-    @w = @sandbox.stub({
+    @standardWatcher = @sandbox.stub({
       on:    ->
       close: ->
     })
 
-    @sandbox.stub(chokidar, "watch").returns(@w)
+    @bundleWatcher = @sandbox.stub({
+      addChangeListener: ->
+      close: ->
+      getLatestBundle: ->
+    })
+
+    @sandbox.stub(chokidar, "watch").returns(@standardWatcher)
+    @sandbox.stub(bundle, "watch").returns(@bundleWatcher)
     @watchers = Watchers()
 
   it "returns instance of watcher class", ->
     expect(@watchers).to.be.instanceof(Watchers)
 
   context "#watch", ->
-    it "watches with chokidar", ->
+    beforeEach ->
       @watchers.watch("/foo/bar")
+
+    it "watches with chokidar", ->
       expect(chokidar.watch).to.be.calledWith("/foo/bar")
-      expect(_.keys(@watchers.watched)).to.have.length(1)
-      expect(@watchers.watched).to.have.property("/foo/bar")
 
-  context "#remove", ->
-    it "calls close", ->
-      @watchers._add("/foo/bar", @w)
-      @watchers.remove("/foo/bar")
-      expect(@w.close).to.be.calledOnce
-      expect(_.keys(@watchers.watched)).to.have.length(0)
-      expect(@watchers.watched).not.to.have.property("/foo/bar")
+    it "stores a reference to the watcher", ->
+      expect(_.keys(@watchers.watchers)).to.have.length(1)
+      expect(@watchers.watchers).to.have.property("/foo/bar")
 
-  context "#_close", ->
+  context "#watchBundle", ->
+    beforeEach ->
+      @bundleWatcher.getLatestBundle.returns("latest bundle")
+      @latestBundle = @watchers.watchBundle("/foo/bar")
+
+    it "watches with bundle watcher", ->
+      expect(bundle.watch).to.be.calledWith("/foo/bar")
+
+    it "stores a reference to the watcher", ->
+      expect(_.keys(@watchers.bundleWatchers)).to.have.length(1)
+      expect(@watchers.bundleWatchers).to.have.property("/foo/bar")
+
+    it "does not add change listener if not specified", ->
+      expect(@bundleWatcher.addChangeListener).not.to.have.been.called
+
+    it "returns the latest bundle", ->
+      expect(@latestBundle).to.equal("latest bundle")
+
+    it "adds change listener if specified", ->
+      changeListener = @sandbox.spy()
+      @watchers.watchBundle("/foo/bar", {}, { onChange: changeListener })
+      expect(@bundleWatcher.addChangeListener).to.have.been.calledWith(changeListener)
+
+  context "#removeBundle", ->
+    it "calls close on the bundle watcher", ->
+      @watchers._addBundle("/foo/bar", @bundleWatcher)
+      @watchers.removeBundle("/foo/bar")
+      expect(@bundleWatcher.close).to.be.calledOnce
+      expect(_.keys(@watchers.watchers)).to.have.length(0)
+      expect(@watchers.watchers).not.to.have.property("/foo/bar")
+
+  context "#close", ->
     it "removes each watched property", ->
       watched1 = {close: @sandbox.spy()}
       @watchers._add("/one", watched1)
@@ -40,21 +75,21 @@ describe "lib/watchers", ->
       watched2 = {close: @sandbox.spy()}
       @watchers._add("/two", watched2)
 
-      expect(_.keys(@watchers.watched)).to.have.length(2)
+      watchedBundle1 = {close: @sandbox.spy()}
+      @watchers._addBundle("/bundleone", watchedBundle1)
+
+      watchedBundle2 = {close: @sandbox.spy()}
+      @watchers._addBundle("/bundletwo", watchedBundle2)
+
+      expect(_.keys(@watchers.watchers)).to.have.length(2)
+      expect(_.keys(@watchers.bundleWatchers)).to.have.length(2)
 
       @watchers.close()
 
       expect(watched1.close).to.be.calledOnce
       expect(watched2.close).to.be.calledOnce
+      expect(watchedBundle1.close).to.be.calledOnce
+      expect(watchedBundle2.close).to.be.calledOnce
 
-      expect(_.keys(@watchers.watched)).to.have.length(0)
-
-  context "#watchAsync", ->
-    it "resolves promise onReady", (done) ->
-      options = {}
-
-      _.delay ->
-        options.onReady()
-      , 50
-
-      @watchers.watchAsync("/foo/bar", options).then -> done()
+      expect(_.keys(@watchers.watchers)).to.have.length(0)
+      expect(_.keys(@watchers.bundleWatchers)).to.have.length(0)

@@ -18,6 +18,7 @@ Promise       = require("bluebird")
 httpsServer   = require("@cypress/core-https-proxy/test/helpers/https_server")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
+Watchers      = require("#{root}lib/watchers")
 files         = require("#{root}lib/controllers/files")
 CacheBuster   = require("#{root}lib/util/cache_buster")
 Fixtures      = require("#{root}spec/server/helpers/fixtures")
@@ -88,7 +89,7 @@ describe "Routes", ->
           httpsServer.start(8443),
 
           ## and open our cypress server
-          @server = Server()
+          @server = Server(Watchers())
 
           @server.open(cfg)
           .then (port) =>
