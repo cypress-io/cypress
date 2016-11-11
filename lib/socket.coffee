@@ -69,7 +69,6 @@ class Socket
   watchTestFileByPath: (config, originalFilePath, watchers) ->
     filePath = path.join("cypress", originalFilePath)
 
-    console.log('----', config.watchForFileChanges)
     ## bail if we're already watching this
     ## exact file or we've turned off watching
     ## for file changes
