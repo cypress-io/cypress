@@ -7,7 +7,7 @@ API = {
   getMsgByType: (type, arg1, arg2) ->
     switch type
       when "CANNOT_TRASH_ASSETS"
-        "Warning: we failed to trash the existing build assets.\n\nThis error will not alter the exist code\n\n#{arg1}"
+        "Warning: we failed to trash the existing build assets.\n\nThis error will not alter the exit code.\n\n#{arg1}"
       when "VIDEO_RECORDING_FAILED"
         "Warning: we failed to record the video.\n\nThis error will not alter the exit code.\n\n#{arg1}"
       when "VIDEO_POST_PROCESSING_FAILED"
