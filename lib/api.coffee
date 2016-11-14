@@ -11,37 +11,49 @@ module.exports = {
   ping: ->
     rp.get(Routes.ping())
 
-  createCi: (options = {}) ->
+  createBuild: (options = {}) ->
     rp.post({
-      url: Routes.ci(options.projectId)
+      url: Routes.builds()
       json: true
       body: {
-        "x-project-token": options.key
-        "x-project-name":  options.projectName
-        "x-git-branch":    options.branch
-        "x-git-author":    options.author
-        "x-git-message":   options.message
-        "x-version":       pkg.version
-        "x-platform":      os.platform()
-        "x-provider":      provider.get()
+        projectId:       options.projectId
+        projectToken:    options.projectToken
+        commitSha:       options.commitSha
+        commitBranch:    options.commitBranch
+        commitAuthor:    options.commitAuthor
+        commitMessage:   options.commitMessage
+        cypressVersion:  pkg.version
+        ciProvider:      provider.get()
       }
     })
     .promise()
-    .get("ci_guid")
+    .get("buildId")
 
-  updateCi: (options = {}) ->
-    rp.put({
-      url: Routes.ci(options.projectId)
+  createInstance: (options = {}) ->
+    body = {
+      tests:        options.tests
+      duration:     options.duration
+      passing:      options.passes
+      failing:      options.failures
+      pending:      options.pending
+      video:        options.video
+      screenshots:  []#options.screenshots
+      failingTests: []#options.failingTests
+    }
+
+    rp.post({
+      url: Routes.instance(options.buildId)
       json: true
       timeout: 10000
-      body: _.extend({}, options.stats, {
-        "x-ci-id":         options.ciId
-        "x-project-token": options.key
-        "x-project-name":  options.projectName
-        "x-version":       pkg.version
-        "x-platform":      os.platform()
-        "x-provider":      provider.get()
-      })
+      body: body
+      # body: _.extend({}, options.stats, {
+      #   "x-ci-id":         options.ciId
+      #   "x-project-token": options.key
+      #   "x-project-name":  options.projectName
+      #   "x-version":       pkg.version
+      #   "x-platform":      os.platform()
+      #   "x-provider":      provider.get()
+      # })
     })
 
   createRaygunException: (body, session, timeout = 3000) ->

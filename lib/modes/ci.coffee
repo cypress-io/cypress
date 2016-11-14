@@ -3,25 +3,40 @@ git      = require("gift")
 Promise  = require("bluebird")
 headless = require("./headless")
 api      = require("../api")
+logger   = require("../logger")
 errors   = require("../errors")
+upload   = require("../upload")
 Project  = require("../project")
+
+logException = (err) ->
+  ## give us up to 1 second to
+  ## create this exception report
+  logger.createException(err)
+  .timeout(1000)
+  .catch ->
+    ## dont yell about any errors either
 
 module.exports = {
   getBranchFromGit: (repo) ->
     repo.branchAsync()
-      .get("name")
-      .catch -> ""
+    .get("name")
+    .catch -> ""
 
   getMessage: (repo) ->
     repo.current_commitAsync()
-      .get("message")
-      .catch -> ""
+    .get("message")
+    .catch -> ""
 
   getAuthor: (repo) ->
     repo.current_commitAsync()
-      .get("author")
-      .get("name")
-      .catch -> ""
+    .get("author")
+    .get("name")
+    .catch -> ""
+
+  getSha: (repo) ->
+    repo.current_commitAsync()
+    .get("id")
+    .catch -> ""
 
   getBranch: (repo) ->
     for branch in ["CIRCLE_BRANCH", "TRAVIS_BRANCH", "CI_BRANCH"]
@@ -30,33 +45,26 @@ module.exports = {
 
     @getBranchFromGit(repo)
 
-  ensureCi: ->
-    Promise.try =>
-      ## TODO: this method is going to change. we'll soon by
-      ## removing CI restrictions once we're spinning up instances
-      return if os.platform() is "linux"
-
-      errors.throw("NOT_CI_ENVIRONMENT")
-
-  ensureProjectAPIToken: (projectId, projectPath, projectName, key) ->
-    if not key
+  ensureProjectAPIToken: (projectId, projectPath, projectName, projectToken) ->
+    if not projectToken
       return errors.throw("CI_KEY_MISSING")
 
     repo = Promise.promisifyAll git(projectPath)
 
     Promise.props({
+      sha:     @getSha(repo)
       branch:  @getBranch(repo)
       author:  @getAuthor(repo)
       message: @getMessage(repo)
     })
     .then (git) ->
-      api.createCi({
-        key:       key
-        projectId: projectId
-        projectName: projectName
-        branch:    git.branch
-        author:    git.author
-        message:   git.message
+      api.createBuild({
+        projectId:     projectId
+        projectToken:  projectToken
+        commitSha:     git.sha
+        commitBranch:  git.branch
+        commitAuthor:  git.author
+        commitMessage: git.message
       })
       .catch (err) ->
         switch err.statusCode
@@ -66,43 +74,90 @@ module.exports = {
           when 404
             errors.throw("CI_PROJECT_NOT_FOUND")
           else
-            errors.throw("CI_CANNOT_COMMUNICATE")
+            ## warn the user that assets will be not recorded
+            errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
 
-  reportStats: (projectId, ciId, projectName, key, stats) ->
-    api.updateCi({
-      key:       key
-      ciId:      ciId
-      stats:     stats
-      projectId: projectId
-      projectName: projectName
+            ## report on this exception
+            ## and return null
+            logException(err)
+            .return(null)
+
+  upload: (options = {}) ->
+    {video, screenshots, videoUrl, screenshotsUrl} = options
+
+    uploads = []
+    count   = 1
+
+    if videoUrl
+      uploads = uploads.concat(upload.video(video, videoUrl, {
+        onStart: ->
+
+        onFinish: ->
+      }))
+
+    # if screenshotsUrl
+    #   uploads = uploads.concat(upload.screenshots(screenshots, screenshotsUrl, {
+    #     onStart: (screenshot) ->
+
+    #     onFinish: (screenshot) ->
+
+    #   }))
+
+    Promise.all(uploads)
+
+  uploadAssets: (buildId, stats, screenshots, failingTests) ->
+    api.createInstance({
+      buildId:      buildId
+      tests:        stats.tests
+      duration:     stats.duration
+      passes:       stats.passes
+      failures:     stats.failures
+      pending:      stats.pending
+      video:        !!stats.video
+      screenshots:  stats.screenshots.length
     })
+    .then (resp) =>
+      @upload({
+        video:          stats.video
+        screenshots:    stats.screenshots
+        videoUrl:       resp.videoUploadUrl
+        screenshotsUrl: resp.screenshotUploadUrls
+      })
+      .catch (err) ->
+        errors.warning("CI_CANNOT_UPLOAD_ASSETS", err)
+
+        logException(err)
     .catch (err) ->
-      ## swallow errors
-      ## TODO shouldn't we report
-      ## this to raygun?
-      ## logger.createException(err)
-      return
+      errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+
+      logException(err)
 
   run: (options) ->
     {projectPath} = options
 
-    @ensureCi()
-    .then ->
-      Project.add(projectPath)
+    Project.add(projectPath)
     .then ->
       Project.id(projectPath)
-    .then (id) =>
+    .then (projectId) =>
       Project.config(projectPath)
       .then (cfg) =>
         {projectName} = cfg
 
-        @ensureProjectAPIToken(id, projectPath, projectName, options.key)
-        .then (ciId) =>
+        @ensureProjectAPIToken(projectId, projectPath, projectName, options.key)
+        .then (buildId) =>
           ## dont check that the user is logged in
           options.ensureSession = false
 
+          ## collect screenshot metadata
+          options.screenshots = []
+
           headless.run(options)
           .then (stats = {}) =>
-            @reportStats(id, ciId, projectName, options.key, stats)
-            .return(stats)
+            ## if we got a buildId then attempt to
+            ## upload these assets
+            if buildId
+              @uploadAssets(buildId, stats, options.screenshots, options.failingTests)
+              .return(stats)
+            else
+              stats
 }
