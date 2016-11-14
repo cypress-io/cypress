@@ -69,6 +69,9 @@ LGPL
 
 ## Changelog
 
+#### 0.3.12 - *(11/14/16)*
+- fix missing lib js file
+
 #### 0.3.11 - *(11/14/16)*
 - updated config to display 'env' property instead of inaccurately named 'environmentVariables' property
 
