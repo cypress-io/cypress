@@ -159,6 +159,8 @@ class Project extends EE
 
       onAutomationRequest: options.onAutomationRequest
 
+      afterAutomationRequest: options.afterAutomationRequest
+
       onFocusTests: options.onFocusTests
 
       onSpecChanged: options.onSpecChanged
@@ -191,11 +193,7 @@ class Project extends EE
               screenshots.copy(config.screenshotsFolder, ca)
 
           Promise.resolve(link)
-          .then ->
-            screenshots.get(config.screenshotsFolder)
-          .then (arr) =>
-            stats.screenshots = arr
-
+          .then =>
             @emit("end", stats)
     })
 

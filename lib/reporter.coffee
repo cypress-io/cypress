@@ -35,7 +35,12 @@ createRunnable = (obj, parent) ->
   return runnable
 
 mergeRunnable = (testProps, runnables) ->
-  _.extend(runnables[testProps.id], testProps)
+  runnable = runnables[testProps.id]
+
+  if not runnable.started
+    testProps.started = new Date
+
+  _.extend(runnable, testProps)
 
 safelyMergeRunnable = (testProps, runnables) ->
   _.extend({}, runnables[testProps.id], testProps)
@@ -43,6 +48,8 @@ safelyMergeRunnable = (testProps, runnables) ->
 mergeErr = (test, runnables) ->
   runnable = runnables[test.id]
   runnable.err = test.err
+  runnable.state = "failed"
+  runnable.duration ?= test.duration
   runnable = _.extend({}, runnable, {title: test.title})
   [runnable, test.err]
 
@@ -132,7 +139,26 @@ class Reporter
       [event].concat(args)
 
   stats: ->
-    _.extend {reporter: @reporterName}, _.pick(@reporter.stats, STATS)
+    failingTests = _.filter @runnables, {state: "failed"}
+
+    console.log failingTests
+
+    _.extend {reporter: @reporterName, failingTests: failingTests}, _.pick(@reporter.stats, STATS)
+
+  @normalizeAll = (videoStart, failingTests = []) ->
+    normalize = (test) ->
+      err = test.err ? {}
+
+      {
+        clientId:       test.id
+        name:           test.title
+        duration:       test.duration
+        stack:          err.stack
+        error:          err.message
+        videoTimestamp: test.started - videoStart
+      }
+
+    _.map(failingTests, normalize)
 
   @create = (reporterName, reporterOptions, projectRoot) ->
     new Reporter(reporterName, reporterOptions, projectRoot)

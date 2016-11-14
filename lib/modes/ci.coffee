@@ -70,8 +70,8 @@ module.exports = {
       .catch (err) ->
         switch err.statusCode
           when 401
-            key = key.slice(0, 5) + "..." + key.slice(-5)
-            errors.throw("CI_KEY_NOT_VALID", key)
+            projectToken = projectToken.slice(0, 5) + "..." + projectToken.slice(-5)
+            errors.throw("CI_KEY_NOT_VALID", projectToken)
           when 404
             errors.throw("CI_PROJECT_NOT_FOUND")
           else
@@ -106,7 +106,7 @@ module.exports = {
 
     Promise.all(uploads)
 
-  uploadAssets: (buildId, stats, screenshots, failingTests) ->
+  uploadAssets: (buildId, stats) ->
     console.log("")
 
     terminal.header("Uploading Assets", {
@@ -123,7 +123,8 @@ module.exports = {
       failures:     stats.failures
       pending:      stats.pending
       video:        !!stats.video
-      screenshots:  stats.screenshots.length
+      screenshots:  stats.screenshots
+      failingTests: stats.failingTests
     })
     .then (resp) =>
       @upload({
@@ -157,15 +158,12 @@ module.exports = {
           ## dont check that the user is logged in
           options.ensureSession = false
 
-          ## collect screenshot metadata
-          options.screenshots = []
-
           headless.run(options)
           .then (stats = {}) =>
             ## if we got a buildId then attempt to
             ## upload these assets
             if buildId
-              @uploadAssets(buildId, stats, options.screenshots, options.failingTests)
+              @uploadAssets(buildId, stats)
               .return(stats)
             else
               stats

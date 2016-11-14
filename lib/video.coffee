@@ -52,7 +52,7 @@ module.exports = {
     .save(name)
     .on "start", (line) ->
       # console.log "spawned ffmpeg", line
-      started.resolve(line)
+      started.resolve(new Date)
     # .on "codecData", (data) ->
       # console.log "codec data", data
     # .on("error", options.onError)

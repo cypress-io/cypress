@@ -51,10 +51,29 @@ $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
         options = name
         name = null
 
-      ## default to the runnables title if not set
-      name ?= @private("runnable").title
+      ## TODO: handle hook titles
+      runnable = @private("runnable")
 
+      ## default to the runnables title if not set
+      name ?= runnable.title
       name = name.toString()
+
+      titles = [runnable.title]
+
+      getParentTitle = (runnable) ->
+        if p = runnable.parent
+          if t = p.title
+            titles.unshift(t)
+
+          getParentTitle(p)
+
+      getParentTitle(runnable)
+
+      props = {
+        name:   name
+        titles: titles
+        testId: runnable.id
+      }
 
       _.defaults options, {
         log: true
@@ -70,7 +89,7 @@ $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
             consoleProps
         })
 
-      @_takeScreenshot(name, options._log, options.timeout)
+      @_takeScreenshot(props, options._log, options.timeout)
       .then (resp) ->
         _.extend consoleProps, {
           Saved: resp.path

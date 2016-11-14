@@ -3,6 +3,7 @@ mime            = require("mime")
 path            = require("path")
 glob            = require("glob")
 bytes           = require("bytes")
+sizeOf          = require("image-size")
 Promise         = require("bluebird")
 dataUriToBuffer = require("data-uri-to-buffer")
 
@@ -28,11 +29,11 @@ module.exports = {
 
     glob(screenshotsFolder, {nodir: true})
 
-  take: (name, dataUrl, screenshotsFolder) ->
+  take: (data, dataUrl, screenshotsFolder) ->
     buffer = dataUriToBuffer(dataUrl)
 
     ## join name + extension with '.'
-    name = [name, mime.extension(buffer.type)].join(".")
+    name = [data.name, mime.extension(buffer.type)].join(".")
 
     pathToScreenshot = path.join(screenshotsFolder, name)
 
@@ -41,9 +42,13 @@ module.exports = {
       fs.statAsync(pathToScreenshot)
       .get("size")
     .then (size) ->
+      dimensions = sizeOf(buffer)
+
       {
-        size: bytes(size, {unitSeparator: " "})
-        path: pathToScreenshot
+        size:   bytes(size, {unitSeparator: " "})
+        path:   pathToScreenshot
+        width:  dimensions.width
+        height: dimensions.height
       }
 
 }

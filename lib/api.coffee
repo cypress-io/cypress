@@ -25,6 +25,7 @@ module.exports = {
     rp.post({
       url: Routes.builds()
       json: true
+      timeout: 10000
       body: {
         projectId:       options.projectId
         projectToken:    options.projectToken
@@ -41,16 +42,9 @@ module.exports = {
     .catch(errors.StatusCodeError, formatResponseBody)
 
   createInstance: (options = {}) ->
-    body = {
-      tests:        options.tests
-      duration:     options.duration
-      passing:      options.passes
-      failing:      options.failures
-      pending:      options.pending
-      video:        options.video
-      screenshots:  []#options.screenshots
-      failingTests: []#options.failingTests
-    }
+    body = _.pick(options, [
+      "tests", "duration", "passes", "failures", "pending", "video", "screenshots", "failingTests"
+    ])
 
     rp.post({
       url: Routes.instance(options.buildId)

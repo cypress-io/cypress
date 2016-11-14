@@ -1,5 +1,6 @@
 _          = require("lodash")
 fs         = require("fs-extra")
+uuid       = require("uuid")
 path       = require("path")
 chalk      = require("chalk")
 Promise    = require("bluebird")
@@ -10,7 +11,9 @@ stats      = require("../stats")
 video      = require("../video")
 errors     = require("../errors")
 Project    = require("../project")
-progress   = require("../progress_bar")
+Reporter   = require("../reporter")
+screenshots = require("../screenshots")
+progress   = require("../util/progress_bar")
 trash      = require("../util/trash")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
@@ -19,6 +22,8 @@ Renderer   = require("../electron/handlers/renderer")
 automation = require("../electron/handlers/automation")
 
 fs = Promise.promisifyAll(fs)
+
+TITLE_SEPARATOR = " /// "
 
 module.exports = {
   getId: ->
@@ -89,7 +94,7 @@ module.exports = {
 
   openProject: (id, options) ->
     # wantsExternalBrowser = true
-    wantsExternalBrowser = !!options.browser
+    # wantsExternalBrowser = !!options.browser
 
     ## now open the project to boot the server
     ## putting our web client app in headless mode
@@ -101,8 +106,10 @@ module.exports = {
       socketId:     id
       report:       true
       isHeadless:   true
+      onAutomationRequest: options.onAutomationRequest
+      afterAutomationRequest: options.afterAutomationRequest
       ## TODO: get session into automation.perform
-      onAutomationRequest: if wantsExternalBrowser then null else automation.perform
+      # onAutomationRequest: if wantsExternalBrowser then null else automation.perform
 
     })
     .catch {portInUse: true}, (err) ->
@@ -199,22 +206,7 @@ module.exports = {
     console.log("")
 
     screenshots.forEach (screenshot) ->
-      console.log("  - " + screenshot)
-
-  screenshotMetadata: (data, png) ->
-    data = {name: data}
-
-    data = _.clone(data)
-
-    screenshots.dimensions(png)
-    .then (size) ->
-      data.clientId = uuid.v4()
-      data.width    = size.width
-      data.height   = size.height
-
-      # console.log data
-
-      data
+      console.log("  - " + JSON.stringify(screenshot))
 
   postProcessRecording: (end, name, cname, videoCompression) ->
     ## once this ended promises resolves
@@ -271,7 +263,7 @@ module.exports = {
       ## is the one that matches our id!
       openProject.on "socket:connected", fn
 
-  waitForTestsToFinishRunning: (openProject, gui, end, name, cname, videoCompression) ->
+  waitForTestsToFinishRunning: (openProject, gui, screenshots, started, end, name, cname, videoCompression) ->
     new Promise (resolve, reject) =>
       ## dont ever end if we're in 'gui' debugging mode
       return if gui
@@ -280,14 +272,20 @@ module.exports = {
         if end
           obj.video = name
 
+        obj.screenshots = screenshots
+
         @displayStats(obj)
 
-        s = obj.screenshots
+        if screenshots and screenshots.length
+          @displayScreenshots(screenshots)
 
-        if s and s.length
-          @displayScreenshots(s)
+        ft = obj.failingTests
+
+        if ft and ft.length
+          obj.failingTests = Reporter.normalizeAll(started, ft)
 
         finish = ->
+          console.log obj
           resolve(obj)
 
         if end
@@ -313,8 +311,19 @@ module.exports = {
     else
       Promise.resolve()
 
+  screenshotMetadata: (data, resp) ->
+    {
+      clientId:  uuid.v4()
+      name:      data.name
+      testId:    data.testId
+      testTitle: data.titles.join(TITLE_SEPARATOR)
+      path:      resp.path
+      height:    resp.height
+      width:     resp.width
+    }
+
   runTests: (options = {}) ->
-    {openProject, id, url, proxyServer, gui, browser, webSecurity, videosFolder, videoRecording, videoCompression} = options
+    {openProject, id, url, screenshots, proxyServer, gui, browser, webSecurity, videosFolder, videoRecording, videoCompression} = options
 
     ## we know we're done running headlessly
     ## when the renderer has connected and
@@ -347,15 +356,26 @@ module.exports = {
       ## make sure we start the recording first
       ## before doing anything
       Promise.resolve(start)
-      .then =>
+      .then (started) =>
         Promise.props({
           connection: @waitForRendererToConnect(openProject, id)
-          stats:      @waitForTestsToFinishRunning(openProject, gui, end, name, cname, videoCompression)
+          stats:      @waitForTestsToFinishRunning(openProject, gui, screenshots, started, end, name, cname, videoCompression)
           renderer:   getRenderer()
         })
 
   ready: (options = {}) ->
     id = @getId()
+
+    wantsExternalBrowser = !!options.browser
+
+    screenshots = []
+
+    options.onAutomationRequest    = if wantsExternalBrowser then null else automation.perform
+    options.afterAutomationRequest = (msg, data, resp) =>
+      if msg is "take:screenshot"
+        screenshots.push @screenshotMetadata(data, resp)
+
+      resp
 
     ## verify this is an added project
     ## and then open it, returning our
@@ -376,6 +396,7 @@ module.exports = {
           @runTests({
             id:               id
             url:              url
+            screenshots:      screenshots
             openProject:      openProject
             proxyServer:      config.clientUrlDisplay
             webSecurity:      config.chromeWebSecurity
