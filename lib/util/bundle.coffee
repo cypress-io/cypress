@@ -104,10 +104,9 @@ module.exports = {
 
     """
     (function () {
-      Cypress.trigger("bundle:error", {
-        name: "#{err.name}",
-        message: "#{err.message}",
-        stack: "#{err.stack}"
+      Cypress.trigger("script:error", {
+        type: "BUNDLE_ERROR",
+        error: "#{err.stack}"
       })
     }())
     """

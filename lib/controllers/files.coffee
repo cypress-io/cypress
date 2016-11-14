@@ -139,7 +139,9 @@ module.exports = {
     {projectRoot, supportScripts, javascripts} = config
 
     ## automatically add in support scripts and any javascripts
-    files = [].concat supportScripts, javascripts
+    files = [].concat javascripts
+    if supportScripts isnt false
+      files = files.concat(supportScripts)
 
     ## TODO: there shouldn't be any reason
     ## why we need to re-map these. its due
@@ -160,6 +162,13 @@ module.exports = {
     .then(_.flatten)
     .map (filePath) =>
       @prepareForBrowser(filePath, projectRoot)
+    .then (filePaths) ->
+      if config.resolved.supportFolder isnt "default"
+        ## displays an error informing user that supportFolder is
+        ## is no longer supported
+        filePaths.concat("/__cypress/errors/support_folder")
+      else
+        filePaths
 
   getTestFiles: (config) ->
     integrationFolderPath = config.integrationFolder

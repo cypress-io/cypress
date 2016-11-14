@@ -10,8 +10,8 @@ scaffold = require("./scaffold")
 cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
-folders = "fileServerFolder fixturesFolder integrationFolder screenshotsFolder unitFolder".split(" ")
-configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges chromeWebSecurity viewportWidth viewportHeight fileServerFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables hosts supportScripts".split(" ")
+folders = "fileServerFolder fixturesFolder integrationFolder screenshotsFolder unitFolder supportFolder".split(" ")
+configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges chromeWebSecurity viewportWidth viewportHeight fileServerFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables hosts supportScripts supportFolder".split(" ")
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
@@ -55,6 +55,7 @@ defaults = {
 
   ## deprecated
   javascripts: []
+  supportFolder: "cypress/support"
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->

@@ -5,7 +5,6 @@ bundle = require("../util/bundle")
 
 module.exports = {
   handle: (spec, req, res, config, next, watchers) ->
-
     res.set({
       "Cache-Control": "no-cache, no-store, must-revalidate"
       "Pragma": "no-cache"
