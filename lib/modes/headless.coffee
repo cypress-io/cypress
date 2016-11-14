@@ -114,7 +114,12 @@ module.exports = {
     .then ->
       console.log("\nStarted video recording: #{chalk.cyan(name)}\n")
 
-      video.start(name)
+      video.start(name, {
+        onError: (err) ->
+          ## catch video recording failures and log them out
+          ## but don't let this affect the run at all
+          errors.warning("VIDEO_RECORDING_FAILED", err)
+      })
 
   createRenderer: (url, proxyServer, showGui = false, chromeWebSecurity, write) ->
     @setProxy(proxyServer)
@@ -195,34 +200,53 @@ module.exports = {
     screenshots.forEach (screenshot) ->
       console.log("  - " + screenshot)
 
+  screenshotMetadata: (data, png) ->
+    data = {name: data}
+
+    data = _.clone(data)
+
+    screenshots.dimensions(png)
+    .then (size) ->
+      data.clientId = uuid.v4()
+      data.width    = size.width
+      data.height   = size.height
+
+      # console.log data
+
+      data
+
   postProcessRecording: (end, name, cname, videoCompression) ->
-    console.log("")
-    console.log("")
-
-    terminal.header("Video", {
-      # preBreak: true
-      color: ["bgCyan", "black"]
-    })
-
-    console.log("")
-
-    # bar = progress.create("Post Processing Video")
-    console.log("  - Started processing:  ", chalk.cyan("Compressing to #{videoCompression}"))
-
-    onProgress = (float) ->
-      if float is 1
-        console.log("  - Finished processing: ", chalk.cyan(name) + "\n")
-      # bar.tickTotal(float)
-
     ## once this ended promises resolves
     ## then begin processing the file
     end()
     .then ->
+      console.log("")
+      console.log("")
+
+      terminal.header("Video", {
+        # preBreak: true
+        color: ["bgCyan", "black"]
+      })
+
+      console.log("")
+
+      # bar = progress.create("Post Processing Video")
+      console.log("  - Started processing:  ", chalk.cyan("Compressing to #{videoCompression}"))
+
+      onProgress = (float) ->
+        if float is 1
+          console.log("  - Finished processing: ", chalk.cyan(name) + "\n")
+        # bar.tickTotal(float)
+
       video.process(name, cname, videoCompression, onProgress)
+    .catch {recordingVideoFailed: true}, (err) ->
+      ## dont do anything if this error occured because
+      ## recording the video had already failed
+      return
     .catch (err) ->
-      ## TODO: log that post processing failed but
-      ## not letting this fail the actual run
-      console.log err
+      ## log that post processing was attempted
+      ## but failed and dont let this change the run exit code
+      errors.warning("VIDEO_POST_PROCESSING_FAILED", err)
 
   waitForRendererToConnect: (openProject, id) ->
     ## wait up to 10 seconds for the renderer

@@ -1,8 +1,9 @@
 fs         = require("fs-extra")
+utils      = require("fluent-ffmpeg/lib/utils")
+ffmpeg     = require("fluent-ffmpeg")
 stream     = require("stream")
 Promise    = require("bluebird")
-ffmpeg     = require("fluent-ffmpeg")
-utils      = require("fluent-ffmpeg/lib/utils")
+defaults   = require("lodash.defaults")
 ffmpegPath = require("@ffmpeg-installer/ffmpeg").path
 
 fs = Promise.promisifyAll(fs)
@@ -10,18 +11,27 @@ fs = Promise.promisifyAll(fs)
 ffmpeg.setFfmpegPath(ffmpegPath)
 
 module.exports = {
-  start: (name) ->
+  start: (name, options = {}) ->
     pt      = stream.PassThrough()
     started = Promise.pending()
     ended   = Promise.pending()
     done    = false
+    errored = false
+
+    defaults(options, {
+      onError: ->
+    })
 
     end = ->
       pt.end()
 
       done = true
 
-      Promise.resolve(ended.promise)
+      if errored
+        errored.recordingVideoFailed = true
+        Promise.reject(errored)
+      else
+        Promise.resolve(ended.promise)
 
     write = (data) ->
       ## make sure we haven't ended
@@ -31,7 +41,7 @@ module.exports = {
       if not done
         pt.write(data)
 
-    ffmpeg({
+    cmd = ffmpeg({
       source: pt
       priority: 20
     })
@@ -45,15 +55,25 @@ module.exports = {
       started.resolve(line)
     # .on "codecData", (data) ->
       # console.log "codec data", data
+    # .on("error", options.onError)
     .on "error", (err, stdout, stderr) ->
+      options.onError(err, stdout, stderr)
+
+      errored = err
+      # ended.reject(err)
+      # console.log "error occured here", arguments
       ## TODO: call into lib/errors here
       # console.log "ffmpeg failed", err
-      ended.reject(err)
+      # ended.reject(err)
     .on "end", ->
-      # console.log "ffmpeg succeeded"
       ended.resolve()
 
+    # setTimeout ->
+    #   cmd.kill()
+    # , 1000
+
     return {
+      cmd:     cmd
       end:     end
       start:   started.promise
       write:   write
@@ -63,7 +83,7 @@ module.exports = {
     total = null
 
     new Promise (resolve, reject) ->
-      ffmpeg()
+      cmd = ffmpeg()
       .input(name)
       .videoCodec("libx264")
       .outputOptions([
@@ -71,11 +91,8 @@ module.exports = {
         "-crf #{videoCompression}"
       ])
       .save(cname)
-      # .on "start", (line) ->
-        # console.log "spawned ffmpeg 2", line
       .on "codecData", (data) ->
         total = utils.timemarkToSeconds(data.duration)
-        # console.log "codec data 2", data
       .on "progress", (progress) ->
         ## bail if we dont have total yet
         return if not total
@@ -84,12 +101,10 @@ module.exports = {
 
         onProgress(progressed / total)
       .on "error", (err, stdout, stderr) ->
-        # console.log "ffmpeg failed 2", err
         reject(err)
       .on "end", ->
         ## we are done progressing
         onProgress(1)
-        # console.log "ffmpeg succeeded 2"
 
         ## rename and obliterate the original
         fs.moveAsync(cname, name, {
@@ -97,4 +112,8 @@ module.exports = {
         })
         .then ->
           resolve()
+
+      # setTimeout ->
+      #   cmd.kill()
+      # , 100
 }

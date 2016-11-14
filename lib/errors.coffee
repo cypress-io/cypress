@@ -8,6 +8,10 @@ exceptions = "CI_CANNOT_COMMUNICATE".split(" ")
 API = {
   getMsgByType: (type, arg1, arg2) ->
     switch type
+      when "VIDEO_RECORDING_FAILED"
+        "Warning: we failed to record the video.\n\nThis error will not alter the exit code.\n\n#{arg1?.stack}"
+      when "VIDEO_POST_PROCESSING_FAILED"
+        "Warning: we failed processing this video.\n\nThis error will not alter the exit code.\n\n#{arg1?.stack}"
       when "NOT_LOGGED_IN"
         "You're not logged in.\n\nRun `cypress open` to open the Desktop App and login."
       when "TESTS_DID_NOT_START"
@@ -65,8 +69,8 @@ API = {
         ## and its not an exception
         err.type not in exceptions
 
-  warning: (type) ->
-    err = @get(type)
+  warning: (type, arg) ->
+    err = @get(type, arg)
     @log(err, "magenta")
 
   log: (err, color = "red") ->
