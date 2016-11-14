@@ -59,10 +59,6 @@ automation = {
     Promise.resolve(true)
 
   takeScreenshot: ->
-    ## we have to show our window and in linux
-    ## for the capturePage to fire
-    isLinux = os.platform() is "linux"
-
     new Promise (resolve) ->
       win = Renderer.get("PROJECT")
 
