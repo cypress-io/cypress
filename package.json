@@ -179,7 +179,7 @@
     "tar-fs": "^1.11.1",
     "through": "2.3.6",
     "tough-cookie": "2.3.0",
-    "trash": "^1.4.1",
+    "trash": "4.0.0",
     "underscore": "1.6.0",
     "underscore.string": "2.3.3",
     "url-parse": "^1.1.4",

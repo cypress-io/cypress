@@ -11,6 +11,7 @@ video      = require("../video")
 errors     = require("../errors")
 Project    = require("../project")
 progress   = require("../progress_bar")
+trash      = require("../util/trash")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
 project    = require("../electron/handlers/project")
@@ -118,7 +119,7 @@ module.exports = {
         onError: (err) ->
           ## catch video recording failures and log them out
           ## but don't let this affect the run at all
-          errors.warning("VIDEO_RECORDING_FAILED", err)
+          errors.warning("VIDEO_RECORDING_FAILED", err.stack)
       })
 
   createRenderer: (url, proxyServer, showGui = false, chromeWebSecurity, write) ->
@@ -246,7 +247,7 @@ module.exports = {
     .catch (err) ->
       ## log that post processing was attempted
       ## but failed and dont let this change the run exit code
-      errors.warning("VIDEO_POST_PROCESSING_FAILED", err)
+      errors.warning("VIDEO_POST_PROCESSING_FAILED", err.stack)
 
   waitForRendererToConnect: (openProject, id) ->
     ## wait up to 10 seconds for the renderer
@@ -299,6 +300,18 @@ module.exports = {
       ## when our openProject fires its end event
       ## resolve the promise
       openProject.once("end", onEnd)
+
+  trashAssets: (options = {}) ->
+    if options.trashAssetsBeforeHeadlessRuns is true
+      Promise.join(
+        trash.folder(options.videosFolder)
+        trash.folder(options.screenshotsFolder)
+      )
+      .catch (err) ->
+        ## dont make trashing assets fail the build
+        errors.warning("CANNOT_TRASH_ASSETS", err.stack)
+    else
+      Promise.resolve()
 
   runTests: (options = {}) ->
     {openProject, id, url, proxyServer, gui, browser, webSecurity, videosFolder, videoRecording, videoCompression} = options
@@ -358,18 +371,20 @@ module.exports = {
         openProject.ensureSpecUrl(options.spec)
       ])
       .spread (config, url) =>
-        @runTests({
-          id:               id
-          url:              url
-          openProject:      openProject
-          proxyServer:      config.clientUrlDisplay
-          webSecurity:      config.chromeWebSecurity
-          videosFolder:     config.videosFolder
-          videoRecording:   config.videoRecording
-          videoCompression: config.videoCompression
-          gui:              options.showHeadlessGui
-          browser:          options.browser
-        })
+        @trashAssets(config)
+        .then =>
+          @runTests({
+            id:               id
+            url:              url
+            openProject:      openProject
+            proxyServer:      config.clientUrlDisplay
+            webSecurity:      config.chromeWebSecurity
+            videosFolder:     config.videosFolder
+            videoRecording:   config.videoRecording
+            videoCompression: config.videoCompression
+            gui:              options.showHeadlessGui
+            browser:          options.browser
+          })
         .get("stats")
 
   run: (options) ->
