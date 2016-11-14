@@ -24,8 +24,8 @@ const SupportFolderError = () => (
       <i className='fa fa-warning'></i>
       The supportFolder option has been removed
     </h4>
-    <p>We noticed that you have explicity set the supportFolder option in your configuration. This option is no supported and has been replaced by the supportScripts option.</p>
-    <p>Please update your configuration to use the supportScripts option. <a href='https://on.cypress.io/guides/support-scripts' target='_blank' rel='noopener noreferrer'>Read more about supportScripts here</a></p>
+    <p>We noticed that you have explicity set the supportFolder option in your configuration. This option is no longer supported and has been replaced by the supportScripts option.</p>
+    <p>Please update your configuration to use the supportScripts option. <a href='https://on.cypress.io/guides/configuration#section-global' target='_blank' rel='noopener noreferrer'>Read more about supportScripts here</a></p>
   </div>
 )
 
