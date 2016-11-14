@@ -7,6 +7,16 @@ Routes   = require("./util/routes")
 pkg      = require("../package.json")
 provider = require("./util/provider")
 
+formatResponseBody = (err) ->
+  ## if the body is JSON object
+  if _.isObject(err.error)
+    ## transform the error message to include the
+    ## stringified body (represented as the 'error' property)
+    body = JSON.stringify(err.error, null, 2)
+    err.message = [err.statusCode, body].join("\n\n")
+
+  throw err
+
 module.exports = {
   ping: ->
     rp.get(Routes.ping())
@@ -28,6 +38,7 @@ module.exports = {
     })
     .promise()
     .get("buildId")
+    .catch(errors.StatusCodeError, formatResponseBody)
 
   createInstance: (options = {}) ->
     body = {
@@ -55,6 +66,7 @@ module.exports = {
       #   "x-provider":      provider.get()
       # })
     })
+    .catch(errors.StatusCodeError, formatResponseBody)
 
   createRaygunException: (body, session, timeout = 3000) ->
     rp.post({
