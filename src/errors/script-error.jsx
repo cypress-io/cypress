@@ -5,14 +5,14 @@ const BundleError = ({ specPath }) => (
   <div>
     <h4>
       <i className='fa fa-warning'></i>
-      Oops...we found an error preparing your spec file:
+      Oops...we found an error preparing your test file:
     </h4>
-    <pre>{specPath.replace(/\//g, ' / ')}</pre>
-    <p>Cypress automatically compiles and bundles your test code so you can use ES2015, JS modules, CoffeeScript, etc (<a href='https://on.cypress.io/we-found-an-error-preparing-your-file' target='_blank' rel='noopener noreferrer'>more details here</a>). This can get tripped up by the following:</p>
+    <pre>{specPath.replace(/\//g, '/')}</pre>
+    <p>Cypress compiles and bundles your test code so you can use ES2015, JS modules, CoffeeScript, etc. (<a href='https://on.cypress.io/we-found-an-error-preparing-your-file' target='_blank' rel='noopener noreferrer'>Learn more</a>). This can cause problems when:</p>
     <ul>
-      <li>The file missing</li>
-      <li>A syntax error in the file or one of its dependencies</li>
-      <li>A missing dependency</li>
+      <li>The file is missing.</li>
+      <li>There's a syntax error in the file or one of its dependencies.</li>
+      <li>There's a missing dependency.</li>
     </ul>
     <p>Fix the error in your code to clear this error and re-run your tests.</p>
   </div>
@@ -24,8 +24,13 @@ const SupportFolderError = () => (
       <i className='fa fa-warning'></i>
       The supportFolder option has been removed
     </h4>
-    <p>We noticed that you have explicity set the supportFolder option in your configuration. This option is no longer supported and has been replaced by the supportScripts option.</p>
-    <p>Please update your configuration to use the supportScripts option. <a href='https://on.cypress.io/guides/configuration#section-global' target='_blank' rel='noopener noreferrer'>Read more about supportScripts here</a></p>
+    <p>We see you setup a <strong>supportFolder</strong> option in your configuration.</p>
+    <p>This option is not supported and was replaced by the <strong>supportScripts</strong> option.</p>
+    <p>Please update your configuration.{' '}
+      <a href='https://on.cypress.io/guides/configuration#section-global' target='_blank' rel='noopener noreferrer'>
+        Learn more.
+      </a>
+    </p>
   </div>
 )
 
@@ -43,13 +48,38 @@ const ScriptError = observer(({ specPath, state }) => {
     }
   }
 
+  // errorStripped = state.scriptError.error.replace(/\{newline\}/g, '\n')}
+
   return (
     <div className='runner script-error'>
       <aside style={{ width: state.reporterWidth }}>
         {error()}
       </aside>
       <main style={{ marginTop: state.headerHeight }}>
-        <pre>{state.scriptError.error.replace(/\{newline\}/g, '\n')}</pre>
+        <pre className='error-stack'>
+          {state.scriptError.error.split('{newline\}').map((line, key) => {
+            return (
+              <span key={key}>
+                {line.split(/\(([^)]+)\)/).map((item, i) => {
+                  if (i === 1) {
+                    return (
+                      <span className="error-url" key={i}>(
+                        {item}
+                      )</span>
+                    )
+                  } else {
+                    return (
+                      <span key={i}>
+                      {item}
+                    </span>
+                    )
+                  }
+                })}
+                <br/>
+              </span>
+            )
+          })}
+        </pre>
       </main>
     </div>
   )
