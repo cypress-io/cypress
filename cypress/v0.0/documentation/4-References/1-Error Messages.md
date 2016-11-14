@@ -3,7 +3,7 @@ excerpt: Errors that require additional explanation are listed here.
 
 # Contents
 
-- :fa-angle-right: [Sorry, there's something wrong with this file](#section-sorry-there-s-something-wrong-with-this-file)
+- :fa-angle-right: [Oops...we found an error preparing your file](#section-we-found-an-error-preparing-your-file)
 - :fa-angle-right: [Cypress cannot execute commands outside a running test](#section-cypress-cannot-execute-commands-outside-a-running-test)
 - :fa-angle-right: [cy.method() failed because the element you are chaining off of has become detached or removed from the dom](#section-cy-method-failed-because-the-element-you-are-chaining-off-of-has-become-detached-or-removed-from-the-dom)
 - :fa-angle-right: [cy.method() failed because the element cannot be interacted with](#section-cy-method-failed-because-the-element-cannot-be-interacted-with)
@@ -15,20 +15,21 @@ excerpt: Errors that require additional explanation are listed here.
 
 ***
 
-# Sorry, there's something wrong with this file
-
-![screen shot 2015-12-01 at 12 29 06 pm](https://cloud.githubusercontent.com/assets/1268976/11508539/553573ba-9827-11e5-956b-e849b95e806c.png)
+# We found an error preparing your file
 
 This message means that Cypress was unable to read or find tests in the specified file.
 
+Cypress automatically compiles and bundles your test code so you can use ES2015, JS modules, CoffeeScript.
+
 You'll typically receive this message due to:
 
-- JavaScript syntax errors that prevent Cypress from reading your tests
-- Compilation errors from typos in `.coffee` files
+- The file missing
+- A syntax error in the file or one of its dependencies
+- A missing dependency
 
-Check the console in your Developer Tools for JavaScript errors or warnings. If Cypress failed to compile a `.coffee` file, you will see the network request has a `500` status code in the Network tab.
+Check the console in your Developer Tools for JavaScript errors or warnings. If Cypress failed to transpile a file, you will see the network request has a `500` status code in the Network tab.
 
-You'll also get this message if you have an empty test file, and have not yet written any tests.
+You'll also get this message if you have an empty test file and have not yet written any tests.
 
 ***
 
