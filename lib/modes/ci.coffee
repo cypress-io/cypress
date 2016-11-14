@@ -7,6 +7,7 @@ logger   = require("../logger")
 errors   = require("../errors")
 upload   = require("../upload")
 Project  = require("../project")
+terminal = require("../util/terminal")
 
 logException = (err) ->
   ## give us up to 1 second to
@@ -106,6 +107,14 @@ module.exports = {
     Promise.all(uploads)
 
   uploadAssets: (buildId, stats, screenshots, failingTests) ->
+    console.log("")
+
+    terminal.header("Uploading Assets", {
+      color: ["bgBlue", "black"]
+    })
+
+    console.log("")
+
     api.createInstance({
       buildId:      buildId
       tests:        stats.tests
