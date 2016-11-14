@@ -1,7 +1,7 @@
 .runner {
   &.automation-failure,
   &.no-spec,
-  &.bundle-error {
+  &.script-error {
     background: #f8f8f8;
     box-shadow: none;
     left: 0;
@@ -57,7 +57,7 @@
     }
   }
 
-  &.bundle-error {
+  &.script-error {
     display: flex;
 
     aside {

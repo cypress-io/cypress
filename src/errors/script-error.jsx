@@ -1,11 +1,13 @@
 import { observer } from 'mobx-react'
 import React from 'react'
 
-const BundleError = observer(({ specPath, state }) => {
-  if (!state.bundleError) return null
+
+
+const ScriptError = observer(({ specPath, state }) => {
+  if (!state.scriptError) return null
 
   return (
-    <div className='runner bundle-error'>
+    <div className='runner script-error'>
       <aside style={{ width: state.reporterWidth }}>
         <h4>
           <i className='fa fa-warning'></i>
@@ -21,10 +23,10 @@ const BundleError = observer(({ specPath, state }) => {
         <p>Fix the error in your code to clear this error and re-run your tests.</p>
       </aside>
       <main style={{ marginTop: state.headerHeight }}>
-        <pre>{state.bundleError.stack.replace(/\{newline\}/g, '\n')}</pre>
+        <pre>{state.scriptError.error.replace(/\{newline\}/g, '\n')}</pre>
       </main>
     </div>
   )
 })
 
-export default BundleError
+export default ScriptError

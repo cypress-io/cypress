@@ -2,7 +2,7 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
 
-import BundleError from '../errors/bundle-error'
+import ScriptError from '../errors/script-error'
 import Message from '../message/message'
 import State from '../lib/state'
 
@@ -99,10 +99,10 @@ describe('<App />', () => {
     expect(component.find('Resizer')).to.have.prop('state', props.state)
   })
 
-  it('renders the <BundleError /> with the state', () => {
+  it('renders the <ScriptError /> with the state', () => {
     const props = createProps()
     const component = shallow(<App {...props} />)
-    expect(component.find(BundleError)).to.have.prop('state', props.state)
+    expect(component.find(ScriptError)).to.have.prop('state', props.state)
   })
 
   describe('resizing reporter', () => {
