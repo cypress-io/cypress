@@ -5,10 +5,10 @@ const BundleError = ({ specPath }) => (
   <div>
     <h4>
       <i className='fa fa-warning'></i>
-      Oops... we found an error preparing your spec file:
+      Oops...we found an error preparing your spec file:
     </h4>
     <pre>{specPath.replace(/\//g, ' / ')}</pre>
-    <p>Cypress automatically compiles and bundles your test code so you can use ES2015, JS modules, CoffeeScript, etc (<a href='https://on.cypress.io/guides/test-transpilation' target='_blank' rel='noopener noreferrer'>more details here</a>). This can get tripped up by the following:</p>
+    <p>Cypress automatically compiles and bundles your test code so you can use ES2015, JS modules, CoffeeScript, etc (<a href='https://on.cypress.io/we-found-an-error-preparing-your-file' target='_blank' rel='noopener noreferrer'>more details here</a>). This can get tripped up by the following:</p>
     <ul>
       <li>The file missing</li>
       <li>A syntax error in the file or one of its dependencies</li>
