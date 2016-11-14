@@ -37,9 +37,10 @@ Cypress also adds placeholder files to help get you started with examples in eac
 ```text
 /cypress/support/commands.js
 /cypress/support/defaults.js
+/cypress/support/index.js
 ```
 
-While Cypress allows for configuration of where your test files can be located, if you're starting your first project, we recommend you use the above structure.
+While Cypress allows for configuration of where your tests, fixtures, and support files can be located, if you're starting your first project, we recommend you use the above structure.
 
 [block:callout]
 {
@@ -53,11 +54,13 @@ While Cypress allows for configuration of where your test files can be located, 
 
 # Test Files
 
-Test files may be written as either `.js` or `.coffee` files.
+Test files may be written as `.js`, `.jsx`, `.coffee`, or `cjsx` files.
+
+Additionally, Cypress supports ES6 (ES2015).
 
 To see an example of every command used in Cypress, open the `example_spec.js` within your `cypress/integration` folder.
 
-To start writing tests for your app, simply create a new file called `app_spec.js` within your `cypress/integration` folder. Refresh your tests list in the Cypress GUI and your new file should have appeared in the list.
+To start writing tests for your app, simply create a new file like `app_spec.js` within your `cypress/integration` folder. Refresh your tests list in the Cypress GUI and your new file should have appeared in the list.
 
 ***
 
