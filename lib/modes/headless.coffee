@@ -224,7 +224,7 @@ module.exports = {
       console.log("")
 
       # bar = progress.create("Post Processing Video")
-      console.log("  - Started processing:  ", chalk.cyan("Compressing to #{videoCompression}"))
+      console.log("  - Started processing:  ", chalk.cyan("Compressing to #{videoCompression} CRF"))
 
       onProgress = (float) ->
         if float is 1
