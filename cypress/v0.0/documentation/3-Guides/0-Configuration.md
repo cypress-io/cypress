@@ -174,4 +174,4 @@ When you open a Cypress project, we will display the resolved configuration to y
 
 This makes it easy to understand and see where different values came from.
 
-![Resolved Configuration](https://cloud.githubusercontent.com/assets/1268976/14413649/6e1b7ac6-ff4e-11e5-9407-48b1f2d3f02c.png)
+![Resolved Configuration](https://cloud.githubusercontent.com/assets/1271364/20274382/62343774-aa62-11e6-8d88-219fdc8512f9.png)
