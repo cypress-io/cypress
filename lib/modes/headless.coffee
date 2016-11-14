@@ -7,7 +7,7 @@ inquirer   = require("inquirer")
 random     = require("randomstring")
 user       = require("../user")
 stats      = require("../stats")
-ffmpeg     = require("../ffmpeg")
+video      = require("../video")
 errors     = require("../errors")
 Project    = require("../project")
 progress   = require("../progress_bar")
@@ -114,7 +114,7 @@ module.exports = {
     .then ->
       console.log("\nStarted video recording: #{chalk.cyan(name)}\n")
 
-      ffmpeg.start(name)
+      video.start(name)
 
   createRenderer: (url, proxyServer, showGui = false, chromeWebSecurity, write) ->
     @setProxy(proxyServer)
@@ -218,7 +218,7 @@ module.exports = {
     ## then begin processing the file
     end()
     .then ->
-      ffmpeg.process(name, cname, videoCompression, onProgress)
+      video.process(name, cname, videoCompression, onProgress)
     .catch (err) ->
       ## TODO: log that post processing failed but
       ## not letting this fail the actual run
