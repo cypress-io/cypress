@@ -26,7 +26,7 @@ class Config extends Component {
             { `{` }
             { this._display(config, { comma: true }) }
             <span className='envVars'>
-              <span className='key'>environmentVariables</span>
+              <span className='key'>env</span>
               <span className='colon'>:</span>{' '}
               { `{` }
               { this._display(envVars) }
