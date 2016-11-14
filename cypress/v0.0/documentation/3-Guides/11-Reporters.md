@@ -1,5 +1,5 @@
 slug: reporters
-excerpt: Reporters
+excerpt: Customize test results with reporters
 
 # Contents
 
