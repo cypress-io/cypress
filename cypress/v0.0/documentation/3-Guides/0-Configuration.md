@@ -63,7 +63,7 @@ Option | Default | Description
 
 ## Folders
 
-To turn off the use of `fixture` folders or `support` folders, pass `false` into the respective configuration option.
+To turn off the use of `fixture` folders, pass `false` into the configuration option.
 
 Option | Default | Description
 ----- | ---- | ----
@@ -123,7 +123,7 @@ Example:
 ## you can pass --config to cypress open, cypress run, or cypress ci
 cypress open --config watchForFileChanges=false,waitForAnimations=false
 
-cypress run --config integrationFolder=tests,fixturesFolder=false,supportFolder=false
+cypress run --config integrationFolder=tests,fixturesFolder=false
 
 cypress ci --config viewportWidth=1280,viewportHeight=720
 ```
