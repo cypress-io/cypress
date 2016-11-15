@@ -57,7 +57,7 @@ describe "lib/scaffold", ->
         ## ensure no files exist
         expect(files.length).to.eq(0)
 
-  context.only ".support", ->
+  context ".support", ->
     beforeEach ->
       pristinePath = Fixtures.projectPath("pristine")
 
