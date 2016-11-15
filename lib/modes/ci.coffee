@@ -163,6 +163,9 @@ module.exports = {
           ## dont check that the user is logged in
           options.ensureSession = false
 
+          ## dont let headless say its all done
+          options.allDone       = false
+
           headless.run(options)
           .then (stats = {}) =>
             ## if we got a buildId then attempt to
@@ -170,6 +173,7 @@ module.exports = {
             if buildId
               @uploadAssets(buildId, stats)
               .return(stats)
+              .finally(headless.allDone)
             else
               stats
 }

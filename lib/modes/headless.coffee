@@ -258,7 +258,6 @@ module.exports = {
           obj.failingTests = Reporter.normalizeAll(started, ft)
 
         finish = ->
-          console.log obj
           resolve(obj)
 
         if end
@@ -295,6 +294,16 @@ module.exports = {
       height:    resp.height
       width:     resp.width
     }
+
+  allDone: ->
+    console.log("")
+
+    terminal.header("All Done", {
+      # preBreak: true
+      color: ["bgWhite", "black"]
+    })
+
+    console.log("")
 
   runTests: (options = {}) ->
     {openProject, id, url, screenshots, proxyServer, gui, browser, webSecurity, videosFolder, videoRecording, videoCompression} = options
@@ -381,6 +390,9 @@ module.exports = {
             browser:          options.browser
           })
         .get("stats")
+        .finally =>
+          if options.allDone isnt false
+            @allDone()
 
   run: (options) ->
     app = require("electron").app
