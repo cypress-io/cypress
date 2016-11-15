@@ -305,8 +305,8 @@ class Base
     e2e = Fixtures.projectPath("e2e")
 
     verifyScreenshots = =>
-      screenshot1 = path.join(e2e, "cypress", "screenshots", "fails1.png")
-      screenshot2 = path.join(e2e, "cypress", "screenshots", "fails2.png")
+      screenshot1 = path.join(e2e, "cypress", "screenshots", "simple failing spec -- fails1.png")
+      screenshot2 = path.join(e2e, "cypress", "screenshots", "simple failing spec -- fails2.png")
 
       Promise.all([
         fs.statAsync(screenshot1)

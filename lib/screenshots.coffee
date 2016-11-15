@@ -10,7 +10,7 @@ dataUriToBuffer = require("data-uri-to-buffer")
 glob = Promise.promisify(glob)
 
 RUNNABLE_SEPARATOR = " -- "
-invalidCharsRe     = /[^0-9a-zA-Z-_\s]/
+invalidCharsRe     = /[^0-9a-zA-Z-_\s]/g
 
 ## TODO: when we parallelize these builds we'll need
 ## a semaphore to access the file system when we write
@@ -37,7 +37,10 @@ module.exports = {
 
     ## use the screenshots specific name or
     ## simply make its name the result of the titles
-    name = data.name ? data.titles.join(RUNNABLE_SEPARATOR).replace(invalidCharsRe, "")
+    name = data.name ? data.titles.join(RUNNABLE_SEPARATOR)
+
+    ## strip out any invalid characters out of the name
+    name = name.replace(invalidCharsRe, "")
 
     ## join name + extension with '.'
     name = [name, mime.extension(buffer.type)].join(".")
