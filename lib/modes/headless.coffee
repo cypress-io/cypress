@@ -145,7 +145,7 @@ module.exports = {
     console.log("")
 
     terminal.header("Tests Finished", {
-      color: ["gray", bgColor]
+      color: [color]
     })
 
     console.log("")
@@ -164,7 +164,7 @@ module.exports = {
     console.log("")
     console.log("")
 
-    terminal.header("Screenshots", {color: ["gray", "bgYellow"]})
+    terminal.header("Screenshots", {color: ["yellow"]})
 
     console.log("")
 
@@ -183,7 +183,7 @@ module.exports = {
       console.log("")
 
       terminal.header("Video", {
-        color: ["gray", "bgCyan"]
+        color: ["cyan"]
       })
 
       console.log("")
@@ -292,7 +292,7 @@ module.exports = {
     console.log("")
 
     terminal.header("All Done", {
-      color: ["gray", "bgWhite"]
+      color: ["gray"]
     })
 
     console.log("")
@@ -320,7 +320,7 @@ module.exports = {
       {start, end, write} = props
 
       getRenderer = =>
-        terminal.header("Tests Starting", {color: ["gray", "bgWhite"]})
+        terminal.header("Tests Starting", {color: ["gray"]})
 
         ## if we have a browser then just physically launch it
         if browser

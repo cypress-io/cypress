@@ -116,7 +116,7 @@
     "bluebird": "3.3.3",
     "browserify": "6.1.0",
     "bytes": "^2.4.0",
-    "chalk": "^1.1.0",
+    "chalk": "1.1.1",
     "chmodr": "^0.1.0",
     "chokidar": "1.6.0",
     "coffee-script": "1.7.1",
