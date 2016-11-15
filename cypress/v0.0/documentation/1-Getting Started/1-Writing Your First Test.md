@@ -56,7 +56,7 @@ While Cypress allows for configuration of where your tests, fixtures, and suppor
 
 Test files may be written as `.js`, `.jsx`, `.coffee`, or `cjsx` files.
 
-Additionally, Cypress supports ES6 (ES2015).
+Cypress supports ES2015, ES2016, ES2017, and JSX. ES2015 modules and CommonJS modules are also supported, so you can `import` or `require` both npm packages and local modules.
 
 To see an example of every command used in Cypress, open the `example_spec.js` within your `cypress/integration` folder.
 
