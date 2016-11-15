@@ -1,11 +1,16 @@
 _        = require("lodash")
 os       = require("os")
-r        = require("request")
 rp       = require("request-promise")
 errors   = require("request-promise/errors")
 Routes   = require("./util/routes")
 pkg      = require("../package.json")
 provider = require("./util/provider")
+
+rp = rp.defaults({
+  headers: {
+    "x-route-version": "2"
+  }
+})
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -152,16 +157,6 @@ module.exports = {
         "x-example": exampleSpec
         "x-all": allSpecs
         "x-project-name": projectName
-      }
-    })
-
-  getBuilds: (projectId, session) ->
-    r.get({
-      url: Routes.projectCi(projectId)
-      json: true
-      headers: {
-        ## TODO: add x-version here
-        "x-session": session
       }
     })
 

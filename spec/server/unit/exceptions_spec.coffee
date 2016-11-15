@@ -14,12 +14,12 @@ Settings      = require("#{root}lib/util/settings")
 describe "lib/exceptions", ->
   context ".getSession", ->
     it "returns session from cache", ->
-      @sandbox.stub(user, "get").resolves({session_token: "abc-123"})
+      @sandbox.stub(user, "get").resolves({sessionToken: "abc-123"})
 
       exception.getSession().then (session) ->
         expect(session).to.eq("abc-123")
 
-    it "returns undefined if no session_token", ->
+    it "returns undefined if no sessionToken", ->
       @sandbox.stub(user, "get").resolves({})
 
       exception.getSession().then (session) ->

@@ -257,7 +257,7 @@ class Base
     # cache = path.join(@buildPathToAppResources(), ".cy", "production", "cache")
 
     cache.write({
-      USER: {session_token: "abc123"}
+      USER: {sessionToken: "abc123"}
       PROJECTS: [project]
     })
 

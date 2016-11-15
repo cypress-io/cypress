@@ -66,7 +66,7 @@ describe "lib/cypress", ->
   context "--get-key", ->
     it "writes out key and exits on success", ->
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
         .then =>
@@ -91,20 +91,20 @@ describe "lib/cypress", ->
           @expectExitWithErr("NOT_LOGGED_IN")
 
     it "logs error and exits when project does not have an id", ->
-      user.set({session_token: "session-123"})
+      user.set({sessionToken: "session-123"})
       .then =>
         cypress.start(["--get-key", "--project=#{@pristinePath}"]).then =>
           @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
 
     it "logs error and exits when project could not be found at the path", ->
-      user.set({session_token: "session-123"})
+      user.set({sessionToken: "session-123"})
       .then =>
         cypress.start(["--get-key", "--project=path/to/no/project"]).then =>
           @expectExitWithErr("NO_PROJECT_FOUND_AT_PROJECT_ROOT", "path/to/no/project")
 
     it "logs error and exits when project token cannot be fetched", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         Project.add(@todosPath)
         .then =>
@@ -123,7 +123,7 @@ describe "lib/cypress", ->
   context "--new-key", ->
     it "writes out key and exits on success", ->
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
         .then =>
@@ -148,20 +148,20 @@ describe "lib/cypress", ->
           @expectExitWithErr("NOT_LOGGED_IN")
 
     it "logs error and exits when project does not have an id", ->
-      user.set({session_token: "session-123"})
+      user.set({sessionToken: "session-123"})
       .then =>
         cypress.start(["--new-key", "--project=#{@pristinePath}"]).then =>
           @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
 
     it "logs error and exits when project could not be found at the path", ->
-      user.set({session_token: "session-123"})
+      user.set({sessionToken: "session-123"})
       .then =>
         cypress.start(["--new-key", "--project=path/to/no/project"]).then =>
           @expectExitWithErr("NO_PROJECT_FOUND_AT_PROJECT_ROOT", "path/to/no/project")
 
     it "logs error and exits when project token cannot be fetched", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         Project.add(@todosPath)
         .then =>
@@ -187,7 +187,7 @@ describe "lib/cypress", ->
 
     it "runs project headlessly and exits with exit code 0", ->
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])
@@ -203,7 +203,7 @@ describe "lib/cypress", ->
       headless.waitForTestsToFinishRunning.resolves({failures: 10})
 
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])
@@ -219,7 +219,7 @@ describe "lib/cypress", ->
       @sandbox.stub(api, "createProject").withArgs("pristine", "session-123").resolves("pristine-id-123")
 
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@pristinePath)
       ])
@@ -236,7 +236,7 @@ describe "lib/cypress", ->
       @sandbox.stub(api, "createProject").withArgs("pristine", "session-123").rejects(new Error)
 
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@pristinePath)
       ])
@@ -248,7 +248,7 @@ describe "lib/cypress", ->
     it "prompts to add the project and then immediately runs the tests and exits with 0", ->
       @sandbox.stub(inquirer, "prompt").yieldsAsync({add: true})
 
-      user.set({session_token: "session-123"})
+      user.set({sessionToken: "session-123"})
       .then =>
         cypress.start(["--run-project=#{@todosPath}"]).then =>
           expect(inquirer.prompt).to.be.calledOnce
@@ -256,7 +256,7 @@ describe "lib/cypress", ->
 
     it "runs project by specific spec and exits with status 0", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])
@@ -267,7 +267,7 @@ describe "lib/cypress", ->
 
     it "runs project by specific spec with default configuration", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         Project.add(@idsPath)
       ])
@@ -278,7 +278,7 @@ describe "lib/cypress", ->
 
     it "runs project by specific absolute spec and exits with status 0", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])
@@ -289,7 +289,7 @@ describe "lib/cypress", ->
 
     it "scaffolds out integration and example_spec if they do not exist", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         config.get(@pristinePath).then (@cfg) =>
 
@@ -308,7 +308,7 @@ describe "lib/cypress", ->
 
     it "scaffolds out fixtures + files if they do not exist", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         config.get(@pristinePath).then (@cfg) =>
 
@@ -327,7 +327,7 @@ describe "lib/cypress", ->
 
     it "scaffolds out support + files if they do not exist", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         config.get(@pristinePath).then (@cfg) =>
 
@@ -348,7 +348,7 @@ describe "lib/cypress", ->
 
     it "removes fixtures when they exist and fixturesFolder is false", (done) ->
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         config.get(@idsPath).then (@cfg) =>
 
@@ -371,7 +371,7 @@ describe "lib/cypress", ->
 
     it "removes support when they exist and supportFolder is false", (done) ->
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         config.get(@idsPath).then (@cfg) =>
 
@@ -394,7 +394,7 @@ describe "lib/cypress", ->
 
     it "runs project headlessly and displays gui", ->
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])
@@ -407,7 +407,7 @@ describe "lib/cypress", ->
       @sandbox.spy(Reporter, "create")
 
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])
@@ -420,7 +420,7 @@ describe "lib/cypress", ->
       @sandbox.spy(Reporter, "create")
 
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])
@@ -433,7 +433,7 @@ describe "lib/cypress", ->
       @sandbox.spy(Reporter, "create")
 
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         config.get(@idsPath).then (@cfg) =>
 
@@ -463,14 +463,14 @@ describe "lib/cypress", ->
     it "logs error and exits when project could not be found at the path and was not chosen to be added to Cypress", ->
       @sandbox.stub(inquirer, "prompt").yieldsAsync({add: false})
 
-      user.set({session_token: "session-123"})
+      user.set({sessionToken: "session-123"})
       .then =>
         cypress.start(["--run-project=does/not/exist"]).then =>
           @expectExitWithErr("PROJECT_DOES_NOT_EXIST")
 
     it "logs error and exits when spec file was specified and does not exist", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])
@@ -480,7 +480,7 @@ describe "lib/cypress", ->
 
     it "logs error and exits when spec absolute file was specified and does not exist", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])
@@ -490,7 +490,7 @@ describe "lib/cypress", ->
 
     it "logs error and exits when project has cypress.json syntax error", ->
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])
@@ -502,7 +502,7 @@ describe "lib/cypress", ->
 
     it "logs error and exits when project has cypress.env.json syntax error", ->
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])
@@ -521,7 +521,7 @@ describe "lib/cypress", ->
 
       @sandbox.stub(inquirer, "prompt").yieldsAsync({add: true})
 
-      user.set({session_token: "session-123"})
+      user.set({sessionToken: "session-123"})
       .then =>
         fs.ensureDirAsync(permissionsPath)
       .then =>
@@ -535,7 +535,7 @@ describe "lib/cypress", ->
     describe "morgan", ->
       it "sets morgan to false", ->
         Promise.all([
-          user.set({name: "brian", session_token: "session-123"}),
+          user.set({name: "brian", sessionToken: "session-123"}),
 
           Project.add(@todosPath)
         ])
@@ -547,7 +547,7 @@ describe "lib/cypress", ->
     describe "config overrides", ->
       it "can override default values", ->
         Promise.all([
-          user.set({name: "brian", session_token: "session-123"}),
+          user.set({name: "brian", sessionToken: "session-123"}),
 
           Project.add(@todosPath)
         ])
@@ -575,7 +575,7 @@ describe "lib/cypress", ->
         headless.waitForTestsToFinishRunning.resolves({failures: 0})
 
         Promise.all([
-          user.set({name: "brian", session_token: "session-123"}),
+          user.set({name: "brian", sessionToken: "session-123"}),
 
           Project.add(@todosPath)
         ])
@@ -608,7 +608,7 @@ describe "lib/cypress", ->
         headless.waitForTestsToFinishRunning.resolves({failures: 0})
 
         Promise.all([
-          user.set({name: "brian", session_token: "session-123"}),
+          user.set({name: "brian", sessionToken: "session-123"}),
 
           Project.add(@todosPath)
         ])
@@ -831,7 +831,7 @@ describe "lib/cypress", ->
       @sandbox.stub(api, "updateProject").resolves()
 
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
 
@@ -854,7 +854,7 @@ describe "lib/cypress", ->
       @sandbox.stub(api, "updateProject").resolves()
 
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
 
@@ -887,7 +887,7 @@ describe "lib/cypress", ->
       process.env.CYPRESS_watch_for_file_changes = "false"
 
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])
