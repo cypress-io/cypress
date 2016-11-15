@@ -178,7 +178,7 @@ module.exports = {
       }
     })
     .promise()
-    .get("api_token")
+    .get("apiToken")
 
   getProjectToken: (projectId, session) ->
     @_projectToken("get", projectId, session)
