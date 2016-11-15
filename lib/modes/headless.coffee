@@ -56,41 +56,14 @@ module.exports = {
       ## immediately open it!
       return open() if bool
 
-      ## else prompt to add the project
-      ## and then open it!
-      @promptAddProject(projectPath)
+      ## else tell the user we're adding this project
+      console.log(
+        "Added this project:"
+        chalk.cyan(projectPath)
+      )
+
+      Project.add(projectPath)
       .then(open)
-
-  promptAddProject: (projectPath) ->
-    console.log(
-      chalk.yellow("We couldn't find a Cypress project at this path:"),
-      chalk.blue(projectPath)
-      "\n"
-    )
-
-    questions = [{
-      name: "add"
-      type: "list"
-      message: "Would you like to add this project to Cypress?"
-      choices: [{
-        name: "Yes: add this project and run the tests."
-        value: true
-      },{
-        name: "No:  don't add this project."
-        value: false
-      }]
-    }]
-
-    new Promise (resolve, reject) =>
-      inquirer.prompt questions, (answers) =>
-        if answers.add
-          Project.add(projectPath)
-          .then ->
-            console.log chalk.green("\nOk great, added the project.\n")
-            resolve()
-          .catch(reject)
-        else
-          reject errors.get("PROJECT_DOES_NOT_EXIST")
 
   openProject: (id, options) ->
     # wantsExternalBrowser = true
