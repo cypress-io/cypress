@@ -6,12 +6,6 @@ Routes   = require("./util/routes")
 pkg      = require("../package.json")
 provider = require("./util/provider")
 
-rp = rp.defaults({
-  headers: {
-    "x-route-version": "2"
-  }
-})
-
 formatResponseBody = (err) ->
   ## if the body is JSON object
   if _.isObject(err.error)
@@ -31,6 +25,9 @@ module.exports = {
       url: Routes.builds()
       json: true
       timeout: 10000
+      headers: {
+        "x-route-version": "2"
+      }
       body: {
         projectId:       options.projectId
         projectToken:    options.projectToken
@@ -55,6 +52,9 @@ module.exports = {
       url: Routes.instance(options.buildId)
       json: true
       timeout: 10000
+      headers: {
+        "x-route-version": "2"
+      }
       body: body
       # body: _.extend({}, options.stats, {
       #   "x-ci-id":         options.ciId
@@ -83,6 +83,9 @@ module.exports = {
     rp.post({
       url: Routes.signin({code: code})
       json: true
+      headers: {
+        "x-route-version": "2"
+      }
       body: {
         "x-platform": os.platform()
         "x-version":  pkg.version
@@ -175,6 +178,7 @@ module.exports = {
       json: true
       headers: {
         "x-session": session
+        "x-route-version": "2"
       }
     })
     .promise()

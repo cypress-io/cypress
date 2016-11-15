@@ -6,7 +6,7 @@ api_url = konfig("api_url")
 
 routes = {
   api:           ""
-  auth:          "v1/auth"
+  auth:          "auth"
   ping:          "ping"
   token:         "token"
   signin:        "signin"
