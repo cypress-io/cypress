@@ -12,11 +12,11 @@ class State {
   @observable version
 
   @computed get hasUser () {
-    return !!this.user && !!this.user.session_token
+    return !!this.user && !!this.user.sessionToken
   }
 
   @action setUser (user) {
-    return this.user = user && user.session_token ? new User(user) : null
+    return this.user = user && user.sessionToken ? new User(user) : null
   }
 
   @action setVersion (version) {
