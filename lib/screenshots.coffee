@@ -7,6 +7,7 @@ sizeOf          = require("image-size")
 Promise         = require("bluebird")
 dataUriToBuffer = require("data-uri-to-buffer")
 
+fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
 
 RUNNABLE_SEPARATOR = " -- "
@@ -19,8 +20,6 @@ invalidCharsRe     = /[^0-9a-zA-Z-_\s]/g
 
 module.exports = {
   copy: (src, dest) ->
-    dest = path.join(dest, "screenshots")
-
     fs
     .copyAsync(src, dest, {clobber: true})
     .catch {code: "ENOENT"}, ->

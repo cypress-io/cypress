@@ -11,6 +11,12 @@ fs = Promise.promisifyAll(fs)
 ffmpeg.setFfmpegPath(ffmpegPath)
 
 module.exports = {
+  copy: (src, dest) ->
+    fs
+    .copyAsync(src, dest, {clobber: true})
+    .catch {code: "ENOENT"}, ->
+      ## dont yell about ENOENT errors
+
   start: (name, options = {}) ->
     pt      = stream.PassThrough()
     started = Promise.pending()
