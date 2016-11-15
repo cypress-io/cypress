@@ -141,17 +141,28 @@ class Reporter
   stats: ->
     failingTests = _.filter @runnables, {state: "failed"}
 
-    console.log failingTests
-
     _.extend {reporter: @reporterName, failingTests: failingTests}, _.pick(@reporter.stats, STATS)
 
   @normalizeAll = (videoStart, failingTests = []) ->
+    getParentTitle = (runnable, titles) ->
+      if p = runnable.parent
+        if t = p.title
+          titles.unshift(t)
+
+        getParentTitle(p, titles)
+      else
+        titles
+
     normalize = (test) ->
       err = test.err ? {}
 
+      titles = [test.title]
+
+      ## TODO: move the separator into some shared util function somewhere
+
       {
         clientId:       test.id
-        name:           test.title
+        title:          getParentTitle(test, titles).join(" /// ")
         duration:       test.duration
         stack:          err.stack
         error:          err.message
