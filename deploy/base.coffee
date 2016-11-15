@@ -109,8 +109,11 @@ class Base
           copy("./lib/screenshots.coffee",  "/src/lib/screenshots.coffee")
           copy("./lib/server.coffee",       "/src/lib/server.coffee")
           copy("./lib/socket.coffee",       "/src/lib/socket.coffee")
+          copy("./lib/stats.coffee",        "/src/lib/stats.coffee")
           copy("./lib/updater.coffee",      "/src/lib/updater.coffee")
+          copy("./lib/upload.coffee",       "/src/lib/upload.coffee")
           copy("./lib/user.coffee",         "/src/lib/user.coffee")
+          copy("./lib/video.coffee",        "/src/lib/video.coffee")
           copy("./lib/watchers.coffee",     "/src/lib/watchers.coffee")
 
         ]
