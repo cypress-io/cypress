@@ -81,7 +81,7 @@ class Reporter
     @projectRoot = projectRoot
     @reporterOptions = reporterOptions
 
-  setRunnables: (rootRunnable) ->
+  setRunnables: (rootRunnable = {}) ->
     @runnables = {}
     rootRunnable = @_createRunnable(rootRunnable, "suite")
 

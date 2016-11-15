@@ -306,6 +306,9 @@ class Project extends EE
     [clientUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
+    ## bail early and do not scaffold if we're headless
+    return Promise.resolve() if config.isHeadless
+
     Promise.join(
       ## ensure integration folder is created
       ## and example spec if dir doesnt exit
