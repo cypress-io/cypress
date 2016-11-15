@@ -1,9 +1,9 @@
+_          = require("lodash")
 fs         = require("fs-extra")
 utils      = require("fluent-ffmpeg/lib/utils")
 ffmpeg     = require("fluent-ffmpeg")
 stream     = require("stream")
 Promise    = require("bluebird")
-defaults   = require("lodash.defaults")
 ffmpegPath = require("@ffmpeg-installer/ffmpeg").path
 
 fs = Promise.promisifyAll(fs)
@@ -18,7 +18,7 @@ module.exports = {
     done    = false
     errored = false
 
-    defaults(options, {
+    _.defaults(options, {
       onError: ->
     })
 

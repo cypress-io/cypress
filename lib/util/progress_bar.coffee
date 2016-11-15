@@ -1,10 +1,10 @@
-defaults    = require("lodash.defaults")
+_           = require("lodash")
 chalk       = require("chalk")
 ProgressBar = require("progress")
 
 module.exports = {
   create: (message, options = {}) ->
-    defaults(options, {
+    _.defaults(options, {
       total: 100
       width: 30
     })
