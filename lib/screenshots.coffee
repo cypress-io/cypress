@@ -35,8 +35,9 @@ module.exports = {
   take: (data, dataUrl, screenshotsFolder) ->
     buffer = dataUriToBuffer(dataUrl)
 
-    ## scrub the title to remove any invalid chars
-    name = data.titles.join(RUNNABLE_SEPARATOR).replace(invalidCharsRe, "")
+    ## use the screenshots specific name or
+    ## simply make its name the result of the titles
+    name = data.name ? data.titles.join(RUNNABLE_SEPARATOR).replace(invalidCharsRe, "")
 
     ## join name + extension with '.'
     name = [name, mime.extension(buffer.type)].join(".")

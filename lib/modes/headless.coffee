@@ -178,8 +178,11 @@ module.exports = {
 
     console.log("")
 
+    format = (s) ->
+      "  - #{s.path} (#{s.width}x#{s.height})"
+
     screenshots.forEach (screenshot) ->
-      console.log("  - " + JSON.stringify(screenshot))
+      console.log(format(screenshot))
 
   postProcessRecording: (end, name, cname, videoCompression) ->
     ## once this ended promises resolves

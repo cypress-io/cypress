@@ -7,7 +7,7 @@ TRANSLATION = {
   failures:     "Failures"
   pending:      "Pending"
   duration:     "Duration"
-  screenshots:  "Screenshots Taken"
+  screenshots:  "Screenshots"
   video:        "Video Recorded"
 }
 

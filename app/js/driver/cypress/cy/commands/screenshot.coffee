@@ -54,10 +54,6 @@ $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
       ## TODO: handle hook titles
       runnable = @private("runnable")
 
-      ## default to the runnables title if not set
-      name ?= runnable.title
-      name = name.toString()
-
       titles = [runnable.title]
 
       getParentTitle = (runnable) ->
