@@ -44,7 +44,7 @@ Option | Default | Description
 `reporter` | `spec` | The [reporter](https://on.cypress.io/guides/reporters) used during headless or CI runs
 `reporterOptions` | `null` | The [reporter options](https://on.cypress.io/guides/reporters#section-reporter-options) used. Supported options depend on the reporter.
 `screenshotOnHeadlessFailure` | `true` | Whether to take a screenshot automatically on test failure when running headlessly or in CI
-`supportScripts` | `cypress/support/index.+(js|jsx|coffee|cjsx)` | Where Cypress will look for the initial script to auto load
+`supportScripts` | `cypress/support/index.+(js|jsx|coffee|cjsx)` | A string or array of glob patterns of files to load before your test files. Under the hood Cypress is using `minimatch` with the options: `{nodir: true}`. We suggest you using [http://globtester.com](http://globtester.com) to test what files would match.
 `watchForFileChanges` | `true` | Whether Cypress will watch and restart tests on file changes
 
 ***
