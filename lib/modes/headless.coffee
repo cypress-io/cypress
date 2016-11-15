@@ -204,7 +204,7 @@ module.exports = {
 
       onProgress = (float) ->
         if float is 1
-          console.log("  - Finished processing: ", chalk.cyan(name) + "\n")
+          console.log("  - Finished processing: ", chalk.cyan(name))
         # bar.tickTotal(float)
 
       video.process(name, cname, videoCompression, onProgress)
@@ -299,6 +299,7 @@ module.exports = {
     }
 
   allDone: ->
+    console.log("")
     console.log("")
 
     terminal.header("All Done", {

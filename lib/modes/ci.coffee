@@ -1,6 +1,7 @@
 _        = require("lodash")
 os       = require("os")
 git      = require("gift")
+chalk    = require("chalk")
 Promise  = require("bluebird")
 headless = require("./headless")
 api      = require("../api")
@@ -85,29 +86,42 @@ module.exports = {
             .return(null)
 
   upload: (options = {}) ->
-    {video, screenshots, videoUrl, screenshotsUrl} = options
+    {video, screenshots, videoUrl, screenshotUrls} = options
 
     uploads = []
-    count   = 1
+    count   = 0
+
+    nums = ->
+      count += 1
+
+      chalk.gray("(#{count}/#{uploads.length})")
+
+    send = (pathToFile, url) ->
+      success = ->
+        console.log("  - Done Uploading #{nums()}", chalk.blue(pathToFile))
+
+      fail = (err) ->
+        console.log("  - Failed Uploading #{nums()}", chalk.red(pathToFile))
+
+      uploads.push(
+        upload(pathToFile, url)
+        .then(success)
+        .catch(fail)
+      )
 
     if videoUrl
-      uploads = uploads.concat(upload.video(video, videoUrl, {
-        onStart: ->
+      send(video, videoUrl)
 
-        onFinish: ->
-      }))
+    if screenshotUrls
+      screenshotUrls.forEach (obj) ->
+        screenshot = _.find(screenshots, {clientId: obj.clientId})
 
-    # if screenshotsUrl
-    #   uploads = uploads.concat(upload.screenshots(screenshots, screenshotsUrl, {
-    #     onStart: (screenshot) ->
-
-    #     onFinish: (screenshot) ->
-
-    #   }))
+        send(screenshot.path, obj.uploadUrl)
 
     Promise.all(uploads)
 
   uploadAssets: (buildId, stats) ->
+    console.log("")
     console.log("")
 
     terminal.header("Uploading Assets", {
@@ -136,7 +150,7 @@ module.exports = {
         video:          stats.video
         screenshots:    stats.screenshots
         videoUrl:       resp.videoUploadUrl
-        screenshotsUrl: resp.screenshotUploadUrls
+        screenshotUrls: resp.screenshotUploadUrls
       })
       .catch (err) ->
         errors.warning("CI_CANNOT_UPLOAD_ASSETS", err)
