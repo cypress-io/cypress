@@ -69,6 +69,9 @@ LGPL
 
 ## Changelog
 
+#### 0.3.13 - *(11/15/16)*
+- camelize session token
+
 #### 0.3.12 - *(11/14/16)*
 - fix missing lib js file
 
