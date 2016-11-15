@@ -6,13 +6,15 @@
 // the 'supportScripts' configuration option
 //
 // You can read more here:
-// https://on.cypress.io/api/configuration
+// https://on.cypress.io/guides/configuration#section-global
 // ***********************************************
 
 // import the commands.js file and the defaults.js file
-import './commands'
-import './defaults'
+{{#each files}}
+import "./{{this}}"
+{{/each}}
 
 // You can alternatively use CommonJS:
-// require("./commands")
-// require("./defaults")
+{{#each files}}
+// require("./{{this}}")
+{{/each}}

@@ -3,8 +3,11 @@ fs        = require("fs-extra")
 Promise   = require("bluebird")
 path      = require("path")
 cypressEx = require("@cypress/core-example")
+glob      = require("glob")
+hbs       = require("hbs")
 cwd       = require("./cwd")
 
+glob = Promise.promisify(glob)
 fs = Promise.promisifyAll(fs)
 
 INTEGRATION_EXAMPLE_SPEC = cypressEx.getPathToExample()
@@ -18,13 +21,34 @@ module.exports = {
     @verifyScaffolding folder, options, =>
       @copy("example.json", folder)
 
-  support: (folder, options) ->
-    @verifyScaffolding folder, options, =>
+  support: (folder, options, config) ->
+    return Promise.resolve() if config.supportScripts is false
+
+    @verifyScaffolding(folder, options, =>
       Promise.join(
-        @copy("index.js", folder)
         @copy("defaults.js", folder)
         @copy("commands.js", folder)
       )
+    )
+    .then ->
+      indexPath = path.join(folder, "index.js")
+      ## scaffold support/index.js with each file in the support folder
+      ## this will help transition users from supportFolder to supportScripts
+      fs.statAsync(indexPath)
+      ## only if support/index.js doesn't exist already
+      .catch =>
+        ## skip if user has explicitly set supportScripts
+        return if config.resolved.supportScripts.from isnt "default"
+
+        Promise.join(
+          fs.readFileAsync(cwd("lib", "scaffold", "index.js.hbs")),
+          glob(path.join(folder, "**", "*"), {dir: no}).map (filePath) ->
+            path.basename(filePath, path.extname(filePath))
+        )
+        .spread (indexTemplateBuffer, supportFiles) ->
+          indexTemplate = hbs.handlebars.compile(indexTemplateBuffer.toString())
+          contents = indexTemplate({ files: supportFiles })
+          fs.outputFileAsync(indexPath, contents)
 
   copy: (file, folder) ->
     ## allow file to be relative or absolute

@@ -57,37 +57,76 @@ describe "lib/scaffold", ->
         ## ensure no files exist
         expect(files.length).to.eq(0)
 
-  context ".support", ->
+  context.only ".support", ->
     beforeEach ->
       pristinePath = Fixtures.projectPath("pristine")
+
+      @config = {
+        resolved: { supportScripts: { from: "default" } }
+        supportScripts: "support/index.js"
+      }
 
       @resolvedSupportFolder = path.resolve(pristinePath, supportFolder)
 
     it "removes supportFolder + contents when existing", ->
-      scaffold.support(@resolvedSupportFolder)
+      scaffold.support(@resolvedSupportFolder, null, @config)
       .then =>
-        scaffold.support(@resolvedSupportFolder, {remove: true})
+        scaffold.support(@resolvedSupportFolder, {remove: true}, @config)
       .then =>
         fs.statAsync(@resolvedSupportFolder)
         .then ->
           throw new Error("should have failed but didnt")
         .catch ->
 
-    it "does not create any files if supportFolder already exists", ->
+    it "does not create any files but index.js if supportFolder already exists", ->
       ## create the supportFolder ourselves manually
       fs.ensureDirAsync(@resolvedSupportFolder)
       .then =>
         ## now scaffold
-        scaffold.support(@resolvedSupportFolder)
+        scaffold.support(@resolvedSupportFolder, null, @config)
       .then =>
         glob("**/*", {cwd: @resolvedSupportFolder})
       .then (files) ->
-        ## ensure no files exist
+        expect(files.length).to.eq(1)
+        expect(files[0]).to.include('index.js')
+
+    it "does not create any files if supportFolder and index.js already exist", ->
+      indexPath = path.join(@resolvedSupportFolder, "index.js")
+      ## create the supportFolder ourselves manually
+      fs.ensureDirAsync(@resolvedSupportFolder)
+      .then =>
+        ## now scaffold
+        scaffold.support(@resolvedSupportFolder, null, @config).then =>
+          fs.outputFileAsync(indexPath, ";")
+      .then =>
+        glob("**/*", {cwd: @resolvedSupportFolder})
+      .then (files) ->
+        fs.readFileAsync(indexPath).then (buffer) ->
+          expect(files.length).to.eq(1)
+          ## it doesn't change the contents of the existing index.js
+          expect(buffer.toString()).to.equal(";")
+
+    it "does not create any files if supportScripts is false", ->
+      @config.supportScripts = false
+      scaffold.support(@resolvedSupportFolder, null, @config)
+      .then =>
+        glob("**/*", {cwd: @resolvedSupportFolder})
+      .then (files) ->
+        expect(files.length).to.eq(0)
+
+    it "does not create supportFolder/index.js if supportScripts is not default", ->
+      @config.resolved.supportScripts.from = "config"
+      fs.ensureDirAsync(@resolvedSupportFolder)
+      .then =>
+        scaffold.support(@resolvedSupportFolder, null, @config)
+      .then =>
+        glob("**/*", {cwd: @resolvedSupportFolder})
+      .then (files) ->
         expect(files.length).to.eq(0)
 
     it "creates both supportFolder and commands.js, defaults.js, and index.js when supportFolder does not exist", ->
       ## todos has a _support folder so let's first nuke it and then scaffold
-      scaffold.support(@resolvedSupportFolder).then =>
+      scaffold.support(@resolvedSupportFolder, null, @config).then =>
         fs.readFileAsync(@resolvedSupportFolder + "/commands.js", "utf8").then (str) =>
           expect(str).to.eq """
           // ***********************************************
@@ -162,12 +201,12 @@ describe "lib/scaffold", ->
               // the 'supportScripts' configuration option
               //
               // You can read more here:
-              // https://on.cypress.io/api/configuration
+              // https://on.cypress.io/guides/configuration#section-global
               // ***********************************************
 
               // import the commands.js file and the defaults.js file
-              import './commands'
-              import './defaults'
+              import "./commands"
+              import "./defaults"
 
               // You can alternatively use CommonJS:
               // require("./commands")
