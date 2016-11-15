@@ -24,7 +24,7 @@ const SupportFolderError = () => (
       <i className='fa fa-warning'></i>
       The supportFolder option has been removed
     </h4>
-    <p>We see you setup a <strong>supportFolder</strong> option in your configuration.</p>
+    <p>We see you set up a <strong>supportFolder</strong> option in your configuration.</p>
     <p>This option is not supported and was replaced by the <strong>supportScripts</strong> option.</p>
     <p>Please update your configuration.{' '}
       <a href='https://on.cypress.io/guides/configuration#section-global' target='_blank' rel='noopener noreferrer'>
@@ -48,8 +48,6 @@ const ScriptError = observer(({ specPath, state }) => {
     }
   }
 
-  // errorStripped = state.scriptError.error.replace(/\{newline\}/g, '\n')}
-
   return (
     <div className='runner script-error'>
       <aside style={{ width: state.reporterWidth }}>
@@ -57,28 +55,7 @@ const ScriptError = observer(({ specPath, state }) => {
       </aside>
       <main style={{ marginTop: state.headerHeight }}>
         <pre className='error-stack'>
-          {state.scriptError.error.split('{newline\}').map((line, key) => {
-            return (
-              <span key={key}>
-                {line.split(/\(([^)]+)\)/).map((item, i) => {
-                  if (i === 1) {
-                    return (
-                      <span className="error-url" key={i}>(
-                        {item}
-                      )</span>
-                    )
-                  } else {
-                    return (
-                      <span key={i}>
-                      {item}
-                    </span>
-                    )
-                  }
-                })}
-                <br/>
-              </span>
-            )
-          })}
+          {state.scriptError.error.replace(/\{newline\}/g, '\n')}
         </pre>
       </main>
     </div>
