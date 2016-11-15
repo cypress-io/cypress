@@ -314,7 +314,8 @@ module.exports = {
   screenshotMetadata: (data, resp) ->
     {
       clientId:  uuid.v4()
-      name:      data.name
+      title:      data.name ## TODO: rename this property
+      # name:      data.name
       testId:    data.testId
       testTitle: data.titles.join(TITLE_SEPARATOR)
       path:      resp.path

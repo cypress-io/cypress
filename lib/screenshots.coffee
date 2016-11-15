@@ -9,6 +9,9 @@ dataUriToBuffer = require("data-uri-to-buffer")
 
 glob = Promise.promisify(glob)
 
+RUNNABLE_SEPARATOR = " -- "
+invalidCharsRe     = /[^0-9a-zA-Z-_\s]/
+
 ## TODO: when we parallelize these builds we'll need
 ## a semaphore to access the file system when we write
 ## screenshots since its possible two screenshots with
@@ -32,8 +35,11 @@ module.exports = {
   take: (data, dataUrl, screenshotsFolder) ->
     buffer = dataUriToBuffer(dataUrl)
 
+    ## scrub the title to remove any invalid chars
+    name = data.titles.join(RUNNABLE_SEPARATOR).replace(invalidCharsRe, "")
+
     ## join name + extension with '.'
-    name = [data.name, mime.extension(buffer.type)].join(".")
+    name = [name, mime.extension(buffer.type)].join(".")
 
     pathToScreenshot = path.join(screenshotsFolder, name)
 

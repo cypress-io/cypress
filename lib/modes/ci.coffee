@@ -1,3 +1,4 @@
+_        = require("lodash")
 os       = require("os")
 git      = require("gift")
 Promise  = require("bluebird")
@@ -115,6 +116,10 @@ module.exports = {
 
     console.log("")
 
+    ## get rid of the path property
+    screenshots = _.map stats.screenshots, (screenshot) ->
+      _.omit(screenshot, "path")
+
     api.createInstance({
       buildId:      buildId
       tests:        stats.tests
@@ -123,7 +128,7 @@ module.exports = {
       failures:     stats.failures
       pending:      stats.pending
       video:        !!stats.video
-      screenshots:  stats.screenshots
+      screenshots:  screenshots
       failingTests: stats.failingTests
     })
     .then (resp) =>
