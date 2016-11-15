@@ -163,7 +163,7 @@ module.exports = {
     .map (filePath) =>
       @prepareForBrowser(filePath, projectRoot)
     .then (filePaths) ->
-      if config.resolved.supportFolder isnt "default"
+      if config.resolved.supportFolder.from isnt "default"
         ## displays an error informing user that supportFolder is
         ## is no longer supported
         filePaths.concat("/__cypress/errors/support_folder")
