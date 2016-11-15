@@ -125,7 +125,7 @@ module.exports = {
     console.log("")
 
     terminal.header("Uploading Assets", {
-      color: ["bgBlue", "black"]
+      color: ["black", "bgBlue"]
     })
 
     console.log("")
