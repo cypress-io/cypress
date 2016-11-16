@@ -10,7 +10,7 @@ excerpt: Run Cypress in any CI provider
   - [Add your project to your CI provider](#section-add-you-project-to-your-ci-provider)
   - [Acquire a Cypress secret key](#section-acquire-a-cypress-secret-key)
   - [Add 2 lines of code to your CI config file](#section-add-2-lines-of-code-to-your-ci-config-file)
-  - [What is the difference between `cypress run` and `cypress ci`?](#section-)
+  - [What is the difference between `cypress run` and `cypress ci`?](#section-what-is-the-difference-between-cypress-run-and-cypress-ci-)
 - :fa-angle-right: [Environment Variables](#section-environment-variables)
   - [Cypress CI Key](#section-cypress-ci-key)
   - [Cypress Version](#section-cypress-version)
