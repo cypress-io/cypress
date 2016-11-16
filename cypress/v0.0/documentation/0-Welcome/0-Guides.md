@@ -31,6 +31,7 @@ excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 | [Environment Variables](https://on.cypress.io/guides/environment-variables) | Set environment variables |
 | [Using Aliases](https://on.cypress.io/guides/using-aliases) | Represent an object as alias |
 | [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures) | Mock data in fixtures |
+| [Screenshots and Videos](https://on.cypress.io/guides/screenshots-and-videos) | Capture screenshots and videos of your test run |
 | [Bundled Tools](https://on.cypress.io/guides/bundled-tools) | What is Cypress built on |
 | [Reporters](https://on.cypress.io/guides/reporters) | Customize test results with reporters |
 
