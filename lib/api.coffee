@@ -1,10 +1,14 @@
 _        = require("lodash")
 os       = require("os")
+getos    = require("getos")
 rp       = require("request-promise")
 errors   = require("request-promise/errors")
+Promise  = require("bluebird")
 Routes   = require("./util/routes")
 pkg      = require("../package.json")
 provider = require("./util/provider")
+
+getos = Promise.promisify(getos)
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -15,6 +19,17 @@ formatResponseBody = (err) ->
     err.message = [err.statusCode, body].join("\n\n")
 
   throw err
+
+osVersion = (platform) ->
+  Promise.try ->
+    if platform is "linux"
+      getos()
+      .then (obj) ->
+        [obj.dist, obj.release].join(" - ")
+      .catch (err) ->
+        os.release()
+    else
+      os.release()
 
 module.exports = {
   ping: ->
@@ -56,21 +71,25 @@ module.exports = {
       "cypressConfig"
     ])
 
-    rp.post({
-      url: Routes.instance(options.buildId)
-      json: true
-      timeout: 10000
-      headers: {
-        "x-route-version": "2"
-      }
-      body: _.extend(body, {
-        browserName:    "Electron"
-        browserVersion: process.versions.chrome
-        osName:         os.platform()
-        osVersion:      os.release()
+    platform = os.platform()
+
+    osVersion(platform)
+    .then (v) ->
+      rp.post({
+        url: Routes.instance(options.buildId)
+        json: true
+        timeout: 10000
+        headers: {
+          "x-route-version": "2"
+        }
+        body: _.extend(body, {
+          browserName:    "Electron"
+          browserVersion: process.versions.chrome
+          osName:         platform
+          osVersion:      v
+        })
       })
-    })
-    .catch(errors.StatusCodeError, formatResponseBody)
+      .catch(errors.StatusCodeError, formatResponseBody)
 
   createRaygunException: (body, session, timeout = 3000) ->
     rp.post({

@@ -134,6 +134,7 @@
     "express": "4.12.3",
     "fluent-ffmpeg": "^2.1.0",
     "fs-extra": "0.26.5",
+    "getos": "^2.8.2",
     "gift": "0.9.0",
     "glob": "5.0.10",
     "gulp-util": "^3.0.6",
