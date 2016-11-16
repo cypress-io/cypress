@@ -6,13 +6,13 @@ chalk      = require("chalk")
 Promise    = require("bluebird")
 inquirer   = require("inquirer")
 random     = require("randomstring")
+ss         = require("../screenshots")
 user       = require("../user")
 stats      = require("../stats")
 video      = require("../video")
 errors     = require("../errors")
 Project    = require("../project")
 Reporter   = require("../reporter")
-screenshots = require("../screenshots")
 progress   = require("../util/progress_bar")
 trash      = require("../util/trash")
 terminal   = require("../util/terminal")
@@ -169,7 +169,9 @@ module.exports = {
     console.log("")
 
     format = (s) ->
-      "  - #{s.path} (#{s.width}x#{s.height})"
+      dimensions = chalk.gray("(#{s.width}x#{s.height})")
+
+      "  - #{s.path} #{dimensions}"
 
     screenshots.forEach (screenshot) ->
       console.log(format(screenshot))
@@ -287,12 +289,12 @@ module.exports = {
       width:     resp.width
     }
 
-  copy: (videos, screenshots) ->
+  copy: (videosFolder, screenshotsFolder) ->
     Promise.try ->
       if ca = process.env.CIRCLE_ARTIFACTS
         Promise.join(
-          screenshots.copy(config.screenshots, ca)
-          video.copy(config.videos, ca)
+          ss.copy(screenshotsFolder, ca)
+          video.copy(videosFolder, ca)
         )
 
   allDone: ->
