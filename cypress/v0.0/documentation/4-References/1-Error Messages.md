@@ -13,6 +13,7 @@ excerpt: Errors that require additional explanation are listed here.
 - :fa-angle-right: [The test has finished but Cypress still has commands in its queue](#section-the-test-has-finished-but-cypress-still-has-commands-in-its-queue)
 - :fa-angle-right: [cy.visit() failed because you're attempting to visit a second unique domain](#section-cy-visit-failed-because-you-are-attempting-to-visit-a-second-unique-domain)
 - :fa-angle-right: [Cypress detected a cross origin error happened on page load](#section-cypress-detected-a-cross-origin-error-happened-on-page-load)
+- :fa-angle-right: [The supportFolder option has been removed](#section-the-supportfolder-option-has-been-removed)
 
 ***
 
@@ -387,3 +388,77 @@ If you find yourself stuck and cannot work around these issues you can just set 
 ```
 
 But before doing so you should really understand and [read about the reasoning here](https://on.cypress.io/guides/web-security).
+
+
+# The supportFolder option has been removed
+
+The `supportFolder` option has been removed from Cypress and has been replaced by module support and the `supportScripts` option. Cypress used to automatically include any scripts in the `supportFolder` before your test files, and that was the best way to include custom Cypress commands and utility functions. However, automatically including all the files in a certain directory is somewhat magical and unintuitive, and requires creating globals for the purpose of utility functions. This behavior has been succeeded by module support and the `supportScripts` option.
+
+## Use modules for utility functions
+
+Cypress supports both ES2015 modules and CommonJS modules. You can import/require npm modules as well as local modules:
+
+```javascript
+import _ from "lodash"
+import util from "./util"
+
+it("uses modules", function () {
+  expect(_.kebabCase("FooBar")).to.equal("foo-bar")
+  expect(util.secretCode()).to.equal("1-2-3-4")
+})
+```
+
+## Use supportScripts to load scripts before your test code
+
+It's still useful to load a file or multiple files before your test code. If you are setting Cypress defaults or utilizing custom Cypress commands, instead of needing to import/require those defaults/commands in every test file, you can use the `supportScripts` configuration option. This works similar to the former `supportFolder` option, but is more explicit.
+
+`supportScripts` is a string (or array of strings) with paths to a file (or files) to include before your test files. The paths can be globs to match multiple files based on a glob pattern. By default, `supportScripts` is set to `cypress/support/index.+(js|jsx|coffee|cjsx)`, which means it will look for one of the following files:
+
+* `cypress/support/index.js`
+* `cypress/support/index.jsx`
+* `cypress/support/index.coffee`
+* `cypress/support/index.cjsx`
+
+Just like with your test files, the `supportScripts` can use ES2015+ and modules, so you can import/require other files as needed.
+
+## Migrating from supportFolder to supportScripts
+
+You're seeing this error because you have the `supportFolder` option explicitly set, either to a different directory or as `false`, meaning you didn't utilize the support folder functionality.
+
+### If you have supportFolder set to false
+
+Set the `supportScripts` option to false instead:
+
+```javascript
+// cypress.json
+
+// before
+{
+  "supportFolder": false
+}
+
+// after
+{
+  "supportScripts": false
+}
+```
+
+### If you have supportFolder set to a different directory
+
+When you open a project with Cypress, we look for a file named `index.js` in the `supportFolder` you have set. If one is not present, we generate a file that imports all the other files in your `supportFolder`. You simply need to set the `supportScripts` option to point to that file, and everything should work as before.
+
+If, for example, you had the `supportFolder` set to `utilities`, change its name to `supportScripts` and its value to `utilities/index.js`:
+
+```javascript
+// cypress.json
+
+// before
+{
+  "supportFolder": "utilities"
+}
+
+// after
+{
+  "supportScripts": "utilities/index.js"
+}
+```
