@@ -144,6 +144,7 @@ module.exports = {
       video:        !!stats.video
       screenshots:  screenshots
       failingTests: stats.failingTests
+      cypressConfig: stats.config
     })
     .then (resp) =>
       @upload({

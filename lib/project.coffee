@@ -182,6 +182,9 @@ class Project extends EE
         if event is "end"
           stats = reporter.stats()
 
+          ## store the config on stats
+          stats.config = config
+
           ## TODO: convert this to a promise
           ## since we need an ack to this end
           ## event, and then finally emit 'end'

@@ -45,7 +45,15 @@ module.exports = {
 
   createInstance: (options = {}) ->
     body = _.pick(options, [
-      "tests", "duration", "passes", "failures", "pending", "video", "screenshots", "failingTests"
+      "tests"
+      "duration"
+      "passes"
+      "failures"
+      "pending"
+      "video"
+      "screenshots"
+      "failingTests"
+      "cypressConfig"
     ])
 
     rp.post({
@@ -55,15 +63,12 @@ module.exports = {
       headers: {
         "x-route-version": "2"
       }
-      body: body
-      # body: _.extend({}, options.stats, {
-      #   "x-ci-id":         options.ciId
-      #   "x-project-token": options.key
-      #   "x-project-name":  options.projectName
-      #   "x-version":       pkg.version
-      #   "x-platform":      os.platform()
-      #   "x-provider":      provider.get()
-      # })
+      body: _.extend(body, {
+        browserName:    "Electron"
+        browserVersion: process.versions.chrome
+        osName:         os.platform()
+        osVersion:      os.release()
+      })
     })
     .catch(errors.StatusCodeError, formatResponseBody)
 
