@@ -10,6 +10,7 @@ excerpt: Run Cypress in any CI provider
   - [Add your project to your CI provider](#section-add-you-project-to-your-ci-provider)
   - [Acquire a Cypress secret key](#section-acquire-a-cypress-secret-key)
   - [Add 2 lines of code to your CI config file](#section-add-2-lines-of-code-to-your-ci-config-file)
+  - [What is the difference between `cypress run` and `cypress ci`?](#section-)
 - :fa-angle-right: [Environment Variables](#section-environment-variables)
   - [Cypress CI Key](#section-cypress-ci-key)
   - [Cypress Version](#section-cypress-version)
@@ -125,8 +126,11 @@ npm install -g cypress-cli
 ```
 
 ```text
-# this will run tests headlessly
+# this will run tests headlessly and upload assets
 cypress ci <your-secret-key>
+# ------- or -------
+# this will run also tests headlessly, but not upload assets
+cypress run <your-secret-key>
 ```
 
 You'll want to refer to your CI providers documentation for knowing when to run those commands. Generally each CI provider gives you a lifecyle of build commands.
@@ -134,6 +138,22 @@ You'll want to refer to your CI providers documentation for knowing when to run 
 For instance, with [Travis CI](https://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle) they expose a `before_install` and `script` phase. You'd write `npm install -g cypress-cli` in the `before_install` phase, and `cypress ci` in the `script` phase.
 
 ***
+
+## What is the difference between `cypress run` and `cypress ci`?
+
+`cypress ci` and `cypress run` both run your tests headlessly.
+
+- `cypress ci` uploads build assets (such as screenshots and videos) to our Cypress servers after a test run completes. This also means that you will not be able to review your screenshots or videos in our upcoming Cypress CI Portal.
+- `cypress run` does *not* upload build assets (such as screenshots and videos) to our Cypress servers after a test run completes. If you do not want your assets to be tracked by Cypress, you will want to use `cypress run`.
+
+We recommend that you use `cypress ci` to take advantage of our upcoming Cypress CI Portal where you will be able to easily review failures, logs, screenshots, and videos of each test run which you can preview below.
+
+**Our Upcoming View of Builds in the Desktop App**
+![desktop](https://cloud.githubusercontent.com/assets/1271364/20360333/4ed80f7a-ac01-11e6-849a-cea67637dad4.png)
+
+**Our Upcoming CI Portal**
+![Portal Online](https://cloud.githubusercontent.com/assets/1271364/20360298/305b6f6a-ac01-11e6-94e9-6a8264002fa3.jpg)
+
 
 # Environment variables
 
