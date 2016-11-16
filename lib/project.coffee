@@ -9,7 +9,6 @@ ids         = require("./ids")
 api         = require("./api")
 user        = require("./user")
 cache       = require("./cache")
-video       = require("./video")
 config      = require("./config")
 logger      = require("./logger")
 errors      = require("./errors")
@@ -18,7 +17,6 @@ scaffold    = require("./scaffold")
 Watchers    = require("./watchers")
 Reporter    = require("./reporter")
 savedState  = require("./saved_state")
-screenshots = require("./screenshots")
 settings    = require("./util/settings")
 
 fs   = Promise.promisifyAll(fs)
@@ -189,16 +187,7 @@ class Project extends EE
           ## event, and then finally emit 'end'
           @server.end()
 
-          link = ->
-            if ca = process.env.CIRCLE_ARTIFACTS
-              Promise.join(
-                screenshots.copy(config.screenshotsFolder, ca)
-                video.copy(config.videosFolder, ca)
-              )
-
-          Promise.resolve(link)
-          .then =>
-            @emit("end", stats)
+          @emit("end", stats)
     })
 
   determineIsNewProject: (integrationFolder) ->

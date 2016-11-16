@@ -287,6 +287,14 @@ module.exports = {
       width:     resp.width
     }
 
+  copy: (videos, screenshots) ->
+    Promise.try ->
+      if ca = process.env.CIRCLE_ARTIFACTS
+        Promise.join(
+          screenshots.copy(config.screenshots, ca)
+          video.copy(config.videos, ca)
+        )
+
   allDone: ->
     console.log("")
     console.log("")
@@ -383,8 +391,10 @@ module.exports = {
           })
         .get("stats")
         .finally =>
-          if options.allDone isnt false
-            @allDone()
+          @copy(config.videosFolder, config.screenshotsFolder)
+          .then =>
+            if options.allDone isnt false
+              @allDone()
 
   run: (options) ->
     app = require("electron").app
