@@ -120,15 +120,17 @@ Depending on which CI provider you're using you'll have access to a configuratio
 
 You'll only need to add two lines of code to this file to run Cypress tests.
 
-```text
+```shell
 # this will install the cypress-cli tools
 npm install -g cypress-cli
 ```
 
-```text
+```shell
 # this will run tests headlessly and upload assets
 cypress ci <your-secret-key>
+
 # ------- or -------
+
 # this will run also tests headlessly, but not upload assets
 cypress run <your-secret-key>
 ```
