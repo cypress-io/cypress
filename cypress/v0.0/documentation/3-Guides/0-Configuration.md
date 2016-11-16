@@ -8,7 +8,7 @@ excerpt: Configure global, network, folder, viewport, and animation options
   - [Timeouts](#section-timeouts)
   - [Folders](#section-folders)
   - [Screenshots](#section-screenshots)
-  - [Video](#section-video)
+  - [Videos](#section-videos)
   - [Browser](#section-browser)
   - [Web Server](#section-web-server)
   - [Viewport](#section-viewport)
@@ -82,17 +82,18 @@ Option | Default | Description
 ----- | ---- | ----
 `screenshotsFolder`     | `cypress/screenshots`     | Where Cypress will automatically save screenshots from [`cy.screenshot()`](https://on.cypress.io/api/screenshot) or during test failures when running headlessly.
 `screenshotOnHeadlessFailure` | `true` | Whether Cypress will automatically take a screenshot when a test fails when running tests headlessly or in CI.
-`trashAssetsBeforeHeadlessRuns` | `true` | Whether Cypress will trash assets within the `screenshotsFolder` and `videosFolder` before test runs when running headlessly.
+`trashAssetsBeforeHeadlessRuns` | `true` | Whether Cypress will trash assets within the `screenshotsFolder` and `videosFolder` before headless test runs.
 
 ***
 
-## Video
+## Videos
 
 Option | Default | Description
 ----- | ---- | ----
 `videoRecording`     | `true`     | Whether Cypress will record a video of the test run when running headlessly.
 `videoCompression` | `32` | The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be between 0 and 51, where a lower value results in better quality (at the expense of a higher file size).
 `videosFolder`     | `cypress/videos`     | Where Cypress will automatically save the video of the test run when running headlessly.
+`trashAssetsBeforeHeadlessRuns` | `true` | Whether Cypress will trash assets within the `screenshotsFolder` and `videosFolder` before headless test runs.
 
 ***
 
