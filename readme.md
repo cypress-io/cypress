@@ -74,7 +74,7 @@ cypress update
 
 ### cypress run
 
-Runs Cypress headlessly. By default will run all your tests. Useful when developing locally.
+Runs Cypress headlessly. By default will run all your tests. Useful when developing locally.  [Read the Continuous Integration docs for the difference between cypress run and cypress ci.](https://docs.cypress.io/docs/continuous-integration#section-what-is-the-difference-between-cypress-run-and-cypress-ci-)
 
 ```bash
 ## by default will use your current path
@@ -120,7 +120,7 @@ You can read more about [environment variables](https://on.cypress.io/environmen
 
 ### cypress ci
 
-Run Cypress headlessly in CI. [Read the Continuous Integration docs for examples.](https://on.cypress.io/continuous-integration)
+Run Cypress headlessly in CI. This also uploads build assets (such as screenshots and videos) to our Cypress servers. [Read the Continuous Integration docs for the difference between cypress run and cypress ci.](https://docs.cypress.io/docs/continuous-integration#section-what-is-the-difference-between-cypress-run-and-cypress-ci-)
 
 > **Note:** `cypress ci` supports all the same flags as `cypress run`.
 
