@@ -159,7 +159,8 @@ module.exports = {
     .catch (err) ->
       errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
 
-      logException(err)
+      ## dont log exceptions if we have a 503 status code
+      logException(err) unless err.statusCode is 503
 
   run: (options) ->
     {projectPath} = options
