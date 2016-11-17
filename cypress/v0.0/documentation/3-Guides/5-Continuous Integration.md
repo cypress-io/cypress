@@ -143,8 +143,8 @@ For instance, with [Travis CI](https://docs.travis-ci.com/user/customizing-the-b
 
 `cypress ci` and `cypress run` both run your tests headlessly.
 
-- `cypress ci` uploads build assets (such as screenshots and videos) to our Cypress servers after a test run completes. This also means that you will not be able to review your screenshots or videos in our upcoming Cypress CI Portal.
-- `cypress run` does *not* upload build assets (such as screenshots and videos) to our Cypress servers after a test run completes. If you do not want your assets to be tracked by Cypress, you will want to use `cypress run`.
+- `cypress ci` uploads build assets (such as screenshots and videos) to our Cypress servers after a test run completes.
+- `cypress run` does *not* upload build assets (such as screenshots and videos) to our Cypress servers after a test run completes. If you do not want your assets to be tracked by Cypress, you will want to use `cypress run`. This also means that you will not be able to review your screenshots or videos in our upcoming Cypress CI Portal.
 
 We recommend that you use `cypress ci` to take advantage of our upcoming Cypress CI Portal where you will be able to easily review failures, logs, screenshots, and videos of each test run which you can preview below.
 
