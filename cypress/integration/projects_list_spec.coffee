@@ -45,7 +45,7 @@ describe "Projects List", ->
       afterEach ->
         cy.clearLocalStorage()
 
-      it "has status in projects list", ->
+      it.skip "has status in projects list", ->
         cy
           .get(".projects-list>li").first()
           .contains("Public")

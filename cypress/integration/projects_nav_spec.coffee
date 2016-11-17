@@ -81,7 +81,7 @@ describe "Projects Nav", ->
         cy
           .location().its("hash").should("include", "builds")
 
-      it.only "displays builds page", ->
+      it "displays builds page", ->
         @ipc.handle("get:builds", null, @builds)
         cy
           .contains("h5", "Builds")

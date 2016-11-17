@@ -69,6 +69,15 @@ LGPL
 
 ## Changelog
 
+#### 0.3.13 - *(11/15/16)*
+- camelize session token
+
+#### 0.3.12 - *(11/14/16)*
+- fix missing lib js file
+
+#### 0.3.11 - *(11/14/16)*
+- updated config to display 'env' property instead of inaccurately named 'environmentVariables' property
+
 #### 0.3.10 - *(10/14/16)*
 - missing lib folder
 
