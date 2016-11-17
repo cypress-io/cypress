@@ -84,10 +84,66 @@ describe "Builds List", ->
         it "displays empty message", ->
           cy.contains("Getting Started with CI")
 
-        it "opens setup project window", ->
-          cy
-            .get(".btn").contains("Setup Project for CI").click()
-            .get(".modal").should("be.visible")
+        describe "setup project window", ->
+          beforeEach ->
+            cy
+              .fixture("organizations").as("orgs").then ->
+                @ipc.handle("get:orgs", null, @orgs)
+              .get(".btn").contains("Setup Project for CI").click()
+
+          it "clicking link opens setup project window", ->
+            cy
+              .get(".modal").should("be.visible")
+
+          describe "project name", ->
+            it "prefills Project Name", ->
+              cy
+                .get("#projectName").should("have.value", @firstProjectName)
+
+            it "allows me to change Project Name value", ->
+              @newProjectName = "New Project Here"
+
+              cy
+                .get("#projectName").clear().type(@newProjectName)
+                .get("#projectName").should("have.value", @newProjectName)
+
+          describe "lists organizations", ->
+            it "lists organizations to assign to project", ->
+              cy
+                .get("#organizations-select").find("option").should("have.length", @orgs.length)
+
+            it "selects default org by default", ->
+              cy
+                .get("#organizations-select").should("have.value", "000")
+
+            it "opens external link on click of manage", ->
+              cy
+                .contains("manage").click().then ->
+                   expect(@App.ipc).to.be.calledWith("external:open", "https://app.cypress.io")
+
+          describe "successfully submit form", ->
+            beforeEach ->
+              cy
+                .get(".modal-body")
+                .contains(".btn", "Setup Project").click()
+
+            it "calls ipc event", ->
+
+            it "sends data from form to ipc event", ->
+
+            it "closes modal", ->
+
+            it "displays new page", ->
+
+          describe "errors on form submit", ->
+            beforeEach ->
+              cy
+                .get(".modal-body")
+                .contains(".btn", "Setup Project").click()
+
+            it "displays errors", ->
+
+            it "does not close modal", ->
 
       context "having previously setup CI", ->
         beforeEach ->

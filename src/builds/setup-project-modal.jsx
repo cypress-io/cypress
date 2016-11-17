@@ -1,9 +1,12 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
+import Loader from 'react-loader'
+
+import App from '../lib/app'
 import BootstrapModal from 'react-bootstrap-modal'
 
-// import buildsCollection from './builds-collection'
+import orgsStore from '../organizations/organizations-store'
 
 @observer
 class SetupProject extends Component {
@@ -15,6 +18,10 @@ class SetupProject extends Component {
   }
 
   render () {
+    if (!orgsStore.isLoaded) return <Loader />
+
+    const defaultOrg = _.find(orgsStore.orgs, { default: true })
+
     return (
       <BootstrapModal
         show={this.props.show}
@@ -45,13 +52,27 @@ class SetupProject extends Component {
                 Organization:
               </label>
               <div className='col-sm-7'>
-                <select className='form-control'>
-                  <option>Jane Lane</option>
-                  <option>ACME Developers</option>
+                <select
+                  id='organizations-select'
+                  className='form-control'>
+                    <option value={defaultOrg.id}>{defaultOrg.name}</option>
+
+                    {_.map(orgsStore.orgs, (org) => {
+                      if (org.default) return null
+
+                      return (
+                        <option
+                          key={org.id}
+                          value={org.id}
+                        >
+                          {org.name}
+                        </option>
+                      )
+                    })}
                 </select>
               </div>
               <div className='col-sm-2 no-left-padding'>
-                <button href='#' className='btn btn-link manage-orgs-btn' onClick=''>manage</button>
+                <button href='#' className='btn btn-link manage-orgs-btn' onClick={this._manageOrgsLink}>manage</button>
               </div>
             </div>
             <div className='form-group'>
@@ -90,6 +111,11 @@ class SetupProject extends Component {
       let splitName = _.last(project.path.split('/'))
       return _.truncate(splitName, { length: 60 })
     }
+  }
+
+  _manageOrgsLink = (e) => {
+    e.preventDefault()
+    App.ipc('external:open', 'https://app.cypress.io')
   }
 }
 

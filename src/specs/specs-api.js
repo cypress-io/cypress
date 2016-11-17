@@ -1,5 +1,5 @@
 import App from '../lib/app'
-import specsCollection from '../specs/specs-collection'
+import specsCollection from './specs-collection'
 
 const getSpecs = (setProjectError) => {
   App.ipc('get:specs', (err, specs = []) => {

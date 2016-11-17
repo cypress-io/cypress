@@ -11,7 +11,7 @@ import Build from './builds-list-item'
 import LoginThenSetupCI from './login-then-setup-ci'
 import LoginThenSeeBuilds from './login-then-see-builds'
 import PermissionMessage from './permission-message'
-import SetupProject from "./setup-project-modal"
+import ProjectNotSetup from "./project-not-setup"
 
 @observer
 class Builds extends Component {
@@ -34,29 +34,30 @@ class Builds extends Component {
     // they are not logged in
     if (!state.hasUser) {
 
-      // they've never setup CI
+      // AND they've never setup CI
       if (!this.props.project.projectId) {
         return <LoginThenSetupCI/>
 
-      // they have setup CI
+      // OR they have setup CI
       } else {
         return <LoginThenSeeBuilds/>
       }
     }
 
+    // OR the build is still loading
     if (buildsCollection.isLoading) return <Loader color="#888" scale={0.5}/>
 
-    // they are not authorized to see builds
+    // OR they are not authorized to see builds
     if (buildsCollection.error && (buildsCollection.error.statusCode === 401)) return <PermissionMessage />
 
-    // there are no builds to show
+    // OR there are no builds to show
     if (!buildsCollection.builds.length) {
 
-      // they've never setup CI
+      // AND they've never setup CI
       if (!this.props.project.projectId) {
         return this._emptyWithoutSetup()
 
-      // they have setup CI
+      // OR they have setup CI
       } else {
         return this._empty()
       }
@@ -82,28 +83,9 @@ class Builds extends Component {
 
   _emptyWithoutSetup () {
     return (
-      <div id='builds-list-page'>
-        <div className="empty">
-          <h4>
-            Getting Started with CI
-          </h4>
-          <p>Run Cypress tests on any <a href='#'>Continous Integration provider</a>.</p>
-          <p>Then see each build's data, screenshots, and video recording.</p>
-          <button
-            className='btn btn-primary'
-            onClick={this._showSetupProjectModal}
-            >
-            <i className='fa fa-wrench'></i>{' '}
-            Setup Project for CI
-          </button>
-        </div>
-        <SetupProject
-          project={this.props.project}
-          show={this.state.setupProjectModalOpen}
-          onConfirm={this._setupProject}
-          onHide={this._hideSetupProjectModal}
-        />
-      </div>
+      <ProjectNotSetup
+        project={this.props.project}
+      />
     )
   }
 
@@ -119,19 +101,6 @@ class Builds extends Component {
         </div>
       </div>
     )
-  }
-
-  _hideSetupProjectModal () {
-    this.setState({ setupProjectModalOpen: false })
-  }
-
-  _showSetupProjectModal = (e) => {
-    e.preventDefault()
-    this.setState({ setupProjectModalOpen: true })
-  }
-
-  _setupProject = (e) => {
-    e.preventDefault()
   }
 }
 

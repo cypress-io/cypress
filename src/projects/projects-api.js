@@ -159,7 +159,6 @@ const openProject = (project) => {
   .then(() => {
     project.loading(false)
 
-
     getSpecs(setProjectError)
 
     return null
