@@ -79,6 +79,9 @@ module.exports = {
       }
     }
 
+    if args.show is false
+      args.webPreferences.offscreen = true
+
     if options.chromeWebSecurity is false
       args.webPreferences.webSecurity = false
 

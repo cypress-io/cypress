@@ -1,4 +1,4 @@
-describe "screenshots", ->
+describe "taking screenshots", ->
   it "manually generates pngs", ->
     cy
       .visit('http://localhost:3322/color/black')

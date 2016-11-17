@@ -180,7 +180,7 @@ describe "lib/api", ->
       .matchHeader("x-session", "session-123")
       .get("/projects/project-123/token")
       .reply(200, {
-        api_token: "token-123"
+        apiToken: "token-123"
       })
 
       api.getProjectToken("project-123", "session-123")
@@ -193,7 +193,7 @@ describe "lib/api", ->
       .matchHeader("x-session", "session-123")
       .put("/projects/project-123/token")
       .reply(200, {
-        api_token: "token-123"
+        apiToken: "token-123"
       })
 
       api.updateProjectToken("project-123", "session-123")

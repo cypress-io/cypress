@@ -1,24 +1,23 @@
-path      = require("path")
-glob      = require("glob")
-EE        = require("events")
-_         = require("lodash")
-fs        = require("fs-extra")
-Promise   = require("bluebird")
-ids       = require("./ids")
-api       = require("./api")
-user      = require("./user")
-cache     = require("./cache")
-config    = require("./config")
-logger    = require("./logger")
-errors    = require("./errors")
-Server    = require("./server")
-scaffold  = require("./scaffold")
-Watchers  = require("./watchers")
-Reporter  = require("./reporter")
-cwd       = require("./cwd")
-settings  = require("./util/settings")
-screenshots = require("./screenshots")
+_           = require("lodash")
+fs          = require("fs-extra")
+EE          = require("events")
+path        = require("path")
+glob        = require("glob")
+Promise     = require("bluebird")
+cwd         = require("./cwd")
+ids         = require("./ids")
+api         = require("./api")
+user        = require("./user")
+cache       = require("./cache")
+config      = require("./config")
+logger      = require("./logger")
+errors      = require("./errors")
+Server      = require("./server")
+scaffold    = require("./scaffold")
+Watchers    = require("./watchers")
+Reporter    = require("./reporter")
 savedState  = require("./saved_state")
+settings    = require("./util/settings")
 
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -159,6 +158,8 @@ class Project extends EE
 
       onAutomationRequest: options.onAutomationRequest
 
+      afterAutomationRequest: options.afterAutomationRequest
+
       onFocusTests: options.onFocusTests
 
       onSpecChanged: options.onSpecChanged
@@ -181,21 +182,15 @@ class Project extends EE
         if event is "end"
           stats = reporter.stats()
 
+          ## store the config on stats
+          stats.config = config
+
           ## TODO: convert this to a promise
           ## since we need an ack to this end
           ## event, and then finally emit 'end'
           @server.end()
 
-          link = ->
-            if ca = process.env.CIRCLE_ARTIFACTS
-              screenshots.copy(config.screenshotsFolder, ca)
-
-          Promise.join(
-            link()
-            Promise.delay(1000)
-          ).then =>
-            # console.log stats
-            @emit("end", stats)
+          @emit("end", stats)
     })
 
   determineIsNewProject: (integrationFolder) ->
@@ -307,6 +302,9 @@ class Project extends EE
     [clientUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
+    ## bail early and do not scaffold if we're headless
+    return Promise.resolve() if config.isHeadless
+
     Promise.join(
       ## ensure integration folder is created
       ## and example spec if dir doesnt exit

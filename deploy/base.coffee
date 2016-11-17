@@ -109,8 +109,11 @@ class Base
           copy("./lib/screenshots.coffee",  "/src/lib/screenshots.coffee")
           copy("./lib/server.coffee",       "/src/lib/server.coffee")
           copy("./lib/socket.coffee",       "/src/lib/socket.coffee")
+          copy("./lib/stats.coffee",        "/src/lib/stats.coffee")
           copy("./lib/updater.coffee",      "/src/lib/updater.coffee")
+          copy("./lib/upload.coffee",       "/src/lib/upload.coffee")
           copy("./lib/user.coffee",         "/src/lib/user.coffee")
+          copy("./lib/video.coffee",        "/src/lib/video.coffee")
           copy("./lib/watchers.coffee",     "/src/lib/watchers.coffee")
 
         ]
@@ -257,7 +260,7 @@ class Base
     # cache = path.join(@buildPathToAppResources(), ".cy", "production", "cache")
 
     cache.write({
-      USER: {session_token: "abc123"}
+      USER: {sessionToken: "abc123"}
       PROJECTS: [project]
     })
 
@@ -302,8 +305,8 @@ class Base
     e2e = Fixtures.projectPath("e2e")
 
     verifyScreenshots = =>
-      screenshot1 = path.join(e2e, "cypress", "screenshots", "fails1.png")
-      screenshot2 = path.join(e2e, "cypress", "screenshots", "fails2.png")
+      screenshot1 = path.join(e2e, "cypress", "screenshots", "simple failing spec -- fails1.png")
+      screenshot2 = path.join(e2e, "cypress", "screenshots", "simple failing spec -- fails2.png")
 
       Promise.all([
         fs.statAsync(screenshot1)

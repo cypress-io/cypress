@@ -46,7 +46,7 @@ module.exports = {
 
   getSession: ->
     user.get().then (user) ->
-      user and user.session_token
+      user and user.sessionToken
 
   create: (err, settings) ->
     return Promise.resolve() if process.env["CYPRESS_ENV"] isnt "production"

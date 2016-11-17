@@ -179,7 +179,7 @@ describe "lib/cache", ->
         cache.ensureExists()
 
       it "returns session id", ->
-        setUser = {id: 1, name: "brian", email: "a@b.com", session_token: "abc"}
+        setUser = {id: 1, name: "brian", email: "a@b.com", sessionToken: "abc"}
         cache.setUser(setUser).then =>
           cache.getUser().then (user) ->
             expect(user).to.deep.eq setUser
@@ -189,7 +189,7 @@ describe "lib/cache", ->
         cache.ensureExists()
 
       it "sets USER into .cy", ->
-        setUser = {id: 1, name: "brian", email: "a@b.com", session_token: "abc"}
+        setUser = {id: 1, name: "brian", email: "a@b.com", sessionToken: "abc"}
         cache.setUser(setUser).then (contents) ->
           expect(contents.USER).to.eq setUser
 
@@ -210,7 +210,7 @@ describe "lib/cache", ->
         id: 1
         name: "brian"
         email: "a@b.com"
-        session_token: "1111-2222-3333-4444"
+        sessionToken: "1111-2222-3333-4444"
       }
 
     it "sets and gets user", ->
@@ -228,7 +228,7 @@ describe "lib/cache", ->
   context "queues public methods", ->
     it "is able to write both values", ->
       Promise.all([
-        cache.setUser({name: "brian", session_token: "session-123"}),
+        cache.setUser({name: "brian", sessionToken: "session-123"}),
         cache.insertProject("foo")
       ])
       .then ->
@@ -237,7 +237,7 @@ describe "lib/cache", ->
         expect(json).to.deep.eq({
           USER: {
             name: "brian"
-            session_token: "session-123"
+            sessionToken: "session-123"
           }
           PROJECTS: ["foo"]
         })

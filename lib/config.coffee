@@ -10,8 +10,8 @@ scaffold = require("./scaffold")
 cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
-folders = "fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder unitFolder".split(" ")
-configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges chromeWebSecurity viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables hosts".split(" ")
+folders = "fileServerFolder videosFolder supportFolder fixturesFolder integrationFolder screenshotsFolder unitFolder".split(" ")
+configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges trashAssetsBeforeHeadlessRuns chromeWebSecurity videoRecording videoCompression viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder videosFolder screenshotsFolder environmentVariables hosts".split(" ")
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
@@ -36,17 +36,21 @@ defaults = {
   responseTimeout:       30000
   pageLoadTimeout:       60000
   execTimeout:           60000
+  videoRecording:    true
+  videoCompression:  32
   chromeWebSecurity: true
   waitForAnimations: true
   animationDistanceThreshold: 5
   numTestsKeptInMemory: 50
   watchForFileChanges: true
   screenshotOnHeadlessFailure: true
+  trashAssetsBeforeHeadlessRuns: true
   autoOpen:       false
   viewportWidth:  1000
   viewportHeight: 660
   fileServerFolder: ""
   # unitFolder:        "cypress/unit"
+  videosFolder:      "cypress/videos"
   supportFolder:     "cypress/support"
   fixturesFolder:    "cypress/fixtures"
   integrationFolder: "cypress/integration"

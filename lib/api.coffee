@@ -1,48 +1,95 @@
 _        = require("lodash")
 os       = require("os")
-r        = require("request")
+getos    = require("getos")
 rp       = require("request-promise")
 errors   = require("request-promise/errors")
+Promise  = require("bluebird")
 Routes   = require("./util/routes")
 pkg      = require("../package.json")
 provider = require("./util/provider")
+
+getos = Promise.promisify(getos)
+
+formatResponseBody = (err) ->
+  ## if the body is JSON object
+  if _.isObject(err.error)
+    ## transform the error message to include the
+    ## stringified body (represented as the 'error' property)
+    body = JSON.stringify(err.error, null, 2)
+    err.message = [err.statusCode, body].join("\n\n")
+
+  throw err
+
+osVersion = (platform) ->
+  Promise.try ->
+    if platform is "linux"
+      getos()
+      .then (obj) ->
+        [obj.dist, obj.release].join(" - ")
+      .catch (err) ->
+        os.release()
+    else
+      os.release()
 
 module.exports = {
   ping: ->
     rp.get(Routes.ping())
 
-  createCi: (options = {}) ->
+  createBuild: (options = {}) ->
     rp.post({
-      url: Routes.ci(options.projectId)
+      url: Routes.builds()
       json: true
+      timeout: 10000
+      headers: {
+        "x-route-version": "2"
+      }
       body: {
-        "x-project-token": options.key
-        "x-project-name":  options.projectName
-        "x-git-branch":    options.branch
-        "x-git-author":    options.author
-        "x-git-message":   options.message
-        "x-version":       pkg.version
-        "x-platform":      os.platform()
-        "x-provider":      provider.get()
+        projectId:       options.projectId
+        projectToken:    options.projectToken
+        commitSha:       options.commitSha
+        commitBranch:    options.commitBranch
+        commitAuthor:    options.commitAuthor
+        commitMessage:   options.commitMessage
+        cypressVersion:  pkg.version
+        ciProvider:      provider.get()
       }
     })
     .promise()
-    .get("ci_guid")
+    .get("buildId")
+    .catch(errors.StatusCodeError, formatResponseBody)
 
-  updateCi: (options = {}) ->
-    rp.put({
-      url: Routes.ci(options.projectId)
-      json: true
-      timeout: 10000
-      body: _.extend({}, options.stats, {
-        "x-ci-id":         options.ciId
-        "x-project-token": options.key
-        "x-project-name":  options.projectName
-        "x-version":       pkg.version
-        "x-platform":      os.platform()
-        "x-provider":      provider.get()
+  createInstance: (options = {}) ->
+    body = _.pick(options, [
+      "tests"
+      "duration"
+      "passes"
+      "failures"
+      "pending"
+      "video"
+      "screenshots"
+      "failingTests"
+      "cypressConfig"
+    ])
+
+    platform = os.platform()
+
+    osVersion(platform)
+    .then (v) ->
+      rp.post({
+        url: Routes.instance(options.buildId)
+        json: true
+        timeout: 10000
+        headers: {
+          "x-route-version": "2"
+        }
+        body: _.extend(body, {
+          browserName:    "Electron"
+          browserVersion: process.versions.chrome
+          osName:         platform
+          osVersion:      v
+        })
       })
-    })
+      .catch(errors.StatusCodeError, formatResponseBody)
 
   createRaygunException: (body, session, timeout = 3000) ->
     rp.post({
@@ -60,6 +107,9 @@ module.exports = {
     rp.post({
       url: Routes.signin({code: code})
       json: true
+      headers: {
+        "x-route-version": "2"
+      }
       body: {
         "x-platform": os.platform()
         "x-version":  pkg.version
@@ -137,16 +187,6 @@ module.exports = {
       }
     })
 
-  getBuilds: (projectId, session) ->
-    r.get({
-      url: Routes.projectCi(projectId)
-      json: true
-      headers: {
-        ## TODO: add x-version here
-        "x-session": session
-      }
-    })
-
   getLoginUrl: ->
     rp.get({
       url: Routes.auth(),
@@ -162,10 +202,11 @@ module.exports = {
       json: true
       headers: {
         "x-session": session
+        "x-route-version": "2"
       }
     })
     .promise()
-    .get("api_token")
+    .get("apiToken")
 
   getProjectToken: (projectId, session) ->
     @_projectToken("get", projectId, session)

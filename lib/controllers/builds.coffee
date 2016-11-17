@@ -6,7 +6,7 @@ module.exports = {
     user.get().then (user) =>
       api.getBuilds(
         config.projectId,
-        user?.session_token
+        user?.sessionToken
       )
       ## should we send up the error here?
       ## yes most likely, so dont issue next

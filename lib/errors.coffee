@@ -3,27 +3,31 @@ chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
 
-exceptions = "CI_CANNOT_COMMUNICATE".split(" ")
-
 API = {
   getMsgByType: (type, arg1, arg2) ->
     switch type
+      when "CANNOT_TRASH_ASSETS"
+        "Warning: We failed to trash the existing build assets.\n\nThis error will not alter the exit code.\n\n#{arg1}"
+      when "VIDEO_RECORDING_FAILED"
+        "Warning: We failed to record the video.\n\nThis error will not alter the exit code.\n\n#{arg1}"
+      when "VIDEO_POST_PROCESSING_FAILED"
+        "Warning: We failed processing this video.\n\nThis error will not alter the exit code.\n\n#{arg1}"
       when "NOT_LOGGED_IN"
         "You're not logged in.\n\nRun `cypress open` to open the Desktop App and login."
       when "TESTS_DID_NOT_START"
         "Can't start tests, the remote client never connected."
       when "PROJECT_DOES_NOT_EXIST"
         "You need to add a project to run tests."
-      when "NOT_CI_ENVIRONMENT"
-        "Can't run CI outside of a CI provider and environment."
+      when "CI_CANNOT_UPLOAD_ASSETS"
+        "Warning: We encountered an error while uploading your build assets.\n\nThese build assets will not be recorded\n\nThis error will not alter or the exit code.\n\n#{arg1}"
+      when "CI_CANNOT_CREATE_BUILD_OR_INSTANCE"
+        "Warning: We encountered an error talking to our servers.\n\nNo build assets will be recorded.\n\nThis error will not alter the exit code.\n\n#{arg1}"
       when "CI_KEY_MISSING"
         "Can't run in CI without a CI key. You did not provide one."
       when "CI_KEY_NOT_VALID"
         "Can't run project in CI. Your project's CI key: #{chalk.blue(arg1)} is invalid."
       when "CI_PROJECT_NOT_FOUND"
         "Can't find project. Aborting the CI run.\n\nCheck that your 'projectId' and 'secret CI key' are valid."
-      when "CI_CANNOT_COMMUNICATE"
-        "Can't communicate with remote Cypress servers. This is a temporary problem. Try again later."
       when "DEV_NO_SERVER"
         " > The local API server isn't running in development. This may cause problems running the GUI."
       when "NO_PROJECT_ID"
@@ -60,13 +64,10 @@ API = {
     err.type and
 
       ## and its found in our list of errors
-      @getMsgByType(err.type) and
+      @getMsgByType(err.type)
 
-        ## and its not an exception
-        err.type not in exceptions
-
-  warning: (type) ->
-    err = @get(type)
+  warning: (type, arg) ->
+    err = @get(type, arg)
     @log(err, "magenta")
 
   log: (err, color = "red") ->
