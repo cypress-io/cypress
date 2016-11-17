@@ -1,4 +1,4 @@
-describe.only "Projects Nav", ->
+describe "Projects Nav", ->
   beforeEach ->
     cy
       .visit("/")
