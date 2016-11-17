@@ -80,11 +80,22 @@ class SetupProject extends Component {
                 Access:
               </label>
               <div className='col-sm-9'>
-                <div className='checkbox'>
+                <div className='radio privacy-radio'>
                   <label>
-                    <input type='checkbox'/>
-                    Make Builds Private{' '}
-                    <small>(Requires paid Cypress account)</small>
+                    <input type='radio' name='privacy-radio' value='true' />
+                    <i className='fa fa-eye'></i>{' '}
+                    <strong>Public</strong>
+                    <p>Anyone can see the project's builds.</p>
+                  </label>
+                </div>
+                <div className='radio privacy-radio'>
+                  <label>
+                    <input type='radio' name='privacy-radio' value='false'/>
+                    <i className='fa fa-lock'></i>{' '}
+                    <strong>Private</strong>
+                    <p>You choose who can see the project's builds.
+                      <small>(Requires paid Cypress account)</small>
+                    </p>
                   </label>
                 </div>
               </div>

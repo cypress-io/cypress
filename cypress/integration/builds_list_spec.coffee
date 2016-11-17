@@ -121,6 +121,13 @@ describe "Builds List", ->
                 .contains("manage").click().then ->
                    expect(@App.ipc).to.be.calledWith("external:open", "https://app.cypress.io")
 
+
+          describe "public v private", ->
+            it "displays public and private radios", ->
+              cy
+                .get(".modal-body").contains("Public")
+                .get(".modal-body").contains("Private")
+
           describe "successfully submit form", ->
             beforeEach ->
               cy
