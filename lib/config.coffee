@@ -48,7 +48,7 @@ defaults = {
   viewportHeight: 660
   fileServerFolder: ""
   # unitFolder:        "cypress/unit"
-  supportFile:       "cypress/support/"
+  supportFile:       "cypress/support"
   fixturesFolder:    "cypress/fixtures"
   integrationFolder: "cypress/integration"
   screenshotsFolder:  "cypress/screenshots"
