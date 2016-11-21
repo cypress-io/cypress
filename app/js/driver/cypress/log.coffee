@@ -11,6 +11,8 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
   counter = 0
 
+  delay = null
+
   logs = {}
 
   abort = ->
@@ -124,6 +126,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       return log
   }
 
+  setDelay = (val) ->
+    ## memoize this value
+    delay = val ? 4
+
   class $Log
     constructor: (@Cypress, obj = {}) ->
       _.defaults obj,
@@ -132,6 +138,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
       trigger = =>
         triggerEvent(@Cypress, @, "log:state:changed")
+
+      ## give us the ability to change the delay for firing
+      ## the change event, or default it to 4
+      delay ?= setDelay(@Cypress.config("logAttrsDelay"))
 
       ## only fire the log:state:changed event
       ## as fast as every 4ms
@@ -248,6 +258,11 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       }
 
     snapshot: (name, options = {}) ->
+      ## bail early and dont snapshot
+      ## if we're in headless mode
+      if $Cypress.isHeadless
+        return @
+
       _.defaults options,
         at: null
         next: null
