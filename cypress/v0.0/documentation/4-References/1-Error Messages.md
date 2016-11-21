@@ -392,7 +392,7 @@ But before doing so you should really understand and [read about the reasoning h
 
 # The supportFolder option has been removed
 
-The `supportFolder` option has been removed from Cypress and has been replaced by module support and the `supportScripts` option. Cypress used to automatically include any scripts in the `supportFolder` before your test files, and that was the best way to include custom Cypress commands and utility functions. However, automatically including all the files in a certain directory is somewhat magical and unintuitive, and requires creating globals for the purpose of utility functions. This behavior has been succeeded by module support and the `supportScripts` option.
+The `supportFolder` option has been removed from Cypress and has been replaced by module support and the `supportFile` option. Cypress used to automatically include any scripts in the `supportFolder` before your test files, and that was the best way to include custom Cypress commands and utility functions. However, automatically including all the files in a certain directory is somewhat magical and unintuitive, and requires creating globals for the purpose of utility functions. This behavior has been succeeded by module support and the `supportFile` option.
 
 ## Use modules for utility functions
 
@@ -408,26 +408,24 @@ it("uses modules", function () {
 })
 ```
 
-## Use supportScripts to load scripts before your test code
+## Use supportFile to load scripts before your test code
 
-It's still useful to load a file or multiple files before your test code. If you are setting Cypress defaults or utilizing custom Cypress commands, instead of needing to import/require those defaults/commands in every test file, you can use the `supportScripts` configuration option. This works similar to the former `supportFolder` option, but is more explicit.
+It's still useful to load a setup file before your test code. If you are setting Cypress defaults or utilizing custom Cypress commands, instead of needing to import/require those defaults/commands in every test file, you can use the `supportFile` configuration option. This works similar to the former `supportFolder` option, but is more explicit.
 
-`supportScripts` is a string (or array of strings) with paths to a file (or files) to include before your test files. The paths can be globs to match multiple files based on a glob pattern. By default, `supportScripts` is set to `cypress/support/index.+(js|jsx|coffee|cjsx)`, which means it will look for one of the following files:
+`supportFile` is a path to a file to include before your test files. By default, `supportFile` is set to look for one of the following files:
 
 * `cypress/support/index.js`
-* `cypress/support/index.jsx`
 * `cypress/support/index.coffee`
-* `cypress/support/index.cjsx`
 
-Just like with your test files, the `supportScripts` can use ES2015+ and modules, so you can import/require other files as needed.
+Just like with your test files, the `supportFile` can use ES2015+ (or CoffeeScript) and modules, so you can import/require other files as needed.
 
-## Migrating from supportFolder to supportScripts
+## Migrating from supportFolder to supportFile
 
 You're seeing this error because you have the `supportFolder` option explicitly set, either to a different directory or as `false`, meaning you didn't utilize the support folder functionality.
 
 ### If you have supportFolder set to false
 
-Set the `supportScripts` option to false instead:
+Set the `supportFile` option to false instead:
 
 ```javascript
 // cypress.json
@@ -439,15 +437,15 @@ Set the `supportScripts` option to false instead:
 
 // after
 {
-  "supportScripts": false
+  "supportFile": false
 }
 ```
 
 ### If you have supportFolder set to a different directory
 
-When you open a project with Cypress, we look for a file named `index.js` in the `supportFolder` you have set. If one is not present, we generate a file that imports all the other files in your `supportFolder`. You simply need to set the `supportScripts` option to point to that file, and everything should work as before.
+When you open a project with Cypress, we look for a file named `index.js` in the `supportFolder` you have set. If one is not present, we generate a file that imports all the other files in your `supportFolder`. You simply need to set the `supportFile` option to point to that file, and everything should work as before.
 
-If, for example, you had the `supportFolder` set to `utilities`, change its name to `supportScripts` and its value to `utilities/index.js`:
+If, for example, you had the `supportFolder` set to `utilities`, change its name to `supportFile` and its value to `utilities/index.js`:
 
 ```javascript
 // cypress.json
@@ -459,6 +457,6 @@ If, for example, you had the `supportFolder` set to `utilities`, change its name
 
 // after
 {
-  "supportScripts": "utilities/index.js"
+  "supportFile": "utilities/index.js"
 }
 ```
