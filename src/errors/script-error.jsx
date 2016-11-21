@@ -7,30 +7,14 @@ const BundleError = ({ specPath }) => (
       <i className='fa fa-warning'></i>
       Oops...we found an error preparing your test file:
     </h4>
-    <pre>{specPath.replace(/\//g, '/')}</pre>
-    <p>Cypress compiles and bundles your test code so you can use ES2015, JS modules, CoffeeScript, etc. (<a href='https://on.cypress.io/we-found-an-error-preparing-your-file' target='_blank' rel='noopener noreferrer'>Learn more</a>). This can cause problems when:</p>
+    <pre>{specPath}</pre>
+    <p>This error occurred while Cypress was compiling and bundling your test code (<a href='https://on.cypress.io/we-found-an-error-preparing-your-file' target='_blank' rel='noopener noreferrer'>learn more</a>) and is usually caused by:</p>
     <ul>
-      <li>The file is missing.</li>
-      <li>There's a syntax error in the file or one of its dependencies.</li>
-      <li>There's a missing dependency.</li>
+      <li>The file missing</li>
+      <li>A syntax error in the file or one of its dependencies</li>
+      <li>A missing dependency</li>
     </ul>
     <p>Fix the error in your code to clear this error and re-run your tests.</p>
-  </div>
-)
-
-const SupportFolderError = () => (
-  <div>
-    <h4>
-      <i className='fa fa-warning'></i>
-      The supportFolder option has been removed
-    </h4>
-    <p>We see you set up a <strong>supportFolder</strong> option in your configuration.</p>
-    <p>This option is not supported and was replaced by the <strong>supportScripts</strong> option.</p>
-    <p>Please update your configuration.{' '}
-      <a href='https://on.cypress.io/guides/configuration#section-global' target='_blank' rel='noopener noreferrer'>
-        Learn more.
-      </a>
-    </p>
   </div>
 )
 
@@ -41,8 +25,6 @@ const ScriptError = observer(({ specPath, state }) => {
     switch (state.scriptError.type) {
       case "BUNDLE_ERROR":
         return <BundleError specPath={specPath} />
-      case "SUPPORT_FOLDER":
-        return <SupportFolderError />
       default:
         return null
     }
