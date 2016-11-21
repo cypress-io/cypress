@@ -48,6 +48,37 @@ API = {
         "Can't find open project."
       when "AUTOMATION_SERVER_DISCONNECTED"
         "The automation server disconnected. Cannot continue running tests."
+      when "SUPPORT_FILE_NOT_FOUND"
+        """
+        Support file not found at '#{arg1}'
+
+        You set the supportFile option, but the file isn't present. Correct your cypress.json or create the appropriate file.
+
+        Learn more at https://on.cypress.io/guides/configuration#section-global
+        """
+      when "BUNDLE_ERROR"
+        ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
+        ## THE ERROR MESSAGE IN THE RUNNER TOO
+        """
+        Oops...we found an error preparing your test file:
+
+          #{chalk.yellow(arg1)}
+
+        This error occurred while Cypress was compiling and bundling your test code and is usually caused by:
+
+        * The file missing
+        * A syntax error in the file or one of its dependencies
+        * A missing dependency
+
+        Fix the error in your code and re-run your tests.
+
+        ------------------------
+
+        #{chalk.yellow(arg2)}
+
+        ------------------------
+        """
+
 
   get: (type, arg1, arg2) ->
     msg = @getMsgByType(type, arg1, arg2)

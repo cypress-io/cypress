@@ -62,28 +62,19 @@ describe "lib/scaffold", ->
       pristinePath = Fixtures.projectPath("pristine")
 
       @config = {
-        resolved: { supportScripts: { from: "default" } }
-        supportScripts: "support/index.js"
+        resolved: { supportFile: { from: "default" } }
+        supportFile: "support/index.js"
+        supportFolder: "support"
       }
 
-      @resolvedSupportFolder = path.resolve(pristinePath, supportFolder)
+      @resolvedSupportFolder = path.resolve(pristinePath, @config.supportFolder)
 
-    it "removes supportFolder + contents when existing", ->
-      scaffold.support(@resolvedSupportFolder, null, @config)
-      .then =>
-        scaffold.support(@resolvedSupportFolder, {remove: true}, @config)
-      .then =>
-        fs.statAsync(@resolvedSupportFolder)
-        .then ->
-          throw new Error("should have failed but didnt")
-        .catch ->
-
-    it "does not create any files but index.js if supportFolder already exists", ->
+    it "does not create any files but index.js if supportFolder directory already exists", ->
       ## create the supportFolder ourselves manually
       fs.ensureDirAsync(@resolvedSupportFolder)
       .then =>
         ## now scaffold
-        scaffold.support(@resolvedSupportFolder, null, @config)
+        scaffold.support(@resolvedSupportFolder, @config)
       .then =>
         glob("**/*", {cwd: @resolvedSupportFolder})
       .then (files) ->
@@ -96,7 +87,7 @@ describe "lib/scaffold", ->
       fs.ensureDirAsync(@resolvedSupportFolder)
       .then =>
         ## now scaffold
-        scaffold.support(@resolvedSupportFolder, null, @config).then =>
+        scaffold.support(@resolvedSupportFolder, @config).then =>
           fs.outputFileAsync(indexPath, ";")
       .then =>
         glob("**/*", {cwd: @resolvedSupportFolder})
@@ -106,27 +97,17 @@ describe "lib/scaffold", ->
           ## it doesn't change the contents of the existing index.js
           expect(buffer.toString()).to.equal(";")
 
-    it "does not create any files if supportScripts is false", ->
-      @config.supportScripts = false
-      scaffold.support(@resolvedSupportFolder, null, @config)
+    it "does not create any files if supportFile is not default", ->
+      @config.resolved.supportFile.from = "config"
+      scaffold.support(@resolvedSupportFolder, @config)
       .then =>
         glob("**/*", {cwd: @resolvedSupportFolder})
       .then (files) ->
         expect(files.length).to.eq(0)
 
-    it "does not create supportFolder/index.js if supportScripts is not default", ->
-      @config.resolved.supportScripts.from = "config"
-      fs.ensureDirAsync(@resolvedSupportFolder)
-      .then =>
-        scaffold.support(@resolvedSupportFolder, null, @config)
-      .then =>
-        glob("**/*", {cwd: @resolvedSupportFolder})
-      .then (files) ->
-        expect(files.length).to.eq(0)
-
-    it "creates both supportFolder and commands.js, defaults.js, and index.js when supportFolder does not exist", ->
+    it "creates supportFolder and commands.js, defaults.js, and index.js when supportFolder does not exist", ->
       ## todos has a _support folder so let's first nuke it and then scaffold
-      scaffold.support(@resolvedSupportFolder, null, @config).then =>
+      scaffold.support(@resolvedSupportFolder, @config).then =>
         fs.readFileAsync(@resolvedSupportFolder + "/commands.js", "utf8").then (str) =>
           expect(str).to.eq """
           // ***********************************************
@@ -198,7 +179,7 @@ describe "lib/scaffold", ->
               // any other test files
               //
               // You can change the location of this file with
-              // the 'supportScripts' configuration option
+              // the 'supportFile' configuration option
               //
               // You can read more here:
               // https://on.cypress.io/guides/configuration#section-global
@@ -220,24 +201,6 @@ describe "lib/scaffold", ->
 
       config.get(todosPath).then (cfg) =>
         {@fixturesFolder} = cfg
-
-    it "is noop when removal is true and there is no folder", ->
-      scaffold.fixture(@fixturesFolder, {remove: true})
-      .then =>
-        fs.statAsync(@fixturesFolder)
-        .then ->
-          throw new Error("should have failed but didnt")
-        .catch ->
-
-    it "removes fixturesFolder + contents when existing", ->
-      scaffold.fixture(@fixturesFolder)
-      .then =>
-        scaffold.fixture(@fixturesFolder, {remove: true})
-      .then =>
-        fs.statAsync(@fixturesFolder)
-        .then ->
-          throw new Error("should have failed but didnt")
-        .catch ->
 
     it "creates both fixturesFolder and example.json when fixturesFolder does not exist", ->
       ## todos has a fixtures folder so let's first nuke it and then scaffold

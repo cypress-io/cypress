@@ -29,7 +29,7 @@ stringStream = (contents) ->
   return stream
 
 module.exports = {
-  watch: (filePath, config) ->
+  build: (filePath, config, watch = false) ->
     emitter = new EventEmitter()
 
     absolutePath = path.join(config.projectRoot, filePath)
@@ -39,7 +39,7 @@ module.exports = {
       extensions: [".js", ".jsx", ".coffee", ".cjsx"]
       cache: {}
       packageCache: {}
-      plugin: [watchify]
+      plugin: if watch then [watchify] else []
     })
 
     bundle = =>
@@ -50,8 +50,11 @@ module.exports = {
           bundler
           .bundle()
           .on "error", (err) =>
-            stringStream(@error(err)).pipe(fs.createWriteStream(outputPath))
-            resolve()
+            if watch
+              stringStream(@clientSideError(err)).pipe(fs.createWriteStream(outputPath))
+              resolve()
+            else
+              reject(err)
           .on "end", ->
             resolve()
           .pipe(fs.createWriteStream(outputPath))
@@ -71,11 +74,13 @@ module.exports = {
       "react/lib/ReactContext"
       "react/lib/ExecutionEnvironment"
     ])
-    .on "update", (filePaths) ->
-      latestBundle = bundle().then ->
-        for updatedFilePath in filePaths
-          emitter.emit("update", updatedFilePath)
-        return
+
+    if watch
+      bundler.on "update", (filePaths) ->
+        latestBundle = bundle().then ->
+          for updatedFilePath in filePaths
+            emitter.emit("update", updatedFilePath)
+          return
 
     latestBundle = bundle()
 
@@ -86,15 +91,14 @@ module.exports = {
         emitter.on "update", onChange
     }
 
-  error: (err) ->
-    if not err or not _.isObject(err)
-      err = {
-        name: "Uncaught Error"
-        message: ""
-        stack: err
-      }
+  errorMessage: (err = "") ->
+    (err.stack or err.annotated or err.message or err)
+    ## strip out stack noise from parser like
+    ## at Parser.pp$5.raise (/path/to/node_modules/babylon/lib/index.js:4215:13)
+    .replace(/\n\s*at.*/g, '')
 
-    err.stack = (err.stack or err.annotated or err.message or "")
+  clientSideError: (err) ->
+    err = @errorMessage(err)
       ## \n doesn't come through properly so preserve it so the
       ## runner can do the right thing
       .replace(/\n/g, '{newline}')
@@ -106,7 +110,7 @@ module.exports = {
     (function () {
       Cypress.trigger("script:error", {
         type: "BUNDLE_ERROR",
-        error: "#{err.stack}"
+        error: "#{err}"
       })
     }())
     """

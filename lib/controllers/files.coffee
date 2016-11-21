@@ -9,6 +9,7 @@ api         = require("../api")
 user        = require("../user")
 pathHelpers = require("../util/path_helpers")
 CacheBuster = require("../util/cache_buster")
+errors      = require("../errors")
 
 glob = Promise.promisify(glob)
 
@@ -136,12 +137,12 @@ module.exports = {
     if test is "__all" then "All Tests" else test
 
   getJavascripts: (config) ->
-    {projectRoot, supportScripts, javascripts} = config
+    {projectRoot, supportFile, javascripts} = config
 
     ## automatically add in support scripts and any javascripts
     files = [].concat javascripts
-    if supportScripts isnt false
-      files = files.concat(supportScripts)
+    if supportFile isnt false
+      files = [supportFile].concat(files)
 
     ## TODO: there shouldn't be any reason
     ## why we need to re-map these. its due
@@ -162,13 +163,6 @@ module.exports = {
     .then(_.flatten)
     .map (filePath) =>
       @prepareForBrowser(filePath, projectRoot)
-    .then (filePaths) ->
-      if config.resolved.supportFolder.from isnt "default"
-        ## displays an error informing user that supportFolder is
-        ## is no longer supported
-        filePaths.concat("/__cypress/errors/support_folder")
-      else
-        filePaths
 
   getTestFiles: (config) ->
     integrationFolderPath = config.integrationFolder
@@ -184,7 +178,7 @@ module.exports = {
       "*"
     )
 
-    supportScriptsPath = path.resolve(config.supportScripts)
+    supportFilePath = path.resolve(config.supportFile)
 
     ## map all of the javascripts to the project root
     ## TODO: think about moving this into config
@@ -200,7 +194,7 @@ module.exports = {
       cwd:      integrationFolderPath
       ignore:   [].concat(
         javascriptsPath,
-        supportScriptsPath,
+        supportFilePath,
         fixturesFolderPath
       )
     }

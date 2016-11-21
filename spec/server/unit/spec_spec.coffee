@@ -13,6 +13,8 @@ babelify      = require("babelify")
 cjsxify       = require("cjsxify")
 streamToPromise = require("stream-to-promise")
 appData = require("#{root}lib/util/app_data")
+bundle = require("#{root}lib/util/bundle")
+errors = require("#{root}lib/errors")
 
 fs = Promise.promisifyAll(fs)
 
@@ -73,15 +75,43 @@ describe "lib/controllers/spec", ->
       .to.have.been.calledOnce
       .and.to.have.been.calledWith('js')
 
-  it "sends the file from the bundles path", ->
-    @handle("sample.js")
+  describe "headed mode", ->
 
-    collectResponse(@res).then (result) ->
-      expect(result).to.equal(";")
+    it "sends the file from the bundles path", ->
+      @handle("sample.js")
 
-  it "sends the error if there is one", ->
-    @watchers.watchBundle = -> Promise.reject(new Error("Reason request failed"))
+      collectResponse(@res).then (result) ->
+        expect(result).to.equal(";")
 
-    @handle("sample.js").then =>
-      expect(@res.send).to.have.been.called
-      expect(@res.send.firstCall.args[0]).to.include("Reason request failed")
+    it "sends the client-side error if there is one", ->
+      @watchers.watchBundle = -> Promise.reject(new Error("Reason request failed"))
+
+      @handle("sample.js").then =>
+        expect(@res.send).to.have.been.called
+        expect(@res.send.firstCall.args[0]).to.include("(function")
+        expect(@res.send.firstCall.args[0]).to.include("Reason request failed")
+
+  describe "headless mode", ->
+    beforeEach ->
+      @build = @sandbox.stub(bundle, "build").returns({
+        getLatestBundle: -> Promise.resolve()
+      })
+      @config.isHeadless = true
+      @exit = @sandbox.stub(process, "exit")
+
+    it "sends the file from the bundles path", ->
+      @handle("sample.js")
+
+      collectResponse(@res).then (result) ->
+        expect(result).to.equal(";")
+
+    it "logs the error and exits if there is one", ->
+      @build.returns({
+        getLatestBundle: -> Promise.reject(new Error("Reason request failed"))
+      })
+      @log = @sandbox.stub(errors, "log")
+
+      @handle("sample.js").then =>
+        expect(@log).to.have.been.called
+        expect(@log.firstCall.args[0].stack).to.include("Oops...we found an error preparing your test file")
+        expect(@exit).to.have.been.calledWith(1)

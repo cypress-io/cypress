@@ -29,8 +29,6 @@ Server   = require("#{root}lib/server")
 Reporter = require("#{root}lib/reporter")
 launcher = require("#{root}lib/launcher")
 
-supportFolder = "cypress/support"
-
 describe "lib/cypress", ->
   beforeEach ->
     cache.removeSync()
@@ -328,6 +326,8 @@ describe "lib/cypress", ->
           fs.statAsync path.join(@cfg.fixturesFolder, "example.json")
 
     it "scaffolds out support + files if they do not exist", ->
+      supportFolder = path.join(@pristinePath, "cypress/support")
+
       Promise.all([
         user.set({session_token: "session-123"}),
 

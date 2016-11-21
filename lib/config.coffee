@@ -4,14 +4,15 @@ path     = require("path")
 Promise  = require("bluebird")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
+errors   = require("./errors")
 scaffold = require("./scaffold")
 
 ## cypress following by _
 cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
-folders = "fileServerFolder fixturesFolder integrationFolder screenshotsFolder unitFolder supportFolder".split(" ")
-configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges chromeWebSecurity viewportWidth viewportHeight fileServerFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables hosts supportScripts supportFolder".split(" ")
+folders = "fileServerFolder fixturesFolder integrationFolder screenshotsFolder unitFolder supportFile".split(" ")
+configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges chromeWebSecurity viewportWidth viewportHeight fileServerFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables hosts supportFile".split(" ")
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
@@ -47,7 +48,7 @@ defaults = {
   viewportHeight: 660
   fileServerFolder: ""
   # unitFolder:        "cypress/unit"
-  supportScripts: "cypress/support/index.+(js|jsx|coffee|cjsx)"
+  supportFile:       "cypress/support/"
   fixturesFolder:    "cypress/fixtures"
   integrationFolder: "cypress/integration"
   screenshotsFolder:  "cypress/screenshots"
@@ -55,33 +56,15 @@ defaults = {
 
   ## deprecated
   javascripts: []
-  supportFolder: "cypress/support"
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
-  converted = _.reduce folders, (memo, folder) ->
+  _.reduce folders, (memo, folder) ->
     val = obj[folder]
     if val?
-      ## if this folder has been specifically turned off
-      ## then set its value to the default value and
-      ## set the Remove key to true
-      if val is false and def = defaults[folder]
-        memo[folder + "Remove"] = true
-        memo[folder] = path.resolve(projectRoot, def)
-      else
-        ## else just resolve the folder from the projectRoot
-        memo[folder] = path.resolve(projectRoot, val)
-
+      memo[folder] = path.resolve(projectRoot, val)
     return memo
   , {}
-
-  if supportScripts = obj.supportScripts
-    converted.supportScripts = if _.isArray(supportScripts)
-      _.map supportScripts, (script) -> path.resolve(projectRoot, script)
-    else
-      path.resolve(projectRoot, supportScripts)
-
-  return converted
 
 module.exports = {
   getConfigKeys: -> configKeys
@@ -157,6 +140,8 @@ module.exports = {
 
     config = @setScaffoldPaths(config)
 
+    config = @setSupportFileAndFolder(config)
+
     return config
 
   setResolvedConfigValues: (config, defaults, resolved) ->
@@ -196,6 +181,30 @@ module.exports = {
 
     obj.integrationExampleFile = path.join(obj.integrationFolder, fileName)
     obj.integrationExampleName = fileName
+
+    return obj
+
+  setSupportFileAndFolder: (obj) ->
+    obj = _.clone(obj)
+
+    ## if supportFile isn't false
+    if sf = obj.supportFile
+      ## set config.supportFolder to its directory
+      try
+        ## resolve full path with extension to
+        obj.supportFile = require.resolve(sf)
+      catch err
+        ## supportFile doesn't exist on disk
+        if sf isnt path.resolve(obj.projectRoot, defaults.supportFile)
+          ## throw because they have it explicitly set,
+          ## so it should be there
+          errors.throw("SUPPORT_FILE_NOT_FOUND", sf)
+        else
+          ## set it to support/index.js, and it will be scaffolded
+          ## later in process
+          obj.supportFile = path.join(sf, "index.js")
+
+      obj.supportFolder = path.dirname(obj.supportFile)
 
     return obj
 

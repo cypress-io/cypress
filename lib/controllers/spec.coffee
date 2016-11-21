@@ -2,6 +2,7 @@ fs = require("fs")
 
 appData = require("../util/app_data")
 bundle = require("../util/bundle")
+errors = require("../errors")
 
 module.exports = {
   handle: (spec, req, res, config, next, watchers) ->
@@ -11,14 +12,25 @@ module.exports = {
       "Expires": "0"
     })
 
-    res.type "js"
+    res.type("js")
 
-    watchers
-    .watchBundle(spec, config)
-    .then ->
+    streamBundle = ->
       fs.createReadStream(appData.path("bundles", spec))
       .pipe(res)
-    .catch (err) ->
-      res.send(bundle.error(err))
+
+    if config.isHeadless
+      bundle
+      .build(spec, config)
+      .getLatestBundle()
+      .then(streamBundle)
+      .catch (err) ->
+        errors.log(errors.get("BUNDLE_ERROR", spec, bundle.errorMessage(err)))
+        process.exit(1)
+    else
+      watchers
+      .watchBundle(spec, config)
+      .then(streamBundle)
+      .catch (err) ->
+        res.send(bundle.clientSideError(err))
 
 }

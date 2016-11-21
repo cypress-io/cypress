@@ -314,13 +314,11 @@ class Project extends EE
 
       ## ensure fixtures dir is created
       ## and example fixture if dir doesnt exist
-      scaffold.fixture(config.fixturesFolder, {
-        remove: config.fixturesFolderRemove
-      })
+      scaffold.fixture(config.fixturesFolder)
 
       ## ensure support dir is created
       ## and example support file if dir doesnt exist
-      scaffold.support(config.supportFolder, null, config)
+      scaffold.support(config.supportFolder, config)
     )
 
   writeProjectId: (id) ->

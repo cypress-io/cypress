@@ -25,7 +25,7 @@ describe "lib/project", ->
     settings.read(@todosPath).then (obj = {}) =>
       {@projectId} = obj
 
-      @config  = config.set({projectName: "project"})
+      @config  = config.set({projectName: "project", projectRoot: "/foo/bar"})
       @project = Project(@todosPath)
 
   afterEach ->
@@ -267,7 +267,7 @@ describe "lib/project", ->
       @sandbox.stub(scaffold, "fixture").resolves()
       @sandbox.stub(scaffold, "support").resolves()
 
-      @obj = {projectRoot: "pr", fixturesFolder: "ff", integrationFolder: "if"}
+      @obj = {projectRoot: "pr", fixturesFolder: "ff", integrationFolder: "if", supportFolder: "sf"}
 
     it "calls scaffold.integration with integrationFolder", ->
       @project.scaffold(@obj).then =>
@@ -277,9 +277,9 @@ describe "lib/project", ->
       @project.scaffold(@obj).then =>
         expect(scaffold.fixture).to.be.calledWith(@obj.fixturesFolder)
 
-    it "calls support.scaffold with cypress/support", ->
+    it "calls support.scaffold with supportFolder", ->
       @project.scaffold(@obj).then =>
-        expect(scaffold.support).to.be.calledWith("cypress/support")
+        expect(scaffold.support).to.be.calledWith(@obj.supportFolder)
 
   context "#watchSettings", ->
     beforeEach ->

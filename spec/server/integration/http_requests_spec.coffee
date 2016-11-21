@@ -55,6 +55,8 @@ describe "Routes", ->
         obj = initialUrl
         initialUrl = null
 
+      obj.projectRoot = "/foo/bar/" unless obj.projectRoot
+
       ## get all the config defaults
       ## and allow us to override them
       ## for each test
@@ -266,7 +268,7 @@ describe "Routes", ->
           config: {
             integrationFolder: "tests"
             fixturesFolder: "tests/_fixtures"
-            supportScripts: "tests/_support/*"
+            supportFile: "tests/_support/spec_helper.js"
             javascripts: ["tests/etc/**/*"]
           }
         })
@@ -696,7 +698,7 @@ describe "Routes", ->
           config: {
             integrationFolder: "tests"
             fixturesFolder: "tests/_fixtures"
-            supportScripts: "tests/_support/*"
+            supportFile: "tests/_support/spec_helper.js"
             javascripts: ["tests/etc/etc.js"]
           }
         })
@@ -727,7 +729,7 @@ describe "Routes", ->
           projectRoot: Fixtures.projectPath("no-server")
           config: {
             integrationFolder: "my-tests"
-            supportScripts: ["helpers/includes.js"]
+            supportFile: "helpers/includes.js"
             fileServerFolder: "foo"
           }
         })
@@ -748,7 +750,7 @@ describe "Routes", ->
           projectRoot: Fixtures.projectPath("e2e")
           config: {
             integrationFolder: "cypress/integration"
-            supportScripts: "cypress/support/**/*"
+            supportFile: "cypress/support/commands.js"
           }
         })
 

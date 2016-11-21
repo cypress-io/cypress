@@ -107,6 +107,7 @@ describe "lib/config", ->
   context ".mergeDefaults", ->
     beforeEach ->
       @defaults = (prop, value, cfg = {}, options = {}) =>
+        cfg.projectRoot = "/foo/bar/"
         expect(config.mergeDefaults(cfg, options)[prop]).to.deep.eq(value)
 
     it "port=null", ->
@@ -187,27 +188,28 @@ describe "lib/config", ->
       @defaults "screenshotOnHeadlessFailure", true
 
     it "resets numTestsKeptInMemory to 0 when", ->
-      cfg = config.mergeDefaults({}, {isHeadless: true})
+      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isHeadless: true})
 
       expect(cfg.numTestsKeptInMemory).to.eq(0)
 
     it "can override morgan in options", ->
-      cfg = config.mergeDefaults({}, {morgan: false})
+      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {morgan: false})
 
       expect(cfg.morgan).to.be.false
 
     it "can override isHeadless in options", ->
-      cfg = config.mergeDefaults({}, {isHeadless: true})
+      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isHeadless: true})
 
       expect(cfg.isHeadless).to.be.true
 
     it "can override socketId in options", ->
-      cfg = config.mergeDefaults({}, {socketId: 1234})
+      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {socketId: 1234})
 
       expect(cfg.socketId).to.eq(1234)
 
     it "deletes envFile", ->
       obj = {
+        projectRoot: "/foo/bar/"
         env: {
           foo: "bar"
           version: "0.5.2"
@@ -230,6 +232,7 @@ describe "lib/config", ->
 
     it "merges env into @config.env", ->
       obj = {
+        projectRoot: "/foo/bar/"
         env: {
           host: "localhost"
           user: "brian"
@@ -255,7 +258,9 @@ describe "lib/config", ->
 
     describe ".resolved", ->
       it "sets reporter and port to cli", ->
-        obj = {}
+        obj = {
+          projectRoot: "/foo/bar"
+        }
 
         options = {
           reporter: "json"
@@ -284,7 +289,7 @@ describe "lib/config", ->
           viewportWidth:              { value: 1000, from: "default" },
           viewportHeight:             { value: 660, from: "default" },
           fileServerFolder:           { value: "", from: "default" },
-          supportScripts:             { value: "cypress/support/index.+(js|jsx|coffee|cjsx)", from: "default" },
+          supportFile:                { value: "cypress/support", from: "default" },
           fixturesFolder:             { value: "cypress/fixtures", from: "default" },
           integrationFolder:          { value: "cypress/integration", from: "default" },
           screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
@@ -295,6 +300,7 @@ describe "lib/config", ->
         @sandbox.stub(config, "getProcessEnvVars").returns({quux: "quux"})
 
         obj = {
+          projectRoot: "/foo/bar"
           baseUrl: "http://localhost:8080"
           port: 2020
           env: {
@@ -332,7 +338,7 @@ describe "lib/config", ->
           viewportWidth:              { value: 1000, from: "default" },
           viewportHeight:             { value: 660, from: "default" },
           fileServerFolder:           { value: "", from: "default" },
-          supportScripts:             { value: "cypress/support/index.+(js|jsx|coffee|cjsx)", from: "default" },
+          supportFile:                { value: "cypress/support", from: "default" },
           fixturesFolder:             { value: "cypress/fixtures", from: "default" },
           integrationFolder:          { value: "cypress/integration", from: "default" },
           screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
@@ -489,23 +495,7 @@ describe "lib/config", ->
 
       expect(config.setAbsolutePaths(obj)).to.deep.eq(obj)
 
-    it "sets special Remove property to true when folder is false", ->
-      obj = {
-        projectRoot: "/path/to/project"
-        fixturesFolder: false
-      }
-
-      defaults = {
-        fixturesFolder: "f"
-      }
-
-      expect(config.setAbsolutePaths(obj, defaults)).to.deep.eq({
-        projectRoot: "/path/to/project"
-        fixturesFolder: "/path/to/project/f"
-        fixturesFolderRemove: true
-      })
-
-    ["fileServerFolder", "fixturesFolder", "integrationFolder", "unitFolder"].forEach (folder) ->
+    ["fileServerFolder", "fixturesFolder", "integrationFolder", "unitFolder", "supportFile"].forEach (folder) ->
 
       it "converts relative #{folder} to absolute path", ->
         obj = {

@@ -47,10 +47,10 @@ describe "lib/util/args", ->
       expect(options.waitForAnimations).eq(false)
 
     it "whitelists config properties", ->
-      options = @setup("--config", "foo=bar,port=1111,supportScripts=path/to/support_script")
+      options = @setup("--config", "foo=bar,port=1111,supportFile=path/to/support_file")
 
       expect(options.port).to.eq(1111)
-      expect(options.supportScripts).to.eq("path/to/support_script")
+      expect(options.supportFile).to.eq("path/to/support_file")
       expect(options).not.to.have.property("foo")
 
     it "overrides existing flat options", ->

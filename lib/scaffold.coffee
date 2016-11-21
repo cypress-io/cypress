@@ -17,28 +17,29 @@ module.exports = {
     @verifyScaffolding folder, =>
       @copy(INTEGRATION_EXAMPLE_SPEC, folder)
 
-  fixture: (folder, options) ->
-    @verifyScaffolding folder, options, =>
+  fixture: (folder) ->
+    @verifyScaffolding folder, =>
       @copy("example.json", folder)
 
-  support: (folder, options, config) ->
-    return Promise.resolve() if config.supportScripts is false
+  support: (folder, config) ->
+    ## skip if user has explicitly set supportFile
+    return Promise.resolve() if config.resolved.supportFile.from isnt "default"
 
-    @verifyScaffolding(folder, options, =>
+    @verifyScaffolding(folder, =>
       Promise.join(
         @copy("defaults.js", folder)
         @copy("commands.js", folder)
       )
     )
     .then ->
-      indexPath = path.join(folder, "index.js")
       ## scaffold support/index.js with each file in the support folder
-      ## this will help transition users from supportFolder to supportScripts
-      fs.statAsync(indexPath)
-      ## only if support/index.js doesn't exist already
-      .catch =>
-        ## skip if user has explicitly set supportScripts
-        return if config.resolved.supportScripts.from isnt "default"
+      ## this will help transition users from supportFolder to supportFile
+      try
+        require.resolve(config.supportFile)
+      catch err
+        ## only if support/index.js doesn't exist already
+        ## rethrow error if it's something unexpected
+        throw err unless err.code is 'MODULE_NOT_FOUND'
 
         Promise.join(
           fs.readFileAsync(cwd("lib", "scaffold", "index.js.hbs")),
@@ -48,7 +49,7 @@ module.exports = {
         .spread (indexTemplateBuffer, supportFiles) ->
           indexTemplate = hbs.handlebars.compile(indexTemplateBuffer.toString())
           contents = indexTemplate({ files: supportFiles })
-          fs.outputFileAsync(indexPath, contents)
+          fs.outputFileAsync(path.join(folder, "index.js"), contents)
 
   copy: (file, folder) ->
     ## allow file to be relative or absolute
@@ -65,40 +66,19 @@ module.exports = {
   integrationExampleName: ->
     path.basename(INTEGRATION_EXAMPLE_SPEC)
 
-  verifyScaffolding: (folder, options = {}, fn) ->
-    if _.isFunction(options)
-      fn = options
-      options = {}
-
-    _.defaults options, {
-      remove: false
-    }
-
-    ## if opts.remove is true then we should automatically
-    ## remove the folder if it exists else noop
-    if options.remove
-      remove = ->
-        ## try to remove it twice
-        fs.removeAsync(folder)
-        .catch(remove)
-
-      fs.statAsync(folder)
-      .then(remove)
-      .catch ->
-
-    else
-      ## we want to build out the folder + and example files
-      ## but only create the example files if the folder doesn't
-      ## exist
-      ##
-      ## this allows us to automatically insert the folder on existing
-      ## projects (whenever they are booted) but allows the user to delete
-      ## the file and not have it re-generated each time
-      ##
-      ## this is ideal because users who are upgrading to newer cypress version
-      ## will still get the files scaffolded but existing users won't be
-      ## annoyed by new example files coming into their projects unnecessarily
-      fs.statAsync(folder)
-      .catch =>
-        fn.call(@)
+  verifyScaffolding: (folder, fn) ->
+    ## we want to build out the folder + and example files
+    ## but only create the example files if the folder doesn't
+    ## exist
+    ##
+    ## this allows us to automatically insert the folder on existing
+    ## projects (whenever they are booted) but allows the user to delete
+    ## the file and not have it re-generated each time
+    ##
+    ## this is ideal because users who are upgrading to newer cypress version
+    ## will still get the files scaffolded but existing users won't be
+    ## annoyed by new example files coming into their projects unnecessarily
+    fs.statAsync(folder)
+    .catch =>
+      fn.call(@)
 }
