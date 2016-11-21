@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.5 - *(11/21/16)*
+- handle script errors
+
 #### 0.3.4 - *(10/13/16)*
 - re-release to rebuild reporter
 
