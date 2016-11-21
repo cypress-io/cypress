@@ -18,11 +18,13 @@ module.exports = {
       ## dont yell about ENOENT errors
 
   start: (name, options = {}) ->
-    pt      = stream.PassThrough()
-    started = Promise.pending()
-    ended   = Promise.pending()
-    done    = false
-    errored = false
+    pt         = stream.PassThrough()
+    started    = Promise.pending()
+    ended      = Promise.pending()
+    done       = false
+    errored    = false
+    wantsWrite = true
+    skipped    = 0
 
     _.defaults(options, {
       onError: ->
@@ -44,8 +46,15 @@ module.exports = {
       ## our stream yet because paint
       ## events can linger beyond
       ## finishing the actual video
-      if not done
-        pt.write(data)
+      return if done
+
+      if wantsWrite
+        if not wantsWrite = pt.write(data)
+          pt.once "drain", ->
+            wantsWrite = true
+      else
+        skipped += 1
+        # console.log("skipping frame. total is", skipped)
 
     cmd = ffmpeg({
       source: pt
