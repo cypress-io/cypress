@@ -119,13 +119,14 @@ module.exports = {
       ## set framerate only once because if we
       ## set the framerate earlier it gets reset
       ## back to 60fps for some reason (bug?)
-      setFrameRate = _.once ->
-        win.webContents.setFrameRate(20)
+      setFrameRate = (num) ->
+        if win.webContents.getFrameRate() isnt num
+          win.webContents.setFrameRate(num)
 
       ## should we even record?
       if write
         win.webContents.on "paint", (event, dirty, image) ->
-          setFrameRate()
+          setFrameRate(20)
 
           write(image.toJPEG(100))
 
