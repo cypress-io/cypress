@@ -19,7 +19,7 @@ describe "lib/watchers", ->
     })
 
     @sandbox.stub(chokidar, "watch").returns(@standardWatcher)
-    @sandbox.stub(bundle, "watch").returns(@bundleWatcher)
+    @sandbox.stub(bundle, "build").returns(@bundleWatcher)
     @watchers = Watchers()
 
   it "returns instance of watcher class", ->
@@ -42,7 +42,7 @@ describe "lib/watchers", ->
       @latestBundle = @watchers.watchBundle("/foo/bar")
 
     it "watches with bundle watcher", ->
-      expect(bundle.watch).to.be.calledWith("/foo/bar")
+      expect(bundle.build).to.be.calledWith("/foo/bar")
 
     it "stores a reference to the watcher", ->
       expect(_.keys(@watchers.bundleWatchers)).to.have.length(1)
