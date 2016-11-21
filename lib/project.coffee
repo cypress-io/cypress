@@ -37,6 +37,7 @@ class Project extends EE
     @projectRoot = path.resolve(projectRoot)
     @server      = Server()
     @watchers    = Watchers()
+    @memoryCheck = null
 
   open: (options = {}) ->
     _.defaults options, {
@@ -46,6 +47,12 @@ class Project extends EE
       onFocusTests: ->
       onSettingsChanged: false
     }
+
+    if process.env.CYPRESS_DEBUG or process.env.CYPRESS_MEMORY
+      log = ->
+        console.log("memory info", process.memoryUsage())
+
+      @memoryCheck = setInterval(log, 1000)
 
     @getConfig(options)
     .then (cfg) =>
@@ -99,6 +106,9 @@ class Project extends EE
       sync: false
       type: "closed"
     }
+
+    if @memoryCheck
+      clearInterval(@memoryCheck)
 
     @sync(options)
 
