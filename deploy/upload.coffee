@@ -3,6 +3,7 @@ fs      = require("fs-extra")
 cp      = require("child_process")
 path    = require("path")
 gulp    = require("gulp")
+human   = require("human-interval")
 konfig  = require("konfig")()
 Promise = require("bluebird")
 meta    = require("./meta")
@@ -14,6 +15,9 @@ module.exports = {
     aws = @getAwsObj()
 
     $.awspublish.create
+      httpOptions: {
+        timeout: human("10 minutes")
+      }
       params: {
         Bucket:        aws.bucket
       }
