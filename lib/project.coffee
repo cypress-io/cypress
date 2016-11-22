@@ -74,7 +74,7 @@ class Project extends EE
         @sync(options)
 
         Promise.join(
-          @watchSettingsAndStartWebsockets(options, cfg)
+          @watchFilesAndStartWebsockets(options, cfg)
           @scaffold(cfg)
         )
 
@@ -127,6 +127,16 @@ class Project extends EE
       .spread (session, cfg) ->
         api.updateProject(id, options.type, cfg.projectName, session)
 
+  watchSupportFile: (config) ->
+    if supportFile = config.supportFile
+      relativePath = path.relative(config.projectRoot, config.supportFile)
+      @watchers.watchBundle(relativePath, config, {
+        onChange: _.bind(@server.onTestFileChange, @server, relativePath)
+      })
+      ## ignore errors b/c we're just setting up the watching. errors 
+      ## are handled by the spec controller
+      .catch ->
+
   watchSettings: (onSettingsChanged) ->
     ## bail if we havent been told to
     ## watch anything
@@ -146,7 +156,8 @@ class Project extends EE
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
 
-  watchSettingsAndStartWebsockets: (options = {}, config = {}) ->
+  watchFilesAndStartWebsockets: (options = {}, config = {}) ->
+    @watchSupportFile(config)
     @watchSettings(options.onSettingsChanged)
 
     ## if we've passed down reporter

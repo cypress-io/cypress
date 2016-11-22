@@ -50,23 +50,19 @@ class Socket
     if not (@ instanceof Socket)
       return new Socket
 
-  onTestFileChange: (integrationFolder, originalFilePath, filePath) ->
+  onTestFileChange: (filePath) ->
     logger.info "onTestFileChange", filePath: filePath
 
     ## return if we're not a js or coffee file.
     ## this will weed out directories as well
     return if not /\.(js|jsx|coffee|cjsx)$/.test filePath
 
-    ## originalFilePath is what was originally sent to us when
-    ## we were told to 'watch:test:file'
-    ## and its what we want to send back to the client
-
     fs.statAsync(filePath)
     .then =>
-      @io.emit "watched:file:changed", {file: originalFilePath}
-    .catch(->)
+      @io.emit("watched:file:changed")
+    .catch ->
 
-  watchTestFileByPath: (config, originalFilePath, watchers) ->
+  watchTestFileByPath: (config, originalFilePath, watchers, options) ->
     filePath = path.join("cypress", originalFilePath)
 
     ## bail if we're already watching this
@@ -84,10 +80,10 @@ class Socket
     @testFilePath = filePath
 
     watchers.watchBundle(filePath, config, {
-      onChange: _.bind(@onTestFileChange, @, config.integrationFolder, originalFilePath)
+      onChange: @onTestFileChange.bind(@)
     })
-    ## ignore errors b/c we're just setting up the watching
-    ## errors are handled by the spec controller
+    ## ignore errors b/c we're just setting up the watching. errors
+    ## are handled by the spec controller
     .catch ->
 
   onFixture: (config, file, options, cb) ->
@@ -171,6 +167,7 @@ class Socket
       onReloadBrowser: ->
       checkForAppErrors: ->
       onSavedStateChanged: ->
+      onTestFileChange: ->
 
     messages = {}
 
@@ -281,7 +278,7 @@ class Socket
         options.onSpecChanged(spec)
 
       socket.on "watch:test:file", (filePath, cb = ->) =>
-        @watchTestFileByPath(config, filePath, watchers)
+        @watchTestFileByPath(config, filePath, watchers, options)
         ## callback is only for testing purposes
         cb()
 

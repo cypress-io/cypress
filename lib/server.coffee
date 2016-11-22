@@ -554,6 +554,9 @@ class Server
   changeToUrl: (url) ->
     @_socket and @_socket.changeToUrl(url)
 
+  onTestFileChange: (filePath) ->
+    @_socket and @_socket.onTestFileChange(filePath)
+
   onRequest: (fn) ->
     @_middleware = fn
 

@@ -494,26 +494,21 @@ describe "lib/socket", ->
           @sandbox.spy(fs, "statAsync")
 
         it "does not emit if not a js or coffee files", ->
-          @socket.onTestFileChange(@cfg.integrationFolder, "foo/bar")
+          @socket.onTestFileChange("foo/bar")
           expect(fs.statAsync).not.to.be.called
 
         it "does not emit if a tmp file", ->
-          @socket.onTestFileChange(@cfg.integrationFolder, "foo/subl-123.js.tmp")
+          @socket.onTestFileChange("foo/subl-123.js.tmp")
           expect(fs.statAsync).not.to.be.called
 
         it "calls statAsync on .js file", ->
-          @socket.onTestFileChange(@cfg.integrationFolder, "original/path", "foo/bar.js").catch(->).then =>
+          @socket.onTestFileChange("foo/bar.js").catch(->).then =>
             expect(fs.statAsync).to.be.calledWith("foo/bar.js")
 
         it "calls statAsync on .coffee file", ->
-          @socket.onTestFileChange(@cfg.integrationFolder, "original/path", "foo/bar.coffee").then =>
+          @socket.onTestFileChange("foo/bar.coffee").then =>
             expect(fs.statAsync).to.be.calledWith("foo/bar.coffee")
 
         it "does not emit if stat throws", ->
-          @socket.onTestFileChange(@cfg.integrationFolder, "original/path", "foo/bar.js").then =>
+          @socket.onTestFileChange("foo/bar.js").then =>
             expect(@io.emit).not.to.be.called
-
-        it "emits 'watched:file:changed' with original/path", ->
-          p = Fixtures.project("todos") + "/tests/test1.js"
-          @socket.onTestFileChange(@cfg.integrationFolder, "original/path", p).then =>
-            expect(@io.emit).to.be.calledWith("watched:file:changed", {file: "original/path"})
