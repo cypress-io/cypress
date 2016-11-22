@@ -187,6 +187,9 @@ describe "lib/config", ->
     it "screenshotOnHeadlessFailure=true", ->
       @defaults "screenshotOnHeadlessFailure", true
 
+    it "supportFile=false", ->
+      @defaults "supportFile", false, {supportFile: false}
+
     it "resets numTestsKeptInMemory to 0 when", ->
       cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isHeadless: true})
 
@@ -438,6 +441,52 @@ describe "lib/config", ->
         integrationExampleFile: "/path/to/project/cypress/integration/example_spec.js"
         integrationExampleName: "example_spec.js"
       })
+
+  context ".setSupportFileAndFolder", ->
+    it "does nothing if supportFile is false", ->
+      obj = {
+        projectRoot: "/path/to/project"
+      }
+
+      expect(config.setSupportFileAndFolder(obj)).to.eql(obj)
+
+    it "sets the full path to the supportFile and supportFolder if it exists", ->
+      projectRoot = process.cwd()
+
+      obj = config.setAbsolutePaths({
+        projectRoot: projectRoot
+        supportFile: "spec/server/unit/config_spec.coffee"
+      })
+
+      expect(config.setSupportFileAndFolder(obj)).to.eql({
+        projectRoot: projectRoot
+        supportFile: "#{projectRoot}/spec/server/unit/config_spec.coffee"
+        supportFolder: "#{projectRoot}/spec/server/unit"
+      })
+
+    it "sets the supportFile to default index.js if it does not exist and supportFile is the default", ->
+      projectRoot = process.cwd()
+
+      obj = config.setAbsolutePaths({
+        projectRoot: projectRoot
+        supportFile: "cypress/support"
+      })
+
+      expect(config.setSupportFileAndFolder(obj)).to.eql({
+        projectRoot: projectRoot
+        supportFile: "#{projectRoot}/cypress/support/index.js"
+        supportFolder: "#{projectRoot}/cypress/support"
+      })
+
+    it "throws error if supportFile is not default and does not exist", ->
+      projectRoot = process.cwd()
+
+      obj = config.setAbsolutePaths({
+        projectRoot: projectRoot
+        supportFile: "does/not/exist"
+      })
+
+      expect(-> config.setSupportFileAndFolder(obj)).to.throw("Support file missing or invalid")
 
   context ".setParentTestsPaths", ->
     it "sets parentTestsFolder and parentTestsFolderDisplay", ->

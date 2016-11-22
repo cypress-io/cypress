@@ -178,7 +178,7 @@ module.exports = {
       "*"
     )
 
-    supportFilePath = path.resolve(config.supportFile)
+    supportFilePath = config.supportFile or []
 
     ## map all of the javascripts to the project root
     ## TODO: think about moving this into config

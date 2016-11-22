@@ -22,6 +22,7 @@ Watchers      = require("#{root}lib/watchers")
 files         = require("#{root}lib/controllers/files")
 CacheBuster   = require("#{root}lib/util/cache_buster")
 Fixtures      = require("#{root}spec/server/helpers/fixtures")
+errors        = require("#{root}lib/errors")
 
 ## force supertest-session to use supertest-as-promised, hah
 Session       = proxyquire("supertest-session", {supertest: supertest})
@@ -336,35 +337,44 @@ describe "Routes", ->
             ])
 
   context "GET /__cypress/tests", ->
-    describe "todos", ->
+    describe "ids", ->
       beforeEach ->
-        Fixtures.scaffold("todos")
+        Fixtures.scaffold("ids")
 
         @setup({
-          projectRoot: Fixtures.projectPath("todos")
-          config: {
-            integrationFolder: "tests"
-            javascripts: ["support/spec_helper.coffee"]
-          }
+          projectRoot: Fixtures.projectPath("ids")
         })
 
-      it "processes sub/sub_test.coffee spec", ->
-        @rp("http://localhost:2020/__cypress/tests?p=tests/sub/sub_test.coffee")
+      it "processes foo.coffee spec", ->
+        @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          browserifyFile(Fixtures.path("projects/todos/tests/sub/sub_test.coffee"))
+          browserifyFile(Fixtures.path("projects/ids/cypress/integration/foo.coffee"))
           .then (file) ->
             expect(res.body).to.equal file.toString()
 
-      it "processes support/spec_helper.coffee javascripts", ->
-        @rp("http://localhost:2020/__cypress/tests?p=lib/my_coffee.coffee")
+      it "serves error javascript file when the file is missing", ->
+        @rp("http://localhost:2020/__cypress/tests?p=does/not/exist.coffee")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
+          expect(res.body).to.include('Cypress.trigger("script:error", {')
+          expect(res.body).to.include("Cannot find module")
 
-          browserifyFile(Fixtures.path("projects/todos/lib/my_coffee.coffee"))
-          .then (file) ->
-            expect(res.body).to.equal file.toString()
+    describe "failures", ->
+      beforeEach ->
+        Fixtures.scaffold("failures")
+
+        @setup({
+          projectRoot: Fixtures.projectPath("failures")
+        })
+
+      it "serves error javascript file when there's a syntax error", ->
+        @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/syntax_error.coffee")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.include('Cypress.trigger("script:error", {')
+          expect(res.body).to.include("ParseError")
 
     describe "no-server", ->
       beforeEach ->
@@ -738,6 +748,26 @@ describe "Routes", ->
         contents = removeWhitespace Fixtures.get("server/expected_no_server_iframe.html")
 
         @rp("http://localhost:2020/__cypress/iframes/integration/test1.js")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          body = removeWhitespace(res.body)
+          expect(body).to.eq contents
+
+    describe "no-server with supportFile: false", ->
+      beforeEach ->
+        @setup({
+          projectRoot: Fixtures.projectPath("no-server")
+          config: {
+            integrationFolder: "my-tests"
+            supportFile: false
+          }
+        })
+
+      it "renders iframe without support file", ->
+        contents = removeWhitespace Fixtures.get("server/expected_no_server_no_support_iframe.html")
+
+        @rp("http://localhost:2020/__cypress/iframes/__all")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 

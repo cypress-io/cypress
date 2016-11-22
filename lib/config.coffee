@@ -61,7 +61,7 @@ defaults = {
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   _.reduce folders, (memo, folder) ->
     val = obj[folder]
-    if val?
+    if val? and val isnt false
       memo[folder] = path.resolve(projectRoot, val)
     return memo
   , {}
@@ -189,7 +189,6 @@ module.exports = {
 
     ## if supportFile isn't false
     if sf = obj.supportFile
-      ## set config.supportFolder to its directory
       try
         ## resolve full path with extension to
         obj.supportFile = require.resolve(sf)
@@ -198,12 +197,13 @@ module.exports = {
         if sf isnt path.resolve(obj.projectRoot, defaults.supportFile)
           ## throw because they have it explicitly set,
           ## so it should be there
-          errors.throw("SUPPORT_FILE_NOT_FOUND", sf)
+          errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf))
         else
           ## set it to support/index.js, and it will be scaffolded
           ## later in process
           obj.supportFile = path.join(sf, "index.js")
 
+      ## set config.supportFolder to its directory
       obj.supportFolder = path.dirname(obj.supportFile)
 
     return obj

@@ -50,9 +50,11 @@ API = {
         "The automation server disconnected. Cannot continue running tests."
       when "SUPPORT_FILE_NOT_FOUND"
         """
-        Support file not found at '#{arg1}'
+        Support file missing or invalid
 
-        You set the supportFile option, but the file isn't present. Correct your cypress.json or create the appropriate file.
+        Your supportFile is set to '#{arg1}', but either the file is missing or it's invalid. The supportFile must be a .js or .coffee file.
+
+        Correct your cypress.json or create the appropriate file.
 
         Learn more at https://on.cypress.io/guides/configuration#section-global
         """

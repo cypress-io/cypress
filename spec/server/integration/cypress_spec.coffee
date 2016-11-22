@@ -441,6 +441,19 @@ describe "lib/cypress", ->
         cypress.start(["--run-project=#{@todosPath}"]).then =>
           @expectExitWith(0)
 
+    it "logs error when supportFile doesn't exist", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        settings.write(@idsPath, {supportFile: "/does/not/exist"})
+
+        Project.add(@idsPath)
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@idsPath}"])
+      .then =>
+        @expectExitWithErr("SUPPORT_FILE_NOT_FOUND", "Your supportFile is set to '/does/not/exist',")
+
     it "logs error and exits when project could not be found at the path and was not chosen to be added to Cypress", ->
       @sandbox.stub(inquirer, "prompt").yieldsAsync({add: false})
 
