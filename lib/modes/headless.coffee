@@ -199,7 +199,7 @@ module.exports = {
 
       started  = new Date
       progress = Date.now()
-      fiveSecs = human("5 seconds")
+      tenSecs = human("10 seconds")
 
       onProgress = (float) ->
         switch
@@ -208,10 +208,10 @@ module.exports = {
             duration = "(#{humanTime(finished)})"
             console.log("  - Finished processing: ", chalk.cyan(name), chalk.gray(duration))
 
-          when (new Date - progress) > fiveSecs
+          when (new Date - progress) > tenSecs
             ## bump up the progress so we dont
             ## continuously get notifications
-            progress += fiveSecs
+            progress += tenSecs
             percentage = Math.ceil(float * 100) + "%"
             console.log("  - Processing progress: ", chalk.cyan(percentage))
 
