@@ -48,7 +48,7 @@ describe "lib/cache", ->
       .then =>
         fs.readJsonAsync(cache.path).then (json) ->
           expect(json).to.deep.eq {
-            USER: {name: "brian"}
+            USER: {name: "brian", sessionToken: "abc123"}
             PROJECTS: [
               "/Users/bmann/Dev/examples-angular-circle-ci"
               "/Users/bmann/Dev/cypress-core-gui"
@@ -60,14 +60,14 @@ describe "lib/cache", ->
       cache.ensureExists().then ->
         fs.statAsync(cwd(".cy", process.env["CYPRESS_ENV"], "cache"))
 
-  context "#convertLegacyCache", ->
+  context "#_applyRewriteRules", ->
     beforeEach ->
       fs.readJsonAsync(Fixtures.path("server/old_cache.json")).then (@oldCache) =>
 
     it "converts object to array of paths", ->
-      obj = cache.convertLegacyCache(@oldCache)
+      obj = cache._applyRewriteRules(@oldCache)
       expect(obj).to.deep.eq({
-        USER: {name: "brian"}
+        USER: {name: "brian", sessionToken: "abc123"}
         PROJECTS: [
           "/Users/bmann/Dev/examples-angular-circle-ci"
           "/Users/bmann/Dev/cypress-core-gui"
@@ -76,7 +76,7 @@ describe "lib/cache", ->
       })
 
     it "compacts non PATH values", ->
-      obj = cache.convertLegacyCache({
+      obj = cache._applyRewriteRules({
         USER: {}
         PROJECTS: {
           one: { PATH: "foo/bar" }
@@ -90,7 +90,7 @@ describe "lib/cache", ->
       })
 
     it "converts session_token to sessionToken", ->
-      obj = cache.convertLegacyCache({
+      obj = cache._applyRewriteRules({
         USER: {id: 1, session_token: "abc123"}
         PROJECTS: []
       })

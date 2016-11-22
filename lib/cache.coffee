@@ -11,6 +11,20 @@ fs    = Promise.promisifyAll(fs)
 
 current = null
 
+convertProjectsToArray = (obj) ->
+  ## if our project structure is not
+  ## an array then its legacy and we
+  ## need to convert it
+  if not _.isArray(obj.PROJECTS)
+    obj.PROJECTS = _.chain(obj.PROJECTS).values().map("PATH").compact().value()
+    obj
+
+renameSessionToken = (obj) ->
+  if obj.USER and (st = obj.USER.session_token)
+    delete obj.USER.session_token
+    obj.USER.sessionToken = st
+    obj
+
 queue = (fn) ->
   if current
     Promise.delay(20)
@@ -42,12 +56,16 @@ module.exports = {
 
       @write(json)
     .then (json) =>
-      ## if our project structure is not
-      ## an array then its legacy and we
-      ## need to convert it
-      if not _.isArray(json.PROJECTS)
-        json = @convertLegacyCache(json)
-        @write(json)
+      changed = @_applyRewriteRules(json)
+
+      ## if our object is unchanged
+      ## then just return it
+      if _.isEqual(json, changed)
+        return json
+      else
+        ## else write the new reduced obj
+        @write(changed)
+
     .return(true)
     .catch =>
       @write(@defaults())
@@ -61,13 +79,13 @@ module.exports = {
       PROJECTS: []
     }
 
-  convertLegacyCache: (json) ->
-    if json.USER and (st = json.USER.session_token)
-      delete json.USER.session_token
-      json.USER.sessionToken = st
-
-    json.PROJECTS = _.chain(json.PROJECTS).values().map("PATH").compact().value()
-    json
+  _applyRewriteRules: (obj = {}) ->
+    _.reduce [convertProjectsToArray, renameSessionToken], (memo, fn) ->
+      if ret = fn(memo)
+        return ret
+      else
+        return memo
+    , _.cloneDeep(obj)
 
   ## Reads the contents of the local file
   ## returns a JSON object
