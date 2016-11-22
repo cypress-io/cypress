@@ -16,7 +16,6 @@ konfig         = require("./konfig")
 logger         = require("./logger")
 argsUtil       = require("./util/args")
 
-trash  = Promise.promisify(trash)
 chmodr = Promise.promisify(chmodr)
 
 ## backup the original cwd
@@ -95,7 +94,7 @@ class Updater
     ## this is the path to the existing app
     logger.info "trashing current app", appPath: appPath
 
-    trash([appPath])
+    Promise.resolve(trash([appPath]))
 
   install: (argsObj = {}) ->
     c = @getClient()
