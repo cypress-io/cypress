@@ -8,6 +8,7 @@
   "scripts": {
     "start": "node index.js",
     "server": "node index.js --mode server",
+    "repl": "node repl.js",
     "build": "gulp app:build",
     "watch": "gulp app",
     "deploy": "gulp deploy",
@@ -74,7 +75,6 @@
     "gulp-tap": "0.1.1",
     "gulp-uglify": "^1.2.0",
     "https-proxy-agent": "^1.0.0",
-    "human-interval": "^0.1.5",
     "istanbul": "^0.4.2",
     "js-yaml": "3.1.0",
     "mkdirp": "^0.5.1",
@@ -143,6 +143,7 @@
     "http-accept": "^0.1.6",
     "http-proxy": "^1.13.2",
     "http-status-codes": "^1.0.6",
+    "human-interval": "^0.1.5",
     "image-size": "^0.5.0",
     "inquirer": "^0.8.0",
     "js-beautify": "^1.5.10",
