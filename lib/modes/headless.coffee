@@ -3,6 +3,7 @@ fs         = require("fs-extra")
 uuid       = require("uuid")
 path       = require("path")
 chalk      = require("chalk")
+human      = require("human-interval")
 Promise    = require("bluebird")
 inquirer   = require("inquirer")
 random     = require("randomstring")
@@ -20,6 +21,7 @@ humanTime  = require("../util/human_time")
 project    = require("../electron/handlers/project")
 Renderer   = require("../electron/handlers/renderer")
 automation = require("../electron/handlers/automation")
+pkg        = require("../../package.json")
 
 fs = Promise.promisifyAll(fs)
 
@@ -159,6 +161,7 @@ module.exports = {
       duration:    humanTime(obj.duration)
       screenshots: obj.screenshots and obj.screenshots.length
       video:       !!obj.video
+      version:     pkg.version
     })
 
   displayScreenshots: (screenshots = []) ->
@@ -194,9 +197,24 @@ module.exports = {
       # bar = progress.create("Post Processing Video")
       console.log("  - Started processing:  ", chalk.cyan("Compressing to #{videoCompression} CRF"))
 
+      started  = new Date
+      progress = Date.now()
+      fiveSecs = human("5 seconds")
+
       onProgress = (float) ->
-        if float is 1
-          console.log("  - Finished processing: ", chalk.cyan(name))
+        switch
+          when float is 1
+            finished = new Date - started
+            duration = "(#{humanTime(finished)})"
+            console.log("  - Finished processing: ", chalk.cyan(name), chalk.gray(duration))
+
+          when (new Date - progress) > fiveSecs
+            ## bump up the progress so we dont
+            ## continuously get notifications
+            progress += fiveSecs
+            percentage = Math.ceil(float * 100) + "%"
+            console.log("  - Processing progress: ", chalk.cyan(percentage))
+
         # bar.tickTotal(float)
 
       video.process(name, cname, videoCompression, onProgress)

@@ -118,6 +118,9 @@ module.exports = {
 
         send(screenshot.path, obj.uploadUrl)
 
+    if not uploads.length
+      console.log("  - Nothing to Upload")
+
     Promise.all(uploads)
 
   uploadAssets: (buildId, stats) ->

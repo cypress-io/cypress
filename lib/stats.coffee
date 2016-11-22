@@ -9,6 +9,7 @@ TRANSLATION = {
   duration:     "Duration"
   screenshots:  "Screenshots"
   video:        "Video Recorded"
+  version:      "Cypress Version"
 }
 
 KEYS =  _.keys(TRANSLATION)
