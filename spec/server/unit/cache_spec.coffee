@@ -89,6 +89,17 @@ describe "lib/cache", ->
         PROJECTS: ["foo/bar"]
       })
 
+    it "converts session_token to sessionToken", ->
+      obj = cache.convertLegacyCache({
+        USER: {id: 1, session_token: "abc123"}
+        PROJECTS: []
+      })
+
+      expect(obj).to.deep.eq({
+        USER: {id: 1, sessionToken: "abc123"}
+        PROJECTS: []
+      })
+
   context "projects", ->
     beforeEach ->
       cache.ensureExists()

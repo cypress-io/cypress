@@ -62,6 +62,10 @@ module.exports = {
     }
 
   convertLegacyCache: (json) ->
+    if json.USER and (st = json.USER.session_token)
+      delete json.USER.session_token
+      json.USER.sessionToken = st
+
     json.PROJECTS = _.chain(json.PROJECTS).values().map("PATH").compact().value()
     json
 
