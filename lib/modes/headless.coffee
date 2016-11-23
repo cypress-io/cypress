@@ -268,7 +268,7 @@ module.exports = {
         ft = obj.failingTests
 
         if ft and ft.length
-          obj.failingTests = Reporter.normalizeAll(started, ft)
+          obj.failingTests = Reporter.setVideoTimestamp(started, ft)
 
         finish = ->
           resolve(obj)

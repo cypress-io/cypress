@@ -38,7 +38,7 @@ mergeRunnable = (testProps, runnables) ->
   runnable = runnables[testProps.id]
 
   if not runnable.started
-    testProps.started = new Date
+    testProps.started = Date.now()
 
   _.extend(runnable, testProps)
 
@@ -138,12 +138,7 @@ class Reporter
 
       [event].concat(args)
 
-  stats: ->
-    failingTests = _.filter @runnables, {state: "failed"}
-
-    _.extend {reporter: @reporterName, failingTests: failingTests}, _.pick(@reporter.stats, STATS)
-
-  @normalizeAll = (videoStart, failingTests = []) ->
+  normalize: (test = {}) ->
     getParentTitle = (runnable, titles) ->
       if p = runnable.parent
         if t = p.title
@@ -153,23 +148,34 @@ class Reporter
       else
         titles
 
-    normalize = (test) ->
-      err = test.err ? {}
+    err = test.err ? {}
 
-      titles = [test.title]
+    titles = [test.title]
 
-      ## TODO: move the separator into some shared util function somewhere
+    ## TODO: move the separator into some shared util function somewhere
 
-      {
-        clientId:       test.id
-        title:          getParentTitle(test, titles).join(" /// ")
-        duration:       test.duration
-        stack:          err.stack
-        error:          err.message
-        videoTimestamp: test.started - videoStart
-      }
+    {
+      clientId:       test.id
+      title:          getParentTitle(test, titles).join(" /// ")
+      duration:       test.duration
+      stack:          err.stack
+      error:          err.message
+      started:        test.started
+      # videoTimestamp: test.started - videoStart
+    }
 
-    _.map(failingTests, normalize)
+  stats: ->
+    failingTests = _.chain(@runnables)
+    .filter({state: "failed"})
+    .map(@normalize)
+    .value()
+
+    _.extend {reporter: @reporterName, failingTests: failingTests}, _.pick(@reporter.stats, STATS)
+
+  @setVideoTimestamp = (videoStart, tests = []) ->
+    _.map tests, (test) ->
+      test.videoTimestamp = test.started - videoStart
+      test
 
   @create = (reporterName, reporterOptions, projectRoot) ->
     new Reporter(reporterName, reporterOptions, projectRoot)
