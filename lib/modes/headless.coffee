@@ -258,7 +258,8 @@ module.exports = {
         if end
           obj.video = name
 
-        obj.screenshots = screenshots
+        if screenshots
+          obj.screenshots = screenshots
 
         @displayStats(obj)
 
