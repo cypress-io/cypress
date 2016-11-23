@@ -8,17 +8,13 @@ routes = {
   api:           ""
   auth:          "auth"
   ping:          "ping"
-  token:         "token"
   signin:        "signin"
   signout:       "signout"
   usage:         "user/usage"
   builds:        "builds"
   instance:      "builds/:id/instances"
-  tests:         "tests/:id"
   projects:      "projects"
   project:       "projects/:id"
-  projectCi:     "projects/:id/ci"
-  projectKeys:   "projects/:id/keys"
   projectToken:  "projects/:id/token"
   exceptions:    "exceptions"
 }
@@ -29,7 +25,7 @@ parseArgs = (url, args = []) ->
       when _.isObject(value)
         url.set("query", _.extend(url.query, value))
 
-      when _.isString(value)
+      when _.isString(value) or _.isNumber(value)
         url.set("pathname", url.pathname.replace(":id", value))
 
   return url
