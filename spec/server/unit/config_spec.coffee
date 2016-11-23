@@ -165,6 +165,18 @@ describe "lib/config", ->
     it "animationDistanceThreshold=5", ->
       @defaults "animationDistanceThreshold", 5
 
+    it "videoRecording=true", ->
+      @defaults "videoRecording", true
+
+    it "videosFolder=true", ->
+      @defaults "videosFolder", "cypress/videos"
+
+    it "videoCompression=32", ->
+      @defaults "videoCompression", 32
+
+    it "trashAssetsBeforeHeadlessRuns=32", ->
+      @defaults "trashAssetsBeforeHeadlessRuns", true
+
     it "morgan=true", ->
       @defaults "morgan", true
 
@@ -279,11 +291,15 @@ describe "lib/config", ->
           numTestsKeptInMemory:       { value: 50, from: "default" },
           waitForAnimations:          { value: true, from: "default" },
           animationDistanceThreshold: { value: 5, from: "default" },
+          trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
           watchForFileChanges:        { value: true, from: "default" },
           chromeWebSecurity:          { value: true, from: "default" },
           viewportWidth:              { value: 1000, from: "default" },
           viewportHeight:             { value: 660, from: "default" },
           fileServerFolder:           { value: "", from: "default" },
+          videoRecording:             { value: true, from: "default" }
+          videoCompression:           { value: 32, from: "default" }
+          videosFolder:               { value: "cypress/videos", from: "default" },
           supportFolder:              { value: "cypress/support", from: "default" },
           fixturesFolder:             { value: "cypress/fixtures", from: "default" },
           integrationFolder:          { value: "cypress/integration", from: "default" },
@@ -327,11 +343,15 @@ describe "lib/config", ->
           waitForAnimations:          { value: true, from: "default" },
           animationDistanceThreshold: { value: 5, from: "default" },
           screenshotOnHeadlessFailure:{ value: true, from: "default" },
+          trashAssetsBeforeHeadlessRuns: { value: true, from: "default" },
           watchForFileChanges:        { value: true, from: "default" },
           chromeWebSecurity:          { value: true, from: "default" },
           viewportWidth:              { value: 1000, from: "default" },
           viewportHeight:             { value: 660, from: "default" },
           fileServerFolder:           { value: "", from: "default" },
+          videoRecording:             { value: true, from: "default" }
+          videoCompression:           { value: 32, from: "default" }
+          videosFolder:               { value: "cypress/videos", from: "default" },
           supportFolder:              { value: "cypress/support", from: "default" },
           fixturesFolder:             { value: "cypress/fixtures", from: "default" },
           integrationFolder:          { value: "cypress/integration", from: "default" },
