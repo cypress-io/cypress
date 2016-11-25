@@ -13,72 +13,203 @@ describe "lib/api", ->
     @sandbox.stub(os, "platform").returns("linux")
     @sandbox.stub(provider, "get").returns("circle")
 
-  context ".createCi", ->
-    it "POST /ci/:id + returns ci_guid", ->
+  context ".createBuild", ->
+    it "POST /builds + returns buildId", ->
       nock("http://localhost:1234")
-      .post("/ci/project-123", {
-        "x-project-token": "guid"
-        "x-project-name": "foobar"
-        "x-git-branch": "master"
-        "x-git-author": "brian"
-        "x-git-message": "such hax"
-        "x-version": pkg.version
-        "x-platform": "linux"
-        "x-provider": "circle"
+      .matchHeader("x-route-version", "2")
+      .post("/builds", {
+        projectId:       "id-123"
+        projectToken:    "token-123"
+        commitSha:       "sha"
+        commitBranch:    "master"
+        commitAuthor:    "brian"
+        commitMessage:   "such hax"
+        cypressVersion:  pkg.version
+        ciProvider:      "circle"
       })
       .reply(200, {
-        ci_guid: "new_ci_guid"
+        buildId: "new-build-id-123"
       })
 
-      api.createCi({
-        key: "guid"
-        branch: "master"
-        author: "brian"
-        message: "such hax"
-        projectId: "project-123"
-        projectName: "foobar"
+      api.createBuild({
+        projectId:      "id-123"
+        projectToken:   "token-123"
+        commitSha:      "sha"
+        commitBranch:   "master"
+        commitAuthor:   "brian"
+        commitMessage:  "such hax"
+        cypressVersion: pkg.version
+        ciProvider:     provider.get()
       })
       .then (ret) ->
-        expect(ret).to.eq("new_ci_guid")
+        expect(ret).to.eq("new-build-id-123")
 
-  context ".updateCi", ->
-    it "PUTS /ci/:id", ->
+    it "POST /builds failure formatting", ->
       nock("http://localhost:1234")
-      .put("/ci/project-123", {
-        tests: 3
-        passes: 1
-        failures: 2
-        "x-ci-id": "ci-123"
-        "x-project-token": "key-123"
-        "x-project-name": "foobar"
-        "x-version": pkg.version
-        "x-platform": "linux"
-        "x-provider": "circle"
+      .matchHeader("x-route-version", "2")
+      .post("/builds", {
+        projectId:       null
+        projectToken:    "token-123"
+        commitSha:       "sha"
+        commitBranch:    "master"
+        commitAuthor:    "brian"
+        commitMessage:   "such hax"
+        cypressVersion:  pkg.version
+        ciProvider:      "circle"
       })
-      .reply(200)
-
-      api.updateCi({
-        key: "key-123"
-        ciId: "ci-123"
-        projectId: "project-123"
-        projectName: "foobar"
-        stats: {
-          tests: 3
-          passes: 1
-          failures: 2
+      .reply(422, {
+        errors: {
+          buildId: ["is required"]
         }
       })
 
-    it "sets timeout to 10 seconds", ->
-      @sandbox.stub(rp, "put").resolves()
+      api.createBuild({
+        projectId:      null
+        projectToken:   "token-123"
+        commitSha:      "sha"
+        commitBranch:   "master"
+        commitAuthor:   "brian"
+        commitMessage:  "such hax"
+        cypressVersion: pkg.version
+        ciProvider:     provider.get()
+      })
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("""
+          422
 
-      api.updateCi({}).then ->
-        expect(rp.put).to.be.calledWithMatch({timeout: 10000})
+          {
+            "errors": {
+              "buildId": [
+                "is required"
+              ]
+            }
+          }
+        """)
+
+    it "handles timeouts", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
+      .post("/builds")
+      .socketDelay(5000)
+      .reply(200, {})
+
+      api.createBuild({
+        timeout: 100
+      })
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
+
+    it "sets timeout to 10 seconds", ->
+      @sandbox.stub(rp, "post").returns({
+        promise: ->
+          get: ->
+            catch: ->
+              then: (fn) -> fn()
+      })
+
+      api.createBuild({})
+      .then ->
+        expect(rp.post).to.be.calledWithMatch({timeout: 10000})
+
+  context ".createInstance", ->
+    beforeEach ->
+      Object.defineProperty(process.versions, "chrome", {
+        value: "53"
+      })
+
+    it "POSTs /builds/:id/instances", ->
+      @sandbox.stub(os, "release").returns("10.10.10")
+      os.platform.returns("darwin")
+
+      nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
+      .post("/builds/build-id-123/instances", {
+        tests: 1
+        passes: 2
+        failures: 3
+        pending: 4
+        duration: 5
+        video: true
+        screenshots: []
+        failingTests: []
+        cypressConfig: {}
+        browserName: "Electron"
+        browserVersion: "53"
+        osName: "darwin"
+        osVersion: "10.10.10"
+      })
+      .reply(200)
+
+      api.createInstance({
+        buildId: "build-id-123"
+        tests: 1
+        passes: 2
+        failures: 3
+        pending: 4
+        duration: 5
+        video: true
+        screenshots: []
+        failingTests: []
+        cypressConfig: {}
+      })
+
+    it "POST /builds/:id/instances failure formatting", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
+      .post("/builds/build-id-123/instances")
+      .reply(422, {
+        errors: {
+          tests: ["is required"]
+        }
+      })
+
+      api.createInstance({buildId: "build-id-123"})
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("""
+          422
+
+          {
+            "errors": {
+              "tests": [
+                "is required"
+              ]
+            }
+          }
+        """)
+
+    it "handles timeouts", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
+      .post("/builds/build-id-123/instances")
+      .socketDelay(5000)
+      .reply(200, {})
+
+      api.createInstance({
+        buildId: "build-id-123"
+        timeout: 100
+      })
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
+
+    it "sets timeout to 10 seconds", ->
+      @sandbox.stub(rp, "post").resolves()
+
+      api.createInstance({})
+      .then ->
+        expect(rp.post).to.be.calledWithMatch({timeout: 10000})
 
   context ".getLoginUrl", ->
-    it "GET /v1/auth + returns the url", ->
+    it "GET /auth + returns the url", ->
       nock("http://localhost:1234")
-      .get("/v1/auth")
+      .get("/auth")
       .reply(200, {
         url: "https://github.com/authorize"
       })

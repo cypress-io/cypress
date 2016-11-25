@@ -39,7 +39,7 @@ module.exports = {
     rp.post({
       url: Routes.builds()
       json: true
-      timeout: 10000
+      timeout: options.timeout ? 10000
       headers: {
         "x-route-version": "2"
       }
@@ -78,7 +78,7 @@ module.exports = {
       rp.post({
         url: Routes.instance(options.buildId)
         json: true
-        timeout: 10000
+        timeout: options.timeout ? 10000
         headers: {
           "x-route-version": "2"
         }
