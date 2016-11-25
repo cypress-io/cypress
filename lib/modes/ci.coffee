@@ -48,7 +48,7 @@ module.exports = {
 
     @getBranchFromGit(repo)
 
-  ensureProjectAPIToken: (projectId, projectPath, projectName, projectToken) ->
+  generateProjectBuildId: (projectId, projectPath, projectName, projectToken) ->
     if not projectToken
       return errors.throw("CI_KEY_MISSING")
 
@@ -121,7 +121,12 @@ module.exports = {
     if not uploads.length
       console.log("  - Nothing to Upload")
 
-    Promise.all(uploads)
+    Promise
+    .all(uploads)
+    .catch (err) ->
+      errors.warning("CI_CANNOT_UPLOAD_ASSETS", err)
+
+      logException(err)
 
   uploadAssets: (buildId, stats) ->
     console.log("")
@@ -140,26 +145,22 @@ module.exports = {
     api.createInstance({
       buildId:      buildId
       tests:        stats.tests
-      duration:     stats.duration
       passes:       stats.passes
       failures:     stats.failures
       pending:      stats.pending
+      duration:     stats.duration
       video:        !!stats.video
       screenshots:  screenshots
       failingTests: stats.failingTests
       cypressConfig: stats.config
     })
-    .then (resp) =>
+    .then (resp = {}) =>
       @upload({
         video:          stats.video
         screenshots:    stats.screenshots
         videoUrl:       resp.videoUploadUrl
         screenshotUrls: resp.screenshotUploadUrls
       })
-      .catch (err) ->
-        errors.warning("CI_CANNOT_UPLOAD_ASSETS", err)
-
-        logException(err)
     .catch (err) ->
       errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
 
@@ -177,7 +178,7 @@ module.exports = {
       .then (cfg) =>
         {projectName} = cfg
 
-        @ensureProjectAPIToken(projectId, projectPath, projectName, options.key)
+        @generateProjectBuildId(projectId, projectPath, projectName, options.key)
         .then (buildId) =>
           ## dont check that the user is logged in
           options.ensureSession = false
