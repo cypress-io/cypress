@@ -32,7 +32,8 @@ parseArgs = (url, args = []) ->
 
 Routes = _.reduce routes, (memo, value, key) ->
   memo[key] = (args...) ->
-    url = new UrlParse(api_url, true).set("pathname", value)
+    url = new UrlParse(api_url, true)
+    url.set("pathname", value) if value
     url = parseArgs(url, args) if args.length
     url.toString()
   memo
