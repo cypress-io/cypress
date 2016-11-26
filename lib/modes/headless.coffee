@@ -80,7 +80,7 @@ module.exports = {
       morgan:       false
       socketId:     id
       report:       true
-      isHeadless:   true
+      isHeadless:   options.isHeadless ? true
       onAutomationRequest: options.onAutomationRequest
       afterAutomationRequest: options.afterAutomationRequest
       ## TODO: get session into automation.perform
