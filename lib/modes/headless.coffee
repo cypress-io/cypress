@@ -311,7 +311,8 @@ module.exports = {
 
   copy: (videosFolder, screenshotsFolder) ->
     Promise.try ->
-      if ca = process.env.CIRCLE_ARTIFACTS
+      ## dont attempt to copy if we're running in circle in test env
+      if ca = process.env.CIRCLE_ARTIFACTS and process.env["CYPRESS_ENV"] isnt "test"
         Promise.join(
           ss.copy(screenshotsFolder, ca)
           video.copy(videosFolder, ca)
