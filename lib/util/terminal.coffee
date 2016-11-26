@@ -7,7 +7,7 @@ module.exports = {
       color:     null
     })
 
-    message = "  (" + chalk.underline.bold(message) + ")  "
+    message = "  (" + chalk.underline.bold(message) + ")"
 
     if c = options.color
       colors = [].concat(c)
