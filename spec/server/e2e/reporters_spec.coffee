@@ -30,9 +30,10 @@ describe "e2e reporters", ->
       reporterOptions: "mochaFile=junit-output/result.xml"
     })
     .then ->
-      fs.readFileAsync(path.join(e2ePath, "junit-output", "result.xml"), "utf8").then (xml) ->
-        expect(xml).to.include("<testsuite name=\"simple passing spec\"")
-        expect(xml).to.include("<testcase name=\"Root Suite simple passing spec passes\"")
+      fs.readFileAsync(path.join(e2ePath, "junit-output", "result.xml"), "utf8")
+      .then (str) ->
+        expect(str).to.include("<testsuite name=\"simple passing spec\"")
+        expect(str).to.include("<testcase name=\"simple passing spec passes\"")
 
   it "supports local custom reporter", ->
     e2e.exec(@, {

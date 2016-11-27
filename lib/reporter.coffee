@@ -35,7 +35,12 @@ createRunnable = (obj, parent) ->
   return runnable
 
 mergeRunnable = (testProps, runnables) ->
-  _.extend(runnables[testProps.id], testProps)
+  runnable = runnables[testProps.id]
+
+  if not runnable.started
+    testProps.started = Date.now()
+
+  _.extend(runnable, testProps)
 
 safelyMergeRunnable = (testProps, runnables) ->
   _.extend({}, runnables[testProps.id], testProps)
@@ -43,6 +48,8 @@ safelyMergeRunnable = (testProps, runnables) ->
 mergeErr = (test, runnables) ->
   runnable = runnables[test.id]
   runnable.err = test.err
+  runnable.state = "failed"
+  runnable.duration ?= test.duration
   runnable = _.extend({}, runnable, {title: test.title})
   [runnable, test.err]
 
@@ -74,7 +81,7 @@ class Reporter
     @projectRoot = projectRoot
     @reporterOptions = reporterOptions
 
-  setRunnables: (rootRunnable) ->
+  setRunnables: (rootRunnable = {}) ->
     @runnables = {}
     rootRunnable = @_createRunnable(rootRunnable, "suite")
 
@@ -131,8 +138,44 @@ class Reporter
 
       [event].concat(args)
 
+  normalize: (test = {}) ->
+    getParentTitle = (runnable, titles) ->
+      if p = runnable.parent
+        if t = p.title
+          titles.unshift(t)
+
+        getParentTitle(p, titles)
+      else
+        titles
+
+    err = test.err ? {}
+
+    titles = [test.title]
+
+    ## TODO: move the separator into some shared util function somewhere
+
+    {
+      clientId:       test.id
+      title:          getParentTitle(test, titles).join(" /// ")
+      duration:       test.duration
+      stack:          err.stack
+      error:          err.message
+      started:        test.started
+      # videoTimestamp: test.started - videoStart
+    }
+
   stats: ->
-    _.extend {reporter: @reporterName}, _.pick(@reporter.stats, STATS)
+    failingTests = _.chain(@runnables)
+    .filter({state: "failed"})
+    .map(@normalize)
+    .value()
+
+    _.extend {reporter: @reporterName, failingTests: failingTests}, _.pick(@reporter.stats, STATS)
+
+  @setVideoTimestamp = (videoStart, tests = []) ->
+    _.map tests, (test) ->
+      test.videoTimestamp = test.started - videoStart
+      test
 
   @create = (reporterName, reporterOptions, projectRoot) ->
     new Reporter(reporterName, reporterOptions, projectRoot)

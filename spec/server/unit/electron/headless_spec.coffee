@@ -1,5 +1,6 @@
 require("../../spec_helper")
 
+random   = require("randomstring")
 Promise  = require("bluebird")
 inquirer = require("inquirer")
 electron = require("electron")
@@ -15,8 +16,16 @@ describe "electron/headless", ->
     @projectInstance = Project("path/to/project")
 
   context ".getId", ->
-    it "returns a random number", ->
-      expect(headless.getId()).to.be.a("number")
+    it "returns random.generate string", ->
+      @sandbox.spy(random, "generate")
+
+      id = headless.getId()
+      expect(id.length).to.eq(5)
+
+      expect(random.generate).to.be.calledWith({
+        length: 5
+        capitalization: "lowercase"
+      })
 
   context ".ensureAndOpenProjectByPath", ->
     beforeEach ->
@@ -24,90 +33,54 @@ describe "electron/headless", ->
 
     it "opens the project if it exists at projectPath", ->
       @sandbox.stub(Project, "exists").resolves(true)
-      @sandbox.spy(headless, "promptAddProject")
+      @sandbox.spy(Project, "add")
 
-      headless.ensureAndOpenProjectByPath(1234, {projectPath: "path/to/project"}).then ->
-        expect(headless.promptAddProject).not.to.be.called
+      headless.ensureAndOpenProjectByPath(1234, {projectPath: "path/to/project"})
+      .then ->
+        expect(Project.add).not.to.be.called
         expect(project.open).to.be.calledWith("path/to/project")
 
     it "prompts to add the project if it doesnt exist at projectPath", ->
       @sandbox.stub(Project, "exists").resolves(false)
-      @sandbox.stub(headless, "promptAddProject").resolves()
+      @sandbox.spy(Project, "add")
+      @sandbox.spy(console, "log")
 
-      headless.ensureAndOpenProjectByPath(1234, {projectPath: "path/to/project"}).then ->
-        expect(headless.promptAddProject).to.be.calledWith("path/to/project")
+      headless.ensureAndOpenProjectByPath(1234, {projectPath: "path/to/project"})
+      .then ->
+        expect(console.log).to.be.calledWithMatch("Added this project:", "path/to/project")
+        expect(Project.add).to.be.calledWith("path/to/project")
         expect(project.open).to.be.calledWith("path/to/project")
-
-  context ".promptAddProject", ->
-    beforeEach ->
-      @log = @sandbox.spy(console, "log")
-      @add = @sandbox.stub(Project, "add").resolves()
-
-    it "prompts with questions", ->
-      @sandbox.stub(inquirer, "prompt").yields({add: true})
-
-      headless.promptAddProject().then ->
-        questions = inquirer.prompt.firstCall.args[0]
-
-        firstQuestion = questions[0]
-
-        expect(questions).to.be.an("array")
-        expect(firstQuestion.choices).to.deep.eq([
-          {name: "Yes: add this project and run the tests.", value: true}
-          {name: "No:  don't add this project.",             value: false}
-        ])
-
-    it "logs warning to console when choosing 'no'", ->
-      @sandbox.stub(inquirer, "prompt").yields({add: false})
-
-      headless.promptAddProject("foobarbaz")
-        .then ->
-          throw new Error("should have errored but did not")
-        .catch (err) =>
-          expect(err.type).to.eq("PROJECT_DOES_NOT_EXIST")
-          expect(@add).not.to.be.called
-          expect(@log).to.be.calledWithMatch(
-            "We couldn't find a Cypress project at this path:",
-            "foobarbaz"
-          )
-
-    it "adds the project when choosing 'yes'", ->
-      @sandbox.stub(inquirer, "prompt").yields({add: true})
-
-      headless.promptAddProject("path/to/project").then =>
-        expect(@add).to.be.calledWith("path/to/project")
-        expect(@log).to.be.calledWithMatch("Ok great, added the project.")
-
-    it "gracefully handles problems with adding the project"
-      ## TODO: implement gracefully exiting with a nice explanation
-      ## when a project could not be added due to a problem talking
-      ## to the api server
 
   context ".openProject", ->
     it "calls project.open with projectPath + options", ->
       @sandbox.stub(project, "open").resolves()
 
+      fn1 = ->
+      fn2 = ->
+
       options = {
         port: 8080
         environmentVariables: {foo: "bar"}
         projectPath: "path/to/project/foo"
+        onAutomationRequest: fn1
+        afterAutomationRequest: fn2
       }
 
-      headless.openProject(1234, options).then ->
+      headless.openProject(1234, options)
+      .then ->
         expect(project.open).to.be.calledWithMatch("path/to/project/foo", {
           port: 8080
           projectPath: "path/to/project/foo"
           environmentVariables: {foo: "bar"}
         }, {
+          sync: false
           morgan: false
           socketId: 1234
           report: true
           isHeadless: true
-          onAutomationRequest: automation.perform
+          onAutomationRequest: fn1
+          afterAutomationRequest: fn2
         })
-
-    ## TODO: write this test!
-    it "binds onAutomationRequest to automation.perform"
 
   context ".setProxy", ->
     it "calls session.defaultSession.setProxy with proxyRules"
@@ -119,6 +92,8 @@ describe "electron/headless", ->
         center: ->
         webContents: {
           on: @sandbox.stub()
+          getFrameRate: @sandbox.stub()
+          setFrameRate: @sandbox.stub()
         }
       })
 
@@ -127,11 +102,12 @@ describe "electron/headless", ->
       @create = @sandbox.stub(Renderer, "create").resolves(@win)
 
     it "calls Renderer.create with url + options", ->
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234").then =>
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234")
+      .then =>
         expect(@create).to.be.calledWith({
           url: "foo/bar/baz"
-          width: 0
-          height: 0
+          width: 1280
+          height: 720
           show: false
           frame: false
           devTools: false
@@ -140,16 +116,36 @@ describe "electron/headless", ->
         })
 
     it "calls win.setSize on the resolved window", ->
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234").then =>
-        expect(@win.setSize).to.be.calledWith(1280, 720)
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234")
+      .then =>
         expect(@win.center).to.be.calledOnce
 
+    it "resets framerate and writes images on paint", ->
+      write = @sandbox.stub()
+
+      image = {
+        toJPEG: @sandbox.stub().returns("imgdata")
+      }
+
+      @win.webContents.on.withArgs("paint").yields({}, false, image)
+
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false, false, write)
+      .then =>
+        expect(image.toJPEG).to.be.calledWith(100)
+        expect(write).to.be.calledWith("imgdata")
+
+    it "does not do anything on paint when write is null", ->
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false, false, null)
+      .then =>
+        expect(@win.webContents.on).not.to.be.calledWith("paint")
+
     it "can show window", ->
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234", true, false).then =>
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234", true, false)
+      .then =>
         expect(@create).to.be.calledWith({
           url: "foo/bar/baz"
-          width: 0
-          height: 0
+          width: 1280
+          height: 720
           show: true
           frame: true
           devTools: true
@@ -164,7 +160,8 @@ describe "electron/headless", ->
         {}, "foo", "bar", "baz", options
       )
 
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234").then =>
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234")
+      .then =>
         expect(options.show).to.eq(false)
 
   context ".waitForRendererToConnect", ->
@@ -174,7 +171,8 @@ describe "electron/headless", ->
 
     it "passes project + id", ->
       @sandbox.stub(headless, "waitForRendererToConnect").resolves()
-      headless.waitForRendererToConnect(@projectInstance, 1234).then =>
+      headless.waitForRendererToConnect(@projectInstance, 1234)
+      .then =>
         expect(headless.waitForRendererToConnect).to.be.calledWith(@projectInstance, 1234)
 
     it "throws TESTS_DID_NOT_START after 10 seconds", ->
@@ -217,7 +215,8 @@ describe "electron/headless", ->
     it "calls removeListener if socketId matches id", ->
       @projectStub.on.yields(1234)
 
-      headless.waitForSocketConnection(@projectStub, 1234).then =>
+      headless.waitForSocketConnection(@projectStub, 1234)
+      .then =>
         expect(@projectStub.removeListener).to.be.calledWith("socket:connected")
 
     describe "integration", ->
@@ -225,7 +224,8 @@ describe "electron/headless", ->
         process.nextTick =>
           @projectInstance.emit("socket:connected", 1234)
 
-        headless.waitForSocketConnection(@projectInstance, 1234).then (ret) ->
+        headless.waitForSocketConnection(@projectInstance, 1234)
+        .then (ret) ->
           expect(ret).to.be.undefined
 
       it "does not resolve if socketId does not match id", (done) ->
@@ -254,7 +254,8 @@ describe "electron/headless", ->
       process.nextTick =>
         @projectInstance.emit("end", {foo: "bar"})
 
-      headless.waitForTestsToFinishRunning(@projectInstance).then (obj) ->
+      headless.waitForTestsToFinishRunning(@projectInstance)
+      .then (obj) ->
         expect(obj).to.deep.eq({foo: "bar"})
 
     it "stops listening to end event", ->
@@ -277,33 +278,40 @@ describe "electron/headless", ->
       @sandbox.stub(headless, "createRenderer").resolves()
 
     it "no longer ensures user session", ->
-      headless.run().then ->
+      headless.run()
+      .then ->
         expect(user.ensureSession).not.to.be.called
 
     it "returns stats", ->
-      headless.run().then (stats) ->
+      headless.run()
+      .then (stats) ->
         expect(stats).to.deep.eq({failures: 10})
 
     it "passes id + options to ensureAndOpenProjectByPath", ->
-      headless.run({foo: "bar"}).then ->
-        expect(headless.ensureAndOpenProjectByPath).to.be.calledWith(1234, {foo: "bar"})
+      headless.run({foo: "bar"})
+      .then ->
+        expect(headless.ensureAndOpenProjectByPath).to.be.calledWithMatch(1234, {foo: "bar"})
 
     it "passes project + id to waitForRendererToConnect", ->
-      headless.run().then =>
+      headless.run()
+      .then =>
         expect(headless.waitForRendererToConnect).to.be.calledWith(@projectInstance, 1234)
 
     it "passes project to waitForTestsToFinishRunning", ->
-      headless.run().then =>
+      headless.run()
+      .then =>
         expect(headless.waitForTestsToFinishRunning).to.be.calledWith(@projectInstance)
 
     it "passes project.ensureSpecUrl to createRenderer", ->
       @sandbox.stub(@projectInstance, "ensureSpecUrl").resolves("foo/bar")
 
-      headless.run().then ->
+      headless.run()
+      .then ->
         expect(headless.createRenderer).to.be.calledWith("foo/bar")
 
     it "passes showHeadlessGui to createRenderer", ->
       @sandbox.stub(@projectInstance, "ensureSpecUrl").resolves("foo/bar")
 
-      headless.run({showHeadlessGui: true}).then ->
+      headless.run({showHeadlessGui: true})
+      .then ->
         expect(headless.createRenderer).to.be.calledWith("foo/bar", "http://localhost:12345", true)

@@ -24,7 +24,7 @@ module.exports = {
 
     @get()
     .then (user) ->
-      session = user and user.session_token
+      session = user and user.sessionToken
 
       ## if we have a session
       ## then send it up
@@ -38,8 +38,8 @@ module.exports = {
 
   ensureSession: ->
     @get().then (user) ->
-      ## return session_token if we have one
-      if user and st = user.session_token
+      ## return sessionToken if we have one
+      if user and st = user.sessionToken
         return st
       else
         ## else throw the not logged in error

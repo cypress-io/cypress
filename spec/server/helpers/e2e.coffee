@@ -50,7 +50,7 @@ module.exports = {
 
       @sandbox.stub(process, "exit")
 
-      user.set({name: "brian", session_token: "session-123"})
+      user.set({name: "brian", sessionToken: "session-123"})
       .then =>
         Project.add(e2ePath)
       .then =>

@@ -46,8 +46,8 @@ describe "e2e screenshots", ->
     .then =>
       screenshot1 = path.join(e2ePath, "cypress", "screenshots", "black.png")
       screenshot2 = path.join(e2ePath, "cypress", "screenshots", "red.png")
-      screenshot3 = path.join(e2ePath, "cypress", "screenshots", "foo", "bar", "baz.png")
-      screenshot4 = path.join(e2ePath, "cypress", "screenshots", "generates pngs on failure.png")
+      screenshot3 = path.join(e2ePath, "cypress", "screenshots", "foobarbaz.png")
+      screenshot4 = path.join(e2ePath, "cypress", "screenshots", "taking screenshots -- generates pngs on failure.png")
 
       Promise.all([
         fs.statAsync(screenshot1).get("size")

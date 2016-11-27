@@ -66,7 +66,7 @@ describe "lib/cypress", ->
   context "--get-key", ->
     it "writes out key and exits on success", ->
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
         .then =>
@@ -80,31 +80,35 @@ describe "lib/cypress", ->
           .withArgs(@projectId, "session-123")
           .resolves("new-key-123")
 
-        cypress.start(["--get-key", "--project=#{@todosPath}"]).then =>
-          expect(console.log).to.be.calledWith("new-key-123")
-          @expectExitWith(0)
+        cypress.start(["--get-key", "--project=#{@todosPath}"])
+      .then =>
+        expect(console.log).to.be.calledWith("new-key-123")
+        @expectExitWith(0)
 
     it "logs error and exits when user isn't logged in", ->
       user.set({})
       .then =>
-        cypress.start(["--get-key", "--project=#{@todosPath}"]).then =>
-          @expectExitWithErr("NOT_LOGGED_IN")
+        cypress.start(["--get-key", "--project=#{@todosPath}"])
+      .then =>
+        @expectExitWithErr("NOT_LOGGED_IN")
 
     it "logs error and exits when project does not have an id", ->
-      user.set({session_token: "session-123"})
+      user.set({sessionToken: "session-123"})
       .then =>
-        cypress.start(["--get-key", "--project=#{@pristinePath}"]).then =>
-          @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
+        cypress.start(["--get-key", "--project=#{@pristinePath}"])
+      .then =>
+        @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
 
     it "logs error and exits when project could not be found at the path", ->
-      user.set({session_token: "session-123"})
+      user.set({sessionToken: "session-123"})
       .then =>
-        cypress.start(["--get-key", "--project=path/to/no/project"]).then =>
-          @expectExitWithErr("NO_PROJECT_FOUND_AT_PROJECT_ROOT", "path/to/no/project")
+        cypress.start(["--get-key", "--project=path/to/no/project"])
+      .then =>
+        @expectExitWithErr("NO_PROJECT_FOUND_AT_PROJECT_ROOT", "path/to/no/project")
 
     it "logs error and exits when project token cannot be fetched", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         Project.add(@todosPath)
         .then =>
@@ -117,13 +121,14 @@ describe "lib/cypress", ->
           .withArgs(@projectId, "session-123")
           .rejects(new Error)
 
-        cypress.start(["--get-key", "--project=#{@todosPath}"]).then =>
-          @expectExitWithErr("CANNOT_FETCH_PROJECT_TOKEN")
+        cypress.start(["--get-key", "--project=#{@todosPath}"])
+      .then =>
+        @expectExitWithErr("CANNOT_FETCH_PROJECT_TOKEN")
 
   context "--new-key", ->
     it "writes out key and exits on success", ->
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
         .then =>
@@ -137,31 +142,35 @@ describe "lib/cypress", ->
           .withArgs(@projectId, "session-123")
           .resolves("new-key-123")
 
-        cypress.start(["--new-key", "--project=#{@todosPath}"]).then =>
-          expect(console.log).to.be.calledWith("new-key-123")
-          @expectExitWith(0)
+        cypress.start(["--new-key", "--project=#{@todosPath}"])
+      .then =>
+        expect(console.log).to.be.calledWith("new-key-123")
+        @expectExitWith(0)
 
     it "logs error and exits when user isn't logged in", ->
       user.set({})
       .then =>
-        cypress.start(["--new-key", "--project=#{@todosPath}"]).then =>
-          @expectExitWithErr("NOT_LOGGED_IN")
+        cypress.start(["--new-key", "--project=#{@todosPath}"])
+      .then =>
+        @expectExitWithErr("NOT_LOGGED_IN")
 
     it "logs error and exits when project does not have an id", ->
-      user.set({session_token: "session-123"})
+      user.set({sessionToken: "session-123"})
       .then =>
-        cypress.start(["--new-key", "--project=#{@pristinePath}"]).then =>
-          @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
+        cypress.start(["--new-key", "--project=#{@pristinePath}"])
+      .then =>
+        @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
 
     it "logs error and exits when project could not be found at the path", ->
-      user.set({session_token: "session-123"})
+      user.set({sessionToken: "session-123"})
       .then =>
-        cypress.start(["--new-key", "--project=path/to/no/project"]).then =>
-          @expectExitWithErr("NO_PROJECT_FOUND_AT_PROJECT_ROOT", "path/to/no/project")
+        cypress.start(["--new-key", "--project=path/to/no/project"])
+      .then =>
+        @expectExitWithErr("NO_PROJECT_FOUND_AT_PROJECT_ROOT", "path/to/no/project")
 
     it "logs error and exits when project token cannot be fetched", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         Project.add(@todosPath)
         .then =>
@@ -174,8 +183,9 @@ describe "lib/cypress", ->
           .withArgs(@projectId, "session-123")
           .rejects(new Error)
 
-        cypress.start(["--new-key", "--project=#{@todosPath}"]).then =>
-          @expectExitWithErr("CANNOT_CREATE_PROJECT_TOKEN")
+        cypress.start(["--new-key", "--project=#{@todosPath}"])
+      .then =>
+        @expectExitWithErr("CANNOT_CREATE_PROJECT_TOKEN")
 
   context "--run-project", ->
     beforeEach ->
@@ -186,11 +196,7 @@ describe "lib/cypress", ->
       @sandbox.spy(api, "updateProject")
 
     it "runs project headlessly and exits with exit code 0", ->
-      Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
-
-        Project.add(@todosPath)
-      ])
+      Project.add(@todosPath)
       .then =>
         cypress.start(["--run-project=#{@todosPath}"])
       .delay(200)
@@ -202,95 +208,88 @@ describe "lib/cypress", ->
     it "runs project headlessly and exits with exit code 10", ->
       headless.waitForTestsToFinishRunning.resolves({failures: 10})
 
-      Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
-
-        Project.add(@todosPath)
-      ])
+      Project.add(@todosPath)
       .then =>
         cypress.start(["--run-project=#{@todosPath}"])
-        .delay(200)
-        .then =>
-          expect(api.updateProject).not.to.be.called
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
-          @expectExitWith(10)
+      .delay(200)
+      .then =>
+        expect(api.updateProject).not.to.be.called
+        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
+        @expectExitWith(10)
 
     it "generates a project id if missing one", ->
       @sandbox.stub(api, "createProject").withArgs("pristine", "session-123").resolves("pristine-id-123")
 
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({sessionToken: "session-123"}),
 
         Project.add(@pristinePath)
       ])
       .then =>
-        cypress.start(["--run-project=#{@pristinePath}"]).then =>
-          @expectExitWith(0)
+        cypress.start(["--run-project=#{@pristinePath}"])
+      .then =>
+        @expectExitWith(0)
 
-          ## give it time to request the project id
-          Promise.delay(200).then =>
-            Project(@pristinePath).getProjectId().then (id) ->
-              expect(id).to.eq("pristine-id-123")
+        ## give it time to request the project id
+        Promise.delay(200)
+      .then =>
+        Project(@pristinePath).getProjectId()
+      .then (id) ->
+        expect(id).to.eq("pristine-id-123")
+
+    it "does not generate project id when not logged in", ->
+      @sandbox.stub(api, "createProject").withArgs("pristine", "session-123").rejects(new Error)
+
+      Project.add(@pristinePath)
+      .then =>
+        cypress.start(["--run-project=#{@pristinePath}"])
+      .then =>
+        Promise.delay(200)
+      .then =>
+        Project(@pristinePath).getProjectId()
+        .then ->
+          throw new Error("should have caught error but didnt")
+        .catch (err) ->
+          expect(err.type).to.eq("NO_PROJECT_ID")
+      .then =>
+        @expectExitWith(0)
 
     it "does not error when getting a creating a project id fails", ->
       @sandbox.stub(api, "createProject").withArgs("pristine", "session-123").rejects(new Error)
 
-      Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
-
-        Project.add(@pristinePath)
-      ])
+      Project.add(@pristinePath)
       .then =>
-        cypress.start(["--run-project=#{@pristinePath}"]).then =>
-          Promise.delay(200).then =>
-            @expectExitWith(0)
-
-    it "prompts to add the project and then immediately runs the tests and exits with 0", ->
-      @sandbox.stub(inquirer, "prompt").yieldsAsync({add: true})
-
-      user.set({session_token: "session-123"})
+        cypress.start(["--run-project=#{@pristinePath}"])
+      .delay(200)
       .then =>
-        cypress.start(["--run-project=#{@todosPath}"]).then =>
-          expect(inquirer.prompt).to.be.calledOnce
-          @expectExitWith(0)
+        @expectExitWith(0)
 
     it "runs project by specific spec and exits with status 0", ->
-      Promise.all([
-        user.set({session_token: "session-123"}),
-
-        Project.add(@todosPath)
-      ])
+      Project.add(@todosPath)
       .then =>
-        cypress.start(["--run-project=#{@todosPath}", "--spec=tests/test2.coffee"]).then =>
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
-          @expectExitWith(0)
+        cypress.start(["--run-project=#{@todosPath}", "--spec=tests/test2.coffee"])
+      .then =>
+        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
+        @expectExitWith(0)
 
     it "runs project by specific spec with default configuration", ->
-      Promise.all([
-        user.set({session_token: "session-123"}),
-
-        Project.add(@idsPath)
-      ])
+      Project.add(@idsPath)
       .then =>
-        cypress.start(["--run-project=#{@idsPath}", "--spec=cypress/integration/bar.js", "--config", "port=2020"]).then =>
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:2020/__/#/tests/integration/bar.js")
-          @expectExitWith(0)
+        cypress.start(["--run-project=#{@idsPath}", "--spec=cypress/integration/bar.js", "--config", "port=2020"])
+      .then =>
+        expect(headless.createRenderer).to.be.calledWith("http://localhost:2020/__/#/tests/integration/bar.js")
+        @expectExitWith(0)
 
     it "runs project by specific absolute spec and exits with status 0", ->
-      Promise.all([
-        user.set({session_token: "session-123"}),
-
-        Project.add(@todosPath)
-      ])
+      Project.add(@todosPath)
       .then =>
-        cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"]).then =>
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
-          @expectExitWith(0)
+        cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"])
+      .then =>
+        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
+        @expectExitWith(0)
 
-    it "scaffolds out integration and example_spec if they do not exist", ->
+    it "scaffolds out integration and example_spec if they do not exist when not headless", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
-
         config.get(@pristinePath).then (@cfg) =>
 
         Project.add(@pristinePath)
@@ -298,18 +297,34 @@ describe "lib/cypress", ->
       .then =>
         fs.statAsync(@cfg.integrationFolder)
         .then ->
-          throw new Error("integrationolder should not exist!")
+          throw new Error("integrationFolder should not exist!")
         .catch =>
-          cypress.start(["--run-project=#{@pristinePath}"])
+          cypress.start(["--run-project=#{@pristinePath}", "--no-headless"])
         .then =>
           fs.statAsync(@cfg.integrationFolder)
         .then =>
           fs.statAsync path.join(@cfg.integrationFolder, "example_spec.js")
 
+    it "does not scaffolds out when headless", ->
+      Promise.all([
+        config.get(@pristinePath).then (@cfg) =>
+
+        Project.add(@pristinePath)
+      ])
+      .then =>
+        fs.statAsync(@cfg.integrationFolder)
+        .then ->
+          throw new Error("integrationFolder should not exist!")
+        .catch {code: "ENOENT"}, =>
+          cypress.start(["--run-project=#{@pristinePath}"])
+        .then =>
+          fs.statAsync(@cfg.integrationFolder)
+        .then ->
+          throw new Error("integrationFolder should not exist!")
+        .catch {code: "ENOENT"}, =>
+
     it "scaffolds out fixtures + files if they do not exist", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
-
         config.get(@pristinePath).then (@cfg) =>
 
         Project.add(@pristinePath)
@@ -319,7 +334,7 @@ describe "lib/cypress", ->
         .then ->
           throw new Error("fixturesFolder should not exist!")
         .catch =>
-          cypress.start(["--run-project=#{@pristinePath}"])
+          cypress.start(["--run-project=#{@pristinePath}", "--no-headless"])
         .then =>
           fs.statAsync(@cfg.fixturesFolder)
         .then =>
@@ -327,8 +342,6 @@ describe "lib/cypress", ->
 
     it "scaffolds out support + files if they do not exist", ->
       Promise.all([
-        user.set({session_token: "session-123"}),
-
         config.get(@pristinePath).then (@cfg) =>
 
         Project.add(@pristinePath)
@@ -337,8 +350,8 @@ describe "lib/cypress", ->
         fs.statAsync(@cfg.supportFolder)
         .then ->
           throw new Error("supportFolder should not exist!")
-        .catch =>
-          cypress.start(["--run-project=#{@pristinePath}"])
+        .catch {code: "ENOENT"}, =>
+          cypress.start(["--run-project=#{@pristinePath}", "--no-headless"])
         .then =>
           fs.statAsync(@cfg.supportFolder)
         .then =>
@@ -348,8 +361,6 @@ describe "lib/cypress", ->
 
     it "removes fixtures when they exist and fixturesFolder is false", (done) ->
       Promise.all([
-        user.set({session_token: "session-123"}),
-
         config.get(@idsPath).then (@cfg) =>
 
         Project.add(@idsPath)
@@ -371,8 +382,6 @@ describe "lib/cypress", ->
 
     it "removes support when they exist and supportFolder is false", (done) ->
       Promise.all([
-        user.set({session_token: "session-123"}),
-
         config.get(@idsPath).then (@cfg) =>
 
         Project.add(@idsPath)
@@ -393,48 +402,37 @@ describe "lib/cypress", ->
         .catch -> done()
 
     it "runs project headlessly and displays gui", ->
-      Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
-
-        Project.add(@todosPath)
-      ])
+      Project.add(@todosPath)
       .then =>
-        cypress.start(["--run-project=#{@todosPath}", "--show-headless-gui"]).then =>
-          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all", "http://localhost:8888", true)
-          @expectExitWith(0)
+        cypress.start(["--run-project=#{@todosPath}", "--show-headless-gui"])
+      .then =>
+        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all", "http://localhost:8888", true)
+        @expectExitWith(0)
 
     it "turns on reporting", ->
       @sandbox.spy(Reporter, "create")
 
-      Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
-
-        Project.add(@todosPath)
-      ])
+      Project.add(@todosPath)
       .then =>
-        cypress.start(["--run-project=#{@todosPath}"]).then  =>
-          expect(Reporter.create).to.be.calledWith("spec")
-          @expectExitWith(0)
+        cypress.start(["--run-project=#{@todosPath}"])
+      .then  =>
+        expect(Reporter.create).to.be.calledWith("spec")
+        @expectExitWith(0)
 
     it "can change the reporter to nyan", ->
       @sandbox.spy(Reporter, "create")
 
-      Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
-
-        Project.add(@todosPath)
-      ])
+      Project.add(@todosPath)
       .then =>
-        cypress.start(["--run-project=#{@todosPath}", "--reporter=nyan"]).then  =>
-          expect(Reporter.create).to.be.calledWith("nyan")
-          @expectExitWith(0)
+        cypress.start(["--run-project=#{@todosPath}", "--reporter=nyan"])
+      .then  =>
+        expect(Reporter.create).to.be.calledWith("nyan")
+        @expectExitWith(0)
 
     it "can change the reporter with cypress.json", ->
       @sandbox.spy(Reporter, "create")
 
       Promise.all([
-        user.set({session_token: "session-123"}),
-
         config.get(@idsPath).then (@cfg) =>
 
         Project.add(@idsPath)
@@ -445,7 +443,7 @@ describe "lib/cypress", ->
         json.reporter = "dot"
         settings.write(@idsPath, json)
       .then =>
-        cypress.start(["--run-project=#{@idsPath}"]).then  =>
+        cypress.start(["--run-project=#{@idsPath}"])
       .then =>
         expect(Reporter.create).to.be.calledWith("dot")
         @expectExitWith(0)
@@ -457,60 +455,49 @@ describe "lib/cypress", ->
         Project.add(@todosPath)
       ])
       .then =>
-        cypress.start(["--run-project=#{@todosPath}"]).then =>
-          @expectExitWith(0)
-
-    it "logs error and exits when project could not be found at the path and was not chosen to be added to Cypress", ->
-      @sandbox.stub(inquirer, "prompt").yieldsAsync({add: false})
-
-      user.set({session_token: "session-123"})
+        cypress.start(["--run-project=#{@todosPath}"])
       .then =>
-        cypress.start(["--run-project=does/not/exist"]).then =>
-          @expectExitWithErr("PROJECT_DOES_NOT_EXIST")
+        @expectExitWith(0)
 
     it "logs error and exits when spec file was specified and does not exist", ->
-      Promise.all([
-        user.set({session_token: "session-123"}),
-
-        Project.add(@todosPath)
-      ])
+      Project.add(@todosPath)
       .then =>
-        cypress.start(["--run-project=#{@todosPath}", "--spec=path/to/spec"]).then =>
-          @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/path/to/spec")
+        cypress.start(["--run-project=#{@todosPath}", "--spec=path/to/spec"])
+      .then =>
+        @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/path/to/spec")
 
     it "logs error and exits when spec absolute file was specified and does not exist", ->
-      Promise.all([
-        user.set({session_token: "session-123"}),
-
-        Project.add(@todosPath)
-      ])
+      Project.add(@todosPath)
       .then =>
-        cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/path/to/spec"]).then =>
-          @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/tests/path/to/spec")
+        cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/path/to/spec"])
+      .then =>
+        @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/tests/path/to/spec")
 
     it "logs error and exits when project has cypress.json syntax error", ->
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])
       .then =>
         fs.writeFileAsync(@todosPath + "/cypress.json", "{'foo': 'bar}")
       .then =>
-        cypress.start(["--run-project=#{@todosPath}"]).then =>
-          @expectExitWithErr("ERROR_READING_FILE", @todosPath)
+        cypress.start(["--run-project=#{@todosPath}"])
+      .then =>
+        @expectExitWithErr("ERROR_READING_FILE", @todosPath)
 
     it "logs error and exits when project has cypress.env.json syntax error", ->
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])
       .then =>
         fs.writeFileAsync(@todosPath + "/cypress.env.json", "{'foo': 'bar}")
       .then =>
-        cypress.start(["--run-project=#{@todosPath}"]).then =>
-          @expectExitWithErr("ERROR_READING_FILE", @todosPath)
+        cypress.start(["--run-project=#{@todosPath}"])
+      .then =>
+        @expectExitWithErr("ERROR_READING_FILE", @todosPath)
 
     ## TODO: make sure we have integration tests around this
     ## for headed projects!
@@ -521,36 +508,32 @@ describe "lib/cypress", ->
 
       @sandbox.stub(inquirer, "prompt").yieldsAsync({add: true})
 
-      user.set({session_token: "session-123"})
+      user.set({sessionToken: "session-123"})
       .then =>
         fs.ensureDirAsync(permissionsPath)
       .then =>
         fs.chmodAsync(permissionsPath, "111")
       .then =>
-        cypress.start(["--run-project=#{permissionsPath}"]).then =>
-          fs.chmodAsync(permissionsPath, "644").then =>
-            fs.removeAsync(permissionsPath).then =>
-              @expectExitWithErr("ERROR_WRITING_FILE", permissionsPath)
+        cypress.start(["--run-project=#{permissionsPath}"])
+      .then =>
+        fs.chmodAsync(permissionsPath, "644")
+        .then =>
+          fs.removeAsync(permissionsPath)
+          .then =>
+            @expectExitWithErr("ERROR_WRITING_FILE", permissionsPath)
 
     describe "morgan", ->
       it "sets morgan to false", ->
-        Promise.all([
-          user.set({name: "brian", session_token: "session-123"}),
-
-          Project.add(@todosPath)
-        ])
+        Project.add(@todosPath)
         .then =>
-          cypress.start(["--run-project=#{@todosPath}"]).then =>
-            expect(project.opened().cfg.morgan).to.be.false
-            @expectExitWith(0)
+          cypress.start(["--run-project=#{@todosPath}"])
+        .then =>
+          expect(project.opened().cfg.morgan).to.be.false
+          @expectExitWith(0)
 
     describe "config overrides", ->
       it "can override default values", ->
-        Promise.all([
-          user.set({name: "brian", session_token: "session-123"}),
-
-          Project.add(@todosPath)
-        ])
+        Project.add(@todosPath)
         .then =>
           cypress.start(["--run-project=#{@todosPath}", "--config=requestTimeout=1234,baseUrl=localhost"])
         .then =>
@@ -574,17 +557,14 @@ describe "lib/cypress", ->
       beforeEach ->
         headless.waitForTestsToFinishRunning.resolves({failures: 0})
 
-        Promise.all([
-          user.set({name: "brian", session_token: "session-123"}),
-
-          Project.add(@todosPath)
-        ])
+        Project.add(@todosPath)
 
       it "can change the default port to 5555", ->
         listen = @sandbox.spy(http.Server.prototype, "listen")
         open   = @sandbox.spy(Server.prototype, "open")
 
-        cypress.start(["--run-project=#{@todosPath}", "--port=5555"]).then =>
+        cypress.start(["--run-project=#{@todosPath}", "--port=5555"])
+        .then =>
           expect(project.opened().cfg.port).to.eq(5555)
           expect(listen).to.be.calledWith(5555)
           expect(open).to.be.calledWithMatch({port: 5555})
@@ -594,10 +574,12 @@ describe "lib/cypress", ->
       it "logs error and exits when port is in use", ->
         server = http.createServer()
         server = Promise.promisifyAll(server)
+
         server.listenAsync(5555)
         .then =>
-          cypress.start(["--run-project=#{@todosPath}", "--port=5555"]).then =>
-            @expectExitWithErr("PORT_IN_USE_LONG", "5555")
+          cypress.start(["--run-project=#{@todosPath}", "--port=5555"])
+        .then =>
+          @expectExitWithErr("PORT_IN_USE_LONG", "5555")
 
     describe "--env", ->
       beforeEach ->
@@ -607,11 +589,7 @@ describe "lib/cypress", ->
 
         headless.waitForTestsToFinishRunning.resolves({failures: 0})
 
-        Promise.all([
-          user.set({name: "brian", session_token: "session-123"}),
-
-          Project.add(@todosPath)
-        ])
+        Project.add(@todosPath)
 
       afterEach ->
         process.env = @env
@@ -619,9 +597,11 @@ describe "lib/cypress", ->
       it "can set specific environment variables", ->
         cypress.start([
           "--run-project=#{@todosPath}",
+          "--videoRecording=false"
           "--env",
           "version=0.12.1,foo=bar,host=http://localhost:8888"
-        ]).then =>
+        ])
+        .then =>
           expect(project.opened().cfg.environmentVariables).to.deep.eq({
             version: "0.12.1"
             foo: "bar"
@@ -637,25 +617,38 @@ describe "lib/cypress", ->
       delete process.env.CYPRESS_PROJECT_ID
 
     beforeEach ->
-      @setup = (projectName) =>
-        @createCi = @sandbox.stub(api, "createCi").withArgs({
-          key: "secret-key-123"
-          projectId: @projectId
-          projectName: projectName
-          branch: "bem/ci"
-          author: "brian"
-          message: "foo"
+      @setup = =>
+        @createBuild = @sandbox.stub(api, "createBuild").withArgs({
+          projectId:     @projectId
+          projectToken: "token-123"
+          commitSha:    "sha-123"
+          commitBranch: "bem/ci"
+          commitAuthor: "brian"
+          commitMessage: "foo"
         })
+
+      @upload = @sandbox.stub(ci, "upload").resolves()
 
       @sandbox.stub(os, "platform").returns("linux")
       ## TODO: might need to change this to a different return
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      @sandbox.stub(ci, "getSha").resolves("sha-123")
       @sandbox.stub(ci, "getBranch").resolves("bem/ci")
       @sandbox.stub(ci, "getAuthor").resolves("brian")
       @sandbox.stub(ci, "getMessage").resolves("foo")
       @sandbox.stub(headless, "createRenderer")
       @sandbox.stub(headless, "waitForRendererToConnect")
-      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
+      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({
+        tests: 1
+        passes: 2
+        failures: 3
+        pending: 4
+        duration: 5
+        video: true
+        screenshots: []
+        failingTests: []
+        config: {}
+      })
 
       Promise.all([
         ## make sure we have no user object
@@ -666,91 +659,106 @@ describe "lib/cypress", ->
           @projectId = id
       ])
 
+    ## TODO: add tests around uploadingAssets + upload
+
     it "runs project in ci and exits with number of failures", ->
-      @setup("todos")
+      @setup()
 
-      @createCi.resolves("ci_guid-123")
+      @createBuild.resolves("build-id-123")
 
-      @updateCi = @sandbox.stub(api, "updateCi").withArgs({
-        key: "secret-key-123"
-        ciId: "ci_guid-123"
-        projectId: @projectId
-        projectName: "todos"
-        stats: {failures: 10}
+      @createInstance = @sandbox.stub(api, "createInstance").withArgs({
+        buildId: "build-id-123"
+        tests: 1
+        passes: 2
+        failures: 3
+        pending: 4
+        duration: 5
+        video: true
+        screenshots: []
+        failingTests: []
+        cypressConfig: {}
       }).resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
-        expect(@updateCi).to.be.calledOnce
-        @expectExitWith(10)
+      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
+      .then =>
+        expect(@createInstance).to.be.calledOnce
+        @expectExitWith(3)
 
-    it "runs project by specific absolute spec and exits with status 10", ->
-      @setup("todos")
+    it "runs project by specific absolute spec and exits with status 3", ->
+      @setup()
 
-      @createCi.resolves("ci_guid-123")
+      @createBuild.resolves("build-id-123")
 
-      @updateCi = @sandbox.stub(api, "updateCi").resolves()
+      @sandbox.stub(api, "createInstance").resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci", "--spec=#{@todosPath}/tests/test2.coffee"]).then =>
+      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci", "--spec=#{@todosPath}/tests/test2.coffee"])
+      .then =>
         expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
-        @expectExitWith(10)
+        @expectExitWith(3)
 
     it "uses process.env.CYPRESS_PROJECT_ID", ->
-      @setup("pristine")
+      @setup()
 
       ## set the projectId to be todos even though
       ## we are running the prisine project
       process.env.CYPRESS_PROJECT_ID = @projectId
 
-      @createCi.resolves()
-      @sandbox.stub(api, "updateCi").resolves()
+      @createBuild.resolves()
+      @sandbox.stub(api, "createInstance").resolves()
 
-      cypress.start(["--run-project=#{@pristinePath}", "--key=secret-key-123", "--ci"]).then =>
-        @expectExitWith(10)
+      cypress.start(["--run-project=#{@pristinePath}", "--key=token-123", "--ci"])
+      .then =>
+        @expectExitWith(3)
 
     it "logs error when missing project id", ->
-      @setup("pristine")
+      @setup()
 
-      cypress.start(["--run-project=#{@pristinePath}", "--key=secret-key-123", "--ci"]).then =>
+      cypress.start(["--run-project=#{@pristinePath}", "--key=token-123", "--ci"])
+      .then =>
         @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
 
     it "logs error and exits when ci key is not valid", ->
-      @setup("todos")
+      @setup()
 
       err = new Error
       err.statusCode = 401
-      @createCi.rejects(err)
+      @createBuild.rejects(err)
 
-      cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
-        @expectExitWithErr("CI_KEY_NOT_VALID", "secre...y-123")
+      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
+      .then =>
+        @expectExitWithErr("CI_KEY_NOT_VALID", "token...n-123")
 
     it "logs error and exits when project could not be found", ->
-      @setup("todos")
+      @setup()
 
       err = new Error
       err.statusCode = 404
-      @createCi.rejects(err)
+      @createBuild.rejects(err)
 
-      cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
+      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
+      .then =>
         @expectExitWithErr("CI_PROJECT_NOT_FOUND")
 
-    it "logs error and exits when cannot communicate with api", ->
-      @setup("todos")
+    it "logs error but continues running the tests", ->
+      @setup()
 
       err = new Error
       err.statusCode = 500
-      @createCi.rejects(err)
+      @createBuild.rejects(err)
 
-      cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
-        @expectExitWithErr("CI_CANNOT_COMMUNICATE")
+      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
+      .then =>
+        @expectExitWith(3)
 
     it "logs error and exits when ci key is missing", ->
-      @setup("todos")
+      @setup()
 
       err = new Error
       err.statusCode = 401
-      @createCi.rejects(err)
+      @createBuild.rejects(err)
 
-      cypress.start(["--run-project=#{@todosPath}", "--ci"]).then =>
+      cypress.start(["--run-project=#{@todosPath}", "--ci"])
+      .then =>
         @expectExitWithErr("CI_KEY_MISSING")
 
   context "--return-pkg", ->
@@ -758,7 +766,8 @@ describe "lib/cypress", ->
       @sandbox.stub(console, "log")
 
     it "logs package.json and exits", ->
-      cypress.start(["--return-pkg"]).then =>
+      cypress.start(["--return-pkg"])
+      .then =>
         expect(console.log).to.be.calledWithMatch('{"name":"cypress"')
         @expectExitWith(0)
 
@@ -767,7 +776,8 @@ describe "lib/cypress", ->
       @sandbox.stub(console, "log")
 
     it "logs version and exits", ->
-      cypress.start(["--version"]).then =>
+      cypress.start(["--version"])
+      .then =>
         expect(console.log).to.be.calledWith(pkg.version)
         @expectExitWith(0)
 
@@ -776,7 +786,8 @@ describe "lib/cypress", ->
       @sandbox.stub(console, "log")
 
     it "logs pong value and exits", ->
-      cypress.start(["--smoke-test", "--ping=abc123"]).then =>
+      cypress.start(["--smoke-test", "--ping=abc123"])
+      .then =>
         expect(console.log).to.be.calledWith("abc123")
         @expectExitWith(0)
 
@@ -785,12 +796,14 @@ describe "lib/cypress", ->
       idsPath = Fixtures.projectPath("ids")
       @sandbox.spy(console, "log")
 
-      cypress.start(["--remove-ids", "--project=#{idsPath}"]).then =>
+      cypress.start(["--remove-ids", "--project=#{idsPath}"])
+      .then =>
         expect(console.log).to.be.calledWith("Removed '5' ids from '2' files.")
         @expectExitWith(0)
 
     it "catches errors when project is not found", ->
-      cypress.start(["--remove-ids", "--project=path/to/no/project"]).then =>
+      cypress.start(["--remove-ids", "--project=path/to/no/project"])
+      .then =>
         @expectExitWithErr("NO_PROJECT_FOUND_AT_PROJECT_ROOT", "path/to/no/project")
 
   context "headed", ->
@@ -812,7 +825,8 @@ describe "lib/cypress", ->
     it "passes options to headed.ready", ->
       @sandbox.stub(headed, "ready")
 
-      cypress.start(["--updating", "--port=2121", "--config=pageLoadTimeout=1000"]).then ->
+      cypress.start(["--updating", "--port=2121", "--config=pageLoadTimeout=1000"])
+      .then ->
         expect(headed.ready).to.be.calledWithMatch({
           updating: true
           port: 2121
@@ -820,7 +834,8 @@ describe "lib/cypress", ->
         })
 
     it "passes options to Events.start", ->
-      cypress.start(["--port=2121", "--config=pageLoadTimeout=1000"]).then ->
+      cypress.start(["--port=2121", "--config=pageLoadTimeout=1000"])
+      .then ->
         expect(Events.start).to.be.calledWithMatch({
           port: 2121,
           pageLoadTimeout: 1000
@@ -831,7 +846,7 @@ describe "lib/cypress", ->
       @sandbox.stub(api, "updateProject").resolves()
 
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
 
@@ -854,7 +869,7 @@ describe "lib/cypress", ->
       @sandbox.stub(api, "updateProject").resolves()
 
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
 
@@ -887,7 +902,7 @@ describe "lib/cypress", ->
       process.env.CYPRESS_watch_for_file_changes = "false"
 
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        user.set({name: "brian", sessionToken: "session-123"}),
 
         Project.add(@todosPath)
       ])

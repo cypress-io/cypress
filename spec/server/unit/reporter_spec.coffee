@@ -13,25 +13,29 @@ describe "lib/reporter", ->
       tests: []
       suites: [
         {
-          id: '000'
-          title: 'TodoMVC - React [000]'
+          id: 'r2'
+          title: 'TodoMVC - React'
           tests: []
           suites: [
             {
-              id: '001'
-              title: 'When page is initially opened [001]'
+              id: 'r3'
+              title: 'When page is initially opened'
               tests: [
                 {
-                  id: '002'
-                  title: 'should focus on the todo input field [002]'
+                  id: 'r4'
+                  title: 'should focus on the todo input field'
                   duration: 4
                   state: 'failed'
                   timedOut: false
                   async: 0
                   sync: true
+                  err: {
+                    message: "foo"
+                    stack: [1, 2, 3]
+                  }
                 }
                 {
-                  id: '003'
+                  id: 'r5'
                   title: 'does something good'
                   duration: 4
                   state: 'pending'
@@ -87,29 +91,37 @@ describe "lib/reporter", ->
       args = @reporter.parseArgs("fail", [@testObj])
       expect(args[0]).to.eq("fail")
 
-      title = "TodoMVC - React [000] When page is initially opened [001] should focus on the todo input field [002]"
+      title = "TodoMVC - React When page is initially opened should focus on the todo input field"
       expect(args[1].fullTitle()).to.eq title
 
-    it "adds failures to stats", ->
-      @reporter.emit("fail", @testObj)
-
-      expect(@reporter.stats()).to.deep.eq({
-        reporter: "spec"
-        suites: 0
-        tests: 0
-        passes: 0
-        pending: 0
-        failures: 1
-      })
 
   context "#stats", ->
-    it "merges in reporter name and specific stat properties", ->
-      @reporter.reporter.stats = {foo: "bar", tests: 1}
+    it "has reporterName and failingTests in stats", ->
+      @sandbox.stub(Date, "now").returns(1234)
+
+      @reporter.emit("test", @testObj)
+      @reporter.emit("fail", @testObj)
+      @reporter.emit("test end", @testObj)
+
       @reporter.reporterName = "foo"
 
       expect(@reporter.stats()).to.deep.eq({
         reporter: "foo"
+        suites: 0
         tests: 1
+        passes: 0
+        pending: 0
+        failures: 1
+        failingTests: [
+          {
+            clientId: "r4"
+            title: "TodoMVC - React /// When page is initially opened /// should focus on the todo input field"
+            duration: 4
+            stack: [1,2,3]
+            error: "foo"
+            started: 1234
+          }
+        ]
       })
 
   context "#emit", ->
@@ -122,7 +134,7 @@ describe "lib/reporter", ->
       expect(@emit).to.be.calledOn(@reporter.runner)
 
     it "emits test with updated properties", ->
-      @reporter.emit("test", {id: "003", state: "passed"})
+      @reporter.emit("test", {id: "r5", state: "passed"})
       expect(@emit).to.be.calledWith("test")
       expect(@emit.getCall(0).args[1].title).to.eq("does something good")
       expect(@emit.getCall(0).args[1].state).to.eq("passed")
@@ -132,7 +144,7 @@ describe "lib/reporter", ->
       expect(@emit).not.to.be.called
 
     it "sends suites with updated properties and nested subtree", ->
-      @reporter.emit("suite", {id: "001", state: "passed"})
+      @reporter.emit("suite", {id: "r3", state: "passed"})
       expect(@emit).to.be.calledWith("suite")
       expect(@emit.getCall(0).args[1].state).to.eq("passed")
       expect(@emit.getCall(0).args[1].tests.length).to.equal(2)

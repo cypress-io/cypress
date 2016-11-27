@@ -48,7 +48,7 @@ describe "lib/cache", ->
       .then =>
         fs.readJsonAsync(cache.path).then (json) ->
           expect(json).to.deep.eq {
-            USER: {name: "brian"}
+            USER: {name: "brian", sessionToken: "abc123"}
             PROJECTS: [
               "/Users/bmann/Dev/examples-angular-circle-ci"
               "/Users/bmann/Dev/cypress-core-gui"
@@ -60,14 +60,14 @@ describe "lib/cache", ->
       cache.ensureExists().then ->
         fs.statAsync(cwd(".cy", process.env["CYPRESS_ENV"], "cache"))
 
-  context "#convertLegacyCache", ->
+  context "#_applyRewriteRules", ->
     beforeEach ->
       fs.readJsonAsync(Fixtures.path("server/old_cache.json")).then (@oldCache) =>
 
     it "converts object to array of paths", ->
-      obj = cache.convertLegacyCache(@oldCache)
+      obj = cache._applyRewriteRules(@oldCache)
       expect(obj).to.deep.eq({
-        USER: {name: "brian"}
+        USER: {name: "brian", sessionToken: "abc123"}
         PROJECTS: [
           "/Users/bmann/Dev/examples-angular-circle-ci"
           "/Users/bmann/Dev/cypress-core-gui"
@@ -76,7 +76,7 @@ describe "lib/cache", ->
       })
 
     it "compacts non PATH values", ->
-      obj = cache.convertLegacyCache({
+      obj = cache._applyRewriteRules({
         USER: {}
         PROJECTS: {
           one: { PATH: "foo/bar" }
@@ -87,6 +87,17 @@ describe "lib/cache", ->
       expect(obj).to.deep.eq({
         USER: {}
         PROJECTS: ["foo/bar"]
+      })
+
+    it "converts session_token to sessionToken", ->
+      obj = cache._applyRewriteRules({
+        USER: {id: 1, session_token: "abc123"}
+        PROJECTS: []
+      })
+
+      expect(obj).to.deep.eq({
+        USER: {id: 1, sessionToken: "abc123"}
+        PROJECTS: []
       })
 
   context "projects", ->
@@ -179,7 +190,7 @@ describe "lib/cache", ->
         cache.ensureExists()
 
       it "returns session id", ->
-        setUser = {id: 1, name: "brian", email: "a@b.com", session_token: "abc"}
+        setUser = {id: 1, name: "brian", email: "a@b.com", sessionToken: "abc"}
         cache.setUser(setUser).then =>
           cache.getUser().then (user) ->
             expect(user).to.deep.eq setUser
@@ -189,7 +200,7 @@ describe "lib/cache", ->
         cache.ensureExists()
 
       it "sets USER into .cy", ->
-        setUser = {id: 1, name: "brian", email: "a@b.com", session_token: "abc"}
+        setUser = {id: 1, name: "brian", email: "a@b.com", sessionToken: "abc"}
         cache.setUser(setUser).then (contents) ->
           expect(contents.USER).to.eq setUser
 
@@ -210,7 +221,7 @@ describe "lib/cache", ->
         id: 1
         name: "brian"
         email: "a@b.com"
-        session_token: "1111-2222-3333-4444"
+        sessionToken: "1111-2222-3333-4444"
       }
 
     it "sets and gets user", ->
@@ -228,7 +239,7 @@ describe "lib/cache", ->
   context "queues public methods", ->
     it "is able to write both values", ->
       Promise.all([
-        cache.setUser({name: "brian", session_token: "session-123"}),
+        cache.setUser({name: "brian", sessionToken: "session-123"}),
         cache.insertProject("foo")
       ])
       .then ->
@@ -237,7 +248,7 @@ describe "lib/cache", ->
         expect(json).to.deep.eq({
           USER: {
             name: "brian"
-            session_token: "session-123"
+            sessionToken: "session-123"
           }
           PROJECTS: ["foo"]
         })

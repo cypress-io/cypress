@@ -363,6 +363,10 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         test = queue.shift()
         _.each RUNNABLE_LOGS, (logs) ->
           _.each test[logs], (attrs) ->
+            ## we know our attrs have been cleaned
+            ## now, so lets store that
+            attrs._hasBeenCleanedUp = true
+
             $Cypress.Log.reduceMemory(attrs)
 
         @cleanupQueue(queue, numTestsKeptInMemory)
@@ -384,6 +388,13 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
 
     addLog: (attrs) ->
       if existing = @logsById[attrs.id]
+        ## because log:state:changed may
+        ## fire at a later time, its possible
+        ## we've already cleaned up these attrs
+        ## and in that case we don't want to do
+        ## anything at all
+        return if existing._hasBeenCleanedUp
+
         ## mutate the existing object
         _.extend(existing, attrs)
       else

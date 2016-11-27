@@ -161,6 +161,7 @@ class Socket
     _.defaults options,
       socketId: null
       onAutomationRequest: null
+      afterAutomationRequest: null
       onSetRunnables: ->
       onMocha: ->
       onConnect: ->
@@ -199,6 +200,11 @@ class Socket
 
         automation(config.namespace, socketIoCookie, config.screenshotsFolder)
         .request(message, data, automate)
+        .then (resp) ->
+          if aar = options.afterAutomationRequest
+            aar(message, data, resp)
+          else
+            resp
 
       socket.on "automation:connected", =>
         return if socket.inAutomationRoom

@@ -1,15 +1,15 @@
 ## TODO: move this to packages/core-file-server
 
+_            = require("lodash")
 url          = require("url")
 http         = require("http")
 path         = require("path")
 send         = require("send")
-compact      = require("lodash.compact")
 allowDestroy = require("server-destroy-vvo")
 errors       = require("./errors")
 
 onRequest = (req, res, fileServerFolder) ->
-  args = compact([
+  args = _.compact([
     fileServerFolder,
     req.url
   ])

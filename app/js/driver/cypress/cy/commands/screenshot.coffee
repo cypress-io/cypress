@@ -1,16 +1,33 @@
 $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
 
-  Cypress.on "test:after:hooks", (test) ->
+  Cypress.on "test:after:hooks", (test, runnable) ->
     if test.err and $Cypress.isHeadless and Cypress.config("screenshotOnHeadlessFailure")
       ## give the UI some time to render the error
       ## because we were noticing that errors were not
       ## yet displayed in the UI when running headlessly
       Promise.delay(75)
       .then =>
-        @_takeScreenshot(test.title)
+        @_takeScreenshot(runnable)
 
   Cypress.Cy.extend
-    _takeScreenshot: (name, log, timeout) ->
+    _takeScreenshot: (runnable, name, log, timeout) ->
+      titles = [runnable.title]
+
+      getParentTitle = (runnable) ->
+        if p = runnable.parent
+          if t = p.title
+            titles.unshift(t)
+
+          getParentTitle(p)
+
+      getParentTitle(runnable)
+
+      props = {
+        name:   name
+        titles: titles
+        testId: runnable.id
+      }
+
       automate = ->
         new Promise (resolve, reject) ->
           fn = (resp) =>
@@ -26,7 +43,7 @@ $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
             else
               resolve(resp.response)
 
-          Cypress.trigger("take:screenshot", name, fn)
+          Cypress.trigger("take:screenshot", props, fn)
 
       if not timeout
         automate()
@@ -51,10 +68,8 @@ $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
         options = name
         name = null
 
-      ## default to the runnables title if not set
-      name ?= @private("runnable").title
-
-      name = name.toString()
+      ## TODO: handle hook titles
+      runnable = @private("runnable")
 
       _.defaults options, {
         log: true
@@ -70,7 +85,7 @@ $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
             consoleProps
         })
 
-      @_takeScreenshot(name, options._log, options.timeout)
+      @_takeScreenshot(runnable, name, options._log, options.timeout)
       .then (resp) ->
         _.extend consoleProps, {
           Saved: resp.path

@@ -56,7 +56,7 @@ module.exports =
         return ret
       else
         return memo
-    , obj
+    , _.cloneDeep(obj)
 
   read: (projectRoot) ->
     file = @_pathToFile(projectRoot, "cypress.json")
