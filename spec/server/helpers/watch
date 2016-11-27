@@ -2,8 +2,8 @@
 
 CMD="$1"
 
-xvfb-maybe npm run $CMD & \
+npm run $CMD & \
 chokidar 'spec/server/**/*' 'lib/**/*' \
--c "xvfb-maybe npm run $CMD" \
+-c "npm run $CMD" \
 --polling \
 --poll-interval=250
