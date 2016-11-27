@@ -4,7 +4,7 @@
   - Passes:          2
   - Failures:        3
   - Pending:         0
-  - Duration:        0 seconds
+  - Duration:        10 seconds
   - Screenshots:     3
   - Video Recorded:  true
   - Cypress Version: 1.2.3

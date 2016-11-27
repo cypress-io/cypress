@@ -13,6 +13,7 @@ normalize = (stdout) ->
   .replace(/\/.+\/cypress\/screenshots/g, "/foo/bar/.projects/e2e/cypress/screenshots")
   .replace(/Cypress Version\: (.+)/, "Cypress Version: 1.2.3")
   .replace(/Duration\: (.+)/, "Duration:        10 seconds")
+  .replace(/\(\d+ seconds?\)/, "(0 seconds)")
   .replace(/\r/g, "")
 
 describe "e2e stdout", ->
