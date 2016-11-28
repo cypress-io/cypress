@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.6.3
+- fix missing var
+
 #### 0.6.2
 - bump kitchen sink default config values
 
