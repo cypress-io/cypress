@@ -1,23 +1,19 @@
-EventEmitter = require("events").EventEmitter
-fs = require("fs-extra")
-path = require("path")
-ReadableStream = require("stream").Readable
-
-_ = require("lodash")
-through = require("through")
-Promise = require("bluebird")
-str = require("underscore.string")
-
-browserify = require("browserify")
-babelify = require("babelify")
-cjsxify = require("cjsxify")
-watchify = require("watchify")
-
+_                      = require("lodash")
+fs                     = require("fs-extra")
+EE                     = require("events")
+str                    = require("underscore.string")
+path                   = require("path")
+through                = require("through")
+cjsxify                = require("cjsxify")
+Promise                = require("bluebird")
+babelify               = require("babelify")
+watchify               = require("watchify")
+browserify             = require("browserify")
+presetReact            = require("babel-preset-react")
+presetLatest           = require("babel-preset-latest")
+stringStream           = require("string-to-stream")
 pluginAddModuleExports = require("babel-plugin-add-module-exports")
-presetLatest = require("babel-preset-latest")
-presetReact = require("babel-preset-react")
-
-appData = require("./app_data")
+appData                = require("./app_data")
 
 fs = Promise.promisifyAll(fs)
 

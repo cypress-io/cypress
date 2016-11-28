@@ -1,7 +1,6 @@
-_ = require("lodash")
-chokidar = require("chokidar")
-
-bundle = require("./util/bundle")
+_           = require("lodash")
+chokidar    = require("chokidar")
+bundle      = require("./util/bundle")
 pathHelpers = require("./util/path_helpers")
 
 class Watchers

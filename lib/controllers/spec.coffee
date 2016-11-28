@@ -1,8 +1,7 @@
-fs = require("fs")
-
+fs      = require("fs")
+errors  = require("../errors")
+bundle  = require("../util/bundle")
 appData = require("../util/app_data")
-bundle = require("../util/bundle")
-errors = require("../errors")
 
 module.exports = {
   handle: (spec, req, res, config, next, watchers) ->
