@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import Loader from 'react-loader'
 
 import App from '../lib/app'
 import BootstrapModal from 'react-bootstrap-modal'
@@ -18,7 +17,7 @@ class SetupProject extends Component {
   }
 
   render () {
-    if (!orgsStore.isLoaded) return <Loader />
+    if (!orgsStore.isLoaded) return null
 
     const defaultOrg = _.find(orgsStore.orgs, { default: true })
 
