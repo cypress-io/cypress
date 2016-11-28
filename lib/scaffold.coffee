@@ -23,6 +23,8 @@ module.exports = {
 
   support: (folder, config) ->
     ## skip if user has explicitly set supportFile
+    ## TODO: change this to use something like config.isDefault(supportFile)
+    ## instead of drilling into all of these resolved properties
     return Promise.resolve() if config.resolved.supportFile.from isnt "default"
 
     @verifyScaffolding(folder, =>
@@ -39,16 +41,25 @@ module.exports = {
       catch err
         ## only if support/index.js doesn't exist already
         ## rethrow error if it's something unexpected
-        throw err unless err.code is 'MODULE_NOT_FOUND'
+        throw err if err.code isnt 'MODULE_NOT_FOUND'
 
         Promise.join(
-          fs.readFileAsync(cwd("lib", "scaffold", "index.js.hbs")),
-          glob(path.join(folder, "**", "*"), {dir: no}).map (filePath) ->
-            path.basename(filePath, path.extname(filePath))
+          fs.readFileAsync(cwd("lib", "scaffold", "index.js.hbs"), "utf8"),
+
+          glob(path.join(folder, "**", "*"), {nodir: true})
+          .map (filePath) ->
+            ## strip off the extension from our filePath
+            ext      = path.extname(filePath)
+            filePath = filePath.replace(ext, "")
+
+            ## get the relative path from the supportFolder
+            ## to this specific file's path
+            path.relative(config.supportFolder, filePath)
         )
-        .spread (indexTemplateBuffer, supportFiles) ->
-          indexTemplate = hbs.handlebars.compile(indexTemplateBuffer.toString())
-          contents = indexTemplate({ files: supportFiles })
+        .spread (indexTemplate, supportFiles) ->
+          indexTemplate = hbs.handlebars.compile(indexTemplate)
+          contents      = indexTemplate({ files: supportFiles })
+
           fs.outputFileAsync(path.join(folder, "index.js"), contents)
 
   copy: (file, folder) ->
