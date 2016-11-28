@@ -5,6 +5,7 @@ fs         = require("fs-extra")
 cp         = require("child_process")
 path       = require("path")
 http       = require("http")
+human      = require("human-interval")
 morgan     = require("morgan")
 express    = require("express")
 Promise    = require("bluebird")
@@ -50,7 +51,7 @@ module.exports = {
     if options.npmInstall
       before ->
         ## npm install needs extra time
-        @timeout(300000)
+        @timeout(human("2 minutes"))
 
         cp.execAsync("npm install", {
           cwd: Fixtures.path("projects/e2e")
