@@ -18,7 +18,7 @@ Started video recording: /foo/bar/.projects/e2e/cypress/videos/abc123.mp4
 
   1) stdout_failing_spec fails:
      Error: foo
-      at Context.<anonymous> (http://localhost:2020/__cypress/tests?p=cypress/integration/stdout_failing_spec.coffee-456:6:15)
+      at Context.<anonymous> (http://localhost:2020/__cypress/tests?p=cypress/integration/stdout_failing_spec.coffee-456:6:13)
 
   2) stdout_failing_spec failing hook "before each" hook for "is failing":
      CypressError: cy.visit() failed trying to load:

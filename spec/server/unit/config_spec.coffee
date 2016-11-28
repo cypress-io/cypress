@@ -169,9 +169,6 @@ describe "lib/config", ->
     it "videoRecording=true", ->
       @defaults "videoRecording", true
 
-    it "videosFolder=true", ->
-      @defaults "videosFolder", "cypress/videos"
-
     it "videoCompression=32", ->
       @defaults "videoCompression", 32
 
