@@ -1,6 +1,7 @@
 require("../spec_helper")
 
 _          = require("lodash")
+fs         = require("fs-extra")
 cp         = require("child_process")
 path       = require("path")
 http       = require("http")
@@ -14,6 +15,7 @@ Project    = require("#{root}lib/project")
 settings   = require("#{root}lib/util/settings")
 
 cp = Promise.promisifyAll(cp)
+fs = Promise.promisifyAll(fs)
 
 env = process.env
 
@@ -45,6 +47,23 @@ stopServer = (srv) ->
 
 module.exports = {
   setup: (options = {}) ->
+    if options.npmInstall
+      before ->
+        ## npm install needs extra time
+        @timeout(300000)
+
+        cp.execAsync("npm install", {
+          cwd: Fixtures.path("projects/e2e")
+          maxBuffer: 1024*1000
+        })
+        .then ->
+          ## symlinks mess up fs.copySync
+          ## and bin files aren't necessary for these tests
+          fs.removeAsync(Fixtures.path("projects/e2e/node_modules/.bin"))
+
+      after ->
+        fs.removeAsync(Fixtures.path("projects/e2e/node_modules"))
+
     beforeEach ->
       Fixtures.scaffold()
 
