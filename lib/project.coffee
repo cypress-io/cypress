@@ -323,22 +323,32 @@ class Project extends EE
     [clientUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
-    ## bail early and do not scaffold if we're headless
-    return Promise.resolve() if config.isHeadless
+    scaffolds = []
 
-    Promise.join(
+    push = scaffolds.push.bind(scaffolds)
+
+    ## TODO: we are currently always scaffolding support
+    ## even when headlessly - this is due to a major breaking
+    ## change of 0.18.0
+    ## we can later force this not to always happen when most
+    ## of our users go beyond 0.18.0
+    ##
+    ## ensure support dir is created
+    ## and example support file if dir doesnt exist
+    push(scaffold.support(config.supportFolder, config))
+
+    ## if we're in headed mode add these other scaffolding
+    ## tasks
+    if not config.isHeadless
       ## ensure integration folder is created
       ## and example spec if dir doesnt exit
-      scaffold.integration(config.integrationFolder)
+      push(scaffold.integration(config.integrationFolder))
 
       ## ensure fixtures dir is created
       ## and example fixture if dir doesnt exist
-      scaffold.fixture(config.fixturesFolder)
+      push(scaffold.fixture(config.fixturesFolder))
 
-      ## ensure support dir is created
-      ## and example support file if dir doesnt exist
-      scaffold.support(config.supportFolder, config)
-    )
+    Promise.all(scaffolds)
 
   writeProjectId: (id) ->
     attrs = {projectId: id}
