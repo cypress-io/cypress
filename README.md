@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.6 - *(11/27/16)*
+- tweaked bundle error message
+
 #### 0.3.5 - *(11/21/16)*
 - handle script errors
 
