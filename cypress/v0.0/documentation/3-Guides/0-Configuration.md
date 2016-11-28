@@ -40,13 +40,13 @@ Option | Default | Description
 ----- | ---- | ----
 `baseUrl` | `null` | Base url to prefix to [`cy.visit`](https://on.cypress.io/api/visit) or [`cy.request`](https://on.cypress.io/api/request) command
 `env` | `{}` | [Environment Variables](https://on.cypress.io/guides/environment-variables)
+`ignoreTestFiles` | `*.hot-update.js` | A string or array of glob patterns for ignoring test files that would otherwise be shown in your tests list. Under the hood Cypress is using `minimatch` with the options: `{dot: true, matchBase: true}`. We suggest you using [http://globtester.com](http://globtester.com) to test what files would match.
 `port` |  | Port to use for Cypress
 `numTestsKeptInMemory` | `50` | The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are seeing extremely high memory consumption in your browser.
 `reporter` | `spec` | The [reporter](https://on.cypress.io/guides/reporters) used during headless or CI runs
 `reporterOptions` | `null` | The [reporter options](https://on.cypress.io/guides/reporters#section-reporter-options) used. Supported options depend on the reporter.
 `screenshotOnHeadlessFailure` | `true` | Whether to take a screenshot automatically on test failure when running headlessly or in CI
 `watchForFileChanges` | `true` | Whether Cypress will watch and restart tests on file changes
-`ignoreTestFiles` | `*.hot-update.js` | A string or array of glob patterns for ignoring test files that would otherwise be shown in your tests list. Under the hood Cypress is using `minimatch` with the options: `{dot: true, matchBase: true}`. We suggest you using [http://globtester.com](http://globtester.com) to test what files would match.
 
 ***
 
@@ -64,14 +64,14 @@ Option | Default | Description
 
 ## Folders
 
-To turn off the use of `fixture` folders or `support` folders, pass `false` into the respective configuration option.
+To turn off the use of `fixture` folders, pass `false` into the configuration option.
 
 Option | Default | Description
 ----- | ---- | ----
 `fixturesFolder`    | `cypress/fixtures`    | Where Cypress will look for fixture files
 `integrationFolder` | `cypress/integration` | Where Cypress will look for integration test files
+`supportFile` | `cypress/support` | Path to a file to load before your test files. File is compiled and bundled as test files are. Pass `false` to turn off.
 `screenshotsFolder`     | `cypress/screenshots`     | Where Cypress will automatically save screenshots from [`cy.screenshot()`](https://on.cypress.io/api/screenshot) or during test failures when running headlessly.
-`supportFolder`     | `cypress/support`     | Where Cypress will auto load support files
 `videosFolder`     | `cypress/videos`     | Where Cypress will automatically save the video of the test run when running headlessly.
 
 ***
@@ -147,7 +147,7 @@ Example:
 ## you can pass --config to cypress open, cypress run, or cypress ci
 cypress open --config watchForFileChanges=false,waitForAnimations=false
 
-cypress run --config integrationFolder=tests,fixturesFolder=false,supportFolder=false
+cypress run --config integrationFolder=tests,fixturesFolder=false
 
 cypress ci --config viewportWidth=1280,viewportHeight=720
 ```

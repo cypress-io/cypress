@@ -41,7 +41,7 @@ A fixture in Cypress is a fixed set of data located in a file that is used as a 
 
 ## Validation
 
-Cypress will automatically validate your fixtures. If your `.json`, `.js`, or `.coffee`  files contain syntax errors, they will automatically be shown in the Command Log.
+Cypress will automatically validate your fixtures. If your `.json`, `.js`, or `.coffee` files contain syntax errors, they will automatically be shown in the Command Log.
 
 ***
 

@@ -4,6 +4,7 @@ excerpt: Errors that require additional explanation are listed here.
 # Contents
 
 - :fa-angle-right: [Sorry, there's something wrong with this file](#section-sorry-there-s-something-wrong-with-this-file)
+- :fa-angle-right: [Oops...we found an error preparing your file](#section-we-found-an-error-preparing-your-file)
 - :fa-angle-right: [Cypress cannot execute commands outside a running test](#section-cypress-cannot-execute-commands-outside-a-running-test)
 - :fa-angle-right: [cy.method() failed because the element you are chaining off of has become detached or removed from the dom](#section-cy-method-failed-because-the-element-you-are-chaining-off-of-has-become-detached-or-removed-from-the-dom)
 - :fa-angle-right: [cy.method() failed because the element cannot be interacted with](#section-cy-method-failed-because-the-element-cannot-be-interacted-with)
@@ -12,6 +13,7 @@ excerpt: Errors that require additional explanation are listed here.
 - :fa-angle-right: [The test has finished but Cypress still has commands in its queue](#section-the-test-has-finished-but-cypress-still-has-commands-in-its-queue)
 - :fa-angle-right: [cy.visit() failed because you're attempting to visit a second unique domain](#section-cy-visit-failed-because-you-are-attempting-to-visit-a-second-unique-domain)
 - :fa-angle-right: [Cypress detected a cross origin error happened on page load](#section-cypress-detected-a-cross-origin-error-happened-on-page-load)
+- :fa-angle-right: [The supportFolder option has been removed](#section-the-supportfolder-option-has-been-removed)
 
 ***
 
@@ -19,16 +21,25 @@ excerpt: Errors that require additional explanation are listed here.
 
 ![screen shot 2015-12-01 at 12 29 06 pm](https://cloud.githubusercontent.com/assets/1268976/11508539/553573ba-9827-11e5-956b-e849b95e806c.png)
 
-This message means that Cypress was unable to read or find tests in the specified file.
+This message means that Cypress was unable to read or find tests in the specified file. You'll likely get this message if you have an empty test file, and have not yet written any tests.
+
+***
+
+# We found an error preparing your file
+
+This message means that Cypress encountered an error when compiling and/or bundling your test file.
+
+Cypress automatically compiles and bundles your test code so you can use ES2015, CoffeeScript, modules, etc.
 
 You'll typically receive this message due to:
 
-- JavaScript syntax errors that prevent Cypress from reading your tests
-- Compilation errors from typos in `.coffee` files
+- The file missing
+- A syntax error in the file or one of its dependencies
+- A missing dependency
 
-Check the console in your Developer Tools for JavaScript errors or warnings. If Cypress failed to compile a `.coffee` file, you will see the network request has a `500` status code in the Network tab.
+The error will be printed on the right side, usually showing the part of the code in which the error occurred.
 
-You'll also get this message if you have an empty test file, and have not yet written any tests.
+When you fix the error in your code, your tests will automatically re-run.
 
 ***
 
@@ -377,3 +388,75 @@ If you find yourself stuck and cannot work around these issues you can just set 
 ```
 
 But before doing so you should really understand and [read about the reasoning here](https://on.cypress.io/guides/web-security).
+
+
+# The supportFolder option has been removed
+
+The `supportFolder` option has been removed from Cypress and has been replaced by module support and the `supportFile` option. Cypress used to automatically include any scripts in the `supportFolder` before your test files, and that was the best way to include custom Cypress commands and utility functions. However, automatically including all the files in a certain directory is somewhat magical and unintuitive, and requires creating globals for the purpose of utility functions. This behavior has been succeeded by module support and the `supportFile` option.
+
+## Use modules for utility functions
+
+Cypress supports both ES2015 modules and CommonJS modules. You can import/require npm modules as well as local modules:
+
+```javascript
+import _ from "lodash"
+import util from "./util"
+
+it("uses modules", function () {
+  expect(_.kebabCase("FooBar")).to.equal("foo-bar")
+  expect(util.secretCode()).to.equal("1-2-3-4")
+})
+```
+
+## Use supportFile to load scripts before your test code
+
+It's still useful to load a setup file before your test code. If you are setting Cypress defaults or utilizing custom Cypress commands, instead of needing to import/require those defaults/commands in every test file, you can use the `supportFile` configuration option. This works similar to the former `supportFolder` option, but is more explicit.
+
+`supportFile` is a path to a file to include before your test files. By default, `supportFile` is set to look for one of the following files:
+
+* `cypress/support/index.js`
+* `cypress/support/index.coffee`
+
+Just like with your test files, the `supportFile` can use ES2015+ (or CoffeeScript) and modules, so you can import/require other files as needed.
+
+## Migrating from supportFolder to supportFile
+
+You're seeing this error because you have the `supportFolder` option explicitly set, either to a different directory or as `false`, meaning you didn't utilize the support folder functionality.
+
+### If you have supportFolder set to false
+
+Set the `supportFile` option to false instead:
+
+```javascript
+// cypress.json
+
+// before
+{
+  "supportFolder": false
+}
+
+// after
+{
+  "supportFile": false
+}
+```
+
+### If you have supportFolder set to a different directory
+
+When you open a project with Cypress, we look for a file named `index.js` in the `supportFolder` you have set. If one is not present, we generate a file that imports all the other files in your `supportFolder`. You simply need to set the `supportFile` option to point to that file, and everything should work as before.
+
+If, for example, you had the `supportFolder` set to `utilities`, change its name to `supportFile` and its value to `utilities/index.js`:
+
+```javascript
+// cypress.json
+
+// before
+{
+  "supportFolder": "utilities"
+}
+
+// after
+{
+  "supportFile": "utilities/index.js"
+}
+```

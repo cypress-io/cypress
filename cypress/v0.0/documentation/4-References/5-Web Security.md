@@ -49,8 +49,6 @@ After the first [`cy.visit`](https://on.cypress.io/api/visit) is issued in a tes
 
 It's important to note that although we do our *very best* to ensure your application works normally inside of Cypress, there **are** some limitations you need to be aware of.
 
-***
-
 ## One Superdomain per Test
 
 Because Cypress changes its own host URL to match that of your applications, it requires that your application remain on the same superdomain for the entirety of a single test.
@@ -158,8 +156,6 @@ If you're in a situation where you don't control the code, or otherwise cannot w
 # Common Workarounds
 
 Let's investigate how you might encounter `cross origin` errors in your test code and break down how to work around them in Cypress.
-
-***
 
 ## External Navigation
 
