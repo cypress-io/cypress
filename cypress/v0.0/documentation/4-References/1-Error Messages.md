@@ -4,7 +4,7 @@ excerpt: Errors that require additional explanation are listed here.
 # Contents
 
 - :fa-angle-right: [Sorry, there's something wrong with this file](#section-sorry-there-s-something-wrong-with-this-file)
-- :fa-angle-right: [Oops...we found an error preparing your file](#section-we-found-an-error-preparing-your-file)
+- :fa-angle-right: [Oops...we found an error preparing your test file](#section-we-found-an-error-preparing-your-test-file)
 - :fa-angle-right: [Cypress cannot execute commands outside a running test](#section-cypress-cannot-execute-commands-outside-a-running-test)
 - :fa-angle-right: [cy.method() failed because the element you are chaining off of has become detached or removed from the dom](#section-cy-method-failed-because-the-element-you-are-chaining-off-of-has-become-detached-or-removed-from-the-dom)
 - :fa-angle-right: [cy.method() failed because the element cannot be interacted with](#section-cy-method-failed-because-the-element-cannot-be-interacted-with)
@@ -25,7 +25,7 @@ This message means that Cypress was unable to read or find tests in the specifie
 
 ***
 
-# We found an error preparing your file
+# We found an error preparing your test file
 
 This message means that Cypress encountered an error when compiling and/or bundling your test file.
 
