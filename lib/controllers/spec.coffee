@@ -4,7 +4,7 @@ bundle  = require("../util/bundle")
 appData = require("../util/app_data")
 
 module.exports = {
-  handle: (spec, req, res, config, next, watchers) ->
+  handle: (spec, req, res, config, next, watchers, project) ->
     res.set({
       "Cache-Control": "no-cache, no-store, must-revalidate"
       "Pragma": "no-cache"
@@ -27,7 +27,7 @@ module.exports = {
 
         errors.log(errors.get("BUNDLE_ERROR", filePath, bundle.errorMessage(err)))
 
-        process.exit(1)
+        project.emit("exitEarly", 1)
     else
       watchers
       .watchBundle(spec, config)

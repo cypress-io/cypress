@@ -52,6 +52,10 @@ describe "lib/controllers/spec", ->
       }
     }
 
+    @project = {
+      emit: @sandbox.stub()
+    }
+
     @res = through2.obj (chunk, enc, cb) -> cb(null, chunk)
 
     @res.set  = @sandbox.stub()
@@ -66,7 +70,7 @@ describe "lib/controllers/spec", ->
     fs.writeFileSync(appData.path("bundles", "sample.js"), ';')
 
     @handle = (filePath) =>
-      spec.handle filePath, {}, @res, @config, (=>), @watchers
+      spec.handle filePath, {}, @res, @config, (=>), @watchers, @project
 
   it "sets the correct content type", ->
     @handle("sample.js")
@@ -97,7 +101,6 @@ describe "lib/controllers/spec", ->
         getLatestBundle: -> Promise.resolve()
       })
       @config.isHeadless = true
-      @exit = @sandbox.stub(process, "exit")
 
     it "sends the file from the bundles path", ->
       @handle("sample.js")
@@ -114,4 +117,4 @@ describe "lib/controllers/spec", ->
       @handle("sample.js").then =>
         expect(@log).to.have.been.called
         expect(@log.firstCall.args[0].stack).to.include("Oops...we found an error preparing this test file")
-        expect(@exit).to.have.been.calledWith(1)
+        expect(@project.emit).to.have.been.calledWith("exitEarly", 1)

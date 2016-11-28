@@ -113,7 +113,7 @@ class Server
       ## and reset to the initial state
       @_onDomainSet("<root>")
 
-  open: (config = {}) ->
+  open: (config = {}, project) ->
     Promise.try =>
       ## always reset any buffers
       ## TODO: change buffers to be an instance
@@ -132,7 +132,7 @@ class Server
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, @watchers)
+      @createRoutes(app, config, @_request, getRemoteState, @watchers, project)
 
       @createServer(app, config, @_request)
 

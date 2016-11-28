@@ -254,6 +254,20 @@ module.exports = {
       ## dont ever end if we're in 'gui' debugging mode
       return if gui
 
+      onFinish = (obj) =>
+        finish = ->
+          resolve(obj)
+
+        if end
+          @postProcessRecording(end, name, cname, videoCompression)
+          .then(finish)
+          ## TODO: add a catch here
+        else
+          finish()
+
+      onExit = (code = 1) ->
+        onFinish({failures: code})
+
       onEnd = (obj) =>
         if end
           obj.video = name
@@ -271,19 +285,12 @@ module.exports = {
         if ft and ft.length
           obj.failingTests = Reporter.setVideoTimestamp(started, ft)
 
-        finish = ->
-          resolve(obj)
-
-        if end
-          @postProcessRecording(end, name, cname, videoCompression)
-          .then(finish)
-          ## TODO: add a catch here
-        else
-          finish()
+        onFinish(obj)
 
       ## when our openProject fires its end event
       ## resolve the promise
       openProject.once("end", onEnd)
+      openProject.once("exitEarly", onExit)
 
   trashAssets: (options = {}) ->
     if options.trashAssetsBeforeHeadlessRuns is true

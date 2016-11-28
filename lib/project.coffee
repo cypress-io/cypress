@@ -58,7 +58,7 @@ class Project extends EE
     .then (cfg) =>
       process.chdir(@projectRoot)
 
-      @server.open(cfg)
+      @server.open(cfg, @)
       .then (port) =>
         ## if we didnt have a cfg.port
         ## then get the port once we
