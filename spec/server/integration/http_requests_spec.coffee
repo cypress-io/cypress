@@ -313,6 +313,8 @@ describe "Routes", ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.deep.eq([
               { name: "integration/bar.js" }
+              { name: "integration/baz.js" }
+              { name: "integration/dom.jsx" }
               { name: "integration/foo.coffee" }
               { name: "integration/nested/tmp.js" }
               { name: "integration/noop.coffee" }
@@ -333,6 +335,8 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.deep.eq([
+              { name: "integration/baz.js" }
+              { name: "integration/dom.jsx" }
               { name: "integration/noop.coffee" }
             ])
 
@@ -353,6 +357,16 @@ describe "Routes", ->
           browserifyFile(Fixtures.path("projects/ids/cypress/integration/foo.coffee"))
           .then (file) ->
             expect(res.body).to.equal file.toString()
+
+      it "processes dom.jsx spec", ->
+        @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          browserifyFile(Fixtures.path("projects/ids/cypress/integration/baz.js"))
+          .then (file) ->
+            expect(res.body).to.equal file.toString()
+            expect(res.body).to.include("React.createElement(")
 
       it "serves error javascript file when the file is missing", ->
         @rp("http://localhost:2020/__cypress/tests?p=does/not/exist.coffee")
@@ -806,7 +820,6 @@ describe "Routes", ->
         @rp("http://localhost:2020/__cypress/iframes/integration/foo.coffee")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-
 
           body = removeWhitespace(res.body)
           expect(body).to.eq contents
