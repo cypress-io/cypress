@@ -113,5 +113,5 @@ describe "lib/controllers/spec", ->
 
       @handle("sample.js").then =>
         expect(@log).to.have.been.called
-        expect(@log.firstCall.args[0].stack).to.include("Oops...we found an error preparing your test file")
+        expect(@log.firstCall.args[0].stack).to.include("Oops...we found an error preparing this test file")
         expect(@exit).to.have.been.calledWith(1)

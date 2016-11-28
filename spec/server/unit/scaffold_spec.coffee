@@ -61,36 +61,31 @@ describe "lib/scaffold", ->
     beforeEach ->
       pristinePath = Fixtures.projectPath("pristine")
 
-      @config = {
-        resolved: { supportFile: { from: "default" } }
-        supportFile: "support/index.js"
-        supportFolder: "support"
-      }
-
-      @resolvedSupportFolder = path.resolve(pristinePath, @config.supportFolder)
+      config.get(pristinePath).then (@cfg) =>
+        {@supportFolder} = @cfg
 
     it "does not create any files but index.js if supportFolder directory already exists", ->
       ## create the supportFolder ourselves manually
-      fs.ensureDirAsync(@resolvedSupportFolder)
+      fs.ensureDirAsync(@supportFolder)
       .then =>
         ## now scaffold
-        scaffold.support(@resolvedSupportFolder, @config)
+        scaffold.support(@supportFolder, @cfg)
       .then =>
-        glob("**/*", {cwd: @resolvedSupportFolder})
+        glob("**/*", {cwd: @supportFolder})
       .then (files) ->
         expect(files.length).to.eq(1)
         expect(files[0]).to.include('index.js')
 
     it "does not create any files if supportFolder and index.js already exist", ->
-      indexPath = path.join(@resolvedSupportFolder, "index.js")
+      indexPath = path.join(@supportFolder, "index.js")
       ## create the supportFolder ourselves manually
-      fs.ensureDirAsync(@resolvedSupportFolder)
+      fs.ensureDirAsync(@supportFolder)
       .then =>
         ## now scaffold
-        scaffold.support(@resolvedSupportFolder, @config).then =>
+        scaffold.support(@supportFolder, @cfg).then =>
           fs.outputFileAsync(indexPath, ";")
       .then =>
-        glob("**/*", {cwd: @resolvedSupportFolder})
+        glob("**/*", {cwd: @supportFolder})
       .then (files) ->
         fs.readFileAsync(indexPath).then (buffer) ->
           expect(files.length).to.eq(1)
@@ -98,17 +93,18 @@ describe "lib/scaffold", ->
           expect(buffer.toString()).to.equal(";")
 
     it "does not create any files if supportFile is not default", ->
-      @config.resolved.supportFile.from = "config"
-      scaffold.support(@resolvedSupportFolder, @config)
+      @cfg.resolved.supportFile.from = "config"
+
+      scaffold.support(@supportFolder, @cfg)
       .then =>
-        glob("**/*", {cwd: @resolvedSupportFolder})
+        glob("**/*", {cwd: @supportFolder})
       .then (files) ->
         expect(files.length).to.eq(0)
 
     it "creates supportFolder and commands.js, defaults.js, and index.js when supportFolder does not exist", ->
       ## todos has a _support folder so let's first nuke it and then scaffold
-      scaffold.support(@resolvedSupportFolder, @config).then =>
-        fs.readFileAsync(@resolvedSupportFolder + "/commands.js", "utf8").then (str) =>
+      scaffold.support(@supportFolder, @cfg).then =>
+        fs.readFileAsync(@supportFolder + "/commands.js", "utf8").then (str) =>
           expect(str).to.eq """
           // ***********************************************
           // This example commands.js shows you how to
@@ -151,7 +147,7 @@ describe "lib/scaffold", ->
           // })
           """
 
-          fs.readFileAsync(@resolvedSupportFolder + "/defaults.js", "utf8").then (str) =>
+          fs.readFileAsync(@supportFolder + "/defaults.js", "utf8").then (str) =>
             expect(str).to.eq """
             // ***********************************************
             // This example defaults.js shows you how to
@@ -172,24 +168,29 @@ describe "lib/scaffold", ->
             // })
             """
 
-            fs.readFileAsync(@resolvedSupportFolder + "/index.js", "utf8").then (str) =>
+            fs.readFileAsync(@supportFolder + "/index.js", "utf8").then (str) =>
               expect(str).to.eq """
-              // ***********************************************
-              // This example support/index.js is loaded before
-              // any other test files
+              // ***********************************************************
+              // This example support/index.js is processed and
+              // loaded automatically before your other test files.
               //
-              // You can change the location of this file with
-              // the 'supportFile' configuration option
+              // This is a great place to put global configuration and
+              // behavior that modifies Cypress.
+              //
+              // You can change the location of this file or turn off
+              // automatically serving support files with the
+              // 'supportFile' configuration option.
               //
               // You can read more here:
               // https://on.cypress.io/guides/configuration#section-global
-              // ***********************************************
+              // ***********************************************************
 
-              // import the commands.js file and the defaults.js file
+              // Import commands.js and defaults.js
+              // using ES2015 syntax:
               import "./commands"
               import "./defaults"
 
-              // You can alternatively use CommonJS:
+              // Alternatively you can use CommonJS syntax:
               // require("./commands")
               // require("./defaults")
 

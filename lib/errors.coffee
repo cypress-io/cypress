@@ -62,25 +62,21 @@ API = {
         ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
         ## THE ERROR MESSAGE IN THE RUNNER TOO
         """
-        Oops...we found an error preparing your test file:
+        Oops...we found an error preparing this test file:
 
-          #{chalk.yellow(arg1)}
+          #{chalk.blue(arg1)}
 
-        This error occurred while Cypress was compiling and bundling your test code and is usually caused by:
-
-        * The file missing
-        * A syntax error in the file or one of its dependencies
-        * A missing dependency
-
-        Fix the error in your code and re-run your tests.
-
-        ------------------------
+        The error was:
 
         #{chalk.yellow(arg2)}
 
-        ------------------------
-        """
+        This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
+        * A missing file or dependency
+        * A syntax error in the file or one of its dependencies
+
+        Fix the error in your code and re-run your tests.
+        """
 
   get: (type, arg1, arg2) ->
     msg = @getMsgByType(type, arg1, arg2)
