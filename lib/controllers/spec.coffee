@@ -23,7 +23,10 @@ module.exports = {
       .getLatestBundle()
       .then(streamBundle)
       .catch (err) ->
-        errors.log(errors.get("BUNDLE_ERROR", spec, bundle.errorMessage(err)))
+        filePath = err.filePath ? spec
+
+        errors.log(errors.get("BUNDLE_ERROR", filePath, bundle.errorMessage(err)))
+
         process.exit(1)
     else
       watchers

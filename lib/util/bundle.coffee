@@ -17,25 +17,18 @@ appData                = require("./app_data")
 
 fs = Promise.promisifyAll(fs)
 
-stringStream = (contents) ->
-  stream = new ReadableStream()
-  stream._read = ->
-  stream.push(contents)
-  stream.push(null)
-  return stream
-
 module.exports = {
   build: (filePath, config, watch = false) ->
-    emitter = new EventEmitter()
+    emitter = new EE()
 
     absolutePath = path.join(config.projectRoot, filePath)
 
     bundler = browserify({
-      entries: [absolutePath]
-      extensions: [".js", ".jsx", ".coffee", ".cjsx"]
-      cache: {}
+      entries:      [absolutePath]
+      extensions:   [".js", ".jsx", ".coffee", ".cjsx"]
+      cache:        {}
       packageCache: {}
-      plugin: if watch then [watchify] else []
+      plugin:       if watch then [watchify] else []
     })
 
     bundle = =>
@@ -47,9 +40,15 @@ module.exports = {
           .bundle()
           .on "error", (err) =>
             if watch
-              stringStream(@clientSideError(err)).pipe(fs.createWriteStream(outputPath))
+              stringStream(@clientSideError(err))
+              .pipe(fs.createWriteStream(outputPath))
+
+              ## TODO: do we need to wait for the 'end'
+              ## event here before resolving?
               resolve()
             else
+              err.filePath = absolutePath
+
               reject(err)
           .on "end", ->
             resolve()
@@ -82,31 +81,34 @@ module.exports = {
 
     return {
       close: bundler.close
+
       getLatestBundle: -> latestBundle
+
       addChangeListener: (onChange) ->
         emitter.on "update", onChange
     }
 
-  errorMessage: (err = "") ->
-    (err.stack or err.annotated or err.message or err)
+  errorMessage: (err = {}) ->
+    (err.stack ? err.annotated ? err.message ? err.toString())
     ## strip out stack noise from parser like
     ## at Parser.pp$5.raise (/path/to/node_modules/babylon/lib/index.js:4215:13)
-    .replace(/\n\s*at.*/g, '')
+    .replace(/\n\s*at.*/g, "")
+    .replace("From previous event:", "")
 
   clientSideError: (err) ->
     err = @errorMessage(err)
-      ## \n doesn't come through properly so preserve it so the
-      ## runner can do the right thing
-      .replace(/\n/g, '{newline}')
-      ## babel adds syntax highlighting for the console in the form of
-      ## [90m that need to be stripped out or they appear in the error message
-      .replace(/\[\d{1,3}m/g, '')
+    ## \n doesn't come through properly so preserve it so the
+    ## runner can do the right thing
+    .replace(/\n/g, '{newline}')
+    ## babel adds syntax highlighting for the console in the form of
+    ## [90m that need to be stripped out or they appear in the error message
+    .replace(/\[\d{1,3}m/g, '')
 
     """
     (function () {
       Cypress.trigger("script:error", {
         type: "BUNDLE_ERROR",
-        error: "#{err}"
+        error: #{JSON.stringify(err)}
       })
     }())
     """
