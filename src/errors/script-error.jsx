@@ -5,16 +5,18 @@ const BundleError = ({ specPath }) => (
   <div>
     <h4>
       <i className='fa fa-warning'></i>
-      Oops...we found an error preparing your test file:
+      Oops...we found an error preparing this test file:
     </h4>
     <pre>{specPath}</pre>
-    <p>This error occurred while Cypress was compiling and bundling your test code (<a href='https://on.cypress.io/we-found-an-error-preparing-your-file' target='_blank' rel='noopener noreferrer'>learn more</a>) and is usually caused by:</p>
+    <p>This occurred while Cypress was compiling and bundling your test code. This is usually caused by:</p>
     <ul>
-      <li>The file missing</li>
+      <li>A missing file or dependency</li>
       <li>A syntax error in the file or one of its dependencies</li>
-      <li>A missing dependency</li>
     </ul>
-    <p>Fix the error in your code to clear this error and re-run your tests.</p>
+    <p>
+      Fix the error in your code and re-run your tests.
+      (<a href='https://on.cypress.io/we-found-an-error-preparing-your-test-file' target='_blank' rel='noopener noreferrer'>learn more</a>)
+    </p>
   </div>
 )
 
