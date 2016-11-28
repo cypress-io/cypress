@@ -389,6 +389,7 @@ If you find yourself stuck and cannot work around these issues you can just set 
 
 But before doing so you should really understand and [read about the reasoning here](https://on.cypress.io/guides/web-security).
 
+***
 
 # The supportFolder option has been removed
 
@@ -423,9 +424,14 @@ Just like with your test files, the `supportFile` can use ES2015+ (or CoffeeScri
 
 You're seeing this error because you have the `supportFolder` option explicitly set, either to a different directory or as `false`, meaning you didn't utilize the support folder functionality.
 
-### If you have supportFolder set to false
+[block:callout]
+{
+  "type": "info",
+  "title": "I have `supportFolder` set to `false`"
+}
+[/block]
 
-Set the `supportFile` option to false instead:
+Set the `supportFile` option to `false` instead:
 
 ```javascript
 // cypress.json
@@ -441,9 +447,16 @@ Set the `supportFile` option to false instead:
 }
 ```
 
-### If you have supportFolder set to a different directory
+[block:callout]
+{
+  "type": "info",
+  "title": "I have `supportFolder` set to a different directory"
+}
+[/block]
 
-When you open a project with Cypress, we look for a file named `index.js` in the `supportFolder` you have set. If one is not present, we generate a file that imports all the other files in your `supportFolder`. You simply need to set the `supportFile` option to point to that file, and everything should work as before.
+When you open a project with Cypress, we look for a file named `index.js` in the `supportFolder` you have set. If one is not present, we generate a file that imports all the other files in your `supportFolder`.
+
+You simply need to set the `supportFile` option to point to that file, and everything should work as before.
 
 If, for example, you had the `supportFolder` set to `utilities`, change its name to `supportFile` and its value to `utilities/index.js`:
 
