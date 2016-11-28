@@ -982,6 +982,7 @@ describe('Kitchen Sink', function(){
     })
 
     it('cy.route() - route responses to matching requests', function(){
+      var message = 'whoa, this comment doesn\'t exist'
 
       cy.server()
 
@@ -1023,8 +1024,6 @@ describe('Kitchen Sink', function(){
 
       // **** Stubbed PUT comment route ****
       //
-      message = 'whoa, this comment doesn\'t exist'
-
       cy
         .route({
             method: 'PUT',
