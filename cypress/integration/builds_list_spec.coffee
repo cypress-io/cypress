@@ -121,7 +121,6 @@ describe "Builds List", ->
                 .contains("manage").click().then ->
                    expect(@App.ipc).to.be.calledWith("external:open", "https://app.cypress.io")
 
-
           describe "public v private", ->
             it "displays public and private radios", ->
               cy
@@ -134,13 +133,13 @@ describe "Builds List", ->
                 .get(".modal-body")
                 .contains(".btn", "Setup Project").click()
 
-            it "calls ipc event", ->
+            it "calls ipc event"
 
-            it "sends data from form to ipc event", ->
+            it "sends data from form to ipc event"
 
-            it "closes modal", ->
+            it "closes modal"
 
-            it "displays new page", ->
+            it "displays new page"
 
           describe "errors on form submit", ->
             beforeEach ->
@@ -148,9 +147,9 @@ describe "Builds List", ->
                 .get(".modal-body")
                 .contains(".btn", "Setup Project").click()
 
-            it "displays errors", ->
+            it "displays errors"
 
-            it "does not close modal", ->
+            it "does not close modal"
 
       context "having previously setup CI", ->
         beforeEach ->
@@ -175,9 +174,7 @@ describe "Builds List", ->
             @ipc.handle("get:specs", null, @specs)
           .get(".nav a").contains("Builds").click()
 
-      it "lists builds", ->
-        cy
-          .get(".builds-list a")
+      it "lists builds"
 
   context "without a current user", ->
     beforeEach ->
