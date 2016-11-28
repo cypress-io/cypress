@@ -35,9 +35,9 @@ class Project extends EE
       throw new Error("Instantiating lib/project requires a projectRoot!")
 
     @projectRoot = path.resolve(projectRoot)
-    @server      = Server()
     @watchers    = Watchers()
     @memoryCheck = null
+    @server      = Server(@watchers)
 
   open: (options = {}) ->
     _.defaults options, {
@@ -80,7 +80,7 @@ class Project extends EE
         @sync(options)
 
         Promise.join(
-          @watchSettingsAndStartWebsockets(options, cfg)
+          @watchFilesAndStartWebsockets(options, cfg)
           @scaffold(cfg)
         )
 
@@ -136,6 +136,16 @@ class Project extends EE
       .spread (session, cfg) ->
         api.updateProject(id, options.type, cfg.projectName, session)
 
+  watchSupportFile: (config) ->
+    if supportFile = config.supportFile
+      relativePath = path.relative(config.projectRoot, config.supportFile)
+      @watchers.watchBundle(relativePath, config, {
+        onChange: _.bind(@server.onTestFileChange, @server, relativePath)
+      })
+      ## ignore errors b/c we're just setting up the watching. errors
+      ## are handled by the spec controller
+      .catch ->
+
   watchSettings: (onSettingsChanged) ->
     ## bail if we havent been told to
     ## watch anything
@@ -155,7 +165,8 @@ class Project extends EE
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
 
-  watchSettingsAndStartWebsockets: (options = {}, config = {}) ->
+  watchFilesAndStartWebsockets: (options = {}, config = {}) ->
+    @watchSupportFile(config)
     @watchSettings(options.onSettingsChanged)
 
     ## if we've passed down reporter
@@ -322,15 +333,11 @@ class Project extends EE
 
       ## ensure fixtures dir is created
       ## and example fixture if dir doesnt exist
-      scaffold.fixture(config.fixturesFolder, {
-        remove: config.fixturesFolderRemove
-      })
+      scaffold.fixture(config.fixturesFolder)
 
       ## ensure support dir is created
       ## and example support file if dir doesnt exist
-      scaffold.support(config.supportFolder, {
-        remove: config.supportFolderRemove
-      })
+      scaffold.support(config.supportFolder, config)
     )
 
   writeProjectId: (id) ->

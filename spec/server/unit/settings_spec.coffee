@@ -66,6 +66,13 @@ describe "lib/settings", ->
       .then (obj) ->
         expect(obj).to.deep.eq {defaultCommandTimeout: 30000, foo: "bar"}
 
+    it "renames supportFolder -> supportFile", ->
+      @setup({supportFolder: "foo", foo: "bar"})
+      .then ->
+        settings.read(projectRoot)
+      .then (obj) ->
+        expect(obj).to.deep.eq {supportFile: "foo", foo: "bar"}
+
     it "renames visitTimeout -> pageLoadTimeout", ->
       @setup({visitTimeout: 30000, foo: "bar"})
       .then ->

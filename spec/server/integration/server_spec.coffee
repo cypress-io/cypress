@@ -271,6 +271,7 @@ describe "Server", ->
     describe "http", ->
       beforeEach ->
         @setup({
+          projectRoot: "/foo/bar/"
           config: {
             port: 2000
           }

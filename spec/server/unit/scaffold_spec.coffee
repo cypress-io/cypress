@@ -10,6 +10,8 @@ Fixtures   = require("#{root}/spec/server/helpers/fixtures")
 
 glob = Promise.promisify(glob)
 
+supportFolder = "cypress/support"
+
 describe "lib/scaffold", ->
   beforeEach ->
     Fixtures.scaffold()
@@ -59,42 +61,49 @@ describe "lib/scaffold", ->
     beforeEach ->
       pristinePath = Fixtures.projectPath("pristine")
 
-      config.get(pristinePath).then (cfg) =>
-        {@supportFolder} = cfg
+      config.get(pristinePath).then (@cfg) =>
+        {@supportFolder} = @cfg
 
-    it "is noop when removal is true and there is no folder", ->
-      scaffold.support(@supportFolder, {remove: true})
-      .then =>
-        fs.statAsync(@supportFolder)
-        .then ->
-          throw new Error("should have failed but didnt")
-        .catch ->
-
-    it "removes supportFolder + contents when existing", ->
-      scaffold.support(@supportFolder)
-      .then =>
-        scaffold.support(@supportFolder, {remove: true})
-      .then =>
-        fs.statAsync(@supportFolder)
-        .then ->
-          throw new Error("should have failed but didnt")
-        .catch ->
-
-    it "does not create any files if supportFolder already exists", ->
+    it "does not create any files but index.js if supportFolder directory already exists", ->
       ## create the supportFolder ourselves manually
       fs.ensureDirAsync(@supportFolder)
       .then =>
         ## now scaffold
-        scaffold.support(@supportFolder)
+        scaffold.support(@supportFolder, @cfg)
       .then =>
         glob("**/*", {cwd: @supportFolder})
       .then (files) ->
-        ## ensure no files exist
+        expect(files.length).to.eq(1)
+        expect(files[0]).to.include('index.js')
+
+    it "does not create any files if supportFolder and index.js already exist", ->
+      indexPath = path.join(@supportFolder, "index.js")
+      ## create the supportFolder ourselves manually
+      fs.ensureDirAsync(@supportFolder)
+      .then =>
+        ## now scaffold
+        scaffold.support(@supportFolder, @cfg).then =>
+          fs.outputFileAsync(indexPath, ";")
+      .then =>
+        glob("**/*", {cwd: @supportFolder})
+      .then (files) ->
+        fs.readFileAsync(indexPath).then (buffer) ->
+          expect(files.length).to.eq(1)
+          ## it doesn't change the contents of the existing index.js
+          expect(buffer.toString()).to.equal(";")
+
+    it "does not create any files if supportFile is not default", ->
+      @cfg.resolved.supportFile.from = "config"
+
+      scaffold.support(@supportFolder, @cfg)
+      .then =>
+        glob("**/*", {cwd: @supportFolder})
+      .then (files) ->
         expect(files.length).to.eq(0)
 
-    it "creates both supportFolder and commands.js and defaults.js when supportFolder does not exist", ->
+    it "creates supportFolder and commands.js, defaults.js, and index.js when supportFolder does not exist", ->
       ## todos has a _support folder so let's first nuke it and then scaffold
-      scaffold.support(@supportFolder).then =>
+      scaffold.support(@supportFolder, @cfg).then =>
         fs.readFileAsync(@supportFolder + "/commands.js", "utf8").then (str) =>
           expect(str).to.eq """
           // ***********************************************
@@ -138,25 +147,53 @@ describe "lib/scaffold", ->
           // })
           """
 
-          fs.readFileAsync(@supportFolder + "/defaults.js", "utf8").then (str) ->
-              expect(str).to.eq """
-              // ***********************************************
-              // This example defaults.js shows you how to
-              // customize the internal behavior of Cypress.
-              //
-              // The defaults.js file is a great place to
-              // override defaults used throughout all tests.
-              //
-              // ***********************************************
-              //
-              // Cypress.Server.defaults({
-              //   delay: 500,
-              //   whitelist: function(xhr){}
-              // })
+          fs.readFileAsync(@supportFolder + "/defaults.js", "utf8").then (str) =>
+            expect(str).to.eq """
+            // ***********************************************
+            // This example defaults.js shows you how to
+            // customize the internal behavior of Cypress.
+            //
+            // The defaults.js file is a great place to
+            // override defaults used throughout all tests.
+            //
+            // ***********************************************
+            //
+            // Cypress.Server.defaults({
+            //   delay: 500,
+            //   whitelist: function(xhr){}
+            // })
 
-              // Cypress.Cookies.defaults({
-              //   whitelist: ["session_id", "remember_token"]
-              // })
+            // Cypress.Cookies.defaults({
+            //   whitelist: ["session_id", "remember_token"]
+            // })
+            """
+
+            fs.readFileAsync(@supportFolder + "/index.js", "utf8").then (str) =>
+              expect(str).to.eq """
+              // ***********************************************************
+              // This example support/index.js is processed and
+              // loaded automatically before your other test files.
+              //
+              // This is a great place to put global configuration and
+              // behavior that modifies Cypress.
+              //
+              // You can change the location of this file or turn off
+              // automatically serving support files with the
+              // 'supportFile' configuration option.
+              //
+              // You can read more here:
+              // https://on.cypress.io/guides/configuration#section-global
+              // ***********************************************************
+
+              // Import commands.js and defaults.js
+              // using ES2015 syntax:
+              import "./commands"
+              import "./defaults"
+
+              // Alternatively you can use CommonJS syntax:
+              // require("./commands")
+              // require("./defaults")
+
               """
 
   context ".fixture", ->
@@ -165,24 +202,6 @@ describe "lib/scaffold", ->
 
       config.get(todosPath).then (cfg) =>
         {@fixturesFolder} = cfg
-
-    it "is noop when removal is true and there is no folder", ->
-      scaffold.fixture(@fixturesFolder, {remove: true})
-      .then =>
-        fs.statAsync(@fixturesFolder)
-        .then ->
-          throw new Error("should have failed but didnt")
-        .catch ->
-
-    it "removes fixturesFolder + contents when existing", ->
-      scaffold.fixture(@fixturesFolder)
-      .then =>
-        scaffold.fixture(@fixturesFolder, {remove: true})
-      .then =>
-        fs.statAsync(@fixturesFolder)
-        .then ->
-          throw new Error("should have failed but didnt")
-        .catch ->
 
     it "creates both fixturesFolder and example.json when fixturesFolder does not exist", ->
       ## todos has a fixtures folder so let's first nuke it and then scaffold

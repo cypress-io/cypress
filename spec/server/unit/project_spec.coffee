@@ -25,7 +25,7 @@ describe "lib/project", ->
     settings.read(@todosPath).then (obj = {}) =>
       {@projectId} = obj
 
-      @config  = config.set({projectName: "project"})
+      @config  = config.set({projectName: "project", projectRoot: "/foo/bar"})
       @project = Project(@todosPath)
 
   afterEach ->
@@ -68,7 +68,7 @@ describe "lib/project", ->
 
   context "#open", ->
     beforeEach ->
-      @sandbox.stub(@project, "watchSettingsAndStartWebsockets").resolves()
+      @sandbox.stub(@project, "watchFilesAndStartWebsockets").resolves()
       @sandbox.stub(@project, "ensureProjectId").resolves("id-123")
       @sandbox.stub(@project, "updateProject").withArgs("id-123", "opened").resolves()
       @sandbox.stub(@project, "scaffold").resolves()
@@ -85,11 +85,11 @@ describe "lib/project", ->
       @project.open(opts).then ->
         expect(opts.type).to.eq("opened")
 
-    it "calls #watchSettingsAndStartWebsockets with options + config", ->
+    it "calls #watchFilesAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
       @project.cfg = {}
       @project.open(opts).then =>
-        expect(@project.watchSettingsAndStartWebsockets).to.be.calledWith(opts, @project.cfg)
+        expect(@project.watchFilesAndStartWebsockets).to.be.calledWith(opts, @project.cfg)
 
     it "calls #scaffold with server config", ->
       @project.open().then =>
@@ -267,7 +267,7 @@ describe "lib/project", ->
       @sandbox.stub(scaffold, "fixture").resolves()
       @sandbox.stub(scaffold, "support").resolves()
 
-      @obj = {projectRoot: "pr", fixturesFolder: "ff", supportFolder: "sf", integrationFolder: "if"}
+      @obj = {projectRoot: "pr", fixturesFolder: "ff", integrationFolder: "if", supportFolder: "sf"}
 
     it "calls scaffold.integration with integrationFolder", ->
       @project.scaffold(@obj).then =>
@@ -288,7 +288,7 @@ describe "lib/project", ->
       @watch = @sandbox.stub(@project.watchers, "watch")
 
     it "sets onChange event when {changeEvents: true}", (done) ->
-      @project.watchSettingsAndStartWebsockets({onSettingsChanged: done})
+      @project.watchFilesAndStartWebsockets({onSettingsChanged: done})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
@@ -297,7 +297,7 @@ describe "lib/project", ->
       obj.onChange()
 
     it "does not call watch when {changeEvents: false}", ->
-      @project.watchSettingsAndStartWebsockets({onSettingsChanged: undefined})
+      @project.watchFilesAndStartWebsockets({onSettingsChanged: undefined})
 
       expect(@watch).not.to.be.called
 
@@ -308,7 +308,7 @@ describe "lib/project", ->
 
       stub = @sandbox.stub()
 
-      @project.watchSettingsAndStartWebsockets({onSettingsChanged: stub})
+      @project.watchFilesAndStartWebsockets({onSettingsChanged: stub})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
@@ -323,17 +323,44 @@ describe "lib/project", ->
 
       expect(stub).to.be.calledOnce
 
-  context "#watchSettingsAndStartWebsockets", ->
+  context "#watchSupportFile", ->
+    beforeEach ->
+      @project = Project("path/to/project")
+      @project.server = {onTestFileChange: @sandbox.spy()}
+      @watchBundle = @sandbox.stub(@project.watchers, "watchBundle").returns(Promise.resolve())
+      @config = {
+        projectRoot: "/path/to/root/"
+        supportFile: "/path/to/root/foo/bar.js"
+      }
+
+    it "does nothing when {supportFile: false}", ->
+      @project.watchSupportFile({supportFile: false})
+
+      expect(@watchBundle).not.to.be.called
+
+    it "calls watchers.watchBundle with relative path to file", ->
+      @project.watchSupportFile(@config)
+
+      expect(@watchBundle).to.be.calledWith("foo/bar.js", @config)
+
+    it "calls server.onTestFileChange when file changes", ->
+      @project.watchSupportFile(@config)
+      @watchBundle.firstCall.args[2].onChange()
+
+      expect(@project.server.onTestFileChange).to.be.calledWith("foo/bar.js")
+
+  context "#watchFilesAndStartWebsockets", ->
     beforeEach ->
       @project = Project("path/to/project")
       @project.watchers = {}
       @project.server = @sandbox.stub({startWebsockets: ->})
+      @sandbox.stub(@project, "watchSupportFile")
       @sandbox.stub(@project, "watchSettings")
 
     it "calls server.startWebsockets with watchers + config", ->
       c = {}
 
-      @project.watchSettingsAndStartWebsockets({}, c)
+      @project.watchFilesAndStartWebsockets({}, c)
 
       expect(@project.server.startWebsockets).to.be.calledWith(@project.watchers, c)
 
@@ -342,7 +369,7 @@ describe "lib/project", ->
 
       @project.server.startWebsockets.yieldsTo("onAutomationRequest")
 
-      @project.watchSettingsAndStartWebsockets({onAutomationRequest: fn}, {})
+      @project.watchFilesAndStartWebsockets({onAutomationRequest: fn}, {})
 
       expect(fn).to.be.calledOnce
 
@@ -351,7 +378,7 @@ describe "lib/project", ->
 
       @project.server.startWebsockets.yieldsTo("onReloadBrowser")
 
-      @project.watchSettingsAndStartWebsockets({onReloadBrowser: fn}, {})
+      @project.watchFilesAndStartWebsockets({onReloadBrowser: fn}, {})
 
       expect(fn).to.be.calledOnce
 

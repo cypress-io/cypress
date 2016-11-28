@@ -50,46 +50,41 @@ class Socket
     if not (@ instanceof Socket)
       return new Socket
 
-  onTestFileChange: (integrationFolder, originalFilePath, filePath, stats) ->
+  onTestFileChange: (filePath) ->
     logger.info "onTestFileChange", filePath: filePath
 
     ## return if we're not a js or coffee file.
     ## this will weed out directories as well
-    return if not /\.(js|coffee)$/.test filePath
-
-    ## originalFilePath is what was originally sent to us when
-    ## we were told to 'watch:test:file'
-    ## and its what we want to send back to the client
+    return if not /\.(js|jsx|coffee|cjsx)$/.test filePath
 
     fs.statAsync(filePath)
     .then =>
-      @io.emit "watched:file:changed", {file: originalFilePath}
-    .catch(->)
+      @io.emit("watched:file:changed")
+    .catch ->
 
-  watchTestFileByPath: (config, originalFilePath, watchers, cb = ->) ->
-    testFilePath = str.ltrim(originalFilePath, "/")
-
-    ## normalize the testFilePath
-    testFilePath = pathHelpers.getAbsolutePathToSpec(testFilePath, config)
+  watchTestFileByPath: (config, originalFilePath, watchers, options) ->
+    filePath = path.join("cypress", originalFilePath)
 
     ## bail if we're already watching this
     ## exact file or we've turned off watching
     ## for file changes
-    return cb() if (testFilePath is @testFilePath) or (config.watchForFileChanges is false)
+    return if (filePath is @testFilePath) or (config.watchForFileChanges is false)
 
-    logger.info "watching test file", {path: testFilePath}
+    logger.info "watching test file", {path: filePath}
 
     ## remove the existing file by its path
     if @testFilePath
-      watchers.remove(@testFilePath)
+      watchers.removeBundle(@testFilePath)
 
     ## store this location
-    @testFilePath = testFilePath
+    @testFilePath = filePath
 
-    watchers.watchAsync(testFilePath, {
-      onChange: _.bind(@onTestFileChange, @, config.integrationFolder, originalFilePath)
+    watchers.watchBundle(filePath, config, {
+      onChange: @onTestFileChange.bind(@)
     })
-    .then(cb)
+    ## ignore errors b/c we're just setting up the watching. errors
+    ## are handled by the spec controller
+    .catch ->
 
   onFixture: (config, file, options, cb) ->
     fixture.get(config.fixturesFolder, file, options)
@@ -173,6 +168,7 @@ class Socket
       onReloadBrowser: ->
       checkForAppErrors: ->
       onSavedStateChanged: ->
+      onTestFileChange: ->
 
     messages = {}
 
@@ -287,8 +283,10 @@ class Socket
       socket.on "spec:changed", (spec) ->
         options.onSpecChanged(spec)
 
-      socket.on "watch:test:file", (filePath, cb) =>
-        @watchTestFileByPath(config, filePath, watchers, cb)
+      socket.on "watch:test:file", (filePath, cb = ->) =>
+        @watchTestFileByPath(config, filePath, watchers, options)
+        ## callback is only for testing purposes
+        cb()
 
       socket.on "fixture", (fixturePath, options, cb) =>
         @onFixture(config, fixturePath, options, cb)

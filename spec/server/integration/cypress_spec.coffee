@@ -341,23 +341,27 @@ describe "lib/cypress", ->
           fs.statAsync path.join(@cfg.fixturesFolder, "example.json")
 
     it "scaffolds out support + files if they do not exist", ->
+      supportFolder = path.join(@pristinePath, "cypress/support")
+
       Promise.all([
         config.get(@pristinePath).then (@cfg) =>
 
         Project.add(@pristinePath)
       ])
       .then =>
-        fs.statAsync(@cfg.supportFolder)
+        fs.statAsync(supportFolder)
         .then ->
           throw new Error("supportFolder should not exist!")
         .catch {code: "ENOENT"}, =>
           cypress.start(["--run-project=#{@pristinePath}", "--no-headless"])
         .then =>
-          fs.statAsync(@cfg.supportFolder)
+          fs.statAsync(supportFolder)
         .then =>
-          fs.statAsync path.join(@cfg.supportFolder, "commands.js")
+          fs.statAsync path.join(supportFolder, "index.js")
         .then =>
-          fs.statAsync path.join(@cfg.supportFolder, "defaults.js")
+          fs.statAsync path.join(supportFolder, "commands.js")
+        .then =>
+          fs.statAsync path.join(supportFolder, "defaults.js")
 
     it "removes fixtures when they exist and fixturesFolder is false", (done) ->
       Promise.all([
@@ -376,27 +380,6 @@ describe "lib/cypress", ->
         cypress.start(["--run-project=#{@idsPath}"])
       .then =>
         fs.statAsync(@cfg.fixturesFolder)
-        .then ->
-          throw new Error("fixturesFolder should not exist!")
-        .catch -> done()
-
-    it "removes support when they exist and supportFolder is false", (done) ->
-      Promise.all([
-        config.get(@idsPath).then (@cfg) =>
-
-        Project.add(@idsPath)
-      ])
-      .then =>
-        fs.statAsync(@cfg.supportFolder)
-      .then =>
-        settings.read(@idsPath)
-      .then (json) =>
-        json.supportFolder = false
-        settings.write(@idsPath, json)
-      .then =>
-        cypress.start(["--run-project=#{@idsPath}"])
-      .then =>
-        fs.statAsync(@cfg.supportFolder)
         .then ->
           throw new Error("fixturesFolder should not exist!")
         .catch -> done()
@@ -458,6 +441,17 @@ describe "lib/cypress", ->
         cypress.start(["--run-project=#{@todosPath}"])
       .then =>
         @expectExitWith(0)
+
+    it "logs error when supportFile doesn't exist", ->
+      Promise.all([
+        settings.write(@idsPath, {supportFile: "/does/not/exist"})
+
+        Project.add(@idsPath)
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@idsPath}"])
+      .then =>
+        @expectExitWithErr("SUPPORT_FILE_NOT_FOUND", "Your supportFile is set to '/does/not/exist',")
 
     it "logs error and exits when spec file was specified and does not exist", ->
       Project.add(@todosPath)

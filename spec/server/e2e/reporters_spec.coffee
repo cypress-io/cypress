@@ -9,18 +9,7 @@ fs       = Promise.promisifyAll(fs)
 e2ePath  = Fixtures.projectPath("e2e")
 
 describe "e2e reporters", ->
-  e2e.setup()
-
-  before ->
-    ## npm install needs extra time
-    @timeout(30000)
-    cp.execSync("npm install", {cwd: Fixtures.path("projects/e2e")})
-    ## symlinks mess up fs.copySync
-    ## and bin files aren't necessary for these tests
-    fs.removeSync(Fixtures.path("projects/e2e/node_modules/.bin"))
-
-  after ->
-    fs.removeSync(Fixtures.path("projects/e2e/node_modules"))
+  e2e.setup({npmInstall: true})
 
   it "supports junit reporter and reporter options", ->
     e2e.start(@, {
