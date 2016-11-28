@@ -35,6 +35,15 @@ module.exports = {
   ping: ->
     rp.get(Routes.ping())
 
+  getProjectBuilds: (projectId, session) ->
+    rp.get({
+      url: Routes.projectBuilds(options.projectId)
+      headers: {
+        "x-route-version": "2"
+        "x-session": session
+      }
+    })
+
   createBuild: (options = {}) ->
     rp.post({
       url: Routes.builds()

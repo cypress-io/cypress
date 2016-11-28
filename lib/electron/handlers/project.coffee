@@ -133,6 +133,9 @@ module.exports = {
     ## always return an array of open browsers
     Promise.resolve(_.compact([openBrowser]))
 
+  getBuilds: ->
+    openProject.getBuilds()
+
   closeBrowser: ->
     launcher.close()
 

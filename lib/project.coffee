@@ -101,6 +101,11 @@ class Project extends EE
       ## the user to work offline
       return
 
+  getBuilds: ->
+    user.ensureSession()
+    .then (session) =>
+      api.getProjectBuilds(@config.projectId, session)
+
   close: (options = {}) ->
     _.defaults options, {
       sync: false

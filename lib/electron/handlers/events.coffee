@@ -224,6 +224,11 @@ handleEvent = (options, bus, event, id, type, arg) ->
         onError: sendErr
       })
 
+    when "get:builds"
+      project.getBuilds()
+      .then(send)
+      .catch(sendErr)
+
     else
       throw new Error("No ipc event registered for: '#{type}'")
 

@@ -16,6 +16,7 @@ routes = {
   projects:      "projects"
   project:       "projects/:id"
   projectToken:  "projects/:id/token"
+  projectBuilds: "projects/:id/builds"
   exceptions:    "exceptions"
 }
 
