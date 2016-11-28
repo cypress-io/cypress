@@ -119,12 +119,12 @@
       box-shadow: inset 0 0 10px #555;
       display: flex;
       flex-direction: column;
-      overflow: scroll;
+      overflow: auto;
       padding: 0;
       width: 100%;
 
       pre {
-        overflow: scroll;
+        overflow: auto;
         padding: 1em 1.5em;
         margin-bottom: 0;
 
@@ -150,4 +150,3 @@
     }
   }
 }
-
