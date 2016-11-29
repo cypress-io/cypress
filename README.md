@@ -57,6 +57,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.2 - *(11/29/16)*
+- display errors passed in
+
 #### 0.3.1 - *(10/13/16)*
 - ensure command.renderProps is an object
 
