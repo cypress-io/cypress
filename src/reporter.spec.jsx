@@ -10,9 +10,11 @@ import Runnables from './runnables/runnables'
 const runnablesStore = {}
 const scroller = {}
 const statsStore = {}
+const error = { title: 'Some error' }
 const getProps = (props) => {
   return _.extend({
     autoScrollingEnabled: true,
+    error,
     runner: { emit: () => {}, on: () => {} },
     specPath: 'the spec path',
     appState: {
@@ -77,8 +79,9 @@ describe('<Reporter />', () => {
     expect(component.find(Header)).to.have.prop('statsStore', statsStore)
   })
 
-  it('renders the runnables with the runnables store and spec path', () => {
+  it('renders the runnables with the error, runnables store, and spec path', () => {
     const component = shallow(<Reporter {...getProps()} />)
+    expect(component.find(Runnables)).to.have.prop('error', error)
     expect(component.find(Runnables)).to.have.prop('runnablesStore', runnablesStore)
     expect(component.find(Runnables)).to.have.prop('specPath', 'the spec path')
   })

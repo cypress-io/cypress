@@ -3,53 +3,44 @@ import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
+import AnError from '../errors/an-error'
 import Runnable from './runnable-and-suite'
 
-const NoTests = observer(({ specPath }) => (
-  <div className='no-tests'>
-    <h4>
-      <i className='fa fa-warning'></i>
-      Sorry, there's something wrong with this file:
-      <a
-        href='https://on.cypress.io/theres-something-wrong-with-this-file'
-        target='_blank'
-        rel='noopener noreferrer'
-      >
-        <i className='fa fa-question-circle'></i>
-      </a>
-    </h4>
-    <pre>{specPath.split('/').join(' / ')}</pre>
-    <ul>
-      <li>Have you written any tests?</li>
-      <li>Are there typo’s or syntax errors?</li>
-      <li>Check your Console for errors.</li>
-      <li>Check your Network Tab for failed requests.</li>
+const noTestsError = (specPath) => ({
+  title: 'No tests found in your file:',
+  link: 'https://on.cypress.io/no-tests-found-in-your-file',
+  callout: specPath,
+  message: 'We could not detect any tests in the above file. Write some tests and re-run.',
+})
+
+const RunnablesList = observer(({ runnables }) => (
+  <div className='wrap'>
+    <ul className='runnables'>
+      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
     </ul>
   </div>
 ))
 
-const RunnablesList = observer(({ runnables }) => (
-  <ul className='runnables'>
-    {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
-  </ul>
-))
-
-function content ({ isReady, runnables }, specPath) {
+function content ({ isReady, runnables }, specPath, error) {
   if (!isReady) return null
 
-  return runnables.length ? <RunnablesList runnables={runnables} /> : <NoTests specPath={specPath} />
+  // show error if there are no tests, but only if there
+  // there isn't an error passed down that supercedes it
+  if (!error && !runnables.length) {
+    error = noTestsError(specPath)
+  }
+
+  return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} />
 }
 
 @observer
 class Runnables extends Component {
   render () {
-    const { runnablesStore, specPath } = this.props
+    const { error, runnablesStore, specPath } = this.props
 
     return (
       <div ref='container' className='container'>
-        <div className='wrap'>
-          {content(runnablesStore, specPath)}
-        </div>
+        {content(runnablesStore, specPath, error)}
       </div>
     )
   }
@@ -63,5 +54,5 @@ class Runnables extends Component {
   }
 }
 
-export { NoTests, RunnablesList }
+export { RunnablesList }
 export default Runnables

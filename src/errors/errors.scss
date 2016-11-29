@@ -1,0 +1,54 @@
+.reporter {
+  .error {
+    background-color: #f5f5f5;
+    min-height: 20px;
+    padding: 24px;
+
+    h2 {
+      color: #e94f5f;
+      font-size: 1.3em;
+      font-weight: 500;
+      line-height: 1.4;
+      margin-bottom: 0.6em;
+
+      > i {
+        margin-right: 5px;
+      }
+
+      a {
+        float: right;
+      }
+    }
+
+    p, ul, ol {
+      font-size: 1.1em;
+    }
+
+    pre {
+      background: #fcf8e3;
+      display: block;
+      width: 100%;
+      white-space: initial;
+      overflow: hidden;
+      line-height: 1.6;
+
+      code {
+        font-family: inherit;
+      }
+    }
+
+    ul {
+      line-height: 1.6;
+      margin-bottom: 10px;
+      padding-left: 2em;
+    }
+
+    ul li {
+      list-style: disc
+    }
+
+    ol li {
+      list-style: decimal;
+    }
+  }
+}
