@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.7 - *(11/29/16)*
+- send reporter side of error through the reporter
+
 #### 0.3.6 - *(11/27/16)*
 - tweaked bundle error message
 
