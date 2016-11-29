@@ -99,12 +99,6 @@ describe('<App />', () => {
     expect(component.find('Resizer')).to.have.prop('state', props.state)
   })
 
-  it('renders the <ScriptError /> with the state', () => {
-    const props = createProps()
-    const component = shallow(<App {...props} />)
-    expect(component.find(ScriptError)).to.have.prop('state', props.state)
-  })
-
   describe('resizing reporter', () => {
     it('renders without is-reporter-resizing class by default', () => {
       const component = shallow(<App {...createProps()} />)

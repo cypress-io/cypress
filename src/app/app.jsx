@@ -7,10 +7,10 @@ import React, { Component, PropTypes } from 'react'
 import { findDOMNode } from 'react-dom'
 import Reporter from '@cypress/core-reporter'
 
+import errorMessages from '../errors/error-messages'
 import windowUtil from '../lib/window-util'
 import State from '../lib/state'
 
-import ScriptError from '../errors/script-error'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
@@ -22,6 +22,8 @@ class App extends Component {
   @observable isReporterResizing = false
 
   render () {
+    const specPath = this._specPath()
+
     return (
       <div className={cs({
         'is-reporter-resizing': this.isReporterResizing,
@@ -34,8 +36,9 @@ class App extends Component {
         >
           <Reporter
             runner={this.props.eventManager.reporterBus}
-            specPath={this._specPath()}
+            specPath={specPath}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
+            error={errorMessages.reporterError(this.props.state.scriptError, specPath)}
           />
         </div>
         <RunnerWrap
@@ -47,10 +50,6 @@ class App extends Component {
           <Message state={this.props.state} />
           {this.props.children}
         </RunnerWrap>
-        <ScriptError
-          specPath={this._specPath()}
-          state={this.props.state}
-        />
         <Resizer
           style={{ left: this.props.state.absoluteReporterWidth }}
           state={this.props.state}

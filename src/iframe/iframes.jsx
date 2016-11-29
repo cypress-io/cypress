@@ -1,11 +1,13 @@
 /* global $ */
 
 import Promise from 'bluebird'
+import cs from 'classnames'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
 import AutIframe from './aut-iframe'
+import ScriptError from '../errors/script-error'
 import SnapshotControls from './snapshot-controls'
 
 import IframeModel from './iframe-model'
@@ -16,11 +18,11 @@ import windowUtil from '../lib/window-util'
 @observer
 export default class Iframes extends Component {
   render () {
-    const { width, height, scale, marginLeft, headerHeight } = this.props.state
+    const { width, height, scale, marginLeft, headerHeight, scriptError } = this.props.state
 
     return (
       <div
-        className='iframes-container'
+        className={cs('iframes-container', { 'has-error': !!scriptError })}
         style={{ top: headerHeight }}
       >
         <div
@@ -33,6 +35,7 @@ export default class Iframes extends Component {
             width,
           }}
         />
+        <ScriptError error={scriptError} />
         <div className='cover' />
       </div>
     )
