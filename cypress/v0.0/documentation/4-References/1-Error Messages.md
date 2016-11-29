@@ -391,7 +391,7 @@ But before doing so you should really understand and [read about the reasoning h
 
 ***
 
-# The supportFolder option has been removed
+# Support file missing or invalid
 
 The `supportFolder` option has been removed from Cypress and has been replaced by module support and the `supportFile` option. Cypress used to automatically include any scripts in the `supportFolder` before your test files, and that was the best way to include custom Cypress commands and utility functions. However, automatically including all the files in a certain directory is somewhat magical and unintuitive, and requires creating globals for the purpose of utility functions. This behavior has been succeeded by module support and the `supportFile` option.
 
