@@ -47,7 +47,7 @@ describe('<Runnables />', () => {
     expect(component.find(AnError)).to.exist
     expect(component.find(AnError).prop('error')).to.eql({
       title: 'No tests found in your file:',
-      link: 'https://on.cypress.io/theres-something-wrong-with-this-file',
+      link: 'https://on.cypress.io/no-tests-found-in-your-file',
       callout: '/path/to/foo_spec.js',
       message: 'We could not detect any tests in the above file. Write some tests and re-run.',
     })
