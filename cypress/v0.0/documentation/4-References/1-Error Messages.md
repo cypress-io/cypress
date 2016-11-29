@@ -17,11 +17,11 @@ excerpt: Errors that require additional explanation are listed here.
 
 ***
 
-# Sorry, there's something wrong with this file
+# No tests found in your file
 
-![screen shot 2015-12-01 at 12 29 06 pm](https://cloud.githubusercontent.com/assets/1268976/11508539/553573ba-9827-11e5-956b-e849b95e806c.png)
+![screen shot 2015-12-01 at 12 29 06 pm](https://cloud.githubusercontent.com/assets/1157043/20714968/aae41e0c-b61b-11e6-8e84-00da944fde04.png)
 
-This message means that Cypress was unable to read or find tests in the specified file. You'll likely get this message if you have an empty test file, and have not yet written any tests.
+This message means that Cypress was unable to find tests in the specified file. You'll likely get this message if you have an empty test file and have not yet written any tests.
 
 ***
 
