@@ -58,6 +58,7 @@ module.exports = {
     .transform(cjsxify)
     .transform(babelify, {
       ast: false
+      babelrc: false
       plugins: [pluginAddModuleExports]
       presets: [presetLatest, presetReact]
     })
