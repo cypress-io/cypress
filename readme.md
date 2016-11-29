@@ -2,8 +2,6 @@
 
 This is the CLI for: [https://github.com/cypress-io/cypress](https://github.com/cypress-io/cypress).
 
-View our progress: [https://www.pivotaltracker.com/n/projects/1531501](https://www.pivotaltracker.com/n/projects/1531501)
-
 ## What this does
 
 This is the `Cypress CLI` tool used for communicating with the real `Cypress Desktop Application`.
