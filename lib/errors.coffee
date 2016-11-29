@@ -60,7 +60,7 @@ API = {
 
         Correct your cypress.json or create the appropriate file.
 
-        Learn more at https://on.cypress.io/guides/configuration#section-global
+        Learn more at https://on.cypress.io/support-file-missing-or-invalid
         """
       when "BUNDLE_ERROR"
         ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
