@@ -15,18 +15,23 @@ import App from './lib/app'
 import ipc from './lib/ipc'
 
 const handleErrors = () => {
-  const sendErr = function (err) {
+  const sendErr = (err) => {
     if (err) {
-      return App.ipc('gui:error', _.pick(err, 'name', 'message', 'stack'))
+      App.ipc('gui:error', _.pick(err, 'name', 'message', 'stack'))
+    }
+
+    if (window.env === 'development') {
+      console.error(err) // eslint-disable-line no-console
+      debugger // eslint-disable-line no-debugger
     }
   }
 
-  window.onerror = function (message, source, lineno, colno, err) {
-    return sendErr(err)
+  window.onerror = (message, source, lineno, colno, err) => {
+    sendErr(err)
   }
 
-  window.onunhandledrejection = function (evt) {
-    return sendErr(evt.reason)
+  window.onunhandledrejection = (evt) => {
+    sendErr(evt.reason)
   }
 }
 
@@ -69,4 +74,3 @@ App.startUpdateApp = () => {
     render(<Updates options={options}/>, el)
   })
 }
-
