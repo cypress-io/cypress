@@ -27,6 +27,20 @@ describe "lib/api", ->
       .then (ret) ->
         expect(ret).to.eql(projects)
 
+  context ".getProjectBuilds", ->
+    it "GET /projects/:id/builds + returns builds", ->
+      builds = []
+
+      nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
+      .matchHeader("x-session", "session-123")
+      .get("/projects/id-123/builds")
+      .reply(200, builds)
+
+      api.getProjectBuilds("id-123", "session-123")
+      .then (ret) ->
+        expect(ret).to.eql(builds)
+
   context ".createBuild", ->
     it "POST /builds + returns buildId", ->
       nock("http://localhost:1234")

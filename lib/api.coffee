@@ -47,7 +47,8 @@ module.exports = {
 
   getProjectBuilds: (projectId, session) ->
     rp.get({
-      url: Routes.projectBuilds(options.projectId)
+      url: Routes.projectBuilds(projectId)
+      json: true
       headers: {
         "x-route-version": "2"
         "x-session": session

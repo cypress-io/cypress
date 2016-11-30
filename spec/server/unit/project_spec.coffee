@@ -245,6 +245,18 @@ describe "lib/project", ->
       .then (ret) ->
         expect(ret).to.be.false
 
+  context "#getBuilds", ->
+    beforeEach ->
+      @project = Project("path/to/project")
+      @sandbox.stub(@project, "ensureProjectId").resolves("project-id")
+      @sandbox.stub(api, "getProjectBuilds").resolves('builds')
+      @sandbox.stub(user, "ensureSession").resolves("session-123")
+
+    it "calls api.getProjectBuilds with project id + session", ->
+      @project.getBuilds().then (builds) ->
+        expect(api.getProjectBuilds).to.be.calledWith("project-id", "session-123")
+        expect(builds).to.equal('builds')
+
   context "#updateProject", ->
     beforeEach ->
       @project = Project("path/to/project")

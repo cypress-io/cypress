@@ -102,9 +102,12 @@ class Project extends EE
       return
 
   getBuilds: ->
-    user.ensureSession()
-    .then (session) =>
-      api.getProjectBuilds(@config.projectId, session)
+    Promise.all([
+      @ensureProjectId(),
+      user.ensureSession()
+    ])
+    .spread (projectId, session) ->
+      api.getProjectBuilds(projectId, session)
 
   close: (options = {}) ->
     _.defaults options, {
