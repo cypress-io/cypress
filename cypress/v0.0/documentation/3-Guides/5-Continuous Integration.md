@@ -38,11 +38,15 @@ Cypress should run on **all** CI providers. We currently have seen Cypress worki
 
 If you're running on your own `Jenkins` server or `Docker` you will have to install some other dependencies [which are documented here](#section-dependencies).
 
+Also `CircleCI` [needs to have the `Ubuntu 12.04` image selected](#section-dependencies).
+
 ***
 
 # Dependencies
 
 If you're using a hosted CI service such as `Travis` or `CircleCI` then you don't have to install anything.
+
+If you are running on `CircleCI` make sure you select the `Ubuntu 12.04` image. Their newest `Ubuntu 14.04` image does not have all the required dependencies installed. [See this issue for more information](https://github.com/cypress-io/cypress/issues/315).
 
 If you're hosting your own `Jenkins` server, or you're using `Docker`, you'll need to install some 3rd party libs to run Cypress.
 
