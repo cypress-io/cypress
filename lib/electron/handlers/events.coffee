@@ -14,6 +14,7 @@ logger      = require("../../logger")
 errors      = require("../../errors")
 Updater     = require("../../updater")
 Project     = require("../../project")
+api         = require("../../api")
 
 handleEvent = (options, bus, event, id, type, arg) ->
   sendResponse = (data = {}) ->
@@ -166,8 +167,10 @@ handleEvent = (options, bus, event, id, type, arg) ->
       logs.off()
       send(null)
 
-    when "get:project:paths"
-      Project.paths()
+    when "get:projects"
+      Project.getPathsAndIds()
+      .then(send)
+      .catch(sendErr)
       .then(send)
       .catch(sendErr)
 

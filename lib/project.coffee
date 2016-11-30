@@ -411,6 +411,14 @@ class Project extends EE
   @paths = ->
     cache.getProjectPaths()
 
+  @getPathsAndIds = ->
+    cache.getProjectPaths()
+    .map (projectPath) ->
+      Promise.props({
+        path: projectPath
+        id: settings.id(projectPath)
+      })
+
   @remove = (path) ->
     cache.removeProject(path)
 

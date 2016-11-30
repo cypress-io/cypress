@@ -290,18 +290,18 @@ describe "lib/electron/handlers/events", ->
           @expectSendErrCalledWith(err2)
 
   context "project events", ->
-    describe "get:project:paths", ->
-      it "returns array of project paths", ->
-        @sandbox.stub(cache, "getProjectPaths").resolves([])
+    describe "get:projects", ->
+      it "returns array of projects", ->
+        @sandbox.stub(Project, "getPathsAndIds").resolves([])
 
-        @handleEvent("get:project:paths").then =>
+        @handleEvent("get:projects").then =>
           @expectSendCalledWith([])
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(cache, "getProjectPaths").rejects(err)
+        @sandbox.stub(Project, "getPathsAndIds").rejects(err)
 
-        @handleEvent("get:project:paths").then =>
+        @handleEvent("get:projects").then =>
           @expectSendErrCalledWith(err)
 
     describe "add:project", ->

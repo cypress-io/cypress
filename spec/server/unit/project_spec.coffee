@@ -605,6 +605,27 @@ describe "lib/project", ->
         expect(ret).to.deep.eq([])
         expect(cache.getProjectPaths).to.be.calledOnce
 
+  context ".getPathsAndIds", ->
+    beforeEach ->
+      @sandbox.stub(cache, "getProjectPaths").resolves([
+        "/path/to/first"
+        "/path/to/second"
+      ])
+      @sandbox.stub(settings, "id").resolves("id-123")
+
+    it "returns array of objects with paths and ids", ->
+      Project.getPathsAndIds().then (pathsAndIds) ->
+        expect(pathsAndIds).to.eql([
+          {
+            path: "/path/to/first"
+            id: "id-123"
+          }
+          {
+            path: "/path/to/second"
+            id: "id-123"
+          }
+        ])
+
   context ".removeIds", ->
     beforeEach ->
       @sandbox.stub(ids, "remove").resolves({})
