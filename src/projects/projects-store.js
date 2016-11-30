@@ -35,29 +35,29 @@ class Projects {
   }
 
   @action setProjects (projects) {
-    this.projects = _.map(projects, (project) => (
-      new Project(project)
-    ))
-
     // get the projects off of localStorage (with statuses)
     // and set them up so we don't have to wait for data from server
-    this.projects = _.map(projects, (project) => {
-      return _.extend({}, project, _.find(JSON.parse(localStorage.getItem('projects')), { id: project.id }))
-    })
+    const localProjects = JSON.parse(localStorage.getItem('projects') || '[]')
+    // index for quick lookup
+    const localProjectsIndex = _.keyBy(localProjects, 'id')
 
-    this.projects = _.map(this.projects, (project) => (
-      new Project(project)
-    ))
+    this.projects = _.map(projects, (project) => {
+      const props = _.extend(project, localProjectsIndex[project.id])
+      return new Project(props)
+    })
 
     this.isLoading = false
     this.isLoaded = true
   }
 
   @action setProjectStatuses (projects) {
-    //cache in local storage
+    // index for quick lookup
+    const projectsIndex = _.keyBy(projects, 'id')
 
-    this.projects = _.map(this.projects, (project) => {
-      return _.extend({}, project, _.find(projects, { id: project.id }))
+    // merge projects received from api with what we
+    // already have in memory
+    _.each(this.projects, (project) => {
+      _.extend(project, projectsIndex[project.id])
     })
 
     localStorage.setItem('projects', JSON.stringify(this.projects))
