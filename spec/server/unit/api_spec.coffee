@@ -13,6 +13,20 @@ describe "lib/api", ->
     @sandbox.stub(os, "platform").returns("linux")
     @sandbox.stub(provider, "get").returns("circle")
 
+  context ".getProjects", ->
+    it "GET /projects + returns projects", ->
+      projects = []
+
+      nock("http://localhost:1234")
+      .matchHeader("x-route-version", "2")
+      .matchHeader("x-session", "session-123")
+      .get("/projects")
+      .reply(200, projects)
+
+      api.getProjects("session-123")
+      .then (ret) ->
+        expect(ret).to.eql(projects)
+
   context ".createBuild", ->
     it "POST /builds + returns buildId", ->
       nock("http://localhost:1234")

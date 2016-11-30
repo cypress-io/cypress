@@ -626,6 +626,71 @@ describe "lib/project", ->
           }
         ])
 
+  context ".getProjectStatuses", ->
+    beforeEach ->
+      @sandbox.stub(user, "ensureSession").resolves("session-123")
+
+    it "gets projects from api", ->
+      @sandbox.stub(api, "getProjects").resolves([])
+
+      Project.getProjectStatuses([])
+      .then ->
+        expect(api.getProjects).to.have.been.calledWith("session-123")
+
+    it "returns array of projects", ->
+      @sandbox.stub(api, "getProjects").resolves([])
+
+      Project.getProjectStatuses([])
+      .then (projectsWithStatuses) =>
+        expect(projectsWithStatuses).to.eql([])
+
+    it "returns same number as client projects, even if there are less api projects", ->
+      @sandbox.stub(api, "getProjects").resolves([])
+
+      Project.getProjectStatuses([{}])
+      .then (projectsWithStatuses) =>
+        expect(projectsWithStatuses.length).to.eql(1)
+
+    it "returns same number as client projects, even if there are more api projects", ->
+      @sandbox.stub(api, "getProjects").resolves([{}, {}])
+
+      Project.getProjectStatuses([{}])
+      .then (projectsWithStatuses) =>
+        expect(projectsWithStatuses.length).to.eql(1)
+
+    it "merges in details of matching projects", ->
+      @sandbox.stub(api, "getProjects").resolves([
+        { id: "id-123", status: "passing" }
+      ])
+
+      Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+      .then (projectsWithStatuses) =>
+        expect(projectsWithStatuses[0]).to.eql({
+          id: "id-123"
+          path: "/path/to/project"
+          status: "passing"
+        })
+
+    it "returns client project when it has no id", ->
+      @sandbox.stub(api, "getProjects").resolves([])
+
+      Project.getProjectStatuses([{ path: "/path/to/project" }])
+      .then (projectsWithStatuses) =>
+        expect(projectsWithStatuses[0]).to.eql({
+          path: "/path/to/project"
+        })
+
+    it "marks project as valid: false if client project has id and there is no matching api project", ->
+      @sandbox.stub(api, "getProjects").resolves([])
+
+      Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+      .then (projectsWithStatuses) =>
+        expect(projectsWithStatuses[0]).to.eql({
+          id: "id-123"
+          path: "/path/to/project"
+          valid: false
+        })
+
   context ".removeIds", ->
     beforeEach ->
       @sandbox.stub(ids, "remove").resolves({})

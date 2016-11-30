@@ -419,6 +419,25 @@ class Project extends EE
         id: settings.id(projectPath)
       })
 
+  @getProjectStatuses = (clientProjects = []) ->
+    user.ensureSession()
+    .then (session) ->
+      api.getProjects(session)
+    .then (projects = []) ->
+      projectsIndex = _.keyBy(projects, "id")
+      return _.map clientProjects, (clientProject) ->
+        ## not a CI project, leave it be
+        return clientProject if not clientProject.id
+
+        if project = projectsIndex[clientProject.id]
+          ## merge in details for matching project
+          return _.extend(clientProject, project)
+        else
+          ## project has id, but no project found in database, 
+          ## so something is wrong
+          clientProject.valid = false
+          return clientProject
+
   @remove = (path) ->
     cache.removeProject(path)
 

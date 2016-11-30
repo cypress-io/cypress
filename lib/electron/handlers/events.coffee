@@ -171,6 +171,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
       Project.getPathsAndIds()
       .then(send)
       .catch(sendErr)
+
+    when "get:project:statuses"
+      Project.getProjectStatuses(arg)
       .then(send)
       .catch(sendErr)
 
