@@ -14,17 +14,13 @@ const getProjects = () => {
 
   return App.ipc('get:projects')
   .then(action('got:projects', (projects) => {
-
     projectsStore.setProjects(projects)
 
-    return App.ipc('get:projects:statuses', (err, projects = []) => {
-      // this might never be called
+    return App.ipc('get:project:statuses', projects)
+    .then((projects = []) => {
       projectsStore.setProjectStatuses(projects)
     })
   }))
-  .catch((err) => {
-    err
-  })
 }
 
 const addProject = () => {
