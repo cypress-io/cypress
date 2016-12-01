@@ -289,6 +289,21 @@ describe "lib/electron/handlers/events", ->
         @handleEvent("gui:error", err).then =>
           @expectSendErrCalledWith(err2)
 
+  context "user events", ->
+    describe "get:orgs", ->
+      it "returns array of orgs", ->
+        @sandbox.stub(Project, "getOrgs").resolves([])
+
+        @handleEvent("get:orgs").then =>
+          @expectSendCalledWith([])
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(Project, "getOrgs").rejects(err)
+
+        @handleEvent("get:orgs").then =>
+          @expectSendErrCalledWith(err)
+
   context "project events", ->
     describe "get:projects", ->
       it "returns array of projects", ->

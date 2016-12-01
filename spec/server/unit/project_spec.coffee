@@ -608,6 +608,17 @@ describe "lib/project", ->
       Project.id(@todosPath).then (id) =>
         expect(id).to.eq(@projectId)
 
+  context ".getOrgs", ->
+    beforeEach ->
+      @sandbox.stub(user, "ensureSession").resolves("session-123")
+      @sandbox.stub(api, "getOrgs").resolves([])
+
+    it "calls api.getOrgs", ->
+      Project.getOrgs().then (orgs) ->
+        expect(orgs).to.deep.eq([])
+        expect(api.getOrgs).to.be.calledOnce
+        expect(api.getOrgs).to.be.calledWith("session-123")
+
   context ".paths", ->
     beforeEach ->
       @sandbox.stub(cache, "getProjectPaths").resolves([])

@@ -35,6 +35,16 @@ module.exports = {
   ping: ->
     rp.get(Routes.ping())
 
+  getOrgs: (session) ->
+    rp.get({
+      url: Routes.orgs()
+      json: true
+      headers: {
+        "x-route-version": "2"
+        "x-session": session
+      }
+    })
+
   getProjects: (session) ->
     rp.get({
       url: Routes.projects()

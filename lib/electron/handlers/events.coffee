@@ -167,6 +167,11 @@ handleEvent = (options, bus, event, id, type, arg) ->
       logs.off()
       send(null)
 
+    when "get:orgs"
+      Project.getOrgs()
+      .then(send)
+      .catch(sendErr)
+
     when "get:projects"
       Project.getPathsAndIds()
       .then(send)

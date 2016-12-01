@@ -13,6 +13,7 @@ routes = {
   usage:         "user/usage"
   builds:        "builds"
   instance:      "builds/:id/instances"
+  orgs:          "organizations"
   projects:      "projects"
   project:       "projects/:id"
   projectToken:  "projects/:id/token"

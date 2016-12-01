@@ -411,6 +411,11 @@ class Project extends EE
     .bind(@)
     .catch({type: "NO_PROJECT_ID"}, @createProjectId)
 
+  @getOrgs = ->
+    user.ensureSession()
+    .then (session) ->
+      api.getOrgs(session)
+
   @paths = ->
     cache.getProjectPaths()
 
@@ -436,8 +441,7 @@ class Project extends EE
           ## merge in details for matching project
           return _.extend(clientProject, project)
         else
-          ## project has id, but no project found in database, 
-          ## so something is wrong
+          ## project has id, but no matching project found
           clientProject.valid = false
           return clientProject
 
