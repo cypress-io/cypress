@@ -38,7 +38,7 @@ Cypress should run on **all** CI providers. We currently have seen Cypress worki
 
 If you're running on your own `Jenkins` server or `Docker` you will have to install some other dependencies [which are documented here](#section-dependencies).
 
-Also `CircleCI` [needs to have the `Ubuntu 12.04` image selected](#section-dependencies).
+Also `CircleCI` needs to have the [`Ubuntu 12.04` image selected](#section-dependencies).
 
 ***
 
@@ -58,7 +58,7 @@ apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1
 
 # Troubleshooting
 
-When executing `cypress run` or `cypress ci`, if you see no output you are likely missing a dependency and you'll need to invoke the binary directly to get the error. This is a longstanding known issue which we're aware of and are working towards resolving.
+When executing `cypress run` or `cypress ci`, if you see no output you are likely missing a dependency and you'll need to invoke the binary directly to get the error. This is a longstanding known issue which we're aware of and are working towards resolving. [See this issue for more information](https://github.com/cypress-io/cypress/issues/317).
 
 ```shell
 ## invoke the Cypress binary directly
