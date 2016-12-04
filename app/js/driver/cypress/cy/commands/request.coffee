@@ -66,7 +66,6 @@ $Cypress.register "Request", (Cypress, _, $) ->
           o.body   = args[2]
 
       _.defaults options, defaults, {
-        domain: window.location.hostname
         timeout: Cypress.config("responseTimeout")
       }
 
