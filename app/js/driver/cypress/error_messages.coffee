@@ -313,7 +313,6 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     request:
       auth_invalid: "#{cmd('request')} must be passed an object literal for the 'auth' option."
-      cookies_invalid: "#{cmd('request')} requires cookies to be true, or an object literal."
       gzip_invalid: "#{cmd('request')} requires gzip to be a boolean."
       headers_invalid: "#{cmd('request')} requires headers to be an object literal."
       invalid_method: "#{cmd('request')} was called with an invalid method: '{{method}}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"

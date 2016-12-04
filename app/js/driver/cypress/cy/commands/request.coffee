@@ -11,7 +11,6 @@ $Cypress.register "Request", (Cypress, _, $) ->
     auth: null
     headers: null
     json: false
-    cookies: true
     gzip: true
     failOnStatus: true
     method: "GET"
@@ -113,13 +112,6 @@ $Cypress.register "Request", (Cypress, _, $) ->
           options.headers = h
         else
           $Cypress.Utils.throwErrByPath("request.headers_invalid")
-
-      isPlainObject = (obj) ->
-        _.isObject(obj) and not _.isArray(obj) and not _.isFunction(obj)
-
-      if c = options.cookies
-        if not _.isBoolean(c) and not isPlainObject(c)
-          $Cypress.Utils.throwErrByPath("request.cookies_invalid")
 
       if not _.isBoolean(options.gzip)
         $Cypress.Utils.throwErrByPath("request.gzip_invalid")

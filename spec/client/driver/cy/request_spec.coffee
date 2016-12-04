@@ -38,7 +38,6 @@ describe "$Cypress.Cy Request Commands", ->
             method: "GET"
             gzip: true
             domain: "localhost"
-            cookies: true
           })
 
       it "accepts object with url, method, headers, body", ->
@@ -55,7 +54,6 @@ describe "$Cypress.Cy Request Commands", ->
             method: "POST"
             json: true
             gzip: true
-            cookies: true
             domain: "localhost"
             body: {name: "brian"}
             headers: {
@@ -69,7 +67,6 @@ describe "$Cypress.Cy Request Commands", ->
             url: "http://localhost:8080/status"
             method: "GET"
             gzip: true
-            cookies: true
             domain: "localhost"
           })
 
@@ -79,7 +76,6 @@ describe "$Cypress.Cy Request Commands", ->
             url: "http://localhost:1234/users/1"
             method: "DELETE"
             gzip: true
-            cookies: true
             domain: "localhost"
           })
 
@@ -91,7 +87,6 @@ describe "$Cypress.Cy Request Commands", ->
             body: {name: "brian"}
             json: true
             gzip: true
-            cookies: true
             domain: "localhost"
           })
 
@@ -103,7 +98,6 @@ describe "$Cypress.Cy Request Commands", ->
             body: {commits: true}
             json: true
             gzip: true
-            cookies: true
             domain: "localhost"
           })
 
@@ -114,7 +108,6 @@ describe "$Cypress.Cy Request Commands", ->
             method: "GET"
             body: "foo"
             gzip: true
-            cookies: true
             domain: "localhost"
           })
 
@@ -125,7 +118,6 @@ describe "$Cypress.Cy Request Commands", ->
               url: "https://www.foo.com/"
               method: "POST"
               gzip: true
-              cookies: true
               domain: "localhost"
             })
 
@@ -138,7 +130,6 @@ describe "$Cypress.Cy Request Commands", ->
               url: "https://www.foo.com/"
               method: "GET"
               gzip: true
-              cookies: true
               domain: "localhost"
             })
 
@@ -148,7 +139,6 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:1234/"
               method: "GET"
               gzip: true
-              cookies: true
               domain: "localhost"
             })
 
@@ -158,7 +148,6 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://www.foo.com/"
               method: "GET"
               gzip: true
-              cookies: true
               domain: "localhost"
             })
 
@@ -171,7 +160,6 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:8080/app/foo/bar?cat=1"
               method: "GET"
               gzip: true
-              cookies: true
               domain: "localhost"
             })
 
@@ -184,7 +172,6 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:1234/foobar?cat=1"
               method: "GET"
               gzip: true
-              cookies: true
               domain: "localhost"
             })
 
@@ -198,7 +185,6 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:8080/"
               method: "GET"
               gzip: false
-              cookies: true
               domain: "localhost"
             })
 
@@ -406,7 +392,6 @@ describe "$Cypress.Cy Request Commands", ->
               gzip: true
               domain: "localhost"
               json: true
-              cookies: true
             }
             Returned: {
               status: 201
@@ -515,24 +500,6 @@ describe "$Cypress.Cy Request Commands", ->
         @cy.request({
           url: "http://localhost:1234/foo"
           auth: "foobar"
-        })
-
-      it "throws when cookies is truthy but not an object", (done) ->
-        logs = []
-
-        @Cypress.on "log", (attrs, @log) =>
-          logs.push(log)
-
-        @cy.on "fail", (err) =>
-          expect(logs.length).to.eq(1)
-          expect(@log.get("error")).to.eq(err)
-          expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() requires cookies to be true, or an object literal.")
-          done()
-
-        @cy.request({
-          url: "http://localhost:1234/foo"
-          cookies: "foo=bar"
         })
 
       it "throws when headers is truthy but not an object", (done) ->
