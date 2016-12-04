@@ -48,7 +48,7 @@ class Project extends EE
       onSettingsChanged: false
     }
 
-    if process.env.CYPRESS_DEBUG or process.env.CYPRESS_MEMORY
+    if process.env.CYPRESS_MEMORY
       log = ->
         console.log("memory info", process.memoryUsage())
 
