@@ -60,7 +60,10 @@ describe "lib/request", ->
         "Content-Type": "text/html"
       }
 
-      request.send({}, @fn, {url: "http://www.github.com/foo"})
+      request.send({}, @fn, {
+        url: "http://www.github.com/foo"
+        cookies: false
+      })
       .then ->
         expect(init).to.be.calledWithMatch({strictSSL: false})
 
@@ -71,7 +74,10 @@ describe "lib/request", ->
 
       ## should not bomb on 500
       ## because simple = false
-      request.send({}, @fn, {url: "http://www.github.com/foo"})
+      request.send({}, @fn, {
+        url: "http://www.github.com/foo"
+        cookies: false
+      })
       .then -> done()
 
     it "sets resolveWithFullResponse=true", ->
@@ -81,7 +87,10 @@ describe "lib/request", ->
         "Content-Type": "text/html"
       }
 
-      request.send({}, @fn, {url: "http://www.github.com/foo"})
+      request.send({}, @fn, {
+        url: "http://www.github.com/foo"
+        cookies: false
+      })
       .then (resp) ->
         expect(resp).to.have.keys("status", "body", "headers", "duration")
 
@@ -131,36 +140,6 @@ describe "lib/request", ->
         url: "http://localhost:8080/users"
         method: "POST"
         cookies: true
-        domain: "localhost"
-        json: true
-        body: {
-          first: "brian"
-          last: "mann"
-        }
-      })
-      .then (resp) ->
-        expect(resp.status).to.eq(200)
-        expect(resp.body.id).to.eq(1)
-
-    it "extracts domain when cookies true and no domain in options", ->
-      nock("http://github.com:8080")
-      .matchHeader("Cookie", "foo=bar; baz=quux")
-      .post("/users", {
-        first: "brian"
-        last: "mann"
-      })
-      .reply(200, {id: 1})
-
-      @fn.withArgs("get:cookies", {url: "http://github.com:8080/users"})
-      .resolves([
-        {name: "foo", value: "bar"}
-        {name: "baz", value: "quux"}
-      ])
-
-      request.send({}, @fn, {
-        url: "http://github.com:8080/users"
-        method: "POST"
-        cookies: true
         json: true
         body: {
           first: "brian"
@@ -192,6 +171,7 @@ describe "lib/request", ->
 
       request.send({}, @fn, {
         url: "http://localhost:8080/status.json"
+        cookies: false
       })
       .then (resp) ->
         expect(resp.body).to.deep.eq({status: "ok"})
@@ -205,6 +185,7 @@ describe "lib/request", ->
 
       request.send({}, @fn, {
         url: "http://localhost:8080/status.json"
+        cookies: false
       })
       .then (resp) ->
         expect(resp.body).to.eq("{bad: 'json'}")
@@ -218,6 +199,7 @@ describe "lib/request", ->
 
       request.send({}, @fn, {
         url: "http://localhost:8080/foo"
+        cookies: false
       })
       .then (resp) ->
         expect(resp.duration).to.be.a("Number")
@@ -234,6 +216,7 @@ describe "lib/request", ->
 
       request.send(headers, @fn, {
         url: "http://localhost:8080/foo"
+        cookies: false
       })
       .then (resp) ->
         expect(resp.body).to.eq("derp")
@@ -246,6 +229,7 @@ describe "lib/request", ->
 
         request.send({}, @fn, {
           url: "http://localhost:8080/foo"
+          cookies: false
           qs: {
             bar: "baz"
             q: 1
@@ -254,7 +238,45 @@ describe "lib/request", ->
         .then (resp) ->
           expect(resp.status).to.eq(200)
 
-    context "followRedirect=false", ->
+    context "followRedirect", ->
+      it "by default follow redirects", ->
+        nock("http://localhost:8080")
+        .get("/dashboard")
+        .reply(302, "", {
+          location: "http://localhost:8080/login"
+        })
+        .get("/login")
+        .reply(200, "login")
+
+        request.send({}, @fn, {
+          url: "http://localhost:8080/dashboard"
+          cookies: false
+          followRedirect: true
+        })
+        .then (resp) ->
+          expect(resp.status).to.eq(200)
+          expect(resp.body).to.eq("login")
+          expect(resp).not.to.have.property("redirectedTo")
+
+      it "follows non-GET redirects by default", ->
+        nock("http://localhost:8080")
+        .post("/login")
+        .reply(302, "", {
+          location: "http://localhost:8080/dashboard"
+        })
+        .get("/dashboard")
+        .reply(200, "dashboard")
+
+        request.send({}, @fn, {
+          method: "POST"
+          url: "http://localhost:8080/login"
+          cookies: false
+        })
+        .then (resp) ->
+          expect(resp.status).to.eq(200)
+          expect(resp.body).to.eq("dashboard")
+          expect(resp).not.to.have.property("redirectedTo")
+
       it "can turn off following redirects", ->
         nock("http://localhost:8080")
         .get("/dashboard")
@@ -266,10 +288,12 @@ describe "lib/request", ->
 
         request.send({}, @fn, {
           url: "http://localhost:8080/dashboard"
+          cookies: false
           followRedirect: false
         })
         .then (resp) ->
           expect(resp.status).to.eq(302)
+          expect(resp.body).to.eq("")
           expect(resp.redirectedTo).to.eq("http://localhost:8080/login")
 
       it "resolves redirectedTo on relative redirects", ->
@@ -283,6 +307,7 @@ describe "lib/request", ->
 
         request.send({}, @fn, {
           url: "http://localhost:8080/dashboard"
+          cookies: false
           followRedirect: false
         })
         .then (resp) ->
@@ -300,6 +325,7 @@ describe "lib/request", ->
 
         request.send({}, @fn, {
           url: "http://localhost:8080/dashboard"
+          cookies: false
           followRedirect: false
         })
         .then (resp) ->
@@ -317,6 +343,7 @@ describe "lib/request", ->
 
         request.send({}, @fn, {
           url: "http://localhost:8080/dashboard"
+          cookies: false
         })
         .then (resp) ->
           expect(resp.status).to.eq(200)
@@ -398,6 +425,7 @@ describe "lib/request", ->
       it "recovers from bad headers", ->
         request.send({}, @fn, {
           url: "http://localhost:9988/foo"
+          cookies: false
           headers: {
             "x-text": "אבגד"
           }
@@ -410,6 +438,7 @@ describe "lib/request", ->
       it "handles weird content in the body just fine", ->
         request.send({}, @fn, {
           url: "http://localhost:9988/foo"
+          cookies: false
           json: true
           body: {
             "x-text": "אבגד"

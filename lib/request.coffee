@@ -221,6 +221,8 @@ module.exports = (options = {}) ->
         headers: {}
         gzip: true
         jar: true
+        cookies: true
+        followRedirect: true
       }
 
       if ua = headers["user-agent"]
@@ -237,6 +239,10 @@ module.exports = (options = {}) ->
         resolveWithFullResponse: true
       }
 
+      ## https://github.com/cypress-io/cypress/issues/322
+      ## either turn these both on or off
+      options.followAllRedirects = options.followRedirect
+
       if options.form is true
         ## reset form to whatever body is
         ## and nuke body
@@ -251,9 +257,6 @@ module.exports = (options = {}) ->
 
       send = =>
         ms = Date.now()
-
-        ## dont send in domain
-        options = _.omit(options, "domain")
 
         @create(options, true)
         .then(@normalizeResponse.bind(@))
