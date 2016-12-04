@@ -321,6 +321,69 @@ describe "lib/request", ->
         .then (resp) ->
           expect(resp.status).to.eq(200)
           expect(resp).not.to.have.property("redirectedTo")
+
+    context "form=true", ->
+      beforeEach ->
+        nock("http://localhost:8080")
+        .matchHeader("Content-Type", "application/x-www-form-urlencoded")
+        .post("/login", "foo=bar&baz=quux")
+        .reply(200, "<html></html>")
+
+      it "takes converts body to x-www-form-urlencoded and sets header", ->
+        request.send({}, @fn, {
+          url: "http://localhost:8080/login"
+          method: "POST"
+          cookies: false
+          form: true
+          body: {
+            foo: "bar"
+            baz: "quux"
+          }
+        })
+        .then (resp) ->
+          expect(resp.status).to.eq(200)
+          expect(resp.body).to.eq("<html></html>")
+
+      it "does not send body", ->
+        init = @sandbox.spy(request.rp.Request.prototype, "init")
+
+        body =  {
+          foo: "bar"
+          baz: "quux"
+        }
+
+        request.send({}, @fn, {
+          url: "http://localhost:8080/login"
+          method: "POST"
+          cookies: false
+          form: true
+          json: true
+          body: body
+        })
+        .then (resp) ->
+          expect(resp.status).to.eq(200)
+          expect(resp.body).to.eq("<html></html>")
+          expect(init).not.to.be.calledWithMatch({body: body})
+
+      it "does not set json=true", ->
+        init = @sandbox.spy(request.rp.Request.prototype, "init")
+
+        request.send({}, @fn, {
+          url: "http://localhost:8080/login"
+          method: "POST"
+          cookies: false
+          form: true
+          json: true
+          body: {
+            foo: "bar"
+            baz: "quux"
+          }
+        })
+        .then (resp) ->
+          expect(resp.status).to.eq(200)
+          expect(resp.body).to.eq("<html></html>")
+          expect(init).not.to.be.calledWithMatch({json: true})
+
     context "bad headers", ->
       beforeEach (done) ->
         @srv = http.createServer (req, res) ->

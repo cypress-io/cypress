@@ -237,6 +237,13 @@ module.exports = (options = {}) ->
         resolveWithFullResponse: true
       }
 
+      if options.form is true
+        ## reset form to whatever body is
+        ## and nuke body
+        options.form = options.body
+        delete options.json
+        delete options.body
+
       setCookies = (cookies) =>
         return if _.isEmpty(cookies)
 

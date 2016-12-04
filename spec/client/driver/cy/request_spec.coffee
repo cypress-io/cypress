@@ -262,6 +262,41 @@ describe "$Cypress.Cy Request Commands", ->
               qs: {foo: "bar"}
             })
 
+      context "form", ->
+        it "accepts an object literal for body", ->
+          @cy.request({
+            url: "http://localhost:8888"
+            form: true
+            body: {
+              foo: "bar"
+            }
+          })
+          .then ->
+            @expectOptionsToBe({
+              url: "http://localhost:8888/"
+              method: "GET"
+              gzip: true
+              form: true
+              followRedirect: true
+              body: {foo: "bar"}
+            })
+
+        it "accepts a string for body", ->
+          @cy.request({
+            url: "http://localhost:8888"
+            form: true
+            body: "foo=bar&baz=quux"
+          })
+          .then ->
+            @expectOptionsToBe({
+              url: "http://localhost:8888/"
+              method: "GET"
+              gzip: true
+              form: true
+              followRedirect: true
+              body: "foo=bar&baz=quux"
+            })
+
     describe "failOnStatus", ->
       it "does not fail even on 500 when failOnStatus=false", ->
         @respondWith({status: 500})
@@ -510,7 +545,7 @@ describe "$Cypress.Cy Request Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() requires headers to be an object literal.")
+          expect(err.message).to.eq("cy.request() requires the 'headers' option to be an object literal.")
           done()
 
         @cy.request({
@@ -546,12 +581,30 @@ describe "$Cypress.Cy Request Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() requires gzip to be a boolean.")
+          expect(err.message).to.eq("cy.request() requires the 'gzip' option to be a boolean.")
           done()
 
         @cy.request({
           url: "http://localhost:1234/foo"
           gzip: {}
+        })
+
+      it "throws when form isnt a boolean", (done) ->
+        logs = []
+
+        @Cypress.on "log", (attrs, @log) =>
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(err.message).to.eq("cy.request() requires the 'form' option to be a boolean.\n\nIf you're trying to send a x-www-form-urlencoded request then pass either a string or object literal to the 'body' property.")
+          done()
+
+        @cy.request({
+          url: "http://localhost:1234/foo"
+          form: {foo: "bar"}
         })
 
       it "throws when status code doesnt start with 2 and failOnStatus is true", (done) ->

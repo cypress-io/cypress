@@ -11,7 +11,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
   REQUEST_DEFAULTS = {
     url: ""
     method: "GET"
-    qs: null ## TODO: add tests / document this
+    qs: null
     body: null
     auth: null
     headers: null
@@ -24,11 +24,6 @@ $Cypress.register "Request", (Cypress, _, $) ->
   REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
 
   OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
-
-  ## TODO:
-  ## if options.form is true
-  ## body must exist and be an object
-  ## or a querystring
 
   request = (options) =>
     Cypress.triggerPromise("request", options)
@@ -118,7 +113,9 @@ $Cypress.register "Request", (Cypress, _, $) ->
       if not Cypress.Location.isFullyQualifiedUrl(options.url)
         $Cypress.Utils.throwErrByPath("request.url_invalid")
 
-      if isValidJsonObj(options.body)
+      ## only set json to true if form isnt true
+      ## and we have a valid object for body
+      if options.form isnt true and isValidJsonObj(options.body)
         options.json = true
 
       options = _.omit(options, whichAreOptional)
@@ -135,6 +132,10 @@ $Cypress.register "Request", (Cypress, _, $) ->
 
       if not _.isBoolean(options.gzip)
         $Cypress.Utils.throwErrByPath("request.gzip_invalid")
+
+      if f = options.form
+        if not _.isBoolean(f)
+          $Cypress.Utils.throwErrByPath("request.form_invalid")
 
       ## clone the requestOpts and reduce them down
       ## to the bare minimum to send to lib/request
