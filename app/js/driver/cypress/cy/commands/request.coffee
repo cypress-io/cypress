@@ -3,20 +3,32 @@ $Cypress.register "Request", (Cypress, _, $) ->
   isOkStatusCodeRe   = /^2/
   validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
 
-  optionalOpts = "body auth headers json".split(" ")
+  isOptional = (memo, val, key) ->
+    if _.isNull(val)
+      memo.push(key)
+    memo
 
-  defaults = {
-    log: true
+  REQUEST_DEFAULTS = {
+    url: ""
+    method: "GET"
     qs: null ## TODO: add tests / document this
     body: null
     auth: null
     headers: null
-    json: false
+    json: null
+    form: null
     gzip: true
-    failOnStatus: true
-    method: "GET"
     followRedirect: true
   }
+
+  REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
+
+  OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
+
+  ## TODO:
+  ## if options.form is true
+  ## body must exist and be an object
+  ## or a querystring
 
   request = (options) =>
     Cypress.triggerPromise("request", options)
@@ -30,8 +42,8 @@ $Cypress.register "Request", (Cypress, _, $) ->
   isValidJsonObj = (body) ->
     _.isObject(body) and not _.isFunction(body)
 
-  whichAreUntruthyAndOptional = (val, key) ->
-    !val and key in optionalOpts
+  whichAreOptional = (val, key) ->
+    val is null and key in OPTIONAL_OPTS
 
   # Cypress.extend
   #   ## set defaults for all requests?
@@ -67,7 +79,9 @@ $Cypress.register "Request", (Cypress, _, $) ->
           o.url    = args[1]
           o.body   = args[2]
 
-      _.defaults options, defaults, {
+      _.defaults options, REQUEST_DEFAULTS, {
+        log: true
+        failOnStatus: true
         timeout: Cypress.config("responseTimeout")
       }
 
@@ -107,7 +121,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
       if isValidJsonObj(options.body)
         options.json = true
 
-      options = _.omit options, whichAreUntruthyAndOptional
+      options = _.omit(options, whichAreOptional)
 
       if a = options.auth
         if not _.isObject(a)
@@ -122,9 +136,9 @@ $Cypress.register "Request", (Cypress, _, $) ->
       if not _.isBoolean(options.gzip)
         $Cypress.Utils.throwErrByPath("request.gzip_invalid")
 
-      ## clone the requestOpts to prevent
-      ## anything from mutating it now
-      requestOpts = _(options).pick("method", "url", "body", "headers", "cookies", "json", "auth", "gzip", "domain")
+      ## clone the requestOpts and reduce them down
+      ## to the bare minimum to send to lib/request
+      requestOpts = _(options).pick(REQUEST_PROPS)
 
       if options.log
         options._log = Cypress.Log.command({
@@ -173,12 +187,12 @@ $Cypress.register "Request", (Cypress, _, $) ->
           args: { timeout: options.timeout }
         }
       .catch responseFailed, (err) ->
-        body = if b = requestOpts.body
+        body = if (b = requestOpts.body)
           "Body: #{Cypress.Utils.stringify(b)}"
         else
           ""
 
-        headers = if h = requestOpts.headers
+        headers = if (h = requestOpts.headers)
           "Headers: #{Cypress.Utils.stringify(h)}"
         else
           ""
