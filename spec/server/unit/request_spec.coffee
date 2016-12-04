@@ -253,6 +253,74 @@ describe "lib/request", ->
         })
         .then (resp) ->
           expect(resp.status).to.eq(200)
+
+    context "followRedirect=false", ->
+      it "can turn off following redirects", ->
+        nock("http://localhost:8080")
+        .get("/dashboard")
+        .reply(302, "", {
+          location: "http://localhost:8080/login"
+        })
+        .get("/login")
+        .reply(200, "login")
+
+        request.send({}, @fn, {
+          url: "http://localhost:8080/dashboard"
+          followRedirect: false
+        })
+        .then (resp) ->
+          expect(resp.status).to.eq(302)
+          expect(resp.redirectedTo).to.eq("http://localhost:8080/login")
+
+      it "resolves redirectedTo on relative redirects", ->
+        nock("http://localhost:8080")
+        .get("/dashboard")
+        .reply(302, "", {
+          location: "/login" ## absolute-relative pathname
+        })
+        .get("/login")
+        .reply(200, "login")
+
+        request.send({}, @fn, {
+          url: "http://localhost:8080/dashboard"
+          followRedirect: false
+        })
+        .then (resp) ->
+          expect(resp.status).to.eq(302)
+          expect(resp.redirectedTo).to.eq("http://localhost:8080/login")
+
+      it "resolves redirectedTo to another domain", ->
+        nock("http://localhost:8080")
+        .get("/dashboard")
+        .reply(301, "", {
+          location: "https://www.google.com/login"
+        })
+        .get("/login")
+        .reply(200, "login")
+
+        request.send({}, @fn, {
+          url: "http://localhost:8080/dashboard"
+          followRedirect: false
+        })
+        .then (resp) ->
+          expect(resp.status).to.eq(301)
+          expect(resp.redirectedTo).to.eq("https://www.google.com/login")
+
+      it "does not included redirectedTo when following redirects", ->
+        nock("http://localhost:8080")
+        .get("/dashboard")
+        .reply(302, "", {
+          location: "http://localhost:8080/login"
+        })
+        .get("/login")
+        .reply(200, "login")
+
+        request.send({}, @fn, {
+          url: "http://localhost:8080/dashboard"
+        })
+        .then (resp) ->
+          expect(resp.status).to.eq(200)
+          expect(resp).not.to.have.property("redirectedTo")
     context "bad headers", ->
       beforeEach (done) ->
         @srv = http.createServer (req, res) ->

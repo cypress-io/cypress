@@ -15,6 +15,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
     gzip: true
     failOnStatus: true
     method: "GET"
+    followRedirect: true
   }
 
   request = (options) =>
@@ -71,6 +72,11 @@ $Cypress.register "Request", (Cypress, _, $) ->
       }
 
       options.method = options.method.toUpperCase()
+
+      ## normalize followRedirects -> followRedirect
+      ## because we are nice
+      if _.has(options, "followRedirects")
+        options.followRedirect = options.followRedirects
 
       if not validHttpMethodsRe.test(options.method)
         $Cypress.Utils.throwErrByPath("request.invalid_method", {

@@ -253,6 +253,12 @@ module.exports = (options = {}) ->
         .then (resp) =>
           resp.duration = Date.now() - ms
 
+          if options.followRedirect is false and (loc = resp.headers.location)
+            ## resolve the new location head against
+            ## the current url
+            redirect = url.resolve(options.url, loc)
+            resp.redirectedTo = redirect
+
           if options.jar
             @setJarCookies(options.jar, automation)
             .return(resp)

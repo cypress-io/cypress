@@ -37,6 +37,7 @@ describe "$Cypress.Cy Request Commands", ->
             url: "http://localhost:8000/foo"
             method: "GET"
             gzip: true
+            followRedirect: true
           })
 
       it "accepts object with url, method, headers, body", ->
@@ -53,6 +54,7 @@ describe "$Cypress.Cy Request Commands", ->
             method: "POST"
             json: true
             gzip: true
+            followRedirect: true
             body: {name: "brian"}
             headers: {
               "x-token": "abc123"
@@ -65,6 +67,7 @@ describe "$Cypress.Cy Request Commands", ->
             url: "http://localhost:8080/status"
             method: "GET"
             gzip: true
+            followRedirect: true
           })
 
       it "accepts method + url", ->
@@ -73,6 +76,7 @@ describe "$Cypress.Cy Request Commands", ->
             url: "http://localhost:1234/users/1"
             method: "DELETE"
             gzip: true
+            followRedirect: true
           })
 
       it "accepts method + url + body", ->
@@ -83,6 +87,7 @@ describe "$Cypress.Cy Request Commands", ->
             body: {name: "brian"}
             json: true
             gzip: true
+            followRedirect: true
           })
 
       it "accepts url + body", ->
@@ -93,6 +98,7 @@ describe "$Cypress.Cy Request Commands", ->
             body: {commits: true}
             json: true
             gzip: true
+            followRedirect: true
           })
 
       it "accepts url + string body", ->
@@ -102,6 +108,7 @@ describe "$Cypress.Cy Request Commands", ->
             method: "GET"
             body: "foo"
             gzip: true
+            followRedirect: true
           })
 
       context "method normalization", ->
@@ -111,6 +118,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "https://www.foo.com/"
               method: "POST"
               gzip: true
+              followRedirect: true
             })
 
       context "url normalization", ->
@@ -122,6 +130,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "https://www.foo.com/"
               method: "GET"
               gzip: true
+              followRedirect: true
             })
 
         it "uses localhost urls", ->
@@ -130,6 +139,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:1234/"
               method: "GET"
               gzip: true
+              followRedirect: true
             })
 
         it "uses wwww urls", ->
@@ -138,6 +148,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://www.foo.com/"
               method: "GET"
               gzip: true
+              followRedirect: true
             })
 
         it "prefixes with baseUrl when origin is empty", ->
@@ -149,6 +160,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:8080/app/foo/bar?cat=1"
               method: "GET"
               gzip: true
+              followRedirect: true
             })
 
         it "prefixes with current origin over baseUrl", ->
@@ -160,6 +172,7 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:1234/foobar?cat=1"
               method: "GET"
               gzip: true
+              followRedirect: true
             })
 
       context "gzip", ->
@@ -172,80 +185,79 @@ describe "$Cypress.Cy Request Commands", ->
               url: "http://localhost:8080/"
               method: "GET"
               gzip: false
-            })
-
-      context "domain", ->
-        it "can change the domain", ->
-          @cy.request({
-            url: "http://localhost:8080"
-          }).then ->
-            @expectOptionsToBe({
-              url: "http://localhost:8080/"
-              method: "GET"
-              gzip: true
-              cookies: true
-            })
-
-      context "cookies", ->
-        it "is true by default", ->
-          @cy.request({
-            url: "http://github.com/users"
-          }).then ->
-            @expectOptionsToBe({
-              url: "http://github.com/users"
-              method: "GET"
-              cookies: true
-              gzip: true
-              domain: "localhost"
-              domain: "localhost"
-            })
-
-        it "sends cookies as is if object", ->
-          @cy.request({
-            url: "http://github.com/users"
-            cookies: {foo: "bar"}
-          }).then ->
-            @expectOptionsToBe({
-              url: "http://github.com/users"
-              method: "GET"
-              cookies: {foo: "bar"}
-              gzip: true
-              domain: "localhost"
-            })
-
-        it "can set cookies to false", ->
-          @cy.request({
-            url: "http://github.com/users"
-            cookies: false
-          }).then ->
-            @expectOptionsToBe({
-              url: "http://github.com/users"
-              method: "GET"
-              cookies: false
-              gzip: true
+              followRedirect: true
             })
 
       context "auth", ->
         it "sends auth when it is an object", ->
-      context "qs", ->
-        it "accepts an object literal", ->
           @cy.request({
             url: "http://localhost:8888"
             auth: {
               user: "brian"
               pass: "password"
-            qs: {
-              foo: "bar"
             }
           }).then ->
             @expectOptionsToBe({
               url: "http://localhost:8888/"
               method: "GET"
               gzip: true
+              followRedirect: true
               auth: {
                 user: "brian"
                 pass: "password"
               }
+            })
+
+      context "followRedirect", ->
+        it "is true by default", ->
+          @cy.request("http://localhost:8888")
+          .then ->
+            @expectOptionsToBe({
+              url: "http://localhost:8888/"
+              method: "GET"
+              gzip: true
+              followRedirect: true
+            })
+
+        it "can be set to false", ->
+          @cy.request({
+            url: "http://localhost:8888"
+            followRedirect: false
+          })
+          .then ->
+            @expectOptionsToBe({
+              url: "http://localhost:8888/"
+              method: "GET"
+              gzip: true
+              followRedirect: false
+            })
+
+        it "normalizes followRedirects -> followRedirect", ->
+          @cy.request({
+            url: "http://localhost:8888"
+            followRedirects: false
+          })
+          .then ->
+            @expectOptionsToBe({
+              url: "http://localhost:8888/"
+              method: "GET"
+              gzip: true
+              followRedirect: false
+            })
+
+      context "qs", ->
+        it "accepts an object literal", ->
+          @cy.request({
+            url: "http://localhost:8888"
+            qs: {
+              foo: "bar"
+            }
+          })
+          .then ->
+            @expectOptionsToBe({
+              url: "http://localhost:8888/"
+              method: "GET"
+              gzip: true
               followRedirect: true
               qs: {foo: "bar"}
             })
@@ -376,6 +388,7 @@ describe "$Cypress.Cy Request Commands", ->
               method: "POST"
               body: {first: "brian"}
               gzip: true
+              followRedirect: true
               json: true
             }
             Returned: {
