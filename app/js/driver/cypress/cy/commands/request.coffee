@@ -7,6 +7,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
 
   defaults = {
     log: true
+    qs: null ## TODO: add tests / document this
     body: null
     auth: null
     headers: null

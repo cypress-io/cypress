@@ -238,6 +238,21 @@ describe "lib/request", ->
       .then (resp) ->
         expect(resp.body).to.eq("derp")
 
+    context "qs", ->
+      it "can accept qs", ->
+        nock("http://localhost:8080")
+        .get("/foo?bar=baz&q=1")
+        .reply(200)
+
+        request.send({}, @fn, {
+          url: "http://localhost:8080/foo"
+          qs: {
+            bar: "baz"
+            q: 1
+          }
+        })
+        .then (resp) ->
+          expect(resp.status).to.eq(200)
     context "bad headers", ->
       beforeEach (done) ->
         @srv = http.createServer (req, res) ->

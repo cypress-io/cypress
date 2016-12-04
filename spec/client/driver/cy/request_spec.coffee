@@ -227,11 +227,15 @@ describe "$Cypress.Cy Request Commands", ->
 
       context "auth", ->
         it "sends auth when it is an object", ->
+      context "qs", ->
+        it "accepts an object literal", ->
           @cy.request({
             url: "http://localhost:8888"
             auth: {
               user: "brian"
               pass: "password"
+            qs: {
+              foo: "bar"
             }
           }).then ->
             @expectOptionsToBe({
@@ -242,6 +246,8 @@ describe "$Cypress.Cy Request Commands", ->
                 user: "brian"
                 pass: "password"
               }
+              followRedirect: true
+              qs: {foo: "bar"}
             })
 
     describe "failOnStatus", ->
