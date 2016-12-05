@@ -18,7 +18,6 @@ describe "lib/api", ->
       orgs = []
 
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
       .matchHeader("x-session", "session-123")
       .get("/organizations")
       .reply(200, orgs)
@@ -32,7 +31,6 @@ describe "lib/api", ->
       projects = []
 
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
       .matchHeader("x-session", "session-123")
       .get("/projects")
       .reply(200, projects)
@@ -46,7 +44,6 @@ describe "lib/api", ->
       builds = []
 
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
       .matchHeader("x-session", "session-123")
       .get("/projects/id-123/builds")
       .reply(200, builds)

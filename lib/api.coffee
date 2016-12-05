@@ -40,7 +40,6 @@ module.exports = {
       url: Routes.orgs()
       json: true
       headers: {
-        "x-route-version": "2"
         "x-session": session
       }
     })
@@ -50,7 +49,6 @@ module.exports = {
       url: Routes.projects()
       json: true
       headers: {
-        "x-route-version": "2"
         "x-session": session
       }
     })
@@ -60,7 +58,6 @@ module.exports = {
       url: Routes.projectBuilds(projectId)
       json: true
       headers: {
-        "x-route-version": "2"
         "x-session": session
       }
     })
