@@ -7,7 +7,6 @@ stream       = require("stream")
 express      = require("express")
 Promise      = require("bluebird")
 evilDns      = require("evil-dns")
-statuses     = require("http-status-codes")
 httpProxy    = require("http-proxy")
 httpsProxy   = require("@cypress/core-https-proxy")
 allowDestroy = require("server-destroy-vvo")
@@ -15,6 +14,7 @@ cors         = require("./util/cors")
 headersUtil  = require("./util/headers")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
+statusCode   = require("./util/status_code")
 cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
@@ -24,7 +24,6 @@ fileServer   = require("./file_server")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
-isOkayStatusRe         = /^2/
 
 setProxiedUrl = (req) ->
   ## bail if we've already proxied the url
@@ -316,12 +315,6 @@ class Server
 
           reject(err)
 
-        getStatusText = (code) ->
-          try
-            statuses.getStatusText(code)
-          catch e
-            "Unknown Status Code"
-
         handleReqStream = (str) =>
           pt = str
           .on("error", error)
@@ -344,18 +337,18 @@ class Server
 
               newUrl ?= urlStr
 
-              isOkay      = isOkayStatusRe.test(incomingRes.statusCode)
+              isOk        = statusCode.isOk(incomingRes.statusCode)
               contentType = headersUtil.getContentType(incomingRes)
               isHtml      = contentType is "text/html"
 
               details = {
-                isOk:   isOkay
+                isOkStatusCode: isOk
                 isHtml: isHtml
                 contentType: contentType
                 url: newUrl
                 status: incomingRes.statusCode
                 cookies: c
-                statusText: getStatusText(incomingRes.statusCode)
+                statusText: statusCode.getText(incomingRes.statusCode)
                 redirects: redirects
                 originalUrl: originalUrl
               }
@@ -365,7 +358,7 @@ class Server
                 ## if so we know this is a local file request
                 details.filePath = fp
 
-              if isOkay and isHtml
+              if isOk and isHtml
                 ## reset the domain to the new url if we're not
                 ## handling a local file
                 @_onDomainSet(newUrl) if not handlingLocalFile

@@ -48,7 +48,7 @@ class Project extends EE
       onSettingsChanged: false
     }
 
-    if process.env.CYPRESS_DEBUG or process.env.CYPRESS_MEMORY
+    if process.env.CYPRESS_MEMORY
       log = ->
         console.log("memory info", process.memoryUsage())
 
@@ -80,8 +80,9 @@ class Project extends EE
         @sync(options)
 
         Promise.join(
-          @watchFilesAndStartWebsockets(options, cfg)
-          @scaffold(cfg)
+          @watchSettingsAndStartWebsockets(options, cfg)
+          @scaffold(cfg).then =>
+            @watchSupportFile(cfg)
         )
 
     # return our project instance
@@ -173,8 +174,7 @@ class Project extends EE
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
 
-  watchFilesAndStartWebsockets: (options = {}, config = {}) ->
-    @watchSupportFile(config)
+  watchSettingsAndStartWebsockets: (options = {}, config = {}) ->
     @watchSettings(options.onSettingsChanged)
 
     ## if we've passed down reporter

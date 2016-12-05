@@ -1,21 +1,28 @@
 $Cypress.register "Request", (Cypress, _, $) ->
 
-  isOkStatusCodeRe   = /^2/
   validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
 
-  optionalOpts = "body auth headers json".split(" ")
+  isOptional = (memo, val, key) ->
+    if _.isNull(val)
+      memo.push(key)
+    memo
 
-  defaults = {
-    log: true
+  REQUEST_DEFAULTS = {
+    url: ""
+    method: "GET"
+    qs: null
     body: null
     auth: null
     headers: null
-    json: false
-    cookies: true
+    json: null
+    form: null
     gzip: true
-    failOnStatus: true
-    method: "GET"
+    followRedirect: true
   }
+
+  REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
+
+  OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
 
   request = (options) =>
     Cypress.triggerPromise("request", options)
@@ -29,8 +36,8 @@ $Cypress.register "Request", (Cypress, _, $) ->
   isValidJsonObj = (body) ->
     _.isObject(body) and not _.isFunction(body)
 
-  whichAreUntruthyAndOptional = (val, key) ->
-    !val and key in optionalOpts
+  whichAreOptional = (val, key) ->
+    val is null and key in OPTIONAL_OPTS
 
   # Cypress.extend
   #   ## set defaults for all requests?
@@ -66,12 +73,22 @@ $Cypress.register "Request", (Cypress, _, $) ->
           o.url    = args[1]
           o.body   = args[2]
 
-      _.defaults options, defaults, {
-        domain: window.location.hostname
+      _.defaults(options, REQUEST_DEFAULTS, {
+        log: true
         timeout: Cypress.config("responseTimeout")
-      }
+        failOnStatusCode: true
+      })
 
       options.method = options.method.toUpperCase()
+
+      if _.has(options, "failOnStatus")
+        $Cypress.Utils.warning("The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time.")
+        options.failOnStatusCode = options.failOnStatus
+
+      ## normalize followRedirects -> followRedirect
+      ## because we are nice
+      if _.has(options, "followRedirects")
+        options.followRedirect = options.followRedirects
 
       if not validHttpMethodsRe.test(options.method)
         $Cypress.Utils.throwErrByPath("request.invalid_method", {
@@ -99,10 +116,12 @@ $Cypress.register "Request", (Cypress, _, $) ->
       if not Cypress.Location.isFullyQualifiedUrl(options.url)
         $Cypress.Utils.throwErrByPath("request.url_invalid")
 
-      if isValidJsonObj(options.body)
+      ## only set json to true if form isnt true
+      ## and we have a valid object for body
+      if options.form isnt true and isValidJsonObj(options.body)
         options.json = true
 
-      options = _.omit options, whichAreUntruthyAndOptional
+      options = _.omit(options, whichAreOptional)
 
       if a = options.auth
         if not _.isObject(a)
@@ -114,27 +133,36 @@ $Cypress.register "Request", (Cypress, _, $) ->
         else
           $Cypress.Utils.throwErrByPath("request.headers_invalid")
 
-      isPlainObject = (obj) ->
-        _.isObject(obj) and not _.isArray(obj) and not _.isFunction(obj)
-
-      if c = options.cookies
-        if not _.isBoolean(c) and not isPlainObject(c)
-          $Cypress.Utils.throwErrByPath("request.cookies_invalid")
-
       if not _.isBoolean(options.gzip)
         $Cypress.Utils.throwErrByPath("request.gzip_invalid")
 
-      ## clone the requestOpts to prevent
-      ## anything from mutating it now
-      requestOpts = _(options).pick("method", "url", "body", "headers", "cookies", "json", "auth", "gzip", "domain")
+      if f = options.form
+        if not _.isBoolean(f)
+          $Cypress.Utils.throwErrByPath("request.form_invalid")
+
+      ## clone the requestOpts and reduce them down
+      ## to the bare minimum to send to lib/request
+      requestOpts = _(options).pick(REQUEST_PROPS)
 
       if options.log
         options._log = Cypress.Log.command({
           message: ""
-          consoleProps: -> {
-            Request: requestOpts
-            Returned: options.response
-          }
+          consoleProps: ->
+            resp = options.response ? {}
+            rr   = resp.allRequestResponses ? []
+
+            obj = {}
+
+            word = $Cypress.Utils.plural(rr.length, "Requests", "Request")
+
+            ## if we have only a single request/response then
+            ## flatten this to an object, else keep as array
+            rr = if rr.length is 1 then rr[0] else rr
+
+            obj[word] = rr
+            obj["Returned"] = _.pick(resp, "status", "duration", "body", "headers")
+
+            return obj
 
           renderProps: ->
             status = switch
@@ -144,7 +172,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
                 indicator = "pending"
                 "---"
 
-            indicator ?= if isOkStatusCodeRe.test(status) then "successful" else "bad"
+            indicator ?= if options.response?.isOkStatusCode then "successful" else "bad"
 
             {
               message: "#{options.method} #{status} #{_.truncate(options.url, 25)}"
@@ -161,8 +189,8 @@ $Cypress.register "Request", (Cypress, _, $) ->
       .then (response) =>
         options.response = response
 
-        ## bomb if we should fail on non 2xx status code
-        if options.failOnStatus and not isOkStatusCodeRe.test(response.status)
+        ## bomb if we should fail on non okay status code
+        if options.failOnStatusCode and response.isOkStatusCode isnt true
           $Cypress.Utils.throwErrByPath("request.status_invalid", {
             onFail: options._log
             args: { status: response.status }
@@ -175,12 +203,12 @@ $Cypress.register "Request", (Cypress, _, $) ->
           args: { timeout: options.timeout }
         }
       .catch responseFailed, (err) ->
-        body = if b = requestOpts.body
+        body = if (b = requestOpts.body)
           "Body: #{Cypress.Utils.stringify(b)}"
         else
           ""
 
-        headers = if h = requestOpts.headers
+        headers = if (h = requestOpts.headers)
           "Headers: #{Cypress.Utils.stringify(h)}"
         else
           ""

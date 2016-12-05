@@ -14,7 +14,6 @@ networkFailures = require("../util/network_failures")
 headRe      = /(<head.*?>)/i
 bodyRe      = /(<body.*?>)/i
 htmlRe      = /(<html.*?>)/i
-okStatusRe  = /^[2|3|4]\d+$/
 redirectRe  = /^30(1|2|3|7|8)$/
 
 zlib = Promise.promisifyAll(zlib)

@@ -7,11 +7,24 @@ moment     = require("moment")
 Promise    = require("bluebird")
 extension  = require("@cypress/core-extension")
 automation = require("./automation")
+statusCode = require("./util/status_code")
 
 Cookie = tough.Cookie
 CookieJar = tough.CookieJar
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
+pick = (resp = {}) ->
+  req = resp.request ? {}
+
+  {
+    "Request Body":     req.body ? null
+    "Request Headers":  req.headers
+    "Request URL":      req.href
+    "Response Body":    resp.body ? null
+    "Response Headers": resp.headers
+    "Response Status":  resp.statusCode
+  }
 
 newCookieJar = ->
   j = new CookieJar(undefined, {looseMode: true})
@@ -98,12 +111,21 @@ module.exports = (options = {}) ->
       catch e
         body
 
-    normalizeResponse: (response) ->
-      response = _.pick response, "statusCode", "body", "headers"
+    normalizeResponse: (push, response) ->
+      req = response.request ? {}
+
+      push(response)
+
+      response = _.pick(response, "statusCode", "body", "headers")
 
       ## normalize status
       response.status = response.statusCode
       delete response.statusCode
+
+      ## normalize what is an ok status code
+      response.isOkStatusCode = statusCode.isOk(response.status)
+
+      response.statusText = statusCode.getText(response.status)
 
       ## if body is a string and content type is json
       ## try to convert the body to JSON
@@ -190,7 +212,7 @@ module.exports = (options = {}) ->
       }
 
       if ua = headers["user-agent"]
-        options.headers["User-Agent"] = ua
+        options.headers["user-agent"] = ua
 
       ## create a new jar instance
       ## unless its falsy or already set
@@ -221,10 +243,12 @@ module.exports = (options = {}) ->
         headers: {}
         gzip: true
         jar: true
+        cookies: true
+        followRedirect: true
       }
 
       if ua = headers["user-agent"]
-        options.headers["User-Agent"] = ua
+        options.headers["user-agent"] = ua
 
       ## create a new jar instance
       ## unless its falsy or already set
@@ -237,6 +261,17 @@ module.exports = (options = {}) ->
         resolveWithFullResponse: true
       }
 
+      ## https://github.com/cypress-io/cypress/issues/322
+      ## either turn these both on or off
+      options.followAllRedirects = options.followRedirect
+
+      if options.form is true
+        ## reset form to whatever body is
+        ## and nuke body
+        options.form = options.body
+        delete options.json
+        delete options.body
+
       setCookies = (cookies) =>
         return if _.isEmpty(cookies)
 
@@ -245,13 +280,37 @@ module.exports = (options = {}) ->
       send = =>
         ms = Date.now()
 
-        ## dont send in domain
-        options = _.omit(options, "domain")
+        requestResponses = []
+
+        push = (response) ->
+          requestResponses.push(pick(response))
+
+        if options.followRedirect
+          options.followRedirect = (incomingRes) ->
+            push(incomingRes)
+
+            ## cause the redirect to happen
+            ## but swallow up the incomingRes
+            ## so we can build an array of responses
+            return true
 
         @create(options, true)
-        .then(@normalizeResponse.bind(@))
+        .then(@normalizeResponse.bind(@, push))
         .then (resp) =>
           resp.duration = Date.now() - ms
+          ## TODO: move duration somewhere...?
+          ## does node store this somewhere?
+          ## we could probably calculate this ourselves
+          ## by using the date headers
+          # resp.duration = Date.now() - ms
+
+          resp.allRequestResponses = requestResponses
+
+          if options.followRedirect is false and (loc = resp.headers.location)
+            ## resolve the new location head against
+            ## the current url
+            redirect = url.resolve(options.url, loc)
+            resp.redirectedTo = redirect
 
           if options.jar
             @setJarCookies(options.jar, automation)
