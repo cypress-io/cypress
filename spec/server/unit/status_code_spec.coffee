@@ -12,3 +12,15 @@ describe "lib/util/status_code", ->
       [100, 400, 401, 500, 404, 503, "200a", "300b"].forEach (code) ->
         expect(statusCode.isOk(code), "expected status code: #{code} to be false").to.be.false
 
+  context ".getText", ->
+    it "is OK", ->
+      expect(statusCode.getText(200)).to.eq("OK")
+
+    it "is Not Found", ->
+      expect(statusCode.getText(404)).to.eq("Not Found")
+
+    it "is Server Error", ->
+      expect(statusCode.getText(500)).to.eq("Server Error")
+
+    it "is Unknown Status Code", ->
+      expect(statusCode.getText(1234)).to.eq("Unknown Status Code")

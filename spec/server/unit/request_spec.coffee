@@ -31,6 +31,7 @@ describe "lib/request", ->
     it "sets status to statusCode and deletes statusCode", ->
       expect(request.normalizeResponse({statusCode: 404})).to.deep.eq({
         status: 404
+        statusText: "Not Found"
         isOkStatusCode: false
       })
 
@@ -46,6 +47,7 @@ describe "lib/request", ->
         body: "<html>foo</html>"
         headers: {"Content-Length": 50}
         status: 200
+        statusText: "OK"
         isOkStatusCode: true
       })
 
@@ -94,9 +96,10 @@ describe "lib/request", ->
         cookies: false
       })
       .then (resp) ->
-        expect(resp).to.have.keys("status", "body", "headers", "duration", "isOkStatusCode")
+        expect(resp).to.have.keys("status", "body", "headers", "duration", "isOkStatusCode", "statusText")
 
         expect(resp.status).to.eq(200)
+        expect(resp.statusText).to.eq("OK")
         expect(resp.body).to.eq("hello")
         expect(resp.headers).to.deep.eq({"content-type": "text/html"})
         expect(resp.isOkStatusCode).to.be.true

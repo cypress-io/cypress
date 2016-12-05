@@ -109,6 +109,8 @@ module.exports = (options = {}) ->
       ## normalize what is an ok status code
       response.isOkStatusCode = statusCode.isOk(response.status)
 
+      response.statusText = statusCode.getText(response.status)
+
       ## if body is a string and content type is json
       ## try to convert the body to JSON
       if _.isString(response.body) and @contentTypeIsJson(response)
