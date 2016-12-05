@@ -67,7 +67,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise, moment, UrlParse) ->
         switch
           ## if we didn't even get an OK response
           ## then immediately die
-          when not resp.isOk
+          when not resp.isOkStatusCode
             err = new Error
             err.gotResponse = true
             _.extend(err, resp)

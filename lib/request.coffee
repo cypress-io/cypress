@@ -7,6 +7,7 @@ moment     = require("moment")
 Promise    = require("bluebird")
 extension  = require("@cypress/core-extension")
 automation = require("./automation")
+statusCode = require("./util/status_code")
 
 Cookie = tough.Cookie
 CookieJar = tough.CookieJar
@@ -99,11 +100,14 @@ module.exports = (options = {}) ->
         body
 
     normalizeResponse: (response) ->
-      response = _.pick response, "statusCode", "body", "headers"
+      response = _.pick(response, "statusCode", "body", "headers")
 
       ## normalize status
       response.status = response.statusCode
       delete response.statusCode
+
+      ## normalize what is an ok status code
+      response.isOkStatusCode = statusCode.isOk(response.status)
 
       ## if body is a string and content type is json
       ## try to convert the body to JSON

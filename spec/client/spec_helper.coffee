@@ -38,7 +38,7 @@ resolveUrl = (url, cb) ->
   url = Cypress.Location.resolve(window.location.origin, url)
 
   cb({
-    isOk: true
+    isOkStatusCode: true
     isHtml: true
     url: url
   })

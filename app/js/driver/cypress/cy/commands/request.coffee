@@ -1,6 +1,5 @@
 $Cypress.register "Request", (Cypress, _, $) ->
 
-  isOkStatusCodeRe   = /^2/
   validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
 
   isOptional = (memo, val, key) ->
@@ -74,13 +73,17 @@ $Cypress.register "Request", (Cypress, _, $) ->
           o.url    = args[1]
           o.body   = args[2]
 
-      _.defaults options, REQUEST_DEFAULTS, {
+      _.defaults(options, REQUEST_DEFAULTS, {
         log: true
-        failOnStatus: true
         timeout: Cypress.config("responseTimeout")
-      }
+        failOnStatusCode: true
+      })
 
       options.method = options.method.toUpperCase()
+
+      if _.has(options, "failOnStatus")
+        $Cypress.Utils.warning("The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time.")
+        options.failOnStatusCode = options.failOnStatus
 
       ## normalize followRedirects -> followRedirect
       ## because we are nice
@@ -146,7 +149,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
           message: ""
           consoleProps: -> {
             Request: requestOpts
-            Returned: options.response
+            Returned: _.omit(options.response, "isOkStatusCode")
           }
 
           renderProps: ->
@@ -157,7 +160,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
                 indicator = "pending"
                 "---"
 
-            indicator ?= if isOkStatusCodeRe.test(status) then "successful" else "bad"
+            indicator ?= if options.response?.isOkStatusCode then "successful" else "bad"
 
             {
               message: "#{options.method} #{status} #{_.truncate(options.url, 25)}"
@@ -174,8 +177,8 @@ $Cypress.register "Request", (Cypress, _, $) ->
       .then (response) =>
         options.response = response
 
-        ## bomb if we should fail on non 2xx status code
-        if options.failOnStatus and not isOkStatusCodeRe.test(response.status)
+        ## bomb if we should fail on non okay status code
+        if options.failOnStatusCode and response.isOkStatusCode isnt true
           $Cypress.Utils.throwErrByPath("request.status_invalid", {
             onFail: options._log
             args: { status: response.status }

@@ -544,7 +544,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays file attributes as consoleProps", ->
         @sandbox.stub(@cy, "_resolveUrl").resolves({
-          isOk: true
+          isOkStatusCode: true
           isHtml: true
           contentType: "text/html"
           url: "http://localhost:3500/foo/bar"
@@ -564,7 +564,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays http attributes as consoleProps", ->
         @sandbox.stub(@cy, "_resolveUrl").resolves({
-          isOk: true
+          isOkStatusCode: true
           isHtml: true
           contentType: "text/html"
           url: "http://localhost:3500/foo"
@@ -583,7 +583,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays originalUrl http attributes as consoleProps", ->
         @sandbox.stub(@cy, "_resolveUrl").resolves({
-          isOk: true
+          isOkStatusCode: true
           isHtml: true
           contentType: "text/html"
           url: "http://localhost:3500/foo/bar"
@@ -603,7 +603,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "indicates redirects in the message", ->
         @sandbox.stub(@cy, "_resolveUrl").resolves({
-          isOk: true
+          isOkStatusCode: true
           isHtml: true
           contentType: "text/html"
           url: "http://localhost:3500/foo/bar"
@@ -673,7 +673,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           ## resolve after 150ms
           Promise.delay(150)
           .then ->
-            cb({isOk: true, isHtml: true, url: "http://some.new-domain.com"})
+            cb({isOkStatusCode: true, isHtml: true, url: "http://some.new-domain.com"})
           .then ->
             p = r.getCall(0).returnValue
 
@@ -815,7 +815,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays loading_file_failed when _resolveUrl resp is not ok", (done) ->
         obj = {
-          isOk: false
+          isOkStatusCode: false
           isHtml: true
           contentType: "text/html"
           originalUrl: "/foo.html"
@@ -853,7 +853,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays loading_file_failed redirects when _resolveUrl resp is not ok", (done) ->
         obj = {
-          isOk: false
+          isOkStatusCode: false
           isHtml: true
           contentType: "text/html"
           originalUrl: "/bar"
@@ -895,7 +895,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays loading_http_failed when _resolveUrl resp is not ok", (done) ->
         obj = {
-          isOk: false
+          isOkStatusCode: false
           isHtml: true
           contentType: "text/html"
           originalUrl: "https://google.com/foo"
@@ -931,7 +931,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays loading_http_failed redirects when _resolveUrl resp is not ok", (done) ->
         obj = {
-          isOk: false
+          isOkStatusCode: false
           isHtml: true
           contentType: "text/html"
           originalUrl: "https://google.com/foo"
@@ -973,7 +973,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays loading_invalid_content_type when isHtml is false on http requests", (done) ->
         obj = {
-          isOk: true
+          isOkStatusCode: true
           isHtml: false
           contentType: "application/json"
           originalUrl: "https://google.com/foo"
@@ -1010,7 +1010,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "displays loading_invalid_content_type when isHtml is false on file requests", (done) ->
         obj = {
-          isOk: true
+          isOkStatusCode: true
           isHtml: false
           filePath: "/path/to/bar/"
           contentType: "application/json"
