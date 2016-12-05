@@ -14,6 +14,18 @@ CookieJar = tough.CookieJar
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
+pick = (resp = {}) ->
+  req = resp.request ? {}
+
+  {
+    "Request Body":     req.body ? null
+    "Request Headers":  req.headers
+    "Request URL":      req.href
+    "Response Body":    resp.body ? null
+    "Response Headers": resp.headers
+    "Response Status":  resp.statusCode
+  }
+
 newCookieJar = ->
   j = new CookieJar(undefined, {looseMode: true})
 
@@ -99,7 +111,11 @@ module.exports = (options = {}) ->
       catch e
         body
 
-    normalizeResponse: (response) ->
+    normalizeResponse: (push, response) ->
+      req = response.request ? {}
+
+      push(response)
+
       response = _.pick(response, "statusCode", "body", "headers")
 
       ## normalize status
@@ -264,10 +280,31 @@ module.exports = (options = {}) ->
       send = =>
         ms = Date.now()
 
+        requestResponses = []
+
+        push = (response) ->
+          requestResponses.push(pick(response))
+
+        if options.followRedirect
+          options.followRedirect = (incomingRes) ->
+            push(incomingRes)
+
+            ## cause the redirect to happen
+            ## but swallow up the incomingRes
+            ## so we can build an array of responses
+            return true
+
         @create(options, true)
-        .then(@normalizeResponse.bind(@))
+        .then(@normalizeResponse.bind(@, push))
         .then (resp) =>
           resp.duration = Date.now() - ms
+          ## TODO: move duration somewhere...?
+          ## does node store this somewhere?
+          ## we could probably calculate this ourselves
+          ## by using the date headers
+          # resp.duration = Date.now() - ms
+
+          resp.allRequestResponses = requestResponses
 
           if options.followRedirect is false and (loc = resp.headers.location)
             ## resolve the new location head against

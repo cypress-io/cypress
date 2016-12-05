@@ -147,10 +147,22 @@ $Cypress.register "Request", (Cypress, _, $) ->
       if options.log
         options._log = Cypress.Log.command({
           message: ""
-          consoleProps: -> {
-            Request: requestOpts
-            Returned: _.omit(options.response, "isOkStatusCode")
-          }
+          consoleProps: ->
+            resp = options.response ? {}
+            rr   = resp.allRequestResponses ? []
+
+            obj = {}
+
+            word = $Cypress.Utils.plural(rr.length, "Requests", "Request")
+
+            ## if we have only a single request/response then
+            ## flatten this to an object, else keep as array
+            rr = if rr.length is 1 then rr[0] else rr
+
+            obj[word] = rr
+            obj["Returned"] = _.pick(resp, "status", "duration", "body", "headers")
+
+            return obj
 
           renderProps: ->
             status = switch
