@@ -315,12 +315,6 @@ class Server
 
           reject(err)
 
-        getStatusText = (code) ->
-          try
-            statuses.getStatusText(code)
-          catch e
-            "Unknown Status Code"
-
         handleReqStream = (str) =>
           pt = str
           .on("error", error)
@@ -354,7 +348,7 @@ class Server
                 url: newUrl
                 status: incomingRes.statusCode
                 cookies: c
-                statusText: getStatusText(incomingRes.statusCode)
+                statusText: statusCode.getText(incomingRes.statusCode)
                 redirects: redirects
                 originalUrl: originalUrl
               }
