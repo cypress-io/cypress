@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.8 - *(12/05/16)*
+- stop test run when there's a script error
+
 #### 0.3.7 - *(11/29/16)*
 - send reporter side of error through the reporter
 
