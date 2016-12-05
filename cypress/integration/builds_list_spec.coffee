@@ -174,7 +174,10 @@ describe "Builds List", ->
             @ipc.handle("get:specs", null, @specs)
           .get(".nav a").contains("Builds").click()
 
-      it "lists builds"
+      it "lists builds", ->
+        cy
+          .get(".builds-list li")
+          .should("have.length", 4)
 
   context "without a current user", ->
     beforeEach ->
@@ -213,4 +216,3 @@ describe "Builds List", ->
 
       it "shows login screen with builds message", ->
         cy.contains('Log in to see Builds')
-

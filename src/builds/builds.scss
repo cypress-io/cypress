@@ -22,3 +22,113 @@
   margin-bottom: 0;
   width: 100%;
 }
+
+.builds-list {
+  @include list-columns(2%, 5%, 30%, 16%, 14%, 6%, 8%, 10%, 9%);
+  position: fixed;
+  bottom: 18px;
+  top: 77px;
+  background-color: white;
+  clear: both;
+  border: 1px solid #eee;
+  border-top: none;
+  margin-bottom: 0;
+  overflow: auto;
+  padding-left: 0;
+  width: 100%;
+
+  > li {
+    overflow: auto;
+    clear: both;
+    border-bottom: 1px solid #eeeeee;
+    vertical-align: top;
+    position: relative;
+    width: 100%;
+    font-size: 12px;
+    color: #898A8B;
+
+    &:hover {
+      background-color: #f8f8f8;
+      cursor: pointer;
+    }
+
+    > div > div {
+      padding: 10px 20px;
+      font-weight: 500;
+    }
+
+    .os-block {
+      padding-right: 0;
+    }
+
+    > div:first-child {
+      border-left: 5px solid #eee;
+      min-height: 62px;
+
+      &.errored {
+        border-left-color: #F5A327;
+        .fa { color: #F5A327;}
+      }
+
+      &.failed {
+        border-left-color: #ec6573;
+        .fa { color: #ec6573;}
+      }
+
+      &.noTests {
+        border-left-color: #F5A327;
+        .fa { color: #F5A327;}
+      }
+
+      &.passed {
+        border-left-color: #1CB77E;
+        .fa { color: #1CB77E;}
+      }
+
+      &.running {
+        border-left-color: #428BCA;
+        .fa { color: #428BCA;}
+      }
+
+      &.overLimit {
+        border-left-color: #F5A327;
+        .fa { color: #F5A327;}
+      }
+
+      &.timedOut {
+        border-left-color: #F5A327;
+        .fa { color: #F5A327;}
+      }
+      &>div {
+        padding-right: 0;
+        padding-left: 10px;
+      }
+    }
+
+    > div:nth-child(2) > div {
+      padding-right: 0;
+      padding-left: 10px;
+      font-weight: 500;
+      color: #666;
+    }
+  }
+
+  .td-border-left {
+    border-left: 1px solid #eee;
+    min-height: 62px;
+  }
+
+  .msg {
+    font-weight: 300;
+    padding-left: 3px;
+  }
+
+  .user {
+    font-weight: 600;
+    margin-left: 3px;
+  }
+
+  .fa-user {
+    color: #bbb;
+  }
+}

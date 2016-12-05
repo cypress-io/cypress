@@ -66,18 +66,15 @@ class Builds extends Component {
 
     // everything's good, there are builds to show!
     return (
-      <div id='builds'>
-        <div className='builds-wrapper'>
-          <h5>Builds</h5>
-        </div>
-        <ul className='builds-list list-as-table'>
-          { _.map(buildsCollection.builds, (build) => (
-            <li key={build.uuid} className='li'>
-              <Build build={build} />
-            </li>
-          ))}
-        </ul>
-      </div>
+      <ul className='builds-list list-as-table'>
+        {_.map(buildsCollection.builds, (build) => (
+          <Build
+            key={build.id}
+            goToBuild={() => {}}
+            {...build}
+          />
+        ))}
+      </ul>
     )
   }
 

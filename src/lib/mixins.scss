@@ -1,9 +1,5 @@
 @mixin responsive-width($width: 100%, $padding: 0, $border: 0, $borderColor: #eee) {
   width: $width;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -o-box-sizing: border-box;
-  -ms-box-sizing: border-box;
   box-sizing: border-box;
   @if $padding != "none" {
     padding: $padding;
