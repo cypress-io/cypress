@@ -196,7 +196,7 @@ module.exports = (options = {}) ->
       }
 
       if ua = headers["user-agent"]
-        options.headers["User-Agent"] = ua
+        options.headers["user-agent"] = ua
 
       ## create a new jar instance
       ## unless its falsy or already set
@@ -232,7 +232,7 @@ module.exports = (options = {}) ->
       }
 
       if ua = headers["user-agent"]
-        options.headers["User-Agent"] = ua
+        options.headers["user-agent"] = ua
 
       ## create a new jar instance
       ## unless its falsy or already set

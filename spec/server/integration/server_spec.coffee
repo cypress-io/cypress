@@ -279,7 +279,7 @@ describe "Server", ->
 
       it "can serve http requests", ->
         nock("http://getbootstrap.com")
-        .matchHeader("User-Agent", "foobarbaz")
+        .matchHeader("user-agent", "foobarbaz")
         .get("/")
         .reply(200, "<html>content</html>", {
           "X-Foo-Bar": "true"

@@ -213,7 +213,7 @@ describe "lib/request", ->
 
     it "sends up user-agent headers", ->
       nock("http://localhost:8080")
-      .matchHeader("User-Agent", "foobarbaz")
+      .matchHeader("user-agent", "foobarbaz")
       .get("/foo")
       .reply(200, "derp")
 
