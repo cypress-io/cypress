@@ -81,9 +81,10 @@ class Project extends EE
 
         Promise.join(
           @watchSettingsAndStartWebsockets(options, cfg)
-          @scaffold(cfg).then =>
-            @watchSupportFile(cfg)
+          @scaffold(cfg)
         )
+        .then =>
+          @watchSupportFile(cfg)
 
     # return our project instance
     .return(@)
