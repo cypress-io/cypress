@@ -19,6 +19,12 @@ export default class Project {
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
   @observable projectId
+  @observable name
+  @observable public
+  @observable orgName
+  @observable defaultOrg
+  @observable status
+  @observable lastRan
 
   constructor (project) {
     // if the project has been setup, it may
@@ -30,6 +36,13 @@ export default class Project {
       this.id = md5(project.path)
     }
     this.path = project.path
+
+    if (project.name) this.name = project.name
+    if (project.public) this.public = project.public
+    if (project.orgName) this.orgName = project.orgName
+    if (project.defaultOrg) this.defaultOrg = project.defaultOrg
+    if (project.status) this.status = project.status
+    if (project.lastRan) this.lastRan = project.lastRan
   }
 
   @computed get otherBrowsers () {

@@ -45,10 +45,10 @@ describe "Projects List", ->
       afterEach ->
         cy.clearLocalStorage()
 
-      it.skip "has status in projects list", ->
+      it "has status in projects list", ->
         cy
           .get(".projects-list>li").first()
-          .contains("Public")
+          .contains("Passing")
 
     describe "lists projects", ->
       beforeEach ->
@@ -123,8 +123,8 @@ describe "Projects List", ->
       describe "project statuses in list", ->
         beforeEach ->
           cy
-            .fixture("projects_statuses").then (@projects_statuses) ->
-              @ipc.handle("get:projects:statuses", null, @projects_statuses)
+            .fixture("projects_statuses").then (@projects_statuses) =>
+              @ipc.handle("get:project:statuses", null, @projects_statuses)
 
         it "displays projects in list", ->
           cy
@@ -225,6 +225,3 @@ describe "Projects List", ->
           cy
             .get(".project.loading").find(".fa")
               .should("have.class", "fa-spinner")
-
-
-
