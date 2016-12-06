@@ -25,6 +25,7 @@ export default class Project {
   @observable defaultOrg
   @observable status
   @observable lastRan
+  @observable valid = true
 
   constructor (project) {
     // if the project has been setup, it may
@@ -38,11 +39,12 @@ export default class Project {
     this.path = project.path
 
     if (project.name) this.name = project.name
-    if (project.public) this.public = project.public
+    if (project.public != null) this.public = project.public
     if (project.orgName) this.orgName = project.orgName
     if (project.defaultOrg) this.defaultOrg = project.defaultOrg
     if (project.status) this.status = project.status
     if (project.lastRan) this.lastRan = project.lastRan
+    if (project.valid != null) this.valid = project.valid
   }
 
   @computed get otherBrowsers () {

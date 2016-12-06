@@ -80,6 +80,7 @@
     "updatedAt": "2016-04-12T18:43:56+00:00",
     "ownerId": 123,
     "orgId": 829,
-    "hoursUsed": 14.75
+    "hoursUsed": 14.75,
+    "valid": false
   }
 ]

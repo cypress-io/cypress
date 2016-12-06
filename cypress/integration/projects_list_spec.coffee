@@ -147,6 +147,11 @@ describe "Projects List", ->
             .get(".projects-list>li").first()
             .contains("Passing")
 
+        it "displays invalid status if invalid", ->
+          cy
+            .get(".projects-list>li").last()
+            .contains("Invalid")
+
     describe "add project", ->
       beforeEach ->
         cy

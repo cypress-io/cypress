@@ -104,6 +104,15 @@ class Project extends Component {
   }
 
   _projectStatus () {
+    if (!this.props.project.valid) {
+      return (
+        <span className='invalid'>
+          <i className={`fa fa-warning`}></i>{' '}
+          Invalid
+        </span>
+      )
+    }
+
     const status = this.props.project.status
     if (!status) return
 
