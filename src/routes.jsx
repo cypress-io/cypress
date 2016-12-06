@@ -36,7 +36,11 @@ const withUser = (ComponentClass) => {
 }
 
 const devTools = () => {
-  if ((window.env === 'development') || (window.env === 'test')) {
+  if (
+    window.env === 'development' ||
+    window.env === 'test' &&
+    !localStorage.noDevtools
+  ) {
     setLogEnabled(true)
     setUpdatesEnabled(true)
     setGraphEnabled(false)
