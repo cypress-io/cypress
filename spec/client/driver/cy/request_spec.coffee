@@ -760,6 +760,74 @@ describe "$Cypress.Cy Request Commands", ->
           }
         })
 
+      it "does not include redirects when there were no redirects", (done) ->
+        @respondWith({
+          isOkStatusCode: false
+          status: 500
+          statusText: "Server Error"
+          headers: {
+            baz: "quux"
+          }
+          body: "response body"
+          requestHeaders: {
+            foo: "bar"
+          }
+          requestBody: "request body"
+        })
+
+        logs = []
+
+        @Cypress.on "log", (attrs, @log) =>
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(err.message).to.include("""
+            cy.request() failed on:
+
+            http://localhost:1234/foo
+
+            The response we received from your web server was:
+
+              > 500: Server Error
+
+            This was considered a failure because the status code was not '2xx' or '3xx'.
+
+            If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+
+            -----------------------------------------------------------
+
+            The request we sent was:
+
+            Method: POST
+            URL: http://localhost:1234/foo
+            Headers: {
+              \"foo\": \"bar\"
+            }
+            Body: request body
+
+            -----------------------------------------------------------
+
+            The response we got was:
+
+            Status: 500 - Server Error
+            Headers: {
+              \"baz\": \"quux\"
+            }
+            Body: response body
+          """)
+          done()
+
+        @cy.request({
+          method: "POST"
+          url: "http://localhost:1234/foo"
+          body: {
+            username: "cypress"
+          }
+        })
+
       it "logs once on error", (done) ->
         @respondWith({__error: "request failed"})
 
@@ -791,7 +859,7 @@ describe "$Cypress.Cy Request Commands", ->
 
             We received this error at the network level:
 
-              > "request failed"
+              > request failed
 
             -----------------------------------------------------------
 

@@ -314,8 +314,10 @@ module.exports = (options = {}) ->
           ## we could probably calculate this ourselves
           ## by using the date headers
           resp.duration            = Date.now() - ms
-          resp.redirects           = redirects
           resp.allRequestResponses = requestResponses
+
+          if redirects.length
+            resp.redirects = redirects
 
           if options.followRedirect is false and (loc = resp.headers.location)
             ## resolve the new location head against

@@ -360,7 +360,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
         We received this error at the network level:
 
-          > "#{obj.error}"
+          > #{obj.error}
 
         #{divider(60, '-')}
 

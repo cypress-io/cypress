@@ -118,13 +118,12 @@ describe "lib/request", ->
         body: "foobarbaz"
       })
       .then (resp) ->
-        expect(resp).to.have.keys("status", "body", "headers", "duration", "isOkStatusCode", "statusText", "allRequestResponses", "redirects", "requestBody", "requestHeaders")
+        expect(resp).to.have.keys("status", "body", "headers", "duration", "isOkStatusCode", "statusText", "allRequestResponses", "requestBody", "requestHeaders")
 
         expect(resp.status).to.eq(200)
         expect(resp.statusText).to.eq("OK")
         expect(resp.body).to.eq("hello")
         expect(resp.headers).to.deep.eq({"content-type": "text/html"})
-        expect(resp.redirects).to.deep.eq([])
         expect(resp.isOkStatusCode).to.be.true
         expect(resp.requestBody).to.eq("foobarbaz")
         expect(resp.requestHeaders).to.deep.eq({
