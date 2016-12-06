@@ -322,7 +322,7 @@ module.exports = (options = {}) ->
           if options.followRedirect is false and (loc = resp.headers.location)
             ## resolve the new location head against
             ## the current url
-            resp.redirectedTo = normalizeUrl(loc)
+            resp.redirectedToUrl = normalizeUrl(loc)
 
           if options.jar
             @setJarCookies(options.jar, automation)

@@ -360,7 +360,7 @@ describe "lib/request", ->
         .then (resp) ->
           expect(resp.status).to.eq(200)
           expect(resp.body).to.eq("login")
-          expect(resp).not.to.have.property("redirectedTo")
+          expect(resp).not.to.have.property("redirectedToUrl")
 
       it "follows non-GET redirects by default", ->
         nock("http://localhost:8080")
@@ -379,7 +379,7 @@ describe "lib/request", ->
         .then (resp) ->
           expect(resp.status).to.eq(200)
           expect(resp.body).to.eq("dashboard")
-          expect(resp).not.to.have.property("redirectedTo")
+          expect(resp).not.to.have.property("redirectedToUrl")
 
       it "can turn off following redirects", ->
         nock("http://localhost:8080")
@@ -398,9 +398,9 @@ describe "lib/request", ->
         .then (resp) ->
           expect(resp.status).to.eq(302)
           expect(resp.body).to.eq("")
-          expect(resp.redirectedTo).to.eq("http://localhost:8080/login")
+          expect(resp.redirectedToUrl).to.eq("http://localhost:8080/login")
 
-      it "resolves redirectedTo on relative redirects", ->
+      it "resolves redirectedToUrl on relative redirects", ->
         nock("http://localhost:8080")
         .get("/dashboard")
         .reply(302, "", {
@@ -416,9 +416,9 @@ describe "lib/request", ->
         })
         .then (resp) ->
           expect(resp.status).to.eq(302)
-          expect(resp.redirectedTo).to.eq("http://localhost:8080/login")
+          expect(resp.redirectedToUrl).to.eq("http://localhost:8080/login")
 
-      it "resolves redirectedTo to another domain", ->
+      it "resolves redirectedToUrl to another domain", ->
         nock("http://localhost:8080")
         .get("/dashboard")
         .reply(301, "", {
@@ -434,9 +434,9 @@ describe "lib/request", ->
         })
         .then (resp) ->
           expect(resp.status).to.eq(301)
-          expect(resp.redirectedTo).to.eq("https://www.google.com/login")
+          expect(resp.redirectedToUrl).to.eq("https://www.google.com/login")
 
-      it "does not included redirectedTo when following redirects", ->
+      it "does not included redirectedToUrl when following redirects", ->
         nock("http://localhost:8080")
         .get("/dashboard")
         .reply(302, "", {
@@ -451,7 +451,7 @@ describe "lib/request", ->
         })
         .then (resp) ->
           expect(resp.status).to.eq(200)
-          expect(resp).not.to.have.property("redirectedTo")
+          expect(resp).not.to.have.property("redirectedToUrl")
 
     context "form=true", ->
       beforeEach ->

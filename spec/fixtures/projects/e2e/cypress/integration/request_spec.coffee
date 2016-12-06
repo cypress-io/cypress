@@ -64,6 +64,7 @@ describe "redirects + requests", ->
       .then (resp) ->
         expect(resp.status).to.eq(302)
         expect(resp.body).to.eq("Found. Redirecting to /home")
+        expect(resp.redirectedToUrl).to.eq("http://localhost:2294/home")
 
   it "follows all redirects even when they change methods", ->
     cy
