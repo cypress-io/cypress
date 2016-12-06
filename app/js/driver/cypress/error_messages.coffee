@@ -1,4 +1,28 @@
 $Cypress.ErrorMessages = do ($Cypress) ->
+  divider = (num, char) ->
+    Array(num).join(char)
+
+  format = (data) ->
+    switch
+      when _.isString(data)
+        _.truncate(data, 100)
+      when _.isObject(data)
+        JSON.stringify(data, null, 2)
+      else
+        data
+
+  formatRedirect = (redirect) -> "  - #{redirect}"
+
+  formatRedirects = (redirects = []) ->
+    _.map(redirects, formatRedirect)
+
+  formatProp = (memo, field) ->
+    {key, value} = field
+
+    if value?
+      memo.push(_.capitalize(key) + ": " + format(value))
+    memo
+
   cmd = (command, args = "") ->
     "cy.#{command}(#{args})"
 
@@ -9,14 +33,19 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     word = $Cypress.Utils.plural(redirects.length, "times", "time")
 
-    list = _.map redirects, (redirect) ->
-      "  - #{redirect}"
+    list = formatRedirects(redirects)
 
     """
     #{phrase} '#{redirects.length}' #{word} to:
 
     #{list.join("\n")}
     """
+
+  getHttpProps = (fields = []) ->
+    _.chain(fields)
+    .reduce(formatProp, [])
+    .value()
+    .join("\n")
 
   return {
     add:
@@ -321,24 +350,77 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
       If you're trying to send a x-www-form-urlencoded request then pass either a string or object literal to the 'body' property.
       """
-      loading_failed: """
-        #{cmd('request')} failed:
+      loading_failed: (obj) ->
+        """
+        #{cmd('request')} failed trying to load:
 
-        The response from the remote server was:
+        #{obj.url}
 
-          > "{{error}}"
+        We attempted to make an http request to this URL but the request failed without a response.
 
-        The request parameters were:
-          Method: {{method}}
-          URL: {{url}}
-          {{body}}
-          {{headers}}
+        We received this error at the network level:
+
+          > "#{obj.error}"
+
+        #{divider(60, '-')}
+
+        The request we sent was:
+
+        #{getHttpProps([
+          {key: 'method',    value: obj.method},
+          {key: 'URL',       value: obj.url},
+        ])}
+
+        #{divider(60, '-')}
+
+        Common situations why this would fail:
+          - you don't have internet access
+          - you forgot to run / boot your web server
+          - your web server isn't accessible
+          - you have weird network configuration settings on your computer
 
         The stack trace for this error is:
 
-        {{stack}}
-      """
-      status_invalid: "#{cmd('request')} failed because the response had the status code: {{status}}"
+        #{obj.stack}
+        """
+
+      status_invalid: (obj) ->
+        """
+        #{cmd('request')} failed on:
+
+        #{obj.url}
+
+        The response we received from your web server was:
+
+          > #{obj.status}: #{obj.statusText}
+
+        This was considered a failure because the status code was not '2xx' or '3xx'.
+
+        If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+
+        #{divider(60, '-')}
+
+        The request we sent was:
+
+        #{getHttpProps([
+          {key: 'method',    value: obj.method},
+          {key: 'URL',       value: obj.url},
+          {key: 'headers',   value: obj.requestHeaders},
+          {key: 'body',      value: obj.requestBody}
+          {key: 'redirects', value: obj.redirects}
+        ])}
+
+        #{divider(60, '-')}
+
+        The response we got was:
+
+        #{getHttpProps([
+          {key: 'status',  value: obj.status + ' - ' + obj.statusText},
+          {key: 'headers', value: obj.responseHeaders},
+          {key: 'body',    value: obj.responseBody}
+        ])}
+
+        """
       timed_out: "#{cmd('request')} timed out waiting {{timeout}}ms for a response. No response ever occured."
       url_missing: "#{cmd('request')} requires a url. You did not provide a url."
       url_invalid: "#{cmd('request')} must be provided a fully qualified url - one that begins with 'http'. By default #{cmd('request')} will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present."
