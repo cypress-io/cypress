@@ -387,20 +387,6 @@ class Server
           @_remoteDomainName   = previousState.domainName
           @_remoteVisitingUrl  = previousState.visiting
 
-        mergeHost = (curr, next) ->
-          ## parse our next url
-          next = url.parse(next, true)
-
-          ## and if its missing its host
-          ## then take it from the current url
-          if not next.host
-            curr = url.parse(curr, true)
-
-            for prop in ["hostname", "port", "protocol"]
-              next[prop] = curr[prop]
-
-          next.format()
-
         request.sendStream(headers, automationRequest, {
           ## turn off gzip since we need to eventually
           ## rewrite these contents
@@ -412,7 +398,7 @@ class Server
 
             curr = newUrl ? urlStr
 
-            newUrl = mergeHost(curr, next)
+            newUrl = url.resolve(curr, next)
 
             redirects.push([status, newUrl].join(": "))
 
