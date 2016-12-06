@@ -80,8 +80,9 @@ class Project extends EE
         @sync(options)
 
         Promise.join(
-          @watchFilesAndStartWebsockets(options, cfg)
-          @scaffold(cfg)
+          @watchSettingsAndStartWebsockets(options, cfg)
+          @scaffold(cfg).then =>
+            @watchSupportFile(cfg)
         )
 
     # return our project instance
@@ -165,8 +166,7 @@ class Project extends EE
 
     @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
 
-  watchFilesAndStartWebsockets: (options = {}, config = {}) ->
-    @watchSupportFile(config)
+  watchSettingsAndStartWebsockets: (options = {}, config = {}) ->
     @watchSettings(options.onSettingsChanged)
 
     ## if we've passed down reporter

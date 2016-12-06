@@ -110,7 +110,7 @@
     "@cypress/core-https-proxy": "0.1.4",
     "@cypress/core-icons": "0.4.1",
     "@cypress/core-launcher": "0.1.0",
-    "@cypress/core-runner": "0.3.7",
+    "@cypress/core-runner": "0.3.8",
     "@cypress/core-socket": "0.2.0",
     "@ffmpeg-installer/ffmpeg": "1.0.3",
     "ansi_up": "^1.3.0",

@@ -68,7 +68,8 @@ describe "lib/project", ->
 
   context "#open", ->
     beforeEach ->
-      @sandbox.stub(@project, "watchFilesAndStartWebsockets").resolves()
+      @sandbox.stub(@project, "watchSettingsAndStartWebsockets").resolves()
+      @sandbox.stub(@project, "watchSupportFile").resolves()
       @sandbox.stub(@project, "ensureProjectId").resolves("id-123")
       @sandbox.stub(@project, "updateProject").withArgs("id-123", "opened").resolves()
       @sandbox.stub(@project, "scaffold").resolves()
@@ -85,15 +86,19 @@ describe "lib/project", ->
       @project.open(opts).then ->
         expect(opts.type).to.eq("opened")
 
-    it "calls #watchFilesAndStartWebsockets with options + config", ->
+    it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
       @project.cfg = {}
       @project.open(opts).then =>
-        expect(@project.watchFilesAndStartWebsockets).to.be.calledWith(opts, @project.cfg)
+        expect(@project.watchSettingsAndStartWebsockets).to.be.calledWith(opts, @project.cfg)
 
     it "calls #scaffold with server config", ->
       @project.open().then =>
         expect(@project.scaffold).to.be.calledWith(@config)
+
+    it "calls #watchSupportFile with server config when scaffolding is finished", ->
+      @project.open().then =>
+        expect(@project.watchSupportFile).to.be.calledWith(@config)
 
     it "calls #getConfig options", ->
       opts = {}
@@ -288,7 +293,7 @@ describe "lib/project", ->
       @watch = @sandbox.stub(@project.watchers, "watch")
 
     it "sets onChange event when {changeEvents: true}", (done) ->
-      @project.watchFilesAndStartWebsockets({onSettingsChanged: done})
+      @project.watchSettingsAndStartWebsockets({onSettingsChanged: done})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
@@ -297,7 +302,7 @@ describe "lib/project", ->
       obj.onChange()
 
     it "does not call watch when {changeEvents: false}", ->
-      @project.watchFilesAndStartWebsockets({onSettingsChanged: undefined})
+      @project.watchSettingsAndStartWebsockets({onSettingsChanged: undefined})
 
       expect(@watch).not.to.be.called
 
@@ -308,7 +313,7 @@ describe "lib/project", ->
 
       stub = @sandbox.stub()
 
-      @project.watchFilesAndStartWebsockets({onSettingsChanged: stub})
+      @project.watchSettingsAndStartWebsockets({onSettingsChanged: stub})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
@@ -349,18 +354,17 @@ describe "lib/project", ->
 
       expect(@project.server.onTestFileChange).to.be.calledWith("foo/bar.js")
 
-  context "#watchFilesAndStartWebsockets", ->
+  context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->
       @project = Project("path/to/project")
       @project.watchers = {}
       @project.server = @sandbox.stub({startWebsockets: ->})
-      @sandbox.stub(@project, "watchSupportFile")
       @sandbox.stub(@project, "watchSettings")
 
     it "calls server.startWebsockets with watchers + config", ->
       c = {}
 
-      @project.watchFilesAndStartWebsockets({}, c)
+      @project.watchSettingsAndStartWebsockets({}, c)
 
       expect(@project.server.startWebsockets).to.be.calledWith(@project.watchers, c)
 
@@ -369,7 +373,7 @@ describe "lib/project", ->
 
       @project.server.startWebsockets.yieldsTo("onAutomationRequest")
 
-      @project.watchFilesAndStartWebsockets({onAutomationRequest: fn}, {})
+      @project.watchSettingsAndStartWebsockets({onAutomationRequest: fn}, {})
 
       expect(fn).to.be.calledOnce
 
@@ -378,7 +382,7 @@ describe "lib/project", ->
 
       @project.server.startWebsockets.yieldsTo("onReloadBrowser")
 
-      @project.watchFilesAndStartWebsockets({onReloadBrowser: fn}, {})
+      @project.watchSettingsAndStartWebsockets({onReloadBrowser: fn}, {})
 
       expect(fn).to.be.calledOnce
 
