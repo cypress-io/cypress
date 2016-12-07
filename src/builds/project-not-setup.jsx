@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 
+import App from '../lib/app'
 import SetupProject from "./setup-project-modal"
 import { getOrgs } from '../organizations/organizations-api'
 
@@ -58,7 +59,10 @@ export default class ProjectNotSetup extends Component {
     this.setState({ setupProjectModalOpen: true })
   }
 
-  _setupProject = (e) => {
-    e.preventDefault()
+  _setupProject = (projectDetails) => {
+    App.ipc('setup:project', projectDetails).then((projectId) => {
+      this._hideSetupProjectModal()
+      this.props.onSetup(projectId)
+    })
   }
 }

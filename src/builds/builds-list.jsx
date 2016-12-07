@@ -29,7 +29,6 @@ class Builds extends Component {
   }
 
   render () {
-
     //--------Build States----------//
     // they are not logged in
     if (!state.hasUser) {
@@ -82,17 +81,20 @@ class Builds extends Component {
     return (
       <ProjectNotSetup
         project={this.props.project}
+        onSetup={this._setProjectId}
       />
     )
+  }
+
+  _setProjectId = (projectId) => {
+    this.props.project.setProjectId(projectId)
   }
 
   _empty () {
     return (
       <div id='builds-list-page'>
         <div className="empty">
-          <h4>
-            No Builds Found
-          </h4>
+          <h4>Getting Started with Builds</h4>
           <p>Porta Amet Euismod Dolor <strong><i className='fa fa-plus'></i> Euismod</strong> Tellus Vehicula Vestibulum Venenatis Euismod.</p>
           <p>Adipiscing Nibh Magna Ridiculus Inceptos.</p>
         </div>

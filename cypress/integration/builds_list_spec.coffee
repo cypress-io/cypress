@@ -129,17 +129,36 @@ describe "Builds List", ->
 
           describe "successfully submit form", ->
             beforeEach ->
+              @ipc.handle("setup:project", null, "project-id-123")
+
               cy
                 .get(".modal-body")
                 .contains(".btn", "Setup Project").click()
 
-            it "calls ipc event"
+            it "sends data from form to ipc event", ->
+              expect(@App.ipc).to.be.calledWith("setup:project", {
+                projectName: "My-Fake-Project"
+                orgId: "000"
+                public: true
+              })
 
-            it "sends data from form to ipc event"
+            it "closes modal", ->
+              cy.get(".modal").should("not.be.visible")
 
-            it "closes modal"
+            it.only "displays empty builds page", ->
+              cy.contains("Getting Started with Builds")
 
-            it "displays new page"
+            describe "welcome page", ->
+
+              it "displays command to run with the ci key"
+
+              it "displays link to CI docs"
+
+              ## something about how we put a projectId in their cypress.json
+              ## and they need to check that into source control
+
+            ## if project is set to private
+            ## - display a different message that talks about inviting users
 
           describe "errors on form submit", ->
             beforeEach ->
@@ -148,6 +167,9 @@ describe "Builds List", ->
                 .contains(".btn", "Setup Project").click()
 
             it "displays errors"
+            ## validate project name
+            ## ipc could return error
+            ## - 422
 
             it "does not close modal"
 
@@ -162,7 +184,7 @@ describe "Builds List", ->
             .get(".nav a").contains("Builds").click()
 
         it "displays empty message", ->
-          cy.contains("No Builds Found")
+          cy.contains("Getting Started with Builds")
 
     describe "list builds", ->
       beforeEach ->

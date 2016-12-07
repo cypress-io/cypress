@@ -16,6 +16,14 @@ class SetupProject extends Component {
     onConfirm: React.PropTypes.func.isRequired,
   }
 
+  constructor (...args) {
+    super(...args)
+
+    this.state = {
+      public: true,
+    }
+  }
+
   render () {
     if (!orgsStore.isLoaded) return null
 
@@ -33,13 +41,14 @@ class SetupProject extends Component {
           <p className='text-muted'>After configuring your project's settings, we will generate a secret key to be used during your CI run.</p>
           <form
             className='form-horizontal'
-            onSubmit={this.props.onConfirm}>
+            onSubmit={this._setupProject}>
             <div className='form-group'>
               <label htmlFor='projectName' className='col-sm-3 control-label'>
                 Project Name:
               </label>
               <div className='col-sm-7'>
                 <input
+                  ref='projectName'
                   type='text'
                   className='form-control'
                   id='projectName'
@@ -52,6 +61,7 @@ class SetupProject extends Component {
               </label>
               <div className='col-sm-7'>
                 <select
+                  ref='orgId'
                   id='organizations-select'
                   className='form-control'>
                     <option value={defaultOrg.id}>{defaultOrg.name}</option>
@@ -71,7 +81,7 @@ class SetupProject extends Component {
                 </select>
               </div>
               <div className='col-sm-2 no-left-padding'>
-                <button href='#' className='btn btn-link manage-orgs-btn' onClick={this._manageOrgsLink}>manage</button>
+                <button href='#' className='btn btn-link manage-orgs-btn' onClick={this._manageOrgs}>manage</button>
               </div>
             </div>
             <div className='form-group'>
@@ -81,7 +91,13 @@ class SetupProject extends Component {
               <div className='col-sm-9'>
                 <div className='radio privacy-radio'>
                   <label>
-                    <input type='radio' name='privacy-radio' value='true' />
+                    <input
+                      type='radio'
+                      name='privacy-radio'
+                      value='true'
+                      checked={this.state.public}
+                      onChange={this._updateAccess}
+                    />
                     <i className='fa fa-eye'></i>{' '}
                     <strong>Public</strong>
                     <p>Anyone can see the project's builds.</p>
@@ -89,10 +105,17 @@ class SetupProject extends Component {
                 </div>
                 <div className='radio privacy-radio'>
                   <label>
-                    <input type='radio' name='privacy-radio' value='false'/>
+                    <input
+                      type='radio'
+                      name='privacy-radio'
+                      value='false'
+                      checked={!this.state.public}
+                      onChange={this._updateAccess}
+                    />
                     <i className='fa fa-lock'></i>{' '}
                     <strong>Private</strong>
                     <p>You choose who can see the project's builds.
+                      {/* needs to indicate that is free now, but will require paid account in future */}
                       <small>(Requires paid Cypress account)</small>
                     </p>
                   </label>
@@ -123,9 +146,25 @@ class SetupProject extends Component {
     }
   }
 
-  _manageOrgsLink = (e) => {
+  _manageOrgs = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'https://app.cypress.io')
+    App.ipc('external:open', 'https://on.cypress.io/admin/manage-orgs')
+  }
+
+  _updateAccess = (e) => {
+    this.setState({
+      public: e.target.value === 'true',
+    })
+  }
+
+  _setupProject = (e) => {
+    e.preventDefault()
+
+    this.props.onConfirm({
+      projectName: this.refs.projectName.value,
+      orgId: this.refs.orgId.value,
+      public: this.state.public,
+    })
   }
 }
 
