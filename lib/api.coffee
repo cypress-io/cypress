@@ -1,7 +1,7 @@
 _        = require("lodash")
 os       = require("os")
 getos    = require("getos")
-rp       = require("request-promise")
+request  = require("request-promise")
 errors   = require("request-promise/errors")
 Promise  = require("bluebird")
 Routes   = require("./util/routes")
@@ -9,6 +9,18 @@ pkg      = require("../package.json")
 provider = require("./util/provider")
 
 getos = Promise.promisify(getos)
+
+rp = request.defaults (params = {}, callback) ->
+  headers = params.headers ?= {}
+
+  _.defaults(headers, {
+    "x-platform":        os.platform()
+    "x-cypress-version": pkg.version
+  })
+
+  method = params.method.toLowerCase()
+
+  request[method](params, callback)
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -51,7 +63,6 @@ module.exports = {
         commitAuthorName:  options.commitAuthorName
         commitAuthorEmail: options.commitAuthorEmail
         commitMessage:     options.commitMessage
-        cypressVersion:    pkg.version
         ciProvider:        provider.get()
       }
     })
