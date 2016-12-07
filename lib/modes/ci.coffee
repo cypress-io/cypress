@@ -30,6 +30,12 @@ module.exports = {
     .get("message")
     .catch -> ""
 
+  getEmail: (repo) ->
+    repo.current_commitAsync()
+    .get("author")
+    .get("email")
+    .catch -> ""
+
   getAuthor: (repo) ->
     repo.current_commitAsync()
     .get("author")
@@ -58,16 +64,18 @@ module.exports = {
       sha:     @getSha(repo)
       branch:  @getBranch(repo)
       author:  @getAuthor(repo)
+      email:   @getEmail(repo)
       message: @getMessage(repo)
     })
     .then (git) ->
       api.createBuild({
-        projectId:     projectId
-        projectToken:  projectToken
-        commitSha:     git.sha
-        commitBranch:  git.branch
-        commitAuthor:  git.author
-        commitMessage: git.message
+        projectId:         projectId
+        projectToken:      projectToken
+        commitSha:         git.sha
+        commitBranch:      git.branch
+        commitAuthorName:  git.author
+        commitAuthorEmail: git.email
+        commitMessage:     git.message
       })
       .catch (err) ->
         switch err.statusCode

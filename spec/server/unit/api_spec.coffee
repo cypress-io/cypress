@@ -18,28 +18,30 @@ describe "lib/api", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "2")
       .post("/builds", {
-        projectId:       "id-123"
-        projectToken:    "token-123"
-        commitSha:       "sha"
-        commitBranch:    "master"
-        commitAuthor:    "brian"
-        commitMessage:   "such hax"
-        cypressVersion:  pkg.version
-        ciProvider:      "circle"
+        projectId:         "id-123"
+        projectToken:      "token-123"
+        commitSha:         "sha"
+        commitBranch:      "master"
+        commitAuthorName:  "brian"
+        commitAuthorEmail: "brian@cypress.io"
+        commitMessage:     "such hax"
+        cypressVersion:    pkg.version
+        ciProvider:        "circle"
       })
       .reply(200, {
         buildId: "new-build-id-123"
       })
 
       api.createBuild({
-        projectId:      "id-123"
-        projectToken:   "token-123"
-        commitSha:      "sha"
-        commitBranch:   "master"
-        commitAuthor:   "brian"
-        commitMessage:  "such hax"
-        cypressVersion: pkg.version
-        ciProvider:     provider.get()
+        projectId:         "id-123"
+        projectToken:      "token-123"
+        commitSha:         "sha"
+        commitBranch:      "master"
+        commitAuthorName:  "brian"
+        commitAuthorEmail: "brian@cypress.io"
+        commitMessage:     "such hax"
+        cypressVersion:    pkg.version
+        ciProvider:        provider.get()
       })
       .then (ret) ->
         expect(ret).to.eq("new-build-id-123")
@@ -48,14 +50,15 @@ describe "lib/api", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "2")
       .post("/builds", {
-        projectId:       null
-        projectToken:    "token-123"
-        commitSha:       "sha"
-        commitBranch:    "master"
-        commitAuthor:    "brian"
-        commitMessage:   "such hax"
-        cypressVersion:  pkg.version
-        ciProvider:      "circle"
+        projectId:         null
+        projectToken:      "token-123"
+        commitSha:         "sha"
+        commitBranch:      "master"
+        commitAuthorName:  "brian"
+        commitAuthorEmail: "brian@cypress.io"
+        commitMessage:     "such hax"
+        cypressVersion:    pkg.version
+        ciProvider:        "circle"
       })
       .reply(422, {
         errors: {
@@ -64,14 +67,15 @@ describe "lib/api", ->
       })
 
       api.createBuild({
-        projectId:      null
-        projectToken:   "token-123"
-        commitSha:      "sha"
-        commitBranch:   "master"
-        commitAuthor:   "brian"
-        commitMessage:  "such hax"
-        cypressVersion: pkg.version
-        ciProvider:     provider.get()
+        projectId:         null
+        projectToken:      "token-123"
+        commitSha:         "sha"
+        commitBranch:      "master"
+        commitAuthorName:  "brian"
+        commitAuthorEmail: "brian@cypress.io"
+        commitMessage:     "such hax"
+        cypressVersion:    pkg.version
+        ciProvider:        provider.get()
       })
       .then ->
         throw new Error("should have thrown here")

@@ -88,6 +88,28 @@ describe "electron/ci", ->
       ci.getAuthor(@repo).then (ret) ->
         expect(ret).to.eq("")
 
+  context ".getEmail", ->
+    beforeEach ->
+      @repo = @sandbox.stub({
+        current_commitAsync: ->
+      })
+
+    it "returns branch name", ->
+      @repo.current_commitAsync.resolves({
+        author: {
+          email: "brian@cypress.io"
+        }
+      })
+
+      ci.getEmail(@repo).then (ret) ->
+        expect(ret).to.eq("brian@cypress.io")
+
+    it "returns '' on err", ->
+      @repo.current_commitAsync.rejects(new Error("bar"))
+
+      ci.getEmail(@repo).then (ret) ->
+        expect(ret).to.eq("")
+
   context ".getBranch", ->
     beforeEach ->
       @repo = @sandbox.stub({
@@ -130,6 +152,7 @@ describe "electron/ci", ->
     beforeEach ->
       @sandbox.stub(ci, "getBranch").resolves("master")
       @sandbox.stub(ci, "getAuthor").resolves("brian")
+      @sandbox.stub(ci, "getEmail").resolves("brian@cypress.io")
       @sandbox.stub(ci, "getMessage").resolves("such hax")
       @sandbox.stub(ci, "getSha").resolves("sha-123")
       @sandbox.stub(api, "createBuild")
@@ -143,7 +166,8 @@ describe "electron/ci", ->
           projectToken: "key-123"
           commitSha: "sha-123"
           commitBranch: "master"
-          commitAuthor: "brian"
+          commitAuthorName: "brian"
+          commitAuthorEmail: "brian@cypress.io"
           commitMessage: "such hax"
         })
 

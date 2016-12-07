@@ -617,7 +617,8 @@ describe "lib/cypress", ->
           projectToken: "token-123"
           commitSha:    "sha-123"
           commitBranch: "bem/ci"
-          commitAuthor: "brian"
+          commitAuthorName: "brian"
+          commitAuthorEmail:  "brian@cypress.io"
           commitMessage: "foo"
         })
 
@@ -629,6 +630,7 @@ describe "lib/cypress", ->
       @sandbox.stub(ci, "getSha").resolves("sha-123")
       @sandbox.stub(ci, "getBranch").resolves("bem/ci")
       @sandbox.stub(ci, "getAuthor").resolves("brian")
+      @sandbox.stub(ci, "getEmail").resolves("brian@cypress.io")
       @sandbox.stub(ci, "getMessage").resolves("foo")
       @sandbox.stub(headless, "createRenderer")
       @sandbox.stub(headless, "waitForRendererToConnect")

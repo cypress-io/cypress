@@ -44,14 +44,15 @@ module.exports = {
         "x-route-version": "2"
       }
       body: {
-        projectId:       options.projectId
-        projectToken:    options.projectToken
-        commitSha:       options.commitSha
-        commitBranch:    options.commitBranch
-        commitAuthor:    options.commitAuthor
-        commitMessage:   options.commitMessage
-        cypressVersion:  pkg.version
-        ciProvider:      provider.get()
+        projectId:         options.projectId
+        projectToken:      options.projectToken
+        commitSha:         options.commitSha
+        commitBranch:      options.commitBranch
+        commitAuthorName:  options.commitAuthorName
+        commitAuthorEmail: options.commitAuthorEmail
+        commitMessage:     options.commitMessage
+        cypressVersion:    pkg.version
+        ciProvider:        provider.get()
       }
     })
     .promise()
