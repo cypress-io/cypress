@@ -111,7 +111,9 @@ module.exports = {
       url: Routes.instance(options.instanceId)
       json: true
       timeout: options.timeout ? 10000
-      body: body
+      body: _.extend(body, {
+        ciProvider: provider.get()
+      })
     })
     .catch(errors.StatusCodeError, formatResponseBody)
 

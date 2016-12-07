@@ -241,6 +241,7 @@ describe "lib/api", ->
         screenshots: []
         failingTests: []
         cypressConfig: {}
+        ciProvider: "circle"
       })
       .reply(200)
 
