@@ -79,6 +79,8 @@ module.exports = {
           osVersion:      v
         }
       })
+      .promise()
+      .get("instanceId")
       .catch(errors.StatusCodeError, formatResponseBody)
 
   updateInstance: (options = {}) ->

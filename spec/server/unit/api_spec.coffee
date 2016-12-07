@@ -138,12 +138,16 @@ describe "lib/api", ->
         osName: "darwin"
         osVersion: "10.10.10"
       })
-      .reply(200)
+      .reply(200, {
+        instanceId: "instance-id-123"
+      })
 
       api.createInstance({
         buildId: "build-id-123"
         spec: "cypress/integration/app_spec.js"
       })
+      .then (instanceId) ->
+        expect(instanceId).to.eq("instance-id-123")
 
     it "POST /builds/:id/instances failure formatting", ->
       nock("http://localhost:1234")
