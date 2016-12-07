@@ -664,6 +664,11 @@ describe "lib/cypress", ->
 
       @createInstance = @sandbox.stub(api, "createInstance").withArgs({
         buildId: "build-id-123"
+        spec: undefined
+      }).resolves("instance-id-123")
+
+      @updateInstance = @sandbox.stub(api, "updateInstance").withArgs({
+        instanceId: "instance-id-123"
         tests: 1
         passes: 2
         failures: 3
@@ -675,9 +680,10 @@ describe "lib/cypress", ->
         cypressConfig: {}
       }).resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
+      cypress.start(["--run-project=#{@todosPath}",  "--key=token-123", "--ci"])
       .then =>
         expect(@createInstance).to.be.calledOnce
+        expect(@updateInstance).to.be.calledOnce
         @expectExitWith(3)
 
     it "runs project by specific absolute spec and exits with status 3", ->
@@ -685,7 +691,12 @@ describe "lib/cypress", ->
 
       @createBuild.resolves("build-id-123")
 
-      @sandbox.stub(api, "createInstance").resolves()
+      @sandbox.stub(api, "createInstance").withArgs({
+        buildId: "build-id-123"
+        spec: "#{@todosPath}/tests/test2.coffee"
+      }).resolves("instance-id-123")
+
+      @updateInstance = @sandbox.stub(api, "updateInstance").resolves()
 
       cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci", "--spec=#{@todosPath}/tests/test2.coffee"])
       .then =>

@@ -94,9 +94,6 @@ module.exports = {
             .return(null)
 
   createInstance: (buildId, spec) ->
-    ## bail if we dont have a buildId
-    return Promise.resolve(null) if not buildId
-
     api.createInstance({
       buildId: buildId
       spec:    spec
@@ -206,15 +203,18 @@ module.exports = {
 
         @generateProjectBuildId(projectId, projectPath, projectName, options.key)
         .then (buildId) =>
+          ## bail if we dont have a buildId
+          return if not buildId
+
           @createInstance(buildId, options.spec)
-          .then (instanceId) =>
-            ## dont check that the user is logged in
-            options.ensureSession = false
+        .then (instanceId) =>
+          ## dont check that the user is logged in
+          options.ensureSession = false
 
-            ## dont let headless say its all done
-            options.allDone       = false
+          ## dont let headless say its all done
+          options.allDone       = false
 
-            headless.run(options)
+          headless.run(options)
           .then (stats = {}) =>
             ## if we got a instanceId then attempt to
             ## upload these assets
