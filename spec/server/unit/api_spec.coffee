@@ -130,17 +130,9 @@ describe "lib/api", ->
       os.platform.returns("darwin")
 
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
       .post("/builds/build-id-123/instances", {
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
-        video: true
-        screenshots: []
-        failingTests: []
-        cypressConfig: {}
+        spec: "cypress/integration/app_spec.js"
         browserName: "Electron"
         browserVersion: "53"
         osName: "darwin"
@@ -150,20 +142,12 @@ describe "lib/api", ->
 
       api.createInstance({
         buildId: "build-id-123"
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
-        video: true
-        screenshots: []
-        failingTests: []
-        cypressConfig: {}
+        spec: "cypress/integration/app_spec.js"
       })
 
     it "POST /builds/:id/instances failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
       .post("/builds/build-id-123/instances")
       .reply(422, {
         errors: {
@@ -189,7 +173,7 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
       .post("/builds/build-id-123/instances")
       .socketDelay(5000)
       .reply(200, {})
@@ -209,6 +193,87 @@ describe "lib/api", ->
       api.createInstance({})
       .then ->
         expect(rp.post).to.be.calledWithMatch({timeout: 10000})
+
+  context ".updateInstance", ->
+    beforeEach ->
+      Object.defineProperty(process.versions, "chrome", {
+        value: "53"
+      })
+
+    it "PUTs /builds/:id/instances", ->
+      nock("http://localhost:1234")
+      .put("/instances/instance-id-123", {
+        tests: 1
+        passes: 2
+        failures: 3
+        pending: 4
+        duration: 5
+        video: true
+        screenshots: []
+        failingTests: []
+        cypressConfig: {}
+      })
+      .reply(200)
+
+      api.updateInstance({
+        instanceId: "instance-id-123"
+        tests: 1
+        passes: 2
+        failures: 3
+        pending: 4
+        duration: 5
+        video: true
+        screenshots: []
+        failingTests: []
+        cypressConfig: {}
+      })
+
+    it "PUT /builds/:id/instances failure formatting", ->
+      nock("http://localhost:1234")
+      .put("/instances/instance-id-123")
+      .reply(422, {
+        errors: {
+          tests: ["is required"]
+        }
+      })
+
+      api.updateInstance({instanceId: "instance-id-123"})
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("""
+          422
+
+          {
+            "errors": {
+              "tests": [
+                "is required"
+              ]
+            }
+          }
+        """)
+
+    it "handles timeouts", ->
+      nock("http://localhost:1234")
+      .put("/instances/instance-id-123")
+      .socketDelay(5000)
+      .reply(200, {})
+
+      api.updateInstance({
+        instanceId: "instance-id-123"
+        timeout: 100
+      })
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
+
+    it "sets timeout to 10 seconds", ->
+      @sandbox.stub(rp, "put").resolves()
+
+      api.updateInstance({})
+      .then ->
+        expect(rp.put).to.be.calledWithMatch({timeout: 10000})
 
   context ".getLoginUrl", ->
     it "GET /auth + returns the url", ->

@@ -60,6 +60,28 @@ module.exports = {
     .catch(errors.StatusCodeError, formatResponseBody)
 
   createInstance: (options = {}) ->
+    platform = os.platform()
+
+    osVersion(platform)
+    .then (v) ->
+      rp.post({
+        url: Routes.instances(options.buildId)
+        json: true
+        timeout: options.timeout ? 10000
+        headers: {
+          "x-route-version": "3"
+        }
+        body: {
+          spec:           options.spec
+          browserName:    "Electron"
+          browserVersion: process.versions.chrome
+          osName:         platform
+          osVersion:      v
+        }
+      })
+      .catch(errors.StatusCodeError, formatResponseBody)
+
+  updateInstance: (options = {}) ->
     body = _.pick(options, [
       "tests"
       "duration"
@@ -72,25 +94,13 @@ module.exports = {
       "cypressConfig"
     ])
 
-    platform = os.platform()
-
-    osVersion(platform)
-    .then (v) ->
-      rp.post({
-        url: Routes.instance(options.buildId)
-        json: true
-        timeout: options.timeout ? 10000
-        headers: {
-          "x-route-version": "2"
-        }
-        body: _.extend(body, {
-          browserName:    "Electron"
-          browserVersion: process.versions.chrome
-          osName:         platform
-          osVersion:      v
-        })
-      })
-      .catch(errors.StatusCodeError, formatResponseBody)
+    rp.put({
+      url: Routes.instance(options.instanceId)
+      json: true
+      timeout: options.timeout ? 10000
+      body: body
+    })
+    .catch(errors.StatusCodeError, formatResponseBody)
 
   createRaygunException: (body, session, timeout = 3000) ->
     rp.post({

@@ -93,6 +93,24 @@ module.exports = {
             logException(err)
             .return(null)
 
+  createInstance: (buildId, spec) ->
+    ## bail if we dont have a buildId
+    return Promise.resolve(null) if not buildId
+
+    api.createInstance({
+      buildId: buildId
+      spec:    spec
+    })
+    .catch (err) ->
+      errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+
+      ## dont log exceptions if we have a 503 status code
+      if err.statusCode isnt 503
+        logException(err)
+        .return(null)
+      else
+        null
+
   upload: (options = {}) ->
     {video, screenshots, videoUrl, screenshotUrls} = options
 
@@ -136,7 +154,7 @@ module.exports = {
 
       logException(err)
 
-  uploadAssets: (buildId, stats) ->
+  uploadAssets: (instanceId, stats) ->
     console.log("")
     console.log("")
 
@@ -150,8 +168,8 @@ module.exports = {
     screenshots = _.map stats.screenshots, (screenshot) ->
       _.omit(screenshot, "path")
 
-    api.createInstance({
-      buildId:      buildId
+    api.updateInstance({
+      instanceId:   instanceId
       tests:        stats.tests
       passes:       stats.passes
       failures:     stats.failures
@@ -188,18 +206,20 @@ module.exports = {
 
         @generateProjectBuildId(projectId, projectPath, projectName, options.key)
         .then (buildId) =>
-          ## dont check that the user is logged in
-          options.ensureSession = false
+          @createInstance(buildId, options.spec)
+          .then (instanceId) =>
+            ## dont check that the user is logged in
+            options.ensureSession = false
 
-          ## dont let headless say its all done
-          options.allDone       = false
+            ## dont let headless say its all done
+            options.allDone       = false
 
-          headless.run(options)
+            headless.run(options)
           .then (stats = {}) =>
-            ## if we got a buildId then attempt to
+            ## if we got a instanceId then attempt to
             ## upload these assets
-            if buildId
-              @uploadAssets(buildId, stats)
+            if instanceId
+              @uploadAssets(instanceId, stats)
               .return(stats)
               .finally(headless.allDone)
             else
