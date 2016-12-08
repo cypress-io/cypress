@@ -127,7 +127,7 @@ class Builds extends Component {
             Run this command: <code>cypress ci {this.state.ciKey}</code>
           </p>
           <p>Adipiscing Nibh Magna Ridiculus Inceptos.</p>
-          <p><a href='#' onClick={this._openCiGuide}>Learn more about Continous Integration</a></p>
+          <p><a href='#' onClick={this._openCiGuide}>Learn more about Continuous Integration</a></p>
           <p>Porta Amet Euismod Dolor <strong><i className='fa fa-plus'></i> Euismod</strong> Tellus Vehicula Vestibulum Venenatis Euismod.</p>
 
           {this._privateMessage()}

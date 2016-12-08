@@ -31,7 +31,7 @@ export default class ProjectNotSetup extends Component {
           <h4>
             Getting Started with CI
           </h4>
-          <p>Run Cypress tests on any <a href='#'>Continous Integration provider</a>.</p>
+          <p>Run Cypress tests on any <a href='#'>Continuous Integration provider</a>.</p>
           <p>Then see each build's data, screenshots, and video recording.</p>
           <button
             className='btn btn-primary'
