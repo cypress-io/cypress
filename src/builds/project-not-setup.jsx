@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 
@@ -62,7 +63,7 @@ export default class ProjectNotSetup extends Component {
   _setupProject = (projectDetails) => {
     App.ipc('setup:project', projectDetails).then((projectId) => {
       this._hideSetupProjectModal()
-      this.props.onSetup(projectId)
+      this.props.onSetup(_.extend({}, projectDetails, { projectId }))
     })
   }
 }

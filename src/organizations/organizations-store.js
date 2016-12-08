@@ -17,6 +17,10 @@ export class Orgs {
     this.isLoading = false
     this.isLoaded = true
   }
+
+  getOrgById (id) {
+    return _.find(this.orgs, { id })
+  }
 }
 
 export default new Orgs()

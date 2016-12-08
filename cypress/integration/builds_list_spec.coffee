@@ -119,7 +119,7 @@ describe "Builds List", ->
             it "opens external link on click of manage", ->
               cy
                 .contains("manage").click().then ->
-                   expect(@App.ipc).to.be.calledWith("external:open", "https://app.cypress.io")
+                   expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/manage-orgs")
 
           describe "public v private", ->
             it "displays public and private radios", ->
@@ -159,8 +159,8 @@ describe "Builds List", ->
                   .get("#builds-list-page a")
                   .should("have.text", "Learn more about Continuous Integration")
 
-              ## something about how we put a projectId in their cypress.json
-              ## and they need to check that into source control
+              it "does not display message about inviting users", ->
+                cy.contains("invite other users").should("not.exist")
 
               it "clicking link opens CI guide", ->
                 cy
@@ -168,6 +168,21 @@ describe "Builds List", ->
                   .click()
                   .then =>
                     expect(@App.ipc).to.be.calledWith("external:open", "http://on.cypress.io/guides/continuous-integration")
+
+          describe "when project is private", ->
+            beforeEach ->
+              @ipc.handle("setup:project", null, "project-id-123")
+              @ipc.handle("get:ci:key", null, "ci-key-123")
+              cy
+                .get("input[name=privacy-radio][value=false]")
+                .click()
+
+              cy
+                .get(".modal-body")
+                .contains(".btn", "Setup Project").click()
+
+            it "displays message about inviting users", ->
+              cy.contains("invite other users")
 
           describe "errors on form submit", ->
             beforeEach ->

@@ -1,17 +1,21 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
+import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 
+import App from '../lib/app'
 import state from '../lib/state'
 import buildsCollection from './builds-collection'
 import { getBuilds } from './builds-api'
+import { getCiKey } from '../projects/projects-api'
+import orgsStore from '../organizations/organizations-store'
 
 import Build from './builds-list-item'
 import LoginThenSetupCI from './login-then-setup-ci'
 import LoginThenSeeBuilds from './login-then-see-builds'
 import PermissionMessage from './permission-message'
-import ProjectNotSetup from "./project-not-setup"
+import ProjectNotSetup from './project-not-setup'
 
 @observer
 class Builds extends Component {
@@ -64,7 +68,7 @@ class Builds extends Component {
     }
 
     // OR the build is still loading
-    if (buildsCollection.isLoading) return <Loader color="#888" scale={0.5}/>
+    if (buildsCollection.isLoading) return <Loader color='#888' scale={0.5}/>
 
     // OR they are not authorized to see builds
     if (buildsCollection.error && (buildsCollection.error.statusCode === 401)) return <PermissionMessage />
@@ -101,13 +105,16 @@ class Builds extends Component {
     return (
       <ProjectNotSetup
         project={this.props.project}
-        onSetup={this._setProjectId}
+        onSetup={this._setProjectDetails}
       />
     )
   }
 
-  _setProjectId = (projectId) => {
-    this.props.project.setProjectId(projectId)
+  @action _setProjectDetails = (projectDetails) => {
+    this.props.project.setProjectId(projectDetails.projectId)
+    this.props.project.name = projectDetails.projectName
+    this.props.project.public = projectDetails.public
+    this.props.project.orgName = (orgsStore.getOrgById(projectDetails.public) || {}).name
   }
 
   _empty () {
@@ -122,8 +129,18 @@ class Builds extends Component {
           <p>Adipiscing Nibh Magna Ridiculus Inceptos.</p>
           <p><a href='#' onClick={this._openCiGuide}>Learn more about Continous Integration</a></p>
           <p>Porta Amet Euismod Dolor <strong><i className='fa fa-plus'></i> Euismod</strong> Tellus Vehicula Vestibulum Venenatis Euismod.</p>
+
+          {this._privateMessage()}
         </div>
       </div>
+    )
+  }
+
+  _privateMessage () {
+    if (this.props.project.public) return null
+
+    return (
+      <p>A message about how user can invite other users through admin</p>
     )
   }
 
