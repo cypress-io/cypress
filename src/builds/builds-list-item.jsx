@@ -162,6 +162,6 @@ export default class BuildsListItem extends Component {
   }
 
   _goToBuild = () => {
-    App.ipc('external:open', `https://on.cypress.io/app/builds/${this.props.id}`)
+    App.ipc('external:open', `https://on.cypress.io/admin/builds/${this.props.id}`)
   }
 }
