@@ -84,7 +84,8 @@ describe "Projects Nav", ->
       it "displays builds page", ->
         @ipc.handle("get:builds", null, @builds)
         cy
-          .contains("h5", "Builds")
+          .get(".builds-list li")
+          .should("have.length", 4)
 
     describe "config page", ->
       beforeEach ->
