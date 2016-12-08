@@ -1,3 +1,4 @@
+import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
@@ -20,7 +21,9 @@ class SetupProject extends Component {
     super(...args)
 
     this.state = {
+      projectName: this._initialProjectName(),
       public: true,
+      showNameMissingError: false,
     }
   }
 
@@ -35,14 +38,16 @@ class SetupProject extends Component {
         onHide={this.props.onHide}
         backdrop='static'
         >
-        <div className='modal-body os-dialog'>
+        <div className='setup-project-modal modal-body os-dialog'>
           <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
           <h4>Setup Project for CI</h4>
           <p className='text-muted'>After configuring your project's settings, we will generate a secret key to be used during your CI run.</p>
           <form
             className='form-horizontal'
-            onSubmit={this._setupProject}>
-            <div className='form-group'>
+            onSubmit={this._submit}>
+            <div className={cs('form-group', {
+              'has-error': this.state.showNameMissingError && !this._hasValidProjectName(),
+            })}>
               <label htmlFor='projectName' className='col-sm-3 control-label'>
                 Project Name:
               </label>
@@ -52,8 +57,11 @@ class SetupProject extends Component {
                   type='text'
                   className='form-control'
                   id='projectName'
-                  defaultValue={this._projectName()}/>
+                  value={this.state.projectName}
+                  onChange={this._updateProjectName}
+                />
               </div>
+              <div className='help-block validation-error'>Please enter a project name</div>
             </div>
             <div className='form-group'>
               <label htmlFor='projectName' className='col-sm-3 control-label'>
@@ -135,7 +143,7 @@ class SetupProject extends Component {
     )
   }
 
-  _projectName = () => {
+  _initialProjectName = () => {
     let project = this.props.project
 
     if (project.name) {
@@ -144,6 +152,16 @@ class SetupProject extends Component {
       let splitName = _.last(project.path.split('/'))
       return _.truncate(splitName, { length: 60 })
     }
+  }
+
+  _updateProjectName = () => {
+    this.setState({
+      projectName: this.refs.projectName.value,
+    })
+  }
+
+  _hasValidProjectName () {
+    return _.trim(this.state.projectName)
   }
 
   _manageOrgs = (e) => {
@@ -157,11 +175,21 @@ class SetupProject extends Component {
     })
   }
 
-  _setupProject = (e) => {
+  _submit = (e) => {
     e.preventDefault()
 
+    if (this._hasValidProjectName()) {
+      this._setupProject()
+    } else {
+      this.setState({
+        showNameMissingError: true,
+      })
+    }
+  }
+
+  _setupProject () {
     this.props.onConfirm({
-      projectName: this.refs.projectName.value,
+      projectName: this.state.projectName,
       orgId: this.refs.orgId.value,
       public: this.state.public,
     })

@@ -132,3 +132,21 @@
     color: #bbb;
   }
 }
+
+.setup-project-modal {
+  .validation-error {
+    display: none;
+    clear: both;
+    margin-left: 25%;
+    padding-top: 4px;
+    padding-left: 15px;
+  }
+
+  .has-error .validation-error {
+    display: block;
+  }
+
+  .form-group.has-error {
+    margin-bottom: 0;
+  }
+}

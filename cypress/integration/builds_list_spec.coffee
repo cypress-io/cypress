@@ -185,17 +185,23 @@ describe "Builds List", ->
               cy.contains("invite other users")
 
           describe "errors on form submit", ->
-            beforeEach ->
-              cy
-                .get(".modal-body")
-                .contains(".btn", "Setup Project").click()
 
-            it "displays errors"
-            ## validate project name
+            describe "name missing", ->
+              beforeEach ->
+                cy
+                  .get("#projectName").clear()
+                  .get(".modal-body")
+                  .contains(".btn", "Setup Project").click()
+
+              it "displays name missing error when empty", ->
+                cy.contains("Please enter a project name").should("be.visible")
+
+              it "clears validation error after inputing name", ->
+                cy.get("#projectName").type("project name")
+                cy.contains("Please enter a project name").should("not.be.visible")
+
             ## ipc could return error
             ## - 422
-
-            it "does not close modal"
 
       context "having previously setup CI", ->
         beforeEach ->
