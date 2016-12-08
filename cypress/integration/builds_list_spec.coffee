@@ -129,7 +129,7 @@ describe "Builds List", ->
 
           describe "successfully submit form", ->
             beforeEach ->
-              @ipc.handle("setup:project", null, "project-id-123")
+              @ipc.handle("setup:ci:project", null, "project-id-123")
               @ipc.handle("get:ci:key", null, "ci-key-123")
 
               cy
@@ -137,7 +137,7 @@ describe "Builds List", ->
                 .contains(".btn", "Setup Project").click()
 
             it "sends data from form to ipc event", ->
-              expect(@App.ipc).to.be.calledWith("setup:project", {
+              expect(@App.ipc).to.be.calledWith("setup:ci:project", {
                 projectName: "My-Fake-Project"
                 orgId: "000"
                 public: true
@@ -171,7 +171,7 @@ describe "Builds List", ->
 
           describe "when project is private", ->
             beforeEach ->
-              @ipc.handle("setup:project", null, "project-id-123")
+              @ipc.handle("setup:ci:project", null, "project-id-123")
               @ipc.handle("get:ci:key", null, "ci-key-123")
               cy
                 .get("input[name=privacy-radio][value=false]")
