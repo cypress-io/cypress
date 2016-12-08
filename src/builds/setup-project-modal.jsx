@@ -10,7 +10,7 @@ import orgsStore from '../organizations/organizations-store'
 @observer
 class SetupProject extends Component {
   static propTypes = {
-    project: React.PropTypes.bool.object,
+    project: React.PropTypes.object,
     show: React.PropTypes.bool.isRequired,
     onHide: React.PropTypes.func.isRequired,
     onConfirm: React.PropTypes.func.isRequired,

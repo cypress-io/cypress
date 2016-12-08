@@ -8,7 +8,7 @@ import { getOrgs } from '../organizations/organizations-api'
 @observer
 export default class ProjectNotSetup extends Component {
   static propTypes = {
-    project: React.PropTypes.bool.object,
+    project: React.PropTypes.object,
   }
 
   constructor (props) {
