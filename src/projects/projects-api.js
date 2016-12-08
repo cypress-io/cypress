@@ -162,6 +162,10 @@ const openProject = (project) => {
   .catch(setProjectError)
 }
 
+const getCiKey = () => {
+  return App.ipc('get:ci:key')
+}
+
 export {
   getProjects,
   openProject,
@@ -169,4 +173,5 @@ export {
   addProject,
   runSpec,
   closeBrowser,
+  getCiKey,
 }

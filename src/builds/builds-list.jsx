@@ -19,6 +19,7 @@ class Builds extends Component {
     super(props)
 
     this.state = {
+      ciKey: null,
       setupProjectModalOpen: false,
       requestAccessModalOpen: false,
     }
@@ -26,6 +27,25 @@ class Builds extends Component {
 
   componentWillMount () {
     getBuilds()
+    this._getCiKey()
+  }
+
+  componentDidUpdate () {
+    this._getCiKey()
+  }
+
+  _getCiKey () {
+    if (
+      state.hasUser &&
+      !buildsCollection.isLoading &&
+      !buildsCollection.error &&
+      !buildsCollection.builds.length &&
+      this.props.project.projectId
+    ) {
+      getCiKey().then((ciKey) => {
+        this.setState({ ciKey })
+      })
+    }
   }
 
   render () {
@@ -93,13 +113,23 @@ class Builds extends Component {
   _empty () {
     return (
       <div id='builds-list-page'>
-        <div className="empty">
+        <div className='empty'>
           <h4>Getting Started with Builds</h4>
-          <p>Porta Amet Euismod Dolor <strong><i className='fa fa-plus'></i> Euismod</strong> Tellus Vehicula Vestibulum Venenatis Euismod.</p>
+          <p>Lorem ipsum dolor sit amet</p>
+          <p>
+            Run this command: <code>cypress ci {this.state.ciKey}</code>
+          </p>
           <p>Adipiscing Nibh Magna Ridiculus Inceptos.</p>
+          <p><a href='#' onClick={this._openCiGuide}>Learn more about Continous Integration</a></p>
+          <p>Porta Amet Euismod Dolor <strong><i className='fa fa-plus'></i> Euismod</strong> Tellus Vehicula Vestibulum Venenatis Euismod.</p>
         </div>
       </div>
     )
+  }
+
+  _openCiGuide = (e) => {
+    e.preventDefault()
+    App.ipc('external:open', 'http://on.cypress.io/guides/continuous-integration')
   }
 }
 

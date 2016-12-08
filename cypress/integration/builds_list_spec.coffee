@@ -130,6 +130,7 @@ describe "Builds List", ->
           describe "successfully submit form", ->
             beforeEach ->
               @ipc.handle("setup:project", null, "project-id-123")
+              @ipc.handle("get:ci:key", null, "ci-key-123")
 
               cy
                 .get(".modal-body")
@@ -145,20 +146,28 @@ describe "Builds List", ->
             it "closes modal", ->
               cy.get(".modal").should("not.be.visible")
 
-            it.only "displays empty builds page", ->
+            it "displays empty builds page", ->
               cy.contains("Getting Started with Builds")
 
             describe "welcome page", ->
 
-              it "displays command to run with the ci key"
+              it "displays command to run with the ci key", ->
+                cy.contains("cypress ci ci-key-123")
 
-              it "displays link to CI docs"
+              it "displays link to CI docs", ->
+                cy
+                  .get("#builds-list-page a")
+                  .should("have.text", "Learn more about Continuous Integration")
 
               ## something about how we put a projectId in their cypress.json
               ## and they need to check that into source control
 
-            ## if project is set to private
-            ## - display a different message that talks about inviting users
+              it "clicking link opens CI guide", ->
+                cy
+                  .get("#builds-list-page a")
+                  .click()
+                  .then =>
+                    expect(@App.ipc).to.be.calledWith("external:open", "http://on.cypress.io/guides/continuous-integration")
 
           describe "errors on form submit", ->
             beforeEach ->
