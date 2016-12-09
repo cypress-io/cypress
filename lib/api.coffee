@@ -134,9 +134,6 @@ module.exports = {
     rp.post({
       url: Routes.signin({code: code})
       json: true
-      headers: {
-        "x-route-version": "2"
-      }
     })
     .catch errors.StatusCodeError, (err) ->
       ## slice out the status code since RP automatically
