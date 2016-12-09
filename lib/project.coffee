@@ -41,8 +41,6 @@ class Project extends EE
 
   open: (options = {}) ->
     _.defaults options, {
-      type:         "opened"
-      sync:         false
       report:       false
       onFocusTests: ->
       onSettingsChanged: false
@@ -76,9 +74,6 @@ class Project extends EE
         options.onSavedStateChanged = =>
           @_setSavedState(@cfg)
 
-        ## sync but do not block
-        @sync(options)
-
         Promise.join(
           @watchSettingsAndStartWebsockets(options, cfg)
           @scaffold(cfg)
@@ -89,38 +84,23 @@ class Project extends EE
     # return our project instance
     .return(@)
 
-  sync: (options) ->
-    ## attempt to sync up with the remote
-    ## server to ensure we have a valid
-    ## project id and user attached to
-    ## this project
-    @ensureProjectId()
-    .then (id) =>
-      @updateProject(id, options)
-    .catch ->
-      ## dont catch ensure project id or
-      ## update project errors which allows
-      ## the user to work offline
-      return
-
   getBuilds: ->
     Promise.all([
-      @ensureProjectId(),
+      @getProjectId(),
       user.ensureSession()
     ])
     .spread (projectId, session) ->
       api.getProjectBuilds(projectId, session)
+    ## TODO: add catch handler
+    ## check desktop gui for what errors it is expecting
+    ## handle different reasons
+    ## - project id doesn't exist
+    ## - user's not logged in
+    ## - api failed to get builds
 
   close: (options = {}) ->
-    _.defaults options, {
-      sync: false
-      type: "closed"
-    }
-
     if @memoryCheck
       clearInterval(@memoryCheck)
-
-    @sync(options)
 
     @removeAllListeners()
 
@@ -133,18 +113,6 @@ class Project extends EE
 
   resetState: ->
     @server.resetState()
-
-  updateProject: (id, options = {}) ->
-    Promise.try =>
-      ## bail if sync isnt true
-      return if not options.sync
-
-      Promise.all([
-        user.ensureSession()
-        @getConfig()
-      ])
-      .spread (session, cfg) ->
-        api.updateProject(id, options.type, cfg.projectName, session)
 
   watchSupportFile: (config) ->
     ## dont watch the supportFile if we're running headlessly
@@ -367,24 +335,6 @@ class Project extends EE
     .write(@projectRoot, attrs)
     .return(id)
 
-  createProjectId: ->
-    ## allow us to specify the exact key
-    ## we want via the CYPRESS_PROJECT_ID env.
-    ## this allows us to omit the cypress.json
-    ## file (like in example repos) yet still
-    ## use a correct id in the API
-    if id = process.env.CYPRESS_PROJECT_ID
-      return @writeProjectId(id)
-
-    Promise.all([
-      user.ensureSession()
-      @getConfig()
-    ])
-    .bind(@)
-    .spread (session, cfg) ->
-      api.createProject(cfg.projectName, session)
-    .then(@writeProjectId)
-
   getProjectId: ->
     @verifyExistence()
     .then =>
@@ -404,11 +354,6 @@ class Project extends EE
     .return(@)
     .catch =>
       errors.throw("NO_PROJECT_FOUND_AT_PROJECT_ROOT", @projectRoot)
-
-  ensureProjectId: ->
-    @getProjectId()
-    .bind(@)
-    .catch({type: "NO_PROJECT_ID"}, @createProjectId)
 
   createCiProject: (projectDetails) ->
     user.ensureSession()

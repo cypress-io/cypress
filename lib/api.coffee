@@ -201,22 +201,6 @@ module.exports = {
     .promise()
     .get("uuid")
 
-  updateProject: (projectId, type, projectName, session) ->
-    ## TODO: change this to PUT method
-    rp.get({
-      url: Routes.project(projectId)
-      json: true
-      headers: {
-        "x-session": session
-      }
-      body: {
-        "x-type": type
-        "x-platform": os.platform()
-        "x-version": pkg.version
-        "x-project-name": projectName
-      }
-    })
-
   sendUsage: (numRuns, exampleSpec, allSpecs, projectName, session) ->
     rp.post({
       url: Routes.usage()

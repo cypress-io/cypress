@@ -427,23 +427,6 @@ describe "lib/api", ->
       api.createProject(projectDetails, "session-123").then (uuid) ->
         expect(uuid).to.eq("uuid-123")
 
-  context ".updateProject", ->
-    it "GETs /projects/:id", ->
-      nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
-      .matchHeader("x-cypress-version", pkg.version)
-      .matchHeader("x-session", "session-123")
-      .get("/projects/project-123", {
-        "x-platform": "linux"
-        "x-type": "opened"
-        "x-version": pkg.version
-        "x-project-name": "foobar"
-      })
-      .reply(200, {})
-
-      api.updateProject("project-123", "opened", "foobar", "session-123").then (resp) ->
-        expect(resp).to.deep.eq({})
-
   context ".sendUsage", ->
     it "POSTs /user/usage", ->
       nock("http://localhost:1234")
