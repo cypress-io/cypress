@@ -18,8 +18,17 @@ appData                = require("./app_data")
 fs = Promise.promisifyAll(fs)
 
 module.exports = {
-  build: (filePath, config, watch = false) ->
+  shouldWatch: (watchForFileChanges) ->
+    ## we should watch only if
+    ## watchForFileChanges isnt false
+    watchForFileChanges isnt false
+
+  build: (filePath, config) ->
     emitter = new EE()
+
+    ## dont watch for file changes if
+    ## config has specifically turned it off
+    shouldWatch = @shouldWatch(config.watchForFileChanges)
 
     absolutePath = path.join(config.projectRoot, filePath)
 
@@ -28,7 +37,7 @@ module.exports = {
       extensions:   [".js", ".jsx", ".coffee", ".cjsx"]
       cache:        {}
       packageCache: {}
-      plugin:       if watch then [watchify] else []
+      plugin:       if shouldWatch then [watchify] else []
     })
 
     bundle = =>
@@ -39,7 +48,7 @@ module.exports = {
           bundler
           .bundle()
           .on "error", (err) =>
-            if watch
+            if shouldWatch
               stringStream(@clientSideError(err))
               .pipe(fs.createWriteStream(outputPath))
 
@@ -71,7 +80,7 @@ module.exports = {
       "react/lib/ExecutionEnvironment"
     ])
 
-    if watch
+    if shouldWatch
       bundler.on "update", (filePaths) ->
         latestBundle = bundle().then ->
           for updatedFilePath in filePaths
@@ -81,7 +90,9 @@ module.exports = {
     latestBundle = bundle()
 
     return {
-      close: bundler.close
+      ## set to empty function in the case where we
+      ## are not watching the bundle
+      close: bundler.close ? ->
 
       getLatestBundle: -> latestBundle
 

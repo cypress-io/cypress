@@ -58,12 +58,8 @@ class Watchers
       onChange: null
       onReady: null
 
-    ## dont watch for file changes if
-    ## config has specifically turned it off
-    shouldWatch = config.watchForFileChanges isnt false
-
     if not watcher = @bundleWatchers[filePath]
-      watcher = bundle.build(filePath, config, shouldWatch)
+      watcher = bundle.build(filePath, config)
       @_addBundle(filePath, watcher)
 
     if _.isFunction(options.onChange)

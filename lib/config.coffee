@@ -128,9 +128,13 @@ module.exports = {
     config.env = process.env["CYPRESS_ENV"]
     delete config.envFile
 
-    ## forcibly reset numTestsKeptInMemory
-    ## to zero when isHeadless
+    ## when headless
     if config.isHeadless
+      ## dont ever watch for file changes
+      config.watchForFileChanges = false
+
+      ## and forcibly reset numTestsKeptInMemory
+      ## to zero
       config.numTestsKeptInMemory = 0
 
     config = @setResolvedConfigValues(config, defaults, resolved)

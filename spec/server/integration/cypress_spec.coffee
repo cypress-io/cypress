@@ -11,6 +11,7 @@ inquirer = require("inquirer")
 extension = require("@cypress/core-extension")
 Fixtures = require("../helpers/fixtures")
 pkg      = require("#{root}package.json")
+bundle   = require("#{root}lib/util/bundle")
 settings = require("#{root}lib/util/settings")
 Events   = require("#{root}lib/electron/handlers/events")
 project  = require("#{root}lib/electron/handlers/project")
@@ -386,18 +387,20 @@ describe "lib/cypress", ->
         .catch -> done()
 
     it "does not watch supportFile when headless", ->
-      watchBundle = @sandbox.spy(Watchers.prototype, "watchBundle")
+      shouldWatch = @sandbox.spy(bundle, "shouldWatch")
 
       cypress.start(["--run-project=#{@pristinePath}"])
       .then =>
-        expect(watchBundle).not.to.be.called
+        expect(shouldWatch).to.have.always.returned(false)
 
     it "does watch supportFile when not headless", ->
+      shouldWatch = @sandbox.spy(bundle, "shouldWatch")
       watchBundle = @sandbox.spy(Watchers.prototype, "watchBundle")
 
       cypress.start(["--run-project=#{@pristinePath}", "--no-headless"])
       .then =>
         expect(watchBundle).to.be.calledWith("cypress/support/index.js")
+        expect(shouldWatch).to.have.always.returned(true)
 
     it "runs project headlessly and displays gui", ->
       Project.add(@todosPath)
