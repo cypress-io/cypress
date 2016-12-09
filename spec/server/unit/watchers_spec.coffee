@@ -38,13 +38,15 @@ describe "lib/watchers", ->
 
   context "#watchBundle", ->
     beforeEach ->
+      @config = {}
       @bundleWatcher.getLatestBundle.returns("latest bundle")
-      @latestBundle = @watchers.watchBundle("/foo/bar")
 
     it "watches with bundle watcher", ->
-      expect(bundle.build).to.be.calledWith("/foo/bar")
+      @watchers.watchBundle("/foo/bar", @config)
+      expect(bundle.build).to.be.calledWith("/foo/bar", @config, true)
 
     it "stores a reference to the watcher", ->
+      @watchers.watchBundle("/foo/bar", @config)
       expect(_.keys(@watchers.bundleWatchers)).to.have.length(1)
       expect(@watchers.bundleWatchers).to.have.property("/foo/bar")
 
@@ -52,12 +54,17 @@ describe "lib/watchers", ->
       expect(@bundleWatcher.addChangeListener).not.to.have.been.called
 
     it "returns the latest bundle", ->
-      expect(@latestBundle).to.equal("latest bundle")
+      expect(@watchers.watchBundle("/foo/bar", @config)).to.equal("latest bundle")
 
     it "adds change listener if specified", ->
       changeListener = @sandbox.spy()
-      @watchers.watchBundle("/foo/bar", {}, { onChange: changeListener })
+      @watchers.watchBundle("/foo/bar", @config, { onChange: changeListener })
       expect(@bundleWatcher.addChangeListener).to.have.been.calledWith(changeListener)
+
+    it "does not watch builds when config.watchForFileChanges is false", ->
+      @config.watchForFileChanges = false
+      @watchers.watchBundle("/foo/bar", @config)
+      expect(bundle.build).to.be.calledWith("/foo/bar", @config, false)
 
   context "#removeBundle", ->
     it "calls close on the bundle watcher", ->
