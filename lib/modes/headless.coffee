@@ -256,7 +256,12 @@ module.exports = {
 
       onFinish = (obj) =>
         finish = ->
-          resolve(obj)
+          openProject
+          .getConfig()
+          .then (cfg) ->
+            obj.config = cfg
+          .finally ->
+            resolve(obj)
 
         if end
           obj.video = name

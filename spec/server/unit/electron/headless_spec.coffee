@@ -251,13 +251,19 @@ describe "electron/headless", ->
         headless.waitForSocketConnection(@projectInstance, 1234)
 
   context ".waitForTestsToFinishRunning", ->
+    beforeEach ->
+      @sandbox.stub(@projectInstance, "getConfig").resolves({})
+
     it "resolves with end event + argument", ->
       process.nextTick =>
         @projectInstance.emit("end", {foo: "bar"})
 
       headless.waitForTestsToFinishRunning(@projectInstance)
       .then (obj) ->
-        expect(obj).to.deep.eq({foo: "bar"})
+        expect(obj).to.deep.eq({
+          foo: "bar"
+          config: {}
+        })
 
     it "stops listening to end event", ->
       process.nextTick =>
@@ -301,6 +307,7 @@ describe "electron/headless", ->
           failures:     3
           pending:      4
           duration:     5
+          config:       {}
           failingTests: [1,2,3]
           screenshots:  screenshots
           video:        "foo.mp4"
@@ -335,6 +342,7 @@ describe "electron/headless", ->
           passes:       0
           pending:      0
           duration:     0
+          config:       {}
           failingTests: []
           screenshots:  screenshots
           video:        "foo.mp4"
