@@ -341,6 +341,13 @@ describe "lib/project", ->
     it "does nothing when {supportFile: false}", ->
       @project.watchSupportFile({supportFile: false})
 
+      expect(@watchBundle).not.toe.called
+
+    it "returns early when isHeadless=true", ->
+      @config.isHeadless = true
+
+      @project.watchSupportFile(@config)
+
       expect(@watchBundle).not.to.be.called
 
     it "calls watchers.watchBundle with relative path to file", ->

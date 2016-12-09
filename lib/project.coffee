@@ -139,7 +139,8 @@ class Project extends EE
         api.updateProject(id, options.type, cfg.projectName, session)
 
   watchSupportFile: (config) ->
-    if supportFile = config.supportFile
+    ## dont watch the supportFile if we're running headlessly
+    if not config.isHeadless and (supportFile = config.supportFile)
       relativePath = path.relative(config.projectRoot, config.supportFile)
       @watchers.watchBundle(relativePath, config, {
         onChange: _.bind(@server.onTestFileChange, @server, relativePath)

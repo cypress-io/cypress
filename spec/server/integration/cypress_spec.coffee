@@ -28,6 +28,7 @@ Project  = require("#{root}lib/project")
 Server   = require("#{root}lib/server")
 Reporter = require("#{root}lib/reporter")
 launcher = require("#{root}lib/launcher")
+Watchers = require("#{root}lib/watchers")
 
 describe "lib/cypress", ->
   beforeEach ->
@@ -383,6 +384,20 @@ describe "lib/cypress", ->
         .then ->
           throw new Error("fixturesFolder should not exist!")
         .catch -> done()
+
+    it "does not watch supportFile when headless", ->
+      watchBundle = @sandbox.spy(Watchers.prototype, "watchBundle")
+
+      cypress.start(["--run-project=#{@pristinePath}"])
+      .then =>
+        expect(watchBundle).not.to.be.called
+
+    it "does watch supportFile when not headless", ->
+      watchBundle = @sandbox.spy(Watchers.prototype, "watchBundle")
+
+      cypress.start(["--run-project=#{@pristinePath}", "--no-headless"])
+      .then =>
+        expect(watchBundle).to.be.calledWith("cypress/support/index.js")
 
     it "runs project headlessly and displays gui", ->
       Project.add(@todosPath)
