@@ -165,7 +165,7 @@ module.exports = {
 
       throw err
 
-  createProject: (projectName, session) ->
+  createProject: (projectDetails, session) ->
     rp.post({
       url: Routes.projects()
       json: true
@@ -175,7 +175,9 @@ module.exports = {
       body: {
         "x-platform": os.platform()
         "x-version": pkg.version
-        "x-project-name": projectName
+        "x-project-name": projectDetails.projectName
+        "x-org-id": projectDetails.orgId
+        "x-public": projectDetails.public
       }
     })
     .promise()

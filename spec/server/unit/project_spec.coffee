@@ -587,6 +587,26 @@ describe "lib/project", ->
       .then (json) =>
         expect(json.PROJECTS).to.deep.eq([@pristinePath])
 
+  context "#createCiProject", ->
+    beforeEach ->
+      @project = Project("path/to/project")
+      @sandbox.stub(@project, "writeProjectId").resolves("uuid-123")
+      @sandbox.stub(user, "ensureSession").resolves("session-123")
+      @sandbox.stub(api, "createProject").resolves("uuid-123")
+
+    it "calls api.createProject with user session", ->
+      @project.createCiProject({}).then ->
+        expect(api.createProject).to.be.calledWith({}, "session-123")
+
+    it "calls writeProjectId with id", ->
+      @project.createCiProject({}).then =>
+        expect(@project.writeProjectId).to.be.calledWith("uuid-123")
+        expect(@project.writeProjectId).to.be.calledOn(@project)
+
+    it "returns project id", ->
+      @project.createCiProject({}).then (projectId) =>
+        expect(projectId).to.equal("uuid-123")
+
   context ".remove", ->
     beforeEach ->
       @sandbox.stub(cache, "removeProject").resolves()

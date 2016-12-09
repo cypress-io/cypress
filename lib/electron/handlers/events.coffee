@@ -229,6 +229,11 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .then(send)
       .catch(sendErr)
 
+    when "setup:ci:project"
+      project.createCiProject(arg)
+      .then(send)
+      .catch(sendErr)
+
     when "get:specs"
       project.getSpecChanges({
         onChange: send

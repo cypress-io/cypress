@@ -411,6 +411,13 @@ class Project extends EE
     .bind(@)
     .catch({type: "NO_PROJECT_ID"}, @createProjectId)
 
+  createCiProject: (projectDetails) ->
+    user.ensureSession()
+    .bind(@)
+    .then (session) ->
+      api.createProject(projectDetails, session)
+    .then(@writeProjectId)
+
   @getOrgs = ->
     user.ensureSession()
     .then (session) ->

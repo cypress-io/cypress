@@ -305,12 +305,19 @@ describe "lib/api", ->
         "x-platform": "linux"
         "x-project-name": "foobar"
         "x-version": pkg.version
+        "x-org-id": "org-id-123"
+        "x-public": true
       })
       .reply(200, {
         uuid: "uuid-123"
       })
 
-      api.createProject("foobar", "session-123").then (uuid) ->
+      projectDetails = {
+        projectName: "foobar"
+        orgId: "org-id-123"
+        public: true
+      }
+      api.createProject(projectDetails, "session-123").then (uuid) ->
         expect(uuid).to.eq("uuid-123")
 
   context ".updateProject", ->

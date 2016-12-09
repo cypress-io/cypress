@@ -431,3 +431,17 @@ describe "lib/electron/handlers/events", ->
 
         @handleEvent("get:builds").then =>
           @expectSendErrCalledWith(err)
+
+    describe "setup:ci:project", ->
+      it "returns result of project.createCiProject", ->
+        @sandbox.stub(project, "createCiProject").resolves("response")
+
+        @handleEvent("setup:ci:project").then =>
+          @expectSendCalledWith("response")
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(project, "createCiProject").rejects(err)
+
+        @handleEvent("setup:ci:project").then =>
+          @expectSendErrCalledWith(err)
