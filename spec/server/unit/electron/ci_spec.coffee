@@ -232,6 +232,7 @@ describe "electron/ci", ->
         pending: 4
         duration: 5
         video: "path/to/video"
+        error: "err msg"
         screenshots: [{
           name: "foo"
           path: "path/to/screenshot"
@@ -247,6 +248,7 @@ describe "electron/ci", ->
         failures: 3
         pending: 4
         duration: 5
+        error: "err msg"
         video: true
         screenshots: [{name: "foo"}]
         failingTests: ["foo"]

@@ -237,6 +237,7 @@ describe "lib/api", ->
         failures: 3
         pending: 4
         duration: 5
+        error: "err msg"
         video: true
         screenshots: []
         failingTests: []
@@ -252,6 +253,7 @@ describe "lib/api", ->
         failures: 3
         pending: 4
         duration: 5
+        error: "err msg"
         video: true
         screenshots: []
         failingTests: []

@@ -172,6 +172,7 @@ module.exports = {
       failures:     stats.failures
       pending:      stats.pending
       duration:     stats.duration
+      error:        stats.error
       video:        !!stats.video
       screenshots:  screenshots
       failingTests: stats.failingTests

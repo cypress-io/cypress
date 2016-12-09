@@ -6,6 +6,7 @@ inquirer = require("inquirer")
 electron = require("electron")
 user     = require("#{root}../lib/user")
 Project  = require("#{root}../lib/project")
+Reporter = require("#{root}../lib/reporter")
 project  = require("#{root}../lib/electron/handlers/project")
 headless = require("#{root}../lib/modes/headless")
 Renderer = require("#{root}../lib/electron/handlers/renderer")
@@ -265,6 +266,79 @@ describe "electron/headless", ->
         expect(@projectInstance.listeners("end")).to.have.length(0)
 
       headless.waitForTestsToFinishRunning(@projectInstance)
+
+    it "end event resolves with obj, displays stats, displays screenshots, setsFailingTests", ->
+      started = new Date
+      screenshots = [{}, {}, {}]
+      end = ->
+      stats = {
+        tests: 1
+        passes: 2
+        failures: 3
+        pending: 4
+        duration: 5
+        failingTests: [4,5,6]
+      }
+
+      @sandbox.stub(Reporter, "setVideoTimestamp").withArgs(started, stats.failingTests).returns([1,2,3])
+      @sandbox.stub(headless, "postProcessRecording").resolves()
+      @sandbox.spy(headless,  "displayStats")
+      @sandbox.spy(headless,  "displayScreenshots")
+
+      process.nextTick =>
+        @projectInstance.emit("end", stats)
+
+      headless.waitForTestsToFinishRunning(@projectInstance, false, screenshots, started, end, "foo.mp4", "foo-compressed.mp4", 32)
+      .then (obj) ->
+        expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32)
+
+        expect(headless.displayStats).to.be.calledWith(obj)
+        expect(headless.displayScreenshots).to.be.calledWith(screenshots)
+
+        expect(obj).to.deep.eq({
+          tests:        1
+          passes:       2
+          failures:     3
+          pending:      4
+          duration:     5
+          failingTests: [1,2,3]
+          screenshots:  screenshots
+          video:        "foo.mp4"
+        })
+
+    it "exitEarlyWithErr event` resolves with no tests, error, and empty failingTests", ->
+      err = new Error("foo")
+      started = new Date
+      screenshots = [{}, {}, {}]
+      end = ->
+
+      @sandbox.stub(headless, "postProcessRecording").resolves()
+      @sandbox.spy(headless,  "displayStats")
+      @sandbox.spy(headless,  "displayScreenshots")
+
+      process.nextTick =>
+        expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(1)
+        @projectInstance.emit("exitEarlyWithErr", err.message)
+        expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(0)
+
+      headless.waitForTestsToFinishRunning(@projectInstance, false, screenshots, started, end, "foo.mp4", "foo-compressed.mp4", 32)
+      .then (obj) ->
+        expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32)
+
+        expect(headless.displayStats).to.be.calledWith(obj)
+        expect(headless.displayScreenshots).to.be.calledWith(screenshots)
+
+        expect(obj).to.deep.eq({
+          error:        err.message
+          failures:     1
+          tests:        0
+          passes:       0
+          pending:      0
+          duration:     0
+          failingTests: []
+          screenshots:  screenshots
+          video:        "foo.mp4"
+        })
 
   context ".run", ->
     beforeEach ->

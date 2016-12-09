@@ -101,6 +101,7 @@ module.exports = {
       "passes"
       "failures"
       "pending"
+      "error"
       "video"
       "screenshots"
       "failingTests"

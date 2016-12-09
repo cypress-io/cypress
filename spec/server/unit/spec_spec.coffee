@@ -109,12 +109,15 @@ describe "lib/controllers/spec", ->
         expect(result).to.equal(";")
 
     it "logs the error and exits if there is one", ->
+      err = new Error("Reason request failed")
+
       @build.returns({
-        getLatestBundle: -> Promise.reject(new Error("Reason request failed"))
+        getLatestBundle: -> Promise.reject(err)
       })
       @log = @sandbox.stub(errors, "log")
 
       @handle("sample.js").then =>
         expect(@log).to.have.been.called
         expect(@log.firstCall.args[0].stack).to.include("Oops...we found an error preparing this test file")
-        expect(@project.emit).to.have.been.calledWith("exitEarly", 1)
+        expect(@project.emit).to.have.been.calledWithMatch("exitEarlyWithErr", "Oops...we found an error preparing this test file")
+        expect(@project.emit).to.have.been.calledWithMatch("exitEarlyWithErr", err.message)
