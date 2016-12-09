@@ -368,10 +368,7 @@ describe "lib/api", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .post("/signin", {
-        "x-version": pkg.version
-        "x-platform": "linux"
-      })
+      .post("/signin")
       .query({code: "abc-123"})
       .reply(200, {
         name: "brian"
@@ -402,10 +399,7 @@ describe "lib/api", ->
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-session", "abc-123")
-      .post("/signout", {
-        "x-version": pkg.version
-        "x-platform": "linux"
-      })
+      .post("/signout")
       .reply(200)
 
       api.createSignout("abc-123")
@@ -417,9 +411,7 @@ describe "lib/api", ->
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-session", "session-123")
       .post("/projects", {
-        "x-platform": "linux"
         "x-project-name": "foobar"
-        "x-version": pkg.version
         "x-org-id": "org-id-123"
         "x-public": true
       })
@@ -462,8 +454,6 @@ describe "lib/api", ->
         "x-runs": 5
         "x-example": true
         "x-all": false
-        "x-version": pkg.version
-        "x-platform": "linux"
         "x-project-name": "admin"
       })
       .reply(200)
