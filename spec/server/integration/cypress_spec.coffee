@@ -690,6 +690,7 @@ describe "lib/cypress", ->
         pending: 4
         duration: 5
         video: true
+        error: undefined
         screenshots: []
         failingTests: []
         cypressConfig: {}
