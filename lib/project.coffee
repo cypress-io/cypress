@@ -81,9 +81,10 @@ class Project extends EE
 
         Promise.join(
           @watchSettingsAndStartWebsockets(options, cfg)
-          @scaffold(cfg).then =>
-            @watchSupportFile(cfg)
+          @scaffold(cfg)
         )
+        .then =>
+          @watchSupportFile(cfg)
 
     # return our project instance
     .return(@)
@@ -146,7 +147,8 @@ class Project extends EE
         api.updateProject(id, options.type, cfg.projectName, session)
 
   watchSupportFile: (config) ->
-    if supportFile = config.supportFile
+    ## dont watch the supportFile if we're running headlessly
+    if not config.isHeadless and (supportFile = config.supportFile)
       relativePath = path.relative(config.projectRoot, config.supportFile)
       @watchers.watchBundle(relativePath, config, {
         onChange: _.bind(@server.onTestFileChange, @server, relativePath)
@@ -210,9 +212,6 @@ class Project extends EE
 
         if event is "end"
           stats = reporter.stats()
-
-          ## store the config on stats
-          stats.config = config
 
           ## TODO: convert this to a promise
           ## since we need an ack to this end

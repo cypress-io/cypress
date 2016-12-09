@@ -47,3 +47,97 @@ describe "redirects + requests", ->
           "localhost:2292": 1
           "localhost:2293": 1 ## from the previous test
         })
+
+  it "automatically follows redirects", ->
+    cy
+      .request("http://localhost:2294/redirect")
+      .then (resp) ->
+        expect(resp.status).to.eq(200)
+        expect(resp.body).to.eq("<html>home</html>")
+
+  it "can turn off automatically following redirects", ->
+    cy
+      .request({
+        url: "http://localhost:2294/redirect"
+        followRedirect: false
+      })
+      .then (resp) ->
+        expect(resp.status).to.eq(302)
+        expect(resp.body).to.eq("Found. Redirecting to /home")
+        expect(resp.redirectedToUrl).to.eq("http://localhost:2294/home")
+
+  it "follows all redirects even when they change methods", ->
+    cy
+      .request({
+        method: "POST"
+        url: "http://localhost:2294/redirectPost"
+      })
+      .then (resp) ->
+        expect(resp.status).to.eq(200)
+        expect(resp.body).to.eq("<html>home</html>")
+
+  it "can submit json body", ->
+    cy
+      .request({
+        method: "POST"
+        url: "http://localhost:2294/json"
+        body: {
+          foo: "bar"
+          baz: "quux"
+        }
+      })
+      .its("body")
+      .should("deep.eq", {
+        foo: "bar"
+        baz: "quux"
+      })
+
+  it "can submit form url encoded body", ->
+    cy
+      .request({
+        method: "POST"
+        url: "http://localhost:2294/form"
+        form: true
+        body: {
+          foo: "bar"
+          baz: "quux"
+        }
+      })
+      .its("body")
+      .should("deep.eq", {
+        foo: "bar"
+        baz: "quux"
+      })
+
+  it "can send qs query params", ->
+    cy
+      .request({
+        url: "http://localhost:2294/params"
+        qs: {
+          foo: "bar"
+          baz: "quux"
+          a: 1
+        }
+      })
+      .its("body")
+      .should("deep.eq", {
+        url: "/params?foo=bar&baz=quux&a=1"
+        params: {
+          foo: "bar"
+          baz: "quux"
+          a: "1"
+        }
+      })
+
+  it "passes even on non 2xx or 3xx status code", ->
+    cy
+      .request({
+        url: "http://localhost:2294/statusCode?code=401"
+        failOnStatusCode: false
+      })
+      .its("status").should("eq", 401)
+      .request({
+        url: "http://localhost:2294/statusCode?code=500"
+        failOnStatusCode: false
+      })
+      .its("status").should("eq", 500)

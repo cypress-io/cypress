@@ -28,28 +28,49 @@ describe "lib/request", ->
       expect(request.createCookieString(obj)).to.eq("foo=bar; baz=quux")
 
   context "#normalizeResponse", ->
+    beforeEach ->
+      @push = @sandbox.stub()
+
     it "sets status to statusCode and deletes statusCode", ->
-      expect(request.normalizeResponse({statusCode: 404})).to.deep.eq({
+      expect(request.normalizeResponse(@push, {
+        statusCode: 404
+        request: {
+          headers: {foo: "bar"}
+          body: "body"
+        }
+      })).to.deep.eq({
         status: 404
         statusText: "Not Found"
         isOkStatusCode: false
+        requestHeaders: {foo: "bar"}
+        requestBody: "body"
       })
 
+      expect(@push).to.be.calledOnce
+
     it "picks out status body and headers", ->
-      expect(request.normalizeResponse({
+      expect(request.normalizeResponse(@push, {
         foo: "bar"
         req: {}
         originalHeaders: {}
         headers: {"Content-Length": 50}
         body: "<html>foo</html>"
         statusCode: 200
+        request: {
+          headers: {foo: "bar"}
+          body: "body"
+        }
       })).to.deep.eq({
         body: "<html>foo</html>"
         headers: {"Content-Length": 50}
         status: 200
         statusText: "OK"
         isOkStatusCode: true
+        requestHeaders: {foo: "bar"}
+        requestBody: "body"
       })
+
+      expect(@push).to.be.calledOnce
 
   context "#send", ->
     beforeEach ->
@@ -87,22 +108,99 @@ describe "lib/request", ->
     it "sets resolveWithFullResponse=true", ->
       nock("http://www.github.com")
       .get("/foo")
-      .reply 200, "hello", {
+      .reply(200, "hello", {
         "Content-Type": "text/html"
-      }
+      })
 
       request.send({}, @fn, {
         url: "http://www.github.com/foo"
         cookies: false
+        body: "foobarbaz"
       })
       .then (resp) ->
-        expect(resp).to.have.keys("status", "body", "headers", "duration", "isOkStatusCode", "statusText")
+        expect(resp).to.have.keys("status", "body", "headers", "duration", "isOkStatusCode", "statusText", "allRequestResponses", "requestBody", "requestHeaders")
 
         expect(resp.status).to.eq(200)
         expect(resp.statusText).to.eq("OK")
         expect(resp.body).to.eq("hello")
         expect(resp.headers).to.deep.eq({"content-type": "text/html"})
         expect(resp.isOkStatusCode).to.be.true
+        expect(resp.requestBody).to.eq("foobarbaz")
+        expect(resp.requestHeaders).to.deep.eq({
+          "accept-encoding": "gzip, deflate"
+          "content-length": 9
+        })
+        expect(resp.allRequestResponses).to.deep.eq([
+          {
+            "Request Body":     "foobarbaz"
+            "Request Headers":  {"accept-encoding": "gzip, deflate", "content-length": 9}
+            "Request URL":      "http://www.github.com/foo"
+            "Response Body":    "hello"
+            "Response Headers": {"content-type": "text/html"}
+            "Response Status":  200
+          }
+        ])
+
+    it "includes redirects", ->
+      nock("http://www.github.com")
+      .get("/dashboard")
+      .reply(301, null, {
+        "location": "/auth"
+      })
+      .get("/auth")
+      .reply(302, null, {
+        "location": "/login"
+      })
+      .get("/login")
+      .reply(200, "log in", {
+        "Content-Type": "text/html"
+      })
+
+      request.send({}, @fn, {
+        url: "http://www.github.com/dashboard"
+        cookies: false
+      })
+      .then (resp) ->
+        expect(resp).to.have.keys("status", "body", "headers", "duration", "isOkStatusCode", "statusText", "allRequestResponses", "redirects", "requestBody", "requestHeaders")
+
+        expect(resp.status).to.eq(200)
+        expect(resp.statusText).to.eq("OK")
+        expect(resp.body).to.eq("log in")
+        expect(resp.headers).to.deep.eq({"content-type": "text/html"})
+        expect(resp.isOkStatusCode).to.be.true
+        expect(resp.requestBody).to.be.undefined
+        expect(resp.redirects).to.deep.eq([
+          "301: http://www.github.com/auth"
+          "302: http://www.github.com/login"
+        ])
+        expect(resp.requestHeaders).to.deep.eq({
+          "accept-encoding": "gzip, deflate",
+          "referer": "http://www.github.com/auth"
+        })
+        expect(resp.allRequestResponses).to.deep.eq([
+          {
+            "Request Body":     null
+            "Request Headers":  {"accept-encoding": "gzip, deflate", "referer": "http://www.github.com/dashboard"}
+            "Request URL":      "http://www.github.com/dashboard"
+            "Response Body":    null
+            "Response Headers": {"location": "/auth"}
+            "Response Status":  301
+          }, {
+            "Request Body":     null
+            "Request Headers":  {"accept-encoding": "gzip, deflate", "referer": "http://www.github.com/auth"}
+            "Request URL":      "http://www.github.com/auth"
+            "Response Body":    null
+            "Response Headers": {"location": "/login"}
+            "Response Status":  302
+          }, {
+            "Request Body":     null
+            "Request Headers":  {"accept-encoding": "gzip, deflate", "referer": "http://www.github.com/auth"}
+            "Request URL":      "http://www.github.com/login"
+            "Response Body":    "log in"
+            "Response Headers": {"content-type": "text/html"}
+            "Response Status":  200
+          }
+        ])
 
     it "sends Cookie header, and body", ->
       nock("http://localhost:8080")
@@ -262,7 +360,7 @@ describe "lib/request", ->
         .then (resp) ->
           expect(resp.status).to.eq(200)
           expect(resp.body).to.eq("login")
-          expect(resp).not.to.have.property("redirectedTo")
+          expect(resp).not.to.have.property("redirectedToUrl")
 
       it "follows non-GET redirects by default", ->
         nock("http://localhost:8080")
@@ -281,7 +379,7 @@ describe "lib/request", ->
         .then (resp) ->
           expect(resp.status).to.eq(200)
           expect(resp.body).to.eq("dashboard")
-          expect(resp).not.to.have.property("redirectedTo")
+          expect(resp).not.to.have.property("redirectedToUrl")
 
       it "can turn off following redirects", ->
         nock("http://localhost:8080")
@@ -300,9 +398,9 @@ describe "lib/request", ->
         .then (resp) ->
           expect(resp.status).to.eq(302)
           expect(resp.body).to.eq("")
-          expect(resp.redirectedTo).to.eq("http://localhost:8080/login")
+          expect(resp.redirectedToUrl).to.eq("http://localhost:8080/login")
 
-      it "resolves redirectedTo on relative redirects", ->
+      it "resolves redirectedToUrl on relative redirects", ->
         nock("http://localhost:8080")
         .get("/dashboard")
         .reply(302, "", {
@@ -318,9 +416,9 @@ describe "lib/request", ->
         })
         .then (resp) ->
           expect(resp.status).to.eq(302)
-          expect(resp.redirectedTo).to.eq("http://localhost:8080/login")
+          expect(resp.redirectedToUrl).to.eq("http://localhost:8080/login")
 
-      it "resolves redirectedTo to another domain", ->
+      it "resolves redirectedToUrl to another domain", ->
         nock("http://localhost:8080")
         .get("/dashboard")
         .reply(301, "", {
@@ -336,9 +434,9 @@ describe "lib/request", ->
         })
         .then (resp) ->
           expect(resp.status).to.eq(301)
-          expect(resp.redirectedTo).to.eq("https://www.google.com/login")
+          expect(resp.redirectedToUrl).to.eq("https://www.google.com/login")
 
-      it "does not included redirectedTo when following redirects", ->
+      it "does not included redirectedToUrl when following redirects", ->
         nock("http://localhost:8080")
         .get("/dashboard")
         .reply(302, "", {
@@ -353,7 +451,7 @@ describe "lib/request", ->
         })
         .then (resp) ->
           expect(resp.status).to.eq(200)
-          expect(resp).not.to.have.property("redirectedTo")
+          expect(resp).not.to.have.property("redirectedToUrl")
 
     context "form=true", ->
       beforeEach ->

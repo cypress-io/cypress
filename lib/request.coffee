@@ -122,10 +122,13 @@ module.exports = (options = {}) ->
       response.status = response.statusCode
       delete response.statusCode
 
-      ## normalize what is an ok status code
-      response.isOkStatusCode = statusCode.isOk(response.status)
-
-      response.statusText = statusCode.getText(response.status)
+      _.extend(response, {
+        ## normalize what is an ok status code
+        statusText:     statusCode.getText(response.status)
+        isOkStatusCode: statusCode.isOk(response.status)
+        requestHeaders: req.headers
+        requestBody:    req.body
+      })
 
       ## if body is a string and content type is json
       ## try to convert the body to JSON
@@ -280,13 +283,22 @@ module.exports = (options = {}) ->
       send = =>
         ms = Date.now()
 
+        redirects        = []
         requestResponses = []
 
         push = (response) ->
           requestResponses.push(pick(response))
 
+        normalizeUrl = (loc) ->
+          url.resolve(options.url, loc)
+
         if options.followRedirect
           options.followRedirect = (incomingRes) ->
+            newUrl = normalizeUrl(incomingRes.headers.location)
+
+            ## normalize the url
+            redirects.push([incomingRes.statusCode, newUrl].join(": "))
+
             push(incomingRes)
 
             ## cause the redirect to happen
@@ -297,20 +309,20 @@ module.exports = (options = {}) ->
         @create(options, true)
         .then(@normalizeResponse.bind(@, push))
         .then (resp) =>
-          resp.duration = Date.now() - ms
           ## TODO: move duration somewhere...?
           ## does node store this somewhere?
           ## we could probably calculate this ourselves
           ## by using the date headers
-          # resp.duration = Date.now() - ms
-
+          resp.duration            = Date.now() - ms
           resp.allRequestResponses = requestResponses
+
+          if redirects.length
+            resp.redirects = redirects
 
           if options.followRedirect is false and (loc = resp.headers.location)
             ## resolve the new location head against
             ## the current url
-            redirect = url.resolve(options.url, loc)
-            resp.redirectedTo = redirect
+            resp.redirectedToUrl = normalizeUrl(loc)
 
           if options.jar
             @setJarCookies(options.jar, automation)

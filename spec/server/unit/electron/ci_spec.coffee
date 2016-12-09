@@ -88,6 +88,28 @@ describe "electron/ci", ->
       ci.getAuthor(@repo).then (ret) ->
         expect(ret).to.eq("")
 
+  context ".getEmail", ->
+    beforeEach ->
+      @repo = @sandbox.stub({
+        current_commitAsync: ->
+      })
+
+    it "returns branch name", ->
+      @repo.current_commitAsync.resolves({
+        author: {
+          email: "brian@cypress.io"
+        }
+      })
+
+      ci.getEmail(@repo).then (ret) ->
+        expect(ret).to.eq("brian@cypress.io")
+
+    it "returns '' on err", ->
+      @repo.current_commitAsync.rejects(new Error("bar"))
+
+      ci.getEmail(@repo).then (ret) ->
+        expect(ret).to.eq("")
+
   context ".getBranch", ->
     beforeEach ->
       @repo = @sandbox.stub({
@@ -130,6 +152,7 @@ describe "electron/ci", ->
     beforeEach ->
       @sandbox.stub(ci, "getBranch").resolves("master")
       @sandbox.stub(ci, "getAuthor").resolves("brian")
+      @sandbox.stub(ci, "getEmail").resolves("brian@cypress.io")
       @sandbox.stub(ci, "getMessage").resolves("such hax")
       @sandbox.stub(ci, "getSha").resolves("sha-123")
       @sandbox.stub(api, "createBuild")
@@ -143,7 +166,8 @@ describe "electron/ci", ->
           projectToken: "key-123"
           commitSha: "sha-123"
           commitBranch: "master"
-          commitAuthor: "brian"
+          commitAuthorName: "brian"
+          commitAuthorEmail: "brian@cypress.io"
           commitMessage: "such hax"
         })
 
@@ -196,10 +220,10 @@ describe "electron/ci", ->
 
   context ".uploadAssets", ->
     beforeEach ->
-      @sandbox.stub(api, "createInstance")
+      @sandbox.stub(api, "updateInstance")
 
-    it "calls api.createInstance", ->
-      api.createInstance.resolves()
+    it "calls api.updateInstance", ->
+      api.updateInstance.resolves()
 
       ci.uploadAssets("id-123", {
         tests: 1
@@ -208,6 +232,7 @@ describe "electron/ci", ->
         pending: 4
         duration: 5
         video: "path/to/video"
+        error: "err msg"
         screenshots: [{
           name: "foo"
           path: "path/to/screenshot"
@@ -216,13 +241,14 @@ describe "electron/ci", ->
         config: {foo: "bar"}
       })
 
-      expect(api.createInstance).to.be.calledWith({
-        buildId: "id-123"
+      expect(api.updateInstance).to.be.calledWith({
+        instanceId: "id-123"
         tests: 1
         passes: 2
         failures: 3
         pending: 4
         duration: 5
+        error: "err msg"
         video: true
         screenshots: [{name: "foo"}]
         failingTests: ["foo"]
@@ -238,7 +264,7 @@ describe "electron/ci", ->
         ]
       }
 
-      api.createInstance.resolves(resp)
+      api.updateInstance.resolves(resp)
 
       @sandbox.stub(ci, "upload").resolves()
 
@@ -274,7 +300,7 @@ describe "electron/ci", ->
       @sandbox.spy(logger, "createException")
       @sandbox.spy(console, "log")
 
-      api.createInstance.rejects(err)
+      api.updateInstance.rejects(err)
 
       ci.uploadAssets("id-123", {})
       .then ->
@@ -289,15 +315,60 @@ describe "electron/ci", ->
 
       @sandbox.spy(logger, "createException")
 
-      api.createInstance.rejects(err)
+      api.updateInstance.rejects(err)
 
       ci.uploadAssets("id-123", {})
       .then ->
         expect(logger.createException).not.to.be.called
 
+  context ".createInstance", ->
+    beforeEach ->
+      @sandbox.stub(api, "createInstance")
+
+    it "calls api.createInstance", ->
+      api.createInstance.resolves()
+
+      ci.createInstance("id-123", "cypress/integration/app_spec.coffee")
+
+      expect(api.createInstance).to.be.calledWith({
+        buildId: "id-123"
+        spec: "cypress/integration/app_spec.coffee"
+      })
+
+    it "logs warning on error", ->
+      err = new Error("foo")
+
+      @sandbox.spy(errors, "warning")
+      @sandbox.spy(logger, "createException")
+      @sandbox.spy(console, "log")
+
+      api.createInstance.rejects(err)
+
+      ci.createInstance("id-123", null)
+      .then (ret) ->
+        expect(ret).to.be.null
+        expect(errors.warning).to.be.calledWith("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+        expect(console.log).to.be.calledWithMatch("No build assets will be recorded.")
+        expect(console.log).to.be.calledWithMatch("Error: foo")
+        expect(logger.createException).to.be.calledWith(err)
+
+    it "does not createException when statusCode is 503", ->
+      err = new Error("foo")
+      err.statusCode = 503
+
+      @sandbox.spy(logger, "createException")
+
+      api.createInstance.rejects(err)
+
+      ci.createInstance("id-123", null)
+      .then (ret) ->
+        expect(ret).to.be.null
+        expect(logger.createException).not.to.be.called
+
   context ".run", ->
     beforeEach ->
       @sandbox.stub(ci, "generateProjectBuildId").resolves("build-id-123")
+      @sandbox.stub(ci, "createInstance").resolves("instance-id-123")
       @sandbox.stub(ci, "uploadAssets").resolves()
       @sandbox.stub(Project, "id").resolves("id-123")
       @sandbox.stub(Project, "config").resolves({projectName: "projectName"})
@@ -319,6 +390,24 @@ describe "electron/ci", ->
       .then ->
         expect(ci.generateProjectBuildId).to.be.calledWith("id-123", "path/to/project", "projectName", "key-foo")
 
+    it "passes buildId + options.spec to createInstance", ->
+      ci.run({spec: "foo/bar/spec"})
+      .then ->
+        expect(ci.createInstance).to.be.calledWith("build-id-123", "foo/bar/spec")
+
+    it "does not call ci.createInstance or ci.uploadAssets when no buildId", ->
+      ci.generateProjectBuildId.resolves(null)
+
+      ci.run({})
+      .then (stats) ->
+        expect(ci.createInstance).not.to.be.called
+        expect(ci.uploadAssets).not.to.be.called
+
+        expect(stats).to.deep.eq({
+          tests: 2
+          passes: 1
+        })
+
     it "calls headless.run + ensureSession + allDone into options", ->
       opts = {foo: "bar"}
 
@@ -326,13 +415,13 @@ describe "electron/ci", ->
       .then ->
         expect(headless.run).to.be.calledWith({foo: "bar", ensureSession: false, allDone: false})
 
-    it "calls uploadAssets with buildId and stats", ->
+    it "calls uploadAssets with instanceId and stats", ->
       ci.run({})
       .then ->
-        expect(ci.uploadAssets).to.be.calledWith("build-id-123", {tests: 2, passes: 1})
+        expect(ci.uploadAssets).to.be.calledWith("instance-id-123", {tests: 2, passes: 1})
 
-    it "does not call uploadAssets with no buildId", ->
-      ci.generateProjectBuildId.resolves(null)
+    it "does not call uploadAssets with no instanceId", ->
+      ci.createInstance.resolves(null)
 
       ci.run({})
       .then (stats) ->

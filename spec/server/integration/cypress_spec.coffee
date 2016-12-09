@@ -28,6 +28,7 @@ Project  = require("#{root}lib/project")
 Server   = require("#{root}lib/server")
 Reporter = require("#{root}lib/reporter")
 launcher = require("#{root}lib/launcher")
+Watchers = require("#{root}lib/watchers")
 
 describe "lib/cypress", ->
   beforeEach ->
@@ -384,6 +385,20 @@ describe "lib/cypress", ->
           throw new Error("fixturesFolder should not exist!")
         .catch -> done()
 
+    it "does not watch supportFile when headless", ->
+      watchBundle = @sandbox.spy(Watchers.prototype, "watchBundle")
+
+      cypress.start(["--run-project=#{@pristinePath}"])
+      .then =>
+        expect(watchBundle).not.to.be.called
+
+    it "does watch supportFile when not headless", ->
+      watchBundle = @sandbox.spy(Watchers.prototype, "watchBundle")
+
+      cypress.start(["--run-project=#{@pristinePath}", "--no-headless"])
+      .then =>
+        expect(watchBundle).to.be.calledWith("cypress/support/index.js")
+
     it "runs project headlessly and displays gui", ->
       Project.add(@todosPath)
       .then =>
@@ -617,7 +632,8 @@ describe "lib/cypress", ->
           projectToken: "token-123"
           commitSha:    "sha-123"
           commitBranch: "bem/ci"
-          commitAuthor: "brian"
+          commitAuthorName: "brian"
+          commitAuthorEmail:  "brian@cypress.io"
           commitMessage: "foo"
         })
 
@@ -629,6 +645,7 @@ describe "lib/cypress", ->
       @sandbox.stub(ci, "getSha").resolves("sha-123")
       @sandbox.stub(ci, "getBranch").resolves("bem/ci")
       @sandbox.stub(ci, "getAuthor").resolves("brian")
+      @sandbox.stub(ci, "getEmail").resolves("brian@cypress.io")
       @sandbox.stub(ci, "getMessage").resolves("foo")
       @sandbox.stub(headless, "createRenderer")
       @sandbox.stub(headless, "waitForRendererToConnect")
@@ -662,20 +679,27 @@ describe "lib/cypress", ->
 
       @createInstance = @sandbox.stub(api, "createInstance").withArgs({
         buildId: "build-id-123"
+        spec: undefined
+      }).resolves("instance-id-123")
+
+      @updateInstance = @sandbox.stub(api, "updateInstance").withArgs({
+        instanceId: "instance-id-123"
         tests: 1
         passes: 2
         failures: 3
         pending: 4
         duration: 5
         video: true
+        error: undefined
         screenshots: []
         failingTests: []
         cypressConfig: {}
       }).resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
+      cypress.start(["--run-project=#{@todosPath}",  "--key=token-123", "--ci"])
       .then =>
         expect(@createInstance).to.be.calledOnce
+        expect(@updateInstance).to.be.calledOnce
         @expectExitWith(3)
 
     it "runs project by specific absolute spec and exits with status 3", ->
@@ -683,7 +707,12 @@ describe "lib/cypress", ->
 
       @createBuild.resolves("build-id-123")
 
-      @sandbox.stub(api, "createInstance").resolves()
+      @sandbox.stub(api, "createInstance").withArgs({
+        buildId: "build-id-123"
+        spec: "#{@todosPath}/tests/test2.coffee"
+      }).resolves("instance-id-123")
+
+      @updateInstance = @sandbox.stub(api, "updateInstance").resolves()
 
       cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci", "--spec=#{@todosPath}/tests/test2.coffee"])
       .then =>

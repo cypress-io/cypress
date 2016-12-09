@@ -52,33 +52,46 @@ describe "lib/api", ->
       .then (ret) ->
         expect(ret).to.eql(builds)
 
+  context ".ping", ->
+    it "GET /ping", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .get("/ping")
+      .reply(200, "OK")
+
+      api.ping()
+      .then (resp) ->
+        expect(resp).to.eq("OK")
+
   context ".createBuild", ->
     it "POST /builds + returns buildId", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "2")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
       .post("/builds", {
-        projectId:       "id-123"
-        projectToken:    "token-123"
-        commitSha:       "sha"
-        commitBranch:    "master"
-        commitAuthor:    "brian"
-        commitMessage:   "such hax"
-        cypressVersion:  pkg.version
-        ciProvider:      "circle"
+        projectId:         "id-123"
+        projectToken:      "token-123"
+        commitSha:         "sha"
+        commitBranch:      "master"
+        commitAuthorName:  "brian"
+        commitAuthorEmail: "brian@cypress.io"
+        commitMessage:     "such hax"
+        ciProvider:        "circle"
       })
       .reply(200, {
         buildId: "new-build-id-123"
       })
 
       api.createBuild({
-        projectId:      "id-123"
-        projectToken:   "token-123"
-        commitSha:      "sha"
-        commitBranch:   "master"
-        commitAuthor:   "brian"
-        commitMessage:  "such hax"
-        cypressVersion: pkg.version
-        ciProvider:     provider.get()
+        projectId:         "id-123"
+        projectToken:      "token-123"
+        commitSha:         "sha"
+        commitBranch:      "master"
+        commitAuthorName:  "brian"
+        commitAuthorEmail: "brian@cypress.io"
+        commitMessage:     "such hax"
       })
       .then (ret) ->
         expect(ret).to.eq("new-build-id-123")
@@ -86,15 +99,17 @@ describe "lib/api", ->
     it "POST /builds failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "2")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
       .post("/builds", {
-        projectId:       null
-        projectToken:    "token-123"
-        commitSha:       "sha"
-        commitBranch:    "master"
-        commitAuthor:    "brian"
-        commitMessage:   "such hax"
-        cypressVersion:  pkg.version
-        ciProvider:      "circle"
+        projectId:         null
+        projectToken:      "token-123"
+        commitSha:         "sha"
+        commitBranch:      "master"
+        commitAuthorName:  "brian"
+        commitAuthorEmail: "brian@cypress.io"
+        commitMessage:     "such hax"
+        ciProvider:        "circle"
       })
       .reply(422, {
         errors: {
@@ -103,14 +118,13 @@ describe "lib/api", ->
       })
 
       api.createBuild({
-        projectId:      null
-        projectToken:   "token-123"
-        commitSha:      "sha"
-        commitBranch:   "master"
-        commitAuthor:   "brian"
-        commitMessage:  "such hax"
-        cypressVersion: pkg.version
-        ciProvider:     provider.get()
+        projectId:         null
+        projectToken:      "token-123"
+        commitSha:         "sha"
+        commitBranch:      "master"
+        commitAuthorName:  "brian"
+        commitAuthorEmail: "brian@cypress.io"
+        commitMessage:     "such hax"
       })
       .then ->
         throw new Error("should have thrown here")
@@ -130,6 +144,8 @@ describe "lib/api", ->
     it "handles timeouts", ->
       nock("http://localhost:1234")
       .matchHeader("x-route-version", "2")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
       .post("/builds")
       .socketDelay(5000)
       .reply(200, {})
@@ -165,40 +181,32 @@ describe "lib/api", ->
       os.platform.returns("darwin")
 
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
+      .matchHeader("x-platform", "darwin")
+      .matchHeader("x-cypress-version", pkg.version)
       .post("/builds/build-id-123/instances", {
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
-        video: true
-        screenshots: []
-        failingTests: []
-        cypressConfig: {}
+        spec: "cypress/integration/app_spec.js"
         browserName: "Electron"
         browserVersion: "53"
         osName: "darwin"
         osVersion: "10.10.10"
       })
-      .reply(200)
+      .reply(200, {
+        instanceId: "instance-id-123"
+      })
 
       api.createInstance({
         buildId: "build-id-123"
-        tests: 1
-        passes: 2
-        failures: 3
-        pending: 4
-        duration: 5
-        video: true
-        screenshots: []
-        failingTests: []
-        cypressConfig: {}
+        spec: "cypress/integration/app_spec.js"
       })
+      .then (instanceId) ->
+        expect(instanceId).to.eq("instance-id-123")
 
     it "POST /builds/:id/instances failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
       .post("/builds/build-id-123/instances")
       .reply(422, {
         errors: {
@@ -224,7 +232,9 @@ describe "lib/api", ->
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
       .post("/builds/build-id-123/instances")
       .socketDelay(5000)
       .reply(200, {})
@@ -239,15 +249,112 @@ describe "lib/api", ->
         expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
 
     it "sets timeout to 10 seconds", ->
-      @sandbox.stub(rp, "post").resolves()
+      @sandbox.stub(rp, "post").returns({
+        promise: ->
+          get: ->
+            catch: ->
+              then: (fn) -> fn()
+      })
 
       api.createInstance({})
       .then ->
         expect(rp.post).to.be.calledWithMatch({timeout: 10000})
 
+  context ".updateInstance", ->
+    beforeEach ->
+      Object.defineProperty(process.versions, "chrome", {
+        value: "53"
+      })
+
+    it "PUTs /builds/:id/instances", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .put("/instances/instance-id-123", {
+        tests: 1
+        passes: 2
+        failures: 3
+        pending: 4
+        duration: 5
+        error: "err msg"
+        video: true
+        screenshots: []
+        failingTests: []
+        cypressConfig: {}
+        ciProvider: "circle"
+      })
+      .reply(200)
+
+      api.updateInstance({
+        instanceId: "instance-id-123"
+        tests: 1
+        passes: 2
+        failures: 3
+        pending: 4
+        duration: 5
+        error: "err msg"
+        video: true
+        screenshots: []
+        failingTests: []
+        cypressConfig: {}
+      })
+
+    it "PUT /builds/:id/instances failure formatting", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .put("/instances/instance-id-123")
+      .reply(422, {
+        errors: {
+          tests: ["is required"]
+        }
+      })
+
+      api.updateInstance({instanceId: "instance-id-123"})
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("""
+          422
+
+          {
+            "errors": {
+              "tests": [
+                "is required"
+              ]
+            }
+          }
+        """)
+
+    it "handles timeouts", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .put("/instances/instance-id-123")
+      .socketDelay(5000)
+      .reply(200, {})
+
+      api.updateInstance({
+        instanceId: "instance-id-123"
+        timeout: 100
+      })
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
+
+    it "sets timeout to 10 seconds", ->
+      @sandbox.stub(rp, "put").resolves()
+
+      api.updateInstance({})
+      .then ->
+        expect(rp.put).to.be.calledWithMatch({timeout: 10000})
+
   context ".getLoginUrl", ->
     it "GET /auth + returns the url", ->
       nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
       .get("/auth")
       .reply(200, {
         url: "https://github.com/authorize"
@@ -259,6 +366,8 @@ describe "lib/api", ->
   context ".createSignin", ->
     it "POSTs /signin + returns user object", ->
       nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
       .post("/signin", {
         "x-version": pkg.version
         "x-platform": "linux"
@@ -275,6 +384,8 @@ describe "lib/api", ->
 
     it "handles 401 exceptions", ->
       nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
       .post("/signin")
       .query({code: "abc-123"})
       .reply(401, "Your email: 'brian@gmail.com' has not been authorized.")
@@ -288,6 +399,8 @@ describe "lib/api", ->
   context ".createSignout", ->
     it "POSTs /signout", ->
       nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-session", "abc-123")
       .post("/signout", {
         "x-version": pkg.version
@@ -300,6 +413,8 @@ describe "lib/api", ->
   context ".createProject", ->
     it "POSTs /projects", ->
       nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-session", "session-123")
       .post("/projects", {
         "x-platform": "linux"
@@ -323,6 +438,8 @@ describe "lib/api", ->
   context ".updateProject", ->
     it "GETs /projects/:id", ->
       nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-session", "session-123")
       .get("/projects/project-123", {
         "x-platform": "linux"
@@ -338,6 +455,8 @@ describe "lib/api", ->
   context ".sendUsage", ->
     it "POSTs /user/usage", ->
       nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-session", "session-123")
       .post("/user/usage", {
         "x-runs": 5
@@ -354,6 +473,8 @@ describe "lib/api", ->
   context ".getProjectToken", ->
     it "GETs /projects/:id/token", ->
       nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-session", "session-123")
       .get("/projects/project-123/token")
       .reply(200, {
@@ -367,6 +488,8 @@ describe "lib/api", ->
   context ".updateProjectToken", ->
     it "PUTs /projects/:id/token", ->
       nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-session", "session-123")
       .put("/projects/project-123/token")
       .reply(200, {
@@ -381,6 +504,8 @@ describe "lib/api", ->
     beforeEach ->
       @setup = (body, session, delay = 0) ->
         nock("http://localhost:1234")
+        .matchHeader("x-platform", "linux")
+        .matchHeader("x-cypress-version", pkg.version)
         .matchHeader("x-session", session)
         .post("/exceptions", body)
         .delayConnection(delay)

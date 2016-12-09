@@ -25,9 +25,11 @@ module.exports = {
       .catch (err) ->
         filePath = err.filePath ? spec
 
-        errors.log(errors.get("BUNDLE_ERROR", filePath, bundle.errorMessage(err)))
+        err = errors.get("BUNDLE_ERROR", filePath, bundle.errorMessage(err))
 
-        project.emit("exitEarly", 1)
+        errors.log(err)
+
+        project.emit("exitEarlyWithErr", err.message)
     else
       watchers
       .watchBundle(spec, config)

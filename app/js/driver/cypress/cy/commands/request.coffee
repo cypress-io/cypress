@@ -193,7 +193,17 @@ $Cypress.register "Request", (Cypress, _, $) ->
         if options.failOnStatusCode and response.isOkStatusCode isnt true
           $Cypress.Utils.throwErrByPath("request.status_invalid", {
             onFail: options._log
-            args: { status: response.status }
+            args: {
+              method:          requestOpts.method
+              url:             requestOpts.url
+              requestBody:     response.requestBody
+              requestHeaders:  response.requestHeaders
+              status:          response.status
+              statusText:      response.statusText
+              responseBody:    response.body
+              responseHeaders: response.headers
+              redirects:       response.redirects
+            }
           })
 
         return response
@@ -203,25 +213,13 @@ $Cypress.register "Request", (Cypress, _, $) ->
           args: { timeout: options.timeout }
         }
       .catch responseFailed, (err) ->
-        body = if (b = requestOpts.body)
-          "Body: #{Cypress.Utils.stringify(b)}"
-        else
-          ""
-
-        headers = if (h = requestOpts.headers)
-          "Headers: #{Cypress.Utils.stringify(h)}"
-        else
-          ""
-
         $Cypress.Utils.throwErrByPath("request.loading_failed", {
           onFail: options._log
           args: {
-            error: err.message
-            stack: err.stack
-            method: requestOpts.method
-            url: requestOpts.url
-            body
-            headers
+            error:   err.message
+            stack:   err.stack
+            method:  requestOpts.method
+            url:     requestOpts.url
           }
         })
 

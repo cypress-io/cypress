@@ -1,7 +1,7 @@
 _        = require("lodash")
 os       = require("os")
 getos    = require("getos")
-rp       = require("request-promise")
+request  = require("request-promise")
 errors   = require("request-promise/errors")
 Promise  = require("bluebird")
 Routes   = require("./util/routes")
@@ -9,6 +9,18 @@ pkg      = require("../package.json")
 provider = require("./util/provider")
 
 getos = Promise.promisify(getos)
+
+rp = request.defaults (params = {}, callback) ->
+  headers = params.headers ?= {}
+
+  _.defaults(headers, {
+    "x-platform":        os.platform()
+    "x-cypress-version": pkg.version
+  })
+
+  method = params.method.toLowerCase()
+
+  request[method](params, callback)
 
 formatResponseBody = (err) ->
   ## if the body is JSON object
@@ -71,14 +83,14 @@ module.exports = {
         "x-route-version": "2"
       }
       body: {
-        projectId:       options.projectId
-        projectToken:    options.projectToken
-        commitSha:       options.commitSha
-        commitBranch:    options.commitBranch
-        commitAuthor:    options.commitAuthor
-        commitMessage:   options.commitMessage
-        cypressVersion:  pkg.version
-        ciProvider:      provider.get()
+        projectId:         options.projectId
+        projectToken:      options.projectToken
+        commitSha:         options.commitSha
+        commitBranch:      options.commitBranch
+        commitAuthorName:  options.commitAuthorName
+        commitAuthorEmail: options.commitAuthorEmail
+        commitMessage:     options.commitMessage
+        ciProvider:        provider.get()
       }
     })
     .promise()
@@ -86,37 +98,52 @@ module.exports = {
     .catch(errors.StatusCodeError, formatResponseBody)
 
   createInstance: (options = {}) ->
+    platform = os.platform()
+
+    osVersion(platform)
+    .then (v) ->
+      rp.post({
+        url: Routes.instances(options.buildId)
+        json: true
+        timeout: options.timeout ? 10000
+        headers: {
+          "x-route-version": "3"
+        }
+        body: {
+          spec:           options.spec
+          browserName:    "Electron"
+          browserVersion: process.versions.chrome
+          osName:         platform
+          osVersion:      v
+        }
+      })
+      .promise()
+      .get("instanceId")
+      .catch(errors.StatusCodeError, formatResponseBody)
+
+  updateInstance: (options = {}) ->
     body = _.pick(options, [
       "tests"
       "duration"
       "passes"
       "failures"
       "pending"
+      "error"
       "video"
       "screenshots"
       "failingTests"
       "cypressConfig"
     ])
 
-    platform = os.platform()
-
-    osVersion(platform)
-    .then (v) ->
-      rp.post({
-        url: Routes.instance(options.buildId)
-        json: true
-        timeout: options.timeout ? 10000
-        headers: {
-          "x-route-version": "2"
-        }
-        body: _.extend(body, {
-          browserName:    "Electron"
-          browserVersion: process.versions.chrome
-          osName:         platform
-          osVersion:      v
-        })
+    rp.put({
+      url: Routes.instance(options.instanceId)
+      json: true
+      timeout: options.timeout ? 10000
+      body: _.extend(body, {
+        ciProvider: provider.get()
       })
-      .catch(errors.StatusCodeError, formatResponseBody)
+    })
+    .catch(errors.StatusCodeError, formatResponseBody)
 
   createRaygunException: (body, session, timeout = 3000) ->
     rp.post({

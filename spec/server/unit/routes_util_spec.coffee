@@ -27,8 +27,11 @@ describe "lib/util/routes", ->
   it "builds", ->
     expect(Routes.builds()).to.eq("http://localhost:1234/builds")
 
+  it "instances", ->
+    expect(Routes.instances(123)).to.eq("http://localhost:1234/builds/123/instances")
+
   it "instance", ->
-    expect(Routes.instance(123)).to.eq("http://localhost:1234/builds/123/instances")
+    expect(Routes.instance(123)).to.eq("http://localhost:1234/instances/123")
 
   it "projects", ->
     expect(Routes.projects()).to.eq "http://localhost:1234/projects"

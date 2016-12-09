@@ -256,19 +256,13 @@ module.exports = {
 
       onFinish = (obj) =>
         finish = ->
-          resolve(obj)
+          openProject
+          .getConfig()
+          .then (cfg) ->
+            obj.config = cfg
+          .finally ->
+            resolve(obj)
 
-        if end
-          @postProcessRecording(end, name, cname, videoCompression)
-          .then(finish)
-          ## TODO: add a catch here
-        else
-          finish()
-
-      onExit = (code = 1) ->
-        onFinish({failures: code})
-
-      onEnd = (obj) =>
         if end
           obj.video = name
 
@@ -285,12 +279,36 @@ module.exports = {
         if ft and ft.length
           obj.failingTests = Reporter.setVideoTimestamp(started, ft)
 
+        if end
+          @postProcessRecording(end, name, cname, videoCompression)
+          .then(finish)
+          ## TODO: add a catch here
+        else
+          finish()
+
+      onEarlyExit = (errMsg) ->
+        ## probably should say we ended
+        ## early too: (Ended Early: true)
+        ## in the stats
+        obj = {
+          error:        errMsg
+          failures:     1
+          tests:        0
+          passes:       0
+          pending:      0
+          duration:     0
+          failingTests: []
+        }
+
+        onFinish(obj)
+
+      onEnd = (obj) =>
         onFinish(obj)
 
       ## when our openProject fires its end event
       ## resolve the promise
       openProject.once("end", onEnd)
-      openProject.once("exitEarly", onExit)
+      openProject.once("exitEarlyWithErr", onEarlyExit)
 
   trashAssets: (options = {}) ->
     if options.trashAssetsBeforeHeadlessRuns is true

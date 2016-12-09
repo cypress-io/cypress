@@ -30,6 +30,12 @@ module.exports = {
     .get("message")
     .catch -> ""
 
+  getEmail: (repo) ->
+    repo.current_commitAsync()
+    .get("author")
+    .get("email")
+    .catch -> ""
+
   getAuthor: (repo) ->
     repo.current_commitAsync()
     .get("author")
@@ -58,16 +64,18 @@ module.exports = {
       sha:     @getSha(repo)
       branch:  @getBranch(repo)
       author:  @getAuthor(repo)
+      email:   @getEmail(repo)
       message: @getMessage(repo)
     })
     .then (git) ->
       api.createBuild({
-        projectId:     projectId
-        projectToken:  projectToken
-        commitSha:     git.sha
-        commitBranch:  git.branch
-        commitAuthor:  git.author
-        commitMessage: git.message
+        projectId:         projectId
+        projectToken:      projectToken
+        commitSha:         git.sha
+        commitBranch:      git.branch
+        commitAuthorName:  git.author
+        commitAuthorEmail: git.email
+        commitMessage:     git.message
       })
       .catch (err) ->
         switch err.statusCode
@@ -84,6 +92,21 @@ module.exports = {
             ## and return null
             logException(err)
             .return(null)
+
+  createInstance: (buildId, spec) ->
+    api.createInstance({
+      buildId: buildId
+      spec:    spec
+    })
+    .catch (err) ->
+      errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+
+      ## dont log exceptions if we have a 503 status code
+      if err.statusCode isnt 503
+        logException(err)
+        .return(null)
+      else
+        null
 
   upload: (options = {}) ->
     {video, screenshots, videoUrl, screenshotUrls} = options
@@ -128,7 +151,7 @@ module.exports = {
 
       logException(err)
 
-  uploadAssets: (buildId, stats) ->
+  uploadAssets: (instanceId, stats) ->
     console.log("")
     console.log("")
 
@@ -142,13 +165,14 @@ module.exports = {
     screenshots = _.map stats.screenshots, (screenshot) ->
       _.omit(screenshot, "path")
 
-    api.createInstance({
-      buildId:      buildId
+    api.updateInstance({
+      instanceId:   instanceId
       tests:        stats.tests
       passes:       stats.passes
       failures:     stats.failures
       pending:      stats.pending
       duration:     stats.duration
+      error:        stats.error
       video:        !!stats.video
       screenshots:  screenshots
       failingTests: stats.failingTests
@@ -180,6 +204,11 @@ module.exports = {
 
         @generateProjectBuildId(projectId, projectPath, projectName, options.key)
         .then (buildId) =>
+          ## bail if we dont have a buildId
+          return if not buildId
+
+          @createInstance(buildId, options.spec)
+        .then (instanceId) =>
           ## dont check that the user is logged in
           options.ensureSession = false
 
@@ -188,10 +217,10 @@ module.exports = {
 
           headless.run(options)
           .then (stats = {}) =>
-            ## if we got a buildId then attempt to
+            ## if we got a instanceId then attempt to
             ## upload these assets
-            if buildId
-              @uploadAssets(buildId, stats)
+            if instanceId
+              @uploadAssets(instanceId, stats)
               .return(stats)
               .finally(headless.allDone)
             else
