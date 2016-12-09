@@ -137,10 +137,6 @@ module.exports = {
       headers: {
         "x-route-version": "2"
       }
-      body: {
-        "x-platform": os.platform()
-        "x-version":  pkg.version
-      }
     })
     .catch errors.StatusCodeError, (err) ->
       ## slice out the status code since RP automatically
@@ -154,10 +150,6 @@ module.exports = {
       json: true
       headers: {
         "x-session": session
-      }
-      body: {
-        "x-platform": os.platform()
-        "x-version":  pkg.version
       }
     })
     .catch (err) ->
@@ -173,8 +165,6 @@ module.exports = {
         "x-session": session
       }
       body: {
-        "x-platform": os.platform()
-        "x-version": pkg.version
         "x-project-name": projectName
       }
     })
@@ -205,8 +195,6 @@ module.exports = {
         "x-session": session
       }
       body: {
-        "x-platform": os.platform()
-        "x-version": pkg.version
         "x-runs": numRuns
         "x-example": exampleSpec
         "x-all": allSpecs
