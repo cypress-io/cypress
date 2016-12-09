@@ -120,16 +120,20 @@ class Builds extends Component {
   _empty () {
     return (
       <div id='builds-list-page'>
-        <div className='empty'>
-          <h4>Getting Started with Builds</h4>
-          <p>Lorem ipsum dolor sit amet</p>
-          <p>
-            Run this command: <code>cypress ci {this.state.ciKey}</code>
+        <div className='first-build-instructions'>
+          <h4>Run Your First Build in CI</h4>
+          <p>You'll need to add 2 lines of code to your CI config. Where this code goes depends on your CI provider.</p>
+          <h5>Install the CLI tools:</h5>
+          <pre><code>npm install -g cypress-cli</code></pre>
+          <h5>Run tests and upload assets:</h5>
+          <pre><code>cypress ci {this.state.ciKey}</code></pre>
+          <p>Refer to your CI provider's documentation to know when to run these commands.</p>
+          <p className='center'>
+            <a href='#' onClick={this._openCiGuide}>
+              <i className='fa fa-question-circle'></i>{' '}
+              Learn more about Continuous Integration
+            </a>
           </p>
-          <p>Adipiscing Nibh Magna Ridiculus Inceptos.</p>
-          <p><a href='#' onClick={this._openCiGuide}>Learn more about Continuous Integration</a></p>
-          <p>Porta Amet Euismod Dolor <strong><i className='fa fa-plus'></i> Euismod</strong> Tellus Vehicula Vestibulum Venenatis Euismod.</p>
-
           {this._privateMessage()}
         </div>
       </div>
