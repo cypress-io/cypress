@@ -119,5 +119,6 @@ describe "lib/controllers/spec", ->
       @handle("sample.js").then =>
         expect(@log).to.have.been.called
         expect(@log.firstCall.args[0].stack).to.include("Oops...we found an error preparing this test file")
+        expect(@project.emit).not.to.have.been.calledWithMatch("exitEarlyWithErr", "[") ## make sure there are no ansi codes
         expect(@project.emit).to.have.been.calledWithMatch("exitEarlyWithErr", "Oops...we found an error preparing this test file")
         expect(@project.emit).to.have.been.calledWithMatch("exitEarlyWithErr", err.message)

@@ -29,7 +29,7 @@ module.exports = {
 
         errors.log(err)
 
-        project.emit("exitEarlyWithErr", err.message)
+        project.emit("exitEarlyWithErr", errors.stripAnsi(err.message))
     else
       watchers
       .watchBundle(spec, config)

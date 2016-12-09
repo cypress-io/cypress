@@ -1,4 +1,5 @@
 _       = require("lodash")
+strip   = require("strip-ansi")
 chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
@@ -116,6 +117,8 @@ API = {
 
   throw: (type, arg) ->
     throw @get(type, arg)
+
+  stripAnsi: strip
 
   clone: (err, options = {}) ->
     _.defaults options, {

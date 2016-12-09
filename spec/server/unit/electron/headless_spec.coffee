@@ -313,7 +313,7 @@ describe "electron/headless", ->
           video:        "foo.mp4"
         })
 
-    it "exitEarlyWithErr event` resolves with no tests, error, and empty failingTests", ->
+    it "exitEarlyWithErr event resolves with no tests, error, and empty failingTests", ->
       err = new Error("foo")
       started = new Date
       screenshots = [{}, {}, {}]
