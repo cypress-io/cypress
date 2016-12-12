@@ -198,6 +198,15 @@ module.exports = {
     .promise()
     .get("uuid")
 
+  getProjectCiKeys: (projectId, session) ->
+    rp.get({
+      url: Routes.projectCiKeys(projectId)
+      json: true
+      headers: {
+        "x-session": session
+      }
+    })
+
   sendUsage: (numRuns, exampleSpec, allSpecs, projectName, session) ->
     rp.post({
       url: Routes.usage()

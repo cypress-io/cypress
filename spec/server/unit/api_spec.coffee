@@ -427,6 +427,19 @@ describe "lib/api", ->
       api.createProject(projectDetails, "session-123").then (uuid) ->
         expect(uuid).to.eq("uuid-123")
 
+  context ".getProjectCiKeys", ->
+    it "GET /projects/:id/keys + returns keys", ->
+      ciKeys = []
+
+      nock("http://localhost:1234")
+      .matchHeader("x-session", "session-123")
+      .get("/projects/id-123/keys")
+      .reply(200, ciKeys)
+
+      api.getProjectCiKeys("id-123", "session-123")
+      .then (ret) ->
+        expect(ret).to.eql(ciKeys)
+
   context ".sendUsage", ->
     it "POSTs /user/usage", ->
       nock("http://localhost:1234")

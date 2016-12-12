@@ -361,6 +361,14 @@ class Project extends EE
       api.createProject(projectDetails, session)
     .then(@writeProjectId)
 
+  getCiKeys: ->
+    Promise.all([
+      @getProjectId(),
+      user.ensureSession()
+    ])
+    .spread (projectId, session) ->
+      api.getProjectCiKeys(projectId, session)
+
   @getOrgs = ->
     user.ensureSession()
     .then (session) ->

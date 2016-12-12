@@ -133,6 +133,9 @@ module.exports = {
     ## always return an array of open browsers
     Promise.resolve(_.compact([openBrowser]))
 
+  getCiKeys: ->
+    openProject.getCiKeys()
+
   createCiProject: (projectDetails) ->
     openProject.createCiProject(projectDetails)
 

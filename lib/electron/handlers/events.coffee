@@ -234,6 +234,11 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .then(send)
       .catch(sendErr)
 
+    when "get:ci:keys"
+      project.getCiKeys()
+      .then(send)
+      .catch(sendErr)
+
     when "get:specs"
       project.getSpecChanges({
         onChange: send

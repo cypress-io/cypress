@@ -445,3 +445,17 @@ describe "lib/electron/handlers/events", ->
 
         @handleEvent("setup:ci:project").then =>
           @expectSendErrCalledWith(err)
+
+    describe "get:ci:keys", ->
+      it "returns result of project.getCiKeys", ->
+        @sandbox.stub(project, "getCiKeys").resolves(["ci-key-123"])
+
+        @handleEvent("get:ci:keys").then =>
+          @expectSendCalledWith(["ci-key-123"])
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(project, "getCiKeys").rejects(err)
+
+        @handleEvent("get:ci:keys").then =>
+          @expectSendErrCalledWith(err)

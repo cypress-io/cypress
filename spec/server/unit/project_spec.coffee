@@ -485,6 +485,22 @@ describe "lib/project", ->
       @project.createCiProject({}).then (projectId) =>
         expect(projectId).to.equal("uuid-123")
 
+  context "#getCiKeys", ->
+    beforeEach ->
+      @ciKeys = []
+      @project = Project("path/to/project")
+      @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
+      @sandbox.stub(user, "ensureSession").resolves("session-123")
+      @sandbox.stub(api, "getProjectCiKeys").resolves(@ciKeys)
+
+    it "calls api.getProjectCiKeys with project id + session", ->
+      @project.getCiKeys().then ->
+        expect(api.getProjectCiKeys).to.be.calledWith("id-123", "session-123")
+
+    it "returns ci keys", ->
+      @project.getCiKeys().then (ciKeys) =>
+        expect(ciKeys).to.equal(@ciKeys)
+
   context ".remove", ->
     beforeEach ->
       @sandbox.stub(cache, "removeProject").resolves()
