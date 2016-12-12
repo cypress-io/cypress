@@ -42,16 +42,18 @@ Pass in an options object to change the default behavior of `cy.request`.
 
 Option | Default | Notes
 --- | --- | ---
-`method` | `GET` | The HTTP method to use when making the request.
-`url` | `null` | The URL to make the request.
-`body` | `null` | The Request Body to send along with the request.
-`headers` | `null` | Any additional headers to send. Accepts an object literal.
 `auth` | `null` | Any auth to send. Accepts an object literal.
-`cookies` | `true` | Whether to send the current browser cookies. Can also accept an object literal.
+`body` | `null` | The Request Body to send along with the request.
+`failOnStatusCode` | `true` | Whether to fail on response codes other than `2xx` and `3xx`.
+`followRedirect` | `true` | Whether to follow automatic redirects.
+`form` | `false` | Whether to convert the `body` values to urlencoded content and automatically set the `x-www-form-urlencoded` header.
 `gzip` | `true` | Whether to accept the `gzip` encoding.
-`failOnStatus` | `true` | Whether to fail on response codes other than `2xx`.
-`timeout` | [`responseTimeout](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for a response (in ms)
+`headers` | `null` | Any additional headers to send. Accepts an object literal.
 `log` | `true` | Whether to log the request in the Command Log
+`method` | `GET` | The HTTP method to use when making the request.
+`qs` | `null` | The query parameters to be appended to the `url` option when making the request.
+`timeout` | [`responseTimeout](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for a response (in ms)
+`url` | `null` | The URL to make the request.
 
 You can also set options for the `cy.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
 
@@ -66,6 +68,18 @@ You can also set options for the `cy.request`'s `baseUrl` and `responseTimeout` 
 beforeEach(function(){
   cy.request("http://localhost:8080/db/seed")
 })
+```
+
+## Issue a simple HTTP request
+
+```javascript
+cy
+  // dont visit this page and load the resources
+  // instead let's just issue a simple HTTP request
+  // so we can make an assertion about its body
+  .request("/admin")
+  .its("body")
+  .should("include", "<h2>admin.html</h2>")
 ```
 
 ***
@@ -112,6 +126,63 @@ cy
     // response.body would automatically be serialized into JSON
     expect(response.body).to.have.property("name", "Jane") // true
 })
+```
+
+***
+
+# Options Usage
+
+## Request the dashboard while disabling auto redirect
+
+```javascript
+// to test the redirection behavior on login without a session
+// cy.request can be used to check the status code and redirectedToUrl property.
+//
+// the 'redirectedToUrl' property is a special Cypress property under the hood
+// that normalizes the url the browser would normally follow during a redirect
+
+cy.request({
+  url: '/dashboard',
+  followRedirect: false // turn off following redirects automatically
+})
+.then((resp) => {
+  // should have status code 302
+  expect(resp.status).to.eq(302)
+
+  // when we turn off following redirects, Cypress will also send us
+  // a 'redirectedToUrl' property with the fully qualified URL that we were redirected to.
+  expect(resp.redirectedToUrl).to.eq("http://localhost:8082/unauthorized")
+})
+```
+
+***
+
+## HTML form submissions using form option
+
+```javascript
+// oftentimes once we have a proper e2e test around logging in
+// there is NO more reason to actually use our UI to log in users
+// doing so wastes a huge amount of time, as our entire page has to load
+// all associated resources, we have to wait to fill the
+// form and for the form submission and redirection process
+//
+// with cy.request we can bypass all of this because it automatically gets
+// and sets cookies under the hood which acts exactly as if these requests
+// came from the browser
+
+cy
+  .request({
+    method: 'POST',
+    url: '/login_with_form', // baseUrl will be prepended to this url
+    form: true, // indicates the body should be form urlencoded and sets Content-Type: application/x-www-form-urlencoded headers
+    body: {
+      username: 'cypress',
+      password: 'password123'
+    }
+  })
+
+  // just to prove we have a session
+  cy.getCookie("cypress-session-cookie").should('exist')
 ```
 
 ***
