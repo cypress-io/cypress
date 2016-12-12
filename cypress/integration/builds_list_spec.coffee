@@ -130,7 +130,7 @@ describe "Builds List", ->
           describe "successfully submit form", ->
             beforeEach ->
               @ipc.handle("setup:ci:project", null, "project-id-123")
-              @ipc.handle("get:ci:key", null, "ci-key-123")
+              @ipc.handle("get:ci:keys", null, [{id: "ci-key-123"}])
 
               cy
                 .get(".modal-body")
@@ -147,7 +147,7 @@ describe "Builds List", ->
               cy.get(".modal").should("not.be.visible")
 
             it "displays empty builds page", ->
-              cy.contains("Getting Started with Builds")
+              cy.contains("Run Your First Build in CI")
 
             describe "welcome page", ->
 
@@ -157,7 +157,7 @@ describe "Builds List", ->
               it "displays link to CI docs", ->
                 cy
                   .get("#builds-list-page a")
-                  .should("have.text", "Learn more about Continuous Integration")
+                  .should("have.text", " Learn more about Continuous Integration")
 
               it "does not display message about inviting users", ->
                 cy.contains("invite other users").should("not.exist")
@@ -172,7 +172,7 @@ describe "Builds List", ->
           describe "when project is private", ->
             beforeEach ->
               @ipc.handle("setup:ci:project", null, "project-id-123")
-              @ipc.handle("get:ci:key", null, "ci-key-123")
+              @ipc.handle("get:ci:keys", null, [{id: "ci-key-123"}])
               cy
                 .get("input[name=privacy-radio][value=false]")
                 .click()
@@ -200,9 +200,6 @@ describe "Builds List", ->
                 cy.get("#projectName").type("project name")
                 cy.contains("Please enter a project name").should("not.be.visible")
 
-            ## ipc could return error
-            ## - 422
-
       context "having previously setup CI", ->
         beforeEach ->
           @ipc.handle("get:builds", null, [])
@@ -214,7 +211,7 @@ describe "Builds List", ->
             .get(".nav a").contains("Builds").click()
 
         it "displays empty message", ->
-          cy.contains("Getting Started with Builds")
+          cy.contains("Run Your First Build in CI")
 
     describe "list builds", ->
       beforeEach ->

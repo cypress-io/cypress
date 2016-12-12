@@ -8,7 +8,7 @@ import App from '../lib/app'
 import state from '../lib/state'
 import buildsCollection from './builds-collection'
 import { getBuilds } from './builds-api'
-import { getCiKey } from '../projects/projects-api'
+import { getCiKeys } from '../projects/projects-api'
 import orgsStore from '../organizations/organizations-store'
 
 import Build from './builds-list-item'
@@ -23,7 +23,7 @@ class Builds extends Component {
     super(props)
 
     this.state = {
-      ciKey: null,
+      ciKey: '<ci-key>',
       setupProjectModalOpen: false,
       requestAccessModalOpen: false,
     }
@@ -46,8 +46,10 @@ class Builds extends Component {
       !buildsCollection.builds.length &&
       this.props.project.projectId
     ) {
-      getCiKey().then((ciKey) => {
-        this.setState({ ciKey })
+      getCiKeys().then((ciKeys) => {
+        if (ciKeys.length) {
+          this.setState({ ciKey: ciKeys[0].id })
+        }
       })
     }
   }
