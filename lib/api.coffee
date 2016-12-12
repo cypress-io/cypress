@@ -187,10 +187,10 @@ module.exports = {
       json: true
       headers: {
         "x-session": session
+        "x-route-version": "2"
       }
       body: {
-        ## TODO: change to camel-cased without x-
-        "x-project-name": projectDetails.projectName
+        "x-name": projectDetails.projectName
         "x-org-id": projectDetails.orgId
         "x-public": projectDetails.public
       }

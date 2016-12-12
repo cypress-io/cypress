@@ -410,8 +410,9 @@ describe "lib/api", ->
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
       .matchHeader("x-session", "session-123")
+      .matchHeader("x-route-version", "2")
       .post("/projects", {
-        "x-project-name": "foobar"
+        "x-name": "foobar"
         "x-org-id": "org-id-123"
         "x-public": true
       })
