@@ -24,7 +24,7 @@ excerpt: Assertions verify an expectation.
 There are two ways to write an assertion in Cypress.
 
 1. **Implicit Subjects:** Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and)
-2. **Explicit Subjects:** Using `expect` or `assert`
+2. **Explicit Subjects:** Using `expect`
 
 ***
 
@@ -42,9 +42,9 @@ cy.get("tbody tr:first").should("have.class", "active")
 
 ***
 
-## Explicit Subjects with `expect` or `assert`
+## Explicit Subjects with `expect`
 
-Using `expect` or `assert` allows you to pass in a specific subject and make an assertion on the specified subject.
+Using `expect` allows you to pass in a specific subject and make an assertion on the specified subject.
 
 These assertions are more commonly used when writing unit tests, but can also be used when writing integration tests. Cypress comes bundled with some existing tools that handle assertions such as:
 
@@ -57,12 +57,9 @@ These assertions are more commonly used when writing unit tests, but can also be
 expect(true).to.be.true
 ```
 
-```javascript
-// assert is also available
-assert.isTrue(true, "true should be true")
-```
-
 Explicit assertions are great when you want to perform custom logic prior to making the assertion.
+
+There is an [open issue](https://github.com/cypress-io/cypress/issues/101) for supporting `assert`.
 
 ```javascript
 cy
