@@ -2,8 +2,9 @@ bundle = require("#{root}lib/util/bundle")
 
 describe "lib/util/bundle", ->
 
-  context "#clientSideError", ->
+  context "#build", ->
 
+  context "#clientSideError", ->
     it "send javascript string with the error", ->
       expect(bundle.clientSideError("an error")).to.equal("""
       (function () {

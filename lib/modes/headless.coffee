@@ -87,6 +87,8 @@ module.exports = {
 
     })
     .catch {portInUse: true}, (err) ->
+      ## TODO: this needs to move to emit exitEarly
+      ## so we record the failure in CI
       errors.throw("PORT_IN_USE_LONG", err.port)
 
   createRecording: (name) ->
@@ -226,13 +228,54 @@ module.exports = {
       ## but failed and dont let this change the run exit code
       errors.warning("VIDEO_POST_PROCESSING_FAILED", err.stack)
 
-  waitForRendererToConnect: (openProject, id) ->
-    ## wait up to 10 seconds for the renderer
-    ## to connect or die
-    @waitForSocketConnection(openProject, id)
-    .timeout(10000)
-    .catch Promise.TimeoutError, (err) ->
-      errors.throw("TESTS_DID_NOT_START")
+  closeAnyOpenBrowser: ->
+    ## close either the open real browser
+    ## or the electron renderer process
+    Promise.join(
+      Renderer.destroy("PROJECT")
+      project.closeBrowser()
+    )
+
+  waitForRendererToConnect: (options = {}) ->
+    { openProject, id, browser, url, proxyServer, gui, webSecurity, write, timeout } = options
+
+    launchRenderer = =>
+      ## if we have a browser then just physically launch it
+      if browser
+        project.launch(browser, url, null, {proxyServer: proxyServer})
+      else
+        @createRenderer(url, proxyServer, gui, webSecurity, write)
+
+    attempts = 0
+
+    do waitForRendererToConnect = =>
+      Promise.join(
+        @waitForSocketConnection(openProject, id)
+        launchRenderer()
+      )
+      .timeout(timeout ? 10000)
+      .catch Promise.TimeoutError, (err) =>
+        attempts += 1
+
+        console.log("")
+
+        ## always first close the open browsers
+        ## before retrying or dieing
+        @closeAnyOpenBrowser()
+        .then ->
+          switch attempts
+            ## try again up to 3 attempts
+            when 1, 2
+              word = if attempts is 1 then "Retrying..." else "Retrying again..."
+              errors.warning("TESTS_DID_NOT_START_RETRYING", word)
+
+              waitForRendererToConnect()
+
+            else
+              err = errors.get("TESTS_DID_NOT_START_FAILED")
+              errors.log(err)
+
+              openProject.emit("exitEarlyWithErr", err.message)
 
   waitForSocketConnection: (openProject, id) ->
     new Promise (resolve, reject) ->
@@ -248,7 +291,9 @@ module.exports = {
       ## is the one that matches our id!
       openProject.on "socket:connected", fn
 
-  waitForTestsToFinishRunning: (openProject, gui, screenshots, started, end, name, cname, videoCompression) ->
+  waitForTestsToFinishRunning: (options = {}) ->
+    { openProject, gui, screenshots, started, end, name, cname, videoCompression } = options
+
     new Promise (resolve, reject) =>
       ## dont ever end if we're in 'gui' debugging mode
       return if gui
@@ -290,7 +335,7 @@ module.exports = {
         ## early too: (Ended Early: true)
         ## in the stats
         obj = {
-          error:        errMsg
+          error:        errors.stripAnsi(errMsg)
           failures:     1
           tests:        0
           passes:       0
@@ -353,7 +398,7 @@ module.exports = {
     console.log("")
 
   runTests: (options = {}) ->
-    {openProject, id, url, screenshots, proxyServer, gui, browser, webSecurity, videosFolder, videoRecording, videoCompression} = options
+    { browser, videoRecording, videosFolder } = options
 
     ## we know we're done running headlessly
     ## when the renderer has connected and
@@ -374,23 +419,33 @@ module.exports = {
       ## extract the started + ended promises from recording
       {start, end, write} = props
 
-      getRenderer = =>
-        terminal.header("Tests Starting", {color: ["gray"]})
-
-        ## if we have a browser then just physically launch it
-        if browser
-          project.launch(browser, url, null, {proxyServer: proxyServer})
-        else
-          @createRenderer(url, proxyServer, gui, webSecurity, write)
+      terminal.header("Tests Starting", {color: ["gray"]})
 
       ## make sure we start the recording first
       ## before doing anything
       Promise.resolve(start)
       .then (started) =>
         Promise.props({
-          connection: @waitForRendererToConnect(openProject, id)
-          stats:      @waitForTestsToFinishRunning(openProject, gui, screenshots, started, end, name, cname, videoCompression)
-          renderer:   getRenderer()
+          stats:      @waitForTestsToFinishRunning({
+            gui:              options.gui
+            openProject:      options.openProject
+            screenshots:      options.screenshots
+            videoCompression: options.videoCompression
+            end
+            name
+            cname
+            started
+          })
+          connection: @waitForRendererToConnect({
+            id:          options.id
+            gui:         options.gui
+            url:         options.url
+            proxyServer: options.proxyServer
+            openProject: options.openProject
+            webSecurity: options.webSecurity
+            write
+            browser
+          })
         })
 
   ready: (options = {}) ->

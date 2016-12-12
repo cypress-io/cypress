@@ -1,4 +1,5 @@
 _       = require("lodash")
+strip   = require("strip-ansi")
 chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
@@ -14,8 +15,10 @@ API = {
         "Warning: We failed processing this video.\n\nThis error will not alter the exit code.\n\n#{arg1}"
       when "NOT_LOGGED_IN"
         "You're not logged in.\n\nRun `cypress open` to open the Desktop App and login."
-      when "TESTS_DID_NOT_START"
-        "Can't start tests, the remote client never connected."
+      when "TESTS_DID_NOT_START_RETRYING"
+        "Timed out waiting for the browser to connect. #{arg1}"
+      when "TESTS_DID_NOT_START_FAILED"
+        "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
       when "PROJECT_DOES_NOT_EXIST"
         "You need to add a project to run tests."
       when "CI_CANNOT_UPLOAD_ASSETS"
@@ -116,6 +119,8 @@ API = {
 
   throw: (type, arg) ->
     throw @get(type, arg)
+
+  stripAnsi: strip
 
   clone: (err, options = {}) ->
     _.defaults options, {

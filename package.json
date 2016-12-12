@@ -1,7 +1,7 @@
 {
   "name": "cypress",
   "productName": "Cypress",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "Javascript Test Engine",
   "main": "index.js",
   "single-instance": false,
@@ -180,6 +180,7 @@
     "send": "^0.14.1",
     "server-destroy-vvo": "1.0.1",
     "string-to-stream": "^1.0.1",
+    "strip-ansi": "^3.0.1",
     "syntax-error": "^1.1.4",
     "tar-fs": "^1.11.1",
     "through": "2.3.6",

@@ -31,6 +31,10 @@ module.exports = {
   reset: ->
     windows = {}
 
+  destroy: (type) ->
+    if type and (win = getByType(type))
+      win.destroy()
+
   get: (type) ->
     getByType(type) ? throw new Error("No window exists for: '#{type}'")
 

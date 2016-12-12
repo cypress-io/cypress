@@ -59,7 +59,7 @@ class Watchers
       onReady: null
 
     if not watcher = @bundleWatchers[filePath]
-      watcher = bundle.build(filePath, config, true)
+      watcher = bundle.build(filePath, config)
       @_addBundle(filePath, watcher)
 
     if _.isFunction(options.onChange)

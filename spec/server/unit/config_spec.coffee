@@ -199,10 +199,15 @@ describe "lib/config", ->
     it "supportFile=false", ->
       @defaults "supportFile", false, {supportFile: false}
 
-    it "resets numTestsKeptInMemory to 0 when", ->
+    it "resets numTestsKeptInMemory to 0 when headless", ->
       cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isHeadless: true})
 
       expect(cfg.numTestsKeptInMemory).to.eq(0)
+
+    it "resets watchForFileChanges to false when headless", ->
+      cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {isHeadless: true})
+
+      expect(cfg.watchForFileChanges).to.be.false
 
     it "can override morgan in options", ->
       cfg = config.mergeDefaults({projectRoot: "/foo/bar/"}, {morgan: false})

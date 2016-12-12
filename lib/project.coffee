@@ -115,8 +115,7 @@ class Project extends EE
     @server.resetState()
 
   watchSupportFile: (config) ->
-    ## dont watch the supportFile if we're running headlessly
-    if not config.isHeadless and (supportFile = config.supportFile)
+    if supportFile = config.supportFile
       relativePath = path.relative(config.projectRoot, config.supportFile)
       @watchers.watchBundle(relativePath, config, {
         onChange: _.bind(@server.onTestFileChange, @server, relativePath)
