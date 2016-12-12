@@ -192,7 +192,7 @@ describe "lib/cypress", ->
   context "--run-project", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(headless, "waitForRendererToConnect")
+      @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "createRenderer")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 0})
       @sandbox.spy(api, "updateProject")
@@ -651,7 +651,7 @@ describe "lib/cypress", ->
       @sandbox.stub(ci, "getEmail").resolves("brian@cypress.io")
       @sandbox.stub(ci, "getMessage").resolves("foo")
       @sandbox.stub(headless, "createRenderer")
-      @sandbox.stub(headless, "waitForRendererToConnect")
+      @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({
         tests: 1
         passes: 2

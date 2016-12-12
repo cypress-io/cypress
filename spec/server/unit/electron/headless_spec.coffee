@@ -5,6 +5,7 @@ Promise  = require("bluebird")
 inquirer = require("inquirer")
 electron = require("electron")
 user     = require("#{root}../lib/user")
+errors   = require("#{root}../lib/errors")
 Project  = require("#{root}../lib/project")
 Reporter = require("#{root}../lib/reporter")
 project  = require("#{root}../lib/electron/handlers/project")
@@ -165,6 +166,19 @@ describe "electron/headless", ->
       .then =>
         expect(options.show).to.eq(false)
 
+  context ".closeAnyOpenBrowser", ->
+    beforeEach ->
+      @sandbox.spy(Renderer, "destroy")
+      @sandbox.spy(project, "closeBrowser")
+
+      headless.closeAnyOpenBrowser()
+
+    it "calls Renderer.destroy(PROJECT)", ->
+      expect(Renderer.destroy).to.be.calledWith("PROJECT")
+
+    it "calls project.closeBrowser", ->
+      expect(project.closeBrowser).to.be.calledOnce
+
   context ".waitForRendererToConnect", ->
     it "resolves on waitForSocketConnection", ->
       @sandbox.stub(headless, "waitForRendererToConnect").resolves()
@@ -176,28 +190,21 @@ describe "electron/headless", ->
       .then =>
         expect(headless.waitForRendererToConnect).to.be.calledWith(@projectInstance, 1234)
 
-    it "throws TESTS_DID_NOT_START after 10 seconds", ->
-      clock = @sandbox.useFakeTimers("setTimeout")
+    it "throws TESTS_DID_NOT_START_FAILED after 3 connection attempts", ->
+      @sandbox.spy(errors, "warning")
+      @sandbox.spy(errors, "get")
+      @sandbox.spy(headless, "closeAnyOpenBrowser")
+      @sandbox.stub(headless, "waitForSocketConnection").resolves(Promise.delay(1000))
+      @sandbox.stub(headless, "createRenderer").resolves()
+      emit = @sandbox.stub(@projectInstance, "emit")
 
-      promise = ->
-        new Promise (resolve, reject) =>
-          ## create the situation where
-          ## our clock ticks forward 10.001secs
-          ## to simulate our promise hanging
-          ## until the timeout is reached
-          process.nextTick ->
-            clock.tick(10001)
-
-      ## force waitForRendererToConnect to return a promise which is never resolved
-      @sandbox.stub(headless, "waitForSocketConnection", promise)
-
-      headless.waitForRendererToConnect()
-        .then ->
-          throw new Error("should have failed but did not")
-        .catch (err) ->
-          expect(err.type).to.eq("TESTS_DID_NOT_START")
-
-    it ".waitForSocketConnection"
+      headless.waitForRendererToConnect({openProject: @projectInstance, timeout: 10})
+      .then ->
+        expect(headless.closeAnyOpenBrowser).to.be.calledThrice
+        expect(errors.warning).to.be.calledWith("TESTS_DID_NOT_START_RETRYING", "Retrying...")
+        expect(errors.warning).to.be.calledWith("TESTS_DID_NOT_START_RETRYING", "Retrying again...")
+        expect(errors.get).to.be.calledWith("TESTS_DID_NOT_START_FAILED")
+        expect(emit).to.be.calledWith("exitEarlyWithErr", "The browser never connected. Something is wrong. The tests cannot run. Aborting...")
 
   context ".waitForSocketConnection", ->
     beforeEach ->
@@ -258,7 +265,7 @@ describe "electron/headless", ->
       process.nextTick =>
         @projectInstance.emit("end", {foo: "bar"})
 
-      headless.waitForTestsToFinishRunning(@projectInstance)
+      headless.waitForTestsToFinishRunning({openProject: @projectInstance})
       .then (obj) ->
         expect(obj).to.deep.eq({
           foo: "bar"
@@ -271,7 +278,7 @@ describe "electron/headless", ->
         @projectInstance.emit("end", {foo: "bar"})
         expect(@projectInstance.listeners("end")).to.have.length(0)
 
-      headless.waitForTestsToFinishRunning(@projectInstance)
+      headless.waitForTestsToFinishRunning({openProject: @projectInstance})
 
     it "end event resolves with obj, displays stats, displays screenshots, setsFailingTests", ->
       started = new Date
@@ -294,7 +301,16 @@ describe "electron/headless", ->
       process.nextTick =>
         @projectInstance.emit("end", stats)
 
-      headless.waitForTestsToFinishRunning(@projectInstance, false, screenshots, started, end, "foo.mp4", "foo-compressed.mp4", 32)
+      headless.waitForTestsToFinishRunning({
+        openProject: @projectInstance,
+        name: "foo.mp4"
+        cname: "foo-compressed.mp4"
+        videoCompression: 32
+        gui: false
+        screenshots
+        started
+        end
+      })
       .then (obj) ->
         expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32)
 
@@ -328,7 +344,16 @@ describe "electron/headless", ->
         @projectInstance.emit("exitEarlyWithErr", err.message)
         expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(0)
 
-      headless.waitForTestsToFinishRunning(@projectInstance, false, screenshots, started, end, "foo.mp4", "foo-compressed.mp4", 32)
+      headless.waitForTestsToFinishRunning({
+        openProject: @projectInstance,
+        name: "foo.mp4"
+        cname: "foo-compressed.mp4"
+        videoCompression: 32
+        gui: false
+        screenshots
+        started
+        end
+      })
       .then (obj) ->
         expect(headless.postProcessRecording).to.be.calledWith(end, "foo.mp4", "foo-compressed.mp4", 32)
 
@@ -355,9 +380,10 @@ describe "electron/headless", ->
       @sandbox.stub(user, "ensureSession")
       @sandbox.stub(headless, "getId").returns(1234)
       @sandbox.stub(headless, "ensureAndOpenProjectByPath").resolves(@projectInstance)
-      @sandbox.stub(headless, "waitForRendererToConnect").resolves()
+      @sandbox.stub(headless, "waitForSocketConnection").resolves()
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
       @sandbox.stub(headless, "createRenderer").resolves()
+      @sandbox.spy(headless,  "waitForRendererToConnect")
 
     it "no longer ensures user session", ->
       headless.run()
@@ -377,12 +403,17 @@ describe "electron/headless", ->
     it "passes project + id to waitForRendererToConnect", ->
       headless.run()
       .then =>
-        expect(headless.waitForRendererToConnect).to.be.calledWith(@projectInstance, 1234)
+        expect(headless.waitForRendererToConnect).to.be.calledWithMatch({
+          openProject: @projectInstance
+          id: 1234
+        })
 
     it "passes project to waitForTestsToFinishRunning", ->
       headless.run()
       .then =>
-        expect(headless.waitForTestsToFinishRunning).to.be.calledWith(@projectInstance)
+        expect(headless.waitForTestsToFinishRunning).to.be.calledWithMatch({
+          openProject: @projectInstance
+        })
 
     it "passes project.ensureSpecUrl to createRenderer", ->
       @sandbox.stub(@projectInstance, "ensureSpecUrl").resolves("foo/bar")
