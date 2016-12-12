@@ -113,7 +113,7 @@ class Project extends Component {
       )
     }
 
-    const status = this.props.project.status
+    const status = this.props.project.lastBuildStatus
     if (!status) return
 
     const statuses = { passing: 'check-circle', failing: 'exclamation-circle', running: 'refresh fa-spin' }
@@ -129,11 +129,11 @@ class Project extends Component {
   }
 
   _projectTime () {
-    const lastRan = this.props.project.lastRan
+    const lastRan = this.props.project.lastBuildCreatedAt
 
     if (!lastRan) return
 
-    if (this.props.project.status === 'running') {
+    if (this.props.project.lastBuildStatus === 'running') {
       return "Now..."
     }
 

@@ -23,8 +23,8 @@ export default class Project {
   @observable public
   @observable orgName
   @observable defaultOrg
-  @observable status
-  @observable lastRan
+  @observable lastBuildStatus
+  @observable lastBuildCreatedAt
   @observable valid = true
 
   constructor (project) {
@@ -42,8 +42,8 @@ export default class Project {
     if (project.public != null) this.public = project.public
     if (project.orgName) this.orgName = project.orgName
     if (project.defaultOrg) this.defaultOrg = project.defaultOrg
-    if (project.status) this.status = project.status
-    if (project.lastRan) this.lastRan = project.lastRan
+    if (project.lastBuildStatus) this.lastBuildStatus = project.lastBuildStatus
+    if (project.lastBuildCreatedAt) this.lastBuildCreatedAt = project.lastBuildCreatedAt
     if (project.valid != null) this.valid = project.valid
   }
 
