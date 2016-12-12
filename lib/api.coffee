@@ -193,9 +193,9 @@ module.exports = {
         "x-route-version": "2"
       }
       body: {
-        "x-name": projectDetails.projectName
-        "x-org-id": projectDetails.orgId
-        "x-public": projectDetails.public
+        name: projectDetails.projectName
+        orgId: projectDetails.orgId
+        public: projectDetails.public
       }
     })
     .promise()

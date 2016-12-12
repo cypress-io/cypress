@@ -414,9 +414,9 @@ describe "lib/api", ->
       .matchHeader("x-session", "session-123")
       .matchHeader("x-route-version", "2")
       .post("/projects", {
-        "x-name": "foobar"
-        "x-org-id": "org-id-123"
-        "x-public": true
+        name: "foobar"
+        orgId: "org-id-123"
+        public: true
       })
       .reply(200, {
         uuid: "uuid-123"
