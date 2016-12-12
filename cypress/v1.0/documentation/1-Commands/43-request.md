@@ -52,7 +52,7 @@ Option | Default | Notes
 `log` | `true` | Whether to log the request in the Command Log
 `method` | `GET` | The HTTP method to use when making the request.
 `qs` | `null` | The query parameters to be appended to the `url` option when making the request.
-`timeout` | [`responseTimeout](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for a response (in ms)
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for a response (in ms)
 `url` | `null` | The URL to make the request.
 
 You can also set options for the `cy.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
@@ -212,15 +212,6 @@ cy
 ## Cookies are automatically sent and received
 
 If the HTTP request being made is sending cookies, they are sent in the request. Additionally, if a server reponds with cookies, these are automatically set on the browser.
-
-To disable sending and receiving cookies in the request, set `cookies: false` in the request's options.
-
-```javascript
-// we can make requests to any external server, no problem.
-cy
-  // cookies are not sent or received and set in the browser
-  .request("users/1.json", {cookies: false})
-```
 
 ***
 
