@@ -19,6 +19,7 @@ cp = Promise.promisifyAll(cp)
 fs = Promise.promisifyAll(fs)
 
 env = process.env
+env.COPY_CIRCLE_ARTIFACTS = "true"
 
 e2ePath = Fixtures.projectPath("e2e")
 
