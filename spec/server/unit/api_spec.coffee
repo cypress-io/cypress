@@ -368,6 +368,7 @@ describe "lib/api", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
+      .matchHeader("x-route-version", "2")
       .post("/signin")
       .query({code: "abc-123"})
       .reply(200, {
@@ -383,6 +384,7 @@ describe "lib/api", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
+      .matchHeader("x-route-version", "2")
       .post("/signin")
       .query({code: "abc-123"})
       .reply(401, "Your email: 'brian@gmail.com' has not been authorized.")
