@@ -21,7 +21,6 @@ excerpt: Run Cypress in any CI provider
 - :fa-angle-right: [Examples](#section-examples)
   - [CircleCI](#section-circleci)
   - [Travis CI](#section-travis-ci)
-  - [Codeship](#section-codeship)
 
 ***
 
@@ -186,7 +185,7 @@ cypress ci
 
 You can specify a specific version of Cypress to use in CI by setting an Environment Variable: `CYPRESS_VERSION`.
 
-**Example of Env Variable in Codeship**
+**Example of Env Variable**
 ![screen shot 2016-03-28 at 11 28 26 am](https://cloud.githubusercontent.com/assets/1271364/14081365/601e2da4-f4d8-11e5-8ea8-0491ffcb0999.png)
 
 As long as a previous version has not been removed (due to security issues) this will work.
@@ -240,21 +239,6 @@ dependencies:
 - [TodoMVC Example](https://travis-ci.org/cypress-io/cypress-example-todomvc)
 
 ![travis-logs](https://cloud.githubusercontent.com/assets/1268976/9291527/8ea21024-4393-11e5-86b7-80e3b5d1047e.gif)
-
-## Codeship
-
-**Kitchen Sink Example Setup Commands**
-```text
-nvm install 5.3
-npm install
-npm install -g cypress-cli
-npm start -- --silent &
-```
-
-**Kitchen Sink Example Test Commands**
-```text
-cypress ci
-```
 
 ***
 
