@@ -46,7 +46,7 @@ class Builds extends Component {
       !buildsCollection.builds.length &&
       this.props.project.projectId
     ) {
-      getCiKeys().then((ciKeys) => {
+      getCiKeys().then((ciKeys = []) => {
         if (ciKeys.length) {
           this.setState({ ciKey: ciKeys[0].id })
         }

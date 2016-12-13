@@ -164,6 +164,8 @@ const openProject = (project) => {
 
 const getCiKeys = () => {
   return App.ipc('get:ci:keys')
+  // ignore error, settle for no ci keys
+  .catch(() => [])
 }
 
 export {
