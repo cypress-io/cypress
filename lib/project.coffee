@@ -420,6 +420,12 @@ class Project extends EE
 
   @add = (path) ->
     cache.insertProject(path)
+    .then =>
+      @id(path)
+    .then (id) ->
+      {id, path}
+    .catch ->
+      {path}
 
   @removeIds = (p) ->
     Project(p)

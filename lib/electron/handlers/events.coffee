@@ -189,7 +189,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "add:project"
       Project.add(arg)
-      .then -> send(arg)
+      .then(send)
       .catch(sendErr)
 
     when "remove:project"

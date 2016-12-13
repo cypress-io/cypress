@@ -348,11 +348,11 @@ describe "lib/electron/handlers/events", ->
           @expectSendErrCalledWith(err)
 
     describe "add:project", ->
-      it "adds project + returns arg", ->
-        @sandbox.stub(Project, "add").withArgs("path/to/project").resolves()
+      it "adds project + returns result", ->
+        @sandbox.stub(Project, "add").withArgs("path/to/project").resolves("result")
 
         @handleEvent("add:project", "path/to/project").then =>
-          @expectSendCalledWith("path/to/project")
+          @expectSendCalledWith("result")
 
       it "catches errors", ->
         err = new Error("foo")

@@ -458,12 +458,31 @@ describe "lib/project", ->
     beforeEach ->
       @pristinePath = Fixtures.projectPath("pristine")
 
-    it "inserts into cache project id + cache", ->
+    it "inserts path into cache", ->
       Project.add(@pristinePath)
       .then =>
         cache.read()
       .then (json) =>
         expect(json.PROJECTS).to.deep.eq([@pristinePath])
+
+    describe "if project at path has id", ->
+      it "returns object containing path and id", ->
+        @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
+
+        Project.add(@pristinePath)
+        .then (project) =>
+          expect(project.id).to.equal("id-123")
+          expect(project.path).to.equal(@pristinePath)
+
+    describe "if project at path does not have id", ->
+      it "returns object containing just the path", ->
+        @sandbox.stub(settings, "read").rejects()
+
+        Project.add(@pristinePath)
+        .then (project) =>
+          expect(project.id).to.be.undefined
+          expect(project.path).to.equal(@pristinePath)
+
 
   context "#createCiProject", ->
     beforeEach ->
@@ -488,7 +507,7 @@ describe "lib/project", ->
   context "#getCiKeys", ->
     beforeEach ->
       @ciKeys = []
-      @project = Project("path/to/project")
+      @project = Project(@pristinePath)
       @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
       @sandbox.stub(user, "ensureSession").resolves("session-123")
       @sandbox.stub(api, "getProjectCiKeys").resolves(@ciKeys)
