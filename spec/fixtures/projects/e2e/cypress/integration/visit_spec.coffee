@@ -103,3 +103,13 @@ describe "visits", ->
         .visit("http://localhost:3434/index.html")
         .visit("http://localhost:3434/response_never_finishes")
         .contains("Cypress errored attempting to make an http request to this url")
+
+  context "issue #309: request accept header not set", ->
+    it "sets accept header to text/html,*/*", ->
+      cy
+        .visit("http://localhost:3434/headers.html")
+        .get("#headers").invoke("text").then (text) ->
+          headers = JSON.parse(text)
+
+          expect(headers.accept).to.eq("text/html,*/*")
+          expect(headers.host).to.eq("localhost:3434")

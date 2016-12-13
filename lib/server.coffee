@@ -392,6 +392,9 @@ class Server
           ## rewrite these contents
           gzip: false
           url: urlFile ? urlStr
+          headers: {
+            accept: "text/html,*/*"
+          }
           followRedirect: (incomingRes) ->
             status = incomingRes.statusCode
             next = incomingRes.headers.location
