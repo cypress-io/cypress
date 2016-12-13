@@ -210,7 +210,11 @@ $Cypress.register "Request", (Cypress, _, $) ->
       .catch Promise.TimeoutError, (err) =>
         $Cypress.Utils.throwErrByPath "request.timed_out", {
           onFail: options._log
-          args: { timeout: options.timeout }
+          args: {
+            url:     requestOpts.url
+            method:  requestOpts.method
+            timeout: options.timeout
+          }
         }
       .catch responseFailed, (err) ->
         $Cypress.Utils.throwErrByPath("request.loading_failed", {
@@ -222,4 +226,3 @@ $Cypress.register "Request", (Cypress, _, $) ->
             url:     requestOpts.url
           }
         })
-

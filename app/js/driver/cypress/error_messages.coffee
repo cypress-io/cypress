@@ -421,7 +421,19 @@ $Cypress.ErrorMessages = do ($Cypress) ->
         ])}
 
         """
-      timed_out: "#{cmd('request')} timed out waiting {{timeout}}ms for a response. No response ever occured."
+      timed_out: (obj) ->
+        """
+        #{cmd('request')} timed out waiting #{obj.timeout}ms for a response from your server.
+
+        The request we sent was:
+
+        #{getHttpProps([
+          {key: 'method',    value: obj.method},
+          {key: 'URL',       value: obj.url},
+        ])}
+
+        No response was received within the timeout.
+        """
       url_missing: "#{cmd('request')} requires a url. You did not provide a url."
       url_invalid: "#{cmd('request')} must be provided a fully qualified url - one that begins with 'http'. By default #{cmd('request')} will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present."
       url_wrong_type: "#{cmd('request')} requires the url to be a string."
