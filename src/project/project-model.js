@@ -74,27 +74,27 @@ export default class Project {
   }
 
   @action loading (bool) {
-    return this.isLoading = bool
+    this.isLoading = bool
   }
 
   @action openModal () {
-    return this.onBoardingModalOpen = true
+    this.onBoardingModalOpen = true
   }
 
   @action closeModal () {
-    return this.onBoardingModalOpen = false
+    this.onBoardingModalOpen = false
   }
 
   @action browserOpening () {
-    return this.browserState = "opening"
+    this.browserState = "opening"
   }
 
   @action browserOpened () {
-    return this.browserState = "opened"
+    this.browserState = "opened"
   }
 
   @action browserClosed () {
-    return this.browserState = "closed"
+    this.browserState = "closed"
   }
 
   @action setBrowsers (browsers = []) {
@@ -108,7 +108,7 @@ export default class Project {
       if (localStorage.getItem('chosenBrowser')) {
         this.setChosenBrowserByName(localStorage.getItem('chosenBrowser'))
       } else {
-        return this.setChosenBrowser(this.defaultBrowser)
+        this.setChosenBrowser(this.defaultBrowser)
       }
     }
   }
@@ -133,23 +133,23 @@ export default class Project {
     this.integrationFolder = config.integrationFolder
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
     this.fileServerFolder = config.fileServerFolder
-    return this.integrationExampleName = config.integrationExampleName
+    this.integrationExampleName = config.integrationExampleName
   }
 
   @action setResolvedConfig (resolved) {
-    return this.resolvedConfig = resolved
+    this.resolvedConfig = resolved
   }
 
   @action setError (err) {
-    return this.error = err
+    this.error = err
   }
 
   setChosenBrowserByName (name) {
     const browser = _.find(this.browsers, { name })
-    return this.setChosenBrowser(browser)
+    this.setChosenBrowser(browser)
   }
 
   @action clearError () {
-    return this.error = undefined
+    this.error = undefined
   }
 }
