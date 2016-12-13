@@ -122,9 +122,8 @@ class SetupProject extends Component {
                     />
                     <i className='fa fa-lock'></i>{' '}
                     <strong>Private</strong>
-                    <p>You choose who can see the project's builds.
-                      {/* needs to indicate that is free now, but will require paid account in future */}
-                      <small>(Requires paid Cypress account)</small>
+                    <p>You choose who can see the project's builds.<br/>
+                      <small className='text-muted'>(Free while in beta, but will require a paid account in the future)</small>
                     </p>
                   </label>
                 </div>
