@@ -14,12 +14,21 @@ CookieJar = tough.CookieJar
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
+getOriginalHeaders = (req = {}) ->
+  ## the request instance holds an instance
+  ## of the original ClientRequest
+  ## as the 'req' property which holds the
+  ## original headers
+  req.req?.headers ? req.headers
+
 pick = (resp = {}) ->
   req = resp.request ? {}
 
+  headers = getOriginalHeaders(req)
+
   {
     "Request Body":     req.body ? null
-    "Request Headers":  req.headers
+    "Request Headers":  headers
     "Request URL":      req.href
     "Response Body":    resp.body ? null
     "Response Headers": resp.headers
@@ -126,7 +135,7 @@ module.exports = (options = {}) ->
         ## normalize what is an ok status code
         statusText:     statusCode.getText(response.status)
         isOkStatusCode: statusCode.isOk(response.status)
-        requestHeaders: req.headers
+        requestHeaders: getOriginalHeaders(req)
         requestBody:    req.body
       })
 
