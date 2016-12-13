@@ -16,8 +16,8 @@ class Projects {
     return _.filter(this.projects, (project) => !project.isChosen)
   }
 
-  getProjectById (projectId) {
-    return _.find(this.projects, { id: projectId })
+  getProjectByClientId (clientId) {
+    return _.find(this.projects, { clientId })
   }
 
   addProject (path) {
@@ -37,12 +37,12 @@ class Projects {
   @action setProjects (projects) {
     // get the projects off of localStorage (with statuses)
     // and set them up so we don't have to wait for data from server
-    const localProjects = JSON.parse(localStorage.getItem('projects') || '[]')
+    // const localProjects = JSON.parse(localStorage.getItem('projects') || '[]')
     // index for quick lookup
-    const localProjectsIndex = _.keyBy(localProjects, 'id')
+    // const localProjectsIndex = _.keyBy(localProjects, 'id')
 
-    this.projects = _.map(projects, (project) => {
-      const props = _.extend(project, localProjectsIndex[project.id])
+    this.projects = _.map(projects, (props) => {
+      // const props = _.extend(project, localProjectsIndex[project.id])
       return new Project(props)
     })
 
@@ -57,10 +57,12 @@ class Projects {
     // merge projects received from api with what we
     // already have in memory
     _.each(this.projects, (project) => {
-      _.extend(project, projectsIndex[project.id])
+      project.update(projectsIndex[project.id])
     })
 
-    localStorage.setItem('projects', JSON.stringify(this.projects))
+    // TODO: need to serialize a project without transient properties
+    // also need to update localStorage when adding or removing projects
+    // localStorage.setItem('projects', JSON.stringify(this.projects))
   }
 
   @action setError (err) {
@@ -75,10 +77,12 @@ class Projects {
     project.isChosen = true
   }
 
-  @action removeProject (projectId) {
-    this.projects = _.filter(this.projects, (project) => {
-      return !(project.id === projectId)
-    })
+  @action removeProject (clientId) {
+    const projectIndex = _.findIndex(this.projects, { clientId })
+
+    if (projectIndex != null) {
+      this.projects.splice(projectIndex, 1)
+    }
   }
 }
 

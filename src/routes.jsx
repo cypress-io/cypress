@@ -64,7 +64,7 @@ const makeRoutes = (updating) => {
       <Route path='/' component={Application}>
         <IndexRedirect to='/projects' />
         <Route path='/projects' component={withUser(Projects)} />
-        <Route path='/projects/:id' component={withUser(Project)}>
+        <Route path='/projects/:clientId' component={withUser(Project)}>
           <IndexRedirect to='specs' />
           <Route path='specs' component={SpecsList} />
           <Route path='builds' component={Builds} />

@@ -26,7 +26,7 @@ class Project extends Component {
       <Link
         ref={(ref) => this.projectLink = ref}
         className={`project ${loadingClassName}`}
-        to={`/projects/${project.id}`}
+        to={`/projects/${project.clientId}`}
         >
         <div className='row-column-wrapper'>
           <div className='row-column'>

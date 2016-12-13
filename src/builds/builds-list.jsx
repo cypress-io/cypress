@@ -44,7 +44,7 @@ class Builds extends Component {
       !buildsCollection.isLoading &&
       !buildsCollection.error &&
       !buildsCollection.builds.length &&
-      this.props.project.projectId
+      this.props.project.id
     ) {
       getCiKeys().then((ciKeys = []) => {
         if (ciKeys.length) {
@@ -60,7 +60,7 @@ class Builds extends Component {
     if (!state.hasUser) {
 
       // AND they've never setup CI
-      if (!this.props.project.projectId) {
+      if (!this.props.project.id) {
         return <LoginThenSetupCI/>
 
       // OR they have setup CI
@@ -79,7 +79,7 @@ class Builds extends Component {
     if (!buildsCollection.builds.length) {
 
       // AND they've never setup CI
-      if (!this.props.project.projectId) {
+      if (!this.props.project.id) {
         return this._emptyWithoutSetup()
 
       // OR they have setup CI

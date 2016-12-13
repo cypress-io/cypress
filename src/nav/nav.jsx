@@ -38,7 +38,7 @@ export default class Nav extends Component {
   }
 
   _leftNavButton = () => {
-    if (this.props.params.id) {
+    if (this.props.params.clientId) {
       return (
         <Link
           to="/projects"
@@ -90,8 +90,7 @@ export default class Nav extends Component {
   }
 
   _closeProject = () => {
-    let projectId = this.props.params.id
-    closeProject(projectId)
+    closeProject(this.props.params.clientId)
   }
 
   _openDocs (e) {

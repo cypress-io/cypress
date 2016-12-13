@@ -86,9 +86,8 @@ describe "Projects List", ->
                 .contains(@firstProjectName).as("firstProject")
 
           it "navigates to project page", ->
-            cy
-              .get("@firstProject").click()
-              .location().its("hash").should("include", @projects[0].id)
+            cy.get("@firstProject").click()
+            cy.contains("Back to Projects")
 
         context "right click on project", ->
           beforeEach ->

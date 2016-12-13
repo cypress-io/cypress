@@ -43,7 +43,7 @@ export default class Browsers extends Component {
 
   _closeBrowser = (e) => {
     e.preventDefault()
-    closeBrowser(this.props.project.id)
+    closeBrowser(this.props.project.clientId)
   }
 
   _onSelect = (browser) => {

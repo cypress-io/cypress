@@ -81,13 +81,13 @@ const runSpec = (project, spec, browser, url) => {
 
 }
 
-const closeBrowser = (projectId) => {
+const closeBrowser = (clientId) => {
   specsCollection.setChosenSpec('')
 
   App.ipc('close:browser')
 
-  if (projectId) {
-    let project = projectsStore.getProjectById(projectId)
+  if (clientId) {
+    let project = projectsStore.getProjectByClientId(clientId)
     project.browserClosed()
   }
 
@@ -95,8 +95,8 @@ const closeBrowser = (projectId) => {
   return App.ipc.off('launch:browser')
 }
 
-const closeProject = (projectId) => {
-  closeBrowser(projectId)
+const closeProject = (clientId) => {
+  closeBrowser(clientId)
 
   // unbind listeners
   App.ipc.off('open:project')
@@ -116,8 +116,8 @@ const openProject = (project) => {
   })
 
   const changeConfig = action('config:changed', (config) => {
+    project.id = config.projectId
     project.setOnBoardingConfig(config)
-    project.setProjectId(config.projectId)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
   })
@@ -127,7 +127,7 @@ const openProject = (project) => {
       resolve = once(resolve)
 
       App.ipc("on:focus:tests", () => {
-        hashHistory.push(`projects/${project.id}/specs`)
+        hashHistory.push(`projects/${project.clientId}/specs`)
       })
 
       App.ipc("open:project", project.path, (err, config = {}) => {

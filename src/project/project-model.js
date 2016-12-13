@@ -16,6 +16,7 @@ const persistentProps = [
 
 export default class Project {
   @observable id
+  @observable clientId
   @observable path
   @observable isChosen = false
   @observable isLoading = false
@@ -27,7 +28,6 @@ export default class Project {
   @observable error
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
-  @observable projectId
   @observable name
   @observable public
   @observable orgName
@@ -36,16 +36,10 @@ export default class Project {
   @observable lastBuildCreatedAt
   @observable valid = true
 
-  constructor (project) {
-    // if the project has been setup, it may
-    // have a generated ID already, otherwise make
-    // an arbitrary one for the list.
-    if (project.id) {
-      this.id = project.id
-    } else {
-      this.id = md5(project.path)
-    }
-    this.path = project.path
+  constructor (props) {
+    this.path = props.path
+    this.clientId = md5(props.path)
+
     this.update(props)
   }
 
@@ -59,6 +53,8 @@ export default class Project {
     if (props[prop]) this[prop] = props[prop]
   }
 
+  serialize () {
+    return _.pick(this, persistentProps)
   }
 
   @computed get otherBrowsers () {
@@ -118,13 +114,7 @@ export default class Project {
       browser.isChosen = false
     })
     localStorage.setItem('chosenBrowser', browser.name)
-    return browser.isChosen = true
-  }
-
-  @action setProjectId (id) {
-    // we need to know if the server has setup an id
-    // and that it isn't just present on the front-end
-    this.projectId = id
+    browser.isChosen = true
   }
 
   @action setOnBoardingConfig (config) {

@@ -21,7 +21,7 @@ class MyContextMenu extends Component {
   }
 
   handleClick (e, project) {
-    projectsStore.removeProject(project.id)
+    projectsStore.removeProject(project.clientId)
 
     App.ipc("remove:project", project.path)
   }
@@ -42,7 +42,7 @@ export default class Projects extends Component {
         { this._error() }
         <ul className='projects-list list-as-table'>
           { _.map(projectsStore.projects, (project) => (
-            <li key={project.id} className='li'>
+            <li key={project.clientId} className='li'>
               <Project project={project} />
             </li>
           ))}
