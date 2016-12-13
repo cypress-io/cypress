@@ -103,21 +103,23 @@ describe "Projects List", ->
                 $el[0].dispatchEvent(e)
 
           it "displays 'remove project' dropdown", ->
-            cy
-              .get(".react-context-menu").should("be.visible")
+            cy.get(".react-context-menu").should("be.visible")
 
-          it "removes project on click of remove project", ->
-            cy
-              .get(".react-context-menu:visible")
-                .contains("Remove project").click()
-                  .should("not.exist")
-              .get("@firstProject").should("not.exist")
+          describe "clicking remove", ->
+            beforeEach ->
+              cy
+                .get(".react-context-menu:visible")
+                  .contains("Remove project").click()
 
-          it "calls remove:project to ipc", ->
-            cy
-              .get(".react-context-menu:visible")
-                .contains("Remove project").click().should ->
-                  expect(@App.ipc).to.be.calledWith("remove:project", "/Users/Jane/Projects/My-Fake-Project")
+            it "removes project", ->
+              cy.get("@firstProject").should("not.exist")
+
+            it "calls remove:project to ipc", ->
+              expect(@App.ipc).to.be.calledWith("remove:project", "/Users/Jane/Projects/My-Fake-Project")
+
+            it "updates localStorage cache", ->
+              @ipc.handle("remove:project").then ->
+                expect(JSON.parse(localStorage.projects || "[]").length).to.equal(7)
 
       describe "project statuses in list", ->
         beforeEach ->
@@ -193,39 +195,27 @@ describe "Projects List", ->
 
       describe "directory chosen", ->
         beforeEach ->
-          cy.get("nav").find(".fa-plus").click()
+          cy
+            .get("nav").find(".fa-plus").click()
+            .then ->
+              @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
 
         it "triggers ipc 'add:project' with directory", ->
-          cy
-            .then ->
-              @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
-            .then ->
-              expect(@App.ipc).to.be.calledWith("add:project")
+          expect(@App.ipc).to.be.calledWith("add:project")
 
         it "displays new project in list", ->
-          cy
-            .then ->
-              @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
-            .then ->
-              expect(@App.ipc).to.be.calledWith("add:project")
-            .get(".projects-list a:last").should("contain", "My-New-Project")
+          cy.get(".projects-list a:last").should("contain", "My-New-Project")
 
         it "no longer shows empty projects view", ->
-          cy
-            .then ->
-              @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
-            .then ->
-              expect(@App.ipc).to.be.calledWith("add:project")
-            .get(".empty").should("not.exist")
+          cy.get(".empty").should("not.exist")
 
         it "disables clicking onto project while loading", ->
-          @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
-
           cy.get(".project.loading").should("have.css", "pointer-events", "none")
 
         it "displays project loading icon", ->
-          @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
-
           cy
             .get(".project.loading").find(".fa")
-              .should("have.class", "fa-spinner")
+            .should("have.class", "fa-spinner")
+
+        it "updates localStorage cache", ->
+          expect(JSON.parse(localStorage.projects || "[]").length).to.equal(9)

@@ -129,7 +129,11 @@ describe "Builds List", ->
 
           describe "successfully submit form", ->
             beforeEach ->
-              @ipc.handle("setup:ci:project", null, {id: "project-id-123", public: true})
+              @ipc.handle("setup:ci:project", null, {
+                id: "project-id-123"
+                public: true
+                orgId: "000"
+              })
               @ipc.handle("get:ci:keys", null, [{id: "ci-key-123"}])
 
               cy
@@ -145,6 +149,9 @@ describe "Builds List", ->
 
             it "closes modal", ->
               cy.get(".modal").should("not.be.visible")
+
+            it "updates localStorage projects cache", ->
+              expect(JSON.parse(localStorage.projects || "[]")[0].orgName).to.equal("Jane Lane")
 
             it "displays empty builds page", ->
               cy.contains("Run Your First Build in CI")

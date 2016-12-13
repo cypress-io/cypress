@@ -1,3 +1,5 @@
+md5 = require("md5")
+
 describe "Config", ->
   beforeEach ->
     @firstProjectName = "My-Fake-Project"
@@ -116,7 +118,5 @@ describe "Config", ->
       cy
         .location().then (location) ->
           expect(location.href).to.include("projects")
-          expect(location.href).to.include(@projects[0].id)
+          expect(location.href).to.include(md5(@projects[0].path))
           expect(location.href).to.include("specs")
-
-

@@ -27,6 +27,7 @@ class Projects {
 
     const project = new Project(projectToAdd)
     this.projects.push(project)
+    this._saveToLocalStorage()
     return project
   }
 
@@ -37,12 +38,12 @@ class Projects {
   @action setProjects (projects) {
     // get the projects off of localStorage (with statuses)
     // and set them up so we don't have to wait for data from server
-    // const localProjects = JSON.parse(localStorage.getItem('projects') || '[]')
+    const localProjects = JSON.parse(localStorage.getItem('projects') || '[]')
     // index for quick lookup
-    // const localProjectsIndex = _.keyBy(localProjects, 'id')
+    const localProjectsIndex = _.keyBy(localProjects, 'id')
 
-    this.projects = _.map(projects, (props) => {
-      // const props = _.extend(project, localProjectsIndex[project.id])
+    this.projects = _.map(projects, (project) => {
+      const props = _.extend(project, localProjectsIndex[project.id])
       return new Project(props)
     })
 
@@ -60,9 +61,7 @@ class Projects {
       project.update(projectsIndex[project.id])
     })
 
-    // TODO: need to serialize a project without transient properties
-    // also need to update localStorage when adding or removing projects
-    // localStorage.setItem('projects', JSON.stringify(this.projects))
+    this._saveToLocalStorage()
   }
 
   @action setError (err) {
@@ -77,12 +76,26 @@ class Projects {
     project.isChosen = true
   }
 
+  updateProject (project, props) {
+    project.update(props)
+    this._saveToLocalStorage()
+  }
+
   @action removeProject (clientId) {
     const projectIndex = _.findIndex(this.projects, { clientId })
 
     if (projectIndex != null) {
       this.projects.splice(projectIndex, 1)
+      this._saveToLocalStorage()
     }
+  }
+
+  serializeProjects () {
+    return _.map(this.projects, (project) => project.serialize())
+  }
+
+  _saveToLocalStorage () {
+    localStorage.setItem('projects', JSON.stringify(this.serializeProjects()))
   }
 }
 

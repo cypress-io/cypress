@@ -50,7 +50,7 @@ export default class Project {
   }
 
   _updateProp (props, prop) {
-    if (props[prop]) this[prop] = props[prop]
+    if (props[prop] != null) this[prop] = props[prop]
   }
 
   serialize () {

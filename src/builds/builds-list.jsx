@@ -9,6 +9,7 @@ import state from '../lib/state'
 import buildsCollection from './builds-collection'
 import { getBuilds } from './builds-api'
 import { getCiKeys } from '../projects/projects-api'
+import projectsStore from '../projects/projects-store'
 import orgsStore from '../organizations/organizations-store'
 
 import Build from './builds-list-item'
@@ -113,11 +114,11 @@ class Builds extends Component {
   }
 
   @action _setProjectDetails = (projectDetails) => {
-    this.props.project.update({
+    projectsStore.updateProject(this.props.project, {
       id: projectDetails.id,
       name: projectDetails.projectName,
       public: projectDetails.public,
-      orgName: (orgsStore.getOrgById(projectDetails.public) || {}).name,
+      orgName: (orgsStore.getOrgById(projectDetails.orgId) || {}).name,
     })
   }
 
