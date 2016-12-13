@@ -141,3 +141,24 @@ describe "redirects + requests", ->
         failOnStatusCode: false
       })
       .its("status").should("eq", 500)
+
+  it "sets Accept header to */* by default", ->
+    cy
+      .request("http://localhost:2294/headers")
+      .its("body")
+      .its("headers")
+      .its("accept")
+      .should("eq", "*/*")
+
+  it "can override the accept header", ->
+    cy
+      .request({
+        url: "http://localhost:2294/headers"
+        headers: {
+          Accept: "text/html"
+        }
+      })
+      .its("body")
+      .its("headers")
+      .its("accept")
+      .should("eq", "text/html")

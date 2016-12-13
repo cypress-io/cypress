@@ -37,6 +37,11 @@ onServer2 = (app) ->
   app.post "/redirectPost", (req, res) ->
     res.redirect("/home")
 
+  app.get "/headers", (req, res) ->
+    res.json({
+      headers: req.headers
+    })
+
   app.post "/form", urlencodedParser, sendBackBody
 
   app.post "/json", jsonParser, sendBackBody
@@ -144,6 +149,7 @@ describe "e2e requests", ->
       expect(stdout).to.include("URL: http://localhost:2294/statusCode?code=503")
       expect(stdout).to.include("Headers: {\n")
       expect(stdout).to.include("user-agent")
+      expect(stdout).to.include("\"accept\": \"*/*\"")
       expect(stdout).to.include("The response we got was:")
       expect(stdout).to.include("Status: 503 - Service Unavailable")
       expect(stdout).to.include("x-powered-by\": \"Express\"")

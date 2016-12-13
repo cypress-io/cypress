@@ -253,6 +253,17 @@ module.exports = (options = {}) ->
       if ua = headers["user-agent"]
         options.headers["user-agent"] = ua
 
+      ## normalize case sensitivity
+      ## to be lowercase
+      if a = options.headers.Accept
+        delete options.headers.Accept
+        options.headers.accept = a
+
+      ## https://github.com/cypress-io/cypress/issues/338
+      _.defaults(options.headers, {
+        accept: "*/*"
+      })
+
       ## create a new jar instance
       ## unless its falsy or already set
       if options.jar is true
