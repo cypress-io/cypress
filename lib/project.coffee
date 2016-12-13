@@ -356,10 +356,11 @@ class Project extends EE
 
   createCiProject: (projectDetails) ->
     user.ensureSession()
-    .bind(@)
     .then (session) ->
       api.createProject(projectDetails, session)
-    .then(@writeProjectId)
+    .then (newProject) =>
+      @writeProjectId(newProject.id)
+      .return(newProject)
 
   getCiKeys: ->
     Promise.all([

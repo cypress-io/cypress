@@ -198,8 +198,6 @@ module.exports = {
         public: projectDetails.public
       }
     })
-    .promise()
-    .get("uuid")
 
   getProjectCiKeys: (projectId, session) ->
     rp.get({

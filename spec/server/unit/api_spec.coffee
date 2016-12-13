@@ -419,7 +419,10 @@ describe "lib/api", ->
         public: true
       })
       .reply(200, {
-        uuid: "uuid-123"
+        id: "id-123"
+        name: "foobar"
+        orgId: "org-id-123"
+        public: true
       })
 
       projectDetails = {
@@ -427,8 +430,13 @@ describe "lib/api", ->
         orgId: "org-id-123"
         public: true
       }
-      api.createProject(projectDetails, "session-123").then (uuid) ->
-        expect(uuid).to.eq("uuid-123")
+      api.createProject(projectDetails, "session-123").then (projectDetails) ->
+        expect(projectDetails).to.eql({
+          id: "id-123"
+          name: "foobar"
+          orgId: "org-id-123"
+          public: true
+        })
 
   context ".getProjectCiKeys", ->
     it "GET /projects/:id/keys + returns keys", ->

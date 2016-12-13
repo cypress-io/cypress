@@ -468,9 +468,10 @@ describe "lib/project", ->
   context "#createCiProject", ->
     beforeEach ->
       @project = Project("path/to/project")
-      @sandbox.stub(@project, "writeProjectId").resolves("uuid-123")
+      @sandbox.stub(@project, "writeProjectId").resolves("project-id-123")
       @sandbox.stub(user, "ensureSession").resolves("session-123")
-      @sandbox.stub(api, "createProject").resolves("uuid-123")
+      @newProject = { id: "project-id-123" }
+      @sandbox.stub(api, "createProject").resolves(@newProject)
 
     it "calls api.createProject with user session", ->
       @project.createCiProject({}).then ->
@@ -478,12 +479,11 @@ describe "lib/project", ->
 
     it "calls writeProjectId with id", ->
       @project.createCiProject({}).then =>
-        expect(@project.writeProjectId).to.be.calledWith("uuid-123")
-        expect(@project.writeProjectId).to.be.calledOn(@project)
+        expect(@project.writeProjectId).to.be.calledWith("project-id-123")
 
     it "returns project id", ->
       @project.createCiProject({}).then (projectId) =>
-        expect(projectId).to.equal("uuid-123")
+        expect(projectId).to.eql(@newProject)
 
   context "#getCiKeys", ->
     beforeEach ->
