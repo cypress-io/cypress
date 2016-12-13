@@ -129,7 +129,7 @@ describe "Builds List", ->
 
           describe "successfully submit form", ->
             beforeEach ->
-              @ipc.handle("setup:ci:project", null, "project-id-123")
+              @ipc.handle("setup:ci:project", null, {id: "project-id-123", public: true})
               @ipc.handle("get:ci:keys", null, [{id: "ci-key-123"}])
 
               cy
@@ -171,7 +171,7 @@ describe "Builds List", ->
 
           describe "when project is private", ->
             beforeEach ->
-              @ipc.handle("setup:ci:project", null, "project-id-123")
+              @ipc.handle("setup:ci:project", null, {id: "project-id-123", public: false})
               @ipc.handle("get:ci:keys", null, [{id: "ci-key-123"}])
               cy
                 .get("input[name=privacy-radio][value=false]")

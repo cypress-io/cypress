@@ -113,10 +113,12 @@ class Builds extends Component {
   }
 
   @action _setProjectDetails = (projectDetails) => {
-    this.props.project.setProjectId(projectDetails.projectId)
-    this.props.project.name = projectDetails.projectName
-    this.props.project.public = projectDetails.public
-    this.props.project.orgName = (orgsStore.getOrgById(projectDetails.public) || {}).name
+    this.props.project.update({
+      id: projectDetails.id,
+      name: projectDetails.projectName,
+      public: projectDetails.public,
+      orgName: (orgsStore.getOrgById(projectDetails.public) || {}).name,
+    })
   }
 
   _empty () {

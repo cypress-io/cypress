@@ -3,7 +3,16 @@ import md5 from 'md5'
 import { computed, observable, action } from 'mobx'
 import Browser from '../lib/browser-model'
 
-// const strLength = 75
+const persistentProps = [
+  'id',
+  'name',
+  'public',
+  'orgName',
+  'defaultOrg',
+  'lastBuildStatus',
+  'lastBuildCreatedAt',
+  'valid',
+]
 
 export default class Project {
   @observable id
@@ -37,14 +46,19 @@ export default class Project {
       this.id = md5(project.path)
     }
     this.path = project.path
+    this.update(props)
+  }
 
-    if (project.name) this.name = project.name
-    if (project.public != null) this.public = project.public
-    if (project.orgName) this.orgName = project.orgName
-    if (project.defaultOrg) this.defaultOrg = project.defaultOrg
-    if (project.lastBuildStatus) this.lastBuildStatus = project.lastBuildStatus
-    if (project.lastBuildCreatedAt) this.lastBuildCreatedAt = project.lastBuildCreatedAt
-    if (project.valid != null) this.valid = project.valid
+  update (props) {
+    _.each(persistentProps, (prop) => {
+      this._updateProp(props, prop)
+    })
+  }
+
+  _updateProp (props, prop) {
+    if (props[prop]) this[prop] = props[prop]
+  }
+
   }
 
   @computed get otherBrowsers () {

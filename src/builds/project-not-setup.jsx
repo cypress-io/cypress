@@ -61,9 +61,9 @@ export default class ProjectNotSetup extends Component {
   }
 
   _setupProject = (projectDetails) => {
-    App.ipc('setup:ci:project', projectDetails).then((projectId) => {
+    App.ipc('setup:ci:project', projectDetails).then((newProjectDetails) => {
       this._hideSetupProjectModal()
-      this.props.onSetup(_.extend({}, projectDetails, { projectId }))
+      this.props.onSetup(newProjectDetails)
     })
   }
 }
