@@ -333,6 +333,20 @@ describe "lib/electron/handlers/events", ->
         @handleEvent("get:project:statuses").then =>
           @expectSendErrCalledWith(err)
 
+    describe "get:project:status", ->
+      it "returns project returned by Project.getProjectStatus", ->
+        @sandbox.stub(Project, "getProjectStatus").resolves("project")
+
+        @handleEvent("get:project:status").then =>
+          @expectSendCalledWith("project")
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(Project, "getProjectStatus").rejects(err)
+
+        @handleEvent("get:project:status").then =>
+          @expectSendErrCalledWith(err)
+
     describe "add:project", ->
       it "adds project + returns arg", ->
         @sandbox.stub(Project, "add").withArgs("path/to/project").resolves()

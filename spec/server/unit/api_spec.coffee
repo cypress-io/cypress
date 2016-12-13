@@ -39,6 +39,19 @@ describe "lib/api", ->
       .then (ret) ->
         expect(ret).to.eql(projects)
 
+  context ".getProject", ->
+    it "GET /projects/:id + returns project", ->
+      project = { id: "id-123" }
+
+      nock("http://localhost:1234")
+      .matchHeader("x-session", "session-123")
+      .get("/projects/id-123")
+      .reply(200, project)
+
+      api.getProject("id-123", "session-123")
+      .then (ret) ->
+        expect(ret).to.eql(project)
+
   context ".getProjectBuilds", ->
     it "GET /projects/:id/builds + returns builds", ->
       builds = []

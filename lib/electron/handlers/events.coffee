@@ -182,6 +182,11 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .then(send)
       .catch(sendErr)
 
+    when "get:project:status"
+      Project.getProjectStatus(arg)
+      .then(send)
+      .catch(sendErr)
+
     when "add:project"
       Project.add(arg)
       .then -> send(arg)

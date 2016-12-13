@@ -404,6 +404,17 @@ class Project extends EE
           clientProject.valid = false
           return clientProject
 
+  @getProjectStatus = (clientProject) ->
+    user.ensureSession()
+    .then (session) ->
+      api.getProject(clientProject.id, session)
+    .then (project) ->
+      return _.extend(clientProject, project)
+    .catch ->
+      ## no matching project found
+      clientProject.valid = false
+      return clientProject
+
   @remove = (path) ->
     cache.removeProject(path)
 

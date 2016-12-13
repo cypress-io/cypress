@@ -632,6 +632,45 @@ describe "lib/project", ->
           valid: false
         })
 
+  context ".getProjectStatus", ->
+    beforeEach ->
+      @clientProject = {
+        id: "id-123",
+        path: "/path/to/project"
+      }
+      @sandbox.stub(user, "ensureSession").resolves("session-123")
+
+    it "gets project from api", ->
+      @sandbox.stub(api, "getProject").resolves([])
+
+      Project.getProjectStatus(@clientProject)
+      .then ->
+        expect(api.getProject).to.have.been.calledWith("id-123", "session-123")
+
+    it "returns project merged with details", ->
+      @sandbox.stub(api, "getProject").resolves({
+        lastBuildStatus: "passing"
+      })
+
+      Project.getProjectStatus(@clientProject)
+      .then (project) =>
+        expect(project).to.eql({
+          id: "id-123"
+          path: "/path/to/project"
+          lastBuildStatus: "passing"
+        })
+
+    it "marks project as valid: false if there is no matching api project", ->
+      @sandbox.stub(api, "getProject").rejects()
+
+      Project.getProjectStatus(@clientProject)
+      .then (project) =>
+        expect(project).to.eql({
+          id: "id-123"
+          path: "/path/to/project"
+          valid: false
+        })
+
   context ".removeIds", ->
     beforeEach ->
       @sandbox.stub(ids, "remove").resolves({})
