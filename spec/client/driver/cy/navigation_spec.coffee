@@ -797,14 +797,27 @@ describe "$Cypress.Cy Navigation Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include("cy.visit() failed trying to load:")
-          expect(err.message).to.include("/foo.html")
-          expect(err.message).to.include("We attempted to make an http request")
-          expect(err.message).to.include("We received this error at the network level:")
-          expect(err.message).to.include("connect ECONNREFUSED 127.0.0.1:64646")
-          expect(err.message).to.include("Common situations why this would fail:")
-          expect(err.message).to.include("The stack trace for this error is:")
-          expect(err.message).to.include("some stack props")
+          expect(err.message).to.include("""
+            cy.visit() failed trying to load:
+
+            /foo.html
+
+            We attempted to make an http request to this URL but the request failed without a response.
+
+            We received this error at the network level:
+
+              > Error: connect ECONNREFUSED 127.0.0.1:64646
+
+            Common situations why this would fail:
+              - you don't have internet access
+              - you forgot to run / boot your web server
+              - your web server isn't accessible
+              - you have weird network configuration settings on your computer
+
+            The stack trace for this error is:
+
+            some stack props
+          """)
           expect(err1.url).to.include("/foo.html")
           expect(trigger).to.be.calledWith("visit:failed", err1)
           expect(logs.length).to.eq(1)
@@ -838,12 +851,19 @@ describe "$Cypress.Cy Navigation Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include("cy.visit() failed trying to load:")
-          expect(err.message).to.include("/foo.html")
-          expect(err.message).to.include("We failed looking for this file at the path:")
-          expect(err.message).to.include("/path/to/foo.html")
-          expect(err.message).to.include("The internal Cypress web server responded with:")
-          expect(err.message).to.include("  > 404: Not Found")
+          expect(err.message).to.include("""
+            cy.visit() failed trying to load:
+
+            /foo.html
+
+            We failed looking for this file at the path:
+
+            /path/to/foo.html
+
+            The internal Cypress web server responded with:
+
+              > 404: Not Found
+          """)
           expect(trigger).to.be.calledWithMatch("visit:failed", obj)
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
@@ -878,14 +898,23 @@ describe "$Cypress.Cy Navigation Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include("cy.visit() failed trying to load:")
-          expect(err.message).to.include("/bar")
-          expect(err.message).to.include("We failed looking for this file at the path:")
-          expect(err.message).to.include("/path/to/bar/")
-          expect(err.message).to.include("The internal Cypress web server responded with:")
-          expect(err.message).to.include("  > 404: Not Found")
-          expect(err.message).to.include("We were redirected '1' time to:")
-          expect(err.message).to.include("  - 301: http://localhost:3500/bar/")
+          expect(err.message).to.include("""
+            cy.visit() failed trying to load:
+
+            /bar
+
+            We failed looking for this file at the path:
+
+            /path/to/bar/
+
+            The internal Cypress web server responded with:
+
+              > 404: Not Found
+
+            We were redirected '1' time to:
+
+              - 301: http://localhost:3500/bar/
+          """)
           expect(trigger).to.be.calledWithMatch("visit:failed", obj)
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
@@ -917,11 +946,17 @@ describe "$Cypress.Cy Navigation Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include("cy.visit() failed trying to load:")
-          expect(err.message).to.include("https://google.com/foo")
-          expect(err.message).to.include("The response we received from your web server was:")
-          expect(err.message).to.include("  > 500: Server Error")
-          expect(err.message).to.include("This was considered a failure because the status code was not '2xx'.")
+          expect(err.message).to.include("""
+            cy.visit() failed trying to load:
+
+            https://google.com/foo
+
+            The response we received from your web server was:
+
+              > 500: Server Error
+
+            This was considered a failure because the status code was not '2xx'.
+          """)
           expect(trigger).to.be.calledWithMatch("visit:failed", obj)
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
@@ -956,14 +991,22 @@ describe "$Cypress.Cy Navigation Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include("cy.visit() failed trying to load:")
-          expect(err.message).to.include("https://google.com/foo")
-          expect(err.message).to.include("The response we received from your web server was:")
-          expect(err.message).to.include("  > 401: Unauthorized")
-          expect(err.message).to.include("This was considered a failure because the status code was not '2xx'.")
-          expect(err.message).to.include("This http request was redirected '2' times to:")
-          expect(err.message).to.include("  - 302: https://google.com/bar/")
-          expect(err.message).to.include("  - 301: https://gmail.com/")
+          expect(err.message).to.include("""
+            cy.visit() failed trying to load:
+
+            https://google.com/foo
+
+            The response we received from your web server was:
+
+              > 401: Unauthorized
+
+            This was considered a failure because the status code was not '2xx'.
+
+            This http request was redirected '2' times to:
+
+              - 302: https://google.com/bar/
+              - 301: https://gmail.com/
+          """)
           expect(trigger).to.be.calledWithMatch("visit:failed", obj)
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
@@ -994,13 +1037,21 @@ describe "$Cypress.Cy Navigation Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include("cy.visit() failed trying to load:")
-          expect(err.message).to.include("https://google.com/foo")
-          expect(err.message).to.include("The content-type of the response we received from your web server was:")
-          expect(err.message).to.include("  > application/json")
-          expect(err.message).to.include("This was considered a failure because responses must have content-type: 'text/html'")
-          expect(err.message).to.include("However, you can likely use cy.request() instead of cy.visit().")
-          expect(err.message).to.include("cy.request() will automatically get and set cookies and enable you to parse responses.")
+          expect(err.message).to.include("""
+            cy.visit() failed trying to load:
+
+            https://google.com/foo
+
+            The content-type of the response we received from your web server was:
+
+              > application/json
+
+            This was considered a failure because responses must have content-type: 'text/html'
+
+            However, you can likely use cy.request() instead of cy.visit().
+
+            cy.request() will automatically get and set cookies and enable you to parse responses.
+          """)
           expect(trigger).to.be.calledWithMatch("visit:failed", obj)
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
@@ -1032,13 +1083,21 @@ describe "$Cypress.Cy Navigation Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.include("cy.visit() failed trying to load:")
-          expect(err.message).to.include("https://google.com/foo")
-          expect(err.message).to.include("The content-type of the response we received from this local file was:")
-          expect(err.message).to.include("  > application/json")
-          expect(err.message).to.include("This was considered a failure because responses must have content-type: 'text/html'")
-          expect(err.message).to.include("However, you can likely use cy.request() instead of cy.visit().")
-          expect(err.message).to.include("cy.request() will automatically get and set cookies and enable you to parse responses.")
+          expect(err.message).to.include("""
+            cy.visit() failed trying to load:
+
+            https://google.com/foo
+
+            The content-type of the response we received from this local file was:
+
+              > application/json
+
+            This was considered a failure because responses must have content-type: 'text/html'
+
+            However, you can likely use cy.request() instead of cy.visit().
+
+            cy.request() will automatically get and set cookies and enable you to parse responses.
+          """)
           expect(trigger).to.be.calledWithMatch("visit:failed", obj)
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
@@ -1175,4 +1234,3 @@ describe "$Cypress.Cy Navigation Commands", ->
 
             null
           .wait(2000)
-
