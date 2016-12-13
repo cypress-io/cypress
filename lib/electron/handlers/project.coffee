@@ -104,7 +104,8 @@ module.exports = {
       .catch(options.onError)
 
     get = ->
-      openProject.getConfig()
+      Promise.try ->
+        openProject.getConfig()
       .then (cfg) ->
         files.getTestFiles(cfg)
 
