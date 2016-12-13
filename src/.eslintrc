@@ -12,7 +12,12 @@
     }
   },
   "plugins": [
+    "import",
     "react"
+  ],
+  "extends": [
+    "plugin:import/errors",
+    "plugin:import/warnings"
   ],
   "rules": {
     "array-bracket-spacing": ["error", "never"],
