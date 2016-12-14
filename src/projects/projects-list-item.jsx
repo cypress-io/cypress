@@ -6,6 +6,8 @@ import { Link } from 'react-router'
 import { observer } from 'mobx-react'
 import { ContextMenuLayer } from 'react-contextmenu'
 
+import { getStatusIcon } from '../lib/utils'
+
 const strLength = 45
 
 @observer
@@ -116,13 +118,9 @@ class Project extends Component {
     const status = this.props.project.lastBuildStatus
     if (!status) return
 
-    const statuses = { passing: 'check-circle', failing: 'exclamation-circle', running: 'refresh fa-spin' }
-
-    const iconClass = statuses[status] || ''
-
     return (
       <span className={`${status}`}>
-        <i className={`fa fa-${iconClass}`}></i>{' '}
+        <i className={`fa ${status} fa-${getStatusIcon(status)}`}></i>{' '}
         {_.startCase(status)}
       </span>
     )

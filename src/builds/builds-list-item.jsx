@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 
 import App from '../lib/app'
 
-import { osIcon, browserIcon, commitEmailHash, getStatusIcon } from './utils'
+import { osIcon, browserIcon, commitEmailHash, getStatusIcon } from '../lib/utils'
 
 export default class BuildsListItem extends Component {
   render () {
