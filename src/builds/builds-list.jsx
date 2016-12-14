@@ -49,7 +49,6 @@ class Builds extends Component {
     ) {
       getCiKeys().then((ciKeys = []) => {
         if (ciKeys.length) {
-          this.setState({ ciKey: ciKeys[0].id })
         }
       })
     }
@@ -70,11 +69,16 @@ class Builds extends Component {
       }
     }
 
-    // OR the build is still loading
+    // OR the builds are still loading
     if (buildsCollection.isLoading) return <Loader color='#888' scale={0.5}/>
 
     // OR they are not authorized to see builds
     if (buildsCollection.error && (buildsCollection.error.statusCode === 401)) return <PermissionMessage />
+
+    // OR the project is invalid
+    if (!this.props.project.valid) {
+      return this._emptyWithoutSetup()
+    }
 
     // OR there are no builds to show
     if (!buildsCollection.builds.length) {
