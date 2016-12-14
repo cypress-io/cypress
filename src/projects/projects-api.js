@@ -39,9 +39,16 @@ const addProject = () => {
       App.ipc('add:project', path),
       Promise.delay(750),
     ])
-    .then(() => {
-      return project.loading(false)
-    })
+    .spread(action('project:added', (clientProjectDetails) => {
+      project.loading(false)
+
+      if (clientProjectDetails.id != null) {
+        return App.ipc('get:project:status', clientProjectDetails)
+        .then(action('project:status:received', (projectDetails) => {
+          project.update(projectDetails)
+        }))
+      }
+    }))
   }))
   .catch((err) => {
     projectsStore.setError(err.message)

@@ -219,3 +219,46 @@ describe "Projects List", ->
 
         it "updates localStorage cache", ->
           expect(JSON.parse(localStorage.projects || "[]").length).to.equal(9)
+
+        it "does not call ipc 'get:project:status'", ->
+          cy.wait(1000).then =>
+            expect(@App.ipc).not.to.be.calledWith("get:project:status")
+
+    describe "add project that has id", ->
+      beforeEach ->
+        @ipc.handle("get:projects", null, [])
+
+        cy.get("nav").find(".fa-plus").click()
+        .then ->
+          @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
+        .then ->
+          @ipc.handle("add:project", null, {
+            id: "id-123"
+            path: "/Users/Jane/Projects/My-New-Project"
+          })
+        .wait(1000)
+
+      it "calls ipc 'get:project:status'", ->
+        expect(@App.ipc).to.be.calledWith("get:project:status", {
+          id: "id-123"
+          path: "/Users/Jane/Projects/My-New-Project"
+        })
+
+      describe "when 'get:project:status' returns project details", ->
+        beforeEach ->
+          @ipc.handle("get:project:status", null, {
+            id: "id-123"
+            path: "/Users/Jane/Projects/My-New-Project"
+            lastBuildStatus: "passing"
+            public: true
+          })
+
+        it "displays public label", ->
+          cy
+            .get(".projects-list>li").first()
+            .contains("Public")
+
+        it "displays status", ->
+          cy
+            .get(".projects-list>li").first()
+            .contains("Passing")
