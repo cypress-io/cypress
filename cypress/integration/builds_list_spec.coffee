@@ -239,6 +239,9 @@ describe "Builds List", ->
 
       context "having previously setup CI", ->
         beforeEach ->
+          cy
+            .get(".projects-list a")
+              .contains("My-Fake-Project").click()
           @ipc.handle("get:builds", null, [])
           cy
             .fixture("config").then (@config) ->
