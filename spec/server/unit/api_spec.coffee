@@ -45,6 +45,7 @@ describe "lib/api", ->
 
       nock("http://localhost:1234")
       .matchHeader("x-session", "session-123")
+      .matchHeader("x-route-version", "2")
       .get("/projects/id-123")
       .reply(200, project)
 

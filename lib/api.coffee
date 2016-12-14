@@ -71,6 +71,7 @@ module.exports = {
       json: true
       headers: {
         "x-session": session
+        "x-route-version": "2"
       }
     })
 
