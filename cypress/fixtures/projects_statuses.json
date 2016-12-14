@@ -11,7 +11,8 @@
     "updatedAt": "2016-04-12T18:43:56+00:00",
     "ownerId": 123,
     "orgId": 829,
-    "hoursUsed": 14.75
+    "hoursUsed": 14.75,
+    "valid": true
   },
   {
     "path": "/Users/Jane/Projects/My-Other-Fake-Project"
@@ -29,7 +30,8 @@
     "updatedAt": "2016-04-12T18:43:56+00:00",
     "ownerId": 123,
     "orgId": 829,
-    "hoursUsed": 14.75
+    "hoursUsed": 14.75,
+    "valid": true
   },
   {
     "id": "d789712jdha0wef082h98ha-8f98h3",
@@ -44,7 +46,8 @@
     "updatedAt": "2016-04-12T18:43:56+00:00",
     "ownerId": 123,
     "orgId": 829,
-    "hoursUsed": 14.75
+    "hoursUsed": 14.75,
+    "valid": true
   },
   {
     "id": "2289712jdha0wef082h98ha-8f98h3",
@@ -59,7 +62,8 @@
     "updatedAt": "2016-04-12T18:43:56+00:00",
     "ownerId": 123,
     "orgId": 829,
-    "hoursUsed": 14.75
+    "hoursUsed": 14.75,
+    "valid": true
   },
   {
     "path": "/Users/Jane/Projects/project3"
