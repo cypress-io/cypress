@@ -27,18 +27,11 @@ export default class ProjectNotSetup extends Component {
     return (
       <div id='builds-list-page'>
         <div className="empty">
-          <h4>
-            Getting Started with CI
-          </h4>
-          <p>Run Cypress tests on any <a href='#'>Continuous Integration provider</a>.</p>
-          <p>Then see each build's data, screenshots, and video recording.</p>
-          <button
-            className='btn btn-primary'
-            onClick={this._showSetupProjectModal}
-            >
-            <i className='fa fa-wrench'></i>{' '}
-            Setup Project for CI
-          </button>
+          {
+            this.props.project.valid ?
+              <div>{this._getStartedWithCI()}</div> :
+              <div>{this._invalidProject()}</div>
+          }
         </div>
         <SetupProject
           project={this.props.project}
@@ -46,6 +39,45 @@ export default class ProjectNotSetup extends Component {
           onConfirm={this._setupProject}
           onHide={this._hideSetupProjectModal}
         />
+      </div>
+    )
+  }
+
+  _getStartedWithCI () {
+    return (
+      <div>
+        <h4>Getting Started with CI</h4>
+        <button
+          className='btn btn-primary'
+          onClick={this._showSetupProjectModal}
+          >
+          <i className='fa fa-wrench'></i>{' '}
+          Setup Project for CI
+        </button>
+      </div>
+    )
+  }
+
+  _invalidProject () {
+    return (
+      <div>
+        <h4>
+          <i className='fa fa-warning errored'></i>{' '}
+          Builds Cannot Be Displayed
+        </h4>
+        <p>We were unable to find an existing project matching the <code>projectId</code> in your <code>cypress.json</code>.</p>
+        <p>To see builds for a current project, add the correct <code>projectId</code> to your <code>cypress.json</code></p>
+        <p>- or -</p>
+        <button
+          className='btn btn-warning'
+          onClick={this._showSetupProjectModal}
+          >
+          <i className='fa fa-wrench'></i>{' '}
+          Setup a New Project for CI
+        </button>
+        <p>
+          <small>The new project will have no previous build data.</small>
+        </p>
       </div>
     )
   }

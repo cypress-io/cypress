@@ -78,3 +78,11 @@
 .fa.red {
   color: $red-primary;
 }
+
+i.errored { color: #F5A327;}
+i.failed { color: #ec6573;}
+i.noTests { color: #F5A327;}
+i.passed { color: #1CB77E;}
+i.running { color: #428BCA;}
+i.overLimit { color: #F5A327;}
+i.timedOut { color: #F5A327;}

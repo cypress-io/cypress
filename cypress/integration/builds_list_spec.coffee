@@ -39,16 +39,20 @@ describe "Builds List", ->
   context "with a current user", ->
     beforeEach ->
       cy
+        .fixture("browsers").as("browsers")
         .fixture("user").then (@user) ->
           @ipc.handle("get:current:user", null, @user)
         .fixture("projects").then (@projects) ->
           @ipc.handle("get:projects", null, @projects)
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
-        .fixture("browsers").as("browsers")
+        .fixture("projects_statuses").then (@projects_statuses) =>
+          @ipc.handle("get:project:statuses", null, @projects_statuses)
+
 
     describe "permissions error", ->
       beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
         @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 401}, null)
         cy
           .fixture("config").then (@config) ->
@@ -69,9 +73,36 @@ describe "Builds List", ->
           cy
             .get(".modal").should("be.visible")
 
+    describe "invalid project", ->
+      beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("project5").click()
+        @ipc.handle("get:builds", null, [])
+        cy
+          .fixture("config").then (@config) ->
+            @config.projectId = null
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+          .get(".nav a").contains("Builds").click()
+
+      it "displays empty message", ->
+        cy.contains("Builds Cannot Be Displayed")
+
+      it "clicking link opens setup project window", ->
+        cy
+          .fixture("organizations").as("orgs").then ->
+            @ipc.handle("get:orgs", null, @orgs)
+          .get(".btn").contains("Setup a New Project for CI").click()
+          .get(".modal").should("be.visible")
+
     describe "no builds", ->
       context "having never setup CI", ->
         beforeEach ->
+          cy
+            .get(".projects-list a")
+              .contains("My-Fake-Project").click()
           @ipc.handle("get:builds", null, [])
           cy
             .fixture("config").then (@config) ->
@@ -157,7 +188,6 @@ describe "Builds List", ->
               cy.contains("Run Your First Build in CI")
 
             describe "welcome page", ->
-
               it "displays command to run with the ci key", ->
                 cy.contains("cypress ci ci-key-123")
 
@@ -209,6 +239,9 @@ describe "Builds List", ->
 
       context "having previously setup CI", ->
         beforeEach ->
+          cy
+            .get(".projects-list a")
+              .contains("My-Fake-Project").click()
           @ipc.handle("get:builds", null, [])
           cy
             .fixture("config").then (@config) ->
@@ -222,6 +255,9 @@ describe "Builds List", ->
 
     describe "list builds", ->
       beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
         @ipc.handle("get:builds", null, @builds)
         cy
           .fixture("config").then (@config) ->
@@ -242,6 +278,8 @@ describe "Builds List", ->
           @ipc.handle("get:current:user", null, {})
         .fixture("projects").then (@projects) ->
           @ipc.handle("get:projects", null, @projects)
+        .fixture("projects_statuses").then (@projects_statuses) =>
+          @ipc.handle("get:project:statuses", null, @projects_statuses)
         .get(".projects-list a")
           .contains("My-Fake-Project").click()
         .fixture("browsers").as("browsers")
