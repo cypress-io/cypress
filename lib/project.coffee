@@ -398,7 +398,7 @@ class Project extends EE
 
         if project = projectsIndex[clientProject.id]
           ## merge in details for matching project
-          return _.extend(clientProject, project)
+          return _.extend(clientProject, project, {valid: true})
         else
           ## project has id, but no matching project found
           clientProject.valid = false
