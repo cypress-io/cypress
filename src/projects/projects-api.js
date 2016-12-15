@@ -23,6 +23,19 @@ const getProjects = () => {
   }))
 }
 
+const pollProjects = () => {
+  return setInterval(() => {
+    App.ipc('get:project:statuses', projectsStore.clientProjects)
+    .then((projects = []) => {
+      projectsStore.setProjectStatuses(projects)
+    })
+  }, 5000)
+}
+
+const stopPollingProjects = (pollId) => {
+  clearInterval(pollId)
+}
+
 const addProject = () => {
   let project
   return App.ipc('show:directory:dialog')
@@ -177,6 +190,8 @@ const getCiKeys = () => {
 
 export {
   getProjects,
+  pollProjects,
+  stopPollingProjects,
   openProject,
   closeProject,
   addProject,

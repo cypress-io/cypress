@@ -16,6 +16,10 @@ class Projects {
     return _.filter(this.projects, (project) => !project.isChosen)
   }
 
+  @computed get clientProjects () {
+    return _.map(this.projects, (project) => _.pick(project, ['path', 'id']))
+  }
+
   getProjectByClientId (clientId) {
     return _.find(this.projects, { clientId })
   }

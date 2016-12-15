@@ -48,7 +48,7 @@ describe "Projects List", ->
       it "has status in projects list", ->
         cy
           .get(".projects-list>li").first()
-          .contains("Passing")
+          .contains("Passed")
 
     describe "lists projects", ->
       beforeEach ->
@@ -146,12 +146,36 @@ describe "Projects List", ->
         it "displays status", ->
           cy
             .get(".projects-list>li").first()
-            .contains("Passing")
+            .contains("Passed")
 
         it "displays invalid status if invalid", ->
           cy
             .get(".projects-list>li").last()
             .contains("Invalid")
+
+    describe "polling project statuses", ->
+      beforeEach ->
+        cy
+          .window().then (win) =>
+            @clock = win.sinon.useFakeTimers()
+          .fixture("projects").then (@projects) ->
+            @ipc.handle("get:projects", null, @projects)
+          .fixture("projects_statuses").then (@projects_statuses) =>
+            @ipc.handle("get:project:statuses", null, @projects_statuses)
+
+      afterEach ->
+        @clock.restore()
+
+      it "updates project statuses every 5 seconds", ->
+        @clock.tick(5000)
+        expect(@App.ipc).to.be.calledWith("get:project:statuses")
+
+        @projects_statuses[0].lastBuildStatus = "failed"
+        @ipc.handle("get:project:statuses", null, @projects_statuses)
+
+        cy
+          .get(".projects-list>li").first()
+          .contains("Failed")
 
     describe "add project", ->
       beforeEach ->
@@ -249,7 +273,7 @@ describe "Projects List", ->
           @ipc.handle("get:project:status", null, {
             id: "id-123"
             path: "/Users/Jane/Projects/My-New-Project"
-            lastBuildStatus: "passing"
+            lastBuildStatus: "passed"
             public: true
           })
 
@@ -261,4 +285,4 @@ describe "Projects List", ->
         it "displays status", ->
           cy
             .get(".projects-list>li").first()
-            .contains("Passing")
+            .contains("Passed")
