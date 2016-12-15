@@ -304,6 +304,45 @@ describe "Builds List", ->
           .get(".builds-list li")
           .should("have.length", 4)
 
+      it "displays build status icon", ->
+        cy
+          .get(".builds-list li").first().find("> div")
+          .should("have.class", "running")
+
+    describe "polling builds", ->
+      beforeEach ->
+        cy
+          .window().then (win) =>
+            @clock = win.sinon.useFakeTimers()
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
+          .fixture("config").then (@config) ->
+            @ipc.handle("open:project", null, @config)
+            @clock.tick(1000)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+            @clock.tick(1000)
+          .get(".nav a").contains("Builds").click()
+          .then =>
+            @ipc.handle("get:builds", null, @builds)
+            @clock.tick(1000)
+
+      afterEach ->
+        @clock.restore()
+
+      it "updates builds every 5 seconds", ->
+        cy
+          .get(".builds-list li").first().find("> div")
+          .should("have.class", "running")
+          .then =>
+            @clock.tick(5000)
+            expect(@App.ipc).to.be.calledWith("get:builds")
+
+            @builds[0].status = "passed"
+            @ipc.handle("get:builds", null, @builds)
+          .get(".builds-list li").first().find("> div")
+          .should("have.class", "passed")
+
   context "without a current user", ->
     beforeEach ->
       cy

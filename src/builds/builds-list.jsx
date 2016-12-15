@@ -8,7 +8,7 @@ import App from '../lib/app'
 import state from '../lib/state'
 import buildsCollection from './builds-collection'
 import errors from '../lib/errors'
-import { getBuilds } from './builds-api'
+import { getBuilds, pollBuilds, stopPollingBuilds } from './builds-api'
 import { getCiKeys } from '../projects/projects-api'
 import projectsStore from '../projects/projects-store'
 import orgsStore from '../organizations/organizations-store'
@@ -34,11 +34,16 @@ class Builds extends Component {
 
   componentWillMount () {
     getBuilds()
+    this.pollId = pollBuilds()
     this._getCiKey()
   }
 
   componentDidUpdate () {
     this._getCiKey()
+  }
+
+  componentWillUnmount () {
+    stopPollingBuilds(this.pollId)
   }
 
   _getCiKey () {
