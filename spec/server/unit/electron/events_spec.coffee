@@ -439,12 +439,34 @@ describe "lib/electron/handlers/events", ->
         @handleEvent("get:builds").then =>
           @expectSendCalledWith([])
 
-      it "catches errors", ->
+      it "sends UNAUTHENTICATED when statusCode is 401", ->
         err = new Error("foo")
+        err.statusCode = 401
         @sandbox.stub(project, "getBuilds").rejects(err)
 
         @handleEvent("get:builds").then =>
-          @expectSendErrCalledWith(err)
+          expect(@send).to.be.calledWith("response")
+          expect(@send.firstCall.args[1].__error.type).to.equal("UNAUTHENTICATED")
+
+      it "sends TIMED_OUT when cause.code is ESOCKETTIMEDOUT", ->
+        err = new Error("foo")
+        err.cause = { code: "ESOCKETTIMEDOUT" }
+        @sandbox.stub(project, "getBuilds").rejects(err)
+
+        @handleEvent("get:builds").then =>
+          expect(@send).to.be.calledWith("response")
+          expect(@send.firstCall.args[1].__error.type).to.equal("TIMED_OUT")
+
+      it "sends UNKNOWN + name,message,stack for other errors", ->
+        err = new Error("foo")
+        err.name = "name"
+        err.message = "message"
+        err.stack = "stack"
+        @sandbox.stub(project, "getBuilds").rejects(err)
+
+        @handleEvent("get:builds").then =>
+          expect(@send).to.be.calledWith("response")
+          expect(@send.firstCall.args[1].__error.type).to.equal("UNKNOWN")
 
     describe "setup:ci:project", ->
       it "returns result of project.createCiProject", ->

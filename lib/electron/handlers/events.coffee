@@ -253,7 +253,16 @@ handleEvent = (options, bus, event, id, type, arg) ->
     when "get:builds"
       project.getBuilds()
       .then(send)
-      .catch(sendErr)
+      .catch (err) ->
+        err.type = if _.get(err, "statusCode") is 401
+          "UNAUTHENTICATED"
+        else if _.get(err, "cause.code") is "ESOCKETTIMEDOUT"
+          "TIMED_OUT"
+        else
+          console.log(err.statusCode)
+          "UNKNOWN"
+
+        sendErr(err)
 
     else
       throw new Error("No ipc event registered for: '#{type}'")

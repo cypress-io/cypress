@@ -66,6 +66,28 @@ describe "lib/api", ->
       .then (ret) ->
         expect(ret).to.eql(builds)
 
+    it "handles timeouts", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-session", "session-123")
+      .get("/projects/id-123/builds")
+      .socketDelay(5000)
+      .reply(200, [])
+
+      api.getProjectBuilds("id-123", "session-123", {timeout: 100})
+      .then (ret) ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
+
+    it "sets timeout to 10 seconds", ->
+      @sandbox.stub(rp, "get").returns({
+        then: (fn) -> fn()
+      })
+
+      api.getProjectBuilds("id-123", "session-123")
+      .then (ret) ->
+        expect(rp.get).to.be.calledWithMatch({timeout: 10000})
+
   context ".ping", ->
     it "GET /ping", ->
       nock("http://localhost:1234")
