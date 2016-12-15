@@ -53,7 +53,7 @@ describe "Builds List", ->
         cy
           .get(".projects-list a")
             .contains("My-Fake-Project").click()
-        @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 401}, null)
+        @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "UNAUTHENTICATED"}, null)
         cy
           .fixture("config").then (@config) ->
             @ipc.handle("open:project", null, @config)
@@ -72,6 +72,39 @@ describe "Builds List", ->
         it "opens modal on click of request access", ->
           cy
             .get(".modal").should("be.visible")
+
+    describe "timed out error", ->
+      beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
+        @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "TIMED_OUT"}, null)
+        cy
+          .fixture("config").then (@config) ->
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+          .get(".nav a").contains("Builds").click()
+
+      it "displays timed out message", ->
+        cy.contains("timed out")
+
+    describe "unexpected error", ->
+      beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
+        @ipc.handle("get:builds", {name: "foo", stack: "There's an error", type: "UNKNOWN"}, null)
+        cy
+          .fixture("config").then (@config) ->
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+          .get(".nav a").contains("Builds").click()
+
+      it "displays unexpected error message", ->
+        cy.contains("unexpected error")
+        cy.contains("There's an error")
 
     describe "invalid project", ->
       beforeEach ->

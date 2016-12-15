@@ -7,12 +7,14 @@ import Loader from 'react-loader'
 import App from '../lib/app'
 import state from '../lib/state'
 import buildsCollection from './builds-collection'
+import errors from '../lib/errors'
 import { getBuilds } from './builds-api'
 import { getCiKeys } from '../projects/projects-api'
 import projectsStore from '../projects/projects-store'
 import orgsStore from '../organizations/organizations-store'
 
 import Build from './builds-list-item'
+import ErrorMessage from './error-message'
 import LoginThenSetupCI from './login-then-setup-ci'
 import LoginThenSeeBuilds from './login-then-see-builds'
 import PermissionMessage from './permission-message'
@@ -49,6 +51,7 @@ class Builds extends Component {
     ) {
       getCiKeys().then((ciKeys = []) => {
         if (ciKeys.length) {
+          this.setState({ ciKey: ciKeys[0].id })
         }
       })
     }
@@ -72,8 +75,17 @@ class Builds extends Component {
     // OR the builds are still loading
     if (buildsCollection.isLoading) return <Loader color='#888' scale={0.5}/>
 
-    // OR they are not authorized to see builds
-    if (buildsCollection.error && (buildsCollection.error.statusCode === 401)) return <PermissionMessage />
+    // OR if there is an error getting the builds
+    if (buildsCollection.error) {
+      // they are not authorized to see builds
+      if (errors.isUnauthenticated(buildsCollection.error)) {
+        return <PermissionMessage />
+
+      // timed out or unknown error
+      } else {
+        return <ErrorMessage error={buildsCollection.error} />
+      }
+    }
 
     // OR the project is invalid
     if (!this.props.project.valid) {
