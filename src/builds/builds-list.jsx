@@ -82,8 +82,12 @@ class Builds extends Component {
 
     // OR if there is an error getting the builds
     if (buildsCollection.error) {
+      // project id missing, probably removed manually from cypress.json
+      if (errors.isMissingProjectId(buildsCollection.error)) {
+        return this._emptyWithoutSetup()
+
       // they are not authorized to see builds
-      if (errors.isUnauthenticated(buildsCollection.error)) {
+      } else if (errors.isUnauthenticated(buildsCollection.error)) {
         return <PermissionMessage />
 
       // timed out or unknown error

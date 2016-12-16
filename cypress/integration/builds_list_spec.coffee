@@ -89,6 +89,22 @@ describe "Builds List", ->
       it "displays timed out message", ->
         cy.contains("timed out")
 
+    describe "no project id error", ->
+      beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
+        @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "NO_PROJECT_ID"}, null)
+        cy
+          .fixture("config").then (@config) ->
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+          .get(".nav a").contains("Builds").click()
+
+      it "displays getting started message", ->
+        cy.contains("Getting Started with CI")
+
     describe "unexpected error", ->
       beforeEach ->
         cy

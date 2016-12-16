@@ -19,6 +19,7 @@ export class BuildsCollection {
       new Build(build)
     ))
 
+    this.error = null
     this.isLoading = false
     this.isLoaded = true
   }
