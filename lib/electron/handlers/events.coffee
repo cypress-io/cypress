@@ -259,8 +259,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
         else if _.get(err, "cause.code") is "ESOCKETTIMEDOUT"
           "TIMED_OUT"
         else
-          console.log(err.statusCode)
-          "UNKNOWN"
+          err.type or "UNKNOWN"
 
         sendErr(err)
 
