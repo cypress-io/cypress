@@ -620,7 +620,7 @@ describe "lib/project", ->
 
     it "merges in details of matching projects", ->
       @sandbox.stub(api, "getProjects").resolves([
-        { id: "id-123", status: "passing" }
+        { id: "id-123", lastBuildStatus: "passing" }
       ])
 
       Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
@@ -628,7 +628,8 @@ describe "lib/project", ->
         expect(projectsWithStatuses[0]).to.eql({
           id: "id-123"
           path: "/path/to/project"
-          status: "passing"
+          lastBuildStatus: "passing"
+          valid: true
         })
 
     it "returns client project when it has no id", ->
