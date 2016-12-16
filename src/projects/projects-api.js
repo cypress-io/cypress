@@ -9,8 +9,10 @@ import specsCollection from '../specs/specs-collection'
 
 import { getSpecs } from '../specs/specs-api'
 
-const getProjects = () => {
-  projectsStore.loading(true)
+const getProjects = (shouldLoad = true) => {
+  if (shouldLoad) {
+    projectsStore.loading(true)
+  }
 
   return App.ipc('get:projects')
   .then(action('got:projects', (projects) => {
@@ -25,10 +27,7 @@ const getProjects = () => {
 
 const pollProjects = () => {
   return setInterval(() => {
-    App.ipc('get:project:statuses', projectsStore.clientProjects)
-    .then((projects = []) => {
-      projectsStore.setProjectStatuses(projects)
-    })
+    getProjects(false)
   }, 5000)
 }
 

@@ -336,7 +336,7 @@ describe "Builds List", ->
           .should("have.class", "running")
           .then =>
             @clock.tick(5000)
-            expect(@App.ipc).to.be.calledWith("get:builds")
+            expect(@App.ipc.withArgs("get:builds")).to.be.calledTwice
 
             @builds[0].status = "passed"
             @ipc.handle("get:builds", null, @builds)

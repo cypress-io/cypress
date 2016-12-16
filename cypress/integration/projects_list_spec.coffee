@@ -160,22 +160,36 @@ describe "Projects List", ->
             @clock = win.sinon.useFakeTimers()
           .fixture("projects").then (@projects) ->
             @ipc.handle("get:projects", null, @projects)
-          .fixture("projects_statuses").then (@projects_statuses) =>
+            @clock.tick(1000)
+          .fixture("projects_statuses").then (@projects_statuses) ->
             @ipc.handle("get:project:statuses", null, @projects_statuses)
+            @clock.tick(1000)
 
       afterEach ->
         @clock.restore()
 
-      it "updates project statuses every 5 seconds", ->
+      it "updates project paths and ids every 5 seconds", ->
         @clock.tick(5000)
-        expect(@App.ipc).to.be.calledWith("get:project:statuses")
+        expect(@App.ipc.withArgs("get:projects")).to.be.calledTwice
 
-        @projects_statuses[0].lastBuildStatus = "failed"
-        @ipc.handle("get:project:statuses", null, @projects_statuses)
+        @projects[0].path = "/new/path"
+        @ipc.handle("get:projects", null, @projects)
 
         cy
           .get(".projects-list>li").first()
-          .contains("Failed")
+          .contains("/new/path")
+
+      it "updates project statuses every 5 seconds", ->
+        @clock.tick(5000)
+        @ipc.handle("get:projects", null, @projects).then =>
+          expect(@App.ipc.withArgs("get:project:statuses")).to.be.calledTwice
+
+          @projects_statuses[0].lastBuildStatus = "failed"
+          @ipc.handle("get:project:statuses", null, @projects_statuses)
+
+          cy
+            .get(".projects-list>li").first()
+            .contains("Failed")
 
     describe "add project", ->
       beforeEach ->
