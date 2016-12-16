@@ -168,18 +168,6 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       ## bail if we've already set our listeners
       return if @setListeners
 
-      testId = null
-      currentTestId = null
-
-      checkAttrs = (attrs) =>
-        # currentTestId
-        # if attrs.testId is testId
-        #   if existing = @logsById[attrs.id]
-        #     if not existing._hasBeenCleanedUp
-        #       debugger
-        #   else
-        #     debugger
-
       @setListeners = true
 
       @listenTo @Cypress, "fail", (err, runnable) =>
@@ -190,40 +178,15 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       @listenTo @Cypress, "stop", => @stop()
 
       @listenTo @Cypress, "log", (attrs) =>
-        checkAttrs(attrs)
-
         @addLog(attrs)
 
       @listenTo @Cypress, "log:state:changed", (attrs) =>
-        checkAttrs(attrs)
-
         @addLog(attrs)
 
-      @listenTo @Cypress, "test:before:run", (test) =>
-        currentTestId = test.id
-
       @listenTo @Cypress, "test:after:run", (test) =>
-        testId = test.id
-
-        test = @testsById[test.id]
-
         numTestsKeptInMemory = @Cypress.config("numTestsKeptInMemory")
 
         @cleanupQueue(@testsQueue, numTestsKeptInMemory)
-
-        # _.each @logsById, (log) ->
-        #   _.each log, (val, key) ->
-        #     if _.isObject(val)
-        #       console.log "WE HAVE AN OBJECT ON LOG", log, "for key", key, "as value", val
-        #       debugger
-
-        # _.each @testsById, (test) ->
-        #   _.each RUNNABLE_LOGS, (logs) ->
-        #     _.each test[logs], (attrs) ->
-        #       _.each attrs, (val, key) ->
-        #         if _.isObject(val)
-        #           console.log "WE HAVE AN OBJECT ON LOG", log, "for key", key, "as value", val
-        #           debugger
 
       return @
 
