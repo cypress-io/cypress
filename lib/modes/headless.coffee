@@ -246,6 +246,8 @@ module.exports = {
   waitForRendererToConnect: (options = {}) ->
     { openProject, id, browser, url, proxyServer, gui, webSecurity, write, timeout } = options
 
+    gui = !!gui
+
     launchRenderer = =>
       ## if we have a browser then just physically launch it
       if browser
