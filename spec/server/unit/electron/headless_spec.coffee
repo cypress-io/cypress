@@ -104,7 +104,7 @@ describe "electron/headless", ->
       @create = @sandbox.stub(Renderer, "create").resolves(@win)
 
     it "calls Renderer.create with url + options", ->
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234")
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false)
       .then =>
         expect(@create).to.be.calledWith({
           url: "foo/bar/baz"
@@ -131,13 +131,13 @@ describe "electron/headless", ->
 
       @win.webContents.on.withArgs("paint").yields({}, false, image)
 
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false, false, write)
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false, false, @projectInstance, write)
       .then =>
         expect(image.toJPEG).to.be.calledWith(100)
         expect(write).to.be.calledWith("imgdata")
 
     it "does not do anything on paint when write is null", ->
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false, false, null)
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false, false, @projectInstance, null)
       .then =>
         expect(@win.webContents.on).not.to.be.calledWith("paint")
 
@@ -165,6 +165,20 @@ describe "electron/headless", ->
       headless.createRenderer("foo/bar/baz", "http://localhost:1234")
       .then =>
         expect(options.show).to.eq(false)
+
+    it "emits exitEarlyWithErr when webContents crashed", ->
+      @sandbox.spy(errors, "get")
+      @sandbox.spy(errors, "log")
+
+      @win.webContents.on.withArgs("crashed").yields({}, false)
+
+      emit = @sandbox.stub(@projectInstance, "emit")
+
+      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false, false, @projectInstance)
+      .then ->
+        expect(errors.get).to.be.calledWith("RENDERER_CRASHED")
+        expect(errors.log).to.be.calledOnce
+        expect(emit).to.be.calledWithMatch("exitEarlyWithErr", "We detected that the Chromium Renderer process just crashed.")
 
   context ".closeAnyOpenBrowser", ->
     beforeEach ->
