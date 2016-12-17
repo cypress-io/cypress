@@ -51,6 +51,26 @@ API = {
         "Error writing to: " + chalk.blue(arg1) + "\n\n" + chalk.yellow(arg2)
       when "SPEC_FILE_NOT_FOUND"
         "Can't find test spec: " + chalk.blue(arg1)
+      when "RENDERER_CRASHED"
+        """
+        We detected that the Chromium Renderer process just crashed.
+
+        This is the equivalent to seeing the 'sad face' when Chrome dies.
+
+        This can happen for a number of different reasons:
+
+        - You wrote an endless loop and you must fix your own code
+        - There is a memory leak in Cypress (unlikely but possible)
+        - You are running Docker (there is an easy fix for this: see link below)
+        - You are running lots of tests on a memory intense application
+        - You are running in a memory starved VM environment
+        - There are problems with your GPU / GPU drivers
+        - There are browser bugs in Chromium
+
+        You can learn more including how to fix Docker here:
+
+        https://on.cypress.io/renderer-process-crashed
+        """
       when "NO_CURRENTLY_OPEN_PROJECT"
         "Can't find open project."
       when "AUTOMATION_SERVER_DISCONNECTED"
