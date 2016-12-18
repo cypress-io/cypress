@@ -47,20 +47,13 @@ $Cypress.register "Window", (Cypress, _, $) ->
         options._log = Cypress.Log.command()
 
       do resolveTitle = =>
-        @execute("get", "title", {
-          log: false
-          verify: false
-        })
-        .then ($el) =>
-          ## set the $el in the options which
-          ## is what the verification uses to
-          ## ensure the element exists
-          options.$el = $el.filter("head title")
-          options.$el.selector = $el.selector
+        doc = @private("document")
 
-          @verifyUpcomingAssertions(options.$el.text(), options, {
-            onRetry: resolveTitle
-          })
+        title = (doc and doc.title) or ""
+
+        @verifyUpcomingAssertions(title, options, {
+          onRetry: resolveTitle
+        })
 
     window: (options = {}) ->
       _.defaults options, {log: true}
@@ -116,8 +109,6 @@ $Cypress.register "Window", (Cypress, _, $) ->
           @verifyUpcomingAssertions(doc, options, {
             onRetry: verifyAssertions
           })
-
-    doc: -> @sync.document()
 
     viewport: (presetOrWidth, heightOrOrientation, options = {}) ->
       if _.isObject(heightOrOrientation)

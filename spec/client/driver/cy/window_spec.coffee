@@ -154,10 +154,6 @@ describe "$Cypress.Cy Window Commands", ->
       @cy.document().then ($doc) ->
         expect($doc).to.eq $("iframe").prop("contentDocument")
 
-    it "aliases doc to document", ->
-      @cy.doc().then ($doc) ->
-        expect($doc).to.eq $("iframe").prop("contentDocument")
-
     describe "assertion verification", ->
       beforeEach ->
         @remoteDocument = @cy.private("window").document
@@ -315,8 +311,7 @@ describe "$Cypress.Cy Window Commands", ->
 
       @cy.on "retry", retry
 
-      @cy.title().then (text) ->
-        expect(text).to.eq "waiting on title"
+      @cy.title().should("eq", "waiting on title")
 
     it "eventually resolves", ->
       _.delay ->
@@ -325,13 +320,32 @@ describe "$Cypress.Cy Window Commands", ->
 
       cy.title().should("eq", "about page").and("match", /about/)
 
-    it "only finds titles in the <head>", ->
+    it "uses the first title element", ->
       title = @cy.$$("head title").text()
 
-      @cy.$$("body").append("<title>some title</title>")
+      @cy.$$("head").prepend("<title>some title</title>")
+      @cy.$$("head").prepend("<title>another title</title>")
 
       @cy.title().then ($title) ->
-        expect($title).to.eq(title)
+        expect($title).to.eq("another title")
+
+    it "uses document.title setter over <title>", ->
+      title = @cy.$$("title")
+
+      ## make sure we have a title element
+      expect(title.length).to.eq(1)
+      expect(title.text()).not.to.eq("foo")
+
+      @cy.private("document").title = "foo"
+
+      @cy.title().then (title) ->
+        expect(title).to.eq("foo")
+
+    it "is empty string when no <title>", ->
+      @cy.$$("title").remove()
+
+      @cy.title().then ($title) ->
+        expect($title).to.eq("")
 
     describe "errors", ->
       beforeEach ->
@@ -342,10 +356,10 @@ describe "$Cypress.Cy Window Commands", ->
         @cy.$$("title").remove()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected to find element: 'title', but never found it."
+          expect(err.message).to.include "expected '' to equal 'asdf'"
           done()
 
-        @cy.title()
+        @cy.title().should("eq", "asdf")
 
       it "only logs once", (done) ->
         @cy.$$("title").remove()
@@ -360,7 +374,7 @@ describe "$Cypress.Cy Window Commands", ->
           expect(@log.get("error")).to.eq(err)
           done()
 
-        @cy.title()
+        @cy.title().should("eq", "asdf")
 
     describe ".log", ->
       beforeEach ->
