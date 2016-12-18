@@ -45,10 +45,23 @@ describe "$Cypress.Cy Screenshot Commands", ->
         $Cypress.isHeadless = true
 
         @Cypress.on "take:screenshot", (data, cb) ->
-          expect(data).to.eq("foo")
+          expect(data).to.deep.eq({
+            name: undefined
+            titles: ["foo", "bar"]
+            testId: 1
+          })
+
           cb({response: {}})
 
-        hooks = @Cypress.invoke("test:after:hooks", {title: "foo", err: {}})
+        hooks = @Cypress.invoke("test:after:hooks", {
+          err: {}
+        }, {
+          id: 1
+          title: "bar"
+          parent: {
+            title: "foo"
+          }
+        })
 
         Promise.all(hooks)
         .then =>
@@ -67,19 +80,19 @@ describe "$Cypress.Cy Screenshot Commands", ->
 
         @cy.screenshot().should("be.null")
 
-      it "uses the runnable title when no passed a name", (done) ->
+      it "sets name to undefined when not passed name", (done) ->
         runnable = @cy.private("runnable")
         runnable.title = "foo bar"
 
         @Cypress.once "take:screenshot", (data) ->
-          expect(data).to.eq("foo bar")
+          expect(data.name).to.be.undefined
           done()
 
         @cy.screenshot()
 
       it "can pass name", (done) ->
         @Cypress.once "take:screenshot", (data) ->
-          expect(data).to.eq("my/file")
+          expect(data.name).to.eq("my/file")
           done()
 
         @cy.screenshot("my/file")
