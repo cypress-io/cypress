@@ -6,6 +6,38 @@ describe "$Cypress.Cy Misc Commands", ->
       @cy.noop({}).end().then (subject) ->
         expect(subject).to.be.null
 
+  context "#log", ->
+    it "nulls out the subject", ->
+      @cy.wrap({}).log("foo").then (subject) ->
+        expect(subject).to.be.null
+
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (attrs, @log) =>
+
+      it "logs immediately", (done) ->
+        @Cypress.on "log", (attrs, @log) =>
+          expect(@log.get("message")).to.eq "foo, {foo: bar}"
+          expect(@log.get("name")).to.eq "log"
+          expect(@log.get("end")).to.be.true
+          done()
+
+        @cy.log("foo", {foo: "bar"}).then =>
+          expect(@log.get("ended")).to.be.true
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
+
+      it "consoleProps", (done) ->
+        @Cypress.on "log", (attrs, @log) =>
+          expect(attrs.consoleProps).to.deep.eq({
+            Command: "log"
+            args: [{}]
+            message: "foobarbaz"
+          })
+          done()
+
+        @cy.log("foobarbaz", [{}])
+
   context "#wrap", ->
     beforeEach ->
       ## set the jquery path back to our
