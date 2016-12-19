@@ -354,40 +354,95 @@ describe "Builds List", ->
           .then =>
             @ipc.handle("get:builds", null, @builds)
             @clock.tick(1000)
+          .then =>
+            @clock.tick(10000)
 
       afterEach ->
         @clock.restore()
 
-      it "updates builds every 5 seconds", ->
+      it "has original state of builds", ->
         cy
           .get(".builds-list li").first().find("> div")
           .should("have.class", "running")
+
+      it "sends get:builds ipc event", ->
+        expect(@App.ipc.withArgs("get:builds")).to.be.calledTwice
+
+      it "disables refresh button", ->
+        cy.get(".builds header button").should("be.disabled")
+
+      it "spins the refresh button", ->
+        cy.get(".builds header button i").should("have.class", "fa-spin")
+
+      context "success", ->
+        beforeEach ->
+          @builds[0].status = "passed"
+          @ipc.handle("get:builds", null, @builds)
+
+        it "updates the builds", ->
+          cy
+            .get(".builds-list li").first().find("> div")
+            .should("have.class", "passed")
+
+        it "enables refresh button", ->
+          cy.get(".builds header button").should("not.be.disabled")
+
+        it "stops spinning the refresh button", ->
+          cy.get(".builds header button i").should("not.have.class", "fa-spin")
+
+      context "errors", ->
+        beforeEach ->
+          @clock.tick(10000)
+          @ipcError = (type) =>
+            @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: type}, null)
+
+        it "displays permissions error", ->
+          @ipcError("UNAUTHENTICATED").then ->
+            cy.contains("Request access")
+
+        it "displays missing project id error", ->
+          @ipcError("NO_PROJECT_ID").then ->
+            cy.contains("Getting Started with CI")
+
+        it "displays old builds if another error", ->
+          @ipcError("TIMED_OUT").then ->
+            cy.get(".builds-list li").should("have.length", 4)
+
+    describe "manually refreshing builds", ->
+      beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
+          .fixture("config").then (@config) ->
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+          .get(".nav a").contains("Builds").click()
           .then =>
-            @clock.tick(10000)
-            expect(@App.ipc.withArgs("get:builds")).to.be.calledTwice
-
-            @builds[0].status = "passed"
             @ipc.handle("get:builds", null, @builds)
-          .get(".builds-list li").first().find("> div")
-          .should("have.class", "passed")
+          .get(".builds header button").click()
 
-      it "displays permissions error", ->
-        @clock.tick(10000)
-        @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "UNAUTHENTICATED"}, null)
-        .then ->
-          cy.contains("Request access")
+      it "sends get:builds ipc event", ->
+        expect(@App.ipc.withArgs("get:builds")).to.be.calledTwice
 
-      it "displays missing project id error", ->
-        @clock.tick(10000)
-        @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "NO_PROJECT_ID"}, null)
-        .then ->
-          cy.contains("Getting Started with CI")
+      it "still shows list of builds", ->
+        cy.get(".builds-list li").should("have.length", 4)
 
-      it "displays old builds if another error", ->
-        @clock.tick(10000)
-        @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "TIMED_OUT"}, null)
-        .then ->
-          cy.get(".builds-list li").should("have.length", 4)
+      it "disables refresh button", ->
+        cy.get(".builds header button").should("be.disabled")
+
+      it "spins the refresh button", ->
+        cy.get(".builds header button i").should("have.class", "fa-spin")
+
+      describe "when builds have loaded", ->
+        beforeEach ->
+          @ipc.handle("get:builds", null, @builds)
+
+        it "enables refresh button", ->
+          cy.get(".builds header button").should("not.be.disabled")
+
+        it "stops spinning the refresh button", ->
+          cy.get(".builds header button i").should("not.have.class", "fa-spin")
 
   context "without a current user", ->
     beforeEach ->

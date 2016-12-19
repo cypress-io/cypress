@@ -3,10 +3,8 @@ import { action } from 'mobx'
 import App from '../lib/app'
 import buildsCollection from './builds-collection'
 
-const getBuilds = (shouldLoad = true) => {
-  if (shouldLoad) {
-    buildsCollection.loading(true)
-  }
+const getBuilds = () => {
+  buildsCollection.loading(true)
 
   return App.ipc('get:builds')
   .then(action('got:builds', (builds) => {
@@ -19,7 +17,7 @@ const getBuilds = (shouldLoad = true) => {
 
 const pollBuilds = () => {
   return setInterval(() => {
-    getBuilds(false)
+    getBuilds()
   }, 10000)
 }
 

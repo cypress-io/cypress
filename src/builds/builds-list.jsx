@@ -1,3 +1,4 @@
+import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { action } from 'mobx'
@@ -33,9 +34,13 @@ class Builds extends Component {
   }
 
   componentWillMount () {
-    getBuilds()
+    this._getBuilds()
     this.pollId = pollBuilds()
     this._getCiKey()
+  }
+
+  _getBuilds = () => {
+    getBuilds()
   }
 
   componentDidUpdate () {
@@ -77,8 +82,8 @@ class Builds extends Component {
       }
     }
 
-    // OR the builds are still loading
-    if (buildsCollection.isLoading) return <Loader color='#888' scale={0.5}/>
+    // OR the builds are loading for the first time
+    if (buildsCollection.isLoading && !buildsCollection.isLoaded) return <Loader color='#888' scale={0.5}/>
 
     // OR if there is an error getting the builds
     if (buildsCollection.error) {
@@ -120,6 +125,15 @@ class Builds extends Component {
       <div className='builds'>
         <header>
           {this._lastUpdated()}
+          <button
+            className='btn'
+            disabled={buildsCollection.isLoading}
+            onClick={this._getBuilds}
+          >
+            <i className={cs('fa fa-refresh', {
+              'fa-spin': buildsCollection.isLoading,
+            })}></i>
+          </button>
         </header>
         <ul className='builds-list list-as-table'>
           {_.map(buildsCollection.builds, (build) => (
