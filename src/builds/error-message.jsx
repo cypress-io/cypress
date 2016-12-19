@@ -9,6 +9,10 @@ const ErrorMessage = observer(({ error }) => {
     errorMessage = (
       <p>Getting the builds timed out.</p>
     )
+  } else if (errors.isNoConnection(error)) {
+    errorMessage = (
+      <p>There is no internet connection.</p>
+    )
   } else {
     errorMessage = (
       <div>

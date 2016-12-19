@@ -5,6 +5,10 @@ const errors = {
     return _.get(err, "type") === 'NO_PROJECT_ID'
   },
 
+  isNoConnection (err) {
+    return _.get(err, "type") === 'NO_CONNECTION'
+  },
+
   isUnauthenticated (err) {
     return _.get(err, "type") === 'UNAUTHENTICATED'
   },
