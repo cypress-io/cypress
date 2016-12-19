@@ -14,6 +14,7 @@ excerpt: Errors that require additional explanation are listed here.
 - :fa-angle-right: [cy.visit() failed because you're attempting to visit a second unique domain](#section-cy-visit-failed-because-you-are-attempting-to-visit-a-second-unique-domain)
 - :fa-angle-right: [Cypress detected a cross origin error happened on page load](#section-cypress-detected-a-cross-origin-error-happened-on-page-load)
 - :fa-angle-right: [The supportFolder option has been removed](#section-the-supportfolder-option-has-been-removed)
+- :fa-angle-right: [The Chromium Renderer process just crashed](#section-the-chromium-renderer-process-just-crashed)
 
 ***
 
@@ -473,3 +474,15 @@ If, for example, you had the `supportFolder` set to `utilities`, change its name
   "supportFile": "utilities/index.js"
 }
 ```
+
+***
+
+# The Chromium Renderer process just crashed
+
+![screen shot 2016-12-16 at 10 52 08 pm](https://cloud.githubusercontent.com/assets/1268976/21284187/5374b152-c3e2-11e6-9811-c79ead05930b.png)
+
+Browsers are enormously complex pieces of software, and from time to time they will inconsistently crash *for no good reason*. Crashes are just a part of running automated tests.
+
+At the moment, we haven't implemented an automatic way to recover from them, but it is actually possible for us to do so. We have an [open issue documenting the steps](https://github.com/cypress-io/cypress/issues/349) we could take to restart the renderer process and continue the run. If you're seeing consistent crashes and would like this implemented, please leave a note in the issue.
+
+If you are running `Docker` [there is a simple one line fix for this problem documented here](https://github.com/cypress-io/cypress/issues/350).
