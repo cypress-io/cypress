@@ -251,7 +251,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       })
 
     when "get:builds"
-      project.getBuilds()
+      project.getBuilds(arg)
       .then(send)
       .catch (err) ->
         err.type = if _.get(err, "statusCode") is 401

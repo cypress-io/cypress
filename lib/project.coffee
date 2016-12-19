@@ -84,19 +84,13 @@ class Project extends EE
     # return our project instance
     .return(@)
 
-  getBuilds: ->
+  getBuilds: (options) ->
     Promise.all([
       @getProjectId(),
       user.ensureSession()
     ])
     .spread (projectId, session) ->
-      api.getProjectBuilds(projectId, session)
-    ## TODO: add catch handler
-    ## check desktop gui for what errors it is expecting
-    ## handle different reasons
-    ## - project id doesn't exist
-    ## - user's not logged in
-    ## - api failed to get builds
+      api.getProjectBuilds(projectId, session, options)
 
   close: (options = {}) ->
     if @memoryCheck

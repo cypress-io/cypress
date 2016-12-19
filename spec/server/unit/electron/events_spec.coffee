@@ -433,6 +433,12 @@ describe "lib/electron/handlers/events", ->
             @expectSendCalledWith(null)
 
     describe "get:builds", ->
+      it "calls project.getBuilds with arg", ->
+        @sandbox.stub(project, "getBuilds").resolves([])
+
+        @handleEvent("get:builds", "arg").then =>
+          expect(project.getBuilds).to.be.calledWith("arg")
+
       it "returns array of builds", ->
         @sandbox.stub(project, "getBuilds").resolves([])
 

@@ -76,12 +76,16 @@ module.exports = {
     })
 
   getProjectBuilds: (projectId, session, options = {}) ->
+    options.page ?= 1
     rp.get({
       url: Routes.projectBuilds(projectId)
       json: true
       timeout: options.timeout ? 10000
       headers: {
         "x-session": session
+      }
+      body: {
+        page: options.page
       }
     })
 

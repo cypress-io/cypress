@@ -208,9 +208,10 @@ describe "lib/project", ->
       @sandbox.stub(api, "getProjectBuilds").resolves('builds')
       @sandbox.stub(user, "ensureSession").resolves("session-123")
 
-    it "calls api.getProjectBuilds with project id + session", ->
-      @project.getBuilds().then (builds) ->
-        expect(api.getProjectBuilds).to.be.calledWith("id-123", "session-123")
+    it "calls api.getProjectBuilds with project id + session + options", ->
+      options = {}
+      @project.getBuilds(options).then (builds) ->
+        expect(api.getProjectBuilds).to.be.calledWith("id-123", "session-123", options)
         expect(builds).to.equal("builds")
 
   context "#scaffold", ->
