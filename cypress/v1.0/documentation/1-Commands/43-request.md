@@ -45,7 +45,7 @@ Option | Default | Notes
 `auth` | `null` | Any auth to send. Accepts an object literal.
 `body` | `null` | The Request Body to send along with the request.
 `failOnStatusCode` | `true` | Whether to fail on response codes other than `2xx` and `3xx`.
-`followRedirect` | `true` | Whether to follow automatic redirects.
+`followRedirect` | `true` | Whether to automatically follow redirects.
 `form` | `false` | Whether to convert the `body` values to urlencoded content and automatically set the `x-www-form-urlencoded` header.
 `gzip` | `true` | Whether to accept the `gzip` encoding.
 `headers` | `null` | Any additional headers to send. Accepts an object literal.
