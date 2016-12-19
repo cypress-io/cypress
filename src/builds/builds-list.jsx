@@ -90,8 +90,8 @@ class Builds extends Component {
       } else if (errors.isUnauthenticated(buildsCollection.error)) {
         return <PermissionMessage />
 
-      // timed out or unknown error
-      } else {
+      // other error, but only show if we don't already have builds
+      } else if (!buildsCollection.isLoaded) {
         return <ErrorMessage error={buildsCollection.error} />
       }
     }

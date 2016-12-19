@@ -359,6 +359,24 @@ describe "Builds List", ->
           .get(".builds-list li").first().find("> div")
           .should("have.class", "passed")
 
+      it "displays permissions error", ->
+        @clock.tick(10000)
+        @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "UNAUTHENTICATED"}, null)
+        .then ->
+          cy.contains("Request access")
+
+      it "displays missing project id error", ->
+        @clock.tick(10000)
+        @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "NO_PROJECT_ID"}, null)
+        .then ->
+          cy.contains("Getting Started with CI")
+
+      it "displays old builds if another error", ->
+        @clock.tick(10000)
+        @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "TIMED_OUT"}, null)
+        .then ->
+          cy.get(".builds-list li").should("have.length", 4)
+
   context "without a current user", ->
     beforeEach ->
       cy

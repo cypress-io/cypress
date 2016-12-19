@@ -28,7 +28,6 @@ export class BuildsCollection {
     this.error = err
 
     this.isLoading = false
-    this.isLoaded = true
   }
 
   @action openModal () {
