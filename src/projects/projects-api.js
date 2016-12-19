@@ -28,7 +28,7 @@ const getProjects = (shouldLoad = true) => {
 const pollProjects = () => {
   return setInterval(() => {
     getProjects(false)
-  }, 5000)
+  }, 10000)
 }
 
 const stopPollingProjects = (pollId) => {

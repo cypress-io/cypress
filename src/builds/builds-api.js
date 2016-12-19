@@ -20,7 +20,7 @@ const getBuilds = (shouldLoad = true) => {
 const pollBuilds = () => {
   return setInterval(() => {
     getBuilds(false)
-  }, 5000)
+  }, 10000)
 }
 
 const stopPollingBuilds = (pollId) => {

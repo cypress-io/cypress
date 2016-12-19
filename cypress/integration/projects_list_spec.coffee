@@ -169,7 +169,7 @@ describe "Projects List", ->
         @clock.restore()
 
       it "updates project paths and ids every 5 seconds", ->
-        @clock.tick(5000)
+        @clock.tick(10000)
         expect(@App.ipc.withArgs("get:projects")).to.be.calledTwice
 
         @projects[0].path = "/new/path"
@@ -180,7 +180,7 @@ describe "Projects List", ->
           .contains("/new/path")
 
       it "updates project statuses every 5 seconds", ->
-        @clock.tick(5000)
+        @clock.tick(10000)
         @ipc.handle("get:projects", null, @projects).then =>
           expect(@App.ipc.withArgs("get:project:statuses")).to.be.calledTwice
 

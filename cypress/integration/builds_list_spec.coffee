@@ -351,7 +351,7 @@ describe "Builds List", ->
           .get(".builds-list li").first().find("> div")
           .should("have.class", "running")
           .then =>
-            @clock.tick(5000)
+            @clock.tick(10000)
             expect(@App.ipc.withArgs("get:builds")).to.be.calledTwice
 
             @builds[0].status = "passed"
