@@ -258,6 +258,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
           "UNAUTHENTICATED"
         else if _.get(err, "cause.code") is "ESOCKETTIMEDOUT"
           "TIMED_OUT"
+        else if _.get(err, "code") is "ENOTFOUND"
+          "NO_CONNECTION"
         else
           err.type or "UNKNOWN"
 

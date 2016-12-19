@@ -457,6 +457,24 @@ describe "lib/electron/handlers/events", ->
           expect(@send).to.be.calledWith("response")
           expect(@send.firstCall.args[1].__error.type).to.equal("TIMED_OUT")
 
+      it "sends NO_CONNECTION when code is ENOTFOUND", ->
+        err = new Error("foo")
+        err.code = "ENOTFOUND"
+        @sandbox.stub(project, "getBuilds").rejects(err)
+
+        @handleEvent("get:builds").then =>
+          expect(@send).to.be.calledWith("response")
+          expect(@send.firstCall.args[1].__error.type).to.equal("NO_CONNECTION")
+
+      it "sends type when if existing for other errors", ->
+        err = new Error("foo")
+        err.type = "NO_PROJECT_ID"
+        @sandbox.stub(project, "getBuilds").rejects(err)
+
+        @handleEvent("get:builds").then =>
+          expect(@send).to.be.calledWith("response")
+          expect(@send.firstCall.args[1].__error.type).to.equal("NO_PROJECT_ID")
+
       it "sends UNKNOWN + name,message,stack for other errors", ->
         err = new Error("foo")
         err.name = "name"
