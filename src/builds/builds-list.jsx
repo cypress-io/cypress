@@ -117,15 +117,30 @@ class Builds extends Component {
 
     // everything's good, there are builds to show!
     return (
-      <ul className='builds-list list-as-table'>
-        {_.map(buildsCollection.builds, (build) => (
-          <Build
-            key={build.id}
-            goToBuild={() => {}}
-            {...build}
-          />
-        ))}
-      </ul>
+      <div className='builds'>
+        <header>
+          {this._lastUpdated()}
+        </header>
+        <ul className='builds-list list-as-table'>
+          {_.map(buildsCollection.builds, (build) => (
+            <Build
+              key={build.id}
+              goToBuild={() => {}}
+              {...build}
+            />
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  _lastUpdated () {
+    if (!buildsCollection.lastUpdated) return null
+
+    return (
+      <span className='last-updated'>
+        Last updated: {buildsCollection.lastUpdated}
+      </span>
     )
   }
 

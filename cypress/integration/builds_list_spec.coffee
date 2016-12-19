@@ -1,3 +1,5 @@
+moment = require("moment")
+
 describe "Builds List", ->
   beforeEach ->
     @firstProjectName = "My-Fake-Project"
@@ -305,15 +307,22 @@ describe "Builds List", ->
     describe "list builds", ->
       beforeEach ->
         cy
-          .get(".projects-list a")
-            .contains("My-Fake-Project").click()
-        @ipc.handle("get:builds", null, @builds)
-        cy
+          .window().then (win) =>
+            timestamp = moment("2016-12-19 10:00:00").valueOf()
+            @clock = win.sinon.useFakeTimers(timestamp)
+          .get(".projects-list a").contains("My-Fake-Project").click()
           .fixture("config").then (@config) ->
             @ipc.handle("open:project", null, @config)
+            @clock.tick(1000)
           .fixture("specs").as("specs").then ->
             @ipc.handle("get:specs", null, @specs)
+            @clock.tick(1000)
           .get(".nav a").contains("Builds").click()
+          .then =>
+            @ipc.handle("get:builds", null, @builds)
+
+      afterEach ->
+        @clock.restore()
 
       it "lists builds", ->
         cy
@@ -324,6 +333,9 @@ describe "Builds List", ->
         cy
           .get(".builds-list li").first().find("> div")
           .should("have.class", "running")
+
+      it "displays last updated", ->
+        cy.contains("Last updated: 10:00:02am")
 
     describe "polling builds", ->
       beforeEach ->
