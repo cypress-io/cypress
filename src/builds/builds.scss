@@ -39,6 +39,8 @@
 }
 
 .builds {
+  display: flex;
+  flex-direction: column;
   position: fixed;
   bottom: 18px;
   top: 77px;
@@ -55,6 +57,7 @@
     background-color: #e9e9e9;
     border-bottom: 1px solid #d3d3d3;
     display: flex;
+    flex-shrink: 0;
     font-size: 0.8em;
     justify-content: flex-end;
     padding: 0.4em;
