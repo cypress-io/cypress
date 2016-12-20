@@ -36,7 +36,7 @@ export default class ProjectNotSetup extends Component {
         <SetupProject
           project={this.props.project}
           show={this.state.setupProjectModalOpen}
-          onConfirm={this._setupProject}
+          onSetup={this._setupProject}
           onHide={this._hideSetupProjectModal}
         />
       </div>
@@ -92,9 +92,7 @@ export default class ProjectNotSetup extends Component {
   }
 
   _setupProject = (projectDetails) => {
-    App.ipc('setup:ci:project', projectDetails).then((newProjectDetails) => {
-      this._hideSetupProjectModal()
-      this.props.onSetup(newProjectDetails)
-    })
+    this.props.onSetup(projectDetails)
+    this._hideSetupProjectModal()
   }
 }

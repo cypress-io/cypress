@@ -14,13 +14,14 @@ class SetupProject extends Component {
     project: React.PropTypes.object,
     show: React.PropTypes.bool.isRequired,
     onHide: React.PropTypes.func.isRequired,
-    onConfirm: React.PropTypes.func.isRequired,
+    onSetup: React.PropTypes.func.isRequired,
   }
 
   constructor (...args) {
     super(...args)
 
     this.state = {
+      error: null,
       projectName: this._initialProjectName(),
       public: true,
       showNameMissingError: false,
@@ -134,6 +135,7 @@ class SetupProject extends Component {
                 </div>
               </div>
             </div>
+            {this._error()}
             <div className='actions form-group'>
               <div className='col-sm-offset-8 col-sm-4'>
                 <button
@@ -160,6 +162,19 @@ class SetupProject extends Component {
       let splitName = _.last(project.path.split('/'))
       return _.truncate(splitName, { length: 60 })
     }
+  }
+
+  _error () {
+    const error = this.state.error
+    if (!error) return null
+
+    return (
+      <div className='error'>
+        <p>An error occurred setting up your project:</p>
+        <p>{error.name}</p>
+        <p>{error.message}</p>
+      </div>
+    )
   }
 
   _updateProjectName = () => {
@@ -201,10 +216,23 @@ class SetupProject extends Component {
   }
 
   _setupProject () {
-    this.props.onConfirm({
+    App.ipc('setup:ci:project', {
       projectName: this.state.projectName,
       orgId: this.refs.orgId.value,
       public: this.state.public,
+    })
+    .then((projectDetails) => {
+      if (projectDetails.__error) {
+        this.setState({
+          error: projectDetails.__error,
+          isSubmitting: false,
+        })
+      } else {
+        this.setState({
+          isSubmitting: false,
+        })
+        this.props.onSetup(projectDetails)
+      }
     })
   }
 }

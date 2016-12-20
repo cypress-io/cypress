@@ -217,6 +217,16 @@
   .form-group.has-error {
     margin-bottom: 0;
   }
+
+  .error {
+    background: #f2dede;
+    border: solid 1px #a94442;
+    border-radius: 3px;
+    color: #a94442;
+    margin-bottom: 1em;
+    padding: 0.4em 0.6em;
+  }
+
   .actions button {
     position: relative;
 
