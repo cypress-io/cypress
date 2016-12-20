@@ -217,4 +217,25 @@
   .form-group.has-error {
     margin-bottom: 0;
   }
+  .actions button {
+    position: relative;
+
+    i {
+      display: none;
+      position: absolute;
+      left: 50%;
+      margin-top: 2px;
+      margin-left: -5px;
+    }
+  }
+
+  &.is-submitting .actions button {
+    span {
+      visibility: hidden;
+    }
+
+    i {
+      display: inline-block;
+    }
+  }
 }

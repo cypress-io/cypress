@@ -178,37 +178,60 @@ describe "Builds List", ->
             cy
               .get(".modal").should("be.visible")
 
-          describe "project name", ->
-            it "prefills Project Name", ->
-              cy
-                .get("#projectName").should("have.value", @firstProjectName)
+          it "prefills Project Name", ->
+            cy
+              .get("#projectName").should("have.value", @firstProjectName)
 
-            it "allows me to change Project Name value", ->
-              @newProjectName = "New Project Here"
+          it "allows me to change Project Name value", ->
+            @newProjectName = "New Project Here"
 
-              cy
-                .get("#projectName").clear().type(@newProjectName)
-                .get("#projectName").should("have.value", @newProjectName)
+            cy
+              .get("#projectName").clear().type(@newProjectName)
+              .get("#projectName").should("have.value", @newProjectName)
 
-          describe "lists organizations", ->
-            it "lists organizations to assign to project", ->
-              cy
-                .get("#organizations-select").find("option").should("have.length", @orgs.length)
+          it "lists organizations to assign to project", ->
+            cy
+              .get("#organizations-select").find("option").should("have.length", @orgs.length)
 
-            it "selects default org by default", ->
-              cy
-                .get("#organizations-select").should("have.value", "000")
+          it "selects default org by default", ->
+            cy
+              .get("#organizations-select").should("have.value", "000")
 
-            it "opens external link on click of manage", ->
-              cy
-                .contains("manage").click().then ->
-                   expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/manage-orgs")
+          it "opens external link on click of manage", ->
+            cy
+              .contains("manage").click().then ->
+                 expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/manage-orgs")
 
-          describe "public v private", ->
-            it "displays public and private radios", ->
+          it "displays public and private radios", ->
+            cy
+              .get(".modal-body").contains("Public")
+              .get(".modal-body").contains("Private")
+
+          describe "on submit", ->
+            beforeEach ->
               cy
-                .get(".modal-body").contains("Public")
-                .get(".modal-body").contains("Private")
+                .get(".modal-body")
+                .contains(".btn", "Setup Project").click()
+
+            it "disables button", ->
+              cy
+                .get(".modal-body")
+                .contains(".btn", "Setup Project")
+                .should("be.disabled")
+
+            it "hides button text", ->
+              cy
+                .get(".modal-body")
+                .contains(".btn", "Setup Project")
+                .find("span")
+                .should("not.be.visible")
+
+            it "shows spinner", ->
+              cy
+                .get(".modal-body")
+                .contains(".btn", "Setup Project")
+                .find("i")
+                .should("be.visible")
 
           describe "successfully submit form", ->
             beforeEach ->
@@ -274,16 +297,39 @@ describe "Builds List", ->
               cy.contains("invite other users")
 
           describe "errors on form submit", ->
+            beforeEach ->
+              cy
+                .get("#projectName").clear()
+                .get(".modal-body")
+                .contains(".btn", "Setup Project").click()
 
-            describe "name missing", ->
-              beforeEach ->
-                cy
-                  .get("#projectName").clear()
-                  .get(".modal-body")
-                  .contains(".btn", "Setup Project").click()
+            it "enables button", ->
+              cy
+                .get(".modal-body")
+                .contains(".btn", "Setup Project")
+                .should("not.be.disabled")
 
-              it "displays name missing error when empty", ->
-                cy.contains("Please enter a project name").should("be.visible")
+            it "shows button text", ->
+              cy
+                .get(".modal-body")
+                .contains(".btn", "Setup Project")
+                .find("span")
+                .should("be.visible")
+
+            it "hide spinner", ->
+              cy
+                .get(".modal-body")
+                .contains(".btn", "Setup Project")
+                .find("i")
+                .should("not.be.visible")
+
+            it "displays name missing error when empty", ->
+              cy.contains("Please enter a project name").should("be.visible")
+
+            it "clears validation error after inputing name", ->
+              cy.get("#projectName").type("project name")
+              cy.contains("Please enter a project name").should("not.be.visible")
+
 
               it "clears validation error after inputing name", ->
                 cy.get("#projectName").type("project name")

@@ -24,6 +24,7 @@ class SetupProject extends Component {
       projectName: this._initialProjectName(),
       public: true,
       showNameMissingError: false,
+      isSubmitting: false,
     }
   }
 
@@ -38,7 +39,11 @@ class SetupProject extends Component {
         onHide={this.props.onHide}
         backdrop='static'
         >
-        <div className='setup-project-modal modal-body os-dialog'>
+        <div
+          className={cs('setup-project-modal modal-body os-dialog', {
+            'is-submitting': this.state.isSubmitting,
+          })}
+        >
           <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
           <h4>Setup Project for CI</h4>
           <p className='text-muted'>After configuring your project's settings, we will generate a secret key to be used during your CI run.</p>
@@ -129,10 +134,14 @@ class SetupProject extends Component {
                 </div>
               </div>
             </div>
-            <div className='form-group'>
+            <div className='actions form-group'>
               <div className='col-sm-offset-8 col-sm-4'>
-                <button type='submit' className='btn btn-primary'>
-                  Setup Project
+                <button
+                  disabled={this.state.isSubmitting}
+                  className='btn btn-primary'
+                >
+                  <span>Setup Project</span>
+                  <i className='fa fa-spinner fa-spin'></i>
                 </button>
               </div>
             </div>
@@ -177,7 +186,12 @@ class SetupProject extends Component {
   _submit = (e) => {
     e.preventDefault()
 
+    if (this.state.isSubmitting) return
+
     if (this._hasValidProjectName()) {
+      this.setState({
+        isSubmitting: true,
+      })
       this._setupProject()
     } else {
       this.setState({
