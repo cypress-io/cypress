@@ -59,8 +59,14 @@
     display: flex;
     flex-shrink: 0;
     font-size: 0.8em;
-    justify-content: flex-end;
+    justify-content: space-between;
     padding: 0.4em;
+    padding-left: 0.8em;
+
+    .last-updated,
+    button {
+      visibility: hidden;
+    }
 
     .last-updated {
       color: #a3a3a3;
@@ -75,6 +81,13 @@
       &[disabled]:focus {
         color: #777;
       }
+    }
+  }
+
+  &.page-1 header {
+    .last-updated,
+    button {
+      visibility: visible;
     }
   }
 }

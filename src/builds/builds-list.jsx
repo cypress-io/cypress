@@ -154,18 +154,23 @@ class Builds extends Component {
 
     // everything's good, there are builds to show!
     return (
-      <div className='builds'>
+      <div className={`builds page-${this._getPage(this.props)}`}>
         <header>
-          {this._lastUpdated()}
-          <button
-            className='btn'
-            disabled={buildsCollection.isLoading}
-            onClick={this._getBuilds}
-          >
-            <i className={cs('fa fa-refresh', {
-              'fa-spin': buildsCollection.isLoading,
-            })}></i>
-          </button>
+          <a href="#" onClick={this._openDashboard}>
+            Open Dashboard <i className='fa fa-external-link'></i>
+          </a>
+          <div>
+            {this._lastUpdated()}
+            <button
+              className='btn'
+              disabled={buildsCollection.isLoading}
+              onClick={this._getBuilds}
+            >
+              <i className={cs('fa fa-refresh', {
+                'fa-spin': buildsCollection.isLoading,
+              })}></i>
+            </button>
+          </div>
         </header>
         <div
           className={cs('builds-list-container', {
@@ -267,6 +272,11 @@ class Builds extends Component {
     return (
       <p>A message about how user can invite other users through admin</p>
     )
+  }
+
+  _openDashboard = (e) => {
+    e.preventDefault()
+    App.ipc('external:open', `https://on.cypress.io/admin`)
   }
 
   _openCiGuide = (e) => {

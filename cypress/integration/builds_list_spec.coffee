@@ -383,6 +383,12 @@ describe "Builds List", ->
           .get(".builds-list li")
           .should("have.length", 4)
 
+      it "displays link to dashboard", ->
+        cy
+          .contains("Open Dashboard").click()
+          .then ->
+             expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin")
+
       it "displays build status icon", ->
         cy
           .get(".builds-list li").first().find("> div")
@@ -429,6 +435,12 @@ describe "Builds List", ->
 
           it "sets the newer button href to previous page", ->
             cy.contains("Newer builds").invoke("attr", "href").should("include", "?page=1")
+
+          it "hides the last updated label", ->
+            cy.contains("Last updated").should("not.be.visible")
+
+          it "hides the refresh button", ->
+            cy.get(".builds header button").should("not.be.visible")
 
         describe "when less than 30 builds", ->
           beforeEach ->
@@ -489,7 +501,7 @@ describe "Builds List", ->
             @clock.tick(10000)
             expect(@App.ipc.withArgs("get:builds").callCount).to.equal(4)
 
-      describe "refreshing page 2", ->
+      describe "going directly to / reloading page 2", ->
         beforeEach ->
           cy
             .visit("/#/projects/e40991dc055454a2f3598752dec39abc/builds?page=2")
