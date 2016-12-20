@@ -1,3 +1,4 @@
+_ = require("lodash")
 moment = require("moment")
 
 describe "Builds List", ->
@@ -336,6 +337,128 @@ describe "Builds List", ->
 
       it "displays last updated", ->
         cy.contains("Last updated: 10:00:02am")
+
+    describe "pagination", ->
+      beforeEach ->
+        @thirtyBuilds = _.range(30).map =>
+          _.extend({}, @builds[0], {id: _.uniqueId()})
+
+        @tenBuilds = _.take(@thirtyBuilds, 10)
+
+        cy
+          .get(".projects-list a").contains("My-Fake-Project").click()
+          .fixture("config").then (@config) ->
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+
+      describe "buttons", ->
+        beforeEach ->
+          cy.get(".nav a").contains("Builds").click()
+
+        describe "when on the first page", ->
+          beforeEach ->
+            @ipc.handle("get:builds", null, @builds)
+
+          it "hides the newer button", ->
+            cy.contains("Newer builds").should("not.be.visible")
+
+        describe "when not on the first page", ->
+          beforeEach ->
+            @ipc.handle("get:builds", null, @thirtyBuilds)
+            .then ->
+              cy.contains("Older builds").click()
+            .then =>
+              @ipc.handle("get:builds", null, @tenBuilds)
+
+          it "shows the newer button", ->
+            cy.contains("Newer builds").should("be.visible")
+
+          it "sets the newer button href to previous page", ->
+            cy.contains("Newer builds").invoke("attr", "href").should("include", "?page=1")
+
+        describe "when less than 30 builds", ->
+          beforeEach ->
+            @ipc.handle("get:builds", null, @builds)
+
+          it "hides the older button", ->
+            cy.contains("Older builds").should("not.be.visible")
+
+        describe "when exactly 30 builds", ->
+          beforeEach ->
+            @ipc.handle("get:builds", null, @thirtyBuilds)
+
+          it "shows the older button", ->
+            cy.contains("Older builds").should("be.visible")
+
+          it "sets the older button href to next page", ->
+            cy.contains("Older builds").invoke("attr", "href").should("include", "?page=2")
+
+      describe "going from page 1 to page 2", ->
+        beforeEach ->
+          cy
+            .window().then (win) =>
+              @clock = win.sinon.useFakeTimers()
+            .get(".nav a").contains("Builds").click()
+            .then =>
+              @ipc.handle("get:builds", null, @thirtyBuilds)
+            .then ->
+              cy.contains("Older builds").click()
+            .then ->
+              @clock.tick(1000)
+
+        afterEach ->
+          @clock.restore()
+
+        it "loads the builds for page 2", ->
+          expect(@App.ipc.withArgs("get:builds")).to.be.calledTwice
+          expect(@App.ipc.withArgs("get:builds").lastCall.args[1]).to.eql({page: 2})
+
+        it "does not poll for builds", ->
+          @clock.tick(10000)
+          expect(@App.ipc.withArgs("get:builds")).to.be.calledTwice
+
+        it "displays the 2nd page of builds", ->
+          @ipc.handle("get:builds", null, @tenBuilds).then ->
+            cy
+              .get(".builds-list li")
+              .should("have.length", 10)
+
+        describe "then going back to page 1", ->
+          beforeEach ->
+            cy.contains("Newer builds").click()
+
+          it "loads the builds for page 1", ->
+            expect(@App.ipc.withArgs("get:builds")).to.be.calledThrice
+            expect(@App.ipc.withArgs("get:builds").lastCall.args[1]).to.eql({page: 1})
+
+          it "polls again", ->
+            @clock.tick(10000)
+            expect(@App.ipc.withArgs("get:builds").callCount).to.equal(4)
+
+      describe "refreshing page 2", ->
+        beforeEach ->
+          cy
+            .visit("/#/projects/e40991dc055454a2f3598752dec39abc/builds?page=2")
+            .window().then (win) =>
+              @clock = win.sinon.useFakeTimers()
+
+        afterEach ->
+          @clock.restore()
+
+        it "loads the builds for page 2", ->
+          expect(@App.ipc.withArgs("get:builds")).to.be.calledOnce
+          expect(@App.ipc.withArgs("get:builds").lastCall.args[1]).to.eql({page: 2})
+
+        it "does not poll for builds", ->
+          @clock.tick(10000)
+          expect(@App.ipc.withArgs("get:builds")).to.be.calledOnce
+
+        it "displays the 2nd page of builds", ->
+          @ipc.handle("get:builds", null, @tenBuilds).then ->
+            cy
+              .get(".builds-list li")
+              .should("have.length", 10)
 
     describe "polling builds", ->
       beforeEach ->

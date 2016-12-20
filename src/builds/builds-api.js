@@ -3,10 +3,10 @@ import { action } from 'mobx'
 import App from '../lib/app'
 import buildsCollection from './builds-collection'
 
-const getBuilds = () => {
+const getBuilds = (options) => {
   buildsCollection.loading(true)
 
-  return App.ipc('get:builds')
+  return App.ipc('get:builds', options)
   .then(action('got:builds', (builds) => {
     buildsCollection.setBuilds(builds)
   }))

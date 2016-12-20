@@ -79,9 +79,31 @@
   }
 }
 
+.builds-list-container {
+  overflow: auto;
+  padding-bottom: 1em;
+
+  footer {
+    background: none;
+    display: flex;
+    height: auto;
+    justify-content: space-between;
+    position: static;
+
+    a {
+      display: none;
+    }
+  }
+
+  &.has-newer .newer-builds,
+  &.has-older .older-builds {
+    display: block;
+  }
+}
+
 .builds-list {
   @include list-columns(2%, 5%, 30%, 16%, 14%, 6%, 8%, 10%, 9%);
-  overflow: auto;
+  margin-bottom: 0;
 
   > li {
     overflow: auto;
