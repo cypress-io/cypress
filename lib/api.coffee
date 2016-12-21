@@ -223,6 +223,15 @@ module.exports = {
       }
     })
 
+  requestAccess: (orgId, session) ->
+    rp.get({
+      url: Routes.membershipRequests(orgId)
+      json: true
+      headers: {
+        "x-session": session
+      }
+    })
+
   sendUsage: (numRuns, exampleSpec, allSpecs, projectName, session) ->
     rp.post({
       url: Routes.usage()

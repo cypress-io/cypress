@@ -519,3 +519,18 @@ describe "lib/electron/handlers/events", ->
 
         @handleEvent("get:ci:keys").then =>
           @expectSendErrCalledWith(err)
+
+    describe "request:access", ->
+      it "returns result of project.requestAccess", ->
+        @sandbox.stub(project, "requestAccess").resolves("response")
+
+        @handleEvent("request:access", "org-id-123").then =>
+          expect(project.requestAccess).to.be.calledWith("org-id-123")
+          @expectSendCalledWith("response")
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(project, "requestAccess").rejects(err)
+
+        @handleEvent("request:access", "org-id-123").then =>
+          @expectSendErrCalledWith(err)

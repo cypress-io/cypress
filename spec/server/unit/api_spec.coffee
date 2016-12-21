@@ -503,6 +503,19 @@ describe "lib/api", ->
       .then (ret) ->
         expect(ret).to.eql(ciKeys)
 
+  context ".requestAccess", ->
+    it "POST /organizations/:id/membership_requests + returns response", ->
+      ciKeys = []
+
+      nock("http://localhost:1234")
+      .matchHeader("x-session", "session-123")
+      .get("/organizations/org-id-123/membership_requests")
+      .reply(200)
+
+      api.requestAccess("org-id-123", "session-123")
+      .then (ret) ->
+        expect(ret).to.be.undefined
+
   context ".sendUsage", ->
     it "POSTs /user/usage", ->
       nock("http://localhost:1234")

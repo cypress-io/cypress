@@ -265,6 +265,11 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
         sendErr(err)
 
+    when "request:access"
+      project.requestAccess(arg)
+      .then(send)
+      .catch(sendErr)
+
     else
       throw new Error("No ipc event registered for: '#{type}'")
 

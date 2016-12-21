@@ -137,6 +137,9 @@ module.exports = {
   getCiKeys: ->
     openProject.getCiKeys()
 
+  requestAccess: (orgId) ->
+    openProject.requestAccess(orgId)
+
   createCiProject: (projectDetails) ->
     openProject.createCiProject(projectDetails)
 

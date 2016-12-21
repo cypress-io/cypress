@@ -521,6 +521,20 @@ describe "lib/project", ->
       @project.getCiKeys().then (ciKeys) =>
         expect(ciKeys).to.equal(@ciKeys)
 
+  context "#requestAccess", ->
+    beforeEach ->
+      @project = Project(@pristinePath)
+      @sandbox.stub(user, "ensureSession").resolves("session-123")
+      @sandbox.stub(api, "requestAccess").resolves("response")
+
+    it "calls api.requestAccess with org id + session", ->
+      @project.requestAccess("org-id-123").then ->
+        expect(api.requestAccess).to.be.calledWith("org-id-123", "session-123")
+
+    it "returns response", ->
+      @project.requestAccess("org-id-123").then (response) =>
+        expect(response).to.equal("response")
+
   context ".remove", ->
     beforeEach ->
       @sandbox.stub(cache, "removeProject").resolves()

@@ -364,6 +364,11 @@ class Project extends EE
     .spread (projectId, session) ->
       api.getProjectCiKeys(projectId, session)
 
+  requestAccess: (orgId) ->
+    user.ensureSession()
+    .then (session) ->
+      api.requestAccess(orgId, session)
+
   @getOrgs = ->
     user.ensureSession()
     .then (session) ->
