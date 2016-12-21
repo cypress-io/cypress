@@ -11,5 +11,8 @@ development: &development
 test:
   <<: *development
 
+staging:
+  api_url: "https://api-staging.cypress.io/"
+
 production:
   api_url: "https://api.cypress.io/"

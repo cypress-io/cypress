@@ -1,6 +1,7 @@
 $Cypress.Runner = do ($Cypress, _, moment) ->
 
   defaultGrep     = /.*/
+  mochaCtxKeysRe  = /^(_runnable|test)$/
   betweenQuotesRe = /\"(.+?)\"/
 
   ERROR_PROPS      = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
@@ -121,6 +122,13 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
     afterRun: (ctx, test) ->
       if not fired("test:after:run", test)
         fire.call(ctx, "test:after:run", test)
+
+        _.each test.ctx, (value, key) ->
+          if _.isObject(value) and not mochaCtxKeysRe.test(key)
+            ## nuke any object properties that come from
+            ## cy.as() aliases aggressively now, even though
+            ## later on 'suite end' it will also clear ctx
+            test.ctx[key] = null
   }
 
   class $Runner
@@ -131,6 +139,7 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
       @tests = []
       @testsById = {}
       @testsQueue = []
+      @testsQueueById = {}
       @runnables = []
       @logsById = {}
       @emissions = {
@@ -175,7 +184,9 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         @addLog(attrs)
 
       @listenTo @Cypress, "test:after:run", (test) =>
-        @addTestToQueue(test)
+        numTestsKeptInMemory = @Cypress.config("numTestsKeptInMemory")
+
+        @cleanupQueue(@testsQueue, numTestsKeptInMemory)
 
       return @
 
@@ -350,17 +361,12 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         if isHook
           @hookFailed(runnable, runnable.err, hookName)
 
-    addTestToQueue: (test) ->
-      if test = @testsById[test.id]
-        @testsQueue.push(test)
-
-        numTestsKeptInMemory = @Cypress.config("numTestsKeptInMemory")
-
-        @cleanupQueue(@testsQueue, numTestsKeptInMemory)
-
     cleanupQueue: (queue, numTestsKeptInMemory) ->
       if queue.length > numTestsKeptInMemory
         test = queue.shift()
+
+        delete @testsQueueById[test.id]
+
         _.each RUNNABLE_LOGS, (logs) ->
           _.each test[logs], (attrs) ->
             ## we know our attrs have been cleaned
@@ -387,6 +393,23 @@ $Cypress.Runner = do ($Cypress, _, moment) ->
         @wrapErr(test.err)
 
     addLog: (attrs) ->
+      ## we dont need to hold a log reference
+      ## to anything in memory when we're headless
+      ## because you cannot inspect any logs
+      return if $Cypress.isHeadless
+
+      test = @testsById[attrs.testId]
+
+      ## bail if for whatever reason we
+      ## cannot associate this log to a test
+      return if not test
+
+      ## if this test isnt in the current queue
+      ## then go ahead and add it
+      if not @testsQueueById[test.id]
+        @testsQueueById[test.id] = true
+        @testsQueue.push(test)
+
       if existing = @logsById[attrs.id]
         ## because log:state:changed may
         ## fire at a later time, its possible

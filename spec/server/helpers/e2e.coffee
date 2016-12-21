@@ -19,6 +19,7 @@ cp = Promise.promisifyAll(cp)
 fs = Promise.promisifyAll(fs)
 
 env = process.env
+env.COPY_CIRCLE_ARTIFACTS = "true"
 
 e2ePath = Fixtures.projectPath("e2e")
 
@@ -95,7 +96,7 @@ module.exports = {
   options: (ctx, options = {}) ->
     _.defaults(options, {
       project: e2ePath
-      timeout: if options.debug then 3000000 else 45000
+      timeout: if options.debug then 3000000 else 120000
     })
 
     ctx.timeout(options.timeout)

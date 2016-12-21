@@ -24,6 +24,15 @@ onServer = (app) ->
       </html
     """)
 
+  app.get "/headers.html", (req, res) ->
+    res.send("""
+      <html>
+        <div id="headers">
+          #{JSON.stringify(req.headers)}
+        </div>
+      </html>
+    """)
+
   app.get "/fail", (req, res) ->
     res.sendStatus(500)
 

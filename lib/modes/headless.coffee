@@ -105,7 +105,7 @@ module.exports = {
           errors.warning("VIDEO_RECORDING_FAILED", err.stack)
       })
 
-  createRenderer: (url, proxyServer, showGui = false, chromeWebSecurity, write) ->
+  createRenderer: (url, proxyServer, showGui, chromeWebSecurity, openProject, write) ->
     @setProxy(proxyServer)
     .then ->
       Renderer.create({
@@ -132,6 +132,12 @@ module.exports = {
           setFrameRate(20)
 
           write(image.toJPEG(100))
+
+      win.webContents.on "crashed", (e, killed) ->
+        err = errors.get("RENDERER_CRASHED")
+        errors.log(err)
+
+        openProject.emit("exitEarlyWithErr", err.message)
 
       win.webContents.on "new-window", (e, url, frameName, disposition, options) ->
         ## force new windows to automatically open with show: false
@@ -239,12 +245,14 @@ module.exports = {
   waitForRendererToConnect: (options = {}) ->
     { openProject, id, browser, url, proxyServer, gui, webSecurity, write, timeout } = options
 
+    gui = !!gui
+
     launchRenderer = =>
       ## if we have a browser then just physically launch it
       if browser
         project.launch(browser, url, null, {proxyServer: proxyServer})
       else
-        @createRenderer(url, proxyServer, gui, webSecurity, write)
+        @createRenderer(url, proxyServer, gui, webSecurity, openProject, write)
 
     attempts = 0
 
@@ -380,8 +388,8 @@ module.exports = {
 
   copy: (videosFolder, screenshotsFolder) ->
     Promise.try ->
-      ## dont attempt to copy if we're running in circle in test env
-      if (ca = process.env.CIRCLE_ARTIFACTS) and process.env["CYPRESS_ENV"] isnt "test"
+      ## dont attempt to copy if we're running in circle and we've turned off copying artifacts
+      if (ca = process.env.CIRCLE_ARTIFACTS) and process.env["COPY_CIRCLE_ARTIFACTS"] isnt "false"
         Promise.join(
           ss.copy(screenshotsFolder, ca)
           video.copy(videosFolder, ca)
@@ -435,7 +443,8 @@ module.exports = {
             name
             cname
             started
-          })
+          }),
+
           connection: @waitForRendererToConnect({
             id:          options.id
             gui:         options.gui

@@ -895,7 +895,16 @@ describe "$Cypress.Cy Request Commands", ->
           expect(logs.length).to.eq(1)
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() timed out waiting 50ms for a response. No response ever occured.")
+          expect(err.message).to.eq("""
+            cy.request() timed out waiting 50ms for a response from your server.
+
+            The request we sent was:
+
+            Method: GET
+            URL: http://localhost:1234/foo
+
+            No response was received within the timeout.
+          """)
           done()
 
         @cy.request({url: "http://localhost:1234/foo", timeout: 50})
