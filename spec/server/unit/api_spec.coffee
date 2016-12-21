@@ -97,6 +97,7 @@ describe "lib/api", ->
 
     it "sets timeout to 10 seconds", ->
       @sandbox.stub(rp, "get").returns({
+        catch: -> @
         then: (fn) -> fn()
       })
 
