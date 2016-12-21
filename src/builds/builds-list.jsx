@@ -8,7 +8,7 @@ import { Link } from 'react-router'
 
 import App from '../lib/app'
 import state from '../lib/state'
-import buildsCollection from './builds-collection'
+import BuildsCollection from './builds-collection'
 import errors from '../lib/errors'
 import { getBuilds, pollBuilds, stopPollingBuilds } from './builds-api'
 import { getCiKeys } from '../projects/projects-api'
@@ -26,6 +26,8 @@ import ProjectNotSetup from './project-not-setup'
 class Builds extends Component {
   constructor (props) {
     super(props)
+
+    this.buildsCollection = new BuildsCollection()
 
     this.state = {
       ciKey: '<ci-key>',
@@ -63,12 +65,12 @@ class Builds extends Component {
   }
 
   _getBuilds = (page) => {
-    getBuilds({ page })
+    getBuilds(this.buildsCollection, { page })
   }
 
   _poll () {
     if (this._canPollBuilds()) {
-      this.pollId = pollBuilds()
+      this.pollId = pollBuilds(this.buildsCollection)
     }
   }
 
@@ -97,9 +99,9 @@ class Builds extends Component {
   _needsCiKey () {
     return (
       state.hasUser &&
-      !buildsCollection.isLoading &&
-      !buildsCollection.error &&
-      !buildsCollection.builds.length &&
+      !this.buildsCollection.isLoading &&
+      !this.buildsCollection.error &&
+      !this.buildsCollection.builds.length &&
       this.props.project.id
     )
   }
@@ -123,23 +125,23 @@ class Builds extends Component {
     }
 
     // OR if there is an error getting the builds
-    if (buildsCollection.error) {
+    if (this.buildsCollection.error) {
       // project id missing, probably removed manually from cypress.json
-      if (errors.isMissingProjectId(buildsCollection.error)) {
+      if (errors.isMissingProjectId(this.buildsCollection.error)) {
         return this._emptyWithoutSetup()
 
       // they are not authorized to see builds
-      } else if (errors.isUnauthenticated(buildsCollection.error)) {
+      } else if (errors.isUnauthenticated(this.buildsCollection.error)) {
         return <PermissionMessage project={project} />
 
       // other error, but only show if we don't already have builds
-      } else if (!buildsCollection.isLoaded) {
-        return <ErrorMessage error={buildsCollection.error} />
+      } else if (!this.buildsCollection.isLoaded) {
+        return <ErrorMessage error={this.buildsCollection.error} />
       }
     }
 
     // OR the builds are loading for the first time
-    if (buildsCollection.isLoading && !buildsCollection.isLoaded) return <Loader color='#888' scale={0.5}/>
+    if (this.buildsCollection.isLoading && !this.buildsCollection.isLoaded) return <Loader color='#888' scale={0.5}/>
 
     // OR the project is invalid
     if (!project.valid) {
@@ -147,7 +149,7 @@ class Builds extends Component {
     }
 
     // OR there are no builds to show
-    if (!buildsCollection.builds.length) {
+    if (!this.buildsCollection.builds.length) {
 
       // AND they've never setup CI
       if (!project.id) {
@@ -171,11 +173,11 @@ class Builds extends Component {
             {this._lastUpdated()}
             <button
               className='btn'
-              disabled={buildsCollection.isLoading}
+              disabled={this.buildsCollection.isLoading}
               onClick={this._getBuilds}
             >
               <i className={cs('fa fa-refresh', {
-                'fa-spin': buildsCollection.isLoading,
+                'fa-spin': this.buildsCollection.isLoading,
               })}></i>
             </button>
           </div>
@@ -187,7 +189,7 @@ class Builds extends Component {
           })}
         >
           <ul className='builds-list list-as-table'>
-            {_.map(buildsCollection.builds, (build) => (
+            {_.map(this.buildsCollection.builds, (build) => (
               <Build
                 key={build.id}
                 goToBuild={() => {}}
@@ -216,11 +218,11 @@ class Builds extends Component {
   }
 
   _lastUpdated () {
-    if (!buildsCollection.lastUpdated) return null
+    if (!this.buildsCollection.lastUpdated) return null
 
     return (
       <span className='last-updated'>
-        Last updated: {buildsCollection.lastUpdated}
+        Last updated: {this.buildsCollection.lastUpdated}
       </span>
     )
   }
@@ -230,7 +232,7 @@ class Builds extends Component {
   }
 
   _hasOlder () {
-    return buildsCollection.builds.length >= 30
+    return this.buildsCollection.builds.length >= 30
   }
 
   _emptyWithoutSetup () {

@@ -10,7 +10,6 @@ export class BuildsCollection {
   @observable isLoading = false
   @observable isLoaded = false
   @observable lastUpdated
-  @observable setupProjectModalOpen = false
 
   @action loading (bool) {
     this.isLoading = bool
@@ -32,14 +31,6 @@ export class BuildsCollection {
 
     this.isLoading = false
   }
-
-  @action openModal () {
-    return this.setupProjectModalOpen = true
-  }
-
-  @action closeModal () {
-    return this.setupProjectModalOpen = false
-  }
 }
 
-export default new BuildsCollection()
+export default BuildsCollection
