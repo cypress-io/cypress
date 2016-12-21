@@ -381,11 +381,18 @@ describe "Builds List", ->
                 .get(".modal-body")
                 .contains(".btn", "Setup Project").click()
                 .then =>
-                  @ipc.handle("setup:ci:project", null, {__error: { name: "Fatal Error!", message: "The system is down"}})
+                  @ipc.handle("setup:ci:project", {
+                    name: "Fatal Error!"
+                    message: """
+                    {
+                      "system": "down",
+                      "toxicity": "of the city"
+                    }
+                    """
+                  })
 
             it "displays error name and message", ->
-              cy.contains("Fatal Error!")
-              cy.contains("The system is down")
+              cy.contains('"system": "down"')
 
       context "having previously setup CI", ->
         beforeEach ->

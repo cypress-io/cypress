@@ -171,8 +171,7 @@ class SetupProject extends Component {
     return (
       <div className='error'>
         <p>An error occurred setting up your project:</p>
-        <p>{error.name}</p>
-        <p>{error.message}</p>
+        <pre>{error.message}</pre>
       </div>
     )
   }
@@ -222,17 +221,16 @@ class SetupProject extends Component {
       public: this.state.public,
     })
     .then((projectDetails) => {
-      if (projectDetails.__error) {
-        this.setState({
-          error: projectDetails.__error,
-          isSubmitting: false,
-        })
-      } else {
-        this.setState({
-          isSubmitting: false,
-        })
-        this.props.onSetup(projectDetails)
-      }
+      this.setState({
+        isSubmitting: false,
+      })
+      this.props.onSetup(projectDetails)
+    })
+    .catch((error) => {
+      this.setState({
+        error,
+        isSubmitting: false,
+      })
     })
   }
 }

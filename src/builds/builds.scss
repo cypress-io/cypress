@@ -240,6 +240,13 @@
     color: #a94442;
     margin-bottom: 1em;
     padding: 0.4em 0.6em;
+
+    pre {
+      background: none;
+      border: none;
+      color: #a94442;
+      padding: 0;
+    }
   }
 
   .actions button {
