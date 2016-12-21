@@ -69,7 +69,13 @@ class Builds extends Component {
   }
 
   _poll () {
-    this.pollId = pollBuilds()
+    if (this._canPollBuilds()) {
+      this.pollId = pollBuilds()
+    }
+  }
+
+  _canPollBuilds () {
+    return state.hasUser && !!this.props.project.id
   }
 
   _stopPolling () {
@@ -81,19 +87,23 @@ class Builds extends Component {
   }
 
   _getCiKey () {
-    if (
-      state.hasUser &&
-      !buildsCollection.isLoading &&
-      !buildsCollection.error &&
-      !buildsCollection.builds.length &&
-      this.props.project.id
-    ) {
+    if (this._needsCiKey()) {
       getCiKeys().then((ciKeys = []) => {
         if (ciKeys.length) {
           this.setState({ ciKey: ciKeys[0].id })
         }
       })
     }
+  }
+
+  _needsCiKey () {
+    return (
+      state.hasUser &&
+      !buildsCollection.isLoading &&
+      !buildsCollection.error &&
+      !buildsCollection.builds.length &&
+      this.props.project.id
+    )
   }
 
   render () {
@@ -114,9 +124,6 @@ class Builds extends Component {
       }
     }
 
-    // OR the builds are loading for the first time
-    if (buildsCollection.isLoading && !buildsCollection.isLoaded) return <Loader color='#888' scale={0.5}/>
-
     // OR if there is an error getting the builds
     if (buildsCollection.error) {
       // project id missing, probably removed manually from cypress.json
@@ -132,6 +139,9 @@ class Builds extends Component {
         return <ErrorMessage error={buildsCollection.error} />
       }
     }
+
+    // OR the builds are loading for the first time
+    if (buildsCollection.isLoading && !buildsCollection.isLoaded) return <Loader color='#888' scale={0.5}/>
 
     // OR the project is invalid
     if (!project.valid) {
