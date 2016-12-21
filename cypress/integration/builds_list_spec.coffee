@@ -430,7 +430,7 @@ describe "Builds List", ->
 
       it "displays link to dashboard", ->
         cy
-          .contains("Open Dashboard").click()
+          .contains("See All").click()
           .then ->
              expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin")
 
@@ -455,6 +455,8 @@ describe "Builds List", ->
             @ipc.handle("open:project", null, @config)
           .fixture("specs").as("specs").then ->
             @ipc.handle("get:specs", null, @specs)
+          .then ->
+            @ipc.handle("updater:check", null, "1.3.4")
 
       describe "buttons", ->
         beforeEach ->
@@ -465,21 +467,21 @@ describe "Builds List", ->
             @ipc.handle("get:builds", null, @builds)
 
           it "hides the newer button", ->
-            cy.contains("Newer builds").should("not.be.visible")
+            cy.contains("Newer").should("not.be.visible")
 
         describe "when not on the first page", ->
           beforeEach ->
             @ipc.handle("get:builds", null, @thirtyBuilds)
             .then ->
-              cy.contains("Older builds").click()
+              cy.contains("Older").click()
             .then =>
               @ipc.handle("get:builds", null, @tenBuilds)
 
           it "shows the newer button", ->
-            cy.contains("Newer builds").should("be.visible")
+            cy.contains("Newer").should("be.visible")
 
           it "sets the newer button href to previous page", ->
-            cy.contains("Newer builds").invoke("attr", "href").should("include", "?page=1")
+            cy.contains("Newer").invoke("attr", "href").should("include", "?page=1")
 
           it "hides the last updated label", ->
             cy.contains("Last updated").should("not.be.visible")
@@ -492,17 +494,17 @@ describe "Builds List", ->
             @ipc.handle("get:builds", null, @builds)
 
           it "hides the older button", ->
-            cy.contains("Older builds").should("not.be.visible")
+            cy.contains("Older").should("not.be.visible")
 
         describe "when exactly 30 builds", ->
           beforeEach ->
             @ipc.handle("get:builds", null, @thirtyBuilds)
 
           it "shows the older button", ->
-            cy.contains("Older builds").should("be.visible")
+            cy.contains("Older").should("be.visible")
 
           it "sets the older button href to next page", ->
-            cy.contains("Older builds").invoke("attr", "href").should("include", "?page=2")
+            cy.contains("Older").invoke("attr", "href").should("include", "?page=2")
 
       describe "going from page 1 to page 2", ->
         beforeEach ->
@@ -513,7 +515,7 @@ describe "Builds List", ->
             .then =>
               @ipc.handle("get:builds", null, @thirtyBuilds)
             .then ->
-              cy.contains("Older builds").click()
+              cy.contains("Older").click()
             .then ->
               @clock.tick(1000)
 
@@ -536,7 +538,7 @@ describe "Builds List", ->
 
         describe "then going back to page 1", ->
           beforeEach ->
-            cy.contains("Newer builds").click()
+            cy.contains("Newer").click()
 
           it "loads the builds for page 1", ->
             expect(@App.ipc.withArgs("get:builds")).to.be.calledThrice

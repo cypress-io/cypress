@@ -164,15 +164,18 @@ class Builds extends Component {
 
     // everything's good, there are builds to show!
     return (
-      <div className={`builds page-${this._getPage(this.props)}`}>
+      <div id='builds-list-page' className={`builds page-${this._getPage(this.props)}`}>
         <header>
-          <a href="#" onClick={this._openDashboard}>
-            Open Dashboard <i className='fa fa-external-link'></i>
+          <h5>Builds
+          <a href="#" className='btn btn-sm see-all-builds' onClick={this._openDashboard}>
+            See All <i className='fa fa-external-link'></i>
           </a>
+
+          </h5>
           <div>
             {this._lastUpdated()}
             <button
-              className='btn'
+              className='btn btn-link btn-sm'
               disabled={this.buildsCollection.isLoading}
               onClick={this._getBuilds}
             >

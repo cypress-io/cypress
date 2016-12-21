@@ -24,7 +24,7 @@ export default class ProjectNav extends Component {
                 to={`/projects/${project.clientId}/builds`}
                 activeClassName='active'
                 >
-                <i className='fa fa-list-ul'></i>{' '}
+                <i className='fa fa-database'></i>{' '}
                 Builds
               </Link>
             </li>
