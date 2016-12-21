@@ -36,3 +36,4 @@ node_modules
 bower_components
 dist
 cypress/screenshots
+*.orig
