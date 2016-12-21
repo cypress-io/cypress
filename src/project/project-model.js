@@ -8,6 +8,7 @@ const persistentProps = [
   'name',
   'public',
   'orgName',
+  'orgId',
   'defaultOrg',
   'lastBuildStatus',
   'lastBuildCreatedAt',
@@ -31,6 +32,7 @@ export default class Project {
   @observable name
   @observable public
   @observable orgName
+  @observable orgId
   @observable defaultOrg
   @observable lastBuildStatus
   @observable lastBuildCreatedAt

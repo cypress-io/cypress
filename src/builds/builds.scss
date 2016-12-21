@@ -262,3 +262,38 @@
     }
   }
 }
+
+.request-access {
+  padding-left: 1em;
+  padding-right: 1em;
+
+  pre {
+    background: #f2dede;
+    border-color: #a94442;
+    color: #a94442;
+    max-height: 200px;
+    overflow: auto;
+  }
+
+  button {
+    position: relative;
+
+    > i {
+      display: none;
+      position: absolute;
+      left: 50%;
+      margin-top: 2px;
+      margin-left: -5px;
+    }
+  }
+
+  &.is-submitting button {
+    span {
+      visibility: hidden;
+    }
+
+    > i {
+      display: inline-block;
+    }
+  }
+}

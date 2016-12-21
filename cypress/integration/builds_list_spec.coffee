@@ -50,44 +50,74 @@ describe "Builds List", ->
         .fixture("projects_statuses").then (@projects_statuses) =>
           @ipc.handle("get:project:statuses", null, @projects_statuses)
 
-
     describe "permissions error", ->
       beforeEach ->
         cy
           .get(".projects-list a")
             .contains("My-Fake-Project").click()
-        @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "UNAUTHENTICATED"}, null)
-        cy
           .fixture("config").then (@config) ->
             @ipc.handle("open:project", null, @config)
           .fixture("specs").as("specs").then ->
             @ipc.handle("get:specs", null, @specs)
           .get(".nav a").contains("Builds").click()
+          .then =>
+            @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "UNAUTHENTICATED"}, null)
 
       it "displays permissions message", ->
-        cy.contains("Request access")
+        cy.contains("Request Access")
 
       context "request access", ->
         beforeEach ->
-          cy
-            .get(".btn").contains("Request Access").click()
+          cy.contains("Request Access").click()
 
-        it "opens modal on click of request access", ->
-          cy
-            .get(".modal").should("be.visible")
+        it "sends request:access ipc event with org id", ->
+          expect(@App.ipc).to.be.calledWith("request:access", 829)
+
+        it "disables button", ->
+          cy.contains("Request Access").should("be.disabled")
+
+        it "hides 'Request Access' text", ->
+          cy.contains("Request Access").find("span").should("not.be.visible")
+
+        it "shows spinner", ->
+          cy.contains("Request Access").find("> i").should("be.visible")
+
+        describe "when request succeeds", ->
+          beforeEach ->
+            @ipc.handle("request:access")
+
+          it "shows success message", ->
+            cy.contains("Request Sent")
+
+        describe "when request fails", ->
+          beforeEach ->
+            @ipc.handle("request:access", {name: "foo", message: "There's an error"})
+
+          it "shows failure message", ->
+            cy.contains("Request Failed")
+            cy.contains("There's an error")
+
+          it "enables button", ->
+            cy.contains("Request Access").should("not.be.disabled")
+
+          it "shows 'Request Access' text", ->
+            cy.contains("Request Access").find("span").should("be.visible")
+
+          it "hides spinner", ->
+            cy.contains("Request Access").find("> i").should("not.be.visible")
 
     describe "timed out error", ->
       beforeEach ->
         cy
           .get(".projects-list a")
             .contains("My-Fake-Project").click()
-        @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "TIMED_OUT"}, null)
-        cy
           .fixture("config").then (@config) ->
             @ipc.handle("open:project", null, @config)
           .fixture("specs").as("specs").then ->
             @ipc.handle("get:specs", null, @specs)
           .get(".nav a").contains("Builds").click()
+          .then =>
+            @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "TIMED_OUT"}, null)
 
       it "displays timed out message", ->
         cy.contains("timed out")
@@ -97,13 +127,13 @@ describe "Builds List", ->
         cy
           .get(".projects-list a")
             .contains("My-Fake-Project").click()
-        @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "NO_PROJECT_ID"}, null)
-        cy
           .fixture("config").then (@config) ->
             @ipc.handle("open:project", null, @config)
           .fixture("specs").as("specs").then ->
             @ipc.handle("get:specs", null, @specs)
           .get(".nav a").contains("Builds").click()
+          .then =>
+            @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "NO_PROJECT_ID"}, null)
 
       it "displays getting started message", ->
         cy.contains("Getting Started with CI")
@@ -113,13 +143,13 @@ describe "Builds List", ->
         cy
           .get(".projects-list a")
             .contains("My-Fake-Project").click()
-        @ipc.handle("get:builds", {name: "foo", stack: "There's an error", type: "UNKNOWN"}, null)
-        cy
           .fixture("config").then (@config) ->
             @ipc.handle("open:project", null, @config)
           .fixture("specs").as("specs").then ->
             @ipc.handle("get:specs", null, @specs)
           .get(".nav a").contains("Builds").click()
+          .then =>
+            @ipc.handle("get:builds", {name: "foo", stack: "There's an error", type: "UNKNOWN"}, null)
 
       it "displays unexpected error message", ->
         cy.contains("unexpected error")
@@ -130,14 +160,14 @@ describe "Builds List", ->
         cy
           .get(".projects-list a")
             .contains("project5").click()
-        @ipc.handle("get:builds", null, [])
-        cy
           .fixture("config").then (@config) ->
             @config.projectId = null
             @ipc.handle("open:project", null, @config)
           .fixture("specs").as("specs").then ->
             @ipc.handle("get:specs", null, @specs)
           .get(".nav a").contains("Builds").click()
+          .then =>
+            @ipc.handle("get:builds", null, [])
 
       it "displays empty message", ->
         cy.contains("Builds Cannot Be Displayed")
@@ -155,14 +185,14 @@ describe "Builds List", ->
           cy
             .get(".projects-list a")
               .contains("My-Fake-Project").click()
-          @ipc.handle("get:builds", null, [])
-          cy
             .fixture("config").then (@config) ->
               @config.projectId = null
               @ipc.handle("open:project", null, @config)
             .fixture("specs").as("specs").then ->
               @ipc.handle("get:specs", null, @specs)
             .get(".nav a").contains("Builds").click()
+            .then =>
+              @ipc.handle("get:builds", null, [])
 
         it "displays empty message", ->
           cy.contains("Getting Started with CI")

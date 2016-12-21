@@ -29,8 +29,6 @@ class Builds extends Component {
 
     this.state = {
       ciKey: '<ci-key>',
-      setupProjectModalOpen: false,
-      requestAccessModalOpen: false,
     }
   }
 
@@ -132,7 +130,7 @@ class Builds extends Component {
 
       // they are not authorized to see builds
       } else if (errors.isUnauthenticated(buildsCollection.error)) {
-        return <PermissionMessage />
+        return <PermissionMessage project={project} />
 
       // other error, but only show if we don't already have builds
       } else if (!buildsCollection.isLoaded) {

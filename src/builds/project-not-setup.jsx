@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 
-import App from '../lib/app'
 import SetupProject from "./setup-project-modal"
 import { getOrgs } from '../organizations/organizations-api'
 
