@@ -154,7 +154,7 @@ class Builds extends Component {
 
     // everything's good, there are builds to show!
     return (
-      <div className={`builds page-${this._getPage(this.props)}`}>
+      <div id='builds-list-page' className={`builds page-${this._getPage(this.props)}`}>
         <header>
           <a href="#" onClick={this._openDashboard}>
             Open Dashboard <i className='fa fa-external-link'></i>

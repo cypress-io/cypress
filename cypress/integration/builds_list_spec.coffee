@@ -410,6 +410,8 @@ describe "Builds List", ->
             @ipc.handle("open:project", null, @config)
           .fixture("specs").as("specs").then ->
             @ipc.handle("get:specs", null, @specs)
+          .then ->
+            @ipc.handle("updater:check", null, "1.3.4")
 
       describe "buttons", ->
         beforeEach ->
