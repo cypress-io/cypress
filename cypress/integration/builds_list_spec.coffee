@@ -89,6 +89,21 @@ describe "Builds List", ->
           it "shows success message", ->
             cy.contains("Request Sent")
 
+          it "'persists' request state (until app is reloaded at least)", ->
+            cy
+              .contains("Back to Projects").click()
+              .get(".projects-list a")
+                .contains("My-Fake-Project").click()
+              .fixture("config").then (@config) ->
+                @ipc.handle("open:project", null, @config)
+              .fixture("specs").as("specs").then ->
+                @ipc.handle("get:specs", null, @specs)
+              .get(".navbar-default")
+                .find("a").contains("Builds").click()
+              .then =>
+                @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "UNAUTHENTICATED"}, null)
+              .end().contains("Request Sent")
+
         describe "when request fails", ->
           beforeEach ->
             @ipc.handle("request:access", {name: "foo", message: "There's an error"})
