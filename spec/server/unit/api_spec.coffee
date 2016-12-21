@@ -104,6 +104,34 @@ describe "lib/api", ->
       .then (ret) ->
         expect(rp.get).to.be.calledWithMatch({timeout: 10000})
 
+    it "GET /projects/:id/builds failure formatting", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-session", "session-123")
+      .get("/projects/id-123/builds", {
+        page: 1
+      })
+      .reply(401, {
+        errors: {
+          permission: ["denied"]
+        }
+      })
+
+      api.getProjectBuilds("id-123", "session-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("""
+          401
+
+          {
+            "errors": {
+              "permission": [
+                "denied"
+              ]
+            }
+          }
+        """)
+
   context ".ping", ->
     it "GET /ping", ->
       nock("http://localhost:1234")
@@ -459,7 +487,7 @@ describe "lib/api", ->
       api.createSignout("abc-123")
 
   context ".createProject", ->
-    it "POSTs /projects", ->
+    it "POST /projects", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
@@ -490,6 +518,45 @@ describe "lib/api", ->
           public: true
         })
 
+    it "POST /projects failure formatting", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .matchHeader("x-session", "session-123")
+      .matchHeader("x-route-version", "2")
+      .post("/projects", {
+        name: "foobar"
+        orgId: "org-id-123"
+        public: true
+      })
+      .reply(422, {
+        errors: {
+          orgId: ["is required"]
+        }
+      })
+
+      projectDetails = {
+        projectName: "foobar"
+        orgId: "org-id-123"
+        public: true
+      }
+      api.createProject(projectDetails, "session-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("""
+          422
+
+          {
+            "errors": {
+              "orgId": [
+                "is required"
+              ]
+            }
+          }
+        """)
+
+
   context ".getProjectCiKeys", ->
     it "GET /projects/:id/keys + returns keys", ->
       ciKeys = []
@@ -505,16 +572,41 @@ describe "lib/api", ->
 
   context ".requestAccess", ->
     it "POST /organizations/:id/membership_requests + returns response", ->
-      ciKeys = []
-
       nock("http://localhost:1234")
       .matchHeader("x-session", "session-123")
-      .get("/organizations/org-id-123/membership_requests")
+      .post("/organizations/org-id-123/membership_requests")
       .reply(200)
 
       api.requestAccess("org-id-123", "session-123")
       .then (ret) ->
         expect(ret).to.be.undefined
+
+
+    it "POST /organizations/:id/membership_requests failure formatting", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-session", "session-123")
+      .post("/organizations/org-id-123/membership_requests")
+      .reply(422, {
+        errors: {
+          access: ["already requested"]
+        }
+      })
+
+      api.requestAccess("org-id-123", "session-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("""
+          422
+
+          {
+            "errors": {
+              "access": [
+                "already requested"
+              ]
+            }
+          }
+        """)
 
   context ".sendUsage", ->
     it "POSTs /user/usage", ->

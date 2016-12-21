@@ -88,6 +88,7 @@ module.exports = {
         page: options.page
       }
     })
+    .catch(errors.StatusCodeError, formatResponseBody)
 
   createBuild: (options = {}) ->
     rp.post({
@@ -213,6 +214,7 @@ module.exports = {
         public: projectDetails.public
       }
     })
+    .catch(errors.StatusCodeError, formatResponseBody)
 
   getProjectCiKeys: (projectId, session) ->
     rp.get({
@@ -224,13 +226,14 @@ module.exports = {
     })
 
   requestAccess: (orgId, session) ->
-    rp.get({
+    rp.post({
       url: Routes.membershipRequests(orgId)
       json: true
       headers: {
         "x-session": session
       }
     })
+    .catch(errors.StatusCodeError, formatResponseBody)
 
   sendUsage: (numRuns, exampleSpec, allSpecs, projectName, session) ->
     rp.post({
