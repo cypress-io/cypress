@@ -42,7 +42,7 @@ class PermissionMessage extends Component {
           </p>
         </div>
       )
-    } else if (this.state.result === 'success') {
+    } else if (this.state.result === 'failed') {
       return (
         <div className='empty'>
           <h3>Request Failed</h3>
