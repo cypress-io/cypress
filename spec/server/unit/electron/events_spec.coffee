@@ -534,3 +534,38 @@ describe "lib/electron/handlers/events", ->
 
         @handleEvent("request:access", "org-id-123").then =>
           @expectSendErrCalledWith(err)
+
+      it "sends DENIED when statusCode is 403", ->
+        err = new Error("foo")
+        err.statusCode = 403
+        @sandbox.stub(project, "requestAccess").rejects(err)
+
+        @handleEvent("request:access", "org-id-123").then =>
+          expect(@send).to.be.calledWith("response")
+          expect(@send.firstCall.args[1].__error.type).to.equal("DENIED")
+
+      it "sends ALREADY_REQUESTED when code is 429", ->
+        err = new Error("foo")
+        err.statusCode = 429
+        @sandbox.stub(project, "requestAccess").rejects(err)
+
+        @handleEvent("request:access", "org-id-123").then =>
+          expect(@send).to.be.calledWith("response")
+          expect(@send.firstCall.args[1].__error.type).to.equal("ALREADY_REQUESTED")
+
+      it "sends type when if existing for other errors", ->
+        err = new Error("foo")
+        err.type = "SOME_TYPE"
+        @sandbox.stub(project, "requestAccess").rejects(err)
+
+        @handleEvent("request:access", "org-id-123").then =>
+          expect(@send).to.be.calledWith("response")
+          expect(@send.firstCall.args[1].__error.type).to.equal("SOME_TYPE")
+
+      it "sends UNKNOWN for other errors", ->
+        err = new Error("foo")
+        @sandbox.stub(project, "requestAccess").rejects(err)
+
+        @handleEvent("request:access", "org-id-123").then =>
+          expect(@send).to.be.calledWith("response")
+          expect(@send.firstCall.args[1].__error.type).to.equal("UNKNOWN")

@@ -268,7 +268,15 @@ handleEvent = (options, bus, event, id, type, arg) ->
     when "request:access"
       project.requestAccess(arg)
       .then(send)
-      .catch(sendErr)
+      .catch (err) ->
+        err.type = if _.get(err, "statusCode") is 403
+          "DENIED"
+        else if _.get(err, "statusCode") is 429
+          "ALREADY_REQUESTED"
+        else
+          err.type or "UNKNOWN"
+
+        sendErr(err)
 
     else
       throw new Error("No ipc event registered for: '#{type}'")
