@@ -37,9 +37,7 @@ class Builds extends Component {
   componentWillMount () {
     const page = this._getPage(this.props)
     this._getBuilds(page)
-    if (page === 1) {
-      this._poll()
-    }
+    this._handlePolling()
     this._getCiKey()
   }
 
@@ -52,12 +50,7 @@ class Builds extends Component {
     if (prevPage === currentPage) return
 
     this._getBuilds(currentPage)
-
-    if (currentPage === 1) {
-      this._poll()
-    } else {
-      this._stopPolling()
-    }
+    this._handlePolling()
   }
 
   componentWillUnmount () {
@@ -68,14 +61,24 @@ class Builds extends Component {
     getBuilds(this.buildsCollection, { page })
   }
 
-  _poll () {
-    if (this._canPollBuilds()) {
-      this.pollId = pollBuilds(this.buildsCollection)
+  _handlePolling () {
+    if (this._shouldPollBuilds()) {
+      this._poll()
+    } else {
+      this._stopPolling()
     }
   }
 
-  _canPollBuilds () {
-    return state.hasUser && !!this.props.project.id
+  _poll () {
+    this.pollId = pollBuilds(this.buildsCollection)
+  }
+
+  _shouldPollBuilds () {
+    return (
+      this._getPage(this.props) === 1 &&
+      state.hasUser &&
+      !!this.props.project.id
+    )
   }
 
   _stopPolling () {
