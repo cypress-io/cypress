@@ -85,7 +85,9 @@ class PermissionMessage extends Component {
         <div className='empty'>
           <h3>Request Failed</h3>
           <p>The following error occurred while requesting access:</p>
-          <pre>{this.state.error.message}</pre>
+          <pre className='alert alert-danger'>
+            {this.state.error.message}
+          </pre>
           <p>Try again:</p>
           {this._button()}
         </div>

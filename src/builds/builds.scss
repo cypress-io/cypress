@@ -233,22 +233,6 @@
     margin-bottom: 0;
   }
 
-  .error {
-    background: #f2dede;
-    border: solid 1px #a94442;
-    border-radius: 3px;
-    color: #a94442;
-    margin-bottom: 1em;
-    padding: 0.4em 0.6em;
-
-    pre {
-      background: none;
-      border: none;
-      color: #a94442;
-      padding: 0;
-    }
-  }
-
   .actions button {
     position: relative;
 
@@ -276,14 +260,6 @@
   padding-left: 1em;
   padding-right: 1em;
 
-  pre {
-    background: #f2dede;
-    border-color: #a94442;
-    color: #a94442;
-    max-height: 200px;
-    overflow: auto;
-  }
-
   button {
     position: relative;
 
@@ -304,5 +280,16 @@
     > i {
       display: inline-block;
     }
+  }
+}
+
+.setup-project-modal,
+.request-access,
+.builds-list-error {
+  .alert-danger {
+    margin-bottom: 1em;
+    max-height: 200px;
+    overflow: auto;
+    text-align: left;
   }
 }

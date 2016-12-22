@@ -169,9 +169,9 @@ class SetupProject extends Component {
     if (!error) return null
 
     return (
-      <div className='error'>
-        <p>An error occurred setting up your project:</p>
-        <pre>{error.message}</pre>
+      <div>
+        <p className='text-danger'>An error occurred setting up your project:</p>
+        <pre className='alert alert-danger'>{error.message}</pre>
       </div>
     )
   }

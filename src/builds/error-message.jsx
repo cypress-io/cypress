@@ -17,15 +17,15 @@ const ErrorMessage = observer(({ error }) => {
     errorMessage = (
       <div>
         <p>An unexpected error occurred:</p>
-        <div className='full-alert alert alert-danger error'>
-          {error.stack}
-        </div>
+        <pre className='alert alert-danger'>
+          {error.message}
+        </pre>
       </div>
     )
   }
 
   return (
-    <div id='builds-list-page'>
+    <div id='builds-list-page' className='builds-list-error'>
       <div className="empty">
         <h4>
           Builds could not be loaded

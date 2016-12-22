@@ -122,11 +122,15 @@ describe "Builds List", ->
         describe "when request fails", ->
           describe "for unknown reason", ->
             beforeEach ->
-              @ipc.handle("request:access", {name: "foo", message: "There's an error"})
+              @ipc.handle("request:access", {name: "foo", message: """
+              {
+                "cheese": "off the cracker"
+              }
+              """})
 
             it "shows failure message", ->
               cy.contains("Request Failed")
-              cy.contains("There's an error")
+              cy.contains('"cheese": "off the cracker"')
 
             it "enables button", ->
               cy.contains("Request Access").should("not.be.disabled")
@@ -194,11 +198,15 @@ describe "Builds List", ->
             @ipc.handle("get:specs", null, @specs)
           .get(".nav a").contains("Builds").click()
           .then =>
-            @ipc.handle("get:builds", {name: "foo", stack: "There's an error", type: "UNKNOWN"}, null)
+            @ipc.handle("get:builds", {name: "foo", message: """
+            {
+              "no builds": "for you"
+            }
+            """, type: "UNKNOWN"}, null)
 
       it "displays unexpected error message", ->
         cy.contains("unexpected error")
-        cy.contains("There's an error")
+        cy.contains('"no builds": "for you"')
 
     describe "invalid project", ->
       beforeEach ->
