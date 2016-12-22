@@ -81,7 +81,7 @@ export default class ProjectNotSetup extends Component {
     )
   }
 
-  _hideSetupProjectModal () {
+  _hideSetupProjectModal = () => {
     this.setState({ setupProjectModalOpen: false })
   }
 
