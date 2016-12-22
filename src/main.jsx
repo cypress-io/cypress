@@ -17,10 +17,10 @@ import ipc from './lib/ipc'
 const handleErrors = () => {
   const sendErr = (err) => {
     if (err) {
-      App.ipc('gui:error', _.pick(err, 'name', 'message', 'stack'))
+      App.ipc('gui:error', _.pick(err, 'name', 'message', 'stack', 'reason'))
     }
 
-    if (window.env === 'development') {
+    if (window.env === 'development' || window.env === 'test') {
       console.error(err) // eslint-disable-line no-console
       debugger // eslint-disable-line no-debugger
     }
@@ -30,8 +30,8 @@ const handleErrors = () => {
     sendErr(err)
   }
 
-  window.onunhandledrejection = (evt) => {
-    sendErr(evt.reason)
+  window.onunhandledrejection = (err) => {
+    sendErr(err)
   }
 }
 
