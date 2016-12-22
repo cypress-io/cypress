@@ -17,7 +17,7 @@ import ipc from './lib/ipc'
 const handleErrors = () => {
   const sendErr = (err) => {
     if (err) {
-      App.ipc('gui:error', _.pick(err, 'name', 'message', 'stack', 'reason'))
+      App.ipc('gui:error', _.pick(err, 'name', 'message', 'stack'))
     }
 
     if (window.env === 'development' || window.env === 'test') {
@@ -31,7 +31,8 @@ const handleErrors = () => {
   }
 
   window.onunhandledrejection = (err) => {
-    sendErr(err)
+    const reason = err && err.reason
+    sendErr(reason || err)
   }
 }
 
