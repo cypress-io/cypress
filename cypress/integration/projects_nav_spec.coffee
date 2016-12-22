@@ -350,6 +350,10 @@ describe "Projects Nav", ->
       cy
         .contains("Back to Projects").click({force: true})
         .then ->
+          @ipc.handle("get:projects", null, [])
+        .then ->
+          @ipc.handle("get:project:statuses", null, [])
+        .then ->
           expect(Cypress._.keys(@App.ipc()).length).to.eq(1)
 
   context "switch project", ->
