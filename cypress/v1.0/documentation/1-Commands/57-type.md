@@ -53,7 +53,7 @@ Option | Default | Notes
 `delay` | `10` | Delay after each keypress
 `force` | `false` | Forces type, disables error checking prior to type
 `release` | `true` | Keep a modifier activated between commands
-`interval` | `16` | Interval to to retry type
+`interval` | `16` | Interval to retry type
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the type
 `log` | `true` | whether to display command in command log
 

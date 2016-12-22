@@ -6,7 +6,6 @@ excerpt: Walkthrough writing your first test
 - :fa-angle-right: [Folder Structure](#section-folder-structure)
 - :fa-angle-right: [Test Files](#section-test-files)
 - :fa-angle-right: [How to Write Tests](#section-how-to-write-tests)
-- :fa-angle-right: [Command Line Tools](#section-command-line-tools)
 
 ***
 
