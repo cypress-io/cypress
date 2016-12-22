@@ -7,8 +7,7 @@ export default class User {
   @observable sessionToken
 
   constructor (user) {
-    if (user.id) {
-      this.id = user.id
+    if (user) {
       this.name = user.name
       this.email = user.email
       this.sessionToken = user.sessionToken
