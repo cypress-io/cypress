@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified\" && exit 0",
     "upload": "readmeio-sync upload",
     "clean": "readmeio-sync clean-remote",
     "add-command": "node ./scripts/add-command.js",
