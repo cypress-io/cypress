@@ -207,10 +207,12 @@ class Builds extends Component {
   }
 
   @action _setProjectDetails = (projectDetails) => {
+    this.buildsCollection.setError(null)
     projectsStore.updateProject(this.props.project, {
       id: projectDetails.id,
       name: projectDetails.projectName,
       public: projectDetails.public,
+      orgId: projectDetails.orgId,
       orgName: (orgsStore.getOrgById(projectDetails.orgId) || {}).name,
     })
   }

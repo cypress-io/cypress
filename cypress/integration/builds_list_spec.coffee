@@ -188,6 +188,21 @@ describe "Builds List", ->
       it "displays getting started message", ->
         cy.contains("Getting Started with CI")
 
+      it "clears message after setting up CI", ->
+        cy
+          .fixture("organizations").as("orgs").then ->
+            @ipc.handle("get:orgs", null, @orgs)
+          .get(".btn").contains("Setup Project for CI").click()
+          .get(".modal-body")
+          .contains(".btn", "Setup Project").click()
+          .then ->
+            @ipc.handle("setup:ci:project", null, {
+              id: "project-id-123"
+              public: true
+              orgId: "000"
+            })
+          .end().contains("Run Your First Build in CI")
+
     describe "unexpected error", ->
       beforeEach ->
         cy
