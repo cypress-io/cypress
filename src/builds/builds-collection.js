@@ -13,6 +13,7 @@ export class BuildsCollection {
 
   @action loading (bool) {
     this.isLoading = bool
+    this.error = null
   }
 
   @action setBuilds (builds) {
@@ -28,7 +29,6 @@ export class BuildsCollection {
 
   @action setError (err) {
     this.error = err
-
     this.isLoading = false
   }
 }

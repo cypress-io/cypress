@@ -111,7 +111,8 @@ describe "Builds List", ->
           it "retries getting builds", ->
             expect(@App.ipc.withArgs("get:builds").callCount).to.equal(2)
 
-          it "shows loading spinner"
+          it "shows loading spinner", ->
+            cy.get(".loader")
 
           it "shows builds when getting builds succeeds", ->
             @ipc.handle("get:builds", null, @builds).then =>
