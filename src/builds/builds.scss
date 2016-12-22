@@ -66,11 +66,6 @@
       margin-bottom: 0
     }
 
-    .last-updated,
-    button {
-      visibility: hidden;
-    }
-
     .last-updated {
       color: #a3a3a3;
       margin-left: 1em;
@@ -86,39 +81,12 @@
       }
     }
   }
-
-  &.page-1 header {
-    .last-updated,
-    button {
-      visibility: visible;
-    }
-  }
-}
-
-.builds-list-container {
-  overflow: auto;
-
-  footer {
-    background: none;
-    display: flex;
-    height: auto;
-    justify-content: space-between;
-    position: static;
-
-    a {
-      display: none;
-    }
-  }
-
-  &.has-newer .newer-builds,
-  &.has-older .older-builds {
-    display: block;
-  }
 }
 
 .builds-list {
   @include list-columns(2%, 5%, 30%, 16%, 14%, 6%, 8%, 10%, 9%);
   margin-bottom: 0;
+  overflow: auto;
 
   > li {
     overflow: auto;

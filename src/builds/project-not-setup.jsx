@@ -91,7 +91,7 @@ export default class ProjectNotSetup extends Component {
   }
 
   _setupProject = (projectDetails) => {
-    this.props.onSetup(projectDetails)
     this._hideSetupProjectModal()
+    this.props.onSetup(projectDetails)
   }
 }

@@ -4,7 +4,6 @@ import React, { Component } from 'react'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
-import { Link } from 'react-router'
 
 import App from '../lib/app'
 import state from '../lib/state'
@@ -30,26 +29,18 @@ class Builds extends Component {
     this.buildsCollection = new BuildsCollection()
 
     this.state = {
-      ciKey: '<ci-key>',
+      ciKey: null,
     }
   }
 
   componentWillMount () {
-    const page = this._getPage(this.props)
-    this._getBuilds(page)
+    this._getBuilds()
     this._handlePolling()
     this._getCiKey()
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate () {
     this._getCiKey()
-
-    const prevPage = this._getPage(prevProps)
-    const currentPage = this._getPage(this.props)
-
-    if (prevPage === currentPage) return
-
-    this._getBuilds(currentPage)
     this._handlePolling()
   }
 
@@ -57,8 +48,8 @@ class Builds extends Component {
     this._stopPolling()
   }
 
-  _getBuilds = (page) => {
-    getBuilds(this.buildsCollection, { page })
+  _getBuilds = () => {
+    getBuilds(this.buildsCollection)
   }
 
   _handlePolling () {
@@ -69,24 +60,19 @@ class Builds extends Component {
     }
   }
 
-  _poll () {
-    this.pollId = pollBuilds(this.buildsCollection)
-  }
-
   _shouldPollBuilds () {
     return (
-      this._getPage(this.props) === 1 &&
       state.hasUser &&
       !!this.props.project.id
     )
   }
 
-  _stopPolling () {
-    stopPollingBuilds(this.pollId)
+  _poll () {
+    pollBuilds(this.buildsCollection)
   }
 
-  _getPage (props) {
-    return Number(_.get(props, 'location.query.page') || 1)
+  _stopPolling () {
+    stopPollingBuilds()
   }
 
   _getCiKey () {
@@ -101,6 +87,7 @@ class Builds extends Component {
 
   _needsCiKey () {
     return (
+      !this.state.ciKey &&
       state.hasUser &&
       !this.buildsCollection.isLoading &&
       !this.buildsCollection.error &&
@@ -111,7 +98,6 @@ class Builds extends Component {
 
   render () {
     const { project } = this.props
-    const page = this._getPage(this.props)
 
     //--------Build States----------//
     // they are not logged in
@@ -167,7 +153,7 @@ class Builds extends Component {
 
     // everything's good, there are builds to show!
     return (
-      <div id='builds-list-page' className={`builds page-${this._getPage(this.props)}`}>
+      <div id='builds-list-page' className='builds'>
         <header>
           <h5>Builds
           <a href="#" className='btn btn-sm see-all-builds' onClick={this._openDashboard}>
@@ -188,37 +174,15 @@ class Builds extends Component {
             </button>
           </div>
         </header>
-        <div
-          className={cs('builds-list-container', {
-            'has-newer': this._hasNewer(),
-            'has-older': this._hasOlder(),
-          })}
-        >
-          <ul className='builds-list list-as-table'>
-            {_.map(this.buildsCollection.builds, (build) => (
-              <Build
-                key={build.id}
-                goToBuild={() => {}}
-                {...build}
-              />
-            ))}
-          </ul>
-          <footer>
-            <Link
-              className='btn newer-builds'
-              to={this._hasNewer() ? `/projects/${project.clientId}/builds?page=${page - 1}` : null}
-            >
-              <i className='fa fa-long-arrow-left'></i> Newer builds
-            </Link>
-            <span>{/* ensures older builds button is right justified */}</span>
-            <Link
-              className='btn older-builds'
-              to={this._hasOlder() ? `/projects/${project.clientId}/builds?page=${page + 1}` : null}
-            >
-              Older builds <i className='fa fa-long-arrow-right'></i>
-            </Link>
-          </footer>
-        </div>
+        <ul className='builds-list list-as-table'>
+          {_.map(this.buildsCollection.builds, (build) => (
+            <Build
+              key={build.id}
+              goToBuild={() => {}}
+              {...build}
+            />
+          ))}
+        </ul>
       </div>
     )
   }
@@ -231,14 +195,6 @@ class Builds extends Component {
         Last updated: {this.buildsCollection.lastUpdated}
       </span>
     )
-  }
-
-  _hasNewer () {
-    return this._getPage(this.props) > 1
-  }
-
-  _hasOlder () {
-    return this.buildsCollection.builds.length >= 30
   }
 
   _emptyWithoutSetup () {
@@ -268,7 +224,7 @@ class Builds extends Component {
           <h5>Install the CLI tools:</h5>
           <pre><code>npm install -g cypress-cli</code></pre>
           <h5>Run tests and upload assets:</h5>
-          <pre><code>cypress ci {this.state.ciKey}</code></pre>
+          <pre><code>cypress ci {this.state.ciKey || '<ci-key>'}</code></pre>
           <p>Refer to your CI provider's documentation to know when to run these commands.</p>
           <p className='center'>
             <a href='#' onClick={this._openCiGuide}>
