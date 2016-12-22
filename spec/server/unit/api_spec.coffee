@@ -54,31 +54,15 @@ describe "lib/api", ->
         expect(ret).to.eql(project)
 
   context ".getProjectBuilds", ->
-    it "GET /projects/:id/builds w/ default page 1 + returns builds", ->
+    it "GET /projects/:id/builds + returns builds", ->
       builds = []
 
       nock("http://localhost:1234")
       .matchHeader("x-session", "session-123")
-      .get("/projects/id-123/builds", {
-        page: 1
-      })
+      .get("/projects/id-123/builds")
       .reply(200, builds)
 
       api.getProjectBuilds("id-123", "session-123")
-      .then (ret) ->
-        expect(ret).to.eql(builds)
-
-    it "sends page if specified", ->
-      builds = []
-
-      nock("http://localhost:1234")
-      .matchHeader("x-session", "session-123")
-      .get("/projects/id-123/builds", {
-        page: 2
-      })
-      .reply(200, builds)
-
-      api.getProjectBuilds("id-123", "session-123", {page: 2})
       .then (ret) ->
         expect(ret).to.eql(builds)
 
@@ -108,9 +92,7 @@ describe "lib/api", ->
     it "GET /projects/:id/builds failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("x-session", "session-123")
-      .get("/projects/id-123/builds", {
-        page: 1
-      })
+      .get("/projects/id-123/builds")
       .reply(401, {
         errors: {
           permission: ["denied"]

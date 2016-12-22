@@ -84,9 +84,6 @@ module.exports = {
       headers: {
         "x-session": session
       }
-      body: {
-        page: options.page
-      }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
 

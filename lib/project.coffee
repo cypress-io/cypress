@@ -84,13 +84,13 @@ class Project extends EE
     # return our project instance
     .return(@)
 
-  getBuilds: (options) ->
+  getBuilds: ->
     Promise.all([
       @getProjectId(),
       user.ensureSession()
     ])
     .spread (projectId, session) ->
-      api.getProjectBuilds(projectId, session, options)
+      api.getProjectBuilds(projectId, session)
 
   close: (options = {}) ->
     if @memoryCheck
