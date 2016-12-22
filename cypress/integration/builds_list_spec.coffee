@@ -104,22 +104,52 @@ describe "Builds List", ->
                 @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "UNAUTHENTICATED"}, null)
               .end().contains("Request Sent")
 
-        describe "when request fails", ->
+        describe "when request succeeds and user is already a member", ->
           beforeEach ->
-            @ipc.handle("request:access", {name: "foo", message: "There's an error"})
+            @ipc.handle("request:access", null, {alreadyMember: true})
 
-          it "shows failure message", ->
-            cy.contains("Request Failed")
-            cy.contains("There's an error")
+          it "retries getting builds", ->
+            expect(@App.ipc.withArgs("get:builds").callCount).to.equal(2)
 
-          it "enables button", ->
-            cy.contains("Request Access").should("not.be.disabled")
+          it "shows loading spinner"
 
-          it "shows 'Request Access' text", ->
-            cy.contains("Request Access").find("span").should("be.visible")
+          it "shows builds when getting builds succeeds", ->
+            @ipc.handle("get:builds", null, @builds).then =>
+              cy
+                .get(".builds-list li")
+                .should("have.length", @builds.length)
 
-          it "hides spinner", ->
-            cy.contains("Request Access").find("> i").should("not.be.visible")
+        describe "when request fails", ->
+          describe "for unknown reason", ->
+            beforeEach ->
+              @ipc.handle("request:access", {name: "foo", message: "There's an error"})
+
+            it "shows failure message", ->
+              cy.contains("Request Failed")
+              cy.contains("There's an error")
+
+            it "enables button", ->
+              cy.contains("Request Access").should("not.be.disabled")
+
+            it "shows 'Request Access' text", ->
+              cy.contains("Request Access").find("span").should("be.visible")
+
+            it "hides spinner", ->
+              cy.contains("Request Access").find("> i").should("not.be.visible")
+
+          describe "because requested was denied", ->
+            beforeEach ->
+              @ipc.handle("request:access", {type: "DENIED", name: "foo", message: "There's an error"})
+
+            it "shows 'success' message", ->
+              cy.contains("Request Sent")
+
+          describe "because request was already sent", ->
+            beforeEach ->
+              @ipc.handle("request:access", {type: "ALREADY_REQUESTED", name: "foo", message: "There's an error"})
+
+            it "shows 'success' message", ->
+              cy.contains("Request Sent")
 
     describe "timed out error", ->
       beforeEach ->
