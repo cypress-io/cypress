@@ -153,6 +153,25 @@ describe "Projects List", ->
             .get(".projects-list>li").last()
             .contains("Invalid")
 
+        describe "returning from project", ->
+          beforeEach ->
+            cy
+              .get(".projects-list a")
+                .contains("My-Fake-Project").click()
+              .fixture("config").then (@config) ->
+                @ipc.handle("open:project", null, @config)
+              .fixture("specs").as("specs").then ->
+                @ipc.handle("get:specs", null, @specs)
+              .end().contains("Back to Projects").click()
+
+          it "loads projects", ->
+            ## in reality, both will get called 3 times, but since we don't
+            ## handle the second call to get:projects, get:project:statuses
+            ## only gets called 2 times in this test
+            expect(@App.ipc.withArgs("get:projects")).to.be.calledThrice
+            @ipc.handle("get:projects", null, @projects).then =>
+              expect(@App.ipc.withArgs("get:project:statuses")).to.be.calledTwice
+
     describe "polling project statuses", ->
       beforeEach ->
         cy
@@ -170,7 +189,10 @@ describe "Projects List", ->
 
       it "updates project paths and ids every 10 seconds", ->
         @clock.tick(10000)
-        expect(@App.ipc.withArgs("get:projects")).to.be.calledTwice
+        ## once by application on load
+        ## once by projects-list on load
+        ## once by polling
+        expect(@App.ipc.withArgs("get:projects")).to.be.calledThrice
 
         @projects[0].path = "/new/path"
         @ipc.handle("get:projects", null, @projects)
