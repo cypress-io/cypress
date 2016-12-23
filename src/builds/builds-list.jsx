@@ -178,12 +178,12 @@ class Builds extends Component {
             </button>
           </div>
         </header>
-        <ul className='builds-list list-as-table'>
+        <ul className='builds-container list-as-table'>
           {_.map(this.buildsCollection.builds, (build) => (
             <Build
               key={build.id}
               goToBuild={this._openBuild}
-              {...build}
+              build={build}
             />
           ))}
         </ul>

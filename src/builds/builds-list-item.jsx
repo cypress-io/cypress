@@ -2,84 +2,126 @@ import _ from 'lodash'
 import moment from 'moment'
 import React, { Component } from 'react'
 
-import App from '../lib/app'
-
-import { osIcon, browserIcon, commitEmailHash, getStatusIcon } from '../lib/utils'
+import { osIcon, browserIcon, gravatarUrl, getStatusIcon, durationFormatted } from '../lib/utils'
 
 export default class BuildsListItem extends Component {
   render () {
+    const build = this.props.build
+
     return (
       <li onClick={this._goToBuild}>
-        <div className={`row-column-wrapper ${this.props.status}`}>
+        <div className={`row-column-wrapper ${build.status}`}>
           <div>
             <i className={`fa fa-${getStatusIcon(this.props.status)}`}></i>
           </div>
         </div>
         <div className='row-column-wrapper'>
           <div>
-            #{this.props.buildNumber}
+            <i className={`fa ${build.status} fa-${getStatusIcon(build.status)}`}></i>{' '}
+            #{build.buildNumber}
           </div>
         </div>
         <div className='row-column-wrapper'>
-          <div>
+          <div className='td-top-padding'>
             <div>
               <i className='fa fa-code-fork fa-rotate-90'></i>{' '}
-              {this.props.commitBranch}{' '}
-              <img height='13' width='13' src={`https://www.gravatar.com/avatar/${commitEmailHash(this.props.commitAuthorEmail)}`} />
+              {build.commitBranch}{' '}
+              <img
+                className='user-avatar'
+                height='13'
+                width='13'
+                src={`${gravatarUrl(build.commitAuthorEmail)}`}
+              />
               {' '}
-              {this.props.commitAuthorName}
+              {build.commitAuthorName}
             </div>
             <div className='msg'>
-              {this.props.commitMessage}
+              {build.commitMessage}
             </div>
           </div>
         </div>
         <div className='row-column-wrapper'>
           <div>
-            <i className='fa fa-clock-o'></i> started{' '}
-            { moment(this.props.createdAt).fromNow() }
+            <i className='fa fa-clock-o'></i>{' '}
+            { moment(build.createdAt).fromNow() }
           </div>
         </div>
         <div className='row-column-wrapper'>
           <div>
-            <i className='fa fa-hourglass-end'></i> ran for{' '}
             {
-              this.props.totalDuration ?
-                moment.duration(this.props.totalDuration).humanize() :
+              build.totalDuration ?
+                <span>
+                  <i className='fa fa-hourglass-end'></i>{' '}
+                  {durationFormatted(build.totalDuration)}
+                </span> :
                 null
             }
           </div>
         </div>
         <div className='row-column-wrapper'>
           <div className={`td-border-left`}>
-            <i className={`fa fa-fw fa-${this._osIcon()}`}></i>{' '}
             {
               (this._moreThanOneInstance() && this._osLength() > 1) ?
-                <span>{this._osLength()}</span> :
-                <span>{this._osDisplay()}</span>
+                <span>
+                  <i className={`fa fa-fw fa-desktop`}></i>{' '}
+                  {this._osLength()}
+                </span> :
+                <span>
+                  <i className={`fa fa-fw fa-${(this._osIcon())}`}></i>{' '}
+                  {this._osDisplay()}
+                </span>
             }
           </div>
         </div>
         <div className='row-column-wrapper'>
           <div>
-            <i className={`fa fa-fw fa-${this._browserIcon()}`}></i>{' '}
             {
               (this._moreThanOneInstance() && this._browsersLength() > 1) ?
-                <span>{this._browsersLength()}</span> :
-                <span>{this._browserDisplay()}</span>
+                <span>
+                  <i className={`fa fa-fw fa-globe`}></i>{' '}
+                  {this._browsersLength()}
+                </span> :
+                <span>
+                  <i className={`fa fa-fw fa-${this._browserIcon()}`}></i>{' '}
+                  {this._browserDisplay()}
+                </span>
             }
           </div>
         </div>
         <div className='row-column-wrapper'>
           <div className='td-border-left'>
-            Pass{' '}
-            <span className='label label-success'>{this.props.totalPasses}</span>
+            <i className="fa fa-circle-o-notch"></i>{' '}
+            <span>
+              {
+                build.totalPending ?
+                  build.totalPending :
+                  '--'
+              }
+            </span>
           </div>
         </div>
         <div className='row-column-wrapper'>
           <div>
-            Fail{' '}
-            <span className='label label-danger'>{this.props.totalFailures}</span>
+            <i className="fa fa-check green"></i>{' '}
+            <span>
+              {
+                build.totalPasses ?
+                  build.totalPasses :
+                  "--"
+              }
+            </span>
+          </div>
+        </div>
+        <div className='row-column-wrapper'>
+          <div>
+            <i className="fa fa-times red"></i>{' '}
+            <span>
+              {
+                build.totalFailures ?
+                  build.totalFailures :
+                  "--"
+              }
+            </span>
           </div>
         </div>
       </li>
@@ -87,14 +129,14 @@ export default class BuildsListItem extends Component {
   }
 
   _moreThanOneInstance () {
-    return (this.props.instances.length > 1)
+    return (this.props.build.instances.length > 1)
   }
 
   _getUniqBrowsers () {
-    if (!this.props.instances) return 0
+    if (!this.props.build.instances) return 0
 
     return _
-      .chain(this.props.instances)
+      .chain(this.props.build.instances)
       .map((instance) => {
         return `${instance.browserName} + ${instance.browserVersion}`
       })
@@ -107,26 +149,26 @@ export default class BuildsListItem extends Component {
   }
 
   _browserIcon () {
-    if (!this._moreThanOneInstance() && this.props.instances.length) {
-      return (browserIcon(this.props.instances[0].browserName))
+    if (!this._moreThanOneInstance() && this.props.build.instances.length) {
+      return (browserIcon(this.props.build.instances[0].browserName))
     } else {
       return 'globe'
     }
   }
 
   _osIcon () {
-    if (!this._moreThanOneInstance() && this.props.instances.length) {
-      return (osIcon(this.props.instances[0].osName))
+    if (!this._moreThanOneInstance() && this.props.build.instances.length) {
+      return (osIcon(this.props.build.instances[0].osName))
     } else {
       return 'desktop'
     }
   }
 
   _getUniqOs () {
-    if (!this.props.instances) return
+    if (!this.props.build.instances) return
 
     return _
-      .chain(this.props.instances)
+      .chain(this.props.build.instances)
       .map((instance) => {
         return `${instance.osName} + ${instance.osVersion}`
       })
@@ -139,29 +181,26 @@ export default class BuildsListItem extends Component {
   }
 
   _osDisplay = () => {
-    if (this.props.instances && this.props.instances[0]) {
+    if (this.props.build.instances && this.props.build.instances[0]) {
       return (
         <span>
-          <i className={`fa fa-${osIcon(this.props.instances[0].osName)}`}></i>
-          {' '}
-          {this.props.instances[0].osVersion}
+          {this.props.build.instances[0].osVersion}
         </span>
       )
     }
   }
 
   _browserDisplay = () => {
-    if (this.props.instances && this.props.instances[0]) {
+    if (this.props.build.instances && this.props.build.instances[0]) {
       return (
         <span>
-          {this.props.instances[0].browserName}{' '}
-          {this.props.instances[0].browserVersion}
+          {this.props.build.instances[0].browserVersion}
         </span>
       )
     }
   }
 
   _goToBuild = () => {
-    this.props.goToBuild(this.props.id)
+    this.props.goToBuild(this.props.build.id)
   }
 }

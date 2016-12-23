@@ -84,19 +84,19 @@
   }
 }
 
-.builds-list {
-  @include list-columns(2%, 5%, 30%, 16%, 14%, 6%, 8%, 10%, 9%);
+.builds-container {
   margin-bottom: 0;
-  overflow: auto;
+  @include list-columns(0%, 7%, 30%, 16%, 15%, 6%, 8%, 6%, 6%, 6%);
 
-  > li {
+  &>li {
     overflow: auto;
     clear: both;
     border-bottom: 1px solid #eeeeee;
     vertical-align: top;
     position: relative;
+    display: inline-block;
     width: 100%;
-    font-size: 12px;
+    font-size: 13px;
     color: #898A8B;
 
     &:hover {
@@ -104,85 +104,103 @@
       cursor: pointer;
     }
 
-    > div > div {
-      padding: 10px 20px;
+    &>.row-column-wrapper>div {
+      padding: 25px 7px;
       font-weight: 500;
-    }
 
+      &.td-top-padding {
+        padding-top: 15px;
+        padding-bottom: 15px;
+      }
+    }
     .os-block {
       padding-right: 0;
     }
 
-    > div:first-child {
+    &>.row-column-wrapper:first-child {
       border-left: 5px solid #eee;
       min-height: 62px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
 
       &.errored {
         border-left-color: #F5A327;
-        .fa { color: #F5A327;}
       }
 
       &.failed {
         border-left-color: #ec6573;
-        .fa { color: #ec6573;}
       }
 
       &.noTests {
         border-left-color: #F5A327;
-        .fa { color: #F5A327;}
       }
 
       &.passed {
         border-left-color: #1CB77E;
-        .fa { color: #1CB77E;}
       }
 
       &.running {
         border-left-color: #428BCA;
-        .fa { color: #428BCA;}
       }
 
       &.overLimit {
         border-left-color: #F5A327;
-        .fa { color: #F5A327;}
       }
 
       &.timedOut {
         border-left-color: #F5A327;
-        .fa { color: #F5A327;}
       }
       &>div {
-        padding-right: 0;
-        padding-left: 10px;
+        padding: 0
       }
     }
 
-    > div:nth-child(2) > div {
+    &>.row-column-wrapper:nth-child(2)>div {
       padding-right: 0;
-      padding-left: 10px;
+      padding-left: 14px;
       font-weight: 500;
       color: #666;
+
+      &>i {
+        min-width: 12px;
+      }
     }
+
+  }
+  .td-border-left {
+    min-height: 62px;
+    padding-left: 20px;
   }
 
-  .td-border-left {
-    border-left: 1px solid #eee;
-    min-height: 62px;
-  }
 
   .msg {
     font-weight: 300;
     padding-left: 3px;
+    margin-top: 3px;
   }
+
+
 
   .user {
     font-weight: 600;
     margin-left: 3px;
   }
 
+  .user-avatar {
+    margin-left: 5px;
+  }
+
   .fa-user {
     color: #bbb;
   }
+}
+
+.user-avatar {
+  margin-left: 5px;
+  position: relative;
+  top: -1px;
 }
 
 .setup-project-modal {

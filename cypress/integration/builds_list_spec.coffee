@@ -117,7 +117,7 @@ describe "Builds List", ->
           it "shows builds when getting builds succeeds", ->
             @ipc.handle("get:builds", null, @builds).then =>
               cy
-                .get(".builds-list li")
+                .get(".builds-container li")
                 .should("have.length", @builds.length)
 
         describe "when request fails", ->
@@ -519,7 +519,7 @@ describe "Builds List", ->
 
       it "lists builds", ->
         cy
-          .get(".builds-list li")
+          .get(".builds-container li")
           .should("have.length", @builds.length)
 
       it "displays link to dashboard that goes to admin project builds", ->
@@ -530,7 +530,7 @@ describe "Builds List", ->
 
       it "displays build status icon", ->
         cy
-          .get(".builds-list li").first().find("> div")
+          .get(".builds-container li").first().find("> div")
           .should("have.class", "running")
 
       it "displays last updated", ->
@@ -538,7 +538,7 @@ describe "Builds List", ->
 
       it "clicking build opens admin", ->
         cy
-          .get(".builds-list li").first()
+          .get(".builds-container li").first()
           .click()
           .then =>
             expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/projects/#{@projects[0].id}/builds/#{@builds[0].id}")
@@ -568,7 +568,7 @@ describe "Builds List", ->
 
       it "has original state of builds", ->
         cy
-          .get(".builds-list li").first().find("> div")
+          .get(".builds-container li").first().find("> div")
           .should("have.class", "running")
 
       it "sends get:builds ipc event", ->
@@ -587,7 +587,7 @@ describe "Builds List", ->
 
         it "updates the builds", ->
           cy
-            .get(".builds-list li").first().find("> div")
+            .get(".builds-container li").first().find("> div")
             .should("have.class", "passed")
 
         it "enables refresh button", ->
@@ -612,7 +612,7 @@ describe "Builds List", ->
 
         it "displays old builds if another error", ->
           @ipcError("TIMED_OUT").then ->
-            cy.get(".builds-list li").should("have.length", 4)
+            cy.get(".builds-container li").should("have.length", 4)
 
     describe "manually refreshing builds", ->
       beforeEach ->
@@ -632,7 +632,7 @@ describe "Builds List", ->
         expect(@App.ipc.withArgs("get:builds")).to.be.calledTwice
 
       it "still shows list of builds", ->
-        cy.get(".builds-list li").should("have.length", 4)
+        cy.get(".builds-container li").should("have.length", 4)
 
       it "disables refresh button", ->
         cy.get(".builds header button").should("be.disabled")

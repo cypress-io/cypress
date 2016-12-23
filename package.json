@@ -39,6 +39,7 @@
     "eslint-plugin-react": "^5.2.2",
     "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
     "font-awesome": "4.6.1",
+    "gravatar": "^1.6.0",
     "gulp-concat": "^2.6.0",
     "history": "^2.0.0",
     "http-server": "^0.9.0",
