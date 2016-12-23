@@ -7,11 +7,11 @@ const ErrorMessage = observer(({ error }) => {
   let errorMessage
   if (errors.isTimedOut(error)) {
     errorMessage = (
-      <p>Getting the builds timed out.</p>
+      <p>The request for builds timed out.</p>
     )
   } else if (errors.isNoConnection(error)) {
     errorMessage = (
-      <p>There is no internet connection.</p>
+      <p>There is no internet connection. The builds can be loaded once you connect to a network.</p>
     )
   } else {
     errorMessage = (
@@ -28,7 +28,7 @@ const ErrorMessage = observer(({ error }) => {
     <div id='builds-list-page' className='builds-list-error'>
       <div className="empty">
         <h4>
-          Builds could not be loaded
+          Builds Could Not Be Loaded
         </h4>
         {errorMessage}
       </div>

@@ -63,7 +63,8 @@
 
     h5 {
       float: left;
-      margin-bottom: 0
+      margin-bottom: 0;
+      margin-top: 0;
     }
 
     .last-updated {
@@ -255,7 +256,7 @@
 .request-access,
 .builds-list-error {
   .alert-danger {
-    margin-bottom: 1em;
+    margin: 0 2em 1em;
     max-height: 200px;
     overflow: auto;
     text-align: left;

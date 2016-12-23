@@ -65,7 +65,7 @@ class PermissionMessage extends Component {
   _success () {
     return (
       <div className='empty'>
-        <h3>Request Sent</h3>
+        <h4>Request Sent</h4>
         <p>
           An email will be sent to the project owner to request access to this project's builds.
         </p>
@@ -83,12 +83,12 @@ class PermissionMessage extends Component {
     } else {
       return (
         <div className='empty'>
-          <h3>Request Failed</h3>
-          <p>The following error occurred while requesting access:</p>
+          <h4>Request Failed</h4>
+          <p>An unexpected error occurred while requesting access:</p>
           <pre className='alert alert-danger'>
             {this.state.error.message}
           </pre>
-          <p>Try again:</p>
+          <p>Try again.</p>
           {this._button()}
         </div>
       )
