@@ -264,6 +264,21 @@ describe "Builds List", ->
           .get(".btn").contains("Setup a New Project for CI").click()
           .get(".modal").should("be.visible")
 
+      it "clears message after setting up CI", ->
+        cy
+          .fixture("organizations").as("orgs").then ->
+            @ipc.handle("get:orgs", null, @orgs)
+          .get(".btn").contains("Setup a New Project for CI").click()
+          .get(".modal-body")
+          .contains(".btn", "Setup Project").click()
+          .then ->
+            @ipc.handle("setup:ci:project", null, {
+              id: "project-id-123"
+              public: true
+              orgId: "000"
+            })
+          .end().contains("Run Your First Build in CI")
+
     describe "no builds", ->
       context "having never setup CI", ->
         beforeEach ->

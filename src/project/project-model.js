@@ -15,6 +15,21 @@ const persistentProps = [
   'valid',
 ]
 
+const validProps = persistentProps.concat([
+  'clientId',
+  'path',
+  'isChosen',
+  'isLoading',
+  'isNew',
+  'browsers',
+  'onBoardingModalOpen',
+  'browserState',
+  'resolvedConfig',
+  'error',
+  'parentTestsFolderDisplay',
+  'integrationExampleName',
+])
+
 export default class Project {
   @observable id
   @observable clientId
@@ -46,7 +61,7 @@ export default class Project {
   }
 
   update (props) {
-    _.each(persistentProps, (prop) => {
+    _.each(validProps, (prop) => {
       this._updateProp(props, prop)
     })
   }

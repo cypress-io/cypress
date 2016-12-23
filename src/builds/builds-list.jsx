@@ -219,6 +219,7 @@ class Builds extends Component {
       public: projectDetails.public,
       orgId: projectDetails.orgId,
       orgName: (orgsStore.getOrgById(projectDetails.orgId) || {}).name,
+      valid: true,
     })
   }
 
