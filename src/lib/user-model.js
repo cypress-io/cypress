@@ -1,7 +1,6 @@
 import { computed, observable } from 'mobx'
 
 export default class User {
-  @observable id
   @observable name
   @observable email
   @observable sessionToken

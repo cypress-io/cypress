@@ -627,7 +627,7 @@ describe "Builds List", ->
         it "stops spinning the refresh button", ->
           cy.get(".builds header button i").should("not.have.class", "fa-spin")
 
-  context "without a current user", ->
+  context.skip "without a current user", ->
     beforeEach ->
       cy
         .then () ->

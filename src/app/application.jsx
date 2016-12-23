@@ -18,12 +18,21 @@ export default class Application extends Component {
     .then(action('got:current:user', (user) => {
       state.userLoaded = true
       state.setUser(user)
+
+      if (!user || !user.session_token) {
+        return this.props.router.push('/login')
+      }
     }))
 
     autorun(() => {
       if (!state.userLoaded) return
 
-      getProjects()
+      if (state.hasUser) {
+        getProjects()
+        return this.props.router.push('/')
+      } else {
+        return this.props.router.push('/login')
+      }
     })
   }
 

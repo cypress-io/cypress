@@ -22,7 +22,7 @@ const history = useRouterHistory(createHashHistory)({ queryKey: false })
 
 const withUser = (ComponentClass) => {
   return observer((props) => {
-    if (state.userLoaded && projectsStore.isLoaded) {
+    if (state.hasUser && projectsStore.isLoaded) {
       return (
         <Layout params={props.params}>
           <ComponentClass {...props} />

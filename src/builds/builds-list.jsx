@@ -99,21 +99,21 @@ class Builds extends Component {
   render () {
     const { project } = this.props
 
-    //--------Build States----------//
-    // they are not logged in
-    if (!state.hasUser) {
+    // //--------Build States----------//
+    // // they are not logged in
+    // if (!state.hasUser) {
 
-      // AND they've never setup CI
-      if (!this.props.project.id) {
-        return <LoginThenSetupCI/>
+    //   // AND they've never setup CI
+    //   if (!this.props.project.id) {
+    //     return <LoginThenSetupCI/>
 
-      // OR they have setup CI
-      } else {
-        return <LoginThenSeeBuilds/>
-      }
-    }
+    //   // OR they have setup CI
+    //   } else {
+    //     return <LoginThenSeeBuilds/>
+    //   }
+    // }
 
-    // OR the project is invalid
+    // If the project is invalid
     if (!project.valid) {
       return this._emptyWithoutSetup(false)
     }

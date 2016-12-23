@@ -8,7 +8,7 @@ describe "Navigation", ->
         @agents.spy(@App, "ipc")
         @ipc.handle("get:options", null, {})
 
-  context "without a current user", ->
+  context.skip "without a current user", ->
     context "links", ->
       beforeEach ->
         cy.then () ->
@@ -114,10 +114,16 @@ describe "Navigation", ->
           cy.contains("a", "Log Out").click().then ->
             expect(@App.ipc).to.be.calledWith("log:out")
 
-        it "displays login button on logout", ->
+        it.skip "displays login button on logout", ->
           @ipc.handle("log:out", null, {})
           cy.contains("Jane Lane").click()
           cy.contains("a", "Log Out").click()
           cy
             .get("nav a").should ($a) ->
               expect($a).to.contain("Log In")
+
+        it "displays login screen on logout", ->
+          @ipc.handle("log:out", null, {})
+          cy.contains("Jane Lane").click()
+          cy.contains("a", "Log Out").click()
+          cy.contains(".btn", "Log In with GitHub")

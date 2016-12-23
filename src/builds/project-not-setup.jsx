@@ -46,6 +46,8 @@ export default class ProjectNotSetup extends Component {
     return (
       <div>
         <h4>Getting Started with CI</h4>
+        <p>To run your tests in CI, you'll need to configure your project.</p>
+        <p>After choosing your settings, we'll give you a secret key in order to collect build data.</p>
         <button
           className='btn btn-primary'
           onClick={this._showSetupProjectModal}
