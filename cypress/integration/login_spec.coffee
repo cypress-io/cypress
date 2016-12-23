@@ -118,19 +118,22 @@ describe "Login", ->
             it "goes back to login on logout", ->
               cy
                 .then ->
-                  @ipc.handle("get:project:paths", null, [])
+                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
-                .contains("Log Out").click()
+                .contains("Log Out").click().then ->
+                  expect(@App.ipc).to.be.calledWith("clear:github:cookies")
+
                 .get("#login")
 
             it "has login button enabled on logout", ->
               cy
                 .then ->
-                  @ipc.handle("get:project:paths", null, [])
+                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
-                .contains("Log Out").click()
+                .contains("Log Out").click().then ->
+                  expect(@App.ipc).to.be.calledWith("clear:github:cookies")
                 .get("@loginBtn").should("not.be.disabled")
 
             it "calls clear:github:cookies", ->
