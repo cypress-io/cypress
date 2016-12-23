@@ -79,23 +79,7 @@ class Config extends Component {
               </tr>
             </tbody>
           </table>
-          <section className='config-ci-keys'>
-            <h5>CI Keys</h5>
-            <p className='text-muted'>
-              We verify that your project is allowed to run in Continuous Integration by checking the project's CI Key. The following code needs to be in your CI config:{' '}
-              <code>cypress ci {`<ci-key>`}</code>{' '}
-              <a href='#' onClick={this._openCiGuide}>
-                <i className='fa fa-info-circle'></i>{' '}
-                Learn More
-              </a>
-            </p>
-            {this._ciKeys()}
-            <p>
-              <a href='#' onClick={this._openAdminCiKeys}>
-                Manage CI Keys <i className='fa fa-external-link'></i>
-              </a>
-            </p>
-          </section>
+          {this._ciKeysSection()}
         </div>
       </div>
     )
@@ -136,6 +120,34 @@ class Config extends Component {
       let hasComma = opts.comma || last !== key
       return this._getSpan(key, value, hasComma)
     })
+  }
+
+  _ciKeysSection () {
+    if (this._notSetupForCi()) return null
+
+    return (
+      <section className='config-ci-keys'>
+        <h5>CI Keys</h5>
+        <p className='text-muted'>
+          We verify that your project is allowed to run in Continuous Integration by checking the project's CI Key. The following code needs to be in your CI config:{' '}
+          <code>cypress ci {`<ci-key>`}</code>{' '}
+          <a href='#' onClick={this._openCiGuide}>
+            <i className='fa fa-info-circle'></i>{' '}
+            Learn More
+          </a>
+        </p>
+        {this._ciKeys()}
+        <p>
+          <a href='#' onClick={this._openAdminCiKeys}>
+            Manage CI Keys <i className='fa fa-external-link'></i>
+          </a>
+        </p>
+      </section>
+    )
+  }
+
+  _notSetupForCi () {
+    return !this.props.project.id || !this.props.project.valid
   }
 
   _ciKeys = () => {
