@@ -188,7 +188,7 @@ class SetupProject extends Component {
 
   _manageOrgs = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/admin/manage-orgs')
+    App.ipc('external:open', 'https://on.cypress.io/admin/settings')
   }
 
   _updateAccess = (e) => {

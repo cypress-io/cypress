@@ -331,7 +331,7 @@ describe "Builds List", ->
           it "opens external link on click of manage", ->
             cy
               .contains("manage").click().then ->
-                 expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/manage-orgs")
+                 expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/settings")
 
           it "displays public and private radios", ->
             cy
@@ -410,7 +410,7 @@ describe "Builds List", ->
                   .get("#builds-list-page a")
                   .click()
                   .then =>
-                    expect(@App.ipc).to.be.calledWith("external:open", "http://on.cypress.io/guides/continuous-integration")
+                    expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/continuous-integration")
 
           describe "when project is private", ->
             beforeEach ->
@@ -504,6 +504,7 @@ describe "Builds List", ->
             @clock = win.sinon.useFakeTimers(timestamp)
           .get(".projects-list a").contains("My-Fake-Project").click()
           .fixture("config").then (@config) ->
+            @config.projectId = @projects[0].id
             @ipc.handle("open:project", null, @config)
             @clock.tick(1000)
           .fixture("specs").as("specs").then ->
@@ -519,13 +520,13 @@ describe "Builds List", ->
       it "lists builds", ->
         cy
           .get(".builds-list li")
-          .should("have.length", 4)
+          .should("have.length", @builds.length)
 
-      it "displays link to dashboard", ->
+      it "displays link to dashboard that goes to admin project builds", ->
         cy
           .contains("See All").click()
           .then ->
-             expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin")
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/projects/#{@projects[0].id}/builds")
 
       it "displays build status icon", ->
         cy
@@ -534,6 +535,13 @@ describe "Builds List", ->
 
       it "displays last updated", ->
         cy.contains("Last updated: 10:00:02am")
+
+      it "clicking build opens admin", ->
+        cy
+          .get(".builds-list li").first()
+          .click()
+          .then =>
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/projects/#{@projects[0].id}/builds/#{@builds[0].id}")
 
     describe "polling builds", ->
       beforeEach ->

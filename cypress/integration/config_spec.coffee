@@ -73,6 +73,11 @@ describe "Config", ->
     it "shows spinner", ->
       cy.get(".config-ci-keys .fa-spinner")
 
+    it "opens admin project settings when manage ci keys is clicked", ->
+      cy
+        .get(".config-ci-keys").contains("Manage CI Keys").click().then ->
+          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/projects/#{@config.projectId}/settings")
+
     describe "when ci keys load", ->
       beforeEach ->
         @ipc.handle("get:ci:keys", null, @ciKeys).then ->

@@ -16,8 +16,8 @@ import orgsStore from '../organizations/organizations-store'
 
 import Build from './builds-list-item'
 import ErrorMessage from './error-message'
-import LoginThenSetupCI from './login-then-setup-ci'
-import LoginThenSeeBuilds from './login-then-see-builds'
+// import LoginThenSetupCI from './login-then-setup-ci'
+// import LoginThenSeeBuilds from './login-then-see-builds'
 import PermissionMessage from './permission-message'
 import ProjectNotSetup from './project-not-setup'
 
@@ -160,7 +160,7 @@ class Builds extends Component {
       <div id='builds-list-page' className='builds'>
         <header>
           <h5>Builds
-          <a href="#" className='btn btn-sm see-all-builds' onClick={this._openDashboard}>
+          <a href="#" className='btn btn-sm see-all-builds' onClick={this._openBuilds}>
             See All <i className='fa fa-external-link'></i>
           </a>
 
@@ -182,7 +182,7 @@ class Builds extends Component {
           {_.map(this.buildsCollection.builds, (build) => (
             <Build
               key={build.id}
-              goToBuild={() => {}}
+              goToBuild={this._openBuild}
               {...build}
             />
           ))}
@@ -254,14 +254,18 @@ class Builds extends Component {
     )
   }
 
-  _openDashboard = (e) => {
+  _openBuilds = (e) => {
     e.preventDefault()
-    App.ipc('external:open', `https://on.cypress.io/admin`)
+    App.ipc('external:open', `https://on.cypress.io/admin/projects/${this.props.project.id}/builds`)
   }
 
   _openCiGuide = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'http://on.cypress.io/guides/continuous-integration')
+    App.ipc('external:open', 'https://on.cypress.io/guides/continuous-integration')
+  }
+
+  _openBuild = (buildId) => {
+    App.ipc('external:open', `https://on.cypress.io/admin/projects/${this.props.project.id}/builds/${buildId}`)
   }
 }
 
