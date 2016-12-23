@@ -172,6 +172,22 @@ describe "Builds List", ->
       it "displays timed out message", ->
         cy.contains("timed out")
 
+    describe "not found error", ->
+      beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
+          .fixture("config").then (@config) ->
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+          .get(".nav a").contains("Builds").click()
+          .then =>
+            @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "NOT_FOUND"}, null)
+
+      it "displays empty message", ->
+        cy.contains("Builds Cannot Be Displayed")
+
     describe "no project id error", ->
       beforeEach ->
         cy

@@ -17,6 +17,10 @@ const errors = {
     return _.get(err, 'type') === 'NO_CONNECTION'
   },
 
+  isNotFound (err) {
+    return _.get(err, 'type') === 'NOT_FOUND'
+  },
+
   isUnauthenticated (err) {
     return _.get(err, 'type') === 'UNAUTHENTICATED'
   },

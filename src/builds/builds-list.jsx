@@ -113,11 +113,20 @@ class Builds extends Component {
       }
     }
 
+    // OR the project is invalid
+    if (!project.valid) {
+      return this._emptyWithoutSetup(false)
+    }
+
     // OR if there is an error getting the builds
     if (this.buildsCollection.error) {
       // project id missing, probably removed manually from cypress.json
       if (errors.isMissingProjectId(this.buildsCollection.error)) {
         return this._emptyWithoutSetup()
+
+      // the project is invalid
+      } else if (errors.isNotFound(this.buildsCollection.error)) {
+        return this._emptyWithoutSetup(false)
 
       // they are not authorized to see builds
       } else if (errors.isUnauthenticated(this.buildsCollection.error)) {
@@ -131,11 +140,6 @@ class Builds extends Component {
 
     // OR the builds are loading for the first time
     if (this.buildsCollection.isLoading && !this.buildsCollection.isLoaded) return <Loader color='#888' scale={0.5}/>
-
-    // OR the project is invalid
-    if (!project.valid) {
-      return this._emptyWithoutSetup()
-    }
 
     // OR there are no builds to show
     if (!this.buildsCollection.builds.length) {
@@ -197,10 +201,11 @@ class Builds extends Component {
     )
   }
 
-  _emptyWithoutSetup () {
+  _emptyWithoutSetup (isValid = true) {
     return (
       <ProjectNotSetup
         project={this.props.project}
+        isValid={isValid}
         onSetup={this._setProjectDetails}
       />
     )

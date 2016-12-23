@@ -27,7 +27,7 @@ export default class ProjectNotSetup extends Component {
       <div id='builds-list-page'>
         <div className="empty">
           {
-            this.props.project.valid ?
+            this.props.isValid ?
               <div>{this._getStartedWithCI()}</div> :
               <div>{this._invalidProject()}</div>
           }
