@@ -11,6 +11,7 @@ describe "Config", ->
         @agents = cy.agents()
         @ipc.handle("get:options", null, {})
         @agents.spy(@App, "ipc")
+      .fixture("ci_keys").as("ciKeys")
       .fixture("user").then (@user) ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
@@ -58,6 +59,52 @@ describe "Config", ->
         .get(".fa-question-circle").click().then ->
           expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/configuration")
 
+    it "displays ci keys text", ->
+      cy.contains("h5", "CI Keys")
+
+    it "opens ci guide when learn more is clicked", ->
+      cy
+        .get(".config-ci-keys").contains("Learn More").click().then ->
+          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/ci-learn-more")
+
+    it "loads the project's ci keys", ->
+      expect(@App.ipc).to.be.calledWith("get:ci:keys")
+
+    it "shows spinner", ->
+      cy.get(".config-ci-keys .fa-spinner")
+
+    describe "when ci keys load", ->
+      beforeEach ->
+        @ipc.handle("get:ci:keys", null, @ciKeys).then ->
+          cy
+            .get(".config-ci-keys tr").first().as("ciKeyRow")
+
+      it "displays table of CI keys", ->
+        cy
+          .get(".config-ci-keys tr").should("have.length", @ciKeys.length)
+
+      it "displays ci key", ->
+        cy
+          .get("@ciKeyRow").first().find("input")
+            .should("have.value", @ciKeys[0].id)
+
+      it "displays date created formatting", ->
+        cy
+          .get("@ciKeyRow")
+            .contains("created 4/5/2016")
+
+      it "displays how long ago it was last used", ->
+        cy
+          .get("@ciKeyRow").contains("used")
+          .get("@ciKeyRow").contains("ago")
+
+    describe "when there are no keys", ->
+      beforeEach ->
+        @ipc.handle("get:ci:keys", null, [])
+
+      it "displays empty view", ->
+        cy
+          .get(".empty-small").contains("No CI Keys")
 
   context "on config changes", ->
     beforeEach ->

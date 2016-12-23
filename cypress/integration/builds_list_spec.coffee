@@ -254,6 +254,7 @@ describe "Builds List", ->
           cy
             .get(".projects-list a")
               .contains("My-Fake-Project").click()
+            .fixture("ci_keys").as("ciKeys")
             .fixture("config").then (@config) ->
               @config.projectId = null
               @ipc.handle("open:project", null, @config)
@@ -339,7 +340,7 @@ describe "Builds List", ->
                 public: true
                 orgId: "000"
               })
-              @ipc.handle("get:ci:keys", null, [{id: "ci-key-123"}])
+              @ipc.handle("get:ci:keys", null, @ciKeys)
 
               cy
                 .get(".modal-body")
@@ -383,7 +384,7 @@ describe "Builds List", ->
           describe "when project is private", ->
             beforeEach ->
               @ipc.handle("setup:ci:project", null, {id: "project-id-123", public: false})
-              @ipc.handle("get:ci:keys", null, [{id: "ci-key-123"}])
+              @ipc.handle("get:ci:keys", null, @ciKeys)
               cy
                 .get("input[name=privacy-radio][value=false]")
                 .click()

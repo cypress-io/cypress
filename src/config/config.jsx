@@ -1,11 +1,28 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
+import moment from 'moment'
 import { observer } from 'mobx-react'
-import App from '../lib/app'
 import Tooltip from 'rc-tooltip'
+
+import App from '../lib/app'
+import { getCiKeys } from '../projects/projects-api'
 
 @observer
 class Config extends Component {
+  state = {
+    ciKeys: [],
+    isLoadingCiKeys: true,
+  }
+
+  componentWillMount () {
+    getCiKeys().then((ciKeys = []) => {
+      this.setState({
+        ciKeys,
+        isLoadingCiKeys: false,
+      })
+    })
+  }
+
   render () {
     this.resolvedConfig = this.props.project.resolvedConfig
 
@@ -62,6 +79,23 @@ class Config extends Component {
               </tr>
             </tbody>
           </table>
+          <section className='config-ci-keys'>
+            <h5>CI Keys</h5>
+            <p className='text-muted'>
+              We verify that your project is allowed to run in Continuous Integration by checking the project's CI Key. The following code needs to be in your CI config:{' '}
+              <code>cypress ci {`<ci-key>`}</code>{' '}
+              <a href='#' onClick={this._openCiGuide}>
+                <i className='fa fa-info-circle'></i>{' '}
+                Learn More
+              </a>
+            </p>
+            {this._ciKeys()}
+            <p>
+              <a href='#' onClick={this._openAdminCiKeys}>
+                Manage CI Keys <i className='fa fa-external-link'></i>
+              </a>
+            </p>
+          </section>
         </div>
       </div>
     )
@@ -104,9 +138,91 @@ class Config extends Component {
     })
   }
 
+  _ciKeys = () => {
+    if (this.state.isLoadingCiKeys) {
+      return (
+        <p className='loading-ci-keys'>
+          <i className='fa fa-spinner fa-spin'></i>{' '}
+          Loading CI keys...
+        </p>
+      )
+    }
+
+    const ciKeys = this.state.ciKeys
+
+    if (!ciKeys.length) {
+      return (
+        <div className='empty empty-small'>No CI Keys</div>
+      )
+    }
+
+    return (
+      <table className='table'>
+        <tbody>
+          {_.map(ciKeys, (ciKey) => (
+            <tr key={ciKey.id}>
+              <td className='ci-key'>
+                <div className='input-group'>
+                  <Tooltip
+                    overlay={<span>Copy to clipboard</span>}
+                    >
+                    <span onClick={this._copyKey} className='input-group-addon'>
+                      <i className='fa fa-copy'></i>
+                    </span>
+                  </Tooltip>
+                  <input
+                    type='text'
+                    className='form-control input-sm'
+                    value={ciKey.id}
+                    readOnly
+                  />
+                </div>
+              </td>
+              <td className='ci-key-date'>
+                created { moment(ciKey.createdAt).format('M/D/YYYY')  }
+              </td>
+              <td className='ci-key-date'>
+                used { moment(ciKey.lastUsed).fromNow() }
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )
+  }
+
+  _copyKey = (e) => {
+    const ciKeyInput = e.currentTarget.parentNode.querySelector('input')
+
+    ciKeyInput.select()
+
+    let message
+    try {
+      const successful = document.execCommand('copy')
+      message = successful ? 'Copied!' : 'Oops, unable to copy'
+    } catch (err) {
+      message = 'Oops, unable to copy'
+    }
+
+    const tooltip = document.querySelector('.rc-tooltip-inner span')
+    if (tooltip) {
+      tooltip.innerHTML = message
+    }
+  }
+
   _openHelp (e) {
     e.preventDefault()
     App.ipc('external:open', 'https://on.cypress.io/guides/configuration')
+  }
+
+  _openCiGuide (e) {
+    e.preventDefault()
+    App.ipc('external:open', 'https://on.cypress.io/ci-learn-more')
+  }
+
+  _openAdminCiKeys (e) {
+    e.preventDefault()
+    App.ipc('external:open', 'https://on.cypress.io/admin/ci-keys')
   }
 }
 

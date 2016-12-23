@@ -261,3 +261,50 @@
     text-align: left;
   }
 }
+
+.config-ci-keys {
+  margin-bottom: 2em;
+
+  table {
+    @include table-columns(60%, 20%, 20%);
+    margin-bottom: 10px;
+
+    &.table > tbody > tr > td {
+      line-height: 30px;
+      padding: 5px;
+      font-size: 13px;
+
+      &:first-child {
+        padding-left: 0;
+      }
+    }
+
+    .ci-key-date {
+      color: #777;
+    }
+
+    .ci-key {
+      font-family: Consolas, Monaco, 'Andale Mono', monospace;
+
+      input {
+        background-color: #fff;
+        font-size: 14px;
+        outline: none;
+      }
+
+      .input-group-addon {
+        cursor: pointer;
+
+        &:hover {
+          color: #333;
+        }
+      }
+    }
+  }
+
+}
+
+.loading-ci-keys {
+  color: #999;
+  margin: 1em;
+}
