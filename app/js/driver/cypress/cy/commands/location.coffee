@@ -6,7 +6,7 @@ $Cypress.register "Location", (Cypress, _, $) ->
 
     _getLocation: (key, win) ->
       try
-        remoteUrl = (win ? @__location(@private("window")))
+        remoteUrl = @__location(win ? @private("window"))
         location  = Cypress.Location.create(remoteUrl)
 
         if key
