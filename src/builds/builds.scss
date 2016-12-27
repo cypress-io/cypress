@@ -281,8 +281,33 @@
   }
 }
 
+.config-table {
+  margin: 10px 0;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
 .config-ci-keys {
   margin-bottom: 2em;
+
+  p.text-muted.manage-btn {
+    text-align: center;
+    margin-bottom: 0;
+  }
+
+  p.text-muted {
+    margin-bottom: 5px;
+  }
+
+  .empty-well {
+    margin: 10px 0;
+  }
+
+  pre {
+    margin: 10px 0;
+    background-color: white;
+    border: 1px solid #ddd;
+  }
 
   table {
     @include table-columns(60%, 20%, 20%);

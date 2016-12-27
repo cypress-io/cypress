@@ -36,6 +36,10 @@
 
   .config-vars {
     font-size: 13px;
+    border: 1px solid #ddd;
+    background-color: white;
+    margin: 0;
+    padding: 10px;
     font-family: Consolas, Monaco, 'Andale Mono', monospace;
 
     .envFile:hover, .env:hover, .config:hover, .cli:hover, .default:hover {
@@ -97,7 +101,7 @@
 }
 
 .config-wrapper {
-  padding: 0 20px;
+  padding: 20px 20px 0;
 
   table tr:first-child td {
     border-top: 0;

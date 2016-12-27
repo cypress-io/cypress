@@ -32,53 +32,54 @@ class Config extends Component {
     return (
       <div id='config'>
         <div className='config-wrapper'>
-          <h5>
-            Your project's configuration:{' '}
-            <a href='#' className='pull-right' onClick={this._openHelp}>
-              <i className='fa fa-question-circle'></i>{' '}
-              Learn more
-            </a>
-          </h5>
-          <pre className='config-vars'>
-            { `{` }
-            { this._display(config, { comma: true }) }
-            <span className='envVars'>
-              <span className='key'>env</span>
-              <span className='colon'>:</span>{' '}
+          <form className='form-horizontal'>
+            <legend>
+              Resolved Configuration:{' '}
+              <a href='#' className='pull-right' onClick={this._openHelp}>
+                <i className='fa fa-info-circle'></i>{' '}
+                Learn more
+              </a>
+            </legend>
+            <p className='text-muted'>Your project's configuration is displayed below. A value can be set from the following sources:
+              <table className='table config-table'>
+                <tbody>
+                  <tr className='config-keys'>
+                    <td><span className='default'>default</span></td>
+                    <td>default values</td>
+                  </tr>
+                  <tr className='config-keys'>
+                    <td><span className='config'>config</span></td>
+                    <td>set from cypress.json</td>
+                  </tr>
+                  <tr className='config-keys'>
+                    <td><span className='envFile'>envFile</span></td>
+                    <td>set from cypress.env.json</td>
+                  </tr>
+                  <tr className='config-keys'>
+                    <td><span className='env'>env</span></td>
+                    <td>set from environment variables</td>
+                  </tr>
+                  <tr className='config-keys'>
+                    <td><span className='cli'>CLI</span></td>
+                    <td>set from CLI arguments</td>
+                  </tr>
+                </tbody>
+              </table>
+            </p>
+            <pre className='config-vars'>
               { `{` }
-              { this._display(envVars) }
-            </span>
-            <span className='line'>{`}`}</span>
-            <br />
-            { `}` }
-          </pre>
-          <h5>
-            Legend
-          </h5>
-          <table className='table'>
-            <tbody>
-              <tr className='config-keys'>
-                <td><span className='default'>default</span></td>
-                <td>default values</td>
-              </tr>
-              <tr className='config-keys'>
-                <td><span className='config'>config</span></td>
-                <td>set from cypress.json</td>
-              </tr>
-              <tr className='config-keys'>
-                <td><span className='envFile'>envFile</span></td>
-                <td>set from cypress.env.json</td>
-              </tr>
-              <tr className='config-keys'>
-                <td><span className='env'>env</span></td>
-                <td>set from environment variables</td>
-              </tr>
-              <tr className='config-keys'>
-                <td><span className='cli'>CLI</span></td>
-                <td>set from CLI arguments</td>
-              </tr>
-            </tbody>
-          </table>
+              { this._display(config, { comma: true }) }
+              <span className='envVars'>
+                <span className='key'>env</span>
+                <span className='colon'>:</span>{' '}
+                { `{` }
+                { this._display(envVars) }
+              </span>
+              <span className='line'>{`}`}</span>
+              <br />
+              { `}` }
+            </pre>
+          </form>
           {this._ciKeysSection()}
         </div>
       </div>
@@ -126,23 +127,31 @@ class Config extends Component {
     if (this._notSetupForCi()) return null
 
     return (
-      <section className='config-ci-keys'>
-        <h5>CI Keys</h5>
-        <p className='text-muted'>
-          We verify that your project is allowed to run in Continuous Integration by checking the project's CI Key. The following code needs to be in your CI config:{' '}
-          <code>cypress ci {`<ci-key>`}</code>{' '}
-          <a href='#' onClick={this._openCiGuide}>
+      <form className='form-horizontal config-ci-keys'>
+        <legend>
+          CI Keys
+          <a href='#' className='pull-right' onClick={this._openCiGuide}>
             <i className='fa fa-info-circle'></i>{' '}
             Learn More
           </a>
+        </legend>
+        <p className='text-muted'>
+          CI Keys allow you to record test results, screenshots and videos in Cypress.
+          {
+            !this.state.isLoadingCiKeys && this.state.ciKeys.length ?
+              <span>To record your builds, run this command:{' '}
+                <pre><code>cypress ci {this.state.ciKeys[0].id}</code></pre>{' '}
+              </span> :
+              null
+          }
         </p>
         {this._ciKeys()}
-        <p>
-          <a href='#' onClick={this._openAdminCiKeys}>
-            Manage CI Keys <i className='fa fa-external-link'></i>
+        <p className='text-muted manage-btn'>
+          <a href='#' onClick={this._openAdminCiKeys} >
+            <i className='fa fa-key'></i> Add or Remove CI Keys
           </a>
         </p>
-      </section>
+      </form>
     )
   }
 
@@ -160,67 +169,61 @@ class Config extends Component {
       )
     }
 
-    const ciKeys = this.state.ciKeys
+    return null
 
-    if (!ciKeys.length) {
-      return (
-        <div className='empty empty-small'>No CI Keys</div>
-      )
-    }
-
-    return (
-      <table className='table'>
-        <tbody>
-          {_.map(ciKeys, (ciKey) => (
-            <tr key={ciKey.id}>
-              <td className='ci-key'>
-                <div className='input-group'>
-                  <Tooltip
-                    overlay={<span>Copy to clipboard</span>}
-                    >
-                    <span onClick={this._copyKey} className='input-group-addon'>
-                      <i className='fa fa-copy'></i>
-                    </span>
-                  </Tooltip>
-                  <input
-                    type='text'
-                    className='form-control input-sm'
-                    value={ciKey.id}
-                    readOnly
-                  />
-                </div>
-              </td>
-              <td className='ci-key-date'>
-                created { moment(ciKey.createdAt).format('M/D/YYYY')  }
-              </td>
-              <td className='ci-key-date'>
-                used { moment(ciKey.lastUsed).fromNow() }
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    )
+    // return (
+    //   <table className='table'>
+    //     <tbody>
+    //       {_.map(ciKeys, (ciKey) => (
+    //         <tr key={ciKey.id}>
+    //           <td className='ci-key'>
+    //             <div className='input-group'>
+    //               <Tooltip
+    //                 overlay={<span>Copy to clipboard</span>}
+    //                 >
+    //                 <span onClick={this._copyKey} className='input-group-addon'>
+    //                   <i className='fa fa-copy'></i>
+    //                 </span>
+    //               </Tooltip>
+    //               <input
+    //                 type='text'
+    //                 className='form-control input-sm'
+    //                 value={ciKey.id}
+    //                 readOnly
+    //               />
+    //             </div>
+    //           </td>
+    //           <td className='ci-key-date'>
+    //             created { moment(ciKey.createdAt).format('M/D/YYYY')  }
+    //           </td>
+    //           <td className='ci-key-date'>
+    //             used { moment(ciKey.lastUsed).fromNow() }
+    //           </td>
+    //         </tr>
+    //       ))}
+    //     </tbody>
+    //   </table>
+    // )
   }
 
-  _copyKey = (e) => {
-    const ciKeyInput = e.currentTarget.parentNode.querySelector('input')
+  // _copyKey = (e) => {
+  //   const ciKeyInput = e.currentTarget.parentNode.querySelector('input')
 
-    ciKeyInput.select()
+  //   ciKeyInput.select()
 
-    let message
-    try {
-      const successful = document.execCommand('copy')
-      message = successful ? 'Copied!' : 'Oops, unable to copy'
-    } catch (err) {
-      message = 'Oops, unable to copy'
-    }
+  //   let message
+  //   try {
+  //     const successful = document.execCommand('copy')
+  //     message = successful ? 'Copied!' : 'Oops, unable to copy'
+  //   } catch (err) {
+  //     message = 'Oops, unable to copy'
+  //   }
 
-    const tooltip = document.querySelector('.rc-tooltip-inner span')
-    if (tooltip) {
-      tooltip.innerHTML = message
-    }
-  }
+  //   const tooltip = document.querySelector('.rc-tooltip-inner span')
+  //   if (tooltip) {
+  //     tooltip.innerHTML = message
+  //   }
+  // }
 
   _openHelp (e) {
     e.preventDefault()

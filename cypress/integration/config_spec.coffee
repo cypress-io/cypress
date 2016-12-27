@@ -1,6 +1,6 @@
 md5 = require("md5")
 
-describe "Config", ->
+describe "Settings", ->
   beforeEach ->
     @firstProjectName = "My-Fake-Project"
 
@@ -27,20 +27,19 @@ describe "Config", ->
       .fixture("config").then (@config) ->
         @ipc.handle("open:project", null, @config)
       .get(".navbar-default")
-      .get("a").contains("Config").click()
+      .get("a").contains("Settings").click()
 
     context "displays page", ->
-      it "navigates to config page", ->
+      it "navigates to settings page", ->
         cy
           .location().its("hash").should("include", "config")
 
-      it "highlight config nav", ->
+      it "highlight settings nav", ->
         cy
-          .contains("a", "Config").should("have.class", "active")
+          .contains("a", "Settings").should("have.class", "active")
 
     context "display legend", ->
       it "has legend in table", ->
-        cy.contains("Legend")
         cy.get("table>tbody>tr").should("have.length", 5)
 
     context "displays config", ->
@@ -61,11 +60,11 @@ describe "Config", ->
 
       it "opens help link on click", ->
         cy
-          .get(".fa-question-circle").click().then ->
+          .get(".fa-info-circle").first().click().then ->
             expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/configuration")
 
       it "displays ci keys section", ->
-        cy.contains("h5", "CI Keys")
+        cy.contains("legend", "CI Keys")
 
       it "opens ci guide when learn more is clicked", ->
         cy
@@ -78,43 +77,26 @@ describe "Config", ->
       it "shows spinner", ->
         cy.get(".config-ci-keys .fa-spinner")
 
-      it "opens admin project settings when manage ci keys is clicked", ->
+      it "opens admin project settings when ci keys link is clicked", ->
         cy
-          .get(".config-ci-keys").contains("Manage CI Keys").click().then ->
+          .get(".config-ci-keys").contains("Add or Remove CI Keys").click().then ->
             expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/projects/#{@config.projectId}/settings")
 
       describe "when ci keys load", ->
         beforeEach ->
-          @ipc.handle("get:ci:keys", null, @ciKeys).then ->
-            cy
-              .get(".config-ci-keys tr").first().as("ciKeyRow")
+          @ipc.handle("get:ci:keys", null, @ciKeys)
 
-        it "displays table of CI keys", ->
+        it "displays first CI key", ->
           cy
-            .get(".config-ci-keys tr").should("have.length", @ciKeys.length)
-
-        it "displays ci key", ->
-          cy
-            .get("@ciKeyRow").first().find("input")
-              .should("have.value", @ciKeys[0].id)
-
-        it "displays date created formatting", ->
-          cy
-            .get("@ciKeyRow")
-              .contains("created 4/5/2016")
-
-        it "displays how long ago it was last used", ->
-          cy
-            .get("@ciKeyRow").contains("used")
-            .get("@ciKeyRow").contains("ago")
+            .get(".config-ci-keys").contains("cypress ci " + @ciKeys[0].id)
 
       describe "when there are no keys", ->
         beforeEach ->
           @ipc.handle("get:ci:keys", null, [])
 
-        it "displays empty view", ->
+        it "does not display cypress ci command", ->
           cy
-            .get(".empty-small").contains("No CI Keys")
+            .get(".config-ci-keys").should("not.contain", "cypress ci")
 
     context "on config changes", ->
       beforeEach ->
@@ -126,7 +108,7 @@ describe "Config", ->
 
             @ipc.handle("open:project", null, @config)
 
-        cy.contains("Config")
+        cy.contains("Settings")
 
       it "displays updated config", ->
         @config.resolved.baseUrl.value = "http://localhost:7777"
@@ -162,12 +144,12 @@ describe "Config", ->
           cy
             .contains("Can't start server").then ->
               @ipc.handle("open:project", null, @config)
-          cy.contains("Config")
+          cy.contains("Settings")
 
     context "on:focus:tests clicked", ->
       beforeEach ->
         cy
-          .contains("Config")
+          .contains("Settings")
 
       it "routes to specs page", ->
         @ipc.handle("on:focus:tests")
@@ -189,7 +171,7 @@ describe "Config", ->
         @config.projectId = null
         @ipc.handle("open:project", null, @config)
       .get(".navbar-default")
-      .get("a").contains("Config").click()
+      .get("a").contains("Settings").click()
       .end().contains("h5", "CI Keys").should("not.exist")
 
     it "does not show ci Keys section when project is invalid", ->
@@ -204,5 +186,5 @@ describe "Config", ->
       .fixture("config").then (@config) ->
         @ipc.handle("open:project", null, @config)
       .get(".navbar-default")
-      .get("a").contains("Config").click()
+      .get("a").contains("Settings").click()
       .end().contains("h5", "CI Keys").should("not.exist")

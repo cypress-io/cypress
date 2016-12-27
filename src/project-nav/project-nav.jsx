@@ -34,7 +34,7 @@ export default class ProjectNav extends Component {
                 activeClassName='active'
                 >
                 <i className='fa fa-cog'></i>{' '}
-                Config
+                Settings
               </Link>
             </li>
           </ul>
