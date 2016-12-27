@@ -162,3 +162,10 @@ describe "redirects + requests", ->
       .its("headers")
       .its("accept")
       .should("eq", "text/html")
+
+  it "issue #375: does not duplicate request cookies on 302 redirect", ->
+    cy
+      .request("http://localhost:2295/login")
+      .request("POST", "http://localhost:2295/login")
+      .its("body.cookie")
+      .should("eq", "session=2")

@@ -38,6 +38,7 @@ normalizeCookieProps = (data) ->
     when data.expirationDate?
       delete cookie.expirationDate
       delete cookie.url
+      cookie.hostOnly = data.hostOnly
       cookie.expiry = data.expirationDate
 
   cookie

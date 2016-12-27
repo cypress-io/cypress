@@ -62,3 +62,25 @@ describe "subdomains", ->
         ## only a single nomnom cookie should have been sent
         ## since we set a domain cookie that matches this request
         expect(cookie).to.eq("nomnom=good")
+
+  it "issue: #361: incorrect cookie synchronization between cy.request redirects", ->
+    cy
+      ## start with a cookie on foobar
+      .setCookie("foobar", "1")
+
+      ## send a request to localhost but get
+      ## redirected back to foobar
+      .request("http://localhost:2292/redirect")
+      .its("body.cookie")
+      .should("eq", "foobar=1")
+
+  it "issue: #362: incorrect cookie synchronization between cy.visit redirects", ->
+    cy
+      ## start with a cookie on foobar specifically for www
+      .setCookie("foobar", "1", {domain: "www.foobar.com"})
+
+      ## send a request to domain.foobar but get
+      ## redirected back to www.foobar.com
+      .visit("http://domain.foobar.com:2292/domainRedirect")
+      .get("#cookie")
+      .should("have.text", "foobar=1")

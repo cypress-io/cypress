@@ -55,11 +55,33 @@ newCookieJar = ->
       j.getCookiesSync(uri, {expire: false})
   }
 
-flattenCookies = (cookies) ->
-  _.reduce cookies, (memo, cookie) ->
-    memo[cookie.name] = cookie.value
-    memo
-  , {}
+convertToJarCookie = (cookies) ->
+
+  cookies.map (cookie) ->
+    props = {
+      key:      cookie.name
+      path:     cookie.path
+      value:    cookie.value
+      secure:   cookie.secure
+      httpOnly: cookie.httpOnly
+      hostOnly: cookie.hostOnly
+    }
+
+    ## if we are a hostOnly then
+    ## this cookie was created with
+    ## a Domain= attribute and must
+    ## be set here
+    if cookie.hostOnly
+      props.domain = cookie.domain
+
+    c = new Cookie(props)
+
+    if cookie.expiry?
+      ## we get expiry in seconds since the EPOCH
+      ## and much convert that to milliseconds
+      c.expiryTime(cookie.expiry * 1000)
+
+    return c
 
 reduceCookieToArray = (c) ->
   _.reduce c, (memo, val, key) ->
@@ -238,7 +260,13 @@ module.exports = (options = {}) ->
       setCookies = (cookies) =>
         return if _.isEmpty(cookies)
 
-        options.headers["Cookie"] = createCookieString(cookies)
+        if jar = options.jar
+          u = options.url
+
+          cookies.forEach (c) ->
+            jar.setCookie(c, u, {ignoreError: true})
+        else
+          options.headers["Cookie"] = createCookieString(cookies)
 
       send = =>
         str = @create(options)
@@ -246,7 +274,7 @@ module.exports = (options = {}) ->
         str
 
       automation("get:cookies", {url: options.url})
-      .then(flattenCookies)
+      .then(convertToJarCookie)
       .then(setCookies)
       .then(send)
 
@@ -295,10 +323,15 @@ module.exports = (options = {}) ->
         delete options.json
         delete options.body
 
-      setCookies = (cookies) =>
+      setCookies = (cookies, jar, url) =>
         return if _.isEmpty(cookies)
 
-        options.headers["Cookie"] = createCookieString(cookies)
+
+        if jar
+          cookies.forEach (c) ->
+            jar.setCookie(c, url, {ignoreError: true})
+        else
+          options.headers["Cookie"] = createCookieString(cookies)
 
       send = =>
         ms = Date.now()
@@ -320,6 +353,21 @@ module.exports = (options = {}) ->
             redirects.push([incomingRes.statusCode, newUrl].join(": "))
 
             push(incomingRes)
+
+            ## if we have a cookie jar
+            if jar = options.jar
+              req = @
+
+              ## and when we know we should follow the redirect
+              ## we need to override the init method and grab
+              ## the cookies for the new url which is this.uri
+              req.init = _.wrap req.init, (orig, opts) =>
+                automation("get:cookies", {url: newUrl})
+                .then(convertToJarCookie)
+                .then (cookies) ->
+                  setCookies(cookies, jar, newUrl)
+                .then ->
+                  orig.call(req, opts)
 
             ## cause the redirect to happen
             ## but swallow up the incomingRes
@@ -364,8 +412,9 @@ module.exports = (options = {}) ->
           ## which automatically pulls all of the cookies that would be
           ## set for that url!
           automation("get:cookies", {url: options.url})
-          .then(flattenCookies)
-          .then(setCookies)
+          .then(convertToJarCookie)
+          .then (cookies) ->
+            setCookies(cookies, options.jar, options.url)
           .then(send)
       else
         send()
