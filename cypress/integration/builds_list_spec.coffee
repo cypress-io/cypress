@@ -403,7 +403,7 @@ describe "Builds List", ->
                   .should("have.text", " Learn more about Continuous Integration")
 
               it "does not display message about inviting users", ->
-                cy.contains("invite other users").should("not.exist")
+                cy.contains("Cypress Dashboard").should("not.exist")
 
               it "clicking link opens CI guide", ->
                 cy
@@ -414,18 +414,23 @@ describe "Builds List", ->
 
           describe "when project is private", ->
             beforeEach ->
-              @ipc.handle("setup:ci:project", null, {id: "project-id-123", public: false})
+              @id = "project-id-123"
+              @ipc.handle("setup:ci:project", null, {id: @id, public: false})
               @ipc.handle("get:ci:keys", null, @ciKeys)
               cy
                 .get("input[name=privacy-radio][value=false]")
                 .click()
-
-              cy
                 .get(".modal-body")
                 .contains(".btn", "Setup Project").click()
 
             it "displays message about inviting users", ->
-              cy.contains("invite other users")
+              cy.contains("Cypress Dashboard")
+
+            it.only "opens link to builds in dashboard", ->
+              cy
+                .contains("Cypress Dashboard").click().then =>
+                  expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/projects/#{@id}/builds")
+
 
           describe "errors on form submit", ->
             beforeEach ->

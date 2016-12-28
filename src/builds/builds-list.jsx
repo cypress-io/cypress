@@ -100,6 +100,8 @@ class Builds extends Component {
     const { project } = this.props
 
     // //--------Build States----------//
+    // THIS IS NOT CURRENTLY IN USE WHILE
+    // LOGIN IS RESTRICTED ON THE APP
     // // they are not logged in
     // if (!state.hasUser) {
 
@@ -228,16 +230,16 @@ class Builds extends Component {
       <div id='builds-list-page'>
         <div className='first-build-instructions'>
           <h4>Run Your First Build in CI</h4>
-          <p>You'll need to add 2 lines of code to your CI config. Where this code goes depends on your CI provider.</p>
+          <p className='text-muted'>To record build results, simply run the commands below.</p>
           <h5>Install the CLI tools:</h5>
           <pre><code>npm install -g cypress-cli</code></pre>
           <h5>Run tests and upload assets:</h5>
           <pre><code>cypress ci {this.state.ciKey || '<ci-key>'}</code></pre>
-          <p>Refer to your CI provider's documentation to know when to run these commands.</p>
-          <p className='center'>
+          <p className='text-muted'>
+            Refer to your CI provider's documentation to know when to run these commands during Continous Integration.{' '}
             <a href='#' onClick={this._openCiGuide}>
-              <i className='fa fa-question-circle'></i>{' '}
-              Learn more about Continuous Integration
+              <i className='fa fa-info-circle'></i>{' '}
+              Learn more
             </a>
           </p>
           {this._privateMessage()}
@@ -250,7 +252,14 @@ class Builds extends Component {
     if (this.props.project.public) return null
 
     return (
-      <p>A message about how user can invite other users through admin</p>
+      <p className='text-muted'>
+        <hr />
+        To manage your project's CI keys, edit access to builds or transfer a project, go to the{' '}
+        <a href='#' onClick={this._openBuilds}>
+          <i className='fa fa-external-link'></i>{' '}
+          Cypress Dashboard
+        </a>.
+      </p>
     )
   }
 
