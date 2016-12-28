@@ -55,7 +55,7 @@ describe "e2e stdout", ->
   it "does not duplicate suites or tests between visits", ->
     e2e.exec(@, {
       spec: "stdout_passing_spec.coffee"
-      timeout: 60000
+      timeout: 120000
       expectedExitCode: 0
     })
     .get("stdout")

@@ -101,9 +101,7 @@ convertToJarCookie = (cookies = []) ->
     if cookie.expiry?
       props.expires = moment.unix(cookie.expiry).toDate()
 
-    c = new Cookie(props)
-
-    return c
+    return new Cookie(props)
 
 reduceCookieToArray = (c) ->
   _.reduce c, (memo, val, key) ->
@@ -420,7 +418,7 @@ module.exports = (options = {}) ->
         ## if we have a cookie object then just
         ## send the request up!
         if _.isObject(c)
-          setCookies(c)
+          setCookies(c, null, options.headers)
           send()
         else
           ## else go get the cookies first
