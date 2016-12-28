@@ -63,6 +63,28 @@ describe "subdomains", ->
         ## since we set a domain cookie that matches this request
         expect(cookie).to.eq("nomnom=good")
 
+  it.skip "issue #362: do not set domain based (non hostOnly) cookies by default", ->
+    cy
+      .setCookie("foobar", "1", {
+        domain: "subdomain.foobar.com"
+      })
+
+      ## send a request to localhost but get
+      ## redirected back to foobar
+      .request("http://localhost:2292/redirect")
+      .its("body.cookie")
+      .should("not.exist")
+
+  it.skip "sets a hostOnly cookie by default", ->
+    cy
+      ## this should set a hostOnly cookie for
+      ## www.foobar.com
+      .setCookie("foobar", "1")
+
+      .request("http://domain.foobar.com:2292/cookies")
+      .its("body.cookie")
+      .should("not.exist")
+
   it "issue #361: incorrect cookie synchronization between cy.request redirects", ->
     cy
       ## start with a cookie on foobar
