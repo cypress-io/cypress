@@ -5,11 +5,10 @@ url        = require("url")
 tough      = require("tough-cookie")
 moment     = require("moment")
 Promise    = require("bluebird")
-extension  = require("@cypress/core-extension")
 automation = require("./automation")
 statusCode = require("./util/status_code")
 
-Cookie = tough.Cookie
+Cookie    = tough.Cookie
 CookieJar = tough.CookieJar
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
@@ -35,6 +34,16 @@ pick = (resp = {}) ->
     "Response Status":  resp.statusCode
   }
 
+setCookies = (cookies, jar, headers, url) =>
+  return if _.isEmpty(cookies)
+
+  if jar
+    cookies.forEach (c) ->
+      jar.setCookie(c, url, {ignoreError: true})
+
+  else
+    headers.Cookie = createCookieString(cookies)
+
 newCookieJar = ->
   j = new CookieJar(undefined, {looseMode: true})
 
@@ -55,9 +64,8 @@ newCookieJar = ->
       j.getCookiesSync(uri, {expire: false})
   }
 
-convertToJarCookie = (cookies) ->
-
-  cookies.map (cookie) ->
+convertToJarCookie = (cookies = []) ->
+  _.map cookies, (cookie) ->
     props = {
       key:      cookie.name
       path:     cookie.path
@@ -94,7 +102,6 @@ convertToJarCookie = (cookies) ->
       props.expires = moment.unix(cookie.expiry).toDate()
 
     c = new Cookie(props)
-
 
     return c
 
@@ -260,16 +267,32 @@ module.exports = (options = {}) ->
         strictSSL: false
       }
 
-      setCookies = (cookies) =>
-        return if _.isEmpty(cookies)
+      self = @
 
-        if jar = options.jar
-          u = options.url
+      if jar = options.jar
+        followRedirect = options.followRedirect
 
-          cookies.forEach (c) ->
-            jar.setCookie(c, u, {ignoreError: true})
-        else
-          options.headers["Cookie"] = createCookieString(cookies)
+        options.followRedirect = (incomingRes) ->
+          ## if we have a cookie jar
+          req = @
+
+          newUrl = url.resolve(options.url, incomingRes.headers.location)
+
+          ## and when we know we should follow the redirect
+          ## we need to override the init method and
+          ## first set the existing jar cookies on the browser
+          ## and then grab the cookies for the new url
+          req.init = _.wrap req.init, (orig, opts) =>
+            self.setJarCookies(jar, automation)
+            .then ->
+              automation("get:cookies", {url: newUrl, includeHostOnly: true})
+            .then(convertToJarCookie)
+            .then (cookies) ->
+              setCookies(cookies, jar, null, newUrl)
+            .then ->
+              orig.call(req, opts)
+
+          followRedirect.call(req, incomingRes)
 
       send = =>
         str = @create(options)
@@ -278,7 +301,8 @@ module.exports = (options = {}) ->
 
       automation("get:cookies", {url: options.url, includeHostOnly: true})
       .then(convertToJarCookie)
-      .then(setCookies)
+      .then (cookies) ->
+        setCookies(cookies, options.jar, options.headers, options.url)
       .then(send)
 
     send: (headers, automation, options = {}) ->
@@ -326,16 +350,6 @@ module.exports = (options = {}) ->
         delete options.json
         delete options.body
 
-      setCookies = (cookies, jar, url) =>
-        return if _.isEmpty(cookies)
-
-
-        if jar
-          cookies.forEach (c) ->
-            jar.setCookie(c, url, {ignoreError: true})
-        else
-          options.headers["Cookie"] = createCookieString(cookies)
-
       send = =>
         ms = Date.now()
 
@@ -346,12 +360,9 @@ module.exports = (options = {}) ->
         push = (response) ->
           requestResponses.push(pick(response))
 
-        normalizeUrl = (loc) ->
-          url.resolve(options.url, loc)
-
         if options.followRedirect
           options.followRedirect = (incomingRes) ->
-            newUrl = normalizeUrl(incomingRes.headers.location)
+            newUrl = url.resolve(options.url, incomingRes.headers.location)
 
             ## normalize the url
             redirects.push([incomingRes.statusCode, newUrl].join(": "))
@@ -372,7 +383,7 @@ module.exports = (options = {}) ->
                   automation("get:cookies", {url: newUrl, includeHostOnly: true})
                 .then(convertToJarCookie)
                 .then (cookies) ->
-                  setCookies(cookies, jar, newUrl)
+                  setCookies(cookies, jar, null, newUrl)
                 .then ->
                   orig.call(req, opts)
 
@@ -397,7 +408,7 @@ module.exports = (options = {}) ->
           if options.followRedirect is false and (loc = resp.headers.location)
             ## resolve the new location head against
             ## the current url
-            resp.redirectedToUrl = normalizeUrl(loc)
+            resp.redirectedToUrl = url.resolve(options.url, loc)
 
           if options.jar
             @setJarCookies(options.jar, automation)
@@ -421,7 +432,7 @@ module.exports = (options = {}) ->
           automation("get:cookies", {url: options.url, includeHostOnly: true})
           .then(convertToJarCookie)
           .then (cookies) ->
-            setCookies(cookies, options.jar, options.url)
+            setCookies(cookies, options.jar, options.headers, options.url)
           .then(send)
       else
         send()

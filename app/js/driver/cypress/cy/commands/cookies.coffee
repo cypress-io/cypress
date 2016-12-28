@@ -11,9 +11,16 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
   mergeDefaults = (obj) ->
     ## we always want to be able to see and influence cookies
     ## on our superdomain
-    {superDomain} = Cypress.Location.create(window.location.href)
+    { superDomain } = Cypress.Location.create(window.location.href)
+    # { hostname } = Cypress.Location.create(window.location.href)
 
     merge = (o) ->
+      ## we are hostOnly if we dont have an
+      ## explicit domain
+      # o.hostOnly = !o.domain
+
+      ## and if the user did not provide a domain
+      ## then we know to set the default to be origin
       _.defaults o, {domain: superDomain}
 
     if _.isArray(obj)
@@ -45,7 +52,7 @@ $Cypress.register "Cookies", (Cypress, _, $, Promise, moment) ->
     _automateCookies: (event, obj = {}, log, timeout) ->
       automate = ->
         new Promise (resolve, reject) ->
-          fn = (resp) =>
+          fn = (resp) ->
             if e = resp.__error
               err = $Cypress.Utils.cypressErr(e)
               err.name = resp.__name

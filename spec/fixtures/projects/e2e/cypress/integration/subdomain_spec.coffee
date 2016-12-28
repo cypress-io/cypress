@@ -63,7 +63,7 @@ describe "subdomains", ->
         ## since we set a domain cookie that matches this request
         expect(cookie).to.eq("nomnom=good")
 
-  it "issue: #361: incorrect cookie synchronization between cy.request redirects", ->
+  it "issue #361: incorrect cookie synchronization between cy.request redirects", ->
     cy
       ## start with a cookie on foobar
       .setCookie("foobar", "1")
@@ -74,7 +74,7 @@ describe "subdomains", ->
       .its("body.cookie")
       .should("eq", "foobar=1")
 
-  it "issue: #362: incorrect cookie synchronization between cy.visit redirects", ->
+  it "issue #362: incorrect cookie synchronization between cy.visit redirects", ->
     cy
       ## start with a cookie on foobar specifically for www
       .setCookie("foobar", "1", {domain: "www.foobar.com"})

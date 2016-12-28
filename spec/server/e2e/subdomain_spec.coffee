@@ -101,7 +101,6 @@ describe "e2e subdomain", ->
 
   it "passes", ->
     e2e.start(@, {
-      debug: true
       spec: "subdomain_spec.coffee"
       hosts: "*.foobar.com=127.0.0.1"
       expectedExitCode: 0

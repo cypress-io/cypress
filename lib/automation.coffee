@@ -91,7 +91,7 @@ automation = (namespace, socketIoCookie, screenshotsFolder) ->
         ## when this is the case we need to remove the domain
         ## property else our cookie will incorrectly be set
         ## as a domain cookie
-        if cookie.hostOnly
+        if data.hostOnly
           cookie = _.omit(cookie, "domain")
 
         automate(message, cookie)
