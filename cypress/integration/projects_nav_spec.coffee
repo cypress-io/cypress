@@ -87,24 +87,24 @@ describe "Projects Nav", ->
           .get(".builds-container li")
           .should("have.length", 4)
 
-    describe "config page", ->
+    describe "settings page", ->
       beforeEach ->
         cy
           .get(".navbar-default")
-            .contains("a", "Config").as("configNav").click()
+            .contains("a", "Settings").as("settingsNav").click()
 
       it "highlights config on click", ->
         cy
-          .get("@configNav")
+          .get("@settingsNav")
             .should("have.class", "active")
 
       it "navigates to config url", ->
         cy
           .location().its("hash").should("include", "config")
 
-      it "displays config page", ->
+      it "displays settings page", ->
         cy
-          .contains("h5", "configuration")
+          .contains("h5", "Configuration")
 
   context "browsers dropdown", ->
     describe "browsers available", ->
