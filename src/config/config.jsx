@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
-import moment from 'moment'
 import { observer } from 'mobx-react'
 import Tooltip from 'rc-tooltip'
 
@@ -170,60 +169,7 @@ class Config extends Component {
     }
 
     return null
-
-    // return (
-    //   <table className='table'>
-    //     <tbody>
-    //       {_.map(ciKeys, (ciKey) => (
-    //         <tr key={ciKey.id}>
-    //           <td className='ci-key'>
-    //             <div className='input-group'>
-    //               <Tooltip
-    //                 overlay={<span>Copy to clipboard</span>}
-    //                 >
-    //                 <span onClick={this._copyKey} className='input-group-addon'>
-    //                   <i className='fa fa-copy'></i>
-    //                 </span>
-    //               </Tooltip>
-    //               <input
-    //                 type='text'
-    //                 className='form-control input-sm'
-    //                 value={ciKey.id}
-    //                 readOnly
-    //               />
-    //             </div>
-    //           </td>
-    //           <td className='ci-key-date'>
-    //             created { moment(ciKey.createdAt).format('M/D/YYYY')  }
-    //           </td>
-    //           <td className='ci-key-date'>
-    //             used { moment(ciKey.lastUsed).fromNow() }
-    //           </td>
-    //         </tr>
-    //       ))}
-    //     </tbody>
-    //   </table>
-    // )
   }
-
-  // _copyKey = (e) => {
-  //   const ciKeyInput = e.currentTarget.parentNode.querySelector('input')
-
-  //   ciKeyInput.select()
-
-  //   let message
-  //   try {
-  //     const successful = document.execCommand('copy')
-  //     message = successful ? 'Copied!' : 'Oops, unable to copy'
-  //   } catch (err) {
-  //     message = 'Oops, unable to copy'
-  //   }
-
-  //   const tooltip = document.querySelector('.rc-tooltip-inner span')
-  //   if (tooltip) {
-  //     tooltip.innerHTML = message
-  //   }
-  // }
 
   _openHelp (e) {
     e.preventDefault()
