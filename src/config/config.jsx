@@ -31,40 +31,39 @@ class Config extends Component {
     return (
       <div id='config'>
         <div className='config-wrapper'>
-          <form className='form-horizontal'>
-            <legend>
+          <section className='form-horizontal'>
+            <h2>
               Resolved Configuration:{' '}
               <a href='#' className='pull-right' onClick={this._openHelp}>
                 <i className='fa fa-info-circle'></i>{' '}
                 Learn more
               </a>
-            </legend>
-            <p className='text-muted'>Your project's configuration is displayed below. A value can be set from the following sources:
-              <table className='table config-table'>
-                <tbody>
-                  <tr className='config-keys'>
-                    <td><span className='default'>default</span></td>
-                    <td>default values</td>
-                  </tr>
-                  <tr className='config-keys'>
-                    <td><span className='config'>config</span></td>
-                    <td>set from cypress.json</td>
-                  </tr>
-                  <tr className='config-keys'>
-                    <td><span className='envFile'>envFile</span></td>
-                    <td>set from cypress.env.json</td>
-                  </tr>
-                  <tr className='config-keys'>
-                    <td><span className='env'>env</span></td>
-                    <td>set from environment variables</td>
-                  </tr>
-                  <tr className='config-keys'>
-                    <td><span className='cli'>CLI</span></td>
-                    <td>set from CLI arguments</td>
-                  </tr>
-                </tbody>
-              </table>
-            </p>
+            </h2>
+            <p className='text-muted'>Your project's configuration is displayed below. A value can be set from the following sources:</p>
+            <table className='table config-table'>
+              <tbody>
+                <tr className='config-keys'>
+                  <td><span className='default'>default</span></td>
+                  <td>default values</td>
+                </tr>
+                <tr className='config-keys'>
+                  <td><span className='config'>config</span></td>
+                  <td>set from cypress.json</td>
+                </tr>
+                <tr className='config-keys'>
+                  <td><span className='envFile'>envFile</span></td>
+                  <td>set from cypress.env.json</td>
+                </tr>
+                <tr className='config-keys'>
+                  <td><span className='env'>env</span></td>
+                  <td>set from environment variables</td>
+                </tr>
+                <tr className='config-keys'>
+                  <td><span className='cli'>CLI</span></td>
+                  <td>set from CLI arguments</td>
+                </tr>
+              </tbody>
+            </table>
             <pre className='config-vars'>
               { `{` }
               { this._display(config, { comma: true }) }
@@ -78,7 +77,7 @@ class Config extends Component {
               <br />
               { `}` }
             </pre>
-          </form>
+          </section>
           {this._ciKeysSection()}
         </div>
       </div>
@@ -126,32 +125,31 @@ class Config extends Component {
     if (this._notSetupForCi()) return null
 
     return (
-      <form className='form-horizontal config-ci-keys'>
-        <legend>
+      <section className='form-horizontal config-ci-keys'>
+        <h2>
           CI Keys
           <a href='#' className='pull-right' onClick={this._openCiGuide}>
             <i className='fa fa-info-circle'></i>{' '}
             Learn More
           </a>
-        </legend>
+        </h2>
         <p className='text-muted'>
           CI Keys allow you to record test results, screenshots and videos in Cypress.
-          {
-            !this.state.isLoadingCiKeys && this.state.ciKeys.length ?
-              <span>To record your builds, run this command:{' '}
-                <pre><code>cypress ci {this.state.ciKeys[0].id}</code></pre>{' '}
-              </span> :
-              null
-          }
+          {this._hasCiKeys() ? ' To record your builds, run this command:' : ''}
         </p>
+        {this._hasCiKeys() ? <pre><code>cypress ci {this.state.ciKeys[0].id}</code></pre> : null}
         {this._ciKeys()}
         <p className='text-muted manage-btn'>
           <a href='#' onClick={this._openAdminCiKeys} >
             <i className='fa fa-key'></i> Add or Remove CI Keys
           </a>
         </p>
-      </form>
+      </section>
     )
+  }
+
+  _hasCiKeys () {
+    return !this.state.isLoadingCiKeys && this.state.ciKeys.length
   }
 
   _notSetupForCi () {
