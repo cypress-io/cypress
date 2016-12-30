@@ -270,8 +270,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .then(send)
       .catch (err) ->
         err.type = if _.get(err, "statusCode") is 403
-          "DENIED"
-        else if _.get(err, "statusCode") is 429
+          "ALREADY_MEMBER"
+        else if _.get(err, "statusCode") is 422 and /existing/.test(err.errors?.userId?.join(''))
           "ALREADY_REQUESTED"
         else
           err.type or "UNKNOWN"
