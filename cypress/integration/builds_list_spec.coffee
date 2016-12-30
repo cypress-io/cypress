@@ -332,7 +332,7 @@ describe "Builds List", ->
           it "opens external link on click of manage", ->
             cy
               .contains("manage").click().then ->
-                 expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/settings")
+                 expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/settings")
 
           it "displays public and private radios", ->
             cy
@@ -430,7 +430,7 @@ describe "Builds List", ->
             it "opens link to builds in dashboard", ->
               cy
                 .contains("Cypress Dashboard").click().then =>
-                  expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/projects/#{@id}/builds")
+                  expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@id}/builds")
 
 
           describe "errors on form submit", ->
@@ -532,7 +532,7 @@ describe "Builds List", ->
         cy
           .contains("See All").click()
           .then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/projects/#{@projects[0].id}/builds")
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@projects[0].id}/builds")
 
       it "displays build status icon", ->
         cy
@@ -547,7 +547,7 @@ describe "Builds List", ->
           .get(".builds-container li").first()
           .click()
           .then =>
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/projects/#{@projects[0].id}/builds/#{@builds[0].id}")
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@projects[0].id}/builds/#{@builds[0].id}")
 
     describe "polling builds", ->
       beforeEach ->

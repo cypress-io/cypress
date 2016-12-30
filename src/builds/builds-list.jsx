@@ -265,7 +265,7 @@ class Builds extends Component {
 
   _openBuilds = (e) => {
     e.preventDefault()
-    App.ipc('external:open', `https://on.cypress.io/admin/projects/${this.props.project.id}/builds`)
+    App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}/builds`)
   }
 
   _openCiGuide = (e) => {
@@ -274,7 +274,7 @@ class Builds extends Component {
   }
 
   _openBuild = (buildId) => {
-    App.ipc('external:open', `https://on.cypress.io/admin/projects/${this.props.project.id}/builds/${buildId}`)
+    App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}/builds/${buildId}`)
   }
 }
 

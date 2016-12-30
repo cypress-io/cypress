@@ -80,7 +80,7 @@ describe "Settings", ->
       it "opens admin project settings when ci keys link is clicked", ->
         cy
           .get(".config-ci-keys").contains("Add or Remove CI Keys").click().then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/projects/#{@config.projectId}/settings")
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@config.projectId}/settings")
 
       describe "when ci keys load", ->
         beforeEach ->

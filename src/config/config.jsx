@@ -183,7 +183,7 @@ class Config extends Component {
 
   _openAdminCiKeys = (e) => {
     e.preventDefault()
-    App.ipc('external:open', `https://on.cypress.io/admin/projects/${this.props.project.id}/settings`)
+    App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}/settings`)
   }
 }
 
