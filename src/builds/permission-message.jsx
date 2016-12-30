@@ -116,13 +116,9 @@ class PermissionMessage extends Component {
     const orgId = this.props.project.orgId
 
     App.ipc("request:access", orgId)
-    .then((response = {}) => {
+    .then(() => {
       orgsStore.membershipRequested(orgId)
-      if (response.alreadyMember) {
-        this.props.onRetry()
-      } else {
-        this._setResult()
-      }
+      this._setResult()
     })
     .catch((error) => {
       this._setResult(error)
@@ -130,6 +126,11 @@ class PermissionMessage extends Component {
   }
 
   _setResult (error) {
+    if (errors.isAlreadyMember(error)) {
+      this.props.onRetry()
+      return
+    }
+
     this.setState({
       error,
       isSubmitting: false,

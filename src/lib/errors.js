@@ -1,6 +1,10 @@
 import _ from 'lodash'
 
 const errors = {
+  isAlreadyMember (err) {
+    return _.get(err, 'type') === 'ALREADY_MEMBER'
+  },
+
   isAlreadyRequested (err) {
     return _.get(err, 'type') === 'ALREADY_REQUESTED'
   },

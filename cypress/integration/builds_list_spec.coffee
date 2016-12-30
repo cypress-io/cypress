@@ -106,7 +106,8 @@ describe "Builds List", ->
 
         describe "when request succeeds and user is already a member", ->
           beforeEach ->
-            @ipc.handle("request:access", null, {alreadyMember: true})
+            @ipc.handle("request:access", {name: "foo", message: "There's an error", type: "ALREADY_MEMBER"})
+            cy.wait(1)
 
           it "retries getting builds", ->
             expect(@App.ipc.withArgs("get:builds").callCount).to.equal(2)
@@ -426,7 +427,7 @@ describe "Builds List", ->
             it "displays message about inviting users", ->
               cy.contains("Cypress Dashboard")
 
-            it.only "opens link to builds in dashboard", ->
+            it "opens link to builds in dashboard", ->
               cy
                 .contains("Cypress Dashboard").click().then =>
                   expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/admin/projects/#{@id}/builds")
