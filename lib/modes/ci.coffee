@@ -7,6 +7,7 @@ headless = require("./headless")
 api      = require("../api")
 logger   = require("../logger")
 errors   = require("../errors")
+stdout   = require("../stdout")
 upload   = require("../upload")
 Project  = require("../project")
 terminal = require("../util/terminal")
@@ -151,7 +152,7 @@ module.exports = {
 
       logException(err)
 
-  uploadAssets: (instanceId, stats) ->
+  uploadAssets: (instanceId, stats, stdout) ->
     console.log("")
     console.log("")
 
@@ -177,6 +178,7 @@ module.exports = {
       screenshots:  screenshots
       failingTests: stats.failingTests
       cypressConfig: stats.config
+      stdout:       stdout
     })
     .then (resp = {}) =>
       @upload({
@@ -193,6 +195,8 @@ module.exports = {
 
   run: (options) ->
     {projectPath} = options
+
+    stdoutLogs = stdout()
 
     Project.add(projectPath)
     .then ->
@@ -217,10 +221,12 @@ module.exports = {
 
           headless.run(options)
           .then (stats = {}) =>
+            stdoutLogs.restore()
+
             ## if we got a instanceId then attempt to
             ## upload these assets
             if instanceId
-              @uploadAssets(instanceId, stats)
+              @uploadAssets(instanceId, stats, stdoutLogs.toString())
               .return(stats)
               .finally(headless.allDone)
             else

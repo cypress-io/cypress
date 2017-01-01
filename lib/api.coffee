@@ -106,6 +106,7 @@ module.exports = {
       "screenshots"
       "failingTests"
       "cypressConfig"
+      "stdout"
     ])
 
     rp.put({
