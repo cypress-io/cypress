@@ -93,7 +93,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
           expect(@log.get("name")).to.eq "fixture"
-          expect(@log.get("message")).to.eq "foo, {timeout: 50, encoding: utf8}"
+          expect(@log.get("message")).to.eq "foo, {timeout: 50}"
           expect(err.message).to.eq("cy.fixture() timed out waiting '50ms' to receive a fixture. No fixture was ever sent by the server.")
           done()
 
