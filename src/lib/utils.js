@@ -2,68 +2,56 @@ import _ from 'lodash'
 import moment from 'moment'
 import gravatar from 'gravatar'
 
+const osNameLookup = {
+  darwin: "apple",
+}
+
+const osIconLookup = {
+  windows: "windows",
+  darwin: "apple",
+  linux: "linux",
+}
+
+const browserNameLookup = {}
+
+const browserIconLookup = {
+  chrome: "chrome",
+  Electron: "chrome",
+  firefox: "firefox",
+  safari: "safari",
+}
+
 module.exports = {
   osIcon: (osName) => {
-    switch (osName) {
-      case 'windows':
-        return 'windows'
-      case 'darwin':
-        return 'apple'
-      default:
-        return ''
-    }
+    if (!osName) return ''
+
+    return osIconLookup[osName] || 'desktop'
   },
 
   osNameFormatted: (osName) => {
-    let name
+    if (!osName) return ''
 
-    switch (osName) {
-      case 'windows':
-        name = 'windows'
-        break
-      case 'darwin':
-        name = 'apple'
-        break
-      default:
-        name = ''
-        break
-    }
-
-    return _.capitalize(name)
+    return _.capitalize(osNameLookup[osName] || osName)
   },
 
   browserIcon: (browserName) => {
-    switch (browserName) {
-      case 'chrome':
-        return 'chrome'
-      case 'firefox':
-        return 'firefox'
-      case 'safari':
-        return 'firefox'
-      default:
-        return ''
-    }
+    if (!browserName) return ''
+
+    return browserIconLookup[browserName] || 'globe'
   },
 
   browserNameFormatted: (browserName) => {
-    let name
+    if (!browserName) return ''
 
-    switch (browserName) {
-      case 'chrome':
-        name = 'chrome'
-        break
-      case 'firefox':
-        name = 'firefox'
-        break
-      case 'safari':
-        name = 'firefox'
-        break
-      default:
-        name = ''
-        break
-    }
+    return _.capitalize(browserNameLookup[browserName] || browserName)
+  },
 
-    return _.capitalize(name)
+
+  browserVersionFormatted: (browserVersion) => {
+    if (!browserVersion) return ''
+
+    // looks like: '53.0.2785.143'
+    return browserVersion.split('.')[0]
   },
 
   gravatarUrl: (email) => {
@@ -90,6 +78,8 @@ module.exports = {
         return 'exclamation-triangle'
       case 'timedOut':
         return 'hourglass-end'
+      case null:
+        return 'terminal'
       default:
         return ''
     }

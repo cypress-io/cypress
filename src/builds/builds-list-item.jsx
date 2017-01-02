@@ -2,7 +2,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import React, { Component } from 'react'
 
-import { osIcon, browserIcon, gravatarUrl, getStatusIcon, durationFormatted } from '../lib/utils'
+import { osIcon, browserIcon, gravatarUrl, getStatusIcon, durationFormatted, browserVersionFormatted } from '../lib/utils'
 
 export default class BuildsListItem extends Component {
   render () {
@@ -12,7 +12,6 @@ export default class BuildsListItem extends Component {
       <li onClick={this._goToBuild}>
         <div className={`row-column-wrapper ${build.status}`}>
           <div>
-            <i className={`fa fa-${getStatusIcon(this.props.status)}`}></i>
           </div>
         </div>
         <div className='row-column-wrapper'>
@@ -24,19 +23,23 @@ export default class BuildsListItem extends Component {
         <div className='row-column-wrapper'>
           <div className='td-top-padding'>
             <div>
-              <i className='fa fa-code-fork fa-rotate-90'></i>{' '}
+              <i className='fa fa-fw fa-code-fork fa-rotate-90'></i>{' '}
               {build.commitBranch}{' '}
+            </div>
+            <div className='msg'>
               <img
                 className='user-avatar'
                 height='13'
                 width='13'
                 src={`${gravatarUrl(build.commitAuthorEmail)}`}
               />
-              {' '}
-              {build.commitAuthorName}
-            </div>
-            <div className='msg'>
-              {build.commitMessage}
+              {
+                build.commitMessage ?
+                  <span className='commit-msg'>
+                    {build.commitMessage.split('\n')[0]}
+                  </span> :
+                  null
+              }
             </div>
           </div>
         </div>
@@ -59,73 +62,87 @@ export default class BuildsListItem extends Component {
           </div>
         </div>
         <div className='row-column-wrapper'>
-          <div className={`td-border-left`}>
+          <div>
             {
-              (this._moreThanOneInstance() && this._osLength() > 1) ?
+              // only display something if we have all of the instances back
+              this._allInstancesArePresent() ?
+              // do we have multiple OS's ?
+              this._moreThanOneInstance() && this._osLength() > 1 ?
                 <span>
                   <i className={`fa fa-fw fa-desktop`}></i>{' '}
                   {this._osLength()}
                 </span> :
+                // or did we only actual run it on one OS
                 <span>
                   <i className={`fa fa-fw fa-${(this._osIcon())}`}></i>{' '}
                   {this._osDisplay()}
-                </span>
+                </span> :
+              null
             }
           </div>
         </div>
         <div className='row-column-wrapper'>
           <div>
             {
-              (this._moreThanOneInstance() && this._browsersLength() > 1) ?
-                <span>
-                  <i className={`fa fa-fw fa-globe`}></i>{' '}
-                  {this._browsersLength()}
-                </span> :
-                <span>
-                  <i className={`fa fa-fw fa-${this._browserIcon()}`}></i>{' '}
-                  {this._browserDisplay()}
-                </span>
+              // only display something if we have all of the instances back
+              this._allInstancesArePresent() ?
+                // do we have multiple browsers ?
+                this._moreThanOneInstance() && this._browsersLength() > 1 ?
+                  <span>
+                    <i className={`fa fa-fw fa-globe`}></i>{' '}
+                    {this._browsersLength()}
+                  </span> :
+                  // or did we only actual run it on one browser
+                  <span>
+                    <i className={`fa fa-fw fa-${this._browserIcon()}`}></i>{' '}
+                    {this._browserDisplay()}
+                  </span> :
+                null
             }
           </div>
         </div>
         <div className='row-column-wrapper'>
-          <div className='td-border-left'>
+          <div className='result'>
             <i className="fa fa-circle-o-notch"></i>{' '}
             <span>
               {
                 build.totalPending ?
                   build.totalPending :
-                  '--'
+                  '-'
               }
             </span>
           </div>
         </div>
         <div className='row-column-wrapper'>
-          <div>
+          <div className='result'>
             <i className="fa fa-check green"></i>{' '}
             <span>
               {
                 build.totalPasses ?
                   build.totalPasses :
-                  "--"
+                  "-"
               }
             </span>
           </div>
         </div>
         <div className='row-column-wrapper'>
-          <div>
+          <div className='result'>
             <i className="fa fa-times red"></i>{' '}
             <span>
               {
                 build.totalFailures ?
                   build.totalFailures :
-                  "--"
+                  "-"
               }
             </span>
           </div>
         </div>
       </li>
     )
+  }
+
+  _allInstancesArePresent () {
+    return this.props.build.expectedInstances === this.props.build.instances.length
   }
 
   _moreThanOneInstance () {
@@ -170,7 +187,7 @@ export default class BuildsListItem extends Component {
     return _
       .chain(this.props.build.instances)
       .map((instance) => {
-        return `${instance.osName} + ${instance.osVersion}`
+        return `${instance.osName} + ${instance.osFormatted}`
       })
       .uniq()
       .value()
@@ -184,7 +201,7 @@ export default class BuildsListItem extends Component {
     if (this.props.build.instances && this.props.build.instances[0]) {
       return (
         <span>
-          {this.props.build.instances[0].osVersion}
+          {this.props.build.instances[0].osFormatted}
         </span>
       )
     }
@@ -194,7 +211,7 @@ export default class BuildsListItem extends Component {
     if (this.props.build.instances && this.props.build.instances[0]) {
       return (
         <span>
-          {this.props.build.instances[0].browserVersion}
+          {browserVersionFormatted(this.props.build.instances[0].browserVersion)}
         </span>
       )
     }

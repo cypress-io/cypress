@@ -86,7 +86,7 @@
 
 .builds-container {
   margin-bottom: 0;
-  @include list-columns(0%, 7%, 30%, 16%, 15%, 6%, 8%, 6%, 6%, 6%);
+  @include list-columns(0%, 9%, 25%, 13%, 10%, 12%, 9%, 7%, 8%, 7%);
 
   &>li {
     overflow: auto;
@@ -96,7 +96,7 @@
     position: relative;
     display: inline-block;
     width: 100%;
-    font-size: 13px;
+    font-size: 12.5px;
     color: #898A8B;
 
     &:hover {
@@ -106,7 +106,6 @@
 
     &>.row-column-wrapper>div {
       padding: 25px 7px;
-      font-weight: 500;
 
       &.td-top-padding {
         padding-top: 15px;
@@ -115,6 +114,10 @@
     }
     .os-block {
       padding-right: 0;
+    }
+
+    .result {
+      font-weight: 500;
     }
 
     &>.row-column-wrapper:first-child {
@@ -152,6 +155,11 @@
       &.timedOut {
         border-left-color: #F5A327;
       }
+
+      &.null {
+        border-left-color: #bbb;
+      }
+
       &>div {
         padding: 0
       }
@@ -169,27 +177,30 @@
     }
 
   }
-  .td-border-left {
-    min-height: 62px;
-    padding-left: 20px;
-  }
-
 
   .msg {
     font-weight: 300;
     padding-left: 3px;
     margin-top: 3px;
+
+    img {
+      float: left;
+    }
+
+    .commit-msg {
+      overflow: auto;
+
+      span {
+        padding-left: 16px;
+        display: inline-block;
+        float: left;
+        width: 90%;
+      }
+    }
   }
-
-
 
   .user {
     font-weight: 600;
-    margin-left: 3px;
-  }
-
-  .user-avatar {
-    margin-left: 5px;
   }
 
   .fa-user {
@@ -198,9 +209,9 @@
 }
 
 .user-avatar {
-  margin-left: 5px;
   position: relative;
-  top: -1px;
+  margin-right: 3px;
+  top: 1px;
 }
 
 .setup-project-modal {

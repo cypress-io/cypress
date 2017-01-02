@@ -1,5 +1,6 @@
 import { useStrict, toJS } from 'mobx'
 import React from 'react'
+import momentOverrides from './lib/overrides/moment-overrides'
 import { render } from 'react-dom'
 import _ from 'lodash'
 
@@ -35,6 +36,8 @@ const handleErrors = () => {
     sendErr(reason || err)
   }
 }
+
+momentOverrides()
 
 const setupState = (options) => {
   state.setVersion(options.version)
