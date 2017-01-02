@@ -16,6 +16,22 @@ sendBackBody = (req, res) ->
   ## send back to the body
   res.json(req.body)
 
+onServer3 = (app) ->
+  app.get "/login", (req, res) ->
+    res.cookie("session", "1")
+
+    res.send("<html>login</html>")
+
+  app.post "/login", (req, res) ->
+    res.cookie("session", "2")
+
+    res.redirect("/cookies")
+
+  app.get "/cookies", (req, res) ->
+    res.json({
+      cookie: req.headers.cookie
+    })
+
 onServer2 = (app) ->
   app.get "/statusCode", (req, res) ->
     code = req.query.code
@@ -109,6 +125,9 @@ describe "e2e requests", ->
     }, {
       port: 2294
       onServer: onServer2
+    }, {
+      port: 2295
+      onServer: onServer3
     }]
   })
 

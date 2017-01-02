@@ -7,12 +7,19 @@ describe "$Cypress.Cy Location Commands", ->
         expect(url).to.eq "http://localhost:3500/fixtures/html/dom.html"
 
     it "eventually resolves", ->
-      _.delay ->
-        win = cy.private("window")
+      _.delay =>
+        win = @cy.private("window")
         win.location.href = "/foo/bar/baz.html"
       , 100
 
       @cy.url().should("match", /baz/).and("eq", "http://localhost:3500/foo/bar/baz.html")
+
+    it "catches thrown errors", ->
+      @sandbox.stub(@cy, "__location")
+      .onFirstCall().throws(new Error)
+      .onSecondCall().returns("http://localhost:3500/baz.html")
+
+      @cy.url().should("include", "/baz.html")
 
     describe "assertion verification", ->
       beforeEach ->

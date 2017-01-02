@@ -107,7 +107,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
       ## origin may return an empty string if we haven't visited anything yet
       options.url = Cypress.Location.normalize(options.url)
 
-      if originOrBase = @_getLocation("origin") or @Cypress.config("baseUrl")
+      if originOrBase = @Cypress.config("baseUrl") or @_getLocation("origin")
         options.url = Cypress.Location.qualifyWithBaseUrl(originOrBase, options.url)
 
       ## if options.url isnt FQDN then we need to throw here

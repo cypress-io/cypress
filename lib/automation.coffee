@@ -1,6 +1,8 @@
 _           = require("lodash")
 Promise     = require("bluebird")
+extension   = require("@cypress/core-extension")
 screenshots = require("./screenshots")
+
 
 middlewareMesssages = "take:screenshot get:cookies get:cookie set:cookie clear:cookie clear:cookies".split(" ")
 
@@ -8,15 +10,16 @@ charAfterColonRe = /:(.)/
 
 ## match the w3c webdriver spec on return cookies
 ## https://w3c.github.io/webdriver/webdriver-spec.html#cookies
-COOKIE_PROPERTIES = "url name value path domain secure httpOnly expiry".split(" ")
+COOKIE_PROPERTIES = "name value path domain secure httpOnly expiry".split(" ")
 
 needsMiddleware = (message) ->
   message in middlewareMesssages
 
-normalizeCookies = (cookies) ->
-  _.map(cookies, normalizeCookieProps)
+normalizeCookies = (cookies, includeHostOnly) ->
+  _.map cookies, (c) ->
+    normalizeCookieProps(c, includeHostOnly)
 
-normalizeCookieProps = (data) ->
+normalizeCookieProps = (data, includeHostOnly) ->
   return data if not data
 
   ## pick off only these specific cookie properties
@@ -25,6 +28,9 @@ normalizeCookieProps = (data) ->
   .pick(COOKIE_PROPERTIES)
   .omitBy(_.isUndefined)
   .value()
+
+  if includeHostOnly
+    cookie.hostOnly = data.hostOnly
 
   ## when sending cookie data we need to convert
   ## expiry to expirationDate
@@ -51,8 +57,13 @@ automation = (namespace, socketIoCookie, screenshotsFolder) ->
 
   return {
     getCookies: (message, data, automate) ->
+      { includeHostOnly } = data
+
+      delete data.includeHostOnly
+
       automate(message, data)
-      .then(normalizeCookies)
+      .then (cookies) ->
+        normalizeCookies(cookies, includeHostOnly)
       .then (cookies) ->
         _.reject(cookies, isCypressNamespaced)
 
@@ -70,6 +81,18 @@ automation = (namespace, socketIoCookie, screenshotsFolder) ->
         throw new Error("Sorry, you cannot set a Cypress namespaced cookie.")
       else
         cookie = normalizeCookieProps(data)
+
+        ## lets construct the url ourselves right now
+        cookie.url = extension.getCookieUrl(data)
+
+        ## https://github.com/SalesforceEng/tough-cookie#setcookiecookieorstring-currenturl-options-cberrcookie
+        ## a host only cookie is when domain was not explictly
+        ## set in the Set-Cookie header and instead was implied.
+        ## when this is the case we need to remove the domain
+        ## property else our cookie will incorrectly be set
+        ## as a domain cookie
+        if data.hostOnly
+          cookie = _.omit(cookie, "domain")
 
         automate(message, cookie)
         .then(normalizeCookieProps)

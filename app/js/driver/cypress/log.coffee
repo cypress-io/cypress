@@ -4,6 +4,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
   CypressErrorRe  = /(AssertionError|CypressError)/
   parentOrChildRe = /parent|child/
+  groupsOrTableRe = /^(groups|table)$/
   ERROR_PROPS     = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
   SNAPSHOT_PROPS  = "id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight".split(" ")
   DISPLAY_PROPS   = "id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible".split(" ")
@@ -434,6 +435,12 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
           when isDomLike(value)
             $Cypress.Utils.stringifyElement(value, "short")
+
+          when _.isFunction(value) and groupsOrTableRe.test(key)
+            value()
+
+          when _.isFunction(value)
+            value.toString()
 
           when _.isObject(value)
             _.mapObject(value, stringify)

@@ -229,35 +229,6 @@ describe "lib/request", ->
         expect(resp.status).to.eq(200)
         expect(resp.body.id).to.eq(1)
 
-    it "retrieves cookies from automation when cookies true", ->
-      nock("http://localhost:8080")
-      .matchHeader("Cookie", "foo=bar; baz=quux")
-      .post("/users", {
-        first: "brian"
-        last: "mann"
-      })
-      .reply(200, {id: 1})
-
-      @fn.withArgs("get:cookies", {url: "http://localhost:8080/users"})
-      .resolves([
-        {name: "foo", value: "bar"}
-        {name: "baz", value: "quux"}
-      ])
-
-      request.send({}, @fn, {
-        url: "http://localhost:8080/users"
-        method: "POST"
-        cookies: true
-        json: true
-        body: {
-          first: "brian"
-          last: "mann"
-        }
-      })
-      .then (resp) ->
-        expect(resp.status).to.eq(200)
-        expect(resp.body.id).to.eq(1)
-
     it "catches errors", ->
       nock.enableNetConnect()
 

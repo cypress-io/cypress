@@ -5,11 +5,10 @@ url        = require("url")
 tough      = require("tough-cookie")
 moment     = require("moment")
 Promise    = require("bluebird")
-extension  = require("@cypress/core-extension")
 automation = require("./automation")
 statusCode = require("./util/status_code")
 
-Cookie = tough.Cookie
+Cookie    = tough.Cookie
 CookieJar = tough.CookieJar
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
@@ -35,6 +34,16 @@ pick = (resp = {}) ->
     "Response Status":  resp.statusCode
   }
 
+setCookies = (cookies, jar, headers, url) =>
+  return if _.isEmpty(cookies)
+
+  if jar
+    cookies.forEach (c) ->
+      jar.setCookie(c, url, {ignoreError: true})
+
+  else
+    headers.Cookie = createCookieString(cookies)
+
 newCookieJar = ->
   j = new CookieJar(undefined, {looseMode: true})
 
@@ -55,11 +64,44 @@ newCookieJar = ->
       j.getCookiesSync(uri, {expire: false})
   }
 
-flattenCookies = (cookies) ->
-  _.reduce cookies, (memo, cookie) ->
-    memo[cookie.name] = cookie.value
-    memo
-  , {}
+convertToJarCookie = (cookies = []) ->
+  _.map cookies, (cookie) ->
+    props = {
+      key:      cookie.name
+      path:     cookie.path
+      value:    cookie.value
+      secure:   cookie.secure
+      httpOnly: cookie.httpOnly
+      hostOnly: cookie.hostOnly
+    }
+
+    ## hostOnly is the default when
+    ## NO DOMAIN= attribute was set
+    ##
+    ## so if we are not hostOnly then
+    ## this cookie WAS created with
+    ## a Domain= attribute and therefore
+    ## which lessens whichs domains this
+    ## cookie may be sent, and therefore
+    ## we need to set props.domain else
+    ## the domain would be implied by URL
+    if not cookie.hostOnly
+      ## https://github.com/salesforce/tough-cookie/issues/26
+      ## we need to strip the leading dot
+      ## on domains else tough cookie will not
+      ## properly send these cookies.
+      ## we get dot leading domains from the
+      ## chrome cookie API's
+      props.domain = _.trimStart(cookie.domain, ".")
+
+    ## if we have an expiry then this
+    ## is the number of seconds since the epoch
+    ## that this cookie expires. we need to convert
+    ## this to a JS date object
+    if cookie.expiry?
+      props.expires = moment.unix(cookie.expiry).toDate()
+
+    return new Cookie(props)
 
 reduceCookieToArray = (c) ->
   _.reduce c, (memo, val, key) ->
@@ -174,18 +216,6 @@ module.exports = (options = {}) ->
         #   lastAccessed: '2016-09-05T03:03:20.780Z',
         #   name: '2293-session' }
 
-        ## lets construct the url ourselves right now
-        cookie.url = extension.getCookieUrl(cookie)
-
-        ## https://github.com/SalesforceEng/tough-cookie#setcookiecookieorstring-currenturl-options-cberrcookie
-        ## a host only cookie is when domain was not explictly
-        ## set in the Set-Cookie header and instead was implied.
-        ## when this is the case we need to remove the domain
-        ## property else our cookie will incorrectly be set
-        ## as a domain cookie
-        if ho = cookie.hostOnly
-          cookie = _.omit(cookie, "domain")
-
         switch
           when cookie.maxAge?
             ## when we have maxAge
@@ -235,19 +265,42 @@ module.exports = (options = {}) ->
         strictSSL: false
       }
 
-      setCookies = (cookies) =>
-        return if _.isEmpty(cookies)
+      self = @
 
-        options.headers["Cookie"] = createCookieString(cookies)
+      if jar = options.jar
+        followRedirect = options.followRedirect
+
+        options.followRedirect = (incomingRes) ->
+          ## if we have a cookie jar
+          req = @
+
+          newUrl = url.resolve(options.url, incomingRes.headers.location)
+
+          ## and when we know we should follow the redirect
+          ## we need to override the init method and
+          ## first set the existing jar cookies on the browser
+          ## and then grab the cookies for the new url
+          req.init = _.wrap req.init, (orig, opts) =>
+            self.setJarCookies(jar, automation)
+            .then ->
+              automation("get:cookies", {url: newUrl, includeHostOnly: true})
+            .then(convertToJarCookie)
+            .then (cookies) ->
+              setCookies(cookies, jar, null, newUrl)
+            .then ->
+              orig.call(req, opts)
+
+          followRedirect.call(req, incomingRes)
 
       send = =>
         str = @create(options)
         str.getJar = -> options.jar
         str
 
-      automation("get:cookies", {url: options.url})
-      .then(flattenCookies)
-      .then(setCookies)
+      automation("get:cookies", {url: options.url, includeHostOnly: true})
+      .then(convertToJarCookie)
+      .then (cookies) ->
+        setCookies(cookies, options.jar, options.headers, options.url)
       .then(send)
 
     send: (headers, automation, options = {}) ->
@@ -295,31 +348,42 @@ module.exports = (options = {}) ->
         delete options.json
         delete options.body
 
-      setCookies = (cookies) =>
-        return if _.isEmpty(cookies)
-
-        options.headers["Cookie"] = createCookieString(cookies)
-
       send = =>
         ms = Date.now()
 
+        self             = @
         redirects        = []
         requestResponses = []
 
         push = (response) ->
           requestResponses.push(pick(response))
 
-        normalizeUrl = (loc) ->
-          url.resolve(options.url, loc)
-
         if options.followRedirect
           options.followRedirect = (incomingRes) ->
-            newUrl = normalizeUrl(incomingRes.headers.location)
+            newUrl = url.resolve(options.url, incomingRes.headers.location)
 
             ## normalize the url
             redirects.push([incomingRes.statusCode, newUrl].join(": "))
 
             push(incomingRes)
+
+            ## if we have a cookie jar
+            if jar = options.jar
+              req = @
+
+              ## and when we know we should follow the redirect
+              ## we need to override the init method and
+              ## first set the existing jar cookies on the browser
+              ## and then grab the cookies for the new url
+              req.init = _.wrap req.init, (orig, opts) =>
+                self.setJarCookies(options.jar, automation)
+                .then ->
+                  automation("get:cookies", {url: newUrl, includeHostOnly: true})
+                .then(convertToJarCookie)
+                .then (cookies) ->
+                  setCookies(cookies, jar, null, newUrl)
+                .then ->
+                  orig.call(req, opts)
 
             ## cause the redirect to happen
             ## but swallow up the incomingRes
@@ -342,7 +406,7 @@ module.exports = (options = {}) ->
           if options.followRedirect is false and (loc = resp.headers.location)
             ## resolve the new location head against
             ## the current url
-            resp.redirectedToUrl = normalizeUrl(loc)
+            resp.redirectedToUrl = url.resolve(options.url, loc)
 
           if options.jar
             @setJarCookies(options.jar, automation)
@@ -354,7 +418,7 @@ module.exports = (options = {}) ->
         ## if we have a cookie object then just
         ## send the request up!
         if _.isObject(c)
-          setCookies(c)
+          setCookies(c, null, options.headers)
           send()
         else
           ## else go get the cookies first
@@ -363,9 +427,10 @@ module.exports = (options = {}) ->
           ## TODO: we can simply use the 'url' property on the cookies API
           ## which automatically pulls all of the cookies that would be
           ## set for that url!
-          automation("get:cookies", {url: options.url})
-          .then(flattenCookies)
-          .then(setCookies)
+          automation("get:cookies", {url: options.url, includeHostOnly: true})
+          .then(convertToJarCookie)
+          .then (cookies) ->
+            setCookies(cookies, options.jar, options.headers, options.url)
           .then(send)
       else
         send()

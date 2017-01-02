@@ -6,6 +6,10 @@ e2e      = require("../helpers/e2e")
 onServer = (app) ->
   app.use(parser())
 
+  app.use (req, res, next) ->
+    console.log "** REQUEST HEADERS ARE", req.url, req.headers
+    next()
+
   getIndex = ->
     """
     <!DOCTYPE html>
@@ -42,11 +46,22 @@ onServer = (app) ->
     }
   })
 
+  app.get "/htmlCookies", (req, res) ->
+    cookie = req.headers.cookie
+
+    res.send("<html><div id='cookie'>#{cookie}</div></html>")
+
   app.get "/cookies*", cors({origin: true, credentials: true}), (req, res) ->
     res.json({
       cookie: req.headers["cookie"]
       parsed: req.cookie
     })
+
+  app.get "/redirect", (req, res) ->
+    res.redirect("http://www.foobar.com:2292/cookies")
+
+  app.get "/domainRedirect", (req, res) ->
+    res.redirect("http://www.foobar.com:2292/htmlCookies")
 
   app.get "*", (req, res, next) ->
     res.set('Content-Type', 'text/html');
@@ -66,7 +81,6 @@ onServer = (app) ->
 
         when "domain.foobar.com:2292"
           res.cookie("nomnom", "good", {
-            name: "domain-cookie"
             domain: ".foobar.com"
           })
 
