@@ -35,17 +35,26 @@ module.exports = {
       .then (resp = {}) =>
         { data, encoding } = resp
 
+        ## grab content-type from x-cypress-headers if present
         headers = @parseHeaders(headers, data)
 
         ## enable us to respond with other encodings
         ## like binary
         encoding ?= "utf8"
 
-        ## grab content-type from x-cypress-headers if present
+        ## TODO: if data is binary then set
+        ## content-type to binary/octet-stream
+        if _.isObject(data)
+          data = JSON.stringify(data)
+
+        chunk = new Buffer(data, encoding)
+
+        headers["content-length"] = chunk.length
+
         res
         .set(headers)
         .status(status)
-        .end(data, encoding)
+        .end(chunk)
       .catch (err) ->
         res
         .status(400)
@@ -85,7 +94,7 @@ module.exports = {
 
   parseContentType: (response) ->
     ret = (type) ->
-      mime.lookup(type)
+      mime.lookup(type) #+ "; charset=utf-8"
 
     switch
       when isValidJSON(response)
@@ -101,7 +110,6 @@ module.exports = {
 
     headers ?= {}
     headers["content-type"] ?= @parseContentType(response)
-    headers["content-length"] = response.length
 
     return headers
 

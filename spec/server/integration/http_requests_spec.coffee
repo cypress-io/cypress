@@ -3,6 +3,7 @@ require("../spec_helper")
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 _             = require("lodash")
+fs            = require("fs-extra")
 rp            = require("request-promise")
 dns           = require("dns")
 http          = require("http")
@@ -23,6 +24,8 @@ files         = require("#{root}lib/controllers/files")
 CacheBuster   = require("#{root}lib/util/cache_buster")
 Fixtures      = require("#{root}spec/server/helpers/fixtures")
 errors        = require("#{root}lib/errors")
+
+fs = Promise.promisifyAll(fs)
 
 ## force supertest-session to use supertest-as-promised, hah
 Session       = proxyquire("supertest-session", {supertest: supertest})
@@ -597,6 +600,23 @@ describe "Routes", ->
             expect(res.statusCode).to.eq(400)
             expect(res.headers["content-type"]).to.match(/application\/json/)
             expect(res.body.__error).to.include("'bad_json' is not valid JSON.")
+
+        it "can change the fixture encoding", ->
+          fs.readFileAsync(Fixtures.projectPath("todos/tests/_fixtures/images/flower.png"), "binary")
+          .then (bin) =>
+            @rp({
+              url: "http://localhost:2020/__cypress/xhrs/bar"
+              headers: {
+                "x-cypress-response": "fixture:images/flower.png,binary"
+                "x-cypress-headers": JSON.stringify({
+                  "content-type": "binary/octet-stream"
+                })
+              }
+            })
+            .then (res) ->
+              expect(res.statusCode).to.eq(200)
+              expect(res.headers["content-type"]).to.include("binary/octet-stream")
+              expect(res.headers["content-length"]).to.eq("" + bin.length)
 
       context "PUT", ->
         it "can issue PUT requests", ->
@@ -1585,8 +1605,6 @@ describe "Routes", ->
             expect(res.statusCode).to.eq(200)
 
             expect(res.body).not.to.include("<script")
-
-            console.log("**********LENGTH", res.body.length, size)
 
             expect(res.body).to.eq(bytes)
 
