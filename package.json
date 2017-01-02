@@ -51,6 +51,7 @@
     "mobx-react": "^3.3.1",
     "mobx-react-devtools": "^4.2.0",
     "moment": "^2.15.1",
+    "rc-collapse": "^1.6.11",
     "rc-tooltip": "^3.3.5",
     "react": "^15.1.0",
     "react-bootstrap-modal": "3.0.1",

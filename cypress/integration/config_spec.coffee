@@ -29,20 +29,28 @@ describe "Settings", ->
       .get(".navbar-default")
       .get("a").contains("Settings").click()
 
-    context "displays page", ->
-      it "navigates to settings page", ->
-        cy
-          .location().its("hash").should("include", "config")
+    it "navigates to settings page", ->
+      cy
+        .location().its("hash").should("include", "config")
 
-      it "highlight settings nav", ->
-        cy
-          .contains("a", "Settings").should("have.class", "active")
+    it "highlight settings nav", ->
+      cy
+        .contains("a", "Settings").should("have.class", "active")
 
-    context "display legend", ->
-      it "has legend in table", ->
+    it "collapses panels by default", ->
+      cy.contains("Your project's configuration is displayed").should("not.exist")
+      cy.contains("CI Keys allow you to").should("not.exist")
+
+    describe "when config panel is opened", ->
+      beforeEach ->
+        cy.contains("Resolved Configuration").click()
+
+      it "displays config section", ->
+        cy.contains("Your project's configuration is displayed")
+
+      it "displays legend in table", ->
         cy.get("table>tbody>tr").should("have.length", 5)
 
-    context "displays config", ->
       it "wraps config line in proper classes", ->
         cy
           .get(".line").first().within ->
@@ -52,19 +60,23 @@ describe "Settings", ->
               .contains("5").should("have.class", "default").end()
               .contains(",").should("have.class", "comma")
 
-      it "displays 'true' values", ->
-        cy.get(".line").contains("true")
+        it "displays 'true' values", ->
+          cy.get(".line").contains("true")
 
-      it "displays 'null' values", ->
-        cy.get(".line").contains("null")
+        it "displays 'null' values", ->
+          cy.get(".line").contains("null")
 
-      it "opens help link on click", ->
-        cy
-          .get(".fa-info-circle").first().click().then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/configuration")
+        it "opens help link on click", ->
+          cy
+            .get(".fa-info-circle").first().click().then ->
+              expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/configuration")
+
+    describe "when ci keys panels is opened", ->
+      beforeEach ->
+        cy.contains("CI Keys").click()
 
       it "displays ci keys section", ->
-        cy.contains("legend", "CI Keys")
+        cy.contains("CI Keys allow you to")
 
       it "opens ci guide when learn more is clicked", ->
         cy
@@ -109,6 +121,7 @@ describe "Settings", ->
             @ipc.handle("open:project", null, @config)
 
         cy.contains("Settings")
+        cy.contains("Resolved Configuration").click()
 
       it "displays updated config", ->
         @config.resolved.baseUrl.value = "http://localhost:7777"

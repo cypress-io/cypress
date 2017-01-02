@@ -2,6 +2,7 @@ import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Tooltip from 'rc-tooltip'
+import Collapse, { Panel } from 'rc-collapse'
 
 import App from '../lib/app'
 import { getCiKeys } from '../projects/projects-api'
@@ -23,64 +24,69 @@ class Config extends Component {
   }
 
   render () {
+    return (
+      <div id='config'>
+        <div className='config-wrapper'>
+          <Collapse>
+            {this._configSection()}
+            {this._ciKeysSection()}
+          </Collapse>
+        </div>
+      </div>
+    )
+  }
+
+  _configSection () {
     this.resolvedConfig = this.props.project.resolvedConfig
 
     let config  = _.omit(this.resolvedConfig, 'environmentVariables')
     let envVars = this.resolvedConfig.environmentVariables
 
     return (
-      <div id='config'>
-        <div className='config-wrapper'>
-          <section className='form-horizontal'>
-            <h2>
-              Resolved Configuration:{' '}
-              <a href='#' className='pull-right' onClick={this._openHelp}>
-                <i className='fa fa-info-circle'></i>{' '}
-                Learn more
-              </a>
-            </h2>
-            <p className='text-muted'>Your project's configuration is displayed below. A value can be set from the following sources:</p>
-            <table className='table config-table'>
-              <tbody>
-                <tr className='config-keys'>
-                  <td><span className='default'>default</span></td>
-                  <td>default values</td>
-                </tr>
-                <tr className='config-keys'>
-                  <td><span className='config'>config</span></td>
-                  <td>set from cypress.json</td>
-                </tr>
-                <tr className='config-keys'>
-                  <td><span className='envFile'>envFile</span></td>
-                  <td>set from cypress.env.json</td>
-                </tr>
-                <tr className='config-keys'>
-                  <td><span className='env'>env</span></td>
-                  <td>set from environment variables</td>
-                </tr>
-                <tr className='config-keys'>
-                  <td><span className='cli'>CLI</span></td>
-                  <td>set from CLI arguments</td>
-                </tr>
-              </tbody>
-            </table>
-            <pre className='config-vars'>
-              { `{` }
-              { this._display(config, { comma: true }) }
-              <span className='envVars'>
-                <span className='key'>env</span>
-                <span className='colon'>:</span>{' '}
-                { `{` }
-                { this._display(envVars) }
-              </span>
-              <span className='line'>{`}`}</span>
-              <br />
-              { `}` }
-            </pre>
-          </section>
-          {this._ciKeysSection()}
-        </div>
-      </div>
+      <Panel header='Resolved Configuration' key='config' className='form-horizontal'>
+        <a href='#' className='pull-right' onClick={this._openHelp}>
+          <i className='fa fa-info-circle'></i>{' '}
+          Learn more
+        </a>
+        <p className='text-muted'>Your project's configuration is displayed below. A value can be set from the following sources:</p>
+        <table className='table config-table'>
+          <tbody>
+            <tr className='config-keys'>
+              <td><span className='default'>default</span></td>
+              <td>default values</td>
+            </tr>
+            <tr className='config-keys'>
+              <td><span className='config'>config</span></td>
+              <td>set from cypress.json</td>
+            </tr>
+            <tr className='config-keys'>
+              <td><span className='envFile'>envFile</span></td>
+              <td>set from cypress.env.json</td>
+            </tr>
+            <tr className='config-keys'>
+              <td><span className='env'>env</span></td>
+              <td>set from environment variables</td>
+            </tr>
+            <tr className='config-keys'>
+              <td><span className='cli'>CLI</span></td>
+              <td>set from CLI arguments</td>
+            </tr>
+          </tbody>
+        </table>
+        <pre className='config-vars'>
+          { `{` }
+          { this._display(config, { comma: true }) }
+          <span className='envVars'>
+            <span className='key'>env</span>
+            <span className='colon'>:</span>{' '}
+            { `{` }
+            { this._display(envVars) }
+          </span>
+          <span className='line'>{`}`}</span>
+          <br />
+          { `}` }
+        </pre>
+      </Panel>
     )
   }
 
@@ -125,14 +131,11 @@ class Config extends Component {
     if (this._notSetupForCi()) return null
 
     return (
-      <section className='form-horizontal config-ci-keys'>
-        <h2>
-          CI Keys
-          <a href='#' className='pull-right' onClick={this._openCiGuide}>
-            <i className='fa fa-info-circle'></i>{' '}
-            Learn More
-          </a>
-        </h2>
+      <Panel header='CI Keys' key='ci-keys' className='form-horizontal config-ci-keys'>
+        <a href='#' className='pull-right' onClick={this._openCiGuide}>
+          <i className='fa fa-info-circle'></i>{' '}
+          Learn More
+        </a>
         <p className='text-muted'>
           CI Keys allow you to record test results, screenshots and videos in Cypress.
           {this._hasCiKeys() ? ' To record your builds, run this command:' : ''}
@@ -144,7 +147,7 @@ class Config extends Component {
             <i className='fa fa-key'></i> Add or Remove CI Keys
           </a>
         </p>
-      </section>
+      </Panel>
     )
   }
 
