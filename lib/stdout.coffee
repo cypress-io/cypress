@@ -1,19 +1,25 @@
-## backup write
-write = process.stdout.write
+_write = process.stdout.write
 
-module.exports = ->
-  logs = []
+module.exports = {
+  capture: ->
+    logs = []
 
-  process.stdout.write = (str) ->
-    logs.push(str)
+    ## lazily backup write to enable
+    ## injection
+    write = process.stdout.write
 
-    write.apply(@, arguments)
+    process.stdout.write = (str) ->
+      logs.push(str)
 
-  return {
-    toString: -> logs.join("")
+      write.apply(@, arguments)
 
-    data: logs
+    return {
+      toString: -> logs.join("")
 
-    restore: ->
-      process.stdout.write = write
-  }
+      data: logs
+    }
+
+  restore: ->
+    ## restore to the original write
+    process.stdout.write = _write
+}

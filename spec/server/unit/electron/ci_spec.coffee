@@ -2,6 +2,7 @@ require("../../spec_helper")
 
 os       = require("os")
 api      = require("#{root}../lib/api")
+stdout   = require("#{root}../lib/stdout")
 errors   = require("#{root}../lib/errors")
 logger   = require("#{root}../lib/logger")
 Project  = require("#{root}../lib/project")
@@ -218,6 +219,49 @@ describe "electron/ci", ->
         expect(console.log).to.be.calledWithMatch("Error: foo")
         expect(logger.createException).to.be.calledWith(err)
 
+  context ".uploadStdout", ->
+    beforeEach ->
+      @sandbox.stub(api, "updateInstanceStdout")
+
+    it "calls api.updateInstanceStdout", ->
+      api.updateInstanceStdout.resolves()
+
+      ci.uploadStdout("id-123", "foobarbaz\n")
+
+      expect(api.updateInstanceStdout).to.be.calledWith({
+        instanceId: "id-123"
+        stdout: "foobarbaz\n"
+      })
+
+    it "logs warning on error", ->
+      err = new Error("foo")
+
+      @sandbox.spy(errors, "warning")
+      @sandbox.spy(logger, "createException")
+      @sandbox.spy(console, "log")
+
+      api.updateInstanceStdout.rejects(err)
+
+      ci.uploadStdout("id-123", "asdf")
+      .then ->
+        expect(errors.warning).to.be.calledWith("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+        expect(console.log).to.be.calledWithMatch("No build assets will be recorded.")
+        expect(console.log).to.be.calledWithMatch("Error: foo")
+        expect(logger.createException).to.be.calledWith(err)
+
+    it "does not createException when statusCode is 503", ->
+      err = new Error("foo")
+      err.statusCode = 503
+
+      @sandbox.spy(logger, "createException")
+
+      api.updateInstanceStdout.rejects(err)
+
+      ci.uploadStdout("id-123", "Asdfasd")
+      .then ->
+        expect(logger.createException).not.to.be.called
+
+
   context ".uploadAssets", ->
     beforeEach ->
       @sandbox.stub(api, "updateInstance")
@@ -370,6 +414,7 @@ describe "electron/ci", ->
       @sandbox.stub(ci, "generateProjectBuildId").resolves("build-id-123")
       @sandbox.stub(ci, "createInstance").resolves("instance-id-123")
       @sandbox.stub(ci, "uploadAssets").resolves()
+      @sandbox.stub(ci, "uploadStdout").resolves()
       @sandbox.stub(Project, "id").resolves("id-123")
       @sandbox.stub(Project, "config").resolves({projectName: "projectName"})
       @sandbox.stub(headless, "run").resolves({tests: 2, passes: 1})
@@ -432,6 +477,48 @@ describe "electron/ci", ->
           passes: 1
         })
 
+    it "does not call uploadStdout with no instanceId", ->
+      ci.createInstance.resolves(null)
+
+      ci.run({})
+      .then (stats) ->
+        expect(ci.uploadStdout).not.to.be.called
+
+    it "does not call uploadStdout on uploadAssets failure", ->
+      ci.uploadAssets.restore()
+      @sandbox.stub(api, "updateInstance").rejects(new Error)
+
+      ci.run({})
+      .then (stats) ->
+        expect(ci.uploadStdout).not.to.be.called
+
+    it "calls ci.uploadStdout on uploadAssets success", ->
+      @sandbox.stub(stdout, "capture").returns({
+        toString: -> "foobarbaz"
+      })
+
+      ci.run({})
+      .then (stats) ->
+        expect(ci.uploadStdout).to.be.calledWith("instance-id-123", "foobarbaz")
+
+    it "captures stdout from headless.run and headless.allDone", ->
+      fn = ->
+        console.log("foo")
+        console.log("bar")
+        process.stdout.write("baz")
+
+        Promise.resolve({failures: 0})
+
+      headless.run.restore()
+      @sandbox.stub(headless, "run", fn)
+
+      ci.run({})
+      .then (stats) ->
+        str = ci.uploadStdout.getCall(0).args[1]
+
+        expect(str).to.include("foo\nbar\nbaz")
+        expect(str).to.include("All Done")
+
     it "calls headless.allDone on uploadAssets success", ->
       @sandbox.spy(terminal, "header")
 
@@ -446,8 +533,21 @@ describe "electron/ci", ->
 
     it "calls headless.allDone on uploadAssets failure", ->
       @sandbox.spy(terminal, "header")
-      @sandbox.stub(api, "createInstance").rejects(new Error)
+      @sandbox.stub(api, "updateInstance").rejects(new Error)
       ci.uploadAssets.restore()
+
+      ci.run({})
+      .then (stats) ->
+        expect(terminal.header).to.be.calledWith("All Done")
+
+        expect(stats).to.deep.eq({
+          tests: 2
+          passes: 1
+        })
+
+    it "calls headless.allDone on createInstance failure", ->
+      @sandbox.spy(terminal, "header")
+      ci.createInstance.resolves(null)
 
       ci.run({})
       .then (stats) ->

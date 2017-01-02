@@ -94,6 +94,17 @@ module.exports = {
       .get("instanceId")
       .catch(errors.StatusCodeError, formatResponseBody)
 
+  updateInstanceStdout: (options = {}) ->
+    rp.put({
+      url: Routes.instanceStdout(options.instanceId)
+      json: true
+      timeout: options.timeout ? 10000
+      body: {
+        stdout: options.stdout
+      }
+    })
+    .catch(errors.StatusCodeError, formatResponseBody)
+
   updateInstance: (options = {}) ->
     body = _.pick(options, [
       "tests"

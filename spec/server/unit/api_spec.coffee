@@ -227,7 +227,7 @@ describe "lib/api", ->
         value: "53"
       })
 
-    it "PUTs /builds/:id/instances", ->
+    it "PUTs /instances/:id", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
@@ -260,7 +260,7 @@ describe "lib/api", ->
         cypressConfig: {}
       })
 
-    it "PUT /builds/:id/instances failure formatting", ->
+    it "PUT /instances/:id failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
@@ -308,6 +308,72 @@ describe "lib/api", ->
       @sandbox.stub(rp, "put").resolves()
 
       api.updateInstance({})
+      .then ->
+        expect(rp.put).to.be.calledWithMatch({timeout: 10000})
+
+  context ".updateInstanceStdout", ->
+    it "PUTs /instances/:id/stdout", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .put("/instances/instance-id-123/stdout", {
+        stdout: "foobarbaz\n"
+      })
+      .reply(200)
+
+      api.updateInstanceStdout({
+        instanceId: "instance-id-123"
+        stdout: "foobarbaz\n"
+      })
+
+    it "PUT /instances/:id/stdout failure formatting", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .put("/instances/instance-id-123/stdout")
+      .reply(422, {
+        errors: {
+          tests: ["is required"]
+        }
+      })
+
+      api.updateInstanceStdout({instanceId: "instance-id-123"})
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("""
+          422
+
+          {
+            "errors": {
+              "tests": [
+                "is required"
+              ]
+            }
+          }
+        """)
+
+    it "handles timeouts", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .put("/instances/instance-id-123/stdout")
+      .socketDelay(5000)
+      .reply(200, {})
+
+      api.updateInstanceStdout({
+        instanceId: "instance-id-123"
+        timeout: 100
+      })
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
+
+    it "sets timeout to 10 seconds", ->
+      @sandbox.stub(rp, "put").resolves()
+
+      api.updateInstanceStdout({})
       .then ->
         expect(rp.put).to.be.calledWithMatch({timeout: 10000})
 
