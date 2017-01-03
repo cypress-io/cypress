@@ -22,7 +22,7 @@
         "id": "od9809-0352-4ad9-85d3-feeb1e0505d5",
         "osName": "windows",
         "osVersion": "7",
-        "osFormatted": "7",
+        "osVersionFormatted": "7",
         "passes": 28,
         "pending": 4,
         "status": "passed"
@@ -56,7 +56,7 @@
         "failures": 0,
         "osName": "windows",
         "osVersion": "7",
-        "osFormatted": "7",
+        "osVersionFormatted": "7",
         "passes": 0,
         "pending": 0,
         "status": "errored"
@@ -112,7 +112,7 @@
         "id": "dkwd809-0352-4ad9-85d3-feeb1e0505d5",
         "osName": "windows",
         "osVersion": "7",
-        "osFormatted": "7",
+        "osVersionFormatted": "7",
         "passes": 0,
         "pending": 0,
         "status": "errored"
@@ -127,7 +127,7 @@
         "id": "as9d0809-0352-4ad9-85d3-feeb1e0505d5",
         "osName": "darwin",
         "osVersion": "10",
-        "osFormatted": "OSX Mountain Lion",
+        "osVersionFormatted": "OSX Mountain Lion",
         "passes": 0,
         "pending": 0,
         "status": "running"

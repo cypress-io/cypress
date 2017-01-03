@@ -187,7 +187,7 @@ export default class BuildsListItem extends Component {
     return _
       .chain(this.props.build.instances)
       .map((instance) => {
-        return `${instance.osName} + ${instance.osFormatted}`
+        return `${instance.osName} + ${instance.osVersionFormatted}`
       })
       .uniq()
       .value()
@@ -201,7 +201,7 @@ export default class BuildsListItem extends Component {
     if (this.props.build.instances && this.props.build.instances[0]) {
       return (
         <span>
-          {this.props.build.instances[0].osFormatted}
+          {this.props.build.instances[0].osVersionFormatted}
         </span>
       )
     }
