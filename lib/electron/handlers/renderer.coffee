@@ -128,8 +128,8 @@ module.exports = {
       delete windows[options.type]
 
     ## open dev tools if they're true
-    # if args.devTools
-    win.webContents.openDevTools({detach: true})
+    if args.devTools
+      win.webContents.openDevTools({detach: true})
 
     ## enable our url to be a promise
     ## and wait for this to be resolved
