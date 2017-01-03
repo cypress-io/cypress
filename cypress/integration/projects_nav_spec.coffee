@@ -103,8 +103,7 @@ describe "Projects Nav", ->
           .location().its("hash").should("include", "config")
 
       it "displays settings page", ->
-        cy
-          .contains("h5", "Configuration")
+        cy.contains("Resolved Configuration")
 
   context "browsers dropdown", ->
     describe "browsers available", ->

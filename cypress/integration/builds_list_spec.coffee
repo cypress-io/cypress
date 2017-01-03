@@ -400,8 +400,8 @@ describe "Builds List", ->
 
               it "displays link to CI docs", ->
                 cy
-                  .get("#builds-list-page a")
-                  .should("have.text", " Learn more about Continuous Integration")
+                  .get(".first-build-instructions a")
+                  .should("have.text", " Learn more")
 
               it "does not display message about inviting users", ->
                 cy.contains("Cypress Dashboard").should("not.exist")
