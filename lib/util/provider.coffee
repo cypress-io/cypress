@@ -28,21 +28,66 @@ providers = {
   "wercker":         isWercker
 }
 
-getProviderKey = ->
+nullDetails = -> {
+  ciUrl: null
+  buildNum: null
+}
+
+details = {
+  "appveyor": -> {
+    ciUrl: "https://ci.appveyor.com/project/#{process.env.APPVEYOR_ACCOUNT_NAME}/#{process.env.APPVEYOR_PROJECT_SLUG}/build/#{process.env.APPVEYOR_BUILD_VERSION}"
+    buildNum: process.env.APPVEYOR_BUILD_NUMBER
+  }
+  "bamboo": nullDetails
+  "buildkite": nullDetails
+  "circle": -> {
+    ciUrl: process.env.CIRCLE_BUILD_URL
+    buildNum: process.env.CIRCLE_BUILD_NUM
+  }
+  "codeship": -> {
+    ciUrl: process.env.CI_BUILD_URL
+    buildNum: process.env.CI_BUILD_NUMBER
+  }
+  "drone": nullDetails
+  "gitlab": -> {
+    ciUrl: "#{process.env.CI_PROJECT_URL}/builds/#{process.env.CI_BUILD_ID}"
+    buildNum: process.env.CI_BUILD_ID
+  }
+  "hudson": nullDetails
+  "jenkins": -> {
+    ciUrl: process.env.BUILD_URL
+    buildNum: process.env.BUILD_NUMBER
+  }
+  "semaphore": nullDetails
+  "shippable": nullDetails
+  "snap": nullDetails
+  "teamcity": nullDetails
+  "teamfoundation": nullDetails
+  "travis": -> {
+    ciUrl: "https://travis-ci.org/#{process.env.TRAVIS_REPO_SLUG}/builds/#{process.env.TRAVIS_BUILD_ID}"
+    buildNum: process.env.TRAVIS_BUILD_NUMBER
+  }
+  "wercker": nullDetails
+
+  "unknown": nullDetails
+}
+
+getProviderName = ->
   ## return the key of the first provider
   ## which is truthy
-  _.findKey providers, (value, key) ->
+  name = _.findKey providers, (value, key) ->
     switch
       when _.isString(value)
         process.env[value]
       when _.isFunction(value)
         value()
 
+  name or "unknown"
+
 module.exports = {
   name: ->
-    getProviderKey() ? "unknown"
+    getProviderName()
 
-  url: ->
-
-  buildNum: ->
+  details: ->
+    details[getProviderName()]()
 }
