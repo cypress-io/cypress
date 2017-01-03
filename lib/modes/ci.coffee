@@ -48,6 +48,12 @@ module.exports = {
     .get("id")
     .catch -> ""
 
+  getRemoteOrigin: (repo) ->
+    repo.configAsync()
+    .get("items")
+    .get("remote.origin.url")
+    .catch -> ""
+
   getBranch: (repo) ->
     for branch in ["CIRCLE_BRANCH", "TRAVIS_BRANCH", "CI_BRANCH"]
       if b = process.env[branch]
@@ -63,6 +69,7 @@ module.exports = {
 
     Promise.props({
       sha:     @getSha(repo)
+      remote:  @getRemoteOrigin(repo)
       branch:  @getBranch(repo)
       author:  @getAuthor(repo)
       email:   @getEmail(repo)
@@ -77,6 +84,7 @@ module.exports = {
         commitAuthorName:  git.author
         commitAuthorEmail: git.email
         commitMessage:     git.message
+        remoteOrigin:      git.remote
       })
       .catch (err) ->
         switch err.statusCode

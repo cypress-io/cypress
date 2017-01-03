@@ -111,6 +111,30 @@ describe "electron/ci", ->
       ci.getEmail(@repo).then (ret) ->
         expect(ret).to.eq("")
 
+  context ".getRemoteOrigin", ->
+    beforeEach ->
+      @repo = @sandbox.stub({
+        configAsync: ->
+      })
+
+    it "returns remote origin url", ->
+      @repo.configAsync.resolves({
+        items: {
+          'remote.origin.url': "https://github.com/foo/bar.git"
+        }
+      })
+
+      ci.getRemoteOrigin(@repo)
+      .then (ret) ->
+        expect(ret).to.eq("https://github.com/foo/bar.git")
+
+    it "returns '' on err", ->
+      @repo.configAsync.rejects(new Error("bar"))
+
+      ci.getRemoteOrigin(@repo)
+      .then (ret) ->
+        expect(ret).to.eq("")
+
   context ".getBranch", ->
     beforeEach ->
       @repo = @sandbox.stub({
@@ -156,6 +180,7 @@ describe "electron/ci", ->
       @sandbox.stub(ci, "getEmail").resolves("brian@cypress.io")
       @sandbox.stub(ci, "getMessage").resolves("such hax")
       @sandbox.stub(ci, "getSha").resolves("sha-123")
+      @sandbox.stub(ci, "getRemoteOrigin").resolves("https://github.com/foo/bar.git")
       @sandbox.stub(api, "createBuild")
 
     it "calls api.createBuild with args", ->
@@ -170,6 +195,7 @@ describe "electron/ci", ->
           commitAuthorName: "brian"
           commitAuthorEmail: "brian@cypress.io"
           commitMessage: "such hax"
+          remoteOrigin: "https://github.com/foo/bar.git"
         })
 
     it "handles status code errors of 401", ->

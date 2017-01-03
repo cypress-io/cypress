@@ -63,6 +63,7 @@ module.exports = {
         commitAuthorName:  options.commitAuthorName
         commitAuthorEmail: options.commitAuthorEmail
         commitMessage:     options.commitMessage
+        remoteOrigin:      options.remoteOrigin
         ciProvider:        provider.name()
       }
     })

@@ -638,6 +638,7 @@ describe "lib/cypress", ->
           commitAuthorName: "brian"
           commitAuthorEmail:  "brian@cypress.io"
           commitMessage: "foo"
+          remoteOrigin: "https://github.com/foo/bar.git"
         })
 
       @upload = @sandbox.stub(ci, "upload").resolves()
@@ -650,6 +651,7 @@ describe "lib/cypress", ->
       @sandbox.stub(ci, "getAuthor").resolves("brian")
       @sandbox.stub(ci, "getEmail").resolves("brian@cypress.io")
       @sandbox.stub(ci, "getMessage").resolves("foo")
+      @sandbox.stub(ci, "getRemoteOrigin").resolves("https://github.com/foo/bar.git")
       @sandbox.stub(headless, "createRenderer")
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({

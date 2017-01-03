@@ -11,7 +11,7 @@ provider = require("#{root}lib/util/provider")
 describe "lib/api", ->
   beforeEach ->
     @sandbox.stub(os, "platform").returns("linux")
-    @sandbox.stub(provider, "get").returns("circle")
+    @sandbox.stub(provider, "name").returns("circle")
 
   context ".ping", ->
     it "GET /ping", ->
@@ -39,6 +39,7 @@ describe "lib/api", ->
         commitAuthorName:  "brian"
         commitAuthorEmail: "brian@cypress.io"
         commitMessage:     "such hax"
+        remoteOrigin:       "https://github.com/foo/bar.git"
         ciProvider:        "circle"
       })
       .reply(200, {
@@ -53,6 +54,7 @@ describe "lib/api", ->
         commitAuthorName:  "brian"
         commitAuthorEmail: "brian@cypress.io"
         commitMessage:     "such hax"
+        remoteOrigin:       "https://github.com/foo/bar.git"
       })
       .then (ret) ->
         expect(ret).to.eq("new-build-id-123")
@@ -70,6 +72,7 @@ describe "lib/api", ->
         commitAuthorName:  "brian"
         commitAuthorEmail: "brian@cypress.io"
         commitMessage:     "such hax"
+        remoteOrigin:       "https://github.com/foo/bar.git"
         ciProvider:        "circle"
       })
       .reply(422, {
@@ -86,6 +89,7 @@ describe "lib/api", ->
         commitAuthorName:  "brian"
         commitAuthorEmail: "brian@cypress.io"
         commitMessage:     "such hax"
+        remoteOrigin:       "https://github.com/foo/bar.git"
       })
       .then ->
         throw new Error("should have thrown here")
