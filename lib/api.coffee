@@ -63,7 +63,7 @@ module.exports = {
         commitAuthorName:  options.commitAuthorName
         commitAuthorEmail: options.commitAuthorEmail
         commitMessage:     options.commitMessage
-        ciProvider:        provider.get()
+        ciProvider:        provider.name()
       }
     })
     .promise()
@@ -125,7 +125,7 @@ module.exports = {
       json: true
       timeout: options.timeout ? 10000
       body: _.extend(body, {
-        ciProvider: provider.get()
+        ciProvider: provider.name()
       })
     })
     .catch(errors.StatusCodeError, formatResponseBody)

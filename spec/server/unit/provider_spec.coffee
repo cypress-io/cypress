@@ -9,7 +9,7 @@ describe "lib/util/provider", ->
     process.env = {}
 
     @expects = (key) ->
-      expect(provider.get()).to.eq(key)
+      expect(provider.name()).to.eq(key)
 
   afterEach ->
     ## restore the env

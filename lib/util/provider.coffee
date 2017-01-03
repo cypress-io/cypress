@@ -39,6 +39,10 @@ getProviderKey = ->
         value()
 
 module.exports = {
-  get: ->
+  name: ->
     getProviderKey() ? "unknown"
+
+  url: ->
+
+  buildNum: ->
 }
