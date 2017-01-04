@@ -131,7 +131,7 @@ class Builds extends Component {
         return this._emptyWithoutSetup(false)
 
       // they are not authorized to see builds
-      } else if (errors.isUnauthenticated(this.buildsCollection.error)) {
+      } else if (errors.isUnauthenticated(this.buildsCollection.error) || errors.isUnauthorized(this.buildsCollection.error)) {
         return <PermissionMessage project={project} onRetry={this._getBuilds} />
 
       // other error, but only show if we don't already have builds

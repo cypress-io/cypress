@@ -60,102 +60,126 @@ describe "Builds List", ->
           .fixture("specs").as("specs").then ->
             @ipc.handle("get:specs", null, @specs)
           .get(".nav a").contains("Builds").click()
-          .then =>
-            @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "UNAUTHENTICATED"}, null)
 
-      it "displays permissions message", ->
-        cy.contains("Request Access")
-
-      context "request access", ->
+      ## currently redirects to login
+      ## enable after login requirement is removed
+      context.skip "type: UNAUTHENTICATED", ->
         beforeEach ->
-          cy.contains("Request Access").click()
+          @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "UNAUTHENTICATED"}, null)
 
-        it "sends request:access ipc event with org id", ->
-          expect(@App.ipc).to.be.calledWith("request:access", 829)
+        it "displays permissions message", ->
+          cy.contains("Request Access")
 
-        it "disables button", ->
-          cy.contains("Request Access").should("be.disabled")
+      ## currently redirects to login
+      ## enable after login requirement is removed
+      context.skip "statusCode: 401", ->
+        beforeEach ->
+          @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 401}, null)
 
-        it "hides 'Request Access' text", ->
-          cy.contains("Request Access").find("span").should("not.be.visible")
+        it "displays permissions message", ->
+          cy.contains("Request Access")
 
-        it "shows spinner", ->
-          cy.contains("Request Access").find("> i").should("be.visible")
+      context "statusCode: 403", ->
+        beforeEach ->
+          @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 403}, null)
 
-        describe "when request succeeds", ->
+        it "displays permissions message", ->
+          cy.contains("Request Access")
+
+      context "any case", ->
+        beforeEach ->
+          @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 403}, null)
+
+        context "request access", ->
           beforeEach ->
-            @ipc.handle("request:access")
+            cy.contains("Request Access").click()
 
-          it "shows success message", ->
-            cy.contains("Request Sent")
+          it "sends request:access ipc event with org id", ->
+            expect(@App.ipc).to.be.calledWith("request:access", 829)
 
-          it "'persists' request state (until app is reloaded at least)", ->
-            cy
-              .contains("Back to Projects").click()
-              .get(".projects-list a")
-                .contains("My-Fake-Project").click()
-              .fixture("config").then (@config) ->
-                @ipc.handle("open:project", null, @config)
-              .fixture("specs").as("specs").then ->
-                @ipc.handle("get:specs", null, @specs)
-              .get(".navbar-default")
-                .find("a").contains("Builds").click()
-              .then =>
-                @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "UNAUTHENTICATED"}, null)
-              .end().contains("Request Sent")
+          it "disables button", ->
+            cy.contains("Request Access").should("be.disabled")
 
-        describe "when request succeeds and user is already a member", ->
-          beforeEach ->
-            @ipc.handle("request:access", {name: "foo", message: "There's an error", type: "ALREADY_MEMBER"})
-            cy.wait(1)
+          it "hides 'Request Access' text", ->
+            cy.contains("Request Access").find("span").should("not.be.visible")
 
-          it "retries getting builds", ->
-            expect(@App.ipc.withArgs("get:builds").callCount).to.equal(2)
+          it "shows spinner", ->
+            cy.contains("Request Access").find("> i").should("be.visible")
 
-          it "shows loading spinner", ->
-            cy.get(".loader")
+          describe "when request succeeds", ->
+            beforeEach ->
+              @ipc.handle("request:access")
 
-          it "shows builds when getting builds succeeds", ->
-            @ipc.handle("get:builds", null, @builds).then =>
+            it "shows success message", ->
+              cy.contains("Request Sent")
+
+            it "'persists' request state (until app is reloaded at least)", ->
               cy
-                .get(".builds-container li")
-                .should("have.length", @builds.length)
+                .contains("Back to Projects").click()
+                .get(".projects-list a")
+                  .contains("My-Fake-Project").click()
+                .fixture("config").then (@config) ->
+                  @ipc.handle("open:project", null, @config)
+                .fixture("specs").as("specs").then ->
+                  @ipc.handle("get:specs", null, @specs)
+                .get(".navbar-default")
+                  .find("a").contains("Builds").click()
+                .then =>
+                  @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 403}, null)
+                .end().contains("Request Sent")
 
-        describe "when request fails", ->
-          describe "for unknown reason", ->
+          describe "when request succeeds and user is already a member", ->
             beforeEach ->
-              @ipc.handle("request:access", {name: "foo", message: """
-              {
-                "cheese": "off the cracker"
-              }
-              """})
+              @ipc.handle("request:access", {name: "foo", message: "There's an error", type: "ALREADY_MEMBER"})
+              cy.wait(1)
 
-            it "shows failure message", ->
-              cy.contains("Request Failed")
-              cy.contains('"cheese": "off the cracker"')
+            it "retries getting builds", ->
+              expect(@App.ipc.withArgs("get:builds").callCount).to.equal(2)
 
-            it "enables button", ->
-              cy.contains("Request Access").should("not.be.disabled")
+            it "shows loading spinner", ->
+              cy.get(".loader")
 
-            it "shows 'Request Access' text", ->
-              cy.contains("Request Access").find("span").should("be.visible")
+            it "shows builds when getting builds succeeds", ->
+              @ipc.handle("get:builds", null, @builds).then =>
+                cy
+                  .get(".builds-container li")
+                  .should("have.length", @builds.length)
 
-            it "hides spinner", ->
-              cy.contains("Request Access").find("> i").should("not.be.visible")
+          describe "when request fails", ->
+            describe "for unknown reason", ->
+              beforeEach ->
+                @ipc.handle("request:access", {name: "foo", message: """
+                {
+                  "cheese": "off the cracker"
+                }
+                """})
 
-          describe "because requested was denied", ->
-            beforeEach ->
-              @ipc.handle("request:access", {type: "DENIED", name: "foo", message: "There's an error"})
+              it "shows failure message", ->
+                cy.contains("Request Failed")
+                cy.contains('"cheese": "off the cracker"')
 
-            it "shows 'success' message", ->
-              cy.contains("Request Sent")
+              it "enables button", ->
+                cy.contains("Request Access").should("not.be.disabled")
 
-          describe "because request was already sent", ->
-            beforeEach ->
-              @ipc.handle("request:access", {type: "ALREADY_REQUESTED", name: "foo", message: "There's an error"})
+              it "shows 'Request Access' text", ->
+                cy.contains("Request Access").find("span").should("be.visible")
 
-            it "shows 'success' message", ->
-              cy.contains("Request Sent")
+              it "hides spinner", ->
+                cy.contains("Request Access").find("> i").should("not.be.visible")
+
+            describe "because requested was denied", ->
+              beforeEach ->
+                @ipc.handle("request:access", {type: "DENIED", name: "foo", message: "There's an error"})
+
+              it "shows 'success' message", ->
+                cy.contains("Request Sent")
+
+            describe "because request was already sent", ->
+              beforeEach ->
+                @ipc.handle("request:access", {type: "ALREADY_REQUESTED", name: "foo", message: "There's an error"})
+
+              it "shows 'success' message", ->
+                cy.contains("Request Sent")
 
     describe "timed out error", ->
       beforeEach ->
@@ -605,19 +629,20 @@ describe "Builds List", ->
       context "errors", ->
         beforeEach ->
           @clock.tick(10000)
-          @ipcError = (type) =>
-            @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: type}, null)
+          @ipcError = (details) =>
+            err = _.extend(details, {name: "foo", message: "There's an error"})
+            @ipc.handle("get:builds", err, null)
 
         it "displays permissions error", ->
-          @ipcError("UNAUTHENTICATED").then ->
+          @ipcError({statusCode: 403}).then ->
             cy.contains("Request access")
 
         it "displays missing project id error", ->
-          @ipcError("NO_PROJECT_ID").then ->
+          @ipcError({type: "NO_PROJECT_ID"}).then ->
             cy.contains("You have no builds...")
 
         it "displays old builds if another error", ->
-          @ipcError("TIMED_OUT").then ->
+          @ipcError({type: "TIMED_OUT"}).then ->
             cy.get(".builds-container li").should("have.length", 4)
 
     describe "manually refreshing builds", ->
