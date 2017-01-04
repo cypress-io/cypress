@@ -19,6 +19,10 @@ export class Orgs {
     this.isLoaded = true
   }
 
+  @action setError (err) {
+    this.error = err
+  }
+
   getOrgById (id) {
     return _.find(this.orgs, { id })
   }

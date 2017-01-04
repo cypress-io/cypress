@@ -1,14 +1,13 @@
 import App from '../lib/app'
 import orgsStore from './organizations-store'
 
-const getOrgs = (setGetOrgsError) => {
-  App.ipc('get:orgs', (err, orgs = []) => {
-    if (err) {
-      return setGetOrgsError(err)
-    }
-
+const getOrgs = () => {
+  return App.ipc('get:orgs')
+  .then((orgs = []) => {
     orgsStore.setOrgs(orgs)
-
+  })
+  .catch((err) => {
+    orgsStore.setError(err)
   })
 }
 
