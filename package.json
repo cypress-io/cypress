@@ -18,7 +18,7 @@
     "url": "https://github.com/cypress-io/cypress-core-desktop-gui.git"
   },
   "author": "Brian Mann",
-  "license": "LGPL",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress-core-desktop-gui/issues"
   },
