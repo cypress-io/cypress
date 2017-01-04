@@ -37,8 +37,7 @@ const withUser = (ComponentClass) => {
 
 const devTools = () => {
   if (
-    window.env === 'development' ||
-    window.env === 'test' &&
+    (window.env === 'development' || window.env === 'test') &&
     !localStorage.noDevtools
   ) {
     setLogEnabled(true)
