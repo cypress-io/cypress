@@ -61,6 +61,8 @@ export default class Project {
   }
 
   update (props) {
+    if (!props) return
+
     _.each(validProps, (prop) => {
       this._updateProp(props, prop)
     })
