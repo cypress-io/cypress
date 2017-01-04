@@ -7,6 +7,7 @@ headless = require("./headless")
 api      = require("../api")
 logger   = require("../logger")
 errors   = require("../errors")
+stdout   = require("../stdout")
 upload   = require("../upload")
 Project  = require("../project")
 terminal = require("../util/terminal")
@@ -189,10 +190,27 @@ module.exports = {
       errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
 
       ## dont log exceptions if we have a 503 status code
+      if err.statusCode isnt 503
+        logException(err)
+        .return(null)
+      else
+        null
+
+  uploadStdout: (instanceId, stdout) ->
+    api.updateInstanceStdout({
+      instanceId:   instanceId
+      stdout:       stdout
+    })
+    .catch (err) ->
+      errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+
+      ## dont log exceptions if we have a 503 status code
       logException(err) unless err.statusCode is 503
 
   run: (options) ->
     {projectPath} = options
+
+    captured = stdout.capture()
 
     Project.add(projectPath)
     .then ->
@@ -215,14 +233,26 @@ module.exports = {
           ## dont let headless say its all done
           options.allDone       = false
 
+          didUploadAssets       = false
+
           headless.run(options)
           .then (stats = {}) =>
             ## if we got a instanceId then attempt to
             ## upload these assets
             if instanceId
               @uploadAssets(instanceId, stats)
+              .then (ret) ->
+                didUploadAssets = ret isnt null
               .return(stats)
-              .finally(headless.allDone)
+              .finally =>
+                headless.allDone()
+
+                if didUploadAssets
+                  stdout.restore()
+                  @uploadStdout(instanceId, captured.toString())
+
             else
-              stats
+              stdout.restore()
+              headless.allDone()
+              return stats
 }
