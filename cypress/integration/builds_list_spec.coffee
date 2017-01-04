@@ -612,8 +612,6 @@ describe "Builds List", ->
           @ipcError("UNAUTHENTICATED").then ->
             cy.contains("Request access")
 
-        ## TODO: this is a duplicate of test on line
-        ## 206 above. needs to be cleaned up
         it "displays missing project id error", ->
           @ipcError("NO_PROJECT_ID").then ->
             cy.contains("You have no builds...")
