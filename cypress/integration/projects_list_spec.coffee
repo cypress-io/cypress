@@ -322,3 +322,23 @@ describe "Projects List", ->
           cy
             .get(".projects-list>li").first()
             .contains("Passed")
+
+    describe "if api returns 401", ->
+      beforeEach ->
+        cy
+          .window().then (win) =>
+            @clock = win.sinon.useFakeTimers()
+          .fixture("projects").then (@projects) ->
+            @ipc.handle("get:projects", null, @projects)
+            @clock.tick(1000)
+          .fixture("projects_statuses").then (@projects_statuses) ->
+            @ipc.handle("get:project:statuses", {name: "", message: "", statusCode: 401})
+            @clock.tick(1000)
+
+      afterEach ->
+        @clock.restore()
+
+      it "redirects to login", ->
+        cy
+          .location().its("hash")
+            .should("contain", "login")

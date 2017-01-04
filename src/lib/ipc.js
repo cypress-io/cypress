@@ -11,12 +11,14 @@ const addMsg = (id, event, fn) => {
 }
 
 const removeMsgsByEvent = (event) => {
-  return msgs = _.omitBy(msgs, (msg) => msg.event === event)
+  msgs = _.omitBy(msgs, (msg) => msg.event === event)
 }
 
 const removeMsgById = (id) => {
-  return msgs = _.omit(msgs, `${id}`)
+  msgs = _.omit(msgs, `${id}`)
 }
+
+let onError = () => {}
 
 const createIpc = () => {
   console.warn("Missing 'ipc'. Polyfilling in development mode.") // eslint-disable-line no-console
@@ -48,6 +50,9 @@ const createIpc = () => {
         const msg = _.find(msgs, { event })
 
         if (msg) {
+          if (err) {
+            onError(err)
+          }
           msg.fn(err, data)
           return resolve()
         } else {
@@ -71,6 +76,10 @@ ipc.on("response", (event, obj = {}) => {
 
   // standard node callback implementation
   if (msg) {
+    if (__error) {
+      onError(__error)
+    }
+
     return msg.fn(__error, data)
   }
 })
@@ -131,6 +140,9 @@ const appIpc = (...args) => {
   return fn()
 }
 
+appIpc.onError = (handler) => {
+  onError = handler
+}
 appIpc.offById = removeMsgById
 appIpc.off = removeMsgsByEvent
 

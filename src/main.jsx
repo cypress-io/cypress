@@ -13,7 +13,6 @@ import Updates from './update/updates'
 useStrict(true)
 
 import App from './lib/app'
-import ipc from './lib/ipc'
 
 const handleErrors = () => {
   const sendErr = (err) => {
@@ -50,8 +49,10 @@ const setupDevVars = () => {
   }
 }
 
+App.onUnauth(state.logOut.bind(state))
+
 App.start = () => {
-  ipc('get:options')
+  App.ipc('get:options')
   .then((options = {}) => {
 
     handleErrors()
@@ -66,7 +67,7 @@ App.start = () => {
 }
 
 App.startUpdateApp = () => {
-  ipc('get:options')
+  App.ipc('get:options')
   .then((options = {}) => {
 
     handleErrors()

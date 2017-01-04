@@ -26,7 +26,7 @@ const errors = {
   },
 
   isUnauthenticated (err) {
-    return _.get(err, 'type') === 'UNAUTHENTICATED'
+    return _.get(err, 'type') === 'UNAUTHENTICATED' || _.get(err, 'statusCode') === 401
   },
 
   isTimedOut (err) {
