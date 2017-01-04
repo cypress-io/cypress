@@ -179,7 +179,7 @@ class Config extends Component {
 
   _openCiGuide (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/ci-learn-more')
+    App.ipc('external:open', 'https://on.cypress.io/guides/continuous-integration')
   }
 
   _openAdminCiKeys = (e) => {

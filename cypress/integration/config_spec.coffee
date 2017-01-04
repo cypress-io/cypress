@@ -81,7 +81,7 @@ describe "Settings", ->
       it "opens ci guide when learn more is clicked", ->
         cy
           .get(".config-ci-keys").contains("Learn More").click().then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/ci-learn-more")
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/continuous-integration")
 
       it "loads the project's ci keys", ->
         expect(@App.ipc).to.be.calledWith("get:ci:keys")
