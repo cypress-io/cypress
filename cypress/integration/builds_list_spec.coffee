@@ -296,8 +296,6 @@ describe "Builds List", ->
             .then =>
               @ipc.handle("get:builds", null, [])
 
-        ## TODO: not sure what this is testing here
-        ## this does not match the beforeEach
         it "displays empty message", ->
           cy.contains("You have no builds...")
 
