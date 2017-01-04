@@ -202,8 +202,8 @@ describe "Builds List", ->
           .then =>
             @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "NO_PROJECT_ID"}, null)
 
-      it "displays getting started message", ->
-        cy.contains("Getting Started with CI")
+      it "displays 'you have no builds'", ->
+        cy.contains("You have no builds...")
 
       it "clears message after setting up CI", ->
         cy
@@ -296,8 +296,10 @@ describe "Builds List", ->
             .then =>
               @ipc.handle("get:builds", null, [])
 
+        ## TODO: not sure what this is testing here
+        ## this does not match the beforeEach
         it "displays empty message", ->
-          cy.contains("Getting Started with CI")
+          cy.contains("You have no builds...")
 
         describe "setup project window", ->
           beforeEach ->
@@ -612,9 +614,11 @@ describe "Builds List", ->
           @ipcError("UNAUTHENTICATED").then ->
             cy.contains("Request access")
 
+        ## TODO: this is a duplicate of test on line
+        ## 206 above. needs to be cleaned up
         it "displays missing project id error", ->
           @ipcError("NO_PROJECT_ID").then ->
-            cy.contains("Getting Started with CI")
+            cy.contains("You have no builds...")
 
         it "displays old builds if another error", ->
           @ipcError("TIMED_OUT").then ->

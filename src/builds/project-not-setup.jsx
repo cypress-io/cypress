@@ -45,9 +45,9 @@ export default class ProjectNotSetup extends Component {
   _getStartedWithCI () {
     return (
       <div>
-        <h4>Getting Started with CI</h4>
-        <p>Cypress displays test results, screenshots, and videos for each build.</p>
-        <p>In order to record and review your builds in Cypress, you need to setup your project.</p>
+        <h4>You have no builds...</h4>
+        <p>You can setup Cypress to record screenshots, videos and failures when your project runs in CI.</p>
+        <p>Once setup, you will have access to these builds within Cypress.</p>
         <button
           className='btn btn-primary'
           onClick={this._showSetupProjectModal}
