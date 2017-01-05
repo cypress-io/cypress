@@ -14,9 +14,8 @@
   .react-context-menu-wrapper {
     overflow: auto;
 
-    &>a {
-      width: 100%;
-      float: left;
+    > a {
+      display: flex;
       background-color: #fff;
 
       &.project {
@@ -27,7 +26,10 @@
             cursor: wait;
             background-color: #fff;
           }
-          .project-name, .project-path, i {
+
+          .project-name,
+          .project-path,
+          i {
             color: #ccc;
           }
         }
@@ -38,9 +40,13 @@
         }
       }
 
-      &:hover, &:focus, &:active {
+      &:hover,
+      &:focus,
+      &:active {
         background-color: #f8f8f8;
-        .fa-chevron-right, .project-name {
+
+        .fa-chevron-right,
+        .project-name {
           color: #555;
         }
 
@@ -49,26 +55,28 @@
         }
       }
     }
+
+    .row-column-wrapper {
+      flex-grow: 0;
+      flex-shrink: 0;
+      float: none;
+    }
   }
 
-
   .row-column-wrapper {
-    &:last-child {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      width: 50px;
-
-      i {
-        position: absolute;
-        top: 37%;
-        right: 37%;
-      }
-    }
+    display: flex;
 
     .row-column {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       padding: 10px 20px;
+      width: 100%;
+    }
+
+    &.arrow {
+      align-items: center;
+      justify-content: center;
     }
   }
 
@@ -85,7 +93,6 @@
       position: relative;
       top: -2px;
       margin-left: 5px;
-
     }
   }
 
@@ -101,7 +108,7 @@
     color: #666;
   }
 
-  .project-status {
+  .last-build-status {
     font-size: 14px;
     color: #555;
     font-weight: 500;
@@ -123,7 +130,7 @@
     }
   }
 
-  .project-time {
+  .last-build-time {
     font-size: 12px;
     color: #888;
     font-style: italic;
@@ -131,7 +138,10 @@
 }
 
 html.has-updates {
-  .projects-list, #tests-list-page, #config, #builds-list-page {
+  .projects-list,
+  #tests-list-page,
+  #config,
+  #builds-list-page {
     bottom: 56px;
   }
 }

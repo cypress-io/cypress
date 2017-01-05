@@ -49,15 +49,15 @@ class Project extends Component {
         </div>
         <div className='row-column-wrapper'>
           <div className='row-column'>
-            <div className='project-status'>
+            <div className='last-build-status'>
               { this._projectStatus() }
             </div>
-            <div className='project-time'>
+            <div className='last-build-time'>
               { this._projectTime() }
             </div>
           </div>
         </div>
-        <div className='row-column-wrapper'>
+        <div className='row-column-wrapper arrow'>
           { this._icon() }
         </div>
       </Link>
