@@ -14,21 +14,26 @@ const strLength = 45
 class Project extends Component {
   componentDidMount () {
     if (this.props.project.isLoading) {
-      let link = findDOMNode(this.projectLink)
+      const link = findDOMNode(this.projectLink)
       link.scrollIntoView()
     }
   }
 
   render () {
-    let project = this.props.project
+    const project = this.props.project
 
-    let loadingClassName = project.isLoading ? 'loading' : ''
+    const loadingClassName = project.isLoading ? 'loading' : ''
+
+    let link = `/projects/${project.clientId}`
+    if (!project.valid) {
+      link += '/builds'
+    }
 
     return (
       <Link
         ref={(ref) => this.projectLink = ref}
         className={`project ${loadingClassName}`}
-        to={`/projects/${project.clientId}`}
+        to={link}
         >
         <div className='row-column-wrapper'>
           <div className='row-column'>
@@ -60,12 +65,12 @@ class Project extends Component {
   }
 
   _projectName () {
-    let project = this.props.project
+    const project = this.props.project
 
     if (project.name) {
       return (project.name)
     } else {
-      let splitName = _.last(project.path.split('/'))
+      const splitName = _.last(project.path.split('/'))
       return _.truncate(splitName, { length: 60 })
     }
   }
@@ -79,11 +84,11 @@ class Project extends Component {
   }
 
   _projectOwner () {
-    let project = this.props.project
+    const project = this.props.project
 
     if (!project.orgName) return
 
-    let iconClass = project.defaultOrg ? 'user' : 'building'
+    const iconClass = project.defaultOrg ? 'user' : 'building'
 
     return (
       <span>
@@ -94,11 +99,11 @@ class Project extends Component {
   }
 
   _displayPath () {
-    let path = this.props.project.path
-    let pathLength = path.length
+    const path = this.props.project.path
+    const pathLength = path.length
 
     if (pathLength > strLength) {
-      let truncatedPath = path.slice((pathLength - 1) - strLength, pathLength)
+      const truncatedPath = path.slice((pathLength - 1) - strLength, pathLength)
       return '...'.concat(truncatedPath)
     } else {
       return path

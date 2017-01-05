@@ -148,11 +148,6 @@ describe "Projects List", ->
             .get(".projects-list>li").first()
             .contains("Passed")
 
-        it "displays invalid status if invalid", ->
-          cy
-            .get(".projects-list>li").last()
-            .contains("Invalid")
-
         describe "returning from project", ->
           beforeEach ->
             cy
@@ -171,6 +166,23 @@ describe "Projects List", ->
             expect(@App.ipc.withArgs("get:projects")).to.be.calledThrice
             @ipc.handle("get:projects", null, @projects).then =>
               expect(@App.ipc.withArgs("get:project:statuses")).to.be.calledTwice
+
+        describe "when project is invalid", ->
+
+          it "displays invalid status", ->
+            cy
+              .get(".projects-list>li").last()
+              .contains("Invalid")
+
+          it "opens builds tab when clicked", ->
+            cy
+              .get(".projects-list>li a").last().click()
+              .fixture("config").then (@config) ->
+                @ipc.handle("open:project", null, @config)
+              .fixture("specs").as("specs").then ->
+                @ipc.handle("get:specs", null, @specs)
+              .location().its("hash")
+                .should("include", "builds")
 
     describe "polling project statuses", ->
       beforeEach ->
