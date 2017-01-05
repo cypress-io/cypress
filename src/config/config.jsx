@@ -40,7 +40,7 @@ class Config extends Component {
     const config = this.props.project.resolvedConfig
 
     return (
-      <Panel header='Resolved Configuration' key='config' className='form-horizontal'>
+      <Panel header='Configuration' key='config' className='form-horizontal'>
         <a href='#' className='pull-right' onClick={this._openHelp}>
           <i className='fa fa-info-circle'></i>{' '}
           Learn more

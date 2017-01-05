@@ -43,7 +43,7 @@ describe "Settings", ->
 
     describe "when config panel is opened", ->
       beforeEach ->
-        cy.contains("Resolved Configuration").click()
+        cy.contains("Configuration").click()
 
       it "displays config section", ->
         cy.contains("Your project's configuration is displayed")
@@ -128,7 +128,7 @@ describe "Settings", ->
             @ipc.handle("open:project", null, @config)
 
         cy.contains("Settings")
-        cy.contains("Resolved Configuration").click()
+        cy.contains("Configuration").click()
 
       it "displays updated config", ->
         @config.resolved.baseUrl.value = "http://localhost:7777"
