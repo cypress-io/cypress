@@ -225,6 +225,7 @@ class SetupProject extends Component {
         isSubmitting: false,
       })
       this.props.onSetup(projectDetails)
+      return null
     })
     .catch((error) => {
       this.setState({

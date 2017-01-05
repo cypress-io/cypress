@@ -37,7 +37,7 @@ const createIpc = () => {
         responses = _.without(responses, response)
         return Promise.delay(1).then(() => {
           this.handle(event, response.err, response.data)
-          return response.resolve()
+          response.resolve()
         })
       }
     },
@@ -54,9 +54,9 @@ const createIpc = () => {
             onError(err)
           }
           msg.fn(err, data)
-          return resolve()
+          resolve()
         } else {
-          return responses.push({
+          responses.push({
             event,
             err,
             data,
@@ -80,7 +80,7 @@ ipc.on("response", (event, obj = {}) => {
       onError(__error)
     }
 
-    return msg.fn(__error, data)
+    msg.fn(__error, data)
   }
 })
 
@@ -125,9 +125,9 @@ const appIpc = (...args) => {
           removeMsgById(id)
 
           if (err) {
-            return reject(err)
+            reject(err)
           } else {
-            return resolve(data)
+            resolve(data)
           }
         })
       })
