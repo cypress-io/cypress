@@ -17,7 +17,6 @@ const persistentProps = [
 
 const validProps = persistentProps.concat([
   'clientId',
-  'path',
   'isChosen',
   'isLoading',
   'isNew',
