@@ -17,6 +17,8 @@ appData                = require("./app_data")
 
 fs = Promise.promisifyAll(fs)
 
+builtFiles = {}
+
 module.exports = {
   shouldWatch: (watchForFileChanges) ->
     ## we should watch only if
@@ -24,6 +26,9 @@ module.exports = {
     watchForFileChanges isnt false
 
   build: (filePath, config) ->
+    if config.isHeadless and built = builtFiles[filePath]
+      return built
+
     emitter = new EE()
 
     ## dont watch for file changes if
@@ -89,7 +94,7 @@ module.exports = {
 
     latestBundle = bundle()
 
-    return {
+    bundleApi = {
       ## set to empty function in the case where we
       ## are not watching the bundle
       close: bundler.close ? ->
@@ -99,6 +104,10 @@ module.exports = {
       addChangeListener: (onChange) ->
         emitter.on "update", onChange
     }
+
+    builtFiles[filePath] = bundleApi
+
+    return bundleApi
 
   errorMessage: (err = {}) ->
     (err.stack ? err.annotated ? err.message ? err.toString())
