@@ -13,6 +13,7 @@ presetReact            = require("babel-preset-react")
 presetLatest           = require("babel-preset-latest")
 stringStream           = require("string-to-stream")
 pluginAddModuleExports = require("babel-plugin-add-module-exports")
+sanitize               = require("sanitize-filename")
 appData                = require("./app_data")
 
 fs = Promise.promisifyAll(fs)
@@ -24,6 +25,9 @@ module.exports = {
     ## we should watch only if
     ## watchForFileChanges isnt false
     watchForFileChanges isnt false
+
+  outputPath: (projectName, filePath) ->
+    appData.path("bundles", sanitize(projectName), filePath)
 
   build: (filePath, config) ->
     if config.isHeadless and built = builtFiles[filePath]
@@ -47,7 +51,7 @@ module.exports = {
 
     bundle = =>
       new Promise (resolve, reject) =>
-        outputPath = appData.path("bundles", filePath)
+        outputPath = @outputPath(config.projectName, filePath)
         fs.ensureDirAsync(path.dirname(outputPath))
         .then =>
           bundler
