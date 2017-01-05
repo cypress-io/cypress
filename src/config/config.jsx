@@ -37,10 +37,7 @@ class Config extends Component {
   }
 
   _configSection () {
-    this.resolvedConfig = this.props.project.resolvedConfig
-
-    let config  = _.omit(this.resolvedConfig, 'environmentVariables')
-    let envVars = this.resolvedConfig.environmentVariables
+    const config = this.props.project.resolvedConfig
 
     return (
       <Panel header='Resolved Configuration' key='config' className='form-horizontal'>
@@ -75,28 +72,20 @@ class Config extends Component {
         </table>
         <pre className='config-vars'>
           { `{` }
-          { this._display(config, { comma: true }) }
-          <span className='envVars'>
-            <span className='key'>env</span>
-            <span className='colon'>:</span>{' '}
-            { `{` }
-            { this._display(envVars) }
-          </span>
-          <span className='line'>{`}`}</span>
-          <br />
+          { this._display(config) }
           { `}` }
         </pre>
       </Panel>
     )
   }
 
-  _getSpan (key, obj, comma) {
+  _getSpan (key, obj, hasComma) {
     return (
       <div key={key} className='line'>
         <span className='key'>{key}</span>
         <span className='colon'>:</span>{' '}
         <Tooltip
-          overlay={obj.from}
+          overlay={obj.from || ''}
         >
           <span className={obj.from}>
             {this._getString(obj.value)}
@@ -104,7 +93,7 @@ class Config extends Component {
             {this._getString(obj.value)}
           </span>
         </Tooltip>
-        {this._getComma(comma)}
+        {this._getComma(hasComma)}
       </div>
     )
   }
@@ -113,18 +102,37 @@ class Config extends Component {
     return _.isString(val) ? "'" : ""
   }
 
-  _getComma (bool) {
-    return bool ? <span className='comma'>,</span> : ''
+  _getComma (hasComma) {
+    return hasComma ? <span className='comma'>,</span> : ''
   }
 
-  _display (obj, opts = {}) {
+  _display (obj) {
     let keys = _.keys(obj)
-    let last = _.last(keys)
+    let lastKey = _.last(keys)
 
     return _.map(obj, (value, key) => {
-      let hasComma = opts.comma || last !== key
-      return this._getSpan(key, value, hasComma)
+      let hasComma = lastKey !== key
+      if (value.from == null) {
+        return this._nested(key, value, hasComma)
+      } else {
+        return this._getSpan(key, value, hasComma)
+      }
     })
+  }
+
+  _nested (key, value, hasComma) {
+    return (
+      <span key={key}>
+        <span className='nested'>
+          <span className='key'>{key}</span>
+          <span className='colon'>:</span>{' '}
+          { `{` }
+          { this._display(value) }
+        </span>
+        <span className='line'>{`}`}{this._getComma(hasComma)}</span>
+        <br />
+      </span>
+    )
   }
 
   _ciKeysSection () {

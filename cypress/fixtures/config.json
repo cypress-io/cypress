@@ -55,6 +55,9 @@
   "report": false,
   "reporter": "spec",
   "requestTimeout": 5000,
+  "hosts": {
+    "*.foobar.com": "127.0.0.1"
+  },
   "resolved": {
     "animationDistanceThreshold": {
       "from": "default",
@@ -145,6 +148,12 @@
     "watchForFileChanges": {
       "from": "default",
       "value": true
+    },
+    "hosts": {
+      "*.foobar.com": {
+        "from": "cli",
+        "value": "127.0.0.1"
+      }
     }
   },
   "responseTimeout": 20000,

@@ -60,16 +60,23 @@ describe "Settings", ->
               .contains("5").should("have.class", "default").end()
               .contains(",").should("have.class", "comma")
 
-        it "displays 'true' values", ->
-          cy.get(".line").contains("true")
+      it "displays 'true' values", ->
+        cy.get(".line").contains("true")
 
-        it "displays 'null' values", ->
-          cy.get(".line").contains("null")
+      it "displays 'null' values", ->
+        cy.get(".line").contains("null")
 
-        it "opens help link on click", ->
-          cy
-            .get(".fa-info-circle").first().click().then ->
-              expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/configuration")
+      it "displays 'object' values for environmentVariables and hosts", ->
+        cy
+          .get(".nested").first()
+            .contains("fixturesFolder")
+          .get(".nested").eq(1)
+            .contains("*.foobar.com")
+
+      it "opens help link on click", ->
+        cy
+          .get(".fa-info-circle").first().click().then ->
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/configuration")
 
     describe "when ci keys panels is opened", ->
       beforeEach ->
