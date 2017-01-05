@@ -418,6 +418,10 @@ describe "Builds List", ->
             it "displays empty builds page", ->
               cy.contains("Run Your First Build in CI")
 
+            it "links CLI tools to npm package", ->
+              cy.contains("CLI tools").click().then =>
+                expect(@App.ipc).to.be.calledWith("external:open", "https://www.npmjs.com/package/cypress-cli")
+
             describe "welcome page", ->
               it "displays command to run with the ci key", ->
                 cy.contains("cypress ci ci-key-123")

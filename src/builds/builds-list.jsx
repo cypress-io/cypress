@@ -231,7 +231,7 @@ class Builds extends Component {
         <div className='first-build-instructions'>
           <h4>Run Your First Build in CI</h4>
           <p className='text-muted'>To record build results, simply run the commands below.</p>
-          <h5>Install the CLI tools:</h5>
+          <h5>Install the <a href='#' onClick={this._openCliNpmPackage}>CLI tools</a>:</h5>
           <pre><code>npm install -g cypress-cli</code></pre>
           <h5>Run tests and upload assets:</h5>
           <pre><code>cypress ci {this.state.ciKey || '<ci-key>'}</code></pre>
@@ -271,6 +271,11 @@ class Builds extends Component {
   _openCiGuide = (e) => {
     e.preventDefault()
     App.ipc('external:open', 'https://on.cypress.io/guides/continuous-integration')
+  }
+
+  _openCliNpmPackage = (e) => {
+    e.preventDefault()
+    App.ipc('external:open', 'https://www.npmjs.com/package/cypress-cli')
   }
 
   _openBuild = (buildId) => {
