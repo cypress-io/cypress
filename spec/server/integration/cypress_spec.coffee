@@ -34,6 +34,8 @@ Watchers = require("#{root}lib/watchers")
 
 describe "lib/cypress", ->
   beforeEach ->
+    @timeout(5000)
+
     cache.removeSync()
 
     Fixtures.scaffold()
