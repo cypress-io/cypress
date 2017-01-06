@@ -1,12 +1,12 @@
-_        = require("lodash")
-os       = require("os")
-getos    = require("getos")
-request  = require("request-promise")
-errors   = require("request-promise/errors")
-Promise  = require("bluebird")
-Routes   = require("./util/routes")
-pkg      = require("../package.json")
-provider = require("./util/provider")
+_          = require("lodash")
+os         = require("os")
+getos      = require("getos")
+request    = require("request-promise")
+errors     = require("request-promise/errors")
+Promise    = require("bluebird")
+Routes     = require("./util/routes")
+pkg        = require("../package.json")
+ciProvider = require("./util/ci_provider")
 
 getos = Promise.promisify(getos)
 
@@ -64,7 +64,7 @@ module.exports = {
         commitAuthorEmail: options.commitAuthorEmail
         commitMessage:     options.commitMessage
         remoteOrigin:      options.remoteOrigin
-        ciProvider:        provider.name()
+        ciProvider:        ciProvider.name()
       }
     })
     .promise()
@@ -126,7 +126,7 @@ module.exports = {
       json: true
       timeout: options.timeout ? 10000
       body: _.extend(body, {
-        ciProvider: provider.name()
+        ciProvider: ciProvider.name()
       })
     })
     .catch(errors.StatusCodeError, formatResponseBody)

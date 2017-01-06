@@ -1,17 +1,17 @@
 require("../spec_helper")
 
-provider = require("#{root}lib/util/provider")
+ciProvider = require("#{root}lib/util/ci_provider")
 
-describe "lib/util/provider", ->
+describe "lib/util/ci_provider", ->
   beforeEach ->
     @env = JSON.stringify(process.env)
 
     process.env = {}
 
     @expects = (name, details) ->
-      expect(provider.name()).to.eq(name)
+      expect(ciProvider.name()).to.eq(name)
       if details
-        expect(provider.details()).to.eql(details)
+        expect(ciProvider.details()).to.eql(details)
 
   afterEach ->
     ## restore the env

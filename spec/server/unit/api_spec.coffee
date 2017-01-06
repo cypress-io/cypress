@@ -6,12 +6,12 @@ os       = require("os")
 pkg      = require("#{root}package.json")
 api      = require("#{root}lib/api")
 Promise  = require("bluebird")
-provider = require("#{root}lib/util/provider")
+ciProvider = require("#{root}lib/util/ci_provider")
 
 describe "lib/api", ->
   beforeEach ->
     @sandbox.stub(os, "platform").returns("linux")
-    @sandbox.stub(provider, "name").returns("circle")
+    @sandbox.stub(ciProvider, "name").returns("circle")
 
   context ".ping", ->
     it "GET /ping", ->
