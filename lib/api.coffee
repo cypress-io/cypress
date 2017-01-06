@@ -6,7 +6,6 @@ errors     = require("request-promise/errors")
 Promise    = require("bluebird")
 Routes     = require("./util/routes")
 pkg        = require("../package.json")
-ciProvider = require("./util/ci_provider")
 
 getos = Promise.promisify(getos)
 
@@ -55,17 +54,19 @@ module.exports = {
       headers: {
         "x-route-version": "2"
       }
-      body: {
-        projectId:         options.projectId
-        projectToken:      options.projectToken
-        commitSha:         options.commitSha
-        commitBranch:      options.commitBranch
-        commitAuthorName:  options.commitAuthorName
-        commitAuthorEmail: options.commitAuthorEmail
-        commitMessage:     options.commitMessage
-        remoteOrigin:      options.remoteOrigin
-        ciProvider:        ciProvider.name()
-      }
+      body: _.pick(options, [
+        "projectId"
+        "projectToken"
+        "commitSha"
+        "commitBranch"
+        "commitAuthorName"
+        "commitAuthorEmail"
+        "commitMessage"
+        "remoteOrigin"
+        "ciParams"
+        "ciProvider"
+        "ciBuildNum"
+      ])
     })
     .promise()
     .get("buildId")
@@ -107,27 +108,24 @@ module.exports = {
     .catch(errors.StatusCodeError, formatResponseBody)
 
   updateInstance: (options = {}) ->
-    body = _.pick(options, [
-      "tests"
-      "duration"
-      "passes"
-      "failures"
-      "pending"
-      "error"
-      "video"
-      "screenshots"
-      "failingTests"
-      "cypressConfig"
-      "stdout"
-    ])
-
     rp.put({
       url: Routes.instance(options.instanceId)
       json: true
       timeout: options.timeout ? 10000
-      body: _.extend(body, {
-        ciProvider: ciProvider.name()
-      })
+      body: _.pick(options, [
+        "tests"
+        "duration"
+        "passes"
+        "failures"
+        "pending"
+        "error"
+        "video"
+        "screenshots"
+        "failingTests"
+        "ciProvider"
+        "cypressConfig"
+        "stdout"
+      ])
     })
     .catch(errors.StatusCodeError, formatResponseBody)
 

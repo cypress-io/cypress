@@ -28,49 +28,78 @@ providers = {
   "wercker":         isWercker
 }
 
-nullDetails = -> {
-  ciUrl: null
-  buildNum: null
-}
+buildNums = (provider) -> {
+  appveyor: process.env.APPVEYOR_BUILD_NUMBER
+  circle:   process.env.CIRCLE_BUILD_NUM
+  codeship: process.env.CI_BUILD_NUMBER
+  gitlab:   process.env.CI_BUILD_ID
+  jenkins:  process.env.BUILD_NUMBER
+  travis:   process.env.TRAVIS_BUILD_NUMBER
+}[provider]
 
-details = {
-  "appveyor": -> {
-    ciUrl: "https://ci.appveyor.com/project/#{process.env.APPVEYOR_ACCOUNT_NAME}/#{process.env.APPVEYOR_PROJECT_SLUG}/build/#{process.env.APPVEYOR_BUILD_VERSION}"
-    buildNum: process.env.APPVEYOR_BUILD_NUMBER
+params = (provider) -> {
+  appveyor: {
+    accountName:  process.env.APPVEYOR_ACCOUNT_NAME
+    projectSlug:  process.env.APPVEYOR_PROJECT_SLUG
+    buildVersion: process.env.APPVEYOR_BUILD_VERSION
   }
-  "bamboo": nullDetails
-  "buildkite": nullDetails
-  "circle": -> {
-    ciUrl: process.env.CIRCLE_BUILD_URL
-    buildNum: process.env.CIRCLE_BUILD_NUM
+  circle: {
+    buildUrl: process.env.CIRCLE_BUILD_URL
   }
-  "codeship": -> {
-    ciUrl: process.env.CI_BUILD_URL
-    buildNum: process.env.CI_BUILD_NUMBER
+  codeship: {
+    buildUrl: process.env.CI_BUILD_URL
   }
-  "drone": nullDetails
-  "gitlab": -> {
-    ciUrl: "#{process.env.CI_PROJECT_URL}/builds/#{process.env.CI_BUILD_ID}"
-    buildNum: process.env.CI_BUILD_ID
+  gitlab: {
+    buildId:    process.env.CI_BUILD_ID
+    projectUrl: process.env.CI_PROJECT_URL
   }
-  "hudson": nullDetails
-  "jenkins": -> {
-    ciUrl: process.env.BUILD_URL
-    buildNum: process.env.BUILD_NUMBER
+  jenkins: {
+    buildUrl: process.env.BUILD_URL
   }
-  "semaphore": nullDetails
-  "shippable": nullDetails
-  "snap": nullDetails
-  "teamcity": nullDetails
-  "teamfoundation": nullDetails
-  "travis": -> {
-    ciUrl: "https://travis-ci.org/#{process.env.TRAVIS_REPO_SLUG}/builds/#{process.env.TRAVIS_BUILD_ID}"
-    buildNum: process.env.TRAVIS_BUILD_NUMBER
+  travis: {
+    buildId:  process.env.TRAVIS_BUILD_ID
+    repoSlug: process.env.TRAVIS_REPO_SLUG
   }
-  "wercker": nullDetails
+}[provider]
 
-  "unknown": nullDetails
-}
+# details = {
+#   "appveyor": -> {
+#     ciUrl: "https://ci.appveyor.com/project/#{process.env.APPVEYOR_ACCOUNT_NAME}/#{process.env.APPVEYOR_PROJECT_SLUG}/build/#{process.env.APPVEYOR_BUILD_VERSION}"
+#     buildNum: process.env.APPVEYOR_BUILD_NUMBER
+#   }
+#   "bamboo": nullDetails
+#   "buildkite": nullDetails
+#   "circle": -> {
+#     ciUrl: process.env.CIRCLE_BUILD_URL
+#     buildNum: process.env.CIRCLE_BUILD_NUM
+#   }
+#   "codeship": -> {
+#     ciUrl: process.env.CI_BUILD_URL
+#     buildNum: process.env.CI_BUILD_NUMBER
+#   }
+#   "drone": nullDetails
+#   "gitlab": -> {
+#     ciUrl: "#{process.env.CI_PROJECT_URL}/builds/#{process.env.CI_BUILD_ID}"
+#     buildNum: process.env.CI_BUILD_ID
+#   }
+#   "hudson": nullDetails
+#   "jenkins": -> {
+#     ciUrl: process.env.BUILD_URL
+#     buildNum: process.env.BUILD_NUMBER
+#   }
+#   "semaphore": nullDetails
+#   "shippable": nullDetails
+#   "snap": nullDetails
+#   "teamcity": nullDetails
+#   "teamfoundation": nullDetails
+#   "travis": -> {
+#     ciUrl: "https://travis-ci.org/#{process.env.TRAVIS_REPO_SLUG}/builds/#{process.env.TRAVIS_BUILD_ID}"
+#     buildNum: process.env.TRAVIS_BUILD_NUMBER
+#   }
+#   "wercker": nullDetails
+
+#   "unknown": nullDetails
+# }
 
 getProviderName = ->
   ## return the key of the first provider
@@ -88,6 +117,9 @@ module.exports = {
   name: ->
     getProviderName()
 
-  details: ->
-    details[getProviderName()]()
+  params: ->
+    params(getProviderName()) ? null
+
+  buildNum: ->
+    buildNums(getProviderName()) ? null
 }

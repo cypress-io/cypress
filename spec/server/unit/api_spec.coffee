@@ -6,12 +6,10 @@ os       = require("os")
 pkg      = require("#{root}package.json")
 api      = require("#{root}lib/api")
 Promise  = require("bluebird")
-ciProvider = require("#{root}lib/util/ci_provider")
 
 describe "lib/api", ->
   beforeEach ->
     @sandbox.stub(os, "platform").returns("linux")
-    @sandbox.stub(ciProvider, "name").returns("circle")
 
   context ".ping", ->
     it "GET /ping", ->
@@ -39,8 +37,10 @@ describe "lib/api", ->
         commitAuthorName:  "brian"
         commitAuthorEmail: "brian@cypress.io"
         commitMessage:     "such hax"
-        remoteOrigin:       "https://github.com/foo/bar.git"
+        remoteOrigin:      "https://github.com/foo/bar.git"
         ciProvider:        "circle"
+        ciBuildNum:        "987"
+        ciParams:          { foo: "bar" }
       })
       .reply(200, {
         buildId: "new-build-id-123"
@@ -54,7 +54,10 @@ describe "lib/api", ->
         commitAuthorName:  "brian"
         commitAuthorEmail: "brian@cypress.io"
         commitMessage:     "such hax"
-        remoteOrigin:       "https://github.com/foo/bar.git"
+        remoteOrigin:      "https://github.com/foo/bar.git"
+        ciProvider:        "circle"
+        ciBuildNum:        "987"
+        ciParams:          { foo: "bar" }
       })
       .then (ret) ->
         expect(ret).to.eq("new-build-id-123")
@@ -72,8 +75,10 @@ describe "lib/api", ->
         commitAuthorName:  "brian"
         commitAuthorEmail: "brian@cypress.io"
         commitMessage:     "such hax"
-        remoteOrigin:       "https://github.com/foo/bar.git"
+        remoteOrigin:      "https://github.com/foo/bar.git"
         ciProvider:        "circle"
+        ciBuildNum:        "987"
+        ciParams:          { foo: "bar" }
       })
       .reply(422, {
         errors: {
@@ -90,6 +95,9 @@ describe "lib/api", ->
         commitAuthorEmail: "brian@cypress.io"
         commitMessage:     "such hax"
         remoteOrigin:       "https://github.com/foo/bar.git"
+        ciProvider:        "circle"
+        ciBuildNum:        "987"
+        ciParams:          { foo: "bar" }
       })
       .then ->
         throw new Error("should have thrown here")
@@ -262,6 +270,7 @@ describe "lib/api", ->
         screenshots: []
         failingTests: []
         cypressConfig: {}
+        ciProvider: "circle"
       })
 
     it "PUT /instances/:id failure formatting", ->

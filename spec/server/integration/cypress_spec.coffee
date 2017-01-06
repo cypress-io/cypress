@@ -12,6 +12,7 @@ extension = require("@cypress/core-extension")
 Fixtures = require("../helpers/fixtures")
 pkg      = require("#{root}package.json")
 bundle   = require("#{root}lib/util/bundle")
+ciProvider = require("#{root}lib/util/ci_provider")
 settings = require("#{root}lib/util/settings")
 Events   = require("#{root}lib/electron/handlers/events")
 project  = require("#{root}lib/electron/handlers/project")
@@ -639,10 +640,16 @@ describe "lib/cypress", ->
           commitAuthorEmail:  "brian@cypress.io"
           commitMessage: "foo"
           remoteOrigin: "https://github.com/foo/bar.git"
+          ciProvider: "travis"
+          ciBuildNum: "987"
+          ciParams: null
         })
 
       @upload = @sandbox.stub(ci, "upload").resolves()
 
+      @sandbox.stub(ciProvider, "name").returns("travis")
+      @sandbox.stub(ciProvider, "buildNum").returns("987")
+      @sandbox.stub(ciProvider, "params").returns(null)
       @sandbox.stub(os, "platform").returns("linux")
       ## TODO: might need to change this to a different return
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
@@ -699,6 +706,7 @@ describe "lib/cypress", ->
         screenshots: []
         failingTests: []
         cypressConfig: {}
+        ciProvider: "travis"
       }).resolves()
 
       cypress.start(["--run-project=#{@todosPath}",  "--key=token-123", "--ci"])

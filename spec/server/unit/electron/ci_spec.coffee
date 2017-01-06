@@ -1,16 +1,22 @@
 require("../../spec_helper")
 
-os       = require("os")
-api      = require("#{root}../lib/api")
-stdout   = require("#{root}../lib/stdout")
-errors   = require("#{root}../lib/errors")
-logger   = require("#{root}../lib/logger")
-Project  = require("#{root}../lib/project")
-terminal = require("#{root}../lib/util/terminal")
-ci       = require("#{root}../lib/modes/ci")
-headless = require("#{root}../lib/modes/headless")
+os         = require("os")
+api        = require("#{root}../lib/api")
+stdout     = require("#{root}../lib/stdout")
+errors     = require("#{root}../lib/errors")
+logger     = require("#{root}../lib/logger")
+Project    = require("#{root}../lib/project")
+terminal   = require("#{root}../lib/util/terminal")
+ci         = require("#{root}../lib/modes/ci")
+headless   = require("#{root}../lib/modes/headless")
+ciProvider = require("#{root}../lib/util/ci_provider")
 
 describe "electron/ci", ->
+  beforeEach ->
+    @sandbox.stub(ciProvider, "name").returns("circle")
+    @sandbox.stub(ciProvider, "params").returns({foo: "bar"})
+    @sandbox.stub(ciProvider, "buildNum").returns("build-123")
+
   context ".getSha", ->
     beforeEach ->
       @repo = @sandbox.stub({
@@ -196,6 +202,9 @@ describe "electron/ci", ->
           commitAuthorEmail: "brian@cypress.io"
           commitMessage: "such hax"
           remoteOrigin: "https://github.com/foo/bar.git"
+          ciProvider: "circle"
+          ciBuildNum: "build-123"
+          ciParams: {foo: "bar"}
         })
 
     it "handles status code errors of 401", ->
@@ -287,7 +296,6 @@ describe "electron/ci", ->
       .then ->
         expect(logger.createException).not.to.be.called
 
-
   context ".uploadAssets", ->
     beforeEach ->
       @sandbox.stub(api, "updateInstance")
@@ -323,6 +331,7 @@ describe "electron/ci", ->
         screenshots: [{name: "foo"}]
         failingTests: ["foo"]
         cypressConfig: {foo: "bar"}
+        ciProvider: "circle"
       })
 
     it "calls ci.upload on success", ->

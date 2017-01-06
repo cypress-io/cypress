@@ -1,16 +1,17 @@
-_        = require("lodash")
-os       = require("os")
-git      = require("gift")
-chalk    = require("chalk")
-Promise  = require("bluebird")
-headless = require("./headless")
-api      = require("../api")
-logger   = require("../logger")
-errors   = require("../errors")
-stdout   = require("../stdout")
-upload   = require("../upload")
-Project  = require("../project")
-terminal = require("../util/terminal")
+_          = require("lodash")
+os         = require("os")
+git        = require("gift")
+chalk      = require("chalk")
+Promise    = require("bluebird")
+headless   = require("./headless")
+api        = require("../api")
+logger     = require("../logger")
+errors     = require("../errors")
+stdout     = require("../stdout")
+upload     = require("../upload")
+Project    = require("../project")
+terminal   = require("../util/terminal")
+ciProvider = require("../util/ci_provider")
 
 logException = (err) ->
   ## give us up to 1 second to
@@ -85,6 +86,9 @@ module.exports = {
         commitAuthorEmail: git.email
         commitMessage:     git.message
         remoteOrigin:      git.remote
+        ciParams:          ciProvider.params()
+        ciProvider:        ciProvider.name()
+        ciBuildNum:        ciProvider.buildNum()
       })
       .catch (err) ->
         switch err.statusCode
@@ -186,6 +190,7 @@ module.exports = {
       screenshots:  screenshots
       failingTests: stats.failingTests
       cypressConfig: stats.config
+      ciProvider:    ciProvider.name()
     })
     .then (resp = {}) =>
       @upload({
