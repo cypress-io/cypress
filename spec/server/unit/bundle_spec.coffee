@@ -1,9 +1,25 @@
 sinon = require("sinon")
+watchify = require("watchify")
+
 browserify = sinon.stub()
 mockery.registerMock("browserify", browserify)
 
+streamApi = {
+  on: -> streamApi
+  pipe: -> streamApi
+}
+
+bundlerApi = {
+  transform: -> bundlerApi
+  external: -> bundlerApi
+  on: -> bundlerApi
+  bundle: -> streamApi
+  close: ->
+}
+
+browserify.returns(bundlerApi)
+
 bundle = require("#{root}lib/util/bundle")
-watchify = require("watchify")
 
 describe "lib/util/bundle", ->
 
@@ -11,21 +27,6 @@ describe "lib/util/bundle", ->
     beforeEach ->
       browserify.reset()
       bundle._builtFiles = {}
-
-      streamApi = {
-        on: -> streamApi
-        pipe: -> streamApi
-      }
-
-      bundlerApi = {
-        transform: -> bundlerApi
-        external: -> bundlerApi
-        on: -> bundlerApi
-        bundle: -> streamApi
-        close: ->
-      }
-
-      browserify.returns(bundlerApi)
 
       @config = {
         projectName: "foo"
