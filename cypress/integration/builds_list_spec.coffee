@@ -428,7 +428,7 @@ describe "Builds List", ->
 
               it "displays link to CI docs", ->
                 cy
-                  .get(".first-build-instructions a")
+                  .get(".first-build-instructions a").eq(1)
                   .should("have.text", " Learn more")
 
               it "does not display message about inviting users", ->
@@ -436,7 +436,7 @@ describe "Builds List", ->
 
               it "clicking link opens CI guide", ->
                 cy
-                  .get("#builds-list-page a")
+                  .get(".first-build-instructions a").eq(1)
                   .click()
                   .then =>
                     expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/continuous-integration")
