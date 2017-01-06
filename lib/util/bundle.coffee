@@ -18,8 +18,6 @@ appData                = require("./app_data")
 
 fs = Promise.promisifyAll(fs)
 
-builtFiles = {}
-
 module.exports = {
   shouldWatch: (watchForFileChanges) ->
     ## we should watch only if
@@ -29,8 +27,10 @@ module.exports = {
   outputPath: (projectName, filePath) ->
     appData.path("bundles", sanitize(projectName), filePath)
 
+  _builtFiles: {}
+
   build: (filePath, config) ->
-    if config.isHeadless and built = builtFiles[filePath]
+    if config.isHeadless and built = @_builtFiles[filePath]
       return built
 
     emitter = new EE()
@@ -109,7 +109,7 @@ module.exports = {
         emitter.on "update", onChange
     }
 
-    builtFiles[filePath] = bundleApi
+    @_builtFiles[filePath] = bundleApi
 
     return bundleApi
 

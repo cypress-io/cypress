@@ -1,8 +1,75 @@
+sinon = require("sinon")
+browserify = sinon.stub()
+mockery.registerMock("browserify", browserify)
+
 bundle = require("#{root}lib/util/bundle")
+watchify = require("watchify")
 
 describe "lib/util/bundle", ->
 
   context "#build", ->
+    beforeEach ->
+      browserify.reset()
+      bundle._builtFiles = {}
+
+      streamApi = {
+        on: -> streamApi
+        pipe: -> streamApi
+      }
+
+      bundlerApi = {
+        transform: -> bundlerApi
+        external: -> bundlerApi
+        on: -> bundlerApi
+        bundle: -> streamApi
+        close: ->
+      }
+
+      browserify.returns(bundlerApi)
+
+      @config = {
+        projectName: "foo"
+        projectRoot: "/path/to/root"
+        watchForFileChanges: true
+      }
+
+    describe "any case / watching", ->
+      beforeEach ->
+        bundle.build("file.js", @config)
+
+      it "runs browserify", ->
+        expect(browserify).to.be.called
+
+      it "specifies the abslute path to the file", ->
+        expect(browserify.lastCall.args[0].entries[0]).to.equal("/path/to/root/file.js")
+
+      it "specifies extensions", ->
+        expect(browserify.lastCall.args[0].extensions).to.eql([".js", ".jsx", ".coffee", ".cjsx"])
+
+      it "specifies watching", ->
+        expect(browserify.lastCall.args[0].plugin[0]).to.equal(watchify)
+
+    describe "not watching", ->
+      beforeEach ->
+        @config.watchForFileChanges = false
+        bundle.build("file.js", @config)
+
+      it "does not specify watching", ->
+        expect(browserify.lastCall.args[0].plugin).to.eql([])
+
+    describe "headless mode", ->
+      beforeEach ->
+        @config.isHeadless = true
+        bundle.build("file.js", @config)
+
+      it "only runs browserify once per file", ->
+        expect(browserify).to.be.calledOnce
+        bundle.build("file.js", @config)
+        expect(browserify).to.be.calledOnce
+        bundle.build("another.js", @config)
+        expect(browserify).to.be.calledTwice
+        bundle.build("another.js", @config)
+        expect(browserify).to.be.calledTwice
 
   context "#clientSideError", ->
     it "send javascript string with the error", ->
