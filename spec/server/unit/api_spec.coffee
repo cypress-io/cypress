@@ -151,6 +151,10 @@ describe "lib/api", ->
 
     it "POSTs /builds/:id/instances", ->
       @sandbox.stub(os, "release").returns("10.10.10")
+      @sandbox.stub(os, "cpus").returns([{model: "foo"}])
+      @sandbox.stub(os, "freemem").returns(1000)
+      @sandbox.stub(os, "totalmem").returns(2000)
+
       os.platform.returns("darwin")
 
       nock("http://localhost:1234")
@@ -163,6 +167,11 @@ describe "lib/api", ->
         browserVersion: "53"
         osName: "darwin"
         osVersion: "10.10.10"
+        osCpus: [{model: "foo"}]
+        osMemory: {
+          free:  1000
+          total: 2000
+        }
       })
       .reply(200, {
         instanceId: "instance-id-123"

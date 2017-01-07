@@ -90,6 +90,11 @@ module.exports = {
           browserVersion: process.versions.chrome
           osName:         platform
           osVersion:      v
+          osCpus:         os.cpus()
+          osMemory:       {
+            free:         os.freemem()
+            total:        os.totalmem()
+          }
         }
       })
       .promise()
