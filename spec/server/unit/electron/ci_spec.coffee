@@ -17,134 +17,10 @@ describe "electron/ci", ->
     @sandbox.stub(ciProvider, "params").returns({foo: "bar"})
     @sandbox.stub(ciProvider, "buildNum").returns("build-123")
 
-  context ".getSha", ->
-    beforeEach ->
-      @repo = @sandbox.stub({
-        current_commitAsync: ->
-      })
-
-    it "returns branch sha", ->
-      @repo.current_commitAsync.resolves({id: "sha-123"})
-
-      ci.getSha(@repo)
-      .then (ret) ->
-        expect(ret).to.eq("sha-123")
-
-    it "returns '' on err", ->
-      @repo.current_commitAsync.rejects(new Error("bar"))
-
-      ci.getSha(@repo)
-      .then (ret) ->
-        expect(ret).to.eq("")
-
-  context ".getBranchFromGit", ->
-    beforeEach ->
-      @repo = @sandbox.stub({
-        branchAsync: ->
-      })
-
-    it "returns branch name", ->
-      @repo.branchAsync.resolves({name: "foo"})
-
-      ci.getBranchFromGit(@repo).then (ret) ->
-        expect(ret).to.eq("foo")
-
-    it "returns '' on err", ->
-      @repo.branchAsync.rejects(new Error("bar"))
-
-      ci.getBranchFromGit(@repo).then (ret) ->
-        expect(ret).to.eq("")
-
-  context ".getMessage", ->
-    beforeEach ->
-      @repo = @sandbox.stub({
-        current_commitAsync: ->
-      })
-
-    it "returns branch name", ->
-      @repo.current_commitAsync.resolves({message: "hax"})
-
-      ci.getMessage(@repo).then (ret) ->
-        expect(ret).to.eq("hax")
-
-    it "returns '' on err", ->
-      @repo.current_commitAsync.rejects(new Error("bar"))
-
-      ci.getMessage(@repo).then (ret) ->
-        expect(ret).to.eq("")
-
-  context ".getAuthor", ->
-    beforeEach ->
-      @repo = @sandbox.stub({
-        current_commitAsync: ->
-      })
-
-    it "returns branch name", ->
-      @repo.current_commitAsync.resolves({
-        author: {
-          name: "brian"
-        }
-      })
-
-      ci.getAuthor(@repo).then (ret) ->
-        expect(ret).to.eq("brian")
-
-    it "returns '' on err", ->
-      @repo.current_commitAsync.rejects(new Error("bar"))
-
-      ci.getAuthor(@repo).then (ret) ->
-        expect(ret).to.eq("")
-
-  context ".getEmail", ->
-    beforeEach ->
-      @repo = @sandbox.stub({
-        current_commitAsync: ->
-      })
-
-    it "returns branch name", ->
-      @repo.current_commitAsync.resolves({
-        author: {
-          email: "brian@cypress.io"
-        }
-      })
-
-      ci.getEmail(@repo).then (ret) ->
-        expect(ret).to.eq("brian@cypress.io")
-
-    it "returns '' on err", ->
-      @repo.current_commitAsync.rejects(new Error("bar"))
-
-      ci.getEmail(@repo).then (ret) ->
-        expect(ret).to.eq("")
-
-  context ".getRemoteOrigin", ->
-    beforeEach ->
-      @repo = @sandbox.stub({
-        configAsync: ->
-      })
-
-    it "returns remote origin url", ->
-      @repo.configAsync.resolves({
-        items: {
-          'remote.origin.url': "https://github.com/foo/bar.git"
-        }
-      })
-
-      ci.getRemoteOrigin(@repo)
-      .then (ret) ->
-        expect(ret).to.eq("https://github.com/foo/bar.git")
-
-    it "returns '' on err", ->
-      @repo.configAsync.rejects(new Error("bar"))
-
-      ci.getRemoteOrigin(@repo)
-      .then (ret) ->
-        expect(ret).to.eq("")
-
   context ".getBranch", ->
     beforeEach ->
       @repo = @sandbox.stub({
-        branchAsync: ->
+        getBranch: ->
       })
 
     afterEach ->
@@ -174,7 +50,7 @@ describe "electron/ci", ->
         expect(ret).to.eq("bem/ci")
 
     it "gets branch from git", ->
-      @repo.branchAsync.resolves({name: "regular-branch"})
+      @repo.getBranch.resolves("regular-branch")
 
       ci.getBranch(@repo).then (ret) ->
         expect(ret).to.eq("regular-branch")

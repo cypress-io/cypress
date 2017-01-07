@@ -1,6 +1,5 @@
 _          = require("lodash")
 os         = require("os")
-git        = require("gift")
 chalk      = require("chalk")
 Promise    = require("bluebird")
 headless   = require("./headless")
@@ -10,6 +9,7 @@ errors     = require("../errors")
 stdout     = require("../stdout")
 upload     = require("../upload")
 Project    = require("../project")
+git        = require("../util/git")
 terminal   = require("../util/terminal")
 ciProvider = require("../util/ci_provider")
 
@@ -22,59 +22,26 @@ logException = (err) ->
     ## dont yell about any errors either
 
 module.exports = {
-  getBranchFromGit: (repo) ->
-    repo.branchAsync()
-    .get("name")
-    .catch -> ""
-
-  getMessage: (repo) ->
-    repo.current_commitAsync()
-    .get("message")
-    .catch -> ""
-
-  getEmail: (repo) ->
-    repo.current_commitAsync()
-    .get("author")
-    .get("email")
-    .catch -> ""
-
-  getAuthor: (repo) ->
-    repo.current_commitAsync()
-    .get("author")
-    .get("name")
-    .catch -> ""
-
-  getSha: (repo) ->
-    repo.current_commitAsync()
-    .get("id")
-    .catch -> ""
-
-  getRemoteOrigin: (repo) ->
-    repo.configAsync()
-    .get("items")
-    .get("remote.origin.url")
-    .catch -> ""
-
   getBranch: (repo) ->
     for branch in ["CIRCLE_BRANCH", "TRAVIS_BRANCH", "CI_BRANCH"]
       if b = process.env[branch]
         return Promise.resolve(b)
 
-    @getBranchFromGit(repo)
+    repo.getBranch()
 
   generateProjectBuildId: (projectId, projectPath, projectName, projectToken) ->
     if not projectToken
       return errors.throw("CI_KEY_MISSING")
 
-    repo = Promise.promisifyAll git(projectPath)
+    repo = git.init(projectPath)
 
     Promise.props({
-      sha:     @getSha(repo)
-      remote:  @getRemoteOrigin(repo)
+      sha:     repo.getSha()
+      email:   repo.getEmail()
+      author:  repo.getAuthor()
+      remote:  repo.getRemoteOrigin()
       branch:  @getBranch(repo)
-      author:  @getAuthor(repo)
-      email:   @getEmail(repo)
-      message: @getMessage(repo)
+      message: repo.getMessage()
     })
     .then (git) ->
       api.createBuild({
