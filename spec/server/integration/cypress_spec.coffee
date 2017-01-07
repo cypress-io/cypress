@@ -11,6 +11,7 @@ inquirer = require("inquirer")
 extension = require("@cypress/core-extension")
 Fixtures = require("../helpers/fixtures")
 pkg      = require("#{root}package.json")
+git      = require("#{root}lib/util/git")
 bundle   = require("#{root}lib/util/bundle")
 ciProvider = require("#{root}lib/util/ci_provider")
 settings = require("#{root}lib/util/settings")
@@ -198,6 +199,7 @@ describe "lib/cypress", ->
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "createRenderer")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 0})
+      @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
       @sandbox.spy(api, "updateProject")
 
     it "runs project headlessly and exits with exit code 0", ->
@@ -223,7 +225,7 @@ describe "lib/cypress", ->
         @expectExitWith(10)
 
     it "generates a project id if missing one", ->
-      @sandbox.stub(api, "createProject").withArgs("pristine", "session-123").resolves("pristine-id-123")
+      @sandbox.stub(api, "createProject").withArgs("pristine", "remoteOrigin", "session-123").resolves("pristine-id-123")
 
       Promise.all([
         user.set({sessionToken: "session-123"}),
@@ -243,7 +245,7 @@ describe "lib/cypress", ->
         expect(id).to.eq("pristine-id-123")
 
     it "does not generate project id when not logged in", ->
-      @sandbox.stub(api, "createProject").withArgs("pristine", "session-123").rejects(new Error)
+      @sandbox.stub(api, "createProject").withArgs("pristine", "remoteOrigin", "session-123").rejects(new Error)
 
       Project.add(@pristinePath)
       .then =>
@@ -260,7 +262,7 @@ describe "lib/cypress", ->
         @expectExitWith(0)
 
     it "does not error when getting a creating a project id fails", ->
-      @sandbox.stub(api, "createProject").withArgs("pristine", "session-123").rejects(new Error)
+      @sandbox.stub(api, "createProject").withArgs("pristine", "remoteOrigin", "session-123").rejects(new Error)
 
       Project.add(@pristinePath)
       .then =>
@@ -655,12 +657,12 @@ describe "lib/cypress", ->
       @sandbox.stub(os, "platform").returns("linux")
       ## TODO: might need to change this to a different return
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(ci, "getSha").resolves("sha-123")
-      @sandbox.stub(ci, "getBranch").resolves("bem/ci")
-      @sandbox.stub(ci, "getAuthor").resolves("brian")
-      @sandbox.stub(ci, "getEmail").resolves("brian@cypress.io")
-      @sandbox.stub(ci, "getMessage").resolves("foo")
-      @sandbox.stub(ci, "getRemoteOrigin").resolves("https://github.com/foo/bar.git")
+      @sandbox.stub(git, "_getSha").resolves("sha-123")
+      @sandbox.stub(git, "_getBranch").resolves("bem/ci")
+      @sandbox.stub(git, "_getAuthor").resolves("brian")
+      @sandbox.stub(git, "_getEmail").resolves("brian@cypress.io")
+      @sandbox.stub(git, "_getMessage").resolves("foo")
+      @sandbox.stub(git, "_getRemoteOrigin").resolves("https://github.com/foo/bar.git")
       @sandbox.stub(headless, "createRenderer")
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({

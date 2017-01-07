@@ -9,6 +9,7 @@ Project    = require("#{root}../lib/project")
 terminal   = require("#{root}../lib/util/terminal")
 ci         = require("#{root}../lib/modes/ci")
 headless   = require("#{root}../lib/modes/headless")
+git        = require("#{root}../lib/util/git")
 ciProvider = require("#{root}../lib/util/ci_provider")
 
 describe "electron/ci", ->
@@ -57,12 +58,12 @@ describe "electron/ci", ->
 
   context ".generateProjectBuildId", ->
     beforeEach ->
-      @sandbox.stub(ci, "getBranch").resolves("master")
-      @sandbox.stub(ci, "getAuthor").resolves("brian")
-      @sandbox.stub(ci, "getEmail").resolves("brian@cypress.io")
-      @sandbox.stub(ci, "getMessage").resolves("such hax")
-      @sandbox.stub(ci, "getSha").resolves("sha-123")
-      @sandbox.stub(ci, "getRemoteOrigin").resolves("https://github.com/foo/bar.git")
+      @sandbox.stub(git, "_getBranch").resolves("master")
+      @sandbox.stub(git, "_getAuthor").resolves("brian")
+      @sandbox.stub(git, "_getEmail").resolves("brian@cypress.io")
+      @sandbox.stub(git, "_getMessage").resolves("such hax")
+      @sandbox.stub(git, "_getSha").resolves("sha-123")
+      @sandbox.stub(git, "_getRemoteOrigin").resolves("https://github.com/foo/bar.git")
       @sandbox.stub(api, "createBuild")
 
     it "calls api.createBuild with args", ->

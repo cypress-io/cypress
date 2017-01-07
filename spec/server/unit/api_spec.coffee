@@ -454,12 +454,13 @@ describe "lib/api", ->
       .matchHeader("x-session", "session-123")
       .post("/projects", {
         "x-project-name": "foobar"
+        "x-remote-origin": "remoteOrigin"
       })
       .reply(200, {
         uuid: "uuid-123"
       })
 
-      api.createProject("foobar", "session-123").then (uuid) ->
+      api.createProject("foobar", "remoteOrigin", "session-123").then (uuid) ->
         expect(uuid).to.eq("uuid-123")
 
   context ".updateProject", ->
