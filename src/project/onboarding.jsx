@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
@@ -15,13 +16,15 @@ class OnBoading extends Component {
   }
 
   render () {
+    const { project } = this.props
+
     let closeModal = () => {
-      this.props.project.closeModal()
+      project.closeModal()
     }
 
     return (
       <BootstrapModal
-        show={this.props.project.onBoardingModalOpen}
+        show={project.onBoardingModalOpen}
         onHide={closeModal}
         backdrop='static'
         >
@@ -32,7 +35,7 @@ class OnBoading extends Component {
               We've added some folders and example tests to your project. Try running the
               <strong onClick={this._openExampleSpec.bind(this)}>
                 <i className='fa fa-file-code-o'></i>{' '}
-                { this.props.project.integrationExampleName }{' '}
+                { project.integrationExampleName }{' '}
               </strong>
               tests or add your own test file to
               <strong onClick={this._openIntegrationFolder.bind(this)}>
@@ -45,7 +48,7 @@ class OnBoading extends Component {
                 <li>
                   <span>
                     <i className='fa fa-folder-open-o'></i>{' '}
-                    {this.props.project.name}
+                    {project.name}
                   </span>
                   <ul>
                     <li className='app-code'>
@@ -54,40 +57,7 @@ class OnBoading extends Component {
                         ...
                       </span>
                     </li>
-                    <li className='new-code'>
-                      <span>
-                        <i className='fa fa-folder-open-o'></i>{' '}
-                        cypress
-                      </span>
-                      <ul>
-                        <li>
-                          <span>
-                            <i className='fa fa-folder-o'></i>{' '}
-                            fixtures
-                          </span>
-                        </li>
-                        <li>
-                          <span>
-                            <i className='fa fa-folder-open-o'></i>{' '}
-                            integration
-                          </span>
-                          <ul>
-                            <li>
-                              <span>
-                                <i className='fa fa-file-code-o'></i>{' '}
-                                { this.props.project.integrationExampleName }
-                              </span>
-                            </li>
-                          </ul>
-                        </li>
-                        <li>
-                          <span>
-                            <i className='fa fa-folder-o'></i>{' '}
-                            support
-                          </span>
-                        </li>
-                      </ul>
-                    </li>
+                    {this._scaffoldedFiles(project.scaffoldedFiles, 'new-code')}
                   </ul>
                 </li>
               </ul>
@@ -101,6 +71,33 @@ class OnBoading extends Component {
         </div>
       </BootstrapModal>
     )
+  }
+
+  _scaffoldedFiles (files, className) {
+    return _.map(_.sortBy(files, 'name'), (file) => {
+      if (file.children) {
+        return (
+          <li className={className} key={file.name}>
+            <span>
+              <i className='fa fa-folder-open-o'></i>{' '}
+              {file.name}
+            </span>
+            <ul>
+              {this._scaffoldedFiles(file.children)}
+            </ul>
+          </li>
+        )
+      } else {
+        return (
+          <li className={className} key={file.name}>
+            <span>
+              <i className='fa fa-file-code-o'></i>{' '}
+              {file.name}
+            </span>
+          </li>
+        )
+      }
+    })
   }
 
   _openExampleSpec () {
