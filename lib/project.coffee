@@ -386,34 +386,49 @@ class Project extends EE
         id: settings.id(projectPath)
       })
 
+  @_mergeDetails = (clientProject, project) ->
+    _.extend({}, clientProject, project, {state: "VALID"})
+
+  @_mergeState = (clientProject, state) ->
+    _.extend({}, clientProject, {state: state})
+
+  @_getProject = (clientProject, session) ->
+    api.getProject(clientProject.id, session)
+    .then (project) ->
+      Project._mergeDetails(clientProject, project)
+    .catch (err) ->
+      switch err.statusCode
+        when 404
+          ## project doesn't exist
+          return Project._mergeState(clientProject, "INVALID")
+        when 403
+          ## project exists, but user isn't authorized for it
+          return Project._mergeState(clientProject, "UNAUTHORIZED")
+        else
+          throw err
+
   @getProjectStatuses = (clientProjects = []) ->
     user.ensureSession()
     .then (session) ->
-      api.getProjects(session)
-    .then (projects = []) ->
-      projectsIndex = _.keyBy(projects, "id")
-      return _.map clientProjects, (clientProject) ->
-        ## not a CI project, leave it be
-        return clientProject if not clientProject.id
+      api.getProjects(session).then (projects = []) ->
+        projectsIndex = _.keyBy(projects, "id")
+        Promise.all(_.map clientProjects, (clientProject) ->
+          ## not a CI project, just mark as valid and return
+          if not clientProject.id
+            return Project._mergeState(clientProject, "VALID")
 
-        if project = projectsIndex[clientProject.id]
-          ## merge in details for matching project
-          return _.extend(clientProject, project, {valid: true})
-        else
-          ## project has id, but no matching project found
-          clientProject.valid = false
-          return clientProject
+          if project = projectsIndex[clientProject.id]
+            ## merge in details for matching project
+            return Project._mergeDetails(clientProject, project)
+          else
+            ## project has id, but no matching project found
+            ## check if it doesn't exist or if user isn't authorized
+            Project._getProject(clientProject, session)
+        )
 
   @getProjectStatus = (clientProject) ->
-    user.ensureSession()
-    .then (session) ->
-      api.getProject(clientProject.id, session)
-    .then (project) ->
-      return _.extend(clientProject, project)
-    .catch ->
-      ## no matching project found
-      clientProject.valid = false
-      return clientProject
+    user.ensureSession().then (session) ->
+      Project._getProject(clientProject, session)
 
   @remove = (path) ->
     cache.removeProject(path)
