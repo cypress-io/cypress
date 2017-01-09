@@ -27,6 +27,7 @@ const validProps = persistentProps.concat([
   'error',
   'parentTestsFolderDisplay',
   'integrationExampleName',
+  'scaffoldedFiles',
 ])
 
 export default class Project {
@@ -58,6 +59,7 @@ export default class Project {
   @observable error
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
+  @observable scaffoldedFiles = []
   // should never change after first set
   @observable path
 
@@ -155,6 +157,7 @@ export default class Project {
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
     this.fileServerFolder = config.fileServerFolder
     this.integrationExampleName = config.integrationExampleName
+    this.scaffoldedFiles = config.scaffoldedFiles
   }
 
   @action setResolvedConfig (resolved) {

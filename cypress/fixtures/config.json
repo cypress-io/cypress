@@ -58,6 +58,43 @@
   "hosts": {
     "*.foobar.com": "127.0.0.1"
   },
+  "scaffoldedFiles": [
+    {
+      "name": "cypress",
+      "children": [
+        {
+          "name": "integration",
+          "children": [
+            {
+              "name": "example_spec.js"
+            }
+          ]
+        },
+        {
+          "name": "fixtures",
+          "children": [
+            {
+              "name": "example.json"
+            }
+          ]
+        },
+        {
+          "name": "support",
+          "children": [
+            {
+              "name": "commands.js"
+            },
+            {
+              "name": "defaults.js"
+            },
+            {
+              "name": "index.js"
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "resolved": {
     "animationDistanceThreshold": {
       "from": "default",
