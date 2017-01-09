@@ -600,6 +600,7 @@ describe "lib/api", ->
         name: "foobar"
         orgId: "org-id-123"
         public: true
+        origin: "remoteOrigin"
       })
       .reply(422, {
         errors: {
@@ -612,7 +613,7 @@ describe "lib/api", ->
         orgId: "org-id-123"
         public: true
       }
-      api.createProject(projectDetails, "session-123")
+      api.createProject(projectDetails, "remoteOrigin", "session-123")
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->
