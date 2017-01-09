@@ -18,6 +18,7 @@ export default class Project {
   @observable error
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
+  @observable scaffoldedFiles = []
 
   constructor (path) {
     this.id = md5(path)
@@ -106,7 +107,8 @@ export default class Project {
     this.integrationFolder = config.integrationFolder
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
     this.fileServerFolder = config.fileServerFolder
-    return this.integrationExampleName = config.integrationExampleName
+    this.integrationExampleName = config.integrationExampleName
+    this.scaffoldedFiles = config.scaffoldedFiles
   }
 
   @action setResolvedConfig (resolved) {
