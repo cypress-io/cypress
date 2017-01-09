@@ -12,10 +12,10 @@ const persistentProps = [
   'defaultOrg',
   'lastBuildStatus',
   'lastBuildCreatedAt',
-  'valid',
 ]
 
 const validProps = persistentProps.concat([
+  'state',
   'clientId',
   'isChosen',
   'isLoading',
@@ -30,9 +30,24 @@ const validProps = persistentProps.concat([
 ])
 
 export default class Project {
+  // state constants
+  static VALID = 'VALID'
+  static INVALID = 'INVALID'
+  static UNAUTHORIZED = 'UNAUTHORIZED'
+
+  // persisted with api
   @observable id
+  @observable name
+  @observable public
+  @observable lastBuildStatus
+  @observable lastBuildCreatedAt
+  @observable orgName
+  @observable orgId
+  @observable defaultOrg
+  // comes from ipc, but not persisted
+  @observable state = Project.VALID
+  // local state
   @observable clientId
-  @observable path
   @observable isChosen = false
   @observable isLoading = false
   @observable isNew = false
@@ -43,14 +58,8 @@ export default class Project {
   @observable error
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
-  @observable name
-  @observable public
-  @observable orgName
-  @observable orgId
-  @observable defaultOrg
-  @observable lastBuildStatus
-  @observable lastBuildCreatedAt
-  @observable valid = true
+  // should never change after first set
+  @observable path
 
   constructor (props) {
     this.path = props.path
