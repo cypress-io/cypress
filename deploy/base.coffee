@@ -110,6 +110,7 @@ class Base
           copy("./lib/server.coffee",       "/src/lib/server.coffee")
           copy("./lib/socket.coffee",       "/src/lib/socket.coffee")
           copy("./lib/stats.coffee",        "/src/lib/stats.coffee")
+          copy("./lib/stdout.coffee",       "/src/lib/stdout.coffee")
           copy("./lib/updater.coffee",      "/src/lib/updater.coffee")
           copy("./lib/upload.coffee",       "/src/lib/upload.coffee")
           copy("./lib/user.coffee",         "/src/lib/user.coffee")

@@ -17,6 +17,7 @@ scaffold    = require("./scaffold")
 Watchers    = require("./watchers")
 Reporter    = require("./reporter")
 savedState  = require("./saved_state")
+git         = require("./util/git")
 settings    = require("./util/settings")
 
 fs   = Promise.promisifyAll(fs)

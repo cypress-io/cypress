@@ -13,17 +13,29 @@ presetReact            = require("babel-preset-react")
 presetLatest           = require("babel-preset-latest")
 stringStream           = require("string-to-stream")
 pluginAddModuleExports = require("babel-plugin-add-module-exports")
+sanitize               = require("sanitize-filename")
 appData                = require("./app_data")
 
 fs = Promise.promisifyAll(fs)
 
+builtFiles = {}
+
 module.exports = {
+  reset: ->
+    builtFiles = {}
+
   shouldWatch: (watchForFileChanges) ->
     ## we should watch only if
     ## watchForFileChanges isnt false
     watchForFileChanges isnt false
 
+  outputPath: (projectName = "", filePath) ->
+    appData.path("bundles", sanitize(projectName), filePath)
+
   build: (filePath, config) ->
+    if config.isHeadless and built = builtFiles[filePath]
+      return built
+
     emitter = new EE()
 
     ## dont watch for file changes if
@@ -42,7 +54,7 @@ module.exports = {
 
     bundle = =>
       new Promise (resolve, reject) =>
-        outputPath = appData.path("bundles", filePath)
+        outputPath = @outputPath(config.projectName, filePath)
         fs.ensureDirAsync(path.dirname(outputPath))
         .then =>
           bundler
@@ -89,7 +101,7 @@ module.exports = {
 
     latestBundle = bundle()
 
-    return {
+    return builtFiles[filePath] = {
       ## set to empty function in the case where we
       ## are not watching the bundle
       close: bundler.close ? ->
@@ -105,7 +117,8 @@ module.exports = {
     ## strip out stack noise from parser like
     ## at Parser.pp$5.raise (/path/to/node_modules/babylon/lib/index.js:4215:13)
     .replace(/\n\s*at.*/g, "")
-    .replace("From previous event:", "")
+    .split("From previous event:\n").join("")
+    .split("From previous event:").join("")
 
   clientSideError: (err) ->
     err = @errorMessage(err)
