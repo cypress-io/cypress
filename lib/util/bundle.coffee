@@ -117,7 +117,8 @@ module.exports = {
     ## strip out stack noise from parser like
     ## at Parser.pp$5.raise (/path/to/node_modules/babylon/lib/index.js:4215:13)
     .replace(/\n\s*at.*/g, "")
-    .replace("From previous event:", "")
+    .split("From previous event:\n").join("")
+    .split("From previous event:").join("")
 
   clientSideError: (err) ->
     err = @errorMessage(err)
