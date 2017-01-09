@@ -1,119 +1,27 @@
 require("../../spec_helper")
 
-os       = require("os")
-api      = require("#{root}../lib/api")
-errors   = require("#{root}../lib/errors")
-logger   = require("#{root}../lib/logger")
-Project  = require("#{root}../lib/project")
-terminal = require("#{root}../lib/util/terminal")
-ci       = require("#{root}../lib/modes/ci")
-headless = require("#{root}../lib/modes/headless")
+os         = require("os")
+api        = require("#{root}../lib/api")
+stdout     = require("#{root}../lib/stdout")
+errors     = require("#{root}../lib/errors")
+logger     = require("#{root}../lib/logger")
+Project    = require("#{root}../lib/project")
+terminal   = require("#{root}../lib/util/terminal")
+ci         = require("#{root}../lib/modes/ci")
+headless   = require("#{root}../lib/modes/headless")
+git        = require("#{root}../lib/util/git")
+ciProvider = require("#{root}../lib/util/ci_provider")
 
 describe "electron/ci", ->
-  context ".getSha", ->
-    beforeEach ->
-      @repo = @sandbox.stub({
-        current_commitAsync: ->
-      })
-
-    it "returns branch sha", ->
-      @repo.current_commitAsync.resolves({id: "sha-123"})
-
-      ci.getSha(@repo)
-      .then (ret) ->
-        expect(ret).to.eq("sha-123")
-
-    it "returns '' on err", ->
-      @repo.current_commitAsync.rejects(new Error("bar"))
-
-      ci.getSha(@repo)
-      .then (ret) ->
-        expect(ret).to.eq("")
-
-  context ".getBranchFromGit", ->
-    beforeEach ->
-      @repo = @sandbox.stub({
-        branchAsync: ->
-      })
-
-    it "returns branch name", ->
-      @repo.branchAsync.resolves({name: "foo"})
-
-      ci.getBranchFromGit(@repo).then (ret) ->
-        expect(ret).to.eq("foo")
-
-    it "returns '' on err", ->
-      @repo.branchAsync.rejects(new Error("bar"))
-
-      ci.getBranchFromGit(@repo).then (ret) ->
-        expect(ret).to.eq("")
-
-  context ".getMessage", ->
-    beforeEach ->
-      @repo = @sandbox.stub({
-        current_commitAsync: ->
-      })
-
-    it "returns branch name", ->
-      @repo.current_commitAsync.resolves({message: "hax"})
-
-      ci.getMessage(@repo).then (ret) ->
-        expect(ret).to.eq("hax")
-
-    it "returns '' on err", ->
-      @repo.current_commitAsync.rejects(new Error("bar"))
-
-      ci.getMessage(@repo).then (ret) ->
-        expect(ret).to.eq("")
-
-  context ".getAuthor", ->
-    beforeEach ->
-      @repo = @sandbox.stub({
-        current_commitAsync: ->
-      })
-
-    it "returns branch name", ->
-      @repo.current_commitAsync.resolves({
-        author: {
-          name: "brian"
-        }
-      })
-
-      ci.getAuthor(@repo).then (ret) ->
-        expect(ret).to.eq("brian")
-
-    it "returns '' on err", ->
-      @repo.current_commitAsync.rejects(new Error("bar"))
-
-      ci.getAuthor(@repo).then (ret) ->
-        expect(ret).to.eq("")
-
-  context ".getEmail", ->
-    beforeEach ->
-      @repo = @sandbox.stub({
-        current_commitAsync: ->
-      })
-
-    it "returns branch name", ->
-      @repo.current_commitAsync.resolves({
-        author: {
-          email: "brian@cypress.io"
-        }
-      })
-
-      ci.getEmail(@repo).then (ret) ->
-        expect(ret).to.eq("brian@cypress.io")
-
-    it "returns '' on err", ->
-      @repo.current_commitAsync.rejects(new Error("bar"))
-
-      ci.getEmail(@repo).then (ret) ->
-        expect(ret).to.eq("")
+  beforeEach ->
+    @sandbox.stub(ciProvider, "name").returns("circle")
+    @sandbox.stub(ciProvider, "params").returns({foo: "bar"})
+    @sandbox.stub(ciProvider, "buildNum").returns("build-123")
 
   context ".getBranch", ->
     beforeEach ->
       @repo = @sandbox.stub({
-        branchAsync: ->
+        getBranch: ->
       })
 
     afterEach ->
@@ -143,18 +51,19 @@ describe "electron/ci", ->
         expect(ret).to.eq("bem/ci")
 
     it "gets branch from git", ->
-      @repo.branchAsync.resolves({name: "regular-branch"})
+      @repo.getBranch.resolves("regular-branch")
 
       ci.getBranch(@repo).then (ret) ->
         expect(ret).to.eq("regular-branch")
 
   context ".generateProjectBuildId", ->
     beforeEach ->
-      @sandbox.stub(ci, "getBranch").resolves("master")
-      @sandbox.stub(ci, "getAuthor").resolves("brian")
-      @sandbox.stub(ci, "getEmail").resolves("brian@cypress.io")
-      @sandbox.stub(ci, "getMessage").resolves("such hax")
-      @sandbox.stub(ci, "getSha").resolves("sha-123")
+      @sandbox.stub(git, "_getBranch").resolves("master")
+      @sandbox.stub(git, "_getAuthor").resolves("brian")
+      @sandbox.stub(git, "_getEmail").resolves("brian@cypress.io")
+      @sandbox.stub(git, "_getMessage").resolves("such hax")
+      @sandbox.stub(git, "_getSha").resolves("sha-123")
+      @sandbox.stub(git, "_getRemoteOrigin").resolves("https://github.com/foo/bar.git")
       @sandbox.stub(api, "createBuild")
 
     it "calls api.createBuild with args", ->
@@ -169,6 +78,10 @@ describe "electron/ci", ->
           commitAuthorName: "brian"
           commitAuthorEmail: "brian@cypress.io"
           commitMessage: "such hax"
+          remoteOrigin: "https://github.com/foo/bar.git"
+          ciProvider: "circle"
+          ciBuildNum: "build-123"
+          ciParams: {foo: "bar"}
         })
 
     it "handles status code errors of 401", ->
@@ -218,6 +131,48 @@ describe "electron/ci", ->
         expect(console.log).to.be.calledWithMatch("Error: foo")
         expect(logger.createException).to.be.calledWith(err)
 
+  context ".uploadStdout", ->
+    beforeEach ->
+      @sandbox.stub(api, "updateInstanceStdout")
+
+    it "calls api.updateInstanceStdout", ->
+      api.updateInstanceStdout.resolves()
+
+      ci.uploadStdout("id-123", "foobarbaz\n")
+
+      expect(api.updateInstanceStdout).to.be.calledWith({
+        instanceId: "id-123"
+        stdout: "foobarbaz\n"
+      })
+
+    it "logs warning on error", ->
+      err = new Error("foo")
+
+      @sandbox.spy(errors, "warning")
+      @sandbox.spy(logger, "createException")
+      @sandbox.spy(console, "log")
+
+      api.updateInstanceStdout.rejects(err)
+
+      ci.uploadStdout("id-123", "asdf")
+      .then ->
+        expect(errors.warning).to.be.calledWith("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+        expect(console.log).to.be.calledWithMatch("No build assets will be recorded.")
+        expect(console.log).to.be.calledWithMatch("Error: foo")
+        expect(logger.createException).to.be.calledWith(err)
+
+    it "does not createException when statusCode is 503", ->
+      err = new Error("foo")
+      err.statusCode = 503
+
+      @sandbox.spy(logger, "createException")
+
+      api.updateInstanceStdout.rejects(err)
+
+      ci.uploadStdout("id-123", "Asdfasd")
+      .then ->
+        expect(logger.createException).not.to.be.called
+
   context ".uploadAssets", ->
     beforeEach ->
       @sandbox.stub(api, "updateInstance")
@@ -253,6 +208,7 @@ describe "electron/ci", ->
         screenshots: [{name: "foo"}]
         failingTests: ["foo"]
         cypressConfig: {foo: "bar"}
+        ciProvider: "circle"
       })
 
     it "calls ci.upload on success", ->
@@ -370,6 +326,7 @@ describe "electron/ci", ->
       @sandbox.stub(ci, "generateProjectBuildId").resolves("build-id-123")
       @sandbox.stub(ci, "createInstance").resolves("instance-id-123")
       @sandbox.stub(ci, "uploadAssets").resolves()
+      @sandbox.stub(ci, "uploadStdout").resolves()
       @sandbox.stub(Project, "id").resolves("id-123")
       @sandbox.stub(Project, "config").resolves({projectName: "projectName"})
       @sandbox.stub(headless, "run").resolves({tests: 2, passes: 1})
@@ -432,6 +389,48 @@ describe "electron/ci", ->
           passes: 1
         })
 
+    it "does not call uploadStdout with no instanceId", ->
+      ci.createInstance.resolves(null)
+
+      ci.run({})
+      .then (stats) ->
+        expect(ci.uploadStdout).not.to.be.called
+
+    it "does not call uploadStdout on uploadAssets failure", ->
+      ci.uploadAssets.restore()
+      @sandbox.stub(api, "updateInstance").rejects(new Error)
+
+      ci.run({})
+      .then (stats) ->
+        expect(ci.uploadStdout).not.to.be.called
+
+    it "calls ci.uploadStdout on uploadAssets success", ->
+      @sandbox.stub(stdout, "capture").returns({
+        toString: -> "foobarbaz"
+      })
+
+      ci.run({})
+      .then (stats) ->
+        expect(ci.uploadStdout).to.be.calledWith("instance-id-123", "foobarbaz")
+
+    it "captures stdout from headless.run and headless.allDone", ->
+      fn = ->
+        console.log("foo")
+        console.log("bar")
+        process.stdout.write("baz")
+
+        Promise.resolve({failures: 0})
+
+      headless.run.restore()
+      @sandbox.stub(headless, "run", fn)
+
+      ci.run({})
+      .then (stats) ->
+        str = ci.uploadStdout.getCall(0).args[1]
+
+        expect(str).to.include("foo\nbar\nbaz")
+        expect(str).to.include("All Done")
+
     it "calls headless.allDone on uploadAssets success", ->
       @sandbox.spy(terminal, "header")
 
@@ -446,8 +445,21 @@ describe "electron/ci", ->
 
     it "calls headless.allDone on uploadAssets failure", ->
       @sandbox.spy(terminal, "header")
-      @sandbox.stub(api, "createInstance").rejects(new Error)
+      @sandbox.stub(api, "updateInstance").rejects(new Error)
       ci.uploadAssets.restore()
+
+      ci.run({})
+      .then (stats) ->
+        expect(terminal.header).to.be.calledWith("All Done")
+
+        expect(stats).to.deep.eq({
+          tests: 2
+          passes: 1
+        })
+
+    it "calls headless.allDone on createInstance failure", ->
+      @sandbox.spy(terminal, "header")
+      ci.createInstance.resolves(null)
 
       ci.run({})
       .then (stats) ->

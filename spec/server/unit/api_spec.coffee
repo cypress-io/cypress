@@ -6,12 +6,10 @@ os       = require("os")
 pkg      = require("#{root}package.json")
 api      = require("#{root}lib/api")
 Promise  = require("bluebird")
-provider = require("#{root}lib/util/provider")
 
 describe "lib/api", ->
   beforeEach ->
     @sandbox.stub(os, "platform").returns("linux")
-    @sandbox.stub(provider, "get").returns("circle")
 
   context ".getOrgs", ->
     it "GET /orgs + returns orgs", ->
@@ -141,7 +139,10 @@ describe "lib/api", ->
         commitAuthorName:  "brian"
         commitAuthorEmail: "brian@cypress.io"
         commitMessage:     "such hax"
+        remoteOrigin:      "https://github.com/foo/bar.git"
         ciProvider:        "circle"
+        ciBuildNum:        "987"
+        ciParams:          { foo: "bar" }
       })
       .reply(200, {
         buildId: "new-build-id-123"
@@ -155,6 +156,10 @@ describe "lib/api", ->
         commitAuthorName:  "brian"
         commitAuthorEmail: "brian@cypress.io"
         commitMessage:     "such hax"
+        remoteOrigin:      "https://github.com/foo/bar.git"
+        ciProvider:        "circle"
+        ciBuildNum:        "987"
+        ciParams:          { foo: "bar" }
       })
       .then (ret) ->
         expect(ret).to.eq("new-build-id-123")
@@ -172,7 +177,10 @@ describe "lib/api", ->
         commitAuthorName:  "brian"
         commitAuthorEmail: "brian@cypress.io"
         commitMessage:     "such hax"
+        remoteOrigin:      "https://github.com/foo/bar.git"
         ciProvider:        "circle"
+        ciBuildNum:        "987"
+        ciParams:          { foo: "bar" }
       })
       .reply(422, {
         errors: {
@@ -188,6 +196,10 @@ describe "lib/api", ->
         commitAuthorName:  "brian"
         commitAuthorEmail: "brian@cypress.io"
         commitMessage:     "such hax"
+        remoteOrigin:       "https://github.com/foo/bar.git"
+        ciProvider:        "circle"
+        ciBuildNum:        "987"
+        ciParams:          { foo: "bar" }
       })
       .then ->
         throw new Error("should have thrown here")
@@ -241,6 +253,10 @@ describe "lib/api", ->
 
     it "POSTs /builds/:id/instances", ->
       @sandbox.stub(os, "release").returns("10.10.10")
+      @sandbox.stub(os, "cpus").returns([{model: "foo"}])
+      @sandbox.stub(os, "freemem").returns(1000)
+      @sandbox.stub(os, "totalmem").returns(2000)
+
       os.platform.returns("darwin")
 
       nock("http://localhost:1234")
@@ -253,6 +269,11 @@ describe "lib/api", ->
         browserVersion: "53"
         osName: "darwin"
         osVersion: "10.10.10"
+        osCpus: [{model: "foo"}]
+        osMemory: {
+          free:  1000
+          total: 2000
+        }
       })
       .reply(200, {
         instanceId: "instance-id-123"
@@ -329,7 +350,7 @@ describe "lib/api", ->
         value: "53"
       })
 
-    it "PUTs /builds/:id/instances", ->
+    it "PUTs /instances/:id", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
@@ -360,9 +381,10 @@ describe "lib/api", ->
         screenshots: []
         failingTests: []
         cypressConfig: {}
+        ciProvider: "circle"
       })
 
-    it "PUT /builds/:id/instances failure formatting", ->
+    it "PUT /instances/:id failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
@@ -410,6 +432,72 @@ describe "lib/api", ->
       @sandbox.stub(rp, "put").resolves()
 
       api.updateInstance({})
+      .then ->
+        expect(rp.put).to.be.calledWithMatch({timeout: 10000})
+
+  context ".updateInstanceStdout", ->
+    it "PUTs /instances/:id/stdout", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .put("/instances/instance-id-123/stdout", {
+        stdout: "foobarbaz\n"
+      })
+      .reply(200)
+
+      api.updateInstanceStdout({
+        instanceId: "instance-id-123"
+        stdout: "foobarbaz\n"
+      })
+
+    it "PUT /instances/:id/stdout failure formatting", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .put("/instances/instance-id-123/stdout")
+      .reply(422, {
+        errors: {
+          tests: ["is required"]
+        }
+      })
+
+      api.updateInstanceStdout({instanceId: "instance-id-123"})
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("""
+          422
+
+          {
+            "errors": {
+              "tests": [
+                "is required"
+              ]
+            }
+          }
+        """)
+
+    it "handles timeouts", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-cypress-version", pkg.version)
+      .put("/instances/instance-id-123/stdout")
+      .socketDelay(5000)
+      .reply(200, {})
+
+      api.updateInstanceStdout({
+        instanceId: "instance-id-123"
+        timeout: 100
+      })
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
+
+    it "sets timeout to 10 seconds", ->
+      @sandbox.stub(rp, "put").resolves()
+
+      api.updateInstanceStdout({})
       .then ->
         expect(rp.put).to.be.calledWithMatch({timeout: 10000})
 
@@ -480,6 +568,7 @@ describe "lib/api", ->
         name: "foobar"
         orgId: "org-id-123"
         public: true
+        origin: "remoteOrigin"
       })
       .reply(200, {
         id: "id-123"
@@ -493,7 +582,7 @@ describe "lib/api", ->
         orgId: "org-id-123"
         public: true
       }
-      api.createProject(projectDetails, "session-123").then (projectDetails) ->
+      api.createProject(projectDetails, "remoteOrigin", "session-123").then (projectDetails) ->
         expect(projectDetails).to.eql({
           id: "id-123"
           name: "foobar"

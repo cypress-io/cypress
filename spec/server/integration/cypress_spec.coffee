@@ -11,7 +11,9 @@ inquirer = require("inquirer")
 extension = require("@cypress/core-extension")
 Fixtures = require("../helpers/fixtures")
 pkg      = require("#{root}package.json")
+git      = require("#{root}lib/util/git")
 bundle   = require("#{root}lib/util/bundle")
+ciProvider = require("#{root}lib/util/ci_provider")
 settings = require("#{root}lib/util/settings")
 Events   = require("#{root}lib/electron/handlers/events")
 project  = require("#{root}lib/electron/handlers/project")
@@ -33,6 +35,8 @@ Watchers = require("#{root}lib/watchers")
 
 describe "lib/cypress", ->
   beforeEach ->
+    @timeout(5000)
+
     cache.removeSync()
 
     Fixtures.scaffold()
@@ -362,7 +366,7 @@ describe "lib/cypress", ->
 
       cypress.start(["--run-project=#{@pristinePath}"])
       .then =>
-        expect(shouldWatch).to.have.always.returned(false)
+        expect(shouldWatch).not.to.be.called
 
     it "does watch supportFile when not headless", ->
       shouldWatch = @sandbox.spy(bundle, "shouldWatch")
@@ -609,18 +613,26 @@ describe "lib/cypress", ->
           commitAuthorName: "brian"
           commitAuthorEmail:  "brian@cypress.io"
           commitMessage: "foo"
+          remoteOrigin: "https://github.com/foo/bar.git"
+          ciProvider: "travis"
+          ciBuildNum: "987"
+          ciParams: null
         })
 
       @upload = @sandbox.stub(ci, "upload").resolves()
 
+      @sandbox.stub(ciProvider, "name").returns("travis")
+      @sandbox.stub(ciProvider, "buildNum").returns("987")
+      @sandbox.stub(ciProvider, "params").returns(null)
       @sandbox.stub(os, "platform").returns("linux")
       ## TODO: might need to change this to a different return
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(ci, "getSha").resolves("sha-123")
-      @sandbox.stub(ci, "getBranch").resolves("bem/ci")
-      @sandbox.stub(ci, "getAuthor").resolves("brian")
-      @sandbox.stub(ci, "getEmail").resolves("brian@cypress.io")
-      @sandbox.stub(ci, "getMessage").resolves("foo")
+      @sandbox.stub(git, "_getSha").resolves("sha-123")
+      @sandbox.stub(git, "_getBranch").resolves("bem/ci")
+      @sandbox.stub(git, "_getAuthor").resolves("brian")
+      @sandbox.stub(git, "_getEmail").resolves("brian@cypress.io")
+      @sandbox.stub(git, "_getMessage").resolves("foo")
+      @sandbox.stub(git, "_getRemoteOrigin").resolves("https://github.com/foo/bar.git")
       @sandbox.stub(headless, "createRenderer")
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({
@@ -668,6 +680,7 @@ describe "lib/cypress", ->
         screenshots: []
         failingTests: []
         cypressConfig: {}
+        ciProvider: "travis"
       }).resolves()
 
       cypress.start(["--run-project=#{@todosPath}",  "--key=token-123", "--ci"])

@@ -192,6 +192,9 @@ module.exports = {
     ## then begin processing the file
     end()
     .then ->
+      ## dont process anything if videoCompress is off
+      return if videoCompression is false
+
       console.log("")
       console.log("")
 
@@ -220,7 +223,7 @@ module.exports = {
             ## continuously get notifications
             progress += tenSecs
             percentage = Math.ceil(float * 100) + "%"
-            console.log("  - Processing progress: ", chalk.cyan(percentage))
+            console.log("  - Compression progress: ", chalk.cyan(percentage))
 
         # bar.tickTotal(float)
 

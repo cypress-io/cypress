@@ -45,6 +45,7 @@ browserifyFile = (filePath) ->
 describe "lib/controllers/spec", ->
   beforeEach ->
     @config = {
+      projectName: "foo?bar"
       projectRoot: ""
       integrationFolder: fixturesRoot
       browserify: {
@@ -66,8 +67,8 @@ describe "lib/controllers/spec", ->
       watchBundle: -> Promise.resolve()
     }
 
-    fs.ensureDirSync(appData.path("bundles"))
-    fs.writeFileSync(appData.path("bundles", "sample.js"), ';')
+    fs.ensureDirSync(appData.path("bundles", "foobar"))
+    fs.writeFileSync(appData.path("bundles", "foobar", "sample.js"), ';')
 
     @handle = (filePath) =>
       spec.handle filePath, {}, @res, @config, (=>), @watchers, @project

@@ -14,6 +14,7 @@ routes = {
   builds:        "builds"
   instances:     "builds/:id/instances"
   instance:      "instances/:id"
+  instanceStdout:"instances/:id/stdout"
   orgs:          "organizations"
   projects:      "projects"
   project:       "projects/:id"

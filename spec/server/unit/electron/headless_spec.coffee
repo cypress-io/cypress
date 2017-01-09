@@ -5,6 +5,7 @@ Promise  = require("bluebird")
 inquirer = require("inquirer")
 electron = require("electron")
 user     = require("#{root}../lib/user")
+video    = require("#{root}../lib/video")
 errors   = require("#{root}../lib/errors")
 Project  = require("#{root}../lib/project")
 Reporter = require("#{root}../lib/reporter")
@@ -191,6 +192,24 @@ describe "electron/headless", ->
 
     it "calls project.closeBrowser", ->
       expect(project.closeBrowser).to.be.calledOnce
+
+  context ".postProcessRecording", ->
+    beforeEach ->
+      @sandbox.stub(video, "process").resolves()
+
+    it "calls video process with name, cname and videoCompression", ->
+      end = -> Promise.resolve()
+
+      headless.postProcessRecording(end, "foo", "foo-compress", 32)
+      .then ->
+        expect(video.process).to.be.calledWith("foo", "foo-compress", 32)
+
+    it "does not call video process when videoCompression is false", ->
+      end = -> Promise.resolve()
+
+      headless.postProcessRecording(end, "foo", "foo-compress", false)
+      .then ->
+        expect(video.process).not.to.be.called
 
   context ".waitForRendererToConnect", ->
     it "resolves on waitForSocketConnection", ->

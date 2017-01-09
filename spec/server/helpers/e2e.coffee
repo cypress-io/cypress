@@ -1,19 +1,20 @@
 require("../spec_helper")
 
-_          = require("lodash")
-fs         = require("fs-extra")
-cp         = require("child_process")
-path       = require("path")
-http       = require("http")
-human      = require("human-interval")
-morgan     = require("morgan")
-express    = require("express")
-Promise    = require("bluebird")
-Fixtures   = require("../helpers/fixtures")
-user       = require("#{root}lib/user")
-cypress    = require("#{root}lib/cypress")
-Project    = require("#{root}lib/project")
-settings   = require("#{root}lib/util/settings")
+_            = require("lodash")
+fs           = require("fs-extra")
+cp           = require("child_process")
+path         = require("path")
+http         = require("http")
+human        = require("human-interval")
+morgan       = require("morgan")
+express      = require("express")
+Promise      = require("bluebird")
+allowDestroy = require("server-destroy-vvo")
+Fixtures     = require("../helpers/fixtures")
+user         = require("#{root}lib/user")
+cypress      = require("#{root}lib/cypress")
+Project      = require("#{root}lib/project")
+settings     = require("#{root}lib/util/settings")
 
 cp = Promise.promisifyAll(cp)
 fs = Promise.promisifyAll(fs)
@@ -30,6 +31,8 @@ startServer = (obj) ->
 
   srv = http.Server(app)
 
+  allowDestroy(srv)
+
   app.use(morgan("dev"))
 
   if s = obj.static
@@ -45,7 +48,7 @@ startServer = (obj) ->
 
 stopServer = (srv) ->
   new Promise (resolve) ->
-    srv.close(resolve)
+    srv.destroy(resolve)
 
 module.exports = {
   setup: (options = {}) ->

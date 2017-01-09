@@ -11,8 +11,9 @@ errors       = require("#{root}lib/errors")
 config       = require("#{root}lib/config")
 scaffold     = require("#{root}lib/scaffold")
 Project      = require("#{root}lib/project")
-settings     = require("#{root}lib/util/settings")
 savedState   = require("#{root}lib/saved_state")
+git          = require("#{root}lib/util/git")
+settings     = require("#{root}lib/util/settings")
 
 describe "lib/project", ->
   beforeEach ->
