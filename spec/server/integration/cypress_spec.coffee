@@ -391,7 +391,7 @@ describe "lib/cypress", ->
 
       cypress.start(["--run-project=#{@pristinePath}"])
       .then =>
-        expect(shouldWatch).to.have.always.returned(false)
+        expect(shouldWatch).not.to.be.called
 
     it "does watch supportFile when not headless", ->
       shouldWatch = @sandbox.spy(bundle, "shouldWatch")

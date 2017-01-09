@@ -176,6 +176,7 @@
     "request": "2.79.0",
     "request-promise": "2.0.0",
     "requirejs": "2.1.15",
+    "sanitize-filename": "^1.6.1",
     "semver": "^5.3.0",
     "send": "^0.14.1",
     "server-destroy-vvo": "1.0.1",
