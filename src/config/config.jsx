@@ -164,7 +164,7 @@ class Config extends Component {
   }
 
   _notSetupForCi () {
-    return !this.props.project.id || !this.props.project.valid
+    return !this.props.project.id || !this.props.project.isValid
   }
 
   _ciKeys = () => {

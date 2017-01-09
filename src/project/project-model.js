@@ -84,6 +84,10 @@ export default class Project {
     return _.pick(this, persistentProps)
   }
 
+  @computed get isValid () {
+    return this.state === Project.VALID
+  }
+
   @computed get otherBrowsers () {
     return _.filter(this.browsers, { isChosen: false })
   }

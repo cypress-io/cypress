@@ -26,7 +26,7 @@ class ProjectListItem extends Component {
     const loadingClassName = project.isLoading ? 'loading' : ''
 
     let link = `/projects/${project.clientId}`
-    if (this._isInvalid()) {
+    if (!project.isValid) {
       link += '/builds'
     }
 
@@ -63,10 +63,6 @@ class ProjectListItem extends Component {
         </div>
       </Link>
     )
-  }
-
-  _isInvalid () {
-    return this.props.project.state !== Project.VALID
   }
 
   _projectName () {
@@ -116,7 +112,7 @@ class ProjectListItem extends Component {
   }
 
   _projectStatus () {
-    if (this._isInvalid()) {
+    if (!this.props.project.isValid) {
       return (
         <span className='invalid'>
           <i className={`fa fa-warning`}></i>{' '}
