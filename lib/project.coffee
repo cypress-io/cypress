@@ -341,11 +341,11 @@ class Project extends EE
     if not config.isHeadless
       ## ensure integration folder is created
       ## and example spec if dir doesnt exit
-      push(scaffold.integration(config.integrationFolder))
+      push(scaffold.integration(config.integrationFolder, config))
 
       ## ensure fixtures dir is created
       ## and example fixture if dir doesnt exist
-      push(scaffold.fixture(config.fixturesFolder))
+      push(scaffold.fixture(config.fixturesFolder, config))
 
     Promise.all(scaffolds)
 

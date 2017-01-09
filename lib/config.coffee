@@ -146,9 +146,9 @@ module.exports = {
 
     config = @setParentTestsPaths(config)
 
-    config = @setScaffoldPaths(config)
-
     config = @setSupportFileAndFolder(config)
+
+    config = @setScaffoldPaths(config)
 
     return config
 
@@ -189,6 +189,7 @@ module.exports = {
 
     obj.integrationExampleFile = path.join(obj.integrationFolder, fileName)
     obj.integrationExampleName = fileName
+    obj.scaffoldedFiles = scaffold.fileTree(obj)
 
     return obj
 

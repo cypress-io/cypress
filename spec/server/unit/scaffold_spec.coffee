@@ -27,14 +27,14 @@ describe "lib/scaffold", ->
     beforeEach ->
       todosPath = Fixtures.projectPath("todos")
 
-      config.get(todosPath).then (cfg) =>
-        {@integrationFolder} = cfg
+      config.get(todosPath).then (@cfg) =>
+        {@integrationFolder} = @cfg
 
     it "creates both integrationFolder and example_spec.js when integrationFolder does not exist", ->
-      ## todos has a integrations folder so let's first nuke it and then scaffold
+      ## todos has an integration folder so let's first nuke it and then scaffold
       fs.removeAsync(@integrationFolder)
       .then =>
-        scaffold.integration(@integrationFolder)
+        scaffold.integration(@integrationFolder, @cfg)
       .then =>
         Promise.all([
           fs.statAsync(@integrationFolder + "/example_spec.js").get("size")
@@ -50,12 +50,22 @@ describe "lib/scaffold", ->
         fs.ensureDirAsync(@integrationFolder)
       .then =>
         ## now scaffold
-        scaffold.integration(@integrationFolder)
+        scaffold.integration(@integrationFolder, @cfg)
       .then =>
         glob("**/*", {cwd: @integrationFolder})
       .then (files) ->
         ## ensure no files exist
         expect(files.length).to.eq(0)
+
+    it "throws if trying to scaffold a file not present in file tree", ->
+      integrationPath = path.join(@integrationFolder, "foo")
+      fs.removeAsync(integrationPath)
+      .then =>
+        scaffold.integration(integrationPath, @cfg)
+      .then ->
+        throw "Should throw the right error"
+      .catch (err = {}) =>
+        expect(err.stack).to.contain("not in the scaffolded file tree")
 
   context ".support", ->
     beforeEach ->
@@ -100,6 +110,16 @@ describe "lib/scaffold", ->
         glob("**/*", {cwd: @supportFolder})
       .then (files) ->
         expect(files.length).to.eq(0)
+
+    it "throws if trying to scaffold a file not present in file tree", ->
+      supportPath = path.join(@supportFolder, "foo")
+      fs.removeAsync(supportPath)
+      .then =>
+        scaffold.support(supportPath, @cfg)
+      .then ->
+        throw "Should throw the right error"
+      .catch (err = {}) =>
+        expect(err.stack).to.contain("not in the scaffolded file tree")
 
     it "creates supportFolder and commands.js, defaults.js, and index.js when supportFolder does not exist", ->
       ## todos has a _support folder so let's first nuke it and then scaffold
@@ -200,14 +220,14 @@ describe "lib/scaffold", ->
     beforeEach ->
       todosPath = Fixtures.projectPath("todos")
 
-      config.get(todosPath).then (cfg) =>
-        {@fixturesFolder} = cfg
+      config.get(todosPath).then (@cfg) =>
+        {@fixturesFolder} = @cfg
 
     it "creates both fixturesFolder and example.json when fixturesFolder does not exist", ->
       ## todos has a fixtures folder so let's first nuke it and then scaffold
       fs.removeAsync(@fixturesFolder)
       .then =>
-        scaffold.fixture(@fixturesFolder)
+        scaffold.fixture(@fixturesFolder, @cfg)
       .then =>
         fs.readFileAsync(@fixturesFolder + "/example.json", "utf8")
       .then (str) ->
@@ -227,9 +247,87 @@ describe "lib/scaffold", ->
         fs.ensureDirAsync(@fixturesFolder)
       .then =>
         ## now scaffold
-        scaffold.fixture(@fixturesFolder)
+        scaffold.fixture(@fixturesFolder, @cfg)
       .then =>
         glob("**/*", {cwd: @fixturesFolder})
       .then (files) ->
         ## ensure no files exist
         expect(files.length).to.eq(0)
+
+    it "throws if trying to scaffold a file not present in file tree", ->
+      fixturesPath = path.join(@fixturesFolder, "foo")
+      fs.removeAsync(fixturesPath)
+      .then =>
+        scaffold.fixture(fixturesPath, @cfg)
+      .then ->
+        throw "Should throw the right error"
+      .catch (err = {}) =>
+        expect(err.stack).to.contain("not in the scaffolded file tree")
+
+  context ".fileTree", ->
+    beforeEach ->
+      todosPath = Fixtures.projectPath("todos")
+
+      config.get(todosPath).then (@cfg) =>
+
+    it "returns tree-like structure of scaffolded", ->
+      expect(scaffold.fileTree(@cfg)).eql([
+        {
+          name: "tests"
+          children: [
+            {
+              name: "example_spec.js"
+            },{
+              name: "_fixtures"
+              children: [
+                { name: "example.json" }
+              ]
+            },{
+              name: "_support"
+              children: [
+                { name: "commands.js" }
+                { name: "defaults.js" }
+                { name: "index.js" }
+              ]
+            }
+          ]
+        }
+      ])
+
+    it "leaves out fixtures if configured to false", ->
+      @cfg.fixturesFolder = false
+      expect(scaffold.fileTree(@cfg)).eql([
+        {
+          name: "tests"
+          children: [
+            {
+              name: "example_spec.js"
+            },{
+              name: "_support"
+              children: [
+                { name: "commands.js" }
+                { name: "defaults.js" }
+                { name: "index.js" }
+              ]
+            }
+          ]
+        }
+      ])
+
+    it "leaves out support if configured to false", ->
+      @cfg.supportFile = false
+      expect(scaffold.fileTree(@cfg)).eql([
+        {
+          name: "tests"
+          children: [
+            {
+              name: "example_spec.js"
+            },{
+              name: "_fixtures"
+              children: [
+                { name: "example.json" }
+              ]
+            }
+          ]
+        }
+      ])
