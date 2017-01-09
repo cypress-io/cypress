@@ -26,7 +26,7 @@ describe "lib/util/bundle", ->
   context "#build", ->
     beforeEach ->
       browserify.reset()
-      bundle._builtFiles = {}
+      bundle.reset()
 
       @config = {
         projectName: "foo"
