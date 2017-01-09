@@ -94,13 +94,25 @@ When no extension is passed to `cy.fixture`, Cypress will search for files with 
 
 ***
 
-## Image fixtures will be sent as `base64`
+## Image fixtures will be sent by default as `base64`
 
 ```javascript
 cy.fixture("images/logo.png").then(function(logo){
   // logo will be encoded as base64
   // and should look something like this:
   // aIJKnwxydrB10NVWqhlmmC+ZiWs7otHotSAAAOw==...
+})
+```
+
+***
+
+## Change encoding of Image fixture
+
+```javascript
+cy.fixture("images/logo.png", "binary").then(function(logo){
+  // logo will be encoded as binary
+  // and should look something like this:
+  // 000000000000000000000000000000000000000000...
 })
 ```
 
