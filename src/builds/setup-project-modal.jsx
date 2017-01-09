@@ -47,7 +47,7 @@ class SetupProject extends Component {
         >
           <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
           <h4>Setup Project for CI</h4>
-          <p className='text-muted'>After configuring your project's settings, we will generate a secret key to be used during your CI run.</p>
+          <p className='text-muted'>After configuring your project's settings, we will generate a CI key to be used during your CI run.</p>
           <form
             className='form-horizontal'
             onSubmit={this._submit}>
