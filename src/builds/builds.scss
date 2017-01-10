@@ -215,6 +215,10 @@
 }
 
 .setup-project-modal {
+  .form-horizontal {
+    background: none;
+  }
+
   .validation-error {
     display: none;
     clear: both;
