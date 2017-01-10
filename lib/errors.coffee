@@ -104,6 +104,12 @@ API = {
 
         Fix the error in your code and re-run your tests.
         """
+      when "CONFIG_VALIDATION_ERROR"
+        """
+        We found a validation error in #{chalk.blue(arg1)}:
+
+        #{chalk.yellow(arg2)}
+        """
 
   get: (type, arg1, arg2) ->
     msg = @getMsgByType(type, arg1, arg2)
@@ -137,8 +143,8 @@ API = {
         ## a known error
         require("./logger").createException(err).catch(->)
 
-  throw: (type, arg) ->
-    throw @get(type, arg)
+  throw: (type, arg1, arg2) ->
+    throw @get(type, arg1, arg2)
 
   stripAnsi: strip
 

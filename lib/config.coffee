@@ -6,6 +6,8 @@ coerce   = require("./util/coerce")
 settings = require("./util/settings")
 errors   = require("./errors")
 scaffold = require("./scaffold")
+errors   = require("./errors")
+v        = require("./util/validation")
 
 ## cypress following by _
 cypressEnvRe = /^(cypress_)/i
@@ -61,6 +63,35 @@ defaults = {
   javascripts:                   []
 }
 
+validationRules = {
+  animationDistanceThreshold: v.isNumber
+  baseUrl: v.isFullyQualifiedUrl
+  chromeWebSecurity: v.isBoolean
+  defaultCommandTimeout: v.isNumber
+  env: v.isPlainObject
+  execTimeout: v.isNumber
+  fileServerFolder: v.isString
+  fixturesFolder: v.isStringOrFalse
+  ignoreTestFiles: v.isStringOrArrayOfStrings
+  integrationFolder: v.isString
+  numTestsKeptInMemory: v.isNumber
+  pageLoadTimeout: v.isNumber
+  port: v.isNumber
+  reporter: v.isString
+  requestTimeout: v.isNumber
+  responseTimeout: v.isNumber
+  screenshotOnHeadlessFailure: v.isBoolean
+  supportFile: v.isStringOrFalse
+  trashAssetsBeforeHeadlessRuns: v.isBoolean
+  videoCompression: v.isNumber
+  videoRecording: v.isBoolean
+  videosFolder: v.isString
+  viewportHeight: v.isNumber
+  viewportWidth: v.isNumber
+  waitForAnimations: v.isBoolean
+  watchForFileChanges: v.isBoolean
+}
+
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   _.reduce folders, (memo, folder) ->
     val = obj[folder]
@@ -68,6 +99,13 @@ convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
       memo[folder] = path.resolve(projectRoot, val)
     return memo
   , {}
+
+validate = (file) -> (settings) ->
+  _.each settings, (value, key) ->
+    if validationFn = validationRules[key]
+      result = validationFn(key, value)
+      if result isnt true
+        errors.throw("CONFIG_VALIDATION_ERROR", file, result)
 
 module.exports = {
   getConfigKeys: -> configKeys
@@ -77,8 +115,8 @@ module.exports = {
 
   get: (projectRoot, options = {}) ->
     Promise.all([
-      settings.read(projectRoot)
-      settings.readEnv(projectRoot)
+      settings.read(projectRoot).then(validate("cypress.json"))
+      settings.readEnv(projectRoot).then(validate("cypress.env.json"))
     ])
     .spread (settings, envFile) =>
       @set({
