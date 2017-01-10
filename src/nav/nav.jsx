@@ -101,7 +101,7 @@ export default class Nav extends Component {
 
   _openChat (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://gitter.im/cypress-io/cypress')
+    App.ipc('external:open', 'https://on.cypress.io/chat')
   }
 
   _logout = (e) => {
