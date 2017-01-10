@@ -18,48 +18,47 @@ isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
 defaults = {
-  port:           null
-  hosts:          null
-  morgan:         true
-  baseUrl:        null
-  socketId:       null
-  isHeadless:     false
-  reporter:       "spec"
-  reporterOptions: null
-  clientRoute:    "/__/"
-  xhrRoute:       "/xhrs/"
-  socketIoRoute:  "/__socket.io"
-  socketIoCookie: "__socket.io"
-  reporterRoute:  "/__cypress/reporter"
-  ignoreTestFiles: "*.hot-update.js"
-  defaultCommandTimeout: 4000
-  requestTimeout:        5000
-  responseTimeout:       30000
-  pageLoadTimeout:       60000
-  execTimeout:           60000
-  videoRecording:    true
-  videoCompression:  32
-  chromeWebSecurity: true
-  waitForAnimations: true
-  animationDistanceThreshold: 5
-  numTestsKeptInMemory: 50
-  watchForFileChanges: true
-  screenshotOnHeadlessFailure: true
+  port:                          null
+  hosts:                         null
+  morgan:                        true
+  baseUrl:                       null
+  socketId:                      null
+  isHeadless:                    false
+  reporter:                      "spec"
+  reporterOptions:               null
+  clientRoute:                   "/__/"
+  xhrRoute:                      "/xhrs/"
+  socketIoRoute:                 "/__socket.io"
+  socketIoCookie:                "__socket.io"
+  reporterRoute:                 "/__cypress/reporter"
+  ignoreTestFiles:               "*.hot-update.js"
+  defaultCommandTimeout:         4000
+  requestTimeout:                5000
+  responseTimeout:               30000
+  pageLoadTimeout:               60000
+  execTimeout:                   60000
+  videoRecording:                true
+  videoCompression:              32
+  chromeWebSecurity:             true
+  waitForAnimations:             true
+  animationDistanceThreshold:    5
+  numTestsKeptInMemory:          50
+  watchForFileChanges:           true
+  screenshotOnHeadlessFailure:   true
   trashAssetsBeforeHeadlessRuns: true
-  autoOpen:       false
-  viewportWidth:  1000
-  viewportHeight: 660
-  fileServerFolder: ""
-  # unitFolder:        "cypress/unit"
-  videosFolder:      "cypress/videos"
-  supportFile:       "cypress/support"
-  fixturesFolder:    "cypress/fixtures"
-  integrationFolder: "cypress/integration"
-  screenshotsFolder:  "cypress/screenshots"
-  namespace:      "__cypress"
+  autoOpen:                      false
+  viewportWidth:                 1000
+  viewportHeight:                660
+  fileServerFolder:              ""
+  videosFolder:                  "cypress/videos"
+  supportFile:                   "cypress/support"
+  fixturesFolder:                "cypress/fixtures"
+  integrationFolder:             "cypress/integration"
+  screenshotsFolder:             "cypress/screenshots"
+  namespace:                     "__cypress"
 
   ## deprecated
-  javascripts: []
+  javascripts:                   []
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
