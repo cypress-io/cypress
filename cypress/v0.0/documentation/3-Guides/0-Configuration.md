@@ -91,7 +91,7 @@ Option | Default | Description
 Option | Default | Description
 ----- | ---- | ----
 `videoRecording`     | `true`     | Whether Cypress will record a video of the test run when running headlessly.
-`videoCompression` | `32` | The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be between 0 and 51, where a lower value results in better quality (at the expense of a higher file size).
+`videoCompression` | `32` | The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be `false` to disable compression or a value between `0` and `51`, where a lower value results in better quality (at the expense of a higher file size).
 `videosFolder`     | `cypress/videos`     | Where Cypress will automatically save the video of the test run when running headlessly.
 `trashAssetsBeforeHeadlessRuns` | `true` | Whether Cypress will trash assets within the `screenshotsFolder` and `videosFolder` before headless test runs.
 

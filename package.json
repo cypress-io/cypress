@@ -15,6 +15,6 @@
   "devDependencies": {
     "colors": "^1.1.2",
     "glob": "^7.0.3",
-    "readmeio-sync": "git+https://github.com/jennifer-mann/readmeio-sync.git"
+    "readmeio-sync": "cypress-io/readmeio-sync#0c3de48db6e4b06d5b2eab095fe104a8e733aea4"
   }
 }

@@ -298,6 +298,20 @@ cy
 
 ***
 
+## Use headers and fixtures for image route
+
+```javascript
+cy.route({
+  url: "image.png",
+  response: "fx:logo.png,binary" // binary encoding
+  headers: {
+    "content-type": "binary/octet-stream" // set content-type headers
+  }
+})
+```
+
+***
+
 ## Setting a delay for a specific route
 
 You can optionally pass in a delay option which will cause a delay (in ms) to the response for matched requests. The example below will cause the response to be delayed by 3 secs.
