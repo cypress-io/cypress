@@ -1,6 +1,62 @@
 describe "$Cypress.Cy Agents Commands", ->
   enterCommandTestingMode()
 
+  context "#stub", ->
+    beforeEach ->
+      @stub = @cy.stub()
+
+    it "synchronously returns stub", ->
+      expect(@stub).to.exist
+      expect(@stub.returns).to.be.a("function")
+
+  context "#stub()", ->
+    beforeEach ->
+      @stub = @cy.stub()
+
+    it "proxies sinon stub", ->
+      @stub()
+      expect(@stub.callCount).to.equal(1)
+
+    it "has sinon stub API", ->
+      @stub.returns(true)
+      result = @stub()
+      expect(result).to.be.true
+
+  context "#stub(obj, 'method')", ->
+    beforeEach ->
+      @originalCalled = false
+      @obj = {
+        foo: => @originalCalled = true
+      }
+      @stub = @cy.stub(@obj, "foo")
+
+    it "proxies sinon stub", ->
+      @obj.foo()
+      expect(@stub.callCount).to.equal(1)
+
+    it "replaces method", ->
+      @obj.foo()
+      expect(@originalCalled).to.be.false
+
+  context "#stub(obj, 'method', replacerFn)", ->
+    beforeEach ->
+      @originalCalled = false
+      @obj = {
+        foo: => @originalCalled = true
+      }
+      @replacementCalled = false
+      @stub = @cy.stub @obj, "foo", =>
+        @replacementCalled = true
+
+    it "proxies sinon stub", ->
+      @obj.foo()
+      expect(@stub.callCount).to.equal(1)
+
+    it "replaces method with replacement", ->
+      @obj.foo()
+      expect(@originalCalled).to.be.false
+      expect(@replacementCalled).to.be.true
+
   context "#agents", ->
     beforeEach ->
       @agents = @cy.agents()
