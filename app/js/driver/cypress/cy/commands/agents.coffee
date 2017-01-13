@@ -7,6 +7,11 @@ $Cypress.register "Agents", (Cypress, _, $) ->
       when "mock" then "Mocked Obj"
 
   Cypress.Cy.extend
+    spy: (obj, method) ->
+      spy = @_getSandbox().spy(obj, method)
+      log = @_onCreate("spy", method)
+      @_wrap("spy", spy, obj, method, log)
+
     stub: (obj, method, replacerFn) ->
       stub = @_getSandbox().stub(obj, method, replacerFn)
       log = @_onCreate("stub", method)

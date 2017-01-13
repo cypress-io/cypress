@@ -57,6 +57,26 @@ describe "$Cypress.Cy Agents Commands", ->
       expect(@originalCalled).to.be.false
       expect(@replacementCalled).to.be.true
 
+  context "#spy(obj, 'method')", ->
+    beforeEach ->
+      @originalCalled = false
+      @obj = {
+        foo: => @originalCalled = true
+      }
+      @spy = @cy.spy @obj, "foo"
+
+    it "synchronously returns spy", ->
+      expect(@spy).to.exist
+      expect(@spy.callCount).to.be.a("number")
+
+    it "proxies sinon spy", ->
+      @obj.foo()
+      expect(@spy.callCount).to.equal(1)
+
+    it "does not replace method", ->
+      @obj.foo()
+      expect(@originalCalled).to.be.true
+
   context "#agents", ->
     beforeEach ->
       @agents = @cy.agents()
