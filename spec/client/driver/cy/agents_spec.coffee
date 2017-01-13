@@ -77,6 +77,36 @@ describe "$Cypress.Cy Agents Commands", ->
       @obj.foo()
       expect(@originalCalled).to.be.true
 
+  context "#clock", ->
+    beforeEach ->
+      @window = @cy.private("window")
+      @originalSetTimeout = @window.setTimeout
+      @setTimeoutSpy = @sandbox.spy()
+      @window.setTimeout = @setTimeoutSpy
+
+    afterEach ->
+      @window.setTimeout = @originalSetTimeout
+
+    it "synchronously returns clock", ->
+      @clock = cy.clock()
+      expect(@clock).to.exist
+      expect(@clock.tick).to.be.a("function")
+
+    it "proxies sinon clock, replacing window time methods", (done) ->
+      @clock = cy.clock()
+      @window.setTimeout =>
+        expect(@setTimeoutSpy).not.to.be.called
+        done()
+      , 1000
+
+      @clock.tick(1000)
+
+    it "takes now arg"
+
+    it "takes extra args for which functions to replace"
+
+    it "restores window time methods when calling restore"
+
   context "#agents", ->
     beforeEach ->
       @agents = @cy.agents()
