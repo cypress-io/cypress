@@ -29,9 +29,9 @@ check = ->
   ## bail if we have no runs yet
   return if numRuns is 0
 
-  user.ensureSession()
-  .then (session) ->
-    api.sendUsage(numRuns, exampleSpec, allSpecs, projectName, session)
+  user.ensureAuthToken()
+  .then (authToken) ->
+    api.sendUsage(numRuns, exampleSpec, allSpecs, projectName, authToken)
   ## reset on success
   .then(reset)
   .catch ->

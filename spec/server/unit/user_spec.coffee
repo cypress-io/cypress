@@ -26,13 +26,13 @@ describe "lib/user", ->
   context ".logOut", ->
     it "calls api.createSignout + removes the session from cache", ->
       @sandbox.stub(api, "createSignout").withArgs("abc-123").resolves()
-      @sandbox.stub(cache, "getUser").resolves({name: "brian", sessionToken: "abc-123"})
+      @sandbox.stub(cache, "getUser").resolves({name: "brian", authToken: "abc-123"})
       @sandbox.spy(cache, "removeUser")
 
       user.logOut().then ->
         expect(cache.removeUser).to.be.calledOnce
 
-    it "does not send to api.createSignout without a sessionToken", ->
+    it "does not send to api.createSignout without a authToken", ->
       @sandbox.spy(api, "createSignout")
       @sandbox.stub(cache, "getUser").resolves({name: "brian"})
       @sandbox.spy(cache, "removeUser")
@@ -48,17 +48,17 @@ describe "lib/user", ->
       user.getLoginUrl().then (url) ->
         expect(url).to.eq("https://github.com/login")
 
-  context ".ensureSession", ->
-    it "returns sessionToken", ->
-      @sandbox.stub(cache, "getUser").resolves({name: "brian", sessionToken: "abc-123"})
+  context ".ensureAuthToken", ->
+    it "returns authToken", ->
+      @sandbox.stub(cache, "getUser").resolves({name: "brian", authToken: "abc-123"})
 
-      user.ensureSession().then (st) ->
+      user.ensureAuthToken().then (st) ->
         expect(st).to.eq("abc-123")
 
-    it "throws NOT_LOGGED_IN when no sessionToken", ->
+    it "throws NOT_LOGGED_IN when no authToken", ->
       @sandbox.stub(cache, "getUser").resolves(null)
 
-      user.ensureSession()
+      user.ensureAuthToken()
       .then ->
         throw new Error("should have thrown an error")
       .catch (err) ->

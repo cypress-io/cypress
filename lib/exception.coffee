@@ -44,17 +44,17 @@ module.exports = {
         body.version  = version
       .return(body)
 
-  getSession: ->
+  getAuthToken: ->
     user.get().then (user) ->
-      user and user.sessionToken
+      user and user.authToken
 
   create: (err, settings) ->
     return Promise.resolve() if process.env["CYPRESS_ENV"] isnt "production"
 
     Promise.props({
-      body:    @getBody(err, settings)
-      session: @getSession()
+      body:      @getBody(err, settings)
+      authToken: @getAuthToken()
     })
     .then (props) ->
-      api.createRaygunException(props.body, props.session)
+      api.createRaygunException(props.body, props.authToken)
 }
