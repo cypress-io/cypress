@@ -42,7 +42,7 @@ There are no dependencies to install the Desktop Application, although if you wa
 
 You can install Cypress in 2 different ways:
 * [Cypress CLI Tool](https://github.com/cypress-io/cypress-cli)
-* [Direct download](#section-direct-download)
+* [Direct Download](#section-direct-download)
 
 ## Command Line Tool
 
@@ -80,7 +80,7 @@ You can download Cypress directly [here.](http://download.cypress.io/desktop)
 
 # Logging In
 
-After installing, you will need to login to Cypress. Login requires a [Github](https://github.com/) account, if you do not have an account, you will have to [create one](https://github.com/join) to use Cypress.
+After installing, you will need to login to Cypress. Login currently requires a [Github](https://github.com/) account, if you do not have an account, you will have to [create one](https://github.com/join) to use Cypress.
 
 **To Login:**
 
