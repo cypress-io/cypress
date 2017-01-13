@@ -4,13 +4,13 @@ export default class User {
   @observable id
   @observable name
   @observable email
-  @observable sessionToken
+  @observable authToken
 
   constructor (user) {
     this.id = user.id
     this.name = user.name
     this.email = user.email
-    this.sessionToken = user.sessionToken
+    this.authToken = user.authToken
   }
 
   @computed get displayName () {
