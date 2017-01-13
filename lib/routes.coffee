@@ -9,7 +9,6 @@ xhrs        = require("./controllers/xhrs")
 client      = require("./controllers/client")
 files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
-builds      = require("./controllers/builds")
 
 module.exports = (app, config, request, getRemoteState, watchers, project) ->
   ## routing for the actual specs which are processed automatically
@@ -36,9 +35,6 @@ module.exports = (app, config, request, getRemoteState, watchers, project) ->
   ## routing for the dynamic iframe html
   app.get "/__cypress/iframes/*", (req, res) ->
     files.handleIframe(req, res, config, getRemoteState)
-
-  app.get "/__cypress/builds", (req, res, next) ->
-    builds.handleBuilds(req, res, config, next)
 
   app.all "/__cypress/xhrs/*", (req, res, next) ->
     xhrs.handle(req, res, config, next)
