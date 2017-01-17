@@ -358,10 +358,12 @@ describe "Builds List", ->
               .contains("manage").click().then ->
                  expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/settings")
 
-          it "displays public and private radios", ->
+          it "displays public and private radios w/ public preselected", ->
             cy
               .get(".modal-body").contains("Public")
+                .find("input").should("be.checked")
               .get(".modal-body").contains("Private")
+                .find("input").should("not.be.checked")
 
           describe "on submit", ->
             beforeEach ->
