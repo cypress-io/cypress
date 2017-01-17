@@ -80,32 +80,58 @@ describe "$Cypress.Cy Agents Commands", ->
   context "#clock", ->
     beforeEach ->
       @window = @cy.private("window")
-      @originalSetTimeout = @window.setTimeout
-      @setTimeoutSpy = @sandbox.spy()
-      @window.setTimeout = @setTimeoutSpy
 
-    afterEach ->
-      @window.setTimeout = @originalSetTimeout
+      @setTimeoutSpy = @sandbox.spy(@window, "setTimeout")
+
+      @setImmediateSpy = @sandbox.stub()
+      @window.setImmediate = @setImmediateSpy
 
     it "synchronously returns clock", ->
-      @clock = cy.clock()
-      expect(@clock).to.exist
-      expect(@clock.tick).to.be.a("function")
+      clock = cy.clock()
+      expect(clock).to.exist
+      expect(clock.tick).to.be.a("function")
 
     it "proxies sinon clock, replacing window time methods", (done) ->
-      @clock = cy.clock()
-      @window.setTimeout =>
-        expect(@setTimeoutSpy).not.to.be.called
+      clock = cy.clock()
+      @window.setImmediate =>
+        expect(@setImmediateSpy).not.to.be.called
         done()
-      , 1000
 
-      @clock.tick(1000)
+      clock.tick()
 
-    it "takes now arg"
+    it "takes now arg", ->
+      now = 1111111111111
+      clock = cy.clock(now)
+      expect(new @window.Date().getTime()).to.equal(now)
+      clock.tick(4321)
+      expect(new @window.Date().getTime()).to.equal(now + 4321)
 
-    it "takes extra args for which functions to replace"
+    it "restores window time methods when calling restore", ->
+      clock = cy.clock()
+      @window.setImmediate =>
+        expect(@setImmediateSpy).not.to.be.called
+        clock.restore()
+        expect(@window.setImmediate).to.equal(@setImmediateSpy)
+      clock.tick()
 
-    it "restores window time methods when calling restore"
+    context "extra args for which functions to replace", ->
+
+      it "replaces specified functions", (done) ->
+        clock = cy.clock(null, "setImmediate")
+        @window.setImmediate =>
+          expect(@setImmediateSpy).not.to.be.called
+          done()
+
+        clock.tick()
+
+      it "does not replace other functions", (done) ->
+        clock = cy.clock(null, "setImmediate")
+        @window.setTimeout =>
+          expect(@setTimeoutSpy).to.be.called
+          @window.setImmediate =>
+            expect(@setImmediateSpy).not.to.be.called
+            done()
+          clock.tick()
 
   context "#agents", ->
     beforeEach ->

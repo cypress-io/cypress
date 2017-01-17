@@ -27,8 +27,6 @@ $Cypress.register "Sandbox", (Cypress, _, $) ->
       return sinon
 
     _getClock: (args...) ->
-      ## TODO: need to accept context (window) as argument and
-      ## use lolex directly?
       sinon = @_getSinon()
       clock  = @prop("clock") ? createClock(sinon, args...)
 
