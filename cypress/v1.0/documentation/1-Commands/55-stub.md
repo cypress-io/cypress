@@ -37,7 +37,7 @@ Replaces the `method` on the `object` with the `replacerFn` wrapped in a spy.See
 ## Create a stub and manually replace a function
 
 ```javascript
-cy.window().then(function (win) {
+cy.window().then((win) => {
   win.reload = cy.stub()
   // ...some action that triggers window.reload() in app...
   expect(win.reload).to.be.called  
@@ -47,7 +47,7 @@ cy.window().then(function (win) {
 ## Replace a method with a stub
 
 ```javascript
-cy.window().then(function (win) {
+cy.window().then((win) => {
   cy.stub(win, "reload")
   // ...trigger action that triggers window.reload() in app...
   expect(win.reload).to.be.called  
@@ -57,7 +57,7 @@ cy.window().then(function (win) {
 ## Replace a method with a function
 
 ```javascript
-cy.window().then(function (win) {
+cy.window().then((win) => {
   let reloadCalled = false
   cy.stub(win, "reload", function () {
     reloadCalled = true
