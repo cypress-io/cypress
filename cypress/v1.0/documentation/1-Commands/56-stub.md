@@ -20,13 +20,13 @@ Creates and returns a stub. See the [sinon.js stub docs](http://sinonjs.org/docs
 
 ***
 
-# [cy.stub( *object*, *"method"* )](#section-two-arguments)
+# [cy.stub( *object*, *"method"* )](#section-replace-a-method-with-a-stub)
 
 Replaces the `method` on the `object` with a stub and returns the stub. See the [sinon.js stub docs](http://sinonjs.org/docs/#stubs) for methods on the stub.
 
 ***
 
-# [cy.stub( *object*, *"method"*, replacerFn )](#section-three-arguments)
+# [cy.stub( *object*, *"method"*, replacerFn )](#section-replace-a-method-with-a-function)
 
 Replaces the `method` on the `object` with the `replacerFn` wrapped in a spy.See the [sinon.js spy docs](http://sinonjs.org/docs/#spies) for methods on the spy.
 
