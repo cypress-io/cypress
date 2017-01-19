@@ -29,6 +29,8 @@ describe "e2e browserify, babel, es2015", ->
         The error was:
 
         SyntaxError: /foo/bar/.projects/e2e/lib/fail.js: Unexpected token, expected { (1:7) while parsing file: /foo/bar/.projects/e2e/lib/fail.js
+        > 1 | export defalt "foo"
+            |        ^
 
 
         This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
