@@ -1,4 +1,4 @@
-$Cypress.register "Clock", (Cypress) ->
+$Cypress.register "Clock", (Cypress, _) ->
   do (lolex) ->
 
     Cypress.on "test:before:run", ->
@@ -17,17 +17,59 @@ $Cypress.register "Clock", (Cypress) ->
       return if not @prop
 
       if clock = @prop("clock")
-        clock.restore()
+        clock.restore(false)
 
     Cypress.Cy.extend
+      clock: (now, methods, options = {}) ->
+        if _.isObject(now)
+          options = now
+        if _.isObject(methods) and !_.isArray(methods)
+          options = methods
 
-      clock: (now, methods) ->
-        if clock = @prop("clock")
-          $Cypress.Utils.throwErrByPath("clock.already_created")
-        else
-          clock = $Cypress.Clock.create(@private("window"), now, methods, {
-            onRestore: =>
-              @prop("clock", null)
+        _.defaults options, {
+          log: true
+        }
+
+        log = (message, snapshot = true) ->
+          if not options.log
+            return
+
+          Cypress.Log.command({
+            message: message
+            name: "clock"
+            type: "parent"
+            end: true
+            snapshot: snapshot
+            event: true
+            consoleProps: ->
+              {now, methods} = clock._details()
+              {
+                "Now": now
+                "Methods replaced": methods
+              }
           })
 
-          @prop("clock", clock)
+        if @prop("clock")
+          $Cypress.Utils.throwErrByPath("clock.already_created")
+
+        clock = $Cypress.Clock.create(@private("window"), now, methods)
+
+        ## TODO: have tick take options, so log: false is possible?
+        clock.tick = _.wrap clock.tick, (tick, ms) ->
+          theLog = log("tick #{ms}", false)
+          theLog.snapshot("before", {next: "after"})
+          ret = tick.call(clock, ms)
+          theLog.snapshot().end()
+          return ret
+
+        ## TODO: have restore take options, so log: false is possible?
+        clock.restore = _.wrap clock.restore, (restore, shouldLog = true) =>
+          ret = restore.call(clock)
+          if shouldLog
+            log("restore")
+          @prop("clock", null)
+          return ret
+
+        log("create / replace methods")
+
+        @prop("clock", clock)

@@ -57,6 +57,10 @@ describe "$Cypress.Cy Clock Commands", ->
     @Cypress.trigger("test:before:run", {})
     expect(@cy.prop("clock")).to.be.null
 
+  it "can take options as first arg"
+
+  it "can take options as second arg"
+
   context "arg for which functions to replace", ->
     beforeEach ->
       @clock = @cy.clock(null, ["setImmediate"])
@@ -98,3 +102,33 @@ describe "$Cypress.Cy Clock Commands", ->
       newWindow.setTimeout(onSetTimeout)
       @clock.tick()
       expect(onSetTimeout).to.be.called
+
+  context "logging", ->
+    beforeEach ->
+      @logs = []
+      @Cypress.on "log", (attrs, log) =>
+        @logs.push(log)
+
+    it "logs when created", ->
+      @cy.clock()
+
+      log = @logs[0]
+
+      expect(@logs.length).to.equal(1)
+      expect(log.get("name")).to.eq("clock")
+      expect(log.get("message")).to.eq("create / replace methods")
+      expect(log.get("type")).to.eq("parent")
+      expect(log.get("state")).to.eq("passed")
+      expect(log.get("snapshots").length).to.eq(1)
+      expect(log.get("snapshots")[0]).to.be.an("object")
+
+    it "logs when ticked"
+      ## has before and after snapshots
+
+    it "logs when restored"
+
+    it "does not log when auto-restored"
+
+    it "does not log when log: false"
+
+    context "#consoleProps", ->
