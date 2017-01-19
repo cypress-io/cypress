@@ -87,6 +87,9 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       multiple_elements: "#{cmd('click')} can only be called on a single element. Your subject contained {{num}} elements. Pass {multiple: true} if you want to serially click each element."
       on_select_element: "#{cmd('click')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
 
+    clock:
+      already_created: "#{cmd('clock')} can only be called once per test. Use the clock returned from the previous call."
+
     contains:
       empty_string: "#{cmd('contains')} cannot be passed an empty string."
       invalid_argument: "#{cmd('contains')} can only accept a string, number or regular expression."

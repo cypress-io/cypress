@@ -77,6 +77,7 @@
     "https-proxy-agent": "^1.0.0",
     "istanbul": "^0.4.2",
     "js-yaml": "3.1.0",
+    "lolex": "^1.5.2",
     "mkdirp": "^0.5.1",
     "mockery": "^1.4.0",
     "nock": "9.0.2",

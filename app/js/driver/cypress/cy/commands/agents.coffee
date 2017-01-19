@@ -17,9 +17,6 @@ $Cypress.register "Agents", (Cypress, _, $) ->
       log = @_onCreate("stub", method)
       @_wrap("stub", stub, obj, method, log)
 
-    clock: (args...) ->
-      @_getClock(args...)
-
     _onCreate: (type, method) ->
       Cypress.Log.agent({
         type: type

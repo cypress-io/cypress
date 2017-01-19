@@ -77,62 +77,6 @@ describe "$Cypress.Cy Agents Commands", ->
       @obj.foo()
       expect(@originalCalled).to.be.true
 
-  context "#clock", ->
-    beforeEach ->
-      @window = @cy.private("window")
-
-      @setTimeoutSpy = @sandbox.spy(@window, "setTimeout")
-
-      @setImmediateSpy = @sandbox.stub()
-      @window.setImmediate = @setImmediateSpy
-
-    it "synchronously returns clock", ->
-      clock = cy.clock()
-      expect(clock).to.exist
-      expect(clock.tick).to.be.a("function")
-
-    it "proxies sinon clock, replacing window time methods", (done) ->
-      clock = cy.clock()
-      @window.setImmediate =>
-        expect(@setImmediateSpy).not.to.be.called
-        done()
-
-      clock.tick()
-
-    it "takes now arg", ->
-      now = 1111111111111
-      clock = cy.clock(now)
-      expect(new @window.Date().getTime()).to.equal(now)
-      clock.tick(4321)
-      expect(new @window.Date().getTime()).to.equal(now + 4321)
-
-    it "restores window time methods when calling restore", ->
-      clock = cy.clock()
-      @window.setImmediate =>
-        expect(@setImmediateSpy).not.to.be.called
-        clock.restore()
-        expect(@window.setImmediate).to.equal(@setImmediateSpy)
-      clock.tick()
-
-    context "extra args for which functions to replace", ->
-
-      it "replaces specified functions", (done) ->
-        clock = cy.clock(null, "setImmediate")
-        @window.setImmediate =>
-          expect(@setImmediateSpy).not.to.be.called
-          done()
-
-        clock.tick()
-
-      it "does not replace other functions", (done) ->
-        clock = cy.clock(null, "setImmediate")
-        @window.setTimeout =>
-          expect(@setTimeoutSpy).to.be.called
-          @window.setImmediate =>
-            expect(@setImmediateSpy).not.to.be.called
-            done()
-          clock.tick()
-
   context "#agents", ->
     beforeEach ->
       @agents = @cy.agents()
