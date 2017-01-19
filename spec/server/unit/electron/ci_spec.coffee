@@ -365,12 +365,12 @@ describe "electron/ci", ->
           passes: 1
         })
 
-    it "calls headless.run + ensureSession + allDone into options", ->
+    it "calls headless.run + ensureAuthToken + allDone into options", ->
       opts = {foo: "bar"}
 
       ci.run(opts)
       .then ->
-        expect(headless.run).to.be.calledWith({foo: "bar", ensureSession: false, allDone: false})
+        expect(headless.run).to.be.calledWith({foo: "bar", ensureAuthToken: false, allDone: false})
 
     it "calls uploadAssets with instanceId and stats", ->
       ci.run({})
