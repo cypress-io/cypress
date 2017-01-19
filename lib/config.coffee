@@ -2,11 +2,12 @@ _        = require("lodash")
 str      = require("underscore.string")
 path     = require("path")
 Promise  = require("bluebird")
-coerce   = require("./util/coerce")
-settings = require("./util/settings")
 errors   = require("./errors")
 scaffold = require("./scaffold")
 errors   = require("./errors")
+origin   = require("./util/origin")
+coerce   = require("./util/coerce")
+settings = require("./util/settings")
 v        = require("./util/validation")
 
 ## cypress following by _
@@ -286,13 +287,18 @@ module.exports = {
   setUrls: (obj) ->
     obj = _.clone(obj)
 
-    rootUrl = "http://localhost:" + obj.port
+    proxyUrl = "http://localhost:" + obj.port
+
+    rootUrl = if obj.baseUrl
+      origin(obj.baseUrl)
+    else
+      proxyUrl
 
     _.extend obj,
-      clientUrlDisplay: rootUrl
-      clientUrl:        rootUrl + obj.clientRoute
-      reporterUrl:      rootUrl + obj.reporterRoute
-      xhrUrl:           obj.namespace + obj.xhrRoute
+      proxyUrl:    proxyUrl
+      browserUrl:  rootUrl + obj.clientRoute
+      reporterUrl: rootUrl + obj.reporterRoute
+      xhrUrl:      obj.namespace + obj.xhrRoute
 
     return obj
 

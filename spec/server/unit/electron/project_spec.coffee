@@ -20,7 +20,7 @@ describe "lib/electron/handlers/projects", ->
   context ".open", ->
     beforeEach ->
       @projectInstance = {
-        getConfig: @sandbox.stub().resolves({clientUrlDisplay: "foo", socketIoRoute: "bar"})
+        getConfig: @sandbox.stub().resolves({proxyUrl: "foo", socketIoRoute: "bar"})
         setBrowsers: @sandbox.stub().resolves([])
       }
 

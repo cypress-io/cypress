@@ -496,7 +496,7 @@ module.exports = {
             url:              url
             screenshots:      screenshots
             openProject:      openProject
-            proxyServer:      config.clientUrlDisplay
+            proxyServer:      config.proxyUrl
             webSecurity:      config.chromeWebSecurity
             videosFolder:     config.videosFolder
             videoRecording:   config.videoRecording
