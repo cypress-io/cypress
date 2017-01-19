@@ -7,7 +7,7 @@ normalize = (stdout) ->
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
   stdout
-  .replace(/\(\d{1,4}m?s\)/g, "(123ms)")
+  .replace(/\(\d{1,5}m?s\)/g, "(123ms)")
   .replace(/\(\d{1,2}s\)/g, "(10s)")
   .replace(/coffee-\d{3}/g, "coffee-456")
   .replace(/\/.+\/cypress\/videos\/(.+)\.mp4/g, "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4")

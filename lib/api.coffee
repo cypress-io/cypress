@@ -1,12 +1,11 @@
-_        = require("lodash")
-os       = require("os")
-getos    = require("getos")
-request  = require("request-promise")
-errors   = require("request-promise/errors")
-Promise  = require("bluebird")
-Routes   = require("./util/routes")
-pkg      = require("../package.json")
-provider = require("./util/provider")
+_          = require("lodash")
+os         = require("os")
+getos      = require("getos")
+request    = require("request-promise")
+errors     = require("request-promise/errors")
+Promise    = require("bluebird")
+Routes     = require("./util/routes")
+pkg        = require("../package.json")
 
 getos = Promise.promisify(getos)
 
@@ -55,16 +54,19 @@ module.exports = {
       headers: {
         "x-route-version": "2"
       }
-      body: {
-        projectId:         options.projectId
-        projectToken:      options.projectToken
-        commitSha:         options.commitSha
-        commitBranch:      options.commitBranch
-        commitAuthorName:  options.commitAuthorName
-        commitAuthorEmail: options.commitAuthorEmail
-        commitMessage:     options.commitMessage
-        ciProvider:        provider.get()
-      }
+      body: _.pick(options, [
+        "projectId"
+        "projectToken"
+        "commitSha"
+        "commitBranch"
+        "commitAuthorName"
+        "commitAuthorEmail"
+        "commitMessage"
+        "remoteOrigin"
+        "ciParams"
+        "ciProvider"
+        "ciBuildNum"
+      ])
     })
     .promise()
     .get("buildId")
@@ -88,33 +90,47 @@ module.exports = {
           browserVersion: process.versions.chrome
           osName:         platform
           osVersion:      v
+          osCpus:         os.cpus()
+          osMemory:       {
+            free:         os.freemem()
+            total:        os.totalmem()
+          }
         }
       })
       .promise()
       .get("instanceId")
       .catch(errors.StatusCodeError, formatResponseBody)
 
-  updateInstance: (options = {}) ->
-    body = _.pick(options, [
-      "tests"
-      "duration"
-      "passes"
-      "failures"
-      "pending"
-      "error"
-      "video"
-      "screenshots"
-      "failingTests"
-      "cypressConfig"
-    ])
+  updateInstanceStdout: (options = {}) ->
+    rp.put({
+      url: Routes.instanceStdout(options.instanceId)
+      json: true
+      timeout: options.timeout ? 10000
+      body: {
+        stdout: options.stdout
+      }
+    })
+    .catch(errors.StatusCodeError, formatResponseBody)
 
+  updateInstance: (options = {}) ->
     rp.put({
       url: Routes.instance(options.instanceId)
       json: true
       timeout: options.timeout ? 10000
-      body: _.extend(body, {
-        ciProvider: provider.get()
-      })
+      body: _.pick(options, [
+        "tests"
+        "duration"
+        "passes"
+        "failures"
+        "pending"
+        "error"
+        "video"
+        "screenshots"
+        "failingTests"
+        "ciProvider"
+        "cypressConfig"
+        "stdout"
+      ])
     })
     .catch(errors.StatusCodeError, formatResponseBody)
 
@@ -157,7 +173,7 @@ module.exports = {
 
       throw err
 
-  createProject: (projectName, session) ->
+  createProject: (projectName, remoteOrigin, session) ->
     rp.post({
       url: Routes.projects()
       json: true
@@ -166,6 +182,7 @@ module.exports = {
       }
       body: {
         "x-project-name": projectName
+        "x-remote-origin": remoteOrigin
       }
     })
     .promise()

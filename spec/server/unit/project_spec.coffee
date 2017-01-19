@@ -11,8 +11,9 @@ errors       = require("#{root}lib/errors")
 config       = require("#{root}lib/config")
 scaffold     = require("#{root}lib/scaffold")
 Project      = require("#{root}lib/project")
-settings     = require("#{root}lib/util/settings")
 savedState   = require("#{root}lib/saved_state")
+git          = require("#{root}lib/util/git")
+settings     = require("#{root}lib/util/settings")
 
 describe "lib/project", ->
   beforeEach ->
@@ -442,8 +443,9 @@ describe "lib/project", ->
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(@project, "writeProjectId").resolves("uuid-123")
       @sandbox.stub(user, "ensureSession").resolves("session-123")
+      @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
       @sandbox.stub(api, "createProject")
-        .withArgs("project", "session-123")
+        .withArgs("project", "remoteOrigin", "session-123")
         .resolves("uuid-123")
 
     afterEach ->
@@ -451,7 +453,7 @@ describe "lib/project", ->
 
     it "calls api.createProject with user session", ->
       @project.createProjectId().then ->
-        expect(api.createProject).to.be.calledWith("project", "session-123")
+        expect(api.createProject).to.be.calledWith("project", "remoteOrigin", "session-123")
 
     it "calls writeProjectId with id", ->
       @project.createProjectId().then =>

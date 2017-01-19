@@ -3,6 +3,7 @@ require("../spec_helper")
 _        = require("lodash")
 path     = require("path")
 config   = require("#{root}lib/config")
+scaffold = require("#{root}lib/scaffold")
 settings = require("#{root}lib/util/settings")
 
 describe "lib/config", ->
@@ -746,15 +747,17 @@ describe "lib/config", ->
       expect(config.setUrls(obj)).not.to.eq(obj)
 
   context ".setScaffoldPaths", ->
-    it "sets integrationExampleFile + integrationExampleName", ->
+    it "sets integrationExampleFile + integrationExampleName + scaffoldedFiles", ->
       obj = {
         integrationFolder: "/path/to/project/cypress/integration"
       }
+      @sandbox.stub(scaffold, "fileTree").returns([])
 
       expect(config.setScaffoldPaths(obj)).to.deep.eq({
         integrationFolder: "/path/to/project/cypress/integration"
         integrationExampleFile: "/path/to/project/cypress/integration/example_spec.js"
         integrationExampleName: "example_spec.js"
+        scaffoldedFiles: []
       })
 
   context ".setSupportFileAndFolder", ->

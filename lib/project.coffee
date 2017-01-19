@@ -17,6 +17,7 @@ scaffold    = require("./scaffold")
 Watchers    = require("./watchers")
 Reporter    = require("./reporter")
 savedState  = require("./saved_state")
+git         = require("./util/git")
 settings    = require("./util/settings")
 
 fs   = Promise.promisifyAll(fs)
@@ -340,11 +341,11 @@ class Project extends EE
     if not config.isHeadless
       ## ensure integration folder is created
       ## and example spec if dir doesnt exit
-      push(scaffold.integration(config.integrationFolder))
+      push(scaffold.integration(config.integrationFolder, config))
 
       ## ensure fixtures dir is created
       ## and example fixture if dir doesnt exist
-      push(scaffold.fixture(config.fixturesFolder))
+      push(scaffold.fixture(config.fixturesFolder, config))
 
     Promise.all(scaffolds)
 
@@ -373,7 +374,11 @@ class Project extends EE
     ])
     .bind(@)
     .spread (session, cfg) ->
-      api.createProject(cfg.projectName, session)
+      git
+      .init(cfg.projectRoot)
+      .getRemoteOrigin()
+      .then (remoteOrigin) ->
+        api.createProject(cfg.projectName, remoteOrigin, session)
     .then(@writeProjectId)
 
   getProjectId: ->
