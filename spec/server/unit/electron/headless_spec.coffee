@@ -408,7 +408,7 @@ describe "electron/headless", ->
 
   context ".run", ->
     beforeEach ->
-      @sandbox.stub(@projectInstance, "getConfig").resolves({clientUrlDisplay: "http://localhost:12345"})
+      @sandbox.stub(@projectInstance, "getConfig").resolves({proxyUrl: "http://localhost:12345"})
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureSession")
       @sandbox.stub(headless, "getId").returns(1234)

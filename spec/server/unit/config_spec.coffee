@@ -44,15 +44,15 @@ describe "lib/config", ->
         .then (obj) ->
           expect(obj.port).to.eq(8080)
 
-      it "updates clientUrl", ->
+      it "updates browserUrl", ->
         config.get(@projectPath, {port: 8080})
         .then (obj) ->
-          expect(obj.clientUrl).to.eq "http://localhost:8080/__/"
+          expect(obj.browserUrl).to.eq "http://localhost:8080/__/"
 
-      it "updates clientUrlDisplay", ->
+      it "updates proxyUrl", ->
         config.get(@projectPath, {port: 8080})
         .then (obj) ->
-          expect(obj.clientUrlDisplay).to.eq "http://localhost:8080"
+          expect(obj.proxyUrl).to.eq "http://localhost:8080"
 
     context "validation", ->
       beforeEach ->
@@ -410,11 +410,11 @@ describe "lib/config", ->
     it "autoOpen=false", ->
       @defaults "autoOpen", false
 
-    it "clientUrl=http://localhost:2020/__/", ->
-      @defaults "clientUrl", "http://localhost:2020/__/", {port: 2020}
+    it "browserUrl=http://localhost:2020/__/", ->
+      @defaults "browserUrl", "http://localhost:2020/__/", {port: 2020}
 
-    it "clientUrlDisplay=http://localhost:2020", ->
-      @defaults "clientUrlDisplay", "http://localhost:2020", {port: 2020}
+    it "proxyUrl=http://localhost:2020", ->
+      @defaults "proxyUrl", "http://localhost:2020", {port: 2020}
 
     it "namespace=__cypress", ->
       @defaults "namespace", "__cypress"
@@ -745,6 +745,30 @@ describe "lib/config", ->
     it "does not mutate existing obj", ->
       obj = {}
       expect(config.setUrls(obj)).not.to.eq(obj)
+
+    it "uses baseUrl when set", ->
+      obj = {
+        port: 65432
+        baseUrl: "https://www.google.com"
+        clientRoute: "/__/"
+      }
+
+      urls = config.setUrls(obj)
+
+      expect(urls.browserUrl).to.eq("https://www.google.com/__/")
+      expect(urls.proxyUrl).to.eq("http://localhost:65432")
+
+    it "strips baseUrl to host when set", ->
+      obj = {
+        port: 65432
+        baseUrl: "http://localhost:9999/app/?foo=bar#index.html"
+        clientRoute: "/__/"
+      }
+
+      urls = config.setUrls(obj)
+
+      expect(urls.browserUrl).to.eq("http://localhost:9999/__/")
+      expect(urls.proxyUrl).to.eq("http://localhost:65432")
 
   context ".setScaffoldPaths", ->
     it "sets integrationExampleFile + integrationExampleName + scaffoldedFiles", ->

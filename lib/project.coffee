@@ -290,9 +290,9 @@ class Project extends EE
           ## once we determine that we can then prefix it correctly
           ## with either integration or unit
           prefixedPath = @getPrefixedPathToSpec(cfg.integrationFolder, pathToSpec)
-          @getUrlBySpec(cfg.clientUrl, prefixedPath)
+          @getUrlBySpec(cfg.browserUrl, prefixedPath)
       else
-        @getUrlBySpec(cfg.clientUrl, "/__all")
+        @getUrlBySpec(cfg.browserUrl, "/__all")
 
   ensureSpecExists: (spec) ->
     specFile = path.resolve(@projectRoot, spec)
@@ -315,11 +315,11 @@ class Project extends EE
     ## becomes /integration/foo.coffee
     "/" + path.join("integration", path.relative(integrationFolder, pathToSpec))
 
-  getUrlBySpec: (clientUrl, specUrl) ->
+  getUrlBySpec: (browserUrl, specUrl) ->
     replacer = (match, p1) ->
       match.replace("//", "/")
 
-    [clientUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
+    [browserUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
     scaffolds = []

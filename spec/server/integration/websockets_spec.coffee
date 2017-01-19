@@ -152,7 +152,7 @@ describe "Web Sockets", ->
 
     context "http", ->
       beforeEach (done) ->
-        @wsClient = socketIo.client(@cfg.clientUrlDisplay, {
+        @wsClient = socketIo.client(@cfg.proxyUrl, {
           path: @cfg.socketIoRoute
           transports: ["websocket"]
         })
@@ -210,4 +210,3 @@ describe "Web Sockets", ->
         @wsClient.emit "fixture", "example.json", {}, (data) ->
           expect(data).to.deep.eq({foo: "bar"})
           done()
-
