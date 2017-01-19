@@ -1,42 +1,25 @@
 $Cypress.register "Sandbox", (Cypress, _, $) ->
+  do (sinon) ->
 
-  createClock = (sinon, args...) ->
-    sinon.useFakeTimers(args...)
+    createSandbox = (sinon) ->
+      sinon.format = -> ""
 
-  createSandbox = (sinon) ->
-    sinon.format = -> ""
+      sinon.sandbox.create()
 
-    sinon.sandbox.create()
+    Cypress.on "restore", ->
+      ## restore the sandbox if we've
+      ## created one
+      return if not @prop
 
-  Cypress.on "restore", ->
-    ## restore the sandbox if we've
-    ## created one
-    return if not @prop
+      if sandbox = @prop("sandbox")
+        sandbox.restore()
 
-    if clock = @prop("clock")
-      clock.restore()
+    Cypress.Cy.extend
 
-    if sandbox = @prop("sandbox")
-      sandbox.restore()
+      ## think about making this "public" so
+      ## users can utilize the root sandbox
+      ## for clocks / special XHRs / etc
+      _getSandbox: ->
+        sandbox = @prop("sandbox") ? createSandbox(sinon)
 
-  Cypress.Cy.extend
-    _getSinon: ->
-      sinon = @private("window").sinon
-      if not sinon
-        $Cypress.Utils.throwErrByPath("miscellaneous.no_sandbox")
-      return sinon
-
-    _getClock: (args...) ->
-      sinon = @_getSinon()
-      clock  = @prop("clock") ? createClock(sinon, args...)
-
-      @prop("clock", clock)
-
-    ## think about making this "public" so
-    ## users can utilize the root sandbox
-    ## for clocks / special XHRs / etc
-    _getSandbox: ->
-      sinon = @_getSinon()
-      sandbox = @prop("sandbox") ? createSandbox(sinon)
-
-      @prop("sandbox", sandbox)
+        @prop("sandbox", sandbox)
