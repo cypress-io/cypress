@@ -21,9 +21,9 @@ Same as above, but starts the clock at the specified timestamp.
 
 ***
 
-# [cy.clock( [*now*, ] *"functionName1"*, *"functionName2"*, ... )](#section-specify-which-functions-to-override)
+# [cy.clock( *now*, *functionNames* )](#section-specify-which-functions-to-override)
 
-Same as abvoe, but start the clock at `now` and only override the specified functions. Can also be called without the `now` argument.
+Same as above, but only override the functions in the array `functionNames`.
 
 ***
 
@@ -85,8 +85,7 @@ This will only override `setTimeout` and `clearTimeout` and leave the other time
 
 ```javascript
 // these are equivalent
-cy.clock(null, "setTimeout", "clearTimeout")
-cy.clock("setTimeout", "clearTimeout")
+cy.clock(null, ["setTimeout", "clearTimeout"])
 ```
 
 ***
