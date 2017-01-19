@@ -6,6 +6,8 @@ coerce   = require("./util/coerce")
 settings = require("./util/settings")
 errors   = require("./errors")
 scaffold = require("./scaffold")
+errors   = require("./errors")
+v        = require("./util/validation")
 
 ## cypress following by _
 cypressEnvRe = /^(cypress_)/i
@@ -18,48 +20,76 @@ isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
 defaults = {
-  port:           null
-  hosts:          null
-  morgan:         true
-  baseUrl:        null
-  socketId:       null
-  isHeadless:     false
-  reporter:       "spec"
-  reporterOptions: null
-  clientRoute:    "/__/"
-  xhrRoute:       "/xhrs/"
-  socketIoRoute:  "/__socket.io"
-  socketIoCookie: "__socket.io"
-  reporterRoute:  "/__cypress/reporter"
-  ignoreTestFiles: "*.hot-update.js"
-  defaultCommandTimeout: 4000
-  requestTimeout:        5000
-  responseTimeout:       30000
-  pageLoadTimeout:       60000
-  execTimeout:           60000
-  videoRecording:    true
-  videoCompression:  32
-  chromeWebSecurity: true
-  waitForAnimations: true
-  animationDistanceThreshold: 5
-  numTestsKeptInMemory: 50
-  watchForFileChanges: true
-  screenshotOnHeadlessFailure: true
+  port:                          null
+  hosts:                         null
+  morgan:                        true
+  baseUrl:                       null
+  socketId:                      null
+  isHeadless:                    false
+  reporter:                      "spec"
+  reporterOptions:               null
+  clientRoute:                   "/__/"
+  xhrRoute:                      "/xhrs/"
+  socketIoRoute:                 "/__socket.io"
+  socketIoCookie:                "__socket.io"
+  reporterRoute:                 "/__cypress/reporter"
+  ignoreTestFiles:               "*.hot-update.js"
+  defaultCommandTimeout:         4000
+  requestTimeout:                5000
+  responseTimeout:               30000
+  pageLoadTimeout:               60000
+  execTimeout:                   60000
+  videoRecording:                true
+  videoCompression:              32
+  chromeWebSecurity:             true
+  waitForAnimations:             true
+  animationDistanceThreshold:    5
+  numTestsKeptInMemory:          50
+  watchForFileChanges:           true
+  screenshotOnHeadlessFailure:   true
   trashAssetsBeforeHeadlessRuns: true
-  autoOpen:       false
-  viewportWidth:  1000
-  viewportHeight: 660
-  fileServerFolder: ""
-  # unitFolder:        "cypress/unit"
-  videosFolder:      "cypress/videos"
-  supportFile:       "cypress/support"
-  fixturesFolder:    "cypress/fixtures"
-  integrationFolder: "cypress/integration"
-  screenshotsFolder:  "cypress/screenshots"
-  namespace:      "__cypress"
+  autoOpen:                      false
+  viewportWidth:                 1000
+  viewportHeight:                660
+  fileServerFolder:              ""
+  videosFolder:                  "cypress/videos"
+  supportFile:                   "cypress/support"
+  fixturesFolder:                "cypress/fixtures"
+  integrationFolder:             "cypress/integration"
+  screenshotsFolder:             "cypress/screenshots"
+  namespace:                     "__cypress"
 
   ## deprecated
-  javascripts: []
+  javascripts:                   []
+}
+
+validationRules = {
+  animationDistanceThreshold: v.isNumber
+  baseUrl: v.isFullyQualifiedUrl
+  chromeWebSecurity: v.isBoolean
+  defaultCommandTimeout: v.isNumber
+  env: v.isPlainObject
+  execTimeout: v.isNumber
+  fileServerFolder: v.isString
+  fixturesFolder: v.isStringOrFalse
+  ignoreTestFiles: v.isStringOrArrayOfStrings
+  integrationFolder: v.isString
+  numTestsKeptInMemory: v.isNumber
+  pageLoadTimeout: v.isNumber
+  port: v.isNumber
+  reporter: v.isString
+  requestTimeout: v.isNumber
+  responseTimeout: v.isNumber
+  screenshotOnHeadlessFailure: v.isBoolean
+  supportFile: v.isStringOrFalse
+  trashAssetsBeforeHeadlessRuns: v.isBoolean
+  videoCompression: v.isNumber
+  videoRecording: v.isBoolean
+  videosFolder: v.isString
+  viewportHeight: v.isNumber
+  viewportWidth: v.isNumber
+  waitForAnimations: v.isBoolean
+  watchForFileChanges: v.isBoolean
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
@@ -70,6 +100,13 @@ convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
     return memo
   , {}
 
+validate = (file) -> (settings) ->
+  _.each settings, (value, key) ->
+    if validationFn = validationRules[key]
+      result = validationFn(key, value)
+      if result isnt true
+        errors.throw("CONFIG_VALIDATION_ERROR", file, result)
+
 module.exports = {
   getConfigKeys: -> configKeys
 
@@ -78,8 +115,8 @@ module.exports = {
 
   get: (projectRoot, options = {}) ->
     Promise.all([
-      settings.read(projectRoot)
-      settings.readEnv(projectRoot)
+      settings.read(projectRoot).then(validate("cypress.json"))
+      settings.readEnv(projectRoot).then(validate("cypress.env.json"))
     ])
     .spread (settings, envFile) =>
       @set({
