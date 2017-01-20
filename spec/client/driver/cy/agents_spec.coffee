@@ -2,63 +2,130 @@ describe "$Cypress.Cy Agents Commands", ->
   enterCommandTestingMode()
 
   context "#stub", ->
-    beforeEach ->
-      @stub = @cy.stub()
-
     it "synchronously returns stub", ->
-      expect(@stub).to.exist
-      expect(@stub.returns).to.be.a("function")
+      stub = @cy.stub()
+      expect(stub).to.exist
+      expect(stub.returns).to.be.a("function")
 
-  context "#stub()", ->
-    beforeEach ->
-      @stub = @cy.stub()
+    context "#stub()", ->
+      beforeEach ->
+        @stub = @cy.stub()
 
-    it "proxies sinon stub", ->
-      @stub()
-      expect(@stub.callCount).to.equal(1)
+      it "proxies sinon stub", ->
+        @stub()
+        expect(@stub.callCount).to.equal(1)
 
-    it "has sinon stub API", ->
-      @stub.returns(true)
-      result = @stub()
-      expect(result).to.be.true
+      it "has sinon stub API", ->
+        @stub.returns(true)
+        result = @stub()
+        expect(result).to.be.true
 
-  context "#stub(obj, 'method')", ->
-    beforeEach ->
-      @originalCalled = false
-      @obj = {
-        foo: => @originalCalled = true
-      }
-      @stub = @cy.stub(@obj, "foo")
+    context "#stub(obj, 'method')", ->
+      beforeEach ->
+        @originalCalled = false
+        @obj = {
+          foo: => @originalCalled = true
+        }
+        @stub = @cy.stub(@obj, "foo")
 
-    it "proxies sinon stub", ->
-      @obj.foo()
-      expect(@stub.callCount).to.equal(1)
+      it "proxies sinon stub", ->
+        @obj.foo()
+        expect(@stub.callCount).to.equal(1)
 
-    it "replaces method", ->
-      @obj.foo()
-      expect(@originalCalled).to.be.false
+      it "replaces method", ->
+        @obj.foo()
+        expect(@originalCalled).to.be.false
 
-  context "#stub(obj, 'method', replacerFn)", ->
-    beforeEach ->
-      @originalCalled = false
-      @obj = {
-        foo: => @originalCalled = true
-      }
-      @replacementCalled = false
-      @stub = @cy.stub @obj, "foo", =>
-        @replacementCalled = true
+    context "#stub(obj, 'method', replacerFn)", ->
+      beforeEach ->
+        @originalCalled = false
+        @obj = {
+          foo: => @originalCalled = true
+        }
+        @replacementCalled = false
+        @stub = @cy.stub @obj, "foo", =>
+          @replacementCalled = true
 
-    it "proxies sinon stub", ->
-      @obj.foo()
-      expect(@stub.callCount).to.equal(1)
+      it "proxies sinon stub", ->
+        @obj.foo()
+        expect(@stub.callCount).to.equal(1)
 
-    it "replaces method with replacement", ->
-      @obj.foo()
-      expect(@originalCalled).to.be.false
-      expect(@replacementCalled).to.be.true
+      it "replaces method with replacement", ->
+        @obj.foo()
+        expect(@originalCalled).to.be.false
+        expect(@replacementCalled).to.be.true
+
+    context "logging", ->
+      beforeEach ->
+        @logs = []
+        @Cypress.on "log", (attrs, log) =>
+          @logs.push(log)
+
+        @obj = {foo: ->}
+        @stub = @cy.stub(@obj, "foo").returns("return value")
+
+      it "logs agent on creation", ->
+        expect(@logs[0].get("name")).to.eq("stub-1")
+        expect(@logs[0].get("type")).to.eq("stub")
+        expect(@logs[0].get("instrument")).to.eq("agent")
+
+      it "logs event for each invocation", ->
+        @stub("foo", "bar")
+        expect(@logs.length).to.equal(2)
+        expect(@logs[1].get("name")).to.eq("stub-1")
+        expect(@logs[1].get("message")).to.eq("foo(arg1, arg2)")
+        expect(@logs[1].get("event")).to.be.true
+        @stub("foo")
+        expect(@logs.length).to.equal(3)
+        expect(@logs[2].get("name")).to.eq("stub-1")
+        expect(@logs[2].get("message")).to.eq("foo(arg1)")
+        expect(@logs[2].get("event")).to.be.true
+
+      it "increments callCount of agent log on each invocation", ->
+        expect(@logs[0].get("callCount")).to.eq 0
+        @stub("foo", "bar")
+        expect(@logs[0].get("callCount")).to.eq 1
+        @stub("foo", "baz")
+        expect(@logs[0].get("callCount")).to.eq 2
+
+      it "resets unique name counter on restore", ->
+        expect(@logs[0].get("name")).to.equal("stub-1")
+        @Cypress.trigger("restore")
+        @cy.stub()
+        expect(@logs[1].get("name")).to.equal("stub-1")
+
+      context "#consoleProps", ->
+        beforeEach ->
+          @context = {}
+          @stub.call(@context, "foo", "baz")
+          @stub("foo", "baz")
+          @consoleProps = @logs[1].get("consoleProps")()
+
+        it "does not include 'command' or 'error' properties", ->
+          expect(@consoleProps["Command"]).to.be.null
+          expect(@consoleProps["Error"]).to.be.null
+
+        it "includes reference to stub", ->
+          expect(@consoleProps["stub"]).to.be.a("function")
+
+        it "includes references to stubbed object", ->
+          expect(@consoleProps["Stubbed Obj"]).to.be.equal(@obj)
+
+        it "includes call count", ->
+          expect(@consoleProps["Calls"]).to.equal(2)
+
+        it "includes group with calls", ->
+          expect(@consoleProps.groups()[0].name).to.equal("Call #1:")
+          expect(@consoleProps.groups()[0].items["Arguments"]).to.eql(["foo", "baz"])
+          expect(@consoleProps.groups()[0].items["Context"]).to.equal(@context)
+          expect(@consoleProps.groups()[0].items["Returned"]).to.equal("return value")
 
   context "#spy(obj, 'method')", ->
     beforeEach ->
+      @logs = []
+      @Cypress.on "log", (attrs, log) =>
+        @logs.push(log)
+
       @originalCalled = false
       @obj = {
         foo: => @originalCalled = true
@@ -76,6 +143,24 @@ describe "$Cypress.Cy Agents Commands", ->
     it "does not replace method", ->
       @obj.foo()
       expect(@originalCalled).to.be.true
+
+    context "logging", ->
+      ## same as cy.stub() except for name and type
+      it "logs agent on creation", ->
+        expect(@logs[0].get("name")).to.eq("spy-1")
+        expect(@logs[0].get("type")).to.eq("spy")
+        expect(@logs[0].get("instrument")).to.eq("agent")
+
+      context "#consoleProps", ->
+        beforeEach ->
+          @obj.foo()
+          @consoleProps = @logs[1].get("consoleProps")()
+
+        it "includes reference to spy", ->
+          expect(@consoleProps["spy"]).to.be.a("function")
+
+        it "includes references to spied object", ->
+          expect(@consoleProps["Spied Obj"]).to.be.equal(@obj)
 
   context "#agents", ->
     beforeEach ->

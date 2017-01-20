@@ -4,28 +4,39 @@ $Cypress.register "Agents", (Cypress, _, $) ->
     switch name
       when "spy"  then "Spied Obj"
       when "stub" then "Stubbed Obj"
-      when "mock" then "Mocked Obj"
+
+  counts = null
+
+  resetCounts = ->
+    counts = {
+      spy: 0
+      stub: 0
+    }
+
+  resetCounts()
+  Cypress.on "restore", resetCounts
 
   Cypress.Cy.extend
     spy: (obj, method) ->
       spy = @_getSandbox().spy(obj, method)
-      log = @_onCreate("spy", method)
-      @_wrap("spy", spy, obj, method, log)
+      @_wrap("spy", spy, obj, method)
 
     stub: (obj, method, replacerFn) ->
       stub = @_getSandbox().stub(obj, method, replacerFn)
-      log = @_onCreate("stub", method)
-      @_wrap("stub", stub, obj, method, log)
+      @_wrap("stub", stub, obj, method)
 
-    _onCreate: (type, method) ->
-      Cypress.Log.agent({
+    _wrap: (type, agent, obj, method) ->
+      _this = @
+
+      count = counts[type] += 1
+
+      log = Cypress.Log.agent({
+        name: [type, count].join("-")
         type: type
         functionName: method
+        count: count
         callCount: 0
       })
-
-    _wrap: (type, agent, obj, method, log) ->
-      _this = @
 
       agent.invoke = _.wrap agent.invoke, (orig, func, thisValue, args) ->
         error = null
@@ -41,8 +52,7 @@ $Cypress.register "Agents", (Cypress, _, $) ->
           error = e
 
         props =
-          ## QUESTION: is this necessary?
-          # count:     agent._cy
+          count:     count
           name:      type
           message:   _this._getMessage(method, args)
           obj:       obj
@@ -66,25 +76,16 @@ $Cypress.register "Agents", (Cypress, _, $) ->
 
     _getMessage: (method, args) ->
       method ?= "function"
-
-      getArgs = ->
-        calls = _.map args, (arg, i) -> "arg#{i + 1}"
-        calls.join(", ")
-
-      method + "(" + getArgs() + ")"
+      args = _.map args, (arg, i) -> "arg#{i + 1}"
+      "#{method}(#{args.join(', ')})"
 
     _onInvoke: (obj) ->
       if log = obj.log
         ## increment the callCount on the agent instrument log
         log.set "callCount", log.get("callCount") + 1
 
-      name = if obj.count?
-        [obj.name, obj.count].join("-")
-      else
-        obj.name
-
       Cypress.Log.command
-        name:     name
+        name:     [obj.name, obj.count].join("-")
         message:  obj.message
         error:    obj.error
         type:     "parent"
@@ -99,10 +100,6 @@ $Cypress.register "Agents", (Cypress, _, $) ->
           console[display(obj.name)] = obj.obj
           console.Calls = obj.agent.callCount
           console.groups = ->
-            ## dont show any groups if we dont
-            ## have any calls
-            return if obj.callCount is 0
-
             items = {
               Arguments: obj.call.args
               Context:   obj.call.thisValue
