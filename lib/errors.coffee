@@ -99,14 +99,14 @@ API = {
 
         This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
-        * A missing file or dependency
-        * A syntax error in the file or one of its dependencies
+        - A missing file or dependency
+        - A syntax error in the file or one of its dependencies
 
         Fix the error in your code and re-run your tests.
         """
       when "CONFIG_VALIDATION_ERROR"
         """
-        We found a validation error in #{chalk.blue(arg1)}:
+        We found an invalid value in the file: '#{chalk.blue(arg1)}'
 
         #{chalk.yellow(arg2)}
         """
