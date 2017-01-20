@@ -12,6 +12,7 @@ httpsProxy   = require("@cypress/core-https-proxy")
 allowDestroy = require("server-destroy-vvo")
 cors         = require("./util/cors")
 origin       = require("./util/origin")
+connect      = require("./util/connect")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
 statusCode   = require("./util/status_code")
@@ -205,6 +206,13 @@ class Server
           @_httpsProxy = httpsProxy
           @_fileServer = fileServer
 
+          ## if we have a baseUrl let's go ahead
+          ## and make sure the server is connectable!
+          if baseUrl
+            connect.ensureUrl(baseUrl)
+            .catch (err) =>
+              reject errors.get("CANNOT_CONNECT_BASE_URL", baseUrl)
+        .then =>
           ## once we open set the domain
           ## to root by default
           ## which prevents a situation where navigating

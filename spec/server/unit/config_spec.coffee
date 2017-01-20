@@ -837,7 +837,7 @@ describe "lib/config", ->
         supportFile: "does/not/exist"
       })
 
-      expect(-> config.setSupportFileAndFolder(obj)).to.throw("Support file missing or invalid")
+      expect(-> config.setSupportFileAndFolder(obj)).to.throw("Support file missing or invalid.")
 
   context ".setParentTestsPaths", ->
     it "sets parentTestsFolder and parentTestsFolderDisplay", ->
