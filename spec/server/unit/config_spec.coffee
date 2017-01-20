@@ -287,9 +287,13 @@ describe "lib/config", ->
           @setup({videoCompression: 10})
           @expectValidationPasses()
 
+        it "passes if false", ->
+          @setup({videoCompression: false})
+          @expectValidationPasses()
+
         it "fails if not a number", ->
           @setup({videoCompression: "foo"})
-          @expectValidationFails("be a number")
+          @expectValidationFails("be a number or false")
 
       context "videoRecording", ->
         it "passes if a boolean", ->

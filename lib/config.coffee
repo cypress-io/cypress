@@ -84,7 +84,7 @@ validationRules = {
   screenshotOnHeadlessFailure: v.isBoolean
   supportFile: v.isStringOrFalse
   trashAssetsBeforeHeadlessRuns: v.isBoolean
-  videoCompression: v.isNumber
+  videoCompression: v.isNumberOrFalse
   videoRecording: v.isBoolean
   videosFolder: v.isString
   viewportHeight: v.isNumber
