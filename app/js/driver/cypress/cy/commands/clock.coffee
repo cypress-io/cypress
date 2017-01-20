@@ -23,8 +23,17 @@ $Cypress.register "Clock", (Cypress, _) ->
       clock: (now, methods, options = {}) ->
         if _.isObject(now)
           options = now
+          now = undefined
+
         if _.isObject(methods) and !_.isArray(methods)
           options = methods
+          methods = undefined
+
+        if now? and !_.isNumber(now)
+          $Cypress.Utils.throwErrByPath("clock.invalid_1st_arg", {args: {arg: now}})
+
+        if methods? and not (_.isArray(methods) and _.every(methods, _.isString))
+          $Cypress.Utils.throwErrByPath("clock.invalid_2nd_arg", {args: {arg: methods}})
 
         _.defaults options, {
           log: true
@@ -54,15 +63,13 @@ $Cypress.register "Clock", (Cypress, _) ->
 
         clock = $Cypress.Clock.create(@private("window"), now, methods)
 
-        ## TODO: have tick take options, so log: false is possible?
         clock.tick = _.wrap clock.tick, (tick, ms) ->
-          theLog = log("tick #{ms}", false)
+          theLog = log("tick #{ms}ms", false)
           theLog.snapshot("before", {next: "after"})
           ret = tick.call(clock, ms)
           theLog.snapshot().end()
           return ret
 
-        ## TODO: have restore take options, so log: false is possible?
         clock.restore = _.wrap clock.restore, (restore, shouldLog = true) =>
           ret = restore.call(clock)
           if shouldLog

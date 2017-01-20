@@ -89,6 +89,8 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     clock:
       already_created: "#{cmd('clock')} can only be called once per test. Use the clock returned from the previous call."
+      invalid_1st_arg: "#{cmd('clock')} only accepts a number or an options object for its first argument. You passed: '{{arg}}'"
+      invalid_2nd_arg: "#{cmd('clock')} only accepts an array of function names or an options object for its second argument. You passed: '{{arg}}'"
 
     contains:
       empty_string: "#{cmd('contains')} cannot be passed an empty string."
