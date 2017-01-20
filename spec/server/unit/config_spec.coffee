@@ -88,8 +88,9 @@ describe "lib/config", ->
           @expectValidationPasses()
 
         it "fails if not a number", ->
-          @setup({animationDistanceThreshold: "foo"})
+          @setup({animationDistanceThreshold: {foo: "bar"}})
           @expectValidationFails("be a number")
+          @expectValidationFails("the value was: {\"foo\":\"bar\"}")
 
       context "baseUrl", ->
         it "passes if begins with http://", ->
@@ -116,6 +117,7 @@ describe "lib/config", ->
         it "fails if not a boolean", ->
           @setup({chromeWebSecurity: 42})
           @expectValidationFails("be a boolean")
+          @expectValidationFails("the value was: 42")
 
       context "defaultCommandTimeout", ->
         it "passes if a number", ->
@@ -125,6 +127,7 @@ describe "lib/config", ->
         it "fails if not a number", ->
           @setup({defaultCommandTimeout: "foo"})
           @expectValidationFails("be a number")
+          @expectValidationFails("the value was: \"foo\"")
 
       context "env", ->
         it "passes if an object", ->
@@ -152,6 +155,7 @@ describe "lib/config", ->
         it "fails if not a string", ->
           @setup({fileServerFolder: true})
           @expectValidationFails("be a string")
+          @expectValidationFails("the value was: true")
 
       context "fixturesFolder", ->
         it "passes if a string", ->
@@ -182,6 +186,7 @@ describe "lib/config", ->
         it "fails if not an array of strings", ->
           @setup({ignoreTestFiles: [5]})
           @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("the value was: [5]")
 
       context "integrationFolder", ->
         it "passes if a string", ->

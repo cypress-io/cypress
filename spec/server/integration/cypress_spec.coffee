@@ -491,11 +491,7 @@ describe "lib/cypress", ->
         @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/tests/path/to/spec")
 
     it "logs error and exits when project has cypress.json syntax error", ->
-      Promise.all([
-        user.set({name: "brian", authToken: "auth-token-123"}),
-
-        Project.add(@todosPath)
-      ])
+      Project.add(@todosPath)
       .then =>
         fs.writeFileAsync(@todosPath + "/cypress.json", "{'foo': 'bar}")
       .then =>
@@ -504,17 +500,24 @@ describe "lib/cypress", ->
         @expectExitWithErr("ERROR_READING_FILE", @todosPath)
 
     it "logs error and exits when project has cypress.env.json syntax error", ->
-      Promise.all([
-        user.set({name: "brian", authToken: "auth-token-123"}),
-
-        Project.add(@todosPath)
-      ])
+      Project.add(@todosPath)
       .then =>
         fs.writeFileAsync(@todosPath + "/cypress.env.json", "{'foo': 'bar}")
       .then =>
         cypress.start(["--run-project=#{@todosPath}"])
       .then =>
         @expectExitWithErr("ERROR_READING_FILE", @todosPath)
+
+    it "logs error and exits when project has invalid cypress.json values", ->
+      Promise.all([
+        Project.add(@todosPath)
+
+        settings.write(@todosPath, {baseUrl: "localhost:9999"})
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}"])
+      .then =>
+        @expectExitWithErr("CONFIG_VALIDATION_ERROR", "cypress.json")
 
     ## TODO: make sure we have integration tests around this
     ## for headed projects!

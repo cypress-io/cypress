@@ -2,11 +2,11 @@ _ = require("lodash")
 errors = require("../errors")
 
 ## validation functions take a key and a value and should:
-##  return true if it passes validation
-##  return an error message if it fails validation
+##  - return true if it passes validation
+##  - return an error message if it fails validation
 
 error = (key, value, type) ->
-  "Expected '#{key}' to be #{type}. Instead it was: #{value}"
+  "Expected '#{key}' to be #{type}. Instead the value was: #{JSON.stringify(value)}"
 
 isFullyQualifiedUrl = (value) ->
   _.isString(value) and /^https?\:\/\//.test(value)
