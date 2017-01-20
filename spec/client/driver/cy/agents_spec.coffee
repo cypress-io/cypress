@@ -55,6 +55,31 @@ describe "$Cypress.Cy Agents Commands", ->
         expect(@originalCalled).to.be.false
         expect(@replacementCalled).to.be.true
 
+    context "#as", ->
+      beforeEach ->
+        @logs = []
+        @Cypress.on "log", (attrs, log) =>
+          @logs.push(log)
+
+        @stub = @cy.stub().as("myStub")
+
+      it "returns stub", ->
+        expect(@stub).to.have.property("callCount")
+
+      it "updates instrument log with alias", ->
+        expect(@logs[0].get("alias")).to.equal("myStub")
+        expect(@logs[0].get("aliasType")).to.equal("agent")
+
+      it "includes alias in invocation log", ->
+        @stub()
+        expect(@logs[1].get("alias")).to.equal("myStub")
+        expect(@logs[1].get("aliasType")).to.equal("agent")
+
+      it "includes alias in console props", ->
+        @stub()
+        consoleProps = @logs[1].get("consoleProps")()
+        expect(consoleProps["Alias"]).to.equal("myStub")
+
     context "logging", ->
       beforeEach ->
         @logs = []
@@ -143,6 +168,31 @@ describe "$Cypress.Cy Agents Commands", ->
     it "does not replace method", ->
       @obj.foo()
       expect(@originalCalled).to.be.true
+
+    context "#as", ->
+      beforeEach ->
+        @logs = []
+        @Cypress.on "log", (attrs, log) =>
+          @logs.push(log)
+
+        @spy = @cy.spy().as("mySpy")
+
+      it "returns spy", ->
+        expect(@spy).to.have.property("callCount")
+
+      it "updates instrument log with alias", ->
+        expect(@logs[0].get("alias")).to.equal("mySpy")
+        expect(@logs[0].get("aliasType")).to.equal("agent")
+
+      it "includes alias in invocation log", ->
+        @spy()
+        expect(@logs[1].get("alias")).to.equal("mySpy")
+        expect(@logs[1].get("aliasType")).to.equal("agent")
+
+      it "includes alias in console props", ->
+        @spy()
+        consoleProps = @logs[1].get("consoleProps")()
+        expect(consoleProps["Alias"]).to.equal("mySpy")
 
     context "logging", ->
       ## same as cy.stub() except for name and type

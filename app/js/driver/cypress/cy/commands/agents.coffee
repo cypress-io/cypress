@@ -72,6 +72,13 @@ $Cypress.register "Agents", (Cypress, _, $) ->
         ## of the spy
         return returned
 
+      agent.as = (alias) ->
+        log.set({
+          alias: alias
+          aliasType: "agent"
+        })
+        return agent
+
       return agent
 
     _getMessage: (method, args) ->
@@ -83,8 +90,9 @@ $Cypress.register "Agents", (Cypress, _, $) ->
       if log = obj.log
         ## increment the callCount on the agent instrument log
         log.set "callCount", log.get("callCount") + 1
+        alias = log.get("alias")
 
-      Cypress.Log.command
+      logProps = {
         name:     [obj.name, obj.count].join("-")
         message:  obj.message
         error:    obj.error
@@ -96,6 +104,7 @@ $Cypress.register "Agents", (Cypress, _, $) ->
           console = {}
           console.Command = null
           console.Error = null
+          console.Alias = alias
           console[obj.name] = obj.agent
           console[display(obj.name)] = obj.obj
           console.Calls = obj.agent.callCount
@@ -115,6 +124,13 @@ $Cypress.register "Agents", (Cypress, _, $) ->
               }
             ]
           console
+      }
+
+      if alias
+        logProps.alias = alias
+        logProps.aliasType = "agent"
+
+      Cypress.Log.command(logProps)
 
     _onError: (err) =>
       $Cypress.Utils.throwErr(err)
