@@ -84,7 +84,7 @@ validationRules = {
   screenshotOnHeadlessFailure: v.isBoolean
   supportFile: v.isStringOrFalse
   trashAssetsBeforeHeadlessRuns: v.isBoolean
-  videoCompression: v.isNumber
+  videoCompression: v.isNumberOrFalse
   videoRecording: v.isBoolean
   videosFolder: v.isString
   viewportHeight: v.isNumber
@@ -101,12 +101,13 @@ convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
     return memo
   , {}
 
-validate = (file) -> (settings) ->
-  _.each settings, (value, key) ->
-    if validationFn = validationRules[key]
-      result = validationFn(key, value)
-      if result isnt true
-        errors.throw("CONFIG_VALIDATION_ERROR", file, result)
+validate = (file) ->
+  return (settings) ->
+    _.each settings, (value, key) ->
+      if validationFn = validationRules[key]
+        result = validationFn(key, value)
+        if result isnt true
+          errors.throw("CONFIG_VALIDATION_ERROR", file, result)
 
 module.exports = {
   getConfigKeys: -> configKeys
