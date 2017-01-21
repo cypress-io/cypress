@@ -264,6 +264,7 @@ describe "lib/api", ->
         failingTests: []
         cypressConfig: {}
         ciProvider: "circle"
+        stdout: "foo\nbar\nbaz"
       })
       .reply(200)
 
@@ -280,6 +281,7 @@ describe "lib/api", ->
         failingTests: []
         cypressConfig: {}
         ciProvider: "circle"
+        stdout: "foo\nbar\nbaz"
       })
 
     it "PUT /instances/:id failure formatting", ->
