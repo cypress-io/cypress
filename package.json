@@ -41,7 +41,7 @@
     "cypress": "bin/cypress"
   },
   "devDependencies": {
-    "@cypress/core-releaser": "^0.1.4",
+    "@cypress/core-releaser": "0.1.8",
     "chai": "^3.2.0",
     "mocha": "^2.2.5",
     "mock-spawn": "^0.2.6",
