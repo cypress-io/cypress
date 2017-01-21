@@ -28,11 +28,9 @@ module.exports = {
         ## https://github.com/petkaantonov/bluebird/pull/1295
         ##
         ## their new behavior messes us how we show these errors
-        ## so we must splice out the 2nd element in our stack array
-        if err.name is "SyntaxError"
-          stack = err.stack.split("\n")
-          stack.splice(1, 1)
-          err.stack = stack.join("\n")
+        ## so we must backup the original stack and replace it here
+        if os = err.originalStack
+          err.stack = os
 
         filePath = err.filePath ? spec
 

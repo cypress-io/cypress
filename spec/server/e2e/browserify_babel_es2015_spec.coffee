@@ -28,7 +28,7 @@ describe "e2e browserify, babel, es2015", ->
 
         The error was:
 
-        SyntaxError: /foo/bar/.projects/e2e/lib/fail.js: Unexpected token, expected { (1:7) while parsing file: /foo/bar/.projects/e2e/lib/fail.js
+        SyntaxError: /foo/bar/.projects/e2e/lib/fail.js: Unexpected token, expected { (1:7)
         > 1 | export defalt "foo"
             |        ^
 
