@@ -3,8 +3,6 @@ dns     = require("dns")
 url     = require("url")
 Promise = require("bluebird")
 
-lookupAsync = Promise.promisify(dns.lookup, {context: dns})
-
 module.exports = {
   byPortAndAddress: (port, address) ->
     ## https://nodejs.org/api/net.html#net_net_connect_port_host_connectlistener
@@ -17,6 +15,10 @@ module.exports = {
 
   getAddress: (port, hostname) ->
     fn = @byPortAndAddress.bind(@, port)
+
+    ## promisify at the very last second which enables us to
+    ## modify dns lookup function (via hosts overrides)
+    lookupAsync = Promise.promisify(dns.lookup, {context: dns})
 
     ## this does not go out to the network to figure
     ## out the addresess. in fact it respects the /etc/hosts file
