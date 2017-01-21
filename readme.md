@@ -202,6 +202,9 @@ These commands have not yet been released:
 
 ## Changelog
 
+#### 0.12.2 - *(01/21/17)*
+- bump core releaser
+
 #### 0.12.1
 - bump update-notifier dep for configstore fixes
 
