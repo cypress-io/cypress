@@ -79,6 +79,9 @@ $Cypress.register "Agents", (Cypress, _, $) ->
         })
         return agent
 
+      agent.withArgs = _.wrap agent.withArgs, (orig, args...) ->
+        _this._wrap(type, orig.apply(@, args), obj, method)
+
       return agent
 
     _getMessage: (method, args) ->

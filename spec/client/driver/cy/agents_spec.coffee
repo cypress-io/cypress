@@ -55,6 +55,23 @@ describe "$Cypress.Cy Agents Commands", ->
         expect(@originalCalled).to.be.false
         expect(@replacementCalled).to.be.true
 
+    context "#withArgs", ->
+      beforeEach ->
+        @logs = []
+        @Cypress.on "log", (attrs, log) =>
+          @logs.push(log)
+
+        @stub = @cy.stub()
+        @stubWithArgs = @stub.withArgs("foo")
+
+      it "creates new log instrument", ->
+        expect(@logs.length).to.equal(2)
+        expect(@logs[1].get("name")).to.equal("stub-2")
+
+      it "can be aliased", ->
+        @stubWithArgs.as("withFoo")
+        expect(@logs[1].get("alias")).to.equal("withFoo")
+
     context "#as", ->
       beforeEach ->
         @logs = []
