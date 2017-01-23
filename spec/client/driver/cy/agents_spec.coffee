@@ -55,6 +55,36 @@ describe "$Cypress.Cy Agents Commands", ->
         expect(@originalCalled).to.be.false
         expect(@replacementCalled).to.be.true
 
+    context "#resolves", ->
+      beforeEach ->
+        @obj = {foo: ->}
+        @stub = @cy.stub(@obj, "foo")
+
+      it "has resolves method", ->
+        expect(@stub.resolves).to.be.a("function")
+
+      it "resolves promise", ->
+        @stub.resolves("foo")
+        @obj.foo().then (foo) ->
+          expect(foo).to.equal("foo")
+
+    context "#rejects", ->
+      beforeEach ->
+        @obj = {foo: ->}
+        @stub = @cy.stub(@obj, "foo")
+
+      it "has rejects method", ->
+        expect(@stub.rejects).to.be.a("function")
+
+      it "rejects promise", ->
+        error = new Error()
+        @stub.rejects(error)
+        @obj.foo()
+        .then ->
+          throw new Error("Should throw error")
+        .catch (err) ->
+          expect(err).to.equal(error)
+
     context "#withArgs", ->
       beforeEach ->
         @logs = []

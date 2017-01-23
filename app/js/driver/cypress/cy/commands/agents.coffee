@@ -1,4 +1,7 @@
-$Cypress.register "Agents", (Cypress, _, $) ->
+$Cypress.register "Agents", (Cypress, _, $, Promise) ->
+
+  do (sinonAsPromised) ->
+    sinonAsPromised(Promise)
 
   display = (name) ->
     switch name
