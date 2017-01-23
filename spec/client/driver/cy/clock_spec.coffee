@@ -134,7 +134,7 @@ describe "$Cypress.Cy Clock Commands", ->
       log = @logs[0]
       expect(@logs.length).to.equal(1)
       expect(log.get("name")).to.eq("clock")
-      expect(log.get("message")).to.eq("create / replace methods")
+      expect(log.get("message")).to.eq("")
       expect(log.get("type")).to.eq("parent")
       expect(log.get("state")).to.eq("passed")
       expect(log.get("snapshots").length).to.eq(1)
@@ -146,8 +146,8 @@ describe "$Cypress.Cy Clock Commands", ->
 
       log = @logs[1]
       expect(@logs.length).to.equal(2)
-      expect(log.get("name")).to.eq("clock")
-      expect(log.get("message")).to.eq("tick 250ms")
+      expect(log.get("name")).to.eq("tick")
+      expect(log.get("message")).to.eq("250ms")
 
     it "logs before and after snapshots when ticked", ->
       clock = @cy.clock()
@@ -164,8 +164,8 @@ describe "$Cypress.Cy Clock Commands", ->
 
       log = @logs[1]
       expect(@logs.length).to.equal(2)
-      expect(log.get("name")).to.eq("clock")
-      expect(log.get("message")).to.eq("restore")
+      expect(log.get("name")).to.eq("restore")
+      expect(log.get("message")).to.eq("")
 
     it "does not log when auto-restored", ->
       @cy.clock()
@@ -191,6 +191,12 @@ describe "$Cypress.Cy Clock Commands", ->
       it "includes methods replaced by clock", ->
         consoleProps = @logs[1].attributes.consoleProps()
         expect(consoleProps["Methods replaced"]).to.eql(["setTimeout"])
+
+      it "logs ticked amount on tick", ->
+        createdConsoleProps = @logs[0].attributes.consoleProps()
+        expect(createdConsoleProps["Ticked"]).to.be.undefined
+        tickedConsoleProps = @logs[1].attributes.consoleProps()
+        expect(tickedConsoleProps["Ticked"]).to.equal("100 milliseconds")
 
       it "properties are unaffected by future actions", ->
         @clock.tick(100)
