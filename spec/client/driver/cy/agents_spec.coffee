@@ -91,7 +91,7 @@ describe "$Cypress.Cy Agents Commands", ->
 
       it "logs agent on creation", ->
         expect(@logs[0].get("name")).to.eq("stub-1")
-        expect(@logs[0].get("type")).to.eq("stub")
+        expect(@logs[0].get("type")).to.eq("stub-1")
         expect(@logs[0].get("instrument")).to.eq("agent")
 
       it "logs event for each invocation", ->
@@ -198,7 +198,7 @@ describe "$Cypress.Cy Agents Commands", ->
       ## same as cy.stub() except for name and type
       it "logs agent on creation", ->
         expect(@logs[0].get("name")).to.eq("spy-1")
-        expect(@logs[0].get("type")).to.eq("spy")
+        expect(@logs[0].get("type")).to.eq("spy-1")
         expect(@logs[0].get("instrument")).to.eq("agent")
 
       context "#consoleProps", ->

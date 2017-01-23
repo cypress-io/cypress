@@ -32,7 +32,7 @@ $Cypress.register "Agents", (Cypress, _, $) ->
 
       log = Cypress.Log.agent({
         name: [type, count].join("-")
-        type: type
+        type: [type, count].join("-")
         functionName: method
         count: count
         callCount: 0
