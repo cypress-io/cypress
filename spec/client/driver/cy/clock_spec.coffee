@@ -173,7 +173,7 @@ describe "$Cypress.Cy Clock Commands", ->
       @Cypress.trigger("restore")
       expect(@logs.length).to.equal(1)
 
-    it.only "does not log when log: false", ->
+    it "does not log when log: false", ->
       clock = @cy.clock({log: false})
       clock.tick()
       clock.restore()
@@ -181,12 +181,20 @@ describe "$Cypress.Cy Clock Commands", ->
 
     context "#consoleProps", ->
       beforeEach ->
-        clock = @cy.clock(100, ["setTimeout"])
-        clock.tick(100)
-        @consoleProps = @logs[1].get("consoleProps")()
+        @clock = @cy.clock(100, ["setTimeout"])
+        @clock.tick(100)
 
       it "includes clock's now value", ->
-        expect(@consoleProps["Now"]).to.equal(200)
+        consoleProps = @logs[1].attributes.consoleProps()
+        expect(consoleProps["Now"]).to.equal(200)
 
       it "includes methods replaced by clock", ->
-        expect(@consoleProps["Methods replaced"]).to.eql(["setTimeout"])
+        consoleProps = @logs[1].attributes.consoleProps()
+        expect(consoleProps["Methods replaced"]).to.eql(["setTimeout"])
+
+      it "properties are unaffected by future actions", ->
+        @clock.tick(100)
+        @clock.restore()
+        consoleProps = @logs[1].attributes.consoleProps()
+        expect(consoleProps["Now"]).to.equal(200)
+        expect(consoleProps["Methods replaced"]).to.eql(["setTimeout"])

@@ -42,9 +42,13 @@ $Cypress.register "Clock", (Cypress, _) ->
           log: true
         }
 
-        log = (message, snapshot = true) ->
+        log = (message, snapshot = true, nowOffset = 0) ->
           if not options.log
             return
+
+          details = clock._details()
+          logNow = details.now + nowOffset
+          logMethods = details.methods.slice()
 
           Cypress.Log.command({
             message: message
@@ -54,17 +58,16 @@ $Cypress.register "Clock", (Cypress, _) ->
             snapshot: snapshot
             event: true
             consoleProps: ->
-              {now, methods} = clock._details()
               {
-                "Now": now
-                "Methods replaced": methods
+                "Now": logNow
+                "Methods replaced": logMethods
               }
           })
 
         clock = $Cypress.Clock.create(@private("window"), now, methods)
 
         clock.tick = _.wrap clock.tick, (tick, ms) ->
-          theLog = log("tick #{ms}ms", false)
+          theLog = log("tick #{ms}ms", false, ms)
           if theLog
             theLog.snapshot("before", {next: "after"})
           ret = tick.call(clock, ms)
