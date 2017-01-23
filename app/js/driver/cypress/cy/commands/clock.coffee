@@ -21,6 +21,9 @@ $Cypress.register "Clock", (Cypress, _) ->
 
     Cypress.Cy.extend
       clock: (now, methods, options = {}) ->
+        if @prop("clock")
+          $Cypress.Utils.throwErrByPath("clock.already_created")
+
         if _.isObject(now)
           options = now
           now = undefined
@@ -58,16 +61,15 @@ $Cypress.register "Clock", (Cypress, _) ->
               }
           })
 
-        if @prop("clock")
-          $Cypress.Utils.throwErrByPath("clock.already_created")
-
         clock = $Cypress.Clock.create(@private("window"), now, methods)
 
         clock.tick = _.wrap clock.tick, (tick, ms) ->
           theLog = log("tick #{ms}ms", false)
-          theLog.snapshot("before", {next: "after"})
+          if theLog
+            theLog.snapshot("before", {next: "after"})
           ret = tick.call(clock, ms)
-          theLog.snapshot().end()
+          if theLog
+            theLog.snapshot().end()
           return ret
 
         clock.restore = _.wrap clock.restore, (restore, shouldLog = true) =>

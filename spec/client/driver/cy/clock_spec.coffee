@@ -173,8 +173,10 @@ describe "$Cypress.Cy Clock Commands", ->
       @Cypress.trigger("restore")
       expect(@logs.length).to.equal(1)
 
-    it "does not log when log: false", ->
-      @cy.clock({log: false})
+    it.only "does not log when log: false", ->
+      clock = @cy.clock({log: false})
+      clock.tick()
+      clock.restore()
       expect(@logs.length).to.equal(0)
 
     context "#consoleProps", ->
