@@ -33,7 +33,7 @@ describe('<Agents />', () => {
 
   it('renders collapsible header with number of agents', () => {
     const component = shallow(<Agents model={model()} />)
-    expect(component.find('Collapsible')).to.have.prop('header', 'Spies / Stubs / Mocks (2)')
+    expect(component.find('Collapsible')).to.have.prop('header', 'Spies / Stubs (2)')
   })
 
   context('<AgentsList />', () => {

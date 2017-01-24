@@ -29,7 +29,7 @@ const Agents = observer(({ model }) => (
       <ul className='hooks-container'>
         <li className='hook-item'>
           <Collapsible
-            header={`Spies / Stubs / Mocks (${model.agents.length})`}
+            header={`Spies / Stubs (${model.agents.length})`}
             headerClass='hook-name'
             contentClass='instrument-content'
           >
