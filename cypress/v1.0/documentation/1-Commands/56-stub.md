@@ -37,35 +37,71 @@ Replaces the `method` on the `object` with the `replacerFn` wrapped in a spy.See
 ## Create a stub and manually replace a function
 
 ```javascript
-cy.window().then((win) => {
-  win.reload = cy.stub()
-  // ...some action that triggers window.reload() in app...
-  expect(win.reload).to.be.called  
-})
+// assume App.start calls util.addListeners
+util.addListeners = cy.stub()
+App.start()
+expect(util.addListeners).to.be.called  
 ```
+
+***
 
 ## Replace a method with a stub
 
 ```javascript
-cy.window().then((win) => {
-  cy.stub(win, "reload")
-  // ...trigger action that triggers window.reload() in app...
-  expect(win.reload).to.be.called  
-})
+// assume App.start calls util.addListeners
+cy.stub(util, "addListeners")
+App.start()
+expect(util.addListeners).to.be.called  
 ```
+
+***
 
 ## Replace a method with a function
 
 ```javascript
-cy.window().then((win) => {
-  let reloadCalled = false
-  cy.stub(win, "reload", function () {
-    reloadCalled = true
-  })
-  // ...trigger action that triggers window.reload() in app...
-  expect(reloadCalled).to.be.true
+// assume App.start calls util.addListeners
+let listenersAdded = false
+cy.stub(util, "addListeners", function () {
+  listenersAdded = true
 })
+App.start()
+expect(listenersAdded).to.be.true
 ```
+
+***
+
+## Specify the return value of a stubbed method
+
+```javascript
+// assume App.start calls util.addListeners, which returns a function
+// that removes the listeners
+const removeStub = cy.stub()
+cy.stub(util, "addListeners").returns(removeStub)
+App.start()
+App.stop()
+expect(removeStub).to.be.called  
+```
+
+***
+
+## Alias a stub
+
+You can utilize sinon's `.named` method to alias a stub, which makes it easier to identify in error messages and Cypress' command log.
+
+```javascript
+const obj = {
+  foo () {}
+}
+const stub = cy.stub(obj, "foo").named("anyCall")
+const withFoo = stub.withArgs("foo").named("withFoo")
+obj.foo()
+expect(stub).to.be.called
+expect(withFoo).to.be.called // purposefully failing assertion
+```
+
+You will see the following in the command log:
+
+![stubs with aliases](https://cloud.githubusercontent.com/assets/1157043/22254216/f0a86678-e221-11e6-9c1b-e0c6007218a4.png)
 
 ***
 

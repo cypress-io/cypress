@@ -24,12 +24,33 @@ Wraps the `method` on the `object` with a spy and returns the spy. See the [sino
 ## Wrap a method with a spy
 
 ```javascript
-cy.window().then((win) => {
-  const reloadSpy = cy.spy(win, "reload")
-  // ...trigger action that triggers window.reload() in app...
-  expect(reloadSpy).to.be.called
-})
+// assume App.start calls util.addListeners
+cy.spy(util, "addListeners")
+App.start()
+expect(util.addListeners).to.be.called  
+
 ```
+
+***
+
+## Alias a spy
+
+You can utilize sinon's `.named` method to alias a spy, which makes it easier to identify in error messages and Cypress' command log.
+
+```javascript
+const obj = {
+  foo () {}
+}
+const spy = cy.spy(obj, "foo").named("anyCall")
+const withFoo = spy.withArgs("foo").named("withFoo")
+obj.foo()
+expect(spy).to.be.called
+expect(withFoo).to.be.called // purposefully failing assertion
+```
+
+You will see the following in the command log:
+
+![spies with aliases](https://cloud.githubusercontent.com/assets/1157043/22254158/ced71846-e221-11e6-960b-11effd6309fc.png)
 
 ***
 
