@@ -99,16 +99,16 @@ describe "$Cypress.Cy Agents Commands", ->
         expect(@logs[1].get("name")).to.equal("stub-2")
 
       it "can be aliased", ->
-        @stubWithArgs.as("withFoo")
+        @stubWithArgs.named("withFoo")
         expect(@logs[1].get("alias")).to.equal("withFoo")
 
-    context "#as", ->
+    context "#named", ->
       beforeEach ->
         @logs = []
         @Cypress.on "log", (attrs, log) =>
           @logs.push(log)
 
-        @stub = @cy.stub().as("myStub")
+        @stub = @cy.stub().named("myStub")
 
       it "returns stub", ->
         expect(@stub).to.have.property("callCount")
@@ -216,13 +216,13 @@ describe "$Cypress.Cy Agents Commands", ->
       @obj.foo()
       expect(@originalCalled).to.be.true
 
-    context "#as", ->
+    context "#named", ->
       beforeEach ->
         @logs = []
         @Cypress.on "log", (attrs, log) =>
           @logs.push(log)
 
-        @spy = @cy.spy().as("mySpy")
+        @spy = @cy.spy().named("mySpy")
 
       it "returns spy", ->
         expect(@spy).to.have.property("callCount")
