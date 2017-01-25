@@ -41,4 +41,6 @@ excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 | [Anti-patterns](https://on.cypress.io/guides/anti-patterns) | Anti-patterns |
 | [Deprecations](https://on.cypress.io/guides/deprecations) | Deprecations |
 | [Known Issues](https://on.cypress.io/guides/known-issues) | Known Issues |
+| [Web Security](https://on.cypress.io/guides/web-security) | Web Security |
 | [Browser Management](https://on.cypress.io/guides/browser-management) | Browser Management |
+| [Userland Extensions](https://on.cypress.io/guides/userland-extensions) | Userland Extensions |
