@@ -238,7 +238,7 @@ class Builds extends Component {
               <i className="fa-li fa fa-question-circle blue"></i>Add this command to your <a href='#' onClick={this._openCliNpmPackage}>CI script</a>.</li>
               <hr />
               <li>
-              <i className="fa-li fa fa-question-circle blue"></i>View your build here or on the <a href='#' onClick={this._openCliNpmPackage}>Cypress Dashboard</a>.</li>
+              <i className="fa-li fa fa-question-circle blue"></i>View your builds here or on the <a href='#' onClick={this._openCliNpmPackage}>Cypress Dashboard</a>.</li>
             </ul>
           </div>
           {this._privateMessage()}
