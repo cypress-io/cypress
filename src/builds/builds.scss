@@ -26,15 +26,47 @@
 .first-build-instructions {
   padding: 50px 200px;
 
+  h5 {
+    overflow: auto;
+
+    a {
+      font-size: 13px;
+      font-weight: normal;
+    }
+  }
+
+  .alert {
+    border-radius: 3px;
+    border: 1px solid #eee;
+    background-color: #f5f5f5;
+    color: #777;
+    ul {
+      padding-left: 0;
+      margin-bottom: 0;
+      margin-left: 10px;
+
+      li {
+        margin-left: 15px;
+      }
+    }
+
+    hr {
+      // opacity: 0.5;
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+  }
+
   h4, .center {
     text-align: center;
   }
 
   pre {
-    background-color: #fcfcfc;
-    border: 1px solid #e9e9e9;
-    border-radius: 0;
-    color: #555;
+    border: 0;
+    background-color: #252831;
+    border-radius: 3px;
+    color: #eee;
+    padding-left: 15px;
   }
 }
 

@@ -56,32 +56,34 @@ class SetupProject extends Component {
               <label htmlFor='projectName' className='col-sm-2 control-label'>
                 Name:
               </label>
-              <div className='col-sm-10'>
-                <input
-                  autoFocus='true'
-                  ref='projectName'
-                  type='text'
-                  className='form-control'
-                  id='projectName'
-                  value={this.state.projectName}
-                  onChange={this._updateProjectName}
-                />
-                <p className='help-block'>You can change this later.</p>
-              </div>
               {
-              // <div className='col-sm-7'>
-              //   <p className='form-control-static'>
-              //     <i className='fa fa-folder-open-o'></i>{' '}{this.state.projectName}{' '}
-              //     <a href='#'>
-              //       edit
-              //     </a>
-              //   </p>
+              // <div className='col-sm-10'>
+              //   <input
+              //     autoFocus='true'
+              //     ref='projectName'
+              //     type='text'
+              //     className='form-control'
+              //     id='projectName'
+              //     value={this.state.projectName}
+              //     onChange={this._updateProjectName}
+              //   />
+              //   <p className='help-block'>You can change this later.</p>
               // </div>
+            }
+              {
+              <div className='col-sm-7'>
+                <p className='form-control-static'>
+                  {this.state.projectName}{' '}
+                  <a href='#'>
+                    <i className='fa fa-pencil'></i>
+                  </a>
+                </p>
+              </div>
               }
               <div className='help-block validation-error'>Please enter a project name</div>
             </div>
           <hr />
-          <p className='text-muted'>Control who sees your project's builds and recordings.</p>
+          <p className='text-muted'>Who should this project belong to?</p>
 
             <div className='form-group'>
               <label htmlFor='projectName' className='col-sm-2 control-label'>

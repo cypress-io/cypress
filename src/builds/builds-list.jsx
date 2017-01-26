@@ -211,23 +211,36 @@ class Builds extends Component {
     return (
       <div id='builds-list-page'>
         <div className='first-build-instructions'>
-          <h4>Record Your First Build</h4>
-          <p className='text-muted'>To record build results, run the commands below.</p>
-          <h5>Install the <a href='#' onClick={this._openCliNpmPackage}>CLI tools</a>:</h5>
-          <pre><code>npm install -g cypress-cli</code></pre>
-          <h5>Run tests and record failures, screenshots, and videos:</h5>
+          <h4>You're ready to run!</h4>
+          <p className='text-muted'>To record builds, run this command:</p>
+          {
+          // <h5>Install the <a href='#' onClick={this._openCliNpmPackage}>CLI tools</a>:</h5>
+          // <pre><code>npm install -g cypress-cli</code></pre>
+          // <h5>Run tests and record failures, screenshots, and videos:</h5>
+            // <a href='#' className='pull-right' onClick={this._openCiGuide}>
+            //   <i className='fa fa-info-circle'></i>{' '}
+            //   Learn more
+            // </a>
+        }
           <pre><code>cypress ci {this.state.ciKey || '<ci-key>'}</code></pre>
-          <p className='text-muted'>
-            The build results will display here as soon as recording begins!
-          </p>
           <hr />
-          <p className='text-muted'>
-            Refer to your CI provider's documentation to know when to run these commands during Continous Integration.{' '}
-            <a href='#' onClick={this._openCiGuide}>
-              <i className='fa fa-info-circle'></i>{' '}
-              Learn more
-            </a>
-          </p>
+          <h5>
+            <span className='pull-left'>Now What?</span>
+            </h5>
+
+          <div className='alert alert-default'>
+            <ul className='fa-ul'>
+              <li>
+              <i className="fa-li fa fa-question-circle blue"></i>
+                Make sure you've installed our <a href='#' onClick={this._openCliNpmPackage}>CLI Tools.</a></li>
+              <hr />
+              <li>
+              <i className="fa-li fa fa-question-circle blue"></i>Add this command to your <a href='#' onClick={this._openCliNpmPackage}>CI script</a>.</li>
+              <hr />
+              <li>
+              <i className="fa-li fa fa-question-circle blue"></i>View your build here or on the <a href='#' onClick={this._openCliNpmPackage}>Cypress Dashboard</a>.</li>
+            </ul>
+          </div>
           {this._privateMessage()}
         </div>
       </div>
