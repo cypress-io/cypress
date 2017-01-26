@@ -19,10 +19,10 @@ $Cypress.register "Clock", (Cypress, _) ->
       if clock = @prop("clock")
         clock.restore(false)
 
-    Cypress.Cy.extend
-      clock: (now, methods, options = {}) ->
-        if @prop("clock")
-          $Cypress.Utils.throwErrByPath("clock.already_created")
+    Cypress.addUtilityCommand
+      clock: (subject, now, methods, options = {}) ->
+        if clock = @prop("clock")
+          return clock
 
         if _.isObject(now)
           options = now
@@ -33,10 +33,10 @@ $Cypress.register "Clock", (Cypress, _) ->
           methods = undefined
 
         if now? and !_.isNumber(now)
-          $Cypress.Utils.throwErrByPath("clock.invalid_1st_arg", {args: {arg: now}})
+          $Cypress.Utils.throwErrByPath("clock.invalid_1st_arg", {args: {arg: JSON.stringify(now)}})
 
         if methods? and not (_.isArray(methods) and _.every(methods, _.isString))
-          $Cypress.Utils.throwErrByPath("clock.invalid_2nd_arg", {args: {arg: methods}})
+          $Cypress.Utils.throwErrByPath("clock.invalid_2nd_arg", {args: {arg: JSON.stringify(methods)}})
 
         _.defaults options, {
           log: true
