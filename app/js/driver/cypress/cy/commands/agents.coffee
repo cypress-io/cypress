@@ -148,12 +148,9 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
       $Cypress.Utils.throwErr(err)
 
     agents: ->
-      Cypress.Agents.create @_getSandbox(),
-        onCreate: (obj) =>
-          obj.type = [obj.type, obj.count].join("-")
-          obj.callCount = 0
-          Cypress.Log.agent(obj)
+      $Cypress.Utils.warning "cy.agents() is deprecated. Use cy.stub() and cy.spy() instead."
 
-        onInvoke: @_onInvoke.bind(@)
-
-        onError: @_onError.bind(@)
+      {
+        stub: @stub.bind(@)
+        spy: @spy.bind(@)
+      }
