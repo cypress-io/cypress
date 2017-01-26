@@ -73,7 +73,7 @@ export default class ProjectNotSetup extends Component {
 
   _invalidProject () {
     return (
-      <div>
+      <div className='empty-builds-not-displayed'>
         <h4>
           <i className='fa fa-warning errored'></i>{' '}
           Builds Cannot Be Displayed

@@ -28,6 +28,7 @@ const ErrorMessage = observer(({ error }) => {
     <div id='builds-list-page' className='builds-list-error'>
       <div className="empty">
         <h4>
+          <i className='fa fa-warning red'></i>{' '}
           Builds Could Not Be Loaded
         </h4>
         {errorMessage}

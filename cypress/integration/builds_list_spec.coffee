@@ -242,7 +242,7 @@ describe "Builds List", ->
               public: true
               orgId: "000"
             })
-          .end().contains("Record Your First Build")
+          .end().contains("You're ready to run")
 
     describe "unexpected error", ->
       beforeEach ->
@@ -302,7 +302,7 @@ describe "Builds List", ->
               public: true
               orgId: "000"
             })
-          .end().contains("Record Your First Build")
+          .end().contains("You're ready to run")
 
     describe "no builds", ->
       context "having never setup CI", ->
@@ -418,7 +418,7 @@ describe "Builds List", ->
               expect(JSON.parse(localStorage.projects || "[]")[0].orgName).to.equal("Jane Lane")
 
             it "displays empty builds page", ->
-              cy.contains("Record Your First Build")
+              cy.contains("You're ready to run")
 
             it "links CLI tools to npm package", ->
               cy.contains("CLI tools").click().then =>
@@ -530,7 +530,7 @@ describe "Builds List", ->
             .get(".nav a").contains("Builds").click()
 
         it "displays empty message", ->
-          cy.contains("Record Your First Build")
+          cy.contains("You're ready to run")
 
     describe "list builds", ->
       beforeEach ->
