@@ -66,6 +66,9 @@ $Cypress.register "Clock", (Cypress, _) ->
         clock = $Cypress.Clock.create(@private("window"), now, methods)
 
         clock.tick = _.wrap clock.tick, (tick, ms) ->
+          if ms? and not _.isNumber(ms)
+            $Cypress.Utils.throwErrByPath("tick.invalid_argument", {args: {arg: JSON.stringify(ms)}})
+
           theLog = log("tick", "#{ms}ms", false, {
             "Now": clock._details().now + ms
             "Ticked": "#{ms} milliseconds"
@@ -87,3 +90,11 @@ $Cypress.register "Clock", (Cypress, _) ->
         log("clock")
 
         @prop("clock", clock)
+
+      tick: (subject, ms) ->
+        clock = @prop("clock")
+
+        if not clock
+          $Cypress.Utils.throwErrByPath("tick.no_clock")
+
+        clock.tick(ms)

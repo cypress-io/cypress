@@ -157,24 +157,6 @@ describe "$Cypress.Cy Clock Commands", ->
           expect(log.get("snapshots").length).to.eq(1)
           expect(log.get("snapshots")[0]).to.be.an("object")
 
-      it "logs when ticked", ->
-        @cy.clock().then (clock) =>
-          clock.tick(250)
-
-          log = @logs[1]
-          expect(@logs.length).to.equal(2)
-          expect(log.get("name")).to.eq("tick")
-          expect(log.get("message")).to.eq("250ms")
-
-      it "logs before and after snapshots when ticked", ->
-        @cy.clock().then (clock) =>
-          clock.tick(250)
-
-          log = @logs[1]
-          expect(log.get("snapshots").length).to.eq(2)
-          expect(log.get("snapshots")[0].name).to.equal("before")
-          expect(log.get("snapshots")[1].name).to.equal("after")
-
       it "logs when restored", ->
         @cy.clock().then (clock) =>
           clock.restore()
@@ -229,3 +211,57 @@ describe "$Cypress.Cy Clock Commands", ->
           consoleProps = @logs[1].attributes.consoleProps()
           expect(consoleProps["Now"]).to.equal(200)
           expect(consoleProps["Methods replaced"]).to.eql(["setTimeout"])
+
+  describe "#tick", ->
+    it "moves time ahead and triggers callbacks", (done) ->
+      @cy
+        .clock()
+        .then =>
+          @window.setTimeout ->
+            done()
+          , 1000
+        .tick(1000)
+
+    context "errors", ->
+      beforeEach ->
+        @allowErrors()
+
+      it "throws if there is not a clock", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.equal("cy.tick() cannot be called without first calling cy.clock()")
+          done()
+
+        @cy.tick()
+
+      it "throws if ms is not undefined or a number", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.equal("clock.tick()/cy.tick() only accept a number as their argument. You passed: \"100\"")
+          done()
+
+        @cy.clock().tick("100")
+
+    context "logging", ->
+      beforeEach ->
+        @logs = []
+        @Cypress.on "log", (attrs, log) =>
+          @logs.push(log)
+
+      it "logs number of milliseconds", ->
+        @cy
+          .clock()
+          .tick(250)
+          .then =>
+            log = @logs[1]
+            expect(@logs.length).to.equal(2)
+            expect(log.get("name")).to.eq("tick")
+            expect(log.get("message")).to.eq("250ms")
+
+      it "logs before and after snapshots", ->
+        @cy
+          .clock()
+          .tick(250)
+          .then =>
+            log = @logs[1]
+            expect(log.get("snapshots").length).to.eq(2)
+            expect(log.get("snapshots")[0].name).to.equal("before")
+            expect(log.get("snapshots")[1].name).to.equal("after")

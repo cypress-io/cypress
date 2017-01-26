@@ -477,6 +477,10 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       multiple_forms: "#{cmd('submit')} can only be called on a single form. Your subject contained {{num}} form elements."
       not_on_form: "#{cmd('submit')} can only be called on a <form>. Your subject {{word}} a: {{node}}"
 
+    tick:
+      invalid_argument: "clock.tick()/#{cmd('tick')} only accept a number as their argument. You passed: {{arg}}"
+      no_clock: "#{cmd('tick')} cannot be called without first calling #{cmd('clock')}"
+
     then:
       callback_mixes_sync_and_async: """
         #{cmd('then')} failed because you are mixing up async and sync code.
