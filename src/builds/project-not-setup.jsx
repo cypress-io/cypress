@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 
+import App from '../lib/app'
 import SetupProject from "./setup-project-modal"
 import { getOrgs } from '../organizations/organizations-api'
 
@@ -44,19 +45,30 @@ export default class ProjectNotSetup extends Component {
 
   _getStartedWithCI () {
     return (
-      <div>
-        <h4>You have no builds...</h4>
-        <p>You can setup Cypress to record screenshots, videos and failures when your project runs in CI.</p>
-        <p>Once setup, you will have access to these builds within Cypress.</p>
+      <div className='empty-no-builds'>
+        <h4>You Have No Recorded Builds</h4>
+        <p>Cypress can record screenshots, videos and failures when running <code>cypress ci</code>.</p>
+        <div className='builds-screenshots'>
+          <img width='150' height='150' src="http://placehold.it/150x150" />
+          <img width='150' height='150' src="http://placehold.it/150x150" />
+          <img width='150' height='150' src="http://placehold.it/150x150" />
+        </div>
+
+        <p>After builds are recorded, you will see them here and on your <a href='#' onClick={this._visitDashboard}>Cypress Dashboard</a></p>
         <button
           className='btn btn-primary'
           onClick={this._showSetupProjectModal}
           >
           <i className='fa fa-wrench'></i>{' '}
-          Setup Project for CI
+          Setup Project to Record
         </button>
       </div>
     )
+  }
+
+  _visitDashboard = (e) => {
+    e.preventDefault()
+    App.ipc('external:open', 'https://on.cypress.io/dashboard')
   }
 
   _invalidProject () {
@@ -74,7 +86,7 @@ export default class ProjectNotSetup extends Component {
           onClick={this._showSetupProjectModal}
           >
           <i className='fa fa-wrench'></i>{' '}
-          Setup a New Project for CI
+          Setup a New Project
         </button>
         <p>
           <small>The new project will have no previous build data.</small>

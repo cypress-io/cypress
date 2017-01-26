@@ -108,13 +108,7 @@ i.timedOut { color: #F5A327;}
   }
 }
 
-legend {
-  font-size: 16px;
-  margin-bottom: 10px;
-  border-bottom-color: #eee;
-  color: #444;
-
-  a {
-    font-size: 13px;
-  }
+.helper-docs-link {
+  cursor: pointer;
 }
+

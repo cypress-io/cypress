@@ -46,19 +46,19 @@ class SetupProject extends Component {
           })}
         >
           <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-          <h4>Setup Project for CI</h4>
-          <p className='text-muted'>After configuring your project's settings, we will generate a CI key to be used during your CI run.</p>
+          <h4>Setup Project to Record</h4>
           <form
             className='form-horizontal'
             onSubmit={this._submit}>
             <div className={cs('form-group', {
               'has-error': this.state.showNameMissingError && !this._hasValidProjectName(),
             })}>
-              <label htmlFor='projectName' className='col-sm-3 control-label'>
-                Project Name:
+              <label htmlFor='projectName' className='col-sm-2 control-label'>
+                Name:
               </label>
-              <div className='col-sm-7'>
+              <div className='col-sm-10'>
                 <input
+                  autoFocus='true'
                   ref='projectName'
                   type='text'
                   className='form-control'
@@ -66,14 +66,29 @@ class SetupProject extends Component {
                   value={this.state.projectName}
                   onChange={this._updateProjectName}
                 />
+                <p className='help-block'>You can change this later.</p>
               </div>
+              {
+              // <div className='col-sm-7'>
+              //   <p className='form-control-static'>
+              //     <i className='fa fa-folder-open-o'></i>{' '}{this.state.projectName}{' '}
+              //     <a href='#'>
+              //       edit
+              //     </a>
+              //   </p>
+              // </div>
+              }
               <div className='help-block validation-error'>Please enter a project name</div>
             </div>
+          <hr />
+          <p className='text-muted'>Control who sees your project's builds and recordings.</p>
+
             <div className='form-group'>
-              <label htmlFor='projectName' className='col-sm-3 control-label'>
-                Organization:
+              <label htmlFor='projectName' className='col-sm-2 control-label'>
+                Owner:
               </label>
-              <div className='col-sm-7'>
+
+              <div className='col-sm-8'>
                 <select
                   ref='orgId'
                   id='organizations-select'
@@ -99,10 +114,10 @@ class SetupProject extends Component {
               </div>
             </div>
             <div className='form-group'>
-              <label htmlFor='projectName' className='col-sm-3 control-label'>
+              <label htmlFor='projectName' className='col-sm-2 control-label'>
                 Access:
               </label>
-              <div className='col-sm-9'>
+              <div className='col-sm-10'>
                 <div className='radio privacy-radio'>
                   <label>
                     <input
@@ -140,7 +155,7 @@ class SetupProject extends Component {
               <div className='col-sm-offset-8 col-sm-4'>
                 <button
                   disabled={this.state.isSubmitting}
-                  className='btn btn-primary'
+                  className='btn btn-primary btn-block'
                 >
                   <span>Setup Project</span>
                   <i className='fa fa-spinner fa-spin'></i>

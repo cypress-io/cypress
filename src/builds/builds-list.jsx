@@ -16,8 +16,6 @@ import orgsStore from '../organizations/organizations-store'
 
 import Build from './builds-list-item'
 import ErrorMessage from './error-message'
-// import LoginThenSetupCI from './login-then-setup-ci'
-// import LoginThenSeeBuilds from './login-then-see-builds'
 import PermissionMessage from './permission-message'
 import ProjectNotSetup from './project-not-setup'
 
@@ -98,22 +96,6 @@ class Builds extends Component {
 
   render () {
     const { project } = this.props
-
-    // //--------Build States----------//
-    // THIS IS NOT CURRENTLY IN USE WHILE
-    // LOGIN IS RESTRICTED ON THE APP
-    // // they are not logged in
-    // if (!state.hasUser) {
-
-    //   // AND they've never setup CI
-    //   if (!this.props.project.id) {
-    //     return <LoginThenSetupCI/>
-
-    //   // OR they have setup CI
-    //   } else {
-    //     return <LoginThenSeeBuilds/>
-    //   }
-    // }
 
     // If the project is invalid
     if (!project.valid) {
@@ -229,12 +211,16 @@ class Builds extends Component {
     return (
       <div id='builds-list-page'>
         <div className='first-build-instructions'>
-          <h4>Run Your First Build in CI</h4>
-          <p className='text-muted'>To record build results, simply run the commands below.</p>
+          <h4>Record Your First Build</h4>
+          <p className='text-muted'>To record build results, run the commands below.</p>
           <h5>Install the <a href='#' onClick={this._openCliNpmPackage}>CLI tools</a>:</h5>
           <pre><code>npm install -g cypress-cli</code></pre>
-          <h5>Run tests and upload assets:</h5>
+          <h5>Run tests and record failures, screenshots, and videos:</h5>
           <pre><code>cypress ci {this.state.ciKey || '<ci-key>'}</code></pre>
+          <p className='text-muted'>
+            The build results will display here as soon as recording begins!
+          </p>
+          <hr />
           <p className='text-muted'>
             Refer to your CI provider's documentation to know when to run these commands during Continous Integration.{' '}
             <a href='#' onClick={this._openCiGuide}>

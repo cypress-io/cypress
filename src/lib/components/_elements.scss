@@ -9,32 +9,11 @@ body {
   // Margin bottom by nav heights
 }
 
-footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  // Set the fixed height of the footer here
-  height: 60px;
-  background-color: #f5f5f5;
-}
-
 html, body {
   background-color: transparent;
   margin: 0 auto;
   overflow: hidden;
   height: 100%;
-}
-
-h3, h4 {
-  font-family: "Fira Sans";
-}
-
-h5 {
-  font-size: 15px;
-}
-
-h4 {
-  font-size: 20px;
 }
 
 a {
@@ -47,6 +26,49 @@ a, button {
   }
 }
 
-.helper-docs-link {
-  cursor: pointer;
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  // Set the fixed height of the footer here
+  height: 60px;
+  background-color: #f5f5f5;
+}
+
+
+
+h3, h4 {
+  font-family: "Fira Sans";
+}
+
+h5 {
+  font-size: 15px;
+}
+
+h4 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+
+legend {
+  font-size: 16px;
+  margin-bottom: 10px;
+  border-bottom-color: #eee;
+  color: #444;
+
+  a {
+    font-size: 13px;
+  }
+}
+
+code {
+  background-color: #f5f5f5;
+  color: #555;
+  font-family: Consolas, Monaco, 'Andale Mono', monospace;
+  border: 1px solid #ddd;
+}
+
+pre code {
+  border: 0;
 }

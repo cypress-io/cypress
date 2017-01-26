@@ -227,13 +227,13 @@ describe "Builds List", ->
             @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "NO_PROJECT_ID"}, null)
 
       it "displays 'you have no builds'", ->
-        cy.contains("You have no builds...")
+        cy.contains("You Have No Recorded Builds")
 
       it "clears message after setting up CI", ->
         cy
           .fixture("organizations").as("orgs").then ->
             @ipc.handle("get:orgs", null, @orgs)
-          .get(".btn").contains("Setup Project for CI").click()
+          .get(".btn").contains("Setup Project").click()
           .get(".modal-body")
           .contains(".btn", "Setup Project").click()
           .then ->
@@ -242,7 +242,7 @@ describe "Builds List", ->
               public: true
               orgId: "000"
             })
-          .end().contains("Run Your First Build in CI")
+          .end().contains("Record Your First Build")
 
     describe "unexpected error", ->
       beforeEach ->
@@ -286,14 +286,14 @@ describe "Builds List", ->
         cy
           .fixture("organizations").as("orgs").then ->
             @ipc.handle("get:orgs", null, @orgs)
-          .get(".btn").contains("Setup a New Project for CI").click()
+          .get(".btn").contains("Setup a New Project").click()
           .get(".modal").should("be.visible")
 
       it "clears message after setting up CI", ->
         cy
           .fixture("organizations").as("orgs").then ->
             @ipc.handle("get:orgs", null, @orgs)
-          .get(".btn").contains("Setup a New Project for CI").click()
+          .get(".btn").contains("Setup a New Project").click()
           .get(".modal-body")
           .contains(".btn", "Setup Project").click()
           .then ->
@@ -302,7 +302,7 @@ describe "Builds List", ->
               public: true
               orgId: "000"
             })
-          .end().contains("Run Your First Build in CI")
+          .end().contains("Record Your First Build")
 
     describe "no builds", ->
       context "having never setup CI", ->
@@ -321,14 +321,14 @@ describe "Builds List", ->
               @ipc.handle("get:builds", null, [])
 
         it "displays empty message", ->
-          cy.contains("You have no builds...")
+          cy.contains("You Have No Recorded Builds")
 
         describe "setup project window", ->
           beforeEach ->
             cy
               .fixture("organizations").as("orgs").then ->
                 @ipc.handle("get:orgs", null, @orgs)
-              .get(".btn").contains("Setup Project for CI").click()
+              .get(".btn").contains("Setup Project").click()
 
           it "clicking link opens setup project window", ->
             cy
@@ -418,7 +418,7 @@ describe "Builds List", ->
               expect(JSON.parse(localStorage.projects || "[]")[0].orgName).to.equal("Jane Lane")
 
             it "displays empty builds page", ->
-              cy.contains("Run Your First Build in CI")
+              cy.contains("Record Your First Build")
 
             it "links CLI tools to npm package", ->
               cy.contains("CLI tools").click().then =>
@@ -530,7 +530,7 @@ describe "Builds List", ->
             .get(".nav a").contains("Builds").click()
 
         it "displays empty message", ->
-          cy.contains("Run Your First Build in CI")
+          cy.contains("Record Your First Build")
 
     describe "list builds", ->
       beforeEach ->
@@ -645,7 +645,7 @@ describe "Builds List", ->
 
         it "displays missing project id error", ->
           @ipcError({type: "NO_PROJECT_ID"}).then ->
-            cy.contains("You have no builds...")
+            cy.contains("You Have No Recorded Builds")
 
         it "displays old builds if another error", ->
           @ipcError({type: "TIMED_OUT"}).then ->

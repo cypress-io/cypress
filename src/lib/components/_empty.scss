@@ -1,10 +1,6 @@
 .empty, .well-message {
   text-align: center;
 
-  h4 {
-    margin-top: 120px;
-  }
-
   p {
     color: #888;
     font-size: 14px;
@@ -14,6 +10,10 @@
   .btn {
     margin-top: 10px;
   }
+}
+
+.empty-no-builds {
+  margin-top: 75px;
 }
 
 .empty-well {

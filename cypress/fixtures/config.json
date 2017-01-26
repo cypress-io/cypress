@@ -29,7 +29,7 @@
   "cypressHostUrl": "http://localhost:2020",
   "env": "development",
   "environmentVariables": {
-
+    
   },
   "execTimeout": 60000,
   "fileServerFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink",
@@ -40,7 +40,7 @@
   "isHeadless": false,
   "isNewProject": false,
   "javascripts": [
-
+    
   ],
   "morgan": true,
   "namespace": "__cypress",
