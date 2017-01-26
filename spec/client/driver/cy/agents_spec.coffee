@@ -99,16 +99,16 @@ describe "$Cypress.Cy Agents Commands", ->
         expect(@logs[1].get("name")).to.equal("stub-2")
 
       it "can be aliased", ->
-        @stubWithArgs.named("withFoo")
+        @stubWithArgs.as("withFoo")
         expect(@logs[1].get("alias")).to.equal("withFoo")
 
-    context "#named", ->
+    context "#as", ->
       beforeEach ->
         @logs = []
         @Cypress.on "log", (attrs, log) =>
           @logs.push(log)
 
-        @stub = @cy.stub().named("myStub")
+        @stub = @cy.stub().as("myStub")
 
       it "returns stub", ->
         expect(@stub).to.have.property("callCount")
@@ -126,6 +126,35 @@ describe "$Cypress.Cy Agents Commands", ->
         @stub()
         consoleProps = @logs[1].get("consoleProps")()
         expect(consoleProps["Alias"]).to.equal("myStub")
+
+      it "updates the displayName of the agent", ->
+        @cy.then ->
+          expect(@myStub.displayName).to.equal("myStub")
+
+      it "stores the lookup as an alias", ->
+        expect(@cy.prop("aliases").b).to.be.defined
+
+      it "stores the agent as the subject", ->
+        expect(@cy.prop("aliases").myStub.subject).to.equal(@stub)
+
+      it "assigns subject to runnable ctx", ->
+        @cy.then ->
+          expect(@myStub).to.eq(@stub)
+
+      describe "errors", ->
+        beforeEach ->
+          @allowErrors()
+
+        _.each [null, undefined, {}, [], 123], (value) =>
+          it "throws if when passed: #{value}", ->
+            expect(=> @cy.stub().as(value)).to.throw("cy.as() can only accept a string.")
+
+        it "throws on blank string", ->
+          expect(=> @cy.stub().as("")).to.throw("cy.as() cannot be passed an empty string.")
+
+        _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
+          it "throws on a blacklisted word: #{blacklist}", ->
+            expect(=> @cy.stub().as(blacklist)).to.throw("cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved.")
 
     context "logging", ->
       beforeEach ->
@@ -216,13 +245,14 @@ describe "$Cypress.Cy Agents Commands", ->
       @obj.foo()
       expect(@originalCalled).to.be.true
 
-    context "#named", ->
+    context "#as", ->
+      ## same as cy.stub(), so just some smoke tests here
       beforeEach ->
         @logs = []
         @Cypress.on "log", (attrs, log) =>
           @logs.push(log)
 
-        @spy = @cy.spy().named("mySpy")
+        @spy = @cy.spy().as("mySpy")
 
       it "returns spy", ->
         expect(@spy).to.have.property("callCount")
@@ -230,16 +260,6 @@ describe "$Cypress.Cy Agents Commands", ->
       it "updates instrument log with alias", ->
         expect(@logs[0].get("alias")).to.equal("mySpy")
         expect(@logs[0].get("aliasType")).to.equal("agent")
-
-      it "includes alias in invocation log", ->
-        @spy()
-        expect(@logs[1].get("alias")).to.equal("mySpy")
-        expect(@logs[1].get("aliasType")).to.equal("agent")
-
-      it "includes alias in console props", ->
-        @spy()
-        consoleProps = @logs[1].get("consoleProps")()
-        expect(consoleProps["Alias"]).to.equal("mySpy")
 
     context "logging", ->
       ## same as cy.stub() except for name and type

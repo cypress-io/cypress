@@ -59,7 +59,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     as:
       empty_string: "#{cmd('as')} cannot be passed an empty string."
       invalid_type: "#{cmd('as')} can only accept a string."
-      reserved_word: "#{cmd('as')} cannot be aliased as: '{{str}}'. This word is reserved."
+      reserved_word: "#{cmd('as')} cannot be aliased as: '{{alias}}'. This word is reserved."
 
     blur:
       multiple_elements: "#{cmd('blur')} can only be called on a single element. Your subject contained {{num}} elements."

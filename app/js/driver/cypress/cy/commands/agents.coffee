@@ -75,12 +75,18 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
         ## of the spy
         return returned
 
-      agent.named = _.wrap agent.named, (orig, name) ->
+      agent.as = (alias) ->
+        _this._validateAlias(alias)
+        _this._addAlias({
+          subject: agent
+          command: log
+          alias: alias
+        })
         log.set({
-          alias: name
+          alias: alias
           aliasType: "agent"
         })
-        orig.call(agent, name)
+        agent.named(alias)
 
       agent.withArgs = _.wrap agent.withArgs, (orig, args...) ->
         _this._wrap(type, orig.apply(@, args), obj, method)

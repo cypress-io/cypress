@@ -2,21 +2,33 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
 
   blacklist = ["test", "runnable", "timeout", "slow", "skip", "inspect"]
 
+  Cypress.Cy.extend
+    _validateAlias: (alias) ->
+      if not _.isString(alias)
+        $Cypress.Utils.throwErrByPath "as.invalid_type"
+
+      if _.isBlank(alias)
+        $Cypress.Utils.throwErrByPath "as.empty_string"
+
+      if alias in blacklist
+        $Cypress.Utils.throwErrByPath "as.reserved_word", { args: { alias } }
+
+    _addAlias: (aliasObj) ->
+      {alias, subject} = aliasObj
+      aliases = @prop("aliases") ? {}
+      aliases[alias] = aliasObj
+      @prop("aliases", aliases)
+
+      remoteSubject = @getRemotejQueryInstance(subject)
+      ## assign the subject to our runnable ctx
+      @assign(alias, remoteSubject ? subject)
+
   Cypress.addUtilityCommand
     as: (subject, str) ->
       @ensureParent()
       @ensureSubject()
 
-      aliases = @prop("aliases") ? {}
-
-      if not _.isString(str)
-        $Cypress.Utils.throwErrByPath "as.invalid_type"
-
-      if _.isBlank(str)
-        $Cypress.Utils.throwErrByPath "as.empty_string"
-
-      if str in blacklist
-        $Cypress.Utils.throwErrByPath "as.reserved_word", { args: { str } }
+      @_validateAlias(str)
 
       ## this is the previous command
       ## which we are setting the alias as
@@ -46,13 +58,6 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
             aliasType: if $Cypress.Utils.hasElement(subject) then "dom" else "primitive"
           })
 
-      aliases[str] = {subject: subject, command: prev, alias: str}
-
-      @prop("aliases", aliases)
-
-      remoteSubject = @getRemotejQueryInstance(subject)
-
-      ## assign the subject to our runnable ctx
-      @assign(str, remoteSubject ? subject)
+      @_addAlias({subject: subject, command: prev, alias: str})
 
       return subject
