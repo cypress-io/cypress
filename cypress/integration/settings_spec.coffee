@@ -40,7 +40,7 @@ describe "Settings", ->
     it "collapses panels by default", ->
       cy.contains("Your project's configuration is displayed").should("not.exist")
       cy.contains("CI Keys allow you to").should("not.exist")
-      cy.contains(@projects[0].id).should("not.exist")
+      cy.contains(@config.projectId).should("not.exist")
 
     describe "when config panel is opened", ->
       beforeEach ->
@@ -84,7 +84,7 @@ describe "Settings", ->
         cy.contains("Project ID").click()
 
       it "displays project id section", ->
-        cy.contains(@projects[0].id)
+        cy.contains(@config.projectId)
 
     describe "when ci keys panels is opened", ->
       beforeEach ->
