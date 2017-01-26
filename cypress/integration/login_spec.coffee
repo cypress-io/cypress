@@ -1,7 +1,7 @@
 describe "Login", ->
   beforeEach ->
     cy
-      .visit("/")
+      .visit("/#login")
       .window().then (win) ->
         {@ipc, @App} = win
         @agents = cy.agents()
@@ -32,9 +32,9 @@ describe "Login", ->
       it "displays help link", ->
         cy.contains("a", "Need help?")
 
-      it "opens link to docs on click of help link", ->
+      it "opens link to login docs on click of help link", ->
         cy.contains("a", "Need help?").click().then ->
-          expect(@App.ipc).to.be.calledWith("external:open", "https://docs.cypress.io")
+          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/installing-and-running/#section-logging-in")
 
     describe "click 'Log In with GitHub'", ->
       beforeEach ->
@@ -85,40 +85,61 @@ describe "Login", ->
               .fixture("user").then (@user) ->
                 @ipc.handle("log:in", null, @user)
 
-          it "triggers get:project:paths", ->
-            expect(@App.ipc).to.be.calledWith("get:project:paths")
+          it "triggers get:projects", ->
+            expect(@App.ipc).to.be.calledWith("get:projects")
 
           it "displays username in UI", ->
             cy
               .then ->
-                @ipc.handle("get:project:paths", null, [])
+                @ipc.handle("get:projects", null, [])
               .get("nav a").should ($a) ->
                 expect($a).to.contain(@user.name)
 
           context "log out", ->
-            it "goes back to login on logout", ->
+            it.skip "displays login button on logout", ->
               cy
                 .then ->
-                  @ipc.handle("get:project:paths", null, [])
+                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click()
+                .get(".nav").contains("Log In")
+
+            it.skip "has login button enabled after logout and re log in", ->
+              cy
+                .then ->
+                  @ipc.handle("get:projects", null, [])
+                .get("nav a").contains("Jane").click()
+              cy
+                .contains("Log Out").click()
+                .get(".nav").contains("Log In").click()
+                .get("@loginBtn").should("not.be.disabled")
+
+            it "goes back to login on logout", ->
+              cy
+                .then ->
+                  @ipc.handle("get:projects", null, [])
+                .get("nav a").contains("Jane").click()
+              cy
+                .contains("Log Out").click().then ->
+                  expect(@App.ipc).to.be.calledWith("clear:github:cookies")
+
                 .get("#login")
 
             it "has login button enabled on logout", ->
               cy
                 .then ->
-                  @ipc.handle("get:project:paths", null, [])
+                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
-                .contains("Log Out").click()
+                .contains("Log Out").click().then ->
+                  expect(@App.ipc).to.be.calledWith("clear:github:cookies")
                 .get("@loginBtn").should("not.be.disabled")
-
 
             it "calls clear:github:cookies", ->
               cy
                 .then ->
-                  @ipc.handle("get:project:paths", null, [])
+                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click().then ->
@@ -127,7 +148,7 @@ describe "Login", ->
             it "calls log:out", ->
               cy
                 .then ->
-                  @ipc.handle("get:project:paths", null, [])
+                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click().then ->

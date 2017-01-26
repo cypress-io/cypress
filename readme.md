@@ -69,6 +69,9 @@ LGPL
 
 ## Changelog
 
+#### 0.4.0 - *(01/04/17)*
+- builds list, adding project for ci
+
 #### 0.3.13 - *(11/15/16)*
 - camelize session token
 

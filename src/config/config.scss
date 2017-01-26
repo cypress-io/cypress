@@ -36,6 +36,10 @@
 
   .config-vars {
     font-size: 13px;
+    border: 1px solid #ddd;
+    background-color: white;
+    margin: 0;
+    padding: 10px;
     font-family: Consolas, Monaco, 'Andale Mono', monospace;
 
     .envFile:hover, .env:hover, .config:hover, .cli:hover, .default:hover {
@@ -59,7 +63,7 @@
       color: #000;
     }
 
-    .envVars {
+    .nested {
       margin-left: 15px;
 
       .line {
@@ -97,9 +101,118 @@
 }
 
 .config-wrapper {
-  padding: 0 20px;
+  padding: 20px 20px 0;
 
   table tr:first-child td {
     border-top: 0;
   }
+
+  .rc-collapse-item {
+    margin-bottom: 20px;
+  }
+
+  .rc-collapse-header {
+    cursor: pointer;
+    font-size: 1.2em;
+    position: relative;
+    left: -15px;
+
+    .arrow {
+      @extend .#{$fa-css-prefix};
+      @extend .#{$fa-css-prefix}-caret-right;
+      @extend .#{$fa-css-prefix}-fw;
+      color: #777;
+      margin-right: 5px;
+    }
+  }
+
+  .rc-collapse-item-active .rc-collapse-header .arrow {
+    @extend .#{$fa-css-prefix}-caret-down;
+  }
+
+  .rc-collapse-content {
+    margin-top: 15px;
+    overflow: hidden;
+  }
+
+  .rc-collapse-content-inactive {
+    display: none;
+  }
+
+  .rc-collapse-anim-active {
+    transition: height 0.2s ease-out;
+  }
+}
+
+.config-table {
+  margin: 10px 0;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
+.config-ci-keys {
+  margin-bottom: 2em;
+
+  p.text-muted.manage-btn {
+    text-align: center;
+    margin-bottom: 0;
+    margin-top: 10px;
+  }
+
+  p.text-muted {
+    margin-bottom: 5px;
+  }
+
+  .empty-well {
+    margin: 10px 0;
+  }
+
+  pre {
+    margin: 10px 0;
+    background-color: white;
+    border: 1px solid #ddd;
+  }
+
+  table {
+    @include table-columns(60%, 20%, 20%);
+    margin-bottom: 10px;
+
+    &.table > tbody > tr > td {
+      line-height: 30px;
+      padding: 5px;
+      font-size: 13px;
+
+      &:first-child {
+        padding-left: 0;
+      }
+    }
+
+    .ci-key-date {
+      color: #777;
+    }
+
+    .ci-key {
+      font-family: Consolas, Monaco, 'Andale Mono', monospace;
+
+      input {
+        background-color: #fff;
+        font-size: 14px;
+        outline: none;
+      }
+
+      .input-group-addon {
+        cursor: pointer;
+
+        &:hover {
+          color: #333;
+        }
+      }
+    }
+  }
+
+}
+
+.loading-ci-keys {
+  color: #999;
+  margin: 1em;
 }

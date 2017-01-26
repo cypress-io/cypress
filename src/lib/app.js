@@ -1,6 +1,20 @@
 import ipc from './ipc'
+import errors from './errors'
 
-const App = { ipc }
+let onUnauth = () => {}
+
+ipc.onError((err) => {
+  if (errors.isUnauthenticated(err)) {
+    onUnauth()
+  }
+})
+
+const App = {
+  ipc,
+  onUnauth (cb) {
+    onUnauth = cb
+  },
+}
 
 window.App = App
 

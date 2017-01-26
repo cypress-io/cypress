@@ -12,7 +12,7 @@ export default class ProjectNav extends Component {
           <ul className='nav navbar-nav'>
             <li>
               <Link
-                to={`/projects/${project.id}/specs`}
+                to={`/projects/${project.clientId}/specs`}
                 activeClassName='active'
                 >
                 <i className='fa fa-code'></i>{' '}
@@ -21,11 +21,20 @@ export default class ProjectNav extends Component {
             </li>
             <li>
               <Link
-                to={`/projects/${project.id}/config`}
+                to={`/projects/${project.clientId}/builds`}
+                activeClassName='active'
+                >
+                <i className='fa fa-database'></i>{' '}
+                Builds
+              </Link>
+            </li>
+            <li>
+              <Link
+                to={`/projects/${project.clientId}/config`}
                 activeClassName='active'
                 >
                 <i className='fa fa-cog'></i>{' '}
-                Config
+                Settings
               </Link>
             </li>
           </ul>

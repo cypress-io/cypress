@@ -5,7 +5,7 @@ import { observer } from 'mobx-react'
 import { ContextMenu, MenuItem } from "react-contextmenu"
 
 import Project from './projects-list-item/'
-import { closeProject } from './projects-api'
+import { closeProject, getProjects, pollProjects, stopPollingProjects } from './projects-api'
 import projectsStore from './projects-store'
 
 class MyContextMenu extends Component {
@@ -21,7 +21,7 @@ class MyContextMenu extends Component {
   }
 
   handleClick (e, project) {
-    projectsStore.removeProject(project.id)
+    projectsStore.removeProject(project.clientId)
 
     App.ipc("remove:project", project.path)
   }
@@ -34,6 +34,15 @@ export default class Projects extends Component {
     closeProject()
   }
 
+  componentDidMount () {
+    getProjects()
+    this.pollId = pollProjects()
+  }
+
+  componentWillUnmount () {
+    stopPollingProjects(this.pollId)
+  }
+
   render () {
     if (!projectsStore.projects.length) return this._empty()
 
@@ -42,7 +51,7 @@ export default class Projects extends Component {
         { this._error() }
         <ul className='projects-list list-as-table'>
           { _.map(projectsStore.projects, (project) => (
-            <li key={project.id} className='li'>
+            <li key={project.clientId} className='li'>
               <Project project={project} />
             </li>
           ))}

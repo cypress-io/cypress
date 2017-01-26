@@ -3,10 +3,36 @@ import md5 from 'md5'
 import { computed, observable, action } from 'mobx'
 import Browser from '../lib/browser-model'
 
-const strLength = 75
+const persistentProps = [
+  'id',
+  'name',
+  'public',
+  'orgName',
+  'orgId',
+  'defaultOrg',
+  'lastBuildStatus',
+  'lastBuildCreatedAt',
+  'valid',
+]
+
+const validProps = persistentProps.concat([
+  'clientId',
+  'isChosen',
+  'isLoading',
+  'isNew',
+  'browsers',
+  'onBoardingModalOpen',
+  'browserState',
+  'resolvedConfig',
+  'error',
+  'parentTestsFolderDisplay',
+  'integrationExampleName',
+  'scaffoldedFiles',
+])
 
 export default class Project {
   @observable id
+  @observable clientId
   @observable path
   @observable isChosen = false
   @observable isLoading = false
@@ -18,26 +44,37 @@ export default class Project {
   @observable error
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
+  @observable scaffoldedFiles = []
+  @observable name
+  @observable public
+  @observable orgName
+  @observable orgId
+  @observable defaultOrg
+  @observable lastBuildStatus
+  @observable lastBuildCreatedAt
+  @observable valid = true
 
-  constructor (path) {
-    this.id = md5(path)
-    this.path = path
+  constructor (props) {
+    this.path = props.path
+    this.clientId = md5(props.path)
+
+    this.update(props)
   }
 
-  @computed get name () {
-    let splitName = _.last(this.path.split('/'))
-    return _.truncate(splitName, { length: 60 })
+  update (props) {
+    if (!props) return
+
+    _.each(validProps, (prop) => {
+      this._updateProp(props, prop)
+    })
   }
 
-  @computed get displayPath () {
-    let pathLength = this.path.length
+  _updateProp (props, prop) {
+    if (props[prop] != null) this[prop] = props[prop]
+  }
 
-    if (pathLength > strLength) {
-      let truncatedPath = this.path.slice((pathLength - 1) - strLength, pathLength)
-      return '...'.concat(truncatedPath)
-    } else {
-      return this.path
-    }
+  serialize () {
+    return _.pick(this, persistentProps)
   }
 
   @computed get otherBrowsers () {
@@ -53,27 +90,27 @@ export default class Project {
   }
 
   @action loading (bool) {
-    return this.isLoading = bool
+    this.isLoading = bool
   }
 
   @action openModal () {
-    return this.onBoardingModalOpen = true
+    this.onBoardingModalOpen = true
   }
 
   @action closeModal () {
-    return this.onBoardingModalOpen = false
+    this.onBoardingModalOpen = false
   }
 
   @action browserOpening () {
-    return this.browserState = "opening"
+    this.browserState = "opening"
   }
 
   @action browserOpened () {
-    return this.browserState = "opened"
+    this.browserState = "opened"
   }
 
   @action browserClosed () {
-    return this.browserState = "closed"
+    this.browserState = "closed"
   }
 
   @action setBrowsers (browsers = []) {
@@ -87,7 +124,7 @@ export default class Project {
       if (localStorage.getItem('chosenBrowser')) {
         this.setChosenBrowserByName(localStorage.getItem('chosenBrowser'))
       } else {
-        return this.setChosenBrowser(this.defaultBrowser)
+        this.setChosenBrowser(this.defaultBrowser)
       }
     }
   }
@@ -97,7 +134,7 @@ export default class Project {
       browser.isChosen = false
     })
     localStorage.setItem('chosenBrowser', browser.name)
-    return browser.isChosen = true
+    browser.isChosen = true
   }
 
   @action setOnBoardingConfig (config) {
@@ -106,23 +143,24 @@ export default class Project {
     this.integrationFolder = config.integrationFolder
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
     this.fileServerFolder = config.fileServerFolder
-    return this.integrationExampleName = config.integrationExampleName
+    this.integrationExampleName = config.integrationExampleName
+    this.scaffoldedFiles = config.scaffoldedFiles
   }
 
   @action setResolvedConfig (resolved) {
-    return this.resolvedConfig = resolved
+    this.resolvedConfig = resolved
   }
 
   @action setError (err) {
-    return this.error = err
+    this.error = err
   }
 
   setChosenBrowserByName (name) {
     const browser = _.find(this.browsers, { name })
-    return this.setChosenBrowser(browser)
+    this.setChosenBrowser(browser)
   }
 
   @action clearError () {
-    return this.error = undefined
+    this.error = undefined
   }
 }

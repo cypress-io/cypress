@@ -14,7 +14,7 @@ export default class Nav extends Component {
         <div className='container-fluid'>
           <ul className='nav navbar-nav'>
             <li>
-              { this.leftNavButton() }
+              { this._leftNavButton() }
             </li>
           </ul>
           <ul className='nav navbar-nav navbar-right'>
@@ -30,37 +30,15 @@ export default class Nav extends Component {
                 Chat
               </a>
             </li>
-            <li className='dropdown'>
-              <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
-                <i className='fa fa-user'></i>{' '}
-                {this._userDisplayName()}{' '}
-                <span className='caret'></span>
-              </a>
-              <ul className='dropdown-menu'>
-                <li>
-                  <a href='#' onClick={this._logout}>
-                    <i className="fa fa-sign-out"></i>{' '}
-                    Log Out
-                  </a>
-                </li>
-              </ul>
-            </li>
+            { this._userStateButton() }
           </ul>
         </div>
       </nav>
     )
   }
 
-  _userDisplayName = () => {
-    // there is a situation where state.user could be undefined
-    // perhaps this is happening very quickly on log out???
-    if (state.user) {
-      return state.user.displayName
-    }
-  }
-
-  leftNavButton = () => {
-    if (this.props.params.id) {
+  _leftNavButton = () => {
+    if (this.props.params.clientId) {
       return (
         <Link
           to="/projects"
@@ -80,9 +58,40 @@ export default class Nav extends Component {
     }
   }
 
+  _userStateButton = () => {
+    if (state.hasUser) {
+      return (
+        <li className='dropdown'>
+          <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
+            <i className='fa fa-user'></i>{' '}
+            { state.user.displayName }{' '}
+            <span className='caret'></span>
+          </a>
+          <ul className='dropdown-menu'>
+            <li>
+              <a href='#' onClick={this._logout}>
+                <i className="fa fa-sign-out"></i>{' '}
+                Log Out
+              </a>
+            </li>
+          </ul>
+        </li>
+      )
+    }
+    //  else {
+    //   return (
+    //     <li>
+    //       <Link to='/login'>
+    //         <i className='fa fa-sign-in'></i>{' '}
+    //         Log In
+    //       </Link>
+    //     </li>
+    //   )
+    // }
+  }
+
   _closeProject = () => {
-    let projectId = this.props.params.id
-    closeProject(projectId)
+    closeProject(this.props.params.clientId)
   }
 
   _openDocs (e) {
@@ -92,7 +101,7 @@ export default class Nav extends Component {
 
   _openChat (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://gitter.im/cypress-io/cypress')
+    App.ipc('external:open', 'https://on.cypress.io/chat')
   }
 
   _logout = (e) => {

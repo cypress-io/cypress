@@ -16,13 +16,22 @@ class Projects {
     return _.filter(this.projects, (project) => !project.isChosen)
   }
 
-  getProjectById (projectId) {
-    return _.find(this.projects, { id: projectId })
+  @computed get clientProjects () {
+    return _.map(this.projects, (project) => _.pick(project, ['path', 'id']))
+  }
+
+  getProjectByClientId (clientId) {
+    return _.find(this.projects, { clientId })
   }
 
   addProject (path) {
-    const project = new Project(path)
+    let projectToAdd = {
+      path,
+    }
+
+    const project = new Project(projectToAdd)
     this.projects.push(project)
+    this._saveToLocalStorage()
     return project
   }
 
@@ -30,12 +39,33 @@ class Projects {
     this.isLoading = bool
   }
 
-  @action setProjects (paths) {
-    this.projects = _.map(paths, (path) => (
-      new Project(path)
-    ))
+  @action setProjects (projects) {
+    // get the projects off of localStorage (with statuses)
+    // and set them up so we don't have to wait for data from server
+    const localProjects = JSON.parse(localStorage.getItem('projects') || '[]')
+    // index for quick lookup
+    const localProjectsIndex = _.keyBy(localProjects, 'id')
+
+    this.projects = _.map(projects, (project) => {
+      const props = _.extend(project, localProjectsIndex[project.id])
+      return new Project(props)
+    })
+
     this.isLoading = false
     this.isLoaded = true
+  }
+
+  @action setProjectStatuses (projects) {
+    // index for quick lookup
+    const projectsIndex = _.keyBy(projects, 'id')
+
+    // merge projects received from api with what we
+    // already have in memory
+    _.each(this.projects, (project) => {
+      project.update(projectsIndex[project.id])
+    })
+
+    this._saveToLocalStorage()
   }
 
   @action setError (err) {
@@ -50,10 +80,26 @@ class Projects {
     project.isChosen = true
   }
 
-  @action removeProject (projectId) {
-    this.projects = _.filter(this.projects, (project) => {
-      return !(project.id === projectId)
-    })
+  updateProject (project, props) {
+    project.update(props)
+    this._saveToLocalStorage()
+  }
+
+  @action removeProject (clientId) {
+    const projectIndex = _.findIndex(this.projects, { clientId })
+
+    if (projectIndex != null) {
+      this.projects.splice(projectIndex, 1)
+      this._saveToLocalStorage()
+    }
+  }
+
+  serializeProjects () {
+    return _.map(this.projects, (project) => project.serialize())
+  }
+
+  _saveToLocalStorage () {
+    localStorage.setItem('projects', JSON.stringify(this.serializeProjects()))
   }
 }
 

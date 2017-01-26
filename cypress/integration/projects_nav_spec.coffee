@@ -13,7 +13,7 @@ describe "Projects Nav", ->
       .fixture("user").then (@user) ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
-        @ipc.handle("get:project:paths", null, @projects)
+        @ipc.handle("get:projects", null, @projects)
       .fixture("config").as("config")
 
   context "project nav", ->
@@ -65,24 +65,45 @@ describe "Projects Nav", ->
             @ipc.handle("get:specs", null, @specs)
           .contains("integration")
 
-    describe "config page", ->
+    describe "builds page", ->
+      beforeEach ->
+        cy
+          .fixture("builds").as("builds")
+          .get(".navbar-default")
+            .contains("a", "Builds").as("buildsNav").click()
+
+      it "highlights builds on click", ->
+        cy
+          .get("@buildsNav")
+            .should("have.class", "active")
+
+      it "navigates to builds url", ->
+        cy
+          .location().its("hash").should("include", "builds")
+
+      it "displays builds page", ->
+        @ipc.handle("get:builds", null, @builds)
+        cy
+          .get(".builds-container li")
+          .should("have.length", 4)
+
+    describe "settings page", ->
       beforeEach ->
         cy
           .get(".navbar-default")
-            .contains("a", "Config").as("configNav").click()
+            .contains("a", "Settings").as("settingsNav").click()
 
       it "highlights config on click", ->
         cy
-          .get("@configNav")
+          .get("@settingsNav")
             .should("have.class", "active")
 
       it "navigates to config url", ->
         cy
           .location().its("hash").should("include", "config")
 
-      it "displays config page", ->
-        cy
-          .contains("h5", "configuration")
+      it "displays settings page", ->
+        cy.contains("Configuration")
 
   context "browsers dropdown", ->
     describe "browsers available", ->
@@ -327,6 +348,10 @@ describe "Projects Nav", ->
 
       cy
         .contains("Back to Projects").click({force: true})
+        .then ->
+          @ipc.handle("get:projects", null, [])
+        .then ->
+          @ipc.handle("get:project:statuses", null, [])
         .then ->
           expect(Cypress._.keys(@App.ipc()).length).to.eq(1)
 

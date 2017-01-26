@@ -1,10 +1,13 @@
-import cs from 'classnames'
-import { action } from 'mobx'
 import React, { Component } from 'react'
+import { withRouter } from 'react-router'
+import { action, autorun } from 'mobx'
+import { observer } from 'mobx-react'
+import cs from 'classnames'
+
 import App from '../lib/app'
 import state from '../lib/state'
-import { observer } from 'mobx-react'
 
+@withRouter
 @observer
 class Login extends Component {
   constructor (props) {
@@ -14,6 +17,12 @@ class Login extends Component {
       isLoggingIn: false,
       error: null,
     }
+
+    autorun(() => {
+      if (state.hasUser) {
+        return this.props.router.push('/')
+      }
+    })
   }
 
   render () {
@@ -25,7 +34,7 @@ class Login extends Component {
         <div className='login-content'>
           {this._error()}
           <button
-            className={cs('btn btn-login btn-block', {
+            className={cs('btn btn-login btn-black btn-block', {
               disabled: this.state.isLoggingIn,
             })}
             onClick={this._login}
@@ -77,6 +86,7 @@ class Login extends Component {
       return state.setUser(user)
     }))
     .catch(alreadyOpen, (err) => {
+      err
       return // do nothing if we're already open!
     })
     .catch(action('error:at:login', (err) => {
@@ -123,7 +133,7 @@ class Login extends Component {
   }
 
   _openHelp () {
-    App.ipc('external:open', 'https://docs.cypress.io')
+    App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running/#section-logging-in')
   }
 
   _openAuthDoc () {

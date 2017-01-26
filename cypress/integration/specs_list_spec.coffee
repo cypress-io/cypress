@@ -12,7 +12,7 @@ describe "Specs List", ->
       .fixture("user").then (@user) ->
         @ipc.handle("get:current:user", null, @user)
       .fixture("projects").then (@projects) ->
-        @ipc.handle("get:project:paths", null, @projects)
+        @ipc.handle("get:projects", null, @projects)
       .fixture("config").as("config")
       .fixture("specs").as("specs")
 
@@ -69,6 +69,24 @@ describe "Specs List", ->
     it "displays modal", ->
       cy
         .contains(".modal", "To help you get started").should("be.visible")
+
+    it "displays the scaffolded files", ->
+      cy.get(".folder-preview-onboarding").within ->
+        cy
+          .contains("fixtures").end()
+          .contains("example.json").end()
+          .contains("integration").end()
+          .contains("example_spec.js").end()
+          .contains("support").end()
+          .contains("commands.js").end()
+          .contains("defaults.js").end()
+          .contains("index.js")
+
+    it "lists folders and files alphabetically", ->
+      cy.get(".folder-preview-onboarding").within ->
+        cy
+          .contains("fixtures").parent().next()
+          .contains("integration")
 
     it "can dismiss the modal", ->
       cy
@@ -332,4 +350,3 @@ describe "Specs List", ->
           .contains("My-Fake-Project").click()
         .get(".error").contains("Go Back to Projects").click().then ->
           expect(@App.ipc).to.be.calledWith("close:project")
-

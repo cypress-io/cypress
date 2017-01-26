@@ -1,0 +1,21 @@
+import moment from 'moment'
+
+export default () => {
+  moment.updateLocale('en', {
+    relativeTime: {
+      future: "in %s",
+      past: "%s ago",
+      s: "secs",
+      m: "a min",
+      mm: "%d mins",
+      h: "an hour",
+      hh: "%d hours",
+      d: "a day",
+      dd: "%d days",
+      M: "a mo",
+      MM: "%d mos",
+      y: "a year",
+      yy: "%d years",
+    },
+  })
+}

@@ -19,7 +19,7 @@ export default class Application extends Component {
       state.userLoaded = true
       state.setUser(user)
 
-      if (!user || !user.sessionToken) {
+      if (!user || !user.session_token) {
         return this.props.router.push('/login')
       }
     }))
