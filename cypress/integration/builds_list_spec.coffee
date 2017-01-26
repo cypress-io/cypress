@@ -265,6 +265,22 @@ describe "Builds List", ->
         cy.contains("unexpected error")
         cy.contains('"no builds": "for you"')
 
+    describe "unauthorized project", ->
+      beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("project4").click()
+          .fixture("config").then (@config) ->
+            @config.projectId = null
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+          .then =>
+            @ipc.handle("get:builds", null, [])
+
+      it "displays permissions message", ->
+        cy.contains("Request access")
+
     describe "invalid project", ->
       beforeEach ->
         cy
@@ -275,7 +291,6 @@ describe "Builds List", ->
             @ipc.handle("open:project", null, @config)
           .fixture("specs").as("specs").then ->
             @ipc.handle("get:specs", null, @specs)
-          .get(".nav a").contains("Builds").click()
           .then =>
             @ipc.handle("get:builds", null, [])
 

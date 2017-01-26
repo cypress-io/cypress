@@ -167,6 +167,23 @@ describe "Projects List", ->
             @ipc.handle("get:projects", null, @projects).then =>
               expect(@App.ipc.withArgs("get:project:statuses")).to.be.calledTwice
 
+        describe "when user is unauthorized for project", ->
+
+          it "displays unauthorized status", ->
+            cy
+              .get(".projects-list>li").last().prev()
+              .contains("Unauthorized")
+
+          it "opens builds tab when clicked", ->
+            cy
+              .get(".projects-list>li a").last().click()
+              .fixture("config").then (@config) ->
+                @ipc.handle("open:project", null, @config)
+              .fixture("specs").as("specs").then ->
+                @ipc.handle("get:specs", null, @specs)
+              .location().its("hash")
+                .should("include", "builds")
+
         describe "when project is invalid", ->
 
           it "displays invalid status", ->
