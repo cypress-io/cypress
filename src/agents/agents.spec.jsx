@@ -78,5 +78,15 @@ describe('<Agents />', () => {
       const component = shallow(<Agent model={agentModel()} />)
       expect(component.find('.call-count')).to.have.text('-')
     })
+
+    it('renders alias when singular', () => {
+      const component = shallow(<Agent model={agentModel({ alias: 'foo' })} />)
+      expect(component.find('td').at(2)).to.have.text('foo')
+    })
+
+    it('renders aliases when multiple', () => {
+      const component = shallow(<Agent model={agentModel({ alias: ['foo', 'bar'] })} />)
+      expect(component.find('td').at(2)).to.have.text('foo, bar')
+    })
   })
 })

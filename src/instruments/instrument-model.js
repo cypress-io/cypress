@@ -1,7 +1,7 @@
 import { asReference, observable } from 'mobx'
 
 export default class Log {
-  @observable alias = null
+  @observable alias = asReference(null)
   @observable aliasType = null
   @observable displayName
   @observable id

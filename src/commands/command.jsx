@@ -25,7 +25,7 @@ const visibleMessage = (model) => {
     'This element is not visible.'
 }
 
-const Aliases = observer(({ model }) => (
+const AliasesReferences = observer(({ model }) => (
   <span>
     {_.map([].concat(model.referencesAlias), (alias) => (
       <Tooltip key={alias} placement='top' title={`Found an alias for: '${alias}'`}>
@@ -34,6 +34,20 @@ const Aliases = observer(({ model }) => (
     ))}
   </span>
 ))
+
+const Aliases = observer(({ model }) => {
+  if (!model.alias) return null
+
+  return (
+    <span>
+      {_.map([].concat(model.alias), (alias) => (
+        <Tooltip key={alias} placement='top' title={`${model.message} aliased as: '${alias}'`}>
+          <span className={`command-alias ${model.aliasType}`}>{alias}</span>
+        </Tooltip>
+      ))}
+    </span>
+  )
+})
 
 const Message = observer(({ model }) => (
   <span>
@@ -86,12 +100,10 @@ class Command extends Component {
               <span>{model.event ? `(${displayName(model)})` :  displayName(model)}</span>
             </span>
             <span className='command-message'>
-              {model.referencesAlias ? <Aliases model={model} /> : <Message model={model} />}
+              {model.referencesAlias ? <AliasesReferences model={model} /> : <Message model={model} />}
             </span>
             <span className='command-controls'>
-              <Tooltip placement='top' title={`${model.message} aliased as: '${model.alias}'`}>
-                <span className={`command-alias ${model.aliasType}`}>{model.alias}</span>
-              </Tooltip>
+              <Aliases model={model} />
               <Tooltip placement='top' title={visibleMessage(model)}>
                 <i className='command-invisible fa fa-eye-slash'></i>
               </Tooltip>
@@ -183,5 +195,5 @@ Command.defaultProps = {
   runnablesStore,
 }
 
-export { Aliases, Message }
+export { Aliases, AliasesReferences, Message }
 export default Command

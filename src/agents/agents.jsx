@@ -8,7 +8,7 @@ const Agent = observer(({ model }) => (
   <tr className={cs({ 'no-calls': !model.callCount })}>
     <td>{model.type}</td>
     <td>{model.functionName}</td>
-    <td>{model.alias}</td>
+    <td>{[].concat(model.alias).join(', ')}</td>
     <td className='call-count'>{model.callCount || '-'}</td>
   </tr>
 ))
@@ -38,7 +38,7 @@ const Agents = observer(({ model }) => (
                 <tr>
                   <th>Type</th>
                   <th>Function</th>
-                  <th>Alias</th>
+                  <th>Alias(es)</th>
                   <th># Calls</th>
                 </tr>
               </thead>
