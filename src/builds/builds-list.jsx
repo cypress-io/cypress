@@ -12,6 +12,7 @@ import errors from '../lib/errors'
 import { getBuilds, pollBuilds, stopPollingBuilds } from './builds-api'
 import { getCiKeys } from '../projects/projects-api'
 import projectsStore from '../projects/projects-store'
+import Project from '../project/project-model'
 import orgsStore from '../organizations/organizations-store'
 
 import Build from './builds-list-item'
@@ -98,8 +99,13 @@ class Builds extends Component {
     const { project } = this.props
 
     // If the project is invalid
-    if (!project.valid) {
+    if (project.state === Project.INVALID) {
       return this._emptyWithoutSetup(false)
+    }
+
+    // OR if user does not have acces to the project
+    if (project.state === Project.UNAUTHORIZED) {
+      return this._permissionMessage()
     }
 
     // OR if there is an error getting the builds
@@ -114,7 +120,7 @@ class Builds extends Component {
 
       // they are not authorized to see builds
       } else if (errors.isUnauthenticated(this.buildsCollection.error) || errors.isUnauthorized(this.buildsCollection.error)) {
-        return <PermissionMessage project={project} onRetry={this._getBuilds} />
+        return this._permissionMessage()
 
       // other error, but only show if we don't already have builds
       } else if (!this.buildsCollection.isLoaded) {
@@ -195,6 +201,15 @@ class Builds extends Component {
     )
   }
 
+  _permissionMessage () {
+    return (
+      <PermissionMessage
+        project={this.props.project}
+        onRetry={this._getBuilds}
+      />
+    )
+  }
+
   @action _setProjectDetails = (projectDetails) => {
     this.buildsCollection.setError(null)
     projectsStore.updateProject(this.props.project, {
@@ -203,7 +218,7 @@ class Builds extends Component {
       public: projectDetails.public,
       orgId: projectDetails.orgId,
       orgName: (orgsStore.getOrgById(projectDetails.orgId) || {}).name,
-      valid: true,
+      state: Project.VALID,
     })
   }
 
