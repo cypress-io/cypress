@@ -91,16 +91,51 @@ describe "$Cypress.Cy Agents Commands", ->
         @Cypress.on "log", (attrs, log) =>
           @logs.push(log)
 
-        @stub = @cy.stub()
+        @obj = {foo: ->}
+        @stub = @cy.stub(@obj, "foo")
         @stubWithArgs = @stub.withArgs("foo")
-
-      it "creates new log instrument", ->
-        expect(@logs.length).to.equal(2)
-        expect(@logs[1].get("name")).to.equal("stub-2")
 
       it "can be aliased", ->
         @stubWithArgs.as("withFoo")
         expect(@logs[1].get("alias")).to.equal("withFoo")
+
+      context "logging", ->
+        it "creates new log instrument", ->
+          expect(@logs.length).to.equal(2)
+          expect(@logs[1].get("name")).to.equal("stub-2")
+
+        describe "on invocation", ->
+          it "only logs once", ->
+            @obj.foo("foo")
+            expect(@logs.length).to.equal(3)
+
+          it "includes both counts in name", ->
+            @obj.foo("foo")
+            expect(@logs[2].get("name")).to.equal("stub-1/2")
+
+          it "has no alias if no aliases set", ->
+            @obj.foo("foo")
+            expect(@logs[2].get("alias")).to.be.undefined
+
+          it "has withArgs alias if it's the only one set", ->
+            @stubWithArgs.as("withFoo")
+            @obj.foo("foo")
+            expect(@logs[2].get("alias")).to.eql(["withFoo"])
+
+          it "has parent alias if it's the only one set", ->
+            @stub.as("noArgs")
+            @obj.foo("foo")
+            expect(@logs[2].get("alias")).to.eql(["noArgs"])
+
+          it "has both aliases if both set", ->
+            @stub.as("noArgs")
+            @stubWithArgs.as("withFoo")
+            @obj.foo("foo")
+            expect(@logs[2].get("alias")).to.eql(["noArgs", "withFoo"])
+
+          it "logs parent if invoked without necessary args", ->
+            @obj.foo()
+            expect(@logs[2].get("name")).to.equal("stub-1")
 
     context "#as", ->
       beforeEach ->
@@ -119,20 +154,20 @@ describe "$Cypress.Cy Agents Commands", ->
 
       it "includes alias in invocation log", ->
         @stub()
-        expect(@logs[1].get("alias")).to.equal("myStub")
+        expect(@logs[1].get("alias")).to.eql(["myStub"])
         expect(@logs[1].get("aliasType")).to.equal("agent")
 
       it "includes alias in console props", ->
         @stub()
         consoleProps = @logs[1].get("consoleProps")()
-        expect(consoleProps["Alias"]).to.equal("myStub")
+        expect(consoleProps["Alias"]).to.eql("myStub")
 
       it "updates the displayName of the agent", ->
         @cy.then ->
           expect(@myStub.displayName).to.equal("myStub")
 
       it "stores the lookup as an alias", ->
-        expect(@cy.prop("aliases").b).to.be.defined
+        expect(@cy.prop("aliases").myStub).to.be.defined
 
       it "stores the agent as the subject", ->
         expect(@cy.prop("aliases").myStub.subject).to.equal(@stub)
@@ -146,7 +181,7 @@ describe "$Cypress.Cy Agents Commands", ->
           @allowErrors()
 
         _.each [null, undefined, {}, [], 123], (value) =>
-          it "throws if when passed: #{value}", ->
+          it "throws when passed: #{value}", ->
             expect(=> @cy.stub().as(value)).to.throw("cy.as() can only accept a string.")
 
         it "throws on blank string", ->

@@ -19,19 +19,37 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
   resetCounts()
   Cypress.on "restore", resetCounts
 
+  hasMatchingFake = (agent, args) ->
+    _.some agent.fakes, (fake) ->
+      fake.matches(args)
+
   getMessage = (method, args) ->
     method ?= "function"
     args = _.map args, (arg, i) -> "arg#{i + 1}"
     "#{method}(#{args.join(', ')})"
 
-  onInvoke = (obj) ->
+  onInvoke = (obj, args) ->
     if log = obj.log
       ## increment the callCount on the agent instrument log
       log.set "callCount", log.get("callCount") + 1
       alias = log.get("alias")
 
+    agent = obj.agent
+
+    if agent.fakes?.length and hasMatchingFake(agent, args)
+      ## this is a parent fake and there is a matching child,
+      ## let them log instead so there isn't a duplicate
+      return
+
+    if parent = agent.parent
+      count = [parent._cyCount, obj.count].join("/")
+    else
+      count = obj.count
+
+    aliases = _.compact([agent.parent?._cyAlias, alias])
+
     logProps = {
-      name:     [obj.name, obj.count].join("-")
+      name:     [obj.name, count].join("-")
       message:  obj.message
       error:    obj.error
       type:     "parent"
@@ -42,10 +60,15 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
         console = {}
         console.Command = null
         console.Error = null
-        console.Alias = alias
+        ## TODO: break out parent/child and show alias, what args match, etc
+        if aliases.length
+          aliasesLabel = "Alias"
+          aliasesLabel += "es" if aliases.length > 1
+          console[aliasesLabel] = aliases.join(", ")
         console[obj.name] = obj.agent
         console[display(obj.name)] = obj.obj
         console.Calls = obj.agent.callCount
+        ## TODO: show this as key:value, not group
         console.groups = ->
           items = {
             Arguments: obj.call.args
@@ -64,8 +87,8 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
         console
     }
 
-    if alias
-      logProps.alias = alias
+    if aliases.length
+      logProps.alias = aliases
       logProps.aliasType = "agent"
 
     Cypress.Log.command(logProps)
@@ -83,6 +106,8 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
       count: count
       callCount: 0
     })
+
+    agent._cyCount = count
 
     agent.invoke = _.wrap agent.invoke, (orig, func, thisValue, args) ->
       error = null
@@ -108,7 +133,7 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
         error:     error
         log:       log
 
-      onInvoke(props)
+      onInvoke(props, args)
 
       ## if an error did exist then we need
       ## to bubble it up
@@ -125,6 +150,7 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
         command: log
         alias: alias
       })
+      agent._cyAlias = alias
       log.set({
         alias: alias
         aliasType: "agent"
