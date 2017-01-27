@@ -139,6 +139,12 @@
   margin-bottom: 0;
   @include list-columns(0%, 9%, 25%, 13%, 10%, 12%, 9%, 7%, 8%, 7%);
 
+  .user-avatar {
+    position: relative;
+    margin-right: 3px;
+    top: 1px;
+  }
+
   &>li {
     overflow: auto;
     clear: both;
@@ -259,38 +265,106 @@
   }
 }
 
+
+
 .user-avatar {
-  position: relative;
-  margin-right: 3px;
-  top: 1px;
+  border-radius: 100px;
 }
 
+
 .setup-project-modal {
+  .label-title {
+    overflow: auto;
+  }
+
+  .radio label {
+    padding-left: 21px;
+    overflow: auto;
+
+    input[type='radio'] {
+      margin-top: 2px;
+    }
+  }
+
+  .owner-parts {
+    overflow: auto;
+    clear: both;
+  }
+
+  .owner-part-one {
+    float: left;
+    width: 42%;
+    margin-right: 1%;
+  }
+
+  .owner-part-two {
+    float: left;
+    width: 57%;
+  }
+
+  .radio + .radio {
+    margin-bottom: 0;
+  }
+
   .form-horizontal {
     background: none;
     margin: 0;
     padding: 0;
     border: 0;
+
+    .form-group {
+      overflow: auto;
+    }
   }
 
   .help-block {
-    font-size: 13px;
+    font-size: 12px;
     color: #999;
     margin-bottom: 0;
     margin-top: 3px;
   }
 
+  small.help-block {
+    font-size: 12px;
+  }
+
   hr {
     border-color: #dadada !important;
+  }
 
+  .btn-group .btn {
+    padding: 4px 12px;
+
+    i {
+      font-size: 12px;
+      position: relative;
+      top: -1px;
+      margin-right: 2px;
+    }
+  }
+
+  .manage-orgs-btn {
+    padding: 0;
+    font-size: 12px;
+  }
+
+
+  .user-avatar {
+    position: relative;
+    top: -2px;
   }
 
   .control-label {
     font-weight: normal;
   }
 
-  input[type='text'].form-control,
   select.form-control {
+    padding: 3px 6px;
+    height: 30px;
+    margin-bottom: 0;
+  }
+
+  input[type='text'].form-control {
     padding: 3px 6px;
     height: 28px;
   }
@@ -321,24 +395,6 @@
 
     button {
       position: relative;
-
-      i {
-        display: none;
-        position: absolute;
-        left: 50%;
-        margin-top: 2px;
-        margin-left: -5px;
-      }
-    }
-  }
-
-  &.is-submitting .actions button {
-    span {
-      visibility: hidden;
-    }
-
-    i {
-      display: inline-block;
     }
   }
 }

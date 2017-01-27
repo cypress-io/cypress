@@ -360,20 +360,20 @@ describe "Builds List", ->
               .get("#projectName").clear().type(@newProjectName)
               .get("#projectName").should("have.value", @newProjectName)
 
-          it "lists organizations to assign to project", ->
+          it.skip "lists organizations to assign to project", ->
             cy
               .get("#organizations-select").find("option").should("have.length", @orgs.length)
 
-          it "selects default org by default", ->
+          it.skip "selects default org by default", ->
             cy
               .get("#organizations-select").should("have.value", "000")
 
-          it "opens external link on click of manage", ->
+          it.skip "opens external link on click of manage", ->
             cy
               .contains("manage").click().then ->
                  expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/settings")
 
-          it "displays public and private radios w/ public preselected", ->
+          it.skip "displays public and private radios w/ public preselected", ->
             cy
               .get(".modal-body").contains("Public")
                 .find("input").should("be.checked")
@@ -392,13 +392,6 @@ describe "Builds List", ->
                 .contains(".btn", "Setup Project")
                 .should("be.disabled")
 
-            it "hides button text", ->
-              cy
-                .get(".modal-body")
-                .contains(".btn", "Setup Project")
-                .find("span")
-                .should("not.be.visible")
-
             it "shows spinner", ->
               cy
                 .get(".modal-body")
@@ -406,7 +399,7 @@ describe "Builds List", ->
                 .find("i")
                 .should("be.visible")
 
-          describe "successfully submit form", ->
+          describe.skip "successfully submit form", ->
             beforeEach ->
               @ipc.handle("setup:ci:project", null, {
                 id: "project-id-123"

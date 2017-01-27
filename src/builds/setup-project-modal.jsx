@@ -2,11 +2,14 @@ import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-
-import App from '../lib/app'
 import BootstrapModal from 'react-bootstrap-modal'
 
+import state from '../lib/state'
+import App from '../lib/app'
 import orgsStore from '../organizations/organizations-store'
+import { gravatarUrl } from '../lib/utils'
+
+const defaultOrg = _.find(orgsStore.orgs, { default: true })
 
 @observer
 class SetupProject extends Component {
@@ -24,6 +27,7 @@ class SetupProject extends Component {
       error: null,
       projectName: this._initialProjectName(),
       public: true,
+      owner: null,
       showNameMissingError: false,
       isSubmitting: false,
     }
@@ -32,8 +36,6 @@ class SetupProject extends Component {
   render () {
     if (!orgsStore.isLoaded) return null
 
-    const defaultOrg = _.find(orgsStore.orgs, { default: true })
-
     return (
       <BootstrapModal
         show={this.props.show}
@@ -41,85 +43,111 @@ class SetupProject extends Component {
         backdrop='static'
         >
         <div
-          className={cs('setup-project-modal modal-body os-dialog', {
-            'is-submitting': this.state.isSubmitting,
-          })}
+          className='setup-project-modal modal-body os-dialog'
         >
           <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
           <h4>Setup Project to Record</h4>
           <form
-            className='form-horizontal'
             onSubmit={this._submit}>
             <div className={cs('form-group', {
               'has-error': this.state.showNameMissingError && !this._hasValidProjectName(),
             })}>
-              <label htmlFor='projectName' className='col-sm-2 control-label'>
-                Name:
-              </label>
-              {
-              // <div className='col-sm-10'>
-              //   <input
-              //     autoFocus='true'
-              //     ref='projectName'
-              //     type='text'
-              //     className='form-control'
-              //     id='projectName'
-              //     value={this.state.projectName}
-              //     onChange={this._updateProjectName}
-              //   />
-              //   <p className='help-block'>You can change this later.</p>
-              // </div>
-            }
-              {
-              <div className='col-sm-7'>
-                <p className='form-control-static'>
-                  {this.state.projectName}{' '}
-                  <a href='#'>
-                    <i className='fa fa-pencil'></i>
-                  </a>
-                </p>
+              <div className='label-title'>
+                <label htmlFor='projectName' className='control-label pull-left'>
+                  What's the name of the project?
+                </label>
+                <p className='help-block pull-right'>(You can change this later)</p>
               </div>
-              }
+              <div>
+                <input
+                  autoFocus='true'
+                  ref='projectName'
+                  type='text'
+                  className='form-control'
+                  id='projectName'
+                  value={this.state.projectName}
+                  onChange={this._updateProjectName}
+                />
+              </div>
               <div className='help-block validation-error'>Please enter a project name</div>
             </div>
           <hr />
-          <p className='text-muted'>Who should this project belong to?</p>
-
             <div className='form-group'>
-              <label htmlFor='projectName' className='col-sm-2 control-label'>
-                Owner:
-              </label>
-
-              <div className='col-sm-8'>
-                <select
-                  ref='orgId'
-                  id='organizations-select'
-                  className='form-control'>
-                    <option value={defaultOrg.id}>{defaultOrg.name}</option>
-
-                    {_.map(orgsStore.orgs, (org) => {
-                      if (org.default) return null
-
-                      return (
-                        <option
-                          key={org.id}
-                          value={org.id}
-                        >
-                          {org.name}
-                        </option>
-                      )
-                    })}
-                </select>
+            <div className='label-title'>
+                <label htmlFor='projectName' className='control-label pull-left'>
+                  Who should own this project?
+                </label>
+                <a
+                  href='#'
+                  className={`btn btn-link manage-orgs-btn pull-right ${this.state.owner === 'org' ? '' : 'hidden'}`}
+                  onClick={this._manageOrgs}>
+                  (manage organizations)
+                </a>
               </div>
-              <div className='col-sm-2 no-left-padding'>
-                <button href='#' className='btn btn-link manage-orgs-btn' onClick={this._manageOrgs}>manage</button>
+              <div className='owner-parts'>
+                <div className='owner-part-one'>
+                  <div className='btn-group' data-toggle='buttons'>
+                    <label className={`btn btn-default ${this.state.owner === 'me' ? 'active' : ''}`}>
+                      <input
+                        type='radio'
+                        name='owner-toggle'
+                        id='me'
+                        autocomplete='off'
+                        value='me'
+                        checked={this.state.owner === 'me'}
+                        onChange={this._updateOwner}
+                        />
+                        <img
+                          className='user-avatar'
+                          height='13'
+                          width='13'
+                          src={`${gravatarUrl(state.email)}`}
+                        />
+                        {' '}Me
+                    </label>
+                    <label className={`btn btn-default ${this.state.owner === 'org' ? 'active' : ''}`}>
+                      <input
+                        type='radio'
+                        name='owner-toggle'
+                        id='org'
+                        autocomplete='off'
+                        value='org'
+                        checked={this.state.owner === 'org'}
+                        onChange={this._updateOwner}
+                        />
+                        <i className='fa fa-building-o'></i>
+                        {' '}An Organization
+                    </label>
+                  </div>
+                </div>
+                <div className='owner-part-two'>
+                  <div className={`form-group ${this.state.owner === 'org' ? '' : 'hidden'}`}>
+                    <select
+                      ref='orgId'
+                      id='organizations-select'
+                      className='form-control'>
+                        {_.map(orgsStore.orgs, (org) => {
+                          if (org.default) return null
+
+                          return (
+                            <option
+                              key={org.id}
+                              value={org.id}
+                            >
+                              {org.name}
+                            </option>
+                          )
+                        })}
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className='form-group'>
-              <label htmlFor='projectName' className='col-sm-2 control-label'>
-                Access:
+            <div className={`form-group ${this.state.owner ? '' : 'hidden'}`}>
+              <hr />
+              <label htmlFor='projectName' className='control-label'>
+                Who should see the builds and recordings?
               </label>
-              <div className='col-sm-10'>
                 <div className='radio privacy-radio'>
                   <label>
                     <input
@@ -129,9 +157,11 @@ class SetupProject extends Component {
                       checked={this.state.public}
                       onChange={this._updateAccess}
                     />
-                    <i className='fa fa-eye'></i>{' '}
-                    <strong>Public</strong>
-                    <p>Anyone can see the project's builds.</p>
+                    <p>
+                      <i className='fa fa-eye'></i>{' '}
+                      <strong>Public:</strong>{' '}
+                      Anyone has access.
+                    </p>
                   </label>
                 </div>
                 <div className='radio privacy-radio'>
@@ -143,24 +173,29 @@ class SetupProject extends Component {
                       checked={!this.state.public}
                       onChange={this._updateAccess}
                     />
-                    <i className='fa fa-lock'></i>{' '}
-                    <strong>Private</strong>
-                    <p>Only invited users can see the project's builds.<br/>
-                      <small className='text-muted'>(Free while in beta, but will require a paid account in the future)</small>
+                    <p>
+                      <i className='fa fa-lock'></i>{' '}
+                      <strong>Private:</strong>{' '}
+                      Only invited users have access.
+                      <br/>
+                      <small className='help-block'>(Free while in beta, but will require a paid account in the future)</small>
                     </p>
                   </label>
                 </div>
               </div>
-            </div>
             {this._error()}
             <div className='actions form-group'>
-              <div className='col-sm-offset-8 col-sm-4'>
+              <div className='pull-right'>
                 <button
                   disabled={this.state.isSubmitting}
                   className='btn btn-primary btn-block'
                 >
+                  {
+                    this.state.isSubmitting ?
+                      <span><i className='fa fa-spin fa-refresh'></i>{' '}</span> :
+                      null
+                  }
                   <span>Setup Project</span>
-                  <i className='fa fa-spinner fa-spin'></i>
                 </button>
               </div>
             </div>
@@ -208,6 +243,12 @@ class SetupProject extends Component {
     App.ipc('external:open', 'https://on.cypress.io/dashboard/settings')
   }
 
+  _updateOwner = (e) => {
+    this.setState({
+      owner: e.target.value,
+    })
+  }
+
   _updateAccess = (e) => {
     this.setState({
       public: e.target.value === 'true',
@@ -232,9 +273,17 @@ class SetupProject extends Component {
   }
 
   _setupProject () {
+    let chosenOrgId
+
+    if (this.state.org === 'me') {
+      chosenOrgId = defaultOrg.id
+    } else {
+      chosenOrgId = this.refs.orgId.value
+    }
+
     App.ipc('setup:ci:project', {
       projectName: this.state.projectName,
-      orgId: this.refs.orgId.value,
+      orgId: chosenOrgId,
       public: this.state.public,
     })
     .then((projectDetails) => {
