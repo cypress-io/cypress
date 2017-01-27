@@ -237,6 +237,12 @@ describe "lib/cypress", ->
       .then =>
         expect(api.createProject).not.to.be.called
 
+        Project(@pristinePath).getProjectId()
+        .then ->
+          throw new Error("should have caught error but didnt")
+        .catch (err) ->
+          expect(err.type).to.eq("NO_PROJECT_ID")
+
     it "runs project by specific spec and exits with status 0", ->
       Project.add(@todosPath)
       .then =>

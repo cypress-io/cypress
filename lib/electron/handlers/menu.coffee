@@ -27,6 +27,11 @@ module.exports = {
             type: "separator"
           }
           {
+            label: "Manage Account"
+            click: ->
+              shell.openExternal("https://on.cypress.io/dashboard")
+          }
+          {
             label: "Log Out"
             click: options.onLogOutClicked
           }
