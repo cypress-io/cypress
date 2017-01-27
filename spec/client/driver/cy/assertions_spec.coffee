@@ -646,21 +646,32 @@ describe "$Cypress.Cy Assertion Commands", ->
       @cy.get("body").then ->
         expect(true).to.be.true
 
-    it "replaces instances of word: 'but' with 'and' for passing assertion", (done) ->
-      ## chai jquery adds 2 assertions here so
-      ## we bind to the 2nd one
+    it "removes rest of line when passing assertion includes ', but' for jQuery subjects", (done) ->
       @Cypress.on "log", (attrs, log) ->
         if log.get("name") is "assert"
           assert(log)
 
+      ## chai jquery adds 2 assertions here so we bind to the 2nd one
       assert = _.after 2, (obj) =>
         @chai.restore()
 
-        expect(obj.get("message")).to.eq "expected **<a>** to have a **href** attribute with the value **#**, and the value was **#**"
+        expect(obj.get("message")).to.eq "expected **<a>** to have a **href** attribute with the value **#**"
         done()
 
       @cy.get("a:first").then ($a) ->
         expect($a).to.have.attr "href", "#"
+
+    it "removes rest of line when passing assertion includes ', but' for spy/stub subjects", (done) ->
+      @Cypress.on "log", (attrs, log) =>
+        if log.get("name") is "assert"
+          @chai.restore()
+
+          expect(log.get("message")).to.eq "expected stub to have been called at least once"
+          done()
+
+      stub = @cy.stub()
+      stub()
+      expect(stub).to.be.called
 
     it "does not replaces instances of word: 'but' with 'and' for failing assertion", (done) ->
       @allowErrors()
@@ -908,7 +919,7 @@ describe "$Cypress.Cy Assertion Commands", ->
     describe "#have.length", ->
       it "formats _obj with cypress", (done) ->
         @onAssert (log) ->
-          expect(log.get("message")).to.eq("expected **<button#button>** to have a length of **1** and got **1**")
+          expect(log.get("message")).to.eq("expected **<button#button>** to have a length of **1**")
           done()
 
         @cy.get("button:first").should("have.length", 1)
