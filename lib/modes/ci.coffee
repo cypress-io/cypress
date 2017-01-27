@@ -1,15 +1,17 @@
-_        = require("lodash")
-os       = require("os")
-git      = require("gift")
-chalk    = require("chalk")
-Promise  = require("bluebird")
-headless = require("./headless")
-api      = require("../api")
-logger   = require("../logger")
-errors   = require("../errors")
-upload   = require("../upload")
-Project  = require("../project")
-terminal = require("../util/terminal")
+_          = require("lodash")
+os         = require("os")
+chalk      = require("chalk")
+Promise    = require("bluebird")
+headless   = require("./headless")
+api        = require("../api")
+logger     = require("../logger")
+errors     = require("../errors")
+stdout     = require("../stdout")
+upload     = require("../upload")
+Project    = require("../project")
+git        = require("../util/git")
+terminal   = require("../util/terminal")
+ciProvider = require("../util/ci_provider")
 
 logException = (err) ->
   ## give us up to 1 second to
@@ -20,52 +22,26 @@ logException = (err) ->
     ## dont yell about any errors either
 
 module.exports = {
-  getBranchFromGit: (repo) ->
-    repo.branchAsync()
-    .get("name")
-    .catch -> ""
-
-  getMessage: (repo) ->
-    repo.current_commitAsync()
-    .get("message")
-    .catch -> ""
-
-  getEmail: (repo) ->
-    repo.current_commitAsync()
-    .get("author")
-    .get("email")
-    .catch -> ""
-
-  getAuthor: (repo) ->
-    repo.current_commitAsync()
-    .get("author")
-    .get("name")
-    .catch -> ""
-
-  getSha: (repo) ->
-    repo.current_commitAsync()
-    .get("id")
-    .catch -> ""
-
   getBranch: (repo) ->
     for branch in ["CIRCLE_BRANCH", "TRAVIS_BRANCH", "CI_BRANCH"]
       if b = process.env[branch]
         return Promise.resolve(b)
 
-    @getBranchFromGit(repo)
+    repo.getBranch()
 
   generateProjectBuildId: (projectId, projectPath, projectName, projectToken) ->
     if not projectToken
       return errors.throw("CI_KEY_MISSING")
 
-    repo = Promise.promisifyAll git(projectPath)
+    repo = git.init(projectPath)
 
     Promise.props({
-      sha:     @getSha(repo)
+      sha:     repo.getSha()
+      email:   repo.getEmail()
+      author:  repo.getAuthor()
+      remote:  repo.getRemoteOrigin()
       branch:  @getBranch(repo)
-      author:  @getAuthor(repo)
-      email:   @getEmail(repo)
-      message: @getMessage(repo)
+      message: repo.getMessage()
     })
     .then (git) ->
       api.createBuild({
@@ -76,6 +52,10 @@ module.exports = {
         commitAuthorName:  git.author
         commitAuthorEmail: git.email
         commitMessage:     git.message
+        remoteOrigin:      git.remote
+        ciParams:          ciProvider.params()
+        ciProvider:        ciProvider.name()
+        ciBuildNum:        ciProvider.buildNum()
       })
       .catch (err) ->
         switch err.statusCode
@@ -177,6 +157,7 @@ module.exports = {
       screenshots:  screenshots
       failingTests: stats.failingTests
       cypressConfig: stats.config
+      ciProvider:    ciProvider.name()
     })
     .then (resp = {}) =>
       @upload({
@@ -189,10 +170,27 @@ module.exports = {
       errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
 
       ## dont log exceptions if we have a 503 status code
+      if err.statusCode isnt 503
+        logException(err)
+        .return(null)
+      else
+        null
+
+  uploadStdout: (instanceId, stdout) ->
+    api.updateInstanceStdout({
+      instanceId:   instanceId
+      stdout:       stdout
+    })
+    .catch (err) ->
+      errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+
+      ## dont log exceptions if we have a 503 status code
       logException(err) unless err.statusCode is 503
 
   run: (options) ->
     {projectPath} = options
+
+    captured = stdout.capture()
 
     Project.add(projectPath)
     .then ->
@@ -210,10 +208,12 @@ module.exports = {
           @createInstance(buildId, options.spec)
         .then (instanceId) =>
           ## dont check that the user is logged in
-          options.ensureSession = false
+          options.ensureAuthToken = false
 
           ## dont let headless say its all done
           options.allDone       = false
+
+          didUploadAssets       = false
 
           headless.run(options)
           .then (stats = {}) =>
@@ -221,8 +221,18 @@ module.exports = {
             ## upload these assets
             if instanceId
               @uploadAssets(instanceId, stats)
+              .then (ret) ->
+                didUploadAssets = ret isnt null
               .return(stats)
-              .finally(headless.allDone)
+              .finally =>
+                headless.allDone()
+
+                if didUploadAssets
+                  stdout.restore()
+                  @uploadStdout(instanceId, captured.toString())
+
             else
-              stats
+              stdout.restore()
+              headless.allDone()
+              return stats
 }

@@ -17,6 +17,7 @@ scaffold    = require("./scaffold")
 Watchers    = require("./watchers")
 Reporter    = require("./reporter")
 savedState  = require("./saved_state")
+git         = require("./util/git")
 settings    = require("./util/settings")
 
 fs   = Promise.promisifyAll(fs)
@@ -87,10 +88,10 @@ class Project extends EE
   getBuilds: ->
     Promise.all([
       @getProjectId(),
-      user.ensureSession()
+      user.ensureAuthToken()
     ])
-    .spread (projectId, session) ->
-      api.getProjectBuilds(projectId, session)
+    .spread (projectId, authToken) ->
+      api.getProjectBuilds(projectId, authToken)
 
   close: (options = {}) ->
     if @memoryCheck
@@ -259,9 +260,9 @@ class Project extends EE
           ## once we determine that we can then prefix it correctly
           ## with either integration or unit
           prefixedPath = @getPrefixedPathToSpec(cfg.integrationFolder, pathToSpec)
-          @getUrlBySpec(cfg.clientUrl, prefixedPath)
+          @getUrlBySpec(cfg.browserUrl, prefixedPath)
       else
-        @getUrlBySpec(cfg.clientUrl, "/__all")
+        @getUrlBySpec(cfg.browserUrl, "/__all")
 
   ensureSpecExists: (spec) ->
     specFile = path.resolve(@projectRoot, spec)
@@ -284,11 +285,11 @@ class Project extends EE
     ## becomes /integration/foo.coffee
     "/" + path.join("integration", path.relative(integrationFolder, pathToSpec))
 
-  getUrlBySpec: (clientUrl, specUrl) ->
+  getUrlBySpec: (browserUrl, specUrl) ->
     replacer = (match, p1) ->
       match.replace("//", "/")
 
-    [clientUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
+    [browserUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
     scaffolds = []
@@ -310,11 +311,11 @@ class Project extends EE
     if not config.isHeadless
       ## ensure integration folder is created
       ## and example spec if dir doesnt exit
-      push(scaffold.integration(config.integrationFolder))
+      push(scaffold.integration(config.integrationFolder, config))
 
       ## ensure fixtures dir is created
       ## and example fixture if dir doesnt exist
-      push(scaffold.fixture(config.fixturesFolder))
+      push(scaffold.fixture(config.fixturesFolder, config))
 
     Promise.all(scaffolds)
 
@@ -349,9 +350,16 @@ class Project extends EE
       errors.throw("NO_PROJECT_FOUND_AT_PROJECT_ROOT", @projectRoot)
 
   createCiProject: (projectDetails) ->
-    user.ensureSession()
-    .then (session) ->
-      api.createProject(projectDetails, session)
+    Promise.all([
+      user.ensureAuthToken()
+      @getConfig()
+    ])
+    .spread (authToken, cfg) ->
+      git
+      .init(cfg.projectRoot)
+      .getRemoteOrigin()
+      .then (remoteOrigin) ->
+        api.createProject(projectDetails, remoteOrigin, authToken)
     .then (newProject) =>
       @writeProjectId(newProject.id)
       .return(newProject)
@@ -359,20 +367,20 @@ class Project extends EE
   getCiKeys: ->
     Promise.all([
       @getProjectId(),
-      user.ensureSession()
+      user.ensureAuthToken()
     ])
-    .spread (projectId, session) ->
-      api.getProjectCiKeys(projectId, session)
+    .spread (projectId, authToken) ->
+      api.getProjectCiKeys(projectId, authToken)
 
   requestAccess: (orgId) ->
-    user.ensureSession()
-    .then (session) ->
-      api.requestAccess(orgId, session)
+    user.ensureAuthToken()
+    .then (authToken) ->
+      api.requestAccess(orgId, authToken)
 
   @getOrgs = ->
-    user.ensureSession()
-    .then (session) ->
-      api.getOrgs(session)
+    user.ensureAuthToken()
+    .then (authToken) ->
+      api.getOrgs(authToken)
 
   @paths = ->
     cache.getProjectPaths()
@@ -386,9 +394,9 @@ class Project extends EE
       })
 
   @getProjectStatuses = (clientProjects = []) ->
-    user.ensureSession()
-    .then (session) ->
-      api.getProjects(session)
+    user.ensureAuthToken()
+    .then (authToken) ->
+      api.getProjects(authToken)
     .then (projects = []) ->
       projectsIndex = _.keyBy(projects, "id")
       return _.map clientProjects, (clientProject) ->
@@ -404,9 +412,9 @@ class Project extends EE
           return clientProject
 
   @getProjectStatus = (clientProject) ->
-    user.ensureSession()
-    .then (session) ->
-      api.getProject(clientProject.id, session)
+    user.ensureAuthToken()
+    .then (authToken) ->
+      api.getProject(clientProject.id, authToken)
     .then (project) ->
       return _.extend(clientProject, project)
     .catch ->
@@ -448,9 +456,9 @@ class Project extends EE
     ## get project id
     Project.id(path)
     .then (id) ->
-      user.ensureSession()
-      .then (session) ->
-        api.getProjectToken(id, session)
+      user.ensureAuthToken()
+      .then (authToken) ->
+        api.getProjectToken(id, authToken)
         .catch ->
           errors.throw("CANNOT_FETCH_PROJECT_TOKEN")
 
@@ -458,9 +466,9 @@ class Project extends EE
     ## get project id
     Project.id(path)
     .then (id) ->
-      user.ensureSession()
-      .then (session) ->
-        api.updateProjectToken(id, session)
+      user.ensureAuthToken()
+      .then (authToken) ->
+        api.updateProjectToken(id, authToken)
         .catch ->
           errors.throw("CANNOT_CREATE_PROJECT_TOKEN")
 

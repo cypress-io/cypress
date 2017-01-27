@@ -30,7 +30,7 @@ describe "lib/controllers/files", ->
 
   context "check", ->
     beforeEach ->
-      @sandbox.stub(user, "ensureSession")
+      @sandbox.stub(user, "ensureAuthToken")
       @sandbox.stub(api,  "sendUsage")
 
     it "is no op if numRuns isnt > 0", ->
@@ -38,7 +38,7 @@ describe "lib/controllers/files", ->
       expect(filesUtil.check()).to.be.undefined
 
     it "sends numRuns, exampleSpec, allSpecs + session to api.sendUsage", ->
-      user.ensureSession.resolves("session-123")
+      user.ensureAuthToken.resolves("auth-token-123")
       api.sendUsage.resolves()
 
       filesUtil.increment("foo", {projectName: "foobar"})
@@ -54,10 +54,10 @@ describe "lib/controllers/files", ->
 
       filesUtil.check()
       .then ->
-        expect(api.sendUsage).to.be.calledWith(3, true, true, "foobar", "session-123")
+        expect(api.sendUsage).to.be.calledWith(3, true, true, "foobar", "auth-token-123")
 
     it "sends exampleSpec false when no example_spec.js has run", ->
-      user.ensureSession.resolves("session-123")
+      user.ensureAuthToken.resolves("auth-token-123")
       api.sendUsage.resolves()
 
       filesUtil.increment("foo", {projectName: "foobar"})
@@ -71,10 +71,10 @@ describe "lib/controllers/files", ->
 
       filesUtil.check()
       .then ->
-        expect(api.sendUsage).to.be.calledWith(1, false, false, "foobar", "session-123")
+        expect(api.sendUsage).to.be.calledWith(1, false, false, "foobar", "auth-token-123")
 
     it "resets after successfully sending usage", ->
-      user.ensureSession.resolves("session-123")
+      user.ensureAuthToken.resolves("auth-token-123")
       api.sendUsage.resolves()
 
       filesUtil.increment("foo")
@@ -90,7 +90,7 @@ describe "lib/controllers/files", ->
         })
 
     it "swallows errors ensuring session", ->
-      user.ensureSession.rejects(new Error)
+      user.ensureAuthToken.rejects(new Error)
 
       filesUtil.increment("foo")
 
@@ -99,7 +99,7 @@ describe "lib/controllers/files", ->
         expect(api.sendUsage).not.to.be.called
 
     it "swallows errors sending usage without resetting", ->
-      user.ensureSession.resolves("session-123")
+      user.ensureAuthToken.resolves("auth-token-123")
       api.sendUsage.rejects(new Error)
 
       filesUtil.increment("foo", {projectName: "foobar"})

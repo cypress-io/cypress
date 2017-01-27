@@ -14,7 +14,7 @@ module.exports = {
     res.type("js")
 
     streamBundle = ->
-      fs.createReadStream(appData.path("bundles", spec))
+      fs.createReadStream(bundle.outputPath(config.projectName, spec))
       .pipe(res)
 
     if config.isHeadless
@@ -23,6 +23,15 @@ module.exports = {
       .getLatestBundle()
       .then(streamBundle)
       .catch (err) ->
+        ## bluebird made a change in 3.4.7 where they handle
+        ## SyntaxErrors differently here
+        ## https://github.com/petkaantonov/bluebird/pull/1295
+        ##
+        ## their new behavior messes us how we show these errors
+        ## so we must backup the original stack and replace it here
+        if os = err.originalStack
+          err.stack = os
+
         filePath = err.filePath ? spec
 
         err = errors.get("BUNDLE_ERROR", filePath, bundle.errorMessage(err))

@@ -44,7 +44,11 @@ API = {
       when "PORT_IN_USE_SHORT"
         "Port '#{arg1}' is already in use."
       when "PORT_IN_USE_LONG"
-        "Can't run project because port is currently in use: " + chalk.blue(arg1) + "\n\n" + chalk.yellow("Assign a different port with the '--port <port>' argument or shut down the other running process.")
+        """
+        Can't run project because port is currently in use: #{chalk.blue(arg1)}
+
+        #{chalk.yellow("Assign a different port with the '--port <port>' argument or shut down the other running process.")}
+        """
       when "ERROR_READING_FILE"
         "Error reading from: " + chalk.blue(arg1) + "\n\n" + chalk.yellow(arg2)
       when "ERROR_WRITING_FILE"
@@ -77,7 +81,7 @@ API = {
         "The automation server disconnected. Cannot continue running tests."
       when "SUPPORT_FILE_NOT_FOUND"
         """
-        Support file missing or invalid
+        Support file missing or invalid.
 
         Your supportFile is set to '#{arg1}', but either the file is missing or it's invalid. The supportFile must be a .js or .coffee file.
 
@@ -99,10 +103,28 @@ API = {
 
         This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
-        * A missing file or dependency
-        * A syntax error in the file or one of its dependencies
+        - A missing file or dependency
+        - A syntax error in the file or one of its dependencies
 
         Fix the error in your code and re-run your tests.
+        """
+      when "CONFIG_VALIDATION_ERROR"
+        """
+        We found an invalid value in the file: '#{chalk.blue(arg1)}'
+
+        #{chalk.yellow(arg2)}
+        """
+      when "CANNOT_CONNECT_BASE_URL"
+        """
+        Cypress cannot start because we could not verify this server is running:
+
+          > #{chalk.blue(arg1)}
+
+        We run this check because this server has been set as your 'baseUrl'.
+
+        You likely forgot to boot this web server prior to running Cypress.
+
+        Please start this server and then run Cypress again.
         """
 
   get: (type, arg1, arg2) ->
@@ -137,8 +159,8 @@ API = {
         ## a known error
         require("./logger").createException(err).catch(->)
 
-  throw: (type, arg) ->
-    throw @get(type, arg)
+  throw: (type, arg1, arg2) ->
+    throw @get(type, arg1, arg2)
 
   stripAnsi: strip
 

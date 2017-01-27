@@ -24,23 +24,23 @@ module.exports = {
 
     @get()
     .then (user) ->
-      session = user and user.sessionToken
+      authToken = user and user.authToken
 
-      ## if we have a session
+      ## if we have a authToken
       ## then send it up
-      if session
-        api.createSignout(session)
+      if authToken
+        api.createSignout(authToken)
         .then(remove)
       else
         ## else just remove the
         ## user from cache
         remove()
 
-  ensureSession: ->
+  ensureAuthToken: ->
     @get().then (user) ->
-      ## return sessionToken if we have one
-      if user and st = user.sessionToken
-        return st
+      ## return authToken if we have one
+      if user and at = user.authToken
+        return at
       else
         ## else throw the not logged in error
         errors.throw("NOT_LOGGED_IN")

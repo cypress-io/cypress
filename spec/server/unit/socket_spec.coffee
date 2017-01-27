@@ -53,12 +53,12 @@ describe "lib/socket", ->
           @socketClient = socket
           done()
 
-        {clientUrlDisplay, socketIoRoute} = @cfg
+        {proxyUrl, socketIoRoute} = @cfg
 
         ## force node into legit proxy mode like a browser
         agent = new httpsAgent("http://localhost:#{@cfg.port}")
 
-        @client = socketIo.client(clientUrlDisplay, {
+        @client = socketIo.client(proxyUrl, {
           agent: agent
           path: socketIoRoute
           transports: ["websocket"]
@@ -93,7 +93,7 @@ describe "lib/socket", ->
             @extClient.on "automation:connected", ->
               done()
 
-          extension.connect(@cfg.clientUrlDisplay, @cfg.socketIoRoute, socketIo.client)
+          extension.connect(@cfg.proxyUrl, @cfg.socketIoRoute, socketIo.client)
 
         afterEach ->
           @extClient.disconnect()
@@ -305,7 +305,6 @@ describe "lib/socket", ->
           expect(@socket.watchTestFileByPath).to.be.calledWith(@cfg, "path/to/file", @watchers)
           done()
 
-
     context "on(app:connect)", ->
       it "calls options.onConnect with socketId and socket", (done) ->
         @options.onConnect = (socketId, socket) ->
@@ -436,8 +435,7 @@ describe "lib/socket", ->
         @filePath        = @socket.testsDir + "/test1.js"
         @watchers        = Watchers()
 
-      afterEach ->
-        @watchers.close()
+        @sandbox.stub(@watchers, "watchBundle").resolves()
 
       it "returns undefined if config.watchForFileChanges is false", ->
         @cfg.watchForFileChanges = false
@@ -464,7 +462,6 @@ describe "lib/socket", ->
           expect(@socket.testFilePath).to.eq "cypress/integration/test1.js"
 
       it "watches file by path", ->
-        @sandbox.stub(@watchers, "watchBundle").returns(Promise.resolve())
         @socket.watchTestFileByPath(@cfg, "integration/test2.coffee", @watchers)
         expect(@watchers.watchBundle).to.be.calledWith("cypress/integration/test2.coffee", @cfg)
 

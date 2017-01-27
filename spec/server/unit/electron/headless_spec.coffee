@@ -5,6 +5,7 @@ Promise  = require("bluebird")
 inquirer = require("inquirer")
 electron = require("electron")
 user     = require("#{root}../lib/user")
+video    = require("#{root}../lib/video")
 errors   = require("#{root}../lib/errors")
 Project  = require("#{root}../lib/project")
 Reporter = require("#{root}../lib/reporter")
@@ -191,6 +192,24 @@ describe "electron/headless", ->
 
     it "calls project.closeBrowser", ->
       expect(project.closeBrowser).to.be.calledOnce
+
+  context ".postProcessRecording", ->
+    beforeEach ->
+      @sandbox.stub(video, "process").resolves()
+
+    it "calls video process with name, cname and videoCompression", ->
+      end = -> Promise.resolve()
+
+      headless.postProcessRecording(end, "foo", "foo-compress", 32)
+      .then ->
+        expect(video.process).to.be.calledWith("foo", "foo-compress", 32)
+
+    it "does not call video process when videoCompression is false", ->
+      end = -> Promise.resolve()
+
+      headless.postProcessRecording(end, "foo", "foo-compress", false)
+      .then ->
+        expect(video.process).not.to.be.called
 
   context ".waitForRendererToConnect", ->
     it "resolves on waitForSocketConnection", ->
@@ -388,9 +407,9 @@ describe "electron/headless", ->
 
   context ".run", ->
     beforeEach ->
-      @sandbox.stub(@projectInstance, "getConfig").resolves({clientUrlDisplay: "http://localhost:12345"})
+      @sandbox.stub(@projectInstance, "getConfig").resolves({proxyUrl: "http://localhost:12345"})
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(user, "ensureSession")
+      @sandbox.stub(user, "ensureAuthToken")
       @sandbox.stub(headless, "getId").returns(1234)
       @sandbox.stub(headless, "ensureAndOpenProjectByPath").resolves(@projectInstance)
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
@@ -401,7 +420,7 @@ describe "electron/headless", ->
     it "no longer ensures user session", ->
       headless.run()
       .then ->
-        expect(user.ensureSession).not.to.be.called
+        expect(user.ensureAuthToken).not.to.be.called
 
     it "returns stats", ->
       headless.run()
