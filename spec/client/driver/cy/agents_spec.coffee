@@ -137,6 +137,37 @@ describe "$Cypress.Cy Agents Commands", ->
             @obj.foo()
             expect(@logs[2].get("name")).to.equal("stub-1")
 
+          describe "#consoleProps", ->
+            beforeEach ->
+              @stub.as("objFoo")
+              @stubWithArgs.as("withFoo")
+              @obj.foo("foo", "baz")
+              @consoleProps = @logs[2].get("consoleProps")()
+
+            it "includes the event", ->
+              expect(@consoleProps["Event"]).to.equal("stub-1/stub-2 called")
+
+            it "includes reference to parent stub", ->
+              expect(@consoleProps["stub-1"]).to.be.a("function")
+
+            it "includes parent call number", ->
+              expect(@consoleProps["stub-1 call #"]).to.equal(1)
+
+            it "includes parent alias", ->
+              expect(@consoleProps["stub-1 alias"]).to.equal("objFoo")
+
+            it "includes reference to withArgs stub", ->
+              expect(@consoleProps["stub-2"]).to.be.a("function")
+
+            it "includes withArgs call number", ->
+              expect(@consoleProps["stub-2 call #"]).to.equal(1)
+
+            it "includes withArgs alias", ->
+              expect(@consoleProps["stub-2 alias"]).to.equal("withFoo")
+
+            it "includes withArgs matching arguments", ->
+              expect(@consoleProps["stub-2 matching arguments"]).to.eql(["foo"])
+
     context "#as", ->
       beforeEach ->
         @logs = []
@@ -206,12 +237,12 @@ describe "$Cypress.Cy Agents Commands", ->
         expect(@logs[0].get("instrument")).to.eq("agent")
 
       it "logs event for each invocation", ->
-        @stub("foo", "bar")
+        @obj.foo("foo", "bar")
         expect(@logs.length).to.equal(2)
         expect(@logs[1].get("name")).to.eq("stub-1")
         expect(@logs[1].get("message")).to.eq("foo(arg1, arg2)")
         expect(@logs[1].get("event")).to.be.true
-        @stub("foo")
+        @obj.foo("foo")
         expect(@logs.length).to.equal(3)
         expect(@logs[2].get("name")).to.eq("stub-1")
         expect(@logs[2].get("message")).to.eq("foo(arg1)")
@@ -219,9 +250,9 @@ describe "$Cypress.Cy Agents Commands", ->
 
       it "increments callCount of agent log on each invocation", ->
         expect(@logs[0].get("callCount")).to.eq 0
-        @stub("foo", "bar")
+        @obj.foo("foo", "bar")
         expect(@logs[0].get("callCount")).to.eq 1
-        @stub("foo", "baz")
+        @obj.foo("foo", "baz")
         expect(@logs[0].get("callCount")).to.eq 2
 
       it "resets unique name counter on restore", ->
@@ -232,29 +263,39 @@ describe "$Cypress.Cy Agents Commands", ->
 
       context "#consoleProps", ->
         beforeEach ->
+          @stub.as("objFoo")
           @context = {}
-          @stub.call(@context, "foo", "baz")
-          @stub("foo", "baz")
+          @obj.foo.call(@context, "foo", "baz")
+          @obj.foo("foo", "baz")
           @consoleProps = @logs[1].get("consoleProps")()
 
         it "does not include 'command' or 'error' properties", ->
           expect(@consoleProps["Command"]).to.be.null
           expect(@consoleProps["Error"]).to.be.null
 
+        it "includes the event", ->
+          expect(@consoleProps["Event"]).to.equal("stub-1 called")
+
         it "includes reference to stub", ->
           expect(@consoleProps["stub"]).to.be.a("function")
+
+        it "includes call number", ->
+          expect(@consoleProps["Call #"]).to.equal(1)
+
+        it "includes alias", ->
+          expect(@consoleProps["Alias"]).to.equal("objFoo")
 
         it "includes references to stubbed object", ->
           expect(@consoleProps["Stubbed Obj"]).to.be.equal(@obj)
 
-        it "includes call count", ->
-          expect(@consoleProps["Calls"]).to.equal(2)
+        it "includes arguments", ->
+          expect(@consoleProps["Arguments"]).to.eql(["foo", "baz"])
 
-        it "includes group with calls", ->
-          expect(@consoleProps.groups()[0].name).to.equal("Call #1:")
-          expect(@consoleProps.groups()[0].items["Arguments"]).to.eql(["foo", "baz"])
-          expect(@consoleProps.groups()[0].items["Context"]).to.equal(@context)
-          expect(@consoleProps.groups()[0].items["Returned"]).to.equal("return value")
+        it "includes context", ->
+          expect(@consoleProps["Context"]).to.equal(@context)
+
+        it "includes return value", ->
+          expect(@consoleProps["Returned"]).to.equal("return value")
 
   context "#spy(obj, 'method')", ->
     beforeEach ->

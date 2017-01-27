@@ -43,13 +43,14 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
 
     if parent = agent.parent
       count = [parent._cyCount, obj.count].join("/")
+      parentCallCount = parent.callCount
     else
       count = obj.count
 
-    aliases = _.compact([agent.parent?._cyAlias, alias])
+    callCount = agent.callCount
 
     logProps = {
-      name:     [obj.name, count].join("-")
+      name:     "#{obj.name}-#{count}"
       message:  obj.message
       error:    obj.error
       type:     "parent"
@@ -60,33 +61,39 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
         console = {}
         console.Command = null
         console.Error = null
-        ## TODO: break out parent/child and show alias, what args match, etc
-        if aliases.length
-          aliasesLabel = "Alias"
-          aliasesLabel += "es" if aliases.length > 1
-          console[aliasesLabel] = aliases.join(", ")
-        console[obj.name] = obj.agent
+
+        if parent
+          parentName = "#{obj.name}-#{parent._cyCount}"
+          name = "#{obj.name}-#{obj.count}"
+          console.Event = "#{parentName}/#{name} called"
+          console[parentName] = parent
+          console["#{parentName} call #"] = parentCallCount
+          if parent._cyAlias
+            console["#{parentName} alias"] = parent._cyAlias
+          console[name] = agent
+          console["#{name} call #"] = callCount
+          if alias
+            console["#{name} alias"] = alias
+          ## typo in sinon! will be fixed in 2.0
+          console["#{name} matching arguments"] = agent.matchingAguments
+        else
+          console.Event = "#{obj.name}-#{obj.count} called"
+          console[obj.name] = agent
+          console["Call #"] = callCount
+          if alias
+            console.Alias = alias
+
         console[display(obj.name)] = obj.obj
-        console.Calls = obj.agent.callCount
-        ## TODO: show this as key:value, not group
-        console.groups = ->
-          items = {
-            Arguments: obj.call.args
-            Context:   obj.call.thisValue
-            Returned:  obj.call.returnValue
-          }
+        console.Arguments = obj.call.args
+        console.Context =   obj.call.thisValue
+        console.Returned =  obj.call.returnValue
+        if obj.error
+          console.Error = obj.error.stack
 
-          items.Error = obj.error.stack if obj.error
-
-          [
-            {
-              name: "Call ##{obj.callCount}:",
-              items: items
-            }
-          ]
         console
     }
 
+    aliases = _.compact([agent.parent?._cyAlias, alias])
     if aliases.length
       logProps.alias = aliases
       logProps.aliasType = "agent"
@@ -99,9 +106,10 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
   wrap = (_cy, type, agent, obj, method) ->
     count = counts[type] += 1
 
+    name = "#{type}-#{count}"
     log = Cypress.Log.agent({
-      name: [type, count].join("-")
-      type: [type, count].join("-")
+      name: name
+      type: name
       functionName: method
       count: count
       callCount: 0
