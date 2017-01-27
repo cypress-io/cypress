@@ -5,6 +5,7 @@ excerpt: Run Cypress in any CI provider
 
 - :fa-angle-right: [What's Supported?](#section-whats-supported)
 - :fa-angle-right: [Dependencies](#section-dependencies)
+- :fa-angle-right: [Docker](#section-docker)
 - :fa-angle-right: [Troubleshooting](#section-troubleshooting)
 - :fa-angle-right: [Running in CI](#section-running-in-ci)
   - [Add your project to your CI provider](#section-add-you-project-to-your-ci-provider)
@@ -52,6 +53,12 @@ If you're hosting your own `Jenkins` server, or you're using `Docker`, you'll ne
 ```shell
 apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1
 ```
+
+***
+
+# Docker
+
+We don't offer an **official** docker container, but our users have created one. [This container has all of the required dependencies installed and ready to go](https://docs.cypress.io/docs/userland-extensions#section-docker).
 
 ***
 
