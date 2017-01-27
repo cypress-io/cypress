@@ -6,7 +6,6 @@ export default class User {
   @observable authToken
 
   constructor (user) {
-    this.id = user.id
     this.name = user.name
     this.email = user.email
     this.authToken = user.authToken
