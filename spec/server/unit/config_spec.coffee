@@ -17,35 +17,337 @@ describe "lib/config", ->
 
   context ".get", ->
     beforeEach ->
-      @sandbox.stub(settings, "readEnv").withArgs("path/to/project").resolves({foo: "bar"})
-      @sandbox.stub(settings, "read").withArgs("path/to/project").resolves({})
+      @projectPath = "path/to/project"
+      @setup = (cypressJson = {}, cypressEnvJson = {}) =>
+        @sandbox.stub(settings, "read").withArgs(@projectPath).resolves(cypressJson)
+        @sandbox.stub(settings, "readEnv").withArgs(@projectPath).resolves(cypressEnvJson)
 
     it "sets projectRoot", ->
-      config.get("path/to/project")
-      .then (obj) ->
-        expect(obj.projectRoot).to.eq("path/to/project")
+      @setup({}, {foo: "bar"})
+      config.get(@projectPath)
+      .then (obj) =>
+        expect(obj.projectRoot).to.eq(@projectPath)
         expect(obj.environmentVariables).to.deep.eq({foo: "bar"})
 
     it "sets projectName", ->
-      config.get("path/to/my-project")
+      @setup({}, {foo: "bar"})
+      config.get(@projectPath)
       .then (obj) ->
-        expect(obj.projectName).to.eq("my-project")
+        expect(obj.projectName).to.eq("project")
 
     context "port", ->
+      beforeEach ->
+        @setup({}, {foo: "bar"})
+
       it "can override default port", ->
-        config.get("path/to/project", {port: 8080})
+        config.get(@projectPath, {port: 8080})
         .then (obj) ->
           expect(obj.port).to.eq(8080)
 
-      it "updates clientUrl", ->
-        config.get("path/to/project", {port: 8080})
+      it "updates browserUrl", ->
+        config.get(@projectPath, {port: 8080})
         .then (obj) ->
-          expect(obj.clientUrl).to.eq "http://localhost:8080/__/"
+          expect(obj.browserUrl).to.eq "http://localhost:8080/__/"
 
-      it "updates clientUrlDisplay", ->
-        config.get("path/to/project", {port: 8080})
+      it "updates proxyUrl", ->
+        config.get(@projectPath, {port: 8080})
         .then (obj) ->
-          expect(obj.clientUrlDisplay).to.eq "http://localhost:8080"
+          expect(obj.proxyUrl).to.eq "http://localhost:8080"
+
+    context "validation", ->
+      beforeEach ->
+        @expectValidationPasses = =>
+          config.get(@projectPath) ## shouldn't throw
+
+        @expectValidationFails = (errorMessage = "validation error") =>
+          config.get(@projectPath)
+          .then ->
+            throw new Error("should throw validation error")
+          .catch (err) ->
+            expect(err.message).to.include(errorMessage)
+
+      it "values are optional", ->
+        @setup()
+        @expectValidationPasses()
+
+      it "validates cypress.json", ->
+        @setup({reporter: 5})
+        @expectValidationFails("cypress.json")
+
+      it "validates cypress.env.json", ->
+        @setup({}, {reporter: 5})
+        @expectValidationFails("cypress.env.json")
+
+      it "only validates known values", ->
+        @setup({foo: "bar"})
+        @expectValidationPasses()
+
+      context "animationDistanceThreshold", ->
+        it "passes if a number", ->
+          @setup({animationDistanceThreshold: 10})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({animationDistanceThreshold: {foo: "bar"}})
+          @expectValidationFails("be a number")
+          @expectValidationFails("the value was: {\"foo\":\"bar\"}")
+
+      context "baseUrl", ->
+        it "passes if begins with http://", ->
+          @setup({baseUrl: "http://example.com"})
+          @expectValidationPasses()
+
+        it "passes if begins with https://", ->
+          @setup({baseUrl: "https://example.com"})
+          @expectValidationPasses()
+
+        it "fails if not a string", ->
+          @setup({baseUrl: false})
+          @expectValidationFails("be a fully qualified URL")
+
+        it "fails if not a fully qualified url", ->
+          @setup({baseUrl: "localhost"})
+          @expectValidationFails("be a fully qualified URL")
+
+      context "chromeWebSecurity", ->
+        it "passes if a boolean", ->
+          @setup({chromeWebSecurity: false})
+          @expectValidationPasses()
+
+        it "fails if not a boolean", ->
+          @setup({chromeWebSecurity: 42})
+          @expectValidationFails("be a boolean")
+          @expectValidationFails("the value was: 42")
+
+      context "defaultCommandTimeout", ->
+        it "passes if a number", ->
+          @setup({defaultCommandTimeout: 10})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({defaultCommandTimeout: "foo"})
+          @expectValidationFails("be a number")
+          @expectValidationFails("the value was: \"foo\"")
+
+      context "env", ->
+        it "passes if an object", ->
+          @setup({env: {}})
+          @expectValidationPasses()
+
+        it "fails if not an object", ->
+          @setup({env: "not an object that's for sure"})
+          @expectValidationFails("a plain object")
+
+      context "execTimeout", ->
+        it "passes if a number", ->
+          @setup({execTimeout: 10})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({execTimeout: "foo"})
+          @expectValidationFails("be a number")
+
+      context "fileServerFolder", ->
+        it "passes if a string", ->
+          @setup({fileServerFolder: "_files"})
+          @expectValidationPasses()
+
+        it "fails if not a string", ->
+          @setup({fileServerFolder: true})
+          @expectValidationFails("be a string")
+          @expectValidationFails("the value was: true")
+
+      context "fixturesFolder", ->
+        it "passes if a string", ->
+          @setup({fixturesFolder: "_fixtures"})
+          @expectValidationPasses()
+
+        it "passes if false", ->
+          @setup({fixturesFolder: false})
+          @expectValidationPasses()
+
+        it "fails if not a string or false", ->
+          @setup({fixturesFolder: true})
+          @expectValidationFails("be a string or false")
+
+      context "ignoreTestFiles", ->
+        it "passes if a string", ->
+          @setup({ignoreTestFiles: "*.jsx"})
+          @expectValidationPasses()
+
+        it "passes if an array of strings", ->
+          @setup({ignoreTestFiles: ["*.jsx"]})
+          @expectValidationPasses()
+
+        it "fails if not a string or array", ->
+          @setup({ignoreTestFiles: 5})
+          @expectValidationFails("be a string or an array of string")
+
+        it "fails if not an array of strings", ->
+          @setup({ignoreTestFiles: [5]})
+          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("the value was: [5]")
+
+      context "integrationFolder", ->
+        it "passes if a string", ->
+          @setup({integrationFolder: "_tests"})
+          @expectValidationPasses()
+
+        it "fails if not a string", ->
+          @setup({integrationFolder: true})
+          @expectValidationFails("be a string")
+
+      context "numTestsKeptInMemory", ->
+        it "passes if a number", ->
+          @setup({numTestsKeptInMemory: 10})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({numTestsKeptInMemory: "foo"})
+          @expectValidationFails("be a number")
+
+      context "pageLoadTimeout", ->
+        it "passes if a number", ->
+          @setup({pageLoadTimeout: 10})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({pageLoadTimeout: "foo"})
+          @expectValidationFails("be a number")
+
+      context "port", ->
+        it "passes if a number", ->
+          @setup({port: 10})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({port: "foo"})
+          @expectValidationFails("be a number")
+
+      context "reporter", ->
+        it "passes if a string", ->
+          @setup({reporter: "_custom"})
+          @expectValidationPasses()
+
+        it "fails if not a string", ->
+          @setup({reporter: true})
+          @expectValidationFails("be a string")
+
+      context "requestTimeout", ->
+        it "passes if a number", ->
+          @setup({requestTimeout: 10})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({requestTimeout: "foo"})
+          @expectValidationFails("be a number")
+
+      context "responseTimeout", ->
+        it "passes if a number", ->
+          @setup({responseTimeout: 10})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({responseTimeout: "foo"})
+          @expectValidationFails("be a number")
+
+      context "screenshotOnHeadlessFailure", ->
+        it "passes if a boolean", ->
+          @setup({screenshotOnHeadlessFailure: false})
+          @expectValidationPasses()
+
+        it "fails if not a boolean", ->
+          @setup({screenshotOnHeadlessFailure: 42})
+          @expectValidationFails("be a boolean")
+
+      context "supportFile", ->
+        it "passes if a string", ->
+          @setup({supportFile: "cypress/support"})
+          @expectValidationPasses()
+
+        it "passes if false", ->
+          @setup({supportFile: false})
+          @expectValidationPasses()
+
+        it "fails if not a string or false", ->
+          @setup({supportFile: true})
+          @expectValidationFails("be a string or false")
+
+      context "trashAssetsBeforeHeadlessRuns", ->
+        it "passes if a boolean", ->
+          @setup({trashAssetsBeforeHeadlessRuns: false})
+          @expectValidationPasses()
+
+        it "fails if not a boolean", ->
+          @setup({trashAssetsBeforeHeadlessRuns: 42})
+          @expectValidationFails("be a boolean")
+
+      context "videoCompression", ->
+        it "passes if a number", ->
+          @setup({videoCompression: 10})
+          @expectValidationPasses()
+
+        it "passes if false", ->
+          @setup({videoCompression: false})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({videoCompression: "foo"})
+          @expectValidationFails("be a number or false")
+
+      context "videoRecording", ->
+        it "passes if a boolean", ->
+          @setup({videoRecording: false})
+          @expectValidationPasses()
+
+        it "fails if not a boolean", ->
+          @setup({videoRecording: 42})
+          @expectValidationFails("be a boolean")
+
+      context "videosFolder", ->
+        it "passes if a string", ->
+          @setup({videosFolder: "_videos"})
+          @expectValidationPasses()
+
+        it "fails if not a string", ->
+          @setup({videosFolder: true})
+          @expectValidationFails("be a string")
+
+      context "viewportHeight", ->
+        it "passes if a number", ->
+          @setup({viewportHeight: 10})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({viewportHeight: "foo"})
+          @expectValidationFails("be a number")
+
+      context "viewportWidth", ->
+        it "passes if a number", ->
+          @setup({viewportWidth: 10})
+          @expectValidationPasses()
+
+        it "fails if not a number", ->
+          @setup({viewportWidth: "foo"})
+          @expectValidationFails("be a number")
+
+      context "waitForAnimations", ->
+        it "passes if a boolean", ->
+          @setup({waitForAnimations: false})
+          @expectValidationPasses()
+
+        it "fails if not a boolean", ->
+          @setup({waitForAnimations: 42})
+          @expectValidationFails("be a boolean")
+
+      context "watchForFileChanges", ->
+        it "passes if a boolean", ->
+          @setup({watchForFileChanges: false})
+          @expectValidationPasses()
+
+        it "fails if not a boolean", ->
+          @setup({watchForFileChanges: 42})
+          @expectValidationFails("be a boolean")
 
   context ".resolveConfigValues", ->
     beforeEach ->
@@ -117,11 +419,11 @@ describe "lib/config", ->
     it "autoOpen=false", ->
       @defaults "autoOpen", false
 
-    it "clientUrl=http://localhost:2020/__/", ->
-      @defaults "clientUrl", "http://localhost:2020/__/", {port: 2020}
+    it "browserUrl=http://localhost:2020/__/", ->
+      @defaults "browserUrl", "http://localhost:2020/__/", {port: 2020}
 
-    it "clientUrlDisplay=http://localhost:2020", ->
-      @defaults "clientUrlDisplay", "http://localhost:2020", {port: 2020}
+    it "proxyUrl=http://localhost:2020", ->
+      @defaults "proxyUrl", "http://localhost:2020", {port: 2020}
 
     it "namespace=__cypress", ->
       @defaults "namespace", "__cypress"
@@ -453,6 +755,30 @@ describe "lib/config", ->
       obj = {}
       expect(config.setUrls(obj)).not.to.eq(obj)
 
+    it "uses baseUrl when set", ->
+      obj = {
+        port: 65432
+        baseUrl: "https://www.google.com"
+        clientRoute: "/__/"
+      }
+
+      urls = config.setUrls(obj)
+
+      expect(urls.browserUrl).to.eq("https://www.google.com/__/")
+      expect(urls.proxyUrl).to.eq("http://localhost:65432")
+
+    it "strips baseUrl to host when set", ->
+      obj = {
+        port: 65432
+        baseUrl: "http://localhost:9999/app/?foo=bar#index.html"
+        clientRoute: "/__/"
+      }
+
+      urls = config.setUrls(obj)
+
+      expect(urls.browserUrl).to.eq("http://localhost:9999/__/")
+      expect(urls.proxyUrl).to.eq("http://localhost:65432")
+
   context ".setScaffoldPaths", ->
     it "sets integrationExampleFile + integrationExampleName + scaffoldedFiles", ->
       obj = {
@@ -511,7 +837,7 @@ describe "lib/config", ->
         supportFile: "does/not/exist"
       })
 
-      expect(-> config.setSupportFileAndFolder(obj)).to.throw("Support file missing or invalid")
+      expect(-> config.setSupportFileAndFolder(obj)).to.throw("Support file missing or invalid.")
 
   context ".setParentTestsPaths", ->
     it "sets parentTestsFolder and parentTestsFolderDisplay", ->

@@ -133,11 +133,11 @@ class Project extends EE
       return if not options.sync
 
       Promise.all([
-        user.ensureSession()
+        user.ensureAuthToken()
         @getConfig()
       ])
-      .spread (session, cfg) ->
-        api.updateProject(id, options.type, cfg.projectName, session)
+      .spread (authToken, cfg) ->
+        api.updateProject(id, options.type, cfg.projectName, authToken)
 
   watchSupportFile: (config) ->
     if supportFile = config.supportFile
@@ -290,9 +290,9 @@ class Project extends EE
           ## once we determine that we can then prefix it correctly
           ## with either integration or unit
           prefixedPath = @getPrefixedPathToSpec(cfg.integrationFolder, pathToSpec)
-          @getUrlBySpec(cfg.clientUrl, prefixedPath)
+          @getUrlBySpec(cfg.browserUrl, prefixedPath)
       else
-        @getUrlBySpec(cfg.clientUrl, "/__all")
+        @getUrlBySpec(cfg.browserUrl, "/__all")
 
   ensureSpecExists: (spec) ->
     specFile = path.resolve(@projectRoot, spec)
@@ -315,11 +315,11 @@ class Project extends EE
     ## becomes /integration/foo.coffee
     "/" + path.join("integration", path.relative(integrationFolder, pathToSpec))
 
-  getUrlBySpec: (clientUrl, specUrl) ->
+  getUrlBySpec: (browserUrl, specUrl) ->
     replacer = (match, p1) ->
       match.replace("//", "/")
 
-    [clientUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
+    [browserUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
     scaffolds = []
@@ -369,16 +369,16 @@ class Project extends EE
       return @writeProjectId(id)
 
     Promise.all([
-      user.ensureSession()
+      user.ensureAuthToken()
       @getConfig()
     ])
     .bind(@)
-    .spread (session, cfg) ->
+    .spread (authToken, cfg) ->
       git
       .init(cfg.projectRoot)
       .getRemoteOrigin()
       .then (remoteOrigin) ->
-        api.createProject(cfg.projectName, remoteOrigin, session)
+        api.createProject(cfg.projectName, remoteOrigin, authToken)
     .then(@writeProjectId)
 
   getProjectId: ->
@@ -437,9 +437,9 @@ class Project extends EE
     ## get project id
     Project.id(path)
     .then (id) ->
-      user.ensureSession()
-      .then (session) ->
-        api.getProjectToken(id, session)
+      user.ensureAuthToken()
+      .then (authToken) ->
+        api.getProjectToken(id, authToken)
         .catch ->
           errors.throw("CANNOT_FETCH_PROJECT_TOKEN")
 
@@ -447,9 +447,9 @@ class Project extends EE
     ## get project id
     Project.id(path)
     .then (id) ->
-      user.ensureSession()
-      .then (session) ->
-        api.updateProjectToken(id, session)
+      user.ensureAuthToken()
+      .then (authToken) ->
+        api.updateProjectToken(id, authToken)
         .catch ->
           errors.throw("CANNOT_CREATE_PROJECT_TOKEN")
 

@@ -70,6 +70,10 @@ module.exports = {
             else
               err.filePath = absolutePath
 
+              ## backup the original stack before its
+              ## potentially modified from bluebird
+              err.originalStack = err.stack
+
               reject(err)
           .on "end", ->
             resolve()

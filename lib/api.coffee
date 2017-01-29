@@ -65,7 +65,7 @@ module.exports = {
         "remoteOrigin"
         "ciParams"
         "ciProvider"
-        "ciBuildNum"
+        "ciBuildNumber"
       ])
     })
     .promise()
@@ -134,13 +134,13 @@ module.exports = {
     })
     .catch(errors.StatusCodeError, formatResponseBody)
 
-  createRaygunException: (body, session, timeout = 3000) ->
+  createRaygunException: (body, authToken, timeout = 3000) ->
     rp.post({
       url: Routes.exceptions()
       json: true
       body: body
-      headers: {
-        "x-session": session
+      auth: {
+        bearer: authToken
       }
     })
     .promise()
@@ -151,34 +151,34 @@ module.exports = {
       url: Routes.signin({code: code})
       json: true
       headers: {
-        "x-route-version": "2"
+        "x-route-version": "3"
       }
     })
     .catch errors.StatusCodeError, (err) ->
-      ## slice out the status code since RP automatically
-      ## adds this before the message
-      err.message = err.message.split(" - ").slice(1).join("")
+      ## reset message to error which is a pure body
+      ## representation of what was sent back from
+      ## the API
+      err.message = err.error
+
       throw err
 
-  createSignout: (session) ->
+  createSignout: (authToken) ->
     rp.post({
       url: Routes.signout()
       json: true
-      headers: {
-        "x-session": session
+      auth: {
+        bearer: authToken
       }
     })
-    .catch (err) ->
-      return if err.statusCode is 401
+    .catch {statusCode: 401}, ->
+      ## do nothing on 401
 
-      throw err
-
-  createProject: (projectName, remoteOrigin, session) ->
+  createProject: (projectName, remoteOrigin, authToken) ->
     rp.post({
       url: Routes.projects()
       json: true
-      headers: {
-        "x-session": session
+      auth: {
+        bearer: authToken
       }
       body: {
         "x-project-name": projectName
@@ -188,13 +188,13 @@ module.exports = {
     .promise()
     .get("uuid")
 
-  updateProject: (projectId, type, projectName, session) ->
+  updateProject: (projectId, type, projectName, authToken) ->
     ## TODO: change this to PUT method
     rp.get({
       url: Routes.project(projectId)
       json: true
-      headers: {
-        "x-session": session
+      auth: {
+        bearer: authToken
       }
       body: {
         "x-type": type
@@ -204,12 +204,12 @@ module.exports = {
       }
     })
 
-  sendUsage: (numRuns, exampleSpec, allSpecs, projectName, session) ->
+  sendUsage: (numRuns, exampleSpec, allSpecs, projectName, authToken) ->
     rp.post({
       url: Routes.usage()
       json: true
-      headers: {
-        "x-session": session
+      auth: {
+        bearer: authToken
       }
       body: {
         "x-runs": numRuns
@@ -227,23 +227,25 @@ module.exports = {
     .promise()
     .get("url")
 
-  _projectToken: (method, projectId, session) ->
+  _projectToken: (method, projectId, authToken) ->
     rp({
       method: method
       url: Routes.projectToken(projectId)
       json: true
+      auth: {
+        bearer: authToken
+      }
       headers: {
-        "x-session": session
         "x-route-version": "2"
       }
     })
     .promise()
     .get("apiToken")
 
-  getProjectToken: (projectId, session) ->
-    @_projectToken("get", projectId, session)
+  getProjectToken: (projectId, authToken) ->
+    @_projectToken("get", projectId, authToken)
 
-  updateProjectToken: (projectId, session) ->
-    @_projectToken("put", projectId, session)
+  updateProjectToken: (projectId, authToken) ->
+    @_projectToken("put", projectId, authToken)
 
 }

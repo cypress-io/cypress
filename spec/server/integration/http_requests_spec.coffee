@@ -234,6 +234,14 @@ describe "Routes", ->
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(/Runner.start/)
 
+    it "routes when baseUrl is set", ->
+      @setup({baseUrl: "http://localhost:9999/app"})
+      .then =>
+        @rp("http://localhost:9999/__")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.match(/Runner.start/)
+
   context "GET /__cypress/runner/*", ->
     beforeEach ->
       @setup("http://localhost:8443")

@@ -158,8 +158,8 @@ describe "lib/project", ->
 
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(@project, "ensureProjectId").resolves("id-123")
-      @sandbox.stub(api, "updateProject").withArgs("id-123", "closed", "project", "session-123").resolves({})
-      @sandbox.stub(user, "ensureSession").resolves("session-123")
+      @sandbox.stub(api, "updateProject").withArgs("id-123", "closed", "project", "auth-token-123").resolves({})
+      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
     it "closes server", ->
       @project.server = @sandbox.stub({close: ->})
@@ -256,7 +256,7 @@ describe "lib/project", ->
       @project = Project("path/to/project")
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(api, "updateProject").resolves({})
-      @sandbox.stub(user, "ensureSession").resolves("session-123")
+      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
     it "is noop if options.updateProject isnt true", ->
       @project.updateProject(1).then ->
@@ -264,7 +264,7 @@ describe "lib/project", ->
 
     it "calls api.updateProject with id + session", ->
       @project.updateProject("project-123", {sync: true, type: "opened"}).then ->
-        expect(api.updateProject).to.be.calledWith("project-123", "opened", "project", "session-123")
+        expect(api.updateProject).to.be.calledWith("project-123", "opened", "project", "auth-token-123")
 
   context "#scaffold", ->
     beforeEach ->
@@ -442,10 +442,10 @@ describe "lib/project", ->
       @project = Project("path/to/project")
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(@project, "writeProjectId").resolves("uuid-123")
-      @sandbox.stub(user, "ensureSession").resolves("session-123")
+      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
       @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
       @sandbox.stub(api, "createProject")
-        .withArgs("project", "remoteOrigin", "session-123")
+        .withArgs("project", "remoteOrigin", "auth-token-123")
         .resolves("uuid-123")
 
     afterEach ->
@@ -453,7 +453,7 @@ describe "lib/project", ->
 
     it "calls api.createProject with user session", ->
       @project.createProjectId().then ->
-        expect(api.createProject).to.be.calledWith("project", "remoteOrigin", "session-123")
+        expect(api.createProject).to.be.calledWith("project", "remoteOrigin", "auth-token-123")
 
     it "calls writeProjectId with id", ->
       @project.createProjectId().then =>
@@ -623,11 +623,11 @@ describe "lib/project", ->
 
   context ".getSecretKeyByPath", ->
     beforeEach ->
-      @sandbox.stub(user, "ensureSession").resolves("session-123")
+      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
     it "calls api.getProjectToken with id + session", ->
       @sandbox.stub(api, "getProjectToken")
-        .withArgs(@projectId, "session-123")
+        .withArgs(@projectId, "auth-token-123")
         .resolves("key-123")
 
       Project.getSecretKeyByPath(@todosPath).then (key) ->
@@ -635,7 +635,7 @@ describe "lib/project", ->
 
     it "throws CANNOT_FETCH_PROJECT_TOKEN on error", ->
       @sandbox.stub(api, "getProjectToken")
-        .withArgs(@projectId, "session-123")
+        .withArgs(@projectId, "auth-token-123")
         .rejects(new Error)
 
       Project.getSecretKeyByPath(@todosPath)
@@ -646,11 +646,11 @@ describe "lib/project", ->
 
   context ".generateSecretKeyByPath", ->
     beforeEach ->
-      @sandbox.stub(user, "ensureSession").resolves("session-123")
+      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
     it "calls api.updateProject with id + session", ->
       @sandbox.stub(api, "updateProjectToken")
-        .withArgs(@projectId, "session-123")
+        .withArgs(@projectId, "auth-token-123")
         .resolves("new-key-123")
 
       Project.generateSecretKeyByPath(@todosPath).then (key) ->
@@ -658,7 +658,7 @@ describe "lib/project", ->
 
     it "throws CANNOT_CREATE_PROJECT_TOKEN on error", ->
       @sandbox.stub(api, "updateProjectToken")
-        .withArgs(@projectId, "session-123")
+        .withArgs(@projectId, "auth-token-123")
         .rejects(new Error)
 
       Project.generateSecretKeyByPath(@todosPath)

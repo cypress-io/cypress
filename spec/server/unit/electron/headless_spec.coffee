@@ -408,9 +408,9 @@ describe "electron/headless", ->
 
   context ".run", ->
     beforeEach ->
-      @sandbox.stub(@projectInstance, "getConfig").resolves({clientUrlDisplay: "http://localhost:12345"})
+      @sandbox.stub(@projectInstance, "getConfig").resolves({proxyUrl: "http://localhost:12345"})
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(user, "ensureSession")
+      @sandbox.stub(user, "ensureAuthToken")
       @sandbox.stub(headless, "getId").returns(1234)
       @sandbox.stub(headless, "ensureAndOpenProjectByPath").resolves(@projectInstance)
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
@@ -421,7 +421,7 @@ describe "electron/headless", ->
     it "no longer ensures user session", ->
       headless.run()
       .then ->
-        expect(user.ensureSession).not.to.be.called
+        expect(user.ensureAuthToken).not.to.be.called
 
     it "returns stats", ->
       headless.run()
