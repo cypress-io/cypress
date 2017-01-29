@@ -660,7 +660,7 @@ describe "lib/cypress", ->
           commitMessage: "foo"
           remoteOrigin: "https://github.com/foo/bar.git"
           ciProvider: "travis"
-          ciBuildNum: "987"
+          ciBuildNumber: "987"
           ciParams: null
         })
 

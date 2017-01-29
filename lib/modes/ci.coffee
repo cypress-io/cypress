@@ -55,7 +55,7 @@ module.exports = {
         remoteOrigin:      git.remote
         ciParams:          ciProvider.params()
         ciProvider:        ciProvider.name()
-        ciBuildNum:        ciProvider.buildNum()
+        ciBuildNumber:     ciProvider.buildNum()
       })
       .catch (err) ->
         switch err.statusCode

@@ -80,7 +80,7 @@ describe "electron/ci", ->
           commitMessage: "such hax"
           remoteOrigin: "https://github.com/foo/bar.git"
           ciProvider: "circle"
-          ciBuildNum: "build-123"
+          ciBuildNumber: "build-123"
           ciParams: {foo: "bar"}
         })
 

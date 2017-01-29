@@ -65,7 +65,7 @@ module.exports = {
         "remoteOrigin"
         "ciParams"
         "ciProvider"
-        "ciBuildNum"
+        "ciBuildNumber"
       ])
     })
     .promise()
