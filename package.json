@@ -104,7 +104,7 @@
     "xvfb-maybe": "cypress-io/xvfb-maybe#c4a810c42d603949cd63b8cf245f6c239331d370"
   },
   "dependencies": {
-    "@cypress/core-desktop-gui": "0.3.13",
+    "@cypress/core-desktop-gui": "0.3.14",
     "@cypress/core-example": "0.6.3",
     "@cypress/core-extension": "0.3.6",
     "@cypress/core-https-proxy": "0.1.4",
