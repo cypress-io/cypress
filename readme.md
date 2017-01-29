@@ -65,7 +65,7 @@ If you want to see the `ipc` events which are pending from Cypress tests:
 - App.ipc() <-- returns you object with pending events
 
 ## License
-LGPL
+MIT
 
 ## Changelog
 
