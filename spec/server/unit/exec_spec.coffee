@@ -15,9 +15,10 @@ runCommand = (cmd, options = {}) ->
 fail = (message) -> throw new Error(message)
 
 describe "lib/exec", ->
+  beforeEach ->
+    @currentTest.timeout(10000)
 
   describe "when exit code is 0", ->
-
     it "reports the stdout, stderr, and code", ->
       runCommand("echo 'foo'")
       .catch (err) ->
