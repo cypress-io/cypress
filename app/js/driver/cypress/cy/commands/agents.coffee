@@ -14,6 +14,7 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
     counts = {
       spy: 0
       stub: 0
+      children: {}
     }
 
   resetCounts()
@@ -22,6 +23,9 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
   hasMatchingFake = (agent, args) ->
     _.some agent.fakes, (fake) ->
       fake.matches(args)
+
+  getName = (obj) ->
+    "#{obj.name}-#{obj.count}"
 
   getMessage = (method, args) ->
     method ?= "function"
@@ -41,16 +45,13 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
       ## let them log instead so there isn't a duplicate
       return
 
-    if parent = agent.parent
-      count = [parent._cyCount, obj.count].join("/")
-      parentCallCount = parent.callCount
-    else
-      count = obj.count
-
     callCount = agent.callCount
 
+    if parent = agent.parent
+      parentCallCount = parent.callCount
+
     logProps = {
-      name:     "#{obj.name}-#{count}"
+      name:     getName(obj)
       message:  obj.message
       error:    obj.error
       type:     "parent"
@@ -61,11 +62,12 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
         console = {}
         console.Command = null
         console.Error = null
+        console.Event = "#{getName(obj)} called"
 
         if parent
-          parentName = "#{obj.name}-#{parent._cyCount}"
-          name = "#{obj.name}-#{obj.count}"
-          console.Event = "#{parentName}/#{name} called"
+          parentCount = obj.count.replace(/\.\d+$/, '')
+          parentName = "#{obj.name}-#{parentCount}"
+          name = getName(obj)
           console[parentName] = parent
           console["#{parentName} call #"] = parentCallCount
           if parent._cyAlias
@@ -77,7 +79,6 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
           ## typo in sinon! will be fixed in 2.0
           console["#{name} matching arguments"] = agent.matchingAguments
         else
-          console.Event = "#{obj.name}-#{obj.count} called"
           console[obj.name] = agent
           console["Call #"] = callCount
           if alias
@@ -103,10 +104,14 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
   onError = (err) ->
     $Cypress.Utils.throwErr(err)
 
-  wrap = (_cy, type, agent, obj, method) ->
-    count = counts[type] += 1
+  wrap = (_cy, type, agent, obj, method, count) ->
+    if not count
+      count = counts[type] += 1
 
     name = "#{type}-#{count}"
+    if not agent.parent
+      counts.children[name] = 0
+
     log = Cypress.Log.agent({
       name: name
       type: name
@@ -114,8 +119,6 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
       count: count
       callCount: 0
     })
-
-    agent._cyCount = count
 
     agent.invoke = _.wrap agent.invoke, (orig, func, thisValue, args) ->
       error = null
@@ -166,7 +169,8 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
       agent.named(alias)
 
     agent.withArgs = _.wrap agent.withArgs, (orig, args...) ->
-      wrap(_cy, type, orig.apply(@, args), obj, method)
+      childCount = counts.children[name] += 1
+      wrap(_cy, type, orig.apply(@, args), obj, method, "#{count}.#{childCount}")
 
     return agent
 

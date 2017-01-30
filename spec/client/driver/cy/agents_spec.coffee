@@ -100,18 +100,21 @@ describe "$Cypress.Cy Agents Commands", ->
         expect(@logs[1].get("alias")).to.equal("withFoo")
 
       context "logging", ->
-        it "creates new log instrument", ->
+        it "creates new log instrument with sub-count", ->
           expect(@logs.length).to.equal(2)
-          expect(@logs[1].get("name")).to.equal("stub-2")
+          expect(@logs[1].get("name")).to.equal("stub-1.1")
+          @stub.withArgs("bar")
+          expect(@logs.length).to.equal(3)
+          expect(@logs[2].get("name")).to.equal("stub-1.2")
 
         describe "on invocation", ->
           it "only logs once", ->
             @obj.foo("foo")
             expect(@logs.length).to.equal(3)
 
-          it "includes both counts in name", ->
+          it "includes child count in name", ->
             @obj.foo("foo")
-            expect(@logs[2].get("name")).to.equal("stub-1/2")
+            expect(@logs[2].get("name")).to.equal("stub-1.1")
 
           it "has no alias if no aliases set", ->
             @obj.foo("foo")
@@ -145,7 +148,7 @@ describe "$Cypress.Cy Agents Commands", ->
               @consoleProps = @logs[2].get("consoleProps")()
 
             it "includes the event", ->
-              expect(@consoleProps["Event"]).to.equal("stub-1/stub-2 called")
+              expect(@consoleProps["Event"]).to.equal("stub-1.1 called")
 
             it "includes reference to parent stub", ->
               expect(@consoleProps["stub-1"]).to.be.a("function")
@@ -157,16 +160,16 @@ describe "$Cypress.Cy Agents Commands", ->
               expect(@consoleProps["stub-1 alias"]).to.equal("objFoo")
 
             it "includes reference to withArgs stub", ->
-              expect(@consoleProps["stub-2"]).to.be.a("function")
+              expect(@consoleProps["stub-1.1"]).to.be.a("function")
 
             it "includes withArgs call number", ->
-              expect(@consoleProps["stub-2 call #"]).to.equal(1)
+              expect(@consoleProps["stub-1.1 call #"]).to.equal(1)
 
             it "includes withArgs alias", ->
-              expect(@consoleProps["stub-2 alias"]).to.equal("withFoo")
+              expect(@consoleProps["stub-1.1 alias"]).to.equal("withFoo")
 
             it "includes withArgs matching arguments", ->
-              expect(@consoleProps["stub-2 matching arguments"]).to.eql(["foo"])
+              expect(@consoleProps["stub-1.1 matching arguments"]).to.eql(["foo"])
 
     context "#as", ->
       beforeEach ->
