@@ -11,7 +11,7 @@ Subsequent calls to `cy.clock` will yield the `clock` object without re-overridi
 
 | | |
 |--- | --- |
-| **Returns** | a `clock` object with the methods `tick` and `restore`. See [clock API](#section-clock-api) |
+| **Returns** | a `clock` object. See [clock API](#section-clock-api) |
 
 ***
 
@@ -39,7 +39,7 @@ Same as above, but only overrides the functions in the array `functionNames`.
 
 ## clock.tick(*milliseconds*)
 
-Move the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called. Note that `cy.tick` exists for this purpose as well for a more fluid
+Move the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called. Note that `cy.tick` exists for this purpose as well for a more fluid.
 
 ## clock.restore()
 
