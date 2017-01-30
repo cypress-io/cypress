@@ -35,14 +35,14 @@ expect(util.addListeners).to.be.called
 
 ## Alias a spy
 
-You can utilize sinon's `.named` method to alias a spy, which makes it easier to identify in error messages and Cypress' command log.
+Cypress adds a `.as` method to spies, which makes them easier to identify in error messages and Cypress's command log.
 
 ```javascript
 const obj = {
   foo () {}
 }
-const spy = cy.spy(obj, "foo").named("anyCall")
-const withFoo = spy.withArgs("foo").named("withFoo")
+const spy = cy.spy(obj, "foo").as("anyArgs")
+const withFoo = spy.withArgs("foo").as("withFoo")
 obj.foo()
 expect(spy).to.be.called
 expect(withFoo).to.be.called // purposefully failing assertion
@@ -50,7 +50,7 @@ expect(withFoo).to.be.called // purposefully failing assertion
 
 You will see the following in the command log:
 
-![spies with aliases](https://cloud.githubusercontent.com/assets/1157043/22254158/ced71846-e221-11e6-960b-11effd6309fc.png)
+![spies with aliases](https://cloud.githubusercontent.com/assets/1157043/22427271/83d3df42-e6d0-11e6-8785-e0f22448bfe1.png)
 
 ***
 

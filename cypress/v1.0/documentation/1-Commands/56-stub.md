@@ -9,7 +9,6 @@ Cypress has built-in [sinon-as-promised](https://github.com/bendrucker/sinon-as-
 
 Cypress also has built-in [sinon-chai](https://github.com/domenic/sinon-chai) support, so any assertions supported by `sinon-chai` can be used without any configuration.
 
-
 Unlike most Cypress commands, `cy.stub` is synchronous and returns a value (the stub) instead of a Promise-like chain-able object.
 
 ***
@@ -86,14 +85,14 @@ expect(removeStub).to.be.called
 
 ## Alias a stub
 
-You can utilize sinon's `.named` method to alias a stub, which makes it easier to identify in error messages and Cypress' command log.
+Cypress adds a `.as` method to stubs, which makes them easier to identify in error messages and Cypress's command log.
 
 ```javascript
 const obj = {
   foo () {}
 }
-const stub = cy.stub(obj, "foo").named("anyCall")
-const withFoo = stub.withArgs("foo").named("withFoo")
+const stub = cy.stub(obj, "foo").as("anyArgs")
+const withFoo = stub.withArgs("foo").as("withFoo")
 obj.foo()
 expect(stub).to.be.called
 expect(withFoo).to.be.called // purposefully failing assertion
@@ -101,7 +100,7 @@ expect(withFoo).to.be.called // purposefully failing assertion
 
 You will see the following in the command log:
 
-![stubs with aliases](https://cloud.githubusercontent.com/assets/1157043/22254216/f0a86678-e221-11e6-9c1b-e0c6007218a4.png)
+![stubs with aliases](https://cloud.githubusercontent.com/assets/1157043/22427297/9e8f4592-e6d0-11e6-9fcc-9e77233313b1.png)
 
 ***
 
