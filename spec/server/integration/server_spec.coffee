@@ -997,3 +997,38 @@ describe "Server", ->
                 port: "443"
               }
             })
+
+    describe "baseUrl", ->
+      beforeEach ->
+        @setup({
+          projectRoot: "/foo/bar/"
+          config: {
+            baseUrl: "https://foo.bar.baz.co.uk:8443"
+            hosts: {
+              "*.baz.co.uk": "127.0.0.1"
+            }
+          }
+        })
+
+      it "resets back to baseUrl on resetState", ->
+        ## this is a test for changing between spec files
+        ## where resetState is called on our server instance
+
+        state = {
+          origin: "https://foo.bar.baz.co.uk:8443"
+          strategy: "http"
+          visiting: undefined
+          fileServer: null
+          domainName: "baz.co.uk"
+          props: {
+            domain: "baz"
+            tld: "co.uk"
+            port: "8443"
+          }
+        }
+
+        expect(@server._getRemoteState()).to.deep.eq(state)
+
+        @server.resetState()
+
+        expect(@server._getRemoteState()).to.deep.eq(state)
