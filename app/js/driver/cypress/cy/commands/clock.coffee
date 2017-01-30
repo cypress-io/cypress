@@ -84,11 +84,13 @@ $Cypress.register "Clock", (Cypress, _) ->
           ret = restore.call(clock)
           if shouldLog
             log("restore")
+          @assign("clock", null)
           @prop("clock", null)
           return ret
 
         log("clock")
 
+        @assign("clock", clock)
         @prop("clock", clock)
 
       tick: (subject, ms) ->

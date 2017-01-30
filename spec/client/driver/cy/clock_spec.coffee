@@ -13,6 +13,10 @@ describe "$Cypress.Cy Clock Commands", ->
         expect(clock).to.exist
         expect(clock.tick).to.be.a("function")
 
+    it "assigns clock to test context", ->
+      @cy.clock().then (clock) ->
+        expect(clock).to.equal(@clock)
+
     it "proxies lolex clock, replacing window time methods", (done) ->
       @cy.clock().then (clock) ->
         @window.setTimeout =>
@@ -36,9 +40,11 @@ describe "$Cypress.Cy Clock Commands", ->
         clock.tick()
 
     it "unsets clock after restore", ->
-      @cy.clock().then (clock) =>
+      cy = @cy
+      @cy.clock().then (clock) ->
         clock.restore()
-        expect(@cy.prop("clock")).to.be.null
+        expect(cy.prop("clock")).to.be.null
+        expect(@clock).to.be.null
 
     it "automatically restores clock on 'restore' event", ->
       clock = {restore: @sandbox.stub()}
