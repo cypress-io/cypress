@@ -69,6 +69,9 @@ MIT
 
 ## Changelog
 
+#### 0.3.15 - *(01/29/17)*
+- display all scaffolded files
+
 #### 0.3.14 - *(01/29/17)*
 - LGPL -> MIT
 - correctly replace new lines on errors
