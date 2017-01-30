@@ -65,9 +65,15 @@ If you want to see the `ipc` events which are pending from Cypress tests:
 - App.ipc() <-- returns you object with pending events
 
 ## License
-LGPL
+MIT
 
 ## Changelog
+
+#### 0.3.14 - *(01/29/17)*
+- LGPL -> MIT
+- correctly replace new lines on errors
+- rename sessionToken -> authToken
+- display full list of scaffolded files
 
 #### 0.3.13 - *(11/15/16)*
 - camelize session token
