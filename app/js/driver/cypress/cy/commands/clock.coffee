@@ -100,3 +100,5 @@ $Cypress.register "Clock", (Cypress, _) ->
           $Cypress.Utils.throwErrByPath("tick.no_clock")
 
         clock.tick(ms)
+
+        return clock

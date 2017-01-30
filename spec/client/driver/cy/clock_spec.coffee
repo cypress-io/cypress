@@ -228,6 +228,12 @@ describe "$Cypress.Cy Clock Commands", ->
           , 1000
         .tick(1000)
 
+    it "returns the clock object", ->
+      @cy
+        .clock()
+        .tick(1000).then (clock) ->
+          expect(clock).to.equal(@clock)
+
     context "errors", ->
       beforeEach ->
         @allowErrors()
