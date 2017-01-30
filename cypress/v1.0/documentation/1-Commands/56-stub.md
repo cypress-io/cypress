@@ -100,7 +100,7 @@ expect(withFoo).to.be.called // purposefully failing assertion
 
 You will see the following in the command log:
 
-![stubs with aliases](https://cloud.githubusercontent.com/assets/1157043/22427297/9e8f4592-e6d0-11e6-9fcc-9e77233313b1.png)
+![stubs with aliases](https://cloud.githubusercontent.com/assets/1157043/22437243/4cc778a4-e6f5-11e6-8f07-e601d3438c4f.png)
 
 ***
 

@@ -50,7 +50,7 @@ expect(withFoo).to.be.called // purposefully failing assertion
 
 You will see the following in the command log:
 
-![spies with aliases](https://cloud.githubusercontent.com/assets/1157043/22427271/83d3df42-e6d0-11e6-8785-e0f22448bfe1.png)
+![spies with aliases](https://cloud.githubusercontent.com/assets/1157043/22437291/805bd0d4-e6f5-11e6-99c5-bded81b9c42b.png)
 
 ***
 
