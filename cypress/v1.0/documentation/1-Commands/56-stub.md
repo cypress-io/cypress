@@ -104,6 +104,29 @@ You will see the following in the command log:
 
 ***
 
+# Command Log
+
+## Create a stub, alias it, and call it
+
+```javascript
+const obj = {
+  foo () {}
+}
+const stub = cy.stub(obj, "foo").as("foo")
+obj.foo("foo", "bar")
+expect(stub).to.be.called
+```
+
+The command above will display in the command log as:
+
+<img width="454" alt="screen shot of command log" src="https://cloud.githubusercontent.com/assets/1157043/22437473/335f7104-e6f6-11e6-8ee8-74dc21e7d4fa.png">
+
+When clicking on the `(stub-1)` event within the command log, the console outputs the following:
+
+<img width="585" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/22437546/6b01e574-e6f6-11e6-878f-e10c2316d213.png">
+
+***
+
 # Related
 
 - [spy](https://on.cypress.io/api/spy)

@@ -54,6 +54,29 @@ You will see the following in the command log:
 
 ***
 
+# Command Log
+
+## Create a spy, alias it, and call it
+
+```javascript
+const obj = {
+  foo () {}
+}
+const spy = cy.spy(obj, "foo").as("foo")
+obj.foo("foo", "bar")
+expect(spy).to.be.called
+```
+
+The command above will display in the command log as:
+
+<img width="454" alt="screen shot of command log" src="https://cloud.githubusercontent.com/assets/1157043/22437713/1d5f7be6-e6f7-11e6-9457-f35cbeaa5385.png">
+
+When clicking on the `spy-1` event within the command log, the console outputs the following:
+
+<img width="585" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/22437712/1d5ed1e6-e6f7-11e6-9808-e61936b1d75f.png">
+
+***
+
 # Related
 
 - [stub](https://on.cypress.io/api/stub)

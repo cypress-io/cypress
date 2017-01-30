@@ -175,6 +175,26 @@ cy
 
 ***
 
+# Command Log
+
+## Create a clock and tick it 1 second
+
+```javascript
+cy
+  .clock()
+  .tick(1000)
+```
+
+The command above will display in the command log as:
+
+<img width="448" alt="screen shot of command log" src="https://cloud.githubusercontent.com/assets/1157043/22437918/059f60a6-e6f8-11e6-903d-d868e044615d.png">
+
+When clicking on the `clock` command within the command log, the console outputs the following:
+
+<img width="1059" alt="screen shot of console output" src="https://cloud.githubusercontent.com/assets/1157043/22437920/0786f9d8-e6f8-11e6-9e77-926b15aa8dae.png">
+
+***
+
 # Related
 
 - [tick](https://on.cypress.io/api/tick)
