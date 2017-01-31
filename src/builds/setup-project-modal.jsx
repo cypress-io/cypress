@@ -48,7 +48,7 @@ class SetupProject extends Component {
           className='setup-project-modal modal-body os-dialog'
         >
           <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-          <h4>Setup Project to Record</h4>
+          <h4>Setup Project</h4>
           <form
             onSubmit={this._submit}>
             <div className={cs('form-group', {
@@ -79,7 +79,6 @@ class SetupProject extends Component {
                 <label htmlFor='projectName' className='control-label pull-left'>
                   Who should own this project?
                 </label>
-
               </div>
               <div className='owner-parts'>
                 <div>
@@ -118,19 +117,19 @@ class SetupProject extends Component {
                   </div>
                 </div>
                 <div className='select-orgs'>
+                  {/* this is the empty view for organizations */}
                   <div className={`${this.state.owner === 'org' && !orgsStore.orgs.length ? '' : 'hidden'}`}>
                     <div className='empty-select-orgs well'>
-                      <p>You don't have any organizations yet.
-                      </p>
+                      <p>You don't have any organizations yet.</p>
                       <p>Organizations can help you manage projects, including billing.</p>
                       <p>
                         <a
-                        href='#'
-                        className={`btn btn-link  ${this.state.owner === 'org' ? '' : 'hidden'}`}
-                        onClick={this._manageOrgs}>
-                        <i className='fa fa-plus'></i>{' '}
-                        Create Organization
-                      </a>
+                          href='#'
+                          className={`btn btn-link  ${this.state.owner === 'org' ? '' : 'hidden'}`}
+                          onClick={this._manageOrgs}>
+                          <i className='fa fa-plus'></i>{' '}
+                          Create Organization
+                        </a>
                       </p>
                     </div>
                   </div>
@@ -140,10 +139,8 @@ class SetupProject extends Component {
                       id='organizations-select'
                       className='form-control float-left'
                       onChange={this._updateOrgId}
-                      require={this.state.owner === 'org'}
                       >
                         <option>-- Select Organization --</option>
-
                         {_.map(orgsStore.orgs, (org) => {
                           if (org.default) return null
 
@@ -158,7 +155,7 @@ class SetupProject extends Component {
                           )
                         })}
                     </select>
-                      <a
+                    <a
                       href='#'
                       className={`btn btn-link manage-orgs-btn float-left ${this.state.owner === 'org' ? '' : 'hidden'}`}
                       onClick={this._manageOrgs}>

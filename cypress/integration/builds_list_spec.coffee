@@ -339,52 +339,129 @@ describe "Builds List", ->
           cy.contains("You Have No Recorded Builds")
 
         describe "setup project window", ->
-          beforeEach ->
-            cy
-              .fixture("organizations").as("orgs").then ->
-                @ipc.handle("get:orgs", null, @orgs)
-              .get(".btn").contains("Setup Project").click()
+          context "modal display", ->
+            beforeEach ->
+              cy
+                .fixture("organizations").as("orgs").then ->
+                  @ipc.handle("get:orgs", null, @orgs)
+                .get(".btn").contains("Setup Project").click()
 
-          it "clicking link opens setup project window", ->
-            cy
-              .get(".modal").should("be.visible")
+              it "clicking link opens setup project window", ->
+                cy
+                  .get(".modal").should("be.visible")
 
-          it "prefills Project Name", ->
-            cy
-              .get("#projectName").should("have.value", @firstProjectName)
+          context "project name", ->
+            beforeEach ->
+              cy
+                .fixture("organizations").as("orgs").then ->
+                  @ipc.handle("get:orgs", null, @orgs)
+                .get(".btn").contains("Setup Project").click()
 
-          it "allows me to change Project Name value", ->
-            @newProjectName = "New Project Here"
+            it "prefills and autofocuses Project Name", ->
+              cy
+                .focused().should("have.value", @firstProjectName)
 
-            cy
-              .get("#projectName").clear().type(@newProjectName)
-              .get("#projectName").should("have.value", @newProjectName)
+            it "allows me to change Project Name value", ->
+              @newProjectName = "New Project Here"
 
-          it.skip "lists organizations to assign to project", ->
-            cy
-              .get("#organizations-select").find("option").should("have.length", @orgs.length)
+              cy
+                .get("#projectName").clear().type(@newProjectName)
+                .get("#projectName").should("have.value", @newProjectName)
 
-          it.skip "selects default org by default", ->
-            cy
-              .get("#organizations-select").should("have.value", "000")
+          context "selecting owner", ->
+            describe "default", ->
+              beforeEach ->
+                cy
+                  .fixture("organizations").as("orgs").then ->
+                    @ipc.handle("get:orgs", null, @orgs)
+                  .get(".btn").contains("Setup Project").click()
 
-          it.skip "opens external link on click of manage", ->
-            cy
-              .contains("manage").click().then ->
-                 expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/settings")
+              it "has no owner selected by default", ->
+                cy.get("#me").should("not.be.selected")
+                cy.get("#org").should("not.be.selected")
 
-          it.skip "displays public and private radios w/ public preselected", ->
-            cy
-              .get(".modal-body").contains("Public")
-                .find("input").should("be.checked")
-              .get(".modal-body").contains("Private")
-                .find("input").should("not.be.checked")
+            describe "select me", ->
+              beforeEach ->
+                cy
+                  .fixture("organizations").as("orgs").then ->
+                    @ipc.handle("get:orgs", null, @orgs)
+                  .get(".btn").contains("Setup Project").click()
+                  .get(".privacy-radio").should("not.be.visible")
+                  .get(".modal-content")
+                    .contains(".btn", "Me").click()
+
+              it "displays public & private radios with no preselects", ->
+                cy
+                  .get(".privacy-radio").should("be.visible")
+                    .find("input").should("not.be.checked")
+
+            describe "select organization", ->
+              context "with organization", ->
+                beforeEach ->
+                  cy
+                    .fixture("organizations").as("orgs").then ->
+                      @ipc.handle("get:orgs", null, @orgs)
+                    .get(".btn").contains("Setup Project").click()
+                    .get(".modal-content")
+                      .contains(".btn", "An Organization").click()
+
+                it "lists organizations to assign to project", ->
+                  cy
+                    .get("#organizations-select").find("option")
+                      # orgs minus the default + 1 for the 'select'
+                      .should("have.length", (@orgs.length) - 1 + 1)
+
+                it "selects none by default", ->
+                  cy
+                    .get("#organizations-select").should("have.value", "-- Select Organization --")
+
+                it "opens external link on click of manage", ->
+                  cy
+                    .get(".manage-orgs-btn").click().then ->
+                       expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/settings")
+
+                it "displays public & private radios on select", ->
+                  cy
+                    .get(".privacy-radio").should("not.be.visible")
+                    .get("select").select("Acme Developers")
+                    .get(".privacy-radio").should("be.visible")
+                      .find("input").should("not.be.checked")
+
+                it "clears selections when switching back to Me", ->
+                  cy
+                    .get("select").select("Acme Developers")
+                    .get(".privacy-radio")
+                      .find("input").first().check()
+                    .get(".btn").contains("Me").click()
+                    .get(".privacy-radio").find("input").should("not.be.checked")
+                    .get(".btn").contains("An Organization").click()
+                    .get("#organizations-select").should("have.value", "-- Select Organization --")
+
+              context "with no organizations", ->
+                beforeEach ->
+                  cy
+                    .fixture("organizations").as("orgs").then ->
+                      @ipc.handle("get:orgs", null, [])
+                    .get(".btn").contains("Setup Project").click()
+                    .get(".modal-content")
+                      .contains(".btn", "An Organization").click()
+
+                it "displays empty message", ->
+                  cy
+                    .get(".empty-select-orgs").should("be.visible")
+                    .contains("Create Organization").click().then ->
+                       expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/settings")
+
+              context.skip "polls for newly added organizations", ->
 
           describe "on submit", ->
             beforeEach ->
               cy
-                .get(".modal-body")
+                .fixture("organizations").as("orgs").then ->
+                  @ipc.handle("get:orgs", null, @orgs)
                 .contains(".btn", "Setup Project").click()
+                .get(".modal-body")
+                  .contains(".btn", "Setup Project").click()
 
             it "disables button", ->
               cy
@@ -399,7 +476,7 @@ describe "Builds List", ->
                 .find("i")
                 .should("be.visible")
 
-          describe.skip "successfully submit form", ->
+          describe "successfully submit form", ->
             beforeEach ->
               @ipc.handle("setup:ci:project", null, {
                 id: "project-id-123"
@@ -409,47 +486,90 @@ describe "Builds List", ->
               @ipc.handle("get:ci:keys", null, @ciKeys)
 
               cy
-                .get(".modal-body")
+                .fixture("organizations").as("orgs").then ->
+                  @ipc.handle("get:orgs", null, @orgs)
                 .contains(".btn", "Setup Project").click()
 
-            it "sends data from form to ipc event", ->
-              expect(@App.ipc).to.be.calledWith("setup:ci:project", {
-                projectName: "My-Fake-Project"
-                orgId: "000"
-                public: true
-              })
-
-            it "closes modal", ->
-              cy.get(".modal").should("not.be.visible")
-
-            it "updates localStorage projects cache", ->
-              expect(JSON.parse(localStorage.projects || "[]")[0].orgName).to.equal("Jane Lane")
-
-            it "displays empty builds page", ->
-              cy.contains("You're ready to run")
-
-            it "links CLI tools to npm package", ->
-              cy.contains("CLI tools").click().then =>
-                expect(@App.ipc).to.be.calledWith("external:open", "https://www.npmjs.com/package/cypress-cli")
-
-            describe "welcome page", ->
-              it "displays command to run with the ci key", ->
-                cy.contains("cypress ci ci-key-123")
-
-              it "displays link to CI docs", ->
+            context "org/public", ->
+              beforeEach ->
                 cy
-                  .get(".first-build-instructions a").eq(1)
-                  .should("have.text", " Learn more")
+                  .get(".modal-body")
+                    .contains(".btn", "An Organization").click()
+                  .get("select").select("Acme Developers")
+                  .get(".privacy-radio").find("input").first().check()
+                  .get(".modal-body")
+                    .contains(".btn", "Setup Project").click()
 
-              it "does not display message about inviting users", ->
-                cy.contains("Cypress Dashboard").should("not.exist")
+              it "sends data from form to ipc event", ->
+                expect(@App.ipc).to.be.calledWith("setup:ci:project", {
+                  projectName: "My-Fake-Project"
+                  orgId: "777"
+                  public: true
+                })
 
-              it "clicking link opens CI guide", ->
+            context "me/private", ->
+              beforeEach ->
                 cy
-                  .get(".first-build-instructions a").eq(1)
-                  .click()
-                  .then =>
-                    expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/continuous-integration")
+                  .get(".modal-body")
+                    .contains(".btn", "Me").click()
+                  .get(".privacy-radio").find("input").last().check()
+                  .get(".modal-body")
+                    .contains(".btn", "Setup Project").click()
+
+              it "sends data from form to ipc event", ->
+                expect(@App.ipc).to.be.calledWith("setup:ci:project", {
+                  projectName: "My-Fake-Project"
+                  orgId: "000"
+                  public: false
+                })
+
+            context "me/public", ->
+              beforeEach ->
+                cy
+                  .get(".modal-body")
+                    .contains(".btn", "Me").click()
+                  .get(".privacy-radio").find("input").first().check()
+                  .get(".modal-body")
+                    .contains(".btn", "Setup Project").click()
+
+              it "sends data from form to ipc event", ->
+                expect(@App.ipc).to.be.calledWith("setup:ci:project", {
+                  projectName: "My-Fake-Project"
+                  orgId: "000"
+                  public: true
+                })
+
+              it "closes modal", ->
+                cy.get(".modal").should("not.be.visible")
+
+              it "updates localStorage projects cache", ->
+                expect(JSON.parse(localStorage.projects || "[]")[0].orgName).to.equal("Jane Lane")
+
+              it "displays empty builds page", ->
+                cy.contains("You're ready to run")
+
+              it "links CLI tools to npm package", ->
+                cy.contains("CLI Tools").click().then =>
+                  expect(@App.ipc).to.be.calledWith("external:open", "https://www.npmjs.com/package/cypress-cli")
+
+              describe "welcome page", ->
+                it "displays command to run with the ci key", ->
+                  cy.contains("cypress ci ci-key-123")
+
+                it.skip "displays link to CI docs", ->
+                  cy
+                    .contains("CI Script")
+                      .should("have.text", " Learn more")
+
+                it.skip "does not display message about inviting users", ->
+                  cy.contains("Cypress Dashboard").should("not.exist")
+
+                it.skip "clicking link opens CI guide", ->
+                  cy
+                    .get(".first-build-instructions a").eq(1)
+                    .click()
+                    .then =>
+                      expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/continuous-integration")
 
           describe "when project is private", ->
             beforeEach ->
