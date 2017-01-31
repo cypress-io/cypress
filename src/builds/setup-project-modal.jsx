@@ -9,7 +9,6 @@ import App from '../lib/app'
 import orgsStore from '../organizations/organizations-store'
 import { gravatarUrl } from '../lib/utils'
 
-const defaultOrg = _.find(orgsStore.orgs, { default: true })
 
 @observer
 class SetupProject extends Component {
@@ -26,8 +25,9 @@ class SetupProject extends Component {
     this.state = {
       error: null,
       projectName: this._initialProjectName(),
-      public: true,
+      public: null,
       owner: null,
+      orgId: null,
       showNameMissingError: false,
       isSubmitting: false,
     }
@@ -35,6 +35,8 @@ class SetupProject extends Component {
 
   render () {
     if (!orgsStore.isLoaded) return null
+
+    // const defaultOrg = _.find(orgsStore.orgs, { default: true })
 
     return (
       <BootstrapModal
@@ -77,22 +79,17 @@ class SetupProject extends Component {
                 <label htmlFor='projectName' className='control-label pull-left'>
                   Who should own this project?
                 </label>
-                <a
-                  href='#'
-                  className={`btn btn-link manage-orgs-btn pull-right ${this.state.owner === 'org' ? '' : 'hidden'}`}
-                  onClick={this._manageOrgs}>
-                  (manage organizations)
-                </a>
+
               </div>
               <div className='owner-parts'>
-                <div className='owner-part-one'>
+                <div>
                   <div className='btn-group' data-toggle='buttons'>
                     <label className={`btn btn-default ${this.state.owner === 'me' ? 'active' : ''}`}>
                       <input
                         type='radio'
                         name='owner-toggle'
                         id='me'
-                        autocomplete='off'
+                        autoComplete='off'
                         value='me'
                         checked={this.state.owner === 'me'}
                         onChange={this._updateOwner}
@@ -110,7 +107,7 @@ class SetupProject extends Component {
                         type='radio'
                         name='owner-toggle'
                         id='org'
-                        autocomplete='off'
+                        autoComplete='off'
                         value='org'
                         checked={this.state.owner === 'org'}
                         onChange={this._updateOwner}
@@ -120,12 +117,33 @@ class SetupProject extends Component {
                     </label>
                   </div>
                 </div>
-                <div className='owner-part-two'>
-                  <div className={`form-group ${this.state.owner === 'org' ? '' : 'hidden'}`}>
+                <div className='select-orgs'>
+                  <div className={`${this.state.owner === 'org' && !orgsStore.orgs.length ? '' : 'hidden'}`}>
+                    <div className='empty-select-orgs well'>
+                      <p>You don't have any organizations yet.
+                      </p>
+                      <p>Organizations can help you manage projects, including billing.</p>
+                      <p>
+                        <a
+                        href='#'
+                        className={`btn btn-link  ${this.state.owner === 'org' ? '' : 'hidden'}`}
+                        onClick={this._manageOrgs}>
+                        <i className='fa fa-plus'></i>{' '}
+                        Create Organization
+                      </a>
+                      </p>
+                    </div>
+                  </div>
+                  <div className={`${this.state.owner === 'org' && orgsStore.orgs.length ? '' : 'hidden'}`}>
                     <select
                       ref='orgId'
                       id='organizations-select'
-                      className='form-control'>
+                      className='form-control float-left'
+                      onChange={this._updateOrgId}
+                      require={this.state.owner === 'org'}
+                      >
+                        <option>-- Select Organization --</option>
+
                         {_.map(orgsStore.orgs, (org) => {
                           if (org.default) return null
 
@@ -133,17 +151,24 @@ class SetupProject extends Component {
                             <option
                               key={org.id}
                               value={org.id}
+                              selected={this.state.orgId === org.id}
                             >
                               {org.name}
                             </option>
                           )
                         })}
                     </select>
+                      <a
+                      href='#'
+                      className={`btn btn-link manage-orgs-btn float-left ${this.state.owner === 'org' ? '' : 'hidden'}`}
+                      onClick={this._manageOrgs}>
+                      (manage organizations)
+                    </a>
                   </div>
                 </div>
               </div>
             </div>
-            <div className={`form-group ${this.state.owner ? '' : 'hidden'}`}>
+            <div className={`${this.state.orgId ? '' : 'hidden'}`}>
               <hr />
               <label htmlFor='projectName' className='control-label'>
                 Who should see the builds and recordings?
@@ -154,7 +179,7 @@ class SetupProject extends Component {
                       type='radio'
                       name='privacy-radio'
                       value='true'
-                      checked={this.state.public}
+                      checked={(this.state.public === true)}
                       onChange={this._updateAccess}
                     />
                     <p>
@@ -170,7 +195,7 @@ class SetupProject extends Component {
                       type='radio'
                       name='privacy-radio'
                       value='false'
-                      checked={!this.state.public}
+                      checked={(this.state.public === false)}
                       onChange={this._updateAccess}
                     />
                     <p>
@@ -228,6 +253,14 @@ class SetupProject extends Component {
     )
   }
 
+  _updateOrgId = () => {
+    let orgId = (this.refs.orgId.value === '-- Select Organization --') ? null : this.refs.orgId.value
+
+    this.setState({
+      orgId,
+    })
+  }
+
   _updateProjectName = () => {
     this.setState({
       projectName: this.refs.projectName.value,
@@ -244,8 +277,18 @@ class SetupProject extends Component {
   }
 
   _updateOwner = (e) => {
+    let owner = e.target.value
+
+    const defaultOrg = _.find(orgsStore.orgs, { default: true })
+
+    let chosenOrgId = (owner === 'me') ? defaultOrg.id : null
+
+    // we want to clear all selects below the radio buttons
+    // otherwise it looks jarring to already have selects
     this.setState({
-      owner: e.target.value,
+      owner,
+      orgId: chosenOrgId,
+      public: null,
     })
   }
 
@@ -273,17 +316,9 @@ class SetupProject extends Component {
   }
 
   _setupProject () {
-    let chosenOrgId
-
-    if (this.state.org === 'me') {
-      chosenOrgId = defaultOrg.id
-    } else {
-      chosenOrgId = this.refs.orgId.value
-    }
-
     App.ipc('setup:ci:project', {
       projectName: this.state.projectName,
-      orgId: chosenOrgId,
+      orgId: this.state.orgId,
       public: this.state.public,
     })
     .then((projectDetails) => {

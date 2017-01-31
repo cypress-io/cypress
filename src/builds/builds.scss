@@ -346,8 +346,27 @@
   .manage-orgs-btn {
     padding: 0;
     font-size: 12px;
+    margin-top: 20px;
+    line-height: 30px;
+    margin-left: 10px;
   }
 
+  .well {
+    text-align: center;
+    background-color: #f8f8f8;
+  }
+
+  .well.empty-select-orgs {
+    margin-top: 20px;
+
+    a.btn.btn-link {
+      padding: 0;
+    }
+
+    p:last-of-type {
+      margin-bottom: 0;
+    }
+  }
 
   .user-avatar {
     position: relative;
@@ -439,5 +458,15 @@
     max-height: 200px;
     overflow: auto;
     text-align: left;
+  }
+}
+
+.select-orgs {
+  overflow: auto;
+
+  select {
+    float: left;
+    width: 205px;
+    margin-top: 20px;
   }
 }
