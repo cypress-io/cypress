@@ -6,9 +6,9 @@ import BootstrapModal from 'react-bootstrap-modal'
 
 import state from '../lib/state'
 import App from '../lib/app'
-import orgsStore from '../organizations/organizations-store'
 import { gravatarUrl } from '../lib/utils'
-
+import orgsStore from '../organizations/organizations-store'
+import { getOrgs, pollOrgs, stopPollingOrgs } from '../organizations/organizations-api'
 
 @observer
 class SetupProject extends Component {
@@ -33,10 +33,43 @@ class SetupProject extends Component {
     }
   }
 
+  componentWillMount () {
+    getOrgs()
+    this._handlePolling()
+  }
+
+  componentDidUpdate () {
+    this._handlePolling()
+  }
+
+  componentWillUnmount () {
+    this._stopPolling()
+  }
+
+  _handlePolling () {
+    if (this._shouldPollBuilds()) {
+      this._poll()
+    } else {
+      this._stopPolling()
+    }
+  }
+
+  _shouldPollBuilds () {
+    return (
+      this.state.owner === 'org'
+    )
+  }
+
+  _poll () {
+    pollOrgs()
+  }
+
+  _stopPolling () {
+    stopPollingOrgs()
+  }
+
   render () {
     if (!orgsStore.isLoaded) return null
-
-    // const defaultOrg = _.find(orgsStore.orgs, { default: true })
 
     return (
       <BootstrapModal
@@ -73,9 +106,9 @@ class SetupProject extends Component {
               </div>
               <div className='help-block validation-error'>Please enter a project name</div>
             </div>
-          <hr />
+            <hr />
             <div className='form-group'>
-            <div className='label-title'>
+              <div className='label-title'>
                 <label htmlFor='projectName' className='control-label pull-left'>
                   Who should own this project?
                 </label>
@@ -274,6 +307,8 @@ class SetupProject extends Component {
   }
 
   _updateOwner = (e) => {
+    this._handlePolling()
+
     let owner = e.target.value
 
     const defaultOrg = _.find(orgsStore.orgs, { default: true })

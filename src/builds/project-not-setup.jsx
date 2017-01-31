@@ -3,7 +3,6 @@ import { observer } from 'mobx-react'
 
 import App from '../lib/app'
 import SetupProject from "./setup-project-modal"
-import { getOrgs } from '../organizations/organizations-api'
 
 @observer
 export default class ProjectNotSetup extends Component {
@@ -17,10 +16,6 @@ export default class ProjectNotSetup extends Component {
     this.state = {
       setupProjectModalOpen: false,
     }
-  }
-
-  componentWillMount () {
-    getOrgs()
   }
 
   render () {

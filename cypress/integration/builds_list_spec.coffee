@@ -452,7 +452,34 @@ describe "Builds List", ->
                     .contains("Create Organization").click().then ->
                        expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/settings")
 
-              context.skip "polls for newly added organizations", ->
+              context "polls for newly added organizations", ->
+                beforeEach ->
+                  cy
+                    .window().then (win) =>
+                      @clock = win.sinon.useFakeTimers()
+
+                    .fixture("organizations").as("orgs").then =>
+                      @ipc.handle("get:orgs", null, @orgs)
+                      @clock.tick(100)
+                    .get(".btn").contains("Setup Project").click()
+                    .get(".modal-content")
+                      .contains(".btn", "An Organization").click()
+
+                afterEach ->
+                  @clock.restore()
+
+                it.only "begins polling on click of org", ->
+                  cy.then =>
+                    @orgs.push =   {
+                      "id": "888",
+                      "name": "Foo Bar Devs",
+                      "default": false
+                    }
+                    @ipc.handle("get:orgs", null, @orgs)
+                    @clock.tick(10000)
+                  cy
+                    .get("#organizations-select").find("option")
+                      .contains("Foo Bar Devs")
 
           describe "on submit", ->
             beforeEach ->
@@ -589,7 +616,6 @@ describe "Builds List", ->
               cy
                 .contains("Cypress Dashboard").click().then =>
                   expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@id}/builds")
-
 
           describe "errors on form submit", ->
             beforeEach ->
