@@ -9,6 +9,8 @@ excerpt: Control time in the browser
 
 Subsequent calls to `cy.clock` will yield the `clock` object without re-overriding the native time functions.
 
+If you call `cy.clock` before visiting a page with `cy.visit`, the page's native global functions will be overridden on window load, before any of your app code runs, so even if `setTimeout`, for example, is called on page load, it can still be controlled via `cy.tick`. This also applies if, during the course of a test, the page under test is reloaded or changed.
+
 | | |
 |--- | --- |
 | **Returns** | a `clock` object. See [clock API](#section-clock-api) |
@@ -65,24 +67,25 @@ Option | Default | Notes
 
 # Usage
 
-## Create a clock and use it to trigger a setTimeout
+## Create a clock and use it to trigger a setInterval
 
 ```javascript
 // app code loaded by index.html
-window.foo = () => {
-  setTimeout(() => {
-    document.getElementById('#foo').textContent = 'Foo'
-  }, 500)
-}
+let seconds = 0
+setInterval(() => {
+  document.getElementById('#seconds-elapsed').textContent = `${++seconds} seconds`
+}, 1000)
 
 // test
 cy
   .clock()
   .visit("/index.html")
-  .window().invoke("foo")
-  .tick(500)
-  .get("#foo")
-    .should("have.text", "Foo")
+  .tick(1000)
+  .get("#seconds-elapsed")
+    .should("have.text", "1 seconds")
+  .tick(1000)
+  .get("#seconds-elapsed")
+    .should("have.text", "2 seconds")
 ```
 
 ***
@@ -91,17 +94,14 @@ cy
 
 ```javascript
 // app code loaded by index.html
-window.foo = () => {
-  document.getElementById('#foo').textContent = new Date().toISOString()
-}
+document.getElementById('#date').textContent = new Date().toISOString()
 
 // test
 const now = new Date(2017, 0, 1).getTime() // Jan 1, 2017 timestamp
 cy
   .clock(now)
   .visit("/index.html")
-  .window().invoke("foo")
-  .get("#foo")
+  .get("#date")
     .contains("2017-01-01")
 ```
 
