@@ -468,15 +468,18 @@ describe "Builds List", ->
                 afterEach ->
                   @clock.restore()
 
-                it.only "begins polling on click of org", ->
+                it "polls for orgs twice on click of org", ->
                   cy.then =>
-                    @orgs.push =   {
-                      "id": "888",
-                      "name": "Foo Bar Devs",
-                      "default": false
-                    }
                     @ipc.handle("get:orgs", null, @orgs)
-                    @clock.tick(10000)
+                    @clock.tick(11000)
+                  .then =>
+                      expect(@App.ipc.withArgs("get:orgs")).to.be.calledTwice
+
+                it "updates orgs list on successful poll", ->
+                  cy.then =>
+                    @orgs[0].name = "Foo Bar Devs"
+                    @ipc.handle("get:orgs", null, @orgs)
+                    @clock.tick(11000)
                   cy
                     .get("#organizations-select").find("option")
                       .contains("Foo Bar Devs")
