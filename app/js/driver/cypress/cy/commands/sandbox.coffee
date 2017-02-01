@@ -2,7 +2,7 @@ $Cypress.register "Sandbox", (Cypress, _, $) ->
   do (sinon) ->
 
     createSandbox = (sinon) ->
-      sinon.format = -> ""
+      sinon.format = Cypress.Utils.stringifyArg.bind(Cypress.Utils)
 
       sinon.sandbox.create()
 

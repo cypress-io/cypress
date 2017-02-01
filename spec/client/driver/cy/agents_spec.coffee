@@ -240,15 +240,15 @@ describe "$Cypress.Cy Agents Commands", ->
         expect(@logs[0].get("instrument")).to.eq("agent")
 
       it "logs event for each invocation", ->
-        @obj.foo("foo", "bar")
+        @obj.foo("foo")
         expect(@logs.length).to.equal(2)
         expect(@logs[1].get("name")).to.eq("stub-1")
-        expect(@logs[1].get("message")).to.eq("foo(arg1, arg2)")
+        expect(@logs[1].get("message")).to.eq("foo(\"foo\")")
         expect(@logs[1].get("event")).to.be.true
-        @obj.foo("foo")
+        @obj.foo("bar")
         expect(@logs.length).to.equal(3)
         expect(@logs[2].get("name")).to.eq("stub-1")
-        expect(@logs[2].get("message")).to.eq("foo(arg1)")
+        expect(@logs[2].get("message")).to.eq("foo(\"bar\")")
         expect(@logs[2].get("event")).to.be.true
 
       it "increments callCount of agent log on each invocation", ->
@@ -263,6 +263,67 @@ describe "$Cypress.Cy Agents Commands", ->
         @Cypress.trigger("restore")
         @cy.stub()
         expect(@logs[1].get("name")).to.equal("stub-1")
+
+      context "arg formatting", ->
+        beforeEach ->
+          @bigArray = [1, 2, 3, 4, 5]
+          @bigObject = {a:1,b:1,c:1,d:1,e:1,f:1}
+
+          @obj.foo("str", 5, true)
+          @obj.foo(null, undefined, [1, 2, 3])
+          @obj.foo({g: 1}, @bigArray, @bigObject)
+          @obj.foo(1, 2, 3, 4, 5)
+
+        context "in message", ->
+          it "formats args", ->
+            expect(@logs[1].get("message")).to.eq("foo(\"str\", 5, true)")
+            expect(@logs[2].get("message")).to.eq("foo(null, undefined, [1, 2, 3])")
+            expect(@logs[3].get("message")).to.eq("foo({g: 1}, Array[5], Object{6})")
+
+          it "truncates if more than 3 args", ->
+            expect(@logs[4].get("message")).to.eq("foo(1, 2, 3, ...)")
+
+        context "in assertion", ->
+          before ->
+            @onAssert = (fn) =>
+              @Cypress.on "log", (attrs, log) =>
+                if log.get("name") is "assert"
+                  ## restore so we dont create an endless loop
+                  ## due to Cypress.assert being called again
+                  @chai.restore()
+                  fn.call(@, log)
+
+          beforeEach ->
+            ## create three here because there was a bug where
+            ## we were not correctly restoring assertions
+            ## during construction
+            @chai = $Cypress.Chai.create(@Cypress, {})
+            @chai = $Cypress.Chai.create(@Cypress, {})
+            @chai = $Cypress.Chai.create(@Cypress, {})
+
+          afterEach ->
+            @chai.restore()
+
+          it "formats string, number, boolean args", (done) ->
+            @onAssert (log) ->
+              expect(log.get("message")).to.include("expected foo to have been called with arguments \"str\", 5, true")
+              done()
+
+            expect(@obj.foo).be.calledWith("str", 5, true)
+
+          it "formats null, undefined, small array args", (done) ->
+            @onAssert (log) ->
+              expect(log.get("message")).to.include("expected foo to have been called with arguments null, undefined, [1, 2, 3]")
+              done()
+
+            expect(@obj.foo).be.calledWith(null, undefined, [1, 2, 3])
+
+          it "formats small object, big array, big object args", (done) ->
+            @onAssert (log) ->
+              expect(log.get("message")).to.include("expected foo to have been called with arguments {g: 1}, Array[5], Object{6}")
+              done()
+
+            expect(@obj.foo).be.calledWith({g: 1}, @bigArray, @bigObject)
 
       context "#consoleProps", ->
         beforeEach ->

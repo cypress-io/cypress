@@ -27,9 +27,16 @@ $Cypress.register "Agents", (Cypress, _, $, Promise) ->
   getName = (obj) ->
     "#{obj.name}-#{obj.count}"
 
+  formatArgs = (args) ->
+    _.map args, (arg) -> Cypress.Utils.stringifyArg(arg)
+
   getMessage = (method, args) ->
     method ?= "function"
-    args = _.map args, (arg, i) -> "arg#{i + 1}"
+    args = if args.length > 3
+      formatArgs(args.slice(0, 3)).concat("...")
+    else
+      formatArgs(args)
+
     "#{method}(#{args.join(', ')})"
 
   onInvoke = (obj, args) ->
