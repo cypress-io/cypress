@@ -73,6 +73,10 @@
       line-height: 39px;
     }
 
+    .see-all-builds:active {
+      box-shadow: none;
+    }
+
     button {
       vertical-align: initial;
 
@@ -215,6 +219,12 @@
 }
 
 .setup-project-modal {
+  .form-horizontal {
+    background: none;
+    margin: 0;
+    padding: 0;
+  }
+
   .validation-error {
     display: none;
     clear: both;

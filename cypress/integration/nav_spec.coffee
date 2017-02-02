@@ -29,7 +29,7 @@ describe "Navigation", ->
       it "opens link to chat on click", ->
         cy
           .get("nav").contains("Chat").click().then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://gitter.im/cypress-io/cypress")
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/chat")
 
     describe "login in header", ->
       beforeEach ->
@@ -76,7 +76,7 @@ describe "Navigation", ->
       it "opens link to chat on click", ->
         cy
           .get("nav").contains("Chat").click().then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://gitter.im/cypress-io/cypress")
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/chat")
 
     context "with a current user", ->
       describe "username in header", ->

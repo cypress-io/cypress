@@ -7,11 +7,12 @@ import { observer } from 'mobx-react'
 import { ContextMenuLayer } from 'react-contextmenu'
 
 import { getStatusIcon } from '../lib/utils'
+import Project from '../project/project-model'
 
 const strLength = 45
 
 @observer
-class Project extends Component {
+class ProjectListItem extends Component {
   componentDidMount () {
     if (this.props.project.isLoading) {
       const link = findDOMNode(this.projectLink)
@@ -25,7 +26,7 @@ class Project extends Component {
     const loadingClassName = project.isLoading ? 'loading' : ''
 
     let link = `/projects/${project.clientId}`
-    if (!project.valid) {
+    if (!project.isValid) {
       link += '/builds'
     }
 
@@ -111,11 +112,11 @@ class Project extends Component {
   }
 
   _projectStatus () {
-    if (!this.props.project.valid) {
+    if (!this.props.project.isValid) {
       return (
         <span className='invalid'>
           <i className={`fa fa-warning`}></i>{' '}
-          Invalid
+          {_.capitalize(this.props.project.state)}
         </span>
       )
     }
@@ -162,4 +163,4 @@ class Project extends Component {
 
 export default ContextMenuLayer('context-menu', (props) => {
   return props.project
-})(Project)
+})(ProjectListItem)
