@@ -24,10 +24,17 @@
 }
 
 .first-build-instructions {
-  padding: 50px 200px;
+  padding: 40px 130px;
+
+  p {
+    text-align: center;
+  }
 
   h5 {
     overflow: auto;
+    margin-top: 25px;
+    line-height: 18px;
+    font-weight: normal;
 
     a {
       font-size: 13px;
@@ -50,23 +57,40 @@
       }
     }
 
-    hr {
-      // opacity: 0.5;
-      margin-top: 15px;
-      margin-bottom: 15px;
-    }
   }
 
+  hr {
+    clear: both;
+    // opacity: 0.5;
+    margin-top: 25px;
+    margin-bottom: 25px;
+  }
   h4, .center {
     text-align: center;
   }
 
   pre {
+    clear: both;
     border: 0;
     background-color: #252831;
     border-radius: 3px;
     color: #eee;
     padding-left: 15px;
+    counter-reset: line;
+
+    span {
+      display: block;
+
+        &:before {
+          counter-increment: line;
+          content: counter(line);
+          display: inline-block;
+          border-right: 1px solid #414344;
+          padding: 0 .5em 0 0;
+          margin-right: .5em;
+          color: #696c6d;
+        }
+      }
   }
 }
 
@@ -455,6 +479,19 @@
 .builds-list-error {
   .alert-danger {
     margin: 0 2em 1em;
+    max-height: 200px;
+    overflow: auto;
+    text-align: left;
+  }
+}
+
+.setup-project-modal {
+  .text-danger {
+    margin-bottom: 0;
+  }
+  .alert-danger {
+    margin: 0 0 1em;
+    padding: 5px;
     max-height: 200px;
     overflow: auto;
     text-align: left;

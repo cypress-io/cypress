@@ -48,8 +48,7 @@ export default class ProjectNotSetup extends Component {
           <img width='150' height='150' src="http://placehold.it/150x150" />
           <img width='150' height='150' src="http://placehold.it/150x150" />
         </div>
-
-        <p>After builds are recorded, you will see them here and on your <a href='#' onClick={this._visitDashboard}>Cypress Dashboard</a></p>
+        <p>After builds are recorded, you will see them here and on your <a href='#' onClick={this._visitDashboard}>Cypress Dashboard</a>.</p>
         <button
           className='btn btn-primary'
           onClick={this._showSetupProjectModal}

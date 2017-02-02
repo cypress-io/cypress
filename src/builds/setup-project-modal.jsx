@@ -84,9 +84,7 @@ class SetupProject extends Component {
           <h4>Setup Project</h4>
           <form
             onSubmit={this._submit}>
-            <div className={cs('form-group', {
-              'has-error': this.state.showNameMissingError && !this._hasValidProjectName(),
-            })}>
+            <div className='form-group'>
               <div className='label-title'>
                 <label htmlFor='projectName' className='control-label pull-left'>
                   What's the name of the project?
