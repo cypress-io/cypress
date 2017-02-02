@@ -141,8 +141,8 @@ class Config extends Component {
 
     return (
       <Panel header='Project ID' key='projectId' className='form-horizontal'>
-        <p className='text-muted'>
-          Something about what the project ID is.
+        <p className='text-muted'>This projectId should be in your <code>cypress.json</code> and checked into source control.
+          It identifies your project and should not be changed.
         </p>
         <pre>
           {this.props.project.id}
