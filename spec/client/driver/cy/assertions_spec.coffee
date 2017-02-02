@@ -661,18 +661,6 @@ describe "$Cypress.Cy Assertion Commands", ->
       @cy.get("a:first").then ($a) ->
         expect($a).to.have.attr "href", "#"
 
-    it "removes rest of line when passing assertion includes ', but' for spy/stub subjects", (done) ->
-      @Cypress.on "log", (attrs, log) =>
-        if log.get("name") is "assert"
-          @chai.restore()
-
-          expect(log.get("message")).to.eq "expected stub to have been called at least once"
-          done()
-
-      stub = @cy.stub()
-      stub()
-      expect(stub).to.be.called
-
     it "does not replaces instances of word: 'but' with 'and' for failing assertion", (done) ->
       @allowErrors()
 
