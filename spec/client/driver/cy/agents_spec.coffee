@@ -325,6 +325,24 @@ describe "$Cypress.Cy Agents Commands", ->
 
             expect(@obj.foo).be.calledWith({g: 1}, @bigArray, @bigObject)
 
+          it "does not include stack with calls when assertion fails", (done) ->
+            @allowErrors()
+            log = null
+            @Cypress.on "log", (attrs, theLog) ->
+              log = theLog
+            @cy.on "fail", =>
+              @chai.restore()
+              expect(log.get("message")).to.include("""
+                #{"    "}foo("str", 5, true) => "return value"
+                #{"    "}foo(null, undefined, [1, 2, 3]) => "return value"
+                #{"    "}foo({g: 1}, Array[5], Object{6}) => "return value"
+                #{"    "}foo(1, 2, 3, 4, 5) => "return value"
+              """)
+              done()
+
+            @cy.then =>
+              expect(@obj.foo).to.be.calledWith(false, false, false)
+
       context "#consoleProps", ->
         beforeEach ->
           @stub.as("objFoo")
