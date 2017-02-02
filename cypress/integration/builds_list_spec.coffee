@@ -418,7 +418,7 @@ describe "Builds List", ->
                 it "opens external link on click of manage", ->
                   cy
                     .get(".manage-orgs-btn").click().then ->
-                       expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/settings")
+                       expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/organizations")
 
                 it "displays public & private radios on select", ->
                   cy
@@ -450,7 +450,7 @@ describe "Builds List", ->
                   cy
                     .get(".empty-select-orgs").should("be.visible")
                     .contains("Create Organization").click().then ->
-                       expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/settings")
+                       expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/organizations")
 
               context "polls for newly added organizations", ->
                 beforeEach ->

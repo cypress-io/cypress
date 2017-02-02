@@ -303,7 +303,7 @@ class SetupProject extends Component {
 
   _manageOrgs = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/dashboard/settings')
+    App.ipc('external:open', 'https://on.cypress.io/dashboard/organizations')
   }
 
   _updateOwner = (e) => {
