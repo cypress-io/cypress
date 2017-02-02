@@ -242,7 +242,7 @@ class SetupProject extends Component {
             <div className='actions form-group'>
               <div className='pull-right'>
                 <button
-                  disabled={this.state.isSubmitting}
+                  disabled={this.state.isSubmitting || this._formNotFilled()}
                   className='btn btn-primary btn-block'
                 >
                   {
@@ -258,6 +258,10 @@ class SetupProject extends Component {
         </div>
       </BootstrapModal>
     )
+  }
+
+  _formNotFilled = () => {
+    return (_.isNull(this.state.public) || !this.state.projectName)
   }
 
   _initialProjectName = () => {
@@ -284,11 +288,21 @@ class SetupProject extends Component {
   }
 
   _updateOrgId = () => {
-    let orgId = (this.refs.orgId.value === '-- Select Organization --') ? null : this.refs.orgId.value
+    const orgIsNotSelected = this.refs.orgId.value === '-- Select Organization --'
+
+    let orgId = (orgIsNotSelected) ? null : this.refs.orgId.value
 
     this.setState({
       orgId,
     })
+
+    // deselect their choice for access
+    // if they didn'tselect anything
+    if (orgIsNotSelected) {
+      this.setState({
+        public: null,
+      })
+    }
   }
 
   _updateProjectName = () => {
@@ -307,9 +321,13 @@ class SetupProject extends Component {
   }
 
   _updateOwner = (e) => {
-    this._handlePolling()
-
     let owner = e.target.value
+
+    // if they clicked the same radio button that's
+    // already selected, then ignore it
+    if (this.state.owner === owner) return
+
+    this._handlePolling()
 
     const defaultOrg = _.find(orgsStore.orgs, { default: true })
 

@@ -346,9 +346,14 @@ describe "Builds List", ->
                   @ipc.handle("get:orgs", null, @orgs)
                 .get(".btn").contains("Setup Project").click()
 
-              it "clicking link opens setup project window", ->
-                cy
-                  .get(".modal").should("be.visible")
+            it "clicking link opens setup project window", ->
+              cy
+                .get(".modal").should("be.visible")
+
+            it "submit button is disabled", ->
+              cy
+                .get(".modal").contains(".btn", "Setup Project")
+                  .should("be.disabled")
 
           context "project name", ->
             beforeEach ->
