@@ -61,6 +61,7 @@ describe "Setup Project", ->
     it "prefills Project Name", ->
       cy
         .get("#projectName").should("have.value", @firstProjectName)
+        .focused().should("have.id", "projectName")
 
     it "allows me to change Project Name value", ->
       @newProjectName = "New Project Here"
