@@ -40,6 +40,7 @@ describe "Settings", ->
     it "collapses panels by default", ->
       cy.contains("Your project's configuration is displayed").should("not.exist")
       cy.contains("CI Keys allow you to").should("not.exist")
+      cy.contains(@config.projectId).should("not.exist")
 
     describe "when config panel is opened", ->
       beforeEach ->
@@ -77,6 +78,13 @@ describe "Settings", ->
         cy
           .get(".fa-info-circle").first().click().then ->
             expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/configuration")
+
+    describe "when project id panel is opened", ->
+      beforeEach ->
+        cy.contains("Project ID").click()
+
+      it "displays project id section", ->
+        cy.contains(@config.projectId)
 
     describe "when ci keys panels is opened", ->
       beforeEach ->
@@ -180,31 +188,40 @@ describe "Settings", ->
             expect(location.href).to.include("specs")
 
   context "when project is not set up for CI", ->
-    it "does not show ci Keys section when project has no id", ->
-      cy.then ->
-        @projects[0].id = null
-        @ipc.handle("get:projects", null, @projects)
-      .get(".projects-list a")
-        .contains("My-Fake-Project").click()
-      .fixture("browsers").as("browsers")
-      .fixture("config").then (@config) ->
-        @config.projectId = null
-        @ipc.handle("open:project", null, @config)
-      .get(".navbar-default")
-      .get("a").contains("Settings").click()
-      .end().contains("h5", "CI Keys").should("not.exist")
 
-    it "does not show ci Keys section when project is invalid", ->
-      cy.then ->
-        @ipc.handle("get:projects", null, @projects)
-      .then ->
-        @projectStatuses[0].valid = false
-        @ipc.handle("get:project:statuses", null, @projectStatuses)
-      .get(".projects-list a")
-        .contains("My-Fake-Project").click()
-      .fixture("browsers").as("browsers")
-      .fixture("config").then (@config) ->
-        @ipc.handle("open:project", null, @config)
-      .get(".navbar-default")
-      .get("a").contains("Settings").click()
-      .end().contains("h5", "CI Keys").should("not.exist")
+    describe "and has no id", ->
+      beforeEach ->
+        cy.then ->
+          @ipc.handle("get:projects", null, @projects)
+        .get(".projects-list a")
+          .contains("My-Other-Fake-Project").click()
+        .fixture("browsers").as("browsers")
+        .fixture("config").then (@config) ->
+          @config.projectId = null
+          @ipc.handle("open:project", null, @config)
+        .get(".navbar-default")
+        .get("a").contains("Settings").click()
+
+      it "does not show project id section", ->
+        cy.contains(".rc-collapse-header", "Project ID").should("not.exist")
+
+      it "does not show ci keys section", ->
+        cy.contains(".rc-collapse-header", "CI Keys").should("not.exist")
+
+    describe "and is invalid", ->
+      beforeEach ->
+        cy.then ->
+          @ipc.handle("get:projects", null, @projects)
+        .then ->
+          @projectStatuses[0].state = "INVALID"
+          @ipc.handle("get:project:statuses", null, @projectStatuses)
+        .get(".projects-list a")
+          .contains("My-Fake-Project").click()
+        .fixture("browsers").as("browsers")
+        .fixture("config").then (@config) ->
+          @ipc.handle("open:project", null, @config)
+        .get(".navbar-default")
+        .get("a").contains("Settings").click()
+
+      it "does not show ci keys section", ->
+        cy.contains(".rc-collapse-header", "CI Keys").should("not.exist")

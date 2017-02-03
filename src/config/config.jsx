@@ -29,6 +29,7 @@ class Config extends Component {
         <div className='config-wrapper'>
           <Collapse>
             {this._configSection()}
+            {this._projectIdSection()}
             {this._ciKeysSection()}
           </Collapse>
         </div>
@@ -132,6 +133,21 @@ class Config extends Component {
         <span className='line'>{`}`}{this._getComma(hasComma)}</span>
         <br />
       </span>
+    )
+  }
+
+  _projectIdSection () {
+    if (!this.props.project.id) return null
+
+    return (
+      <Panel header='Project ID' key='projectId' className='form-horizontal'>
+        <p className='text-muted'>This projectId should be in your <code>cypress.json</code> and checked into source control.
+          It identifies your project and should not be changed.
+        </p>
+        <pre>
+          {this.props.project.id}
+        </pre>
+      </Panel>
     )
   }
 
