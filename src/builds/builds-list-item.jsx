@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import moment from 'moment'
 import React, { Component } from 'react'
+import Tooltip from 'rc-tooltip'
 
 import { osIcon, browserIcon, gravatarUrl, getStatusIcon, durationFormatted, browserVersionFormatted } from '../lib/utils'
 
@@ -16,27 +17,41 @@ export default class BuildsListItem extends Component {
         </div>
         <div className='row-column-wrapper'>
           <div>
-            <i className={`fa ${build.status} fa-${getStatusIcon(build.status)}`}></i>{' '}
-            #{build.buildNumber}
+            <Tooltip
+              placement='top'
+              overlay={<span>{_.startCase(build.status)}</span>}
+              >
+              <i className={`fa ${build.status} fa-${getStatusIcon(build.status)}`}></i>
+            </Tooltip>
+            {' '}#{build.buildNumber}
           </div>
         </div>
         <div className='row-column-wrapper'>
           <div className='td-top-padding'>
             <div>
-              <i className='fa fa-fw fa-code-fork fa-rotate-90'></i>{' '}
-              {build.commitBranch}{' '}
+              {
+                build.commitBranch ?
+                  build.commitBranch :
+                  null
+              }
             </div>
             <div className='msg'>
-              <img
-                className='user-avatar'
-                height='13'
-                width='13'
-                src={`${gravatarUrl(build.commitAuthorEmail)}`}
-              />
+              {
+                build.commitAuthorEmail ?
+                  <img
+                    className='user-avatar'
+                    height='13'
+                    width='13'
+                    src={`${gravatarUrl(build.commitAuthorEmail)}`}
+                  /> :
+                  null
+              }
               {
                 build.commitMessage ?
                   <span className='commit-msg'>
+                    {' '}
                     {build.commitMessage.split('\n')[0]}
+                    }
                   </span> :
                   null
               }
@@ -142,7 +157,9 @@ export default class BuildsListItem extends Component {
   }
 
   _allInstancesArePresent () {
-    return this.props.build.expectedInstances === this.props.build.instances.length
+    if (this.props.build.instances) {
+      return this.props.build.expectedInstances === this.props.build.instances.length
+    }
   }
 
   _moreThanOneInstance () {
