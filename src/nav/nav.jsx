@@ -1,9 +1,10 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import state from '../lib/state'
-import App from '../lib/app'
 import { Link } from 'react-router'
 
+import state from '../lib/state'
+import App from '../lib/app'
+import { gravatarUrl } from '../lib/utils'
 import { closeProject, addProject } from '../projects/projects-api'
 
 @observer
@@ -63,8 +64,13 @@ export default class Nav extends Component {
       return (
         <li className='dropdown'>
           <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
-            <i className='fa fa-user'></i>{' '}
-            { state.user.displayName }{' '}
+            <img
+              className='user-avatar'
+              height='13'
+              width='13'
+              src={`${gravatarUrl(state.email)}`}
+            />
+            {' '}{ state.user.displayName }{' '}
             <span className='caret'></span>
           </a>
           <ul className='dropdown-menu'>

@@ -6,6 +6,11 @@
   width: 550px;
 }
 
+.close {
+  position: relative;
+  top: 5px
+}
+
 .modal-body.os-dialog {
   background-color: #f2f2f2;
   border-radius: 10px;

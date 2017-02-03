@@ -2,11 +2,13 @@ import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-
-import App from '../lib/app'
 import BootstrapModal from 'react-bootstrap-modal'
 
+import state from '../lib/state'
+import App from '../lib/app'
+import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'
+import { getOrgs, pollOrgs, stopPollingOrgs } from '../organizations/organizations-api'
 
 @observer
 class SetupProject extends Component {
@@ -23,16 +25,51 @@ class SetupProject extends Component {
     this.state = {
       error: null,
       projectName: this._initialProjectName(),
-      public: true,
+      public: null,
+      owner: null,
+      orgId: null,
       showNameMissingError: false,
       isSubmitting: false,
     }
   }
 
+  componentWillMount () {
+    getOrgs()
+    this._handlePolling()
+  }
+
+  componentDidUpdate () {
+    this._handlePolling()
+  }
+
+  componentWillUnmount () {
+    this._stopPolling()
+  }
+
+  _handlePolling () {
+    if (this._shouldPollBuilds()) {
+      this._poll()
+    } else {
+      this._stopPolling()
+    }
+  }
+
+  _shouldPollBuilds () {
+    return (
+      this.state.owner === 'org'
+    )
+  }
+
+  _poll () {
+    pollOrgs()
+  }
+
+  _stopPolling () {
+    stopPollingOrgs()
+  }
+
   render () {
     if (!orgsStore.isLoaded) return null
-
-    const defaultOrg = _.find(orgsStore.orgs, { default: true })
 
     return (
       <BootstrapModal
@@ -41,24 +78,22 @@ class SetupProject extends Component {
         backdrop='static'
         >
         <div
-          className={cs('setup-project-modal modal-body os-dialog', {
-            'is-submitting': this.state.isSubmitting,
-          })}
+          className='setup-project-modal modal-body os-dialog'
         >
           <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-          <h4>Setup Project for CI</h4>
-          <p className='text-muted'>After configuring your project's settings, we will generate a CI key to be used during your CI run.</p>
+          <h4>Setup Project</h4>
           <form
-            className='form-horizontal'
             onSubmit={this._submit}>
-            <div className={cs('form-group', {
-              'has-error': this.state.showNameMissingError && !this._hasValidProjectName(),
-            })}>
-              <label htmlFor='projectName' className='col-sm-3 control-label'>
-                Project Name:
-              </label>
-              <div className='col-sm-7'>
+            <div className='form-group'>
+              <div className='label-title'>
+                <label htmlFor='projectName' className='control-label pull-left'>
+                  What's the name of the project?
+                </label>
+                <p className='help-block pull-right'>(You can change this later)</p>
+              </div>
+              <div>
                 <input
+                  autoFocus='true'
                   ref='projectName'
                   type='text'
                   className='form-control'
@@ -69,52 +104,117 @@ class SetupProject extends Component {
               </div>
               <div className='help-block validation-error'>Please enter a project name</div>
             </div>
+            <hr />
             <div className='form-group'>
-              <label htmlFor='projectName' className='col-sm-3 control-label'>
-                Organization:
-              </label>
-              <div className='col-sm-7'>
-                <select
-                  ref='orgId'
-                  id='organizations-select'
-                  className='form-control'>
-                    <option value={defaultOrg.id}>{defaultOrg.name}</option>
-
-                    {_.map(orgsStore.orgs, (org) => {
-                      if (org.default) return null
-
-                      return (
-                        <option
-                          key={org.id}
-                          value={org.id}
-                        >
-                          {org.name}
-                        </option>
-                      )
-                    })}
-                </select>
+              <div className='label-title'>
+                <label htmlFor='projectName' className='control-label pull-left'>
+                  Who should own this project?
+                </label>
               </div>
-              <div className='col-sm-2 no-left-padding'>
-                <button href='#' className='btn btn-link manage-orgs-btn' onClick={this._manageOrgs}>manage</button>
+              <div className='owner-parts'>
+                <div>
+                  <div className='btn-group' data-toggle='buttons'>
+                    <label className={`btn btn-default ${this.state.owner === 'me' ? 'active' : ''}`}>
+                      <input
+                        type='radio'
+                        name='owner-toggle'
+                        id='me'
+                        autoComplete='off'
+                        value='me'
+                        checked={this.state.owner === 'me'}
+                        onChange={this._updateOwner}
+                        />
+                        <img
+                          className='user-avatar'
+                          height='13'
+                          width='13'
+                          src={`${gravatarUrl(state.email)}`}
+                        />
+                        {' '}Me
+                    </label>
+                    <label className={`btn btn-default ${this.state.owner === 'org' ? 'active' : ''}`}>
+                      <input
+                        type='radio'
+                        name='owner-toggle'
+                        id='org'
+                        autoComplete='off'
+                        value='org'
+                        checked={this.state.owner === 'org'}
+                        onChange={this._updateOwner}
+                        />
+                        <i className='fa fa-building-o'></i>
+                        {' '}An Organization
+                    </label>
+                  </div>
+                </div>
+                <div className='select-orgs'>
+                  {/* this is the empty view for organizations */}
+                  <div className={`${this.state.owner === 'org' && !orgsStore.orgs.length ? '' : 'hidden'}`}>
+                    <div className='empty-select-orgs well'>
+                      <p>You don't have any organizations yet.</p>
+                      <p>Organizations can help you manage projects, including billing.</p>
+                      <p>
+                        <a
+                          href='#'
+                          className={`btn btn-link  ${this.state.owner === 'org' ? '' : 'hidden'}`}
+                          onClick={this._manageOrgs}>
+                          <i className='fa fa-plus'></i>{' '}
+                          Create Organization
+                        </a>
+                      </p>
+                    </div>
+                  </div>
+                  <div className={`${this.state.owner === 'org' && orgsStore.orgs.length ? '' : 'hidden'}`}>
+                    <select
+                      ref='orgId'
+                      id='organizations-select'
+                      className='form-control float-left'
+                      onChange={this._updateOrgId}
+                      >
+                        <option>-- Select Organization --</option>
+                        {_.map(orgsStore.orgs, (org) => {
+                          if (org.default) return null
+
+                          return (
+                            <option
+                              key={org.id}
+                              value={org.id}
+                              selected={this.state.orgId === org.id}
+                            >
+                              {org.name}
+                            </option>
+                          )
+                        })}
+                    </select>
+                    <a
+                      href='#'
+                      className={`btn btn-link manage-orgs-btn float-left ${this.state.owner === 'org' ? '' : 'hidden'}`}
+                      onClick={this._manageOrgs}>
+                      (manage organizations)
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className='form-group'>
-              <label htmlFor='projectName' className='col-sm-3 control-label'>
-                Access:
+            <div className={`${this.state.orgId ? '' : 'hidden'}`}>
+              <hr />
+              <label htmlFor='projectName' className='control-label'>
+                Who should see the builds and recordings?
               </label>
-              <div className='col-sm-9'>
                 <div className='radio privacy-radio'>
                   <label>
                     <input
                       type='radio'
                       name='privacy-radio'
                       value='true'
-                      checked={this.state.public}
+                      checked={(this.state.public === true)}
                       onChange={this._updateAccess}
                     />
-                    <i className='fa fa-eye'></i>{' '}
-                    <strong>Public</strong>
-                    <p>Anyone can see the project's builds.</p>
+                    <p>
+                      <i className='fa fa-eye'></i>{' '}
+                      <strong>Public:</strong>{' '}
+                      Anyone has access.
+                    </p>
                   </label>
                 </div>
                 <div className='radio privacy-radio'>
@@ -123,27 +223,32 @@ class SetupProject extends Component {
                       type='radio'
                       name='privacy-radio'
                       value='false'
-                      checked={!this.state.public}
+                      checked={(this.state.public === false)}
                       onChange={this._updateAccess}
                     />
-                    <i className='fa fa-lock'></i>{' '}
-                    <strong>Private</strong>
-                    <p>Only invited users can see the project's builds.<br/>
-                      <small className='text-muted'>(Free while in beta, but will require a paid account in the future)</small>
+                    <p>
+                      <i className='fa fa-lock'></i>{' '}
+                      <strong>Private:</strong>{' '}
+                      Only invited users have access.
+                      <br/>
+                      <small className='help-block'>(Free while in beta, but will require a paid account in the future)</small>
                     </p>
                   </label>
                 </div>
               </div>
-            </div>
             {this._error()}
             <div className='actions form-group'>
-              <div className='col-sm-offset-8 col-sm-4'>
+              <div className='pull-right'>
                 <button
-                  disabled={this.state.isSubmitting}
-                  className='btn btn-primary'
+                  disabled={this.state.isSubmitting || this._formNotFilled()}
+                  className='btn btn-primary btn-block'
                 >
+                  {
+                    this.state.isSubmitting ?
+                      <span><i className='fa fa-spin fa-refresh'></i>{' '}</span> :
+                      null
+                  }
                   <span>Setup Project</span>
-                  <i className='fa fa-spinner fa-spin'></i>
                 </button>
               </div>
             </div>
@@ -151,6 +256,10 @@ class SetupProject extends Component {
         </div>
       </BootstrapModal>
     )
+  }
+
+  _formNotFilled = () => {
+    return (_.isNull(this.state.public) || !this.state.projectName)
   }
 
   _initialProjectName = () => {
@@ -176,6 +285,24 @@ class SetupProject extends Component {
     )
   }
 
+  _updateOrgId = () => {
+    const orgIsNotSelected = this.refs.orgId.value === '-- Select Organization --'
+
+    let orgId = (orgIsNotSelected) ? null : this.refs.orgId.value
+
+    this.setState({
+      orgId,
+    })
+
+    // deselect their choice for access
+    // if they didn'tselect anything
+    if (orgIsNotSelected) {
+      this.setState({
+        public: null,
+      })
+    }
+  }
+
   _updateProjectName = () => {
     this.setState({
       projectName: this.refs.projectName.value,
@@ -188,7 +315,29 @@ class SetupProject extends Component {
 
   _manageOrgs = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/dashboard/settings')
+    App.ipc('external:open', 'https://on.cypress.io/dashboard/organizations')
+  }
+
+  _updateOwner = (e) => {
+    let owner = e.target.value
+
+    // if they clicked the same radio button that's
+    // already selected, then ignore it
+    if (this.state.owner === owner) return
+
+    this._handlePolling()
+
+    const defaultOrg = _.find(orgsStore.orgs, { default: true })
+
+    let chosenOrgId = (owner === 'me') ? defaultOrg.id : null
+
+    // we want to clear all selects below the radio buttons
+    // otherwise it looks jarring to already have selects
+    this.setState({
+      owner,
+      orgId: chosenOrgId,
+      public: null,
+    })
   }
 
   _updateAccess = (e) => {
@@ -217,7 +366,7 @@ class SetupProject extends Component {
   _setupProject () {
     App.ipc('setup:ci:project', {
       projectName: this.state.projectName,
-      orgId: this.refs.orgId.value,
+      orgId: this.state.orgId,
       public: this.state.public,
     })
     .then((projectDetails) => {

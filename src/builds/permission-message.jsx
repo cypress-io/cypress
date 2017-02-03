@@ -65,9 +65,12 @@ class PermissionMessage extends Component {
   _success () {
     return (
       <div className='empty'>
-        <h4>Request Sent</h4>
+        <h4>
+          <i className='fa fa-check passed'></i>{' '}
+          Request Sent
+        </h4>
         <p>
-          An email will be sent to the project owner to request access to this project's builds.
+          The project owner will be notified with your request.
         </p>
       </div>
     )
@@ -83,7 +86,10 @@ class PermissionMessage extends Component {
     } else {
       return (
         <div className='empty'>
-          <h4>Request Failed</h4>
+          <h4>
+            <i className='fa fa-exclamation-triangle failed'></i>{' '}
+            Request Failed
+          </h4>
           <p>An unexpected error occurred while requesting access:</p>
           <pre className='alert alert-danger'>
             {this.state.error.message}
@@ -99,6 +105,7 @@ class PermissionMessage extends Component {
     return (
       <div className="empty">
         <h4>
+          <i className='fa fa-lock'></i>{' '}
           Request access to see the builds
         </h4>
         <p>This is a private project created by someone else.</p>

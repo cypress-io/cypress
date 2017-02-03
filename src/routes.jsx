@@ -26,7 +26,9 @@ const withUser = (ComponentClass) => {
       return (
         <Layout params={props.params}>
           <ComponentClass {...props} />
-          {devTools()}
+          {
+            // devTools()
+          }
         </Layout>
       )
     } else {
