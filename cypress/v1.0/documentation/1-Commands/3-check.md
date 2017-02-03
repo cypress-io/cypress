@@ -42,6 +42,7 @@ Option | Default | Notes
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the check
 `force` | `false` | Forces check, disables error checking prior to check
 `log` | `true` | whether to display command in command log
+`multiple` | `false` | Enables serially checking multiple elements
 
 ***
 
