@@ -21,7 +21,6 @@ describe "Builds List", ->
       .fixture("projects_statuses").then (@projects_statuses) =>
         @ipc.handle("get:project:statuses", null, @projects_statuses)
 
-
   context "displays page", ->
     beforeEach ->
       cy
@@ -42,283 +41,265 @@ describe "Builds List", ->
       cy
         .contains("a", "Build").should("have.class", "active")
 
-
-  describe "permissions error", ->
-    beforeEach ->
-      cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
-        .fixture("config").then (@config) ->
-          @ipc.handle("open:project", null, @config)
-        .fixture("specs").as("specs").then ->
-          @ipc.handle("get:specs", null, @specs)
-        .get(".nav a").contains("Builds").click()
-
-    ## currently redirects to login
-    ## enable after login requirement is removed
-    context.skip "type: UNAUTHENTICATED", ->
+  context "error states", ->
+    describe "permissions error", ->
       beforeEach ->
-        @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "UNAUTHENTICATED"}, null)
+        cy
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
+          .fixture("config").then (@config) ->
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+          .get(".nav a").contains("Builds").click()
 
-      it "displays permissions message", ->
-        cy.contains("Request Access")
-
-    ## currently redirects to login
-    ## enable after login requirement is removed
-    context.skip "statusCode: 401", ->
-      beforeEach ->
-        @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 401}, null)
-
-      it "displays permissions message", ->
-        cy.contains("Request Access")
-
-    context "statusCode: 403", ->
-      beforeEach ->
-        @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 403}, null)
-
-      it "displays permissions message", ->
-        cy.contains("Request Access")
-
-    context "any case", ->
-      beforeEach ->
-        @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 403}, null)
-
-      context "request access", ->
+      context "statusCode: 403", ->
         beforeEach ->
-          cy.contains("Request Access").click()
+          @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 403}, null)
 
-        it "sends request:access ipc event with org id", ->
-          expect(@App.ipc).to.be.calledWith("request:access", 829)
+        it "displays permissions message", ->
+          cy.contains("Request Access")
 
-        it "disables button", ->
-          cy.contains("Request Access").should("be.disabled")
+      context "any case", ->
+        beforeEach ->
+          @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 403}, null)
 
-        it "hides 'Request Access' text", ->
-          cy.contains("Request Access").find("span").should("not.be.visible")
-
-        it "shows spinner", ->
-          cy.contains("Request Access").find("> i").should("be.visible")
-
-        describe "when request succeeds", ->
+        context "request access", ->
           beforeEach ->
-            @ipc.handle("request:access")
+            cy.contains("Request Access").click()
 
-          it "shows success message", ->
-            cy.contains("Request Sent")
+          it "sends request:access ipc event with org id", ->
+            expect(@App.ipc).to.be.calledWith("request:access", 829)
 
-          it "'persists' request state (until app is reloaded at least)", ->
-            cy
-              .contains("Back to Projects").click()
-              .get(".projects-list a")
-                .contains("My-Fake-Project").click()
-              .fixture("config").then (@config) ->
-                @ipc.handle("open:project", null, @config)
-              .fixture("specs").as("specs").then ->
-                @ipc.handle("get:specs", null, @specs)
-              .get(".navbar-default")
-                .find("a").contains("Builds").click()
-              .then =>
-                @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 403}, null)
-              .end().contains("Request Sent")
+          it "disables button", ->
+            cy.contains("Request Access").should("be.disabled")
 
-        describe "when request succeeds and user is already a member", ->
-          beforeEach ->
-            @ipc.handle("request:access", {name: "foo", message: "There's an error", type: "ALREADY_MEMBER"})
-            cy.wait(1)
+          it "hides 'Request Access' text", ->
+            cy.contains("Request Access").find("span").should("not.be.visible")
 
-          it "retries getting builds", ->
-            expect(@App.ipc.withArgs("get:builds").callCount).to.equal(2)
+          it "shows spinner", ->
+            cy.contains("Request Access").find("> i").should("be.visible")
 
-          it "shows loading spinner", ->
-            cy.get(".loader")
+          describe "when request succeeds", ->
+            beforeEach ->
+              @ipc.handle("request:access")
 
-          it "shows builds when getting builds succeeds", ->
-            @ipc.handle("get:builds", null, @builds).then =>
+            it "shows success message", ->
+              cy.contains("Request Sent")
+
+            it "'persists' request state (until app is reloaded at least)", ->
               cy
-                .get(".builds-container li")
-                .should("have.length", @builds.length)
+                .contains("Back to Projects").click()
+                .get(".projects-list a")
+                  .contains("My-Fake-Project").click()
+                .fixture("config").then (@config) ->
+                  @ipc.handle("open:project", null, @config)
+                .fixture("specs").as("specs").then ->
+                  @ipc.handle("get:specs", null, @specs)
+                .get(".navbar-default")
+                  .find("a").contains("Builds").click()
+                .then =>
+                  @ipc.handle("get:builds", {name: "foo", message: "There's an error", statusCode: 403}, null)
+                .end().contains("Request Sent")
 
-        describe "when request fails", ->
-          describe "for unknown reason", ->
+          describe "when request succeeds and user is already a member", ->
             beforeEach ->
-              @ipc.handle("request:access", {name: "foo", message: """
-              {
-                "cheese": "off the cracker"
-              }
-              """})
+              @ipc.handle("request:access", {name: "foo", message: "There's an error", type: "ALREADY_MEMBER"})
+              cy.wait(1)
 
-            it "shows failure message", ->
-              cy.contains("Request Failed")
-              cy.contains('"cheese": "off the cracker"')
+            it "retries getting builds", ->
+              expect(@App.ipc.withArgs("get:builds").callCount).to.equal(2)
 
-            it "enables button", ->
-              cy.contains("Request Access").should("not.be.disabled")
+            it "shows loading spinner", ->
+              cy.get(".loader")
 
-            it "shows 'Request Access' text", ->
-              cy.contains("Request Access").find("span").should("be.visible")
+            it "shows builds when getting builds succeeds", ->
+              @ipc.handle("get:builds", null, @builds).then =>
+                cy
+                  .get(".builds-container li")
+                  .should("have.length", @builds.length)
 
-            it "hides spinner", ->
-              cy.contains("Request Access").find("> i").should("not.be.visible")
+          describe "when request fails", ->
+            describe "for unknown reason", ->
+              beforeEach ->
+                @ipc.handle("request:access", {name: "foo", message: """
+                {
+                  "cheese": "off the cracker"
+                }
+                """})
 
-          describe "because requested was denied", ->
-            beforeEach ->
-              @ipc.handle("request:access", {type: "DENIED", name: "foo", message: "There's an error"})
+              it "shows failure message", ->
+                cy.contains("Request Failed")
+                cy.contains('"cheese": "off the cracker"')
 
-            it "shows 'success' message", ->
-              cy.contains("Request Sent")
+              it "enables button", ->
+                cy.contains("Request Access").should("not.be.disabled")
 
-          describe "because request was already sent", ->
-            beforeEach ->
-              @ipc.handle("request:access", {type: "ALREADY_REQUESTED", name: "foo", message: "There's an error"})
+              it "shows 'Request Access' text", ->
+                cy.contains("Request Access").find("span").should("be.visible")
 
-            it "shows 'success' message", ->
-              cy.contains("Request Sent")
+              it "hides spinner", ->
+                cy.contains("Request Access").find("> i").should("not.be.visible")
 
-  describe "timed out error", ->
-    beforeEach ->
-      cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
-        .fixture("config").then (@config) ->
-          @ipc.handle("open:project", null, @config)
-        .fixture("specs").as("specs").then ->
-          @ipc.handle("get:specs", null, @specs)
-        .get(".nav a").contains("Builds").click()
-        .then =>
-          @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "TIMED_OUT"}, null)
+            describe "because requested was denied", ->
+              beforeEach ->
+                @ipc.handle("request:access", {type: "DENIED", name: "foo", message: "There's an error"})
 
-    it "displays timed out message", ->
-      cy.contains("timed out")
+              it "shows 'success' message", ->
+                cy.contains("Request Sent")
 
-  describe "not found error", ->
-    beforeEach ->
-      cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
-        .fixture("config").then (@config) ->
-          @ipc.handle("open:project", null, @config)
-        .fixture("specs").as("specs").then ->
-          @ipc.handle("get:specs", null, @specs)
-        .get(".nav a").contains("Builds").click()
-        .then =>
-          @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "NOT_FOUND"}, null)
+            describe "because request was already sent", ->
+              beforeEach ->
+                @ipc.handle("request:access", {type: "ALREADY_REQUESTED", name: "foo", message: "There's an error"})
 
-    it "displays empty message", ->
-      cy.contains("Builds Cannot Be Displayed")
+              it "shows 'success' message", ->
+                cy.contains("Request Sent")
 
-  describe "no project id error", ->
-    beforeEach ->
-      cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
-        .fixture("config").then (@config) ->
-          @ipc.handle("open:project", null, @config)
-        .fixture("specs").as("specs").then ->
-          @ipc.handle("get:specs", null, @specs)
-        .get(".nav a").contains("Builds").click()
-        .then =>
-          @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "NO_PROJECT_ID"}, null)
+    describe "timed out error", ->
+      beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
+          .fixture("config").then (@config) ->
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+          .get(".nav a").contains("Builds").click()
+          .then =>
+            @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "TIMED_OUT"}, null)
 
-    it "displays 'you have no builds'", ->
-      cy.contains("You Have No Recorded Builds")
+      it "displays timed out message", ->
+        cy.contains("timed out")
 
-    it "clears message after setting up CI", ->
-      cy
-        .fixture("organizations").as("orgs").then ->
-          @ipc.handle("get:orgs", null, @orgs)
-        .get(".btn").contains("Setup Project").click()
-        .get(".modal-body")
-          .contains(".btn", "Me").click()
-        .get(".privacy-radio").find("input").last().check()
-        .get(".modal-body")
-        .contains(".btn", "Setup Project").click()
-        .then ->
-          @ipc.handle("setup:ci:project", null, {
-            id: "project-id-123"
-            public: true
-            orgId: "000"
-          })
-        .end().contains("To record your first")
+    describe "not found error", ->
+      beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
+          .fixture("config").then (@config) ->
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+          .get(".nav a").contains("Builds").click()
+          .then =>
+            @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "NOT_FOUND"}, null)
 
-  describe "unexpected error", ->
-    beforeEach ->
-      cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
-        .fixture("config").then (@config) ->
-          @ipc.handle("open:project", null, @config)
-        .fixture("specs").as("specs").then ->
-          @ipc.handle("get:specs", null, @specs)
-        .get(".nav a").contains("Builds").click()
-        .then =>
-          @ipc.handle("get:builds", {name: "foo", message: """
-          {
-            "no builds": "for you"
-          }
-          """, type: "UNKNOWN"}, null)
+      it "displays empty message", ->
+        cy.contains("Builds Cannot Be Displayed")
 
-    it "displays unexpected error message", ->
-      cy.contains("unexpected error")
-      cy.contains('"no builds": "for you"')
+    describe "no project id error", ->
+      beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
+          .fixture("config").then (@config) ->
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+          .get(".nav a").contains("Builds").click()
+          .then =>
+            @ipc.handle("get:builds", {name: "foo", message: "There's an error", type: "NO_PROJECT_ID"}, null)
 
-  describe "unauthorized project", ->
-    beforeEach ->
-      cy
-        .get(".projects-list a")
-          .contains("project4").click()
-        .fixture("config").then (@config) ->
-          @config.projectId = null
-          @ipc.handle("open:project", null, @config)
-        .fixture("specs").as("specs").then ->
-          @ipc.handle("get:specs", null, @specs)
-        .then =>
-          @ipc.handle("get:builds", null, [])
+      it "displays 'you have no builds'", ->
+        cy.contains("You Have No Recorded Builds")
 
-    it "displays permissions message", ->
-      cy.contains("Request access")
+      it "clears message after setting up CI", ->
+        cy
+          .fixture("organizations").as("orgs").then ->
+            @ipc.handle("get:orgs", null, @orgs)
+          .get(".btn").contains("Setup Project").click()
+          .get(".modal-body")
+            .contains(".btn", "Me").click()
+          .get(".privacy-radio").find("input").last().check()
+          .get(".modal-body")
+          .contains(".btn", "Setup Project").click()
+          .then ->
+            @ipc.handle("setup:ci:project", null, {
+              id: "project-id-123"
+              public: true
+              orgId: "000"
+            })
+          .end().contains("To record your first")
 
-  describe "invalid project", ->
-    beforeEach ->
-      cy
-        .get(".projects-list a")
-          .contains("project5").click()
-        .fixture("config").then (@config) ->
-          @config.projectId = null
-          @ipc.handle("open:project", null, @config)
-        .fixture("specs").as("specs").then ->
-          @ipc.handle("get:specs", null, @specs)
-        .then =>
-          @ipc.handle("get:builds", null, [])
+    describe "unexpected error", ->
+      beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
+          .fixture("config").then (@config) ->
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+          .get(".nav a").contains("Builds").click()
+          .then =>
+            @ipc.handle("get:builds", {name: "foo", message: """
+            {
+              "no builds": "for you"
+            }
+            """, type: "UNKNOWN"}, null)
 
-    it "displays empty message", ->
-      cy.contains("Builds Cannot Be Displayed")
+      it "displays unexpected error message", ->
+        cy.contains("unexpected error")
+        cy.contains('"no builds": "for you"')
 
-    it "clicking link opens setup project window", ->
-      cy
-        .fixture("organizations").as("orgs").then ->
-          @ipc.handle("get:orgs", null, @orgs)
-        .get(".btn").contains("Setup a New Project").click()
-        .get(".modal").should("be.visible")
+    describe "unauthorized project", ->
+      beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("project4").click()
+          .fixture("config").then (@config) ->
+            @config.projectId = null
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+          .then =>
+            @ipc.handle("get:builds", null, [])
 
-    it "clears message after setting up CI", ->
-      cy
-        .fixture("organizations").as("orgs").then ->
-          @ipc.handle("get:orgs", null, @orgs)
-        .get(".btn").contains("Setup a New Project").click()
-        .get(".modal-body")
-          .contains(".btn", "Me").click()
-        .get(".privacy-radio").find("input").last().check()
-        .get(".modal-body")
-        .contains(".btn", "Setup Project").click()
-        .then ->
-          @ipc.handle("setup:ci:project", null, {
-            id: "project-id-123"
-            public: true
-            orgId: "000"
-          })
-        .end().contains("To record your first")
+      it "displays permissions message", ->
+        cy.contains("Request access")
 
-  describe "no builds", ->
+    describe "invalid project", ->
+      beforeEach ->
+        cy
+          .get(".projects-list a")
+            .contains("project5").click()
+          .fixture("config").then (@config) ->
+            @config.projectId = null
+            @ipc.handle("open:project", null, @config)
+          .fixture("specs").as("specs").then ->
+            @ipc.handle("get:specs", null, @specs)
+          .then =>
+            @ipc.handle("get:builds", null, [])
+
+      it "displays empty message", ->
+        cy.contains("Builds Cannot Be Displayed")
+
+      it "clicking link opens setup project window", ->
+        cy
+          .fixture("organizations").as("orgs").then ->
+            @ipc.handle("get:orgs", null, @orgs)
+          .get(".btn").contains("Setup a New Project").click()
+          .get(".modal").should("be.visible")
+
+      it "clears message after setting up CI", ->
+        cy
+          .fixture("organizations").as("orgs").then ->
+            @ipc.handle("get:orgs", null, @orgs)
+          .get(".btn").contains("Setup a New Project").click()
+          .get(".modal-body")
+            .contains(".btn", "Me").click()
+          .get(".privacy-radio").find("input").last().check()
+          .get(".modal-body")
+          .contains(".btn", "Setup Project").click()
+          .then ->
+            @ipc.handle("setup:ci:project", null, {
+              id: "project-id-123"
+              public: true
+              orgId: "000"
+            })
+          .end().contains("To record your first")
+
+  describe "empty state - no builds", ->
     context "having never setup CI", ->
       beforeEach ->
         cy
@@ -374,7 +355,7 @@ describe "Builds List", ->
     afterEach ->
       @clock.restore()
 
-    it "lists builds", ->
+    it.only "lists builds", ->
       cy
         .get(".builds-container li")
         .should("have.length", @builds.length)

@@ -161,7 +161,7 @@
 
 .builds-container {
   margin-bottom: 0;
-  @include list-columns(0%, 9%, 25%, 13%, 10%, 12%, 9%, 7%, 8%, 7%);
+  @include list-columns(0%, 10%, 25%, 14%, 10%, 12%, 7%, 7%, 8%, 7%);
 
   .user-avatar {
     position: relative;
@@ -261,35 +261,34 @@
 
   .msg {
     font-weight: 300;
-    padding-left: 3px;
     margin-top: 3px;
 
-    img {
+    + img {
       float: left;
+      padding-left: 3px;
     }
 
     .commit-msg {
       overflow: auto;
-
-      span {
-        padding-left: 16px;
-        display: inline-block;
-        float: left;
-        width: 90%;
-      }
     }
   }
 
   .user {
     font-weight: 600;
+    margin-left: 3px;
+  }
+
+  .user-avatar {
+    margin-right: 0;
+    position: relative;
+    top: 0;
+    left: 1px;
   }
 
   .fa-user {
     color: #bbb;
   }
 }
-
-
 
 .user-avatar {
   border-radius: 100px;
