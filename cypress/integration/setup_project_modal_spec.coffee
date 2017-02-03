@@ -58,9 +58,9 @@ describe "Setup Project", ->
           @ipc.handle("get:orgs", null, @orgs)
         .get(".btn").contains("Setup Project").click()
 
-    it "prefills and autofocuses Project Name", ->
+    it "prefills Project Name", ->
       cy
-        .focused().should("have.value", @firstProjectName)
+        .get("#projectName").should("have.value", @firstProjectName)
 
     it "allows me to change Project Name value", ->
       @newProjectName = "New Project Here"
