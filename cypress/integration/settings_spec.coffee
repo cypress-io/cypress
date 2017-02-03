@@ -213,7 +213,7 @@ describe "Settings", ->
         cy.then ->
           @ipc.handle("get:projects", null, @projects)
         .then ->
-          @projectStatuses[0].valid = false
+          @projectStatuses[0].state = "INVALID"
           @ipc.handle("get:project:statuses", null, @projectStatuses)
         .get(".projects-list a")
           .contains("My-Fake-Project").click()
