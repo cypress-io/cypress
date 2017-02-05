@@ -5,6 +5,9 @@ vendor:
   - bower_components/mocha/mocha.js
   - bower_components/chai/chai.js
   - bower_components/chai-jquery/chai-jquery.js ## need to conditionally load this
+  - node_modules/lolex/lolex.js
+  - bower_components/sinon/dist/sinon.js
+  - bower_components/sinon-as-promised/release/sinon-as-promised.js
   - bower_components/sinon-chai/lib/sinon-chai.js ## need to conditionally load this
   - bower_components/backbone/backbone.js
   - bower_components/underscore.string/lib/underscore.string.js
@@ -24,9 +27,3 @@ cypress:
   - app/js/driver/cypress.coffee
   - app/js/driver/cypress/*
   - app/js/driver/cypress/cy/**/*
-
-sinon:
-  - bower_components/sinon/index.js
-
-sinon-as-promised:
-  - app/js/vendor/sinon-as-promised.js

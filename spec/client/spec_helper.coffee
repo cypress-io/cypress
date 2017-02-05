@@ -7,8 +7,10 @@ before ->
     c = Cypress ? @Cypress
     c.off("fail")
 
-  sinon.format = -> ""
-  @sandbox = sinon.sandbox.create()
+  # sinon.format = -> ""
+  @sandbox = s = sinon.sandbox.create()
+  @sandbox.useFakeTimers = ->
+    s.clock = lolex.install()
 
 beforeEach ->
   ## allow our own cypress errors to bubble up!
@@ -27,6 +29,8 @@ beforeEach ->
 
 afterEach ->
   @sandbox.restore()
+
+  @sandbox.clock?.uninstall()
 
   ## must remove references to the server
   ## and its requests / responses due to sinon bug

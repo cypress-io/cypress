@@ -148,6 +148,17 @@ $Cypress.Utils = do ($Cypress, _) ->
             .value()
               .join(", ")
 
+    stringifyArg: (arg) ->
+      switch
+        when _.isString(arg) or _.isNumber(arg) or _.isBoolean(arg)
+          JSON.stringify(arg)
+        when _.isNull(arg)
+          "null"
+        when _.isUndefined(arg)
+          "undefined"
+        else
+          @_stringify(arg)
+
     hasWindow: (obj) ->
       try
         !!(obj and $.isWindow(obj[0])) or $.isWindow(obj)

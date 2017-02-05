@@ -21,7 +21,6 @@ module.exports = {
           Cypress.onUncaughtException.apply(Cypress, arguments);
         }
       </script>
-      <script type='text/javascript' src='/__cypress/static/js/sinon.js'></script>
       <script type='text/javascript'>
         Cypress.onBeforeLoad(window);
       </script>
