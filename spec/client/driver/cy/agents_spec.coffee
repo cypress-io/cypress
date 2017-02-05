@@ -68,6 +68,17 @@ describe "$Cypress.Cy Agents Commands", ->
         @obj.foo().then (foo) ->
           expect(foo).to.equal("foo")
 
+      it "uses Bluebird under the hood", ->
+        obj = {
+          foo: ->
+        }
+
+        @cy.stub(obj, "foo").resolves("bar")
+
+        obj
+        .foo()
+        .delay(1)
+
     context "#rejects", ->
       beforeEach ->
         @obj = {foo: ->}
