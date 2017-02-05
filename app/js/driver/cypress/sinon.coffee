@@ -13,5 +13,5 @@ do ($Cypress) ->
           return ret
         return call
 
-      sinon.format = $Cypress.Utils.stringifyArg.bind(Cypress.Utils)
+      sinon.format = $Cypress.Utils.stringifyArg.bind($Cypress.Utils)
   }
