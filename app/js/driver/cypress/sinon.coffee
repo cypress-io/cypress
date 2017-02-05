@@ -1,6 +1,6 @@
 do ($Cypress) ->
 
-  $Cypress.SinonUtils =
+  $Cypress.Sinon = {
     override: (sinon) ->
       ## monkey-patch call.toString() so that it doesn't include stack
       sinon.spyCall = _.wrap sinon.spyCall, (orig, args...) ->
@@ -13,4 +13,5 @@ do ($Cypress) ->
           return ret
         return call
 
-      sinon.format = Cypress.Utils.stringifyArg.bind(Cypress.Utils)
+      sinon.format = $Cypress.Utils.stringifyArg.bind(Cypress.Utils)
+  }
