@@ -57,6 +57,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.3 - *(02/05/17)*
+- display spy / stub aliases
+
 #### 0.3.2 - *(11/29/16)*
 - display errors passed in
 
