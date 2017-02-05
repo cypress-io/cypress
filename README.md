@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.9 - *(02/05/17)*
+- bump reporter dep
+
 #### 0.3.8 - *(12/05/16)*
 - stop test run when there's a script error
 
