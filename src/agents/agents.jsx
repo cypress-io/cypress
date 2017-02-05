@@ -8,6 +8,7 @@ const Agent = observer(({ model }) => (
   <tr className={cs({ 'no-calls': !model.callCount })}>
     <td>{model.type}</td>
     <td>{model.functionName}</td>
+    <td>{[].concat(model.alias).join(', ')}</td>
     <td className='call-count'>{model.callCount || '-'}</td>
   </tr>
 ))
@@ -28,7 +29,7 @@ const Agents = observer(({ model }) => (
       <ul className='hooks-container'>
         <li className='hook-item'>
           <Collapsible
-            header={`Spies / Stubs / Mocks (${model.agents.length})`}
+            header={`Spies / Stubs (${model.agents.length})`}
             headerClass='hook-name'
             contentClass='instrument-content'
           >
@@ -37,6 +38,7 @@ const Agents = observer(({ model }) => (
                 <tr>
                   <th>Type</th>
                   <th>Function</th>
+                  <th>Alias(es)</th>
                   <th># Calls</th>
                 </tr>
               </thead>

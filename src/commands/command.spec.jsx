@@ -3,7 +3,7 @@ import _ from 'lodash'
 import React from 'react'
 import sinon from 'sinon'
 
-import Command, { Aliases, Message } from './command'
+import Command, { Aliases, AliasesReferences, Message } from './command'
 
 const longText = Array(110).join('-')
 const withMarkdown = '**this** is _markdown_'
@@ -166,12 +166,12 @@ describe('<Command />', () => {
     })
   })
 
-  context('alias', () => {
+  context('aliases', () => {
     context('message', () => {
       let aliases
 
       beforeEach(() => {
-        aliases = shallow(<Command model={model({ referencesAlias: ['barAlias', 'bazAlias'], aliasType: 'dom' })} />).find(Aliases).shallow()
+        aliases = shallow(<Command model={model({ referencesAlias: ['barAlias', 'bazAlias'], aliasType: 'dom' })} />).find(AliasesReferences).shallow()
       })
 
       it('renders the aliases for each one it references', () => {
@@ -199,24 +199,40 @@ describe('<Command />', () => {
     })
 
     context('controls', () => {
-      it('renders the alias when it has an alias', () => {
-        const component = shallow(<Command model={model({ alias: 'fooAlias' })} />)
-        expect(component.find('.command-alias')).to.have.text('fooAlias')
+      let aliases
+
+      describe('any case / when there is a single alias', () => {
+        beforeEach(() => {
+          aliases = shallow(<Command model={model({ alias: 'fooAlias', aliasType: 'dom' })} />).find(Aliases).shallow()
+        })
+
+        it('renders the alias', () => {
+          expect(aliases.find('.command-alias').first()).to.have.text('fooAlias')
+        })
+
+        it('renders the alias with the alias type as a class', () => {
+          expect(aliases.find('.command-alias')).to.have.className('dom')
+        })
+
+        it('renders a tooltip for the alias', () => {
+          expect(aliases.find('Tooltip').first().find('.command-alias')).to.exist
+        })
+
+        it('renders the alias tooltip with the right title', () => {
+          expect(aliases.find('Tooltip').first()).to.have.prop('title', "The message aliased as: 'fooAlias'")
+        })
       })
 
-      it('renders the alias with the alias type as a class', () => {
-        const component = shallow(<Command model={model({ alias: 'fooAlias', aliasType: 'dom' })} />)
-        expect(component.find('.command-alias')).to.have.className('dom')
-      })
+      describe('when there are multiple aliases', () => {
+        beforeEach(() => {
+          aliases = shallow(<Command model={model({ alias: ['fooAlias', 'barAlias'], aliasType: 'dom' })} />).find(Aliases).shallow()
+        })
 
-      it('renders a tooltip for the alias', () => {
-        const component = shallow(<Command model={model()} />)
-        expect(component.find('Tooltip').at(0).find('.command-alias')).to.exist
-      })
-
-      it('renders the alias tooltip with the right title', () => {
-        const component = shallow(<Command model={model({ alias: 'fooAlias' })} />)
-        expect(component.find('Tooltip').at(0)).to.have.prop('title', "The message aliased as: 'fooAlias'")
+        it('renders all the aliases', () => {
+          expect(aliases.find('.command-alias').length).to.equal(2)
+          expect(aliases.find('.command-alias').first()).to.have.text('fooAlias')
+          expect(aliases.find('.command-alias').last()).to.have.text('barAlias')
+        })
       })
     })
   })
@@ -281,12 +297,12 @@ describe('<Command />', () => {
   context('invisible indicator', () => {
     it('renders a tooltip for the invisible indicator', () => {
       const component = shallow(<Command model={model({ visible: false })} />)
-      expect(component.find('Tooltip').at(1).find('.command-invisible')).to.exist
+      expect(component.find('Tooltip').first().find('.command-invisible')).to.exist
     })
 
     it('renders the invisible indicator tooltip with the right title', () => {
       const component = shallow(<Command model={model({ visible: false })} />)
-      expect(component.find('Tooltip').at(1)).to.have.prop('title', 'This element is not visible.')
+      expect(component.find('Tooltip').first()).to.have.prop('title', 'This element is not visible.')
     })
   })
 
@@ -298,12 +314,12 @@ describe('<Command />', () => {
 
     it('renders a tooltip for the number of elements', () => {
       const component = shallow(<Command model={model({ numElements: 3 })} />)
-      expect(component.find('Tooltip').at(2).find('.command-num-elements')).to.exist
+      expect(component.find('Tooltip').at(1).find('.command-num-elements')).to.exist
     })
 
     it('renders the number of elements tooltip with the right title', () => {
       const component = shallow(<Command model={model({ numElements: 3 })} />)
-      expect(component.find('Tooltip').at(2)).to.have.prop('title', '3 matched elements')
+      expect(component.find('Tooltip').at(1)).to.have.prop('title', '3 matched elements')
     })
   })
 
