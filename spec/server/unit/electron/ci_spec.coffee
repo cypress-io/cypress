@@ -194,7 +194,7 @@ describe "electron/ci", ->
         }]
         failingTests: ["foo"]
         config: {foo: "bar"}
-      })
+      }, "foobarbaz")
 
       expect(api.updateInstance).to.be.calledWith({
         instanceId: "id-123"
@@ -209,6 +209,7 @@ describe "electron/ci", ->
         failingTests: ["foo"]
         cypressConfig: {foo: "bar"}
         ciProvider: "circle"
+        stdout: "foobarbaz"
       })
 
     it "calls ci.upload on success", ->
@@ -372,10 +373,14 @@ describe "electron/ci", ->
       .then ->
         expect(headless.run).to.be.calledWith({foo: "bar", ensureAuthToken: false, allDone: false})
 
-    it "calls uploadAssets with instanceId and stats", ->
+    it "calls uploadAssets with instanceId, stats, and stdout", ->
+      @sandbox.stub(stdout, "capture").returns({
+        toString: -> "foobarbaz"
+      })
+
       ci.run({})
       .then ->
-        expect(ci.uploadAssets).to.be.calledWith("instance-id-123", {tests: 2, passes: 1})
+        expect(ci.uploadAssets).to.be.calledWith("instance-id-123", {tests: 2, passes: 1}, "foobarbaz")
 
     it "does not call uploadAssets with no instanceId", ->
       ci.createInstance.resolves(null)

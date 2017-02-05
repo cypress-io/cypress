@@ -131,7 +131,7 @@ module.exports = {
 
       logException(err)
 
-  uploadAssets: (instanceId, stats) ->
+  uploadAssets: (instanceId, stats, stdout) ->
     console.log("")
     console.log("")
 
@@ -158,6 +158,7 @@ module.exports = {
       failingTests: stats.failingTests
       cypressConfig: stats.config
       ciProvider:    ciProvider.name()
+      stdout:       stdout
     })
     .then (resp = {}) =>
       @upload({
@@ -220,7 +221,7 @@ module.exports = {
             ## if we got a instanceId then attempt to
             ## upload these assets
             if instanceId
-              @uploadAssets(instanceId, stats)
+              @uploadAssets(instanceId, stats, captured.toString())
               .then (ret) ->
                 didUploadAssets = ret isnt null
               .return(stats)
