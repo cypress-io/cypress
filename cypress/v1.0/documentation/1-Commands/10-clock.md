@@ -19,7 +19,9 @@ If you call `cy.clock` before visiting a page with [`cy.visit`](https://on.cypre
 
 # [cy.clock()](#section-usage)
 
-Replaces `setTimeout`, `clearTimeout`, `setInterval`, `clearInterval` and `Date` and allows them to be controlled synchronously via [`cy.tick`](https://on.cypress.io/api/tick) or the yielded `clock` object (see [clock API](#section-clock-api)). The clock starts at the unix epoch (timestamp of 0).
+Replaces `setTimeout`, `clearTimeout`, `setInterval`, `clearInterval` and `Date` and allows them to be controlled synchronously via [`cy.tick`](https://on.cypress.io/api/tick) or the yielded `clock` object (see [clock API](#section-clock-api)).
+
+The clock starts at the unix epoch (timestamp of 0). This means that when you instantiate `new Date` in your application, it will have a time of `January 1st, 1970`.
 
 ***
 
@@ -70,13 +72,16 @@ Option | Default | Notes
 ## Create a clock and use it to trigger a setInterval
 
 ```javascript
-// app code loaded by index.html
-let seconds = 0
-setInterval(() => {
-  document.getElementById('#seconds-elapsed').textContent = `${++seconds} seconds`
-}, 1000)
+// your app code
+var seconds = 0
 
-// test
+setInterval(function(){
+  $('#seconds-elapsed').text(++seconds + ' seconds')
+}, 1000)
+```
+
+```javascript
+// test code
 cy
   .clock()
   .visit("/index.html")
@@ -93,10 +98,12 @@ cy
 ## Specify the now timestamp
 
 ```javascript
-// app code loaded by index.html
-document.getElementById('#date').textContent = new Date().toISOString()
+// your app code
+$('#date').text(new Date().toISOString())
+```
 
-// test
+```javascript
+// test code
 const now = new Date(2017, 0, 1).getTime() // Jan 1, 2017 timestamp
 cy
   .clock(now)
