@@ -42,7 +42,7 @@ module.exports = {
     .then ->
       openProject.getConfig()
       .then (cfg) ->
-        extension.setHostAndPath(cfg.clientUrlDisplay, cfg.socketIoRoute)
+        extension.setHostAndPath(cfg.proxyUrl, cfg.socketIoRoute)
     .return(openProject)
 
   opened: -> openProject
@@ -51,12 +51,12 @@ module.exports = {
     openProject.getConfig()
     .then (cfg) ->
       if spec
-        url = openProject.getUrlBySpec(cfg.clientUrl, spec)
+        url = openProject.getUrlBySpec(cfg.browserUrl, spec)
 
-      url            ?= cfg.clientUrl
+      url            ?= cfg.browserUrl
       openBrowser     = browser
       openBrowserOpts = options
-      options.proxyServer ?= cfg.clientUrlDisplay
+      options.proxyServer ?= cfg.proxyUrl
       options.chromeWebSecurity = cfg.chromeWebSecurity
 
       launcher.launch(browser, url, options)
@@ -121,7 +121,7 @@ module.exports = {
       ## so that our document.domain is reset back to <root>
       openProject.resetState()
 
-      url = openProject.getUrlBySpec(cfg.clientUrl, spec)
+      url = openProject.getUrlBySpec(cfg.browserUrl, spec)
 
       ## TODO: the problem here is that we really need
       ## an 'ack' event when changing the url because

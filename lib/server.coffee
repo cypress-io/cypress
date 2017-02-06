@@ -11,10 +11,12 @@ httpProxy    = require("http-proxy")
 httpsProxy   = require("@cypress/core-https-proxy")
 allowDestroy = require("server-destroy-vvo")
 cors         = require("./util/cors")
-headersUtil  = require("./util/headers")
+origin       = require("./util/origin")
+connect      = require("./util/connect")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
 statusCode   = require("./util/status_code")
+headersUtil  = require("./util/headers")
 cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
@@ -141,7 +143,7 @@ class Server
 
   createServer: (app, config, request) ->
     new Promise (resolve, reject) =>
-      {port, fileServerFolder, socketIoRoute} = config
+      {port, fileServerFolder, socketIoRoute, baseUrl} = config
 
       @_server  = http.createServer(app)
       @_wsProxy = httpProxy.createProxyServer()
@@ -204,11 +206,18 @@ class Server
           @_httpsProxy = httpsProxy
           @_fileServer = fileServer
 
+          ## if we have a baseUrl let's go ahead
+          ## and make sure the server is connectable!
+          if baseUrl
+            connect.ensureUrl(baseUrl)
+            .catch (err) =>
+              reject errors.get("CANNOT_CONNECT_BASE_URL", baseUrl)
+        .then =>
           ## once we open set the domain
           ## to root by default
           ## which prevents a situation where navigating
           ## to http sites redirects to /__/ cypress
-          @_onDomainSet("<root>")
+          @_onDomainSet(baseUrl ? "<root>")
 
           resolve(port)
 
@@ -432,15 +441,7 @@ class Server
       log("remoteFileServer", @_remoteFileServer)
 
     else
-      parsed = url.parse(fullyQualifiedUrl)
-
-      parsed.hash     = null
-      parsed.search   = null
-      parsed.query    = null
-      parsed.path     = null
-      parsed.pathname = null
-
-      @_remoteOrigin = url.format(parsed)
+      @_remoteOrigin = origin(fullyQualifiedUrl)
 
       @_remoteStrategy = "http"
 

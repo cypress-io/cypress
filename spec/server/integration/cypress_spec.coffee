@@ -13,6 +13,7 @@ Fixtures = require("../helpers/fixtures")
 pkg      = require("#{root}package.json")
 git      = require("#{root}lib/util/git")
 bundle   = require("#{root}lib/util/bundle")
+connect  = require("#{root}lib/util/connect")
 ciProvider = require("#{root}lib/util/ci_provider")
 settings = require("#{root}lib/util/settings")
 Events   = require("#{root}lib/electron/handlers/events")
@@ -72,7 +73,7 @@ describe "lib/cypress", ->
   context "--get-key", ->
     it "writes out key and exits on success", ->
       Promise.all([
-        user.set({name: "brian", sessionToken: "session-123"}),
+        user.set({name: "brian", authToken: "auth-token-123"}),
 
         Project.add(@todosPath)
         .then =>
@@ -83,7 +84,7 @@ describe "lib/cypress", ->
       .then =>
         @sandbox.spy(console, "log")
         @sandbox.stub(api, "getProjectToken")
-          .withArgs(@projectId, "session-123")
+          .withArgs(@projectId, "auth-token-123")
           .resolves("new-key-123")
 
         cypress.start(["--get-key", "--project=#{@todosPath}"])
@@ -99,14 +100,14 @@ describe "lib/cypress", ->
         @expectExitWithErr("NOT_LOGGED_IN")
 
     it "logs error and exits when project does not have an id", ->
-      user.set({sessionToken: "session-123"})
+      user.set({authToken: "auth-token-123"})
       .then =>
         cypress.start(["--get-key", "--project=#{@pristinePath}"])
       .then =>
         @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
 
     it "logs error and exits when project could not be found at the path", ->
-      user.set({sessionToken: "session-123"})
+      user.set({authToken: "auth-token-123"})
       .then =>
         cypress.start(["--get-key", "--project=path/to/no/project"])
       .then =>
@@ -114,7 +115,7 @@ describe "lib/cypress", ->
 
     it "logs error and exits when project token cannot be fetched", ->
       Promise.all([
-        user.set({sessionToken: "session-123"}),
+        user.set({authToken: "auth-token-123"}),
 
         Project.add(@todosPath)
         .then =>
@@ -124,7 +125,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @sandbox.stub(api, "getProjectToken")
-          .withArgs(@projectId, "session-123")
+          .withArgs(@projectId, "auth-token-123")
           .rejects(new Error)
 
         cypress.start(["--get-key", "--project=#{@todosPath}"])
@@ -134,7 +135,7 @@ describe "lib/cypress", ->
   context "--new-key", ->
     it "writes out key and exits on success", ->
       Promise.all([
-        user.set({name: "brian", sessionToken: "session-123"}),
+        user.set({name: "brian", authToken: "auth-token-123"}),
 
         Project.add(@todosPath)
         .then =>
@@ -145,7 +146,7 @@ describe "lib/cypress", ->
       .then =>
         @sandbox.spy(console, "log")
         @sandbox.stub(api, "updateProjectToken")
-          .withArgs(@projectId, "session-123")
+          .withArgs(@projectId, "auth-token-123")
           .resolves("new-key-123")
 
         cypress.start(["--new-key", "--project=#{@todosPath}"])
@@ -161,14 +162,14 @@ describe "lib/cypress", ->
         @expectExitWithErr("NOT_LOGGED_IN")
 
     it "logs error and exits when project does not have an id", ->
-      user.set({sessionToken: "session-123"})
+      user.set({authToken: "auth-token-123"})
       .then =>
         cypress.start(["--new-key", "--project=#{@pristinePath}"])
       .then =>
         @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
 
     it "logs error and exits when project could not be found at the path", ->
-      user.set({sessionToken: "session-123"})
+      user.set({authToken: "auth-token-123"})
       .then =>
         cypress.start(["--new-key", "--project=path/to/no/project"])
       .then =>
@@ -176,7 +177,7 @@ describe "lib/cypress", ->
 
     it "logs error and exits when project token cannot be fetched", ->
       Promise.all([
-        user.set({sessionToken: "session-123"}),
+        user.set({authToken: "auth-token-123"}),
 
         Project.add(@todosPath)
         .then =>
@@ -186,7 +187,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         @sandbox.stub(api, "updateProjectToken")
-          .withArgs(@projectId, "session-123")
+          .withArgs(@projectId, "auth-token-123")
           .rejects(new Error)
 
         cypress.start(["--new-key", "--project=#{@todosPath}"])
@@ -199,6 +200,7 @@ describe "lib/cypress", ->
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "createRenderer")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 0})
+      @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
 
     it "runs project headlessly and exits with exit code 0", ->
       Project.add(@todosPath)
@@ -224,7 +226,7 @@ describe "lib/cypress", ->
       @sandbox.stub(api, "createProject")
 
       Promise.all([
-        user.set({sessionToken: "session-123"}),
+        user.set({authToken: "auth-token-123"}),
 
         Project.add(@pristinePath)
       ])
@@ -461,11 +463,7 @@ describe "lib/cypress", ->
         @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/tests/path/to/spec")
 
     it "logs error and exits when project has cypress.json syntax error", ->
-      Promise.all([
-        user.set({name: "brian", sessionToken: "session-123"}),
-
-        Project.add(@todosPath)
-      ])
+      Project.add(@todosPath)
       .then =>
         fs.writeFileAsync(@todosPath + "/cypress.json", "{'foo': 'bar}")
       .then =>
@@ -474,17 +472,35 @@ describe "lib/cypress", ->
         @expectExitWithErr("ERROR_READING_FILE", @todosPath)
 
     it "logs error and exits when project has cypress.env.json syntax error", ->
-      Promise.all([
-        user.set({name: "brian", sessionToken: "session-123"}),
-
-        Project.add(@todosPath)
-      ])
+      Project.add(@todosPath)
       .then =>
         fs.writeFileAsync(@todosPath + "/cypress.env.json", "{'foo': 'bar}")
       .then =>
         cypress.start(["--run-project=#{@todosPath}"])
       .then =>
         @expectExitWithErr("ERROR_READING_FILE", @todosPath)
+
+    it "logs error and exits when project has invalid cypress.json values", ->
+      Promise.all([
+        Project.add(@todosPath)
+
+        settings.write(@todosPath, {baseUrl: "localhost:9999"})
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}"])
+      .then =>
+        @expectExitWithErr("CONFIG_VALIDATION_ERROR", "cypress.json")
+
+    it "logs error and exits when baseUrl cannot be verified", ->
+      Promise.all([
+        Project.add(@todosPath)
+
+        settings.write(@todosPath, {baseUrl: "http://localhost:90874"})
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}"])
+      .then =>
+        @expectExitWithErr("CANNOT_CONNECT_BASE_URL", "http://localhost:90874")
 
     ## TODO: make sure we have integration tests around this
     ## for headed projects!
@@ -495,7 +511,7 @@ describe "lib/cypress", ->
 
       @sandbox.stub(inquirer, "prompt").yieldsAsync({add: true})
 
-      user.set({sessionToken: "session-123"})
+      user.set({authToken: "auth-token-123"})
       .then =>
         fs.ensureDirAsync(permissionsPath)
       .then =>
@@ -522,15 +538,15 @@ describe "lib/cypress", ->
       it "can override default values", ->
         Project.add(@todosPath)
         .then =>
-          cypress.start(["--run-project=#{@todosPath}", "--config=requestTimeout=1234,baseUrl=localhost"])
+          cypress.start(["--run-project=#{@todosPath}", "--config=requestTimeout=1234,videoCompression=false"])
         .then =>
           cfg = project.opened().cfg
 
-          expect(cfg.baseUrl).to.eq("localhost")
+          expect(cfg.videoCompression).to.be.false
           expect(cfg.requestTimeout).to.eq(1234)
 
-          expect(cfg.resolved.baseUrl).to.deep.eq({
-            value: "localhost"
+          expect(cfg.resolved.videoCompression).to.deep.eq({
+            value: false
             from: "cli"
           })
           expect(cfg.resolved.requestTimeout).to.deep.eq({
@@ -862,7 +878,7 @@ describe "lib/cypress", ->
       process.env.CYPRESS_watch_for_file_changes = "false"
 
       Promise.all([
-        user.set({name: "brian", sessionToken: "session-123"}),
+        user.set({name: "brian", authToken: "auth-token-123"}),
 
         Project.add(@todosPath)
       ])

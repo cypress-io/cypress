@@ -74,7 +74,7 @@ module.exports = {
 
       @sandbox.stub(process, "exit")
 
-      user.set({name: "brian", sessionToken: "session-123"})
+      user.set({name: "brian", authToken: "auth-token-123"})
       .then =>
         Project.add(e2ePath)
       .then =>

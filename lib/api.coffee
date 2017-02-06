@@ -46,42 +46,44 @@ module.exports = {
   ping: ->
     rp.get(Routes.ping())
 
-  getOrgs: (session) ->
+  getOrgs: (authToken) ->
     rp.get({
       url: Routes.orgs()
       json: true
-      headers: {
-        "x-session": session
+      auth: {
+        bearer: authToken
       }
     })
 
-  getProjects: (session) ->
+  getProjects: (authToken) ->
     rp.get({
       url: Routes.projects()
       json: true
-      headers: {
-        "x-session": session
+      auth: {
+        bearer: authToken
       }
     })
 
-  getProject: (projectId, session) ->
+  getProject: (projectId, authToken) ->
     rp.get({
       url: Routes.project(projectId)
       json: true
+      auth: {
+        bearer: authToken
+      }
       headers: {
-        "x-session": session
         "x-route-version": "2"
       }
     })
 
-  getProjectBuilds: (projectId, session, options = {}) ->
+  getProjectBuilds: (projectId, authToken, options = {}) ->
     options.page ?= 1
     rp.get({
       url: Routes.projectBuilds(projectId)
       json: true
       timeout: options.timeout ? 10000
-      headers: {
-        "x-session": session
+      auth: {
+        bearer: authToken
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
@@ -174,13 +176,13 @@ module.exports = {
     })
     .catch(errors.StatusCodeError, formatResponseBody)
 
-  createRaygunException: (body, session, timeout = 3000) ->
+  createRaygunException: (body, authToken, timeout = 3000) ->
     rp.post({
       url: Routes.exceptions()
       json: true
       body: body
-      headers: {
-        "x-session": session
+      auth: {
+        bearer: authToken
       }
     })
     .promise()
@@ -191,70 +193,72 @@ module.exports = {
       url: Routes.signin({code: code})
       json: true
       headers: {
-        "x-route-version": "2"
+        "x-route-version": "3"
       }
     })
     .catch errors.StatusCodeError, (err) ->
-      ## slice out the status code since RP automatically
-      ## adds this before the message
-      err.message = err.message.split(" - ").slice(1).join("")
+      ## reset message to error which is a pure body
+      ## representation of what was sent back from
+      ## the API
+      err.message = err.error
+
       throw err
 
-  createSignout: (session) ->
+  createSignout: (authToken) ->
     rp.post({
       url: Routes.signout()
       json: true
-      headers: {
-        "x-session": session
+      auth: {
+        bearer: authToken
       }
     })
-    .catch (err) ->
-      return if err.statusCode is 401
+    .catch {statusCode: 401}, ->
+      ## do nothing on 401
 
-      throw err
-
-  createProject: (projectDetails, remoteOrigin, session) ->
+  createProject: (projectDetails, remoteOrigin, authToken) ->
     rp.post({
       url: Routes.projects()
       json: true
+      auth: {
+        bearer: authToken
+      }
       headers: {
-        "x-session": session
         "x-route-version": "2"
       }
       body: {
         name: projectDetails.projectName
         orgId: projectDetails.orgId
         public: projectDetails.public
-        origin: remoteOrigin
+        remoteOrigin: remoteOrigin
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
 
-  getProjectCiKeys: (projectId, session) ->
+  getProjectCiKeys: (projectId, authToken) ->
     rp.get({
       url: Routes.projectCiKeys(projectId)
       json: true
-      headers: {
-        "x-session": session
+      auth: {
+        bearer: authToken
       }
     })
 
-  requestAccess: (orgId, session) ->
+  requestAccess: (orgId, authToken) ->
     rp.post({
       url: Routes.membershipRequests(orgId)
       json: true
-      headers: {
-        "x-session": session
+      auth: {
+        bearer: authToken
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
 
-  sendUsage: (numRuns, exampleSpec, allSpecs, projectName, session) ->
+  sendUsage: (numRuns, exampleSpec, allSpecs, projectName, authToken) ->
     rp.post({
       url: Routes.usage()
       json: true
-      headers: {
-        "x-session": session
+      auth: {
+        bearer: authToken
       }
       body: {
         "x-runs": numRuns
@@ -272,23 +276,25 @@ module.exports = {
     .promise()
     .get("url")
 
-  _projectToken: (method, projectId, session) ->
+  _projectToken: (method, projectId, authToken) ->
     rp({
       method: method
       url: Routes.projectToken(projectId)
       json: true
+      auth: {
+        bearer: authToken
+      }
       headers: {
-        "x-session": session
         "x-route-version": "2"
       }
     })
     .promise()
     .get("apiToken")
 
-  getProjectToken: (projectId, session) ->
-    @_projectToken("get", projectId, session)
+  getProjectToken: (projectId, authToken) ->
+    @_projectToken("get", projectId, authToken)
 
-  updateProjectToken: (projectId, session) ->
-    @_projectToken("put", projectId, session)
+  updateProjectToken: (projectId, authToken) ->
+    @_projectToken("put", projectId, authToken)
 
 }
