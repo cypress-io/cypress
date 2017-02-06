@@ -59,7 +59,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     as:
       empty_string: "#{cmd('as')} cannot be passed an empty string."
       invalid_type: "#{cmd('as')} can only accept a string."
-      reserved_word: "#{cmd('as')} cannot be aliased as: '{{str}}'. This word is reserved."
+      reserved_word: "#{cmd('as')} cannot be aliased as: '{{alias}}'. This word is reserved."
 
     blur:
       multiple_elements: "#{cmd('blur')} can only be called on a single element. Your subject contained {{num}} elements."
@@ -86,6 +86,11 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     click:
       multiple_elements: "#{cmd('click')} can only be called on a single element. Your subject contained {{num}} elements. Pass {multiple: true} if you want to serially click each element."
       on_select_element: "#{cmd('click')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
+
+    clock:
+      already_created: "#{cmd('clock')} can only be called once per test. Use the clock returned from the previous call."
+      invalid_1st_arg: "#{cmd('clock')} only accepts a number or an options object for its first argument. You passed: {{arg}}"
+      invalid_2nd_arg: "#{cmd('clock')} only accepts an array of function names or an options object for its second argument. You passed: {{arg}}"
 
     contains:
       empty_string: "#{cmd('contains')} cannot be passed an empty string."
@@ -471,6 +476,10 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     submit:
       multiple_forms: "#{cmd('submit')} can only be called on a single form. Your subject contained {{num}} form elements."
       not_on_form: "#{cmd('submit')} can only be called on a <form>. Your subject {{word}} a: {{node}}"
+
+    tick:
+      invalid_argument: "clock.tick()/#{cmd('tick')} only accept a number as their argument. You passed: {{arg}}"
+      no_clock: "#{cmd('tick')} cannot be called without first calling #{cmd('clock')}"
 
     then:
       callback_mixes_sync_and_async: """

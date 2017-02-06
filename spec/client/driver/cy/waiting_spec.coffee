@@ -18,15 +18,13 @@ describe "$Cypress.Cy Waiting Commands", ->
           .wait(10).then ($input) ->
             expect($input).to.eq @$input
 
-      it "does not time out the runnable", ->
-        @test.enableTimeouts(false)
-        timer = @sandbox.useFakeTimers("setTimeout")
-        trigger = @sandbox.spy(@cy, "trigger")
-        @cy._timeout(1000)
-        @cy.wait()
-        timer.tick()
-        timer.tick(5000)
-        expect(trigger).not.to.be.calledWith "invoke:end"
+      it "increases timeout by delta", ->
+        timeout = @sandbox.spy(@cy, "_timeout")
+
+        @cy
+        .wait(50)
+        .then ->
+          expect(timeout).to.be.calledWith(50, true)
 
     describe "function argument", ->
       describe "errors thrown", ->
