@@ -16,11 +16,11 @@ describe "lib/api", ->
       orgs = []
 
       nock("http://localhost:1234")
-      .matchHeader("x-session", "session-123")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .get("/organizations")
       .reply(200, orgs)
 
-      api.getOrgs("session-123")
+      api.getOrgs("auth-token-123")
       .then (ret) ->
         expect(ret).to.eql(orgs)
 
@@ -29,11 +29,11 @@ describe "lib/api", ->
       projects = []
 
       nock("http://localhost:1234")
-      .matchHeader("x-session", "session-123")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .get("/projects")
       .reply(200, projects)
 
-      api.getProjects("session-123")
+      api.getProjects("auth-token-123")
       .then (ret) ->
         expect(ret).to.eql(projects)
 
@@ -42,12 +42,12 @@ describe "lib/api", ->
       project = { id: "id-123" }
 
       nock("http://localhost:1234")
-      .matchHeader("x-session", "session-123")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .matchHeader("x-route-version", "2")
       .get("/projects/id-123")
       .reply(200, project)
 
-      api.getProject("id-123", "session-123")
+      api.getProject("id-123", "auth-token-123")
       .then (ret) ->
         expect(ret).to.eql(project)
 
@@ -56,22 +56,22 @@ describe "lib/api", ->
       builds = []
 
       nock("http://localhost:1234")
-      .matchHeader("x-session", "session-123")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .get("/projects/id-123/builds")
       .reply(200, builds)
 
-      api.getProjectBuilds("id-123", "session-123")
+      api.getProjectBuilds("id-123", "auth-token-123")
       .then (ret) ->
         expect(ret).to.eql(builds)
 
     it "handles timeouts", ->
       nock("http://localhost:1234")
-      .matchHeader("x-session", "session-123")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .get("/projects/id-123/builds")
       .socketDelay(5000)
       .reply(200, [])
 
-      api.getProjectBuilds("id-123", "session-123", {timeout: 100})
+      api.getProjectBuilds("id-123", "auth-token-123", {timeout: 100})
       .then (ret) ->
         throw new Error("should have thrown here")
       .catch (err) ->
@@ -83,13 +83,13 @@ describe "lib/api", ->
         then: (fn) -> fn()
       })
 
-      api.getProjectBuilds("id-123", "session-123")
+      api.getProjectBuilds("id-123", "auth-token-123")
       .then (ret) ->
         expect(rp.get).to.be.calledWithMatch({timeout: 10000})
 
     it "GET /projects/:id/builds failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-session", "session-123")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .get("/projects/id-123/builds")
       .reply(401, {
         errors: {
@@ -97,7 +97,7 @@ describe "lib/api", ->
         }
       })
 
-      api.getProjectBuilds("id-123", "session-123")
+      api.getProjectBuilds("id-123", "auth-token-123")
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->
@@ -519,7 +519,7 @@ describe "lib/api", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
       .post("/signin")
       .query({code: "abc-123"})
       .reply(200, {
@@ -535,7 +535,7 @@ describe "lib/api", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .matchHeader("x-route-version", "2")
+      .matchHeader("x-route-version", "3")
       .post("/signin")
       .query({code: "abc-123"})
       .reply(401, "Your email: 'brian@gmail.com' has not been authorized.")
@@ -551,24 +551,24 @@ describe "lib/api", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .matchHeader("x-session", "abc-123")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .post("/signout")
       .reply(200)
 
-      api.createSignout("abc-123")
+      api.createSignout("auth-token-123")
 
   context ".createProject", ->
     it "POST /projects", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .matchHeader("x-session", "session-123")
       .matchHeader("x-route-version", "2")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .post("/projects", {
         name: "foobar"
         orgId: "org-id-123"
         public: true
-        origin: "remoteOrigin"
+        remoteOrigin: "remoteOrigin"
       })
       .reply(200, {
         id: "id-123"
@@ -582,7 +582,9 @@ describe "lib/api", ->
         orgId: "org-id-123"
         public: true
       }
-      api.createProject(projectDetails, "remoteOrigin", "session-123").then (projectDetails) ->
+
+      api.createProject(projectDetails, "remoteOrigin", "auth-token-123")
+      .then (projectDetails) ->
         expect(projectDetails).to.eql({
           id: "id-123"
           name: "foobar"
@@ -594,12 +596,13 @@ describe "lib/api", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .matchHeader("x-session", "session-123")
       .matchHeader("x-route-version", "2")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .post("/projects", {
         name: "foobar"
         orgId: "org-id-123"
         public: true
+        remoteOrigin: "remoteOrigin"
       })
       .reply(422, {
         errors: {
@@ -612,7 +615,8 @@ describe "lib/api", ->
         orgId: "org-id-123"
         public: true
       }
-      api.createProject(projectDetails, "session-123")
+
+      api.createProject(projectDetails, "remoteOrigin", "auth-token-123")
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->
@@ -634,29 +638,29 @@ describe "lib/api", ->
       ciKeys = []
 
       nock("http://localhost:1234")
-      .matchHeader("x-session", "session-123")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .get("/projects/id-123/keys")
       .reply(200, ciKeys)
 
-      api.getProjectCiKeys("id-123", "session-123")
+      api.getProjectCiKeys("id-123", "auth-token-123")
       .then (ret) ->
         expect(ret).to.eql(ciKeys)
 
   context ".requestAccess", ->
     it "POST /organizations/:id/membership_requests + returns response", ->
       nock("http://localhost:1234")
-      .matchHeader("x-session", "session-123")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .post("/organizations/org-id-123/membership_requests")
       .reply(200)
 
-      api.requestAccess("org-id-123", "session-123")
+      api.requestAccess("org-id-123", "auth-token-123")
       .then (ret) ->
         expect(ret).to.be.undefined
 
 
     it "POST /organizations/:id/membership_requests failure formatting", ->
       nock("http://localhost:1234")
-      .matchHeader("x-session", "session-123")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .post("/organizations/org-id-123/membership_requests")
       .reply(422, {
         errors: {
@@ -664,7 +668,7 @@ describe "lib/api", ->
         }
       })
 
-      api.requestAccess("org-id-123", "session-123")
+      api.requestAccess("org-id-123", "auth-token-123")
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->
@@ -685,7 +689,7 @@ describe "lib/api", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .matchHeader("x-session", "session-123")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .post("/user/usage", {
         "x-runs": 5
         "x-example": true
@@ -694,20 +698,20 @@ describe "lib/api", ->
       })
       .reply(200)
 
-      api.sendUsage(5, true, false, "admin", "session-123")
+      api.sendUsage(5, true, false, "admin", "auth-token-123")
 
   context ".getProjectToken", ->
     it "GETs /projects/:id/token", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .matchHeader("x-session", "session-123")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .get("/projects/project-123/token")
       .reply(200, {
         apiToken: "token-123"
       })
 
-      api.getProjectToken("project-123", "session-123")
+      api.getProjectToken("project-123", "auth-token-123")
       .then (resp) ->
         expect(resp).to.eq("token-123")
 
@@ -716,30 +720,30 @@ describe "lib/api", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
-      .matchHeader("x-session", "session-123")
+      .matchHeader("authorization", "Bearer auth-token-123")
       .put("/projects/project-123/token")
       .reply(200, {
         apiToken: "token-123"
       })
 
-      api.updateProjectToken("project-123", "session-123")
+      api.updateProjectToken("project-123", "auth-token-123")
       .then (resp) ->
         expect(resp).to.eq("token-123")
 
   context ".createRaygunException", ->
     beforeEach ->
-      @setup = (body, session, delay = 0) ->
+      @setup = (body, authToken, delay = 0) ->
         nock("http://localhost:1234")
         .matchHeader("x-platform", "linux")
         .matchHeader("x-cypress-version", pkg.version)
-        .matchHeader("x-session", session)
+        .matchHeader("authorization", "Bearer #{authToken}")
         .post("/exceptions", body)
         .delayConnection(delay)
         .reply(200)
 
     it "POSTs /exceptions", ->
-      @setup({foo: "bar"}, "abc-123")
-      api.createRaygunException({foo: "bar"}, "abc-123")
+      @setup({foo: "bar"}, "auth-token-123")
+      api.createRaygunException({foo: "bar"}, "auth-token-123")
 
     it "by default times outs after 3 seconds", ->
       ## return our own specific promise
@@ -748,16 +752,16 @@ describe "lib/api", ->
       @sandbox.spy(p, "timeout")
       @sandbox.stub(rp.Request.prototype, "promise").returns(p)
 
-      @setup({foo: "bar"}, "abc-123")
-      api.createRaygunException({foo: "bar"}, "abc-123").then ->
+      @setup({foo: "bar"}, "auth-token-123")
+      api.createRaygunException({foo: "bar"}, "auth-token-123").then ->
         expect(p.timeout).to.be.calledWith(3000)
 
     it "times out after exceeding timeout", (done) ->
       ## force our connection to be delayed 5 seconds
-      @setup({foo: "bar"}, "abc-123", 5000)
+      @setup({foo: "bar"}, "auth-token-123", 5000)
 
       ## and set the timeout to only be 50ms
-      api.createRaygunException({foo: "bar"}, "abc-123", 50)
+      api.createRaygunException({foo: "bar"}, "auth-token-123", 50)
       .then ->
         done("errored: it did not catch the timeout error!")
       .catch Promise.TimeoutError, ->

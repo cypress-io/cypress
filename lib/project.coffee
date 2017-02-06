@@ -88,10 +88,10 @@ class Project extends EE
   getBuilds: ->
     Promise.all([
       @getProjectId(),
-      user.ensureSession()
+      user.ensureAuthToken()
     ])
-    .spread (projectId, session) ->
-      api.getProjectBuilds(projectId, session)
+    .spread (projectId, authToken) ->
+      api.getProjectBuilds(projectId, authToken)
 
   close: (options = {}) ->
     if @memoryCheck
@@ -260,9 +260,9 @@ class Project extends EE
           ## once we determine that we can then prefix it correctly
           ## with either integration or unit
           prefixedPath = @getPrefixedPathToSpec(cfg.integrationFolder, pathToSpec)
-          @getUrlBySpec(cfg.clientUrl, prefixedPath)
+          @getUrlBySpec(cfg.browserUrl, prefixedPath)
       else
-        @getUrlBySpec(cfg.clientUrl, "/__all")
+        @getUrlBySpec(cfg.browserUrl, "/__all")
 
   ensureSpecExists: (spec) ->
     specFile = path.resolve(@projectRoot, spec)
@@ -285,11 +285,11 @@ class Project extends EE
     ## becomes /integration/foo.coffee
     "/" + path.join("integration", path.relative(integrationFolder, pathToSpec))
 
-  getUrlBySpec: (clientUrl, specUrl) ->
+  getUrlBySpec: (browserUrl, specUrl) ->
     replacer = (match, p1) ->
       match.replace("//", "/")
 
-    [clientUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
+    [browserUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
     scaffolds = []
@@ -350,9 +350,16 @@ class Project extends EE
       errors.throw("NO_PROJECT_FOUND_AT_PROJECT_ROOT", @projectRoot)
 
   createCiProject: (projectDetails) ->
-    user.ensureSession()
-    .then (session) ->
-      api.createProject(projectDetails, session)
+    Promise.all([
+      user.ensureAuthToken()
+      @getConfig()
+    ])
+    .spread (authToken, cfg) ->
+      git
+      .init(cfg.projectRoot)
+      .getRemoteOrigin()
+      .then (remoteOrigin) ->
+        api.createProject(projectDetails, remoteOrigin, authToken)
     .then (newProject) =>
       @writeProjectId(newProject.id)
       .return(newProject)
@@ -360,20 +367,20 @@ class Project extends EE
   getCiKeys: ->
     Promise.all([
       @getProjectId(),
-      user.ensureSession()
+      user.ensureAuthToken()
     ])
-    .spread (projectId, session) ->
-      api.getProjectCiKeys(projectId, session)
+    .spread (projectId, authToken) ->
+      api.getProjectCiKeys(projectId, authToken)
 
   requestAccess: (orgId) ->
-    user.ensureSession()
-    .then (session) ->
-      api.requestAccess(orgId, session)
+    user.ensureAuthToken()
+    .then (authToken) ->
+      api.requestAccess(orgId, authToken)
 
   @getOrgs = ->
-    user.ensureSession()
-    .then (session) ->
-      api.getOrgs(session)
+    user.ensureAuthToken()
+    .then (authToken) ->
+      api.getOrgs(authToken)
 
   @paths = ->
     cache.getProjectPaths()
@@ -386,34 +393,49 @@ class Project extends EE
         id: settings.id(projectPath)
       })
 
-  @getProjectStatuses = (clientProjects = []) ->
-    user.ensureSession()
-    .then (session) ->
-      api.getProjects(session)
-    .then (projects = []) ->
-      projectsIndex = _.keyBy(projects, "id")
-      return _.map clientProjects, (clientProject) ->
-        ## not a CI project, leave it be
-        return clientProject if not clientProject.id
+  @_mergeDetails = (clientProject, project) ->
+    _.extend({}, clientProject, project, {state: "VALID"})
 
-        if project = projectsIndex[clientProject.id]
-          ## merge in details for matching project
-          return _.extend(clientProject, project, {valid: true})
+  @_mergeState = (clientProject, state) ->
+    _.extend({}, clientProject, {state: state})
+
+  @_getProject = (clientProject, authToken) ->
+    api.getProject(clientProject.id, authToken)
+    .then (project) ->
+      Project._mergeDetails(clientProject, project)
+    .catch (err) ->
+      switch err.statusCode
+        when 404
+          ## project doesn't exist
+          return Project._mergeState(clientProject, "INVALID")
+        when 403
+          ## project exists, but user isn't authorized for it
+          return Project._mergeState(clientProject, "UNAUTHORIZED")
         else
-          ## project has id, but no matching project found
-          clientProject.valid = false
-          return clientProject
+          throw err
+
+  @getProjectStatuses = (clientProjects = []) ->
+    user.ensureAuthToken()
+    .then (authToken) ->
+      api.getProjects(authToken).then (projects = []) ->
+        projectsIndex = _.keyBy(projects, "id")
+        Promise.all(_.map clientProjects, (clientProject) ->
+          ## not a CI project, just mark as valid and return
+          if not clientProject.id
+            return Project._mergeState(clientProject, "VALID")
+
+          if project = projectsIndex[clientProject.id]
+            ## merge in details for matching project
+            return Project._mergeDetails(clientProject, project)
+          else
+            ## project has id, but no matching project found
+            ## check if it doesn't exist or if user isn't authorized
+            Project._getProject(clientProject, authToken)
+        )
 
   @getProjectStatus = (clientProject) ->
-    user.ensureSession()
-    .then (session) ->
-      api.getProject(clientProject.id, session)
-    .then (project) ->
-      return _.extend(clientProject, project)
-    .catch ->
-      ## no matching project found
-      clientProject.valid = false
-      return clientProject
+    user.ensureAuthToken().then (authToken) ->
+      Project._getProject(clientProject, authToken)
 
   @remove = (path) ->
     cache.removeProject(path)
@@ -449,9 +471,9 @@ class Project extends EE
     ## get project id
     Project.id(path)
     .then (id) ->
-      user.ensureSession()
-      .then (session) ->
-        api.getProjectToken(id, session)
+      user.ensureAuthToken()
+      .then (authToken) ->
+        api.getProjectToken(id, authToken)
         .catch ->
           errors.throw("CANNOT_FETCH_PROJECT_TOKEN")
 
@@ -459,9 +481,9 @@ class Project extends EE
     ## get project id
     Project.id(path)
     .then (id) ->
-      user.ensureSession()
-      .then (session) ->
-        api.updateProjectToken(id, session)
+      user.ensureAuthToken()
+      .then (authToken) ->
+        api.updateProjectToken(id, authToken)
         .catch ->
           errors.throw("CANNOT_CREATE_PROJECT_TOKEN")
 

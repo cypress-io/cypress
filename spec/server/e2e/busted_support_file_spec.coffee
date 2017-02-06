@@ -27,10 +27,9 @@ describe "e2e busted support file", ->
 
         This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
-        * A missing file or dependency
-        * A syntax error in the file or one of its dependencies
+        - A missing file or dependency
+        - A syntax error in the file or one of its dependencies
 
         Fix the error in your code and re-run your tests.
 
       """)
-

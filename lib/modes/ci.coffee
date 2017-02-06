@@ -208,7 +208,7 @@ module.exports = {
           @createInstance(buildId, options.spec)
         .then (instanceId) =>
           ## dont check that the user is logged in
-          options.ensureSession = false
+          options.ensureAuthToken = false
 
           ## dont let headless say its all done
           options.allDone       = false
