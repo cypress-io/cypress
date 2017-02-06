@@ -63,7 +63,7 @@ export default class Projects extends Component {
 
   _empty () {
     return (
-      <div className='empty'>
+      <div className='empty empty-projects'>
         <h4>Add your first project</h4>
         <p>To begin testing, click <strong><i className='fa fa-plus'></i> Add Project</strong> above.</p>
         <p>Choose the folder with the resources of your project.</p>
