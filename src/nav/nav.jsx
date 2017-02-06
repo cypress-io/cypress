@@ -68,7 +68,7 @@ export default class Nav extends Component {
               className='user-avatar'
               height='13'
               width='13'
-              src={`${gravatarUrl(state.email)}`}
+              src={`${gravatarUrl(state.user.email)}`}
             />
             {' '}{ state.user.displayName }{' '}
             <span className='caret'></span>
