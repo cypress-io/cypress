@@ -99,17 +99,18 @@ cy
 
 ```javascript
 // your app code
-$('#date').text(new Date().toISOString())
+$('#date').text(new Date().toJSON())
 ```
 
 ```javascript
 // test code
-const now = new Date(2017, 0, 1).getTime() // Jan 1, 2017 timestamp
+const now = new Date(2017, 2, 14).getTime() // March 14, 2017 timestamp
+
 cy
   .clock(now)
   .visit("/index.html")
   .get("#date")
-    .contains("2017-01-01")
+    .contains("2017-03-14")
 ```
 
 ***
