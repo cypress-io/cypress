@@ -163,13 +163,13 @@ describe "$Cypress.Cy Request Commands", ->
               followRedirect: true
             })
 
-        it "prefixes with current origin over baseUrl", ->
+        it "prefixes with baseUrl over current origin", ->
           @Cypress.config("baseUrl", "http://localhost:8080/app")
           @sandbox.stub(@cy, "_getLocation").withArgs("origin").returns("http://localhost:1234")
 
           @cy.request("foobar?cat=1").then ->
             @expectOptionsToBe({
-              url: "http://localhost:1234/foobar?cat=1"
+              url: "http://localhost:8080/app/foobar?cat=1"
               method: "GET"
               gzip: true
               followRedirect: true
