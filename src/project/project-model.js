@@ -169,7 +169,11 @@ export default class Project {
   }
 
   setChosenBrowserByName (name) {
+<<<<<<< HEAD
     const browser = _.find(this.browsers, { name })
+=======
+    const browser = _.find(this.browsers, { name }) || this.defaultBrowser
+>>>>>>> master
     this.setChosenBrowser(browser)
   }
 
