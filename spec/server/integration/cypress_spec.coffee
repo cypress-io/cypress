@@ -26,6 +26,7 @@ api      = require("#{root}lib/api")
 user     = require("#{root}lib/user")
 config   = require("#{root}lib/config")
 cache    = require("#{root}lib/cache")
+stdout   = require("#{root}lib/stdout")
 errors   = require("#{root}lib/errors")
 cypress  = require("#{root}lib/cypress")
 Project  = require("#{root}lib/project")
@@ -631,11 +632,14 @@ describe "lib/cypress", ->
           commitMessage: "foo"
           remoteOrigin: "https://github.com/foo/bar.git"
           ciProvider: "travis"
-          ciBuildNum: "987"
+          ciBuildNumber: "987"
           ciParams: null
         })
 
       @upload = @sandbox.stub(ci, "upload").resolves()
+      @sandbox.stub(stdout, "capture").returns({
+        toString: -> "foobarbaz"
+      })
 
       @sandbox.stub(ciProvider, "name").returns("travis")
       @sandbox.stub(ciProvider, "buildNum").returns("987")
@@ -697,6 +701,7 @@ describe "lib/cypress", ->
         failingTests: []
         cypressConfig: {}
         ciProvider: "travis"
+        stdout: "foobarbaz"
       }).resolves()
 
       cypress.start(["--run-project=#{@todosPath}",  "--key=token-123", "--ci"])

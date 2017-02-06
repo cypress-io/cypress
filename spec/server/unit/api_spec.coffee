@@ -141,7 +141,7 @@ describe "lib/api", ->
         commitMessage:     "such hax"
         remoteOrigin:      "https://github.com/foo/bar.git"
         ciProvider:        "circle"
-        ciBuildNum:        "987"
+        ciBuildNumber:      "987"
         ciParams:          { foo: "bar" }
       })
       .reply(200, {
@@ -158,7 +158,7 @@ describe "lib/api", ->
         commitMessage:     "such hax"
         remoteOrigin:      "https://github.com/foo/bar.git"
         ciProvider:        "circle"
-        ciBuildNum:        "987"
+        ciBuildNumber:     "987"
         ciParams:          { foo: "bar" }
       })
       .then (ret) ->
@@ -179,7 +179,7 @@ describe "lib/api", ->
         commitMessage:     "such hax"
         remoteOrigin:      "https://github.com/foo/bar.git"
         ciProvider:        "circle"
-        ciBuildNum:        "987"
+        ciBuildNumber:     "987"
         ciParams:          { foo: "bar" }
       })
       .reply(422, {
@@ -196,9 +196,9 @@ describe "lib/api", ->
         commitAuthorName:  "brian"
         commitAuthorEmail: "brian@cypress.io"
         commitMessage:     "such hax"
-        remoteOrigin:       "https://github.com/foo/bar.git"
+        remoteOrigin:      "https://github.com/foo/bar.git"
         ciProvider:        "circle"
-        ciBuildNum:        "987"
+        ciBuildNumber:     "987"
         ciParams:          { foo: "bar" }
       })
       .then ->
@@ -366,6 +366,7 @@ describe "lib/api", ->
         failingTests: []
         cypressConfig: {}
         ciProvider: "circle"
+        stdout: "foo\nbar\nbaz"
       })
       .reply(200)
 
@@ -382,6 +383,7 @@ describe "lib/api", ->
         failingTests: []
         cypressConfig: {}
         ciProvider: "circle"
+        stdout: "foo\nbar\nbaz"
       })
 
     it "PUT /instances/:id failure formatting", ->

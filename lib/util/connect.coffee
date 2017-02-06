@@ -26,7 +26,8 @@ module.exports = {
     ## https://nodejs.org/api/dns.html#dns_dns_lookup_hostname_options_callback
     lookupAsync(hostname, {all: true})
     .then (addresses) ->
-      addresses.map(fn)
+      ## convert to an array if string
+      [].concat(addresses).map(fn)
     .any()
 
   ensureUrl: (urlStr) ->
