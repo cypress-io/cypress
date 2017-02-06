@@ -11,9 +11,9 @@ errors       = require("#{root}lib/errors")
 config       = require("#{root}lib/config")
 scaffold     = require("#{root}lib/scaffold")
 Project      = require("#{root}lib/project")
+settings     = require("#{root}lib/util/settings")
 savedState   = require("#{root}lib/saved_state")
 git          = require("#{root}lib/util/git")
-settings     = require("#{root}lib/util/settings")
 
 describe "lib/project", ->
   beforeEach ->
@@ -647,7 +647,7 @@ describe "lib/project", ->
           id: "id-123"
           path: "/path/to/project"
           lastBuildStatus: "passing"
-          valid: true
+          state: "VALID"
         })
 
     it "returns client project when it has no id", ->
@@ -657,18 +657,56 @@ describe "lib/project", ->
       .then (projectsWithStatuses) =>
         expect(projectsWithStatuses[0]).to.eql({
           path: "/path/to/project"
+          state: "VALID"
         })
 
-    it "marks project as valid: false if client project has id and there is no matching api project", ->
-      @sandbox.stub(api, "getProjects").resolves([])
+    describe "when client project has id and there is no matching user project", ->
+      beforeEach ->
+        @sandbox.stub(api, "getProjects").resolves([])
 
-      Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
-      .then (projectsWithStatuses) =>
-        expect(projectsWithStatuses[0]).to.eql({
-          id: "id-123"
-          path: "/path/to/project"
-          valid: false
-        })
+      it "marks project as invalid if api 404s", ->
+        @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404})
+
+        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        .then (projectsWithStatuses) =>
+          expect(projectsWithStatuses[0]).to.eql({
+            id: "id-123"
+            path: "/path/to/project"
+            state: "INVALID"
+          })
+
+      it "marks project as unauthorized if api 403s", ->
+        @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 403})
+
+        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        .then (projectsWithStatuses) =>
+          expect(projectsWithStatuses[0]).to.eql({
+            id: "id-123"
+            path: "/path/to/project"
+            state: "UNAUTHORIZED"
+          })
+
+      it "merges in project details and marks valid if somehow project exists and is authorized", ->
+        @sandbox.stub(api, "getProject").resolves({ id: "id-123", lastBuildStatus: "passing" })
+
+        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        .then (projectsWithStatuses) =>
+          expect(projectsWithStatuses[0]).to.eql({
+            id: "id-123"
+            path: "/path/to/project"
+            lastBuildStatus: "passing"
+            state: "VALID"
+          })
+
+      it "throws error if not accounted for", ->
+        error = {name: "", message: ""}
+        @sandbox.stub(api, "getProject").rejects(error)
+
+        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        .then =>
+          throw new Error("Should throw error")
+        .catch (err) ->
+          expect(err).to.equal(error)
 
   context ".getProjectStatus", ->
     beforeEach ->
@@ -696,18 +734,40 @@ describe "lib/project", ->
           id: "id-123"
           path: "/path/to/project"
           lastBuildStatus: "passing"
+          state: "VALID"
         })
 
-    it "marks project as valid: false if there is no matching api project", ->
-      @sandbox.stub(api, "getProject").rejects()
+    it "marks project as invalid if api 404s", ->
+      @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404})
 
       Project.getProjectStatus(@clientProject)
       .then (project) =>
         expect(project).to.eql({
           id: "id-123"
           path: "/path/to/project"
-          valid: false
+          state: "INVALID"
         })
+
+    it "marks project as unauthorized if api 403s", ->
+      @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 403})
+
+      Project.getProjectStatus(@clientProject)
+      .then (project) =>
+        expect(project).to.eql({
+          id: "id-123"
+          path: "/path/to/project"
+          state: "UNAUTHORIZED"
+        })
+
+    it "throws error if not accounted for", ->
+      error = {name: "", message: ""}
+      @sandbox.stub(api, "getProject").rejects(error)
+
+      Project.getProjectStatus(@clientProject)
+      .then =>
+        throw new Error("Should throw error")
+      .catch (err) ->
+        expect(err).to.equal(error)
 
   context ".removeIds", ->
     beforeEach ->
