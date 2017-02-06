@@ -9,7 +9,7 @@ excerpt: Control time in the browser
 
 Subsequent calls to `cy.clock` will yield the `clock` object without re-overriding the native time functions.
 
-If you call `cy.clock` before visiting a page with `cy.visit`, the page's native global functions will be overridden on window load, before any of your app code runs, so even if `setTimeout`, for example, is called on page load, it can still be controlled via `cy.tick`. This also applies if, during the course of a test, the page under test is reloaded or changed.
+If you call `cy.clock` before visiting a page with [`cy.visit`](https://on.cypress.io/api/visit), the page's native global functions will be overridden on window load, before any of your app code runs, so even if `setTimeout`, for example, is called on page load, it can still be controlled via [`cy.tick`](https://on.cypress.io/api/tick). This also applies if, during the course of a test, the page under test is reloaded or changed.
 
 | | |
 |--- | --- |
@@ -37,11 +37,11 @@ Same as above, but only overrides the functions in the array `functionNames`.
 
 # clock API
 
-`cy.clock` yields a `clock` object with the following methods. You can also access the `clock` object via `this.clock` in a `.then` callback.
+`cy.clock` yields a `clock` object with the following methods. You can also access the `clock` object via `this.clock` in a [`cy.then`](https://on.cypress.io/api/then) callback.
 
 ## clock.tick(*milliseconds*)
 
-Move the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called. Note that `cy.tick` exists for this purpose as well for a more fluid.
+Move the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called.
 
 ## clock.restore()
 
@@ -198,5 +198,5 @@ When clicking on the `clock` command within the command log, the console outputs
 # Related
 
 - [tick](https://on.cypress.io/api/tick)
-- [stub](https://on.cypress.io/api/stub)
 - [spy](https://on.cypress.io/api/spy)
+- [stub](https://on.cypress.io/api/stub)

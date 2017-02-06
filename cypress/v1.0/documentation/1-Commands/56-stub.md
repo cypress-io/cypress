@@ -1,15 +1,19 @@
 slug: stub
 excerpt: Create a stub and/or replace a function with a stub
 
-A stub is used to replace a function and both records its usage and control its behavior. You can track calls to the functions and what arguments the function was called with. You can also control what the function returns and even cause it to throw an exception.
+A stub is used to replace a function, record its usage and control its behavior. You can track calls to the functions and what arguments the function was called with. You can also control what the function returns and even cause it to throw an exception.
 
 `cy.stub` returns a [sinon.js stub](http://sinonjs.org/docs/#stubs). All methods found on sinon.js spies and stubs are supported. `cy.stub` creates stubs in a [sandbox](http://sinonjs.org/docs/#sandbox), so all stubs created are automatically reset/restored between tests without you having to explicitly reset/restore them.
 
-Cypress has built-in [sinon-as-promised](https://github.com/bendrucker/sinon-as-promised) support, so the stubs returned by `cy.stub` support the `.resolves` and `.rejects` API provided by `sinon-as-promised`.
+Cypress has built-in [sinon-as-promised](https://github.com/bendrucker/sinon-as-promised) support, so the stubs returned by `cy.stub` supports the `.resolves` and `.rejects` API provided by `sinon-as-promised`.
 
-Cypress also has built-in [sinon-chai](https://github.com/domenic/sinon-chai) support, so any assertions supported by `sinon-chai` can be used without any configuration.
+Cypress also has built-in [sinon-chai](https://github.com/domenic/sinon-chai) support, so any [assertions](https://github.com/domenic/sinon-chai#assertions) supported by `sinon-chai` can be used without any configuration.
 
-Unlike most Cypress commands, `cy.stub` is synchronous and returns a value (the stub) instead of a Promise-like chain-able object.
+Unlike most Cypress commands, `cy.stub` is *synchronous* and returns a value (the stub) instead of a Promise-like chain-able object.
+
+| | |
+|--- | --- |
+| **Returns** | the stub |
 
 ***
 
@@ -39,7 +43,7 @@ Replaces the `method` on the `object` with the `replacerFn` wrapped in a spy.See
 // assume App.start calls util.addListeners
 util.addListeners = cy.stub()
 App.start()
-expect(util.addListeners).to.be.called  
+expect(util.addListeners).to.be.called
 ```
 
 ***
@@ -50,7 +54,7 @@ expect(util.addListeners).to.be.called
 // assume App.start calls util.addListeners
 cy.stub(util, "addListeners")
 App.start()
-expect(util.addListeners).to.be.called  
+expect(util.addListeners).to.be.called
 ```
 
 ***
@@ -78,14 +82,14 @@ const removeStub = cy.stub()
 cy.stub(util, "addListeners").returns(removeStub)
 App.start()
 App.stop()
-expect(removeStub).to.be.called  
+expect(removeStub).to.be.called
 ```
 
 ***
 
 ## Alias a stub
 
-Cypress adds a `.as` method to stubs, which makes them easier to identify in error messages and Cypress's command log.
+Adding an alias using [`cy.as`](https://on.cypress.io/api/as) to stubs makes them easier to identify in error messages and Cypress's command log.
 
 ```javascript
 const obj = {

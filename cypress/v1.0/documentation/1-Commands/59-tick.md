@@ -5,7 +5,7 @@ excerpt: Move time in the browser
 
 It moves the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called.
 
-`cy.clock` must be called before `cy.tick` in order to override native time functions first.
+[`cy.clock`](https://on.cypress.io/api/clock) must be called before `cy.tick` in order to override native time functions first.
 
 | | |
 |--- | --- |
