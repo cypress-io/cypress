@@ -22,7 +22,7 @@ Commands drive your tests in the browser like a real user would. They let you pe
 | Querying | |
 | -------------------- | -- |
 | [contains](https://on.cypress.io/api/contains) | Get a DOM element that contains specific text |
-| [get](https://on.cypress.io/api/get) | Get DOM element(s) by selector or aliast |
+| [get](https://on.cypress.io/api/get) | Get DOM element(s) by selector or alias |
 | [root](https://on.cypress.io/api/root) | Set the root scope to the current subject |
 | [within](https://on.cypress.io/api/within) | Set the root scope to the current subject |
 
@@ -93,6 +93,13 @@ Commands drive your tests in the browser like a real user would. They let you pe
 | Aliasing | |
 | -------------------- | -- |
 | [as](https://on.cypress.io/api/as) | Alias a route or DOM element for use later. |
+
+| Spies, Stubs & Clocks | |
+| -------------------- | -- |
+| [spy](https://on.cypress.io/api/spy) | Wrap a method in a spy |
+| [stub](https://on.cypress.io/api/stub) | Create a stub and/or replace a function with a stub |
+| [clock](https://on.cypress.io/api/clock) | Control time in the browser |
+| [tick](https://on.cypress.io/api/tick) | Move time in the browser |
 
 | Files | |
 | -------------------- | -- |
