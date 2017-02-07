@@ -38,7 +38,7 @@ module.exports = {
         "remove-ids":  "removeIds"
         "get-key":     "getKey"
         "new-key":     "generateKey"
-        "run-project": "runProject"
+        "run-project": "project"
         "clear-logs":  "clearLogs"
         "return-pkg":  "returnPkg"
         "auto-open":   "autoOpen"
@@ -89,9 +89,9 @@ module.exports = {
       ## config directly into our options
       _.extend options, config.whitelist(c)
 
-    ## normalize runProject or project to projectPath
-    if rp = options.runProject or p = options.project
-      options.projectPath = path.resolve(cwd(), rp ? p)
+    ## normalize project to projectPath
+    if p = options.project
+      options.projectPath = path.resolve(cwd(), p)
 
     if options.smokeTest
       options.pong = options.ping

@@ -152,9 +152,9 @@ module.exports = {
         when options.ci
           options.mode = "ci"
 
-        when options.runProject
+        when options.project
           ## go into headless mode
-          ## when we have 'runProject'
+          ## when we have 'project'
           options.mode = "headless"
 
         else
