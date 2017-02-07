@@ -46,6 +46,48 @@ module.exports = {
   ping: ->
     rp.get(Routes.ping())
 
+  getOrgs: (authToken) ->
+    rp.get({
+      url: Routes.orgs()
+      json: true
+      auth: {
+        bearer: authToken
+      }
+    })
+
+  getProjects: (authToken) ->
+    rp.get({
+      url: Routes.projects()
+      json: true
+      auth: {
+        bearer: authToken
+      }
+    })
+
+  getProject: (projectId, authToken) ->
+    rp.get({
+      url: Routes.project(projectId)
+      json: true
+      auth: {
+        bearer: authToken
+      }
+      headers: {
+        "x-route-version": "2"
+      }
+    })
+
+  getProjectBuilds: (projectId, authToken, options = {}) ->
+    options.page ?= 1
+    rp.get({
+      url: Routes.projectBuilds(projectId)
+      json: true
+      timeout: options.timeout ? 10000
+      auth: {
+        bearer: authToken
+      }
+    })
+    .catch(errors.StatusCodeError, formatResponseBody)
+
   createBuild: (options = {}) ->
     rp.post({
       url: Routes.builds()
@@ -173,36 +215,43 @@ module.exports = {
     .catch {statusCode: 401}, ->
       ## do nothing on 401
 
-  createProject: (projectName, remoteOrigin, authToken) ->
+  createProject: (projectDetails, remoteOrigin, authToken) ->
     rp.post({
       url: Routes.projects()
       json: true
       auth: {
         bearer: authToken
       }
+      headers: {
+        "x-route-version": "2"
+      }
       body: {
-        "x-project-name": projectName
-        "x-remote-origin": remoteOrigin
+        name: projectDetails.projectName
+        orgId: projectDetails.orgId
+        public: projectDetails.public
+        remoteOrigin: remoteOrigin
       }
     })
-    .promise()
-    .get("uuid")
+    .catch(errors.StatusCodeError, formatResponseBody)
 
-  updateProject: (projectId, type, projectName, authToken) ->
-    ## TODO: change this to PUT method
+  getProjectCiKeys: (projectId, authToken) ->
     rp.get({
-      url: Routes.project(projectId)
+      url: Routes.projectCiKeys(projectId)
       json: true
       auth: {
         bearer: authToken
       }
-      body: {
-        "x-type": type
-        "x-platform": os.platform()
-        "x-version": pkg.version
-        "x-project-name": projectName
+    })
+
+  requestAccess: (orgId, authToken) ->
+    rp.post({
+      url: Routes.membershipRequests(orgId)
+      json: true
+      auth: {
+        bearer: authToken
       }
     })
+    .catch(errors.StatusCodeError, formatResponseBody)
 
   sendUsage: (numRuns, exampleSpec, allSpecs, projectName, authToken) ->
     rp.post({

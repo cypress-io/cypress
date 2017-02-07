@@ -104,7 +104,8 @@ module.exports = {
       .catch(options.onError)
 
     get = ->
-      openProject.getConfig()
+      Promise.try ->
+        openProject.getConfig()
       .then (cfg) ->
         files.getTestFiles(cfg)
 
@@ -132,6 +133,18 @@ module.exports = {
   getBrowsers: ->
     ## always return an array of open browsers
     Promise.resolve(_.compact([openBrowser]))
+
+  getCiKeys: ->
+    openProject.getCiKeys()
+
+  requestAccess: (orgId) ->
+    openProject.requestAccess(orgId)
+
+  createCiProject: (projectDetails) ->
+    openProject.createCiProject(projectDetails)
+
+  getBuilds: ->
+    openProject.getBuilds()
 
   closeBrowser: ->
     launcher.close()

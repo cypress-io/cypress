@@ -76,7 +76,6 @@ describe "electron/headless", ->
           projectPath: "path/to/project/foo"
           environmentVariables: {foo: "bar"}
         }, {
-          sync: false
           morgan: false
           socketId: 1234
           report: true

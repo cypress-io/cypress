@@ -202,7 +202,6 @@ describe "lib/cypress", ->
       @sandbox.stub(headless, "createRenderer")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 0})
       @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
-      @sandbox.spy(api, "updateProject")
 
     it "runs project headlessly and exits with exit code 0", ->
       Project.add(@todosPath)
@@ -210,7 +209,6 @@ describe "lib/cypress", ->
         cypress.start(["--run-project=#{@todosPath}"])
       .delay(200)
       .then =>
-        expect(api.updateProject).not.to.be.called
         expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
         @expectExitWith(0)
 
@@ -222,12 +220,11 @@ describe "lib/cypress", ->
         cypress.start(["--run-project=#{@todosPath}"])
       .delay(200)
       .then =>
-        expect(api.updateProject).not.to.be.called
         expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
         @expectExitWith(10)
 
-    it "generates a project id if missing one", ->
-      @sandbox.stub(api, "createProject").withArgs("pristine", "remoteOrigin", "auth-token-123").resolves("pristine-id-123")
+    it "does not generate a project id even if missing one", ->
+      @sandbox.stub(api, "createProject")
 
       Promise.all([
         user.set({authToken: "auth-token-123"}),
@@ -238,40 +235,14 @@ describe "lib/cypress", ->
         cypress.start(["--run-project=#{@pristinePath}"])
       .then =>
         @expectExitWith(0)
+      .then =>
+        expect(api.createProject).not.to.be.called
 
-        ## give it time to request the project id
-        Promise.delay(200)
-      .then =>
-        Project(@pristinePath).getProjectId()
-      .then (id) ->
-        expect(id).to.eq("pristine-id-123")
-
-    it "does not generate project id when not logged in", ->
-      @sandbox.stub(api, "createProject").withArgs("pristine", "remoteOrigin", "auth-token-123").rejects(new Error)
-
-      Project.add(@pristinePath)
-      .then =>
-        cypress.start(["--run-project=#{@pristinePath}"])
-      .then =>
-        Promise.delay(200)
-      .then =>
         Project(@pristinePath).getProjectId()
         .then ->
           throw new Error("should have caught error but didnt")
         .catch (err) ->
           expect(err.type).to.eq("NO_PROJECT_ID")
-      .then =>
-        @expectExitWith(0)
-
-    it "does not error when getting a creating a project id fails", ->
-      @sandbox.stub(api, "createProject").withArgs("pristine", "remoteOrigin", "auth-token-123").rejects(new Error)
-
-      Project.add(@pristinePath)
-      .then =>
-        cypress.start(["--run-project=#{@pristinePath}"])
-      .delay(200)
-      .then =>
-        @expectExitWith(0)
 
     it "runs project by specific spec and exits with status 0", ->
       Project.add(@todosPath)
@@ -901,57 +872,7 @@ describe "lib/cypress", ->
           pageLoadTimeout: 1000
         })
 
-    it "calls api.updateProject with projectName and session on open", ->
-      @sandbox.stub(Server.prototype, "open").resolves()
-      @sandbox.stub(api, "updateProject").resolves()
-
-      Promise.all([
-        user.set({name: "brian", authToken: "auth-token-123"}),
-
-        Project.add(@todosPath)
-
-        Project.id(@todosPath)
-        .then (id) =>
-          @projectId = id
-      ])
-      .then =>
-        cypress.start([])
-      .then =>
-        options = Events.start.firstCall.args[0]
-        Events.handleEvent(options, {}, {}, 123, "open:project", @todosPath)
-      .delay(200)
-      .then =>
-        ## must delay here because sync isnt promise connected
-        expect(api.updateProject).to.be.calledWith(@projectId, "opened", "todos", "auth-token-123")
-
-    it "calls api.updateProject with projectName and session on close", ->
-      @sandbox.stub(Server.prototype, "open").resolves()
-      @sandbox.stub(api, "updateProject").resolves()
-
-      Promise.all([
-        user.set({name: "brian", authToken: "auth-token-123"}),
-
-        Project.add(@todosPath)
-
-        Project.id(@todosPath)
-        .then (id) =>
-          @projectId = id
-      ])
-      .then =>
-        cypress.start([])
-      .then =>
-        options = Events.start.firstCall.args[0]
-        Events.handleEvent(options, {}, {}, 123, "open:project", @todosPath)
-        .delay(200)
-        .then =>
-          Events.handleEvent(options, {}, {}, 123, "close:project")
-      .delay(200)
-      .then =>
-        ## must delay here because sync isnt promise connected
-        expect(api.updateProject).to.be.calledWith(@projectId, "closed", "todos", "auth-token-123")
-
     it "passes filtered options to Project#open and sets cli config", ->
-      sync      = @sandbox.stub(Project.prototype, "sync").resolves()
       getConfig = @sandbox.spy(Project.prototype, "getConfig")
       open      = @sandbox.stub(Server.prototype, "open").resolves()
 
@@ -981,8 +902,6 @@ describe "lib/cypress", ->
         expect(getConfig).to.be.calledWithMatch({
           port: 2121
           pageLoadTimeout: 1000
-          sync: true
-          type: "opened"
           report: false
           environmentVariables: { baz: "baz" }
         })

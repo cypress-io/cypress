@@ -14,6 +14,7 @@ logger      = require("../../logger")
 errors      = require("../../errors")
 Updater     = require("../../updater")
 Project     = require("../../project")
+api         = require("../../api")
 
 handleEvent = (options, bus, event, id, type, arg) ->
   sendResponse = (data = {}) ->
@@ -166,14 +167,29 @@ handleEvent = (options, bus, event, id, type, arg) ->
       logs.off()
       send(null)
 
-    when "get:project:paths"
-      Project.paths()
+    when "get:orgs"
+      Project.getOrgs()
+      .then(send)
+      .catch(sendErr)
+
+    when "get:projects"
+      Project.getPathsAndIds()
+      .then(send)
+      .catch(sendErr)
+
+    when "get:project:statuses"
+      Project.getProjectStatuses(arg)
+      .then(send)
+      .catch(sendErr)
+
+    when "get:project:status"
+      Project.getProjectStatus(arg)
       .then(send)
       .catch(sendErr)
 
     when "add:project"
       Project.add(arg)
-      .then -> send(arg)
+      .then(send)
       .catch(sendErr)
 
     when "remove:project"
@@ -218,11 +234,49 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .then(send)
       .catch(sendErr)
 
+    when "setup:ci:project"
+      project.createCiProject(arg)
+      .then(send)
+      .catch(sendErr)
+
+    when "get:ci:keys"
+      project.getCiKeys()
+      .then(send)
+      .catch(sendErr)
+
     when "get:specs"
       project.getSpecChanges({
         onChange: send
         onError: sendErr
       })
+
+    when "get:builds"
+      project.getBuilds()
+      .then(send)
+      .catch (err) ->
+        err.type = if _.get(err, "statusCode") is 401
+          "UNAUTHENTICATED"
+        else if _.get(err, "cause.code") is "ESOCKETTIMEDOUT"
+          "TIMED_OUT"
+        else if _.get(err, "code") is "ENOTFOUND"
+          "NO_CONNECTION"
+        else
+          err.type or "UNKNOWN"
+
+        sendErr(err)
+
+    when "request:access"
+      project.requestAccess(arg)
+      .then(send)
+      .catch (err) ->
+        err.type = if _.get(err, "statusCode") is 403
+          "ALREADY_MEMBER"
+        else if _.get(err, "statusCode") is 422 and /existing/.test(err.errors?.userId?.join(''))
+          "ALREADY_REQUESTED"
+        else
+          err.type or "UNKNOWN"
+
+        sendErr(err)
 
     else
       throw new Error("No ipc event registered for: '#{type}'")

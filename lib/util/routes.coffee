@@ -15,10 +15,14 @@ routes = {
   instances:     "builds/:id/instances"
   instance:      "instances/:id"
   instanceStdout:"instances/:id/stdout"
+  orgs:          "organizations"
   projects:      "projects"
   project:       "projects/:id"
   projectToken:  "projects/:id/token"
+  projectBuilds: "projects/:id/builds"
+  projectCiKeys: "projects/:id/keys"
   exceptions:    "exceptions"
+  membershipRequests: "organizations/:id/membership_requests"
 }
 
 parseArgs = (url, args = []) ->

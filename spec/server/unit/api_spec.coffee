@@ -11,6 +11,108 @@ describe "lib/api", ->
   beforeEach ->
     @sandbox.stub(os, "platform").returns("linux")
 
+  context ".getOrgs", ->
+    it "GET /orgs + returns orgs", ->
+      orgs = []
+
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/organizations")
+      .reply(200, orgs)
+
+      api.getOrgs("auth-token-123")
+      .then (ret) ->
+        expect(ret).to.eql(orgs)
+
+  context ".getProjects", ->
+    it "GET /projects + returns projects", ->
+      projects = []
+
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/projects")
+      .reply(200, projects)
+
+      api.getProjects("auth-token-123")
+      .then (ret) ->
+        expect(ret).to.eql(projects)
+
+  context ".getProject", ->
+    it "GET /projects/:id + returns project", ->
+      project = { id: "id-123" }
+
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .matchHeader("x-route-version", "2")
+      .get("/projects/id-123")
+      .reply(200, project)
+
+      api.getProject("id-123", "auth-token-123")
+      .then (ret) ->
+        expect(ret).to.eql(project)
+
+  context ".getProjectBuilds", ->
+    it "GET /projects/:id/builds + returns builds", ->
+      builds = []
+
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/projects/id-123/builds")
+      .reply(200, builds)
+
+      api.getProjectBuilds("id-123", "auth-token-123")
+      .then (ret) ->
+        expect(ret).to.eql(builds)
+
+    it "handles timeouts", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/projects/id-123/builds")
+      .socketDelay(5000)
+      .reply(200, [])
+
+      api.getProjectBuilds("id-123", "auth-token-123", {timeout: 100})
+      .then (ret) ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("Error: ESOCKETTIMEDOUT")
+
+    it "sets timeout to 10 seconds", ->
+      @sandbox.stub(rp, "get").returns({
+        catch: -> @
+        then: (fn) -> fn()
+      })
+
+      api.getProjectBuilds("id-123", "auth-token-123")
+      .then (ret) ->
+        expect(rp.get).to.be.calledWithMatch({timeout: 10000})
+
+    it "GET /projects/:id/builds failure formatting", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/projects/id-123/builds")
+      .reply(401, {
+        errors: {
+          permission: ["denied"]
+        }
+      })
+
+      api.getProjectBuilds("id-123", "auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("""
+          401
+
+          {
+            "errors": {
+              "permission": [
+                "denied"
+              ]
+            }
+          }
+        """)
+
   context ".ping", ->
     it "GET /ping", ->
       nock("http://localhost:1234")
@@ -458,38 +560,131 @@ describe "lib/api", ->
       api.createSignout("auth-token-123")
 
   context ".createProject", ->
-    it "POSTs /projects", ->
+    it "POST /projects", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
+      .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
       .post("/projects", {
-        "x-project-name": "foobar"
-        "x-remote-origin": "remoteOrigin"
+        name: "foobar"
+        orgId: "org-id-123"
+        public: true
+        remoteOrigin: "remoteOrigin"
       })
       .reply(200, {
-        uuid: "uuid-123"
+        id: "id-123"
+        name: "foobar"
+        orgId: "org-id-123"
+        public: true
       })
 
-      api.createProject("foobar", "remoteOrigin", "auth-token-123").then (uuid) ->
-        expect(uuid).to.eq("uuid-123")
+      projectDetails = {
+        projectName: "foobar"
+        orgId: "org-id-123"
+        public: true
+      }
 
-  context ".updateProject", ->
-    it "GETs /projects/:id", ->
+      api.createProject(projectDetails, "remoteOrigin", "auth-token-123")
+      .then (projectDetails) ->
+        expect(projectDetails).to.eql({
+          id: "id-123"
+          name: "foobar"
+          orgId: "org-id-123"
+          public: true
+        })
+
+    it "POST /projects failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("x-platform", "linux")
       .matchHeader("x-cypress-version", pkg.version)
+      .matchHeader("x-route-version", "2")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .get("/projects/project-123", {
-        "x-platform": "linux"
-        "x-type": "opened"
-        "x-version": pkg.version
-        "x-project-name": "foobar"
+      .post("/projects", {
+        name: "foobar"
+        orgId: "org-id-123"
+        public: true
+        remoteOrigin: "remoteOrigin"
       })
-      .reply(200, {})
+      .reply(422, {
+        errors: {
+          orgId: ["is required"]
+        }
+      })
 
-      api.updateProject("project-123", "opened", "foobar", "auth-token-123").then (resp) ->
-        expect(resp).to.deep.eq({})
+      projectDetails = {
+        projectName: "foobar"
+        orgId: "org-id-123"
+        public: true
+      }
+
+      api.createProject(projectDetails, "remoteOrigin", "auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("""
+          422
+
+          {
+            "errors": {
+              "orgId": [
+                "is required"
+              ]
+            }
+          }
+        """)
+
+
+  context ".getProjectCiKeys", ->
+    it "GET /projects/:id/keys + returns keys", ->
+      ciKeys = []
+
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .get("/projects/id-123/keys")
+      .reply(200, ciKeys)
+
+      api.getProjectCiKeys("id-123", "auth-token-123")
+      .then (ret) ->
+        expect(ret).to.eql(ciKeys)
+
+  context ".requestAccess", ->
+    it "POST /organizations/:id/membership_requests + returns response", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .post("/organizations/org-id-123/membership_requests")
+      .reply(200)
+
+      api.requestAccess("org-id-123", "auth-token-123")
+      .then (ret) ->
+        expect(ret).to.be.undefined
+
+
+    it "POST /organizations/:id/membership_requests failure formatting", ->
+      nock("http://localhost:1234")
+      .matchHeader("authorization", "Bearer auth-token-123")
+      .post("/organizations/org-id-123/membership_requests")
+      .reply(422, {
+        errors: {
+          access: ["already requested"]
+        }
+      })
+
+      api.requestAccess("org-id-123", "auth-token-123")
+      .then ->
+        throw new Error("should have thrown here")
+      .catch (err) ->
+        expect(err.message).to.eq("""
+          422
+
+          {
+            "errors": {
+              "access": [
+                "already requested"
+              ]
+            }
+          }
+        """)
 
   context ".sendUsage", ->
     it "POSTs /user/usage", ->

@@ -11,9 +11,9 @@ errors       = require("#{root}lib/errors")
 config       = require("#{root}lib/config")
 scaffold     = require("#{root}lib/scaffold")
 Project      = require("#{root}lib/project")
+settings     = require("#{root}lib/util/settings")
 savedState   = require("#{root}lib/saved_state")
 git          = require("#{root}lib/util/git")
-settings     = require("#{root}lib/util/settings")
 
 describe "lib/project", ->
   beforeEach ->
@@ -71,21 +71,9 @@ describe "lib/project", ->
     beforeEach ->
       @sandbox.stub(@project, "watchSettingsAndStartWebsockets").resolves()
       @sandbox.stub(@project, "watchSupportFile").resolves()
-      @sandbox.stub(@project, "ensureProjectId").resolves("id-123")
-      @sandbox.stub(@project, "updateProject").withArgs("id-123", "opened").resolves()
       @sandbox.stub(@project, "scaffold").resolves()
       @sandbox.stub(@project, "getConfig").resolves(@config)
       @sandbox.stub(@project.server, "open").resolves()
-
-    it "sets updateProject to false by default", ->
-      opts = {}
-      @project.open(opts).then ->
-        expect(opts.sync).to.be.false
-
-    it "sets type to opened by default", ->
-      opts = {}
-      @project.open(opts).then ->
-        expect(opts.type).to.eq("opened")
 
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
@@ -105,28 +93,6 @@ describe "lib/project", ->
       opts = {}
       @project.open(opts).then =>
         expect(@project.getConfig).to.be.calledWith(opts)
-
-    it "passes id + options to updateProject", ->
-      opts = {}
-
-      @project.open(opts).then =>
-        expect(@project.updateProject).to.be.calledWith("id-123", opts)
-
-    it "swallows errors from ensureProjectId", ->
-      @project.ensureProjectId.rejects(new Error)
-      @project.open()
-
-    it "swallows errors from updateProject", ->
-      @project.updateProject.rejects(new Error)
-      @project.open()
-
-    it "does not wait on ensureProjectId", ->
-      @project.ensureProjectId.resolves(Promise.delay(10000))
-      @project.open()
-
-    it "does not wait on updateProject", ->
-      @project.updateProject.resolves(Promise.delay(10000))
-      @project.open()
 
     it "updates config.state when saved state changes", ->
       getSavedState = @sandbox.stub(savedState, "get").returns(Promise.resolve({}))
@@ -157,8 +123,6 @@ describe "lib/project", ->
       @project = Project("path/to/project")
 
       @sandbox.stub(@project, "getConfig").resolves(@config)
-      @sandbox.stub(@project, "ensureProjectId").resolves("id-123")
-      @sandbox.stub(api, "updateProject").withArgs("id-123", "closed", "project", "auth-token-123").resolves({})
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
     it "closes server", ->
@@ -172,19 +136,6 @@ describe "lib/project", ->
 
       @project.close().then =>
         expect(@project.watchers.close).to.be.calledOnce
-
-    it "does not sync by default", ->
-      opts = {}
-
-      @project.close(opts).then ->
-        expect(opts.sync).to.be.false
-        Promise.delay(100).then ->
-          expect(api.updateProject).not.to.be.called
-
-    it "can sync", ->
-      @project.close({sync: true}).then ->
-        Promise.delay(100).then ->
-          expect(api.updateProject).to.be.called
 
     it "can close when server + watchers arent open", ->
       @project.close()
@@ -251,20 +202,17 @@ describe "lib/project", ->
       .then (ret) ->
         expect(ret).to.be.false
 
-  context "#updateProject", ->
+  context "#getBuilds", ->
     beforeEach ->
-      @project = Project("path/to/project")
-      @sandbox.stub(@project, "getConfig").resolves(@config)
-      @sandbox.stub(api, "updateProject").resolves({})
+      @project = Project(@todosPath)
+      @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
+      @sandbox.stub(api, "getProjectBuilds").resolves('builds')
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
-    it "is noop if options.updateProject isnt true", ->
-      @project.updateProject(1).then ->
-        expect(api.updateProject).not.to.be.called
-
-    it "calls api.updateProject with id + session", ->
-      @project.updateProject("project-123", {sync: true, type: "opened"}).then ->
-        expect(api.updateProject).to.be.calledWith("project-123", "opened", "project", "auth-token-123")
+    it "calls api.getProjectBuilds with project id + session", ->
+      @project.getBuilds().then (builds) ->
+        expect(api.getProjectBuilds).to.be.calledWith("id-123", "auth-token-123")
+        expect(builds).to.equal("builds")
 
   context "#scaffold", ->
     beforeEach ->
@@ -437,35 +385,6 @@ describe "lib/project", ->
       .catch (err) ->
         expect(err.code).to.eq("EACCES")
 
-  context "#createProjectId", ->
-    beforeEach ->
-      @project = Project("path/to/project")
-      @sandbox.stub(@project, "getConfig").resolves(@config)
-      @sandbox.stub(@project, "writeProjectId").resolves("uuid-123")
-      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
-      @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
-      @sandbox.stub(api, "createProject")
-        .withArgs("project", "remoteOrigin", "auth-token-123")
-        .resolves("uuid-123")
-
-    afterEach ->
-      delete process.env.CYPRESS_PROJECT_ID
-
-    it "calls api.createProject with user session", ->
-      @project.createProjectId().then ->
-        expect(api.createProject).to.be.calledWith("project", "remoteOrigin", "auth-token-123")
-
-    it "calls writeProjectId with id", ->
-      @project.createProjectId().then =>
-        expect(@project.writeProjectId).to.be.calledWith("uuid-123")
-        expect(@project.writeProjectId).to.be.calledOn(@project)
-
-    it "can set the project id by CYPRESS_PROJECT_ID env", ->
-      process.env.CYPRESS_PROJECT_ID = "987-654-321-foo"
-      @project.createProjectId().then =>
-        expect(@project.writeProjectId).to.be.calledWith("987-654-321-foo")
-        expect(@project.writeProjectId).to.be.calledOn(@project)
-
   context "#writeProjectId", ->
     beforeEach ->
       @project = Project("path/to/project")
@@ -481,36 +400,6 @@ describe "lib/project", ->
     it "sets generatedProjectIdTimestamp", ->
       @project.writeProjectId("id-123").then =>
         expect(@project.generatedProjectIdTimestamp).to.be.a("date")
-
-  context "#ensureProjectId", ->
-    beforeEach ->
-      @project = Project("path/to/project")
-
-    it "returns the project id", ->
-      @sandbox.stub(Project.prototype, "getProjectId").resolves("id-123")
-
-      @project.ensureProjectId()
-      .then (id) =>
-        expect(id).to.eq "id-123"
-
-    it "calls createProjectId if getProjectId throws NO_PROJECT_ID", ->
-      err = errors.get("NO_PROJECT_ID")
-      @sandbox.stub(Project.prototype, "getProjectId").rejects(err)
-      createProjectId = @sandbox.stub(Project.prototype, "createProjectId").resolves()
-
-      @project.ensureProjectId().then ->
-        expect(createProjectId).to.be.calledWith(err)
-
-    it "does not call createProjectId from other errors", ->
-      err = new Error
-      err.code = "EACCES"
-      @sandbox.stub(Project.prototype, "getProjectId").rejects(err)
-      createProjectId = @sandbox.spy(Project.prototype, "createProjectId")
-
-      @project.ensureProjectId()
-      .catch (e) ->
-        expect(e).to.eq(err)
-        expect(createProjectId).not.to.be.calledWith(err)
 
   context "#ensureSpecUrl", ->
     beforeEach ->
@@ -570,12 +459,84 @@ describe "lib/project", ->
     beforeEach ->
       @pristinePath = Fixtures.projectPath("pristine")
 
-    it "inserts into cache project id + cache", ->
+    it "inserts path into cache", ->
       Project.add(@pristinePath)
       .then =>
         cache.read()
       .then (json) =>
         expect(json.PROJECTS).to.deep.eq([@pristinePath])
+
+    describe "if project at path has id", ->
+      it "returns object containing path and id", ->
+        @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
+
+        Project.add(@pristinePath)
+        .then (project) =>
+          expect(project.id).to.equal("id-123")
+          expect(project.path).to.equal(@pristinePath)
+
+    describe "if project at path does not have id", ->
+      it "returns object containing just the path", ->
+        @sandbox.stub(settings, "read").rejects()
+
+        Project.add(@pristinePath)
+        .then (project) =>
+          expect(project.id).to.be.undefined
+          expect(project.path).to.equal(@pristinePath)
+
+  context "#createCiProject", ->
+    beforeEach ->
+      @project = Project("path/to/project")
+      @newProject = { id: "project-id-123" }
+
+      @sandbox.stub(@project, "writeProjectId").resolves("project-id-123")
+      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
+      @sandbox.stub(api, "createProject")
+      .withArgs({foo: "bar"}, "remoteOrigin", "auth-token-123")
+      .resolves(@newProject)
+
+    it "calls api.createProject with user session", ->
+      @project.createCiProject({foo: "bar"}).then ->
+        expect(api.createProject).to.be.calledWith({foo: "bar"}, "remoteOrigin", "auth-token-123")
+
+    it "calls writeProjectId with id", ->
+      @project.createCiProject({foo: "bar"}).then =>
+        expect(@project.writeProjectId).to.be.calledWith("project-id-123")
+
+    it "returns project id", ->
+      @project.createCiProject({foo: "bar"}).then (projectId) =>
+        expect(projectId).to.eql(@newProject)
+
+  context "#getCiKeys", ->
+    beforeEach ->
+      @ciKeys = []
+      @project = Project(@pristinePath)
+      @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
+      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      @sandbox.stub(api, "getProjectCiKeys").resolves(@ciKeys)
+
+    it "calls api.getProjectCiKeys with project id + session", ->
+      @project.getCiKeys().then ->
+        expect(api.getProjectCiKeys).to.be.calledWith("id-123", "auth-token-123")
+
+    it "returns ci keys", ->
+      @project.getCiKeys().then (ciKeys) =>
+        expect(ciKeys).to.equal(@ciKeys)
+
+  context "#requestAccess", ->
+    beforeEach ->
+      @project = Project(@pristinePath)
+      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      @sandbox.stub(api, "requestAccess").resolves("response")
+
+    it "calls api.requestAccess with org id + session", ->
+      @project.requestAccess("org-id-123").then ->
+        expect(api.requestAccess).to.be.calledWith("org-id-123", "auth-token-123")
+
+    it "returns response", ->
+      @project.requestAccess("org-id-123").then (response) =>
+        expect(response).to.equal("response")
 
   context ".remove", ->
     beforeEach ->
@@ -602,6 +563,17 @@ describe "lib/project", ->
       Project.id(@todosPath).then (id) =>
         expect(id).to.eq(@projectId)
 
+  context ".getOrgs", ->
+    beforeEach ->
+      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      @sandbox.stub(api, "getOrgs").resolves([])
+
+    it "calls api.getOrgs", ->
+      Project.getOrgs().then (orgs) ->
+        expect(orgs).to.deep.eq([])
+        expect(api.getOrgs).to.be.calledOnce
+        expect(api.getOrgs).to.be.calledWith("auth-token-123")
+
   context ".paths", ->
     beforeEach ->
       @sandbox.stub(cache, "getProjectPaths").resolves([])
@@ -610,6 +582,192 @@ describe "lib/project", ->
       Project.paths().then (ret) ->
         expect(ret).to.deep.eq([])
         expect(cache.getProjectPaths).to.be.calledOnce
+
+  context ".getPathsAndIds", ->
+    beforeEach ->
+      @sandbox.stub(cache, "getProjectPaths").resolves([
+        "/path/to/first"
+        "/path/to/second"
+      ])
+      @sandbox.stub(settings, "id").resolves("id-123")
+
+    it "returns array of objects with paths and ids", ->
+      Project.getPathsAndIds().then (pathsAndIds) ->
+        expect(pathsAndIds).to.eql([
+          {
+            path: "/path/to/first"
+            id: "id-123"
+          }
+          {
+            path: "/path/to/second"
+            id: "id-123"
+          }
+        ])
+
+  context ".getProjectStatuses", ->
+    beforeEach ->
+      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
+
+    it "gets projects from api", ->
+      @sandbox.stub(api, "getProjects").resolves([])
+
+      Project.getProjectStatuses([])
+      .then ->
+        expect(api.getProjects).to.have.been.calledWith("auth-token-123")
+
+    it "returns array of projects", ->
+      @sandbox.stub(api, "getProjects").resolves([])
+
+      Project.getProjectStatuses([])
+      .then (projectsWithStatuses) =>
+        expect(projectsWithStatuses).to.eql([])
+
+    it "returns same number as client projects, even if there are less api projects", ->
+      @sandbox.stub(api, "getProjects").resolves([])
+
+      Project.getProjectStatuses([{}])
+      .then (projectsWithStatuses) =>
+        expect(projectsWithStatuses.length).to.eql(1)
+
+    it "returns same number as client projects, even if there are more api projects", ->
+      @sandbox.stub(api, "getProjects").resolves([{}, {}])
+
+      Project.getProjectStatuses([{}])
+      .then (projectsWithStatuses) =>
+        expect(projectsWithStatuses.length).to.eql(1)
+
+    it "merges in details of matching projects", ->
+      @sandbox.stub(api, "getProjects").resolves([
+        { id: "id-123", lastBuildStatus: "passing" }
+      ])
+
+      Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+      .then (projectsWithStatuses) =>
+        expect(projectsWithStatuses[0]).to.eql({
+          id: "id-123"
+          path: "/path/to/project"
+          lastBuildStatus: "passing"
+          state: "VALID"
+        })
+
+    it "returns client project when it has no id", ->
+      @sandbox.stub(api, "getProjects").resolves([])
+
+      Project.getProjectStatuses([{ path: "/path/to/project" }])
+      .then (projectsWithStatuses) =>
+        expect(projectsWithStatuses[0]).to.eql({
+          path: "/path/to/project"
+          state: "VALID"
+        })
+
+    describe "when client project has id and there is no matching user project", ->
+      beforeEach ->
+        @sandbox.stub(api, "getProjects").resolves([])
+
+      it "marks project as invalid if api 404s", ->
+        @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404})
+
+        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        .then (projectsWithStatuses) =>
+          expect(projectsWithStatuses[0]).to.eql({
+            id: "id-123"
+            path: "/path/to/project"
+            state: "INVALID"
+          })
+
+      it "marks project as unauthorized if api 403s", ->
+        @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 403})
+
+        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        .then (projectsWithStatuses) =>
+          expect(projectsWithStatuses[0]).to.eql({
+            id: "id-123"
+            path: "/path/to/project"
+            state: "UNAUTHORIZED"
+          })
+
+      it "merges in project details and marks valid if somehow project exists and is authorized", ->
+        @sandbox.stub(api, "getProject").resolves({ id: "id-123", lastBuildStatus: "passing" })
+
+        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        .then (projectsWithStatuses) =>
+          expect(projectsWithStatuses[0]).to.eql({
+            id: "id-123"
+            path: "/path/to/project"
+            lastBuildStatus: "passing"
+            state: "VALID"
+          })
+
+      it "throws error if not accounted for", ->
+        error = {name: "", message: ""}
+        @sandbox.stub(api, "getProject").rejects(error)
+
+        Project.getProjectStatuses([{ id: "id-123", path: "/path/to/project" }])
+        .then =>
+          throw new Error("Should throw error")
+        .catch (err) ->
+          expect(err).to.equal(error)
+
+  context ".getProjectStatus", ->
+    beforeEach ->
+      @clientProject = {
+        id: "id-123",
+        path: "/path/to/project"
+      }
+      @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
+
+    it "gets project from api", ->
+      @sandbox.stub(api, "getProject").resolves([])
+
+      Project.getProjectStatus(@clientProject)
+      .then ->
+        expect(api.getProject).to.have.been.calledWith("id-123", "auth-token-123")
+
+    it "returns project merged with details", ->
+      @sandbox.stub(api, "getProject").resolves({
+        lastBuildStatus: "passing"
+      })
+
+      Project.getProjectStatus(@clientProject)
+      .then (project) =>
+        expect(project).to.eql({
+          id: "id-123"
+          path: "/path/to/project"
+          lastBuildStatus: "passing"
+          state: "VALID"
+        })
+
+    it "marks project as invalid if api 404s", ->
+      @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404})
+
+      Project.getProjectStatus(@clientProject)
+      .then (project) =>
+        expect(project).to.eql({
+          id: "id-123"
+          path: "/path/to/project"
+          state: "INVALID"
+        })
+
+    it "marks project as unauthorized if api 403s", ->
+      @sandbox.stub(api, "getProject").rejects({name: "", message: "", statusCode: 403})
+
+      Project.getProjectStatus(@clientProject)
+      .then (project) =>
+        expect(project).to.eql({
+          id: "id-123"
+          path: "/path/to/project"
+          state: "UNAUTHORIZED"
+        })
+
+    it "throws error if not accounted for", ->
+      error = {name: "", message: ""}
+      @sandbox.stub(api, "getProject").rejects(error)
+
+      Project.getProjectStatus(@clientProject)
+      .then =>
+        throw new Error("Should throw error")
+      .catch (err) ->
+        expect(err).to.equal(error)
 
   context ".removeIds", ->
     beforeEach ->
@@ -648,7 +806,7 @@ describe "lib/project", ->
     beforeEach ->
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
 
-    it "calls api.updateProject with id + session", ->
+    it "calls api.updateProjectToken with id + session", ->
       @sandbox.stub(api, "updateProjectToken")
         .withArgs(@projectId, "auth-token-123")
         .resolves("new-key-123")

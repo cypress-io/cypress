@@ -76,7 +76,6 @@ module.exports = {
     ## - NO  display server logs (via morgan)
     ## - YES display reporter results (via mocha reporter)
     project.open(options.projectPath, options, {
-      sync:         false
       morgan:       false
       socketId:     id
       report:       true

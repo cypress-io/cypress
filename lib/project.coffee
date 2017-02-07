@@ -42,8 +42,6 @@ class Project extends EE
 
   open: (options = {}) ->
     _.defaults options, {
-      type:         "opened"
-      sync:         false
       report:       false
       onFocusTests: ->
       onSettingsChanged: false
@@ -77,9 +75,6 @@ class Project extends EE
         options.onSavedStateChanged = =>
           @_setSavedState(@cfg)
 
-        ## sync but do not block
-        @sync(options)
-
         Promise.join(
           @watchSettingsAndStartWebsockets(options, cfg)
           @scaffold(cfg)
@@ -90,30 +85,17 @@ class Project extends EE
     # return our project instance
     .return(@)
 
-  sync: (options) ->
-    ## attempt to sync up with the remote
-    ## server to ensure we have a valid
-    ## project id and user attached to
-    ## this project
-    @ensureProjectId()
-    .then (id) =>
-      @updateProject(id, options)
-    .catch ->
-      ## dont catch ensure project id or
-      ## update project errors which allows
-      ## the user to work offline
-      return
+  getBuilds: ->
+    Promise.all([
+      @getProjectId(),
+      user.ensureAuthToken()
+    ])
+    .spread (projectId, authToken) ->
+      api.getProjectBuilds(projectId, authToken)
 
   close: (options = {}) ->
-    _.defaults options, {
-      sync: false
-      type: "closed"
-    }
-
     if @memoryCheck
       clearInterval(@memoryCheck)
-
-    @sync(options)
 
     @removeAllListeners()
 
@@ -126,18 +108,6 @@ class Project extends EE
 
   resetState: ->
     @server.resetState()
-
-  updateProject: (id, options = {}) ->
-    Promise.try =>
-      ## bail if sync isnt true
-      return if not options.sync
-
-      Promise.all([
-        user.ensureAuthToken()
-        @getConfig()
-      ])
-      .spread (authToken, cfg) ->
-        api.updateProject(id, options.type, cfg.projectName, authToken)
 
   watchSupportFile: (config) ->
     if supportFile = config.supportFile
@@ -359,28 +329,6 @@ class Project extends EE
     .write(@projectRoot, attrs)
     .return(id)
 
-  createProjectId: ->
-    ## allow us to specify the exact key
-    ## we want via the CYPRESS_PROJECT_ID env.
-    ## this allows us to omit the cypress.json
-    ## file (like in example repos) yet still
-    ## use a correct id in the API
-    if id = process.env.CYPRESS_PROJECT_ID
-      return @writeProjectId(id)
-
-    Promise.all([
-      user.ensureAuthToken()
-      @getConfig()
-    ])
-    .bind(@)
-    .spread (authToken, cfg) ->
-      git
-      .init(cfg.projectRoot)
-      .getRemoteOrigin()
-      .then (remoteOrigin) ->
-        api.createProject(cfg.projectName, remoteOrigin, authToken)
-    .then(@writeProjectId)
-
   getProjectId: ->
     @verifyExistence()
     .then =>
@@ -401,19 +349,105 @@ class Project extends EE
     .catch =>
       errors.throw("NO_PROJECT_FOUND_AT_PROJECT_ROOT", @projectRoot)
 
-  ensureProjectId: ->
-    @getProjectId()
-    .bind(@)
-    .catch({type: "NO_PROJECT_ID"}, @createProjectId)
+  createCiProject: (projectDetails) ->
+    Promise.all([
+      user.ensureAuthToken()
+      @getConfig()
+    ])
+    .spread (authToken, cfg) ->
+      git
+      .init(cfg.projectRoot)
+      .getRemoteOrigin()
+      .then (remoteOrigin) ->
+        api.createProject(projectDetails, remoteOrigin, authToken)
+    .then (newProject) =>
+      @writeProjectId(newProject.id)
+      .return(newProject)
+
+  getCiKeys: ->
+    Promise.all([
+      @getProjectId(),
+      user.ensureAuthToken()
+    ])
+    .spread (projectId, authToken) ->
+      api.getProjectCiKeys(projectId, authToken)
+
+  requestAccess: (orgId) ->
+    user.ensureAuthToken()
+    .then (authToken) ->
+      api.requestAccess(orgId, authToken)
+
+  @getOrgs = ->
+    user.ensureAuthToken()
+    .then (authToken) ->
+      api.getOrgs(authToken)
 
   @paths = ->
     cache.getProjectPaths()
+
+  @getPathsAndIds = ->
+    cache.getProjectPaths()
+    .map (projectPath) ->
+      Promise.props({
+        path: projectPath
+        id: settings.id(projectPath)
+      })
+
+  @_mergeDetails = (clientProject, project) ->
+    _.extend({}, clientProject, project, {state: "VALID"})
+
+  @_mergeState = (clientProject, state) ->
+    _.extend({}, clientProject, {state: state})
+
+  @_getProject = (clientProject, authToken) ->
+    api.getProject(clientProject.id, authToken)
+    .then (project) ->
+      Project._mergeDetails(clientProject, project)
+    .catch (err) ->
+      switch err.statusCode
+        when 404
+          ## project doesn't exist
+          return Project._mergeState(clientProject, "INVALID")
+        when 403
+          ## project exists, but user isn't authorized for it
+          return Project._mergeState(clientProject, "UNAUTHORIZED")
+        else
+          throw err
+
+  @getProjectStatuses = (clientProjects = []) ->
+    user.ensureAuthToken()
+    .then (authToken) ->
+      api.getProjects(authToken).then (projects = []) ->
+        projectsIndex = _.keyBy(projects, "id")
+        Promise.all(_.map clientProjects, (clientProject) ->
+          ## not a CI project, just mark as valid and return
+          if not clientProject.id
+            return Project._mergeState(clientProject, "VALID")
+
+          if project = projectsIndex[clientProject.id]
+            ## merge in details for matching project
+            return Project._mergeDetails(clientProject, project)
+          else
+            ## project has id, but no matching project found
+            ## check if it doesn't exist or if user isn't authorized
+            Project._getProject(clientProject, authToken)
+        )
+
+  @getProjectStatus = (clientProject) ->
+    user.ensureAuthToken().then (authToken) ->
+      Project._getProject(clientProject, authToken)
 
   @remove = (path) ->
     cache.removeProject(path)
 
   @add = (path) ->
     cache.insertProject(path)
+    .then =>
+      @id(path)
+    .then (id) ->
+      {id, path}
+    .catch ->
+      {path}
 
   @removeIds = (p) ->
     Project(p)
