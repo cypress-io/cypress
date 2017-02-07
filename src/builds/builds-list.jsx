@@ -285,6 +285,12 @@ class Builds extends Component {
   _openBuild = (buildId) => {
     App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}/builds/${buildId}`)
   }
+
+  _visitDashboard = (e) => {
+    e.preventDefault()
+    App.ipc('external:open', `https://on.cypress.io/dashboard`)
+
+  }
 }
 
 export default Builds

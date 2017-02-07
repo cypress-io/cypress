@@ -289,6 +289,18 @@ describe "Builds List", ->
       it "displays empty message", ->
         cy.contains("To record your first")
 
+      it "opens project id guide on clicking 'Why?'", ->
+        cy
+          .contains("Why?").click()
+          .then ->
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/why-do-i-need-a-project-id")
+
+      it "opens dashboard on clicking 'Cypress Dashboard'", ->
+        cy
+          .contains("Cypress Dashboard").click()
+          .then ->
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard")
+
   describe "list builds", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
