@@ -1,4 +1,3 @@
-import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
@@ -128,7 +127,7 @@ class SetupProject extends Component {
                           className='user-avatar'
                           height='13'
                           width='13'
-                          src={`${gravatarUrl(state.email)}`}
+                          src={`${gravatarUrl(state.user.email)}`}
                         />
                         {' '}Me
                     </label>
