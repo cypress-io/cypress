@@ -3,13 +3,13 @@ excerpt: An overview of our Dashboard
 
 # Contents
 
-- :fa-angle-right: [What is the Dashboard?](#section-what-is-the-dashboard)
+- :fa-angle-right: [What is the Dashboard?](#section-what-is-the-dashboard-)
 - :fa-angle-right: [Frequently Asked Questions](#section-frequently-asked-questions)
   - [How do I record my builds?](#section-how-do-i-record-my-builds)
-  - [How is this different than CI?](#section-how-is-this-different-than-ci)
-  - [How much does this cost?](#section-how-much-does-this-cost)
-  - [Can I host this myself?](#section-can-i-host-this-myself)
-  - [Can I choose not to use it?](#section-can-i-choose-not-to-use-it)
+  - [How is this different than CI?](#section-how-is-this-different-than-ci-)
+  - [How much does this cost?](#section-how-much-does-this-cost-)
+  - [Can I host this myself?](#section-can-i-host-this-myself-)
+  - [Can I choose not to use it?](#section-can-i-choose-not-to-use-it-)
 
 ***
 
