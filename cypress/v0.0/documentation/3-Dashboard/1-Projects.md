@@ -57,7 +57,7 @@ During a build we record all failing tests, logs, screenshots, and videos.
 
 ![](https://cloud.githubusercontent.com/assets/1271364/22700406/9b3bc416-ed28-11e6-995b-297350420cce.png)
 
-3. Choose who owns the project. You can own it yourself or select an organization you've created. Organizations work just like they do in Github. They enable you seperate your personal and worl projects.
+3. Choose who owns the project. You can personally own it or select an organization you've created. Organizations work just like they do in Github. They enable you seperate your personal and work projects.
 
 [Read more about Organizations.](https://on.cypress.io/guides/organizations)
 
@@ -75,16 +75,18 @@ During a build we record all failing tests, logs, screenshots, and videos.
 
 You are now ready to integrate Cypress into your CI Provider so that builds can be recorded. Integrating Cypress into your CI provider should be pretty straightforward, and we [have a guide](https://on.cypress.io/guides/continuous-integration) describing what you need to do.
 
-Once builds run, you will see them show up in the [Dashboard](https://on.cypress.io/dashboard) and in the Desktop Application.
-
-![](https://cloud.githubusercontent.com/assets/1271364/22701577/fab631d0-ed2b-11e6-8ee1-f57a89013658.png)
-
 [block:callout]
 {
   "type": "info",
   "body": "Be sure to check your `cypress.json` into source control."
 }
 [/block]
+
+Once builds run, you will see them show up in the [Dashboard](https://on.cypress.io/dashboard) and in the Desktop Application.
+
+![](https://cloud.githubusercontent.com/assets/1271364/22701577/fab631d0-ed2b-11e6-8ee1-f57a89013658.png)
+
+(image of dashboard builds)
 
 ***
 
@@ -112,6 +114,8 @@ We recommend that you check your `cypress.json` including the `projectId` into s
 ## What is a CI Key?
 
 Once you're setup to record builds, we automatically generate you a CI Key for the project.
+
+(image)
 
 A CI Key is a GUID that looks like this:
 
