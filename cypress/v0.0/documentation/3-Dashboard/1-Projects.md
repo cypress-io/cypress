@@ -16,7 +16,7 @@ excerpt: Manage your Projects and configure them to record builds
 
 # What are Projects?
 
-A Cypress project represents the directory of files and folders which make up your tests.
+A Cypress project represents the directory of files and folders that make up your tests.
 
 This is often the same repository as your code, but can also be a subfolder or a separate repository altogether.
 
@@ -24,20 +24,16 @@ This is often the same repository as your code, but can also be a subfolder or a
 
 # Adding a new Project
 
-Projects can **only** be added to Cypress through our Desktop Application.
+Projects can **only** be added to Cypress through our [Desktop Application](https://on.cypress.io/guides/installing-and-running).
 
-1. Click to add a new project.
+1. Click :fa-plus: Add Project.
 
-(image)
-
-2. You will now see it alongside any other projects you've added.
-
-(image)
+![](https://cloud.githubusercontent.com/assets/1271364/22699969/fe44c2e4-ed26-11e6-83d0-9baa0f51b15e.png)
 
 [block:callout]
 {
   "type": "info",
-  "body": "By default Projects are stricly local to your computer. They are not tracked in any way by our servers and do not communicate with us until they are setup to be recorded."
+  "body": "Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are [setup to be recorded](#section-recording-builds)."
 }
 [/block]
 
@@ -45,49 +41,43 @@ Projects can **only** be added to Cypress through our Desktop Application.
 
 # Recording Builds
 
-After you and your team has adopted Cypress, you're likely ready to integrate Cypress into your build and deployment processes. This usually is as simple as adding a couple lines to your CI provider's script.
+Integrating your Cypress tests into your build and deployment process is as simple as adding a couple lines to your CI provider's script.
 
 You can also setup your project to have its builds recorded and displayed in both the Desktop Application and the Dashboard.
 
-During a build we will record all failing tests, logs, screenshots, and videos.
+During a build we record all failing tests, logs, screenshots, and videos.
 
 **To setup a project:**
 
-1. Click on the Builds tab for your project
+1. Click on the Builds tab of your project, then click "Setup Project to Record".
 
-(image)
+![](https://cloud.githubusercontent.com/assets/1271364/22700292/2597d81c-ed28-11e6-8cfa-aa3670605418.png)
 
-2. Click "Setup Project to Record"
+2. Fill in the name of your project (this is only for display purposes and can be changed later).
 
-(image)
+![](https://cloud.githubusercontent.com/assets/1271364/22700406/9b3bc416-ed28-11e6-995b-297350420cce.png)
 
-3. Fill in the name of your project. This is purely for display purposes and can be changed later.
+3. Choose who owns the project. You can own it yourself or select an organization you've created. Organizations work just like they do in Github. They enable you seperate your personal and worl projects.
 
-(image)
+[Read more about Organizations.](https://on.cypress.io/guides/organizations)
 
-4. Choose who owns this project. You can add it to yourself, or select an organization you've created. Organizations work just like they do on Github. They enable you organize your projects between personal and work.
+![](https://cloud.githubusercontent.com/assets/1271364/22700579/26353ba6-ed29-11e6-9510-5b7bf4a1cdd2.png)
 
-You can [read more](https://on.cypress.io/guides/organizations) about Organizations here.
+4. Choose whether this project is Public or Private.
 
-(image)
+**A public project** can have its recordings and builds seen by *anyone*. Typically these are open source projects.
 
-5. Choose whether this project is public or private.
+**A private project** restricts its access to *only users you invite* to see your Organization or your own projects.
 
-**A public project** can have its recordings and builds seen by anyone. Typically these are open source projects.
+![](https://cloud.githubusercontent.com/assets/1271364/22700720/8d539c24-ed29-11e6-97a4-915f008c17db.png)
 
-**A private project** restricts its access to **only users you invite** into your Organization.
+5. Click "Setup Project".
 
-(image)
+You are now ready to integrate Cypress into your CI Provider so that builds can be recorded. Integrating Cypress into your CI provider should be pretty straightforward, and we [have a guide](https://on.cypress.io/guides/continuous-integration) describing what you need to do.
 
-6. Click setup.
+Once builds run, you will see them show up in the [Dashboard](https://on.cypress.io/dashboard) and in the Desktop Application.
 
-You are now ready to integrate Cypress into your CI Provider and then builds will be recorded.
-
-Once builds run, you will see them show up in the Dashboard and in the Desktop Application.
-
-(image)
-
-Integrating Cypress into your CI provider should be pretty straightforward, and we [have a guide](https://on.cypress.io/guides/continuous-integration) describing what you need to do.
+![](https://cloud.githubusercontent.com/assets/1271364/22701577/fab631d0-ed2b-11e6-8ee1-f57a89013658.png)
 
 [block:callout]
 {
@@ -100,9 +90,9 @@ Integrating Cypress into your CI provider should be pretty straightforward, and 
 
 ## What is a projectId?
 
-Once you setup your project to record its builds, we will generate a unique projectId for your project, and automatically insert it into your `cypress.json` file.
+Once you setup your project to record its builds, we will generate a unique `projectId` for your project, and automatically insert it into your `cypress.json` file.
 
-This is how we uniquely identify your project - a projectId is a simple 6 character string.
+This is how we uniquely identify your project - a `projectId` is a simple 6 character string.
 
 It will look something like this:
 
@@ -113,15 +103,15 @@ It will look something like this:
 }
 ```
 
-If you manually alter this, Cypress will no longer be able to identify your project or find the recorded builds for it.
+If you manually alter this, **Cypress will no longer be able to identify your project or find the recorded builds for it**.
 
-You should check the projectId into source control.
+We recommend that you check your `cypress.json` including the `projectId` into source control.
 
 ***
 
 ## What is a CI Key?
 
-Once you're setup, we will automatically generate you a CI Key for this project.
+Once you're setup to record builds, we automatically generate you a CI Key for the project.
 
 A CI Key is a GUID that looks like this:
 
@@ -136,21 +126,18 @@ f4466038-70c2-4688-9ed9-106bf013cd73
 }
 [/block]
 
-Cypress uses your projectId and CI Key together to identify your project.
+Cypress uses your `projectId` and CI Key together to identify projects.
 
-Your CI Key is how we authenticate that your project is allowed to record.
+The CI Key is used to authenticate that your project is allowed to record. As long as your CI Key stays *private*, nobody will be able to record builds for your project - even if they have your projectId.
 
-As long as your CI Key stays private, nobody will be able to record builds for your project - even if they have your projectId.
-
-If you have a **public project** you will **still** need to keep your CI Key secret. If someone knows both your CI Key and your projectId, they could record builds for your project - which would mix up all the results!
+If you have a **public project** you should **still** keep your CI Key secret. If someone knows both your CI Key and your `projectId`, they could record builds for your project - which would mix up all the of your results!
 
 Think of your CI Key as the key that enables you to "write and create" builds. However, it has nothing to do with being able to "read or see" builds once they are created. Read on to understand our security model.
-
 
 [block:callout]
 {
   "type": "warning",
-  "body": "If you accidentally leak your CI Key, you simply need to remove it and generate a new one from our [Dashboard](https://on.cypress.io/dashboard)."
+  "body": "If your CI Key is accidentally exposed, you simply need to remove it and generate a new one from our [Dashboard](https://on.cypress.io/dashboard)."
 }
 [/block]
 
