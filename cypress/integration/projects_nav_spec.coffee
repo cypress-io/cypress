@@ -272,12 +272,10 @@ describe "Projects Nav", ->
     describe "when browser saved in local storage no longer exists", ->
       beforeEach ->
         localStorage.setItem("chosenBrowser", "netscape-navigator")
+        @["open:project"].yields(null, @config)
         cy
-          .fixture("browsers").then (@browsers) ->
-            @config.browsers = @browsers
           .get(".projects-list a")
-            .contains("My-Fake-Project").as("firstProject").click().then ->
-              @ipc.handle("open:project", null, @config)
+            .contains("My-Fake-Project").as("firstProject").click()
 
       it "defaults to first browser", ->
         cy
