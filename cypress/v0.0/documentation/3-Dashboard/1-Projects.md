@@ -3,12 +3,12 @@ excerpt: Manage your Projects and configure them to record builds
 
 # Contents
 
-- :fa-angle-right: [What Are Projects?](#section-what-are-projects)
+- :fa-angle-right: [What Are Projects?](#section-what-are-projects-)
 - :fa-angle-right: [Adding a New Project](#section-adding-a-new-project)
 - :fa-angle-right: [Recording Builds](#section-recording-builds)
-  - [What is a projectId?](#section-what-is-a-projectid)
-  - [What is a CI Key?](#section-what-is-a-ci-key)
-  - [What is the difference between public and private projects?](#section-what-is-the-difference-between-public-and-private-projects)
+  - [What is a projectId?](#section-what-is-a-projectid-)
+  - [What is a CI Key?](#section-what-is-a-ci-key-)
+  - [What is the difference between public and private projects?](#section-what-is-the-difference-between-public-and-private-projects-)
 - :fa-angle-right: [Transferring Ownership of a Project](#section-transferring-ownership-of-a-project)
 - :fa-angle-right: [Deleting a Project](#section-deleting-a-project)
 
