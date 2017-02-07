@@ -14,3 +14,29 @@ excerpt: Manage your Organizations
 ***
 
 TODO: mention that inviting users will unlock them automatically for use in cypress.
+
+# What are Organizations?
+
+***
+
+## Default Organization
+
+***
+
+# Managing an Organization
+
+***
+
+## Inviting Users
+
+***
+
+## User Requests
+
+***
+
+## Transferring Projects
+
+***
+
+# Deleting an Organization
