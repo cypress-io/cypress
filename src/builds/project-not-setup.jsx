@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
+import BootstrapModal from 'react-bootstrap-modal'
 
 import App from '../lib/app'
 import SetupProject from "./setup-project-modal"
@@ -28,12 +29,13 @@ export default class ProjectNotSetup extends Component {
               <div>{this._invalidProject()}</div>
           }
         </div>
-        <SetupProject
-          project={this.props.project}
+        <BootstrapModal
           show={this.state.setupProjectModalOpen}
-          onSetup={this._setupProject}
           onHide={this._hideSetupProjectModal}
-        />
+          backdrop='static'
+        >
+          {this._projectSetup()}
+        </BootstrapModal>
       </div>
     )
   }
@@ -86,6 +88,17 @@ export default class ProjectNotSetup extends Component {
           <small>The new project will have no previous build data.</small>
         </p>
       </div>
+    )
+  }
+
+  _projectSetup () {
+    if (!this.state.setupProjectModalOpen) return null
+
+    return (
+      <SetupProject
+        project={this.props.project}
+        onSetup={this._setupProject}
+      />
     )
   }
 

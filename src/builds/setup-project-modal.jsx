@@ -14,8 +14,6 @@ import { getOrgs, pollOrgs, stopPollingOrgs } from '../organizations/organizatio
 class SetupProject extends Component {
   static propTypes = {
     project: React.PropTypes.object,
-    show: React.PropTypes.bool.isRequired,
-    onHide: React.PropTypes.func.isRequired,
     onSetup: React.PropTypes.func.isRequired,
   }
 
@@ -33,38 +31,12 @@ class SetupProject extends Component {
     }
   }
 
-  componentWillMount () {
+  componentDidMount () {
     getOrgs()
-    this._handlePolling()
-  }
-
-  componentDidUpdate () {
-    this._handlePolling()
-  }
-
-  componentWillUnmount () {
-    this._stopPolling()
-  }
-
-  _handlePolling () {
-    if (this._shouldPollBuilds()) {
-      this._poll()
-    } else {
-      this._stopPolling()
-    }
-  }
-
-  _shouldPollBuilds () {
-    return (
-      this.state.owner === 'org'
-    )
-  }
-
-  _poll () {
     pollOrgs()
   }
 
-  _stopPolling () {
+  componentWillUnmount () {
     stopPollingOrgs()
   }
 
@@ -72,201 +44,223 @@ class SetupProject extends Component {
     if (!orgsStore.isLoaded) return null
 
     return (
-      <BootstrapModal
-        show={this.props.show}
-        onHide={this.props.onHide}
-        backdrop='static'
-        >
-        <div
-          className='setup-project-modal modal-body os-dialog'
-        >
-          <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-          <h4>Setup Project</h4>
-          <form
-            onSubmit={this._submit}>
-            <div className='form-group'>
-              <div className='label-title'>
-                <label htmlFor='projectName' className='control-label pull-left'>
-                  What's the name of the project?
-                </label>
-                <p className='help-block pull-right'>(You can change this later)</p>
-              </div>
-              <div>
-                <input
-                  autoFocus='true'
-                  ref='projectName'
-                  type='text'
-                  className='form-control'
-                  id='projectName'
-                  value={this.state.projectName}
-                  onChange={this._updateProjectName}
-                />
-              </div>
-              <div className='help-block validation-error'>Please enter a project name</div>
+      <div className='setup-project-modal modal-body os-dialog'>
+        <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
+        <h4>Setup Project</h4>
+        <form
+          onSubmit={this._submit}>
+          {this._nameField()}
+          <hr />
+          {this._ownerSelector()}
+          {this._accessSelector()}
+          {this._error()}
+          <div className='actions form-group'>
+            <div className='pull-right'>
+              <button
+                disabled={this.state.isSubmitting || this._formNotFilled()}
+                className='btn btn-primary btn-block'
+              >
+                {
+                  this.state.isSubmitting ?
+                    <span><i className='fa fa-spin fa-refresh'></i>{' '}</span> :
+                    null
+                }
+                <span>Setup Project</span>
+              </button>
             </div>
-            <hr />
-            <div className='form-group'>
-              <div className='label-title'>
-                <label htmlFor='projectName' className='control-label pull-left'>
-                  Who should own this project?
-                </label>
-              </div>
-              <div className='owner-parts'>
-                <div>
-                  <div className='btn-group' data-toggle='buttons'>
-                    <label className={`btn btn-default ${this.state.owner === 'me' ? 'active' : ''}`}>
-                      <input
-                        type='radio'
-                        name='owner-toggle'
-                        id='me'
-                        autoComplete='off'
-                        value='me'
-                        checked={this.state.owner === 'me'}
-                        onChange={this._updateOwner}
-                        />
-                        <img
-                          className='user-avatar'
-                          height='13'
-                          width='13'
-                          src={`${gravatarUrl(state.email)}`}
-                        />
-                        {' '}Me
-                    </label>
-                    <label className={`btn btn-default ${this.state.owner === 'org' ? 'active' : ''}`}>
-                      <input
-                        type='radio'
-                        name='owner-toggle'
-                        id='org'
-                        autoComplete='off'
-                        value='org'
-                        checked={this.state.owner === 'org'}
-                        onChange={this._updateOwner}
-                        />
-                        <i className='fa fa-building-o'></i>
-                        {' '}An Organization
-                    </label>
-                  </div>
-                </div>
-                <div className='select-orgs'>
-                  {/* this is the empty view for organizations */}
-                  <div className={`${this.state.owner === 'org' && !orgsStore.orgs.length ? '' : 'hidden'}`}>
-                    <div className='empty-select-orgs well'>
-                      <p>You don't have any organizations yet.</p>
-                      <p>Organizations can help you manage projects, including billing.</p>
-                      <p>
-                        <a
-                          href='#'
-                          className={`btn btn-link  ${this.state.owner === 'org' ? '' : 'hidden'}`}
-                          onClick={this._manageOrgs}>
-                          <i className='fa fa-plus'></i>{' '}
-                          Create Organization
-                        </a>
-                      </p>
-                    </div>
-                  </div>
-                  <div className={`${this.state.owner === 'org' && orgsStore.orgs.length ? '' : 'hidden'}`}>
-                    <select
-                      ref='orgId'
-                      id='organizations-select'
-                      className='form-control float-left'
-                      onChange={this._updateOrgId}
-                      >
-                        <option>-- Select Organization --</option>
-                        {_.map(orgsStore.orgs, (org) => {
-                          if (org.default) return null
-
-                          return (
-                            <option
-                              key={org.id}
-                              value={org.id}
-                              selected={this.state.orgId === org.id}
-                            >
-                              {org.name}
-                            </option>
-                          )
-                        })}
-                    </select>
-                    <a
-                      href='#'
-                      className={`btn btn-link manage-orgs-btn float-left ${this.state.owner === 'org' ? '' : 'hidden'}`}
-                      onClick={this._manageOrgs}>
-                      (manage organizations)
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className={`${this.state.orgId ? '' : 'hidden'}`}>
-              <hr />
-              <label htmlFor='projectName' className='control-label'>
-                Who should see the builds and recordings?
-              </label>
-                <div className='radio privacy-radio'>
-                  <label>
-                    <input
-                      type='radio'
-                      name='privacy-radio'
-                      value='true'
-                      checked={(this.state.public === true)}
-                      onChange={this._updateAccess}
-                    />
-                    <p>
-                      <i className='fa fa-eye'></i>{' '}
-                      <strong>Public:</strong>{' '}
-                      Anyone has access.
-                    </p>
-                  </label>
-                </div>
-                <div className='radio privacy-radio'>
-                  <label>
-                    <input
-                      type='radio'
-                      name='privacy-radio'
-                      value='false'
-                      checked={(this.state.public === false)}
-                      onChange={this._updateAccess}
-                    />
-                    <p>
-                      <i className='fa fa-lock'></i>{' '}
-                      <strong>Private:</strong>{' '}
-                      Only invited users have access.
-                      <br/>
-                      <small className='help-block'>(Free while in beta, but will require a paid account in the future)</small>
-                    </p>
-                  </label>
-                </div>
-              </div>
-            {this._error()}
-            <div className='actions form-group'>
-              <div className='pull-right'>
-                <button
-                  disabled={this.state.isSubmitting || this._formNotFilled()}
-                  className='btn btn-primary btn-block'
-                >
-                  {
-                    this.state.isSubmitting ?
-                      <span><i className='fa fa-spin fa-refresh'></i>{' '}</span> :
-                      null
-                  }
-                  <span>Setup Project</span>
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </BootstrapModal>
+          </div>
+        </form>
+      </div>
     )
   }
 
-  _formNotFilled = () => {
-    return (_.isNull(this.state.public) || !this.state.projectName)
+  _nameField () {
+    return (
+      <div className='form-group'>
+        <div className='label-title'>
+          <label htmlFor='projectName' className='control-label pull-left'>
+            What's the name of the project?
+          </label>
+          <p className='help-block pull-right'>(You can change this later)</p>
+        </div>
+        <div>
+          <input
+            autoFocus='true'
+            ref='projectName'
+            type='text'
+            className='form-control'
+            id='projectName'
+            value={this.state.projectName}
+            onChange={this._updateProjectName}
+          />
+        </div>
+        <div className='help-block validation-error'>Please enter a project name</div>
+      </div>
+    )
+  }
+
+  _ownerSelector () {
+    return (
+      <div className='form-group'>
+        <div className='label-title'>
+          <label htmlFor='projectName' className='control-label pull-left'>
+            Who should own this project?
+          </label>
+        </div>
+        <div className='owner-parts'>
+          <div>
+            <div className='btn-group' data-toggle='buttons'>
+              <label className={cs('btn btn-default', {
+                'active': this.state.owner === 'me',
+              })}>
+                <input
+                  type='radio'
+                  name='owner-toggle'
+                  id='me'
+                  autoComplete='off'
+                  value='me'
+                  checked={this.state.owner === 'me'}
+                  onChange={this._updateOwner}
+                  />
+                  <img
+                    className='user-avatar'
+                    height='13'
+                    width='13'
+                    src={`${gravatarUrl(state.email)}`}
+                  />
+                  {' '}Me
+              </label>
+              <label className={`btn btn-default ${this.state.owner === 'org' ? 'active' : ''}`}>
+                <input
+                  type='radio'
+                  name='owner-toggle'
+                  id='org'
+                  autoComplete='off'
+                  value='org'
+                  checked={this.state.owner === 'org'}
+                  onChange={this._updateOwner}
+                  />
+                  <i className='fa fa-building-o'></i>
+                  {' '}An Organization
+              </label>
+            </div>
+          </div>
+          <div className='select-orgs'>
+            <div className={cs({ 'hidden': this.state.owner !== 'org' || orgsStore.orgs.length })}>
+              <div className='empty-select-orgs well'>
+                <p>You don't have any organizations yet.</p>
+                <p>Organizations can help you manage projects, including billing.</p>
+                <p>
+                  <a
+                    href='#'
+                    className={cs('btn btn-link', { 'hidden': this.state.owner !== 'org' })}
+                    onClick={this._manageOrgs}>
+                    <i className='fa fa-plus'></i>{' '}
+                    Create Organization
+                  </a>
+                </p>
+              </div>
+            </div>
+            {this._orgSelector()}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  _orgSelector () {
+    return (
+      <div className={cs({ 'hidden': this.state.owner !== 'org' || !orgsStore.orgs.length })}>
+        <select
+          ref='orgId'
+          id='organizations-select'
+          className='form-control float-left'
+          value={this.state.orgId || ''}
+          onChange={this._updateOrgId}
+          >
+            <option value=''>-- Select Organization --</option>
+            {_.map(orgsStore.orgs, (org) => {
+              if (org.default) return null
+
+              return (
+                <option
+                  key={org.id}
+                  value={org.id}
+                >
+                  {org.name}
+                </option>
+              )
+            })}
+        </select>
+        <a
+          href='#'
+          className='btn btn-link manage-orgs-btn float-left'
+          onClick={this._manageOrgs}>
+          (manage organizations)
+        </a>
+      </div>
+    )
+  }
+
+  _accessSelector () {
+    return (
+      <div className={cs({ 'hidden': !this.state.orgId })}>
+        <hr />
+        <label htmlFor='projectName' className='control-label'>
+          Who should see the builds and recordings?
+        </label>
+        <div className='radio privacy-radio'>
+          <label>
+            <input
+              type='radio'
+              name='privacy-radio'
+              value='true'
+              checked={(this.state.public === true)}
+              onChange={this._updateAccess}
+            />
+            <p>
+              <i className='fa fa-eye'></i>{' '}
+              <strong>Public:</strong>{' '}
+              Anyone has access.
+            </p>
+          </label>
+        </div>
+        <div className='radio privacy-radio'>
+          <label>
+            <input
+              type='radio'
+              name='privacy-radio'
+              value='false'
+              checked={(this.state.public === false)}
+              onChange={this._updateAccess}
+            />
+            <p>
+              <i className='fa fa-lock'></i>{' '}
+              <strong>Private:</strong>{' '}
+              Only invited users have access.
+              <br/>
+              <small className='help-block'>(Free while in beta, but will require a paid account in the future)</small>
+            </p>
+          </label>
+        </div>
+      </div>
+    )
+  }
+
+  _manageOrgs = (e) => {
+    e.preventDefault()
+    App.ipc('external:open', 'https://on.cypress.io/dashboard/organizations')
+  }
+
+  _formNotFilled () {
+    return _.isNull(this.state.public) || !this.state.projectName
   }
 
   _initialProjectName = () => {
     let project = this.props.project
 
     if (project.name) {
-      return (project.name)
+      return project.name
     } else {
       let splitName = _.last(project.path.split('/'))
       return _.truncate(splitName, { length: 60 })
@@ -288,7 +282,7 @@ class SetupProject extends Component {
   _updateOrgId = () => {
     const orgIsNotSelected = this.refs.orgId.value === '-- Select Organization --'
 
-    let orgId = (orgIsNotSelected) ? null : this.refs.orgId.value
+    const orgId = orgIsNotSelected ? null : this.refs.orgId.value
 
     this.setState({
       orgId,
@@ -313,11 +307,6 @@ class SetupProject extends Component {
     return _.trim(this.state.projectName)
   }
 
-  _manageOrgs = (e) => {
-    e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/dashboard/organizations')
-  }
-
   _updateOwner = (e) => {
     let owner = e.target.value
 
@@ -325,11 +314,9 @@ class SetupProject extends Component {
     // already selected, then ignore it
     if (this.state.owner === owner) return
 
-    this._handlePolling()
-
     const defaultOrg = _.find(orgsStore.orgs, { default: true })
 
-    let chosenOrgId = (owner === 'me') ? defaultOrg.id : null
+    let chosenOrgId = owner === 'me' ? defaultOrg.id : null
 
     // we want to clear all selects below the radio buttons
     // otherwise it looks jarring to already have selects
