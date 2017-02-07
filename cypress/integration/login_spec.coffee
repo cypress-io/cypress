@@ -1,16 +1,35 @@
+{deferred, stubIpc} = require("../support/util")
+
 describe "Login", ->
   beforeEach ->
     cy
+      .fixture("user").as("user")
       .visit("/#login")
       .window().then (win) ->
-        {@ipc, @App} = win
-        @agents = cy.agents()
-        @agents.spy(@App, "ipc")
-        @ipc.handle("get:options", null, {})
+        {@App} = win
+        cy.stub(@App, "ipc").as("ipc")
+
+        @getCurrentUser = deferred()
+        @openWindow = deferred()
+        @login = deferred()
+
+        stubIpc(@App.ipc, {
+          "on:menu:clicked": ->
+          "close:browser": ->
+          "close:project": ->
+          "on:focus:tests": ->
+          "updater:check": (stub) => stub.resolves(false)
+          "get:options": (stub) => stub.resolves({})
+          "get:current:user": (stub) => stub.returns(@getCurrentUser.promise)
+          "window:open": (stub) => stub.returns(@openWindow.promise)
+          "log:in": (stub) => stub.returns(@login.promise)
+        })
+
+        @App.start()
 
   context "without a current user", ->
     beforeEach ->
-      @ipc.handle("get:current:user", null, {})
+      @getCurrentUser.resolve({})
 
     describe "login display", ->
       it "displays Cypress logo", ->
@@ -58,14 +77,14 @@ describe "Login", ->
       it "does not lock up UI if login is clicked multiple times", ->
         cy
           .get("@loginBtn").click().click().then ->
-            @ipc.handle("window:open", {name: "foo", message: "bar", alreadyOpen: true}, null)
+            @openWindow.reject({name: "foo", message: "bar", alreadyOpen: true})
           .get("#login").contains("button", "Log In with GitHub").should("not.be.disabled")
 
       context "on 'window:open' ipc response", ->
         beforeEach ->
           cy
             .get("@loginBtn").click().then ->
-              @ipc.handle("window:open", null, "code-123")
+              @openWindow.resolve("code-123")
 
         it "triggers ipc 'log:in'", ->
           cy.then ->
@@ -80,26 +99,25 @@ describe "Login", ->
 
         describe "on ipc log:in success", ->
           beforeEach ->
-            cy
-              .contains("Logging in...")
-              .fixture("user").then (@user) ->
-                @ipc.handle("log:in", null, @user)
+            stubIpc(@App.ipc, {
+              "get:projects": (stub) -> stub.resolves([])
+              "get:project:statuses": (stub) -> stub.resolves([])
+            })
+
+            @login.resolve(@user)
 
           it "triggers get:projects", ->
-            expect(@App.ipc).to.be.calledWith("get:projects")
+            cy.get("nav a").then =>
+              expect(@App.ipc).to.be.calledWith("get:projects")
 
           it "displays username in UI", ->
             cy
-              .then ->
-                @ipc.handle("get:projects", null, [])
               .get("nav a").should ($a) ->
                 expect($a).to.contain(@user.name)
 
           context "log out", ->
             it.skip "displays login button on logout", ->
               cy
-                .then ->
-                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click()
@@ -107,8 +125,6 @@ describe "Login", ->
 
             it.skip "has login button enabled after logout and re log in", ->
               cy
-                .then ->
-                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click()
@@ -117,8 +133,6 @@ describe "Login", ->
 
             it "goes back to login on logout", ->
               cy
-                .then ->
-                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click().then ->
@@ -128,8 +142,6 @@ describe "Login", ->
 
             it "has login button enabled on logout", ->
               cy
-                .then ->
-                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click().then ->
@@ -138,8 +150,6 @@ describe "Login", ->
 
             it "calls clear:github:cookies", ->
               cy
-                .then ->
-                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click().then ->
@@ -147,39 +157,33 @@ describe "Login", ->
 
             it "calls log:out", ->
               cy
-                .then ->
-                  @ipc.handle("get:projects", null, [])
                 .get("nav a").contains("Jane").click()
               cy
                 .contains("Log Out").click().then ->
                   expect(@App.ipc).to.be.calledWith("log:out")
 
         describe "on ipc 'log:in' error", ->
+          beforeEach ->
+            @login.reject({name: "foo", message: "There's an error"})
+
           it "displays error in ui", ->
             cy
-              .fixture("user").then (@user) ->
-                @ipc.handle("log:in", {name: "foo", message: "There's an error"}, null)
               .get(".alert-danger")
                 .should("be.visible")
                 .contains("There's an error")
 
           it "login button should be enabled", ->
             cy
-              .fixture("user").then (@user) ->
-                @ipc.handle("log:in", {name: "foo", message: "There's an error"}, null)
               .get("@loginBtn").should("not.be.disabled")
-
 
         describe "on ipc 'log:in' unauthorized error", ->
           beforeEach ->
-            cy
-              .fixture("user").then (@user) ->
-                @ipc.handle("log:in", {
-                  error: "Your email: 'foo@bar.com' has not been authorized."
-                  message: "Your email: 'foo@bar.com' has not been authorized."
-                  name: "StatusCodeError"
-                  statusCode: 401
-                }, null)
+            @login.reject({
+              error: "Your email: 'foo@bar.com' has not been authorized."
+              message: "Your email: 'foo@bar.com' has not been authorized."
+              name: "StatusCodeError"
+              statusCode: 401
+            })
 
           it "displays error in ui", ->
             cy

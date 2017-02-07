@@ -1,3 +1,5 @@
+{stubIpc} = require("../support/util")
+
 describe "App", ->
   beforeEach ->
     cy
@@ -7,12 +9,15 @@ describe "App", ->
     beforeEach ->
       cy
         .window().then (win) ->
-          {@ipc, @App} = win
+          {@App} = win
+          cy.stub(@App, "ipc").as("ipc")
 
-          @agents = cy.agents()
-          @agents.spy(@App, "ipc")
+          stubIpc(@App.ipc, {
+            "get:options": (stub) -> stub.resolves({})
+            "get:current:user": (stub) -> stub.resolves(null)
+          })
 
-          @ipc.handle("get:options", null, {})
+          @App.start()
 
     it "attaches to window.onerror", ->
       cy.window().then (win) ->
@@ -39,8 +44,7 @@ describe "App", ->
 
       cy.window().then (win) ->
         win.foo = ->
-          new win.Promise (resolve, reject) ->
-            reject(err)
+          win.Promise.reject(err)
 
         setTimeout ->
           win.foo()
@@ -55,19 +59,25 @@ describe "App", ->
     beforeEach ->
       cy
         .window().then (win) ->
-          {@ipc, @App} = win
+          {@App} = win
+          cy.stub(@App, "ipc").as("ipc")
 
-          @agents = cy.agents()
-          @agents.spy(@App, "ipc")
+          stubIpc(@App.ipc, {
+            "get:options": (stub) -> stub.resolves({})
+            "get:current:user": (stub) -> stub.resolves(null)
+            "on:menu:clicked": ->
+          })
 
-          @ipc.handle("get:options", null, {})
+          @onMenuClicked = @App.ipc.withArgs("on:menu:clicked")
+
+          @App.start()
 
     it "calls log:out", ->
-      @ipc.handle("on:menu:clicked", null, "log:out")
+      @onMenuClicked.yield(null, "log:out")
       expect(@App.ipc).to.be.calledWith("log:out")
 
     it "checks for updates", ->
-      @ipc.handle("on:menu:clicked", null, 'check:for:updates')
+      @onMenuClicked.yield(null, "check:for:updates")
       expect(@App.ipc).to.be.calledWithExactly("window:open", {
         position: "center",
         width: 300,
@@ -81,12 +91,14 @@ describe "App", ->
     beforeEach ->
       cy
         .window().then (win) ->
-          {@ipc, @App} = win
+          {@App} = win
+          cy.stub(@App, "ipc").as("ipc")
 
-          @agents = cy.agents()
-          @agents.spy(@App, "ipc")
+          stubIpc(@App.ipc, {
+            "get:options": (stub) -> stub.resolves({"updating": true})
+          })
 
-          @ipc.handle("get:options", null, {"updating": true})
+          @App.start()
 
     it "shows updates being applied view", ->
       cy

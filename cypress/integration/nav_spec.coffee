@@ -1,20 +1,36 @@
+{deferred, stubIpc} = require("../support/util")
+
 describe "Navigation", ->
   beforeEach ->
     cy
+      .fixture("user").as("user")
       .visit("/")
       .window().then (win) ->
-        {@ipc, @App} = win
-        @agents = cy.agents()
-        @agents.spy(@App, "ipc")
-        @ipc.handle("get:options", null, {})
+        {@App} = win
+        cy.stub(@App, "ipc").as("ipc")
+
+        @getCurrentUser = deferred()
+
+        stubIpc(@App.ipc, {
+          "on:menu:clicked": ->
+          "close:browser": ->
+          "close:project": ->
+          "on:focus:tests": ->
+          "updater:check": (stub) => stub.resolves(false)
+          "get:options": (stub) => stub.resolves({})
+          "get:current:user": (stub) => stub.returns(@getCurrentUser.promise)
+          "get:projects": (stub) -> stub.resolves([])
+          "get:project:statuses": (stub) -> stub.resolves([])
+          "log:out": (stub) -> stub.resolves({})
+        })
+
+        @App.start()
 
   context.skip "without a current user", ->
-    context "links", ->
-      beforeEach ->
-        cy.then () ->
-          @ipc.handle("get:current:user", null, {})
-          @ipc.handle("get:projects", null, [])
+    beforeEach ->
+      @getCurrentUser.resolve({})
 
+    context "links", ->
       it "displays link to docs", ->
         cy.get("nav").contains("Docs")
 
@@ -30,13 +46,6 @@ describe "Navigation", ->
         cy
           .get("nav").contains("Chat").click().then ->
             expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/chat")
-
-    describe "login in header", ->
-      beforeEach ->
-        cy
-          .then ->
-            @ipc.handle("get:current:user", null, {})
-            @ipc.handle("get:projects", null, [])
 
       it "displays login button", ->
         cy
@@ -55,13 +64,10 @@ describe "Navigation", ->
           cy.contains(".btn", "Log In with GitHub")
 
   context "with a current user", ->
-    context "links", ->
-      beforeEach ->
-        cy
-          .fixture("user").then (@user) ->
-            @ipc.handle("get:current:user", null, @user)
-            @ipc.handle("get:projects", null, [])
+    beforeEach ->
+      @getCurrentUser.resolve(@user)
 
+    context "links", ->
       it "displays link to docs", ->
         cy.get("nav").contains("Docs")
 
@@ -78,52 +84,40 @@ describe "Navigation", ->
           .get("nav").contains("Chat").click().then ->
             expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/chat")
 
-    context "with a current user", ->
-      describe "username in header", ->
-        it "displays user name", ->
-          cy
-            .fixture("user").then (@user) ->
-              @ipc.handle("get:current:user", null, @user)
-              @ipc.handle("get:projects", null, [])
-            .get("nav a").should ($a) ->
-              expect($a).to.contain(@user.name)
+      it "displays user name", ->
+        cy
+          .get("nav a").should ($a) ->
+            expect($a).to.contain(@user.name)
 
-        it "displays email instead of name", ->
-          cy
-            .fixture("user").then (@user) ->
-              @user.name = null
+      it "shows dropdown on click of user name", ->
+        cy.contains("Jane Lane").click()
+        cy.contains("Log Out").should("be.visible")
 
-              @ipc.handle("get:current:user", null, @user)
-              @ipc.handle("get:projects", null, [])
-            .get("nav a").should ($a) ->
-              expect($a).to.contain(@user.email)
-
-      describe "logout of user", ->
-        beforeEach ->
-          cy
-            .fixture("user").then (@user) ->
-              @ipc.handle("get:current:user", null, @user)
-              @ipc.handle("get:projects", null, [])
-
-        it "shows dropdown on click of user name", ->
-          cy.contains("Jane Lane").click()
-          cy.contains("Log Out").should("be.visible")
+      describe "logging out", ->
 
         it "triggers logout on click of logout", ->
           cy.contains("Jane Lane").click()
           cy.contains("a", "Log Out").click().then ->
             expect(@App.ipc).to.be.calledWith("log:out")
 
-        it.skip "displays login button on logout", ->
-          @ipc.handle("log:out", null, {})
+        it.skip "displays login button", ->
           cy.contains("Jane Lane").click()
           cy.contains("a", "Log Out").click()
           cy
             .get("nav a").should ($a) ->
               expect($a).to.contain("Log In")
 
-        it "displays login screen on logout", ->
-          @ipc.handle("log:out", null, {})
+        it "displays login screen", ->
           cy.contains("Jane Lane").click()
           cy.contains("a", "Log Out").click()
           cy.contains(".btn", "Log In with GitHub")
+
+  context "when current user has no name", ->
+    beforeEach ->
+      @user.name = null
+      @getCurrentUser.resolve(@user)
+
+    it "displays email instead of name", ->
+      cy
+        .get("nav a").should ($a) ->
+          expect($a).to.contain(@user.email)

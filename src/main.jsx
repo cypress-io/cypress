@@ -6,6 +6,7 @@ import _ from 'lodash'
 
 import makeRoutes from './routes'
 
+import errors from './lib/errors'
 import state from './lib/state'
 
 import Updates from './update/updates'
@@ -30,9 +31,16 @@ const handleErrors = () => {
     sendErr(err)
   }
 
-  window.onunhandledrejection = (err) => {
-    const reason = err && err.reason
-    sendErr(reason || err)
+  window.onunhandledrejection = (event) => {
+    const reason = event && event.reason
+
+    if (errors.isUnauthenticated(reason)) {
+      event.preventDefault()
+      state.logOut()
+      return
+    }
+
+    sendErr(reason || event)
   }
 }
 
@@ -48,8 +56,6 @@ const setupDevVars = () => {
     window.toJS = toJS
   }
 }
-
-App.onUnauth(state.logOut.bind(state))
 
 App.start = () => {
   App.ipc('get:options')

@@ -32,7 +32,7 @@ class UpdateBanner extends Component {
 
     return (
       <div id='updates-available'>
-      New updates are available
+        New updates are available
         <strong onClick={this._downloadUpdate}>
           <i className='fa fa-download'></i>{' '}
           Update
@@ -47,6 +47,9 @@ class UpdateBanner extends Component {
     .then(action('checked:updates', (version) => {
       state.updatesAvailable(!!version)
     }))
+    .catch((error) => {
+      console.warn('Error checking for updates:', error) // eslint-disable-line no-console
+    })
   }
 
   _downloadUpdate () {

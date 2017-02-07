@@ -74,27 +74,26 @@ class Login extends Component {
       title: 'Login',
       type: 'GITHUB_LOGIN',
     })
-    .then(action('login:window:opened', (code) => {
+    .then((code) => {
       // TODO: supposed to focus the window here!
       // i think this is for linux
       // App.execute 'gui:focus'
       this.setState({ isLoggingIn: true })
 
       return App.ipc('log:in', code)
-    }))
+    })
     .then(action('logged:in', (user) => {
-      return state.setUser(user)
+      state.setUser(user)
     }))
-    .catch(alreadyOpen, (err) => {
-      err
+    .catch(alreadyOpen, () => {
       return // do nothing if we're already open!
     })
-    .catch(action('error:at:login', (err) => {
-      return this.setState({
+    .catch((err) => {
+      this.setState({
         isLoggingIn: false,
         error: err,
       })
-    }))
+    })
   }
 
   _error () {

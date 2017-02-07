@@ -1,25 +1,47 @@
+{deferred, stubIpc} = require("../support/util")
+
 describe "Projects List", ->
   beforeEach ->
     cy
+      .fixture("user").as("user")
+      .fixture("projects").as("projects")
+      .fixture("projects_statuses").as("projectStatuses")
+      .fixture("config").as("config")
+      .fixture("specs").as("specs")
       .visit("/#/projects")
       .window().then (win) ->
-        {@ipc, @App} = win
+        {@App} = win
+        cy.stub(@App, "ipc").as("ipc")
 
-        @agents = cy.agents()
-        @agents.spy(@App, "ipc")
+        @getCurrentUser = deferred()
+        @getProjects = deferred()
+        @getProjectStatuses = deferred()
 
-        @ipc.handle("get:options", null, {})
+        stubIpc(@App.ipc, {
+          "on:menu:clicked": ->
+          "close:browser": ->
+          "close:project": ->
+          "on:focus:tests": ->
+          "updater:check": (stub) => stub.resolves(false)
+          "get:options": (stub) => stub.resolves({})
+          "get:current:user": (stub) => stub.returns(@getCurrentUser.promise)
+          "get:projects": (stub) => stub.returns(@getProjects.promise)
+          "get:project:statuses": (stub) => stub.returns(@getProjectStatuses.promise)
+          "remove:project": (stub) -> stub.resolves()
+          "open:project": (stub) => stub.yields(null, @config)
+          "get:specs": (stub) => stub.resolves(@specs)
+        })
+
+        @App.start()
 
   context "with a current user", ->
     beforeEach ->
-      cy
-        .fixture("user").then (@user) ->
-          @ipc.handle("get:current:user", null, @user)
+      @getCurrentUser.resolve(@user)
 
     describe "no projects", ->
       beforeEach ->
-        cy.then ->
-          @ipc.handle("get:projects", null, [])
+        @getProjects.resolve([])
+        @getProjectStatuses.resolve([])
 
       it "does not display projects list", ->
         cy.get("projects-list").should("not.exist")
@@ -36,11 +58,8 @@ describe "Projects List", ->
 
     describe "project statuses from localStorage load", ->
       beforeEach ->
-        cy
-          .fixture("projects_statuses").then (@projects_statuses) ->
-            localStorage.setItem("projects", JSON.stringify(@projects_statuses))
-          .fixture("projects").then (@projects) ->
-            @ipc.handle("get:projects", null, @projects)
+        localStorage.setItem("projects", JSON.stringify(@projectStatuses))
+        @getProjects.resolve(@projects)
 
       afterEach ->
         cy.clearLocalStorage()
@@ -52,9 +71,7 @@ describe "Projects List", ->
 
     describe "lists projects", ->
       beforeEach ->
-        cy
-          .fixture("projects").then (@projects) ->
-            @ipc.handle("get:projects", null, @projects)
+        @getProjects.resolve(@projects)
 
       describe "projects listed", ->
         it "displays projects in list", ->
@@ -118,14 +135,11 @@ describe "Projects List", ->
               expect(@App.ipc).to.be.calledWith("remove:project", "/Users/Jane/Projects/My-Fake-Project")
 
             it "updates localStorage cache", ->
-              @ipc.handle("remove:project").then ->
-                expect(JSON.parse(localStorage.projects || "[]").length).to.equal(7)
+              expect(JSON.parse(localStorage.projects || "[]").length).to.equal(7)
 
       describe "project statuses in list", ->
         beforeEach ->
-          cy
-            .fixture("projects_statuses").then (@projects_statuses) =>
-              @ipc.handle("get:project:statuses", null, @projects_statuses)
+          @getProjectStatuses.resolve(@projectStatuses)
 
         it "displays projects in list", ->
           cy
@@ -141,7 +155,7 @@ describe "Projects List", ->
         it.skip "displays owner", ->
           cy
             .get(".projects-list>li").first()
-            .contains(@projects_statuses[0].orgName)
+            .contains(@projectStatuses[0].orgName)
 
         it "displays status", ->
           cy
@@ -153,19 +167,15 @@ describe "Projects List", ->
             cy
               .get(".projects-list a")
                 .contains("My-Fake-Project").click()
-              .fixture("config").then (@config) ->
-                @ipc.handle("open:project", null, @config)
-              .fixture("specs").as("specs").then ->
-                @ipc.handle("get:specs", null, @specs)
-              .end().contains("Back to Projects").click()
+              .end()
+              .contains("Back to Projects").click()
 
           it "loads projects", ->
             ## in reality, both will get called 3 times, but since we don't
             ## handle the second call to get:projects, get:project:statuses
             ## only gets called 2 times in this test
             expect(@App.ipc.withArgs("get:projects")).to.be.calledThrice
-            @ipc.handle("get:projects", null, @projects).then =>
-              expect(@App.ipc.withArgs("get:project:statuses")).to.be.calledTwice
+            expect(@App.ipc.withArgs("get:project:statuses")).to.be.calledThrice
 
         describe "when user is unauthorized for project", ->
 
@@ -177,10 +187,6 @@ describe "Projects List", ->
           it "opens builds tab when clicked", ->
             cy
               .get(".projects-list>li a").last().click()
-              .fixture("config").then (@config) ->
-                @ipc.handle("open:project", null, @config)
-              .fixture("specs").as("specs").then ->
-                @ipc.handle("get:specs", null, @specs)
               .location().its("hash")
                 .should("include", "builds")
 
@@ -194,152 +200,145 @@ describe "Projects List", ->
           it "opens builds tab when clicked", ->
             cy
               .get(".projects-list>li a").last().click()
-              .fixture("config").then (@config) ->
-                @ipc.handle("open:project", null, @config)
-              .fixture("specs").as("specs").then ->
-                @ipc.handle("get:specs", null, @specs)
               .location().its("hash")
                 .should("include", "builds")
 
-    describe "polling project statuses", ->
+    describe "polling projects", ->
       beforeEach ->
-        cy
-          .window().then (win) =>
-            @clock = win.sinon.useFakeTimers()
-          .fixture("projects").then (@projects) ->
-            @ipc.handle("get:projects", null, @projects)
-            @clock.tick(1000)
-          .fixture("projects_statuses").then (@projects_statuses) ->
-            @ipc.handle("get:project:statuses", null, @projects_statuses)
-            @clock.tick(1000)
+        @projects[0].path = "/new/path"
+        @["get:projects"].onCall(2).resolves(@projects)
 
-      afterEach ->
-        @clock.restore()
+        @projectStatuses[0].lastBuildStatus = "failed"
+        @["get:project:statuses"].onCall(2).resolves(@projectStatuses)
+
+        cy
+          .clock()
+          .then =>
+            @getProjects.resolve(@projects)
+            @getProjectStatuses.resolve(@projectStatuses)
+          .tick(10000)
 
       it "updates project paths and ids every 10 seconds", ->
-        @clock.tick(10000)
         ## once by application on load
         ## once by projects-list on load
         ## once by polling
-        expect(@App.ipc.withArgs("get:projects")).to.be.calledThrice
-
-        @projects[0].path = "/new/path"
-        @ipc.handle("get:projects", null, @projects)
+        expect(@["get:projects"]).to.be.calledThrice
 
         cy
           .get(".projects-list>li").first()
           .contains("/new/path")
 
       it "updates project statuses every 10 seconds", ->
-        @clock.tick(10000)
-        @ipc.handle("get:projects", null, @projects).then =>
-          expect(@App.ipc.withArgs("get:project:statuses")).to.be.calledTwice
+        expect(@["get:project:statuses"]).to.be.calledThrice
 
-          @projects_statuses[0].lastBuildStatus = "failed"
-          @ipc.handle("get:project:statuses", null, @projects_statuses)
+        cy
+          .get(".projects-list>li").first()
+          .contains("Failed")
 
-          cy
-            .get(".projects-list>li").first()
-            .contains("Failed")
+      it "redirects to login if api returns 401", ->
+        cy
+          .window().then (win) =>
+            foo = deferred(win.Promise)
+            # @["get:project:statuses"].onCall(3).rejects({name: "", message: "", statusCode: 401})
+            @["get:project:statuses"].onCall(3).returns(foo.promise)
+            foo.reject({name: "", message: "", statusCode: 401})
+          .tick(10000)
+          .location().its("hash")
+            .should("contain", "login")
 
     describe "add project", ->
       beforeEach ->
-        cy
-          .fixture("projects").then (@projects) ->
-            @ipc.handle("get:projects", null, @projects)
+        @selectDirectory = deferred()
+        @addProject = deferred()
 
-      it "triggers ipc 'show:directory:dialog on nav +", ->
-        cy.get("nav").find(".fa-plus").click().then ->
-          expect(@App.ipc).to.be.calledWith("show:directory:dialog")
-
-      describe "error thrown", ->
-        beforeEach ->
-          cy
-            .get("nav").find(".fa-plus").click().then ->
-              @ipc.handle("show:directory:dialog", {name: "error", message: "something bad happened"}, null)
-
-        it "displays error", ->
-          cy
-            .get(".error")
-              .should("be.visible")
-              .and("contain", "something bad happened")
-
-        it "hides error on dismiss click", ->
-          cy
-            .get(".error")
-              .should("be.visible")
-              .find(".close").click({force: true})
-            .get(".error")
-              .should("not.be.visible")
-
-      describe "directory dialog dismissed", ->
-        beforeEach ->
-          cy.get("nav").find(".fa-plus").click()
-
-        it "does no action", ->
-          @ipc.handle("show:directory:dialog", null, null)
-
-          cy.get(".projects-list").should("exist").then ->
-              expect(@App.ipc).to.not.be.calledWith("add:project")
-
-      describe "directory chosen", ->
-        beforeEach ->
-          cy
-            .get("nav").find(".fa-plus").click()
-            .then ->
-              @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
-
-        it "triggers ipc 'add:project' with directory", ->
-          expect(@App.ipc).to.be.calledWith("add:project")
-
-        it "displays new project in list", ->
-          cy.get(".projects-list a:last").should("contain", "My-New-Project")
-
-        it "no longer shows empty projects view", ->
-          cy.get(".empty").should("not.exist")
-
-        it "disables clicking onto project while loading", ->
-          cy.get(".project.loading").should("have.css", "pointer-events", "none")
-
-        it "displays project loading icon", ->
-          cy
-            .get(".project.loading").find(".fa")
-            .should("have.class", "fa-spinner")
-
-        it "updates localStorage cache", ->
-          expect(JSON.parse(localStorage.projects || "[]").length).to.equal(9)
-
-        it "does not call ipc 'get:project:status'", ->
-          cy.wait(1000).then =>
-            expect(@App.ipc).not.to.be.calledWith("get:project:status")
-
-    describe "add project that has id", ->
-      beforeEach ->
-        @ipc.handle("get:projects", null, [])
-
-        cy.get("nav").find(".fa-plus").click()
-        .then ->
-          @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-New-Project")
-        .then ->
-          @ipc.handle("add:project", null, {
-            id: "id-123"
-            path: "/Users/Jane/Projects/My-New-Project"
-          })
-        .wait(1000)
-
-      it "calls ipc 'get:project:status'", ->
-        expect(@App.ipc).to.be.calledWith("get:project:status", {
-          id: "id-123"
-          path: "/Users/Jane/Projects/My-New-Project"
-        })
-
-      describe "when 'get:project:status' returns project details", ->
-        beforeEach ->
-          @ipc.handle("get:project:status", null, {
+        stubIpc(@App.ipc, {
+          "show:directory:dialog": (stub) => stub.returns(@selectDirectory.promise)
+          "add:project": (stub) => stub.returns(@addProject.promise)
+          "get:project:status": (stub) -> stub.resolves({
             id: "id-123"
             path: "/Users/Jane/Projects/My-New-Project"
             lastBuildStatus: "passed"
             public: true
+          })
+        })
+
+        @getProjects.resolve(@projects)
+        @getProjectStatuses.resolve(@projectStatuses)
+
+        cy.get("nav").find(".fa-plus").click()
+
+      describe "any case / no project id", ->
+        it "triggers ipc 'show:directory:dialog on nav +", ->
+          expect(@App.ipc).to.be.calledWith("show:directory:dialog")
+
+        describe "error thrown", ->
+          beforeEach ->
+            @selectDirectory.reject({name: "error", message: "something bad happened"})
+
+          it "displays error", ->
+            cy
+              .get(".error")
+                .should("be.visible")
+                .and("contain", "something bad happened")
+
+          it "hides error on dismiss click", ->
+            cy
+              .get(".error")
+                .should("be.visible")
+                .find(".close").click({force: true})
+              .get(".error")
+                .should("not.be.visible")
+
+        describe "directory dialog dismissed", ->
+          beforeEach ->
+            @selectDirectory.resolve()
+
+          it "does no action", ->
+            cy.get(".projects-list").should("exist").then ->
+                expect(@App.ipc).to.not.be.calledWith("add:project")
+
+        describe "directory chosen", ->
+          beforeEach ->
+            @projectPath = "/Users/Jane/Projects/My-New-Project"
+            @selectDirectory.resolve(@projectPath)
+            cy.wait(1000)
+
+          it "triggers ipc 'add:project' with directory", ->
+            expect(@App.ipc).to.be.calledWith("add:project", @projectPath)
+
+          it "displays new project in list", ->
+            cy.get(".projects-list a:last").should("contain", "My-New-Project")
+
+          it "no longer shows empty projects view", ->
+            cy.get(".empty").should("not.exist")
+
+          it "disables clicking onto project while loading", ->
+            cy.get(".project.loading").should("have.css", "pointer-events", "none")
+
+          it "displays project loading icon", ->
+            cy
+              .get(".project.loading").find(".fa")
+              .should("have.class", "fa-spinner")
+
+          it "updates localStorage cache", ->
+            expect(JSON.parse(localStorage.projects || "[]").length).to.equal(9)
+
+          it "does not call ipc 'get:project:status'", ->
+            expect(@App.ipc).not.to.be.calledWith("get:project:status")
+
+      describe "with pre-existing project id", ->
+        beforeEach ->
+          @selectDirectory.resolve("/Users/Jane/Projects/My-New-Project")
+          @addProject.resolve({
+            id: "id-123"
+            path: "/Users/Jane/Projects/My-New-Project"
+          })
+          cy.wait(1000)
+
+        it "calls ipc 'get:project:status'", ->
+          expect(@App.ipc).to.be.calledWith("get:project:status", {
+            id: "id-123"
+            path: "/Users/Jane/Projects/My-New-Project"
           })
 
         it "displays public label", ->
@@ -351,23 +350,3 @@ describe "Projects List", ->
           cy
             .get(".projects-list>li").first()
             .contains("Passed")
-
-    describe "if api returns 401", ->
-      beforeEach ->
-        cy
-          .window().then (win) =>
-            @clock = win.sinon.useFakeTimers()
-          .fixture("projects").then (@projects) ->
-            @ipc.handle("get:projects", null, @projects)
-            @clock.tick(1000)
-          .fixture("projects_statuses").then (@projects_statuses) ->
-            @ipc.handle("get:project:statuses", {name: "", message: "", statusCode: 401})
-            @clock.tick(1000)
-
-      afterEach ->
-        @clock.restore()
-
-      it "redirects to login", ->
-        cy
-          .location().its("hash")
-            .should("contain", "login")

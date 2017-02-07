@@ -1,4 +1,5 @@
 md5 = require("md5")
+{deferred, stubIpc} = require("../support/util")
 
 describe "Settings", ->
   beforeEach ->
@@ -6,26 +7,40 @@ describe "Settings", ->
 
     cy
       .visit("/")
-      .window().then (win) ->
-        {@ipc, @App} = win
-        @agents = cy.agents()
-        @ipc.handle("get:options", null, {})
-        @agents.spy(@App, "ipc")
       .fixture("ci_keys").as("ciKeys")
-      .fixture("user").then (@user) ->
-        @ipc.handle("get:current:user", null, @user)
+      .fixture("user").as("user")
+      .fixture("config").as("config")
+      .fixture("browsers").as("browsers")
       .fixture("projects").as("projects")
       .fixture("projects_statuses").as("projectStatuses")
+      .fixture("builds").as("builds")
+      .window().then (win) ->
+        {@App} = win
+        cy.stub(@App, "ipc").as("ipc")
+
+        @getCiKeys = deferred()
+        @getProjectStatuses = deferred()
+
+        stubIpc(@App.ipc, {
+          "get:options": (stub) => stub.resolves({})
+          "get:current:user": (stub) => stub.resolves(@user)
+          "updater:check": (stub) => stub.resolves(false)
+          "get:projects": (stub) => stub.resolves(@projects)
+          "get:project:statuses": (stub) => stub.returns(@getProjectStatuses.promise)
+          "open:project": (stub) => stub.yields(null, @config)
+          "get:ci:keys": (stub) => stub.returns(@getCiKeys.promise)
+          "get:builds": (stub) => stub.resolves(@builds)
+          "get:orgs": (stub) => stub.resolves([])
+        })
+
+        @App.start()
 
   describe "any case / project is set up for ci", ->
     beforeEach ->
-      cy.then ->
-        @ipc.handle("get:projects", null, @projects)
+      @getProjectStatuses.resolve(@projectStatuses)
+      cy
       .get(".projects-list a")
         .contains("My-Fake-Project").click()
-      .fixture("browsers").as("browsers")
-      .fixture("config").then (@config) ->
-        @ipc.handle("open:project", null, @config)
       .get(".navbar-default")
       .get("a").contains("Settings").click()
 
@@ -111,7 +126,7 @@ describe "Settings", ->
 
       describe "when ci keys load", ->
         beforeEach ->
-          @ipc.handle("get:ci:keys", null, @ciKeys)
+          @getCiKeys.resolve(@ciKeys)
 
         it "displays first CI key", ->
           cy
@@ -119,7 +134,7 @@ describe "Settings", ->
 
       describe "when there are no keys", ->
         beforeEach ->
-          @ipc.handle("get:ci:keys", null, [])
+          @getCiKeys.resolve([])
 
         it "does not display cypress ci command", ->
           cy
@@ -132,8 +147,7 @@ describe "Settings", ->
             @config.clientUrl = "http://localhost:8888"
             @config.clientUrlDisplay = "http://localhost:8888"
             @config.browsers = @browsers
-
-            @ipc.handle("open:project", null, @config)
+            @App.ipc.withArgs("open:project").yield(null, @config)
 
         cy.contains("Settings")
         cy.contains("Configuration").click()
@@ -141,7 +155,7 @@ describe "Settings", ->
       it "displays updated config", ->
         @config.resolved.baseUrl.value = "http://localhost:7777"
 
-        @ipc.handle("open:project", null, @config)
+        @App.ipc.withArgs("open:project").yield(null, @config)
 
         cy.contains("http://localhost:7777")
 
@@ -158,29 +172,29 @@ describe "Settings", ->
 
           @config.resolved.baseUrl.value = "http://localhost:7777"
 
-          @ipc.handle("open:project", null, @config)
+          @App.ipc.withArgs("open:project").yield(null, @config)
 
           cy
             .contains("http://localhost:7777")
             .then ->
-              @ipc.handle("open:project", @err, {})
+              @App.ipc.withArgs("open:project").yield(@err)
 
         it "displays errors", ->
           cy.contains("Can't start server")
 
-        it "displays config after error is fixed.", ->
-          cy
-            .contains("Can't start server").then ->
-              @ipc.handle("open:project", null, @config)
+        it "displays config after error is fixed", ->
+          cy.contains("Can't start server").then ->
+            @App.ipc.withArgs("open:project").yield(null, @config)
           cy.contains("Settings")
 
     context "on:focus:tests clicked", ->
       beforeEach ->
         cy
           .contains("Settings")
+          .then =>
+            @App.ipc.withArgs("on:focus:tests").yield()
 
       it "routes to specs page", ->
-        @ipc.handle("on:focus:tests")
         cy
           .location().then (location) ->
             expect(location.href).to.include("projects")
@@ -188,40 +202,20 @@ describe "Settings", ->
             expect(location.href).to.include("specs")
 
   context "when project is not set up for CI", ->
+    it "does not show ci Keys section when project has no id", ->
+      @config.projectId = null
+      @App.ipc.withArgs("open:project").yields(null, @config)
+      @getProjectStatuses.resolve(@projectStatuses)
+      cy
+      cy.contains("h5", "CI Keys").should("not.exist")
 
-    describe "and has no id", ->
-      beforeEach ->
-        cy.then ->
-          @ipc.handle("get:projects", null, @projects)
-        .get(".projects-list a")
-          .contains("My-Other-Fake-Project").click()
-        .fixture("browsers").as("browsers")
-        .fixture("config").then (@config) ->
-          @config.projectId = null
-          @ipc.handle("open:project", null, @config)
-        .get(".navbar-default")
-        .get("a").contains("Settings").click()
+    it "does not show ci Keys section when project is invalid", ->
+      @projectStatuses[0].valid = false
+      @getProjectStatuses.resolve(@projectStatuses)
+      cy
+      .get(".projects-list a")
+        .contains("My-Fake-Project").click()
+      .get(".navbar-default")
+      .get("a").contains("Settings").click()
 
-      it "does not show project id section", ->
-        cy.contains(".rc-collapse-header", "Project ID").should("not.exist")
-
-      it "does not show ci keys section", ->
-        cy.contains(".rc-collapse-header", "CI Keys").should("not.exist")
-
-    describe "and is invalid", ->
-      beforeEach ->
-        cy.then ->
-          @ipc.handle("get:projects", null, @projects)
-        .then ->
-          @projectStatuses[0].state = "INVALID"
-          @ipc.handle("get:project:statuses", null, @projectStatuses)
-        .get(".projects-list a")
-          .contains("My-Fake-Project").click()
-        .fixture("browsers").as("browsers")
-        .fixture("config").then (@config) ->
-          @ipc.handle("open:project", null, @config)
-        .get(".navbar-default")
-        .get("a").contains("Settings").click()
-
-      it "does not show ci keys section", ->
-        cy.contains(".rc-collapse-header", "CI Keys").should("not.exist")
+      cy.contains("h5", "CI Keys").should("not.exist")

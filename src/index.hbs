@@ -28,7 +28,9 @@
       __REACT_DEVTOOLS_GLOBAL_HOOK__ = parent.__REACT_DEVTOOLS_GLOBAL_HOOK__
     }
 
-    App.start()
+    if (!window.Cypress) {
+      App.start()
+    }
   </script>
 </body>
 </html>

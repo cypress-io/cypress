@@ -18,54 +18,12 @@ const removeMsgById = (id) => {
   msgs = _.omit(msgs, `${id}`)
 }
 
-let onError = () => {}
-
 const createIpc = () => {
   console.warn("Missing 'ipc'. Polyfilling in development mode.") // eslint-disable-line no-console
-
-  let responses = []
-
-  // return a mock ipc interface useful in development + testing
-  return ({
+  return {
     on () {},
-    off () {},
-    send (resp, id, event) {
-      // if we have a pending response then just
-      // invoke it asynchronously
-      let response = _.find(responses, { event })
-      if (response) {
-        responses = _.without(responses, response)
-        return Promise.delay(1).then(() => {
-          this.handle(event, response.err, response.data)
-          response.resolve()
-        })
-      }
-    },
-
-    handle (event, err, data) {
-      return new Promise((resolve) => {
-        // create our own handle function to callback the registered events
-        //
-        // grab the first msg by its event
-        const msg = _.find(msgs, { event })
-
-        if (msg) {
-          if (err) {
-            onError(err)
-          }
-          msg.fn(err, data)
-          resolve()
-        } else {
-          responses.push({
-            event,
-            err,
-            data,
-            resolve,
-          })
-        }
-      })
-    },
-  })
+    send () {},
+  }
 }
 
 const ipc = window.ipc != null ? window.ipc : (window.ipc = createIpc())
@@ -76,10 +34,6 @@ ipc.on("response", (event, obj = {}) => {
 
   // standard node callback implementation
   if (msg) {
-    if (__error) {
-      onError(__error)
-    }
-
     msg.fn(__error, data)
   }
 })
@@ -140,9 +94,6 @@ const appIpc = (...args) => {
   return fn()
 }
 
-appIpc.onError = (handler) => {
-  onError = handler
-}
 appIpc.offById = removeMsgById
 appIpc.off = removeMsgsByEvent
 

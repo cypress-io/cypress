@@ -1,45 +1,59 @@
 _ = require("lodash")
 moment = require("moment")
+{deferred, stubIpc} = require("../support/util")
 
 describe "Setup Project", ->
   beforeEach ->
-    @firstProjectName = "My-Fake-Project"
-
     cy
+      .fixture("user").as("user")
+      .fixture("projects").as("projects")
+      .fixture("projects_statuses").as("projectStatuses")
+      .fixture("config").as("config")
+      .fixture("specs").as("specs")
+      .fixture("organizations").as("orgs")
+      .fixture("ci_keys").as("ciKeys")
       .visit("/")
       .window().then (win) ->
-        {@ipc, @App} = win
-        @agents = cy.agents()
-        @ipc.handle("get:options", null, {})
-        @agents.spy(@App, "ipc")
-      .fixture("builds").as("builds")
-      .fixture("browsers").as("browsers")
-      .fixture("user").then (@user) ->
-        @ipc.handle("get:current:user", null, @user)
-      .fixture("projects").then (@projects) ->
-        @ipc.handle("get:projects", null, @projects)
-      .fixture("projects_statuses").then (@projects_statuses) =>
-        @ipc.handle("get:project:statuses", null, @projects_statuses)
-      .get(".projects-list a")
-        .contains("My-Fake-Project").click()
-      .fixture("ci_keys").as("ciKeys")
-      .fixture("config").then (@config) ->
+        {@App} = win
+        cy.stub(@App, "ipc").as("ipc")
+
         @config.projectId = null
-        @ipc.handle("open:project", null, @config)
-      .fixture("specs").as("specs").then ->
-        @ipc.handle("get:specs", null, @specs)
-      .get(".nav a").contains("Builds").click()
-      .then =>
-        @ipc.handle("get:builds", null, [])
+        @setupCiProject = deferred()
+        @getOrgs = deferred()
+
+        stubIpc(@App.ipc, {
+          "on:menu:clicked": ->
+          "close:browser": ->
+          "close:project": ->
+          "on:focus:tests": ->
+          "get:options": (stub) => stub.resolves({})
+          "get:current:user": (stub) => stub.resolves(@user)
+          "updater:check": (stub) => stub.resolves(false)
+          "get:projects": (stub) => stub.resolves(@projects)
+          "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
+          "open:project": (stub) => stub.yields(null, @config)
+          "get:specs": (stub) => stub.resolves(@specs)
+          "get:builds": (stub) => stub.resolves([])
+          "get:orgs": (stub) => stub.returns(@getOrgs.promise)
+          "setup:ci:project": (stub) => stub.returns(@setupCiProject.promise)
+          "get:ci:keys": (stub) => stub.resolves(@ciKeys)
+        })
+
+        @App.start()
+
+        cy
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
+          .get(".navbar-default a")
+            .contains("Builds").click()
 
   it "displays empty message", ->
     cy.contains("You Have No Recorded Builds")
 
   context "modal display", ->
     beforeEach ->
+      @getOrgs.resolve(@orgs)
       cy
-        .fixture("organizations").as("orgs").then ->
-          @ipc.handle("get:orgs", null, @orgs)
         .get(".btn").contains("Setup Project").click()
 
     it "clicking link opens setup project window", ->
@@ -53,28 +67,26 @@ describe "Setup Project", ->
 
   context "project name", ->
     beforeEach ->
+      @getOrgs.resolve(@orgs)
       cy
-        .fixture("organizations").as("orgs").then ->
-          @ipc.handle("get:orgs", null, @orgs)
         .get(".btn").contains("Setup Project").click()
 
     it "prefills Project Name", ->
       cy
-        .get("#projectName").should("have.value", @firstProjectName)
+        .get("#projectName").should("have.value", "My-Fake-Project")
 
     it "allows me to change Project Name value", ->
-      @newProjectName = "New Project Here"
+      newProjectName = "New Project Here"
 
       cy
-        .get("#projectName").clear().type(@newProjectName)
-        .get("#projectName").should("have.value", @newProjectName)
+        .get("#projectName").clear().type(newProjectName)
+        .get("#projectName").should("have.value", newProjectName)
 
   context "selecting owner", ->
     describe "default", ->
       beforeEach ->
+        @getOrgs.resolve(@orgs)
         cy
-          .fixture("organizations").as("orgs").then ->
-            @ipc.handle("get:orgs", null, @orgs)
           .get(".btn").contains("Setup Project").click()
 
       it "has no owner selected by default", ->
@@ -83,9 +95,8 @@ describe "Setup Project", ->
 
     describe "select me", ->
       beforeEach ->
+        @getOrgs.resolve(@orgs)
         cy
-          .fixture("organizations").as("orgs").then ->
-            @ipc.handle("get:orgs", null, @orgs)
           .get(".btn").contains("Setup Project").click()
           .get(".privacy-radio").should("not.be.visible")
           .get(".modal-content")
@@ -99,9 +110,8 @@ describe "Setup Project", ->
     describe "select organization", ->
       context "with organization", ->
         beforeEach ->
+          @getOrgs.resolve(@orgs)
           cy
-            .fixture("organizations").as("orgs").then ->
-              @ipc.handle("get:orgs", null, @orgs)
             .get(".btn").contains("Setup Project").click()
             .get(".modal-content")
               .contains(".btn", "An Organization").click()
@@ -109,12 +119,11 @@ describe "Setup Project", ->
         it "lists organizations to assign to project", ->
           cy
             .get("#organizations-select").find("option")
-              # orgs minus the default + 1 for the 'select'
-              .should("have.length", (@orgs.length) - 1 + 1)
+              .should("have.length", @orgs.length)
 
         it "selects none by default", ->
           cy
-            .get("#organizations-select").should("have.value", "-- Select Organization --")
+            .get("#organizations-select").should("have.value", "")
 
         it "opens external link on click of manage", ->
           cy
@@ -136,13 +145,12 @@ describe "Setup Project", ->
             .get(".btn").contains("Me").click()
             .get(".privacy-radio").find("input").should("not.be.checked")
             .get(".btn").contains("An Organization").click()
-            .get("#organizations-select").should("have.value", "-- Select Organization --")
+            .get("#organizations-select").should("have.value", "")
 
       context "with no organizations", ->
         beforeEach ->
+          @getOrgs.resolve([])
           cy
-            .fixture("organizations").as("orgs").then ->
-              @ipc.handle("get:orgs", null, [])
             .get(".btn").contains("Setup Project").click()
             .get(".modal-content")
               .contains(".btn", "An Organization").click()
@@ -150,46 +158,36 @@ describe "Setup Project", ->
         it "displays empty message", ->
           cy
             .get(".empty-select-orgs").should("be.visible")
-            .contains("Create Organization").click().then ->
-               expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/organizations")
+
+        it "opens dashboard organizations when 'create organizatoin' is clicked", ->
+          cy.contains("Create Organization").click().then ->
+             expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/organizations")
 
       context "polls for newly added organizations", ->
         beforeEach ->
+          @getOrgs.resolve(@orgs)
           cy
-            .window().then (win) =>
-              @clock = win.sinon.useFakeTimers()
-
-            .fixture("organizations").as("orgs").then =>
-              @ipc.handle("get:orgs", null, @orgs)
-              @clock.tick(100)
+            .clock()
             .get(".btn").contains("Setup Project").click()
             .get(".modal-content")
               .contains(".btn", "An Organization").click()
 
-        afterEach ->
-          @clock.restore()
-
         it "polls for orgs twice on click of org", ->
-          cy.then =>
-            @ipc.handle("get:orgs", null, @orgs)
-            @clock.tick(11000)
-          .then =>
-              expect(@App.ipc.withArgs("get:orgs")).to.be.calledTwice
+          cy.tick(11000).then =>
+            expect(@App.ipc.withArgs("get:orgs")).to.be.calledTwice
 
         it "updates orgs list on successful poll", ->
-          cy.then =>
-            @orgs[0].name = "Foo Bar Devs"
-            @ipc.handle("get:orgs", null, @orgs)
-            @clock.tick(11000)
+          @orgs[0].name = "Foo Bar Devs"
+          @getOrgsAgain = @App.ipc.withArgs("get:orgs").onCall(2).resolves(@orgs)
           cy
+            .tick(11000)
             .get("#organizations-select").find("option")
               .contains("Foo Bar Devs")
 
   describe "on submit", ->
     beforeEach ->
+      @getOrgs.resolve(@orgs)
       cy
-        .fixture("organizations").as("orgs").then ->
-          @ipc.handle("get:orgs", null, @orgs)
         .contains(".btn", "Setup Project").click()
         .get(".modal-body")
           .contains(".btn", "Me").click()
@@ -212,17 +210,14 @@ describe "Setup Project", ->
 
   describe "successfully submit form", ->
     beforeEach ->
-      @ipc.handle("setup:ci:project", null, {
+      @getOrgs.resolve(@orgs)
+      @setupCiProject.resolve({
         id: "project-id-123"
         public: true
         orgId: "000"
       })
-      @ipc.handle("get:ci:keys", null, @ciKeys)
 
-      cy
-        .fixture("organizations").as("orgs").then ->
-          @ipc.handle("get:orgs", null, @orgs)
-        .contains(".btn", "Setup Project").click()
+      cy.contains(".btn", "Setup Project").click()
 
     context "org/public", ->
       beforeEach ->
@@ -288,9 +283,8 @@ describe "Setup Project", ->
 
   describe "errors from ipc event", ->
     beforeEach ->
+      @getOrgs.resolve(@orgs)
       cy
-        .fixture("organizations").as("orgs").then ->
-          @ipc.handle("get:orgs", null, @orgs)
         .contains(".btn", "Setup Project").click()
         .get(".modal-body")
           .contains(".btn", "Me").click()
@@ -298,7 +292,7 @@ describe "Setup Project", ->
         .get(".modal-body")
           .contains(".btn", "Setup Project").click()
         .then =>
-          @ipc.handle("setup:ci:project", {
+          @setupCiProject.reject({
             name: "Fatal Error!"
             message: """
             {
@@ -310,4 +304,3 @@ describe "Setup Project", ->
 
     it "displays error name and message", ->
       cy.contains('"system": "down"')
-
