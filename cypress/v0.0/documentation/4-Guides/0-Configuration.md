@@ -198,4 +198,4 @@ When you open a Cypress project, we will display the resolved configuration to y
 
 This makes it easy to understand and see where different values came from.
 
-![Resolved Configuration](https://cloud.githubusercontent.com/assets/1271364/20274382/62343774-aa62-11e6-8d88-219fdc8512f9.png)
+![Resolved Configuration](https://cloud.githubusercontent.com/assets/1271364/22704601/47c9881e-ed36-11e6-81a0-725778038902.png)
