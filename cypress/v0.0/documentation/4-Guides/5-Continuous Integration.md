@@ -9,7 +9,7 @@ excerpt: Run Cypress in any CI provider
 - :fa-angle-right: [Troubleshooting](#section-troubleshooting)
 - :fa-angle-right: [Running in CI](#section-running-in-ci)
   - [Add your project to your CI provider](#section-add-you-project-to-your-ci-provider)
-  - [Acquire a Cypress secret key](#section-acquire-a-cypress-ci-key)
+  - [Acquire a CI key](#section-acquire-a-ci-key)
   - [Add 2 lines of code to your CI config file](#section-add-2-lines-of-code-to-your-ci-config-file)
   - [What is the difference between `cypress run` and `cypress ci`?](#section-what-is-the-difference-between-cypress-run-and-cypress-ci-)
 - :fa-angle-right: [Environment Variables](#section-environment-variables)
@@ -78,7 +78,7 @@ When executing `cypress run` or `cypress ci`, if you see no output you are likel
 Running Cypress in CI is very easy. If you're using a hosted CI service, generally the workflow is the same:
 
 1. [Add your project's repo to your CI provider](#section-add-your-project-to-your-ci-provider)
-2. [Acquire a Cypress secret key](#section-acquire-a-cypress-secret-key)
+2. [Acquire a CI Key](#section-acquire-a-ci-key)
 3. [Add 2 lines of code to your CI config file](#section-add-2-lines-of-code-to-your-ci-config-file)
 
 ***
@@ -89,7 +89,7 @@ This is different for each provider, but usually includes logging into your CI s
 
 ***
 
-## Acquire a Cypress CI key
+## Acquire a CI key
 
 Cypress verifies that your project is allowed to run in CI by using a CI key. This key can only be obtained from the [Cypress CLI tool](https://on.cypress.io/cli), within the Project Settings tab in the Desktop App, or within the Project Settings tab in the [Cypress Dashboard](http://on.cypress.io/dashboard).
 
@@ -159,7 +159,7 @@ For instance, with [Travis CI](https://docs.travis-ci.com/user/customizing-the-b
 
 `cypress ci` and `cypress run` both run your tests headlessly.
 
-- `cypress ci` requires a [CI Key](https://docs.cypress.io/docs/continuous-integration#section-acquire-a-cypress-ci-key) and uploads build assets (such as screenshots, videos, and logs) to our Cypress servers after a test run completes. If you do not want your assets to be tracked by Cypress, you will want to use `cypress run`.
+- `cypress ci` requires a [CI Key](https://docs.cypress.io/docs/continuous-integration#section-acquire-a-ci-key) and uploads build assets (such as screenshots, videos, and logs) to our Cypress servers after a test run completes. If you do not want your assets to be tracked by Cypress, you will want to use `cypress run`.
 - `cypress run` does *not* upload build assets (such as screenshots, videos, and logs) to our Cypress servers after a test run completes. This also means that you will not be able to review your screenshots or videos in our upcoming Cypress CI Portal.
 
 We recommend that you use `cypress ci` to take full advantage of the [Cypress Dashboard](https://on.cypress.io/dashboard)
