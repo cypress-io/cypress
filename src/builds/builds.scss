@@ -47,6 +47,8 @@
     border: 1px solid #eee;
     background-color: #f5f5f5;
     color: #777;
+    margin-bottom: 0;
+
     ul {
       padding-left: 0;
       margin-bottom: 0;
@@ -152,6 +154,7 @@
   &>img {
     float: left;
     margin-right: 25px;
+    border: 1px solid #cecece;
 
     &:last-of-type {
       margin-right: 0;

@@ -126,7 +126,7 @@ class SetupProject extends Component {
                     className='user-avatar'
                     height='13'
                     width='13'
-                    src={`${gravatarUrl(state.email)}`}
+                    src={`${gravatarUrl(state.user.email)}`}
                   />
                   {' '}Me
               </label>

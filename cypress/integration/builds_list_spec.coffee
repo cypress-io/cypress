@@ -293,13 +293,13 @@ describe "Builds List", ->
         cy
           .contains("Why?").click()
           .then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/why-do-i-need-a-project-id")
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/projects#section-what-is-a-projectid-")
 
       it "opens dashboard on clicking 'Cypress Dashboard'", ->
         cy
           .contains("Cypress Dashboard").click()
           .then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard")
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@config.projectId}/builds")
 
   describe "list builds", ->
     beforeEach ->

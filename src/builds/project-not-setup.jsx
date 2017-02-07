@@ -46,9 +46,9 @@ export default class ProjectNotSetup extends Component {
         <h4>You Have No Recorded Builds</h4>
         <p>Cypress can record screenshots, videos and failures when running <code>cypress ci</code>.</p>
         <div className='builds-screenshots'>
-          <img width='150' height='150' src="http://placehold.it/150x150" />
-          <img width='150' height='150' src="http://placehold.it/150x150" />
-          <img width='150' height='150' src="http://placehold.it/150x150" />
+          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-1' />
+          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-2' />
+          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-3' />
         </div>
         <p>After builds are recorded, you will see them here and on your <a href='#' onClick={this._visitDashboard}>Cypress Dashboard</a>.</p>
         <button

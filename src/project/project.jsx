@@ -146,14 +146,12 @@ class Project extends Component {
   }
 
   _errorMessage (message) {
-    function createMarkup () {
-      return {
-        __html: message.replace('\n', '<br /><br />'),
-      }
+    const html = {
+      __html: message.split('\n').join('<br />'),
     }
 
     return (
-      <span dangerouslySetInnerHTML={createMarkup()} />
+      <span dangerouslySetInnerHTML={html} />
     )
   }
 
