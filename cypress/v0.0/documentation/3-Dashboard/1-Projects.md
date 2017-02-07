@@ -28,7 +28,7 @@ Projects can **only** be added to Cypress through our [Desktop Application](http
 
 1. Click :fa-plus: Add Project.
 
-![](https://cloud.githubusercontent.com/assets/1271364/22699969/fe44c2e4-ed26-11e6-83d0-9baa0f51b15e.png)
+![Add Project in LeftHand Corner](https://cloud.githubusercontent.com/assets/1271364/22699969/fe44c2e4-ed26-11e6-83d0-9baa0f51b15e.png)
 
 [block:callout]
 {
@@ -51,17 +51,17 @@ During a build we record all failing tests, logs, screenshots, and videos.
 
 1. Click on the Builds tab of your project, then click "Setup Project to Record".
 
-![](https://cloud.githubusercontent.com/assets/1271364/22700292/2597d81c-ed28-11e6-8cfa-aa3670605418.png)
+![Setup Project Screen](https://cloud.githubusercontent.com/assets/1271364/22700292/2597d81c-ed28-11e6-8cfa-aa3670605418.png)
 
 2. Fill in the name of your project (this is only for display purposes and can be changed later).
 
-![](https://cloud.githubusercontent.com/assets/1271364/22700406/9b3bc416-ed28-11e6-995b-297350420cce.png)
+![Project Name in Setup Project](https://cloud.githubusercontent.com/assets/1271364/22700406/9b3bc416-ed28-11e6-995b-297350420cce.png)
 
 3. Choose who owns the project. You can personally own it or select an organization you've created. Organizations work just like they do in Github. They enable you seperate your personal and work projects.
 
 [Read more about Organizations.](https://on.cypress.io/guides/organizations)
 
-![](https://cloud.githubusercontent.com/assets/1271364/22700579/26353ba6-ed29-11e6-9510-5b7bf4a1cdd2.png)
+![Chosen Organization to Own](https://cloud.githubusercontent.com/assets/1271364/22700579/26353ba6-ed29-11e6-9510-5b7bf4a1cdd2.png)
 
 4. Choose whether this project is Public or Private.
 
@@ -69,7 +69,7 @@ During a build we record all failing tests, logs, screenshots, and videos.
 
 **A private project** restricts its access to *only users you invite* to see your Organization or your own projects.
 
-![](https://cloud.githubusercontent.com/assets/1271364/22700720/8d539c24-ed29-11e6-97a4-915f008c17db.png)
+![Privacy of Project](https://cloud.githubusercontent.com/assets/1271364/22700720/8d539c24-ed29-11e6-97a4-915f008c17db.png)
 
 5. Click "Setup Project".
 
@@ -84,7 +84,7 @@ You are now ready to integrate Cypress into your CI Provider so that builds can 
 
 Once builds run, you will see them show up in the [Dashboard](https://on.cypress.io/dashboard) and in the Desktop Application.
 
-![](https://cloud.githubusercontent.com/assets/1271364/22701577/fab631d0-ed2b-11e6-8ee1-f57a89013658.png)
+![Builds List](https://cloud.githubusercontent.com/assets/1271364/22701577/fab631d0-ed2b-11e6-8ee1-f57a89013658.png)
 
 (image of dashboard builds)
 
