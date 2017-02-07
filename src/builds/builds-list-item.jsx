@@ -51,7 +51,6 @@ export default class BuildsListItem extends Component {
                   <span className='commit-msg'>
                     {' '}
                     {build.commitMessage.split('\n')[0]}
-                    }
                   </span> :
                   null
               }
@@ -117,40 +116,52 @@ export default class BuildsListItem extends Component {
           </div>
         </div>
         <div className='row-column-wrapper'>
-          <div className='result'>
-            <i className="fa fa-circle-o-notch"></i>{' '}
-            <span>
-              {
-                build.totalPending ?
-                  build.totalPending :
-                  '-'
-              }
-            </span>
-          </div>
+          {
+            build.status !== 'running' ?
+              <div className='result'>
+                <i className="fa fa-circle-o-notch"></i>{' '}
+                <span>
+                  {
+                    build.totalPending ?
+                      build.totalPending :
+                      '-'
+                  }
+                </span>
+              </div> :
+              null
+          }
         </div>
         <div className='row-column-wrapper'>
-          <div className='result'>
-            <i className="fa fa-check green"></i>{' '}
-            <span>
-              {
-                build.totalPasses ?
-                  build.totalPasses :
-                  "-"
-              }
-            </span>
-          </div>
+          {
+            build.status !== 'running' ?
+              <div className='result'>
+                <i className="fa fa-check green"></i>{' '}
+                <span>
+                  {
+                    build.totalPasses ?
+                      build.totalPasses :
+                      "-"
+                  }
+                </span>
+              </div> :
+              null
+          }
         </div>
         <div className='row-column-wrapper'>
-          <div className='result'>
-            <i className="fa fa-times red"></i>{' '}
-            <span>
-              {
-                build.totalFailures ?
-                  build.totalFailures :
-                  "-"
-              }
-            </span>
-          </div>
+          {
+            build.status !== 'running' ?
+              <div className='result'>
+                <i className="fa fa-times red"></i>{' '}
+                <span>
+                  {
+                    build.totalFailures ?
+                      build.totalFailures :
+                      "-"
+                  }
+                </span>
+              </div> :
+              null
+          }
         </div>
       </li>
     )
