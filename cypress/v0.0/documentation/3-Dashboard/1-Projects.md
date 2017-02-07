@@ -136,7 +136,7 @@ The CI Key is used to authenticate that your project is allowed to record. As lo
 
 If you have a **public project** you should **still** keep your CI Key secret. If someone knows both your CI Key and your `projectId`, they could record builds for your project - which would mix up all the of your results!
 
-Think of your CI Key as the key that enables you to "write and create" builds. However, it has nothing to do with being able to "read or see" builds once they are created. Read on to understand our security model.
+Think of your CI Key as the key that enables you to "write and create" builds. However, it has nothing to do with being able to "read or see" builds once they are created.
 
 [block:callout]
 {
