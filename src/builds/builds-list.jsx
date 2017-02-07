@@ -260,7 +260,7 @@ class Builds extends Component {
           <p className='alert alert-default'>
             <i className='fa fa-info-circle'></i>{' '}
             Builds you record will show up here and on your{' '}
-            <a href='#' onClick={this._visitDashboard}>Cypress Dashboard</a>.
+            <a href='#' onClick={this._openBuilds}>Cypress Dashboard</a>.
           </p>
         </div>
       </div>
@@ -279,7 +279,7 @@ class Builds extends Component {
 
   _openProjectIdGuide = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/why-do-i-need-a-project-id')
+    App.ipc('external:open', 'https://on.cypress.io/guides/projects#section-what-is-a-projectid-')
   }
 
   _openBuild = (buildId) => {
