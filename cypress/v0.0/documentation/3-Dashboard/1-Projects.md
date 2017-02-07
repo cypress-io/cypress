@@ -132,6 +132,8 @@ f4466038-70c2-4688-9ed9-106bf013cd73
 
 Cypress uses your `projectId` and CI Key together to identify projects.
 
+![ProjectID and CI Keys in Dashboard](https://cloud.githubusercontent.com/assets/1271364/22709269/3f6d912c-ed47-11e6-87b1-5792ff322541.png)
+
 The CI Key is used to authenticate that your project is allowed to record. As long as your CI Key stays *private*, nobody will be able to record builds for your project - even if they have your projectId.
 
 If you have a **public project** you should **still** keep your CI Key secret. If someone knows both your CI Key and your `projectId`, they could record builds for your project - which would mix up all the of your results!
