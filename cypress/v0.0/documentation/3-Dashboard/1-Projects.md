@@ -165,9 +165,9 @@ A CI Key has nothing to do with **viewing** build data - it's a "write only" key
 
 # Transferring Ownership of a Project
 
-You can transfer projects between organizations you are a part of. This functionality only exists in our [Dashboard](https://on.cypress.io/dashboard).
+You can transfer projects that you own to another organization you are a part of or to another user in the organization. This functionality only exists in our [Dashboard](https://on.cypress.io/dashboard).
 
-(image)
+![Transfer Project dialog](https://cloud.githubusercontent.com/assets/1271364/22708695/440f4e5c-ed45-11e6-9a98-8f91b67871a3.png)
 
 ***
 
@@ -175,4 +175,4 @@ You can transfer projects between organizations you are a part of. This function
 
 You can delete projects you own, which will also delete all of their recorded builds. This functionality only exists in our [Dashboard](https://on.cypress.io/dashboard).
 
-(image)
+![Delete project dialog](https://cloud.githubusercontent.com/assets/1271364/22708770/89f3080a-ed45-11e6-820e-7a8880fb0c20.png)
