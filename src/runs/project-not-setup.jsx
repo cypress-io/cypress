@@ -21,7 +21,7 @@ export default class ProjectNotSetup extends Component {
 
   render () {
     return (
-      <div id='builds-list-page'>
+      <div id='runs-list-page'>
         <div className="empty">
           {
             this.props.isValid ?
@@ -42,15 +42,15 @@ export default class ProjectNotSetup extends Component {
 
   _getStartedWithCI () {
     return (
-      <div className='empty-no-builds'>
-        <h4>You Have No Recorded Builds</h4>
+      <div className='empty-no-runs'>
+        <h4>You Have No Recorded Runs</h4>
         <p>Cypress can record screenshots, videos and failures when running <code>cypress ci</code>.</p>
-        <div className='builds-screenshots'>
+        <div className='runs-screenshots'>
           <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-1' />
           <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-2' />
           <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-3' />
         </div>
-        <p>After builds are recorded, you will see them here and on your <a href='#' onClick={this._visitDashboard}>Cypress Dashboard</a>.</p>
+        <p>After runs are recorded, you will see them here and on your <a href='#' onClick={this._visitDashboard}>Cypress Dashboard</a>.</p>
         <button
           className='btn btn-primary'
           onClick={this._showSetupProjectModal}
@@ -69,13 +69,13 @@ export default class ProjectNotSetup extends Component {
 
   _invalidProject () {
     return (
-      <div className='empty-builds-not-displayed'>
+      <div className='empty-runs-not-displayed'>
         <h4>
           <i className='fa fa-warning errored'></i>{' '}
-          Builds Cannot Be Displayed
+          Runs Cannot Be Displayed
         </h4>
         <p>We were unable to find an existing project matching the <code>projectId</code> in your <code>cypress.json</code>.</p>
-        <p>To see builds for a current project, add the correct <code>projectId</code> to your <code>cypress.json</code></p>
+        <p>To see runs for a current project, add the correct <code>projectId</code> to your <code>cypress.json</code></p>
         <p>- or -</p>
         <button
           className='btn btn-warning'
@@ -85,7 +85,7 @@ export default class ProjectNotSetup extends Component {
           Setup a New Project
         </button>
         <p>
-          <small>The new project will have no previous build data.</small>
+          <small>The new project will have no previous run data.</small>
         </p>
       </div>
     )

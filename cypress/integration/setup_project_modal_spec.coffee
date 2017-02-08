@@ -45,10 +45,10 @@ describe "Setup Project", ->
           .get(".projects-list a")
             .contains("My-Fake-Project").click()
           .get(".navbar-default a")
-            .contains("Builds").click()
+            .contains("Runs").click()
 
   it "displays empty message", ->
-    cy.contains("You Have No Recorded Builds")
+    cy.contains("You Have No Recorded Runs")
 
   context "modal display", ->
     beforeEach ->
@@ -274,7 +274,7 @@ describe "Setup Project", ->
       it "updates localStorage projects cache", ->
         expect(JSON.parse(localStorage.projects || "[]")[0].orgName).to.equal("Jane Lane")
 
-      it "displays empty builds page", ->
+      it "displays empty runs page", ->
         cy.contains("To record your first")
 
       describe "welcome page", ->

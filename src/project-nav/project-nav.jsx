@@ -21,11 +21,11 @@ export default class ProjectNav extends Component {
             </li>
             <li>
               <Link
-                to={`/projects/${project.clientId}/builds`}
+                to={`/projects/${project.clientId}/runs`}
                 activeClassName='active'
                 >
-                <i className='fa fa-database'></i>{' '}
-                Builds
+                <i className='fa fa-history fa-flip-horizontal'></i>{' '}
+                Runs
               </Link>
             </li>
             <li>

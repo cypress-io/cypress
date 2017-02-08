@@ -162,7 +162,7 @@ class Config extends Component {
         </a>
         <p className='text-muted'>
           CI Keys allow you to record test results, screenshots and videos in Cypress.
-          {this._hasCiKeys() ? ' To record your builds, run this command:' : ''}
+          {this._hasCiKeys() ? ' To record your tests, run this command:' : ''}
         </p>
         {this._hasCiKeys() ? <pre><code>cypress ci {this.state.ciKeys[0].id}</code></pre> : null}
         {this._ciKeys()}

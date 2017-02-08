@@ -84,16 +84,6 @@ export default class Nav extends Component {
         </li>
       )
     }
-    //  else {
-    //   return (
-    //     <li>
-    //       <Link to='/login'>
-    //         <i className='fa fa-sign-in'></i>{' '}
-    //         Log In
-    //       </Link>
-    //     </li>
-    //   )
-    // }
   }
 
   _closeProject = () => {

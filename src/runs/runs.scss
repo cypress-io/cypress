@@ -1,4 +1,4 @@
-#builds {
+#runs {
   bottom: 18px;
   top: 77px;
   position: fixed;
@@ -14,7 +14,7 @@
   }
 }
 
-#builds-list-page {
+#runs-list-page {
   bottom: 18px;
   top: 77px;
   position: fixed;
@@ -23,7 +23,7 @@
   width: 100%;
 }
 
-.first-build-instructions {
+.first-run-instructions {
   padding: 40px 130px;
 
   p {
@@ -96,7 +96,7 @@
   }
 }
 
-.builds {
+.runs {
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -131,7 +131,7 @@
       line-height: 39px;
     }
 
-    .see-all-builds:active {
+    .see-all-runs:active {
       box-shadow: none;
     }
 
@@ -146,7 +146,7 @@
   }
 }
 
-.builds-screenshots {
+.runs-screenshots {
   overflow: auto;
   width: 500px;
   margin: 15px auto;
@@ -162,7 +162,7 @@
   }
 }
 
-.builds-container {
+.runs-container {
   margin-bottom: 0;
   @include list-columns(0%, 10%, 25%, 14%, 10%, 12%, 7%, 7%, 8%, 7%);
 
@@ -472,13 +472,13 @@
   }
 }
 
-.builds-list-error {
+.runs-list-error {
   margin-top: 100px
 }
 
 .setup-project-modal,
 .request-access,
-.builds-list-error {
+.runs-list-error {
   .alert-danger {
     margin: 0 2em 1em;
     max-height: 200px;

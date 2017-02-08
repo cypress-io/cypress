@@ -13,7 +13,7 @@ describe "Settings", ->
       .fixture("browsers").as("browsers")
       .fixture("projects").as("projects")
       .fixture("projects_statuses").as("projectStatuses")
-      .fixture("builds").as("builds")
+      .fixture("runs").as("runs")
       .window().then (win) ->
         {@App} = win
         cy.stub(@App, "ipc").as("ipc")
@@ -29,7 +29,7 @@ describe "Settings", ->
           "get:project:statuses": (stub) => stub.returns(@getProjectStatuses.promise)
           "open:project": (stub) => stub.yields(null, @config)
           "get:ci:keys": (stub) => stub.returns(@getCiKeys.promise)
-          "get:builds": (stub) => stub.resolves(@builds)
+          "get:builds": (stub) => stub.resolves(@runs)
           "get:orgs": (stub) => stub.resolves([])
         })
 
