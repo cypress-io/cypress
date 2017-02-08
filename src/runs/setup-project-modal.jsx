@@ -351,7 +351,7 @@ class SetupProject extends Component {
   }
 
   _setupProject () {
-    App.ipc('setup:ci:project', {
+    App.ipc('setup:dashboard:project', {
       projectName: this.state.projectName,
       orgId: this.state.orgId,
       public: this.state.public,

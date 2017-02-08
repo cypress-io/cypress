@@ -25,7 +25,7 @@ describe "Runs List", ->
       .fixture("specs").as("specs")
       .fixture("runs").as("runs")
       .fixture("organizations").as("orgs")
-      .fixture("ci_keys").as("ciKeys")
+      .fixture("dashboard_tokens").as("dashboardTokens")
       .visit("/")
       .window().then (win) ->
         {@App} = win
@@ -198,7 +198,7 @@ describe "Runs List", ->
     describe "no project id error", ->
       beforeEach ->
         stubIpc(@App.ipc, {
-          "setup:ci:project": (stub) => stub.resolves(@validCiProject)
+          "setup:dashboard:project": (stub) => stub.resolves(@validCiProject)
         })
         @goToRuns().then =>
           @getRuns.reject({name: "foo", message: "There's an error", type: "NO_PROJECT_ID"})
@@ -244,7 +244,7 @@ describe "Runs List", ->
         @config.projectId = null
         @App.ipc.withArgs("open:project").resolves(@config)
         stubIpc(@App.ipc, {
-          "setup:ci:project": (stub) => stub.resolves(@validCiProject)
+          "setup:dashboard:project": (stub) => stub.resolves(@validCiProject)
         })
 
         @goToRuns("project5").then =>

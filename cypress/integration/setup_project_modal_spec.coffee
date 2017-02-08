@@ -11,7 +11,7 @@ describe "Setup Project", ->
       .fixture("config").as("config")
       .fixture("specs").as("specs")
       .fixture("organizations").as("orgs")
-      .fixture("ci_keys").as("ciKeys")
+      .fixture("dashboard_tokens").as("dashboardTokens")
       .visit("/")
       .window().then (win) ->
         {@App} = win
@@ -35,8 +35,8 @@ describe "Setup Project", ->
           "get:specs": (stub) => stub.resolves(@specs)
           "get:builds": (stub) => stub.resolves([])
           "get:orgs": (stub) => stub.returns(@getOrgs.promise)
-          "setup:ci:project": (stub) => stub.returns(@setupCiProject.promise)
-          "get:ci:keys": (stub) => stub.resolves(@ciKeys)
+          "setup:dashboard:project": (stub) => stub.returns(@setupCiProject.promise)
+          "get:dashboard:tokens": (stub) => stub.resolves(@dashboardTokens)
         })
 
         @App.start()
@@ -230,7 +230,7 @@ describe "Setup Project", ->
             .contains(".btn", "Setup Project").click()
 
       it "sends data from form to ipc event", ->
-        expect(@App.ipc).to.be.calledWith("setup:ci:project", {
+        expect(@App.ipc).to.be.calledWith("setup:dashboard:project", {
           projectName: "My-Fake-Project"
           orgId: "777"
           public: true
@@ -246,7 +246,7 @@ describe "Setup Project", ->
             .contains(".btn", "Setup Project").click()
 
       it "sends data from form to ipc event", ->
-        expect(@App.ipc).to.be.calledWith("setup:ci:project", {
+        expect(@App.ipc).to.be.calledWith("setup:dashboard:project", {
           projectName: "My-Fake-Project"
           orgId: "000"
           public: false
@@ -262,7 +262,7 @@ describe "Setup Project", ->
             .contains(".btn", "Setup Project").click()
 
       it "sends data from form to ipc event", ->
-        expect(@App.ipc).to.be.calledWith("setup:ci:project", {
+        expect(@App.ipc).to.be.calledWith("setup:dashboard:project", {
           projectName: "My-Fake-Project"
           orgId: "000"
           public: true
@@ -278,8 +278,8 @@ describe "Setup Project", ->
         cy.contains("To record your first")
 
       describe "welcome page", ->
-        it "displays command to run with the ci key", ->
-          cy.contains("cypress ci ci-key-123")
+        it "displays command to run with the dashboard token", ->
+          cy.contains("cypress run dashboard-token-123")
 
   describe "errors from ipc event", ->
     beforeEach ->

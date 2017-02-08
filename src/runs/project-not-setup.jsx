@@ -44,7 +44,7 @@ export default class ProjectNotSetup extends Component {
     return (
       <div className='empty-no-runs'>
         <h4>You Have No Recorded Runs</h4>
-        <p>Cypress can record screenshots, videos and failures when running <code>cypress ci</code>.</p>
+        <p>Cypress can record screenshots, videos and failures when running <code>cypress run</code>.</p>
         <div className='runs-screenshots'>
           <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-1' />
           <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-2' />
