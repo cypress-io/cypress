@@ -96,7 +96,7 @@ describe "electron/ci", ->
         .then ->
           throw new Error("should have failed but did not")
         .catch (err) ->
-          expect(err.type).to.eq("CI_KEY_NOT_VALID")
+          expect(err.type).to.eq("DASHBOARD_TOKEN_NOT_VALID")
           expect(err.message).to.include("key")
           expect(err.message).to.include("3206e...158aa")
           expect(err.message).to.include("invalid")
@@ -111,7 +111,7 @@ describe "electron/ci", ->
       .then ->
         throw new Error("should have failed but did not")
       .catch (err) ->
-        expect(err.type).to.eq("CI_PROJECT_NOT_FOUND")
+        expect(err.type).to.eq("DASHBOARD_PROJECT_NOT_FOUND")
 
     it "handles all other errors", ->
       err = new Error("foo")
@@ -126,7 +126,7 @@ describe "electron/ci", ->
       ci.generateProjectBuildId(1,2,3,4)
       .then (ret) ->
         expect(ret).to.be.null
-        expect(errors.warning).to.be.calledWith("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+        expect(errors.warning).to.be.calledWith("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
         expect(console.log).to.be.calledWithMatch("Warning: We encountered an error talking to our servers.")
         expect(console.log).to.be.calledWithMatch("Error: foo")
         expect(logger.createException).to.be.calledWith(err)
@@ -156,7 +156,7 @@ describe "electron/ci", ->
 
       ci.uploadStdout("id-123", "asdf")
       .then ->
-        expect(errors.warning).to.be.calledWith("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+        expect(errors.warning).to.be.calledWith("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
         expect(console.log).to.be.calledWithMatch("No build assets will be recorded.")
         expect(console.log).to.be.calledWithMatch("Error: foo")
         expect(logger.createException).to.be.calledWith(err)
@@ -261,7 +261,7 @@ describe "electron/ci", ->
 
       ci.uploadAssets("id-123", {})
       .then ->
-        expect(errors.warning).to.be.calledWith("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+        expect(errors.warning).to.be.calledWith("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
         expect(console.log).to.be.calledWithMatch("No build assets will be recorded.")
         expect(console.log).to.be.calledWithMatch("Error: foo")
         expect(logger.createException).to.be.calledWith(err)
@@ -304,7 +304,7 @@ describe "electron/ci", ->
       ci.createInstance("id-123", null)
       .then (ret) ->
         expect(ret).to.be.null
-        expect(errors.warning).to.be.calledWith("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+        expect(errors.warning).to.be.calledWith("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
         expect(console.log).to.be.calledWithMatch("No build assets will be recorded.")
         expect(console.log).to.be.calledWithMatch("Error: foo")
         expect(logger.createException).to.be.calledWith(err)

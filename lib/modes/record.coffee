@@ -29,8 +29,8 @@ module.exports = {
 
     repo.getBranch()
 
-  generateProjectBuildId: (projectId, projectPath, projectName, projectToken) ->
-    if not projectToken
+  generateProjectBuildId: (projectId, projectPath, projectName, dashboardToken) ->
+    if not dashboardToken
       return errors.throw("CI_KEY_MISSING")
 
     repo = git.init(projectPath)
@@ -46,7 +46,7 @@ module.exports = {
     .then (git) ->
       api.createBuild({
         projectId:         projectId
-        projectToken:      projectToken
+        dashboardToken:    dashboardToken
         commitSha:         git.sha
         commitBranch:      git.branch
         commitAuthorName:  git.author
@@ -60,13 +60,13 @@ module.exports = {
       .catch (err) ->
         switch err.statusCode
           when 401
-            projectToken = projectToken.slice(0, 5) + "..." + projectToken.slice(-5)
-            errors.throw("CI_KEY_NOT_VALID", projectToken)
+            dashboardToken = dashboardToken.slice(0, 5) + "..." + dashboardToken.slice(-5)
+            errors.throw("DASHBOARD_TOKEN_NOT_VALID", dashboardToken, projectId)
           when 404
-            errors.throw("CI_PROJECT_NOT_FOUND")
+            errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
           else
             ## warn the user that assets will be not recorded
-            errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+            errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
             ## report on this exception
             ## and return null
@@ -79,7 +79,7 @@ module.exports = {
       spec:    spec
     })
     .catch (err) ->
-      errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+      errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
       ## dont log exceptions if we have a 503 status code
       if err.statusCode isnt 503
@@ -127,7 +127,7 @@ module.exports = {
     Promise
     .all(uploads)
     .catch (err) ->
-      errors.warning("CI_CANNOT_UPLOAD_ASSETS", err)
+      errors.warning("DASHBOARD_CANNOT_UPLOAD_RESULTS", err)
 
       logException(err)
 
@@ -168,7 +168,7 @@ module.exports = {
         screenshotUrls: resp.screenshotUploadUrls
       })
     .catch (err) ->
-      errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+      errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
       ## dont log exceptions if we have a 503 status code
       if err.statusCode isnt 503
@@ -183,7 +183,7 @@ module.exports = {
       stdout:       stdout
     })
     .catch (err) ->
-      errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+      errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
       ## dont log exceptions if we have a 503 status code
       logException(err) unless err.statusCode is 503

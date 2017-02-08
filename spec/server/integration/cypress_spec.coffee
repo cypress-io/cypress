@@ -758,7 +758,7 @@ describe "lib/cypress", ->
 
       cypress.start(["--project=#{@todosPath}", "--key=token-123", "--ci"])
       .then =>
-        @expectExitWithErr("CI_KEY_NOT_VALID", "token...n-123")
+        @expectExitWithErr("DASHBOARD_TOKEN_NOT_VALID", "token...n-123")
 
     it "logs error and exits when project could not be found", ->
       @setup()
@@ -769,7 +769,7 @@ describe "lib/cypress", ->
 
       cypress.start(["--project=#{@todosPath}", "--key=token-123", "--ci"])
       .then =>
-        @expectExitWithErr("CI_PROJECT_NOT_FOUND")
+        @expectExitWithErr("DASHBOARD_PROJECT_NOT_FOUND")
 
     it "logs error but continues running the tests", ->
       @setup()

@@ -9,7 +9,7 @@ API = {
     switch type
       when "CANNOT_TRASH_ASSETS"
         """
-        Warning: We failed to trash the existing run artifacts.
+        Warning: We failed to trash the existing run results.
 
         This error will not alter the exit code.
 
@@ -71,17 +71,17 @@ API = {
 
         https://on.cypress.io/deprecated-cypress-ci
         """
-      when "CI_CANNOT_UPLOAD_ASSETS"
+      when "DASHBOARD_CANNOT_UPLOAD_RESULTS"
         """
-        Warning: We encountered an error while uploading artifacts from your run.
+        Warning: We encountered an error while uploading results from your run.
 
-        These artifacts will not be recorded.
+        These results will not be recorded.
 
         This error will not alter or the exit code.
 
         #{arg1}
         """
-      when "CI_CANNOT_CREATE_BUILD_OR_INSTANCE"
+      when "DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE"
         """
         Warning: We encountered an error talking to our servers.
 
@@ -93,13 +93,29 @@ API = {
         """
       when "CI_KEY_MISSING"
         "Can't run in CI without a CI key. You did not provide one."
-      when "CI_KEY_NOT_VALID"
-        "Can't run project in CI. Your project's CI key: #{chalk.blue(arg1)} is invalid."
-      when "CI_PROJECT_NOT_FOUND"
+      when "DASHBOARD_TOKEN_NOT_VALID"
         """
-        Can't find project. Aborting the CI run.
+        We failed trying to authenticate this project.
 
-        Check that your 'projectId' and 'secret CI key' are valid.
+        Your Dashboard Token is invalid: #{chalk.yellow(arg1)}
+
+        It may have been recently revoked by you or another user.
+
+        Please log into the Dashboard to see the updated token.
+
+        https://on.cypress.io/dashboard/projects/#{arg2}
+        """
+      when "DASHBOARD_PROJECT_NOT_FOUND"
+        """
+        We could not find a project with the ID: #{chalk.yellow(arg1)}
+
+        This projectId came from your cypress.json file or an environment variable.
+
+        Please log into the Dashboard and find your project.
+
+        We will list the correct projectId in the 'Settings' tab.
+
+        Alternatively, you can create a new project using the Desktop Application.
         """
       when "DEV_NO_SERVER"
         " > The local API server isn't running in development. This may cause problems running the GUI."
