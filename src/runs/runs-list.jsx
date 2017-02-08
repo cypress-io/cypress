@@ -235,10 +235,10 @@ class Runs extends Component {
               Why?
             </a>
           </h5>
-          <pre>
-              <span>{`{`}</span>
-              <span>{`  projectId: ${this.props.project.id || '<projectId>'}`}</span>
-              <span>{`}`}</span>
+          <pre className='line-nums'>
+            <span>{`{`}</span>
+            <span>{`  projectId: ${this.props.project.id || '<projectId>'}`}</span>
+            <span>{`}`}</span>
           </pre>
           <h5>
             <span className='pull-left'>
