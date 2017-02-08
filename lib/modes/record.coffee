@@ -209,6 +209,9 @@ module.exports = {
     .then ->
       Project.id(projectPath)
     .then (projectId) =>
+      ## store the projectId for later use
+      options.projectId = projectId
+
       Project.config(projectPath)
       .then (cfg) =>
         {projectName} = cfg

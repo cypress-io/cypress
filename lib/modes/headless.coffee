@@ -27,6 +27,12 @@ fs = Promise.promisifyAll(fs)
 
 TITLE_SEPARATOR = " /// "
 
+haveProjectIdAndNoDashboardToken = (projectId, options) ->
+  ## if we have a project id
+  ## and we haven't turned off recording
+  ## and we don't have a dashboard token
+  (projectId and options.record) and not options.key
+
 module.exports = {
   getId: ->
     ## return a random id
@@ -34,6 +40,17 @@ module.exports = {
       length: 5
       capitalization: "lowercase"
     })
+
+  getProjectId: (openProject, id) ->
+    ## if we have an ID just use it
+    if id
+      return Promise.resolve(id)
+
+    openProject
+    .getProjectId()
+    .catch ->
+      ## no id no problem
+      return null
 
   setProxy: (proxyServer) ->
     session = require("electron").session
@@ -480,6 +497,8 @@ module.exports = {
     @ensureAndOpenProjectByPath(id, options)
     .then (openProject) =>
       Promise.all([
+        @getProjectId(openProject, options.projectId)
+
         openProject.getConfig(),
 
         ## either get the url to the all specs
@@ -487,7 +506,15 @@ module.exports = {
         ## it exists
         openProject.ensureSpecUrl(options.spec)
       ])
-      .spread (config, url) =>
+      .spread (projectId, config, url) =>
+        ## if we have a project id and no dashboard token
+        if haveProjectIdAndNoDashboardToken(projectId, options)
+          ## log a warning telling the user
+          ## that they either need to provide us
+          ## with a DASHBOARD_TOKEN or turn off
+          ## record mode
+          errors.warning("PROJECT_ID_AND_MISSING_DASHBOARD_TOKEN", projectId)
+
         @trashAssets(config)
         .then =>
           @runTests({

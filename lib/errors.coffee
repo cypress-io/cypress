@@ -43,6 +43,26 @@ API = {
         "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
       when "PROJECT_DOES_NOT_EXIST"
         "You need to add a project to run tests."
+      when "PROJECT_ID_AND_MISSING_DASHBOARD_TOKEN"
+        """
+        This project has been configured to record runs on our Dashboard.
+
+        It currently has the projectId: #{chalk.green(arg1)}
+
+        However, no Dashboard Token was provided. This run will not be recorded.
+
+        If you meant to have this run recorded please provide us your Dashboard Token.
+
+          #{chalk.blue("cypress run <dashboard_token>")}
+
+        If you don't want to record these runs, you can silence this warning:
+
+          #{chalk.yellow("cypress run --no-record")}
+
+        Or you can remove your 'projectId' from cypress.json
+
+        TODO: add a cypress.on link here! <link>
+        """
       when "DEPRECATED_CYPRESS_CI"
         """
         1. You are using an older version of the CLI tools.
