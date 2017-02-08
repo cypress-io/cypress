@@ -21,6 +21,34 @@ API = {
         "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
       when "PROJECT_DOES_NOT_EXIST"
         "You need to add a project to run tests."
+      when "DEPRECATED_CYPRESS_CI"
+        """
+        1. You are using an older version of the CLI tools.
+
+           Please update the CLI tools by running: #{chalk.blue("npm install -g cypress-cli")}
+
+        2. You are also using the deprecated command: #{chalk.yellow("cypress ci <key>")}
+
+           Please switch and use: #{chalk.blue("cypress run <key>")}
+
+        https://on.cypress.io/deprecated-cypress-ci
+        """
+      when "DEPRECATED_CYPRESS_CI_ENV_VAR"
+        """
+        1. You are using an older version of the CLI tools.
+
+           Please update the CLI tools by running: #{chalk.blue("npm install -g cypress-cli")}
+
+        2. You are also using the deprecated command: #{chalk.yellow("cypress ci")}
+
+           Please switch and use: #{chalk.blue("cypress run")}
+
+        3. You are also using the environment variable: #{chalk.yellow("CYPRESS_CI_KEY")}
+
+           Please rename this environment variable to: #{chalk.blue("CYPRESS_DASHBOARD_TOKEN")}
+
+        https://on.cypress.io/deprecated-cypress-ci
+        """
       when "CI_CANNOT_UPLOAD_ASSETS"
         "Warning: We encountered an error while uploading your build assets.\n\nThese build assets will not be recorded\n\nThis error will not alter or the exit code.\n\n#{arg1}"
       when "CI_CANNOT_CREATE_BUILD_OR_INSTANCE"

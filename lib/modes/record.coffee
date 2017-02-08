@@ -193,6 +193,18 @@ module.exports = {
 
     captured = stdout.capture()
 
+    ## if we are using the ci flag that means
+    ## we have an old version of the CLI tools installed
+    ## and that we need to warn the user what to update
+    if options.ci
+      type = switch
+        when process.env.CYPRESS_CI_KEY
+          "DEPRECATED_CYPRESS_CI_ENV_VAR"
+        else
+          "DEPRECATED_CYPRESS_CI"
+
+      errors.warning(type)
+
     Project.add(projectPath)
     .then ->
       Project.id(projectPath)
