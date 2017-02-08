@@ -24,7 +24,7 @@ export default class ProjectNav extends Component {
                 to={`/projects/${project.clientId}/runs`}
                 activeClassName='active'
                 >
-                <i className='fa fa-history fa-flip-horizontal'></i>{' '}
+                <i className='fa fa-database'></i>{' '}
                 Runs
               </Link>
             </li>
