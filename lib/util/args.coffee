@@ -53,9 +53,14 @@ module.exports = {
       }
     })
 
-    _.extend options, _.pick(argv, whitelist...), {
-      env: process.env["CYPRESS_ENV"]
-    }
+    whitelisted = _.pick(argv, whitelist...)
+
+    options = _
+    .chain(options)
+    .defaults(whitelisted)
+    .extend({env: process.env["CYPRESS_ENV"]})
+    .mapValues(coerce)
+    .value()
 
     ## if we are updating we may have to pluck out the
     ## appPath + execPath from the options._ because
