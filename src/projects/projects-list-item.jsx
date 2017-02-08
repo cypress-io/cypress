@@ -7,7 +7,6 @@ import { observer } from 'mobx-react'
 import { ContextMenuLayer } from 'react-contextmenu'
 
 import { getStatusIcon } from '../lib/utils'
-import Project from '../project/project-model'
 
 const strLength = 45
 
@@ -27,7 +26,7 @@ class ProjectListItem extends Component {
 
     let link = `/projects/${project.clientId}`
     if (!project.isValid) {
-      link += '/builds'
+      link += '/runs'
     }
 
     return (
@@ -50,10 +49,10 @@ class ProjectListItem extends Component {
         </div>
         <div className='row-column-wrapper'>
           <div className='row-column'>
-            <div className='last-build-status'>
+            <div className='last-run-status'>
               { this._projectStatus() }
             </div>
-            <div className='last-build-time'>
+            <div className='last-run-time'>
               { this._projectTime() }
             </div>
           </div>

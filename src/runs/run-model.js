@@ -1,6 +1,6 @@
 import { observable } from 'mobx'
 
-export default class Build {
+export default class Run {
   @observable id
 
   constructor (props) {

@@ -2,14 +2,14 @@ _ = require("lodash")
 moment = require("moment")
 {deferred, stubIpc} = require("../support/util")
 
-describe "Builds List", ->
+describe "Runs List", ->
   beforeEach ->
-    @goToBuilds = (projectName = "My-Fake-Project") =>
+    @goToRuns = (projectName = "My-Fake-Project") =>
       cy
         .get(".projects-list a")
           .contains(projectName).click()
         .get(".navbar-default a")
-          .contains("Builds").click()
+          .contains("Runs").click()
 
     @validCiProject = {
       id: "project-id-123"
@@ -23,7 +23,7 @@ describe "Builds List", ->
       .fixture("projects_statuses").as("projectStatuses")
       .fixture("config").as("config")
       .fixture("specs").as("specs")
-      .fixture("builds").as("builds")
+      .fixture("runs").as("runs")
       .fixture("organizations").as("orgs")
       .fixture("dashboard_tokens").as("dashboardTokens")
       .visit("/")
@@ -32,7 +32,7 @@ describe "Builds List", ->
         cy.stub(@App, "ipc").as("ipc")
 
         @getCurrentUser = deferred()
-        @getBuilds = deferred()
+        @getRuns = deferred()
 
         stubIpc(@App.ipc, {
           "get:options": (stub) => stub.resolves({})
@@ -46,7 +46,7 @@ describe "Builds List", ->
           "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
           "open:project": (stub) => stub.yields(null, @config)
           "get:specs": (stub) => stub.resolves(@specs)
-          "get:builds": (stub) => stub.returns(@getBuilds.promise)
+          "get:builds": (stub) => stub.returns(@getRuns.promise)
           "get:orgs": (stub) => stub.resolves(@orgs)
         })
 
@@ -55,17 +55,17 @@ describe "Builds List", ->
   context "displays page", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
-      @getBuilds.resolve(@builds)
-      @goToBuilds()
+      @getRuns.resolve(@runs)
+      @goToRuns()
 
-    it "navigates to builds page", ->
+    it "navigates to runs page", ->
       cy
-        .location().its("hash").should("include", "builds")
+        .location().its("hash").should("include", "runs")
 
-    it "highlight build nav", ->
+    it "highlight run nav", ->
       cy
         .get(".navbar-default a")
-          .contains("Builds").should("have.class", "active")
+          .contains("Runs").should("have.class", "active")
 
   context "error states", ->
     beforeEach ->
@@ -73,11 +73,11 @@ describe "Builds List", ->
 
     describe "permissions error", ->
       beforeEach ->
-        @goToBuilds()
+        @goToRuns()
 
       context "statusCode: 403", ->
         beforeEach ->
-          @getBuilds.reject({name: "foo", message: "There's an error", statusCode: 403})
+          @getRuns.reject({name: "foo", message: "There's an error", statusCode: 403})
 
         it "displays permissions message", ->
           cy.contains("Request Access")
@@ -88,7 +88,7 @@ describe "Builds List", ->
           stubIpc(@App.ipc, {
             "request:access": (stub) => stub.returns(@requestAccess.promise)
           })
-          @getBuilds.reject({name: "foo", message: "There's an error", statusCode: 403})
+          @getRuns.reject({name: "foo", message: "There's an error", statusCode: 403})
 
         context "request access", ->
           beforeEach ->
@@ -121,27 +121,27 @@ describe "Builds List", ->
                 .get(".projects-list a")
                   .contains("My-Fake-Project").click()
                 .get(".navbar-default")
-                  .find("a").contains("Builds").click()
+                  .find("a").contains("Runs").click()
                 .end().contains("Request Sent")
 
           describe "when request succeeds and user is already a member", ->
             beforeEach ->
               @requestAccess.reject({name: "foo", message: "There's an error", type: "ALREADY_MEMBER"})
-              @getBuilds = deferred()
-              @App.ipc.withArgs("get:builds").onCall(1).returns(@getBuilds.promise)
+              @getRuns = deferred()
+              @App.ipc.withArgs("get:builds").onCall(1).returns(@getRuns.promise)
               cy.wait(1)
 
-            it "retries getting builds", ->
+            it "retries getting runs", ->
               expect(@App.ipc.withArgs("get:builds").callCount).to.equal(2)
 
             it "shows loading spinner", ->
               cy.get(".loader")
 
-            it "shows builds when getting builds succeeds", ->
-              @getBuilds.resolve(@builds)
+            it "shows runs when getting runs succeeds", ->
+              @getRuns.resolve(@runs)
               cy
-                .get(".builds-container li")
-                .should("have.length", @builds.length)
+                .get(".runs-container li")
+                .should("have.length", @runs.length)
 
           describe "when request fails", ->
             describe "for unknown reason", ->
@@ -181,30 +181,30 @@ describe "Builds List", ->
 
     describe "timed out error", ->
       beforeEach ->
-        @goToBuilds().then =>
-          @getBuilds.reject({name: "foo", message: "There's an error", type: "TIMED_OUT"})
+        @goToRuns().then =>
+          @getRuns.reject({name: "foo", message: "There's an error", type: "TIMED_OUT"})
 
       it "displays timed out message", ->
         cy.contains("timed out")
 
     describe "not found error", ->
       beforeEach ->
-        @goToBuilds().then =>
-          @getBuilds.reject({name: "foo", message: "There's an error", type: "NOT_FOUND"})
+        @goToRuns().then =>
+          @getRuns.reject({name: "foo", message: "There's an error", type: "NOT_FOUND"})
 
       it "displays empty message", ->
-        cy.contains("Builds Cannot Be Displayed")
+        cy.contains("Runs Cannot Be Displayed")
 
     describe "no project id error", ->
       beforeEach ->
         stubIpc(@App.ipc, {
           "setup:dashboard:project": (stub) => stub.resolves(@validCiProject)
         })
-        @goToBuilds().then =>
-          @getBuilds.reject({name: "foo", message: "There's an error", type: "NO_PROJECT_ID"})
+        @goToRuns().then =>
+          @getRuns.reject({name: "foo", message: "There's an error", type: "NO_PROJECT_ID"})
 
-      it "displays 'you have no builds'", ->
-        cy.contains("You Have No Recorded Builds")
+      it "displays 'you have no runs'", ->
+        cy.contains("You Have No Recorded Runs")
 
       it "clears message after setting up CI", ->
         cy
@@ -219,16 +219,16 @@ describe "Builds List", ->
 
     describe "unexpected error", ->
       beforeEach ->
-        @goToBuilds().then =>
-          @getBuilds.reject({name: "foo", message: """
+        @goToRuns().then =>
+          @getRuns.reject({name: "foo", message: """
           {
-            "no builds": "for you"
+            "no runs": "for you"
           }
           """, type: "UNKNOWN"})
 
       it "displays unexpected error message", ->
         cy.contains("unexpected error")
-        cy.contains('"no builds": "for you"')
+        cy.contains('"no runs": "for you"')
 
     describe "unauthorized project", ->
       beforeEach ->
@@ -247,11 +247,11 @@ describe "Builds List", ->
           "setup:dashboard:project": (stub) => stub.resolves(@validCiProject)
         })
 
-        @goToBuilds("project5").then =>
-          @getBuilds.resolve([])
+        @goToRuns("project5").then =>
+          @getRuns.resolve([])
 
       it "displays empty message", ->
-        cy.contains("Builds Cannot Be Displayed")
+        cy.contains("Runs Cannot Be Displayed")
 
       it "clicking link opens setup project window", ->
         cy
@@ -269,22 +269,22 @@ describe "Builds List", ->
           .end()
           .contains("To record your first")
 
-    describe "no builds", ->
+    describe "no runs", ->
       context "having never setup CI", ->
         beforeEach ->
           @config.projectId = null
           @App.ipc.withArgs("open:project").resolves(@config)
 
-          @goToBuilds().then =>
-            @getBuilds.resolve([])
+          @goToRuns().then =>
+            @getRuns.resolve([])
 
         it "displays empty message", ->
-          cy.contains("You Have No Recorded Builds")
+          cy.contains("You Have No Recorded Runs")
 
     context "having previously setup CI", ->
       beforeEach ->
-        @goToBuilds().then =>
-          @getBuilds.resolve([])
+        @goToRuns().then =>
+          @getRuns.resolve([])
 
       it "displays empty message", ->
         cy.contains("To record your first")
@@ -299,9 +299,9 @@ describe "Builds List", ->
         cy
           .contains("Cypress Dashboard").click()
           .then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@config.projectId}/builds")
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@config.projectId}/runs")
 
-  describe "list builds", ->
+  describe "list runs", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
       @config.projectId = @projects[0].id
@@ -315,41 +315,41 @@ describe "Builds List", ->
           .contains("My-Fake-Project").click()
         .tick(1000) ## allow promises from get:specs, etc to resolve
         .get(".navbar-default a")
-          .contains("Builds").click()
+          .contains("Runs").click()
         .then =>
-          @getBuilds.resolve(@builds)
+          @getRuns.resolve(@runs)
 
-    it "lists builds", ->
+    it "lists runs", ->
       cy
-        .get(".builds-container li")
-        .should("have.length", @builds.length)
+        .get(".runs-container li")
+        .should("have.length", @runs.length)
 
-    it "displays link to dashboard that goes to admin project builds", ->
+    it "displays link to dashboard that goes to admin project runs", ->
       cy
         .contains("See All").click()
         .then ->
-          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@projects[0].id}/builds")
+          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs")
 
-    it "displays build status icon", ->
+    it "displays run status icon", ->
       cy
-        .get(".builds-container li").first().find("> div")
+        .get(".runs-container li").first().find("> div")
         .should("have.class", "running")
 
     it "displays last updated", ->
       cy.contains("Last updated: 10:00:01am")
 
-    it "clicking build opens admin", ->
+    it "clicking run opens admin", ->
       cy
-        .get(".builds-container li").first()
+        .get(".runs-container li").first()
         .click()
         .then =>
-          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@projects[0].id}/builds/#{@builds[0].id}")
+          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@projects[0].id}/runs/#{@runs[0].id}")
 
-  describe "polling builds", ->
+  describe "polling runs", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
-      @getBuildsAgain = deferred()
-      @App.ipc.withArgs("get:builds").onCall(1).returns(@getBuildsAgain.promise)
+      @getRunsAgain = deferred()
+      @App.ipc.withArgs("get:builds").onCall(1).returns(@getRunsAgain.promise)
 
       cy
         .clock()
@@ -357,50 +357,50 @@ describe "Builds List", ->
           .contains("My-Fake-Project").click()
         .tick(1000) ## allow promises from get:specs, etc to resolve
         .get(".navbar-default a")
-          .contains("Builds").click()
+          .contains("Runs").click()
         .then =>
-          @getBuilds.resolve(@builds)
-        .get(".builds-container") ## wait for original builds to show
+          @getRuns.resolve(@runs)
+        .get(".runs-container") ## wait for original runs to show
         .clock().then (clock) =>
-          @getBuildsAgain = deferred()
-          @App.ipc.withArgs("get:builds").onCall(1).returns(@getBuildsAgain.promise)
+          @getRunsAgain = deferred()
+          @App.ipc.withArgs("get:builds").onCall(1).returns(@getRunsAgain.promise)
         .tick(10000)
 
-    it "has original state of builds", ->
+    it "has original state of runs", ->
       cy
-        .get(".builds-container li").first().find("> div")
+        .get(".runs-container li").first().find("> div")
         .should("have.class", "running")
 
-    it "sends get:builds ipc event", ->
+    it "sends get:runs ipc event", ->
       expect(@App.ipc.withArgs("get:builds")).to.be.calledTwice
 
     it "disables refresh button", ->
-      cy.get(".builds header button").should("be.disabled")
+      cy.get(".runs header button").should("be.disabled")
 
     it "spins the refresh button", ->
-      cy.get(".builds header button i").should("have.class", "fa-spin")
+      cy.get(".runs header button i").should("have.class", "fa-spin")
 
     context "success", ->
       beforeEach ->
-        @builds[0].status = "passed"
-        @getBuildsAgain.resolve(@builds)
+        @runs[0].status = "passed"
+        @getRunsAgain.resolve(@runs)
 
-      it "updates the builds", ->
+      it "updates the runs", ->
         cy
-          .get(".builds-container li").first().find("> div")
+          .get(".runs-container li").first().find("> div")
           .should("have.class", "passed")
 
       it "enables refresh button", ->
-        cy.get(".builds header button").should("not.be.disabled")
+        cy.get(".runs header button").should("not.be.disabled")
 
       it "stops spinning the refresh button", ->
-        cy.get(".builds header button i").should("not.have.class", "fa-spin")
+        cy.get(".runs header button i").should("not.have.class", "fa-spin")
 
     context "errors", ->
       beforeEach ->
         @ipcError = (details) =>
           err = _.extend(details, {name: "foo", message: "There's an error"})
-          @getBuildsAgain.reject(err)
+          @getRunsAgain.reject(err)
 
       it "displays permissions error", ->
         @ipcError({statusCode: 403})
@@ -408,40 +408,40 @@ describe "Builds List", ->
 
       it "displays missing project id error", ->
         @ipcError({type: "NO_PROJECT_ID"})
-        cy.contains("You Have No Recorded Builds")
+        cy.contains("You Have No Recorded Runs")
 
-      it "displays old builds if another error", ->
+      it "displays old runs if another error", ->
         @ipcError({type: "TIMED_OUT"})
-        cy.get(".builds-container li").should("have.length", 4)
+        cy.get(".runs-container li").should("have.length", 4)
 
-  describe "manually refreshing builds", ->
+  describe "manually refreshing runs", ->
     beforeEach ->
       @getCurrentUser.resolve(@user)
-      @getBuildsAgain = deferred()
-      @App.ipc.withArgs("get:builds").onCall(1).returns(@getBuildsAgain.promise)
+      @getRunsAgain = deferred()
+      @App.ipc.withArgs("get:builds").onCall(1).returns(@getRunsAgain.promise)
 
-      @getBuilds.resolve(@builds)
-      @goToBuilds().then ->
-        cy.get(".builds header button").click()
+      @getRuns.resolve(@runs)
+      @goToRuns().then ->
+        cy.get(".runs header button").click()
 
-    it "sends get:builds ipc event", ->
+    it "sends get:runs ipc event", ->
       expect(@App.ipc.withArgs("get:builds")).to.be.calledTwice
 
-    it "still shows list of builds", ->
-      cy.get(".builds-container li").should("have.length", 4)
+    it "still shows list of runs", ->
+      cy.get(".runs-container li").should("have.length", 4)
 
     it "disables refresh button", ->
-      cy.get(".builds header button").should("be.disabled")
+      cy.get(".runs header button").should("be.disabled")
 
     it "spins the refresh button", ->
-      cy.get(".builds header button i").should("have.class", "fa-spin")
+      cy.get(".runs header button i").should("have.class", "fa-spin")
 
-    describe "when builds have loaded", ->
+    describe "when runs have loaded", ->
       beforeEach ->
-        @getBuildsAgain.resolve(@builds)
+        @getRunsAgain.resolve(@runs)
 
       it "enables refresh button", ->
-        cy.get(".builds header button").should("not.be.disabled")
+        cy.get(".runs header button").should("not.be.disabled")
 
       it "stops spinning the refresh button", ->
-        cy.get(".builds header button i").should("not.have.class", "fa-spin")
+        cy.get(".runs header button i").should("not.have.class", "fa-spin")

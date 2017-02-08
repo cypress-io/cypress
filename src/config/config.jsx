@@ -42,7 +42,7 @@ class Config extends Component {
 
     return (
       <Panel header='Configuration' key='config' className='form-horizontal'>
-        <a href='#' className='pull-right' onClick={this._openHelp}>
+        <a href='#' className='learn-more' onClick={this._openHelp}>
           <i className='fa fa-info-circle'></i>{' '}
           Learn more
         </a>
@@ -141,11 +141,17 @@ class Config extends Component {
 
     return (
       <Panel header='Project ID' key='projectId' className='form-horizontal'>
+        <a href='#' className='learn-more' onClick={this._openProjectIdHelp}>
+          <i className='fa fa-info-circle'></i>{' '}
+          Learn more
+        </a>
         <p className='text-muted'>This projectId should be in your <code>cypress.json</code> and checked into source control.
           It identifies your project and should not be changed.
         </p>
-        <pre>
-          {this.props.project.id}
+        <pre className='line-nums'>
+          <span>{`{`}</span>
+          <span>{`  projectId: ${this.props.project.id || '<projectId>'}`}</span>
+          <span>{`}`}</span>
         </pre>
       </Panel>
     )
@@ -156,13 +162,13 @@ class Config extends Component {
 
     return (
       <Panel header='Dashboard Tokens' key='dashboard-tokens' className='form-horizontal config-dashboard-tokens'>
-        <a href='#' className='pull-right' onClick={this._openCiGuide}>
+        <a href='#' className='learn-more' onClick={this._openCiGuide}>
           <i className='fa fa-info-circle'></i>{' '}
           Learn More
         </a>
         <p className='text-muted'>
           Dashboard Tokens allow you to record test results, screenshots and videos in Cypress.
-          {this._hasCiKeys() ? ' To record your builds, run this command:' : ''}
+          {this._hasCiKeys() ? ' To record your tests, run this command:' : ''}
         </p>
         {this._hasCiKeys() ? <pre><code>cypress run {this.state.dashboardTokens[0].id}</code></pre> : null}
         {this._dashboardTokens()}
@@ -194,6 +200,11 @@ class Config extends Component {
     }
 
     return null
+  }
+
+  _openProjectIdHelp (e) {
+    e.preventDefault()
+    App.ipc('external:open', 'https://on.cypress.io/guides/projects#section-what-is-a-projectid-')
   }
 
   _openHelp (e) {

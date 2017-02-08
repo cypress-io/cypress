@@ -24,7 +24,7 @@ class PermissionMessage extends Component {
   render () {
     return (
       <div
-        id='builds-list-page'
+        id='runs-list-page'
         className={cs('request-access', {
           'is-submitting': this.state.isSubmitting,
         })}
@@ -106,10 +106,10 @@ class PermissionMessage extends Component {
       <div className="empty">
         <h4>
           <i className='fa fa-lock'></i>{' '}
-          Request access to see the builds
+          Request access to see the runs
         </h4>
         <p>This is a private project created by someone else.</p>
-        <p>The project owner must give you access to see the builds.</p>
+        <p>The project owner must give you access to see the runs.</p>
         {this._button()}
       </div>
     )

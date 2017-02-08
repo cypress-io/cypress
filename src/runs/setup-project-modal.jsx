@@ -207,7 +207,7 @@ class SetupProject extends Component {
       <div className={cs({ 'hidden': !this.state.orgId })}>
         <hr />
         <label htmlFor='projectName' className='control-label'>
-          Who should see the builds and recordings?
+          Who should see the runs and recordings?
         </label>
         <div className='radio privacy-radio'>
           <label>
