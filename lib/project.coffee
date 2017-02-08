@@ -364,13 +364,13 @@ class Project extends EE
       @writeProjectId(newProject.id)
       .return(newProject)
 
-  getCiKeys: ->
+  getDashboardTokens: ->
     Promise.all([
       @getProjectId(),
       user.ensureAuthToken()
     ])
     .spread (projectId, authToken) ->
-      api.getProjectCiKeys(projectId, authToken)
+      api.getProjectDashboardTokens(projectId, authToken)
 
   requestAccess: (orgId) ->
     user.ensureAuthToken()
