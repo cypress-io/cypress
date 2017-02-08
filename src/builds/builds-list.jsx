@@ -10,7 +10,7 @@ import state from '../lib/state'
 import BuildsCollection from './builds-collection'
 import errors from '../lib/errors'
 import { getBuilds, pollBuilds, stopPollingBuilds } from './builds-api'
-import { getCiKeys } from '../projects/projects-api'
+import { getDashboardTokens } from '../projects/projects-api'
 import projectsStore from '../projects/projects-store'
 import Project from '../project/project-model'
 import orgsStore from '../organizations/organizations-store'
@@ -28,7 +28,7 @@ class Builds extends Component {
     this.buildsCollection = new BuildsCollection()
 
     this.state = {
-      ciKey: null,
+      dashboardToken: null,
     }
   }
 
@@ -76,9 +76,9 @@ class Builds extends Component {
 
   _getCiKey () {
     if (this._needsCiKey()) {
-      getCiKeys().then((ciKeys = []) => {
-        if (ciKeys.length) {
-          this.setState({ ciKey: ciKeys[0].id })
+      getDashboardTokens().then((dashboardTokens = []) => {
+        if (dashboardTokens.length) {
+          this.setState({ dashboardToken: dashboardTokens[0].id })
         }
       })
     }
@@ -86,7 +86,7 @@ class Builds extends Component {
 
   _needsCiKey () {
     return (
-      !this.state.ciKey &&
+      !this.state.dashboardToken &&
       state.hasUser &&
       !this.buildsCollection.isLoading &&
       !this.buildsCollection.error &&
@@ -254,7 +254,7 @@ class Builds extends Component {
             </a>
           </h5>
           <pre>
-            <code>cypress ci {this.state.ciKey || '<ci-key>'}</code>
+            <code>cypress run {this.state.dashboardToken || '<dashboard-token>'}</code>
           </pre>
           <hr />
           <p className='alert alert-default'>

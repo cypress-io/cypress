@@ -181,9 +181,9 @@ const openProject = (project) => {
   .catch(setProjectError)
 }
 
-const getCiKeys = () => {
-  return App.ipc('get:ci:keys')
-  // ignore error, settle for no ci keys
+const getDashboardTokens = () => {
+  return App.ipc('get:dashboard:tokens')
+  // ignore error, settle for no dashboard tokens
   .catch(() => [])
 }
 
@@ -196,5 +196,5 @@ export {
   addProject,
   runSpec,
   closeBrowser,
-  getCiKeys,
+  getDashboardTokens,
 }
