@@ -150,7 +150,7 @@ class Config extends Component {
         </p>
         <pre className='line-nums'>
           <span>{`{`}</span>
-          <span>{`  projectId: ${this.props.project.id || '<projectId>'}`}</span>
+          <span>{`  "projectId": "${this.props.project.id || '<projectId>'}"`}</span>
           <span>{`}`}</span>
         </pre>
       </Panel>

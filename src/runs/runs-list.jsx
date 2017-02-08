@@ -229,7 +229,7 @@ class Runs extends Component {
             <span className='pull-left'>
               1. Check <code>cypress.json</code> into source control.
             </span>
-            <a onClick={this._openProjectIdGuide}className='pull-right'>
+            <a onClick={this._openProjectIdGuide} className='pull-right'>
               <i className='fa fa-question-circle'></i>{' '}
               {' '}
               Why?
@@ -237,7 +237,7 @@ class Runs extends Component {
           </h5>
           <pre className='line-nums'>
             <span>{`{`}</span>
-            <span>{`  projectId: ${this.props.project.id || '<projectId>'}`}</span>
+            <span>{`  "projectId": "${this.props.project.id || '<projectId>'}"`}</span>
             <span>{`}`}</span>
           </pre>
           <h5>

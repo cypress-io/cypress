@@ -26,6 +26,10 @@
 .first-run-instructions {
   padding: 40px 130px;
 
+  a {
+    cursor: pointer;
+  }
+
   p {
     text-align: center;
   }
