@@ -9,7 +9,7 @@ import state from '../lib/state'
 import RunsCollection from './runs-collection'
 import errors from '../lib/errors'
 import { getRuns, pollRuns, stopPollingRuns } from './runs-api'
-import { getDashboardTokens } from '../projects/projects-api'
+import { getRecordKeys } from '../projects/projects-api'
 import projectsStore from '../projects/projects-store'
 import Project from '../project/project-model'
 import orgsStore from '../organizations/organizations-store'
@@ -26,18 +26,18 @@ class Runs extends Component {
     this.runsCollection = new RunsCollection()
 
     this.state = {
-      dashboardToken: null,
+      recordKey: null,
     }
   }
 
   componentWillMount () {
     this._getRuns()
     this._handlePolling()
-    this._getCiKey()
+    this._getKey()
   }
 
   componentDidUpdate () {
-    this._getCiKey()
+    this._getKey()
     this._handlePolling()
   }
 
@@ -72,19 +72,19 @@ class Runs extends Component {
     stopPollingRuns()
   }
 
-  _getCiKey () {
-    if (this._needsCiKey()) {
-      getDashboardTokens().then((dashboardTokens = []) => {
-        if (dashboardTokens.length) {
-          this.setState({ dashboardToken: dashboardTokens[0].id })
+  _getKey () {
+    if (this._needsKey()) {
+      getRecordKeys().then((keys = []) => {
+        if (keys.length) {
+          this.setState({ recordKey: keys[0].id })
         }
       })
     }
   }
 
-  _needsCiKey () {
+  _needsKey () {
     return (
-      !this.state.dashboardToken &&
+      !this.state.recordKey &&
       state.hasUser &&
       !this.runsCollection.isLoading &&
       !this.runsCollection.error &&
@@ -250,7 +250,7 @@ class Runs extends Component {
             </a>
           </h5>
           <pre>
-            <code>cypress run --key {this.state.dashboardToken || '<dashboard-token>'}</code>
+            <code>cypress run --key {this.state.recordKey || '<record-key>'}</code>
           </pre>
           <hr />
           <p className='alert alert-default'>

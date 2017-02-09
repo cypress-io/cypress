@@ -25,7 +25,7 @@ describe "Runs List", ->
       .fixture("specs").as("specs")
       .fixture("runs").as("runs")
       .fixture("organizations").as("orgs")
-      .fixture("dashboard_tokens").as("dashboardTokens")
+      .fixture("keys").as("keys")
       .visit("/")
       .window().then (win) ->
         {@App} = win

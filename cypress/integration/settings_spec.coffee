@@ -7,7 +7,7 @@ describe "Settings", ->
 
     cy
       .visit("/")
-      .fixture("dashboard_tokens").as("dashboardTokens")
+      .fixture("keys").as("keys")
       .fixture("user").as("user")
       .fixture("config").as("config")
       .fixture("browsers").as("browsers")
@@ -18,7 +18,7 @@ describe "Settings", ->
         {@App} = win
         cy.stub(@App, "ipc").as("ipc")
 
-        @getDashboardTokens = deferred()
+        @getRecordKeys = deferred()
         @getProjectStatuses = deferred()
 
         stubIpc(@App.ipc, {
@@ -28,7 +28,7 @@ describe "Settings", ->
           "get:projects": (stub) => stub.resolves(@projects)
           "get:project:statuses": (stub) => stub.returns(@getProjectStatuses.promise)
           "open:project": (stub) => stub.yields(null, @config)
-          "get:dashboard:tokens": (stub) => stub.returns(@getDashboardTokens.promise)
+          "get:dashboard:tokens": (stub) => stub.returns(@getRecordKeys.promise)
           "get:builds": (stub) => stub.resolves(@runs)
           "get:orgs": (stub) => stub.resolves([])
         })
@@ -54,7 +54,7 @@ describe "Settings", ->
 
     it "collapses panels by default", ->
       cy.contains("Your project's configuration is displayed").should("not.exist")
-      cy.contains("Dashboard Tokens allow you to").should("not.exist")
+      cy.contains("Record Keys allow you to").should("not.exist")
       cy.contains(@config.projectId).should("not.exist")
 
     describe "when config panel is opened", ->
@@ -101,44 +101,44 @@ describe "Settings", ->
       it "displays project id section", ->
         cy.contains(@config.projectId)
 
-    describe "when dashboard tokens panels is opened", ->
+    describe "when record keys panels is opened", ->
       beforeEach ->
-        cy.contains("Dashboard Tokens").click()
+        cy.contains("Record Keys").click()
 
-      it "displays dashboard tokens section", ->
-        cy.contains("Dashboard Tokens allow you to")
+      it "displays record keys section", ->
+        cy.contains("Record Keys allow you to")
 
       it "opens ci guide when learn more is clicked", ->
         cy
-          .get(".config-dashboard-tokens").contains("Learn More").click().then ->
+          .get(".config-record-keys").contains("Learn More").click().then ->
             expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/continuous-integration")
 
-      it "loads the project's dashboard tokens", ->
+      it "loads the project's record keys", ->
         expect(@App.ipc).to.be.calledWith("get:dashboard:tokens")
 
       it "shows spinner", ->
-        cy.get(".config-dashboard-tokens .fa-spinner")
+        cy.get(".config-record-keys .fa-spinner")
 
-      it "opens admin project settings when dashboard tokens link is clicked", ->
+      it "opens admin project settings when record keys link is clicked", ->
         cy
-          .get(".config-dashboard-tokens").contains("Add or Remove Dashboard Tokens").click().then ->
+          .get(".config-record-keys").contains("Add or Remove Record Keys").click().then ->
             expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@config.projectId}/settings")
 
-      describe "when dashboard tokens load", ->
+      describe "when record keys load", ->
         beforeEach ->
-          @getDashboardTokens.resolve(@dashboardTokens)
+          @getRecordKeys.resolve(@keys)
 
-        it "displays first Dashboard Token", ->
+        it "displays first Record Key", ->
           cy
-            .get(".config-dashboard-tokens").contains("cypress run " + @dashboardTokens[0].id)
+            .get(".config-record-keys").contains("cypress run " + @keys[0].id)
 
       describe "when there are no keys", ->
         beforeEach ->
-          @getDashboardTokens.resolve([])
+          @getRecordKeys.resolve([])
 
         it "does not display cypress run command", ->
           cy
-            .get(".config-dashboard-tokens").should("not.contain", "cypress run")
+            .get(".config-record-keys").should("not.contain", "cypress run")
 
     context "on config changes", ->
       beforeEach ->
@@ -207,7 +207,7 @@ describe "Settings", ->
       @App.ipc.withArgs("open:project").yields(null, @config)
       @getProjectStatuses.resolve(@projectStatuses)
       cy
-      cy.contains("h5", "Dashboard Tokens").should("not.exist")
+      cy.contains("h5", "Record Keys").should("not.exist")
 
     it "does not show ci Keys section when project is invalid", ->
       @projectStatuses[0].valid = false
@@ -218,4 +218,4 @@ describe "Settings", ->
       .get(".navbar-default")
       .get("a").contains("Settings").click()
 
-      cy.contains("h5", "Dashboard Tokens").should("not.exist")
+      cy.contains("h5", "Record Keys").should("not.exist")

@@ -5,20 +5,20 @@ import Tooltip from 'rc-tooltip'
 import Collapse, { Panel } from 'rc-collapse'
 
 import App from '../lib/app'
-import { getDashboardTokens } from '../projects/projects-api'
+import { getRecordKeys } from '../projects/projects-api'
 
 @observer
 class Config extends Component {
   state = {
-    dashboardTokens: [],
-    isLoadingCiKeys: true,
+    keys: [],
+    isLoadingKeys: true,
   }
 
   componentWillMount () {
-    getDashboardTokens().then((dashboardTokens = []) => {
+    getRecordKeys().then((keys = []) => {
       this.setState({
-        dashboardTokens,
-        isLoadingCiKeys: false,
+        keys,
+        isLoadingKeys: false,
       })
     })
   }
@@ -30,7 +30,7 @@ class Config extends Component {
           <Collapse>
             {this._configSection()}
             {this._projectIdSection()}
-            {this._dashboardTokensSection()}
+            {this._keysSection()}
           </Collapse>
         </div>
       </div>
@@ -157,11 +157,11 @@ class Config extends Component {
     )
   }
 
-  _dashboardTokensSection () {
+  _keysSection () {
     if (this._notSetupForCi()) return null
 
     return (
-      <Panel header='Record Key' key='dashboard-tokens' className='form-horizontal config-dashboard-tokens'>
+      <Panel header='Record Key' key='record-keys' className='form-horizontal config-record-keys'>
         <a href='#' className='learn-more' onClick={this._openCiGuide}>
           <i className='fa fa-info-circle'></i>{' '}
           Learn More
@@ -169,19 +169,19 @@ class Config extends Component {
         <p className='text-muted'>
           A Record Key enables you to record your failing tests, screenshots, and videos.
         </p>
-        {this._hasCiKeys() ?
+        {this._hasKeys() ?
           <div>
             <p className='text-muted'>
               To record, run this command:
             </p>
             <p>
-              <pre><code>cypress run --key {this.state.dashboardTokens[0].id}</code></pre>
+              <pre><code>cypress run --key {this.state.keys[0].id}</code></pre>
             </p>
           </div>
         : null}
-        {this._dashboardTokens()}
+        {this._recordKeys()}
         <p className='text-muted manage-btn'>
-          <a href='#' onClick={this._openAdminCiKeys}>
+          <a href='#' onClick={this._openAdminKeys}>
             <i className='fa fa-key'></i> You can change this key in the Dashboard
           </a>
         </p>
@@ -189,18 +189,18 @@ class Config extends Component {
     )
   }
 
-  _hasCiKeys () {
-    return !this.state.isLoadingCiKeys && this.state.dashboardTokens.length
+  _hasKeys () {
+    return !this.state.isLoadingKeys && this.state.keys.length
   }
 
   _notSetupForCi () {
     return !this.props.project.id || !this.props.project.isValid
   }
 
-  _dashboardTokens = () => {
-    if (this.state.isLoadingCiKeys) {
+  _recordKeys = () => {
+    if (this.state.isLoadingKeys) {
       return (
-        <p className='loading-dashboard-tokens'>
+        <p className='loading-record-keys'>
           <i className='fa fa-spinner fa-spin'></i>{' '}
           Loading Keys...
         </p>
@@ -225,7 +225,7 @@ class Config extends Component {
     App.ipc('external:open', 'https://on.cypress.io/guides/continuous-integration')
   }
 
-  _openAdminCiKeys = (e) => {
+  _openAdminKeys = (e) => {
     e.preventDefault()
     App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}/settings`)
   }
