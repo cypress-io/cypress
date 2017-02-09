@@ -6,6 +6,7 @@ import Collapse, { Panel } from 'rc-collapse'
 
 import App from '../lib/app'
 import { getDashboardTokens } from '../projects/projects-api'
+import Project from '../project/project-model'
 
 @observer
 class Config extends Component {
@@ -158,7 +159,7 @@ class Config extends Component {
   }
 
   _dashboardTokensSection () {
-    if (this._notSetupForCi()) return null
+    if (this._notSetupForCi() || this._doesNotHavePermission()) return null
 
     return (
       <Panel header='Dashboard Tokens' key='dashboard-tokens' className='form-horizontal config-dashboard-tokens'>
@@ -179,6 +180,11 @@ class Config extends Component {
         </p>
       </Panel>
     )
+  }
+
+  _doesNotHavePermission () {
+    // OR if user does not have access to the project
+    this.props.project.state === Project.UNAUTHORIZED
   }
 
   _hasCiKeys () {

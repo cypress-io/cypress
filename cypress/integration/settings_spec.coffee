@@ -206,7 +206,13 @@ describe "Settings", ->
       @config.projectId = null
       @App.ipc.withArgs("open:project").yields(null, @config)
       @getProjectStatuses.resolve(@projectStatuses)
+
       cy
+      .get(".projects-list a")
+        .contains("My-Fake-Project").click()
+      .get(".navbar-default")
+      .get("a").contains("Settings").click()
+
       cy.contains("h5", "Dashboard Tokens").should("not.exist")
 
     it "does not show ci Keys section when project is invalid", ->
@@ -219,3 +225,19 @@ describe "Settings", ->
       .get("a").contains("Settings").click()
 
       cy.contains("h5", "Dashboard Tokens").should("not.exist")
+
+  context "when you are not a user of this project's org", ->
+    it "does not show record key", ->
+      @projectStatuses[0].state = 'UNAUTHORIZED'
+      @App.ipc.withArgs("open:project").yields(null, @config)
+      @getProjectStatuses.resolve(@projectStatuses)
+
+      cy
+      .get(".projects-list a")
+        .contains("My-Fake-Project").click()
+      .get(".navbar-default")
+      .get("a").contains("Settings").click()
+
+
+      cy.contains("h5", "Dashboard Tokens").should("not.exist")
+
