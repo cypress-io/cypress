@@ -278,8 +278,8 @@ describe "Setup Project", ->
         cy.contains("To record your first")
 
       describe "welcome page", ->
-        it "displays command to run with the dashboard token", ->
-          cy.contains("cypress run dashboard-token-123")
+        it "displays command to run with the record key", ->
+          cy.contains("cypress run --key record-key-123")
 
   describe "errors from ipc event", ->
     beforeEach ->

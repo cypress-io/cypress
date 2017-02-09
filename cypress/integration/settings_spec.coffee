@@ -103,10 +103,10 @@ describe "Settings", ->
 
     describe "when record keys panels is opened", ->
       beforeEach ->
-        cy.contains("Record Keys").click()
+        cy.contains("Record Key").click()
 
       it "displays record keys section", ->
-        cy.contains("Record Keys allow you to")
+        cy.contains("A record key enables")
 
       it "opens ci guide when learn more is clicked", ->
         cy
@@ -121,7 +121,7 @@ describe "Settings", ->
 
       it "opens admin project settings when record keys link is clicked", ->
         cy
-          .get(".config-record-keys").contains("Add or Remove Record Keys").click().then ->
+          .get(".config-record-keys").contains("You can change").click().then ->
             expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/projects/#{@config.projectId}/settings")
 
       describe "when record keys load", ->
@@ -130,7 +130,7 @@ describe "Settings", ->
 
         it "displays first Record Key", ->
           cy
-            .get(".config-record-keys").contains("cypress run " + @keys[0].id)
+            .get(".config-record-keys").contains("cypress run --key " + @keys[0].id)
 
       describe "when there are no keys", ->
         beforeEach ->

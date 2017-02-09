@@ -167,7 +167,7 @@ class Config extends Component {
           Learn More
         </a>
         <p className='text-muted'>
-          A Record Key enables you to record your failing tests, screenshots, and videos.
+          A record key enables you to record your failing tests, screenshots, and videos.
         </p>
         {this._hasKeys() ?
           <div>
