@@ -7,13 +7,12 @@ excerpt: Manage your Organizations
   - [Default Organization](#section-default-organization)
 - :fa-angle-right: [Managing an Organization](#section-managing-an-organization)
   - [Inviting Users](#section-inviting-users)
+  - [User Roles](#section-user-roles)
   - [User Requests](#section-user-requests)
   - [Transferring Projects](#section-transferring-projects)
 - :fa-angle-right: [Deleting an Organization](#section-deleting-an-organization)
 
 ***
-
-TODO: mention that inviting users will unlock them automatically for use in cypress.
 
 # What are Organizations?
 
@@ -33,7 +32,28 @@ TODO: mention that inviting users will unlock them automatically for use in cypr
 
 ## Inviting Users
 
+You can invite users to Cypress from our [Dashboard](https://on.cypress.io/dashboard). All invited users will be able to see the projects, runs and keys for the organization's project (even if the project's are private).
+
+Additionally, any users invited will be automatically given access to log in to the Cypress Desktop App and Dashbaord while in Beta.
+
+*To invite a user to an organization:*
+
+1. Click the :fa-cog: beside the Projects you want to give the user access to.
+2. Click 'Invite User'. Note: you must have the role of 'owner' or 'admin' to invite users.
+3. Fill in the email and select the role for the user and click 'Invite User'
+4. The user will recieve an invite email with a link to accept the invitation.
+
 ![Invite User dialog](https://cloud.githubusercontent.com/assets/1271364/22709421/baf79a54-ed47-11e6-9796-79ba2008d2d2.png)
+
+***
+
+## User Roles
+
+User's can be assigned roles that affect their access to certain features.
+
+- *Member:* Can see the projects, runs, and keys.
+- *Admin:* Can also invite and delete users.
+- *Owner:* Can also transfer or delete projects.
 
 ***
 

@@ -5,7 +5,7 @@ excerpt: An overview of our Dashboard
 
 - :fa-angle-right: [What is the Dashboard?](#section-what-is-the-dashboard-)
 - :fa-angle-right: [Frequently Asked Questions](#section-frequently-asked-questions)
-  - [How do I record my builds?](#section-how-do-i-record-my-builds)
+  - [How do I record my tests?](#section-how-do-i-record-my-tests)
   - [How is this different than CI?](#section-how-is-this-different-than-ci-)
   - [How much does this cost?](#section-how-much-does-this-cost-)
   - [Can I host this myself?](#section-can-i-host-this-myself-)
@@ -15,9 +15,9 @@ excerpt: An overview of our Dashboard
 
 # What is the Dashboard?
 
-![screen shot 2017-02-06 at 7 26 29 pm](https://cloud.githubusercontent.com/assets/1268976/22672483/47258924-eca2-11e6-8544-268c777c46aa.png)
+![Dashboard Screenshot](https://cloud.githubusercontent.com/assets/1271364/22800284/d4dbe1d8-eed6-11e6-87ce-32474ea1000c.png)
 
-The Dashboard is a Cypress service that gives you access to builds you've recorded - typically when running Cypress tests from your CI provider. The Dashboard provides you insight into what happened during your build.
+The Dashboard is a Cypress service that gives you access to tests you've recorded - typically when running Cypress tests from your CI provider. The Dashboard provides you insight into what happened during your build.
 
 **The Dashboard allows you to:**
 
@@ -27,19 +27,19 @@ The Dashboard is a Cypress service that gives you access to builds you've record
 - Watch a video of your entire test run or a clip at the point of test failure.
 - Manage who has access to your build data
 
-Additionally we've integrated the dashboard into the Cypress [Desktop Application](https://on.cypress.io/guides/installing-and-running). This means you'll see the builds in the Builds tab from within every project.
+Additionally we've integrated the dashboard into the Cypress [Desktop Application](https://on.cypress.io/guides/installing-and-running). This means you'll see the test runs in the Tunes tab from within every project.
 
-![Builds List](https://cloud.githubusercontent.com/assets/1271364/22701577/fab631d0-ed2b-11e6-8ee1-f57a89013658.png)
+![Runs List](https://cloud.githubusercontent.com/assets/1271364/22800330/ff6c9474-eed6-11e6-9a32-8360d64b1071.png)
 
 ***
 
 # Frequently Asked Questions
 
-## How do I record my builds?
+## How do I record my tests?
 
 [By adding your project and running it in CI.](https://on.cypress.io/guides/projects)
 
-[After recording your builds, you will see them in the Dashboard and in the Desktop Application](https://on.cypress.io/guides/projects).
+[After recording your tests, you will see them in the Dashboard and in the Desktop Application](https://on.cypress.io/guides/projects).
 
 ***
 
@@ -53,7 +53,7 @@ The difference is that your CI provider has no idea what is going on inside of t
 
 Our dashboard provides you with the low level details of *what* happened during your run. Using both your CI provider + Cypress together gives the insight required to debug your test runs.
 
-When a run happens and a test fails - instead of going and inspecting your CI provider's `stdout` output, you can log into the [Dashboard](https://on.cypress.io/dashboard) and see all of the build results. It should be instantly clear what the problem was.
+When a run happens and a test fails - instead of going and inspecting your CI provider's `stdout` output, you can log into the [Dashboard](https://on.cypress.io/dashboard) and see all of the test run results. It should be instantly clear what the problem was.
 
 ***
 
@@ -79,4 +79,4 @@ No, although we are looking to build an on-prem version of the Dashboard for use
 
 Of course. The dashboard is a separate service from the Desktop Application and will always remain optional. We hope you'll find a tremendous amount of value out of it, but it is not coupled to being able to run your tests.
 
-You can simply always run your tests in CI using `cypress run` which does not communicate with our external servers and will not record any build results.
+You can simply always run your tests in CI using `cypress run` without a key which does not communicate with our external servers and will not record any test results.
