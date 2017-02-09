@@ -141,12 +141,12 @@ cy
 Once you have a `stub` or a `spy` in hand, you can then create assertions about them.
 
 ```javascript
-const obj = {
-  foo: function(arg){
+const user = {
+  getName: function(arg){
     return arg
   },
 
-  bar: function(arg){
+  updateEmail: function(arg){
     return arg
   },
 
@@ -155,37 +155,40 @@ const obj = {
   }
 }
 
-// force obj.foo() to return "quux"
-cy.stub(obj, "foo").returns("quux")
+// force user.getName() to return "Jane"
+cy.stub(user, "getName").returns("Jane Lane")
 
-// spy on bar but do not change its behavior
-cy.spy(obj, "bar")
+// spy on updateEmail but do not change its behavior
+cy.spy(user, "updateEmail")
 
 // spy on fail but do not change its behavior
-cy.spy(obj, "fail")
+cy.spy(user, "fail")
 
-const ret  = obj.foo("123") // invoke foo
-const ret2 = obj.bar("123") // invoke bar
+// invoke getName
+const name  = user.getName(123)
+
+// invoke updateEmail
+const email = user.updateEmail("jane@devs.com")
 
 try {
   // invoke fail
-  obj.fail()
-} catch (e) {
+  user.fail()
+  } catch (e) {
 
 }
 
-expect(ret).to.eq("quux") // true
-expect(obj.foo).to.be.calledOnce // true
-expect(obj.foo).not.to.be.calledTwice // true
-expect(obj.foo).to.be.calledWith("123")
-expect(obj.foo).to.be.calledMatch(/1/) // true
-expect(obj.foo).to.be.calledOn(obj) // true
+expect(name).to.eq("Jane Lane")                            // true
+expect(user.getName).to.be.calledOnce                      // true
+expect(user.getName).not.to.be.calledTwice                 // true
+expect(user.getName).to.be.calledWith(123)
+expect(user.getName).to.be.calledWithExactly(123)          // true
+expect(user.getName).to.be.calledOn(user)                  // true
 
-expect(ret2).to.eq("123") // true
-expect(obj.bar).to.be.calledWith("123") // true
-expect(obj.bar).to.have.returned("123") // true
+expect(email).to.eq("jane@devs.com")                       // true
+expect(user.updateEmail).to.be.calledWith("jane@devs.com") // true
+expect(user.updateEmail).to.have.returned("jane@devs.com") // true
 
-expect(obj.fail).to.have.thrown("fail whale") // true
+expect(user.fail).to.have.thrown("Error")                  // true
 ```
 
 ***
