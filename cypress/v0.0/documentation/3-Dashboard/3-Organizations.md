@@ -16,11 +16,15 @@ excerpt: Manage your Organizations
 
 # What are Organizations?
 
+Organizations are used to group projects and to manage permissions for who can access those projects.
+
 ![Add Organization dialog](https://cloud.githubusercontent.com/assets/1271364/22709492/f1d3e7e4-ed47-11e6-8f35-64fed633862b.png)
 
 ***
 
 ## Default Organization
+
+By default, every user of Cypress is given a default organization. This is created in order to ease the process of initially setting up projects to record.
 
 ***
 
@@ -59,8 +63,6 @@ User's can be assigned roles that affect their access to certain features.
 
 ## User Requests
 
-![Request Access to Org](https://cloud.githubusercontent.com/assets/1271364/22710044/e32577b0-ed49-11e6-873e-0581add54ec5.png)
-
 ![User requesting access](https://cloud.githubusercontent.com/assets/1271364/22709877/61ca46be-ed49-11e6-80cc-d54299634053.png)
 
 ***
@@ -76,6 +78,8 @@ You can transfer projects that you own to another organization you are a part of
 
 # Deleting an Organization
 
+Before deleting an organization, ensure that all of the organization's projects are transferred or deleted first. This is to avoid deleting any run data by mistake.
+
 Note: You cannot delete your default organization.
 
-![](https://cloud.githubusercontent.com/assets/1271364/22709764/f9c63e9c-ed48-11e6-885d-ced14d91c3a8.png)
+![Delete Organization](https://cloud.githubusercontent.com/assets/1271364/22709764/f9c63e9c-ed48-11e6-885d-ced14d91c3a8.png)
