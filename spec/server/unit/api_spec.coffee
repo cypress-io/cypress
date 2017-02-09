@@ -635,7 +635,7 @@ describe "lib/api", ->
         """)
 
 
-  context ".getProjectDashboardTokens", ->
+  context ".getProjectRecordKeys", ->
     it "GET /projects/:id/keys + returns keys", ->
       ciKeys = []
 
@@ -644,7 +644,7 @@ describe "lib/api", ->
       .get("/projects/id-123/keys")
       .reply(200, ciKeys)
 
-      api.getProjectDashboardTokens("id-123", "auth-token-123")
+      api.getProjectRecordKeys("id-123", "auth-token-123")
       .then (ret) ->
         expect(ret).to.eql(ciKeys)
 

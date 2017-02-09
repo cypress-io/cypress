@@ -29,8 +29,8 @@ module.exports = {
 
     repo.getBranch()
 
-  generateProjectBuildId: (projectId, projectPath, projectName, dashboardToken) ->
-    if not dashboardToken
+  generateProjectBuildId: (projectId, projectPath, projectName, recordKey) ->
+    if not recordKey
       return errors.throw("CI_KEY_MISSING")
 
     repo = git.init(projectPath)
@@ -46,7 +46,7 @@ module.exports = {
     .then (git) ->
       api.createBuild({
         projectId:         projectId
-        dashboardToken:    dashboardToken
+        recordKey:    recordKey
         commitSha:         git.sha
         commitBranch:      git.branch
         commitAuthorName:  git.author
@@ -60,8 +60,8 @@ module.exports = {
       .catch (err) ->
         switch err.statusCode
           when 401
-            dashboardToken = dashboardToken.slice(0, 5) + "..." + dashboardToken.slice(-5)
-            errors.throw("DASHBOARD_TOKEN_NOT_VALID", dashboardToken, projectId)
+            recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
+            errors.throw("DASHBOARD_TOKEN_NOT_VALID", recordKey, projectId)
           when 404
             errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
           else

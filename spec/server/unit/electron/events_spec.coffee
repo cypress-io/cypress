@@ -506,18 +506,18 @@ describe "lib/electron/handlers/events", ->
         @handleEvent("setup:dashboard:project").then =>
           @expectSendErrCalledWith(err)
 
-    describe "get:dashboard:tokens", ->
-      it "returns result of project.getDashboardTokens", ->
-        @sandbox.stub(project, "getDashboardTokens").resolves(["ci-key-123"])
+    describe "get:record:keys", ->
+      it "returns result of project.getRecordKeys", ->
+        @sandbox.stub(project, "getRecordKeys").resolves(["ci-key-123"])
 
-        @handleEvent("get:dashboard:tokens").then =>
+        @handleEvent("get:record:keys").then =>
           @expectSendCalledWith(["ci-key-123"])
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(project, "getDashboardTokens").rejects(err)
+        @sandbox.stub(project, "getRecordKeys").rejects(err)
 
-        @handleEvent("get:dashboard:tokens").then =>
+        @handleEvent("get:record:keys").then =>
           @expectSendErrCalledWith(err)
 
     describe "request:access", ->

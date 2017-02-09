@@ -27,7 +27,7 @@ fs = Promise.promisifyAll(fs)
 
 TITLE_SEPARATOR = " /// "
 
-haveProjectIdAndNoDashboardToken = (projectId, options) ->
+haveProjectIdAndNoRecordKey = (projectId, options) ->
   ## if we have a project id
   ## and we haven't turned off recording
   ## and we don't have a dashboard token
@@ -508,7 +508,7 @@ module.exports = {
       ])
       .spread (projectId, config, url) =>
         ## if we have a project id and no dashboard token
-        if haveProjectIdAndNoDashboardToken(projectId, options)
+        if haveProjectIdAndNoRecordKey(projectId, options)
           ## log a warning telling the user
           ## that they either need to provide us
           ## with a DASHBOARD_TOKEN or turn off

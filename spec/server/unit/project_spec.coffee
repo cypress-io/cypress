@@ -508,20 +508,20 @@ describe "lib/project", ->
       @project.createCiProject({foo: "bar"}).then (projectId) =>
         expect(projectId).to.eql(@newProject)
 
-  context "#getDashboardTokens", ->
+  context "#getRecordKeys", ->
     beforeEach ->
       @ciKeys = []
       @project = Project(@pristinePath)
       @sandbox.stub(settings, "read").resolves({projectId: "id-123"})
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
-      @sandbox.stub(api, "getProjectDashboardTokens").resolves(@ciKeys)
+      @sandbox.stub(api, "getProjectRecordKeys").resolves(@ciKeys)
 
-    it "calls api.getProjectDashboardTokens with project id + session", ->
-      @project.getDashboardTokens().then ->
-        expect(api.getProjectDashboardTokens).to.be.calledWith("id-123", "auth-token-123")
+    it "calls api.getProjectRecordKeys with project id + session", ->
+      @project.getRecordKeys().then ->
+        expect(api.getProjectRecordKeys).to.be.calledWith("id-123", "auth-token-123")
 
     it "returns ci keys", ->
-      @project.getDashboardTokens().then (ciKeys) =>
+      @project.getRecordKeys().then (ciKeys) =>
         expect(ciKeys).to.equal(@ciKeys)
 
   context "#requestAccess", ->

@@ -239,8 +239,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .then(send)
       .catch(sendErr)
 
-    when "get:dashboard:tokens"
-      project.getDashboardTokens()
+    when "get:record:keys"
+      project.getRecordKeys()
       .then(send)
       .catch(sendErr)
 

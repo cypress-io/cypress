@@ -49,11 +49,11 @@ API = {
 
         It currently has the projectId: #{chalk.green(arg1)}
 
-        However, no Dashboard Token was provided. This run will not be recorded.
+        However, no Record Key was provided. This run will not be recorded.
 
-        If you meant to have this run recorded please provide us your Dashboard Token.
+        If you meant to have this run recorded please provide us your Record Key.
 
-          #{chalk.blue("cypress run <dashboard_token>")}
+          #{chalk.blue("cypress run --key <record_token>")}
 
         If you don't want to record these runs, you can silence this warning:
 
@@ -117,7 +117,7 @@ API = {
         """
         We failed trying to authenticate this project.
 
-        Your Dashboard Token is invalid: #{chalk.yellow(arg1)}
+        Your Record Key is invalid: #{chalk.yellow(arg1)}
 
         It may have been recently revoked by you or another user.
 
