@@ -28,7 +28,7 @@ describe "Settings", ->
           "get:projects": (stub) => stub.resolves(@projects)
           "get:project:statuses": (stub) => stub.returns(@getProjectStatuses.promise)
           "open:project": (stub) => stub.yields(null, @config)
-          "get:dashboard:tokens": (stub) => stub.returns(@getRecordKeys.promise)
+          "get:record:keys": (stub) => stub.returns(@getRecordKeys.promise)
           "get:builds": (stub) => stub.resolves(@runs)
           "get:orgs": (stub) => stub.resolves([])
         })
@@ -114,7 +114,7 @@ describe "Settings", ->
             expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/continuous-integration")
 
       it "loads the project's record keys", ->
-        expect(@App.ipc).to.be.calledWith("get:dashboard:tokens")
+        expect(@App.ipc).to.be.calledWith("get:record:keys")
 
       it "shows spinner", ->
         cy.get(".config-record-keys .fa-spinner")

@@ -182,7 +182,7 @@ const openProject = (project) => {
 }
 
 const getRecordKeys = () => {
-  return App.ipc('get:dashboard:tokens')
+  return App.ipc('get:record:keys')
   // ignore error, settle for no keys
   .catch(() => [])
 }

@@ -36,7 +36,7 @@ describe "Setup Project", ->
           "get:builds": (stub) => stub.resolves([])
           "get:orgs": (stub) => stub.returns(@getOrgs.promise)
           "setup:dashboard:project": (stub) => stub.returns(@setupCiProject.promise)
-          "get:dashboard:tokens": (stub) => stub.resolves(@keys)
+          "get:record:keys": (stub) => stub.resolves(@keys)
         })
 
         @App.start()
