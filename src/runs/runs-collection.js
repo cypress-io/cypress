@@ -2,10 +2,10 @@ import _ from 'lodash'
 import { observable, action } from 'mobx'
 import moment from 'moment'
 
-import Build from './build-model'
+import Run from './run-model'
 
-export class BuildsCollection {
-  @observable builds = []
+export class RunsCollection {
+  @observable runs = []
   @observable error = null
   @observable isLoading = false
   @observable isLoaded = false
@@ -16,9 +16,9 @@ export class BuildsCollection {
     this.error = null
   }
 
-  @action setBuilds (builds) {
-    this.builds = _.map(builds, (build) => (
-      new Build(build)
+  @action setRuns (runs) {
+    this.runs = _.map(runs, (run) => (
+      new Run(run)
     ))
 
     this.lastUpdated = moment().format("h:mm:ssa")
@@ -33,4 +33,4 @@ export class BuildsCollection {
   }
 }
 
-export default BuildsCollection
+export default RunsCollection

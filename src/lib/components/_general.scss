@@ -112,3 +112,22 @@ i.timedOut { color: #F5A327;}
   cursor: pointer;
 }
 
+pre.line-nums {
+  padding-left: 15px;
+  counter-reset: line;
+
+  span {
+    display: block;
+
+    &:before {
+      counter-increment: line;
+      content: counter(line);
+      display: inline-block;
+      border-right: 1px solid #414344;
+      padding: 0 .5em 0 0;
+      margin-right: .5em;
+      color: #696c6d;
+    }
+  }
+}
+

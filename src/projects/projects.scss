@@ -108,7 +108,7 @@
     color: #666;
   }
 
-  .last-build-status {
+  .last-run-status {
     font-size: 14px;
     color: #555;
     font-weight: 500;
@@ -130,7 +130,7 @@
     }
   }
 
-  .last-build-time {
+  .last-run-time {
     font-size: 12px;
     color: #888;
     font-style: italic;
@@ -141,7 +141,7 @@ html.has-updates {
   .projects-list,
   #tests-list-page,
   #config,
-  #builds-list-page {
+  #runs-list-page {
     bottom: 56px;
   }
 }

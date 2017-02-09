@@ -1,4 +1,4 @@
-#builds {
+#runs {
   bottom: 18px;
   top: 77px;
   position: fixed;
@@ -14,7 +14,7 @@
   }
 }
 
-#builds-list-page {
+#runs-list-page {
   bottom: 18px;
   top: 77px;
   position: fixed;
@@ -23,8 +23,12 @@
   width: 100%;
 }
 
-.first-build-instructions {
+.first-run-instructions {
   padding: 40px 130px;
+
+  a {
+    cursor: pointer;
+  }
 
   p {
     text-align: center;
@@ -77,26 +81,10 @@
     background-color: #252831;
     border-radius: 3px;
     color: #eee;
-    padding-left: 15px;
-    counter-reset: line;
-
-    span {
-      display: block;
-
-        &:before {
-          counter-increment: line;
-          content: counter(line);
-          display: inline-block;
-          border-right: 1px solid #414344;
-          padding: 0 .5em 0 0;
-          margin-right: .5em;
-          color: #696c6d;
-        }
-      }
   }
 }
 
-.builds {
+.runs {
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -131,7 +119,7 @@
       line-height: 39px;
     }
 
-    .see-all-builds:active {
+    .see-all-runs:active {
       box-shadow: none;
     }
 
@@ -146,7 +134,7 @@
   }
 }
 
-.builds-screenshots {
+.runs-screenshots {
   overflow: auto;
   width: 500px;
   margin: 15px auto;
@@ -162,7 +150,7 @@
   }
 }
 
-.builds-container {
+.runs-container {
   margin-bottom: 0;
   @include list-columns(0%, 10%, 25%, 14%, 10%, 12%, 7%, 7%, 8%, 7%);
 
@@ -472,13 +460,13 @@
   }
 }
 
-.builds-list-error {
+.runs-list-error {
   margin-top: 100px
 }
 
 .setup-project-modal,
 .request-access,
-.builds-list-error {
+.runs-list-error {
   .alert-danger {
     margin: 0 2em 1em;
     max-height: 200px;

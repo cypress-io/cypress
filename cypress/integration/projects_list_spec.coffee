@@ -184,11 +184,11 @@ describe "Projects List", ->
               .get(".projects-list>li").last().prev()
               .contains("Unauthorized")
 
-          it "opens builds tab when clicked", ->
+          it "opens runs tab when clicked", ->
             cy
               .get(".projects-list>li a").last().click()
               .location().its("hash")
-                .should("include", "builds")
+                .should("include", "runs")
 
         describe "when project is invalid", ->
 
@@ -197,11 +197,11 @@ describe "Projects List", ->
               .get(".projects-list>li").last()
               .contains("Invalid")
 
-          it "opens builds tab when clicked", ->
+          it "opens runs tab when clicked", ->
             cy
               .get(".projects-list>li a").last().click()
               .location().its("hash")
-                .should("include", "builds")
+                .should("include", "runs")
 
     describe "polling projects", ->
       beforeEach ->

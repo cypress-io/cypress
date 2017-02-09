@@ -6,6 +6,13 @@
   margin-bottom: 0;
   width: 100%;
 
+  .learn-more {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 13px;
+  }
+
   h5 {
     margin-top: 20px;
     overflow: hidden;
@@ -24,7 +31,6 @@
   }
 
   .config-keys {
-
     margin-bottom: 0;
     line-height: 16px;
 
@@ -37,7 +43,9 @@
   .config-vars {
     font-size: 13px;
     border: 1px solid #ddd;
-    background-color: white;
+    border-radius: 3px;
+    background-color: #252831;
+    color: #eee;
     margin: 0;
     padding: 10px;
     font-family: Consolas, Monaco, 'Andale Mono', monospace;
@@ -51,16 +59,16 @@
     }
 
     .key {
-      color: #666;
+      color: #ccc;
     }
 
     .comma, .colon, {
-      color: #888;
+      color: #ccc;
     }
 
     .line {
       margin-left: 15px;
-      color: #000;
+      color: #eee;
     }
 
     .nested {
@@ -103,17 +111,32 @@
 .config-wrapper {
   padding: 20px 20px 0;
 
+  pre {
+    border-radius: 3px;
+    background-color: #252831;
+    color: #eee;
+    padding: 10px;
+    font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    border: 0;
+  }
+
   table tr:first-child td {
     border-top: 0;
   }
 
   .rc-collapse-item {
-    margin-bottom: 20px;
+    margin-bottom: 0;
+    position: relative;
+    border-bottom: 0;
+
+    &:last-child {
+      border-bottom: 1px solid #eee;
+    }
   }
 
   .rc-collapse-header {
     cursor: pointer;
-    font-size: 1.2em;
+    font-size: 1em;
     position: relative;
     left: -15px;
 
@@ -131,7 +154,7 @@
   }
 
   .rc-collapse-content {
-    margin-top: 15px;
+    margin: 15px 8px 0;
     overflow: hidden;
   }
 
@@ -150,7 +173,7 @@
   border-bottom: 1px solid #ddd;
 }
 
-.config-ci-keys {
+.config-dashboard-tokens {
   margin-bottom: 2em;
 
   p.text-muted.manage-btn {
@@ -167,12 +190,6 @@
     margin: 10px 0;
   }
 
-  pre {
-    margin: 10px 0;
-    background-color: white;
-    border: 1px solid #ddd;
-  }
-
   table {
     @include table-columns(60%, 20%, 20%);
     margin-bottom: 10px;
@@ -187,11 +204,11 @@
       }
     }
 
-    .ci-key-date {
+    .dashboard-token-date {
       color: #777;
     }
 
-    .ci-key {
+    .dashboard-token {
       font-family: Consolas, Monaco, 'Andale Mono', monospace;
 
       input {
@@ -212,7 +229,7 @@
 
 }
 
-.loading-ci-keys {
+.loading-dashboard-tokens {
   color: #999;
   margin: 1em;
 }

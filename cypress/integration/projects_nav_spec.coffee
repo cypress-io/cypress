@@ -7,7 +7,7 @@ describe "Projects Nav", ->
       .fixture("projects").as("projects")
       .fixture("projects_statuses").as("projectStatuses")
       .fixture("config").as("config")
-      .fixture("builds").as("builds")
+      .fixture("runs").as("runs")
       .fixture("specs").as("specs")
       .visit("/")
       .window().then (win) ->
@@ -27,10 +27,10 @@ describe "Projects Nav", ->
           "get:current:user": (stub) => stub.resolves(@user)
           "get:projects": (stub) => stub.resolves(@projects)
           "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
-          "get:builds": (stub) => stub.resolves(@builds)
+          "get:builds": (stub) => stub.resolves(@runs)
           "get:open:browsers": (stub) => stub.resolves([])
           "get:specs": (stub) => stub.yields(null, @specs)
-          "get:ci:keys": (stub) -> stub.resolves([])
+          "get:dashboard:tokens": (stub) -> stub.resolves([])
         })
 
         @App.start()
@@ -83,25 +83,25 @@ describe "Projects Nav", ->
           .contains("Back to Projects").click({force: true})
           .title().should("eq", "Cypress")
 
-    describe "builds page", ->
+    describe "runs page", ->
       beforeEach ->
         cy
-          .fixture("builds").as("builds")
+          .fixture("runs").as("runs")
           .get(".navbar-default")
-            .contains("a", "Builds").as("buildsNav").click()
+            .contains("a", "Runs").as("runsNav").click()
 
-      it "highlights builds on click", ->
+      it "highlights runs on click", ->
         cy
-          .get("@buildsNav")
+          .get("@runsNav")
             .should("have.class", "active")
 
-      it "navigates to builds url", ->
+      it "navigates to runs url", ->
         cy
-          .location().its("hash").should("include", "builds")
+          .location().its("hash").should("include", "runs")
 
-      it "displays builds page", ->
+      it "displays runs page", ->
         cy
-          .get(".builds-container li")
+          .get(".runs-container li")
           .should("have.length", 4)
 
     describe "settings page", ->

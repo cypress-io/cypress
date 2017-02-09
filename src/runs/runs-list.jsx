@@ -1,4 +1,3 @@
-import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { action } from 'mobx'
@@ -7,33 +6,32 @@ import Loader from 'react-loader'
 
 import App from '../lib/app'
 import state from '../lib/state'
-import BuildsCollection from './builds-collection'
+import RunsCollection from './runs-collection'
 import errors from '../lib/errors'
-import { getBuilds, pollBuilds, stopPollingBuilds } from './builds-api'
-import { getCiKeys } from '../projects/projects-api'
+import { getRuns, pollRuns, stopPollingRuns } from './runs-api'
+import { getDashboardTokens } from '../projects/projects-api'
 import projectsStore from '../projects/projects-store'
 import Project from '../project/project-model'
 import orgsStore from '../organizations/organizations-store'
-
-import Build from './builds-list-item'
+import Run from './runs-list-item'
 import ErrorMessage from './error-message'
 import PermissionMessage from './permission-message'
 import ProjectNotSetup from './project-not-setup'
 
 @observer
-class Builds extends Component {
+class Runs extends Component {
   constructor (props) {
     super(props)
 
-    this.buildsCollection = new BuildsCollection()
+    this.runsCollection = new RunsCollection()
 
     this.state = {
-      ciKey: null,
+      dashboardToken: null,
     }
   }
 
   componentWillMount () {
-    this._getBuilds()
+    this._getRuns()
     this._handlePolling()
     this._getCiKey()
   }
@@ -47,19 +45,19 @@ class Builds extends Component {
     this._stopPolling()
   }
 
-  _getBuilds = () => {
-    getBuilds(this.buildsCollection)
+  _getRuns = () => {
+    getRuns(this.runsCollection)
   }
 
   _handlePolling () {
-    if (this._shouldPollBuilds()) {
+    if (this._shouldPollRuns()) {
       this._poll()
     } else {
       this._stopPolling()
     }
   }
 
-  _shouldPollBuilds () {
+  _shouldPollRuns () {
     return (
       state.hasUser &&
       !!this.props.project.id
@@ -67,18 +65,18 @@ class Builds extends Component {
   }
 
   _poll () {
-    pollBuilds(this.buildsCollection)
+    pollRuns(this.runsCollection)
   }
 
   _stopPolling () {
-    stopPollingBuilds()
+    stopPollingRuns()
   }
 
   _getCiKey () {
     if (this._needsCiKey()) {
-      getCiKeys().then((ciKeys = []) => {
-        if (ciKeys.length) {
-          this.setState({ ciKey: ciKeys[0].id })
+      getDashboardTokens().then((dashboardTokens = []) => {
+        if (dashboardTokens.length) {
+          this.setState({ dashboardToken: dashboardTokens[0].id })
         }
       })
     }
@@ -86,11 +84,11 @@ class Builds extends Component {
 
   _needsCiKey () {
     return (
-      !this.state.ciKey &&
+      !this.state.dashboardToken &&
       state.hasUser &&
-      !this.buildsCollection.isLoading &&
-      !this.buildsCollection.error &&
-      !this.buildsCollection.builds.length &&
+      !this.runsCollection.isLoading &&
+      !this.runsCollection.error &&
+      !this.runsCollection.runs.length &&
       this.props.project.id
     )
   }
@@ -108,31 +106,31 @@ class Builds extends Component {
       return this._permissionMessage()
     }
 
-    // OR if there is an error getting the builds
-    if (this.buildsCollection.error) {
+    // OR if there is an error getting the runs
+    if (this.runsCollection.error) {
       // project id missing, probably removed manually from cypress.json
-      if (errors.isMissingProjectId(this.buildsCollection.error)) {
+      if (errors.isMissingProjectId(this.runsCollection.error)) {
         return this._emptyWithoutSetup()
 
       // the project is invalid
-      } else if (errors.isNotFound(this.buildsCollection.error)) {
+      } else if (errors.isNotFound(this.runsCollection.error)) {
         return this._emptyWithoutSetup(false)
 
-      // they are not authorized to see builds
-      } else if (errors.isUnauthenticated(this.buildsCollection.error) || errors.isUnauthorized(this.buildsCollection.error)) {
+      // they are not authorized to see runs
+      } else if (errors.isUnauthenticated(this.runsCollection.error) || errors.isUnauthorized(this.runsCollection.error)) {
         return this._permissionMessage()
 
-      // other error, but only show if we don't already have builds
-      } else if (!this.buildsCollection.isLoaded) {
-        return <ErrorMessage error={this.buildsCollection.error} />
+      // other error, but only show if we don't already have runs
+      } else if (!this.runsCollection.isLoaded) {
+        return <ErrorMessage error={this.runsCollection.error} />
       }
     }
 
-    // OR the builds are loading for the first time
-    if (this.buildsCollection.isLoading && !this.buildsCollection.isLoaded) return <Loader color='#888' scale={0.5}/>
+    // OR the runs are loading for the first time
+    if (this.runsCollection.isLoading && !this.runsCollection.isLoaded) return <Loader color='#888' scale={0.5}/>
 
-    // OR there are no builds to show
-    if (!this.buildsCollection.builds.length) {
+    // OR there are no runs to show
+    if (!this.runsCollection.runs.length) {
 
       // AND they've never setup CI
       if (!project.id) {
@@ -143,14 +141,14 @@ class Builds extends Component {
         return this._empty()
       }
     }
-    //--------End Build States----------//
+    //--------End Run States----------//
 
-    // everything's good, there are builds to show!
+    // everything's good, there are runs to show!
     return (
-      <div id='builds-list-page' className='builds'>
+      <div id='runs-list-page' className='runs'>
         <header>
-          <h5>Builds
-          <a href="#" className='btn btn-sm see-all-builds' onClick={this._openBuilds}>
+          <h5>Runs
+          <a href="#" className='btn btn-sm see-all-runs' onClick={this._openRuns}>
             See All <i className='fa fa-external-link'></i>
           </a>
 
@@ -159,21 +157,19 @@ class Builds extends Component {
             {this._lastUpdated()}
             <button
               className='btn btn-link btn-sm'
-              disabled={this.buildsCollection.isLoading}
-              onClick={this._getBuilds}
+              disabled={this.runsCollection.isLoading}
+              onClick={this._getRuns}
             >
-              <i className={cs('fa fa-refresh', {
-                'fa-spin': this.buildsCollection.isLoading,
-              })}></i>
+              <i className={`fa fa-refresh ${this.runsCollection.isLoading ? 'fa-spin' : ''}`}></i>
             </button>
           </div>
         </header>
-        <ul className='builds-container list-as-table'>
-          {_.map(this.buildsCollection.builds, (build) => (
-            <Build
-              key={build.id}
-              goToBuild={this._openBuild}
-              build={build}
+        <ul className='runs-container list-as-table'>
+          {_.map(this.runsCollection.runs, (run) => (
+            <Run
+              key={run.id}
+              goToRun={this._openRun}
+              run={run}
             />
           ))}
         </ul>
@@ -182,11 +178,11 @@ class Builds extends Component {
   }
 
   _lastUpdated () {
-    if (!this.buildsCollection.lastUpdated) return null
+    if (!this.runsCollection.lastUpdated) return null
 
     return (
       <span className='last-updated'>
-        Last updated: {this.buildsCollection.lastUpdated}
+        Last updated: {this.runsCollection.lastUpdated}
       </span>
     )
   }
@@ -205,13 +201,13 @@ class Builds extends Component {
     return (
       <PermissionMessage
         project={this.props.project}
-        onRetry={this._getBuilds}
+        onRetry={this._getRuns}
       />
     )
   }
 
   @action _setProjectDetails = (projectDetails) => {
-    this.buildsCollection.setError(null)
+    this.runsCollection.setError(null)
     projectsStore.updateProject(this.props.project, {
       id: projectDetails.id,
       name: projectDetails.projectName,
@@ -224,25 +220,25 @@ class Builds extends Component {
 
   _empty () {
     return (
-      <div id='builds-list-page'>
-        <div className='first-build-instructions'>
+      <div id='runs-list-page'>
+        <div className='first-run-instructions'>
           <h4>
-            To record your first build...
+            To record your first run...
           </h4>
           <h5>
             <span className='pull-left'>
               1. Check <code>cypress.json</code> into source control.
             </span>
-            <a onClick={this._openProjectIdGuide}className='pull-right'>
+            <a onClick={this._openProjectIdGuide} className='pull-right'>
               <i className='fa fa-question-circle'></i>{' '}
               {' '}
               Why?
             </a>
           </h5>
-          <pre>
-              <span>{`{`}</span>
-              <span>{`  projectId: ${this.props.project.id || '<projectId>'}`}</span>
-              <span>{`}`}</span>
+          <pre className='line-nums'>
+            <span>{`{`}</span>
+            <span>{`  "projectId": "${this.props.project.id || '<projectId>'}"`}</span>
+            <span>{`}`}</span>
           </pre>
           <h5>
             <span className='pull-left'>
@@ -254,22 +250,22 @@ class Builds extends Component {
             </a>
           </h5>
           <pre>
-            <code>cypress ci {this.state.ciKey || '<ci-key>'}</code>
+            <code>cypress run {this.state.dashboardToken || '<dashboard-token>'}</code>
           </pre>
           <hr />
           <p className='alert alert-default'>
             <i className='fa fa-info-circle'></i>{' '}
-            Builds you record will show up here and on your{' '}
-            <a href='#' onClick={this._openBuilds}>Cypress Dashboard</a>.
+            Tests you record will show up here and on your{' '}
+            <a href='#' onClick={this._openRuns}>Cypress Dashboard</a>.
           </p>
         </div>
       </div>
     )
   }
 
-  _openBuilds = (e) => {
+  _openRuns = (e) => {
     e.preventDefault()
-    App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}/builds`)
+    App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs`)
   }
 
   _openCiGuide = (e) => {
@@ -282,9 +278,9 @@ class Builds extends Component {
     App.ipc('external:open', 'https://on.cypress.io/guides/projects#section-what-is-a-projectid-')
   }
 
-  _openBuild = (buildId) => {
-    App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}/builds/${buildId}`)
+  _openRun = (runId) => {
+    App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs/${runId}`)
   }
 }
 
-export default Builds
+export default Runs

@@ -5,19 +5,19 @@ import Tooltip from 'rc-tooltip'
 import Collapse, { Panel } from 'rc-collapse'
 
 import App from '../lib/app'
-import { getCiKeys } from '../projects/projects-api'
+import { getDashboardTokens } from '../projects/projects-api'
 
 @observer
 class Config extends Component {
   state = {
-    ciKeys: [],
+    dashboardTokens: [],
     isLoadingCiKeys: true,
   }
 
   componentWillMount () {
-    getCiKeys().then((ciKeys = []) => {
+    getDashboardTokens().then((dashboardTokens = []) => {
       this.setState({
-        ciKeys,
+        dashboardTokens,
         isLoadingCiKeys: false,
       })
     })
@@ -30,7 +30,7 @@ class Config extends Component {
           <Collapse>
             {this._configSection()}
             {this._projectIdSection()}
-            {this._ciKeysSection()}
+            {this._dashboardTokensSection()}
           </Collapse>
         </div>
       </div>
@@ -42,7 +42,7 @@ class Config extends Component {
 
     return (
       <Panel header='Configuration' key='config' className='form-horizontal'>
-        <a href='#' className='pull-right' onClick={this._openHelp}>
+        <a href='#' className='learn-more' onClick={this._openHelp}>
           <i className='fa fa-info-circle'></i>{' '}
           Learn more
         </a>
@@ -141,34 +141,40 @@ class Config extends Component {
 
     return (
       <Panel header='Project ID' key='projectId' className='form-horizontal'>
+        <a href='#' className='learn-more' onClick={this._openProjectIdHelp}>
+          <i className='fa fa-info-circle'></i>{' '}
+          Learn more
+        </a>
         <p className='text-muted'>This projectId should be in your <code>cypress.json</code> and checked into source control.
           It identifies your project and should not be changed.
         </p>
-        <pre>
-          {this.props.project.id}
+        <pre className='line-nums'>
+          <span>{`{`}</span>
+          <span>{`  "projectId": "${this.props.project.id || '<projectId>'}"`}</span>
+          <span>{`}`}</span>
         </pre>
       </Panel>
     )
   }
 
-  _ciKeysSection () {
+  _dashboardTokensSection () {
     if (this._notSetupForCi()) return null
 
     return (
-      <Panel header='CI Keys' key='ci-keys' className='form-horizontal config-ci-keys'>
-        <a href='#' className='pull-right' onClick={this._openCiGuide}>
+      <Panel header='Dashboard Tokens' key='dashboard-tokens' className='form-horizontal config-dashboard-tokens'>
+        <a href='#' className='learn-more' onClick={this._openCiGuide}>
           <i className='fa fa-info-circle'></i>{' '}
           Learn More
         </a>
         <p className='text-muted'>
-          CI Keys allow you to record test results, screenshots and videos in Cypress.
-          {this._hasCiKeys() ? ' To record your builds, run this command:' : ''}
+          Dashboard Tokens allow you to record test results, screenshots and videos in Cypress.
+          {this._hasCiKeys() ? ' To record your tests, run this command:' : ''}
         </p>
-        {this._hasCiKeys() ? <pre><code>cypress ci {this.state.ciKeys[0].id}</code></pre> : null}
-        {this._ciKeys()}
+        {this._hasCiKeys() ? <pre><code>cypress run {this.state.dashboardTokens[0].id}</code></pre> : null}
+        {this._dashboardTokens()}
         <p className='text-muted manage-btn'>
           <a href='#' onClick={this._openAdminCiKeys} >
-            <i className='fa fa-key'></i> Add or Remove CI Keys
+            <i className='fa fa-key'></i> Add or Remove Dashboard Tokens
           </a>
         </p>
       </Panel>
@@ -176,24 +182,29 @@ class Config extends Component {
   }
 
   _hasCiKeys () {
-    return !this.state.isLoadingCiKeys && this.state.ciKeys.length
+    return !this.state.isLoadingCiKeys && this.state.dashboardTokens.length
   }
 
   _notSetupForCi () {
     return !this.props.project.id || !this.props.project.isValid
   }
 
-  _ciKeys = () => {
+  _dashboardTokens = () => {
     if (this.state.isLoadingCiKeys) {
       return (
-        <p className='loading-ci-keys'>
+        <p className='loading-dashboard-tokens'>
           <i className='fa fa-spinner fa-spin'></i>{' '}
-          Loading CI keys...
+          Loading Dashboard Tokens...
         </p>
       )
     }
 
     return null
+  }
+
+  _openProjectIdHelp (e) {
+    e.preventDefault()
+    App.ipc('external:open', 'https://on.cypress.io/guides/projects#section-what-is-a-projectid-')
   }
 
   _openHelp (e) {

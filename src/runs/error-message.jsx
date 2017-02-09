@@ -7,11 +7,11 @@ const ErrorMessage = observer(({ error }) => {
   let errorMessage
   if (errors.isTimedOut(error)) {
     errorMessage = (
-      <p>The request for builds timed out.</p>
+      <p>The request for runs timed out.</p>
     )
   } else if (errors.isNoConnection(error)) {
     errorMessage = (
-      <p>There is no internet connection. The builds can be loaded once you connect to a network.</p>
+      <p>There is no internet connection. The runs can be loaded once you connect to a network.</p>
     )
   } else {
     errorMessage = (
@@ -25,11 +25,11 @@ const ErrorMessage = observer(({ error }) => {
   }
 
   return (
-    <div id='builds-list-page' className='builds-list-error'>
+    <div id='runs-list-page' className='runs-list-error'>
       <div className="empty">
         <h4>
           <i className='fa fa-warning red'></i>{' '}
-          Builds Could Not Be Loaded
+          Runs Could Not Be Loaded
         </h4>
         {errorMessage}
       </div>
