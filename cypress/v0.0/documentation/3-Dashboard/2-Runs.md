@@ -1,10 +1,10 @@
-slug: builds
-excerpt: View your Recorded Builds
+slug: runs
+excerpt: View your Recorded Runs
 
 # Contents
 
-- :fa-angle-right: [What are Recorded Builds?](#section-what-are-recorded-builds)
-- :fa-angle-right: [What is recorded during a build?](#section-what-is-recorded-during-a-build-)
+- :fa-angle-right: [What are Recorded Runs?](#section-what-are-recorded-runs)
+- :fa-angle-right: [What is recorded during a run?](#section-what-is-recorded-during-a-run-)
   - [Standard Output](#section-standard-output)
   - [Test Failures](#section-test-failures)
   - [Screenshots](#section-screenshots)
@@ -13,11 +13,11 @@ excerpt: View your Recorded Builds
 
 ***
 
-# What are Recorded Builds?
+# What are Recorded Runs?
 
 ***
 
-# What is recorded during a build?
+# What is recorded during a run?
 
 ***
 

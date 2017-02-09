@@ -1,11 +1,11 @@
 slug: projects
-excerpt: Manage your Projects and configure them to record builds
+excerpt: Manage your Projects and configure them to record runs
 
 # Contents
 
 - :fa-angle-right: [What Are Projects?](#section-what-are-projects-)
 - :fa-angle-right: [Adding a New Project](#section-adding-a-new-project)
-- :fa-angle-right: [Recording Builds](#section-recording-builds)
+- :fa-angle-right: [Recording Runs](#section-recording-runs)
   - [What is a projectId?](#section-what-is-a-projectid-)
   - [What is a CI Key?](#section-what-is-a-ci-key-)
   - [What is the difference between public and private projects?](#section-what-is-the-difference-between-public-and-private-projects-)
