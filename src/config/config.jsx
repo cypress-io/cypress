@@ -161,20 +161,28 @@ class Config extends Component {
     if (this._notSetupForCi()) return null
 
     return (
-      <Panel header='Dashboard Tokens' key='dashboard-tokens' className='form-horizontal config-dashboard-tokens'>
+      <Panel header='Record Key' key='dashboard-tokens' className='form-horizontal config-dashboard-tokens'>
         <a href='#' className='learn-more' onClick={this._openCiGuide}>
           <i className='fa fa-info-circle'></i>{' '}
           Learn More
         </a>
         <p className='text-muted'>
-          Dashboard Tokens allow you to record test results, screenshots and videos in Cypress.
-          {this._hasCiKeys() ? ' To record your tests, run this command:' : ''}
+          A Record Key enables you to record your failing tests, screenshots, and videos.
         </p>
-        {this._hasCiKeys() ? <pre><code>cypress run {this.state.dashboardTokens[0].id}</code></pre> : null}
+        {this._hasCiKeys() ?
+          <div>
+            <p className='text-muted'>
+              To record, run this command:
+            </p>
+            <p>
+              <pre><code>cypress run --key {this.state.dashboardTokens[0].id}</code></pre>
+            </p>
+          </div>
+        : null}
         {this._dashboardTokens()}
         <p className='text-muted manage-btn'>
-          <a href='#' onClick={this._openAdminCiKeys} >
-            <i className='fa fa-key'></i> Add or Remove Dashboard Tokens
+          <a href='#' onClick={this._openAdminCiKeys}>
+            <i className='fa fa-key'></i> You can change this key in the Dashboard
           </a>
         </p>
       </Panel>
@@ -194,7 +202,7 @@ class Config extends Component {
       return (
         <p className='loading-dashboard-tokens'>
           <i className='fa fa-spinner fa-spin'></i>{' '}
-          Loading Dashboard Tokens...
+          Loading Keys...
         </p>
       )
     }

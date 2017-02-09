@@ -242,7 +242,7 @@ class Runs extends Component {
           </pre>
           <h5>
             <span className='pull-left'>
-              2. Setup Cypress to run in your CI Provider.
+              2. Run this command now, or in CI.
             </span>
             <a onClick={this._openCiGuide} className='pull-right'>
               <i className='fa fa-question-circle'></i>{' '}
@@ -250,17 +250,24 @@ class Runs extends Component {
             </a>
           </h5>
           <pre>
-            <code>cypress run {this.state.dashboardToken || '<dashboard-token>'}</code>
+            <code>cypress run --key {this.state.dashboardToken || '<dashboard-token>'}</code>
           </pre>
           <hr />
           <p className='alert alert-default'>
             <i className='fa fa-info-circle'></i>{' '}
-            Tests you record will show up here and on your{' '}
+            Recorded runs will show up{' '}
+            <a href='#' onClick={this._openRunGuide}>here</a>{' '}
+            and on your{' '}
             <a href='#' onClick={this._openRuns}>Cypress Dashboard</a>.
           </p>
         </div>
       </div>
     )
+  }
+
+  _openRunGuide = (e) => {
+    e.preventDefault()
+    App.ipc('external:open', 'https://on.cypress.io/guides/projects#section-recording-builds')
   }
 
   _openRuns = (e) => {
