@@ -52,7 +52,7 @@ During a run we record all failing tests, logs, screenshots, and videos.
 
 1. Click on the "Runs" tab of your project, then click "Setup Project to Record".
 
-![Setup Project Screen](https://cloud.githubusercontent.com/assets/1271364/22700292/2597d81c-ed28-11e6-8cfa-aa3670605418.png)
+![Setup Project Screen](https://cloud.githubusercontent.com/assets/1271364/22803739/2d66f42a-eee4-11e6-9b84-bd2e73a523d0.png)
 
 2. Fill in the name of your project (this is only for display purposes and can be changed later).
 
@@ -66,11 +66,11 @@ During a run we record all failing tests, logs, screenshots, and videos.
 
 4. Choose whether this project is Public or Private.
 
-**A public project** can have its recordings and runs seen by *anyone*. Typically these are open source projects.
+  **A public project** can have its recordings and runs seen by *anyone*. Typically these are open source projects.
 
-**A private project** restricts its access to *only users you invite* to see your Organization or your own projects.
+  **A private project** restricts its access to *only users you invite* to see your Organization or your own projects.
 
-![Privacy of Project](https://cloud.githubusercontent.com/assets/1271364/22700720/8d539c24-ed29-11e6-97a4-915f008c17db.png)
+![Privacy of Project](https://cloud.githubusercontent.com/assets/1271364/22803847/95870626-eee4-11e6-9627-7c00e8b77519.png)
 
 5. Click "Setup Project".
 
@@ -110,9 +110,9 @@ This is how we uniquely identify your project. If you manually alter this, **Cyp
 
 ## What is a Record Key?
 
-Once you're setup to record test runs, we automatically generate you a Record Key for the project.
+Once you're setup to record test runs, we automatically generate a **Record Key** for the project.
 
-A Record Key is a GUID that looks like this:
+**A record Kkey is a GUID that looks like this:**
 
 ```shell
 f4466038-70c2-4688-9ed9-106bf013cd73
@@ -127,15 +127,15 @@ f4466038-70c2-4688-9ed9-106bf013cd73
 
 ## How a projectId and Record Key work together
 
-Cypress uses your `projectId` and Record Key together to identify projects.
+Cypress uses your `projectId` and **Record Key** together to identify projects.
 
-![ProjectID and Record Keys in Dashboard](https://cloud.githubusercontent.com/assets/1271364/22709269/3f6d912c-ed47-11e6-87b1-5792ff322541.png)
+![ProjectID and Record Keys in Dashboard](https://cloud.githubusercontent.com/assets/1271364/22804089/8498f1a2-eee5-11e6-8598-4e60b4b1fc0b.png)
 
-The Record Key is used to authenticate that your project is *allowed* to record. As long as your Record Key stays *private*, nobody will be able to record test runs for your project - even if they have your `projectId`.
+The record key is used to authenticate that your project is *allowed* to record. As long as your record key stays *private*, nobody will be able to record test runs for your project - even if they have your `projectId`.
 
-If you have a **public project** you should **still** keep your Record Key secret. If someone knows both your Record Key and your `projectId`, they could record test runs for your project - which would mix up all the of your results!
+If you have a public project you should *still* keep your record key secret. If someone knows both your record key and your `projectId`, they could record test runs for your project - which would mix up all the of your results!
 
-Think of your Record Key as the key that enables you to "write and create" builds. However, it has nothing to do with being able to "read or see" builds once they are created.
+Think of your record key as the key that enables you to **write and create** builds. However, it has nothing to do with being able to **read or see** builds once they are created.
 
 [block:callout]
 {
