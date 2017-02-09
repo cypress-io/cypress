@@ -71,7 +71,7 @@ API = {
 
         2. You are also using the deprecated command: #{chalk.yellow("cypress ci <key>")}
 
-           Please switch and use: #{chalk.blue("cypress run <key>")}
+           Please switch and use: #{chalk.blue("cypress run --key <key>")}
 
         https://on.cypress.io/deprecated-cypress-ci
         """
