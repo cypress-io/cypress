@@ -204,7 +204,7 @@ class Config extends Component {
 
   _openProjectIdHelp (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/guides/projects#section-what-is-a-projectid-')
+    App.ipc('external:open', 'https://on.cypress.io/what-is-a-project-id')
   }
 
   _openHelp (e) {

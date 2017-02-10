@@ -107,7 +107,7 @@ export default class Projects extends Component {
   }
 
   _openHelp () {
-    App.ipc('external:open', 'https://on.cypress.io/guides/projects#section-adding-a-new-project')
+    App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running#section-adding-projects')
   }
 
 }

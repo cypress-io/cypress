@@ -293,7 +293,7 @@ describe "Runs List", ->
         cy
           .contains("Why?").click()
           .then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/projects#section-what-is-a-projectid-")
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/what-is-a-project-id")
 
       it "opens dashboard on clicking 'Cypress Dashboard'", ->
         cy
