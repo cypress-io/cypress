@@ -95,7 +95,7 @@ describe "Runs List", ->
             cy.contains("Request Access").click()
 
           it "sends request:access ipc event with org id", ->
-            expect(@App.ipc).to.be.calledWith("request:access", 829)
+            expect(@App.ipc).to.be.calledWith("request:access", "d8104707-a348-4653-baea-7da9c7d52448")
 
           it "disables button", ->
             cy.contains("Request Access").should("be.disabled")

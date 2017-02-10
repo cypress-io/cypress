@@ -4,7 +4,7 @@ import { observer } from 'mobx-react'
 
 import App from '../lib/app'
 import errors from '../lib/errors'
-import orgsStore from '../organizations/organizations-store'
+import projectsStore from '../projects/projects-store'
 
 const SUCCESS = 'SUCCESS'
 const FAILURE = 'FAILURE'
@@ -35,7 +35,7 @@ class PermissionMessage extends Component {
   }
 
   _message () {
-    const membershipRequested = orgsStore.wasMembershipRequested(this.props.project.orgId)
+    const membershipRequested = projectsStore.wasMembershipRequested(this.props.project.id)
 
     if (this.state.result === SUCCESS || membershipRequested) {
       return this._success()
