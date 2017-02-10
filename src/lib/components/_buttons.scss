@@ -1,0 +1,14 @@
+.btn-black {
+  background-color: #333;
+  font-weight: 500;
+  color: white;
+
+  &:hover, &:focus {
+    background-color: #242424;
+    color: white;
+  }
+
+  &:active, &:focus {
+    outline: 0
+  }
+}

@@ -1,9 +1,10 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import state from '../lib/state'
-import App from '../lib/app'
 import { Link } from 'react-router'
 
+import state from '../lib/state'
+import App from '../lib/app'
+import { gravatarUrl } from '../lib/utils'
 import { closeProject, addProject } from '../projects/projects-api'
 
 @observer
@@ -14,7 +15,7 @@ export default class Nav extends Component {
         <div className='container-fluid'>
           <ul className='nav navbar-nav'>
             <li>
-              { this.leftNavButton() }
+              { this._leftNavButton() }
             </li>
           </ul>
           <ul className='nav navbar-nav navbar-right'>
@@ -30,37 +31,15 @@ export default class Nav extends Component {
                 Chat
               </a>
             </li>
-            <li className='dropdown'>
-              <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
-                <i className='fa fa-user'></i>{' '}
-                {this._userDisplayName()}{' '}
-                <span className='caret'></span>
-              </a>
-              <ul className='dropdown-menu'>
-                <li>
-                  <a href='#' onClick={this._logout}>
-                    <i className="fa fa-sign-out"></i>{' '}
-                    Log Out
-                  </a>
-                </li>
-              </ul>
-            </li>
+            { this._userStateButton() }
           </ul>
         </div>
       </nav>
     )
   }
 
-  _userDisplayName = () => {
-    // there is a situation where state.user could be undefined
-    // perhaps this is happening very quickly on log out???
-    if (state.user) {
-      return state.user.displayName
-    }
-  }
-
-  leftNavButton = () => {
-    if (this.props.params.id) {
+  _leftNavButton = () => {
+    if (this.props.params.clientId) {
       return (
         <Link
           to="/projects"
@@ -80,9 +59,35 @@ export default class Nav extends Component {
     }
   }
 
+  _userStateButton = () => {
+    if (state.hasUser) {
+      return (
+        <li className='dropdown'>
+          <a href='#' className='dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup='true' aria-expanded='false'>
+            <img
+              className='user-avatar'
+              height='13'
+              width='13'
+              src={`${gravatarUrl(state.user.email)}`}
+            />
+            {' '}{ state.user.displayName }{' '}
+            <span className='caret'></span>
+          </a>
+          <ul className='dropdown-menu'>
+            <li>
+              <a href='#' onClick={this._logout}>
+                <i className="fa fa-sign-out"></i>{' '}
+                Log Out
+              </a>
+            </li>
+          </ul>
+        </li>
+      )
+    }
+  }
+
   _closeProject = () => {
-    let projectId = this.props.params.id
-    closeProject(projectId)
+    closeProject(this.props.params.clientId)
   }
 
   _openDocs (e) {
@@ -92,7 +97,7 @@ export default class Nav extends Component {
 
   _openChat (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://gitter.im/cypress-io/cypress')
+    App.ipc('external:open', 'https://on.cypress.io/chat')
   }
 
   _logout = (e) => {

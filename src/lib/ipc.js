@@ -11,56 +11,19 @@ const addMsg = (id, event, fn) => {
 }
 
 const removeMsgsByEvent = (event) => {
-  return msgs = _.omitBy(msgs, (msg) => msg.event === event)
+  msgs = _.omitBy(msgs, (msg) => msg.event === event)
 }
 
 const removeMsgById = (id) => {
-  return msgs = _.omit(msgs, `${id}`)
+  msgs = _.omit(msgs, `${id}`)
 }
 
 const createIpc = () => {
   console.warn("Missing 'ipc'. Polyfilling in development mode.") // eslint-disable-line no-console
-
-  let responses = []
-
-  // return a mock ipc interface useful in development + testing
-  return ({
+  return {
     on () {},
-    off () {},
-    send (resp, id, event) {
-      // if we have a pending response then just
-      // invoke it asynchronously
-      let response = _.find(responses, { event })
-      if (response) {
-        responses = _.without(responses, response)
-        return Promise.delay(1).then(() => {
-          this.handle(event, response.err, response.data)
-          return response.resolve()
-        })
-      }
-    },
-
-    handle (event, err, data) {
-      return new Promise((resolve) => {
-        // create our own handle function to callback the registered events
-        //
-        // grab the first msg by its event
-        const msg = _.find(msgs, { event })
-
-        if (msg) {
-          msg.fn(err, data)
-          return resolve()
-        } else {
-          return responses.push({
-            event,
-            err,
-            data,
-            resolve,
-          })
-        }
-      })
-    },
-  })
+    send () {},
+  }
 }
 
 const ipc = window.ipc != null ? window.ipc : (window.ipc = createIpc())
@@ -71,7 +34,7 @@ ipc.on("response", (event, obj = {}) => {
 
   // standard node callback implementation
   if (msg) {
-    return msg.fn(__error, data)
+    msg.fn(__error, data)
   }
 })
 
@@ -116,9 +79,9 @@ const appIpc = (...args) => {
           removeMsgById(id)
 
           if (err) {
-            return reject(err)
+            reject(err)
           } else {
-            return resolve(data)
+            resolve(data)
           }
         })
       })

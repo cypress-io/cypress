@@ -1,6 +1,8 @@
 import ipc from './ipc'
 
-const App = { ipc }
+const App = {
+  ipc,
+}
 
 window.App = App
 

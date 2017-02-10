@@ -3,11 +3,52 @@ import md5 from 'md5'
 import { computed, observable, action } from 'mobx'
 import Browser from '../lib/browser-model'
 
-const strLength = 75
+const persistentProps = [
+  'id',
+  'name',
+  'public',
+  'orgName',
+  'orgId',
+  'defaultOrg',
+  'lastBuildStatus',
+  'lastBuildCreatedAt',
+]
+
+const validProps = persistentProps.concat([
+  'state',
+  'clientId',
+  'isChosen',
+  'isLoading',
+  'isNew',
+  'browsers',
+  'onBoardingModalOpen',
+  'browserState',
+  'resolvedConfig',
+  'error',
+  'parentTestsFolderDisplay',
+  'integrationExampleName',
+  'scaffoldedFiles',
+])
 
 export default class Project {
+  // state constants
+  static VALID = 'VALID'
+  static INVALID = 'INVALID'
+  static UNAUTHORIZED = 'UNAUTHORIZED'
+
+  // persisted with api
   @observable id
-  @observable path
+  @observable name
+  @observable public
+  @observable lastBuildStatus
+  @observable lastBuildCreatedAt
+  @observable orgName
+  @observable orgId
+  @observable defaultOrg
+  // comes from ipc, but not persisted
+  @observable state = Project.VALID
+  // local state
+  @observable clientId
   @observable isChosen = false
   @observable isLoading = false
   @observable isNew = false
@@ -19,26 +60,34 @@ export default class Project {
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
   @observable scaffoldedFiles = []
+  // should never change after first set
+  @observable path
 
-  constructor (path) {
-    this.id = md5(path)
-    this.path = path
+  constructor (props) {
+    this.path = props.path
+    this.clientId = md5(props.path)
+
+    this.update(props)
   }
 
-  @computed get name () {
-    let splitName = _.last(this.path.split('/'))
-    return _.truncate(splitName, { length: 60 })
+  update (props) {
+    if (!props) return
+
+    _.each(validProps, (prop) => {
+      this._updateProp(props, prop)
+    })
   }
 
-  @computed get displayPath () {
-    let pathLength = this.path.length
+  _updateProp (props, prop) {
+    if (props[prop] != null) this[prop] = props[prop]
+  }
 
-    if (pathLength > strLength) {
-      let truncatedPath = this.path.slice((pathLength - 1) - strLength, pathLength)
-      return '...'.concat(truncatedPath)
-    } else {
-      return this.path
-    }
+  serialize () {
+    return _.pick(this, persistentProps)
+  }
+
+  @computed get isValid () {
+    return this.state === Project.VALID
   }
 
   @computed get otherBrowsers () {

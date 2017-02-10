@@ -1,21 +1,32 @@
+{deferred, stubIpc} = require("../support/util")
+
 describe "Update Banner", ->
   beforeEach ->
     cy
+      .fixture("user").as("user")
+      .fixture("projects").as("projects")
+      .fixture("projects_statuses").as("projectStatuses")
+      .fixture("config").as("config")
+      .fixture("specs").as("specs")
       .visit("/#/projects")
       .window().then (win) ->
-        {@ipc, @App} = win
+        {@App} = win
+        cy.stub(@App, "ipc").as("ipc")
 
-        @agents = cy.agents()
-        @agents.spy(@App, "ipc")
+        @updateCheck = deferred(win.Promise)
 
-        @ipc.handle("get:options", null, {})
-      .fixture("user").then (@user) ->
-        @ipc.handle("get:current:user", null, @user)
-      .fixture("projects").then (@projects) ->
-        @ipc.handle("get:project:paths", null, @projects)
+        stubIpc(@App.ipc, {
+          "get:options": (stub) => stub.resolves({})
+          "get:current:user": (stub) => stub.resolves(@user)
+          "updater:check": (stub) => stub.returns(@updateCheck.promise)
+          "get:projects": (stub) => stub.resolves(@projects)
+          "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
+        })
+
+        @App.start()
 
   it "does not display update banner when no update available", ->
-    @ipc.handle("updater:check", null, false)
+    @updateCheck.resolve(false)
 
     cy
       .get("#updates-available").should("not.exist")
@@ -26,14 +37,14 @@ describe "Update Banner", ->
       expect(@App.ipc).to.be.calledWith("updater:check")
 
   it "displays banner if updater:check is new version", ->
-    @ipc.handle("updater:check", null, "1.3.4")
+    @updateCheck.resolve("1.3.4")
     cy.get("#updates-available").should("be.visible")
     cy.contains("New updates are available")
     cy
       .get("html").should("have.class", "has-updates")
 
   it "triggers open:window on click of Update link", ->
-    @ipc.handle("updater:check", null, "1.3.4")
+    @updateCheck.resolve("1.3.4")
     cy.contains("Update").click().then ->
       expect(@App.ipc).to.be.calledWith("window:open", {
         position: "center"
@@ -45,5 +56,5 @@ describe "Update Banner", ->
       })
 
   it "gracefully handles error", ->
-    @ipc.handle("updater:check", {name: "foo", message: "Something bad happened"}, null)
+    @updateCheck.reject({name: "foo", message: "Something bad happened"})
     cy.get(".footer").should("be.visible")

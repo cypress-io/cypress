@@ -1,30 +1,47 @@
+{deferred, stubIpc} = require("../support/util")
+
 describe "Projects Nav", ->
   beforeEach ->
     cy
+      .fixture("user").as("user")
+      .fixture("projects").as("projects")
+      .fixture("projects_statuses").as("projectStatuses")
+      .fixture("config").as("config")
+      .fixture("runs").as("runs")
+      .fixture("specs").as("specs")
       .visit("/")
       .window().then (win) ->
-        {@ipc, @App} = win
+        {@App} = win
+        cy.stub(@App, "ipc").as("ipc")
+        @App.ipc.off = cy.stub().as("ipc.off")
 
-        @agents = cy.agents()
+        stubIpc(@App.ipc, {
+          "on:menu:clicked": ->
+          "launch:browser": ->
+          "close:browser": ->
+          "close:project": ->
+          "on:focus:tests": ->
+          "open:project": ->
+          "updater:check": (stub) => stub.resolves(false)
+          "get:options": (stub) => stub.resolves({})
+          "get:current:user": (stub) => stub.resolves(@user)
+          "get:projects": (stub) => stub.resolves(@projects)
+          "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
+          "get:builds": (stub) => stub.resolves(@runs)
+          "get:open:browsers": (stub) => stub.resolves([])
+          "get:specs": (stub) => stub.yields(null, @specs)
+          "get:record:keys": (stub) -> stub.resolves([])
+        })
 
-        @agents.spy(@App, "ipc")
-
-        @ipc.handle("get:options", null, {})
-      .fixture("user").then (@user) ->
-        @ipc.handle("get:current:user", null, @user)
-      .fixture("projects").then (@projects) ->
-        @ipc.handle("get:project:paths", null, @projects)
-      .fixture("config").as("config")
+        @App.start()
 
   context "project nav", ->
     beforeEach ->
+      @["open:project"].yields(null, @config)
+
       cy
-        .fixture("browsers").then (browsers) ->
-          @config.browsers = browsers
         .get(".projects-list a")
-          .contains("My-Fake-Project").as("firstProject").click().then ->
-            @ipc.handle("open:project", null, @config)
-            return
+        .contains("My-Fake-Project").click()
 
     it "displays projects nav", ->
       cy
@@ -33,6 +50,19 @@ describe "Projects Nav", ->
 
     it "adds project name to title", ->
       cy.title().should("eq", "My-Fake-Project")
+
+    it "displays 'tests' nav as active", ->
+      cy
+      .get(".navbar-default").contains("a", "Tests")
+      .should("have.class", "active")
+
+    describe "when project loads", ->
+      beforeEach ->
+        cy.wait(600)
+
+      it "displays 'tests' page", ->
+        cy
+          .contains("integration")
 
     describe "back button", ->
       it "does not display 'Add Project' button", ->
@@ -53,46 +83,53 @@ describe "Projects Nav", ->
           .contains("Back to Projects").click({force: true})
           .title().should("eq", "Cypress")
 
-    describe "default page", ->
-      it "displays 'tests' nav as active", ->
+    describe "runs page", ->
+      beforeEach ->
         cy
-          .get(".navbar-default").contains("a", "Tests")
+          .fixture("runs").as("runs")
+          .get(".navbar-default")
+            .contains("a", "Runs").as("runsNav").click()
+
+      it "highlights runs on click", ->
+        cy
+          .get("@runsNav")
             .should("have.class", "active")
 
-      it "displays 'tests' page", ->
+      it "navigates to runs url", ->
         cy
-          .fixture("specs").then (@specs) ->
-            @ipc.handle("get:specs", null, @specs)
-          .contains("integration")
+          .location().its("hash").should("include", "runs")
 
-    describe "config page", ->
+      it "displays runs page", ->
+        cy
+          .get(".runs-container li")
+          .should("have.length", 4)
+
+    describe "settings page", ->
       beforeEach ->
         cy
           .get(".navbar-default")
-            .contains("a", "Config").as("configNav").click()
+            .contains("a", "Settings").as("settingsNav").click()
 
       it "highlights config on click", ->
         cy
-          .get("@configNav")
+          .get("@settingsNav")
             .should("have.class", "active")
 
       it "navigates to config url", ->
         cy
           .location().its("hash").should("include", "config")
 
-      it "displays config page", ->
-        cy
-          .contains("h5", "configuration")
+      it "displays settings page", ->
+        cy.contains("Configuration")
 
   context "browsers dropdown", ->
     describe "browsers available", ->
       beforeEach ->
+        @["open:project"].yields(null, @config)
+
         cy
-          .fixture("browsers").then (@browsers) ->
-            @config.browsers = @browsers
           .get(".projects-list a")
-            .contains("My-Fake-Project").as("firstProject").click().then ->
-              @ipc.handle("open:project", null, @config)
+          .contains("My-Fake-Project").click()
 
       context "normal browser list behavior", ->
         it "lists browsers", ->
@@ -145,12 +182,7 @@ describe "Projects Nav", ->
 
       context "opening browser by choosing spec", ->
         beforeEach ->
-          cy
-            .fixture("specs").then (@specs) ->
-              @ipc.handle("get:specs", null, @specs)
-          cy
-            .contains(".file", "app_spec").click().then ->
-              @ipc.handle("get:open:browsers", null, [])
+          cy.contains(".file", "app_spec").click()
 
         it "displays browser icon as spinner", ->
           cy
@@ -164,17 +196,8 @@ describe "Projects Nav", ->
 
       context "browser opened after choosing spec", ->
         beforeEach ->
-          cy
-            .fixture("specs").then (@specs) ->
-              @ipc.handle("get:specs", null, @specs)
-
-          cy
-            .contains(".file", "app_spec").click().then ->
-              @ipc.handle("get:open:browsers", null, [])
-              @ipc.handle("launch:browser", null, {
-                  browserOpened: true
-                }
-              )
+          @["launch:browser"].yields(null, {browserOpened: true})
+          cy.contains(".file", "app_spec").click()
 
         it "displays browser icon as opened", ->
           cy
@@ -191,58 +214,47 @@ describe "Projects Nav", ->
             .get(".close-browser").should("be.visible")
 
         describe "stop browser", ->
+          beforeEach ->
+            cy.get(".close-browser").click()
+
           it "calls close:browser on click of stop button", ->
-            cy
-              .get(".close-browser").click().then ->
-                expect(@App.ipc).to.be.calledWith("close:browser")
+            expect(@App.ipc).to.be.calledWith("close:browser")
 
           it "hides close button on click of stop", ->
-            cy
-              .get(".close-browser").click()
-                .should("not.exist")
+            cy.get(".close-browser").should("not.exist")
 
           it "re-enables browser dropdown", ->
             cy
-              .get(".close-browser").click()
               .get(".browsers-list>a").first()
                 .should("not.have.class", "disabled")
 
           it "displays default browser icon", ->
             cy
-              .get(".close-browser").click()
               .get(".browsers-list>a").first()
                 .find(".fa-chrome")
 
         describe "browser is closed manually", ->
+          beforeEach ->
+            @["launch:browser"].yield(null, {browserClosed: true})
+
           it "hides close browser button", ->
-            cy
-              .get(".close-browser").should("be.visible").then ->
-                @ipc.handle("launch:browser", null, {browserClosed: true})
-              .get(".close-browser").should("not.be.visible")
+            cy.get(".close-browser").should("not.be.visible")
 
           it "re-enables browser dropdown", ->
-            cy
-              .get(".close-browser").should("be.visible").then ->
-                @ipc.handle("launch:browser", null, {browserClosed: true})
-              .get(".browsers-list>a").first()
-                .and("not.have.class", "disabled")
+            cy.get(".browsers-list>a").first()
+              .and("not.have.class", "disabled")
 
           it "displays default browser icon", ->
-            cy
-              .get(".close-browser").should("be.visible").then ->
-                @ipc.handle("launch:browser", null, {browserClosed: true})
-              .get(".browsers-list>a").first()
-                .find(".fa-chrome")
+            cy.get(".browsers-list>a").first()
+              .find(".fa-chrome")
 
     describe "local storage saved browser", ->
       beforeEach ->
         localStorage.setItem("chosenBrowser", "chromium")
+        @["open:project"].yields(null, @config)
         cy
-          .fixture("browsers").then (@browsers) ->
-            @config.browsers = @browsers
           .get(".projects-list a")
-            .contains("My-Fake-Project").as("firstProject").click().then ->
-              @ipc.handle("open:project", null, @config)
+            .contains("My-Fake-Project").click()
 
       afterEach ->
         cy.clearLocalStorage()
@@ -260,12 +272,10 @@ describe "Projects Nav", ->
     describe "when browser saved in local storage no longer exists", ->
       beforeEach ->
         localStorage.setItem("chosenBrowser", "netscape-navigator")
+        @["open:project"].yields(null, @config)
         cy
-          .fixture("browsers").then (@browsers) ->
-            @config.browsers = @browsers
           .get(".projects-list a")
-            .contains("My-Fake-Project").as("firstProject").click().then ->
-              @ipc.handle("open:project", null, @config)
+            .contains("My-Fake-Project").as("firstProject").click()
 
       it "defaults to first browser", ->
         cy
@@ -281,12 +291,11 @@ describe "Projects Nav", ->
           "majorVersion": "50"
         }]
 
+        @config.browsers = @oneBrowser
+        @["open:project"].yields(null, @config)
         cy
-          .fixture("browsers").then ->
-            @config.browsers = @oneBrowser
           .get(".projects-list a")
-            .contains("My-Fake-Project").as("firstProject").click().then ->
-              @ipc.handle("open:project", null, @config)
+            .contains("My-Fake-Project").click()
 
       context "displays no dropdown btn", ->
         it "displays the first browser and 2 others in the dropdown", ->
@@ -296,11 +305,12 @@ describe "Projects Nav", ->
 
     describe "no browsers available", ->
       beforeEach ->
+        @config.browsers = []
+        @["open:project"].yields(null, @config)
+
         cy
           .get(".projects-list a")
-            .contains("My-Fake-Project").as("firstProject").click().then ->
-              @config.browsers = []
-              @ipc.handle("open:project", null, @config)
+            .contains("My-Fake-Project").click()
 
       it "does not list browsers", ->
         cy.get(".browsers-list").should("not.exist")
@@ -324,46 +334,27 @@ describe "Projects Nav", ->
             .contains(".btn", "Download Chrome").click().then ->
               expect(@App.ipc).to.be.calledWith("external:open", "https://www.google.com/chrome/browser/desktop")
 
-  context "unbind ipc listeners", ->
-    it "empty's App.ipc()", ->
-      obj = @App.ipc()
-
-      ## clear out all the ipc listeners
-      ## so we start from a clean slate
-      for key, value of obj
-        delete obj[key]
-
-      cy
-        .get(".projects-list a")
-        .contains("My-Fake-Project").as("firstProject").click()
-        .then ->
-          @ipc.handle("open:project", null, @config)
-          @ipc.handle("get:specs", null, [])
-
-      cy
-        .contains("Back to Projects").click({force: true})
-        .then ->
-          expect(Cypress._.keys(@App.ipc()).length).to.eq(1)
-
-  context "switch project", ->
+  context "returning to projects list", ->
     beforeEach ->
-      cy
-        .get(".projects-list a")
-          .contains("My-Fake-Project").as("firstProject").click().then ->
-            @ipc.handle("open:project", null, @config)
-            @ipc.handle("get:specs", null, [])
+      @["open:project"].yields(null, @config)
+
+      cy.get(".projects-list a")
+        .contains("My-Fake-Project").click()
+      cy.contains("Back to Projects").click({force: true})
+
+    it "removes ipc listeners", ->
+      expect(@App.ipc.off).to.be.calledWith("open:project")
+      expect(@App.ipc.off).to.be.calledWith("get:specs")
+      expect(@App.ipc.off).to.be.calledWith("on:focus:tests")
 
     it "closes project", ->
-      cy.contains("Back to Projects").click({force: true}).then ->
-        expect(@App.ipc).to.be.calledWith("close:project")
+      expect(@App.ipc).to.be.calledWith("close:project")
+      expect(@App.ipc.off).to.be.calledWith("close:project")
 
     describe "click on diff project", ->
       beforeEach ->
-        cy
-          .contains("Back to Projects").click({force: true})
-          .get(".projects-list a")
-            .contains("project1").click().then ->
-              @ipc.handle("open:project", null, @config)
+        cy.get(".projects-list a")
+          .contains("project1").click()
 
       it "displays projects nav", ->
         cy

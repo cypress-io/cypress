@@ -5,8 +5,6 @@ describe "App Ipc", ->
       .window().then (win) ->
         {@ipc, @App} = win
 
-        @agents = cy.agents()
-
   context "#off", ->
     it "removes queued messages by event name", ->
       @App.ipc("foo:bar:baz", ->)

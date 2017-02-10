@@ -16,7 +16,9 @@
   {{/each}}
   <script>
     window.env = '{{env.NODE_ENV}}'
-    App.startUpdateApp()
+    if (!window.Cypress) {
+      App.startUpdateApp()
+    }
   </script>
 </body>
 </html>

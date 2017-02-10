@@ -78,3 +78,56 @@
 .fa.red {
   color: $red-primary;
 }
+
+i.errored { color: #F5A327;}
+i.failed { color: #ec6573;}
+i.noTests { color: #F5A327;}
+i.passed { color: #1CB77E;}
+i.running { color: #428BCA;}
+i.overLimit { color: #F5A327;}
+i.timedOut { color: #F5A327;}
+
+.form-horizontal {
+  margin-bottom: 25px;
+
+  background-color: #fafafa;
+  border: 1px solid #eee;
+  padding: 15px 25px;
+
+  .empty-well {
+    background-color: white;
+  }
+
+  .btn-block {
+    margin-top: 25px;
+  }
+
+  p.text-muted {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+}
+
+.helper-docs-link {
+  cursor: pointer;
+}
+
+pre.line-nums {
+  padding-left: 15px;
+  counter-reset: line;
+
+  span {
+    display: block;
+
+    &:before {
+      counter-increment: line;
+      content: counter(line);
+      display: inline-block;
+      border-right: 1px solid #414344;
+      padding: 0 .5em 0 0;
+      margin-right: .5em;
+      color: #696c6d;
+    }
+  }
+}
+

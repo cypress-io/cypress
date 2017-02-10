@@ -1,9 +1,5 @@
 @mixin responsive-width($width: 100%, $padding: 0, $border: 0, $borderColor: #eee) {
   width: $width;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -o-box-sizing: border-box;
-  -ms-box-sizing: border-box;
   box-sizing: border-box;
   @if $padding != "none" {
     padding: $padding;
@@ -27,6 +23,20 @@
     @include el-width($var, $width);
     $n: $n + 1;
     $var: ".row-column-wrapper:nth-child(" + $n + ")";
+  }
+}
+
+@mixin td-width($col, $width) {
+  #{$col} { width: $width; }
+}
+
+@mixin table-columns($widths...) {
+  $n: 1;
+  $var: "td:nth-child(" + $n + ")";
+  @each $width in $widths {
+    @include td-width($var, $width);
+    $n: $n + 1;
+    $var: "td:nth-child(" + $n + ")";
   }
 }
 

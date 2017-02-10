@@ -36,3 +36,5 @@ node_modules
 bower_components
 dist
 cypress/screenshots
+cypress/videos
+*.orig

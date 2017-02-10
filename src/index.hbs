@@ -15,8 +15,22 @@
     <script src="{{this}}"></script>
   {{/each}}
   <script>
-    window.env = '{{env.NODE_ENV}}'
-    App.start()
+
+    if (!!window.Cypress) {
+      window.env = 'test'
+    } else {
+      window.env = '{{env.NODE_ENV}}'
+    }
+
+    if (window.env === 'development') {
+      // this allows React DevTools to work in an iframe
+      // (if we're in Cypress running our app)
+      __REACT_DEVTOOLS_GLOBAL_HOOK__ = parent.__REACT_DEVTOOLS_GLOBAL_HOOK__
+    }
+
+    if (!window.Cypress) {
+      App.start()
+    }
   </script>
 </body>
 </html>

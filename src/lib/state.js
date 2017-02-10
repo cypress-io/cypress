@@ -16,7 +16,7 @@ class State {
   }
 
   @action setUser (user) {
-    return this.user = user && user.authToken ? new User(user) : null
+    this.user = user && user.authToken ? new User(user) : null
   }
 
   @action setVersion (version) {

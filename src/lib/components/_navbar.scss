@@ -24,6 +24,7 @@
         line-height: 35px;
 
         &:hover, &:focus {
+          cursor: pointer;
           background-color: #f3f3f3;
         }
 
@@ -53,6 +54,11 @@
 
 .navbar-right {
   margin-right: 0;
+
+  .user-avatar {
+    position: relative;
+    top: -1px;
+  }
 }
 
 .navbar .container-fluid {
