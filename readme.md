@@ -69,6 +69,9 @@ MIT
 
 ## Changelog
 
+#### 0.4.2 - *(02/10/17)*
+- merged missed PR
+
 #### 0.4.1 - *(02/10/17)*
 - display runs
 - new settings areas
