@@ -15,6 +15,8 @@ excerpt: Errors that require additional explanation are listed here.
 - :fa-angle-right: [Cypress detected a cross origin error happened on page load](#section-cypress-detected-a-cross-origin-error-happened-on-page-load)
 - :fa-angle-right: [The supportFolder option has been removed](#section-the-supportfolder-option-has-been-removed)
 - :fa-angle-right: [The Chromium Renderer process just crashed](#section-the-chromium-renderer-process-just-crashed)
+- :fa-angle-right: [The 'cypress ci' command has been deprecated](#section-the-cypress-ci-command-has-been-deprecated)
+- :fa-angle-right: [The Record Key is missing](#section-the-record-key-is-missing)
 
 ***
 
@@ -486,3 +488,15 @@ Browsers are enormously complex pieces of software, and from time to time they w
 At the moment, we haven't implemented an automatic way to recover from them, but it is actually possible for us to do so. We have an [open issue documenting the steps](https://github.com/cypress-io/cypress/issues/349) we could take to restart the renderer process and continue the run. If you're seeing consistent crashes and would like this implemented, please leave a note in the issue.
 
 If you are running `Docker` [there is a simple one line fix for this problem documented here](https://github.com/cypress-io/cypress/issues/350).
+
+***
+
+# The 'cypress ci' command has been deprecated
+
+TBD
+
+***
+
+# The Record Key is missing
+
+TBD
