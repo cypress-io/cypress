@@ -43,7 +43,7 @@ API = {
         "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
       when "PROJECT_DOES_NOT_EXIST"
         "You need to add a project to run tests."
-      when "PROJECT_ID_AND_MISSING_DASHBOARD_TOKEN"
+      when "PROJECT_ID_AND_MISSING_RECORD_KEY"
         """
         This project has been configured to record runs on our Dashboard.
 
@@ -53,7 +53,7 @@ API = {
 
         If you meant to have this run recorded please provide us your Record Key.
 
-          #{chalk.blue("cypress run --key <record_token>")}
+          #{chalk.blue("cypress run --key <record_key>")}
 
         If you don't want to record these runs, you can silence this warning:
 
@@ -71,7 +71,7 @@ API = {
 
         2. You are also using the deprecated command: #{chalk.yellow("cypress ci <key>")}
 
-           Please switch and use: #{chalk.blue("cypress run --key <key>")}
+           Please switch and use: #{chalk.blue("cypress run --key <record_key>")}
 
         https://on.cypress.io/deprecated-cypress-ci
         """
@@ -87,7 +87,7 @@ API = {
 
         3. You are also using the environment variable: #{chalk.yellow("CYPRESS_CI_KEY")}
 
-           Please rename this environment variable to: #{chalk.blue("CYPRESS_DASHBOARD_TOKEN")}
+           Please rename this environment variable to: #{chalk.blue("CYPRESS_RECORD_KEY")}
 
         https://on.cypress.io/deprecated-cypress-ci
         """
@@ -111,9 +111,7 @@ API = {
 
         #{arg1}
         """
-      when "CI_KEY_MISSING"
-        "Can't run in CI without a CI key. You did not provide one."
-      when "DASHBOARD_TOKEN_NOT_VALID"
+      when "RECORD_KEY_NOT_VALID"
         """
         We failed trying to authenticate this project.
 

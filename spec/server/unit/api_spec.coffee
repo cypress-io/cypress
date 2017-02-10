@@ -133,7 +133,7 @@ describe "lib/api", ->
       .matchHeader("x-cypress-version", pkg.version)
       .post("/builds", {
         projectId:         "id-123"
-        projectToken:      "token-123"
+        recordKey:         "token-123"
         commitSha:         "sha"
         commitBranch:      "master"
         commitAuthorName:  "brian"
@@ -150,7 +150,7 @@ describe "lib/api", ->
 
       api.createBuild({
         projectId:         "id-123"
-        projectToken:      "token-123"
+        recordKey:         "token-123"
         commitSha:         "sha"
         commitBranch:      "master"
         commitAuthorName:  "brian"
@@ -171,7 +171,7 @@ describe "lib/api", ->
       .matchHeader("x-cypress-version", pkg.version)
       .post("/builds", {
         projectId:         null
-        projectToken:      "token-123"
+        recordKey:         "token-123"
         commitSha:         "sha"
         commitBranch:      "master"
         commitAuthorName:  "brian"
@@ -190,7 +190,7 @@ describe "lib/api", ->
 
       api.createBuild({
         projectId:         null
-        projectToken:      "token-123"
+        recordKey:         "token-123"
         commitSha:         "sha"
         commitBranch:      "master"
         commitAuthorName:  "brian"

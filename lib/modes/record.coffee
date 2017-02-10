@@ -30,9 +30,6 @@ module.exports = {
     repo.getBranch()
 
   generateProjectBuildId: (projectId, projectPath, projectName, recordKey) ->
-    if not recordKey
-      return errors.throw("CI_KEY_MISSING")
-
     repo = git.init(projectPath)
 
     Promise.props({
@@ -46,7 +43,7 @@ module.exports = {
     .then (git) ->
       api.createBuild({
         projectId:         projectId
-        recordKey:    recordKey
+        recordKey:         recordKey
         commitSha:         git.sha
         commitBranch:      git.branch
         commitAuthorName:  git.author
@@ -61,7 +58,7 @@ module.exports = {
         switch err.statusCode
           when 401
             recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
-            errors.throw("DASHBOARD_TOKEN_NOT_VALID", recordKey, projectId)
+            errors.throw("RECORD_KEY_NOT_VALID", recordKey, projectId)
           when 404
             errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
           else

@@ -511,9 +511,9 @@ module.exports = {
         if haveProjectIdAndNoRecordKey(projectId, options)
           ## log a warning telling the user
           ## that they either need to provide us
-          ## with a DASHBOARD_TOKEN or turn off
+          ## with a RECORD_KEY or turn off
           ## record mode
-          errors.warning("PROJECT_ID_AND_MISSING_DASHBOARD_TOKEN", projectId)
+          errors.warning("PROJECT_ID_AND_MISSING_RECORD_KEY", projectId)
 
         @trashAssets(config)
         .then =>

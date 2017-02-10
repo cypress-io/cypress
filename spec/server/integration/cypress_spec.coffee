@@ -19,7 +19,7 @@ settings = require("#{root}lib/util/settings")
 Events   = require("#{root}lib/electron/handlers/events")
 project  = require("#{root}lib/electron/handlers/project")
 Renderer = require("#{root}lib/electron/handlers/renderer")
-ci       = require("#{root}lib/modes/ci")
+record   = require("#{root}lib/modes/record")
 headed   = require("#{root}lib/modes/headed")
 headless = require("#{root}lib/modes/headless")
 api      = require("#{root}lib/api")
@@ -53,6 +53,8 @@ describe "lib/cypress", ->
     @sandbox.stub(launcher, "getBrowsers").resolves([])
     @sandbox.stub(process, "exit")
     @sandbox.spy(errors, "log")
+    @sandbox.spy(errors, "warning")
+    @sandbox.spy(console, "log")
 
     @expectExitWith = (code) =>
       expect(process.exit).to.be.calledWith(code)
@@ -83,7 +85,6 @@ describe "lib/cypress", ->
           @projectId = id
       ])
       .then =>
-        @sandbox.spy(console, "log")
         @sandbox.stub(api, "getProjectToken")
           .withArgs(@projectId, "auth-token-123")
           .resolves("new-key-123")
@@ -145,7 +146,6 @@ describe "lib/cypress", ->
           @projectId = id
       ])
       .then =>
-        @sandbox.spy(console, "log")
         @sandbox.stub(api, "updateProjectToken")
           .withArgs(@projectId, "auth-token-123")
           .resolves("new-key-123")
@@ -439,6 +439,31 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWith(0)
 
+    it "logs warning when projectId and no key", ->
+      Project.add(@todosPath)
+      .then =>
+        cypress.start(["--project=#{@todosPath}"])
+      .then =>
+        expect(errors.warning).to.be.calledWith("PROJECT_ID_AND_MISSING_RECORD_KEY", "abc123")
+        expect(console.log).to.be.calledWithMatch("However, no Record Key was provided. This run will not be recorded.")
+        expect(console.log).to.be.calledWithMatch("cypress run --key <record_key>")
+
+    it "does not log warning when no projectId", ->
+      Project.add(@pristinePath)
+      .then =>
+        cypress.start(["--project=#{@pristinePath}"])
+      .then =>
+        expect(errors.warning).not.to.be.calledWith("PROJECT_ID_AND_MISSING_RECORD_KEY", "abc123")
+        expect(console.log).not.to.be.calledWithMatch("cypress run --key <record_key>")
+
+    it "does not log warning when projectId but --no-record", ->
+      Project.add(@todosPath)
+      .then =>
+        cypress.start(["--project=#{@todosPath}", "--no-record"])
+      .then =>
+        expect(errors.warning).not.to.be.calledWith("PROJECT_ID_AND_MISSING_RECORD_KEY", "abc123")
+        expect(console.log).not.to.be.calledWithMatch("cypress run --key <record_key>")
+
     it "logs error when supportFile doesn't exist", ->
       Promise.all([
         settings.write(@idsPath, {supportFile: "/does/not/exist"})
@@ -615,17 +640,17 @@ describe "lib/cypress", ->
 
           @expectExitWith(0)
 
-  ## the majority of the logic in CI is covered already
+  ## the majority of the logic in Record mode is covered already
   ## in --project specs above
-  context "--ci", ->
+  context "--key", ->
     afterEach ->
       delete process.env.CYPRESS_PROJECT_ID
 
     beforeEach ->
       @setup = =>
         @createBuild = @sandbox.stub(api, "createBuild").withArgs({
-          projectId:     @projectId
-          projectToken: "token-123"
+          projectId:    @projectId
+          recordKey:    "token-123"
           commitSha:    "sha-123"
           commitBranch: "bem/ci"
           commitAuthorName: "brian"
@@ -637,10 +662,11 @@ describe "lib/cypress", ->
           ciParams: null
         })
 
-      @upload = @sandbox.stub(ci, "upload").resolves()
+      @upload = @sandbox.stub(record, "upload").resolves()
       @sandbox.stub(stdout, "capture").returns({
         toString: -> "foobarbaz"
       })
+
 
       @sandbox.stub(ciProvider, "name").returns("travis")
       @sandbox.stub(ciProvider, "buildNum").returns("987")
@@ -705,7 +731,7 @@ describe "lib/cypress", ->
         stdout: "foobarbaz"
       }).resolves()
 
-      cypress.start(["--project=#{@todosPath}",  "--key=token-123", "--ci"])
+      cypress.start(["--project=#{@todosPath}",  "--key=token-123"])
       .then =>
         expect(@createInstance).to.be.calledOnce
         expect(@updateInstance).to.be.calledOnce
@@ -723,7 +749,7 @@ describe "lib/cypress", ->
 
       @updateInstance = @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--project=#{@todosPath}", "--key=token-123", "--ci", "--spec=#{@todosPath}/tests/test2.coffee"])
+      cypress.start(["--project=#{@todosPath}", "--key=token-123", "--spec=#{@todosPath}/tests/test2.coffee"])
       .then =>
         expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
         @expectExitWith(3)
@@ -738,14 +764,45 @@ describe "lib/cypress", ->
       @createBuild.resolves()
       @sandbox.stub(api, "createInstance").resolves()
 
-      cypress.start(["--project=#{@pristinePath}", "--key=token-123", "--ci"])
+      cypress.start(["--project=#{@pristinePath}", "--key=token-123"])
       .then =>
+        expect(errors.warning).not.to.be.called
         @expectExitWith(3)
+
+    it "logs warning when using deprecated --ci arg and no env var", ->
+      @setup()
+
+      @createBuild.resolves("build-id-123")
+      @sandbox.stub(api, "createInstance").resolves()
+      @sandbox.stub(api, "updateInstance").resolves()
+
+      cypress.start(["--project=#{@todosPath}", "--key=token-123", "--ci"])
+      .then =>
+        expect(errors.warning).to.be.calledWith("DEPRECATED_CYPRESS_CI")
+        expect(console.log).to.be.calledWithMatch("You are using an older version of the CLI tools.")
+        expect(console.log).to.be.calledWithMatch("cypress run --key <record_key>")
+
+    it "logs warning when using deprecated --ci arg and env var", ->
+      @setup()
+
+      process.env.CYPRESS_CI_KEY = "asdf123foobarbaz"
+
+      @createBuild.resolves("build-id-123")
+      @sandbox.stub(api, "createInstance").resolves()
+      @sandbox.stub(api, "updateInstance").resolves()
+
+      cypress.start(["--project=#{@todosPath}", "--key=token-123", "--ci"])
+      .then =>
+        delete process.env.CYPRESS_CI_KEY
+
+        expect(errors.warning).to.be.calledWith("DEPRECATED_CYPRESS_CI_ENV_VAR")
+        expect(console.log).to.be.calledWithMatch("You are using an older version of the CLI tools.")
+        expect(console.log).to.be.calledWithMatch("cypress run")
 
     it "logs error when missing project id", ->
       @setup()
 
-      cypress.start(["--project=#{@pristinePath}", "--key=token-123", "--ci"])
+      cypress.start(["--project=#{@pristinePath}", "--key=token-123"])
       .then =>
         @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
 
@@ -756,9 +813,9 @@ describe "lib/cypress", ->
       err.statusCode = 401
       @createBuild.rejects(err)
 
-      cypress.start(["--project=#{@todosPath}", "--key=token-123", "--ci"])
+      cypress.start(["--project=#{@todosPath}", "--key=token-123"])
       .then =>
-        @expectExitWithErr("DASHBOARD_TOKEN_NOT_VALID", "token...n-123")
+        @expectExitWithErr("RECORD_KEY_NOT_VALID", "token...n-123")
 
     it "logs error and exits when project could not be found", ->
       @setup()
@@ -767,9 +824,9 @@ describe "lib/cypress", ->
       err.statusCode = 404
       @createBuild.rejects(err)
 
-      cypress.start(["--project=#{@todosPath}", "--key=token-123", "--ci"])
+      cypress.start(["--project=#{@todosPath}", "--key=token-123"])
       .then =>
-        @expectExitWithErr("DASHBOARD_PROJECT_NOT_FOUND")
+        @expectExitWithErr("DASHBOARD_PROJECT_NOT_FOUND", "abc123")
 
     it "logs error but continues running the tests", ->
       @setup()
@@ -778,23 +835,13 @@ describe "lib/cypress", ->
       err.statusCode = 500
       @createBuild.rejects(err)
 
-      cypress.start(["--project=#{@todosPath}", "--key=token-123", "--ci"])
+      cypress.start(["--project=#{@todosPath}", "--key=token-123"])
       .then =>
         @expectExitWith(3)
 
-    it "logs error and exits when ci key is missing", ->
-      @setup()
-
-      err = new Error
-      err.statusCode = 401
-      @createBuild.rejects(err)
-
-      cypress.start(["--project=#{@todosPath}", "--ci"])
-      .then =>
-        @expectExitWithErr("CI_KEY_MISSING")
-
   context "--return-pkg", ->
     beforeEach ->
+      console.log.restore()
       @sandbox.stub(console, "log")
 
     it "logs package.json and exits", ->
@@ -805,6 +852,7 @@ describe "lib/cypress", ->
 
   context "--version", ->
     beforeEach ->
+      console.log.restore()
       @sandbox.stub(console, "log")
 
     it "logs version and exits", ->
@@ -815,6 +863,7 @@ describe "lib/cypress", ->
 
   context "--smoke-test", ->
     beforeEach ->
+      console.log.restore()
       @sandbox.stub(console, "log")
 
     it "logs pong value and exits", ->
@@ -826,7 +875,6 @@ describe "lib/cypress", ->
   context "--remove-ids", ->
     it "logs stats", ->
       idsPath = Fixtures.projectPath("ids")
-      @sandbox.spy(console, "log")
 
       cypress.start(["--remove-ids", "--project=#{idsPath}"])
       .then =>
