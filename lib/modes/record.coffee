@@ -196,9 +196,9 @@ module.exports = {
     if options.ci
       type = switch
         when process.env.CYPRESS_CI_KEY
-          "DEPRECATED_CYPRESS_CI_ENV_VAR"
+          "CYPRESS_CI_DEPRECATED_ENV_VAR"
         else
-          "DEPRECATED_CYPRESS_CI"
+          "CYPRESS_CI_DEPRECATED"
 
       errors.warning(type)
 

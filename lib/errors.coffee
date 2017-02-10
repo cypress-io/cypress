@@ -61,9 +61,9 @@ API = {
 
         Or you can remove your 'projectId' from cypress.json
 
-        TODO: add a cypress.on link here! <link>
+        https://on.cypress.io/missing-record-key
         """
-      when "DEPRECATED_CYPRESS_CI"
+      when "CYPRESS_CI_DEPRECATED"
         """
         1. You are using an older version of the CLI tools.
 
@@ -73,9 +73,9 @@ API = {
 
            Please switch and use: #{chalk.blue("cypress run --key <record_key>")}
 
-        https://on.cypress.io/deprecated-cypress-ci
+        https://on.cypress.io/cypress-ci-deprecated
         """
-      when "DEPRECATED_CYPRESS_CI_ENV_VAR"
+      when "CYPRESS_CI_DEPRECATED_ENV_VAR"
         """
         1. You are using an older version of the CLI tools.
 
@@ -89,7 +89,7 @@ API = {
 
            Please rename this environment variable to: #{chalk.blue("CYPRESS_RECORD_KEY")}
 
-        https://on.cypress.io/deprecated-cypress-ci
+        https://on.cypress.io/cypress-ci-deprecated
         """
       when "DASHBOARD_CANNOT_UPLOAD_RESULTS"
         """
@@ -134,6 +134,8 @@ API = {
         We will list the correct projectId in the 'Settings' tab.
 
         Alternatively, you can create a new project using the Desktop Application.
+
+        https://on.cypress.io/dashboard
         """
       when "DEV_NO_SERVER"
         " > The local API server isn't running in development. This may cause problems running the GUI."
