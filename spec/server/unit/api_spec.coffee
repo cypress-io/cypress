@@ -133,7 +133,7 @@ describe "lib/api", ->
       .matchHeader("x-cypress-version", pkg.version)
       .post("/builds", {
         projectId:         "id-123"
-        projectToken:      "token-123"
+        recordKey:         "token-123"
         commitSha:         "sha"
         commitBranch:      "master"
         commitAuthorName:  "brian"
@@ -150,7 +150,7 @@ describe "lib/api", ->
 
       api.createBuild({
         projectId:         "id-123"
-        projectToken:      "token-123"
+        recordKey:         "token-123"
         commitSha:         "sha"
         commitBranch:      "master"
         commitAuthorName:  "brian"
@@ -171,7 +171,7 @@ describe "lib/api", ->
       .matchHeader("x-cypress-version", pkg.version)
       .post("/builds", {
         projectId:         null
-        projectToken:      "token-123"
+        recordKey:         "token-123"
         commitSha:         "sha"
         commitBranch:      "master"
         commitAuthorName:  "brian"
@@ -190,7 +190,7 @@ describe "lib/api", ->
 
       api.createBuild({
         projectId:         null
-        projectToken:      "token-123"
+        recordKey:         "token-123"
         commitSha:         "sha"
         commitBranch:      "master"
         commitAuthorName:  "brian"
@@ -635,18 +635,18 @@ describe "lib/api", ->
         """)
 
 
-  context ".getProjectCiKeys", ->
+  context ".getProjectRecordKeys", ->
     it "GET /projects/:id/keys + returns keys", ->
-      ciKeys = []
+      recordKeys = []
 
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
       .get("/projects/id-123/keys")
-      .reply(200, ciKeys)
+      .reply(200, recordKeys)
 
-      api.getProjectCiKeys("id-123", "auth-token-123")
+      api.getProjectRecordKeys("id-123", "auth-token-123")
       .then (ret) ->
-        expect(ret).to.eql(ciKeys)
+        expect(ret).to.eql(recordKeys)
 
   context ".requestAccess", ->
     it "POST /projects/:id/membership_requests + returns response", ->

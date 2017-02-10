@@ -134,8 +134,8 @@ module.exports = {
     ## always return an array of open browsers
     Promise.resolve(_.compact([openBrowser]))
 
-  getCiKeys: ->
-    openProject.getCiKeys()
+  getRecordKeys: ->
+    openProject.getRecordKeys()
 
   requestAccess: (projectId) ->
     openProject.requestAccess(projectId)

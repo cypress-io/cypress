@@ -5,7 +5,7 @@ coerce   = require("./coerce")
 config   = require("../config")
 cwd      = require("../cwd")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci updating ping key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode hosts browser headless".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode hosts browser headless".split(" ")
 whitelist = whitelist.concat(config.getConfigKeys())
 
 parseNestedValues = (vals) ->
@@ -48,11 +48,19 @@ module.exports = {
         "exit-with-code": "exitWithCode"
         "reporter-options": "reporterOptions"
       }
+      default: {
+        record: true
+      }
     })
 
-    _.extend options, _.pick(argv, whitelist...), {
-      env: process.env["CYPRESS_ENV"]
-    }
+    whitelisted = _.pick(argv, whitelist...)
+
+    options = _
+    .chain(options)
+    .defaults(whitelisted)
+    .extend({env: process.env["CYPRESS_ENV"]})
+    .mapValues(coerce)
+    .value()
 
     ## if we are updating we may have to pluck out the
     ## appPath + execPath from the options._ because

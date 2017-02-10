@@ -98,7 +98,7 @@ module.exports = {
       }
       body: _.pick(options, [
         "projectId"
-        "projectToken"
+        "recordKey"
         "commitSha"
         "commitBranch"
         "commitAuthorName"
@@ -234,9 +234,9 @@ module.exports = {
     })
     .catch(errors.StatusCodeError, formatResponseBody)
 
-  getProjectCiKeys: (projectId, authToken) ->
+  getProjectRecordKeys: (projectId, authToken) ->
     rp.get({
-      url: Routes.projectCiKeys(projectId)
+      url: Routes.projectRecordKeys(projectId)
       json: true
       auth: {
         bearer: authToken

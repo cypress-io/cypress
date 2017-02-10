@@ -8,29 +8,135 @@ API = {
   getMsgByType: (type, arg1, arg2) ->
     switch type
       when "CANNOT_TRASH_ASSETS"
-        "Warning: We failed to trash the existing build assets.\n\nThis error will not alter the exit code.\n\n#{arg1}"
+        """
+        Warning: We failed to trash the existing run results.
+
+        This error will not alter the exit code.
+
+        #{arg1}
+        """
       when "VIDEO_RECORDING_FAILED"
-        "Warning: We failed to record the video.\n\nThis error will not alter the exit code.\n\n#{arg1}"
+        """
+        Warning: We failed to record the video.
+
+        This error will not alter the exit code.
+
+        #{arg1}
+        """
       when "VIDEO_POST_PROCESSING_FAILED"
-        "Warning: We failed processing this video.\n\nThis error will not alter the exit code.\n\n#{arg1}"
+        """
+        Warning: We failed processing this video.
+
+        This error will not alter the exit code.
+
+        #{arg1}
+        """
       when "NOT_LOGGED_IN"
-        "You're not logged in.\n\nRun `cypress open` to open the Desktop App and login."
+        """
+        You're not logged in.
+
+        Run `cypress open` to open the Desktop App and login.
+        """
       when "TESTS_DID_NOT_START_RETRYING"
         "Timed out waiting for the browser to connect. #{arg1}"
       when "TESTS_DID_NOT_START_FAILED"
         "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
       when "PROJECT_DOES_NOT_EXIST"
         "You need to add a project to run tests."
-      when "CI_CANNOT_UPLOAD_ASSETS"
-        "Warning: We encountered an error while uploading your build assets.\n\nThese build assets will not be recorded\n\nThis error will not alter or the exit code.\n\n#{arg1}"
-      when "CI_CANNOT_CREATE_BUILD_OR_INSTANCE"
-        "Warning: We encountered an error talking to our servers.\n\nNo build assets will be recorded.\n\nThis error will not alter the exit code.\n\n#{arg1}"
-      when "CI_KEY_MISSING"
-        "Can't run in CI without a CI key. You did not provide one."
-      when "CI_KEY_NOT_VALID"
-        "Can't run project in CI. Your project's CI key: #{chalk.blue(arg1)} is invalid."
-      when "CI_PROJECT_NOT_FOUND"
-        "Can't find project. Aborting the CI run.\n\nCheck that your 'projectId' and 'secret CI key' are valid."
+      when "PROJECT_ID_AND_MISSING_RECORD_KEY"
+        """
+        This project has been configured to record runs on our Dashboard.
+
+        It currently has the projectId: #{chalk.green(arg1)}
+
+        However, no Record Key was provided. This run will not be recorded.
+
+        If you meant to have this run recorded please provide us your Record Key.
+
+          #{chalk.blue("cypress run --key <record_key>")}
+
+        If you don't want to record these runs, you can silence this warning:
+
+          #{chalk.yellow("cypress run --no-record")}
+
+        Or you can remove your 'projectId' from cypress.json
+
+        https://on.cypress.io/missing-record-key
+        """
+      when "CYPRESS_CI_DEPRECATED"
+        """
+        1. You are using an older version of the CLI tools.
+
+           Please update the CLI tools by running: #{chalk.blue("npm install -g cypress-cli")}
+
+        2. You are also using the deprecated command: #{chalk.yellow("cypress ci <key>")}
+
+           Please switch and use: #{chalk.blue("cypress run --key <record_key>")}
+
+        https://on.cypress.io/cypress-ci-deprecated
+        """
+      when "CYPRESS_CI_DEPRECATED_ENV_VAR"
+        """
+        1. You are using an older version of the CLI tools.
+
+           Please update the CLI tools by running: #{chalk.blue("npm install -g cypress-cli")}
+
+        2. You are also using the deprecated command: #{chalk.yellow("cypress ci")}
+
+           Please switch and use: #{chalk.blue("cypress run")}
+
+        3. You are also using the environment variable: #{chalk.yellow("CYPRESS_CI_KEY")}
+
+           Please rename this environment variable to: #{chalk.blue("CYPRESS_RECORD_KEY")}
+
+        https://on.cypress.io/cypress-ci-deprecated
+        """
+      when "DASHBOARD_CANNOT_UPLOAD_RESULTS"
+        """
+        Warning: We encountered an error while uploading results from your run.
+
+        These results will not be recorded.
+
+        This error will not alter or the exit code.
+
+        #{arg1}
+        """
+      when "DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE"
+        """
+        Warning: We encountered an error talking to our servers.
+
+        This run will not be recorded.
+
+        This error will not alter the exit code.
+
+        #{arg1}
+        """
+      when "RECORD_KEY_NOT_VALID"
+        """
+        We failed trying to authenticate this project.
+
+        Your Record Key is invalid: #{chalk.yellow(arg1)}
+
+        It may have been recently revoked by you or another user.
+
+        Please log into the Dashboard to see the updated token.
+
+        https://on.cypress.io/dashboard/projects/#{arg2}
+        """
+      when "DASHBOARD_PROJECT_NOT_FOUND"
+        """
+        We could not find a project with the ID: #{chalk.yellow(arg1)}
+
+        This projectId came from your cypress.json file or an environment variable.
+
+        Please log into the Dashboard and find your project.
+
+        We will list the correct projectId in the 'Settings' tab.
+
+        Alternatively, you can create a new project using the Desktop Application.
+
+        https://on.cypress.io/dashboard
+        """
       when "DEV_NO_SERVER"
         " > The local API server isn't running in development. This may cause problems running the GUI."
       when "NO_PROJECT_ID"
@@ -50,9 +156,17 @@ API = {
         #{chalk.yellow("Assign a different port with the '--port <port>' argument or shut down the other running process.")}
         """
       when "ERROR_READING_FILE"
-        "Error reading from: " + chalk.blue(arg1) + "\n\n" + chalk.yellow(arg2)
+        """
+        Error reading from: #{chalk.blue(arg1)}
+
+        #{chalk.yellow(arg2)}
+        """
       when "ERROR_WRITING_FILE"
-        "Error writing to: " + chalk.blue(arg1) + "\n\n" + chalk.yellow(arg2)
+        """
+        Error writing to: #{chalk.blue(arg1)}
+
+        #{chalk.yellow(arg2)}
+        """
       when "SPEC_FILE_NOT_FOUND"
         "Can't find test spec: " + chalk.blue(arg1)
       when "RENDERER_CRASHED"
@@ -78,7 +192,7 @@ API = {
       when "NO_CURRENTLY_OPEN_PROJECT"
         "Can't find open project."
       when "AUTOMATION_SERVER_DISCONNECTED"
-        "The automation server disconnected. Cannot continue running tests."
+        "The automation client disconnected. Cannot continue running tests."
       when "SUPPORT_FILE_NOT_FOUND"
         """
         Support file missing or invalid.

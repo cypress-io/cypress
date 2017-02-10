@@ -234,13 +234,13 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .then(send)
       .catch(sendErr)
 
-    when "setup:ci:project"
+    when "setup:dashboard:project"
       project.createCiProject(arg)
       .then(send)
       .catch(sendErr)
 
-    when "get:ci:keys"
-      project.getCiKeys()
+    when "get:record:keys"
+      project.getRecordKeys()
       .then(send)
       .catch(sendErr)
 

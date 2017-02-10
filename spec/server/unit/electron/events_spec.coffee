@@ -492,32 +492,32 @@ describe "lib/electron/handlers/events", ->
           expect(@send).to.be.calledWith("response")
           expect(@send.firstCall.args[1].__error.type).to.equal("UNKNOWN")
 
-    describe "setup:ci:project", ->
+    describe "setup:dashboard:project", ->
       it "returns result of project.createCiProject", ->
         @sandbox.stub(project, "createCiProject").resolves("response")
 
-        @handleEvent("setup:ci:project").then =>
+        @handleEvent("setup:dashboard:project").then =>
           @expectSendCalledWith("response")
 
       it "catches errors", ->
         err = new Error("foo")
         @sandbox.stub(project, "createCiProject").rejects(err)
 
-        @handleEvent("setup:ci:project").then =>
+        @handleEvent("setup:dashboard:project").then =>
           @expectSendErrCalledWith(err)
 
-    describe "get:ci:keys", ->
-      it "returns result of project.getCiKeys", ->
-        @sandbox.stub(project, "getCiKeys").resolves(["ci-key-123"])
+    describe "get:record:keys", ->
+      it "returns result of project.getRecordKeys", ->
+        @sandbox.stub(project, "getRecordKeys").resolves(["ci-key-123"])
 
-        @handleEvent("get:ci:keys").then =>
+        @handleEvent("get:record:keys").then =>
           @expectSendCalledWith(["ci-key-123"])
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(project, "getCiKeys").rejects(err)
+        @sandbox.stub(project, "getRecordKeys").rejects(err)
 
-        @handleEvent("get:ci:keys").then =>
+        @handleEvent("get:record:keys").then =>
           @expectSendErrCalledWith(err)
 
     describe "request:access", ->
