@@ -103,7 +103,16 @@ While in beta, the Cypress team has to whitelist the email address associated wi
 
 After successfully logging in, you will need to add the project(s) you want to write Cypress tests in.
 
-- Add the parent directory of your project to Cypress by clicking :fa-folder-o: Add Project in the top-left corner.
+- Click :fa-plus: Add Project.
+
+![Add Project in LeftHand Corner](https://cloud.githubusercontent.com/assets/1271364/22699969/fe44c2e4-ed26-11e6-83d0-9baa0f51b15e.png)
+
+[block:callout]
+{
+  "type": "info",
+  "body": "Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are [setup to be recorded](https://on.cypress.io/guides/projects#section-recording-runs)."
+}
+[/block]
 
 ***
 

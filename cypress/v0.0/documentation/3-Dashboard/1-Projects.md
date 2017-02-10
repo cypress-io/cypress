@@ -42,9 +42,14 @@ Projects can **only** be added to Cypress through our [Desktop Application](http
 
 # Recording Runs
 
-Integrating your Cypress tests into your build and deployment process is as simple as adding a couple lines to your CI provider's script.
-
 You can also setup your project to have its test runs recorded and displayed in both the Desktop Application and the Dashboard.
+
+[block:callout]
+{
+  "type": "info",
+  "body": "Not sure what the Dashboard is? [Its our service which displays all of your recorded runs](https://on.cypress.io/guides/dashboard-features)."
+}
+[/block]
 
 During a run we record all failing tests, logs, screenshots, and videos.
 
@@ -58,9 +63,7 @@ During a run we record all failing tests, logs, screenshots, and videos.
 
 ![Project Name in Setup Project](https://cloud.githubusercontent.com/assets/1271364/22700406/9b3bc416-ed28-11e6-995b-297350420cce.png)
 
-3. Choose who owns the project. You can personally own it or select an organization you've created. Organizations work just like they do in Github. They enable you to seperate your personal and work projects.
-
-[Read more about Organizations.](https://on.cypress.io/guides/organizations)
+3. Choose who owns the project. You can personally own it or select an organization you've created. Organizations work just like they do in Github. They enable you to seperate your personal and work projects. [Read more about Organizations.](https://on.cypress.io/guides/organizations)
 
 ![Chosen Organization to Own](https://cloud.githubusercontent.com/assets/1271364/22700579/26353ba6-ed29-11e6-9510-5b7bf4a1cdd2.png)
 
