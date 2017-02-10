@@ -83,14 +83,14 @@ module.exports = ->
       require("./commands/ci")(key, parseOpts(opts))
 
   program
-    .command("open [project]")
-    .usage("[project] [options]")
+    .command("open")
+    .usage("[options]")
     .description("Opens Cypress normally, as a desktop application.")
     .option("-p, --port <port>",         text("port"))
     .option("-e, --env <env>",           text("env"))
     .option("-c, --config <config>",     text("config"))
-    .action (project, opts) ->
-      require("./commands/open")(project, parseOpts(opts))
+    .action (opts) ->
+      require("./commands/open")(parseOpts(opts))
 
   program
     .command("get:path")

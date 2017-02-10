@@ -3,18 +3,15 @@ path    = require("path")
 utils   = require("../utils")
 
 class Open
-  constructor: (project = ".", options = {}) ->
+  constructor: (options = {}) ->
     if not (@ instanceof Open)
-      return new Open(project, options)
-
-    _.defaults options,
-      project:  path.resolve(process.cwd(), project)
+      return new Open(options)
 
     @open(options)
 
   open: (options) ->
     opts = {}
-    args = ["--project", options.project]
+    args = []
 
     if options.env
       args.push("--env", options.env)
