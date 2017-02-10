@@ -516,7 +516,7 @@ describe "lib/project", ->
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
       @sandbox.stub(api, "getProjectCiKeys").resolves(@ciKeys)
 
-    it "calls api.getProjectCiKeys with project id + session", ->
+    it "calls api.getProjectCiKeys with project id + auth token", ->
       @project.getCiKeys().then ->
         expect(api.getProjectCiKeys).to.be.calledWith("id-123", "auth-token-123")
 
@@ -530,12 +530,12 @@ describe "lib/project", ->
       @sandbox.stub(user, "ensureAuthToken").resolves("auth-token-123")
       @sandbox.stub(api, "requestAccess").resolves("response")
 
-    it "calls api.requestAccess with org id + session", ->
-      @project.requestAccess("org-id-123").then ->
-        expect(api.requestAccess).to.be.calledWith("org-id-123", "auth-token-123")
+    it "calls api.requestAccess with project id + auth token", ->
+      @project.requestAccess("project-id-123").then ->
+        expect(api.requestAccess).to.be.calledWith("project-id-123", "auth-token-123")
 
     it "returns response", ->
-      @project.requestAccess("org-id-123").then (response) =>
+      @project.requestAccess("project-id-123").then (response) =>
         expect(response).to.equal("response")
 
   context ".remove", ->

@@ -243,9 +243,9 @@ module.exports = {
       }
     })
 
-  requestAccess: (orgId, authToken) ->
+  requestAccess: (projectId, authToken) ->
     rp.post({
-      url: Routes.membershipRequests(orgId)
+      url: Routes.membershipRequests(projectId)
       json: true
       auth: {
         bearer: authToken

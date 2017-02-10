@@ -649,28 +649,28 @@ describe "lib/api", ->
         expect(ret).to.eql(ciKeys)
 
   context ".requestAccess", ->
-    it "POST /organizations/:id/membership_requests + returns response", ->
+    it "POST /projects/:id/membership_requests + returns response", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .post("/organizations/org-id-123/membership_requests")
+      .post("/projects/project-id-123/membership_requests")
       .reply(200)
 
-      api.requestAccess("org-id-123", "auth-token-123")
+      api.requestAccess("project-id-123", "auth-token-123")
       .then (ret) ->
         expect(ret).to.be.undefined
 
 
-    it "POST /organizations/:id/membership_requests failure formatting", ->
+    it "POST /projects/:id/membership_requests failure formatting", ->
       nock("http://localhost:1234")
       .matchHeader("authorization", "Bearer auth-token-123")
-      .post("/organizations/org-id-123/membership_requests")
+      .post("/projects/project-id-123/membership_requests")
       .reply(422, {
         errors: {
           access: ["already requested"]
         }
       })
 
-      api.requestAccess("org-id-123", "auth-token-123")
+      api.requestAccess("project-id-123", "auth-token-123")
       .then ->
         throw new Error("should have thrown here")
       .catch (err) ->
