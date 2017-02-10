@@ -5,6 +5,7 @@ import Tooltip from 'rc-tooltip'
 import Collapse, { Panel } from 'rc-collapse'
 
 import App from '../lib/app'
+import Project from '../project/project-model'
 import { getRecordKeys } from '../projects/projects-api'
 
 @observer
@@ -157,8 +158,9 @@ class Config extends Component {
     )
   }
 
+
   _keysSection () {
-    if (this._notSetupForCi()) return null
+    if (this._notSetupForCi() || this._doesNotHavePermission()) return null
 
     return (
       <Panel header='Record Key' key='record-keys' className='form-horizontal config-record-keys'>
@@ -188,6 +190,12 @@ class Config extends Component {
       </Panel>
     )
   }
+
+  _doesNotHavePermission () {
+    // OR if user does not have access to the project
+    this.props.project.state === Project.UNAUTHORIZED
+  }
+
 
   _hasKeys () {
     return !this.state.isLoadingKeys && this.state.keys.length
