@@ -11,7 +11,7 @@ describe "Setup Project", ->
       .fixture("config").as("config")
       .fixture("specs").as("specs")
       .fixture("organizations").as("orgs")
-      .fixture("dashboard_tokens").as("dashboardTokens")
+      .fixture("keys").as("keys")
       .visit("/")
       .window().then (win) ->
         {@App} = win
@@ -36,7 +36,7 @@ describe "Setup Project", ->
           "get:builds": (stub) => stub.resolves([])
           "get:orgs": (stub) => stub.returns(@getOrgs.promise)
           "setup:dashboard:project": (stub) => stub.returns(@setupCiProject.promise)
-          "get:dashboard:tokens": (stub) => stub.resolves(@dashboardTokens)
+          "get:record:keys": (stub) => stub.resolves(@keys)
         })
 
         @App.start()
@@ -278,8 +278,8 @@ describe "Setup Project", ->
         cy.contains("To record your first")
 
       describe "welcome page", ->
-        it "displays command to run with the dashboard token", ->
-          cy.contains("cypress run dashboard-token-123")
+        it "displays command to run with the record key", ->
+          cy.contains("cypress run --key record-key-123")
 
   describe "errors from ipc event", ->
     beforeEach ->
