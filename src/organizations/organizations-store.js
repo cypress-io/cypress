@@ -8,7 +8,6 @@ export class Orgs {
   @observable error = null
   @observable isLoading = false
   @observable isLoaded = false
-  @observable _membershipRequestedIds = {}
 
   @action setOrgs (orgs) {
     this.orgs = _.map(orgs, (org) => (
@@ -25,14 +24,6 @@ export class Orgs {
 
   getOrgById (id) {
     return _.find(this.orgs, { id })
-  }
-
-  membershipRequested (id) {
-    this._membershipRequestedIds[id] = true
-  }
-
-  wasMembershipRequested (id) {
-    return this._membershipRequestedIds[id] === true
   }
 }
 

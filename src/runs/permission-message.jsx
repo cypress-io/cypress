@@ -120,11 +120,11 @@ class PermissionMessage extends Component {
       isSubmitting: true,
     })
 
-    const orgId = this.props.project.orgId
+    const id = this.props.project.id
 
-    App.ipc("request:access", orgId)
+    App.ipc("request:access", id)
     .then(() => {
-      orgsStore.membershipRequested(orgId)
+      projectsStore.membershipRequested(id)
       this._setResult()
     })
     .catch((error) => {
