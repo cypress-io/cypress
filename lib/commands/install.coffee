@@ -19,13 +19,9 @@ fs = Promise.promisifyAll(fs)
 
 baseUrl = "https://download.cypress.io/"
 
-class Install
-  constructor: (options = {}) ->
-    if not (@ instanceof Install)
-      return new Install(options)
-
+module.exports = {
+  start: (options = {}) ->
     _.defaults options,
-      initialize:     true
       displayOpen:    true
       version:        null
       cypressVersion: null
@@ -39,18 +35,16 @@ class Install
       executable:     utils.getPathToUserExecutable()
       after:          ->
 
-    return if not options.initialize
-
     @initialize(options)
 
   initialize: (options) ->
     @download(options)
-      .bind(@)
-      .catch(@downloadErr)
-      .then(@unzip)
-      .catch(@unzipErr)
-      .then ->
-        @finish(options)
+    .bind(@)
+    .catch(@downloadErr)
+    .then(@unzip)
+    .catch(@unzipErr)
+    .then ->
+      @finish(options)
 
   downloadErr: (err) ->
     console.log("")
@@ -273,4 +267,4 @@ class Install
 
       options.after(options)
 
-module.exports = Install
+}

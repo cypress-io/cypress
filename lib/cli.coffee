@@ -8,7 +8,7 @@ pkg       = require("../package.json")
 updater({pkg: pkg, updateCheckInterval: human("one hour")}).notify()
 
 parseOpts = (opts) ->
-  _.pick(opts, "spec", "reporter", "reporterOptions", "path", "destination", "port", "env", "cypressVersion", "config")
+  _.pick(opts, "spec", "reporter", "reporterOptions", "path", "destination", "port", "env", "cypressVersion", "config", "noRecord")
 
 descriptions = {
   destination:     "destination path to extract and install Cypress to"
@@ -19,6 +19,7 @@ descriptions = {
   env:             "sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json"
   config:          "sets configuration values. separate multiple values with a comma. overrides any value in cypress.json."
   version:         "installs a specific version of Cypress"
+  noRecord:        "silences the console warning when you do not provide a record key"
 }
 
 text = (d) ->
@@ -45,32 +46,33 @@ module.exports = ->
     .option("-d, --destination <path>", text("destination"))
     .option("--cypress-version <version>", text("version"))
     .action (opts) ->
-      require("./commands/install")(parseOpts(opts))
+      require("./commands/install").start(parseOpts(opts))
 
   program
     .command("update")
     .description("Updates Cypress to the latest version")
     .option("-d, --destination <path>", text("destination"))
     .action (opts) ->
-      require("./commands/install")(parseOpts(opts))
+      require("./commands/install").start(parseOpts(opts))
 
   program
     .command("run [project]")
     .usage("[project] [options]")
-    .description("Runs Cypress Tests Headlessly")
+    .description("Runs Cypress Headlessly")
     .option("-s, --spec <spec>",                         text("spec"))
     .option("-r, --reporter <reporter>",                 text("reporter"))
     .option("-o, --reporter-options <reporter-options>", text("reporterOptions"))
     .option("-p, --port <port>",                         text("port"))
     .option("-e, --env <env>",                           text("env"))
     .option("-c, --config <config>",                     text("config"))
+    .option("--no-record",                               text("noRecord"))
     .action (project, opts) ->
-      require("./commands/run")(project, parseOpts(opts))
+      require("./commands/run").start(project, parseOpts(opts))
 
   program
     .command("ci [key]")
     .usage("[key] [options]")
-    .description("Runs Cypress in CI Mode")
+    .description("[DEPRECATED] Use 'cypress run --key <record_key>'")
     .option("-s, --spec <spec>",                         text("spec"))
     .option("-r, --reporter <reporter>",                 text("reporter"))
     .option("-o, --reporter-options <reporter-options>", text("reporterOptions"))
