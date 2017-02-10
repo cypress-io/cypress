@@ -69,6 +69,12 @@ MIT
 
 ## Changelog
 
+#### 0.4.1 - *(02/10/17)*
+- display runs
+- new settings areas
+- request access
+- add project to Dashboard
+
 #### 0.4.0 - *(01/04/17)*
 - builds list, adding project for ci
 
