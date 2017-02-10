@@ -1,4 +1,5 @@
 fs        = require("fs-extra")
+os        = require("os")
 mockSpawn = require("mock-spawn")
 
 fs = Promise.promisifyAll(fs)
@@ -25,17 +26,30 @@ describe "utils", ->
       utils.spawn("--foo", {foo: "bar"}).then =>
         expect(@spawn).to.be.calledWithMatch("/path/to/cypress", ["--foo"], {foo: "bar"})
 
+    it "does not call into startXvfb when its not needed", ->
+      @sandbox.spy(utils, "startXvfb")
+      @sandbox.stub(utils, "needsXfvb").returns(false)
+
+      utils.spawn("--foo")
+      .then ->
+        expect(utils.startXvfb).not.to.be.called
+
     it "starts utils.xvfb", ->
-      utils.spawn("--foo", {xvfb: true}).then =>
+      @sandbox.stub(utils, "needsXfvb").returns(true)
+
+      utils.spawn("--foo")
+      .then =>
         expect(@startAsync).to.be.calledOnce
 
     it "stops utils.xvfb when spawn closes", (done) ->
+      @sandbox.stub(utils, "needsXfvb").returns(true)
+
       spawn.setDefault (cb) =>
         cb(0)
         expect(@stopAsync).to.be.calledOnce
         done()
 
-      utils.spawn("--foo", {xvfb: true})
+      utils.spawn("--foo")
 
     it "exits with spawned exit code", (done) ->
       spawn.setDefault (cb) =>
@@ -53,7 +67,7 @@ describe "utils", ->
         unref: unref
       })
 
-      utils.spawn(null, {detached: true, xvfb: false}).then ->
+      utils.spawn(null, {detached: true}).then ->
         expect(unref).to.be.calledOnce
 
     it "does not unref by default", ->
@@ -64,8 +78,29 @@ describe "utils", ->
         unref: unref
       })
 
-      utils.spawn(null, {xvfb: false}).then ->
+      utils.spawn(null).then ->
         expect(unref).not.to.be.called
+
+  context ".needsXfvb", ->
+    afterEach ->
+      delete process.env.DISPLAY
+
+    it "does not need xvfb on osx", ->
+      @sandbox.stub(os, "platform").returns("darwin")
+
+      expect(utils.needsXfvb()).to.be.false
+
+    it "does not need xvfb on linux when DISPLAY is set", ->
+      @sandbox.stub(os, "platform").returns("linux")
+
+      process.env.DISPLAY = ":99"
+
+      expect(utils.needsXfvb()).to.be.false
+
+    it "does need xvfb on linux when no DISPLAY is set", ->
+      @sandbox.stub(os, "platform").returns("linux")
+
+      expect(utils.needsXfvb()).to.be.true
 
   context "#getCypressPath", ->
     beforeEach ->

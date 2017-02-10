@@ -26,7 +26,6 @@ class Open
       args.push("--port", options.port)
 
     utils.spawn(args, {
-      xvfb: false
       detached: true
       stdio: ["ignore", "ignore", "ignore"]
     })

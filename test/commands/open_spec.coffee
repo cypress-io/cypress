@@ -41,7 +41,6 @@ describe "Open", ->
 
       pathToProject = path.resolve(process.cwd(), "path/to/project")
       expect(@spawn).to.be.calledWith(["--project", pathToProject], {
-        xvfb: false
         detached: true
         stdio: ["ignore", "ignore", "ignore"]
       })

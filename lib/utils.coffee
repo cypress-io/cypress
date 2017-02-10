@@ -123,6 +123,13 @@ module.exports = {
     .then(fn)
     .catch(fn)
 
+  needsXfvb: ->
+    ## do we need xvfb to run?
+    ##
+    ## we only need xvfb on linux
+    ## and when no process.env.DISPLAY is not
+    os.platform() is "linux" and not process.env.DISPLAY
+
   exec: (args, options = {}) ->
     e = null
 
@@ -149,10 +156,11 @@ module.exports = {
   spawn: (args, options = {}) ->
     args = [].concat(args)
 
+    needsXfvb = @needsXfvb()
+
     _.defaults options,
       verify: false
       detached: false
-      xvfb: os.platform() is "linux"
       stdio: [process.stdin, process.stdout, "ignore"]
 
     spawn = =>
@@ -162,7 +170,7 @@ module.exports = {
           return process.exit()
 
         sp = cp.spawn pathToCypress, args, options
-        if options.xvfb
+        if needsXfvb
           ## make sure we close down xvfb
           ## when our spawned process exits
           sp.on "close", @stopXvfb
@@ -177,7 +185,7 @@ module.exports = {
 
         return sp
 
-    if options.xvfb
+    if needsXfvb
       @startXvfb().then(spawn)
     else
       spawn()
