@@ -7,6 +7,7 @@ class Projects {
   @observable error = null
   @observable isLoading = false
   @observable isLoaded = false
+  @observable _membershipRequestedIds = {}
 
   @computed get chosen () {
     return _.find(this.projects, { isChosen: true })
@@ -100,6 +101,14 @@ class Projects {
 
   _saveToLocalStorage () {
     localStorage.setItem('projects', JSON.stringify(this.serializeProjects()))
+  }
+
+  membershipRequested (id) {
+    this._membershipRequestedIds[id] = true
+  }
+
+  wasMembershipRequested (id) {
+    return this._membershipRequestedIds[id] === true
   }
 }
 

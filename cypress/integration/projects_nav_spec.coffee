@@ -30,7 +30,7 @@ describe "Projects Nav", ->
           "get:builds": (stub) => stub.resolves(@runs)
           "get:open:browsers": (stub) => stub.resolves([])
           "get:specs": (stub) => stub.yields(null, @specs)
-          "get:dashboard:tokens": (stub) -> stub.resolves([])
+          "get:record:keys": (stub) -> stub.resolves([])
         })
 
         @App.start()

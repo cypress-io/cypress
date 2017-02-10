@@ -9,7 +9,7 @@ import state from '../lib/state'
 import RunsCollection from './runs-collection'
 import errors from '../lib/errors'
 import { getRuns, pollRuns, stopPollingRuns } from './runs-api'
-import { getDashboardTokens } from '../projects/projects-api'
+import { getRecordKeys } from '../projects/projects-api'
 import projectsStore from '../projects/projects-store'
 import Project from '../project/project-model'
 import orgsStore from '../organizations/organizations-store'
@@ -26,18 +26,18 @@ class Runs extends Component {
     this.runsCollection = new RunsCollection()
 
     this.state = {
-      dashboardToken: null,
+      recordKey: null,
     }
   }
 
   componentWillMount () {
     this._getRuns()
     this._handlePolling()
-    this._getCiKey()
+    this._getKey()
   }
 
   componentDidUpdate () {
-    this._getCiKey()
+    this._getKey()
     this._handlePolling()
   }
 
@@ -72,19 +72,19 @@ class Runs extends Component {
     stopPollingRuns()
   }
 
-  _getCiKey () {
-    if (this._needsCiKey()) {
-      getDashboardTokens().then((dashboardTokens = []) => {
-        if (dashboardTokens.length) {
-          this.setState({ dashboardToken: dashboardTokens[0].id })
+  _getKey () {
+    if (this._needsKey()) {
+      getRecordKeys().then((keys = []) => {
+        if (keys.length) {
+          this.setState({ recordKey: keys[0].id })
         }
       })
     }
   }
 
-  _needsCiKey () {
+  _needsKey () {
     return (
-      !this.state.dashboardToken &&
+      !this.state.recordKey &&
       state.hasUser &&
       !this.runsCollection.isLoading &&
       !this.runsCollection.error &&
@@ -242,7 +242,7 @@ class Runs extends Component {
           </pre>
           <h5>
             <span className='pull-left'>
-              2. Setup Cypress to run in your CI Provider.
+              2. Run this command now, or in CI.
             </span>
             <a onClick={this._openCiGuide} className='pull-right'>
               <i className='fa fa-question-circle'></i>{' '}
@@ -250,17 +250,24 @@ class Runs extends Component {
             </a>
           </h5>
           <pre>
-            <code>cypress run {this.state.dashboardToken || '<dashboard-token>'}</code>
+            <code>cypress run --key {this.state.recordKey || '<record-key>'}</code>
           </pre>
           <hr />
           <p className='alert alert-default'>
             <i className='fa fa-info-circle'></i>{' '}
-            Tests you record will show up here and on your{' '}
+            Recorded runs will show up{' '}
+            <a href='#' onClick={this._openRunGuide}>here</a>{' '}
+            and on your{' '}
             <a href='#' onClick={this._openRuns}>Cypress Dashboard</a>.
           </p>
         </div>
       </div>
     )
+  }
+
+  _openRunGuide = (e) => {
+    e.preventDefault()
+    App.ipc('external:open', 'https://on.cypress.io/guides/projects#section-recording-builds')
   }
 
   _openRuns = (e) => {
@@ -275,7 +282,7 @@ class Runs extends Component {
 
   _openProjectIdGuide = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/guides/projects#section-what-is-a-projectid-')
+    App.ipc('external:open', 'https://on.cypress.io/what-is-a-project-id')
   }
 
   _openRun = (runId) => {

@@ -25,7 +25,7 @@ describe "Runs List", ->
       .fixture("specs").as("specs")
       .fixture("runs").as("runs")
       .fixture("organizations").as("orgs")
-      .fixture("dashboard_tokens").as("dashboardTokens")
+      .fixture("keys").as("keys")
       .visit("/")
       .window().then (win) ->
         {@App} = win
@@ -95,7 +95,7 @@ describe "Runs List", ->
             cy.contains("Request Access").click()
 
           it "sends request:access ipc event with org id", ->
-            expect(@App.ipc).to.be.calledWith("request:access", 829)
+            expect(@App.ipc).to.be.calledWith("request:access", "d8104707-a348-4653-baea-7da9c7d52448")
 
           it "disables button", ->
             cy.contains("Request Access").should("be.disabled")
@@ -293,7 +293,7 @@ describe "Runs List", ->
         cy
           .contains("Why?").click()
           .then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/projects#section-what-is-a-projectid-")
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/what-is-a-project-id")
 
       it "opens dashboard on clicking 'Cypress Dashboard'", ->
         cy

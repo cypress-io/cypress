@@ -181,9 +181,9 @@ const openProject = (project) => {
   .catch(setProjectError)
 }
 
-const getDashboardTokens = () => {
-  return App.ipc('get:dashboard:tokens')
-  // ignore error, settle for no dashboard tokens
+const getRecordKeys = () => {
+  return App.ipc('get:record:keys')
+  // ignore error, settle for no keys
   .catch(() => [])
 }
 
@@ -196,5 +196,5 @@ export {
   addProject,
   runSpec,
   closeBrowser,
-  getDashboardTokens,
+  getRecordKeys,
 }

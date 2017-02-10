@@ -5,21 +5,25 @@ import Tooltip from 'rc-tooltip'
 import Collapse, { Panel } from 'rc-collapse'
 
 import App from '../lib/app'
+<<<<<<< HEAD
 import { getDashboardTokens } from '../projects/projects-api'
 import Project from '../project/project-model'
+=======
+import { getRecordKeys } from '../projects/projects-api'
+>>>>>>> develop
 
 @observer
 class Config extends Component {
   state = {
-    dashboardTokens: [],
-    isLoadingCiKeys: true,
+    keys: [],
+    isLoadingKeys: true,
   }
 
   componentWillMount () {
-    getDashboardTokens().then((dashboardTokens = []) => {
+    getRecordKeys().then((keys = []) => {
       this.setState({
-        dashboardTokens,
-        isLoadingCiKeys: false,
+        keys,
+        isLoadingKeys: false,
       })
     })
   }
@@ -31,7 +35,7 @@ class Config extends Component {
           <Collapse>
             {this._configSection()}
             {this._projectIdSection()}
-            {this._dashboardTokensSection()}
+            {this._keysSection()}
           </Collapse>
         </div>
       </div>
@@ -158,30 +162,44 @@ class Config extends Component {
     )
   }
 
+<<<<<<< HEAD
   _dashboardTokensSection () {
     if (this._notSetupForCi() || this._doesNotHavePermission()) return null
+=======
+  _keysSection () {
+    if (this._notSetupForCi()) return null
+>>>>>>> develop
 
     return (
-      <Panel header='Dashboard Tokens' key='dashboard-tokens' className='form-horizontal config-dashboard-tokens'>
+      <Panel header='Record Key' key='record-keys' className='form-horizontal config-record-keys'>
         <a href='#' className='learn-more' onClick={this._openCiGuide}>
           <i className='fa fa-info-circle'></i>{' '}
           Learn More
         </a>
         <p className='text-muted'>
-          Dashboard Tokens allow you to record test results, screenshots and videos in Cypress.
-          {this._hasCiKeys() ? ' To record your tests, run this command:' : ''}
+          A record key enables you to record your failing tests, screenshots, and videos.
         </p>
-        {this._hasCiKeys() ? <pre><code>cypress run {this.state.dashboardTokens[0].id}</code></pre> : null}
-        {this._dashboardTokens()}
+        {this._hasKeys() ?
+          <div>
+            <p className='text-muted'>
+              To record, run this command:
+            </p>
+            <p>
+              <pre><code>cypress run --key {this.state.keys[0].id}</code></pre>
+            </p>
+          </div>
+        : null}
+        {this._recordKeys()}
         <p className='text-muted manage-btn'>
-          <a href='#' onClick={this._openAdminCiKeys} >
-            <i className='fa fa-key'></i> Add or Remove Dashboard Tokens
+          <a href='#' onClick={this._openAdminKeys}>
+            <i className='fa fa-key'></i> You can change this key in the Dashboard
           </a>
         </p>
       </Panel>
     )
   }
 
+<<<<<<< HEAD
   _doesNotHavePermission () {
     // OR if user does not have access to the project
     this.props.project.state === Project.UNAUTHORIZED
@@ -189,18 +207,22 @@ class Config extends Component {
 
   _hasCiKeys () {
     return !this.state.isLoadingCiKeys && this.state.dashboardTokens.length
+=======
+  _hasKeys () {
+    return !this.state.isLoadingKeys && this.state.keys.length
+>>>>>>> develop
   }
 
   _notSetupForCi () {
     return !this.props.project.id || !this.props.project.isValid
   }
 
-  _dashboardTokens = () => {
-    if (this.state.isLoadingCiKeys) {
+  _recordKeys = () => {
+    if (this.state.isLoadingKeys) {
       return (
-        <p className='loading-dashboard-tokens'>
+        <p className='loading-record-keys'>
           <i className='fa fa-spinner fa-spin'></i>{' '}
-          Loading Dashboard Tokens...
+          Loading Keys...
         </p>
       )
     }
@@ -210,7 +232,7 @@ class Config extends Component {
 
   _openProjectIdHelp (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/guides/projects#section-what-is-a-projectid-')
+    App.ipc('external:open', 'https://on.cypress.io/what-is-a-project-id')
   }
 
   _openHelp (e) {
@@ -223,7 +245,7 @@ class Config extends Component {
     App.ipc('external:open', 'https://on.cypress.io/guides/continuous-integration')
   }
 
-  _openAdminCiKeys = (e) => {
+  _openAdminKeys = (e) => {
     e.preventDefault()
     App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}/settings`)
   }
