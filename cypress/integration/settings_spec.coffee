@@ -211,6 +211,7 @@ describe "Settings", ->
           .contains("My-Fake-Project").click()
         .get(".navbar-default")
         .get("a").contains("Settings").click()
+
       cy.contains("h5", "Record Keys").should("not.exist")
 
     it "does not show ci Keys section when project is invalid", ->

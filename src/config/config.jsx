@@ -5,12 +5,8 @@ import Tooltip from 'rc-tooltip'
 import Collapse, { Panel } from 'rc-collapse'
 
 import App from '../lib/app'
-<<<<<<< HEAD
-import { getDashboardTokens } from '../projects/projects-api'
 import Project from '../project/project-model'
-=======
 import { getRecordKeys } from '../projects/projects-api'
->>>>>>> develop
 
 @observer
 class Config extends Component {
@@ -162,13 +158,9 @@ class Config extends Component {
     )
   }
 
-<<<<<<< HEAD
-  _dashboardTokensSection () {
-    if (this._notSetupForCi() || this._doesNotHavePermission()) return null
-=======
+
   _keysSection () {
-    if (this._notSetupForCi()) return null
->>>>>>> develop
+    if (this._notSetupForCi() || this._doesNotHavePermission()) return null
 
     return (
       <Panel header='Record Key' key='record-keys' className='form-horizontal config-record-keys'>
@@ -199,18 +191,14 @@ class Config extends Component {
     )
   }
 
-<<<<<<< HEAD
   _doesNotHavePermission () {
     // OR if user does not have access to the project
     this.props.project.state === Project.UNAUTHORIZED
   }
 
-  _hasCiKeys () {
-    return !this.state.isLoadingCiKeys && this.state.dashboardTokens.length
-=======
+
   _hasKeys () {
     return !this.state.isLoadingKeys && this.state.keys.length
->>>>>>> develop
   }
 
   _notSetupForCi () {
