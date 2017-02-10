@@ -22,7 +22,7 @@ routes = {
   projectBuilds: "projects/:id/builds"
   projectCiKeys: "projects/:id/keys"
   exceptions:    "exceptions"
-  membershipRequests: "organizations/:id/membership_requests"
+  membershipRequests: "projects/:id/membership_requests"
 }
 
 parseArgs = (url, args = []) ->

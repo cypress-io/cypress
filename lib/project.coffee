@@ -372,10 +372,10 @@ class Project extends EE
     .spread (projectId, authToken) ->
       api.getProjectCiKeys(projectId, authToken)
 
-  requestAccess: (orgId) ->
+  requestAccess: (projectId) ->
     user.ensureAuthToken()
     .then (authToken) ->
-      api.requestAccess(orgId, authToken)
+      api.requestAccess(projectId, authToken)
 
   @getOrgs = ->
     user.ensureAuthToken()
