@@ -64,7 +64,7 @@ describe "Specs List", ->
 
     it "opens link to docs on click of help link", ->
       cy.contains("a", "Need help?").click().then ->
-        expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/writing-your-first-test#section-test-files")
+        expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/writing-first-test")
 
   describe "first time onboarding specs", ->
     beforeEach ->

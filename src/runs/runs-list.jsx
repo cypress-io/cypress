@@ -267,7 +267,7 @@ class Runs extends Component {
 
   _openRunGuide = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/guides/projects#section-recording-builds')
+    App.ipc('external:open', 'https://on.cypress.io/recording-project-runs')
   }
 
   _openRuns = (e) => {

@@ -132,11 +132,11 @@ class Login extends Component {
   }
 
   _openHelp () {
-    App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running/#section-logging-in')
+    App.ipc('external:open', 'https://on.cypress.io/logging-in')
   }
 
   _openAuthDoc () {
-    App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running#section-your-email-has-not-been-authorized-')
+    App.ipc('external:open', 'https://on.cypress.io/email-not-authorized')
   }
 }
 

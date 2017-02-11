@@ -53,7 +53,7 @@ describe "Login", ->
 
       it "opens link to login docs on click of help link", ->
         cy.contains("a", "Need help?").click().then ->
-          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/installing-and-running/#section-logging-in")
+          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/logging-in")
 
     describe "click 'Log In with GitHub'", ->
       beforeEach ->
@@ -198,7 +198,7 @@ describe "Login", ->
           it "opens link to docs on click of help link", ->
             cy
               .contains("a", "Why am I not authorized?").click().then ->
-                expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/installing-and-running#section-your-email-has-not-been-authorized-")
+                expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/email-not-authorized")
 
           it "login button should be enabled", ->
             cy
