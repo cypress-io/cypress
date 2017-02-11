@@ -27,6 +27,13 @@ You run tasks such as:
 
 ## Changelog
 
+#### 0.13.0 - *(02/11/17)*
+- deprecated 'cypress ci'
+- 'cypress run' now accepts a --key argument and a --no-record argument
+- search for CYPRESS_RECORD_KEY env var
+- more intelligently spawn XVFB
+- some horrid code cleanup
+
 #### 0.12.2 - *(01/21/17)*
 - bump core releaser
 
