@@ -35,6 +35,10 @@ run = (options) ->
   if options.noRecord
     args.push("--no-record")
 
+  if options.ci
+    ## push to display the deprecation message
+    args.push("--ci")
+
   ## if we have a key assume we're in record mode
   if options.key
     args.push("--key", options.key)

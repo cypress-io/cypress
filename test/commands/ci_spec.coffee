@@ -63,10 +63,10 @@ describe "Ci", ->
     afterEach ->
       delete process.env.CYPRESS_RECORD_KEY
 
-    it "spawns --project with --ci and --key and xvfb", ->
+    it "spawns --project with --ci and --key", ->
       @setup("abc12345").then =>
         pathToProject = path.resolve(process.cwd(), ".")
-        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--key", "abc12345"])
+        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--ci", "--key", "abc12345"])
 
     it "can pass a specific reporter", ->
       @setup("foo", {reporter: "some/custom/reporter.js"}).then =>
@@ -94,7 +94,7 @@ describe "Ci", ->
     it "spawns with config", ->
       @setup("abc123", {config: "watchForFileChanges=false,baseUrl=localhost"}).then =>
         pathToProject = path.resolve(process.cwd(), ".")
-        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--config", "watchForFileChanges=false,baseUrl=localhost", "--key", "abc123"])
+        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--config", "watchForFileChanges=false,baseUrl=localhost", "--ci", "--key", "abc123"])
 
  context "#_noKeyErr", ->
     beforeEach ->

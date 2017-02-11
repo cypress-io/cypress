@@ -16,6 +16,7 @@ class Ci
 
     _.defaults options,
       initialize: true
+      ci:         true
       key:        key
 
     return if not options.initialize
