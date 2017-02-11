@@ -69,6 +69,9 @@ MIT
 
 ## Changelog
 
+#### 0.4.4 - *(02/11/17)*
+- more slug renaming
+
 #### 0.4.3 - *(02/10/17)*
 - updated content
 - renamed slugs
