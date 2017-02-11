@@ -63,7 +63,9 @@ module.exports = {
 
     if rp = options["run-project"]
       options.project         = rp
-      options.oldVersionOfCli = true
+
+      if not options.ci
+        options.oldVersionOfCli = true
 
     ## if we are updating we may have to pluck out the
     ## appPath + execPath from the options._ because

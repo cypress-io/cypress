@@ -787,8 +787,9 @@ describe "lib/cypress", ->
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--project=#{@todosPath}", "--key=token-123", "--ci"])
+      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
       .then =>
+        expect(errors.warning).not.to.be.calledWith("OLD_VERSION_OF_CLI")
         expect(errors.warning).to.be.calledWith("CYPRESS_CI_DEPRECATED")
         expect(console.log).to.be.calledWithMatch("You are using an older version of the CLI tools.")
         expect(console.log).to.be.calledWithMatch("cypress run --key <record_key>")
@@ -802,7 +803,7 @@ describe "lib/cypress", ->
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--project=#{@todosPath}", "--key=token-123", "--ci"])
+      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
       .then =>
         delete process.env.CYPRESS_CI_KEY
 
