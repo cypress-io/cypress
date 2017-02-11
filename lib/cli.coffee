@@ -8,10 +8,11 @@ pkg       = require("../package.json")
 updater({pkg: pkg, updateCheckInterval: human("one hour")}).notify()
 
 parseOpts = (opts) ->
-  _.pick(opts, "spec", "reporter", "reporterOptions", "path", "destination", "port", "env", "cypressVersion", "config", "noRecord")
+  _.pick(opts, "spec", "reporter", "reporterOptions", "path", "destination", "port", "env", "cypressVersion", "config", "noRecord", "key")
 
 descriptions = {
   destination:     "destination path to extract and install Cypress to"
+  key:             "records your run. sends test results, screenshots and videos to your Dashboard."
   spec:            "runs a specific spec file. defaults to 'all'"
   reporter:        "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'"
   reporterOptions: "options for the mocha reporter. defaults to 'null'"
@@ -59,6 +60,7 @@ module.exports = ->
     .command("run [project]")
     .usage("[project] [options]")
     .description("Runs Cypress Headlessly")
+    .option("-k, --key <record_key>",                    text("key"))
     .option("-s, --spec <spec>",                         text("spec"))
     .option("-r, --reporter <reporter>",                 text("reporter"))
     .option("-o, --reporter-options <reporter-options>", text("reporterOptions"))

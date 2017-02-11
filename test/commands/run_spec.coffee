@@ -31,6 +31,10 @@ describe "run", ->
       @parse("run myApp --config watchForFileChanges=false,baseUrl=localhost")
       expect(run.start).to.be.calledWith("myApp", {config: "watchForFileChanges=false,baseUrl=localhost"})
 
+    it "calls run with key", ->
+      @parse("run --key asdf")
+      expect(run.start).to.be.calledWith(undefined, {key: "asdf"})
+
   context ".start", ->
     beforeEach ->
       @spawn  = @sandbox.stub(utils, "spawn")
