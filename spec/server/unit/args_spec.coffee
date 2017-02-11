@@ -70,9 +70,15 @@ describe "lib/util/args", ->
       ## make sure it works with both --env=foo=bar and --config foo=bar
       @obj = @setup("--get-key", "--hosts=*.foobar.com=127.0.0.1", "--env=foo=bar,baz=quux", "--config", "requestTimeout=1234,responseTimeout=9876")
 
+    it "coerces booleans", ->
+      expect(@setup("--foo=true").foo).be.true
+      expect(@setup("--no-record").record).to.be.false
+      expect(@setup("--record=false").record).to.be.false
+
     it "backs up hosts + environmentVariables", ->
       expect(@obj).to.deep.eq({
         _: []
+        record: true
         env: process.env.NODE_ENV
         "get-key": true
         getKey: true
@@ -95,6 +101,7 @@ describe "lib/util/args", ->
     it "can transpose back to an array", ->
       expect(argsUtil.toArray(@obj)).to.deep.eq([
         "--getKey=true"
+        "--record=true"
         "--config=requestTimeout=1234,responseTimeout=9876"
         "--hosts=*.foobar.com=127.0.0.1"
         "--requestTimeout=1234"
@@ -124,6 +131,7 @@ describe "lib/util/args", ->
         appPath: "/Applications/Cypress.app"
         execPath: "/Applications/Cypress.app"
         updating: true
+        record: true
       })
 
     it "does not slurp up appPath + execPath if updating and these are already present in args", ->
@@ -148,4 +156,5 @@ describe "lib/util/args", ->
         "app-path": "a"
         "exec-path": "e"
         updating: true
+        record: true
       })

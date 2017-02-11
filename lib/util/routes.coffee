@@ -10,15 +10,18 @@ routes = {
   ping:          "ping"
   signin:        "signin"
   signout:       "signout"
-  usage:         "user/usage"
   builds:        "builds"
   instances:     "builds/:id/instances"
   instance:      "instances/:id"
   instanceStdout:"instances/:id/stdout"
+  orgs:          "organizations"
   projects:      "projects"
   project:       "projects/:id"
   projectToken:  "projects/:id/token"
+  projectBuilds: "projects/:id/builds"
+  projectRecordKeys: "projects/:id/keys"
   exceptions:    "exceptions"
+  membershipRequests: "projects/:id/membership_requests"
 }
 
 parseArgs = (url, args = []) ->

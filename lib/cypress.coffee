@@ -149,12 +149,12 @@ module.exports = {
         when options.exitWithCode?
           options.mode = "exitWithCode"
 
-        when options.ci
-          options.mode = "ci"
+        when options.key
+          options.mode = "record"
 
-        when options.runProject
+        when options.project
           ## go into headless mode
-          ## when we have 'runProject'
+          ## when we have 'project'
           options.mode = "headless"
 
         else
@@ -241,8 +241,8 @@ module.exports = {
       when "headed"
         @runElectron(mode, options)
 
-      when "ci"
-        ## run headlessly in ci mode and exit
+      when "record"
+        ## run headlessly, record, and exit
         @runElectron(mode, options)
         .get("failures")
         .then(exit)

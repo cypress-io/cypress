@@ -1,4 +1,4 @@
-spec/server/unit
+spec/server/unit/api_spec
 spec/server/integration
 spec/server/e2e
 --recursive

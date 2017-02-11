@@ -702,47 +702,6 @@ describe "Routes", ->
       Fixtures.scaffold("no-server")
       Fixtures.scaffold("ids")
 
-    afterEach ->
-      files.reset()
-
-    describe "usage", ->
-      beforeEach ->
-        @setup({
-          projectRoot: Fixtures.projectPath("ids")
-          projectName: "foobarbaz"
-        })
-
-      it "counts specs, exampleSpec, and allSpecs", ->
-        @rp("http://localhost:2020/__cypress/iframes/integration/foo.coffee")
-        .then (res) =>
-          expect(res.statusCode).to.eq(200)
-          expect(files.getStats()).to.deep.eq({
-            numRuns: 1
-            allSpecs: false
-            exampleSpec: false
-            projectName: "foobarbaz"
-          })
-        .then =>
-          @rp("http://localhost:2020/__cypress/iframes/__all")
-          .then (res) =>
-            expect(res.statusCode).to.eq(200)
-            expect(files.getStats()).to.deep.eq({
-              numRuns: 2
-              allSpecs: true
-              exampleSpec: false
-              projectName: "foobarbaz"
-            })
-        .then =>
-          @rp("http://localhost:2020/__cypress/iframes/integration/example_spec.js")
-          .then (res) ->
-            expect(res.statusCode).to.eq(200)
-            expect(files.getStats()).to.deep.eq({
-              numRuns: 3
-              allSpecs: true
-              exampleSpec: true
-              projectName: "foobarbaz"
-            })
-
     describe "todos", ->
       beforeEach ->
         @setup({

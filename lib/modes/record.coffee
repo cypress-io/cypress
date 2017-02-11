@@ -29,10 +29,7 @@ module.exports = {
 
     repo.getBranch()
 
-  generateProjectBuildId: (projectId, projectPath, projectName, projectToken) ->
-    if not projectToken
-      return errors.throw("CI_KEY_MISSING")
-
+  generateProjectBuildId: (projectId, projectPath, projectName, recordKey) ->
     repo = git.init(projectPath)
 
     Promise.props({
@@ -46,7 +43,7 @@ module.exports = {
     .then (git) ->
       api.createBuild({
         projectId:         projectId
-        projectToken:      projectToken
+        recordKey:         recordKey
         commitSha:         git.sha
         commitBranch:      git.branch
         commitAuthorName:  git.author
@@ -60,13 +57,13 @@ module.exports = {
       .catch (err) ->
         switch err.statusCode
           when 401
-            projectToken = projectToken.slice(0, 5) + "..." + projectToken.slice(-5)
-            errors.throw("CI_KEY_NOT_VALID", projectToken)
+            recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
+            errors.throw("RECORD_KEY_NOT_VALID", recordKey, projectId)
           when 404
-            errors.throw("CI_PROJECT_NOT_FOUND")
+            errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
           else
             ## warn the user that assets will be not recorded
-            errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+            errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
             ## report on this exception
             ## and return null
@@ -79,7 +76,7 @@ module.exports = {
       spec:    spec
     })
     .catch (err) ->
-      errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+      errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
       ## dont log exceptions if we have a 503 status code
       if err.statusCode isnt 503
@@ -127,7 +124,7 @@ module.exports = {
     Promise
     .all(uploads)
     .catch (err) ->
-      errors.warning("CI_CANNOT_UPLOAD_ASSETS", err)
+      errors.warning("DASHBOARD_CANNOT_UPLOAD_RESULTS", err)
 
       logException(err)
 
@@ -168,7 +165,7 @@ module.exports = {
         screenshotUrls: resp.screenshotUploadUrls
       })
     .catch (err) ->
-      errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+      errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
       ## dont log exceptions if we have a 503 status code
       if err.statusCode isnt 503
@@ -183,7 +180,7 @@ module.exports = {
       stdout:       stdout
     })
     .catch (err) ->
-      errors.warning("CI_CANNOT_CREATE_BUILD_OR_INSTANCE", err)
+      errors.warning("DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE", err)
 
       ## dont log exceptions if we have a 503 status code
       logException(err) unless err.statusCode is 503
@@ -193,10 +190,25 @@ module.exports = {
 
     captured = stdout.capture()
 
+    ## if we are using the ci flag that means
+    ## we have an old version of the CLI tools installed
+    ## and that we need to warn the user what to update
+    if options.ci
+      type = switch
+        when process.env.CYPRESS_CI_KEY
+          "CYPRESS_CI_DEPRECATED_ENV_VAR"
+        else
+          "CYPRESS_CI_DEPRECATED"
+
+      errors.warning(type)
+
     Project.add(projectPath)
     .then ->
       Project.id(projectPath)
     .then (projectId) =>
+      ## store the projectId for later use
+      options.projectId = projectId
+
       Project.config(projectPath)
       .then (cfg) =>
         {projectName} = cfg
