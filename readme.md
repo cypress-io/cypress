@@ -69,6 +69,10 @@ MIT
 
 ## Changelog
 
+#### 0.4.3 - *(02/10/17)*
+- updated content
+- renamed slugs
+
 #### 0.4.2 - *(02/10/17)*
 - merged missed PR
 
