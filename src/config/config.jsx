@@ -164,12 +164,15 @@ class Config extends Component {
 
     return (
       <Panel header='Record Key' key='record-keys' className='form-horizontal config-record-keys'>
-        <a href='#' className='learn-more' onClick={this._openCiGuide}>
+        <a href='#' className='learn-more' onClick={this._openRecordKeyGuide}>
           <i className='fa fa-info-circle'></i>{' '}
           Learn More
         </a>
         <p className='text-muted'>
-          A record key enables you to record your failing tests, screenshots, and videos.
+          A Record Key sends your failing tests, screenshots, and videos to your{' '}
+          <a href='#' onClick={this._openDashboardProject}>
+            Dashboard.
+          </a>
         </p>
         {this._hasKeys() ?
           <div>
@@ -218,6 +221,11 @@ class Config extends Component {
     return null
   }
 
+  _openDashboardProject = (e) => {
+    e.preventDefault()
+    App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}`)
+  }
+
   _openProjectIdHelp (e) {
     e.preventDefault()
     App.ipc('external:open', 'https://on.cypress.io/what-is-a-project-id')
@@ -228,9 +236,9 @@ class Config extends Component {
     App.ipc('external:open', 'https://on.cypress.io/guides/configuration')
   }
 
-  _openCiGuide (e) {
+  _openRecordKeyGuide (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/guides/continuous-integration')
+    App.ipc('external:open', 'https://on.cypress.io/what-is-a-record-key')
   }
 
   _openAdminKeys = (e) => {
