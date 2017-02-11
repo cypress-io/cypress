@@ -106,12 +106,12 @@ describe "Settings", ->
         cy.contains("Record Key").click()
 
       it "displays record keys section", ->
-        cy.contains("A record key enables")
+        cy.contains("A Record Key sends")
 
       it "opens ci guide when learn more is clicked", ->
         cy
           .get(".config-record-keys").contains("Learn More").click().then ->
-            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/continuous-integration")
+            expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/what-is-a-record-key")
 
       it "loads the project's record keys", ->
         expect(@App.ipc).to.be.calledWith("get:record:keys")
