@@ -133,7 +133,7 @@ class Specs extends Component {
 
   _openHelp (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/guides/writing-your-first-test#section-test-files')
+    App.ipc('external:open', 'https://on.cypress.io/writing-first-test')
   }
 }
 
