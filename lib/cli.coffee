@@ -8,7 +8,7 @@ pkg       = require("../package.json")
 updater({pkg: pkg, updateCheckInterval: human("one hour")}).notify()
 
 parseOpts = (opts) ->
-  _.pick(opts, "spec", "reporter", "reporterOptions", "path", "destination", "port", "env", "cypressVersion", "config", "noRecord", "key")
+  _.pick(opts, "spec", "reporter", "reporterOptions", "path", "destination", "port", "env", "cypressVersion", "config", "record", "key")
 
 descriptions = {
   destination:     "destination path to extract and install Cypress to"
@@ -69,6 +69,12 @@ module.exports = ->
     .option("-c, --config <config>",                     text("config"))
     .option("--no-record",                               text("noRecord"))
     .action (project, opts) ->
+      ## commander automatically sets record
+      ## to true when it is omitted
+      ## and we only care if this is false
+      if opts.record is true
+        delete opts.record
+
       require("./commands/run").start(project, parseOpts(opts))
 
   program

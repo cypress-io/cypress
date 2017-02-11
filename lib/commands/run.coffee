@@ -32,7 +32,7 @@ run = (options) ->
   if options.reporterOptions
     args.push("--reporter-options", options.reporterOptions)
 
-  if options.noRecord
+  if options.record is false
     args.push("--no-record")
 
   if options.ci
@@ -42,7 +42,6 @@ run = (options) ->
   ## if we have a key assume we're in record mode
   if options.key
     args.push("--key", options.key)
-    opts.xvfb = true
 
   utils.spawn(args, opts)
 

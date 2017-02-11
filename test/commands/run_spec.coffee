@@ -35,6 +35,10 @@ describe "run", ->
       @parse("run --key asdf")
       expect(run.start).to.be.calledWith(undefined, {key: "asdf"})
 
+    it "calls run with --no-record", ->
+      @parse("run --no-record")
+      expect(run.start).to.be.calledWith(undefined, {record: false})
+
   context ".start", ->
     beforeEach ->
       @spawn  = @sandbox.stub(utils, "spawn")
@@ -61,6 +65,13 @@ describe "run", ->
       run.start(null, {config: "watchForFileChanges=false,baseUrl=localhost"})
       .then =>
         expect(@spawn).to.be.calledWith(["--project", pathToProject, "--config", "watchForFileChanges=false,baseUrl=localhost"])
+
+    it "spawns --project with --no-record", ->
+      pathToProject = path.resolve(process.cwd(), ".")
+
+      run.start(null, {record: false})
+      .then =>
+        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--no-record"])
 
   context ".run", ->
     beforeEach ->
