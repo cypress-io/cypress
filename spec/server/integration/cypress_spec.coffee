@@ -203,14 +203,25 @@ describe "lib/cypress", ->
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 0})
       @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
 
-    it "runs project headlessly and exits with exit code 0", ->
+    it "runs project headlessly and exits with exit code 0 and yells about old version of CLI", ->
       Project.add(@todosPath)
       .then =>
         ## test that --run-project gets properly aliased to project
         cypress.start(["--run-project=#{@todosPath}"])
-      .delay(200)
       .then =>
         expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
+        expect(errors.warning).to.be.calledWith("OLD_VERSION_OF_CLI")
+        expect(console.log).to.be.calledWithMatch("You are using an older version of the CLI tools.")
+        @expectExitWith(0)
+
+    it "yells about old even when --no-record was passed", ->
+      Project.add(@todosPath)
+      .then =>
+        ## test that --run-project gets properly aliased to project
+        cypress.start(["--run-project=#{@todosPath}", "--no-record"])
+      .then =>
+        expect(errors.warning).to.be.calledWith("OLD_VERSION_OF_CLI")
+        expect(console.log).to.be.calledWithMatch("You are using an older version of the CLI tools.")
         @expectExitWith(0)
 
     it "runs project headlessly and exits with exit code 10", ->
@@ -219,7 +230,6 @@ describe "lib/cypress", ->
       Project.add(@todosPath)
       .then =>
         cypress.start(["--project=#{@todosPath}"])
-      .delay(200)
       .then =>
         expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
         @expectExitWith(10)
@@ -444,6 +454,7 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--project=#{@todosPath}"])
       .then =>
+        expect(errors.warning).not.to.be.calledWith("OLD_VERSION_OF_CLI")
         expect(errors.warning).to.be.calledWith("PROJECT_ID_AND_MISSING_RECORD_KEY", "abc123")
         expect(console.log).to.be.calledWithMatch("However, no Record Key was provided. This run will not be recorded.")
         expect(console.log).to.be.calledWithMatch("cypress run --key <record_key>")

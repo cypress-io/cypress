@@ -515,6 +515,10 @@ module.exports = {
           ## record mode
           errors.warning("PROJECT_ID_AND_MISSING_RECORD_KEY", projectId)
 
+        ## old version of the CLI tools
+        if options.oldVersionOfCli
+          errors.warning("OLD_VERSION_OF_CLI")
+
         @trashAssets(config)
         .then =>
           @runTests({
