@@ -253,21 +253,6 @@ module.exports = {
     })
     .catch(errors.StatusCodeError, formatResponseBody)
 
-  sendUsage: (numRuns, exampleSpec, allSpecs, projectName, authToken) ->
-    rp.post({
-      url: Routes.usage()
-      json: true
-      auth: {
-        bearer: authToken
-      }
-      body: {
-        "x-runs": numRuns
-        "x-example": exampleSpec
-        "x-all": allSpecs
-        "x-project-name": projectName
-      }
-    })
-
   getLoginUrl: ->
     rp.get({
       url: Routes.auth(),

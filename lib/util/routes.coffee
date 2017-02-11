@@ -10,7 +10,6 @@ routes = {
   ping:          "ping"
   signin:        "signin"
   signout:       "signout"
-  usage:         "user/usage"
   builds:        "builds"
   instances:     "builds/:id/instances"
   instance:      "instances/:id"

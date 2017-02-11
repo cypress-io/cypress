@@ -686,22 +686,6 @@ describe "lib/api", ->
           }
         """)
 
-  context ".sendUsage", ->
-    it "POSTs /user/usage", ->
-      nock("http://localhost:1234")
-      .matchHeader("x-platform", "linux")
-      .matchHeader("x-cypress-version", pkg.version)
-      .matchHeader("authorization", "Bearer auth-token-123")
-      .post("/user/usage", {
-        "x-runs": 5
-        "x-example": true
-        "x-all": false
-        "x-project-name": "admin"
-      })
-      .reply(200)
-
-      api.sendUsage(5, true, false, "admin", "auth-token-123")
-
   context ".getProjectToken", ->
     it "GETs /projects/:id/token", ->
       nock("http://localhost:1234")
