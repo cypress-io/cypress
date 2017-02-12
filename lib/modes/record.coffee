@@ -208,6 +208,8 @@ module.exports = {
     Project.add(projectPath)
     .then ->
       Project.id(projectPath)
+      .catch ->
+        errors.throw("CANNOT_RECORD_NO_PROJECT_ID")
     .then (projectId) =>
       ## store the projectId for later use
       options.projectId = projectId
