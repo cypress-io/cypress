@@ -13,4 +13,4 @@ test:
     - npm run server:
         background: true
   override:
-    - cypress run
+    - cypress run --record
