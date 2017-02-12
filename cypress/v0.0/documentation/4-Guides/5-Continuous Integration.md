@@ -9,7 +9,7 @@ excerpt: Run Cypress in any CI provider
 - :fa-angle-right: [Troubleshooting](#section-troubleshooting)
 - :fa-angle-right: [Running in CI](#section-running-in-ci)
   - [Add your project to your CI provider](#section-add-you-project-to-your-ci-provider)
-  - [Acquire a Cypress secret key](#section-acquire-a-cypress-secret-key)
+  - [Acquire a CI key](#section-acquire-a-ci-key)
   - [Add 2 lines of code to your CI config file](#section-add-2-lines-of-code-to-your-ci-config-file)
   - [What is the difference between `cypress run` and `cypress ci`?](#section-what-is-the-difference-between-cypress-run-and-cypress-ci-)
 - :fa-angle-right: [Environment Variables](#section-environment-variables)
@@ -78,35 +78,39 @@ When executing `cypress run` or `cypress ci`, if you see no output you are likel
 Running Cypress in CI is very easy. If you're using a hosted CI service, generally the workflow is the same:
 
 1. [Add your project's repo to your CI provider](#section-add-your-project-to-your-ci-provider)
-2. [Acquire a Cypress secret key](#section-acquire-a-cypress-secret-key)
+2. [Acquire a CI Key](#section-acquire-a-ci-key)
 3. [Add 2 lines of code to your CI config file](#section-add-2-lines-of-code-to-your-ci-config-file)
 
 ***
 
 ## Add your project to your CI provider
 
-This is different for each provider, but usually includes logging into your CI service, connecting it with your Github account, and then adding that project's repo.
+This is different for each provider, but usually includes logging into your CI service, connecting it with your GitHub, Bitbucket, or GitLab account, and then selecting the project's repository.
 
 ***
 
-## Acquire a Cypress secret key
+## Acquire a CI key
 
-Cypress verifies that your project is allowed to run in CI by using a secret key. This key can only be obtained from the Cypress CLI tool (currently). If you haven't installed the Cypress CLI tool, run the following command from your terminal:
+Cypress verifies that your project is allowed to run in CI by using a CI key. This key can only be obtained from the [Cypress CLI tool](https://on.cypress.io/cli), within the Project Settings tab in the Desktop App, or within the Project Settings tab in the [Cypress Dashboard](http://on.cypress.io/dashboard).
+
+**Acquire CI Key from Cypress CLI**
+
+If you haven't installed the [Cypress CLI tool](https://on.cypress.io/cli) tool, run the following command from your terminal:
 
 ```shell
 # install the Cypress CLI tool
 npm install -g cypress-cli
 ```
 
-Run this following Cypress command from your terminal:
+Run this Cypress command from your terminal to get a CI key:
 
 ```shell
-# this will return your secret key
+# this will return your CI Key
 cypress get:key
 ```
 
 ```shell
-# you'll see a key that looks like this
+# The CI Key will look like this
 703b33d9-a00e-4c66-90c2-40efc0fee2c6
 ```
 
@@ -137,12 +141,12 @@ npm install -g cypress-cli
 
 ```shell
 # this will run tests headlessly and upload assets
-cypress ci <your-secret-key>
+cypress ci <ci-key>
 
 # ------- or -------
 
 # this will run also tests headlessly, but not upload assets
-cypress run <your-secret-key>
+cypress run <ci-key>
 ```
 
 You'll want to refer to your CI providers documentation for knowing when to run those commands. Generally each CI provider gives you a lifecyle of build commands.
@@ -155,29 +159,21 @@ For instance, with [Travis CI](https://docs.travis-ci.com/user/customizing-the-b
 
 `cypress ci` and `cypress run` both run your tests headlessly.
 
-- `cypress ci` requires a [CI Key](https://docs.cypress.io/docs/continuous-integration#section-acquire-a-cypress-secret-key) and uploads build assets (such as screenshots, videos, and logs) to our Cypress servers after a test run completes. If you do not want your assets to be tracked by Cypress, you will want to use `cypress run`.
+- `cypress ci` requires a [CI Key](https://docs.cypress.io/docs/continuous-integration#section-acquire-a-ci-key) and uploads build assets (such as screenshots, videos, and logs) to our Cypress servers after a test run completes. If you do not want your assets to be tracked by Cypress, you will want to use `cypress run`.
 - `cypress run` does *not* upload build assets (such as screenshots, videos, and logs) to our Cypress servers after a test run completes. This also means that you will not be able to review your screenshots or videos in our upcoming Cypress CI Portal.
 
-We recommend that you use `cypress ci` to take advantage of our upcoming Cypress CI Portal where you will be able to easily review failures, logs, screenshots, and videos of each test run which you can preview below.
-
-**Upcoming View of Builds in the Desktop App**
-![desktop](https://cloud.githubusercontent.com/assets/1271364/20360333/4ed80f7a-ac01-11e6-849a-cea67637dad4.png)
-
-**Upcoming CI Portal**
-![Portal Online](https://cloud.githubusercontent.com/assets/1271364/20360298/305b6f6a-ac01-11e6-94e9-6a8264002fa3.jpg)
-
+We recommend that you use `cypress ci` to take full advantage of the [Cypress Dashboard](https://on.cypress.io/dashboard)
 
 # Environment variables
 
 ## Cypress CI Key
 
-Instead of hard-coding your secret key into a configuration file, you can opt to store this as an environment variable with your CI provider. This prevents your secret key from being stored in version control. Each CI provider will be different, but generally each exposes a way to set environment variables.
+Instead of hard-coding your CI Key into a configuration file, you can opt to store this as an environment variable with your CI provider. This prevents your CI Key from being stored in version control. Each CI provider will be different, but generally each exposes a way to set environment variables.
 
-Set the name of the environment variable to `CYPRESS_CI_KEY` and paste your secret key as the value.
+Set the name of the environment variable to `CYPRESS_CI_KEY` and paste your CI Key as the value.
 
 **Example of Env Variable in CircleCI**
 ![screen shot 2016-03-28 at 11 38 36 am](https://cloud.githubusercontent.com/assets/1271364/14081640/b5a25e52-f4d9-11e5-977b-43e209809716.png)
-
 
 Then run your tests in CI by simply calling:
 
@@ -211,7 +207,7 @@ You can specify a specific project ID in CI by setting an Environment Variable: 
 
 # Optimizing CI
 
-Most CI providers allow caching of directories and dependencies between builds. This allows you to save the state of Cypress, thereforce making the builds run faster.
+Most CI providers allow caching of directories and dependencies between builds. This allows you to save the state of Cypress, therefore making the builds run faster.
 
 ## Example of caching Cypress in Travis CI in `travis.yml`
 

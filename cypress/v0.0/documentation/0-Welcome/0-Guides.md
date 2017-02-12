@@ -19,6 +19,14 @@ excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 | Examples | |
 | -------------------- | -- |
 | [List of Example Apps](https://on.cypress.io/guides/all-example-apps) | See Cypress being used in existing projects. |
+| [List of Example Recipes](https://github.com/cypress-io/cypress-example-recipes) | Recipes for testing common scenarios in Cypress. |
+
+| Dashboard | |
+| -------------------- | -- |
+| [Features](https://on.cypress.io/guides/dashboard-features) | An overview of our Dashboard. |
+| [Projects](https://on.cypress.io/guides/projects) | Manage your Projects and configure them to record runs. |
+| [Runs](https://on.cypress.io/guides/runs) | View your Recorded Runs. |
+| [Organizations](https://on.cypress.io/guides/organizations) | Manage your Organizations. |
 
 | Guides | |
 | -------------------- | -- |
@@ -29,6 +37,7 @@ excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 | [Network Requests](https://on.cypress.io/guides/network-requests-xhr) | Handle AJAX/XHR Requests |
 | [Continuous Integration](https://on.cypress.io/guides/continuous-integration) | Integrate with CI Providers |
 | [Environment Variables](https://on.cypress.io/guides/environment-variables) | Set environment variables |
+| [Stubs, Spies and Clocks](https://on.cypress.io/guides/stubs-spies-clocks) | Learn about when and why to use stubs, spies, and control clock time |
 | [Using Aliases](https://on.cypress.io/guides/using-aliases) | Represent an object as alias |
 | [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures) | Mock data in fixtures |
 | [Screenshots and Videos](https://on.cypress.io/guides/screenshots-and-videos) | Capture screenshots and videos of your test run |
@@ -39,7 +48,6 @@ excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 | -------------------- | -- |
 | [Error Messages](https://on.cypress.io/guides/errors) | Error messages |
 | [Anti-patterns](https://on.cypress.io/guides/anti-patterns) | Anti-patterns |
-| [Deprecations](https://on.cypress.io/guides/deprecations) | Deprecations |
 | [Known Issues](https://on.cypress.io/guides/known-issues) | Known Issues |
 | [Web Security](https://on.cypress.io/guides/web-security) | Web Security |
 | [Browser Management](https://on.cypress.io/guides/browser-management) | Browser Management |
