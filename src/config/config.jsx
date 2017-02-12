@@ -180,7 +180,7 @@ class Config extends Component {
               To record, run this command:
             </p>
             <p>
-              <pre><code>cypress run --key {this.state.keys[0].id}</code></pre>
+              <pre><code>cypress run --record --key {this.state.keys[0].id}</code></pre>
             </p>
           </div>
         : null}

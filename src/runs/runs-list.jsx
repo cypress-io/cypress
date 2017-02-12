@@ -250,7 +250,7 @@ class Runs extends Component {
             </a>
           </h5>
           <pre>
-            <code>cypress run --key {this.state.recordKey || '<record-key>'}</code>
+            <code>cypress run --record --key {this.state.recordKey || '<record-key>'}</code>
           </pre>
           <hr />
           <p className='alert alert-default'>
