@@ -130,7 +130,7 @@ describe "Settings", ->
 
         it "displays first Record Key", ->
           cy
-            .get(".config-record-keys").contains("cypress run --key " + @keys[0].id)
+            .get(".config-record-keys").contains("cypress run --record --key " + @keys[0].id)
 
       describe "when there are no keys", ->
         beforeEach ->

@@ -279,7 +279,7 @@ describe "Setup Project", ->
 
       describe "welcome page", ->
         it "displays command to run with the record key", ->
-          cy.contains("cypress run --key record-key-123")
+          cy.contains("cypress run --record --key record-key-123")
 
   describe "errors from ipc event", ->
     beforeEach ->
