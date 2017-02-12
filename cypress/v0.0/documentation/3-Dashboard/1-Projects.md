@@ -5,10 +5,11 @@ excerpt: Manage your Projects and configure them to record runs
 
 - :fa-angle-right: [What Are Projects?](#section-what-are-projects-)
 - :fa-angle-right: [Adding a New Project](#section-adding-a-new-project)
-- :fa-angle-right: [Recording Runs](#section-recording-runs)
+- :fa-angle-right: [Setting up a Project to Record](#section-setting-up-a-project-to-record)
+  - [How do I record runs?](#section-how-do-i-record-runs-)
   - [What is a projectId?](#section-what-is-a-projectid-)
   - [What is a Record Key?](#section-what-is-a-record-key-)
-  - [How a projectId and Record Key work together](#how-a-projectid-and-record-key-work-together)
+  - [How do a projectId and Record Key work together?](#how-do-a-projectid-and-record-key-work-together-)
   - [What is the difference between public and private projects?](#section-what-is-the-difference-between-public-and-private-projects-)
 - :fa-angle-right: [Transferring Ownership of a Project](#section-transferring-ownership-of-a-project)
 - :fa-angle-right: [Deleting a Project](#section-deleting-a-project)
@@ -40,7 +41,7 @@ Projects can **only** be added to Cypress through our [Desktop Application](http
 
 ***
 
-# Recording Runs
+# Setting up a Project to Record
 
 You can also setup your project to have its test runs recorded and displayed in both the Desktop Application and the Dashboard.
 
@@ -77,7 +78,15 @@ During a run we record all failing tests, logs, screenshots, and videos.
 
 5. Click "Setup Project".
 
-You are now ready to integrate Cypress into your CI Provider so that test runs can be recorded. Integrating Cypress into your CI provider should be pretty straightforward, and we [have a guide](https://on.cypress.io/guides/continuous-integration) describing what you need to do.
+![screen shot 2017-02-12 at 3 46 30 pm](https://cloud.githubusercontent.com/assets/1268976/22866093/64a9fb4c-f13e-11e6-9ebe-980ec078ba4e.png)
+
+You are now ready to record your runs. Typically you would record your runs when running in [Continuous Integration](https://on.cypress.io/guides/continuous-integration) but you can also record your runs from your local computer.
+
+***
+
+## How do I record runs?
+
+Now that your project is setup, Cypress has inserted your unique [projectId](#section-what-is-a-projectid-) into `cypress.json`.
 
 [block:callout]
 {
@@ -85,6 +94,24 @@ You are now ready to integrate Cypress into your CI Provider so that test runs c
   "body": "Be sure to check your `cypress.json` into source control."
 }
 [/block]
+
+In order to record we also require you provide us your [Record Key](#section-what-is-a-record-key-). The record key along with your projectId uniquely identifies your project.
+
+You can provide the Record Key when running this command:
+
+```shell
+cypress run --record --key <record_key>
+```
+
+Or you can also set an environment variable and we will automatically look for that.
+
+```shell
+## you'd typically set this in your CI provider
+export CYPRESS_RECORD_KEY=abc-key-123
+
+## we will automatically search and apply the key
+cypress run --record
+```
 
 Once tests run, you will see them show up in the [Dashboard](https://on.cypress.io/dashboard) and in the Desktop Application.
 
@@ -115,7 +142,7 @@ This is how we uniquely identify your project. If you manually alter this, **Cyp
 
 Once you're setup to record test runs, we automatically generate a **Record Key** for the project.
 
-**A record Kkey is a GUID that looks like this:**
+**A record key is a GUID that looks like this:**
 
 ```shell
 f4466038-70c2-4688-9ed9-106bf013cd73
@@ -128,9 +155,16 @@ f4466038-70c2-4688-9ed9-106bf013cd73
 }
 [/block]
 
-## How a projectId and Record Key work together
+You can also find your Record Key inside of the **Settings** tab.
 
-Cypress uses your `projectId` and **Record Key** together to identify projects.
+
+![screen shot 2017-02-12 at 4 12 40 pm](https://cloud.githubusercontent.com/assets/1268976/22866094/64aeeb3e-f13e-11e6-93f5-f7420892913f.png)
+
+***
+
+## How do a projectId and Record Key work together?
+
+Cypress uses your `projectId` and **Record Key** together to uniquely identify projects.
 
 ![ProjectID and Record Keys in Dashboard](https://cloud.githubusercontent.com/assets/1271364/22804089/8498f1a2-eee5-11e6-8598-4e60b4b1fc0b.png)
 

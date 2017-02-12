@@ -9,23 +9,46 @@ excerpt: View your Recorded Runs
   - [Test Failures](#section-test-failures)
   - [Screenshots](#section-screenshots)
   - [Videos](#section-videos)
-- :fa-angle-right: [Roadmap](#section-roadmap)
 
 ***
 
 # What are Recorded Runs?
 
-Recorded runs are the recorded test results when using the `cypress run --record --key <record-key>` command from our [Cypress CLI Tool](https://github.com/cypress-io/cypress-cli).
+Recorded runs are the results and artifacts captured from your test runs.
+
+To record your runs:
+
+1. First [setup your project to record](https://on.cypress.io/recording-project-runs)
+2. Then [run the command](https://on.cypress.io/how-do-i-record-runs) `cypress run --record --key <record_key>`
 
 ***
 
 # What is recorded during a run?
 
+We capture the following:
+
+- [Standard Output](#section-standard-output)
+- [Test Failures](#section-test-failures)
+- [Screenshots](#section-screenshots)
+- [Video](#section-video)
+
+We have already begun the implementation for capturing even more things from your run such as:
+
+- Commands
+- Network Traffic
+- Browser Console Logs
+
+These will be added in subsequent releases.
+
 ***
 
 ## Standard Output
 
+Standard output includes details and summaries of your tests based on the [reporter](https://on.cypress.io/guides/reporters) you have set. By default it is the `spec` reporter.
+
 ![output](https://cloud.githubusercontent.com/assets/1271364/22707798/f5e5608e-ed41-11e6-8832-d66e5a68094b.png)
+
+You will also see a summary at the bottom indicating the files we've recorded.
 
 ***
 
@@ -58,9 +81,3 @@ Each screenshot will display under the test title it was taken in.
 Any videos taken during the run can be found under the **Videos** tab. You can also download the video of a run.
 
 ![Video of tests](https://cloud.githubusercontent.com/assets/1271364/22706030/c3a442f8-ed3b-11e6-812e-a12980057e39.png)
-
-***
-
-# Roadmap
-
-***

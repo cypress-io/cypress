@@ -37,9 +37,10 @@ Additionally we've integrated the dashboard into the Cypress [Desktop Applicatio
 
 ## How do I record my tests?
 
-[By adding your project and running it in CI.](https://on.cypress.io/guides/projects)
+1. First [setup your project to record](https://on.cypress.io/guides/projects).
+2. Then [record your runs](https://on.cypress.io/how-do-i-record-runs).
 
-[After recording your tests, you will see them in the Dashboard and in the Desktop Application](https://on.cypress.io/guides/projects).
+After recording your tests, you will see them in the Dashboard and in the Desktop Application.
 
 ***
 
@@ -67,11 +68,12 @@ Public projects will be free but will likely have a monthly usage cap on them.
 
 We will offer similar pricing models of other Developer Tools you are familiar with using.
 
+Plans will likely start around the $99/month level.
 ***
 
 ## Can I host this myself?
 
-No, although we are looking to build an on-prem version of the Dashboard for use in the future.
+No, although we are looking to build an on-premise version of the Dashboard for use in private clouds.
 
 ***
 

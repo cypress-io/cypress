@@ -5,7 +5,7 @@ excerpt: Manage your Organizations
 
 - :fa-angle-right: [What are Organizations?](#section-what-are-organizations-)
   - [Default Organization](#section-default-organization)
-- :fa-angle-right: [Managing an Organization](#section-managing-an-organization)
+- :fa-angle-right: [Creating an Organization](#section-creating-an-organization)
   - [Inviting Users](#section-inviting-users)
   - [User Roles](#section-user-roles)
   - [User Requests](#section-user-requests)
@@ -18,27 +18,50 @@ excerpt: Manage your Organizations
 
 Organizations are used to group projects and to manage permissions for who can access those projects.
 
-![Add Organization dialog](https://cloud.githubusercontent.com/assets/1271364/22709492/f1d3e7e4-ed47-11e6-8f35-64fed633862b.png)
+![Organizations](https://cloud.githubusercontent.com/assets/1271364/22709686/a81ed568-ed48-11e6-8ebd-55c014682815.png)
+
+With organizations you can:
+
+- Create projects
+- Invite users
+
+Once out of beta, organizations will also handle billing.
+
+[block:callout]
+{
+  "type": "info",
+  "body": "Cypress Organizations are meant to work exactly like Github Organizations."
+}
+[/block]
 
 ***
 
 ## Default Organization
 
-By default, every user of Cypress is given a default organization. This is created in order to ease the process of initially setting up projects to record.
+By default, every user of Cypress is given a default personal organization - named after you.
+
+You cannot delete this organization.
+
+[block:callout]
+{
+  "type": "info",
+  "body": "All existing Cypress projects prior to version 0.19.0 were automatically set to your default organization."
+}
+[/block]
 
 ***
 
-# Managing an Organization
+# Creating an Organization
 
-![Organizations](https://cloud.githubusercontent.com/assets/1271364/22709686/a81ed568-ed48-11e6-8ebd-55c014682815.png)
+![Add Organization dialog](https://cloud.githubusercontent.com/assets/1271364/22709492/f1d3e7e4-ed47-11e6-8f35-64fed633862b.png)
 
 ***
 
 ## Inviting Users
 
-You can invite users to Cypress from our [Dashboard](https://on.cypress.io/dashboard). All invited users will be able to see the projects, runs and keys for the organization's project (even if the project's are private).
+You can invite users to Cypress from our [Dashboard](https://on.cypress.io/dashboard). Invited users will see the projects and runs for your organization.
 
-Additionally, any users invited will be automatically given access to log in to the Cypress Desktop App and Dashbaord while in Beta.
+Even though we are in a **private beta**, any user you invite will automatically be whitelisted to use Cypress. This means you can freely invite your team members without needing to talk to us!
 
 *To invite a user to an organization:*
 
@@ -55,13 +78,19 @@ Additionally, any users invited will be automatically given access to log in to 
 
 User's can be assigned roles that affect their access to certain features.
 
-- *Member:* Can see the projects, runs, and keys.
-- *Admin:* Can also invite and delete users.
-- *Owner:* Can also transfer or delete projects.
+- **Member:** Can see the projects, runs, and keys.
+- **Admin:** Can also invite and delete users.
+- **Owner:** Can also transfer or delete projects.
 
 ***
 
 ## User Requests
+
+We have also built Cypress with the ability for users to "Request" access to a given organization. This makes for a very natural flow.
+
+If a developer on your team has access to Cypress and your project's source code - they can request to be given access to your Organization.
+
+This means instead of you having to invite team members up front, they can simply request access and you can choose to accept or deny them.
 
 ![User requesting access](https://cloud.githubusercontent.com/assets/1271364/22709877/61ca46be-ed49-11e6-80cc-d54299634053.png)
 
@@ -69,7 +98,9 @@ User's can be assigned roles that affect their access to certain features.
 
 ## Transferring Projects
 
-You can transfer projects that you own to another organization you are a part of or to another user in the organization. This functionality only exists in our [Dashboard](https://on.cypress.io/dashboard).
+You can transfer projects that you own to another organization or another user.
+
+This functionality only exists in our [Dashboard](https://on.cypress.io/dashboard).
 
 ![Transfer Project dialog](https://cloud.githubusercontent.com/assets/1271364/22708695/440f4e5c-ed45-11e6-9a98-8f91b67871a3.png)
 
@@ -78,8 +109,6 @@ You can transfer projects that you own to another organization you are a part of
 
 # Deleting an Organization
 
-Before deleting an organization, ensure that all of the organization's projects are transferred or deleted first. This is to avoid deleting any run data by mistake.
-
-Note: You cannot delete your default organization.
+You can delete organizations as long as they don't have any projects. You must first transfer ownership of your projects to another organization before you can delete them.
 
 ![Delete Organization](https://cloud.githubusercontent.com/assets/1271364/22709764/f9c63e9c-ed48-11e6-885d-ced14d91c3a8.png)
