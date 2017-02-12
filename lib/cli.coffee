@@ -7,12 +7,16 @@ pkg       = require("../package.json")
 ## check for updates every hour
 updater({pkg: pkg, updateCheckInterval: human("one hour")}).notify()
 
+coerceFalse = (arg) ->
+  if arg is "false" then false else true
+
 parseOpts = (opts) ->
   _.pick(opts, "spec", "reporter", "reporterOptions", "path", "destination", "port", "env", "cypressVersion", "config", "record", "key")
 
 descriptions = {
   destination:     "destination path to extract and install Cypress to"
-  key:             "records your run. sends test results, screenshots and videos to your Dashboard."
+  record:          "records the run. sends test results, screenshots and videos to your Cypress Dashboard."
+  key:             "your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable."
   spec:            "runs a specific spec file. defaults to 'all'"
   reporter:        "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'"
   reporterOptions: "options for the mocha reporter. defaults to 'null'"
@@ -20,7 +24,6 @@ descriptions = {
   env:             "sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json"
   config:          "sets configuration values. separate multiple values with a comma. overrides any value in cypress.json."
   version:         "installs a specific version of Cypress"
-  noRecord:        "silences the console warning when you do not provide a record key"
 }
 
 text = (d) ->
@@ -60,6 +63,7 @@ module.exports = ->
     .command("run [project]")
     .usage("[project] [options]")
     .description("Runs Cypress Headlessly")
+    .option("-r, --record [bool]",                       text("record"), coerceFalse)
     .option("-k, --key <record_key>",                    text("key"))
     .option("-s, --spec <spec>",                         text("spec"))
     .option("-r, --reporter <reporter>",                 text("reporter"))
@@ -67,14 +71,7 @@ module.exports = ->
     .option("-p, --port <port>",                         text("port"))
     .option("-e, --env <env>",                           text("env"))
     .option("-c, --config <config>",                     text("config"))
-    .option("--no-record",                               text("noRecord"))
     .action (project, opts) ->
-      ## commander automatically sets record
-      ## to true when it is omitted
-      ## and we only care if this is false
-      if opts.record is true
-        delete opts.record
-
       require("./commands/run").start(project, parseOpts(opts))
 
   program

@@ -1,4 +1,5 @@
 path    = require("path")
+pkg     = require("../../package")
 utils   = require("../../lib/utils")
 Ci      = require("../../lib/commands/ci")
 
@@ -66,7 +67,7 @@ describe "Ci", ->
     it "spawns --project with --ci and --key", ->
       @setup("abc12345").then =>
         pathToProject = path.resolve(process.cwd(), ".")
-        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--ci", "--key", "abc12345"])
+        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--ci", "--record", true, "--key", "abc12345", "--cli-version", pkg.version])
 
     it "can pass a specific reporter", ->
       @setup("foo", {reporter: "some/custom/reporter.js"}).then =>
@@ -94,7 +95,7 @@ describe "Ci", ->
     it "spawns with config", ->
       @setup("abc123", {config: "watchForFileChanges=false,baseUrl=localhost"}).then =>
         pathToProject = path.resolve(process.cwd(), ".")
-        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--config", "watchForFileChanges=false,baseUrl=localhost", "--ci", "--key", "abc123"])
+        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--config", "watchForFileChanges=false,baseUrl=localhost", "--ci", "--record", true, "--key", "abc123", "--cli-version", pkg.version])
 
  context "#_noKeyErr", ->
     beforeEach ->

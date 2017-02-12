@@ -1,4 +1,5 @@
 path    = require("path")
+pkg     = require("../../package")
 utils   = require("../../lib/utils")
 install = require("../../lib/commands/install")
 run     = require("../../lib/commands/run")
@@ -35,8 +36,12 @@ describe "run", ->
       @parse("run --key asdf")
       expect(run.start).to.be.calledWith(undefined, {key: "asdf"})
 
-    it "calls run with --no-record", ->
-      @parse("run --no-record")
+    it "calls run with --record", ->
+      @parse("run --record")
+      expect(run.start).to.be.calledWith(undefined, {record: true})
+
+    it "calls run with --record false", ->
+      @parse("run --record false")
       expect(run.start).to.be.calledWith(undefined, {record: false})
 
   context ".start", ->
@@ -50,28 +55,28 @@ describe "run", ->
 
       run.start(null, {port: "1234"})
       .then =>
-        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--port", "1234"])
+        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--port", "1234", "--cli-version", pkg.version])
 
     it "spawns --project with --env", ->
       pathToProject = path.resolve(process.cwd(), ".")
 
       run.start(null, {env: "host=http://localhost:1337,name=brian"})
       .then =>
-        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--env", "host=http://localhost:1337,name=brian"])
+        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--env", "host=http://localhost:1337,name=brian", "--cli-version", pkg.version])
 
     it "spawns --project with --config", ->
       pathToProject = path.resolve(process.cwd(), ".")
 
       run.start(null, {config: "watchForFileChanges=false,baseUrl=localhost"})
       .then =>
-        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--config", "watchForFileChanges=false,baseUrl=localhost"])
+        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--config", "watchForFileChanges=false,baseUrl=localhost", "--cli-version", pkg.version])
 
-    it "spawns --project with --no-record", ->
+    it "spawns --project with --record false", ->
       pathToProject = path.resolve(process.cwd(), ".")
 
       run.start(null, {record: false})
       .then =>
-        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--no-record"])
+        expect(@spawn).to.be.calledWith(["--project", pathToProject, "--record", false, "--cli-version", pkg.version])
 
   context ".run", ->
     beforeEach ->

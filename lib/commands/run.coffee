@@ -3,6 +3,7 @@ path    = require("path")
 chalk   = require("chalk")
 install = require("./install")
 utils   = require("../utils")
+pkg     = require("../../package")
 
 run = (options) ->
   opts = {}
@@ -32,16 +33,24 @@ run = (options) ->
   if options.reporterOptions
     args.push("--reporter-options", options.reporterOptions)
 
-  if options.record is false
-    args.push("--no-record")
-
   if options.ci
     ## push to display the deprecation message
     args.push("--ci")
 
+    ## also automatically record
+    args.push("--record", true)
+
   ## if we have a key assume we're in record mode
   if options.key
     args.push("--key", options.key)
+
+  ## if record is defined and we're not
+  ## already in ci mode, then send it up
+  if options.record? and not options.ci
+    args.push("--record", options.record)
+
+  ## send in the CLI version
+  args.push("--cli-version", pkg.version)
 
   utils.spawn(args, opts)
 
