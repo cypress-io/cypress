@@ -69,6 +69,9 @@ MIT
 
 ## Changelog
 
+#### 0.4.5 - *(02/11/17)*
+- added --record flag
+
 #### 0.4.4 - *(02/11/17)*
 - more slug renaming
 
