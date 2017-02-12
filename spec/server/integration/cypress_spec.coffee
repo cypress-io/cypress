@@ -214,14 +214,23 @@ describe "lib/cypress", ->
         expect(console.log).to.be.calledWithMatch("You are using an older version of the CLI tools.")
         @expectExitWith(0)
 
-    it "yells about old even when --no-record was passed", ->
+    it "warns when using old version of the CLI tools", ->
       Project.add(@todosPath)
       .then =>
         ## test that --run-project gets properly aliased to project
-        cypress.start(["--run-project=#{@todosPath}", "--no-record"])
+        cypress.start(["--run-project=#{@todosPath}"])
       .then =>
         expect(errors.warning).to.be.calledWith("OLD_VERSION_OF_CLI")
         expect(console.log).to.be.calledWithMatch("You are using an older version of the CLI tools.")
+        @expectExitWith(0)
+
+    it "does not warn about old version of the CLI tools if --cli-version has been set", ->
+      Project.add(@todosPath)
+      .then =>
+        ## test that --run-project gets properly aliased to project
+        cypress.start(["--run-project=#{@todosPath}", "--cli-version=0.19.0"])
+      .then =>
+        expect(errors.warning).not.to.be.calledWith("OLD_VERSION_OF_CLI")
         @expectExitWith(0)
 
     it "runs project headlessly and exits with exit code 10", ->
@@ -449,30 +458,31 @@ describe "lib/cypress", ->
       .then =>
         @expectExitWith(0)
 
-    it "logs warning when projectId and no key", ->
+    it "logs warning when projectId and key but no record option", ->
       Project.add(@todosPath)
       .then =>
-        cypress.start(["--project=#{@todosPath}"])
+        cypress.start(["--project=#{@todosPath}", "--cli-version=0.19.0", "--key=asdf"])
       .then =>
         expect(errors.warning).not.to.be.calledWith("OLD_VERSION_OF_CLI")
-        expect(errors.warning).to.be.calledWith("PROJECT_ID_AND_MISSING_RECORD_KEY", "abc123")
-        expect(console.log).to.be.calledWithMatch("However, no Record Key was provided. This run will not be recorded.")
-        expect(console.log).to.be.calledWithMatch("cypress run --key <record_key>")
+        expect(errors.warning).to.be.calledWith("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", "abc123")
+        expect(console.log).to.be.calledWithMatch("You also provided your Record Key, but you did not pass the --record flag.")
+        expect(console.log).to.be.calledWithMatch("cypress run --record")
+        expect(console.log).to.be.calledWithMatch("https://on.cypress.io/recording-project-runs")
 
     it "does not log warning when no projectId", ->
       Project.add(@pristinePath)
       .then =>
-        cypress.start(["--project=#{@pristinePath}"])
+        cypress.start(["--project=#{@pristinePath}", "--cli-version=0.19.0", "--key=asdf"])
       .then =>
-        expect(errors.warning).not.to.be.calledWith("PROJECT_ID_AND_MISSING_RECORD_KEY", "abc123")
+        expect(errors.warning).not.to.be.calledWith("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", "abc123")
         expect(console.log).not.to.be.calledWithMatch("cypress run --key <record_key>")
 
-    it "does not log warning when projectId but --no-record", ->
+    it "does not log warning when projectId but --record false", ->
       Project.add(@todosPath)
       .then =>
-        cypress.start(["--project=#{@todosPath}", "--no-record"])
+        cypress.start(["--project=#{@todosPath}", "--cli-version=0.19.0", "--key=asdf", "--record=false"])
       .then =>
-        expect(errors.warning).not.to.be.calledWith("PROJECT_ID_AND_MISSING_RECORD_KEY", "abc123")
+        expect(errors.warning).not.to.be.calledWith("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", "abc123")
         expect(console.log).not.to.be.calledWithMatch("cypress run --key <record_key>")
 
     it "logs error when supportFile doesn't exist", ->
@@ -653,7 +663,7 @@ describe "lib/cypress", ->
 
   ## the majority of the logic in Record mode is covered already
   ## in --project specs above
-  context "--key", ->
+  context "--record or --ci", ->
     afterEach ->
       delete process.env.CYPRESS_PROJECT_ID
 
@@ -742,7 +752,7 @@ describe "lib/cypress", ->
         stdout: "foobarbaz"
       }).resolves()
 
-      cypress.start(["--project=#{@todosPath}",  "--key=token-123"])
+      cypress.start(["--project=#{@todosPath}", "--record",  "--key=token-123"])
       .then =>
         expect(@createInstance).to.be.calledOnce
         expect(@updateInstance).to.be.calledOnce
@@ -760,7 +770,7 @@ describe "lib/cypress", ->
 
       @updateInstance = @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--project=#{@todosPath}", "--key=token-123", "--spec=#{@todosPath}/tests/test2.coffee"])
+      cypress.start(["--project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{@todosPath}/tests/test2.coffee"])
       .then =>
         expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
         @expectExitWith(3)
@@ -775,9 +785,20 @@ describe "lib/cypress", ->
       @createBuild.resolves()
       @sandbox.stub(api, "createInstance").resolves()
 
-      cypress.start(["--project=#{@pristinePath}", "--key=token-123"])
+      cypress.start(["--project=#{@pristinePath}", "--cli-version=0.19.0", "--record", "--key=token-123"])
       .then =>
         expect(errors.warning).not.to.be.called
+        @expectExitWith(3)
+
+    it "still records even with old --ci option", ->
+      @setup()
+
+      @createBuild.resolves("build-id-123")
+      @sandbox.stub(api, "createInstance").resolves()
+      @sandbox.stub(api, "updateInstance").resolves()
+
+      cypress.start(["--run-project=#{@todosPath}", "--cli-version=0.19.0", "--key=token-123", "--ci"])
+      .then =>
         @expectExitWith(3)
 
     it "logs warning when using deprecated --ci arg and no env var", ->
@@ -787,12 +808,25 @@ describe "lib/cypress", ->
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
+      cypress.start(["--run-project=#{@todosPath}", "--cli-version=0.19.0", "--key=token-123", "--ci"])
       .then =>
         expect(errors.warning).not.to.be.calledWith("OLD_VERSION_OF_CLI")
         expect(errors.warning).to.be.calledWith("CYPRESS_CI_DEPRECATED")
-        expect(console.log).to.be.calledWithMatch("You are using an older version of the CLI tools.")
-        expect(console.log).to.be.calledWithMatch("cypress run --key <record_key>")
+        expect(console.log).to.be.calledWithMatch("You are using the deprecated command:")
+        expect(console.log).to.be.calledWithMatch("cypress run --record --key <record_key>")
+
+    it "logs ONLY CLI warning when using older version of CLI when using deprecated --ci", ->
+      @setup()
+
+      @createBuild.resolves("build-id-123")
+      @sandbox.stub(api, "createInstance").resolves()
+      @sandbox.stub(api, "updateInstance").resolves()
+
+      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
+      .then =>
+        expect(errors.warning).to.be.calledWith("OLD_VERSION_OF_CLI")
+        expect(errors.warning).to.be.calledWith("CYPRESS_CI_DEPRECATED")
+        expect(errors.warning).not.to.be.calledWith("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION")
 
     it "logs warning when using deprecated --ci arg and env var", ->
       @setup()
@@ -803,18 +837,20 @@ describe "lib/cypress", ->
       @sandbox.stub(api, "createInstance").resolves()
       @sandbox.stub(api, "updateInstance").resolves()
 
-      cypress.start(["--run-project=#{@todosPath}", "--key=token-123", "--ci"])
+      cypress.start(["--run-project=#{@todosPath}", "--cli-version=0.19.0", "--key=token-123", "--ci"])
       .then =>
         delete process.env.CYPRESS_CI_KEY
 
+        expect(errors.warning).not.to.be.calledWith("OLD_VERSION_OF_CLI")
         expect(errors.warning).to.be.calledWith("CYPRESS_CI_DEPRECATED_ENV_VAR")
-        expect(console.log).to.be.calledWithMatch("You are using an older version of the CLI tools.")
-        expect(console.log).to.be.calledWithMatch("cypress run")
+        expect(console.log).to.be.calledWithMatch("You are using the deprecated command:")
+        expect(console.log).to.be.calledWithMatch("cypress ci")
+        expect(console.log).to.be.calledWithMatch("cypress run --record")
 
     it "logs error when missing project id", ->
       @setup()
 
-      cypress.start(["--project=#{@pristinePath}", "--key=token-123"])
+      cypress.start(["--project=#{@pristinePath}", "--record", "--key=token-123"])
       .then =>
         @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
 
@@ -825,7 +861,7 @@ describe "lib/cypress", ->
       err.statusCode = 401
       @createBuild.rejects(err)
 
-      cypress.start(["--project=#{@todosPath}", "--key=token-123"])
+      cypress.start(["--project=#{@todosPath}", "--record", "--key=token-123"])
       .then =>
         @expectExitWithErr("RECORD_KEY_NOT_VALID", "token...n-123")
 
@@ -836,7 +872,7 @@ describe "lib/cypress", ->
       err.statusCode = 404
       @createBuild.rejects(err)
 
-      cypress.start(["--project=#{@todosPath}", "--key=token-123"])
+      cypress.start(["--project=#{@todosPath}", "--record", "--key=token-123"])
       .then =>
         @expectExitWithErr("DASHBOARD_PROJECT_NOT_FOUND", "abc123")
 
@@ -847,9 +883,16 @@ describe "lib/cypress", ->
       err.statusCode = 500
       @createBuild.rejects(err)
 
-      cypress.start(["--project=#{@todosPath}", "--key=token-123"])
+      cypress.start(["--project=#{@todosPath}", "--record", "--key=token-123"])
       .then =>
         @expectExitWith(3)
+
+    it "throws when no Record Key was provided", ->
+      @setup()
+
+      cypress.start(["--project=#{@todosPath}", "--cli-version=0.19.0", "--record"])
+      .then =>
+        @expectExitWithErr("RECORD_KEY_MISSING", "cypress run --record --key <record_key>")
 
   context "--return-pkg", ->
     beforeEach ->

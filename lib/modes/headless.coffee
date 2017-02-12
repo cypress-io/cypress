@@ -27,11 +27,11 @@ fs = Promise.promisifyAll(fs)
 
 TITLE_SEPARATOR = " /// "
 
-haveProjectIdAndNoRecordKey = (projectId, options) ->
+haveProjectIdAndKeyButNoRecordOption = (projectId, options) ->
   ## if we have a project id
-  ## and we haven't turned off recording
-  ## and we don't have a dashboard token
-  (projectId and options.record) and not options.key
+  ## and we have a key
+  ## and (record or ci) hasn't been set to true or false
+  (projectId and options.key) and (_.isUndefined(options.record) and _.isUndefined(options.ci))
 
 module.exports = {
   getId: ->
@@ -507,16 +507,17 @@ module.exports = {
         openProject.ensureSpecUrl(options.spec)
       ])
       .spread (projectId, config, url) =>
-        ## if we have a project id and no dashboard token
-        if haveProjectIdAndNoRecordKey(projectId, options)
+        ## if we have a project id and a key but record hasnt
+        ## been set
+        if haveProjectIdAndKeyButNoRecordOption(projectId, options)
           ## log a warning telling the user
           ## that they either need to provide us
           ## with a RECORD_KEY or turn off
           ## record mode
-          errors.warning("PROJECT_ID_AND_MISSING_RECORD_KEY", projectId)
+          errors.warning("PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION", projectId)
 
         ## old version of the CLI tools
-        if options.oldVersionOfCli
+        if not options.cliVersion
           errors.warning("OLD_VERSION_OF_CLI")
 
         @trashAssets(config)

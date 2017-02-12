@@ -149,7 +149,8 @@ module.exports = {
         when options.exitWithCode?
           options.mode = "exitWithCode"
 
-        when options.key
+        ## enable old CLI tools to record
+        when options.record or options.ci
           options.mode = "record"
 
         when options.project

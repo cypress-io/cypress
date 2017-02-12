@@ -30,6 +30,9 @@ module.exports = {
     repo.getBranch()
 
   generateProjectBuildId: (projectId, projectPath, projectName, recordKey) ->
+    if not recordKey
+      errors.throw("RECORD_KEY_MISSING")
+
     repo = git.init(projectPath)
 
     Promise.props({
