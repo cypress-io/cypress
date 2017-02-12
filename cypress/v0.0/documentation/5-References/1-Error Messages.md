@@ -16,7 +16,6 @@ excerpt: Errors that require additional explanation are listed here.
 - :fa-angle-right: [The supportFolder option has been removed](#section-the-supportfolder-option-has-been-removed)
 - :fa-angle-right: [The Chromium Renderer process just crashed](#section-the-chromium-renderer-process-just-crashed)
 - :fa-angle-right: [The 'cypress ci' command has been deprecated](#section-the-cypress-ci-command-has-been-deprecated)
-- :fa-angle-right: [The Record Key is missing](#section-the-record-key-is-missing)
 
 ***
 
@@ -493,10 +492,34 @@ If you are running `Docker` [there is a simple one line fix for this problem doc
 
 # The 'cypress ci' command has been deprecated
 
-TBD
+As of version `0.19.0` and CLI versions `0.13.0`, we have deprecated the `cypress ci` command.
 
-***
+We did this to make it clearer what the difference was between a **regular run** and a **recorded run**.
 
-# The Record Key is missing
+Previously to record runs runs you wrote:
 
-TBD
+```shell
+cypress ci <key>
+```
+
+Or if you had the environment variable: `CYPRESS_CI_KEY`
+
+```shell
+cypress ci
+```
+
+You need to rewrite this as:
+
+```shell
+cypress run --record --key <record_key>
+```
+
+If you were using the environment variable `CYPRESS_CI_KEY`, rename it to`CYPRESS_RECORD_KEY`.
+
+You can now run and omit the `--key` flag:
+
+```shell
+cypress run --record
+```
+
+We will automatically apply the record key environment variable.
