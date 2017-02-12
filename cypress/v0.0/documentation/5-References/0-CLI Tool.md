@@ -9,6 +9,7 @@ excerpt: Cypress CLI Tool for programmatically interacting with the Desktop Appl
   - [cypress install](#section-cypress-install)
   - [cypress update](#section-cypress-update)
   - [cypress run](#section-cypress-run)
+  - [cypress run --record](#section-cypress-run-record)
   - [cypress open](#section-cypress-open)
   - [cypress get:path](#section-cypress-get-path)
   - [cypress verify](#section-cypress-verify)
@@ -49,19 +50,9 @@ You can now execute the following commands:
 
 # Available Commands
 
-- [cypress install](#section-cypress-install)
-- [cypress update](#section-cypress-update)
-- [cypress run](#section-cypress-run)
-- [cypress open](#section-cypress-open)
-- [cypress get:path](#section-cypress-get-path)
-- [cypress verify](#section-cypress-verify)
-- [cypress version](#section-cypress-version)
+## `cypress install`
 
-***
-
-## cypress install
-
-Installs the `Cypress Desktop Application` to the default location for each Operating System.
+Installs the **Cypress Desktop Application** to the default location for each Operating System.
 
 OS | Path
 :--- | :---
@@ -78,11 +69,13 @@ cypress install
 cypress install --cypress-version 0.13.0
 ```
 
-Additionally if you have a `CYPRESS_VERSION` environment variable set, it will automatically download that version. Useful in CI.
+Additionally if you have a `CYPRESS_VERSION` environment variable set, it will automatically download that version. This is most useful when running Cypress in CI.
 
-> [Watch a video of Cypress being installed](https://docs.cypress.io/docs/installing-and-running#section-installing)
+![cypress-cli](https://cloud.githubusercontent.com/assets/1268976/14435124/4f632278-ffe4-11e5-9dab-0a2d493551b3.gif)
 
-## cypress update
+***
+
+## `cypress update`
 
 Updates Cypress to the latest version. This does the same thing as `cypress install`.
 
@@ -93,9 +86,19 @@ cypress update
 
 ***
 
-## cypress run
+## `cypress run`
 
-Runs Cypress headlessly. By default will run all your tests. Useful when developing locally.  [Read the Continuous Integration docs for the difference between cypress run and cypress ci.](https://docs.cypress.io/docs/continuous-integration#section-what-is-the-difference-between-cypress-run-and-cypress-ci-)
+Runs Cypress headlessly without spawning a browser.
+
+You can use this command when working locally, or when running in [Continuous Integration](https://on.cypress.io/guides/continuous-integration).
+
+[block:callout]
+{
+  "type": "success",
+  "title": "Want your runs recorded?",
+  "body": "You can also have Cypress record your runs and make them available on our [Dashboard](https://on.cypress.io/guides/dashboard-features)."
+}
+[/block]
 
 ```shell
 ## by default will use your current path
@@ -141,25 +144,38 @@ You can read more about [environment variables](https://on.cypress.io/environmen
 
 ***
 
-## cypress ci
+## `cypress run --record`
 
-Run Cypress headlessly in CI. This also uploads build assets (such as screenshots and videos) to our Cypress servers. [Read the Continuous Integration docs for the difference between cypress run and cypress ci.](https://docs.cypress.io/docs/continuous-integration#section-what-is-the-difference-between-cypress-run-and-cypress-ci)
+You can also have your runs recorded [once your project is setup to record](https://on.cypress.io/guides/projects).
 
-> **Note:** `cypress ci` supports all the same flags as `cypress run`.
+[block:callout]
+{
+  "type": "info",
+  "body": "You'd typically record your runs in [Continuous Integration](https://on.cypress.io/guides/continuous-integration) but you can also record when running locally."
+}
+[/block]
+
+After setting up your project you will recieve a **Record Key**.
 
 ```shell
-## provide the CI secret key directly
-cypress ci 1234-abcd-efgh-9876
+cypress run --record --key <record_key>
 ```
 
+If you set this **Record Key** as an environment variable you can omit the `--key` flag.
+
 ```shell
-## or if its setup in an env variable called CYPRESS_RECORD_KEY
-cypress ci
+## you'd typically set this in your CI provider
+export CYPRESS_RECORD_KEY=abc-key-123
+
+## we can now omit --key
+cypress run --record
 ```
+
+You can [read more](https://on.cypress.io/how-do-i-record-runs) about recording runs here.
 
 ***
 
-## cypress open
+## `cypress open`
 
 Opens the Cypress application. This is the same thing as double-clicking the application.
 
@@ -184,18 +200,18 @@ cypress open --env host=api.dev.local
 
 ***
 
-## cypress get:path
+## `cypress get:path`
 
 Returns the path Cypress will be install to. Additionally checks to see if Cypress already exists at that path.
 
 ***
 
-## cypress verify
+## `cypress verify`
 
 Verifies that the Cypress application is found.
 
 ***
 
-## cypress version
+## `cypress version`
 
 Outputs both the version of the CLI Tool and the installed Cypress application.
