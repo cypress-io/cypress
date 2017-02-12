@@ -15,7 +15,7 @@ excerpt: View your Recorded Runs
 
 # What are Recorded Runs?
 
-Recorded runs are the recorded test results when using the `cypress run --key <record-key>` command from our [Cypress CLI Tool](https://github.com/cypress-io/cypress-cli).
+Recorded runs are the recorded test results when using the `cypress run --record --key <record-key>` command from our [Cypress CLI Tool](https://github.com/cypress-io/cypress-cli).
 
 ***
 
