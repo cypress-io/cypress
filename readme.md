@@ -27,6 +27,9 @@ You run tasks such as:
 
 ## Changelog
 
+#### 0.13.1 - *(02/11/17)*
+- add --record option, pass --cli-version to cypress
+
 #### 0.13.0 - *(02/11/17)*
 - deprecated 'cypress ci'
 - 'cypress run' now accepts a --key argument and a --record false argument
