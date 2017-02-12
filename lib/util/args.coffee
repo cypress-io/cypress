@@ -5,7 +5,7 @@ coerce   = require("./coerce")
 config   = require("../config")
 cwd      = require("../cwd")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey run-project project spec ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode hosts browser headless".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey cliVersion runProject project spec ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode hosts browser headless".split(" ")
 whitelist = whitelist.concat(config.getConfigKeys())
 
 parseNestedValues = (vals) ->
@@ -36,9 +36,11 @@ module.exports = {
         "api-key":     "apiKey"
         "smoke-test":  "smokeTest"
         "remove-ids":  "removeIds"
+        "cli-version": "cliVersion"
         "get-key":     "getKey"
         "new-key":     "generateKey"
         "clear-logs":  "clearLogs"
+        "run-project": "project"
         "return-pkg":  "returnPkg"
         "auto-open":   "autoOpen"
         "env":         "environmentVariables"
@@ -46,9 +48,6 @@ module.exports = {
         "show-headless-gui":"showHeadlessGui"
         "exit-with-code": "exitWithCode"
         "reporter-options": "reporterOptions"
-      }
-      default: {
-        record: true
       }
     })
 
@@ -60,12 +59,6 @@ module.exports = {
     .extend({env: process.env["CYPRESS_ENV"]})
     .mapValues(coerce)
     .value()
-
-    if rp = options["run-project"]
-      options.project         = rp
-
-      if not options.ci
-        options.oldVersionOfCli = true
 
     ## if we are updating we may have to pluck out the
     ## appPath + execPath from the options._ because

@@ -43,6 +43,18 @@ API = {
         "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
       when "PROJECT_DOES_NOT_EXIST"
         "You need to add a project to run tests."
+      when "RECORD_KEY_MISSING"
+        """
+        You passed the --record flag but did not provide us your Record Key.
+
+        You can pass us your Record Key like this:
+
+          #{chalk.blue("cypress run --record --key <record_key>")}
+
+        You can also set the key as an environment variable with the name CYPRESS_RECORD_KEY.
+
+        https://on.cypress.io/how-do-i-record-runs
+        """
       when "OLD_VERSION_OF_CLI"
         """
 
@@ -52,49 +64,41 @@ API = {
         Please update the CLI tools by running: #{chalk.blue("npm install -g cypress-cli")}
         -----------------------------------------------------------------------------------
         """
-      when "PROJECT_ID_AND_MISSING_RECORD_KEY"
+      when "PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION"
         """
         This project has been configured to record runs on our Dashboard.
 
         It currently has the projectId: #{chalk.green(arg1)}
 
-        However, no Record Key was provided. This run will not be recorded.
+        You also provided your Record Key, but you did not pass the --record flag.
 
-        If you meant to have this run recorded please provide us your Record Key.
+        This run will not be recorded.
 
-          #{chalk.blue("cypress run --key <record_key>")}
+        If you meant to have this run recorded please additionally pass this flag.
+
+          #{chalk.blue("cypress run --record")}
 
         If you don't want to record these runs, you can silence this warning:
 
-          #{chalk.yellow("cypress run --no-record")}
+          #{chalk.yellow("cypress run --record false")}
 
-        Or you can remove your 'projectId' from cypress.json
-
-        https://on.cypress.io/missing-record-key
+        https://on.cypress.io/recording-project-runs
         """
       when "CYPRESS_CI_DEPRECATED"
         """
-        1. You are using an older version of the CLI tools.
+        You are using the deprecated command: #{chalk.yellow("cypress ci <key>")}
 
-           Please update the CLI tools by running: #{chalk.blue("npm install -g cypress-cli")}
-
-        2. You are also using the deprecated command: #{chalk.yellow("cypress ci <key>")}
-
-           Please switch and use: #{chalk.blue("cypress run --key <record_key>")}
+        Please switch and use: #{chalk.blue("cypress run --record --key <record_key>")}
 
         https://on.cypress.io/cypress-ci-deprecated
         """
       when "CYPRESS_CI_DEPRECATED_ENV_VAR"
         """
-        1. You are using an older version of the CLI tools.
+        1. You are using the deprecated command: #{chalk.yellow("cypress ci")}
 
-           Please update the CLI tools by running: #{chalk.blue("npm install -g cypress-cli")}
+           Please switch and use: #{chalk.blue("cypress run --record")}
 
-        2. You are also using the deprecated command: #{chalk.yellow("cypress ci")}
-
-           Please switch and use: #{chalk.blue("cypress run")}
-
-        3. You are also using the environment variable: #{chalk.yellow("CYPRESS_CI_KEY")}
+        2. You are also using the environment variable: #{chalk.yellow("CYPRESS_CI_KEY")}
 
            Please rename this environment variable to: #{chalk.blue("CYPRESS_RECORD_KEY")}
 
