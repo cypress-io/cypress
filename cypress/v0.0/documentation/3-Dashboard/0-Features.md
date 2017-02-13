@@ -37,7 +37,7 @@ Additionally we've integrated the dashboard into the Cypress [Desktop Applicatio
 
 ## How do I record my tests?
 
-1. First [setup your project to record](https://on.cypress.io/guides/projects).
+1. First [setup your project to record](https://on.cypress.io/recording-project-runs).
 2. Then [record your runs](https://on.cypress.io/how-do-i-record-runs).
 
 After recording your tests, you will see them in the Dashboard and in the Desktop Application.
