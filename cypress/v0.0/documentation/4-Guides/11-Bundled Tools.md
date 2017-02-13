@@ -53,9 +53,7 @@ When writing integration tests, you will likely work a lot with the DOM. Cypress
 
 [Sinon docs](http://sinonjs.org/)
 
-When writing unit tests, or even in integration-like tests, you often need to ability to [`stub`](http://sinonjs.org/docs/#stubs) and [`spy`](http://sinonjs.org/docs/#spies) methods. Sinon brings in the ability to [`stub`](http://sinonjs.org/docs/#stubs) and [`spy`](http://sinonjs.org/docs/#spies) methods, [stop or accelerate time](http://sinonjs.org/docs/#clock), and create [fake servers](http://sinonjs.org/docs/#fakeServer). Cypress passes on some of Sinons' API without modifying it, but Cypress has also built an entire layer for [creating servers and routing](https://on.cypress.io/guides/network-requests-xhr) on the client.
-
-Dealing with AJAX/XHR's on the client has traditionally been very difficult to manage. Cypress provides an easy yet powerful API for managing the request/response lifecycle.
+When writing unit tests, or even in integration-like tests, you often need to ability to [stub](http://sinonjs.org/docs/#stubs) and [spy](http://sinonjs.org/docs/#spies) methods. Cypress includes two methods, [`cy.stub`](https://on.cypress.io/api/stub) and [`cy.spy`](https://on.cypress.io/api/spy) that return Sinon stubs and spies, respectively.
 
 ***
 
