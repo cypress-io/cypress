@@ -208,6 +208,8 @@ cy
   })
 ```
 
+Refer to the dedicated [Environment Variables Guide](https://on.cypress.io/guides/environment-variables) for more examples.
+
 ***
 
 # Optimizing CI
