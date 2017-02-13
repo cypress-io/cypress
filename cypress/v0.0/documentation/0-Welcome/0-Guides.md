@@ -46,6 +46,7 @@ excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 
 | References | |
 | -------------------- | -- |
+| [CLI Tool](https://on.cypress.io/guides/cli) | Cypress CLI Tool for programmatically interacting with the Desktop Application |
 | [Error Messages](https://on.cypress.io/guides/errors) | Error messages |
 | [Anti-patterns](https://on.cypress.io/guides/anti-patterns) | Anti-patterns |
 | [Known Issues](https://on.cypress.io/guides/known-issues) | Known Issues |
