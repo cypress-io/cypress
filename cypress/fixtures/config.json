@@ -187,9 +187,10 @@
       "value": true
     },
     "hosts": {
-      "*.foobar.com": {
-        "from": "cli",
-        "value": "127.0.0.1"
+      "from": "config",
+      "value": {
+        "*.foobar.com": "127.0.0.1",
+        "*.bazqux.com": "127.0.0.2"
       }
     }
   },

@@ -116,6 +116,8 @@ class Config extends Component {
       let hasComma = lastKey !== key
       if (value.from == null) {
         return this._nested(key, value, hasComma)
+      } else if (_.isObject(value.value)) {
+        return this._object(key, value, hasComma)
       } else {
         return this._getSpan(key, value, hasComma)
       }
@@ -135,6 +137,16 @@ class Config extends Component {
         <br />
       </span>
     )
+  }
+
+  _object (key, nestedObj, hasComma) {
+    const obj = _.reduce(nestedObj.value, (obj, value, key) => {
+      return _.extend(obj, {
+        [key]: { value, from: nestedObj.from },
+      })
+    }, {})
+
+    return this._nested(key, obj, hasComma)
   }
 
   _projectIdSection () {
