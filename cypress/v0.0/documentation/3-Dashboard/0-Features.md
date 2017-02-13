@@ -17,7 +17,7 @@ excerpt: An overview of our Dashboard
 
 ![Dashboard Screenshot](https://cloud.githubusercontent.com/assets/1271364/22800284/d4dbe1d8-eed6-11e6-87ce-32474ea1000c.png)
 
-The Dashboard is a Cypress service that gives you access to tests you've recorded - typically when running Cypress tests from your CI provider. The Dashboard provides you insight into what happened during your build.
+The Dashboard is a Cypress service that gives you access to tests you've recorded - typically when running Cypress tests from your CI provider. The Dashboard provides you insight into what happened during your run.
 
 **The Dashboard allows you to:**
 
@@ -25,7 +25,7 @@ The Dashboard is a Cypress service that gives you access to tests you've recorde
 - Get the entire stack trace of failed tests
 - View screenshots taken when tests fail and when using [`cy.screenshot`](https://on.cypress.io/api/screenshot)
 - Watch a video of your entire test run or a clip at the point of test failure.
-- Manage who has access to your build data
+- Manage who has access to your run data
 
 Additionally we've integrated the dashboard into the Cypress [Desktop Application](https://on.cypress.io/guides/installing-and-running). This means you'll see the test runs in the Tunes tab from within every project.
 
@@ -73,7 +73,7 @@ Plans will likely start around the $99/month level.
 
 ## Can I host this myself?
 
-No, although we are looking to build an on-premise version of the Dashboard for use in private clouds.
+No, although we are looking to build an on-premise version of the Dashboard for use in private clouds. If you're interested in our on-premise version, [let us know](mailto:hello@cypress.io)!
 
 ***
 
