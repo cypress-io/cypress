@@ -19,7 +19,7 @@ excerpt: Cypress CLI Tool for programmatically interacting with the Desktop Appl
 
 # What is the CLI Tool?
 
-The CLI Tool is an [`npm package`](https://www.npmjs.com/package/cypress) that wraps the Desktop Application.
+The CLI Tool is an [`npm package`](https://github.com/cypress-io/cypress-cli) that wraps the Desktop Application.
 
 It provides a set of commands that can be used to do things like:
 
