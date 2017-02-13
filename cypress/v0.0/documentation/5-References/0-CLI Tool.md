@@ -19,19 +19,19 @@ excerpt: Cypress CLI Tool for programmatically interacting with the Desktop Appl
 
 # What is the CLI Tool?
 
-The CLI Tool is a `npm package` that wraps the Desktop Application.
+The CLI Tool is an [`npm package`](https://www.npmjs.com/package/cypress) that wraps the Desktop Application.
 
-It provides a set of commands which can be used to do things like:
+It provides a set of commands that can be used to do things like:
 
 - Install Cypress
 - Run Cypress headlessly
-- Record your runs
+- Record your test runs
 - Output the current installed version
 
 [block:callout]
 {
   "type": "info",
-  "body": "You generally install the CLI tool so you can progamatically install and run Cypress. This is common when running in your CI provider."
+  "body": "You generally install the CLI tool so you can progamatically install and run Cypress. This is commonly used when running Cypress from your CI provider."
 }
 [/block]
 
@@ -91,15 +91,15 @@ cypress update
 
 Runs Cypress headlessly without spawning a browser.
 
-You can use this command when working locally, or when running in [Continuous Integration](https://on.cypress.io/guides/continuous-integration).
+You can use this command when working locally or when running in [Continuous Integration](https://on.cypress.io/guides/continuous-integration).
 
-Cypress will first check to see if the Desktop Application is installed, and will automatically install it prior to running (if necessary).
+Cypress will first check to see that the Desktop Application is installed and will automatically install it prior to running (if necessary).
 
 [block:callout]
 {
   "type": "success",
-  "title": "Want your runs recorded?",
-  "body": "You can also have Cypress record your runs and make them available on our [Dashboard](https://on.cypress.io/guides/dashboard-features)."
+  "title": "Want your test runs recorded?",
+  "body": "You can also have Cypress record your test runs and make them available on our [Dashboard](https://on.cypress.io/guides/dashboard-features)."
 }
 [/block]
 
@@ -129,7 +129,7 @@ cypress run --reporter-options mochaFile=result.xml,toConsole=true
 ```
 
 ```shell
-## specify a spec to run instead of running all the tests
+## specify a file to run instead of running all the tests files
 cypress run --spec cypress/integration/app_spec.js
 ```
 
@@ -139,7 +139,7 @@ cypress run --env host=api.dev.local
 ```
 
 ```shell
-## specify configuration values which override cypress.json
+## specify configuration values to override cypress.json
 cypress run --config pageLoadTimeout=100000,watchForFileChanges=false
 ```
 
@@ -149,12 +149,12 @@ You can read more about [environment variables](https://on.cypress.io/environmen
 
 ## `cypress run --record`
 
-You can also have your runs recorded [once your project is setup to record](https://on.cypress.io/guides/projects).
+You can also have your test runs recorded [once your project is setup to record](https://on.cypress.io/guides/projects).
 
 [block:callout]
 {
   "type": "info",
-  "body": "You'd typically record your runs in [Continuous Integration](https://on.cypress.io/guides/continuous-integration) but you can also record when running locally."
+  "body": "You'd typically record your runs in [Continuous Integration](https://on.cypress.io/guides/continuous-integration), but you can also record when running locally."
 }
 [/block]
 
@@ -182,7 +182,7 @@ You can [read more](https://on.cypress.io/how-do-i-record-runs) about recording 
 
 Opens the Cypress application. This is the same thing as double-clicking the application.
 
-In Mac you'll see the `cy` icon in the tray, and in Linux you'll see the Cypress application window open.
+In Mac you'll see the **cy** icon in the dock and in Linux you'll see the Cypress application window open.
 
 Arguments you pass to `cypress open` will automatically be applied to the projects you open. These persist onto all projects until you quit the Cypress Desktop Application.
 
@@ -205,7 +205,7 @@ cypress open --env host=api.dev.local
 
 ## `cypress get:path`
 
-Returns the path Cypress will be install to. Additionally checks to see if Cypress already exists at that path.
+Returns the path Cypress will be installed to. Additionally checks to see if Cypress already exists at that path.
 
 ***
 
