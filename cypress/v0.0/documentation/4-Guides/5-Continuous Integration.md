@@ -3,31 +3,31 @@ excerpt: Run Cypress in any CI provider
 
 # Contents
 
-- :fa-angle-right: [What's Supported?](#section-whats-supported)
-- :fa-angle-right: [Dependencies](#section-dependencies)
-- :fa-angle-right: [Docker](#section-docker)
-- :fa-angle-right: [Troubleshooting](#section-troubleshooting)
+- :fa-angle-right: [What's Supported?](#section-what-s-supported-)
 - :fa-angle-right: [Running in CI](#section-running-in-ci)
-  - [Add your project to your CI provider](#section-add-you-project-to-your-ci-provider)
-  - [Acquire a CI key](#section-acquire-a-ci-key)
-  - [Add 2 lines of code to your CI config file](#section-add-2-lines-of-code-to-your-ci-config-file)
-  - [What is the difference between `cypress run` and `cypress ci`?](#section-what-is-the-difference-between-cypress-run-and-cypress-ci-)
-- :fa-angle-right: [Environment Variables](#section-environment-variables)
-  - [Cypress CI Key](#section-cypress-ci-key)
-  - [Cypress Version](#section-cypress-version)
-  - [Cypress Project Id](#section-cypress-project-id)
+  - [Your CI config file](#section-your-ci-config-file)
+  - [Recording your runs](#section-recording-your-runs)
+- :fa-angle-right: [Using Environment Variables](#section-using-environment-variables)
+  - [Hide your **Record Key**](#section-hide-your-record-key)
+  - [Install a specific version](#section-install-a-specific-version)
+  - [Modify configuration settings](#section-modify-configuration-settings)
+  - [Change environment variables in your tests](#section-change-environment-variables-in-your-tests)
 - :fa-angle-right: [Optimizing CI](#section-optimizing-ci)
-  - [Example of caching Cypress in Travis CI](#section-example-of-caching-cypress-in-travis-ci-in-travis-yml-)
-  - [Example of caching Cypress in CircleCI](#section-example-of-caching-cypress-in-circleci-s-circle-yml-)
-- :fa-angle-right: [Examples](#section-examples)
+  - [Caching Cypress in Travis CI](#section-caching-cypress-in-travis-ci)
+  - [Caching Cypress in CircleCI](#section-caching-cypress-in-circleci)
+- :fa-angle-right: [Dependencies](#section-dependencies)
+- :fa-angle-right: [Known Issues](#section-known-issues)
   - [CircleCI](#section-circleci)
-  - [Travis CI](#section-travis-ci)
+  - [Jenkins](#section-jenkins)
+  - [Docker](#section-docker)
+- :fa-angle-right: [Troubleshooting](#section-troubleshooting)
+  - [No output](#section-no-output)
 
 ***
 
 # What's Supported?
 
-Cypress should run on **all** CI providers. We currently have seen Cypress working on the following providers:
+Cypress should run on **all** CI providers. We currently have seen Cypress working on the following services / providers:
 
 - Jenkins (Linux)
 - TravisCI
@@ -36,172 +36,177 @@ Cypress should run on **all** CI providers. We currently have seen Cypress worki
 - GitLab
 - Docker
 
-If you're running on your own `Jenkins` server or `Docker` you will have to install some other dependencies [which are documented here](#section-dependencies).
-
-Also `CircleCI` needs to have the [`Ubuntu 12.04` image selected](#section-dependencies).
-
-***
-
-# Dependencies
-
-If you're using a hosted CI service such as `Travis` or `CircleCI` then you don't have to install anything.
-
-If you are running on `CircleCI` make sure you select the `Ubuntu 12.04` image. Their newest `Ubuntu 14.04` image does not have all the required dependencies installed. [See this issue for more information](https://github.com/cypress-io/cypress/issues/315).
-
-If you're hosting your own `Jenkins` server, or you're using `Docker`, you'll need to install some 3rd party libs to run Cypress.
-
-```shell
-apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1
-```
-
-***
-
-# Docker
-
-We don't offer an **official** docker container, but our users have created one. [This container has all of the required dependencies installed and ready to go](https://docs.cypress.io/docs/userland-extensions#section-docker).
-
-***
-
-# Troubleshooting
-
-When executing `cypress run` or `cypress ci`, if you see no output you are likely missing a dependency and you'll need to invoke the binary directly to get the error. This is a longstanding known issue which we're aware of and are working towards resolving. [See this issue for more information](https://github.com/cypress-io/cypress/issues/317).
-
-```shell
-## invoke the Cypress binary directly
-/home/travis/.cypress/Cypress/Cypress
-```
-
 ***
 
 # Running in CI
 
-Running Cypress in CI is very easy. If you're using a hosted CI service, generally the workflow is the same:
-
-1. [Add your project's repo to your CI provider](#section-add-your-project-to-your-ci-provider)
-2. [Acquire a CI Key](#section-acquire-a-ci-key)
-3. [Add 2 lines of code to your CI config file](#section-add-2-lines-of-code-to-your-ci-config-file)
-
-***
-
-## Add your project to your CI provider
-
-This is different for each provider, but usually includes logging into your CI service, connecting it with your GitHub, Bitbucket, or GitLab account, and then selecting the project's repository.
-
-***
-
-## Acquire a CI key
-
-Cypress verifies that your project is allowed to run in CI by using a CI key. This key can only be obtained from the [Cypress CLI tool](https://on.cypress.io/cli), within the Project Settings tab in the Desktop App, or within the Project Settings tab in the [Cypress Dashboard](http://on.cypress.io/dashboard).
-
-**Acquire CI Key from Cypress CLI**
-
-If you haven't installed the [Cypress CLI tool](https://on.cypress.io/cli) tool, run the following command from your terminal:
+Running Cypress in CI is just as easy as running it locally. You generally only need to do two things:
 
 ```shell
-# install the Cypress CLI tool
+## 1. install the CLI tools
 npm install -g cypress-cli
+
+## 2. run cypress
+cypress run
 ```
 
-Run this Cypress command from your terminal to get a CI key:
+That's it!
 
-```shell
-# this will return your CI Key
-cypress get:key
-```
+This will automatically go out and install Cypress, and then run all your tests.
 
-```shell
-# The CI Key will look like this
-703b33d9-a00e-4c66-90c2-40efc0fee2c6
-```
+For a comprehensive list of all the options you can pass to `cypress run`, [refer to the CLI documentation](https://on.cypress.io/cli).
 
-![get-key](https://cloud.githubusercontent.com/assets/1268976/9291525/8ea13f28-4393-11e5-955e-1a41fee12f5f.gif)
-
-[block:callout]
-{
-  "type": "info",
-  "body": "`cypress get:key` expects your `pwd` to be that of your project."
-}
-[/block]
+![travis-logs](https://cloud.githubusercontent.com/assets/1268976/9291527/8ea21024-4393-11e5-86b7-80e3b5d1047e.gif)
 
 ***
 
-## Add 2 lines of code to your CI config file
+## Your CI Config File
 
-Depending on which CI provider you're using you'll have access to a configuration file such as:
+Depending on which CI provider you'll need to add these two lines (above) to a config file.
+
+For instance with TravisCI and CircleCI we have:
 
 - `.travis.yml`
 - `circle.yml`
 
-You'll only need to add two lines of code to this file to run Cypress tests.
+You'll want to refer to your CI providers documentation for knowing when to run those commands.
 
-```shell
-# this will install the cypress-cli tools
-npm install -g cypress-cli
-```
-
-```shell
-# this will run tests headlessly and upload assets
-cypress ci <ci-key>
-
-# ------- or -------
-
-# this will run also tests headlessly, but not upload assets
-cypress run <ci-key>
-```
-
-You'll want to refer to your CI providers documentation for knowing when to run those commands. Generally each CI provider gives you a lifecyle of build commands.
-
-For instance, with [Travis CI](https://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle) they expose a `before_install` and `script` phase. You'd write `npm install -g cypress-cli` in the `before_install` phase, and `cypress ci` in the `script` phase.
-
-***
-
-## What is the difference between `cypress run` and `cypress ci`?
-
-`cypress ci` and `cypress run` both run your tests headlessly.
-
-- `cypress ci` requires a [CI Key](https://docs.cypress.io/docs/continuous-integration#section-acquire-a-ci-key) and uploads build assets (such as screenshots, videos, and logs) to our Cypress servers after a test run completes. If you do not want your assets to be tracked by Cypress, you will want to use `cypress run`.
-- `cypress run` does *not* upload build assets (such as screenshots, videos, and logs) to our Cypress servers after a test run completes. This also means that you will not be able to review your screenshots or videos in our upcoming Cypress CI Portal.
-
-We recommend that you use `cypress ci` to take full advantage of the [Cypress Dashboard](https://on.cypress.io/dashboard)
-
-# Environment variables
-
-## Cypress CI Key
-
-Instead of hard-coding your CI Key into a configuration file, you can opt to store this as an environment variable with your CI provider. This prevents your CI Key from being stored in version control. Each CI provider will be different, but generally each exposes a way to set environment variables.
-
-Set the name of the environment variable to `CYPRESS_CI_KEY` and paste your CI Key as the value.
-
-**Example of Env Variable in CircleCI**
-![screen shot 2016-03-28 at 11 38 36 am](https://cloud.githubusercontent.com/assets/1271364/14081640/b5a25e52-f4d9-11e5-977b-43e209809716.png)
-
-Then run your tests in CI by simply calling:
+Here's a couple example config files:
 
 ```yaml
-# this will run tests headlessly
-cypress ci
+## .travis.yml
+
+before_install:
+  - npm install -g cypress-cli
+
+script:
+  - cypress run
+```
+
+```yaml
+## circle.yml
+
+dependencies:
+  post:
+    - npm install -g cypress-cli
+
+test:
+  override:
+    - cypress run
+```
+
+For more example config files check out any of our [example apps](https://on.cypress.io/guides/all-example-apps).
+
+***
+
+## Recording your runs
+
+You can automatically have Cypress record your runs and make them available in our Dashboard.
+
+Recorded runs will contain:
+
+- Standard output
+- Failing Tests
+- Screenshots
+- Videos
+
+To record your runs:
+
+1. [Setup your project to record](https://on.cypress.io/guides/projects)
+2. [Pass the --record flag to `cypress run`](https://on.cypress.io/how-do-i-record-runs)
+
+You can [read more about the Dashboard here](https://on.cypress.io/guides/dashboard-features).
+
+***
+
+# Using Environment Variables
+
+You can set various environment variables to modify how Cypress runs.
+
+Typically you'd want to do this to:
+
+- [Hide your **Record Key**](#section-hide-your-record-key)
+- [Install a specific version](#section-install-a-specific-version)
+- [Modify configuration settings](#section-modify-configuration-settings)
+- [Change environment variables in your tests](#section-change-environment-variables-in-your-tests)
+
+***
+
+## Hide your Record Key
+
+If you are [recording your runs](#section-recording-your-runs) on a public project, you'll want to protect your Record Key. [Learn why.](https://docs.cypress.io/docs/projects#section-how-do-a-projectid-and-record-key-work-together-)
+
+Instead of hard coding it into your run command like this:
+
+```shell
+cypress run --record --key <record_key>
+```
+
+You can set it as an environment variable and we'll automatically use that value.
+
+Typically you'd set this inside of your CI provider like this:
+
+**CircleCI**
+![screen shot 2017-02-12 at 8 56 17 pm](https://cloud.githubusercontent.com/assets/1268976/22868594/cabd8152-f165-11e6-8897-0e3e57d0eafd.png)
+
+**TravisCI**
+![screen shot 2017-02-12 at 8 58 01 pm](https://cloud.githubusercontent.com/assets/1268976/22868637/05c46e00-f166-11e6-9106-682d5729acca.png)
+
+You can now omit the `--key` flag when recording.
+
+```shell
+## weeee we don't have to pass in the key here!
+cypress run --record
 ```
 
 ***
 
-## Cypress Version
+## Install a specific version
 
-You can specify a specific version of Cypress to use in CI by setting an Environment Variable: `CYPRESS_VERSION`.
+You can install a specific version of Cypress by setting the environment variable: `CYPRESS_VERSION`.
 
-**Example of Env Variable**
+**Set the version to an older Cypress**
 ![screen shot 2016-03-28 at 11 28 26 am](https://cloud.githubusercontent.com/assets/1271364/14081365/601e2da4-f4d8-11e5-8ea8-0491ffcb0999.png)
-
-As long as a previous version has not been removed (due to security issues) this will work.
 
 ***
 
+## Modify configuration settings
 
-## Cypress Project Id
+Don't forget you can also override settings in `cypress.json` to modify Cypress's behavior.
 
-You can specify a specific project ID in CI by setting an Environment Variable: `CYPRESS_PROJECT_ID`. The `projectId` value can be found in your [`cypress.json`](https://on.cypress.io/guides/configuration) file generated when first running tests in Cypress.
+Typical use cases would be modifying things like:
 
-**Example of Env Variable in Travis CI**
-![screen shot 2016-03-28 at 11 32 50 am](https://cloud.githubusercontent.com/assets/1271364/14081563/5e2ede20-f4d9-11e5-9e3f-38d052e8f104.png)
+- `CYPRESS_BASE_URL`
+- `CYPRESS_VIDEO_COMPRESSION`
+- `CYPRESS_REPORTER`
+
+Refer to the [configuration docs](https://on.cypress.io/guides/configuration#section-environment-variables) for more examples.
+
+***
+
+## Change environment variables in your tests
+
+Of course you can also set environment varibables for use strictly in your tests.
+
+These enable your code to reference dynamic values.
+
+```shell
+export "EXTERNAL_API_SERVER=https://corp.acme.co"
+```
+
+And then in your tests:
+
+```javascript
+cy
+  .request({
+    method: "POST",
+    url: Cypress.env("EXTERNAL_API_SERVER") + "/users/1",
+    body: {
+      foo: "bar",
+      baz: "quux"
+    }
+  })
+```
 
 ***
 
@@ -209,17 +214,24 @@ You can specify a specific project ID in CI by setting an Environment Variable: 
 
 Most CI providers allow caching of directories and dependencies between builds. This allows you to save the state of Cypress, therefore making the builds run faster.
 
-## Example of caching Cypress in Travis CI in `travis.yml`
+## Caching Cypress in Travis CI
 
 ```yaml
+## .travis.yml
+
 cache:
   directories:
     - /home/travis/.cypress/Cypress
 ```
 
-## Example of caching Cypress in CircleCI's `circle.yml`
+***
+
+## Caching Cypress in CircleCI
 
 ```yaml
+## circle.yml
+
+## make sure you set the correct node version based on what you've installed!
 dependencies:
   cache_directories:
     - /home/ubuntu/nvm/versions/node/v6.2.2/bin/cypress
@@ -229,22 +241,70 @@ dependencies:
 
 ***
 
-# Examples
+# Dependencies
 
-## CircleCI
+If you're using a hosted CI service such as `Travis` or `CircleCI` then you don't have to install anything.
 
-- [Kitchen Sink Example](https://circleci.com/gh/cypress-io/cypress-example-kitchensink)
-- [Pie Chopper Example](https://circleci.com/gh/cypress-io/cypress-example-piechopper)
+For **everything else** you must install these dependencies:
 
-## Travis CI
+```shell
+apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1
+```
 
-- [Kitchen Sink Example](https://travis-ci.org/cypress-io/cypress-example-kitchensink)
-- [TodoMVC Example](https://travis-ci.org/cypress-io/cypress-example-todomvc)
-
-![travis-logs](https://cloud.githubusercontent.com/assets/1268976/9291527/8ea21024-4393-11e5-86b7-80e3b5d1047e.gif)
+If you run `cypress run` and see no output [see this section for troubleshooting this known issue](#section-no-output).
 
 ***
 
-# Related
+# Known Issues
 
-- [Reporters](https://on.cypress.io/guides/reporters)
+## CircleCI
+
+You need to select their [`Ubuntu 12.04` image](https://circleci.com/docs/build-image-precise/).
+
+![](https://cloud.githubusercontent.com/assets/1268976/20771195/6e93e9f4-b716-11e6-809b-f4fd8f6fa439.png)
+
+The `Ubuntu 14.04` image does not have all of the required dependencies installed by default. You can likely install them yourself. [There is an open issue for this here.](https://github.com/cypress-io/cypress/issues/315)
+
+***
+
+## Jenkins
+
+You need to install all of the [linux dependencies](#section-dependencies).
+
+***
+
+## Docker
+
+We don't offer an **official** docker container, but our users have created one. [This container has all of the required dependencies installed and ready to go](https://docs.cypress.io/docs/userland-extensions#section-docker).
+
+If you don't use this image you must install all of the [linux dependencies](#section-dependencies).
+
+See [this issue](https://github.com/cypress-io/cypress/issues/165) for more information.
+
+If you are running **long** runs on Docker, you need to set the `ipc` to `host` mode.
+
+[This issue](https://github.com/cypress-io/cypress/issues/350) describes exactly what to do.
+
+***
+
+# Troubleshooting
+
+## No Output
+
+**Sympton**
+After executing `cypress run` you don't see any output. In other words: nothing happens.
+
+**Problem**
+You are in 100% of the cases missing [a dependency](#section-dependencies) above. Please install all of the dependencies.
+
+The reason you're not seeing any output is a longstanding issue with Cypress which [there is an open issue for](https://github.com/cypress-io/cypress/issues/317).
+
+We are working on improving this experience!
+
+**Seeing Errors**
+Although running `cypress run` will yield no output - you can see the actual dependency failure by invoking the Cypress binary directly.
+
+```shell
+## invoke the Cypress binary directly
+/home/<user>/.cypress/Cypress/Cypress
+```
