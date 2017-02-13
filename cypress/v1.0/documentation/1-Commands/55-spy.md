@@ -85,3 +85,4 @@ When clicking on the `spy-1` event within the command log, the console outputs t
 
 - [stub](https://on.cypress.io/api/stub)
 - [clock](https://on.cypress.io/api/clock)
+- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
