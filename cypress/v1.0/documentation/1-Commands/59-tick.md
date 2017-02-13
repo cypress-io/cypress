@@ -68,3 +68,4 @@ When clicking on the `tick` command within the command log, the console outputs 
 - [clock](https://on.cypress.io/api/clock)
 - [stub](https://on.cypress.io/api/stub)
 - [spy](https://on.cypress.io/api/spy)
+- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)

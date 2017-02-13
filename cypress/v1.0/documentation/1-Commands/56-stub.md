@@ -135,3 +135,5 @@ When clicking on the `(stub-1)` event within the command log, the console output
 
 - [spy](https://on.cypress.io/api/spy)
 - [clock](https://on.cypress.io/api/clock)
+- [Recipe: Unit Test - Stubbing Dependencies](https://github.com/cypress-io/cypress-example-recipes#unit-test---stubbing-dependencies)
+- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
