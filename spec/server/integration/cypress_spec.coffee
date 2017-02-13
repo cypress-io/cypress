@@ -852,7 +852,7 @@ describe "lib/cypress", ->
 
       cypress.start(["--project=#{@pristinePath}", "--record", "--key=token-123"])
       .then =>
-        @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
+        @expectExitWithErr("CANNOT_RECORD_NO_PROJECT_ID")
 
     it "logs error and exits when ci key is not valid", ->
       @setup()
