@@ -3,17 +3,17 @@ excerpt: Cypress CLI Tool for programmatically interacting with the Desktop Appl
 
 # Contents
 
-- :fa-angle-right: [What is the CLI Tool?](#section-what-is-the-cli-tool)
+- :fa-angle-right: [What is the CLI Tool?](#section-what-is-the-cli-tool-)
 - :fa-angle-right: [Installation](#section-installation)
 - :fa-angle-right: [Available Commands](#section-available-commands)
-  - [cypress install](#section-cypress-install)
-  - [cypress update](#section-cypress-update)
-  - [cypress run](#section-cypress-run)
-  - [cypress run --record](#section-cypress-run-record)
-  - [cypress open](#section-cypress-open)
-  - [cypress get:path](#section-cypress-get-path)
-  - [cypress verify](#section-cypress-verify)
-  - [cypress version](#section-cypress-version)
+  - [cypress install](#section--cypress-install-)
+  - [cypress update](#section--cypress-update-)
+  - [cypress run](#section--cypress-run-)
+  - [cypress run --record](cli#section--cypress-run-record-)
+  - [cypress open](#section--cypress-open-)
+  - [cypress get:path](#section--cypress-get-path-)
+  - [cypress verify](#section--cypress-verify-)
+  - [cypress version](#section--cypress-version-)
 
 ***
 
