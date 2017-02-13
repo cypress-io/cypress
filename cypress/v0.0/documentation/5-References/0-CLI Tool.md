@@ -24,7 +24,8 @@ The CLI Tool is a `npm package` that wraps the Desktop Application.
 It provides a set of commands which can be used to do things like:
 
 - Install Cypress
-- Run Cypress Headlessly
+- Run Cypress headlessly
+- Record your runs
 - Output the current installed version
 
 [block:callout]
@@ -91,6 +92,8 @@ cypress update
 Runs Cypress headlessly without spawning a browser.
 
 You can use this command when working locally, or when running in [Continuous Integration](https://on.cypress.io/guides/continuous-integration).
+
+Cypress will first check to see if the Desktop Application is installed, and will automatically install it prior to running (if necessary).
 
 [block:callout]
 {
