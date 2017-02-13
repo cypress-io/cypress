@@ -186,7 +186,7 @@ Lastly you can also pass in environment variables as options when [using the CLI
 
 Values here will overwrite all other conflicting environment variables.
 
-You can use the `--env` option on `cypress ci`.
+You can use the `--env` option on `cypress run`.
 
 [block:callout]
 {
@@ -196,7 +196,7 @@ You can use the `--env` option on `cypress ci`.
 [/block]
 
 ```yaml
-cypress ci --env host=kevin.dev.local,api_server=http://localhost:8888/api/v1
+cypress run --env host=kevin.dev.local,api_server=http://localhost:8888/api/v1
 ```
 
 ```javascript

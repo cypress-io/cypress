@@ -25,7 +25,6 @@ When running Cypress headlessly or in CI, you can specify which Mocha reporter C
 Command line:
 
 ```shell
-## also works with 'cypress ci'
 cypress run --reporter json
 ```
 
@@ -71,7 +70,6 @@ Specify the path to your custom reporter to use it:
 Command line:
 
 ```shell
-## also works with 'cypress ci'
 cypress run --reporter reporters/custom.js
 ```
 
@@ -91,7 +89,6 @@ If you have installed a custom reporter through npm, specify the package name:
 Command line:
 
 ```shell
-## also works with 'cypress ci'
 cypress run --reporter mochawesome
 ```
 
@@ -124,7 +121,6 @@ Some reporters accept options to customize their behavior. These can be specifie
 Command line:
 
 ```shell
-## also works with 'cypress ci'
 cypress run --reporter junit --reporter-options "mochaFile=results/my-test-output.xml,toConsole=true"
 ```
 

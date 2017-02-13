@@ -144,12 +144,12 @@ Be sure to separate multiple values with a **comma**.
 Example:
 
 ```shell
-## you can pass --config to cypress open, cypress run, or cypress ci
+## you can pass --config to cypress open or cypress run
 cypress open --config watchForFileChanges=false,waitForAnimations=false
 
 cypress run --config integrationFolder=tests,fixturesFolder=false
 
-cypress ci --config viewportWidth=1280,viewportHeight=720
+cypress run --record --config viewportWidth=1280,viewportHeight=720
 ```
 
 ***
