@@ -4,6 +4,7 @@ excerpt: An overview of our Dashboard
 # Contents
 
 - :fa-angle-right: [What is the Dashboard?](#section-what-is-the-dashboard-)
+  - [Example Projects](#section-example-projects)
 - :fa-angle-right: [Frequently Asked Questions](#section-frequently-asked-questions)
   - [How do I record my tests?](#section-how-do-i-record-my-tests)
   - [How is this different than CI?](#section-how-is-this-different-than-ci-)
@@ -30,6 +31,20 @@ excerpt: An overview of our Dashboard
 Additionally we've integrated the dashboard into the Cypress [Desktop Application](https://on.cypress.io/guides/installing-and-running). This means you'll see the test runs in the Tunes tab from within every project.
 
 ![Runs List](https://cloud.githubusercontent.com/assets/1271364/22800330/ff6c9474-eed6-11e6-9a32-8360d64b1071.png)
+
+***
+
+## Example Projects
+
+Once you're logged into the [Dashboard](https://on.cypress.io/dashboard) you can view any [public project](https://on.cypress.io/what-is-project-access).
+
+Here are some of our own public projects you can look at:
+
+- [cypress-core-desktop-gui](https://dashboard.cypress.io/#/projects/fas5qd)
+- [cypress-example-recipes](https://dashboard.cypress.io/#/projects/6p53jw)
+- [cypress-example-kitchensink](https://dashboard.cypress.io/#/projects/4b7344)
+- [cypress-example-todomvc](https://dashboard.cypress.io/#/projects/245obj)
+- [cypress-example-piechopper](https://dashboard.cypress.io/#/projects/fuduzp)
 
 ***
 
