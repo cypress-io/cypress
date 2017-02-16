@@ -105,6 +105,10 @@ class SetupProject extends Component {
         <div className='label-title'>
           <label htmlFor='projectName' className='control-label pull-left'>
             Who should own this project?
+            {' '}
+            <a onClick={this._openOrgDocs}>
+              <i className='fa fa-question-circle'></i>
+            </a>
           </label>
         </div>
         <div className='owner-parts'>
@@ -208,6 +212,10 @@ class SetupProject extends Component {
         <hr />
         <label htmlFor='projectName' className='control-label'>
           Who should see the runs and recordings?
+          {' '}
+          <a onClick={this._openAccessDocs}>
+            <i className='fa fa-question-circle'></i>
+          </a>
         </label>
         <div className='radio privacy-radio'>
           <label>
@@ -245,6 +253,16 @@ class SetupProject extends Component {
         </div>
       </div>
     )
+  }
+
+  _openOrgDocs = (e) => {
+    e.preventDefault()
+    App.ipc('external:open', 'https://on.cypress.io/dashboard/organizations')
+  }
+
+  _openAccessDocs = (e) => {
+    e.preventDefault()
+    App.ipc('external:open', 'https://on.cypress.io/what-is-project-access')
   }
 
   _manageOrgs = (e) => {

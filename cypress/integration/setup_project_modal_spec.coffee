@@ -93,6 +93,13 @@ describe "Setup Project", ->
         cy.get("#me").should("not.be.selected")
         cy.get("#org").should("not.be.selected")
 
+      it "org docs are linked", ->
+        cy
+          .contains("label", "Who should own this")
+            .find("a").click().then ->
+              expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/organizations")
+
+
     describe "select me", ->
       beforeEach ->
         @getOrgs.resolve(@orgs)
@@ -101,6 +108,12 @@ describe "Setup Project", ->
           .get(".privacy-radio").should("not.be.visible")
           .get(".modal-content")
             .contains(".btn", "Me").click()
+
+      it "access docs are linked", ->
+        cy
+          .contains("label", "Who should see the runs")
+            .find("a").click().then ->
+              expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/what-is-project-access")
 
       it "displays public & private radios with no preselects", ->
         cy
