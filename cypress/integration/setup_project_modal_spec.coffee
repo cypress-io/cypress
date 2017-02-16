@@ -97,7 +97,7 @@ describe "Setup Project", ->
         cy
           .contains("label", "Who should own this")
             .find("a").click().then ->
-              expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/dashboard/organizations")
+              expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/what-are-organizations")
 
 
     describe "select me", ->
