@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import { withRouter, Link } from 'react-router'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import projectsStore from '../projects/projects-store'
 import ProjectNav from '../project-nav/project-nav'
 import { closeProject, openProject } from '../projects/projects-api'
@@ -43,7 +43,7 @@ const NoBrowsers = ({ projectClientId }) => {
 
 const downloadBrowser = function (e) {
   e.preventDefault()
-  App.ipc('external:open', 'https://www.google.com/chrome/browser/desktop')
+  ipc.externalOpen('https://www.google.com/chrome/browser/desktop')
 }
 
 const PortInUse = () => {

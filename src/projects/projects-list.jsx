@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import { ContextMenu, MenuItem } from "react-contextmenu"
@@ -23,7 +23,7 @@ class MyContextMenu extends Component {
   handleClick (e, project) {
     projectsStore.removeProject(project.clientId)
 
-    App.ipc("remove:project", project.path)
+    ipc.removeProject(project.path)
   }
 }
 
@@ -107,7 +107,7 @@ export default class Projects extends Component {
   }
 
   _openHelp () {
-    App.ipc('external:open', 'https://on.cypress.io/adding-new-project')
+    ipc.externalOpen('https://on.cypress.io/adding-new-project')
   }
 
 }

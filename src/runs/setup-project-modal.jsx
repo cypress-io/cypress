@@ -5,7 +5,7 @@ import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
 import state from '../lib/state'
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'
 import { getOrgs, pollOrgs, stopPollingOrgs } from '../organizations/organizations-api'
@@ -126,7 +126,7 @@ class SetupProject extends Component {
                     className='user-avatar'
                     height='13'
                     width='13'
-                    src={`${gravatarUrl(state.user.email)}`}
+                    src={`${gravatarUrl(state.user && state.user.email)}`}
                   />
                   {' '}Me
               </label>
@@ -249,7 +249,7 @@ class SetupProject extends Component {
 
   _manageOrgs = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/dashboard/organizations')
+    ipc.externalOpen('https://on.cypress.io/dashboard/organizations')
   }
 
   _formNotFilled () {
@@ -351,7 +351,7 @@ class SetupProject extends Component {
   }
 
   _setupProject () {
-    App.ipc('setup:dashboard:project', {
+    ipc.setupDashboardProject({
       projectName: this.state.projectName,
       orgId: this.state.orgId,
       public: this.state.public,
@@ -363,6 +363,7 @@ class SetupProject extends Component {
       this.props.onSetup(projectDetails)
       return null
     })
+    .catch(ipc.isUnauthed, ipc.handleUnauthed)
     .catch((error) => {
       this.setState({
         error,

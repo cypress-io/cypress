@@ -18,7 +18,7 @@ describe "Setup Project", ->
         cy.stub(@App, "ipc").as("ipc")
 
         @config.projectId = null
-        @setupCiProject = deferred()
+        @setupDashboardProject = deferred()
         @getOrgs = deferred()
 
         stubIpc(@App.ipc, {
@@ -35,7 +35,7 @@ describe "Setup Project", ->
           "get:specs": (stub) => stub.resolves(@specs)
           "get:builds": (stub) => stub.resolves([])
           "get:orgs": (stub) => stub.returns(@getOrgs.promise)
-          "setup:dashboard:project": (stub) => stub.returns(@setupCiProject.promise)
+          "setup:dashboard:project": (stub) => stub.returns(@setupDashboardProject.promise)
           "get:record:keys": (stub) => stub.resolves(@keys)
         })
 
@@ -211,7 +211,7 @@ describe "Setup Project", ->
   describe "successfully submit form", ->
     beforeEach ->
       @getOrgs.resolve(@orgs)
-      @setupCiProject.resolve({
+      @setupDashboardProject.resolve({
         id: "project-id-123"
         public: true
         orgId: "000"
@@ -281,7 +281,7 @@ describe "Setup Project", ->
         it "displays command to run with the record key", ->
           cy.contains("cypress run --record --key record-key-123")
 
-  describe "errors from ipc event", ->
+  describe "errors", ->
     beforeEach ->
       @getOrgs.resolve(@orgs)
       cy
@@ -291,16 +291,29 @@ describe "Setup Project", ->
         .get(".privacy-radio").find("input").last().check()
         .get(".modal-body")
           .contains(".btn", "Setup Project").click()
-        .then =>
-          @setupCiProject.reject({
-            name: "Fatal Error!"
-            message: """
-            {
-              "system": "down",
-              "toxicity": "of the city"
-            }
-            """
-          })
 
-    it "displays error name and message", ->
+    it "redirects to login when 401", ->
+      @setupDashboardProject.reject({ name: "", message: "", statusCode: 401 })
+      cy.shouldBeOnLogin()
+
+    it "displays error name and message when unexpected", ->
+      @setupDashboardProject.reject({
+        name: "Fatal Error!"
+        message: """
+        {
+          "system": "down",
+          "toxicity": "of the city"
+        }
+        """
+      })
       cy.contains('"system": "down"')
+
+  describe "when get orgs 401s", ->
+    beforeEach ->
+      cy
+        .contains(".btn", "Setup Project").click()
+        .then =>
+          @getOrgs.reject({ name: "", message: "", statusCode: 401 })
+
+    it "redirects to login", ->
+      cy.shouldBeOnLogin()

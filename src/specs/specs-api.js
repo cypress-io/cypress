@@ -1,14 +1,13 @@
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import specsCollection from './specs-collection'
 
 const getSpecs = (setProjectError) => {
-  App.ipc('get:specs', (err, specs = []) => {
+  ipc.getSpecs((err, specs = []) => {
     if (err) {
       return setProjectError(err)
     }
 
     specsCollection.setSpecs(specs)
-
   })
 }
 

@@ -2,7 +2,7 @@ import cs from 'classnames'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import errors from '../lib/errors'
 import projectsStore from '../projects/projects-store'
 
@@ -122,11 +122,12 @@ class PermissionMessage extends Component {
 
     const id = this.props.project.id
 
-    App.ipc("request:access", id)
+    ipc.requestAccess(id)
     .then(() => {
       projectsStore.membershipRequested(id)
       this._setResult()
     })
+    .catch(ipc.isUnauthed, ipc.handleUnauthed)
     .catch((error) => {
       this._setResult(error)
     })

@@ -4,7 +4,7 @@ import { observer } from 'mobx-react'
 import Tooltip from 'rc-tooltip'
 import Collapse, { Panel } from 'rc-collapse'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import Project from '../project/project-model'
 import { getRecordKeys } from '../projects/projects-api'
 
@@ -235,27 +235,27 @@ class Config extends Component {
 
   _openDashboardProject = (e) => {
     e.preventDefault()
-    App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}`)
+    ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}`)
   }
 
   _openProjectIdHelp (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/what-is-a-project-id')
+    ipc.externalOpen('https://on.cypress.io/what-is-a-project-id')
   }
 
   _openHelp (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/guides/configuration')
+    ipc.externalOpen('https://on.cypress.io/guides/configuration')
   }
 
   _openRecordKeyGuide (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/what-is-a-record-key')
+    ipc.externalOpen('https://on.cypress.io/what-is-a-record-key')
   }
 
   _openAdminKeys = (e) => {
     e.preventDefault()
-    App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}/settings`)
+    ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}/settings`)
   }
 }
 

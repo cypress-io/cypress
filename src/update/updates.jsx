@@ -2,12 +2,12 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import updater from './update-model'
 
 const openChangelog = (e) => {
   e.preventDefault()
-  return App.ipc('external:open', 'https://on.cypress.io/changelog')
+  return ipc.externalOpen('https://on.cypress.io/changelog')
 }
 
 @observer
@@ -17,7 +17,7 @@ class Updates extends Component {
 
     updater.setVersion(props.options.version)
 
-    App.ipc('updater:run', (err, data = {}) => {
+    ipc.updaterRun((err, data = {}) => {
       switch (data.event) {
         case 'start':
           return updater.setState('checking')
@@ -84,7 +84,7 @@ class Updates extends Component {
       errClass = 'text-danger'
     }
 
-    if (!!updater.state) {
+    if (updater.state) {
       return (
         <div>
           <p className={`state ${errClass}`}>
@@ -123,7 +123,7 @@ class Updates extends Component {
 
   _closeWindow (e) {
     e.preventDefault()
-    App.ipc('window:close')
+    ipc.windowClose()
   }
 }
 

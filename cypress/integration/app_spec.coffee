@@ -1,4 +1,4 @@
-{stubIpc} = require("../support/util")
+{stubIpc, deferred} = require("../support/util")
 
 describe "App", ->
   beforeEach ->
@@ -104,3 +104,34 @@ describe "App", ->
       cy
         .get("#login").contains("Applying updates")
         .get("img").should("have.attr", "src", "img/cypress-inverse.png")
+
+  context "getting current user", ->
+    beforeEach ->
+      cy
+        .window().then (win) ->
+          {@App} = win
+          cy.stub(@App, "ipc").as("ipc")
+
+          @getCurrentUser = deferred()
+
+          stubIpc(@App.ipc, {
+            "get:options": (stub) -> stub.resolves({})
+            "get:current:user": (stub) => stub.returns(@getCurrentUser.promise)
+          })
+
+          @App.start()
+
+    it "requests current user", ->
+      expect(@App.ipc).to.be.calledWith("get:current:user")
+
+    it "redirects to login when no user", ->
+      @getCurrentUser.resolve(null)
+      cy.shouldBeOnLogin()
+
+    it "redirects to login when user has no auth token", ->
+      @getCurrentUser.resolve({})
+      cy.shouldBeOnLogin()
+
+    it "redirects to login when request 401s", ->
+      @getCurrentUser.reject({ name: "", message: "", statusCode: 401 })
+      cy.shouldBeOnLogin()

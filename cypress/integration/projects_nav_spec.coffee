@@ -349,7 +349,6 @@ describe "Projects Nav", ->
 
     it "closes project", ->
       expect(@App.ipc).to.be.calledWith("close:project")
-      expect(@App.ipc.off).to.be.calledWith("close:project")
 
     describe "click on diff project", ->
       beforeEach ->

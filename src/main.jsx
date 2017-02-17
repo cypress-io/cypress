@@ -4,21 +4,20 @@ import momentOverrides from './lib/overrides/moment-overrides'
 import { render } from 'react-dom'
 import _ from 'lodash'
 
+import appApi from './lib/app-api'
 import makeRoutes from './routes'
-
-import errors from './lib/errors'
 import state from './lib/state'
-
 import Updates from './update/updates'
 
 useStrict(true)
 
 import App from './lib/app'
+import ipc from './lib/ipc'
 
 const handleErrors = () => {
   const sendErr = (err) => {
     if (err) {
-      App.ipc('gui:error', _.pick(err, 'name', 'message', 'stack'))
+      ipc.guiError(_.pick(err, 'name', 'message', 'stack'))
     }
 
     if (window.env === 'development' || window.env === 'test') {
@@ -33,13 +32,6 @@ const handleErrors = () => {
 
   window.onunhandledrejection = (event) => {
     const reason = event && event.reason
-
-    if (errors.isUnauthenticated(reason)) {
-      event.preventDefault()
-      state.logOut()
-      return
-    }
-
     sendErr(reason || event)
   }
 }
@@ -48,7 +40,7 @@ momentOverrides()
 
 const setupState = (options) => {
   state.setVersion(options.version)
-  state.listenForMenuClicks()
+  appApi.listenForMenuClicks()
 }
 
 const setupDevVars = () => {
@@ -58,7 +50,7 @@ const setupDevVars = () => {
 }
 
 App.start = () => {
-  App.ipc('get:options')
+  ipc.getOptions()
   .then((options = {}) => {
 
     handleErrors()
@@ -73,7 +65,7 @@ App.start = () => {
 }
 
 App.startUpdateApp = () => {
-  App.ipc('get:options')
+  ipc.getOptions()
   .then((options = {}) => {
 
     handleErrors()
