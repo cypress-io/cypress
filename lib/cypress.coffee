@@ -1,3 +1,6 @@
+fs = require('fs')
+require('graceful-fs').gracefulify(fs)
+
 require("./environment")
 
 ## we are not requiring everything up front
