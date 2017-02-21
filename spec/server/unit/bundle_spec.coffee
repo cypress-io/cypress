@@ -9,24 +9,25 @@ streamApi = {
   pipe: -> streamApi
 }
 
-bundlerApi = {
-  transform: -> bundlerApi
-  external: -> bundlerApi
-  on: -> bundlerApi
-  bundle: -> streamApi
-  close: ->
-}
-
-browserify.returns(bundlerApi)
-
 bundle = require("#{root}lib/util/bundle")
 
 describe "lib/util/bundle", ->
 
   context "#build", ->
     beforeEach ->
+      bundlerApi = @bundlerApi = {
+        transform: -> bundlerApi
+        external: -> bundlerApi
+        on: -> bundlerApi
+        bundle: -> streamApi
+        close: ->
+        plugin: sinon.stub()
+      }
+
       browserify.reset()
       bundle.reset()
+
+      browserify.returns(bundlerApi)
 
       @config = {
         projectName: "foo"
@@ -47,8 +48,8 @@ describe "lib/util/bundle", ->
       it "specifies extensions", ->
         expect(browserify.lastCall.args[0].extensions).to.eql([".js", ".jsx", ".coffee", ".cjsx"])
 
-      it "specifies watching", ->
-        expect(browserify.lastCall.args[0].plugin[0]).to.equal(watchify)
+      it "watches", ->
+        expect(@bundlerApi.plugin).to.be.calledWith(watchify)
 
     describe "not watching", ->
       beforeEach ->
@@ -56,7 +57,7 @@ describe "lib/util/bundle", ->
         bundle.build("file.js", @config)
 
       it "does not specify watching", ->
-        expect(browserify.lastCall.args[0].plugin).to.eql([])
+        expect(@bundlerApi.plugin).not.to.be.called
 
     describe "headless mode", ->
       beforeEach ->
