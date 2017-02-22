@@ -112,9 +112,11 @@ class Project extends EE
   watchSupportFile: (config) ->
     if supportFile = config.supportFile
       relativePath = path.relative(config.projectRoot, config.supportFile)
-      @watchers.watchBundle(relativePath, config, {
-        onChange: _.bind(@server.onTestFileChange, @server, relativePath)
-      })
+      if config.watchForFileChanges isnt false
+        options = {
+          onChange: _.bind(@server.onTestFileChange, @server, relativePath)
+        }
+      @watchers.watchBundle(relativePath, config, options)
       ## ignore errors b/c we're just setting up the watching. errors
       ## are handled by the spec controller
       .catch ->

@@ -34,7 +34,7 @@ describe "lib/util/bundle", ->
         watchForFileChanges: true
       }
 
-    describe "any case / watching", ->
+    describe "any case / headed mode", ->
       beforeEach ->
         bundle.build("file.js", @config)
 
@@ -50,18 +50,13 @@ describe "lib/util/bundle", ->
       it "specifies watching", ->
         expect(browserify.lastCall.args[0].plugin[0]).to.equal(watchify)
 
-    describe "not watching", ->
-      beforeEach ->
-        @config.watchForFileChanges = false
-        bundle.build("file.js", @config)
-
-      it "does not specify watching", ->
-        expect(browserify.lastCall.args[0].plugin).to.eql([])
-
     describe "headless mode", ->
       beforeEach ->
         @config.isHeadless = true
         bundle.build("file.js", @config)
+
+      it "does not watch", ->
+        expect(browserify.lastCall.args[0].plugin).to.eql([])
 
       it "only runs browserify once per file", ->
         expect(browserify).to.be.calledOnce
