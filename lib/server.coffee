@@ -227,7 +227,7 @@ class Server
           resolve(port)
 
   _port: ->
-    @_server?.address().port
+    @_server?.address()?.port
 
   _listen: (port, onError) ->
     new Promise (resolve) =>

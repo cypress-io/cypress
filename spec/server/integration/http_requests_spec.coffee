@@ -682,7 +682,7 @@ describe "Routes", ->
             expect(res.statusCode).to.eq(200)
             expect(res.headers["content-type"]).to.match(/text\/plain/)
 
-    # describe.only "maximum header size", ->
+    # describe "maximum header size", ->
     #   ## https://github.com/cypress-io/cypress/issues/76
     #   it "does not bomb on huge headers", ->
     #     json = Fixtures.get("server/really_big_json.json")
@@ -701,47 +701,6 @@ describe "Routes", ->
       Fixtures.scaffold("todos")
       Fixtures.scaffold("no-server")
       Fixtures.scaffold("ids")
-
-    afterEach ->
-      files.reset()
-
-    describe "usage", ->
-      beforeEach ->
-        @setup({
-          projectRoot: Fixtures.projectPath("ids")
-          projectName: "foobarbaz"
-        })
-
-      it "counts specs, exampleSpec, and allSpecs", ->
-        @rp("http://localhost:2020/__cypress/iframes/integration/foo.coffee")
-        .then (res) =>
-          expect(res.statusCode).to.eq(200)
-          expect(files.getStats()).to.deep.eq({
-            numRuns: 1
-            allSpecs: false
-            exampleSpec: false
-            projectName: "foobarbaz"
-          })
-        .then =>
-          @rp("http://localhost:2020/__cypress/iframes/__all")
-          .then (res) =>
-            expect(res.statusCode).to.eq(200)
-            expect(files.getStats()).to.deep.eq({
-              numRuns: 2
-              allSpecs: true
-              exampleSpec: false
-              projectName: "foobarbaz"
-            })
-        .then =>
-          @rp("http://localhost:2020/__cypress/iframes/integration/example_spec.js")
-          .then (res) ->
-            expect(res.statusCode).to.eq(200)
-            expect(files.getStats()).to.deep.eq({
-              numRuns: 3
-              allSpecs: true
-              exampleSpec: true
-              projectName: "foobarbaz"
-            })
 
     describe "todos", ->
       beforeEach ->
@@ -1705,27 +1664,6 @@ describe "Routes", ->
       beforeEach ->
         @setup("http://www.google.com")
 
-      it "injects sinon content into head", ->
-        contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")
-
-        nock(@server._remoteOrigin)
-        .get("/bar")
-        .reply 200, "<html> <head> <title>foo</title> </head> <body>hello from bar!</body> </html>", {
-          "Content-Type": "text/html"
-        }
-
-        @rp({
-          url: "http://www.google.com/bar"
-          headers: {
-            "Cookie": "__cypress.initial=true"
-          }
-        })
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
-          body = removeWhitespace(res.body)
-          expect(body).to.eq contents
-
       it "injects when head has attributes", ->
         contents = removeWhitespace Fixtures.get("server/expected_head_inject.html")
 
@@ -1854,9 +1792,7 @@ describe "Routes", ->
 
           expect(res.body).to.eq "<html> <head> <script type='text/javascript'> document.domain = 'google.com'; </script> </head> <body>hello from bar!</body> </html>"
 
-      it "injects sinon content after following redirect", ->
-        contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")
-
+      it "injects content after following redirect", ->
         nock(@server._remoteOrigin)
         .get("/bar")
         .reply 302, undefined, {
@@ -1866,7 +1802,7 @@ describe "Routes", ->
 
         nock(@server._remoteOrigin)
         .get("/foo")
-        .reply 200, "<html> <head> <title>foo</title> </head> <body>hello from bar!</body> </html>", {
+        .reply 200, "<html> <head prefix=\"og: foo\"> <title>foo</title> </head> <body>hello from bar!</body> </html>", {
           "Content-Type": "text/html"
         }
 
@@ -1886,8 +1822,7 @@ describe "Routes", ->
             expect(res.statusCode).to.eq(200)
             expect(res.headers["set-cookie"]).to.match(/initial=;/)
 
-            body = removeWhitespace(res.body)
-            expect(body).to.eq contents
+            expect(res.body).to.include("Cypress.onBeforeLoad")
 
       it "injects performantly on a huge amount of elements over http", ->
         Fixtures.scaffold()
@@ -1982,7 +1917,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include("sinon.js")
+            expect(res.body).to.include("Cypress.onBeforeLoad")
 
       it "injects even on 5xx responses", ->
         @setup("https://www.google.com")
@@ -2273,7 +2208,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.match(/index.html content/)
-            expect(res.body).to.match(/sinon.js/)
+            expect(res.body).to.match(/Cypress\.onBeforeLoad/)
 
             expect(res.headers["set-cookie"]).to.match(/initial=;/)
             expect(res.headers["cache-control"]).to.eq("no-cache, no-store, must-revalidate")

@@ -68,7 +68,7 @@ Code changes are applied instantly:
 
 ```bash
 ## boot a specific project
-npm start -- --run-project <path-to-the-project-you-want-to-test>
+npm start -- --project <path-to-the-project-you-want-to-test>
 ```
 
 You will see Cypress run all the tests headlessly and you'll see output in your console.
@@ -251,4 +251,3 @@ Event | From | To | Description
 --- | --- | --- | ---
 watched:file:changed | Server | Runner | when user has changed local spec file
 automation:push:message | Server | Runner | when automation server has sent a message
-
