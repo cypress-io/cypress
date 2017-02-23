@@ -42,6 +42,7 @@
       padding-top: 2px;
       white-space: pre-wrap;
       word-break: break-word;
+      user-select: initial;
 
       &:empty {
         display: none;
