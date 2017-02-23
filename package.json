@@ -129,7 +129,7 @@
     "coffee-script": "1.7.1",
     "compression": "1.1.0",
     "concat-stream": "^1.5.1",
-    "conf": "cypress-io/conf#5f74d18b0e0a9c43cc816219d927809f667513a7",
+    "conf": "cypress-io/conf#41e2f59395cd06807ca06b5adbbe5bc7c5521778",
     "content-type": "^1.0.2",
     "cookie": "^0.2.3",
     "cookie-parser": "^1.3.3",
