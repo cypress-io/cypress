@@ -201,9 +201,7 @@ describe "$Cypress.Cy API", ->
         null
 
       it "is attached to cy", ->
-        @sandbox.useFakeTimers()
         expect(@cy.moment).to.eq(moment)
-        expect(@cy.moment().toJSON()).to.eq(moment().toJSON())
 
       it "logs a deprecation", ->
         warning = @sandbox.spy @Cypress.Utils, "warning"

@@ -13,69 +13,7 @@ errors      = require("../errors")
 
 glob = Promise.promisify(glob)
 
-intervalId  = null
-numRuns     = null
-exampleSpec = null
-allSpecs    = null
-projectName = null
-
-do reset = ->
-  numRuns = 0
-  projectName = null
-  exampleSpec = false
-  allSpecs    = false
-
-check = ->
-  ## bail if we have no runs yet
-  return if numRuns is 0
-
-  user.ensureAuthToken()
-  .then (authToken) ->
-    api.sendUsage(numRuns, exampleSpec, allSpecs, projectName, authToken)
-  ## reset on success
-  .then(reset)
-  .catch ->
-    ## fail silently
-    return
-
-## check every 10 minutes
-do interval = ->
-  intervalId = setInterval(check, 1000 * 60 * 10)
-
 module.exports = {
-  interval: ->
-    interval()
-
-  getStats: ->
-    {
-      numRuns: numRuns
-      allSpecs: allSpecs
-      exampleSpec: exampleSpec
-      projectName: projectName
-    }
-
-  check: ->
-    check()
-
-  reset: ->
-    reset()
-
-    ## stop polling (useful in testing)
-    clearInterval(intervalId) if intervalId
-
-  increment: (test, config = {}) ->
-    switch test
-      when "integration/example_spec.js"
-        exampleSpec = true
-      when "__all"
-        allSpecs = true
-
-    numRuns += 1
-
-    ## set projectName if we have it
-    if p = config.projectName
-      projectName = p
-
   handleFiles: (req, res, config) ->
     @getTestFiles(config)
     .then (files) ->
@@ -85,8 +23,6 @@ module.exports = {
     test = req.params[0]
 
     iframePath = cwd("lib", "html", "iframe.html")
-
-    @increment(test, config)
 
     @getSpecs(test, config)
     .then (specs) =>

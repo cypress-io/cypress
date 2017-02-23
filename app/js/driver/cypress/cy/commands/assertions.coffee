@@ -3,7 +3,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
   bRe            = /(\*\*)(.+)(\*\*)/
   bTagOpen       = /\*\*/g
   bTagClosed     = /\*\*/g
-  allButs        = /\bbut\b/g
+  butRe          = /,? but\b/
   reExistence    = /exist/
   reEventually   = /^eventually/
   reHaveLength   = /length/
@@ -154,10 +154,11 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       return subject
 
   assertFn = (passed, message, value, actual, expected, error, verifying = false) ->
-    ## if this is a jquery object and its true
-    ## then remove all the 'but's and replace with 'and'
-    ## also just think about slicing off everything after a comma?
-    message = message.split(allButs).join("and") if message and passed
+    ## slice off everything after a ', but' or ' but ' for passing assertions, because
+    ## otherwise it doesn't make sense:
+    ## "expected <div> to have a an attribute 'href', but it was 'href'"
+    if message and passed and butRe.test(message)
+      message = message.substring(0, message.search(butRe))
 
     obj = parseValueActualAndExpected(value, actual, expected)
 

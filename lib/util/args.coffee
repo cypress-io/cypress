@@ -5,7 +5,7 @@ coerce   = require("./coerce")
 config   = require("../config")
 cwd      = require("../cwd")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec ci updating ping key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode hosts browser headless".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey cliVersion runProject project spec ci record updating ping key logs clearLogs returnPkg version mode autoOpen removeIds showHeadlessGui config exitWithCode hosts browser headless".split(" ")
 whitelist = whitelist.concat(config.getConfigKeys())
 
 parseNestedValues = (vals) ->
@@ -36,10 +36,11 @@ module.exports = {
         "api-key":     "apiKey"
         "smoke-test":  "smokeTest"
         "remove-ids":  "removeIds"
+        "cli-version": "cliVersion"
         "get-key":     "getKey"
         "new-key":     "generateKey"
-        "run-project": "runProject"
         "clear-logs":  "clearLogs"
+        "run-project": "project"
         "return-pkg":  "returnPkg"
         "auto-open":   "autoOpen"
         "env":         "environmentVariables"
@@ -50,9 +51,14 @@ module.exports = {
       }
     })
 
-    _.extend options, _.pick(argv, whitelist...), {
-      env: process.env["CYPRESS_ENV"]
-    }
+    whitelisted = _.pick(argv, whitelist...)
+
+    options = _
+    .chain(options)
+    .defaults(whitelisted)
+    .extend({env: process.env["CYPRESS_ENV"]})
+    .mapValues(coerce)
+    .value()
 
     ## if we are updating we may have to pluck out the
     ## appPath + execPath from the options._ because
@@ -89,9 +95,9 @@ module.exports = {
       ## config directly into our options
       _.extend options, config.whitelist(c)
 
-    ## normalize runProject or project to projectPath
-    if rp = options.runProject or p = options.project
-      options.projectPath = path.resolve(cwd(), rp ? p)
+    ## normalize project to projectPath
+    if p = options.project
+      options.projectPath = path.resolve(cwd(), p)
 
     if options.smokeTest
       options.pong = options.ping

@@ -64,6 +64,14 @@ module.exports =
         return memo
     , _.cloneDeep(obj)
 
+  id: (projectRoot) ->
+    file = @_pathToFile(projectRoot, "cypress.json")
+
+    fs.readJsonAsync(file)
+    .get("projectId")
+    .catch ->
+      null
+
   read: (projectRoot) ->
     file = @_pathToFile(projectRoot, "cypress.json")
 
