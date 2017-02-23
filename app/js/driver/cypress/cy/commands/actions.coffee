@@ -1256,6 +1256,45 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               onRetry: verifyAssertions
         })
 
+    ttrigger: (subject, eventName, options) ->
+      _.defaults options,
+        log: true
+        bubbles: true
+        cancelable: true
+
+      @ensureDom(subject)
+
+      eventOptions = _.pick(options, "bubbles", "cancelable")
+
+      if options.log
+        options._log = Cypress.Log.command
+          $el: subject
+          consoleProps: ->
+            {
+              "Returned": subject
+              "Event options": eventOptions
+            }
+
+        options._log.snapshot("before", {next: "after"})
+
+      if not _.isString(eventName)
+        $Cypress.Utils.throwErrByPath("trigger.invalid_arg", {
+          onFail: options._log
+          args: { eventName }
+        })
+
+      trigger = (el) ->
+        event = new Event(eventName, eventOptions)
+
+        el.dispatchEvent(event)
+
+      Promise
+        .resolve(subject.toArray())
+        .each(trigger)
+        .then ->
+          options._log.snapshot("after")
+        .return(subject)
+
   Cypress.addParentCommand
     focused: (options = {}) ->
       _.defaults options,
