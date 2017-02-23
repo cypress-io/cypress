@@ -8,15 +8,8 @@ config = new Conf({
   cwd: appData.path()
 })
 
-getAsync = Promise.promisify(config.getAsync.bind(config))
-setAsync = Promise.promisify(config.setAsync.bind(config))
-
 module.exports = {
-  get: (key) ->
-    getAsync(key).tap ->
-
-  set: (state)->
-    setAsync(state).tap ->
-
+  get: Promise.promisify(config.getAsync.bind(config))
+  set: Promise.promisify(config.setAsync.bind(config))
   path: config.path
 }
