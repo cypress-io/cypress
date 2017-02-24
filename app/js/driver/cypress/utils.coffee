@@ -274,4 +274,14 @@ $Cypress.Utils = do ($Cypress, _) ->
         val = val[key]
         break unless val
       val
+
+    ## clientX and clientY by their definition
+    ## are calculated from viewport edge
+    ## and should subtract the pageX or pageY offset
+    ## see img: https://camo.githubusercontent.com/9963a83071b4b14c8dee6699335630f29d668d1f/68747470733a2f2f692d6d73646e2e7365632e732d6d7366742e636f6d2f64796e696d672f49433536313937302e706e67
+    getClientX: (coords, win) ->
+      coords.x - win.pageXOffset
+
+    getClientY: (coords, win) ->
+      coords.y - win.pageYOffset
   }

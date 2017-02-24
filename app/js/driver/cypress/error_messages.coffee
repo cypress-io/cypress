@@ -494,6 +494,10 @@ $Cypress.ErrorMessages = do ($Cypress) ->
         The value you synchronously returned was: '{{value}}'
       """
 
+    trigger:
+      invalid_argument: "#{cmd('trigger')} must be passed a non-empty string as its 1st argument. You passed: '{{cmd}}'."
+      multiple_elements: "#{cmd('trigger')} can only be called on a single element. Your subject contained {{num}} elements."
+
     type:
       empty_string: "#{cmd('type')} cannot accept an empty String. You need to actually type something."
       invalid: "Special character sequence: '{{chars}}' is not recognized. Available sequences are: {{allChars}}"
