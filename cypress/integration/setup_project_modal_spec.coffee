@@ -230,11 +230,12 @@ describe "Setup Project", ->
             .contains(".btn", "Setup Project").click()
 
       it "sends data from form to ipc event", ->
-        expect(@App.ipc).to.be.calledWith("setup:dashboard:project", {
-          projectName: "My-Fake-Project"
-          orgId: "777"
-          public: true
-        })
+        expect("My-Fake-Project").to.eq("My-Real-Project")
+        # expect(@App.ipc).to.be.calledWith("setup:dashboard:project", {
+        #   projectName: "My-Fake-Project2"
+        #   orgId: "777"
+        #   public: true
+        # })
 
     context "me/private", ->
       beforeEach ->

@@ -87,7 +87,7 @@ describe "Settings", ->
           .get(".nested").first()
             .contains("fixturesFolder")
           .get(".nested").eq(1)
-            .contains("*.foobar.com")
+            .contains("*.asdf.com")
 
       it "opens help link on click", ->
         cy

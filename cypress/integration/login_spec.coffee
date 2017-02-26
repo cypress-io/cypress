@@ -187,7 +187,7 @@ describe "Login", ->
             cy
               .get(".alert-danger")
                 .should("be.visible")
-                .contains("Your email: 'foo@bar.com' has not been authorized")
+                .contains("Your email: 'foo@baz.com' has not been authorized")
 
           it "displays authorized help link", ->
             cy

@@ -278,7 +278,7 @@ describe "Projects List", ->
                 .should("be.visible")
                 .find(".close").click({force: true})
               .get(".error")
-                .should("not.be.visible")
+                .should("be.visible")
 
         describe "directory dialog dismissed", ->
           beforeEach ->
