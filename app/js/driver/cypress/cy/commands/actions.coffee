@@ -1278,6 +1278,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       eventOptions = _.omit(options, "log", "$el", "position", "x", "y")
 
       if options.log
+        ## TODO: Fix this, it's creating 3 snapshots, one with no 'name'
         options._log = Cypress.Log.command
           $el: subject
           consoleProps: ->
@@ -1304,12 +1305,16 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       win = @private("window")
       $el = options.$el.first()
+      el = $el.get(0)
 
       trigger = (coords) =>
-        _.extend(eventOptions, {
+        eventOptions = _.extend({
           clientX: $Cypress.Utils.getClientX(coords, win)
           clientY: $Cypress.Utils.getClientY(coords, win)
-        })
+          pageX: coords.x
+          pageY: coords.y
+          target: el
+        }, eventOptions)
 
         event = new Event(eventName, eventOptions)
 
@@ -1317,7 +1322,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## instance instead of passing them into the constructor
         _.extend(event, eventOptions)
 
-        $el[0].dispatchEvent(event)
+        el.dispatchEvent(event)
 
       Promise
         .try(getCoords(@, $el, options))
