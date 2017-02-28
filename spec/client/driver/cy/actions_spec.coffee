@@ -5869,3 +5869,314 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button:first").click({force: true, timeout: 1000}).then ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
           expect(@log.attributes.consoleProps().Options).to.deep.eq {force: true, timeout: 1000}
+
+  context "#trigger", ->
+    it "sends event", (done) ->
+      btn = @cy.$$("#button")
+
+      coords = @cy.getCoordinates(btn)
+
+      btn.get(0).addEventListener "mouseover", (e) =>
+        obj = _(e).pick("bubbles", "cancelable", "clientX", "clientY", "target", "type")
+        expect(obj).to.deep.eq {
+          bubbles: true
+          cancelable: true
+          clientX: coords.x - @cy.private("window").pageXOffset
+          clientY: coords.y - @cy.private("window").pageYOffset
+          target: btn.get(0)
+          type: "mouseover"
+        }
+        done()
+
+      @cy.get("#button").ttrigger("mouseover")
+
+    it "bubbles up event by default", (done) ->
+      mouseover = (e) =>
+        @cy.private("window").removeEventListener "mouseover", mouseover
+        done()
+
+      @cy.private("window").addEventListener "mouseover", mouseover
+
+      @cy.get("#button").ttrigger("mouseover")
+
+    it "does not bubble up event if specified", (done) ->
+      mouseover = (e) =>
+        @cy.private("window").removeEventListener "mouseover", mouseover
+        done("Should not have bubbled to window listener")
+
+      @cy.private("window").addEventListener "mouseover", mouseover
+
+      @cy.get("#button").ttrigger("mouseover", {bubbles: false})
+
+      setTimeout ->
+        @cy.private("window").removeEventListener "mouseover", mouseover
+        done()
+      , 500
+
+    it "records correct clientX when el scrolled", (done) ->
+      btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo @cy.$$("body")
+
+      coords = @cy.getCoordinates(btn)
+
+      win = @cy.private("window")
+
+      btn.get(0).addEventListener "mouseover", (e) =>
+        expect(win.pageXOffset).to.be.gt(0)
+        expect(e.clientX).to.eq coords.x - win.pageXOffset
+        done()
+
+      @cy.get("#scrolledBtn").ttrigger("mouseover")
+
+    it "records correct clientY when el scrolled", (done) ->
+      btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo @cy.$$("body")
+
+      coords = @cy.getCoordinates(btn)
+
+      win = @cy.private("window")
+
+      btn.get(0).addEventListener "mouseover", (e) =>
+        expect(win.pageYOffset).to.be.gt(0)
+        expect(e.clientY).to.eq coords.y - win.pageYOffset
+        done()
+
+      @cy.get("#scrolledBtn").ttrigger("mouseover")
+
+    it "waits until element becomes visible", ->
+      btn = cy.$$("#button").hide()
+
+      retried = false
+
+      @cy.on "retry", _.after 3, ->
+        btn.show()
+        retried = true
+
+      @cy.get("#button").ttrigger("mouseover").then ->
+        expect(retried).to.be.true
+
+    it "waits until element is no longer disabled", ->
+      btn = cy.$$("#button").prop("disabled", true)
+
+      retried = false
+      mouseovers = 0
+
+      btn.on "mouseover", ->
+        mouseovers += 1
+
+      @cy.on "retry", _.after 3, ->
+        btn.prop("disabled", false)
+        retried = true
+
+      @cy.get("#button").ttrigger("mouseover").then ->
+        expect(mouseovers).to.eq(1)
+        expect(retried).to.be.true
+
+    it "waits until element stops animating", (done) ->
+      retries = []
+      mouseovers  = 0
+
+      p = $("<p class='slidein'>sliding in</p>")
+      p.on "mouseover", -> mouseovers += 1
+      p.css("animation-duration", ".5s")
+
+      @cy.on "retry", (obj) ->
+        expect(mouseovers).to.eq(0)
+        retries.push(obj)
+
+      p.on "animationstart", =>
+        t = Date.now()
+        _.delay =>
+          console.log Date.now() - t
+
+          @cy.get(".slidein").ttrigger("mouseover").then ->
+            expect(retries.length).to.be.gt(5)
+            done()
+        , 100
+
+      @cy.$$("#animation-container").append(p)
+
+    it "does not throw when waiting for animations is disabled", ->
+      @sandbox.stub(@Cypress, "config").withArgs("waitForAnimations").returns(false)
+
+      @cy._timeout(100)
+
+      p = $("<p class='slidein'>sliding in</p>")
+      p.css("animation-duration", ".5s")
+
+      @cy.$$("#animation-container").append(p)
+
+      @cy.get(".slidein").ttrigger("mouseover")
+
+    it "does not throw when turning off waitForAnimations in options", ->
+      @cy._timeout(100)
+
+      p = $("<p class='slidein'>sliding in</p>")
+      p.css("animation-duration", ".5s")
+
+      @cy.$$("#animation-container").append(p)
+
+      @cy.get(".slidein").ttrigger("mouseover", {waitForAnimations: false})
+
+    it "does not throw when setting animationDistanceThreshold extremely high in options", ->
+      @cy._timeout(100)
+
+      p = $("<p class='slidein'>sliding in</p>")
+      p.css("animation-duration", ".5s")
+
+      @cy.$$("#animation-container").append(p)
+
+      @cy.get(".slidein").ttrigger("mouseover", {animationDistanceThreshold: 1000})
+
+    describe "assertion verification", ->
+      beforeEach ->
+        @allowErrors()
+        @cy._timeout(200)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (attrs, log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it.skip "eventually passes the assertion", ->
+        @cy.$$("button:first").on "mouseover", ->
+          _.delay =>
+            $(@).addClass("moused-over")
+          , 50
+          return false
+
+        @cy.get("button:first").ttrigger("mouseover").should("have.class", "moused-over").then ->
+          ## TODO: fix this, it never gets here
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("ended")).to.be.true
+
+      it "eventually fails the assertion", (done) ->
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.get("button:first").ttrigger("mouseover").should("have.class", "moused-over")
+
+      it "does not log an additional log on failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (attrs, log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(3)
+          done()
+
+        @cy.get("button:first").ttrigger("mouseover").should("have.class", "moused-over")
+
+    describe "position argument", ->
+      it "can trigger event on center by default", (done) ->
+        div = @cy.$$("#massively-long-div")
+        onMouseover = (e) ->
+          div.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(108)
+          expect(e.clientY).to.equal(250)
+          done()
+        div.on("mouseover", onMouseover)
+
+        @cy.get("#massively-long-div").ttrigger("mouseover")
+
+      it "can trigger event on center", (done) ->
+        div = @cy.$$("#massively-long-div")
+        onMouseover = (e) ->
+          div.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(108)
+          expect(e.clientY).to.equal(250)
+          done()
+        div.on("mouseover", onMouseover)
+
+        @cy.get("#massively-long-div").ttrigger("mouseover", "center")
+
+      it "can trigger event on topLeft", (done) ->
+        div = @cy.$$("#massively-long-div")
+        onMouseover = (e) ->
+          div.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(8)
+          expect(e.clientY).to.equal(0)
+          done()
+        div.on("mouseover", onMouseover)
+
+        @cy.get("#massively-long-div").ttrigger("mouseover", "topLeft")
+
+      it "can trigger event on topRight", (done) ->
+        div = @cy.$$("#massively-long-div")
+        onMouseover = (e) ->
+          div.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(207)
+          expect(e.clientY).to.equal(0)
+          done()
+        div.on("mouseover", onMouseover)
+
+        @cy.get("#massively-long-div").ttrigger("mouseover", "topRight")
+
+      it "can trigger event on bottomLeft", (done) ->
+        div = @cy.$$("#massively-long-div")
+        onMouseover = (e) ->
+          div.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(8)
+          expect(e.clientY).to.equal(499)
+          done()
+        div.on("mouseover", onMouseover)
+
+        @cy.get("#massively-long-div").ttrigger("mouseover", "bottomLeft")
+
+      it "can trigger event on bottomRight", (done) ->
+        div = @cy.$$("#massively-long-div")
+        onMouseover = (e) ->
+          div.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(207)
+          expect(e.clientY).to.equal(499)
+          done()
+        div.on("mouseover", onMouseover)
+
+        @cy.get("#massively-long-div").ttrigger("mouseover", "bottomRight")
+
+      it "can pass options along with position", (done) ->
+        div = @cy.$$("#massively-long-div")
+        onMouseover = (e) ->
+          div.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(207)
+          expect(e.clientY).to.equal(499)
+          done()
+        div.on("mouseover", onMouseover)
+
+        @cy.get("#massively-long-div").ttrigger("mouseover", "bottomRight", {bubbles: false})
+
+    describe "relative coordinate arguments", ->
+      it "can specify x and y", (done) ->
+        div = @cy.$$("#massively-long-div")
+        onMouseover = (e) ->
+          div.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(83)
+          expect(e.clientY).to.equal(78)
+          done()
+        div.on("mouseover", onMouseover)
+
+        @cy.get("#massively-long-div").ttrigger("mouseover", 75, 78)
+
+      it "can pass options along with x, y", (done) ->
+        div = @cy.$$("#massively-long-div")
+        onMouseover = (e) ->
+          div.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(83)
+          expect(e.clientY).to.equal(78)
+          done()
+        div.on("mouseover", onMouseover)
+
+        @cy.get("#massively-long-div").ttrigger("mouseover", 75, 78, {bubbles: false})
