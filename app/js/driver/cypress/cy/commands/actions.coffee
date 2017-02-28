@@ -664,8 +664,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
                 ## try again now that we've nudged the window's scroll
                 return @_retry(retry, options)
+                         .then(verifyElementAtCoordinates)
 
               return @_retry(getCoords(@, $el, options), options)
+                       .then(verifyElementAtCoordinates)
 
             return coordsObj(coords, $elToClick)
 
@@ -1278,7 +1280,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       eventOptions = _.omit(options, "log", "$el", "position", "x", "y")
 
       if options.log
-        ## TODO: Fix this, it's creating 3 snapshots, one with no 'name'
         options._log = Cypress.Log.command
           $el: subject
           consoleProps: ->
@@ -1328,7 +1329,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         .try(getCoords(@, $el, options))
         .then(trigger)
         .then ->
-          options._log.snapshot("after")
+          options._log.snapshot("after").end()
         .return(subject)
 
   Cypress.addParentCommand
