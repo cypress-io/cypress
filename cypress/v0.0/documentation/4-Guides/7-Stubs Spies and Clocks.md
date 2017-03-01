@@ -39,6 +39,14 @@ You can refer to each of these libraries documentation for more examples and exp
 
 # Common Scenarios
 
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)",
+  "title": "Example test!"
+}
+[/block]
+
 ## Stubs
 
 A stub is a way to modify a function and force its behavior to be controlled by you (the programmer).

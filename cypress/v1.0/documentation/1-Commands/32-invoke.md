@@ -36,6 +36,14 @@ var fn = function(){
 cy.wrap({foo: fn}).invoke("foo").should("eq", "bar") // true
 ```
 
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe where we use cy.invoke('text') to test against HTML content](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)",
+  "title": "Using cy.invoke('text')"
+}
+[/block]
+
 ## Properties that are functions are invoked
 
 ```javascript
@@ -48,6 +56,14 @@ cy
     .should("be.visible") // true
     .find("input").type("Cypress is great")
 ```
+
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe where we use cy.invoke('show') and cy.invoke('trigger') to click an element that is only visible on hover](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements.js)",
+  "title": "Using cy.invoke('show') and cy.invoke('trigger')"
+}
+[/block]
 
 ***
 
@@ -62,6 +78,8 @@ cy.get("input").invoke("getKendoDropDownList").then(function(dropDownList){
   return dropDownList.select("apples")
 })
 ```
+
+***
 
 ## We can rewrite the previous example in a more terse way and add an assertion.
 
@@ -91,6 +109,14 @@ cy
     .and("be.lt", 20) // true
 ```
 
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe where we use cy.invoke('removeAttr', 'target') to test clicking on a link without opening in a new tab](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/tab_handling_anchor_links_spec.js)",
+  "title": "Using cy.invoke('removeAttr', 'target')"
+}
+[/block]
+
 ## Arguments are automatically forwarded to the function
 
 ```javascript
@@ -106,3 +132,5 @@ cy
 - [its](https://on.cypress.io/api/its)
 - [wrap](https://on.cypress.io/api/wrap)
 - [then](https://on.cypress.io/api/then)
+- [stub](https://on.cypress.io/api/stub)
+- [spy](https://on.cypress.io/api/spy)
