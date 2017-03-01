@@ -183,6 +183,18 @@ cy
 
 ***
 
+## Example Recipe
+
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)",
+  "title": "Using cy.clock and cy.tick"
+}
+[/block]
+
+***
+
 # Command Log
 
 ## Create a clock and tick it 1 second
@@ -205,7 +217,8 @@ When clicking on the `clock` command within the command log, the console outputs
 
 # Related
 
+- [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
+- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
 - [tick](https://on.cypress.io/api/tick)
 - [spy](https://on.cypress.io/api/spy)
 - [stub](https://on.cypress.io/api/stub)
-- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)

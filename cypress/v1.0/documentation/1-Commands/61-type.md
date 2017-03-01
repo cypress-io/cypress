@@ -123,6 +123,14 @@ When using special character sequences (see table at top of page), it's possible
 cy.get("input").type("{shift}{alt}Q")
 ```
 
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe of logging in by typing username and password](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)",
+  "title": "Typing into a login form"
+}
+[/block]
+
 ***
 
 ## Hold down modifier key and type a word

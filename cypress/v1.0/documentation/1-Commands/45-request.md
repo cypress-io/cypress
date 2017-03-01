@@ -176,7 +176,7 @@ cy
     url: '/login_with_form', // baseUrl will be prepended to this url
     form: true, // indicates the body should be form urlencoded and sets Content-Type: application/x-www-form-urlencoded headers
     body: {
-      username: 'cypress',
+      username: 'jane.lane',
       password: 'password123'
     }
   })
@@ -184,6 +184,14 @@ cy
   // just to prove we have a session
   cy.getCookie("cypress-session-cookie").should('exist')
 ```
+
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe using cy.request for HTML form submissions](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)",
+  "title": "Using cy.request for HTML Forms"
+}
+[/block]
 
 ***
 
@@ -246,4 +254,8 @@ If Cypress cannot determine the host it will throw an explicit error.
 
 # Related
 
+- [Recipe: Logging In - HTML Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
+- [Recipe: Logging In - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
+- [Recipe: Logging In - CSRF Tokens](https://github.com/cypress-io/cypress-example-recipes#logging-in---csrf-tokens)
+- [Recipe: Logging In - Single Sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
 - [visit](https://on.cypress.io/api/visit)
