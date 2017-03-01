@@ -1309,12 +1309,15 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       el = $el.get(0)
 
       trigger = (coords) =>
+        if options._log
+          ## display the red dot at these coords
+          options._log.set({coords: coords})
+
         eventOptions = _.extend({
           clientX: $Cypress.Utils.getClientX(coords, win)
           clientY: $Cypress.Utils.getClientY(coords, win)
           pageX: coords.x
           pageY: coords.y
-          target: el
         }, eventOptions)
 
         event = new Event(eventName, eventOptions)
