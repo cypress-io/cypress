@@ -68,6 +68,14 @@ cy
 
 ```
 
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe on testing window.fetch using cy.its()](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)",
+  "title": "Testing cy.window().its('fetch')"
+}
+[/block]
+
 ***
 
 ## Drill into nested properties

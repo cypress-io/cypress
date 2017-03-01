@@ -123,6 +123,14 @@ This is useful when you want the click issued no matter what. Forcing a click di
 cy.get("button").click({force: true})
 ```
 
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe on testing hover and working with hidden elements](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements.js)",
+  "title": "Dealing with hover and hidden elements"
+}
+[/block]
+
 ***
 
 ## Force a click with position argument

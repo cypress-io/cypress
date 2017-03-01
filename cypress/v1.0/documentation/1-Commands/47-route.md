@@ -108,6 +108,14 @@ cy
   .wait("@postUser")
 ```
 
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe using cy.route to POST for login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)",
+  "title": "Setup route to POST to login"
+}
+[/block]
+
 ***
 
 # Url and Response Usage
@@ -295,6 +303,30 @@ cy
     }
   })
 ```
+
+## Simulate the server returning 503 and redirect
+
+```javascript
+cy
+  // simulate the server returning 503 with
+  // empty JSON response body
+  .route({
+    method: 'POST',
+    url: '/login',
+    response: {
+      // simulate a redirect to another page
+      redirect: '/error'
+    }
+  })
+```
+
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe using cy.route to simulate a 503 on POST to login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)",
+  "title": "Setup route to error on POST to login"
+}
+[/block]
 
 ***
 
@@ -500,7 +532,9 @@ When clicking on `XHR Stub` within the Command Log, the console outputs the foll
 
 # Related
 
+- [Guide: Network Requests](https://on.cypress.io/guides/network-requests-xhr)
+- [Recipe: Loggin in - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
 - [server](https://on.cypress.io/api/server)
 - [wait](https://on.cypress.io/api/wait)
 - [as](https://on.cypress.io/api/as)
-- [Network Requests](https://on.cypress.io/guides/network-requests-xhr)
+- [fixture](https://on.cypress.io/api/fixture)

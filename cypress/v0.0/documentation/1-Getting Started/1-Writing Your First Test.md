@@ -57,6 +57,14 @@ Test files may be written as `.js`, `.jsx`, `.coffee`, or `cjsx` files.
 
 Cypress supports ES2015, ES2016, ES2017, and JSX. ES2015 modules and CommonJS modules are also supported, so you can `import` or `require` both npm packages and local modules.
 
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe using ES2015 and CommonJS modules](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/es2015_commonjs_modules_spec.js)",
+  "title": "Importing ES2015 or CommonJS modules"
+}
+[/block]
+
 To see an example of every command used in Cypress, open the `example_spec.js` within your `cypress/integration` folder.
 
 To start writing tests for your app, simply create a new file like `app_spec.js` within your `cypress/integration` folder. Refresh your tests list in the Cypress GUI and your new file should have appeared in the list.
@@ -69,4 +77,4 @@ Cypress is built on top of [Mocha](https://on.cypress.io/guides/bundled-tools#se
 
 If you're familiar with writing tests in JavaScript, then writing tests in Cypress will be a breeze.
 
-We're still working on introductory docs and videos. For now, [check out some examples](https://on.cypress.io/guides/all-example-apps) of applications using Cypress tests.
+We're still working on introductory docs and videos. For now, [check out some examples](https://on.cypress.io/guides/all-example-apps) of applications using Cypress tests and [check out some example recipes we've written](https://github.com/cypress-io/cypress-example-recipes) for special use cases.

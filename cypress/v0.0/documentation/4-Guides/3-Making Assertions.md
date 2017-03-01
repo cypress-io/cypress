@@ -57,6 +57,14 @@ These assertions are more commonly used when writing unit tests, but can also be
 expect(true).to.be.true
 ```
 
+[block:callout]
+{
+  "type": "info",
+  "body": "Check out our example recipes for [unit testing](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_application_code_spec.js) and [unit testing React components](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_react_enzyme_spec.js)",
+  "title": "Unit Testing"
+}
+[/block]
+
 Explicit assertions are great when you want to perform custom logic prior to making the assertion.
 
 There is an [open issue](https://github.com/cypress-io/cypress/issues/101) for supporting `assert`.

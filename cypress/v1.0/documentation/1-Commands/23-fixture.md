@@ -186,20 +186,20 @@ The following encodings are supported:
 
 # Usage with `cy.route()`
 
+## Using fixture or fx shortcuts
+
 Fixtures can be referenced directly by the special keywords: `fixture:` or `fx:`.
 
 This enables you to set a fixture as the response for a route without having to first use the `cy.fixture` command.
-
-## Example 1:
 
 ```javascript
 cy.route("GET", /users/, "fixture:users") // this works
 cy.route("GET", /users/, "fx:users")      // this also works
 ```
 
-This saves you from having to explicitly load the fixture first (like in [Example #2](https://on.cypress.io/api/fixture#section-example-2-)).
+This saves you from having to explicitly load the fixture first (like [below](https://on.cypress.io/api/fixture#section-using-cy-then-to-access-fixture-data)).
 
-## Example 2:
+## Using cy.then to access fixture data
 
 ```javascript
 cy
@@ -208,9 +208,19 @@ cy
   })
 ```
 
-However if you still need access to the fixture data, instead of yielding the fixture's data in [Example #2](https://on.cypress.io/api/fixture#section-example-2-), we can make use of [aliasing](https://on.cypress.io/guides/using-aliases).
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe using cy.fixture to bootstrap data for our application.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)",
+  "title": "Using cy.fixture for response data"
+}
+[/block]
 
-## Example 3:
+## Using an alias to access a fixture
+
+However if you still need access to the fixture data, instead of [yielding the fixture's data](https://on.cypress.io/api/fixture#section-using-cy-then-to-access-fixture-data), we can make use of [aliasing](https://on.cypress.io/guides/using-aliases).
+
+Using an alias provides the benefit of terseness and readability.
 
 ```javascript
 cy
@@ -225,23 +235,21 @@ cy
   })
 ```
 
-Using an alias provides the benefit of terseness and readability.
+## Modifying fixture data before using it
 
-## Example 4:
+You can also modify fixture data directly before passing it along to the route.
 
 ```javascript
 cy
   .fixture("user").then(function(user){
-    user.firstName = "Jennifer"
+    user.firstName = "Jane"
 
     cy.route("GET", "/users/1", user)
   })
   .visit("/users")
-  .get(".user").should("include", "Jennifer")
+  .get(".user").should("include", "Jane")
 })
 ```
-
-You can also modify fixture data directly before passing it along to the route.
 
 ***
 
@@ -253,5 +261,7 @@ You can also modify fixture data directly before passing it along to the route.
 
 # Related
 
+- [Guide: Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
+- [Recipe: Bootstrapping App Test Data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
 - [route](https://on.cypress.io/api/route)
-- [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
+- [then](https://on.cypress.io/api/then)
