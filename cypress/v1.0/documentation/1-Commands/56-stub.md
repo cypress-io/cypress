@@ -87,6 +87,18 @@ expect(removeStub).to.be.called
 
 ***
 
+## Example Recipe
+
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)",
+  "title": "Using cy.stub"
+}
+[/block]
+
+***
+
 ## Alias a stub
 
 Adding an alias using [`cy.as`](https://on.cypress.io/api/as) to stubs makes them easier to identify in error messages and Cypress's command log.
@@ -133,7 +145,8 @@ When clicking on the `(stub-1)` event within the command log, the console output
 
 # Related
 
+- [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
+- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
+- [Recipe: Unit Test - Stubbing Dependencies](https://github.com/cypress-io/cypress-example-recipes#unit-test---stubbing-dependencies)
 - [spy](https://on.cypress.io/api/spy)
 - [clock](https://on.cypress.io/api/clock)
-- [Recipe: Unit Test - Stubbing Dependencies](https://github.com/cypress-io/cypress-example-recipes#unit-test---stubbing-dependencies)
-- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)

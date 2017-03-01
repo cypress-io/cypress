@@ -118,6 +118,14 @@ cy.visit("http://localhost:3000/#dashboard", {
 })
 ```
 
+[block:callout]
+{
+  "type": "info",
+  "body": "Check out our example recipes using cy.visit's onBeforeLoad option to [help bootstrap app data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js), to [set a token to localStorage for login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js) and to [stub window.fetch](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)",
+  "title": "Using onBeforeLoad"
+}
+[/block]
+
 ***
 
 ## Provide an `onLoad` callback function
@@ -216,5 +224,7 @@ Cypress will automatically apply the server and routes to the very next `visit` 
 
 # Related
 
+- [Recipe: Bootstrapping App Test Data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
+- [Recipe: Logging In - Single Sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
 - [go](https://on.cypress.io/api/go)
 - [server](https://on.cypress.io/api/server)
