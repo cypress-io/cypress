@@ -20,6 +20,10 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("select[name=foods]").select("Ramen").then ($select) ->
         expect($select).to.have.value("Ramen")
 
+    it "can handle options nested in optgroups", ->
+      @cy.get("select[name=starwars]").select("Jar Jar").then ($select) ->
+        expect($select).to.have.value("jarjar")
+
     it "can select an array of values", ->
       @cy.get("select[name=movies]").select(["apoc", "br"]).then ($select) ->
         expect($select.val()).to.deep.eq ["apoc", "br"]

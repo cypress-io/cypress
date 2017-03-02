@@ -1134,7 +1134,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         values  = []
         optionEls = []
-        optionsObjects = options.$el.children().map (index, el) ->
+        optionsObjects = options.$el.find("option").map (index, el) ->
           ## push the value in values array if its
           ## found within the valueOrText
           value = el.value
