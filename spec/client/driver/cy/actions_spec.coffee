@@ -24,6 +24,11 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("select[name=starwars]").select("Jar Jar").then ($select) ->
         expect($select).to.have.value("jarjar")
 
+    it "can handle options with same value selected by text", ->
+      @cy.get("select[name=startrek]").select("Uhura").then ($select) ->
+        expect($select.val()).to.equal("same")
+        expect($select.find("option:selected")).to.have.text("Uhura")
+
     it "can select an array of values", ->
       @cy.get("select[name=movies]").select(["apoc", "br"]).then ($select) ->
         expect($select.val()).to.deep.eq ["apoc", "br"]
