@@ -1,5 +1,5 @@
 slug: using-the-cypress-runner
-excerpt: Seeing test commands, instrumentation and your application under test.
+excerpt: Review test commands, instrumentation and your application under test.
 
 # Contents
 
@@ -14,8 +14,6 @@ excerpt: Seeing test commands, instrumentation and your application under test.
 # Overview
 
 Cypress runs tests in a unique interactive runner that allows you to see commands as they execute while also viewing the application under test.
-
-***
 
 ![Cypress Test Runner](https://www.cypress.io/img/test-runner-gui-in-browser.9e6f99d7.png)
 
@@ -68,7 +66,7 @@ For certain commands like [`cy.route()`](https://on.cypress.io/api/route), [`cy.
 
 ## Application Under Test
 
-The righthand side of the test runner is used to display the Application Under Test (APU: the application that was navigated to using a [`cy.visit()`](https://on.cypress.io/api/visit) or any subsequent routing calls made from the visited application.
+The righthand side of the test runner is used to display the Application Under Test (AUT: the application that was navigated to using a [`cy.visit()`](https://on.cypress.io/api/visit) or any subsequent routing calls made from the visited application.
 
 In the example below, we wrote the following code in our test file:
 
@@ -82,9 +80,9 @@ In the corresponding Application Preview below, you can see `https://example.cyp
 
 ![screen shot 2017-03-06 at 2 31 06 pm](https://cloud.githubusercontent.com/assets/1271364/23626182/ec9d421a-0279-11e7-8ff2-42f33d2fe1ca.png)
 
-The APU also displays in the size and orientation specified in your tests. You can change the size or orientation with the [`cy.viewport()`](https://on.cypress.io/api/viewport) command or in your [Cypress configuration](https://docs.cypress.io/docs/configuration#section-viewport). If the APU does not fit within the current browser window, it is scaled appropriately to fit within the window.
+The AUT also displays in the size and orientation specified in your tests. You can change the size or orientation with the [`cy.viewport()`](https://on.cypress.io/api/viewport) command or in your [Cypress configuration](https://docs.cypress.io/docs/configuration#section-viewport). If the AUT does not fit within the current browser window, it is scaled appropriately to fit within the window.
 
-The current size and scale of the APU is displayed in the top right corner of the window.
+The current size and scale of the AUT is displayed in the top right corner of the window.
 
 The image below shows that our application is displaying at `1000px` width, `660px` height and scaled to `100%`.
 
