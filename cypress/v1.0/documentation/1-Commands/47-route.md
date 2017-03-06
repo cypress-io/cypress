@@ -304,7 +304,7 @@ cy
   })
 ```
 
-## Simulate the server returning 503 and redirect
+## Simulate a server redirect
 
 ```javascript
 cy
