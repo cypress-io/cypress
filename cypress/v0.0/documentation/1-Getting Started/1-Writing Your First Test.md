@@ -79,7 +79,7 @@ To start writing tests for your app, simply create a new file like `app_spec.js`
 
 ***
 
-# How to write tests
+# How to Write Tests
 
 Cypress is built on top of [Mocha](https://on.cypress.io/guides/bundled-tools#section-mocha) and uses its `bdd` interface. Tests you write in Cypress will mostly adhere to this style.
 
