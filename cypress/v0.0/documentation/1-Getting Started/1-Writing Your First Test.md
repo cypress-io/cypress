@@ -39,15 +39,19 @@ Cypress also adds placeholder files to help get you started with examples in eac
 /cypress/support/index.js
 ```
 
-While Cypress allows for configuration of where your tests, fixtures, and support files can be located, if you're starting your first project, we recommend you use the above structure.
-
 [block:callout]
 {
   "type": "info",
-  "body": "You can modify the folder configuration in your `cypress.json`. See [configuration](https://on.cypress.io/guides/configuration) for more detail.",
-  "title": "Configure Folder Structure"
+  "body": "[Check out our example recipe using support files to import common utilities](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/es2015_commonjs_modules_spec.js)",
+  "title": "Using Support files for common functionality"
 }
 [/block]
+
+**Configuring Folder Structure**
+
+While Cypress allows for configuration of where your tests, fixtures, and support files are located, if you're starting your first project, we recommend you use the above structure.
+
+You can modify the folder configuration in your `cypress.json`. See [configuration](https://on.cypress.io/guides/configuration) for more detail.
 
 ***
 
