@@ -3,7 +3,11 @@ excerpt: Seeing test commands, instrumentation and your application under test.
 
 # Contents
 
-- :fa-angle-right: [Overview](#section-Overview)
+- :fa-angle-right: [Overview](#section-overview)
+- :fa-angle-right: [Test Runner Components](#section-test-runner-components)
+  - [Command Log](#section-command-log)
+  - [Instrument Panel](#section-instrument-panel)
+  - [Application Under Test](#section-application-under-test)
 
 ***
 
@@ -17,9 +21,9 @@ Cypress runs tests in a unique interactive runner that allows you to see command
 
 ***
 
-## Test Runner Components:
+# Test Runner Components:
 
-#### Command Log
+## Command Log
 
 The lefthand side of the test runner is a visual representation of your test suite. Each test block is properly nested and each test, when clicked, displays every Cypress command and assertion executed within the test's block as well as any command or assertion executed in relevant `before`, `beforeEach`, `afterEach`, and `after` hooks.
 
@@ -46,7 +50,7 @@ Each command, assertion, or error, when clicked on, displays extra information i
 
 ***
 
-#### Instrument Panel
+## Instrument Panel
 
 For certain commands like [`cy.route()`](https://on.cypress.io/api/route), [`cy.stub()`](https://on.cypress.io/api/stub), and [`cy.spy()`](https://on.cypress.io/api/spy), an extra instrument panel is displayed above the test to give more information about the state of your tests.
 
@@ -62,7 +66,7 @@ For certain commands like [`cy.route()`](https://on.cypress.io/api/route), [`cy.
 
 ![Spies Instrument Panel](https://cloud.githubusercontent.com/assets/1157043/22437713/1d5f7be6-e6f7-11e6-9457-f35cbeaa5385.png)
 
-#### Application Preview
+## Application Under Test
 
 The righthand side of the test runner is used to display the Application Under Test (APU: the application that was navigated to using a [`cy.visit()`](https://on.cypress.io/api/visit) or any subsequent routing calls made from the visited application.
 
