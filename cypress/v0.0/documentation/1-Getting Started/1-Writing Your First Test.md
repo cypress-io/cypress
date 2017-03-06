@@ -142,7 +142,7 @@ Cypress also provides hooks (borrowed from [Mocha](https://on.cypress.io/guides/
 
 These are helpful to set conditions that you want run before a set of tests or before each test. They're also helpful to clean up conditions after a set of tests or after each test.
 
-```
+```javascript
 describe('Hooks', function() {
   before(function() {
     // runs before all tests in this block
@@ -162,7 +162,7 @@ describe('Hooks', function() {
 })
 ```
 
-The order of hook and test execution is as follows:
+**The order of hook and test execution is as follows:**
 
 - All `before()` hooks run (once)
 - Any `beforeEach()` hooks run
@@ -228,7 +228,7 @@ it.skip('returns "fizz" when number is multiple of 3', function(){
 
 You can dynamically generate tests using JavaScript.
 
-```
+```javascript
 describe('if your app uses jQuery', function(){
   ['mouseover', 'mouseout', 'mouseenter', 'mouseleave'].forEach((event) => {
     it(`triggers event: '${event}`, function(){
