@@ -57,6 +57,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.4 - *(03/07/17)*
+- enable error messages to be copyable
+
 #### 0.3.3 - *(02/05/17)*
 - display spy / stub aliases
 
