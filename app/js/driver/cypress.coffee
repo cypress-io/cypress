@@ -50,6 +50,9 @@ window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
 
       @trigger("config", config)
 
+    setVersion: (version) ->
+      @version = version
+
     initialize: (specWindow, $remoteIframe) ->
       ## push down the options
       ## to the runner
