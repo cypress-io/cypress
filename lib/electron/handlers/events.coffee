@@ -204,9 +204,18 @@ handleEvent = (options, bus, event, id, type, arg) ->
         .then(send)
         .catch(sendErr)
 
+      openProject = ->
+        project.open(arg, options, {
+          onFocusTests: onFocusTests
+          onSpecChanged: onSpecChanged
+          onSettingsChanged: onSettingsChanged
+        })
+        .then(getConfig)
+        .catch(sendErr)
+
       onSettingsChanged = ->
         project.reboot()
-        .then(open)
+        .then(openProject)
 
       onSpecChanged = (spec) ->
         send({specChanged: spec})
@@ -217,17 +226,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
         bus.emit("focus:tests")
 
-      open = ->
-        project.open(arg, options, {
-          onFocusTests: onFocusTests
-          onSpecChanged: onSpecChanged
-          onSettingsChanged: onSettingsChanged
-        })
-        .then(getConfig)
-        .catch(sendErr)
-
       ## initially open!
-      open()
+      openProject()
 
     when "close:project"
       project.close()
