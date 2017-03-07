@@ -943,7 +943,13 @@ describe "lib/cypress", ->
 
   context "headed", ->
     beforeEach ->
-      @win = {}
+      @win = {
+        on: @sandbox.stub()
+        webContents: {
+          on: @sandbox.stub()
+        }
+      }
+
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(Renderer, "create").resolves(@win)
       @sandbox.stub(Server.prototype, "startWebsockets")

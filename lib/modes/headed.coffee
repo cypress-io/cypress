@@ -71,8 +71,10 @@ module.exports = {
         bus.emit("menu:item:clicked", "log:out")
     })
 
-    savedState.get().then (state) =>
-      Renderer.create(@getRendererArgs(state)).then (win) =>
+    savedState.get()
+    .then (state) =>
+      Renderer.create(@getRendererArgs(state))
+      .then (win) =>
         ## cause the browser window instance
         ## to receive focus when we"ve been
         ## told to focus on the tests!
