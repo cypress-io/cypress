@@ -11,6 +11,7 @@ Updater  = require("#{root}../lib/updater")
 user     = require("#{root}../lib/user")
 errors   = require("#{root}../lib/errors")
 launcher = require("#{root}../lib/launcher")
+open     = require("#{root}../lib/util/open")
 logs     = require("#{root}../lib/electron/handlers/logs")
 events   = require("#{root}../lib/electron/handlers/events")
 dialog   = require("#{root}../lib/electron/handlers/dialog")
@@ -303,6 +304,33 @@ describe "lib/electron/handlers/events", ->
 
         @handleEvent("get:orgs").then =>
           @expectSendErrCalledWith(err)
+
+    describe "open:finder", ->
+      it "opens with open lib", ->
+        @sandbox.stub(open, "opn").resolves("okay")
+
+        @handleEvent("open:finder", "path").then =>
+          expect(open.opn).to.be.calledWith("path")
+          @expectSendCalledWith("okay")
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(open, "opn").rejects(err)
+
+        @handleEvent("open:finder", "path").then =>
+          @expectSendErrCalledWith(err)
+
+      it "works even after project is opened (issue #227)", ->
+        @sandbox.stub(open, "opn").resolves("okay")
+        @sandbox.stub(Project.prototype, "open")
+        @sandbox.stub(Project.prototype, "getConfig").resolves({some: "config"})
+
+        @handleEvent("open:project", "path/to/project")
+        .then =>
+          @handleEvent("open:finder", "path")
+        .then =>
+          expect(open.opn).to.be.calledWith("path")
+          @expectSendCalledWith("okay")
 
   context "project events", ->
     describe "get:projects", ->

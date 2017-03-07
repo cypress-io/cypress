@@ -443,27 +443,27 @@ describe "lib/socket", ->
         expect(result).to.be.undefined
 
       it "returns undefined if #testFilePath matches arguments", ->
-        @socket.testFilePath = "cypress/integration/test1.js"
+        @socket.testFilePath = "tests/test1.js"
         result = @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers)
         expect(result).to.be.undefined
 
       it "closes existing watched test file", ->
         remove = @sandbox.stub(@watchers, "removeBundle")
-        @socket.testFilePath = "test1.js"
-        @socket.watchTestFileByPath(@cfg, "test1.js", @watchers).then ->
+        @socket.testFilePath = "tests/test1.js"
+        @socket.watchTestFileByPath(@cfg, "test2.js", @watchers).then ->
           expect(remove).to.be.calledWithMatch("test1.js")
 
       it "sets #testFilePath", ->
         @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers).then =>
-          expect(@socket.testFilePath).to.eq "cypress/integration/test1.js"
+          expect(@socket.testFilePath).to.eq "tests/test1.js"
 
       it "can normalizes leading slash", ->
         @socket.watchTestFileByPath(@cfg, "/integration/test1.js", @watchers).then =>
-          expect(@socket.testFilePath).to.eq "cypress/integration/test1.js"
+          expect(@socket.testFilePath).to.eq "tests/test1.js"
 
       it "watches file by path", ->
         @socket.watchTestFileByPath(@cfg, "integration/test2.coffee", @watchers)
-        expect(@watchers.watchBundle).to.be.calledWith("cypress/integration/test2.coffee", @cfg)
+        expect(@watchers.watchBundle).to.be.calledWith("tests/test2.coffee", @cfg)
 
     context "#startListening", ->
       it "sets #testsDir", ->

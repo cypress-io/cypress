@@ -24,11 +24,6 @@ module.exports = {
   reset: ->
     builtFiles = {}
 
-  shouldWatch: (watchForFileChanges) ->
-    ## we should watch only if
-    ## watchForFileChanges isnt false
-    watchForFileChanges isnt false
-
   outputPath: (projectName = "", filePath) ->
     appData.path("bundles", sanitize(projectName), filePath)
 
@@ -37,10 +32,6 @@ module.exports = {
       return built
 
     emitter = new EE()
-
-    ## dont watch for file changes if
-    ## config has specifically turned it off
-    shouldWatch = @shouldWatch(config.watchForFileChanges)
 
     absolutePath = path.join(config.projectRoot, filePath)
 
@@ -51,7 +42,7 @@ module.exports = {
       packageCache: {}
     })
 
-    if shouldWatch
+    if not config.isHeadless
       bundler.plugin(watchify, {
         ignoreWatch: [
           "**/.git/**"
@@ -72,21 +63,19 @@ module.exports = {
           bundler
           .bundle()
           .on "error", (err) =>
-            if shouldWatch
+            if config.isHeadless
+              err.filePath = absolutePath
+              ## backup the original stack before its
+              ## potentially modified from bluebird
+              err.originalStack = err.stack
+              reject(err)
+            else
               stringStream(@clientSideError(err))
               .pipe(fs.createWriteStream(outputPath))
 
               ## TODO: do we need to wait for the 'end'
               ## event here before resolving?
               resolve()
-            else
-              err.filePath = absolutePath
-
-              ## backup the original stack before its
-              ## potentially modified from bluebird
-              err.originalStack = err.stack
-
-              reject(err)
           .on "end", ->
             resolve()
           .pipe(fs.createWriteStream(outputPath))
@@ -108,12 +97,11 @@ module.exports = {
       "react/lib/ExecutionEnvironment"
     ])
 
-    if shouldWatch
-      bundler.on "update", (filePaths) ->
-        latestBundle = bundle().then ->
-          for updatedFilePath in filePaths
-            emitter.emit("update", updatedFilePath)
-          return
+    bundler.on "update", (filePaths) ->
+      latestBundle = bundle().then ->
+        for updatedFilePath in filePaths
+          emitter.emit("update", updatedFilePath)
+        return
 
     latestBundle = bundle()
 

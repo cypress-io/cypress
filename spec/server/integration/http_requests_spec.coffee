@@ -17,6 +17,7 @@ streamToPromise = require("stream-to-promise")
 evilDns       = require("evil-dns")
 Promise       = require("bluebird")
 httpsServer   = require("@cypress/core-https-proxy/test/helpers/https_server")
+pkg           = require("#{root}package.json")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 Watchers      = require("#{root}lib/watchers")
@@ -241,6 +242,15 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.match(/Runner.start/)
+
+    it "sends Cypress.version", ->
+      @setup({baseUrl: "http://localhost:9999/app"})
+      .then =>
+        @rp("http://localhost:9999/__")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.include("version")
+          expect(res.body).to.include(pkg.version)
 
   context "GET /__cypress/runner/*", ->
     beforeEach ->
