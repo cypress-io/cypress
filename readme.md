@@ -69,6 +69,9 @@ MIT
 
 ## Changelog
 
+#### 0.4.6 - *(03/07/17)*
+- provide help links to explain orgs + access
+
 #### 0.4.5 - *(02/11/17)*
 - added --record flag
 
