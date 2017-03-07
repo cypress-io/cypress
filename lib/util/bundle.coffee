@@ -40,13 +40,24 @@ module.exports = {
       extensions:   [".js", ".jsx", ".coffee", ".cjsx"]
       cache:        {}
       packageCache: {}
-      ## don't watch in headless mode
-      plugin:       if config.isHeadless then [] else [watchify]
     })
+
+    if not config.isHeadless
+      bundler.plugin(watchify, {
+        ignoreWatch: [
+          "**/.git/**"
+          "**/.nyc_output/**"
+          "**/.sass-cache/**"
+          "**/bower_components/**"
+          "**/coverage/**"
+          "**/node_modules/**"
+        ]
+      })
 
     bundle = =>
       new Promise (resolve, reject) =>
         outputPath = @outputPath(config.projectName, filePath)
+        ## TODO: only ensure directory when first run and not on updates?
         fs.ensureDirAsync(path.dirname(outputPath))
         .then =>
           bundler
