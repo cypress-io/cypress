@@ -287,6 +287,10 @@
 
 
 .setup-project-modal {
+  a>i {
+    color: #999;
+  }
+
   .label-title {
     overflow: auto;
   }
@@ -430,6 +434,17 @@
       position: relative;
     }
   }
+
+  .text-danger {
+    margin-bottom: 0;
+  }
+  .alert-danger {
+    margin: 0 0 1em;
+    padding: 5px;
+    max-height: 200px;
+    overflow: auto;
+    text-align: left;
+  }
 }
 
 .request-access {
@@ -469,19 +484,6 @@
 .runs-list-error {
   .alert-danger {
     margin: 0 2em 1em;
-    max-height: 200px;
-    overflow: auto;
-    text-align: left;
-  }
-}
-
-.setup-project-modal {
-  .text-danger {
-    margin-bottom: 0;
-  }
-  .alert-danger {
-    margin: 0 0 1em;
-    padding: 5px;
     max-height: 200px;
     overflow: auto;
     text-align: left;
