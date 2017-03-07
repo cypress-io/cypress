@@ -21,6 +21,7 @@ fs = Promise.promisifyAll(fs)
 builtFiles = {}
 
 module.exports = {
+  ## for testing purposes
   reset: ->
     builtFiles = {}
 
@@ -43,6 +44,8 @@ module.exports = {
     })
 
     if not config.isHeadless
+      @_watching = true ## for testing purposes
+
       bundler.plugin(watchify, {
         ignoreWatch: [
           "**/.git/**"
