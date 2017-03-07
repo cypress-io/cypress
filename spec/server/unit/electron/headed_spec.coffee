@@ -141,13 +141,11 @@ describe "electron/headed", ->
         it "opens dev tools if saved state is open", ->
           @sandbox.stub(savedState, "get").resolves({ isAppDevToolsOpen: true })
           headed.ready({}).then (win) ->
-            win.webContents.on.withArgs("did-finish-load").yield()
             expect(win.webContents.openDevTools).to.be.called
 
         it "does not open dev tools if saved state is not open", ->
           @sandbox.stub(savedState, "get").resolves({})
           headed.ready({}).then (win) ->
-            win.webContents.on.withArgs("did-finish-load").yield()
             expect(win.webContents.openDevTools).not.to.be.called
 
   context ".run", ->

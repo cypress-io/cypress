@@ -103,9 +103,8 @@ module.exports = {
           })
         , 500
 
-        win.webContents.on "did-finish-load", ->
-          if state.isAppDevToolsOpen is true
-            win.webContents.openDevTools()
+        if state.isAppDevToolsOpen
+          win.webContents.openDevTools()
 
         win.webContents.on "devtools-opened", ->
           savedState.set({ isAppDevToolsOpen: true })
