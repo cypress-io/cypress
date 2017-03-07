@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.10 - *(03/07/17)*
+- set version of cypress
+
 #### 0.3.9 - *(02/05/17)*
 - bump reporter dep
 
