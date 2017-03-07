@@ -63,7 +63,11 @@ class Socket
     .catch ->
 
   watchTestFileByPath: (config, originalFilePath, watchers, options) ->
-    filePath = path.join("cypress", originalFilePath)
+    ## files are always sent as integration/foo_spec.js
+    ## need to take into account integrationFolder may be different so
+    ## integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
+    filePath = path.join(config.integrationFolder, originalFilePath.replace("integration/", ""))
+    filePath = filePath.replace("#{config.projectRoot}/", "")
 
     ## bail if we're already watching this
     ## exact file or we've turned off watching
