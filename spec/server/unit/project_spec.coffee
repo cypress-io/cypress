@@ -303,6 +303,12 @@ describe "lib/project", ->
 
       expect(@project.server.onTestFileChange).to.be.calledWith("foo/bar.js")
 
+    it "does not add change listener when {watchForFileChanges: false}", ->
+      @config.watchForFileChanges = false
+      @project.watchSupportFile(@config)
+
+      expect(@watchBundle.firstCall.args[2]).to.be.undefined
+
   context "#watchSettingsAndStartWebsockets", ->
     beforeEach ->
       @project = Project("path/to/project")
