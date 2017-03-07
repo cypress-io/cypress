@@ -4,7 +4,7 @@ import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import cs from 'classnames'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import state from '../lib/state'
 
 @withRouter
@@ -65,7 +65,7 @@ class Login extends Component {
       return err && err.alreadyOpen
     }
 
-    return App.ipc('window:open', {
+    ipc.windowOpen({
       position: 'center',
       focus: true,
       width: 1000,
@@ -80,7 +80,7 @@ class Login extends Component {
       // App.execute 'gui:focus'
       this.setState({ isLoggingIn: true })
 
-      return App.ipc('log:in', code)
+      return ipc.logIn(code)
     })
     .then(action('logged:in', (user) => {
       state.setUser(user)
@@ -132,11 +132,11 @@ class Login extends Component {
   }
 
   _openHelp () {
-    App.ipc('external:open', 'https://on.cypress.io/logging-in')
+    ipc.externalOpen('https://on.cypress.io/logging-in')
   }
 
   _openAuthDoc () {
-    App.ipc('external:open', 'https://on.cypress.io/email-not-authorized')
+    ipc.externalOpen('https://on.cypress.io/email-not-authorized')
   }
 }
 

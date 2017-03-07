@@ -179,6 +179,13 @@ describe "Runs List", ->
               it "shows 'success' message", ->
                 cy.contains("Request Sent")
 
+            describe "because user became unauthenticated", ->
+              beforeEach ->
+                @requestAccess.reject({name: "", message: "", statusCode: 401})
+
+              it "redirects to login", ->
+                cy.shouldBeOnLogin()
+
     describe "timed out error", ->
       beforeEach ->
         @goToRuns().then =>
@@ -194,6 +201,14 @@ describe "Runs List", ->
 
       it "displays empty message", ->
         cy.contains("Runs Cannot Be Displayed")
+
+    describe "unauthenticated error", ->
+      beforeEach ->
+        @goToRuns().then =>
+          @getRuns.reject({name: "", message: "", statusCode: 401})
+
+      it "redirects to login", ->
+        cy.shouldBeOnLogin()
 
     describe "no project id error", ->
       beforeEach ->

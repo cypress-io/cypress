@@ -1,10 +1,9 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import { action } from 'mobx'
 import Loader from 'react-loader'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import { runSpec } from '../projects/projects-api'
 import specsCollection from './specs-collection'
 
@@ -128,12 +127,12 @@ class Specs extends Component {
   }
 
   _openIntegrationFolder () {
-    App.ipc('open:finder', this.props.project.integrationFolder)
+    ipc.openFinder(this.props.project.integrationFolder)
   }
 
   _openHelp (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/writing-first-test')
+    ipc.externalOpen('https://on.cypress.io/writing-first-test')
   }
 }
 

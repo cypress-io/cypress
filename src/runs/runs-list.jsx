@@ -4,7 +4,7 @@ import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import state from '../lib/state'
 import RunsCollection from './runs-collection'
 import errors from '../lib/errors'
@@ -267,26 +267,26 @@ class Runs extends Component {
 
   _openRunGuide = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/recording-project-runs')
+    ipc.externalOpen('https://on.cypress.io/recording-project-runs')
   }
 
   _openRuns = (e) => {
     e.preventDefault()
-    App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs`)
+    ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs`)
   }
 
   _openCiGuide = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/guides/continuous-integration')
+    ipc.externalOpen('https://on.cypress.io/guides/continuous-integration')
   }
 
   _openProjectIdGuide = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/what-is-a-project-id')
+    ipc.externalOpen('https://on.cypress.io/what-is-a-project-id')
   }
 
   _openRun = (runId) => {
-    App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs/${runId}`)
+    ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs/${runId}`)
   }
 }
 

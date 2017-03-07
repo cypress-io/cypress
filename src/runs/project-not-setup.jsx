@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import SetupProject from "./setup-project-modal"
 
 @observer
@@ -64,7 +64,7 @@ export default class ProjectNotSetup extends Component {
 
   _visitDashboard = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/dashboard')
+    ipc.externalOpen('https://on.cypress.io/dashboard')
   }
 
   _invalidProject () {

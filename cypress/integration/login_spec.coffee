@@ -40,9 +40,7 @@ describe "Login", ->
               .and("include", "cypress-inverse")
 
       it "has login url", ->
-        cy
-          .location().its("hash")
-            .should("contain", "login")
+        cy.shouldBeOnLogin()
 
       it "has Github Login button", ->
         cy

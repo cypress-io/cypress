@@ -1,14 +1,15 @@
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import orgsStore from './organizations-store'
 
 let pollId
 
 const getOrgs = () => {
-  App.ipc('get:orgs')
+  ipc.getOrgs()
   .then((orgs = []) => {
     orgsStore.setOrgs(orgs)
     return null
   })
+  .catch(ipc.isUnauthed, ipc.handleUnauthed)
   .catch((err) => {
     orgsStore.setError(err)
     return null

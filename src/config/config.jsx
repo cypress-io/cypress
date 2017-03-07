@@ -4,7 +4,7 @@ import { observer } from 'mobx-react'
 import Tooltip from 'rc-tooltip'
 import Collapse, { Panel } from 'rc-collapse'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import Project from '../project/project-model'
 import { getRecordKeys } from '../projects/projects-api'
 
@@ -116,6 +116,8 @@ class Config extends Component {
       let hasComma = lastKey !== key
       if (value.from == null) {
         return this._nested(key, value, hasComma)
+      } else if (_.isObject(value.value)) {
+        return this._object(key, value, hasComma)
       } else {
         return this._getSpan(key, value, hasComma)
       }
@@ -135,6 +137,16 @@ class Config extends Component {
         <br />
       </span>
     )
+  }
+
+  _object (key, nestedObj, hasComma) {
+    const obj = _.reduce(nestedObj.value, (obj, value, key) => {
+      return _.extend(obj, {
+        [key]: { value, from: nestedObj.from },
+      })
+    }, {})
+
+    return this._nested(key, obj, hasComma)
   }
 
   _projectIdSection () {
@@ -223,27 +235,27 @@ class Config extends Component {
 
   _openDashboardProject = (e) => {
     e.preventDefault()
-    App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}`)
+    ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}`)
   }
 
   _openProjectIdHelp (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/what-is-a-project-id')
+    ipc.externalOpen('https://on.cypress.io/what-is-a-project-id')
   }
 
   _openHelp (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/guides/configuration')
+    ipc.externalOpen('https://on.cypress.io/guides/configuration')
   }
 
   _openRecordKeyGuide (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/what-is-a-record-key')
+    ipc.externalOpen('https://on.cypress.io/what-is-a-record-key')
   }
 
   _openAdminKeys = (e) => {
     e.preventDefault()
-    App.ipc('external:open', `https://on.cypress.io/dashboard/projects/${this.props.project.id}/settings`)
+    ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}/settings`)
   }
 }
 

@@ -1,7 +1,7 @@
-import ipc from './ipc'
+import ipcBus from './ipc-bus'
 
 const App = {
-  ipc,
+  ipc: ipcBus,
 }
 
 window.App = App

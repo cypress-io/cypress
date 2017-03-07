@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 
 @observer
 class OnBoading extends Component {
@@ -101,11 +101,11 @@ class OnBoading extends Component {
   }
 
   _openExampleSpec () {
-    App.ipc('open:finder', this.props.project.integrationExampleFile)
+    ipc.openFinder(this.props.project.integrationExampleFile)
   }
 
   _openIntegrationFolder () {
-    App.ipc('open:finder', this.props.project.integrationFolder)
+    ipc.openFinder(this.props.project.integrationFolder)
   }
 }
 

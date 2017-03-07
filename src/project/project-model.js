@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import md5 from 'md5'
-import { computed, observable, action } from 'mobx'
+import { computed, observable, action, asReference } from 'mobx'
 import Browser from '../lib/browser-model'
 
 const persistentProps = [
@@ -55,7 +55,7 @@ export default class Project {
   @observable browsers = []
   @observable onBoardingModalOpen = false
   @observable browserState = "closed"
-  @observable resolvedConfig
+  @observable resolvedConfig = asReference(null)
   @observable error
   @observable parentTestsFolderDisplay
   @observable integrationExampleName

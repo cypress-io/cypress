@@ -2,8 +2,9 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { Link } from 'react-router'
 
+import appApi from '../lib/app-api'
 import state from '../lib/state'
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import { closeProject, addProject } from '../projects/projects-api'
 
@@ -92,18 +93,18 @@ export default class Nav extends Component {
 
   _openDocs (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io')
+    ipc.externalOpen('https://on.cypress.io')
   }
 
   _openChat (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/chat')
+    ipc.externalOpen('https://on.cypress.io/chat')
   }
 
   _logout = (e) => {
     e.preventDefault()
 
-    state.logOut()
+    appApi.logOut()
   }
 
   _addProject (e) {

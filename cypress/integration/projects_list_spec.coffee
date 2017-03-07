@@ -2,6 +2,8 @@
 
 describe "Projects List", ->
   beforeEach ->
+    @unauthError = {name: "", message: "", statusCode: 401}
+
     cy
       .fixture("user").as("user")
       .fixture("projects").as("projects")
@@ -235,17 +237,6 @@ describe "Projects List", ->
           .get(".projects-list>li").first()
           .contains("Failed")
 
-      it "redirects to login if api returns 401", ->
-        cy
-          .window().then (win) =>
-            foo = deferred(win.Promise)
-            # @["get:project:statuses"].onCall(3).rejects({name: "", message: "", statusCode: 401})
-            @["get:project:statuses"].onCall(3).returns(foo.promise)
-            foo.reject({name: "", message: "", statusCode: 401})
-          .tick(10000)
-          .location().its("hash")
-            .should("contain", "login")
-
     describe "add project", ->
       beforeEach ->
         @selectDirectory = deferred()
@@ -350,3 +341,25 @@ describe "Projects List", ->
           cy
             .get(".projects-list>li").first()
             .contains("Passed")
+
+    describe "when user becomes unauthenticated", ->
+      it "redirects to login when get:projects returns 401", ->
+        @getProjects.reject(@unauthError)
+        cy.shouldBeOnLogin()
+
+      it "redirects to login when get:project:statuses returns 401", ->
+        @getProjects.resolve([])
+        @getProjectStatuses.reject(@unauthError)
+        cy.shouldBeOnLogin()
+
+      it "redirects to login when get:project:status returns 401", ->
+        @getProjects.resolve([])
+        @getProjectStatuses.resolve([])
+        stubIpc(@App.ipc, {
+          "show:directory:dialog": (stub) -> stub.resolves("/foo/bar")
+          "add:project": (stub) -> stub.resolves({ id: "id-123" })
+          "get:project:status": (stub) => stub.rejects(@unauthError)
+        })
+        cy.get("nav").find(".fa-plus").click().wait(1000)
+
+        cy.shouldBeOnLogin()

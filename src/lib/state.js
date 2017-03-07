@@ -1,8 +1,6 @@
 import { computed, observable, action } from 'mobx'
 
-import App from '../lib/app'
 import User from '../lib/user-model'
-import updater from '../update/update-model'
 
 class State {
   @observable userLoaded = false
@@ -34,29 +32,6 @@ class State {
   closeModal () {
     this.modalOpen = false
   }
-
-  logOut () {
-    this.setUser(null)
-
-    App.ipc('clear:github:cookies')
-    App.ipc('log:out')
-  }
-
-  listenForMenuClicks () {
-    return App.ipc("on:menu:clicked", (err, item) => {
-      switch (item) {
-        case 'log:out':
-          this.logOut()
-          break
-        case 'check:for:updates':
-          updater.openUpdateWindow()
-          break
-        default:
-          return
-      }
-    })
-  }
-
 }
 
 export default new State()
