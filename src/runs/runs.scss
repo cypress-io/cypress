@@ -289,6 +289,12 @@
 .setup-project-modal {
   a>i {
     color: #999;
+    cursor: pointer;
+
+    &:hover {
+      color: #666;
+    }
+
   }
 
   .label-title {
