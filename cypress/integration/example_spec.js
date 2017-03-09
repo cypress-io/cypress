@@ -1362,7 +1362,7 @@ describe('Kitchen Sink', function(){
 
     })
 
-    it.only('cy.tick() - move time in the browser', function(){
+    it('cy.tick() - move time in the browser', function(){
       // create the date in UTC so its always the same
       // no matter what local timezone the browser is running in
       var now = new Date(Date.UTC(2017, 2, 14)).getTime() // March 14, 2017 timestamp
