@@ -10,3 +10,7 @@ dependencies:
     - npm install -g cypress-cli
 
     - npm run build
+
+test:
+  override:
+    - cypress run --record

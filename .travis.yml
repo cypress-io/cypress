@@ -14,4 +14,4 @@ install:
 script:
   - npm run build
 
-  - cypress ci
+  - cypress run --record

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test-lib": "NODE_ENV=test mocha",
-    "test": "cypress ci",
+    "test": "cypress run",
     "build": "./bin/build.sh && gulp build",
     "predeploy": "npm run build",
     "deploy": "gulp deploy",
