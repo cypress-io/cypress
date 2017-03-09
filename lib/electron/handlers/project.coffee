@@ -34,7 +34,7 @@ module.exports = {
       ## browsers here we should just
       ## immediately close the server?
       ## but continue sending the config
-      version = process.versions.chrome
+      version = process.versions.chrome or ""
       electronBrowser = {
         name: "electron"
         version: version
