@@ -385,20 +385,19 @@ describe "lib/cypress", ->
         .catch -> done()
 
     it "does not watch supportFile when headless", ->
-      shouldWatch = @sandbox.spy(bundle, "shouldWatch")
-
+      bundle._watching = false
       cypress.start(["--project=#{@pristinePath}"])
       .then =>
-        expect(shouldWatch).not.to.be.called
+        expect(bundle._watching).to.be.false
 
     it "does watch supportFile when not headless", ->
-      shouldWatch = @sandbox.spy(bundle, "shouldWatch")
+      bundle._watching = false
       watchBundle = @sandbox.spy(Watchers.prototype, "watchBundle")
 
       cypress.start(["--project=#{@pristinePath}", "--no-headless"])
       .then =>
         expect(watchBundle).to.be.calledWith("cypress/support/index.js")
-        expect(shouldWatch).to.have.always.returned(true)
+        expect(bundle._watching).to.be.true
 
     it "runs project headlessly and displays gui", ->
       Project.add(@todosPath)
@@ -943,7 +942,13 @@ describe "lib/cypress", ->
 
   context "headed", ->
     beforeEach ->
-      @win = {}
+      @win = {
+        on: @sandbox.stub()
+        webContents: {
+          on: @sandbox.stub()
+        }
+      }
+
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(Renderer, "create").resolves(@win)
       @sandbox.stub(Server.prototype, "startWebsockets")

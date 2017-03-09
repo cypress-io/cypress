@@ -3,18 +3,13 @@ Promise = require("bluebird")
 appData = require("./util/app_data")
 
 config = new Conf({
+  async: true
   configName: "state"
   cwd: appData.path()
 })
 
 module.exports = {
-  get: (key) ->
-    Promise.try ->
-      config.get(key)
-
-  set: (state)->
-    Promise.try ->
-      config.set(state)
-
+  get: Promise.promisify(config.getAsync.bind(config))
+  set: Promise.promisify(config.setAsync.bind(config))
   path: config.path
 }
