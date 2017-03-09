@@ -617,22 +617,22 @@ describe('Kitchen Sink', function(){
 
     it('cy.go() - go back or forward in the browser\'s history', function(){
 
-      cy.location().its('pathname').should('include', 'navigation')
+      cy.location('pathname').should('include', 'navigation')
 
       // https://on.cypress.io/api/go
       cy.go('back')
-      cy.location().its('pathname').should('not.include', 'navigation')
+      cy.location('pathname').should('not.include', 'navigation')
 
       cy.go('forward')
-      cy.location().its('pathname').should('include', 'navigation')
+      cy.location('pathname').should('include', 'navigation')
 
       // equivalent to clicking back
       cy.go(-1)
-      cy.location().its('pathname').should('not.include', 'navigation')
+      cy.location('pathname').should('not.include', 'navigation')
 
       // equivalent to clicking forward
       cy.go(1)
-      cy.location().its('pathname').should('include', 'navigation')
+      cy.location('pathname').should('include', 'navigation')
 
     })
 
