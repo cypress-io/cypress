@@ -86,33 +86,13 @@ module.exports = {
         if options.updating
           Updater.install(options)
 
-        win.on "resize", _.debounce ->
-          [width, height] = win.getSize()
-          [x, y] = win.getPosition()
-          savedState.set({
-            appWidth: width
-            appHeight: height
-            appX: x
-            appY: y
-          })
-        , 500
-
-        win.on "moved", _.debounce ->
-          [x, y] = win.getPosition()
-          savedState.set({
-            appX: x
-            appY: y
-          })
-        , 500
-
-        if state.isAppDevToolsOpen
-          win.webContents.openDevTools()
-
-        win.webContents.on "devtools-opened", ->
-          savedState.set({ isAppDevToolsOpen: true })
-
-        win.webContents.on "devtools-closed", ->
-          savedState.set({ isAppDevToolsOpen: false })
+        Renderer.trackState(win, state, {
+          width: "appWidth"
+          height: "appHeight"
+          x: "appX"
+          y: "appY"
+          devTools: "isAppDevToolsOpen"
+        })
 
         return win
 

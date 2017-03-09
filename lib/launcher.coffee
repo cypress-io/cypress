@@ -1,16 +1,23 @@
-_         = require("lodash")
-fs        = require("fs-extra")
-path      = require("path")
-Promise   = require("bluebird")
-launcher  = require("@cypress/core-launcher")
-extension = require("@cypress/core-extension")
-appData   = require("./util/app_data")
+_             = require("lodash")
+fs            = require("fs-extra")
+path          = require("path")
+Promise       = require("bluebird")
+electron      = require("electron")
+contextMenu   = require("electron-context-menu")
+launcher      = require("@cypress/core-launcher")
+extension     = require("@cypress/core-extension")
+appData       = require("./util/app_data")
+savedState    = require("./saved_state")
+electronUtils = require("./electron/utils")
+automation    = require("./electron/handlers/automation")
+Renderer      = require("./electron/handlers/renderer")
 
 fs              = Promise.promisifyAll(fs)
 profiles        = appData.path("browsers")
 pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
 instance        = null
+currentBrowser  = null
 
 kill = (unbind) ->
   ## cleanup our running browser
@@ -21,6 +28,7 @@ kill = (unbind) ->
     instance.removeAllListeners()
   instance.kill()
   instance = null
+  currentBrowser = null
 
 process.once "exit", kill
 
@@ -85,6 +93,66 @@ module.exports = {
       onBrowserOpen: ->
       onBrowserClose: ->
 
+    currentBrowser = name
+
+    switch name
+      when "electron"
+        @_launchElectron(url, options)
+      else
+        @_launchBrowser(name, url, options)
+
+  _launchElectron: (url, options) ->
+    electronUtils.setProxy(options.proxyServer)
+    .then ->
+      savedState.get()
+    .then (state) ->
+      Renderer.create({
+        url: url
+        width: state.browserWidth or 800
+        height: state.browserHeight or 600
+        minWidth: 100
+        minHeight: 100
+        x: state.browserX
+        y: state.browserY
+        show: true
+        chromeWebSecurity: options.chromeWebSecurity
+        type: "PROJECT"
+        onClose: options.onBrowserClose
+      })
+      .then (win) ->
+        Renderer.trackState(win, state, {
+          width: "browserWidth"
+          height: "browserHeight"
+          x: "browserX"
+          y: "browserY"
+          devTools: "isBrowserDevToolsOpen"
+        })
+
+        ## adds context menu with copy, paste, inspect element, etc
+        contextMenu({
+          showInspectElement: true
+          window: win
+        })
+
+        ## open any links externally, not in new electron browser
+        win.webContents.on "new-window", (e, url) ->
+          e.preventDefault()
+          electron.shell.openExternal(url)
+
+        ## TODO: same as below concerning waiting for socket connection
+        Promise.delay(1000)
+        .then ->
+          options.onBrowserOpen()
+
+          return instance = {
+            kill: ->
+              if not win.isDestroyed()
+                win.close()
+            ## renderer takes care of removing listeners
+            removeAllListeners: ->
+          }
+
+  _launchBrowser: (name, url, options) ->
     args = defaultArgs.concat(options.args)
 
     ## ensure we have a folder created
@@ -127,4 +195,9 @@ module.exports = {
           options.onBrowserOpen()
 
           return instance
+
+  onAutomationRequest: (args...) ->
+    if currentBrowser is "electron"
+      automation.perform(args...)
+
 }

@@ -18,6 +18,7 @@ progress   = require("../util/progress_bar")
 trash      = require("../util/trash")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
+electronUtils = require("../electron/utils")
 project    = require("../electron/handlers/project")
 Renderer   = require("../electron/handlers/renderer")
 automation = require("../electron/handlers/automation")
@@ -51,14 +52,6 @@ module.exports = {
     .catch ->
       ## no id no problem
       return null
-
-  setProxy: (proxyServer) ->
-    session = require("electron").session
-
-    new Promise (resolve) ->
-      session.defaultSession.setProxy({
-        proxyRules: proxyServer
-      }, resolve)
 
   ensureAndOpenProjectByPath: (id, options) ->
     ## verify we have a project at this path
@@ -123,7 +116,7 @@ module.exports = {
       })
 
   createRenderer: (url, proxyServer, showGui, chromeWebSecurity, openProject, write) ->
-    @setProxy(proxyServer)
+    electronUtils.setProxy(proxyServer)
     .then ->
       Renderer.create({
         url:    url

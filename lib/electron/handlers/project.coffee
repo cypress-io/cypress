@@ -34,7 +34,16 @@ module.exports = {
       ## browsers here we should just
       ## immediately close the server?
       ## but continue sending the config
-      options.browsers = browsers
+      version = process.versions.chrome
+      electronBrowser = {
+        name: "electron"
+        version: version
+        path: ""
+        majorVersion: version.split(".")[0]
+        info: "The Electron browser is the version of Chrome that is bundled with Electron. Cypress uses this browser when running headlessly, so it may be useful for debugging issues that occur only in headless mode."
+      }
+      options.browsers = browsers.concat(electronBrowser)
+      options.onAutomationRequest = launcher.onAutomationRequest
 
       ## open the project and return
       ## the config for the project instance

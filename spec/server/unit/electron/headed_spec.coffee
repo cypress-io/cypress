@@ -32,20 +32,15 @@ describe "electron/headed", ->
 
   context ".ready", ->
     beforeEach ->
-      @win = {
-        on: @sandbox.stub()
-        webContents: {
-          on: @sandbox.stub()
-          openDevTools: @sandbox.stub()
-        }
-        getSize: @sandbox.stub().returns([1, 2])
-        getPosition: @sandbox.stub().returns([3, 4])
-      }
+      @win = {}
+      @state = {}
 
       @sandbox.stub(menu, "set")
       @sandbox.stub(Events, "start")
       @sandbox.stub(Updater, "install")
       @sandbox.stub(Renderer, "create").resolves(@win)
+      @sandbox.stub(Renderer, "trackState")
+      @sandbox.stub(savedState, "get").resolves(@state)
 
     it "calls Events.start with options", ->
       opts = {}
@@ -69,84 +64,39 @@ describe "electron/headed", ->
       headed.ready({}).then (win) =>
         expect(win).to.eq(@win)
 
-    describe "app state", ->
-      context "saving", ->
-        it "saves app size and position when window resizes, debounced", ->
-          ## tried using useFakeTimers here, but it didn't work for some
-          ## reason, so this is the next best thing
-          @sandbox.stub(_, "debounce").returnsArg(0)
-          @sandbox.stub(savedState, "set")
-          headed.ready({}).then (win) ->
-            win.on.withArgs("resize").yield()
-            expect(savedState.set).to.be.calledWith({
-              appWidth: 1
-              appHeight: 2
-              appX: 3
-              appY: 4
-            })
+    it "tracks state", ->
+      headed.ready({}).then =>
+        expect(Renderer.trackState).to.be.calledWith(@win, @state, {
+          width: "appWidth"
+          height: "appHeight"
+          x: "appX"
+          y: "appY"
+          devTools: "isAppDevToolsOpen"
+        })
 
-        it "saves app position when window moves, debounced", ->
-          ## tried using useFakeTimers here, but it didn't work for some
-          ## reason, so this is the next best thing
-          @sandbox.stub(_, "debounce").returnsArg(0)
-          @sandbox.stub(savedState, "set")
-          headed.ready({}).then (win) ->
-            win.on.withArgs("moved").yield()
-            expect(savedState.set).to.be.calledWith({
-              appX: 3
-              appY: 4
-            })
+    it "renders with saved width if it exists", ->
+      expect(headed.getRendererArgs({appWidth: 1}).width).to.equal(1)
 
-        it "saves dev tools state when opened", ->
-          @sandbox.stub(savedState, "set")
-          headed.ready({}).then (win) ->
-            win.webContents.on.withArgs("devtools-opened").yield()
-            expect(savedState.set).to.be.calledWith({
-              isAppDevToolsOpen: true
-            })
+    it "renders with default width if no width saved", ->
+      expect(headed.getRendererArgs({}).width).to.equal(800)
 
-        it "saves dev tools state when closed", ->
-          @sandbox.stub(savedState, "set")
-          headed.ready({}).then (win) ->
-            win.webContents.on.withArgs("devtools-closed").yield()
-            expect(savedState.set).to.be.calledWith({
-              isAppDevToolsOpen: false
-            })
+    it "renders with saved height if it exists", ->
+      expect(headed.getRendererArgs({appHeight: 2}).height).to.equal(2)
 
-      context "utilizing", ->
-        it "renders with saved width if it exists", ->
-          expect(headed.getRendererArgs({appWidth: 1}).width).to.equal(1)
+    it "renders with default height if no height saved", ->
+      expect(headed.getRendererArgs({}).height).to.equal(550)
 
-        it "renders with default width if no width saved", ->
-          expect(headed.getRendererArgs({}).width).to.equal(800)
+    it "renders with saved x if it exists", ->
+      expect(headed.getRendererArgs({appX: 3}).x).to.equal(3)
 
-        it "renders with saved height if it exists", ->
-          expect(headed.getRendererArgs({appHeight: 2}).height).to.equal(2)
+    it "renders with no x if no x saved", ->
+      expect(headed.getRendererArgs({}).x).to.be.undefined
 
-        it "renders with default height if no height saved", ->
-          expect(headed.getRendererArgs({}).height).to.equal(550)
+    it "renders with saved y if it exists", ->
+      expect(headed.getRendererArgs({appY: 4}).y).to.equal(4)
 
-        it "renders with saved x if it exists", ->
-          expect(headed.getRendererArgs({appX: 3}).x).to.equal(3)
-
-        it "renders with no x if no x saved", ->
-          expect(headed.getRendererArgs({}).x).to.be.undefined
-
-        it "renders with saved y if it exists", ->
-          expect(headed.getRendererArgs({appY: 4}).y).to.equal(4)
-
-        it "renders with no y if no y saved", ->
-          expect(headed.getRendererArgs({}).y).to.be.undefined
-
-        it "opens dev tools if saved state is open", ->
-          @sandbox.stub(savedState, "get").resolves({ isAppDevToolsOpen: true })
-          headed.ready({}).then (win) ->
-            expect(win.webContents.openDevTools).to.be.called
-
-        it "does not open dev tools if saved state is not open", ->
-          @sandbox.stub(savedState, "get").resolves({})
-          headed.ready({}).then (win) ->
-            expect(win.webContents.openDevTools).not.to.be.called
+    it "renders with no y if no y saved", ->
+      expect(headed.getRendererArgs({}).y).to.be.undefined
 
   context ".run", ->
     beforeEach ->

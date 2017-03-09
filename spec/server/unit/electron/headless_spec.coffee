@@ -9,6 +9,7 @@ video    = require("#{root}../lib/video")
 errors   = require("#{root}../lib/errors")
 Project  = require("#{root}../lib/project")
 Reporter = require("#{root}../lib/reporter")
+electronUtils = require("#{root}../lib/electron/utils")
 project  = require("#{root}../lib/electron/handlers/project")
 headless = require("#{root}../lib/modes/headless")
 Renderer = require("#{root}../lib/electron/handlers/renderer")
@@ -84,9 +85,6 @@ describe "electron/headless", ->
           afterAutomationRequest: fn2
         })
 
-  context ".setProxy", ->
-    it "calls session.defaultSession.setProxy with proxyRules"
-
   context ".createRenderer", ->
     beforeEach ->
       @win = @sandbox.stub({
@@ -99,7 +97,7 @@ describe "electron/headless", ->
         }
       })
 
-      @sandbox.stub(headless, "setProxy").withArgs("http://localhost:1234").resolves()
+      @sandbox.stub(electronUtils, "setProxy").withArgs("http://localhost:1234").resolves()
 
       @create = @sandbox.stub(Renderer, "create").resolves(@win)
 

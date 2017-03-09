@@ -5,6 +5,7 @@ cyDesktop     = require("@cypress/core-desktop-gui")
 BrowserWindow = require("electron").BrowserWindow
 cwd           = require("../../cwd")
 user          = require("../../user")
+savedState    = require("../../saved_state")
 
 windows               = {}
 recentlyCreatedWindow = false
@@ -71,17 +72,20 @@ module.exports = {
     _.defaults options,
       onFocus: ->
       onBlur: ->
+      onClose: ->
 
     args = _.defaults {}, options, {
       width:  600
       height: 500
       show:   true
       webPreferences: {
-        preload: cwd("lib", "ipc", "ipc.js")
         nodeIntegration: false
         backgroundThrottling: false
       }
     }
+
+    if options.type isnt "PROJECT"
+      args.webPreferences.preload = cwd("lib", "ipc", "ipc.js")
 
     if args.show is false
       args.webPreferences.offscreen = true
@@ -123,6 +127,7 @@ module.exports = {
 
     win.once "closed", ->
       win.removeAllListeners()
+      options.onClose()
 
       ## slice the window out of windows reference
       delete windows[options.type]
@@ -137,6 +142,8 @@ module.exports = {
       .resolve(args.url)
       .then (url) ->
         if width and height
+          ## QUESTION: is this code unreachable? doesn't seem that
+          ## width and height will ever be truthy
           win.webContents.once "dom-ready", ->
             win.setSize(width, height)
             win.show()
@@ -156,5 +163,38 @@ module.exports = {
               urlChanged(newUrl, resolve)
         else
           Promise.resolve(win)
+
+  trackState: (win, state, keys) ->
+    win.on "resize", _.debounce ->
+      [width, height] = win.getSize()
+      [x, y] = win.getPosition()
+      newState = {}
+      newState[keys.width] = width
+      newState[keys.height] = height
+      newState[keys.x] = x
+      newState[keys.y] = y
+      savedState.set(newState)
+    , 500
+
+    win.on "moved", _.debounce ->
+      [x, y] = win.getPosition()
+      newState = {}
+      newState[keys.x] = x
+      newState[keys.y] = y
+      savedState.set(newState)
+    , 500
+
+    if state[keys.devTools]
+      win.webContents.openDevTools()
+
+    win.webContents.on "devtools-opened", ->
+      newState = {}
+      newState[keys.devTools] = true
+      savedState.set(newState)
+
+    win.webContents.on "devtools-closed", ->
+      newState = {}
+      newState[keys.devTools] = false
+      savedState.set(newState)
 
 }

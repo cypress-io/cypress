@@ -10,6 +10,8 @@ describe "lib/electron/handlers/projects", ->
   beforeEach ->
     Fixtures.scaffold()
 
+    process.versions.chrome = "2020.0.1776"
+
     @todosPath = Fixtures.projectPath("todos")
 
   afterEach ->
@@ -21,10 +23,15 @@ describe "lib/electron/handlers/projects", ->
     beforeEach ->
       @projectInstance = {
         getConfig: @sandbox.stub().resolves({proxyUrl: "foo", socketIoRoute: "bar"})
-        setBrowsers: @sandbox.stub().resolves([])
       }
 
-      @sandbox.stub(launcher, "getBrowsers").resolves([])
+      browsers = [{
+        name: "chrome"
+        verson: "2077.1.42"
+        path: "/path/to/Chrome.app"
+        majorVersion: "2077"
+      }]
+      @sandbox.stub(launcher, "getBrowsers").resolves(browsers)
       @sandbox.stub(extension, "setHostAndPath").withArgs("foo", "bar").resolves()
       @open = @sandbox.stub(Project.prototype, "open").resolves(@projectInstance)
 
@@ -55,9 +62,18 @@ describe "lib/electron/handlers/projects", ->
         @open.getCall(0).args[0].onReloadBrowser("foo", "bar")
         expect(relaunch).to.be.calledWith("foo", "bar")
 
-    ## TODO: write these tests!!
-    it "gets browsers available for launch"
+    it "opens project with available browsers, appending electron browser", ->
+      project.open(@todosPath)
+      .then =>
+        browsers = @open.lastCall.args[0].browsers
+        expect(browsers.length).to.equal(2)
+        expect(browsers[0].name).to.equal("chrome")
+        expect(browsers[1].name).to.equal("electron")
 
-    it "sets browsers on project"
+    it "electron browser has info explaining what it is", ->
+      project.open(@todosPath)
+      .then =>
+        electron = @open.lastCall.args[0].browsers[1]
+        expect(electron.info).to.include("version of Chrome")
 
   context ".close", ->
