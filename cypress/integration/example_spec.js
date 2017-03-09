@@ -59,7 +59,7 @@ describe('Kitchen Sink', function(){
     //
     // Let's query for some DOM elements and make assertions
     // The most commonly used query is 'cy.get()', you can
-    // think of this like the '$' in jQueury
+    // think of this like the '$' in jQuery
 
     it('cy.get() - query DOM elements', function(){
 
@@ -135,7 +135,7 @@ describe('Kitchen Sink', function(){
     //
     // Let's query for some DOM elements and make assertions
     // The most commonly used query is 'cy.get()', you can
-    // think of this like the '$' in jQueury
+    // think of this like the '$' in jQuery
 
     it('cy.children() - get child DOM elements', function(){
 
@@ -212,7 +212,7 @@ describe('Kitchen Sink', function(){
     // **** Actions ****
     //
     // Let's perform some actions on DOM elements
-    // Move of these involve filling in form elements
+    // Most of these involve filling in form elements
     // But some actions, like click, will often be
     // used throughout an application
 
@@ -1108,9 +1108,8 @@ describe('Kitchen Sink', function(){
 
       cy
         // https://on.cypress.io/api/readfile
-        .readFile('app/commands/actions.html')
-        .then(function (html) {
-          expect(html).to.include('<!DOCTYPE html>')
+        .readFile('cypress.json').then(function(json) {
+          expect(json).to.be.an('object')
         })
 
     })
@@ -1304,6 +1303,83 @@ describe('Kitchen Sink', function(){
 
   })
 
+  context('Spies, Stubs, and Clock', function(){
+
+    // **** Spies, Stubs, and Clock ****
+    //
+    // Cypress comes built in with the ability to stub,
+    // spy or modify your applications clock -
+    // such as controlling Date, setTimeout, and setInterval.
+
+    // These commands are useful when writing both
+    // unit tests and integration tests.
+
+    it('cy.spy() - wrap a method in a spy', function(){
+
+      // https://on.cypress.io/api/spy
+      cy.visit('https://example.cypress.io/commands/spies-stubs-clocks')
+
+      var obj = {
+        foo () {}
+      }
+
+      var spy = cy.spy(obj, "foo").as("anyArgs")
+
+      obj.foo()
+
+      expect(spy).to.be.called
+
+    })
+
+    it('cy.stub() - create a stub and/or replace a function with a stub', function(){
+
+      // https://on.cypress.io/api/stub
+      cy.visit('https://example.cypress.io/commands/spies-stubs-clocks')
+
+      var obj = {
+        foo () {}
+      }
+
+      var stub = cy.stub(obj, "foo").as("foo")
+
+      obj.foo("foo", "bar")
+
+      expect(stub).to.be.called
+
+    })
+
+    it('cy.clock() - control time in the browser', function(){
+      // create the date in UTC so its always the same
+      // no matter what local timezone the browser is running in
+      var now = new Date(Date.UTC(2017, 2, 14)).getTime() // March 14, 2017 timestamp
+
+      // https://on.cypress.io/api/clock
+      cy
+        .clock(now)
+        .visit('https://example.cypress.io/commands/spies-stubs-clocks')
+        .get("#clock-div").click()
+          .should("have.text", "1489449600")
+
+    })
+
+    it.only('cy.tick() - move time in the browser', function(){
+      // create the date in UTC so its always the same
+      // no matter what local timezone the browser is running in
+      var now = new Date(Date.UTC(2017, 2, 14)).getTime() // March 14, 2017 timestamp
+
+      // https://on.cypress.io/api/tick
+      cy
+        .clock(now)
+        .visit('https://example.cypress.io/commands/spies-stubs-clocks')
+        .get("#tick-div").click()
+          .should("have.text", "1489449600")
+        .tick(10000) // 10 seconds passed
+        .get("#tick-div").click()
+          .should("have.text", "1489449610")
+
+    })
+  })
+
   context('Utilities', function(){
     beforeEach(function(){
       cy.visit('https://example.cypress.io/utilities')
@@ -1352,7 +1428,7 @@ describe('Kitchen Sink', function(){
           .should('have.class', 'badge')
     })
 
-    it('Cypress.Blob.method() - blob utilties and base64 string conversion', function(){
+    it('Cypress.Blob.method() - blob utilities and base64 string conversion', function(){
 
       // https://on.cypress.io/api/cypress-blob
       // https://github.com/nolanlawson/blob-util#imgSrcToDataURL
