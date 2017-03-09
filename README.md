@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.7.0
+- bump kitchensink dep, spies, stubs, clocks, cy.readfile fixes
+
 #### 0.6.3
 - fix missing var
 
