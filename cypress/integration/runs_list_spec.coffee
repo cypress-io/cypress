@@ -334,7 +334,7 @@ describe "Runs List", ->
         .then =>
           @getRuns.resolve(@runs)
 
-    it "lists runs", ->
+    it.only "lists runs", ->
       cy
         .get(".runs-container li")
         .should("have.length", @runs.length)

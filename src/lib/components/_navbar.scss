@@ -108,3 +108,29 @@
   padding: 9px 15px;
   display: inline-block;
 }
+
+.nav .browser-info {
+  span {
+    color: #777;
+    position: relative;
+    right: -5px;
+    top: 9px;
+    // otherwise gets covered by browser dropdown, interfering with hovering
+    z-index: 1;
+  }
+}
+
+.browser-info-tooltip {
+  background: #ececec;
+  border-color: #c7c7c7;
+  color: #333;
+  max-width: 300px;
+  line-height: 1.5;
+  padding: 8px 12px;
+  text-align: left;
+
+  svg {
+    fill: #ececec;
+    stroke: #c7c7c7;
+  }
+}

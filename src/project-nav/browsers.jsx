@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
-import Dropdown from '../dropdown/dropdown'
 import { observer } from 'mobx-react'
+import Tooltip from '@cypress/react-tooltip'
+import Dropdown from '../dropdown/dropdown'
 
 import { closeBrowser } from '../projects/projects-api'
 
@@ -12,8 +13,9 @@ export default class Browsers extends Component {
     if (!project.browsers.length) return null
 
     return (
-      <ul className='nav navbar-nav navbar-right'>
+      <ul className='browsers nav navbar-nav navbar-right'>
         {this._closeBrowserBtn()}
+        {this._info()}
         <Dropdown
           className='browsers-list'
           disabled={project.browserState === 'opened' || project.browserState === 'opening'}
@@ -24,11 +26,11 @@ export default class Browsers extends Component {
           keyProperty='name'
           browserState={project.browserState}
         />
-      </ul>
+    </ul>
     )
   }
 
-  _closeBrowserBtn = () => {
+  _closeBrowserBtn () {
     if (this.props.project.browserState === 'opened') {
       return (
         <li className='close-browser'>
@@ -39,6 +41,23 @@ export default class Browsers extends Component {
         </li>
       )
     }
+  }
+
+  _info () {
+    const { chosenBrowser } = this.props.project
+    if (!chosenBrowser || !chosenBrowser.info) return null
+
+    return (
+      <li className='browser-info'>
+        <Tooltip
+          title={chosenBrowser.info}
+          placement='bottom'
+          className='browser-info-tooltip cy-tooltip'
+        >
+          <i className='fa fa-info-circle' />
+        </Tooltip>
+      </li>
+    )
   }
 
   _closeBrowser = (e) => {

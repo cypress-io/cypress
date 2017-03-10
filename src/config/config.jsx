@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import Tooltip from 'rc-tooltip'
+import Tooltip from '@cypress/react-tooltip'
 import Collapse, { Panel } from 'rc-collapse'
 
 import ipc from '../lib/ipc'
@@ -86,9 +86,7 @@ class Config extends Component {
       <div key={key} className='line'>
         <span className='key'>{key}</span>
         <span className='colon'>:</span>{' '}
-        <Tooltip
-          overlay={obj.from || ''}
-        >
+        <Tooltip title={obj.from || ''} placement='right' className='cy-tooltip'>
           <span className={obj.from}>
             {this._getString(obj.value)}
             {`${obj.value}`}
