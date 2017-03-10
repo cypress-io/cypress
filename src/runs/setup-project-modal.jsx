@@ -257,12 +257,12 @@ class SetupProject extends Component {
 
   _openOrgDocs = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/what-are-organizations')
+    ipc.externalOpen('https://on.cypress.io/what-are-organizations')
   }
 
   _openAccessDocs = (e) => {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/what-is-project-access')
+    ipc.externalOpen('https://on.cypress.io/what-is-project-access')
   }
 
   _manageOrgs = (e) => {
