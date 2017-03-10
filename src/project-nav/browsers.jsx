@@ -15,7 +15,6 @@ export default class Browsers extends Component {
     return (
       <ul className='browsers nav navbar-nav navbar-right'>
         {this._closeBrowserBtn()}
-        {this._info()}
         <Dropdown
           className='browsers-list'
           disabled={project.browserState === 'opened' || project.browserState === 'opening'}
@@ -43,23 +42,6 @@ export default class Browsers extends Component {
     }
   }
 
-  _info () {
-    const { chosenBrowser } = this.props.project
-    if (!chosenBrowser || !chosenBrowser.info) return null
-
-    return (
-      <li className='browser-info'>
-        <Tooltip
-          title={chosenBrowser.info}
-          placement='bottom'
-          className='browser-info-tooltip cy-tooltip'
-        >
-          <i className='fa fa-info-circle' />
-        </Tooltip>
-      </li>
-    )
-  }
-
   _closeBrowser = (e) => {
     e.preventDefault()
     closeBrowser(this.props.project.clientId)
@@ -81,15 +63,31 @@ export default class Browsers extends Component {
         break
       default:
         prefixText = ''
-        // clearActiveSpec()
     }
 
     return (
-      <span>
+      <span className={browser.name}>
         <i className={`fa fa-${browser.icon}`}></i>{' '}
         { prefixText }{' '}
         { browser.displayName }{' '}
         { browser.majorVersion }
+        {this._info(browser)}
+      </span>
+    )
+  }
+
+  _info (browser) {
+    if (!browser.info) return null
+
+    return (
+      <span className='browser-info'>
+        <Tooltip
+          title={browser.info}
+          placement='bottom'
+          className='browser-info-tooltip cy-tooltip'
+        >
+          <i className='fa fa-info-circle' />
+        </Tooltip>
       </span>
     )
   }

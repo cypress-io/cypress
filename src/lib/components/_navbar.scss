@@ -104,20 +104,22 @@
   }
 }
 
-.browsers-list>span {
-  padding: 9px 15px;
-  display: inline-block;
+.browsers-list {
+  > span {
+    padding: 9px 15px;
+    display: inline-block;
+  }
+
+  .chrome > i { color: #1aa15f; }
+  .canary > i { color: #e4b721; }
+  .chromium > i { color: #829ac3; }
+  .electron > i { color: #777; }
 }
 
 .nav .browser-info {
-  span {
-    color: #777;
-    position: relative;
-    right: -5px;
-    top: 9px;
-    // otherwise gets covered by browser dropdown, interfering with hovering
-    z-index: 1;
-  }
+  color: #999;
+  margin-left: 6px;
+  margin-right: 4px;
 }
 
 .browser-info-tooltip {
