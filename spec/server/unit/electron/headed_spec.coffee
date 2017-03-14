@@ -16,7 +16,6 @@ Renderer   = require("#{root}../lib/electron/handlers/renderer")
 describe "electron/headed", ->
   context.skip ".onClick", ->
   context.skip ".onWindowAllClosed", ->
-  context.skip ".getRendererArgs", ->
   context.skip ".platformArgs", ->
 
   context ".isMac", ->
@@ -29,6 +28,12 @@ describe "electron/headed", ->
       @sandbox.stub(os, "platform").returns("linux64")
 
       expect(headed.isMac()).to.be.false
+
+  context ".getRendererArgs", ->
+    it "exits process when onClose is called", ->
+      @sandbox.stub(process, "exit")
+      headed.getRendererArgs({}).onClose()
+      expect(process.exit).to.be.called
 
   context ".ready", ->
     beforeEach ->
@@ -122,11 +127,3 @@ describe "electron/headed", ->
       opts = {}
       headed.run(opts).then ->
         expect(headed.ready).to.be.calledWith(opts)
-
-    it "listens to 'window-all-closed' and calls onWindowAllClosed with app", ->
-      electron.app.on.withArgs("window-all-closed").yields()
-      @sandbox.stub(headed, "ready")
-      @sandbox.stub(headed, "onWindowAllClosed")
-
-      headed.run().then ->
-        expect(headed.onWindowAllClosed).to.be.calledWith(electron.app)

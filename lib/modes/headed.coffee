@@ -19,9 +19,6 @@ module.exports = {
   isMac: ->
     os.platform() is "darwin"
 
-  onWindowAllClosed: (app) ->
-    process.exit(0)
-
   getRendererArgs: (state) ->
     common = {
       backgroundColor: "#dfe2e4"
@@ -38,6 +35,8 @@ module.exports = {
         Renderer.hideAllUnlessAnotherWindowIsFocused()
       onFocus: ->
         Renderer.showAll()
+      onClose: ->
+        process.exit()
     }
 
     _.extend(common, @platformArgs())
@@ -98,9 +97,6 @@ module.exports = {
         return win
 
   run: (options) ->
-    app.on "window-all-closed", =>
-      @onWindowAllClosed(app)
-
     waitForReady = ->
       new Promise (resolve, reject) ->
         app.on "ready", resolve
