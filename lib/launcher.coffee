@@ -9,6 +9,7 @@ extension     = require("@cypress/core-extension")
 appData       = require("./util/app_data")
 savedState    = require("./saved_state")
 electronUtils = require("./electron/utils")
+menu          = require("./electron/handlers/menu")
 automation    = require("./electron/handlers/automation")
 Renderer      = require("./electron/handlers/renderer")
 
@@ -18,6 +19,8 @@ pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
 instance        = null
 currentBrowser  = null
+
+isDev = process.env["CYPRESS_ENV"] is "development"
 
 kill = (unbind) ->
   ## cleanup our running browser
@@ -117,7 +120,13 @@ module.exports = {
         show: true
         chromeWebSecurity: options.chromeWebSecurity
         type: "PROJECT"
-        onClose: options.onBrowserClose
+        onFocus: ->
+          menu.set({withDevTools: true})
+        onBlur: ->
+          menu.set({withDevTools: isDev})
+        onClose: ->
+          menu.set({withDevTools: isDev})
+          options.onBrowserClose()
       })
       .then (win) ->
         Renderer.trackState(win, state, {
@@ -127,6 +136,8 @@ module.exports = {
           y: "browserY"
           devTools: "isBrowserDevToolsOpen"
         })
+
+        menu.set({withDevTools: true})
 
         ## adds context menu with copy, paste, inspect element, etc
         contextMenu({

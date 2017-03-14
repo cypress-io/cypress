@@ -60,6 +60,20 @@ describe "electron/headed", ->
       headed.ready({}).then ->
         expect(menu.set).to.be.calledOnce
 
+    it "calls menu.set withDevTools: true when in dev env", ->
+      env = process.env["CYPRESS_ENV"]
+      process.env["CYPRESS_ENV"] = "development"
+      headed.ready({}).then ->
+        expect(menu.set.lastCall.args[0].withDevTools).to.be.true
+        process.env["CYPRESS_ENV"] = env
+
+    it "calls menu.set withDevTools: false when not in dev env", ->
+      env = process.env["CYPRESS_ENV"]
+      process.env["CYPRESS_ENV"] = "production"
+      headed.ready({}).then ->
+        expect(menu.set.lastCall.args[0].withDevTools).to.be.false
+        process.env["CYPRESS_ENV"] = env
+
     it "resolves with win", ->
       headed.ready({}).then (win) =>
         expect(win).to.eq(@win)

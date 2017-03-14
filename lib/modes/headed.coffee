@@ -64,6 +64,7 @@ module.exports = {
     ## TODO: potentially just pass an event emitter
     ## instance here instead of callback functions
     menu.set({
+      withDevTools: process.env["CYPRESS_ENV"] is "development"
       onUpdatesClicked: ->
         bus.emit("menu:item:clicked", "check:for:updates")
 

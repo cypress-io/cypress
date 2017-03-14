@@ -4,6 +4,7 @@ Promise = require("bluebird")
 EE = require("events").EventEmitter
 electron = require("electron")
 electronUtils = require("#{root}lib/electron/utils")
+menu = require("#{root}lib/electron/handlers/menu")
 Renderer = require("#{root}lib/electron/handlers/renderer")
 automation = require("#{root}lib/electron/handlers/automation")
 savedState = require("#{root}lib/saved_state")
@@ -26,6 +27,7 @@ describe "lib/launcher", ->
 
         @sandbox.stub(electronUtils, "setProxy").resolves()
         @sandbox.stub(Renderer, "create").resolves(@win)
+        @sandbox.stub(menu, "set")
         @sandbox.stub(Renderer, "trackState")
         @sandbox.stub(savedState, "get").resolves({})
 
@@ -45,10 +47,48 @@ describe "lib/launcher", ->
         launcher.launch("electron", @url, {chromeWebSecurity: false}).then ->
           expect(Renderer.create.lastCall.args[0].chromeWebSecurity).to.be.false
 
-      it "passes along onBrowserClose callback", ->
-        onBrowserClose = ->
+      it "sets menu with dev tools on focus", ->
+        launcher.launch("electron").then ->
+          Renderer.create.lastCall.args[0].onFocus()
+          expect(menu.set).to.be.calledWith({withDevTools: true})
+
+      it "sets menu with dev tools when dev env on blur", ->
+        env = process.env["CYPRESS_ENV"]
+        process.env["CYPRESS_ENV"] = "development"
+        launcher.launch("electron").then ->
+          Renderer.create.lastCall.args[0].onBlur()
+          expect(menu.set).to.be.calledWith({withDevTools: true})
+          process.env["CYPRESS_ENV"] = env
+
+      it "sets menu without dev tools when not dev env on blur", ->
+        env = process.env["CYPRESS_ENV"]
+        process.env["CYPRESS_ENV"] = "production"
+        launcher.launch("electron").then ->
+          Renderer.create.lastCall.args[0].onBlur()
+          expect(menu.set).to.be.calledWith({withDevTools: false})
+          process.env["CYPRESS_ENV"] = env
+
+      it "sets menu with dev tools when dev env on close", ->
+        env = process.env["CYPRESS_ENV"]
+        process.env["CYPRESS_ENV"] = "development"
+        launcher.launch("electron", @url, {onBrowserClose: ->}).then ->
+          Renderer.create.lastCall.args[0].onClose()
+          expect(menu.set).to.be.calledWith({withDevTools: true})
+          process.env["CYPRESS_ENV"] = env
+
+      it "sets menu without dev tools when not dev env on close", ->
+        env = process.env["CYPRESS_ENV"]
+        process.env["CYPRESS_ENV"] = "production"
+        launcher.launch("electron", @url, {onBrowserClose: ->}).then ->
+          Renderer.create.lastCall.args[0].onClose()
+          expect(menu.set).to.be.calledWith({withDevTools: false})
+          process.env["CYPRESS_ENV"] = env
+
+      it "calls onBrowserClose callback on close", ->
+        onBrowserClose = @sandbox.stub()
         launcher.launch("electron", @url, {onBrowserClose}).then ->
-          expect(Renderer.create.lastCall.args[0].onClose).to.equal(onBrowserClose)
+          Renderer.create.lastCall.args[0].onClose()
+          expect(onBrowserClose).to.be.called
 
       it "uses default width if there isn't one saved", ->
         launcher.launch("electron").then ->
