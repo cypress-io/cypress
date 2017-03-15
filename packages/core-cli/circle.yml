@@ -1,0 +1,17 @@
+test:
+  override:
+    - nvm install 0.12
+    - npm install
+    - npm run test-ci
+    - nvm install 0.11
+    - npm install
+    - npm run test-ci
+    - nvm install 0.10
+    - npm install
+    - npm run test-ci
+    - nvm install iojs
+    - npm install
+    - npm run test-ci
+    - nvm install stable
+    - npm install
+    - npm run test-ci

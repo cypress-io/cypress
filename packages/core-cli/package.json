@@ -1,0 +1,55 @@
+{
+  "name": "cypress-cli",
+  "version": "0.13.1",
+  "description": "CLI for Cypress.io Desktop App",
+  "preferGlobal": true,
+  "scripts": {
+    "test": "NODE_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.* mocha --watch",
+    "test-ci": "NODE_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.* mocha",
+    "test-debug": "NODE_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.* node-debug --hidden=node_modules --no-preload _mocha --opts test/mocha.opts --watch",
+    "release": "releaser"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress-cli.git"
+  },
+  "author": "Brian Mann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress-cli/issues"
+  },
+  "homepage": "https://github.com/cypress-io/cypress-cli",
+  "dependencies": {
+    "bluebird": "3.3.4",
+    "chalk": "^1.1.0",
+    "coffee-script": "^1.9.3",
+    "commander": "^2.8.1",
+    "extract-zip": "1.5.0",
+    "fs-extra": "^0.22.1",
+    "home-or-tmp": "^2.0.0",
+    "human-interval": "^0.1.5",
+    "lodash": "^3.10.0",
+    "progress": "^1.1.8",
+    "request": "^2.60.0",
+    "request-progress": "^0.3.1",
+    "through2": "^2.0.0",
+    "update-notifier": "^1.0.3",
+    "xvfb": "cypress-io/node-xvfb",
+    "yauzl": "^2.4.1"
+  },
+  "bin": {
+    "cypress": "bin/cypress"
+  },
+  "devDependencies": {
+    "@cypress/core-releaser": "0.1.8",
+    "chai": "^3.2.0",
+    "mocha": "^2.2.5",
+    "mock-spawn": "^0.2.6",
+    "mockery": "^1.4.0",
+    "nock": "^2.9.1",
+    "proxyquire": "^1.6.0",
+    "sinon": "^1.15.4",
+    "sinon-as-promised": "^4.0.0",
+    "sinon-chai": "^2.8.0"
+  }
+}
