@@ -37,9 +37,6 @@
     "xvfb": "cypress-io/node-xvfb",
     "yauzl": "^2.4.1"
   },
-  "bin": {
-    "cypress": "bin/cypress"
-  },
   "devDependencies": {
     "@cypress/core-releaser": "0.1.8",
     "chai": "^3.2.0",

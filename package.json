@@ -2,6 +2,9 @@
   "name": "cypress-monorepo",
   "version": "0.0.0",
   "main": "index.js",
+  "bin": {
+    "cypress": "bin/cypress"
+  },
   "scripts": {
     "postinstall": "npm run all install",
     "start": "node lib/run.js",
