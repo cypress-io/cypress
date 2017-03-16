@@ -170,7 +170,7 @@ Cypress uses your `projectId` and **Record Key** together to uniquely identify p
 
 The record key is used to authenticate that your project is *allowed* to record. As long as your record key stays *private*, nobody will be able to record test runs for your project - even if they have your `projectId`.
 
-If you have a public project you should *still* keep your record key secret. If someone knows both your record key and your `projectId`, they could record test runs for your project - which would mix up all the of your results!
+If you have a public project you should *still* keep your record key secret. If someone knows both your record key and your `projectId`, they could record test runs for your project - which would mix up all of your results!
 
 Think of your record key as the key that enables you to **write and create** builds. However, it has nothing to do with being able to **read or see** builds once they are created.
 
