@@ -45,7 +45,7 @@ describe "$Cypress.jQuery Extensions", ->
 
       @$parentWithWidthHeightNoOverflow = add """
         <div style='width: 100px; height: 100px; overflow: hidden;'>
-          <div style='height: 500px; width: 500px;'>
+          <div style='height: 100px; width: 100px;'>
             <span>child</span>
           </div>
         </div>"""
@@ -90,6 +90,36 @@ describe "$Cypress.jQuery Extensions", ->
           <span>child</span>
         </div>
         """
+
+      @$elOutOfBoundsToLeft = add """
+        <div style='width: 100px; height: 100px; overflow: hidden; border: 1px solid red; position: relative;'>
+          <span style='position: absolute; left: -100px; top: 0px;'>child</span>
+        </div>
+      """
+
+      @$elOutOfBoundsToRight = add """
+        <div style='width: 100px; height: 100px; overflow: hidden; border: 1px solid red; position: relative;'>
+          <span style='position: absolute; left: 200px; top: 0px;'>child</span>
+        </div>
+      """
+
+      @$elOutOfBoundsAbove = add """
+        <div style='width: 100px; height: 100px; overflow: hidden; border: 1px solid red; position: relative;'>
+          <span style='position: absolute; left: 0px; top: -100px;'>child</span>
+        </div>
+      """
+
+      @$elOutOfBoundsBelow = add """
+        <div style='width: 100px; height: 100px; overflow: hidden; border: 1px solid red; position: relative;'>
+          <span style='position: absolute; left: 0px; top: 200px;'>child</span>
+        </div>
+      """
+
+      @$elNotOutOfBounds = add """
+        <div style='width: 100px; height: 100px; overflow: hidden; border: 1px solid red; position: relative;'>
+          <span style='position: absolute; left: 0px; top: 0px;'>child</span>
+        </div>
+      """
 
     it "is hidden if .css(visibility) is hidden", ->
       expect(@$visHidden.is(":hidden")).to.be.true
@@ -138,6 +168,21 @@ describe "$Cypress.jQuery Extensions", ->
     it "is visible when parent doesnt have overflow hidden", ->
       expect(@$parentNoWidthHeightOverflowAuto.find("span")).to.be.visible
 
+    it "is hidden when parent overflow hidden and out of bounds to left", ->
+      expect(@$elOutOfBoundsToLeft.find("span")).to.be.hidden
+
+    it "is hidden when parent overflow hidden and out of bounds to right", ->
+      expect(@$elOutOfBoundsToRight.find("span")).to.be.hidden
+
+    it "is hidden when parent overflow hidden and out of bounds above", ->
+      expect(@$elOutOfBoundsAbove.find("span")).to.be.hidden
+
+    it "is hidden when parent overflow hidden and out of bounds below", ->
+      expect(@$elOutOfBoundsBelow.find("span")).to.be.hidden
+
+    it "is visible when parent overflow hidden and not out of bounds", ->
+      expect(@$elNotOutOfBounds.find("span")).to.be.visible
+
     describe "#getReasonElIsHidden", ->
       beforeEach ->
         @reasonIs = ($el, str) ->
@@ -163,6 +208,9 @@ describe "$Cypress.jQuery Extensions", ->
 
       it "has a parent when an effective zero width and overflow: hidden", ->
         @reasonIs @$parentNoHeight.find("span"), "This element is not visible because it's parent: <div> has CSS property: 'overflow: hidden' and an effective width and height of: '100 x 0' pixels."
+
+      it "element sits outside boundaries of parent with overflow: hidden", ->
+        @reasonIs @$elOutOfBoundsToRight.find("span"), "This element is not visible because it sits outside the boundaries of it's parent: <div>, which has the CSS property: 'overflow: hidden'"
 
       it "cannot determine why element is not visible", ->
         @reasonIs @$btnOpacity, "Cypress could not determine why this element is not visible."
