@@ -168,10 +168,11 @@ do ($Cypress, _, $) ->
 
       unless $Cypress.Utils.isDescendent($el1, $el2)
         if $el2
-          node = $Cypress.Utils.stringifyElement($el2)
+          element1 = $Cypress.Utils.stringifyElement($el1)
+          element2 = $Cypress.Utils.stringifyElement($el2)
           $Cypress.Utils.throwErrByPath("dom.covered", {
             onFail
-            args: { cmd, node }
+            args: { cmd, element1, element2 }
           })
         else
           node = $Cypress.Utils.stringifyElement($el1)
