@@ -1,7 +1,6 @@
 _       = require("lodash")
 path    = require("path")
 chalk   = require("chalk")
-install = require("./install")
 utils   = require("../utils")
 pkg     = require("../../package")
 
@@ -69,16 +68,6 @@ module.exports = {
     after = ->
       run(options)
 
-    utils.verifyCypressExists()
-    .then(after)
-    .catch ->
-      console.log("")
-      console.log("Cypress was not found:", chalk.green("Installing a fresh copy."))
-      console.log("")
-
-      ## TODO: no reason after should be a callback function here
-      ## just use a promise
-      install.start({after: after, displayOpen: false})
-
+    ## TODO: require("lib/install/utils") and verifyCypress
 
 }

@@ -1,0 +1,32 @@
+{
+  "name": "@cypress/core-download",
+  "version": "0.0.1",
+  "description": "Installs local version of Cypress binary",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --watch",
+    "test-once": "mocha"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.4.5",
+    "chalk": "^1.1.3",
+    "extract-zip": "^1.6.0",
+    "fs-extra": "^2.1.2",
+    "lodash": "^4.16.3",
+    "progress": "^1.1.8",
+    "request": "^2.81.0",
+    "request-progress": "^0.3.1",
+    "url": "^0.11.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "eslint": "^3.18.0",
+    "eslint-plugin-mocha": "^4.9.0",
+    "mocha": "^3.2.0",
+    "nock": "^9.0.9",
+    "sinon": "^2.1.0",
+    "sinon-chai": "^2.9.0"
+  }
+}

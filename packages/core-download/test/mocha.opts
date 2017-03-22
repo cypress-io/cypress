@@ -1,0 +1,3 @@
+test/*_spec.js
+--reporter spec
+--recursive

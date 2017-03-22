@@ -5,83 +5,19 @@ fs       = require("fs-extra")
 path     = require("path")
 chalk    = require("chalk")
 Xvfb     = require("xvfb")
-home     = require("home-or-tmp")
 Promise  = require("bluebird")
 
 fs   = Promise.promisifyAll(fs)
 xvfb = Promise.promisifyAll(new Xvfb({silent: true}))
 
+## TODO: things in here are broken for the moment because they were
+## moved to root of repo, need to require("lib/install/utils") and use
+
 module.exports = {
   xvfb: xvfb
 
-  getPathToExecutable: ->
-    path.join(@getDefaultAppFolder(), @getPlatformExecutable())
-
   getPathToUserExecutable: ->
     path.join(@getDefaultAppFolder(), @getPlatformExecutable().split("/")[0])
-
-  getPlatformExecutable: ->
-    switch p = os.platform()
-      when "darwin" then "Cypress.app/Contents/MacOS/Cypress"
-      when "linux"  then "Cypress/Cypress"
-      when "win32"  then "Cypress/Cypress.exe"
-      else
-        throw new Error("Platform: '#{p}' is not supported.")
-
-  getDefaultAppFolder: ->
-    switch p = os.platform()
-      when "darwin" then "/Applications"
-      when "linux"  then path.join(home, ".cypress")
-      # when "win32"   then "i/dont/know/yet"
-      else
-        throw new Error("Platform: '#{p}' is not supported.")
-
-  getOs: ->
-    switch p = os.platform()
-      when "darwin" then "mac"
-      when "linux"  then "linux64"
-      when "win32"  then "win"
-      else
-        throw new Error("Platform: '#{p}' is not supported.")
-
-  _fileExistsAtPath: (options = {}) ->
-    ## this needs to change to become async and
-    ## to do a lookup for the cached cypress path
-    _.defaults options,
-      pathToCypress: @getPathToExecutable()
-
-    fs.statAsync(options.pathToCypress)
-      .bind(@)
-      .return(options.pathToCypress)
-      .catch (err) =>
-        ## allow us to bubble up the error if catch is false
-        return throw(err) if options.catch is false
-
-        console.log("")
-        console.log(chalk.bgRed.white(" -Error- "))
-        console.log(chalk.red.underline("The Cypress App could not be found."))
-        console.log("Expected the app to be found here:", chalk.blue(@getPathToUserExecutable()))
-        console.log("")
-        console.log(chalk.yellow("To fix this do (one) of the following:"))
-        console.log("1. Reinstall Cypress with:", chalk.cyan("cypress install"))
-        console.log("2. If Cypress is stored in another location, move it to the expected location")
-        ## TODO talk about how to permanently change the path to the cypress executable
-        # console.log("3. Specify the existing location of Cypress with:", chalk.cyan("cypress run --cypress path/to/cypress"))
-        console.log("")
-        process.exit(1)
-
-  verifyCypress: (options = {}) ->
-    _.defaults options,
-      catch: true
-
-    ## verify that there is a file at this path
-    @_fileExistsAtPath(options)
-
-  verifyCypressExists: (options = {}) ->
-    _.defaults options,
-      catch: false
-
-    @_fileExistsAtPath(options)
 
   getCypressPath: ->
     msgs = [
