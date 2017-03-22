@@ -26,7 +26,9 @@ $Cypress.Dom = do ($Cypress, _, $) ->
 
           ## we do some calculations taking into account the parents
           ## to see if its hidden by a parent
-          obj.elIsHiddenByAncestors($el)
+          obj.elIsHiddenByAncestors($el) or
+
+            obj.elIsOutOfBoundsOfAncestorsOverflow($el)
 
     elHasNoOffsetWidthOrHeight: ($el) ->
       @elOffsetWidth($el) <= 0 or @elOffsetHeight($el) <= 0
@@ -46,6 +48,15 @@ $Cypress.Dom = do ($Cypress, _, $) ->
     elHasOverflowHidden: ($el) ->
       $el.css("overflow") is "hidden"
 
+    canClipContent: ($el) ->
+      elStyle    = getComputedStyle($el[0])
+      elOverflow = elStyle.overflow
+
+      ##: if overflow-x, overflow-y hidden, then overflow is auto
+      (elOverflow is 'hidden') or
+      (elOverflow is 'scroll') or
+      (elOverflow is 'auto')
+
     elDescendentsHavePositionFixedOrAbsolute: ($parent, $child) ->
       ## create an array of all elements between $parent and $child
       ## including child but excluding parent
@@ -55,42 +66,57 @@ $Cypress.Dom = do ($Cypress, _, $) ->
       _.any $els.get(), (el) ->
         fixedOrAbsoluteRe.test $(el).css("position")
 
-    elIsOutOfBoundsOfParent: ($parent, $el) ->
-      ## get some offset positions for el & parent
-      elOffsetTop = $el[0].offsetTop
-      elOffsetLeft = $el[0].offsetLeft
-      elOffsetWidth  = @elOffsetWidth($el)
-      elOffsetHeight = @elOffsetHeight($el)
+    elIsOutOfBoundsOfAncestorsOverflow: ($el) ->
+      ## get some offset positions for el
+      elTop = $el[0].offsetTop ## Top corner position number
+      elLeft = $el[0].offsetLeft ## Left corner position number
+      elWidth = $el[0].offsetWidth ## el width
+      elHeight = $el[0].offsetHeight ## el height
+      elBottom = elTop + elHeight ## Bottom corner position number
+      elRight = elLeft + elWidth ## Right corner position number
 
-      parentOffsetTop = $parent[0].offsetTop
-      parentOffsetLeft = $parent[0].offsetLeft
-      parentOffsetWidth = $parent[0].offsetWidth
-      parentOffsetHeight = $parent[0].offsetHeight
+      @isInBounds($el, elTop, elRight, elBottom, elLeft, elWidth, elHeight)
 
-      ## if the current element's offset parent IS the
-      ## parent, we want to add that offset to the element
-      ## so we can make correct comparisons of the boundaries.
-      if $el[0].offsetParent == $parent[0]
-        elOffsetLeft = elOffsetLeft + parentOffsetLeft
-        elOffsetTop = elOffsetTop + parentOffsetTop
+    isInBounds: ($el, elTop, elRight, elBottom, elLeft, elWidth, elHeight) ->
+      $parent = $el.parent()
 
-      if (
-        ## If the target el is to the right of the parent el
-        elOffsetLeft > elOffsetWidth + parentOffsetLeft ||
+      if $parent
+        ## if we've reached the top parent, which is document
+        ## then we're in bounds all the way up, return false
+        return false if $parent.is("body,html") or $Cypress.Utils.hasDocument($parent)
 
-        ## If the target el is to the left of the parent el
-        elOffsetLeft + elOffsetWidth < parentOffsetLeft ||
+        ## if the current element's offset parent IS the
+        ## parent, we want to add that offset to the element
+        ## so we can make correct comparisons of the boundaries.
+        if $parent[0] is $el[0].offsetParent
+          elLeft += $parent[0].offsetLeft
+          elTop += $parent[0].offsetTop
 
-        ## If the target el is under the parent el
-        elOffsetTop > parentOffsetHeight + parentOffsetTop ||
+        ## hidden, scroll, or auto can all chip children elements
+        if @canClipContent($parent)
 
-        ## If the target el is above the parent el
-        elOffsetTop + elOffsetHeight < parentOffsetTop
-      )
-        ## Our target el is out of bounds
-        return true
+          parentWidth = $parent[0].offsetWidth
+          parentHeight = $parent[0].offsetHeight
+          parentLeft = $parent[0].offsetLeft
+          parentTop = $parent[0].offsetTop
+
+          ## Our target el is out of bounds
+          return true if (
+            ## target el is to the right of the parent el
+            elLeft > parentWidth + parentLeft ||
+
+            ## target el is to the left of the parent el
+            elLeft + elWidth < parentLeft ||
+
+            ## target el is under the parent el
+            elTop > parentHeight + parentTop ||
+
+            ## target el is above the parent el
+            elTop + elHeight < parentTop
+          )
+
+        @isInBounds($parent, elTop, elRight, elBottom, elLeft, elWidth, elHeight)
       else
-        ## Our target el is in bounds
         return false
 
     elIsHiddenByAncestors: ($el, $origEl) ->
@@ -121,8 +147,6 @@ $Cypress.Dom = do ($Cypress, _, $) ->
           else
             ## else they are
             return true
-        else if @elIsOutOfBoundsOfParent($parent, $origEl)
-          return true
 
       ## continue to recursively walk up the chain until we reach body or html
       @elIsHiddenByAncestors($parent, $origEl)
@@ -162,38 +186,39 @@ $Cypress.Dom = do ($Cypress, _, $) ->
         return @parentHasVisibilityNone($el.parent())
 
     getReasonElIsHidden: ($el) ->
+      node   = $Cypress.Utils.stringifyElement($el, "short")
+
       ## returns the reason in human terms why an element is considered not visible
       switch
         when @elHasDisplayNone($el)
-          "This element is not visible because it has CSS property: 'display: none'"
+          "This element: #{node} is not visible because it has CSS property: 'display: none'"
 
         when $parent = @parentHasDisplayNone($el.parent())
-          node = $Cypress.Utils.stringifyElement($parent, "short")
-          "This element is not visible because it's parent: #{node} has CSS property: 'display: none'"
+          parentNode = $Cypress.Utils.stringifyElement($parent, "short")
+          "This element: #{node} is not visible because it's parent: #{parentNode} has CSS property: 'display: none'"
 
         when $parent = @parentHasVisibilityNone($el.parent())
-          node = $Cypress.Utils.stringifyElement($parent, "short")
-          "This element is not visible because it's parent: #{node} has CSS property: 'visibility: hidden'"
+          parentNode = $Cypress.Utils.stringifyElement($parent, "short")
+          "This element: #{node} is not visible because it's parent: #{parentNode} has CSS property: 'visibility: hidden'"
 
         when @elHasVisibilityHidden($el)
-          "This element is not visible because it has CSS property: 'visibility: hidden'"
+          "This element: #{node} is not visible because it has CSS property: 'visibility: hidden'"
 
         when @elHasNoOffsetWidthOrHeight($el)
           width  = @elOffsetWidth($el)
           height = @elOffsetHeight($el)
-          "This element is not visible because it has an effective width and height of: '#{width} x #{height}' pixels."
+          "This element: #{node} is not visible because it has an effective width and height of: '#{width} x #{height}' pixels."
 
         when $parent = @parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())
-          node   = $Cypress.Utils.stringifyElement($parent, "short")
-          width  = @elOffsetWidth($parent)
-          height = @elOffsetHeight($parent)
-          "This element is not visible because it's parent: #{node} has CSS property: 'overflow: hidden' and an effective width and height of: '#{width} x #{height}' pixels."
+          parentNode  = $Cypress.Utils.stringifyElement($parent, "short")
+          width       = @elOffsetWidth($parent)
+          height      = @elOffsetHeight($parent)
+          "This element: #{node} is not visible because it's parent: #{parentNode} has CSS property: 'overflow: hidden' and an effective width and height of: '#{width} x #{height}' pixels."
 
-        when @elIsOutOfBoundsOfParent($el.parent(), $el)
-          node   = $Cypress.Utils.stringifyElement($el.parent(), "short")
-          "This element is not visible because it sits outside the boundaries of it's parent: #{node}, which has the CSS property: 'overflow: hidden'"
+        when @elIsOutOfBoundsOfAncestorsOverflow($el)
+          "This element: #{node} is not visible because it's content is being clipped by one of it's parent elements, which has a CSS property of overflow: 'hidden', 'scroll' or 'auto'"
 
         else
-          "Cypress could not determine why this element is not visible."
+          "Cypress could not determine why this element: #{node} is not visible."
 
   }
