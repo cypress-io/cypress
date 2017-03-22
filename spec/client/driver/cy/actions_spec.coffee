@@ -5033,7 +5033,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#three-buttons button").click({multiple: true})
 
-    it.only "can click elements which are hidden until scrolled within parent container", ->
+    it "can click elements which are hidden until scrolled within parent container", ->
       @cy.get("#overflow-auto-container").contains("quux").click()
 
     ## this test needs to increase the height + width of the div
