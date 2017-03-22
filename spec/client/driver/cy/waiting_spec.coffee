@@ -2,6 +2,7 @@ describe "$Cypress.Cy Waiting Commands", ->
   enterCommandTestingMode()
 
   context "#wait", ->
+
     describe "number argument", ->
       it "passes delay onto Promise", ->
         delay = @sandbox.spy Promise, "delay"
@@ -616,6 +617,19 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "throws and includes the incremented alias number"
           ## use underscore string here for formatting the number
+
+    describe "errors", ->
+      describe "invalid 1st argument", ->
+        beforeEach ->
+          @currentTest.enableTimeouts(false)
+          @uncaught = @allowErrors()
+
+        it.skip "is undefined", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.eq "cy.wait() must be invoked with either a number or an alias for a route."
+            done()
+
+          @cy.get("body").wait(undefined)
 
     describe ".log", ->
       beforeEach ->
