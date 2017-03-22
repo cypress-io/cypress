@@ -176,7 +176,7 @@ do ($Cypress, _, $) ->
           })
         else
           node = $Cypress.Utils.stringifyElement($el1)
-          $Cypress.Utils.throwErrByPath("dom.hidden", {
+          $Cypress.Utils.throwErrByPath("dom.center_hidden", {
             onFail
             args: { cmd, node }
           })
