@@ -67,57 +67,57 @@ $Cypress.Dom = do ($Cypress, _, $) ->
         fixedOrAbsoluteRe.test $(el).css("position")
 
     elIsOutOfBoundsOfAncestorsOverflow: ($el) ->
+      el = $el[0]
       ## get some offset positions for el
-      elTop = $el[0].offsetTop ## Top corner position number
-      elLeft = $el[0].offsetLeft ## Left corner position number
-      elWidth = $el[0].offsetWidth ## el width
-      elHeight = $el[0].offsetHeight ## el height
+      elTop = el.offsetTop ## Top corner position number
+      elLeft = el.offsetLeft ## Left corner position number
+      elWidth = el.offsetWidth ## el width
+      elHeight = el.offsetHeight ## el height
       elBottom = elTop + elHeight ## Bottom corner position number
       elRight = elLeft + elWidth ## Right corner position number
 
       @isInBounds($el, elTop, elRight, elBottom, elLeft, elWidth, elHeight)
 
     isInBounds: ($el, elTop, elRight, elBottom, elLeft, elWidth, elHeight) ->
-      $parent = $el.parent()
-
-      if $parent
-        ## if we've reached the top parent, which is document
-        ## then we're in bounds all the way up, return false
-        return false if $parent.is("body,html") or $Cypress.Utils.hasDocument($parent)
-
-        ## if the current element's offset parent IS the
-        ## parent, we want to add that offset to the element
-        ## so we can make correct comparisons of the boundaries.
-        if $parent[0] is $el[0].offsetParent
-          elLeft += $parent[0].offsetLeft
-          elTop += $parent[0].offsetTop
-
-        ## hidden, scroll, or auto can all chip children elements
-        if @canClipContent($parent)
-
-          parentWidth = $parent[0].offsetWidth
-          parentHeight = $parent[0].offsetHeight
-          parentLeft = $parent[0].offsetLeft
-          parentTop = $parent[0].offsetTop
-
-          ## Our target el is out of bounds
-          return true if (
-            ## target el is to the right of the parent el
-            elLeft > parentWidth + parentLeft ||
-
-            ## target el is to the left of the parent el
-            elLeft + elWidth < parentLeft ||
-
-            ## target el is under the parent el
-            elTop > parentHeight + parentTop ||
-
-            ## target el is above the parent el
-            elTop + elHeight < parentTop
-          )
-
-        @isInBounds($parent, elTop, elRight, elBottom, elLeft, elWidth, elHeight)
-      else
+      if not $parent = $el.parent()
         return false
+
+      ## if we've reached the top parent, which is document
+      ## then we're in bounds all the way up, return false
+      return false if $parent.is("body,html") or $Cypress.Utils.hasDocument($parent)
+
+      parent = $parent[0]
+
+      ## if the current element's offset parent IS the
+      ## parent, we want to add that offset to the element
+      ## so we can make correct comparisons of the boundaries.
+      if parent is $el[0].offsetParent
+        elLeft += parent.offsetLeft
+        elTop += parent.offsetTop
+
+      ## hidden, scroll, or auto can all chip children elements
+      if @canClipContent($parent)
+        parentTop    = parent.offsetTop
+        parentLeft   = parent.offsetLeft
+        parentWidth  = parent.offsetWidth
+        parentHeight = parent.offsetHeight
+
+        ## Our target el is out of bounds
+        return true if (
+          ## target el is to the right of the parent el
+          elLeft > parentWidth + parentLeft or
+
+          ## target el is to the left of the parent el
+          elLeft + elWidth < parentLeft or
+
+          ## target el is under the parent el
+          elTop > parentHeight + parentTop or
+
+          ## target el is above the parent el
+          elTop + elHeight < parentTop
+        )
+
+      @isInBounds($parent, elTop, elRight, elBottom, elLeft, elWidth, elHeight)
 
     elIsHiddenByAncestors: ($el, $origEl) ->
       ## store the original $el
@@ -186,7 +186,7 @@ $Cypress.Dom = do ($Cypress, _, $) ->
         return @parentHasVisibilityNone($el.parent())
 
     getReasonElIsHidden: ($el) ->
-      node   = $Cypress.Utils.stringifyElement($el, "short")
+      node = $Cypress.Utils.stringifyElement($el, "short")
 
       ## returns the reason in human terms why an element is considered not visible
       switch
