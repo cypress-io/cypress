@@ -97,23 +97,25 @@ $Cypress.Dom = do ($Cypress, _, $) ->
 
       ## hidden, scroll, or auto can all chip children elements
       if @canClipContent($parent)
-        parentTop    = parent.offsetTop
-        parentLeft   = parent.offsetLeft
-        parentWidth  = parent.offsetWidth
-        parentHeight = parent.offsetHeight
+        parentTop         = parent.offsetTop
+        parentLeft        = parent.offsetLeft
+        parentScrollTop   = parent.scrollTop
+        parentScrollLeft  = parent.scrollLeft
+        parentWidth       = parent.offsetWidth
+        parentHeight      = parent.offsetHeight
 
         ## Our target el is out of bounds
         return true if (
-          ## target el is to the right of the parent el
-          elLeft > parentWidth + parentLeft or
+          ## target el is to the right of the parent el's visible area
+          elLeft > parentWidth + parentLeft + parentScrollLeft or
 
-          ## target el is to the left of the parent el
+          ## target el is to the left of the parent el visible area
           elLeft + elWidth < parentLeft or
 
-          ## target el is under the parent el
-          elTop > parentHeight + parentTop or
+          ## target el is under the parent el visible area
+          elTop > parentHeight + parentTop + parentScrollTop or
 
-          ## target el is above the parent el
+          ## target el is above the parent el visible area
           elTop + elHeight < parentTop
         )
 
