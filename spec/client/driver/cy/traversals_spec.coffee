@@ -7,7 +7,7 @@ describe "$Cypress.Cy Traversal Commands", ->
     {not: "div"}
     {eq: 0}
     {closest: "body"}
-    "children", "first", "last", "next", "nextAll", "nextUntil", "offsetParent", "parent", "parents", "parentsUntil", "prev", "prevAll", "prevUntil", "siblings"
+    "children", "first", "last", "next", "nextAll", "nextUntil", "parent", "parents", "prev", "prevAll", "prevUntil", "siblings"
   ]
   _.each fns, (fn) ->
     ## normalize string vs object

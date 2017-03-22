@@ -1,6 +1,6 @@
 $Cypress.register "Traversals", (Cypress, _, $) ->
 
-  traversals = "find filter not children eq closest first last next nextAll nextUntil offsetParent parent parents parentsUntil prev prevAll prevUntil siblings".split(" ")
+  traversals = "find filter not children eq closest first last next nextAll nextUntil parent parents prev prevAll prevUntil siblings".split(" ")
 
   _.each traversals, (traversal) ->
     Cypress.addChildCommand traversal, (subject, arg1, arg2, options) ->
