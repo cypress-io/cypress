@@ -3,8 +3,6 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
   Cypress.addDualCommand
 
     wait: (subject, msOrFnOrAlias, options = {}) ->
-      msOrFnOrAlias ?= 1e9
-
       ## check to ensure options is an object
       ## if its a string the user most likely is trying
       ## to wait on multiple aliases and forget to make this
@@ -17,12 +15,22 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
       args = [subject, msOrFnOrAlias, options]
 
       switch
-        when _.isNumber(msOrFnOrAlias)   then @_waitNumber.apply(@, args)
+        when _.isNumber(msOrFnOrAlias)
+          if Number.isNaN(msOrFnOrAlias) or !_.isFinite(msOrFnOrAlias)
+            $Cypress.Utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg: "an invalid Number"}})
+          else
+            @_waitNumber.apply(@, args)
         when _.isFunction(msOrFnOrAlias) then @_waitFunction.apply(@, args)
         when _.isString(msOrFnOrAlias)   then @_waitString.apply(@, args)
-        when _.isArray(msOrFnOrAlias)    then @_waitString.apply(@, args)
+        when _.isArray(msOrFnOrAlias)
+          if _.isEmpty(msOrFnOrAlias)
+            $Cypress.Utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg: JSON.stringify(msOrFnOrAlias)}})
+          else
+            @_waitString.apply(@, args)
         else
-          $Cypress.Utils.throwErrByPath "wait.invalid_1st_arg"
+          ## TODO: This will fail if the user passes something
+          ## obscure, like a Symbol since we cant JSON.stringify that
+          $Cypress.Utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg: JSON.stringify(msOrFnOrAlias)}})
 
   Cypress.Cy.extend
     _waitNumber: (subject, ms, options) ->
