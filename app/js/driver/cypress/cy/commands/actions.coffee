@@ -1144,10 +1144,14 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             optionEls.push optEl
             values.push(value)
 
+
+          ## replace new line chars, then trim spaces
+          trimmedText = optEl.text().replace(/\n/g, " ").trim()
+
           ## return the elements text + value
           {
             value: value
-            text: optEl.text()
+            text: trimmedText
             $el: optEl
           }
         ).get()

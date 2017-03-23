@@ -16,6 +16,10 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("select[name=maps]").select("train").then ($select) ->
         expect($select).to.have.value("de_train")
 
+    it "selects by trimmed text with newlines stripped", ->
+      @cy.get("select[name=maps]").select("italy").then ($select) ->
+        expect($select).to.have.value("cs_italy")
+
     it "prioritizes value over text", ->
       @cy.get("select[name=foods]").select("Ramen").then ($select) ->
         expect($select).to.have.value("Ramen")
