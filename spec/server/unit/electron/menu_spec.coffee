@@ -3,10 +3,15 @@ require("../../spec_helper")
 _        = require("lodash")
 os       = require("os")
 electron = require("electron")
+appData  = require("#{root}../lib/util/app_data")
+open     = require("#{root}../lib/util/open")
 menu     = require("#{root}../lib/electron/handlers/menu")
 
 getMenuItem = (label) ->
   _.find(electron.Menu.buildFromTemplate.lastCall.args[0], {label})
+
+getSubMenuItem = (menu, label) ->
+  _.find(menu.submenu, {label})
 
 getLabels = (menu) ->
   _(menu).map("label").compact().value()
@@ -42,21 +47,21 @@ describe "electron/menu", ->
 
       it "sets roles and shortcuts", ->
         menu.set()
-        submenu = getMenuItem("Cypress").submenu
+        cyMenu = getMenuItem("Cypress")
 
-        expect(submenu[0].role).to.equal("about")
-        expect(submenu[2].role).to.equal("services")
-        expect(submenu[4].role).to.equal("hide")
-        expect(submenu[4].accelerator).to.equal("Command+H")
-        expect(submenu[5].role).to.equal("hideothers")
-        expect(submenu[5].accelerator).to.equal("Command+Shift+H")
-        expect(submenu[6].role).to.equal("unhide")
-        expect(submenu[8].accelerator).to.equal("Command+Q")
+        expect(getSubMenuItem(cyMenu, "About Cypress").role).to.equal("about")
+        expect(getSubMenuItem(cyMenu, "Services").role).to.equal("services")
+        expect(getSubMenuItem(cyMenu, "Hide Cypress").role).to.equal("hide")
+        expect(getSubMenuItem(cyMenu, "Hide Cypress").accelerator).to.equal("Command+H")
+        expect(getSubMenuItem(cyMenu, "Hide Others").role).to.equal("hideothers")
+        expect(getSubMenuItem(cyMenu, "Hide Others").accelerator).to.equal("Command+Shift+H")
+        expect(getSubMenuItem(cyMenu, "Show All").role).to.equal("unhide")
+        expect(getSubMenuItem(cyMenu, "Quit").accelerator).to.equal("Command+Q")
 
       it "exits process when Quit is clicked", ->
         @sandbox.stub(process, "exit")
         menu.set()
-        getMenuItem("Cypress").submenu[8].click()
+        getSubMenuItem(getMenuItem("Cypress"), "Quit").click()
         expect(process.exit).to.be.calledWith(0)
 
     describe "other OS", ->
@@ -75,56 +80,63 @@ describe "electron/menu", ->
         "Check for Updates"
         "Manage Account"
         "Log Out"
+        "View App Data"
         "Close Window"
       ])
 
     it "opens changelog when Changelog is clicked", ->
       menu.set()
-      getMenuItem("File").submenu[0].click()
+      getSubMenuItem(getMenuItem("File"), "Changelog").click()
       expect(electron.shell.openExternal).to.be.calledWith("https://on.cypress.io/changelog")
 
     it "calls updates callback when Check for Updates is clicked", ->
       onUpdatesClicked = @sandbox.stub()
       menu.set({onUpdatesClicked})
-      getMenuItem("File").submenu[1].click()
+      getSubMenuItem(getMenuItem("File"), "Check for Updates").click()
       expect(onUpdatesClicked).to.be.called
 
     it "calls original updates callback when menu is reset without new callback", ->
       onUpdatesClicked = @sandbox.stub()
       menu.set({onUpdatesClicked})
       menu.set()
-      getMenuItem("File").submenu[1].click()
+      getSubMenuItem(getMenuItem("File"), "Check for Updates").click()
       expect(onUpdatesClicked).to.be.called
 
     it "is noop when Check for Updates is clicked with no callback", ->
       menu.set()
-      expect(-> getMenuItem("File").submenu[1].click()).not.to.throw()
+      expect(-> getSubMenuItem(getMenuItem("File"), "Check for Updates").click()).not.to.throw()
 
     it "opens dashboard when Manage Account is clicked", ->
       menu.set()
-      getMenuItem("File").submenu[3].click()
+      getSubMenuItem(getMenuItem("File"), "Manage Account").click()
       expect(electron.shell.openExternal).to.be.calledWith("https://on.cypress.io/dashboard")
+
+    it "opens app data directory when View App Data is clicked", ->
+      @sandbox.stub(open, "opn")
+      menu.set()
+      getSubMenuItem(getMenuItem("File"), "View App Data").click()
+      expect(open.opn).to.be.calledWith(appData.path())
 
     it "calls logout callback when Log Out is clicked", ->
       onLogOutClicked = @sandbox.stub()
       menu.set({onLogOutClicked})
-      getMenuItem("File").submenu[4].click()
+      getSubMenuItem(getMenuItem("File"), "Log Out").click()
       expect(onLogOutClicked).to.be.called
 
     it "calls original logout callback when menu is reset without new callback", ->
       onLogOutClicked = @sandbox.stub()
       menu.set({onLogOutClicked})
       menu.set()
-      getMenuItem("File").submenu[4].click()
+      getSubMenuItem(getMenuItem("File"), "Log Out").click()
       expect(onLogOutClicked).to.be.called
 
-    it "is noop when Check for Updates is clicked with no callback", ->
+    it "is noop when Log Out is clicked with no callback", ->
       menu.set()
-      expect(-> getMenuItem("File").submenu[4].click()).not.to.throw()
+      expect(-> getSubMenuItem(getMenuItem("File"), "Log Out").click()).not.to.throw()
 
     it "binds Close Window to shortcut", ->
       menu.set()
-      expect(getMenuItem("File").submenu[6]).to.eql({
+      expect(getSubMenuItem(getMenuItem("File"), "Close Window")).to.eql({
         label: "Close Window"
         accelerator: "CmdOrCtrl+W"
         role: "close"

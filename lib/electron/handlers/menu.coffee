@@ -3,6 +3,9 @@ os    = require("os")
 Menu  = require("electron").Menu
 shell = require("electron").shell
 
+appData = require("../../util/app_data")
+open    = require("../../util/open")
+
 onUpdatesClicked = ->
 onLogOutClicked = ->
 
@@ -44,6 +47,14 @@ module.exports = {
           {
             label: "Log Out"
             click: onLogOutClicked
+          }
+          {
+            type: "separator"
+          }
+          {
+            label: "View App Data"
+            click: ->
+              open.opn(appData.path())
           }
           {
             type: "separator"
