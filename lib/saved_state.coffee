@@ -1,15 +1,7 @@
-Conf = require("conf")
-Promise = require("bluebird")
+Conf = require("./util/conf")
 appData = require("./util/app_data")
 
-config = new Conf({
-  async: true
+module.exports = new Conf({
   configName: "state"
   cwd: appData.path()
 })
-
-module.exports = {
-  get: Promise.promisify(config.getAsync.bind(config))
-  set: Promise.promisify(config.setAsync.bind(config))
-  path: config.path
-}
