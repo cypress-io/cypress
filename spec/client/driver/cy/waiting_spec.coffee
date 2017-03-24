@@ -126,8 +126,6 @@ describe "$Cypress.Cy Waiting Commands", ->
             null
           .wait("@fetch")
 
-
-
       describe "errors", ->
         beforeEach ->
           @currentTest.enableTimeouts(false)
@@ -135,7 +133,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "throws when alias doesnt match a route", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() can only accept aliases for routes.\nThe alias: 'b' did not match a route."
+            expect(err.message).to.include "cy.wait() only accepts aliases for routes.\nThe alias: 'b' did not match a route."
             done()
 
           @cy.get("body").as("b").wait("@b")
@@ -203,7 +201,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "throws when 2nd alias isnt a route alias", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() can only accept aliases for routes.\nThe alias: 'bar' did not match a route."
+            expect(err.message).to.include "cy.wait() only accepts aliases for routes.\nThe alias: 'bar' did not match a route."
             done()
 
           @cy
@@ -292,7 +290,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @Cypress.config("requestTimeout", 100)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.eq "cy.wait() can only accept aliases for routes.\nThe alias: 'bar' did not match a route."
+            expect(err.message).to.eq "cy.wait() only accepts aliases for routes.\nThe alias: 'bar' did not match a route."
             _.delay ->
               done()
             , 500
@@ -626,45 +624,51 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "is NaN", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias for a route, or an array of aliases for routes for its 1st argument. You passed: an invalid Number"
+            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: NaN"
             done()
           @cy.get("body").wait(0/0)
 
         it "Infinity", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias for a route, or an array of aliases for routes for its 1st argument. You passed: an invalid Number"
+            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: an infinite Number"
             done()
           @cy.get("body").wait(Infinity)
 
         it "is empty array", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias for a route, or an array of aliases for routes for its 1st argument. You passed: []"
+            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: []"
             done()
           @cy.get("body").wait([])
 
         it "is null", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias for a route, or an array of aliases for routes for its 1st argument. You passed: null"
+            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: null"
             done()
           @cy.get("body").wait(null)
 
         it "is undefined", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias for a route, or an array of aliases for routes for its 1st argument. You passed: undefined"
+            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: undefined"
             done()
           @cy.get("body").wait(undefined)
 
         it "is bool", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias for a route, or an array of aliases for routes for its 1st argument. You passed: true"
+            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: true"
             done()
           @cy.get("body").wait(true)
 
         it "is Object", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias for a route, or an array of aliases for routes for its 1st argument. You passed: {}"
+            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: {}"
             done()
           @cy.get("body").wait({})
+
+        it "is Symbol", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: undefined"
+            done()
+          @cy.get("body").wait(Symbol.iterator)
 
     describe ".log", ->
       beforeEach ->
