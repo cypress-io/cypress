@@ -1,7 +1,11 @@
 _ = require("lodash")
+md5 = require("md5")
+os = require("os")
 path = require("path")
 Promise = require("bluebird")
+lockFile = Promise.promisifyAll(require("lockfile"))
 fs = Promise.promisifyAll(require("fs-extra"))
+exit = require("./exit")
 
 module.exports = class Conf
   constructor: (options = {}) ->
@@ -13,7 +17,10 @@ module.exports = class Conf
       throw new Error("Must specify cwd when creating new Conf()")
 
     @cache = null
-    @path = path.resolve(options.cwd, "#{options.configName}.json")
+    @path = path.join(options.cwd, "#{options.configName}.json")
+    @lockFilePath = path.join(os.tmpdir(), "#{md5(@path)}.lock")
+
+    exit.ensure => lockFile.unlockSync(@lockFilePath)
 
   get: (key, defaultValue) ->
     @_getStore().then (store) ->
@@ -44,27 +51,40 @@ module.exports = class Conf
       @cache = store
       @_setStore()
 
-  _ensureDir: ->
-    fs.ensureDirAsync(path.dirname(@path))
-
   _getStore: ->
     if @cache and _.isObject(@cache)
-      return Promise.resolve(@cache)
+      Promise.resolve(@cache)
+    else
+      @_getStoreFromDisk().then (store) =>
+        @cache = store
 
-    fs.readFileAsync(@path, "utf8")
-    .then (contents) ->
-      JSON.parse(contents)
+  _getStoreFromDisk: ->
+    @_lock()
+    .then =>
+      fs.readJsonAsync(@path, "utf8")
     .catch (err) =>
-      if err.name is "SyntaxError"
+      ## default to {} in certain cases, otherwise bubble up error
+      if (
+        err.code is "ENOENT" or ## file doesn't exist
+        err.code is "EEXIST" or ## file contains invalid JSON
+        err.name is "SyntaxError" ## can't get lock on file
+      )
         return {}
-
-      if err.code is "ENOENT"
-        return @_ensureDir().return({})
-
-      throw err
-    .then (store) =>
-      @cache = store
+      else
+        throw err
+    .finally =>
+      @_unlock()
 
   _setStore: ->
-    @_ensureDir().then =>
-      fs.writeFileAsync(@path, JSON.stringify(@cache, null, 2))
+    @_lock()
+    .then =>
+      fs.outputJsonAsync(@path, @cache, {spaces: 2})
+    .finally =>
+      @_unlock()
+
+  _lock: ->
+    ## polls every 100ms up to 2000ms to obtain lock, otherwise rejects
+    lockFile.lockAsync(@lockFilePath, {wait: 2000})
+
+  _unlock: ->
+    lockFile.unlockAsync(@lockFilePath)

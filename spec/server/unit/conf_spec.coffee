@@ -4,10 +4,10 @@ os = require("os")
 path = require("path")
 Promise = require("bluebird")
 Conf = require("#{root}lib/util/conf")
+lockFile = Promise.promisifyAll(require("lockfile"))
 fs = Promise.promisifyAll(require("fs-extra"))
 
 describe "lib/util/conf", ->
-
   beforeEach ->
     @dir = path.join(os.tmpdir(), "conf_spec")
     fs.removeAsync(@dir).catch ->
@@ -76,6 +76,15 @@ describe "lib/util/conf", ->
       .then (config) ->
         expect(config).to.eql({})
 
+    it "resolves empty object when it can't get lock on file", ->
+      @conf.set("foo", "bar")
+      .then =>
+        @conf.cache = null ## null out cache or it won't try to read from disk
+        @sandbox.stub(lockFile, "lockAsync").rejects({name: "", message: "", code: "EEXIST"})
+        @conf.get()
+      .then (config) ->
+        expect(config).to.eql({})
+
     it "resolves empty object when config file has invalid json", ->
       fs.ensureDirAsync(@dir)
       .then =>
@@ -94,6 +103,22 @@ describe "lib/util/conf", ->
         @conf.get()
       .then (config) =>
         expect(config).to.eql(@originallySet)
+
+    it "locks file while reading", ->
+      @sandbox.spy(lockFile, "lockAsync")
+      @conf.get().then ->
+        expect(lockFile.lockAsync).to.be.called
+
+    it "unlocks file when finished reading", ->
+      @sandbox.spy(lockFile, "unlockAsync")
+      @conf.get().then ->
+        expect(lockFile.unlockAsync).to.be.called
+
+    it "unlocks file even if reading fails", ->
+      @sandbox.spy(lockFile, "unlockAsync")
+      @sandbox.stub(fs, "readJsonAsync").rejects(new Error("fail!"))
+      @conf.get().catch ->
+        expect(lockFile.unlockAsync).to.be.called
 
   context "#set", ->
     beforeEach ->
@@ -162,3 +187,19 @@ describe "lib/util/conf", ->
         @conf.set("foo", "baz")
       .then (contents) =>
         expect(@conf.cache).to.eql({foo: "baz"})
+
+    it "locks file while writing", ->
+      @sandbox.spy(lockFile, "lockAsync")
+      @conf.set("foo", "bar").then ->
+        expect(lockFile.lockAsync).to.be.called
+
+    it "unlocks file when finished writing", ->
+      @sandbox.spy(lockFile, "unlockAsync")
+      @conf.set("foo", "bar").then ->
+        expect(lockFile.unlockAsync).to.be.called
+
+    it "unlocks file even if writing fails", ->
+      @sandbox.spy(lockFile, "unlockAsync")
+      @sandbox.stub(fs, "outputJsonAsync").rejects(new Error("fail!"))
+      @conf.set("foo", "bar").catch ->
+        expect(lockFile.unlockAsync).to.be.called
