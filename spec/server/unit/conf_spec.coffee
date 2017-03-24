@@ -87,7 +87,6 @@ describe "lib/util/conf", ->
     it "resolves empty object when it can't get lock on file", ->
       @conf.set("foo", "bar")
       .then =>
-        @conf.cache = null ## null out cache or it won't try to read from disk
         @sandbox.stub(lockFile, "lockAsync").rejects({name: "", message: "", code: "EEXIST"})
         @conf.get()
       .then (config) ->
@@ -102,15 +101,15 @@ describe "lib/util/conf", ->
       .then (config) ->
         expect(config).to.eql({})
 
-    it "caches store so subsequent gets don't read from disk", ->
-      @originallySet = { foo: "bar" }
-      @conf.set(@originallySet)
-      .then =>
-        fs.writeFileAsync(path.join(@dir, "config.json"), "{}")
-      .then =>
+    it "debounces reading from disk", ->
+      @sandbox.stub(fs, "readJsonAsync").resolves({})
+      Promise.all([
         @conf.get()
-      .then (config) =>
-        expect(config).to.eql(@originallySet)
+        @conf.get()
+        @conf.get()
+      ])
+      .then ->
+        expect(fs.readJsonAsync).to.be.calledOnce
 
     it "locks file while reading", ->
       @sandbox.spy(lockFile, "lockAsync")
@@ -188,13 +187,6 @@ describe "lib/util/conf", ->
         fs.readFileAsync(path.join(@dir, "config.json"), "utf8")
       .then (contents) ->
         expect(JSON.parse(contents)).to.eql({foo: "bar"})
-
-    it "updates cache", ->
-      @conf.set("foo", "bar")
-      .then =>
-        @conf.set("foo", "baz")
-      .then (contents) =>
-        expect(@conf.cache).to.eql({foo: "baz"})
 
     it "locks file while writing", ->
       @sandbox.spy(lockFile, "lockAsync")

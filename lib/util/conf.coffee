@@ -1,3 +1,4 @@
+debouncePromise = require("debounce-promise")
 _ = require("lodash")
 md5 = require("md5")
 os = require("os")
@@ -16,9 +17,14 @@ module.exports = class Conf
     if not options.cwd
       throw new Error("Must specify cwd when creating new Conf()")
 
-    @cache = null
     @path = path.join(options.cwd, "#{options.configName}.json")
     @lockFilePath = path.join(os.tmpdir(), "#{md5(@path)}.lock")
+
+    ## debounce calls to read from disk
+    ## if 5 calls are made within 300 milliseconds, @_getStore will
+    ## called once at the end and each of the 5 calls will receive
+    ## the value from that one call
+    @_getStore = debouncePromise(@_getStore.bind(@), 300)
 
     exit.ensure => lockFile.unlockSync(@lockFilePath)
 
@@ -48,17 +54,9 @@ module.exports = class Conf
       _.each valueObject, (value, key) ->
         _.set(store, key, value)
 
-      @cache = store
-      @_setStore()
+      @_setStore(store)
 
   _getStore: ->
-    if @cache and _.isObject(@cache)
-      Promise.resolve(@cache)
-    else
-      @_getStoreFromDisk().then (store) =>
-        @cache = store
-
-  _getStoreFromDisk: ->
     @_lock()
     .then =>
       fs.readJsonAsync(@path, "utf8")
@@ -75,10 +73,10 @@ module.exports = class Conf
     .finally =>
       @_unlock()
 
-  _setStore: ->
+  _setStore: (store) ->
     @_lock()
     .then =>
-      fs.outputJsonAsync(@path, @cache, {spaces: 2})
+      fs.outputJsonAsync(@path, store, {spaces: 2})
     .finally =>
       @_unlock()
 
