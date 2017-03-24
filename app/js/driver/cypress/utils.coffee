@@ -130,11 +130,19 @@ $Cypress.Utils = do ($Cypress, _) ->
           else
             @_stringifyObj(value)
 
+        ## TODO: replace this w/ lodash _.isSymbol
+        ## which is a more extensive check for symbol
+        when @_isSymbol(value)
+          "Symbol"
+
         when _.isUndefined(value)
           undefined
 
         else
           "" + value
+
+    _isSymbol: (value) ->
+      typeof value is 'symbol'
 
     stringify: (values) ->
       ## if we already have an array
