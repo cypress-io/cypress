@@ -4,6 +4,7 @@ os = require("os")
 path = require("path")
 Promise = require("bluebird")
 Conf = require("#{root}lib/util/conf")
+exit = require("#{root}lib/util/exit")
 lockFile = Promise.promisifyAll(require("lockfile"))
 fs = Promise.promisifyAll(require("fs-extra"))
 
@@ -15,6 +16,13 @@ describe "lib/util/conf", ->
 
   it "throws if cwd is not specified", ->
     expect(-> new Conf()).to.throw("Must specify cwd when creating new Conf()")
+
+  it "unlocks file on exit", ->
+    @sandbox.stub(lockFile, "unlockSync")
+    @sandbox.stub(exit, "ensure")
+    new Conf({cwd: @dir})
+    exit.ensure.yield()
+    expect(lockFile.unlockSync).to.be.called
 
   context "configName", ->
     it "defaults to config.json", ->
