@@ -4184,6 +4184,19 @@ describe "$Cypress.Cy Actions Commands", ->
             ## to test this accurately
             done()
 
+  context.only "#scrollIntoView", ->
+    it "sends a scroll event", (done) ->
+      @cy.$$("#scroll-into-view button").scrollIntoView -> done()
+
+      @cy.get("#scroll-into-view button").scrollIntoView()
+
+    it "does not change the subject", ->
+      button = @cy.$$("#scroll-into-view button")
+
+      @cy.get("#scroll-into-view button").scrollIntoView().then ($button) ->
+        expect($button).to.match button
+
+
   context "#blur", ->
     it "should blur the originally focused element", (done) ->
       @cy.$$("#focus input").blur -> done()
