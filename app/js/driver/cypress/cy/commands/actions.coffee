@@ -223,6 +223,12 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               onRetry: verifyAssertions
         })
 
+    scrollIntoView: (subject, options = {}) ->
+
+      _.defaults options,
+        $el: subject
+        log: true
+
     blur: (subject, options = {}) ->
       ## we should throw errors by default!
       ## but allow them to be silenced
