@@ -199,7 +199,9 @@ cy
 
 ## Why don't I see the XHR in the Network Tab of the Chrome Dev Tools?
 
-Cypress does not actually make an XHR request out of the browser, it makes a simple HTTP request. So you will not see the request inside of the Chrome Dev Tools.
+Cypress does not actually make an XHR request out of the browser. Under the hood we are making the HTTP request from the desktop application (in node). Therefore you will not see the request inside of the Chrome Dev Tools.
+
+Note that we automatically set both Cookies + User Agent headers correctly as if the request was really coming from the browser.
 
 ***
 
@@ -219,7 +221,9 @@ cy
 
 ## Cookies are automatically sent and received
 
-If the HTTP request being made is sending cookies, they are sent in the request. Additionally, if a server reponds with cookies, these are automatically set on the browser.
+Before sending the HTTP request, we will automatically attach cookies that would have otherwise been attached had the request come from the browser. Additionally, if a response has a `Set-Cookie` header, these are automatically set back on the browser cookies.
+
+In other words, `cy.request` transparently performs all of the underlying functions as if it came from the browser.
 
 ***
 
