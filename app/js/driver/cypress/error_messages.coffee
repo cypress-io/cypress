@@ -454,6 +454,10 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     screenshot:
       timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
 
+    scrollTo:
+      invalid_target: "#{cmd('scrollTo')} only accepts valid targets"
+      container_not_scrollable: "#{cmd('scrollTo')} the container could not be scrolled"
+
     select:
       disabled: "#{cmd('select')} failed because this element is currently disabled:\n\n{{node}}"
       invalid_element: "#{cmd('select')} can only be called on a <select>. Your subject is a: {{node}}"

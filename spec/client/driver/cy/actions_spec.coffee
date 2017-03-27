@@ -4184,16 +4184,16 @@ describe "$Cypress.Cy Actions Commands", ->
             ## to test this accurately
             done()
 
-  context.only "#scrollIntoView", ->
+  context.only "#scrollTo", ->
     it "sends a scroll event", (done) ->
-      @cy.$$("#scroll-into-view button").scrollIntoView -> done()
+      @cy.$$("#scroll-into-view button").scrollTo -> done()
 
-      @cy.get("#scroll-into-view button").scrollIntoView()
+      @cy.get("#scroll-into-view button").scrollTo()
 
     it "does not change the subject", ->
       button = @cy.$$("#scroll-into-view button")
 
-      @cy.get("#scroll-into-view button").scrollIntoView().then ($button) ->
+      @cy.get("#scroll-into-view button").scrollTo().then ($button) ->
         expect($button).to.match button
 
 

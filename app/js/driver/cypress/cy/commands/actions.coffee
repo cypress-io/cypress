@@ -223,12 +223,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               onRetry: verifyAssertions
         })
 
-    scrollIntoView: (subject, options = {}) ->
-
-      _.defaults options,
-        $el: subject
-        log: true
-
     blur: (subject, options = {}) ->
       ## we should throw errors by default!
       ## but allow them to be silenced
@@ -1346,6 +1340,84 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             onRetry: resolveFocused
           })
           .return(options.$el)
+
+  Cypress.addDualCommand
+    scrollTo: (subject, target, options = {}) ->
+
+      ## if we don't have a subject, then we are a parent command
+      ## assume they want to scroll the body.
+      if subject and not Cypress.Utils.hasElement(subject)
+        subject = null
+
+      if not target
+        $Cypress.Utils.throwErrByPath "scrollTo.invalid_target", {args: { target }}
+
+      switch
+        when _.isObject(target)
+          ## cy.scrollTo({ top: "250px", left: "50px")
+          type = position
+          axis = 'xy'
+          x = target.left
+          y = target.top
+        when _.isNumber(target)
+          ## cy.scrollTo(250)
+          type = position
+          axis = 'y'
+          y = target
+        when target is 'max'
+          ## cy.scrollTo('max')
+          type = position
+          x = 9e9
+          y = 9e9
+        ## here we need to check some craziness
+        ## like, is it a string?
+        ## is it a percentage? '50%'
+        ## does it have px specified '40px'
+        ## or does it resolve to an element
+
+        # when Cypress.Utils.hasElement(target)
+        #   ## cy.scrollTo("button:last")
+        #   type = element
+
+      _.defaults options,
+        container: subject or 'body'
+        type: type
+        axis: 'xy'
+        log: true
+        duration: 0
+
+      ## need to calculate if the container is even scrollable
+      ## is it's scrollHeight bigger than height?
+      ## is it's scrollWidth bigger than width?
+      ## Does it even have the right overflow set?
+      if !containerIsScrollable()
+        $Cypress.Utils.throwErrByPath "scrollTo.container_not_scrollable", {args: { subject }}
+
+      ## based on whether this was of `type: position`
+      ## or `type: element`, we need to calculate our
+      ## find x and y coords to scrollTo
+
+      ## if it's an element, then we need to get that el's
+      ## coords and set that to x & y
+
+      ## otherwise, we should have already set our position above
+      ## in the options if they were passed in
+
+      ## then add any offset
+      if options.offset
+        switch
+          when _.isObject(options.offset)
+            if options.offset.top
+              offsetY = options.offset.top
+            if options.offset.left
+              offsetY = options.offset.top
+          else
+            offsetY = options.offset
+
+      ## now we should be ready to scroll
+
+      ## and trigger the scroll event
+
 
   Cypress.Cy.extend
     _waitForAnimations: ($el, options, coordsHistory = []) ->
