@@ -1,7 +1,6 @@
-Conf = require("./util/conf")
+FileUtil = require("./util/file")
 appData = require("./util/app_data")
 
-module.exports = new Conf({
-  configName: "state"
-  cwd: appData.path()
+module.exports = new FileUtil({
+  path: appData.path("state.json")
 })

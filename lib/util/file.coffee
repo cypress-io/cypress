@@ -10,19 +10,15 @@ exit = require("./exit")
 
 module.exports = class Conf
   constructor: (options = {}) ->
-    _.defaults(options, {
-      configName: "config"
-    })
+    if not options.path
+      throw new Error("Must specify path to file when creating new FileUtil()")
 
-    if not options.cwd
-      throw new Error("Must specify cwd when creating new Conf()")
-
-    @path = path.join(options.cwd, "#{options.configName}.json")
+    @path = options.path
     @lockFilePath = path.join(os.tmpdir(), "#{md5(@path)}.lock")
 
     ## debounce calls to read from disk
-    ## if 5 calls are made within 300 milliseconds, @_getStore will
-    ## called once at the end and each of the 5 calls will receive
+    ## if 5 calls are made within 300 milliseconds, @_getStore will be
+    ## called once at the end and each of the 5 calls will resolve with
     ## the value from that one call
     @_getStore = debouncePromise(@_getStore.bind(@), 300)
 
