@@ -14,26 +14,35 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
       args = [subject, msOrFnOrAlias, options]
 
-      switch
-        when _.isNumber(msOrFnOrAlias) and
-          _.isFinite(msOrFnOrAlias) and
-          !Number.isNaN(msOrFnOrAlias)   then @_waitNumber.apply(@, args)
-        when _.isFunction(msOrFnOrAlias) then @_waitFunction.apply(@, args)
-        when _.isString(msOrFnOrAlias)   then @_waitString.apply(@, args)
-        when _.isArray(msOrFnOrAlias) and
-          !_.isEmpty(msOrFnOrAlias)      then @_waitString.apply(@, args)
-        else
-          switch
-            when Number.isNaN(msOrFnOrAlias) then $Cypress.Utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg: "NaN"}})
-            when _.isNumber(msOrFnOrAlias) and
-              !_.isFinite(msOrFnOrAlias)     then $Cypress.Utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg: "an infinite Number"}})
-            else
-              try
-                arg = JSON.stringify(msOrFnOrAlias)
-              catch e
-                arg = "an invalid argument"
+      throwErr = (arg) ->
+        $Cypress.Utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}})
 
-              $Cypress.Utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}})
+      try
+        switch
+          when _.isFinite(msOrFnOrAlias)   then @_waitNumber.apply(@, args)
+          when _.isFunction(msOrFnOrAlias) then @_waitFunction.apply(@, args)
+          when _.isString(msOrFnOrAlias)   then @_waitString.apply(@, args)
+          when _.isArray(msOrFnOrAlias) and not _.isEmpty(msOrFnOrAlias)
+            @_waitString.apply(@, args)
+          else
+            ## figure out why this error failed
+            arg = switch
+              when _.isNaN(msOrFnOrAlias)    then "NaN"
+              when msOrFnOrAlias is Infinity then "Infinity"
+              else
+                try
+                  JSON.stringify(msOrFnOrAlias)
+                catch
+                  "an invalid argument"
+
+            throwErr(arg)
+      catch err
+        if err.name is "CypressError"
+          throw err
+        else
+          ## whatever was passed in could not be parsed
+          ## by our switch case
+          throwErr("an invalid argument")
 
   Cypress.Cy.extend
     _waitNumber: (subject, ms, options) ->

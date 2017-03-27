@@ -630,7 +630,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "Infinity", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: an infinite Number"
+            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: Infinity"
             done()
           @cy.get("body").wait(Infinity)
 
@@ -666,7 +666,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "is Symbol", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: undefined"
+            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: an invalid argument"
             done()
           @cy.get("body").wait(Symbol.iterator)
 
