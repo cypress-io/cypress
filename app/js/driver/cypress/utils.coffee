@@ -130,8 +130,6 @@ $Cypress.Utils = do ($Cypress, _) ->
           else
             @_stringifyObj(value)
 
-        ## TODO: replace this w/ lodash _.isSymbol
-        ## which is a more extensive check for symbol
         when @_isSymbol(value)
           "Symbol"
 
@@ -141,6 +139,8 @@ $Cypress.Utils = do ($Cypress, _) ->
         else
           "" + value
 
+    ## TODO: replace this w/ lodash _.isSymbol
+    ## which is a more extensive check for symbol
     _isSymbol: (value) ->
       typeof value is 'symbol'
 
