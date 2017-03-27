@@ -116,6 +116,9 @@ describe "$Cypress.Utils API", ->
       it "undefined", ->
         expect(@str(undefined)).to.eq ""
 
+      it "symbol", ->
+        expect(@str(Symbol.iterator)).to.eq("Symbol")
+
     context "Arrays", ->
       it "length <= 3", ->
         a = [["one", 2, "three"]]
