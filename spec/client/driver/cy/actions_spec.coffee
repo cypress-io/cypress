@@ -4185,11 +4185,20 @@ describe "$Cypress.Cy Actions Commands", ->
             done()
 
   context "#scrollTo", ->
-    it "does not change the subject", ->
-      scrollableContainer = @cy.$$("")
+    it.skip "does not change the subject", ->
+      scrollableContainer = @cy.$$("#scroll-to")
 
-      @cy.scrollTo("500px").then ($el) ->
+      @cy.get("#scroll-to").scrollTo("125px").then ($el) ->
         expect($el).to.match scrollableContainer
+
+    describe "errors", ->
+      it.skip "throws if no args passed", ->
+        @cy.scrollTo()
+
+      it.skip "throws is scrollable container is multiple elements", ->
+        scrollableContainer = @cy.$$("window")
+
+        @cy.get("button").scrollTo("500px")
 
   context "#scrollIntoView", ->
     it.only "does not change the subject", ->

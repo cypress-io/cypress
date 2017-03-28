@@ -1352,6 +1352,36 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
   Cypress.addDualCommand
     scrollTo: (subject, target, options = {}) ->
+      _convertToPx = (target, axis) =>
+        ## set to an impossibly high amount of pixels
+
+        number = parseFloat(target)
+
+        ## what if we're NaN or Infinity?
+
+        unit = target.match(/px|%/)[0] or 'px'
+
+        ## we don't need to calculate positioning
+        ## off of the container if there was no direction given
+        return number if !axis?
+
+        if target is 'max'
+          if axis is 'x'
+            ## we need to scroll to container's width
+            number = $container[0].scrollWidth
+          if axis is 'y'
+            ## we need to scroll to container's height
+            number = $container[0].scrollHeight
+
+        if unit is '%'
+          if axis is 'x'
+            ## we need to find % of container's width
+            number = $container[0].scrollWidth  * (number * 0.01)   ## 600 * 0.50 = 300
+          if axis is 'y'
+            ## we need to find % of container's height
+            number = $container[0].scrollHeight * (number * 0.01)     ## 600 * (0.50) = 300
+
+        return number
 
       ## if we don't have a subject, then we are a parent command
       ## assume they want to scroll the body.
@@ -1361,64 +1391,67 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if not target
         $Cypress.Utils.throwErrByPath "scrollTo.invalid_target", {args: { target }}
 
+      ## we need to set this to something to signify that
+      ## we just want to eventually scroll the highest scrollable
+      ## element, I'm not exactly sure what this should be
+      $container = subject or @$$("html")
+
+      ## throw if we're trying to scroll multiple containers
+      if $container.length > 1
+        $Cypress.Utils.throwErrByPath("scrollTo.multiple_containers", {args: { num: $container.length }})
+
       ## need to calculate if the container is even scrollable
-      @ensureScrollability(options.container, "scrollTo")
+      @ensureScrollability($container, "scrollTo")
+
+      x = 0
+      y = 0
+      duration = 0
 
       switch
         when _.isObject(target)
-          ## cy.scrollTo({ top: "250px", left: "50px")
-          type = position
-          axis = 'xy'
-          x = target.left
-          y = target.top
-        when _.isNumber(target)
-          ## cy.scrollTo(250)
-          type = position
-          axis = 'y'
-          y = target
-        when target is 'max'
-          ## cy.scrollTo('max')
-          type = position
-          x = 9e9
-          y = 9e9
-        ## here we need to check some craziness
-        ## like, is it a string?
-        ## is it a percentage? '50%'
-        ## does it have px specified '40px'
+          ## { top: "250px", left: "50px" }
+          ## { top: "50%", left: "50px" }
+          ## { top: 50, left: 50 }
+          x = _convertToPx(target.left, "x")
+          y = _convertToPx(target.top, "y")
+        else
+          y = _convertToPx(target, "y")
 
-      _.defaults options,
-        container: subject or 'body'
-        type: type
-        axis: 'xy'
-        log: true
-        duration: 0
-
-
-      ## based on whether this was of `type: position`
-      ## or `type: element`, we need to calculate our
-      ## find x and y coords to scrollTo
-
-      ## if it's an element, then we need to get that el's
-      ## coords and set that to x & y
-
-      ## otherwise, we should have already set our position above
-      ## in the options if they were passed in
+      ## if there was no duration specified,
+      ## else it'll default to 0 (instant scroll)
+      if options.duration
+        duration = options.duration
 
       ## then add any offset
       if options.offset
         switch
           when _.isObject(options.offset)
             if options.offset.top
-              offsetY = options.offset.top
+              offsetY = _convertToPx(options.offset.top)
             if options.offset.left
-              offsetY = options.offset.top
+              offsetX = _convertToPx(options.offset.left)
           else
-            offsetY = options.offset
+            offsetY = _convertToPx(options.offset)
 
-      ## now we should be ready to scroll
+        ## hmm, we can't add this is x or y is a string
+        x += offsetX
+        y += offsetY
 
-      ## and trigger the scroll event
+      _.defaults options,
+        $container: $container
+        log: true
+        duration: duration
+        x: x
+        y: y
 
+      ## why not do it in JavaScript scrollTo?
+      ## well, because we need this duration bs
+      ## so we use jQuery's animate
+      if options.y != 0
+        $container.animate('scrollTop', options.y, options.duration)
+
+      if options.x != 0
+        $container.animate('scrollLeft', options.x, options.duration)
 
   Cypress.Cy.extend
     _waitForAnimations: ($el, options, coordsHistory = []) ->
