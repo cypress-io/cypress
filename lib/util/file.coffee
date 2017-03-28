@@ -42,7 +42,11 @@ module.exports = class Conf
 
   remove: ->
     @_cache = {}
-    fs.removeAsync(@path)
+    @_lock()
+    .then =>
+      fs.removeAsync(@path)
+    .finally =>
+      @_unlock()
 
   _get: (inTransaction, key, defaultValue) ->
     get = if inTransaction

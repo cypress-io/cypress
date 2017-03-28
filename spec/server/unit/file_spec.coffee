@@ -231,3 +231,29 @@ describe "lib/util/file", ->
       @sandbox.stub(fs, "outputJsonAsync").rejects(new Error("fail!"))
       @fileUtil.set("foo", "bar").catch ->
         expect(lockFile.unlockAsync).to.be.called
+
+  context.only "#remove", ->
+    beforeEach ->
+      @fileUtil = new FileUtil({path: @path})
+
+    it "removes the file", ->
+      @fileUtil.remove()
+      .then =>
+        fs.statAsync(@path)
+      .catch ->
+
+    it "locks file while removing", ->
+      @sandbox.spy(lockFile, "lockAsync")
+      @fileUtil.remove().then ->
+        expect(lockFile.lockAsync).to.be.called
+
+    it "unlocks file when finished removing", ->
+      @sandbox.spy(lockFile, "unlockAsync")
+      @fileUtil.remove().then ->
+        expect(lockFile.unlockAsync).to.be.called
+
+    it "unlocks file even if removing fails", ->
+      @sandbox.spy(lockFile, "unlockAsync")
+      @sandbox.stub(fs, "removeAsync").rejects(new Error("fail!"))
+      @fileUtil.remove().catch ->
+        expect(lockFile.unlockAsync).to.be.called
