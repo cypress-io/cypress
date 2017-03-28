@@ -25,7 +25,7 @@ describe "lib/util/file", ->
     exit.ensure.yield()
     expect(lockFile.unlockSync).to.be.called
 
-  it "#transaction", ->
+  context "#transaction", ->
     beforeEach ->
       @fileUtil = new FileUtil({path: @path})
 
@@ -232,7 +232,7 @@ describe "lib/util/file", ->
       @fileUtil.set("foo", "bar").catch ->
         expect(lockFile.unlockAsync).to.be.called
 
-  context.only "#remove", ->
+  context "#remove", ->
     beforeEach ->
       @fileUtil = new FileUtil({path: @path})
 
