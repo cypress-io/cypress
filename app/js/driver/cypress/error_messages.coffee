@@ -460,7 +460,6 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     scrollTo:
       invalid_target: "#{cmd('scrollTo')} only accepts valid targets"
-      container_not_scrollable: "#{cmd('scrollTo')} the container could not be scrolled"
 
     select:
       disabled: "#{cmd('select')} failed because this element is currently disabled:\n\n{{node}}"

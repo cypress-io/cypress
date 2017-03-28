@@ -347,6 +347,15 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
                 onRetry: verifyAssertions
           })
 
+    scrollIntoView: (subject, options = {}) ->
+      _.defaults options,
+        $el: subject
+        log: true
+        force: false
+
+      @ensureDom(options.$el)
+
+
     ## update dblclick to use the click
     ## logic and just swap out the event details?
     dblclick: (subject, options = {}) ->
@@ -1352,6 +1361,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if not target
         $Cypress.Utils.throwErrByPath "scrollTo.invalid_target", {args: { target }}
 
+      ## need to calculate if the container is even scrollable
+      @ensureScrollability(options.container, "scrollTo")
+
       switch
         when _.isObject(target)
           ## cy.scrollTo({ top: "250px", left: "50px")
@@ -1373,11 +1385,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## like, is it a string?
         ## is it a percentage? '50%'
         ## does it have px specified '40px'
-        ## or does it resolve to an element
-
-        # when Cypress.Utils.hasElement(target)
-        #   ## cy.scrollTo("button:last")
-        #   type = element
 
       _.defaults options,
         container: subject or 'body'
@@ -1386,12 +1393,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         log: true
         duration: 0
 
-      ## need to calculate if the container is even scrollable
-      ## is it's scrollHeight bigger than height?
-      ## is it's scrollWidth bigger than width?
-      ## Does it even have the right overflow set?
-      if !containerIsScrollable()
-        $Cypress.Utils.throwErrByPath "scrollTo.container_not_scrollable", {args: { subject }}
 
       ## based on whether this was of `type: position`
       ## or `type: element`, we need to calculate our
