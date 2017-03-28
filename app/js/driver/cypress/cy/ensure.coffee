@@ -179,3 +179,38 @@ do ($Cypress, _, $) ->
             onFail
             args: { cmd, node }
           })
+
+    ensureScrollability: ($el, cmd) ->
+      el          = $el[0]
+      elStyle     = getComputedStyle(el)
+
+      elOverflow  = elStyle.overflow
+      elOverflowX = elStyle.overflowX
+      elOverflowY = elStyle.overflowY
+
+      return true if elOverflow is 'scroll' or elOverflowX is 'scroll' or elOverflowY is 'scroll'
+
+      verticallySrollable =
+        el.clientHeight < el.scrollHeight and
+        (
+          $.inArray(elOverflowY,  ['scroll', 'auto']) != -1 or
+          $.inArray(elOverflow,   ['scroll', 'auto']) != -1
+        )
+
+      return true if verticallySrollable
+
+      horizontallyScrollable =
+        el.clientWidth < el.scrollWidth and
+        (
+          $.inArray(elOverflowX,  ['scroll', 'auto']) != -1 or
+          $.inArray(elOverflow,   ['scroll', 'auto']) != -1
+        )
+
+      return true if horizontallyScrollable
+
+      cmd   ?= @prop("current").get("name")
+      node  = $Cypress.Utils.stringifyElement($el)
+
+      $Cypress.Utils.throwErrByPath("dom.not_scrollable", {
+        args: { cmd, node }
+      })

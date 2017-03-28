@@ -75,6 +75,68 @@ describe "$Cypress.Cy Ensure Extensions", ->
 
       expect(fn).not.to.throw(Error)
 
+  context "#ensureScrollability", ->
+    beforeEach ->
+      @allowErrors()
+
+      @add = (el) =>
+        $(el).appendTo(@cy.$$("body"))
+
+    it "throws when el is not scrollable", ->
+      noScroll = @add """
+        <div style="height: 100px; overflow: auto;">
+          <div>No Scroll</div>
+        </div>
+        """
+
+      fn = => @cy.ensureScrollability(noScroll, "foo")
+
+      expect(fn).to.throw('cy.foo() failed because this element is not scrollable:\n\n<div style="height: 100px; overflow: auto;">...</div>\n')
+
+    it "throws when el has no overflow", ->
+      noOverflow = @add """
+        <div style="height: 100px; width: 100px;">
+          <div style="height: 150px;">No Overflow</div>
+        </div>
+        """
+
+      fn = => @cy.ensureScrollability(noOverflow, "foo")
+
+      expect(fn).to.throw('cy.foo() failed because this element is not scrollable:\n\n<div style="height: 100px; width: 100px;">...</div>\n')
+
+    it "returns early when vertically scrollable", ->
+      vertScrollable = @add """
+        <div style="height: 100px; width: 100px; overflow: auto;">
+          <div style="height: 150px;">Vertical Scroll</div>
+        </div>
+      """
+
+      fn = => @cy.ensureScrollability(vertScrollable, "foo")
+
+      expect(fn).not.to.throw(Error)
+
+    it "returns early when horizontal scrollable", ->
+      horizScrollable = @add """
+        <div style="height: 100px; width: 100px; overflow: auto; ">
+          <div style="height: 150px;">Horizontal Scroll</div>
+        </div>
+      """
+
+      fn = => @cy.ensureScrollability(horizScrollable, "foo")
+
+      expect(fn).not.to.throw(Error)
+
+    it "returns early when overflow scroll forced", ->
+      forcedScroll = @add """
+        <div style="height: 100px; width: 100px; overflow: scroll; ">
+          <div>Forced Scroll</div>
+        </div>
+      """
+
+      fn = => @cy.ensureScrollability(forcedScroll, "foo")
+
+      expect(fn).not.to.throw(Error)
+
   ## WE NEED TO ADD SPECS AROUND THE EXACT ERROR MESSAGE TEXT
   ## SINCE WE ARE NOT ACTUALLY TESTING THE EXACT MESSAGE TEXT
   ## IN OUR ACTIONS SPEC (BECAUSE THEY'RE TOO DAMN LONG)
