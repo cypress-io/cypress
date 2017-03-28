@@ -4185,23 +4185,61 @@ describe "$Cypress.Cy Actions Commands", ->
             done()
 
   context "#scrollTo", ->
+    it.skip "subject is window by default", ->
+      scrollableContainer = @cy.$$(window)
+
+      @cy.scrollTo("125px").then ($el) ->
+        expect($el).to.match scrollableContainer
+
     it.skip "does not change the subject", ->
       scrollableContainer = @cy.$$("#scroll-to")
 
       @cy.get("#scroll-to").scrollTo("125px").then ($el) ->
         expect($el).to.match scrollableContainer
 
+    it.skip "accepts number arg", ->
+      @cy.get("#scroll-to").scrollTo(125)
+
+    it.skip "scrolls container by number of px", ->
+      @cy.get("#scroll-to").scrollTo("125px")
+
+    it.skip "scrolls container by % of height", ->
+      @cy.get("#scroll-to").scrollTo("30%")
+
+    it.skip "accepts object as target", ->
+      @cy.get("#scroll-to").scrollTo({top: "25px", left: "25px"})
+
+    describe "assertion verification", ->
+
     describe "errors", ->
-      it.skip "throws if no args passed", ->
+      beforeEach ->
+        @allowErrors()
+
+      it "throws if no args passed", (done) ->
+        @cy.on "fail", (err) =>
+          expect(err.message).to.include "cy.scrollTo() must be called with a valid position. It can be a string, number or object."
+          done()
+
         @cy.scrollTo()
 
-      it.skip "throws is scrollable container is multiple elements", ->
-        scrollableContainer = @cy.$$("window")
+      it "throws when not passed DOM element", (done) ->
+        @cy.on "fail", (err) =>
+          expect(err.message).to.include "Cannot call cy.scrollTo() on a non-DOM subject."
+          done()
+
+        @cy.noop({foo: "bar"}).scrollTo("250px")
+
+      it "throws if scrollable container is multiple elements", (done) ->
+        @cy.on "fail", (err) =>
+          expect(err.message).to.include "cy.scrollTo() can only be used to scroll one element, you tried to scroll 15 elements."
+          done()
 
         @cy.get("button").scrollTo("500px")
 
+    describe ".log", ->
+
   context "#scrollIntoView", ->
-    it.only "does not change the subject", ->
+    it "does not change the subject", ->
       button = @cy.$$("#scroll-into-view button")
 
       @cy.get("#scroll-into-view button").scrollIntoView().then ($button) ->

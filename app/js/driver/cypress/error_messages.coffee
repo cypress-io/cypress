@@ -459,8 +459,8 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
 
     scrollTo:
-      invalid_target: "#{cmd('scrollTo')} only accepts valid targets"
-      multiple_containers: "#{cmd('scrollTo')} can only be used to scroll one container, you tried to scroll {{num}}"
+      invalid_target: "#{cmd('scrollTo')} must be called with a valid position. It can be a string, number or object."
+      multiple_containers: "#{cmd('scrollTo')} can only be used to scroll one element, you tried to scroll {{num}} elements.\n\n"
 
     select:
       disabled: "#{cmd('select')} failed because this element is currently disabled:\n\n{{node}}"

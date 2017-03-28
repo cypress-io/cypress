@@ -1383,18 +1383,21 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         return number
 
-      ## if we don't have a subject, then we are a parent command
-      ## assume they want to scroll the body.
-      if subject and not Cypress.Utils.hasElement(subject)
-        subject = null
-
       if not target
         $Cypress.Utils.throwErrByPath "scrollTo.invalid_target", {args: { target }}
 
-      ## we need to set this to something to signify that
-      ## we just want to eventually scroll the highest scrollable
-      ## element, I'm not exactly sure what this should be
-      $container = subject or @$$("html")
+      if subject
+        ## if they passed something here, need to ensure DOM
+        @ensureDom(subject)
+        $container = subject
+      else
+        ## if we don't have a subject, then we are a parent command
+        ## assume they want to scroll the body.
+
+        ## we need to set this to something to signify that
+        ## we just want to eventually scroll the highest scrollable
+        ## element, I'm not exactly sure what this should be
+        $container = @$$("html")
 
       ## throw if we're trying to scroll multiple containers
       if $container.length > 1
@@ -1433,25 +1436,34 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           else
             offsetY = _convertToPx(options.offset)
 
-        ## hmm, we can't add this is x or y is a string
         x += offsetX
         y += offsetY
 
       _.defaults options,
-        $container: $container
+        $el: $container
         log: true
         duration: duration
         x: x
         y: y
 
+      if options.log
+        options._log = Cypress.Log.command
+          $el: options.$el
+          consoleProps: ->
+            ## merge into consoleProps without mutating it
+            _.extend {}, consoleProps,
+              "Applied To": $Cypress.Utils.getDomElements(options.$el)
+
+        options._log.snapshot("before", {next: "after"})
+
       ## why not do it in JavaScript scrollTo?
       ## well, because we need this duration bs
       ## so we use jQuery's animate
       if options.y != 0
-        $container.animate('scrollTop', options.y, options.duration)
+        $el.animate('scrollTop', options.y, options.duration)
 
       if options.x != 0
-        $container.animate('scrollLeft', options.x, options.duration)
+        $el.animate('scrollLeft', options.x, options.duration)
 
   Cypress.Cy.extend
     _waitForAnimations: ($el, options, coordsHistory = []) ->
