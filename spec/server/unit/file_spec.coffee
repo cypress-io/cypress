@@ -10,7 +10,7 @@ fs = Promise.promisifyAll(require("fs-extra"))
 
 describe "lib/util/file", ->
   beforeEach ->
-    @dir = path.join(os.tmpdir(), "file_spec")
+    @dir = path.join(os.tmpdir(), "cypress", "file_spec")
     @path = path.join(@dir, "file.json")
     fs.removeAsync(@dir).catch ->
       ## ignore error if directory didn't exist in the first place
@@ -19,11 +19,34 @@ describe "lib/util/file", ->
     expect(-> new FileUtil()).to.throw("Must specify path to file when creating new FileUtil()")
 
   it "unlocks file on exit", ->
-    @sandbox.stub(lockFile, "unlockSync")
+    @sandbox.spy(lockFile, "unlockSync")
     @sandbox.stub(exit, "ensure")
     new FileUtil({path: @path})
     exit.ensure.yield()
     expect(lockFile.unlockSync).to.be.called
+
+  it "#transaction", ->
+    beforeEach ->
+      @fileUtil = new FileUtil({path: @path})
+
+    it "ensures returned promise completely resolves before moving on with queue", ->
+      Promise.all([
+        @fileUtil.transaction (tx) =>
+          tx.get("items", []).then (items) =>
+            tx.set("items", items.concat("foo"))
+
+        @fileUtil.transaction (tx) =>
+          tx.get("items", []).then (items) =>
+            tx.set("items", items.concat("bar"))
+
+        @fileUtil.transaction (tx) =>
+          tx.get("items", []).then (items) =>
+            tx.set("items", items.concat("baz"))
+      ])
+      .then =>
+        @fileUtil.transaction (tx) =>
+          tx.get("items").then (items) ->
+            expect(items).to.eql(["foo", "bar", "baz"])
 
   context "#get", ->
     beforeEach ->
@@ -78,13 +101,23 @@ describe "lib/util/file", ->
       .then (contents) ->
         expect(contents).to.eql({})
 
-    it "resolves empty object when it can't get lock on file", ->
-      @fileUtil.set("foo", "bar")
+    it "resolves empty object when it can't get lock on file on initial read", ->
+      fs.ensureDirAsync(@dir)
+      .then =>
+        fs.writeJsonAsync(@path, {foo: "bar"})
       .then =>
         @sandbox.stub(lockFile, "lockAsync").rejects({name: "", message: "", code: "EEXIST"})
         @fileUtil.get()
       .then (contents) ->
         expect(contents).to.eql({})
+
+    it "resolves cached contents when it can't get lock on file after an initial read", ->
+      @fileUtil.set("foo", "bar")
+      .then =>
+        @sandbox.stub(lockFile, "lockAsync").rejects({name: "", message: "", code: "EEXIST"})
+        @fileUtil.get()
+      .then (contents) ->
+        expect(contents).to.eql({foo: "bar"})
 
     it "resolves empty object when contents file has invalid json", ->
       fs.ensureDirAsync(@dir)
@@ -125,8 +158,9 @@ describe "lib/util/file", ->
     beforeEach ->
       @fileUtil = new FileUtil({path: @path})
 
-    it "throws if 1st argument is not a string or object", ->
-      expect(=> @fileUtil.set(5)).to.throw("Expected `key` to be of type `string` or `object`, got `number`")
+    it "throws if 1st argument is not a string or plain object", ->
+      expect(=> @fileUtil.set(1)).to.throw("Expected `key` to be of type `string` or `object`, got `number`")
+      expect(=> @fileUtil.set([])).to.throw("Expected `key` to be of type `string` or `object`, got `array`")
 
     it "sets value for given key", ->
       @fileUtil.set("foo", "bar")

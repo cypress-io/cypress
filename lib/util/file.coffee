@@ -1,12 +1,14 @@
-debouncePromise = require("debounce-promise")
 _ = require("lodash")
 md5 = require("md5")
 os = require("os")
 path = require("path")
 Promise = require("bluebird")
+Queue = require("p-queue")
 lockFile = Promise.promisifyAll(require("lockfile"))
 fs = Promise.promisifyAll(require("fs-extra"))
 exit = require("./exit")
+
+DEBOUNCE_LIMIT = 1000
 
 module.exports = class Conf
   constructor: (options = {}) ->
@@ -14,45 +16,63 @@ module.exports = class Conf
       throw new Error("Must specify path to file when creating new FileUtil()")
 
     @path = options.path
-    @lockFilePath = path.join(os.tmpdir(), "#{md5(@path)}.lock")
 
-    ## debounce calls to read from disk
-    ## if 5 calls are made within 300 milliseconds, @_getStore will be
-    ## called once at the end and each of the 5 calls will resolve with
-    ## the value from that one call
-    @_getStore = debouncePromise(@_getStore.bind(@), 300)
+    @_lockFileDir = path.join(os.tmpdir(), "cypress")
+    @_lockFilePath = path.join(@_lockFileDir, "#{md5(@path)}.lock")
 
-    exit.ensure => lockFile.unlockSync(@lockFilePath)
+    @_queue = new Queue({concurrency: 1})
 
-  get: (key, defaultValue) ->
-    @_getStore().then (store) ->
+    @_cache = {}
+    @_lastRead = 0
+
+    exit.ensure => lockFile.unlockSync(@_lockFilePath)
+
+  transaction: (fn) ->
+    @_addToQueue =>
+      fn({
+        get: @_get.bind(@, true)
+        set: @_set.bind(@, true)
+      })
+
+  get: (args...) ->
+    @_get(false, args...)
+
+  set: (args...) ->
+    @_set(false, args...)
+
+  remove: ->
+    @_cache = {}
+    fs.removeAsync(@path)
+
+  _get: (inTransaction, key, defaultValue) ->
+    get = if inTransaction
+      @_getContents()
+    else
+      @_addToQueue => @_getContents()
+
+    get.then (contents) ->
       if not key?
-        return store
+        return contents
 
-      value = _.get(store, key)
+      value = _.get(contents, key)
       if value is undefined
         defaultValue
       else
         value
 
-  set: (key, value) ->
-    if not _.isString(key) and not _.isObject(key)
-      throw new TypeError("Expected `key` to be of type `string` or `object`, got `#{typeof key}`")
-
-    valueObject = if _.isString(key)
-      tmp = {}
-      tmp[key] = value
-      tmp
+  _getContents: (inTransaction) ->
+    ## read from disk on first call, but resolve cache for any subsequent
+    ## calls within the DEBOUNCE_LIMIT
+    ## once the DEBOUNCE_LIMIT passes, read from disk again
+    ## on the next call
+    if Date.now() - @_lastRead > DEBOUNCE_LIMIT
+      @_lastRead = Date.now()
+      @_read().then (contents) =>
+        @_cache = contents
     else
-      key
+      Promise.resolve(@_cache)
 
-    @_getStore().then (store) =>
-      _.each valueObject, (value, key) ->
-        _.set(store, key, value)
-
-      @_setStore(store)
-
-  _getStore: ->
+  _read: ->
     @_lock()
     .then =>
       fs.readJsonAsync(@path, "utf8")
@@ -69,16 +89,47 @@ module.exports = class Conf
     .finally =>
       @_unlock()
 
-  _setStore: (store) ->
+  _set: (inTransaction, key, value) ->
+    if not _.isString(key) and not _.isPlainObject(key)
+      type = if _.isArray(key) then "array" else (typeof key)
+      throw new TypeError("Expected `key` to be of type `string` or `object`, got `#{type}`")
+
+    valueObject = if _.isString(key)
+      tmp = {}
+      tmp[key] = value
+      tmp
+    else
+      key
+
+    if inTransaction
+      @_setContents(valueObject)
+    else
+      @_addToQueue => @_setContents(valueObject)
+
+  _setContents: (valueObject) ->
+    @_getContents().then (contents) =>
+      _.each valueObject, (value, key) ->
+        _.set(contents, key, value)
+
+      @_cache = contents
+      @_write()
+
+  _addToQueue: (operation) ->
+    ## queues operations so they occur serially as invoked
+    Promise.try =>
+      @_queue.add(operation)
+
+  _write: ->
     @_lock()
     .then =>
-      fs.outputJsonAsync(@path, store, {spaces: 2})
+      fs.outputJsonAsync(@path, @_cache, {spaces: 2})
     .finally =>
       @_unlock()
 
   _lock: ->
-    ## polls every 100ms up to 2000ms to obtain lock, otherwise rejects
-    lockFile.lockAsync(@lockFilePath, {wait: 2000})
+    fs.ensureDirAsync(@_lockFileDir).then =>
+      ## polls every 100ms up to 2000ms to obtain lock, otherwise rejects
+      lockFile.lockAsync(@_lockFilePath, {wait: 2000})
 
   _unlock: ->
-    lockFile.unlockAsync(@lockFilePath)
+    lockFile.unlockAsync(@_lockFilePath)
