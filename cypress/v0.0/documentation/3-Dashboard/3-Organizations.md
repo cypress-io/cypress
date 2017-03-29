@@ -67,7 +67,7 @@ Even though we are in a **private beta**, any user you invite will automatically
 
 1. Click the :fa-cog: beside the Projects you want to give the user access to.
 2. Click 'Invite User'. Note: you must have the role of 'owner' or 'admin' to invite users.
-3. Fill in the email and select the role for the user and click 'Invite User'
+3. Fill in the email and select the role for the user and click 'Invite User' Note: only 'owner's can give other user's 'owner' access.
 4. The user will recieve an invite email with a link to accept the invitation.
 
 ![Invite User dialog](https://cloud.githubusercontent.com/assets/1271364/22709421/baf79a54-ed47-11e6-9796-79ba2008d2d2.png)
@@ -79,8 +79,8 @@ Even though we are in a **private beta**, any user you invite will automatically
 User's can be assigned roles that affect their access to certain features.
 
 - **Member:** Can see the projects, runs, and keys.
-- **Admin:** Can also invite and delete users.
-- **Owner:** Can also transfer or delete projects.
+- **Admin:** Can also invite, edit and delete users.
+- **Owner:** Can also transfer or delete projects. Can delete the organization.
 
 ***
 
@@ -109,6 +109,6 @@ This functionality only exists in our [Dashboard](https://on.cypress.io/dashboar
 
 # Deleting an Organization
 
-You can delete organizations as long as they don't have any projects. You must first transfer ownership of your projects to another organization before you can delete them.
+You can delete organizations that you own as long as they don't have any projects. You must first transfer ownership of your projects to another organization before you can delete them.
 
 ![Delete Organization](https://cloud.githubusercontent.com/assets/1271364/22709764/f9c63e9c-ed48-11e6-885d-ced14d91c3a8.png)
