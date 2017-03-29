@@ -39,7 +39,7 @@ describe "lib/cypress", ->
   beforeEach ->
     @timeout(5000)
 
-    cache.removeSync()
+    cache.__removeSync()
 
     Fixtures.scaffold()
     @todosPath    = Fixtures.projectPath("todos")
