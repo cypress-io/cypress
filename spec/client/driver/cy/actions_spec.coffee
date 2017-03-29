@@ -4197,17 +4197,41 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#scroll-to").scrollTo("125px").then ($el) ->
         expect($el).to.match scrollableContainer
 
-    it.skip "accepts number arg", ->
+    it.skip "scrolls y axis to num px", ->
       @cy.get("#scroll-to").scrollTo(125)
 
-    it.skip "scrolls container by number of px", ->
+    it.skip "scrolls y axis to px", ->
       @cy.get("#scroll-to").scrollTo("125px")
 
-    it.skip "scrolls container by % of height", ->
+    it.skip "scrolls y axis by % of height", ->
       @cy.get("#scroll-to").scrollTo("30%")
 
-    it.skip "accepts object as target", ->
-      @cy.get("#scroll-to").scrollTo({top: "25px", left: "25px"})
+    it.skip "scrolls y axis to position", ->
+      @cy.get("#scroll-to").scrollTo("bottom")
+
+    it.skip "scrolls both x and y axis num of px", ->
+      @cy.get("#scroll-to").scrollTo(25, 25)
+
+    it.skip "scrolls both x and y axis of px", ->
+      @cy.get("#scroll-to").scrollTo("25px", "25px")
+
+    it.skip "scrolls both x and y axis of percentage", ->
+      @cy.get("#scroll-to").scrollTo("25%", "25%")
+
+    it.skip "scrolls both x and y axis to positions", ->
+      @cy.get("#scroll-to").scrollTo("bottom", "right")
+
+    it.skip "has duration set to 0 by default", ->
+      @cy.get("#scroll-to").scrollTo("25px", "25px")
+
+    it.skip "accepts duration option", ->
+      @cy.get("#scroll-to").scrollTo("25px", "25px", { duration: 500 })
+
+    it.skip "has easing set to swing by default", ->
+      @cy.get("#scroll-to").scrollTo("25px", "25px")
+
+    it.skip "accepts easing option", ->
+      @cy.get("#scroll-to").scrollTo("25px", "25px", { easing: 'linear' })
 
     describe "assertion verification", ->
 
@@ -4215,26 +4239,64 @@ describe "$Cypress.Cy Actions Commands", ->
       beforeEach ->
         @allowErrors()
 
-      it "throws if no args passed", (done) ->
-        @cy.on "fail", (err) =>
-          expect(err.message).to.include "cy.scrollTo() must be called with a valid position. It can be a string, number or object."
-          done()
+      context "subject errors", ->
+        it "throws when not passed DOM element as subject", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "Cannot call cy.scrollTo() on a non-DOM subject."
+            done()
 
-        @cy.scrollTo()
+          @cy.noop({foo: "bar"}).scrollTo("250px")
 
-      it "throws when not passed DOM element", (done) ->
-        @cy.on "fail", (err) =>
-          expect(err.message).to.include "Cannot call cy.scrollTo() on a non-DOM subject."
-          done()
+        it "throws if scrollable container is multiple elements", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "cy.scrollTo() can only be used to scroll one element, you tried to scroll 15 elements."
+            done()
 
-        @cy.noop({foo: "bar"}).scrollTo("250px")
+          @cy.get("button").scrollTo("500px")
 
-      it "throws if scrollable container is multiple elements", (done) ->
-        @cy.on "fail", (err) =>
-          expect(err.message).to.include "cy.scrollTo() can only be used to scroll one element, you tried to scroll 15 elements."
-          done()
+      context "argument errors", ->
+        it "throws if no args passed", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "cy.scrollTo() must be called with a valid position. It can be a string, number or object."
+            done()
 
-        @cy.get("button").scrollTo("500px")
+          @cy.scrollTo()
+
+        it "throws if NaN", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "..."
+            done()
+
+          @cy.get("button").scrollTo(25, 0/0)
+
+        it "throws if Infinity", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "..."
+            done()
+
+          @cy.get("button").scrollTo(25, 10/0)
+
+        it "throws if unrecognized position", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "..."
+            done()
+
+          @cy.get("button").scrollTo("botom")
+
+      context "option errors", ->
+        it "throws if duration is not a number", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "..."
+            done()
+
+          @cy.get("button").scrollTo("25px", { duration: "900" })
+
+        it "throws if unrecognized easing", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "..."
+            done()
+
+          @cy.get("button").scrollTo("25px", { easing: "flower" })
 
     describe ".log", ->
 
