@@ -92,7 +92,7 @@ describe "lib/launcher", ->
 
       it "uses default width if there isn't one saved", ->
         launcher.launch("electron").then ->
-          expect(Renderer.create.lastCall.args[0].width).to.equal(800)
+          expect(Renderer.create.lastCall.args[0].width).to.equal(1280)
 
       it "uses saved width if there is one", ->
         savedState.get.resolves({browserWidth: 1024})
@@ -101,7 +101,7 @@ describe "lib/launcher", ->
 
       it "uses default height if there isn't one saved", ->
         launcher.launch("electron").then ->
-          expect(Renderer.create.lastCall.args[0].height).to.equal(600)
+          expect(Renderer.create.lastCall.args[0].height).to.equal(720)
 
       it "uses saved height if there is one", ->
         savedState.get.resolves({browserHeight: 768})

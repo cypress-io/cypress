@@ -111,8 +111,8 @@ module.exports = {
     .then (state) ->
       Renderer.create({
         url: url
-        width: state.browserWidth or 800
-        height: state.browserHeight or 600
+        width: state.browserWidth or 1280
+        height: state.browserHeight or 720
         minWidth: 100
         minHeight: 100
         x: state.browserX
