@@ -4,7 +4,7 @@ excerpt: Manage your Organizations
 # Contents
 
 - :fa-angle-right: [What are Organizations?](#section-what-are-organizations-)
-  - [Default Organization](#section-default-organization)
+  - [Personal Organization](#section-personal-organization)
 - :fa-angle-right: [Creating an Organization](#section-creating-an-organization)
   - [Inviting Users](#section-inviting-users)
   - [User Roles](#section-user-roles)
@@ -30,22 +30,22 @@ Once out of beta, organizations will also handle billing.
 [block:callout]
 {
   "type": "info",
-  "body": "Cypress Organizations are meant to work exactly like Github Organizations."
+  "body": "Cypress Organizations are meant to work similar to GitHub Organizations."
 }
 [/block]
 
 ***
 
-## Default Organization
+## Personal Organization
 
-By default, every user of Cypress is given a default personal organization - named after you.
+By default, every user of Cypress is given a personal organization - named after you.
 
-You cannot delete this organization.
+You cannot delete or edit the name of this organization.
 
 [block:callout]
 {
   "type": "info",
-  "body": "All existing Cypress projects prior to version 0.19.0 were automatically set to your default organization."
+  "body": "All existing Cypress projects prior to version 0.19.0 were automatically added to your personal organization."
 }
 [/block]
 
@@ -80,7 +80,7 @@ User's can be assigned roles that affect their access to certain features.
 
 - **Member:** Can see the projects, runs, and keys.
 - **Admin:** Can also invite, edit and delete users.
-- **Owner:** Can also transfer or delete projects. Can delete the organization.
+- **Owner:** Can also transfer or delete projects. Can delete and edit the organization.
 
 ***
 
