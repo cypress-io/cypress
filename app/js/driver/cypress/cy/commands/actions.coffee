@@ -1351,119 +1351,166 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           .return(options.$el)
 
   Cypress.addDualCommand
-    scrollTo: (subject, target, options = {}) ->
-      _convertToPx = (target, axis) =>
-        ## set to an impossibly high amount of pixels
+    scrollTo: (subject, y, xOrOptions, options = {}) ->
 
-        number = parseFloat(target)
+      switch
+        when _.isObject(xOrOptions)
+          options = xOrOptions
+          x = null
+        else
+          x = xOrOptions
 
-        ## what if we're NaN or Infinity?
-
-        unit = target.match(/px|%/)[0] or 'px'
-
-        ## we don't need to calculate positioning
-        ## off of the container if there was no direction given
-        return number if !axis?
-
-        if target is 'max'
-          if axis is 'x'
-            ## we need to scroll to container's width
-            number = $container[0].scrollWidth
-          if axis is 'y'
-            ## we need to scroll to container's height
-            number = $container[0].scrollHeight
-
-        if unit is '%'
-          if axis is 'x'
-            ## we need to find % of container's width
-            number = $container[0].scrollWidth  * (number * 0.01)   ## 600 * 0.50 = 300
-          if axis is 'y'
-            ## we need to find % of container's height
-            number = $container[0].scrollHeight * (number * 0.01)     ## 600 * (0.50) = 300
-
-        return number
-
-      if not target
-        $Cypress.Utils.throwErrByPath "scrollTo.invalid_target", {args: { target }}
+      if not y
+        $Cypress.Utils.throwErrByPath "scrollTo.invalid_target", {args: { y }}
 
       if subject
-        ## if they passed something here, need to ensure DOM
+        ## if they passed something here, need to ensure it's DOM
         @ensureDom(subject)
         $container = subject
       else
         ## if we don't have a subject, then we are a parent command
-        ## assume they want to scroll the body.
+        ## assume they want to scroll the entire window.
+        $container = @private("window")
 
-        ## we need to set this to something to signify that
-        ## we just want to eventually scroll the highest scrollable
-        ## element, I'm not exactly sure what this should be
-        $container = @$$("html")
+        ## jQuery scrollTo looks for the prop contentWindow
+        ## otherwise it'll use the wrong window to scroll :(
+        $container.contentWindow = $container
 
       ## throw if we're trying to scroll multiple containers
       if $container.length > 1
         $Cypress.Utils.throwErrByPath("scrollTo.multiple_containers", {args: { num: $container.length }})
 
-      ## need to calculate if the container is even scrollable
-      @ensureScrollability($container, "scrollTo")
 
-      x = 0
-      y = 0
-      duration = 0
-
-      switch
-        when _.isObject(target)
-          ## { top: "250px", left: "50px" }
-          ## { top: "50%", left: "50px" }
-          ## { top: 50, left: 50 }
-          x = _convertToPx(target.left, "x")
-          y = _convertToPx(target.top, "y")
-        else
-          y = _convertToPx(target, "y")
-
-      ## if there was no duration specified,
-      ## else it'll default to 0 (instant scroll)
-      if options.duration
-        duration = options.duration
-
-      ## then add any offset
-      if options.offset
-        switch
-          when _.isObject(options.offset)
-            if options.offset.top
-              offsetY = _convertToPx(options.offset.top)
-            if options.offset.left
-              offsetX = _convertToPx(options.offset.left)
-          else
-            offsetY = _convertToPx(options.offset)
-
-        x += offsetX
-        y += offsetY
+      if !options.duration
+        options.duration = 0
 
       _.defaults options,
         $el: $container
         log: true
-        duration: duration
+        duration: options.duration
+        easing: options.easing || "swing"
         x: x
         y: y
 
-      if options.log
-        options._log = Cypress.Log.command
-          $el: options.$el
-          consoleProps: ->
-            ## merge into consoleProps without mutating it
-            _.extend {}, consoleProps,
-              "Applied To": $Cypress.Utils.getDomElements(options.$el)
+      ## scroll our y axis
+      $(options.$el).scrollTo(y, {
+        axis: "y"
+        duration: options.duration
+        easing: options.easing
+        always: ->
+        complete: ->
+        fail: ->
+        progress: ->
+        start: ->
+      })
 
-        options._log.snapshot("before", {next: "after"})
+      ## scroll our x axis if they gave us one
+      if x?
+        $(options.$el).scrollTo(x, {
+          axis: "x"
+          duration: options.duration
+          easing: options.easing
+          always: ->
+          complete: ->
+          fail: ->
+          progress: ->
+          start: ->
+        })
 
-      ## why not do it in JavaScript scrollTo?
-      ## well, because we need this duration bs
-      ## so we use jQuery's animate
-      if options.y != 0
-        $el.animate('scrollTop', options.y, options.duration)
+      ## remove the contentWindow that we added above
+      if options.$el is @private("window")
+        delete options.$el.contentWindow
 
-      if options.x != 0
-        $el.animate('scrollLeft', options.x, options.duration)
+      return options.$el
+
+
+      # _convertToPx = (target, axis) =>
+      #   ## set to an impossibly high amount of pixels
+
+      #   number = parseFloat(target)
+
+      #   ## what if we're NaN or Infinity?
+
+      #   unit = target.match(/px|%/)[0] or 'px'
+
+      #   ## we don't need to calculate positioning
+      #   ## off of the container if there was no direction given
+      #   return number if !axis?
+
+      #   if target is 'max'
+      #     if axis is 'x'
+      #       ## we need to scroll to container's width
+      #       number = $container[0].scrollWidth
+      #     if axis is 'y'
+      #       ## we need to scroll to container's height
+      #       number = $container[0].scrollHeight
+
+      #   if unit is '%'
+      #     if axis is 'x'
+      #       ## we need to find % of container's width
+      #       number = $container[0].scrollWidth  * (number * 0.01)   ## 600 * 0.50 = 300
+      #     if axis is 'y'
+      #       ## we need to find % of container's height
+      #       number = $container[0].scrollHeight * (number * 0.01)     ## 600 * (0.50) = 300
+
+      #   return number
+
+      # ## need to calculate if the container is even scrollable
+      # @ensureScrollability($container, "scrollTo")
+
+      # x = 0
+      # y = 0
+      # duration = 0
+
+      # switch
+      #   when _.isObject(target)
+      #     ## { top: "250px", left: "50px" }
+      #     ## { top: "50%", left: "50px" }
+      #     ## { top: 50, left: 50 }
+      #     x = _convertToPx(target.left, "x")
+      #     y = _convertToPx(target.top, "y")
+      #   else
+      #     y = _convertToPx(target, "y")
+
+      # ## if there was no duration specified,
+      # ## else it'll default to 0 (instant scroll)
+      # if options.duration
+      #   duration = options.duration
+
+      # ## then add any offset
+      # if options.offset
+      #   switch
+      #     when _.isObject(options.offset)
+      #       if options.offset.top
+      #         offsetY = _convertToPx(options.offset.top)
+      #       if options.offset.left
+      #         offsetX = _convertToPx(options.offset.left)
+      #     else
+      #       offsetY = _convertToPx(options.offset)
+
+      #   x += offsetX
+      #   y += offsetY
+
+
+
+      # if options.log
+      #   options._log = Cypress.Log.command
+      #     $el: options.$el
+      #     consoleProps: ->
+      #       ## merge into consoleProps without mutating it
+      #       _.extend {}, consoleProps,
+      #         "Applied To": $Cypress.Utils.getDomElements(options.$el)
+
+      #   options._log.snapshot("before", {next: "after"})
+
+      # ## why not do it in JavaScript scrollTo?
+      # ## well, because we need this duration bs
+      # ## so we use jQuery's animate
+      # if options.y != 0
+      #   $el.animate('scrollTop', options.y, options.duration)
+
+      # if options.x != 0
+      #   $el.animate('scrollLeft', options.x, options.duration)
 
   Cypress.Cy.extend
     _waitForAnimations: ($el, options, coordsHistory = []) ->

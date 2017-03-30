@@ -4185,53 +4185,134 @@ describe "$Cypress.Cy Actions Commands", ->
             done()
 
   context "#scrollTo", ->
-    it.skip "subject is window by default", ->
-      scrollableContainer = @cy.$$(window)
+    beforeEach ->
+      @win          = @cy.private("window")
+      @scrollVert   = @cy.$$("#scroll-to-vertical")
+      @scrollHoriz  = @cy.$$("#scroll-to-horizontal")
+      @scrollBoth   = @cy.$$("#scroll-to-both")
 
-      @cy.scrollTo("125px").then ($el) ->
-        expect($el).to.match scrollableContainer
+    afterEach ->
+      ## reset the scrollable containers back
+      ## to furthest left and top
+      @win.scrollTop           = 0
+      @win.scrollLeft          = 0
 
-    it.skip "does not change the subject", ->
-      scrollableContainer = @cy.$$("#scroll-to")
+      @scrollVert.scrollTop    = 0
+      @scrollVert.scrollLeft   = 0
 
-      @cy.get("#scroll-to").scrollTo("125px").then ($el) ->
-        expect($el).to.match scrollableContainer
+      @scrollHoriz.scrollTop   = 0
+      @scrollHoriz.scrollLeft  = 0
 
-    it.skip "scrolls y axis to num px", ->
-      @cy.get("#scroll-to").scrollTo(125)
+      @scrollBoth.scrollTop    = 0
+      @scrollBoth.scrollLeft   = 0
 
-    it.skip "scrolls y axis to px", ->
-      @cy.get("#scroll-to").scrollTo("125px")
+    it "subject is window by default", ->
+      @cy.scrollTo("125px").then (win2) ->
+        expect(@win).to.eq(win2)
 
-    it.skip "scrolls y axis by % of height", ->
-      @cy.get("#scroll-to").scrollTo("30%")
+    it "subject is DOM", ->
+      @cy.get("#scroll-to-vertical").scrollTo("125px").then ($el) ->
+        expect($el.get(0)).to.eq @scrollVert.get(0)
+
+    it "scrolls y axis to num px", ->
+      expect(@scrollVert.get(0).scrollTop).to.eq(0)
+      expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+
+      @cy.get("#scroll-to-vertical").scrollTo(300).then ($el) ->
+        expect(@scrollVert.get(0).scrollTop).to.eq(300)
+        expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+
+    it "scrolls y axis to px", ->
+      expect(@scrollVert.get(0).scrollTop).to.eq(0)
+      expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+
+      @cy.get("#scroll-to-vertical").scrollTo("125px").then ($el) ->
+        expect(@scrollVert.get(0).scrollTop).to.eq(125)
+        expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+
+    it "scrolls y axis by % of scrollable height", ->
+      expect(@scrollVert.get(0).scrollTop).to.eq(0)
+      expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+
+      @cy.get("#scroll-to-vertical").scrollTo("50%").then ($el) ->
+        ## they don't calculate the height of the container
+        ## in the percentage of the scroll (since going the height
+        ## of the container wouldn't scroll at all...)
+        expect(@scrollVert.get(0).scrollTop).to.eq((500-100)/2)
+        expect(@scrollVert.get(0).scrollLeft).to.eq(0)
 
     it.skip "scrolls y axis to position", ->
       @cy.get("#scroll-to").scrollTo("bottom")
 
-    it.skip "scrolls both x and y axis num of px", ->
-      @cy.get("#scroll-to").scrollTo(25, 25)
+    it "scrolls both x and y axis num of px", ->
+      expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+      expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-    it.skip "scrolls both x and y axis of px", ->
-      @cy.get("#scroll-to").scrollTo("25px", "25px")
+      @cy.get("#scroll-to-both").scrollTo(300, 300).then ($el) ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(300)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
 
-    it.skip "scrolls both x and y axis of percentage", ->
-      @cy.get("#scroll-to").scrollTo("25%", "25%")
+    it "scrolls both x and y axis of px", ->
+      expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+      expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+      @cy.get("#scroll-to-both").scrollTo("300px", "300px").then ($el) ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(300)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
+
+    it "scrolls both x and y axis of percentage", ->
+      expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+      expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+      @cy.get("#scroll-to-both").scrollTo("50%", "50%").then ($el) ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
 
     it.skip "scrolls both x and y axis to positions", ->
+
       @cy.get("#scroll-to").scrollTo("bottom", "right")
 
-    it.skip "has duration set to 0 by default", ->
-      @cy.get("#scroll-to").scrollTo("25px", "25px")
+    it "calls jQuery scroll to", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
 
-    it.skip "accepts duration option", ->
-      @cy.get("#scroll-to").scrollTo("25px", "25px", { duration: 500 })
+      @cy.get("#scroll-to-both").scrollTo("25px").then ->
+        expect(scrollTo).to.have.been.called
+        expect(scrollTo.args[0][0]).to.eq "25px"
 
-    it.skip "has easing set to swing by default", ->
-      @cy.get("#scroll-to").scrollTo("25px", "25px")
+    it "sets duration to 0 by default", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
 
-    it.skip "accepts easing option", ->
-      @cy.get("#scroll-to").scrollTo("25px", "25px", { easing: 'linear' })
+      @cy.get("#scroll-to-both").scrollTo("25px").then ->
+        expect(scrollTo).to.have.been.called
+        expect(scrollTo.args[0][1].duration).to.eq 0
+
+    it "sets axis to correct x or y", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-to-both").scrollTo("25px", "80px").then ->
+        expect(scrollTo.firstCall.args[1].axis).to.eq "y"
+
+        expect(scrollTo.secondCall.args[1].axis).to.eq "x"
+
+    it "accepts duration option", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-to-both").scrollTo("25px", {duration: 500}).then ->
+        expect(scrollTo.args[0][1].duration).to.eq 500
+
+    it "has easing set to swing by default", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-to-both").scrollTo("25px").then ->
+        expect(scrollTo).to.have.been.called
+        expect(scrollTo.args[0][1].easing).to.eq "swing"
+
+    it "accepts easing option", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-to-both").scrollTo("25px", "50px", {easing: "linear"}).then ->
+        expect(scrollTo).to.have.been.called
+        expect(scrollTo.args[0][1].easing).to.eq "linear"
 
     describe "assertion verification", ->
 
@@ -4262,21 +4343,21 @@ describe "$Cypress.Cy Actions Commands", ->
 
           @cy.scrollTo()
 
-        it "throws if NaN", (done) ->
+        it.skip "throws if NaN", (done) ->
           @cy.on "fail", (err) =>
             expect(err.message).to.include "..."
             done()
 
           @cy.get("button").scrollTo(25, 0/0)
 
-        it "throws if Infinity", (done) ->
+        it.skip "throws if Infinity", (done) ->
           @cy.on "fail", (err) =>
             expect(err.message).to.include "..."
             done()
 
           @cy.get("button").scrollTo(25, 10/0)
 
-        it "throws if unrecognized position", (done) ->
+        it.skip "throws if unrecognized position", (done) ->
           @cy.on "fail", (err) =>
             expect(err.message).to.include "..."
             done()
@@ -4284,12 +4365,12 @@ describe "$Cypress.Cy Actions Commands", ->
           @cy.get("button").scrollTo("botom")
 
       context "option errors", ->
-        it "throws if duration is not a number", (done) ->
+        it.skip "throws if duration is not a number", (done) ->
           @cy.on "fail", (err) =>
             expect(err.message).to.include "..."
             done()
 
-          @cy.get("button").scrollTo("25px", { duration: "900" })
+          @cy.get("#scroll-to-both").scrollTo("25px", { duration: "foo" })
 
         it "throws if unrecognized easing", (done) ->
           @cy.on "fail", (err) =>
@@ -4298,7 +4379,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
           @cy.get("button").scrollTo("25px", { easing: "flower" })
 
-    describe ".log", ->
+    describe.skip ".log", ->
 
   context "#scrollIntoView", ->
     it "does not change the subject", ->
