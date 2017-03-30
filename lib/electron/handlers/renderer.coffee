@@ -84,7 +84,9 @@ module.exports = {
       }
     }
 
-    if options.type isnt "PROJECT"
+    ## PROJECT windows are the runner or descendants of the
+    ## runner, so they don't need ipc
+    if not /^PROJECT/.test(options.type)
       args.webPreferences.preload = cwd("lib", "ipc", "ipc.js")
 
     if args.show is false

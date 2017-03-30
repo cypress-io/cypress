@@ -117,6 +117,21 @@ describe "electron/headed", ->
     it "renders with no y if no y saved", ->
       expect(headed.getRendererArgs({}).y).to.be.undefined
 
+    describe "on window focus", ->
+      it "calls menu.set withDevTools: true when in dev env", ->
+        env = process.env["CYPRESS_ENV"]
+        process.env["CYPRESS_ENV"] = "development"
+        headed.getRendererArgs({}).onFocus()
+        expect(menu.set.lastCall.args[0].withDevTools).to.be.true
+        process.env["CYPRESS_ENV"] = env
+
+      it "calls menu.set withDevTools: false when not in dev env", ->
+        env = process.env["CYPRESS_ENV"]
+        process.env["CYPRESS_ENV"] = "production"
+        headed.getRendererArgs({}).onFocus()
+        expect(menu.set.lastCall.args[0].withDevTools).to.be.false
+        process.env["CYPRESS_ENV"] = env
+
   context ".run", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()

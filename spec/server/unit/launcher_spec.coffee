@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+_ = require("lodash")
 Promise = require("bluebird")
 EE = require("events").EventEmitter
 electron = require("electron")
@@ -18,11 +19,11 @@ describe "lib/launcher", ->
   context "#launch", ->
     describe "when electron", ->
       beforeEach ->
-        @win = {
+        @win = _.extend(new EE(), {
           close: @sandbox.stub()
           isDestroyed: @sandbox.stub()
           webContents: new EE()
-        }
+        })
         @url = "the://url"
 
         @sandbox.stub(electronUtils, "setProxy").resolves()
@@ -52,36 +53,12 @@ describe "lib/launcher", ->
           Renderer.create.lastCall.args[0].onFocus()
           expect(menu.set).to.be.calledWith({withDevTools: true})
 
-      it "sets menu with dev tools when dev env on blur", ->
-        env = process.env["CYPRESS_ENV"]
-        process.env["CYPRESS_ENV"] = "development"
-        launcher.launch("electron").then ->
-          Renderer.create.lastCall.args[0].onBlur()
-          expect(menu.set).to.be.calledWith({withDevTools: true})
-          process.env["CYPRESS_ENV"] = env
-
-      it "sets menu without dev tools when not dev env on blur", ->
-        env = process.env["CYPRESS_ENV"]
-        process.env["CYPRESS_ENV"] = "production"
-        launcher.launch("electron").then ->
-          Renderer.create.lastCall.args[0].onBlur()
-          expect(menu.set).to.be.calledWith({withDevTools: false})
-          process.env["CYPRESS_ENV"] = env
-
       it "sets menu with dev tools when dev env on close", ->
         env = process.env["CYPRESS_ENV"]
         process.env["CYPRESS_ENV"] = "development"
         launcher.launch("electron", @url, {onBrowserClose: ->}).then ->
           Renderer.create.lastCall.args[0].onClose()
           expect(menu.set).to.be.calledWith({withDevTools: true})
-          process.env["CYPRESS_ENV"] = env
-
-      it "sets menu without dev tools when not dev env on close", ->
-        env = process.env["CYPRESS_ENV"]
-        process.env["CYPRESS_ENV"] = "production"
-        launcher.launch("electron", @url, {onBrowserClose: ->}).then ->
-          Renderer.create.lastCall.args[0].onClose()
-          expect(menu.set).to.be.calledWith({withDevTools: false})
           process.env["CYPRESS_ENV"] = env
 
       it "calls onBrowserClose callback on close", ->
@@ -128,14 +105,6 @@ describe "lib/launcher", ->
             devTools: "isBrowserDevToolsOpen"
           })
 
-      it "prevents new windows from being created", ->
-        electron.shell = {openExternal: @sandbox.stub()}
-        event = {preventDefault: @sandbox.stub()}
-        launcher.launch("electron").then =>
-          @win.webContents.emit("new-window", event, "some://url")
-          expect(event.preventDefault).to.be.called
-          expect(electron.shell.openExternal).to.be.calledWith("some://url")
-
       it "calls onBrowserOpen callback", ->
          onBrowserOpen = @sandbox.stub()
          launcher.launch("electron", @url, {onBrowserOpen}).then =>
@@ -161,6 +130,110 @@ describe "lib/launcher", ->
         launcher.launch("electron").then (instance) =>
           instance.kill()
           expect(@win.close).not.to.be.called
+
+      describe "new windows", ->
+        beforeEach ->
+          @childWin = _.extend(new EE(), {
+            close: @sandbox.stub()
+            isDestroyed: @sandbox.stub().returns(false)
+            webContents: new EE()
+          })
+
+          Renderer.create.onCall(1).resolves(@childWin)
+
+          @event = {preventDefault: @sandbox.stub()}
+          @win.getPosition = -> [4, 2]
+
+          @openNewWindow = (options) =>
+            launcher.launch("electron", @url, options).then =>
+              @win.webContents.emit("new-window", @event, "some://other.url")
+
+        it "prevents default", ->
+          @openNewWindow().then =>
+            expect(@event.preventDefault).to.be.called
+
+        it "creates child window", ->
+          @openNewWindow().then =>
+            args = Renderer.create.lastCall.args[0]
+            expect(Renderer.create).to.be.calledTwice
+            expect(args.url).to.equal("some://other.url")
+            expect(args.minWidth).to.equal(100)
+            expect(args.minHeight).to.equal(100)
+
+        it "offsets it from parent by 100px", ->
+          @openNewWindow().then =>
+            args = Renderer.create.lastCall.args[0]
+            expect(args.x).to.equal(104)
+            expect(args.y).to.equal(102)
+
+        it "passes along web security", ->
+          @openNewWindow({chromeWebSecurity: false}).then =>
+            args = Renderer.create.lastCall.args[0]
+            expect(args.chromeWebSecurity).to.be.false
+
+        it "sets unique PROJECT type on each new window", ->
+          @openNewWindow().then =>
+            firstArgs = Renderer.create.lastCall.args[0]
+            expect(firstArgs.type).to.match(/^PROJECT-CHILD-\d/)
+            @win.webContents.emit("new-window", @event, "yet://another.url")
+            secondArgs = Renderer.create.lastCall.args[0]
+            expect(secondArgs.type).to.match(/^PROJECT-CHILD-\d/)
+            expect(firstArgs.type).not.to.equal(secondArgs.type)
+
+        it "set newGuest on child window", ->
+          @openNewWindow()
+          .then ->
+            Promise.delay(1)
+          .then =>
+            expect(@event.newGuest).to.equal(@childWin)
+
+        it "sets menu with dev tools on creation", ->
+          @openNewWindow().then =>
+            ## once for main window, once for child
+            expect(menu.set).to.be.calledTwice
+            expect(menu.set).to.be.calledWith({withDevTools: true})
+
+        it "sets menu with dev tools on focus", ->
+          @openNewWindow().then =>
+            Renderer.create.lastCall.args[0].onFocus()
+            ## once for main window, once for child, once for focus
+            expect(menu.set).to.be.calledThrice
+            expect(menu.set).to.be.calledWith({withDevTools: true})
+
+        it "it closes the child window when the parent window is closed", ->
+          @openNewWindow()
+          .then ->
+            Promise.delay(1)
+          .then =>
+            @win.emit("close")
+            expect(@childWin.close).to.be.called
+
+        it "does not close the child window when it is already destroyed", ->
+          @openNewWindow()
+          .then ->
+            Promise.delay(1)
+          .then =>
+            @childWin.isDestroyed.returns(true)
+            @win.emit("close")
+            expect(@childWin.close).not.to.be.called
+
+        it "does the same things for children of the child window", ->
+          @grandchildWin = _.extend(new EE(), {
+            close: @sandbox.stub()
+            isDestroyed: @sandbox.stub().returns(false)
+            webContents: new EE()
+          })
+          Renderer.create.onCall(2).resolves(@grandchildWin)
+          @childWin.getPosition = -> [104, 102]
+
+          @openNewWindow().then =>
+            @childWin.webContents.emit("new-window", @event, "yet://another.url")
+            args = Renderer.create.lastCall.args[0]
+            expect(Renderer.create).to.be.calledThrice
+            expect(args.url).to.equal("yet://another.url")
+            expect(args.type).to.match(/^PROJECT-CHILD-\d/)
+            expect(args.x).to.equal(204)
+            expect(args.y).to.equal(202)
 
       context "#onAutomationRequest", ->
         it "performs the automation", ->

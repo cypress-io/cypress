@@ -42,7 +42,9 @@ describe "lib/socket", ->
         @options = {
           onSavedStateChanged: @sandbox.spy()
         }
-        @watchers = {}
+        @watchers = {
+          watch: ->
+        }
         @server.startWebsockets(@watchers, @cfg, @options)
         @socket = @server._socket
 

@@ -108,7 +108,7 @@ module.exports = {
     electronUtils.setProxy(options.proxyServer)
     .then ->
       savedState.get()
-    .then (state) ->
+    .then (state) =>
       Renderer.create({
         url: url
         width: state.browserWidth or 1280
@@ -117,18 +117,14 @@ module.exports = {
         minHeight: 100
         x: state.browserX
         y: state.browserY
-        show: true
         chromeWebSecurity: options.chromeWebSecurity
         type: "PROJECT"
         onFocus: ->
           menu.set({withDevTools: true})
-        onBlur: ->
-          menu.set({withDevTools: isDev})
         onClose: ->
-          menu.set({withDevTools: isDev})
           options.onBrowserClose()
       })
-      .then (win) ->
+      .then (win) =>
         Renderer.trackState(win, state, {
           width: "browserWidth"
           height: "browserHeight"
@@ -145,10 +141,7 @@ module.exports = {
           window: win
         })
 
-        ## open any links externally, not in new electron browser
-        win.webContents.on "new-window", (e, url) ->
-          e.preventDefault()
-          electron.shell.openExternal(url)
+        @_handleNewWindow(win, options)
 
         ## TODO: same as below concerning waiting for socket connection
         Promise.delay(1000)
@@ -162,6 +155,48 @@ module.exports = {
             ## renderer takes care of removing listeners
             removeAllListeners: ->
           }
+
+  _handleNewWindow: (win, options) ->
+    win.webContents.on "new-window", (e, url) =>
+      @_launchChildBrowser(e, url, win, options)
+      .then (close) ->
+        ## close child on closed
+        win.on("close", close)
+
+  _launchChildBrowser: (e, url, parent, options) ->
+    e.preventDefault()
+
+    [parentX, parentY] = parent.getPosition()
+
+    Renderer.create({
+      url: url
+      minWidth: 100
+      minHeight: 100
+      x: parentX + 100 ## offset from parent by
+      y: parentY + 100 ## 100 px right and down
+      chromeWebSecurity: options.chromeWebSecurity
+      type: _.uniqueId("PROJECT-CHILD-")
+      onFocus: ->
+        menu.set({withDevTools: true})
+    })
+    .then (win) =>
+      ## needed by electron since we prevented default and are creating
+      ## our own BrowserWindow (https://electron.atom.io/docs/api/web-contents/#event-new-window)
+      e.newGuest = win
+
+      menu.set({withDevTools: true})
+
+      ## adds context menu with copy, paste, inspect element, etc
+      contextMenu({
+        showInspectElement: true
+        window: win
+      })
+
+      @_handleNewWindow(win, options)
+
+      return ->
+        if not win.isDestroyed()
+          win.close()
 
   _launchBrowser: (name, url, options) ->
     args = defaultArgs.concat(options.args)

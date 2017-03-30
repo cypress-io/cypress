@@ -15,6 +15,9 @@ menu       = require("../electron/handlers/menu")
 Events     = require("../electron/handlers/events")
 Renderer   = require("../electron/handlers/renderer")
 
+isDev = ->
+  process.env["CYPRESS_ENV"] is "development"
+
 module.exports = {
   isMac: ->
     os.platform() is "darwin"
@@ -34,6 +37,9 @@ module.exports = {
 
         Renderer.hideAllUnlessAnotherWindowIsFocused()
       onFocus: ->
+        ## hide dev tools if in production and previously focused
+        ## window was the electron browser
+        menu.set({withDevTools: isDev()})
         Renderer.showAll()
       onClose: ->
         process.exit()
@@ -63,7 +69,7 @@ module.exports = {
     ## TODO: potentially just pass an event emitter
     ## instance here instead of callback functions
     menu.set({
-      withDevTools: process.env["CYPRESS_ENV"] is "development"
+      withDevTools: isDev()
       onUpdatesClicked: ->
         bus.emit("menu:item:clicked", "check:for:updates")
 
