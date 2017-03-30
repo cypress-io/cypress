@@ -15,6 +15,7 @@ vendor:
   - bower_components/js-cookie/src/js.cookie.js
   - bower_components/moment/moment.js
   - bower_components/blob-util/dist/blob-util.js
+  - node_modules/jquery.scrollto/jquery.scrollTo.js
   - app/js/vendor/url-parse.js
   - app/js/vendor/minimatch.js
   - app/js/vendor/bililiteRange.js

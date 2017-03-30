@@ -76,6 +76,7 @@
     "gulp-uglify": "^1.2.0",
     "https-proxy-agent": "^1.0.0",
     "istanbul": "^0.4.2",
+    "jquery.scrollto": "^2.1.2",
     "js-yaml": "3.1.0",
     "lolex": "^1.5.2",
     "mkdirp": "^0.5.1",
