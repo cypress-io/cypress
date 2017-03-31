@@ -4276,43 +4276,55 @@ describe "$Cypress.Cy Actions Commands", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-to-both").scrollTo("25px").then ->
-        expect(scrollTo).to.have.been.called
-        expect(scrollTo.args[0][0]).to.eq "25px"
+        expect(scrollTo).to.be.calledWith({top: "25px", left: 0})
 
     it "sets duration to 0 by default", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-to-both").scrollTo("25px").then ->
-        expect(scrollTo).to.have.been.called
-        expect(scrollTo.args[0][1].duration).to.eq 0
+        expect(scrollTo).to.be.calledWithMatch({}, {duration: 0})
 
     it "sets axis to correct x or y", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-to-both").scrollTo("25px", "80px").then ->
-        expect(scrollTo.firstCall.args[1].axis).to.eq "y"
+        expect(scrollTo).to.be.calledWithMatch({}, {axis: "yx"})
 
-        expect(scrollTo.secondCall.args[1].axis).to.eq "x"
+    it "scrolling resolves after a set duration", ->
+      expect(@scrollVert.get(0).scrollTop).to.eq(0)
+      expect(@scrollVert.get(0).scrollLeft).to.eq(0)
 
-    it "accepts duration option", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
-      @cy.get("#scroll-to-both").scrollTo("25px", {duration: 500}).then ->
-        expect(scrollTo.args[0][1].duration).to.eq 500
+      @cy.get("#scroll-to-vertical").scrollTo("125px", {duration: 500}).then ->
+        expect(scrollTo).to.be.calledWithMatch({}, {duration: 500})
+        expect(@scrollVert.get(0).scrollTop).to.eq(125)
+        expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+
+    it "accepts duration string option", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-to-both").scrollTo("25px", {duration: "500"}).then ->
+        expect(scrollTo.args[0][1].duration).to.eq "500"
 
     it "has easing set to swing by default", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-to-both").scrollTo("25px").then ->
-        expect(scrollTo).to.have.been.called
         expect(scrollTo.args[0][1].easing).to.eq "swing"
 
-    it "accepts easing option", ->
+    it "scrolling resolves after easing", ->
+      expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+      expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-to-both").scrollTo("25px", "50px", {easing: "linear"}).then ->
-        expect(scrollTo).to.have.been.called
-        expect(scrollTo.args[0][1].easing).to.eq "linear"
+        expect(scrollTo).to.be.calledWithMatch({}, {easing: "linear"})
+        expect(@scrollBoth.get(0).scrollTop).to.eq(25)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(50)
+
+    it.skip "retries until element is scrollable"
 
     describe "assertion verification", ->
 
@@ -4343,43 +4355,71 @@ describe "$Cypress.Cy Actions Commands", ->
 
           @cy.scrollTo()
 
-        it.skip "throws if NaN", (done) ->
+        it "throws if NaN", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.include "..."
+            expect(err.message).to.include "cy.scrollTo() must be called with a valid position. It can be a string, number or object. Your position was: 25, NaN"
             done()
 
-          @cy.get("button").scrollTo(25, 0/0)
+          @cy.get("#scroll-to-both").scrollTo(25, 0/0)
 
-        it.skip "throws if Infinity", (done) ->
+        it "throws if Infinity", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.include "..."
+            expect(err.message).to.include "cy.scrollTo() must be called with a valid position. It can be a string, number or object. Your position was: 25, Infinity"
             done()
 
-          @cy.get("button").scrollTo(25, 10/0)
+          @cy.get("#scroll-to-both").scrollTo(25, 10/0)
 
         it.skip "throws if unrecognized position", (done) ->
           @cy.on "fail", (err) =>
             expect(err.message).to.include "..."
             done()
 
-          @cy.get("button").scrollTo("botom")
+          @cy.get("#scroll-to-both").scrollTo("botom")
 
       context "option errors", ->
-        it.skip "throws if duration is not a number", (done) ->
+        it "throws if duration is not a number or valid string", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.include "..."
+            expect(err.message).to.include "cy.scrollTo() must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: foo"
             done()
 
           @cy.get("#scroll-to-both").scrollTo("25px", { duration: "foo" })
 
         it "throws if unrecognized easing", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.include "..."
+            expect(err.message).to.include "cy.scrollTo() must be called with a valid easing. Your easing was: flower"
             done()
 
-          @cy.get("button").scrollTo("25px", { easing: "flower" })
+          @cy.get("#scroll-to-both").scrollTo("25px", { easing: "flower" })
 
-    describe.skip ".log", ->
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (attrs, @log) =>
+
+      it "logs out scrollTo", ->
+        @cy.get("#scroll-to-both").scrollTo(25).then ->
+          expect(@log.get("name")).to.eq "scrollTo"
+
+      it "passes in $el if child command", ->
+        @cy.get("#scroll-to-both").scrollTo(25).then ($container) ->
+          expect(@log.get("$el")).to.eq $container
+
+      it "passes undefined in $el if parent command", ->
+        @cy.scrollTo(25).then ($container) ->
+          expect(@log.get("$el")).to.be.undefined
+
+      it.skip "snapshots before scrolling", (done) ->
+
+      it.skip "snapshots after scrolling", ->
+
+      it.skip "#consoleProps", ->
+        @cy.get("#scroll-to-both").scrollTo(25).then ($container) ->
+          # coords = @cy.getCoordinates($container)
+          console = @log.attributes.consoleProps()
+          expect(console.Command).to.eq("scrollTo")
+          expect(console["Applied To"]).to.eq $container.get(0)
+          # expect(console.Coords.x).to.be.closeTo coords.x, 10
+          # expect(console.Coords.y).to.be.closeTo coords.y, 10
+
 
   context "#scrollIntoView", ->
     it "does not change the subject", ->
