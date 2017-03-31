@@ -5,7 +5,7 @@ os       = require("os")
 electron = require("electron")
 appData  = require("#{root}../lib/util/app_data")
 open     = require("#{root}../lib/util/open")
-menu     = require("#{root}../lib/electron/handlers/menu")
+menu     = require("#{root}../lib/gui/handlers/menu")
 
 getMenuItem = (label) ->
   _.find(electron.Menu.buildFromTemplate.lastCall.args[0], {label})
@@ -16,7 +16,7 @@ getSubMenuItem = (menu, label) ->
 getLabels = (menu) ->
   _(menu).map("label").compact().value()
 
-describe "electron/menu", ->
+describe "gui/menu", ->
   beforeEach ->
     @sandbox.stub(os, "platform").returns("darwin")
     @sandbox.stub(electron.Menu, "buildFromTemplate")

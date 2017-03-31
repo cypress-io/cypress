@@ -1,6 +1,7 @@
 _         = require("lodash")
 Promise   = require("bluebird")
 extension = require("@cypress/core-extension")
+automation = require("./automation")
 files     = require("../../controllers/files")
 config    = require("../../config")
 errors    = require("../../errors")
@@ -43,7 +44,7 @@ module.exports = {
         info: "The Electron browser is the version of Chrome that is bundled with Electron. Cypress uses this browser when running headlessly, so it may be useful for debugging issues that occur only in headless mode."
       }
       options.browsers = browsers.concat(electronBrowser)
-      options.onAutomationRequest = launcher.onAutomationRequest
+      # options.onAutomationRequest = launcher.onAutomationRequest
 
       ## open the project and return
       ## the config for the project instance

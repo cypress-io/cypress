@@ -12,7 +12,7 @@ headless   = require("#{root}../lib/modes/headless")
 git        = require("#{root}../lib/util/git")
 ciProvider = require("#{root}../lib/util/ci_provider")
 
-describe "electron/record", ->
+describe "gui/record", ->
   beforeEach ->
     @sandbox.stub(ciProvider, "name").returns("circle")
     @sandbox.stub(ciProvider, "params").returns({foo: "bar"})

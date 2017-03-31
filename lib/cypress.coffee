@@ -67,7 +67,7 @@ module.exports = {
   openProject: (options) ->
     ## this code actually starts a project
     ## and is spawned from nodemon
-    require("./electron/handlers/project").open(options.project, options)
+    require("./gui/handlers/project").open(options.project, options)
 
   runServer: (options) ->
     args = {}
@@ -201,13 +201,13 @@ module.exports = {
 
       when "logs"
         ## print the logs + exit
-        require("./electron/handlers/logs").print()
+        require("./gui/handlers/logs").print()
         .then(exit0)
         .catch(exitErr)
 
       when "clearLogs"
         ## clear the logs + exit
-        require("./electron/handlers/logs").clear()
+        require("./gui/handlers/logs").clear()
         .then(exit0)
         .catch(exitErr)
 

@@ -9,13 +9,13 @@ video    = require("#{root}../lib/video")
 errors   = require("#{root}../lib/errors")
 Project  = require("#{root}../lib/project")
 Reporter = require("#{root}../lib/reporter")
-electronUtils = require("#{root}../lib/electron/utils")
-project  = require("#{root}../lib/electron/handlers/project")
+electronUtils = require("#{root}../lib/gui/utils")
+project  = require("#{root}../lib/gui/handlers/project")
 headless = require("#{root}../lib/modes/headless")
-Renderer = require("#{root}../lib/electron/handlers/renderer")
-automation = require("#{root}../lib/electron/handlers/automation")
+Renderer = require("#{root}../lib/gui/handlers/renderer")
+automation = require("#{root}../lib/gui/handlers/automation")
 
-describe "electron/headless", ->
+describe "gui/headless", ->
   beforeEach ->
     @projectInstance = Project("path/to/project")
 

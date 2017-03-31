@@ -12,14 +12,14 @@ user     = require("#{root}../lib/user")
 errors   = require("#{root}../lib/errors")
 launcher = require("#{root}../lib/launcher")
 open     = require("#{root}../lib/util/open")
-logs     = require("#{root}../lib/electron/handlers/logs")
-events   = require("#{root}../lib/electron/handlers/events")
-dialog   = require("#{root}../lib/electron/handlers/dialog")
-project  = require("#{root}../lib/electron/handlers/project")
-cookies  = require("#{root}../lib/electron/handlers/cookies")
-Renderer = require("#{root}../lib/electron/handlers/renderer")
+logs     = require("#{root}../lib/gui/handlers/logs")
+events   = require("#{root}../lib/gui/handlers/events")
+dialog   = require("#{root}../lib/gui/handlers/dialog")
+project  = require("#{root}../lib/gui/handlers/project")
+cookies  = require("#{root}../lib/gui/handlers/cookies")
+Renderer = require("#{root}../lib/gui/handlers/renderer")
 
-describe "lib/electron/handlers/events", ->
+describe "lib/gui/handlers/events", ->
   beforeEach ->
     @id      = Math.random()
     @send    = @sandbox.spy()

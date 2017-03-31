@@ -2,11 +2,11 @@ require("../../spec_helper")
 
 extension = require("@cypress/core-extension")
 Fixtures = require("../../helpers/fixtures")
-project  = require("#{root}../lib/electron/handlers/project")
+project  = require("#{root}../lib/gui/handlers/project")
 Project  = require("#{root}../lib/project")
 launcher = require("#{root}../lib/launcher")
 
-describe "lib/electron/handlers/projects", ->
+describe "lib/gui/handlers/projects", ->
   beforeEach ->
     Fixtures.scaffold()
 

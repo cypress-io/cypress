@@ -9,11 +9,11 @@ logger     = require("#{root}../lib/logger")
 Updater    = require("#{root}../lib/updater")
 savedState = require("#{root}../lib/saved_state")
 headed     = require("#{root}../lib/modes/headed")
-menu       = require("#{root}../lib/electron/handlers/menu")
-Events     = require("#{root}../lib/electron/handlers/events")
-Renderer   = require("#{root}../lib/electron/handlers/renderer")
+menu       = require("#{root}../lib/gui/handlers/menu")
+Events     = require("#{root}../lib/gui/handlers/events")
+Renderer   = require("#{root}../lib/gui/handlers/renderer")
 
-describe "electron/headed", ->
+describe "gui/headed", ->
   context.skip ".onClick", ->
   context.skip ".onWindowAllClosed", ->
   context.skip ".platformArgs", ->

@@ -3,9 +3,9 @@ require("../../spec_helper")
 _ = require("lodash")
 EE = require("events").EventEmitter
 savedState = require("#{root}../lib/saved_state")
-Renderer = require("#{root}../lib/electron/handlers/renderer")
+Renderer = require("#{root}../lib/gui/handlers/renderer")
 
-describe "lib/electron/handlers/renderer", ->
+describe "lib/gui/handlers/renderer", ->
 
   context "#trackState", ->
     beforeEach ->

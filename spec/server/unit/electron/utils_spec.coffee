@@ -1,9 +1,9 @@
 require("../../spec_helper")
 
 electron = require("electron")
-electronUtils = require("#{root}../lib/electron/utils")
+electronUtils = require("#{root}../lib/gui/utils")
 
-describe "electron/utils", ->
+describe "gui/utils", ->
 
   context "#setProxy", ->
     it "sets proxy rules through electron's session", ->

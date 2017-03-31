@@ -1,10 +1,10 @@
 require("../../spec_helper")
 
 electron = require("electron")
-dialog   = require("#{root}../lib/electron/handlers/dialog")
-Renderer = require("#{root}../lib/electron/handlers/renderer")
+dialog   = require("#{root}../lib/gui/handlers/dialog")
+Renderer = require("#{root}../lib/gui/handlers/renderer")
 
-describe "electron/dialog", ->
+describe "gui/dialog", ->
   context ".show", ->
     beforeEach ->
       @showOpenDialog = electron.dialog.showOpenDialog = @sandbox.stub()
