@@ -4,6 +4,9 @@ do ($Cypress, _, $) ->
 
   returnFalse = -> return false
 
+  isScrollOrAuto = (prop) ->
+    prop is "scroll" or prop is "auto"
+
   $Cypress.Cy.extend
     ensureSubject: ->
       subject = @prop("subject")
@@ -181,36 +184,46 @@ do ($Cypress, _, $) ->
           })
 
     ensureScrollability: ($el, cmd) ->
-      el          = $el[0]
-      elStyle     = getComputedStyle(el)
+      throwErr = ($el) ->
+        ## prep args to throw in error since we can't scroll
+        cmd   ?= @prop("current").get("name")
+        node  = $Cypress.Utils.stringifyElement($el)
 
-      elOverflow  = elStyle.overflow
-      elOverflowX = elStyle.overflowX
-      elOverflowY = elStyle.overflowY
+        $Cypress.Utils.throwErrByPath("dom.not_scrollable", {
+          args: { cmd, node }
+        })
 
-      return true if elOverflow is 'scroll' or elOverflowX is 'scroll' or elOverflowY is 'scroll'
+      ## if we're the window, we want to get the document's
+      ## element and check it's size against the actual window
+      if $Cypress.Utils.hasWindow($el)
+        win = $el
+        $el = $($el.document.documentElement)
+        el  = $el[0]
 
-      verticallySrollable =
-        el.clientHeight < el.scrollHeight and
-        (
-          $.inArray(elOverflowY,  ['scroll', 'auto']) != -1 or
-          $.inArray(elOverflow,   ['scroll', 'auto']) != -1
-        )
+        ## Check if body height is higher than window height
+        return true if win.innerHeight < el.scrollHeight
 
-      return true if verticallySrollable
+        ## Check if body width is higher than window width
+        return true if win.innerWidth < el.scrollWidth
 
-      horizontallyScrollable =
-        el.clientWidth < el.scrollWidth and
-        (
-          $.inArray(elOverflowX,  ['scroll', 'auto']) != -1 or
-          $.inArray(elOverflow,   ['scroll', 'auto']) != -1
-        )
+        ## else throw an error since the window is not scrollable
+        return throwErr(win)
+      else
+        ## if we're any other element, we do some css calculations
+        ## to see that the overflow is correct and the scroll
+        ## area is larger than the actual height or width
+        el = $el[0]
 
-      return true if horizontallyScrollable
+        {overflow, overflowY, overflowX} = getComputedStyle(el)
 
-      cmd   ?= @prop("current").get("name")
-      node  = $Cypress.Utils.stringifyElement($el)
+        ## y axis
+        ## if our content height is less than the total scroll height
+        if el.clientHeight < el.scrollHeight
+          ## and our element has scroll or auto overflow or overflowX
+          return true if isScrollOrAuto(overflow) or isScrollOrAuto(overflowY)
 
-      $Cypress.Utils.throwErrByPath("dom.not_scrollable", {
-        args: { cmd, node }
-      })
+        ## x axis
+        if el.clientWidth < el.scrollWidth
+          return true if isScrollOrAuto(overflow) or isScrollOrAuto(overflowX)
+
+        throwErr($el)
