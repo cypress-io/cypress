@@ -7,8 +7,8 @@ Promise       = require("bluebird")
 launcher      = require("@cypress/core-launcher")
 # extension     = require("@cypress/core-extension")
 # appData       = require("./util/app_data")
+savedState    = require("../saved_state")
 utils         = require("./utils")
-savedState    = require("./saved_state")
 # electronUtils = require("./gui/utils")
 # menu          = require("./gui/handlers/menu")
 # automation    = require("./gui/handlers/automation")
@@ -40,15 +40,19 @@ browsers = {
 }
 
 module.exports = {
-  get: ->
-    utils.getBrowsers()
+  get: utils.getBrowsers
 
-  open: (name, openProject, config = {}, options = {}) ->
+  launch: utils.launch
+
+  open: (name, automation, config = {}, options = {}) ->
     if not browser = browsers[name]
       keys = _.keys(browsers).join(", ")
       throw new Error("Browser: #{name} has not been added. Available browsers are: #{keys}")
 
-    browser.open(config, options)
+    if not url = options.url
+      throw new Error("options.url must be provided when opening a browser. You passed:", options)
+
+    browser.open(url, automation, config, options)
     .then (i) ->
       instance = i
 
@@ -77,11 +81,3 @@ module.exports = {
       #   return instance
 
 }
-
-module.exports = (name, config, options = {}) ->
-  if not browser = browsers[name]
-    throw new Error("Browser: #{name} has not been registered.")
-
-  browser.create(config, options)
-
-  # return browser
