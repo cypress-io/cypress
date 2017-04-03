@@ -13,7 +13,7 @@ files         = require("./files")
 fixture       = require("./fixture")
 errors        = require("./errors")
 logger        = require("./logger")
-launcher      = require("./launcher")
+browsers      = require("./browsers")
 automation    = require("./automation")
 savedState    = require("./saved_state")
 
@@ -120,33 +120,36 @@ class Socket
   toRunner: (event, data) ->
     @io and @io.to("runner").emit(event, data)
 
-  onAutomation: (messages, message, data) ->
-    Promise.try =>
-      ## instead of throwing immediately here perhaps we need
-      ## to make this more resilient by automatically retrying
-      ## up to 1 second in the case where our automation room
-      ## is empty. that would give padding for reconnections
-      ## to automatically happen.
-      ## for instance when socket.io detects a disconnect
-      ## does it immediately remove the member from the room?
-      ## YES it does per http://socket.io/docs/rooms-and-namespaces/#disconnection
-      if _.isEmpty(@io.sockets.adapter.rooms.automation)
-        throw new Error("Could not process '#{message}'. No automation servers connected.")
-      else
-        new Promise (resolve, reject) =>
-          id = uuid.v4()
-          messages[id] = (obj) ->
-            ## normalize the error from automation responses
-            if e = obj.__error
-              err = new Error(e)
-              err.name = obj.__name
-              err.stack = obj.__stack
-              reject(err)
-            else
-              ## normalize the response
-              resolve(obj.response)
+  # onAutomation: (messages, message, data) ->
+  onAutomation: (socket, id, message, data) ->
+    # Promise.try =>
+    ## instead of throwing immediately here perhaps we need
+    ## to make this more resilient by automatically retrying
+    ## up to 1 second in the case where our automation room
+    ## is empty. that would give padding for reconnections
+    ## to automatically happen.
+    ## for instance when socket.io detects a disconnect
+    ## does it immediately remove the member from the room?
+    ## YES it does per http://socket.io/docs/rooms-and-namespaces/#disconnection
+    if socket and socket.connected
+      socket.emit("automation:request", id, message, data)
+    # if _.isEmpty(@io.sockets.adapter.rooms.automation)
+    else
+      throw new Error("Could not process '#{message}'. No automation clients connected.")
+      # new Promise (resolve, reject) =>
+        #   id = uuid.v4()
+        #   messages[id] = (obj) ->
+        #     ## normalize the error from automation responses
+        #     if e = obj.__error
+        #       err = new Error(e)
+        #       err.name = obj.__name
+        #       err.stack = obj.__stack
+        #       reject(err)
+        #     else
+        #       ## normalize the response
+        #       resolve(obj.response)
 
-          @io.to("automation").emit("automation:request", id, message, data)
+          # @io.to("automation").emit("automation:request", id, message, data)
 
   createIo: (server, path, cookie) ->
     socketIo.server(server, {
@@ -156,11 +159,11 @@ class Socket
       cookie: cookie
     })
 
-  _startListening: (server, watchers, config, options) ->
+  _startListening: (server, watchers, automation, config, options) ->
     _.defaults options,
       socketId: null
-      onAutomationRequest: null
-      afterAutomationRequest: null
+      # onAutomationRequest: null
+      # afterAutomationRequest: null
       onSetRunnables: ->
       onMocha: ->
       onConnect: ->
@@ -174,13 +177,18 @@ class Socket
       onSavedStateChanged: ->
       onTestFileChange: ->
 
-    messages = {}
+    automationClient = null
 
     {integrationFolder, socketIoRoute, socketIoCookie} = config
 
     @testsDir = integrationFolder
 
     @io = @createIo(server, socketIoRoute, socketIoCookie)
+
+    automation.use({
+      onPush: (message, data)  =>
+        @io.emit("automation:push:message", message, data)
+    })
 
     @io.on "connection", (socket) =>
       logger.info "socket connected"
@@ -189,38 +197,37 @@ class Socket
       ## them at any time
       headers = socket.request?.headers ? {}
 
-      respond = (id, resp) ->
-        if message = messages[id]
-          delete messages[id]
-          message(resp)
+      # respond = (id, resp) ->
+      #   if message = messages[id]
+      #     delete messages[id]
+      #     message(resp)
 
-      automationRequest = (message, data) =>
-        automate = options.onAutomationRequest ? (message, data) =>
-          @onAutomation(messages, message, data)
+      # automationRequest = (message, data) =>
+      #   automate = options.onAutomationRequest ? (message, data) =>
+      #     @onAutomation(messages, message, data)
 
-        automation(config.namespace, socketIoCookie, config.screenshotsFolder)
-        .request(message, data, automate)
-        .then (resp) ->
-          if aar = options.afterAutomationRequest
-            aar(message, data, resp)
-          else
-            resp
+      #   automation(config.namespace, socketIoCookie, config.screenshotsFolder)
+      #   .request(message, data, automate)
+      #   .then (resp) ->
+      #     if aar = options.afterAutomationRequest
+      #       aar(message, data, resp)
+      #     else
+      #       resp
 
-      socket.on "automation:connected", =>
-        return if socket.inAutomationRoom
+      socket.on "automation:client:connected", =>
+        return if automationClient
 
-        socket.inAutomationRoom = true
-        socket.join("automation")
+        automationClient = socket
 
         ## if our automation disconnects then we're
         ## in trouble and should probably bomb everything
-        socket.on "disconnect", =>
+        automationClient.on "disconnect", =>
           ## if we are in headless mode then log out an error and maybe exit with process.exit(1)?
           Promise.delay(500)
           .then =>
             ## give ourselves about 500ms to reconnected
             ## and if we're connected its all good
-            return if socket.connected
+            return if automationClient.connected
 
             ## TODO: if all of our clients have also disconnected
             ## then don't warn anything
@@ -228,18 +235,23 @@ class Socket
             ## TODO: no longer emit this, just close the browser and display message in reporter
             @io.emit("automation:disconnected")
 
-        socket.on "automation:push:request", (msg, data, cb = ->) =>
-          fn = (data) =>
-            @io.emit("automation:push:message", msg, data)
-            cb()
+        socket.on "automation:push:request", (message, data, cb = ->) =>
+          # fn = (data) =>
+            # @io.emit("automation:push:message", message, data)
+            # cb()
 
-          automation(config.namespace, socketIoCookie)
-          .pushMessage(msg, data, fn)
+          # automation(config.namespace, socketIoCookie)
+          # .pushMessage(message, data, fn)
 
-        socket.on "automation:response", respond
+          automation.push(message, data)
+
+        socket.on "automation:response", automation.response
 
       socket.on "automation:request", (message, data, cb) =>
-        automationRequest(message, data)
+        fn = _.partial(@onAutomation, automationClient)
+
+        automation.request(message, data, fn)
+        # automationRequest(message, data)
         .then (resp) ->
           cb({response: resp})
         .catch (err) ->
@@ -324,9 +336,9 @@ class Socket
       socket.on "focus:tests", ->
         options.onFocusTests()
 
-      socket.on "is:automation:connected", (data = {}, cb) =>
+      socket.on "is:automation:client:connected", (data = {}, cb) =>
         isConnected = =>
-          automationRequest("is:automation:connected", data)
+          automationRequest("is:automation:client:connected", data)
 
         tryConnected = =>
           Promise
@@ -369,7 +381,7 @@ class Socket
           cb()
 
       socket.on "go:to:file", (p) ->
-        launcher.launch("chrome", "http://localhost:2020/__#" + p, {
+        browsers.launch("chrome", "http://localhost:2020/__#" + p, {
           host: "http://localhost:2020"
         })
 

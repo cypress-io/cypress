@@ -554,12 +554,12 @@ class Server
 
       @_middleware = null
 
-  startWebsockets: (watchers, config, options = {}) ->
+  startWebsockets: (watchers, automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
 
     @_socket = Socket()
-    @_socket.startListening(@_server, watchers, config, options)
+    @_socket.startListening(@_server, watchers, automation, config, options)
     @_normalizeReqUrl(@_server)
     # handleListeners(@_server)
 

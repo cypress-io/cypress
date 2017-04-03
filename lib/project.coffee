@@ -17,6 +17,7 @@ scaffold    = require("./scaffold")
 Watchers    = require("./watchers")
 Reporter    = require("./reporter")
 savedState  = require("./saved_state")
+Automation  = require("./automation")
 git         = require("./util/git")
 settings    = require("./util/settings")
 
@@ -37,8 +38,9 @@ class Project extends EE
 
     @projectRoot = path.resolve(projectRoot)
     @watchers    = Watchers()
-    @memoryCheck = null
     @server      = Server(@watchers)
+    @memoryCheck = null
+    @automation  = null
 
   open: (options = {}) ->
     _.defaults options, {
@@ -148,7 +150,9 @@ class Project extends EE
     if config.report
       reporter = Reporter.create(config.reporter, config.reporterOptions, config.projectRoot)
 
-    @server.startWebsockets(@watchers, config, {
+    @automation = Automation.create(config.namespace, config.socketIoCookie, config.screenshotsFolder)
+
+    @server.startWebsockets(@watchers, @automation, config, {
       onReloadBrowser: options.onReloadBrowser
 
       onAutomationRequest: options.onAutomationRequest
