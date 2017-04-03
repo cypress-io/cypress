@@ -20,60 +20,58 @@ pathToTheme     = extension.getPathToTheme()
 instance        = null
 currentBrowser  = null
 
-isDev = process.env["CYPRESS_ENV"] is "development"
+# kill = (unbind) ->
+#   ## cleanup our running browser
+#   ## instance
+#   return if not instance
 
-kill = (unbind) ->
-  ## cleanup our running browser
-  ## instance
-  return if not instance
+#   if unbind
+#     instance.removeAllListeners()
+#   instance.kill()
+#   instance = null
+#   currentBrowser = null
 
-  if unbind
-    instance.removeAllListeners()
-  instance.kill()
-  instance = null
-  currentBrowser = null
+# process.once "exit", kill
 
-process.once "exit", kill
+# defaultArgs = [
+#   "--test-type"
+#   "--ignore-certificate-errors"
+#   "--load-extension=#{pathToExtension},#{pathToTheme}"
+#   "--start-maximized"
+#   "--silent-debugger-extension-api"
+#   "--no-default-browser-check"
+#   "--no-first-run"
+#   "--noerrdialogs"
+#   "--enable-fixed-layout"
+#   "--disable-popup-blocking"
+#   "--disable-password-generation"
+#   "--disable-save-password-bubble"
+#   "--disable-single-click-autofill"
+#   "--disable-prompt-on-repos"
+#   "--disable-background-timer-throttling"
+#   "--disable-renderer-backgrounding"
+#   "--disable-renderer-throttling"
+#   "--disable-restore-session-state"
+#   "--disable-translate"
+#   "--disable-new-profile-management"
+#   "--disable-new-avatar-menu"
+#   "--allow-insecure-localhost"
+#   "--reduce-security-for-testing"
 
-defaultArgs = [
-  "--test-type"
-  "--ignore-certificate-errors"
-  "--load-extension=#{pathToExtension},#{pathToTheme}"
-  "--start-maximized"
-  "--silent-debugger-extension-api"
-  "--no-default-browser-check"
-  "--no-first-run"
-  "--noerrdialogs"
-  "--enable-fixed-layout"
-  "--disable-popup-blocking"
-  "--disable-password-generation"
-  "--disable-save-password-bubble"
-  "--disable-single-click-autofill"
-  "--disable-prompt-on-repos"
-  "--disable-background-timer-throttling"
-  "--disable-renderer-backgrounding"
-  "--disable-renderer-throttling"
-  "--disable-restore-session-state"
-  "--disable-translate"
-  "--disable-new-profile-management"
-  "--disable-new-avatar-menu"
-  "--allow-insecure-localhost"
-  "--reduce-security-for-testing"
-
-  ## the following come frome chromedriver
-  ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
-  "--metrics-recording-only"
-  "--disable-prompt-on-repost"
-  "--disable-hang-monitor"
-  "--disable-sync"
-  "--disable-background-networking"
-  "--disable-web-resources"
-  "--safebrowsing-disable-auto-update"
-  "--safebrowsing-disable-download-protection"
-  "--disable-client-side-phishing-detection"
-  "--disable-component-update"
-  "--disable-default-apps"
-]
+#   ## the following come frome chromedriver
+#   ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
+#   "--metrics-recording-only"
+#   "--disable-prompt-on-repost"
+#   "--disable-hang-monitor"
+#   "--disable-sync"
+#   "--disable-background-networking"
+#   "--disable-web-resources"
+#   "--safebrowsing-disable-auto-update"
+#   "--safebrowsing-disable-download-protection"
+#   "--disable-client-side-phishing-detection"
+#   "--disable-component-update"
+#   "--disable-default-apps"
+# ]
 
 module.exports = {
   args: defaultArgs
@@ -242,8 +240,8 @@ module.exports = {
 
           return instance
 
-  onAutomationRequest: (args...) ->
-    if currentBrowser is "electron"
-      automation.perform(args...)
+  # onAutomationRequest: (args...) ->
+  #   if currentBrowser is "electron"
+  #     automation.perform(args...)
 
 }

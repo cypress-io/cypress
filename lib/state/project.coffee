@@ -49,10 +49,6 @@ module.exports = {
       ## open the project and return
       ## the config for the project instance
       openProject.open(options)
-    .then ->
-      openProject.getConfig()
-      .then (cfg) ->
-        extension.setHostAndPath(cfg.proxyUrl, cfg.socketIoRoute)
     .return(openProject)
 
   opened: -> openProject
