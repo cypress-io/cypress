@@ -46,7 +46,7 @@ module.exports = {
       if @isCurrentlyRunningElectron()
         ## just run the gui code directly here
         ## and pass our options directly to main
-        require("./electron")(mode, options)
+        require("./modes")(mode, options)
       else
         ## sanity check to ensure we're running
         ## the local dev server. dont crash just
