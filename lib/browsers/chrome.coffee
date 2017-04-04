@@ -1,5 +1,10 @@
+fs       = require("fs-extra")
+Promise   = require("bluebird")
 extension = require("@cypress/core-extension")
+appData   = require("../util/app_data")
 utils     = require("./utils")
+
+fs = Promise.promisifyAll(fs)
 
 pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
@@ -61,22 +66,6 @@ module.exports = {
   open: (url, automation, config = {}, options = {}) ->
     args = defaultArgs.concat(options.args)
 
-    automation.register({
-      externalWebsocketAutomationClient: true
-    })
-
-    # automationClient = null
-
-    # automation.register({
-    #   onConnect: (socket) ->
-    #     automationClient = socket
-
-    #     automationClient.on "disconnect",
-
-    #   onRequest: ->
-    #     if not automationClient
-    # })
-
     Promise.all([
       ## ensure that we have a chrome profile dir
       utils.ensureProfile("chrome"),
@@ -99,3 +88,4 @@ module.exports = {
         args.push("--allow-running-insecure-content")
 
       utils.launch("chrome", url, args)
+}
