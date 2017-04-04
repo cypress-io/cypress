@@ -338,7 +338,7 @@ class Socket
 
       socket.on "is:automation:client:connected", (data = {}, cb) =>
         isConnected = =>
-          automationRequest("is:automation:client:connected", data)
+          automation.request("is:automation:client:connected", data)
 
         tryConnected = =>
           Promise
@@ -405,11 +405,11 @@ class Socket
   changeToUrl: (url) ->
     @toRunner("change:to:url", url)
 
-  startListening: (server, watchers, config, options) ->
+  startListening: (server, watchers, automation, config, options) ->
     if process.env["CYPRESS_ENV"] is "development"
       @listenToCssChanges(watchers)
 
-    @_startListening(server, watchers, config, options)
+    @_startListening(server, watchers, automation, config, options)
 
   listenToCssChanges: (watchers) ->
     watchers.watch cwd("lib", "public", "css"), {
