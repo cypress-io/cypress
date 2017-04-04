@@ -75,8 +75,8 @@ module.exports = {
           .return(resp)
 
       response: (id, resp) ->
-        if message = messages[id]
-          delete messages[id]
-          message(resp)
+        if request = requests[id]
+          delete request[id]
+          request(resp)
     }
 }
