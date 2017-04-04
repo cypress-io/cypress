@@ -1,11 +1,14 @@
 _             = require("lodash")
 Promise       = require("bluebird")
+extension     = require("@cypress/core-extension")
 BrowserWindow = require("electron").BrowserWindow
-# Renderer      = require("./renderer")
 
 firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null
+
+getUrl = (props) ->
+  extension.getCookieUrl(props)
 
 module.exports = {
   _render: (url, options = {}) ->
@@ -88,15 +91,14 @@ module.exports = {
       }, resolve)
 
   _automations: (win) ->
+    cookies = Promise.promisifyAll(win.webContents.session.cookies)
+
     return {
-      getSessionCookies: ->
-        win.webContents.session.cookies
-
       clear: (filter = {}) ->
-        c = @getSessionCookies()
-
         clear = (cookie) =>
-          cookies.remove(c, cookie)
+          url = getUrl(cookie)
+
+          cookies.removeAsync(url, cookie.name)
           .return(cookie)
 
         @getAll(filter)
@@ -104,7 +106,7 @@ module.exports = {
 
       getAll: (filter) ->
         cookies
-        .get(@getSessionCookies(), filter)
+        .getAsync(filter)
 
       getCookies: (filter) ->
         @getAll(filter)
@@ -114,13 +116,16 @@ module.exports = {
         .then(firstOrNull)
 
       setCookie: (props = {}) ->
+        ## only set the url if its not already present
+        props.url ?= getUrl(props)
+
         ## resolve with the cookie props. the extension
         ## calls back with the cookie details but electron
         ## chrome API's do not. but it doesn't matter because
         ## we always send a fully complete cookie props object
         ## which can simply be returned.
         cookies
-        .set(@getSessionCookies(), props)
+        .setAsync(props)
         .return(props)
 
       clearCookie: (filter) ->
@@ -130,7 +135,7 @@ module.exports = {
       clearCookies: (filter) ->
         @clear(filter)
 
-      isAutomationConnected: (data) ->
+      isAutomationConnected: ->
         true
 
       takeScreenshot: ->
