@@ -44,6 +44,8 @@ module.exports = {
 
   launch: utils.launch
 
+  close: kill
+
   open: (name, automation, config = {}, options = {}) ->
     if not browser = browsers[name]
       keys = _.keys(browsers).join(", ")

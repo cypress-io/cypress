@@ -1,13 +1,13 @@
 _         = require("lodash")
 Promise   = require("bluebird")
 extension = require("@cypress/core-extension")
-automation = require("./automation")
-files     = require("../../controllers/files")
-config    = require("../../config")
-errors    = require("../../errors")
-cache     = require("../../cache")
-Project   = require("../../project")
-launcher  = require("../../launcher")
+# automation = require("./automation")
+files     = require("../controllers/files")
+config    = require("../config")
+errors    = require("../errors")
+cache     = require("../cache")
+Project   = require("../project")
+browsers  = require("../browsers")
 
 ## global reference to open objects
 onRelaunch      = null
@@ -29,8 +29,8 @@ module.exports = {
     ## store the currently open project
     openProject = Project(path)
 
-    launcher.getBrowsers()
-    .then (browsers = []) ->
+    browsers.get()
+    .then (b = []) ->
       ## TODO: maybe if there are no
       ## browsers here we should just
       ## immediately close the server?
@@ -43,7 +43,7 @@ module.exports = {
         majorVersion: version.split(".")[0]
         info: "The Electron browser is the version of Chrome that is bundled with Electron. Cypress uses this browser when running headlessly, so it may be useful for debugging issues that occur only in headless mode."
       }
-      options.browsers = browsers.concat(electronBrowser)
+      options.browsers = b.concat(electronBrowser)
       # options.onAutomationRequest = launcher.onAutomationRequest
 
       ## open the project and return
@@ -65,7 +65,7 @@ module.exports = {
       options.proxyServer ?= cfg.proxyUrl
       options.chromeWebSecurity = cfg.chromeWebSecurity
 
-      launcher.launch(browser, url, options)
+      browsers.launch(browser, url, options)
 
   onRelaunch: (fn) ->
     onRelaunch = fn
@@ -81,7 +81,7 @@ module.exports = {
       return if not b = openBrowser
 
       ## assume there are openBrowserOpts
-      launcher.launch(b, url, openBrowserOpts)
+      browsers.launch(b, url, openBrowserOpts)
 
   reboot: ->
     @close({
@@ -153,7 +153,7 @@ module.exports = {
     openProject.getBuilds()
 
   closeBrowser: ->
-    launcher.close()
+    browsers.close()
 
     if openProject
       openProject.resetState()
