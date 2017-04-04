@@ -1,6 +1,8 @@
-_       = require("lodash")
-uuid    = require("uuid")
-Promise = require("bluebird")
+_           = require("lodash")
+uuid        = require("uuid")
+Promise     = require("bluebird")
+Cookies     = require("./cookies")
+Screenshot  = require("./screenshot")
 
 assertValidOptions = (options, keys...) ->
   _.each keys, (key) ->
@@ -8,7 +10,7 @@ assertValidOptions = (options, keys...) ->
       throw new Error("Automation requires the key: #{key}. You passed in:", options)
 
 module.exports = {
-  create: (namespace, cookie, screenshotsFolder) ->
+  create: (cyNamespace, cookieNamespace, screenshotsFolder) ->
     # assertValidOptions(options, "namespace", "cookie", "screenshotsFolder")
 
     requests = {}
@@ -21,6 +23,9 @@ module.exports = {
       onAfterResponse: null
     }
 
+    cookies    = Cookies(cyNamespace, cookieNamespace)
+    screenshot = Screenshot(screenshotsFolder)
+
     get = (fn) ->
       middleware[fn]
 
@@ -30,11 +35,11 @@ module.exports = {
         if fn = get(fn)
           fn.apply(null, args)
 
-    return {
-      _requests: requests
+    requestAutomationResponse = (message, data, fn) ->
+      new Promise (resolve, reject) =>
+        id = uuid.v4()
 
-      _promisifyRequest: (obj) ->
-        new Promise (resolve, reject) =>
+        requests[id] = (obj) ->
           ## normalize the error from automation responses
           if e = obj.__error
             err = new Error(e)
@@ -45,31 +50,57 @@ module.exports = {
             ## normalize the response
             resolve(obj.response)
 
+        ## callback onAutomate with the right args
+        fn(message, data, id)
+
+    automationValve = (message, fn) ->
+      return (data) ->
+        ## if we have an onRequest function
+        ## then just invoke that
+        if onReq = get("onRequest")
+          onReq(message, data)
+        else
+          ## do the default
+          requestAutomationResponse(message, data, fn)
+
+    normalize = (message, data, automate) ->
+      switch message
+        when "take:screenshot"
+          screenshot.capture(data, automate)
+        when "get:cookies"
+          cookies.getCookies(data, automate)
+        when "get:cookie"
+          cookies.getCookie(data, automate)
+        when "set:cookie"
+          cookies.setCookie(data, automate)
+        when "clear:cookies"
+          cookies.clearCookies(data, automate)
+        when "clear:cookie"
+          cookies.clearCookie(data, automate)
+        else
+          automate(data)
+
+    return {
+      _requests: requests
+
       use: (middlewares = {}) ->
         _.extend(middleware, middlewares)
 
       push: (message, data) ->
         ## TODO: normalize the automation message
-        normalize(message, data)
-        .then (data) ->
-          invokeAsync("onPush", message, data)
+        # normalize(message, data)
+        # .then (data) ->
+        #   invokeAsync("onPush", message, data)
 
       request: (message, data, fn) ->
+        ## curry in the message + callback function
+        ## for obtaining the external automation data
+        automate = automationValve(message, fn)
+
         ## enable us to tap into before making the request
         invokeAsync("onBeforeRequest", message, data)
-        .then =>
-          ## if we have an onRequest function
-          ## then just invoke that
-          if fn = get("onRequest")
-            fn(message, data)
-          else
-            ## do the default
-            id = uuid.v4()
-
-            ## callback onAutomate with the right args
-            fn(id, message, data)
-
-            requests[id] = @_promisifyRequest
+        .then ->
+          normalize(message, data, automate)
         .then (resp) ->
           invokeAsync("onAfterResponse", message, data, resp)
           .return(resp)

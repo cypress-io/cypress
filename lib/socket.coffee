@@ -121,7 +121,7 @@ class Socket
     @io and @io.to("runner").emit(event, data)
 
   # onAutomation: (messages, message, data) ->
-  onAutomation: (socket, id, message, data) ->
+  onAutomation: (socket, message, data, id) ->
     # Promise.try =>
     ## instead of throwing immediately here perhaps we need
     ## to make this more resilient by automatically retrying
@@ -190,6 +190,12 @@ class Socket
         @io.emit("automation:push:message", message, data)
     })
 
+    onAutomationClientRequestCallback = (message, data, id) =>
+      @onAutomation(automationClient, message, data, id)
+
+    automationRequest = (message, data) ->
+      automation.request(message, data, onAutomationClientRequestCallback)
+
     @io.on "connection", (socket) =>
       logger.info "socket connected"
 
@@ -248,10 +254,7 @@ class Socket
         socket.on "automation:response", automation.response
 
       socket.on "automation:request", (message, data, cb) =>
-        fn = _.partial(@onAutomation, automationClient)
-
-        automation.request(message, data, fn)
-        # automationRequest(message, data)
+        automationRequest(message, data)
         .then (resp) ->
           cb({response: resp})
         .catch (err) ->
@@ -338,7 +341,7 @@ class Socket
 
       socket.on "is:automation:client:connected", (data = {}, cb) =>
         isConnected = =>
-          automation.request("is:automation:client:connected", data)
+          automationRequest("is:automation:client:connected", data)
 
         tryConnected = =>
           Promise
