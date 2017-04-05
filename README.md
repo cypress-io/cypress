@@ -6,6 +6,7 @@ This monorepo is made up of various packages, all of which are found under the `
 
 Some, like `core-https-proxy` and `core-launcher`, run solely in node and support the Cypress server. Others, like `core-desktop-gui` and `core-runner`, create the GUI parts of the Cypress app.
 
+[CLI Documentation](https://on.cypress.io/cli)
 
 ## Development
 
@@ -45,21 +46,21 @@ Each package is responsible for building itself and testing itself and can do so
 
 **clean-all**: Run *clean* and *clean-deps* scripts
 
-**test**: Run all tests in watch mode
+**test-all**: Run all tests in watch mode
 
-**test-once**: Run all tests
+**test-all-once**: Run all tests
 
-**test-unit**: Run unit tests in watch mode
+**test-all-unit**: Run unit tests in watch mode
 
-**test-unit-once**: Run unit tests
+**test-all-unit-once**: Run unit tests
 
-**test-integration**: Run integration tests in watch mode
+**test-all-integration**: Run integration tests in watch mode
 
-**test-integration-once**: Run integration tests
+**test-all-integration-once**: Run integration tests
 
-**test-e2e**: Run end-2-end tests in watch mode
+**test-all-e2e**: Run end-2-end tests in watch mode
 
-**test-e2e-once**: Run end-2-end tests
+**test-all-e2e-once**: Run end-2-end tests
 
 Not every package requires or makes use of every script, so it is simply omitted from that package's `package.json` and not run.
 
