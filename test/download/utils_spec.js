@@ -5,11 +5,20 @@ const path = require('path')
 const Promise = require('bluebird')
 const fs = Promise.promisifyAll(require('fs-extra'))
 
+const packageVersion = require('../../package').version
 const utils = require('../../lib/download/utils')
 
 const distDir = path.join(__dirname, '../../lib/download/dist')
 
 describe('utils', function () {
+  beforeEach(function () {
+    this.ensureEmptyInstallationDir = () => {
+      return fs.removeAsync(distDir).then(() => {
+        return utils.ensureInstallationDir()
+      })
+    }
+  })
+
   context('#ensureInstallationDir', function () {
     beforeEach(function () {
       return fs.removeAsync(distDir)
@@ -30,13 +39,11 @@ describe('utils', function () {
 
   context('#getInstalledVersion', function () {
     beforeEach(function () {
-      return fs.removeAsync(distDir).then(() => {
-        return utils.ensureInstallationDir()
-      })
+      return this.ensureEmptyInstallationDir()
     })
 
     it('resolves version from version file when it exists', function () {
-      return fs.writeFileAsync(path.join(distDir, 'version'), '2.0.48')
+      return utils.writeInstalledVersion('2.0.48')
       .then(() => {
         return utils.getInstalledVersion()
       })
@@ -45,11 +52,9 @@ describe('utils', function () {
       })
     })
 
-    it('resolves null when version file does not exists', function () {
+    it('throws when version file does not exist', function () {
       return utils.getInstalledVersion()
-      .then((version) => {
-        expect(version).to.be.null
-      })
+      .catch(() => {})
     })
   })
 
@@ -87,9 +92,7 @@ describe('utils', function () {
 
   context('#writeInstalledVersion', function () {
     beforeEach(function () {
-      return fs.removeAsync(distDir).then(() => {
-        return utils.ensureInstallationDir()
-      })
+      return this.ensureEmptyInstallationDir()
     })
 
     it('writes the version to the version file', function () {
@@ -99,6 +102,49 @@ describe('utils', function () {
       })
       .then((version) => {
         expect(version).to.equal('84.0.2')
+      })
+    })
+  })
+
+  context('#verify', function () {
+    beforeEach(function () {
+      this.log = this.sandbox.spy(console, 'log')
+      this.sandbox.stub(process, 'exit')
+      return this.ensureEmptyInstallationDir()
+    })
+
+    it('logs that it is verifying', function () {
+      return utils.verify().then(() => {
+        expect(this.log).to.be.calledWith('Verifying Cypress executable...')
+      })
+    })
+
+    it('logs error and exits when no version of Cypress is installed', function () {
+      return utils.verify().then(() => {
+        expect(this.log).to.be.calledWith('No version of Cypress executable installed. Run `cypress install` and then try again.')
+        expect(process.exit).to.be.calledWith(1)
+      })
+    })
+
+    it('logs error and exits when installed version does not match package version', function () {
+      return utils.writeInstalledVersion('bloop')
+      .then(() => {
+        return utils.verify()
+      })
+      .then(() => {
+        expect(this.log).to.be.calledWith(`Installed version (bloop) does not match package version (${packageVersion}). Run \`cypress install\` and then try again.`)
+        expect(process.exit).to.be.calledWith(1)
+      })
+    })
+
+    it('logs error and exits when executable cannot be found', function () {
+      return utils.writeInstalledVersion(packageVersion)
+      .then(() => {
+        return utils.verify()
+      })
+      .then(() => {
+        expect(this.log).to.be.calledWith('Cypress executable not found. Run `cypress install` and then try again.')
+        expect(process.exit).to.be.calledWith(1)
       })
     })
   })

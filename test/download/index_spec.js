@@ -36,7 +36,7 @@ describe('index', function () {
       })
 
       it('logs message', function () {
-        expect(utils.log.lastCall.args[0]).to.equal('Cypress was not found.')
+        expect(utils.log.lastCall.args[0]).to.equal('Cypress executable was not found.')
         expect(utils.log.lastCall.args[1]).to.include(`Installing Cypress (version: ${packageVersion}).`)
       })
 
