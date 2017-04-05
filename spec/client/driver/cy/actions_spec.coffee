@@ -4520,13 +4520,13 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
         expect(scrollTo).to.be.called
 
-    it.skip "sets duration to 0 by default", ->
+    it "sets duration to 0 by default", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
         expect(scrollTo).to.be.calledWithMatch({}, {duration: 0})
 
-    it.skip "sets axis to correct x or y", ->
+    it "sets axis to correct x or y", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
@@ -4543,25 +4543,25 @@ describe "$Cypress.Cy Actions Commands", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(125)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-    it.skip "accepts duration string option", ->
+    it "accepts duration string option", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-into-view-both h5").scrollIntoView({duration: "500"}).then ->
         expect(scrollTo.args[0][1].duration).to.eq "500"
 
-    it.skip "accepts offset string option", ->
+    it "accepts offset string option", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-into-view-both h5").scrollIntoView({offset: 500}).then ->
-        expect(scrollTo.args[0][1].offset).to.eq "500"
+        expect(scrollTo.args[0][1].offset).to.eq 500
 
-    it.skip "accepts offset object option", ->
+    it "accepts offset object option", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-into-view-both h5").scrollIntoView({offset: {left: 500, top: 200}}).then ->
-        expect(scrollTo.args[0][1].offset).to.eq "500"
+        expect(scrollTo.args[0][1].offset).to.deep.eq {left: 500, top: 200}
 
-    it.skip "has easing set to swing by default", ->
+    it.only "has easing set to swing by default", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->

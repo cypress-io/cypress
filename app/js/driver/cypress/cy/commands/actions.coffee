@@ -362,6 +362,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         $el: subject
         $container: @private("window")
         log: true
+        offset: 0
         duration: 0
         easing: "swing"
         axis: "yx"
@@ -420,6 +421,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           axis:     options.axis
           easing:   options.easing
           duration: options.duration
+          offset:   options.offset
           done: (animation, jumpedToEnd) ->
             resolve(options.$el)
           fail: (animation, jumpedToEnd) ->
