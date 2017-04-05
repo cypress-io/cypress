@@ -98,7 +98,7 @@ describe('utils', function () {
     it('writes the version to the version file', function () {
       return utils.writeInstalledVersion('84.0.2')
       .then(() => {
-        return fs.readFileAsync(path.join(distDir, 'version'), 'utf8')
+        return fs.readJsonAsync(path.join(distDir, 'info.json')).get('version')
       })
       .then((version) => {
         expect(version).to.equal('84.0.2')
