@@ -458,6 +458,12 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     screenshot:
       timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
 
+    scrollIntoView:
+      invalid_argument: "#{cmd('scrollIntoView')} can only be called with an options object. Your argument was: {{arg}}"
+      multiple_elements: "#{cmd('scrollIntoView')} can only be used to scroll to 1 element, you tried to scroll to {{num}} elements.\n\n"
+      invalid_easing: "#{cmd('scrollIntoView')} must be called with a valid easing. Your easing was: {{easing}}"
+      invalid_duration: "#{cmd('scrollIntoView')} must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: {{duration}}"
+
     scrollTo:
       invalid_target: "#{cmd('scrollTo')} must be called with a valid position. It can be a string, number or object. Your position was: {{y}}, {{x}}"
       multiple_containers: "#{cmd('scrollTo')} can only be used to scroll one element, you tried to scroll {{num}} elements.\n\n"

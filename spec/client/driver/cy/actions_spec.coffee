@@ -4438,7 +4438,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
   context "#scrollIntoView", ->
     beforeEach ->
-      @win          = @cy.private("window")
+      @body         = @cy.$$("body")
       @scrollVert   = @cy.$$("#scroll-into-view-vertical")
       @scrollHoriz  = @cy.$$("#scroll-into-view-horizontal")
       @scrollBoth   = @cy.$$("#scroll-into-view-both")
@@ -4446,8 +4446,8 @@ describe "$Cypress.Cy Actions Commands", ->
     afterEach ->
       ## reset the scrollable containers back
       ## to furthest left and top
-      @win.scrollTop           = 0
-      @win.scrollLeft          = 0
+      @body.scrollTop          = 0
+      @body.scrollLeft         = 0
 
       @scrollVert.scrollTop    = 0
       @scrollVert.scrollLeft   = 0
@@ -4458,51 +4458,53 @@ describe "$Cypress.Cy Actions Commands", ->
       @scrollBoth.scrollTop    = 0
       @scrollBoth.scrollLeft   = 0
 
-    it.skip "does not change the subject", ->
-      button = @cy.$$("#scroll-into-view button")
+    it "does not change the subject", ->
+      div = @cy.$$("#scroll-into-view-vertical div")
 
-      @cy.get("#scroll-into-view button").scrollIntoView().then ($button) ->
-        expect($button).to.match button
-
-    it.skip "scrolls y axis of window to element", ->
-      expect(@win.get(0).scrollTop).to.eq(0)
-      expect(@win.get(0).scrollLeft).to.eq(0)
-
-      @cy.get("#scroll-into-view-win-vertical div").scrollIntoView().then ($el) ->
-        expect(@win.get(0).scrollTop).to.eq(700)
-        expect(@win.get(0).scrollLeft).to.eq(0)
+      @cy.get("#scroll-into-view-vertical div").scrollIntoView().then ($div) ->
+        expect($div).to.match div
 
     it.skip "scrolls x axis of window to element", ->
-      expect(@win.get(0).scrollTop).to.eq(0)
-      expect(@win.get(0).scrollLeft).to.eq(0)
+      expect(@body.get(0).scrollTop).to.eq(0)
+      expect(@body.get(0).scrollLeft).to.eq(0)
+
+      @cy.get("#scroll-into-view-win-horizontal div").scrollIntoView().then ($el) ->
+        expect(@body.get(0).scrollTop).to.eq(0)
+
+        ## it'll scorll to the position - the width of the el
+        expect(@body.get(0).scrollLeft).to.eq(1500 - @cy.$$("#scroll-into-view-win-vertical div").get(0).getBoundingClientRect().left)
+
+    it.skip "scrolls y axis of window to element", ->
+      expect(@body.get(0).scrollTop).to.eq(0)
+      expect(@body.get(0).scrollLeft).to.eq(0)
 
       @cy.get("#scroll-into-view-win-vertical div").scrollIntoView().then ($el) ->
-        expect(@win.get(0).scrollTop).to.eq(0)
-        expect(@win.get(0).scrollLeft).to.eq(700)
+        expect(@body.get(0).scrollTop).to.eq(1500 - @cy.$$("#scroll-into-view-win-vertical div").get(0).getBoundingClientRect().top)
+        expect(@body.get(0).scrollLeft).to.eq(0)
 
     it.skip "scrolls both axes of window to element", ->
-      expect(@win.get(0).scrollTop).to.eq(0)
-      expect(@win.get(0).scrollLeft).to.eq(0)
+      expect(@body.get(0).scrollTop).to.eq(0)
+      expect(@body.get(0).scrollLeft).to.eq(0)
 
-      @cy.get("#scroll-into-view-win-vertical div").scrollIntoView().then ($el) ->
-        expect(@win.get(0).scrollTop).to.eq(700)
-        expect(@win.get(0).scrollLeft).to.eq(700)
-
-    it.skip "scrolls y axis of container to element", ->
-      expect(@scrollVert.get(0).scrollTop).to.eq(0)
-      expect(@scrollVert.get(0).scrollLeft).to.eq(0)
-
-      @cy.get("#scroll-into-view-vertical h5").scrollIntoView().then ($el) ->
-        expect(@scrollVert.get(0).scrollTop).to.eq(300)
-        expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+      @cy.get("#scroll-into-view-win-both div").scrollIntoView().then ($el) ->
+        expect(@body.get(0).scrollTop).to.eq(1500 - @cy.$$("#scroll-into-view-win-both div").get(0).getBoundingClientRect().top)
+        expect(@body.get(0).scrollLeft).to.eq(1500 - @cy.$$("#scroll-into-view-win-both div").get(0).getBoundingClientRect().left)
 
     it.skip "scrolls x axis of container to element", ->
       expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
       expect(@scrollHoriz.get(0).scrollLeft).to.eq(0)
 
       @cy.get("#scroll-into-view-horizontal h5").scrollIntoView().then ($el) ->
-        expect(@scrollHoriz.get(0).scrollTop).to.eq(300)
-        expect(@scrollHoriz.get(0).scrollLeft).to.eq(0)
+        expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+        expect(@scrollHoriz.get(0).scrollLeft).to.eq(300)
+
+    it.skip "scrolls y axis of container to element", ->
+      expect(@scrollVert.get(0).scrollTop).to.eq(0)
+      expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+
+      @cy.get("#scroll-into-view-horizontal h5").scrollIntoView().then ($el) ->
+        expect(@scrollVert.get(0).scrollTop).to.eq(300)
+        expect(@scrollVert.get(0).scrollLeft).to.eq(0)
 
     it.skip "scrolls both axes of container to element", ->
       expect(@scrollBoth.get(0).scrollTop).to.eq(0)
@@ -4512,11 +4514,11 @@ describe "$Cypress.Cy Actions Commands", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(300)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
 
-    it.skip "calls jQuery scroll to", ->
+    it "calls jQuery scroll to", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
-        expect(scrollTo).to.be.calledWith({top: "25px", left: 0})
+        expect(scrollTo).to.be.called
 
     it.skip "sets duration to 0 by default", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
@@ -4546,6 +4548,18 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#scroll-into-view-both h5").scrollIntoView({duration: "500"}).then ->
         expect(scrollTo.args[0][1].duration).to.eq "500"
+
+    it.skip "accepts offset string option", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-into-view-both h5").scrollIntoView({offset: 500}).then ->
+        expect(scrollTo.args[0][1].offset).to.eq "500"
+
+    it.skip "accepts offset object option", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-into-view-both h5").scrollIntoView({offset: {left: 500, top: 200}}).then ->
+        expect(scrollTo.args[0][1].offset).to.eq "500"
 
     it.skip "has easing set to swing by default", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
@@ -4586,46 +4600,46 @@ describe "$Cypress.Cy Actions Commands", ->
         @allowErrors()
 
       context "subject errors", ->
-        it.skip "throws when not passed DOM element as subject", (done) ->
+        it "throws when not passed DOM element as subject", (done) ->
           @cy.on "fail", (err) =>
             expect(err.message).to.include "Cannot call cy.scrollIntoView() on a non-DOM subject."
             done()
 
           @cy.noop({foo: "bar"}).scrollIntoView()
 
-        it.skip "throws if scrollable container is multiple elements", (done) ->
+        it.skip "throws when passed window or document object as subject", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView() can only be used to scroll to 1 element, you tried to scroll to 15 elements."
+            expect(err.message).to.include "Cannot call cy.scrollIntoView() on a non-DOM subject."
+            done()
+
+          @cy.get("window").scrollIntoView()
+
+        it "throws if scrollable container is multiple elements", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "cy.scrollIntoView() can only be used to scroll to 1 element, you tried to scroll to 14 elements."
             done()
 
           @cy.get("button").scrollIntoView()
 
-      context "argument errors", ->
-        it.skip "throws if called off cy", (done) ->
+     describe "argument errors", ->
+        it "throws if arg passed as non-object", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollIntoView()..."
-            done()
-
-          @cy.scrollIntoView()
-
-        it.skip "throws if arg passed as non-object", (done) ->
-          @cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollTo() must be called with a valid position. It can be a string, number or object. Your position was: 25, NaN"
+            expect(err.message).to.include "cy.scrollIntoView() can only be called with an options object. Your argument was: foo"
             done()
 
           @cy.get("#scroll-into-view-both h5").scrollIntoView("foo")
 
       context "option errors", ->
-        it.skip "throws if duration is not a number or valid string", (done) ->
+        it "throws if duration is not a number or valid string", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollTo() must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: foo"
+            expect(err.message).to.include "cy.scrollIntoView() must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: foo"
             done()
 
           @cy.get("#scroll-into-view-both h5").scrollIntoView({ duration: "foo" })
 
-        it.skip "throws if unrecognized easing", (done) ->
+        it "throws if unrecognized easing", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollTo() must be called with a valid easing. Your easing was: flower"
+            expect(err.message).to.include "cy.scrollIntoView() must be called with a valid easing. Your easing was: flower"
             done()
 
           @cy.get("#scroll-into-view-both h5").scrollIntoView({ easing: "flower" })
@@ -5859,7 +5873,7 @@ describe "$Cypress.Cy Actions Commands", ->
         num = @cy.$$("button").length
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 15 elements. Pass {multiple: true} if you want to serially click each element."
+          expect(err.message).to.eq "cy.click() can only be called on a single element. Your subject contained 14 elements. Pass {multiple: true} if you want to serially click each element."
           done()
 
         @cy.get("button").click()

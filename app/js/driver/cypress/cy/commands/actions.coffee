@@ -348,12 +348,87 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           })
 
     scrollIntoView: (subject, options = {}) ->
+      if !_.isObject(options)
+        $Cypress.Utils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: options }})
+
+      ## need to ensure the subject is DOM
+      @ensureDom(subject)
+
+      ## throw if we're trying to scroll to multiple elements
+      if subject.length > 1
+        $Cypress.Utils.throwErrByPath("scrollIntoView.multiple_elements", {args: { num: subject.length }})
+
       _.defaults options,
         $el: subject
+        $container: @private("window")
         log: true
-        force: false
+        duration: 0
+        easing: "swing"
+        axis: "yx"
 
-      @ensureDom(options.$el)
+      ## here we want to figure out what has to actually
+      ## be scrolled to get to this element, cause we need
+      ## to scrollTo passing in those elements.
+
+      ## jQuery scrollTo looks for the prop contentWindow
+      ## otherwise it'll use the wrong window to scroll :(
+      # if options.$container is @private("window")
+      #   options.$container.contentWindow = options.$container
+
+      isNaNOrInfinity = (item) ->
+        num = Number.parseFloat(item)
+
+        return _.isNaN(num) or !_.isFinite(num)
+
+      ## if we cannot parse an integer out of duration
+      ## which could be 500 or "500", then it's NaN...throw
+      if isNaNOrInfinity(options.duration)
+        $Cypress.Utils.throwErrByPath("scrollIntoView.invalid_duration", {args: { duration: options.duration }})
+
+      if !(options.easing is "swing" or options.easing is "linear")
+        $Cypress.Utils.throwErrByPath("scrollIntoView.invalid_easing", {args: { easing: options.easing }})
+
+      if options.log
+        log = {
+          consoleProps: -> {
+            ## merge into consoleProps without mutating it
+            ScrolledTo: $Cypress.Utils.getDomElements(options.$el)
+          }
+        }
+
+        # if !isWin then log.$el = options.$el
+
+        options._log = Cypress.Log.command(log)
+
+        options._log.snapshot("before", {next: "after"})
+
+      # ensureScrollability = =>
+      #   try
+      #     ## make sure our container can even be scrolled
+      #     @ensureScrollability($container, "scrollTo")
+      #   catch err
+      #     options.error = err
+      #     @_retry(ensureScrollability, options)
+
+      return new Promise (resolve, reject) =>
+
+        $window = $(@private("window"))
+
+
+        ## scroll our axes
+        $window.scrollTo(options.$el, {
+          axis:     options.axis
+          easing:   options.easing
+          duration: options.duration
+          done: (animation, jumpedToEnd) ->
+            resolve(options.$el)
+          fail: (animation, jumpedToEnd) ->
+            ## its Promise object is rejected
+            try
+              $Cypress.Utils.throwErrByPath("scrollTo.animation_failed")
+            catch err
+              reject(err)
+        })
 
 
     ## update dblclick to use the click
