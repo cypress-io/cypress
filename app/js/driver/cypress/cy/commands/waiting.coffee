@@ -3,8 +3,6 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
   Cypress.addDualCommand
 
     wait: (subject, msOrFnOrAlias, options = {}) ->
-      msOrFnOrAlias ?= 1e9
-
       ## check to ensure options is an object
       ## if its a string the user most likely is trying
       ## to wait on multiple aliases and forget to make this
@@ -16,13 +14,35 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
       args = [subject, msOrFnOrAlias, options]
 
-      switch
-        when _.isNumber(msOrFnOrAlias)   then @_waitNumber.apply(@, args)
-        when _.isFunction(msOrFnOrAlias) then @_waitFunction.apply(@, args)
-        when _.isString(msOrFnOrAlias)   then @_waitString.apply(@, args)
-        when _.isArray(msOrFnOrAlias)    then @_waitString.apply(@, args)
+      throwErr = (arg) ->
+        $Cypress.Utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}})
+
+      try
+        switch
+          when _.isFinite(msOrFnOrAlias)   then @_waitNumber.apply(@, args)
+          when _.isFunction(msOrFnOrAlias) then @_waitFunction.apply(@, args)
+          when _.isString(msOrFnOrAlias)   then @_waitString.apply(@, args)
+          when _.isArray(msOrFnOrAlias) and not _.isEmpty(msOrFnOrAlias)
+            @_waitString.apply(@, args)
+          else
+            ## figure out why this error failed
+            arg = switch
+              when _.isNaN(msOrFnOrAlias)    then "NaN"
+              when msOrFnOrAlias is Infinity then "Infinity"
+              else
+                try
+                  JSON.stringify(msOrFnOrAlias)
+                catch
+                  "an invalid argument"
+
+            throwErr(arg)
+      catch err
+        if err.name is "CypressError"
+          throw err
         else
-          $Cypress.Utils.throwErrByPath "wait.invalid_1st_arg"
+          ## whatever was passed in could not be parsed
+          ## by our switch case
+          throwErr("an invalid argument")
 
   Cypress.Cy.extend
     _waitNumber: (subject, ms, options) ->
