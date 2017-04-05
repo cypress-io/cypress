@@ -4492,7 +4492,7 @@ describe "$Cypress.Cy Actions Commands", ->
         expect(@body.get(0).scrollTop).to.not.eq(0)
         expect(@body.get(0).scrollLeft).to.not.eq(0)
 
-    it.skip "scrolls x axis of container to element", ->
+    it "scrolls x axis of container to element", ->
       expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
       expect(@scrollHoriz.get(0).scrollLeft).to.eq(0)
 
@@ -4614,7 +4614,7 @@ describe "$Cypress.Cy Actions Commands", ->
             expect(err.message).to.include "Cannot call cy.scrollIntoView() on a non-DOM subject."
             done()
 
-          @cy.get("window").scrollIntoView()
+          @cy.window().scrollIntoView()
 
         it "throws if scrollable container is multiple elements", (done) ->
           @cy.on "fail", (err) =>

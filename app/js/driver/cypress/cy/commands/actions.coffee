@@ -369,8 +369,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       ## here we want to figure out what has to actually
       ## be scrolled to get to this element, cause we need
-      ## to scrollTo passing in those elements.
+      ## to scrollTo passing in that element.
 
+      $parent = @findScrollableParent(options.$el)
       ## jQuery scrollTo looks for the prop contentWindow
       ## otherwise it'll use the wrong window to scroll :(
       if options.$container is @private("window")
@@ -413,20 +414,22 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       return new Promise (resolve, reject) =>
 
+        options.$el.offsetParent()[0].scrollIntoView()
+
         ## scroll our axes
-        $(options.$container).scrollTo(options.$el, {
+        $(options.$el.offsetParent()[0]).scrollTo(options.$el, {
           axis:     options.axis
           easing:   options.easing
           duration: options.duration
           offset:   options.offset
-          done: (animation, jumpedToEnd) ->
-            resolve(options.$el)
-          fail: (animation, jumpedToEnd) ->
-            ## its Promise object is rejected
-            try
-              $Cypress.Utils.throwErrByPath("scrollTo.animation_failed")
-            catch err
-              reject(err)
+          # done: (animation, jumpedToEnd) ->
+          #   resolve(options.$el)
+          # fail: (animation, jumpedToEnd) ->
+          #   ## its Promise object is rejected
+          #   try
+          #     $Cypress.Utils.throwErrByPath("scrollTo.animation_failed")
+          #   catch err
+          #     reject(err)
         })
 
 
@@ -1541,6 +1544,18 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
 
   Cypress.Cy.extend
+    findScrollableParent: ($el) ->
+      $parent = $el.parent()
+
+      return $parent if $parent.is("body,html") or $Cypress.Utils.hasDocument($parent)
+
+      try
+        @ensureScrollability($parent, "el")
+      catch
+        @findScrollableParent($parent)
+
+      return $parent
+
     _waitForAnimations: ($el, options, coordsHistory = []) ->
       ## determine if this element is animating
       if options.x and options.y
