@@ -5,16 +5,16 @@ cyIcons     = require("@cypress/core-icons")
 dialog      = require("./dialog")
 project     = require("./project")
 pgk         = require("./package")
-cookies     = require("./cookies")
 logs        = require("./logs")
+cookies     = require("./cookies")
 Renderer    = require("./renderer")
+api         = require("../../api")
 open        = require("../../util/open")
 user        = require("../../user")
 logger      = require("../../logger")
 errors      = require("../../errors")
 Updater     = require("../../updater")
 Project     = require("../../project")
-api         = require("../../api")
 
 handleEvent = (options, bus, event, id, type, arg) ->
   sendResponse = (data = {}) ->
@@ -68,7 +68,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "clear:github:cookies"
-      cookies.clearGithub(event.sender.session.cookies)
+      Renderer.getAutomation(event.sender)
+      .clearCookies({domain: "github.com"})
+      .return(null)
       .then(send)
       .catch(sendErr)
 

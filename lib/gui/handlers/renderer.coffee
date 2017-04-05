@@ -5,6 +5,7 @@ cyDesktop     = require("@cypress/core-desktop-gui")
 BrowserWindow = require("electron").BrowserWindow
 cwd           = require("../../cwd")
 user          = require("../../user")
+Electron      = require("../../browsers/electron")
 savedState    = require("../../saved_state")
 
 windows               = {}
@@ -41,6 +42,9 @@ module.exports = {
 
   showAll: ->
     _.invoke windows, "showInactive"
+
+  getAutomation: (win) ->
+    win.automation ?= Electron.automation(win)
 
   hideAllUnlessAnotherWindowIsFocused: ->
     ## bail if we have another focused window
