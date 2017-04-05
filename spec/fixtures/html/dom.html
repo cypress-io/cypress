@@ -216,8 +216,37 @@
         </div>
       </form>
 
-      <div id="scroll-into-view">
-        <button>scroll into view</button>
+      <div id="scroll-into-view-win-vertical">
+        <div style="position: absolute; left: 1500px; top: 0px;">scroll into view</div>
+      </div>
+
+      <div id="scroll-into-view-win-horizontal">
+        <div style="position: absolute; left: 1500px; top: 0px;">scroll into view</div>
+      </div>
+
+      <div id="scroll-into-view-win-both">
+        <div style="position: absolute; left: 1500px; top: 0px;">scroll into view</div>
+      </div>
+
+      <div id="scroll-into-view-vertical" style="height: 100px; width: 100px; overflow: auto;">
+        <div style="height: 500px; position: relative;">
+          Vertical Scroll
+          <h5 style="position: absolute; top: 300px; left: 0">here</h5>
+        </div>
+      </div>
+
+      <div id="scroll-into-view-horizontal"  style="height: 100px; width: 100px; overflow: auto;">
+        <div style="width: 500px; position: relative;">
+          Horizontal Scroll
+          <h5 style="position: absolute; top: 0px; left: 300px">here</h5>
+        </div>
+      </div>
+
+      <div id="scroll-into-view-both"  style="height: 100px; width: 100px; overflow: auto;">
+        <div style="width: 500px; height: 500px; position: relative;">
+          Both Scroll
+          <h5 style="position: absolute; top: 300px; left: 300px">here</h5>
+        </div>
       </div>
 
       <div id="scroll-to-vertical" style="height: 100px; width: 100px; overflow: auto; border: 1px solid red">
@@ -233,7 +262,10 @@
       </div>
 
       <div id="nonscroll-becomes-scrollable">
-        <div style="height: 1000px; width: 1000px">Becomes Scrollable</div>
+        <div style="height: 1000px; width: 1000px">
+          Becomes Scrollable
+          <h5 style="position: absolute; top: 300px; left: 300px">here</h5>
+        </div>
       </div>
 
 
