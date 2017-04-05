@@ -4446,17 +4446,18 @@ describe "$Cypress.Cy Actions Commands", ->
     afterEach ->
       ## reset the scrollable containers back
       ## to furthest left and top
-      @body.scrollTop          = 0
-      @body.scrollLeft         = 0
 
-      @scrollVert.scrollTop    = 0
-      @scrollVert.scrollLeft   = 0
+      @body.scrollTop(0)
+      @body.scrollLeft(0)
 
-      @scrollHoriz.scrollTop   = 0
-      @scrollHoriz.scrollLeft  = 0
+      @scrollVert.scrollTop(0)
+      @scrollVert.scrollLeft(0)
 
-      @scrollBoth.scrollTop    = 0
-      @scrollBoth.scrollLeft   = 0
+      @scrollHoriz.scrollTop(0)
+      @scrollHoriz.scrollLeft(0)
+
+      @scrollBoth.scrollTop(0)
+      @scrollBoth.scrollLeft(0)
 
     it "does not change the subject", ->
       div = @cy.$$("#scroll-into-view-vertical div")
@@ -4464,22 +4465,23 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#scroll-into-view-vertical div").scrollIntoView().then ($div) ->
         expect($div).to.match div
 
-    it.skip "scrolls x axis of window to element", ->
+    it "scrolls x axis of window to element", ->
       expect(@body.get(0).scrollTop).to.eq(0)
       expect(@body.get(0).scrollLeft).to.eq(0)
 
       @cy.get("#scroll-into-view-win-horizontal div").scrollIntoView().then ($el) ->
         expect(@body.get(0).scrollTop).to.eq(0)
 
-        ## it'll scorll to the position - the width of the el
-        expect(@body.get(0).scrollLeft).to.eq(1500 - @cy.$$("#scroll-into-view-win-vertical div").get(0).getBoundingClientRect().left)
+        ## it'll scorll to the position, but this depends on
+        ## the size of the window??
+        expect(@body.get(0).scrollLeft).to.not.eq(0)
 
-    it.skip "scrolls y axis of window to element", ->
+    it "scrolls y axis of window to element", ->
       expect(@body.get(0).scrollTop).to.eq(0)
       expect(@body.get(0).scrollLeft).to.eq(0)
 
       @cy.get("#scroll-into-view-win-vertical div").scrollIntoView().then ($el) ->
-        expect(@body.get(0).scrollTop).to.eq(1500 - @cy.$$("#scroll-into-view-win-vertical div").get(0).getBoundingClientRect().top)
+        expect(@body.get(0).scrollTop).to.not.eq(0)
         expect(@body.get(0).scrollLeft).to.eq(0)
 
     it.skip "scrolls both axes of window to element", ->
@@ -4487,8 +4489,8 @@ describe "$Cypress.Cy Actions Commands", ->
       expect(@body.get(0).scrollLeft).to.eq(0)
 
       @cy.get("#scroll-into-view-win-both div").scrollIntoView().then ($el) ->
-        expect(@body.get(0).scrollTop).to.eq(1500 - @cy.$$("#scroll-into-view-win-both div").get(0).getBoundingClientRect().top)
-        expect(@body.get(0).scrollLeft).to.eq(1500 - @cy.$$("#scroll-into-view-win-both div").get(0).getBoundingClientRect().left)
+        expect(@body.get(0).scrollTop).to.not.eq(0)
+        expect(@body.get(0).scrollLeft).to.not.eq(0)
 
     it.skip "scrolls x axis of container to element", ->
       expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
@@ -4561,7 +4563,7 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#scroll-into-view-both h5").scrollIntoView({offset: {left: 500, top: 200}}).then ->
         expect(scrollTo.args[0][1].offset).to.deep.eq {left: 500, top: 200}
 
-    it.only "has easing set to swing by default", ->
+    it "has easing set to swing by default", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->

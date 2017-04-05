@@ -373,8 +373,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       ## jQuery scrollTo looks for the prop contentWindow
       ## otherwise it'll use the wrong window to scroll :(
-      # if options.$container is @private("window")
-      #   options.$container.contentWindow = options.$container
+      if options.$container is @private("window")
+        options.$container.contentWindow = options.$container
 
       isNaNOrInfinity = (item) ->
         num = Number.parseFloat(item)
@@ -413,11 +413,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       return new Promise (resolve, reject) =>
 
-        $window = $(@private("window"))
-
-
         ## scroll our axes
-        $window.scrollTo(options.$el, {
+        $(options.$container).scrollTo(options.$el, {
           axis:     options.axis
           easing:   options.easing
           duration: options.duration
