@@ -145,30 +145,30 @@ module.exports = {
     ## enable our url to be a promise
     ## and wait for this to be resolved
     Promise
-      .resolve(args.url)
-      .then (url) ->
-        if width and height
-          ## QUESTION: is this code unreachable? doesn't seem that
-          ## width and height will ever be truthy
-          win.webContents.once "dom-ready", ->
-            win.setSize(width, height)
-            win.show()
+    .resolve(args.url)
+    .then (url) ->
+      if width and height
+        ## QUESTION: is this code unreachable? doesn't seem that
+        ## width and height will ever be truthy
+        win.webContents.once "dom-ready", ->
+          win.setSize(width, height)
+          win.show()
 
-        ## navigate the window here!
-        win.loadURL(url)
+      ## navigate the window here!
+      win.loadURL(url)
 
-        ## reset this back to false
-        recentlyCreatedWindow = false
+      ## reset this back to false
+      recentlyCreatedWindow = false
 
-        if args.type is "GITHUB_LOGIN"
-          new Promise (resolve, reject) ->
-            win.webContents.on "will-navigate", (e, url) ->
-              urlChanged(url, resolve)
+      if args.type is "GITHUB_LOGIN"
+        new Promise (resolve, reject) ->
+          win.webContents.on "will-navigate", (e, url) ->
+            urlChanged(url, resolve)
 
-            win.webContents.on "did-get-redirect-request", (e, oldUrl, newUrl) ->
-              urlChanged(newUrl, resolve)
-        else
-          Promise.resolve(win)
+          win.webContents.on "did-get-redirect-request", (e, oldUrl, newUrl) ->
+            urlChanged(newUrl, resolve)
+      else
+        Promise.resolve(win)
 
   trackState: (win, state, keys) ->
     win.on "resize", _.debounce ->
