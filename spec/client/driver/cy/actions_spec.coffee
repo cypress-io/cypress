@@ -4324,7 +4324,22 @@ describe "$Cypress.Cy Actions Commands", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(25)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(50)
 
-    it.skip "retries until element is scrollable"
+    it "retries until element is scrollable", ->
+      $container = cy.$$("#nonscroll-becomes-scrollable")
+
+      expect($container.get(0).scrollTop).to.eq(0)
+      expect($container.get(0).scrollLeft).to.eq(0)
+
+      retried = false
+
+      @cy.on "retry", _.after 2, ->
+        $container.css("overflow", "scroll")
+        retried = true
+
+      @cy.get("#nonscroll-becomes-scrollable").scrollTo(500, 300).then ->
+        expect(retried).to.be.true
+        expect($container.get(0).scrollTop).to.eq(500)
+        expect($container.get(0).scrollLeft).to.eq(300)
 
     describe "assertion verification", ->
 
