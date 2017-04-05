@@ -1,8 +1,8 @@
 require("../../spec_helper")
 
 electron = require("electron")
-dialog   = require("#{root}../lib/gui/handlers/dialog")
-Renderer = require("#{root}../lib/gui/handlers/renderer")
+dialog   = require("#{root}../lib/gui/dialog")
+Renderer = require("#{root}../lib/gui/renderer")
 
 describe "gui/dialog", ->
   context ".show", ->

@@ -1,9 +1,9 @@
 require("../../spec_helper")
 
-cookies    = require("#{root}../lib/gui/handlers/cookies")
-automation = require("#{root}../lib/gui/handlers/automation")
+cookies    = require("#{root}../lib/gui/cookies")
+automation = require("#{root}../lib/gui/automation")
 
-describe "lib/gui/handlers/automation", ->
+describe "lib/gui/automation", ->
   context "unit", ->
 
   context "integration", ->

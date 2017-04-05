@@ -12,8 +12,8 @@ Reporter = require("#{root}../lib/reporter")
 electronUtils = require("#{root}../lib/gui/utils")
 project  = require("#{root}../lib/state/project")
 headless = require("#{root}../lib/modes/headless")
-Renderer = require("#{root}../lib/gui/handlers/renderer")
-automation = require("#{root}../lib/gui/handlers/automation")
+Renderer = require("#{root}../lib/gui/renderer")
+automation = require("#{root}../lib/gui/automation")
 
 describe "gui/headless", ->
   beforeEach ->

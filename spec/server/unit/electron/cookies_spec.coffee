@@ -1,6 +1,6 @@
 require("../../spec_helper")
 
-cookies = require("#{root}../lib/gui/handlers/cookies")
+cookies = require("#{root}../lib/gui/cookies")
 
 cookiesStub = {
   remove: (url, name, cb) ->

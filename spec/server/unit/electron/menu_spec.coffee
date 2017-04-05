@@ -5,7 +5,7 @@ os       = require("os")
 electron = require("electron")
 appData  = require("#{root}../lib/util/app_data")
 open     = require("#{root}../lib/util/open")
-menu     = require("#{root}../lib/gui/handlers/menu")
+menu     = require("#{root}../lib/gui/menu")
 
 getMenuItem = (label) ->
   _.find(electron.Menu.buildFromTemplate.lastCall.args[0], {label})

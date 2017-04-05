@@ -9,9 +9,9 @@ logger     = require("#{root}../lib/logger")
 Updater    = require("#{root}../lib/updater")
 savedState = require("#{root}../lib/saved_state")
 headed     = require("#{root}../lib/modes/headed")
-menu       = require("#{root}../lib/gui/handlers/menu")
-Events     = require("#{root}../lib/gui/handlers/events")
-Renderer   = require("#{root}../lib/gui/handlers/renderer")
+menu       = require("#{root}../lib/gui/menu")
+Events     = require("#{root}../lib/gui/events")
+Renderer   = require("#{root}../lib/gui/renderer")
 
 describe "gui/headed", ->
   context.skip ".onClick", ->

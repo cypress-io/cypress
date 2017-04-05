@@ -201,13 +201,13 @@ module.exports = {
 
       when "logs"
         ## print the logs + exit
-        require("./gui/handlers/logs").print()
+        require("./gui/logs").print()
         .then(exit0)
         .catch(exitErr)
 
       when "clearLogs"
         ## clear the logs + exit
-        require("./gui/handlers/logs").clear()
+        require("./gui/logs").clear()
         .then(exit0)
         .catch(exitErr)
 

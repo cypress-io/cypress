@@ -10,10 +10,10 @@ user       = require("../user")
 errors     = require("../errors")
 savedState = require("../saved_state")
 Updater    = require("../updater")
-logs       = require("../gui/handlers/logs")
-menu       = require("../gui/handlers/menu")
-Events     = require("../gui/handlers/events")
-Renderer   = require("../gui/handlers/renderer")
+logs       = require("../gui/logs")
+menu       = require("../gui/menu")
+Events     = require("../gui/events")
+Renderer   = require("../gui/renderer")
 
 isDev = ->
   process.env["CYPRESS_ENV"] is "development"

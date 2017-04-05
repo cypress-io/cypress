@@ -12,14 +12,14 @@ user     = require("#{root}../lib/user")
 errors   = require("#{root}../lib/errors")
 launcher = require("#{root}../lib/launcher")
 open     = require("#{root}../lib/util/open")
-logs     = require("#{root}../lib/gui/handlers/logs")
-events   = require("#{root}../lib/gui/handlers/events")
-dialog   = require("#{root}../lib/gui/handlers/dialog")
+logs     = require("#{root}../lib/gui/logs")
+events   = require("#{root}../lib/gui/events")
+dialog   = require("#{root}../lib/gui/dialog")
 project  = require("#{root}../lib/state/project")
-cookies  = require("#{root}../lib/gui/handlers/cookies")
-Renderer = require("#{root}../lib/gui/handlers/renderer")
+cookies  = require("#{root}../lib/gui/cookies")
+Renderer = require("#{root}../lib/gui/renderer")
 
-describe "lib/gui/handlers/events", ->
+describe "lib/gui/events", ->
   beforeEach ->
     @id      = Math.random()
     @send    = @sandbox.spy()

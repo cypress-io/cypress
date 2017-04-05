@@ -5,9 +5,9 @@ Promise = require("bluebird")
 EE = require("events").EventEmitter
 electron = require("electron")
 electronUtils = require("#{root}lib/gui/utils")
-menu = require("#{root}lib/gui/handlers/menu")
-Renderer = require("#{root}lib/gui/handlers/renderer")
-automation = require("#{root}lib/gui/handlers/automation")
+menu = require("#{root}lib/gui/menu")
+Renderer = require("#{root}lib/gui/renderer")
+automation = require("#{root}lib/gui/automation")
 savedState = require("#{root}lib/saved_state")
 launcher = require("#{root}lib/launcher")
 
