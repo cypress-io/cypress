@@ -1,10 +1,10 @@
 require('../spec_helper')
 
-const xvfb = require('../../lib/cli/xvfb')
+const xvfb = require('../../lib/exec/xvfb')
 
 const os = require('os')
 
-describe('cli xvfb', function () {
+describe('exec xvfb', function () {
   context('#isNeeded', function () {
     afterEach(() => delete process.env.DISPLAY)
 

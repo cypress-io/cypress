@@ -9,9 +9,10 @@ const args = minimist(process.argv.slice(2))
 switch (args.exec) {
   case 'run':
     require('coffee-script/register')
-    require('lib/run')(args)
+    require('dev/run')(args)
     break
   case 'install':
+    //// TODO: do this through lib/cli.js?
     require('packages/core-download').install()
     break
   case undefined:

@@ -3,12 +3,12 @@ require('../spec_helper')
 const path = require('path')
 const pkg = require('../../package')
 
-const download = require('../../lib/download')
-const cli = require('../../lib/cli/cli')
-const utils = require('../../lib/cli/utils')
-const run = require('../../lib/cli/run')
+const downloadUtils = require('../../lib/download/utils')
+const cli = require('../../lib/cli')
+const spawn = require('../../lib/exec/spawn')
+const run = require('../../lib/exec/run')
 
-describe('cli run', function () {
+describe('exec run', function () {
   context('cli interface', function () {
     beforeEach(function () {
       this.sandbox.stub(run, 'start')
@@ -59,21 +59,21 @@ describe('cli run', function () {
 
   context('#start', function () {
     beforeEach(function () {
-      this.spawn = this.sandbox.stub(utils, 'spawn')
-      this.sandbox.stub(download, 'verify').resolves()
+      this.spawn = this.sandbox.stub(spawn, 'start')
+      this.sandbox.stub(downloadUtils, 'verify').resolves()
       this.log = this.sandbox.spy(console, 'log')
     })
 
     it('verifies cypress', function () {
       return run.start()
       .then(() => {
-        expect(download.verify).to.be.calledOnce
+        expect(downloadUtils.verify).to.be.calledOnce
       })
     })
 
     it('logs message and exits if verification failed', function () {
       this.sandbox.stub(process, 'exit')
-      download.verify.rejects({ name: '', message: 'An error message' })
+      downloadUtils.verify.rejects({ name: '', message: 'An error message' })
 
       return run.start().then(() => {
         expect(this.log).to.be.calledWith('An error message')
