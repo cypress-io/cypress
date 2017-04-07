@@ -20,18 +20,14 @@ describe('exec spawn', function () {
   })
 
   context('#spawn', function () {
-    beforeEach(function () {
-      this.sandbox.stub(downloadUtils, 'getPathToExecutable').resolves('/path/to/cypress')
-    })
-
     it('passes args + options to spawn', function () {
-      return spawn.start('--foo', { foo: 'bar' }).then(() => {
+      return spawn.start('/path/to/cypress', '--foo', { foo: 'bar' }).then(() => {
         expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', ['--foo'], { foo: 'bar' })
       })
     })
 
     it('starts xvfb when needed', function () {
-      return spawn.start('--foo').then(() => {
+      return spawn.start('/path/to/cypress', '--foo').then(() => {
         expect(xvfb.start).to.be.calledOnce
       })
     })
@@ -39,13 +35,13 @@ describe('exec spawn', function () {
     it('does not start xvfb when its not needed', function () {
       xvfb.isNeeded.returns(false)
 
-      return spawn.start('--foo').then(() => {
+      return spawn.start('/path/to/cypress', '--foo').then(() => {
         expect(xvfb.start).not.to.be.called
       })
     })
 
     it('stops xvfb when spawn closes', function () {
-      return spawn.start('--foo').then(() => {
+      return spawn.start('/path/to/cypress', '--foo').then(() => {
         this.spawnedProcess.emit('close')
         expect(xvfb.stop).to.be.calledOnce
       })
@@ -53,20 +49,20 @@ describe('exec spawn', function () {
 
     it('exits with spawned exit code', function () {
       this.sandbox.stub(process, 'exit')
-      return spawn.start('--foo').then(() => {
+      return spawn.start('/path/to/cypress', '--foo').then(() => {
         this.spawnedProcess.emit('exit', 10)
         expect(process.exit).to.be.calledWith(10)
       })
     })
 
     it('unrefs if options.detached is true', function () {
-      return spawn.start(null, { detached: true }).then(() => {
+      return spawn.start('/path/to/cypress', null, { detached: true }).then(() => {
         expect(this.spawnedProcess.unref).to.be.calledOnce
       })
     })
 
     it('does not unref by default', function () {
-      return spawn.start(null).then(() => {
+      return spawn.start('/path/to/cypress', null).then(() => {
         expect(this.spawnedProcess.unref).not.to.be.called
       })
     })
