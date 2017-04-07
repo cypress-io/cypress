@@ -5,17 +5,29 @@ describe "$Cypress.jQuery Extensions", ->
     expect($Cypress.Dom).to.be.an("object")
     expect(Cypress.Dom).to.be.an("object")
 
-  it "exposes isHidden", ->
-    expect($Cypress.Dom.isHidden).to.be.a("function")
-    expect(Cypress.Dom.isHidden).to.be.a("function")
+  context "isHidden", ->
+    it "exposes isHidden", ->
+      expect($Cypress.Dom.isHidden).to.be.a("function")
+      expect(Cypress.Dom.isHidden).to.be.a("function")
 
-  it "throws when not passed a DOM element", ->
-    fn = ->
-      $Cypress.Dom.isHidden(null)
+    it "throws when not passed a DOM element", ->
+      fn = ->
+        $Cypress.Dom.isHidden(null)
 
-    expect(fn).to.throw("$Cypress.Dom.isHidden() must be passed a basic DOM element. You passed: 'null'")
+      expect(fn).to.throw("$Cypress.Dom.isHidden() must be passed a basic DOM element. You passed: 'null'")
 
-  context "hidden overrides", ->
+  context "isVisible", ->
+    it "exposes isVisible", ->
+      expect($Cypress.Dom.isVisible).to.be.a("function")
+      expect(Cypress.Dom.isVisible).to.be.a("function")
+
+    it "throws when not passed a DOM element", ->
+      fn = ->
+        $Cypress.Dom.isVisible(null)
+
+      expect(fn).to.throw("$Cypress.Dom.isVisible() must be passed a basic DOM element. You passed: 'null'")
+
+  context "hidden/visible overrides", ->
     beforeEach ->
       add = (el) =>
         $(el).appendTo(@cy.$$("body"))
@@ -93,50 +105,79 @@ describe "$Cypress.jQuery Extensions", ->
 
     it "is hidden if .css(visibility) is hidden", ->
       expect(@$visHidden.is(":hidden")).to.be.true
+      expect(@$visHidden.is(":visible")).to.be.false
+
       expect(@$visHidden).to.be.hidden
+      expect(@$visHidden).to.not.be.visible
+
       cy.wrap(@$visHidden).should("be.hidden")
+      cy.wrap(@$visHidden).should("not.be.visible")
 
     it "is hidden if parents have .css(visibility) hidden", ->
       expect(@$parentVisHidden.find("button").is(":hidden")).to.be.true
+      expect(@$parentVisHidden.find("button").is(":visible")).to.be.false
+
       expect(@$parentVisHidden.find("button")).to.be.hidden
+      expect(@$parentVisHidden.find("button")).to.not.be.visible
+
       cy.wrap(@$parentVisHidden).find("button").should("be.hidden")
+      cy.wrap(@$parentVisHidden).find("button").should("not.be.visible")
 
     it "is visible if opacity is 0", ->
       expect(@$btnOpacity.is(":hidden")).to.be.false
+      expect(@$btnOpacity.is(":visible")).to.be.true
+
       expect(@$btnOpacity).not.to.be.hidden
+      expect(@$btnOpacity).to.be.visible
+
       cy.wrap(@$btnOpacity).should("not.be.hidden")
+      cy.wrap(@$btnOpacity).should("be.visible")
 
     it "is hidden if offsetWidth is 0", ->
       expect(@$divNoWidth.is(":hidden")).to.be.true
+      expect(@$divNoWidth.is(":visible")).to.be.false
+
       expect(@$divNoWidth).to.be.hidden
+      expect(@$divNoWidth).to.not.be.visible
+
       cy.wrap(@$divNoWidth).should("be.hidden")
+      cy.wrap(@$divNoWidth).should("not.be.visible")
 
     it "is hidden if parent has overflow: hidden and no width", ->
       expect(@$parentNoWidth.find("span")).to.be.hidden
+      expect(@$parentNoWidth.find("span")).to.not.be.visible
 
     it "is hidden if parent has overflow: hidden and no height", ->
       expect(@$parentNoHeight.find("span")).to.be.hidden
+      expect(@$parentNoHeight.find("span")).to.not.be.visible
 
     it "is visible when parent has positive dimensions even with overflow hidden", ->
       expect(@$parentWithWidthHeightNoOverflow.find("span")).to.be.visible
+      expect(@$parentWithWidthHeightNoOverflow.find("span")).to.not.be.hidden
 
     it "is visible if child has position: absolute", ->
       expect(@$childPosAbs.find("span")).to.be.visible
+      expect(@$childPosAbs.find("span")).not.be.hidden
 
     it "is visible if child has position: fixed", ->
       expect(@$childPosFixed.find("span")).to.be.visible
+      expect(@$childPosFixed.find("span")).to.not.be.hidden
 
     it "is visible if descendent from parent has position: absolute", ->
       expect(@$descendentPosAbs.find("span")).to.be.visible
+      expect(@$descendentPosAbs.find("span")).to.not.be.hidden
 
     it "is visible if descendent from parent has position: fixed", ->
       expect(@$descendentPosFixed.find("span")).to.be.visible
+      expect(@$descendentPosFixed.find("span")).to.not.be.hidden
 
     it "is hidden if only the parent has position absolute", ->
       expect(@$parentPosAbs.find("span")).to.be.hidden
+      expect(@$parentPosAbs.find("span")).to.not.be.visible
 
     it "is visible when parent doesnt have overflow hidden", ->
       expect(@$parentNoWidthHeightOverflowAuto.find("span")).to.be.visible
+      expect(@$parentNoWidthHeightOverflowAuto.find("span")).to.not.be.hidden
 
     describe "#getReasonElIsHidden", ->
       beforeEach ->
