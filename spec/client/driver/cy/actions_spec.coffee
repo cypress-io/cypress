@@ -4357,7 +4357,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         it "throws if scrollable container is multiple elements", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.include "cy.scrollTo() can only be used to scroll one element, you tried to scroll 15 elements."
+            expect(err.message).to.include "cy.scrollTo() can only be used to scroll one element, you tried to scroll 14 elements."
             done()
 
           @cy.get("button").scrollTo("500px")
@@ -4435,20 +4435,19 @@ describe "$Cypress.Cy Actions Commands", ->
           # expect(console.Coords.x).to.be.closeTo coords.x, 10
           # expect(console.Coords.y).to.be.closeTo coords.y, 10
 
-
   context "#scrollIntoView", ->
     beforeEach ->
-      @body         = @cy.$$("body")
+      @_body        = @cy.$$("body")
       @scrollVert   = @cy.$$("#scroll-into-view-vertical")
       @scrollHoriz  = @cy.$$("#scroll-into-view-horizontal")
       @scrollBoth   = @cy.$$("#scroll-into-view-both")
 
     afterEach ->
-      ## reset the scrollable containers back
-      ## to furthest left and top
+    #   ## reset the scrollable containers back
+    #   ## to furthest left and top
 
-      @body.scrollTop(0)
-      @body.scrollLeft(0)
+      @_body.scrollTop(0)
+      @_body.scrollLeft(0)
 
       @scrollVert.scrollTop(0)
       @scrollVert.scrollLeft(0)
@@ -4466,31 +4465,31 @@ describe "$Cypress.Cy Actions Commands", ->
         expect($div).to.match div
 
     it "scrolls x axis of window to element", ->
-      expect(@body.get(0).scrollTop).to.eq(0)
-      expect(@body.get(0).scrollLeft).to.eq(0)
+      expect(@_body.get(0).scrollTop).to.eq(0)
+      expect(@_body.get(0).scrollLeft).to.eq(0)
 
       @cy.get("#scroll-into-view-win-horizontal div").scrollIntoView().then ($el) ->
-        expect(@body.get(0).scrollTop).to.eq(0)
+        expect(@_body.get(0).scrollTop).to.eq(0)
 
         ## it'll scorll to the position, but this depends on
         ## the size of the window??
-        expect(@body.get(0).scrollLeft).to.not.eq(0)
+        expect(@_body.get(0).scrollLeft).to.not.eq(0)
 
     it "scrolls y axis of window to element", ->
-      expect(@body.get(0).scrollTop).to.eq(0)
-      expect(@body.get(0).scrollLeft).to.eq(0)
+      expect(@_body.get(0).scrollTop).to.eq(0)
+      expect(@_body.get(0).scrollLeft).to.eq(0)
 
       @cy.get("#scroll-into-view-win-vertical div").scrollIntoView().then ($el) ->
-        expect(@body.get(0).scrollTop).to.not.eq(0)
-        expect(@body.get(0).scrollLeft).to.eq(0)
+        expect(@_body.get(0).scrollTop).to.not.eq(0)
+        expect(@_body.get(0).scrollLeft).to.eq(0)
 
-    it.skip "scrolls both axes of window to element", ->
-      expect(@body.get(0).scrollTop).to.eq(0)
-      expect(@body.get(0).scrollLeft).to.eq(0)
+    it "scrolls both axes of window to element", ->
+      expect(@_body.get(0).scrollTop).to.eq(0)
+      expect(@_body.get(0).scrollLeft).to.eq(0)
 
       @cy.get("#scroll-into-view-win-both div").scrollIntoView().then ($el) ->
-        expect(@body.get(0).scrollTop).to.not.eq(0)
-        expect(@body.get(0).scrollLeft).to.not.eq(0)
+        expect(@_body.get(0).scrollTop).to.not.eq(0)
+        expect(@_body.get(0).scrollLeft).to.not.eq(0)
 
     it "scrolls x axis of container to element", ->
       expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
@@ -4500,15 +4499,15 @@ describe "$Cypress.Cy Actions Commands", ->
         expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
         expect(@scrollHoriz.get(0).scrollLeft).to.eq(300)
 
-    it.skip "scrolls y axis of container to element", ->
+    it "scrolls y axis of container to element", ->
       expect(@scrollVert.get(0).scrollTop).to.eq(0)
       expect(@scrollVert.get(0).scrollLeft).to.eq(0)
 
-      @cy.get("#scroll-into-view-horizontal h5").scrollIntoView().then ($el) ->
+      @cy.get("#scroll-into-view-vertical h5").scrollIntoView().then ($el) ->
         expect(@scrollVert.get(0).scrollTop).to.eq(300)
         expect(@scrollVert.get(0).scrollLeft).to.eq(0)
 
-    it.skip "scrolls both axes of container to element", ->
+    it "scrolls both axes of container to element", ->
       expect(@scrollBoth.get(0).scrollTop).to.eq(0)
       expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
@@ -4534,7 +4533,7 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
         expect(scrollTo).to.be.calledWithMatch({}, {axis: "yx"})
 
-    it.skip "scrolling resolves after a set duration", ->
+    it "scrolling resolves after a set duration", ->
       expect(@scrollBoth.get(0).scrollTop).to.eq(0)
       expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
@@ -4542,8 +4541,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#scroll-into-view-both h5").scrollIntoView({duration: 500}).then ->
         expect(scrollTo).to.be.calledWithMatch({}, {duration: 500})
-        expect(@scrollBoth.get(0).scrollTop).to.eq(125)
-        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
+        expect(@scrollBoth.get(0).scrollTop).to.eq(300)
 
     it "accepts duration string option", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
@@ -4569,7 +4568,7 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
         expect(scrollTo.args[0][1].easing).to.eq "swing"
 
-    it.skip "scrolling resolves after easing", ->
+    it "scrolling resolves after easing", ->
       expect(@scrollBoth.get(0).scrollTop).to.eq(0)
       expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
@@ -4577,25 +4576,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#scroll-into-view-both h5").scrollIntoView({easing: "linear"}).then ->
         expect(scrollTo).to.be.calledWithMatch({}, {easing: "linear"})
-        expect(@scrollBoth.get(0).scrollTop).to.eq(25)
-        expect(@scrollBoth.get(0).scrollLeft).to.eq(50)
-
-    it.skip "retries until element is scrollable", ->
-      $container = cy.$$("#nonscroll-becomes-scrollable")
-
-      expect($container.get(0).scrollTop).to.eq(0)
-      expect($container.get(0).scrollLeft).to.eq(0)
-
-      retried = false
-
-      @cy.on "retry", _.after 2, ->
-        $container.css("overflow", "scroll")
-        retried = true
-
-      @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
-        expect(retried).to.be.true
-        expect($container.get(0).scrollTop).to.eq(500)
-        expect($container.get(0).scrollLeft).to.eq(300)
+        expect(@scrollBoth.get(0).scrollTop).to.eq(300)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
 
     describe "errors", ->
       beforeEach ->
@@ -4609,12 +4591,19 @@ describe "$Cypress.Cy Actions Commands", ->
 
           @cy.noop({foo: "bar"}).scrollIntoView()
 
-        it.skip "throws when passed window or document object as subject", (done) ->
+        it "throws when passed window object as subject", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "Cannot call cy.scrollIntoView() on Window subject."
+            done()
+
+          @cy.window().scrollIntoView()
+
+        it "throws when passed document object as subject", (done) ->
           @cy.on "fail", (err) =>
             expect(err.message).to.include "Cannot call cy.scrollIntoView() on a non-DOM subject."
             done()
 
-          @cy.window().scrollIntoView()
+          @cy.document().scrollIntoView()
 
         it "throws if scrollable container is multiple elements", (done) ->
           @cy.on "fail", (err) =>

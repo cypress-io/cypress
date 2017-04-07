@@ -183,16 +183,7 @@ do ($Cypress, _, $) ->
             args: { cmd, node }
           })
 
-    ensureScrollability: ($el, cmd) ->
-      throwErr = ($el) ->
-        ## prep args to throw in error since we can't scroll
-        cmd   ?= @prop("current").get("name")
-        node  = $Cypress.Utils.stringifyElement($el)
-
-        $Cypress.Utils.throwErrByPath("dom.not_scrollable", {
-          args: { cmd, node }
-        })
-
+    isScrollable: ($el) ->
       ## if we're the window, we want to get the document's
       ## element and check it's size against the actual window
       if $Cypress.Utils.hasWindow($el)
@@ -206,8 +197,8 @@ do ($Cypress, _, $) ->
         ## Check if body width is higher than window width
         return true if win.innerWidth < el.scrollWidth
 
-        ## else throw an error since the window is not scrollable
-        return throwErr(win)
+        ## else return false since the window is not scrollable
+        return false
       else
         ## if we're any other element, we do some css calculations
         ## to see that the overflow is correct and the scroll
@@ -226,4 +217,18 @@ do ($Cypress, _, $) ->
         if el.clientWidth < el.scrollWidth
           return true if isScrollOrAuto(overflow) or isScrollOrAuto(overflowX)
 
-        throwErr($el)
+        return false
+
+    ensureScrollability: ($el, cmd) ->
+      throwErr = ($el) ->
+        ## prep args to throw in error since we can't scroll
+        cmd   ?= @prop("current").get("name")
+        node  = $Cypress.Utils.stringifyElement($el)
+
+        $Cypress.Utils.throwErrByPath("dom.not_scrollable", {
+          args: { cmd, node }
+        })
+
+      return true if @isScrollable($el)
+
+      throwErr($el)

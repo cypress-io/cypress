@@ -460,6 +460,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     scrollIntoView:
       invalid_argument: "#{cmd('scrollIntoView')} can only be called with an options object. Your argument was: {{arg}}"
+      subject_is_window: "Cannot call #{cmd('scrollIntoView')} on Window subject."
       multiple_elements: "#{cmd('scrollIntoView')} can only be used to scroll to 1 element, you tried to scroll to {{num}} elements.\n\n"
       invalid_easing: "#{cmd('scrollIntoView')} must be called with a valid easing. Your easing was: {{easing}}"
       invalid_duration: "#{cmd('scrollIntoView')} must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: {{duration}}"

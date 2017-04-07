@@ -351,6 +351,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if !_.isObject(options)
         $Cypress.Utils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: options }})
 
+      ## ensure the subject is not window itself
+      ## cause how are you gonna scroll the window into view...
+      if subject is @private("window")
+        $Cypress.Utils.throwErrByPath("scrollIntoView.subject_is_window")
+
       ## need to ensure the subject is DOM
       @ensureDom(subject)
 
@@ -360,7 +365,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       _.defaults options,
         $el: subject
-        $container: @private("window")
+        $parent: @private("window")
         log: true
         offset: 0
         duration: 0
@@ -371,7 +376,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## be scrolled to get to this element, cause we need
       ## to scrollTo passing in that element.
 
-      $parent = @findScrollableParent(options.$el)
+      options.$parent = @_findScrollableParent(options.$el)
+
+      if options.$parent is @private("window")
+        parentIsWin = true
       ## jQuery scrollTo looks for the prop contentWindow
       ## otherwise it'll use the wrong window to scroll :(
       if options.$container is @private("window")
@@ -394,7 +402,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         log = {
           consoleProps: -> {
             ## merge into consoleProps without mutating it
-            ScrolledTo: $Cypress.Utils.getDomElements(options.$el)
+            "scrolled to": $Cypress.Utils.getDomElements(options.$el)
           }
         }
 
@@ -404,33 +412,37 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         options._log.snapshot("before", {next: "after"})
 
-      # ensureScrollability = =>
-      #   try
-      #     ## make sure our container can even be scrolled
-      #     @ensureScrollability($container, "scrollTo")
-      #   catch err
-      #     options.error = err
-      #     @_retry(ensureScrollability, options)
+      scrollParentIntoView = =>
+        try
+          ## we don't need to get the window into the view...
+          return if parentIsWin
 
-      return new Promise (resolve, reject) =>
+          options.$parent[0].scrollIntoView()
+        catch err
+          options.error = err
 
-        options.$el.offsetParent()[0].scrollIntoView()
+      Promise
+      .try(scrollParentIntoView)
+      .then =>
+        return new Promise (resolve, reject) =>
+          ## scroll our axes
+          $(options.$parent).scrollTo(options.$el, {
+            axis:     options.axis
+            easing:   options.easing
+            duration: options.duration
+            offset:   options.offset
+            done: (animation, jumpedToEnd) ->
+              resolve(options.$el)
+            fail: (animation, jumpedToEnd) ->
+              ## its Promise object is rejected
+              try
+                $Cypress.Utils.throwErrByPath("scrollTo.animation_failed")
+              catch err
+                reject(err)
+          })
 
-        ## scroll our axes
-        $(options.$el.offsetParent()[0]).scrollTo(options.$el, {
-          axis:     options.axis
-          easing:   options.easing
-          duration: options.duration
-          offset:   options.offset
-          # done: (animation, jumpedToEnd) ->
-          #   resolve(options.$el)
-          # fail: (animation, jumpedToEnd) ->
-          #   ## its Promise object is rejected
-          #   try
-          #     $Cypress.Utils.throwErrByPath("scrollTo.animation_failed")
-          #   catch err
-          #     reject(err)
-        })
+        if parentIsWin
+          delete options.$parent.contentWindow
 
 
     ## update dblclick to use the click
@@ -1544,17 +1556,23 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
 
   Cypress.Cy.extend
-    findScrollableParent: ($el) ->
+    _findScrollableParent: ($el) ->
       $parent = $el.parent()
 
-      return $parent if $parent.is("body,html") or $Cypress.Utils.hasDocument($parent)
+      ## if we're at the body, we just want to pass in
+      ## window into jQuery scrollTo
+      if $parent.is("body,html") or $Cypress.Utils.hasDocument($parent)
+        $parent = @private("window")
 
-      try
-        @ensureScrollability($parent, "el")
-      catch
-        @findScrollableParent($parent)
+        ## jQuery scrollTo looks for the prop contentWindow
+        ## otherwise it'll use the wrong window to scroll :(
+        $parent.contentWindow = $parent
 
-      return $parent
+        return $parent
+
+      return $parent if @isScrollable($parent)
+
+      @_findScrollableParent($parent)
 
     _waitForAnimations: ($el, options, coordsHistory = []) ->
       ## determine if this element is animating
