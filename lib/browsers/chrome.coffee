@@ -63,12 +63,12 @@ module.exports = {
         fs.writeFileAsync(extensionBg, str)
       .return(extensionDest)
 
-  open: (url, automation, config = {}, options = {}) ->
-    args = defaultArgs.concat(options.args)
+  open: (browserName, url, automation, config = {}, options = {}) ->
+    args = defaultArgs.concat(options.args or [])
 
     Promise.all([
       ## ensure that we have a chrome profile dir
-      utils.ensureProfile("chrome"),
+      utils.ensureProfile(browserName),
 
       @_writeExtension(config.proxyUrl, config.socketIoRoute)
     ])
@@ -87,5 +87,5 @@ module.exports = {
         args.push("--disable-web-security")
         args.push("--allow-running-insecure-content")
 
-      utils.launch("chrome", url, args)
+      utils.launch(browserName, url, args)
 }

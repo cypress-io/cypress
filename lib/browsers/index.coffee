@@ -39,6 +39,9 @@ browsers = {
   electron: require("./electron")
 }
 
+## normalize all the chrome* browsers
+browsers.chromium = browsers.canary = browsers.chrome
+
 module.exports = {
   get: utils.getBrowsers
 
@@ -61,9 +64,7 @@ module.exports = {
     if not url = options.url
       throw new Error("options.url must be provided when opening a browser. You passed:", options)
 
-    console.log "opening browser", browser, browser.open
-
-    browser.open(url, automation, config, options)
+    browser.open(name, url, automation, config, options)
     .then (i) ->
       ## TODO: bind to process.exit here
       ## or move this functionality into cypress-core-launder

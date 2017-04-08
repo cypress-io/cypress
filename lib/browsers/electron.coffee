@@ -146,7 +146,7 @@ module.exports = {
             resolve(img.toDataURL())
     }
 
-  open: (url, automation, config = {}, options = {}) ->
+  open: (browserName, url, automation, config = {}, options = {}) ->
     @_render(url, options)
     .then (win) =>
       a = @automation(win)
