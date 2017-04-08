@@ -19,7 +19,7 @@ fs              = Promise.promisifyAll(fs)
 # pathToExtension = extension.getPathToExtension()
 # pathToTheme     = extension.getPathToTheme()
 instance        = null
-currentBrowser  = null
+# currentBrowser  = null
 
 kill = (unbind) ->
   ## cleanup our running browser
@@ -30,7 +30,7 @@ kill = (unbind) ->
     instance.removeAllListeners()
   instance.kill()
   instance = null
-  currentBrowser = null
+  # currentBrowser = null
 
 process.once "exit", kill
 
@@ -47,6 +47,13 @@ module.exports = {
   close: kill
 
   open: (name, automation, config = {}, options = {}) ->
+    kill(true)
+
+    # _.defaults options,
+      # args: []
+      # onBrowserOpen: ->
+      # onBrowserClose: ->
+
     if not browser = browsers[name]
       keys = _.keys(browsers).join(", ")
       throw new Error("Browser: #{name} has not been added. Available browsers are: #{keys}")
@@ -54,8 +61,13 @@ module.exports = {
     if not url = options.url
       throw new Error("options.url must be provided when opening a browser. You passed:", options)
 
+    console.log "opening browser", browser, browser.open
+
     browser.open(url, automation, config, options)
     .then (i) ->
+      ## TODO: bind to process.exit here
+      ## or move this functionality into cypress-core-launder
+
       instance = i
 
       ## TODO: normalizing opening and closing / exiting

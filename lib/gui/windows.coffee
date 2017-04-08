@@ -1,12 +1,10 @@
 _             = require("lodash")
-path          = require("path")
 uri           = require("url")
 cyDesktop     = require("@cypress/core-desktop-gui")
 BrowserWindow = require("electron").BrowserWindow
-cwd           = require("../../cwd")
-user          = require("../../user")
-Electron      = require("../../browsers/electron")
-savedState    = require("../../saved_state")
+cwd           = require("../cwd")
+user          = require("../user")
+savedState    = require("../saved_state")
 
 windows               = {}
 recentlyCreatedWindow = false
@@ -42,9 +40,6 @@ module.exports = {
 
   showAll: ->
     _.invoke windows, "showInactive"
-
-  getAutomation: (win) ->
-    win.automation ?= Electron.automation(win)
 
   hideAllUnlessAnotherWindowIsFocused: ->
     ## bail if we have another focused window
@@ -83,21 +78,11 @@ module.exports = {
       height: 500
       show:   true
       webPreferences: {
+        preload: cwd("lib", "ipc", "ipc.js")
         nodeIntegration: false
         backgroundThrottling: false
       }
     }
-
-    ## PROJECT windows are the runner or descendants of the
-    ## runner, so they don't need ipc
-    if not /^PROJECT/.test(options.type)
-      args.webPreferences.preload = cwd("lib", "ipc", "ipc.js")
-
-    if args.show is false
-      args.webPreferences.offscreen = true
-
-    if options.chromeWebSecurity is false
-      args.webPreferences.webSecurity = false
 
     args.url ?= getUrl(options.type)
 
@@ -148,8 +133,8 @@ module.exports = {
     .resolve(args.url)
     .then (url) ->
       if width and height
-        ## QUESTION: is this code unreachable? doesn't seem that
-        ## width and height will ever be truthy
+        ## width and height are truthy when
+        ## transparent: true is sent
         win.webContents.once "dom-ready", ->
           win.setSize(width, height)
           win.show()

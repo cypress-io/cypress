@@ -3,11 +3,17 @@ ipc         = require("electron").ipcMain
 shell       = require("electron").shell
 cyIcons     = require("@cypress/core-icons")
 dialog      = require("./dialog")
-project     = require("./project")
 pgk         = require("./package")
 logs        = require("./logs")
-cookies     = require("./cookies")
-Renderer    = require("./renderer")
+Windows     = require("./windows")
+project     = require("../state/project")
+api         = require("../api")
+open        = require("../util/open")
+user        = require("../user")
+logger      = require("../logger")
+errors      = require("../errors")
+Updater     = require("../updater")
+Project     = require("../project")
 
 handleEvent = (options, bus, event, id, type, arg) ->
   sendResponse = (data = {}) ->
@@ -61,7 +67,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "clear:github:cookies"
-      Renderer.getAutomation(event.sender)
+      Windows.getAutomation(event.sender)
       .clearCookies({domain: "github.com"})
       .return(null)
       .then(send)
@@ -79,7 +85,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "launch:browser"
-      # headless.createRenderer(arg, true)
+      # headless.createWindows(arg, true)
       project.launch(arg.browser, arg.url, arg.spec, {
         onBrowserOpen: ->
           send({browserOpened: true})
@@ -102,12 +108,12 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "window:open"
-      Renderer.create(arg)
+      Windows.create(arg)
       .then(send)
       .catch(sendErr)
 
     when "window:close"
-      Renderer.getByWebContents(event.sender).destroy()
+      Windows.getByWebContents(event.sender).destroy()
 
     when "open:finder"
       open.opn(arg)
@@ -141,7 +147,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
       ## TODO: there is no note here, what if the window
       ## is closed once the updater finishes?
-      win = Renderer.getByWebContents(event.sender)
+      win = Windows.getByWebContents(event.sender)
       win.once "closed", ->
         upd.cancel()
 

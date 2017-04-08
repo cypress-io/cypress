@@ -13,7 +13,7 @@ Updater    = require("../updater")
 logs       = require("../gui/logs")
 menu       = require("../gui/menu")
 Events     = require("../gui/events")
-Renderer   = require("../gui/renderer")
+Windows    = require("../gui/windows")
 
 isDev = ->
   process.env["CYPRESS_ENV"] is "development"
@@ -22,7 +22,7 @@ module.exports = {
   isMac: ->
     os.platform() is "darwin"
 
-  getRendererArgs: (state) ->
+  getWindowArgs: (state) ->
     common = {
       backgroundColor: "#dfe2e4"
       width: state.appWidth or 800
@@ -35,12 +35,12 @@ module.exports = {
       onBlur: ->
         return if @webContents.isDevToolsOpened()
 
-        Renderer.hideAllUnlessAnotherWindowIsFocused()
+        Windows.hideAllUnlessAnotherWindowIsFocused()
       onFocus: ->
         ## hide dev tools if in production and previously focused
         ## window was the electron browser
         menu.set({withDevTools: isDev()})
-        Renderer.showAll()
+        Windows.showAll()
       onClose: ->
         process.exit()
     }
@@ -79,7 +79,7 @@ module.exports = {
 
     savedState.get()
     .then (state) =>
-      Renderer.create(@getRendererArgs(state))
+      Windows.create(@getWindowArgs(state))
       .then (win) =>
         ## cause the browser window instance
         ## to receive focus when we"ve been
@@ -92,7 +92,7 @@ module.exports = {
         if options.updating
           Updater.install(options)
 
-        Renderer.trackState(win, state, {
+        Windows.trackState(win, state, {
           width: "appWidth"
           height: "appHeight"
           x: "appX"
