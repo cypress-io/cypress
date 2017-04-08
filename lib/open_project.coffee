@@ -1,200 +1,139 @@
 _         = require("lodash")
 Promise   = require("bluebird")
-# extension = require("@cypress/core-extension")
-# automation = require("./automation")
-files     = require("../controllers/files")
-config    = require("../config")
-errors    = require("../errors")
-cache     = require("../cache")
-Project   = require("../project")
-browsers  = require("../browsers")
+files     = require("./controllers/files")
+config    = require("./config")
+errors    = require("./errors")
+cache     = require("./cache")
+Project   = require("./project")
+browsers  = require("./browsers")
 
-## global reference to open objects
-onRelaunch      = null
-openProject     = null
-openBrowser     = null
-specIntervalId  = null
-openBrowserCfg  = null
-openBrowserOpts = null
+create = ->
+  openProject     = null
+  specIntervalId  = null
+  relaunchBrowser = null
 
-browsersOpen = (name, automation, config, options) ->
-  browsers.open.apply(browsers, arguments)
+  reset = ->
+    openProject     = null
+    relaunchBrowser = null
 
-module.exports = {
-  open: (path, args = {}, options = {}) ->
-    _.defaults options, {
-      sync: true
-      onReloadBrowser: (url, browser) =>
-        @relaunch(url, browser)
-    }
+  tryToCall = (method, args...) ->
+    return ->
+      if openProject
+        openProject[method].apply(openProject, args)
+      else
+        Promise.resolve(null)
 
-    options = _.extend {}, config.whitelist(args), options
+  return {
+    getConfig: tryToCall("getConfig")
 
-    ## store the currently open project
-    openProject = Project(path)
+    createCiProject: tryToCall("createCiProject")
 
-    browsers.get()
-    .then (b = []) ->
-      ## TODO: maybe if there are no
-      ## browsers here we should just
-      ## immediately close the server?
-      ## but continue sending the config
-      version = process.versions.chrome or ""
-      electronBrowser = {
-        name: "electron"
-        version: version
-        path: ""
-        majorVersion: version.split(".")[0]
-        info: "The Electron browser is the version of Chrome that is bundled with Electron. Cypress uses this browser when running headlessly, so it may be useful for debugging issues that occur only in headless mode."
-      }
-      options.browsers = b.concat(electronBrowser)
+    getRecordKeys: tryToCall("getRecordKeys")
 
-      ## open the project and return
-      ## the config for the project instance
-      openProject.open(options)
-    .return(openProject)
+    getBuilds: tryToCall("getBuilds")
 
-  opened: -> openProject
+    requestAccess: tryToCall("requestAccess")
 
-  launch: (browser, url, spec, options = {}) ->
-    openProject.getConfig()
-    .then (cfg) ->
-      if spec
-        url = openProject.getUrlBySpec(cfg.browserUrl, spec)
-
-      url            ?= cfg.browserUrl
-      openBrowser     = browser
-      openBrowserCfg  = cfg
-      openBrowserOpts = options
-      options.proxyServer ?= cfg.proxyUrl
-      options.chromeWebSecurity = cfg.chromeWebSecurity
-
-      options.url = url
-
-      browsersOpen(browser, openProject.automation, cfg, options)
-      # browsers.open(browser, openProject.automation, cfg, options)
-
-  onRelaunch: (fn) ->
-    onRelaunch = fn
-
-  relaunch: (url, browser) ->
-    if (b = browser) and onRelaunch
-      onRelaunch({
-        browser: b, url: url
-      })
-    else
-      ## if we didnt specify a browser and
-      ## theres not a currently open browser then bail
-      return if not b = openBrowser
-
-      ## assume there are openBrowserOpts
-      # browsers.open(b, url, openBrowserOpts)
-      browsersOpen(b, openProject.automation, openBrowserCfg, openBrowserOpts)
-
-  reboot: ->
-    @close({
-      sync: false
-      clearInterval: false
-    })
-
-  getSpecChanges: (options = {}) ->
-    currentSpecs = null
-
-    _.defaults(options, {
-      onChange: ->
-      onError: ->
-    })
-
-    sendIfChanged = (specs = []) ->
-      ## dont do anything if the specs haven't changed
-      return if _.isEqual(specs, currentSpecs)
-
-      currentSpecs = specs
-      options.onChange(specs)
-
-    checkForSpecUpdates = ->
-      get()
-      .then(sendIfChanged)
-      .catch(options.onError)
-
-    get = ->
-      Promise.try ->
-        openProject.getConfig()
+    launch: (browserName, url, spec, options = {}) ->
+      openProject.getConfig()
       .then (cfg) ->
-        files.getTestFiles(cfg)
+        if spec
+          url = openProject.getUrlBySpec(cfg.browserUrl, spec)
 
-    specIntervalId = setInterval(checkForSpecUpdates, 2500)
+        url            ?= cfg.browserUrl
+        options.proxyServer ?= cfg.proxyUrl
+        options.chromeWebSecurity = cfg.chromeWebSecurity
 
-    ## immediately check the first time around
-    checkForSpecUpdates()
+        options.url = url
 
-  changeToSpec: (spec) ->
-    openProject.getConfig()
-    .then (cfg) ->
-      ## always reset the state when swapping specs
-      ## so that our document.domain is reset back to <root>
-      openProject.resetState()
+        do relaunchBrowser = ->
+          browsers.open(browserName, openProject.automation, cfg, options)
 
-      url = openProject.getUrlBySpec(cfg.browserUrl, spec)
+    getSpecChanges: (options = {}) ->
+      currentSpecs = null
 
-      ## TODO: the problem here is that we really need
-      ## an 'ack' event when changing the url because
-      ## the runner may not even be connected, which
-      ## in that case we need to open a new tab or
-      ## spawn a new browser instance!
-      openProject.changeToUrl(url)
+      _.defaults(options, {
+        onChange: ->
+        onError: ->
+      })
 
-  getBrowsers: ->
-    ## always return an array of open browsers
-    Promise.resolve(_.compact([openBrowser]))
+      sendIfChanged = (specs = []) ->
+        ## dont do anything if the specs haven't changed
+        return if _.isEqual(specs, currentSpecs)
 
-  getRecordKeys: ->
-    openProject.getRecordKeys()
+        currentSpecs = specs
+        options.onChange(specs)
 
-  requestAccess: (projectId) ->
-    openProject.requestAccess(projectId)
+      checkForSpecUpdates = =>
+        if not openProject
+          return @clearSpecInterval()
 
-  createCiProject: (projectDetails) ->
-    openProject.createCiProject(projectDetails)
+        get()
+        .then(sendIfChanged)
+        .catch(options.onError)
 
-  getBuilds: ->
-    openProject.getBuilds()
+      get = ->
+        openProject.getConfig()
+        .then (cfg) ->
+          files.getTestFiles(cfg)
 
-  closeBrowser: ->
-    browsers.close()
+      specIntervalId = setInterval(checkForSpecUpdates, 2500)
 
-    if openProject
-      openProject.resetState()
+      ## immediately check the first time around
+      checkForSpecUpdates()
 
-    openBrowser     = null
-    openBrowserCfg  = null
-    openBrowserOpts = null
-
-    Promise.resolve(null)
-
-  close: (options = {}) ->
-    _.defaults options, {
-      sync: true
-      clearInterval: true
-    }
-
-    nullify = ->
-      ## null these back out
-      onRelaunch      = null
-      openProject     = null
-
-      if options.clearInterval
+    clearSpecInterval: ->
+      if specIntervalId
         clearInterval(specIntervalId)
-        specIntervalId  = null
+        specIntervalId = null
+
+    closeBrowser: ->
+      browsers.close()
 
       Promise.resolve(null)
 
-    if not openProject
-      nullify()
-    else
+    closeOpenProjectAndBrowsers: ->
       Promise.all([
         @closeBrowser()
-        openProject.close(options)
+        openProject.close() if openProject
       ])
-      .then(nullify)
-}
+      .then ->
+        reset()
+
+        return null
+
+    close:  ->
+      @clearSpecInterval()
+      @closeOpenProjectAndBrowsers()
+
+    reboot: ->
+      @closeOpenProjectAndBrowsers()
+      .then(open)
+
+    create: (path, args = {}, options = {}) ->
+      open = ->
+        ## store the currently open project
+        openProject = Project(path)
+
+        ## open the project and return
+        ## the config for the project instance
+        openProject.open(options)
+
+      _.defaults(options, {
+        onReloadBrowser: (url, browser) =>
+          if relaunchBrowser
+            relaunchBrowser()
+      })
+
+      options = _.extend {}, config.whitelist(args), options
+
+      browsers.get()
+      .then (b = []) ->
+        options.browsers = b
+
+        open()
+      .return(@)
+  }
+
+module.exports = create()
+module.exports.Factory = create
