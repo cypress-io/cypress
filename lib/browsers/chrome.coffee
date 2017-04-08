@@ -64,7 +64,7 @@ module.exports = {
       .return(extensionDest)
 
   open: (browserName, url, automation, config = {}, options = {}) ->
-    args = defaultArgs.concat(options.args or [])
+    args = defaultArgs.concat(options.browserArgs)
 
     Promise.all([
       ## ensure that we have a chrome profile dir
