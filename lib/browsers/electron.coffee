@@ -13,29 +13,31 @@ getUrl = (props) ->
 module.exports = {
   _render: (url, options = {}) ->
     _.defaults options,
-      recordFrameRate: null
-      onPaint: null
+      proxyServer:       null
+      recordFrameRate:   null
+      chromeWebSecurity: true
+      onPaint:           null
       onFocus: ->
       onBlur: ->
       onClose: ->
       onCrashed: ->
       onNewWindow: ->
 
-    args = _.defaults {}, options, {
+    args = _.defaults {}, {
       width:             1280
       height:            720
       show:              true
       frame:             true
       devTools:          true
-      proxyServer:       null
-      chromeWebSecurity: true
       webPreferences: {
         nodeIntegration:      false
         backgroundThrottling: false
       }
     }
 
-    if args.show is false
+    if options.show is false
+      args.show = false
+      args.frame = false
       args.webPreferences.offscreen = true
 
     if options.chromeWebSecurity is false
@@ -90,7 +92,7 @@ module.exports = {
         proxyRules: proxyServer
       }, resolve)
 
-  _automations: (win) ->
+  automation: (win) ->
     cookies = Promise.promisifyAll(win.webContents.session.cookies)
 
     return {
@@ -147,10 +149,10 @@ module.exports = {
   open: (url, automation, config = {}, options = {}) ->
     @_render(url, options)
     .then (win) =>
-      automations = @_automations(win)
+      a = @automation(win)
 
       invoke = (method, data) =>
-        automations[method](data)
+        a[method](data)
 
       automation.use({
         onRequest: (message, data) ->
