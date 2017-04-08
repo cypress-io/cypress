@@ -3,8 +3,8 @@ os    = require("os")
 Menu  = require("electron").Menu
 shell = require("electron").shell
 
-appData = require("../../util/app_data")
-open    = require("../../util/open")
+appData = require("../util/app_data")
+open    = require("../util/open")
 
 onUpdatesClicked = ->
 onLogOutClicked = ->

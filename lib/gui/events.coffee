@@ -8,13 +8,6 @@ pgk         = require("./package")
 logs        = require("./logs")
 cookies     = require("./cookies")
 Renderer    = require("./renderer")
-api         = require("../../api")
-open        = require("../../util/open")
-user        = require("../../user")
-logger      = require("../../logger")
-errors      = require("../../errors")
-Updater     = require("../../updater")
-Project     = require("../../project")
 
 handleEvent = (options, bus, event, id, type, arg) ->
   sendResponse = (data = {}) ->
