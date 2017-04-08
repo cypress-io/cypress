@@ -1,6 +1,6 @@
 _         = require("lodash")
 Promise   = require("bluebird")
-extension = require("@cypress/core-extension")
+# extension = require("@cypress/core-extension")
 # automation = require("./automation")
 files     = require("../controllers/files")
 config    = require("../config")
@@ -14,7 +14,11 @@ onRelaunch      = null
 openProject     = null
 openBrowser     = null
 specIntervalId  = null
+openBrowserCfg  = null
 openBrowserOpts = null
+
+browsersOpen = (name, automation, config, options) ->
+  browsers.open.apply(browsers, arguments)
 
 module.exports = {
   open: (path, args = {}, options = {}) ->
@@ -44,7 +48,6 @@ module.exports = {
         info: "The Electron browser is the version of Chrome that is bundled with Electron. Cypress uses this browser when running headlessly, so it may be useful for debugging issues that occur only in headless mode."
       }
       options.browsers = b.concat(electronBrowser)
-      # options.onAutomationRequest = launcher.onAutomationRequest
 
       ## open the project and return
       ## the config for the project instance
@@ -61,11 +64,15 @@ module.exports = {
 
       url            ?= cfg.browserUrl
       openBrowser     = browser
+      openBrowserCfg  = cfg
       openBrowserOpts = options
       options.proxyServer ?= cfg.proxyUrl
       options.chromeWebSecurity = cfg.chromeWebSecurity
 
-      browsers.launch(browser, url, options)
+      options.url = url
+
+      browsersOpen(browser, openProject.automation, cfg, options)
+      # browsers.open(browser, openProject.automation, cfg, options)
 
   onRelaunch: (fn) ->
     onRelaunch = fn
@@ -81,7 +88,8 @@ module.exports = {
       return if not b = openBrowser
 
       ## assume there are openBrowserOpts
-      browsers.launch(b, url, openBrowserOpts)
+      # browsers.open(b, url, openBrowserOpts)
+      browsersOpen(b, openProject.automation, openBrowserCfg, openBrowserOpts)
 
   reboot: ->
     @close({
@@ -159,6 +167,7 @@ module.exports = {
       openProject.resetState()
 
     openBrowser     = null
+    openBrowserCfg  = null
     openBrowserOpts = null
 
     Promise.resolve(null)
