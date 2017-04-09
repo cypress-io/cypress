@@ -50,8 +50,7 @@ module.exports = {
     _.invoke windows, "hide"
 
   getByWebContents: (webContents) ->
-    _.find windows, (win) ->
-      win.webContents is webContents
+    BrowserWindow.fromWebContents(webContents)
 
   create: (options = {}) ->
     ## if we already have a window open based
