@@ -107,8 +107,6 @@ create = ->
       @closeOpenProjectAndBrowsers()
 
     reboot: ->
-      @closeOpenProjectAndBrowsers()
-      .then(open)
 
     create: (path, args = {}, options = {}) ->
       open = ->
@@ -124,6 +122,10 @@ create = ->
           if relaunchBrowser
             relaunchBrowser()
       })
+
+      @reboot = ->
+        @closeOpenProjectAndBrowsers()
+        .then(open)
 
       options = _.extend {}, config.whitelist(args), options
 
