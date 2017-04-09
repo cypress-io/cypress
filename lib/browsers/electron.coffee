@@ -1,4 +1,5 @@
 _             = require("lodash")
+EE            = require("events")
 Promise       = require("bluebird")
 extension     = require("@cypress/core-extension")
 BrowserWindow = require("electron").BrowserWindow
@@ -180,7 +181,12 @@ module.exports = {
           if not win.isDestroyed()
             win[method]()
 
-      return {
+      events = new EE
+
+      win.once "closed", ->
+        events.emit("exit")
+
+      return _.extend events, {
         browserWindow:      win
         kill:               call("close")
         removeAllListeners: call("removeAllListeners")

@@ -90,8 +90,6 @@ create = ->
     closeBrowser: ->
       browsers.close()
 
-      Promise.resolve(null)
-
     closeOpenProjectAndBrowsers: ->
       Promise.all([
         @closeBrowser()
