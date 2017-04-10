@@ -2,7 +2,9 @@ _             = require("lodash")
 EE            = require("events")
 Promise       = require("bluebird")
 extension     = require("@cypress/core-extension")
-BrowserWindow = require("electron").BrowserWindow
+menu          = require("../gui/menu")
+Windows       = require("../gui/windows")
+savedState    = require("../saved_state")
 
 firstOrNull = (cookies) ->
   ## normalize into null when empty array
@@ -12,72 +14,67 @@ getUrl = (props) ->
   extension.getCookieUrl(props)
 
 module.exports = {
-  _render: (url, options = {}) ->
-    _.defaults options,
-      proxyServer:       null
-      recordFrameRate:   null
-      chromeWebSecurity: true
-      onPaint:           null
-      onFocus: ->
-      onBlur: ->
-      onClose: ->
-      onCrashed: ->
-      onNewWindow: ->
+  _render: (url, state, options = {}) ->
+    _this = @
 
-    args = _.defaults {}, {
-      width:             1280
-      height:            720
-      show:              true
-      frame:             true
-      devTools:          true
-      webPreferences: {
-        nodeIntegration:      false
-        backgroundThrottling: false
+    ## TODO: dont forget about type: "PROJECT" here
+
+    _.defaults(options, {
+      x: state.browserX
+      y: state.browserY
+      width: state.browserWidth or 1280
+      height: state.browserHeight or 720
+      devTools: state.isBrowserDevToolsOpen
+      minWidth: 100
+      minHeight: 100
+      contextMenu: true
+      trackState: {
+        width: "browserWidth"
+        height: "browserHeight"
+        x: "browserX"
+        y: "browserY"
+        devTools: "isBrowserDevToolsOpen"
       }
-    }
+      onFocus: ->
+        menu.set({withDevTools: true})
+      onNewWindow: (e, url) ->
+        _win = @
 
-    if options.show is false
-      args.show = false
-      args.frame = false
-      args.webPreferences.offscreen = true
+        _this._launchChild(e, url, _win, options)
+        .then (child) ->
+          ## close child on parent close
+          _win.on "close", ->
+            if not child.isDestroyed()
+              child.close()
+    })
 
-    if options.chromeWebSecurity is false
-      args.webPreferences.webSecurity = false
+    win = Windows.create(options)
 
-    win = new BrowserWindow(args)
+    @_launch(win, url, options)
 
-    # win.on "blur", ->
-    #   options.onBlur.apply(win, arguments)
+  _launchChild: (e, url, parent, options) ->
+    e.preventDefault()
 
-    # win.on "focus", ->
-    #   options.onFocus.apply(win, arguments)
+    [parentX, parentY] = parent.getPosition()
 
-    win.webContents.on "crashed", ->
-      options.onCrashed.apply(win, arguments)
+    options = _.clone(options)
 
-    win.webContents.on "new-window", ->
-      options.onNewWindow.apply(win, arguments)
+    _.extend(options, {
+      x: parentX + 100
+      y: parentY + 100
+      trackState: false
+    })
 
-    # win.once "closed", ->
-      # win.webContents.removeAllListeners()
-      # win.removeAllListeners()
-      # options.onClose()
+    win = Windows.create(options)
 
-    ## open dev tools if they're true
-    if args.devTools
-      ## TODO: we may not want to detach these
-      win.webContents.openDevTools({detach: true})
+    ## needed by electron since we prevented default and are creating
+    ## our own BrowserWindow (https://electron.atom.io/docs/api/web-contents/#event-new-window)
+    e.newGuest = win
 
-    if options.onPaint
-      setFrameRate = (num) ->
-        if win.webContents.getFrameRate() isnt num
-          win.webContents.setFrameRate(num)
+    @_launch(win, url, options)
 
-      win.webContents.on "paint", (event, dirty, image) ->
-        if fr = options.recordFrameRate
-          setFrameRate(fr)
-
-        options.onPaint.apply(win, arguments)
+  _launch: (win, url, options) ->
+    menu.set({withDevTools: true})
 
     Promise
     .try =>
@@ -148,47 +145,50 @@ module.exports = {
     }
 
   open: (browserName, url, automation, config = {}, options = {}) ->
-    @_render(url, options)
-    .then (win) =>
-      a = @automation(win)
+    savedState.get()
+    .then (state) =>
+      @_render(url, state, options)
+      .then (win) =>
+        a = @automation(win)
 
-      invoke = (method, data) =>
-        a[method](data)
+        invoke = (method, data) =>
+          a[method](data)
 
-      automation.use({
-        onRequest: (message, data) ->
-          switch message
-            when "get:cookies"
-              invoke("getCookies", data)
-            when "get:cookie"
-              invoke("getCookie", data)
-            when "set:cookie"
-              invoke("setCookie", data)
-            when "clear:cookies"
-              invoke("clearCookies", data)
-            when "clear:cookie"
-              invoke("clearCookie", data)
-            when "is:automation:client:connected"
-              invoke("isAutomationConnected", data)
-            when "take:screenshot"
-              invoke("takeScreenshot")
-            else
-              throw new Error("No automation handler registered for: '#{message}'")
-      })
+        automation.use({
+          onRequest: (message, data) ->
+            switch message
+              when "get:cookies"
+                invoke("getCookies", data)
+              when "get:cookie"
+                invoke("getCookie", data)
+              when "set:cookie"
+                invoke("setCookie", data)
+              when "clear:cookies"
+                invoke("clearCookies", data)
+              when "clear:cookie"
+                invoke("clearCookie", data)
+              when "is:automation:client:connected"
+                invoke("isAutomationConnected", data)
+              when "take:screenshot"
+                invoke("takeScreenshot")
+              else
+                throw new Error("No automation handler registered for: '#{message}'")
+        })
 
-      call = (method) ->
-        return ->
-          if not win.isDestroyed()
-            win[method]()
+        call = (method) ->
+          return ->
+            if not win.isDestroyed()
+              win[method]()
 
-      events = new EE
+        events = new EE
 
-      win.once "closed", ->
-        events.emit("exit")
+        win.once "closed", ->
+          call("removeAllListeners")
+          events.emit("exit")
 
-      return _.extend events, {
-        browserWindow:      win
-        kill:               call("close")
-        removeAllListeners: call("removeAllListeners")
-      }
+        return _.extend events, {
+          browserWindow:      win
+          kill:               call("close")
+          removeAllListeners: call("removeAllListeners")
+        }
 }

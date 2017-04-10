@@ -1,6 +1,7 @@
 _             = require("lodash")
 uri           = require("url")
 cyDesktop     = require("@cypress/core-desktop-gui")
+contextMenu   = require("electron-context-menu")
 BrowserWindow = require("electron").BrowserWindow
 cwd           = require("../cwd")
 user          = require("../user")
@@ -53,6 +54,87 @@ module.exports = {
     BrowserWindow.fromWebContents(webContents)
 
   create: (options = {}) ->
+    _.defaultsDeep(options, {
+      x:               null
+      y:               null
+      show:            true
+      frame:           true
+      width:           null
+      height:          null
+      winWidth:        null
+      minHeight:       null
+      devTools:        false
+      trackState:      false
+      contextMenu:     false
+      detachDevTools:  true
+      recordFrameRate: null
+      onPaint:         null
+      onFocus: ->
+      onBlur: ->
+      onClose: ->
+      onCrashed: ->
+      onNewWindow: ->
+      webPreferences:  {
+        chromeWebSecurity:    true
+        nodeIntegration:      false
+        backgroundThrottling: false
+      }
+    })
+
+    if options.show is false
+      options.frame = false
+      options.webPreferences.offscreen = true
+
+    if options.chromeWebSecurity is false
+      options.webPreferences.webSecurity = false
+
+    win = new BrowserWindow(options)
+
+    win.on "blur", ->
+      options.onBlur.apply(win, arguments)
+
+    win.on "focus", ->
+      options.onFocus.apply(win, arguments)
+
+    win.once "closed", ->
+      win.removeAllListeners()
+      options.onClose.apply(win, arguments)
+
+    win.webContents.on "crashed", ->
+      options.onCrashed.apply(win, arguments)
+
+    win.webContents.on "new-window", ->
+      options.onNewWindow.apply(win, arguments)
+
+    if ts = options.trackState
+      @trackState(win, ts)
+
+    ## open dev tools if they're true
+    if options.devTools
+      ## and possibly detach dev tools if true
+      win.webContents.openDevTools({detach: options.detachDevTools})
+
+    if options.contextMenu
+      ## adds context menu with copy, paste, inspect element, etc
+      contextMenu({
+        showInspectElement: true
+        window: win
+      })
+
+    if options.onPaint
+      setFrameRate = (num) ->
+        if win.webContents.getFrameRate() isnt num
+          win.webContents.setFrameRate(num)
+
+      win.webContents.on "paint", (event, dirty, image) ->
+        if fr = options.recordFrameRate
+          setFrameRate(fr)
+
+        options.onPaint.apply(win, arguments)
+
+    win
+
+  open: (options = {}) ->
     ## if we already have a window open based
     ## on that type then just show + focus it!
     if win = getByType(options.type)
@@ -67,23 +149,15 @@ module.exports = {
 
     recentlyCreatedWindow = true
 
-    _.defaults options,
-      onFocus: ->
-      onBlur: ->
-      onClose: ->
-
-    args = _.defaults {}, options, {
+    _.defaults options, {
       width:  600
       height: 500
       show:   true
+      url:    getUrl(options.type)
       webPreferences: {
         preload: cwd("lib", "ipc", "ipc.js")
-        nodeIntegration: false
-        backgroundThrottling: false
       }
     }
-
-    args.url ?= getUrl(options.type)
 
     urlChanged = (url, resolve) ->
       parsed = uri.parse(url, true)
@@ -96,47 +170,34 @@ module.exports = {
 
         resolve(code)
 
-    if args.transparent and args.show
-      {width, height} = args
+    # if args.transparent and args.show
+    #   {width, height} = args
 
-      args.show = false
-      args.width = 0
-      args.height = 0
+    #   args.show = false
+    #   args.width = 0
+    #   args.height = 0
 
-    win = new BrowserWindow(args)
-
-    win.on "blur", ->
-      options.onBlur.apply(win, arguments)
-
-    win.on "focus", ->
-      options.onFocus.apply(win, arguments)
+    win = @create(options)
 
     windows[options.type] = win
 
     win.webContents.id = _.uniqueId("webContents")
 
     win.once "closed", ->
-      win.removeAllListeners()
-      options.onClose()
-
       ## slice the window out of windows reference
       delete windows[options.type]
-
-    ## open dev tools if they're true
-    if args.devTools
-      win.webContents.openDevTools({detach: true})
 
     ## enable our url to be a promise
     ## and wait for this to be resolved
     Promise
-    .resolve(args.url)
+    .resolve(options.url)
     .then (url) ->
-      if width and height
-        ## width and height are truthy when
-        ## transparent: true is sent
-        win.webContents.once "dom-ready", ->
-          win.setSize(width, height)
-          win.show()
+      # if width and height
+      #   ## width and height are truthy when
+      #   ## transparent: true is sent
+      #   win.webContents.once "dom-ready", ->
+      #     win.setSize(width, height)
+      #     win.show()
 
       ## navigate the window here!
       win.loadURL(url)
@@ -144,7 +205,7 @@ module.exports = {
       ## reset this back to false
       recentlyCreatedWindow = false
 
-      if args.type is "GITHUB_LOGIN"
+      if options.type is "GITHUB_LOGIN"
         new Promise (resolve, reject) ->
           win.webContents.on "will-navigate", (e, url) ->
             urlChanged(url, resolve)
@@ -154,7 +215,7 @@ module.exports = {
       else
         Promise.resolve(win)
 
-  trackState: (win, state, keys) ->
+  trackState: (win, keys) ->
     win.on "resize", _.debounce ->
       [width, height] = win.getSize()
       [x, y] = win.getPosition()
@@ -173,9 +234,6 @@ module.exports = {
       newState[keys.y] = y
       savedState.set(newState)
     , 500
-
-    if state[keys.devTools]
-      win.webContents.openDevTools()
 
     win.webContents.on "devtools-opened", ->
       newState = {}

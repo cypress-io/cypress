@@ -32,6 +32,14 @@ module.exports = {
       x: state.appX
       y: state.appY
       type: "INDEX"
+      devTools: state.isAppDevToolsOpen
+      trackState: {
+        width: "appWidth"
+        height: "appHeight"
+        x: "appX"
+        y: "appY"
+        devTools: "isAppDevToolsOpen"
+      }
       onBlur: ->
         return if @webContents.isDevToolsOpened()
 
@@ -79,7 +87,7 @@ module.exports = {
 
     savedState.get()
     .then (state) =>
-      Windows.create(@getWindowArgs(state))
+      Windows.open(@getWindowArgs(state))
       .then (win) =>
         ## cause the browser window instance
         ## to receive focus when we"ve been
@@ -91,14 +99,6 @@ module.exports = {
 
         if options.updating
           Updater.install(options)
-
-        Windows.trackState(win, state, {
-          width: "appWidth"
-          height: "appHeight"
-          x: "appX"
-          y: "appY"
-          devTools: "isAppDevToolsOpen"
-        })
 
         return win
 

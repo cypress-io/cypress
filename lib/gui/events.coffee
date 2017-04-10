@@ -92,7 +92,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "window:open"
-      Windows.create(arg)
+      Windows.open(arg)
       .then(send)
       .catch(sendErr)
 
