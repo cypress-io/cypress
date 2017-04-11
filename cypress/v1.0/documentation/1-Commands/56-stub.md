@@ -17,19 +17,19 @@ Unlike most Cypress commands, `cy.stub` is *synchronous* and returns a value (th
 
 ***
 
-# [cy.stub()](#section-usage)
+# [cy.stub()](#usage)
 
 Creates and returns a stub. See the [sinon.js stub docs](http://sinonjs.org/docs/#stubs) for methods on the stub.
 
 ***
 
-# [cy.stub( *object*, *"method"* )](#section-replace-a-method-with-a-stub)
+# [cy.stub( *object*, *"method"* )](#replace-a-method-with-a-stub)
 
 Replaces the `method` on the `object` with a stub and returns the stub. See the [sinon.js stub docs](http://sinonjs.org/docs/#stubs) for methods on the stub.
 
 ***
 
-# [cy.stub( *object*, *"method"*, replacerFn )](#section-replace-a-method-with-a-function)
+# [cy.stub( *object*, *"method"*, replacerFn )](#replace-a-method-with-a-function)
 
 Replaces the `method` on the `object` with the `replacerFn` wrapped in a spy.See the [sinon.js spy docs](http://sinonjs.org/docs/#spies) for methods on the spy.
 

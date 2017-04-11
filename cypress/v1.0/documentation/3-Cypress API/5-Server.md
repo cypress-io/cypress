@@ -5,7 +5,7 @@ Any configuration you pass to [`cy.server`](https://on.cypress.io/api/server) wi
 
 ***
 
-# [Cypress.Server.defaults( *object* )](#section-usage)
+# [Cypress.Server.defaults( *object* )](#usage)
 
 Change default configuration for [`cy.server`](https://on.cypress.io/api/server)
 

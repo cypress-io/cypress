@@ -8,11 +8,11 @@ If you want to call a function on the current subject, use [`cy.invoke`](https:/
 | | |
 |--- | --- |
 | **Returns** | the value of the property |
-| **Timeout** | `cy.its` cannot timeout unless you've added assertions. The assertions will retry for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.its` cannot timeout unless you've added assertions. The assertions will retry for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
 ***
 
-# [cy.its( *propertyName* )](#section-usage)
+# [cy.its( *propertyName* )](#usage)
 
 Gets the property with the specified name.
 

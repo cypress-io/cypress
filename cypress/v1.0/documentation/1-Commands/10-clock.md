@@ -13,25 +13,25 @@ If you call `cy.clock` before visiting a page with [`cy.visit`](https://on.cypre
 
 | | |
 |--- | --- |
-| **Returns** | a `clock` object. See [clock API](#section-clock-api) |
+| **Returns** | a `clock` object. See [clock API](#clock-api) |
 
 ***
 
-# [cy.clock()](#section-usage)
+# [cy.clock()](#usage)
 
-Replaces `setTimeout`, `clearTimeout`, `setInterval`, `clearInterval` and `Date` and allows them to be controlled synchronously via [`cy.tick`](https://on.cypress.io/api/tick) or the yielded `clock` object (see [clock API](#section-clock-api)).
+Replaces `setTimeout`, `clearTimeout`, `setInterval`, `clearInterval` and `Date` and allows them to be controlled synchronously via [`cy.tick`](https://on.cypress.io/api/tick) or the yielded `clock` object (see [clock API](#clock-api)).
 
 The clock starts at the unix epoch (timestamp of 0). This means that when you instantiate `new Date` in your application, it will have a time of `January 1st, 1970`.
 
 ***
 
-# [cy.clock( *now* )](#section-specify-the-now-timestamp)
+# [cy.clock( *now* )](#specify-the-now-timestamp)
 
 Same as above, but starts the clock at the specified timestamp.
 
 ***
 
-# [cy.clock( *now*, *functionNames* )](#section-specify-which-functions-to-override)
+# [cy.clock( *now*, *functionNames* )](#specify-which-functions-to-override)
 
 Same as above, but only overrides the functions in the array `functionNames`.
 

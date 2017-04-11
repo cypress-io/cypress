@@ -3,13 +3,13 @@ excerpt: Quick start guide for using Cypress
 
 # Contents
 
-- :fa-angle-right: [System Requirements](#section-system-requirements)
-- :fa-angle-right: [Installing](#section-installing)
-  - [Command Line](#section-command-line-tool)
-  - [Direct Download](#section-direct-download)
-- :fa-angle-right: [Logging In](#section-logging-in)
-- :fa-angle-right: [Adding Projects](#section-adding-projects)
-- :fa-angle-right: [Running Headlessly](#section-running-headlessly)
+- :fa-angle-right: [System Requirements](#system-requirements)
+- :fa-angle-right: [Installing](#installing)
+  - [Command Line](#command-line-tool)
+  - [Direct Download](#direct-download)
+- :fa-angle-right: [Logging In](#logging-in)
+- :fa-angle-right: [Adding Projects](#adding-projects)
+- :fa-angle-right: [Running Headlessly](#running-headlessly)
 
 ***
 
@@ -42,7 +42,7 @@ There are no dependencies to install the Desktop Application, although if you wa
 
 You can install Cypress in 2 different ways:
 * [Cypress CLI Tool](https://github.com/cypress-io/cypress-cli)
-* [Direct Download](#section-direct-download)
+* [Direct Download](#direct-download)
 
 ## Command Line Tool
 
@@ -71,7 +71,7 @@ You can download Cypress directly [here.](http://download.cypress.io/desktop)
 [block:callout]
 {
   "type": "danger",
-  "body": "The vast majority of the time, Cypress will install correctly. But if you're on Linux you [might have to install some other dependencies](https://on.cypress.io/guides/continuous-integration#section-dependencies).",
+  "body": "The vast majority of the time, Cypress will install correctly. But if you're on Linux you [might have to install some other dependencies](https://on.cypress.io/guides/continuous-integration#dependencies).",
   "title": "Woops, I got an error installing"
 }
 [/block]
@@ -110,7 +110,7 @@ After successfully logging in, you will need to add the project(s) you want to w
 [block:callout]
 {
   "type": "info",
-  "body": "Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are [setup to be recorded](https://on.cypress.io/guides/projects#section-recording-runs)."
+  "body": "Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are [setup to be recorded](https://on.cypress.io/guides/projects#recording-runs)."
 }
 [/block]
 

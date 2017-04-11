@@ -6,17 +6,17 @@ Writes to a file with the specified contents. JavaScript arrays and objects are 
 | | |
 |--- | --- |
 | **Returns** | the contents written to the file |
-| **Timeout** | `cy.writeFile` will wait for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the server to write the file. |
+| **Timeout** | `cy.writeFile` will wait for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to write the file. |
 
 ***
 
-# [cy.writeFile( *filePath*, *contents* )](#section-usage)
+# [cy.writeFile( *filePath*, *contents* )](#usage)
 
 Writes to the `filePath` with the `contents`. The `filePath` is relative to the project's root. `contents` must be a string, an array, or an object.
 
 ***
 
-# [cy.writeFile( *filePath*, *contents*, *encoding* )](#section-specify-encoding)
+# [cy.writeFile( *filePath*, *contents*, *encoding* )](#specify-encoding)
 
 Writes to the `filePath` with the `contents` using the `encoding`. The `filePath` is relative to the project's root. `contents` must be a string, an array, or an object.
 
@@ -32,7 +32,7 @@ Pass in an options object to change the default behavior of `cy.writeFile`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.writeFile` command to be processed
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.writeFile` command to be processed
 
 ***
 

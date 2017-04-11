@@ -6,11 +6,11 @@ Get the first DOM element that matches the selector whether it be itself or one 
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.filter` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.filter` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
 ***
 
-# [cy.closest( *selector* )](#section-selector-usage)
+# [cy.closest( *selector* )](#selector-usage)
 
 For each DOM element in the set, get the first DOM element that matches the selector by testing the DOM element itself and traversing up through its ancestors in the DOM tree.
 
@@ -25,7 +25,7 @@ Pass in an options object to change the default behavior of `cy.closest`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ***
 
