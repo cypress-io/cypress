@@ -221,15 +221,12 @@ do ($Cypress, _, $) ->
         return false
 
     ensureScrollability: ($el, cmd) ->
-      throwErr = ($el) ->
-        ## prep args to throw in error since we can't scroll
-        cmd   ?= @prop("current").get("name")
-        node  = $Cypress.Utils.stringifyElement($el)
-
-        $Cypress.Utils.throwErrByPath("dom.not_scrollable", {
-          args: { cmd, node }
-        })
-
       return true if @isScrollable($el)
 
-      throwErr($el)
+      ## prep args to throw in error since we can't scroll
+      cmd   ?= @prop("current").get("name")
+      node  = $Cypress.Utils.stringifyElement($el)
+
+      $Cypress.Utils.throwErrByPath("dom.not_scrollable", {
+        args: { cmd, node }
+      })

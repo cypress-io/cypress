@@ -375,15 +375,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## here we want to figure out what has to actually
       ## be scrolled to get to this element, cause we need
       ## to scrollTo passing in that element.
-
       options.$parent = @_findScrollableParent(options.$el)
 
       if options.$parent is @private("window")
         parentIsWin = true
-      ## jQuery scrollTo looks for the prop contentWindow
-      ## otherwise it'll use the wrong window to scroll :(
-      if options.$container is @private("window")
-        options.$container.contentWindow = options.$container
+        ## jQuery scrollTo looks for the prop contentWindow
+        ## otherwise it'll use the wrong window to scroll :(
+        options.$parent.contentWindow = options.$parent
 
       isNaNOrInfinity = (item) ->
         num = Number.parseFloat(item)
@@ -412,38 +410,36 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         options._log.snapshot("before", {next: "after"})
 
-      scrollParentIntoView = =>
-        try
-          ## we don't need to get the window into the view...
-          return if parentIsWin
+      if not parentIsWin
+        ## scroll the parent into view first
+        ## before attemp
+        options.$parent[0].scrollIntoView()
 
-          options.$parent[0].scrollIntoView()
-        catch err
-          options.error = err
 
-      Promise
-      .try(scrollParentIntoView)
-      .then =>
-        return new Promise (resolve, reject) =>
-          ## scroll our axes
-          $(options.$parent).scrollTo(options.$el, {
-            axis:     options.axis
-            easing:   options.easing
-            duration: options.duration
-            offset:   options.offset
-            done: (animation, jumpedToEnd) ->
-              resolve(options.$el)
-            fail: (animation, jumpedToEnd) ->
-              ## its Promise object is rejected
-              try
-                $Cypress.Utils.throwErrByPath("scrollTo.animation_failed")
-              catch err
-                reject(err)
-          })
+      # do scrollParentIntoView = ->
+      #   ## we don't need to get the window into the view...
+      #   return if parentIsWin
 
-        if parentIsWin
-          delete options.$parent.contentWindow
 
+      return new Promise (resolve, reject) =>
+        ## scroll our axes
+        $(options.$parent).scrollTo(options.$el, {
+          axis:     options.axis
+          easing:   options.easing
+          duration: options.duration
+          offset:   options.offset
+          done: (animation, jumpedToEnd) ->
+            resolve(options.$el)
+          fail: (animation, jumpedToEnd) ->
+            ## its Promise object is rejected
+            try
+              $Cypress.Utils.throwErrByPath("scrollTo.animation_failed")
+            catch err
+              reject(err)
+          always: ->
+            if parentIsWin
+              delete options.$parent.contentWindow
+        })
 
     ## update dblclick to use the click
     ## logic and just swap out the event details?
@@ -1562,13 +1558,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## if we're at the body, we just want to pass in
       ## window into jQuery scrollTo
       if $parent.is("body,html") or $Cypress.Utils.hasDocument($parent)
-        $parent = @private("window")
-
-        ## jQuery scrollTo looks for the prop contentWindow
-        ## otherwise it'll use the wrong window to scroll :(
-        $parent.contentWindow = $parent
-
-        return $parent
+        return @private("window")
 
       return $parent if @isScrollable($parent)
 
