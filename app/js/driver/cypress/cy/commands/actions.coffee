@@ -1436,8 +1436,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           .return(options.$el)
 
   Cypress.addDualCommand
-    scrollTo: (subject, x, yOrOptions, options = {}) ->
-      if not x
+    scrollTo: (subject, xOrPosition, yOrOptions, options = {}) ->
+      if not xOrPosition
         $Cypress.Utils.throwErrByPath "scrollTo.invalid_target", {args: { x }}
 
       switch
@@ -1446,10 +1446,51 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         else
           y = yOrOptions
 
-      y ?= 0
+      position = null
 
-      # if (_.isNaN(y) or _.isNaN(x) or !_.isFinite(y) or !_.isFinite(x))
-        # $Cypress.Utils.throwErrByPath "scrollTo.invalid_target", {args: {y, x}}
+      ## we may be '50%' or 'bottomCenter'
+      if _.isString(xOrPosition)
+        ## if there's a number in our string, then
+        ## don't check for positions and just set x
+        if (Number.parseFloat(xOrPosition))
+          x = xOrPosition
+        else
+          position = xOrPosition
+          ## make sure it's one of the valid position strings
+          @ensureValidPosition(position)
+      else
+        x = xOrPosition
+
+      switch position
+        when 'topLeft'
+          x = 0       # y = 0
+        when 'topCenter'
+          x = '50%'   # y = 0
+        when 'topRight'
+          x = '100%'  # y = 0
+        when 'centerLeft'
+          x = 0
+          y = '50%'
+        when 'center'
+          x = '50%'
+          y = '50%'
+        when 'centerRight'
+          x = '100%'
+          y = '50%'
+        when 'bottomLeft'
+          x = 0
+          y = '100%'
+        when 'bottomCenter'
+          x = '50%'
+          y = '100%'
+        when 'bottomRight'
+          x = '100%'
+          y = '100%'
+        else
+          break
+
+      y ?= 0
+      x ?= 0
 
       if subject
         ## if they passed something here, need to ensure it's DOM
@@ -1515,7 +1556,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         if !isWin then log.$el = options.$el
 
         options._log = Cypress.Log.command(log)
-
 
         options._log.snapshot("before", {next: "after"})
 
