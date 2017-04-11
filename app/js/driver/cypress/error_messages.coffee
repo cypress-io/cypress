@@ -154,7 +154,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
         Fix this problem, or use {force: true} to disable error checking.\n
         https://on.cypress.io/element-cannot-be-interacted-with
       """
-      invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be topLeft, topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, or bottomRight."
+      invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be {{validPositions}}."
       hidden: """
         #{cmd('{{cmd}}')} failed because the center of this element is hidden from view:\n
         {{node}}\n

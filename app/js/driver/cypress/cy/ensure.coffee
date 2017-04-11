@@ -181,8 +181,15 @@ do ($Cypress, _, $) ->
             args: { cmd, node }
           })
 
+    ensureValidPosition: (position) ->
+      validPositions = ["topLeft", "topCenter", "topRight", "centerLeft", "center", "centerRight", "bottomLeft", "bottomCenter", "bottomRight"]
 
+      if (validPositions.indexOf(position) is -1)
+        $Cypress.Utils.throwErrByPath("dom.invalid_position_argument", {
+          args: { position, validPositions: validPositions.join(', ') }
+        })
       else
+        return true
 
     ensureScrollability: ($el, cmd) ->
       return true if $Cypress.Dom.elIsScrollable($el)

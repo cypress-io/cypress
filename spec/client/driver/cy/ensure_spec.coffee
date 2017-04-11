@@ -75,12 +75,19 @@ describe "$Cypress.Cy Ensure Extensions", ->
 
       expect(fn).not.to.throw(Error)
 
+  context "#ensureValidPosition", ->
     beforeEach ->
       @allowErrors()
 
+    it "throws when invalid position", ->
+      fn = => @cy.ensureValidPosition("foo")
 
+      expect(fn).to.throw('Invalid position argument: \'foo\'. Position may only be topLeft, topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, bottomRight.')
 
+    it "does not throws when valid position", ->
+      fn = => @cy.ensureValidPosition("topRight")
 
+      expect(fn).to.not.throw
 
   context "#ensureScrollability", ->
     beforeEach ->
