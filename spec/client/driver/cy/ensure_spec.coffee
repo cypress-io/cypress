@@ -75,86 +75,12 @@ describe "$Cypress.Cy Ensure Extensions", ->
 
       expect(fn).not.to.throw(Error)
 
-  context "#isScrollable", ->
     beforeEach ->
       @allowErrors()
 
-      @add = (el) =>
-        $(el).appendTo(@cy.$$("body"))
 
-    it "returns true if window and body > window height", ->
-      win = @cy.private("window")
 
-      fn = => @cy.isScrollable(win)
 
-      expect(fn()).to.be.true
-
-    it "returns false window and body > window height", ->
-
-      @cy.$$("body").html("<div>foo</div>")
-
-      win = @cy.private("window")
-
-      fn = => @cy.isScrollable(win)
-
-      expect(fn()).to.be.false
-
-    it "returns false el is not scrollable", ->
-      noScroll = @add """
-        <div style="height: 100px; overflow: auto;">
-          <div>No Scroll</div>
-        </div>
-        """
-
-      fn = => @cy.isScrollable(noScroll)
-
-      expect(fn()).to.be.false
-
-    it "returns false el has no overflow", ->
-      noOverflow = @add """
-        <div style="height: 100px; width: 100px; border: 1px solid green;">
-          <div style="height: 150px;">
-            No Overflow Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean lacinia bibendum nulla sed consectetur. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Etiam porta sem malesuada magna mollis euismod.
-          </div>
-        </div>
-        """
-
-      fn = => @cy.isScrollable(noOverflow)
-
-      expect(fn()).to.be.false
-
-    it "returns true when vertically scrollable", ->
-      vertScrollable = @add """
-        <div style="height: 100px; width: 100px; overflow: auto;">
-          <div style="height: 150px;">Vertical Scroll</div>
-        </div>
-      """
-
-      fn = => @cy.isScrollable(vertScrollable)
-
-      expect(fn()).to.be.true
-
-    it "returns true when horizontal scrollable", ->
-      horizScrollable = @add """
-        <div style="height: 100px; width: 100px; overflow: auto; ">
-          <div style="height: 150px;">Horizontal Scroll</div>
-        </div>
-      """
-
-      fn = => @cy.isScrollable(horizScrollable)
-
-      expect(fn()).to.be.true
-
-    it "returns true when overflow scroll forced and content larger", ->
-      forcedScroll = @add """
-        <div style="height: 100px; width: 100px; overflow: scroll; border: 1px solid yellow;">
-          <div style="height: 300px; width: 300px;">Forced Scroll</div>
-        </div>
-      """
-
-      fn = => @cy.isScrollable(forcedScroll)
-
-      expect(fn()).to.be.true
 
   context "#ensureScrollability", ->
     beforeEach ->

@@ -4,9 +4,6 @@ do ($Cypress, _, $) ->
 
   returnFalse = -> return false
 
-  isScrollOrAuto = (prop) ->
-    prop is "scroll" or prop is "auto"
-
   $Cypress.Cy.extend
     ensureSubject: ->
       subject = @prop("subject")
@@ -184,44 +181,11 @@ do ($Cypress, _, $) ->
             args: { cmd, node }
           })
 
-    isScrollable: ($el) ->
-      ## if we're the window, we want to get the document's
-      ## element and check it's size against the actual window
-      if $Cypress.Utils.hasWindow($el)
-        win = $el
-        $el = $($el.document.documentElement)
-        el  = $el[0]
 
-        ## Check if body height is higher than window height
-        return true if win.innerHeight < el.scrollHeight
-
-        ## Check if body width is higher than window width
-        return true if win.innerWidth < el.scrollWidth
-
-        ## else return false since the window is not scrollable
-        return false
       else
-        ## if we're any other element, we do some css calculations
-        ## to see that the overflow is correct and the scroll
-        ## area is larger than the actual height or width
-        el = $el[0]
-
-        {overflow, overflowY, overflowX} = getComputedStyle(el)
-
-        ## y axis
-        ## if our content height is less than the total scroll height
-        if el.clientHeight < el.scrollHeight
-          ## and our element has scroll or auto overflow or overflowX
-          return true if isScrollOrAuto(overflow) or isScrollOrAuto(overflowY)
-
-        ## x axis
-        if el.clientWidth < el.scrollWidth
-          return true if isScrollOrAuto(overflow) or isScrollOrAuto(overflowX)
-
-        return false
 
     ensureScrollability: ($el, cmd) ->
-      return true if @isScrollable($el)
+      return true if $Cypress.Dom.elIsScrollable($el)
 
       ## prep args to throw in error since we can't scroll
       cmd   ?= @prop("current").get("name")
