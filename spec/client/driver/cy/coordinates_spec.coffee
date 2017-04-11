@@ -22,13 +22,25 @@ describe "$Cypress.Cy Coordinates Extensions", ->
 
     context "#getBoundingClientRect", ->
 
+    context "#getCenterLeftCoordinates", ->
+      it "returns center left x, y coord", ->
+        expect(@cy.getCenterLeftCoordinates({top: 35.56, left: 100.75, width: 100, height: 90})).to.deep.eq {x: 101, y: 80}
+
     context "#getCenterCoordinates", ->
       it "returns center x, y coord", ->
         expect(@cy.getCenterCoordinates({top: 35.56, left: 60.43, width: 100, height: 90})).to.deep.eq {x: 110, y: 80}
 
+    context "#getCenterRightCoordinates", ->
+      it "returns center right x, y coord", ->
+        expect(@cy.getCenterRightCoordinates({top: 35.56, left: 100.75, width: 100, height: 90})).to.deep.eq {x: 199, y: 80}
+
     context "#getTopLeftCoordinates", ->
       it "returns top left x, y coord", ->
         expect(@cy.getTopLeftCoordinates({top: 200.75, left: 100.75, width: 100, height: 100})).to.deep.eq {x: 101, y: 201}
+
+    context "#getTopCenterCoordinates", ->
+      it "returns top center x, y coord", ->
+        expect(@cy.getTopCenterCoordinates({top: 200.75, left: 60.43, width: 100, height: 100})).to.deep.eq {x: 110, y: 201}
 
     context "#getTopRightCoordinates", ->
       it "returns top right x, y coord", ->
@@ -38,12 +50,20 @@ describe "$Cypress.Cy Coordinates Extensions", ->
       it "returns bottom left x, y coord", ->
         expect(@cy.getBottomLeftCoordinates({top: 200.75, left: 100.75, width: 100, height: 100})).to.deep.eq {x: 101, y: 299}
 
+    context "#getBottomCenterCoordinates", ->
+      it "returns bottom center x, y coord", ->
+        expect(@cy.getBottomCenterCoordinates({top: 200.75, left: 60.43, width: 100, height: 100})).to.deep.eq {x: 110, y: 299}
+
     context "#getBottomRightCoordinates", ->
       it "returns bottom right x, y coord", ->
         expect(@cy.getBottomRightCoordinates({top: 200.75, left: 100.75, width: 100, height: 100})).to.deep.eq {x: 199, y: 299}
 
-
     context "#getCoordinates", ->
+      context "centerLeft", ->
+        it "returns center left x/y including padding + border", ->
+          ## padding is added to the line-height but width includes the padding
+          expect(@cy.getCoordinates(@$button, "centerLeft")).to.deep.eq {x: 60, y: 80}
+
       context "center", ->
         it "returns center x/y including padding + border", ->
           ## padding is added to the line-height but width includes the padding
@@ -56,10 +76,20 @@ describe "$Cypress.Cy Coordinates Extensions", ->
           @$button.css({transform: "rotate(90deg)"})
           expect(@cy.getCoordinates(@$button)).to.deep.eq {x: 110, y: 80}
 
+      context "centerRight", ->
+        it "returns center right x/y including padding + border", ->
+          ## padding is added to the line-height but width includes the padding
+          expect(@cy.getCoordinates(@$button, "centerRight")).to.deep.eq {x: 159, y: 80}
+
       context "topLeft", ->
         it "returns top left x/y including padding + border", ->
           ## padding is added to the line-height but width includes the padding
           expect(@cy.getCoordinates(@$button, "topLeft")).to.deep.eq {x: 60, y: 35}
+
+      context "topCenter", ->
+        it "returns top center x/y including padding + border", ->
+          ## padding is added to the line-height but width includes the padding
+          expect(@cy.getCoordinates(@$button, "topCenter")).to.deep.eq {x: 110, y: 35}
 
       context "topRight", ->
         it "returns top right x/y including padding + border", ->
@@ -70,6 +100,11 @@ describe "$Cypress.Cy Coordinates Extensions", ->
         it "returns bottom left x/y including padding + border", ->
           ## padding is added to the line-height but width includes the padding
           expect(@cy.getCoordinates(@$button, "bottomLeft")).to.deep.eq {x: 60, y: 124}
+
+      context "bottomCenter", ->
+        it "returns bottom center x/y including padding + border", ->
+          ## padding is added to the line-height but width includes the padding
+          expect(@cy.getCoordinates(@$button, "bottomCenter")).to.deep.eq {x: 110, y: 124}
 
       context "bottomRight", ->
         it "returns bottom right x/y including padding + border", ->

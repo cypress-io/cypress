@@ -20,13 +20,13 @@ do ($Cypress, _) ->
       coords = {}
 
       switch xPosition
-        when "center" then coords.x = Math.floor(x)
         when "left"   then coords.x = Math.ceil(x)
+        when "center" then coords.x = Math.floor(x)
         when "right"  then coords.x = Math.floor(x) - 1
 
       switch yPosition
-        when "center" then coords.y = Math.floor(y)
         when "top"    then coords.y = Math.ceil(y)
+        when "center" then coords.y = Math.floor(y)
         when "bottom" then coords.y = Math.floor(y) - 1
 
       coords
@@ -77,16 +77,30 @@ do ($Cypress, _) ->
         width  = $el.outerWidth()
         height = $el.outerHeight()
 
+    getCenterLeftCoordinates: (rect) ->
+      x = rect.left
+      y = rect.top + rect.height / 2
+      @normalizeCoords(x, y, "left", "center")
 
     getCenterCoordinates: (rect) ->
       x = rect.left + rect.width / 2
       y = rect.top + rect.height / 2
       @normalizeCoords(x, y, "center", "center")
 
+    getCenterRightCoordinates: (rect) ->
+      x = rect.left + rect.width
+      y = rect.top + rect.height / 2
+      @normalizeCoords(x, y, "right", "center")
+
     getTopLeftCoordinates: (rect) ->
       x = rect.left
       y = rect.top
       @normalizeCoords(x, y, "left", "top")
+
+    getTopCenterCoordinates: (rect) ->
+      x = rect.left + rect.width / 2
+      y = rect.top
+      @normalizeCoords(x, y, "center", "top")
 
     getTopRightCoordinates: (rect) ->
       x = rect.left + rect.width
@@ -97,6 +111,11 @@ do ($Cypress, _) ->
       x = rect.left
       y = rect.top + rect.height
       @normalizeCoords(x, y, "left", "bottom")
+
+    getBottomCenterCoordinates: (rect) ->
+      x = rect.left + rect.width / 2
+      y = rect.top + rect.height
+      @normalizeCoords(x, y, "center", "bottom")
 
     getBottomRightCoordinates: (rect) ->
       x = rect.left + rect.width
@@ -114,10 +133,14 @@ do ($Cypress, _) ->
       ## rect = {top: 35, left: 60, width: 100, height: 90}
 
       switch position
-        when "center"       then @getCenterCoordinates(rect)
         when "topLeft"      then @getTopLeftCoordinates(rect)
+        when "topCenter"    then @getTopCenterCoordinates(rect)
         when "topRight"     then @getTopRightCoordinates(rect)
+        when "centerLeft"   then @getCenterLeftCoordinates(rect)
+        when "center"       then @getCenterCoordinates(rect)
+        when "centerRight"  then @getCenterRightCoordinates(rect)
         when "bottomLeft"   then @getBottomLeftCoordinates(rect)
+        when "bottomCenter" then @getBottomCenterCoordinates(rect)
         when "bottomRight"  then @getBottomRightCoordinates(rect)
         else
           $Cypress.Utils.throwErrByPath("dom.invalid_position_argument", {

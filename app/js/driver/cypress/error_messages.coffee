@@ -146,7 +146,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
         Fix this problem, or use {force: true} to disable error checking.\n
         https://on.cypress.io/element-cannot-be-interacted-with
       """
-      invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be center, topLeft, topRight, bottomLeft, or bottomRight."
+      invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be topLeft, topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, or bottomRight."
       non_dom: "Cannot call #{cmd('{{cmd}}')} on a non-DOM subject."
       non_dom_is_hidden: "$Cypress.Dom.isHidden() must be passed a basic DOM element. You passed: '{{el}}'"
       not_visible: """
