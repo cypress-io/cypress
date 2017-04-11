@@ -474,7 +474,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       invalid_duration: "#{cmd('scrollIntoView')} must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: {{duration}}"
 
     scrollTo:
-      invalid_target: "#{cmd('scrollTo')} must be called with a valid position. It can be a string, number or object. Your position was: {{y}}, {{x}}"
+      invalid_target: "#{cmd('scrollTo')} must be called with a valid position. It can be a string, number or object. Your position was: {{x}}, {{y}}"
       multiple_containers: "#{cmd('scrollTo')} can only be used to scroll one element, you tried to scroll {{num}} elements.\n\n"
       invalid_easing: "#{cmd('scrollTo')} must be called with a valid easing. Your easing was: {{easing}}"
       invalid_duration: "#{cmd('scrollTo')} must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: {{duration}}"

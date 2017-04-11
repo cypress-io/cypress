@@ -1436,18 +1436,17 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           .return(options.$el)
 
   Cypress.addDualCommand
-    scrollTo: (subject, y, xOrOptions, options = {}) ->
-      if not y
-        $Cypress.Utils.throwErrByPath "scrollTo.invalid_target", {args: { y }}
+    scrollTo: (subject, x, yOrOptions, options = {}) ->
+      if not x
+        $Cypress.Utils.throwErrByPath "scrollTo.invalid_target", {args: { x }}
 
       switch
-        when _.isObject(xOrOptions)
-          options = xOrOptions
-          # x = 0
+        when _.isObject(yOrOptions)
+          options = yOrOptions
         else
-          x = xOrOptions
+          y = yOrOptions
 
-      x ?= 0
+      y ?= 0
 
       # if (_.isNaN(y) or _.isNaN(x) or !_.isFinite(y) or !_.isFinite(x))
         # $Cypress.Utils.throwErrByPath "scrollTo.invalid_target", {args: {y, x}}
@@ -1476,7 +1475,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         log: true
         duration: 0
         easing: "swing"
-        axis: "yx"
+        axis: "xy"
         x: x
         y: y
 
@@ -1508,8 +1507,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           consoleProps: -> {
             ## merge into consoleProps without mutating it
             Scrolled: $Cypress.Utils.getDomElements(options.$el)
-            y: options.y
             x: options.x
+            y: options.y
           }
         }
 
@@ -1533,7 +1532,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       .then =>
         return new Promise (resolve, reject) =>
           ## scroll our axis'
-          $(options.$el).scrollTo({top: y, left: x}, {
+          $(options.$el).scrollTo({left: x, top: y}, {
             axis:     options.axis
             easing:   options.easing
             duration: options.duration

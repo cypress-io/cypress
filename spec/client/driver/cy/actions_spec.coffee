@@ -4218,32 +4218,32 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#scroll-to-vertical").scrollTo("125px").then ($el) ->
         expect($el.get(0)).to.eq @scrollVert.get(0)
 
-    it "scrolls y axis to num px", ->
-      expect(@scrollVert.get(0).scrollTop).to.eq(0)
-      expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+    it "scrolls x axis to num px", ->
+      expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+      expect(@scrollHoriz.get(0).scrollLeft).to.eq(0)
 
-      @cy.get("#scroll-to-vertical").scrollTo(300).then ($el) ->
-        expect(@scrollVert.get(0).scrollTop).to.eq(300)
-        expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+      @cy.get("#scroll-to-horizontal").scrollTo(300).then ($el) ->
+        expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+        expect(@scrollHoriz.get(0).scrollLeft).to.eq(300)
 
-    it "scrolls y axis to px", ->
-      expect(@scrollVert.get(0).scrollTop).to.eq(0)
-      expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+    it "scrolls x axis to px", ->
+      expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+      expect(@scrollHoriz.get(0).scrollLeft).to.eq(0)
 
-      @cy.get("#scroll-to-vertical").scrollTo("125px").then ($el) ->
-        expect(@scrollVert.get(0).scrollTop).to.eq(125)
-        expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+      @cy.get("#scroll-to-horizontal").scrollTo("125px").then ($el) ->
+        expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+        expect(@scrollHoriz.get(0).scrollLeft).to.eq(125)
 
-    it "scrolls y axis by % of scrollable height", ->
-      expect(@scrollVert.get(0).scrollTop).to.eq(0)
-      expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+    it "scrolls x axis by % of scrollable height", ->
+      expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+      expect(@scrollHoriz.get(0).scrollLeft).to.eq(0)
 
-      @cy.get("#scroll-to-vertical").scrollTo("50%").then ($el) ->
+      @cy.get("#scroll-to-horizontal").scrollTo("50%").then ($el) ->
         ## they don't calculate the height of the container
         ## in the percentage of the scroll (since going the height
         ## of the container wouldn't scroll at all...)
-        expect(@scrollVert.get(0).scrollTop).to.eq((500-100)/2)
-        expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+        expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+        expect(@scrollHoriz.get(0).scrollLeft).to.eq((500-100)/2)
 
     it.skip "scrolls y axis to position", ->
       @cy.get("#scroll-to").scrollTo("bottom")
@@ -4252,16 +4252,16 @@ describe "$Cypress.Cy Actions Commands", ->
       expect(@scrollBoth.get(0).scrollTop).to.eq(0)
       expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-      @cy.get("#scroll-to-both").scrollTo(300, 300).then ($el) ->
-        expect(@scrollBoth.get(0).scrollTop).to.eq(300)
+      @cy.get("#scroll-to-both").scrollTo(300, 150).then ($el) ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(150)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
 
     it "scrolls both x and y axis of px", ->
       expect(@scrollBoth.get(0).scrollTop).to.eq(0)
       expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-      @cy.get("#scroll-to-both").scrollTo("300px", "300px").then ($el) ->
-        expect(@scrollBoth.get(0).scrollTop).to.eq(300)
+      @cy.get("#scroll-to-both").scrollTo("300px", "150px").then ($el) ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(150)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
 
     it "scrolls both x and y axis of percentage", ->
@@ -4280,7 +4280,7 @@ describe "$Cypress.Cy Actions Commands", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-to-both").scrollTo("25px").then ->
-        expect(scrollTo).to.be.calledWith({top: "25px", left: 0})
+        expect(scrollTo).to.be.calledWith({left: "25px", top: 0})
 
     it "sets duration to 0 by default", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
@@ -4288,22 +4288,22 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#scroll-to-both").scrollTo("25px").then ->
         expect(scrollTo).to.be.calledWithMatch({}, {duration: 0})
 
-    it "sets axis to correct x or y", ->
+    it "sets axis to correct xy", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-to-both").scrollTo("25px", "80px").then ->
-        expect(scrollTo).to.be.calledWithMatch({}, {axis: "yx"})
+        expect(scrollTo).to.be.calledWithMatch({}, {axis: "xy"})
 
     it "scrolling resolves after a set duration", ->
-      expect(@scrollVert.get(0).scrollTop).to.eq(0)
-      expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+      expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+      expect(@scrollHoriz.get(0).scrollLeft).to.eq(0)
 
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
-      @cy.get("#scroll-to-vertical").scrollTo("125px", {duration: 500}).then ->
+      @cy.get("#scroll-to-horizontal").scrollTo("125px", {duration: 500}).then ->
         expect(scrollTo).to.be.calledWithMatch({}, {duration: 500})
-        expect(@scrollVert.get(0).scrollTop).to.eq(125)
-        expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+        expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+        expect(@scrollHoriz.get(0).scrollLeft).to.eq(125)
 
     it "accepts duration string option", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
@@ -4325,8 +4325,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#scroll-to-both").scrollTo("25px", "50px", {easing: "linear"}).then ->
         expect(scrollTo).to.be.calledWithMatch({}, {easing: "linear"})
-        expect(@scrollBoth.get(0).scrollTop).to.eq(25)
-        expect(@scrollBoth.get(0).scrollLeft).to.eq(50)
+        expect(@scrollBoth.get(0).scrollTop).to.eq(50)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(25)
 
     it "retries until element is scrollable", ->
       $container = cy.$$("#nonscroll-becomes-scrollable")
@@ -4342,8 +4342,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#nonscroll-becomes-scrollable").scrollTo(500, 300).then ->
         expect(retried).to.be.true
-        expect($container.get(0).scrollTop).to.eq(500)
-        expect($container.get(0).scrollLeft).to.eq(300)
+        expect($container.get(0).scrollTop).to.eq(300)
+        expect($container.get(0).scrollLeft).to.eq(500)
 
     describe "assertion verification", ->
 
