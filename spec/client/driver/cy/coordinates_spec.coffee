@@ -59,6 +59,14 @@ describe "$Cypress.Cy Coordinates Extensions", ->
         expect(@cy.getBottomRightCoordinates({top: 200.75, left: 100.75, width: 100, height: 100})).to.deep.eq {x: 199, y: 299}
 
     context "#getCoordinates", ->
+      context "throws when unrecognized", ->
+        it "throws error on foo", ->
+          @allowErrors()
+
+          fn = => @cy.getCoordinates(@$button, "foo")
+
+          expect(fn).to.throw('Invalid position argument: \'foo\'. Position may only be topLeft, topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, bottomRight.')
+
       context "centerLeft", ->
         it "returns center left x/y including padding + border", ->
           ## padding is added to the line-height but width includes the padding
