@@ -7,7 +7,7 @@ describe "$Cypress.Cy Traversal Commands", ->
     {not: "div"}
     {eq: 0}
     {closest: "body"}
-    "children", "first", "last", "next", "parent", "parents", "prev", "siblings"
+    "children", "first", "last", "next", "nextAll", "nextUntil", "parent", "parents", "parentsUntil", "prev", "prevAll", "prevUntil", "siblings"
   ]
   _.each fns, (fn) ->
     ## normalize string vs object
@@ -87,7 +87,7 @@ describe "$Cypress.Cy Traversal Commands", ->
               @cy.get(":checkbox").not(":checkbox")
 
             ## these cannot error
-            when "first", "last" then done()
+            when "first", "last", "parentsUntil" then done()
 
             else
               errIncludes(".no-class-like-this-exists", "div:first")

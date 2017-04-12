@@ -628,8 +628,8 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     wait:
       alias_invalid: "'{{prop}}' is not a valid alias property. Are you trying to ask for the first request? If so write @{{str}}.request"
       fn_deprecated: "#{cmd('wait', 'fn')} has been deprecated. Instead just change this command to be #{cmd('should', 'fn')}."
-      invalid_1st_arg: "#{cmd('wait')} must be invoked with either a number or an alias for a route."
-      invalid_alias: "#{cmd('wait')} can only accept aliases for routes.\nThe alias: '{{alias}}' did not match a route."
+      invalid_1st_arg: "#{cmd('wait')} only accepts a number, an alias of a route, or an array of aliases of routes. You passed: {{arg}}"
+      invalid_alias: "#{cmd('wait')} only accepts aliases for routes.\nThe alias: '{{alias}}' did not match a route."
       invalid_arguments: "#{cmd('wait')} was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array."
       timed_out: "#{cmd('wait')} timed out waiting {{timeout}}ms for the {{num}} {{type}} to the route: '{{alias}}'. No {{type}} ever occured."
 

@@ -21,7 +21,7 @@ invalidCharsRe     = /[^0-9a-zA-Z-_\s]/g
 module.exports = {
   copy: (src, dest) ->
     fs
-    .copyAsync(src, dest, {clobber: true})
+    .copyAsync(src, dest, {overwrite: true})
     .catch {code: "ENOENT"}, ->
       ## dont yell about ENOENT errors
 

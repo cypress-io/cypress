@@ -256,6 +256,8 @@ class Base
         if err then reject(err) else resolve()
 
   createCyCache: (project) ->
+    throw new Error("Brian! Remove this!")
+
     cache.path = cache.path.replace("development", "production")
 
     # cache = path.join(@buildPathToAppResources(), ".cy", "production", "cache")

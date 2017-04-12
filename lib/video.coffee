@@ -13,7 +13,7 @@ ffmpeg.setFfmpegPath(ffmpegPath)
 module.exports = {
   copy: (src, dest) ->
     fs
-    .copyAsync(src, dest, {clobber: true})
+    .copyAsync(src, dest, {overwrite: true})
     .catch {code: "ENOENT"}, ->
       ## dont yell about ENOENT errors
 
@@ -123,7 +123,7 @@ module.exports = {
 
         ## rename and obliterate the original
         fs.moveAsync(cname, name, {
-          clobber: true
+          overwrite: true
         })
         .then ->
           resolve()

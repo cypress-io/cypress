@@ -36,7 +36,7 @@ describe "lib/screenshots", ->
     it "doesnt yell over ENOENT errors", ->
       screenshots.copy("/does/not/exist", "/foo/bar/baz")
 
-    it "copies src to des with {clobber: true}", ->
-      @sandbox.stub(fs, "copyAsync").withArgs("foo", "bar", {clobber: true}).resolves()
+    it "copies src to des with {overwrite: true}", ->
+      @sandbox.stub(fs, "copyAsync").withArgs("foo", "bar", {overwrite: true}).resolves()
 
       screenshots.copy("foo", "bar")
