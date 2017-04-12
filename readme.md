@@ -69,6 +69,11 @@ MIT
 
 ## Changelog
 
+#### 0.4.7 - *(04/12/17)*
+- colorize browser icons
+- display browser tooltip + icon
+- update ipc events
+
 #### 0.4.6 - *(03/07/17)*
 - provide help links to explain orgs + access
 
