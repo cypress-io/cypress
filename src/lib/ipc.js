@@ -24,7 +24,6 @@ const register = (eventName, isPromiseApi = true) => {
 }
 
 register('add:project')
-register('change:browser:spec')
 register('clear:github:cookies')
 register('close:browser')
 register('close:project')
@@ -33,7 +32,6 @@ register('get:current:user')
 register('get:orgs')
 register('gui:error')
 register('get:builds')
-register('get:open:browsers')
 register('get:options')
 register('get:projects')
 register('get:project:statuses')

@@ -18,7 +18,7 @@ describe "Projects Nav", ->
         stubIpc(@App.ipc, {
           "on:menu:clicked": ->
           "launch:browser": ->
-          "close:browser": ->
+          "close:browser": (stub) -> stub.resolves(null)
           "close:project": ->
           "on:focus:tests": ->
           "open:project": ->
@@ -28,7 +28,6 @@ describe "Projects Nav", ->
           "get:projects": (stub) => stub.resolves(@projects)
           "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
           "get:builds": (stub) => stub.resolves(@runs)
-          "get:open:browsers": (stub) => stub.resolves([])
           "get:specs": (stub) => stub.yields(null, @specs)
           "get:record:keys": (stub) -> stub.resolves([])
         })
