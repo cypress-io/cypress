@@ -155,10 +155,6 @@ class Project extends EE
     @server.startWebsockets(@watchers, @automation, config, {
       onReloadBrowser: options.onReloadBrowser
 
-      onAutomationRequest: options.onAutomationRequest
-
-      afterAutomationRequest: options.afterAutomationRequest
-
       onFocusTests: options.onFocusTests
 
       onSpecChanged: options.onSpecChanged

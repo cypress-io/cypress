@@ -34,6 +34,8 @@ create = ->
 
     requestAccess: tryToCall("requestAccess")
 
+    getProject: -> openProject
+
     launch: (browserName, url, spec, options = {}) ->
       openProject.getConfig()
       .then (cfg) ->

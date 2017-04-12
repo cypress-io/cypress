@@ -15,7 +15,7 @@ open     = require("#{root}../lib/util/open")
 logs     = require("#{root}../lib/gui/logs")
 events   = require("#{root}../lib/gui/events")
 dialog   = require("#{root}../lib/gui/dialog")
-project  = require("#{root}../lib/state/project")
+project  = require("#{root}../lib/open_project")
 cookies  = require("#{root}../lib/gui/cookies")
 Renderer = require("#{root}../lib/gui/renderer")
 

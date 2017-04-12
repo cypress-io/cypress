@@ -15,14 +15,12 @@ errors     = require("../errors")
 Project    = require("../project")
 Reporter   = require("../reporter")
 browsers   = require("../browsers")
+openProject = require("../open_project")
 progress   = require("../util/progress_bar")
 trash      = require("../util/trash")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
-electronUtils = require("../gui/utils")
-project    = require("../state/project")
-Renderer   = require("../gui/renderer")
-automation = require("../gui/automation")
+Windows    = require("../gui/windows")
 pkg        = require("../../package.json")
 
 fs = Promise.promisifyAll(fs)
@@ -43,12 +41,12 @@ module.exports = {
       capitalization: "lowercase"
     })
 
-  getProjectId: (openProject, id) ->
+  getProjectId: (project, id) ->
     ## if we have an ID just use it
     if id
       return Promise.resolve(id)
 
-    openProject
+    project
     .getProjectId()
     .catch ->
       ## no id no problem
@@ -86,16 +84,11 @@ module.exports = {
     ## putting our web client app in headless mode
     ## - NO  display server logs (via morgan)
     ## - YES display reporter results (via mocha reporter)
-    project.open(options.projectPath, options, {
+    openProject.create(options.projectPath, options, {
       morgan:       false
       socketId:     id
       report:       true
       isHeadless:   options.isHeadless ? true
-      onAutomationRequest: options.onAutomationRequest
-      afterAutomationRequest: options.afterAutomationRequest
-      ## TODO: get session into automation.perform
-      # onAutomationRequest: if wantsExternalBrowser then null else automation.perform
-
     })
     .catch {portInUse: true}, (err) ->
       ## TODO: this needs to move to emit exitEarly
@@ -116,48 +109,39 @@ module.exports = {
           errors.warning("VIDEO_RECORDING_FAILED", err.stack)
       })
 
-  createRenderer: (url, proxyServer, showGui, chromeWebSecurity, openProject, write) ->
-    electronUtils.setProxy(proxyServer)
-    .then ->
-      Renderer.create({
-        url:    url
-        width:  1280
-        height: 720
-        show:   showGui
-        frame:  showGui
-        devTools: showGui
-        chromeWebSecurity: chromeWebSecurity
-        type:   "PROJECT"
-      })
-    .then (win) ->
-      ## set framerate only once because if we
-      ## set the framerate earlier it gets reset
-      ## back to 60fps for some reason (bug?)
-      setFrameRate = (num) ->
-        if win.webContents.getFrameRate() isnt num
-          win.webContents.setFrameRate(num)
-
-      ## should we even record?
-      if write
-        win.webContents.on "paint", (event, dirty, image) ->
-          setFrameRate(20)
-
-          write(image.toJPEG(100))
-
-      win.webContents.on "crashed", (e, killed) ->
+  createRenderer: (url, proxyServer, showGui, chromeWebSecurity, project, write) ->
+    options = {
+      url:               url
+      # width:             1280
+      # height:            720
+      # type:              "PROJECT"
+      show:              showGui
+      frame:             showGui
+      devTools:          showGui
+      proxyServer:       proxyServer
+      chromeWebSecurity: chromeWebSecurity
+      onCrashed: ->
         err = errors.get("RENDERER_CRASHED")
         errors.log(err)
 
-        openProject.emit("exitEarlyWithErr", err.message)
-
-      win.webContents.on "new-window", (e, url, frameName, disposition, options) ->
+        project.emit("exitEarlyWithErr", err.message)
+      onNewWindow: (e, url, frameName, disposition, options) ->
         ## force new windows to automatically open with show: false
         ## this prevents window.open inside of javascript client code
         ## to cause a new BrowserWindow instance to open
         ## https://github.com/cypress-io/cypress/issues/123
         options.show = false
+    }
 
-      win.center()
+    if write
+      options.recordFrameRate = 20
+      options.onPaint = (event, dirty, image) ->
+        write(image.toJPEG(100))
+
+    ## TODO: fix project.automation
+    browsers.open("electron", project.automation, {}, options)
+    .then (obj) ->
+      obj.browserWindow.center()
 
   displayStats: (obj = {}) ->
     bgColor = if obj.failures then "bgRed" else "bgGreen"
@@ -248,31 +232,23 @@ module.exports = {
       ## but failed and dont let this change the run exit code
       errors.warning("VIDEO_POST_PROCESSING_FAILED", err.stack)
 
-  closeAnyOpenBrowser: ->
-    ## close either the open real browser
-    ## or the electron renderer process
-    Promise.join(
-      Renderer.destroy("PROJECT")
-      project.closeBrowser()
-    )
-
-  waitForRendererToConnect: (options = {}) ->
-    { openProject, id, browser, url, proxyServer, gui, webSecurity, write, timeout } = options
+  waitForBrowserToConnect: (options = {}) ->
+    { project, id, browser, url, proxyServer, gui, webSecurity, write, timeout } = options
 
     gui = !!gui
 
     launchRenderer = =>
       ## if we have a browser then just physically launch it
       if browser
-        project.launch(browser, url, null, {proxyServer: proxyServer})
+        openProject.launch(browser, url, null, {proxyServer: proxyServer})
       else
-        @createRenderer(url, proxyServer, gui, webSecurity, openProject, write)
+        @createRenderer(url, proxyServer, gui, webSecurity, project, write)
 
     attempts = 0
 
-    do waitForRendererToConnect = =>
+    do waitForBrowserToConnect = =>
       Promise.join(
-        @waitForSocketConnection(openProject, id)
+        @waitForSocketConnection(project, id)
         launchRenderer()
       )
       .timeout(timeout ? 10000)
@@ -283,7 +259,7 @@ module.exports = {
 
         ## always first close the open browsers
         ## before retrying or dieing
-        @closeAnyOpenBrowser()
+        openProject.closeBrowser()
         .then ->
           switch attempts
             ## try again up to 3 attempts
@@ -291,30 +267,30 @@ module.exports = {
               word = if attempts is 1 then "Retrying..." else "Retrying again..."
               errors.warning("TESTS_DID_NOT_START_RETRYING", word)
 
-              waitForRendererToConnect()
+              waitForBrowserToConnect()
 
             else
               err = errors.get("TESTS_DID_NOT_START_FAILED")
               errors.log(err)
 
-              openProject.emit("exitEarlyWithErr", err.message)
+              project.emit("exitEarlyWithErr", err.message)
 
-  waitForSocketConnection: (openProject, id) ->
+  waitForSocketConnection: (project, id) ->
     new Promise (resolve, reject) ->
       fn = (socketId) ->
         if socketId is id
           ## remove the event listener if we've connected
-          openProject.removeListener "socket:connected", fn
+          project.removeListener "socket:connected", fn
 
           ## resolve the promise
           resolve()
 
       ## when a socket connects verify this
       ## is the one that matches our id!
-      openProject.on "socket:connected", fn
+      project.on "socket:connected", fn
 
   waitForTestsToFinishRunning: (options = {}) ->
-    { openProject, gui, screenshots, started, end, name, cname, videoCompression } = options
+    { project, gui, screenshots, started, end, name, cname, videoCompression } = options
 
     new Promise (resolve, reject) =>
       ## dont ever end if we're in 'gui' debugging mode
@@ -322,7 +298,7 @@ module.exports = {
 
       onFinish = (obj) =>
         finish = ->
-          openProject
+          project
           .getConfig()
           .then (cfg) ->
             obj.config = cfg
@@ -371,10 +347,10 @@ module.exports = {
       onEnd = (obj) =>
         onFinish(obj)
 
-      ## when our openProject fires its end event
+      ## when our project fires its end event
       ## resolve the promise
-      openProject.once("end", onEnd)
-      openProject.once("exitEarlyWithErr", onEarlyExit)
+      project.once("end", onEnd)
+      project.once("exitEarlyWithErr", onEarlyExit)
 
   trashAssets: (options = {}) ->
     if options.trashAssetsBeforeHeadlessRuns is true
@@ -450,7 +426,7 @@ module.exports = {
         Promise.props({
           stats:      @waitForTestsToFinishRunning({
             gui:              options.gui
-            openProject:      options.openProject
+            project:          options.project
             screenshots:      options.screenshots
             videoCompression: options.videoCompression
             end
@@ -459,12 +435,12 @@ module.exports = {
             started
           }),
 
-          connection: @waitForRendererToConnect({
+          connection: @waitForBrowserToConnect({
             id:          options.id
             gui:         options.gui
             url:         options.url
             proxyServer: options.proxyServer
-            openProject: options.openProject
+            project:     options.project
             webSecurity: options.webSecurity
             write
             browser
@@ -478,27 +454,29 @@ module.exports = {
 
     screenshots = []
 
-    options.onAutomationRequest    = if wantsExternalBrowser then null else automation.perform
-    options.afterAutomationRequest = (msg, data, resp) =>
-      if msg is "take:screenshot"
-        screenshots.push @screenshotMetadata(data, resp)
-
-      resp
-
     ## verify this is an added project
     ## and then open it, returning our
     ## project instance
     @ensureAndOpenProjectByPath(id, options)
-    .then (openProject) =>
-      Promise.all([
-        @getProjectId(openProject, options.projectId)
+    .call("getProject")
+    .then (project) =>
+      project.automation.use({
+        onAfterResponse: (message, data, resp) =>
+          if message is "take:screenshot"
+            screenshots.push @screenshotMetadata(data, resp)
 
-        openProject.getConfig(),
+          resp
+      })
+
+      Promise.all([
+        @getProjectId(project, options.projectId)
+
+        project.getConfig(),
 
         ## either get the url to the all specs
         ## or if we've specificed one make sure
         ## it exists
-        openProject.ensureSpecUrl(options.spec)
+        project.ensureSpecUrl(options.spec)
       ])
       .spread (projectId, config, url) =>
         ## if we have a project id and a key but record hasnt
@@ -519,8 +497,8 @@ module.exports = {
           @runTests({
             id:               id
             url:              url
+            project:          project
             screenshots:      screenshots
-            openProject:      openProject
             proxyServer:      config.proxyUrl
             webSecurity:      config.chromeWebSecurity
             videosFolder:     config.videosFolder
