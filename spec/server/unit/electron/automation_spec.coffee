@@ -151,8 +151,8 @@ describe "lib/gui/automation", ->
         .catch (err) ->
           expect(err.message).to.eq("some error")
 
-  describe "is:automation:connected", ->
+  describe "is:automation:client:connected", ->
     it "always returns true", ->
-      automation.perform("is:automation:connected")
+      automation.perform("is:automation:client:connected")
       .then (ret) ->
         expect(ret).to.be.true
