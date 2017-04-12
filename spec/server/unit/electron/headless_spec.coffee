@@ -12,7 +12,7 @@ Reporter = require("#{root}../lib/reporter")
 electronUtils = require("#{root}../lib/gui/utils")
 project  = require("#{root}../lib/open_project")
 headless = require("#{root}../lib/modes/headless")
-Renderer = require("#{root}../lib/gui/renderer")
+Windows = require("#{root}../lib/gui/windows")
 automation = require("#{root}../lib/gui/automation")
 
 describe "gui/headless", ->
@@ -85,7 +85,7 @@ describe "gui/headless", ->
           afterAutomationRequest: fn2
         })
 
-  context ".createRenderer", ->
+  context ".launchBrowser", ->
     beforeEach ->
       @win = @sandbox.stub({
         setSize: ->
@@ -99,10 +99,10 @@ describe "gui/headless", ->
 
       @sandbox.stub(electronUtils, "setProxy").withArgs("http://localhost:1234").resolves()
 
-      @create = @sandbox.stub(Renderer, "create").resolves(@win)
+      @create = @sandbox.stub(Windows, "create").resolves(@win)
 
-    it "calls Renderer.create with url + options", ->
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false)
+    it "calls Windows.create with url + options", ->
+      headless.launchBrowser("foo/bar/baz", "http://localhost:1234", false)
       .then =>
         expect(@create).to.be.calledWith({
           url: "foo/bar/baz"
@@ -116,7 +116,7 @@ describe "gui/headless", ->
         })
 
     it "calls win.setSize on the resolved window", ->
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234")
+      headless.launchBrowser("foo/bar/baz", "http://localhost:1234")
       .then =>
         expect(@win.center).to.be.calledOnce
 
@@ -129,18 +129,18 @@ describe "gui/headless", ->
 
       @win.webContents.on.withArgs("paint").yields({}, false, image)
 
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false, false, @projectInstance, write)
+      headless.launchBrowser("foo/bar/baz", "http://localhost:1234", false, false, @projectInstance, write)
       .then =>
         expect(image.toJPEG).to.be.calledWith(100)
         expect(write).to.be.calledWith("imgdata")
 
     it "does not do anything on paint when write is null", ->
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false, false, @projectInstance, null)
+      headless.launchBrowser("foo/bar/baz", "http://localhost:1234", false, false, @projectInstance, null)
       .then =>
         expect(@win.webContents.on).not.to.be.calledWith("paint")
 
     it "can show window", ->
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234", true, false)
+      headless.launchBrowser("foo/bar/baz", "http://localhost:1234", true, false)
       .then =>
         expect(@create).to.be.calledWith({
           url: "foo/bar/baz"
@@ -160,7 +160,7 @@ describe "gui/headless", ->
         {}, "foo", "bar", "baz", options
       )
 
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234")
+      headless.launchBrowser("foo/bar/baz", "http://localhost:1234")
       .then =>
         expect(options.show).to.eq(false)
 
@@ -172,21 +172,21 @@ describe "gui/headless", ->
 
       emit = @sandbox.stub(@projectInstance, "emit")
 
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false, false, @projectInstance)
+      headless.launchBrowser("foo/bar/baz", "http://localhost:1234", false, false, @projectInstance)
       .then ->
         expect(errors.get).to.be.calledWith("RENDERER_CRASHED")
         expect(errors.log).to.be.calledOnce
-        expect(emit).to.be.calledWithMatch("exitEarlyWithErr", "We detected that the Chromium Renderer process just crashed.")
+        expect(emit).to.be.calledWithMatch("exitEarlyWithErr", "We detected that the Chromium Windows process just crashed.")
 
   context ".closeAnyOpenBrowser", ->
     beforeEach ->
-      @sandbox.spy(Renderer, "destroy")
+      @sandbox.spy(Windows, "destroy")
       @sandbox.spy(project, "closeBrowser")
 
       headless.closeAnyOpenBrowser()
 
-    it "calls Renderer.destroy(PROJECT)", ->
-      expect(Renderer.destroy).to.be.calledWith("PROJECT")
+    it "calls Windows.destroy(PROJECT)", ->
+      expect(Windows.destroy).to.be.calledWith("PROJECT")
 
     it "calls project.closeBrowser", ->
       expect(project.closeBrowser).to.be.calledOnce
@@ -209,26 +209,26 @@ describe "gui/headless", ->
       .then ->
         expect(video.process).not.to.be.called
 
-  context ".waitForRendererToConnect", ->
+  context ".waitForWindowsToConnect", ->
     it "resolves on waitForSocketConnection", ->
-      @sandbox.stub(headless, "waitForRendererToConnect").resolves()
-      headless.waitForRendererToConnect()
+      @sandbox.stub(headless, "waitForWindowsToConnect").resolves()
+      headless.waitForWindowsToConnect()
 
     it "passes project + id", ->
-      @sandbox.stub(headless, "waitForRendererToConnect").resolves()
-      headless.waitForRendererToConnect(@projectInstance, 1234)
+      @sandbox.stub(headless, "waitForWindowsToConnect").resolves()
+      headless.waitForWindowsToConnect(@projectInstance, 1234)
       .then =>
-        expect(headless.waitForRendererToConnect).to.be.calledWith(@projectInstance, 1234)
+        expect(headless.waitForWindowsToConnect).to.be.calledWith(@projectInstance, 1234)
 
     it "throws TESTS_DID_NOT_START_FAILED after 3 connection attempts", ->
       @sandbox.spy(errors, "warning")
       @sandbox.spy(errors, "get")
       @sandbox.spy(headless, "closeAnyOpenBrowser")
       @sandbox.stub(headless, "waitForSocketConnection").resolves(Promise.delay(1000))
-      @sandbox.stub(headless, "createRenderer").resolves()
+      @sandbox.stub(headless, "launchBrowser").resolves()
       emit = @sandbox.stub(@projectInstance, "emit")
 
-      headless.waitForRendererToConnect({openProject: @projectInstance, timeout: 10})
+      headless.waitForWindowsToConnect({openProject: @projectInstance, timeout: 10})
       .then ->
         expect(headless.closeAnyOpenBrowser).to.be.calledThrice
         expect(errors.warning).to.be.calledWith("TESTS_DID_NOT_START_RETRYING", "Retrying...")
@@ -412,8 +412,8 @@ describe "gui/headless", ->
       @sandbox.stub(headless, "ensureAndOpenProjectByPath").resolves(@projectInstance)
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
-      @sandbox.stub(headless, "createRenderer").resolves()
-      @sandbox.spy(headless,  "waitForRendererToConnect")
+      @sandbox.stub(headless, "launchBrowser").resolves()
+      @sandbox.spy(headless,  "waitForWindowsToConnect")
 
     it "no longer ensures user session", ->
       headless.run()
@@ -430,10 +430,10 @@ describe "gui/headless", ->
       .then ->
         expect(headless.ensureAndOpenProjectByPath).to.be.calledWithMatch(1234, {foo: "bar"})
 
-    it "passes project + id to waitForRendererToConnect", ->
+    it "passes project + id to waitForWindowsToConnect", ->
       headless.run()
       .then =>
-        expect(headless.waitForRendererToConnect).to.be.calledWithMatch({
+        expect(headless.waitForWindowsToConnect).to.be.calledWithMatch({
           openProject: @projectInstance
           id: 1234
         })
@@ -445,16 +445,16 @@ describe "gui/headless", ->
           openProject: @projectInstance
         })
 
-    it "passes project.ensureSpecUrl to createRenderer", ->
+    it "passes project.ensureSpecUrl to launchBrowser", ->
       @sandbox.stub(@projectInstance, "ensureSpecUrl").resolves("foo/bar")
 
       headless.run()
       .then ->
-        expect(headless.createRenderer).to.be.calledWith("foo/bar")
+        expect(headless.launchBrowser).to.be.calledWith("foo/bar")
 
-    it "passes showHeadlessGui to createRenderer", ->
+    it "passes showHeadlessGui to launchBrowser", ->
       @sandbox.stub(@projectInstance, "ensureSpecUrl").resolves("foo/bar")
 
       headless.run({showHeadlessGui: true})
       .then ->
-        expect(headless.createRenderer).to.be.calledWith("foo/bar", "http://localhost:12345", true)
+        expect(headless.launchBrowser).to.be.calledWith("foo/bar", "http://localhost:12345", true)

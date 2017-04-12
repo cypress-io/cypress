@@ -11,7 +11,7 @@ savedState = require("#{root}../lib/saved_state")
 headed     = require("#{root}../lib/modes/headed")
 menu       = require("#{root}../lib/gui/menu")
 Events     = require("#{root}../lib/gui/events")
-Renderer   = require("#{root}../lib/gui/renderer")
+Windows   = require("#{root}../lib/gui/windows")
 
 describe "gui/headed", ->
   context.skip ".onClick", ->
@@ -29,10 +29,10 @@ describe "gui/headed", ->
 
       expect(headed.isMac()).to.be.false
 
-  context ".getRendererArgs", ->
+  context ".getWindowsArgs", ->
     it "exits process when onClose is called", ->
       @sandbox.stub(process, "exit")
-      headed.getRendererArgs({}).onClose()
+      headed.getWindowsArgs({}).onClose()
       expect(process.exit).to.be.called
 
   context ".ready", ->
@@ -43,8 +43,8 @@ describe "gui/headed", ->
       @sandbox.stub(menu, "set")
       @sandbox.stub(Events, "start")
       @sandbox.stub(Updater, "install")
-      @sandbox.stub(Renderer, "create").resolves(@win)
-      @sandbox.stub(Renderer, "trackState")
+      @sandbox.stub(Windows, "create").resolves(@win)
+      @sandbox.stub(Windows, "trackState")
       @sandbox.stub(savedState, "get").resolves(@state)
 
     it "calls Events.start with options", ->
@@ -85,7 +85,7 @@ describe "gui/headed", ->
 
     it "tracks state", ->
       headed.ready({}).then =>
-        expect(Renderer.trackState).to.be.calledWith(@win, @state, {
+        expect(Windows.trackState).to.be.calledWith(@win, @state, {
           width: "appWidth"
           height: "appHeight"
           x: "appX"
@@ -94,41 +94,41 @@ describe "gui/headed", ->
         })
 
     it "renders with saved width if it exists", ->
-      expect(headed.getRendererArgs({appWidth: 1}).width).to.equal(1)
+      expect(headed.getWindowsArgs({appWidth: 1}).width).to.equal(1)
 
     it "renders with default width if no width saved", ->
-      expect(headed.getRendererArgs({}).width).to.equal(800)
+      expect(headed.getWindowsArgs({}).width).to.equal(800)
 
     it "renders with saved height if it exists", ->
-      expect(headed.getRendererArgs({appHeight: 2}).height).to.equal(2)
+      expect(headed.getWindowsArgs({appHeight: 2}).height).to.equal(2)
 
     it "renders with default height if no height saved", ->
-      expect(headed.getRendererArgs({}).height).to.equal(550)
+      expect(headed.getWindowsArgs({}).height).to.equal(550)
 
     it "renders with saved x if it exists", ->
-      expect(headed.getRendererArgs({appX: 3}).x).to.equal(3)
+      expect(headed.getWindowsArgs({appX: 3}).x).to.equal(3)
 
     it "renders with no x if no x saved", ->
-      expect(headed.getRendererArgs({}).x).to.be.undefined
+      expect(headed.getWindowsArgs({}).x).to.be.undefined
 
     it "renders with saved y if it exists", ->
-      expect(headed.getRendererArgs({appY: 4}).y).to.equal(4)
+      expect(headed.getWindowsArgs({appY: 4}).y).to.equal(4)
 
     it "renders with no y if no y saved", ->
-      expect(headed.getRendererArgs({}).y).to.be.undefined
+      expect(headed.getWindowsArgs({}).y).to.be.undefined
 
     describe "on window focus", ->
       it "calls menu.set withDevTools: true when in dev env", ->
         env = process.env["CYPRESS_ENV"]
         process.env["CYPRESS_ENV"] = "development"
-        headed.getRendererArgs({}).onFocus()
+        headed.getWindowsArgs({}).onFocus()
         expect(menu.set.lastCall.args[0].withDevTools).to.be.true
         process.env["CYPRESS_ENV"] = env
 
       it "calls menu.set withDevTools: false when not in dev env", ->
         env = process.env["CYPRESS_ENV"]
         process.env["CYPRESS_ENV"] = "production"
-        headed.getRendererArgs({}).onFocus()
+        headed.getWindowsArgs({}).onFocus()
         expect(menu.set.lastCall.args[0].withDevTools).to.be.false
         process.env["CYPRESS_ENV"] = env
 

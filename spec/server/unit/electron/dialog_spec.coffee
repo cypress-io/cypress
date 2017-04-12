@@ -2,7 +2,7 @@ require("../../spec_helper")
 
 electron = require("electron")
 dialog   = require("#{root}../lib/gui/dialog")
-Renderer = require("#{root}../lib/gui/renderer")
+Windows = require("#{root}../lib/gui/windows")
 
 describe "gui/dialog", ->
   context ".show", ->

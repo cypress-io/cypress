@@ -109,7 +109,7 @@ module.exports = {
           errors.warning("VIDEO_RECORDING_FAILED", err.stack)
       })
 
-  createRenderer: (url, proxyServer, showGui, chromeWebSecurity, project, write) ->
+  launchBrowser: (url, proxyServer, showGui, chromeWebSecurity, project, write) ->
     options = {
       url:               url
       # width:             1280
@@ -237,19 +237,19 @@ module.exports = {
 
     gui = !!gui
 
-    launchRenderer = =>
+    launchBrowser = =>
       ## if we have a browser then just physically launch it
       if browser
         openProject.launch(browser, url, null, {proxyServer: proxyServer})
       else
-        @createRenderer(url, proxyServer, gui, webSecurity, project, write)
+        @launchBrowser(url, proxyServer, gui, webSecurity, project, write)
 
     attempts = 0
 
     do waitForBrowserToConnect = =>
       Promise.join(
         @waitForSocketConnection(project, id)
-        launchRenderer()
+        launchBrowser()
       )
       .timeout(timeout ? 10000)
       .catch Promise.TimeoutError, (err) =>

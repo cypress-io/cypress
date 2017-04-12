@@ -18,7 +18,7 @@ ciProvider = require("#{root}lib/util/ci_provider")
 settings = require("#{root}lib/util/settings")
 Events   = require("#{root}lib/gui/events")
 project  = require("#{root}lib/open_project")
-Renderer = require("#{root}lib/gui/renderer")
+Windows = require("#{root}lib/gui/windows")
 record   = require("#{root}lib/modes/record")
 headed   = require("#{root}lib/modes/headed")
 headless = require("#{root}lib/modes/headless")
@@ -199,7 +199,7 @@ describe "lib/cypress", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(headless, "waitForSocketConnection")
-      @sandbox.stub(headless, "createRenderer")
+      @sandbox.stub(headless, "launchBrowser")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 0})
       @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
 
@@ -209,7 +209,7 @@ describe "lib/cypress", ->
         ## test that --run-project gets properly aliased to project
         cypress.start(["--run-project=#{@todosPath}"])
       .then =>
-        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
+        expect(headless.launchBrowser).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
         expect(errors.warning).to.be.calledWith("OLD_VERSION_OF_CLI")
         expect(console.log).to.be.calledWithMatch("You are using an older version of the CLI tools.")
         @expectExitWith(0)
@@ -240,7 +240,7 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--project=#{@todosPath}"])
       .then =>
-        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
+        expect(headless.launchBrowser).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
         @expectExitWith(10)
 
     it "does not generate a project id even if missing one", ->
@@ -269,7 +269,7 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--project=#{@todosPath}", "--spec=tests/test2.coffee"])
       .then =>
-        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
+        expect(headless.launchBrowser).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
         @expectExitWith(0)
 
     it "runs project by specific spec with default configuration", ->
@@ -277,7 +277,7 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--project=#{@idsPath}", "--spec=cypress/integration/bar.js", "--config", "port=2020"])
       .then =>
-        expect(headless.createRenderer).to.be.calledWith("http://localhost:2020/__/#/tests/integration/bar.js")
+        expect(headless.launchBrowser).to.be.calledWith("http://localhost:2020/__/#/tests/integration/bar.js")
         @expectExitWith(0)
 
     it "runs project by specific absolute spec and exits with status 0", ->
@@ -285,7 +285,7 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"])
       .then =>
-        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
+        expect(headless.launchBrowser).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
         @expectExitWith(0)
 
     it "scaffolds out integration and example_spec if they do not exist when not headless", ->
@@ -404,7 +404,7 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--project=#{@todosPath}", "--show-headless-gui"])
       .then =>
-        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all", "http://localhost:8888", true)
+        expect(headless.launchBrowser).to.be.calledWith("http://localhost:8888/__/#/tests/__all", "http://localhost:8888", true)
         @expectExitWith(0)
 
     it "turns on reporting", ->
@@ -700,7 +700,7 @@ describe "lib/cypress", ->
       @sandbox.stub(git, "_getEmail").resolves("brian@cypress.io")
       @sandbox.stub(git, "_getMessage").resolves("foo")
       @sandbox.stub(git, "_getRemoteOrigin").resolves("https://github.com/foo/bar.git")
-      @sandbox.stub(headless, "createRenderer")
+      @sandbox.stub(headless, "launchBrowser")
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({
         tests: 1
@@ -771,7 +771,7 @@ describe "lib/cypress", ->
 
       cypress.start(["--project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{@todosPath}/tests/test2.coffee"])
       .then =>
-        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
+        expect(headless.launchBrowser).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
         @expectExitWith(3)
 
     it "uses process.env.CYPRESS_PROJECT_ID", ->
@@ -950,7 +950,7 @@ describe "lib/cypress", ->
       }
 
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(Renderer, "create").resolves(@win)
+      @sandbox.stub(Windows, "create").resolves(@win)
       @sandbox.stub(Server.prototype, "startWebsockets")
       @sandbox.spy(Events, "start")
       @sandbox.stub(electron.ipcMain, "on")
