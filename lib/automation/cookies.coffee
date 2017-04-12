@@ -101,20 +101,36 @@ cookies = (cyNamespace, cookieNamespace) ->
         .then(normalizeCookieProps)
 
     clearCookie: (data, automate) ->
-      if isCypressNamespaced(data)
+      if isNamespaced(data)
         throw new Error("Sorry, you cannot clear a Cypress namespaced cookie.")
       else
         automate(data)
         .then(normalizeCookieProps)
 
     clearCookies: (data, automate) ->
-      cookies = _.reject(normalizeCookies(data), isCypressNamespaced)
+      cookies = _.reject(normalizeCookies(data), isNamespaced)
 
       clear = (cookie) ->
         automate("clear:cookie", {name: cookie.name})
         .then(normalizeCookieProps)
 
       Promise.map(cookies, clear)
+
+    changeCookie: (data) ->
+      c = normalizeCookieProps(data.cookie)
+
+      return if isNamespaced(c)
+
+      msg = if data.removed
+        "Cookie Removed: '#{c.name}'"
+      else
+        "Cookie Set: '#{c.name}'"
+
+      return {
+        cookie:  c
+        message: msg
+        removed: data.removed
+      }
 
   }
 

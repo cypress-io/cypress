@@ -5,8 +5,8 @@ url        = require("url")
 tough      = require("tough-cookie")
 moment     = require("moment")
 Promise    = require("bluebird")
-automation = require("./automation")
 statusCode = require("./util/status_code")
+Cookies    = require("./automation/cookies")
 
 Cookie    = tough.Cookie
 CookieJar = tough.CookieJar
@@ -234,7 +234,7 @@ module.exports = (options = {}) ->
         .then ->
           ## the automation may return us null in
           ## the case an expired cookie is removed
-          automation.normalizeCookieProps(cookie)
+          Cookies.normalizeCookieProps(cookie)
 
       Promise.try ->
         store = jar.toJSON()
@@ -247,7 +247,7 @@ module.exports = (options = {}) ->
         ## values which need to be set in order
         Promise.each(store.cookies, setCookie)
 
-    sendStream: (headers, automation, options = {}) ->
+    sendStream: (headers, automationFn, options = {}) ->
       _.defaults options, {
         headers: {}
         jar: true
@@ -281,9 +281,9 @@ module.exports = (options = {}) ->
           ## first set the existing jar cookies on the browser
           ## and then grab the cookies for the new url
           req.init = _.wrap req.init, (orig, opts) =>
-            self.setJarCookies(jar, automation)
+            self.setJarCookies(jar, automationFn)
             .then ->
-              automation("get:cookies", {url: newUrl, includeHostOnly: true})
+              automationFn("get:cookies", {url: newUrl, includeHostOnly: true})
             .then(convertToJarCookie)
             .then (cookies) ->
               setCookies(cookies, jar, null, newUrl)
@@ -297,13 +297,13 @@ module.exports = (options = {}) ->
         str.getJar = -> options.jar
         str
 
-      automation("get:cookies", {url: options.url, includeHostOnly: true})
+      automationFn("get:cookies", {url: options.url, includeHostOnly: true})
       .then(convertToJarCookie)
       .then (cookies) ->
         setCookies(cookies, options.jar, options.headers, options.url)
       .then(send)
 
-    send: (headers, automation, options = {}) ->
+    send: (headers, automationFn, options = {}) ->
       _.defaults options, {
         headers: {}
         gzip: true
@@ -376,9 +376,9 @@ module.exports = (options = {}) ->
               ## first set the existing jar cookies on the browser
               ## and then grab the cookies for the new url
               req.init = _.wrap req.init, (orig, opts) =>
-                self.setJarCookies(options.jar, automation)
+                self.setJarCookies(options.jar, automationFn)
                 .then ->
-                  automation("get:cookies", {url: newUrl, includeHostOnly: true})
+                  automationFn("get:cookies", {url: newUrl, includeHostOnly: true})
                 .then(convertToJarCookie)
                 .then (cookies) ->
                   setCookies(cookies, jar, null, newUrl)
@@ -409,7 +409,7 @@ module.exports = (options = {}) ->
             resp.redirectedToUrl = url.resolve(options.url, loc)
 
           if options.jar
-            @setJarCookies(options.jar, automation)
+            @setJarCookies(options.jar, automationFn)
             .return(resp)
           else
             resp
@@ -427,7 +427,7 @@ module.exports = (options = {}) ->
           ## TODO: we can simply use the 'url' property on the cookies API
           ## which automatically pulls all of the cookies that would be
           ## set for that url!
-          automation("get:cookies", {url: options.url, includeHostOnly: true})
+          automationFn("get:cookies", {url: options.url, includeHostOnly: true})
           .then(convertToJarCookie)
           .then (cookies) ->
             setCookies(cookies, options.jar, options.headers, options.url)

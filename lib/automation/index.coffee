@@ -54,31 +54,40 @@ module.exports = {
         fn(message, data, id)
 
     automationValve = (message, fn) ->
-      return (data) ->
+      return (msg, data) ->
+        ## enable us to omit message
+        ## argument
+        if not data
+          data = msg
+          msg  = message
+
         ## if we have an onRequest function
         ## then just invoke that
         if onReq = get("onRequest")
-          onReq(message, data)
+          onReq(msg, data)
         else
           ## do the default
-          requestAutomationResponse(message, data, fn)
+          requestAutomationResponse(msg, data, fn)
 
     normalize = (message, data, automate) ->
-      switch message
-        when "take:screenshot"
-          screenshot.capture(data, automate)
-        when "get:cookies"
-          cookies.getCookies(data, automate)
-        when "get:cookie"
-          cookies.getCookie(data, automate)
-        when "set:cookie"
-          cookies.setCookie(data, automate)
-        when "clear:cookies"
-          cookies.clearCookies(data, automate)
-        when "clear:cookie"
-          cookies.clearCookie(data, automate)
-        else
-          automate(data)
+      Promise.try ->
+        switch message
+          when "take:screenshot"
+            screenshot.capture(data, automate)
+          when "get:cookies"
+            cookies.getCookies(data, automate)
+          when "get:cookie"
+            cookies.getCookie(data, automate)
+          when "set:cookie"
+            cookies.setCookie(data, automate)
+          when "clear:cookies"
+            cookies.clearCookies(data, automate)
+          when "clear:cookie"
+            cookies.clearCookie(data, automate)
+          when "change:cookie"
+            cookies.changeCookie(data)
+          else
+            automate(data)
 
     return {
       _requests: requests
@@ -87,10 +96,9 @@ module.exports = {
         _.extend(middleware, middlewares)
 
       push: (message, data) ->
-        ## TODO: normalize the automation message
-        # normalize(message, data)
-        # .then (data) ->
-        #   invokeAsync("onPush", message, data)
+        normalize(message, data)
+        .then (data) ->
+          invokeAsync("onPush", message, data) if data
 
       request: (message, data, fn) ->
         ## curry in the message + callback function
