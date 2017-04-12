@@ -14,11 +14,11 @@ The current working directory is set to the project root (the directory that con
 | | |
 |--- | --- |
 | **Returns** | an object with the exit `code`, the `stdout`, and the `stderr` |
-| **Timeout** | `cy.exec` will allow the command to execute for the duration of the [`execTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+| **Timeout** | `cy.exec` will allow the command to execute for the duration of the [`execTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
-# [cy.exec( *command* )](#command-usage)
+# [cy.exec( *command* )](#section-command-usage)
 
 Execute a system command.
 
@@ -33,7 +33,7 @@ Pass in an options object to change the default behavior of `cy.exec`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`execTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to allow the command to execute
+`timeout` | [`execTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to allow the command to execute
 `failOnNonZeroExit` | `true` | Fail if the command exits with a non-zero code
 `env` | `{}` | Object of environment variables to set before the command executes (e.g. { USERNAME: 'johndoe' }). Will be merged with existing system environment variables
 

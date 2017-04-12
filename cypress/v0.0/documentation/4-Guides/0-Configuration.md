@@ -3,20 +3,20 @@ excerpt: Configure global, network, folder, viewport, and animation options
 
 # Contents
 
-- :fa-angle-right: [Configuration Options](#configuration-options)
-  - [Global](#global)
-  - [Timeouts](#timeouts)
-  - [Folders](#folders)
-  - [Screenshots](#screenshots)
-  - [Videos](#videos)
-  - [Browser](#browser)
-  - [Web Server](#web-server)
-  - [Viewport](#viewport)
-  - [Animation](#animation)
-- :fa-angle-right: [Overriding Options](#overriding-options)
-  - [Command Line](#command-line)
-  - [Environment Variables](#environment-variables)
-- :fa-angle-right: [Resolved Configuration](#resolved-configuration)
+- :fa-angle-right: [Configuration Options](#section-configuration-options)
+  - [Global](#section-global)
+  - [Timeouts](#section-timeouts)
+  - [Folders](#section-folders)
+  - [Screenshots](#section-screenshots)
+  - [Videos](#section-videos)
+  - [Browser](#section-browser)
+  - [Web Server](#section-web-server)
+  - [Viewport](#section-viewport)
+  - [Animation](#section-animation)
+- :fa-angle-right: [Overriding Options](#section-overriding-options)
+  - [Command Line](#section-command-line)
+  - [Environment Variables](#section-environment-variables)
+- :fa-angle-right: [Resolved Configuration](#section-resolved-configuration)
 
 ***
 
@@ -44,7 +44,7 @@ Option | Default | Description
 `port` |  | Port to use for Cypress
 `numTestsKeptInMemory` | `50` | The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are seeing extremely high memory consumption in your browser.
 `reporter` | `spec` | The [reporter](https://on.cypress.io/guides/reporters) used during headless or CI runs
-`reporterOptions` | `null` | The [reporter options](https://on.cypress.io/guides/reporters#reporter-options) used. Supported options depend on the reporter.
+`reporterOptions` | `null` | The [reporter options](https://on.cypress.io/guides/reporters#section-reporter-options) used. Supported options depend on the reporter.
 `screenshotOnHeadlessFailure` | `true` | Whether to take a screenshot automatically on test failure when running headlessly or in CI
 `watchForFileChanges` | `true` | Whether Cypress will watch and restart tests on file changes
 

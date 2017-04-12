@@ -3,17 +3,17 @@ excerpt: A guide to managing XHR requests
 
 # Contents
 
-- :fa-angle-right: [Strategy](#strategy)
-  - [1: Don't Stub Responses](#1-don-1-stub-responses)
-  - [2: Stub Responses](#2-stub-responses)
-- :fa-angle-right: [How to Stub Responses](#how-to-stub-responses)
-- :fa-angle-right: [Requests](#requests)
-- :fa-angle-right: [Server + Routing Table](#server-routing-table)
-- :fa-angle-right: [Fixtures](#fixtures)
-- :fa-angle-right: [Waiting](#waiting)
-  - [Removing Flake](#removing-flake)
-  - [Clear Source of Failure](#clear-source-of-failure)
-  - [Asserting about the XHR Object](#asserting-about-the-xhr-object)
+- :fa-angle-right: [Strategy](#section-strategy)
+  - [1: Don't Stub Responses](#section-1-don-1-stub-responses)
+  - [2: Stub Responses](#section-2-stub-responses)
+- :fa-angle-right: [How to Stub Responses](#section-how-to-stub-responses)
+- :fa-angle-right: [Requests](#section-requests)
+- :fa-angle-right: [Server + Routing Table](#section-server-routing-table)
+- :fa-angle-right: [Fixtures](#section-fixtures)
+- :fa-angle-right: [Waiting](#section-waiting)
+  - [Removing Flake](#section-removing-flake)
+  - [Clear Source of Failure](#section-clear-source-of-failure)
+  - [Asserting about the XHR Object](#section-asserting-about-the-xhr-object)
 
 ***
 
@@ -122,7 +122,7 @@ To begin stubbing responses you have to do two things.
 1. Start a [`cy.server`](https://on.cypress.io/api/server)
 2. Provide a [`cy.route`](https://on.cypress.io/api/route)
 
-These two commands work together to control the behavior of your responses within the command's options. See [`cy.server` options](https://on.cypress.io/api/server#options) and [`cy.route` options](https://on.cypress.io/api/route#options) for instructions on how to stub responses.
+These two commands work together to control the behavior of your responses within the command's options. See [`cy.server` options](https://on.cypress.io/api/server#section-options) and [`cy.route` options](https://on.cypress.io/api/route#section-options) for instructions on how to stub responses.
 
 [`cy.server`](https://on.cypress.io/api/server) enables stubbing, while [`cy.route`](https://on.cypress.io/api/route) provides a routing table so Cypress understands which response should go with which request.
 

@@ -8,7 +8,7 @@ Get the remote `window.location` as a normalized object.
 | **Returns** | location object detailed below |
 | **Timeout** | *cannot timeout* |
 
-# [cy.location()](#usage)
+# [cy.location()](#section-usage)
 
 Given a remote URL of `http://localhost:8000/app/index.html?q=dan#/users/123/edit`, an object would be returned with the following properties:
 
@@ -27,7 +27,7 @@ Key | Type | Returns
 
 ***
 
-# [cy.location( *key* )](#key-usage)
+# [cy.location( *key* )](#section-key-usage)
 
 Get the specific value by key of the location object above.
 
