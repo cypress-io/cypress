@@ -12,11 +12,11 @@ Just like Promises, you can return any compatible "thenable" (anything that has 
 | | |
 |--- | --- |
 | **Returns** | the return of the callback function |
-| **Timeout** | `cy.then` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Timeout** | `cy.then` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options). |
 
 ***
 
-# [cy.then( *function* )](#section-usage)
+# [cy.then( *function* )](#usage)
 
 Yield the current subject as the first argument.
 
@@ -50,7 +50,7 @@ Pass in an options object to change the default behavior of `cy.then`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the click
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the click
 
 ***
 

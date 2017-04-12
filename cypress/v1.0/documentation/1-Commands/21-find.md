@@ -6,11 +6,11 @@ Get the descendents DOM elements of a specific selector.
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.find` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.find` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
 ***
 
-# [cy.find( *selector* )](#section-selector-usage)
+# [cy.find( *selector* )](#selector-usage)
 
 Get the descendants of each DOM element in the current set of matched DOM elements within the selector.
 
@@ -25,7 +25,7 @@ Pass in an options object to change the default behavior of `cy.find`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ***
 

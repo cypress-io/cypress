@@ -13,25 +13,25 @@ This document covers the API for consuming your environment variables *in your t
 }
 [/block]
 
-# [Cypress.env()](#section-no-arguments-usage)
+# [Cypress.env()](#no-arguments-usage)
 
 Returns all of your environment variables as an object literal.
 
 ***
 
-# [Cypress.env( *key* )](#section-key-usage)
+# [Cypress.env( *key* )](#key-usage)
 
 Returns the value of a single environment variable by its key.
 
 ***
 
-# [Cypress.env( *key*, *value* )](#section-key-value-usage)
+# [Cypress.env( *key*, *value* )](#key-value-usage)
 
 Sets an environment variable for a specific key.
 
 ***
 
-# [Cypress.env( *object* )](#section-object-usage)
+# [Cypress.env( *object* )](#object-usage)
 
 Sets multiple environment variables.
 
