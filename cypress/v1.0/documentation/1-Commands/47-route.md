@@ -18,31 +18,31 @@ Use `cy.route` to manage the behavior of network requests.
 
 ***
 
-# [cy.route( *url* )](#section-url-usage)
+# [cy.route( *url* )](#url-usage)
 
 Set a route matching the specific `url` which is not stubbed but can be waited on later. This will match `GET` request methods.
 
 ***
 
-# [cy.route( *url*, *response* )](#section-url-and-response-usage)
+# [cy.route( *url*, *response* )](#url-and-response-usage)
 
 Set a route matching the `url` stubbed with the supplied `response`. This will match `GET` request methods.
 
 ***
 
-# [cy.route( *method*, *url* )](#section-method-and-url-usage)
+# [cy.route( *method*, *url* )](#method-and-url-usage)
 
 Set a route matching the specific `method` and `url` which is not stubbed but can be waited on later.
 
 ***
 
-# [cy.route( *method*, *url*, *response* )](#section-method-url-and-response-usage)
+# [cy.route( *method*, *url*, *response* )](#method-url-and-response-usage)
 
 Set a route matching the `method` and `url` stubbed with the supplied `response`.
 
 ***
 
-# [cy.route( *function* )](#section-function-usage)
+# [cy.route( *function* )](#function-usage)
 
 Set a route by returning an object literal from your callback function.
 
@@ -107,6 +107,14 @@ cy
   .get("#first-name").type("Julius{enter}")
   .wait("@postUser")
 ```
+
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe using cy.route to POST for login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)",
+  "title": "Setup route to POST to login"
+}
+[/block]
 
 ***
 
@@ -295,6 +303,30 @@ cy
     }
   })
 ```
+
+## Simulate a server redirect
+
+```javascript
+cy
+  // simulate the server returning 503 with
+  // empty JSON response body
+  .route({
+    method: 'POST',
+    url: '/login',
+    response: {
+      // simulate a redirect to another page
+      redirect: '/error'
+    }
+  })
+```
+
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe using cy.route to simulate a 503 on POST to login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)",
+  "title": "Setup route to error on POST to login"
+}
+[/block]
 
 ***
 
@@ -500,7 +532,9 @@ When clicking on `XHR Stub` within the Command Log, the console outputs the foll
 
 # Related
 
+- [Guide: Network Requests](https://on.cypress.io/guides/network-requests-xhr)
+- [Recipe: Loggin in - XHR Web Form](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
 - [server](https://on.cypress.io/api/server)
 - [wait](https://on.cypress.io/api/wait)
 - [as](https://on.cypress.io/api/as)
-- [Network Requests](https://on.cypress.io/guides/network-requests-xhr)
+- [fixture](https://on.cypress.io/api/fixture)

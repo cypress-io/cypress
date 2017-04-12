@@ -13,25 +13,25 @@ If you call `cy.clock` before visiting a page with [`cy.visit`](https://on.cypre
 
 | | |
 |--- | --- |
-| **Returns** | a `clock` object. See [clock API](#section-clock-api) |
+| **Returns** | a `clock` object. See [clock API](#clock-api) |
 
 ***
 
-# [cy.clock()](#section-usage)
+# [cy.clock()](#usage)
 
-Replaces `setTimeout`, `clearTimeout`, `setInterval`, `clearInterval` and `Date` and allows them to be controlled synchronously via [`cy.tick`](https://on.cypress.io/api/tick) or the yielded `clock` object (see [clock API](#section-clock-api)).
+Replaces `setTimeout`, `clearTimeout`, `setInterval`, `clearInterval` and `Date` and allows them to be controlled synchronously via [`cy.tick`](https://on.cypress.io/api/tick) or the yielded `clock` object (see [clock API](#clock-api)).
 
 The clock starts at the unix epoch (timestamp of 0). This means that when you instantiate `new Date` in your application, it will have a time of `January 1st, 1970`.
 
 ***
 
-# [cy.clock( *now* )](#section-specify-the-now-timestamp)
+# [cy.clock( *now* )](#specify-the-now-timestamp)
 
 Same as above, but starts the clock at the specified timestamp.
 
 ***
 
-# [cy.clock( *now*, *functionNames* )](#section-specify-which-functions-to-override)
+# [cy.clock( *now*, *functionNames* )](#specify-which-functions-to-override)
 
 Same as above, but only overrides the functions in the array `functionNames`.
 
@@ -183,6 +183,18 @@ cy
 
 ***
 
+## Example Recipe
+
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)",
+  "title": "Using cy.clock and cy.tick"
+}
+[/block]
+
+***
+
 # Command Log
 
 ## Create a clock and tick it 1 second
@@ -205,7 +217,8 @@ When clicking on the `clock` command within the command log, the console outputs
 
 # Related
 
+- [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
+- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
 - [tick](https://on.cypress.io/api/tick)
 - [spy](https://on.cypress.io/api/spy)
 - [stub](https://on.cypress.io/api/stub)
-- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)

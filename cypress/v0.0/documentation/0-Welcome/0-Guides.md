@@ -15,6 +15,7 @@ excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 | -------------------- | -- |
 | [Installing & Running](https://on.cypress.io/guides/installing-and-running) | Get Cypress downloaded and in your project |
 | [Writing your First Test](https://on.cypress.io/guides/writing-your-first-test) | Write a test in Cypress |
+| [Using the Cypress Running](https://on.cypress.io/guides/using-the-cypress-runner) | Review test commands, instrumentation and your application under test. |
 
 | Examples | |
 | -------------------- | -- |

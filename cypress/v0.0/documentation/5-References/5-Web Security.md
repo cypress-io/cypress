@@ -3,16 +3,16 @@ excerpt: How Cypress handles same-origin policy
 
 # Contents
 
-- :fa-angle-right: [Overview](#section-overview)
-- :fa-angle-right: [Limitations](#section-limitations)
-  - [One Superdomain per Test](#section-one-superdomain-per-test)
-  - [Cross Origin Iframes](#section-cross-origin-iframes)
-  - [Insecure Content](#section-insecure-content)
-- :fa-angle-right: [Common Workarounds](#section-common-workarounds)
-  - [External Navigation](#section-external-navigation)
-  - [Form Submission Redirects](#section-form-submission-redirects)
-  - [JavaScript Redirects](#section-javascript-redirects)
-- :fa-angle-right: [Disabling Web Security](#section-disabling-web-security)
+- :fa-angle-right: [Overview](#overview)
+- :fa-angle-right: [Limitations](#limitations)
+  - [One Superdomain per Test](#one-superdomain-per-test)
+  - [Cross Origin Iframes](#cross-origin-iframes)
+  - [Insecure Content](#insecure-content)
+- :fa-angle-right: [Common Workarounds](#common-workarounds)
+  - [External Navigation](#external-navigation)
+  - [Form Submission Redirects](#form-submission-redirects)
+  - [JavaScript Redirects](#javascript-redirects)
+- :fa-angle-right: [Disabling Web Security](#disabling-web-security)
 
 ***
 
@@ -79,7 +79,7 @@ Although Cypress tries to enforce this limitation, it is possible for your appli
 
 In each of these situations, Cypress will lose the ability to automate your application and will immediately error.
 
-Read on to learn about [working around these common problems](#section-common-workarounds) or even [disabling web security](#section-disabling-web-security) altogether.
+Read on to learn about [working around these common problems](#common-workarounds) or even [disabling web security](#disabling-web-security) altogether.
 
 ***
 
@@ -97,7 +97,7 @@ It's actually *possible* for Cypress to accomodate these situations the same way
 
 As a workaround, you may be able to use [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) to directly communicate with these iframes and control them (if the 3rd party iframe supports it).
 
-Other than that, you'll have to wait for us to implement API's to support this (check our [open issue](https://github.com/cypress-io/cypress/issues/136)), or you can [disable web security](#section-disabling-web-security).
+Other than that, you'll have to wait for us to implement API's to support this (check our [open issue](https://github.com/cypress-io/cypress/issues/136)), or you can [disable web security](#disabling-web-security).
 
 ***
 
@@ -149,7 +149,7 @@ This security vulnerability exists **even if** your webserver forces a `301 redi
 
 Simply update your `HTML` or `JavaScript` code to not navigate to an insecure `HTTP` page and instead only use `HTTPS`. Additionally make sure that cookies have their `secure` flag set to `true`.
 
-If you're in a situation where you don't control the code, or otherwise cannot work around this, you can bypass this restriction in Cypress by [disabling web security](#section-dislabing-web-security).
+If you're in a situation where you don't control the code, or otherwise cannot work around this, you can bypass this restriction in Cypress by [disabling web security](#dislabing-web-security).
 
 ***
 
@@ -202,7 +202,7 @@ cy
   })
 ```
 
-Still not satisfied? Do you really want to click through to another application? Okay then read about [disabling web security](#section-disabling-web-security).
+Still not satisfied? Do you really want to click through to another application? Okay then read about [disabling web security](#disabling-web-security).
 
 ***
 
@@ -266,7 +266,7 @@ cy
   })
 ```
 
-Not working for you? Don't know how to set your token? If you still need to be able to be redirected to your SSO server you can read about [disabling web security](#section-disabling-web-security).
+Not working for you? Don't know how to set your token? If you still need to be able to be redirected to your SSO server you can read about [disabling web security](#disabling-web-security).
 
 ***
 
@@ -280,7 +280,7 @@ window.location.href = "http://some.superdomain.com"
 
 This is probably the hardest situation to test because it's usually happening due to another cause. You will need to figure out why your JavaScript code is redirecting. Perhaps you're not logged in, and you need to handle that setup elsewhere? Perhaps you're using a `Single sign-on (SSO)` server and you just need to read the previous section about working around that?
 
-If you can't figure out why your JavaScript code is redirecting you to a different superdomain then you might want to just read about [disabling web security](#section-disabling-websecurity).
+If you can't figure out why your JavaScript code is redirecting you to a different superdomain then you might want to just read about [disabling web security](#disabling-websecurity).
 
 ***
 

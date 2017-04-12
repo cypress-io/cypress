@@ -3,13 +3,13 @@ excerpt: Cypress bundles together a familiar set of tools and builds heavily on 
 
 # Contents
 
-- :fa-angle-right: [Mocha](#section-mocha)
-- :fa-angle-right: [Chai](#section-chai)
-- :fa-angle-right: [Chai-jQuery](#section-chai-jquery)
-- :fa-angle-right: [Sinon](#section-sinon)
-- :fa-angle-right: [Sinon-Chai](#section-sinon-chai)
-- :fa-angle-right: [Sinon-as-Promised](#section-sinon-as-romised)
-- :fa-angle-right: [Utilities](#section-utilies)
+- :fa-angle-right: [Mocha](#mocha)
+- :fa-angle-right: [Chai](#chai)
+- :fa-angle-right: [Chai-jQuery](#chai-jquery)
+- :fa-angle-right: [Sinon](#sinon)
+- :fa-angle-right: [Sinon-Chai](#sinon-chai)
+- :fa-angle-right: [Sinon-as-Promised](#sinon-as-romised)
+- :fa-angle-right: [Utilities](#utilies)
 
 ***
 
@@ -39,6 +39,14 @@ Additionally, Mocha gives us excellent [`async` support](https://mochajs.org/#as
 
 While Mocha provides us a framework to structure our tests, Chai gives us the ability to easily write assertions. Chai gives us readable assertions with excellent error messages. Cypress extends this, fixes several common pitfalls, and wraps Chai's DSL using [subjects](https://on.cypress.io/guides/making-assertions) and the [cy.should](https://on.cypress.io/api/should) command.
 
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe to see how to extend chai yourself](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/extending_chai_assertion_plugins_spec.js)",
+  "title": "Extending chai to use assertion plugins"
+}
+[/block]
+
 ***
 
 # Chai-jQuery
@@ -54,6 +62,14 @@ When writing integration tests, you will likely work a lot with the DOM. Cypress
 [Sinon docs](http://sinonjs.org/)
 
 When writing unit tests, or even in integration-like tests, you often need to ability to [stub](http://sinonjs.org/docs/#stubs) and [spy](http://sinonjs.org/docs/#spies) methods. Cypress includes two methods, [`cy.stub`](https://on.cypress.io/api/stub) and [`cy.spy`](https://on.cypress.io/api/spy) that return Sinon stubs and spies, respectively.
+
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe for stubbing dependencies in unit tests](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_stubbing_dependencies_spec.js)",
+  "title": "Stubbing Dependencies when Unit Testing"
+}
+[/block]
 
 ***
 

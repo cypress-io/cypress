@@ -6,17 +6,17 @@ Reads a file and returns its contents. JSON is automatically parsed into JavaScr
 | | |
 |--- | --- |
 | **Returns** | the contents of the file |
-| **Timeout** | `cy.readFile` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.readFile` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
 ***
 
-# [cy.readFile( *filePath* )](#section-usage)
+# [cy.readFile( *filePath* )](#usage)
 
 Reads the file at the `filePath`. The `filePath` is relative to the project's root.
 
 ***
 
-# [cy.readFile( *filePath*, *encoding* )](#section-specify-encoding)
+# [cy.readFile( *filePath*, *encoding* )](#specify-encoding)
 
 Reads the file at the `filePath` with the `encoding`. The `filePath` is relative to the project's root.
 
@@ -32,7 +32,7 @@ Pass in an options object to change the default behavior of `cy.readFile`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.readFile` command to be processed
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.readFile` command to be processed
 
 ***
 

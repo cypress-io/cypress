@@ -9,11 +9,11 @@ It moves the clock the specified number of `milliseconds`. Any timers within the
 
 | | |
 |--- | --- |
-| **Returns** | the `clock` object. See [clock API](https://on.cypress.io/api/clock#section-clock-api) |
+| **Returns** | the `clock` object. See [clock API](https://on.cypress.io/api/clock#clock-api) |
 
 ***
 
-# [cy.tick( *milliseconds* )](#section-usage)
+# [cy.tick( *milliseconds* )](#usage)
 
 Moves the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called.
 
@@ -43,6 +43,19 @@ cy
 
 ***
 
+
+## Example Recipe
+
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)",
+  "title": "Using cy.clock and cy.tick"
+}
+[/block]
+
+***
+
 # Command Log
 
 ## Create a clock and tick it 1 second
@@ -65,7 +78,8 @@ When clicking on the `tick` command within the command log, the console outputs 
 
 # Related
 
+- [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
+- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
 - [clock](https://on.cypress.io/api/clock)
 - [stub](https://on.cypress.io/api/stub)
 - [spy](https://on.cypress.io/api/spy)
-- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)

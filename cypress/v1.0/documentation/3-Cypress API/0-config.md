@@ -5,7 +5,6 @@ excerpt: get and set configuration options
 
 This document covers the API for consuming your configuration options *in your tests*.
 
-
 [block:callout]
 {
   "type": "info",
@@ -14,25 +13,25 @@ This document covers the API for consuming your configuration options *in your t
 }
 [/block]
 
-# [Cypress.config()](#section-no-arguments-usage)
+# [Cypress.config()](#no-arguments-usage)
 
 Returns all of your configuration options as an object literal.
 
 ***
 
-# [Cypress.config( *key* )](#section-key-usage)
+# [Cypress.config( *key* )](#key-usage)
 
 Returns the value of a single configuration option by its key.
 
 ***
 
-# [Cypress.config( *key*, *value* )](#section-key-value-usage)
+# [Cypress.config( *key*, *value* )](#key-value-usage)
 
 Sets a configuration option for a specific key.
 
 ***
 
-# [Cypress.config( *object* )](#section-object-usage)
+# [Cypress.config( *object* )](#object-usage)
 
 Sets multiple configuration options.
 
@@ -97,6 +96,14 @@ Cypress.config("viewportWidth", 800)
 Cypress.config("viewportWidth") // => 800
 ```
 
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe where we reset our baseUrl using Cypress.config](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)",
+  "title": "Using config to set baseUrl"
+}
+[/block]
+
 ***
 
 # Object Usage
@@ -129,3 +136,9 @@ Cypress.config() // => {defaultCommandTimeout: 10000, viewportHeight: 900, ...}
 As a rule of thumb anything you call from `Cypress` affects global state. Anything you call from `cy` affects local state.
 
 Methods on `cy` are local and specific to a single test. Side effects from `cy` methods are restored between each test. We chose to use `Cypress` because changes to your configuration options take effect for the remainder of **ALL** tests.
+
+***
+
+# Related
+
+- [Configuration](https://on.cypress.io/guides/configuration)

@@ -10,7 +10,7 @@ Reset the root scope to the current subject and pass that as an argument to the 
 
 ***
 
-# [cy.within( *function* )](#section-usage)
+# [cy.within( *function* )](#usage)
 
 Set the root scope to the current subject
 

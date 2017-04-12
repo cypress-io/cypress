@@ -10,7 +10,7 @@ Return the object passed into `cy.wrap`.
 
 ***
 
-# [cy.wrap( *object* )](#section-usage)
+# [cy.wrap( *object* )](#usage)
 
 Return the object passed into `cy.wrap`.
 

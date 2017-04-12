@@ -10,7 +10,7 @@ The spread command allows an expression to be expanded in places where multiple 
 
 ***
 
-# [cy.spread( *fn* )](#section-usage)
+# [cy.spread( *fn* )](#usage)
 
 Expand an array of arguments.
 

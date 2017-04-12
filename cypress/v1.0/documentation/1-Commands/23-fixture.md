@@ -30,19 +30,19 @@ If an extension is omitted, Cypress will attempt to resolve the fixture by order
 | | |
 |--- | --- |
 | **Returns** | the contents of the file, formatted by file extension |
-| **Timeout** | `cy.fixture` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the server to process this command. |
+| **Timeout** | `cy.fixture` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to process this command. |
 
 ***
 
-# [cy.fixture( *fixture* )](#section-single-fixture-usage)
+# [cy.fixture( *fixture* )](#single-fixture-usage)
 
-Loads the fixture at the specified filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#section-folders), which defaults to `cypress/fixtures`.
+Loads the fixture at the specified filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders), which defaults to `cypress/fixtures`.
 
 ***
 
-# [cy.fixture( *fixture*, *encoding* )](#section-encoding)
+# [cy.fixture( *fixture*, *encoding* )](#encoding)
 
-Loads the fixture at the specified filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#section-folders), which defaults to `cypress/fixtures`, using the encoding specified when reading the file.
+Loads the fixture at the specified filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders), which defaults to `cypress/fixtures`, using the encoding specified when reading the file.
 
 ***
 
@@ -56,7 +56,7 @@ Pass in an options object to change the default behavior of `cy.fixture`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.fixture` command to be processed
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.fixture` command to be processed
 
 ***
 
@@ -76,7 +76,7 @@ cy.fixture("users.json")
 cy.fixture("admin")
 ```
 
-When no extension is passed to `cy.fixture`, Cypress will search for files with the specified name within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#section-folders), which defaults to `cypress/fixtures`, and resolve the first one. The above example would resolve in the following order:
+When no extension is passed to `cy.fixture`, Cypress will search for files with the specified name within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders), which defaults to `cypress/fixtures`, and resolve the first one. The above example would resolve in the following order:
 
 1. `{fixturesFolder}/admin.json`
 2. `{fixturesFolder}/admin.js`
@@ -162,7 +162,7 @@ Cypress automatically determines the encoding for the following file types:
 * `.tiff`
 * `.zip`
 
-For other types of files, they will be read as `utf8` by default. You can specify a different encoding by passing it as the [second argument](https://on.cypress.io/api/fixture#section--cy-fixture-fixture-encoding-section-encoding-).
+For other types of files, they will be read as `utf8` by default. You can specify a different encoding by passing it as the [second argument](https://on.cypress.io/api/fixture#-cy-fixture-fixture-encoding-section-encoding-).
 
 ```javascript
 cy.fixture("foo.bmp", "base64")
@@ -186,20 +186,20 @@ The following encodings are supported:
 
 # Usage with `cy.route()`
 
+## Using fixture or fx shortcuts
+
 Fixtures can be referenced directly by the special keywords: `fixture:` or `fx:`.
 
 This enables you to set a fixture as the response for a route without having to first use the `cy.fixture` command.
-
-## Example 1:
 
 ```javascript
 cy.route("GET", /users/, "fixture:users") // this works
 cy.route("GET", /users/, "fx:users")      // this also works
 ```
 
-This saves you from having to explicitly load the fixture first (like in [Example #2](https://on.cypress.io/api/fixture#section-example-2-)).
+This saves you from having to explicitly load the fixture first (like [below](https://on.cypress.io/api/fixture#using-cy-then-to-access-fixture-data)).
 
-## Example 2:
+## Using cy.then to access fixture data
 
 ```javascript
 cy
@@ -208,9 +208,19 @@ cy
   })
 ```
 
-However if you still need access to the fixture data, instead of yielding the fixture's data in [Example #2](https://on.cypress.io/api/fixture#section-example-2-), we can make use of [aliasing](https://on.cypress.io/guides/using-aliases).
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe using cy.fixture to bootstrap data for our application.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)",
+  "title": "Using cy.fixture for response data"
+}
+[/block]
 
-## Example 3:
+## Using an alias to access a fixture
+
+However if you still need access to the fixture data, instead of [yielding the fixture's data](https://on.cypress.io/api/fixture#using-cy-then-to-access-fixture-data), we can make use of [aliasing](https://on.cypress.io/guides/using-aliases).
+
+Using an alias provides the benefit of terseness and readability.
 
 ```javascript
 cy
@@ -225,23 +235,21 @@ cy
   })
 ```
 
-Using an alias provides the benefit of terseness and readability.
+## Modifying fixture data before using it
 
-## Example 4:
+You can also modify fixture data directly before passing it along to the route.
 
 ```javascript
 cy
   .fixture("user").then(function(user){
-    user.firstName = "Jennifer"
+    user.firstName = "Jane"
 
     cy.route("GET", "/users/1", user)
   })
   .visit("/users")
-  .get(".user").should("include", "Jennifer")
+  .get(".user").should("include", "Jane")
 })
 ```
-
-You can also modify fixture data directly before passing it along to the route.
 
 ***
 
@@ -253,5 +261,7 @@ You can also modify fixture data directly before passing it along to the route.
 
 # Related
 
+- [Guide: Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
+- [Recipe: Bootstrapping App Test Data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
 - [route](https://on.cypress.io/api/route)
-- [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures)
+- [then](https://on.cypress.io/api/then)

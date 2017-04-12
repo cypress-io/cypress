@@ -13,29 +13,29 @@ Get the DOM element containing the text. DOM elements can contain *more* than th
 | | |
 |--- | --- |
 | **Returns** | the deepest DOM element containing the text  |
-| **Timeout** | `cy.contains` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.contains` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
 ***
 
-# [cy.contains( *text* )](#section-text-usage)
+# [cy.contains( *text* )](#text-usage)
 
 Get the deepest DOM element containing the text.
 
 ***
 
-# [cy.contains( *number* )](#section-number-usage)
+# [cy.contains( *number* )](#number-usage)
 
 Get the deepest DOM element containing the number.
 
 ***
 
-# [cy.contains( *regexp* )](#section-regular-expression-usage)
+# [cy.contains( *regexp* )](#regular-expression-usage)
 
 Get the deepest DOM element containing the text matching the regular expression.
 
 ***
 
-# [cy.contains( *selector*, *text* )](#section-selector-and-text-usage)
+# [cy.contains( *selector*, *text* )](#selector-and-text-usage)
 
 Specify a selector to filter DOM elements containing the text. Cypress will **ignore** it's default preference for the specified selector. Using a selector allows you to return more *shallow* elements in the tree which contain the specific text.
 
@@ -51,7 +51,7 @@ Pass in an options object to change the default behavior of `cy.contains`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry finding an element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry finding an element
 
 ***
 

@@ -17,7 +17,7 @@ Unlike most Cypress commands, `cy.spy` is *synchronous* and returns a value (the
 
 ***
 
-# [cy.spy( *object*, *"method"* )](#section-usage)
+# [cy.spy( *object*, *"method"* )](#usage)
 
 Wraps the `method` on the `object` with a spy and returns the spy. See the [sinon.js spy docs](http://sinonjs.org/docs/#spies) for [methods](http://sinonjs.org/docs/#spies-api) on the spy.
 
@@ -34,6 +34,18 @@ App.start()
 expect(util.addListeners).to.be.called
 
 ```
+
+***
+
+## Example Recipe
+
+[block:callout]
+{
+  "type": "info",
+  "body": "[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)",
+  "title": "Using cy.spy"
+}
+[/block]
 
 ***
 
@@ -83,6 +95,7 @@ When clicking on the `spy-1` event within the command log, the console outputs t
 
 # Related
 
+- [Guide: Stubs, Spies and Clocks ](https://on.cypress.io/guides/stubs-spies-clocks)
+- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
 - [stub](https://on.cypress.io/api/stub)
 - [clock](https://on.cypress.io/api/clock)
-- [Recipe: Controlling Behavior with Spies, Stubs, and Clocks](https://github.com/cypress-io/cypress-example-recipes#controlling-behavior-with-spies-stubs-and-clocks)
