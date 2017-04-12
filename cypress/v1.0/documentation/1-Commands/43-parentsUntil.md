@@ -6,17 +6,17 @@ Get all ancestors of each DOM element in the set of matched DOM elements up to, 
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.parentsUntil` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.parentsUntil` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
 ***
 
-# [cy.parentsUntil( *selector* )](#section-usage)
+# [cy.parentsUntil( *selector* )](#usage)
 
 Get all of the ancestors of the elements until the selector.
 
 ***
 
-# [cy.parentsUntil( *selector*, *filter )](#section-filter-usage)
+# [cy.parentsUntil( *selector*, *filter )](#filter-usage)
 
 When a filter is provided, it retrieves all of the ancestors up until the selector only if it matches that filter.
 
@@ -46,7 +46,7 @@ Pass in an options object to change the default behavior of `cy.parentsUntil`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ***
 

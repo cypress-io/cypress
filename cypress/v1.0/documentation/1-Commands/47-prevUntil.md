@@ -6,17 +6,17 @@ Get all previous siblings of each DOM element in the set of matched DOM elements
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.prevUntil` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.prevUntil` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
 ***
 
-# [cy.prevUntil( *selector* )](#section-usage)
+# [cy.prevUntil( *selector* )](#usage)
 
 Get all of the previous siblings of the elements until the selector.
 
 ***
 
-# [cy.prevUntil( *selector*, *filter )](#section-filter-usage)
+# [cy.prevUntil( *selector*, *filter )](#filter-usage)
 
 When a filter is provided, it retrieves all of the previous siblings up until the selector only if it matches that filter.
 
@@ -46,7 +46,7 @@ Pass in an options object to change the default behavior of `cy.prevUntil`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ***
 

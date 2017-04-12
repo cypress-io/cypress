@@ -6,17 +6,17 @@ Get all previous siblings of each DOM element in the set of matched DOM elements
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.prevAll` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.prevAll` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
 ***
 
-# [cy.prevAll()](#section-usage)
+# [cy.prevAll()](#usage)
 
 Get all of the next siblings of the elements.
 
 ***
 
-# [cy.prevAll( *selector* )](#section-selector-usage)
+# [cy.prevAll( *selector* )](#selector-usage)
 
 When a selector is provided, it retrieves all of the previous siblings only if it matches that selector.
 
@@ -32,7 +32,7 @@ Pass in an options object to change the default behavior of `cy.prevAll`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ***
 

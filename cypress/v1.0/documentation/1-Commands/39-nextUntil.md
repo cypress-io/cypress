@@ -6,17 +6,17 @@ Get all following siblings of each DOM element in the set of matched DOM element
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.nextUntil` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.nextUntil` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
 ***
 
-# [cy.nextUntil( *selector* )](#section-usage)
+# [cy.nextUntil( *selector* )](#usage)
 
 Get all of the next siblings of the elements until the selector.
 
 ***
 
-# [cy.nextUntil( *selector*, *filter )](#section-filter-usage)
+# [cy.nextUntil( *selector*, *filter )](#filter-usage)
 
 When a filter is provided, it retrieves all of the following siblings up until the selector only if it matches that filter.
 
@@ -46,7 +46,7 @@ Pass in an options object to change the default behavior of `cy.nextUntil`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ***
 
