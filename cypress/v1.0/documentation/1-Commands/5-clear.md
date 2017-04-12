@@ -16,11 +16,11 @@ Prior to clearing, if the element isn't currently focused, Cypress will issue a 
 | | |
 |--- | --- |
 | **Returns** | the element that was typed into |
-| **Timeout** | `cy.clear` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options).|
+| **Timeout** | `cy.clear` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options).|
 
 ***
 
-# [cy.clear()](#usage)
+# [cy.clear()](#section-usage)
 
 Clears the value of an `<input>` or `<textarea>`.
 
@@ -36,7 +36,7 @@ Option | Default | Notes
 --- | --- | ---
 `force` | `false` | Forces clear, disables error checking prior to clear
 `interval` | `16` | Interval which to retry type
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the type
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the type
 `log` | `true` | whether to display command in command log
 
 ***

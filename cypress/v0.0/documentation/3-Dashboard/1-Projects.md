@@ -3,16 +3,16 @@ excerpt: Manage your Projects and configure them to record runs
 
 # Contents
 
-- :fa-angle-right: [What Are Projects?](#what-are-projects-)
-- :fa-angle-right: [Adding a New Project](#adding-a-new-project)
-- :fa-angle-right: [Setting up a Project to Record](#setting-up-a-project-to-record)
-  - [How do I record runs?](#how-do-i-record-runs-)
-  - [What is a projectId?](#what-is-a-projectid-)
-  - [What is a Record Key?](#what-is-a-record-key-)
+- :fa-angle-right: [What Are Projects?](#section-what-are-projects-)
+- :fa-angle-right: [Adding a New Project](#section-adding-a-new-project)
+- :fa-angle-right: [Setting up a Project to Record](#section-setting-up-a-project-to-record)
+  - [How do I record runs?](#section-how-do-i-record-runs-)
+  - [What is a projectId?](#section-what-is-a-projectid-)
+  - [What is a Record Key?](#section-what-is-a-record-key-)
   - [How do a projectId and Record Key work together?](#how-do-a-projectid-and-record-key-work-together-)
-  - [What is the difference between public and private projects?](#what-is-the-difference-between-public-and-private-projects-)
-- :fa-angle-right: [Transferring Ownership of a Project](#transferring-ownership-of-a-project)
-- :fa-angle-right: [Deleting a Project](#deleting-a-project)
+  - [What is the difference between public and private projects?](#section-what-is-the-difference-between-public-and-private-projects-)
+- :fa-angle-right: [Transferring Ownership of a Project](#section-transferring-ownership-of-a-project)
+- :fa-angle-right: [Deleting a Project](#section-deleting-a-project)
 
 ***
 
@@ -35,7 +35,7 @@ Projects can **only** be added to Cypress through our [Desktop Application](http
 [block:callout]
 {
   "type": "info",
-  "body": "Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are [setup to be recorded](#recording-runs)."
+  "body": "Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are [setup to be recorded](#section-recording-runs)."
 }
 [/block]
 
@@ -86,7 +86,7 @@ You are now ready to record your runs. Typically you would record your runs when
 
 ## How do I record runs?
 
-Now that your project is setup, Cypress has inserted your unique [projectId](#what-is-a-projectid-) into `cypress.json`.
+Now that your project is setup, Cypress has inserted your unique [projectId](#section-what-is-a-projectid-) into `cypress.json`.
 
 [block:callout]
 {
@@ -95,7 +95,7 @@ Now that your project is setup, Cypress has inserted your unique [projectId](#wh
 }
 [/block]
 
-In order to record we also require you provide us your [Record Key](#what-is-a-record-key-). The record key along with your projectId uniquely identifies your project.
+In order to record we also require you provide us your [Record Key](#section-what-is-a-record-key-). The record key along with your projectId uniquely identifies your project.
 
 You can provide the Record Key when running this command:
 
@@ -187,7 +187,7 @@ Think of your record key as the key that enables you to **write and create** bui
 
 **A public project** means that anyone can see the recorded runs for it. It's similar to how public projects on Github, Travis, or Circle are handled. Anyone who knows your `projectId` will be able to see the recorded runs for public projects.
 
-**A private project** means that only [users](https://on.cypress.io/guides/organizations#inviting-users) you explicitly invite to your [organization](https://on.cypress.io/guides/organizations) can see its recorded runs. Even if someone knows your `projectId`, they will not have access to your runs unless you have invited them.
+**A private project** means that only [users](https://on.cypress.io/guides/organizations#section-inviting-users) you explicitly invite to your [organization](https://on.cypress.io/guides/organizations) can see its recorded runs. Even if someone knows your `projectId`, they will not have access to your runs unless you have invited them.
 
 A Record Key has nothing to do with **viewing** build data - it's a "write only" key. Even if it is accidentally leaked, it will not affect who can "see" your builds.
 

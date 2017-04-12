@@ -8,11 +8,11 @@ Focus on a DOM element. If there is currently a different DOM element currently 
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.focus` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+| **Timeout** | `cy.focus` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
-# [cy.focus()](#usage)
+# [cy.focus()](#section-usage)
 
 Focus on the DOM element found in the previous command.
 

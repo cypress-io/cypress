@@ -3,14 +3,14 @@ excerpt: Learn about when and why to use stubs, spies, and control clock time
 
 # Contents
 
-- :fa-angle-right: [Capabilities](#capabilities)
-- :fa-angle-right: [Libraries and Tools](#libraries-and-tools)
-- :fa-angle-right: [Common Scenarios](#common-scenarios)
-  - [Stubs](#stubs)
-  - [Spies](#spies)
-  - [Clock](#clock)
-  - [Assertions](#assertions)
-- :fa-angle-right: [Integration and Extensions](#integration-and-extensions)
+- :fa-angle-right: [Capabilities](#section-capabilities)
+- :fa-angle-right: [Libraries and Tools](#section-libraries-and-tools)
+- :fa-angle-right: [Common Scenarios](#section-common-scenarios)
+  - [Stubs](#section-stubs)
+  - [Spies](#section-spies)
+  - [Clock](#section-clock)
+  - [Assertions](#section-assertions)
+- :fa-angle-right: [Integration and Extensions](#section-integration-and-extensions)
 
 ***
 

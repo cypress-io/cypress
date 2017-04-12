@@ -8,17 +8,17 @@ If you want to call a regular property that is not a function on the current sub
 | | |
 |--- | --- |
 | **Returns** | the return value of the invoked property |
-| **Timeout** | `cy.invoke` cannot timeout unless you've added assertions. The assertions will retry for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts)  |
+| **Timeout** | `cy.invoke` cannot timeout unless you've added assertions. The assertions will retry for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts)  |
 
 ***
 
-# [cy.invoke( *functionName* )](#function-usage)
+# [cy.invoke( *functionName* )](#section-function-usage)
 
 Invokes the function with the specified name
 
 ***
 
-# [cy.invoke( *functionName*, **arguments* )](#function-with-arguments-usage)
+# [cy.invoke( *functionName*, **arguments* )](#section-function-with-arguments-usage)
 
 Invokes the function with the specified name and forwards any additional arguments to the function call. There are no limits to the number of arguments.
 

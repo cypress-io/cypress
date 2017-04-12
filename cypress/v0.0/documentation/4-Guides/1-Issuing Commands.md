@@ -3,12 +3,12 @@ excerpt: Traverse the dom and perform actions with commands
 
 # Contents
 
-- :fa-angle-right: [Commands are Async](#commands-are-async)
-- :fa-angle-right: [Subjects](#subjects)
-- :fa-angle-right: [Chaining](#chaining)
-  - [Parent Commands](#parent-commands)
-  - [Child Commands](#child-commands)
-  - [Dual Commands](#dual-commands)
+- :fa-angle-right: [Commands are Async](#section-commands-are-async)
+- :fa-angle-right: [Subjects](#section-subjects)
+- :fa-angle-right: [Chaining](#section-chaining)
+  - [Parent Commands](#section-parent-commands)
+  - [Child Commands](#section-child-commands)
+  - [Dual Commands](#section-dual-commands)
 
 ***
 
@@ -92,9 +92,9 @@ Because Cypress implements a fluent API, all commands are linked together.  Cypr
 
 **There are 3 types of commands:**
 
-- [Parent Commands](#parent-commands)
-- [Child Commands](#child-commands)
-- [Dual Commands](#dual-commands)
+- [Parent Commands](#section-parent-commands)
+- [Child Commands](#section-child-commands)
+- [Dual Commands](#section-dual-commands)
 
 ***
 

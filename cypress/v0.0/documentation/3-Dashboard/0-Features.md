@@ -3,14 +3,14 @@ excerpt: An overview of our Dashboard
 
 # Contents
 
-- :fa-angle-right: [What is the Dashboard?](#what-is-the-dashboard-)
-  - [Example Projects](#example-projects)
-- :fa-angle-right: [Frequently Asked Questions](#frequently-asked-questions)
-  - [How do I record my tests?](#how-do-i-record-my-tests)
-  - [How is this different than CI?](#how-is-this-different-than-ci-)
-  - [How much does this cost?](#how-much-does-this-cost-)
-  - [Can I host this myself?](#can-i-host-this-myself-)
-  - [Can I choose not to use it?](#can-i-choose-not-to-use-it-)
+- :fa-angle-right: [What is the Dashboard?](#section-what-is-the-dashboard-)
+  - [Example Projects](#section-example-projects)
+- :fa-angle-right: [Frequently Asked Questions](#section-frequently-asked-questions)
+  - [How do I record my tests?](#section-how-do-i-record-my-tests)
+  - [How is this different than CI?](#section-how-is-this-different-than-ci-)
+  - [How much does this cost?](#section-how-much-does-this-cost-)
+  - [Can I host this myself?](#section-can-i-host-this-myself-)
+  - [Can I choose not to use it?](#section-can-i-choose-not-to-use-it-)
 
 ***
 
