@@ -1599,7 +1599,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if $parent.is("body,html") or $Cypress.Utils.hasDocument($parent)
         return @private("window")
 
-      return $parent if @isScrollable($parent)
+      return $parent if $Cypress.Dom.elIsScrollable($parent)
 
       @_findScrollableParent($parent)
 
