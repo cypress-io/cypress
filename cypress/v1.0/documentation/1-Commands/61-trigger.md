@@ -7,24 +7,24 @@ excerpt: Trigger an event on a DOM element
 
 Cypress automatically scrolls the element into view prior to attempting to trigger the event.
 
-By default, the event is triggered with coordinates at the exact center of the element. You can pass a [`position`](#section-position-usage) option, relative coordinates, or the raw event properties (e.g. `clientX`) to override this.
+By default, the event is triggered with coordinates at the exact center of the element. You can pass a [`position`](#position-usage) option, relative coordinates, or the raw event properties (e.g. `clientX`) to override this.
 
 By default, the event will bubble and is cancelable. You can pass `bubbles: false` and/or `cancelable: false` as options to override this.
 
 | | |
 |--- | --- |
 | **Returns** | the existing DOM subject |
-| **Timeout** | `cy.trigger` will wait and retry until the element is 'interactable' for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options) |
+| **Timeout** | `cy.trigger` will wait and retry until the element is 'interactable' for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options) |
 
 ***
 
-# [cy.trigger( *eventName* )](#section-usage)
+# [cy.trigger( *eventName* )](#usage)
 
 Trigger the event named `eventName` on the DOM element.
 
 ***
 
-# [cy.trigger( *eventName*, *position* )](#section-position-usage)
+# [cy.trigger( *eventName*, *position* )](#position-usage)
 
 Triggers event on the element at the specified position. The `center` position is the default position.
 
@@ -38,7 +38,7 @@ Position | Default | Notes
 
 ***
 
-# [cy.trigger( *eventName*, *x*, *y* )](#section-coordinates-usage)
+# [cy.trigger( *eventName*, *x*, *y* )](#coordinates-usage)
 
 You can pass a relative `x` and `y` coordinate which will calculate distance in pixels from the top left corner of the element and triggers the event with the calculated coordinates.
 
@@ -57,7 +57,7 @@ Pass in an options object to change the default behavior of `cy.click`.
 Option | Default | Notes
 --- | --- | ---
 `interval` | `16` | Interval which to retry triggering the event
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the click
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the click
 `log` | `true` | whether to display command in command log
 
 You can also include arbitrary event properties (e.g. `clientX`, `shiftKey`) and they will be attached to the event. Passing in coordinate arguments (`clientX`, `pageX`, etc) will override the position coordinates.
