@@ -21,7 +21,10 @@ kill = (unbind) ->
     instance.once("exit", resolve)
 
     instance.kill()
-    instance = null
+    cleanup()
+
+cleanup = ->
+  instance = null
 
 process.once "exit", kill
 
@@ -69,6 +72,7 @@ module.exports = {
         ## enable the browser to configure the interface
         instance.once "exit", ->
           options.onBrowserClose()
+          cleanup()
 
         ## TODO: instead of waiting an arbitrary
         ## amount of time here we could instead
