@@ -17,8 +17,6 @@ module.exports = {
   _render: (url, state, options = {}) ->
     _this = @
 
-    ## TODO: dont forget about type: "PROJECT" here
-
     _.defaults(options, {
       x: state.browserX
       y: state.browserY
@@ -63,6 +61,7 @@ module.exports = {
       x: parentX + 100
       y: parentY + 100
       trackState: false
+      onPaint: null ## dont capture paint events
     })
 
     win = Windows.create(options)
