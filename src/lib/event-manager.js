@@ -33,7 +33,7 @@ export default {
   reporterBus,
 
   init (state, connectionInfo) {
-    channel.emit('is:automation:connected', connectionInfo, action('automationEnsured', (isConnected) => {
+    channel.emit('is:automation:client:connected', connectionInfo, action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
       channel.on('automation:disconnected', action('automationDisconnected', () => {
         state.automation = automation.DISCONNECTED
