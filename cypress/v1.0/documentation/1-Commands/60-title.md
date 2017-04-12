@@ -6,11 +6,11 @@ Get the title of the document.
 | | |
 |--- | --- |
 | **Returns** | the `document` title as a string |
-| **Timeout** | `cy.title` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+| **Timeout** | `cy.title` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
-# [cy.title()](#usage)
+# [cy.title()](#section-usage)
 
 Get the title of the document.
 

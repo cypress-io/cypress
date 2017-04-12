@@ -10,7 +10,7 @@ Get the current URL hash. This is the same as [`cy.location().hash`](https://on.
 
 ***
 
-# [cy.hash()](#usage)
+# [cy.hash()](#section-usage)
 
 Get the current URL hash.
 

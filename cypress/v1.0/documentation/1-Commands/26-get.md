@@ -8,17 +8,17 @@ Get one or more DOM elements by selector or [alias](https://on.cypress.io/guides
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.get` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+| **Timeout** | `cy.get` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
-# [cy.get( *selector* )](#selector-usage)
+# [cy.get( *selector* )](#section-selector-usage)
 
 Finds one or more DOM elements based on the selector.
 
 ***
 
-# [cy.get( *alias* )](#alias-usage)
+# [cy.get( *alias* )](#section-alias-usage)
 
 [block:callout]
 {
@@ -44,7 +44,7 @@ Pass in an options object to change the default behavior of `cy.get`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
 
 ***
 

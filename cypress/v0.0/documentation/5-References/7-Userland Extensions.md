@@ -3,12 +3,12 @@ excerpt: 3rd party tools, plugins, and extensions
 
 # Contents
 
-- :fa-angle-right: [Docker](#docker)
-  - [Base Image](#base-image)
-- :fa-angle-right: [Gitlab](#gitlab)
-  - [Multi Cypress](#multi-cypress)
-- :fa-angle-right: [Typescript](#typescript)
-  - [Definitions](#definitions)
+- :fa-angle-right: [Docker](#section-docker)
+  - [Base Image](#section-base-image)
+- :fa-angle-right: [Gitlab](#section-gitlab)
+  - [Multi Cypress](#section-multi-cypress)
+- :fa-angle-right: [Typescript](#section-typescript)
+  - [Definitions](#section-definitions)
 
 ***
 

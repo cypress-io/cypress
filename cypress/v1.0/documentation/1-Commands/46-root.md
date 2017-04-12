@@ -6,11 +6,11 @@ Get the root element. By default the root is `document`. When calling `cy.root` 
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.root` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+| **Timeout** | `cy.root` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
-# [cy.root()](#root-usage)
+# [cy.root()](#section-root-usage)
 
 Get the root element.
 

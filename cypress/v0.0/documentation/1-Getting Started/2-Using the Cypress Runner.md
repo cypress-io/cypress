@@ -3,11 +3,11 @@ excerpt: Review test commands, instrumentation and your application under test.
 
 # Contents
 
-- :fa-angle-right: [Overview](#overview)
-- :fa-angle-right: [Test Runner Components](#test-runner-components)
-  - [Command Log](#command-log)
-  - [Instrument Panel](#instrument-panel)
-  - [Application Under Test](#application-under-test)
+- :fa-angle-right: [Overview](#section-overview)
+- :fa-angle-right: [Test Runner Components](#section-test-runner-components)
+  - [Command Log](#section-command-log)
+  - [Instrument Panel](#section-instrument-panel)
+  - [Application Under Test](#section-application-under-test)
 
 ***
 
@@ -34,7 +34,7 @@ Each command and assertion, when hovered over, restores the Application Under Te
 [block:callout]
 {
   "type": "info",
-  "body": "By default, Cypress keeps 50 tests worth of snapshots and command data for time traveling. If you are seeing extremely high memory consumption in your browser, you may want to lower the `numTestsKeptInMemory` in your [configuration](https://on.cypress.io/guides/configuration#global)."
+  "body": "By default, Cypress keeps 50 tests worth of snapshots and command data for time traveling. If you are seeing extremely high memory consumption in your browser, you may want to lower the `numTestsKeptInMemory` in your [configuration](https://on.cypress.io/guides/configuration#section-global)."
 }
 [/block]
 
@@ -80,7 +80,7 @@ In the corresponding Application Preview below, you can see `https://example.cyp
 
 ![screen shot 2017-03-06 at 2 31 06 pm](https://cloud.githubusercontent.com/assets/1271364/23626182/ec9d421a-0279-11e7-8ff2-42f33d2fe1ca.png)
 
-The AUT also displays in the size and orientation specified in your tests. You can change the size or orientation with the [`cy.viewport()`](https://on.cypress.io/api/viewport) command or in your [Cypress configuration](https://docs.cypress.io/docs/configuration#viewport). If the AUT does not fit within the current browser window, it is scaled appropriately to fit within the window.
+The AUT also displays in the size and orientation specified in your tests. You can change the size or orientation with the [`cy.viewport()`](https://on.cypress.io/api/viewport) command or in your [Cypress configuration](https://docs.cypress.io/docs/configuration#section-viewport). If the AUT does not fit within the current browser window, it is scaled appropriately to fit within the window.
 
 The current size and scale of the AUT is displayed in the top right corner of the window.
 

@@ -6,11 +6,11 @@ Get the global `window` object of the remote application [visited](https://on.cy
 | | |
 |--- | --- |
 | **Returns** | the `window` object |
-| **Timeout** | `cy.window` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+| **Timeout** | `cy.window` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
-# [cy.window()](#usage)
+# [cy.window()](#section-usage)
 
 Get the global window object of the remote application you've visited.
 
@@ -20,7 +20,7 @@ Get the global window object of the remote application you've visited.
 
 Pass in an options object to change the default behavior of `cy.window`.
 
-**[cy.window( *options* )](#options-usage)**
+**[cy.window( *options* )](#section-options-usage)**
 
 Option | Default | Notes
 --- | --- | ---
