@@ -31,6 +31,9 @@ npm test
 
 ## Changelog
 
+#### 0.3.11 - *(04/12/17)*
+- automation event renamed
+
 #### 0.3.10 - *(03/07/17)*
 - set version of cypress
 
