@@ -8,17 +8,17 @@ Unchecks the checkboxes within the current subject.
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.uncheck` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the commands [options](#options). |
+| **Timeout** | `cy.uncheck` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the commands [options](#section-options). |
 
 ***
 
-# [cy.uncheck()](#usage)
+# [cy.uncheck()](#section-usage)
 
 Unchecks checkboxes. Triggers events associated with check.
 
 ***
 
-# [cy.uncheck( *values* )](#values-usage)
+# [cy.uncheck( *values* )](#section-values-usage)
 
 Unchecks the checkboxes matching the values. Triggers events associated with uncheck.
 
@@ -33,7 +33,7 @@ Pass in an options object to change the default behavior of `cy.uncheck`.
 Option | Default | Notes
 --- | --- | ---
 `interval` | `16` | Interval which to retry a uncheck
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the uncheck
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the uncheck
 `force` | `false` | Forces uncheck, disables error checking prior to uncheck
 `log` | `true` | whether to display command in command log
 `multiple` | `false` | Enables serially unchecking multiple elements

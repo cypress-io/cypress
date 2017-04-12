@@ -6,11 +6,11 @@ Gets all of the browser cookies.
 | | |
 |--- | --- |
 | **Returns** | an array of cookie objects |
-| **Timeout** | `cy.getCookies` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command.  |
+| **Timeout** | `cy.getCookies` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the automation server to process this command.  |
 
 ***
 
-# [cy.getCookies()](#usage)
+# [cy.getCookies()](#section-usage)
 
 Gets the browser cookies.
 
@@ -37,7 +37,7 @@ Pass in an options object to change the default behavior of `cy.getCookies`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.getCookies` command to be processed
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.getCookies` command to be processed
 `log` | `true` | whether to display command in command log
 
 ***

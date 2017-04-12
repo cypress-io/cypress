@@ -3,13 +3,13 @@ excerpt: Load fixtures
 
 # Contents
 
-- :fa-angle-right: [What are Fixtures](#what-are-fixtures)
-- :fa-angle-right: [Supported Formats](#supported-formats)
-  - [Validation](#validation)
-  - [Formatting](#formatting)
-- :fa-angle-right: [Fixtures vs Factories](#fixtures-vs-factories)
-- :fa-angle-right: [Routing Responses](#routing-responses)
-- :fa-angle-right: [Organizing Fixtures](#organizing-fixtures)
+- :fa-angle-right: [What are Fixtures](#section-what-are-fixtures)
+- :fa-angle-right: [Supported Formats](#section-supported-formats)
+  - [Validation](#section-validation)
+  - [Formatting](#section-formatting)
+- :fa-angle-right: [Fixtures vs Factories](#section-fixtures-vs-factories)
+- :fa-angle-right: [Routing Responses](#section-routing-responses)
+- :fa-angle-right: [Organizing Fixtures](#section-organizing-fixtures)
 
 ***
 

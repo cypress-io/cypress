@@ -6,11 +6,11 @@ Get the last DOM element within a set of DOM elements.
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.last` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+| **Timeout** | `cy.last` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
-# [cy.last()](#usage)
+# [cy.last()](#section-usage)
 
 Reduce the set of matched DOM elements to the final one in the set.
 
@@ -25,7 +25,7 @@ Pass in an options object to change the default behavior of `cy.last`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
 
 ***
 

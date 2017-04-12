@@ -1,7 +1,7 @@
 slug: cypress-promise
 excerpt: Instantiate a bluebird promise
 
-# [new Cypress.Promise( *function* )](#usage)
+# [new Cypress.Promise( *function* )](#section-usage)
 
 Cypress automatically proxies [`Bluebird`](https://github.com/petkaantonov/bluebird) and exposes it as `Cypress.Promise`.
 

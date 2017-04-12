@@ -3,12 +3,12 @@ excerpt: Customize test results with reporters
 
 # Contents
 
-- :fa-angle-right: [Reporters](#reporters)
-- :fa-angle-right: [Supported Reporters](#supported-reporters)
-- :fa-angle-right: [Custom Reporters](#custom-reporters)
-  - [Local Reporters](#local-reporters)
-  - [npm Reporters](#npm-reporters)
-- :fa-angle-right: [Reporter Options](#reporter-options)
+- :fa-angle-right: [Reporters](#section-reporters)
+- :fa-angle-right: [Supported Reporters](#section-supported-reporters)
+- :fa-angle-right: [Custom Reporters](#section-custom-reporters)
+  - [Local Reporters](#section-local-reporters)
+  - [npm Reporters](#section-npm-reporters)
+- :fa-angle-right: [Reporter Options](#section-reporter-options)
 
 # Reporters
 
@@ -37,7 +37,7 @@ Cypress supports the following reporters:
 * [Mocha's built-in reporters](https://mochajs.org/#reporters).
 * [`teamcity`](https://github.com/cypress-io/mocha-teamcity-reporter)
 * [`junit`](https://github.com/michaelleeallen/mocha-junit-reporter)
-* Custom reporters ([see below](#custom-reporters))
+* Custom reporters ([see below](#section-custom-reporters))
 
 ***
 

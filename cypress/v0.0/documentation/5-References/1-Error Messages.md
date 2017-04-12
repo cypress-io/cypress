@@ -3,19 +3,19 @@ excerpt: Errors that require additional explanation are listed here.
 
 # Contents
 
-- :fa-angle-right: [Sorry, there's something wrong with this file](#sorry-there-s-something-wrong-with-this-file)
-- :fa-angle-right: [Oops...we found an error preparing your test file](#we-found-an-error-preparing-your-test-file)
-- :fa-angle-right: [Cypress cannot execute commands outside a running test](#cypress-cannot-execute-commands-outside-a-running-test)
-- :fa-angle-right: [cy.method() failed because the element you are chaining off of has become detached or removed from the dom](#cy-method-failed-because-the-element-you-are-chaining-off-of-has-become-detached-or-removed-from-the-dom)
-- :fa-angle-right: [cy.method() failed because the element cannot be interacted with](#cy-method-failed-because-the-element-cannot-be-interacted-with)
-- :fa-angle-right: [cy.method() failed because the element is currently animating](#cy-method-failed-because-the-element-is-currently-animating)
-- :fa-angle-right: [Running Cypress in CI requires a secret project key](#running-cypress-in-ci-requires-a-secret-project-key)
-- :fa-angle-right: [The test has finished but Cypress still has commands in its queue](#the-test-has-finished-but-cypress-still-has-commands-in-its-queue)
-- :fa-angle-right: [cy.visit() failed because you're attempting to visit a second unique domain](#cy-visit-failed-because-you-are-attempting-to-visit-a-second-unique-domain)
-- :fa-angle-right: [Cypress detected a cross origin error happened on page load](#cypress-detected-a-cross-origin-error-happened-on-page-load)
-- :fa-angle-right: [The supportFolder option has been removed](#the-supportfolder-option-has-been-removed)
-- :fa-angle-right: [The Chromium Renderer process just crashed](#the-chromium-renderer-process-just-crashed)
-- :fa-angle-right: [The 'cypress ci' command has been deprecated](#the-cypress-ci-command-has-been-deprecated)
+- :fa-angle-right: [Sorry, there's something wrong with this file](#section-sorry-there-s-something-wrong-with-this-file)
+- :fa-angle-right: [Oops...we found an error preparing your test file](#section-we-found-an-error-preparing-your-test-file)
+- :fa-angle-right: [Cypress cannot execute commands outside a running test](#section-cypress-cannot-execute-commands-outside-a-running-test)
+- :fa-angle-right: [cy.method() failed because the element you are chaining off of has become detached or removed from the dom](#section-cy-method-failed-because-the-element-you-are-chaining-off-of-has-become-detached-or-removed-from-the-dom)
+- :fa-angle-right: [cy.method() failed because the element cannot be interacted with](#section-cy-method-failed-because-the-element-cannot-be-interacted-with)
+- :fa-angle-right: [cy.method() failed because the element is currently animating](#section-cy-method-failed-because-the-element-is-currently-animating)
+- :fa-angle-right: [Running Cypress in CI requires a secret project key](#section-running-cypress-in-ci-requires-a-secret-project-key)
+- :fa-angle-right: [The test has finished but Cypress still has commands in its queue](#section-the-test-has-finished-but-cypress-still-has-commands-in-its-queue)
+- :fa-angle-right: [cy.visit() failed because you're attempting to visit a second unique domain](#section-cy-visit-failed-because-you-are-attempting-to-visit-a-second-unique-domain)
+- :fa-angle-right: [Cypress detected a cross origin error happened on page load](#section-cypress-detected-a-cross-origin-error-happened-on-page-load)
+- :fa-angle-right: [The supportFolder option has been removed](#section-the-supportfolder-option-has-been-removed)
+- :fa-angle-right: [The Chromium Renderer process just crashed](#section-the-chromium-renderer-process-just-crashed)
+- :fa-angle-right: [The 'cypress ci' command has been deprecated](#section-the-cypress-ci-command-has-been-deprecated)
 
 ***
 
@@ -217,7 +217,7 @@ Since no key was passed, Cypress then checks for any environment variable with t
 
 You can get your project's secret key by running the terminal command: `cypress get:key`
 
-Then [add the key to your config file or as an environment variable](https://on.cypress.io/guides/continuous-integration#acquire-a-cypress-secret-key).
+Then [add the key to your config file or as an environment variable](https://on.cypress.io/guides/continuous-integration#section-acquire-a-cypress-secret-key).
 
 ***
 

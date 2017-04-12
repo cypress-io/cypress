@@ -6,17 +6,17 @@ Get the siblings DOM elements of each element in the set of matched DOM elements
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.siblings` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+| **Timeout** | `cy.siblings` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
-# [cy.siblings()](#usage)
+# [cy.siblings()](#section-usage)
 
 Get the siblings of each DOM element in the set of matched DOM elements.
 
 ***
 
-# [cy.siblings( *selector* )](#selector-usage)
+# [cy.siblings( *selector* )](#section-selector-usage)
 
 Get the siblings of each DOM element in the set of matched DOM elements filtered by a selector.
 
@@ -32,7 +32,7 @@ Pass in an options object to change the default behavior of `cy.siblings`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
 
 ***
 

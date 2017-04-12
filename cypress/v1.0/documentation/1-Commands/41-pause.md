@@ -12,7 +12,7 @@ This does not set a `debugger` in your code, unlike [`cy.debug`](https://on.cypr
 
 ***
 
-# [cy.pause()](#usage)
+# [cy.pause()](#section-usage)
 
 Stop command execution at the current command.
 

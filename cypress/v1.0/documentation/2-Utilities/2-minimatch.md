@@ -1,7 +1,7 @@
 slug: cypress-minimatch
 excerpt: Match glob patterns to strings
 
-# [Cypress.minimatch()](#usage)
+# [Cypress.minimatch()](#section-usage)
 
 Cypress automatically proxies [`minimatch`](https://github.com/isaacs/minimatch) and exposes it as `Cypress.minimatch`.
 

@@ -8,23 +8,23 @@ Check the checkboxes or radios within the current subject.
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.check` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options). |
+| **Timeout** | `cy.check` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
 ***
 
-# [cy.check()](#usage)
+# [cy.check()](#section-usage)
 
 Checks checkboxes or radios.
 
 ***
 
-# [cy.check( *value* )](#value-usage)
+# [cy.check( *value* )](#section-value-usage)
 
 Checks the checkbox or radio with the matching value.
 
 ***
 
-# [cy.check( *values* )](#values-usage)
+# [cy.check( *values* )](#section-values-usage)
 
 Checks the checkboxes or radios with the matching values.
 
@@ -39,7 +39,7 @@ Pass in an options object to change the default behavior of `cy.check`.
 Option | Default | Notes
 --- | --- | ---
 `interval` | `16` | Interval which to retry a check
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the check
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the check
 `force` | `false` | Forces check, disables error checking prior to check
 `log` | `true` | whether to display command in command log
 `multiple` | `false` | Enables serially checking multiple elements
