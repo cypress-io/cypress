@@ -3,19 +3,19 @@ excerpt: Assertions verify an expectation.
 
 # Contents
 
-- :fa-angle-right: [Writing an Assertion](#section-writing-an-assertion)
-  - [Implicit Subjects with `cy.should` or `cy.and`](#section-implicit-subjects-with-cy-should-or-cy-and-)
-  - [Explicit Subjects with `expect` and `assert`](#section-explicit-subjects-with-expect-and-assert-)
-- :fa-angle-right: [Available Assertions](#section-available-assertions)
-  - [Chai](#section-chai)
-  - [Chai-jQuery](#section-chai-jquery)
-  - [Chai-Sinon](#section-chai-sinon)
-- :fa-angle-right: [Using Chainers with Implicit Subjects](#section-using-chainers-with-implicit-subjects)
-  - [Assertions that Change the Subject](#section-assertions-that-change-the-subject)
-  - [How do I know which assertions change the subject and which keep it the same?](#section-how-do-i-know-which-assertions-change-the-subject-and-which-keep-it-the-same-)
-- :fa-angle-right: [Negating Assertions](#section-negating-assertions)
-- :fa-angle-right: [Resolving Assertions](#section-resolving-assertions)
-- :fa-angle-right: [Increasing timeouts of Assertions](#section-increasing-timeouts)
+- :fa-angle-right: [Writing an Assertion](#writing-an-assertion)
+  - [Implicit Subjects with `cy.should` or `cy.and`](#implicit-subjects-with-cy-should-or-cy-and-)
+  - [Explicit Subjects with `expect` and `assert`](#explicit-subjects-with-expect-and-assert-)
+- :fa-angle-right: [Available Assertions](#available-assertions)
+  - [Chai](#chai)
+  - [Chai-jQuery](#chai-jquery)
+  - [Chai-Sinon](#chai-sinon)
+- :fa-angle-right: [Using Chainers with Implicit Subjects](#using-chainers-with-implicit-subjects)
+  - [Assertions that Change the Subject](#assertions-that-change-the-subject)
+  - [How do I know which assertions change the subject and which keep it the same?](#how-do-i-know-which-assertions-change-the-subject-and-which-keep-it-the-same-)
+- :fa-angle-right: [Negating Assertions](#negating-assertions)
+- :fa-angle-right: [Resolving Assertions](#resolving-assertions)
+- :fa-angle-right: [Increasing timeouts of Assertions](#increasing-timeouts)
 
 ***
 
@@ -48,9 +48,9 @@ Using `expect` allows you to pass in a specific subject and make an assertion on
 
 These assertions are more commonly used when writing unit tests, but can also be used when writing integration tests. Cypress comes bundled with some existing tools that handle assertions such as:
 
-* [Chai](https://on.cypress.io/guides/bundled-tools#section-chai)
-* [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#section-chai-jquery)
-* [Chai-Sinon](https://on.cypress.io/guides/bundled-tools#section-sinon-chai)
+* [Chai](https://on.cypress.io/guides/bundled-tools#chai)
+* [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery)
+* [Chai-Sinon](https://on.cypress.io/guides/bundled-tools#sinon-chai)
 
 ```javascript
 // the explicit subject here is the boolean: true
@@ -108,9 +108,9 @@ expect({foo: "bar"}).to.have.property("foo")
 
 The following chainers are available for your use:
 
-- [Chai](#section-chai)
-- [Chai-jQuery](#section-chai-jquery)
-- [Chai-Sinon](#section-chai-sinon)
+- [Chai](#chai)
+- [Chai-jQuery](#chai-jquery)
+- [Chai-Sinon](#chai-sinon)
 
 ***
 
@@ -295,7 +295,7 @@ This example above may be more familiar to you if you've written tests in JavaSc
 
 If you look closely, you'll see that we've passed a callback function to the [`cy.should`](https://on.cypress.io/api/should) method. This allows us to write expectations inside of that callback function, yet still receive all of the wonderful benefits of [`cy.should`](https://on.cypress.io/api/should).
 
-Read about [resolving assertions](https://on.cypress.io/guides/making-assertions#section-resolving-assertions) below to learn how [`cy.should`](https://on.cypress.io/api/should) works under the hood.
+Read about [resolving assertions](https://on.cypress.io/guides/making-assertions#resolving-assertions) below to learn how [`cy.should`](https://on.cypress.io/api/should) works under the hood.
 
 ***
 
@@ -338,7 +338,7 @@ cy
 
 ## How do I know which assertions change the subject and which keep it the same?
 
-The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#section-chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#section-chai-jquery) will always document what they return.
+The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
 
 Alternatively, it is very easy to use Cypress itself to figure this out.
 
@@ -449,7 +449,7 @@ Cypress makes it easy to test and make assertions about all of these.
 
 You have two ways of increasing the amount of time Cypress waits for assertions to pass.
 
-1. Change the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) globally
+1. Change the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) globally
 2. Override the timeout option on a previous command before the assertion command.
 
 Overriding the timeout option on a specific command looks like this:

@@ -3,24 +3,24 @@ excerpt: Traverse the DOM, find elements, make assertions
 
 # Contents
 
-- :fa-angle-right: [Traversal](#section-traversing-the-dom)
-  - [List of Commands](#section-list-of-commands)
-  - [Starting a Query](#section-starting-a-query)
-  - [CSS Selectors](#section-css-selectors)
-- :fa-angle-right: [Existence](#section-existence)
-  - [Waiting for an element to exist](#section-waiting-for-an-element-to-exist)
-  - [Waiting for an element to not exist](#section-waiting-for-an-element-to-not-exist)
-- :fa-angle-right: [Timeouts](#section-timeouts)
-  - [How retrying works](#section-how-retrying-works)
-  - [Increasing timeouts](#section-increasing-timeouts)
+- :fa-angle-right: [Traversal](#traversing-the-dom)
+  - [List of Commands](#list-of-commands)
+  - [Starting a Query](#starting-a-query)
+  - [CSS Selectors](#css-selectors)
+- :fa-angle-right: [Existence](#existence)
+  - [Waiting for an element to exist](#waiting-for-an-element-to-exist)
+  - [Waiting for an element to not exist](#waiting-for-an-element-to-not-exist)
+- :fa-angle-right: [Timeouts](#timeouts)
+  - [How retrying works](#how-retrying-works)
+  - [Increasing timeouts](#increasing-timeouts)
 - :fa-angle-right: [Assertions](#assertions)
-  - [Length Assertions](#section-length-assertions)
-  - [Class Assertions](#section-class-assertions)
-  - [Value Assertions](#section-value-assertions)
-  - [Text Content Assertions](#section-text-content-assertions)
-  - [Visibility Assertions](#section-visibility-assertions)
-  - [Existence Assertions](#section-existence-assertions)
-  - [State Assertions](#section-state-assertions)
+  - [Length Assertions](#length-assertions)
+  - [Class Assertions](#class-assertions)
+  - [Value Assertions](#value-assertions)
+  - [Text Content Assertions](#text-content-assertions)
+  - [Visibility Assertions](#visibility-assertions)
+  - [Existence Assertions](#existence-assertions)
+  - [State Assertions](#state-assertions)
 
 ***
 
@@ -174,7 +174,7 @@ When you provide assertions, Cypress knows to automatically wait until those ass
 
 When an assertion does not pass, Cypress will wait a brief period of time and retry again.
 
-By default, all commands will retry until [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) is exceeded. By default this means Cypress will wait up to **4 seconds** per DOM command + its associated assertions.
+By default, all commands will retry until [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) is exceeded. By default this means Cypress will wait up to **4 seconds** per DOM command + its associated assertions.
 
 Imagine this example:
 
@@ -198,7 +198,7 @@ cy
 
 You have two ways of increasing the amount of time Cypress waits for resolving DOM commands.
 
-1. Change the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) globally
+1. Change the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) globally
 2. Override the timeout option on a specific command
 
 Overriding the timeout option on a specific command looks like this:

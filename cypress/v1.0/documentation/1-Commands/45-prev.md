@@ -6,17 +6,17 @@ Get the immediately preceding sibling of each element in the set of the elements
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.prev` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.prev` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
 ***
 
-# [cy.prev()](#section-usage)
+# [cy.prev()](#usage)
 
 Get the immediately preceding sibling of each element in the set of matched elements.
 
 ***
 
-# [cy.prev( *selector* )](#section-selector-usage)
+# [cy.prev( *selector* )](#selector-usage)
 
 Get the immediately preceding sibling of each element in the set of matched elements filtered by selector.
 
@@ -32,7 +32,7 @@ Pass in an options object to change the default behavior of `cy.prev`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 ***
 

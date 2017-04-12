@@ -12,7 +12,7 @@ Make sure you have your Developer Tools open for `cy.debug` to hit the breakpoin
 
 ***
 
-# [cy.debug()](#section-usage)
+# [cy.debug()](#usage)
 
 Debug the previous command.
 

@@ -3,13 +3,13 @@ excerpt: Cypress bundles together a familiar set of tools and builds heavily on 
 
 # Contents
 
-- :fa-angle-right: [Mocha](#section-mocha)
-- :fa-angle-right: [Chai](#section-chai)
-- :fa-angle-right: [Chai-jQuery](#section-chai-jquery)
-- :fa-angle-right: [Sinon](#section-sinon)
-- :fa-angle-right: [Sinon-Chai](#section-sinon-chai)
-- :fa-angle-right: [Sinon-as-Promised](#section-sinon-as-romised)
-- :fa-angle-right: [Utilities](#section-utilies)
+- :fa-angle-right: [Mocha](#mocha)
+- :fa-angle-right: [Chai](#chai)
+- :fa-angle-right: [Chai-jQuery](#chai-jquery)
+- :fa-angle-right: [Sinon](#sinon)
+- :fa-angle-right: [Sinon-Chai](#sinon-chai)
+- :fa-angle-right: [Sinon-as-Promised](#sinon-as-romised)
+- :fa-angle-right: [Utilities](#utilies)
 
 ***
 

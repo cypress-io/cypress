@@ -5,24 +5,24 @@ excerpt: Click a DOM element
 
 Cypress automatically scrolls the element into view prior to attempting the click.
 
-By default, the click is issued at the exact center of the element. You can pass a [`position`](#section-position-usage) option to override this setting.
+By default, the click is issued at the exact center of the element. You can pass a [`position`](#position-usage) option to override this setting.
 
 **The following events are fired during click:** `mousedown`, `focus`, `mouseup`, `click`
 
 | | |
 |--- | --- |
 | **Returns** | the existing DOM subject |
-| **Timeout** | `cy.click` will wait and retry until the element is 'clickable' for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options) |
+| **Timeout** | `cy.click` will wait and retry until the element is 'clickable' for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options) |
 
 ***
 
-# [cy.click()](#section-usage)
+# [cy.click()](#usage)
 
 Click the DOM element.
 
 ***
 
-# [cy.click( *position* )](#section-position-usage)
+# [cy.click( *position* )](#position-usage)
 
 Clicks the element at the specified position. The `center` position is the default position.
 
@@ -36,7 +36,7 @@ Position | Default | Notes
 
 ***
 
-# [cy.click( *x*, *y* )](#section-coordinates-usage)
+# [cy.click( *x*, *y* )](#coordinates-usage)
 
 You can pass a relative `x` and `y` coordinate which will calculate distance in pixels from the top left corner of the element and isssue the click at the calculated coordinate.
 
@@ -64,7 +64,7 @@ Option | Default | Notes
 `force` | `false` | Forces click, disables error checking prior to click
 `multiple` | `false` | Enables serially clicking multiple elements
 `interval` | `16` | Interval which to retry a click
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the click
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the click
 `log` | `true` | whether to display command in command log
 
 ***

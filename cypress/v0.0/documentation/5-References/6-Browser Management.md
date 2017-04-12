@@ -3,17 +3,17 @@ excerpt: How and why Cypress manages your browser
 
 # Contents
 
-- :fa-angle-right: [Managing Browsers](#section-managing-browsers)
-- :fa-angle-right: [Launching Browsers](#section-launching-browsers)
-  - [Unsupported Browsers](#section-unsupported-browsers)
-- :fa-angle-right: [Clean Testing Environment](#section-clean-testing-environment)
-  - [Cypress Profile](#section-cypress-profile)
-  - [Testing Barriers](#section-removing-testing-barriers)
-  - [Tabbed Browsing](#section-tabbed-browsing)
-- :fa-angle-right: [Automation API's](#section-automation-apis)
-  - [Cypress Extension](#section-cypress-extension)
-  - [Browser Drivers](#section-browser-drivers)
-  - [No Selenium Server](#section-no-selenium-server)
+- :fa-angle-right: [Managing Browsers](#managing-browsers)
+- :fa-angle-right: [Launching Browsers](#launching-browsers)
+  - [Unsupported Browsers](#unsupported-browsers)
+- :fa-angle-right: [Clean Testing Environment](#clean-testing-environment)
+  - [Cypress Profile](#cypress-profile)
+  - [Testing Barriers](#removing-testing-barriers)
+  - [Tabbed Browsing](#tabbed-browsing)
+- :fa-angle-right: [Automation API's](#automation-apis)
+  - [Cypress Extension](#cypress-extension)
+  - [Browser Drivers](#browser-drivers)
+  - [No Selenium Server](#no-selenium-server)
 
 ***
 
@@ -28,7 +28,7 @@ When you're ready to start testing, Cypress launches the browser for you. It doe
 
 # Launching Browsers
 
-When Cypress is initially [run from the Desktop application](https://on.cypress.io/guides/installing-and-running#section-running-tests-from-the-gui), you can choose to run Cypress in a select number of browsers including:
+When Cypress is initially [run from the Desktop application](https://on.cypress.io/guides/installing-and-running#running-tests-from-the-gui), you can choose to run Cypress in a select number of browsers including:
 
 - Chrome
 - Chromium

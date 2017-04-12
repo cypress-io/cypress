@@ -3,10 +3,10 @@ excerpt: Reference work done in previous commands.
 
 # Contents
 
-- :fa-angle-right: [Async Challenges](#section-async-challenges)
-- :fa-angle-right: [Introducing Aliasing](#section-introducing-aliasing)
-- :fa-angle-right: [Aliasing DOM Elements](#section-aliasing-dom-elements)
-- :fa-angle-right: [Aliasing Routes](#section-asliasing-routes)
+- :fa-angle-right: [Async Challenges](#async-challenges)
+- :fa-angle-right: [Introducing Aliasing](#introducing-aliasing)
+- :fa-angle-right: [Aliasing DOM Elements](#aliasing-dom-elements)
+- :fa-angle-right: [Aliasing Routes](#asliasing-routes)
 
 ***
 

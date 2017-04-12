@@ -8,11 +8,11 @@ Make the DOM element found in the previous command lose focus.
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.blur` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.blur` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
 ***
 
-# [cy.blur()](#section-usage)
+# [cy.blur()](#usage)
 
 Blur the DOM element from the previous command.
 

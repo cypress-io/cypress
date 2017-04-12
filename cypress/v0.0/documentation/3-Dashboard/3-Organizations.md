@@ -3,14 +3,14 @@ excerpt: Manage your Organizations
 
 # Contents
 
-- :fa-angle-right: [What are Organizations?](#section-what-are-organizations-)
-  - [Default Organization](#section-default-organization)
-- :fa-angle-right: [Creating an Organization](#section-creating-an-organization)
-  - [Inviting Users](#section-inviting-users)
-  - [User Roles](#section-user-roles)
-  - [User Requests](#section-user-requests)
-  - [Transferring Projects](#section-transferring-projects)
-- :fa-angle-right: [Deleting an Organization](#section-deleting-an-organization)
+- :fa-angle-right: [What are Organizations?](#what-are-organizations-)
+  - [Personal Organization](#personal-organization)
+- :fa-angle-right: [Creating an Organization](#creating-an-organization)
+  - [Inviting Users](#inviting-users)
+  - [User Roles](#user-roles)
+  - [User Requests](#user-requests)
+  - [Transferring Projects](#transferring-projects)
+- :fa-angle-right: [Deleting an Organization](#deleting-an-organization)
 
 ***
 
@@ -30,22 +30,22 @@ Once out of beta, organizations will also handle billing.
 [block:callout]
 {
   "type": "info",
-  "body": "Cypress Organizations are meant to work exactly like Github Organizations."
+  "body": "Cypress Organizations are meant to work similar to GitHub Organizations."
 }
 [/block]
 
 ***
 
-## Default Organization
+## Personal Organization
 
-By default, every user of Cypress is given a default personal organization - named after you.
+By default, every user of Cypress is given a personal organization - named after you.
 
-You cannot delete this organization.
+You cannot delete or edit the name of this organization.
 
 [block:callout]
 {
   "type": "info",
-  "body": "All existing Cypress projects prior to version 0.19.0 were automatically set to your default organization."
+  "body": "All existing Cypress projects prior to version 0.19.0 were automatically added to your personal organization."
 }
 [/block]
 
@@ -67,7 +67,7 @@ Even though we are in a **private beta**, any user you invite will automatically
 
 1. Click the :fa-cog: beside the Projects you want to give the user access to.
 2. Click 'Invite User'. Note: you must have the role of 'owner' or 'admin' to invite users.
-3. Fill in the email and select the role for the user and click 'Invite User'
+3. Fill in the email and select the role for the user and click 'Invite User' Note: only 'owner's can give other user's 'owner' access.
 4. The user will recieve an invite email with a link to accept the invitation.
 
 ![Invite User dialog](https://cloud.githubusercontent.com/assets/1271364/22709421/baf79a54-ed47-11e6-9796-79ba2008d2d2.png)
@@ -79,8 +79,8 @@ Even though we are in a **private beta**, any user you invite will automatically
 User's can be assigned roles that affect their access to certain features.
 
 - **Member:** Can see the projects, runs, and keys.
-- **Admin:** Can also invite and delete users.
-- **Owner:** Can also transfer or delete projects.
+- **Admin:** Can also invite, edit and delete users.
+- **Owner:** Can also transfer or delete projects. Can delete and edit the organization.
 
 ***
 
@@ -109,6 +109,6 @@ This functionality only exists in our [Dashboard](https://on.cypress.io/dashboar
 
 # Deleting an Organization
 
-You can delete organizations as long as they don't have any projects. You must first transfer ownership of your projects to another organization before you can delete them.
+You can delete organizations that you own as long as they don't have any projects. You must first transfer ownership of your projects to another organization before you can delete them.
 
 ![Delete Organization](https://cloud.githubusercontent.com/assets/1271364/22709764/f9c63e9c-ed48-11e6-885d-ced14d91c3a8.png)

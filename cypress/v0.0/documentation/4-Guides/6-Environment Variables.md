@@ -3,13 +3,13 @@ excerpt: Set up environment variables
 
 # Contents
 
-- :fa-angle-right: [Use Case](#section-use-case)
-- :fa-angle-right: [Setting Environment Variables](#section-setting-environment-variables)
-  - [Option #1: Set in `cypress.json`](#section-option-1-set-in-cypress-json-)
-  - [Option #2: Create a `cypress.env.json`](#section-option-2-create-a-cypress-env-json-)
-  - [Option #3: Export as `CYPRESS_*`](#section-option-3-export-as-cypress_-)
-  - [Option #4: Pass in from the CLI as `--env`](#section-option-4-pass-in-from-the-cli-as-env-)
-- :fa-angle-right: [Overriding Configuration](#section-overriding-configuration)
+- :fa-angle-right: [Use Case](#use-case)
+- :fa-angle-right: [Setting Environment Variables](#setting-environment-variables)
+  - [Option #1: Set in `cypress.json`](#option-1-set-in-cypress-json-)
+  - [Option #2: Create a `cypress.env.json`](#option-2-create-a-cypress-env-json-)
+  - [Option #3: Export as `CYPRESS_*`](#option-3-export-as-cypress_-)
+  - [Option #4: Pass in from the CLI as `--env`](#option-4-pass-in-from-the-cli-as-env-)
+- :fa-angle-right: [Overriding Configuration](#overriding-configuration)
 
 ***
 

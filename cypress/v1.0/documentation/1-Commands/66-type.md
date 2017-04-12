@@ -32,11 +32,11 @@ Sequence | Notes
 | | |
 |--- | --- |
 | **Returns** | the DOM element that was typed into |
-| **Timeout** | `cy.type` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Timeout** | `cy.type` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options). |
 
 ***
 
-# [cy.type( *text* )](#section-usage)
+# [cy.type( *text* )](#usage)
 
 Types the text provided into the current DOM subject.
 
@@ -54,7 +54,7 @@ Option | Default | Notes
 `force` | `false` | Forces type, disables error checking prior to type
 `release` | `true` | Keep a modifier activated between commands
 `interval` | `16` | Interval to retry type
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the type
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the type
 `log` | `true` | whether to display command in command log
 
 ***
@@ -114,7 +114,7 @@ cy.get("input[type=text]").type("Test all the things", {force: true})
 
 # Key combinations / Modifiers
 
-When using special character sequences (see table at top of page), it's possible to activate modifier keys and type key combinations, such as `CTRL + R` or `SHIFT + ALT + Q`. The modifier(s) remain activated for the duration of the `cy.type()` command, and are released when all subsequent characters are typed, unless [`{release: false}`](https://on.cypress.io/api/type#section-options) is passed as an [option](https://on.cypress.io/v1.0/api/type#section-release-behavior). A `keydown` event is fired when a modifier is activated and a `keyup` event is fired when it is released.
+When using special character sequences (see table at top of page), it's possible to activate modifier keys and type key combinations, such as `CTRL + R` or `SHIFT + ALT + Q`. The modifier(s) remain activated for the duration of the `cy.type()` command, and are released when all subsequent characters are typed, unless [`{release: false}`](https://on.cypress.io/api/type#options) is passed as an [option](https://on.cypress.io/v1.0/api/type#release-behavior). A `keydown` event is fired when a modifier is activated and a `keyup` event is fired when it is released.
 
 ## Type a key combination
 
@@ -358,7 +358,7 @@ Of course if the form's `submit` event is `preventedDefault` the form will not a
 
 ## Key Events Table
 
-Cypress will print out a table of key events that detail the keys that were pressed when clicking on type within the [command log](https://on.cypress.io/api/type#section-command-log). Each character will contain the `which` character code and the events that happened as a result of that key press.
+Cypress will print out a table of key events that detail the keys that were pressed when clicking on type within the [command log](https://on.cypress.io/api/type#command-log). Each character will contain the `which` character code and the events that happened as a result of that key press.
 
 Events that were `defaultPrevented` may prevent other events from firing and those will show up as empty.  For instance, canceling `keydown` will not fire `keypress` or `textInput` or `input`, but will fire `keyup` (which matches the spec).
 

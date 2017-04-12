@@ -8,29 +8,29 @@ Select an option within a `<select>` DOM element.
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.select` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Timeout** | `cy.select` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options). |
 
 ***
 
-# [cy.select( *text* )](#section-text-usage)
+# [cy.select( *text* )](#text-usage)
 
 Select an option within a `<select>` element based on the text content of the option.
 
 ***
 
-# [cy.select( *value* )](#section-value-usage)
+# [cy.select( *value* )](#value-usage)
 
 Select an option within a `<select>` element based on the value of the option.
 
 ***
 
-# [cy.select( *texts* )](#section-texts-usage)
+# [cy.select( *texts* )](#texts-usage)
 
 Select multiple options within a `<select>` element based on the text of the option.
 
 ***
 
-# [cy.select( *values* )](#section-values-usage)
+# [cy.select( *values* )](#values-usage)
 
 Select multiple options within a `<select>` element based on the value of the option.
 
@@ -49,7 +49,7 @@ Option | Default | Notes
 --- | --- | ---
 `force` | `false` | Forces select, disables error checking prior to select
 `interval` | `50` | Interval which to retry a select
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the select
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the select
 `log` | `true` | whether to display command in command log
 
 ***
