@@ -122,7 +122,6 @@ class Socket
 
   # onAutomation: (messages, message, data) ->
   onAutomation: (socket, message, data, id) ->
-    # Promise.try =>
     ## instead of throwing immediately here perhaps we need
     ## to make this more resilient by automatically retrying
     ## up to 1 second in the case where our automation room
@@ -133,23 +132,8 @@ class Socket
     ## YES it does per http://socket.io/docs/rooms-and-namespaces/#disconnection
     if socket and socket.connected
       socket.emit("automation:request", id, message, data)
-    # if _.isEmpty(@io.sockets.adapter.rooms.automation)
     else
       throw new Error("Could not process '#{message}'. No automation clients connected.")
-      # new Promise (resolve, reject) =>
-        #   id = uuid.v4()
-        #   messages[id] = (obj) ->
-        #     ## normalize the error from automation responses
-        #     if e = obj.__error
-        #       err = new Error(e)
-        #       err.name = obj.__name
-        #       err.stack = obj.__stack
-        #       reject(err)
-        #     else
-        #       ## normalize the response
-        #       resolve(obj.response)
-
-          # @io.to("automation").emit("automation:request", id, message, data)
 
   createIo: (server, path, cookie) ->
     socketIo.server(server, {
@@ -162,8 +146,6 @@ class Socket
   _startListening: (server, watchers, automation, config, options) ->
     _.defaults options,
       socketId: null
-      # onAutomationRequest: null
-      # afterAutomationRequest: null
       onSetRunnables: ->
       onMocha: ->
       onConnect: ->
@@ -203,25 +185,8 @@ class Socket
       ## them at any time
       headers = socket.request?.headers ? {}
 
-      # respond = (id, resp) ->
-      #   if message = messages[id]
-      #     delete messages[id]
-      #     message(resp)
-
-      # automationRequest = (message, data) =>
-      #   automate = options.onAutomationRequest ? (message, data) =>
-      #     @onAutomation(messages, message, data)
-
-      #   automation(config.namespace, socketIoCookie, config.screenshotsFolder)
-      #   .request(message, data, automate)
-      #   .then (resp) ->
-      #     if aar = options.afterAutomationRequest
-      #       aar(message, data, resp)
-      #     else
-      #       resp
-
       socket.on "automation:client:connected", =>
-        return if automationClient
+        return if automationClient is socket
 
         automationClient = socket
 
@@ -231,6 +196,9 @@ class Socket
           ## if we are in headless mode then log out an error and maybe exit with process.exit(1)?
           Promise.delay(500)
           .then =>
+            ## bail if we've swapped to a new automationClient
+            return if automationClient isnt socket
+
             ## give ourselves about 500ms to reconnected
             ## and if we're connected its all good
             return if automationClient.connected
@@ -241,7 +209,7 @@ class Socket
             ## TODO: no longer emit this, just close the browser and display message in reporter
             @io.emit("automation:disconnected")
 
-        socket.on "automation:push:request", (message, data, cb = ->) =>
+        socket.on "automation:push:request", (message, data) =>
           # fn = (data) =>
             # @io.emit("automation:push:message", message, data)
             # cb()
