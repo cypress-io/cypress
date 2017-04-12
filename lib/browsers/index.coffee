@@ -60,8 +60,6 @@ module.exports = {
 
       browser.open(name, url, automation, config, options)
       .then (i) ->
-        console.log "instance is", i
-
         ## TODO: bind to process.exit here
         ## or move this functionality into cypress-core-launder
 
