@@ -3,14 +3,14 @@ excerpt: Manage your Organizations
 
 # Contents
 
-- :fa-angle-right: [What are Organizations?](#what-are-organizations-)
-  - [Personal Organization](#personal-organization)
-- :fa-angle-right: [Creating an Organization](#creating-an-organization)
-  - [Inviting Users](#inviting-users)
-  - [User Roles](#user-roles)
-  - [User Requests](#user-requests)
-  - [Transferring Projects](#transferring-projects)
-- :fa-angle-right: [Deleting an Organization](#deleting-an-organization)
+- :fa-angle-right: [What are Organizations?](#section-what-are-organizations-)
+  - [Personal Organization](#section-personal-organization)
+- :fa-angle-right: [Creating an Organization](#section-creating-an-organization)
+  - [Inviting Users](#section-inviting-users)
+  - [User Roles](#section-user-roles)
+  - [User Requests](#section-user-requests)
+  - [Transferring Projects](#section-transferring-projects)
+- :fa-angle-right: [Deleting an Organization](#section-deleting-an-organization)
 
 ***
 

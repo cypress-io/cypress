@@ -7,19 +7,19 @@ Typically you'd use `Cypress.Cookies` in hooks like `before`, `beforeEach`, `aft
 
 Cypress automatically clears all cookies **before** each test to prevent state from building up. You can take advantage of `Cypress.Cookies.preserveOnce` or even **whitelist** cookies by their name to preserve values across multiple tests. This enables you to preserve sessions through several tests.
 
-# [Cypress.Cookies.debug( *boolean*, *options* )](#debug-usage)
+# [Cypress.Cookies.debug( *boolean*, *options* )](#section-debug-usage)
 
 Enable or disable cookie debugging. When enabled, Cypress will log out when cookies are set or cleared.
 
 ***
 
-# [Cypress.Cookies.preserveOnce( *name1*, *name2*, *name3*, ... )](#preserve-usage)
+# [Cypress.Cookies.preserveOnce( *name1*, *name2*, *name3*, ... )](#section-preserve-usage)
 
 Will preserve cookies by name. Pass an unlimited number of arguments. These preserved cookies will not be cleared before the next test starts.
 
 ***
 
-# [Cypress.Cookies.defaults( *options* )](#defaults-usage)
+# [Cypress.Cookies.defaults( *options* )](#section-defaults-usage)
 
 Set defaults for all cookies, such as whitelisting a set of cookies to bypass being cleared before each test.
 

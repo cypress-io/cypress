@@ -10,13 +10,13 @@ Print a message to the Command Log within Cypress.
 
 ***
 
-# [cy.log( *message* )](#usage)
+# [cy.log( *message* )](#section-usage)
 
 Print the message to the Command Log.
 
 ***
 
-# [cy.log( *message*, *arguments* )](#arguments-usage)
+# [cy.log( *message*, *arguments* )](#section-arguments-usage)
 
 Print the message to the Command Log, along with any arguments.
 

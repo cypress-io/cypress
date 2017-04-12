@@ -6,17 +6,17 @@ Get the parents DOM elements of the DOM elements.
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.parents` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+| **Timeout** | `cy.parents` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
-# [cy.parents()](#usage)
+# [cy.parents()](#section-usage)
 
 Get the ancestors of each element in the current set of matched elements.
 
 ***
 
-# [cy.parents( *selector* )](#selector-usage)
+# [cy.parents( *selector* )](#section-selector-usage)
 
 Get the ancestors of each element in the current set of matched elements filtered by selector
 
@@ -32,7 +32,7 @@ Pass in an options object to change the default behavior of `cy.parents`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
 
 ***
 

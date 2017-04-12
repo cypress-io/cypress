@@ -10,7 +10,7 @@ Get the current URL. `cy.url()` uses [`cy.location.href`](https://on.cypress.io/
 
 ***
 
-# [cy.url()](#usage)
+# [cy.url()](#section-usage)
 
 Get the current URL.
 

@@ -8,11 +8,11 @@ Submits the DOM element from the previous command if it is a form. Submit can on
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.submit` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts). |
+| **Timeout** | `cy.submit` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts). |
 
 ***
 
-# [cy.submit()](#usage)
+# [cy.submit()](#section-usage)
 
 Submit a form.
 

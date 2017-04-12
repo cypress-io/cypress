@@ -13,25 +13,25 @@ This document covers the API for consuming your configuration options *in your t
 }
 [/block]
 
-# [Cypress.config()](#no-arguments-usage)
+# [Cypress.config()](#section-no-arguments-usage)
 
 Returns all of your configuration options as an object literal.
 
 ***
 
-# [Cypress.config( *key* )](#key-usage)
+# [Cypress.config( *key* )](#section-key-usage)
 
 Returns the value of a single configuration option by its key.
 
 ***
 
-# [Cypress.config( *key*, *value* )](#key-value-usage)
+# [Cypress.config( *key*, *value* )](#section-key-value-usage)
 
 Sets a configuration option for a specific key.
 
 ***
 
-# [Cypress.config( *object* )](#object-usage)
+# [Cypress.config( *object* )](#section-object-usage)
 
 Sets multiple configuration options.
 

@@ -14,29 +14,29 @@ excerpt: Make an assertion about the current subject
 | | |
 |--- | --- |
 | **Returns** | the current subject but (in some cases) a new subject |
-| **Timeout** | the assertion will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+| **Timeout** | the assertion will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
-# [cy.should( *chainers* )](#chainers-usage)
+# [cy.should( *chainers* )](#section-chainers-usage)
 
 Implicitly assert about the current subject.
 
 ***
 
-# [cy.should( *chainers*, *value* )](#chainers-with-value-usage)
+# [cy.should( *chainers*, *value* )](#section-chainers-with-value-usage)
 
 Implicitly assert a value about the current subject. Returns the existing current subject (usually). Some chai methods and chai-jQuery methods return a new (different) subject for chain-ability.
 
 ***
 
-# [cy.should( *chainers*, *method*, *value* )](#chainers-with-method-and-value-usage)
+# [cy.should( *chainers*, *method*, *value* )](#section-chainers-with-method-and-value-usage)
 
 Implicitly assert about the subject by calling a method and providing a value to that method.
 
 ***
 
-# [cy.should( *function* )](#function-usage)
+# [cy.should( *function* )](#section-function-usage)
 
 Pass a function that can have any number of explicit assertions within it. Does not change the subject. Whatever was passed to the function is what is returned.
 
@@ -248,7 +248,7 @@ cy
     .and("not.have.class", "inactive")
 ```
 
-You can [read more about how Cypress resolves your assertions](https://on.cypress.io/guides/making-assertions#resolving-assertions) here.
+You can [read more about how Cypress resolves your assertions](https://on.cypress.io/guides/making-assertions#section-resolving-assertions) here.
 
 ***
 
@@ -267,7 +267,7 @@ A [list of these](https://on.cypress.io/guides/making-assertions#available-asser
 
 ## How do I know which assertions change the subject and which keep it the same?
 
-The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
+The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#section-chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#section-chai-jquery) will always document what they return.
 
 Alternatively, it is very easy to use Cypress itself to figure this out.
 

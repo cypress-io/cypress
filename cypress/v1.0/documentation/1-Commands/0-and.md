@@ -16,17 +16,17 @@ You'd typically use `cy.and` when you are making multiple assertions about the s
 | | |
 |--- | --- |
 | **Returns** | the current subject but (in some cases) a new subject  |
-| **Timeout** | the assertion will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
+| **Timeout** | the assertion will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
 
 ***
 
-# [cy.and( *chainers* )](#chainers-usage)
+# [cy.and( *chainers* )](#section-chainers-usage)
 
 Make an assertion about the current subject using assertion chainers.
 
 ***
 
-# [cy.and( *chainers*, *value* )](#chainers-with-value-usage)
+# [cy.and( *chainers*, *value* )](#section-chainers-with-value-usage)
 
 Make an assertion about the value of the current subject.
 
@@ -34,13 +34,13 @@ Some chai methods and chai-jQuery methods return a new (different) subject for c
 
 ***
 
-# [cy.and( *chainers*, *method*, *value* )](#chainers-with-method-and-value-usage)
+# [cy.and( *chainers*, *method*, *value* )](#section-chainers-with-method-and-value-usage)
 
 Make an assertion about the subject by calling a method and providing a value to that method.
 
 ***
 
-# [cy.and( *function* )](#function-usage)
+# [cy.and( *function* )](#section-function-usage)
 
 Pass a function that can have any number of explicit assertions written within it.
 
@@ -260,7 +260,7 @@ cy.find("input", {timeout: 10000}).should("have.value", "foo").and("have.class",
 
 ## How do I know which assertions change the subject and which keep it the same?
 
-The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
+The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#section-chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#section-chai-jquery) will always document what they return.
 
 Alternatively, it is very easy to use Cypress itself to figure this out.
 

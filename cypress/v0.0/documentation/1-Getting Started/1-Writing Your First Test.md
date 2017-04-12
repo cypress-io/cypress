@@ -3,13 +3,13 @@ excerpt: Walkthrough writing your first test
 
 # Contents
 
-- :fa-angle-right: [Folder Structure](#folder-structure)
-- :fa-angle-right: [Test Files](#test-files)
-- :fa-angle-right: [How to Write Tests](#how-to-write-tests)
-  - [BDD Interface](#bdd-interface)
-  - [Hooks](#hooks)
-  - [Excluding and Including Tests](#excluding-and-including-tests)
-  - [Dynamically Generate Tests](#dynamically-generate-tests)
+- :fa-angle-right: [Folder Structure](#section-folder-structure)
+- :fa-angle-right: [Test Files](#section-test-files)
+- :fa-angle-right: [How to Write Tests](#section-how-to-write-tests)
+  - [BDD Interface](#section-bdd-interface)
+  - [Hooks](#section-hooks)
+  - [Excluding and Including Tests](#section-excluding-and-including-tests)
+  - [Dynamically Generate Tests](#section-dynamically-generate-tests)
 
 ***
 
@@ -81,7 +81,7 @@ To start writing tests for your app, simply create a new file like `app_spec.js`
 
 # How to Write Tests
 
-Cypress is built on top of [Mocha](https://on.cypress.io/guides/bundled-tools#mocha) and uses its `bdd` interface. Tests you write in Cypress will mostly adhere to this style.
+Cypress is built on top of [Mocha](https://on.cypress.io/guides/bundled-tools#section-mocha) and uses its `bdd` interface. Tests you write in Cypress will mostly adhere to this style.
 
 If you're familiar with writing tests in JavaScript, then writing tests in Cypress will be a breeze.
 
@@ -89,7 +89,7 @@ We're still working on introductory docs and videos. If you want to see Cypress 
 
 ## BDD Interface
 
-The BDD interface borrowed from [Mocha](https://on.cypress.io/guides/bundled-tools#mocha) provides `describe()`, `context()`, `it()` and `specify()`.
+The BDD interface borrowed from [Mocha](https://on.cypress.io/guides/bundled-tools#section-mocha) provides `describe()`, `context()`, `it()` and `specify()`.
 
 `context()` is identical to `describe()` and `specify()` is identical to `it()`, so choose whatever terminology works best for you.
 
@@ -138,7 +138,7 @@ describe('Unit test our math functions', function() {
 
 ## Hooks
 
-Cypress also provides hooks (borrowed from [Mocha](https://on.cypress.io/guides/bundled-tools#mocha)).
+Cypress also provides hooks (borrowed from [Mocha](https://on.cypress.io/guides/bundled-tools#section-mocha)).
 
 These are helpful to set conditions that you want run before a set of tests or before each test. They're also helpful to clean up conditions after a set of tests or after each test.
 

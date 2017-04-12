@@ -3,13 +3,13 @@ excerpt: Known issues which cause problems in Cypress
 
 # Contents
 
-- :fa-angle-right: [Missing Commands](#missing-dom-action-commands)
-  - [Right click](#right-click)
-  - [Hover](#hover)
-- :fa-angle-right: [Difficult use cases](#missing-dom-action-commands)
-  - [Iframes](#iframes)
-  - [OAuth](#oauth)
-  - [window.fetch](#window-fetch-routing-and-stubbing)
+- :fa-angle-right: [Missing Commands](#section-missing-dom-action-commands)
+  - [Right click](#section-right-click)
+  - [Hover](#section-hover)
+- :fa-angle-right: [Difficult use cases](#section-missing-dom-action-commands)
+  - [Iframes](#section-iframes)
+  - [OAuth](#section-oauth)
+  - [window.fetch](#section-window-fetch-routing-and-stubbing)
 
 ***
 
