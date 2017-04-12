@@ -30,6 +30,7 @@
   "devDependencies": {
     "@cypress/core-icons": "^0.5.0",
     "@cypress/core-releaser": "0.1.8",
+    "@cypress/react-tooltip": "^0.2.2",
     "babel-eslint": "^6.0.4",
     "bluebird": "^3.4.0",
     "bootstrap-sass": "3.3.5",
@@ -52,7 +53,6 @@
     "mobx-react-devtools": "^4.2.0",
     "moment": "^2.15.1",
     "rc-collapse": "^1.6.11",
-    "rc-tooltip": "^3.3.5",
     "react": "^15.1.0",
     "react-bootstrap-modal": "3.0.1",
     "react-contextmenu": "^1.6.2",

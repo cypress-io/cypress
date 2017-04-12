@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import moment from 'moment'
 import React, { Component } from 'react'
-import Tooltip from 'rc-tooltip'
+import Tooltip from '@cypress/react-tooltip'
 
 import { osIcon, browserIcon, gravatarUrl, getStatusIcon, durationFormatted, browserVersionFormatted } from '../lib/utils'
 
@@ -17,10 +17,7 @@ export default class RunsListItem extends Component {
         </div>
         <div className='row-column-wrapper'>
           <div>
-            <Tooltip
-              placement='top'
-              overlay={<span>{_.startCase(run.status)}</span>}
-              >
+            <Tooltip title={_.startCase(run.status)} className='cy-tooltip'>
               <i className={`fa ${run.status} fa-${getStatusIcon(run.status)}`}></i>
             </Tooltip>
             {' '}#{run.buildNumber}

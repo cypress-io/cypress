@@ -18,7 +18,7 @@ describe "Projects Nav", ->
         stubIpc(@App.ipc, {
           "on:menu:clicked": ->
           "launch:browser": ->
-          "close:browser": ->
+          "close:browser": (stub) -> stub.resolves(null)
           "close:project": ->
           "on:focus:tests": ->
           "open:project": ->
@@ -28,7 +28,6 @@ describe "Projects Nav", ->
           "get:projects": (stub) => stub.resolves(@projects)
           "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
           "get:builds": (stub) => stub.resolves(@runs)
-          "get:open:browsers": (stub) => stub.resolves([])
           "get:specs": (stub) => stub.yields(null, @specs)
           "get:record:keys": (stub) -> stub.resolves([])
         })
@@ -275,7 +274,7 @@ describe "Projects Nav", ->
         @["open:project"].yields(null, @config)
         cy
           .get(".projects-list a")
-            .contains("My-Fake-Project").as("firstProject").click()
+            .contains("My-Fake-Project").click()
 
       it "defaults to first browser", ->
         cy
@@ -297,11 +296,10 @@ describe "Projects Nav", ->
           .get(".projects-list a")
             .contains("My-Fake-Project").click()
 
-      context "displays no dropdown btn", ->
-        it "displays the first browser and 2 others in the dropdown", ->
-          cy
-            .get(".browsers-list")
-              .find(".dropdown-toggle").should("not.be.visible")
+      it "displays no dropdown btn", ->
+        cy
+          .get(".browsers-list")
+            .find(".dropdown-toggle").should("not.be.visible")
 
     describe "no browsers available", ->
       beforeEach ->
@@ -333,6 +331,30 @@ describe "Projects Nav", ->
           cy
             .contains(".btn", "Download Chrome").click().then ->
               expect(@App.ipc).to.be.calledWith("external:open", "https://www.google.com/chrome/browser/desktop")
+
+    describe "browser with info", ->
+      beforeEach ->
+        @info = "The Electron browser is the version of Chrome that is bundled with Electron. Cypress uses this browser when running headlessly, so it may be useful for debugging issues that occur only in headless mode."
+        @config.browsers = [{
+          "name": "electron",
+          "version": "50.0.2661.86",
+          "path": "",
+          "majorVersion": "50",
+          "info": @info
+        }]
+
+        @["open:project"].yields(null, @config)
+        cy
+          .get(".projects-list a")
+            .contains("My-Fake-Project").click()
+
+      it "shows info icon with tooltip", ->
+        cy
+          .get(".browsers .fa-info-circle")
+          .then ($el) ->
+            $el[0].dispatchEvent(new Event("mouseover", {bubbles: true}))
+          .get(".cy-tooltip")
+          .should("contain", @info)
 
   context "returning to projects list", ->
     beforeEach ->
