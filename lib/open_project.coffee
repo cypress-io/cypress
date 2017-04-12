@@ -39,6 +39,10 @@ create = ->
     launch: (browserName, url, spec, options = {}) ->
       openProject.getConfig()
       .then (cfg) ->
+        ## always reset the state when launching a browser
+        ## so that our document.domain is reset back to <root>
+        openProject.resetState()
+
         if spec
           url = openProject.getUrlBySpec(cfg.browserUrl, spec)
 
