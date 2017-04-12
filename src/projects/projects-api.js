@@ -90,21 +90,12 @@ const runSpec = (project, spec, browser, url) => {
     })
   }
 
-  return ipc.getOpenBrowsers()
-  .then((browsers = []) => {
-    if (browsers.length) {
-      return ipc.changeBrowserSpec({ spec })
-    } else {
-      return launchBrowser()
-    }
-  })
-
+  return ipc.closeBrowser()
+  .then(launchBrowser)
 }
 
 const closeBrowser = (clientId) => {
   specsCollection.setChosenSpec('')
-
-  ipc.closeBrowser()
 
   if (clientId) {
     let project = projectsStore.getProjectByClientId(clientId)
@@ -112,6 +103,8 @@ const closeBrowser = (clientId) => {
   }
 
   ipc.offLaunchBrowser()
+
+  return ipc.closeBrowser()
 }
 
 const closeProject = (clientId) => {

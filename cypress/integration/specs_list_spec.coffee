@@ -13,13 +13,11 @@ describe "Specs List", ->
         {@App} = win
         cy.stub(@App, "ipc").as("ipc")
 
-        @getOpenBrowsers = deferred()
-
         stubIpc(@App.ipc, {
           "get:options": (stub) => stub.resolves({})
           "get:current:user": (stub) => stub.resolves(@user)
           "on:menu:clicked": ->
-          "close:browser": ->
+          "close:browser": (stub) -> stub.resolves(null)
           "close:project": ->
           "on:focus:tests": ->
           "updater:check": (stub) => stub.resolves(false)
@@ -27,7 +25,6 @@ describe "Specs List", ->
           "get:project:statuses": (stub) => stub.resolves(@projectStatuses)
           "open:project": ->
           "get:specs": ->
-          "get:open:browsers": (stub) => stub.returns(@getOpenBrowsers.promise)
           "change:browser:spec": (stub) -> stub.resolves({})
         })
 
@@ -116,6 +113,7 @@ describe "Specs List", ->
     beforeEach ->
       @["open:project"].yields(null, @config)
       @["get:specs"].yields(null, @specs)
+
       cy
         .get(".projects-list a")
           .contains("My-Fake-Project").click()
@@ -132,7 +130,6 @@ describe "Specs List", ->
             .find("i").should("have.class", "fa-play")
 
       it "triggers launch:browser on click of button", ->
-        @getOpenBrowsers.resolve([])
         cy
           .contains(".btn", "Run All Tests").click()
           .then ->
@@ -143,18 +140,8 @@ describe "Specs List", ->
             expect(lastCallArgs[1].browser).to.eq "chrome"
             expect(lastCallArgs[1].spec).to.eq "__all"
 
-      it "triggers change:browser:spec if browser is open", ->
-        @getOpenBrowsers.resolve(["chrome"])
-        cy
-          .contains(".btn", "Run All Tests").click()
-          .then ->
-            expect(@App.ipc).to.be.calledWithExactly("change:browser:spec", {
-              spec: "__all"
-            })
-
       describe "all specs running in browser", ->
         beforeEach ->
-          @getOpenBrowsers.resolve(["chrome"])
           cy.contains(".btn", "Run All Tests").as("allSpecs").click()
 
         it "updates spec icon", ->
@@ -179,17 +166,11 @@ describe "Specs List", ->
       beforeEach ->
         cy.get(".file a").contains("app_spec.coffee").as("firstSpec")
 
-      it "triggers get:open:browsers on click of file", ->
+      it "triggers close:browser and launch:browser on click of file", ->
         cy
           .get("@firstSpec").click().then ->
-            expect(@App.ipc).to.be.calledWith("get:open:browsers")
+            expect(@App.ipc).to.be.calledWith("close:browser")
 
-      it "triggers launch:browser if browser is not open", ->
-        @getOpenBrowsers.resolve([])
-
-        cy
-          .get("@firstSpec").click()
-          .then ->
             ln = @App.ipc.args.length
             lastCallArgs = @App.ipc.args[ln-1]
 
@@ -197,20 +178,7 @@ describe "Specs List", ->
             expect(lastCallArgs[1].browser).to.eq "chrome"
             expect(lastCallArgs[1].spec).to.eq "integration/app_spec.coffee"
 
-      it "triggers change:browser:spec if browser is open", ->
-        @getOpenBrowsers.resolve(["chrome"])
-
-        cy
-          .get("@firstSpec").click()
-          .then ->
-            expect(@App.ipc).to.be.calledWithExactly("change:browser:spec", {
-              spec: "integration/app_spec.coffee"
-            })
-
     describe "spec running in browser", ->
-      beforeEach ->
-        @getOpenBrowsers.resolve(["chrome"])
-
       context "choose shallow spec", ->
         beforeEach ->
           cy.get(".file a").contains("a", "app_spec.coffee").as("firstSpec").click()
@@ -234,8 +202,6 @@ describe "Specs List", ->
 
     describe "switching specs", ->
       beforeEach ->
-        @getOpenBrowsers.resolve(["chrome"])
-
         cy
           .get(".file").contains("a", "app_spec.coffee").as("firstSpec")
             .click()
