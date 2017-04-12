@@ -14,11 +14,11 @@ Assign an alias to a route or DOM element for use later. Reference the alias lat
 | | |
 |--- | --- |
 | **Returns** | the DOM element or route being aliased  |
-| **Timeout** | the alias will retry the chain of commands before the alias assignment for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | the alias will retry the chain of commands before the alias assignment for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
 ***
 
-# [cy.as( *text* )](#section-usage)
+# [cy.as( *text* )](#usage)
 
 Create an alias to be used later, passing the name of the alias as a parameter.
 

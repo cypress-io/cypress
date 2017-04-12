@@ -20,7 +20,7 @@ cy
   .get("input[type=file]").then(function($input){
 
     // convert the logo base64 string to a blob
-    Cypress.Blob.base64StringToBlob(this.logo, "image/png").then(function(blob){
+    return Cypress.Blob.base64StringToBlob(this.logo, "image/png").then(function(blob){
 
       // pass the blob to the fileupload jQuery plugin
       // which initiates a programmatic upload

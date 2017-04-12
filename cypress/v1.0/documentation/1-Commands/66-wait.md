@@ -6,17 +6,17 @@ Use `cy.wait` to wait for a number of milliseconds or for a resource to resolve.
 | | |
 |--- | --- |
 | **Returns** | the current subject if waiting for number of milliseconds, the xhr object if waiting for a route |
-| **Timeout** | `cy.wait` will wait for the request the duration of the [requestTimeout](https://on.cypress.io/guides/configuration#section-timeouts) and wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#section-timeouts) or it will wait for both the duration request and response for the `timeout` specified in the command's [options](#section-options).|
+| **Timeout** | `cy.wait` will wait for the request the duration of the [requestTimeout](https://on.cypress.io/guides/configuration#timeouts) and wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) or it will wait for both the duration request and response for the `timeout` specified in the command's [options](#options).|
 
 ***
 
-# [cy.wait( *number* )](#section-number-usage)
+# [cy.wait( *number* )](#number-usage)
 
 Wait a specific amount of `ms` before resolving and continuing onto the next command.
 
 ***
 
-# [cy.wait( *alias* )](#section-alias-usage)
+# [cy.wait( *alias* )](#alias-usage)
 
 Wait until the matching [aliased](https://on.cypress.io/guides/using-aliases) XHR has a response.
 
@@ -44,7 +44,7 @@ Pass in an options object to change the default behavior of `cy.wait`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [requestTimeout](https://on.cypress.io/guides/configuration#section-timeouts), [responseTimeout](https://on.cypress.io/guides/configuration#section-timeouts) | Override the default requestTimeout and responseTimeout (in ms)
+`timeout` | [requestTimeout](https://on.cypress.io/guides/configuration#timeouts), [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) | Override the default requestTimeout and responseTimeout (in ms)
 `log` | `true` | whether to display command in command log
 
 You can also change the default `requestTimeout` and `responseTimeout` that all `cy.wait` use in [configuration](https://on.cypress.io/guides/configuration).
@@ -159,13 +159,13 @@ cy
 
 `cy.wait` goes through two separate "waiting" periods for a matching XHR.
 
-The first period waits for a matching request to leave the browser. This duration is configured by [`requestTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) - which has a default of `5000` ms.
+The first period waits for a matching request to leave the browser. This duration is configured by [`requestTimeout`](https://on.cypress.io/guides/configuration#timeouts) - which has a default of `5000` ms.
 
 This means that when you begin waiting for an XHR, Cypress will wait up to 5 seconds for a matching XHR to be created. If no matching XHR is found, you will get an error message that looks like this:
 
 ![screen shot 2015-12-21 at 5 00 09 pm](https://cloud.githubusercontent.com/assets/1268976/11942578/8e7cba50-a805-11e5-805c-614f8640fbcc.png)
 
-Once Cypress detects that a matching XHR has begun its request it then switches over to the 2nd waiting period. This duration is configured by [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) - which has a default of `20000` ms.
+Once Cypress detects that a matching XHR has begun its request it then switches over to the 2nd waiting period. This duration is configured by [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) - which has a default of `20000` ms.
 
 This means Cypress will now wait up to 20 seconds for the external server to respond to this XHR. If no response is detected, you will get an error message that looks like this:
 

@@ -3,9 +3,9 @@ excerpt: Deprecations that require additional explanation will be listed here.
 
 # Contents
 
-- :fa-angle-right: [Passing `cy.server({stub: false})` is now deprecated](#section-passing-cy-server-stub-false-is-now-deprecated)
-- :fa-angle-right: [Passing `cy.route({stub: false})` is now deprecated](#section-passing-cy-route-stub-false-is-now-deprecated)
-- :fa-angle-right: [Cypress Package Renamed](#section-cypress-package-renamed)
+- :fa-angle-right: [Passing `cy.server({stub: false})` is now deprecated](#passing-cy-server-stub-false-is-now-deprecated)
+- :fa-angle-right: [Passing `cy.route({stub: false})` is now deprecated](#passing-cy-route-stub-false-is-now-deprecated)
+- :fa-angle-right: [Cypress Package Renamed](#cypress-package-renamed)
 
 ***
 

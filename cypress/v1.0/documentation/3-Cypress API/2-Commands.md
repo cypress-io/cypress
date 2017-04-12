@@ -64,3 +64,52 @@ Cypress.addParentCommand("login", function(email, password){
     })
 })
 ```
+
+## Another custom command for sign in
+
+```javascript
+Cypress.addParentCommand("signIn", function(email, password) {
+  return cy.chain()
+  .request({
+    method: "POST",
+    url: "/auth",
+    body: {email, password}
+  }).its("body");
+});
+
+describe("custom command", function() {
+  it("resolves with the body", function() {
+    // the subject (body) is carried on and
+    // we can then add assertions about it
+    cy.signIn({"jane.lane", "password123"}).should("deep.eq", {
+      email: "jane.lane",
+      password: "password123"
+    });
+  });
+});
+```
+
+## Using cy.chain to manage a command's subject
+
+```javascript
+Cypress.addParentCommand("a", function(){
+  cy
+    .chain()
+    .wrap({foo: "bar"})
+    .its("foo")
+})
+
+Cypress.addChildCommand("b", function(subj){
+  cy
+    .chain()
+    .wrap(subj)
+    .should("eq", "bar")
+})
+
+it("can chain subjects", function(){
+  cy
+    .a()
+    .b()
+    .should("eq", "bar")
+})
+```

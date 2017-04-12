@@ -9,11 +9,11 @@ It moves the clock the specified number of `milliseconds`. Any timers within the
 
 | | |
 |--- | --- |
-| **Returns** | the `clock` object. See [clock API](https://on.cypress.io/api/clock#section-clock-api) |
+| **Returns** | the `clock` object. See [clock API](https://on.cypress.io/api/clock#clock-api) |
 
 ***
 
-# [cy.tick( *milliseconds* )](#section-usage)
+# [cy.tick( *milliseconds* )](#usage)
 
 Moves the clock the specified number of `milliseconds`. Any timers within the affected range of time will be called.
 

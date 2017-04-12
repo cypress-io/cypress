@@ -3,12 +3,12 @@ excerpt: View your Recorded Runs
 
 # Contents
 
-- :fa-angle-right: [What are Recorded Runs?](#section-what-are-recorded-runs)
-- :fa-angle-right: [What is recorded during a run?](#section-what-is-recorded-during-a-run-)
-  - [Standard Output](#section-standard-output)
-  - [Test Failures](#section-test-failures)
-  - [Screenshots](#section-screenshots)
-  - [Videos](#section-videos)
+- :fa-angle-right: [What are Recorded Runs?](#what-are-recorded-runs)
+- :fa-angle-right: [What is recorded during a run?](#what-is-recorded-during-a-run-)
+  - [Standard Output](#standard-output)
+  - [Test Failures](#test-failures)
+  - [Screenshots](#screenshots)
+  - [Videos](#videos)
 
 ***
 
@@ -27,10 +27,10 @@ To record your runs:
 
 We capture the following:
 
-- [Standard Output](#section-standard-output)
-- [Test Failures](#section-test-failures)
-- [Screenshots](#section-screenshots)
-- [Video](#section-video)
+- [Standard Output](#standard-output)
+- [Test Failures](#test-failures)
+- [Screenshots](#screenshots)
+- [Video](#video)
 
 We have already begun the implementation for capturing even more things from your run such as:
 

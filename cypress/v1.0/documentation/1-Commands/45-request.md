@@ -6,29 +6,29 @@ Use `cy.request` to make HTTP requests. Great for talking to an external endpoin
 | | |
 |--- | --- |
 | **Returns** | the `response` as an object literal. |
-| **Timeout** | `cy.request` will wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#section-timeouts) or the [`timeout`](#section-options) passed in the options object of the command. |
+| **Timeout** | `cy.request` will wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#timeouts) or the [`timeout`](#options) passed in the options object of the command. |
 
 ***
 
-# [cy.request( *url* )](#section-url-usage)
+# [cy.request( *url* )](#url-usage)
 
 Makes a `GET` request using the specified url.
 
 ***
 
-# [cy.request( *url*, *body* )](#section-url-and-body-usage)
+# [cy.request( *url*, *body* )](#url-and-body-usage)
 
 Make a `GET` request to the provided url with the provided body.
 
 ***
 
-# [cy.request( *method*, *url* )](#section-method-and-url-usage)
+# [cy.request( *method*, *url* )](#method-and-url-usage)
 
 Make a request using the provided method to the specified url.
 
 ***
 
-# [cy.request( *method*, *url*, *body* )](#section-method-and-url-and-body-usage)
+# [cy.request( *method*, *url*, *body* )](#method-and-url-and-body-usage)
 
 Additionally pass in the request `body` as a `String` or `Object Literal`. Cypress will set the `Accepts` request header and serialize the response body by its `Content-Type`.
 
@@ -52,7 +52,7 @@ Option | Default | Notes
 `log` | `true` | Whether to log the request in the Command Log
 `method` | `GET` | The HTTP method to use when making the request.
 `qs` | `null` | The query parameters to be appended to the `url` option when making the request.
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for a response (in ms)
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for a response (in ms)
 `url` | `null` | The URL to make the request.
 
 You can also set options for the `cy.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
@@ -199,7 +199,9 @@ cy
 
 ## Why don't I see the XHR in the Network Tab of the Chrome Dev Tools?
 
-Cypress does not actually make an XHR request out of the browser, it makes a simple HTTP request. So you will not see the request inside of the Chrome Dev Tools.
+Cypress does not actually make an XHR request out of the browser. Under the hood we are making the HTTP request from the desktop application (in node). Therefore you will not see the request inside of the Chrome Dev Tools.
+
+Note that we automatically set both Cookies + User Agent headers correctly as if the request was really coming from the browser.
 
 ***
 
@@ -219,7 +221,9 @@ cy
 
 ## Cookies are automatically sent and received
 
-If the HTTP request being made is sending cookies, they are sent in the request. Additionally, if a server reponds with cookies, these are automatically set on the browser.
+Before sending the HTTP request, we will automatically attach cookies that would have otherwise been attached had the request come from the browser. Additionally, if a response has a `Set-Cookie` header, these are automatically set back on the browser cookies.
+
+In other words, `cy.request` transparently performs all of the underlying functions as if it came from the browser.
 
 ***
 

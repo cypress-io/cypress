@@ -15,6 +15,6 @@
   "devDependencies": {
     "colors": "^1.1.2",
     "glob": "^7.0.3",
-    "readmeio-sync": "cypress-io/readmeio-sync#0c3de48db6e4b06d5b2eab095fe104a8e733aea4"
+    "readmeio-sync": "cypress-io/readmeio-sync#fbd703d57d872093ea7cbf7d0c5b9dd1483860a1"
   }
 }

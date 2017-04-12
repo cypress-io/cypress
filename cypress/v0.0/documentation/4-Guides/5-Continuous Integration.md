@@ -3,25 +3,25 @@ excerpt: Run Cypress in any CI provider
 
 # Contents
 
-- :fa-angle-right: [What's Supported?](#section-what-s-supported-)
-- :fa-angle-right: [Running in CI](#section-running-in-ci)
-  - [Your CI config file](#section-your-ci-config-file)
-  - [Recording your runs](#section-recording-your-runs)
-- :fa-angle-right: [Using Environment Variables](#section-using-environment-variables)
-  - [Hide your **Record Key**](#section-hide-your-record-key)
-  - [Install a specific version](#section-install-a-specific-version)
-  - [Modify configuration settings](#section-modify-configuration-settings)
-  - [Change environment variables in your tests](#section-change-environment-variables-in-your-tests)
-- :fa-angle-right: [Optimizing CI](#section-optimizing-ci)
-  - [Caching Cypress in Travis CI](#section-caching-cypress-in-travis-ci)
-  - [Caching Cypress in CircleCI](#section-caching-cypress-in-circleci)
-- :fa-angle-right: [Dependencies](#section-dependencies)
-- :fa-angle-right: [Known Issues](#section-known-issues)
-  - [CircleCI](#section-circleci)
-  - [Jenkins](#section-jenkins)
-  - [Docker](#section-docker)
-- :fa-angle-right: [Troubleshooting](#section-troubleshooting)
-  - [No output](#section-no-output)
+- :fa-angle-right: [What's Supported?](#what-s-supported-)
+- :fa-angle-right: [Running in CI](#running-in-ci)
+  - [Your CI config file](#your-ci-config-file)
+  - [Recording your runs](#recording-your-runs)
+- :fa-angle-right: [Using Environment Variables](#using-environment-variables)
+  - [Hide your **Record Key**](#hide-your-record-key)
+  - [Install a specific version](#install-a-specific-version)
+  - [Modify configuration settings](#modify-configuration-settings)
+  - [Change environment variables in your tests](#change-environment-variables-in-your-tests)
+- :fa-angle-right: [Optimizing CI](#optimizing-ci)
+  - [Caching Cypress in Travis CI](#caching-cypress-in-travis-ci)
+  - [Caching Cypress in CircleCI](#caching-cypress-in-circleci)
+- :fa-angle-right: [Dependencies](#dependencies)
+- :fa-angle-right: [Known Issues](#known-issues)
+  - [CircleCI](#circleci)
+  - [Jenkins](#jenkins)
+  - [Docker](#docker)
+- :fa-angle-right: [Troubleshooting](#troubleshooting)
+  - [No output](#no-output)
 
 ***
 
@@ -125,16 +125,16 @@ You can set various environment variables to modify how Cypress runs.
 
 Typically you'd want to do this to:
 
-- [Hide your **Record Key**](#section-hide-your-record-key)
-- [Install a specific version](#section-install-a-specific-version)
-- [Modify configuration settings](#section-modify-configuration-settings)
-- [Change environment variables in your tests](#section-change-environment-variables-in-your-tests)
+- [Hide your **Record Key**](#hide-your-record-key)
+- [Install a specific version](#install-a-specific-version)
+- [Modify configuration settings](#modify-configuration-settings)
+- [Change environment variables in your tests](#change-environment-variables-in-your-tests)
 
 ***
 
 ## Hide your Record Key
 
-If you are [recording your runs](#section-recording-your-runs) on a public project, you'll want to protect your Record Key. [Learn why.](https://docs.cypress.io/docs/projects#section-how-do-a-projectid-and-record-key-work-together-)
+If you are [recording your runs](#recording-your-runs) on a public project, you'll want to protect your Record Key. [Learn why.](https://docs.cypress.io/docs/projects#how-do-a-projectid-and-record-key-work-together-)
 
 Instead of hard coding it into your run command like this:
 
@@ -180,7 +180,7 @@ Typical use cases would be modifying things like:
 - `CYPRESS_VIDEO_COMPRESSION`
 - `CYPRESS_REPORTER`
 
-Refer to the [configuration docs](https://on.cypress.io/guides/configuration#section-environment-variables) for more examples.
+Refer to the [configuration docs](https://on.cypress.io/guides/configuration#environment-variables) for more examples.
 
 ***
 
@@ -253,7 +253,7 @@ For **everything else** you must install these dependencies:
 apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1
 ```
 
-If you run `cypress run` and see no output [see this section for troubleshooting this known issue](#section-no-output).
+If you run `cypress run` and see no output [see this section for troubleshooting this known issue](#no-output).
 
 ***
 
@@ -271,15 +271,15 @@ The `Ubuntu 14.04` image does not have all of the required dependencies installe
 
 ## Jenkins
 
-You need to install all of the [linux dependencies](#section-dependencies).
+You need to install all of the [linux dependencies](#dependencies).
 
 ***
 
 ## Docker
 
-We don't offer an **official** docker container, but our users have created one. [This container has all of the required dependencies installed and ready to go](https://docs.cypress.io/docs/userland-extensions#section-docker).
+We don't offer an **official** docker container, but our users have created one. [This container has all of the required dependencies installed and ready to go](https://docs.cypress.io/docs/userland-extensions#docker).
 
-If you don't use this image you must install all of the [linux dependencies](#section-dependencies).
+If you don't use this image you must install all of the [linux dependencies](#dependencies).
 
 See [this issue](https://github.com/cypress-io/cypress/issues/165) for more information.
 
@@ -297,7 +297,7 @@ If you are running **long** runs on Docker, you need to set the `ipc` to `host` 
 After executing `cypress run` you don't see any output. In other words: nothing happens.
 
 **Problem**
-You are in 100% of the cases missing [a dependency](#section-dependencies) above. Please install all of the dependencies.
+You are in 100% of the cases missing [a dependency](#dependencies) above. Please install all of the dependencies.
 
 The reason you're not seeing any output is a longstanding issue with Cypress which [there is an open issue for](https://github.com/cypress-io/cypress/issues/317).
 

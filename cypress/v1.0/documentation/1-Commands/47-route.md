@@ -18,31 +18,31 @@ Use `cy.route` to manage the behavior of network requests.
 
 ***
 
-# [cy.route( *url* )](#section-url-usage)
+# [cy.route( *url* )](#url-usage)
 
 Set a route matching the specific `url` which is not stubbed but can be waited on later. This will match `GET` request methods.
 
 ***
 
-# [cy.route( *url*, *response* )](#section-url-and-response-usage)
+# [cy.route( *url*, *response* )](#url-and-response-usage)
 
 Set a route matching the `url` stubbed with the supplied `response`. This will match `GET` request methods.
 
 ***
 
-# [cy.route( *method*, *url* )](#section-method-and-url-usage)
+# [cy.route( *method*, *url* )](#method-and-url-usage)
 
 Set a route matching the specific `method` and `url` which is not stubbed but can be waited on later.
 
 ***
 
-# [cy.route( *method*, *url*, *response* )](#section-method-url-and-response-usage)
+# [cy.route( *method*, *url*, *response* )](#method-url-and-response-usage)
 
 Set a route matching the `method` and `url` stubbed with the supplied `response`.
 
 ***
 
-# [cy.route( *function* )](#section-function-usage)
+# [cy.route( *function* )](#function-usage)
 
 Set a route by returning an object literal from your callback function.
 
@@ -304,7 +304,7 @@ cy
   })
 ```
 
-## Simulate the server returning 503 and redirect
+## Simulate a server redirect
 
 ```javascript
 cy

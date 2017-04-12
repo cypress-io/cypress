@@ -10,7 +10,7 @@ Ends the Cypress command chain and returns `null`. This is equivalent to the jQu
 
 ***
 
-# [cy.end()](#section-usage)
+# [cy.end()](#usage)
 
 End the command chain.
 

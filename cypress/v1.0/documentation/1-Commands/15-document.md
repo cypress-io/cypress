@@ -6,11 +6,11 @@ Get the document and work with its properties or methods.
 | | |
 |--- | --- |
 | **Returns** | the `window.document` object |
-| **Timeout** | `cy.document` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.document` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
 ***
 
-# [cy.document()](#section-usage)
+# [cy.document()](#usage)
 
 Get the document.
 

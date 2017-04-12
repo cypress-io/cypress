@@ -3,7 +3,7 @@ excerpt: Patterns which you should avoid
 
 # Contents
 
-- :fa-angle-right: [Adding unncessary waits](#section-adding-unnecessary-waits)
+- :fa-angle-right: [Adding unncessary waits](#adding-unnecessary-waits)
 
 ***
 

@@ -30,19 +30,19 @@ If an extension is omitted, Cypress will attempt to resolve the fixture by order
 | | |
 |--- | --- |
 | **Returns** | the contents of the file, formatted by file extension |
-| **Timeout** | `cy.fixture` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the server to process this command. |
+| **Timeout** | `cy.fixture` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the server to process this command. |
 
 ***
 
-# [cy.fixture( *fixture* )](#section-single-fixture-usage)
+# [cy.fixture( *fixture* )](#single-fixture-usage)
 
-Loads the fixture at the specified filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#section-folders), which defaults to `cypress/fixtures`.
+Loads the fixture at the specified filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders), which defaults to `cypress/fixtures`.
 
 ***
 
-# [cy.fixture( *fixture*, *encoding* )](#section-encoding)
+# [cy.fixture( *fixture*, *encoding* )](#encoding)
 
-Loads the fixture at the specified filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#section-folders), which defaults to `cypress/fixtures`, using the encoding specified when reading the file.
+Loads the fixture at the specified filepath within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders), which defaults to `cypress/fixtures`, using the encoding specified when reading the file.
 
 ***
 
@@ -56,7 +56,7 @@ Pass in an options object to change the default behavior of `cy.fixture`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.fixture` command to be processed
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.fixture` command to be processed
 
 ***
 
@@ -76,7 +76,7 @@ cy.fixture("users.json")
 cy.fixture("admin")
 ```
 
-When no extension is passed to `cy.fixture`, Cypress will search for files with the specified name within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#section-folders), which defaults to `cypress/fixtures`, and resolve the first one. The above example would resolve in the following order:
+When no extension is passed to `cy.fixture`, Cypress will search for files with the specified name within the [`fixturesFolder`](https://on.cypress.io/guides/configuration#folders), which defaults to `cypress/fixtures`, and resolve the first one. The above example would resolve in the following order:
 
 1. `{fixturesFolder}/admin.json`
 2. `{fixturesFolder}/admin.js`
@@ -162,7 +162,7 @@ Cypress automatically determines the encoding for the following file types:
 * `.tiff`
 * `.zip`
 
-For other types of files, they will be read as `utf8` by default. You can specify a different encoding by passing it as the [second argument](https://on.cypress.io/api/fixture#section--cy-fixture-fixture-encoding-section-encoding-).
+For other types of files, they will be read as `utf8` by default. You can specify a different encoding by passing it as the [second argument](https://on.cypress.io/api/fixture#-cy-fixture-fixture-encoding-section-encoding-).
 
 ```javascript
 cy.fixture("foo.bmp", "base64")
@@ -197,7 +197,7 @@ cy.route("GET", /users/, "fixture:users") // this works
 cy.route("GET", /users/, "fx:users")      // this also works
 ```
 
-This saves you from having to explicitly load the fixture first (like [below](https://on.cypress.io/api/fixture#section-using-cy-then-to-access-fixture-data)).
+This saves you from having to explicitly load the fixture first (like [below](https://on.cypress.io/api/fixture#using-cy-then-to-access-fixture-data)).
 
 ## Using cy.then to access fixture data
 
@@ -218,7 +218,7 @@ cy
 
 ## Using an alias to access a fixture
 
-However if you still need access to the fixture data, instead of [yielding the fixture's data](https://on.cypress.io/api/fixture#section-using-cy-then-to-access-fixture-data), we can make use of [aliasing](https://on.cypress.io/guides/using-aliases).
+However if you still need access to the fixture data, instead of [yielding the fixture's data](https://on.cypress.io/api/fixture#using-cy-then-to-access-fixture-data), we can make use of [aliasing](https://on.cypress.io/guides/using-aliases).
 
 Using an alias provides the benefit of terseness and readability.
 

@@ -1,7 +1,14 @@
 slug: location
 excerpt: Get the `window.location`
 
-Get the `window.location`.
+Get the remote `window.location` as a normalized object.
+
+| | |
+|--- | --- |
+| **Returns** | location object detailed below |
+| **Timeout** | *cannot timeout* |
+
+# [cy.location()](#usage)
 
 Given a remote URL of `http://localhost:8000/app/index.html?q=dan#/users/123/edit`, an object would be returned with the following properties:
 
@@ -18,16 +25,11 @@ Key | Type | Returns
 `search` | string | ?q=brian
 `toString` | function | http://localhost:8000/app/index.html?q=brian#/users/123/edit
 
-| | |
-|--- | --- |
-| **Returns** | location object detailed above |
-| **Timeout** | *cannot timeout* |
-
 ***
 
-# [cy.location()](#section-usage)
+# [cy.location( *key* )](#key-usage)
 
-Get the `window.location`
+Get the specific value by key of the location object above.
 
 ***
 
@@ -36,6 +38,7 @@ Get the `window.location`
 Pass in an options object to change the default behavior of `cy.location`.
 
 **cy.location( *options* )**
+**cy.location( *key*, *options* )**
 
 Option | Default | Notes
 --- | --- | ---
@@ -45,17 +48,6 @@ Option | Default | Notes
 
 # Usage
 
-## Assert that a redirect works
-
-```javascript
-// we should be redirected to the login page
-cy
-  .visit("http://localhost:3000/admin")
-  .location().its("pathname").should("eq", "/login")
-```
-
-***
-
 ## Check location for query params and pathname
 
 ```javascript
@@ -63,11 +55,24 @@ cy
 // it directly as an object
 cy
   .get("#search").type("brian{enter}")
-  .location().then(function(location){
+  .location().should(function(location){
     expect(location.search).to.eq("?search=brian")
     expect(location.pathname).to.eq("/users")
     expect(location.toString()).to.eq("http://localhost:8000/users?search=brian")
   })
+```
+
+***
+
+# Key Usage
+
+## Assert that a redirect works
+
+```javascript
+// we should be redirected to the login page
+cy
+  .visit("http://localhost:3000/admin")
+  .location("pathname").should("eq", "/login")
 ```
 
 ***
@@ -105,16 +110,18 @@ When changing properties on the real `window.location` object, it will force the
 ## Assert on the location's href
 
 ```javascript
-cy.location().its("href").should("include", "#users/new")
+cy.location().should(function(location){
+  expect(location.href).to.include("commands/querying")
+})
 ```
 
 The commands above will display in the command log as:
 
-<img width="581" alt="screen shot 2015-11-29 at 1 39 13 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459185/b2bca74a-969e-11e5-85b5-3d154efd57a7.png">
+![screen shot 2017-03-09 at 1 54 22 pm](https://cloud.githubusercontent.com/assets/1268976/23765705/0768366a-04d0-11e7-8936-beb7d546cbc7.png)
 
 When clicking on `location` within the command log, the console outputs the following:
 
-<img width="818" alt="screen shot 2015-11-29 at 1 39 30 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459186/b6766bc8-969e-11e5-85b4-d9a1c67e6ef2.png">
+![screen shot 2017-03-09 at 1 54 58 pm](https://cloud.githubusercontent.com/assets/1268976/23765706/089375e0-04d0-11e7-8344-5872c6f270b2.png)
 
 ***
 
