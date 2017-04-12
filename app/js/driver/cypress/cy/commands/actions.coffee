@@ -1437,7 +1437,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
   Cypress.addDualCommand
     scrollTo: (subject, xOrPosition, yOrOptions, options = {}) ->
-      if not xOrPosition
+      ## check for undefined or null values
+      if !xOrPosition?
         $Cypress.Utils.throwErrByPath "scrollTo.invalid_target", {args: { x }}
 
       switch
@@ -1452,7 +1453,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if _.isString(xOrPosition)
         ## if there's a number in our string, then
         ## don't check for positions and just set x
-        if (Number.parseFloat(xOrPosition))
+        ## this will check for NaN, etc - we need to explicitly
+        ## include '0%' as a use case
+        if (Number.parseFloat(xOrPosition) or Number.parseFloat(xOrPosition) is 0)
           x = xOrPosition
         else
           position = xOrPosition

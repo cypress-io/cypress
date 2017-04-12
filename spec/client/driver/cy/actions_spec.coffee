@@ -4329,6 +4329,22 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@scrollBoth.get(0).scrollTop).to.eq(150)
           expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
 
+      it "scrolls x to 0 and y num of px", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo(0, 150).then ($el) ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq(150)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+      it "scrolls x num of px and y to 0 ", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo(150, 0).then ($el) ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq(150)
+
       it "scrolls both x and y axis of px", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
@@ -4343,6 +4359,22 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("#scroll-to-both").scrollTo("50%", "50%").then ($el) ->
           expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
+
+      it "scrolls x to 0 and y percentage", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("0%", "50%").then ($el) ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+      it "scrolls x to percentage and y to 0", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("50%", "0%").then ($el) ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq(0)
           expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
 
     describe "scrolls with options", ->
