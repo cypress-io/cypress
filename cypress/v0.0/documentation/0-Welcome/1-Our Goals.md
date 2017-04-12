@@ -3,8 +3,8 @@ excerpt: What we believe and why
 
 # Contents
 
-- :fa-angle-right: [Problems with current front-end testing tools](#problems-with-current-front-end-testing-tools)
-- :fa-angle-right: [Goals of Cypress](#goals-of-cypress)
+- :fa-angle-right: [Problems with current front-end testing tools](#section-problems-with-current-front-end-testing-tools)
+- :fa-angle-right: [Goals of Cypress](#section-goals-of-cypress)
 
 ***
 
