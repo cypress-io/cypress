@@ -77,27 +77,12 @@ do ($Cypress, _) ->
         width  = $el.outerWidth()
         height = $el.outerHeight()
 
-    getCenterLeftCoordinates: (rect) ->
-      x = rect.left
-      y = rect.top + rect.height / 2
-      @normalizeCoords(x, y, "left", "center")
-
-    getCenterCoordinates: (rect) ->
-      x = rect.left + rect.width / 2
-      y = rect.top + rect.height / 2
-      @normalizeCoords(x, y, "center", "center")
-
-    getCenterRightCoordinates: (rect) ->
-      x = rect.left + rect.width
-      y = rect.top + rect.height / 2
-      @normalizeCoords(x, y, "right", "center")
-
     getTopLeftCoordinates: (rect) ->
       x = rect.left
       y = rect.top
       @normalizeCoords(x, y, "left", "top")
 
-    getTopCenterCoordinates: (rect) ->
+    getTopCoordinates: (rect) ->
       x = rect.left + rect.width / 2
       y = rect.top
       @normalizeCoords(x, y, "center", "top")
@@ -107,12 +92,27 @@ do ($Cypress, _) ->
       y = rect.top
       @normalizeCoords(x, y, "right", "top")
 
+    getLeftCoordinates: (rect) ->
+      x = rect.left
+      y = rect.top + rect.height / 2
+      @normalizeCoords(x, y, "left", "center")
+
+    getCenterCoordinates: (rect) ->
+      x = rect.left + rect.width / 2
+      y = rect.top + rect.height / 2
+      @normalizeCoords(x, y, "center", "center")
+
+    getRightCoordinates: (rect) ->
+      x = rect.left + rect.width
+      y = rect.top + rect.height / 2
+      @normalizeCoords(x, y, "right", "center")
+
     getBottomLeftCoordinates: (rect) ->
       x = rect.left
       y = rect.top + rect.height
       @normalizeCoords(x, y, "left", "bottom")
 
-    getBottomCenterCoordinates: (rect) ->
+    getBottomCoordinates: (rect) ->
       x = rect.left + rect.width / 2
       y = rect.top + rect.height
       @normalizeCoords(x, y, "center", "bottom")
