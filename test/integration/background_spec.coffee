@@ -116,13 +116,13 @@ describe "app/background", ->
 
       background.connect("http://localhost:#{PORT}", "/__socket.io")
 
-    it "emits 'automation:connected'", (done) ->
+    it "emits 'automation:client:connected'", (done) ->
       client = background.connect("http://localhost:#{PORT}", "/__socket.io")
 
       @sandbox.spy(client, "emit")
 
       client.on "connect", _.once ->
-        expect(client.emit).to.be.calledWith("automation:connected")
+        expect(client.emit).to.be.calledWith("automation:client:connected")
         done()
 
     it "listens to cookie changes", (done) ->
@@ -473,7 +473,7 @@ describe "app/background", ->
 
         @server.emit("automation:request", 123, "clear:cookie", {domain: "cdn.github.com", name: "shouldThrow"})
 
-    describe "is:automation:connected", ->
+    describe "is:automation:client:connected", ->
       beforeEach ->
         @sandbox.stub(chrome.tabs, "query")
         .withArgs({url: "CHANGE_ME_HOST/*", windowType: "normal"})
@@ -485,7 +485,7 @@ describe "app/background", ->
           expect(obj.response).to.be.undefined
           done()
 
-        @server.emit("automation:request", 123, "is:automation:connected")
+        @server.emit("automation:request", 123, "is:automation:client:connected")
 
     describe "take:screenshot", ->
       beforeEach ->
@@ -514,4 +514,3 @@ describe "app/background", ->
           done()
 
         @server.emit("automation:request", 123, "take:screenshot")
-
