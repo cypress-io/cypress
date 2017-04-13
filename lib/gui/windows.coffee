@@ -66,7 +66,6 @@ module.exports = {
       devTools:        false
       trackState:      false
       contextMenu:     false
-      detachDevTools:  true
       recordFrameRate: null
       onPaint:         null
       onFocus: ->
@@ -112,7 +111,7 @@ module.exports = {
     ## open dev tools if they're true
     if options.devTools
       ## and possibly detach dev tools if true
-      win.webContents.openDevTools({detach: options.detachDevTools})
+      win.webContents.openDevTools()
 
     if options.contextMenu
       ## adds context menu with copy, paste, inspect element, etc
