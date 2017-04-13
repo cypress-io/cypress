@@ -11,7 +11,7 @@ Scroll to a specific position in the window or in the element found in the previ
 
 ***
 
-# [cy.scrollTo( *position* )](#section-text-usage)
+# [cy.scrollTo( *position* )](#section-position-usage)
 
 Scroll to a specific positin in the window or in the element found in the previous command.
 
@@ -30,7 +30,7 @@ Position | Notes
 
 ***
 
-# [cy.scrollTo( *x*, *y* )](#section-number-usage)
+# [cy.scrollTo( *x*, *y* )](#section-coordinate-usage)
 
 You can pass a relative `x` and `y` coordinate which will calculate distance the distance from the top left corner of the element and scroll to the calculated coordinate.
 
@@ -54,3 +54,29 @@ Option | Default | Notes
 `log` | `true` | whether to display command in command log
 
 ***
+
+# Position Usage
+
+***
+
+# Coordinate Usage
+
+***
+
+# Options Usage
+
+***
+
+# Notes
+
+## Snapshots
+
+***
+
+# Command Log
+
+***
+
+# Related
+
+- [scrollIntoView](https://on.cypress.io/api/scrollintoview)
