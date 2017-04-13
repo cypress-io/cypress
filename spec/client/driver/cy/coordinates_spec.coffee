@@ -61,11 +61,9 @@ describe "$Cypress.Cy Coordinates Extensions", ->
     context "#getCoordinates", ->
       context "throws when unrecognized", ->
         it "throws error on foo", ->
-          @allowErrors()
-
           fn = => @cy.getCoordinates(@$button, "foo")
 
-          expect(fn).to.throw('Invalid position argument: \'foo\'. Position may only be topLeft, topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, bottomRight.')
+          expect(fn).to.throw('Invalid position argument: \'foo\'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight.')
 
       context "topLeft", ->
         it "returns top left x/y including padding + border", ->

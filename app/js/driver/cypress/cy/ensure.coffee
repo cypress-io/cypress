@@ -1,7 +1,7 @@
 do ($Cypress, _, $) ->
 
   commandOptions = ["exist", "exists", "visible", "length"]
-  VALID_POSITIONS = ["topLeft", "topCenter", "topRight", "centerLeft", "center", "centerRight", "bottomLeft", "bottomCenter", "bottomRight"]
+  VALID_POSITIONS = ["topLeft", "top", "topRight", "left", "center", "right", "bottomLeft", "bottom", "bottomRight"]
 
   returnFalse = -> return false
 

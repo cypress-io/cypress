@@ -1471,23 +1471,23 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       switch position
         when 'topLeft'
           x = 0       # y = 0
-        when 'topCenter'
+        when 'top'
           x = '50%'   # y = 0
         when 'topRight'
           x = '100%'  # y = 0
-        when 'centerLeft'
+        when 'left'
           x = 0
           y = '50%'
         when 'center'
           x = '50%'
           y = '50%'
-        when 'centerRight'
+        when 'right'
           x = '100%'
           y = '50%'
         when 'bottomLeft'
           x = 0
           y = '100%'
-        when 'bottomCenter'
+        when 'bottom'
           x = '50%'
           y = '100%'
         when 'bottomRight'
@@ -1552,16 +1552,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         }
 
         if !isWin then log.$el = options.$el
-
-        fn = (arg) ->
-          ## foo
-
-
-        obj = {}
-
-        obj.fn = _.partial(fn, "foo")
-
-        obj.fn()
 
         options._log = Cypress.Log.command(log)
 

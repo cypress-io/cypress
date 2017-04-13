@@ -4256,11 +4256,11 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@scrollBoth.get(0).scrollTop).to.eq(0)
           expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-      it "scrolls x/y axis to topCenter", ->
+      it "scrolls x/y axis to top", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        @cy.get("#scroll-to-both").scrollTo("topCenter").then () ->
+        @cy.get("#scroll-to-both").scrollTo("top").then () ->
           expect(@scrollBoth.get(0).scrollTop).to.eq(0)
           expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
 
@@ -4272,11 +4272,11 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@scrollBoth.get(0).scrollTop).to.eq(0)
           expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100))
 
-      it "scrolls x/y axis to centerLeft", ->
+      it "scrolls x/y axis to left", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        @cy.get("#scroll-to-both").scrollTo("centerLeft").then () ->
+        @cy.get("#scroll-to-both").scrollTo("left").then () ->
           expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
           expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
@@ -4288,11 +4288,11 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
           expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
 
-      it "scrolls x/y axis to centerRight", ->
+      it "scrolls x/y axis to right", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        @cy.get("#scroll-to-both").scrollTo("centerRight").then () ->
+        @cy.get("#scroll-to-both").scrollTo("right").then () ->
           expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
           expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100))
 
@@ -4304,11 +4304,11 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@scrollBoth.get(0).scrollTop).to.eq((500-100))
           expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-      it "scrolls x/y axis to bottomCenter", ->
+      it "scrolls x/y axis to bottom", ->
         expect(@scrollBoth.get(0).scrollTop).to.eq(0)
         expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
 
-        @cy.get("#scroll-to-both").scrollTo("bottomCenter").then () ->
+        @cy.get("#scroll-to-both").scrollTo("bottom").then () ->
           expect(@scrollBoth.get(0).scrollTop).to.eq((500-100))
           expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
 
