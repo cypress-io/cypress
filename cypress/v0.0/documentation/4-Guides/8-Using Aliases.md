@@ -53,8 +53,6 @@ Of course this is *not good*. It's clunky and difficult to figure out what is go
 
 **Aliasing** was designed to solve async referencing issues and DOM Element re-querying, routing requests and responses, server integration, and automated error handling. Aliasing also gives you a human readable word for a potentially complex series of events. Aliasing is prominently displayed in the Cypress Command Log making it even easier to understand relationships.
 
-![alias-commands](https://cloud.githubusercontent.com/assets/1271364/12363262/cf6fee26-bb95-11e5-8592-4f8cd3a6520e.jpg)
-
 **Aliasing is incredibly powerful but very simple to use:**
 
 * Create an alias with the [`cy.as`](https://on.cypress.io/api/as) command.
@@ -131,6 +129,8 @@ In our case it would re-issue the commands: `cy.get("#todos li").first()`. Every
 # Aliasing Routes
 
 Another use case for aliasing is with routes. Using aliases with [`cy.route`](https://on.cypress.io/api/route) makes dealing with AJAX requests much easier.
+
+![alias-routes](https://cloud.githubusercontent.com/assets/1271364/12363262/cf6fee26-bb95-11e5-8592-4f8cd3a6520e.jpg)
 
 ```javascript
 cy
