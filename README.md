@@ -36,6 +36,10 @@ npm run watch
 
 ## Changelog
 
+#### 0.4.0 - *(04/13/17)*
+- dont write extension to dist
+- emit new automation client event
+
 #### 0.3.6 - *(10/13/16)*
 - fix #266, handle null set cookie details
 
