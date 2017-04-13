@@ -129,14 +129,17 @@ do ($Cypress, _) ->
       @normalizeCoords(x, y)
 
     getCoordinates: ($el, position = "center") ->
-      ## rect = {top: 35, left: 60, width: 100, height: 90}
-      rect = @getBoundingClientRect($el)
-
       @ensureValidPosition(position)
 
+      ## rect is an object literal looking like this...
+      ## {top: 35, left: 60, width: 100, height: 90}
+      rect = @getBoundingClientRect($el)
+
+      ## dynamically call the function by transforming the name
+      ## bottom -> getBottomCoordinates
+      ## topLeft -> getTopLeftCoordinates
       capitalizedPosition = position.charAt(0).toUpperCase() + position.slice(1)
 
       fnName = "get" + capitalizedPosition + "Coordinates"
 
-      ## @getBottomCenterCoordinates(rect)
       @[fnName](rect)

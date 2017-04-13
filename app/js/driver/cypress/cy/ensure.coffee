@@ -1,6 +1,7 @@
 do ($Cypress, _, $) ->
 
   commandOptions = ["exist", "exists", "visible", "length"]
+  VALID_POSITIONS = ["topLeft", "topCenter", "topRight", "centerLeft", "center", "centerRight", "bottomLeft", "bottomCenter", "bottomRight"]
 
   returnFalse = -> return false
 
@@ -182,14 +183,13 @@ do ($Cypress, _, $) ->
           })
 
     ensureValidPosition: (position) ->
-      validPositions = ["topLeft", "topCenter", "topRight", "centerLeft", "center", "centerRight", "bottomLeft", "bottomCenter", "bottomRight"]
-
-      if (validPositions.indexOf(position) is -1)
-        $Cypress.Utils.throwErrByPath("dom.invalid_position_argument", {
-          args: { position, validPositions: validPositions.join(', ') }
-        })
-      else
+      ## make sure its valid first!
+      if position in VALID_POSITIONS
         return true
+
+      $Cypress.Utils.throwErrByPath("dom.invalid_position_argument", {
+        args: { position, validPositions: VALID_POSITIONS.join(', ') }
+      })
 
     ensureScrollability: ($el, cmd) ->
       return true if $Cypress.Dom.elIsScrollable($el)

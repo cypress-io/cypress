@@ -23,6 +23,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
     ## if we have exactly 1 command return that
     commands[0]
 
+  isNaNOrInfinity = (item) ->
+    num = Number.parseFloat(item)
+
+    return _.isNaN(num) or !_.isFinite(num)
+
   Cypress.addChildCommand
 
     submit: (subject, options = {}) ->
@@ -372,6 +377,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         easing: "swing"
         axis: "yx"
 
+      ## figure out the options which actually change the behavior of clicks
+      deltaOptions = Cypress.Utils.filterOutOptions(options)
+
       ## here we want to figure out what has to actually
       ## be scrolled to get to this element, cause we need
       ## to scrollTo passing in that element.
@@ -383,11 +391,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## otherwise it'll use the wrong window to scroll :(
         options.$parent.contentWindow = options.$parent
 
-      isNaNOrInfinity = (item) ->
-        num = Number.parseFloat(item)
-
-        return _.isNaN(num) or !_.isFinite(num)
-
       ## if we cannot parse an integer out of duration
       ## which could be 500 or "500", then it's NaN...throw
       if isNaNOrInfinity(options.duration)
@@ -398,6 +401,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       if options.log
         log = {
+          message: deltaOptions
           consoleProps: -> {
             ## merge into consoleProps without mutating it
             "scrolled to": $Cypress.Utils.getDomElements(options.$el)
@@ -1438,7 +1442,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
   Cypress.addDualCommand
     scrollTo: (subject, xOrPosition, yOrOptions, options = {}) ->
       ## check for undefined or null values
-      if !xOrPosition?
+      if not xOrPosition?
         $Cypress.Utils.throwErrByPath "scrollTo.invalid_target", {args: { x }}
 
       switch
@@ -1489,8 +1493,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         when 'bottomRight'
           x = '100%'
           y = '100%'
-        else
-          break
 
       y ?= 0
       x ?= 0
@@ -1509,7 +1511,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## otherwise it'll use the wrong window to scroll :(
         $container.contentWindow = $container
 
-
       ## throw if we're trying to scroll multiple containers
       if $container.length > 1
         $Cypress.Utils.throwErrByPath("scrollTo.multiple_containers", {args: { num: $container.length }})
@@ -1523,11 +1524,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         x: x
         y: y
 
-      isNaNOrInfinity = (item) ->
-        num = Number.parseFloat(item)
-
-        return _.isNaN(num) or !_.isFinite(num)
-
       ## if we cannot parse an integer out of duration
       ## which could be 500 or "500", then it's NaN...throw
       if isNaNOrInfinity(options.duration)
@@ -1539,15 +1535,14 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## if we cannot parse an integer out of y or x
       ## which could be 50 or "50px" or "50%" then
       ## it's NaN/Infinity...throw
-
-      if isNaNOrInfinity(options.y)
-        $Cypress.Utils.throwErrByPath("scrollTo.invalid_target", {args: { y, x }})
-
-      if x? and isNaNOrInfinity(options.x)
-        $Cypress.Utils.throwErrByPath("scrollTo.invalid_target", {args: { y, x }})
+      if isNaNOrInfinity(options.y) or isNaNOrInfinity(options.x)
+        $Cypress.Utils.throwErrByPath("scrollTo.invalid_target", {args: { x, y }})
 
       if options.log
+        deltaOptions = Cypress.Utils.filterOutOptions(options, {duration: 0, easing: 'swing'})
+
         log = {
+          message: deltaOptions
           consoleProps: -> {
             ## merge into consoleProps without mutating it
             Scrolled: $Cypress.Utils.getDomElements(options.$el)
@@ -1558,9 +1553,17 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         if !isWin then log.$el = options.$el
 
-        options._log = Cypress.Log.command(log)
+        fn = (arg) ->
+          ## foo
 
-        options._log.snapshot("before", {next: "after"})
+
+        obj = {}
+
+        obj.fn = _.partial(fn, "foo")
+
+        obj.fn()
+
+        options._log = Cypress.Log.command(log)
 
       ensureScrollability = =>
         try
@@ -1591,7 +1594,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           if isWin
             delete options.$el.contentWindow
-
 
   Cypress.Cy.extend
     _findScrollableParent: ($el) ->

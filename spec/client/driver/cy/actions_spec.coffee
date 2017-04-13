@@ -4528,11 +4528,19 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.scrollTo(25).then ($container) ->
           expect(@log.get("$el")).to.be.undefined
 
+      it "logs duration options", ->
+        @cy.get("#scroll-to-both").scrollTo(25, { duration: 1 }).then () ->
+          expect(@log.get("message")).to.eq "{duration: 1}"
+
+      it "logs easing options", ->
+        @cy.get("#scroll-to-both").scrollTo(25, { easing: 'linear' }).then () ->
+          expect(@log.get("message")).to.eq "{easing: linear}"
+
       it.skip "snapshots before scrolling", (done) ->
 
       it.skip "snapshots after scrolling", ->
 
-      it.skip "#consoleProps", ->
+      it "#consoleProps", ->
         @cy.get("#scroll-to-both").scrollTo(25).then ($container) ->
           # coords = @cy.getCoordinates($container)
           console = @log.attributes.consoleProps()
