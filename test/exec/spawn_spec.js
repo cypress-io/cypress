@@ -4,7 +4,6 @@ const _ = require('lodash')
 const EE = require('events').EventEmitter
 const cp = require('child_process')
 
-const downloadUtils = require('../../lib/download/utils')
 const xvfb = require('../../lib/exec/xvfb')
 const spawn = require('../../lib/exec/spawn')
 
