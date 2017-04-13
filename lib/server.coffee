@@ -9,7 +9,6 @@ Promise      = require("bluebird")
 evilDns      = require("evil-dns")
 httpProxy    = require("http-proxy")
 httpsProxy   = require("@cypress/core-https-proxy")
-allowDestroy = require("server-destroy-vvo")
 cors         = require("./util/cors")
 origin       = require("./util/origin")
 connect      = require("./util/connect")
@@ -17,6 +16,7 @@ appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
 statusCode   = require("./util/status_code")
 headersUtil  = require("./util/headers")
+allowDestroy = require("./util/server_destroy")
 cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
@@ -497,20 +497,19 @@ class Server
       socket.end() if socket.writable
 
   _close: ->
-    new Promise (resolve) =>
-      logger.unsetSettings()
+    buffers.reset()
 
-      evilDns.clear()
+    logger.unsetSettings()
 
-      ## bail early we dont have a server or we're not
-      ## currently listening
-      return resolve() if not @_server or not @isListening
+    evilDns.clear()
 
-      logger.info("Server closing")
+    ## bail early we dont have a server or we're not
+    ## currently listening
+    return Promise.resolve() if not @_server or not @isListening
 
-      @_server.destroy =>
-        @isListening = false
-        resolve()
+    @_server.destroyAsync()
+    .then =>
+      @isListening = false
 
   close: ->
     Promise.join(
