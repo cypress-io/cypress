@@ -108,14 +108,15 @@ const closeBrowser = (clientId) => {
 }
 
 const closeProject = (clientId) => {
-  closeBrowser(clientId)
-
   // unbind listeners
   ipc.offOpenProject()
   ipc.offGetSpecs()
   ipc.offOnFocusTests()
 
-  ipc.closeProject()
+  return Promise.join(
+    closeBrowser(clientId),
+    ipc.closeProject()
+  )
 }
 
 const openProject = (project) => {
