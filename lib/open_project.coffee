@@ -37,20 +37,20 @@ create = ->
     getProject: -> openProject
 
     launch: (browserName, url, spec, options = {}) ->
-      openProject.getConfig()
+      @reboot()
+      .then ->
+        openProject.getConfig()
       .then (cfg) ->
-        ## always reset the state when launching a browser
-        ## so that our document.domain is reset back to <root>
-        openProject.resetState()
-
         if spec
           url = openProject.getUrlBySpec(cfg.browserUrl, spec)
 
-        url            ?= cfg.browserUrl
-        options.proxyServer ?= cfg.proxyUrl
+        url                      ?= cfg.browserUrl
+        options.proxyServer      ?= cfg.proxyUrl
         options.chromeWebSecurity = cfg.chromeWebSecurity
 
         options.url = url
+
+        ## automation = openProject.getAutomation()
 
         do relaunchBrowser = ->
           browsers.open(browserName, openProject.automation, cfg, options)
@@ -110,7 +110,7 @@ create = ->
       @clearSpecInterval()
       @closeOpenProjectAndBrowsers()
 
-    reboot: ->
+    reboot: -> Promise.resolve()
 
     create: (path, args = {}, options = {}) ->
       open = ->

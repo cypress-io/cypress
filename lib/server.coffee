@@ -41,14 +41,6 @@ setProxiedUrl = (req) ->
 
   req.url = url.parse(req.url).path
 
-resetState = (baseUrl) ->
-  buffers.reset()
-
-  if @_remoteProps
-    ## clear out the previous domain
-    ## and reset to the initial state
-    @_onDomainSet(baseUrl ? "<root>")
-
 ## currently not making use of event emitter
 ## but may do so soon
 class Server
@@ -113,8 +105,6 @@ class Server
     e.port = port
     e.portInUse = true
     e
-
-  resetState: resetState
 
   open: (config = {}, project) ->
     Promise.try =>
@@ -211,9 +201,6 @@ class Server
           ## if we have a baseUrl let's go ahead
           ## and make sure the server is connectable!
           if baseUrl
-            ## rebind resetState to baseUrl
-            @resetState = _.bind(resetState, @, baseUrl)
-
             connect.ensureUrl(baseUrl)
             .catch (err) =>
               reject errors.get("CANNOT_CONNECT_BASE_URL", baseUrl)

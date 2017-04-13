@@ -95,7 +95,7 @@ class Project extends EE
     .spread (projectId, authToken) ->
       api.getProjectBuilds(projectId, authToken)
 
-  close: (options = {}) ->
+  close: ->
     if @memoryCheck
       clearInterval(@memoryCheck)
 
@@ -107,9 +107,6 @@ class Project extends EE
     )
     .then ->
       process.chdir(localCwd)
-
-  resetState: ->
-    @server.resetState()
 
   watchSupportFile: (config) ->
     if supportFile = config.supportFile
@@ -226,6 +223,9 @@ class Project extends EE
     @getConfig()
     .then (cfg) ->
       cfg.browsers = browsers
+
+  getAutomation: ->
+    @automation
 
   getConfig: (options = {}) ->
     getConfig = =>
