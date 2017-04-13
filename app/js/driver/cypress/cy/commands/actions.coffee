@@ -372,10 +372,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         $el: subject
         $parent: @private("window")
         log: true
-        offset: 0
         duration: 0
         easing: "swing"
-        axis: "yx"
+        axis: "xy"
 
       ## figure out the options which actually change the behavior of clicks
       deltaOptions = Cypress.Utils.filterOutOptions(options)
@@ -400,30 +399,27 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         $Cypress.Utils.throwErrByPath("scrollIntoView.invalid_easing", {args: { easing: options.easing }})
 
       if options.log
+        deltaOptions = Cypress.Utils.filterOutOptions(options, {duration: 0, easing: 'swing', offset: {left: 0, top: 0}})
+
         log = {
+          $el: options.$el
           message: deltaOptions
-          consoleProps: -> {
-            ## merge into consoleProps without mutating it
-            "scrolled to": $Cypress.Utils.getDomElements(options.$el)
-          }
+          consoleProps: ->
+            obj = {
+              ## merge into consoleProps without mutating it
+              "Applied To": $Cypress.Utils.getDomElements(options.$el)
+              "Scrolled Element": $Cypress.Utils.getDomElements(options.$el)
+            }
+
+            return obj
         }
 
-        # if !isWin then log.$el = options.$el
-
         options._log = Cypress.Log.command(log)
-
-        options._log.snapshot("before", {next: "after"})
 
       if not parentIsWin
         ## scroll the parent into view first
         ## before attemp
         options.$parent[0].scrollIntoView()
-
-
-      # do scrollParentIntoView = ->
-      #   ## we don't need to get the window into the view...
-      #   return if parentIsWin
-
 
       return new Promise (resolve, reject) =>
         ## scroll our axes
@@ -1543,12 +1539,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         log = {
           message: deltaOptions
-          consoleProps: -> {
-            ## merge into consoleProps without mutating it
-            Scrolled: $Cypress.Utils.getDomElements(options.$el)
-            x: options.x
-            y: options.y
-          }
+          consoleProps: ->
+            obj = {
+              ## merge into consoleProps without mutating it
+              "Scrolled Element": $Cypress.Utils.getDomElements(options.$el)
+            }
+
+            return obj
         }
 
         if !isWin then log.$el = options.$el

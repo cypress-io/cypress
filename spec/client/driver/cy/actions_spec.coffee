@@ -4492,7 +4492,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         it "throws if unrecognized position", (done) ->
           @cy.on "fail", (err) =>
-            expect(err.message).to.include "Invalid position argument: \'botom\'. Position may only be topLeft, topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, bottomRight."
+            expect(err.message).to.include "Invalid position argument: \'botom\'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
             done()
 
           @cy.get("#scroll-to-both").scrollTo("botom")
@@ -4529,25 +4529,23 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("$el")).to.be.undefined
 
       it "logs duration options", ->
-        @cy.get("#scroll-to-both").scrollTo(25, { duration: 1 }).then () ->
+        @cy.get("#scroll-to-both").scrollTo(25, { duration: 1 }).then ->
           expect(@log.get("message")).to.eq "{duration: 1}"
 
       it "logs easing options", ->
-        @cy.get("#scroll-to-both").scrollTo(25, { easing: 'linear' }).then () ->
+        @cy.get("#scroll-to-both").scrollTo(25, { easing: 'linear' }).then ->
           expect(@log.get("message")).to.eq "{easing: linear}"
 
-      it.skip "snapshots before scrolling", (done) ->
-
-      it.skip "snapshots after scrolling", ->
+      it "snapshots immediately", ->
+        @cy.get("#scroll-to-both").scrollTo(25, { duration: 1 }).then ->
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "#consoleProps", ->
         @cy.get("#scroll-to-both").scrollTo(25).then ($container) ->
-          # coords = @cy.getCoordinates($container)
           console = @log.attributes.consoleProps()
           expect(console.Command).to.eq("scrollTo")
-          expect(console["Applied To"]).to.eq $container.get(0)
-          # expect(console.Coords.x).to.be.closeTo coords.x, 10
-          # expect(console.Coords.y).to.be.closeTo coords.y, 10
+          expect(console["Scrolled Element"]).to.eq $container.get(0)
 
   context "#scrollIntoView", ->
     beforeEach ->
@@ -4645,7 +4643,7 @@ describe "$Cypress.Cy Actions Commands", ->
       scrollTo = @sandbox.spy($.fn, "scrollTo")
 
       @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
-        expect(scrollTo).to.be.calledWithMatch({}, {axis: "yx"})
+        expect(scrollTo).to.be.calledWithMatch({}, {axis: "xy"})
 
     it "scrolling resolves after a set duration", ->
       expect(@scrollBoth.get(0).scrollTop).to.eq(0)
@@ -4748,6 +4746,42 @@ describe "$Cypress.Cy Actions Commands", ->
             done()
 
           @cy.get("#scroll-into-view-both h5").scrollIntoView({ easing: "flower" })
+
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (attrs, @log) =>
+
+      it "logs out scrollIntoView", ->
+        @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
+          expect(@log.get("name")).to.eq "scrollIntoView"
+
+      it "passes in $el", ->
+        @cy.get("#scroll-into-view-both h5").scrollIntoView().then ($container) ->
+          expect(@log.get("$el")).to.eq $container
+
+      it "logs duration options", ->
+        @cy.get("#scroll-into-view-both h5").scrollIntoView({duration: "1"}).then ->
+          expect(@log.get("message")).to.eq "{duration: 1}"
+
+      it "logs easing options", ->
+        @cy.get("#scroll-into-view-both h5").scrollIntoView({easing: "linear"}).then ->
+          expect(@log.get("message")).to.eq "{easing: linear}"
+
+      it "logs offset options", ->
+        @cy.get("#scroll-into-view-both h5").scrollIntoView({offset: {left: 500, top: 200}}).then ->
+          expect(@log.get("message")).to.eq "{offset: {left: 500, top: 200}}"
+
+      it "snapshots immediately", ->
+        @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
+
+      it "#consoleProps", ->
+        @cy.get("#scroll-into-view-both h5").scrollIntoView().then ($container) ->
+          console = @log.attributes.consoleProps()
+          expect(console.Command).to.eq("scrollIntoView")
+          expect(console["Applied To"]).to.eq $container.get(0)
+          expect(console["Scrolled Element"]).to.exist
 
   context "#blur", ->
     it "should blur the originally focused element", (done) ->
