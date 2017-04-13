@@ -34,9 +34,6 @@ gulp.task "backup", ->
   .pipe(rename("background_src.js"))
   .pipe(gulp.dest("dist"))
 
-gulp.task "default:host:path", ->
-  ext.setHostAndPath("http://localhost:2020", "/__socket.io")
-
 gulp.task "background", ->
   browserify({
     entries: "app/background.coffee"
@@ -82,4 +79,4 @@ gulp.task "build", ->
     "background"
     "html"
     "css"
-  ], "backup", "default:host:path"
+  ]

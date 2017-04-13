@@ -2,9 +2,9 @@
   var HOST, PATH, automation, client, fail, invoke,
     slice = [].slice;
 
-  HOST = "http://dev.local:8080";
+  HOST = "CHANGE_ME_HOST";
 
-  PATH = "/__foo";
+  PATH = "CHANGE_ME_PATH";
 
   client = io.connect(HOST, {
     path: PATH

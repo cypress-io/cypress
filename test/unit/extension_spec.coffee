@@ -36,19 +36,13 @@ describe "Extension", ->
 
   context ".setHostAndPath", ->
     beforeEach ->
-      @src  = path.join(cwd, "test", "helpers", "background_src.js")
-      @dest = path.join(cwd, "test", "helpers", "background.js")
+      @src = path.join(cwd, "test", "helpers", "background.js")
 
       @sandbox.stub(extension, "getPathToExtension")
-        .withArgs("background.js").returns(@dest)
-        .withArgs("background_src.js").returns(@src)
-
-      fs.copyAsync(@src, @dest)
+      .withArgs("background.js").returns(@src)
 
     it "rewrites the background.js source", ->
       extension.setHostAndPath("http://dev.local:8080", "/__foo")
-      .then =>
-        fs.readFileAsync(@dest, "utf8")
       .then (str) ->
         expect(str).to.eq """
         (function() {
@@ -76,7 +70,7 @@ describe "Extension", ->
 
         """
 
-    it "does not mutate background_src", ->
+    it "does not mutate background.js", ->
       fs.readFileAsync(@src, "utf8")
       .then (str) =>
         extension.setHostAndPath("http://dev.local:8080", "/__foo")
