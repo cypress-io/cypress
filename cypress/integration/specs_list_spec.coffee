@@ -164,11 +164,13 @@ describe "Specs List", ->
 
     context "click on spec", ->
       beforeEach ->
-        cy.get(".file a").contains("app_spec.coffee").as("firstSpec")
+        cy.contains(".file a", "app_spec.coffee").as("firstSpec")
 
       it "triggers close:browser and launch:browser on click of file", ->
         cy
-          .get("@firstSpec").click().then ->
+          .get("@firstSpec")
+          .click()
+          .then ->
             expect(@App.ipc).to.be.calledWith("close:browser")
 
             ln = @App.ipc.args.length
@@ -177,6 +179,13 @@ describe "Specs List", ->
             expect(lastCallArgs[0]).to.eq "launch:browser"
             expect(lastCallArgs[1].browser).to.eq "chrome"
             expect(lastCallArgs[1].spec).to.eq "integration/app_spec.coffee"
+
+      it "adds 'active' class on click", ->
+        cy
+          .get("@firstSpec")
+          .should("not.have.class", "active")
+          .click()
+          .should("have.class", "active")
 
     describe "spec running in browser", ->
       context "choose shallow spec", ->

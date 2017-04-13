@@ -90,7 +90,12 @@ const runSpec = (project, spec, browser, url) => {
     })
   }
 
-  return ipc.closeBrowser()
+  let changeChosenSpec = () => {
+    specsCollection.setChosenSpec(spec)
+  }
+
+  return closeBrowser()
+  .then(changeChosenSpec)
   .then(launchBrowser)
 }
 
