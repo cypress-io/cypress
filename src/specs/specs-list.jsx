@@ -34,7 +34,7 @@ class Specs extends Component {
   specItem (spec) {
     if (spec.children.specs && spec.children.specs.length) {
       return (
-        <li key={spec.id} className='folder'>
+        <li key={spec.path} className='folder'>
           <div>
             <div>
               <i className='fa fa-folder-open-o fa-fw'></i>
@@ -54,8 +54,8 @@ class Specs extends Component {
       let activeClass = spec.isChosen ? 'active' : ''
 
       return (
-        <li key={spec.id} className='file'>
-          <a href='#' onClick={this._selectSpec.bind(this, spec.id)} className={activeClass}>
+        <li key={spec.path} className='file'>
+          <a href='#' onClick={this._selectSpec.bind(this, spec.path)} className={activeClass}>
             <div>
               <div>
                 <i className={`fa fa-fw ${this._specIcon(spec.isChosen)}`}></i>
@@ -97,14 +97,14 @@ class Specs extends Component {
     runSpec(project, '__all', project.chosenBrowser.name)
   }
 
-  _selectSpec (specId, e) {
+  _selectSpec (specPath, e) {
     e.preventDefault()
 
-    specsCollection.setChosenSpec(specId)
+    specsCollection.setChosenSpec(specPath)
 
     let project = this.props.project
 
-    runSpec(project, specId, project.chosenBrowser.name)
+    runSpec(project, specPath, project.chosenBrowser.name)
   }
 
   _empty () {

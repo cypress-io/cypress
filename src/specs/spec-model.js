@@ -6,7 +6,7 @@ export default class Spec {
   @observable isChosen = false
   @observable children = new SpecsCollection([])
 
-  constructor (spec) {
-    this.name = spec.name
+  constructor (name) {
+    this.name = name
   }
 }

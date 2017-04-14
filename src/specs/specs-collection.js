@@ -21,8 +21,8 @@ export class SpecsCollection {
     this.isLoaded = true
   }
 
-  @action setChosenSpec (specId) {
-    if (specId === '__all') {
+  @action setChosenSpec (specPath) {
+    if (specPath === '__all') {
       this.allSpecsChosen = true
     } else {
       this.allSpecsChosen = false
@@ -31,7 +31,7 @@ export class SpecsCollection {
     function setChosen (specs) {
       _.forEach(specs, (spec) => {
         // we're a file if we have no child specs
-        if (!spec.children.specs.length && (spec.id === specId)) {
+        if (!spec.children.specs.length && (spec.path === specPath)) {
           spec.isChosen = true
         } else {
           spec.isChosen = false
@@ -55,32 +55,43 @@ export class SpecsCollection {
   resetToTreeView (specs) {
     let specsTree = new SpecsCollection([])
 
-    _.forEach(this.getFilesSplitByDirectory(specs), (segments) => {
-      _.reduce(segments, (memo, segment) => {
-        // attempt to find an existing spec
-        // on the specs memo by its segment name
-        let spec = memo.findByName(memo.specs, segment)
+    _.forEach(specs, (arr, key) => {
+      _.forEach(this.getFilesSplitByDirectory(arr), (segments, index) => {
+        // add the 'key' to the beginning of the segment
+        // so it prepend 'unit' or 'integration'
+        segments.unshift(key)
 
-        // if its not found then we know we need to
-        // push a new spec into the specs memo
-        if (!spec) {
-          memo.specs.push(new Spec({ name: segment }))
+        _.reduce(segments, (memo, segment) => {
+          // attempt to find an existing spec
+          // on the specs memo by its segment name
+          let spec = memo.findByName(memo.specs, segment)
 
-          spec = memo.specs[memo.specs.length - 1]
-        }
+          // if its not found then we know we need to
+          // push a new spec into the specs memo
+          if (!spec) {
+            spec = new Spec(segment)
 
-        // set the full segment if its the spec model
-        if (_.last(segments) === segment) {
-          spec.fullPath = segments.join("/")
-        }
+            memo.specs.push(spec)
+          }
 
-        spec.id = segments.join("/")
+          // set the full segment if its the spec model
+          // if (_.last(segments) === segment) {
+          //   spec.fullPath = segments.join("/")
+          // }
 
-        // and always return the spec's children
-        return spec.children
+          // grab the original object
+          // at index so we can find its path
+          let obj = arr[index]
 
-      }, specsTree)
+          spec.path = obj.path
+
+          // and always return the spec's children
+          return spec.children
+
+        }, specsTree)
+      })
     })
+
 
     return specsTree.specs
   }

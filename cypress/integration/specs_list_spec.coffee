@@ -178,7 +178,7 @@ describe "Specs List", ->
 
             expect(lastCallArgs[0]).to.eq "launch:browser"
             expect(lastCallArgs[1].browser).to.eq "chrome"
-            expect(lastCallArgs[1].spec).to.eq "integration/app_spec.coffee"
+            expect(lastCallArgs[1].spec).to.eq "cypress/integration/app_spec.coffee"
 
       it "adds 'active' class on click", ->
         cy
@@ -187,7 +187,7 @@ describe "Specs List", ->
           .click()
           .should("have.class", "active")
 
-    describe "spec running in browser", ->
+    context "spec running in browser", ->
       context "choose shallow spec", ->
         beforeEach ->
           cy.get(".file a").contains("a", "app_spec.coffee").as("firstSpec").click()
@@ -209,7 +209,7 @@ describe "Specs List", ->
         it "sets spec as active", ->
           cy.get("@deepSpec").should("have.class", "active")
 
-    describe "switching specs", ->
+    context "switching specs", ->
       beforeEach ->
         cy
           .get(".file").contains("a", "app_spec.coffee").as("firstSpec")
