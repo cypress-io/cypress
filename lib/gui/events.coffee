@@ -83,7 +83,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "launch:browser"
       # headless.createWindows(arg, true)
-      openProject.launch(arg.browser, arg.url, arg.spec, {
+      openProject.launch(arg.browser, arg.spec, {
         onBrowserOpen: ->
           send({browserOpened: true})
         onBrowserClose: ->

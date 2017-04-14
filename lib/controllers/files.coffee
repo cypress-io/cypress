@@ -135,14 +135,16 @@ module.exports = {
       )
     }
 
-    ## integrationFolderPath: /Users/bmann/Dev/my-project/cypress/integration
-    ## filePath:              /Users/bmann/Dev/my-project/cypress/integration/foo.coffee
-    ## prependedFilePath:     integration/foo.coffee
+    ## filePath                          = /Users/bmann/Dev/my-project/cypress/integration/foo.coffee
+    ## integrationFolderPath             = /Users/bmann/Dev/my-project/cypress/integration
+    ## relativePathFromIntegrationFolder = foo.coffee
+    ## relativePathFromProjectRoot       = cypress/integration/foo.coffee
 
-    prependIntegrationPath = (file) ->
-      ## prepend integration before the file and return only the relative
-      ## path between the integrationFolderPath + the file
-      path.join("integration", path.relative(integrationFolderPath, file))
+    relativePathFromIntegrationFolder = (file) ->
+      path.relative(integrationFolderPath, file)
+
+    relativePathFromProjectRoot = (file) ->
+      path.relative(config.projectRoot, file)
 
     ignorePatterns = [].concat(config.ignoreTestFiles)
 
@@ -163,5 +165,12 @@ module.exports = {
     ## ignored test files glob
     .filter(doesNotMatchAllIgnoredPatterns)
     .map (file) ->
-      {name: prependIntegrationPath(file)}
+      {
+        name: relativePathFromIntegrationFolder(file)
+        path: relativePathFromProjectRoot(file)
+      }
+    .then (arr) ->
+      {
+        integration: arr
+      }
 }
