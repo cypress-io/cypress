@@ -252,7 +252,7 @@ module.exports = {
         @waitForSocketConnection(project, id)
         launchBrowser()
       )
-      .timeout(timeout ? 10000)
+      .timeout(timeout ? 30000)
       .catch Promise.TimeoutError, (err) =>
         attempts += 1
 
