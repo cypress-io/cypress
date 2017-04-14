@@ -36,6 +36,9 @@ npm run release
 
 ## Changelog
 
+#### 0.8.0
+- new traversal methods
+
 #### 0.7.1
 - fix flaky test
 
