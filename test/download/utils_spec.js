@@ -17,6 +17,7 @@ const distDir = path.join(__dirname, '../../lib/download/dist')
 
 describe('utils', function () {
   beforeEach(function () {
+    this.sandbox.stub(process, 'exit')
     this.ensureEmptyInstallationDir = () => {
       return fs.removeAsync(distDir).then(() => {
         return utils.ensureInstallationDir()
@@ -99,7 +100,7 @@ describe('utils', function () {
   context('#verify', function () {
     beforeEach(function () {
       this.log = this.sandbox.spy(console, 'log')
-      this.sandbox.stub(process, 'exit')
+      this.sandbox.stub(os, 'platform').returns('darwin')
       this.spawnedProcess = _.extend(new EE(), {
         unref: this.sandbox.stub(),
         stderr: new EE(),
@@ -107,12 +108,18 @@ describe('utils', function () {
       this.sandbox.stub(cp, 'spawn').returns(this.spawnedProcess)
       this.sandbox.stub(xvfb, 'start').resolves()
       this.sandbox.stub(xvfb, 'stop').resolves()
-      this.sandbox.stub(xvfb, 'isNeeded').returns(true)
+      this.sandbox.stub(xvfb, 'isNeeded').returns(false)
+      this.sandbox.stub(this.spawnedProcess, 'on')
+      this.spawnedProcess.on.withArgs('exit').yieldsAsync(0)
       return this.ensureEmptyInstallationDir()
     })
 
     it('logs error and exits when no version of Cypress is installed', function () {
-      return utils.verify().then(() => {
+      return fs.outputJsonAsync(path.join(distDir, 'info.json'), {})
+      .then(() => {
+        return utils.verify()
+      })
+      .then(() => {
         expect(this.log).to.be.calledWith(chalk.red('No version of Cypress executable installed. Run `cypress install` and try again.'))
         expect(process.exit).to.be.calledWith(1)
       })
@@ -145,8 +152,6 @@ describe('utils', function () {
     describe('smoke test', function () {
       beforeEach(function () {
         this.sandbox.stub(fs, 'statAsync').resolves()
-        this.sandbox.stub(this.spawnedProcess, 'on')
-        this.spawnedProcess.on.withArgs('exit').yieldsAsync(0)
       })
 
       it('logs and runs when no version has been verified', function () {
@@ -211,7 +216,7 @@ describe('utils', function () {
         })
       })
 
-      describe.only('on linux', function () {
+      describe('on linux', function () {
         beforeEach(function () {
           xvfb.isNeeded.returns(true)
 

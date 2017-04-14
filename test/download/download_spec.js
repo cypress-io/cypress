@@ -11,7 +11,7 @@ const utils = require('../../lib/download//utils')
 describe('download', function () {
   beforeEach(function () {
     this.options = { displayOpen: false }
-    this.exit = this.sandbox.stub(process, 'exit')
+    this.sandbox.stub(process, 'exit')
     this.sandbox.stub(unzip, 'start').resolves()
     this.sandbox.stub(unzip, 'logErr').resolves()
     this.sandbox.stub(unzip, 'cleanup').resolves()
@@ -90,7 +90,7 @@ describe('download', function () {
     this.sandbox.stub(utils, 'ensureInstallationDir').rejects(err)
 
     return download.start(this.options).then(() => {
-      expect(this.exit).to.be.calledWith(1)
+      expect(process.exit).to.be.calledWith(1)
     })
   })
 
@@ -112,7 +112,7 @@ describe('download', function () {
 
     return download.start(this.options).then(() => {
       expect(unzip.logErr).to.be.calledWithMatch(err)
-      expect(this.exit).to.be.calledWith(1)
+      expect(process.exit).to.be.calledWith(1)
     })
   })
 
