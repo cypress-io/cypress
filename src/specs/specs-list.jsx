@@ -38,7 +38,7 @@ class Specs extends Component {
           <div>
             <div>
               <i className='fa fa-folder-open-o fa-fw'></i>
-              { spec.name }{' '}
+              { spec.displayName }{' '}
             </div>
             <div>
               <ul className='list-as-table'>
@@ -59,7 +59,7 @@ class Specs extends Component {
             <div>
               <div>
                 <i className={`fa fa-fw ${this._specIcon(spec.isChosen)}`}></i>
-                { spec.name }
+                { spec.displayName }
               </div>
             </div>
             <div>

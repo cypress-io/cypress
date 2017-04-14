@@ -31,7 +31,7 @@ export class SpecsCollection {
     function setChosen (specs) {
       _.forEach(specs, (spec) => {
         // we're a file if we have no child specs
-        if (!spec.children.specs.length && (spec.path === specPath)) {
+        if (!spec.children.specs.length && (spec.name === specPath || spec.path === specPath)) {
           spec.isChosen = true
         } else {
           spec.isChosen = false
@@ -44,8 +44,8 @@ export class SpecsCollection {
   }
 
 
-  findByName (specs, path) {
-    return _.find(specs, (spec) => (spec.name === path))
+  findByDisplayName (specs, path) {
+    return _.find(specs, (spec) => (spec.displayName === path))
   }
 
   getFilesSplitByDirectory (specs) {
@@ -62,26 +62,24 @@ export class SpecsCollection {
         segments.unshift(key)
 
         _.reduce(segments, (memo, segment) => {
+          // grab the original object
+          // at index so we can find its path
+          let obj = arr[index]
+
           // attempt to find an existing spec
-          // on the specs memo by its segment name
-          let spec = memo.findByName(memo.specs, segment)
+          // on the specs memo by its segment
+          let spec = memo.findByDisplayName(memo.specs, segment)
 
           // if its not found then we know we need to
           // push a new spec into the specs memo
           if (!spec) {
-            spec = new Spec(segment)
+            spec = new Spec({
+              name: segments.join('/'),
+              displayName: segment,
+            })
 
             memo.specs.push(spec)
           }
-
-          // set the full segment if its the spec model
-          // if (_.last(segments) === segment) {
-          //   spec.fullPath = segments.join("/")
-          // }
-
-          // grab the original object
-          // at index so we can find its path
-          let obj = arr[index]
 
           spec.path = obj.path
 
