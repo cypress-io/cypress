@@ -69,13 +69,13 @@ const addProject = () => {
   })
 }
 
-const runSpec = (project, spec, browser, url) => {
+const runSpec = (project, spec, browser) => {
   project.setChosenBrowserByName(browser)
 
   let launchBrowser = () => {
     project.browserOpening()
 
-    ipc.launchBrowser({ browser, url, spec }, (err, data = {}) => {
+    ipc.launchBrowser({ browser, spec }, (err, data = {}) => {
       if (data.browserOpened) {
         project.browserOpened()
       }
