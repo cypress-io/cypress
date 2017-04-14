@@ -160,7 +160,7 @@ describe('utils', function () {
           return utils.verify()
         })
         .then(() => {
-          expect(this.log).to.be.calledWith(chalk.yellow('Verifying Cypress executable...'))
+          expect(this.log).to.be.calledWith(chalk.green('⧖ Verifying Cypress executable...'))
           expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), ['--project', path.join(distDir, '../project')])
         })
       })
@@ -174,7 +174,7 @@ describe('utils', function () {
           return utils.verify()
         })
         .then(() => {
-          expect(this.log).to.be.calledWith(chalk.yellow('Verifying Cypress executable...'))
+          expect(this.log).to.be.calledWith(chalk.green('⧖ Verifying Cypress executable...'))
           expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), ['--project', path.join(__dirname, '../../lib/download/project')])
         })
       })
@@ -194,7 +194,7 @@ describe('utils', function () {
           return utils.verify()
         })
         .then(() => {
-          expect(this.log).to.be.calledWith(chalk.red('Failed to verify Cypress executable.'))
+          expect(this.log).to.be.calledWith(chalk.red('✖ Failed to verify Cypress executable.'))
           expect(this.log).to.be.calledWith('the stderr output')
         })
       })
@@ -211,7 +211,7 @@ describe('utils', function () {
           return fs.readJsonAsync(path.join(distDir, 'info.json'))
         })
         .then((info) => {
-          expect(this.log).to.be.calledWith(chalk.green('✓ Verified Cypress executable'))
+          expect(this.log).to.be.calledWith(chalk.green('✓ Successfully verified Cypress executable'))
           expect(info.verifiedVersion).to.equal(packageVersion)
         })
       })
