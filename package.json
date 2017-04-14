@@ -108,7 +108,7 @@
   },
   "dependencies": {
     "@cypress/core-desktop-gui": "0.4.8",
-    "@cypress/core-example": "0.7.1",
+    "@cypress/core-example": "0.8.0",
     "@cypress/core-extension": "0.4.0",
     "@cypress/core-https-proxy": "0.1.4",
     "@cypress/core-icons": "0.4.1",
