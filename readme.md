@@ -69,6 +69,10 @@ MIT
 
 ## Changelog
 
+#### 0.4.8 - *(04/14/17)*
+- properly await browser closing
+- new spec data structure
+
 #### 0.4.7 - *(04/12/17)*
 - colorize browser icons
 - display browser tooltip + icon
