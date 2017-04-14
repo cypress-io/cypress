@@ -36,24 +36,27 @@ create = ->
 
     getProject: -> openProject
 
-    launch: (browserName, url, spec, options = {}) ->
+    launch: (browserName, spec, options = {}) ->
       @reboot()
       .then ->
+        openProject.ensureSpecUrl(spec)
+      .then (url) ->
         openProject.getConfig()
-      .then (cfg) ->
-        if spec
-          url = openProject.getUrlBySpec(cfg.browserUrl, spec)
+        .then (cfg) ->
+          options.proxyServer       = cfg.proxyUrl
+          options.chromeWebSecurity = cfg.chromeWebSecurity
 
-        url                      ?= cfg.browserUrl
-        options.proxyServer      ?= cfg.proxyUrl
-        options.chromeWebSecurity = cfg.chromeWebSecurity
+          options.url = url
 
-        options.url = url
+          automation = openProject.getAutomation()
 
-        ## automation = openProject.getAutomation()
+          ## use automation middleware if its
+          ## been defined here
+          if am = options.automationMiddleware
+            automation.use(am)
 
-        do relaunchBrowser = ->
-          browsers.open(browserName, openProject.automation, cfg, options)
+          do relaunchBrowser = ->
+            browsers.open(browserName, automation, cfg, options)
 
     getSpecChanges: (options = {}) ->
       currentSpecs = null
@@ -113,13 +116,8 @@ create = ->
     reboot: -> Promise.resolve()
 
     create: (path, args = {}, options = {}) ->
-      open = ->
-        ## store the currently open project
-        openProject = Project(path)
-
-        ## open the project and return
-        ## the config for the project instance
-        openProject.open(options)
+      ## store the currently open project
+      openProject = Project(path)
 
       _.defaults(options, {
         onReloadBrowser: (url, browser) =>
@@ -127,8 +125,13 @@ create = ->
             relaunchBrowser()
       })
 
+      open = ->
+        ## open the project and return
+        ## the config for the project instance
+        openProject.open(options)
+
       @reboot = ->
-        @closeOpenProjectAndBrowsers()
+        openProject.close()
         .then(open)
 
       options = _.extend {}, config.whitelist(args), options

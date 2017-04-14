@@ -77,9 +77,6 @@ module.exports = {
       .then(open)
 
   openProject: (id, options) ->
-    # wantsExternalBrowser = true
-    # wantsExternalBrowser = !!options.browser
-
     ## now open the project to boot the server
     ## putting our web client app in headless mode
     ## - NO  display server logs (via morgan)
@@ -109,17 +106,12 @@ module.exports = {
           errors.warning("VIDEO_RECORDING_FAILED", err.stack)
       })
 
-  launchBrowser: (url, proxyServer, showGui, chromeWebSecurity, project, write) ->
-    options = {
-      url:               url
-      # width:             1280
-      # height:            720
-      # type:              "PROJECT"
+  getElectronProps: (showGui, project, write) ->
+    obj = {
+      width:             1280
+      height:            720
       show:              showGui
-      frame:             showGui
       devTools:          showGui
-      proxyServer:       proxyServer
-      chromeWebSecurity: chromeWebSecurity
       onCrashed: ->
         err = errors.get("RENDERER_CRASHED")
         errors.log(err)
@@ -134,14 +126,11 @@ module.exports = {
     }
 
     if write
-      options.recordFrameRate = 20
-      options.onPaint = (event, dirty, image) ->
+      obj.recordFrameRate = 20
+      obj.onPaint = (event, dirty, image) ->
         write(image.toJPEG(100))
 
-    ## TODO: fix project.automation
-    browsers.open("electron", project.automation, {}, options)
-    .then (obj) ->
-      obj.browserWindow.center()
+    obj
 
   displayStats: (obj = {}) ->
     bgColor = if obj.failures then "bgRed" else "bgGreen"
@@ -233,16 +222,28 @@ module.exports = {
       errors.warning("VIDEO_POST_PROCESSING_FAILED", err.stack)
 
   waitForBrowserToConnect: (options = {}) ->
-    { project, id, browser, url, proxyServer, gui, webSecurity, write, timeout } = options
+    { project, id, browser, gui, spec, write, timeout, screenshots } = options
 
     gui = !!gui
 
-    launchBrowser = =>
-      ## if we have a browser then just physically launch it
-      if browser
-        openProject.launch(browser, url, null, {proxyServer: proxyServer})
+    browser ?= "electron"
+
+    browserOpts = switch browser
+      when "electron"
+        @getElectronProps(gui, project, write)
       else
-        @launchBrowser(url, proxyServer, gui, webSecurity, project, write)
+        {}
+
+    browserOpts.automationMiddleware = {
+      onAfterResponse: (message, data, resp) =>
+        if message is "take:screenshot"
+          screenshots.push @screenshotMetadata(data, resp)
+
+        resp
+    }
+
+    launchBrowser = =>
+      openProject.launch(browser, spec, browserOpts)
 
     attempts = 0
 
@@ -398,6 +399,8 @@ module.exports = {
   runTests: (options = {}) ->
     { browser, videoRecording, videosFolder } = options
 
+    screenshots = []
+
     ## we know we're done running headlessly
     ## when the renderer has connected and
     ## finishes running all of the tests.
@@ -427,32 +430,28 @@ module.exports = {
           stats:      @waitForTestsToFinishRunning({
             gui:              options.gui
             project:          options.project
-            screenshots:      options.screenshots
             videoCompression: options.videoCompression
             end
             name
             cname
             started
+            screenshots
           }),
 
           connection: @waitForBrowserToConnect({
             id:          options.id
             gui:         options.gui
-            url:         options.url
-            proxyServer: options.proxyServer
+            spec:        options.spec
             project:     options.project
             webSecurity: options.webSecurity
             write
             browser
+            screenshots
           })
         })
 
   ready: (options = {}) ->
     id = @getId()
-
-    wantsExternalBrowser = !!options.browser
-
-    screenshots = []
 
     ## verify this is an added project
     ## and then open it, returning our
@@ -460,25 +459,12 @@ module.exports = {
     @ensureAndOpenProjectByPath(id, options)
     .call("getProject")
     .then (project) =>
-      project.automation.use({
-        onAfterResponse: (message, data, resp) =>
-          if message is "take:screenshot"
-            screenshots.push @screenshotMetadata(data, resp)
-
-          resp
-      })
-
       Promise.all([
         @getProjectId(project, options.projectId)
 
         project.getConfig(),
-
-        ## either get the url to the all specs
-        ## or if we've specificed one make sure
-        ## it exists
-        project.ensureSpecUrl(options.spec)
       ])
-      .spread (projectId, config, url) =>
+      .spread (projectId, config) =>
         ## if we have a project id and a key but record hasnt
         ## been set
         if haveProjectIdAndKeyButNoRecordOption(projectId, options)
@@ -496,14 +482,11 @@ module.exports = {
         .then =>
           @runTests({
             id:               id
-            url:              url
             project:          project
-            screenshots:      screenshots
-            proxyServer:      config.proxyUrl
-            webSecurity:      config.chromeWebSecurity
             videosFolder:     config.videosFolder
             videoRecording:   config.videoRecording
             videoCompression: config.videoCompression
+            spec:             options.spec
             gui:              options.showHeadlessGui
             browser:          options.browser
           })

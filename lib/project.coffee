@@ -37,12 +37,16 @@ class Project extends EE
       throw new Error("Instantiating lib/project requires a projectRoot!")
 
     @projectRoot = path.resolve(projectRoot)
-    @watchers    = Watchers()
-    @server      = Server(@watchers)
+    @watchers    = null
+    @server      = null
+    @cfg         = null
     @memoryCheck = null
     @automation  = null
 
   open: (options = {}) ->
+    @watchers    = Watchers()
+    @server      = Server(@watchers)
+
     _.defaults options, {
       report:       false
       onFocusTests: ->
@@ -99,7 +103,7 @@ class Project extends EE
     if @memoryCheck
       clearInterval(@memoryCheck)
 
-    @removeAllListeners()
+    @cfg = null
 
     Promise.join(
       @server?.close(),
@@ -244,7 +248,8 @@ class Project extends EE
       @_setSavedState(cfg)
 
   _setSavedState: (cfg) ->
-    savedState.get().then (state) ->
+    savedState.get()
+    .then (state) ->
       cfg.state = state
       cfg
 
@@ -277,7 +282,10 @@ class Project extends EE
     .catch ->
       errors.throw("SPEC_FILE_NOT_FOUND", specFile)
 
-  getPrefixedPathToSpec: (integrationFolder, pathToSpec) ->
+  getPrefixedPathToSpec: (integrationFolder, pathToSpec, type = "integration") ->
+    ## for now hard code the 'type' as integration
+    ## but in the future accept something different here
+
     ## strip out the integration folder and prepend with "/"
     ## example:
     ##
@@ -285,7 +293,7 @@ class Project extends EE
     ## /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.coffee
     ##
     ## becomes /integration/foo.coffee
-    "/" + path.join("integration", path.relative(integrationFolder, pathToSpec))
+    "/" + path.join(type, path.relative(integrationFolder, pathToSpec))
 
   getUrlBySpec: (browserUrl, specUrl) ->
     replacer = (match, p1) ->
