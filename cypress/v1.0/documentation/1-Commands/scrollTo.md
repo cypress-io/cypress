@@ -13,28 +13,22 @@ Scroll to a specific position in the window or in the element found in the previ
 
 # [cy.scrollTo( *position* )](#section-position-usage)
 
-Scroll to a specific positin in the window or in the element found in the previous command.
+Scroll to a specific position in the window or in the element found in the previous command. Valid positions are `topLeft`, `top`, `topRight`, `left`, `center`, `right`, `bottomLeft`, `bottom`, and `bottomRight`.
 
-
-Position | Notes
---- | ---
-`topLeft` | Scrolls to the top left corner of the element
-`top` | Scrolls to the top center of the element
-`topRight` | Scrolls to the top right corner of the element
-`left` | Scrolls to left center of the element
-`center` | Scrolls to the exact center of the element
-`right` | Scrolls to the right center of the element
-`bottomLeft` | Scrolls to the bottom left corner of the element
-`bottom` | Scrolls to the bottom center of the element
-`bottomRight` | Scrolls to the bottom right corner of the element
+![cypress-command-positions-diagram](https://cloud.githubusercontent.com/assets/1271364/25048528/fe0c6378-210a-11e7-96bc-3773f774085b.jpg)
 
 ***
 
 # [cy.scrollTo( *x*, *y* )](#section-coordinate-usage)
 
-You can pass a relative `x` and `y` coordinate which will calculate distance the distance from the top left corner of the element and scroll to the calculated coordinate.
+You can pass an `x` and `y` coordinate in pixels which will calculate the distance from the top left corner of the element and scroll to the calculated coordinate. The coordinates can be a number or a string with 'px'.
 
-x and y can be a number or percentage
+***
+
+# [cy.scrollTo( *width %*, *height %* )](#section-percentage-usage)
+
+You can pass a string with the percentage of the element's width and height to scroll to that position.
+
 
 ***
 
@@ -45,6 +39,7 @@ Pass in an options object to change the default behavior of `cy.scrollTo`.
 
 **[cy.scrollTo( *position*, *options* )](#options-usage)**
 **[cy.scrollTo( *x*, *y*, *options* )](#options-usage)**
+**[cy.scrollTo( *width %*, *height %*, *options* )](#options-usage)**
 
 Option | Default | Notes
 --- | --- | ---
