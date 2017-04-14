@@ -51,7 +51,7 @@ module.exports = {
         .get("integration")
         .map (spec) ->
           ## grab the name of each
-          spec.name
+          spec.path
         .map(convertSpecPath)
       else
         ## normalize by sending in an array of 1
