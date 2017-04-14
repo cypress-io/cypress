@@ -185,16 +185,58 @@ describe('Kitchen Sink', function(){
       cy.get('.traversal-ul').contains('apples').next().should('contain', 'oranges')
     })
 
+    it('cy.nextAll() - get all next sibling DOM elements', function(){
+
+      // https://on.cypress.io/api/nextall
+      cy.get('.traversal-next-all').contains('oranges').nextAll().should("have.length", 3)
+    })
+
+    it('cy.nextUntil() - get all next sibling DOM elements until other element', function(){
+
+      // https://on.cypress.io/api/nextuntil
+      cy.get("#veggies").nextUntil("#nuts").should("have.length", 3)
+    })
+
     it('cy.not() - remove DOM elements from set of DOM elements', function(){
 
       // https://on.cypress.io/api/not
       cy.get('.traversal-disabled .btn').not('[disabled]').should('not.contain', 'Disabled')
     })
 
-    it('cy.parents() - get parents DOM element from set of DOM elements', function(){
+    it('cy.parent() - get parent DOM element from set of DOM elements', function(){
+
+      // https://on.cypress.io/api/parent
+      cy.get('.traversal-mark').parent().should('contain', 'Morbi leo risus')
+    })
+
+    it('cy.parents() - get parent DOM elements from set of DOM elements', function(){
 
       // https://on.cypress.io/api/parents
       cy.get('.traversal-cite').parents().should('match', 'blockquote')
+    })
+
+    it('cy.parentsUntil() - get parent DOM elements from set of DOM elements until other element', function(){
+
+      // https://on.cypress.io/api/parentsuntil
+      cy.get('.clothes-nav').find(".active").parentsUntil('.clothes-nav').should("have.length", 2)
+    })
+
+    it('cy.prev() - get previous sibling DOM element', function(){
+
+      // https://on.cypress.io/api/prev
+      cy.get('.birds').find(".active").prev().should("contain", "Lorikeets")
+    })
+
+    it('cy.prevAll() - get all previous sibling DOM elements', function(){
+
+      // https://on.cypress.io/api/prevAll
+      cy.get('.fruits-list').find(".third").prevAll().should("have.length", 2)
+    })
+
+    it('cy.prevUntil() - get all previous sibling DOM elements until other element', function(){
+
+      // https://on.cypress.io/api/prevUntil
+      cy.get(".foods-list").find("#nuts").prevUntil("#veggies")
     })
 
     it('cy.siblings() - get all sibling DOM elements from set of DOM elements', function(){
