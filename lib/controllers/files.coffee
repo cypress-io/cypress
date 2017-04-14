@@ -48,6 +48,7 @@ module.exports = {
       ## grab all of the specs if this is ci
       if spec is "__all"
         @getTestFiles(config)
+        .get("integration")
         .map (spec) ->
           ## grab the name of each
           spec.name
