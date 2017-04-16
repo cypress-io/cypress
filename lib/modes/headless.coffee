@@ -221,8 +221,8 @@ module.exports = {
       ## but failed and dont let this change the run exit code
       errors.warning("VIDEO_POST_PROCESSING_FAILED", err.stack)
 
-  waitForBrowserToConnect: (options = {}) ->
-    { project, id, browser, gui, spec, write, timeout, screenshots } = options
+  launchBrowser: (options = {}) ->
+    { browser, spec, write, gui, project, screenshots } = options
 
     gui = !!gui
 
@@ -242,15 +242,17 @@ module.exports = {
         resp
     }
 
-    launchBrowser = =>
-      openProject.launch(browser, spec, browserOpts)
+    openProject.launch(browser, spec, browserOpts)
+
+  waitForBrowserToConnect: (options = {}) ->
+    { project, id, timeout } = options
 
     attempts = 0
 
     do waitForBrowserToConnect = =>
       Promise.join(
         @waitForSocketConnection(project, id)
-        launchBrowser()
+        @launchBrowser(options)
       )
       .timeout(timeout ? 30000)
       .catch Promise.TimeoutError, (err) =>
