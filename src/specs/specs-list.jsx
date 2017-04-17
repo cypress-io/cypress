@@ -18,7 +18,7 @@ class Specs extends Component {
 
     return (
       <div id='tests-list-page'>
-        <a onClick={this._runAllSpecs.bind(this)} className={`all-tests btn btn-link ${allActiveClass}`}>
+        <a onClick={this._selectSpec.bind(this, '__all')} className={`all-tests btn btn-link ${allActiveClass}`}>
           <i className={`fa fa-fw ${this._allSpecsIcon(specsCollection.allSpecsChosen)}`}></i>{' '}
           Run All Tests
         </a>
@@ -85,16 +85,6 @@ class Specs extends Component {
     } else {
       return 'fa-file-code-o'
     }
-  }
-
-  _runAllSpecs (e) {
-    e.preventDefault()
-
-    specsCollection.setChosenSpec('__all')
-
-    let project = this.props.project
-
-    runSpec(project, '__all', project.chosenBrowser.name)
   }
 
   _selectSpec (specPath, e) {
