@@ -1,6 +1,8 @@
 _             = require("lodash")
 uri           = require("url")
+Promise       = require("bluebird")
 cyDesktop     = require("@cypress/core-desktop-gui")
+extension     = require("@cypress/core-extension")
 contextMenu   = require("electron-context-menu")
 BrowserWindow = require("electron").BrowserWindow
 cwd           = require("../cwd")
@@ -28,6 +30,13 @@ getUrl = (type) ->
 getByType = (type) ->
   windows[type]
 
+getCookieUrl = (props) ->
+  extension.getCookieUrl(props)
+
+firstOrNull = (cookies) ->
+  ## normalize into null when empty array
+  cookies[0] ? null
+
 module.exports = {
   reset: ->
     windows = {}
@@ -52,6 +61,60 @@ module.exports = {
 
   getByWebContents: (webContents) ->
     BrowserWindow.fromWebContents(webContents)
+
+  automation: (win) ->
+    cookies = Promise.promisifyAll(win.webContents.session.cookies)
+
+    return {
+      clear: (filter = {}) ->
+        clear = (cookie) =>
+          url = getCookieUrl(cookie)
+
+          cookies.removeAsync(url, cookie.name)
+          .return(cookie)
+
+        @getAll(filter)
+        .map(clear)
+
+      getAll: (filter) ->
+        cookies
+        .getAsync(filter)
+
+      getCookies: (filter) ->
+        @getAll(filter)
+
+      getCookie: (filter) ->
+        @getAll(filter)
+        .then(firstOrNull)
+
+      setCookie: (props = {}) ->
+        ## only set the url if its not already present
+        props.url ?= getCookieUrl(props)
+
+        ## resolve with the cookie props. the extension
+        ## calls back with the cookie details but electron
+        ## chrome API's do not. but it doesn't matter because
+        ## we always send a fully complete cookie props object
+        ## which can simply be returned.
+        cookies
+        .setAsync(props)
+        .return(props)
+
+      clearCookie: (filter) ->
+        @clear(filter)
+        .then(firstOrNull)
+
+      clearCookies: (filter) ->
+        @clear(filter)
+
+      isAutomationConnected: ->
+        true
+
+      takeScreenshot: ->
+        new Promise (resolve) ->
+          win.capturePage (img) ->
+            resolve(img.toDataURL())
+    }
 
   create: (options = {}) ->
     _.defaultsDeep(options, {
@@ -215,7 +278,12 @@ module.exports = {
         Promise.resolve(win)
 
   trackState: (win, keys) ->
+    isDestroyed = ->
+      win.isDestroyed()
+
     win.on "resize", _.debounce ->
+      return if isDestroyed()
+
       [width, height] = win.getSize()
       [x, y] = win.getPosition()
       newState = {}
@@ -227,6 +295,8 @@ module.exports = {
     , 500
 
     win.on "moved", _.debounce ->
+      return if isDestroyed()
+
       [x, y] = win.getPosition()
       newState = {}
       newState[keys.x] = x

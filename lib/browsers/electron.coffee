@@ -1,17 +1,9 @@
 _             = require("lodash")
 EE            = require("events")
 Promise       = require("bluebird")
-extension     = require("@cypress/core-extension")
 menu          = require("../gui/menu")
 Windows       = require("../gui/windows")
 savedState    = require("../saved_state")
-
-firstOrNull = (cookies) ->
-  ## normalize into null when empty array
-  cookies[0] ? null
-
-getUrl = (props) ->
-  extension.getCookieUrl(props)
 
 module.exports = {
   _render: (url, state, options = {}) ->
@@ -89,66 +81,12 @@ module.exports = {
         proxyRules: proxyServer
       }, resolve)
 
-  automation: (win) ->
-    cookies = Promise.promisifyAll(win.webContents.session.cookies)
-
-    return {
-      clear: (filter = {}) ->
-        clear = (cookie) =>
-          url = getUrl(cookie)
-
-          cookies.removeAsync(url, cookie.name)
-          .return(cookie)
-
-        @getAll(filter)
-        .map(clear)
-
-      getAll: (filter) ->
-        cookies
-        .getAsync(filter)
-
-      getCookies: (filter) ->
-        @getAll(filter)
-
-      getCookie: (filter) ->
-        @getAll(filter)
-        .then(firstOrNull)
-
-      setCookie: (props = {}) ->
-        ## only set the url if its not already present
-        props.url ?= getUrl(props)
-
-        ## resolve with the cookie props. the extension
-        ## calls back with the cookie details but electron
-        ## chrome API's do not. but it doesn't matter because
-        ## we always send a fully complete cookie props object
-        ## which can simply be returned.
-        cookies
-        .setAsync(props)
-        .return(props)
-
-      clearCookie: (filter) ->
-        @clear(filter)
-        .then(firstOrNull)
-
-      clearCookies: (filter) ->
-        @clear(filter)
-
-      isAutomationConnected: ->
-        true
-
-      takeScreenshot: ->
-        new Promise (resolve) ->
-          win.capturePage (img) ->
-            resolve(img.toDataURL())
-    }
-
   open: (browserName, url, options = {}, automation) ->
     savedState.get()
     .then (state) =>
       @_render(url, state, options)
       .then (win) =>
-        a = @automation(win)
+        a = Windows.automation(win)
 
         invoke = (method, data) =>
           a[method](data)
