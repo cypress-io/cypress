@@ -143,7 +143,7 @@ module.exports = {
             resolve(img.toDataURL())
     }
 
-  open: (browserName, url, automation, config = {}, options = {}) ->
+  open: (browserName, url, options = {}, automation) ->
     savedState.get()
     .then (state) =>
       @_render(url, state, options)

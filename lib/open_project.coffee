@@ -54,9 +54,13 @@ create = ->
           ## been defined here
           if am = options.automationMiddleware
             automation.use(am)
+          
+          ## merge options into config
+          ## without mutating cfg
+          options = _.extend({}, cfg, options)
 
           do relaunchBrowser = ->
-            browsers.open(browserName, automation, cfg, options)
+            browsers.open(browserName, options, automation)
 
     getSpecChanges: (options = {}) ->
       currentSpecs = null

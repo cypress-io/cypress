@@ -43,7 +43,7 @@ module.exports = {
 
   close: kill
 
-  open: (name, automation, config = {}, options = {}) ->
+  open: (name, options = {}, automation) ->
     kill(true)
     .then ->
       _.defaults options,
@@ -58,7 +58,7 @@ module.exports = {
       if not url = options.url
         throw new Error("options.url must be provided when opening a browser. You passed:", options)
 
-      browser.open(name, url, automation, config, options)
+      browser.open(name, url, options, automation)
       .then (i) ->
         ## TODO: bind to process.exit here
         ## or move this functionality into cypress-core-launder

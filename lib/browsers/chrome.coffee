@@ -63,14 +63,14 @@ module.exports = {
         fs.writeFileAsync(extensionBg, str)
       .return(extensionDest)
 
-  open: (browserName, url, automation, config = {}, options = {}) ->
+  open: (browserName, url, options = {}, automation) ->
     args = defaultArgs.concat(options.browserArgs)
 
     Promise.all([
       ## ensure that we have a chrome profile dir
       utils.ensureProfile(browserName),
 
-      @_writeExtension(config.proxyUrl, config.socketIoRoute)
+      @_writeExtension(options.proxyUrl, options.socketIoRoute)
     ])
     .spread (dir, dest) ->
       ## we now know where this extension is going
