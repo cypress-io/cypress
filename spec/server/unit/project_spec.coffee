@@ -429,6 +429,11 @@ describe "lib/project", ->
       .then (str) ->
         expect(str).to.eq("http://localhost:8888/__/#/tests/__all")
 
+    it "returns __all spec url with spec is __all", ->
+      @project.ensureSpecUrl('__all')
+      .then (str) ->
+        expect(str).to.eq("http://localhost:8888/__/#/tests/__all")
+
     it "throws when spec isnt found", ->
       @project.ensureSpecUrl("does/not/exist.js")
       .catch (err) ->

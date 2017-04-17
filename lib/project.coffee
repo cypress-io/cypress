@@ -256,7 +256,9 @@ class Project extends EE
   ensureSpecUrl: (spec) ->
     @getConfig()
     .then (cfg) =>
-      if spec
+      if _.isNull(spec) or spec is "__all"
+        @getUrlBySpec(cfg.browserUrl, "/__all")
+      else
         @ensureSpecExists(spec)
         .then (pathToSpec) =>
           ## TODO:
@@ -268,8 +270,6 @@ class Project extends EE
           ## with either integration or unit
           prefixedPath = @getPrefixedPathToSpec(cfg.integrationFolder, pathToSpec)
           @getUrlBySpec(cfg.browserUrl, prefixedPath)
-      else
-        @getUrlBySpec(cfg.browserUrl, "/__all")
 
   ensureSpecExists: (spec) ->
     specFile = path.resolve(@projectRoot, spec)
