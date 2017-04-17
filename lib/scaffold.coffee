@@ -34,14 +34,10 @@ module.exports = {
       )
     )
     .then =>
-      ## scaffold support/index.js with each file in the support folder
-      ## this will help transition users from supportFolder to supportFile
-      try
-        require.resolve(config.supportFile)
-      catch err
+      fs.statAsync(config.supportFile)
+      .catch {code: "ENOENT"}, =>
         ## only if support/index.js doesn't exist already
         ## rethrow error if it's something unexpected
-        throw err if err.code isnt 'MODULE_NOT_FOUND'
 
         Promise.join(
           fs.readFileAsync(cwd("lib", "scaffold", "index.js.hbs"), "utf8"),
@@ -59,7 +55,7 @@ module.exports = {
         .spread (indexTemplate, supportFiles) =>
           indexTemplate = hbs.handlebars.compile(indexTemplate)
           contents      = indexTemplate({ files: supportFiles })
-          filePath    = path.join(folder, "index.js")
+          filePath      = path.join(folder, "index.js")
 
           @_assertInFileTree(filePath, config)
 
