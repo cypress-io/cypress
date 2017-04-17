@@ -256,7 +256,8 @@ class Project extends EE
   ensureSpecUrl: (spec) ->
     @getConfig()
     .then (cfg) =>
-      if _.isNull(spec) or spec is "__all"
+      ## if we dont have a spec or its __all
+      if not spec or (spec is "__all")
         @getUrlBySpec(cfg.browserUrl, "/__all")
       else
         @ensureSpecExists(spec)
