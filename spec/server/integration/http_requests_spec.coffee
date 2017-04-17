@@ -314,6 +314,15 @@ describe "Routes", ->
             })
             .then (res) ->
               expect(res.statusCode).to.eq(200)
+
+              body = res.body
+              
+              expect(body.integration).to.have.length(3)
+
+              ## remove the absolute path key
+              body.integration = _.map body.integration, (obj) ->
+                _.pick(obj, "name", "path")
+              
               expect(res.body).to.deep.eq({
                 integration: [
                   {
@@ -343,7 +352,16 @@ describe "Routes", ->
           })
           .then (res) ->
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.deep.eq({
+            
+            body = res.body
+              
+            expect(body.integration).to.have.length(6)
+
+            ## remove the absolute path key
+            body.integration = _.map body.integration, (obj) ->
+              _.pick(obj, "name", "path")
+
+            expect(body).to.deep.eq({
               integration: [
                 {
                   name: "bar.js"
@@ -386,7 +404,16 @@ describe "Routes", ->
           })
           .then (res) ->
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.deep.eq({
+
+            body = res.body
+              
+            expect(body.integration).to.have.length(3)
+
+            ## remove the absolute path key
+            body.integration = _.map body.integration, (obj) ->
+              _.pick(obj, "name", "path")
+              
+            expect(body).to.deep.eq({
               integration: [
                 {
                   name: "baz.js"

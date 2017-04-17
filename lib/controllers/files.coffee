@@ -51,7 +51,7 @@ module.exports = {
         .get("integration")
         .map (spec) ->
           ## grab the name of each
-          spec.path
+          spec.absolute
         .map(convertSpecPath)
       else
         ## normalize by sending in an array of 1
@@ -146,7 +146,7 @@ module.exports = {
 
     relativePathFromProjectRoot = (file) ->
       path.relative(config.projectRoot, file)
-
+    
     ignorePatterns = [].concat(config.ignoreTestFiles)
 
     ## a function which returns true if the file does NOT match
@@ -169,6 +169,7 @@ module.exports = {
       {
         name: relativePathFromIntegrationFolder(file)
         path: relativePathFromProjectRoot(file)
+        absolute: file
       }
     .then (arr) ->
       {
