@@ -17,6 +17,7 @@ scaffold    = require("./scaffold")
 Watchers    = require("./watchers")
 Reporter    = require("./reporter")
 savedState  = require("./saved_state")
+Automation  = require("./automation")
 git         = require("./util/git")
 settings    = require("./util/settings")
 
@@ -36,11 +37,16 @@ class Project extends EE
       throw new Error("Instantiating lib/project requires a projectRoot!")
 
     @projectRoot = path.resolve(projectRoot)
-    @watchers    = Watchers()
+    @watchers    = null
+    @server      = null
+    @cfg         = null
     @memoryCheck = null
-    @server      = Server(@watchers)
+    @automation  = null
 
   open: (options = {}) ->
+    @watchers    = Watchers()
+    @server      = Server(@watchers)
+
     _.defaults options, {
       report:       false
       onFocusTests: ->
@@ -93,11 +99,11 @@ class Project extends EE
     .spread (projectId, authToken) ->
       api.getProjectBuilds(projectId, authToken)
 
-  close: (options = {}) ->
+  close: ->
     if @memoryCheck
       clearInterval(@memoryCheck)
 
-    @removeAllListeners()
+    @cfg = null
 
     Promise.join(
       @server?.close(),
@@ -105,9 +111,6 @@ class Project extends EE
     )
     .then ->
       process.chdir(localCwd)
-
-  resetState: ->
-    @server.resetState()
 
   watchSupportFile: (config) ->
     if supportFile = config.supportFile
@@ -148,12 +151,10 @@ class Project extends EE
     if config.report
       reporter = Reporter.create(config.reporter, config.reporterOptions, config.projectRoot)
 
-    @server.startWebsockets(@watchers, config, {
+    @automation = Automation.create(config.namespace, config.socketIoCookie, config.screenshotsFolder)
+
+    @server.startWebsockets(@watchers, @automation, config, {
       onReloadBrowser: options.onReloadBrowser
-
-      onAutomationRequest: options.onAutomationRequest
-
-      afterAutomationRequest: options.afterAutomationRequest
 
       onFocusTests: options.onFocusTests
 
@@ -227,6 +228,9 @@ class Project extends EE
     .then (cfg) ->
       cfg.browsers = browsers
 
+  getAutomation: ->
+    @automation
+
   getConfig: (options = {}) ->
     getConfig = =>
       if c = @cfg
@@ -244,7 +248,8 @@ class Project extends EE
       @_setSavedState(cfg)
 
   _setSavedState: (cfg) ->
-    savedState.get().then (state) ->
+    savedState.get()
+    .then (state) ->
       cfg.state = state
       cfg
 
@@ -277,7 +282,10 @@ class Project extends EE
     .catch ->
       errors.throw("SPEC_FILE_NOT_FOUND", specFile)
 
-  getPrefixedPathToSpec: (integrationFolder, pathToSpec) ->
+  getPrefixedPathToSpec: (integrationFolder, pathToSpec, type = "integration") ->
+    ## for now hard code the 'type' as integration
+    ## but in the future accept something different here
+
     ## strip out the integration folder and prepend with "/"
     ## example:
     ##
@@ -285,7 +293,7 @@ class Project extends EE
     ## /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.coffee
     ##
     ## becomes /integration/foo.coffee
-    "/" + path.join("integration", path.relative(integrationFolder, pathToSpec))
+    "/" + path.join(type, path.relative(integrationFolder, pathToSpec))
 
   getUrlBySpec: (browserUrl, specUrl) ->
     replacer = (match, p1) ->

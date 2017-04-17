@@ -60,6 +60,32 @@ module.exports = {
         }
     }]
 
+  getVersions: (releases) ->
+    [{
+      name: "version"
+      type: "list"
+      message: "Bump to which version?"
+      choices: _.map releases, (r) ->
+        {
+          name: r
+          value: r
+        }
+    }]
+
+  getBumpTasks: ->
+    [{
+      name: "task"
+      type: "list"
+      message: "Which bump task?"
+      choices: [{
+        name: "Bump Cypress Version for all CI providers"
+        value: "version"
+      },{
+        name: "Run All Projects for all CI providers"
+        value: "run"
+      }]
+    }]
+
   deployNewVersion: ->
     new Promise (resolve, reject) =>
       fs.readJsonAsync("./package.json").then (json) =>
@@ -71,6 +97,21 @@ module.exports = {
             resolve(answers.version)
           else
             resolve(json.version)
+
+  whichVersion: (distDir) ->
+    new Promise (resolve, reject) =>
+      ## realpath returns the absolute full path
+      glob "*/package.json", {cwd: distDir, realpath: true}, (err, pkgs) =>
+        return reject(err) if err
+
+        Promise
+        .map pkgs, (pkg) ->
+          fs.readJsonAsync(pkg).get("version")
+        .then (versions) =>
+          versions = _.uniq(versions)
+
+          inquirer.prompt @getVersions(versions), (answers) =>
+            resolve(answers.version)
 
   whichRelease: (distDir) ->
     new Promise (resolve, reject) =>
@@ -91,5 +132,10 @@ module.exports = {
     new Promise (resolve, reject) =>
       inquirer.prompt @getPlatformQuestion(), (answers) =>
         resolve(answers.platform)
+
+  whichBumpTask: ->
+    new Promise (resolve, reject) =>
+      inquirer.prompt @getBumpTasks(), (answers) =>
+        resolve(answers.task)
 
 }

@@ -31,7 +31,7 @@ module.exports = {
 
     glob(screenshotsFolder, {nodir: true})
 
-  take: (data, dataUrl, screenshotsFolder) ->
+  save: (data, dataUrl, screenshotsFolder) ->
     buffer = dataUriToBuffer(dataUrl)
 
     ## use the screenshots specific name or

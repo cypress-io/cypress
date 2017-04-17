@@ -12,14 +12,14 @@ user     = require("#{root}../lib/user")
 errors   = require("#{root}../lib/errors")
 launcher = require("#{root}../lib/launcher")
 open     = require("#{root}../lib/util/open")
-logs     = require("#{root}../lib/electron/handlers/logs")
-events   = require("#{root}../lib/electron/handlers/events")
-dialog   = require("#{root}../lib/electron/handlers/dialog")
-project  = require("#{root}../lib/electron/handlers/project")
-cookies  = require("#{root}../lib/electron/handlers/cookies")
-Renderer = require("#{root}../lib/electron/handlers/renderer")
+logs     = require("#{root}../lib/gui/logs")
+events   = require("#{root}../lib/gui/events")
+dialog   = require("#{root}../lib/gui/dialog")
+project  = require("#{root}../lib/open_project")
+cookies  = require("#{root}../lib/gui/cookies")
+Windows = require("#{root}../lib/gui/windows")
 
-describe "lib/electron/handlers/events", ->
+describe "lib/gui/events", ->
   beforeEach ->
     @id      = Math.random()
     @send    = @sandbox.spy()
@@ -150,22 +150,22 @@ describe "lib/electron/handlers/events", ->
 
   context "window", ->
     describe "window:open", ->
-      it "calls Renderer#create with args and resolves with return of Renderer.create", ->
-        @sandbox.stub(Renderer, "create").withArgs({foo: "bar"}).resolves({bar: "baz"})
+      it "calls Windows#create with args and resolves with return of Windows.create", ->
+        @sandbox.stub(Windows, "create").withArgs({foo: "bar"}).resolves({bar: "baz"})
         @handleEvent("window:open", {foo: "bar"}).then =>
           @expectSendCalledWith({bar: "baz"})
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(Renderer, "create").withArgs({foo: "bar"}).rejects(err)
+        @sandbox.stub(Windows, "create").withArgs({foo: "bar"}).rejects(err)
 
         @handleEvent("window:open", {foo: "bar"}).then =>
           @expectSendErrCalledWith(err)
 
     describe "window:close", ->
-      it "calls destroy on Renderer#getByWebContents", ->
+      it "calls destroy on Windows#getByWebContents", ->
         @destroy = @sandbox.stub()
-        @sandbox.stub(Renderer, "getByWebContents").withArgs(@event.sender).returns({destroy: @destroy})
+        @sandbox.stub(Windows, "getByWebContents").withArgs(@event.sender).returns({destroy: @destroy})
         @handleEvent("window:close")
         expect(@destroy).to.be.calledOnce
 
@@ -184,7 +184,7 @@ describe "lib/electron/handlers/events", ->
     describe "updater:run", ->
       beforeEach ->
         @once = @sandbox.stub()
-        @sandbox.stub(Renderer, "getByWebContents").withArgs(@event.sender).returns({once: @once})
+        @sandbox.stub(Windows, "getByWebContents").withArgs(@event.sender).returns({once: @once})
 
       it "calls cancel when win is closed", ->
         cancel = @sandbox.spy()
