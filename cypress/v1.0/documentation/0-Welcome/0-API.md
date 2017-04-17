@@ -41,10 +41,15 @@ Commands drive your tests in the browser like a real user would. They let you pe
 | [first](https://on.cypress.io/api/first) | Get the first DOM element within a set of DOM elements |
 | [last](https://on.cypress.io/api/last) | Get the last DOM element |
 | [next](https://on.cypress.io/api/next) | Get the next sibling of the DOM elements |
+| [nextAll](https://on.cypress.io/api/nextall) | Get all following siblings of the DOM elements |
+| [nextUntil](https://on.cypress.io/api/nextuntil) | Get all following siblings of the DOM elements until another element |
 | [not](https://on.cypress.io/api/not) | Remove DOM elements from the set of DOM elements |
 | [parent](https://on.cypress.io/api/parent) | Get the parent DOM element of the DOM elements |
 | [parents](https://on.cypress.io/api/parents) | Get the parents DOM elements of the DOM elements |
+| [parentsUntil](https://on.cypress.io/api/parentsuntil) | Get all ancestors of the DOM elements until another element |
 | [prev](https://on.cypress.io/api/prev) | Get the previous sibling of elements |
+| [prevAll](https://on.cypress.io/api/prevall) | Get all previous siblings of the DOM elements |
+| [prevUntil](https://on.cypress.io/api/prev) | Get all previous siblings of the DOM elements until another element |
 | [siblings](https://on.cypress.io/api/siblings) | Get all siblings DOM elements of the DOM elements |
 
 | Actions | |
