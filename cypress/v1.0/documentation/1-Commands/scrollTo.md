@@ -52,13 +52,59 @@ Option | Default | Notes
 
 # Position Usage
 
+## Scroll to the bottom of the window
+
+```javascript
+cy.scrollTo("bottom")
+```
+
+## Scroll to the center of the list
+
+```javascript
+cy.get("#movies-list").scrollTo('center')
+```
+
 ***
 
 # Coordinate Usage
 
+## Scroll 500px down the list
+
+```javascript
+cy.get("#infinite-scroll-list").scrollTo(0, 500)
+```
+
+## Scroll the window 500px to the right
+
+```javascript
+cy.scrollTo("500px")
+```
+
+***
+
+# Percentage Usage
+
+## Scroll 25% down the element
+
+```javascript
+ cy.get(".user-photo").scrollTo('0%', '25%')
+```
+
 ***
 
 # Options Usage
+
+## Use linear easing animation to scroll
+
+```javascript
+cy.get(".documentation").scrollTo('top', { easing: 'linear'} )
+```
+
+## Scroll to the right over 2000ms
+
+```javascript
+cy.get("#slider").scrollTo('right', { duration: 2000} )
+```
 
 ***
 
@@ -66,9 +112,26 @@ Option | Default | Notes
 
 ## Snapshots
 
+**Cypress does not reflect the accurate scroll positions of any elements within snapshots.** If you want to see the actual scrolling behavior in action, we recommend using [`cy.pause()`](https://on.cypress.io/api/pause) to walk through each command or [watching the video of the test run](#https://on.cypress.io/guides/runs#section-videos).
+
 ***
 
 # Command Log
+
+## Scroll to the bottom of the window then scroll the element to the "right"
+
+```javascript
+cy.scrollTo("bottom")
+cy.get("#scrollable-horizontal").scrollTo("right")
+```
+
+The commands above will display in the command log as:
+
+<img width="529" alt="screen shot 2017-04-14 at 12 29 13 pm" src="https://cloud.githubusercontent.com/assets/1271364/25049157/50d68f18-210e-11e7-81f1-ed837075160d.png">
+
+When clicking on `scrollTo` within the command log, the console outputs the following:
+
+<img width="788" alt="screen shot 2017-04-14 at 12 32 16 pm" src="https://cloud.githubusercontent.com/assets/1271364/25049182/6e07211a-210e-11e7-9419-b57f3e08a608.png">
 
 ***
 
