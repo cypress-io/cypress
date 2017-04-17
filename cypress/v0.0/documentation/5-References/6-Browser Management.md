@@ -5,6 +5,7 @@ excerpt: How and why Cypress manages your browser
 
 - :fa-angle-right: [Managing Browsers](#section-managing-browsers)
 - :fa-angle-right: [Launching Browsers](#section-launching-browsers)
+  - [Electron Browser](#section-electron-browser)
   - [Unsupported Browsers](#section-unsupported-browsers)
 - :fa-angle-right: [Clean Testing Environment](#section-clean-testing-environment)
   - [Cypress Profile](#section-cypress-profile)
@@ -49,13 +50,21 @@ You might notice that if you already have the browser open you will see two icon
 
 ![switching browsers](https://cloud.githubusercontent.com/assets/1268976/15520492/b812cfe6-21d4-11e6-8764-831f33bd0acf.gif)
 
-We understand that when Cypress is running in its own profile it can be confusing telling the difference from your normal browser and Cypress. For this reason we recommend [downloading Chromium](https://download-chromium.appspot.com/) or [downloading Canary](https://www.google.com/chrome/browser/canary.html). These browsers both have different icons from the standard Chrome browser and it'll be much easier to tell the difference.
+We understand that when Cypress is running in its own profile it can be confusing telling the difference from your normal browser and Cypress. For this reason we recommend [downloading Chromium](https://download-chromium.appspot.com/) or [downloading Canary](https://www.google.com/chrome/browser/canary.html). These browsers both have different icons from the standard Chrome browser and it'll be much easier to tell the difference. You can also use the bundled [Electron browser](#section-electron-browser), which does not have a Dock icon.
 
 ![switch canary](https://cloud.githubusercontent.com/assets/1268976/15520491/b812bfe2-21d4-11e6-99ea-c77dae947b26.gif)
 
 Additionally, we've made the browsers spawned by Cypress look different than regular sessions. You'll see a darker theme around the chrome of the browser. You'll always be able to visually distinguish these.
 
 ![screen shot 2016-05-24 at 5 25 19 pm](https://cloud.githubusercontent.com/assets/1268976/15520464/936b3976-21d4-11e6-8aca-33d05f2c2a8b.png)
+
+***
+
+## Electron Browser
+
+In addition to the browsers found on your system, you'll notice that `Electron` is another available browser (it may be the only browser if Cypress does not detect any compatible browsers on your system). The `Electron` browser is a version of Chrome that is bundled with [Electron](https://electron.atom.io/) (the platform underlying the Cypress app). Cypress uses it when running headless via `cypress run`. It may be useful for debugging issues that only occur when running headless.
+
+The `Electron` browser does not have its own Dock icon or any chrome (address bar, tabs, bookmarks, etc).
 
 ***
 
@@ -86,7 +95,7 @@ Cypress generates its own isolated profile away from your regular browsing profi
 }
 [/block]
 
-That's no problem - you simply have to reinstall them **once**. We'll continue to use this Cypress testing profile on subsequent launches so all of your configuration will automatically be preserved.
+That's no problem - you simply have to reinstall them **once**. We'll continue to use this Cypress testing profile on subsequent launches so all of your configuration will automatically be preserved. Note that in the [Electron browser](#section-electron-browser), while it's possible to use the dev tools, it's not possible to install developer extensions.
 
 ***
 
@@ -124,4 +133,3 @@ For instance we will automatically:
 ***
 
 ## No Selenium Server
-
