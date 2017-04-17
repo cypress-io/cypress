@@ -62,6 +62,11 @@ module.exports = {
   getByWebContents: (webContents) ->
     BrowserWindow.fromWebContents(webContents)
 
+  getBrowserAutomation: (webContents) ->
+    win = @getByWebContents(webContents)
+
+    @automation(win)
+
   automation: (win) ->
     cookies = Promise.promisifyAll(win.webContents.session.cookies)
 

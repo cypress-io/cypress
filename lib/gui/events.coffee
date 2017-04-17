@@ -67,7 +67,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "clear:github:cookies"
-      Windows.getAutomation(event.sender)
+      Windows.getBrowserAutomation(event.sender)
       .clearCookies({domain: "github.com"})
       .return(null)
       .then(send)

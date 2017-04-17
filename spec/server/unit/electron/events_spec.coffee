@@ -10,21 +10,24 @@ Project  = require("#{root}../lib/project")
 Updater  = require("#{root}../lib/updater")
 user     = require("#{root}../lib/user")
 errors   = require("#{root}../lib/errors")
-launcher = require("#{root}../lib/launcher")
+browsers = require("#{root}../lib/browsers")
 open     = require("#{root}../lib/util/open")
 logs     = require("#{root}../lib/gui/logs")
 events   = require("#{root}../lib/gui/events")
 dialog   = require("#{root}../lib/gui/dialog")
 project  = require("#{root}../lib/open_project")
-cookies  = require("#{root}../lib/gui/cookies")
-Windows = require("#{root}../lib/gui/windows")
+Windows  = require("#{root}../lib/gui/windows")
 
 describe "lib/gui/events", ->
   beforeEach ->
     @id      = Math.random()
     @send    = @sandbox.spy()
-    @cookies = {}
     @options = {}
+    @cookies = @sandbox.stub({
+      get: ->
+      set: ->
+      remove: ->
+    })
     @event   = {
       sender: {
         send: @send
@@ -128,15 +131,24 @@ describe "lib/gui/events", ->
 
   context "cookies", ->
     describe "clear:github:cookies", ->
-      it "clears cookies and returns", ->
-        clearGithub = @sandbox.stub(cookies, "clearGithub").resolves({foo: "bar"})
+      it "clears cookies and returns null", ->
+        @sandbox.stub(Windows, "getBrowserAutomation")
+        .withArgs(@event.sender)
+        .returns({
+          clearCookies: @sandbox.stub().withArgs({domain: "github.com"}).resolves()
+        })
+
         @handleEvent("clear:github:cookies").then =>
-          @expectSendCalledWith({foo: "bar"})
-          expect(clearGithub).to.be.calledWith(@cookies)
+          @expectSendCalledWith(null)
 
       it "catches errors", ->
         err = new Error("foo")
-        clearGithub = @sandbox.stub(cookies, "clearGithub").rejects(err)
+
+        @sandbox.stub(Windows, "getBrowserAutomation")
+        .withArgs(@event.sender)
+        .returns({
+          clearCookies: @sandbox.stub().withArgs({domain: "github.com"}).rejects(err)
+        })
 
         @handleEvent("clear:github:cookies", {foo: "bar"}).then =>
           @expectSendErrCalledWith(err)
@@ -406,7 +418,7 @@ describe "lib/gui/events", ->
     describe "open:project", ->
       beforeEach ->
         @sandbox.stub(extension, "setHostAndPath").resolves()
-        @sandbox.stub(launcher, "getBrowsers").resolves([])
+        @sandbox.stub(browsers, "get").resolves([])
         @sandbox.stub(Project.prototype, "close").resolves()
 
       afterEach ->

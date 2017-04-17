@@ -21,6 +21,9 @@ module.exports = {
     isDarkMode: ->
     subscribeNotification: ->
   }
+  BrowserWindow: {
+    fromWebContents: ->
+  }
   Menu: {
     buildFromTemplate: ->
     setApplicationMenu: ->
