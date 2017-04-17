@@ -3,18 +3,17 @@ ipc         = require("electron").ipcMain
 shell       = require("electron").shell
 cyIcons     = require("@cypress/core-icons")
 dialog      = require("./dialog")
-project     = require("./project")
 pgk         = require("./package")
-cookies     = require("./cookies")
 logs        = require("./logs")
-Renderer    = require("./renderer")
-open        = require("../../util/open")
-user        = require("../../user")
-logger      = require("../../logger")
-errors      = require("../../errors")
-Updater     = require("../../updater")
-Project     = require("../../project")
-api         = require("../../api")
+Windows     = require("./windows")
+api         = require("../api")
+open        = require("../util/open")
+user        = require("../user")
+logger      = require("../logger")
+errors      = require("../errors")
+Updater     = require("../updater")
+Project     = require("../project")
+openProject = require("../open_project")
 
 handleEvent = (options, bus, event, id, type, arg) ->
   sendResponse = (data = {}) ->
@@ -68,51 +67,37 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "clear:github:cookies"
-      cookies.clearGithub(event.sender.session.cookies)
+      Windows.getAutomation(event.sender)
+      .clearCookies({domain: "github.com"})
+      .return(null)
       .then(send)
       .catch(sendErr)
 
     when "external:open"
       shell.openExternal(arg)
 
-    when "on:launch:browser"
-      project.onRelaunch(send)
-
     when "close:browser"
-      project.closeBrowser()
+      openProject.closeBrowser()
       .then(send)
       .catch(sendErr)
 
     when "launch:browser"
-      # headless.createRenderer(arg, true)
-      project.launch(arg.browser, arg.url, arg.spec, {
+      # headless.createWindows(arg, true)
+      openProject.launch(arg.browser, arg.spec, {
         onBrowserOpen: ->
           send({browserOpened: true})
         onBrowserClose: ->
-          ## ensure the state is correct
-          project.closeBrowser()
-
           send({browserClosed: true})
       })
       .catch(sendErr)
 
-    when "change:browser:spec"
-      project.changeToSpec(arg.spec)
-      .then(send)
-      .catch(sendErr)
-
-    when "get:open:browsers"
-      project.getBrowsers()
-      .then(send)
-      .catch(sendErr)
-
     when "window:open"
-      Renderer.create(arg)
+      Windows.open(arg)
       .then(send)
       .catch(sendErr)
 
     when "window:close"
-      Renderer.getByWebContents(event.sender).destroy()
+      Windows.getByWebContents(event.sender).destroy()
 
     when "open:finder"
       open.opn(arg)
@@ -146,7 +131,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
       ## TODO: there is no note here, what if the window
       ## is closed once the updater finishes?
-      win = Renderer.getByWebContents(event.sender)
+      win = Windows.getByWebContents(event.sender)
       win.once "closed", ->
         upd.cancel()
 
@@ -198,24 +183,11 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "open:project"
-      getConfig = ->
-        project.opened()
-        .getConfig()
+      onSettingsChanged = ->
+        openProject.reboot()
+        .call("getConfig")
         .then(send)
         .catch(sendErr)
-
-      openProject = ->
-        project.open(arg, options, {
-          onFocusTests: onFocusTests
-          onSpecChanged: onSpecChanged
-          onSettingsChanged: onSettingsChanged
-        })
-        .then(getConfig)
-        .catch(sendErr)
-
-      onSettingsChanged = ->
-        project.reboot()
-        .then(openProject)
 
       onSpecChanged = (spec) ->
         send({specChanged: spec})
@@ -226,32 +198,38 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
         bus.emit("focus:tests")
 
-      ## initially open!
-      openProject()
+      openProject.create(arg, options, {
+        onFocusTests: onFocusTests
+        onSpecChanged: onSpecChanged
+        onSettingsChanged: onSettingsChanged
+      })
+      .call("getConfig")
+      .then(send)
+      .catch(sendErr)
 
     when "close:project"
-      project.close()
+      openProject.close()
       .then(send)
       .catch(sendErr)
 
     when "setup:dashboard:project"
-      project.createCiProject(arg)
+      openProject.createCiProject(arg)
       .then(send)
       .catch(sendErr)
 
     when "get:record:keys"
-      project.getRecordKeys()
+      openProject.getRecordKeys()
       .then(send)
       .catch(sendErr)
 
     when "get:specs"
-      project.getSpecChanges({
+      openProject.getSpecChanges({
         onChange: send
         onError: sendErr
       })
 
     when "get:builds"
-      project.getBuilds()
+      openProject.getBuilds()
       .then(send)
       .catch (err) ->
         err.type = if _.get(err, "statusCode") is 401
@@ -266,7 +244,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
         sendErr(err)
 
     when "request:access"
-      project.requestAccess(arg)
+      openProject.requestAccess(arg)
       .then(send)
       .catch (err) ->
         err.type = if _.get(err, "statusCode") is 403

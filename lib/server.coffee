@@ -9,7 +9,6 @@ Promise      = require("bluebird")
 evilDns      = require("evil-dns")
 httpProxy    = require("http-proxy")
 httpsProxy   = require("@cypress/core-https-proxy")
-allowDestroy = require("server-destroy-vvo")
 cors         = require("./util/cors")
 origin       = require("./util/origin")
 connect      = require("./util/connect")
@@ -17,6 +16,7 @@ appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
 statusCode   = require("./util/status_code")
 headersUtil  = require("./util/headers")
+allowDestroy = require("./util/server_destroy")
 cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
@@ -40,14 +40,6 @@ setProxiedUrl = (req) ->
   logger.info "Setting proxied url", proxiedUrl: req.proxiedUrl
 
   req.url = url.parse(req.url).path
-
-resetState = (baseUrl) ->
-  buffers.reset()
-
-  if @_remoteProps
-    ## clear out the previous domain
-    ## and reset to the initial state
-    @_onDomainSet(baseUrl ? "<root>")
 
 ## currently not making use of event emitter
 ## but may do so soon
@@ -113,8 +105,6 @@ class Server
     e.port = port
     e.portInUse = true
     e
-
-  resetState: resetState
 
   open: (config = {}, project) ->
     Promise.try =>
@@ -211,9 +201,6 @@ class Server
           ## if we have a baseUrl let's go ahead
           ## and make sure the server is connectable!
           if baseUrl
-            ## rebind resetState to baseUrl
-            @resetState = _.bind(resetState, @, baseUrl)
-
             connect.ensureUrl(baseUrl)
             .catch (err) =>
               reject errors.get("CANNOT_CONNECT_BASE_URL", baseUrl)
@@ -510,20 +497,19 @@ class Server
       socket.end() if socket.writable
 
   _close: ->
-    new Promise (resolve) =>
-      logger.unsetSettings()
+    buffers.reset()
 
-      evilDns.clear()
+    logger.unsetSettings()
 
-      ## bail early we dont have a server or we're not
-      ## currently listening
-      return resolve() if not @_server or not @isListening
+    evilDns.clear()
 
-      logger.info("Server closing")
+    ## bail early we dont have a server or we're not
+    ## currently listening
+    return Promise.resolve() if not @_server or not @isListening
 
-      @_server.destroy =>
-        @isListening = false
-        resolve()
+    @_server.destroyAsync()
+    .then =>
+      @isListening = false
 
   close: ->
     Promise.join(
@@ -554,12 +540,12 @@ class Server
 
       @_middleware = null
 
-  startWebsockets: (watchers, config, options = {}) ->
+  startWebsockets: (watchers, automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
 
     @_socket = Socket()
-    @_socket.startListening(@_server, watchers, config, options)
+    @_socket.startListening(@_server, watchers, automation, config, options)
     @_normalizeReqUrl(@_server)
     # handleListeners(@_server)
 

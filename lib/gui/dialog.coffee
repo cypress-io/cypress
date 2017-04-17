@@ -1,5 +1,4 @@
-dialog   = require("electron").dialog
-Renderer = require("./renderer")
+dialog = require("electron").dialog
 
 module.exports = {
   show: ->

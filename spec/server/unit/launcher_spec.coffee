@@ -4,10 +4,10 @@ _ = require("lodash")
 Promise = require("bluebird")
 EE = require("events").EventEmitter
 electron = require("electron")
-electronUtils = require("#{root}lib/electron/utils")
-menu = require("#{root}lib/electron/handlers/menu")
-Renderer = require("#{root}lib/electron/handlers/renderer")
-automation = require("#{root}lib/electron/handlers/automation")
+electronUtils = require("#{root}lib/gui/utils")
+menu = require("#{root}lib/gui/menu")
+Windows = require("#{root}lib/gui/windows")
+automation = require("#{root}lib/gui/automation")
 savedState = require("#{root}lib/saved_state")
 launcher = require("#{root}lib/launcher")
 
@@ -27,9 +27,9 @@ describe "lib/launcher", ->
         @url = "the://url"
 
         @sandbox.stub(electronUtils, "setProxy").resolves()
-        @sandbox.stub(Renderer, "create").resolves(@win)
+        @sandbox.stub(Windows, "create").resolves(@win)
         @sandbox.stub(menu, "set")
-        @sandbox.stub(Renderer, "trackState")
+        @sandbox.stub(Windows, "trackState")
         @sandbox.stub(savedState, "get").resolves({})
 
       it "sets proxy", ->
@@ -38,66 +38,66 @@ describe "lib/launcher", ->
 
       it "creates renderer", ->
         launcher.launch("electron").then ->
-          expect(Renderer.create).to.be.called
+          expect(Windows.create).to.be.called
 
       it "passes along url", ->
         launcher.launch("electron", @url).then =>
-          expect(Renderer.create.lastCall.args[0].url).to.equal(@url)
+          expect(Windows.create.lastCall.args[0].url).to.equal(@url)
 
       it "passes along web security", ->
         launcher.launch("electron", @url, {chromeWebSecurity: false}).then ->
-          expect(Renderer.create.lastCall.args[0].chromeWebSecurity).to.be.false
+          expect(Windows.create.lastCall.args[0].chromeWebSecurity).to.be.false
 
       it "sets menu with dev tools on focus", ->
         launcher.launch("electron").then ->
-          Renderer.create.lastCall.args[0].onFocus()
+          Windows.create.lastCall.args[0].onFocus()
           expect(menu.set).to.be.calledWith({withDevTools: true})
 
       it "sets menu with dev tools when dev env on close", ->
         env = process.env["CYPRESS_ENV"]
         process.env["CYPRESS_ENV"] = "development"
         launcher.launch("electron", @url, {onBrowserClose: ->}).then ->
-          Renderer.create.lastCall.args[0].onClose()
+          Windows.create.lastCall.args[0].onClose()
           expect(menu.set).to.be.calledWith({withDevTools: true})
           process.env["CYPRESS_ENV"] = env
 
       it "calls onBrowserClose callback on close", ->
         onBrowserClose = @sandbox.stub()
         launcher.launch("electron", @url, {onBrowserClose}).then ->
-          Renderer.create.lastCall.args[0].onClose()
+          Windows.create.lastCall.args[0].onClose()
           expect(onBrowserClose).to.be.called
 
       it "uses default width if there isn't one saved", ->
         launcher.launch("electron").then ->
-          expect(Renderer.create.lastCall.args[0].width).to.equal(1280)
+          expect(Windows.create.lastCall.args[0].width).to.equal(1280)
 
       it "uses saved width if there is one", ->
         savedState.get.resolves({browserWidth: 1024})
         launcher.launch("electron").then ->
-          expect(Renderer.create.lastCall.args[0].width).to.equal(1024)
+          expect(Windows.create.lastCall.args[0].width).to.equal(1024)
 
       it "uses default height if there isn't one saved", ->
         launcher.launch("electron").then ->
-          expect(Renderer.create.lastCall.args[0].height).to.equal(720)
+          expect(Windows.create.lastCall.args[0].height).to.equal(720)
 
       it "uses saved height if there is one", ->
         savedState.get.resolves({browserHeight: 768})
         launcher.launch("electron").then ->
-          expect(Renderer.create.lastCall.args[0].height).to.equal(768)
+          expect(Windows.create.lastCall.args[0].height).to.equal(768)
 
       it "uses saved x if there is one", ->
         savedState.get.resolves({browserX: 200})
         launcher.launch("electron").then ->
-          expect(Renderer.create.lastCall.args[0].x).to.equal(200)
+          expect(Windows.create.lastCall.args[0].x).to.equal(200)
 
       it "uses saved y if there is one", ->
         savedState.get.resolves({browserY: 300})
         launcher.launch("electron").then ->
-          expect(Renderer.create.lastCall.args[0].y).to.equal(300)
+          expect(Windows.create.lastCall.args[0].y).to.equal(300)
 
       it "tracks browser state", ->
         launcher.launch("electron").then =>
-          expect(Renderer.trackState).to.be.calledWith(@win, {}, {
+          expect(Windows.trackState).to.be.calledWith(@win, {}, {
             width: "browserWidth"
             height: "browserHeight"
             x: "browserX"
@@ -139,7 +139,7 @@ describe "lib/launcher", ->
             webContents: new EE()
           })
 
-          Renderer.create.onCall(1).resolves(@childWin)
+          Windows.create.onCall(1).resolves(@childWin)
 
           @event = {preventDefault: @sandbox.stub()}
           @win.getPosition = -> [4, 2]
@@ -154,29 +154,29 @@ describe "lib/launcher", ->
 
         it "creates child window", ->
           @openNewWindow().then =>
-            args = Renderer.create.lastCall.args[0]
-            expect(Renderer.create).to.be.calledTwice
+            args = Windows.create.lastCall.args[0]
+            expect(Windows.create).to.be.calledTwice
             expect(args.url).to.equal("some://other.url")
             expect(args.minWidth).to.equal(100)
             expect(args.minHeight).to.equal(100)
 
         it "offsets it from parent by 100px", ->
           @openNewWindow().then =>
-            args = Renderer.create.lastCall.args[0]
+            args = Windows.create.lastCall.args[0]
             expect(args.x).to.equal(104)
             expect(args.y).to.equal(102)
 
         it "passes along web security", ->
           @openNewWindow({chromeWebSecurity: false}).then =>
-            args = Renderer.create.lastCall.args[0]
+            args = Windows.create.lastCall.args[0]
             expect(args.chromeWebSecurity).to.be.false
 
         it "sets unique PROJECT type on each new window", ->
           @openNewWindow().then =>
-            firstArgs = Renderer.create.lastCall.args[0]
+            firstArgs = Windows.create.lastCall.args[0]
             expect(firstArgs.type).to.match(/^PROJECT-CHILD-\d/)
             @win.webContents.emit("new-window", @event, "yet://another.url")
-            secondArgs = Renderer.create.lastCall.args[0]
+            secondArgs = Windows.create.lastCall.args[0]
             expect(secondArgs.type).to.match(/^PROJECT-CHILD-\d/)
             expect(firstArgs.type).not.to.equal(secondArgs.type)
 
@@ -195,7 +195,7 @@ describe "lib/launcher", ->
 
         it "sets menu with dev tools on focus", ->
           @openNewWindow().then =>
-            Renderer.create.lastCall.args[0].onFocus()
+            Windows.create.lastCall.args[0].onFocus()
             ## once for main window, once for child, once for focus
             expect(menu.set).to.be.calledThrice
             expect(menu.set).to.be.calledWith({withDevTools: true})
@@ -223,13 +223,13 @@ describe "lib/launcher", ->
             isDestroyed: @sandbox.stub().returns(false)
             webContents: new EE()
           })
-          Renderer.create.onCall(2).resolves(@grandchildWin)
+          Windows.create.onCall(2).resolves(@grandchildWin)
           @childWin.getPosition = -> [104, 102]
 
           @openNewWindow().then =>
             @childWin.webContents.emit("new-window", @event, "yet://another.url")
-            args = Renderer.create.lastCall.args[0]
-            expect(Renderer.create).to.be.calledThrice
+            args = Windows.create.lastCall.args[0]
+            expect(Windows.create).to.be.calledThrice
             expect(args.url).to.equal("yet://another.url")
             expect(args.type).to.match(/^PROJECT-CHILD-\d/)
             expect(args.x).to.equal(204)

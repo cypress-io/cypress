@@ -4,7 +4,7 @@ _        = require("lodash")
 path     = require("path")
 repl     = require("repl")
 history  = require("repl.history")
-launcher = require("./launcher")
+browsers = require("./browsers")
 Fixtures = require("../spec/server/helpers/fixtures")
 
 replServer = repl.start({
@@ -25,7 +25,7 @@ getObj = ->
     darwin: deploy.getPlatform("darwin")
     linux:  deploy.getPlatform("linux")
     Fixtures: Fixtures
-    launcher: launcher
+    browsers: browsers
 
     reload: ->
       for key of require.cache

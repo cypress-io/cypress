@@ -1,45 +1,45 @@
 require("../spec_helper")
 
-_        = require("lodash")
-os       = require("os")
-cp       = require("child_process")
-path     = require("path")
-http     = require("http")
-Promise  = require("bluebird")
-electron = require("electron")
-inquirer = require("inquirer")
-extension = require("@cypress/core-extension")
-Fixtures = require("../helpers/fixtures")
-pkg      = require("#{root}package.json")
-git      = require("#{root}lib/util/git")
-bundle   = require("#{root}lib/util/bundle")
-connect  = require("#{root}lib/util/connect")
+_          = require("lodash")
+os         = require("os")
+cp         = require("child_process")
+path       = require("path")
+http       = require("http")
+Promise    = require("bluebird")
+electron   = require("electron")
+inquirer   = require("inquirer")
+extension  = require("@cypress/core-extension")
+Fixtures   = require("../helpers/fixtures")
+pkg        = require("#{root}package.json")
+git        = require("#{root}lib/util/git")
+bundle     = require("#{root}lib/util/bundle")
+connect    = require("#{root}lib/util/connect")
 ciProvider = require("#{root}lib/util/ci_provider")
-settings = require("#{root}lib/util/settings")
-Events   = require("#{root}lib/electron/handlers/events")
-project  = require("#{root}lib/electron/handlers/project")
-Renderer = require("#{root}lib/electron/handlers/renderer")
-record   = require("#{root}lib/modes/record")
-headed   = require("#{root}lib/modes/headed")
-headless = require("#{root}lib/modes/headless")
-api      = require("#{root}lib/api")
-user     = require("#{root}lib/user")
-config   = require("#{root}lib/config")
-cache    = require("#{root}lib/cache")
-stdout   = require("#{root}lib/stdout")
-errors   = require("#{root}lib/errors")
-cypress  = require("#{root}lib/cypress")
-Project  = require("#{root}lib/project")
-Server   = require("#{root}lib/server")
-Reporter = require("#{root}lib/reporter")
-launcher = require("#{root}lib/launcher")
-Watchers = require("#{root}lib/watchers")
+settings   = require("#{root}lib/util/settings")
+Events     = require("#{root}lib/gui/events")
+Windows    = require("#{root}lib/gui/windows")
+record     = require("#{root}lib/modes/record")
+headed     = require("#{root}lib/modes/headed")
+headless   = require("#{root}lib/modes/headless")
+api        = require("#{root}lib/api")
+user       = require("#{root}lib/user")
+config     = require("#{root}lib/config")
+cache      = require("#{root}lib/cache")
+stdout     = require("#{root}lib/stdout")
+errors     = require("#{root}lib/errors")
+cypress    = require("#{root}lib/cypress")
+Project    = require("#{root}lib/project")
+Server     = require("#{root}lib/server")
+Reporter   = require("#{root}lib/reporter")
+browsers   = require("#{root}lib/browsers")
+Watchers   = require("#{root}lib/watchers")
+openProject = require("#{root}lib/open_project")
 
 describe "lib/cypress", ->
   beforeEach ->
     @timeout(5000)
 
-    cache.removeSync()
+    cache.__removeSync()
 
     Fixtures.scaffold()
     @todosPath    = Fixtures.projectPath("todos")
@@ -50,7 +50,7 @@ describe "lib/cypress", ->
     ## spawning a separate process
     @sandbox.stub(cypress, "isCurrentlyRunningElectron").returns(true)
     @sandbox.stub(extension, "setHostAndPath").resolves()
-    @sandbox.stub(launcher, "getBrowsers").resolves([])
+    @sandbox.stub(browsers, "get").resolves([])
     @sandbox.stub(process, "exit")
     @sandbox.spy(errors, "log")
     @sandbox.spy(errors, "warning")
@@ -71,7 +71,7 @@ describe "lib/cypress", ->
 
     ## make sure every project
     ## we spawn is closed down
-    project.close()
+    openProject.close()
 
   context "--get-key", ->
     it "writes out key and exits on success", ->
@@ -199,8 +199,8 @@ describe "lib/cypress", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(headless, "waitForSocketConnection")
-      @sandbox.stub(headless, "createRenderer")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 0})
+      @sandbox.stub(browsers, "open")
       @sandbox.stub(git, "_getRemoteOrigin").resolves("remoteOrigin")
 
     it "runs project headlessly and exits with exit code 0 and yells about old version of CLI", ->
@@ -209,7 +209,7 @@ describe "lib/cypress", ->
         ## test that --run-project gets properly aliased to project
         cypress.start(["--run-project=#{@todosPath}"])
       .then =>
-        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
+        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/__all"})
         expect(errors.warning).to.be.calledWith("OLD_VERSION_OF_CLI")
         expect(console.log).to.be.calledWithMatch("You are using an older version of the CLI tools.")
         @expectExitWith(0)
@@ -240,7 +240,7 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--project=#{@todosPath}"])
       .then =>
-        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all")
+        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/__all"})
         @expectExitWith(10)
 
     it "does not generate a project id even if missing one", ->
@@ -269,7 +269,7 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--project=#{@todosPath}", "--spec=tests/test2.coffee"])
       .then =>
-        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
+        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
         @expectExitWith(0)
 
     it "runs project by specific spec with default configuration", ->
@@ -277,7 +277,7 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--project=#{@idsPath}", "--spec=cypress/integration/bar.js", "--config", "port=2020"])
       .then =>
-        expect(headless.createRenderer).to.be.calledWith("http://localhost:2020/__/#/tests/integration/bar.js")
+        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:2020/__/#/tests/integration/bar.js"})
         @expectExitWith(0)
 
     it "runs project by specific absolute spec and exits with status 0", ->
@@ -285,7 +285,7 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"])
       .then =>
-        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
+        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
         @expectExitWith(0)
 
     it "scaffolds out integration and example_spec if they do not exist when not headless", ->
@@ -404,7 +404,11 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--project=#{@todosPath}", "--show-headless-gui"])
       .then =>
-        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all", "http://localhost:8888", true)
+        expect(browsers.open).to.be.calledWithMatch("electron", {
+          url: "http://localhost:8888/__/#/tests/__all"
+          proxyServer: "http://localhost:8888"
+          show: true
+        })
         @expectExitWith(0)
 
     it "turns on reporting", ->
@@ -498,14 +502,14 @@ describe "lib/cypress", ->
     it "logs error and exits when spec file was specified and does not exist", ->
       Project.add(@todosPath)
       .then =>
-        cypress.start(["--project=#{@todosPath}", "--spec=path/to/spec"])
+        cypress.start(["--project=#{@todosPath}", "--cli-version", "--spec=path/to/spec"])
       .then =>
         @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/path/to/spec")
 
     it "logs error and exits when spec absolute file was specified and does not exist", ->
       Project.add(@todosPath)
       .then =>
-        cypress.start(["--project=#{@todosPath}", "--spec=#{@todosPath}/tests/path/to/spec"])
+        cypress.start(["--project=#{@todosPath}", "--cli-version", "--spec=#{@todosPath}/tests/path/to/spec"])
       .then =>
         @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/tests/path/to/spec")
 
@@ -578,7 +582,7 @@ describe "lib/cypress", ->
         .then =>
           cypress.start(["--project=#{@todosPath}"])
         .then =>
-          expect(project.opened().cfg.morgan).to.be.false
+          expect(openProject.getProject().cfg.morgan).to.be.false
           @expectExitWith(0)
 
     describe "config overrides", ->
@@ -587,7 +591,7 @@ describe "lib/cypress", ->
         .then =>
           cypress.start(["--project=#{@todosPath}", "--config=requestTimeout=1234,videoCompression=false"])
         .then =>
-          cfg = project.opened().cfg
+          cfg = openProject.getProject().cfg
 
           expect(cfg.videoCompression).to.be.false
           expect(cfg.requestTimeout).to.eq(1234)
@@ -615,7 +619,7 @@ describe "lib/cypress", ->
 
         cypress.start(["--project=#{@todosPath}", "--port=5555"])
         .then =>
-          expect(project.opened().cfg.port).to.eq(5555)
+          expect(openProject.getProject().cfg.port).to.eq(5555)
           expect(listen).to.be.calledWith(5555)
           expect(open).to.be.calledWithMatch({port: 5555})
           @expectExitWith(0)
@@ -652,7 +656,7 @@ describe "lib/cypress", ->
           "version=0.12.1,foo=bar,host=http://localhost:8888"
         ])
         .then =>
-          expect(project.opened().cfg.environmentVariables).to.deep.eq({
+          expect(openProject.getProject().cfg.environmentVariables).to.deep.eq({
             version: "0.12.1"
             foo: "bar"
             host: "http://localhost:8888"
@@ -700,7 +704,7 @@ describe "lib/cypress", ->
       @sandbox.stub(git, "_getEmail").resolves("brian@cypress.io")
       @sandbox.stub(git, "_getMessage").resolves("foo")
       @sandbox.stub(git, "_getRemoteOrigin").resolves("https://github.com/foo/bar.git")
-      @sandbox.stub(headless, "createRenderer")
+      @sandbox.stub(browsers, "open")
       @sandbox.stub(headless, "waitForSocketConnection")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({
         tests: 1
@@ -771,7 +775,7 @@ describe "lib/cypress", ->
 
       cypress.start(["--project=#{@todosPath}", "--record", "--key=token-123", "--spec=#{@todosPath}/tests/test2.coffee"])
       .then =>
-        expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/integration/test2.coffee")
+        expect(browsers.open).to.be.calledWithMatch("electron", {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
         @expectExitWith(3)
 
     it "uses process.env.CYPRESS_PROJECT_ID", ->
@@ -950,7 +954,7 @@ describe "lib/cypress", ->
       }
 
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
-      @sandbox.stub(Renderer, "create").resolves(@win)
+      @sandbox.stub(Windows, "open").resolves(@win)
       @sandbox.stub(Server.prototype, "startWebsockets")
       @sandbox.spy(Events, "start")
       @sandbox.stub(electron.ipcMain, "on")

@@ -314,11 +314,31 @@ describe "Routes", ->
             })
             .then (res) ->
               expect(res.statusCode).to.eq(200)
-              expect(res.body).to.deep.eq([
-                { name: "integration/sub/sub_test.coffee" }
-                { name: "integration/test1.js" }
-                { name: "integration/test2.coffee" }
-              ])
+
+              body = res.body
+              
+              expect(body.integration).to.have.length(3)
+
+              ## remove the absolute path key
+              body.integration = _.map body.integration, (obj) ->
+                _.pick(obj, "name", "path")
+              
+              expect(res.body).to.deep.eq({
+                integration: [
+                  {
+                    name: "sub/sub_test.coffee"
+                    path: "tests/sub/sub_test.coffee"
+                  }
+                  {
+                    name: "test1.js"
+                    path: "tests/test1.js"
+                  }
+                  {
+                    name: "test2.coffee"
+                    path: "tests/test2.coffee"
+                  }
+                ]
+              })
 
     describe "ids with regular configuration", ->
       it "returns test files as json ignoring *.hot-update.js", ->
@@ -332,14 +352,43 @@ describe "Routes", ->
           })
           .then (res) ->
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.deep.eq([
-              { name: "integration/bar.js" }
-              { name: "integration/baz.js" }
-              { name: "integration/dom.jsx" }
-              { name: "integration/foo.coffee" }
-              { name: "integration/nested/tmp.js" }
-              { name: "integration/noop.coffee" }
-            ])
+            
+            body = res.body
+              
+            expect(body.integration).to.have.length(6)
+
+            ## remove the absolute path key
+            body.integration = _.map body.integration, (obj) ->
+              _.pick(obj, "name", "path")
+
+            expect(body).to.deep.eq({
+              integration: [
+                {
+                  name: "bar.js"
+                  path: "cypress/integration/bar.js"
+                }
+                {
+                  name: "baz.js"
+                  path: "cypress/integration/baz.js"
+                }
+                {
+                  name: "dom.jsx"
+                  path: "cypress/integration/dom.jsx"
+                }
+                {
+                  name: "foo.coffee"
+                  path: "cypress/integration/foo.coffee"
+                }
+                {
+                  name: "nested/tmp.js"
+                  path: "cypress/integration/nested/tmp.js"
+                }
+                {
+                  name: "noop.coffee"
+                  path: "cypress/integration/noop.coffee"
+                }
+              ]
+            })
 
       it "can ignore other files as well", ->
         @setup({
@@ -355,11 +404,31 @@ describe "Routes", ->
           })
           .then (res) ->
             expect(res.statusCode).to.eq(200)
-            expect(res.body).to.deep.eq([
-              { name: "integration/baz.js" }
-              { name: "integration/dom.jsx" }
-              { name: "integration/noop.coffee" }
-            ])
+
+            body = res.body
+              
+            expect(body.integration).to.have.length(3)
+
+            ## remove the absolute path key
+            body.integration = _.map body.integration, (obj) ->
+              _.pick(obj, "name", "path")
+              
+            expect(body).to.deep.eq({
+              integration: [
+                {
+                  name: "baz.js"
+                  path: "cypress/integration/baz.js"
+                }
+                {
+                  name: "dom.jsx"
+                  path: "cypress/integration/dom.jsx"
+                }
+                {
+                  name: "noop.coffee"
+                  path: "cypress/integration/noop.coffee"
+                }
+              ]
+            })
 
   context "GET /__cypress/tests", ->
     describe "ids", ->

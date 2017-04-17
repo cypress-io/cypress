@@ -3,9 +3,9 @@ require("../../spec_helper")
 _ = require("lodash")
 EE = require("events").EventEmitter
 savedState = require("#{root}../lib/saved_state")
-Renderer = require("#{root}../lib/electron/handlers/renderer")
+Windows = require("#{root}../lib/gui/windows")
 
-describe "lib/electron/handlers/renderer", ->
+describe "lib/gui/windows", ->
 
   context "#trackState", ->
     beforeEach ->
@@ -29,7 +29,7 @@ describe "lib/electron/handlers/renderer", ->
       @sandbox.stub(_, "debounce").returnsArg(0)
       @sandbox.stub(savedState, "set")
 
-      Renderer.trackState(@win, {}, @keys)
+      Windows.trackState(@win, {}, @keys)
       @win.emit("resize")
 
       expect(_.debounce).to.be.called
@@ -46,7 +46,7 @@ describe "lib/electron/handlers/renderer", ->
       @sandbox.stub(_, "debounce").returnsArg(0)
       @sandbox.stub(savedState, "set")
 
-      Renderer.trackState(@win, {}, @keys)
+      Windows.trackState(@win, {}, @keys)
       @win.emit("moved")
 
       expect(savedState.set).to.be.calledWith({
@@ -57,7 +57,7 @@ describe "lib/electron/handlers/renderer", ->
     it "saves dev tools state when opened", ->
       @sandbox.stub(savedState, "set")
 
-      Renderer.trackState(@win, {}, @keys)
+      Windows.trackState(@win, {}, @keys)
       @win.webContents.emit("devtools-opened")
 
       expect(savedState.set).to.be.calledWith({whatsUpWithDevTools: true})
@@ -65,17 +65,17 @@ describe "lib/electron/handlers/renderer", ->
     it "saves dev tools state when closed", ->
       @sandbox.stub(savedState, "set")
 
-      Renderer.trackState(@win, {}, @keys)
+      Windows.trackState(@win, {}, @keys)
       @win.webContents.emit("devtools-closed")
 
       expect(savedState.set).to.be.calledWith({whatsUpWithDevTools: false})
 
     it "opens dev tools if saved state is open", ->
-      Renderer.trackState(@win, {whatsUpWithDevTools: true}, @keys)
+      Windows.trackState(@win, {whatsUpWithDevTools: true}, @keys)
 
       expect(@win.webContents.openDevTools).to.be.called
 
     it "does not open dev tools if saved state is not open", ->
-      Renderer.trackState(@win, {}, @keys)
+      Windows.trackState(@win, {}, @keys)
 
       expect(@win.webContents.openDevTools).not.to.be.called

@@ -2,20 +2,16 @@ require("../../spec_helper")
 
 random   = require("randomstring")
 Promise  = require("bluebird")
-inquirer = require("inquirer")
 electron = require("electron")
 user     = require("#{root}../lib/user")
 video    = require("#{root}../lib/video")
 errors   = require("#{root}../lib/errors")
 Project  = require("#{root}../lib/project")
 Reporter = require("#{root}../lib/reporter")
-electronUtils = require("#{root}../lib/electron/utils")
-project  = require("#{root}../lib/electron/handlers/project")
 headless = require("#{root}../lib/modes/headless")
-Renderer = require("#{root}../lib/electron/handlers/renderer")
-automation = require("#{root}../lib/electron/handlers/automation")
+openProject = require("#{root}../lib/open_project")
 
-describe "electron/headless", ->
+describe "lib/modes/headless", ->
   beforeEach ->
     @projectInstance = Project("path/to/project")
 
@@ -33,16 +29,16 @@ describe "electron/headless", ->
 
   context ".ensureAndOpenProjectByPath", ->
     beforeEach ->
-      @sandbox.stub(project, "open").resolves(@projectInstance)
+      @sandbox.stub(openProject, "create").resolves(@projectInstance)
 
-    it "opens the project if it exists at projectPath", ->
+    it "creates the project if it exists at projectPath", ->
       @sandbox.stub(Project, "exists").resolves(true)
       @sandbox.spy(Project, "add")
 
       headless.ensureAndOpenProjectByPath(1234, {projectPath: "path/to/project"})
       .then ->
         expect(Project.add).not.to.be.called
-        expect(project.open).to.be.calledWith("path/to/project")
+        expect(openProject.create).to.be.calledWith("path/to/project")
 
     it "prompts to add the project if it doesnt exist at projectPath", ->
       @sandbox.stub(Project, "exists").resolves(false)
@@ -53,26 +49,21 @@ describe "electron/headless", ->
       .then ->
         expect(console.log).to.be.calledWithMatch("Added this project:", "path/to/project")
         expect(Project.add).to.be.calledWith("path/to/project")
-        expect(project.open).to.be.calledWith("path/to/project")
+        expect(openProject.create).to.be.calledWith("path/to/project")
 
   context ".openProject", ->
-    it "calls project.open with projectPath + options", ->
-      @sandbox.stub(project, "open").resolves()
-
-      fn1 = ->
-      fn2 = ->
+    it "calls openProject.create with projectPath + options", ->
+      @sandbox.stub(openProject, "create").resolves()
 
       options = {
         port: 8080
         environmentVariables: {foo: "bar"}
         projectPath: "path/to/project/foo"
-        onAutomationRequest: fn1
-        afterAutomationRequest: fn2
       }
 
       headless.openProject(1234, options)
       .then ->
-        expect(project.open).to.be.calledWithMatch("path/to/project/foo", {
+        expect(openProject.create).to.be.calledWithMatch("path/to/project/foo", {
           port: 8080
           projectPath: "path/to/project/foo"
           environmentVariables: {foo: "bar"}
@@ -81,115 +72,113 @@ describe "electron/headless", ->
           socketId: 1234
           report: true
           isHeadless: true
-          onAutomationRequest: fn1
-          afterAutomationRequest: fn2
         })
 
-  context ".createRenderer", ->
-    beforeEach ->
-      @win = @sandbox.stub({
-        setSize: ->
-        center: ->
-        webContents: {
-          on: @sandbox.stub()
-          getFrameRate: @sandbox.stub()
-          setFrameRate: @sandbox.stub()
-        }
-      })
+  context ".getElectronProps", ->
+    it "sets width and height", ->
+      props = headless.getElectronProps()
 
-      @sandbox.stub(electronUtils, "setProxy").withArgs("http://localhost:1234").resolves()
+      expect(props.width).to.eq(1280)
+      expect(props.height).to.eq(720)
 
-      @create = @sandbox.stub(Renderer, "create").resolves(@win)
+    it "sets show and devTools to boolean", ->
+      props = headless.getElectronProps(false)
 
-    it "calls Renderer.create with url + options", ->
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false)
-      .then =>
-        expect(@create).to.be.calledWith({
-          url: "foo/bar/baz"
-          width: 1280
-          height: 720
-          show: false
-          frame: false
-          devTools: false
-          chromeWebSecurity: undefined
-          type: "PROJECT"
-        })
+      expect(props.show).to.be.false
+      expect(props.devTools).to.be.false
 
-    it "calls win.setSize on the resolved window", ->
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234")
-      .then =>
-        expect(@win.center).to.be.calledOnce
+      props = headless.getElectronProps(true)
 
-    it "resets framerate and writes images on paint", ->
+      expect(props.show).to.be.true
+      expect(props.devTools).to.be.true
+
+    it "sets recordFrameRate and onPaint when write is true", ->
       write = @sandbox.stub()
 
       image = {
         toJPEG: @sandbox.stub().returns("imgdata")
       }
 
-      @win.webContents.on.withArgs("paint").yields({}, false, image)
+      props = headless.getElectronProps(true, {}, write)
 
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false, false, @projectInstance, write)
-      .then =>
-        expect(image.toJPEG).to.be.calledWith(100)
-        expect(write).to.be.calledWith("imgdata")
+      expect(props.recordFrameRate).to.eq(20)
 
-    it "does not do anything on paint when write is null", ->
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false, false, @projectInstance, null)
-      .then =>
-        expect(@win.webContents.on).not.to.be.calledWith("paint")
+      props.onPaint({}, false, image)
 
-    it "can show window", ->
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234", true, false)
-      .then =>
-        expect(@create).to.be.calledWith({
-          url: "foo/bar/baz"
-          width: 1280
-          height: 720
-          show: true
-          frame: true
-          devTools: true
-          chromeWebSecurity: false
-          type: "PROJECT"
-        })
+      expect(write).to.be.calledWith("imgdata")
 
-    it "sets options.show = false on new-window", ->
+    it "does not set recordFrameRate or onPaint when write is falsy", ->
+      props = headless.getElectronProps(true, {}, false)
+
+      expect(props).not.to.have.property("recordFrameRate")
+      expect(props).not.to.have.property("onPaint")
+
+    it "sets options.show = false onNewWindow callback", ->
       options = {show: true}
 
-      @win.webContents.on.withArgs("new-window").yields(
-        {}, "foo", "bar", "baz", options
-      )
+      props = headless.getElectronProps()
+      props.onNewWindow(null, null, null, null, options)
 
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234")
-      .then =>
-        expect(options.show).to.eq(false)
+      expect(options.show).to.eq(false)
 
     it "emits exitEarlyWithErr when webContents crashed", ->
       @sandbox.spy(errors, "get")
       @sandbox.spy(errors, "log")
 
-      @win.webContents.on.withArgs("crashed").yields({}, false)
-
       emit = @sandbox.stub(@projectInstance, "emit")
 
-      headless.createRenderer("foo/bar/baz", "http://localhost:1234", false, false, @projectInstance)
-      .then ->
-        expect(errors.get).to.be.calledWith("RENDERER_CRASHED")
-        expect(errors.log).to.be.calledOnce
-        expect(emit).to.be.calledWithMatch("exitEarlyWithErr", "We detected that the Chromium Renderer process just crashed.")
+      props = headless.getElectronProps(true, @projectInstance)
 
-  context ".closeAnyOpenBrowser", ->
+      props.onCrashed()
+
+      expect(errors.get).to.be.calledWith("RENDERER_CRASHED")
+      expect(errors.log).to.be.calledOnce
+      expect(emit).to.be.calledWithMatch("exitEarlyWithErr", "We detected that the Chromium Renderer process just crashed.")
+
+  context ".launchBrowser", ->
     beforeEach ->
-      @sandbox.spy(Renderer, "destroy")
-      @sandbox.spy(project, "closeBrowser")
+      @launch = @sandbox.stub(openProject, "launch")
 
-      headless.closeAnyOpenBrowser()
+      @sandbox.stub(headless, "getElectronProps").returns({foo: "bar"})
 
-    it "calls Renderer.destroy(PROJECT)", ->
-      expect(Renderer.destroy).to.be.calledWith("PROJECT")
+      @sandbox.stub(headless, "screenshotMetadata").returns({a: "a"})
 
-    it "calls project.closeBrowser", ->
-      expect(project.closeBrowser).to.be.calledOnce
+    it "gets electron props by default", ->
+      screenshots = []
+
+      headless.launchBrowser({
+        browser: undefined
+        spec: null
+        project: @projectInstance
+        write: "write"
+        gui: null
+        screenshots: screenshots
+      })
+
+      expect(headless.getElectronProps).to.be.calledWith(false, @projectInstance, "write")
+
+      expect(@launch).to.be.calledWithMatch("electron", null, {foo: "bar"})
+
+      browserOpts = @launch.firstCall.args[2]
+
+      onAfterResponse = browserOpts.automationMiddleware.onAfterResponse
+
+      expect(onAfterResponse).to.be.a("function")
+
+      onAfterResponse("take:screenshot")
+      onAfterResponse("get:cookies")
+
+      expect(screenshots).to.deep.eq([{a: "a"}])
+
+    it "can launch chrome", ->
+      headless.launchBrowser({
+        browser: "chrome"
+        spec: "spec"
+      })
+
+      expect(headless.getElectronProps).not.to.be.called
+
+      expect(@launch).to.be.calledWithMatch("chrome", "spec", {})
 
   context ".postProcessRecording", ->
     beforeEach ->
@@ -209,28 +198,19 @@ describe "electron/headless", ->
       .then ->
         expect(video.process).not.to.be.called
 
-  context ".waitForRendererToConnect", ->
-    it "resolves on waitForSocketConnection", ->
-      @sandbox.stub(headless, "waitForRendererToConnect").resolves()
-      headless.waitForRendererToConnect()
-
-    it "passes project + id", ->
-      @sandbox.stub(headless, "waitForRendererToConnect").resolves()
-      headless.waitForRendererToConnect(@projectInstance, 1234)
-      .then =>
-        expect(headless.waitForRendererToConnect).to.be.calledWith(@projectInstance, 1234)
-
+  context ".waitForBrowserToConnect", ->
     it "throws TESTS_DID_NOT_START_FAILED after 3 connection attempts", ->
       @sandbox.spy(errors, "warning")
       @sandbox.spy(errors, "get")
-      @sandbox.spy(headless, "closeAnyOpenBrowser")
+      @sandbox.spy(openProject, "closeBrowser")
+      @sandbox.stub(headless, "launchBrowser").resolves()
       @sandbox.stub(headless, "waitForSocketConnection").resolves(Promise.delay(1000))
-      @sandbox.stub(headless, "createRenderer").resolves()
       emit = @sandbox.stub(@projectInstance, "emit")
 
-      headless.waitForRendererToConnect({openProject: @projectInstance, timeout: 10})
+      headless.waitForBrowserToConnect({project: @projectInstance, timeout: 10})
       .then ->
-        expect(headless.closeAnyOpenBrowser).to.be.calledThrice
+        expect(openProject.closeBrowser).to.be.calledThrice
+        expect(headless.launchBrowser).to.be.calledThrice
         expect(errors.warning).to.be.calledWith("TESTS_DID_NOT_START_RETRYING", "Retrying...")
         expect(errors.warning).to.be.calledWith("TESTS_DID_NOT_START_RETRYING", "Retrying again...")
         expect(errors.get).to.be.calledWith("TESTS_DID_NOT_START_FAILED")
@@ -242,9 +222,6 @@ describe "electron/headless", ->
         on: ->
         removeListener: ->
       })
-
-    it "returns promise instance", ->
-      expect(headless.waitForSocketConnection(@projectStub, 1234)).to.be.instanceOf(Promise)
 
     it "attaches fn to 'socket:connected' event", ->
       headless.waitForSocketConnection(@projectStub, 1234)
@@ -295,7 +272,7 @@ describe "electron/headless", ->
       process.nextTick =>
         @projectInstance.emit("end", {foo: "bar"})
 
-      headless.waitForTestsToFinishRunning({openProject: @projectInstance})
+      headless.waitForTestsToFinishRunning({project: @projectInstance})
       .then (obj) ->
         expect(obj).to.deep.eq({
           foo: "bar"
@@ -308,7 +285,7 @@ describe "electron/headless", ->
         @projectInstance.emit("end", {foo: "bar"})
         expect(@projectInstance.listeners("end")).to.have.length(0)
 
-      headless.waitForTestsToFinishRunning({openProject: @projectInstance})
+      headless.waitForTestsToFinishRunning({project: @projectInstance})
 
     it "end event resolves with obj, displays stats, displays screenshots, setsFailingTests", ->
       started = new Date
@@ -332,7 +309,7 @@ describe "electron/headless", ->
         @projectInstance.emit("end", stats)
 
       headless.waitForTestsToFinishRunning({
-        openProject: @projectInstance,
+        project: @projectInstance,
         name: "foo.mp4"
         cname: "foo-compressed.mp4"
         videoCompression: 32
@@ -375,7 +352,7 @@ describe "electron/headless", ->
         expect(@projectInstance.listeners("exitEarlyWithErr")).to.have.length(0)
 
       headless.waitForTestsToFinishRunning({
-        openProject: @projectInstance,
+        project: @projectInstance,
         name: "foo.mp4"
         cname: "foo-compressed.mp4"
         videoCompression: 32
@@ -409,11 +386,12 @@ describe "electron/headless", ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureAuthToken")
       @sandbox.stub(headless, "getId").returns(1234)
-      @sandbox.stub(headless, "ensureAndOpenProjectByPath").resolves(@projectInstance)
+      @sandbox.stub(headless, "ensureAndOpenProjectByPath").resolves(openProject)
       @sandbox.stub(headless, "waitForSocketConnection").resolves()
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
-      @sandbox.stub(headless, "createRenderer").resolves()
-      @sandbox.spy(headless,  "waitForRendererToConnect")
+      @sandbox.spy(headless,  "waitForBrowserToConnect")
+      @sandbox.stub(openProject, "launch").resolves()
+      @sandbox.stub(openProject, "getProject").resolves(@projectInstance)
 
     it "no longer ensures user session", ->
       headless.run()
@@ -430,11 +408,11 @@ describe "electron/headless", ->
       .then ->
         expect(headless.ensureAndOpenProjectByPath).to.be.calledWithMatch(1234, {foo: "bar"})
 
-    it "passes project + id to waitForRendererToConnect", ->
+    it "passes project + id to waitForBrowserToConnect", ->
       headless.run()
       .then =>
-        expect(headless.waitForRendererToConnect).to.be.calledWithMatch({
-          openProject: @projectInstance
+        expect(headless.waitForBrowserToConnect).to.be.calledWithMatch({
+          project: @projectInstance
           id: 1234
         })
 
@@ -442,19 +420,10 @@ describe "electron/headless", ->
       headless.run()
       .then =>
         expect(headless.waitForTestsToFinishRunning).to.be.calledWithMatch({
-          openProject: @projectInstance
+          project: @projectInstance
         })
 
-    it "passes project.ensureSpecUrl to createRenderer", ->
-      @sandbox.stub(@projectInstance, "ensureSpecUrl").resolves("foo/bar")
-
-      headless.run()
-      .then ->
-        expect(headless.createRenderer).to.be.calledWith("foo/bar")
-
-    it "passes showHeadlessGui to createRenderer", ->
-      @sandbox.stub(@projectInstance, "ensureSpecUrl").resolves("foo/bar")
-
+    it "passes showHeadlessGui to openProject.launch", ->
       headless.run({showHeadlessGui: true})
       .then ->
-        expect(headless.createRenderer).to.be.calledWith("foo/bar", "http://localhost:12345", true)
+        expect(openProject.launch).to.be.calledWithMatch("electron", undefined, {show: true})
