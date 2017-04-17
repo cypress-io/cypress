@@ -1,6 +1,6 @@
 require("../../spec_helper")
 
-cookies = require("#{root}../lib/electron/handlers/cookies")
+cookies = require("#{root}../lib/gui/cookies")
 
 cookiesStub = {
   remove: (url, name, cb) ->
@@ -47,7 +47,7 @@ cookiesArray = [
   }
 ]
 
-describe "electron/cookies", ->
+describe "gui/cookies", ->
   context ".set", ->
     it "sets url onto props", ->
       @sandbox.spy(cookiesStub, "set")
@@ -92,4 +92,3 @@ describe "electron/cookies", ->
         expect(cookiesStub.remove.firstCall).to.be.calledWith("https://.github.com/foo", "logged_in")
         expect(cookiesStub.remove.secondCall).to.be.calledWith("http://.github.com/", "dotcom_user")
         expect(cookiesStub.remove.thirdCall).to.be.calledWith("https://github.com/", "user_session")
-

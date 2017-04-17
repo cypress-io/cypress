@@ -5,6 +5,7 @@ Promise  = require("bluebird")
 minimist = require("minimist")
 zip      = require("./zip")
 ask      = require("./ask")
+bump     = require("./bump")
 meta     = require("./meta")
 upload   = require("./upload")
 Base     = require("./base")
@@ -47,6 +48,17 @@ deploy = {
     options = @parseOptions(process.argv)
 
     @getPlatform(platform?.osName, options).build()
+
+  bump: ->
+    ask.whichBumpTask()
+    .then (task) ->
+      switch task
+        when "run"
+          bump.run()
+        when "version"
+          ask.whichVersion(meta.distDir)
+          .then (v) ->
+            bump.version(v)
 
   release: ->
     ## read off the argv

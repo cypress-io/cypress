@@ -179,6 +179,8 @@ gulp.task "build", deploy.build
 
 gulp.task "deploy", deploy.deploy
 
+gulp.task "bump", deploy.bump
+
 gulp.task "app",        ["app:build", "app:watch"]
 
 gulp.task "app:build",  ["bower"], (cb) ->

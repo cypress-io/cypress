@@ -42,8 +42,14 @@ describe "lib/socket", ->
         @options = {
           onSavedStateChanged: @sandbox.spy()
         }
-        @watchers = {}
-        @server.startWebsockets(@watchers, @cfg, @options)
+        
+        @watchers = {
+          watch: ->
+        }
+
+        @automation = automation.create()
+        
+        @server.startWebsockets(@watchers, @automation, @cfg, @options)
         @socket = @server._socket
 
         done = _.once(done)
@@ -90,7 +96,7 @@ describe "lib/socket", ->
 
         beforeEach (done) ->
           @socket.io.on "connection", (@extClient) =>
-            @extClient.on "automation:connected", ->
+            @extClient.on "automation:client:connected", ->
               done()
 
           extension.connect(@cfg.proxyUrl, @cfg.socketIoRoute, socketIo.client)
@@ -174,7 +180,7 @@ describe "lib/socket", ->
           .withArgs(1, {code: code})
           .yieldsAsync(["string"])
 
-          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string"}, (resp) ->
+          @client.emit "is:automation:client:connected", {element: "__cypress-string", string: "string"}, (resp) ->
             expect(resp).to.be.true
             done()
 
@@ -190,7 +196,7 @@ describe "lib/socket", ->
           .onCall(2).rejects(err)
           .onCall(3).resolves()
 
-          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string"}, (resp) ->
+          @client.emit "is:automation:client:connected", {element: "__cypress-string", string: "string"}, (resp) ->
             expect(oA.callCount).to.be.eq(4)
 
             expect(resp).to.be.true
@@ -208,7 +214,7 @@ describe "lib/socket", ->
           .yieldsAsync(["foobarbaz"])
 
           ## reduce the timeout so we dont have to wait so long
-          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string", timeout: 100}, (resp) ->
+          @client.emit "is:automation:client:connected", {element: "__cypress-string", string: "string", timeout: 100}, (resp) ->
             expect(resp).to.be.false
             done()
 
@@ -217,7 +223,7 @@ describe "lib/socket", ->
           oA = @sandbox.stub(@socket, "onAutomation").rejects(new Error)
 
           ## reduce the timeout so we dont have to wait so long
-          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string", timeout: 100}, (resp) ->
+          @client.emit "is:automation:client:connected", {element: "__cypress-string", string: "string", timeout: 100}, (resp) ->
             callCount = oA.callCount
 
             ## it retries every 25ms so explect that
@@ -262,18 +268,18 @@ describe "lib/socket", ->
 
         it "throws when onAutomationRequest rejects"
 
-        it "is:automation:connected returns true", (done) ->
-          @oar.withArgs("is:automation:connected", {string: "foo"}).resolves(true)
+        it "is:automation:client:connected returns true", (done) ->
+          @oar.withArgs("is:automation:client:connected", {string: "foo"}).resolves(true)
 
-          @client.emit "is:automation:connected", {string: "foo"}, (resp) ->
+          @client.emit "is:automation:client:connected", {string: "foo"}, (resp) ->
             expect(resp).to.be.true
             done()
 
     context "on(automation:push:request)", ->
       beforeEach (done) ->
-        @socketClient.on "automation:connected", -> done()
+        @socketClient.on "automation:client:connected", -> done()
 
-        @client.emit("automation:connected")
+        @client.emit("automation:client:connected")
 
       it "emits 'automation:push:message'", (done) ->
         data = {cause: "explicit", cookie: {name: "foo", value: "bar"}, removed: true}

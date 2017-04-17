@@ -3,12 +3,25 @@ os    = require("os")
 Menu  = require("electron").Menu
 shell = require("electron").shell
 
+appData = require("../util/app_data")
+open    = require("../util/open")
+
+onUpdatesClicked = ->
+onLogOutClicked = ->
+
 module.exports = {
   set: (options = {}) ->
     _.defaults(options, {
-      onUpdatesClicked: ->
-      onLogOutClicked: ->
+      withDevTools: false
     })
+
+    ## these are set by modes/headed.coffee and need to be preserved
+    ## if the menu is set again by launcher.coffee when the Electron
+    ## browser is run
+    if options.onUpdatesClicked
+      onUpdatesClicked = options.onUpdatesClicked
+    if options.onLogOutClicked
+      onLogOutClicked = options.onLogOutClicked
 
     template = [
       {
@@ -21,7 +34,7 @@ module.exports = {
           }
           {
             label: "Check for Updates"
-            click: options.onUpdatesClicked
+            click: onUpdatesClicked
           }
           {
             type: "separator"
@@ -33,7 +46,15 @@ module.exports = {
           }
           {
             label: "Log Out"
-            click: options.onLogOutClicked
+            click: onLogOutClicked
+          }
+          {
+            type: "separator"
+          }
+          {
+            label: "View App Data"
+            click: ->
+              open.opn(appData.path())
           }
           {
             type: "separator"
@@ -123,7 +144,7 @@ module.exports = {
         label: name
         submenu: [
           {
-            label: "About " + name
+            label: "About #{name}"
             role: "about"
           }
           {
@@ -138,7 +159,7 @@ module.exports = {
             type: "separator"
           }
           {
-            label: "Hide " + name
+            label: "Hide #{name}"
             accelerator: "Command+H"
             role: "hide"
           }
@@ -164,7 +185,7 @@ module.exports = {
         ]
       })
 
-    if process.env["CYPRESS_ENV"] is "development"
+    if options.withDevTools
       template.push(
         {
           label: "Developer Tools"

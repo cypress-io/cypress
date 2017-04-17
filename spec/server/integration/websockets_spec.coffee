@@ -10,6 +10,7 @@ socketIo    = require("@cypress/core-socket")
 httpsServer = require("@cypress/core-https-proxy/test/helpers/https_server")
 config      = require("#{root}lib/config")
 Server      = require("#{root}lib/server")
+Automation  = require("#{root}lib/automation")
 Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
 cyPort  = 12345
@@ -148,7 +149,9 @@ describe "Web Sockets", ->
 
   context "socket.io handling", ->
     beforeEach ->
-      @server.startWebsockets({}, @cfg, {})
+      @automation = Automation.create(@cfg.namespace, @cfg.socketIoCookie, @cfg.screenshotsFolder)
+    
+      @server.startWebsockets({}, @automation, @cfg, {})
 
     context "http", ->
       beforeEach (done) ->

@@ -5,8 +5,8 @@ url          = require("url")
 http         = require("http")
 path         = require("path")
 send         = require("send")
-allowDestroy = require("server-destroy-vvo")
 errors       = require("./errors")
+allowDestroy = require("./util/server_destroy")
 
 onRequest = (req, res, fileServerFolder) ->
   args = _.compact([
@@ -49,7 +49,6 @@ module.exports = {
             "http://localhost:" + @port()
 
           close: ->
-            new Promise (resolve) ->
-              srv.destroy(resolve)
+            srv.destroyAsync()
       })
 }

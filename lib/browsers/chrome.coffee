@@ -1,33 +1,17 @@
-_         = require("lodash")
-fs        = require("fs-extra")
-path      = require("path")
+fs       = require("fs-extra")
 Promise   = require("bluebird")
-launcher  = require("@cypress/core-launcher")
 extension = require("@cypress/core-extension")
-appData   = require("./util/app_data")
+appData   = require("../util/app_data")
+utils     = require("./utils")
 
-fs              = Promise.promisifyAll(fs)
-profiles        = appData.path("browsers")
+fs = Promise.promisifyAll(fs)
+
 pathToExtension = extension.getPathToExtension()
 pathToTheme     = extension.getPathToTheme()
-instance        = null
-
-kill = (unbind) ->
-  ## cleanup our running browser
-  ## instance
-  return if not instance
-
-  if unbind
-    instance.removeAllListeners()
-  instance.kill()
-  instance = null
-
-process.once "exit", kill
 
 defaultArgs = [
   "--test-type"
   "--ignore-certificate-errors"
-  "--load-extension=#{pathToExtension},#{pathToTheme}"
   "--start-maximized"
   "--silent-debugger-extension-api"
   "--no-default-browser-check"
@@ -65,32 +49,32 @@ defaultArgs = [
 ]
 
 module.exports = {
-  args: defaultArgs
+  _writeExtension: (proxyUrl, socketIoRoute) ->
+    ## get the string bytes for the final extension file
+    extension.setHostAndPath(proxyUrl, socketIoRoute)
+    .then (str) ->
+      extensionDest = appData.path("extensions", "chrome")
+      extensionBg   = appData.path("extensions", "chrome", "background.js")
 
-  close: kill
+      ## copy the extension src to the extension dist
+      utils.copyExtension(pathToExtension, extensionDest)
+      .then ->
+        ## and overwrite background.js with the final string bytes
+        fs.writeFileAsync(extensionBg, str)
+      .return(extensionDest)
 
-  ensureProfile: (name) ->
-    p = path.join(profiles, name)
+  open: (browserName, url, options = {}, automation) ->
+    args = defaultArgs.concat(options.browserArgs)
 
-    fs.ensureDirAsync(p).return(p)
+    Promise.all([
+      ## ensure that we have a chrome profile dir
+      utils.ensureProfile(browserName),
 
-  getBrowsers: ->
-    launcher.detect()
-
-  launch: (name, url, options = {}) ->
-    kill(true)
-
-    _.defaults options,
-      args: []
-      onBrowserOpen: ->
-      onBrowserClose: ->
-
-    args = defaultArgs.concat(options.args)
-
-    ## ensure we have a folder created
-    ## for this browser profile
-    @ensureProfile(name)
-    .then (dir) ->
+      @_writeExtension(options.proxyUrl, options.socketIoRoute)
+    ])
+    .spread (dir, dest) ->
+      ## we now know where this extension is going
+      args.push("--load-extension=#{dest},#{pathToTheme}")
 
       ## this overrides any previous user-data-dir args
       ## by being the last one
@@ -103,28 +87,5 @@ module.exports = {
         args.push("--disable-web-security")
         args.push("--allow-running-insecure-content")
 
-      launcher()
-      .call("launch", name, url, args)
-      .then (i) ->
-        instance = i
-
-        instance.once "exit", ->
-          options.onBrowserClose()
-
-        ## TODO: instead of waiting an arbitrary
-        ## amount of time here we could instead
-        ## wait for the socket.io connect event
-        ## which would mean that our browser is
-        ## completely rendered and open. that would
-        ## mean moving this code out of here and
-        ## into the project itself
-        ## (just like headless code)
-        ## ----------------------------
-        ## give a little padding around
-        ## the browser opening
-        Promise.delay(1000)
-        .then ->
-          options.onBrowserOpen()
-
-          return instance
+      utils.launch(browserName, url, args)
 }

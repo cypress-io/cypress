@@ -26,7 +26,7 @@ describe "$Cypress.Cy Commands", ->
 
   context "custom commands", ->
     beforeEach ->
-      @Cypress.addParentCommand "dashboard.selectRenderer", =>
+      @Cypress.addParentCommand "dashboard.selectWindows", =>
         @cy
           .chain()
           .get("[contenteditable]")
@@ -51,7 +51,7 @@ describe "$Cypress.Cy Commands", ->
       ce = @cy.$$("[contenteditable]").first()
 
       @cy
-        .command("dashboard.selectRenderer").then ($ce) ->
+        .command("dashboard.selectWindows").then ($ce) ->
           expect($ce.get(0)).to.eq(ce.get(0))
 
   describe "errors", ->

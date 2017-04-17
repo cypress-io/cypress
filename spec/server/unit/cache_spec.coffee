@@ -10,55 +10,8 @@ Fixtures  = require("../helpers/fixtures")
 fs = Promise.promisifyAll(fs)
 
 describe "lib/cache", ->
-  context "#ensureExists", ->
-    it "creates empty cache file with defaults", ->
-      cache.ensureExists().then =>
-        fs.readJsonAsync(cache.path).then (json) ->
-          expect(json).to.deep.eq {
-            USER: {}
-            PROJECTS: []
-          }
-
-    it "detects when not defaults and automatically inserts PROJECTS", ->
-      fs.writeJsonAsync(cache.path, {USER: {name: "brian"}})
-      .then =>
-        cache.ensureExists()
-      .then =>
-        fs.readJsonAsync(cache.path).then (json) ->
-          expect(json).to.deep.eq {
-            USER: {name: "brian"}
-            PROJECTS: []
-          }
-
-    it "detects when not defaults and automatically inserts USER", ->
-      fs.writeJsonAsync(cache.path, {PROJECTS: {asdf: "jkl"}})
-      .then =>
-        cache.ensureExists()
-      .then =>
-        fs.readJsonAsync(cache.path).then (json) ->
-          expect(json).to.deep.eq {
-            USER: {}
-            PROJECTS: []
-          }
-
-    it "converts legacy cache projects to array", ->
-      fs.writeFileAsync(cache.path, Fixtures.get("server/old_cache.json"))
-      .then =>
-        cache.ensureExists()
-      .then =>
-        fs.readJsonAsync(cache.path).then (json) ->
-          expect(json).to.deep.eq {
-            USER: {name: "brian", sessionToken: "abc123"}
-            PROJECTS: [
-              "/Users/bmann/Dev/examples-angular-circle-ci"
-              "/Users/bmann/Dev/cypress-core-gui"
-              "/Users/bmann/Dev/cypress-app/spec/fixtures/projects/todos"
-            ]
-          }
-
-    it "creates cache file in root/.cy/{environment}/cache", ->
-      cache.ensureExists().then ->
-        fs.statAsync(cwd(".cy", process.env["CYPRESS_ENV"], "cache"))
+  beforeEach ->
+    cache.remove()
 
   context "#_applyRewriteRules", ->
     beforeEach ->
@@ -101,13 +54,10 @@ describe "lib/cache", ->
       })
 
   context "projects", ->
-    beforeEach ->
-      cache.ensureExists()
-
     describe "#insertProject", ->
       it "inserts project by path", ->
         cache.insertProject("foo/bar").then =>
-          cache._getProjects().then (projects) ->
+          cache.__get("PROJECTS").then (projects) ->
             expect(projects).to.deep.eq ["foo/bar"]
 
       it "is a noop if project already exists by id", ->
@@ -115,20 +65,17 @@ describe "lib/cache", ->
         .then =>
           cache.insertProject("foo/bar")
         .then =>
-          cache._getProjects().then (projects) ->
+          cache.__get("PROJECTS").then (projects) ->
             expect(projects).to.deep.eq(["foo/bar"])
 
       it "can insert multiple projects", ->
-        insert = (path) =>
-          cache.insertProject(path)
-
-        insert("foo")
+        Promise.all([
+          cache.insertProject("foo")
+          cache.insertProject("bar")
+          cache.insertProject("baz")
+        ])
         .then =>
-          insert("bar")
-        .then =>
-          insert("baz")
-        .then =>
-          cache._getProjects().then (projects) ->
+          cache.__get("PROJECTS").then (projects) ->
             expect(projects).to.deep.eq(["foo", "bar", "baz"])
 
     describe "#removeProject", ->
@@ -137,7 +84,7 @@ describe "lib/cache", ->
         .then =>
           cache.removeProject("/Users/brian/app")
         .then =>
-          cache._getProjects().then (projects) ->
+          cache.__get("PROJECTS").then (projects) ->
             expect(projects).to.deep.eq []
 
     describe "#getProjectPaths", ->
@@ -169,53 +116,10 @@ describe "lib/cache", ->
           ## we have to wait on the write event because
           ## of process.nextTick
           Promise.delay(100).then =>
-            cache._getProjects().then (projects) ->
+            cache.__get("PROJECTS").then (projects) ->
               expect(projects).to.deep.eq ["/Users/brian/app"]
 
-    describe "#_removeProjects", ->
-      it "removes projects by path",  ->
-        cache.insertProject("/Users/brian/app")
-        .then =>
-          cache.insertProject("/Users/sam/app2")
-        .then =>
-          cache._getProjects().then (projects) =>
-            cache._removeProjects(projects, "/Users/sam/app2")
-        .then =>
-          cache._getProjects().then (projects) ->
-            expect(projects).to.deep.eq ["/Users/brian/app"]
-
-  context "sessions", ->
-    describe "#getUser", ->
-      beforeEach ->
-        cache.ensureExists()
-
-      it "returns session id", ->
-        setUser = {id: 1, name: "brian", email: "a@b.com", authToken: "abc"}
-        cache.setUser(setUser).then =>
-          cache.getUser().then (user) ->
-            expect(user).to.deep.eq setUser
-
-    describe "#setUser", ->
-      beforeEach ->
-        cache.ensureExists()
-
-      it "sets USER into .cy", ->
-        setUser = {id: 1, name: "brian", email: "a@b.com", authToken: "abc"}
-        cache.setUser(setUser).then (contents) ->
-          expect(contents.USER).to.eq setUser
-
-  context "setters + getters", ->
-    describe "#_set", ->
-      beforeEach ->
-        cache.ensureExists()
-
-      it "does not override existing properties", ->
-        cache.write({foo: "foo"}).then (contents) =>
-          cache._set({bar: "bar"}).then (contents) ->
-            expect(contents.foo).to.eq "foo"
-            expect(contents.bar).to.eq "bar"
-
-  context "#getUser / #setUser", ->
+  context "#setUser / #getUser", ->
     beforeEach ->
       @user = {
         id: 1

@@ -9,8 +9,8 @@ human        = require("human-interval")
 morgan       = require("morgan")
 express      = require("express")
 Promise      = require("bluebird")
-allowDestroy = require("server-destroy-vvo")
 Fixtures     = require("../helpers/fixtures")
+allowDestroy = require("#{root}lib/util/server_destroy")
 user         = require("#{root}lib/user")
 cypress      = require("#{root}lib/cypress")
 Project      = require("#{root}lib/project")
@@ -47,8 +47,7 @@ startServer = (obj) ->
       resolve(srv)
 
 stopServer = (srv) ->
-  new Promise (resolve) ->
-    srv.destroy(resolve)
+  srv.destroyAsync()
 
 module.exports = {
   setup: (options = {}) ->
