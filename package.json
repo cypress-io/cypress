@@ -46,6 +46,7 @@
     "progress": "^1.1.8",
     "request": "^2.81.0",
     "request-progress": "^0.3.1",
+    "tmp": "0.0.31",
     "url": "^0.11.0",
     "xvfb": "cypress-io/node-xvfb"
   }

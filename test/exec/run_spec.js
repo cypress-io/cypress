@@ -119,5 +119,14 @@ describe('exec run', function () {
         expect(spawn.start).to.be.calledWith(['--project', pathToProject, '--record', false, '--cli-version', pkg.version])
       })
     })
+
+    it('spawns --project with --output-path', function () {
+      let pathToProject = path.resolve(process.cwd(), '.')
+
+      return run.start({ outputPath: '/path/to/output' })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith(['--project', pathToProject, '--output-path', '/path/to/output', '--cli-version', pkg.version])
+      })
+    })
   })
 })
