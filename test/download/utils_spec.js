@@ -14,6 +14,7 @@ const utils = require('../../lib/download/utils')
 const xvfb = require('../../lib/exec/xvfb')
 
 const distDir = path.join(__dirname, '../../lib/download/dist')
+const infoFilePath = path.join(distDir, 'info.json')
 
 describe('utils', function () {
   beforeEach(function () {
@@ -23,6 +24,21 @@ describe('utils', function () {
         return utils.ensureInstallationDir()
       })
     }
+  })
+
+  context('#clearVersionState', function () {
+    it('wipes out version info in info.json', function () {
+      return fs.outputJsonAsync(infoFilePath, { version: '5', verifiedVersion: '5', other: 'info' })
+      .then(() => {
+        return utils.clearVersionState()
+      })
+      .then(() => {
+        return fs.readJsonAsync(infoFilePath)
+      })
+      .then((contents) => {
+        expect(contents).to.eql({ other: 'info' })
+      })
+    })
   })
 
   context('#ensureInstallationDir', function () {
@@ -89,7 +105,7 @@ describe('utils', function () {
     it('writes the version to the version file', function () {
       return utils.writeInstalledVersion('the version')
       .then(() => {
-        return fs.readJsonAsync(path.join(distDir, 'info.json')).get('version')
+        return fs.readJsonAsync(infoFilePath).get('version')
       })
       .then((version) => {
         expect(version).to.equal('the version')
@@ -115,7 +131,7 @@ describe('utils', function () {
     })
 
     it('logs error and exits when no version of Cypress is installed', function () {
-      return fs.outputJsonAsync(path.join(distDir, 'info.json'), {})
+      return fs.outputJsonAsync(infoFilePath, {})
       .then(() => {
         return utils.verify()
       })
@@ -146,6 +162,31 @@ describe('utils', function () {
       .then(() => {
         expect(this.log).to.be.calledWith(chalk.red('Cypress executable not found. Run `cypress install` and try again.'))
         expect(process.exit).to.be.calledWith(1)
+      })
+    })
+
+    describe('with force: true', function () {
+      beforeEach(function () {
+        this.sandbox.stub(fs, 'statAsync').resolves()
+        return fs.outputJsonAsync(infoFilePath, { version: packageVersion, verifiedVersion: packageVersion })
+      })
+
+      it('runs smoke test even if version already verified', function () {
+        return utils.verify({ force: true }).then(() => {
+          expect(this.log).to.be.calledWith(chalk.green('⧖ Verifying Cypress executable...'))
+          expect(cp.spawn).to.be.calledWith(utils.getPathToExecutable(), ['--project', path.join(distDir, '../project')])
+        })
+      })
+
+      it('clears verified version from state if verification fails', function () {
+        this.spawnedProcess.on.withArgs('exit').yieldsAsync(1)
+        return utils.verify({ force: true })
+        .then(() => {
+          return fs.readJsonAsync(infoFilePath).get('verifiedVersion')
+        })
+        .then((verifiedVersion) => {
+          expect(verifiedVersion).to.be.null
+        })
       })
     })
 
@@ -186,7 +227,7 @@ describe('utils', function () {
         })
         this.spawnedProcess.on.withArgs('exit').yieldsAsync(1)
 
-        return fs.outputJsonAsync(path.join(distDir, 'info.json'), {
+        return fs.outputJsonAsync(infoFilePath, {
           version: packageVersion,
           verifiedVersion: "different version",
         })
@@ -200,7 +241,7 @@ describe('utils', function () {
       })
 
       it('logs success message and writes version when it succeeds', function () {
-        return fs.outputJsonAsync(path.join(distDir, 'info.json'), {
+        return fs.outputJsonAsync(infoFilePath, {
           version: packageVersion,
           verifiedVersion: "different version",
         })
@@ -208,7 +249,7 @@ describe('utils', function () {
           return utils.verify()
         })
         .then(() => {
-          return fs.readJsonAsync(path.join(distDir, 'info.json'))
+          return fs.readJsonAsync(infoFilePath)
         })
         .then((info) => {
           expect(this.log).to.be.calledWith(chalk.green('✓ Successfully verified Cypress executable'))
@@ -220,7 +261,7 @@ describe('utils', function () {
         beforeEach(function () {
           xvfb.isNeeded.returns(true)
 
-          return fs.outputJsonAsync(path.join(distDir, 'info.json'), {
+          return fs.outputJsonAsync(infoFilePath, {
             version: packageVersion,
             verifiedVersion: "different version",
           })

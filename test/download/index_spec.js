@@ -68,5 +68,21 @@ describe('index', function () {
         })
       })
     })
+
+    describe('with force: true', function () {
+      beforeEach(function () {
+        this.sandbox.stub(utils, 'clearVersionState').resolves()
+        utils.getInstalledVersion.resolves(packageVersion)
+        return index.install({ force: true })
+      })
+
+      it('clears version state', function () {
+        expect(utils.clearVersionState).to.be.called
+      })
+
+      it('forces download even if version matches', function () {
+        expect(download.start).to.be.called
+      })
+    })
   })
 })
