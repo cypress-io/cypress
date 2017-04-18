@@ -1,0 +1,51 @@
+
+//colors
+$black: #000;
+
+$white: #fff;
+$white-80: rgba(255,255,255,0.8);
+$white-60: rgba(255,255,255,0.6);
+
+$red: #f00;
+
+$color-gray: #999;
+$color-default: #444;
+$color-border: #e3e3e3;
+$color-link: #0094ff;
+$color-link-hover: #005999;
+$color-background: #24262F;
+
+$color-gallery: #eee;
+$color-alto: #ddd;
+$color-pink-swan: #bbb;
+
+$color-outer-space: #283542;
+$color-yellow-sea: #fa0;
+$color-emperor: #4d4d4c;
+$color-stack: #8e908c;
+$color-persian-red: #c82829;
+$color-carrot-orange: #f5871f;
+$color-limeade: #718c00;
+$color-boston-blue: #3e999f;
+$color-san-marino: #4271ae;
+$color-trendy-pink: #8959a8;
+
+// Typography
+$font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+$font-serif: Garamond, Georgia, "Times New Roman", serif;
+$font-mono: Consolas, Monaco, 'Andale Mono', monospace;
+$font-title: "Fira Sans", font-sans;
+$font-size: 15px;
+$line-height: 1.6em;
+
+// Layout
+$max-width: 1200px;
+$gutter-width: 20px;
+$sidebar-width: 220px;
+$mobile-nav-width: 260px;
+
+// Media queries
+$mq-mobile: "screen and (max-width: 768px)";
+$mq-normal: "screen and (min-width: 769px)";
+$mq-tablet: "screen and (min-width: 480px)";
+

@@ -1,0 +1,104 @@
+#banner {
+  color: $white-80;
+  text-align: center;
+}
+#banner-title {
+  padding-top: 20px;
+  font-size: 40px;
+  line-height: 1.15;
+  font-weight: 300;
+  font-family: $font-title;
+}
+#banner-start {
+  text-align: center;
+  padding: 40px 0;
+}
+#banner-start-command {
+  background: $color-outer-space;
+  font-family: $font-mono;
+  display: inline-block;
+  padding: 15px 20px;
+  &:before {
+    opacity: 0.5;
+    padding-right: 10px;
+  }
+}
+#banner-start-link {
+  color: $white;
+  background: $color-link;
+  display: inline-block;
+  padding: 15px;
+  text-decoration: none;
+  transition: 0.2s;
+  &:hover {
+    background: $color-link-hover;
+  }
+}
+#banner-share {
+  display: none;
+  padding-bottom: 60px;
+}
+#intro-feature-list {
+  padding-top: 20px;
+  display: box;
+  display: flex;
+  flex-flow: column;
+}
+.intro-feature-wrap {
+  padding-top: 20px;
+}
+.intro-feature {
+  position: relative;
+  text-align: center;
+}
+.intro-feature-icon {
+  color: $color-link;
+  font-size: 36px;
+  padding-bottom: 26px;
+  text-align: center;
+}
+.intro-feature-title {
+  color: $color-link;
+  font-family: $font-title;
+  font-size: 24px;
+}
+.intro-feature-desc {
+  margin: 1.6em 0;
+  line-height: 1.6em;
+}
+#intro-cmd-wrap {
+  max-width: 700px;
+  background: $color-gallery;
+  padding: 15px 0;
+  margin: 25px -20px 0;
+}
+.intro-cmd-item {
+  font-size: 16px;
+  font-family: $font-mono;
+  line-height: 2;
+  padding: 0 30px;
+  &:before {
+    color: $color-link;
+    padding-right: 15px;
+  }
+}
+#intro-get-started-wrap {
+  text-align: center;
+}
+#intro-get-started-link {
+  font-size: 18px;
+  font-family: $font-title;
+  display: inline-block;
+  color: $color-link;
+  text-decoration: none;
+  margin: 40px 0;
+  border: 3px solid;
+  border-color: $color-link-hover;
+  padding: 12px 24px;
+  position: relative;
+  transition: 0.2s;
+  &:hover {
+    background: $color-link-hover;
+    color: $white;
+  }
+}
