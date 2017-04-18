@@ -1,0 +1,129 @@
+docs:
+  welcome:
+    intro: index.html
+    our_goals: our_goals.html
+  getting_started:
+    installing_and_running: installing_and_running.html
+    writing_your_first_test: writing_your_first_test.html
+    using_the_cypress_runner: using_the_cypress_runner.html
+  examples:
+    list_of_example_apps: list_of_example_apps.html
+    list_of_example_recipes: list_of_example_recipes.html
+  dashboard:
+    features: dashboard-features.html
+    projects: dashboard-projects.html
+    runs: dashboard-runs.html
+    organizations: dashboard-organizations.html
+  guides:
+    configuration: configuration.html
+    issuing_commands: issuing_commands.html
+    finding_elements: finding_elements.html
+    making_assertions: making_assertions.html
+    network_requests: network_requests.html
+    continuous_integration: continuous_integration.html
+    environment_variables: environment_variables.html
+    stubs_spies_and_clocks: stubs_spies_and_clocks.html
+    using_aliases: using_aliases.html
+    creating_fixtures: creating_fixtures.html
+    screenshots_and_videos: screenshots_and_videos.html
+    bundled_tools: bundled_tools.html
+    reporters: reporters.html
+  references:
+    cli_tool: cli_tool.html
+    error_messages: error_messages.html
+    anti-patterns: anti-patterns.html
+    known_issues: known_issues.html
+    web_security: web_security.html
+    browser_management: browser_management.html
+    userland_extensions: userland_extensions.html
+
+api:
+  welcome:
+    api: index.html
+  commands:
+    and: and.html
+    as: as.html
+    blur: blur.html
+    check: check.html
+    children: children.html
+    clear: clear.html
+    clear_cookie: clear_cookie.html
+    clear_cookies: clear_cookies.html
+    clear_local_storage: clear_local_storage.html
+    click: click.html
+    clock: clock.html
+    closest: closest.html
+    contains: contains.html
+    dblclick: dblclick.html
+    debug: debug.html
+    document: document.html
+    each: each.html
+    end: end.html
+    eq: eq.html
+    exec: exec.html
+    filter: filter.html
+    find: find.html
+    first: first.html
+    fixture: fixture.html
+    focus: focus.html
+    focused: focused.html
+    get: get.html
+    get_cookie: get_cookie.html
+    get_cookies: get_cookies.html
+    go: go.html
+    hash: hash.html
+    hover: hover.html
+    invoke: invoke.html
+    its: its.html
+    last: last.html
+    location: location.html
+    log: log.html
+    next: next.html
+    next_all: next_all.html
+    next_until: next_until.html
+    not: not.html
+    parent: parent.html
+    parents: parents.html
+    parents_until: parents_until.html
+    read_file: read_file.html
+    reload: reload.html
+    request: request.html
+    root: root.html
+    route: route.html
+    screenshot: screenshot.html
+    select: select.html
+    server: server.html
+    set_cookie: set_cookie.html
+    should: should.html
+    siblings: siblings.html
+    spread: spread.html
+    spy: spy.html
+    stub: stub.html
+    submit: submit.html
+    then: then.html
+    tick: tick.html
+    title: title.html
+    type: type.html
+    uncheck: uncheck.html
+    url: url.html
+    viewport: viewport.html
+    visit: visit.html
+    wait: wait.html
+    window: window.html
+    within: within.html
+    wrap: wrap.html
+    write_file: write_file.html
+  utilities:
+    _: _.html
+    $: $.html
+    minimatch: minimatch.html
+    blob: blob.html
+    promise: promise.html
+  cypress_api:
+    config: config.html
+    env: env.html
+    cypress_commands: commands.html
+    cookies: cookies.html
+    dom: dom.html
+    cypress_server: server.html
+

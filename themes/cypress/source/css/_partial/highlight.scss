@@ -1,0 +1,212 @@
+pre {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font-weight: inherit;
+  font-style: inherit;
+  font-family: inherit;
+  font-size: 100%;
+  vertical-align: baseline;
+  font-family: $font-mono;
+  color: $color-emperor;
+  background: $color-gallery;
+  font-size: 0.95em;
+  padding: 10px 15px;
+  line-height: 22px;
+  code {
+    border: none;
+    display: block;
+    padding: 0;
+  }
+  .comment {
+    color: $color-stack;
+  }
+  .title {
+    color: $color-stack;
+  }
+  .variable {
+    color: $color-persian-red;
+  }
+  .attribute {
+    color: $color-persian-red;
+  }
+  .tag {
+    color: $color-persian-red;
+  }
+  .regexp {
+    color: $color-persian-red;
+  }
+  .ruby {
+    .constant {
+      color: $color-persian-red;
+    }
+    .symbol {
+      color: $color-limeade;
+    }
+    .class .title {
+      color: $color-limeade;
+    }
+    .function .title {
+      color: $color-san-marino;
+    }
+    .title .keyword {
+      color: $color-san-marino;
+    }
+  }
+  .xml {
+    .pi {
+      color: $color-persian-red;
+    }
+    .doctype {
+      color: $color-persian-red;
+    }
+    .cdata {
+      color: $color-limeade;
+    }
+    .tag .title {
+      color: $color-persian-red;
+    }
+  }
+  .css {
+    .id {
+      color: $color-persian-red;
+    }
+    .class {
+      color: $color-persian-red;
+    }
+    .pseudo {
+      color: $color-persian-red;
+    }
+    .hexcolor {
+      color: $color-boston-blue;
+    }
+    .rules .attribute {
+      color: $color-limeade;
+    }
+  }
+  .number {
+    color: $color-carrot-orange;
+  }
+  .preprocessor {
+    color: $color-carrot-orange;
+  }
+  .built-in {
+    color: $color-carrot-orange;
+  }
+  .literal {
+    color: $color-carrot-orange;
+  }
+  .params {
+    color: $color-carrot-orange;
+  }
+  .constant {
+    color: $color-carrot-orange;
+  }
+  .class {
+    color: $color-limeade;
+  }
+  .string {
+    color: $color-limeade;
+  }
+  .value {
+    color: $color-limeade;
+  }
+  .inheritance {
+    color: $color-limeade;
+  }
+  .header {
+    color: $color-limeade;
+  }
+  .function {
+    color: $color-san-marino;
+  }
+  .python {
+    .decorator {
+      color: $color-san-marino;
+    }
+    .title {
+      color: $color-san-marino;
+    }
+  }
+  .javascript {
+    .title {
+      color: $color-san-marino;
+    }
+    .function {
+      color: $color-trendy-pink;
+    }
+  }
+  .keyword {
+    color: $color-trendy-pink;
+  }
+  .html .doctype {
+    color: $color-persian-red;
+  }
+  .perl .sub {
+    color: $color-san-marino;
+  }
+  .coffeescript .title {
+    color: $color-san-marino;
+  }
+}
+
+code {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font-weight: inherit;
+  font-style: inherit;
+  font-family: inherit;
+  font-size: 100%;
+  vertical-align: baseline;
+  font-family: $font-mono;
+  color: $color-emperor;
+  background: $color-gallery;
+  font-size: 0.95em;
+  padding: 0 5px;
+}
+
+.highlight {
+  background: $color-gallery;
+  padding: 10px 15px;
+  color: $color-emperor;
+  overflow: auto;
+  margin: 0;
+  table {
+    margin: 0 !important;
+    border: 0;
+    th {
+      padding: 0;
+    }
+    td {
+      padding: 0;
+    }
+  }
+  figcaption {
+    margin: -5px 0 5px;
+    font-size: 0.9em;
+    color: $color-gray;
+    &:before {
+      content: "";
+      display: table;
+    }
+    &:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+    a {
+      float: right;
+    }
+  }
+  pre {
+    padding: 0;
+    border: none;
+    background: none;
+  }
+  .line {
+    height: 22px;
+  }
+}
