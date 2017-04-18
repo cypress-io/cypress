@@ -1,4 +1,4 @@
-slug: prevAll
+slug: prevall
 excerpt: Get all previous siblings of the DOM elements
 
 Get all previous siblings of each DOM element in the set of matched DOM elements.
