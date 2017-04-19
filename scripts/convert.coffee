@@ -67,6 +67,7 @@ transfer = (type) ->
 
       chunkToRemove = string.slice(contentsIndex, dividerIndex)
 
+      ## convert multi line breaks to 2
       string
       .split(chunkToRemove)
       .join("")
