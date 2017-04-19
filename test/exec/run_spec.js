@@ -75,15 +75,6 @@ describe('exec run', function () {
       })
     })
 
-    it('logs message and exits if verification failed', function () {
-      downloadUtils.verify.rejects({ name: '', message: '', stack: 'An error message' })
-
-      return run.start().then(() => {
-        expect(this.log).to.be.calledWith('An error message')
-        expect(process.exit).to.be.calledWith(1)
-      })
-    })
-
     it('spawns --project with --key and xvfb', function () {
       let pathToProject = path.resolve(process.cwd(), '.')
 
