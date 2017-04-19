@@ -194,14 +194,21 @@
     max-width: 100%;
   }
   .note {
-    &.tip {
-      border-left-color: $color-yellow-sea;
+    &.warning {
+      border-left-color: #f0ad4e;
+      background-color: #fcf8f2;
     }
     &.info {
-      border-left-color: $color-link-hover;
+      border-left-color: #5bc0de;
+      background-color: #f4f8fa;
     }
-    &.warn {
-      border-left-color: $red;
+    &.success {
+      border-left-color: #50af51;
+      background-color: #f3f8f3;
+    }
+    &.danger {
+      border-left-color: #d9534f;
+      background-color: #fdf7f7;
     }
   }
   .note-title {

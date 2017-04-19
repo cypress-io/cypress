@@ -8,12 +8,11 @@
   },
   "scripts": {
     "start": "hexo server",
-    "convert": "coffee ./scripts/convert.coffee"
+    "convert": "node ./cy_scripts/convert.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "coffee-script": "^1.12.5",
     "colors": "^1.1.2",
     "fs-extra": "^2.1.2",
     "glob": "^7.1.1",

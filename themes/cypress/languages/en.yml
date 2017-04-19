@@ -1,34 +1,31 @@
 menu:
-  docs: Docs
+  guides: Guides
   api: API
-  news: News
-  plugins: Plugins
-  themes: Themes
   search: Search
 
 index:
-  get_started: Get started
+  get-started: Get started
 
 page:
   contents: Contents
-  back_to_top: Back to Top
+  back-to-top: Back to Top
   improve: Improve this doc
   prev: Prev
   next: Next
-  last_updated: "Last updated: %s"
+  last-updated: "Last updated: %s"
 
 sidebar:
-  docs:
+  guides:
     welcome: Welcome
     intro: Intro
-    our_goals: Our Goals
-    getting_started: Getting Started
-    installing_and_running: Installing and Running
-    writing_your_first_test: Writing Your First Test
-    using_the_cypress_runner: Using the Cypress Runner
+    our-goals: Our Goals
+    getting-started: Getting Started
+    installing-and-running: Installing and Running
+    writing-your-first-test: Writing Your First Test
+    using-the-cypress-runner: Using the Cypress Runner
     examples: Examples
-    list_of_example_apps: List of Example Apps
-    list_of_example_recipes: List of Example Recipes
+    list-of-example-apps: List of Example Apps
+    list-of-example-recipes: List of Example Recipes
     dashboard: Dashboard
     features: Features
     projects: Projects
@@ -36,26 +33,26 @@ sidebar:
     organizations: Organizations
     guides: Guides
     configuration: Configuration
-    issuing_commands: Issuing Commands
-    finding_elements: Finding Elements
-    making_assertions: Making Assertions
-    network_requests: Network Requests
-    continuous_integration: Continuous Integration
-    environment_variables: Environment Variables
-    stubs_spies_and_clocks: Stubs, Spies, and Clocks
-    using_aliases: Using Aliases
-    creating_fixtures: Creating Fixtures
-    screenshots_and_videos: Screenshots and Videos
-    bundled_tools: Bundled Tools
+    issuing-commands: Issuing Commands
+    finding-elements: Finding Elements
+    making-assertions: Making Assertions
+    network-requests: Network Requests
+    continuous-integration: Continuous Integration
+    environment-variables: Environment Variables
+    stubs-spies-and-clocks: Stubs, Spies, and Clocks
+    using-aliases: Using Aliases
+    creating-fixtures: Creating Fixtures
+    screenshots-and-videos: Screenshots and Videos
+    bundled-tools: Bundled Tools
     reporters: Reporters
     references: References
-    cli_tool: CLI Tool
-    error_messages: Error Messages
+    cli-tool: CLI Tool
+    error-messages: Error Messages
     anti-patterns: Anti-patterns
-    known_issues: Known Issues
-    web_security: Web Security
-    browser_management: Browser Management
-    userland_extensions: Userland Extensions
+    known-issues: Known Issues
+    web-security: Web Security
+    browser-management: Browser Management
+    userland-extensions: Userland Extensions
   api:
     welcome: Welcome
     api: api
@@ -66,9 +63,9 @@ sidebar:
     check: check
     children: children
     clear: clear
-    clear_cookie: clear_cookie
-    clear_cookies: clear_cookies
-    clear_local_storage: clear_local_storage
+    clear-cookie: clear-cookie
+    clear-cookies: clear-cookies
+    clear-local-storage: clear-local-storage
     click: click
     clock: clock
     closest: closest
@@ -87,8 +84,8 @@ sidebar:
     focus: focus
     focused: focused
     get: get
-    get_cookie: get_cookie
-    get_cookies: get_cookies
+    get-cookie: get-cookie
+    get-cookies: get-cookies
     go: go
     hash: hash
     hover: hover
@@ -98,13 +95,13 @@ sidebar:
     location: location
     log: log
     next: next
-    next_all: next_all
-    next_until: next_until
+    next-all: next-all
+    next-until: next-until
     not: not
     parent: parent
     parents: parents
-    parents_until: parents_until
-    read_file: read_file
+    parents-until: parents-until
+    read-file: read-file
     reload: reload
     request: request
     root: root
@@ -112,7 +109,7 @@ sidebar:
     screenshot: screenshot
     select: select
     server: server
-    set_cookie: set_cookie
+    set-cookie: set-cookie
     should: should
     siblings: siblings
     spread: spread
@@ -131,19 +128,19 @@ sidebar:
     window: window
     within: within
     wrap: wrap
-    write_file: write_file
+    write-file: write-file
     utilities: Utilities
     _: _
     $: $
     minimatch: minimatch
     blob: blob
     promise: promise
-    cypress_api: Cypress API
+    cypress-api: Cypress API
     config: config
     env: env
-    cypress_commands: commands
+    cypress-commands: commands
     cookies: cookies
     dom: dom
-    cypress_server: server
+    cypress-server: server
 
 
