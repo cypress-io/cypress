@@ -1,55 +1,55 @@
-docs:
+guides:
   welcome:
-    intro: index.html
-    our_goals: our_goals.html
-  getting_started:
-    installing_and_running: installing_and_running.html
-    writing_your_first_test: writing_your_first_test.html
-    using_the_cypress_runner: using_the_cypress_runner.html
+    intro: guides.html
+    our-goals: our-goals.html
+  getting-started:
+    installing-and-running: installing-and-running.html
+    writing-your-first-test: writing-your-first-test.html
+    using-the-cypress-runner: using-the-cypress-runner.html
   examples:
-    list_of_example_apps: list_of_example_apps.html
-    list_of_example_recipes: list_of_example_recipes.html
+    list-of-example-apps: list-of-example-apps.html
+    list-of-example-recipes: list-of-example-recipes.html
   dashboard:
-    features: dashboard-features.html
-    projects: dashboard-projects.html
-    runs: dashboard-runs.html
-    organizations: dashboard-organizations.html
+    features: features.html
+    projects: projects.html
+    runs: runs.html
+    organizations: organizations.html
   guides:
     configuration: configuration.html
-    issuing_commands: issuing_commands.html
-    finding_elements: finding_elements.html
-    making_assertions: making_assertions.html
-    network_requests: network_requests.html
-    continuous_integration: continuous_integration.html
-    environment_variables: environment_variables.html
-    stubs_spies_and_clocks: stubs_spies_and_clocks.html
-    using_aliases: using_aliases.html
-    creating_fixtures: creating_fixtures.html
-    screenshots_and_videos: screenshots_and_videos.html
-    bundled_tools: bundled_tools.html
+    issuing-commands: issuing-commands.html
+    finding-elements: finding-elements.html
+    making-assertions: making-assertions.html
+    network-requests: network-requests.html
+    continuous-integration: continuous-integration.html
+    environment-variables: environment-variables.html
+    stubs-spies-and-clocks: stubs-spies-and-clocks.html
+    using-aliases: using-aliases.html
+    creating-fixtures: creating-fixtures.html
+    screenshots-and-videos: screenshots-and-videos.html
+    bundled-tools: bundled-tools.html
     reporters: reporters.html
   references:
-    cli_tool: cli_tool.html
-    error_messages: error_messages.html
+    cli-tool: cli-tool.html
+    error-messages: error-messages.html
     anti-patterns: anti-patterns.html
-    known_issues: known_issues.html
-    web_security: web_security.html
-    browser_management: browser_management.html
-    userland_extensions: userland_extensions.html
+    known-issues: known-issues.html
+    web-security: web-security.html
+    browser-management: browser-management.html
+    userland-extensions: userland-extensions.html
 
 api:
   welcome:
     api: index.html
   commands:
-    and: and.html
+    and: commands/and.html
     as: as.html
     blur: blur.html
     check: check.html
     children: children.html
     clear: clear.html
-    clear_cookie: clear_cookie.html
-    clear_cookies: clear_cookies.html
-    clear_local_storage: clear_local_storage.html
+    clear-cookie: clear-cookie.html
+    clear-cookies: clear-cookies.html
+    clear-local-storage: clear-local-storage.html
     click: click.html
     clock: clock.html
     closest: closest.html
@@ -68,8 +68,8 @@ api:
     focus: focus.html
     focused: focused.html
     get: get.html
-    get_cookie: get_cookie.html
-    get_cookies: get_cookies.html
+    get-cookie: get-cookie.html
+    get-cookies: get-cookies.html
     go: go.html
     hash: hash.html
     hover: hover.html
@@ -79,13 +79,13 @@ api:
     location: location.html
     log: log.html
     next: next.html
-    next_all: next_all.html
-    next_until: next_until.html
+    next-all: next-all.html
+    next-until: next-until.html
     not: not.html
     parent: parent.html
     parents: parents.html
-    parents_until: parents_until.html
-    read_file: read_file.html
+    parents-until: parents-until.html
+    read-file: read-file.html
     reload: reload.html
     request: request.html
     root: root.html
@@ -93,7 +93,7 @@ api:
     screenshot: screenshot.html
     select: select.html
     server: server.html
-    set_cookie: set_cookie.html
+    set-cookie: set-cookie.html
     should: should.html
     siblings: siblings.html
     spread: spread.html
@@ -112,18 +112,18 @@ api:
     window: window.html
     within: within.html
     wrap: wrap.html
-    write_file: write_file.html
+    write-file: write-file.html
   utilities:
-    _: _.html
+    -: -.html
     $: $.html
     minimatch: minimatch.html
     blob: blob.html
     promise: promise.html
-  cypress_api:
+  cypress-api:
     config: config.html
     env: env.html
-    cypress_commands: commands.html
+    cypress-commands: commands.html
     cookies: cookies.html
     dom: dom.html
-    cypress_server: server.html
+    cypress-server: server.html
 

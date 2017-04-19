@@ -7,7 +7,7 @@
 <!-- endbuild -->
 <script src="https://cdn.jsdelivr.net/retinajs/1.3.0/retina.min.js" async></script>
 
-<!-- Algolia -->
+{# <!-- Algolia -->
 {% if config.algolia[page.lang] %}
   <script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script>
   <script type="text/javascript">
@@ -18,4 +18,4 @@
       inputSelector: '#search-input'
     });
   </script>
-{% endif %}
+{% endif %} #}
