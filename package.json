@@ -7,15 +7,20 @@
     "version": "3.3.1"
   },
   "scripts": {
-    "start": "hexo server"
+    "start": "hexo server",
+    "convert": "coffee ./scripts/convert.coffee"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "coffee-script": "^1.12.5",
     "colors": "^1.1.2",
-    "glob": "^7.0.3"
+    "fs-extra": "^2.1.2",
+    "glob": "^7.1.1",
+    "underscore.string": "^3.3.4"
   },
   "dependencies": {
+    "bluebird": "^3.5.0",
     "hexo": "^3.2.0",
     "hexo-algoliasearch": "^0.2.1",
     "hexo-deployer-git": "^0.2.0",
@@ -27,6 +32,7 @@
     "hexo-renderer-marked": "^0.2.10",
     "hexo-renderer-scss": "^1.0.2",
     "hexo-server": "^0.2.0",
+    "lodash": "^4.17.4",
     "lunr": "^2.0.1"
   }
 }
