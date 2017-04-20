@@ -10,8 +10,8 @@ pre {
   vertical-align: baseline;
   font-family: $font-mono;
   color: $color-emperor;
-  background: $color-gallery;
-  font-size: 0.95em;
+  background: #F7F7F7;
+  font-size: 0.90em;
   padding: 10px 15px;
   line-height: 22px;
   code {
@@ -36,37 +36,6 @@ pre {
   }
   .regexp {
     color: $color-persian-red;
-  }
-  .ruby {
-    .constant {
-      color: $color-persian-red;
-    }
-    .symbol {
-      color: $color-limeade;
-    }
-    .class .title {
-      color: $color-limeade;
-    }
-    .function .title {
-      color: $color-san-marino;
-    }
-    .title .keyword {
-      color: $color-san-marino;
-    }
-  }
-  .xml {
-    .pi {
-      color: $color-persian-red;
-    }
-    .doctype {
-      color: $color-persian-red;
-    }
-    .cdata {
-      color: $color-limeade;
-    }
-    .tag .title {
-      color: $color-persian-red;
-    }
   }
   .css {
     .id {
@@ -104,30 +73,19 @@ pre {
     color: $color-carrot-orange;
   }
   .class {
-    color: $color-limeade;
+    color: #006fa9;
   }
   .string {
-    color: $color-limeade;
+    color: #006fa9;
   }
   .value {
-    color: $color-limeade;
+    color: #006fa9;
   }
   .inheritance {
-    color: $color-limeade;
+    color: #006fa9;
   }
   .header {
-    color: $color-limeade;
-  }
-  .function {
-    color: $color-san-marino;
-  }
-  .python {
-    .decorator {
-      color: $color-san-marino;
-    }
-    .title {
-      color: $color-san-marino;
-    }
+    color: #006fa9;
   }
   .javascript {
     .title {
@@ -154,7 +112,8 @@ pre {
 code {
   margin: 0;
   padding: 0;
-  border: 0;
+  border: 1px solid #E9E9EF;
+  border-radius: 4px;
   outline: 0;
   font-weight: inherit;
   font-style: inherit;
@@ -162,26 +121,46 @@ code {
   font-size: 100%;
   vertical-align: baseline;
   font-family: $font-mono;
-  color: $color-emperor;
-  background: $color-gallery;
+  color: #149c6a;
+  background: #F7F7F9;
   font-size: 0.95em;
   padding: 0 5px;
+
+
+}
+
+a code {
+  color: $color-link;
+
+  &:hover {
+    color: $color-link-hover;
+  }
 }
 
 .highlight {
-  background: $color-gallery;
+  background: #F7F7F7;
   padding: 10px 15px;
   color: $color-emperor;
   overflow: auto;
   margin: 0;
+
+  &.shell {
+    background: #030304;
+    pre {
+      color: #E4F4F4;
+    }
+  }
+
   table {
     margin: 0 !important;
     border: 0;
     th {
       padding: 0;
+      border: 0;
     }
     td {
       padding: 0;
+      border: 0;
     }
   }
   figcaption {
@@ -208,5 +187,8 @@ code {
   }
   .line {
     height: 22px;
+  }
+  .gutter {
+    display: none;
   }
 }

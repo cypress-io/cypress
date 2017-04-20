@@ -9,10 +9,10 @@ $white-60: rgba(255,255,255,0.6);
 $red: #f00;
 
 $color-gray: #999;
-$color-default: #444;
+$color-default: #474a54;
 $color-border: #e3e3e3;
-$color-link: #0094ff;
-$color-link-hover: #005999;
+$color-link: #4685d8;
+$color-link-hover: #0369b3;
 $color-background: #24262F;
 
 $color-gallery: #eee;
@@ -25,7 +25,7 @@ $color-emperor: #4d4d4c;
 $color-stack: #8e908c;
 $color-persian-red: #c82829;
 $color-carrot-orange: #f5871f;
-$color-limeade: #718c00;
+$color-limeade: #149c6a;
 $color-boston-blue: #3e999f;
 $color-san-marino: #4271ae;
 $color-trendy-pink: #8959a8;
@@ -39,13 +39,12 @@ $font-size: 15px;
 $line-height: 1.6em;
 
 // Layout
-$max-width: 1200px;
-$gutter-width: 20px;
-$sidebar-width: 220px;
+$max-width: 1300px;
+$gutter-width: 40px;
+$sidebar-width: 280px;
 $mobile-nav-width: 260px;
 
 // Media queries
 $mq-mobile: "screen and (max-width: 768px)";
 $mq-normal: "screen and (min-width: 769px)";
 $mq-tablet: "screen and (min-width: 480px)";
-

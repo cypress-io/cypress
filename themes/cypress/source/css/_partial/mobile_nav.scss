@@ -6,14 +6,14 @@
     height: 100%;
   }
   .wrapper {
-    max-width: 1200px;
+    max-width: $max-width;
     margin: 0 auto;
   }
   .inner {
-    padding: 0 20px;
+    padding: 0 $gutter-width;
   }
   #article-toc-inner {
-    padding: 0 20px;
+    padding: 0 $gutter-width;
   }
   .post {
     max-width: 800px;
@@ -64,14 +64,14 @@
     display: block;
   }
   #content-inner {
-    margin-left: 220px;
+    margin-left: $sidebar-width;
   }
   .article-container {
     float: right;
     width: 100%;
   }
   .article-inner {
-    margin-right: 220px;
+    margin-right: $sidebar-width;
   }
   #article-toc {
     display: block;
@@ -97,8 +97,8 @@
 #mobile-nav {
   position: fixed;
   top: 0;
-  width: 260px;
-  left: -260px;
+  width: $mobile-nav-width;
+  left: -$mobile-nav-width;
   height: 100%;
   background: $color-background;
   transition: 0.4s;

@@ -39,7 +39,7 @@ guides:
 
 api:
   welcome:
-    api: index.html
+    api: api.html
   commands:
     and: commands/and.html
     as: as.html
@@ -126,4 +126,3 @@ api:
     cookies: cookies.html
     dom: dom.html
     cypress-server: server.html
-

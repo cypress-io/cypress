@@ -9,7 +9,6 @@ Text passed to `cy.type` may include any of these special character sequences:
 
 Sequence | Notes
 --- | ---
-`{{}`| Types the literal `{` key
 `{backspace}` | Deletes character to the left of the cursor
 `{del}` | Deletes character to the right of the cursor
 `{enter}` | Types the Enter key

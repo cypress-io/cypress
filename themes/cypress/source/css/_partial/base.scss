@@ -78,20 +78,6 @@ button, select, input, input[type="submit"]::-moz-focus-inner, input[type="butto
   }
 }
 
-#article-toc-inner {
-  overflow-x: hidden;
-  overflow-y: auto;
-  width: 220px;
-  &:before {
-    content: "";
-    display: table;
-  }
-  &:after {
-    content: "";
-    display: table;
-    clear: both;
-  }
-}
 #content-wrap {
   background: $white;
   border-top: 1px solid $color-background;
@@ -137,25 +123,6 @@ button, select, input, input[type="submit"]::-moz-focus-inner, input[type="butto
   }
 }
 
-.toc-link {
-  font-family: $font-title;
-  display: block;
-  color: $color-default;
-  text-decoration: none;
-  padding: 7px 0;
-  line-height: 1;
-  position: relative;
-  width: 100%;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-  &.current {
-    color: $color-link;
-  }
-  &:hover {
-    color: $color-link-hover;
-  }
-}
 #content {
   position: relative;
   &:before {
@@ -180,155 +147,7 @@ button, select, input, input[type="submit"]::-moz-focus-inner, input[type="butto
   }
 }
 
-.post {
-  margin: 0 auto;
-  float: none;
-  .article-title {
-    float: none;
-  }
-}
-
 #container {
   transition: 0.4s;
   height: 100%;
-}
-
-.fixed #article-toc-inner {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-}
-.article-heading:hover .article-anchor {
-  display: inline-block;
-}
-
-// Old Styles
-
-.landing-heading {
-  text-align: center;
-}
-
-#jumbotron {
-  display: none;
-}
-
-#landing-page .highlight-boxes>div>.highlight-box {
-  margin-top: 40px;
-  display: block;
-  border: 2px solid #ddd;
-  padding: 20px;
-  text-align: center;
-  color: #ec4f5c;
-}
-
-#landing-page .highlight-boxes>div>.highlight-box:hover {
-  color: #d32f3d;
-  border: 2px solid #ccc;
-}
-
-#landing-page .highlight-boxes>div:nth-child(2)>.highlight-box {
-  color: #08bf88;
-}
-
-#landing-page .highlight-boxes>div:nth-child(2)>.highlight-box:hover {
-  color: #069167;
-}
-
-#landing-page .highlight-boxes>div:nth-child(3)>.highlight-box {
-  color: #f5a327;
-}
-
-#landing-page .highlight-boxes>div:nth-child(3)>.highlight-box:hover {
-  color: #ce810d;
-}
-
-
-#landing-page .highlight-boxes.chat>div>.highlight-box {
-  color: #0094ff;
-}
-
-#landing-page .highlight-boxes.chat>div>.highlight-box:hover {
-  color: #428bca;
-}
-
-#landing-page .highlight-boxes.chat>div>.highlight-box i, #landing-page .highlight-boxes.chat>div>.highlight-box h3{
-  display: inline;
-}
-
-#landing-page .highlight-boxes>div>.highlight-box:hover>p {
-  color: #555;
-}
-
-.highlight-box i {
-  display: block;
-  font-size: 40px;
-}
-
-#landing-page h1 {
-  font-size: 2em;
-  font-weight: bold;
-  margin-top: 2em;
-  margin-bottom: 5px;
-}
-
-#landing-page h2 {
-  margin-top: 2em;
-  margin-bottom: 5px;
-}
-
-#landing-page p {
-  color: #888;
-  margin-bottom: 1em;
-}
-
-#landing-page h4 {
-  border-bottom: 1px solid #ddd;
-  font-weight: bold;
-  padding-bottom: 10px;
-  margin-top: 2em;
-}
-
-#landing-page ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-#landing-page ul>li {
-  line-height: 2em;  ;
-}
-
-#landing-page .row>.col-xs-6:first-child {
-  border-right: 1px solid #ddd;
-}
-
-/*-------Tables---------*/
-
-.docs-content th {
-  border-right: 0;
-  border-bottom: 0;
-}
-
-.docs-content td {
-  border-bottom: 0;
-  border-right: 0;
-}
-
-.docs-content tbody>tr {
-  border-top: 1px solid #ddd;
-}
-
-.docs-content tr:nth-child(even) {
-  background-color: #f8f8f8;
-}
-
-.docs-content table {
-  border: 1px solid #ddd;
-}
-
-thead>tr>th {
-  border-bottom: 1px solid #ddd;
-}
-
-thead>tr>th:empty {
-  padding: 0;
 }
