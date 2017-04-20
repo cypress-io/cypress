@@ -31,4 +31,15 @@ work out script running UX
 - bring back panes
   * need to be able to scroll
 
+requirements
+---
+developers will generally work in one repo at a time
+- in terminal, pwd is that repo (packages/core-app)
+- run tests individually per package
+from root:
+- npm install (or run one command to npm install) for all packages
+- start app and run it
+- run watch-dev for all packages
+- run e2e tests
+
 ###
