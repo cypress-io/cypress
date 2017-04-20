@@ -32,18 +32,33 @@ module.exports = {
       ## figure out the stream interface and pipe these
       ## chunks to the response
       @getResponse(response, config)
-        .then (resp) =>
-          headers = @parseHeaders(headers, resp)
+      .then (resp = {}) =>
+        { data, encoding } = resp
 
-          ## grab content-type from x-cypress-headers if present
-          res
-            .set(headers)
-            .status(status)
-            .send(resp)
-        .catch (err) ->
-          res
-            .status(400)
-            .send({__error: err.message})
+        ## grab content-type from x-cypress-headers if present
+        headers = @parseHeaders(headers, data)
+
+        ## enable us to respond with other encodings
+        ## like binary
+        encoding ?= "utf8"
+
+        ## TODO: if data is binary then set
+        ## content-type to binary/octet-stream
+        if _.isObject(data)
+          data = JSON.stringify(data)
+
+        chunk = new Buffer(data, encoding)
+
+        headers["content-length"] = chunk.length
+
+        res
+        .set(headers)
+        .status(status)
+        .end(chunk)
+      .catch (err) ->
+        res
+        .status(400)
+        .send({__error: err.stack})
 
     if delay > 0
       Promise.delay(delay).then(respond)
@@ -51,8 +66,18 @@ module.exports = {
       respond()
 
   _get: (resp, config) ->
+    options = {}
+
     file = resp.replace(fixturesRe, "")
-    fixture.get(config.fixturesFolder, file)
+
+    [filePath, encoding] = file.split(",")
+
+    if encoding
+      options.encoding = encoding
+
+    fixture.get(config.fixturesFolder, filePath, options)
+    .then (bytes) ->
+      {data: bytes, encoding: encoding}
 
   getStream: (resp) ->
     if fixturesRe.test(resp)
@@ -65,11 +90,11 @@ module.exports = {
     if fixturesRe.test(resp)
       @_get(resp, config)
     else
-      Promise.resolve(resp)
+      Promise.resolve({data: resp})
 
   parseContentType: (response) ->
     ret = (type) ->
-      mime.lookup(type)
+      mime.lookup(type) #+ "; charset=utf-8"
 
     switch
       when isValidJSON(response)

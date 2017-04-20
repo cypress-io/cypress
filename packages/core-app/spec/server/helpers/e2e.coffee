@@ -1,21 +1,26 @@
 require("../spec_helper")
 
-_          = require("lodash")
-cp         = require("child_process")
-path       = require("path")
-http       = require("http")
-morgan     = require("morgan")
-express    = require("express")
-Promise    = require("bluebird")
-Fixtures   = require("../helpers/fixtures")
-user       = require("#{root}lib/user")
-cypress    = require("#{root}lib/cypress")
-Project    = require("#{root}lib/project")
-settings   = require("#{root}lib/util/settings")
+_            = require("lodash")
+fs           = require("fs-extra")
+cp           = require("child_process")
+path         = require("path")
+http         = require("http")
+human        = require("human-interval")
+morgan       = require("morgan")
+express      = require("express")
+Promise      = require("bluebird")
+Fixtures     = require("../helpers/fixtures")
+allowDestroy = require("#{root}lib/util/server_destroy")
+user         = require("#{root}lib/user")
+cypress      = require("#{root}lib/cypress")
+Project      = require("#{root}lib/project")
+settings     = require("#{root}lib/util/settings")
 
 cp = Promise.promisifyAll(cp)
+fs = Promise.promisifyAll(fs)
 
 env = process.env
+env.COPY_CIRCLE_ARTIFACTS = "true"
 
 e2ePath = Fixtures.projectPath("e2e")
 
@@ -25,6 +30,8 @@ startServer = (obj) ->
   app = express()
 
   srv = http.Server(app)
+
+  allowDestroy(srv)
 
   app.use(morgan("dev"))
 
@@ -40,17 +47,33 @@ startServer = (obj) ->
       resolve(srv)
 
 stopServer = (srv) ->
-  new Promise (resolve) ->
-    srv.close(resolve)
+  srv.destroyAsync()
 
 module.exports = {
   setup: (options = {}) ->
+    if options.npmInstall
+      before ->
+        ## npm install needs extra time
+        @timeout(human("2 minutes"))
+
+        cp.execAsync("npm install", {
+          cwd: Fixtures.path("projects/e2e")
+          maxBuffer: 1024*1000
+        })
+        .then ->
+          ## symlinks mess up fs.copySync
+          ## and bin files aren't necessary for these tests
+          fs.removeAsync(Fixtures.path("projects/e2e/node_modules/.bin"))
+
+      after ->
+        fs.removeAsync(Fixtures.path("projects/e2e/node_modules"))
+
     beforeEach ->
       Fixtures.scaffold()
 
       @sandbox.stub(process, "exit")
 
-      user.set({name: "brian", session_token: "session-123"})
+      user.set({name: "brian", authToken: "auth-token-123"})
       .then =>
         Project.add(e2ePath)
       .then =>
@@ -75,7 +98,7 @@ module.exports = {
   options: (ctx, options = {}) ->
     _.defaults(options, {
       project: e2ePath
-      timeout: if options.debug then 3000000 else 45000
+      timeout: if options.debug then 3000000 else 120000
     })
 
     ctx.timeout(options.timeout)

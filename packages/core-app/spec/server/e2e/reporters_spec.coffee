@@ -9,18 +9,7 @@ fs       = Promise.promisifyAll(fs)
 e2ePath  = Fixtures.projectPath("e2e")
 
 describe "e2e reporters", ->
-  e2e.setup()
-
-  before ->
-    ## npm install needs extra time
-    @timeout(30000)
-    cp.execSync("npm install", {cwd: Fixtures.path("projects/e2e")})
-    ## symlinks mess up fs.copySync
-    ## and bin files aren't necessary for these tests
-    fs.removeSync(Fixtures.path("projects/e2e/node_modules/.bin"))
-
-  after ->
-    fs.removeSync(Fixtures.path("projects/e2e/node_modules"))
+  e2e.setup({npmInstall: true})
 
   it "supports junit reporter and reporter options", ->
     e2e.start(@, {
@@ -30,9 +19,10 @@ describe "e2e reporters", ->
       reporterOptions: "mochaFile=junit-output/result.xml"
     })
     .then ->
-      fs.readFileAsync(path.join(e2ePath, "junit-output", "result.xml"), "utf8").then (xml) ->
-        expect(xml).to.include("<testsuite name=\"simple passing spec\"")
-        expect(xml).to.include("<testcase name=\"Root Suite simple passing spec passes\"")
+      fs.readFileAsync(path.join(e2ePath, "junit-output", "result.xml"), "utf8")
+      .then (str) ->
+        expect(str).to.include("<testsuite name=\"simple passing spec\"")
+        expect(str).to.include("<testcase name=\"simple passing spec passes\"")
 
   it "supports local custom reporter", ->
     e2e.exec(@, {

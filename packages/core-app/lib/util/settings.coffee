@@ -28,6 +28,12 @@ renameCommandTimeout = (obj) ->
     obj.defaultCommandTimeout = c
     obj
 
+renameSupportFolder = (obj) ->
+  if sf = obj.supportFolder
+    obj = _.omit(obj, "supportFolder")
+    obj.supportFile = sf
+    obj
+
 module.exports =
   _pathToFile: (projectRoot, file) ->
     path.join(projectRoot, file)
@@ -51,12 +57,20 @@ module.exports =
       @_logWriteErr(file, err)
 
   _applyRewriteRules: (obj = {}) ->
-    _.reduce [flattenCypress, renameVisitToPageLoad, renameCommandTimeout], (memo, fn) ->
+    _.reduce [flattenCypress, renameVisitToPageLoad, renameCommandTimeout, renameSupportFolder], (memo, fn) ->
       if ret = fn(memo)
         return ret
       else
         return memo
-    , obj
+    , _.cloneDeep(obj)
+
+  id: (projectRoot) ->
+    file = @_pathToFile(projectRoot, "cypress.json")
+
+    fs.readJsonAsync(file)
+    .get("projectId")
+    .catch ->
+      null
 
   read: (projectRoot) ->
     file = @_pathToFile(projectRoot, "cypress.json")

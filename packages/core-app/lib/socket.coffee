@@ -13,7 +13,7 @@ files         = require("./files")
 fixture       = require("./fixture")
 errors        = require("./errors")
 logger        = require("./logger")
-launcher      = require("./launcher")
+browsers      = require("./browsers")
 automation    = require("./automation")
 savedState    = require("./saved_state")
 
@@ -50,46 +50,45 @@ class Socket
     if not (@ instanceof Socket)
       return new Socket
 
-  onTestFileChange: (integrationFolder, originalFilePath, filePath, stats) ->
+  onTestFileChange: (filePath) ->
     logger.info "onTestFileChange", filePath: filePath
 
     ## return if we're not a js or coffee file.
     ## this will weed out directories as well
-    return if not /\.(js|coffee)$/.test filePath
-
-    ## originalFilePath is what was originally sent to us when
-    ## we were told to 'watch:test:file'
-    ## and its what we want to send back to the client
+    return if not /\.(js|jsx|coffee|cjsx)$/.test filePath
 
     fs.statAsync(filePath)
     .then =>
-      @io.emit "watched:file:changed", {file: originalFilePath}
-    .catch(->)
+      @io.emit("watched:file:changed")
+    .catch ->
 
-  watchTestFileByPath: (config, originalFilePath, watchers, cb = ->) ->
-    testFilePath = str.ltrim(originalFilePath, "/")
-
-    ## normalize the testFilePath
-    testFilePath = pathHelpers.getAbsolutePathToSpec(testFilePath, config)
+  watchTestFileByPath: (config, originalFilePath, watchers, options) ->
+    ## files are always sent as integration/foo_spec.js
+    ## need to take into account integrationFolder may be different so
+    ## integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
+    filePath = path.join(config.integrationFolder, originalFilePath.replace("integration/", ""))
+    filePath = filePath.replace("#{config.projectRoot}/", "")
 
     ## bail if we're already watching this
     ## exact file or we've turned off watching
     ## for file changes
-    return cb() if (testFilePath is @testFilePath) or (config.watchForFileChanges is false)
+    return if (filePath is @testFilePath) or (config.watchForFileChanges is false)
 
-    logger.info "watching test file", {path: testFilePath}
+    logger.info "watching test file", {path: filePath}
 
     ## remove the existing file by its path
     if @testFilePath
-      watchers.remove(@testFilePath)
+      watchers.removeBundle(@testFilePath)
 
     ## store this location
-    @testFilePath = testFilePath
+    @testFilePath = filePath
 
-    watchers.watchAsync(testFilePath, {
-      onChange: _.bind(@onTestFileChange, @, config.integrationFolder, originalFilePath)
+    watchers.watchBundle(filePath, config, {
+      onChange: @onTestFileChange.bind(@)
     })
-    .then(cb)
+    ## ignore errors b/c we're just setting up the watching. errors
+    ## are handled by the spec controller
+    .catch ->
 
   onFixture: (config, file, options, cb) ->
     fixture.get(config.fixturesFolder, file, options)
@@ -121,33 +120,20 @@ class Socket
   toRunner: (event, data) ->
     @io and @io.to("runner").emit(event, data)
 
-  onAutomation: (messages, message, data) ->
-    Promise.try =>
-      ## instead of throwing immediately here perhaps we need
-      ## to make this more resilient by automatically retrying
-      ## up to 1 second in the case where our automation room
-      ## is empty. that would give padding for reconnections
-      ## to automatically happen.
-      ## for instance when socket.io detects a disconnect
-      ## does it immediately remove the member from the room?
-      ## YES it does per http://socket.io/docs/rooms-and-namespaces/#disconnection
-      if _.isEmpty(@io.sockets.adapter.rooms.automation)
-        throw new Error("Could not process '#{message}'. No automation servers connected.")
-      else
-        new Promise (resolve, reject) =>
-          id = uuid.v4()
-          messages[id] = (obj) ->
-            ## normalize the error from automation responses
-            if e = obj.__error
-              err = new Error(e)
-              err.name = obj.__name
-              err.stack = obj.__stack
-              reject(err)
-            else
-              ## normalize the response
-              resolve(obj.response)
-
-          @io.to("automation").emit("automation:request", id, message, data)
+  # onAutomation: (messages, message, data) ->
+  onAutomation: (socket, message, data, id) ->
+    ## instead of throwing immediately here perhaps we need
+    ## to make this more resilient by automatically retrying
+    ## up to 1 second in the case where our automation room
+    ## is empty. that would give padding for reconnections
+    ## to automatically happen.
+    ## for instance when socket.io detects a disconnect
+    ## does it immediately remove the member from the room?
+    ## YES it does per http://socket.io/docs/rooms-and-namespaces/#disconnection
+    if socket and socket.connected
+      socket.emit("automation:request", id, message, data)
+    else
+      throw new Error("Could not process '#{message}'. No automation clients connected.")
 
   createIo: (server, path, cookie) ->
     socketIo.server(server, {
@@ -157,10 +143,9 @@ class Socket
       cookie: cookie
     })
 
-  _startListening: (server, watchers, config, options) ->
+  _startListening: (server, watchers, automation, config, options) ->
     _.defaults options,
       socketId: null
-      onAutomationRequest: null
       onSetRunnables: ->
       onMocha: ->
       onConnect: ->
@@ -172,14 +157,26 @@ class Socket
       onReloadBrowser: ->
       checkForAppErrors: ->
       onSavedStateChanged: ->
+      onTestFileChange: ->
 
-    messages = {}
+    automationClient = null
 
     {integrationFolder, socketIoRoute, socketIoCookie} = config
 
     @testsDir = integrationFolder
 
     @io = @createIo(server, socketIoRoute, socketIoCookie)
+
+    automation.use({
+      onPush: (message, data)  =>
+        @io.emit("automation:push:message", message, data)
+    })
+
+    onAutomationClientRequestCallback = (message, data, id) =>
+      @onAutomation(automationClient, message, data, id)
+
+    automationRequest = (message, data) ->
+      automation.request(message, data, onAutomationClientRequestCallback)
 
     @io.on "connection", (socket) =>
       logger.info "socket connected"
@@ -188,33 +185,23 @@ class Socket
       ## them at any time
       headers = socket.request?.headers ? {}
 
-      respond = (id, resp) ->
-        if message = messages[id]
-          delete messages[id]
-          message(resp)
+      socket.on "automation:client:connected", =>
+        return if automationClient is socket
 
-      automationRequest = (message, data) =>
-        automate = options.onAutomationRequest ? (message, data) =>
-          @onAutomation(messages, message, data)
-
-        automation(config.namespace, socketIoCookie, config.screenshotsFolder)
-        .request(message, data, automate)
-
-      socket.on "automation:connected", =>
-        return if socket.inAutomationRoom
-
-        socket.inAutomationRoom = true
-        socket.join("automation")
+        automationClient = socket
 
         ## if our automation disconnects then we're
         ## in trouble and should probably bomb everything
-        socket.on "disconnect", =>
+        automationClient.on "disconnect", =>
           ## if we are in headless mode then log out an error and maybe exit with process.exit(1)?
           Promise.delay(500)
           .then =>
+            ## bail if we've swapped to a new automationClient
+            return if automationClient isnt socket
+
             ## give ourselves about 500ms to reconnected
             ## and if we're connected its all good
-            return if socket.connected
+            return if automationClient.connected
 
             ## TODO: if all of our clients have also disconnected
             ## then don't warn anything
@@ -222,15 +209,17 @@ class Socket
             ## TODO: no longer emit this, just close the browser and display message in reporter
             @io.emit("automation:disconnected")
 
-        socket.on "automation:push:request", (msg, data, cb = ->) =>
-          fn = (data) =>
-            @io.emit("automation:push:message", msg, data)
-            cb()
+        socket.on "automation:push:request", (message, data) =>
+          # fn = (data) =>
+            # @io.emit("automation:push:message", message, data)
+            # cb()
 
-          automation(config.namespace, socketIoCookie)
-          .pushMessage(msg, data, fn)
+          # automation(config.namespace, socketIoCookie)
+          # .pushMessage(message, data, fn)
 
-        socket.on "automation:response", respond
+          automation.push(message, data)
+
+        socket.on "automation:response", automation.response
 
       socket.on "automation:request", (message, data, cb) =>
         automationRequest(message, data)
@@ -281,8 +270,10 @@ class Socket
       socket.on "spec:changed", (spec) ->
         options.onSpecChanged(spec)
 
-      socket.on "watch:test:file", (filePath, cb) =>
-        @watchTestFileByPath(config, filePath, watchers, cb)
+      socket.on "watch:test:file", (filePath, cb = ->) =>
+        @watchTestFileByPath(config, filePath, watchers, options)
+        ## callback is only for testing purposes
+        cb()
 
       socket.on "fixture", (fixturePath, options, cb) =>
         @onFixture(config, fixturePath, options, cb)
@@ -316,9 +307,9 @@ class Socket
       socket.on "focus:tests", ->
         options.onFocusTests()
 
-      socket.on "is:automation:connected", (data = {}, cb) =>
+      socket.on "is:automation:client:connected", (data = {}, cb) =>
         isConnected = =>
-          automationRequest("is:automation:connected", data)
+          automationRequest("is:automation:client:connected", data)
 
         tryConnected = =>
           Promise
@@ -361,7 +352,7 @@ class Socket
           cb()
 
       socket.on "go:to:file", (p) ->
-        launcher.launch("chrome", "http://localhost:2020/__#" + p, {
+        browsers.launch("chrome", "http://localhost:2020/__#" + p, {
           host: "http://localhost:2020"
         })
 
@@ -385,11 +376,11 @@ class Socket
   changeToUrl: (url) ->
     @toRunner("change:to:url", url)
 
-  startListening: (server, watchers, config, options) ->
+  startListening: (server, watchers, automation, config, options) ->
     if process.env["CYPRESS_ENV"] is "development"
       @listenToCssChanges(watchers)
 
-    @_startListening(server, watchers, config, options)
+    @_startListening(server, watchers, automation, config, options)
 
   listenToCssChanges: (watchers) ->
     watchers.watch cwd("lib", "public", "css"), {

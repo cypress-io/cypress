@@ -7,14 +7,16 @@ stream       = require("stream")
 express      = require("express")
 Promise      = require("bluebird")
 evilDns      = require("evil-dns")
-statuses     = require("http-status-codes")
 httpProxy    = require("http-proxy")
-httpsProxy   = require("packages/core-https-proxy")
-allowDestroy = require("server-destroy-vvo")
+httpsProxy   = require("@cypress/core-https-proxy")
 cors         = require("./util/cors")
-headersUtil  = require("./util/headers")
+origin       = require("./util/origin")
+connect      = require("./util/connect")
 appData      = require("./util/app_data")
 buffers      = require("./util/buffers")
+statusCode   = require("./util/status_code")
+headersUtil  = require("./util/headers")
+allowDestroy = require("./util/server_destroy")
 cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
@@ -24,7 +26,6 @@ fileServer   = require("./file_server")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
-isOkayStatusRe         = /^2/
 
 setProxiedUrl = (req) ->
   ## bail if we've already proxied the url
@@ -43,10 +44,11 @@ setProxiedUrl = (req) ->
 ## currently not making use of event emitter
 ## but may do so soon
 class Server
-  constructor: ->
+  constructor: (watchers) ->
     if not (@ instanceof Server)
-      return new Server
+      return new Server(watchers)
 
+    @watchers = watchers
     @_request    = null
     @_middleware = null
     @_server     = null
@@ -104,15 +106,7 @@ class Server
     e.portInUse = true
     e
 
-  resetState: ->
-    buffers.reset()
-
-    if @_remoteProps
-      ## clear out the previous domain
-      ## and reset to the initial state
-      @_onDomainSet("<root>")
-
-  open: (config = {}) ->
+  open: (config = {}, project) ->
     Promise.try =>
       ## always reset any buffers
       ## TODO: change buffers to be an instance
@@ -131,7 +125,7 @@ class Server
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState)
+      @createRoutes(app, config, @_request, getRemoteState, @watchers, project)
 
       @createServer(app, config, @_request)
 
@@ -141,7 +135,7 @@ class Server
 
   createServer: (app, config, request) ->
     new Promise (resolve, reject) =>
-      {port, fileServerFolder, socketIoRoute} = config
+      {port, fileServerFolder, socketIoRoute, baseUrl} = config
 
       @_server  = http.createServer(app)
       @_wsProxy = httpProxy.createProxyServer()
@@ -204,16 +198,23 @@ class Server
           @_httpsProxy = httpsProxy
           @_fileServer = fileServer
 
+          ## if we have a baseUrl let's go ahead
+          ## and make sure the server is connectable!
+          if baseUrl
+            connect.ensureUrl(baseUrl)
+            .catch (err) =>
+              reject errors.get("CANNOT_CONNECT_BASE_URL", baseUrl)
+        .then =>
           ## once we open set the domain
           ## to root by default
           ## which prevents a situation where navigating
           ## to http sites redirects to /__/ cypress
-          @_onDomainSet("<root>")
+          @_onDomainSet(baseUrl ? "<root>")
 
           resolve(port)
 
   _port: ->
-    @_server?.address().port
+    @_server?.address()?.port
 
   _listen: (port, onError) ->
     new Promise (resolve) =>
@@ -315,12 +316,6 @@ class Server
 
           reject(err)
 
-        getStatusText = (code) ->
-          try
-            statuses.getStatusText(code)
-          catch e
-            "Unknown Status Code"
-
         handleReqStream = (str) =>
           pt = str
           .on("error", error)
@@ -343,18 +338,18 @@ class Server
 
               newUrl ?= urlStr
 
-              isOkay      = isOkayStatusRe.test(incomingRes.statusCode)
+              isOk        = statusCode.isOk(incomingRes.statusCode)
               contentType = headersUtil.getContentType(incomingRes)
               isHtml      = contentType is "text/html"
 
               details = {
-                isOk:   isOkay
+                isOkStatusCode: isOk
                 isHtml: isHtml
                 contentType: contentType
                 url: newUrl
                 status: incomingRes.statusCode
                 cookies: c
-                statusText: getStatusText(incomingRes.statusCode)
+                statusText: statusCode.getText(incomingRes.statusCode)
                 redirects: redirects
                 originalUrl: originalUrl
               }
@@ -364,7 +359,7 @@ class Server
                 ## if so we know this is a local file request
                 details.filePath = fp
 
-              if isOkay and isHtml
+              if isOk and isHtml
                 ## reset the domain to the new url if we're not
                 ## handling a local file
                 @_onDomainSet(newUrl) if not handlingLocalFile
@@ -393,32 +388,21 @@ class Server
           @_remoteDomainName   = previousState.domainName
           @_remoteVisitingUrl  = previousState.visiting
 
-        mergeHost = (curr, next) ->
-          ## parse our next url
-          next = url.parse(next, true)
-
-          ## and if its missing its host
-          ## then take it from the current url
-          if not next.host
-            curr = url.parse(curr, true)
-
-            for prop in ["hostname", "port", "protocol"]
-              next[prop] = curr[prop]
-
-          next.format()
-
         request.sendStream(headers, automationRequest, {
           ## turn off gzip since we need to eventually
           ## rewrite these contents
           gzip: false
           url: urlFile ? urlStr
+          headers: {
+            accept: "text/html,*/*"
+          }
           followRedirect: (incomingRes) ->
             status = incomingRes.statusCode
             next = incomingRes.headers.location
 
             curr = newUrl ? urlStr
 
-            newUrl = mergeHost(curr, next)
+            newUrl = url.resolve(curr, next)
 
             redirects.push([status, newUrl].join(": "))
 
@@ -449,15 +433,7 @@ class Server
       log("remoteFileServer", @_remoteFileServer)
 
     else
-      parsed = url.parse(fullyQualifiedUrl)
-
-      parsed.hash     = null
-      parsed.search   = null
-      parsed.query    = null
-      parsed.path     = null
-      parsed.pathname = null
-
-      @_remoteOrigin = url.format(parsed)
+      @_remoteOrigin = origin(fullyQualifiedUrl)
 
       @_remoteStrategy = "http"
 
@@ -521,20 +497,19 @@ class Server
       socket.end() if socket.writable
 
   _close: ->
-    new Promise (resolve) =>
-      logger.unsetSettings()
+    buffers.reset()
 
-      evilDns.clear()
+    logger.unsetSettings()
 
-      ## bail early we dont have a server or we're not
-      ## currently listening
-      return resolve() if not @_server or not @isListening
+    evilDns.clear()
 
-      logger.info("Server closing")
+    ## bail early we dont have a server or we're not
+    ## currently listening
+    return Promise.resolve() if not @_server or not @isListening
 
-      @_server.destroy =>
-        @isListening = false
-        resolve()
+    @_server.destroyAsync()
+    .then =>
+      @isListening = false
 
   close: ->
     Promise.join(
@@ -553,6 +528,9 @@ class Server
   changeToUrl: (url) ->
     @_socket and @_socket.changeToUrl(url)
 
+  onTestFileChange: (filePath) ->
+    @_socket and @_socket.onTestFileChange(filePath)
+
   onRequest: (fn) ->
     @_middleware = fn
 
@@ -562,12 +540,12 @@ class Server
 
       @_middleware = null
 
-  startWebsockets: (watchers, config, options = {}) ->
+  startWebsockets: (watchers, automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
 
     @_socket = Socket()
-    @_socket.startListening(@_server, watchers, config, options)
+    @_socket.startListening(@_server, watchers, automation, config, options)
     @_normalizeReqUrl(@_server)
     # handleListeners(@_server)
 

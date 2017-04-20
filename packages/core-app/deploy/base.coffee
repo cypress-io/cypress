@@ -18,7 +18,6 @@ log          = require("./log")
 meta         = require("./meta")
 pkg          = require("../package.json")
 konfig       = require("../lib/konfig")
-cache        = require("../lib/cache")
 appData      = require("../lib/util/app_data")
 Fixtures     = require("../spec/server/helpers/fixtures")
 
@@ -79,12 +78,13 @@ class Base
           copy("./index.js", "/src/index.js")
 
           ## copy coffee src files
+          copy("./lib/automation",          "/src/lib/automation")
+          copy("./lib/browsers",            "/src/lib/browsers")
           copy("./lib/controllers",         "/src/lib/controllers")
-          copy("./lib/electron",            "/src/lib/electron")
+          copy("./lib/gui",                 "/src/lib/gui")
           copy("./lib/modes",               "/src/lib/modes")
           copy("./lib/util",                "/src/lib/util")
           copy("./lib/api.coffee",          "/src/lib/api.coffee")
-          copy("./lib/automation.coffee",   "/src/lib/automation.coffee")
           copy("./lib/cache.coffee",        "/src/lib/cache.coffee")
           copy("./lib/config.coffee",       "/src/lib/config.coffee")
           copy("./lib/cwd.coffee",          "/src/lib/cwd.coffee")
@@ -98,8 +98,8 @@ class Base
           copy("./lib/fixture.coffee",      "/src/lib/fixture.coffee")
           copy("./lib/ids.coffee",          "/src/lib/ids.coffee")
           copy("./lib/konfig.coffee",       "/src/lib/konfig.coffee")
-          copy("./lib/launcher.coffee",     "/src/lib/launcher.coffee")
           copy("./lib/logger.coffee",       "/src/lib/logger.coffee")
+          copy("./lib/open_project.coffee", "/src/lib/open_project.coffee")
           copy("./lib/project.coffee",      "/src/lib/project.coffee")
           copy("./lib/reporter.coffee",     "/src/lib/reporter.coffee")
           copy("./lib/request.coffee",      "/src/lib/request.coffee")
@@ -109,8 +109,12 @@ class Base
           copy("./lib/screenshots.coffee",  "/src/lib/screenshots.coffee")
           copy("./lib/server.coffee",       "/src/lib/server.coffee")
           copy("./lib/socket.coffee",       "/src/lib/socket.coffee")
+          copy("./lib/stats.coffee",        "/src/lib/stats.coffee")
+          copy("./lib/stdout.coffee",       "/src/lib/stdout.coffee")
           copy("./lib/updater.coffee",      "/src/lib/updater.coffee")
+          copy("./lib/upload.coffee",       "/src/lib/upload.coffee")
           copy("./lib/user.coffee",         "/src/lib/user.coffee")
+          copy("./lib/video.coffee",        "/src/lib/video.coffee")
           copy("./lib/watchers.coffee",     "/src/lib/watchers.coffee")
 
         ]
@@ -251,24 +255,6 @@ class Base
       runSequence "app:build", (err) ->
         if err then reject(err) else resolve()
 
-  createCyCache: (project) ->
-    cache.path = cache.path.replace("development", "production")
-
-    # cache = path.join(@buildPathToAppResources(), ".cy", "production", "cache")
-
-    cache.write({
-      USER: {session_token: "abc123"}
-      PROJECTS: [project]
-    })
-
-  removeCyCache: ->
-    ## empty the .cy/production folder
-    # cache = path.join(@buildPathToAppResources(), ".cy", "production")
-
-    cache.path = cache.path.replace("development", "production")
-
-    cache.remove()
-
   _runProjectTest: ->
     @log("#runProjectTest")
 
@@ -287,12 +273,9 @@ class Base
           else
             reject(new Error("running project tests failed with: '#{code}' errors."))
 
-    @createCyCache(e2e)
-    .then(runProjectTest)
+    runProjectTest()
     .then ->
       Fixtures.remove()
-    .then =>
-      @removeCyCache()
 
   _runFailingProjectTest: ->
     @log("#runFailingProjectTest")
@@ -302,8 +285,8 @@ class Base
     e2e = Fixtures.projectPath("e2e")
 
     verifyScreenshots = =>
-      screenshot1 = path.join(e2e, "cypress", "screenshots", "fails1.png")
-      screenshot2 = path.join(e2e, "cypress", "screenshots", "fails2.png")
+      screenshot1 = path.join(e2e, "cypress", "screenshots", "simple failing spec -- fails1.png")
+      screenshot2 = path.join(e2e, "cypress", "screenshots", "simple failing spec -- fails2.png")
 
       Promise.all([
         fs.statAsync(screenshot1)
@@ -321,13 +304,10 @@ class Base
           else
             reject(new Error("running project tests failed with: '#{code}' errors."))
 
-    @createCyCache(e2e)
-    .then(runProjectTest)
+    runProjectTest()
     .then(verifyScreenshots)
     .then ->
       Fixtures.remove()
-    .then =>
-      @removeCyCache()
 
   _runSmokeTest: ->
     @log("#runSmokeTest")

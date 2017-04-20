@@ -46,7 +46,7 @@ module.exports = {
       if @isCurrentlyRunningElectron()
         ## just run the gui code directly here
         ## and pass our options directly to main
-        require("./electron")(mode, options)
+        require("./modes")(mode, options)
       else
         ## sanity check to ensure we're running
         ## the local dev server. dont crash just
@@ -67,7 +67,7 @@ module.exports = {
   openProject: (options) ->
     ## this code actually starts a project
     ## and is spawned from nodemon
-    require("./electron/handlers/project").open(options.project, options)
+    require("./open_project").open(options.project, options)
 
   runServer: (options) ->
     args = {}
@@ -100,7 +100,7 @@ module.exports = {
     ## default cypress web app client
     if options.autoOpen
       _.delay ->
-        require("./launcher").launch("chrome", "http://localhost:2020/__", {
+        require("./browsers").launch("chrome", "http://localhost:2020/__", {
           proxyServer: "http://localhost:2020"
         })
       , 2000
@@ -149,12 +149,13 @@ module.exports = {
         when options.exitWithCode?
           options.mode = "exitWithCode"
 
-        when options.ci
-          options.mode = "ci"
+        ## enable old CLI tools to record
+        when options.record or options.ci
+          options.mode = "record"
 
-        when options.runProject
+        when options.project
           ## go into headless mode
-          ## when we have 'runProject'
+          ## when we have 'project'
           options.mode = "headless"
 
         else
@@ -200,13 +201,13 @@ module.exports = {
 
       when "logs"
         ## print the logs + exit
-        require("./electron/handlers/logs").print()
+        require("./gui/logs").print()
         .then(exit0)
         .catch(exitErr)
 
       when "clearLogs"
         ## clear the logs + exit
-        require("./electron/handlers/logs").clear()
+        require("./gui/logs").clear()
         .then(exit0)
         .catch(exitErr)
 
@@ -241,8 +242,8 @@ module.exports = {
       when "headed"
         @runElectron(mode, options)
 
-      when "ci"
-        ## run headlessly in ci mode and exit
+      when "record"
+        ## run headlessly, record, and exit
         @runElectron(mode, options)
         .get("failures")
         .then(exit)

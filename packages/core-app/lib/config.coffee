@@ -2,75 +2,112 @@ _        = require("lodash")
 str      = require("underscore.string")
 path     = require("path")
 Promise  = require("bluebird")
+errors   = require("./errors")
+scaffold = require("./scaffold")
+errors   = require("./errors")
+origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
-scaffold = require("./scaffold")
+v        = require("./util/validation")
 
 ## cypress following by _
 cypressEnvRe = /^(cypress_)/i
 dashesOrUnderscoresRe = /^(_-)+/
 
-folders = "fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder unitFolder".split(" ")
-configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges chromeWebSecurity viewportWidth viewportHeight fileServerFolder supportFolder fixturesFolder integrationFolder screenshotsFolder environmentVariables hosts".split(" ")
+folders = "fileServerFolder videosFolder supportFolder fixturesFolder integrationFolder screenshotsFolder unitFolder supportFile".split(" ")
+configKeys = "port reporter reporterOptions baseUrl execTimeout defaultCommandTimeout pageLoadTimeout requestTimeout responseTimeout numTestsKeptInMemory screenshotOnHeadlessFailure waitForAnimations animationDistanceThreshold watchForFileChanges trashAssetsBeforeHeadlessRuns chromeWebSecurity videoRecording videoCompression viewportWidth viewportHeight supportFile fileServerFolder supportFolder fixturesFolder integrationFolder videosFolder screenshotsFolder environmentVariables hosts".split(" ")
 
 isCypressEnvLike = (key) ->
   cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
 defaults = {
-  port:           null
-  hosts:          null
-  morgan:         true
-  baseUrl:        null
-  socketId:       null
-  isHeadless:     false
-  reporter:       "spec"
-  reporterOptions: null
-  clientRoute:    "/__/"
-  xhrRoute:       "/xhrs/"
-  socketIoRoute:  "/__socket.io"
-  socketIoCookie: "__socket.io"
-  reporterRoute:  "/__cypress/reporter"
-  ignoreTestFiles: "*.hot-update.js"
-  defaultCommandTimeout: 4000
-  requestTimeout:        5000
-  responseTimeout:       30000
-  pageLoadTimeout:       60000
-  execTimeout:           60000
-  chromeWebSecurity: true
-  waitForAnimations: true
-  animationDistanceThreshold: 5
-  numTestsKeptInMemory: 50
-  watchForFileChanges: true
-  screenshotOnHeadlessFailure: true
-  autoOpen:       false
-  viewportWidth:  1000
-  viewportHeight: 660
-  fileServerFolder: ""
-  # unitFolder:        "cypress/unit"
-  supportFolder:     "cypress/support"
-  fixturesFolder:    "cypress/fixtures"
-  integrationFolder: "cypress/integration"
-  screenshotsFolder:  "cypress/screenshots"
-  javascripts:    []
-  namespace:      "__cypress"
+  port:                          null
+  hosts:                         null
+  morgan:                        true
+  baseUrl:                       null
+  socketId:                      null
+  isHeadless:                    false
+  reporter:                      "spec"
+  reporterOptions:               null
+  clientRoute:                   "/__/"
+  xhrRoute:                      "/xhrs/"
+  socketIoRoute:                 "/__socket.io"
+  socketIoCookie:                "__socket.io"
+  reporterRoute:                 "/__cypress/reporter"
+  ignoreTestFiles:               "*.hot-update.js"
+  defaultCommandTimeout:         4000
+  requestTimeout:                5000
+  responseTimeout:               30000
+  pageLoadTimeout:               60000
+  execTimeout:                   60000
+  videoRecording:                true
+  videoCompression:              32
+  chromeWebSecurity:             true
+  waitForAnimations:             true
+  animationDistanceThreshold:    5
+  numTestsKeptInMemory:          50
+  watchForFileChanges:           true
+  screenshotOnHeadlessFailure:   true
+  trashAssetsBeforeHeadlessRuns: true
+  autoOpen:                      false
+  viewportWidth:                 1000
+  viewportHeight:                660
+  fileServerFolder:              ""
+  videosFolder:                  "cypress/videos"
+  supportFile:                   "cypress/support"
+  fixturesFolder:                "cypress/fixtures"
+  integrationFolder:             "cypress/integration"
+  screenshotsFolder:             "cypress/screenshots"
+  namespace:                     "__cypress"
+
+  ## deprecated
+  javascripts:                   []
+}
+
+validationRules = {
+  animationDistanceThreshold: v.isNumber
+  baseUrl: v.isFullyQualifiedUrl
+  chromeWebSecurity: v.isBoolean
+  defaultCommandTimeout: v.isNumber
+  env: v.isPlainObject
+  execTimeout: v.isNumber
+  fileServerFolder: v.isString
+  fixturesFolder: v.isStringOrFalse
+  ignoreTestFiles: v.isStringOrArrayOfStrings
+  integrationFolder: v.isString
+  numTestsKeptInMemory: v.isNumber
+  pageLoadTimeout: v.isNumber
+  port: v.isNumber
+  reporter: v.isString
+  requestTimeout: v.isNumber
+  responseTimeout: v.isNumber
+  screenshotOnHeadlessFailure: v.isBoolean
+  supportFile: v.isStringOrFalse
+  trashAssetsBeforeHeadlessRuns: v.isBoolean
+  videoCompression: v.isNumberOrFalse
+  videoRecording: v.isBoolean
+  videosFolder: v.isString
+  viewportHeight: v.isNumber
+  viewportWidth: v.isNumber
+  waitForAnimations: v.isBoolean
+  watchForFileChanges: v.isBoolean
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   _.reduce folders, (memo, folder) ->
     val = obj[folder]
-    if val?
-      ## if this folder has been specifically turned off
-      ## then set its value to the default value and
-      ## set the Remove key to true
-      if val is false and def = defaults[folder]
-        memo[folder + "Remove"] = true
-        memo[folder] = path.resolve(projectRoot, def)
-      else
-        ## else just resolve the folder from the projectRoot
-        memo[folder] = path.resolve(projectRoot, val)
-
+    if val? and val isnt false
+      memo[folder] = path.resolve(projectRoot, val)
     return memo
   , {}
+
+validate = (file) ->
+  return (settings) ->
+    _.each settings, (value, key) ->
+      if validationFn = validationRules[key]
+        result = validationFn(key, value)
+        if result isnt true
+          errors.throw("CONFIG_VALIDATION_ERROR", file, result)
 
 module.exports = {
   getConfigKeys: -> configKeys
@@ -80,8 +117,8 @@ module.exports = {
 
   get: (projectRoot, options = {}) ->
     Promise.all([
-      settings.read(projectRoot)
-      settings.readEnv(projectRoot)
+      settings.read(projectRoot).then(validate("cypress.json"))
+      settings.readEnv(projectRoot).then(validate("cypress.env.json"))
     ])
     .spread (settings, envFile) =>
       @set({
@@ -130,9 +167,13 @@ module.exports = {
     config.env = process.env["CYPRESS_ENV"]
     delete config.envFile
 
-    ## forcibly reset numTestsKeptInMemory
-    ## to zero when isHeadless
+    ## when headless
     if config.isHeadless
+      ## dont ever watch for file changes
+      config.watchForFileChanges = false
+
+      ## and forcibly reset numTestsKeptInMemory
+      ## to zero
       config.numTestsKeptInMemory = 0
 
     config = @setResolvedConfigValues(config, defaults, resolved)
@@ -143,6 +184,8 @@ module.exports = {
     config = @setAbsolutePaths(config, defaults)
 
     config = @setParentTestsPaths(config)
+
+    config = @setSupportFileAndFolder(config)
 
     config = @setScaffoldPaths(config)
 
@@ -185,6 +228,31 @@ module.exports = {
 
     obj.integrationExampleFile = path.join(obj.integrationFolder, fileName)
     obj.integrationExampleName = fileName
+    obj.scaffoldedFiles = scaffold.fileTree(obj)
+
+    return obj
+
+  setSupportFileAndFolder: (obj) ->
+    obj = _.clone(obj)
+
+    ## if supportFile isn't false
+    if sf = obj.supportFile
+      try
+        ## resolve full path with extension to
+        obj.supportFile = require.resolve(sf)
+      catch err
+        ## supportFile doesn't exist on disk
+        if sf isnt path.resolve(obj.projectRoot, defaults.supportFile)
+          ## throw because they have it explicitly set,
+          ## so it should be there
+          errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf))
+        else
+          ## set it to support/index.js, and it will be scaffolded
+          ## later in process
+          obj.supportFile = path.join(sf, "index.js")
+
+      ## set config.supportFolder to its directory
+      obj.supportFolder = path.dirname(obj.supportFile)
 
     return obj
 
@@ -220,13 +288,18 @@ module.exports = {
   setUrls: (obj) ->
     obj = _.clone(obj)
 
-    rootUrl = "http://localhost:" + obj.port
+    proxyUrl = "http://localhost:" + obj.port
+
+    rootUrl = if obj.baseUrl
+      origin(obj.baseUrl)
+    else
+      proxyUrl
 
     _.extend obj,
-      clientUrlDisplay: rootUrl
-      clientUrl:        rootUrl + obj.clientRoute
-      reporterUrl:      rootUrl + obj.reporterRoute
-      xhrUrl:           obj.namespace + obj.xhrRoute
+      proxyUrl:    proxyUrl
+      browserUrl:  rootUrl + obj.clientRoute
+      reporterUrl: rootUrl + obj.reporterRoute
+      xhrUrl:      obj.namespace + obj.xhrRoute
 
     return obj
 

@@ -1132,9 +1132,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           node = Cypress.Utils.stringifyElement(options.$el)
           $Cypress.Utils.throwErrByPath "select.disabled", { args: { node } }
 
-        values  = []
+        values = []
         optionEls = []
-        optionsObjects = options.$el.children().map (index, el) ->
+        optionsObjects = options.$el.find("option").map((index, el) ->
           ## push the value in values array if its
           ## found within the valueOrText
           value = el.value
@@ -1150,11 +1150,18 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             text: optEl.text()
             $el: optEl
           }
+        ).get()
 
         ## if we couldn't find anything by value then attempt
         ## to find it by text and insert its value into values arr
         if not values.length
-          _.each optionsObjects.get(), (obj, index) ->
+          ## if all the values are the same and the user is trying to
+          ## select based on the text, setting the value won't work
+          ## `allSameValue` is used later to do the right thing
+          uniqueValues = _(optionsObjects).chain().pluck("value").uniq().value()
+          allSameValue = uniqueValues.length is 1
+
+          _.each optionsObjects, (obj, index) ->
             if obj.text in valueOrText
               optionEls.push obj.$el
               values.push(obj.value)
@@ -1178,7 +1185,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               args: { node }
             })
 
-        {values: values, optionEls: optionEls}
+        {values: values, optionEls: optionEls, allSameValue: allSameValue}
 
       retryOptions = =>
         Promise
@@ -1190,7 +1197,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       Promise
       .try(retryOptions)
       .then (obj = {}) =>
-        {values, optionEls} = obj
+        {values, optionEls, allSameValue} = obj
 
         ## preserve the selected values
         consoleProps.Selected = values
@@ -1228,13 +1235,20 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               })
             .cancellable()
             .then =>
-              ## reset the selects value after we've
-              ## fired all the proper click events
-              ## for the options
-              ## TODO: shouldn't we be updating the values
-              ## as we click the <option> instead of
-              ## all afterwards?
-              options.$el.val(values)
+              if allSameValue
+                ## if all the values are the same and the user is trying to
+                ## select based on the text, setting the val() will just
+                ## select the first one
+                _.each optionEls, ($el) ->
+                  $el.prop("selected", "selected")
+              else
+                ## reset the selects value after we've
+                ## fired all the proper click events
+                ## for the options
+                ## TODO: shouldn't we be updating the values
+                ## as we click the <option> instead of
+                ## all afterwards?
+                options.$el.val(values)
 
               input = new Event "input", {
                 bubbles: true

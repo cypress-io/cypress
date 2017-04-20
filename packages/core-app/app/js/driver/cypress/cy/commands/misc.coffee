@@ -5,12 +5,21 @@ $Cypress.register "Misc", (Cypress, _, $) ->
       null
 
   Cypress.addParentCommand
-    options: (options = {}) ->
-      ## change things like pauses in between commands
-      ## the max timeout per command
-      ## or anything else here...
-
     noop: (subject) -> subject
+
+    log: (msg, args) ->
+      Cypress.Log.command({
+        end: true
+        snapshot: true
+        message: [msg, args]
+        consoleProps: ->
+          {
+            message: msg
+            args:    args
+          }
+      })
+
+      return null
 
     wrap: (subject, options = {}) ->
       _.defaults options, {log: true}

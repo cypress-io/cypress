@@ -6,7 +6,7 @@ exec = require("#{root}lib/exec")
 runCommand = (cmd, options = {}) ->
   _.defaults(options, {
     cmd: cmd
-    timeout: 3000
+    timeout: 10000
     env: {}
     failOnNonZeroExit: true
   })
@@ -15,9 +15,9 @@ runCommand = (cmd, options = {}) ->
 fail = (message) -> throw new Error(message)
 
 describe "lib/exec", ->
+  @timeout(10000)
 
   describe "when exit code is 0", ->
-
     it "reports the stdout, stderr, and code", ->
       runCommand("echo 'foo'")
       .catch (err) ->

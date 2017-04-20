@@ -78,3 +78,16 @@ describe "iframes", ->
       .get("a").click()
       .get("body").then ($body) ->
         expect($body).to.contain("Cannot GET /page/does-not-exist")
+
+  it "does not inject into xhr's", ->
+    cy
+      .visit("http://localhost:1616/")
+      .window().then (win) ->
+        new Cypress.Promise (resolve) ->
+          xhr = new win.XMLHttpRequest
+          xhr.open("GET", "/iframe")
+          xhr.onload = ->
+            resolve(xhr.responseText)
+          xhr.send()
+      .then (response) ->
+        expect(response).not.to.include("document.domain")

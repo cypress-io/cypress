@@ -51,6 +51,23 @@ describe "lib/settings", ->
         expect(obj).to.deep.eq({})
         expect(fs.existsSync("cypress.env.json")).to.be.false
 
+  context ".id", ->
+    beforeEach ->
+      @projectPath = "path/to/project/"
+      fs.ensureDirAsync(@projectPath)
+
+    afterEach ->
+      fs.removeAsync("#{@projectPath}cypress.json")
+
+    it "returns project id for project", ->
+      fs.writeJsonAsync("#{@projectPath}cypress.json", {
+        projectId: "id-123"
+      })
+      .then =>
+        settings.id(@projectPath)
+      .then (id) ->
+        expect(id).to.equal("id-123")
+
   context ".read", ->
     it "promises cypress.json", ->
       @setup({foo: "bar"})
@@ -65,6 +82,13 @@ describe "lib/settings", ->
         settings.read(projectRoot)
       .then (obj) ->
         expect(obj).to.deep.eq {defaultCommandTimeout: 30000, foo: "bar"}
+
+    it "renames supportFolder -> supportFile", ->
+      @setup({supportFolder: "foo", foo: "bar"})
+      .then ->
+        settings.read(projectRoot)
+      .then (obj) ->
+        expect(obj).to.deep.eq {supportFile: "foo", foo: "bar"}
 
     it "renames visitTimeout -> pageLoadTimeout", ->
       @setup({visitTimeout: 30000, foo: "bar"})

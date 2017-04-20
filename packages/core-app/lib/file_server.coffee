@@ -1,15 +1,15 @@
 ## TODO: move this to packages/core-file-server
 
+_            = require("lodash")
 url          = require("url")
 http         = require("http")
 path         = require("path")
 send         = require("send")
-compact      = require("lodash.compact")
-allowDestroy = require("server-destroy-vvo")
 errors       = require("./errors")
+allowDestroy = require("./util/server_destroy")
 
 onRequest = (req, res, fileServerFolder) ->
-  args = compact([
+  args = _.compact([
     fileServerFolder,
     req.url
   ])
@@ -49,7 +49,6 @@ module.exports = {
             "http://localhost:" + @port()
 
           close: ->
-            new Promise (resolve) ->
-              srv.destroy(resolve)
+            srv.destroyAsync()
       })
 }

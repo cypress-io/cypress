@@ -2,13 +2,15 @@ require("../../spec_helper")
 
 extension = require("packages/core-extension")
 Fixtures = require("../../helpers/fixtures")
-project  = require("#{root}../lib/electron/handlers/project")
+project  = require("#{root}../lib/open_project")
 Project  = require("#{root}../lib/project")
 launcher = require("#{root}../lib/launcher")
 
-describe "lib/electron/handlers/projects", ->
+describe "lib/open_projects", ->
   beforeEach ->
     Fixtures.scaffold()
+
+    process.versions.chrome = "2020.0.1776"
 
     @todosPath = Fixtures.projectPath("todos")
 
@@ -20,12 +22,18 @@ describe "lib/electron/handlers/projects", ->
   context ".open", ->
     beforeEach ->
       @projectInstance = {
-        getConfig: @sandbox.stub().resolves({clientUrlDisplay: "foo", socketIoRoute: "bar"})
-        setBrowsers: @sandbox.stub().resolves([])
+        getConfig: @sandbox.stub().resolves({proxyUrl: "foo", socketIoRoute: "bar"})
       }
 
-      @sandbox.stub(launcher, "getBrowsers").resolves([])
+      browsers = [{
+        name: "chrome"
+        verson: "2077.1.42"
+        path: "/path/to/Chrome.app"
+        majorVersion: "2077"
+      }]
+      @sandbox.stub(launcher, "getBrowsers").resolves(browsers)
       @sandbox.stub(extension, "setHostAndPath").withArgs("foo", "bar").resolves()
+      @open = @sandbox.stub(Project.prototype, "open").resolves(@projectInstance)
 
     it "resolves with opened project instance", ->
       project.open(@todosPath)
@@ -34,33 +42,38 @@ describe "lib/electron/handlers/projects", ->
         expect(p).to.be.an.instanceOf(Project)
 
     it "merges options into whitelisted config args", ->
-      open = @sandbox.stub(Project.prototype, "open").resolves(@projectInstance)
-
       args = {port: 2222, baseUrl: "localhost", foo: "bar"}
       options = {socketId: 123, port: 2020}
       project.open(@todosPath, args, options)
-      .then ->
-        expect(open).to.be.calledWithMatch({
+      .then =>
+        expect(@open).to.be.calledWithMatch({
           port: 2020
           socketId: 123
           baseUrl: "localhost"
           sync: true
         })
-        expect(open.getCall(0).args[0].onReloadBrowser).to.be.a("function")
+        expect(@open.getCall(0).args[0].onReloadBrowser).to.be.a("function")
 
     it "passes onReloadBrowser which calls relaunch with url + browser", ->
-      open     = @sandbox.stub(Project.prototype, "open").resolves(@projectInstance)
       relaunch = @sandbox.stub(project, "relaunch")
 
       project.open(@todosPath)
-      .then ->
-        open.getCall(0).args[0].onReloadBrowser("foo", "bar")
+      .then =>
+        @open.getCall(0).args[0].onReloadBrowser("foo", "bar")
         expect(relaunch).to.be.calledWith("foo", "bar")
 
-    ## TODO: write these tests!!
-    it "gets browsers available for launch"
+    it "opens project with available browsers, appending electron browser", ->
+      project.open(@todosPath)
+      .then =>
+        browsers = @open.lastCall.args[0].browsers
+        expect(browsers.length).to.equal(2)
+        expect(browsers[0].name).to.equal("chrome")
+        expect(browsers[1].name).to.equal("electron")
 
-    it "sets browsers on project"
+    it "electron browser has info explaining what it is", ->
+      project.open(@todosPath)
+      .then =>
+        electron = @open.lastCall.args[0].browsers[1]
+        expect(electron.info).to.include("version of Chrome")
 
   context ".close", ->
-

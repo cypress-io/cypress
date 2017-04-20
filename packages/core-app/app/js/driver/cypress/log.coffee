@@ -4,12 +4,15 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
   CypressErrorRe  = /(AssertionError|CypressError)/
   parentOrChildRe = /parent|child/
+  groupsOrTableRe = /^(groups|table)$/
   ERROR_PROPS     = "message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff".split(" ")
   SNAPSHOT_PROPS  = "id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight".split(" ")
   DISPLAY_PROPS   = "id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible".split(" ")
   BLACKLIST_PROPS = "snapshots".split(" ")
 
   counter = 0
+
+  delay = null
 
   logs = {}
 
@@ -124,6 +127,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       return log
   }
 
+  setDelay = (val) ->
+    ## memoize this value
+    delay = val ? 4
+
   class $Log
     constructor: (@Cypress, obj = {}) ->
       _.defaults obj,
@@ -132,6 +139,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
       trigger = =>
         triggerEvent(@Cypress, @, "log:state:changed")
+
+      ## give us the ability to change the delay for firing
+      ## the change event, or default it to 4
+      delay ?= setDelay(@Cypress.config("logAttrsDelay"))
 
       ## only fire the log:state:changed event
       ## as fast as every 4ms
@@ -248,6 +259,11 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       }
 
     snapshot: (name, options = {}) ->
+      ## bail early and dont snapshot
+      ## if we're in headless mode
+      if $Cypress.isHeadless
+        return @
+
       _.defaults options,
         at: null
         next: null
@@ -419,6 +435,12 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
           when isDomLike(value)
             $Cypress.Utils.stringifyElement(value, "short")
+
+          when _.isFunction(value) and groupsOrTableRe.test(key)
+            value()
+
+          when _.isFunction(value)
+            value.toString()
 
           when _.isObject(value)
             _.mapObject(value, stringify)

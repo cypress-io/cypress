@@ -42,8 +42,14 @@ describe "lib/socket", ->
         @options = {
           onSavedStateChanged: @sandbox.spy()
         }
-        @watchers = {}
-        @server.startWebsockets(@watchers, @cfg, @options)
+        
+        @watchers = {
+          watch: ->
+        }
+
+        @automation = automation.create()
+        
+        @server.startWebsockets(@watchers, @automation, @cfg, @options)
         @socket = @server._socket
 
         done = _.once(done)
@@ -53,12 +59,12 @@ describe "lib/socket", ->
           @socketClient = socket
           done()
 
-        {clientUrlDisplay, socketIoRoute} = @cfg
+        {proxyUrl, socketIoRoute} = @cfg
 
         ## force node into legit proxy mode like a browser
         agent = new httpsAgent("http://localhost:#{@cfg.port}")
 
-        @client = socketIo.client(clientUrlDisplay, {
+        @client = socketIo.client(proxyUrl, {
           agent: agent
           path: socketIoRoute
           transports: ["websocket"]
@@ -90,10 +96,10 @@ describe "lib/socket", ->
 
         beforeEach (done) ->
           @socket.io.on "connection", (@extClient) =>
-            @extClient.on "automation:connected", ->
+            @extClient.on "automation:client:connected", ->
               done()
 
-          extension.connect(@cfg.clientUrlDisplay, @cfg.socketIoRoute, socketIo.client)
+          extension.connect(@cfg.proxyUrl, @cfg.socketIoRoute, socketIo.client)
 
         afterEach ->
           @extClient.disconnect()
@@ -174,7 +180,7 @@ describe "lib/socket", ->
           .withArgs(1, {code: code})
           .yieldsAsync(["string"])
 
-          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string"}, (resp) ->
+          @client.emit "is:automation:client:connected", {element: "__cypress-string", string: "string"}, (resp) ->
             expect(resp).to.be.true
             done()
 
@@ -190,7 +196,7 @@ describe "lib/socket", ->
           .onCall(2).rejects(err)
           .onCall(3).resolves()
 
-          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string"}, (resp) ->
+          @client.emit "is:automation:client:connected", {element: "__cypress-string", string: "string"}, (resp) ->
             expect(oA.callCount).to.be.eq(4)
 
             expect(resp).to.be.true
@@ -208,7 +214,7 @@ describe "lib/socket", ->
           .yieldsAsync(["foobarbaz"])
 
           ## reduce the timeout so we dont have to wait so long
-          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string", timeout: 100}, (resp) ->
+          @client.emit "is:automation:client:connected", {element: "__cypress-string", string: "string", timeout: 100}, (resp) ->
             expect(resp).to.be.false
             done()
 
@@ -217,7 +223,7 @@ describe "lib/socket", ->
           oA = @sandbox.stub(@socket, "onAutomation").rejects(new Error)
 
           ## reduce the timeout so we dont have to wait so long
-          @client.emit "is:automation:connected", {element: "__cypress-string", string: "string", timeout: 100}, (resp) ->
+          @client.emit "is:automation:client:connected", {element: "__cypress-string", string: "string", timeout: 100}, (resp) ->
             callCount = oA.callCount
 
             ## it retries every 25ms so explect that
@@ -262,18 +268,18 @@ describe "lib/socket", ->
 
         it "throws when onAutomationRequest rejects"
 
-        it "is:automation:connected returns true", (done) ->
-          @oar.withArgs("is:automation:connected", {string: "foo"}).resolves(true)
+        it "is:automation:client:connected returns true", (done) ->
+          @oar.withArgs("is:automation:client:connected", {string: "foo"}).resolves(true)
 
-          @client.emit "is:automation:connected", {string: "foo"}, (resp) ->
+          @client.emit "is:automation:client:connected", {string: "foo"}, (resp) ->
             expect(resp).to.be.true
             done()
 
     context "on(automation:push:request)", ->
       beforeEach (done) ->
-        @socketClient.on "automation:connected", -> done()
+        @socketClient.on "automation:client:connected", -> done()
 
-        @client.emit("automation:connected")
+        @client.emit("automation:client:connected")
 
       it "emits 'automation:push:message'", (done) ->
         data = {cause: "explicit", cookie: {name: "foo", value: "bar"}, removed: true}
@@ -299,12 +305,10 @@ describe "lib/socket", ->
 
     context "on(watch:test:file)", ->
       it "calls socket#watchTestFileByPath with config, filePath, watchers", (done) ->
-        watchers = {}
-
-        @sandbox.stub(@socket, "watchTestFileByPath").yieldsAsync()
+        @sandbox.stub(@socket, "watchTestFileByPath")
 
         @client.emit "watch:test:file", "path/to/file", =>
-          expect(@socket.watchTestFileByPath).to.be.calledWith(@cfg, "path/to/file", watchers)
+          expect(@socket.watchTestFileByPath).to.be.calledWith(@cfg, "path/to/file", @watchers)
           done()
 
     context "on(app:connect)", ->
@@ -437,79 +441,35 @@ describe "lib/socket", ->
         @filePath        = @socket.testsDir + "/test1.js"
         @watchers        = Watchers()
 
-      afterEach ->
-        @watchers.close()
+        @sandbox.stub(@watchers, "watchBundle").resolves()
 
       it "returns undefined if config.watchForFileChanges is false", ->
         @cfg.watchForFileChanges = false
-        cb = @sandbox.spy()
-        @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers, cb)
-        expect(cb).to.be.calledOnce
+        result = @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers)
+        expect(result).to.be.undefined
 
       it "returns undefined if #testFilePath matches arguments", ->
-        @socket.testFilePath = @filePath
-        cb = @sandbox.spy()
-        @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers, cb)
-        expect(cb).to.be.calledOnce
+        @socket.testFilePath = "tests/test1.js"
+        result = @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers)
+        expect(result).to.be.undefined
 
-      it "closes existing watchedTestFile", ->
-        remove = @sandbox.stub(@watchers, "remove")
-        @socket.watchedTestFile = "test1.js"
-        @socket.watchTestFileByPath(@cfg, "test1.js", @watchers).then ->
+      it "closes existing watched test file", ->
+        remove = @sandbox.stub(@watchers, "removeBundle")
+        @socket.testFilePath = "tests/test1.js"
+        @socket.watchTestFileByPath(@cfg, "test2.js", @watchers).then ->
           expect(remove).to.be.calledWithMatch("test1.js")
 
       it "sets #testFilePath", ->
         @socket.watchTestFileByPath(@cfg, "integration/test1.js", @watchers).then =>
-          expect(@socket.testFilePath).to.eq @filePath
+          expect(@socket.testFilePath).to.eq "tests/test1.js"
 
       it "can normalizes leading slash", ->
         @socket.watchTestFileByPath(@cfg, "/integration/test1.js", @watchers).then =>
-          expect(@socket.testFilePath).to.eq @filePath
+          expect(@socket.testFilePath).to.eq "tests/test1.js"
 
-      it "watches file by path", (done) ->
-        socket = @socket
-
-        ## chokidar may take 100ms to pick up the file changes
-        ## so we just override onTestFileChange and whenever
-        ## its invoked we finish the test
-        onTestFileChange = @sandbox.stub @socket, "onTestFileChange", ->
-          expect(@).to.eq(socket)
-          done()
-
+      it "watches file by path", ->
         @socket.watchTestFileByPath(@cfg, "integration/test2.coffee", @watchers)
-        .then =>
-          fs.writeFileAsync(@socket.testsDir + "/test2.coffee", "foooooooooo")
-
-      describe "ids project", ->
-        beforeEach ->
-          @idsPath = Fixtures.projectPath("ids")
-          @server  = Server(@idsPath)
-
-          config.get(@idsPath).then (@idCfg) =>
-
-        it "joins on integration test files", ->
-          @socket.testsDir = @idCfg.integrationFolder
-
-          cfg = {integrationFolder: @idCfg.integrationFolder}
-
-          @socket.watchTestFileByPath(cfg, "integration/foo.coffee", @watchers)
-          .then =>
-            expect(@socket.testFilePath).to.eq path.join(@idCfg.integrationFolder, "foo.coffee")
-
-        it "watches file by path for integration folder", (done) ->
-          file = path.join(@idCfg.integrationFolder, "bar.js")
-
-          @sandbox.stub @socket, "onTestFileChange", =>
-            expect(@socket.onTestFileChange).to.be.calledWith(
-              @idCfg.integrationFolder,
-              "integration/bar.js",
-              file
-            )
-            done()
-
-          @socket.watchTestFileByPath(@idCfg, "integration/bar.js", @watchers)
-          .then =>
-            fs.writeFileAsync(file, "foooooooooo")
+        expect(@watchers.watchBundle).to.be.calledWith("tests/test2.coffee", @cfg)
 
     context "#startListening", ->
       it "sets #testsDir", ->
@@ -537,26 +497,21 @@ describe "lib/socket", ->
           @sandbox.spy(fs, "statAsync")
 
         it "does not emit if not a js or coffee files", ->
-          @socket.onTestFileChange(@cfg.integrationFolder, "foo/bar")
+          @socket.onTestFileChange("foo/bar")
           expect(fs.statAsync).not.to.be.called
 
         it "does not emit if a tmp file", ->
-          @socket.onTestFileChange(@cfg.integrationFolder, "foo/subl-123.js.tmp")
+          @socket.onTestFileChange("foo/subl-123.js.tmp")
           expect(fs.statAsync).not.to.be.called
 
         it "calls statAsync on .js file", ->
-          @socket.onTestFileChange(@cfg.integrationFolder, "original/path", "foo/bar.js").catch(->).then =>
+          @socket.onTestFileChange("foo/bar.js").catch(->).then =>
             expect(fs.statAsync).to.be.calledWith("foo/bar.js")
 
         it "calls statAsync on .coffee file", ->
-          @socket.onTestFileChange(@cfg.integrationFolder, "original/path", "foo/bar.coffee").then =>
+          @socket.onTestFileChange("foo/bar.coffee").then =>
             expect(fs.statAsync).to.be.calledWith("foo/bar.coffee")
 
         it "does not emit if stat throws", ->
-          @socket.onTestFileChange(@cfg.integrationFolder, "original/path", "foo/bar.js").then =>
+          @socket.onTestFileChange("foo/bar.js").then =>
             expect(@io.emit).not.to.be.called
-
-        it "emits 'watched:file:changed' with original/path", ->
-          p = Fixtures.project("todos") + "/tests/test1.js"
-          @socket.onTestFileChange(@cfg.integrationFolder, "original/path", p).then =>
-            expect(@io.emit).to.be.calledWith("watched:file:changed", {file: "original/path"})

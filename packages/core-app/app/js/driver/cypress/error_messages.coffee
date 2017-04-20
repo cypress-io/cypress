@@ -1,4 +1,28 @@
 $Cypress.ErrorMessages = do ($Cypress) ->
+  divider = (num, char) ->
+    Array(num).join(char)
+
+  format = (data) ->
+    switch
+      when _.isString(data)
+        _.truncate(data, 100)
+      when _.isObject(data)
+        JSON.stringify(data, null, 2)
+      else
+        data
+
+  formatRedirect = (redirect) -> "  - #{redirect}"
+
+  formatRedirects = (redirects = []) ->
+    _.map(redirects, formatRedirect)
+
+  formatProp = (memo, field) ->
+    {key, value} = field
+
+    if value?
+      memo.push(_.capitalize(key) + ": " + format(value))
+    memo
+
   cmd = (command, args = "") ->
     "cy.#{command}(#{args})"
 
@@ -9,14 +33,19 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     word = $Cypress.Utils.plural(redirects.length, "times", "time")
 
-    list = _.map redirects, (redirect) ->
-      "  - #{redirect}"
+    list = formatRedirects(redirects)
 
     """
     #{phrase} '#{redirects.length}' #{word} to:
 
     #{list.join("\n")}
     """
+
+  getHttpProps = (fields = []) ->
+    _.chain(fields)
+    .reduce(formatProp, [])
+    .value()
+    .join("\n")
 
   return {
     add:
@@ -30,7 +59,7 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     as:
       empty_string: "#{cmd('as')} cannot be passed an empty string."
       invalid_type: "#{cmd('as')} can only accept a string."
-      reserved_word: "#{cmd('as')} cannot be aliased as: '{{str}}'. This word is reserved."
+      reserved_word: "#{cmd('as')} cannot be aliased as: '{{alias}}'. This word is reserved."
 
     blur:
       multiple_elements: "#{cmd('blur')} can only be called on a single element. Your subject contained {{num}} elements."
@@ -57,6 +86,11 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     click:
       multiple_elements: "#{cmd('click')} can only be called on a single element. Your subject contained {{num}} elements. Pass {multiple: true} if you want to serially click each element."
       on_select_element: "#{cmd('click')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
+
+    clock:
+      already_created: "#{cmd('clock')} can only be called once per test. Use the clock returned from the previous call."
+      invalid_1st_arg: "#{cmd('clock')} only accepts a number or an options object for its first argument. You passed: {{arg}}"
+      invalid_2nd_arg: "#{cmd('clock')} only accepts an array of function names or an options object for its second argument. You passed: {{arg}}"
 
     contains:
       empty_string: "#{cmd('contains')} cannot be passed an empty string."
@@ -313,29 +347,98 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     request:
       auth_invalid: "#{cmd('request')} must be passed an object literal for the 'auth' option."
-      cookies_invalid: "#{cmd('request')} requires cookies to be true, or an object literal."
-      gzip_invalid: "#{cmd('request')} requires gzip to be a boolean."
-      headers_invalid: "#{cmd('request')} requires headers to be an object literal."
+      gzip_invalid: "#{cmd('request')} requires the 'gzip' option to be a boolean."
+      headers_invalid: "#{cmd('request')} requires the 'headers' option to be an object literal."
       invalid_method: "#{cmd('request')} was called with an invalid method: '{{method}}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
-      loading_failed: """
-        #{cmd('request')} failed:
+      form_invalid: """
+      #{cmd('request')} requires the 'form' option to be a boolean.
 
-        The response from the remote server was:
+      If you're trying to send a x-www-form-urlencoded request then pass either a string or object literal to the 'body' property.
+      """
+      loading_failed: (obj) ->
+        """
+        #{cmd('request')} failed trying to load:
 
-          > "{{error}}"
+        #{obj.url}
 
-        The request parameters were:
-          Method: {{method}}
-          URL: {{url}}
-          {{body}}
-          {{headers}}
+        We attempted to make an http request to this URL but the request failed without a response.
+
+        We received this error at the network level:
+
+          > #{obj.error}
+
+        #{divider(60, '-')}
+
+        The request we sent was:
+
+        #{getHttpProps([
+          {key: 'method',    value: obj.method},
+          {key: 'URL',       value: obj.url},
+        ])}
+
+        #{divider(60, '-')}
+
+        Common situations why this would fail:
+          - you don't have internet access
+          - you forgot to run / boot your web server
+          - your web server isn't accessible
+          - you have weird network configuration settings on your computer
 
         The stack trace for this error is:
 
-        {{stack}}
-      """
-      status_invalid: "#{cmd('request')} failed because the response had the status code: {{status}}"
-      timed_out: "#{cmd('request')} timed out waiting {{timeout}}ms for a response. No response ever occured."
+        #{obj.stack}
+        """
+
+      status_invalid: (obj) ->
+        """
+        #{cmd('request')} failed on:
+
+        #{obj.url}
+
+        The response we received from your web server was:
+
+          > #{obj.status}: #{obj.statusText}
+
+        This was considered a failure because the status code was not '2xx' or '3xx'.
+
+        If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+
+        #{divider(60, '-')}
+
+        The request we sent was:
+
+        #{getHttpProps([
+          {key: 'method',    value: obj.method},
+          {key: 'URL',       value: obj.url},
+          {key: 'headers',   value: obj.requestHeaders},
+          {key: 'body',      value: obj.requestBody}
+          {key: 'redirects', value: obj.redirects}
+        ])}
+
+        #{divider(60, '-')}
+
+        The response we got was:
+
+        #{getHttpProps([
+          {key: 'status',  value: obj.status + ' - ' + obj.statusText},
+          {key: 'headers', value: obj.responseHeaders},
+          {key: 'body',    value: obj.responseBody}
+        ])}
+
+        """
+      timed_out: (obj) ->
+        """
+        #{cmd('request')} timed out waiting #{obj.timeout}ms for a response from your server.
+
+        The request we sent was:
+
+        #{getHttpProps([
+          {key: 'method',    value: obj.method},
+          {key: 'URL',       value: obj.url},
+        ])}
+
+        No response was received within the timeout.
+        """
       url_missing: "#{cmd('request')} requires a url. You did not provide a url."
       url_invalid: "#{cmd('request')} must be provided a fully qualified url - one that begins with 'http'. By default #{cmd('request')} will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present."
       url_wrong_type: "#{cmd('request')} requires the url to be a string."
@@ -373,6 +476,10 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     submit:
       multiple_forms: "#{cmd('submit')} can only be called on a single form. Your subject contained {{num}} form elements."
       not_on_form: "#{cmd('submit')} can only be called on a <form>. Your subject {{word}} a: {{node}}"
+
+    tick:
+      invalid_argument: "clock.tick()/#{cmd('tick')} only accept a number as their argument. You passed: {{arg}}"
+      no_clock: "#{cmd('tick')} cannot be called without first calling #{cmd('clock')}"
 
     then:
       callback_mixes_sync_and_async: """
@@ -521,8 +628,8 @@ $Cypress.ErrorMessages = do ($Cypress) ->
     wait:
       alias_invalid: "'{{prop}}' is not a valid alias property. Are you trying to ask for the first request? If so write @{{str}}.request"
       fn_deprecated: "#{cmd('wait', 'fn')} has been deprecated. Instead just change this command to be #{cmd('should', 'fn')}."
-      invalid_1st_arg: "#{cmd('wait')} must be invoked with either a number or an alias for a route."
-      invalid_alias: "#{cmd('wait')} can only accept aliases for routes.\nThe alias: '{{alias}}' did not match a route."
+      invalid_1st_arg: "#{cmd('wait')} only accepts a number, an alias of a route, or an array of aliases of routes. You passed: {{arg}}"
+      invalid_alias: "#{cmd('wait')} only accepts aliases for routes.\nThe alias: '{{alias}}' did not match a route."
       invalid_arguments: "#{cmd('wait')} was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array."
       timed_out: "#{cmd('wait')} timed out waiting {{timeout}}ms for the {{num}} {{type}} to the route: '{{alias}}'. No {{type}} ever occured."
 

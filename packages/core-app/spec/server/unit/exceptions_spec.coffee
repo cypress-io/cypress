@@ -12,18 +12,18 @@ Routes        = require("#{root}lib/util/routes")
 Settings      = require("#{root}lib/util/settings")
 
 describe "lib/exceptions", ->
-  context ".getSession", ->
-    it "returns session from cache", ->
-      @sandbox.stub(user, "get").resolves({session_token: "abc-123"})
+  context ".getAuthToken", ->
+    it "returns authToken from cache", ->
+      @sandbox.stub(user, "get").resolves({authToken: "auth-token-123"})
 
-      exception.getSession().then (session) ->
-        expect(session).to.eq("abc-123")
+      exception.getAuthToken().then (authToken) ->
+        expect(authToken).to.eq("auth-token-123")
 
-    it "returns undefined if no session_token", ->
+    it "returns undefined if no authToken", ->
       @sandbox.stub(user, "get").resolves({})
 
-      exception.getSession().then (session) ->
-        expect(session).to.be.undinefed
+      exception.getAuthToken().then (authToken) ->
+        expect(authToken).to.be.undinefed
 
   context ".getErr", ->
     it "returns an object literal", ->
@@ -124,11 +124,11 @@ describe "lib/exceptions", ->
           version: "0.1.2"
         })
 
-        @sandbox.stub(exception, "getSession").resolves("abc-123")
+        @sandbox.stub(exception, "getAuthToken").resolves("auth-token-123")
 
         @sandbox.stub(api, "createRaygunException")
 
-      it "sends body + session to api.createRaygunException", ->
+      it "sends body + authToken to api.createRaygunException", ->
         api.createRaygunException.resolves()
 
         exception.create().then =>
@@ -140,4 +140,4 @@ describe "lib/exceptions", ->
             version: "0.1.2"
           }
 
-          expect(api.createRaygunException).to.be.calledWith(body, "abc-123")
+          expect(api.createRaygunException).to.be.calledWith(body, "auth-token-123")

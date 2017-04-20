@@ -216,6 +216,11 @@ describe "$Cypress API", ->
       @Cypress.config({foo: "baz", bar: "baz"})
       expect(@Cypress.config()).to.deep.eq({foo: "baz", bar: "baz"})
 
+  describe "#setVersion", ->
+    it "sets version on instance", ->
+      @Cypress.setVersion("1.0.0")
+      expect(@Cypress.version).to.equal("1.0.0")
+
   describe "#onSpecWindow", ->
     beforeEach ->
       _.each ["Cy", "Chai", "Mocha", "Runner"], (klass) =>
@@ -273,4 +278,3 @@ describe "$Cypress API", ->
   describe ".minimatch", ->
     it "is a reference to minimatch function", ->
       expect(@Cypress.minimatch("/foo/bar/baz", "/foo/**")).to.be.true
-

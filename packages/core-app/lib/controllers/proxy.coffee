@@ -3,6 +3,7 @@ zlib          = require("zlib")
 concat        = require("concat-stream")
 through       = require("through")
 Promise       = require("bluebird")
+accept        = require("http-accept")
 cwd           = require("../cwd")
 logger        = require("../logger")
 cors          = require("../util/cors")
@@ -13,7 +14,6 @@ networkFailures = require("../util/network_failures")
 headRe      = /(<head.*?>)/i
 bodyRe      = /(<body.*?>)/i
 htmlRe      = /(<html.*?>)/i
-okStatusRe  = /^[2|3|4]\d+$/
 redirectRe  = /^30(1|2|3|7|8)$/
 
 zlib = Promise.promisifyAll(zlib)
@@ -73,12 +73,26 @@ module.exports = {
 
     wantsInjection = null
 
-    resContentTypeIsHtmlAndMatchesOriginPolicy = (respHeaders) ->
+    resContentTypeIsHtml = (respHeaders) ->
       contentType = respHeaders["content-type"]
 
-      ## bail if our response headers are not text/html
-      return if not (contentType and contentType.includes("text/html"))
+      ## make sure the response includes text/html
+      contentType and contentType.includes("text/html")
 
+    reqAcceptsHtml = ->
+      ## don't inject if this is an XHR from jquery
+      return if req.headers["x-requested-with"]
+
+      types = accept.parser(req.headers.accept) ? []
+
+      find = (type) ->
+        type in types
+
+      ## bail if we didn't find both text/html and application/xhtml+xml
+      ## https://github.com/cypress-io/cypress/issues/288
+      find("text/html") and find("application/xhtml+xml")
+
+    resMatchesOriginPolicy = (respHeaders) ->
       switch remoteState.strategy
         when "http"
           cors.urlMatchesOriginPolicyProps(remoteUrl, remoteState.props)
@@ -165,9 +179,15 @@ module.exports = {
       {headers, statusCode} = incomingRes
 
       wantsInjection ?= do ->
-        return false if not resContentTypeIsHtmlAndMatchesOriginPolicy(headers)
+        return false if not resContentTypeIsHtml(headers)
 
-        if isInitial then "full" else "partial"
+        return false if not resMatchesOriginPolicy(headers)
+
+        return "full" if isInitial
+
+        return false if not reqAcceptsHtml()
+
+        return "partial"
 
       @setResHeaders(req, res, incomingRes, wantsInjection)
 

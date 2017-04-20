@@ -74,7 +74,7 @@ module.exports = {
 
         throw err
 
-  parseFileByExtension: (p, fixture, ext, options) ->
+  parseFileByExtension: (p, fixture, ext, options = {}) ->
     ext ?= path.extname(fixture)
 
     switch ext
@@ -83,7 +83,7 @@ module.exports = {
       when ".coffee" then @parseCoffee(p, fixture)
       when ".html"   then @parseHtml(p, fixture)
       when ".png", ".jpg", ".jpeg", ".gif", ".tif", ".tiff", ".zip"
-        @parse(p, fixture, "base64")
+        @parse(p, fixture, options.encoding or "base64")
       else
         @parse(p, fixture, options.encoding)
 

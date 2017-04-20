@@ -1,4 +1,4 @@
-FOLDER="$1"
+SPEC="$1"
 BROWSER="$2"
 
 CYPRESS_DEBUG=true \
@@ -6,9 +6,8 @@ NODE_ENV=test \
 NODE_DEBUG=request \
 CYPRESS_ENV=test \
 BLUEBIRD_DEBUG=1 \
-DEBUG=nock.*,-nock.common,socket.io:* \
+DEBUG=nock.*,-nock.common,-nock.scope,socket.io:*,xvfb-maybe \
 BROWSER=$BROWSER \
-mocha spec/server/$FOLDER \
+xvfb-maybe --xvfb-run-args "-s \"-screen 0 1280x1024x8\"" mocha $SPEC \
 --recursive \
---compilers coffee:coffee-script/register \
---require spec/server/helpers/setup.js
+--compilers coffee:coffee-script/register

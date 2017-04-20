@@ -29,8 +29,8 @@ module.exports =
   projectPath: (name) ->
     path.join(tmpDir, name)
 
-  get: (fixture) ->
-    fs.readFileSync path.join(root, "spec", "fixtures", fixture), "utf8"
+  get: (fixture, encoding = "utf8") ->
+    fs.readFileSync path.join(root, "spec", "fixtures", fixture), encoding
 
   path: (fixture) ->
     path.join(root, "spec", "fixtures", fixture)

@@ -43,7 +43,6 @@ $Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
 
       _.defaults options, {
         timeout: Cypress.config("responseTimeout")
-        encoding: 'utf8'
       }
 
       ## need to remove the current timeout

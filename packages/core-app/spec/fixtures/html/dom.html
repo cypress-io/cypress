@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>DOM Fixture</title>
-    <script type="text/javascript" src="/lib/public/js/sinon.js"></script>
+    <script type="text/javascript" src="/bower_components/sinon/dist/sinon.js"></script>
     <script type="text/javascript" src="/bower_components/jquery/dist/jquery.js"></script>
   </head>
   <body>
@@ -304,6 +304,26 @@
 
       <select name="opt-disabled">
         <option disabled>bar</option>
+      </select>
+
+      <select name="starwars">
+        <optgroup label="Light Side">
+          <option value="luke">Luke</option>
+          <option value="leia">Leia</option>
+          <option value="rey">Rey</option>
+        </optgroup>
+        <optgroup label="Dark Side">
+          <option value="vader">Vader</option>
+          <option value="palpatine">Palpatine</option>
+          <option value="jarjar">Jar Jar</option>
+        </optgroup>
+      </select>
+
+      <select name="startrek">
+        <option value="same">Kirk</option>
+        <option value="same">Spock</option>
+        <option value="same">Uhura</option>
+        <option value="same">Sulu</option>
       </select>
 
       <div id="contenteditable" contenteditable="true">

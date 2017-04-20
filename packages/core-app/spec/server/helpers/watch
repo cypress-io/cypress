@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 CMD="$1"
+ARGS="$2"
 
-xvfb-maybe npm run $CMD & \
+npm run $CMD $ARGS & \
 chokidar 'spec/server/**/*' 'lib/**/*' \
--c "xvfb-maybe npm run $CMD" \
+-c "npm run $CMD $ARGS" \
 --polling \
 --poll-interval=250

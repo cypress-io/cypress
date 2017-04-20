@@ -1,29 +1,169 @@
 _       = require("lodash")
+strip   = require("strip-ansi")
 chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
 
-exceptions = "CI_CANNOT_COMMUNICATE".split(" ")
-
 API = {
   getMsgByType: (type, arg1, arg2) ->
     switch type
+      when "CANNOT_TRASH_ASSETS"
+        """
+        Warning: We failed to trash the existing run results.
+
+        This error will not alter the exit code.
+
+        #{arg1}
+        """
+      when "VIDEO_RECORDING_FAILED"
+        """
+        Warning: We failed to record the video.
+
+        This error will not alter the exit code.
+
+        #{arg1}
+        """
+      when "VIDEO_POST_PROCESSING_FAILED"
+        """
+        Warning: We failed processing this video.
+
+        This error will not alter the exit code.
+
+        #{arg1}
+        """
       when "NOT_LOGGED_IN"
-        "You're not logged in.\n\nRun `cypress open` to open the Desktop App and login."
-      when "TESTS_DID_NOT_START"
-        "Can't start tests, the remote client never connected."
+        """
+        You're not logged in.
+
+        Run `cypress open` to open the Desktop App and login.
+        """
+      when "TESTS_DID_NOT_START_RETRYING"
+        "Timed out waiting for the browser to connect. #{arg1}"
+      when "TESTS_DID_NOT_START_FAILED"
+        "The browser never connected. Something is wrong. The tests cannot run. Aborting..."
       when "PROJECT_DOES_NOT_EXIST"
         "You need to add a project to run tests."
-      when "NOT_CI_ENVIRONMENT"
-        "Can't run CI outside of a CI provider and environment."
-      when "CI_KEY_MISSING"
-        "Can't run in CI without a CI key. You did not provide one."
-      when "CI_KEY_NOT_VALID"
-        "Can't run project in CI. Your project's CI key: #{chalk.blue(arg1)} is invalid."
-      when "CI_PROJECT_NOT_FOUND"
-        "Can't find project. Aborting the CI run.\n\nCheck that your 'projectId' and 'secret CI key' are valid."
-      when "CI_CANNOT_COMMUNICATE"
-        "Can't communicate with remote Cypress servers. This is a temporary problem. Try again later."
+      when "RECORD_KEY_MISSING"
+        """
+        You passed the --record flag but did not provide us your Record Key.
+
+        You can pass us your Record Key like this:
+
+          #{chalk.blue("cypress run --record --key <record_key>")}
+
+        You can also set the key as an environment variable with the name CYPRESS_RECORD_KEY.
+
+        https://on.cypress.io/how-do-i-record-runs
+        """
+      when "CANNOT_RECORD_NO_PROJECT_ID"
+        """
+        You passed the --record flag but this project has not been setup to record.
+
+        This project is missing the 'projectId' inside of 'cypress.json'.
+
+        We cannot uniquely identify this project without this id.
+
+        You need to setup this project to record. This will generate a unique 'projectId'.
+
+        Alternatively if you omit the --record flag this project will run without recording.
+
+        https://on.cypress.io/recording-project-runs
+        """
+      when "OLD_VERSION_OF_CLI"
+        """
+
+        -----------------------------------------------------------------------------------
+        You are using an older version of the CLI tools.
+
+        Please update the CLI tools by running: #{chalk.blue("npm install -g cypress-cli")}
+        -----------------------------------------------------------------------------------
+        """
+      when "PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION"
+        """
+        This project has been configured to record runs on our Dashboard.
+
+        It currently has the projectId: #{chalk.green(arg1)}
+
+        You also provided your Record Key, but you did not pass the --record flag.
+
+        This run will not be recorded.
+
+        If you meant to have this run recorded please additionally pass this flag.
+
+          #{chalk.blue("cypress run --record")}
+
+        If you don't want to record these runs, you can silence this warning:
+
+          #{chalk.yellow("cypress run --record false")}
+
+        https://on.cypress.io/recording-project-runs
+        """
+      when "CYPRESS_CI_DEPRECATED"
+        """
+        You are using the deprecated command: #{chalk.yellow("cypress ci <key>")}
+
+        Please switch and use: #{chalk.blue("cypress run --record --key <record_key>")}
+
+        https://on.cypress.io/cypress-ci-deprecated
+        """
+      when "CYPRESS_CI_DEPRECATED_ENV_VAR"
+        """
+        1. You are using the deprecated command: #{chalk.yellow("cypress ci")}
+
+           Please switch and use: #{chalk.blue("cypress run --record")}
+
+        2. You are also using the environment variable: #{chalk.yellow("CYPRESS_CI_KEY")}
+
+           Please rename this environment variable to: #{chalk.blue("CYPRESS_RECORD_KEY")}
+
+        https://on.cypress.io/cypress-ci-deprecated
+        """
+      when "DASHBOARD_CANNOT_UPLOAD_RESULTS"
+        """
+        Warning: We encountered an error while uploading results from your run.
+
+        These results will not be recorded.
+
+        This error will not alter or the exit code.
+
+        #{arg1}
+        """
+      when "DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE"
+        """
+        Warning: We encountered an error talking to our servers.
+
+        This run will not be recorded.
+
+        This error will not alter the exit code.
+
+        #{arg1}
+        """
+      when "RECORD_KEY_NOT_VALID"
+        """
+        We failed trying to authenticate this project.
+
+        Your Record Key is invalid: #{chalk.yellow(arg1)}
+
+        It may have been recently revoked by you or another user.
+
+        Please log into the Dashboard to see the updated token.
+
+        https://on.cypress.io/dashboard/projects/#{arg2}
+        """
+      when "DASHBOARD_PROJECT_NOT_FOUND"
+        """
+        We could not find a project with the ID: #{chalk.yellow(arg1)}
+
+        This projectId came from your cypress.json file or an environment variable.
+
+        Please log into the Dashboard and find your project.
+
+        We will list the correct projectId in the 'Settings' tab.
+
+        Alternatively, you can create a new project using the Desktop Application.
+
+        https://on.cypress.io/dashboard
+        """
       when "DEV_NO_SERVER"
         " > The local API server isn't running in development. This may cause problems running the GUI."
       when "NO_PROJECT_ID"
@@ -37,17 +177,96 @@ API = {
       when "PORT_IN_USE_SHORT"
         "Port '#{arg1}' is already in use."
       when "PORT_IN_USE_LONG"
-        "Can't run project because port is currently in use: " + chalk.blue(arg1) + "\n\n" + chalk.yellow("Assign a different port with the '--port <port>' argument or shut down the other running process.")
+        """
+        Can't run project because port is currently in use: #{chalk.blue(arg1)}
+
+        #{chalk.yellow("Assign a different port with the '--port <port>' argument or shut down the other running process.")}
+        """
       when "ERROR_READING_FILE"
-        "Error reading from: " + chalk.blue(arg1) + "\n\n" + chalk.yellow(arg2)
+        """
+        Error reading from: #{chalk.blue(arg1)}
+
+        #{chalk.yellow(arg2)}
+        """
       when "ERROR_WRITING_FILE"
-        "Error writing to: " + chalk.blue(arg1) + "\n\n" + chalk.yellow(arg2)
+        """
+        Error writing to: #{chalk.blue(arg1)}
+
+        #{chalk.yellow(arg2)}
+        """
       when "SPEC_FILE_NOT_FOUND"
         "Can't find test spec: " + chalk.blue(arg1)
+      when "RENDERER_CRASHED"
+        """
+        We detected that the Chromium Renderer process just crashed.
+
+        This is the equivalent to seeing the 'sad face' when Chrome dies.
+
+        This can happen for a number of different reasons:
+
+        - You wrote an endless loop and you must fix your own code
+        - There is a memory leak in Cypress (unlikely but possible)
+        - You are running Docker (there is an easy fix for this: see link below)
+        - You are running lots of tests on a memory intense application
+        - You are running in a memory starved VM environment
+        - There are problems with your GPU / GPU drivers
+        - There are browser bugs in Chromium
+
+        You can learn more including how to fix Docker here:
+
+        https://on.cypress.io/renderer-process-crashed
+        """
       when "NO_CURRENTLY_OPEN_PROJECT"
         "Can't find open project."
       when "AUTOMATION_SERVER_DISCONNECTED"
-        "The automation server disconnected. Cannot continue running tests."
+        "The automation client disconnected. Cannot continue running tests."
+      when "SUPPORT_FILE_NOT_FOUND"
+        """
+        Support file missing or invalid.
+
+        Your supportFile is set to '#{arg1}', but either the file is missing or it's invalid. The supportFile must be a .js or .coffee file.
+
+        Correct your cypress.json or create the appropriate file.
+
+        Learn more at https://on.cypress.io/support-file-missing-or-invalid
+        """
+      when "BUNDLE_ERROR"
+        ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
+        ## THE ERROR MESSAGE IN THE RUNNER TOO
+        """
+        Oops...we found an error preparing this test file:
+
+          #{chalk.blue(arg1)}
+
+        The error was:
+
+        #{chalk.yellow(arg2)}
+
+        This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
+
+        - A missing file or dependency
+        - A syntax error in the file or one of its dependencies
+
+        Fix the error in your code and re-run your tests.
+        """
+      when "CONFIG_VALIDATION_ERROR"
+        """
+        We found an invalid value in the file: '#{chalk.blue(arg1)}'
+
+        #{chalk.yellow(arg2)}
+        """
+      when "CANNOT_CONNECT_BASE_URL"
+        """
+        Cypress cannot start because we could not verify this server is running:
+
+          > #{chalk.blue(arg1)}
+
+        We run this check because this server has been set as your 'baseUrl'.
+
+        You likely forgot to boot this web server prior to running Cypress.
+
+        Please start this server and then run Cypress again.
+        """
 
   get: (type, arg1, arg2) ->
     msg = @getMsgByType(type, arg1, arg2)
@@ -60,13 +279,10 @@ API = {
     err.type and
 
       ## and its found in our list of errors
-      @getMsgByType(err.type) and
+      @getMsgByType(err.type)
 
-        ## and its not an exception
-        err.type not in exceptions
-
-  warning: (type) ->
-    err = @get(type)
+  warning: (type, arg) ->
+    err = @get(type, arg)
     @log(err, "magenta")
 
   log: (err, color = "red") ->
@@ -84,8 +300,10 @@ API = {
         ## a known error
         require("./logger").createException(err).catch(->)
 
-  throw: (type, arg) ->
-    throw @get(type, arg)
+  throw: (type, arg1, arg2) ->
+    throw @get(type, arg1, arg2)
+
+  stripAnsi: strip
 
   clone: (err, options = {}) ->
     _.defaults options, {

@@ -39,6 +39,12 @@ describe "lib/util/args", ->
         host: "localhost:8888"
       })
 
+  context "--cli-version", ->
+    it "aliases from --cli-version", ->
+      options = @setup("--cli-version=0.18.8")
+
+      expect(options.cliVersion).to.eq("0.18.8")
+
   context "--config", ->
     it "converts to object literal", ->
       options = @setup("--config", "pageLoadTimeout=10000,waitForAnimations=false")
@@ -47,10 +53,10 @@ describe "lib/util/args", ->
       expect(options.waitForAnimations).eq(false)
 
     it "whitelists config properties", ->
-      options = @setup("--config", "foo=bar,port=1111,supportFolder=path/to/support")
+      options = @setup("--config", "foo=bar,port=1111,supportFile=path/to/support_file")
 
       expect(options.port).to.eq(1111)
-      expect(options.supportFolder).to.eq("path/to/support")
+      expect(options.supportFile).to.eq("path/to/support_file")
       expect(options).not.to.have.property("foo")
 
     it "overrides existing flat options", ->
@@ -69,6 +75,11 @@ describe "lib/util/args", ->
     beforeEach ->
       ## make sure it works with both --env=foo=bar and --config foo=bar
       @obj = @setup("--get-key", "--hosts=*.foobar.com=127.0.0.1", "--env=foo=bar,baz=quux", "--config", "requestTimeout=1234,responseTimeout=9876")
+
+    it "coerces booleans", ->
+      expect(@setup("--foo=true").foo).be.true
+      expect(@setup("--no-record").record).to.be.false
+      expect(@setup("--record=false").record).to.be.false
 
     it "backs up hosts + environmentVariables", ->
       expect(@obj).to.deep.eq({
@@ -149,4 +160,3 @@ describe "lib/util/args", ->
         "exec-path": "e"
         updating: true
       })
-

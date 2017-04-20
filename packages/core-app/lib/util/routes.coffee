@@ -6,20 +6,22 @@ api_url = konfig("api_url")
 
 routes = {
   api:           ""
-  auth:          "v1/auth"
+  auth:          "auth"
   ping:          "ping"
-  token:         "token"
   signin:        "signin"
   signout:       "signout"
-  usage:         "user/usage"
-  ci:            "ci/:id"
-  tests:         "tests/:id"
+  builds:        "builds"
+  instances:     "builds/:id/instances"
+  instance:      "instances/:id"
+  instanceStdout:"instances/:id/stdout"
+  orgs:          "organizations"
   projects:      "projects"
   project:       "projects/:id"
-  projectCi:     "projects/:id/ci"
-  projectKeys:   "projects/:id/keys"
   projectToken:  "projects/:id/token"
+  projectBuilds: "projects/:id/builds"
+  projectRecordKeys: "projects/:id/keys"
   exceptions:    "exceptions"
+  membershipRequests: "projects/:id/membership_requests"
 }
 
 parseArgs = (url, args = []) ->
@@ -28,14 +30,15 @@ parseArgs = (url, args = []) ->
       when _.isObject(value)
         url.set("query", _.extend(url.query, value))
 
-      when _.isString(value)
+      when _.isString(value) or _.isNumber(value)
         url.set("pathname", url.pathname.replace(":id", value))
 
   return url
 
 Routes = _.reduce routes, (memo, value, key) ->
   memo[key] = (args...) ->
-    url = new UrlParse(api_url, true).set("pathname", value)
+    url = new UrlParse(api_url, true)
+    url.set("pathname", value) if value
     url = parseArgs(url, args) if args.length
     url.toString()
   memo

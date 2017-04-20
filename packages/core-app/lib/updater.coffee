@@ -2,6 +2,7 @@ _              = require("lodash")
 os             = require("os")
 fs             = require("fs-extra")
 tar            = require("tar-fs")
+nmi            = require("node-machine-id")
 path           = require("path")
 glob           = require("glob")
 home           = require("home-or-tmp")
@@ -16,7 +17,6 @@ konfig         = require("./konfig")
 logger         = require("./logger")
 argsUtil       = require("./util/args")
 
-trash  = Promise.promisify(trash)
 chmodr = Promise.promisify(chmodr)
 
 ## backup the original cwd
@@ -46,7 +46,20 @@ NwUpdater.prototype.checkNewVersion = (cb) ->
 
     cb(null, newVersion, data)
 
-  request.get(@manifest.manifestUrl, gotManifest.bind(@))
+  sendReq = (id) =>
+    request.get({
+      url: @manifest.manifestUrl,
+      headers: {
+        "x-machine-id": id
+      }
+    }, gotManifest.bind(@))
+
+  ## return hashed value because we dont care nor want
+  ## to know anything about you or your machine
+  nmi.machineId()
+  .then(sendReq)
+  .catch ->
+    sendReq(null)
 
 class Updater
   constructor: (callbacks) ->
@@ -95,7 +108,7 @@ class Updater
     ## this is the path to the existing app
     logger.info "trashing current app", appPath: appPath
 
-    trash([appPath])
+    Promise.resolve(trash([appPath]))
 
   install: (argsObj = {}) ->
     c = @getClient()

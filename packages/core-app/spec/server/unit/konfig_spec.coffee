@@ -40,18 +40,18 @@ describe "lib/konfig", ->
       @setup("development")
 
     it "api_url", ->
-      @eq("api_url", "http://localhost:1234")
+      @eq("api_url", "http://localhost:1234/")
 
   context "test", ->
     beforeEach ->
       @setup("test")
 
     it "api_url", ->
-      @eq("api_url", "http://localhost:1234")
+      @eq("api_url", "http://localhost:1234/")
 
   context "production", ->
     beforeEach ->
       @setup("production")
 
     it "api_url", ->
-      @eq("api_url", "https://api.cypress.io")
+      @eq("api_url", "https://api.cypress.io/")

@@ -4,8 +4,10 @@ delete global.fs
 
 os          = require("os")
 tar         = require("tar-fs")
+nmi         = require("node-machine-id")
 cwd         = require("#{root}lib/cwd")
 home        = require("home-or-tmp")
+request     = require("request")
 Updater     = require("#{root}lib/updater")
 Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
@@ -134,6 +136,36 @@ describe "lib/updater", ->
 
       expect(process.cwd()).to.include(tmp)
       expect(process.cwd()).not.to.include(localCwd)
+
+  context "#checkNewVersion", ->
+    beforeEach ->
+      @get = @sandbox.spy(request, "get")
+
+      @updater = Updater({})
+
+    it "sends x-machine-id", (done) ->
+      nmi.machineId()
+      .then (id) =>
+        @updater.getClient().checkNewVersion =>
+          expect(@get).to.be.calledWithMatch({
+            headers: {
+              "x-machine-id": id
+            }
+          })
+
+          done()
+
+    it "sends x-machine-id as null on error", (done) ->
+      @sandbox.stub(nmi, "machineId").rejects(new Error)
+
+      @updater.getClient().checkNewVersion =>
+        expect(@get).to.be.calledWithMatch({
+          headers: {
+            "x-machine-id": null
+          }
+        })
+
+        done()
 
   context ".run", ->
     beforeEach ->
@@ -438,7 +470,7 @@ describe "lib/updater", ->
       @updater.check()
       expect(@updater.client.checkNewVersion).to.be.called
 
-    it "calls optsions.newVersionExists when there is a no version", ->
+    it "calls options.newVersionExists when there is a no version", ->
       @updater.client.checkNewVersion.yields(null, true, {})
 
       options = {onNewVersion: @sandbox.spy()}

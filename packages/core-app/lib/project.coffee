@@ -1,24 +1,25 @@
-path      = require("path")
-glob      = require("glob")
-EE        = require("events")
-_         = require("lodash")
-fs        = require("fs-extra")
-Promise   = require("bluebird")
-ids       = require("./ids")
-api       = require("./api")
-user      = require("./user")
-cache     = require("./cache")
-config    = require("./config")
-logger    = require("./logger")
-errors    = require("./errors")
-Server    = require("./server")
-scaffold  = require("./scaffold")
-Watchers  = require("./watchers")
-Reporter  = require("./reporter")
-cwd       = require("./cwd")
-settings  = require("./util/settings")
-screenshots = require("./screenshots")
+_           = require("lodash")
+fs          = require("fs-extra")
+EE          = require("events")
+path        = require("path")
+glob        = require("glob")
+Promise     = require("bluebird")
+cwd         = require("./cwd")
+ids         = require("./ids")
+api         = require("./api")
+user        = require("./user")
+cache       = require("./cache")
+config      = require("./config")
+logger      = require("./logger")
+errors      = require("./errors")
+Server      = require("./server")
+scaffold    = require("./scaffold")
+Watchers    = require("./watchers")
+Reporter    = require("./reporter")
 savedState  = require("./saved_state")
+Automation  = require("./automation")
+git         = require("./util/git")
+settings    = require("./util/settings")
 
 fs   = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -36,23 +37,33 @@ class Project extends EE
       throw new Error("Instantiating lib/project requires a projectRoot!")
 
     @projectRoot = path.resolve(projectRoot)
-    @server      = Server()
-    @watchers    = Watchers()
+    @watchers    = null
+    @server      = null
+    @cfg         = null
+    @memoryCheck = null
+    @automation  = null
 
   open: (options = {}) ->
+    @watchers    = Watchers()
+    @server      = Server(@watchers)
+
     _.defaults options, {
-      type:         "opened"
-      sync:         false
       report:       false
       onFocusTests: ->
       onSettingsChanged: false
     }
 
+    if process.env.CYPRESS_MEMORY
+      log = ->
+        console.log("memory info", process.memoryUsage())
+
+      @memoryCheck = setInterval(log, 1000)
+
     @getConfig(options)
     .then (cfg) =>
       process.chdir(@projectRoot)
 
-      @server.open(cfg)
+      @server.open(cfg, @)
       .then (port) =>
         ## if we didnt have a cfg.port
         ## then get the port once we
@@ -70,40 +81,29 @@ class Project extends EE
         options.onSavedStateChanged = =>
           @_setSavedState(@cfg)
 
-        ## sync but do not block
-        @sync(options)
-
         Promise.join(
           @watchSettingsAndStartWebsockets(options, cfg)
           @scaffold(cfg)
         )
+        .then =>
+          @watchSupportFile(cfg)
 
     # return our project instance
     .return(@)
 
-  sync: (options) ->
-    ## attempt to sync up with the remote
-    ## server to ensure we have a valid
-    ## project id and user attached to
-    ## this project
-    @ensureProjectId()
-    .then (id) =>
-      @updateProject(id, options)
-    .catch ->
-      ## dont catch ensure project id or
-      ## update project errors which allows
-      ## the user to work offline
-      return
+  getBuilds: ->
+    Promise.all([
+      @getProjectId(),
+      user.ensureAuthToken()
+    ])
+    .spread (projectId, authToken) ->
+      api.getProjectBuilds(projectId, authToken)
 
-  close: (options = {}) ->
-    _.defaults options, {
-      sync: false
-      type: "closed"
-    }
+  close: ->
+    if @memoryCheck
+      clearInterval(@memoryCheck)
 
-    @sync(options)
-
-    @removeAllListeners()
+    @cfg = null
 
     Promise.join(
       @server?.close(),
@@ -112,20 +112,17 @@ class Project extends EE
     .then ->
       process.chdir(localCwd)
 
-  resetState: ->
-    @server.resetState()
-
-  updateProject: (id, options = {}) ->
-    Promise.try =>
-      ## bail if sync isnt true
-      return if not options.sync
-
-      Promise.all([
-        user.ensureSession()
-        @getConfig()
-      ])
-      .spread (session, cfg) ->
-        api.updateProject(id, options.type, cfg.projectName, session)
+  watchSupportFile: (config) ->
+    if supportFile = config.supportFile
+      relativePath = path.relative(config.projectRoot, config.supportFile)
+      if config.watchForFileChanges isnt false
+        options = {
+          onChange: _.bind(@server.onTestFileChange, @server, relativePath)
+        }
+      @watchers.watchBundle(relativePath, config, options)
+      ## ignore errors b/c we're just setting up the watching. errors
+      ## are handled by the spec controller
+      .catch ->
 
   watchSettings: (onSettingsChanged) ->
     ## bail if we havent been told to
@@ -154,10 +151,10 @@ class Project extends EE
     if config.report
       reporter = Reporter.create(config.reporter, config.reporterOptions, config.projectRoot)
 
-    @server.startWebsockets(@watchers, config, {
-      onReloadBrowser: options.onReloadBrowser
+    @automation = Automation.create(config.namespace, config.socketIoCookie, config.screenshotsFolder)
 
-      onAutomationRequest: options.onAutomationRequest
+    @server.startWebsockets(@watchers, @automation, config, {
+      onReloadBrowser: options.onReloadBrowser
 
       onFocusTests: options.onFocusTests
 
@@ -186,16 +183,7 @@ class Project extends EE
           ## event, and then finally emit 'end'
           @server.end()
 
-          link = ->
-            if ca = process.env.CIRCLE_ARTIFACTS
-              screenshots.copy(config.screenshotsFolder, ca)
-
-          Promise.join(
-            link()
-            Promise.delay(1000)
-          ).then =>
-            # console.log stats
-            @emit("end", stats)
+          @emit("end", stats)
     })
 
   determineIsNewProject: (integrationFolder) ->
@@ -240,6 +228,9 @@ class Project extends EE
     .then (cfg) ->
       cfg.browsers = browsers
 
+  getAutomation: ->
+    @automation
+
   getConfig: (options = {}) ->
     getConfig = =>
       if c = @cfg
@@ -257,14 +248,18 @@ class Project extends EE
       @_setSavedState(cfg)
 
   _setSavedState: (cfg) ->
-    savedState.get().then (state) ->
+    savedState.get()
+    .then (state) ->
       cfg.state = state
       cfg
 
   ensureSpecUrl: (spec) ->
     @getConfig()
     .then (cfg) =>
-      if spec
+      ## if we dont have a spec or its __all
+      if not spec or (spec is "__all")
+        @getUrlBySpec(cfg.browserUrl, "/__all")
+      else
         @ensureSpecExists(spec)
         .then (pathToSpec) =>
           ## TODO:
@@ -275,9 +270,7 @@ class Project extends EE
           ## once we determine that we can then prefix it correctly
           ## with either integration or unit
           prefixedPath = @getPrefixedPathToSpec(cfg.integrationFolder, pathToSpec)
-          @getUrlBySpec(cfg.clientUrl, prefixedPath)
-      else
-        @getUrlBySpec(cfg.clientUrl, "/__all")
+          @getUrlBySpec(cfg.browserUrl, prefixedPath)
 
   ensureSpecExists: (spec) ->
     specFile = path.resolve(@projectRoot, spec)
@@ -290,7 +283,10 @@ class Project extends EE
     .catch ->
       errors.throw("SPEC_FILE_NOT_FOUND", specFile)
 
-  getPrefixedPathToSpec: (integrationFolder, pathToSpec) ->
+  getPrefixedPathToSpec: (integrationFolder, pathToSpec, type = "integration") ->
+    ## for now hard code the 'type' as integration
+    ## but in the future accept something different here
+
     ## strip out the integration folder and prepend with "/"
     ## example:
     ##
@@ -298,32 +294,41 @@ class Project extends EE
     ## /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.coffee
     ##
     ## becomes /integration/foo.coffee
-    "/" + path.join("integration", path.relative(integrationFolder, pathToSpec))
+    "/" + path.join(type, path.relative(integrationFolder, pathToSpec))
 
-  getUrlBySpec: (clientUrl, specUrl) ->
+  getUrlBySpec: (browserUrl, specUrl) ->
     replacer = (match, p1) ->
       match.replace("//", "/")
 
-    [clientUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
+    [browserUrl, "#/tests", specUrl].join("/").replace(multipleForwardSlashesRe, replacer)
 
   scaffold: (config) ->
-    Promise.join(
+    scaffolds = []
+
+    push = scaffolds.push.bind(scaffolds)
+
+    ## TODO: we are currently always scaffolding support
+    ## even when headlessly - this is due to a major breaking
+    ## change of 0.18.0
+    ## we can later force this not to always happen when most
+    ## of our users go beyond 0.18.0
+    ##
+    ## ensure support dir is created
+    ## and example support file if dir doesnt exist
+    push(scaffold.support(config.supportFolder, config))
+
+    ## if we're in headed mode add these other scaffolding
+    ## tasks
+    if not config.isHeadless
       ## ensure integration folder is created
       ## and example spec if dir doesnt exit
-      scaffold.integration(config.integrationFolder)
+      push(scaffold.integration(config.integrationFolder, config))
 
       ## ensure fixtures dir is created
       ## and example fixture if dir doesnt exist
-      scaffold.fixture(config.fixturesFolder, {
-        remove: config.fixturesFolderRemove
-      })
+      push(scaffold.fixture(config.fixturesFolder, config))
 
-      ## ensure support dir is created
-      ## and example support file if dir doesnt exist
-      scaffold.support(config.supportFolder, {
-        remove: config.supportFolderRemove
-      })
-    )
+    Promise.all(scaffolds)
 
   writeProjectId: (id) ->
     attrs = {projectId: id}
@@ -334,24 +339,6 @@ class Project extends EE
     settings
     .write(@projectRoot, attrs)
     .return(id)
-
-  createProjectId: ->
-    ## allow us to specify the exact key
-    ## we want via the CYPRESS_PROJECT_ID env.
-    ## this allows us to omit the cypress.json
-    ## file (like in example repos) yet still
-    ## use a correct id in the API
-    if id = process.env.CYPRESS_PROJECT_ID
-      return @writeProjectId(id)
-
-    Promise.all([
-      user.ensureSession()
-      @getConfig()
-    ])
-    .bind(@)
-    .spread (session, cfg) ->
-      api.createProject(cfg.projectName, session)
-    .then(@writeProjectId)
 
   getProjectId: ->
     @verifyExistence()
@@ -373,19 +360,105 @@ class Project extends EE
     .catch =>
       errors.throw("NO_PROJECT_FOUND_AT_PROJECT_ROOT", @projectRoot)
 
-  ensureProjectId: ->
-    @getProjectId()
-    .bind(@)
-    .catch({type: "NO_PROJECT_ID"}, @createProjectId)
+  createCiProject: (projectDetails) ->
+    Promise.all([
+      user.ensureAuthToken()
+      @getConfig()
+    ])
+    .spread (authToken, cfg) ->
+      git
+      .init(cfg.projectRoot)
+      .getRemoteOrigin()
+      .then (remoteOrigin) ->
+        api.createProject(projectDetails, remoteOrigin, authToken)
+    .then (newProject) =>
+      @writeProjectId(newProject.id)
+      .return(newProject)
+
+  getRecordKeys: ->
+    Promise.all([
+      @getProjectId(),
+      user.ensureAuthToken()
+    ])
+    .spread (projectId, authToken) ->
+      api.getProjectRecordKeys(projectId, authToken)
+
+  requestAccess: (projectId) ->
+    user.ensureAuthToken()
+    .then (authToken) ->
+      api.requestAccess(projectId, authToken)
+
+  @getOrgs = ->
+    user.ensureAuthToken()
+    .then (authToken) ->
+      api.getOrgs(authToken)
 
   @paths = ->
     cache.getProjectPaths()
+
+  @getPathsAndIds = ->
+    cache.getProjectPaths()
+    .map (projectPath) ->
+      Promise.props({
+        path: projectPath
+        id: settings.id(projectPath)
+      })
+
+  @_mergeDetails = (clientProject, project) ->
+    _.extend({}, clientProject, project, {state: "VALID"})
+
+  @_mergeState = (clientProject, state) ->
+    _.extend({}, clientProject, {state: state})
+
+  @_getProject = (clientProject, authToken) ->
+    api.getProject(clientProject.id, authToken)
+    .then (project) ->
+      Project._mergeDetails(clientProject, project)
+    .catch (err) ->
+      switch err.statusCode
+        when 404
+          ## project doesn't exist
+          return Project._mergeState(clientProject, "INVALID")
+        when 403
+          ## project exists, but user isn't authorized for it
+          return Project._mergeState(clientProject, "UNAUTHORIZED")
+        else
+          throw err
+
+  @getProjectStatuses = (clientProjects = []) ->
+    user.ensureAuthToken()
+    .then (authToken) ->
+      api.getProjects(authToken).then (projects = []) ->
+        projectsIndex = _.keyBy(projects, "id")
+        Promise.all(_.map clientProjects, (clientProject) ->
+          ## not a CI project, just mark as valid and return
+          if not clientProject.id
+            return Project._mergeState(clientProject, "VALID")
+
+          if project = projectsIndex[clientProject.id]
+            ## merge in details for matching project
+            return Project._mergeDetails(clientProject, project)
+          else
+            ## project has id, but no matching project found
+            ## check if it doesn't exist or if user isn't authorized
+            Project._getProject(clientProject, authToken)
+        )
+
+  @getProjectStatus = (clientProject) ->
+    user.ensureAuthToken().then (authToken) ->
+      Project._getProject(clientProject, authToken)
 
   @remove = (path) ->
     cache.removeProject(path)
 
   @add = (path) ->
     cache.insertProject(path)
+    .then =>
+      @id(path)
+    .then (id) ->
+      {id, path}
+    .catch ->
+      {path}
 
   @removeIds = (p) ->
     Project(p)
@@ -409,9 +482,9 @@ class Project extends EE
     ## get project id
     Project.id(path)
     .then (id) ->
-      user.ensureSession()
-      .then (session) ->
-        api.getProjectToken(id, session)
+      user.ensureAuthToken()
+      .then (authToken) ->
+        api.getProjectToken(id, authToken)
         .catch ->
           errors.throw("CANNOT_FETCH_PROJECT_TOKEN")
 
@@ -419,9 +492,9 @@ class Project extends EE
     ## get project id
     Project.id(path)
     .then (id) ->
-      user.ensureSession()
-      .then (session) ->
-        api.updateProjectToken(id, session)
+      user.ensureAuthToken()
+      .then (authToken) ->
+        api.updateProjectToken(id, authToken)
         .catch ->
           errors.throw("CANNOT_CREATE_PROJECT_TOKEN")
 

@@ -21,12 +21,14 @@ describe "lib/screenshots", ->
 
   context ".take", ->
     it "outputs file and returns size and path", ->
-      screenshots.take("foo/tweet", image, @cfg.screenshotsFolder)
+      screenshots.take({name: "foo/tweet"}, image, @cfg.screenshotsFolder)
       .then (obj) =>
-        path = @cfg.screenshotsFolder + "/foo/tweet.png"
+        path = @cfg.screenshotsFolder + "/footweet.png"
 
         expect(obj.size).to.eq("279 B")
         expect(obj.path).to.eq(path)
+        expect(obj.width).to.eq(10)
+        expect(obj.height).to.eq(10)
 
         fs.statAsync(path)
 
@@ -34,7 +36,7 @@ describe "lib/screenshots", ->
     it "doesnt yell over ENOENT errors", ->
       screenshots.copy("/does/not/exist", "/foo/bar/baz")
 
-    it "copies src to des with {clobber: true}", ->
-      @sandbox.stub(fs, "copyAsync").withArgs("foo", "bar/screenshots", {clobber: true}).resolves()
+    it "copies src to des with {overwrite: true}", ->
+      @sandbox.stub(fs, "copyAsync").withArgs("foo", "bar", {overwrite: true}).resolves()
 
       screenshots.copy("foo", "bar")

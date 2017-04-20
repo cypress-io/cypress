@@ -130,11 +130,19 @@ $Cypress.Utils = do ($Cypress, _) ->
           else
             @_stringifyObj(value)
 
+        when @_isSymbol(value)
+          "Symbol"
+
         when _.isUndefined(value)
           undefined
 
         else
           "" + value
+
+    ## TODO: replace this w/ lodash _.isSymbol
+    ## which is a more extensive check for symbol
+    _isSymbol: (value) ->
+      typeof value is 'symbol'
 
     stringify: (values) ->
       ## if we already have an array
@@ -147,6 +155,17 @@ $Cypress.Utils = do ($Cypress, _) ->
           .without(undefined)
             .value()
               .join(", ")
+
+    stringifyArg: (arg) ->
+      switch
+        when _.isString(arg) or _.isNumber(arg) or _.isBoolean(arg)
+          JSON.stringify(arg)
+        when _.isNull(arg)
+          "null"
+        when _.isUndefined(arg)
+          "undefined"
+        else
+          @_stringify(arg)
 
     hasWindow: (obj) ->
       try

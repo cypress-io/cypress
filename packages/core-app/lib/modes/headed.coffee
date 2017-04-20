@@ -1,40 +1,56 @@
-_        = require("lodash")
-os       = require("os")
-EE       = require("events")
-app      = require("electron").app
-image    = require("electron").nativeImage
-Promise  = require("bluebird")
-cyIcons  = require("@cypress/core-icons")
-Position = require("electron-positioner")
-user     = require("../user")
-errors   = require("../errors")
-Updater  = require("../updater")
-logs     = require("../electron/handlers/logs")
-menu     = require("../electron/handlers/menu")
-Events   = require("../electron/handlers/events")
-Renderer = require("../electron/handlers/renderer")
+_          = require("lodash")
+os         = require("os")
+EE         = require("events")
+app        = require("electron").app
+image      = require("electron").nativeImage
+Promise    = require("bluebird")
+cyIcons    = require("@cypress/core-icons")
+Position   = require("electron-positioner")
+user       = require("../user")
+errors     = require("../errors")
+savedState = require("../saved_state")
+Updater    = require("../updater")
+logs       = require("../gui/logs")
+menu       = require("../gui/menu")
+Events     = require("../gui/events")
+Windows    = require("../gui/windows")
+
+isDev = ->
+  process.env["CYPRESS_ENV"] is "development"
 
 module.exports = {
   isMac: ->
     os.platform() is "darwin"
 
-  onWindowAllClosed: (app) ->
-    process.exit(0)
-
-  getRendererArgs: ->
+  getWindowArgs: (state) ->
     common = {
-      backgroundColor: '#dfe2e4'
-      width: 800
-      height: 550
+      backgroundColor: "#dfe2e4"
+      width: state.appWidth or 800
+      height: state.appHeight or 550
       minWidth: 458
       minHeight: 400
+      x: state.appX
+      y: state.appY
       type: "INDEX"
+      devTools: state.isAppDevToolsOpen
+      trackState: {
+        width: "appWidth"
+        height: "appHeight"
+        x: "appX"
+        y: "appY"
+        devTools: "isAppDevToolsOpen"
+      }
       onBlur: ->
         return if @webContents.isDevToolsOpened()
 
-        Renderer.hideAllUnlessAnotherWindowIsFocused()
+        Windows.hideAllUnlessAnotherWindowIsFocused()
       onFocus: ->
-        Renderer.showAll()
+        ## hide dev tools if in production and previously focused
+        ## window was the electron browser
+        menu.set({withDevTools: isDev()})
+        Windows.showAll()
+      onClose: ->
+        process.exit()
     }
 
     _.extend(common, @platformArgs())
@@ -61,6 +77,7 @@ module.exports = {
     ## TODO: potentially just pass an event emitter
     ## instance here instead of callback functions
     menu.set({
+      withDevTools: isDev()
       onUpdatesClicked: ->
         bus.emit("menu:item:clicked", "check:for:updates")
 
@@ -68,25 +85,24 @@ module.exports = {
         bus.emit("menu:item:clicked", "log:out")
     })
 
-    Renderer.create(@getRendererArgs())
-    .then (win) =>
-      ## cause the browser window instance
-      ## to receive focus when we've been
-      ## told to focus on the tests!
-      options.onFocusTests = ->
-        win.focus()
+    savedState.get()
+    .then (state) =>
+      Windows.open(@getWindowArgs(state))
+      .then (win) =>
+        ## cause the browser window instance
+        ## to receive focus when we"ve been
+        ## told to focus on the tests!
+        options.onFocusTests = ->
+          win.focus()
 
-      Events.start(options, bus)
+        Events.start(options, bus)
 
-      if options.updating
-        Updater.install(options)
+        if options.updating
+          Updater.install(options)
 
-      return win
+        return win
 
   run: (options) ->
-    app.on "window-all-closed", =>
-      @onWindowAllClosed(app)
-
     waitForReady = ->
       new Promise (resolve, reject) ->
         app.on "ready", resolve
