@@ -6,11 +6,13 @@
   &:hover {
     color: $color-link-hover;
   }
+
 }
 .article-edit-link {
   float: right;
-  color: $color-pink-swan;
-  font-size: 24px;
+  color: $color-link;
+  font-size: 14px;
+  text-decoration: none;
   line-height: 36px;
   transition: 0.2s;
   display: none;
@@ -18,12 +20,22 @@
     color: $color-link-hover;
   }
 }
+
+.article-heading:hover .article-anchor {
+  display: inline-block;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
 .article-anchor {
   margin-left: 10px;
   display: none;
   &:before {
     content: "#";
   }
+
 }
 .article-content {
   line-height: 1.6em;
@@ -83,18 +95,22 @@
     }
   }
   table {
-    margin: 1em 0;
-    max-width: 100%;
+    margin: 2em 0;
+    width: 100%;
     border: 1px solid $color-border;
+    border-bottom: 0;
     th {
       font-weight: bold;
       padding: 5px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ebeef1;
     }
     td {
       padding: 5px 15px;
+      border-bottom: 1px solid #ebeef1;
     }
     tr:nth-child(2n) {
-      background: $color-gallery;
+      background: #f6f7f9;
     }
   }
   blockquote {
@@ -118,22 +134,38 @@
     }
   }
   iframe {
-    margin: 1em 0;
+    margin: 2em 0;
   }
   .highlight {
-    margin: 1em 0;
+    margin: 2em 0;
+  }
+  hr {
+    border-color: #eee;
+    margin-top: 4em;
+    margin-bottom: 4em;
+    margin-left: 0;
+    border-width: 2px;
+    border-style: solid;
+    display: none;
   }
   h1 {
     font-size: 2em;
     line-height: 1em;
-    font-weight: bold;
-    margin: 1em 0;
+    font-weight: 900;
+    margin: 2em 0 1em 0;
+    padding: 0.5em 0;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #eee;
+
+    &:first-of-type {
+      margin-top: 0.5em;
+    }
   }
   h2 {
     font-size: 1.5em;
     line-height: 1em;
     font-weight: bold;
-    margin: 1em 0;
+    margin: 3em 0 1em 0;
   }
   h3 {
     font-size: 1.3em;
@@ -159,6 +191,7 @@
   a {
     color: $color-link;
     text-decoration: none;
+    font-weight: 500;
     &:hover {
       color: $color-link-hover;
       text-decoration: underline;
@@ -171,11 +204,13 @@
     font-style: italic;
   }
   li {
+    margin: 0.5em 0;
+
     p {
       margin: 0;
     }
     table {
-      margin: 1em 0;
+      margin: 2em 0;
     }
     blockquote {
       margin: 1em 0;
@@ -184,7 +219,7 @@
       margin: 1em 0;
     }
     .highlight {
-      margin: 1em 0;
+      margin: 2em 0;
     }
   }
   img {
@@ -218,13 +253,14 @@
     font-weight: bold;
   }
 }
+
 .article-footer {
-  margin: 1em 0;
+  margin: 4em 0;
   border-top: 1px solid $color-border;
   text-align: center;
   color: $color-gray;
   line-height: 1em;
-  padding-top: 1em;
+  padding-top: 2em;
   position: relative;
   &:before {
     content: "";
@@ -236,53 +272,35 @@
     clear: both;
   }
 }
+.article-footer-prev, .article-footer-next {
+  color: $color-link;
+  text-decoration: none;
+  font-weight: 500;
+  font-family: $font-title;
+  text-transform: uppercase;
+  position: absolute;
+  &:hover {
+    color: $color-link-hover;
+  }
+  span {
+    padding: 0 6px;
+  }
+}
+
 .article-footer-prev {
-  color: $color-link;
-  text-decoration: none;
-  font-weight: bold;
-  font-family: $font-title;
-  text-transform: uppercase;
-  position: absolute;
   left: 0;
-  &:hover {
-    color: $color-link-hover;
-  }
-  span {
-    padding: 0 6px;
-  }
 }
+
 .article-footer-next {
-  color: $color-link;
-  text-decoration: none;
-  font-weight: bold;
-  font-family: $font-title;
-  text-transform: uppercase;
-  position: absolute;
   right: 0;
-  &:hover {
-    color: $color-link-hover;
-  }
-  span {
-    padding: 0 6px;
-  }
 }
+
 .article-footer-updated {
   font-size: 0.9em;
-}
-
-
-#article-toc-top {
-  margin-top: 2em;
-  font-size: 0.9em;
-  text-decoration: none;
-  color: $color-default;
-  display: block;
-  margin-bottom: 40px;
   font-family: $font-title;
-  &:hover {
-    color: $color-link-hover;
-  }
+  font-style: italic;
 }
+
 .article-header {
   padding-bottom: 20px;
   &:before {
@@ -298,8 +316,9 @@
 .article-title {
   float: left;
   font-family: $font-title;
-  font-size: 36px;
-  font-weight: 300;
+  font-size: 40px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
   text-decoration: none;
   color: $color-default;
   transition: 0.2s;
@@ -319,22 +338,6 @@
 .article {
   float: left;
   width: 100%;
-  padding: 40px 0;
-}
-#article-toc {
-  display: none;
-  float: right;
-  width: 220px;
-  margin-right: -220px;
-  opacity: 0.8;
-  &.fixed {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 220px;
-  }
-}
-.toc-child {
-  padding-left: 1em;
-  font-size: 0.9em;
+  border: 1px solid #eee;
+  padding: 60px 30px;
 }

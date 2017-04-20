@@ -1,15 +1,15 @@
 #sidebar {
-  width: 220px;
+  width: $sidebar-width;
   float: left;
   padding-bottom: 40px;
   opacity: 0.8;
-  margin-left: -220px;
+  margin-left: -$sidebar-width;
   display: none;
 }
 .sidebar-title {
   margin-top: 20px;
   font-size: 0.75;
-  padding: 10px 0;
+  padding: 10px 7px;
   font-family: $font-title;
   font-weight: 400;
   color: #ccc;
@@ -17,12 +17,17 @@
   line-height: 1;
   text-transform: uppercase;
 }
+
+#article-toc .sidebar-title {
+  padding: 10px 0;
+}
+
 .sidebar-link {
-  font-family: $font-title;
+  font-family: $font-sans;
   display: block;
-  color: $color-default;
+  color: #666;
   text-decoration: none;
-  padding: 7px 0;
+  padding: 7px;
   line-height: 1;
   position: relative;
   width: 100%;
@@ -31,7 +36,11 @@
   white-space: nowrap;
   &.current {
     color: $color-link;
-    font-weight: bold;
+    font-weight: 500;
+    background-color: #f1f4f7;
+    &:hover {
+      color: $color-link;
+    }
   }
   &:hover {
     color: $color-link-hover;

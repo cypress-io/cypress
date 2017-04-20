@@ -1,4 +1,4 @@
-title: installing-and-running
+title: Installing and Running
 ---
 
 # System Requirements
