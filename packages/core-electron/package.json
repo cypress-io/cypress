@@ -6,9 +6,11 @@
   "main": "index.js",
   "scripts": {
     "start": "./bin/cypress-electron",
-    "test": "mocha --compilers coffee:coffee-script/register",
+    "test-once": "npm run test-unit-once",
+    "test-unit-once": "mocha --compilers coffee:coffee-script/register",
     "postinstall": "./bin/cypress-electron --install",
-    "release": "releaser"
+    "clean-deps": "rm -rf node_modules",
+    "clean-all": "npm run clean-deps"
   },
   "bin": {
     "cypress-electron": "./bin/cypress-electron"
@@ -25,7 +27,6 @@
   "homepage": "https://github.com/cypress-io/cypress-core-electron#readme",
   "devDependencies": {
     "@cypress/core-icons": "^0.4.1",
-    "@cypress/core-releaser": "^0.1.8",
     "chai": "^3.5.0",
     "mocha": "^3.0.2"
   },

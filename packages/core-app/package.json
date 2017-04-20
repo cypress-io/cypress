@@ -10,10 +10,13 @@
     "server": "node index.js --mode server",
     "build-prod": "gulp app:build",
     "watch-dev": "gulp app",
+    "clean": "rm -rf lib/public",
+    "clean-deps": "rm -rf bower_components && rm -rf node_modules",
+    "clean-all": "npm run clean && npm run clean-deps",
     "deploy": "gulp deploy",
     "release": "gulp release",
     "postinstall": "bower install",
-    "test": "npm run test-unit-once && npm run test-integration-once && npm run test-e2e-once",
+    "test-once": "npm run test-unit-once && npm run test-integration-once && npm run test-e2e-once",
     "test-unit": "./spec/server/helpers/watch test-unit-once",
     "test-unit-once": "./spec/server/helpers/run unit",
     "test-integration": "./spec/server/helpers/watch test-integration-once",
@@ -33,7 +36,7 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "author": "Brian Mann",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues"
   },

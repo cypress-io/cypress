@@ -6,19 +6,19 @@
   "scripts": {
     "build-dev": "zunder build-dev",
     "build-prod": "node ./scripts/build-prod.js",
-    "prod": "npm run build-prod && npm run server",
+    "run-prod": "npm run build-prod && npm run server",
     "server": "zunder serve-prod --port 8000",
     "watch-dev": "zunder watch",
-    "prepublish": "npm run build-prod",
-    "release": "releaser",
-    "test": "npm run build-prod && npm run server & cypress run"
+    "clean": "zunder clean",
+    "clean-deps": "rm -rf node_modules",
+    "clean-all": "npm run clean && npm run clean-deps"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/cypress-io/cypress-core-desktop-gui.git"
   },
   "author": "Brian Mann",
-  "license": "LGPL",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress-core-desktop-gui/issues"
   },
@@ -29,12 +29,12 @@
   ],
   "devDependencies": {
     "@cypress/core-icons": "^0.5.0",
-    "@cypress/core-releaser": "0.1.8",
     "babel-eslint": "^6.0.4",
     "bluebird": "^3.4.0",
     "bootstrap-sass": "3.3.5",
     "bower": "^1.7.2",
     "classnames": "^2.2.5",
+    "cypress-cli": "^0.12.0",
     "eslint": "^2.12.0",
     "eslint-plugin-react": "^5.2.2",
     "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
@@ -56,6 +56,6 @@
     "react-dom": "^15.1.0",
     "react-loader": "^2.4.0",
     "react-router": "^2.4.1",
-    "zunder": "^3.5.4"
+    "zunder": "^3.5.5"
   }
 }

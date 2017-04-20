@@ -5,14 +5,17 @@
   "scripts": {
     "postinstall": "npm run all install",
     "start": "node index.js",
-    "watch-dev": "node run all watch-dev",
-    "test": "node run all test",
+    "watch-dev": "npm run all watch-dev",
+    "test-once": "npm run all test-once -- --serial",
+    "test-unit-once": "npm run all test-unit-once -- --serial",
+    "test-integration-once": "npm run all test-integration-once -- --serial",
+    "test-e2e-once": "npm run all test-e2e-once -- --serial",
     "all": "node index.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
-    "@cypress/npm-run-all": "^4.0.1",
+    "@cypress/npm-run-all": "^4.0.2",
     "ascii-table": "0.0.9",
     "bluebird": "^3.4.5",
     "coffee-script": "^1.11.1",

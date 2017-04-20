@@ -8,26 +8,39 @@ The runner is the minimal "chrome" around the user's app and has the following r
 - Managing the viewport size and scale
 - Showing the currently active URL
 
+
 ## Development
 
-```bash
-## Install project dependencies
-npm install
-```
+### Building
+
+#### For development
 
 ```bash
-## Runs a dev server (localhost:8000 if free, but could be different - check the output in the console)
-## Watches all project files
-## - runs *.js and *.jsx through babel and bundles with browserify into single runner.js in dist
-## - runs associated unit test of file saved and outputs to terminal
-## - compiles *.scss files to single runner.css in dist
-npm start
+npm run build-dev
 ```
 
+#### For production
+
 ```bash
-## Runs all tests
-npm test
+npm run build-prod
 ```
+
+### Watching
+
+- Runs `*.js` and `*.jsx` through babel and bundles with browserify into single `dist/runner.js`
+- Runs associated unit test of file saved and outputs to terminal
+- Compiles `*.scss` files to single `dist/runner.css`
+
+```bash
+npm run watch-dev
+```
+
+### Testing
+
+```bash
+npm test-once
+```
+
 
 ## Changelog
 

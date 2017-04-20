@@ -5,9 +5,11 @@
   "scripts": {
     "build-dev": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
-    "prepublish": "npm run build-prod",
-    "release": "releaser",
-    "test": "node ./scripts/test.js",
+    "clean": "zunder clean",
+    "clean-deps": "rm -rf node_modules",
+    "clean-all": "npm run clean && npm run clean-deps",
+    "test-once": "npm run test-unit-once",
+    "test-unit-once": "node ./scripts/test.js",
     "watch-dev": "node ./scripts/watch.js"
   },
   "repository": {
@@ -25,7 +27,6 @@
     "lib/reporter.js"
   ],
   "devDependencies": {
-    "@cypress/core-releaser": "^0.1.8",
     "@cypress/react-tooltip": "^0.1.1",
     "classnames": "^2.2.5",
     "babel-eslint": "^6.0.4",
@@ -47,6 +48,6 @@
     "react-dom": "^15.3.0",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
-    "zunder": "^3.5.4"
+    "zunder": "^3.5.5"
   }
 }

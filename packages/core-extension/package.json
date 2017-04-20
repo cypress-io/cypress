@@ -7,9 +7,11 @@
     "watch-dev": "gulp watch",
     "build-dev": "gulp build",
     "build-prod": "gulp build",
-    "test": "NODE_ENV=test mocha --require test-setup.js",
-    "prerelease": "npm run build-prod",
-    "release": "releaser"
+    "test-once": "npm run test-unit-once",
+    "test-unit-once": "NODE_ENV=test mocha --require test-setup.js",
+    "clean": "gulp clean",
+    "clean-deps": "rm -rf node_modules",
+    "clean-all": "npm run clean && npm run clean-deps"
   },
   "files": [
     "app",
@@ -29,7 +31,6 @@
   "homepage": "https://github.com/cypress-io/cypress-core-extension#readme",
   "devDependencies": {
     "@cypress/core-icons": "0.4.0",
-    "@cypress/core-releaser": "0.1.8",
     "@cypress/core-socket": "0.1.0",
     "browserify": "^13.0.0",
     "chai": "^3.5.0",

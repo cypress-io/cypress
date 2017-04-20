@@ -7,7 +7,7 @@ module.exports = {
 
     switch
       when cmd = options._[0]
-        runAll(cmd)
+        runAll(cmd, options)
 
       else
         require("packages/core-app").start()
@@ -16,9 +16,6 @@ module.exports = {
 
 ###
 
-run a task for an individual repo
-clean task (probably per repo the 'npm run all clean')
-remove node_modules task (clean install)
 starting app
 deployment
 break up core-app
@@ -28,14 +25,21 @@ break up core-app
 tests
 - unit/integration in each package
 - e2e should be in root
-running all tests
-- needs to be sequential?
-- unit tests in parallel?
-- how are errors reporter?
 work out script running UX
 - preserve coloring of individual output
   * nodemon's colors are coming through, so see what it does
 - bring back panes
   * need to be able to scroll
+
+requirements
+---
+developers will generally work in one repo at a time
+- in terminal, pwd is that repo (packages/core-app)
+- run tests individually per package
+from root:
+- npm install (or run one command to npm install) for all packages
+- start app and run it
+- run watch-dev for all packages
+- run e2e tests
 
 ###

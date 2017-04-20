@@ -4,7 +4,8 @@
   "description": "Internal lib for spawning browser processes",
   "main": "index.js",
   "scripts": {
-    "release": "releaser"
+    "clean-deps": "rm -rf node_modules",
+    "clean-all": "npm run clean-deps"
   },
   "repository": {
     "type": "git",
@@ -17,7 +18,6 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-launcher#readme",
   "devDependencies": {
-    "@cypress/core-releaser": "^0.1.6",
     "chai": "^3.5.0",
     "mocha": "^2.4.5",
     "sinon": "^1.17.3",
