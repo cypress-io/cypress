@@ -4,7 +4,6 @@ path       = require("path")
 Promise    = require("bluebird")
 appData    = require("./util/app_data")
 FileUtil   = require("./util/file")
-api        = require("./api")
 logger     = require("./logger")
 
 fs = Promise.promisifyAll(fs)
