@@ -16,8 +16,8 @@ create = ->
     openProject     = null
     relaunchBrowser = null
 
-  tryToCall = (method, args...) ->
-    return ->
+  tryToCall = (method) ->
+    return (args...) ->
       if openProject
         openProject[method].apply(openProject, args)
       else
@@ -54,7 +54,7 @@ create = ->
           ## been defined here
           if am = options.automationMiddleware
             automation.use(am)
-          
+
           ## merge options into config
           ## without mutating cfg
           options = _.extend({}, cfg, options)
