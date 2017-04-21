@@ -53,6 +53,15 @@ npm test-once
 
 ## Changelog
 
+#### 0.3.4 - *(03/07/17)*
+- enable error messages to be copyable
+
+#### 0.3.3 - *(02/05/17)*
+- display spy / stub aliases
+
+#### 0.3.2 - *(11/29/16)*
+- display errors passed in
+
 #### 0.3.1 - *(10/13/16)*
 - ensure command.renderProps is an object
 

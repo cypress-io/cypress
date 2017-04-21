@@ -3,7 +3,8 @@ import React from 'react'
 import { mount, shallow } from 'enzyme'
 import sinon from 'sinon'
 
-import Runnables, { NoTests, RunnablesList } from './runnables'
+import Runnables, { RunnablesList } from './runnables'
+import AnError from '../errors/an-error'
 
 const appStateStub = (props) => {
   return _.extend({
@@ -35,15 +36,21 @@ describe('<Runnables />', () => {
     expect(component.find(RunnablesList)).to.exist
   })
 
-  it('renders <NoTests /> when there are no runnables', () => {
+  it('renders <AnError /> when there are no runnables', () => {
     const component = shallow(
       <Runnables
         runnablesStore={runnablesStoreStub()}
         scroller={scrollerStub()}
-        specPath=''
+        specPath='/path/to/foo_spec.js'
       />
     )
-    expect(component.find(NoTests)).to.exist
+    expect(component.find(AnError)).to.exist
+    expect(component.find(AnError).prop('error')).to.eql({
+      title: 'No tests found in your file:',
+      link: 'https://on.cypress.io/no-tests-found-in-your-file',
+      callout: '/path/to/foo_spec.js',
+      message: 'We could not detect any tests in the above file. Write some tests and re-run.',
+    })
   })
 
   it('renders nothing when not ready', () => {
@@ -103,13 +110,6 @@ describe('<Runnables />', () => {
     it('renders a runnable for each runnable in model', () => {
       const component = shallow(<RunnablesList runnables={[{ id: 1 }, { id: 2 }]} />)
       expect(component.find('Runnable').length).to.equal(2)
-    })
-  })
-
-  context('<NoTests />', () => {
-    it('includes specPath with spaces between /s', () => {
-      const component = shallow(<NoTests specPath='/Users/eliza/app/foo_spec.js' />)
-      expect(component.find('pre')).to.have.text(' / Users / eliza / app / foo_spec.js')
     })
   })
 })

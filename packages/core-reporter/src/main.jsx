@@ -39,6 +39,7 @@ class Reporter extends Component {
         <Header appState={appState} statsStore={this.props.statsStore} />
         <Runnables
           appState={appState}
+          error={this.props.error}
           runnablesStore={this.props.runnablesStore}
           scroller={this.props.scroller}
           specPath={this.props.specPath}
@@ -54,6 +55,12 @@ class Reporter extends Component {
 
 Reporter.propTypes = {
   autoScrollingEnabled: PropTypes.bool,
+  error: PropTypes.shape({
+    title: PropTypes.string.isRequired,
+    link: PropTypes.string,
+    callout: PropTypes.string,
+    message: PropTypes.string.isRequired,
+  }),
   runner: PropTypes.shape({
     emit: PropTypes.func.isRequired,
     on: PropTypes.func.isRequired,

@@ -15,6 +15,7 @@ Object.keys(document.defaultView).forEach((property) => {
   }
 })
 global.navigator = {
+  appVersion: 'node',
   userAgent: 'node.js'
 }
 

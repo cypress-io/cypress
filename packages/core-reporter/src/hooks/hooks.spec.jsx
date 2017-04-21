@@ -43,7 +43,7 @@ describe('<Hooks />', () => {
     it('renders Collapsible with hook header', () => {
       const component = shallow(<Hook model={hookModel()} />)
       const header = shallow(component.find('Collapsible').prop('header'))
-      expect(header).to.match(HookHeader)
+      expect(header.find('.hook-failed-message')).to.have.text('(failed)')
     })
 
     it('renders Collapsible open', () => {
