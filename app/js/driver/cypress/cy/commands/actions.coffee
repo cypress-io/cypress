@@ -1127,6 +1127,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         $Cypress.Utils.throwErrByPath "select.invalid_multiple"
 
       getOptions = =>
+        newLineRe = /\n/g
+
         ## throw if <select> is disabled
         if options.$el.prop("disabled")
           node = Cypress.Utils.stringifyElement(options.$el)
@@ -1144,10 +1146,14 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             optionEls.push optEl
             values.push(value)
 
+
+          ## replace new line chars, then trim spaces
+          trimmedText = optEl.text().replace(newLineRe, "").trim()
+
           ## return the elements text + value
           {
             value: value
-            text: optEl.text()
+            text: trimmedText
             $el: optEl
           }
         ).get()
