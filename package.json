@@ -28,8 +28,8 @@
     "lib"
   ],
   "devDependencies": {
-    "@cypress/core-icons": "^0.5.0",
-    "@cypress/core-releaser": "0.1.8",
+    "@cypress/icons": "0.5.2",
+    "@cypress/releaser": "0.1.12",
     "@cypress/react-tooltip": "^0.2.2",
     "babel-eslint": "^6.0.4",
     "bluebird": "^3.4.0",
