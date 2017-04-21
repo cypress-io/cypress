@@ -1,7 +1,7 @@
 {
   "name": "@cypress/core-reporter",
   "version": "0.3.4",
-  "main": "lib/reporter",
+  "main": "src/reporter",
   "scripts": {
     "build-dev": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
@@ -23,8 +23,7 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-reporter#readme",
   "files": [
-    "dist",
-    "lib/reporter.js"
+    "dist"
   ],
   "devDependencies": {
     "@cypress/react-tooltip": "^0.1.1",
