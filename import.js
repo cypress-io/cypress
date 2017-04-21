@@ -10,7 +10,7 @@ const remoteName = snakeCase(to)
 
 function exec (command) {
   console.log(command)
-  execSync(command)
+  execSync(command, { stdio: 'inherit' })
 }
 
 exec(`git remote add ${remoteName} ${from}`)

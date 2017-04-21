@@ -10,4 +10,4 @@ const remote = snakeCase(to)
 const command = `git subtree pull --prefix=packages/${to}/ ${remote} ${branch}`
 
 console.log(command)
-execSync(command)
+execSync(command, { stdio: 'inherit' })
