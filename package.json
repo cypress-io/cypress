@@ -1,6 +1,6 @@
 {
   "name": "@cypress/core-launcher",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Internal lib for spawning browser processes",
   "main": "index.js",
   "scripts": {
