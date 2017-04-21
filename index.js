@@ -1,3 +1,3 @@
-require("@cypress/core-coffee-script")
+require("@cypress/coffee-script")
 
 module.exports = require("./lib/proxy")

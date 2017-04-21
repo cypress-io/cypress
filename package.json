@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-https-proxy#readme",
   "devDependencies": {
-    "@cypress/core-releaser": "^0.1.8",
+    "@cypress/releaser": "0.1.11",
     "chai": "^3.5.0",
     "http-mitm-proxy": "^0.5.1",
     "mocha": "^2.5.3",
@@ -34,7 +34,7 @@
     "supertest-as-promised": "^3.1.0"
   },
   "dependencies": {
-    "@cypress/core-coffee-script": "^0.1.0",
+    "@cypress/coffee-script": "0.1.1",
     "bluebird": "^3.4.0",
     "fs-extra": "^0.30.0",
     "node-forge": "^0.6.39",
