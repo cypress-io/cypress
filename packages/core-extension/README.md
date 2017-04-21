@@ -30,6 +30,16 @@ npm run test-once
 
 ## Changelog
 
+#### 0.4.2 - *(04/20/17)*
+- bump cypress icons dep
+
+#### 0.4.1 - *(04/20/17)*
+- bump cypress coffee script and releaser dep
+
+#### 0.4.0 - *(04/13/17)*
+- dont write extension to dist
+- emit new automation client event
+
 #### 0.3.6 - *(10/13/16)*
 - fix #266, handle null set cookie details
 

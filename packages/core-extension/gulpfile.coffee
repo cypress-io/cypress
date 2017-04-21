@@ -7,7 +7,7 @@ clean      = require("gulp-clean")
 rename     = require("gulp-rename")
 runSeq     = require("run-sequence")
 source     = require("vinyl-source-stream")
-icons      = require("@cypress/core-icons")
+icons      = require("@cypress/icons")
 Promise    = require("bluebird")
 coffeeify  = require("coffeeify")
 browserify = require("browserify")
@@ -34,9 +34,6 @@ gulp.task "backup", ->
   gulp.src("dist/background.js")
   .pipe(rename("background_src.js"))
   .pipe(gulp.dest("dist"))
-
-gulp.task "default:host:path", ->
-  ext.setHostAndPath("http://localhost:2020", "/__socket.io")
 
 gulp.task "background", ->
   browserify({
@@ -83,4 +80,4 @@ gulp.task "build", ->
     "background"
     "html"
     "css"
-  ], "backup", "default:host:path"
+  ]

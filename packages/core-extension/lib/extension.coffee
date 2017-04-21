@@ -18,16 +18,13 @@ module.exports = {
     path.join(__dirname, "..")
 
   setHostAndPath: (host, path) ->
-    src  = @getPathToExtension("background_src.js")
-    dest = @getPathToExtension("background.js")
+    src = @getPathToExtension("background.js")
 
     fs.readFileAsync(src, "utf8")
     .then (str) ->
       str
       .replace("CHANGE_ME_HOST", host)
       .replace("CHANGE_ME_PATH", path)
-    .then (str) ->
-      fs.writeFileAsync(dest, str)
 
   getCookieUrl: background.getUrl
 

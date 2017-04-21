@@ -55,7 +55,7 @@ connect = (host, path, io) ->
         invoke("clearCookies", id, data)
       when "clear:cookie"
         invoke("clearCookie", id, data)
-      when "is:automation:connected"
+      when "is:automation:client:connected"
         invoke("verify", id, data)
       when "focus:browser:window"
         invoke("focus", id)
@@ -67,7 +67,7 @@ connect = (host, path, io) ->
   client.on "connect", ->
     listenToCookieChanges()
 
-    client.emit("automation:connected")
+    client.emit("automation:client:connected")
 
   return client
 
