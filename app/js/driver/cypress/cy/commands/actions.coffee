@@ -28,6 +28,51 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
     return _.isNaN(num) or !_.isFinite(num)
 
+  getPositionFromArguments = (positionOrX, y, options) ->
+    switch
+      when _.isObject(positionOrX)
+        options = positionOrX
+        position = null
+
+      when _.isObject(y)
+        options = y
+        position = positionOrX
+        y = null
+        x = null
+
+      when _.all [positionOrX, y], _.isFinite
+        position = null
+        x = positionOrX
+
+      when _.isString(positionOrX)
+        position = positionOrX
+
+    return {options, position, x, y}
+
+  getCoords = (cy, $el, options) -> (scrollIntoView = true, coordsHistory = []) ->
+    retry = ->
+      getCoords(cy, $el, options)(scrollIntoView, coordsHistory)
+
+    ## use native scrollIntoView here so scrollable
+    ## containers are automatically handled correctly
+
+    ## its possible the center of the element actually isnt
+    ## in view yet so we probably need to factor that in
+    ## and scrollBy the amount of distance between the center
+    ## and the left of the element so it positions the center
+    ## in the viewport
+    $el.get(0).scrollIntoView() if scrollIntoView
+
+    if options.force isnt true
+      try
+        cy.ensureVisibility($el, options._log)
+        cy.ensureActionability($el, options._log)
+      catch err
+        options.error = err
+        return cy._retry(retry, options)
+
+    cy._waitForAnimations($el, options, coordsHistory)
+
   Cypress.addChildCommand
 
     submit: (subject, options = {}) ->
@@ -512,23 +557,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## TODO handle pointer-events: none
       ## http://caniuse.com/#feat=pointer-events
 
-      switch
-        when _.isObject(positionOrX)
-            options = positionOrX
-            position = null
-
-        when _.isObject(y)
-          options = y
-          position = positionOrX
-          y = null
-          x = null
-
-        when _.all [positionOrX, y], _.isFinite
-          position = null
-          x = positionOrX
-
-        when _.isString(positionOrX)
-          position = positionOrX
+      {options, position, x, y} = getPositionFromArguments(positionOrX, y, options)
 
       _.defaults options,
         $el: subject
@@ -702,7 +731,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             $elToClick = @getElementAtCoordinates(coords.x, coords.y)
 
             try
-              @ensureDescendents $el, $elToClick, options._log
+              @ensureDescendents($el, $elToClick, options._log)
             catch err
               if options._log
                 options._log.set consoleProps: ->
@@ -724,42 +753,20 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               if $fixed = getElementWithFixedPosition($elToClick)
                 scrollWindowPastFixedElement($fixed)
 
-                retry = ->
-                  getCoords(false)
+                retry = =>
+                  getCoords(@, $el, options)(false)
 
                 ## try again now that we've nudged the window's scroll
                 return @_retry(retry, options)
+                         .then(verifyElementAtCoordinates)
 
-              return @_retry(getCoords, options)
+              return @_retry(getCoords(@, $el, options), options)
+                       .then(verifyElementAtCoordinates)
 
             return coordsObj(coords, $elToClick)
 
-          getCoords = (scrollIntoView = true, coordsHistory = []) =>
-            retry = ->
-              getCoords(scrollIntoView, coordsHistory)
-
-            ## use native scrollIntoView here so scrollable
-            ## containers are automatically handled correctly
-
-            ## its possible the center of the element actually isnt
-            ## in view yet so we probably need to factor that in
-            ## and scrollBy the amount of distance between the center
-            ## and the left of the element so it positions the center
-            ## in the viewport
-            $el.get(0).scrollIntoView() if scrollIntoView
-
-            if options.force isnt true
-              try
-                @ensureVisibility($el, options._log)
-                @ensureActionability($el, options._log)
-              catch err
-                options.error = err
-                return @_retry(retry, options)
-
-            @_waitForAnimations($el, options, coordsHistory)
-            .then(verifyElementAtCoordinates)
-
-          Promise.try(getCoords)
+          Promise.try(getCoords(@, $el, options))
+          .then(verifyElementAtCoordinates)
 
         shouldFireFocusEvent = ($focused, $elToFocus) ->
           ## if we dont have a focused element
@@ -1369,6 +1376,78 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             @verifyUpcomingAssertions(options.$el, options, {
               onRetry: verifyAssertions
         })
+
+    ttrigger: (subject, eventName, positionOrX, y, options = {}) ->
+      {options, position, x, y} = getPositionFromArguments(positionOrX, y, options)
+
+      _.defaults options,
+        log: true
+        $el: subject
+        bubbles: true
+        cancelable: true
+        position: position
+        x: x
+        y: y
+
+      ## omit entries we know aren't part of an event, but pass anything
+      ## else through so user can specify what the event object needs
+      eventOptions = _.omit(options, "log", "$el", "position", "x", "y")
+
+      if options.log
+        options._log = Cypress.Log.command
+          $el: subject
+          consoleProps: ->
+            {
+              "Returned": subject
+              "Event options": eventOptions
+            }
+
+        options._log.snapshot("before", {next: "after"})
+
+      @ensureDom(options.$el)
+
+      if not _.isString(eventName)
+        $Cypress.Utils.throwErrByPath("trigger.invalid_argument", {
+          onFail: options._log
+          args: { eventName }
+        })
+
+      if options.$el.length > 1
+        $Cypress.Utils.throwErrByPath("trigger.multiple_elements", {
+          onFail: options._log
+          args: { num: options.$el.length }
+        })
+
+      win = @private("window")
+      $el = options.$el.first()
+      el = $el.get(0)
+
+      trigger = (coords) =>
+        if options._log
+          ## display the red dot at these coords
+          options._log.set({coords: coords})
+
+        eventOptions = _.extend({
+          clientX: $Cypress.Utils.getClientX(coords, win)
+          clientY: $Cypress.Utils.getClientY(coords, win)
+          pageX: coords.x
+          pageY: coords.y
+        }, eventOptions)
+
+        event = new Event(eventName, eventOptions)
+
+        ## some options, like clientX & clientY, must be set on the
+        ## instance instead of passing them into the constructor
+        _.extend(event, eventOptions)
+
+        el.dispatchEvent(event)
+
+      Promise
+        .try(getCoords(@, $el, options))
+        .then(trigger)
+        .then ->
+          options._log.snapshot("after").end()
+        .return(subject)
 
   Cypress.addParentCommand
     focused: (options = {}) ->
