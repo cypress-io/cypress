@@ -6,6 +6,21 @@ It is a simple wrapper that `symlinks` while in development.
 
 ## Changelog
 
+#### 0.3.4 - *(04/20/17)*
+- fix require path
+
+#### 0.3.3 - *(04/20/17)*
+- bump cypress icons dep
+
+#### 0.3.2 - *(04/20/17)*
+- bump cypress coffee script and releaser dep
+
+#### 0.3.1 - *(11/15/16)*
+- bump electron to 1.4.6
+
+#### 0.3.0 - *(11/07/16)*
+- bump electron
+
 #### 0.2.1 - *(08/26/16)*
 - downgrade electron, bump node
 

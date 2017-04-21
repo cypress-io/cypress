@@ -1,3 +1,3 @@
-require("coffee-script/register")
+require("@cypress/coffee-script")
 
 module.exports = require("./lib/electron")
