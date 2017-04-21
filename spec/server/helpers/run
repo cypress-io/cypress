@@ -10,4 +10,4 @@ DEBUG=nock.*,-nock.common,-nock.scope,socket.io:*,xvfb-maybe \
 BROWSER=$BROWSER \
 xvfb-maybe --xvfb-run-args "-s \"-screen 0 1280x1024x8\"" mocha $SPEC \
 --recursive \
---compilers coffee:coffee-script/register
+--compilers coffee:@cypress/coffee-script
