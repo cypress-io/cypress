@@ -1,6 +1,7 @@
 do ($Cypress, _, $) ->
 
   commandOptions = ["exist", "exists", "visible", "length"]
+  VALID_POSITIONS = ["topLeft", "top", "topRight", "left", "center", "right", "bottomLeft", "bottom", "bottomRight"]
 
   returnFalse = -> return false
 
@@ -166,7 +167,7 @@ do ($Cypress, _, $) ->
     ensureDescendents: ($el1, $el2, onFail) ->
       cmd = @prop("current").get("name")
 
-      unless $Cypress.Utils.isDescendent($el1, $el2)
+      if not $Cypress.Utils.isDescendent($el1, $el2)
         if $el2
           element1 = $Cypress.Utils.stringifyElement($el1)
           element2 = $Cypress.Utils.stringifyElement($el2)
@@ -180,3 +181,23 @@ do ($Cypress, _, $) ->
             onFail
             args: { cmd, node }
           })
+
+    ensureValidPosition: (position) ->
+      ## make sure its valid first!
+      if position in VALID_POSITIONS
+        return true
+
+      $Cypress.Utils.throwErrByPath("dom.invalid_position_argument", {
+        args: { position, validPositions: VALID_POSITIONS.join(', ') }
+      })
+
+    ensureScrollability: ($el, cmd) ->
+      return true if $Cypress.Dom.elIsScrollable($el)
+
+      ## prep args to throw in error since we can't scroll
+      cmd   ?= @prop("current").get("name")
+      node  = $Cypress.Utils.stringifyElement($el)
+
+      $Cypress.Utils.throwErrByPath("dom.not_scrollable", {
+        args: { cmd, node }
+      })

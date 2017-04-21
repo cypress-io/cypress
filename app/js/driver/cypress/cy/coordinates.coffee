@@ -129,20 +129,17 @@ do ($Cypress, _) ->
       @normalizeCoords(x, y)
 
     getCoordinates: ($el, position = "center") ->
-      rect = @getBoundingClientRect($el)
-      ## rect = {top: 35, left: 60, width: 100, height: 90}
+      @ensureValidPosition(position)
 
-      switch position
-        when "topLeft"      then @getTopLeftCoordinates(rect)
-        when "top"          then @getTopCoordinates(rect)
-        when "topRight"     then @getTopRightCoordinates(rect)
-        when "left"         then @getLeftCoordinates(rect)
-        when "center"       then @getCenterCoordinates(rect)
-        when "right"        then @getRightCoordinates(rect)
-        when "bottomLeft"   then @getBottomLeftCoordinates(rect)
-        when "bottom"       then @getBottomCoordinates(rect)
-        when "bottomRight"  then @getBottomRightCoordinates(rect)
-        else
-          $Cypress.Utils.throwErrByPath("dom.invalid_position_argument", {
-            args: { position }
-          })
+      ## rect is an object literal looking like this...
+      ## {top: 35, left: 60, width: 100, height: 90}
+      rect = @getBoundingClientRect($el)
+
+      ## dynamically call the function by transforming the name
+      ## bottom -> getBottomCoordinates
+      ## topLeft -> getTopLeftCoordinates
+      capitalizedPosition = position.charAt(0).toUpperCase() + position.slice(1)
+
+      fnName = "get" + capitalizedPosition + "Coordinates"
+
+      @[fnName](rect)

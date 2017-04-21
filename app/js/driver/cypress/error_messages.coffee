@@ -154,9 +154,13 @@ $Cypress.ErrorMessages = do ($Cypress) ->
         Fix this problem, or use {force: true} to disable error checking.\n
         https://on.cypress.io/element-cannot-be-interacted-with
       """
-      invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be topLeft, topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, or bottomRight."
+      invalid_position_argument: "Invalid position argument: '{{position}}'. Position may only be {{validPositions}}."
       non_dom: "Cannot call #{cmd('{{cmd}}')} on a non-DOM subject."
       non_dom_is_hidden: "$Cypress.Dom.{{filter}} must be passed a basic DOM element. You passed: '{{el}}'"
+      not_scrollable: """
+        #{cmd('{{cmd}}')} failed because this element is not scrollable:\n
+        {{node}}\n
+      """
       not_visible: """
         #{cmd('{{cmd}}')} failed because this element is not visible:\n
         {{node}}\n
@@ -461,6 +465,20 @@ $Cypress.ErrorMessages = do ($Cypress) ->
 
     screenshot:
       timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
+
+    scrollIntoView:
+      invalid_argument: "#{cmd('scrollIntoView')} can only be called with an options object. Your argument was: {{arg}}"
+      subject_is_window: "Cannot call #{cmd('scrollIntoView')} on Window subject."
+      multiple_elements: "#{cmd('scrollIntoView')} can only be used to scroll to 1 element, you tried to scroll to {{num}} elements.\n\n"
+      invalid_easing: "#{cmd('scrollIntoView')} must be called with a valid easing. Your easing was: {{easing}}"
+      invalid_duration: "#{cmd('scrollIntoView')} must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: {{duration}}"
+
+    scrollTo:
+      invalid_target: "#{cmd('scrollTo')} must be called with a valid position. It can be a string, number or object. Your position was: {{x}}, {{y}}"
+      multiple_containers: "#{cmd('scrollTo')} can only be used to scroll one element, you tried to scroll {{num}} elements.\n\n"
+      invalid_easing: "#{cmd('scrollTo')} must be called with a valid easing. Your easing was: {{easing}}"
+      invalid_duration: "#{cmd('scrollTo')} must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: {{duration}}"
+      animation_failed: "#{cmd('scrollTo')} failed."
 
     select:
       disabled: "#{cmd('select')} failed because this element is currently disabled:\n\n{{node}}"
