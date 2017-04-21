@@ -36,6 +36,9 @@ npm run watch
 
 ## Changelog
 
+#### 0.4.2 - *(04/20/17)*
+- bump cypress icons dep
+
 #### 0.4.1 - *(04/20/17)*
 - bump cypress coffee script and releaser dep
 
