@@ -1,6 +1,6 @@
 {
   "name": "@cypress/core-launcher",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Internal lib for spawning browser processes",
   "main": "index.js",
   "scripts": {
@@ -18,12 +18,14 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-launcher#readme",
   "devDependencies": {
+    "@cypress/releaser": "0.1.12",
     "chai": "^3.5.0",
     "mocha": "^2.4.5",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
+    "@cypress/coffee-script": "0.1.2",
     "bluebird": "^3.3.5",
     "fs-extra": "^0.28.0",
     "lodash": "^4.11.1",
