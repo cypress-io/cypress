@@ -41,10 +41,7 @@ find = function(type) {
 }
 
 transfer = function(type) {
-  return find(type).then(function(files) {
-    if (files == null) {
-      files = []
-    }
+  return find(type).then(function(files = []) {
 
     return _.filter(files, fileStartsWithNumberAndDash)
   }).map(function(file) {
@@ -58,16 +55,48 @@ transfer = function(type) {
       return fs.readFileAsync(dest, 'utf8')
     })
     .then(function(string) {
-      return string.replace('slug:', 'title:').replace(excerptRe, '---')
+      // slug: foo-bar
+      // excerpt: this is our doc on foo bar
+      // >> becomes >>
+      // title: foo-bar
+      // ---
+
+      return string
+        .replace('slug:', 'title:')
+        .replace(excerptRe, '---')
     })
     .then(function(string) {
+      // Remove
+      // # Contents
+      // - :fa-angle-right: Welcome
+      // ***
+
       var contentsIndex = string.indexOf('# Contents')
       var dividerIndex = string.indexOf('***') + 3
       var chunkToRemove = string.slice(contentsIndex, dividerIndex)
 
-      return string.split(chunkToRemove).join('').split(newLinesRe).join('\n\n')
+      return string
+      .split(chunkToRemove)
+      .join('')
+      .split(newLinesRe)
+      .join('\n\n')
     })
-      .then(function(string) {
+    .then(function(string) {
+      // :fa-cog:
+      // >> becomes >>
+      // {% fa fa-cog %}
+
+      function replace(s, icon) {
+        return s
+        .replace(":fa-" + icon + ":", "{% fa fa-" + icon + " %}")
+      }
+
+      return ["cog", "plus"].reduce(function(memo, icon) {
+        return replace(memo, icon)
+      }, string)
+    })
+    })
+    .then(function(string) {
       return fs.writeFileAsync(dest, string)
     })
   })

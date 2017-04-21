@@ -1,4 +1,4 @@
-title: Installing and Running
+title: installing-and-running
 ---
 
 # System Requirements
@@ -90,7 +90,7 @@ While in beta, the Cypress team has to whitelist the email address associated wi
 
 After successfully logging in, you will need to add the project(s) you want to write Cypress tests in.
 
-- Click :fa-plus: Add Project.
+- Click {% fa fa-plus %} Add Project.
 
 ![Add Project in LeftHand Corner](https://cloud.githubusercontent.com/assets/1271364/22699969/fe44c2e4-ed26-11e6-83d0-9baa0f51b15e.png)
 
