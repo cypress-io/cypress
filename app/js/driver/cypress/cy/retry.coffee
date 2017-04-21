@@ -1,6 +1,10 @@
-do ($Cypress, _, Promise) ->
+_ = require("lodash")
+Promise = require("../bluebird")
 
-  $Cypress.Cy.extend
+utils = require("../utils")
+
+module.exports = ($Cy) ->
+  $Cy.extend
     _retry: (fn, options, log) ->
       ## remove the runnables timeout because we are now in retry
       ## mode and should be handling timing out ourselves and dont
@@ -9,7 +13,7 @@ do ($Cypress, _, Promise) ->
         runnableTimeout = options.timeout ? @_timeout()
         @_clearTimeout()
 
-      current = @prop("current")
+      current = @state("current")
 
       ## use the log if passed in, else fallback to options._log
       ## else fall back to just grabbing the last log per our current command
@@ -51,7 +55,7 @@ do ($Cypress, _, Promise) ->
             else
               err
 
-        $Cypress.Utils.throwErrByPath "miscellaneous.retry_timed_out", {
+        utils.throwErrByPath "miscellaneous.retry_timed_out", {
           onFail: (options.onFail or log)
           args: { error: getErrMessage(options.error) }
         }

@@ -1,20 +1,20 @@
 vendor:
-  - node_modules/setimmediate/setImmediate.js
-  - bower_components/jquery/dist/jquery.js
-  - bower_components/underscore/underscore.js
-  - bower_components/mocha/mocha.js
-  - bower_components/chai/chai.js
-  - bower_components/chai-jquery/chai-jquery.js ## need to conditionally load this
-  - node_modules/lolex/lolex.js
-  - bower_components/sinon/dist/sinon.js
-  - bower_components/sinon-as-promised/release/sinon-as-promised.js
-  - bower_components/sinon-chai/lib/sinon-chai.js ## need to conditionally load this
-  - bower_components/backbone/backbone.js
-  - bower_components/underscore.string/lib/underscore.string.js
-  - bower_components/underscore.inflection/lib/underscore.inflection.js
-  - bower_components/js-cookie/src/js.cookie.js
-  - bower_components/moment/moment.js
-  - bower_components/blob-util/dist/blob-util.js
+  - node_modules/setimmediate/setImmediate.js # x
+  - bower_components/jquery/dist/jquery.js # x
+  - bower_components/underscore/underscore.js # x
+  - bower_components/mocha/mocha.js # x
+  - bower_components/chai/chai.js # x
+  - bower_components/chai-jquery/chai-jquery.js # x
+  - node_modules/lolex/lolex.js # x
+  - bower_components/sinon/dist/sinon.js # x
+  - bower_components/sinon-as-promised/release/sinon-as-promised.js # x
+  - bower_components/sinon-chai/lib/sinon-chai.js # x
+  - bower_components/backbone/backbone.js # x
+  - bower_components/underscore.string/lib/underscore.string.js # x
+  - bower_components/underscore.inflection/lib/underscore.inflection.js # x
+  - bower_components/js-cookie/src/js.cookie.js # x
+  - bower_components/moment/moment.js # x
+  - bower_components/blob-util/dist/blob-util.js # x
   - node_modules/jquery.scrollto/jquery.scrollTo.js
   - app/js/vendor/url-parse.js
   - app/js/vendor/minimatch.js

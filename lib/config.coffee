@@ -1,5 +1,4 @@
 _        = require("lodash")
-str      = require("underscore.string")
 path     = require("path")
 Promise  = require("bluebird")
 errors   = require("./errors")
@@ -157,7 +156,7 @@ module.exports = {
 
     if url = config.baseUrl
       ## always strip trailing slashes
-      config.baseUrl = str.rtrim(url, "/")
+      config.baseUrl = _.trimEnd(url, "/")
 
     _.defaults config, defaults
 
@@ -200,7 +199,8 @@ module.exports = {
 
   resolveConfigValues: (config, defaults, resolved = {}) ->
     ## pick out only the keys found in configKeys
-    _.chain(config)
+    _
+    .chain(config)
     .pick(configKeys)
     .mapValues (val, key) ->
       source = (s) ->
@@ -323,7 +323,7 @@ module.exports = {
         return key
 
       key = key.toLowerCase().replace(dashesOrUnderscoresRe, "")
-      key = str.camelize(key)
+      key = _.camelCase(key)
 
       if _.has(cfg, key)
         return key

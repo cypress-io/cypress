@@ -1,6 +1,6 @@
 require("../spec_helper")
 
-_    = require("underscore")
+_    = require("lodash")
 exec = require("#{root}lib/exec")
 
 runCommand = (cmd, options = {}) ->

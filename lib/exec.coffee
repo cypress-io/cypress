@@ -1,5 +1,4 @@
-_       = require("underscore")
-str     = require("underscore.string")
+_       = require("lodash")
 cp      = require("child_process")
 Promise = require("bluebird")
 
@@ -26,7 +25,7 @@ getShell = ->
   return Promise.resolve(shell) if shell
 
   exec("echo $SHELL").then (shell) ->
-    path = str.trim(shell)
+    path = _.trim(shell)
     shell = {
       shellPath: path
       profilePath: getProfilePath(path)

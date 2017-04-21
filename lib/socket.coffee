@@ -1,6 +1,5 @@
 _             = require("lodash")
 fs            = require("fs-extra")
-str           = require("underscore.string")
 path          = require("path")
 uuid          = require("node-uuid")
 Promise       = require("bluebird")

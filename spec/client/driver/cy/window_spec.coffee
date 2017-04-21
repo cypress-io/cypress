@@ -8,7 +8,7 @@ describe "$Cypress.Cy Window Commands", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        @remoteWindow = @cy.private("window")
+        @remoteWindow = @cy.privateState("window")
 
         delete @remoteWindow.foo
 
@@ -52,9 +52,9 @@ describe "$Cypress.Cy Window Commands", ->
         @cy.window().should("have.property", "foo", "bar")
 
       it "can still fail on window", (done) ->
-        win = @cy.private("window")
+        win = @cy.privateState("window")
 
-        @cy.private("window", undefined)
+        @cy.privateState("window", undefined)
 
         logs = []
 
@@ -62,7 +62,7 @@ describe "$Cypress.Cy Window Commands", ->
           logs.push log
 
         @cy.on "fail", (err) =>
-          @cy.private("window", win)
+          @cy.privateState("window", win)
 
           @chai.restore()
 
@@ -156,7 +156,7 @@ describe "$Cypress.Cy Window Commands", ->
 
     describe "assertion verification", ->
       beforeEach ->
-        @remoteDocument = @cy.private("window").document
+        @remoteDocument = @cy.privateState("window").document
 
         delete @remoteDocument.foo
 
@@ -200,9 +200,9 @@ describe "$Cypress.Cy Window Commands", ->
         @cy.document().should("have.property", "foo", "bar")
 
       it "can still fail on document", (done) ->
-        win = @cy.private("window")
+        win = @cy.privateState("window")
 
-        @cy.private("window", undefined)
+        @cy.privateState("window", undefined)
 
         logs = []
 
@@ -210,7 +210,7 @@ describe "$Cypress.Cy Window Commands", ->
           logs.push log
 
         @cy.on "fail", (err) =>
-          @cy.private("window", win)
+          @cy.privateState("window", win)
 
           @chai.restore()
 
@@ -336,7 +336,7 @@ describe "$Cypress.Cy Window Commands", ->
       expect(title.length).to.eq(1)
       expect(title.text()).not.to.eq("foo")
 
-      @cy.private("document").title = "foo"
+      @cy.privateState("document").title = "foo"
 
       @cy.title().then (title) ->
         expect(title).to.eq("foo")

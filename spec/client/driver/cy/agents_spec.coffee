@@ -212,10 +212,10 @@ describe "$Cypress.Cy Agents Commands", ->
           expect(@myStub.displayName).to.equal("myStub")
 
       it "stores the lookup as an alias", ->
-        expect(@cy.prop("aliases").myStub).to.be.defined
+        expect(@cy.state("aliases").myStub).to.be.defined
 
       it "stores the agent as the subject", ->
-        expect(@cy.prop("aliases").myStub.subject).to.equal(@stub)
+        expect(@cy.state("aliases").myStub.subject).to.equal(@stub)
 
       it "assigns subject to runnable ctx", ->
         @cy.then ->

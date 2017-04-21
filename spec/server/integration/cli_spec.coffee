@@ -12,7 +12,13 @@ parse = (str) ->
   ## remove blank lines and slice off any line
   ## starting with a caret because thats junk
   ## from npm logs
-  _(str.split("\n")).compact().reject(anyLineWithCaret).value().join("\n")
+  _
+  .chain(str)
+  .split("\n")
+  .compact()
+  .reject(anyLineWithCaret)
+  .join("\n")
+  .value()
 
 env = _.omit(process.env, "CYPRESS_DEBUG")
 

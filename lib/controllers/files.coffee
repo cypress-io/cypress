@@ -1,5 +1,4 @@
 _           = require("lodash")
-str         = require("underscore.string")
 path        = require("path")
 glob        = require("glob")
 Promise     = require("bluebird")

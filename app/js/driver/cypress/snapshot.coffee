@@ -1,20 +1,22 @@
-do ($Cypress, _, $) ->
+_ = require("lodash")
+$ = require("jquery")
 
-  reduceText = (arr, fn) ->
-    _.reduce arr, ((memo, item) -> memo += fn(item)), ""
+reduceText = (arr, fn) ->
+  _.reduce arr, ((memo, item) -> memo += fn(item)), ""
 
-  getCssRulesString = (stylesheet) ->
-    ## some browsers may throw a SecurityError if the stylesheet is cross-domain
-    ## https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet#Notes
-    ## for others, it will just be null
-    return try
-      if rules = stylesheet.rules or stylesheet.cssRules
-        reduceText rules, (rule) -> rule.cssText
-      else
-        null
-    catch e
+getCssRulesString = (stylesheet) ->
+  ## some browsers may throw a SecurityError if the stylesheet is cross-domain
+  ## https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet#Notes
+  ## for others, it will just be null
+  return try
+    if rules = stylesheet.rules or stylesheet.cssRules
+      reduceText rules, (rule) -> rule.cssText
+    else
       null
+  catch e
+    null
 
+module.exports = ($Cypress) ->
   $Cypress.extend
     highlightAttr: "data-cypress-el"
 
@@ -92,7 +94,7 @@ do ($Cypress, _, $) ->
           @cy.$$(stylesheet).text()
 
     _indexedStylesheets: ->
-      _.reduce @cy.private("document").styleSheets, (memo, stylesheet) ->
+      _.reduce @cy.privateState("document").styleSheets, (memo, stylesheet) ->
         memo[stylesheet.href] = stylesheet
         return memo
       , {}

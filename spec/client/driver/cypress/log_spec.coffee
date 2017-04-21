@@ -3,6 +3,7 @@ describe "$Cypress.Log API", ->
   describe "instances", ->
     beforeEach ->
       @Cypress = $Cypress.create()
+      @Cypress.setConfig({})
       @log = new $Cypress.Log @Cypress
 
     it "sets state to pending by default", ->
@@ -513,8 +514,7 @@ describe "$Cypress.Log API", ->
         expect(@interface.pick("bar")).to.deep.eq {bar: "baz"}
 
       it "#on", (done) ->
-        m = new Backbone.Model
-        m.listenTo @interface, "foo", done
+        @log.on "foo", done
         @log.trigger "foo"
 
       it "#off", ->
@@ -606,7 +606,7 @@ describe "$Cypress.Log API", ->
         @Cypress.Log.create(@Cypress, @cy)
 
         obj = {name: "foo", ctx: @cy, fn: (->), args: [1,2,3], type: "parent"}
-        @cy.prop("current", @Cypress.Command.create(obj))
+        @cy.state("current", @Cypress.Command.create(obj))
 
       describe "#command", ->
         it "displays a deprecation warning", ->
@@ -701,11 +701,11 @@ describe "$Cypress.Log API", ->
             @Cypress.Log.command({})
 
           it "sets hookName to prop hookName", (done) ->
-            @cy.private("hookName", "beforeEach")
+            @cy.privateState("hookName", "beforeEach")
 
             @Cypress.on "log", (obj) ->
               expect(obj.hookName).to.eq "beforeEach"
-              @private("hookName", null)
+              @privateState("hookName", null)
               done()
 
             @Cypress.Log.command({})
@@ -729,7 +729,7 @@ describe "$Cypress.Log API", ->
             @Cypress.Log.command({})
 
           it "sets url to private url", (done) ->
-            @cy.private("url", "www.github.com")
+            @cy.privateState("url", "www.github.com")
 
             @Cypress.on "log", (obj) ->
               expect(obj.url).to.eq "www.github.com"
@@ -738,11 +738,11 @@ describe "$Cypress.Log API", ->
             @Cypress.Log.command({})
 
           it "sets testId to runnable.id", (done) ->
-            @cy.private("runnable", {id: 123})
+            @cy.privateState("runnable", {id: 123})
 
             @Cypress.on "log", (obj) ->
               expect(obj.testId).to.eq 123
-              @private("runnable", null)
+              @privateState("runnable", null)
               done()
 
             @Cypress.Log.command({})
@@ -823,7 +823,7 @@ describe "$Cypress.Log API", ->
                 btns = getFirstSubjectByName.call(@, "get")
                 expect(@log.attributes.consoleProps()).to.deep.eq {
                   Command: "wait"
-                  "Applied To": $Cypress.Utils.getDomElements(btns)
+                  "Applied To": $Cypress.utils.getDomElements(btns)
                   Error: err.toString()
                 }
                 done()
@@ -842,7 +842,7 @@ describe "$Cypress.Log API", ->
                   Content: "asdfasdfasdfasdf"
                   Elements: 0
                   Returned: undefined
-                  "Applied To": $Cypress.Utils.getDomElements(btns)
+                  "Applied To": $Cypress.utils.getDomElements(btns)
                   Error: err.toString()
                 }
                 done()

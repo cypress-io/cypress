@@ -1,7 +1,6 @@
 _                      = require("lodash")
 fs                     = require("fs-extra")
 EE                     = require("events")
-str                    = require("underscore.string")
 path                   = require("path")
 through                = require("through")
 cjsxify                = require("cjsxify")

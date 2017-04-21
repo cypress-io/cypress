@@ -9,7 +9,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       win = {location: {reload: fn}}
 
-      @cy.private("window", win)
+      @cy.privateState("window", win)
 
       @cy.reload()
 
@@ -20,7 +20,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       win = {location: {reload: fn}}
 
-      @cy.private("window", win)
+      @cy.privateState("window", win)
 
       @cy.reload(true)
 
@@ -31,7 +31,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       win = {location: {reload: fn}}
 
-      @cy.private("window", win)
+      @cy.privateState("window", win)
 
       @cy.reload(true, {})
 
@@ -42,7 +42,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       win = {location: {reload: fn}}
 
-      @cy.private("window", win)
+      @cy.privateState("window", win)
 
       @cy.reload({})
 
@@ -56,7 +56,7 @@ describe "$Cypress.Cy Navigation Commands", ->
             expect(win).not.to.be.undefined
             expect(win.foo).to.be.undefined
 
-            expect(win).to.eq(@cy.private("window"))
+            expect(win).to.eq(@cy.privateState("window"))
 
     it "sets timeout to Cypress.config(pageLoadTimeout)", ->
       timeout = @sandbox.spy Promise.prototype, "timeout"
@@ -263,7 +263,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     it "does not error without an onBeforeLoad callback", ->
       @cy.visit("/fixtures/html/sinon.html").then ->
-        prev = @cy.prop("current").get("prev")
+        prev = @cy.state("current").get("prev")
         expect(prev.get("args")).to.have.length(1)
 
     it "calls resolve:url with http:// when localhost", ->
@@ -275,7 +275,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(trigger).to.be.calledWith("resolve:url", "http://localhost:3500/app")
 
     it "prepends hostname when visiting locally", ->
-      prop = @sandbox.spy(@cy.private("$remoteIframe"), "prop")
+      prop = @sandbox.spy(@cy.privateState("$remoteIframe"), "prop")
 
       @cy
         .visit("fixtures/html/sinon.html")
@@ -301,7 +301,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         .visit("http://localhost:3500")
 
     it "can visit pages on different subdomain but same originPolicy", ->
-      $remoteIframe = @cy.private("$remoteIframe")
+      $remoteIframe = @cy.privateState("$remoteIframe")
 
       load = ->
         $remoteIframe.trigger("load")
@@ -346,8 +346,8 @@ describe "$Cypress.Cy Navigation Commands", ->
         count = 0
         urls = []
 
-        @cy.private("$remoteIframe").on "load", =>
-          urls.push @cy.private("window").location.href
+        @cy.privateState("$remoteIframe").on "load", =>
+          urls.push @cy.privateState("window").location.href
 
           count += 1
 
@@ -743,7 +743,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           .visit("http://google.com:3500")
 
       it "throws attemping to visit 2 unique ip addresses", (done) ->
-        $remoteIframe = @cy.private("$remoteIframe")
+        $remoteIframe = @cy.privateState("$remoteIframe")
 
         load = ->
           $remoteIframe.trigger("load")
@@ -1121,8 +1121,8 @@ describe "$Cypress.Cy Navigation Commands", ->
       @cy.window().then (win) =>
         timeout = @sandbox.spy(@cy, "_timeout")
 
-        @cy.private("$remoteIframe").one "load", =>
-          @cy.prop("ready").promise.then ->
+        @cy.privateState("$remoteIframe").one "load", =>
+          @cy.state("ready").promise.then ->
             _.delay ->
               expect(timeout.callCount).to.eq(1)
               expect(timeout.firstCall).to.be.calledWith(1000)
@@ -1145,7 +1145,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       input = @cy.$$("form#click-me input[type=submit]")
 
       @cy.get("form#click-me").find("input[type=submit]").click().then (subject) ->
-        expect(@cy.commands.names()).to.deep.eq [
+        expect(@cy.queue.names()).to.deep.eq [
           "get", "find", "click", "then", "then"
         ]
         expect(getFirstSubjectByName("click").get(0)).to.eq input.get(0)
@@ -1155,7 +1155,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       form = @cy.$$("form#click-me")
 
       @cy.get("form#click-me").submit().then (subject) ->
-        expect(@cy.commands.names()).to.deep.eq [
+        expect(@cy.queue.names()).to.deep.eq [
           "get", "submit", "then", "then"
         ]
         expect(getFirstSubjectByName("get").get(0)).to.eq form.get(0)

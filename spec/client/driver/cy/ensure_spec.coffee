@@ -22,7 +22,7 @@ describe "$Cypress.Cy Ensure Extensions", ->
         @cy.ensureElExistence($())
 
       expect(fn).to.throw("to exist in the DOM")
-      expect(@cy.prop("onBeforeLog")).to.be.null
+      expect(@cy.state("onBeforeLog")).to.be.null
 
   context "#ensureElementIsNotAnimating", ->
     beforeEach ->
@@ -43,9 +43,9 @@ describe "$Cypress.Cy Ensure Extensions", ->
       @commands = $Cypress.Commands.create()
       @commands.splice(0, 1, {id: 1, name: "foo"})
 
-      cmd = @commands.findWhere({name: "foo"})
+      cmd = @commands.find({name: "foo"})
 
-      @cy.prop("current", cmd)
+      @cy.state("current", cmd)
 
       $el    = @cy.$$("button:first")
       coords = [{x: 10, y: 20}, {x: 20, y: 30}]

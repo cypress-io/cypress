@@ -299,7 +299,7 @@ describe "$Cypress.Cy Request Commands", ->
 
     describe "failOnStatus", ->
       it "is deprecated but does not fail even on 500 when failOnStatus=false", ->
-        warning = @sandbox.spy(@Cypress.Utils, "warning")
+        warning = @sandbox.spy(@Cypress.utils, "warning")
 
         @respondWith({isOkStatusCode: false, status: 500})
 
@@ -376,7 +376,7 @@ describe "$Cypress.Cy Request Commands", ->
         @respondWith({}, 50)
 
         @Cypress.on "log", (attrs, @log) =>
-          @cmd = @cy.commands.first()
+          @cmd = @cy.queue.first()
           @Cypress.abort()
 
         @cy.on "cancel", (cancelledCmd) =>

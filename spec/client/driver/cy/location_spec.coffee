@@ -8,7 +8,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     it "eventually resolves", ->
       _.delay =>
-        win = @cy.private("window")
+        win = @cy.privateState("window")
         win.location.href = "/foo/bar/baz.html"
       , 100
 
@@ -36,7 +36,7 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "eventually passes the assertion", ->
         @cy.on "retry", _.after 2, _.once =>
-          win = @cy.private("window")
+          win = @cy.privateState("window")
           win.location.href = "/foo/bar/baz.html"
 
         @cy.url().should("match", /baz/).then ->
@@ -120,7 +120,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     it "eventually resolves", ->
       _.delay ->
-        win = cy.private("window")
+        win = cy.privateState("window")
         win.location.hash = "users/1"
       , 100
 
@@ -141,7 +141,7 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "eventually passes the assertion", ->
         @cy.on "retry", _.after 2, =>
-          win = cy.private("window")
+          win = cy.privateState("window")
           win.location.hash = "users/1"
 
         @cy.hash().should("match", /users/).then ->
@@ -230,7 +230,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     it "eventually resolves", ->
       _.delay ->
-        win = cy.private("window")
+        win = cy.privateState("window")
         win.location.pathname = "users/1"
       , 100
 
@@ -251,7 +251,7 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "eventually passes the assertion", ->
         @cy.on "retry", _.after 2, _.once =>
-          win = @cy.private("window")
+          win = @cy.privateState("window")
           win.location.pathname = "users/1"
 
         @cy.location("pathname").should("match", /users/).then ->
@@ -336,6 +336,6 @@ describe "$Cypress.Cy Location Commands", ->
         @cy.location().then ->
           consoleProps = @log.attributes.consoleProps()
 
-          expect(_(consoleProps).keys()).to.deep.eq ["Command", "Returned"]
+          expect(_.keys(consoleProps)).to.deep.eq ["Command", "Returned"]
           expect(consoleProps.Command).to.eq "location"
-          expect(_(consoleProps.Returned).keys()).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "originPolicy", "superDomain", "toString"]
+          expect(_.keys(consoleProps.Returned)).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "originPolicy", "superDomain", "toString"]

@@ -1,15 +1,19 @@
+_ = require("lodash")
+Backbone = require("backbone")
+Promise = require("./bluebird")
+
 ## adds a custom lightweight event bus
 ## to the Cypress class
-do ($Cypress, _) ->
 
-  splice = (index) ->
-    @_events.splice(index, 1)
+splice = (index) ->
+  @_events.splice(index, 1)
 
+module.exports = ($Cypress) ->
   $Cypress.extend
     event: (name) ->
       return if not @_events
 
-      _.pluck @_events[name], "callback"
+      _.map @_events[name], "callback"
 
     invoke: (name, args...) ->
       return if not events = @event(name)

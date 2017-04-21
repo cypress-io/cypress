@@ -144,7 +144,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
             expect(logs.length).to.eq(3)
 
-            types = _(logs).map (l) -> l.get("type")
+            types = _.map logs, (l) -> l.get("type")
 
             expect(types).to.deep.eq(["parent", "child", "child"])
 
@@ -154,7 +154,7 @@ describe "$Cypress.Cy Assertion Commands", ->
           ## remote window
           @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
-          @remoteWindow = @cy.private("window")
+          @remoteWindow = @cy.privateState("window")
 
         afterEach ->
           ## restore back to the global $
@@ -553,11 +553,11 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "resets upcomingAssertions after resolving assertions", ->
         @cy.get("button").as("btn").should("match", "button").and ->
           ## length should be 2 for 'cy.should' and 'cy.and'
-          expect(@cy.prop("upcomingAssertions").length).to.eq(2)
+          expect(@cy.state("upcomingAssertions").length).to.eq(2)
         @cy.should ->
-          expect(@cy.prop("upcomingAssertions")).to.deep.eq([])
+          expect(@cy.state("upcomingAssertions")).to.deep.eq([])
         .then ->
-          expect(@cy.prop("upcomingAssertions")).to.deep.eq([])
+          expect(@cy.state("upcomingAssertions")).to.deep.eq([])
 
   context "#and", ->
     it "proxies to #should", ->
@@ -611,7 +611,7 @@ describe "$Cypress.Cy Assertion Commands", ->
         done()
 
       @cy.get("body").then ->
-        expect(@cy.prop("subject")).to.match "body"
+        expect(@cy.state("subject")).to.match "body"
 
     it "snapshots immediately", (done) ->
       @onAssert (log) ->
@@ -620,7 +620,7 @@ describe "$Cypress.Cy Assertion Commands", ->
         done()
 
       @cy.get("body").then ->
-        expect(@cy.prop("subject")).to.match "body"
+        expect(@cy.state("subject")).to.match "body"
 
     it "sets type to child when assertion involved current subject", (done) ->
       @onAssert (log) ->
@@ -628,7 +628,7 @@ describe "$Cypress.Cy Assertion Commands", ->
         done()
 
       @cy.get("body").then ->
-        expect(@cy.prop("subject")).to.match "body"
+        expect(@cy.state("subject")).to.match "body"
 
     it "sets type to child current command had arguments but does not match subject", (done) ->
       @onAssert (log) ->

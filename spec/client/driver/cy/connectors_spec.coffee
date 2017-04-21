@@ -55,9 +55,9 @@ describe "$Cypress.Cy Connectors Commands", ->
       ## on the returned object, we will know
 
       @cy.then ->
-        expect(@cy.commands.length).to.eq 2
+        expect(@cy.queue.length).to.eq 2
 
-        lastThen = @cy.commands.last()
+        lastThen = @cy.queue.last()
 
         expect(lastThen.get("args")[0]).to.be.a.function
         expect(lastThen.get("args")[1].length).to.eq 1
@@ -72,7 +72,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       fn = (err) ->
 
       @cy.on "end", ->
-        expect(@prop("next")).not.to.be.undefined
+        expect(@state("next")).not.to.be.undefined
         done()
 
       @cy.noop().then((->), fn)
@@ -230,7 +230,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         ## remote window
         @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
-        @remoteWindow = @cy.private("window")
+        @remoteWindow = @cy.privateState("window")
 
       afterEach ->
         ## restore back to the global $
@@ -258,8 +258,8 @@ describe "$Cypress.Cy Connectors Commands", ->
             expectOriginal($input).to.be.instanceof @remoteWindow.$
             return $input
           .then ($input) ->
-            expectOriginal(@cy.prop("subject")).not.to.be.instanceof @remoteWindow.$
-            expectOriginal(@cy.prop("subject")).to.be.instanceof window.$
+            expectOriginal(@cy.state("subject")).not.to.be.instanceof @remoteWindow.$
+            expectOriginal(@cy.state("subject")).to.be.instanceof window.$
 
       it "does not nuke selector properties", ->
         @cy
@@ -275,7 +275,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       ## remote window
       @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
-      @remoteWindow = @cy.private("window")
+      @remoteWindow = @cy.privateState("window")
 
     afterEach ->
       ## restore back to the global $
@@ -367,7 +367,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
         @cy.get("input:first").invoke("parent").then ($parent) ->
           expectOriginal($parent).to.be.instanceof @remoteWindow.$
-          expect(@cy.prop("subject")).to.match parent
+          expect(@cy.state("subject")).to.match parent
 
     describe "function property", ->
       beforeEach ->
@@ -586,7 +586,7 @@ describe "$Cypress.Cy Connectors Commands", ->
           expect(err.message).to.eq "Subject is undefined. You cannot call cy.its() without a subject."
           done()
 
-        @cy.noop(undefined).its("attr", "src")
+        @cy.noop(undefined).its("attr")
 
       it "consoleProps subject", (done) ->
         @cy.on "fail", (err) =>
@@ -605,7 +605,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       ## remote window
       @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
-      @remoteWindow = @cy.private("window")
+      @remoteWindow = @cy.privateState("window")
 
     it "proxies to #invokeFn", ->
       fn = -> "bar"

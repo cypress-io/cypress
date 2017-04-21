@@ -1,11 +1,13 @@
-$Cypress.register "Traversals", (Cypress, _, $) ->
+_ = require("lodash")
 
+$Log = require("../../log")
+utils = require("../../utils")
+
+module.exports = (Cypress, Commands) ->
   traversals = "find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings".split(" ")
 
   _.each traversals, (traversal) ->
-    Cypress.addChildCommand traversal, (subject, arg1, arg2, options) ->
-      @ensureDom(subject)
-
+    Commands.add traversal, {prevSubject: "dom"}, (subject, arg1, arg2, options) ->
       if _.isObject(arg2)
         options = arg2
 
@@ -19,24 +21,24 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
       @ensureNoCommandOptions(options)
 
       getSelector = ->
-        args = _([arg1, arg2]).chain().reject(_.isFunction).reject(_.isObject).value()
-        args = _(args).without(null, undefined)
+        args = _.chain([arg1, arg2]).reject(_.isFunction).reject(_.isObject).value()
+        args = _.without(args, null, undefined)
         args.join(", ")
 
       consoleProps = {
         Selector: getSelector()
-        "Applied To": $Cypress.Utils.getDomElements(subject)
+        "Applied To": utils.getDomElements(subject)
       }
 
       if options.log isnt false
-        options._log = Cypress.Log.command
+        options._log = $Log.command
           message: getSelector()
           consoleProps: -> consoleProps
 
       setEl = ($el) ->
         return if options.log is false
 
-        consoleProps.Returned = Cypress.Utils.getDomElements($el)
+        consoleProps.Returned = utils.getDomElements($el)
         consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})
@@ -59,6 +61,6 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
           onRetry: getElements
           onFail: (err) ->
             if err.type is "existence"
-              node = $Cypress.Utils.stringifyElement(subject, "short")
+              node = utils.stringifyElement(subject, "short")
               err.displayMessage += " Queried from element: #{node}"
         })

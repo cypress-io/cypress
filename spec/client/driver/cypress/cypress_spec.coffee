@@ -1,27 +1,9 @@
 describe "$Cypress API", ->
   beforeEach ->
-    ## back these up!
-    @modules = $Cypress.modules
-
-    $Cypress.reset()
     @Cypress = $Cypress.create()
 
   afterEach ->
-    $Cypress.modules = @modules
     @Cypress.stop()
-
-  it ".modules", ->
-    expect($Cypress.modules).to.deep.eq {}
-
-  it ".register", ->
-    fn = ->
-    $Cypress.register "foo", fn
-    expect($Cypress.modules.foo).to.eq fn
-
-  it ".remove", ->
-    $Cypress.register "foo", ->
-    $Cypress.remove "foo"
-    expect($Cypress.modules).to.deep.eq {}
 
   it ".extend", ->
     $Cypress.extend {foo: -> "foo"}
@@ -48,40 +30,6 @@ describe "$Cypress API", ->
         Cypress = $Cypress.create()
         Cypress.start()
         expect(window.Cypress).to.eq Cypress
-
-  describe "#loadModule", ->
-    it "invokes module callback", (done) ->
-      $Cypress.register "SomeCommand", (Cypress, _, $) =>
-        expect(Cypress).to.eq @Cypress
-        expect(_).to.be.ok
-        expect($).to.be.ok
-        done()
-
-      @Cypress.loadModule "SomeCommand"
-
-    it "throws when no module is found by name", ->
-      fn = => @Cypress.loadModule("foo")
-
-      expect(fn).to.throw "$Cypress.Module: foo not registered."
-
-  describe "#loadModules", ->
-    beforeEach ->
-      @loadModule = @sandbox.stub @Cypress, "loadModule"
-
-    it "can loads modules by array of names", ->
-      @Cypress.loadModules ["foo", "bar", "baz"]
-      expect(@loadModule.firstCall).to.be.calledWith "foo"
-      expect(@loadModule.secondCall).to.be.calledWith "bar"
-      expect(@loadModule.thirdCall).to.be.calledWith "baz"
-
-    it "can automatically load all modules", ->
-      $Cypress.register "foo", ->
-      $Cypress.register "bar", ->
-      $Cypress.register "baz", ->
-      @Cypress.loadModules()
-      expect(@loadModule.firstCall).to.be.calledWith "foo"
-      expect(@loadModule.secondCall).to.be.calledWith "bar"
-      expect(@loadModule.thirdCall).to.be.calledWith "baz"
 
   describe "#stop", ->
     it "calls .abort()", ->
@@ -240,6 +188,70 @@ describe "$Cypress API", ->
     it "creates runner", ->
       expect(@Cypress.Runner.create).to.be.calledWith(@Cypress, {}, "Mocha")
 
+  describe "#addParentCommand", ->
+    it "throws deprecation", (done) ->
+      fn = =>
+        @Cypress.addParentCommand "foo", ->
+
+      try
+        fn()
+      catch err
+        expect(err.message).to.include("Cypress.addParentCommand(...) has been removed")
+        expect(err.message).to.include("Cypress.Commands.add(...)")
+        expect(err.message).to.include("Cypress.Commands.add('foo', function(){...}")
+        expect(err.message).to.include("https://on.cypress.io/custom-command-interface-changed")
+        done()
+
+  describe "#addChildCommand", ->
+    it "throws deprecation", (done) ->
+      fn = =>
+        @Cypress.addChildCommand "foo", ->
+
+      try
+        fn()
+      catch err
+        expect(err.message).to.include("Cypress.addChildCommand(...) has been removed")
+        expect(err.message).to.include("Cypress.Commands.add(...)")
+        expect(err.message).to.include("Cypress.Commands.add('foo', { prevSubject: true }, function(){...}")
+        expect(err.message).to.include("https://on.cypress.io/custom-command-interface-changed")
+        done()
+
+  describe "#addDualCommand", ->
+    it "throws deprecation", (done) ->
+      fn = =>
+        @Cypress.addDualCommand "foo", ->
+
+      try
+        fn()
+      catch err
+        expect(err.message).to.include("Cypress.addDualCommand(...) has been removed")
+        expect(err.message).to.include("Cypress.Commands.add(...)")
+        expect(err.message).to.include("Cypress.Commands.add('foo', { prevSubject: 'optional' }, function(){...}")
+        expect(err.message).to.include("https://on.cypress.io/custom-command-interface-changed")
+        done()
+
+  describe "#addAssertionCommand", ->
+    it "throws", (done) ->
+      fn = =>
+        @Cypress.addAssertionCommand "foo", ->
+
+      try
+        fn()
+      catch err
+        expect(err.message).to.eq("You cannot use the undocumented private command interface: addAssertionCommand")
+        done()
+
+  describe "#addUtilityCommand", ->
+    it "throws", (done) ->
+      fn = =>
+        @Cypress.addUtilityCommand "foo", ->
+
+      try
+        fn()
+      catch err
+        expect(err.message).to.eq("You cannot use the undocumented private command interface: addUtilityCommand")
+        done()
+
   describe ".$", ->
     it "proxies back to cy.$$", ->
       cy = {$$: @sandbox.spy()}
@@ -264,16 +276,19 @@ describe "$Cypress API", ->
         expect(@Cypress.$[fn]).to.be.a("function")
 
   describe "._", ->
-    it "is a reference to underscore", ->
-      expect(@Cypress._).to.eq(window._)
+    it "is a reference to lodash", ->
+      expect(@Cypress._).to.be.defined
+      expect(@Cypress._.map).to.be.a("function")
 
   describe ".Blob", ->
-    it "is a reference to underscore", ->
-      expect(@Cypress.Blob).to.eq(window.blobUtil)
+    it "is a reference to blob util", ->
+      expect(@Cypress.Blob).to.be.defined
+      expect(@Cypress.Blob.createBlob).to.be.a("function")
 
   describe ".Promise", ->
-    it "is a reference to underscore", ->
-      expect(@Cypress.Promise).to.eq(window.Promise)
+    it "is a reference to Promise", ->
+      expect(@Cypress.Promise).to.be.defined
+      expect(@Cypress.Promise.resolve).to.be.a("function")
 
   describe ".minimatch", ->
     it "is a reference to minimatch function", ->

@@ -1,19 +1,207 @@
-$Cypress.register "Actions", (Cypress, _, $, Promise) ->
+_ = require("lodash")
+$ = require("jquery")
+Promise = require("../../bluebird")
 
-  textLike = "textarea,:text,[contenteditable],[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url],[type=tel]"
+## TODO: extract ensure
+## TODO: extract coordinates
+## TODO: extract animations
 
-  focusable = "a[href],link[href],button,input,select,textarea,[tabindex],[contenteditable]"
+$Cy = require("../../cy")
+$Keyboard = require("../../keyboard")
+$Log = require("../../log")
+$Mouse = require("../../mouse")
+utils = require("../../utils")
 
-  inputEvents = "textInput input".split(" ")
+textLike = "textarea,:text,[contenteditable],[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url],[type=tel]"
 
-  delay = 50
+focusable = "a[href],link[href],button,input,select,textarea,[tabindex],[contenteditable]"
 
+inputEvents = "textInput input".split(" ")
+
+delay = 50
+
+$Cy.extend({
+  _waitForAnimations: ($el, options, coordsHistory = []) ->
+    ## determine if this element is animating
+    if options.x and options.y
+      coords = @getRelativeCoordinates($el, options.x, options.y)
+    else
+      try
+        coords = @getCoordinates($el, options.position)
+      catch err
+        utils.throwErr(err, { onFail: options._log })
+
+    ## if we're forcing this click event
+    ## just immediately send it up
+    if options.force is true or options.waitForAnimations is false
+      return Promise.resolve(coords)
+    else
+      ## verify that our element is not currently animating
+      ## by verifying it is still at the same coordinates within
+      ## 5 pixels of x/y?
+      coordsHistory.push(coords)
+
+      retry = =>
+        @_waitForAnimations($el, options, coordsHistory)
+
+      ## if we dont have at least 2 points
+      ## then automatically retry
+      if coordsHistory.length < 2
+        ## silence the first trigger so we dont
+        ## actually fire the 'retry' event
+        opts = _.chain(options).clone().extend({silent: true}).value()
+        return @_retry(retry, opts)
+
+      ## make sure our element is not currently animating
+      try
+        @ensureElementIsNotAnimating($el, coordsHistory, options.animationDistanceThreshold)
+        Promise.resolve(coords)
+      catch err
+        options.error = err
+        @_retry(retry, options)
+
+  _check_or_uncheck: (type, subject, values = [], options = {}) ->
+    ## we're not handling conversion of values to strings
+    ## in case we've received numbers
+
+    ## if we're not an array but we are an object
+    ## reassign options to values
+    if not _.isArray(values) and _.isObject(values)
+      options = values
+      values = []
+    else
+      ## make sure we're an array of values
+      values = [].concat(values)
+
+    ## keep an array of subjects which
+    ## are potentially reduced down
+    ## to new filtered subjects
+    matchingElements = []
+
+    _.defaults options,
+      $el: subject
+      log: true
+      force: false
+
+    @ensureDom(options.$el)
+
+    isNoop = ($el) ->
+      switch type
+        when "check"
+          $el.prop("checked")
+        when "uncheck"
+          not $el.prop("checked")
+
+    isAcceptableElement = ($el) ->
+      switch type
+        when "check"
+          $el.is(":checkbox,:radio")
+        when "uncheck"
+          $el.is(":checkbox")
+
+    ## does our el have a value
+    ## in the values array?
+    ## or values array is empty
+    elHasMatchingValue = ($el) ->
+      values.length is 0 or $el.val() in values
+
+    ## blow up if any member of the subject
+    ## isnt a checkbox or radio
+    checkOrUncheck = (el, index) =>
+      $el = $(el)
+
+      isElActionable = elHasMatchingValue($el)
+
+      if isElActionable
+        matchingElements.push(el)
+
+      consoleProps = {
+        "Applied To":   utils.getDomElements($el)
+        "Elements":     $el.length
+      }
+
+      if options.log and isElActionable
+
+        ## figure out the options which actually change the behavior of clicks
+        deltaOptions = utils.filterOutOptions(options)
+
+        options._log = $Log.command
+          message: deltaOptions
+          $el: $el
+          consoleProps: ->
+            _.extend consoleProps, {
+              Options: deltaOptions
+            }
+
+        options._log.snapshot("before", {next: "after"})
+
+        if not isAcceptableElement($el)
+          node   = utils.stringifyElement($el)
+          word   = utils.plural(options.$el, "contains", "is")
+          phrase = if type is "check" then " and :radio" else ""
+          utils.throwErrByPath "check_uncheck.invalid_element", {
+            onFail: options._log
+            args: { node, word, phrase, cmd: type }
+          }
+
+        ## if the checkbox was already checked
+        ## then notify the user of this note
+        ## and bail
+        if isNoop($el)
+          ## still ensure visibility even if the command is noop
+          @ensureVisibility $el, options._log
+          if options._log
+            inputType = if $el.is(":radio") then "radio" else "checkbox"
+            consoleProps.Note = "This #{inputType} was already #{type}ed. No operation took place."
+            options._log.snapshot().end()
+
+          return null
+        else
+          ## set the coords only if we are actually
+          ## going to go out and click this bad boy
+          coords = @getCoordinates($el)
+          consoleProps.Coords = coords
+          options._log.set "coords", coords
+
+      ## if we didnt pass in any values or our
+      ## el's value is in the array then check it
+      if isElActionable
+        @execute("click", {
+          $el: $el
+          log: false
+          verify: false
+          _log: options._log
+          force: options.force
+          timeout: options.timeout
+          interval: options.interval
+        }).then ->
+          options._log.snapshot().end() if options._log
+
+          return null
+
+    ## return our original subject when our promise resolves
+    Promise
+      .resolve(options.$el.toArray())
+      .each(checkOrUncheck)
+      .cancellable()
+      .then =>
+        ## filter down our $el to the
+        ## matching elements
+        options.$el = options.$el.filter(matchingElements)
+
+        do verifyAssertions = =>
+          @verifyUpcomingAssertions(options.$el, options, {
+            onRetry: verifyAssertions
+          })
+})
+
+module.exports = (Cypress, Commands) ->
   Cypress.on "test:before:run", ->
-    Cypress.Keyboard.resetModifiers(@private("document"), @private("window"))
+    $Keyboard.resetModifiers(@privateState("document"), @privateState("window"))
 
   dispatchPrimedChangeEvents = ->
     ## if we have a changeEvent, dispatch it
-    if changeEvent = @prop("changeEvent")
+    if changeEvent = @state("changeEvent")
       changeEvent.call(@)
 
   getFirstCommandOrNull = (commands) =>
@@ -73,8 +261,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
     cy._waitForAnimations($el, options, coordsHistory)
 
-  Cypress.addChildCommand
-
+  Commands.addAll({ prevSubject: "dom" }, {
     submit: (subject, options = {}) ->
       _.defaults options,
         log: true
@@ -89,24 +276,24 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       form = options.$el.get(0)
 
       if options.log
-        options._log = Cypress.Log.command
+        options._log = $Log.command
           $el: options.$el
           consoleProps: ->
-            "Applied To": $Cypress.Utils.getDomElements(options.$el)
+            "Applied To": utils.getDomElements(options.$el)
             Elements: options.$el.length
 
         options._log.snapshot("before", {next: "after"})
 
       if not options.$el.is("form")
-        node = Cypress.Utils.stringifyElement(options.$el)
-        word = Cypress.Utils.plural(options.$el, "contains", "is")
-        $Cypress.Utils.throwErrByPath("submit.not_on_form", {
+        node = utils.stringifyElement(options.$el)
+        word = utils.plural(options.$el, "contains", "is")
+        utils.throwErrByPath("submit.not_on_form", {
           onFail: options._log
           args: { node, word }
         })
 
       if (num = options.$el.length) and num > 1
-        $Cypress.Utils.throwErrByPath("submit.multiple_forms", {
+        utils.throwErrByPath("submit.multiple_forms", {
           onFail: options._log
           args: { num }
         })
@@ -133,7 +320,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             })
 
     fill: (subject, obj, options = {}) ->
-      $Cypress.Utils.throwErrByPath "fill.invalid_1st_arg" if not _.isObject(obj)
+      utils.throwErrByPath "fill.invalid_1st_arg" if not _.isObject(obj)
 
     check: (subject, values, options) ->
       @_check_or_uncheck("check", subject, values, options)
@@ -153,19 +340,19 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       @ensureDom(options.$el, "focus")
 
       if options.log
-        options._log = Cypress.Log.command
+        options._log = $Log.command
           $el: options.$el
           consoleProps: ->
-            "Applied To": $Cypress.Utils.getDomElements(options.$el)
+            "Applied To": utils.getDomElements(options.$el)
 
       ## http://www.w3.org/TR/html5/editing.html#specially-focusable
       ## ensure there is only 1 dom element in the subject
       ## make sure its allowed to be focusable
-      if not (options.$el.is(focusable) or $Cypress.Utils.hasWindow(options.$el))
+      if not (options.$el.is(focusable) or utils.hasWindow(options.$el))
         return if options.error is false
 
-        node = Cypress.Utils.stringifyElement(options.$el)
-        $Cypress.Utils.throwErrByPath("focus.invalid_element", {
+        node = utils.stringifyElement(options.$el)
+        utils.throwErrByPath("focus.invalid_element", {
           onFail: options._log
           args: { node }
         })
@@ -173,7 +360,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        $Cypress.Utils.throwErrByPath("focus.multiple_elements", {
+        utils.throwErrByPath("focus.multiple_elements", {
           onFail: options._log
           args: { num }
         })
@@ -197,8 +384,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           ## set this back to null unless we are
           ## force focused ourselves during this command
-          forceFocusedEl = @prop("forceFocusedEl")
-          @prop("forceFocusedEl", null) unless forceFocusedEl is options.$el.get(0)
+          forceFocusedEl = @state("forceFocusedEl")
+          @state("forceFocusedEl", null) unless forceFocusedEl is options.$el.get(0)
 
           cleanup()
 
@@ -218,17 +405,17 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           return if hasFocused
 
           simulate = =>
-            @prop("forceFocusedEl", options.$el.get(0))
+            @state("forceFocusedEl", options.$el.get(0))
 
             ## todo handle relatedTarget's per the spec
             focusinEvt = new FocusEvent "focusin", {
               bubbles: true
-              view: @private("window")
+              view: @privateState("window")
               relatedTarget: null
             }
 
             focusEvt = new FocusEvent "focus", {
-              view: @private("window")
+              view: @privateState("window")
               relatedTarget: null
             }
 
@@ -264,7 +451,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           return if options.error is false
 
-          $Cypress.Utils.throwErrByPath "focus.timed_out", { onFail: options._log }
+          utils.throwErrByPath "focus.timed_out", { onFail: options._log }
         .then =>
           return options.$el if options.verify is false
 
@@ -285,20 +472,20 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
-        deltaOptions = Cypress.Utils.filterOutOptions(options)
+        deltaOptions = utils.filterOutOptions(options)
 
-        options._log = Cypress.Log.command
+        options._log = $Log.command
           $el: options.$el
           message: deltaOptions
           consoleProps: ->
-            "Applied To": $Cypress.Utils.getDomElements(options.$el)
+            "Applied To": utils.getDomElements(options.$el)
 
       @ensureDom(options.$el, "blur", options._log)
 
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        $Cypress.Utils.throwErrByPath("blur.multiple_elements", {
+        utils.throwErrByPath("blur.multiple_elements", {
           onFail: options._log
           args: { num }
         })
@@ -307,13 +494,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         if options.force isnt true and not $focused
           return if options.error is false
 
-          $Cypress.Utils.throwErrByPath("blur.no_focused_element", { onFail: options._log })
+          utils.throwErrByPath("blur.no_focused_element", { onFail: options._log })
 
         if options.force isnt true and options.$el.get(0) isnt $focused.get(0)
           return if options.error is false
 
-          node = Cypress.Utils.stringifyElement($focused)
-          $Cypress.Utils.throwErrByPath("blur.wrong_focused_element", {
+          node = utils.stringifyElement($focused)
+          utils.throwErrByPath("blur.wrong_focused_element", {
             onFail: options._log
             args: { node }
           })
@@ -337,8 +524,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
             ## set this back to null unless we are
             ## force blurring ourselves during this command
-            blacklistFocusedEl = @prop("blacklistFocusedEl")
-            @prop("blacklistFocusedEl", null) unless blacklistFocusedEl is options.$el.get(0)
+            blacklistFocusedEl = @state("blacklistFocusedEl")
+            @state("blacklistFocusedEl", null) unless blacklistFocusedEl is options.$el.get(0)
 
             cleanup()
 
@@ -361,20 +548,20 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             ## to simulate the blur + focusout
             return if hasBlurred
 
-            @prop("blacklistFocusedEl", options.$el.get(0))
+            @state("blacklistFocusedEl", options.$el.get(0))
 
             ## todo handle relatedTarget's per the spec
             focusoutEvt = new FocusEvent "focusout", {
               bubbles: true
               cancelable: false
-              view: @private("window")
+              view: @privateState("window")
               relatedTarget: null
             }
 
             blurEvt = new FocusEvent "blur", {
               bubble: false
               cancelable: false
-              view: @private("window")
+              view: @privateState("window")
               relatedTarget: null
             }
 
@@ -388,7 +575,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
             return if options.error is false
 
-            $Cypress.Utils.throwErrByPath "blur.timed_out", { onFail: command }
+            utils.throwErrByPath "blur.timed_out", { onFail: command }
           .then =>
             return options.$el if options.verify is false
 
@@ -505,10 +692,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         @_timeout(delay, true)
 
         if options.log
-          log = Cypress.Log.command
+          log = $Log.command
             $el: $el
             consoleProps: ->
-              "Applied To":   $Cypress.Utils.getDomElements($el)
+              "Applied To":   utils.getDomElements($el)
               "Elements":     $el.length
 
         @ensureVisibility $el, log
@@ -547,11 +734,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         .cancellable()
         .return(subject)
         .catch Promise.CancellationError, (err) ->
-          _(dblclicks).invoke("cancel")
+          _.invokeMap(dblclicks, "cancel")
           throw err
 
     hover: (args) ->
-      $Cypress.Utils.throwErrByPath("hover.not_implemented")
+      utils.throwErrByPath("hover.not_implemented")
 
     click: (subject, positionOrX, y, options = {}) ->
       ## TODO handle pointer-events: none
@@ -575,11 +762,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## throw if we're trying to click multiple elements
       ## and we did not pass the multiple flag
       if options.multiple is false and options.$el.length > 1
-        $Cypress.Utils.throwErrByPath("click.multiple_elements", {
+        utils.throwErrByPath("click.multiple_elements", {
           args: { num: options.$el.length }
         })
 
-      win  = @private("window")
+      win  = @privateState("window")
 
       clicks = []
 
@@ -591,9 +778,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
-          deltaOptions = Cypress.Utils.filterOutOptions(options)
+          deltaOptions = utils.filterOutOptions(options)
 
-          options._log = Cypress.Log.command({
+          options._log = $Log.command({
             message: deltaOptions
             $el: $el
           })
@@ -601,7 +788,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           options._log.snapshot("before", {next: "after"})
 
         if options.errorOnSelect and $el.is("select")
-          $Cypress.Utils.throwErrByPath "click.on_select_element", { onFail: options._log }
+          utils.throwErrByPath "click.on_select_element", { onFail: options._log }
 
         isAttached = ($elToClick) =>
           @_contains($elToClick)
@@ -627,17 +814,17 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## https://www.w3.org/TR/uievents/#event-type-click (scroll up slightly)
 
           if isAttached($elToClick)
-            domEvents.mouseUp = @Cypress.Mouse.mouseUp($elToClick, coords, win)
+            domEvents.mouseUp = $Mouse.mouseUp($elToClick, coords, win)
 
           if isAttached($elToClick)
-            domEvents.click   = @Cypress.Mouse.click($elToClick, coords, win)
+            domEvents.click   = $Mouse.click($elToClick, coords, win)
 
           if options._log
             consoleObj = options._log.attributes.consoleProps()
 
           consoleProps = ->
             consoleObj = _.defaults consoleObj ? {}, {
-              "Applied To":   $Cypress.Utils.getDomElements($el)
+              "Applied To":   utils.getDomElements($el)
               "Elements":     $el.length
               "Coords":       coords
               "Options":      deltaOptions
@@ -645,24 +832,24 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
             if $el.get(0) isnt $elToClick.get(0)
               ## only do this if $elToClick isnt $el
-              consoleObj["Actual Element Clicked"] = $Cypress.Utils.getDomElements($elToClick)
+              consoleObj["Actual Element Clicked"] = utils.getDomElements($elToClick)
 
             consoleObj.groups = ->
               groups = [{
                 name: "MouseDown"
-                items: _(domEvents.mouseDown).pick("preventedDefault", "stoppedPropagation", "modifiers")
+                items: _.pick(domEvents.mouseDown, "preventedDefault", "stoppedPropagation", "modifiers")
               }]
 
               if domEvents.mouseUp
                 groups.push({
                   name: "MouseUp"
-                  items: _(domEvents.mouseUp).pick("preventedDefault", "stoppedPropagation", "modifiers")
+                  items: _.pick(domEvents.mouseUp, "preventedDefault", "stoppedPropagation", "modifiers")
                 })
 
               if domEvents.click
                 groups.push({
                   name: "Click"
-                  items: _(domEvents.click).pick("preventedDefault", "stoppedPropagation", "modifiers")
+                  items: _.pick(domEvents.click, "preventedDefault", "stoppedPropagation", "modifiers")
                 })
 
               return groups
@@ -736,8 +923,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               if options._log
                 options._log.set consoleProps: ->
                   obj = {}
-                  obj["Tried to Click"]     = $Cypress.Utils.getDomElements($el)
-                  obj["But its Covered By"] = $Cypress.Utils.getDomElements($elToClick)
+                  obj["Tried to Click"]     = utils.getDomElements($el)
+                  obj["But its Covered By"] = utils.getDomElements($elToClick)
                   obj
 
               ## snapshot only on click failure
@@ -808,7 +995,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               ## without firing the focus event
               $previouslyFocusedEl = $focused
 
-              domEvents.mouseDown = @Cypress.Mouse.mouseDown($elToClick, coords, win)
+              domEvents.mouseDown = $Mouse.mouseDown($elToClick, coords, win)
 
               ## if mousedown was cancelled then or caused
               ## our element to be removed from the DOM
@@ -853,7 +1040,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               onRetry: verifyAssertions
             })
         .catch Promise.CancellationError, (err) ->
-          _(clicks).invoke("cancel")
+          _.invokeMap(clicks, "cancel")
           throw err
 
     type: (subject, chars, options = {}) ->
@@ -871,14 +1058,14 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
-        deltaOptions = Cypress.Utils.filterOutOptions(options)
+        deltaOptions = utils.filterOutOptions(options)
 
         table = {}
 
         getRow = (id, key, which) ->
           table[id] or do ->
             table[id] = (obj = {})
-            modifiers = Cypress.Keyboard.activeModifiers()
+            modifiers = $Keyboard.activeModifiers()
             obj.modifiers = modifiers.join(", ") if modifiers.length
             if key
               obj.typed = key
@@ -891,17 +1078,17 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         getTableData = ->
           ## transform table object into object with zero based index as keys
-          _.reduce _(table).values(), (memo, value, index) ->
+          _.reduce _.values(table), (memo, value, index) ->
             memo[index + 1] = value
             memo
           , {}
 
-        options._log = Cypress.Log.command
+        options._log = $Log.command
           message: [chars, deltaOptions]
           $el: options.$el
           consoleProps: ->
             "Typed":      chars
-            "Applied To": $Cypress.Utils.getDomElements(options.$el)
+            "Applied To": utils.getDomElements(options.$el)
             "Options":    deltaOptions
             "table": ->
               {
@@ -922,26 +1109,26 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       isTypeableButNotAnInput = isBody or (hasTabIndex and not isTextLike)
 
       if not isBody and not isTextLike and not hasTabIndex
-        node = Cypress.Utils.stringifyElement(options.$el)
-        $Cypress.Utils.throwErrByPath("type.not_on_text_field", {
+        node = utils.stringifyElement(options.$el)
+        utils.throwErrByPath("type.not_on_text_field", {
           onFail: options._log
           args: { node }
         })
 
       if (num = options.$el.length) and num > 1
-        $Cypress.Utils.throwErrByPath("type.multiple_elements", {
+        utils.throwErrByPath("type.multiple_elements", {
           onFail: options._log
           args: { num }
         })
 
       if not (_.isString(chars) or _.isFinite(chars))
-        $Cypress.Utils.throwErrByPath("type.wrong_type", {
+        utils.throwErrByPath("type.wrong_type", {
           onFail: options._log
           args: { chars }
         })
 
       if _.isBlank(chars)
-        $Cypress.Utils.throwErrByPath("type.empty_string", { onFail: options._log })
+        utils.throwErrByPath("type.empty_string", { onFail: options._log })
 
       options.chars = "" + chars
 
@@ -1007,12 +1194,12 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           return dispatched
 
-        @Cypress.Keyboard.type({
+        $Keyboard.type({
           $el:     options.$el
           chars:   options.chars
           delay:   options.delay
           release: options.release
-          window:  @private("window")
+          window:  @privateState("window")
 
           onBeforeType: (totalKeys) =>
             ## for the total number of keys we're about to
@@ -1045,9 +1232,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             ## never fire any change events for contenteditable
             return if options.$el.is("[contenteditable]")
 
-            @prop "changeEvent", ->
+            @state "changeEvent", ->
               dispatchChangeEvent()
-              @prop "changeEvent", null
+              @state "changeEvent", null
 
           onEnterPressed: (changed, id) =>
             ## dont dispatch change events or handle
@@ -1066,9 +1253,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           onNoMatchingSpecialChars: (chars, allChars) =>
             if chars is "{tab}"
-              $Cypress.Utils.throwErrByPath("type.tab", { onFail: options._log })
+              utils.throwErrByPath("type.tab", { onFail: options._log })
             else
-              $Cypress.Utils.throwErrByPath("type.invalid", {
+              utils.throwErrByPath("type.invalid", {
                 onFail: options._log
                 args: { chars, allChars }
               })
@@ -1133,21 +1320,21 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
-          deltaOptions = Cypress.Utils.filterOutOptions(options)
+          deltaOptions = utils.filterOutOptions(options)
 
-          options._log = Cypress.Log.command
+          options._log = $Log.command
             message: deltaOptions
             $el: $el
             consoleProps: ->
-              "Applied To": $Cypress.Utils.getDomElements($el)
+              "Applied To": utils.getDomElements($el)
               "Elements":   $el.length
               "Options":    deltaOptions
 
-        node = Cypress.Utils.stringifyElement($el)
+        node = utils.stringifyElement($el)
 
         if not $el.is(textLike)
-          word = Cypress.Utils.plural(subject, "contains", "is")
-          $Cypress.Utils.throwErrByPath "clear.invalid_element", {
+          word = utils.plural(subject, "contains", "is")
+          utils.throwErrByPath "clear.invalid_element", {
             onFail: options._log
             args: { word, node }
           }
@@ -1187,15 +1374,15 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
-        deltaOptions = Cypress.Utils.filterOutOptions(options)
+        deltaOptions = utils.filterOutOptions(options)
 
-        options._log = Cypress.Log.command
+        options._log = $Log.command
           message: deltaOptions
           $el: options.$el
           consoleProps: ->
             ## merge into consoleProps without mutating it
             _.extend {}, consoleProps,
-              "Applied To": $Cypress.Utils.getDomElements(options.$el)
+              "Applied To": utils.getDomElements(options.$el)
               "Options":    deltaOptions
 
         options._log.snapshot("before", {next: "after"})
@@ -1212,11 +1399,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## behavior
 
       if not options.$el.is("select")
-        node = Cypress.Utils.stringifyElement(options.$el)
-        $Cypress.Utils.throwErrByPath "select.invalid_element", { args: { node } }
+        node = utils.stringifyElement(options.$el)
+        utils.throwErrByPath "select.invalid_element", { args: { node } }
 
       if (num = options.$el.length) and num > 1
-        $Cypress.Utils.throwErrByPath "select.multiple_elements", { args: { num } }
+        utils.throwErrByPath "select.multiple_elements", { args: { num } }
 
       ## normalize valueOrText if its not an array
       valueOrText = [].concat(valueOrText)
@@ -1225,15 +1412,15 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## throw if we're not a multiple select and we've
       ## passed an array of values
       if not multiple and valueOrText.length > 1
-        $Cypress.Utils.throwErrByPath "select.invalid_multiple"
+        utils.throwErrByPath "select.invalid_multiple"
 
       getOptions = =>
         newLineRe = /\n/g
 
         ## throw if <select> is disabled
         if options.$el.prop("disabled")
-          node = Cypress.Utils.stringifyElement(options.$el)
-          $Cypress.Utils.throwErrByPath "select.disabled", { args: { node } }
+          node = utils.stringifyElement(options.$el)
+          utils.throwErrByPath "select.disabled", { args: { node } }
 
         values = []
         optionEls = []
@@ -1265,7 +1452,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## if all the values are the same and the user is trying to
           ## select based on the text, setting the value won't work
           ## `allSameValue` is used later to do the right thing
-          uniqueValues = _(optionsObjects).chain().pluck("value").uniq().value()
+          uniqueValues = _.chain(optionsObjects).map("value").uniq().value()
           allSameValue = uniqueValues.length is 1
 
           _.each optionsObjects, (obj, index) ->
@@ -1276,19 +1463,19 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## if we didnt set multiple to true and
         ## we have more than 1 option to set then blow up
         if not multiple and values.length > 1
-          $Cypress.Utils.throwErrByPath("select.multiple_matches", {
+          utils.throwErrByPath("select.multiple_matches", {
             args: { value: valueOrText.join(", ") }
           })
 
         if not values.length
-          $Cypress.Utils.throwErrByPath("select.no_matches", {
+          utils.throwErrByPath("select.no_matches", {
             args: { value: valueOrText.join(", ") }
           })
 
         _.each optionEls, ($el) =>
           if $el.prop("disabled")
-            node = Cypress.Utils.stringifyElement($el)
-            $Cypress.Utils.throwErrByPath("select.option_disabled", {
+            node = utils.stringifyElement($el)
+            utils.throwErrByPath("select.option_disabled", {
               args: { node }
             })
 
@@ -1448,15 +1635,16 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         .then ->
           options._log.snapshot("after").end()
         .return(subject)
+  })
 
-  Cypress.addParentCommand
+  Commands.addAll({
     focused: (options = {}) ->
       _.defaults options,
         verify: true
         log: true
 
       if options.log
-        options._log = Cypress.Log.command()
+        options._log = $Log.command()
 
       log = ($el) ->
         return if options.log is false
@@ -1465,7 +1653,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           $el: $el
           consoleProps: ->
             ret = if $el
-              $Cypress.Utils.getDomElements($el)
+              utils.getDomElements($el)
             else
               "--nothing--"
             Returned: ret
@@ -1474,20 +1662,20 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       getFocused = =>
         try
-          d = @private("document")
-          forceFocusedEl = @prop("forceFocusedEl")
+          d = @privateState("document")
+          forceFocusedEl = @state("forceFocusedEl")
           if forceFocusedEl
             if @_contains(forceFocusedEl)
               el = forceFocusedEl
             else
-              @prop("forceFocusedEl", null)
+              @state("forceFocusedEl", null)
           else
             el = d.activeElement
 
           ## return null if we have an el but
           ## the el is body or the el is currently the
           ## blacklist focused el
-          if el and el isnt @prop("blacklistFocusedEl")
+          if el and el isnt @state("blacklistFocusedEl")
             el = $(el)
 
             if el.is("body")
@@ -1520,7 +1708,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           })
           .return(options.$el)
 
-  Cypress.addDualCommand
+  Commands.addAll({ subject: "optional"}, {
     scrollTo: (subject, xOrPosition, yOrOptions, options = {}) ->
       ## check for undefined or null values
       if not xOrPosition?
@@ -1666,8 +1854,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           if isWin
             delete options.$el.contentWindow
+})
 
-  Cypress.Cy.extend
+  Cypress.Cy.extend({
     _findScrollableParent: ($el) ->
       $parent = $el.parent()
 
@@ -1852,3 +2041,4 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             @verifyUpcomingAssertions(options.$el, options, {
               onRetry: verifyAssertions
             })
+  })

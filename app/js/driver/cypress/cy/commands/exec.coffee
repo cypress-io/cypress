@@ -1,15 +1,20 @@
-$Cypress.register "Exec", (Cypress, _, $, Promise) ->
+_ = require("lodash")
+Promise = require("../../bluebird")
 
-  exec = (options) =>
-    new Promise (resolve, reject) ->
-      Cypress.trigger "exec", options, (resp) ->
-        if err = resp.__error
-          err.timedout = resp.timedout
-          reject(err)
-        else
-          resolve(resp)
+$Log = require("../../log")
+utils = require("../../utils")
 
-  Cypress.addParentCommand
+exec = (options) =>
+  new Promise (resolve, reject) ->
+    Cypress.trigger "exec", options, (resp) ->
+      if err = resp.__error
+        err.timedout = resp.timedout
+        reject(err)
+      else
+        resolve(resp)
+
+module.exports = (Cypress, Commands) ->
+  Commands.addAll({
     exec: (cmd, options = {}) ->
       _.defaults options,
         log: true
@@ -20,14 +25,14 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
       if options.log
         consoleOutput = {}
 
-        options._log = Cypress.Log.command({
+        options._log = $Log.command({
           message: _.truncate(cmd, 25)
           consoleProps: ->
             consoleOutput
         })
 
       if not cmd or not _.isString(cmd)
-        $Cypress.Utils.throwErrByPath("exec.invalid_argument", {
+        utils.throwErrByPath("exec.invalid_argument", {
           onFail: options._log,
           args: { cmd: cmd ? '' }
         })
@@ -38,7 +43,7 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
       ## because we're handling timeouts ourselves
       @_clearTimeout()
 
-      isTimedoutError = (err)-> err.timedout
+      isTimedoutError = (err) -> err.timedout
 
       exec(_.pick(options, "cmd", "timeout", "env"))
       .timeout(options.timeout)
@@ -54,13 +59,13 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
         output += "\nStdout:\n#{_.truncate(result.stdout, 200)}" if result.stdout
         output += "\nStderr:\n#{_.truncate(result.stderr, 200)}" if result.stderr
 
-        $Cypress.Utils.throwErrByPath "exec.non_zero_exit", {
+        utils.throwErrByPath "exec.non_zero_exit", {
           onFail: options._log
           args: { cmd, output, code: result.code }
         }
 
       .catch Promise.TimeoutError, isTimedoutError, (err) ->
-        $Cypress.Utils.throwErrByPath "exec.timed_out", {
+        utils.throwErrByPath "exec.timed_out", {
           onFail: options._log
           args: { cmd, timeout: options.timeout }
         }
@@ -69,7 +74,8 @@ $Cypress.register "Exec", (Cypress, _, $, Promise) ->
         ## re-throw if timedout error from above
         throw error if error.name is "CypressError"
 
-        $Cypress.Utils.throwErrByPath("exec.failed", {
+        utils.throwErrByPath("exec.failed", {
           onFail: options._log
           args: { cmd, error }
         })
+  })

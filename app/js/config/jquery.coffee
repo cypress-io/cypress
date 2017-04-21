@@ -1,6 +1,6 @@
-do ($, _) ->
+$ = require("jquery")
 
-  $.expr.cacheLength = 1
+$.expr.cacheLength = 1
 
-  $.ajaxSetup
-    cache: false
+$.ajaxSetup
+  cache: false

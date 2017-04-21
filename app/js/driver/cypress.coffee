@@ -1,271 +1,320 @@
-window.$Cypress = do ($, _, Backbone, Promise, minimatch) ->
-
-  class $Cypress
-    constructor: ->
-      @cy     = null
-      @chai   = null
-      @mocha  = null
-      @runner = null
+_ = require('lodash')
+$ = require("jquery")
+Backbone = require("backbone")
+blobUtil = require("blob-util")
+minimatch = require("minimatch")
+moment = require("moment")
+Promise = require("./cypress/bluebird")
+
+$Chai = require("./cypress/chai")
+$Chainer = require("./cypress/chainer")
+$Command = require("./cypress/command")
+$Commands = require("./cypress/commands")
+$Config = require("./cypress/config")
+$Cookies = require("./cypress/cookies")
+$Cy = require("./cypress/cy")
+$Dom = require("./cypress/dom")
+$EnvironmentVariables = require("./cypress/environment_variables")
+$ErrorMessages = require("./cypress/error_messages")
+$Keyboard = require("./cypress/keyboard")
+$Log = require("./cypress/log")
+$Location = require("./cypress/location")
+$LocalStorage = require("./cypress/local_storage")
+$Mocha = require("./cypress/mocha")
+$Runner = require("./cypress/runner")
+$Server = require("./cypress/server")
+
+utils = require("./cypress/utils")
+
+throwDeprecatedCommandInterface = (key, method) ->
+  signature = switch method
+    when "addParentCommand"
+      "'#{key}', function(){...}"
+    when "addChildCommand"
+      "'#{key}', { prevSubject: true }, function(){...}"
+    when "addDualCommand"
+      "'#{key}', { prevSubject: 'optional' }, function(){...}"
+
+  utils.throwErrByPath("miscellaneous.custom_command_interface_changed", {
+    args: { method, signature }
+  })
+
+throwPrivateCommandInterface = (method) ->
+  utils.throwErrByPath("miscellaneous.private_custom_command_interface", {
+    args: { method }
+  })
+
+class $Cypress
+  constructor: ->
+    @cy       = null
+    @chai     = null
+    @mocha    = null
+    @runner   = null
+    @Commands = null
+
+  start: ->
+    window.Cypress = @
+
+  setConfig: (config = {}) ->
+    ## config.remote
+    # {
+    #   origin: "http://localhost:2020"
+    #   domainName: "localhost"
+    #   props: null
+    #   strategy: "file"
+    # }
+
+    # -- or --
+
+    # {
+    #   origin: "https://foo.google.com"
+    #   domainName: "google.com"
+    #   strategy: "http"
+    #   props: {
+    #     port: 443
+    #     tld: "com"
+    #     domain: "google"
+    #   }
+    # }
+
+    ## set domainName but allow us to turn
+    ## off this feature in testing
+    if d = config.remote?.domainName
+      document.domain = d
+
+    if config.isHeadless
+      $Cypress.isHeadless = true
+
+    {environmentVariables, remote} = config
+
+    config = _.omit(config, "environmentVariables", "remote")
+
+    $EnvironmentVariables.extend($Cypress)
+    $EnvironmentVariables.create(@, environmentVariables)
+    $Config.create(@, config)
+    $Cookies.create(@, config.namespace, d)
+
+    @trigger("config", config)
+
+  initialize: (specWindow, $remoteIframe) ->
+    ## push down the options
+    ## to the runner
+    @mocha.options(@runner)
 
-    start: ->
-      window.Cypress = @
+    ## allow mocha + chai to initialize
+    ## themselves or any other listeners
+    @trigger "initialize",
+      specWindow: specWindow
+      $remoteIframe: $remoteIframe
 
-    setConfig: (config = {}) ->
-      ## config.remote
-      # {
-      #   origin: "http://localhost:2020"
-      #   domainName: "localhost"
-      #   props: null
-      #   strategy: "file"
-      # }
+    ## let the world know we're ready to
+    ## rock and roll
+    @trigger "initialized",
+      cy: @cy
+      runner: @runner
+      mocha: @mocha
+      chai: @chai
 
-      # -- or --
+    return @
 
-      # {
-      #   origin: "https://foo.google.com"
-      #   domainName: "google.com"
-      #   strategy: "http"
-      #   props: {
-      #     port: 443
-      #     tld: "com"
-      #     domain: "google"
-      #   }
-      # }
-
-      ## set domainName but allow us to turn
-      ## off this feature in testing
-      if d = config.remote?.domainName
-        document.domain = d
-
-      if config.isHeadless
-        $Cypress.isHeadless = true
-
-      {environmentVariables, remote} = config
-
-      config = _.omit(config, "environmentVariables", "remote")
-
-      $Cypress.EnvironmentVariables.create(@, environmentVariables)
-      $Cypress.Config.create(@, config)
-      $Cypress.Cookies.create(@, config.namespace, d)
-
-      @trigger("config", config)
-
-    setVersion: (version) ->
-      @version = version
-
-    initialize: (specWindow, $remoteIframe) ->
-      ## push down the options
-      ## to the runner
-      @mocha.options(@runner)
-
-      ## allow mocha + chai to initialize
-      ## themselves or any other listeners
-      @trigger "initialize",
-        specWindow: specWindow
-        $remoteIframe: $remoteIframe
-
-      ## let the world know we're ready to
-      ## rock and roll
-      @trigger "initialized",
-        cy: @cy
-        runner: @runner
-        mocha: @mocha
-        chai: @chai
-
-      return @
-
-    run: (fn) ->
-      @Utils.throwErrByPath("miscellaneous.no_runner") if not @runner
-
-      @runner.run(fn)
-
-    getStartTime: ->
-      @runner.getStartTime()
-
-    getTestsState: ->
-      @runner.getTestsState()
-
-    getEmissions: ->
-      @runner.getEmissions()
-
-    countByTestState: (tests, state) ->
-      @runner.countByTestState(tests, state)
-
-    getDisplayPropsForLog: (attrs) ->
-      @runner.getDisplayPropsForLog(attrs)
-
-    getConsolePropsForLogById: (logId) ->
-      @runner.getConsolePropsForLogById(logId)
-
-    getSnapshotPropsForLogById: (logId) ->
-      @runner.getSnapshotPropsForLogById(logId)
-
-    getErrorByTestId: (testId) ->
-      @runner.getErrorByTestId(testId)
-
-    checkForEndedEarly: ->
-      @cy and @cy.checkForEndedEarly()
-
-    onUncaughtException: ->
-      @cy.onUncaughtException.apply(@cy, arguments)
+  run: (fn) ->
+    utils.throwErrByPath("miscellaneous.no_runner") if not @runner
 
-    ## TODO: TEST THIS
-    ## restore our on callback
-    ## after the run completes
-    after: (err) ->
-      @on = @_on if @_on
-      @
+    @runner.run(fn)
 
-    ## TODO: TEST THIS
-    set: (runnable, hookName) ->
-      $Cypress.Cy.set(@, runnable, hookName)
+  getStartTime: ->
+    @runner.getStartTime()
 
-    onSpecWindow: (specWindow) ->
-      cy     = $Cypress.Cy.create(@, specWindow)
-      chai   = $Cypress.Chai.create(@, specWindow)
-      mocha  = $Cypress.Mocha.create(@, specWindow)
-      runner = $Cypress.Runner.create(@, specWindow, mocha)
-      log    = $Cypress.Log.create(@, cy)
+  getTestsState: ->
+    @runner.getTestsState()
 
-      ## TODO: TEST THIS
-      @prepareForSpecEvents()
-      @prepareForCustomCommands()
+  getEmissions: ->
+    @runner.getEmissions()
 
-    onBeforeLoad: (contentWindow) ->
-      ## should probably just trigger the "before:window:load"
-      ## event here, so other commands can tap into that
-      return if not @cy
+  countByTestState: (tests, state) ->
+    @runner.countByTestState(tests, state)
 
-      @cy.silenceConsole(contentWindow) if $Cypress.isHeadless
-      @cy.bindWindowListeners(contentWindow)
-      @cy._setWindowDocumentProps(contentWindow)
+  getDisplayPropsForLog: (attrs) ->
+    @runner.getDisplayPropsForLog(attrs)
 
-      @trigger("before:window:load", contentWindow)
+  getConsolePropsForLogById: (logId) ->
+    @runner.getConsolePropsForLogById(logId)
 
-    ## TODO: TEST THIS
-    ## we need to specially handle spec events coming
-    ## from spec windows.  they will listen to cypress
-    ## events so we slurp them up when they happen
-    ## and then restore them before binding them
-    ## again
-    prepareForSpecEvents: ->
-      @_specEvents ?= _.extend {}, Backbone.Events
+  getSnapshotPropsForLogById: (logId) ->
+    @runner.getSnapshotPropsForLogById(logId)
 
-      ## anytime we prepare for spec events
-      ## we unbind previous listeners
-      @_specEvents.stopListening()
+  getErrorByTestId: (testId) ->
+    @runner.getErrorByTestId(testId)
 
-      @_on  = @on
-      _this = @
+  checkForEndedEarly: ->
+    @cy and @cy.checkForEndedEarly()
 
-      @on = _.wrap @on, (orig, name, callback, context) ->
-        ## if we have context then call through because
-        ## that has happened from the specEvents.listenTo
-        if context
-          orig.call(@, name, callback, context)
-        else
-          _this._specEvents.listenTo _this, name, callback
+  onUncaughtException: ->
+    @cy.onUncaughtException.apply(@cy, arguments)
 
-        return @
+  setVersion: (version) ->
+    @version = version
 
-    stop: ->
-      ## we immediately delete Cypress due to
-      ## abort being async. waiting for the async
-      ## event causes problems in other areas in
-      ## the system when we cannot tap into this async
-      ## method. (such as moving from remote manual
-      ## browser back to your own browser)
-      delete window.Cypress
+  ## TODO: TEST THIS
+  set: (runnable, hookName) ->
+    $Cypress.Cy.set(@, runnable, hookName)
 
-      @abort().then =>
+  ## onSpecWindow is called as the spec window
+  ## is being served but BEFORE any of the actual
+  ## specs or support files have been downloaded
+  ## or parsed. we have not received any custom commands
+  ## at this point
+  onSpecWindow: (specWindow) ->
+    cy       = $Cy.create(@, specWindow)
+    chai     = $Chai.create(@, specWindow)
+    mocha    = $Mocha.create(@, specWindow)
+    runner   = $Runner.create(@, specWindow, mocha)
+    log      = $Log.create(@, cy)
 
-        @trigger "stop"
+    ## wire up command create to cy
+    @Commands = $Commands.create(@, cy)
 
-        @removeCustomCommands()
+  onBeforeLoad: (contentWindow) ->
+    ## should probably just trigger the "before:window:load"
+    ## event here, so other commands can tap into that
+    return if not @cy
 
-        @off()
+    @cy.silenceConsole(contentWindow) if $Cypress.isHeadless
+    @cy.bindWindowListeners(contentWindow)
+    @cy._setWindowDocumentProps(contentWindow)
 
-    abort: ->
-      ## grab all the abort callbacks
-      ## instead of triggering them
+    @trigger("before:window:load", contentWindow)
 
-      ## coerce into an array
-      aborts = [].concat @invoke("abort")
+  stop: ->
+    ## we immediately delete Cypress due to
+    ## abort being async. waiting for the async
+    ## event causes problems in other areas in
+    ## the system when we cannot tap into this async
+    ## method. (such as moving from remote manual
+    ## browser back to your own browser)
+    delete window.Cypress
 
-      aborts = _.reject aborts, (r) -> r is @cy
+    @abort().then =>
 
-      ## abort can be async so make sure
-      ## we wait until they all resolve!
-      Promise.all(aborts).then => @restore()
+      @trigger "stop"
 
-    ## restores cypress after each test run by
-    ## removing the queue from the proto and
-    ## removing additional own instance properties
-    restore: ->
-      restores = [].concat @invoke("restore")
+      @off()
 
-      restores = _.reject restores, (r) -> r is @cy
+  abort: ->
+    ## grab all the abort callbacks
+    ## instead of triggering them
 
-      Promise.all(restores).return(null)
+    ## coerce into an array
+    aborts = [].concat @invoke("abort")
 
-    $: ->
-      if not @cy
-        $Cypress.Utils.throwErrByPath("miscellaneous.no_cy")
+    aborts = _.reject aborts, (r) -> r is @cy
 
-      @cy.$$.apply(@cy, arguments)
+    ## abort can be async so make sure
+    ## we wait until they all resolve!
+    Promise.all(aborts).then => @restore()
 
-    _: _
+  ## restores cypress after each test run by
+  ## removing the queue from the proto and
+  ## removing additional own instance properties
+  restore: ->
+    restores = [].concat @invoke("restore")
 
-    moment: window.moment
+    restores = _.reject restores, (r) -> r is @cy
 
-    Blob: window.blobUtil
+    Promise.all(restores).return(null)
 
-    Promise: Promise
+  addChildCommand: (key, fn) ->
+    throwDeprecatedCommandInterface(key, "addChildCommand")
 
-    minimatch: minimatch.js
+  addParentCommand: (key, fn) ->
+    throwDeprecatedCommandInterface(key, "addParentCommand")
 
-    _.extend $Cypress.prototype.$, _($).pick("Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
+  addDualCommand: (key, fn) ->
+    throwDeprecatedCommandInterface(key, "addDualCommand")
 
-    _.extend $Cypress.prototype, Backbone.Events
+  addAssertionCommand: (key, fn) ->
+    throwPrivateCommandInterface("addAssertionCommand")
 
-    @create = (options = {}) ->
-      _.defaults options,
-        loadModules: false
+  addUtilityCommand: (key, fn) ->
+    throwPrivateCommandInterface("addUtilityCommand")
 
-      Cypress = new $Cypress
+  command: (obj = {}) ->
+    utils.warning "Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
 
-      ## attach each of the classes
-      ## to the Cypress instance
-      for klass in "Cy Log Utils Chai Mocha Runner Agents Server Chainer Location LocalStorage Cookies Keyboard Mouse Command Commands EnvironmentVariables Dom ErrorMessages".split(" ")
-        Cypress[klass] = $Cypress[klass]
+    $Log.command(obj)
 
-      ## copy the modules by reference too
-      Cypress.modules = $Cypress.modules
+  $: ->
+    if not @cy
+      utils.throwErrByPath("miscellaneous.no_cy")
 
-      ## conditionally load up all of the modules
-      ## so that any listeners get attached immediately
-      ## prior to instantiating our helper objects
-      ## in Cypress#init
-      ## TODO: TEST THIS
-      Cypress.loadModules() if options.loadModules
+    @cy.$$.apply(@cy, arguments)
 
-      return Cypress
+  ## attach to $Cypress to access
+  ## all of the constructors
+  ## to enable users to monkeypatch
+  $Cypress: $Cypress
 
-    @extend = (obj) ->
-      _.extend @prototype, obj
+  Location: $Location
 
-    ## register a module
-    @register = (name, fn) ->
-      @modules ?= {}
-      @modules[name] = fn
-      return @
+  Log: $Log
 
-    @remove = (name) ->
-      @modules ?= {}
-      delete @modules[name]
-      return @
+  utils: utils
 
-    @reset = ->
-      @modules = {}
+  _: _
 
-  return $Cypress
+  moment: moment
+
+  Blob: blobUtil
+
+  Promise: Promise
+
+  minimatch: minimatch
+
+  _.extend $Cypress.prototype.$, _.pick($, "Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
+
+  _.extend $Cypress.prototype, Backbone.Events
+
+  @create = (options = {}) ->
+    new $Cypress
+
+  @extend = (obj) ->
+    _.extend @prototype, obj
+
+## TODO: make these return object and do $Cypress.extend() here
+require("./cypress/events")($Cypress)
+require("./cypress/options")($Cypress)
+require("./cypress/snapshot")($Cypress)
+
+## attach these to the prototype
+## instead of $Cypress
+$Cypress.$ = $
+$Cypress.Chai = $Chai
+$Cypress.Chainer = $Chainer
+$Cypress.Command = $Command
+$Cypress.Commands = $Commands
+$Cypress.Config = $Config
+$Cypress.Cookies = $Cookies
+$Cypress.Cy = $Cy
+$Cypress.Dom = $Dom
+$Cypress.EnvironmentVariables = $EnvironmentVariables
+$Cypress.ErrorMessages = $ErrorMessages
+$Cypress.Keyboard = $Keyboard
+$Cypress.Log = $Log
+$Cypress.Location = $Location
+$Cypress.LocalStorage = $LocalStorage
+$Cypress.Mocha = $Mocha
+$Cypress.Runner = $Runner
+$Cypress.Server = $Server
+$Cypress.utils = utils
+
+## expose globally (temporarily for the runner)
+window.$Cypress = $Cypress
+
+module.exports = $Cypress
+
+
+
+## QUESTION:
+## Do we need to expose $Cypress?
+## how do we attach submodules / other utilities?
+## move things around / reorganize how its attached

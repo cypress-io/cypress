@@ -1,4 +1,4 @@
-_            = require("underscore")
+_            = require("lodash")
 hbs          = require("hbs")
 url          = require("url")
 http         = require("http")

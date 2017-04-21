@@ -1,21 +1,27 @@
-$Cypress.register "Querying", (Cypress, _, $) ->
+_ = require("lodash")
+$ = require("jquery")
+Promise = require("../../bluebird")
 
-  priorityElement = "input[type='submit'], button, a, label"
+$Log = require("../../log")
+utils = require("../../utils")
 
-  $expr = $.expr[":"]
+priorityElement = "input[type='submit'], button, a, label"
 
-  $contains = $expr.contains
+$expr = $.expr[":"]
 
-  restoreContains = ->
-    $expr.contains = $contains
+$contains = $expr.contains
 
+restoreContains = ->
+  $expr.contains = $contains
+
+module.exports = (Cypress, Commands) ->
   Cypress.on "abort", restoreContains
 
-  Cypress.addParentCommand
+  Commands.addAll({
     get: (selector, options = {}) ->
       _.defaults options,
         retry: true
-        withinSubject: @prop("withinSubject")
+        withinSubject: @state("withinSubject")
         log: true
         command: null
         verify: true
@@ -27,7 +33,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       start = (aliasType) ->
         return if options.log is false
 
-        options._log ?= Cypress.Log.command
+        options._log ?= $Log.command
           message: selector
           referencesAlias: aliasObj?.alias
           aliasType: aliasType
@@ -52,7 +58,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           switch aliasType
             when "dom"
               _.extend consoleProps,
-                Returned: Cypress.Utils.getDomElements(value)
+                Returned: utils.getDomElements(value)
                 Elements: value?.length
 
             when "primitive"
@@ -75,7 +81,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         return do resolveAlias = =>
           switch
             ## if this is a DOM element
-            when Cypress.Utils.hasElement(subject)
+            when utils.hasElement(subject)
               replayFrom = false
 
               replay = =>
@@ -127,7 +133,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       setEl = ($el) ->
         return if options.log is false
 
-        consoleProps.Returned = Cypress.Utils.getDomElements($el)
+        consoleProps.Returned = utils.getDomElements($el)
         consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})
@@ -176,23 +182,24 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       _.defaults options, {log: true}
 
       if options.log isnt false
-        options._log = Cypress.Log.command({message: ""})
+        options._log = $Log.command({message: ""})
 
       log = ($el) ->
         options._log.set({$el: $el}) if options.log
 
         return $el
 
-      if withinSubject = @prop("withinSubject")
+      if withinSubject = @state("withinSubject")
         return log(withinSubject)
 
       @execute("get", "html", {log: false}).then(log)
+  })
 
-  Cypress.addDualCommand
+  Commands.addAll({ prevSubject: "optional" }, {
     contains: (subject, filter, text, options = {}) ->
       ## nuke our subject if its present but not an element
       ## since we want contains to operate as a parent command
-      if subject and not Cypress.Utils.hasElement(subject)
+      if subject and not utils.hasElement(subject)
         subject = null
 
       switch
@@ -208,18 +215,18 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       @ensureNoCommandOptions(options)
 
-      $Cypress.Utils.throwErrByPath "contains.invalid_argument" if not (_.isString(text) or _.isFinite(text) or _.isRegExp(text))
-      $Cypress.Utils.throwErrByPath "contains.empty_string" if _.isBlank(text)
+      utils.throwErrByPath "contains.invalid_argument" if not (_.isString(text) or _.isFinite(text) or _.isRegExp(text))
+      utils.throwErrByPath "contains.empty_string" if _.isBlank(text)
 
       getPhrase = (type, negated) ->
         switch
           when filter and subject
-            node = Cypress.Utils.stringifyElement(subject, "short")
+            node = utils.stringifyElement(subject, "short")
             "within the element: #{node} and with the selector: '#{filter}' "
           when filter
             "within the selector: '#{filter}' "
           when subject
-            node = Cypress.Utils.stringifyElement(subject, "short")
+            node = utils.stringifyElement(subject, "short")
             "within the element: #{node} "
           else
             ""
@@ -237,17 +244,17 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       if options.log isnt false
         consoleProps = {
           Content: text
-          "Applied To": Cypress.Utils.getDomElements(subject or @prop("withinSubject"))
+          "Applied To": utils.getDomElements(subject or @state("withinSubject"))
         }
 
-        options._log = Cypress.Log.command
+        options._log = $Log.command
           message: _.compact([filter, text])
           type: if subject then "child" else "parent"
           consoleProps: -> consoleProps
 
       getOpts = _.extend _.clone(options),
         # error: getErr(text, phrase)
-        withinSubject: subject or @prop("withinSubject") or @$$("body")
+        withinSubject: subject or @state("withinSubject") or @$$("body")
         filter: true
         log: false
         # retry: false ## dont retry because we perform our own element validation
@@ -256,7 +263,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       setEl = ($el) ->
         return if options.log is false
 
-        consoleProps.Returned = Cypress.Utils.getDomElements($el)
+        consoleProps.Returned = utils.getDomElements($el)
         consoleProps.Elements = $el?.length
 
         options._log.set({$el: $el})
@@ -289,7 +296,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           ## taken from jquery's normal contains method
           text.test(elem.textContent or elem.innerText or $.text(elem))
       else
-        text = Cypress.Utils.escapeQuotes(text)
+        text = utils.escapeQuotes(text)
 
       ## find elements by the :contains psuedo selector
       ## and any submit inputs with the attributeContainsWord selector
@@ -322,7 +329,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
               switch err.type
                 when "length"
                   if err.expected > 1
-                    $Cypress.Utils.throwErrByPath "contains.length_option", { onFail: options._log }
+                    utils.throwErrByPath "contains.length_option", { onFail: options._log }
                 when "existence"
                   err.displayMessage = getErr(err)
           })
@@ -333,8 +340,9 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         ## always restore contains in case
         ## we used a regexp!
         restoreContains()
+  })
 
-  Cypress.addChildCommand
+  Commands.addAll({ prevSubject: "dom"}, {
     within: (subject, options, fn) ->
       @ensureDom(subject)
 
@@ -345,26 +353,26 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = Cypress.Log.command
+        options._log = $Log.command
           $el: subject
           message: ""
 
-      $Cypress.Utils.throwErrByPath("within.invalid_argument", { onFail: options._log }) if not _.isFunction(fn)
+      utils.throwErrByPath("within.invalid_argument", { onFail: options._log }) if not _.isFunction(fn)
 
       ## reference the next command after this
       ## within.  when that command runs we'll
       ## know to remove withinSubject
-      next = @prop("current").get("next")
+      next = @state("current").get("next")
 
       ## backup the current withinSubject
       ## this prevents a bug where we null out
       ## withinSubject when there are nested .withins()
       ## we want the inner within to restore the outer
       ## once its done
-      prevWithinSubject = @prop("withinSubject")
-      @prop("withinSubject", subject)
+      prevWithinSubject = @state("withinSubject")
+      @state("withinSubject", subject)
 
-      fn.call @private("runnable").ctx, subject
+      fn.call @privateState("runnable").ctx, subject
 
       stop = =>
         @off "command:start", setWithinSubject
@@ -384,9 +392,9 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         ## exact same 'next' command, then this prevents accidentally
         ## resetting withinSubject more than once.  If they point
         ## to differnet 'next's then its okay
-        if next isnt @prop("nextWithinSubject")
-          @prop "withinSubject", prevWithinSubject or null
-          @prop "nextWithinSubject", next
+        if next isnt @state("nextWithinSubject")
+          @state "withinSubject", prevWithinSubject or null
+          @state "nextWithinSubject", next
 
         ## regardless nuke this listeners
         stop()
@@ -400,6 +408,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         ## event which will finalize cleanup if there was no next obj
         @once "end", ->
           stop()
-          @prop "withinSubject", null
+          @state "withinSubject", null
 
       return subject
+  })

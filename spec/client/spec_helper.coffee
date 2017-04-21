@@ -1,4 +1,27 @@
+## do we need to require these or just use cypress?
+lolex = require("lolex")
+sinon = require("sinon")
+sinonChai = require("sinon-chai")
+
+window.$Cypress = $Cypress = require("../../app/js/driver/main")
+
+$ = window.$ = $Cypress.$
+_ = window._ = $Cypress.prototype._
+window.moment = $Cypress.prototype.moment
+window.Promise = $Cypress.prototype.Promise
+window.Cookies = require("js-cookie")
+
+## TODO: move this as something we can grab
+## off of the driver
+require("sinon-as-promised")(Promise)
+
+window.bililiteRange = require("../../app/js/vendor/bililiteRange")
+$Cypress.Chai.use(sinonChai)
+
 uncaught = Mocha.Runner::uncaught
+
+## create the global for hooks and suites and tests
+mocha.setup("bdd")
 
 before ->
   $Cypress.Chai.setGlobals(window)
@@ -60,10 +83,10 @@ window.loadDom = (fixture) ->
     @body = @$iframe.contents().find("body").children().prop("outerHTML")
 
 window.getNames = (queue) ->
-  _(queue).pluck("name")
+  _.map(queue, "name")
 
 window.getFirstSubjectByName = (name) ->
-  @cy.commands.findWhere({name: name}).get("subject")
+  @cy.queue.find({name: name}).get("subject")
 
 window.enterAppTestingMode = ->
   beforeEach (done) ->
@@ -86,61 +109,6 @@ window.enterAppTestingMode = ->
   afterEach ->
     @$iframe.remove()
 
-window.enterIntegrationTestingMode = (fixture, options = {}) ->
-  _.defaults options,
-    silent: false
-
-  before ->
-    @loadDom = _.bind(loadDom, @)
-
-  beforeEach ->
-    ## load all of the modules
-    @Cypress = $Cypress.create({loadModules: true})
-
-    @Cypress.runner = {
-      getStartTime:      @sandbox.stub()
-      getTestsState:     @sandbox.stub()
-      countByTestState:  @sandbox.stub()
-      stopListening: ->
-    }
-
-    ## immediately create the chai instance so
-    ## we get our custom properties but then
-    ## restore it to keep things simple
-    @chai = $Cypress.Chai.create(@Cypress, {})
-    @chai.restore()
-    @chai.addCustomProperties()
-
-    @Cypress.start()
-
-    if options.silent is false
-      @Cypress.on "fail", (err) ->
-        console.error(err.stack)
-
-    @loadDom(fixture).then =>
-      @sandbox.stub(@Cypress.cy, "_automateCookies").resolves([])
-
-      @Cypress.setConfig({
-        namespace: "__cypress"
-        xhrUrl: "__cypress/xhrs/"
-        defaultCommandTimeout: 2000
-        pageLoadTimeout: 2001
-        requestTimeout: 2002
-        responseTimeout: 2003
-        waitForAnimations: true
-        animationDistanceThreshold: 5
-      })
-
-      ## why do we use the initialize method here but only
-      ## trigger it in the command testing mode below?
-      @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe
-
-      @Cypress.on("resolve:url", resolveUrl)
-
-  after ->
-    @$iframe.remove()
-    @Cypress.stop()
-
 window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
   before ->
     @loadDom = _.bind(loadDom, @)
@@ -157,7 +125,7 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       # window.mocha.enableTimeouts(false)
 
       ## load all of the modules
-      @Cypress = $Cypress.create({loadModules: true})
+      @Cypress = $Cypress.create()
 
       @Cypress.runner = {
         getStartTime:      @sandbox.stub()
@@ -180,6 +148,7 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       ## and Runner and Chai overrides
       @cy = $Cypress.Cy.create(@Cypress, {})
       $Cypress.Log.create(@Cypress, @cy)
+      @Cypress.Commands = $Cypress.Commands.create(@Cypress, @cy)
 
       @sandbox.stub(@Cypress.cy, "_automateCookies").resolves([])
 
@@ -319,7 +288,7 @@ window.loadFixture = (paths, options = {}) ->
 
   ## transform to array even if string
   paths = [].concat(paths)
-  paths = _(paths).map (path) -> "/fixtures/" + ext(path)
+  paths = _.map paths, (path) -> "/fixtures/" + ext(path)
 
   dfs = []
 

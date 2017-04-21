@@ -38,6 +38,24 @@ describe "$Cypress.Cy API", ->
         cy = $Cypress.Cy.create(@Cypress, @specWindow)
         expect(@specWindow.cy).to.eq cy
 
+      it "throws on accessing props", ->
+        fn = =>
+          cy = $Cypress.Cy.create(@Cypress, @specWindow)
+          cy.props.foo
+
+        expect(fn).to.throw(/You are accessing a private property/)
+        expect(fn).to.throw(/getter function: cy.state\(\.\.\.\)/)
+        expect(fn).to.throw(/api\/state/)
+
+      it "throws on accessing privates", ->
+        fn = =>
+          cy = $Cypress.Cy.create(@Cypress, @specWindow)
+          cy.privates.foo
+
+        expect(fn).to.throw(/You are accessing a private property/)
+        expect(fn).to.throw(/getter function: cy.privateState\(\.\.\.\)/)
+        expect(fn).not.to.throw(/api/)
+
     describe "#initialize", ->
       beforeEach ->
         @cy = $Cypress.Cy.create(@Cypress, @specWindow)
@@ -45,15 +63,15 @@ describe "$Cypress.Cy API", ->
 
       it "sets $remoteIframe", ->
         @Cypress.trigger "initialize", {$remoteIframe: @remoteIframe}
-        expect(@cy.private("$remoteIframe")).to.eq @remoteIframe
+        expect(@cy.privateState("$remoteIframe")).to.eq @remoteIframe
 
     describe "#defaults", ->
-      it "sets props to {}", ->
+      it "sets state to {}", ->
         cy = $Cypress.Cy.create(@Cypress, @specWindow)
-        expect(cy.props).to.deep.eq {}
-        cy.props.foo = "bar"
+        expect(cy._state).to.deep.eq {}
+        cy.state("foo", "bar")
         cy.defaults()
-        expect(cy.props).to.deep.eq {}
+        expect(cy._state).to.deep.eq {}
 
     describe "#listeners", ->
       beforeEach ->
@@ -110,7 +128,7 @@ describe "$Cypress.Cy API", ->
         null
 
       it "calls reset on commands", ->
-        reset = @sandbox.spy @cy.commands, "reset"
+        reset = @sandbox.spy @cy.queue, "reset"
         @Cypress.trigger("restore")
         expect(reset).to.be.calledOnce
 
@@ -130,10 +148,10 @@ describe "$Cypress.Cy API", ->
 
       it "calls endedEarlyErr if index > 0 and < queue.length", ->
         endedEarlyErr = @sandbox.stub @cy, "endedEarlyErr"
-        @cy.prop("index", 2)
-        @cy.commands.splice(0, 1, {})
-        @cy.commands.splice(1, 2, {})
-        @cy.commands.splice(2, 3, {})
+        @cy.state("index", 2)
+        @cy.queue.splice(0, 1, {})
+        @cy.queue.splice(1, 2, {})
+        @cy.queue.splice(2, 3, {})
         @cy.checkForEndedEarly()
         expect(endedEarlyErr).to.be.calledOnce
 
@@ -145,7 +163,7 @@ describe "$Cypress.Cy API", ->
 
       it "sets prop(hookName)", ->
         @cy._setRunnable({}, "foobar")
-        expect(@cy.private("hookName")).to.eq "foobar"
+        expect(@cy.privateState("hookName")).to.eq "foobar"
 
       it "sets startedAt on the runnable", ->
         obj = {}
@@ -172,7 +190,7 @@ describe "$Cypress.Cy API", ->
         expect(@cy.Promise.pending).to.eq(Promise.pending)
 
       it "logs a deprecation", ->
-        warning = @sandbox.spy @Cypress.Utils, "warning"
+        warning = @sandbox.spy @Cypress.utils, "warning"
 
         @cy.Promise.resolve()
 
@@ -186,10 +204,10 @@ describe "$Cypress.Cy API", ->
       it "is attached to cy", ->
         expect(@cy._).to.eq(_)
         expect(@cy._.each).to.be.a("function")
-        expect(@cy._.findWhere).to.eq(_.findWhere)
+        expect(@cy._.find).to.eq(_.find)
 
       it "logs a deprecation", ->
-        warning = @sandbox.spy @Cypress.Utils, "warning"
+        warning = @sandbox.spy @Cypress.utils, "warning"
 
         @cy._.each([], ->)
 
@@ -204,7 +222,7 @@ describe "$Cypress.Cy API", ->
         expect(@cy.moment).to.eq(moment)
 
       it "logs a deprecation", ->
-        warning = @sandbox.spy @Cypress.Utils, "warning"
+        warning = @sandbox.spy @Cypress.utils, "warning"
 
         @cy.moment().format("MMM DD, YYYY")
 
@@ -221,7 +239,7 @@ describe "$Cypress.Cy API", ->
         expect(@cy.Blob).to.have.property("base64StringToBlob")
 
       it "logs a deprecation", ->
-        warning = @sandbox.spy @Cypress.Utils, "warning"
+        warning = @sandbox.spy @Cypress.utils, "warning"
 
         @cy.Blob.createBlob(['hello world'])
 
@@ -230,16 +248,16 @@ describe "$Cypress.Cy API", ->
   context "integration", ->
     enterCommandTestingMode()
 
-    describe "#prop", ->
+    describe "#state", ->
       beforeEach ->
         @Cypress.restore()
 
       it "is initially empty", ->
-        expect(@cy.props).to.deep.eq {}
+        expect(@cy._state).to.deep.eq {}
 
-      it "inserts into the props registry", ->
-        @cy.prop("foo", "bar")
-        expect(@cy.props).to.deep.eq {foo: "bar"}
+      it "inserts into the state registry", ->
+        @cy.state("foo", "bar")
+        expect(@cy._state).to.deep.eq {foo: "bar"}
 
       it "calls defaults during restore", ->
         defaults = @sandbox.spy(@cy, "defaults")
@@ -247,15 +265,15 @@ describe "$Cypress.Cy API", ->
         expect(defaults).to.have.been.called
 
       it "acts as a getter when no value is given", ->
-        @cy.prop("foo", "bar")
-        expect(@cy.prop("foo")).to.eq "bar"
+        @cy.state("foo", "bar")
+        expect(@cy.state("foo")).to.eq "bar"
 
       describe "falsy setter values", ->
         before ->
           @set = (key, val) ->
-            @cy.prop(key, val)
-            expect(@cy.prop(key)).to.eq val
-            expect(_.keys(@cy.props)).to.have.length(1)
+            @cy.state(key, val)
+            expect(@cy.state(key)).to.eq val
+            expect(_.keys(@cy._state)).to.have.length(1)
 
         it "sets zero", ->
           @set "zero", 0
@@ -271,8 +289,8 @@ describe "$Cypress.Cy API", ->
 
       describe "sets each prop in the registry to null", ->
         beforeEach ->
-          @cy.prop("foo", "bar")
-          @cy.prop("baz", "quux")
+          @cy.state("foo", "bar")
+          @cy.state("baz", "quux")
           @cy.defaults()
 
           ## need to return null here else mocha would insert a .then
@@ -280,11 +298,11 @@ describe "$Cypress.Cy API", ->
           return null
 
         it "resets the registry", ->
-          expect(@cy.props).to.deep.eq {}
+          expect(@cy._state).to.deep.eq {}
 
         it "deletes registered properies", ->
 
-          expect([@cy.prop("foo"), @cy.prop("baz")]).to.deep.eq [undefined, undefined]
+          expect([@cy.state("foo"), @cy.state("baz")]).to.deep.eq [undefined, undefined]
 
     describe "#_timeout", ->
       it "setter", ->
@@ -305,7 +323,7 @@ describe "$Cypress.Cy API", ->
         expect(@cy._timeout()).to.eq timeout
 
       it "throws error when no runnable", ->
-        @cy.private("runnable", null)
+        @cy.privateState("runnable", null)
 
         fn = =>
           @cy._timeout(500)
@@ -347,7 +365,7 @@ describe "$Cypress.Cy API", ->
 
     describe "#$", ->
       it "logs a deprecation", ->
-        warning = @sandbox.spy @Cypress.Utils, "warning"
+        warning = @sandbox.spy @Cypress.utils, "warning"
 
         @cy.$("#by-name input:first")
 
@@ -357,16 +375,16 @@ describe "$Cypress.Cy API", ->
       it "calls prop next() on end if exists", (done) ->
         fn = -> done()
 
-        @cy.prop("next", fn)
+        @cy.state("next", fn)
 
         @cy.noop()
 
       it "removes prop next after calling", (done) ->
         fn = => _.defer =>
-          expect(@cy.prop("next")).to.eq null
+          expect(@cy.state("next")).to.eq null
           done()
 
-        @cy.prop("next", fn)
+        @cy.state("next", fn)
 
         @cy.noop()
 
@@ -379,7 +397,7 @@ describe "$Cypress.Cy API", ->
         ## immediately when the done() is called
         @cy.on "command:start", =>
           @_t = @sandbox.spy @cy, "_timeout"
-          @ct = @sandbox.spy @cy.private("runnable"), "clearTimeout"
+          @ct = @sandbox.spy @cy.privateState("runnable"), "clearTimeout"
 
         @cy.on "command:end", =>
           ## we changed cy.then to do a clearTimeout
@@ -393,11 +411,11 @@ describe "$Cypress.Cy API", ->
           ## clear the state again else the function done()
           ## inside of mocha (runnable.run) will return
           ## early and not self.clearTimeout()
-          delete @cy.private("runnable").state
+          delete @cy.privateState("runnable").state
           done()
 
         @cy.then ->
-          @cy.private("runnable").state = "passed"
+          @cy.privateState("runnable").state = "passed"
 
     describe "promises", ->
       it "doesnt invoke .then on the cypress instance", (done) ->
@@ -425,14 +443,14 @@ describe "$Cypress.Cy API", ->
     describe "#isReady", ->
       it "creates a deferred when not ready", ->
         @cy.isReady(false)
-        keys = _.keys @cy.prop("ready")
+        keys = _.keys @cy.state("ready")
         expect(keys).to.include("promise", "resolve", "reject")
 
       it "resolves the deferred when ready", (done) ->
         @cy.isReady(false)
         @cy.isReady(true)
         @cy.once "ready", (bool) ->
-          expect(@prop("ready").promise.isResolved()).to.be.true
+          expect(@state("ready").promise.isResolved()).to.be.true
           done()
         null
 
@@ -441,7 +459,7 @@ describe "$Cypress.Cy API", ->
         @cy.isReady(true)
 
         @cy.on "end", ->
-          expect(@commands.length).to.eq(1)
+          expect(@queue.length).to.eq(1)
           done()
 
         @cy.noop({})
@@ -470,61 +488,54 @@ describe "$Cypress.Cy API", ->
           .then ->
             @cy.endedEarlyErr(1)
 
-    describe "nested commands", ->
+    describe "internals of custom commands", ->
       beforeEach ->
-        @setup = (fn = ->) =>
-          @Cypress.addParentCommand "nested", =>
-            @cy.chain().url()
+          @setup = (fn = ->) =>
+            @Cypress.Commands.add "nested", =>
+              @cy.url()
 
-          @cy
-            .nested()
-            .noop()
-            .then ->
-              fn()
-
-      it "works when custom command is first command", ->
-        Cypress.addParentCommand "login", (email) =>
-          @cy.get("input:first").type("foo")
-
-        @cy.login().then ->
-          expect(@cy.$$("input:first")).to.have.value("foo")
+            @cy
+              .nested()
+              .noop()
+              .then ->
+                fn()
 
       it "ensures to splice queue correctly on first custom command", ->
-        Cypress.addParentCommand "login", (email) =>
+        @Cypress.Commands.add  "login", (email) =>
           @cy.get("input:first").type("foo")
 
         @cy.login().noop().then ->
-          expect(@cy.commands.names()).to.deep.eq ["login", "get", "type", "noop", "then", "then"]
+          expect(@cy.queue.names()).to.deep.eq ["login", "get", "type", "noop", "then", "then"]
 
       it "queues in the correct order", ->
         @setup =>
-          expect(@cy.commands.names()).to.deep.eq ["nested", "url", "noop", "then", "then"]
+          expect(@cy.queue.names()).to.deep.eq ["nested", "url", "noop", "then", "then"]
 
       it "nested command should reference url as next property", ->
         @setup =>
-          nested = @cy.commands.findWhere({name: "nested"})
+          nested = @cy.queue.find({name: "nested"})
           expect(nested.get("next").get("name")).to.eq "url"
 
       it "null outs nestedIndex prior to restoring", (done) ->
         @setup()
         @cy.on "end", ->
-          expect(@prop("nestedIndex")).to.be.null
+          expect(@state("nestedIndex")).to.be.null
           done()
 
       it "can recursively nest", ->
-        @Cypress.addParentCommand "nest1", =>
+        @Cypress.Commands.add "nest1", =>
           @cy.nest2()
 
-        @Cypress.addParentCommand "nest2", =>
+        @Cypress.Commands.add "nest2", =>
           @cy.noop()
 
         @cy
           .nest1()
           .then ->
-            expect(@cy.commands.names()).to.deep.eq ["nest1", "nest2", "noop", "then", "then"]
+            expect(@cy.queue.names()).to.deep.eq ["nest1", "nest2", "noop", "then", "then"]
 
       it "works with multiple nested commands", ->
-        @Cypress.addParentCommand "multiple", =>
+        @Cypress.Commands.add "multiple", =>
           @cy
             .url()
             .location()
@@ -533,7 +544,165 @@ describe "$Cypress.Cy API", ->
         @cy
           .multiple()
           .then ->
-            expect(@cy.commands.names()).to.deep.eq ["multiple", "url", "location", "noop", "then", "then"]
+            expect(@cy.queue.names()).to.deep.eq ["multiple", "url", "location", "noop", "then", "then"]
+
+    describe "custom commands", ->
+      beforeEach ->
+        @Cypress.Commands.add "dashboard.selectRenderer", =>
+          @cy
+            # .chain()
+            .get("[contenteditable]")
+            .first()
+
+        @Cypress.Commands.add "login", {prevSubject: true}, (subject, email) =>
+          @cy
+            # .chain()
+            .wrap(subject.find("input:first"))
+            .type(email)
+
+      it "works with custom commands", ->
+        input = @cy.$$("input:first")
+
+        @cy
+          .get("input:first")
+          .parent()
+          .cmd("login", "brian@foo.com").then ($input) ->
+            expect($input.get(0)).to.eq(input.get(0))
+
+      it "works with namespaced commands", ->
+        ce = @cy.$$("[contenteditable]").first()
+
+        @cy
+          .command("dashboard.selectRenderer").then ($ce) ->
+            expect($ce.get(0)).to.eq(ce.get(0))
+
+      describe "parent commands", ->
+        it "ignores existing subject", ->
+          @Cypress.Commands.add "bar", (arg1, arg2) ->
+            return [arg1, arg2]
+
+          cy.wrap("foo").bar(1, 2).then (arr) ->
+            expect(arr).to.deep.eq([1, 2])
+
+      describe "child commands", ->
+        beforeEach ->
+          @Cypress.Commands.add "c", {prevSubject: true}, (subject, arg) =>
+            return @cy.wrap([subject, arg])
+
+          @Cypress.Commands.add "c2", {prevSubject: true},  (subject, arg) =>
+            return [subject, arg]
+
+          @Cypress.Commands.add "dom", {prevSubject: "dom"}, (subject, arg) =>
+            debugger
+
+        it "inherits subjects", ->
+          @cy
+            .wrap("foo")
+            .c("bar")
+            .then (arr) ->
+              expect(arr).to.deep.eq(["foo", "bar"])
+
+              return null
+            .c("baz")
+            .then (arr) ->
+              expect(arr).to.deep.eq([null, "baz"])
+            .wrap("foo2")
+            .c2("bar2")
+            .then (arr) ->
+              expect(arr).to.deep.eq(["foo2", "bar2"])
+
+              return null
+            .c("baz2")
+            .then (arr) ->
+              expect(arr).to.deep.eq([null, "baz2"])
+
+        it "fails when calling child command before parent", (done) ->
+          @allowErrors()
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include("Oops, it looks like you are trying to call a child command before running a parent command")
+            expect(err.message).to.include("cy.c()")
+            done()
+
+          @cy.wrap("foo")
+          @cy.c()
+
+        it "fails when previous subject isnt DOM", (done) ->
+          @allowErrors()
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include("Cannot call cy.dom() on a non-DOM subject.")
+            done()
+
+          @cy.wrap("foo").dom()
+
+      describe "dual commands", ->
+        beforeEach ->
+          @Cypress.Commands.add "d", {prevSubject: "optional"}, (subject, arg) =>
+            @cy.wrap([subject, arg])
+
+        it "passes on subject when used as a child", ->
+          @cy
+            .wrap("foo")
+            .d("bar")
+            .then (arr) ->
+              expect(arr).to.deep.eq(["foo", "bar"])
+
+        it "has an undefined subject when used as a parent", ->
+          @cy
+            .d("bar")
+            .then (arr) ->
+              expect(arr).to.deep.eq([undefined, "bar"])
+
+        it "has an undefined subject as a parent with a previous parent", ->
+          @cy.wrap("foo")
+          @cy
+            .d("bar")
+            .then (arr) ->
+              expect(arr).to.deep.eq([undefined, "bar"])
+            .wrap("foo")
+            .d("bar")
+            .then (arr) ->
+              expect(arr).to.deep.eq(["foo", "bar"])
+
+              return null
+            .d("baz")
+            .then (arr) ->
+              expect(arr).to.deep.eq([null, "baz"])
+
+    describe "overwrite custom commands", ->
+      beforeEach ->
+        @Cypress.Commands.overwrite "wrap", (orig, arg1) ->
+          return orig("foo" + arg1)
+
+        @Cypress.Commands.overwrite "first", (orig, subject) ->
+          subject = $([1, 2])
+
+          return orig(subject)
+
+      it "can modify parent commands", ->
+        @cy.on "fail", (err) -> debugger
+
+        @cy.wrap("bar").then (str) ->
+          expect(str).to.eq("foobar")
+
+      it "can modify child commands", ->
+        @cy.get("li").first().then (el) ->
+          expect(el[0]).to.eq(1)
+
+      it "overwrites only once", ->
+        @Cypress.Commands.overwrite "wrap", (orig, arg1) ->
+          return orig(arg1 + "baz")
+
+        @cy.wrap("bar").should("eq", "barbaz")
+
+      it "errors when command does not exist", ->
+        @allowErrors()
+
+        fn = =>
+          @Cypress.Commands.overwrite "foo", ->
+
+        expect(fn).to.throw("Cannot overwite command for: 'foo'. An existing command does not exist by that name.")
 
     describe "cancelling promises", ->
       it "cancels via a delay", (done) ->

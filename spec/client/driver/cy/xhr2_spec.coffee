@@ -42,7 +42,7 @@ describe "$Cypress.Cy XHR Commands", ->
       ## this ends up being faster than doing a cy.visit in every test
       @Cypress.trigger "before:window:load", @$iframe.prop("contentWindow")
 
-      @server = @cy.prop("server")
+      @server = @cy.state("server")
 
   afterEach ->
     ## after each test we need to restore the iframe's XHR
@@ -246,7 +246,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       _.each extensions, (val, ext) ->
         it "filters out non ajax requests by default for extension: .#{ext}", (done) ->
-          @cy.private("window").$.get("/fixtures/ajax/app.#{ext}").done (res) ->
+          @cy.privateState("window").$.get("/fixtures/ajax/app.#{ext}").done (res) ->
             expect(res).to.eq val
             done()
 
@@ -268,9 +268,9 @@ describe "$Cypress.Cy XHR Commands", ->
           }).as("getFoo")
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             win.$.get("/foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -283,9 +283,9 @@ describe "$Cypress.Cy XHR Commands", ->
           .route(/foo/).as("getFoo")
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             win.$.get("foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -301,9 +301,9 @@ describe "$Cypress.Cy XHR Commands", ->
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
             win.$("<base href='/'>").appendTo(win.$("head"))
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             win.$.get("foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -319,9 +319,9 @@ describe "$Cypress.Cy XHR Commands", ->
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
             win.$("<base href='/nested/route/path'>").appendTo(win.$("head"))
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             win.$.get("../foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -334,9 +334,9 @@ describe "$Cypress.Cy XHR Commands", ->
           .route(/foo/).as("getFoo")
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             win.$.get("http://localhost:3501/foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -352,9 +352,9 @@ describe "$Cypress.Cy XHR Commands", ->
           }).as("getFoo")
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             win.$.get("http://localhost:9999/foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -367,9 +367,9 @@ describe "$Cypress.Cy XHR Commands", ->
           .route(/foo/, {}).as("getFoo")
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             win.$.get("/foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -381,9 +381,9 @@ describe "$Cypress.Cy XHR Commands", ->
           .server({force404: true})
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             new Promise (resolve) ->
               win.$.ajax({
                 method: "POST"
@@ -392,7 +392,7 @@ describe "$Cypress.Cy XHR Commands", ->
               }).fail ->
                 resolve()
           .then ->
-            xhr = @cy.prop("responses")[0].xhr
+            xhr = @cy.state("responses")[0].xhr
             expect(xhr.url).to.eq("http://localhost:3500/foo")
             expect(@open).to.be.calledWith("POST", "/__cypress/xhrs/http://localhost:3500/foo")
 
@@ -405,14 +405,14 @@ describe "$Cypress.Cy XHR Commands", ->
             response: {}
           }).as("getPhones")
           .window().then (win) ->
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             win.$.get("phones/phones.json")
             null
           .wait("@getPhones")
           .then ->
-            xhr = @cy.prop("responses")[0].xhr
+            xhr = @cy.state("responses")[0].xhr
             expect(xhr.url).to.eq("http://localhost:3500/fixtures/html/phones/phones.json")
             expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://localhost:3500/fixtures/html/phones/phones.json")
 
@@ -420,14 +420,14 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             new Promise (resolve) ->
               win.$.get("http://www.google.com/phones/phones.json").fail ->
                 resolve()
           .then ->
-            xhr = @cy.prop("requests")[0].xhr
+            xhr = @cy.state("requests")[0].xhr
             expect(xhr.url).to.eq("http://www.google.com/phones/phones.json")
             expect(@open).to.be.calledWith("GET", "http://www.google.com/phones/phones.json")
 
@@ -440,14 +440,14 @@ describe "$Cypress.Cy XHR Commands", ->
             response: {}
           }).as("getPhones")
           .window().then (win) ->
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             win.$.get("http://www.google.com/phones/phones.json")
             null
           .wait("@getPhones")
           .then ->
-            xhr = @cy.prop("responses")[0].xhr
+            xhr = @cy.state("responses")[0].xhr
             expect(xhr.url).to.eq("http://www.google.com/phones/phones.json")
             expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://www.google.com/phones/phones.json")
 
@@ -457,18 +457,18 @@ describe "$Cypress.Cy XHR Commands", ->
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .route("http://localhost:3501/fixtures/ajax/app.json").as("getPhones")
           .window().then (win) ->
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             win.$.get("http://localhost:3501/fixtures/ajax/app.json")
             null
           .wait("@getPhones")
           .then ->
-            xhr = @cy.prop("responses")[0].xhr
+            xhr = @cy.state("responses")[0].xhr
             expect(xhr.url).to.eq("http://localhost:3501/fixtures/ajax/app.json")
             expect(@open).to.be.calledWith("GET", "http://localhost:3501/fixtures/ajax/app.json")
 
-      # it.only "can stub root requests to CORS", ->
+      # it "can stub root requests to CORS", ->
       #   @cy
       #     .server()
       #     .visit("http://localhost:3500/fixtures/html/xhr.html")
@@ -477,14 +477,14 @@ describe "$Cypress.Cy XHR Commands", ->
       #       stub: false
       #     }).as("getPhones")
       #     .window().then (win) ->
-      #       @cy.prop("server").restore()
+      #       @cy.state("server").restore()
       #       @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-      #       @cy.prop("server").bindTo(win)
+      #       @cy.state("server").bindTo(win)
       #       win.$.get("http://localhost:3501")
       #       null
       #     .wait("@getPhones")
       #     .then ->
-      #       xhr = @cy.prop("responses")[0].xhr
+      #       xhr = @cy.state("responses")[0].xhr
       #       expect(xhr.url).to.eq("http://localhost:3501")
       #       expect(@open).to.be.calledWith("GET", "/http://localhost:3501")
 
@@ -501,9 +501,9 @@ describe "$Cypress.Cy XHR Commands", ->
           .window().then (win) ->
             ## trick cypress into thinking the remoteOrigin is location:9999
             @sandbox.stub(@cy, "_getLocation").withArgs("origin").returns("")
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             win.$.get("/foo")
             null
           .wait("@getFoo").then (xhr) ->
@@ -519,14 +519,14 @@ describe "$Cypress.Cy XHR Commands", ->
             response: {}
           }).as("getUsers")
           .window().then (win) ->
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             win.$.get("/users?q=(id eq 123)")
             null
           .wait("@getUsers")
           .then ->
-            xhr = @cy.prop("responses")[0].xhr
+            xhr = @cy.state("responses")[0].xhr
             expect(xhr.url).to.eq("http://localhost:3500/users?q=(id eq 123)")
             url = encodeURI("users?q=(id eq 123)")
             expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://localhost:3500/#{url}")
@@ -537,14 +537,14 @@ describe "$Cypress.Cy XHR Commands", ->
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .route(/accounts/, {}).as("getAccounts")
           .window().then (win) ->
-            @cy.prop("server").restore()
+            @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
-            @cy.prop("server").bindTo(win)
+            @cy.state("server").bindTo(win)
             win.$.get("/accounts?page=1&%24filter=(rowStatus+eq+1)&%24orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true")
             null
           .wait("@getAccounts")
           .then ->
-            xhr = @cy.prop("responses")[0].xhr
+            xhr = @cy.state("responses")[0].xhr
             expect(xhr.url).to.eq("http://localhost:3500/accounts?page=1&$filter=(rowStatus+eq+1)&$orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true")
             url = "accounts?page=1&%24filter=(rowStatus+eq+1)&%24orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true"
             expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://localhost:3500/#{url}")
@@ -756,7 +756,7 @@ describe "$Cypress.Cy XHR Commands", ->
               w.$.getJSON("foo")
               null
             .then ->
-              cmd = @cy.commands.findWhere({name: "window"})
+              cmd = @cy.queue.find({name: "window"})
               logs = cmd.get("next").get("logs")
 
               expect(logs.length).to.eq(3)
@@ -787,7 +787,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
               null
             .then ->
-              xhrs = @cy.commands.logs({name: "xhr"})
+              xhrs = @cy.queue.logs({name: "xhr"})
 
               expect(xhrs[0].get("state")).to.eq("failed")
               expect(xhrs[0].get("error").name).to.eq("AbortError")
@@ -797,10 +797,10 @@ describe "$Cypress.Cy XHR Commands", ->
               expect(xhrs[0].get("snapshots")[1].name).to.eq("aborted")
               expect(xhrs[0].get("snapshots")[1].body).to.be.a("object")
 
-              expect(@cy.prop("requests").length).to.eq(2)
+              expect(@cy.state("requests").length).to.eq(2)
 
               ## the abort should have set its response
-              expect(@cy.prop("responses").length).to.eq(1)
+              expect(@cy.state("responses").length).to.eq(1)
             .wait(["@getFoo", "@getFoo"]).then ->
               ## should not re-snapshot after the response
               expect(xhrs[0].get("snapshots").length).to.eq(2)
@@ -834,7 +834,7 @@ describe "$Cypress.Cy XHR Commands", ->
               win.$.get("foo_bar")
               null
             .wait("@getFoo").then ->
-              @log = _(logs).find (l) -> l.get("name") is "xhr"
+              @log = _.find logs, (l) -> l.get("name") is "xhr"
 
         it "logs obj", ->
           obj = {
@@ -918,20 +918,20 @@ describe "$Cypress.Cy XHR Commands", ->
 
     it "sets serverIsStubbed", ->
       @cy.server().then ->
-        expect(@cy.prop("serverIsStubbed")).to.be.true
+        expect(@cy.state("serverIsStubbed")).to.be.true
 
     it "can disable serverIsStubbed", ->
       @cy.server({enable: false}).then ->
-        expect(@cy.prop("serverIsStubbed")).to.be.false
+        expect(@cy.state("serverIsStubbed")).to.be.false
 
     it "sends enable to server", ->
-      set = @sandbox.spy @cy.prop("server"), "set"
+      set = @sandbox.spy @cy.state("server"), "set"
 
       @cy.server().then ->
         expect(set).to.be.calledWithExactly({enable: true})
 
     it "can disable the server after enabling it", ->
-      set = @sandbox.spy @cy.prop("server"), "set"
+      set = @sandbox.spy @cy.state("server"), "set"
 
       @cy
         .server()
@@ -953,14 +953,14 @@ describe "$Cypress.Cy XHR Commands", ->
         .server()
         .route("*", {})
         .then ->
-          expect(@cy.prop("server").routes[0].delay).to.eq(0)
+          expect(@cy.state("server").routes[0].delay).to.eq(0)
 
     it "passes down options.delay to routes", ->
       @cy
         .server({delay: 100})
         .route("*", {})
         .then ->
-          expect(@cy.prop("server").routes[0].delay).to.eq(100)
+          expect(@cy.state("server").routes[0].delay).to.eq(100)
 
     describe "errors", ->
       beforeEach ->
@@ -1056,7 +1056,7 @@ describe "$Cypress.Cy XHR Commands", ->
     describe "without sinon present", ->
       beforeEach ->
         ## force us to start from blank window
-        @cy.private("$remoteIframe").prop("src", "about:blank")
+        @cy.privateState("$remoteIframe").prop("src", "about:blank")
 
       it "can start server with no errors", ->
         @cy
@@ -1291,7 +1291,7 @@ describe "$Cypress.Cy XHR Commands", ->
           onRequest: -> done()
         })
         .then ->
-          @cy.private("window").$.post("/users", "name=brian")
+          @cy.privateState("window").$.post("/users", "name=brian")
 
     it "can accept response as a function", ->
       users = [{}, {}]
@@ -1380,7 +1380,7 @@ describe "$Cypress.Cy XHR Commands", ->
         .route("foo", {})
         .route("bar", {})
         .then ->
-          expect(@cy.prop("sandbox").server.responses).to.have.length(2)
+          expect(@cy.state("sandbox").server.responses).to.have.length(2)
 
     it "can use regular strings as response", ->
       @cy
@@ -1458,7 +1458,7 @@ describe "$Cypress.Cy XHR Commands", ->
             win.$.get("/fixtures/ajax/app.json")
             null
           .wait("@getFoo").then (xhr) ->
-            log = @cy.commands.logs({name: "xhr"})[0]
+            log = @cy.queue.logs({name: "xhr"})[0]
 
             expect(log.get("displayName")).to.eq("xhr")
             expect(log.get("alias")).to.eq("getFoo")
@@ -1601,11 +1601,11 @@ describe "$Cypress.Cy XHR Commands", ->
         cancel = @sandbox.spy(Promise.prototype, "cancel")
 
         @cy.on "retry", =>
-          if @cy.prop("err")
+          if @cy.state("err")
             done("should have cancelled and not retried after failing")
 
         @cy.on "fail", (err) =>
-          p = @cy.prop("promise")
+          p = @cy.state("promise")
 
           _.delay =>
             expect(cancel).to.be.calledOn(p)
@@ -1728,7 +1728,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "calculates duration", ->
         @cy.then ->
-          xhr = @cy.prop("responses")[0].xhr
+          xhr = @cy.state("responses")[0].xhr
 
           consoleProps = @log.attributes.consoleProps()
           expect(consoleProps.Duration).to.be.a("number")
@@ -1737,7 +1737,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "sends back regular 404", ->
         @cy.then ->
-          xhr = @cy.prop("responses")[0].xhr
+          xhr = @cy.state("responses")[0].xhr
 
           consoleProps = _.pick @log.attributes.consoleProps(), "Method", "Status", "URL", "XHR"
           expect(consoleProps).to.deep.eq({
@@ -1791,7 +1791,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "logs Method, Status, URL, and XHR", ->
         @cy.then ->
-          xhr = @cy.prop("responses")[0].xhr
+          xhr = @cy.state("responses")[0].xhr
 
           consoleProps = _.pick @log.attributes.consoleProps(), "Method", "Status", "URL", "XHR"
           expect(consoleProps).to.deep.eq({
@@ -1857,18 +1857,17 @@ describe "$Cypress.Cy XHR Commands", ->
       beforeEach ->
         @cy
           .server()
-          .route({ url: "/foo", status: 0, response: {} })
+          .route({ url: "/foo", delay: 500, response: {} })
           .window().then (win) ->
             win.$.get("/foo")
             null
 
+      ## FAILING
       it "sends correct message", ->
-        @cy.then ->
-          expect(@log.attributes.renderProps().message).to.equal("GET --- /foo")
+        expect(@log.attributes.renderProps().message).to.equal("GET --- /foo")
 
       it "sends correct indicator", ->
-        @cy.then ->
-          expect(@log.attributes.renderProps().indicator).to.equal("pending")
+        expect(@log.attributes.renderProps().indicator).to.equal("pending")
 
     describe "when response is outside 200 range", ->
       beforeEach ->
@@ -1886,7 +1885,7 @@ describe "$Cypress.Cy XHR Commands", ->
   context.skip "Cypress.on(before:window:load)", ->
     beforeEach ->
       ## force us to start from blank window
-      @cy.private("$remoteIframe").prop("src", "about:blank")
+      @cy.privateState("$remoteIframe").prop("src", "about:blank")
 
     it "reapplies server + route automatically before window:load", ->
       ## this tests that the server + routes are automatically reapplied
@@ -1896,12 +1895,12 @@ describe "$Cypress.Cy XHR Commands", ->
         .server()
         .route(/foo/, {foo: "bar"}).as("getFoo")
         .then ->
-          expect(@cy.prop("bindServer")).to.be.a("function")
-          expect(@cy.prop("bindRoutes")).to.be.a("array")
+          expect(@cy.state("bindServer")).to.be.a("function")
+          expect(@cy.state("bindRoutes")).to.be.a("array")
         .visit("http://localhost:3500/fixtures/html/sinon.html")
         .then ->
-          expect(@cy.prop("bindServer")).to.be.a("function")
-          expect(@cy.prop("bindRoutes")).to.be.a("array")
+          expect(@cy.state("bindServer")).to.be.a("function")
+          expect(@cy.state("bindRoutes")).to.be.a("array")
         .visit("http://localhost:3500/fixtures/html/sinon.html")
         .wait("@getFoo").its("url").should("include", "?some=data")
 
@@ -1914,7 +1913,7 @@ describe "$Cypress.Cy XHR Commands", ->
         done()
 
       @cy.server().then ->
-        cancel = @sandbox.spy @cy.prop("server"), "cancel"
+        cancel = @sandbox.spy @cy.state("server"), "cancel"
         @Cypress.trigger "abort"
 
   context "#getPendingRequests", ->
@@ -1922,12 +1921,12 @@ describe "$Cypress.Cy XHR Commands", ->
       expect(@cy.getPendingRequests()).to.deep.eq []
 
     it "returns requests if not responses", ->
-      @cy.prop("requests", ["foo", "bar"])
+      @cy.state("requests", ["foo", "bar"])
       expect(@cy.getPendingRequests()).to.deep.eq ["foo", "bar"]
 
     it "returns diff between requests + responses", ->
-      @cy.prop("requests", ["foo", "bar", "baz"])
-      @cy.prop("responses", ["bar"])
+      @cy.state("requests", ["foo", "bar", "baz"])
+      @cy.state("responses", ["bar"])
       expect(@cy.getPendingRequests()).to.deep.eq ["foo", "baz"]
 
   context "#getCompletedRequests", ->
@@ -1935,7 +1934,7 @@ describe "$Cypress.Cy XHR Commands", ->
       expect(@cy.getCompletedRequests()).to.deep.eq []
 
     it "returns responses", ->
-      @cy.prop("responses", ["foo"])
+      @cy.state("responses", ["foo"])
       expect(@cy.getCompletedRequests()).to.deep.eq ["foo"]
 
   context.skip "#respond", ->

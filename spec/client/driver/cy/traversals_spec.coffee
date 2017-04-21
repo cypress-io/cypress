@@ -38,7 +38,7 @@ describe "$Cypress.Cy Traversal Commands", ->
         it "throws on too many elements after timing out waiting for length", (done) ->
           el = @cy.$$("#list")[name](arg)
 
-          node = $Cypress.Utils.stringifyElement @cy.$$("#list"), "short"
+          node = $Cypress.utils.stringifyElement @cy.$$("#list"), "short"
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "Too many elements found. Found '#{el.length}', expected '#{el.length - 1}'."
@@ -49,7 +49,7 @@ describe "$Cypress.Cy Traversal Commands", ->
         it "throws on too few elements after timing out waiting for length", (done) ->
           el = @cy.$$("#list")[name](arg)
 
-          node = $Cypress.Utils.stringifyElement @cy.$$("#list"), "short"
+          node = $Cypress.utils.stringifyElement @cy.$$("#list"), "short"
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "Not enough elements found. Found '#{el.length}', expected '#{el.length + 1}'."
@@ -75,7 +75,7 @@ describe "$Cypress.Cy Traversal Commands", ->
           @cy._timeout(100)
 
           errIncludes = (el, node) =>
-            node = $Cypress.Utils.stringifyElement @cy.$$(node), "short"
+            node = $Cypress.utils.stringifyElement @cy.$$(node), "short"
 
             @cy.on "fail", (err) ->
               expect(err.message).to.include "Expected to find element: '#{el}', but never found it. Queried from element: #{node}"
@@ -126,7 +126,7 @@ describe "$Cypress.Cy Traversal Commands", ->
             obj = {Command: name}
             obj.Selector = [].concat(arg).join(", ") unless _.isFunction(arg)
 
-            returned = @Cypress.Utils.getDomElements($el)
+            returned = @Cypress.utils.getDomElements($el)
 
             _.extend obj, {
               "Applied To": getFirstSubjectByName.call(@, "get").get(0)

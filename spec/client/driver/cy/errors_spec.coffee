@@ -19,7 +19,7 @@ describe "$Cypress.Cy Errors Extensions", ->
 
   context "#endedEarlyErr", ->
     beforeEach ->
-      @commands = @cy.commands
+      @commands = @cy.queue
       @commands.splice(0, 1, {name: "get", args: ["form:first"]})
       @commands.splice(1, 2, {name: "find", args: ["button"]})
       @commands.splice(2, 3, {name: "click", args: [{multiple: true}]})
@@ -41,7 +41,7 @@ describe "$Cypress.Cy Errors Extensions", ->
 
       err = new Error
       err.onFail = ->
-      @cy.private("runnable", {})
+      @cy.privateState("runnable", {})
       @cy.fail(err)
 
       expect(trigger).to.be.calledWith "fail", err, {}

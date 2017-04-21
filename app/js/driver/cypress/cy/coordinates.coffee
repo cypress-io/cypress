@@ -1,7 +1,10 @@
-do ($Cypress, _) ->
+_ = require("lodash")
+$ = require("jquery")
 
+$Utils = require("../utils")
 
-  $Cypress.Cy.extend
+module.exports = ($Cy) ->
+  $Cy.extend
 
     #                   ** CEIL **
     #                   top: if y coord is 100.75,
@@ -41,12 +44,12 @@ do ($Cypress, _) ->
       ## in the viewport, and therefore we must ensure to scroll the
       ## element into view prior to running this method or this will
       ## return null
-      win = @private("window")
+      win = @privateState("window")
 
       scrollX = x - win.pageXOffset
       scrollY = y - win.pageYOffset
 
-      el = @private("document").elementFromPoint(scrollX, scrollY)
+      el = @privateState("document").elementFromPoint(scrollX, scrollY)
 
       ## only wrap el if its non-null
       if el
@@ -59,7 +62,7 @@ do ($Cypress, _) ->
       ## is factored into calculations
       ## which means we dont have to do any math, yay!
       if Element.prototype.getBoundingClientRect
-        win = @private("window")
+        win = @privateState("window")
 
         ## top/left are returned relative to viewport
         ## so we have to add in the scrolled amount
@@ -67,7 +70,7 @@ do ($Cypress, _) ->
         offset = $el.get(0).getBoundingClientRect()
 
         ## we have to convert to a regular object to mutate
-        offset = _(offset).pick("top", "left", "width", "height")
+        offset = _.pick(offset, "top", "left", "width", "height")
         offset.top  += win.pageYOffset
         offset.left += win.pageXOffset
 

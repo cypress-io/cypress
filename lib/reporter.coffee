@@ -165,7 +165,8 @@ class Reporter
     }
 
   stats: ->
-    failingTests = _.chain(@runnables)
+    failingTests = _
+    .chain(@runnables)
     .filter({state: "failed"})
     .map(@normalize)
     .value()

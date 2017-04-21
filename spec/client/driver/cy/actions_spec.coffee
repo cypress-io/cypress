@@ -24,6 +24,10 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("select[name=foods]").select("Ramen").then ($select) ->
         expect($select).to.have.value("Ramen")
 
+    it "can select an array of values", ->
+      @cy.get("select[name=movies]").select(["apoc", "br"]).then ($select) ->
+        expect($select.val()).to.deep.eq ["apoc", "br"]
+
     it "can handle options nested in optgroups", ->
       @cy.get("select[name=starwars]").select("Jar Jar").then ($select) ->
         expect($select).to.have.value("jarjar")
@@ -251,7 +255,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when the subject isnt visible", (done) ->
         select = @cy.$$("select:first").show().hide()
 
-        node = $Cypress.Utils.stringifyElement(select)
+        node = $Cypress.utils.stringifyElement(select)
 
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.select() failed because this element is not visible"
@@ -301,7 +305,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("select:first").select("de_dust2").then ->
           expect(@log.get("name")).to.eq "select"
 
-      it "passes in $el", ->
+      it.skip "passes in $el", ->
         @cy.get("select:first").select("de_dust2").then ($select) ->
           expect(@log.get("$el")).to.eq $select
 
@@ -643,7 +647,7 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$$(":text:first")
 
         input.get(0).addEventListener "keydown", (e) =>
-          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          obj = _.pick(e, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
           expect(obj).to.deep.eq {
             altKey: false
             bubbles: true
@@ -661,7 +665,7 @@ describe "$Cypress.Cy Actions Commands", ->
             repeat: false
             shiftKey: false
             type: "keydown"
-            view: @cy.private("window")
+            view: @cy.privateState("window")
             which: 65 ## deprecated but fired by chrome
           }
           done()
@@ -672,7 +676,7 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$$(":text:first")
 
         input.get(0).addEventListener "keypress", (e) =>
-          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          obj = _.pick(e, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
           expect(obj).to.deep.eq {
             altKey: false
             bubbles: true
@@ -690,7 +694,7 @@ describe "$Cypress.Cy Actions Commands", ->
             repeat: false
             shiftKey: false
             type: "keypress"
-            view: @cy.private("window")
+            view: @cy.privateState("window")
             which: 97 ## deprecated
           }
           done()
@@ -701,7 +705,7 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$$(":text:first")
 
         input.get(0).addEventListener "keyup", (e) =>
-          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          obj = _.pick(e, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
           expect(obj).to.deep.eq {
             altKey: false
             bubbles: true
@@ -719,7 +723,7 @@ describe "$Cypress.Cy Actions Commands", ->
             repeat: false
             shiftKey: false
             type: "keyup"
-            view: @cy.private("window")
+            view: @cy.privateState("window")
             which: 65 ## deprecated but fired by chrome
           }
           done()
@@ -730,7 +734,7 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$$(":text:first")
 
         input.get(0).addEventListener "textInput", (e) =>
-          obj = _(e).pick "bubbles", "cancelable", "charCode", "data", "detail", "keyCode", "layerX", "layerY", "pageX", "pageY", "type", "view", "which"
+          obj = _.pick e, "bubbles", "cancelable", "charCode", "data", "detail", "keyCode", "layerX", "layerY", "pageX", "pageY", "type", "view", "which"
           expect(obj).to.deep.eq {
             bubbles: true
             cancelable: true
@@ -743,7 +747,7 @@ describe "$Cypress.Cy Actions Commands", ->
             pageX: 0
             pageY: 0
             type: "textInput"
-            view: @cy.private("window")
+            view: @cy.privateState("window")
             which: 0
           }
           done()
@@ -754,7 +758,7 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$$(":text:first")
 
         input.get(0).addEventListener "input", (e) =>
-          obj = _(e).pick "bubbles", "cancelable", "type"
+          obj = _.pick e, "bubbles", "cancelable", "type"
           expect(obj).to.deep.eq {
             bubbles: true
             cancelable: false
@@ -2069,7 +2073,7 @@ describe "$Cypress.Cy Actions Commands", ->
       beforeEach ->
         @Cypress.on "log", (attrs, @log) =>
 
-      it "passes in $el", ->
+      it.skip "passes in $el", ->
         @cy.get("input:first").type("foobar").then ($input) ->
           expect(@log.get("$el")).to.eq $input
 
@@ -2083,7 +2087,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "clones textarea value after the type happens", ->
         expectToHaveValueAndCoords = =>
-          cmd = @cy.commands.findWhere({name: "type"})
+          cmd = @cy.queue.find({name: "type"})
           log = cmd.get("logs")[0]
           txt = log.get("snapshots")[1].body.find("#comments")
           expect(txt).to.have.value("foobarbaz")
@@ -2097,7 +2101,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "clones textarea value when textarea is focused first", ->
         expectToHaveValueAndNoCoords = =>
-          cmd = @cy.commands.findWhere({name: "type"})
+          cmd = @cy.queue.find({name: "type"})
           log = cmd.get("logs")[0]
           txt = log.get("snapshots")[1].body.find("#comments")
           expect(txt).to.have.value("foobarbaz")
@@ -2246,7 +2250,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when the subject isnt visible", (done) ->
         input = @cy.$$("input:text:first").show().hide()
 
-        node = $Cypress.Utils.stringifyElement(input)
+        node = $Cypress.utils.stringifyElement(input)
 
         logs = []
 
@@ -2319,7 +2323,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq 2
-          allChars = _.keys(@Cypress.Keyboard.specialChars).concat(_.keys(@Cypress.Keyboard.modifierChars)).join(", ")
+          allChars = _.keys($Cypress.Keyboard.specialChars).concat(_.keys($Cypress.Keyboard.modifierChars)).join(", ")
           expect(err.message).to.eq "Special character sequence: '{bar}' is not recognized. Available sequences are: #{allChars}"
           done()
 
@@ -2370,18 +2374,21 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when element animation exceeds timeout", (done) ->
         @cy._timeout(100)
 
-        input = $("<input class='slidein' />")
-        input.css("animation-duration", ".5s")
-
-        @cy.$$("#animation-container").append(input)
+        @Cypress.config("animationDistanceThreshold", 1)
 
         @cy.on "fail", (err) ->
           expect(input).to.have.value("")
           expect(err.message).to.include("cy.type() could not be issued because this element is currently animating:\n")
           done()
 
+        input = $("<input class='slidein' />")
+        input.css("animation-duration", ".5s")
         input.on "animationstart", =>
-          @cy.get(".slidein").type("foo")
+          Promise.delay(50)
+          .then =>
+            @cy.get(".slidein").type("foo")
+
+        @cy.$$("#animation-container").append(input)
 
   context "#clear", ->
     it "does not change the subject", ->
@@ -2558,7 +2565,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when the subject isnt visible", (done) ->
         input = @cy.$$("input:text:first").show().hide()
 
-        node = $Cypress.Utils.stringifyElement(input)
+        node = $Cypress.utils.stringifyElement(input)
 
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.clear() failed because this element is not visible"
@@ -2894,7 +2901,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when any member of the subject isnt visible", (done) ->
         chk = @cy.$$(":checkbox").first().hide()
 
-        node = $Cypress.Utils.stringifyElement(chk.last())
+        node = $Cypress.utils.stringifyElement(chk.last())
 
         logs = []
 
@@ -2929,7 +2936,7 @@ describe "$Cypress.Cy Actions Commands", ->
         chk = @cy.$$(":checkbox")
         chk.show().last().hide()
 
-        node = $Cypress.Utils.stringifyElement(chk.last())
+        node = $Cypress.utils.stringifyElement(chk.last())
 
         logs = []
 
@@ -3315,7 +3322,7 @@ describe "$Cypress.Cy Actions Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          node = $Cypress.Utils.stringifyElement(chk.last())
+          node = $Cypress.utils.stringifyElement(chk.last())
           len  = (chk.length * 2) + 6
           expect(logs).to.have.length(len)
           expect(@log.get("error")).to.eq(err)
@@ -3568,7 +3575,7 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.on "command:returned:value", (cmd, ret) =>
         if cmd.get("name") is "submit"
           ## expect our isReady to be pending
-          expect(@cy.prop("ready").promise.isPending()).to.be.true
+          expect(@cy.state("ready").promise.isPending()).to.be.true
 
       @cy.get("form:first").submit()
 
@@ -3795,7 +3802,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     it "uses forceFocusedEl if set", ->
       input = @cy.$$("input:first")
-      @cy.prop("forceFocusedEl", input.get(0))
+      @cy.state("forceFocusedEl", input.get(0))
 
       @cy.focused().then ($focused) ->
         expect($focused.get(0)).to.eq input.get(0)
@@ -3816,11 +3823,11 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:first").focus().focused().then ->
           input.remove()
         .focused().then ($el) ->
-          expect(cy.prop("forceFocusedEl")).to.be.null
+          expect(cy.state("forceFocusedEl")).to.be.null
 
     it "refuses to use blacklistFocusedEl", ->
       input = @cy.$$("input:first")
-      @cy.prop("blacklistFocusedEl", input.get(0))
+      @cy.state("blacklistFocusedEl", input.get(0))
 
       @cy
         .get("input:first").focus()
@@ -3945,9 +3952,9 @@ describe "$Cypress.Cy Actions Commands", ->
           ## make sure we have either set the property
           ## or havent
           if document.hasFocus()
-            expect(@cy.prop("forceFocusedEl")).not.to.be.ok
+            expect(@cy.state("forceFocusedEl")).not.to.be.ok
           else
-            expect(@cy.prop("forceFocusedEl")).to.eq(input.get(0))
+            expect(@cy.state("forceFocusedEl")).to.eq(input.get(0))
 
     it "matches @cy.focused()", ->
       button = @cy.$$("#button")
@@ -4089,7 +4096,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy
           .get("input:first").focus()
           .get("button:first").focus().then ->
-            names = _(logs).map (log) -> log.get("name")
+            names = _.map logs, (log) -> log.get("name")
             expect(logs).to.have.length(4)
             expect(names).to.deep.eq ["get", "focus", "get", "focus"]
 
@@ -4807,9 +4814,9 @@ describe "$Cypress.Cy Actions Commands", ->
           ## make sure we have either set the property
           ## or havent
           if document.hasFocus()
-            expect(@cy.prop("blacklistFocusedEl")).not.to.be.ok
+            expect(@cy.state("blacklistFocusedEl")).not.to.be.ok
           else
-            expect(@cy.prop("blacklistFocusedEl")).to.eq(input.get(0))
+            expect(@cy.state("blacklistFocusedEl")).to.eq(input.get(0))
 
     it "sends a focusout event", (done) ->
       @cy.$$("#focus").focusout -> done()
@@ -4966,7 +4973,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy
           .get("input:first").focus().blur().then ->
-            names = _(logs).map (log) -> log.get("name")
+            names = _.map logs, (log) -> log.get("name")
             expect(logs).to.have.length(3)
             expect(names).to.deep.eq ["get", "focus", "blur"]
 
@@ -5213,7 +5220,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when any member of the subject isnt visible", (done) ->
         btn = @cy.$$("button").show().last().hide()
 
-        node = $Cypress.Utils.stringifyElement(btn)
+        node = $Cypress.utils.stringifyElement(btn)
 
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.dblclick() failed because this element is not visible"
@@ -5237,7 +5244,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when any member of the subject isnt visible", (done) ->
         btn = @cy.$$("#three-buttons button").show().last().hide()
 
-        node = $Cypress.Utils.stringifyElement(btn)
+        node = $Cypress.utils.stringifyElement(btn)
 
         logs = []
 
@@ -5324,13 +5331,13 @@ describe "$Cypress.Cy Actions Commands", ->
       coords = @cy.getCoordinates(btn)
 
       btn.get(0).addEventListener "click", (e) =>
-        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+        obj = _.pick(e, "bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
-          view: @cy.private("window")
-          clientX: coords.x - @cy.private("window").pageXOffset
-          clientY: coords.y - @cy.private("window").pageYOffset
+          view: @cy.privateState("window")
+          clientX: coords.x - @cy.privateState("window").pageXOffset
+          clientY: coords.y - @cy.privateState("window").pageYOffset
           button: 0
           buttons: 0
           which: 1
@@ -5348,10 +5355,10 @@ describe "$Cypress.Cy Actions Commands", ->
 
     it "bubbles up native click event", (done) ->
       click = (e) =>
-        @cy.private("window").removeEventListener "click", click
+        @cy.privateState("window").removeEventListener "click", click
         done()
 
-      @cy.private("window").addEventListener "click", click
+      @cy.privateState("window").addEventListener "click", click
 
       @cy.get("#button").click()
 
@@ -5360,10 +5367,10 @@ describe "$Cypress.Cy Actions Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.private("window")
+      win = @cy.privateState("window")
 
       btn.get(0).addEventListener "mousedown", (e) =>
-        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+        obj = _.pick(e, "bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
@@ -5390,10 +5397,10 @@ describe "$Cypress.Cy Actions Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.private("window")
+      win = @cy.privateState("window")
 
       btn.get(0).addEventListener "mouseup", (e) =>
-        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+        obj = _.pick(e, "bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
@@ -5432,7 +5439,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.private("window")
+      win = @cy.privateState("window")
 
       btn.get(0).addEventListener "click", (e) =>
         expect(win.pageXOffset).to.be.gt(0)
@@ -5446,7 +5453,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.private("window")
+      win = @cy.privateState("window")
 
       btn.get(0).addEventListener "click", (e) =>
         expect(win.pageYOffset).to.be.gt(0)
@@ -5953,11 +5960,11 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$$("input:first")
 
         input.get(0).addEventListener "focus", (e) =>
-          obj = _(e).pick("bubbles", "cancelable", "view", "which", "relatedTarget", "detail", "type")
+          obj = _.pick(e, "bubbles", "cancelable", "view", "which", "relatedTarget", "detail", "type")
           expect(obj).to.deep.eq {
             bubbles: false
             cancelable: false
-            view: @cy.private("window")
+            view: @cy.privateState("window")
             ## chrome no longer fires pageX and pageY
             # pageX: 0
             # pageY: 0
@@ -5974,11 +5981,11 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$$("input:first")
 
         input.get(0).addEventListener "focusin", (e) =>
-          obj = _(e).pick("bubbles", "cancelable", "view", "which", "relatedTarget", "detail", "type")
+          obj = _.pick(e, "bubbles", "cancelable", "view", "which", "relatedTarget", "detail", "type")
           expect(obj).to.deep.eq {
             bubbles: true
             cancelable: false
-            view: @cy.private("window")
+            view: @cy.privateState("window")
             # pageX: 0
             # pageY: 0
             which: 0
@@ -6023,13 +6030,13 @@ describe "$Cypress.Cy Actions Commands", ->
           .focused().should("have.id", "button-covered-in-span")
 
       it "will give focus to the window if no element is focusable", (done) ->
-        $(@cy.private("window")).on "focus", -> done()
+        $(@cy.privateState("window")).on "focus", -> done()
 
         @cy.get("#nested-find").click()
 
       # it "events", ->
       #   btn = @cy.$$("button")
-      #   win = $(@cy.private("window"))
+      #   win = $(@cy.privateState("window"))
 
       #   _.each {"btn": btn, "win": win}, (type, key) ->
       #     _.each "focus mousedown mouseup click".split(" "), (event) ->
@@ -6097,7 +6104,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when any member of the subject isnt visible", (done) ->
         btn = @cy.$$("#three-buttons button").show().last().hide()
 
-        node = $Cypress.Utils.stringifyElement(btn)
+        node = $Cypress.utils.stringifyElement(btn)
 
         logs = []
 
@@ -6136,7 +6143,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        node = @Cypress.Utils.stringifyElement(span)
+        node = @Cypress.utils.stringifyElement(span)
 
         @Cypress.on "log", (attrs, @log) =>
           logs.push log
@@ -6171,7 +6178,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        node = @Cypress.Utils.stringifyElement(span)
+        node = @Cypress.utils.stringifyElement(span)
 
         @Cypress.on "log", (attrs, @log) =>
           logs.push log
@@ -6244,17 +6251,19 @@ describe "$Cypress.Cy Actions Commands", ->
 
         clicks = 0
 
-        p = $("<p class='slidein'>sliding in</p>")
-        p.css("animation-duration", ".5s")
-        p.on "click", -> clicks += 1
-
         @cy.on "fail", (err) ->
           expect(clicks).to.eq(0)
           expect(err.message).to.include("cy.click() could not be issued because this element is currently animating:\n")
           done()
 
+        p = $("<p class='slidein'>sliding in</p>")
+        p.css("animation-duration", ".5s")
+        p.on "click", ->
+          clicks += 1
         p.on "animationstart", =>
-          @cy.get(".slidein").click({interval: 50, animationDistanceThreshold: 0})
+          Promise.delay(50)
+          .then =>
+            @cy.get(".slidein").click({interval: 50, animationDistanceThreshold: 0})
 
         @cy.$$("#animation-container").append(p)
 

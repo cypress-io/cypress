@@ -46,7 +46,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
         @respondWith({}, 50)
 
         @Cypress.on "fixture", =>
-          @cmd = @cy.commands.first()
+          @cmd = @cy.queue.first()
           @Cypress.abort()
 
         @cy.on "cancel", (cancelledCmd) =>

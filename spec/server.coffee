@@ -1,3 +1,4 @@
+_         = require("lodash")
 express   = require("express")
 http      = require("http")
 path      = require("path")
@@ -7,7 +8,6 @@ glob      = require("glob")
 coffee    = require("coffee-script")
 str       = require("string-to-stream")
 Promise   = require("bluebird")
-_         = require("underscore")
 xhrs      = require("../lib/controllers/xhrs")
 
 [3500, 3501].forEach (port) ->
@@ -35,17 +35,18 @@ xhrs      = require("../lib/controllers/xhrs")
   getAllSpecs = (allSpecs = true) ->
     specs = glob.sync "client/**/*.coffee", cwd: __dirname
     specs.unshift "client/all_specs.coffee" if allSpecs
-    _.chain(specs)
-      ## remove the spec helper file
-      .reject (spec) -> /spec_helper/.test(spec)
-      .map (spec) ->
-        ## replace client/whatevs.coffee -> specs/whatevs.coffee
-        spec = spec.split("/")
-        spec.splice(0, 1, "specs")
+    _
+    .chain(specs)
+    ## remove the spec helper file
+    .reject (spec) -> /spec_helper/.test(spec)
+    .map (spec) ->
+      ## replace client/whatevs.coffee -> specs/whatevs.coffee
+      spec = spec.split("/")
+      spec.splice(0, 1, "specs")
 
-        ## strip off the extension
-        removeExtension spec.join("/")
-      .value()
+      ## strip off the extension
+      removeExtension spec.join("/")
+    .value()
 
   getSpec = (spec) ->
     spec = removeExtension(spec) + ".coffee"
@@ -71,6 +72,10 @@ xhrs      = require("../lib/controllers/xhrs")
 
   app.get "/bower_components/*", (req, res) ->
     res.sendFile path.join("bower_components", req.params[0]),
+      root: path.join(__dirname, "..")
+
+  app.get "/node_modules/*", (req, res) ->
+    res.sendFile path.join("node_modules", req.params[0]),
       root: path.join(__dirname, "..")
 
   app.get "/lib/*", (req, res) ->

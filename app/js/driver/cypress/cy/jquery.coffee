@@ -1,13 +1,17 @@
-do ($Cypress, $) ->
-  remoteJQueryisNotSameAsGlobal = (remoteJQuery) ->
-    remoteJQuery and (remoteJQuery isnt $)
+$ = require("jquery")
 
-  $Cypress.Cy.extend
-    getRemotejQueryInstance: (subject) ->
+utils = require("../utils")
+
+remoteJQueryisNotSameAsGlobal = (remoteJQuery) ->
+  remoteJQuery and (remoteJQuery isnt $)
+
+module.exports = ($Cy) ->
+  $Cy.extend
+    _getRemotejQueryInstance: (subject) ->
       remoteJQuery = @_getRemoteJQuery()
-      if $Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
+      if utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
         remoteSubject = remoteJQuery(subject)
-        $Cypress.Utils.setCypressNamespace(remoteSubject, subject)
+        utils.setCypressNamespace(remoteSubject, subject)
 
         return remoteSubject
 
@@ -15,4 +19,4 @@ do ($Cypress, $) ->
       if opt = @Cypress.option("jQuery")
         return opt
       else
-        @private("window").$
+        @privateState("window").$

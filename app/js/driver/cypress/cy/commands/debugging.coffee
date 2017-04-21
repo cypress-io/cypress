@@ -1,5 +1,38 @@
-$Cypress.register "Debugging", (Cypress, _, $) ->
+_ = require("lodash")
 
+$Cy = require("../../cy")
+$Cypress = require("../../../cypress")
+$Log = require("../../log")
+
+$Cy.extend({
+  resume: (resumeAll = true) ->
+    onResume = @state("onResume")
+
+    ## dont do anything if this isnt a fn
+    return if not _.isFunction(onResume)
+
+    ## nuke this out so it can only
+    ## be called a maximum of 1 time
+    @state("onResume", null)
+
+    ## call the fn
+    onResume.call(@, resumeAll)
+
+  _getNextQueuedCommand: ->
+    ## gets the next command which
+    ## isnt skipped
+    search = (i) =>
+      cmd = @commands.at(i)
+
+      if cmd and cmd.get("skip")
+        search(i + 1)
+      else
+        return cmd
+
+    search(@state("index"))
+})
+
+module.exports = (Cypress, Commands) ->
   Cypress.on "resume:next", ->
     @resume(false)
 
@@ -8,39 +41,12 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
 
   Cypress.on "pause", ->
     ## continue chaining off the current chain
-    if chain = @prop("chain")
+    if chain = @state("chain")
       chain.pause()
     else
       @pause()
 
-  Cypress.Cy.extend
-    resume: (resumeAll = true) ->
-      onResume = @prop("onResume")
-
-      ## dont do anything if this isnt a fn
-      return if not _.isFunction(onResume)
-
-      ## nuke this out so it can only
-      ## be called a maximum of 1 time
-      @prop("onResume", null)
-
-      ## call the fn
-      onResume.call(@, resumeAll)
-
-    getNextQueuedCommand: ->
-      ## gets the next command which
-      ## isnt skipped
-      search = (i) =>
-        cmd = @commands.at(i)
-
-        if cmd and cmd.get("skip")
-          search(i + 1)
-        else
-          return cmd
-
-      search(@prop("index"))
-
-  Cypress.addUtilityCommand
+  Commands.addUtility({
     ## pause should indefinitely pause until the user
     ## presses a key or clicks in the UI to continue
     pause: (subject, options = {}) ->
@@ -50,19 +56,19 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = Cypress.Log.command({
+        options._log = $Log.command({
           snapshot: true
           autoEnd: false
         })
 
       onResume = (fn, timeout) =>
-        @prop "onResume", (resumeAll) ->
+        @state "onResume", (resumeAll) ->
           if resumeAll
             ## nuke onPause only if
             ## we've been told to resume
             ## all the commands, else
             ## pause on the very next one
-            @prop("onPaused", null)
+            @state("onPaused", null)
 
             if options.log
               options._log.end()
@@ -73,10 +79,10 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
           ## invoke callback fn
           fn.call(@)
 
-      @prop "onPaused", (fn) ->
-        next = @getNextQueuedCommand()
+      @state "onPaused", (fn) ->
+        next = @_getNextQueuedCommand()
 
-        if next and @isCommandFromMocha(next)
+        if next and @_isCommandFromMocha(next)
           return fn.call(@)
 
         Cypress.trigger("paused", next?.get("name"))
@@ -96,12 +102,12 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = Cypress.Log.command({
+        options._log = $Log.command({
           snapshot: true
           end: true
         })
 
-      previous = @prop("current").get("prev")
+      previous = @state("current").get("prev")
 
       console.log "\n%c------------------------ Debug Info ------------------------", "font-weight: bold;"
       console.log "Command Name:    ", previous and previous.get("name")
@@ -116,3 +122,4 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
         debugger`
 
       return subject
+  })

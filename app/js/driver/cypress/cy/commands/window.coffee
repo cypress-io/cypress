@@ -1,23 +1,28 @@
-$Cypress.register "Window", (Cypress, _, $) ->
+_ = require("lodash")
+Promise = require("../../bluebird")
 
-  ## hold a global reference to defaults
-  viewportDefaults = null
+$Log = require("../../log")
+utils = require("../../utils")
 
-  viewports = {
-    "macbook-15" : "1440x900"
-    "macbook-13" : "1280x800"
-    "macbook-11" : "1366x768"
-    "ipad-2"     : "768x1024"
-    "ipad-mini"  : "768x1024"
-    "iphone-6+"  : "414x736"
-    "iphone-6"   : "375x667"
-    "iphone-5"   : "320x568"
-    "iphone-4"   : "320x480"
-    "iphone-3"   : "320x480"
-  }
+## hold a global reference to defaults
+viewportDefaults = null
 
-  validOrientations = ["landscape", "portrait"]
+viewports = {
+  "macbook-15" : "1440x900"
+  "macbook-13" : "1280x800"
+  "macbook-11" : "1366x768"
+  "ipad-2"     : "768x1024"
+  "ipad-mini"  : "768x1024"
+  "iphone-6+"  : "414x736"
+  "iphone-6"   : "375x667"
+  "iphone-5"   : "320x568"
+  "iphone-4"   : "320x480"
+  "iphone-3"   : "320x480"
+}
 
+validOrientations = ["landscape", "portrait"]
+
+module.exports = (Cypress, Commands) ->
   Cypress.on "test:before:hooks", ->
     ## if we have viewportDefaults it means
     ## something has changed the default and we
@@ -29,8 +34,8 @@ $Cypress.register "Window", (Cypress, _, $) ->
       viewportDefaults = null
 
   triggerAndSetViewport = (width, height) ->
-    @Cypress.config("viewportWidth", width)
-    @Cypress.config("viewportHeight", height)
+    Cypress.config("viewportWidth", width)
+    Cypress.config("viewportHeight", height)
 
     viewport = {viewportWidth: width, viewportHeight: height}
 
@@ -39,15 +44,15 @@ $Cypress.register "Window", (Cypress, _, $) ->
 
     return viewport
 
-  Cypress.addParentCommand
+  Commands.addAll({
     title: (options = {}) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = Cypress.Log.command()
+        options._log = $Log.command()
 
       do resolveTitle = =>
-        doc = @private("document")
+        doc = @privateState("document")
 
         title = (doc and doc.title) or ""
 
@@ -59,11 +64,11 @@ $Cypress.register "Window", (Cypress, _, $) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = Cypress.Log.command()
+        options._log = $Log.command()
 
       getWindow = =>
-        window = @private("window")
-        $Cypress.Utils.throwErrByPath("window.iframe_undefined", { onFail: options._log }) if not window
+        window = @privateState("window")
+        utils.throwErrByPath("window.iframe_undefined", { onFail: options._log }) if not window
 
         return window
 
@@ -86,12 +91,12 @@ $Cypress.register "Window", (Cypress, _, $) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = Cypress.Log.command()
+        options._log = $Log.command()
 
       getDocument = =>
-        win = @private("window")
+        win = @privateState("window")
         ## TODO: add failing test around logging twice
-        $Cypress.Utils.throwErrByPath("window.iframe_doc_undefined") if not win?.document
+        utils.throwErrByPath("window.iframe_doc_undefined") if not win?.document
 
         return win.document
 
@@ -117,7 +122,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
       _.defaults options, {log: true}
 
       if options.log
-        options._log = Cypress.Log.command
+        options._log = $Log.command
           consoleProps: ->
             obj = {}
             obj.Preset = preset if preset
@@ -126,27 +131,27 @@ $Cypress.register "Window", (Cypress, _, $) ->
             obj
 
       throwErrBadArgs = =>
-        $Cypress.Utils.throwErrByPath "viewport.bad_args", { onFail: options._log }
+        utils.throwErrByPath "viewport.bad_args", { onFail: options._log }
 
       widthAndHeightAreValidNumbers = (width, height) ->
-        _.all [width, height], (val) ->
+        _.every [width, height], (val) ->
           _.isNumber(val) and _.isFinite(val)
 
       widthAndHeightAreWithinBounds = (width, height) ->
-        _.all [width, height], (val) ->
+        _.every [width, height], (val) ->
           val >= 200 and val <= 3000
 
       switch
         when _.isString(presetOrWidth) and _.isBlank(presetOrWidth)
-          $Cypress.Utils.throwErrByPath "viewport.empty_string", { onFail: options._log }
+          utils.throwErrByPath "viewport.empty_string", { onFail: options._log }
 
         when _.isString(presetOrWidth)
           getPresetDimensions = (preset) =>
             try
-              _(viewports[presetOrWidth].split("x")).map(Number)
+              _.map(viewports[presetOrWidth].split("x"), Number)
             catch e
               presets = _.keys(viewports).join(", ")
-              $Cypress.Utils.throwErrByPath "viewport.missing_preset", {
+              utils.throwErrByPath "viewport.missing_preset", {
                 onFail: options._log
                 args: { preset, presets }
               }
@@ -154,7 +159,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
           orientationIsValidAndLandscape = (orientation) =>
             if orientation not in validOrientations
               all = validOrientations.join("' or '")
-              $Cypress.Utils.throwErrByPath "viewport.invalid_orientation", {
+              utils.throwErrByPath "viewport.invalid_orientation", {
                 onFail: options._log
                 args: { all, orientation }
               }
@@ -178,7 +183,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
           height = heightOrOrientation
 
           if not widthAndHeightAreWithinBounds(width, height)
-            $Cypress.Utils.throwErrByPath "viewport.dimensions_out_of_range", { onFail: options._log }
+            utils.throwErrByPath "viewport.dimensions_out_of_range", { onFail: options._log }
 
         else
           throwErrBadArgs()
@@ -194,3 +199,4 @@ $Cypress.register "Window", (Cypress, _, $) ->
         options._log.set(viewport)
 
       return null
+  })

@@ -21,7 +21,7 @@ describe "$Cypress.Cy Commands", ->
 
   it "does not add cmds to cy.commands queue", ->
     @cy.cmd("get", "body").then ->
-      names = @cy.commands.names()
+      names = @cy.queue.names()
       expect(names).to.deep.eq(["get", "then", "then"])
 
   context "custom commands", ->
@@ -54,7 +54,7 @@ describe "$Cypress.Cy Commands", ->
         .command("dashboard.selectWindows").then ($ce) ->
           expect($ce.get(0)).to.eq(ce.get(0))
 
-  describe "errors", ->
+  context "errors", ->
     beforeEach ->
       @allowErrors()
 
@@ -62,6 +62,6 @@ describe "$Cypress.Cy Commands", ->
       try
         @cy.get("body").cmd("fooDoesNotExist", "bar", "baz")
       catch err
-        cmds = _.keys(@Cypress.Chainer.prototype)
+        cmds = _.keys($Cypress.Chainer.prototype)
         expect(cmds.length).to.be.gt(1)
         expect(err.message).to.eq("Could not find a command for: 'fooDoesNotExist'.\n\nAvailable commands are: #{cmds.join(", ")}.\n")

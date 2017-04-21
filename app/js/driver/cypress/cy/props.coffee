@@ -1,15 +1,13 @@
-do ($Cypress, _) ->
-
-  $Cypress.Cy.extend
-
-    prop: (key, val) ->
+module.exports = ($Cy) ->
+  $Cy.extend
+    state: (key, val) ->
       if arguments.length is 1
-        @props[key]
+        @_state[key]
       else
-        @props[key] = val
+        @_state[key] = val
 
-    private: (key, val) ->
+    privateState: (key, val) ->
       if arguments.length is 1
-        @privates[key]
+        @_privateState[key]
       else
-        @privates[key] = val
+        @_privateState[key] = val
