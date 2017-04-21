@@ -1,5 +1,5 @@
 test/unit
 test/integration
 --reporter spec
---compilers coffee:coffee-script/register
+--compilers coffee:@cypress/coffee-script
 --recursive
