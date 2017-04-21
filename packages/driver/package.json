@@ -2,6 +2,10 @@
   "name": "driver",
   "version": "1.0.0",
   "description": "",
+  "scripts": {
+    "build-dev": "gulp build",
+    "watch-dev": "gulp watch"
+  },
   "devDependencies": {
     "@cypress/coffee-script": "0.1.2",
     "@cypress/core-electron": "0.3.4",

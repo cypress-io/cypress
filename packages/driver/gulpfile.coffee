@@ -26,9 +26,9 @@ log = (obj = {}) ->
   $.util.beep()
 
 jsOptions =
-  entries: ["src/driver/main.coffee"]
+  entries: ["src/main.coffee"]
   extensions: [".coffee", ".js"]
-  destination: "lib/public/js"
+  destination: "dist"
   outputName: "driver.js"
 
 specOptions =
@@ -101,7 +101,7 @@ gulp.task "app:html", ->
   gulp.src(["app/html/*"])
     .pipe gulp.dest("lib/public")
 
-gulp.task "app:watch", ["watch:app:js", "watch:app:html"]
+gulp.task "watch", ["watch:app:js", "watch:app:html"]
 
 gulp.task "watch:app:js", -> watchJs(jsOptions)
 
@@ -116,5 +116,5 @@ gulp.task "test", ->
 
 gulp.task "app", ["app:img", "app:html", "app:watch"]
 
-gulp.task "app:build", (cb) ->
+gulp.task "build", (cb) ->
   runSequence ["app:img", "app:js", "app:html"], cb
