@@ -2,6 +2,9 @@
 
 ## Changelog
 
+#### 0.1.5 - *(04/20/17)*
+- bump cypress coffee script and releaser dep
+
 #### 0.1.4 - *(10/21/16)*
 - add server destroy to https helper
 
