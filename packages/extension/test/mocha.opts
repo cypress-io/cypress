@@ -1,0 +1,5 @@
+test/unit
+test/integration
+--reporter spec
+--compilers coffee:@cypress/coffee-script
+--recursive

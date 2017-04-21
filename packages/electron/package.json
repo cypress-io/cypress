@@ -1,0 +1,41 @@
+{
+  "name": "@cypress/core-electron",
+  "version": "0.3.4",
+  "electronVersion": "1.4.6",
+  "description": "Cypress electron wrapper shell",
+  "main": "index.js",
+  "scripts": {
+    "start": "./bin/cypress-electron",
+    "test": "mocha --compilers coffee:@cypress/coffee-script",
+    "postinstall": "./bin/cypress-electron --install",
+    "clean-deps": "rm -rf node_modules",
+    "clean-all": "npm run clean-deps"
+  },
+  "bin": {
+    "cypress-electron": "./bin/cypress-electron"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress-core-electron.git"
+  },
+  "author": "Brian Mann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress-core-electron/issues"
+  },
+  "homepage": "https://github.com/cypress-io/cypress-core-electron#readme",
+  "devDependencies": {
+    "@cypress/icons": "0.5.2",
+    "@cypress/releaser": "0.1.12",
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2"
+  },
+  "dependencies": {
+    "@cypress/coffee-script": "0.1.2",
+    "bluebird": "^3.4.1",
+    "electron-packager": "^7.2.0",
+    "fs-extra": "^0.30.0",
+    "lodash": "^4.15.0",
+    "minimist": "^1.2.0"
+  }
+}

@@ -1,0 +1,18 @@
+default:
+  cdn_url: "https://cdn.cypress.io"
+  desktop_url: "https://download.cypress.io/desktop"
+  desktop_manifest_url: https://download.cypress.io/desktop.json
+  chromium_url: https://download.cypress.io/chromium
+  chromium_manifest_url: https://download.cypress.io/chromium.json
+
+development: &development
+  api_url: "http://localhost:1234/"
+
+test:
+  <<: *development
+
+staging:
+  api_url: "https://api-staging.cypress.io/"
+
+production:
+  api_url: "https://api.cypress.io/"

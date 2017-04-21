@@ -1,0 +1,52 @@
+.runner {
+  .iframes-container {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+  }
+
+  .size-container {
+    width: 100%;
+    height: 100%;
+    transform: scale(1);
+    transform-origin: 50% 0;
+  }
+
+  .has-error .size-container {
+    display: none;
+  }
+
+  .aut-iframe {
+    background-color: #fff;
+    box-shadow: 0 6px 10px #555;
+    border: none;
+    display: block;
+    height: 100%;
+    overflow: auto;
+    width: 100%;
+  }
+
+  .spec-iframe {
+    border: none;
+    height: 0;
+    position: absolute;
+    visibility: hidden;
+    width: 0;
+  }
+
+  // when the reporter is being resized, cover the iframe or else
+  // mouseover events stop firing if the user mouses over the iframe
+  .cover {
+    bottom: 0;
+    display: none;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+
+  .is-reporter-resizing & .cover {
+    display: block;
+  }
+}

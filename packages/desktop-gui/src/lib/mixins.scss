@@ -1,0 +1,48 @@
+@mixin responsive-width($width: 100%, $padding: 0, $border: 0, $borderColor: #eee) {
+  width: $width;
+  box-sizing: border-box;
+  @if $padding != "none" {
+    padding: $padding;
+  }
+  border-width: $border; // these border styles needed to be split out, so you could pass border: 0 1px 5px 2px instead of just one single border argument
+  border-color: $borderColor;
+  border-style: solid;
+  float: left;
+}
+
+@mixin el-width($col, $width) {
+  #{$col} {
+    @include responsive-width($width: $width, $padding: 0);
+  }
+}
+
+@mixin list-columns($widths...) {
+  $n: 1;
+  $var: ".row-column-wrapper:nth-child(" + $n + ")";
+  @each $width in $widths {
+    @include el-width($var, $width);
+    $n: $n + 1;
+    $var: ".row-column-wrapper:nth-child(" + $n + ")";
+  }
+}
+
+@mixin td-width($col, $width) {
+  #{$col} { width: $width; }
+}
+
+@mixin table-columns($widths...) {
+  $n: 1;
+  $var: "td:nth-child(" + $n + ")";
+  @each $width in $widths {
+    @include td-width($var, $width);
+    $n: $n + 1;
+    $var: "td:nth-child(" + $n + ")";
+  }
+}
+
+@mixin text-overflow-custom {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  word-wrap: break-word;
+}

@@ -6,8 +6,10 @@ const { snakeCase } = require('lodash')
 const { execSync } = require('child_process')
 const argv = require('minimist')(process.argv.slice(2))
 
-const remote = snakeCase(argv._[0])
-const command = `git pull -s subtree ${remote} master`
+const to = argv._[0]
+const branch = argv._[1] || 'master'
+const remote = snakeCase(to)
+const command = `git subtree pull --prefix=packages/${to}/ ${remote} ${branch}`
 
 console.log(command)
-execSync(command)
+execSync(command, { stdio: 'inherit' })

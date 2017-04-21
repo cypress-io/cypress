@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>All Tests</title>
+  </head>
+  <body>
+    <script type="text/javascript">
+      document.domain = 'localhost';
+
+      (function(parent) {
+        var Cypress = window.Cypress = parent.Cypress;
+        if (!Cypress) {
+          throw new Error("Tests cannot run without a reference to Cypress!");
+        }
+        return Cypress.onSpecWindow(window);
+      })(window.opener || window.parent);
+    </script>
+
+      <script type="text/javascript" src="/__cypress/tests?p=cypress/support/index.js-123"></script>
+      <script type="text/javascript" src="/__cypress/tests?p=cypress/integration/bar.js-123"></script>
+      <script type="text/javascript" src="/__cypress/tests?p=cypress/integration/baz.js-123"></script>
+      <script type="text/javascript" src="/__cypress/tests?p=cypress/integration/dom.jsx-123"></script>
+      <script type="text/javascript" src="/__cypress/tests?p=cypress/integration/foo.coffee-123"></script>
+      <script type="text/javascript" src="/__cypress/tests?p=cypress/integration/nested/tmp.js-123"></script>
+      <script type="text/javascript" src="/__cypress/tests?p=cypress/integration/noop.coffee-123"></script>
+  </body>
+</html>

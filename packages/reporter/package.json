@@ -1,0 +1,54 @@
+{
+  "name": "@cypress/core-reporter",
+  "version": "0.3.4",
+  "main": "lib/reporter",
+  "scripts": {
+    "build-dev": "node ./scripts/build-dev.js",
+    "build-prod": "node ./scripts/build-prod.js",
+    "clean": "zunder clean",
+    "clean-deps": "rm -rf node_modules",
+    "clean-all": "npm run clean && npm run clean-deps",
+    "test-once": "npm run test-unit-once",
+    "test-unit-once": "node ./scripts/test.js",
+    "watch-dev": "node ./scripts/watch.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress-core-reporter.git"
+  },
+  "author": "Brian Mann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress-core-reporter/issues"
+  },
+  "homepage": "https://github.com/cypress-io/cypress-core-reporter#readme",
+  "files": [
+    "dist",
+    "lib/reporter.js"
+  ],
+  "devDependencies": {
+    "@cypress/react-tooltip": "^0.1.1",
+    "@cypress/releaser": "0.1.12",
+    "babel-eslint": "^6.0.4",
+    "chai": "^3.5.0",
+    "chai-enzyme": "^0.6.1",
+    "classnames": "^2.2.5",
+    "css-element-queries": "^0.3.2",
+    "enzyme": "^2.8.1",
+    "eslint": "^3.11.1",
+    "eslint-plugin-mocha": "^4.0.0",
+    "eslint-plugin-react": "^5.1.1",
+    "font-awesome": "^4.6.3",
+    "jsdom": "^9.4.1",
+    "lodash": "^4.0.0",
+    "markdown-it": "^6.1.1",
+    "mobx": "^2.3.6",
+    "mobx-react": "^3.5.3",
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0",
+    "react-test-renderer": "^15.5.4",
+    "sinon": "^1.17.4",
+    "sinon-chai": "^2.8.0",
+    "zunder": "^3.5.5"
+  }
+}

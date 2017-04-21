@@ -1,0 +1,45 @@
+{
+  "name": "@cypress/core-https-proxy",
+  "version": "0.1.5",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "NODE_ENV=test mocha --watch",
+    "test-ci": "NODE_ENV=test mocha",
+    "https": "node https.js",
+    "release": "releaser"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress-core-https-proxy.git"
+  },
+  "author": "Brian Mann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress-core-https-proxy/issues"
+  },
+  "homepage": "https://github.com/cypress-io/cypress-core-https-proxy#readme",
+  "devDependencies": {
+    "@cypress/releaser": "0.1.12",
+    "chai": "^3.5.0",
+    "http-mitm-proxy": "^0.5.1",
+    "mocha": "^2.5.3",
+    "request": "^2.72.0",
+    "request-promise": "^3.0.0",
+    "sinon": "^1.17.4",
+    "sinon-as-promised": "^4.0.0",
+    "sinon-chai": "^2.8.0",
+    "supertest": "^1.2.0",
+    "supertest-as-promised": "^3.1.0"
+  },
+  "dependencies": {
+    "@cypress/coffee-script": "0.1.2",
+    "bluebird": "^3.4.0",
+    "fs-extra": "^0.30.0",
+    "node-forge": "^0.6.39",
+    "semaphore": "^1.0.5",
+    "server-destroy-vvo": "1.0.1",
+    "ssl-root-cas": "^1.1.10"
+  }
+}
