@@ -5,8 +5,9 @@ const { execSync } = require('child_process')
 const argv = require('minimist')(process.argv.slice(2))
 
 const to = argv._[0]
+const branch = argv._[1] || 'master'
 const remote = snakeCase(to)
-const command = `git subtree pull --prefix=packages/${to}/ ${remote} master`
+const command = `git subtree pull --prefix=packages/${to}/ ${remote} ${branch}`
 
 console.log(command)
 execSync(command)
