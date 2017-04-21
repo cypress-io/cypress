@@ -4,17 +4,16 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import { withRouter, Link } from 'react-router'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import projectsStore from '../projects/projects-store'
 import ProjectNav from '../project-nav/project-nav'
 import { closeProject, openProject } from '../projects/projects-api'
 import OnBoarding from "./onboarding"
 import Loader from "react-loader"
 
-const NoBrowsers = () => {
-
-  let _closeProject = function () {
-    closeProject(this.projectId)
+const NoBrowsers = ({ projectClientId }) => {
+  let _closeProject = () => {
+    closeProject(projectClientId)
   }
 
   return (
@@ -44,7 +43,7 @@ const NoBrowsers = () => {
 
 const downloadBrowser = function (e) {
   e.preventDefault()
-  App.ipc('external:open', 'https://www.google.com/chrome/browser/desktop')
+  ipc.externalOpen('https://www.google.com/chrome/browser/desktop')
 }
 
 const PortInUse = () => {
@@ -62,7 +61,7 @@ class Project extends Component {
   constructor (props) {
     super(props)
 
-    this.project = _.find(projectsStore.projects, { id: props.params.id })
+    this.project = projectsStore.getProjectByClientId(props.params.clientId)
 
     if (!this.project) {
       return props.router.push('/projects')
@@ -88,13 +87,13 @@ class Project extends Component {
   }
 
   render () {
-    document.title = `${this.project.name}`
+    document.title = `${this._projectName()}`
 
     if (this.project.isLoading) return <Loader color="#888" scale={0.5}/>
 
     if (!(this.project.error === undefined)) return this._error()
 
-    if (!this.project.browsers.length) return <NoBrowsers projectId={this.project.id}/>
+    if (!this.project.browsers.length) return <NoBrowsers projectClientId={this.project.clientId}/>
 
     return (
       <div>
@@ -105,12 +104,23 @@ class Project extends Component {
     )
   }
 
+  _projectName () {
+    let project = this.project
+
+    if (project.name) {
+      return (project.name)
+    } else {
+      let splitName = _.last(project.path.split('/'))
+      return _.truncate(splitName, { length: 60 })
+    }
+  }
+
   _error = () => {
     let err = this.project.error
     let portInUse
 
     if (err.portInUse) {
-      portInUse = <PortInUse projectId={this.project.id}/>
+      portInUse = <PortInUse />
     }
 
     return (
@@ -136,14 +146,12 @@ class Project extends Component {
   }
 
   _errorMessage (message) {
-    function createMarkup () {
-      return {
-        __html: message.replace('\n', '<br /><br />'),
-      }
+    const html = {
+      __html: message.split('\n').join('<br />'),
     }
 
     return (
-      <span dangerouslySetInnerHTML={createMarkup()} />
+      <span dangerouslySetInnerHTML={html} />
     )
   }
 

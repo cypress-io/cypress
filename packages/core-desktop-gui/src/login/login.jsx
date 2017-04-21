@@ -1,10 +1,13 @@
-import cs from 'classnames'
-import { action } from 'mobx'
 import React, { Component } from 'react'
-import App from '../lib/app'
-import state from '../lib/state'
+import { withRouter } from 'react-router'
+import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
+import cs from 'classnames'
 
+import ipc from '../lib/ipc'
+import state from '../lib/state'
+
+@withRouter
 @observer
 class Login extends Component {
   constructor (props) {
@@ -14,6 +17,12 @@ class Login extends Component {
       isLoggingIn: false,
       error: null,
     }
+
+    autorun(() => {
+      if (state.hasUser) {
+        return this.props.router.push('/')
+      }
+    })
   }
 
   render () {
@@ -25,7 +34,7 @@ class Login extends Component {
         <div className='login-content'>
           {this._error()}
           <button
-            className={cs('btn btn-login btn-block', {
+            className={cs('btn btn-login btn-black btn-block', {
               disabled: this.state.isLoggingIn,
             })}
             onClick={this._login}
@@ -56,7 +65,7 @@ class Login extends Component {
       return err && err.alreadyOpen
     }
 
-    return App.ipc('window:open', {
+    ipc.windowOpen({
       position: 'center',
       focus: true,
       width: 1000,
@@ -65,26 +74,26 @@ class Login extends Component {
       title: 'Login',
       type: 'GITHUB_LOGIN',
     })
-    .then(action('login:window:opened', (code) => {
+    .then((code) => {
       // TODO: supposed to focus the window here!
       // i think this is for linux
       // App.execute 'gui:focus'
       this.setState({ isLoggingIn: true })
 
-      return App.ipc('log:in', code)
-    }))
+      return ipc.logIn(code)
+    })
     .then(action('logged:in', (user) => {
-      return state.setUser(user)
+      state.setUser(user)
     }))
-    .catch(alreadyOpen, (err) => {
+    .catch(alreadyOpen, () => {
       return // do nothing if we're already open!
     })
-    .catch(action('error:at:login', (err) => {
-      return this.setState({
+    .catch((err) => {
+      this.setState({
         isLoggingIn: false,
         error: err,
       })
-    }))
+    })
   }
 
   _error () {
@@ -123,11 +132,11 @@ class Login extends Component {
   }
 
   _openHelp () {
-    App.ipc('external:open', 'https://docs.cypress.io')
+    ipc.externalOpen('https://on.cypress.io/logging-in')
   }
 
   _openAuthDoc () {
-    App.ipc('external:open', 'https://on.cypress.io/guides/installing-and-running#section-your-email-has-not-been-authorized-')
+    ipc.externalOpen('https://on.cypress.io/email-not-authorized')
   }
 }
 

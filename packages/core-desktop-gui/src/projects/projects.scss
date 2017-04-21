@@ -5,6 +5,7 @@
   overflow: auto;
   margin-bottom: 0;
   background-color: #fafafa;
+  @include list-columns(75%, 20%, 5%);
 
   .fa-chevron-right {
     color: #666;
@@ -13,9 +14,8 @@
   .react-context-menu-wrapper {
     overflow: auto;
 
-    &>a {
-      width: 100%;
-      float: left;
+    > a {
+      display: flex;
       background-color: #fff;
 
       &.project {
@@ -26,7 +26,10 @@
             cursor: wait;
             background-color: #fff;
           }
-          .project-name, .project-path, i {
+
+          .project-name,
+          .project-path,
+          i {
             color: #ccc;
           }
         }
@@ -37,9 +40,13 @@
         }
       }
 
-      &:hover, &:focus, &:active {
+      &:hover,
+      &:focus,
+      &:active {
         background-color: #f8f8f8;
-        .fa-chevron-right, .project-name {
+
+        .fa-chevron-right,
+        .project-name {
           color: #555;
         }
 
@@ -48,26 +55,28 @@
         }
       }
     }
+
+    .row-column-wrapper {
+      flex-grow: 0;
+      flex-shrink: 0;
+      float: none;
+    }
   }
 
-
   .row-column-wrapper {
-    &:last-child {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      width: 50px;
-
-      i {
-        position: absolute;
-        top: 37%;
-        right: 37%;
-      }
-    }
+    display: flex;
 
     .row-column {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       padding: 10px 20px;
+      width: 100%;
+    }
+
+    &.arrow {
+      align-items: center;
+      justify-content: center;
     }
   }
 
@@ -76,6 +85,15 @@
     font-size: 16px;
     font-weight: 500;
     line-height: 22px;
+    position: relative;
+    top:5px;
+
+    .label {
+      font-size: 9px;
+      position: relative;
+      top: -2px;
+      margin-left: 5px;
+    }
   }
 
   .project-path {
@@ -84,10 +102,46 @@
     font-style: italic;
     line-height: 22px;
   }
+
+  .project-owner {
+    font-size: 13px;
+    color: #666;
+  }
+
+  .last-run-status {
+    font-size: 14px;
+    color: #555;
+    font-weight: 500;
+
+    .passing i {
+      color: #39c598;
+    }
+
+    .failing i {
+      color: #ea6675;
+    }
+
+    .running i {
+      color: #5793d1;
+    }
+
+    .invalid i {
+      color: #f0ad4e;
+    }
+  }
+
+  .last-run-time {
+    font-size: 12px;
+    color: #888;
+    font-style: italic;
+  }
 }
 
 html.has-updates {
-  .projects-list, #tests-list-page, #config {
+  .projects-list,
+  #tests-list-page,
+  #config,
+  #runs-list-page {
     bottom: 56px;
   }
 }

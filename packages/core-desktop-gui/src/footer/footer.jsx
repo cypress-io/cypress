@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import state from '../lib/state'
 
 export default class Footer extends Component {
@@ -20,7 +20,6 @@ export default class Footer extends Component {
 
   _openChangelog (e) {
     e.preventDefault()
-    return App.ipc('external:open', 'https://on.cypress.io/changelog')
+    return ipc.externalOpen('https://on.cypress.io/changelog')
   }
 }
-

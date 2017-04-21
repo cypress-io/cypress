@@ -1,43 +1,93 @@
 import _ from 'lodash'
 import md5 from 'md5'
-import { computed, observable, action } from 'mobx'
+import { computed, observable, action, asReference } from 'mobx'
 import Browser from '../lib/browser-model'
 
-const strLength = 75
+const persistentProps = [
+  'id',
+  'name',
+  'public',
+  'orgName',
+  'orgId',
+  'defaultOrg',
+  'lastBuildStatus',
+  'lastBuildCreatedAt',
+]
+
+const validProps = persistentProps.concat([
+  'state',
+  'clientId',
+  'isChosen',
+  'isLoading',
+  'isNew',
+  'browsers',
+  'onBoardingModalOpen',
+  'browserState',
+  'resolvedConfig',
+  'error',
+  'parentTestsFolderDisplay',
+  'integrationExampleName',
+  'scaffoldedFiles',
+])
 
 export default class Project {
+  // state constants
+  static VALID = 'VALID'
+  static INVALID = 'INVALID'
+  static UNAUTHORIZED = 'UNAUTHORIZED'
+
+  // persisted with api
   @observable id
-  @observable path
+  @observable name
+  @observable public
+  @observable lastBuildStatus
+  @observable lastBuildCreatedAt
+  @observable orgName
+  @observable orgId
+  @observable defaultOrg
+  // comes from ipc, but not persisted
+  @observable state = Project.VALID
+  // local state
+  @observable clientId
   @observable isChosen = false
   @observable isLoading = false
   @observable isNew = false
   @observable browsers = []
   @observable onBoardingModalOpen = false
   @observable browserState = "closed"
-  @observable resolvedConfig
+  @observable resolvedConfig = asReference(null)
   @observable error
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
+  @observable scaffoldedFiles = []
+  // should never change after first set
+  @observable path
 
-  constructor (path) {
-    this.id = md5(path)
-    this.path = path
+  constructor (props) {
+    this.path = props.path
+    this.clientId = md5(props.path)
+
+    this.update(props)
   }
 
-  @computed get name () {
-    let splitName = _.last(this.path.split('/'))
-    return _.truncate(splitName, { length: 60 })
+  update (props) {
+    if (!props) return
+
+    _.each(validProps, (prop) => {
+      this._updateProp(props, prop)
+    })
   }
 
-  @computed get displayPath () {
-    let pathLength = this.path.length
+  _updateProp (props, prop) {
+    if (props[prop] != null) this[prop] = props[prop]
+  }
 
-    if (pathLength > strLength) {
-      let truncatedPath = this.path.slice((pathLength - 1) - strLength, pathLength)
-      return '...'.concat(truncatedPath)
-    } else {
-      return this.path
-    }
+  serialize () {
+    return _.pick(this, persistentProps)
+  }
+
+  @computed get isValid () {
+    return this.state === Project.VALID
   }
 
   @computed get otherBrowsers () {
@@ -53,27 +103,27 @@ export default class Project {
   }
 
   @action loading (bool) {
-    return this.isLoading = bool
+    this.isLoading = bool
   }
 
   @action openModal () {
-    return this.onBoardingModalOpen = true
+    this.onBoardingModalOpen = true
   }
 
   @action closeModal () {
-    return this.onBoardingModalOpen = false
+    this.onBoardingModalOpen = false
   }
 
   @action browserOpening () {
-    return this.browserState = "opening"
+    this.browserState = "opening"
   }
 
   @action browserOpened () {
-    return this.browserState = "opened"
+    this.browserState = "opened"
   }
 
   @action browserClosed () {
-    return this.browserState = "closed"
+    this.browserState = "closed"
   }
 
   @action setBrowsers (browsers = []) {
@@ -87,7 +137,7 @@ export default class Project {
       if (localStorage.getItem('chosenBrowser')) {
         this.setChosenBrowserByName(localStorage.getItem('chosenBrowser'))
       } else {
-        return this.setChosenBrowser(this.defaultBrowser)
+        this.setChosenBrowser(this.defaultBrowser)
       }
     }
   }
@@ -97,7 +147,7 @@ export default class Project {
       browser.isChosen = false
     })
     localStorage.setItem('chosenBrowser', browser.name)
-    return browser.isChosen = true
+    browser.isChosen = true
   }
 
   @action setOnBoardingConfig (config) {
@@ -106,23 +156,24 @@ export default class Project {
     this.integrationFolder = config.integrationFolder
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
     this.fileServerFolder = config.fileServerFolder
-    return this.integrationExampleName = config.integrationExampleName
+    this.integrationExampleName = config.integrationExampleName
+    this.scaffoldedFiles = config.scaffoldedFiles
   }
 
   @action setResolvedConfig (resolved) {
-    return this.resolvedConfig = resolved
+    this.resolvedConfig = resolved
   }
 
   @action setError (err) {
-    return this.error = err
+    this.error = err
   }
 
   setChosenBrowserByName (name) {
-    const browser = _.find(this.browsers, { name })
-    return this.setChosenBrowser(browser)
+    const browser = _.find(this.browsers, { name }) || this.defaultBrowser
+    this.setChosenBrowser(browser)
   }
 
   @action clearError () {
-    return this.error = undefined
+    this.error = undefined
   }
 }

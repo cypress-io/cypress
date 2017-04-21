@@ -1,6 +1,8 @@
-import ipc from './ipc'
+import ipcBus from './ipc-bus'
 
-const App = { ipc }
+const App = {
+  ipc: ipcBus,
+}
 
 window.App = App
 

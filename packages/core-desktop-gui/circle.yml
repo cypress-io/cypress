@@ -1,6 +1,6 @@
 machine:
   node:
-    version: 6.1.0
+    version: 6.5.0
 
 dependencies:
   override:
@@ -13,4 +13,4 @@ test:
     - npm run server:
         background: true
   override:
-    - cypress ci
+    - cypress run --record

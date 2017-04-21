@@ -17,6 +17,7 @@
 // Components
 @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/component-animations";
 @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/dropdowns";
+@import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/input-groups";
 @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/button-groups";
 @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/navs";
 @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/navbar";
@@ -33,8 +34,10 @@
 // Utilities
 @import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/utilities";
 
-@import "../../node_modules/rc-tooltip/assets/bootstrap";
-
 // Fonts
 @import "../../node_modules/font-awesome/scss/font-awesome";
 @import "../../node_modules/fira/fira";
+
+// Tooltip
+$cy-tooltip-class: 'cy-tooltip';
+@import 'node_modules/@cypress/react-tooltip/dist/tooltip.scss';

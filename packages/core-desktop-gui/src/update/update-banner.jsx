@@ -4,7 +4,7 @@ import { observer } from 'mobx-react'
 
 import state from '../lib/state'
 import updater from './update-model'
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 
 @observer
 class UpdateBanner extends Component {
@@ -21,7 +21,7 @@ class UpdateBanner extends Component {
   componentWillUnmount () {
     document.getElementsByTagName('html')[0].classList.remove('has-updates')
 
-    App.ipc.off('updater:check')
+    ipc.offUpdaterCheck()
     clearInterval(this.checkId)
   }
 
@@ -32,7 +32,7 @@ class UpdateBanner extends Component {
 
     return (
       <div id='updates-available'>
-      New updates are available
+        New updates are available
         <strong onClick={this._downloadUpdate}>
           <i className='fa fa-download'></i>{' '}
           Update
@@ -42,11 +42,14 @@ class UpdateBanner extends Component {
   }
 
   _checkForUpdate () {
-    App.ipc.off('updater:check')
-    App.ipc('updater:check')
+    ipc.offUpdaterCheck()
+    ipc.updaterCheck()
     .then(action('checked:updates', (version) => {
       state.updatesAvailable(!!version)
     }))
+    .catch((error) => {
+      console.warn('Error checking for updates:', error) // eslint-disable-line no-console
+    })
   }
 
   _downloadUpdate () {

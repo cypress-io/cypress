@@ -1,137 +1,57 @@
 import _ from 'lodash'
-import Promise from 'bluebird'
 
-let msgs = {}
+import App from './app'
+import errors from './errors'
+import state from './state'
 
-const addMsg = (id, event, fn) => {
-  msgs[id] = {
-    event,
-    fn,
+const ipc = {
+  isUnauthed (error) {
+    return errors.isUnauthenticated(error)
+  },
+  handleUnauthed () {
+    state.setUser(null)
+
+    ipc.clearGithubCookies()
+    ipc.logOut()
+  },
+}
+
+const register = (eventName, isPromiseApi = true) => {
+  ipc[_.camelCase(eventName)] = (...args) => App.ipc(eventName, ...args)
+  if (!isPromiseApi) {
+    ipc[_.camelCase(`off:${eventName}`)] = () => App.ipc.off(eventName)
   }
 }
 
-const removeMsgsByEvent = (event) => {
-  return msgs = _.omitBy(msgs, (msg) => msg.event === event)
-}
+register('add:project')
+register('clear:github:cookies')
+register('close:browser')
+register('close:project')
+register('external:open')
+register('get:current:user')
+register('get:orgs')
+register('gui:error')
+register('get:builds')
+register('get:options')
+register('get:projects')
+register('get:project:statuses')
+register('get:project:status')
+register('get:record:keys')
+register('get:specs', false)
+register('launch:browser', false)
+register('log:in')
+register('log:out')
+register('on:focus:tests', false)
+register('on:menu:clicked', false)
+register('open:finder')
+register('open:project', false)
+register('remove:project')
+register('request:access')
+register('setup:dashboard:project')
+register('show:directory:dialog')
+register('updater:check', false)
+register('updater:run', false)
+register('window:open')
+register('window:close')
 
-const removeMsgById = (id) => {
-  return msgs = _.omit(msgs, `${id}`)
-}
-
-const createIpc = () => {
-  console.warn("Missing 'ipc'. Polyfilling in development mode.") // eslint-disable-line no-console
-
-  let responses = []
-
-  // return a mock ipc interface useful in development + testing
-  return ({
-    on () {},
-    off () {},
-    send (resp, id, event) {
-      // if we have a pending response then just
-      // invoke it asynchronously
-      let response = _.find(responses, { event })
-      if (response) {
-        responses = _.without(responses, response)
-        return Promise.delay(1).then(() => {
-          this.handle(event, response.err, response.data)
-          return response.resolve()
-        })
-      }
-    },
-
-    handle (event, err, data) {
-      return new Promise((resolve) => {
-        // create our own handle function to callback the registered events
-        //
-        // grab the first msg by its event
-        const msg = _.find(msgs, { event })
-
-        if (msg) {
-          msg.fn(err, data)
-          return resolve()
-        } else {
-          return responses.push({
-            event,
-            err,
-            data,
-            resolve,
-          })
-        }
-      })
-    },
-  })
-}
-
-const ipc = window.ipc != null ? window.ipc : (window.ipc = createIpc())
-
-ipc.on("response", (event, obj = {}) => {
-  const { id, __error, data } = obj
-  const msg = msgs[id]
-
-  // standard node callback implementation
-  if (msg) {
-    return msg.fn(__error, data)
-  }
-})
-
-const appIpc = (...args) => {
-  if (args.length === 0) { return msgs }
-
-  // our ipc interface can either be a standard
-  // node callback or a promise interface
-  // we support both because oftentimes we want
-  // to our async request to be resolved with a
-  // singular value, and other times we want it
-  // to be called multiple times akin to a stream
-
-  // generate an id
-  const id = Math.random()
-
-  // first arg is the event
-  const event = args[0]
-
-  // get the last argument
-  const lastArg = args.pop()
-
-  let fn
-  // enable the last arg to be a function
-  // which changes this interface from being
-  // a promise to just calling the callback
-  // function directly
-  if (lastArg && _.isFunction(lastArg)) {
-    fn = () => addMsg(id, event, lastArg)
-  } else {
-    // push it back onto the array
-    args.push(lastArg)
-
-    fn = () => {
-      // return a promise interface and at the
-      // same time store this callback function
-      // by id in msgs
-      return new Promise((resolve, reject) => {
-        addMsg(id, event, (err, data) => {
-          // cleanup messages using promise interface
-          // automatically
-          removeMsgById(id)
-
-          if (err) {
-            return reject(err)
-          } else {
-            return resolve(data)
-          }
-        })
-      })
-    }
-  }
-
-  // pass in request, id, and remaining args
-  ipc.send(...["request", id].concat(args))
-
-  return fn()
-}
-
-appIpc.offById = removeMsgById
-appIpc.off = removeMsgsByEvent
-
-export default appIpc
+export default ipc

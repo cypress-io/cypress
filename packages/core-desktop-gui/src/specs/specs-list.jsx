@@ -1,10 +1,9 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import { action } from 'mobx'
 import Loader from 'react-loader'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import { runSpec } from '../projects/projects-api'
 import specsCollection from './specs-collection'
 
@@ -19,7 +18,7 @@ class Specs extends Component {
 
     return (
       <div id='tests-list-page'>
-        <a onClick={this._runAllSpecs.bind(this)} className={`all-tests btn btn-link ${allActiveClass}`}>
+        <a onClick={this._selectSpec.bind(this, '__all')} className={`all-tests btn btn-link ${allActiveClass}`}>
           <i className={`fa fa-fw ${this._allSpecsIcon(specsCollection.allSpecsChosen)}`}></i>{' '}
           Run All Tests
         </a>
@@ -35,11 +34,11 @@ class Specs extends Component {
   specItem (spec) {
     if (spec.children.specs && spec.children.specs.length) {
       return (
-        <li key={spec.id} className='folder'>
+        <li key={spec.path} className='folder'>
           <div>
             <div>
               <i className='fa fa-folder-open-o fa-fw'></i>
-              { spec.name }{' '}
+              { spec.displayName }{' '}
             </div>
             <div>
               <ul className='list-as-table'>
@@ -55,12 +54,12 @@ class Specs extends Component {
       let activeClass = spec.isChosen ? 'active' : ''
 
       return (
-        <li key={spec.id} className='file'>
-          <a href='#' onClick={this._selectSpec.bind(this, spec.id)} className={activeClass}>
+        <li key={spec.path} className='file'>
+          <a href='#' onClick={this._selectSpec.bind(this, spec.path)} className={activeClass}>
             <div>
               <div>
                 <i className={`fa fa-fw ${this._specIcon(spec.isChosen)}`}></i>
-                { spec.name }
+                { spec.displayName }
               </div>
             </div>
             <div>
@@ -88,24 +87,14 @@ class Specs extends Component {
     }
   }
 
-  _runAllSpecs (e) {
+  _selectSpec (specPath, e) {
     e.preventDefault()
 
-    specsCollection.setChosenSpec('__all')
+    specsCollection.setChosenSpec(specPath)
 
     let project = this.props.project
 
-    runSpec(project, '__all', project.chosenBrowser.name)
-  }
-
-  _selectSpec (specId, e) {
-    e.preventDefault()
-
-    specsCollection.setChosenSpec(specId)
-
-    let project = this.props.project
-
-    runSpec(project, specId, project.chosenBrowser.name)
+    runSpec(project, specPath, project.chosenBrowser.name)
   }
 
   _empty () {
@@ -128,12 +117,12 @@ class Specs extends Component {
   }
 
   _openIntegrationFolder () {
-    App.ipc('open:finder', this.props.project.integrationFolder)
+    ipc.openFinder(this.props.project.integrationFolder)
   }
 
   _openHelp (e) {
     e.preventDefault()
-    App.ipc('external:open', 'https://on.cypress.io/guides/writing-your-first-test#section-test-files')
+    ipc.externalOpen('https://on.cypress.io/writing-first-test')
   }
 }
 

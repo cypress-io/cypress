@@ -5,7 +5,7 @@ import { withRouter } from 'react-router'
 
 import { getProjects } from '../projects/projects-api'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import state from '../lib/state'
 
 @withRouter
@@ -14,24 +14,27 @@ export default class Application extends Component {
   constructor (props) {
     super(props)
 
-    App.ipc('get:current:user')
+    ipc.getCurrentUser()
     .then(action('got:current:user', (user) => {
       state.userLoaded = true
       state.setUser(user)
 
-      if (!user || !user.session_token) {
-        return this.props.router.push('/login')
+      if (!user || !user.authToken) {
+        this.props.router.push('/login')
       }
     }))
+    .catch(ipc.isUnauthed, () => {
+      this.props.router.push('/login')
+    })
 
     autorun(() => {
       if (!state.userLoaded) return
 
       if (state.hasUser) {
         getProjects()
-        return this.props.router.push('/')
+        this.props.router.push('/')
       } else {
-        return this.props.router.push('/login')
+        this.props.router.push('/login')
       }
     })
   }

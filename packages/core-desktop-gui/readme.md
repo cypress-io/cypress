@@ -54,10 +54,65 @@ If you want to see the `ipc` events which are pending from Cypress tests:
 
 
 ## License
-LGPL
+MIT
 
 
 ## Changelog
+
+#### 0.4.9 - *(04/20/17)*
+- bump cypress deps
+
+#### 0.4.8 - *(04/14/17)*
+- properly await browser closing
+- new spec data structure
+
+#### 0.4.7 - *(04/12/17)*
+- colorize browser icons
+- display browser tooltip + icon
+- update ipc events
+
+#### 0.4.6 - *(03/07/17)*
+- provide help links to explain orgs + access
+
+#### 0.4.5 - *(02/11/17)*
+- added --record flag
+
+#### 0.4.4 - *(02/11/17)*
+- more slug renaming
+
+#### 0.4.3 - *(02/10/17)*
+- updated content
+- renamed slugs
+
+#### 0.4.2 - *(02/10/17)*
+- merged missed PR
+
+#### 0.4.1 - *(02/10/17)*
+- display runs
+- new settings areas
+- request access
+- add project to Dashboard
+
+#### 0.4.0 - *(01/04/17)*
+- builds list, adding project for ci
+
+#### 0.3.15 - *(01/29/17)*
+- display all scaffolded files
+
+#### 0.3.14 - *(01/29/17)*
+- LGPL -> MIT
+- correctly replace new lines on errors
+- rename sessionToken -> authToken
+- display full list of scaffolded files
+
+#### 0.3.13 - *(11/15/16)*
+- camelize session token
+
+#### 0.3.12 - *(11/14/16)*
+- fix missing lib js file
+
+#### 0.3.11 - *(11/14/16)*
+- updated config to display 'env' property instead of inaccurately named 'environmentVariables' property
 
 #### 0.3.10 - *(10/14/16)*
 - missing lib folder

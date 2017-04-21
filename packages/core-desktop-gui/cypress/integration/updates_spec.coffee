@@ -1,19 +1,24 @@
+{deferred, stubIpc} = require("../support/util")
+
 describe "Updates", ->
   beforeEach ->
     cy
       .viewport(300, 240)
       .visit("/updates.html")
-      .window().then (win) ->
-        {@ipc, @App} = win
+      .then (win) ->
+        {@App} = win
+        cy.stub(@App, "ipc").as("ipc")
 
-        @agents = cy.agents()
-        @agents.spy(@App, "ipc")
+        @version = "1.78"
 
-        @v = "1.78"
+        stubIpc(@App.ipc, {
+          "get:options": (stub) => stub.resolves({version: @version})
+          "updater:run": ->
+        })
 
-        @ipc.handle("get:options", null, {version: @v})
+        @App.startUpdateApp()
 
-  it "has updates title", ->
+  it "updates title", ->
     cy.title().should("include", "Updates")
 
   it "displays loading spinner before updater:run is called", ->
@@ -23,58 +28,58 @@ describe "Updates", ->
     expect(@App.ipc).to.be.calledWith("updater:run")
 
   it "links to Changelog", ->
-    @ipc.handle("updater:run", null, {event: "none"})
+    @["updater:run"].yield(null, {event: "none"})
 
     cy.contains("a", "View Changelog").click().then ->
       expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/changelog")
 
   it "displays current version", ->
-    @ipc.handle("updater:run", null, {event: "none"})
+    @["updater:run"].yield(null, {event: "none"})
 
-    cy.get(".version").contains(@v)
+    cy.get(".version").contains(@version)
 
   describe "updater:run start", ->
     it "displays check for updates msg", ->
-      @ipc.handle("updater:run", null, {event: "start"})
+      @["updater:run"].yield(null, {event: "start"})
       cy.contains("Checking for updates...")
 
   describe "updater:run apply", ->
     it "displays applying updates msg", ->
-      @ipc.handle("updater:run", null, {event: "apply"})
+      @["updater:run"].yield(null, {event: "apply"})
       cy.contains("Applying updates...")
 
   describe "updater:run error", ->
     it "displays error msg", ->
-      @ipc.handle("updater:run", null, {event: "error"})
+      @["updater:run"].yield(null, {event: "error"})
       cy.contains("An error occurred updating")
       cy.contains("You can manually update Cypress by running 'cypress install' from your terminal or by downloading it again.")
 
     it "triggers window:close on click of close btn", ->
-      @ipc.handle("updater:run", null, {event: "error"})
+      @["updater:run"].yield(null, {event: "error"})
       cy.contains(".btn", "Done").click().then ->
         expect(@App.ipc).to.be.calledWith("window:close")
 
   describe "updater:run none", ->
     it "displays none msg", ->
-      @ipc.handle("updater:run", null, {event: "none"})
+      @["updater:run"].yield(null, {event: "none"})
       cy.contains("No updates available")
 
     it "triggers window:close on click of close btn", ->
-      @ipc.handle("updater:run", null, {event: "none"})
+      @["updater:run"].yield(null, {event: "none"})
       cy.contains(".btn", "Done").click().then ->
         expect(@App.ipc).to.be.calledWith("window:close")
 
   describe "updater:run download", ->
     it "displays download msg", ->
-      @ipc.handle("updater:run", null, {event: "download"})
+      @["updater:run"].yield(null, {event: "download"})
       cy.contains("Downloading updates...")
 
   describe "updater:run done", ->
     it "displays done msg", ->
-      @ipc.handle("updater:run", null, {event: "done"})
+      @["updater:run"].yield(null, {event: "done"})
       cy.contains("Updates ready")
 
     it "triggers window:close on click of restart btn", ->
-      @ipc.handle("updater:run", null, {event: "done"})
+      @["updater:run"].yield(null, {event: "done"})
       cy.contains(".btn", "Restart").click().then ->
         expect(@App.ipc).to.be.calledWith("window:close")

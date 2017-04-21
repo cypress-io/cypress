@@ -1,4 +1,4 @@
-var cyIcons = require('@cypress/core-icons')
+var cyIcons = require('@cypress/icons')
 
 module.exports = function (zunder) {
   var staticGlobs = {

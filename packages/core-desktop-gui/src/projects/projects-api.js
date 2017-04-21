@@ -3,22 +3,42 @@ import { action } from 'mobx'
 import Promise from 'bluebird'
 import { hashHistory } from 'react-router'
 
-import App from '../lib/app'
+import ipc from '../lib/ipc'
 import projectsStore from '../projects/projects-store'
 import specsCollection from '../specs/specs-collection'
 
-const getProjects = () => {
-  projectsStore.loading(true)
+import { getSpecs } from '../specs/specs-api'
 
-  return App.ipc('get:project:paths')
-  .then(action('got:projects:paths', (paths) => {
-    return projectsStore.setProjects(paths)
+const getProjects = (shouldLoad = true) => {
+  if (shouldLoad) {
+    projectsStore.loading(true)
+  }
+
+  return ipc.getProjects()
+  .then(action('got:projects', (projects) => {
+    projectsStore.setProjects(projects)
+
+    return ipc.getProjectStatuses(projects)
+    .then((projects = []) => {
+      projectsStore.setProjectStatuses(projects)
+    })
   }))
+  .catch(ipc.isUnauthed, ipc.handleUnauthed)
+}
+
+const pollProjects = () => {
+  return setInterval(() => {
+    getProjects(false)
+  }, 10000)
+}
+
+const stopPollingProjects = (pollId) => {
+  clearInterval(pollId)
 }
 
 const addProject = () => {
   let project
-  return App.ipc('show:directory:dialog')
+  return ipc.showDirectoryDialog()
   .then(action('directory:dialog:closed', (path) => {
      // if the user cancelled the dialog selection
      // path will be undefined
@@ -29,28 +49,35 @@ const addProject = () => {
     project.loading(true)
 
     return Promise.all([
-      App.ipc('add:project', path),
+      ipc.addProject(path),
       Promise.delay(750),
     ])
-    .then(() => {
-      return project.loading(false)
-    })
+    .spread(action('project:added', (clientProjectDetails) => {
+      project.loading(false)
+
+      if (clientProjectDetails.id != null) {
+        return ipc.getProjectStatus(clientProjectDetails)
+        .then(action('project:status:received', (projectDetails) => {
+          project.update(projectDetails)
+        }))
+        .catch(ipc.isUnauthed, ipc.handleUnauthed)
+      }
+    }))
   }))
   .catch((err) => {
     projectsStore.setError(err.message)
   })
 }
 
-const runSpec = (project, spec, browser, url) => {
+const runSpec = (project, spec, browser) => {
   project.setChosenBrowserByName(browser)
 
   let launchBrowser = () => {
     project.browserOpening()
 
-    return App.ipc('launch:browser', { browser, url, spec }, (err, data = {}) => {
+    ipc.launchBrowser({ browser, spec }, (err, data = {}) => {
       if (data.browserOpened) {
         project.browserOpened()
-
       }
 
       if (data.browserClosed) {
@@ -58,46 +85,43 @@ const runSpec = (project, spec, browser, url) => {
 
         specsCollection.setChosenSpec('')
 
-        return App.ipc.off('launch:browser')
+        ipc.offLaunchBrowser()
       }
     })
   }
 
-  return App.ipc('get:open:browsers')
-  .then((browsers = []) => {
-    if (browsers.length) {
-      return App.ipc('change:browser:spec', { spec })
-    } else {
-      return launchBrowser()
-    }
-  })
+  let changeChosenSpec = () => {
+    specsCollection.setChosenSpec(spec)
+  }
 
+  return closeBrowser()
+  .then(changeChosenSpec)
+  .then(launchBrowser)
 }
 
-const closeBrowser = (projectId) => {
+const closeBrowser = (clientId) => {
   specsCollection.setChosenSpec('')
 
-  App.ipc('close:browser')
-
-  if (projectId) {
-    let project = projectsStore.getProjectById(projectId)
+  if (clientId) {
+    let project = projectsStore.getProjectByClientId(clientId)
     project.browserClosed()
   }
 
-  App.ipc.off('close:browser')
-  return App.ipc.off('launch:browser')
+  ipc.offLaunchBrowser()
+
+  return ipc.closeBrowser()
 }
 
-const closeProject = (projectId) => {
-  closeBrowser(projectId)
-
+const closeProject = (clientId) => {
   // unbind listeners
-  App.ipc.off('open:project')
-  App.ipc.off('get:specs')
-  App.ipc.off('on:focus:tests')
+  ipc.offOpenProject()
+  ipc.offGetSpecs()
+  ipc.offOnFocusTests()
 
-  App.ipc('close:project')
-  App.ipc.off('close:project')
+  return Promise.join(
+    closeBrowser(clientId),
+    ipc.closeProject()
+  )
 }
 
 const openProject = (project) => {
@@ -109,6 +133,7 @@ const openProject = (project) => {
   })
 
   const changeConfig = action('config:changed', (config) => {
+    project.id = config.projectId
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
@@ -118,11 +143,11 @@ const openProject = (project) => {
     return new Promise((resolve) => {
       resolve = once(resolve)
 
-      App.ipc("on:focus:tests", () => {
-        hashHistory.push(`projects/${project.id}/specs`)
+      ipc.onFocusTests(() => {
+        hashHistory.push(`projects/${project.clientId}/specs`)
       })
 
-      App.ipc("open:project", project.path, (err, config = {}) => {
+      ipc.openProject(project.path, (err, config = {}) => {
         if (config.specChanged) {
           return specsCollection.setChosenSpec(config.specChanged)
         }
@@ -147,25 +172,28 @@ const openProject = (project) => {
   .then(() => {
     project.loading(false)
 
-    App.ipc('get:specs', (err, specs = []) => {
-      if (err) {
-        return setProjectError(err)
-      }
-
-      specsCollection.setSpecs(specs)
-
-    })
+    getSpecs(setProjectError)
 
     return null
   })
   .catch(setProjectError)
 }
 
+const getRecordKeys = () => {
+  return ipc.getRecordKeys()
+  .catch(ipc.isUnauthed, ipc.handleUnauthed)
+  // ignore error, settle for no keys
+  .catch(() => [])
+}
+
 export {
   getProjects,
+  pollProjects,
+  stopPollingProjects,
   openProject,
   closeProject,
   addProject,
   runSpec,
   closeBrowser,
+  getRecordKeys,
 }
