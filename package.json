@@ -29,8 +29,8 @@
   "homepage": "https://github.com/cypress-io/cypress-core-extension#readme",
   "devDependencies": {
     "@cypress/core-icons": "0.4.0",
-    "@cypress/core-releaser": "0.1.8",
     "@cypress/core-socket": "0.1.0",
+    "@cypress/releaser": "0.1.11",
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
     "coffeeify": "^2.0.1",
@@ -45,8 +45,8 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
+    "@cypress/coffee-script": "0.1.1",
     "bluebird": "^3.3.5",
-    "coffee-script": "^1.10.0",
     "lodash": "^4.11.2"
   }
 }
