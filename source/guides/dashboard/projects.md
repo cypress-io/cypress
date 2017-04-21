@@ -13,7 +13,7 @@ This is often the same repository as your code, but can also be a subfolder or a
 
 Projects can **only** be added to Cypress through our [Desktop Application](https://on.cypress.io/guides/installing-and-running).
 
-1. Click :fa-plus: Add Project.
+1. Click {% fa fa-plus %} Add Project.
 
 ![Add Project in LeftHand Corner](https://cloud.githubusercontent.com/assets/1271364/22699969/fe44c2e4-ed26-11e6-83d0-9baa0f51b15e.png)
 

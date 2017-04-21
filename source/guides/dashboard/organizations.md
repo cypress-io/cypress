@@ -52,7 +52,7 @@ Even though we are in a **private beta**, any user you invite will automatically
 
 *To invite a user to an organization:*
 
-1. Click the :fa-cog: beside the Projects you want to give the user access to.
+1. Click the {% fa fa-cog %} beside the Projects you want to give the user access to.
 2. Click 'Invite User'. Note: you must have the role of 'owner' or 'admin' to invite users.
 3. Fill in the email and select the role for the user and click 'Invite User' Note: only 'owner's can give other user's 'owner' access.
 4. The user will recieve an invite email with a link to accept the invitation.
