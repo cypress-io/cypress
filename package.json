@@ -30,7 +30,7 @@
   "devDependencies": {
     "@cypress/core-icons": "0.4.0",
     "@cypress/core-socket": "0.1.0",
-    "@cypress/releaser": "0.1.11",
+    "@cypress/releaser": "0.1.12",
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
     "coffeeify": "^2.0.1",
@@ -45,7 +45,7 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
-    "@cypress/coffee-script": "0.1.1",
+    "@cypress/coffee-script": "0.1.2",
     "bluebird": "^3.3.5",
     "lodash": "^4.11.2"
   }
