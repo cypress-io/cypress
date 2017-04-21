@@ -123,12 +123,26 @@ $Cypress.ErrorMessages = do ($Cypress) ->
         https://on.cypress.io/element-is-animating
       """
       animation_check_failed: "Not enough coord points provided to calculate distance."
-      covered: """
-        #{cmd('{{cmd}}')} failed because this element is being covered by another element:\n
+      center_hidden: """
+        #{cmd('{{cmd}}')} failed because the center of this element is hidden from view:\n
         {{node}}\n
         Fix this problem, or use {force: true} to disable error checking.\n
         https://on.cypress.io/element-cannot-be-interacted-with
       """
+      covered: (obj) ->
+        """
+        #{cmd(obj.cmd)} failed because this element:
+
+        #{obj.element1}
+
+        is being covered by another element:
+
+        #{obj.element2}
+
+        Fix this problem, or use {force: true} to disable error checking.
+
+        https://on.cypress.io/element-cannot-be-interacted-with
+        """
       detached: """
         #{cmd('{{cmd}}')} failed because this element you are chaining off of has become detached or removed from the DOM:\n
         {{node}}\n
@@ -136,12 +150,6 @@ $Cypress.ErrorMessages = do ($Cypress) ->
       """
       disabled: """
         #{cmd('{{cmd}}')} failed because this element is disabled:\n
-        {{node}}\n
-        Fix this problem, or use {force: true} to disable error checking.\n
-        https://on.cypress.io/element-cannot-be-interacted-with
-      """
-      hidden: """
-        #{cmd('{{cmd}}')} failed because the center of this element is hidden from view:\n
         {{node}}\n
         Fix this problem, or use {force: true} to disable error checking.\n
         https://on.cypress.io/element-cannot-be-interacted-with

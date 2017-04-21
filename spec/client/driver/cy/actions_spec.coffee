@@ -2301,7 +2301,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(2)
-          expect(err.message).to.include "cy.type() failed because this element is being covered by another element"
+          expect(err.message).to.include "cy.type() failed because this element"
+          expect(err.message).to.include "is being covered by another element"
           done()
 
         @cy.get("#input-covered-in-span").type("foo")
@@ -2603,7 +2604,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(2)
-          expect(err.message).to.include "cy.clear() failed because this element is being covered by another element"
+          expect(err.message).to.include "cy.clear() failed because this element"
+          expect(err.message).to.include "is being covered by another element"
           done()
 
         @cy.get("#input-covered-in-span").clear()
@@ -2964,7 +2966,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(2)
-          expect(err.message).to.include "cy.check() failed because this element is being covered by another element"
+          expect(err.message).to.include "cy.check() failed because this element"
+          expect(err.message).to.include "is being covered by another element"
           done()
 
         @cy.get("#checkbox-covered-in-span").check()
@@ -3361,7 +3364,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(2)
-          expect(err.message).to.include "cy.uncheck() failed because this element is being covered by another element"
+          expect(err.message).to.include "cy.uncheck() failed because this element"
+          expect(err.message).to.include "is being covered by another element"
           done()
 
         @cy.get("#checkbox-covered-in-span").uncheck()
@@ -5504,7 +5508,8 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("snapshots")[0].name).to.eq("before")
           expect(@log.get("snapshots")[1]).to.be.an("object")
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(err.message).to.include "cy.click() failed because this element is being covered by another element"
+          expect(err.message).to.include "cy.click() failed because this element"
+          expect(err.message).to.include "is being covered by another element"
 
           console = @log.attributes.consoleProps()
           expect(console["Tried to Click"]).to.eq btn.get(0)
@@ -5538,7 +5543,8 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("snapshots")[0].name).to.eq("before")
           expect(@log.get("snapshots")[1]).to.be.an("object")
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(err.message).to.include "cy.click() failed because this element is being covered by another element"
+          expect(err.message).to.include "cy.click() failed because this element"
+          expect(err.message).to.include "is being covered by another element"
 
           console = @log.attributes.consoleProps()
           expect(console["Tried to Click"]).to.eq btn.get(0)

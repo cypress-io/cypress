@@ -644,14 +644,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             retry = ->
               getCoords(scrollIntoView, coordsHistory)
 
-            if options.force isnt true
-              try
-                @ensureVisibility($el, options._log)
-                @ensureActionability($el, options._log)
-              catch err
-                options.error = err
-                return @_retry(retry, options)
-
             ## use native scrollIntoView here so scrollable
             ## containers are automatically handled correctly
 
@@ -661,6 +653,14 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             ## and the left of the element so it positions the center
             ## in the viewport
             $el.get(0).scrollIntoView() if scrollIntoView
+
+            if options.force isnt true
+              try
+                @ensureVisibility($el, options._log)
+                @ensureActionability($el, options._log)
+              catch err
+                options.error = err
+                return @_retry(retry, options)
 
             @_waitForAnimations($el, options, coordsHistory)
             .then(verifyElementAtCoordinates)
