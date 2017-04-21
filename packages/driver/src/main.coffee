@@ -1,5 +1,5 @@
-require("../config/jquery")
-require("../config/lodash")
-require("../config/moment")
+require("./config/jquery")
+require("./config/lodash")
+require("./config/moment")
 
 module.exports = require("./cypress")

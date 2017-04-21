@@ -21,6 +21,18 @@ inputEvents = "textInput input".split(" ")
 delay = 50
 
 $Cy.extend({
+  _findScrollableParent: ($el) ->
+    $parent = $el.parent()
+
+    ## if we're at the body, we just want to pass in
+    ## window into jQuery scrollTo
+    if $parent.is("body,html") or $Cypress.Utils.hasDocument($parent)
+      return @private("window")
+
+    return $parent if $Cypress.Dom.elIsScrollable($parent)
+
+    @_findScrollableParent($parent)
+
   _waitForAnimations: ($el, options, coordsHistory = []) ->
     ## determine if this element is animating
     if options.x and options.y
@@ -61,138 +73,138 @@ $Cy.extend({
         @_retry(retry, options)
 
   _check_or_uncheck: (type, subject, values = [], options = {}) ->
-    ## we're not handling conversion of values to strings
-    ## in case we've received numbers
+      ## we're not handling conversion of values to strings
+      ## in case we've received numbers
 
-    ## if we're not an array but we are an object
-    ## reassign options to values
-    if not _.isArray(values) and _.isObject(values)
-      options = values
-      values = []
-    else
-      ## make sure we're an array of values
-      values = [].concat(values)
+      ## if we're not an array but we are an object
+      ## reassign options to values
+      if not _.isArray(values) and _.isObject(values)
+        options = values
+        values = []
+      else
+        ## make sure we're an array of values
+        values = [].concat(values)
 
-    ## keep an array of subjects which
-    ## are potentially reduced down
-    ## to new filtered subjects
-    matchingElements = []
+      ## keep an array of subjects which
+      ## are potentially reduced down
+      ## to new filtered subjects
+      matchingElements = []
 
-    _.defaults options,
-      $el: subject
-      log: true
-      force: false
+      _.defaults options,
+        $el: subject
+        log: true
+        force: false
 
-    @ensureDom(options.$el)
+      @ensureDom(options.$el)
 
-    isNoop = ($el) ->
-      switch type
-        when "check"
-          $el.prop("checked")
-        when "uncheck"
-          not $el.prop("checked")
+      isNoop = ($el) ->
+        switch type
+          when "check"
+            $el.prop("checked")
+          when "uncheck"
+            not $el.prop("checked")
 
-    isAcceptableElement = ($el) ->
-      switch type
-        when "check"
-          $el.is(":checkbox,:radio")
-        when "uncheck"
-          $el.is(":checkbox")
+      isAcceptableElement = ($el) ->
+        switch type
+          when "check"
+            $el.is(":checkbox,:radio")
+          when "uncheck"
+            $el.is(":checkbox")
 
-    ## does our el have a value
-    ## in the values array?
-    ## or values array is empty
-    elHasMatchingValue = ($el) ->
-      values.length is 0 or $el.val() in values
+      ## does our el have a value
+      ## in the values array?
+      ## or values array is empty
+      elHasMatchingValue = ($el) ->
+        values.length is 0 or $el.val() in values
 
-    ## blow up if any member of the subject
-    ## isnt a checkbox or radio
-    checkOrUncheck = (el, index) =>
-      $el = $(el)
+      ## blow up if any member of the subject
+      ## isnt a checkbox or radio
+      checkOrUncheck = (el, index) =>
+        $el = $(el)
 
-      isElActionable = elHasMatchingValue($el)
+        isElActionable = elHasMatchingValue($el)
 
-      if isElActionable
-        matchingElements.push(el)
+        if isElActionable
+          matchingElements.push(el)
 
-      consoleProps = {
-        "Applied To":   utils.getDomElements($el)
-        "Elements":     $el.length
-      }
+        consoleProps = {
+          "Applied To":   utils.getDomElements($el)
+          "Elements":     $el.length
+        }
 
-      if options.log and isElActionable
+        if options.log and isElActionable
 
-        ## figure out the options which actually change the behavior of clicks
-        deltaOptions = utils.filterOutOptions(options)
+          ## figure out the options which actually change the behavior of clicks
+          deltaOptions = utils.filterOutOptions(options)
 
-        options._log = $Log.command
-          message: deltaOptions
-          $el: $el
-          consoleProps: ->
-            _.extend consoleProps, {
-              Options: deltaOptions
+          options._log = $Log.command
+            message: deltaOptions
+            $el: $el
+            consoleProps: ->
+              _.extend consoleProps, {
+                Options: deltaOptions
+              }
+
+          options._log.snapshot("before", {next: "after"})
+
+          if not isAcceptableElement($el)
+            node   = utils.stringifyElement($el)
+            word   = utils.plural(options.$el, "contains", "is")
+            phrase = if type is "check" then " and :radio" else ""
+            utils.throwErrByPath "check_uncheck.invalid_element", {
+              onFail: options._log
+              args: { node, word, phrase, cmd: type }
             }
 
-        options._log.snapshot("before", {next: "after"})
+          ## if the checkbox was already checked
+          ## then notify the user of this note
+          ## and bail
+          if isNoop($el)
+            ## still ensure visibility even if the command is noop
+            @ensureVisibility $el, options._log
+            if options._log
+              inputType = if $el.is(":radio") then "radio" else "checkbox"
+              consoleProps.Note = "This #{inputType} was already #{type}ed. No operation took place."
+              options._log.snapshot().end()
 
-        if not isAcceptableElement($el)
-          node   = utils.stringifyElement($el)
-          word   = utils.plural(options.$el, "contains", "is")
-          phrase = if type is "check" then " and :radio" else ""
-          utils.throwErrByPath "check_uncheck.invalid_element", {
-            onFail: options._log
-            args: { node, word, phrase, cmd: type }
-          }
+            return null
+          else
+            ## set the coords only if we are actually
+            ## going to go out and click this bad boy
+            coords = @getCoordinates($el)
+            consoleProps.Coords = coords
+            options._log.set "coords", coords
 
-        ## if the checkbox was already checked
-        ## then notify the user of this note
-        ## and bail
-        if isNoop($el)
-          ## still ensure visibility even if the command is noop
-          @ensureVisibility $el, options._log
-          if options._log
-            inputType = if $el.is(":radio") then "radio" else "checkbox"
-            consoleProps.Note = "This #{inputType} was already #{type}ed. No operation took place."
-            options._log.snapshot().end()
+        ## if we didnt pass in any values or our
+        ## el's value is in the array then check it
+        if isElActionable
+          @execute("click", {
+            $el: $el
+            log: false
+            verify: false
+            _log: options._log
+            force: options.force
+            timeout: options.timeout
+            interval: options.interval
+          }).then ->
+            options._log.snapshot().end() if options._log
 
-          return null
-        else
-          ## set the coords only if we are actually
-          ## going to go out and click this bad boy
-          coords = @getCoordinates($el)
-          consoleProps.Coords = coords
-          options._log.set "coords", coords
+            return null
 
-      ## if we didnt pass in any values or our
-      ## el's value is in the array then check it
-      if isElActionable
-        @execute("click", {
-          $el: $el
-          log: false
-          verify: false
-          _log: options._log
-          force: options.force
-          timeout: options.timeout
-          interval: options.interval
-        }).then ->
-          options._log.snapshot().end() if options._log
+      ## return our original subject when our promise resolves
+      Promise
+        .resolve(options.$el.toArray())
+        .each(checkOrUncheck)
+        .cancellable()
+        .then =>
+          ## filter down our $el to the
+          ## matching elements
+          options.$el = options.$el.filter(matchingElements)
 
-          return null
-
-    ## return our original subject when our promise resolves
-    Promise
-      .resolve(options.$el.toArray())
-      .each(checkOrUncheck)
-      .cancellable()
-      .then =>
-        ## filter down our $el to the
-        ## matching elements
-        options.$el = options.$el.filter(matchingElements)
-
-        do verifyAssertions = =>
-          @verifyUpcomingAssertions(options.$el, options, {
-            onRetry: verifyAssertions
-          })
+          do verifyAssertions = =>
+            @verifyUpcomingAssertions(options.$el, options, {
+              onRetry: verifyAssertions
+            })
 })
 
 module.exports = (Cypress, Commands) ->
@@ -1707,6 +1719,7 @@ module.exports = (Cypress, Commands) ->
             onRetry: resolveFocused
           })
           .return(options.$el)
+  })
 
   Commands.addAll({ subject: "optional"}, {
     scrollTo: (subject, xOrPosition, yOrOptions, options = {}) ->
@@ -1855,190 +1868,3 @@ module.exports = (Cypress, Commands) ->
           if isWin
             delete options.$el.contentWindow
 })
-
-  Cypress.Cy.extend({
-    _findScrollableParent: ($el) ->
-      $parent = $el.parent()
-
-      ## if we're at the body, we just want to pass in
-      ## window into jQuery scrollTo
-      if $parent.is("body,html") or $Cypress.Utils.hasDocument($parent)
-        return @private("window")
-
-      return $parent if $Cypress.Dom.elIsScrollable($parent)
-
-      @_findScrollableParent($parent)
-
-    _waitForAnimations: ($el, options, coordsHistory = []) ->
-      ## determine if this element is animating
-      if options.x and options.y
-        coords = @getRelativeCoordinates($el, options.x, options.y)
-      else
-        try
-          coords = @getCoordinates($el, options.position)
-        catch err
-          $Cypress.Utils.throwErr(err, { onFail: options._log })
-
-      ## if we're forcing this click event
-      ## just immediately send it up
-      if options.force is true or options.waitForAnimations is false
-        return Promise.resolve(coords)
-      else
-        ## verify that our element is not currently animating
-        ## by verifying it is still at the same coordinates within
-        ## 5 pixels of x/y?
-        coordsHistory.push(coords)
-
-        retry = =>
-          @_waitForAnimations($el, options, coordsHistory)
-
-        ## if we dont have at least 2 points
-        ## then automatically retry
-        if coordsHistory.length < 2
-          ## silence the first trigger so we dont
-          ## actually fire the 'retry' event
-          opts = _.chain(options).clone().extend({silent: true}).value()
-          return @_retry(retry, opts)
-
-        ## make sure our element is not currently animating
-        try
-          @ensureElementIsNotAnimating($el, coordsHistory, options.animationDistanceThreshold)
-          Promise.resolve(coords)
-        catch err
-          options.error = err
-          @_retry(retry, options)
-
-    _check_or_uncheck: (type, subject, values = [], options = {}) ->
-      ## we're not handling conversion of values to strings
-      ## in case we've received numbers
-
-      ## if we're not an array but we are an object
-      ## reassign options to values
-      if not _.isArray(values) and _.isObject(values)
-        options = values
-        values = []
-      else
-        ## make sure we're an array of values
-        values = [].concat(values)
-
-      ## keep an array of subjects which
-      ## are potentially reduced down
-      ## to new filtered subjects
-      matchingElements = []
-
-      _.defaults options,
-        $el: subject
-        log: true
-        force: false
-
-      @ensureDom(options.$el)
-
-      isNoop = ($el) ->
-        switch type
-          when "check"
-            $el.prop("checked")
-          when "uncheck"
-            not $el.prop("checked")
-
-      isAcceptableElement = ($el) ->
-        switch type
-          when "check"
-            $el.is(":checkbox,:radio")
-          when "uncheck"
-            $el.is(":checkbox")
-
-      ## does our el have a value
-      ## in the values array?
-      ## or values array is empty
-      elHasMatchingValue = ($el) ->
-        values.length is 0 or $el.val() in values
-
-      ## blow up if any member of the subject
-      ## isnt a checkbox or radio
-      checkOrUncheck = (el, index) =>
-        $el = $(el)
-
-        isElActionable = elHasMatchingValue($el)
-
-        if isElActionable
-          matchingElements.push(el)
-
-        consoleProps = {
-          "Applied To":   $Cypress.Utils.getDomElements($el)
-          "Elements":     $el.length
-        }
-
-        if options.log and isElActionable
-
-          ## figure out the options which actually change the behavior of clicks
-          deltaOptions = Cypress.Utils.filterOutOptions(options)
-
-          options._log = Cypress.Log.command
-            message: deltaOptions
-            $el: $el
-            consoleProps: ->
-              _.extend consoleProps, {
-                Options: deltaOptions
-              }
-
-          options._log.snapshot("before", {next: "after"})
-
-          if not isAcceptableElement($el)
-            node   = Cypress.Utils.stringifyElement($el)
-            word   = Cypress.Utils.plural(options.$el, "contains", "is")
-            phrase = if type is "check" then " and :radio" else ""
-            $Cypress.Utils.throwErrByPath "check_uncheck.invalid_element", {
-              onFail: options._log
-              args: { node, word, phrase, cmd: type }
-            }
-
-          ## if the checkbox was already checked
-          ## then notify the user of this note
-          ## and bail
-          if isNoop($el)
-            ## still ensure visibility even if the command is noop
-            @ensureVisibility $el, options._log
-            if options._log
-              inputType = if $el.is(":radio") then "radio" else "checkbox"
-              consoleProps.Note = "This #{inputType} was already #{type}ed. No operation took place."
-              options._log.snapshot().end()
-
-            return null
-          else
-            ## set the coords only if we are actually
-            ## going to go out and click this bad boy
-            coords = @getCoordinates($el)
-            consoleProps.Coords = coords
-            options._log.set "coords", coords
-
-        ## if we didnt pass in any values or our
-        ## el's value is in the array then check it
-        if isElActionable
-          @execute("click", {
-            $el: $el
-            log: false
-            verify: false
-            _log: options._log
-            force: options.force
-            timeout: options.timeout
-            interval: options.interval
-          }).then ->
-            options._log.snapshot().end() if options._log
-
-            return null
-
-      ## return our original subject when our promise resolves
-      Promise
-        .resolve(options.$el.toArray())
-        .each(checkOrUncheck)
-        .cancellable()
-        .then =>
-          ## filter down our $el to the
-          ## matching elements
-          options.$el = options.$el.filter(matchingElements)
-
-          do verifyAssertions = =>
-            @verifyUpcomingAssertions(options.$el, options, {
-              onRetry: verifyAssertions
-            })
-  })

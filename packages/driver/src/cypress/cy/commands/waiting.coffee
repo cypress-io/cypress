@@ -5,7 +5,6 @@ $Cy = require("../../cy")
 $Log = require("../../log")
 utils = require("../../utils")
 
-
 $Cy.extend({
   _waitNumber: (subject, ms, options) ->
     ## increase the timeout by the delta
@@ -196,3 +195,4 @@ module.exports = (Cypress, Commands) ->
           ## whatever was passed in could not be parsed
           ## by our switch case
           throwErr("an invalid argument")
+  })

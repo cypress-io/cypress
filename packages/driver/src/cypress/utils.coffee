@@ -249,57 +249,6 @@ module.exports = {
         else
           "<#{str}>"
 
-    plural: (obj, plural, singular) ->
-      obj = if _.isNumber(obj) then obj else obj.length
-      if obj > 1 then plural else singular
-
-    convertHtmlTags: (html) ->
-      html
-        .replace(tagOpen, "<$1>")
-        .replace(tagClosed, "</$1>")
-
-    isInstanceOf: (instance, constructor) ->
-      try
-        instance instanceof constructor
-      catch e
-        false
-
-    escapeQuotes: (text) ->
-      ## convert to str and escape any single
-      ## or double quotes
-      ("" + text).replace(quotesRe, "\\$1")
-
-    getCypressNamespace: (obj) ->
-      obj and obj[CYPRESS_OBJECT_NAMESPACE]
-
-    ## backs up an original object to another
-    ## by going through the cypress object namespace
-    setCypressNamespace: (obj, original) ->
-      obj[CYPRESS_OBJECT_NAMESPACE] = original
-
-    getObjValueByPath: (obj, keyPath) ->
-      if not _.isObject obj
-        throw new Error "The first parameter to $Cypress.Utils.getObjValueByPath() must be an object"
-      if not _.isString keyPath
-        throw new Error "The second parameter to $Cypress.Utils.getObjValueByPath() must be a string"
-      keys = keyPath.split '.'
-      val = obj
-      for key in keys
-        val = val[key]
-        break unless val
-      val
-
-    ## clientX and clientY by their definition
-    ## are calculated from viewport edge
-    ## and should subtract the pageX or pageY offset
-    ## see img: https://camo.githubusercontent.com/9963a83071b4b14c8dee6699335630f29d668d1f/68747470733a2f2f692d6d73646e2e7365632e732d6d7366742e636f6d2f64796e696d672f49433536313937302e706e67
-    getClientX: (coords, win) ->
-      coords.x - win.pageXOffset
-
-    getClientY: (coords, win) ->
-      coords.y - win.pageYOffset
-  }
-
   plural: (obj, plural, singular) ->
     obj = if _.isNumber(obj) then obj else obj.length
     if obj > 1 then plural else singular
@@ -328,6 +277,16 @@ module.exports = {
   setCypressNamespace: (obj, original) ->
     obj[CYPRESS_OBJECT_NAMESPACE] = original
 
+  ## clientX and clientY by their definition
+  ## are calculated from viewport edge
+  ## and should subtract the pageX or pageY offset
+  ## see img: https://camo.githubusercontent.com/9963a83071b4b14c8dee6699335630f29d668d1f/68747470733a2f2f692d6d73646e2e7365632e732d6d7366742e636f6d2f64796e696d672f49433536313937302e706e67
+  getClientX: (coords, win) ->
+    coords.x - win.pageXOffset
+
+  getClientY: (coords, win) ->
+    coords.y - win.pageYOffset
+
   getObjValueByPath: (obj, keyPath) ->
     if not _.isObject obj
       throw new Error "The first parameter to utils.getObjValueByPath() must be an object"
@@ -339,5 +298,5 @@ module.exports = {
       val = val[key]
       break unless val
     val
+
 }
->>>>>>> origin/CYP-707-improve-driver-build-process

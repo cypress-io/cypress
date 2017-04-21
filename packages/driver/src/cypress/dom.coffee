@@ -204,5 +204,6 @@ $Dom = {
     ## if we have overflow hidden and no effective width or height
     if @elHasOverflowHidden($el) and @elHasNoEffectiveWidthOrHeight($el)
       return $el
+}
 
 module.exports = $Dom
