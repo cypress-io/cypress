@@ -1,10 +1,11 @@
-/* global $, Reporter */
+/* global $ */
 
 import cs from 'classnames'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, PropTypes } from 'react'
 import { findDOMNode } from 'react-dom'
+import Reporter from '@cypress/core-reporter'
 
 import errorMessages from '../errors/error-messages'
 import windowUtil from '../lib/window-util'
