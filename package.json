@@ -116,6 +116,7 @@
     "@cypress/core-launcher": "0.1.0",
     "@cypress/core-runner": "0.3.11",
     "@cypress/core-socket": "0.2.0",
+    "@cypress/icons": "0.5.2",
     "@ffmpeg-installer/ffmpeg": "1.0.3",
     "ansi_up": "^1.3.0",
     "babel-plugin-add-module-exports": "^0.2.1",
