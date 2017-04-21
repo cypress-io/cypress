@@ -25,12 +25,12 @@
   "homepage": "https://github.com/cypress-io/cypress-core-electron#readme",
   "devDependencies": {
     "@cypress/core-icons": "^0.4.1",
-    "@cypress/releaser": "0.1.11",
+    "@cypress/releaser": "0.1.12",
     "chai": "^3.5.0",
     "mocha": "^3.0.2"
   },
   "dependencies": {
-    "@cypress/coffee-script": "0.1.1",
+    "@cypress/coffee-script": "0.1.2",
     "bluebird": "^3.4.1",
     "electron-packager": "^7.2.0",
     "fs-extra": "^0.30.0",
