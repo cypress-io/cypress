@@ -56,7 +56,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
       it "waits for the route alias to have a request", ->
         @cy.on "retry", _.once =>
-          win = @cy.private("window")
+          win = @cy.privateState("window")
           win.$.get("/users")
           null
 
@@ -70,7 +70,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
       it "passes timeout option down to requestTimeout of wait", (done) ->
         retry = _.after 3, _.once =>
-          @cy.private("window").$.get("/foo")
+          @cy.privateState("window").$.get("/foo")
 
         @cy.on "retry", (options) ->
           expect(options.timeout).to.eq 900
@@ -86,7 +86,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         prevTimeout = @cy._timeout()
 
         retry = _.after 3, _.once =>
-          @cy.private("window").$.get("/foo")
+          @cy.privateState("window").$.get("/foo")
 
         @cy.on "retry", retry
 
@@ -235,7 +235,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy.on "retry", _.once =>
-            win = @cy.private("window")
+            win = @cy.privateState("window")
             win.$.get("/foo")
             null
 
@@ -254,7 +254,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy.on "retry", _.once =>
-            win = @cy.private("window")
+            win = @cy.privateState("window")
             win.$.get("/bar")
             null
 
@@ -368,7 +368,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
             ## dont send the 3rd response
             return @cy.off("retry") if response is 3
-            win = @cy.private("window")
+            win = @cy.privateState("window")
             win.$.get("/users", {num: response})
 
           @cy
@@ -390,7 +390,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           ## dont send the 2nd response
           @cy.on "retry", _.once =>
             response += 1
-            win = @cy.private("window")
+            win = @cy.privateState("window")
             win.$.get("/users", {num: response})
 
           @cy
@@ -413,7 +413,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           ## dont send the 2nd request
           @cy.on "retry", _.once =>
             request += 1
-            win = @cy.private("window")
+            win = @cy.privateState("window")
             win.$.get("/users", {num: request})
 
           @cy
@@ -478,7 +478,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @Cypress.config("requestTimeout", 200)
 
           @cy.on "retry", _.once =>
-            win = @cy.private("window")
+            win = @cy.privateState("window")
             win.$.get("/users")
             null
 
@@ -500,7 +500,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @Cypress.config("responseTimeout", 10000)
 
           @cy.on "retry", _.once =>
-            win = @cy.private("window")
+            win = @cy.privateState("window")
             _.defer => win.$.get("/timeout?ms=2001")
             _.defer => win.$.get("/timeout?ms=2002")
 
@@ -521,7 +521,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @Cypress.config("responseTimeout", 300)
 
           @cy.on "retry", _.once =>
-            win = @cy.private("window")
+            win = @cy.privateState("window")
             _.defer => win.$.get("/timeout?ms=1")
             _.defer => win.$.get("/timeout?ms=2")
             _.defer => win.$.get("/timeout?ms=3000")
@@ -570,7 +570,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         @cy.on "retry", =>
           response += 1
-          win = @cy.private("window")
+          win = @cy.privateState("window")
           win.$.get("/users", {num: response})
 
         @cy
@@ -593,7 +593,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         @cy.on "retry", =>
           response += 1
-          win = @cy.private("window")
+          win = @cy.privateState("window")
           win.$.get("/users", {num: response})
 
         @cy
@@ -614,7 +614,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @allowErrors()
 
         it "throws and includes the incremented alias number"
-          ## use underscore string here for formatting the number
+          ## use underscore.string here for formatting the number
 
     describe "errors", ->
       describe "invalid 1st argument", ->

@@ -1,25 +1,25 @@
-$Cypress.Clock = do ($Cypress, _) ->
+lolex = require("lolex")
 
-  class $Clock
-    constructor: (win, now, @_methods) ->
-      @_lolexClock = lolex.install(win, now, @_methods)
+class $Clock
+  constructor: (win, now, @_methods) ->
+    @_lolexClock = lolex.install(win, now, @_methods)
 
-    tick: (ms) ->
-      @_lolexClock.tick(ms)
+  tick: (ms) ->
+    @_lolexClock.tick(ms)
 
-    restore: ->
-      @_lolexClock.uninstall()
+  restore: ->
+    @_lolexClock.uninstall()
 
-    _bind: (win) ->
-      @_lolexClock = lolex.install(win, @_lolexClock.now, @_methods)
+  _bind: (win) ->
+    @_lolexClock = lolex.install(win, @_lolexClock.now, @_methods)
 
-    _details: ->
-      {
-        now: @_lolexClock.now
-        methods: @_lolexClock.methods
-      }
+  _details: ->
+    {
+      now: @_lolexClock.now
+      methods: @_lolexClock.methods
+    }
 
-    @create: (args...)->
-      new $Clock(args...)
+  @create = (args...)->
+    new $Clock(args...)
 
-  return $Clock
+module.exports = $Clock

@@ -1,27 +1,35 @@
-$Cypress.register "Location", (Cypress, _, $) ->
+_ = require("lodash")
+Promise = require("../../bluebird")
 
-  Cypress.Cy.extend
-    __location: (win) ->
-      win.location.toString()
+$Cy = require("../../cy")
+$Location = require("../../location")
+$Log = require("../../log")
+utils = require("../../utils")
 
-    _getLocation: (key, win) ->
-      try
-        remoteUrl = @__location(win ? @private("window"))
-        location  = Cypress.Location.create(remoteUrl)
+$Cy.extend({
+  __location: (win) ->
+    win.location.toString()
 
-        if key
-          location[key]
-        else
-          location
-      catch e
-        ""
+  _getLocation: (key, win) ->
+    try
+      remoteUrl = @__location(win ? @privateState("window"))
+      location  = $Location.create(remoteUrl)
 
-  Cypress.addParentCommand
+      if key
+        location[key]
+      else
+        location
+    catch e
+      ""
+})
+
+module.exports = (Cypress, Commands) ->
+  Commands.addAll({
     url: (options = {}) ->
       _.defaults options, {log: true}
 
       if options.log isnt false
-        options._log = Cypress.Log.command
+        options._log = $Log.command
           message: ""
 
       getHref = =>
@@ -37,7 +45,7 @@ $Cypress.register "Location", (Cypress, _, $) ->
       _.defaults options, {log: true}
 
       if options.log isnt false
-        options._log = Cypress.Log.command
+        options._log = $Log.command
           message: ""
 
       getHash = =>
@@ -66,12 +74,12 @@ $Cypress.register "Location", (Cypress, _, $) ->
           ## use existential here because we only want to throw
           ## on null or undefined values (and not empty strings)
           location[key] ?
-            $Cypress.Utils.throwErrByPath("location.invalid_key", { args: { key } })
+            utils.throwErrByPath("location.invalid_key", { args: { key } })
         else
           location
 
       if options.log isnt false
-        options._log = Cypress.Log.command
+        options._log = $Log.command
           message: key ? ""
 
       do resolveLocation = =>
@@ -79,3 +87,4 @@ $Cypress.register "Location", (Cypress, _, $) ->
           @verifyUpcomingAssertions(ret, options, {
             onRetry: resolveLocation
           })
+  })

@@ -81,7 +81,7 @@ describe "$Cypress.Cy Screenshot Commands", ->
         @cy.screenshot().should("be.null")
 
       it "sets name to undefined when not passed name", (done) ->
-        runnable = @cy.private("runnable")
+        runnable = @cy.privateState("runnable")
         runnable.title = "foo bar"
 
         @Cypress.once "take:screenshot", (data) ->
@@ -103,7 +103,7 @@ describe "$Cypress.Cy Screenshot Commands", ->
           @respondWith({}, 50)
 
           @Cypress.on "take:screenshot", =>
-            @cmd = @cy.commands.first()
+            @cmd = @cy.queue.first()
             @Cypress.abort()
 
           @cy.on "cancel", (cancelledCmd) =>

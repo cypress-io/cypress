@@ -78,10 +78,10 @@ describe "$Cypress.Cy Querying Commands", ->
       @cy.on "end", ->
         ## should be defined here because next would have been
         ## null and withinSubject would not have been cleared
-        expect(@prop("withinSubject")).not.to.be.undefined
+        expect(@state("withinSubject")).not.to.be.undefined
 
         _.defer =>
-          expect(@prop("withinSubject")).to.be.null
+          expect(@state("withinSubject")).to.be.null
           done()
 
       @cy.get("#button-text").within ->
@@ -264,7 +264,7 @@ describe "$Cypress.Cy Querying Commands", ->
         expect(options._runnableTimeout).to.eq 10000
 
         ## we shouldnt have a timer either
-        expect(@cy.private("runnable")).not.to.have.property("timer")
+        expect(@cy.privateState("runnable")).not.to.have.property("timer")
 
       ## but wait 300ms
       _.delay =>
@@ -305,7 +305,6 @@ describe "$Cypress.Cy Querying Commands", ->
       @cy.on "cancel", ->
         _.delay ->
           expect(retrys).to.eq(2)
-          console.log logs
           done()
         , 500
 
@@ -513,7 +512,7 @@ describe "$Cypress.Cy Querying Commands", ->
           .get("button").as("btns")
           .get("@btns").should("have.length", length).then ($buttons) ->
             expect(_replayFrom).not.to.be.called
-            expect(@cy.commands.length).to.eq(6) ## we should not have replayed any commands
+            expect(@cy.queue.length).to.eq(6) ## we should not have replayed any commands
             expect($buttons.length).to.eq length
 
     describe "assertion verification", ->
@@ -866,7 +865,7 @@ describe "$Cypress.Cy Querying Commands", ->
               @cy._timeout(1000)
 
               retry = _.after 3, _.once =>
-                @cy.private("window").$.getJSON("/json")
+                @cy.privateState("window").$.getJSON("/json")
 
               @cy.on "retry", retry
           .get("#get-json").as("getJsonButton").click()
@@ -1264,7 +1263,7 @@ describe "$Cypress.Cy Querying Commands", ->
         ## GOOD: [ {name: get} , {name: contains} ]
         ## BAD:  [ {name: get} , {name: get} , {name: contains} ]
         @cy.get("#complex-contains").contains("nested contains").then ($label) ->
-          names = _(logs).map (log) -> log.get("name")
+          names = _.map logs, (log) -> log.get("name")
           expect(logs).to.have.length(2)
           expect(names).to.deep.eq ["get", "contains"]
 

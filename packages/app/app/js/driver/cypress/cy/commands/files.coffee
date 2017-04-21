@@ -1,23 +1,27 @@
-$Cypress.register "Files", (Cypress, _, $, Promise) ->
+_ = require("lodash")
+Promise = require("../../bluebird")
 
-  readFile = (file, options) =>
-    new Promise (resolve, reject) ->
-      Cypress.trigger "read:file", file, options, (resp) ->
-        if err = resp.__error
-          reject(err)
-        else
-          resolve(resp)
+$Log = require("../../log")
+utils = require("../../utils")
 
+readFile = (file, options) =>
+  new Promise (resolve, reject) ->
+    Cypress.trigger "read:file", file, options, (resp) ->
+      if err = resp.__error
+        reject(err)
+      else
+        resolve(resp)
 
-  writeFile = (file, contents, options) =>
-    new Promise (resolve, reject) ->
-      Cypress.trigger "write:file", file, contents, options, (resp = {}) ->
-        if err = resp.__error
-          reject(err)
-        else
-          resolve(resp)
+writeFile = (file, contents, options) =>
+  new Promise (resolve, reject) ->
+    Cypress.trigger "write:file", file, contents, options, (resp = {}) ->
+      if err = resp.__error
+        reject(err)
+      else
+        resolve(resp)
 
-  Cypress.addParentCommand
+module.exports = (Cypress, Commands) ->
+  Commands.addAll({
     readFile: (file, encoding, options = {}) ->
       if _.isObject(encoding)
         options = encoding
@@ -30,13 +34,13 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
       consoleProps = {}
 
       if options.log
-        options._log = Cypress.Log.command({
+        options._log = $Log.command({
           message: file
           consoleProps: -> consoleProps
         })
 
       if not file or not _.isString(file)
-        $Cypress.Utils.throwErrByPath("files.invalid_argument", {
+        utils.throwErrByPath("files.invalid_argument", {
           onFail: options._log,
           args: { cmd: "readFile", file }
         })
@@ -50,7 +54,7 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
               filePath: err.filePath
             }
           else
-            $Cypress.Utils.throwErrByPath("files.unexpected_error", {
+            utils.throwErrByPath("files.unexpected_error", {
               onFail: options._log,
               args: { cmd: "readFile", action: "read", file, filePath: err.filePath, error: err.message }
             })
@@ -65,12 +69,12 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
 
               if contents?
                 ## file exists but it shouldn't
-                err.displayMessage = $Cypress.Utils.errMessageByPath("files.existent", {
+                err.displayMessage = utils.errMessageByPath("files.existent", {
                   file, filePath
                 })
               else
                 ## file doesn't exist but it should
-                err.displayMessage = $Cypress.Utils.errMessageByPath("files.nonexistent", {
+                err.displayMessage = utils.errMessageByPath("files.nonexistent", {
                   file, filePath
                 })
             onRetry: verifyAssertions
@@ -88,19 +92,19 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
       consoleProps = {}
 
       if options.log
-        options._log = Cypress.Log.command({
+        options._log = $Log.command({
           message: fileName
           consoleProps: -> consoleProps
         })
 
       if not fileName or not _.isString(fileName)
-        $Cypress.Utils.throwErrByPath("files.invalid_argument", {
+        utils.throwErrByPath("files.invalid_argument", {
           onFail: options._log,
           args: { cmd: "writeFile", file: fileName }
         })
 
       if not (_.isString(contents) or _.isObject(contents))
-        $Cypress.Utils.throwErrByPath("files.invalid_contents", {
+        utils.throwErrByPath("files.invalid_contents", {
           onFail: options._log,
           args: { contents: contents }
         })
@@ -115,12 +119,13 @@ $Cypress.register "Files", (Cypress, _, $, Promise) ->
 
         return contents
       .catch Promise.TimeoutError, (err) ->
-        $Cypress.Utils.throwErrByPath "files.timed_out", {
+        utils.throwErrByPath "files.timed_out", {
           onFail: options._log
           args: { cmd: "writeFile", file: fileName, timeout: options.timeout }
         }
       .catch (err) ->
-        $Cypress.Utils.throwErrByPath("files.unexpected_error", {
+        utils.throwErrByPath("files.unexpected_error", {
           onFail: options._log
           args: { cmd: "writeFile", action: "write", file: fileName, filePath: err.filePath, error: err.message }
         })
+  })

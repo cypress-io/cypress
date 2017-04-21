@@ -1,4 +1,4 @@
-str = require("underscore.string")
+_ = require("lodash")
 e2e = require("../helpers/e2e")
 
 onServer = (app) ->
@@ -65,7 +65,7 @@ describe "e2e web security", ->
           ## make sure this message is included
           ## three times in stdout, one for each
           ## failing test
-          expect(str.count(stdout, msg)).to.eq(3)
+          expect(_.count(stdout, msg)).to.eq(3)
 
   context "when disabled", ->
     e2e.setup({

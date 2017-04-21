@@ -55,11 +55,11 @@ describe "$Cypress.LocalStorage API", ->
     ## propogate properly to the parent, aka it will return the correct .length
     ## but when you iterate over the keys it is fubar'd
     it "returns the same number of keys when remoteWindow sets localStorage", ->
-      count = _(localStorage).keys().length
+      count = _.keys(localStorage).length
 
       @remoteStorage.setItem "foo", "bar"
 
-      keys = _(localStorage).keys().length
+      keys = _.keys(localStorage).length
 
       expect(keys).to.eq count + 1
 
@@ -86,18 +86,6 @@ describe "$Cypress.LocalStorage API", ->
 
       arr = @getItems("foo")
       expect(arr).to.deep.eq [null, null]
-
-    it "does not nuke ecl keys no matter what", ->
-      @setItem "ecl-foo", "bar"
-      @setItem "foo", "bar"
-
-      $Cypress.LocalStorage.clear()
-
-      arr = @getItems("foo")
-      expect(arr).to.deep.eq [null, null]
-
-      arr = @getItems("ecl-foo")
-      expect(arr).to.deep.eq ["bar", "bar"]
 
     it "can remove specific items by string", ->
       @setItem "foo", "bar"
@@ -135,4 +123,3 @@ describe "$Cypress.LocalStorage API", ->
       foo = @remoteStorage.getItem "foo"
 
       expect(foo).to.eq null
-

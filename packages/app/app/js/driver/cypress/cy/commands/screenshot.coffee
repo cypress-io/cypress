@@ -1,5 +1,66 @@
-$Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
+_ = require("lodash")
+moment = require("moment")
+Promise = require("../../bluebird")
 
+$Cy = require("../../cy")
+$Log = require("../../log")
+utils = require("../../utils")
+
+$Cy.extend({
+  _takeScreenshot: (runnable, name, log, timeout) ->
+    titles = [runnable.title]
+
+    getParentTitle = (runnable) ->
+      if p = runnable.parent
+        if t = p.title
+          titles.unshift(t)
+
+        getParentTitle(p)
+
+    getParentTitle(runnable)
+
+    props = {
+      name:   name
+      titles: titles
+      testId: runnable.id
+    }
+
+    automate = ->
+      new Promise (resolve, reject) ->
+        fn = (resp) =>
+          if e = resp.__error
+            err = utils.cypressErr(e)
+            err.name = resp.__name
+            err.stack = resp.__stack
+
+            try
+              utils.throwErr(err, { onFail: log })
+            catch e
+              reject(e)
+          else
+            resolve(resp.response)
+
+        Cypress.trigger("take:screenshot", props, fn)
+
+    if not timeout
+      automate()
+    else
+      ## need to remove the current timeout
+      ## because we're handling timeouts ourselves
+      @_clearTimeout()
+
+      automate()
+      .timeout(timeout)
+      .catch Promise.TimeoutError, (err) ->
+        utils.throwErrByPath "screenshot.timed_out", {
+          onFail: log
+          args: {
+            timeout: timeout
+          }
+        }
+})
+
+module.exports = (Cypress, Commands) ->
   Cypress.on "test:after:hooks", (test, runnable) ->
     if test.err and $Cypress.isHeadless and Cypress.config("screenshotOnHeadlessFailure")
       ## give the UI some time to render the error
@@ -9,67 +70,14 @@ $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
       .then =>
         @_takeScreenshot(runnable)
 
-  Cypress.Cy.extend
-    _takeScreenshot: (runnable, name, log, timeout) ->
-      titles = [runnable.title]
-
-      getParentTitle = (runnable) ->
-        if p = runnable.parent
-          if t = p.title
-            titles.unshift(t)
-
-          getParentTitle(p)
-
-      getParentTitle(runnable)
-
-      props = {
-        name:   name
-        titles: titles
-        testId: runnable.id
-      }
-
-      automate = ->
-        new Promise (resolve, reject) ->
-          fn = (resp) =>
-            if e = resp.__error
-              err = $Cypress.Utils.cypressErr(e)
-              err.name = resp.__name
-              err.stack = resp.__stack
-
-              try
-                $Cypress.Utils.throwErr(err, { onFail: log })
-              catch e
-                reject(e)
-            else
-              resolve(resp.response)
-
-          Cypress.trigger("take:screenshot", props, fn)
-
-      if not timeout
-        automate()
-      else
-        ## need to remove the current timeout
-        ## because we're handling timeouts ourselves
-        @_clearTimeout()
-
-        automate()
-        .timeout(timeout)
-        .catch Promise.TimeoutError, (err) ->
-          $Cypress.Utils.throwErrByPath "screenshot.timed_out", {
-            onFail: log
-            args: {
-              timeout: timeout
-            }
-          }
-
-  Cypress.addParentCommand
+  Commands.addAll({
     screenshot: (name, options = {}) ->
       if _.isObject(name)
         options = name
         name = null
 
       ## TODO: handle hook titles
-      runnable = @private("runnable")
+      runnable = @privateState("runnable")
 
       _.defaults options, {
         log: true
@@ -79,7 +87,7 @@ $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
       if options.log
         consoleProps = {}
 
-        options._log = Cypress.Log.command({
+        options._log = $Log.command({
           message: name
           consoleProps: ->
             consoleProps
@@ -92,3 +100,4 @@ $Cypress.register "Screenshot", (Cypress, _, $, Promise, moment) ->
           Size: resp.size
         }
       .return(null)
+  })

@@ -1,8 +1,9 @@
-do ($Cypress, _) ->
+$ = require("jquery")
 
+module.exports = ($Cy) ->
   previousWin = null
 
-  $Cypress.Cy.extend
+  $Cy.extend
 
     offWindowListeners: ->
       if previousWin

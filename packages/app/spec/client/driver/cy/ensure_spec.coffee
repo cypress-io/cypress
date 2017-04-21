@@ -22,7 +22,7 @@ describe "$Cypress.Cy Ensure Extensions", ->
         @cy.ensureElExistence($())
 
       expect(fn).to.throw("to exist in the DOM")
-      expect(@cy.prop("onBeforeLog")).to.be.null
+      expect(@cy.state("onBeforeLog")).to.be.null
 
   context "#ensureElementIsNotAnimating", ->
     beforeEach ->
@@ -43,9 +43,9 @@ describe "$Cypress.Cy Ensure Extensions", ->
       @commands = $Cypress.Commands.create()
       @commands.splice(0, 1, {id: 1, name: "foo"})
 
-      cmd = @commands.findWhere({name: "foo"})
+      cmd = @commands.find({name: "foo"})
 
-      @cy.prop("current", cmd)
+      @cy.state("current", cmd)
 
       $el    = @cy.$$("button:first")
       coords = [{x: 10, y: 20}, {x: 20, y: 30}]
@@ -72,6 +72,101 @@ describe "$Cypress.Cy Ensure Extensions", ->
 
       fn = =>
         @cy.ensureElementIsNotAnimating(null, coords)
+
+      expect(fn).not.to.throw(Error)
+
+  context "#ensureValidPosition", ->
+    beforeEach ->
+      @allowErrors()
+
+    it "throws when invalid position", ->
+      fn = => @cy.ensureValidPosition("foo")
+
+      expect(fn).to.throw('Invalid position argument: \'foo\'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight.')
+
+    it "does not throws when valid position", ->
+      fn = => @cy.ensureValidPosition("topRight")
+
+      expect(fn).to.not.throw
+
+  context "#ensureScrollability", ->
+    beforeEach ->
+      @allowErrors()
+
+      @add = (el) =>
+        $(el).appendTo(@cy.$$("body"))
+
+    it "does not throw when window and body > window height", ->
+      win = @cy.private("window")
+
+      fn = => @cy.ensureScrollability(win, "foo")
+
+      expect(fn).not.to.throw(Error)
+
+    it "throws when window and body > window height", ->
+
+      @cy.$$("body").html("<div>foo</div>")
+
+      win = @cy.private("window")
+
+      fn = => @cy.ensureScrollability(win, "foo")
+
+      expect(fn).to.throw('cy.foo() failed because this element is not scrollable:\n\n<window>\n')
+
+    it "throws when el is not scrollable", ->
+      noScroll = @add """
+        <div style="height: 100px; overflow: auto;">
+          <div>No Scroll</div>
+        </div>
+        """
+
+      fn = => @cy.ensureScrollability(noScroll, "foo")
+
+      expect(fn).to.throw('cy.foo() failed because this element is not scrollable:\n\n<div style="height: 100px; overflow: auto;">...</div>\n')
+
+    it "throws when el has no overflow", ->
+      noOverflow = @add """
+        <div style="height: 100px; width: 100px; border: 1px solid green;">
+          <div style="height: 150px;">
+            No Overflow Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean lacinia bibendum nulla sed consectetur. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Etiam porta sem malesuada magna mollis euismod.
+          </div>
+        </div>
+        """
+
+      fn = => @cy.ensureScrollability(noOverflow, "foo")
+
+      expect(fn).to.throw('cy.foo() failed because this element is not scrollable:\n\n<div style="height: 100px; width: 100px; border: 1px solid green;">...</div>\n')
+
+    it "does not throw when vertically scrollable", ->
+      vertScrollable = @add """
+        <div style="height: 100px; width: 100px; overflow: auto;">
+          <div style="height: 150px;">Vertical Scroll</div>
+        </div>
+      """
+
+      fn = => @cy.ensureScrollability(vertScrollable, "foo")
+
+      expect(fn).not.to.throw(Error)
+
+    it "does not throw when horizontal scrollable", ->
+      horizScrollable = @add """
+        <div style="height: 100px; width: 100px; overflow: auto; ">
+          <div style="height: 150px;">Horizontal Scroll</div>
+        </div>
+      """
+
+      fn = => @cy.ensureScrollability(horizScrollable, "foo")
+
+      expect(fn).not.to.throw(Error)
+
+    it "does not throw when overflow scroll forced and content larger", ->
+      forcedScroll = @add """
+        <div style="height: 100px; width: 100px; overflow: scroll; border: 1px solid yellow;">
+          <div style="height: 300px; width: 300px;">Forced Scroll</div>
+        </div>
+      """
+
+      fn = => @cy.ensureScrollability(forcedScroll, "foo")
 
       expect(fn).not.to.throw(Error)
 

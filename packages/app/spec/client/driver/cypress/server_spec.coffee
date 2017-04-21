@@ -568,7 +568,7 @@ describe "$Cypress.Cy Server API", ->
 
 #         done()
 
-#       _.invoke [xhr1, xhr2, xhr3], "send"
+#       _.invokeMap [xhr1, xhr2, xhr3], "send"
 
 #   context ".whitelist", ->
 #     it "ignores whitelisted routes even when matching stub"

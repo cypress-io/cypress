@@ -1,29 +1,34 @@
-$Cypress.register "Aliasing", (Cypress, _, $) ->
+_ = require("lodash")
 
-  blacklist = ["test", "runnable", "timeout", "slow", "skip", "inspect"]
+$Cy = require("../../cy")
+utils = require("../../utils")
 
-  Cypress.Cy.extend
-    _validateAlias: (alias) ->
-      if not _.isString(alias)
-        $Cypress.Utils.throwErrByPath "as.invalid_type"
+blacklist = ["test", "runnable", "timeout", "slow", "skip", "inspect"]
 
-      if _.isBlank(alias)
-        $Cypress.Utils.throwErrByPath "as.empty_string"
+$Cy.extend({
+  _validateAlias: (alias) ->
+    if not _.isString(alias)
+      utils.throwErrByPath "as.invalid_type"
 
-      if alias in blacklist
-        $Cypress.Utils.throwErrByPath "as.reserved_word", { args: { alias } }
+    if _.isBlank(alias)
+      utils.throwErrByPath "as.empty_string"
 
-    _addAlias: (aliasObj) ->
-      {alias, subject} = aliasObj
-      aliases = @prop("aliases") ? {}
-      aliases[alias] = aliasObj
-      @prop("aliases", aliases)
+    if alias in blacklist
+      utils.throwErrByPath "as.reserved_word", { args: { alias } }
 
-      remoteSubject = @getRemotejQueryInstance(subject)
-      ## assign the subject to our runnable ctx
-      @assign(alias, remoteSubject ? subject)
+  _addAlias: (aliasObj) ->
+    {alias, subject} = aliasObj
+    aliases = @state("aliases") ? {}
+    aliases[alias] = aliasObj
+    @state("aliases", aliases)
 
-  Cypress.addUtilityCommand
+    remoteSubject = @_getRemotejQueryInstance(subject)
+    ## assign the subject to our runnable ctx
+    @assign(alias, remoteSubject ? subject)
+})
+
+module.exports = (Cypress, Commands) ->
+  Commands.addUtility({
     as: (subject, str) ->
       @ensureParent()
       @ensureSubject()
@@ -32,19 +37,19 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
 
       ## this is the previous command
       ## which we are setting the alias as
-      prev = @prop("current").get("prev")
+      prev = @state("current").get("prev")
       prev.set("alias", str)
 
       noLogFromPreviousCommandisAlreadyAliased = ->
-        _.all prev.get("logs"), (log) ->
+        _.every prev.get("logs"), (log) ->
           log.get("alias") isnt str
 
       ## we also need to set the alias on the last command log
       ## that matches our chainerId
-      if log = _.last(@commands.logs({
+      if log = _.last(@queue.logs({
         instrument: "command"
         event: false
-        chainerId: @prop("chainerId")
+        chainerId: @state("chainerId")
       }))
 
         ## make sure this alias hasn't already been applied
@@ -55,9 +60,10 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
 
           log.set({
             alias:     str
-            aliasType: if $Cypress.Utils.hasElement(subject) then "dom" else "primitive"
+            aliasType: if utils.hasElement(subject) then "dom" else "primitive"
           })
 
       @_addAlias({subject: subject, command: prev, alias: str})
 
       return subject
+  })

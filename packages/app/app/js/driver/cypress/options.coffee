@@ -1,5 +1,4 @@
-do ($Cypress, _) ->
-
+module.exports = ($Cypress) ->
   $Cypress.extend
     ## TODO
     ## write tests for the options interface

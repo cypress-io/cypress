@@ -6,9 +6,9 @@ describe "$Cypress.Commands API", ->
     it "resets to zero commands", ->
       @commands.splice(0, 1, {})
       @commands.splice(1, 2, {})
-      expect(@commands.length).to.eq(2)
+      expect(@queue.length).to.eq(2)
       @commands.reset()
-      expect(@commands.length).to.eq(0)
+      expect(@queue.length).to.eq(0)
 
   context "#clone", ->
     beforeEach ->
@@ -73,10 +73,10 @@ describe "$Cypress.Commands API", ->
       @commands.splice(3, 4, {})
 
     it "returns a new instance", ->
-      expect(@commands.length).to.eq(4)
+      expect(@queue.length).to.eq(4)
       commands2 = @commands.slice(0, 2)
       expect(commands2.length).to.eq(2)
-      expect(@commands.length).to.eq(4)
+      expect(@queue.length).to.eq(4)
 
   context "#get", ->
     beforeEach ->
@@ -88,26 +88,26 @@ describe "$Cypress.Commands API", ->
       expect(arr.length).to.eq(2)
       expect(arr).to.be.instanceof(Array)
 
-  context "#where", ->
+  context "#filter", ->
     beforeEach ->
       @commands.splice(0, 1, {name: "foo"})
       @commands.splice(1, 2, {name: "bar"})
       @commands.splice(2, 3, {name: "foo"})
 
     it "returns array of commands by name", ->
-      cmds = @commands.where({name: "foo"})
-      names = _(cmds).invoke("get", "name")
+      cmds = @commands.filter({name: "foo"})
+      names = _.invokeMap(cmds, "get", "name")
       expect(cmds.length).to.eq(2)
       expect(names).to.deep.eq ["foo", "foo"]
 
-  context "#findWhere", ->
+  context "#find", ->
     beforeEach ->
       @commands.splice(0, 1, {id: 1, name: "foo"})
       @commands.splice(1, 2, {id: 2, name: "bar"})
       @commands.splice(2, 3, {id: 3, name: "foo"})
 
     it "returns first command by name", ->
-      cmd = @commands.findWhere({name: "foo"})
+      cmd = @commands.find({name: "foo"})
       expect(cmd.get("name")).to.eq("foo")
       expect(cmd.get("id")).to.eq(1)
 

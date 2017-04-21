@@ -22,7 +22,7 @@ describe "$Cypress.Cy Angular Commands", ->
           @allowErrors()
 
         it "throws when cannot find angular", (done) ->
-          delete @cy.private("window").angular
+          delete @cy.privateState("window").angular
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use cy.ng() methods without angular."
@@ -118,7 +118,7 @@ describe "$Cypress.Cy Angular Commands", ->
           @cy.ng("repeater", "not-found")
 
         it "throws when cannot find angular", (done) ->
-          delete @cy.private("window").angular
+          delete @cy.privateState("window").angular
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use cy.ng() methods without angular."
@@ -231,7 +231,7 @@ describe "$Cypress.Cy Angular Commands", ->
           @cy.ng("model", "not-found")
 
         it "throws when cannot find angular", (done) ->
-          delete @cy.private("window").angular
+          delete @cy.privateState("window").angular
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window. You cannot use cy.ng() methods without angular."

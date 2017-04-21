@@ -1,14 +1,19 @@
-$Cypress.register "Misc", (Cypress, _, $) ->
+_ = require("lodash")
 
-  Cypress.addDualCommand
+$Log = require("../../log")
+utils = require("../../utils")
+
+module.exports = (Cypress, Commands) ->
+  Commands.addAll({ prevSubject: "optional" }, {
     end: ->
       null
+  })
 
-  Cypress.addParentCommand
-    noop: (subject) -> subject
+  Commands.addAll({
+    noop: (arg) -> arg
 
     log: (msg, args) ->
-      Cypress.Log.command({
+      $Log.command({
         end: true
         snapshot: true
         message: [msg, args]
@@ -21,18 +26,19 @@ $Cypress.register "Misc", (Cypress, _, $) ->
 
       return null
 
-    wrap: (subject, options = {}) ->
+    wrap: (arg, options = {}) ->
       _.defaults options, {log: true}
 
-      remoteSubject = @getRemotejQueryInstance(subject)
+      remoteSubject = @_getRemotejQueryInstance(arg)
 
       if options.log isnt false
-        options._log = Cypress.Log.command()
+        options._log = $Log.command()
 
-        if Cypress.Utils.hasElement(subject)
-          options._log.set({$el: subject})
+        if utils.hasElement(arg)
+          options._log.set({$el: arg})
 
       do resolveWrap = =>
-        @verifyUpcomingAssertions(subject, options, {
+        @verifyUpcomingAssertions(arg, options, {
           onRetry: resolveWrap
         })
+  })

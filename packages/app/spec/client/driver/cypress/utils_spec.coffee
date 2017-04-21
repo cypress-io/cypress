@@ -1,4 +1,4 @@
-describe "$Cypress.Utils API", ->
+describe "$Cypress.utils API", ->
   enterCommandTestingMode()
 
   context "#throwErrByPath", ->
@@ -13,13 +13,13 @@ describe "$Cypress.Utils API", ->
 
       it "has an err.name of InternalError", ->
         try
-          $Cypress.Utils.throwErrByPath("not.there")
+          $Cypress.utils.throwErrByPath("not.there")
         catch e
           expect(e.name).to.eq "InternalError"
 
       it "has the right message", ->
         try
-          $Cypress.Utils.throwErrByPath("not.there")
+          $Cypress.utils.throwErrByPath("not.there")
         catch e
           expect(e.message).to.include "Error message path 'not.there' does not exist"
 
@@ -27,13 +27,13 @@ describe "$Cypress.Utils API", ->
 
       it "has an err.name of CypressError", ->
         try
-          $Cypress.Utils.throwErrByPath("__test_errors.simple")
+          $Cypress.utils.throwErrByPath("__test_errors.simple")
         catch e
           expect(e.name).to.eq "CypressError"
 
       it "has the right message", ->
         try
-          $Cypress.Utils.throwErrByPath("__test_errors.simple")
+          $Cypress.utils.throwErrByPath("__test_errors.simple")
         catch e
           expect(e.message).to.include "This is a simple error message"
 
@@ -41,7 +41,7 @@ describe "$Cypress.Utils API", ->
 
       it "uses them in the error message", ->
         try
-          $Cypress.Utils.throwErrByPath("__test_errors.with_args", {
+          $Cypress.utils.throwErrByPath("__test_errors.with_args", {
             args: { foo: "foo", bar: ["bar", "qux"]  }
           })
         catch e
@@ -51,7 +51,7 @@ describe "$Cypress.Utils API", ->
 
       it "uses them in the error message", ->
         try
-          $Cypress.Utils.throwErrByPath("__test_errors.with_multi_args", {
+          $Cypress.utils.throwErrByPath("__test_errors.with_multi_args", {
             args: { foo: "foo", bar: ["bar", "qux"]  }
           })
         catch e
@@ -62,7 +62,7 @@ describe "$Cypress.Utils API", ->
       it "attaches the function to the error", ->
         onFail = ->
         try
-          $Cypress.Utils.throwErrByPath("window.iframe_undefined", { onFail })
+          $Cypress.utils.throwErrByPath("window.iframe_undefined", { onFail })
         catch e
           expect(e.onFail).to.equal onFail
 
@@ -71,7 +71,7 @@ describe "$Cypress.Utils API", ->
       it "attaches the handler to the error", ->
         command = { error: @sandbox.spy() }
         try
-          $Cypress.Utils.throwErrByPath("window.iframe_undefined", { onFail: command })
+          $Cypress.utils.throwErrByPath("window.iframe_undefined", { onFail: command })
         catch e
           e.onFail("the error")
           expect(command.error).to.be.calledWith("the error")
@@ -80,28 +80,28 @@ describe "$Cypress.Utils API", ->
 
     it "throws the error as sent", ->
       try
-        $Cypress.Utils.throwErr("Something unexpected")
+        $Cypress.utils.throwErr("Something unexpected")
       catch e
         expect(e.message).to.include "Something unexpected"
         expect(e.name).to.eq "CypressError"
 
   describe "#filterOutOptions", ->
     it "returns new obj based on the delta from the filter", ->
-      obj = $Cypress.Utils.filterOutOptions {visible: true, exist: false, foo: "bar"}, {visible: null, exist: false}
+      obj = $Cypress.utils.filterOutOptions {visible: true, exist: false, foo: "bar"}, {visible: null, exist: false}
       expect(obj).to.deep.eq {visible: true}
 
     it "returns undefined if nothing is different", ->
-      obj = $Cypress.Utils.filterOutOptions {foo: "foo", bar: "bar"}, {foo: "foo"}
+      obj = $Cypress.utils.filterOutOptions {foo: "foo", bar: "bar"}, {foo: "foo"}
       expect(obj).to.be.undefined
 
     it "normalizes objects with length property", ->
-      obj = $Cypress.Utils.filterOutOptions {exist: true}, {visible: null, exist: false, length: null}
+      obj = $Cypress.utils.filterOutOptions {exist: true}, {visible: null, exist: false, length: null}
       expect(obj).to.deep.eq {exist: true}
 
   describe "#stringify", ->
     beforeEach ->
       @str = (str) ->
-        $Cypress.Utils.stringify(str)
+        $Cypress.utils.stringify(str)
 
     context "Values", ->
       it "string", ->
@@ -154,23 +154,23 @@ describe "$Cypress.Utils API", ->
   describe "#hasElement", ->
     it "is true on jQuery objects", ->
       body = @cy.$$("body")
-      expect($Cypress.Utils.hasElement(body)).to.be.true
+      expect($Cypress.utils.hasElement(body)).to.be.true
 
     it "is true on DOM objects", ->
       body = @cy.$$("body").get(0)
-      expect($Cypress.Utils.hasElement(body)).to.be.true
+      expect($Cypress.utils.hasElement(body)).to.be.true
 
     _.each [{}, [], [{}], 1, "", true], (value) ->
       it "is false on: #{typeof value}", ->
-        expect($Cypress.Utils.hasElement(value)).to.be.false
+        expect($Cypress.utils.hasElement(value)).to.be.false
 
   describe "#stringifyElement", ->
     it "returns <window>", ->
-      str = $Cypress.Utils.stringifyElement(window)
+      str = $Cypress.utils.stringifyElement(window)
       expect(str).to.eq("<window>")
 
     it "returns <document>", ->
-      str = $Cypress.Utils.stringifyElement(document)
+      str = $Cypress.utils.stringifyElement(document)
       expect(str).to.eq("<document>")
 
     context "long form", ->
@@ -178,42 +178,42 @@ describe "$Cypress.Utils API", ->
         input = $("<input />")
         @cy.$$("body").append(input)
 
-        str = $Cypress.Utils.stringifyElement(input)
+        str = $Cypress.utils.stringifyElement(input)
         expect(str).to.eq "<input>"
 
     context "short form", ->
       it "returns element", ->
         body = @cy.$$("body")
 
-        str = $Cypress.Utils.stringifyElement(body, "short")
+        str = $Cypress.utils.stringifyElement(body, "short")
         expect(str).to.eq "<body>"
 
       it "returns element + id", ->
         div = $("<div id='id' />")
         @cy.$$("body").append(div)
 
-        str = $Cypress.Utils.stringifyElement(div, "short")
+        str = $Cypress.utils.stringifyElement(div, "short")
         expect(str).to.eq "<div#id>"
 
       it "uses element class", ->
         div = $("<div class='class foo bar' />")
         @cy.$$("body").append(div)
 
-        str = $Cypress.Utils.stringifyElement(div, "short")
+        str = $Cypress.utils.stringifyElement(div, "short")
         expect(str).to.eq "<div.class.foo.bar>"
 
       it "uses name, id, and class", ->
         div = $("<div id='baz' class='foo' />")
         @cy.$$("body").append(div)
 
-        str = $Cypress.Utils.stringifyElement(div, "short")
+        str = $Cypress.utils.stringifyElement(div, "short")
         expect(str).to.eq "<div#baz.foo>"
 
       it "can stringify svg", ->
         svg = $('<svg id="svg123" class="icon icon-svg" width="100" height="100"><rect class="node" fill="red" width="50" height="50" x="25" y="25"></rect></svg>')
         @cy.$$("body").append(svg)
 
-        str = $Cypress.Utils.stringifyElement(svg, "short")
+        str = $Cypress.utils.stringifyElement(svg, "short")
         expect(str).to.eq("<svg#svg123.icon.icon-svg>")
 
       it "gets updated class names", ->
@@ -221,13 +221,13 @@ describe "$Cypress.Utils API", ->
         div.prop("class", "foo bar")
         @cy.$$("body").append(div)
 
-        str = $Cypress.Utils.stringifyElement(div, "short")
+        str = $Cypress.utils.stringifyElement(div, "short")
         expect(str).to.eq("<div#baz.foo.bar>")
 
       it "returns array of els", ->
         lis = @cy.$$("li")
 
-        str = $Cypress.Utils.stringifyElement(lis, "short")
+        str = $Cypress.utils.stringifyElement(lis, "short")
         expect(str).to.eq "[ <li.item>, #{lis.length - 1} more... ]"
 
       it "stringifies array of elements", ->
@@ -237,20 +237,20 @@ describe "$Cypress.Utils API", ->
         _.times 3, appendButton
 
         btns = @cy.$$(".stringify")
-        str  = $Cypress.Utils.stringifyElement(btns, "short")
+        str  = $Cypress.utils.stringifyElement(btns, "short")
         expect(str).to.eq "[ <button.stringify>, 2 more... ]"
 
     context "#convertHtmlTags", ->
       it "converts opening brackets to tags", ->
-        html = $Cypress.Utils.convertHtmlTags "[strong]foo"
+        html = $Cypress.utils.convertHtmlTags "[strong]foo"
         expect(html).to.eq "<strong>foo"
 
       it "converts closing brackets to tags", ->
-        html = $Cypress.Utils.convertHtmlTags "foo[/strong]"
+        html = $Cypress.utils.convertHtmlTags "foo[/strong]"
         expect(html).to.eq "foo</strong>"
 
       it "converts opening brackets with attrs", ->
-        html = $Cypress.Utils.convertHtmlTags "[i class='fa-circle']foo"
+        html = $Cypress.utils.convertHtmlTags "[i class='fa-circle']foo"
         expect(html).to.eq "<i class='fa-circle'>foo"
 
   describe "#plural", ->
@@ -264,19 +264,19 @@ describe "$Cypress.Utils API", ->
             qux: 'qux'
 
     it 'throws if object not provided as first argument', ->
-      expect(-> $Cypress.Utils.getObjValueByPath("foo")).to.throw "The first parameter to $Cypress.Utils.getObjValueByPath() must be an object"
+      expect(-> $Cypress.utils.getObjValueByPath("foo")).to.throw "The first parameter to utils.getObjValueByPath() must be an object"
 
     it 'throws if path not provided as second argument', ->
-      expect(=> $Cypress.Utils.getObjValueByPath(@obj)).to.throw "The second parameter to $Cypress.Utils.getObjValueByPath() must be a string"
+      expect(=> $Cypress.utils.getObjValueByPath(@obj)).to.throw "The second parameter to utils.getObjValueByPath() must be a string"
 
     it 'returns value for shallow path', ->
-      expect($Cypress.Utils.getObjValueByPath @obj, 'foo').to.equal 'foo'
+      expect($Cypress.utils.getObjValueByPath @obj, 'foo').to.equal 'foo'
 
     it 'returns value for deeper path', ->
-      expect($Cypress.Utils.getObjValueByPath @obj, 'bar.baz.qux').to.equal 'qux'
+      expect($Cypress.utils.getObjValueByPath @obj, 'bar.baz.qux').to.equal 'qux'
 
     it 'returns undefined for non-existent shallow path', ->
-      expect($Cypress.Utils.getObjValueByPath @obj, 'nope').to.be.undefined
+      expect($Cypress.utils.getObjValueByPath @obj, 'nope').to.be.undefined
 
     it 'returns undefined for non-existent deeper path', ->
-      expect($Cypress.Utils.getObjValueByPath @obj, 'bar.baz.nope').to.be.undefined
+      expect($Cypress.utils.getObjValueByPath @obj, 'bar.baz.nope').to.be.undefined

@@ -1,31 +1,31 @@
-$Cypress.Config = do ($Cypress, _) ->
+_ = require("lodash")
 
-  return {
-    create: (Cypress, config) ->
-      get = (key) ->
-        if key
-          config[key]
-        else
-          config
+module.exports = {
+  create: (Cypress, config) ->
+    get = (key) ->
+      if key
+        config[key]
+      else
+        config
 
-      set = (key, value) ->
-        if _.isObject(key)
-          obj = key
-        else
-          obj = {}
-          obj[key] = value
+    set = (key, value) ->
+      if _.isObject(key)
+        obj = key
+      else
+        obj = {}
+        obj[key] = value
 
-        _.extend(config, obj)
+      _.extend(config, obj)
 
-      Cypress.config = (key, value) ->
-        switch arguments.length
-          when 0
-            get()
-          when 1
-            if _.isString(key)
-              get(key)
-            else
-              set(key)
+    Cypress.config = (key, value) ->
+      switch arguments.length
+        when 0
+          get()
+        when 1
+          if _.isString(key)
+            get(key)
           else
-            set(key, value)
-  }
+            set(key)
+        else
+          set(key, value)
+}

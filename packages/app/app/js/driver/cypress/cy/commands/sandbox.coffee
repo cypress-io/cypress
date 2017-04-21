@@ -1,25 +1,28 @@
-$Cypress.register "Sandbox", (Cypress, _, $) ->
-  do (sinon) ->
+sinon = require("sinon")
 
-    createSandbox = (sinon) ->
-      $Cypress.Sinon.override(sinon)
+$Cy = require("../../cy")
+sinonUtils = require("../../sinon")
 
-      sinon.sandbox.create()
+createSandbox = (sinon) ->
+  sinonUtils.override(sinon)
 
-    Cypress.on "restore", ->
-      ## restore the sandbox if we've
-      ## created one
-      return if not @prop
+  sinon.sandbox.create()
 
-      if sandbox = @prop("sandbox")
-        sandbox.restore()
+$Cy.extend({
+  ## think about making this "public" so
+  ## users can utilize the root sandbox
+  ## for clocks / special XHRs / etc
+  _getSandbox: ->
+    sandbox = @state("sandbox") ? createSandbox(sinon)
 
-    Cypress.Cy.extend
+    @state("sandbox", sandbox)
+})
 
-      ## think about making this "public" so
-      ## users can utilize the root sandbox
-      ## for clocks / special XHRs / etc
-      _getSandbox: ->
-        sandbox = @prop("sandbox") ? createSandbox(sinon)
+module.exports = (Cypress, Commands) ->
+  Cypress.on "restore", ->
+    ## restore the sandbox if we've
+    ## created one
+    return if not @prop
 
-        @prop("sandbox", sandbox)
+    if sandbox = @state("sandbox")
+      sandbox.restore()

@@ -1,6 +1,9 @@
-do ($Cypress, _) ->
+_ = require("lodash")
 
-  $Cypress.Cy.extend
+$Log = require("../log")
+
+module.exports = ($Cy) ->
+  $Cy.extend
     urlChanged: (url, options = {}) ->
       ## allow the url to be explictly passed here
       url ?= @_getLocation("href")
@@ -9,15 +12,15 @@ do ($Cypress, _) ->
       ## want to trigger the url:changed
       return if _.isEmpty(url)
 
-      urls = @prop("urls") ? []
+      urls = @state("urls") ? []
 
       previousUrl = _.last(urls)
 
       urls.push(url)
 
-      @prop("urls", urls)
+      @state("urls", urls)
 
-      @private("url", url)
+      @privateState("url", url)
 
       _.defaults options,
         log: true
@@ -28,7 +31,7 @@ do ($Cypress, _) ->
       ## the previous was. this prevents logging
       ## additionally when the url didnt actually change
       if options.log and (url isnt previousUrl)
-        Cypress.Log.command
+        $Log.command
           name: "new url"
           message: url
           event: true

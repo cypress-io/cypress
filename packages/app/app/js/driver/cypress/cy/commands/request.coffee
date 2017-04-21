@@ -1,49 +1,54 @@
-$Cypress.register "Request", (Cypress, _, $) ->
+_ = require("lodash")
 
-  validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
+$Location = require("../../location")
+$Log = require("../../log")
+utils = require("../../utils")
 
-  isOptional = (memo, val, key) ->
-    if _.isNull(val)
-      memo.push(key)
-    memo
+validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
 
-  REQUEST_DEFAULTS = {
-    url: ""
-    method: "GET"
-    qs: null
-    body: null
-    auth: null
-    headers: null
-    json: null
-    form: null
-    gzip: true
-    followRedirect: true
-  }
+isOptional = (memo, val, key) ->
+  if _.isNull(val)
+    memo.push(key)
+  memo
 
-  REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
+REQUEST_DEFAULTS = {
+  url: ""
+  method: "GET"
+  qs: null
+  body: null
+  auth: null
+  headers: null
+  json: null
+  form: null
+  gzip: true
+  followRedirect: true
+}
 
-  OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
+REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
 
+OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
+
+responseFailed = (err) ->
+  err.triggerPromise is true
+
+argIsHttpMethod = (str) ->
+  _.isString(str) and validHttpMethodsRe.test str.toUpperCase()
+
+isValidJsonObj = (body) ->
+  _.isObject(body) and not _.isFunction(body)
+
+whichAreOptional = (val, key) ->
+  val is null and key in OPTIONAL_OPTS
+
+module.exports = (Cypress, Commands) ->
   request = (options) =>
     Cypress.triggerPromise("request", options)
-
-  responseFailed = (err) ->
-    err.triggerPromise is true
-
-  argIsHttpMethod = (str) ->
-    _.isString(str) and validHttpMethodsRe.test str.toUpperCase()
-
-  isValidJsonObj = (body) ->
-    _.isObject(body) and not _.isFunction(body)
-
-  whichAreOptional = (val, key) ->
-    val is null and key in OPTIONAL_OPTS
 
   # Cypress.extend
   #   ## set defaults for all requests?
   #   requestDefaults: (options = {}) ->
 
-  Cypress.addParentCommand
+  Commands.addAll({
     ## allow our signature to be similar to cy.route
     ## METHOD / URL / BODY
     ## or object literal with all expanded options
@@ -82,7 +87,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
       options.method = options.method.toUpperCase()
 
       if _.has(options, "failOnStatus")
-        $Cypress.Utils.warning("The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time.")
+        utils.warning("The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time.")
         options.failOnStatusCode = options.failOnStatus
 
       ## normalize followRedirects -> followRedirect
@@ -91,61 +96,61 @@ $Cypress.register "Request", (Cypress, _, $) ->
         options.followRedirect = options.followRedirects
 
       if not validHttpMethodsRe.test(options.method)
-        $Cypress.Utils.throwErrByPath("request.invalid_method", {
+        utils.throwErrByPath("request.invalid_method", {
           args: { method: o.method }
         })
 
       if not options.url
-        $Cypress.Utils.throwErrByPath("request.url_missing")
+        utils.throwErrByPath("request.url_missing")
 
       if not _.isString(options.url)
-        $Cypress.Utils.throwErrByPath("request.url_wrong_type")
+        utils.throwErrByPath("request.url_wrong_type")
 
       ## normalize the url by prepending it with our current origin
       ## or the baseUrl
       ## or just using the options.url if its FQDN
       ## origin may return an empty string if we haven't visited anything yet
-      options.url = Cypress.Location.normalize(options.url)
+      options.url = $Location.normalize(options.url)
 
       if originOrBase = @Cypress.config("baseUrl") or @_getLocation("origin")
-        options.url = Cypress.Location.qualifyWithBaseUrl(originOrBase, options.url)
+        options.url = $Location.qualifyWithBaseUrl(originOrBase, options.url)
 
       ## if options.url isnt FQDN then we need to throw here
       ## if we made a request prior to a visit then it needs
       ## to be filled out
-      if not Cypress.Location.isFullyQualifiedUrl(options.url)
-        $Cypress.Utils.throwErrByPath("request.url_invalid")
+      if not $Location.isFullyQualifiedUrl(options.url)
+        utils.throwErrByPath("request.url_invalid")
 
       ## only set json to true if form isnt true
       ## and we have a valid object for body
       if options.form isnt true and isValidJsonObj(options.body)
         options.json = true
 
-      options = _.omit(options, whichAreOptional)
+      options = _.omitBy(options, whichAreOptional)
 
       if a = options.auth
         if not _.isObject(a)
-          $Cypress.Utils.throwErrByPath("request.auth_invalid")
+          utils.throwErrByPath("request.auth_invalid")
 
       if h = options.headers
         if _.isObject(h)
           options.headers = h
         else
-          $Cypress.Utils.throwErrByPath("request.headers_invalid")
+          utils.throwErrByPath("request.headers_invalid")
 
       if not _.isBoolean(options.gzip)
-        $Cypress.Utils.throwErrByPath("request.gzip_invalid")
+        utils.throwErrByPath("request.gzip_invalid")
 
       if f = options.form
         if not _.isBoolean(f)
-          $Cypress.Utils.throwErrByPath("request.form_invalid")
+          utils.throwErrByPath("request.form_invalid")
 
       ## clone the requestOpts and reduce them down
       ## to the bare minimum to send to lib/request
-      requestOpts = _(options).pick(REQUEST_PROPS)
+      requestOpts = _.pick(options, REQUEST_PROPS)
 
       if options.log
-        options._log = Cypress.Log.command({
+        options._log = $Log.command({
           message: ""
           consoleProps: ->
             resp = options.response ? {}
@@ -153,7 +158,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
 
             obj = {}
 
-            word = $Cypress.Utils.plural(rr.length, "Requests", "Request")
+            word = utils.plural(rr.length, "Requests", "Request")
 
             ## if we have only a single request/response then
             ## flatten this to an object, else keep as array
@@ -191,7 +196,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
 
         ## bomb if we should fail on non okay status code
         if options.failOnStatusCode and response.isOkStatusCode isnt true
-          $Cypress.Utils.throwErrByPath("request.status_invalid", {
+          utils.throwErrByPath("request.status_invalid", {
             onFail: options._log
             args: {
               method:          requestOpts.method
@@ -208,7 +213,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
 
         return response
       .catch Promise.TimeoutError, (err) =>
-        $Cypress.Utils.throwErrByPath "request.timed_out", {
+        utils.throwErrByPath "request.timed_out", {
           onFail: options._log
           args: {
             url:     requestOpts.url
@@ -217,7 +222,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
           }
         }
       .catch responseFailed, (err) ->
-        $Cypress.Utils.throwErrByPath("request.loading_failed", {
+        utils.throwErrByPath("request.loading_failed", {
           onFail: options._log
           args: {
             error:   err.message
@@ -226,3 +231,4 @@ $Cypress.register "Request", (Cypress, _, $) ->
             url:     requestOpts.url
           }
         })
+  })

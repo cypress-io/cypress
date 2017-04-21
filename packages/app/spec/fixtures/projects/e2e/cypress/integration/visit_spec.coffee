@@ -31,8 +31,8 @@ describe "visits", ->
 
       {origin} = Cypress.Location.create(window.location.href)
 
-      cy.private("$remoteIframe").on "load", =>
-        urls.push cy.private("window").location.href
+      cy.privateState("$remoteIframe").on "load", =>
+        urls.push cy.privateState("window").location.href
 
         count += 1
 

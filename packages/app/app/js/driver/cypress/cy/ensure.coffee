@@ -1,26 +1,30 @@
-do ($Cypress, _, $) ->
+_ = require("lodash")
+$Dom = require("../dom")
+utils = require("../utils")
 
-  commandOptions = ["exist", "exists", "visible", "length"]
+commandOptions = ["exist", "exists", "visible", "length"]
+VALID_POSITIONS = ["topLeft", "top", "topRight", "left", "center", "right", "bottomLeft", "bottom", "bottomRight"]
 
-  returnFalse = -> return false
+returnFalse = -> return false
 
-  $Cypress.Cy.extend
+module.exports = ($Cy) ->
+  $Cy.extend
     ensureSubject: ->
-      subject = @prop("subject")
+      subject = @state("subject")
 
       if not subject?
-        cmd = @prop("current").get("name")
-        $Cypress.Utils.throwErrByPath("miscellaneous.no_subject", {
+        cmd = @state("current").get("name")
+        utils.throwErrByPath("miscellaneous.no_subject", {
           args: { subject, cmd }
         })
 
       return subject
 
     ensureParent: ->
-      current = @prop("current")
+      current = @state("current")
 
       if not current.get("prev")
-        $Cypress.Utils.throwErrByPath("miscellaneous.orphan", {
+        utils.throwErrByPath("miscellaneous.orphan", {
           args: { cmd: current.get("name") }
         })
 
@@ -36,7 +40,7 @@ do ($Cypress, _, $) ->
 
       ## bail if we dont yet have two points
       if lastTwo.length isnt 2
-        $Cypress.Utils.throwErrByPath("dom.animation_check_failed")
+        utils.throwErrByPath("dom.animation_check_failed")
 
       [point1, point2] = lastTwo
 
@@ -50,21 +54,21 @@ do ($Cypress, _, $) ->
       ## greater than a default of '5' between
       ## the points
       if distance() > threshold
-        cmd  = @prop("current").get("name")
-        node = $Cypress.Utils.stringifyElement($el)
-        $Cypress.Utils.throwErrByPath("dom.animating", {
+        cmd  = @state("current").get("name")
+        node = utils.stringifyElement($el)
+        utils.throwErrByPath("dom.animating", {
           args: { cmd, node }
         })
 
     ensureActionability: (subject, onFail) ->
       subject ?= @ensureSubject()
 
-      cmd = @prop("current").get("name")
+      cmd = @state("current").get("name")
 
       if subject.prop("disabled")
-        node = $Cypress.Utils.stringifyElement(subject)
+        node = utils.stringifyElement(subject)
 
-        $Cypress.Utils.throwErrByPath("dom.disabled", {
+        utils.throwErrByPath("dom.disabled", {
           onFail
           args: { cmd, node }
         })
@@ -72,12 +76,12 @@ do ($Cypress, _, $) ->
     ensureVisibility: (subject, onFail) ->
       subject ?= @ensureSubject()
 
-      cmd = @prop("current").get("name")
+      cmd = @state("current").get("name")
 
       if not (subject.length is subject.filter(":visible").length)
-        reason = $Cypress.Dom.getReasonElIsHidden(subject)
-        node   = $Cypress.Utils.stringifyElement(subject)
-        $Cypress.Utils.throwErrByPath("dom.not_visible", {
+        reason = $Dom.getReasonElIsHidden(subject)
+        node   = utils.stringifyElement(subject)
+        utils.throwErrByPath("dom.not_visible", {
           onFail
           args: { cmd, node, reason }
         })
@@ -85,25 +89,24 @@ do ($Cypress, _, $) ->
     ensureDom: (subject, cmd, log) ->
       subject ?= @ensureSubject()
 
-      cmd ?= @prop("current").get("name")
+      cmd ?= @state("current").get("name")
 
-      isWindow = $Cypress.Utils.hasWindow(subject)
+      isWindow = utils.hasWindow(subject)
 
       ## think about dropping the 'cmd' part
       ## and adding exactly what the subject is
       ## if its an object or array, just say Object or Array
       ## but if its a primitive, just print out its value like
       ## true, false, 0, 1, 3, "foo", "bar"
-      if not (isWindow or $Cypress.Utils.hasElement(subject))
-        console.warn("Subject is currently: ", subject)
-        $Cypress.Utils.throwErrByPath("dom.non_dom", {
+      if not utils.hasDom(subject)
+        utils.throwErrByPath("dom.non_dom", {
           onFail: log
           args: { cmd }
         })
 
       if not (isWindow or @_contains(subject))
-        node = $Cypress.Utils.stringifyElement(subject)
-        $Cypress.Utils.throwErrByPath("dom.detached", {
+        node = utils.stringifyElement(subject)
+        utils.throwErrByPath("dom.detached", {
           onFail: log
           args: { cmd, node }
         })
@@ -117,10 +120,10 @@ do ($Cypress, _, $) ->
         return false
 
       cleanup = =>
-        @prop("onBeforeLog", null)
+        @state("onBeforeLog", null)
 
       ## prevent any additional logs this is an implicit assertion
-      @prop("onBeforeLog", returnFalse)
+      @state("onBeforeLog", returnFalse)
 
       ## verify the $el exists and use our default error messages
       ## TODO: always unbind if our expectation failed
@@ -133,7 +136,7 @@ do ($Cypress, _, $) ->
 
     ensureElExistence: ($el) ->
       ## dont throw if this isnt even a DOM object
-      # return if not $Cypress.Utils.isInstanceOf($el, $)
+      # return if not utils.isInstanceOf($el, $)
 
       ## ensure that we either had some assertions
       ## or that the element existed
@@ -155,7 +158,7 @@ do ($Cypress, _, $) ->
             when "length"
               "have.length', '#{options[opt]}"
 
-          $Cypress.Utils.throwErrByPath("miscellaneous.deprecated", {
+          utils.throwErrByPath("miscellaneous.deprecated", {
             args: {
               assertion
               opt
@@ -164,18 +167,39 @@ do ($Cypress, _, $) ->
           })
 
     ensureDescendents: ($el1, $el2, onFail) ->
-      cmd = @prop("current").get("name")
+      cmd = @state("current").get("name")
 
-      unless $Cypress.Utils.isDescendent($el1, $el2)
+      if not utils.isDescendent($el1, $el2)
         if $el2
-          node = $Cypress.Utils.stringifyElement($el2)
-          $Cypress.Utils.throwErrByPath("dom.covered", {
+          element1 = utils.stringifyElement($el1)
+          element2 = utils.stringifyElement($el2)
+          utils.throwErrByPath("dom.covered", {
             onFail
-            args: { cmd, node }
+            args: { cmd, element1, element2 }
           })
         else
-          node = $Cypress.Utils.stringifyElement($el1)
-          $Cypress.Utils.throwErrByPath("dom.hidden", {
+          node = utils.stringifyElement($el1)
+          utils.throwErrByPath("dom.center_hidden", {
             onFail
             args: { cmd, node }
           })
+
+    ensureValidPosition: (position) ->
+      ## make sure its valid first!
+      if position in VALID_POSITIONS
+        return true
+
+      $Cypress.Utils.throwErrByPath("dom.invalid_position_argument", {
+        args: { position, validPositions: VALID_POSITIONS.join(', ') }
+      })
+
+    ensureScrollability: ($el, cmd) ->
+      return true if $Cypress.Dom.elIsScrollable($el)
+
+      ## prep args to throw in error since we can't scroll
+      cmd   ?= @prop("current").get("name")
+      node  = $Cypress.Utils.stringifyElement($el)
+
+      $Cypress.Utils.throwErrByPath("dom.not_scrollable", {
+        args: { cmd, node }
+      })

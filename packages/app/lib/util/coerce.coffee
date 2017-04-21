@@ -1,12 +1,13 @@
-str = require("underscore.string")
+_         = require("lodash")
+toBoolean = require("underscore.string/toBoolean")
 
 module.exports = (value) ->
   switch
     ## convert to number
-    when str.toNumber(value)?.toString() is value
-      str.toNumber(value)
+    when _.toNumber(value)?.toString() is value
+      _.toNumber(value)
     ## convert to boolean
-    when str.toBoolean(value)?.toString() is value
-      str.toBoolean(value)
+    when toBoolean(value)?.toString() is value
+      toBoolean(value)
     else
       value

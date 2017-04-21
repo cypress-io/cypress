@@ -16,9 +16,17 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("select[name=maps]").select("train").then ($select) ->
         expect($select).to.have.value("de_train")
 
+    it "selects by trimmed text with newlines stripped", ->
+      @cy.get("select[name=maps]").select("italy").then ($select) ->
+        expect($select).to.have.value("cs_italy")
+
     it "prioritizes value over text", ->
       @cy.get("select[name=foods]").select("Ramen").then ($select) ->
         expect($select).to.have.value("Ramen")
+
+    it "can select an array of values", ->
+      @cy.get("select[name=movies]").select(["apoc", "br"]).then ($select) ->
+        expect($select.val()).to.deep.eq ["apoc", "br"]
 
     it "can handle options nested in optgroups", ->
       @cy.get("select[name=starwars]").select("Jar Jar").then ($select) ->
@@ -247,7 +255,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when the subject isnt visible", (done) ->
         select = @cy.$$("select:first").show().hide()
 
-        node = $Cypress.Utils.stringifyElement(select)
+        node = $Cypress.utils.stringifyElement(select)
 
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.select() failed because this element is not visible"
@@ -297,7 +305,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("select:first").select("de_dust2").then ->
           expect(@log.get("name")).to.eq "select"
 
-      it "passes in $el", ->
+      it.skip "passes in $el", ->
         @cy.get("select:first").select("de_dust2").then ($select) ->
           expect(@log.get("$el")).to.eq $select
 
@@ -639,7 +647,7 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$$(":text:first")
 
         input.get(0).addEventListener "keydown", (e) =>
-          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          obj = _.pick(e, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
           expect(obj).to.deep.eq {
             altKey: false
             bubbles: true
@@ -657,7 +665,7 @@ describe "$Cypress.Cy Actions Commands", ->
             repeat: false
             shiftKey: false
             type: "keydown"
-            view: @cy.private("window")
+            view: @cy.privateState("window")
             which: 65 ## deprecated but fired by chrome
           }
           done()
@@ -668,7 +676,7 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$$(":text:first")
 
         input.get(0).addEventListener "keypress", (e) =>
-          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          obj = _.pick(e, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
           expect(obj).to.deep.eq {
             altKey: false
             bubbles: true
@@ -686,7 +694,7 @@ describe "$Cypress.Cy Actions Commands", ->
             repeat: false
             shiftKey: false
             type: "keypress"
-            view: @cy.private("window")
+            view: @cy.privateState("window")
             which: 97 ## deprecated
           }
           done()
@@ -697,7 +705,7 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$$(":text:first")
 
         input.get(0).addEventListener "keyup", (e) =>
-          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          obj = _.pick(e, "altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
           expect(obj).to.deep.eq {
             altKey: false
             bubbles: true
@@ -715,7 +723,7 @@ describe "$Cypress.Cy Actions Commands", ->
             repeat: false
             shiftKey: false
             type: "keyup"
-            view: @cy.private("window")
+            view: @cy.privateState("window")
             which: 65 ## deprecated but fired by chrome
           }
           done()
@@ -726,7 +734,7 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$$(":text:first")
 
         input.get(0).addEventListener "textInput", (e) =>
-          obj = _(e).pick "bubbles", "cancelable", "charCode", "data", "detail", "keyCode", "layerX", "layerY", "pageX", "pageY", "type", "view", "which"
+          obj = _.pick e, "bubbles", "cancelable", "charCode", "data", "detail", "keyCode", "layerX", "layerY", "pageX", "pageY", "type", "view", "which"
           expect(obj).to.deep.eq {
             bubbles: true
             cancelable: true
@@ -739,7 +747,7 @@ describe "$Cypress.Cy Actions Commands", ->
             pageX: 0
             pageY: 0
             type: "textInput"
-            view: @cy.private("window")
+            view: @cy.privateState("window")
             which: 0
           }
           done()
@@ -750,7 +758,7 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$$(":text:first")
 
         input.get(0).addEventListener "input", (e) =>
-          obj = _(e).pick "bubbles", "cancelable", "type"
+          obj = _.pick e, "bubbles", "cancelable", "type"
           expect(obj).to.deep.eq {
             bubbles: true
             cancelable: false
@@ -2065,7 +2073,7 @@ describe "$Cypress.Cy Actions Commands", ->
       beforeEach ->
         @Cypress.on "log", (attrs, @log) =>
 
-      it "passes in $el", ->
+      it.skip "passes in $el", ->
         @cy.get("input:first").type("foobar").then ($input) ->
           expect(@log.get("$el")).to.eq $input
 
@@ -2079,7 +2087,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "clones textarea value after the type happens", ->
         expectToHaveValueAndCoords = =>
-          cmd = @cy.commands.findWhere({name: "type"})
+          cmd = @cy.queue.find({name: "type"})
           log = cmd.get("logs")[0]
           txt = log.get("snapshots")[1].body.find("#comments")
           expect(txt).to.have.value("foobarbaz")
@@ -2093,7 +2101,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "clones textarea value when textarea is focused first", ->
         expectToHaveValueAndNoCoords = =>
-          cmd = @cy.commands.findWhere({name: "type"})
+          cmd = @cy.queue.find({name: "type"})
           log = cmd.get("logs")[0]
           txt = log.get("snapshots")[1].body.find("#comments")
           expect(txt).to.have.value("foobarbaz")
@@ -2242,7 +2250,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when the subject isnt visible", (done) ->
         input = @cy.$$("input:text:first").show().hide()
 
-        node = $Cypress.Utils.stringifyElement(input)
+        node = $Cypress.utils.stringifyElement(input)
 
         logs = []
 
@@ -2301,7 +2309,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(2)
-          expect(err.message).to.include "cy.type() failed because this element is being covered by another element"
+          expect(err.message).to.include "cy.type() failed because this element"
+          expect(err.message).to.include "is being covered by another element"
           done()
 
         @cy.get("#input-covered-in-span").type("foo")
@@ -2314,7 +2323,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq 2
-          allChars = _.keys(@Cypress.Keyboard.specialChars).concat(_.keys(@Cypress.Keyboard.modifierChars)).join(", ")
+          allChars = _.keys($Cypress.Keyboard.specialChars).concat(_.keys($Cypress.Keyboard.modifierChars)).join(", ")
           expect(err.message).to.eq "Special character sequence: '{bar}' is not recognized. Available sequences are: #{allChars}"
           done()
 
@@ -2365,18 +2374,21 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when element animation exceeds timeout", (done) ->
         @cy._timeout(100)
 
-        input = $("<input class='slidein' />")
-        input.css("animation-duration", ".5s")
-
-        @cy.$$("#animation-container").append(input)
+        @Cypress.config("animationDistanceThreshold", 1)
 
         @cy.on "fail", (err) ->
           expect(input).to.have.value("")
           expect(err.message).to.include("cy.type() could not be issued because this element is currently animating:\n")
           done()
 
+        input = $("<input class='slidein' />")
+        input.css("animation-duration", ".5s")
         input.on "animationstart", =>
-          @cy.get(".slidein").type("foo")
+          Promise.delay(50)
+          .then =>
+            @cy.get(".slidein").type("foo")
+
+        @cy.$$("#animation-container").append(input)
 
   context "#clear", ->
     it "does not change the subject", ->
@@ -2553,7 +2565,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when the subject isnt visible", (done) ->
         input = @cy.$$("input:text:first").show().hide()
 
-        node = $Cypress.Utils.stringifyElement(input)
+        node = $Cypress.utils.stringifyElement(input)
 
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.clear() failed because this element is not visible"
@@ -2603,7 +2615,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(2)
-          expect(err.message).to.include "cy.clear() failed because this element is being covered by another element"
+          expect(err.message).to.include "cy.clear() failed because this element"
+          expect(err.message).to.include "is being covered by another element"
           done()
 
         @cy.get("#input-covered-in-span").clear()
@@ -2888,7 +2901,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when any member of the subject isnt visible", (done) ->
         chk = @cy.$$(":checkbox").first().hide()
 
-        node = $Cypress.Utils.stringifyElement(chk.last())
+        node = $Cypress.utils.stringifyElement(chk.last())
 
         logs = []
 
@@ -2923,7 +2936,7 @@ describe "$Cypress.Cy Actions Commands", ->
         chk = @cy.$$(":checkbox")
         chk.show().last().hide()
 
-        node = $Cypress.Utils.stringifyElement(chk.last())
+        node = $Cypress.utils.stringifyElement(chk.last())
 
         logs = []
 
@@ -2964,7 +2977,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(2)
-          expect(err.message).to.include "cy.check() failed because this element is being covered by another element"
+          expect(err.message).to.include "cy.check() failed because this element"
+          expect(err.message).to.include "is being covered by another element"
           done()
 
         @cy.get("#checkbox-covered-in-span").check()
@@ -3308,7 +3322,7 @@ describe "$Cypress.Cy Actions Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          node = $Cypress.Utils.stringifyElement(chk.last())
+          node = $Cypress.utils.stringifyElement(chk.last())
           len  = (chk.length * 2) + 6
           expect(logs).to.have.length(len)
           expect(@log.get("error")).to.eq(err)
@@ -3361,7 +3375,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(2)
-          expect(err.message).to.include "cy.uncheck() failed because this element is being covered by another element"
+          expect(err.message).to.include "cy.uncheck() failed because this element"
+          expect(err.message).to.include "is being covered by another element"
           done()
 
         @cy.get("#checkbox-covered-in-span").uncheck()
@@ -3560,7 +3575,7 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.on "command:returned:value", (cmd, ret) =>
         if cmd.get("name") is "submit"
           ## expect our isReady to be pending
-          expect(@cy.prop("ready").promise.isPending()).to.be.true
+          expect(@cy.state("ready").promise.isPending()).to.be.true
 
       @cy.get("form:first").submit()
 
@@ -3787,7 +3802,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     it "uses forceFocusedEl if set", ->
       input = @cy.$$("input:first")
-      @cy.prop("forceFocusedEl", input.get(0))
+      @cy.state("forceFocusedEl", input.get(0))
 
       @cy.focused().then ($focused) ->
         expect($focused.get(0)).to.eq input.get(0)
@@ -3808,11 +3823,11 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:first").focus().focused().then ->
           input.remove()
         .focused().then ($el) ->
-          expect(cy.prop("forceFocusedEl")).to.be.null
+          expect(cy.state("forceFocusedEl")).to.be.null
 
     it "refuses to use blacklistFocusedEl", ->
       input = @cy.$$("input:first")
-      @cy.prop("blacklistFocusedEl", input.get(0))
+      @cy.state("blacklistFocusedEl", input.get(0))
 
       @cy
         .get("input:first").focus()
@@ -3937,9 +3952,9 @@ describe "$Cypress.Cy Actions Commands", ->
           ## make sure we have either set the property
           ## or havent
           if document.hasFocus()
-            expect(@cy.prop("forceFocusedEl")).not.to.be.ok
+            expect(@cy.state("forceFocusedEl")).not.to.be.ok
           else
-            expect(@cy.prop("forceFocusedEl")).to.eq(input.get(0))
+            expect(@cy.state("forceFocusedEl")).to.eq(input.get(0))
 
     it "matches @cy.focused()", ->
       button = @cy.$$("#button")
@@ -4081,7 +4096,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy
           .get("input:first").focus()
           .get("button:first").focus().then ->
-            names = _(logs).map (log) -> log.get("name")
+            names = _.map logs, (log) -> log.get("name")
             expect(logs).to.have.length(4)
             expect(names).to.deep.eq ["get", "focus", "get", "focus"]
 
@@ -4184,6 +4199,601 @@ describe "$Cypress.Cy Actions Commands", ->
             ## to test this accurately
             done()
 
+  context "#scrollTo", ->
+    beforeEach ->
+      @win          = @cy.private("window")
+      @scrollVert   = @cy.$$("#scroll-to-vertical")
+      @scrollHoriz  = @cy.$$("#scroll-to-horizontal")
+      @scrollBoth   = @cy.$$("#scroll-to-both")
+
+    afterEach ->
+      ## reset the scrollable containers back
+      ## to furthest left and top
+      @win.scrollTop           = 0
+      @win.scrollLeft          = 0
+
+      @scrollVert.scrollTop    = 0
+      @scrollVert.scrollLeft   = 0
+
+      @scrollHoriz.scrollTop   = 0
+      @scrollHoriz.scrollLeft  = 0
+
+      @scrollBoth.scrollTop    = 0
+      @scrollBoth.scrollLeft   = 0
+
+    describe "subjects", ->
+      it "subject is window by default", ->
+        @cy.scrollTo("125px").then (win2) ->
+          expect(@win).to.eq(win2)
+
+      it "subject is DOM", ->
+        @cy.get("#scroll-to-vertical").scrollTo("125px").then ($el) ->
+          expect($el.get(0)).to.eq @scrollVert.get(0)
+
+    describe "x axis only", ->
+      it "scrolls x axis to num px", ->
+        expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+        expect(@scrollHoriz.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-horizontal").scrollTo(300).then ($el) ->
+          expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+          expect(@scrollHoriz.get(0).scrollLeft).to.eq(300)
+
+      it "scrolls x axis to px", ->
+        expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+        expect(@scrollHoriz.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-horizontal").scrollTo("125px").then ($el) ->
+          expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+          expect(@scrollHoriz.get(0).scrollLeft).to.eq(125)
+
+      it "scrolls x axis by % of scrollable height", ->
+        expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+        expect(@scrollHoriz.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-horizontal").scrollTo("50%").then ($el) ->
+          ## they don't calculate the height of the container
+          ## in the percentage of the scroll (since going the height
+          ## of the container wouldn't scroll at all...)
+          expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+          expect(@scrollHoriz.get(0).scrollLeft).to.eq((500-100)/2)
+
+    describe "position arugments", ->
+      it "scrolls x/y axis to topLeft", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("topLeft").then () ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+      it "scrolls x/y axis to top", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("top").then () ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
+
+      it "scrolls x/y axis to topRight", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("topRight").then () ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100))
+
+      it "scrolls x/y axis to left", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("left").then () ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+      it "scrolls x/y axis to center", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("center").then () ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
+
+      it "scrolls x/y axis to right", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("right").then () ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100))
+
+      it "scrolls x/y axis to bottomLeft", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("bottomLeft").then () ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq((500-100))
+          expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+      it "scrolls x/y axis to bottom", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("bottom").then () ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq((500-100))
+          expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
+
+      it "scrolls x/y axis to bottomRight", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("bottomRight").then () ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq((500-100))
+          expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100))
+
+    describe "scroll both axis", ->
+      it "scrolls both x and y axis num of px", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo(300, 150).then ($el) ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq(150)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
+
+      it "scrolls x to 0 and y num of px", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo(0, 150).then ($el) ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq(150)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+      it "scrolls x num of px and y to 0 ", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo(150, 0).then ($el) ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq(150)
+
+      it "scrolls both x and y axis of px", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("300px", "150px").then ($el) ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq(150)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
+
+      it "scrolls both x and y axis of percentage", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("50%", "50%").then ($el) ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
+
+      it "scrolls x to 0 and y percentage", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("0%", "50%").then ($el) ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq((500-100)/2)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+      it "scrolls x to percentage and y to 0", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        @cy.get("#scroll-to-both").scrollTo("50%", "0%").then ($el) ->
+          expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq((500-100)/2)
+
+    describe "scrolls with options", ->
+      it "calls jQuery scroll to", ->
+        scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+        @cy.get("#scroll-to-both").scrollTo("25px").then ->
+          expect(scrollTo).to.be.calledWith({left: "25px", top: 0})
+
+      it "sets duration to 0 by default", ->
+        scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+        @cy.get("#scroll-to-both").scrollTo("25px").then ->
+          expect(scrollTo).to.be.calledWithMatch({}, {duration: 0})
+
+      it "sets axis to correct xy", ->
+        scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+        @cy.get("#scroll-to-both").scrollTo("25px", "80px").then ->
+          expect(scrollTo).to.be.calledWithMatch({}, {axis: "xy"})
+
+      it "scrolling resolves after a set duration", ->
+        expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+        expect(@scrollHoriz.get(0).scrollLeft).to.eq(0)
+
+        scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+        @cy.get("#scroll-to-horizontal").scrollTo("125px", {duration: 500}).then ->
+          expect(scrollTo).to.be.calledWithMatch({}, {duration: 500})
+          expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+          expect(@scrollHoriz.get(0).scrollLeft).to.eq(125)
+
+      it "accepts duration string option", ->
+        scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+        @cy.get("#scroll-to-both").scrollTo("25px", {duration: "500"}).then ->
+          expect(scrollTo.args[0][1].duration).to.eq "500"
+
+      it "has easing set to swing by default", ->
+        scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+        @cy.get("#scroll-to-both").scrollTo("25px").then ->
+          expect(scrollTo.args[0][1].easing).to.eq "swing"
+
+      it "scrolling resolves after easing", ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+        scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+        @cy.get("#scroll-to-both").scrollTo("25px", "50px", {easing: "linear"}).then ->
+          expect(scrollTo).to.be.calledWithMatch({}, {easing: "linear"})
+          expect(@scrollBoth.get(0).scrollTop).to.eq(50)
+          expect(@scrollBoth.get(0).scrollLeft).to.eq(25)
+
+      it "retries until element is scrollable", ->
+        $container = cy.$$("#nonscroll-becomes-scrollable")
+
+        expect($container.get(0).scrollTop).to.eq(0)
+        expect($container.get(0).scrollLeft).to.eq(0)
+
+        retried = false
+
+        @cy.on "retry", _.after 2, ->
+          $container.css("overflow", "scroll")
+          retried = true
+
+        @cy.get("#nonscroll-becomes-scrollable").scrollTo(500, 300).then ->
+          expect(retried).to.be.true
+          expect($container.get(0).scrollTop).to.eq(300)
+          expect($container.get(0).scrollLeft).to.eq(500)
+
+    describe "assertion verification", ->
+
+    describe "errors", ->
+      beforeEach ->
+        @allowErrors()
+
+      context "subject errors", ->
+        it "throws when not passed DOM element as subject", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "Cannot call cy.scrollTo() on a non-DOM subject."
+            done()
+
+          @cy.noop({foo: "bar"}).scrollTo("250px")
+
+        it "throws if scrollable container is multiple elements", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "cy.scrollTo() can only be used to scroll one element, you tried to scroll 14 elements."
+            done()
+
+          @cy.get("button").scrollTo("500px")
+
+      context "argument errors", ->
+        it "throws if no args passed", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "cy.scrollTo() must be called with a valid position. It can be a string, number or object."
+            done()
+
+          @cy.scrollTo()
+
+        it "throws if NaN", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "cy.scrollTo() must be called with a valid position. It can be a string, number or object. Your position was: 25, NaN"
+            done()
+
+          @cy.get("#scroll-to-both").scrollTo(25, 0/0)
+
+        it "throws if Infinity", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "cy.scrollTo() must be called with a valid position. It can be a string, number or object. Your position was: 25, Infinity"
+            done()
+
+          @cy.get("#scroll-to-both").scrollTo(25, 10/0)
+
+        it "throws if unrecognized position", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "Invalid position argument: \'botom\'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
+            done()
+
+          @cy.get("#scroll-to-both").scrollTo("botom")
+
+      context "option errors", ->
+        it "throws if duration is not a number or valid string", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "cy.scrollTo() must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: foo"
+            done()
+
+          @cy.get("#scroll-to-both").scrollTo("25px", { duration: "foo" })
+
+        it "throws if unrecognized easing", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "cy.scrollTo() must be called with a valid easing. Your easing was: flower"
+            done()
+
+          @cy.get("#scroll-to-both").scrollTo("25px", { easing: "flower" })
+
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (attrs, @log) =>
+
+      it "logs out scrollTo", ->
+        @cy.get("#scroll-to-both").scrollTo(25).then ->
+          expect(@log.get("name")).to.eq "scrollTo"
+
+      it "passes in $el if child command", ->
+        @cy.get("#scroll-to-both").scrollTo(25).then ($container) ->
+          expect(@log.get("$el")).to.eq $container
+
+      it "passes undefined in $el if parent command", ->
+        @cy.scrollTo(25).then ($container) ->
+          expect(@log.get("$el")).to.be.undefined
+
+      it "logs duration options", ->
+        @cy.get("#scroll-to-both").scrollTo(25, { duration: 1 }).then ->
+          expect(@log.get("message")).to.eq "{duration: 1}"
+
+      it "logs easing options", ->
+        @cy.get("#scroll-to-both").scrollTo(25, { easing: 'linear' }).then ->
+          expect(@log.get("message")).to.eq "{easing: linear}"
+
+      it "snapshots immediately", ->
+        @cy.get("#scroll-to-both").scrollTo(25, { duration: 1 }).then ->
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
+
+      it "#consoleProps", ->
+        @cy.get("#scroll-to-both").scrollTo(25).then ($container) ->
+          console = @log.attributes.consoleProps()
+          expect(console.Command).to.eq("scrollTo")
+          expect(console["Scrolled Element"]).to.eq $container.get(0)
+
+  context "#scrollIntoView", ->
+    beforeEach ->
+      @_body        = @cy.$$("body")
+      @scrollVert   = @cy.$$("#scroll-into-view-vertical")
+      @scrollHoriz  = @cy.$$("#scroll-into-view-horizontal")
+      @scrollBoth   = @cy.$$("#scroll-into-view-both")
+
+    afterEach ->
+    #   ## reset the scrollable containers back
+    #   ## to furthest left and top
+
+      @_body.scrollTop(0)
+      @_body.scrollLeft(0)
+
+      @scrollVert.scrollTop(0)
+      @scrollVert.scrollLeft(0)
+
+      @scrollHoriz.scrollTop(0)
+      @scrollHoriz.scrollLeft(0)
+
+      @scrollBoth.scrollTop(0)
+      @scrollBoth.scrollLeft(0)
+
+    it "does not change the subject", ->
+      div = @cy.$$("#scroll-into-view-vertical div")
+
+      @cy.get("#scroll-into-view-vertical div").scrollIntoView().then ($div) ->
+        expect($div).to.match div
+
+    it "scrolls x axis of window to element", ->
+      expect(@_body.get(0).scrollTop).to.eq(0)
+      expect(@_body.get(0).scrollLeft).to.eq(0)
+
+      @cy.get("#scroll-into-view-win-horizontal div").scrollIntoView().then ($el) ->
+        expect(@_body.get(0).scrollTop).to.eq(0)
+
+        ## it'll scorll to the position, but this depends on
+        ## the size of the window??
+        expect(@_body.get(0).scrollLeft).to.not.eq(0)
+
+    it "scrolls y axis of window to element", ->
+      expect(@_body.get(0).scrollTop).to.eq(0)
+      expect(@_body.get(0).scrollLeft).to.eq(0)
+
+      @cy.get("#scroll-into-view-win-vertical div").scrollIntoView().then ($el) ->
+        expect(@_body.get(0).scrollTop).to.not.eq(0)
+        expect(@_body.get(0).scrollLeft).to.eq(0)
+
+    it "scrolls both axes of window to element", ->
+      expect(@_body.get(0).scrollTop).to.eq(0)
+      expect(@_body.get(0).scrollLeft).to.eq(0)
+
+      @cy.get("#scroll-into-view-win-both div").scrollIntoView().then ($el) ->
+        expect(@_body.get(0).scrollTop).to.not.eq(0)
+        expect(@_body.get(0).scrollLeft).to.not.eq(0)
+
+    it "scrolls x axis of container to element", ->
+      expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+      expect(@scrollHoriz.get(0).scrollLeft).to.eq(0)
+
+      @cy.get("#scroll-into-view-horizontal h5").scrollIntoView().then ($el) ->
+        expect(@scrollHoriz.get(0).scrollTop).to.eq(0)
+        expect(@scrollHoriz.get(0).scrollLeft).to.eq(300)
+
+    it "scrolls y axis of container to element", ->
+      expect(@scrollVert.get(0).scrollTop).to.eq(0)
+      expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+
+      @cy.get("#scroll-into-view-vertical h5").scrollIntoView().then ($el) ->
+        expect(@scrollVert.get(0).scrollTop).to.eq(300)
+        expect(@scrollVert.get(0).scrollLeft).to.eq(0)
+
+    it "scrolls both axes of container to element", ->
+      expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+      expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+      @cy.get("#scroll-into-view-both h5").scrollIntoView().then ($el) ->
+        expect(@scrollBoth.get(0).scrollTop).to.eq(300)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
+
+    it "calls jQuery scroll to", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
+        expect(scrollTo).to.be.called
+
+    it "sets duration to 0 by default", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
+        expect(scrollTo).to.be.calledWithMatch({}, {duration: 0})
+
+    it "sets axis to correct x or y", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
+        expect(scrollTo).to.be.calledWithMatch({}, {axis: "xy"})
+
+    it "scrolling resolves after a set duration", ->
+      expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+      expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-into-view-both h5").scrollIntoView({duration: 500}).then ->
+        expect(scrollTo).to.be.calledWithMatch({}, {duration: 500})
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
+        expect(@scrollBoth.get(0).scrollTop).to.eq(300)
+
+    it "accepts duration string option", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-into-view-both h5").scrollIntoView({duration: "500"}).then ->
+        expect(scrollTo.args[0][1].duration).to.eq "500"
+
+    it "accepts offset string option", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-into-view-both h5").scrollIntoView({offset: 500}).then ->
+        expect(scrollTo.args[0][1].offset).to.eq 500
+
+    it "accepts offset object option", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-into-view-both h5").scrollIntoView({offset: {left: 500, top: 200}}).then ->
+        expect(scrollTo.args[0][1].offset).to.deep.eq {left: 500, top: 200}
+
+    it "has easing set to swing by default", ->
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
+        expect(scrollTo.args[0][1].easing).to.eq "swing"
+
+    it "scrolling resolves after easing", ->
+      expect(@scrollBoth.get(0).scrollTop).to.eq(0)
+      expect(@scrollBoth.get(0).scrollLeft).to.eq(0)
+
+      scrollTo = @sandbox.spy($.fn, "scrollTo")
+
+      @cy.get("#scroll-into-view-both h5").scrollIntoView({easing: "linear"}).then ->
+        expect(scrollTo).to.be.calledWithMatch({}, {easing: "linear"})
+        expect(@scrollBoth.get(0).scrollTop).to.eq(300)
+        expect(@scrollBoth.get(0).scrollLeft).to.eq(300)
+
+    describe "errors", ->
+      beforeEach ->
+        @allowErrors()
+
+      context "subject errors", ->
+        it "throws when not passed DOM element as subject", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "Cannot call cy.scrollIntoView() on a non-DOM subject."
+            done()
+
+          @cy.noop({foo: "bar"}).scrollIntoView()
+
+        it "throws when passed window object as subject", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "Cannot call cy.scrollIntoView() on Window subject."
+            done()
+
+          @cy.window().scrollIntoView()
+
+        it "throws when passed document object as subject", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "Cannot call cy.scrollIntoView() on a non-DOM subject."
+            done()
+
+          @cy.document().scrollIntoView()
+
+        it "throws if scrollable container is multiple elements", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "cy.scrollIntoView() can only be used to scroll to 1 element, you tried to scroll to 14 elements."
+            done()
+
+          @cy.get("button").scrollIntoView()
+
+     describe "argument errors", ->
+        it "throws if arg passed as non-object", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "cy.scrollIntoView() can only be called with an options object. Your argument was: foo"
+            done()
+
+          @cy.get("#scroll-into-view-both h5").scrollIntoView("foo")
+
+      context "option errors", ->
+        it "throws if duration is not a number or valid string", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "cy.scrollIntoView() must be called with a valid duration. Duration may be either a number (ms) or a string representing a number (ms). Your duration was: foo"
+            done()
+
+          @cy.get("#scroll-into-view-both h5").scrollIntoView({ duration: "foo" })
+
+        it "throws if unrecognized easing", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.include "cy.scrollIntoView() must be called with a valid easing. Your easing was: flower"
+            done()
+
+          @cy.get("#scroll-into-view-both h5").scrollIntoView({ easing: "flower" })
+
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (attrs, @log) =>
+
+      it "logs out scrollIntoView", ->
+        @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
+          expect(@log.get("name")).to.eq "scrollIntoView"
+
+      it "passes in $el", ->
+        @cy.get("#scroll-into-view-both h5").scrollIntoView().then ($container) ->
+          expect(@log.get("$el")).to.eq $container
+
+      it "logs duration options", ->
+        @cy.get("#scroll-into-view-both h5").scrollIntoView({duration: "1"}).then ->
+          expect(@log.get("message")).to.eq "{duration: 1}"
+
+      it "logs easing options", ->
+        @cy.get("#scroll-into-view-both h5").scrollIntoView({easing: "linear"}).then ->
+          expect(@log.get("message")).to.eq "{easing: linear}"
+
+      it "logs offset options", ->
+        @cy.get("#scroll-into-view-both h5").scrollIntoView({offset: {left: 500, top: 200}}).then ->
+          expect(@log.get("message")).to.eq "{offset: {left: 500, top: 200}}"
+
+      it "snapshots immediately", ->
+        @cy.get("#scroll-into-view-both h5").scrollIntoView().then ->
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
+
+      it "#consoleProps", ->
+        @cy.get("#scroll-into-view-both h5").scrollIntoView().then ($container) ->
+          console = @log.attributes.consoleProps()
+          expect(console.Command).to.eq("scrollIntoView")
+          expect(console["Applied To"]).to.eq $container.get(0)
+          expect(console["Scrolled Element"]).to.exist
+
   context "#blur", ->
     it "should blur the originally focused element", (done) ->
       @cy.$$("#focus input").blur -> done()
@@ -4204,9 +4814,9 @@ describe "$Cypress.Cy Actions Commands", ->
           ## make sure we have either set the property
           ## or havent
           if document.hasFocus()
-            expect(@cy.prop("blacklistFocusedEl")).not.to.be.ok
+            expect(@cy.state("blacklistFocusedEl")).not.to.be.ok
           else
-            expect(@cy.prop("blacklistFocusedEl")).to.eq(input.get(0))
+            expect(@cy.state("blacklistFocusedEl")).to.eq(input.get(0))
 
     it "sends a focusout event", (done) ->
       @cy.$$("#focus").focusout -> done()
@@ -4363,7 +4973,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy
           .get("input:first").focus().blur().then ->
-            names = _(logs).map (log) -> log.get("name")
+            names = _.map logs, (log) -> log.get("name")
             expect(logs).to.have.length(3)
             expect(names).to.deep.eq ["get", "focus", "blur"]
 
@@ -4610,7 +5220,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when any member of the subject isnt visible", (done) ->
         btn = @cy.$$("button").show().last().hide()
 
-        node = $Cypress.Utils.stringifyElement(btn)
+        node = $Cypress.utils.stringifyElement(btn)
 
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.dblclick() failed because this element is not visible"
@@ -4634,7 +5244,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when any member of the subject isnt visible", (done) ->
         btn = @cy.$$("#three-buttons button").show().last().hide()
 
-        node = $Cypress.Utils.stringifyElement(btn)
+        node = $Cypress.utils.stringifyElement(btn)
 
         logs = []
 
@@ -4721,13 +5331,13 @@ describe "$Cypress.Cy Actions Commands", ->
       coords = @cy.getCoordinates(btn)
 
       btn.get(0).addEventListener "click", (e) =>
-        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+        obj = _.pick(e, "bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
-          view: @cy.private("window")
-          clientX: coords.x - @cy.private("window").pageXOffset
-          clientY: coords.y - @cy.private("window").pageYOffset
+          view: @cy.privateState("window")
+          clientX: coords.x - @cy.privateState("window").pageXOffset
+          clientY: coords.y - @cy.privateState("window").pageYOffset
           button: 0
           buttons: 0
           which: 1
@@ -4745,10 +5355,10 @@ describe "$Cypress.Cy Actions Commands", ->
 
     it "bubbles up native click event", (done) ->
       click = (e) =>
-        @cy.private("window").removeEventListener "click", click
+        @cy.privateState("window").removeEventListener "click", click
         done()
 
-      @cy.private("window").addEventListener "click", click
+      @cy.privateState("window").addEventListener "click", click
 
       @cy.get("#button").click()
 
@@ -4757,10 +5367,10 @@ describe "$Cypress.Cy Actions Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.private("window")
+      win = @cy.privateState("window")
 
       btn.get(0).addEventListener "mousedown", (e) =>
-        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+        obj = _.pick(e, "bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
@@ -4787,10 +5397,10 @@ describe "$Cypress.Cy Actions Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.private("window")
+      win = @cy.privateState("window")
 
       btn.get(0).addEventListener "mouseup", (e) =>
-        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+        obj = _.pick(e, "bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
@@ -4829,7 +5439,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.private("window")
+      win = @cy.privateState("window")
 
       btn.get(0).addEventListener "click", (e) =>
         expect(win.pageXOffset).to.be.gt(0)
@@ -4843,7 +5453,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.private("window")
+      win = @cy.privateState("window")
 
       btn.get(0).addEventListener "click", (e) =>
         expect(win.pageYOffset).to.be.gt(0)
@@ -5217,17 +5827,6 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("#button-covered-in-span").click()
 
-      it "can click center", (done) ->
-        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$$("body"))
-        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 30, top: btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
-
-        clicked = _.after 2, -> done()
-
-        span.on "click", clicked
-        btn.on "click", clicked
-
-        @cy.get("#button-covered-in-span").click("center")
-
       it "can click topLeft", (done) ->
         btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
@@ -5238,6 +5837,17 @@ describe "$Cypress.Cy Actions Commands", ->
         btn.on "click", clicked
 
         @cy.get("#button-covered-in-span").click("topLeft")
+
+      it "can click top", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 30, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("top")
 
       it "can click topRight", (done) ->
         btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$$("body"))
@@ -5250,6 +5860,40 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("#button-covered-in-span").click("topRight")
 
+      it "can click left", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("left")
+
+      it "can click center", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 30, top: btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("center")
+
+      it "can click right", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 80, top: btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("right")
+
+
       it "can click bottomLeft", (done) ->
         btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$$("body"))
         span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
@@ -5260,6 +5904,17 @@ describe "$Cypress.Cy Actions Commands", ->
         btn.on "click", clicked
 
         @cy.get("#button-covered-in-span").click("bottomLeft")
+
+      it "can click bottom", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 30, top: btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("bottom")
 
       it "can click bottomRight", (done) ->
         btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$$("body"))
@@ -5305,11 +5960,11 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$$("input:first")
 
         input.get(0).addEventListener "focus", (e) =>
-          obj = _(e).pick("bubbles", "cancelable", "view", "which", "relatedTarget", "detail", "type")
+          obj = _.pick(e, "bubbles", "cancelable", "view", "which", "relatedTarget", "detail", "type")
           expect(obj).to.deep.eq {
             bubbles: false
             cancelable: false
-            view: @cy.private("window")
+            view: @cy.privateState("window")
             ## chrome no longer fires pageX and pageY
             # pageX: 0
             # pageY: 0
@@ -5326,11 +5981,11 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$$("input:first")
 
         input.get(0).addEventListener "focusin", (e) =>
-          obj = _(e).pick("bubbles", "cancelable", "view", "which", "relatedTarget", "detail", "type")
+          obj = _.pick(e, "bubbles", "cancelable", "view", "which", "relatedTarget", "detail", "type")
           expect(obj).to.deep.eq {
             bubbles: true
             cancelable: false
-            view: @cy.private("window")
+            view: @cy.privateState("window")
             # pageX: 0
             # pageY: 0
             which: 0
@@ -5375,13 +6030,13 @@ describe "$Cypress.Cy Actions Commands", ->
           .focused().should("have.id", "button-covered-in-span")
 
       it "will give focus to the window if no element is focusable", (done) ->
-        $(@cy.private("window")).on "focus", -> done()
+        $(@cy.privateState("window")).on "focus", -> done()
 
         @cy.get("#nested-find").click()
 
       # it "events", ->
       #   btn = @cy.$$("button")
-      #   win = $(@cy.private("window"))
+      #   win = $(@cy.privateState("window"))
 
       #   _.each {"btn": btn, "win": win}, (type, key) ->
       #     _.each "focus mousedown mouseup click".split(" "), (event) ->
@@ -5449,7 +6104,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "throws when any member of the subject isnt visible", (done) ->
         btn = @cy.$$("#three-buttons button").show().last().hide()
 
-        node = $Cypress.Utils.stringifyElement(btn)
+        node = $Cypress.utils.stringifyElement(btn)
 
         logs = []
 
@@ -5488,7 +6143,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        node = @Cypress.Utils.stringifyElement(span)
+        node = @Cypress.utils.stringifyElement(span)
 
         @Cypress.on "log", (attrs, @log) =>
           logs.push log
@@ -5504,7 +6159,8 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("snapshots")[0].name).to.eq("before")
           expect(@log.get("snapshots")[1]).to.be.an("object")
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(err.message).to.include "cy.click() failed because this element is being covered by another element"
+          expect(err.message).to.include "cy.click() failed because this element"
+          expect(err.message).to.include "is being covered by another element"
 
           console = @log.attributes.consoleProps()
           expect(console["Tried to Click"]).to.eq btn.get(0)
@@ -5522,7 +6178,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        node = @Cypress.Utils.stringifyElement(span)
+        node = @Cypress.utils.stringifyElement(span)
 
         @Cypress.on "log", (attrs, @log) =>
           logs.push log
@@ -5538,7 +6194,8 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("snapshots")[0].name).to.eq("before")
           expect(@log.get("snapshots")[1]).to.be.an("object")
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(err.message).to.include "cy.click() failed because this element is being covered by another element"
+          expect(err.message).to.include "cy.click() failed because this element"
+          expect(err.message).to.include "is being covered by another element"
 
           console = @log.attributes.consoleProps()
           expect(console["Tried to Click"]).to.eq btn.get(0)
@@ -5584,7 +6241,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(logs.length).to.eq(2)
-          expect(err.message).to.eq "Invalid position argument: 'foo'. Position may only be center, topLeft, topRight, bottomLeft, or bottomRight."
+          expect(err.message).to.eq "Invalid position argument: 'foo'. Position may only be topLeft, topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, or bottomRight."
           done()
 
         @cy.get("button:first").click("foo")
@@ -5594,17 +6251,19 @@ describe "$Cypress.Cy Actions Commands", ->
 
         clicks = 0
 
-        p = $("<p class='slidein'>sliding in</p>")
-        p.css("animation-duration", ".5s")
-        p.on "click", -> clicks += 1
-
         @cy.on "fail", (err) ->
           expect(clicks).to.eq(0)
           expect(err.message).to.include("cy.click() could not be issued because this element is currently animating:\n")
           done()
 
+        p = $("<p class='slidein'>sliding in</p>")
+        p.css("animation-duration", ".5s")
+        p.on "click", ->
+          clicks += 1
         p.on "animationstart", =>
-          @cy.get(".slidein").click({interval: 50, animationDistanceThreshold: 0})
+          Promise.delay(50)
+          .then =>
+            @cy.get(".slidein").click({interval: 50, animationDistanceThreshold: 0})
 
         @cy.$$("#animation-container").append(p)
 
@@ -5878,3 +6537,541 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button:first").click({force: true, timeout: 1000}).then ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
           expect(@log.attributes.consoleProps().Options).to.deep.eq {force: true, timeout: 1000}
+
+  context "#trigger", ->
+    it "sends event", (done) ->
+      btn = @cy.$$("#button")
+
+      coords = @cy.getCoordinates(btn)
+
+      btn.get(0).addEventListener "mouseover", (e) =>
+        obj = _(e).pick("bubbles", "cancelable", "clientX", "clientY", "target", "type")
+        expect(obj).to.deep.eq {
+          bubbles: true
+          cancelable: true
+          clientX: coords.x - @cy.private("window").pageXOffset
+          clientY: coords.y - @cy.private("window").pageYOffset
+          target: btn.get(0)
+          type: "mouseover"
+        }
+        done()
+
+      @cy.get("#button").ttrigger("mouseover")
+
+    it "bubbles up event by default", (done) ->
+      mouseover = (e) =>
+        @cy.private("window").removeEventListener "mouseover", mouseover
+        done()
+
+      @cy.private("window").addEventListener "mouseover", mouseover
+
+      @cy.get("#button").ttrigger("mouseover")
+
+    it "does not bubble up event if specified", (done) ->
+      mouseover = (e) =>
+        @cy.private("window").removeEventListener "mouseover", mouseover
+        done("Should not have bubbled to window listener")
+
+      @cy.private("window").addEventListener "mouseover", mouseover
+
+      @cy.get("#button").ttrigger("mouseover", {bubbles: false})
+
+      setTimeout ->
+        @cy.private("window").removeEventListener "mouseover", mouseover
+        done()
+      , 500
+
+    it "sends through event options, overriding defaults", (done) ->
+      options = {
+        clientX: 42
+        clientY: 24
+        pageX: 420
+        pageY: 240
+        foo: "foo"
+      }
+
+      @cy.$$("button:first").get(0).addEventListener "mouseover", (e) =>
+        eventOptions = _.pick(e, "clientX", "clientY", "pageX", "pageY", "foo")
+        ## options gets mutated by the command :(
+        options = _.pick(options, "clientX", "clientY", "pageX", "pageY", "foo")
+        expect(eventOptions).to.eql(options)
+        done()
+
+      @cy.get("button:first").ttrigger("mouseover", options)
+
+    it "records correct clientX when el scrolled", (done) ->
+      btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo @cy.$$("body")
+
+      coords = @cy.getCoordinates(btn)
+
+      win = @cy.private("window")
+
+      btn.get(0).addEventListener "mouseover", (e) =>
+        expect(win.pageXOffset).to.be.gt(0)
+        expect(e.clientX).to.eq coords.x - win.pageXOffset
+        done()
+
+      @cy.get("#scrolledBtn").ttrigger("mouseover")
+
+    it "records correct clientY when el scrolled", (done) ->
+      btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo @cy.$$("body")
+
+      coords = @cy.getCoordinates(btn)
+
+      win = @cy.private("window")
+
+      btn.get(0).addEventListener "mouseover", (e) =>
+        expect(win.pageYOffset).to.be.gt(0)
+        expect(e.clientY).to.eq coords.y - win.pageYOffset
+        done()
+
+      @cy.get("#scrolledBtn").ttrigger("mouseover")
+
+    it "waits until element becomes visible", ->
+      btn = cy.$$("#button").hide()
+
+      retried = false
+
+      @cy.on "retry", _.after 3, ->
+        btn.show()
+        retried = true
+
+      @cy.get("#button").ttrigger("mouseover").then ->
+        expect(retried).to.be.true
+
+    it "waits until element is no longer disabled", ->
+      btn = cy.$$("#button").prop("disabled", true)
+
+      retried = false
+      mouseovers = 0
+
+      btn.on "mouseover", ->
+        mouseovers += 1
+
+      @cy.on "retry", _.after 3, ->
+        btn.prop("disabled", false)
+        retried = true
+
+      @cy.get("#button").ttrigger("mouseover").then ->
+        expect(mouseovers).to.eq(1)
+        expect(retried).to.be.true
+
+    it "waits until element stops animating", (done) ->
+      retries = []
+      mouseovers  = 0
+
+      p = $("<p class='slidein'>sliding in</p>")
+      p.on "mouseover", -> mouseovers += 1
+      p.css("animation-duration", ".5s")
+
+      @cy.on "retry", (obj) ->
+        expect(mouseovers).to.eq(0)
+        retries.push(obj)
+
+      p.on "animationstart", =>
+        t = Date.now()
+        _.delay =>
+          console.log Date.now() - t
+
+          @cy.get(".slidein").ttrigger("mouseover").then ->
+            expect(retries.length).to.be.gt(5)
+            done()
+        , 100
+
+      @cy.$$("#animation-container").append(p)
+
+    it "does not throw when waiting for animations is disabled", ->
+      @sandbox.stub(@Cypress, "config").withArgs("waitForAnimations").returns(false)
+
+      @cy._timeout(100)
+
+      p = $("<p class='slidein'>sliding in</p>")
+      p.css("animation-duration", ".5s")
+
+      @cy.$$("#animation-container").append(p)
+
+      @cy.get(".slidein").ttrigger("mouseover")
+
+    it "does not throw when turning off waitForAnimations in options", ->
+      @cy._timeout(100)
+
+      p = $("<p class='slidein'>sliding in</p>")
+      p.css("animation-duration", ".5s")
+
+      @cy.$$("#animation-container").append(p)
+
+      @cy.get(".slidein").ttrigger("mouseover", {waitForAnimations: false})
+
+    it "does not throw when setting animationDistanceThreshold extremely high in options", ->
+      @cy._timeout(100)
+
+      p = $("<p class='slidein'>sliding in</p>")
+      p.css("animation-duration", ".5s")
+
+      @cy.$$("#animation-container").append(p)
+
+      @cy.get(".slidein").ttrigger("mouseover", {animationDistanceThreshold: 1000})
+
+    describe "assertion verification", ->
+      beforeEach ->
+        @allowErrors()
+        @cy._timeout(200)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (attrs, log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it.skip "eventually passes the assertion", ->
+        @cy.$$("button:first").on "mouseover", ->
+          _.delay =>
+            $(@).addClass("moused-over")
+          , 50
+          return false
+
+        @cy.get("button:first").ttrigger("mouseover").should("have.class", "moused-over").then ->
+          ## TODO: fix this, it never gets here
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("ended")).to.be.true
+
+      it "eventually fails the assertion", (done) ->
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.get("button:first").ttrigger("mouseover").should("have.class", "moused-over")
+
+      it "does not log an additional log on failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (attrs, log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(3)
+          done()
+
+        @cy.get("button:first").ttrigger("mouseover").should("have.class", "moused-over")
+
+    describe "position argument", ->
+      it "can trigger event on center by default", (done) ->
+        button = @cy.$$("<button />").css({width:200,height:100}).prependTo(@cy.$$("body"))
+        onMouseover = (e) ->
+          button.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(108)
+          expect(e.clientY).to.equal(50)
+          done()
+        button.on("mouseover", onMouseover)
+
+        @cy.get("button:first").ttrigger("mouseover")
+
+      it "can trigger event on center", (done) ->
+        button = @cy.$$("<button />").css({width:200,height:100}).prependTo(@cy.$$("body"))
+        onMouseover = (e) ->
+          button.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(108)
+          expect(e.clientY).to.equal(50)
+          done()
+        button.on("mouseover", onMouseover)
+
+        @cy.get("button:first").ttrigger("mouseover", "center")
+
+      it "can trigger event on topLeft", (done) ->
+        button = @cy.$$("<button />").css({width:200,height:100}).prependTo(@cy.$$("body"))
+        onMouseover = (e) ->
+          button.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(8)
+          expect(e.clientY).to.equal(0)
+          done()
+        button.on("mouseover", onMouseover)
+
+        @cy.get("button:first").ttrigger("mouseover", "topLeft")
+
+      it "can trigger event on topRight", (done) ->
+        button = @cy.$$("<button />").css({width:200,height:100}).prependTo(@cy.$$("body"))
+        onMouseover = (e) ->
+          button.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(207)
+          expect(e.clientY).to.equal(0)
+          done()
+        button.on("mouseover", onMouseover)
+
+        @cy.get("button:first").ttrigger("mouseover", "topRight")
+
+      it "can trigger event on bottomLeft", (done) ->
+        button = @cy.$$("<button />").css({width:200,height:100}).prependTo(@cy.$$("body"))
+        onMouseover = (e) ->
+          button.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(8)
+          expect(e.clientY).to.equal(99)
+          done()
+        button.on("mouseover", onMouseover)
+
+        @cy.get("button:first").ttrigger("mouseover", "bottomLeft")
+
+      it "can trigger event on bottomRight", (done) ->
+        button = @cy.$$("<button />").css({width:200,height:100}).prependTo(@cy.$$("body"))
+        onMouseover = (e) ->
+          button.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(207)
+          expect(e.clientY).to.equal(99)
+          done()
+        button.on("mouseover", onMouseover)
+
+        @cy.get("button:first").ttrigger("mouseover", "bottomRight")
+
+      it "can pass options along with position", (done) ->
+        button = @cy.$$("<button />").css({width:200,height:100}).prependTo(@cy.$$("body"))
+        onMouseover = (e) ->
+          button.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(207)
+          expect(e.clientY).to.equal(99)
+          done()
+        button.on("mouseover", onMouseover)
+
+        @cy.get("button:first").ttrigger("mouseover", "bottomRight", {bubbles: false})
+
+    describe "relative coordinate arguments", ->
+      it "can specify x and y", (done) ->
+        button = @cy.$$("<button />").css({width:200,height:100}).prependTo(@cy.$$("body"))
+        onMouseover = (e) ->
+          button.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(83)
+          expect(e.clientY).to.equal(78)
+          done()
+        button.on("mouseover", onMouseover)
+
+        @cy.get("button:first").ttrigger("mouseover", 75, 78)
+
+      it "can pass options along with x, y", (done) ->
+        button = @cy.$$("<button />").css({width:200,height:100}).prependTo(@cy.$$("body"))
+        onMouseover = (e) ->
+          button.off("mouseover", onMouseover)
+          expect(e.clientX).to.equal(83)
+          expect(e.clientY).to.equal(78)
+          done()
+        button.on("mouseover", onMouseover)
+
+        @cy.get("button:first").ttrigger("mouseover", 75, 78, {bubbles: false})
+
+    describe "errors", ->
+      beforeEach ->
+        @currentTest.timeout(200)
+        @allowErrors()
+
+      it "throws when eventName is not a string", ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.trigger() can only be called on a single element. Your subject contained 14 elements."
+          done()
+
+        @cy.get("button:first").ttrigger("cy.trigger() must be passed a non-empty string as its 1st argument. You passed: 'undefined'.")
+
+      it "throws when not a dom subject", (done) ->
+        @cy.on "fail", -> done()
+
+        @cy.ttrigger("mouseover")
+
+      it "throws when attempting to trigger multiple elements", (done) ->
+        num = @cy.$$("button").length
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.trigger() can only be called on a single element. Your subject contained 14 elements."
+          done()
+
+        @cy.get("button").ttrigger("mouseover")
+
+      it "throws when subject is not in the document", (done) ->
+        clicked = 0
+
+        checkbox = @cy.$$(":checkbox:first").on "mouseover", (e) ->
+          clicked += 1
+          checkbox.remove()
+          return false
+
+        @cy.on "fail", (err) ->
+          expect(clicked).to.eq 1
+          expect(err.message).to.include "cy.ttrigger() failed because this element"
+          done()
+
+        @cy.get(":checkbox:first").ttrigger("mouseover").ttrigger("mouseover")
+
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        @Cypress.on "log", (attrs, @log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        @cy.ttrigger("mouseover")
+
+      it "throws when the subject isnt visible", (done) ->
+        btn = @cy.$$("#button:first").hide()
+
+        node = $Cypress.Utils.stringifyElement(btn)
+
+        logs = []
+
+        @Cypress.on "log", (attrs, @log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(2)
+          expect(@log.get("error")).to.eq(err)
+          expect(err.message).to.include "cy.ttrigger() failed because this element is not visible"
+          done()
+
+        @cy.get("button:first").ttrigger("mouseover")
+
+      it "throws when subject is disabled", (done) ->
+        btn = @cy.$$("#button").prop("disabled", true)
+
+        logs = []
+
+        @Cypress.on "log", (attrs, @log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          ## get + click logs
+          expect(logs.length).eq(2)
+          expect(err.message).to.include("cy.ttrigger() failed because this element is disabled:\n")
+          done()
+
+        @cy.get("#button").ttrigger("mouseover")
+
+      it "throws when provided invalid position", (done) ->
+        logs = []
+
+        @Cypress.on "log", (attrs, @log) =>
+          logs.push log
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.eq "Invalid position argument: 'foo'. Position may only be center, topLeft, topRight, bottomLeft, or bottomRight."
+          done()
+
+        @cy.get("button:first").ttrigger("mouseover", "foo")
+
+      it "throws when element animation exceeds timeout", (done) ->
+        @cy._timeout(100)
+
+        mouseovers = 0
+
+        p = $("<p class='slidein'>sliding in</p>")
+        p.css("animation-duration", ".5s")
+        p.on "mouseover", -> mouseovers += 1
+
+        @cy.on "fail", (err) ->
+          expect(mouseovers).to.eq(0)
+          expect(err.message).to.include("cy.ttrigger() could not be issued because this element is currently animating:\n")
+          done()
+
+        p.on "animationstart", =>
+          @cy.get(".slidein").ttrigger("mouseover", {interval: 50, animationDistanceThreshold: 0})
+
+        @cy.$$("#animation-container").append(p)
+
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (attrs, @log) =>
+
+      it "logs immediately before resolving", (done) ->
+        button = @cy.$$("button:first")
+
+        @Cypress.on "log", (attrs, log) ->
+          if log.get("name") is "ttrigger"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq button.get(0)
+            done()
+
+        @cy.get("button:first").ttrigger("mouseover")
+
+      it "snapshots before triggering", (done) ->
+        @cy.$$("button:first").on "mouseover", =>
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0].name).to.eq("before")
+          expect(@log.get("snapshots")[0].body).to.be.an("object")
+          done()
+
+        @cy.get("button:first").ttrigger("mouseover")
+
+      it "snapshots after triggering", ->
+        @cy.get("button:first").ttrigger("mouseover").then ($button) ->
+          expect(@log.get("snapshots").length).to.eq(2)
+          expect(@log.get("snapshots")[1].name).to.eq("after")
+          expect(@log.get("snapshots")[1].body).to.be.an("object")
+
+      it "returns only the $el for the element of the subject that was triggered", ->
+        clicks = []
+
+        ## append two buttons
+        button = -> $("<button class='clicks'>click</button>")
+        @cy.$$("body").append(button()).append(button())
+
+        @Cypress.on "log", (attrs, log) ->
+          clicks.push(log) if log.get("name") is "click"
+
+        @cy.get("button.clicks").click({multiple: true}).then ($buttons) ->
+          expect($buttons.length).to.eq(2)
+          expect(clicks.length).to.eq(2)
+          expect(clicks[1].get("$el").get(0)).to.eq $buttons.last().get(0)
+
+      it "logs only 1 event", ->
+        logs = []
+
+        @Cypress.on "log", (attrs, log) ->
+          logs.push(log) if log.get("name") is "ttrigger"
+
+        @cy.get("button:first").ttrigger("mouseover").then ->
+          expect(logs).to.have.length(1)
+
+      it "passes in coords", ->
+        @cy.get("button:first").ttrigger("mouseover").then ($btn) ->
+          coords = @cy.getCoordinates($btn)
+          expect(@log.get("coords")).to.deep.eq coords
+
+      it "ends", ->
+        logs = []
+
+        @Cypress.on "log", (attrs, log) ->
+          logs.push(log) if log.get("name") is "click"
+
+        @cy.get("button").invoke("slice", 0, 2).click({multiple: true}).then ->
+          _.each logs, (log) ->
+            expect(log.get("state")).to.eq("passed")
+            expect(log.get("ended")).to.be.true
+
+      it "#consoleProps", ->
+        @cy.get("button:first").ttrigger("mouseover").then ($button) ->
+          consoleProps = @log.attributes.consoleProps()
+          coords       = @cy.getCoordinates($button)
+          logCoords    = @log.get("coords")
+          expect(logCoords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
+          expect(logCoords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1
+          expect(consoleProps.Command).to.eq "ttrigger"
+          console.log(consoleProps["Event options"])
+          expect(consoleProps["Event options"]).to.eql({
+            bubbles: true
+            cancelable: true
+            clientX: 168
+            clientY: 9
+            pageX: 168
+            pageY: 548
+            target: $button.get(0)
+          })

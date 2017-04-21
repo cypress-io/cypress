@@ -2,7 +2,7 @@ describe "$Cypress.Cy Clock Commands", ->
   enterCommandTestingMode()
 
   beforeEach ->
-    @window = @cy.private("window")
+    @window = @cy.privateState("window")
 
     @setTimeoutSpy = @sandbox.spy(@window, "setTimeout")
     @setIntervalSpy = @sandbox.spy(@window, "setInterval")
@@ -43,19 +43,19 @@ describe "$Cypress.Cy Clock Commands", ->
       cy = @cy
       @cy.clock().then (clock) ->
         clock.restore()
-        expect(cy.prop("clock")).to.be.null
+        expect(cy.state("clock")).to.be.null
         expect(@clock).to.be.null
 
     it "automatically restores clock on 'restore' event", ->
       clock = {restore: @sandbox.stub()}
-      @cy.prop("clock", clock)
+      @cy.state("clock", clock)
       @Cypress.trigger("restore")
       expect(clock.restore).to.be.called
 
     it "unsets clock before test run", ->
-      @cy.prop("clock", {})
+      @cy.state("clock", {})
       @Cypress.trigger("test:before:run", {})
-      expect(@cy.prop("clock")).to.be.null
+      expect(@cy.state("clock")).to.be.null
 
     it "returns clock on subsequent calls, ignoring arguments", ->
       @cy
@@ -128,7 +128,7 @@ describe "$Cypress.Cy Clock Commands", ->
       it "binds to default window before visit", ->
         @cy.clock(null, ["setTimeout"]).then (clock) =>
           onSetTimeout = @sandbox.spy()
-          @cy.private("window").setTimeout(onSetTimeout)
+          @cy.privateState("window").setTimeout(onSetTimeout)
           clock.tick()
           expect(onSetTimeout).to.be.called
 

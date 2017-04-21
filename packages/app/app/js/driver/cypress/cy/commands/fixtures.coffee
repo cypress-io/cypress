@@ -1,22 +1,27 @@
-$Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
+_ = require("lodash")
+Promise = require("../../bluebird")
 
-  cache = {}
+$Cy = require("../../cy")
+utils = require("../../utils")
 
-  fixturesRe = /^(fx:|fixture:)/
+cache = {}
 
-  clone = (obj) ->
-    JSON.parse(JSON.stringify(obj))
+fixturesRe = /^(fx:|fixture:)/
 
+clone = (obj) ->
+  JSON.parse(JSON.stringify(obj))
+
+module.exports = (Cypress, Commands) ->
   fixture = (fixture, options) =>
     new Promise (resolve) ->
-      Cypress.trigger "fixture", fixture, options, resolve
+      Cypress.trigger("fixture", fixture, options, resolve)
 
   ## reset the cache whenever we
   ## completely stop
   Cypress.on "stop", ->
     cache = {}
 
-  Cypress.addParentCommand
+  Commands.addAll({
     fixture: (fx, args...) ->
       ## if we already have cached
       ## this fixture then just return it
@@ -53,7 +58,7 @@ $Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
       .timeout(options.timeout)
       .then (response) =>
         if err = response.__error
-          $Cypress.Utils.throwErr(err)
+          utils.throwErr(err)
         else
           ## add the fixture to the cache
           ## so it can just be returned next time
@@ -62,13 +67,7 @@ $Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
           ## return the cloned response
           return clone(response)
       .catch Promise.TimeoutError, (err) ->
-        $Cypress.Utils.throwErrByPath "fixture.timed_out", {
+        utils.throwErrByPath "fixture.timed_out", {
           args: { timeout: options.timeout }
         }
-
-  Cypress.Cy.extend
-    matchesFixture: (fixture) ->
-      fixturesRe.test(fixture)
-
-    parseFixture: (fixture) ->
-      fixture.replace(fixturesRe, "")
+  })

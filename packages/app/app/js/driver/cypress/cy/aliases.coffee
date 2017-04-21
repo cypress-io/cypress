@@ -1,21 +1,24 @@
-do ($Cypress, _) ->
+_ = require("lodash")
 
-  aliasRe = /^@.+/
-  aliasDisplayRe = /^([@]+)/
+utils = require("../utils")
 
-  $Cypress.Cy.extend
+aliasRe = /^@.+/
+aliasDisplayRe = /^([@]+)/
+
+module.exports = ($Cy) ->
+  $Cy.extend
     assign: (str, obj) ->
-      @private("runnable").ctx[str] = obj
+      @privateState("runnable").ctx[str] = obj
 
     ## these are public because its expected other commands
     ## know about them and are expected to call them
     getNextAlias: ->
-      next = @prop("current").get("next")
+      next = @state("current").get("next")
       if next and next.get("name") is "as"
         next.get("args")[0]
 
     getAlias: (name, cmd, log) ->
-      aliases = @prop("aliases") ? {}
+      aliases = @state("aliases") ? {}
 
       ## bail if the name doesnt reference an alias
       return if not aliasRe.test(name)
@@ -30,9 +33,9 @@ do ($Cypress, _) ->
       name.replace(aliasDisplayRe, "")
 
     getAvailableAliases: ->
-      return [] if not aliases = @prop("aliases")
+      return [] if not aliases = @state("aliases")
 
-      _(aliases).keys()
+      _.keys(aliases)
 
     aliasNotFoundFor: (name, cmd, log) ->
       availableAliases = @getAvailableAliases()
@@ -41,12 +44,12 @@ do ($Cypress, _) ->
       ## format, but its word is found in the availableAliases
       if (not aliasRe.test(name)) and (name in availableAliases)
         displayName = @_aliasDisplayName(name)
-        $Cypress.Utils.throwErrByPath "alias.invalid", {
+        utils.throwErrByPath "alias.invalid", {
           onFail: log
           args: { name, displayName }
         }
 
-      cmd ?= log and log.get("name") or @prop("current").get("name")
+      cmd ?= log and log.get("name") or @state("current").get("name")
       displayName = @_aliasDisplayName(name)
 
       errPath = if availableAliases.length
@@ -54,7 +57,7 @@ do ($Cypress, _) ->
       else
         "alias.not_registered_without_available"
 
-      $Cypress.Utils.throwErrByPath errPath, {
+      utils.throwErrByPath errPath, {
         onFail: log
         args: { cmd, displayName, availableAliases: availableAliases.join(", ") }
       }
@@ -75,7 +78,7 @@ do ($Cypress, _) ->
     _replayFrom: (current) ->
       ## reset each chainerId to the
       ## current value
-      chainerId = @prop("chainerId")
+      chainerId = @state("chainerId")
 
       insert = (commands) =>
         _.each commands, (cmd) =>

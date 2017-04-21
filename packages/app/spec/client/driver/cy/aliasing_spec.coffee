@@ -10,13 +10,13 @@ describe "$Cypress.Cy Aliasing Commands", ->
 
     it "stores the lookup as an alias", ->
       @cy.get("body").as("b").then ->
-        expect(@cy.prop("aliases").b).to.be.defined
+        expect(@cy.state("aliases").b).to.be.defined
 
     it "stores the resulting subject as the alias", (done) ->
       body = @cy.$$("body")
 
       @cy.on "end", ->
-        expect(@prop("aliases").b.subject.get(0)).to.eq body.get(0)
+        expect(@state("aliases").b.subject.get(0)).to.eq body.get(0)
         done()
 
       @cy.get("body").as("b")
@@ -33,7 +33,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
         ## remote window
         @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
-        @remoteWindow = @cy.private("window")
+        @remoteWindow = @cy.privateState("window")
 
       afterEach ->
         ## restore back to the global $
@@ -135,7 +135,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
         @Cypress.on "log", (attrs, @log) =>
           logs.push(log)
 
-        @Cypress.addParentCommand "foo", =>
+        @Cypress.Commands.addAll({ "foo", =>
           cmd = @Cypress.Log.command({})
 
           @cy.chain().get("ul:first li", {log: false}).first({log: false}).then ($li) ->
@@ -179,7 +179,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
     describe "subject in document", ->
       it "returns if subject is still in the document", (done) ->
         @cy.on "end", ->
-          expect(@commands.length).to.eq 3
+          expect(@queue.length).to.eq 3
           done()
 
         @cy
@@ -192,7 +192,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
           .get("#list li").eq(0).as("firstLi").then ($li) ->
             $li.remove()
           .get("@firstLi").then ->
-            expect(@cy.commands.names()).to.deep.eq(
+            expect(@cy.queue.names()).to.deep.eq(
               ["get", "eq", "as", "then", "get", "get", "eq", "then"]
             )
             done()
@@ -210,7 +210,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
 
       it "replays up until first root command", (done) ->
         @cy.on "end", ->
-          expect(@commands.names()).to.deep.eq(
+          expect(@queue.names()).to.deep.eq(
             ["get", "noop", "get", "eq", "as", "then", "get", "get", "eq"]
           )
           done()
@@ -255,19 +255,19 @@ describe "$Cypress.Cy Aliasing Commands", ->
           .click()
           .as("firstItem")
           .then ->
-            expect(@cy.commands.names()).to.deep.eq(
+            expect(@cy.queue.names()).to.deep.eq(
               ["get", "then", "as", "first", "click", "as", "then", "get", "should", "then", "get", "should", "then"]
             )
           .get("@items")
           .should("have.length", 2)
           .then ->
-            expect(@cy.commands.names()).to.deep.eq(
+            expect(@cy.queue.names()).to.deep.eq(
               ["get", "then", "as", "first", "click", "as", "then", "get", "get", "should", "then", "get", "should", "then"]
             )
           .get("@firstItem")
           .should("contain", "li 1")
           .then ->
-            expect(@cy.commands.names()).to.deep.eq(
+            expect(@cy.queue.names()).to.deep.eq(
               ["get", "then", "as", "first", "click", "as", "then", "get", "get", "should", "then", "get", "get", "first", "should", "then"]
             )
             done()
@@ -282,7 +282,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
             $input.remove()
           .get("@firstItem")
           .then ->
-            expect(@cy.commands.names()).to.deep.eq(
+            expect(@cy.queue.names()).to.deep.eq(
               ["get", "eq", "should", "as", "then", "get", "get", "eq", "should", "then"]
             )
             done()

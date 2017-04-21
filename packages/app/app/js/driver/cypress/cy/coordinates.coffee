@@ -1,7 +1,10 @@
-do ($Cypress, _) ->
+_ = require("lodash")
+$ = require("jquery")
 
+$Utils = require("../utils")
 
-  $Cypress.Cy.extend
+module.exports = ($Cy) ->
+  $Cy.extend
 
     #                   ** CEIL **
     #                   top: if y coord is 100.75,
@@ -20,13 +23,13 @@ do ($Cypress, _) ->
       coords = {}
 
       switch xPosition
-        when "center" then coords.x = Math.floor(x)
         when "left"   then coords.x = Math.ceil(x)
+        when "center" then coords.x = Math.floor(x)
         when "right"  then coords.x = Math.floor(x) - 1
 
       switch yPosition
-        when "center" then coords.y = Math.floor(y)
         when "top"    then coords.y = Math.ceil(y)
+        when "center" then coords.y = Math.floor(y)
         when "bottom" then coords.y = Math.floor(y) - 1
 
       coords
@@ -41,12 +44,12 @@ do ($Cypress, _) ->
       ## in the viewport, and therefore we must ensure to scroll the
       ## element into view prior to running this method or this will
       ## return null
-      win = @private("window")
+      win = @privateState("window")
 
       scrollX = x - win.pageXOffset
       scrollY = y - win.pageYOffset
 
-      el = @private("document").elementFromPoint(scrollX, scrollY)
+      el = @privateState("document").elementFromPoint(scrollX, scrollY)
 
       ## only wrap el if its non-null
       if el
@@ -59,7 +62,7 @@ do ($Cypress, _) ->
       ## is factored into calculations
       ## which means we dont have to do any math, yay!
       if Element.prototype.getBoundingClientRect
-        win = @private("window")
+        win = @privateState("window")
 
         ## top/left are returned relative to viewport
         ## so we have to add in the scrolled amount
@@ -67,7 +70,7 @@ do ($Cypress, _) ->
         offset = $el.get(0).getBoundingClientRect()
 
         ## we have to convert to a regular object to mutate
-        offset = _(offset).pick("top", "left", "width", "height")
+        offset = _.pick(offset, "top", "left", "width", "height")
         offset.top  += win.pageYOffset
         offset.left += win.pageXOffset
 
@@ -77,26 +80,45 @@ do ($Cypress, _) ->
         width  = $el.outerWidth()
         height = $el.outerHeight()
 
-
-    getCenterCoordinates: (rect) ->
-      x = rect.left + rect.width / 2
-      y = rect.top + rect.height / 2
-      @normalizeCoords(x, y, "center", "center")
-
     getTopLeftCoordinates: (rect) ->
       x = rect.left
       y = rect.top
       @normalizeCoords(x, y, "left", "top")
+
+    getTopCoordinates: (rect) ->
+      x = rect.left + rect.width / 2
+      y = rect.top
+      @normalizeCoords(x, y, "center", "top")
 
     getTopRightCoordinates: (rect) ->
       x = rect.left + rect.width
       y = rect.top
       @normalizeCoords(x, y, "right", "top")
 
+    getLeftCoordinates: (rect) ->
+      x = rect.left
+      y = rect.top + rect.height / 2
+      @normalizeCoords(x, y, "left", "center")
+
+    getCenterCoordinates: (rect) ->
+      x = rect.left + rect.width / 2
+      y = rect.top + rect.height / 2
+      @normalizeCoords(x, y, "center", "center")
+
+    getRightCoordinates: (rect) ->
+      x = rect.left + rect.width
+      y = rect.top + rect.height / 2
+      @normalizeCoords(x, y, "right", "center")
+
     getBottomLeftCoordinates: (rect) ->
       x = rect.left
       y = rect.top + rect.height
       @normalizeCoords(x, y, "left", "bottom")
+
+    getBottomCoordinates: (rect) ->
+      x = rect.left + rect.width / 2
+      y = rect.top + rect.height
+      @normalizeCoords(x, y, "center", "bottom")
 
     getBottomRightCoordinates: (rect) ->
       x = rect.left + rect.width
@@ -110,16 +132,17 @@ do ($Cypress, _) ->
       @normalizeCoords(x, y)
 
     getCoordinates: ($el, position = "center") ->
-      rect = @getBoundingClientRect($el)
-      ## rect = {top: 35, left: 60, width: 100, height: 90}
+      @ensureValidPosition(position)
 
-      switch position
-        when "center"       then @getCenterCoordinates(rect)
-        when "topLeft"      then @getTopLeftCoordinates(rect)
-        when "topRight"     then @getTopRightCoordinates(rect)
-        when "bottomLeft"   then @getBottomLeftCoordinates(rect)
-        when "bottomRight"  then @getBottomRightCoordinates(rect)
-        else
-          $Cypress.Utils.throwErrByPath("dom.invalid_position_argument", {
-            args: { position }
-          })
+      ## rect is an object literal looking like this...
+      ## {top: 35, left: 60, width: 100, height: 90}
+      rect = @getBoundingClientRect($el)
+
+      ## dynamically call the function by transforming the name
+      ## bottom -> getBottomCoordinates
+      ## topLeft -> getTopLeftCoordinates
+      capitalizedPosition = position.charAt(0).toUpperCase() + position.slice(1)
+
+      fnName = "get" + capitalizedPosition + "Coordinates"
+
+      @[fnName](rect)

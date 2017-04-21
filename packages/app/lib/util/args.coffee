@@ -11,7 +11,9 @@ whitelist = whitelist.concat(config.getConfigKeys())
 parseNestedValues = (vals) ->
   ## convert foo=bar,version=1.2.3 to
   ## {foo: 'bar', version: '1.2.3'}
-  _(vals.split(","))
+  _
+  .chain(vals)
+  .split(",")
   .map (pair) ->
     pair.split("=")
   .fromPairs()
@@ -109,7 +111,8 @@ module.exports = {
     ## and converts to an array by picking
     ## only the whitelisted properties and
     ## mapping them to include the argument
-    _.chain(obj)
+    _
+    .chain(obj)
     .mapValues(anyUnderscoredValuePairs)
     .pick(whitelist...)
     .mapValues (val, key) ->

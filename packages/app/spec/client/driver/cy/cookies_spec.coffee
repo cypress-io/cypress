@@ -79,7 +79,7 @@ describe "$Cypress.Cy Cookie Commands", ->
           @respondWith([], 50)
 
           @Cypress.on "get:cookies", =>
-            @cmd = @cy.commands.first()
+            @cmd = @cy.queue.first()
             @Cypress.abort()
 
           @cy.on "cancel", (cancelledCmd) =>

@@ -1,11 +1,12 @@
-do ($Cypress, _) ->
+utils = require("../utils")
 
-  $Cypress.Cy.extend
+module.exports = ($Cy) ->
+  $Cy.extend
     _timeout: (ms, delta = false) ->
-      runnable = @private("runnable")
+      runnable = @privateState("runnable")
 
       if not runnable
-        $Cypress.Utils.throwErrByPath("outside_test_with_cmd", { args: { cmd: "timeout" } })
+        utils.throwErrByPath("outside_test_with_cmd", { args: { cmd: "timeout" } })
 
       if ms
         ## if delta is true then we add (or subtract) from the
@@ -17,10 +18,10 @@ do ($Cypress, _) ->
         runnable.timeout()
 
     _clearTimeout: ->
-      runnable = @private("runnable")
+      runnable = @privateState("runnable")
 
       if not runnable
-        $Cypress.Utils.throwErrByPath("outside_test_with_cmd", { args: { cmd: "clearTimeout" } })
+        utils.throwErrByPath("outside_test_with_cmd", { args: { cmd: "clearTimeout" } })
 
       runnable.clearTimeout()
 

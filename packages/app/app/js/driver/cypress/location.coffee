@@ -6,220 +6,222 @@
 ## 2. there is a bug when handling about:blank which borks it and
 ## turns it into about://blank
 
-## attach to global
-$Cypress.Location = do ($Cypress, _, UrlParse) ->
+_ = require("lodash")
+UrlParse = require("url-parse")
 
-  reHttp = /^https?:\/\//
-  reWww = /^www/
+$Cypress = require("../cypress")
 
-  reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
-  ipAddressRe = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
+reHttp = /^https?:\/\//
+reWww = /^www/
 
-  class $Location
-    constructor: (remote) ->
-      @remote = new UrlParse remote
+reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
+ipAddressRe = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
 
-    getHash: ->
-      @remote.hash
+class $Location
+  constructor: (remote) ->
+    @remote = new UrlParse remote
 
-    getHref: ->
-      @getToString()
+  getHash: ->
+    @remote.hash
 
-    ## Location Host
-    ## The URLUtils.host property is a DOMString containing the host,
-    ## that is the hostname, and then, if the port of the URL is nonempty,
-    ## a ':', and the port of the URL.
-    getHost: ->
-      @remote.host
+  getHref: ->
+    @getToString()
 
-    getHostName: ->
-      @remote.hostname
+  ## Location Host
+  ## The URLUtils.host property is a DOMString containing the host,
+  ## that is the hostname, and then, if the port of the URL is nonempty,
+  ## a ':', and the port of the URL.
+  getHost: ->
+    @remote.host
 
-    getOrigin: ->
-      ## https://github.com/unshiftio/url-parse/issues/38
-      if @remote.origin is "null"
-        null
+  getHostName: ->
+    @remote.hostname
+
+  getOrigin: ->
+    ## https://github.com/unshiftio/url-parse/issues/38
+    if @remote.origin is "null"
+      null
+    else
+      @remote.origin
+
+  getProtocol: ->
+    @remote.protocol
+
+  getPathName: ->
+    @remote.pathname or "/"
+
+  getPort: ->
+    @remote.port
+
+  getSearch: ->
+    @remote.query
+
+  getOriginPolicy: ->
+    ## origin policy is comprised of
+    ## protocol + superdomain
+    ## and subdomain is not factored in
+    _.compact([
+      @getProtocol() + "//" + @getSuperDomain(),
+      @getPort()
+    ]).join(":")
+
+  getSuperDomain: ->
+    hostname = @getHostName()
+    parts    = hostname.split(".")
+
+    ## if this is an ip address then
+    ## just return it straight up
+    if ipAddressRe.test(hostname)
+      return hostname
+
+    switch parts.length
+      when 1
+        ## localhost => localhost
+        hostname
+      when 2
+        ## stackoverflow.com => stackoverflow.com
+        hostname
       else
-        @remote.origin
+        ## mail.google.com => google.com
+        ## cart.shopping.co.uk => shopping.co.uk
+        parts.slice(1).join(".")
 
-    getProtocol: ->
-      @remote.protocol
+  getToString: ->
+    @remote.toString()
 
-    getPathName: ->
-      @remote.pathname or "/"
+  getObject: ->
+    {
+      hash: @getHash()
+      href: @getHref()
+      host: @getHost()
+      hostname: @getHostName()
+      origin: @getOrigin()
+      pathname: @getPathName()
+      port: @getPort()
+      protocol: @getProtocol()
+      search: @getSearch()
+      originPolicy: @getOriginPolicy()
+      superDomain: @getSuperDomain()
+      toString: _.bind(@getToString, @)
+    }
 
-    getPort: ->
-      @remote.port
+  ## override pathname + query here
+  @override = (Cypress, win, navigated) ->
 
-    getSearch: ->
-      @remote.query
+    # getHistory = =>
+    #   new Promise (resolve) ->
+    #     Cypress.trigger "history:entries", resolve
 
-    getOriginPolicy: ->
-      ## origin policy is comprised of
-      ## protocol + superdomain
-      ## and subdomain is not factored in
-      _.compact([
-        @getProtocol() + "//" + @getSuperDomain(),
-        @getPort()
-      ]).join(":")
+    ## history does not fire events until a click or back has happened
+    ## so we have to know when they do manually
+    _.each ["back", "forward", "go", "pushState", "replaceState"], (attr) ->
+      ## dont use lodash wrap here because its potentially very
+      ## confusing for users and this manually override is faster anyway
+      return if not orig = win.history?[attr]
 
-    getSuperDomain: ->
-      hostname = @getHostName()
-      parts    = hostname.split(".")
+      win.history[attr] = ->
+        orig.apply(@, arguments)
 
-      ## if this is an ip address then
-      ## just return it straight up
-      if ipAddressRe.test(hostname)
-        return hostname
+        ## let our function know we've navigated
+        navigated(attr, arguments)
 
-      switch parts.length
-        when 1
-          ## localhost => localhost
-          hostname
-        when 2
-          ## stackoverflow.com => stackoverflow.com
-          hostname
-        else
-          ## mail.google.com => google.com
-          ## cart.shopping.co.uk => shopping.co.uk
-          parts.slice(1).join(".")
+  @isFullyQualifiedUrl = (url) ->
+    reHttp.test(url)
 
-    getToString: ->
-      @remote.toString()
+  @isUrlLike = (url) ->
+    ## beta.cypress.io
+    ## aws.amazon.com/bucket/foo
+    ## foo.bar.co.uk
+    ## foo.bar.co.uk/asdf
+    url = url.split("/")[0].split(".")
+    url.length is 3 or url.length is 4
 
-    getObject: ->
-      {
-        hash: @getHash()
-        href: @getHref()
-        host: @getHost()
-        hostname: @getHostName()
-        origin: @getOrigin()
-        pathname: @getPathName()
-        port: @getPort()
-        protocol: @getProtocol()
-        search: @getSearch()
-        originPolicy: @getOriginPolicy()
-        superDomain: @getSuperDomain()
-        toString: _.bind(@getToString, @)
-      }
+  @fullyQualifyUrl = (url) ->
+    return url if @isFullyQualifiedUrl(url)
 
-    ## override pathname + query here
-    @override = (Cypress, win, navigated) ->
+    existing = new UrlParse(window.location.href)
 
-      # getHistory = =>
-      #   new Promise (resolve) ->
-      #     Cypress.trigger "history:entries", resolve
+    ## always normalize against our existing origin
+    ## as the baseUrl so that we do not accidentally
+    ## have relative url's
+    url = new UrlParse(url, existing.origin)
+    url.toString()
 
-      ## history does not fire events until a click or back has happened
-      ## so we have to know when they do manually
-      _.each ["back", "forward", "go", "pushState", "replaceState"], (attr) ->
-        ## dont use underscore wrap here because its potentially very
-        ## confusing for users and this manually override is faster anyway
-        return if not orig = win.history?[attr]
+  @normalize = (url) ->
+    ## A properly formed URL will always have a trailing
+    ## slash at the end of it
+    ## http://localhost:8000/
+    ##
+    ## A url with a path (sub folder) does not necessarily
+    ## have a trailing slash after it
+    ## http://localhost:8000/app
+    ##
+    ## If the webserver redirects us we will follow those
+    ## correctly
+    ## http://getbootstrap.com/css => 301 http://getbootstrap.com/css/
+    ##
+    ## A file being served by the file system never has a leading slash
+    ## or a trailing slash
+    ## index.html NOT index.html/ or /index.html
+    ##
+    if reHttp.test(url) or reWww.test(url) or reLocalHost.test(url) or @isUrlLike(url)
+      ## if we're missing a protocol then go
+      ## ahead and append it
+      if not reHttp.test(url)
+        url = "http://" + url
 
-        win.history[attr] = ->
-          orig.apply(@, arguments)
+      url = new UrlParse(url)
 
-          ## let our function know we've navigated
-          navigated(attr, arguments)
+      if not url.pathname
+        url.set("pathname", "/")
 
-    @isFullyQualifiedUrl = (url) ->
-      reHttp.test(url)
-
-    @isUrlLike = (url) ->
-      ## beta.cypress.io
-      ## aws.amazon.com/bucket/foo
-      ## foo.bar.co.uk
-      ## foo.bar.co.uk/asdf
-      url = url.split("/")[0].split(".")
-      url.length is 3 or url.length is 4
-
-    @fullyQualifyUrl = (url) ->
-      return url if @isFullyQualifiedUrl(url)
-
-      existing = new UrlParse(window.location.href)
-
-      ## always normalize against our existing origin
-      ## as the baseUrl so that we do not accidentally
-      ## have relative url's
-      url = new UrlParse(url, existing.origin)
       url.toString()
+    else
+      url
 
-    @normalize = (url) ->
-      ## A properly formed URL will always have a trailing
-      ## slash at the end of it
-      ## http://localhost:8000/
-      ##
-      ## A url with a path (sub folder) does not necessarily
-      ## have a trailing slash after it
-      ## http://localhost:8000/app
-      ##
-      ## If the webserver redirects us we will follow those
-      ## correctly
-      ## http://getbootstrap.com/css => 301 http://getbootstrap.com/css/
-      ##
-      ## A file being served by the file system never has a leading slash
-      ## or a trailing slash
-      ## index.html NOT index.html/ or /index.html
-      ##
-      if reHttp.test(url) or reWww.test(url) or reLocalHost.test(url) or @isUrlLike(url)
-        ## if we're missing a protocol then go
-        ## ahead and append it
-        if not reHttp.test(url)
-          url = "http://" + url
+  @qualifyWithBaseUrl = (baseUrl, url) ->
+    ## if we have a root url and our url isnt full qualified
+    if baseUrl and (not @isFullyQualifiedUrl(url))
+      ## prepend the root url to it
+      url = @join(baseUrl, url)
 
-        url = new UrlParse(url)
+    @fullyQualifyUrl(url)
 
-        if not url.pathname
-          url.set("pathname", "/")
+  @isAbsoluteRelative = (segment) ->
+    ## does this start with a forward slash?
+    segment and segment[0] is "/"
 
-        url.toString()
+  @join = (from, rest...) ->
+    last = _.last(rest)
+
+    paths = _.reduce rest, (memo, segment) ->
+      if segment is last
+        memo.push _.trimStart(segment, "/")
       else
-        url
+        memo.push _.trim(segment, "/")
+      memo
+    , [_.trimEnd(from, "/")]
 
-    @qualifyWithBaseUrl = (baseUrl, url) ->
-      ## if we have a root url and our url isnt full qualified
-      if baseUrl and (not @isFullyQualifiedUrl(url))
-        ## prepend the root url to it
-        url = @join(baseUrl, url)
+    paths.join("/")
 
-      @fullyQualifyUrl(url)
+  @resolve = (from, to) ->
+    ## if to is fully qualified then
+    ## just return that
+    return to if @isFullyQualifiedUrl(to)
 
-    @isAbsoluteRelative = (segment) ->
-      ## does this start with a forward slash?
-      segment and segment[0] is "/"
+    ## else take from and figure out if
+    ## to is relative or absolute-relative
 
-    @join = (from, rest...) ->
-      last = _.last(rest)
+    ## if to is absolute relative '/foo'
+    if @isAbsoluteRelative(to)
+      ## get origin from 'from'
+      origin = @create(from).origin
+      @join(origin, to)
+    else
+      @join(from, to)
 
-      paths = _.reduce rest, (memo, segment) ->
-        if segment is last
-          memo.push _.ltrim(segment, "/")
-        else
-          memo.push _.trim(segment, "/")
-        memo
-      , [_.rtrim(from, "/")]
+  @create = (remote) ->
+    location = new $Location(remote)
+    location.getObject()
 
-      paths.join("/")
-
-    @resolve = (from, to) ->
-      ## if to is fully qualified then
-      ## just return that
-      return to if @isFullyQualifiedUrl(to)
-
-      ## else take from and figure out if
-      ## to is relative or absolute-relative
-
-      ## if to is absolute relative '/foo'
-      if @isAbsoluteRelative(to)
-        ## get origin from 'from'
-        origin = @create(from).origin
-        @join(origin, to)
-      else
-        @join(from, to)
-
-    @create = (remote) ->
-      location = new $Location(remote)
-      location.getObject()
-
-  return $Location
+module.exports = $Location

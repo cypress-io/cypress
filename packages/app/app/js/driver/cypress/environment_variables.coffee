@@ -1,47 +1,50 @@
-$Cypress.EnvironmentVariables = do ($Cypress, _) ->
+_ = require("lodash")
 
-  $Cypress.extend
-    env: (key, value) ->
-      env = @environmentVariables
+$Utils = require("./utils")
 
-      $Cypress.Utils.throwErrByPath("env.variables_missing") if not env
+class $EnvironmentVariables
+  constructor: (obj = {}) ->
+    @env = {}
 
-      env.getOrSet.apply(env, arguments)
+    @set(obj)
 
-  class $EnvironmentVariables
-    constructor: (obj = {}) ->
-      @env = {}
-
-      @set(obj)
-
-    getOrSet: (key, value) ->
-      switch
-        when arguments.length is 0
-          @get()
-        when arguments.length is 1
-          if _.isString(key)
-            @get(key)
-          else
-            @set(key)
+  getOrSet: (key, value) ->
+    switch
+      when arguments.length is 0
+        @get()
+      when arguments.length is 1
+        if _.isString(key)
+          @get(key)
         else
-          @set(key, value)
-
-    get: (key) ->
-      if key
-        @env[key]
+          @set(key)
       else
-        @env
+        @set(key, value)
 
-    set: (key, value) ->
-      if _.isObject(key)
-        obj = key
-      else
-        obj = {}
-        obj[key] = value
+  get: (key) ->
+    if key
+      @env[key]
+    else
+      @env
 
-      _.extend(@env, obj)
+  set: (key, value) ->
+    if _.isObject(key)
+      obj = key
+    else
+      obj = {}
+      obj[key] = value
 
-    @create = (Cypress, obj) ->
-      Cypress.environmentVariables = new $EnvironmentVariables(obj)
+    _.extend(@env, obj)
 
-  return $EnvironmentVariables
+  @create = (Cypress, obj) ->
+    Cypress.environmentVariables = new $EnvironmentVariables(obj)
+
+  @extend = ($Cypress) ->
+    $Cypress.extend
+      env: (key, value) ->
+        env = @environmentVariables
+
+        $Utils.throwErrByPath("env.variables_missing") if not env
+
+        env.getOrSet.apply(env, arguments)
+
+module.exports = $EnvironmentVariables

@@ -1,21 +1,26 @@
-$Cypress.register "LocalStorage", (Cypress, _, $) ->
+_ = require("lodash")
 
-  clearLocalStorage = (keys) ->
-    local = window.localStorage
-    remote = @private("window").localStorage
+$LocalStorage = require("../../local_storage")
+$Log = require("../../log")
+utils = require("../../utils")
 
-    ## set our localStorage and the remote localStorage
-    Cypress.LocalStorage.setStorages(local, remote)
+clearLocalStorage = (keys) ->
+  local = window.localStorage
+  remote = @privateState("window").localStorage
 
-    ## clear the keys
-    Cypress.LocalStorage.clear(keys)
+  ## set our localStorage and the remote localStorage
+  $LocalStorage.setStorages(local, remote)
 
-    ## and then unset the references
-    Cypress.LocalStorage.unsetStorages()
+  ## clear the keys
+  $LocalStorage.clear(keys)
 
-    ## return the remote localStorage object
-    return remote
+  ## and then unset the references
+  $LocalStorage.unsetStorages()
 
+  ## return the remote localStorage object
+  return remote
+
+module.exports = (Cypress, Commands) ->
   Cypress.on "test:before:hooks", ->
     try
       ## this may fail if the current
@@ -24,19 +29,19 @@ $Cypress.register "LocalStorage", (Cypress, _, $) ->
     catch
       null
 
-  Cypress.addParentCommand
-
+  Commands.addAll({
     clearLocalStorage: (keys) ->
       ## bail if we have keys and we're not a string and we're not a regexp
       if keys and not _.isString(keys) and not _.isRegExp(keys)
-        $Cypress.Utils.throwErrByPath("clearLocalStorage.invalid_argument")
+        utils.throwErrByPath("clearLocalStorage.invalid_argument")
 
       remote = clearLocalStorage.call(@, keys)
 
-      Cypress.Log.command
+      $Log.command
         name: "clear ls"
         snapshot: true
         end: true
 
       ## return the remote local storage object
       return remote
+  })

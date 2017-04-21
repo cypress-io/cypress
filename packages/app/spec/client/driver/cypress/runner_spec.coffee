@@ -362,7 +362,7 @@ describe "$Cypress.Runner API", ->
         invoke = @sandbox.spy @Cypress, "invoke"
 
         @runner.run ->
-          calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
+          calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "test:before:hooks"
           expect(calls.length).to.eq(2)
           done()
 
@@ -401,7 +401,7 @@ describe "$Cypress.Runner API", ->
         invoke = @sandbox.stub(@Cypress, "invoke").returns([])
 
         @runner.run ->
-          calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
+          calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "test:after:hooks"
           expect(calls.length).to.eq(2)
           done()
 
@@ -446,7 +446,7 @@ describe "$Cypress.Runner API", ->
             trigger = @sandbox.spy(@Cypress, "trigger")
 
             @runner.run ->
-              calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:before:run"
+              calls = _.filter trigger.getCalls()), (call) -> call.args[0] is "test:before:run"
               expect(calls.length).to.eq(2)
               done()
 
@@ -454,7 +454,7 @@ describe "$Cypress.Runner API", ->
             trigger = @sandbox.stub(@Cypress, "trigger").returns([])
 
             @runner.run ->
-              calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:after:run"
+              calls = _.filter trigger.getCalls()), (call) -> call.args[0] is "test:after:run"
               expect(calls.length).to.eq(2)
               done()
 
@@ -463,7 +463,7 @@ describe "$Cypress.Runner API", ->
             invoke = @sandbox.spy(@Cypress, "invoke")
 
             @runner.run ->
-              calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
+              calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "test:before:hooks"
               expect(calls.length).to.eq(1)
               done()
 
@@ -472,7 +472,7 @@ describe "$Cypress.Runner API", ->
             invoke = @sandbox.stub(@Cypress, "invoke").returns([])
 
             @runner.run ->
-              calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
+              calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "test:after:hooks"
               expect(calls.length).to.eq(1)
               done()
 
@@ -491,7 +491,7 @@ describe "$Cypress.Runner API", ->
             trigger = @sandbox.spy(@Cypress, "trigger")
 
             @runner.run ->
-              calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:before:run"
+              calls = _.filter trigger.getCalls()), (call) -> call.args[0] is "test:before:run"
               expect(calls.length).to.eq(3)
               done()
 
@@ -499,7 +499,7 @@ describe "$Cypress.Runner API", ->
             trigger = @sandbox.stub(@Cypress, "trigger").returns([])
 
             @runner.run ->
-              calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:after:run"
+              calls = _.filter trigger.getCalls()), (call) -> call.args[0] is "test:after:run"
               expect(calls.length).to.eq(3)
               done()
 
@@ -508,7 +508,7 @@ describe "$Cypress.Runner API", ->
             invoke = @sandbox.spy(@Cypress, "invoke")
 
             @runner.run ->
-              calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
+              calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "test:before:hooks"
               expect(calls.length).to.eq(2)
               done()
 
@@ -517,7 +517,7 @@ describe "$Cypress.Runner API", ->
             invoke = @sandbox.stub(@Cypress, "invoke").returns([])
 
             @runner.run ->
-              calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
+              calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "test:after:hooks"
               expect(calls.length).to.eq(2)
               done()
 
@@ -540,7 +540,7 @@ describe "$Cypress.Runner API", ->
             trigger = @sandbox.spy(@Cypress, "trigger")
 
             @runner.run ->
-              calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:before:run"
+              calls = _.filter trigger.getCalls()), (call) -> call.args[0] is "test:before:run"
               expect(calls.length).to.eq(5)
               done()
 
@@ -548,7 +548,7 @@ describe "$Cypress.Runner API", ->
             trigger = @sandbox.stub(@Cypress, "trigger").returns([])
 
             @runner.run ->
-              calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:after:run"
+              calls = _.filter trigger.getCalls()), (call) -> call.args[0] is "test:after:run"
               expect(calls.length).to.eq(5)
               done()
 
@@ -556,8 +556,8 @@ describe "$Cypress.Runner API", ->
             invoke = @sandbox.spy(@Cypress, "invoke")
 
             @runner.run ->
-              calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
-              titles = _(calls).map (call) -> call.args[1].title
+              calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "test:before:hooks"
+              titles = _.map calls, (call) -> call.args[1].title
               expect(calls.length).to.eq(4)
 
               ## this may seem strange but it is correct. only pending tests
@@ -571,8 +571,8 @@ describe "$Cypress.Runner API", ->
             invoke = @sandbox.stub(@Cypress, "invoke").returns([])
 
             @runner.run ->
-              calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
-              titles = _(calls).map (call) -> call.args[1].title
+              calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "test:after:hooks"
+              titles = _.map calls, (call) -> call.args[1].title
 
               ## this may seem strange but it is correct. only pending tests
               ## on the book ends will get their test:after:hooks called since
@@ -613,7 +613,7 @@ describe "$Cypress.Runner API", ->
         invoke = @sandbox.stub(@Cypress, "invoke").returns([])
 
         @runner.run ->
-          calls = _(invoke.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
+          calls = _.filter invoke.getCalls(), (call) -> call.args[0] is "test:after:hooks"
           expect(calls).to.have.length(1)
           done()
 
@@ -656,7 +656,7 @@ describe "$Cypress.Runner API", ->
       @runner.anyTestInSuite @runner.runner.suite, (test) ->
         tests.push(test)
 
-      allTests = _(tests).all (test) -> test.type is "test"
+      allTests = _.every tests, (test) -> test.type is "test"
       expect(allTests).to.be.true
       expect(tests).to.have.length(4)
 
@@ -720,7 +720,7 @@ describe "$Cypress.Runner API", ->
       expect(@runner.tests).to.have.length(1)
 
     it "sets runnable type", ->
-      types = _.pluck @runner.runnables, "type"
+      types = _.map @runner.runnables, "type"
       expect(types).to.deep.eq ["suite", "test", "suite", "test", "test", "suite", "test"]
 
     it "returns only matching tests + suites to the grep", ->

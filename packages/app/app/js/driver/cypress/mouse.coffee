@@ -1,109 +1,102 @@
-$Cypress.Mouse = do ($Cypress, _, Promise) ->
+Promise = require("./bluebird")
 
-  stopPropagation = MouseEvent.prototype.stopPropagation
+$Cypress = require("../cypress")
+$Keyboard = require("./keyboard")
+utils = require("./utils")
 
-  ## clientX and clientY by their definition
-  ## are calculated from viewport edge
-  ## and should subtract the pageX or pageY offset
-  ## see img: https://camo.githubusercontent.com/9963a83071b4b14c8dee6699335630f29d668d1f/68747470733a2f2f692d6d73646e2e7365632e732d6d7366742e636f6d2f64796e696d672f49433536313937302e706e67
+stopPropagation = MouseEvent.prototype.stopPropagation
 
-  getClientX = (coords, win) ->
-    coords.x - win.pageXOffset
+module.exports = {
+  mouseDown: ($elToClick, coords, win) ->
+    mdownEvtProps = $Keyboard.mixinModifiers({
+      bubbles: true
+      cancelable: true
+      view: win
+      clientX: utils.getClientX(coords, win)
+      clientY: utils.getClientY(coords, win)
+      buttons: 1
+      detail: 1
+    })
 
-  getClientY = (coords, win) ->
-    coords.y - win.pageYOffset
+    mdownEvt = new MouseEvent "mousedown", mdownEvtProps
 
-  return {
-    mouseDown: ($elToClick, coords, win) ->
-      mdownEvtProps = Cypress.Keyboard.mixinModifiers({
-        bubbles: true
-        cancelable: true
-        view: win
-        clientX: getClientX(coords, win)
-        clientY: getClientY(coords, win)
-        buttons: 1
-        detail: 1
-      })
+    ## ensure this property exists on older chromium versions
+    mdownEvt.buttons ?= 1
 
-      mdownEvt = new MouseEvent "mousedown", mdownEvtProps
+    mdownEvt.stopPropagation = ->
+      @_hasStoppedPropagation = true
+      stopPropagation.apply(@, arguments)
 
-      ## ensure this property exists on older chromium versions
-      mdownEvt.buttons ?= 1
+    cancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
 
-      mdownEvt.stopPropagation = ->
-        @_hasStoppedPropagation = true
-        stopPropagation.apply(@, arguments)
+    props = {
+      preventedDefault: cancelled
+      stoppedPropagation: !!mdownEvt._hasStoppedPropagation
+    }
 
-      cancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
+    modifiers = $Keyboard.activeModifiers()
+    props.modifiers = modifiers.join(", ") if modifiers.length
+    props
 
-      props = {
-        preventedDefault: cancelled
-        stoppedPropagation: !!mdownEvt._hasStoppedPropagation
-      }
+  mouseUp: ($elToClick, coords, win) ->
+    mupEvtProps = $Keyboard.mixinModifiers({
+      bubbles: true
+      cancelable: true
+      view: win
+      clientX: utils.getClientX(coords, win)
+      clientY: utils.getClientY(coords, win)
+      buttons: 0
+      detail: 1
+    })
 
-      modifiers = Cypress.Keyboard.activeModifiers()
-      props.modifiers = modifiers.join(", ") if modifiers.length
-      props
+    mupEvt = new MouseEvent "mouseup", mupEvtProps
 
-    mouseUp: ($elToClick, coords, win) ->
-      mupEvtProps = Cypress.Keyboard.mixinModifiers({
-        bubbles: true
-        cancelable: true
-        view: win
-        clientX: getClientX(coords, win)
-        clientY: getClientY(coords, win)
-        buttons: 0
-        detail: 1
-      })
+    ## ensure this property exists on older chromium versions
+    mupEvt.buttons ?= 0
 
-      mupEvt = new MouseEvent "mouseup", mupEvtProps
+    mupEvt.stopPropagation = ->
+      @_hasStoppedPropagation = true
+      stopPropagation.apply(@, arguments)
 
-      ## ensure this property exists on older chromium versions
-      mupEvt.buttons ?= 0
+    cancelled = !$elToClick.get(0).dispatchEvent(mupEvt)
 
-      mupEvt.stopPropagation = ->
-        @_hasStoppedPropagation = true
-        stopPropagation.apply(@, arguments)
+    props = {
+      preventedDefault: cancelled
+      stoppedPropagation: !!mupEvt._hasStoppedPropagation
+    }
 
-      cancelled = !$elToClick.get(0).dispatchEvent(mupEvt)
+    modifiers = $Keyboard.activeModifiers()
+    props.modifiers = modifiers.join(", ") if modifiers.length
+    props
 
-      props = {
-        preventedDefault: cancelled
-        stoppedPropagation: !!mupEvt._hasStoppedPropagation
-      }
+  click: ($elToClick, coords, win) ->
+    clickEvtProps = $Keyboard.mixinModifiers({
+      bubbles: true
+      cancelable: true
+      view: win
+      clientX: utils.getClientX(coords, win)
+      clientY: utils.getClientY(coords, win)
+      buttons: 0
+      detail: 1
+    })
 
-      modifiers = Cypress.Keyboard.activeModifiers()
-      props.modifiers = modifiers.join(", ") if modifiers.length
-      props
+    clickEvt = new MouseEvent "click", clickEvtProps
 
-    click: ($elToClick, coords, win) ->
-      clickEvtProps = Cypress.Keyboard.mixinModifiers({
-        bubbles: true
-        cancelable: true
-        view: win
-        clientX: getClientX(coords, win)
-        clientY: getClientY(coords, win)
-        buttons: 0
-        detail: 1
-      })
+    ## ensure this property exists on older chromium versions
+    clickEvt.buttons ?= 0
 
-      clickEvt = new MouseEvent "click", clickEvtProps
+    clickEvt.stopPropagation = ->
+      @_hasStoppedPropagation = true
+      stopPropagation.apply(@, arguments)
 
-      ## ensure this property exists on older chromium versions
-      clickEvt.buttons ?= 0
+    cancelled = !$elToClick.get(0).dispatchEvent(clickEvt)
 
-      clickEvt.stopPropagation = ->
-        @_hasStoppedPropagation = true
-        stopPropagation.apply(@, arguments)
+    props = {
+      preventedDefault: cancelled
+      stoppedPropagation: !!clickEvt._hasStoppedPropagation
+    }
 
-      cancelled = !$elToClick.get(0).dispatchEvent(clickEvt)
-
-      props = {
-        preventedDefault: cancelled
-        stoppedPropagation: !!clickEvt._hasStoppedPropagation
-      }
-
-      modifiers = Cypress.Keyboard.activeModifiers()
-      props.modifiers = modifiers.join(", ") if modifiers.length
-      props
-  }
+    modifiers = $Keyboard.activeModifiers()
+    props.modifiers = modifiers.join(", ") if modifiers.length
+    props
+}
