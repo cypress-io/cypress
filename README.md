@@ -36,6 +36,9 @@ npm run watch
 
 ## Changelog
 
+#### 0.4.1 - *(04/20/17)*
+- bump cypress coffee script and releaser dep
+
 #### 0.4.0 - *(04/13/17)*
 - dont write extension to dist
 - emit new automation client event
