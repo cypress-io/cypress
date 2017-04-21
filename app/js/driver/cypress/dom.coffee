@@ -3,12 +3,15 @@ $Cypress.Dom = do ($Cypress, _, $) ->
   fixedOrAbsoluteRe = /(fixed|absolute)/
 
   return obj = {
+    isVisible: $.expr.filters.visible = (el) ->
+      !$Cypress.Dom.isHidden(el, "isVisible()")
+
     ## assign this fn to jquery and to our revealing module
     ## at the same time. #pro
-    isHidden: $.expr.filters.hidden = (el) ->
+    isHidden: $.expr.filters.hidden = (el, filter) ->
       if not $Cypress.Utils.hasElement(el)
         $Cypress.Utils.throwErrByPath("dom.non_dom_is_hidden", {
-          args: { el }
+          args: { el, filter: filter || "isHidden()" }
         })
 
       $el = $(el)
@@ -17,7 +20,7 @@ $Cypress.Dom = do ($Cypress, _, $) ->
       ## either its offsetHeight or offsetWidth is 0 because
       ## it is impossible for the user to interact with this element
       ## offsetHeight / offsetWidth includes the ef
-      obj.elHasNoOffsetWidthOrHeight($el) or
+      obj.elHasNoEffectiveWidthOrHeight($el) or
 
         ## additionally if the effective visibility of the element
         ## is hidden (which includes any parent nodes) then the user
@@ -30,8 +33,8 @@ $Cypress.Dom = do ($Cypress, _, $) ->
 
             obj.elIsOutOfBoundsOfAncestorsOverflow($el)
 
-    elHasNoOffsetWidthOrHeight: ($el) ->
-      @elOffsetWidth($el) <= 0 or @elOffsetHeight($el) <= 0
+    elHasNoEffectiveWidthOrHeight: ($el) ->
+      @elOffsetWidth($el) <= 0 or @elOffsetHeight($el) <= 0 or $el[0].getClientRects().length <= 0
 
     elOffsetWidth: ($el) ->
       $el[0].offsetWidth
@@ -139,16 +142,15 @@ $Cypress.Dom = do ($Cypress, _, $) ->
       ## happen if we already have an <html> element
       return false if $parent.is("body,html") or $Cypress.Utils.hasDocument($parent)
 
-      if @elHasOverflowHidden($parent)
-        if @elHasNoOffsetWidthOrHeight($parent)
-          ## if any of the elements between the parent and origEl
-          ## have fixed or position absolute
-          if @elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
-            ## then they are not hidden
-            return false
-          else
-            ## else they are
-            return true
+      if @elHasOverflowHidden($parent) and @elHasNoEffectiveWidthOrHeight($parent)
+        ## if any of the elements between the parent and origEl
+        ## have fixed or position absolute
+        if @elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
+          ## then they are not hidden
+          return false
+        else
+          ## else they are
+          return true
 
       ## continue to recursively walk up the chain until we reach body or html
       @elIsHiddenByAncestors($parent, $origEl)
@@ -158,7 +160,7 @@ $Cypress.Dom = do ($Cypress, _, $) ->
       return false if not $el.length or $el.is("body,html")
 
       ## if we have overflow hidden and no effective width or height
-      if @elHasOverflowHidden($el) and @elHasNoOffsetWidthOrHeight($el)
+      if @elHasOverflowHidden($el) and @elHasNoEffectiveWidthOrHeight($el)
         return $el
       else
         ## continue walking
@@ -206,7 +208,7 @@ $Cypress.Dom = do ($Cypress, _, $) ->
         when @elHasVisibilityHidden($el)
           "This element: #{node} is not visible because it has CSS property: 'visibility: hidden'"
 
-        when @elHasNoOffsetWidthOrHeight($el)
+        when @elHasNoEffectiveWidthOrHeight($el)
           width  = @elOffsetWidth($el)
           height = @elOffsetHeight($el)
           "This element: #{node} is not visible because it has an effective width and height of: '#{width} x #{height}' pixels."
