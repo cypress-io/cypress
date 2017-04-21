@@ -69,6 +69,9 @@ MIT
 
 ## Changelog
 
+#### 0.4.9 - *(04/20/17)*
+- bump cypress deps
+
 #### 0.4.8 - *(04/14/17)*
 - properly await browser closing
 - new spec data structure
