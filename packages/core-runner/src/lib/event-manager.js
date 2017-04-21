@@ -33,7 +33,7 @@ export default {
   reporterBus,
 
   init (state, connectionInfo) {
-    channel.emit('is:automation:connected', connectionInfo, action('automationEnsured', (isConnected) => {
+    channel.emit('is:automation:client:connected', connectionInfo, action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
       channel.on('automation:disconnected', action('automationDisconnected', () => {
         state.automation = automation.DISCONNECTED
@@ -81,6 +81,8 @@ export default {
     reporterBus.on('focus:tests', this.focusTests)
 
     driver.setConfig(_.pick(config, 'isHeadless', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote'))
+
+    driver.setVersion(config.version)
 
     driver.start()
 
@@ -188,6 +190,11 @@ export default {
 
     _.each(driverToLocalEvents, (event) => {
       driver.on(event, (...args) => localBus.emit(event, ...args))
+    })
+
+    driver.on('script:error', (err) => {
+      driver.abort()
+      localBus.emit('script:error', err)
     })
 
     _.each(socketRerunEvents, (event) => {

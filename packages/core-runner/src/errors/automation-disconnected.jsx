@@ -1,5 +1,5 @@
 import React from 'react'
-import RunnerWrap from './runner-wrap'
+import RunnerWrap from '../app/runner-wrap'
 
 export default ({ onReload }) => (
   <RunnerWrap className='automation-failure'>
@@ -10,7 +10,7 @@ export default ({ onReload }) => (
         <i className='fa fa-refresh'></i> Reload the Browser
       </button>
       <div className='helper-line'>
-        <a href='https://on.cypress.io/guides/browser-management' target='_blank'>
+        <a href='https://on.cypress.io/guides/browser-management' target='_blank' rel='noopener noreferrer'>
           <i className='fa fa-question-circle'></i>
           Why am I seeing this message?
         </a>

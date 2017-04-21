@@ -1,10 +1,13 @@
 /* global $ */
 
 import Promise from 'bluebird'
+import cs from 'classnames'
+import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
 import AutIframe from './aut-iframe'
+import ScriptError from '../errors/script-error'
 import SnapshotControls from './snapshot-controls'
 
 import IframeModel from './iframe-model'
@@ -15,11 +18,11 @@ import windowUtil from '../lib/window-util'
 @observer
 export default class Iframes extends Component {
   render () {
-    const { width, height, scale, marginLeft, headerHeight } = this.props.state
+    const { width, height, scale, marginLeft, headerHeight, scriptError } = this.props.state
 
     return (
       <div
-        className='iframes-container'
+        className={cs('iframes-container', { 'has-error': !!scriptError })}
         style={{ top: headerHeight }}
       >
         <div
@@ -32,6 +35,7 @@ export default class Iframes extends Component {
             width,
           }}
         />
+        <ScriptError error={scriptError} />
         <div className='cover' />
       </div>
     )
@@ -41,10 +45,11 @@ export default class Iframes extends Component {
     this.autIframe = new AutIframe(this.props.config)
 
     eventManager.on('visit:failed', this.autIframe.showVisitFailure)
+    eventManager.on('script:error', this._setScriptError)
 
     // TODO: need to take headless mode into account
     // may need to not display reporter if more than 200 tests
-    eventManager.on('restart', this._run.bind(this))
+    eventManager.on('restart', this._run)
 
     eventManager.start(this.props.config)
 
@@ -68,10 +73,15 @@ export default class Iframes extends Component {
     this._run()
   }
 
-  _run () {
+  @action _setScriptError = (err) => {
+    this.props.state.scriptError = err
+  }
+
+  _run = () => {
     const specPath = windowUtil.specPath()
     this.props.eventManager.notifyRunningSpec(specPath)
     logger.clearLog()
+    this._setScriptError(null)
 
     this._loadIframes(specPath)
     .then(([specWindow, $autIframe]) => {

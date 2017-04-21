@@ -1,0 +1,77 @@
+.runner {
+  &.automation-failure,
+  &.no-spec {
+    background: #f8f8f8;
+    box-shadow: none;
+    left: 0;
+  }
+
+  &.automation-failure,
+  &.no-spec {
+    background: #f8f8f8;
+    box-shadow: none;
+  }
+
+  .automation-message,
+  .no-spec-message {
+    padding: 100px 50px 20px;
+    text-align: center;
+
+    p {
+      color: #333;
+      font-size: 200%;
+
+      &.muted {
+        color: #aaa;
+        font-size: 120%;
+      }
+    }
+
+    button {
+      margin: 20px 0 0;
+
+      i {
+        margin-right: 5px;
+      }
+    }
+
+    .dropdown button i,
+    .dropdown-menu li i {
+      margin-right: 5px;
+    }
+  }
+
+  .automation-disconnected button {
+    font-size: 18px;
+    line-height: 1.3;
+    padding: 10px 16px;
+  }
+
+  .helper-line {
+    margin-top: 50px;
+    text-align: center;
+
+    i {
+      margin-right: 5px;
+    }
+  }
+
+  .script-error {
+    background-color: #f8f8f8;
+    bottom: 0;
+    border: none;
+    border-radius: 0;
+    color: #ec6573;
+    left: 0;
+    overflow: auto;
+    margin: 0;
+    padding: 2em;
+    position: absolute;
+    right: 0;
+    top: 0;
+
+    &:empty {
+      display: none;
+    }
+  }
+}

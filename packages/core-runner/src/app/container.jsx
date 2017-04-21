@@ -7,9 +7,9 @@ import State from '../lib/state'
 import windowUtil from '../lib/window-util'
 
 import App from './app'
-import AutomationDisconnected from './automation-disconnected'
-import NoAutomation from './no-automation'
-import NoSpec from './no-spec'
+import AutomationDisconnected from '../errors/automation-disconnected'
+import NoAutomation from '../errors/no-automation'
+import NoSpec from '../errors/no-spec'
 
 const automationElementId = '__cypress-string'
 

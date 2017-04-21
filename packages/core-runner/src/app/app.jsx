@@ -6,6 +6,7 @@ import { observer } from 'mobx-react'
 import React, { Component, PropTypes } from 'react'
 import { findDOMNode } from 'react-dom'
 
+import errorMessages from '../errors/error-messages'
 import windowUtil from '../lib/window-util'
 import State from '../lib/state'
 
@@ -20,6 +21,8 @@ class App extends Component {
   @observable isReporterResizing = false
 
   render () {
+    const specPath = this._specPath()
+
     return (
       <div className={cs({
         'is-reporter-resizing': this.isReporterResizing,
@@ -32,8 +35,9 @@ class App extends Component {
         >
           <Reporter
             runner={this.props.eventManager.reporterBus}
-            specPath={this._specPath()}
+            specPath={specPath}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
+            error={errorMessages.reporterError(this.props.state.scriptError, specPath)}
           />
         </div>
         <RunnerWrap

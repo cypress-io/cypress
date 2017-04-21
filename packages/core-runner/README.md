@@ -44,6 +44,27 @@ npm test-once
 
 ## Changelog
 
+#### 0.3.11 - *(04/12/17)*
+- automation event renamed
+
+#### 0.3.10 - *(03/07/17)*
+- set version of cypress
+
+#### 0.3.9 - *(02/05/17)*
+- bump reporter dep
+
+#### 0.3.8 - *(12/05/16)*
+- stop test run when there's a script error
+
+#### 0.3.7 - *(11/29/16)*
+- send reporter side of error through the reporter
+
+#### 0.3.6 - *(11/27/16)*
+- tweaked bundle error message
+
+#### 0.3.5 - *(11/21/16)*
+- handle script errors
+
 #### 0.3.4 - *(10/13/16)*
 - re-release to rebuild reporter
 

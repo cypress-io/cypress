@@ -2,6 +2,7 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
 
+import ScriptError from '../errors/script-error'
 import Message from '../message/message'
 import State from '../lib/state'
 
@@ -25,6 +26,7 @@ const createProps = () => ({
       emit: sinon.spy(),
       on: sinon.spy(),
     },
+    on: sinon.spy(),
   },
   state: new State(),
   windowUtil: {

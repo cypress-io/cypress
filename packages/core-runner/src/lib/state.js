@@ -47,6 +47,8 @@ export default class State {
 
   @observable automation = automation.CONNECTING
 
+  @observable scriptError = asReference(null)
+
   constructor (reporterWidth = _defaults.reporterWidth) {
     this.reporterWidth = reporterWidth
   }
