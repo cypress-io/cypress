@@ -56,6 +56,9 @@ npm test-once
 
 ## Changelog
 
+#### 0.2.1 - *(04/20/17)*
+- bump cypress releaser dep
+
 #### 0.2.0 - *(06/17/16)*
 - added socket.getClientVersion and socket.getClientSource methods
 
