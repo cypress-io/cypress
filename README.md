@@ -6,6 +6,9 @@ It is a simple wrapper that `symlinks` while in development.
 
 ## Changelog
 
+#### 0.3.4 - *(04/20/17)*
+- fix require path
+
 #### 0.3.3 - *(04/20/17)*
 - bump cypress icons dep
 
