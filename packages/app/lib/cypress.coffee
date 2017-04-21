@@ -57,7 +57,7 @@ module.exports = {
 
         ## open the cypress electron wrapper shell app
         new Promise (resolve) ->
-          cypressElectron = require("packages/core-electron")
+          cypressElectron = require("../../electron")
           fn = (code) ->
             ## juggle up the failures since our outer
             ## promise is expecting this object structure

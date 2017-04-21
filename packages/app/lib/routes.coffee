@@ -25,9 +25,6 @@ module.exports = (app, config, request, getRemoteState, watchers, project) ->
   app.get "/__cypress/socket.io.js", (req, res) ->
     client.handle(req, res)
 
-  app.get "/__cypress/reporter/*", (req, res) ->
-    reporter.handle(req, res)
-
   app.get "/__cypress/runner/*", (req, res) ->
     runner.handle(req, res)
 

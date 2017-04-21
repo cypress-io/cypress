@@ -9,7 +9,7 @@
     "start": "node index.js",
     "server": "node index.js --mode server",
     "repl": "node repl.js",
-    "build": "gulp app:build",
+    "build-dev": "gulp app:build",
     "watch": "gulp app",
     "bump": "gulp bump",
     "deploy": "gulp deploy",

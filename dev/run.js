@@ -1,11 +1,7 @@
 module.exports = (args) => {
   const cmd = args._[0]
 
-  if (cmd) {
-    require('./run-all')(cmd, args)
-  } else {
-    require('packages/core-app').start()
-  }
+  require('./run-all')(cmd, args)
 }
 
 
@@ -39,4 +35,3 @@ from root:
 - run e2e tests
 
 **/
-

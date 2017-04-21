@@ -1,6 +1,6 @@
 _      = require("lodash")
 send   = require("send")
-runner = require("@cypress/core-runner")
+runner = require("../../../runner")
 pkg    = require("../../package.json")
 
 module.exports = {

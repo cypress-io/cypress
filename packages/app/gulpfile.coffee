@@ -10,7 +10,7 @@ child_process = require("child_process")
 runSequence   = require("run-sequence")
 importOnce    = require("node-sass-import-once")
 cyIcons       = require("@cypress/icons")
-# deploy        = require("./deploy")
+deploy        = require("./deploy")
 
 fs = Promise.promisifyAll(fs)
 

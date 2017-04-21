@@ -1,7 +1,7 @@
 fs       = require("fs-extra")
 path     = require("path")
 Promise  = require("bluebird")
-launcher = require("@cypress/core-launcher")
+launcher = require("../../../launcher")
 appData  = require("../util/app_data")
 
 fs = Promise.promisifyAll(fs)

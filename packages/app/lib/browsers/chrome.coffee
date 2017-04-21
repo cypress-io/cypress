@@ -1,6 +1,6 @@
 fs       = require("fs-extra")
 Promise   = require("bluebird")
-extension = require("packages/core-extension")
+extension = require("../../../extension")
 appData   = require("../util/app_data")
 utils     = require("./utils")
 

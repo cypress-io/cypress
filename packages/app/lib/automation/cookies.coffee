@@ -1,6 +1,6 @@
 _         = require("lodash")
 Promise   = require("bluebird")
-extension = require("@cypress/core-extension")
+extension = require("../../../extension")
 
 ## match the w3c webdriver spec on return cookies
 ## https://w3c.github.io/webdriver/webdriver-spec.html#cookies

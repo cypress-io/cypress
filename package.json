@@ -7,7 +7,8 @@
   },
   "scripts": {
     "install-app": "node cli.js --exec install",
-    "start": "npm run all",
+    "install-all": "npm run all install",
+    "start": "node start.js",
     "watch-dev": "npm run all watch-dev",
     "test": "mocha --watch",
     "test-once": "mocha",
@@ -24,7 +25,6 @@
     "@cypress/npm-run-all": "^4.0.4",
     "ascii-table": "0.0.9",
     "chai": "^3.5.0",
-    "coffee-script": "^1.11.1",
     "eslint": "^3.18.0",
     "eslint-plugin-mocha": "^4.9.0",
     "mocha": "^3.2.0",

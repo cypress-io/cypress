@@ -8,7 +8,6 @@ const args = minimist(process.argv.slice(2))
 
 switch (args.exec) {
   case 'run':
-    require('coffee-script/register')
     require('dev/run')(args)
     break
   case 'install':

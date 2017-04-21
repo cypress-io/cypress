@@ -14,7 +14,7 @@ browserify = require("browserify")
 ext        = require("./")
 
 gulp.task "copy:socket:client", ->
-  gulp.src(require("packages/core-socket").getPathToClientSource())
+  gulp.src(require("../socket").getPathToClientSource())
   .pipe(gulp.dest("dist"))
 
 gulp.task "clean", ->
