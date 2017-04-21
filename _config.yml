@@ -70,19 +70,9 @@ fb_admins: 909781955804405
 ## Algolia Search
 ## https://github.com/LouisBarranqueiro/hexo-algoliasearch
 algolia:
-  appId: "R9KDA5FMJB"
-  apiKey: "2d1dd6823e46b492c7f0fcfad049ef1e"
-  adminApiKey: "86cb5b345150edcc6750db26fba8bf94"
-  chunkSize: 5000
-  indexName: "cypress"
-  fields:
-    - title
-    - tags
-    - slug
-    - excerpt
-    - excerpt:strip
-    - photos
-    - gallery
+  en:
+    api_key: "8baa384b1e9cbf317e714aa0df1a2576"
+    index_name: "cypress"
 
 # Extensions
 ## Plugins: https://hexo.io/plugins/

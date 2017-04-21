@@ -49,28 +49,7 @@
     color: $white;
   }
 }
-#search-input-wrap {
-  display: none;
-  padding-left: 6px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid $color-gray;
-  &.on {
-    display: inline-block;
-  }
-}
-#search-input-icon {
-  color: $white;
-  padding-right: 0.5em;
-  display: inline-block;
-  opacity: 0.7;
-}
-#search-input {
-  background: none;
-  font-size: inherit;
-  font-family: $font-title;
-  color: $white;
-  outline: none;
-}
+
 // #lang-select-wrap {
 //   display: none;
 //   position: relative;
