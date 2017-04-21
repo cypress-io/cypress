@@ -11,6 +11,7 @@ var glob = Promise.promisify(glob)
 var startsWithNumberAndDashRe = /(\d+-)/
 var excerptRe = /excerpt:.+/
 var newLinesRe = /\n{3,}/
+var calloutRe = /\[block:callout\](\n.\s\s.+\n.+\n.+\n+.+\n)\[\/block\]/g
 
 var LOOKUP = {
   guides: 'v0.0',
@@ -103,6 +104,25 @@ transfer = function(type) {
 
       return string
         .replace('{{', '{% raw %}{{{% endraw %}')
+    })
+    .then(function(string) {
+      // [block:callout]
+      // {
+      //   "type": "info",
+      //   "body": "Explore talks, blogs, and podcasts about testing in Cypress.",
+      //   "title": "Want to see Cypress in action?"
+      // }
+      // [/block]
+
+      // >> becomes >>
+
+      // {% note info Want to see Cypress in action? %}
+      // Explore talks, blogs, and podcasts about testing in Cypress.
+      // {% endnote %}
+
+      // matches = calloutRe.exec(string)
+      //
+      // return string
     })
     .then(function(string) {
       return fs.writeFileAsync(dest, string)
