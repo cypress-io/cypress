@@ -95,6 +95,14 @@ transfer = function(type) {
         return replace(memo, icon)
       }, string)
     })
+    .then(function(string) {
+      // Content with {{ }} or {% %} get parsed & cause problems
+      // {{
+      // >> becomes >>
+      // {% raw %}{{{% endraw %}
+
+      return string
+        .replace('{{', '{% raw %}{{{% endraw %}')
     })
     .then(function(string) {
       return fs.writeFileAsync(dest, string)
