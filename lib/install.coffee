@@ -52,7 +52,7 @@ module.exports = {
 
   package: (options = {}) ->
     pkgr    = require("electron-packager")
-    icons   = require("@cypress/core-icons")
+    icons   = require("@cypress/icons")
 
     pkgr    = Promise.promisify(pkgr)
 
