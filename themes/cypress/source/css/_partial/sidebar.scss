@@ -11,11 +11,10 @@
   font-size: 0.75;
   padding: 10px 7px;
   font-family: $font-title;
-  font-weight: 400;
-  color: #ccc;
+  font-weight: 600;
+  color: $color-default;
   display: inline-block;
   line-height: 1;
-  text-transform: uppercase;
 }
 
 #article-toc .sidebar-title {
@@ -24,13 +23,15 @@
 
 .sidebar-link {
   font-family: $font-sans;
+  font-size: 0.9em;
   display: block;
-  color: #666;
+  color: $color-link;
   text-decoration: none;
   padding: 7px;
   line-height: 1;
   position: relative;
   width: 100%;
+  font-weight: 400;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;

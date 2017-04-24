@@ -18,6 +18,7 @@
   width: $sidebar-width;
   margin-right: -$sidebar-width;
   opacity: 0.8;
+  font-size: 0.9em;
   &.fixed {
     position: absolute;
     top: 0;
@@ -27,7 +28,7 @@
 }
 .toc-child {
   padding-left: 1em;
-  font-size: 0.9em;
+  font-size: 0.85em;
 }
 
 #article-toc-inner {

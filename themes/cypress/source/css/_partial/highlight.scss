@@ -1,26 +1,17 @@
 pre {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-weight: inherit;
-  font-style: inherit;
-  font-family: inherit;
-  font-size: 100%;
-  vertical-align: baseline;
   font-family: $font-mono;
-  color: $color-emperor;
+  color: $color-default;
   background: #F7F7F7;
-  font-size: 0.90em;
-  padding: 10px 15px;
-  line-height: 22px;
+  font-size: 0.9em;
+  padding: 1em;
+  line-height: $line-height;
   code {
     border: none;
     display: block;
     padding: 0;
   }
   .comment {
-    color: $color-stack;
+    color: #9aa7b1;
   }
   .title {
     color: $color-stack;
@@ -73,26 +64,26 @@ pre {
     color: $color-carrot-orange;
   }
   .class {
-    color: #006fa9;
+    color: #459a82;
   }
   .string {
-    color: #006fa9;
+    color: #459a82;
   }
   .value {
-    color: #006fa9;
+    color: #459a82;
   }
   .inheritance {
-    color: #006fa9;
+    color: #459a82;
   }
   .header {
-    color: #006fa9;
+    color: #459a82;
   }
   .javascript {
     .title {
-      color: $color-san-marino;
+      color: $color-link;
     }
     .function {
-      color: $color-trendy-pink;
+      color: #996bb7;
     }
   }
   .keyword {
@@ -115,18 +106,14 @@ code {
   border: 1px solid #E9E9EF;
   border-radius: 4px;
   outline: 0;
-  font-weight: inherit;
-  font-style: inherit;
+  font-weight: normal;
   font-family: inherit;
-  font-size: 100%;
+  font-size: 0.9em;
   vertical-align: baseline;
   font-family: $font-mono;
-  color: #149c6a;
+  color: #46af91;
   background: #F7F7F9;
-  font-size: 0.95em;
   padding: 0 5px;
-
-
 }
 
 a code {
@@ -145,9 +132,9 @@ a code {
   margin: 0;
 
   &.shell {
-    background: #030304;
+    background: #252831;
     pre {
-      color: #E4F4F4;
+      color: #c4c5ca;
     }
   }
 
@@ -187,6 +174,7 @@ a code {
   }
   .line {
     height: 22px;
+    font-size: 0.9em;
   }
   .gutter {
     display: none;

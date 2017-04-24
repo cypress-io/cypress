@@ -13,7 +13,7 @@
   color: $color-link;
   font-size: 14px;
   text-decoration: none;
-  line-height: 36px;
+  line-height: 40px;
   transition: 0.2s;
   display: none;
   &:hover {
@@ -38,11 +38,13 @@
 
 }
 .article-content {
-  line-height: 1.6em;
+  line-height: $line-height;
   color: $color-default;
+
   p {
     margin: 1em 0;
   }
+
   ol {
     margin: 1em 0;
     margin-left: 20px;
@@ -60,6 +62,7 @@
       margin-bottom: 0;
     }
   }
+
   ul {
     margin: 1em 0;
     margin-left: 20px;
@@ -77,6 +80,7 @@
       margin-bottom: 0;
     }
   }
+
   dl {
     margin: 1em 0;
     margin-left: 20px;
@@ -94,8 +98,9 @@
       margin-bottom: 0;
     }
   }
+
   table {
-    margin: 2em 0;
+    margin: 1em 0;
     width: 100%;
     border: 1px solid $color-border;
     border-bottom: 0;
@@ -113,6 +118,7 @@
       background: #f6f7f9;
     }
   }
+
   blockquote {
     margin: 1em 0;
     padding: 0 20px;
@@ -133,12 +139,15 @@
       }
     }
   }
+
   iframe {
     margin: 2em 0;
   }
+
   .highlight {
-    margin: 2em 0;
+    margin: 1em 0;
   }
+
   hr {
     border-color: #eee;
     margin-top: 4em;
@@ -149,13 +158,11 @@
     display: none;
   }
   h1 {
-    font-size: 2em;
+    font-size: 1.7em;
     line-height: 1em;
     font-weight: 900;
-    margin: 2em 0 1em 0;
-    padding: 0.5em 0;
-    letter-spacing: 1px;
-    border-bottom: 1px solid #eee;
+    margin: 2em 0 0 0;
+    padding: 0;
 
     &:first-of-type {
       margin-top: 0.5em;
@@ -165,7 +172,7 @@
     font-size: 1.5em;
     line-height: 1em;
     font-weight: bold;
-    margin: 3em 0 1em 0;
+    margin: 2em 0 0 0;
   }
   h3 {
     font-size: 1.3em;
@@ -188,10 +195,11 @@
     font-weight: bold;
     margin: 1em 0;
   }
+
   a {
     color: $color-link;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: normal;
     &:hover {
       color: $color-link-hover;
       text-decoration: underline;
@@ -204,7 +212,7 @@
     font-style: italic;
   }
   li {
-    margin: 0.5em 0;
+    margin: 0;
 
     p {
       margin: 0;
@@ -249,7 +257,7 @@
   .note-title {
     margin: 1em 0;
     display: block;
-    font-size: 1.3em;
+    font-size: 1em;
     font-weight: bold;
   }
 }
@@ -275,15 +283,17 @@
 .article-footer-prev, .article-footer-next {
   color: $color-link;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 400;
   font-family: $font-title;
-  text-transform: uppercase;
   position: absolute;
   &:hover {
     color: $color-link-hover;
   }
   span {
     padding: 0 6px;
+  }
+  i {
+    font-size: 0.8em;
   }
 }
 
