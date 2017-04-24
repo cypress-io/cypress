@@ -11,7 +11,8 @@ var glob = Promise.promisify(glob)
 var startsWithNumberAndDashRe = /(\d+-)/
 var excerptRe = /excerpt:.+/
 var newLinesRe = /\n{3,}/
-var calloutRe = /\[block:callout\](\n.\s\s.+\n.+\n.+\n+.+\n)\[\/block\]/g
+var calloutGlobalRe = /\[block:callout\]([^]+?)\[\/block\]/g
+var calloutRe = /\[block:callout\]([^]+?)\[\/block\]/
 
 var LOOKUP = {
   guides: 'v0.0',
@@ -120,9 +121,23 @@ transfer = function(type) {
       // Explore talks, blogs, and podcasts about testing in Cypress.
       // {% endnote %}
 
-      // matches = calloutRe.exec(string)
-      //
-      // return string
+      const callouts = string.match(calloutGlobalRe)
+      if (!callouts) return string
+
+      callouts
+      .map((callout) => callout.match(calloutRe))
+      .forEach((callout) => {
+        // callout[0] includes [block:callout]
+        // callout[1] is just the JSON string
+        let calloutData = JSON.parse(callout[1])
+
+        string = string.replace(
+          callout[0],
+          `{% note ${calloutData.type} ${calloutData.title ? calloutData.title : ''} %}\n${calloutData.body}\n{% endnote %}`
+        )
+      })
+
+      return string
     })
     .then(function(string) {
       return fs.writeFileAsync(dest, string)
