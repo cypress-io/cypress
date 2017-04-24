@@ -39,13 +39,9 @@ These assertions are more commonly used when writing unit tests, but can also be
 expect(true).to.be.true
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "body": "Check out our example recipes for [unit testing](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_application_code_spec.js) and [unit testing React components](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_react_enzyme_spec.js)",
-  "title": "Unit Testing"
-}
-[/block]
+{% note info Unit Testing %}
+Check out our example recipes for [unit testing](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_application_code_spec.js) and [unit testing React components](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/unit_test_react_enzyme_spec.js)
+{% endnote %}
 
 Explicit assertions are great when you want to perform custom logic prior to making the assertion.
 
@@ -462,9 +458,6 @@ cy.find("input", {timeout: 10000}).should("have.value", "foo").and("have.class",
       // be retried for up to 10 seconds
 ```
 
-[block:callout]
-{
-  "type": "warning",
-  "body": "Assuming you have two assertions, if one passes, and one fails, Cypress will continue to retry until they **both** pass. If Cypress eventually times out you'll get a visual indicator in your Command Log to know which specific assertion failed."
-}
-[/block]
+{% note warning  %}
+Assuming you have two assertions, if one passes, and one fails, Cypress will continue to retry until they **both** pass. If Cypress eventually times out you'll get a visual indicator in your Command Log to know which specific assertion failed.
+{% endnote %}

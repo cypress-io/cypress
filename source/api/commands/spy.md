@@ -39,13 +39,9 @@ expect(util.addListeners).to.be.called
 
 ## Example Recipe
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)",
-  "title": "Using cy.spy"
-}
-[/block]
+{% note info Using cy.spy %}
+[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+{% endnote %}
 
 ***
 

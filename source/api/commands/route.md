@@ -1,13 +1,9 @@
 title: route
 ---
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Read about Network Requests first.](https://on.cypress.io/guides/network-requests-xhr)",
-  "title": "New to Cypress?"
-}
-[/block]
+{% note info New to Cypress? %}
+[Read about Network Requests first.](https://on.cypress.io/guides/network-requests-xhr)
+{% endnote %}
 
 Use `cy.route` to manage the behavior of network requests.
 
@@ -108,13 +104,9 @@ cy
   .wait("@postUser")
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Check out our example recipe using cy.route to POST for login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)",
-  "title": "Setup route to POST to login"
-}
-[/block]
+{% note info Setup route to POST to login %}
+[Check out our example recipe using cy.route to POST for login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
+{% endnote %}
 
 ***
 
@@ -320,13 +312,9 @@ cy
   })
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Check out our example recipe using cy.route to simulate a 503 on POST to login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)",
-  "title": "Setup route to error on POST to login"
-}
-[/block]
+{% note info Setup route to error on POST to login %}
+[Check out our example recipe using cy.route to simulate a 503 on POST to login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js)
+{% endnote %}
 
 ***
 

@@ -42,12 +42,9 @@ You can pass a relative `x` and `y` coordinate which will calculate distance in 
 
 `x` and `y` must both be `Numbers`. Currently you cannot use `%` based arguments. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you'd like this functionality.
 
-[block:callout]
-{
-  "type": "warning",
-  "body": "Make sure not to issue a click outside of the width and height of the element. This will result in a `Command Timeout`"
-}
-[/block]
+{% note warning  %}
+Make sure not to issue a click outside of the width and height of the element. This will result in a `Command Timeout`
+{% endnote %}
 
 ***
 
@@ -110,12 +107,9 @@ cy.get("button").click(15, 40)
 
 This is useful when you want the click issued no matter what. Forcing a click disables the error checking that happens prior to a click.
 
-[block:callout]
-{
-  "type": "warning",
-  "body": "Be careful with this option because it allows the click to happen when it might actually be impossible for a real user to click."
-}
-[/block]
+{% note warning  %}
+Be careful with this option because it allows the click to happen when it might actually be impossible for a real user to click.
+{% endnote %}
 
 ```javascript
 // this will disable the built-in logic for ensuring
@@ -123,13 +117,9 @@ This is useful when you want the click issued no matter what. Forcing a click di
 cy.get("button").click({force: true})
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Check out our example recipe on testing hover and working with hidden elements](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements.js)",
-  "title": "Dealing with hover and hidden elements"
-}
-[/block]
+{% note info Dealing with hover and hidden elements %}
+[Check out our example recipe on testing hover and working with hidden elements](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements.js)
+{% endnote %}
 
 ***
 

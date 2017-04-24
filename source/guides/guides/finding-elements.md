@@ -209,24 +209,17 @@ cy.find("input", {timeout: 10000}).should("have.value", "foo").and("have.class",
       // be retried for up to 10 seconds
 ```
 
-[block:callout]
-{
-  "type": "warning",
-  "body": "Assuming you have two assertions, if one passes, and one fails, Cypress will continue to retry until they **both** pass. If Cypress eventually times out you'll get a visual indicator in your Command Log to know which specific assertion failed."
-}
-[/block]
+{% note warning  %}
+Assuming you have two assertions, if one passes, and one fails, Cypress will continue to retry until they **both** pass. If Cypress eventually times out you'll get a visual indicator in your Command Log to know which specific assertion failed.
+{% endnote %}
 
 ***
 
 # Assertions
 
-[block:callout]
-{
-  "type": "info",
-  "body": "Read about [Making Assertions](https://on.cypress.io/guides/making-assertions) and where they come from.",
-  "title": "New to Cypress?"
-}
-[/block]
+{% note info New to Cypress? %}
+Read about [Making Assertions](https://on.cypress.io/guides/making-assertions) and where they come from.
+{% endnote %}
 
 ## Length Assertions
 

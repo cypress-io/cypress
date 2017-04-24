@@ -20,13 +20,9 @@ Wait a specific amount of `ms` before resolving and continuing onto the next com
 
 Wait until the matching [aliased](https://on.cypress.io/guides/using-aliases) XHR has a response.
 
-[block:callout]
-{
-  "type": "info",
-  "body": "Read about [Network Requests](https://on.cypress.io/guides/network-requests-xhr) and [Aliasing](https://on.cypress.io/guides/using-aliases) first.",
-  "title": "New to Cypress?"
-}
-[/block]
+{% note info New to Cypress? %}
+Read about [Network Requests](https://on.cypress.io/guides/network-requests-xhr) and [Aliasing](https://on.cypress.io/guides/using-aliases) first.
+{% endnote %}
 
 ***
 

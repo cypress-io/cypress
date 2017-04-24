@@ -14,12 +14,9 @@ With organizations you can:
 
 Once out of beta, organizations will also handle billing.
 
-[block:callout]
-{
-  "type": "info",
-  "body": "Cypress Organizations are meant to work similar to GitHub Organizations."
-}
-[/block]
+{% note info  %}
+Cypress Organizations are meant to work similar to GitHub Organizations.
+{% endnote %}
 
 ***
 
@@ -29,12 +26,9 @@ By default, every user of Cypress is given a personal organization - named after
 
 You cannot delete or edit the name of this organization.
 
-[block:callout]
-{
-  "type": "info",
-  "body": "All existing Cypress projects prior to version 0.19.0 were automatically added to your personal organization."
-}
-[/block]
+{% note info  %}
+All existing Cypress projects prior to version 0.19.0 were automatically added to your personal organization.
+{% endnote %}
 
 ***
 

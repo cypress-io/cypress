@@ -7,12 +7,9 @@ This allows you to build up specific commands for your application which take th
 
 For example, the first custom command you'll probably create is the canonical `login` command. This typically would navigate the user to your `/login` url, fill out a username / password combination, submit the form, and then assert that the dashboard page comes up (or whatever happens upon successful login).
 
-[block:callout]
-{
-  "type": "info",
-  "body": "A great place to define these commands is in your `cypress/support/commands.js` file, since it is loaded before any test files are evaluated."
-}
-[/block]
+{% note info  %}
+A great place to define these commands is in your `cypress/support/commands.js` file, since it is loaded before any test files are evaluated.
+{% endnote %}
 
 # [Cypress.addChildCommand()]()
 

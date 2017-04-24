@@ -5,12 +5,9 @@ title: installing-and-running
 
 Cypress is a desktop application. This desktop application is the equivalent replacement of Selenium Server and must be running to test in Cypress.
 
-[block:callout]
-{
-  "type": "info",
-  "body": "The desktop application manages your local projects. The actual testing will be done in a **browser**, not the desktop application"
-}
-[/block]
+{% note info  %}
+The desktop application manages your local projects. The actual testing will be done in a **browser**, not the desktop application
+{% endnote %}
 
 The desktop application can be installed in the following operating systems:
 
@@ -43,25 +40,19 @@ cypress install
 
 ![cypress-cli](https://cloud.githubusercontent.com/assets/1268976/14435124/4f632278-ffe4-11e5-9dab-0a2d493551b3.gif)
 
-[block:callout]
-{
-  "type": "info",
-  "body": "The Cypress CLI Tool contains many additional options such as installing a specific Cypress version.\n\nSee the [Cypress CLI Docs](https://github.com/cypress-io/cypress-cli#installation).",
-  "title": "Cypress CLI"
-}
-[/block]
+{% note info Cypress CLI %}
+The Cypress CLI Tool contains many additional options such as installing a specific Cypress version.
+
+See the [Cypress CLI Docs](https://github.com/cypress-io/cypress-cli#installation).
+{% endnote %}
 
 ## Direct Download
 
 You can download Cypress directly [here.](http://download.cypress.io/desktop)
 
-[block:callout]
-{
-  "type": "danger",
-  "body": "The vast majority of the time, Cypress will install correctly. But if you're on Linux you [might have to install some other dependencies](https://on.cypress.io/guides/continuous-integration#section-dependencies).",
-  "title": "Woops, I got an error installing"
-}
-[/block]
+{% note danger Woops, I got an error installing %}
+The vast majority of the time, Cypress will install correctly. But if you're on Linux you [might have to install some other dependencies](https://on.cypress.io/guides/continuous-integration#section-dependencies).
+{% endnote %}
 
 ***
 
@@ -94,12 +85,9 @@ After successfully logging in, you will need to add the project(s) you want to w
 
 ![Add Project in LeftHand Corner](https://cloud.githubusercontent.com/assets/1271364/22699969/fe44c2e4-ed26-11e6-83d0-9baa0f51b15e.png)
 
-[block:callout]
-{
-  "type": "info",
-  "body": "Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are [setup to be recorded](https://on.cypress.io/guides/projects#section-recording-runs)."
-}
-[/block]
+{% note info  %}
+Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are [setup to be recorded](https://on.cypress.io/guides/projects#section-recording-runs).
+{% endnote %}
 
 ***
 

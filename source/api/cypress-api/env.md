@@ -5,13 +5,9 @@ title: env
 
 This document covers the API for consuming your environment variables *in your tests*. The [Environment Variable](https://on.cypress.io/guides/environment-variables) guide explains the 4 ways you can set them *outside of your tests*.
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Read about environment variables first.](https://on.cypress.io/guides/environment-variables)",
-  "title": "New to Cypress?"
-}
-[/block]
+{% note info New to Cypress? %}
+[Read about environment variables first.](https://on.cypress.io/guides/environment-variables)
+{% endnote %}
 
 # [Cypress.env()](#section-no-arguments-usage)
 
@@ -82,12 +78,9 @@ Cypress.env("baz") // => quux
 
 ## Cypress allows you to change the values of your environment variables from within your tests.
 
-[block:callout]
-{
-  "type": "warning",
-  "body": "Any value you change will be permanently changed for the remainder of your tests."
-}
-[/block]
+{% note warning  %}
+Any value you change will be permanently changed for the remainder of your tests.
+{% endnote %}
 
 ```javascript
 // cypress.json

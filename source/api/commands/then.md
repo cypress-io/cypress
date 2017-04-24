@@ -77,12 +77,9 @@ cy.get("#todos li").then(function($lis){
 
 Normally you'd use implicit subject assertions via [should](https://on.cypress.io/api/should) or [and](https://on.cypress.io/api/and), but it's sometimes it's more convenient to write explicit assertions about a given subject.
 
-[block:callout]
-{
-  "type": "warning",
-  "body": "Any errors raised by failed assertions will immediately bubble up and cause the test to fail."
-}
-[/block]
+{% note warning  %}
+Any errors raised by failed assertions will immediately bubble up and cause the test to fail.
+{% endnote %}
 
 ***
 

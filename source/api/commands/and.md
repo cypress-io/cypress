@@ -1,13 +1,9 @@
 title: and
 ---
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Read about Making Assertions first.](https://on.cypress.io/guides/making-assertions)",
-  "title": "New to Cypress?"
-}
-[/block]
+{% note info New to Cypress? %}
+[Read about Making Assertions first.](https://on.cypress.io/guides/making-assertions)
+{% endnote %}
 
 `cy.and` makes chaining together assertions easy.
 

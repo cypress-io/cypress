@@ -1,13 +1,9 @@
 title: as
 ---
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Read about Using Aliases first.](https://on.cypress.io/guides/using-aliases)",
-  "title": "New to Cypress?"
-}
-[/block]
+{% note info New to Cypress? %}
+[Read about Using Aliases first.](https://on.cypress.io/guides/using-aliases)
+{% endnote %}
 
 Assign an alias to a route or DOM element for use later. Reference the alias later within the [`cy.get`](https://on.cypress.io/api/get) or [`cy.wait`](https://on.cypress.io/api/wait) command with the prefix `@`.
 

@@ -9,12 +9,9 @@ Any configuration you pass to [`cy.server`](https://on.cypress.io/api/server) wi
 
 Change default configuration for [`cy.server`](https://on.cypress.io/api/server)
 
-[block:callout]
-{
-  "type": "info",
-  "body": "A great place to put this configuration is in your `cypress/support/defaults.js` file, since it is loaded before any test files are evaluated."
-}
-[/block]
+{% note info  %}
+A great place to put this configuration is in your `cypress/support/defaults.js` file, since it is loaded before any test files are evaluated.
+{% endnote %}
 
 ***
 

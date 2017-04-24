@@ -17,12 +17,9 @@ Projects can **only** be added to Cypress through our [Desktop Application](http
 
 ![Add Project in LeftHand Corner](https://cloud.githubusercontent.com/assets/1271364/22699969/fe44c2e4-ed26-11e6-83d0-9baa0f51b15e.png)
 
-[block:callout]
-{
-  "type": "info",
-  "body": "Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are [setup to be recorded](#section-recording-runs)."
-}
-[/block]
+{% note info  %}
+Projects added in our Desktop Application are strictly local to your computer. They are not tracked in any way by Cypress servers and do not communicate with us until they are [setup to be recorded](#section-recording-runs).
+{% endnote %}
 
 ***
 
@@ -30,12 +27,9 @@ Projects can **only** be added to Cypress through our [Desktop Application](http
 
 You can also setup your project to have its test runs recorded and displayed in both the Desktop Application and the Dashboard.
 
-[block:callout]
-{
-  "type": "info",
-  "body": "Not sure what the Dashboard is? [Its our service which displays all of your recorded runs](https://on.cypress.io/guides/dashboard-features)."
-}
-[/block]
+{% note info  %}
+Not sure what the Dashboard is? [Its our service which displays all of your recorded runs](https://on.cypress.io/guides/dashboard-features).
+{% endnote %}
 
 During a run we record all failing tests, logs, screenshots, and videos.
 
@@ -73,12 +67,9 @@ You are now ready to record your runs. Typically you would record your runs when
 
 Now that your project is setup, Cypress has inserted your unique [projectId](#section-what-is-a-projectid-) into `cypress.json`.
 
-[block:callout]
-{
-  "type": "info",
-  "body": "Be sure to check your `cypress.json` into source control."
-}
-[/block]
+{% note info  %}
+Be sure to check your `cypress.json` into source control.
+{% endnote %}
 
 In order to record we also require you provide us your [Record Key](#section-what-is-a-record-key-). The record key along with your projectId uniquely identifies your project.
 
@@ -133,12 +124,9 @@ Once you're setup to record test runs, we automatically generate a **Record Key*
 f4466038-70c2-4688-9ed9-106bf013cd73
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "body": "You can create multiple Record Keys for a project, or delete existing ones from our [Dashboard](https://on.cypress.io/dashboard)."
-}
-[/block]
+{% note info  %}
+You can create multiple Record Keys for a project, or delete existing ones from our [Dashboard](https://on.cypress.io/dashboard).
+{% endnote %}
 
 You can also find your Record Key inside of the **Settings** tab.
 
@@ -158,12 +146,9 @@ If you have a public project you should *still* keep your record key secret. If 
 
 Think of your record key as the key that enables you to **write and create** builds. However, it has nothing to do with being able to **read or see** builds once they are created.
 
-[block:callout]
-{
-  "type": "warning",
-  "body": "If your Record Key is accidentally exposed, you simply need to remove it and generate a new one from our [Dashboard](https://on.cypress.io/dashboard)."
-}
-[/block]
+{% note warning  %}
+If your Record Key is accidentally exposed, you simply need to remove it and generate a new one from our [Dashboard](https://on.cypress.io/dashboard).
+{% endnote %}
 
 ***
 

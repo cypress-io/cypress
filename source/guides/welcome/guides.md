@@ -1,13 +1,9 @@
 title: guides
 ---
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Explore talks, blogs, and podcasts about testing in Cypress.](https://www.cypress.io/explore)",
-  "title": "Want to see Cypress in action?"
-}
-[/block]
+{% note info Want to see Cypress in action? %}
+[Explore talks, blogs, and podcasts about testing in Cypress.](https://www.cypress.io/explore)
+{% endnote %}
 
 ---
 

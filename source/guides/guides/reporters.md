@@ -63,13 +63,9 @@ Command line:
 cypress run --reporter mochawesome
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "title": "Peer Dependencies",
-  "body": "You need to install any peer dependencies the reporter requires, even if they're bundled with Cypress. For example, [mochawesome](https://github.com/adamgruber/mochawesome) requires `mocha` as a peer dependency. You will need to install mocha as a dev dependency of your own project for it to work (`npm install mocha --save-dev`)."
-}
-[/block]
+{% note info Peer Dependencies %}
+You need to install any peer dependencies the reporter requires, even if they're bundled with Cypress. For example, [mochawesome](https://github.com/adamgruber/mochawesome) requires `mocha` as a peer dependency. You will need to install mocha as a dev dependency of your own project for it to work (`npm install mocha --save-dev`).
+{% endnote %}
 
 ***
 

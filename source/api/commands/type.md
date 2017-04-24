@@ -103,12 +103,9 @@ Type issues a [`click`](https://on.cypress.io/api/click) prior to typing (only i
 cy.get("input[type=text]").type("Test all the things", {force: true})
 ```
 
-[block:callout]
-{
-  "type": "warning",
-  "body": "Be careful with the `force` option because it allows the type to happen where it might actually be impossible for a real user to type."
-}
-[/block]
+{% note warning  %}
+Be careful with the `force` option because it allows the type to happen where it might actually be impossible for a real user to type.
+{% endnote %}
 
 ***
 
@@ -123,13 +120,9 @@ When using special character sequences (see table at top of page), it's possible
 cy.get("input").type("{shift}{alt}Q")
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Check out our example recipe of logging in by typing username and password](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)",
-  "title": "Typing into a login form"
-}
-[/block]
+{% note info Typing into a login form %}
+[Check out our example recipe of logging in by typing username and password](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
+{% endnote %}
 
 ***
 

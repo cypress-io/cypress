@@ -68,21 +68,13 @@ Cypress.env("foo")  // => "bar"
 Cypress.env("some") // => "value"
 ```
 
-[block:callout]
-{
-  "type": "success",
-  "body": "- Great for values that need to be checked into source control and remain the same on all machines",
-  "title": "Benefits"
-}
-[/block]
+{% note success Benefits %}
+- Great for values that need to be checked into source control and remain the same on all machines
+{% endnote %}
 
-[block:callout]
-{
-  "type": "danger",
-  "body": "- Only works for values which should be the same on across all machines",
-  "title": "Downsides"
-}
-[/block]
+{% note danger Downsides %}
+- Only works for values which should be the same on across all machines
+{% endnote %}
 
 ***
 
@@ -109,21 +101,16 @@ Cypress.env("host")       // => "veronica.dev.local"
 Cypress.env("api_server") // => "http://localhost:8888/api/v1/"
 ```
 
-[block:callout]
-{
-  "type": "success",
-  "body": "- Dedicated file just for environment variables\n- Enables you to generate this file from other build processes\n- Values can be different on each machine if not checked into source control",
-  "title": "Benefits"
-}
-[/block]
+{% note success Benefits %}
+- Dedicated file just for environment variables
+- Enables you to generate this file from other build processes
+- Values can be different on each machine if not checked into source control
+{% endnote %}
 
-[block:callout]
-{
-  "type": "danger",
-  "body": "- Another file you have to deal with\n- Overkill for 1 or 2 environment variables",
-  "title": "Downsides"
-}
-[/block]
+{% note danger Downsides %}
+- Another file you have to deal with
+- Overkill for 1 or 2 environment variables
+{% endnote %}
 
 ***
 
@@ -149,21 +136,16 @@ Cypress.env("HOST")       // => "laura.dev.local"
 Cypress.env("api_server") // => "http://localhost:8888/api/v1/"
 ```
 
-[block:callout]
-{
-  "type": "success",
-  "body": "- Quickly export some values\n- Can be stored in your `bash_profile`\n- Allows for dynamic values between different machines\n- Especially useful for CI environments",
-  "title": "Benefits"
-}
-[/block]
+{% note success Benefits %}
+- Quickly export some values
+- Can be stored in your `bash_profile`
+- Allows for dynamic values between different machines
+- Especially useful for CI environments
+{% endnote %}
 
-[block:callout]
-{
-  "type": "danger",
-  "body": "- Not as obvious where values come from vs the other methods",
-  "title": "Downsides"
-}
-[/block]
+{% note danger Downsides %}
+- Not as obvious where values come from vs the other methods
+{% endnote %}
 
 ***
 
@@ -175,12 +157,9 @@ Values here will overwrite all other conflicting environment variables.
 
 You can use the `--env` option on `cypress run`.
 
-[block:callout]
-{
-  "type": "info",
-  "body": "Multiple values must be separated by a comma. NOT A SPACE."
-}
-[/block]
+{% note info  %}
+Multiple values must be separated by a comma. NOT A SPACE.
+{% endnote %}
 
 ```yaml
 cypress run --env host=kevin.dev.local,api_server=http://localhost:8888/api/v1
@@ -194,21 +173,16 @@ Cypress.env("host")       // => "kevin.dev.local"
 Cypress.env("api_server") // => "http://localhost:8888/api/v1/"
 ```
 
-[block:callout]
-{
-  "type": "success",
-  "body": "- Does not require any changes to files / config\n- Obvious where environment variables come from\n- Allows for dynamic values between different machines\n- Overwrites all other forms of setting env variables",
-  "title": "Benefits"
-}
-[/block]
+{% note success Benefits %}
+- Does not require any changes to files / config
+- Obvious where environment variables come from
+- Allows for dynamic values between different machines
+- Overwrites all other forms of setting env variables
+{% endnote %}
 
-[block:callout]
-{
-  "type": "danger",
-  "body": "- Pain to write the `--env` options everywhere you use Cypress",
-  "title": "Downsides"
-}
-[/block]
+{% note danger Downsides %}
+- Pain to write the `--env` options everywhere you use Cypress
+{% endnote %}
 
 ***
 
