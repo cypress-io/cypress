@@ -209,13 +209,9 @@ Then [add the key to your config file or as an environment variable](https://on.
 
 Let's examine several different ways you may get this error message. In every situation, you'll need to change something in your code to prevent this error.
 
-[block:callout]
-{
-  "type": "warning",
-  "title": "Flaky tests below!",
-  "body": "Several of these tests are dependent on race conditions. You may have to run these tests multiple times before they will actually fail. You can also try tweaking some of the delays."
-}
-[/block]
+{% note warning Flaky tests below! %}
+Several of these tests are dependent on race conditions. You may have to run these tests multiple times before they will actually fail. You can also try tweaking some of the delays.
+{% endnote %}
 
 ## Simple Example
 
@@ -342,13 +338,9 @@ TBD.
 
 # Cypress detected a cross origin error happened on page load
 
-[block:callout]
-{
-  "type": "info",
-  "title": "This is a simple overview...",
-  "body": "For a more thorough explanation of Cypress's Web Security model, [please read our dedicated guide to it](https://on.cypress.io/guides/web-security)."
-}
-[/block]
+{% note info This is a simple overview... %}
+For a more thorough explanation of Cypress's Web Security model, [please read our dedicated guide to it](https://on.cypress.io/guides/web-security).
+{% endnote %}
 
 This error means that your application navigated to a superdomain that Cypress was not bound to.
 
@@ -408,12 +400,9 @@ Just like with your test files, the `supportFile` can use ES2015+ (or CoffeeScri
 
 You're seeing this error because you have the `supportFolder` option explicitly set, either to a different directory or as `false`, meaning you didn't utilize the support folder functionality.
 
-[block:callout]
-{
-  "type": "info",
-  "title": "I have `supportFolder` set to `false`"
-}
-[/block]
+{% note info I have `supportFolder` set to `false` %}
+undefined
+{% endnote %}
 
 Set the `supportFile` option to `false` instead:
 
@@ -431,12 +420,9 @@ Set the `supportFile` option to `false` instead:
 }
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "title": "I have `supportFolder` set to a different directory"
-}
-[/block]
+{% note info I have `supportFolder` set to a different directory %}
+undefined
+{% endnote %}
 
 When you open a project with Cypress, we look for a file named `index.js` in the `supportFolder` you have set. If one is not present, we generate a file that imports all the other files in your `supportFolder`.
 

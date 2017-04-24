@@ -185,13 +185,9 @@ cy
   cy.getCookie("cypress-session-cookie").should('exist')
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Check out our example recipe using cy.request for HTML form submissions](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)",
-  "title": "Using cy.request for HTML Forms"
-}
-[/block]
+{% note info Using cy.request for HTML Forms %}
+[Check out our example recipe using cy.request for HTML form submissions](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js)
+{% endnote %}
 
 ***
 

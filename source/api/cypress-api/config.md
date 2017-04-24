@@ -5,13 +5,9 @@ title: config
 
 This document covers the API for consuming your configuration options *in your tests*.
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Read about configuration first.](https://on.cypress.io/guides/configuration)",
-  "title": "New to Cypress?"
-}
-[/block]
+{% note info New to Cypress? %}
+[Read about configuration first.](https://on.cypress.io/guides/configuration)
+{% endnote %}
 
 # [Cypress.config()](#section-no-arguments-usage)
 
@@ -75,12 +71,9 @@ Cypress.config("pageLoadTimeout") // => 60000
 
 ## Cypress allows you to change the values of your configuration options from within your tests.
 
-[block:callout]
-{
-  "type": "warning",
-  "body": "Any value you change will be permanently changed for the remainder of your tests."
-}
-[/block]
+{% note warning  %}
+Any value you change will be permanently changed for the remainder of your tests.
+{% endnote %}
 
 ```javascript
 // cypress.json
@@ -96,13 +89,9 @@ Cypress.config("viewportWidth", 800)
 Cypress.config("viewportWidth") // => 800
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Check out our example recipe where we reset our baseUrl using Cypress.config](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)",
-  "title": "Using config to set baseUrl"
-}
-[/block]
+{% note info Using config to set baseUrl %}
+[Check out our example recipe where we reset our baseUrl using Cypress.config](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
+{% endnote %}
 
 ***
 

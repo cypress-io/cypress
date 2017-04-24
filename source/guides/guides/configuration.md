@@ -157,19 +157,15 @@ export CYPRESS_pageLoadTimeout=100000
 export CYPRESS_PAGE_LOAD_TIMEOUT=100000
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "body": "Make sure to prefix your environment variables with **CYPRESS_** else they will be ignored."
-}
-[/block]
+{% note info  %}
+Make sure to prefix your environment variables with **CYPRESS_** else they will be ignored.
+{% endnote %}
 
-[block:callout]
-{
-  "type": "warning",
-  "body": "Environment variables which do not match configuration keys will instead be set as regular environment variables for use in your tests with `Cypress.env()`.\n\nYou can [read more about Environment Variables](https://on.cypress.io/environment-variables)."
-}
-[/block]
+{% note warning  %}
+Environment variables which do not match configuration keys will instead be set as regular environment variables for use in your tests with `Cypress.env()`.
+
+You can [read more about Environment Variables](https://on.cypress.io/environment-variables).
+{% endnote %}
 
 ***
 

@@ -26,13 +26,9 @@ You can refer to each of these libraries documentation for more examples and exp
 
 # Common Scenarios
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)",
-  "title": "Example test!"
-}
-[/block]
+{% note info Example test! %}
+[Check out our example recipe testing spying, stubbing and time](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+{% endnote %}
 
 ## Stubs
 
@@ -72,13 +68,9 @@ You generally stub a function when it has side effects you are trying to control
 - You want to "trick" your application into thinking its logged in or logged out.
 - You're using `oauth` and want to stub login methods.
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Read more about how to use cy.stub](https://on.cypress.io/api/stub)",
-  "title": "cy.stub()"
-}
-[/block]
+{% note info cy.stub() %}
+[Read more about how to use cy.stub](https://on.cypress.io/api/stub)
+{% endnote %}
 
 ***
 
@@ -92,13 +84,9 @@ A spy does **not** modify the behavior of the function - it is left perfectly in
 cy.spy(obj, "method")
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Read more about how to use cy.spy](https://on.cypress.io/api/spy)",
-  "title": "cy.spy()"
-}
-[/block]
+{% note info cy.spy() %}
+[Read more about how to use cy.spy](https://on.cypress.io/api/spy)
+{% endnote %}
 
 ***
 

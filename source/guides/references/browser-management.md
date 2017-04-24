@@ -22,12 +22,9 @@ When Cypress is initially [run from the Desktop application](https://on.cypress.
 
 We'll automatically detect available browsers based on your OS. In `Linux` we detect browsers by their executable binary, and in `OSX` we'll automatically find them even if they aren't in your `/Applications` folder.
 
-[block:callout]
-{
-  "type": "warning",
-  "body": "I'm confused which is the Cypress browser and which is my own browser!"
-}
-[/block]
+{% note warning  %}
+I'm confused which is the Cypress browser and which is my own browser!
+{% endnote %}
 
 You might notice that if you already have the browser open you will see two icons of the same browser in your Dock.
 
@@ -71,12 +68,9 @@ When we launch browsers we open them in a way that makes testing more reliable a
 
 Cypress generates its own isolated profile away from your regular browsing profile. This means things like `history` entries, `cookies`, and `3rd party extensions` from your regular browsing session will not affect Cypress.
 
-[block:callout]
-{
-  "type": "warning",
-  "body": "Wait, I need my developer extensions such as React Dev Tools, Batarang, or Ember Inspector!"
-}
-[/block]
+{% note warning  %}
+Wait, I need my developer extensions such as React Dev Tools, Batarang, or Ember Inspector!
+{% endnote %}
 
 That's no problem - you simply have to reinstall them **once**. We'll continue to use this Cypress testing profile on subsequent launches so all of your configuration will automatically be preserved. Note that in the [Electron browser](#section-electron-browser), while it's possible to use the dev tools, it's not possible to install developer extensions.
 

@@ -118,13 +118,9 @@ cy.visit("http://localhost:3000/#dashboard", {
 })
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "body": "Check out our example recipes using cy.visit's onBeforeLoad option to [help bootstrap app data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js), to [set a token to localStorage for login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js) and to [stub window.fetch](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)",
-  "title": "Using onBeforeLoad"
-}
-[/block]
+{% note info Using onBeforeLoad %}
+Check out our example recipes using cy.visit's onBeforeLoad option to [help bootstrap app data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js), to [set a token to localStorage for login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js) and to [stub window.fetch](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
+{% endnote %}
 
 ***
 

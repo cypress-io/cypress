@@ -1,13 +1,9 @@
 title: fixture
 ---
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Read about Creating Fixtures first.](https://on.cypress.io/guides/creating-fixtures)",
-  "title": "New to Cypress?"
-}
-[/block]
+{% note info New to Cypress? %}
+[Read about Creating Fixtures first.](https://on.cypress.io/guides/creating-fixtures)
+{% endnote %}
 
 Loads a single fixture file. Image fixtures will be sent as `base64`.
 
@@ -208,13 +204,9 @@ cy
   })
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Check out our example recipe using cy.fixture to bootstrap data for our application.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)",
-  "title": "Using cy.fixture for response data"
-}
-[/block]
+{% note info Using cy.fixture for response data %}
+[Check out our example recipe using cy.fixture to bootstrap data for our application.](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js)
+{% endnote %}
 
 ## Using an alias to access a fixture
 

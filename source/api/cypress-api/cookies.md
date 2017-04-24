@@ -68,12 +68,9 @@ Cypress gives you a simple interface to automatically preserve cookies for multi
 
 By clearing cookies before each test you are gauranteed to always start from a clean slate. Starting from a clean state prevents coupling your tests to one another and prevents situations where mutating something in your application in one test affects another one downstream.
 
-[block:callout]
-{
-  "type": "info",
-  "body": "The most common use case for preserving cookies is to prevent having to log in to your application before each individual test. This is a problem if the majority of each test is spent logging in a user."
-}
-[/block]
+{% note info  %}
+The most common use case for preserving cookies is to prevent having to log in to your application before each individual test. This is a problem if the majority of each test is spent logging in a user.
+{% endnote %}
 
 You can use `Cypress.Cookies.preserveOnce` to preserve cookies through multiple tests.
 
@@ -123,12 +120,9 @@ You can modify the global defaults and whitelist a set of Cookies which will alw
 
 Any change you make here will take effect immediately for the remainder of every single test.
 
-[block:callout]
-{
-  "type": "info",
-  "body": "A great place to put this configuration is in your `cypress/support/defaults.js` file, since it is loaded before any test files are evaluated."
-}
-[/block]
+{% note info  %}
+A great place to put this configuration is in your `cypress/support/defaults.js` file, since it is loaded before any test files are evaluated.
+{% endnote %}
 
 **Whitelist accepts:**
 

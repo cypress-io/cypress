@@ -20,13 +20,9 @@ Finds one or more DOM elements based on the selector.
 
 # [cy.get( *alias* )](#section-alias-usage)
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Read about using aliases first.](https://on.cypress.io/guides/using-aliases)",
-  "title": "New to Cypress?"
-}
-[/block]
+{% note info New to Cypress? %}
+[Read about using aliases first.](https://on.cypress.io/guides/using-aliases)
+{% endnote %}
 
 You can pass in the `@` character and the name of an alias as a parameter to find an [aliased](https://on.cypress.io/guides/using-aliases) element.
 

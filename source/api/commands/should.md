@@ -1,13 +1,9 @@
 title: should
 ---
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Read about making assertions first.](https://on.cypress.io/guides/making-assertions)",
-  "title": "New to Cypress?"
-}
-[/block]
+{% note info New to Cypress? %}
+[Read about making assertions first.](https://on.cypress.io/guides/making-assertions)
+{% endnote %}
 
 `cy.should` makes assertions about the current subject.
 

@@ -31,13 +31,9 @@ Cypress also adds placeholder files to help get you started with examples in eac
 /cypress/support/index.js
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Check out our example recipe using support files to import common utilities](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/es2015_commonjs_modules_spec.js)",
-  "title": "Using Support files for common functionality"
-}
-[/block]
+{% note info Using Support files for common functionality %}
+[Check out our example recipe using support files to import common utilities](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/es2015_commonjs_modules_spec.js)
+{% endnote %}
 
 **Configuring Folder Structure**
 
@@ -53,13 +49,9 @@ Test files may be written as `.js`, `.jsx`, `.coffee`, or `cjsx` files.
 
 Cypress supports ES2015, ES2016, ES2017, and JSX. ES2015 modules and CommonJS modules are also supported, so you can `import` or `require` both npm packages and local modules.
 
-[block:callout]
-{
-  "type": "info",
-  "body": "[Check out our example recipe using ES2015 and CommonJS modules](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/es2015_commonjs_modules_spec.js)",
-  "title": "Importing ES2015 or CommonJS modules"
-}
-[/block]
+{% note info Importing ES2015 or CommonJS modules %}
+[Check out our example recipe using ES2015 and CommonJS modules](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/es2015_commonjs_modules_spec.js)
+{% endnote %}
 
 To see an example of every command used in Cypress, open the [`example_spec.js`](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/cypress/integration/example_spec.js) within your `cypress/integration` folder.
 

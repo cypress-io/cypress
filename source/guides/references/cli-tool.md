@@ -12,12 +12,9 @@ It provides a set of commands that can be used to do things like:
 - Record your test runs
 - Output the current installed version
 
-[block:callout]
-{
-  "type": "info",
-  "body": "You generally install the CLI tool so you can progamatically install and run Cypress. This is commonly used when running Cypress from your CI provider."
-}
-[/block]
+{% note info  %}
+You generally install the CLI tool so you can progamatically install and run Cypress. This is commonly used when running Cypress from your CI provider.
+{% endnote %}
 
 ***
 
@@ -79,13 +76,9 @@ You can use this command when working locally or when running in [Continuous Int
 
 Cypress will first check to see that the Desktop Application is installed and will automatically install it prior to running (if necessary).
 
-[block:callout]
-{
-  "type": "success",
-  "title": "Want your test runs recorded?",
-  "body": "You can also have Cypress record your test runs and make them available on our [Dashboard](https://on.cypress.io/guides/dashboard-features)."
-}
-[/block]
+{% note success Want your test runs recorded? %}
+You can also have Cypress record your test runs and make them available on our [Dashboard](https://on.cypress.io/guides/dashboard-features).
+{% endnote %}
 
 ```shell
 ## by default will use your current path
@@ -135,12 +128,9 @@ You can read more about [environment variables](https://on.cypress.io/environmen
 
 You can also have your test runs recorded [once your project is setup to record](https://on.cypress.io/guides/projects).
 
-[block:callout]
-{
-  "type": "info",
-  "body": "You'd typically record your runs in [Continuous Integration](https://on.cypress.io/guides/continuous-integration), but you can also record when running locally."
-}
-[/block]
+{% note info  %}
+You'd typically record your runs in [Continuous Integration](https://on.cypress.io/guides/continuous-integration), but you can also record when running locally.
+{% endnote %}
 
 After setting up your project you will recieve a **Record Key**.
 

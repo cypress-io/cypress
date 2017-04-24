@@ -1,13 +1,9 @@
 title: api
 ---
 
-[block:callout]
-{
-  "type": "info",
-  "body": "Read through our [Guides](https://on.cypress.io/guides/guides) first.",
-  "title": "New to Cypress?"
-}
-[/block]
+{% note info New to Cypress? %}
+Read through our [Guides](https://on.cypress.io/guides/guides) first.
+{% endnote %}
 
 # Commands
 

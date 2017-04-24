@@ -128,12 +128,9 @@ Child commands are always chained off of a **parent** command, or another **chil
 
 Each of the above commands require an existing subject. It wouldn't make sense to [`click`](https://on.cypress.io/api/click) onto nothing, nor would it make sense to [`type`](https://on.cypress.io/api/type) or query for [`children`](https://on.cypress.io/api/children) of nothing.
 
-[block:callout]
-{
-  "type": "info",
-  "body": "If child commands have specific rules which are not met, they will throw a very explicit error telling you why they can't be invoked at that time."
-}
-[/block]
+{% note info  %}
+If child commands have specific rules which are not met, they will throw a very explicit error telling you why they can't be invoked at that time.
+{% endnote %}
 
 Looking at our previous example:
 

@@ -54,13 +54,9 @@ cy
     .should('have.property', 'value', '189jd09sufh33aaiidhf99d09')
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "body": "Check out our example recipes using cy.getCookie to test [logging in using HTML web forms](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js), [logging in using XHR web forms](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js) and [logging in with single sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)",
-  "title": "Using cy.getCookie to test login"
-}
-[/block]
+{% note info Using cy.getCookie to test login %}
+Check out our example recipes using cy.getCookie to test [logging in using HTML web forms](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js), [logging in using XHR web forms](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js) and [logging in with single sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
+{% endnote %}
 
 ***
 

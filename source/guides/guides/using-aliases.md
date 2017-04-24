@@ -108,12 +108,9 @@ When we reference `@firstTodo`, Cypress checks to see if all elements its refere
 
 In our case it would re-issue the commands: `cy.get("#todos li").first()`. Everything just works because the new `<li>` is found.
 
-[block:callout]
-{
-  "type": "warning",
-  "body": "*Usually* replaying previous commands will return what you expect, but not always. Cypress' calculations are complicated and we may improve this algorithm at a later time. It is recommended to not alias DOM elements very far down a chain of commands - **alias elements as soon as possible with as few commands as possible**. When in doubt, you can *always* issue a regular `cy.get` to query for the elements again."
-}
-[/block]
+{% note warning  %}
+*Usually* replaying previous commands will return what you expect, but not always. Cypress' calculations are complicated and we may improve this algorithm at a later time. It is recommended to not alias DOM elements very far down a chain of commands - **alias elements as soon as possible with as few commands as possible**. When in doubt, you can *always* issue a regular `cy.get` to query for the elements again.
+{% endnote %}
 
 ***
 

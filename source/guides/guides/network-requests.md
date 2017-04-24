@@ -37,29 +37,23 @@ In other words, you can have confidence your server is sending the correct data 
 
 If you are writing a traditional server-side application where most of the responses are `HTML` you will likely have few stubbed responses. However, most modern applications that serve `JSON` can take advantage of stubbing.
 
-[block:callout]
-{
-  "type": "success",
-  "body": "- Guaranteed to work in production\n- Test coverage around server endpoints\n- Great for traditional server-side HTML rendering",
-  "title": "Benefits"
-}
-[/block]
+{% note success Benefits %}
+- Guaranteed to work in production
+- Test coverage around server endpoints
+- Great for traditional server-side HTML rendering
+{% endnote %}
 
-[block:callout]
-{
-  "type": "danger",
-  "body": "- Requires seeding\n- Much slower\n- Hard to test edge cases",
-  "title": "Downsides"
-}
-[/block]
+{% note danger Downsides %}
+- Requires seeding
+- Much slower
+- Hard to test edge cases
+{% endnote %}
 
-[block:callout]
-{
-  "type": "info",
-  "body": "- Use sparingly\n- Great for the *critical paths* of your application\n- Helpful to have one test around the *happy path* of a feature",
-  "title": "Suggestions"
-}
-[/block]
+{% note info Suggestions %}
+- Use sparingly
+- Great for the *critical paths* of your application
+- Helpful to have one test around the *happy path* of a feature
+{% endnote %}
 
 ***
 
@@ -71,29 +65,24 @@ Stubbing responses enables you to control every aspect of the response, includin
 
 You don't have to do any work on the server. Your application will have no idea it's requests are being stubbed, so there are **no code changes** needed. In fact, stubbed requests will show up in the Network tab of your Developer Tools, and your application will continue to work after the test is finished.
 
-[block:callout]
-{
-  "type": "success",
-  "body": "- Easy control of response bodies, status, and headers\n- Force responses to take longer to simulate network delay\n- No code changes to your server or client code\n- Fast, < 20ms response times\n- Perfect for JSON API's",
-  "title": "Benefits"
-}
-[/block]
+{% note success Benefits %}
+- Easy control of response bodies, status, and headers
+- Force responses to take longer to simulate network delay
+- No code changes to your server or client code
+- Fast, < 20ms response times
+- Perfect for JSON API's
+{% endnote %}
 
-[block:callout]
-{
-  "type": "danger",
-  "body": "- No guarantee your stubbed responses match the actual data your server sends\n- No test coverage on some server endpoints\n- Not as useful if you're using traditional server side HTML rendering",
-  "title": "Downsides"
-}
-[/block]
+{% note danger Downsides %}
+- No guarantee your stubbed responses match the actual data your server sends
+- No test coverage on some server endpoints
+- Not as useful if you're using traditional server side HTML rendering
+{% endnote %}
 
-[block:callout]
-{
-  "type": "info",
-  "body": "- Use for the vast majority of your testing\n- Mix and match, typically have one true end to end test, and then stub the rest",
-  "title": "Suggestions"
-}
-[/block]
+{% note info Suggestions %}
+- Use for the vast majority of your testing
+- Mix and match, typically have one true end to end test, and then stub the rest
+{% endnote %}
 
 ***
 
