@@ -1,4 +1,4 @@
-html, body, a, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, abbr, acronym, address, big, cite, del, dfn, table, caption, td, th, ins, img, em, kbd, q, s, samp, small, strike, strong, sup, sub, var, tt, dl, dt, dd, ol, ul, li, form, fieldset, label, tr, thead, tfoot, tbody, legend {
+html, body, a, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, abbr, acronym, address, big, cite, del, dfn, table, caption, td, th, ins, img, em, kbd, q, s, samp, small, strike, strong, sup, sub, var, tt, dl, dt, dd, ol, ul, li, form, fieldset, label, tr, thead, tfoot, tbody, legend, pre {
   margin: 0;
   padding: 0;
   border: 0;
@@ -16,7 +16,7 @@ html {
 body {
   line-height: 1;
   background: $color-background;
-  font-size: 15px;
+  font-size: $font-size;
   font-family: $font-sans;
   color: $color-default;
   text-rendering: optimizeLegibility;
