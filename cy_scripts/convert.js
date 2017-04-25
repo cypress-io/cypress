@@ -13,6 +13,7 @@ var excerptRe = /excerpt:.+/
 var newLinesRe = /\n{3,}/
 var calloutGlobalRe = /\[block:callout\]([^]+?)\[\/block\]/g
 var calloutRe = /\[block:callout\]([^]+?)\[\/block\]/
+var underscoreRe = /_.md/
 
 var LOOKUP = {
   guides: 'v0.0',
@@ -28,7 +29,13 @@ getNameFromFile = function(file) {
 }
 
 normalize = function(string) {
+  // Remove '2-' from '2-Getting-Started.md'
   var string = string.replace(startsWithNumberAndDashRe, '').toLowerCase()
+
+  // Don't dasherize our '_.md' file
+  if (string.match(underscoreRe)) {
+    return string 
+  }
 
   return str.dasherize(string)
 }
