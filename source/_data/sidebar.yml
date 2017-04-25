@@ -41,15 +41,15 @@ api:
   welcome:
     api: api.html
   commands:
-    and: commands/and.html
+    and: and.html
     as: as.html
     blur: blur.html
     check: check.html
     children: children.html
     clear: clear.html
-    clear-cookie: clear-cookie.html
-    clear-cookies: clear-cookies.html
-    clear-local-storage: clear-local-storage.html
+    clearcookie: clearcookie.html
+    clearcookies: clearcookies.html
+    clearlocalstorage: clearlocalstorage.html
     click: click.html
     clock: clock.html
     closest: closest.html
@@ -68,8 +68,8 @@ api:
     focus: focus.html
     focused: focused.html
     get: get.html
-    get-cookie: get-cookie.html
-    get-cookies: get-cookies.html
+    getcookie: getcookie.html
+    getcookies: getcookies.html
     go: go.html
     hash: hash.html
     hover: hover.html
@@ -79,13 +79,13 @@ api:
     location: location.html
     log: log.html
     next: next.html
-    next-all: next-all.html
-    next-until: next-until.html
+    nextall: nextall.html
+    nextuntil: nextuntil.html
     not: not.html
     parent: parent.html
     parents: parents.html
-    parents-until: parents-until.html
-    read-file: read-file.html
+    parentsuntil: parentsuntil.html
+    readfile: readfile.html
     reload: reload.html
     request: request.html
     root: root.html
@@ -93,7 +93,7 @@ api:
     screenshot: screenshot.html
     select: select.html
     server: server.html
-    set-cookie: set-cookie.html
+    setcookie: setcookie.html
     should: should.html
     siblings: siblings.html
     spread: spread.html
@@ -112,9 +112,9 @@ api:
     window: window.html
     within: within.html
     wrap: wrap.html
-    write-file: write-file.html
+    writefile: writefile.html
   utilities:
-    -: -.html
+    _: _.html
     $: $.html
     minimatch: minimatch.html
     blob: blob.html
