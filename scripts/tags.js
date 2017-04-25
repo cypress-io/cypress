@@ -24,12 +24,24 @@ hexo.extend.tag.register('note', function(args, content){
   //   </p>
   // </blockquote>
 
+  const iconLookup = {
+    info: "info",
+    warning: "exclamation",
+    success: "check",
+    danger: "times",
+  }
+
   var className = args.shift()
   var header = ''
   var result = ''
+  var icon = iconLookup[className]
+
 
   if (args.length){
-    header += '<strong class="note-title">' + args.join(' ') + '</strong>'
+    header += `<strong class="note-title foo">
+      ${icon ? `<i class="fa fa-${icon}"></i>` : ""}
+      ${args.join(' ')}
+    </strong>`
   }
 
   result += '<blockquote class="note ' + className + '">' + header
