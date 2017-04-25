@@ -110,11 +110,22 @@
       padding: 5px 15px;
       text-align: left;
       border-bottom: 1px solid #ebeef1;
+
+      &:empty {
+        border: 0;
+        padding: 0;
+      }
     }
     td {
       padding: 5px 15px;
       border-bottom: 1px solid #ebeef1;
+      border-right: 1px solid #ebeef1;
     }
+
+    tr>td:last-child {
+      border-right: 0; 
+    }
+
     tr:nth-child(2n) {
       background: #f6f7f9;
     }
@@ -159,15 +170,20 @@
     // display: none;
   }
   h1 {
-    font-size: 1.8em;
+    font-size: 1.7em;
     line-height: 1em;
-    font-weight: 900;
+    font-weight: 700;
     margin: 2em 0 0 0;
     padding: 0;
     font-family: $font-title;
 
     &:first-of-type {
       margin-top: 0.5em;
+    }
+
+    &>a {
+      font-family: $font-mono;
+      letter-spacing: -1.5px;
     }
   }
   h2 {
@@ -363,9 +379,8 @@
 .article-title {
   float: left;
   font-family: $font-title;
-  font-size: 40px;
+  font-size: 2.5em;
   font-weight: 900;
-  letter-spacing: 1.5px;
   text-decoration: none;
   color: $color-default;
   transition: 0.2s;
