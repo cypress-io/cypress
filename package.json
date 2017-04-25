@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "hexo server",
-    "convert": "node ./cy_scripts/convert.js"
+    "convert": "node ./cy_scripts/convert.js",
+    "deploy": "hexo deploy --generate"
   },
   "author": "",
   "license": "ISC",
