@@ -29,7 +29,7 @@ sidebar:
     dashboard: Dashboard
     features: Features
     projects: Projects
-    runs: Runs
+    recorded-runs: Recorded Runs
     organizations: Organizations
     guides: Guides
     configuration: Configuration
@@ -142,5 +142,3 @@ sidebar:
     cookies: cookies
     dom: dom
     cypress-server: server
-
-
