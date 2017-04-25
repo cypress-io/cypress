@@ -61,11 +61,12 @@ transfer = function(type) {
       // excerpt: this is our doc on foo bar
       // >> becomes >>
       // title: foo-bar
+      // comments: true
       // ---
 
       return string
         .replace('slug:', 'title:')
-        .replace(excerptRe, '---')
+        .replace(excerptRe, 'comments: true\n---')
     })
     .then(function(string) {
       // Remove
