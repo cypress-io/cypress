@@ -51,19 +51,26 @@
   display: block;
   color: #999;
   text-decoration: none;
-  padding: 0;
+  padding: 0 0 0 5px;
   line-height: $line-height;
   position: relative;
   width: 100%;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  border-left: 4px solid transparent;
   &.current {
     color: $color-link;
   }
   &:hover {
     color: $color-link-hover;
   }
+}
+
+.active>.toc-link {
+  font-weight: 500;
+  border-left: 4px solid $color-link;
+  color: $color-default;
 }
 
 .fixed #article-toc-inner {

@@ -33,6 +33,7 @@
     "hexo-renderer-scss": "^1.0.2",
     "hexo-server": "^0.2.0",
     "lodash": "^4.17.4",
-    "lunr": "^2.0.1"
+    "lunr": "^2.0.1",
+    "menuspy": "^1.0.1"
   }
 }
