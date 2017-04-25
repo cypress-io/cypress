@@ -1,4 +1,5 @@
 title: known-issues
+comments: true
 ---
 
 # Missing Commands

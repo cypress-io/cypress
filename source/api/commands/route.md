@@ -1,4 +1,5 @@
 title: route
+comments: true
 ---
 
 {% note info New to Cypress? %}

@@ -1,4 +1,5 @@
 title: creating-fixtures
+comments: true
 ---
 
 # What are Fixtures

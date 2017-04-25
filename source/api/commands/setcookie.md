@@ -1,4 +1,5 @@
 title: setcookie
+comments: true
 ---
 
 Set a browser cookie.

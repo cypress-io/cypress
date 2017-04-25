@@ -1,4 +1,5 @@
 title: installing-and-running
+comments: true
 ---
 
 # System Requirements

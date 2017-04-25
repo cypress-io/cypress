@@ -1,4 +1,5 @@
 title: title
+comments: true
 ---
 
 Get the title of the document.

@@ -1,4 +1,5 @@
 title: continuous-integration
+comments: true
 ---
 
 # What's Supported?

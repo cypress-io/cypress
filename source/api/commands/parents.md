@@ -1,4 +1,5 @@
 title: parents
+comments: true
 ---
 
 Get the parents DOM elements of the DOM elements.

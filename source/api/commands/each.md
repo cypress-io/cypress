@@ -1,4 +1,5 @@
 title: each
+comments: true
 ---
 
 The `cy.each()` will iterate through an array like structure (arrays and objects with a `length` property).

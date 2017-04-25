@@ -1,4 +1,5 @@
 title: select
+comments: true
 ---
 
 Select an option within a `<select>` DOM element.

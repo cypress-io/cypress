@@ -1,4 +1,5 @@
 title: its
+comments: true
 ---
 
 `cy.its` gets regular properties on the current subject.

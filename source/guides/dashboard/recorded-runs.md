@@ -1,4 +1,5 @@
 title: runs
+comments: true
 ---
 
 # What are Recorded Runs?

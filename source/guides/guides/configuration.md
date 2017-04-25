@@ -1,4 +1,5 @@
 title: configuration
+comments: true
 ---
 
 # Configuration Options

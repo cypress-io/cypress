@@ -1,4 +1,5 @@
 title: screenshots-and-videos
+comments: true
 ---
 
 # Screenshots

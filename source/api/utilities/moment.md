@@ -1,4 +1,5 @@
 title: cypress-moment
+comments: true
 ---
 
 # [Cypress.moment()](#section-usage)

@@ -1,4 +1,5 @@
 title: network-requests-xhr
+comments: true
 ---
 
 # Strategy

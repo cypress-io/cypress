@@ -1,4 +1,5 @@
 title: cli
+comments: true
 ---
 
 # What is the CLI Tool?

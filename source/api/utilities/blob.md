@@ -1,4 +1,5 @@
 title: cypress-blob
+comments: true
 ---
 
 # [Cypress.Blob.method()](#setion-usage)

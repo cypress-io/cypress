@@ -1,4 +1,5 @@
 title: getcookie
+comments: true
 ---
 
 Get a browser cookie.

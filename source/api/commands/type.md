@@ -1,4 +1,5 @@
 title: type
+comments: true
 ---
 
 Types into the DOM element found in the previous command.

@@ -1,4 +1,5 @@
 title: filter
+comments: true
 ---
 
 Get DOM elements that match a specific selector. Opposite of [`cy.not()`](https://on.cypress.io/api/not)

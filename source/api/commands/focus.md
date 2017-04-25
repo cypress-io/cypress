@@ -1,4 +1,5 @@
 title: focus
+comments: true
 ---
 
 Focus on a DOM element. If there is currently a different DOM element currently with focus, Cypress will issue a `blur` event to that element first.

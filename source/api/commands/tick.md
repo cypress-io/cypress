@@ -1,4 +1,5 @@
 title: tick
+comments: true
 ---
 
 `cy.tick` is used to move time after overriding native time functions with [`cy.clock`](https://on.cypress.io/api/clock).

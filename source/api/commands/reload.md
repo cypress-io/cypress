@@ -1,4 +1,5 @@
 title: reload
+comments: true
 ---
 
 Reload the page.

@@ -1,4 +1,5 @@
 title: clear
+comments: true
 ---
 
 Clears a value of an `<input>` or `<textarea>`. Under the hood this is actually a shortcut for writing:

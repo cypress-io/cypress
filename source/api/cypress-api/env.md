@@ -1,4 +1,5 @@
 title: env
+comments: true
 ---
 
 `Cypress.env` allows you to `get` and `set` your environment variables.

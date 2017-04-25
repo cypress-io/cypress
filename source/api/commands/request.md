@@ -1,4 +1,5 @@
 title: request
+comments: true
 ---
 
 Use `cy.request` to make HTTP requests. Great for talking to an external endpoint before, during, or after your tests for seeding, querying records, or API testing.

@@ -1,4 +1,5 @@
 title: api
+comments: true
 ---
 
 {% note info New to Cypress? %}

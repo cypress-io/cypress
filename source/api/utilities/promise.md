@@ -1,4 +1,5 @@
 title: cypress-promise
+comments: true
 ---
 
 # [new Cypress.Promise( *function* )](#section-usage)

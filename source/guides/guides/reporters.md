@@ -1,4 +1,5 @@
 title: reporters
+comments: true
 ---
 
 # Supported Reporters

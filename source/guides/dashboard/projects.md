@@ -1,4 +1,5 @@
 title: projects
+comments: true
 ---
 
 # What are Projects?

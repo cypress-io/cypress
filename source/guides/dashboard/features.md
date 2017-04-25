@@ -1,4 +1,5 @@
 title: dashboard-features
+comments: true
 ---
 
 # What is the Dashboard?

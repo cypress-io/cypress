@@ -1,4 +1,5 @@
 title: spy
+comments: true
 ---
 
 Wrap a method in a spy in order to record calls to the functions and what arguments the function was called with.

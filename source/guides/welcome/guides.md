@@ -1,4 +1,5 @@
 title: guides
+comments: true
 ---
 
 {% note info Want to see Cypress in action? %}

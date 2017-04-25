@@ -1,4 +1,5 @@
 title: debug
+comments: true
 ---
 
 `cy.debug` sets a `debugger` and logs the subject from the previous command.

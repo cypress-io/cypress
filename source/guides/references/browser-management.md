@@ -1,4 +1,5 @@
 title: browser-management
+comments: true
 ---
 
 # Managing Browsers

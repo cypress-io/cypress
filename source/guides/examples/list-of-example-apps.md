@@ -1,4 +1,5 @@
 title: all-example-apps
+comments: true
 ---
 
 Name | JS | Server | CI
