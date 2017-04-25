@@ -63,9 +63,9 @@ sidebar:
     check: check
     children: children
     clear: clear
-    clear-cookie: clear-cookie
-    clear-cookies: clear-cookies
-    clear-local-storage: clear-local-storage
+    clearcookie: clearCookie
+    clearcookies: clearCookies
+    clearlocalstorage: clearLocalStorage
     click: click
     clock: clock
     closest: closest
@@ -84,8 +84,8 @@ sidebar:
     focus: focus
     focused: focused
     get: get
-    get-cookie: get-cookie
-    get-cookies: get-cookies
+    getcookie: getCookie
+    getcookies: getCookies
     go: go
     hash: hash
     hover: hover
@@ -95,13 +95,13 @@ sidebar:
     location: location
     log: log
     next: next
-    next-all: next-all
-    next-until: next-until
+    nextall: nextAll
+    nextuntil: nextUntil
     not: not
     parent: parent
     parents: parents
-    parents-until: parents-until
-    read-file: read-file
+    parentsuntil: parentsUntil
+    readfile: readFile
     reload: reload
     request: request
     root: root
@@ -109,7 +109,7 @@ sidebar:
     screenshot: screenshot
     select: select
     server: server
-    set-cookie: set-cookie
+    setcookie: setCookie
     should: should
     siblings: siblings
     spread: spread
@@ -128,7 +128,7 @@ sidebar:
     window: window
     within: within
     wrap: wrap
-    write-file: write-file
+    writefile: writeFile
     utilities: Utilities
     _: _
     $: $
