@@ -143,10 +143,10 @@ hexo.extend.helper.register('canonical_path_for_nav', function(){
   }
 })
 
-// hexo.extend.helper.register('lang_name', function(lang){
-//   var data = this.site.data.languages[lang]
-//   return data.name || data
-// })
+hexo.extend.helper.register('lang_name', function(lang){
+  var data = this.site.data.languages[lang]
+  return data.name || data
+})
 
 hexo.extend.helper.register('disqus_lang', function(){
   var lang = this.page.lang
