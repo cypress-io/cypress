@@ -15,6 +15,7 @@
   #article-toc-inner {
     padding: 0 $gutter-width;
   }
+
   .post {
     max-width: 800px;
   }
@@ -100,10 +101,12 @@
   width: $mobile-nav-width;
   left: -$mobile-nav-width;
   height: 100%;
-  background: $color-background;
+  background: white;
   transition: 0.4s;
   font-family: $font-title;
 }
+
+
 .mobile-nav-on {
   #mobile-nav {
     transform: translateX(100%);
@@ -132,6 +135,7 @@
     transition: opacity 0.4s;
   }
 }
+
 #mobile-nav-inner {
   overflow-y: auto;
   padding: 10px 0;
@@ -141,6 +145,7 @@
   left: 0;
   right: 0;
 }
+
 #mobile-nav-toggle {
   position: absolute;
   top: 0;
@@ -156,6 +161,7 @@
     opacity: 1;
   }
 }
+
 .mobile-nav-toggle-bar {
   background: $white;
   position: absolute;
@@ -176,7 +182,7 @@
   }
 }
 .mobile-nav-link {
-  color: $white;
+  color: $color-link;
   text-decoration: none;
   display: block;
   padding: 10px 15px;
@@ -184,18 +190,40 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  &.current {
+    color: $color-link;
+    font-weight: 500;
+    background-color: #f1f4f7;
+    &:hover {
+      color: $color-link;
+    }
+  }
+
+  &:hover {
+    color: $color-link-hover;
+
+  }
 }
+
 .mobile-nav-title {
-  color: $color-link;
-  font-weight: bold;
+  color: $color-default;
+  font-family: $font-title;
+  font-weight: 600;
+  font-size: 0.75;
   padding: 10px 15px;
   line-height: 1;
   display: block;
-  border-top: 1px solid $color-default;
+  border-top: 1px solid #eee;
   margin-top: 10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+
+#mobile-nav-list .mobile-nav-link {
+  font-weight: 600;
 }
 
 #mobile-nav-dimmer {
@@ -214,12 +242,13 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  background: $color-background;
-  border-top: 1px solid $color-default;
+  background: white;
+  border-top: 1px solid #eee;
 }
+
 #mobile-lang-select-label {
   line-height: 40px;
-  color: $white;
+  color: $color-default;
   padding: 10px 15px;
   i {
     opacity: 0.7;
@@ -228,6 +257,7 @@
     padding-left: 8px;
   }
 }
+
 #mobile-lang-select {
   opacity: 0;
   position: absolute;
