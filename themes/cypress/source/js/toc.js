@@ -1,7 +1,6 @@
 (function(){
   'use strict';
 
-
   var header = document.getElementById('header');
   var toc = document.getElementById('article-toc');
   var tocInner = document.querySelector('.toc');
@@ -10,8 +9,11 @@
 
   if (!toc) return;
 
+  // https://github.com/lcdsantos/menuspy
+  // This highlights the proper toc link while scrolling
   var ms = new MenuSpy(tocInner)
 
+  // This keeps the toc within the view
   function updateSidebarPosition(){
     var scrollTop = document.scrollingElement.scrollTop;
 
