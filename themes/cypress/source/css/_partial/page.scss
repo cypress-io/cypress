@@ -67,6 +67,7 @@
     margin: 1em 0;
     margin-left: 20px;
     list-style: disc;
+
     ul {
       margin-top: 0;
       margin-bottom: 0;
@@ -158,11 +159,12 @@
     // display: none;
   }
   h1 {
-    font-size: 1.7em;
+    font-size: 1.8em;
     line-height: 1em;
     font-weight: 900;
     margin: 2em 0 0 0;
     padding: 0;
+    font-family: $font-title;
 
     &:first-of-type {
       margin-top: 0.5em;
@@ -171,29 +173,34 @@
   h2 {
     font-size: 1.5em;
     line-height: 1em;
-    font-weight: bold;
-    margin: 2em 0 0 0;
+    font-weight: 700;
+    margin: 1em 0 0 0;
+    font-family: $font-title;
   }
   h3 {
     font-size: 1.3em;
     line-height: 1em;
     font-weight: bold;
     margin: 1em 0;
+    font-family: $font-title;
   }
   h4 {
     line-height: 1em;
     font-weight: bold;
     margin: 1em 0;
+    font-family: $font-title;
   }
   h5 {
     line-height: 1em;
     font-weight: bold;
     margin: 1em 0;
+    font-family: $font-title;
   }
   h6 {
     line-height: 1em;
     font-weight: bold;
     margin: 1em 0;
+    font-family: $font-title;
   }
 
   a {
@@ -236,9 +243,6 @@
   video {
     max-width: 100%;
   }
-
-
-
   .note {
     font-weight: 200;
     border: 0;
@@ -289,8 +293,9 @@
   .note-title {
     margin: 0;
     display: block;
-    font-size: 0.9em;
+    font-size: 1em;
     font-weight: 500;
+    font-family: $font-title;
   }
 }
 

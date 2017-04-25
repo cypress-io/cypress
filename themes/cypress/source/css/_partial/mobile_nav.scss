@@ -26,6 +26,10 @@
     padding: 0 $gutter-width;
   }
 
+  #sidebar .inner {
+    padding-right: 0; 
+  }
+
   #main-nav {
     display: block;
   }
