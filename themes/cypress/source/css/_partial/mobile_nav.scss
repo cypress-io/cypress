@@ -10,7 +10,7 @@
     margin: 0 auto;
   }
   .inner {
-    padding: 0 $gutter-width;
+    padding: 0;
   }
   #article-toc-inner {
     padding: 0 $gutter-width;
@@ -22,9 +22,14 @@
 }
 
 @media screen and(min-width: 769px) {
+  .inner {
+    padding: 0 $gutter-width;
+  }
+
   #main-nav {
     display: block;
   }
+
   #lang-select-wrap {
     display: block;
   }
