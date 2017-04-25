@@ -1,4 +1,5 @@
 title: fixture
+comments: true
 ---
 
 {% note info New to Cypress? %}

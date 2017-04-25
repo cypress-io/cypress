@@ -1,4 +1,5 @@
 title: last
+comments: true
 ---
 
 Get the last DOM element within a set of DOM elements.

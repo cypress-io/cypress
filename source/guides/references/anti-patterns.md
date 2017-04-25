@@ -1,4 +1,5 @@
 title: anti-patterns
+comments: true
 ---
 
 # Adding unncessary waits

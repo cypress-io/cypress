@@ -1,4 +1,5 @@
 title: document
+comments: true
 ---
 
 Get the document and work with its properties or methods.

@@ -1,4 +1,5 @@
 title: uncheck
+comments: true
 ---
 
 Unchecks the checkboxes within the current subject.

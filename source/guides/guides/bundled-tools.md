@@ -1,4 +1,5 @@
 title: bundled-tools
+comments: true
 ---
 
 # Mocha

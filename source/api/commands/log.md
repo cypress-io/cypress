@@ -1,4 +1,5 @@
 title: log
+comments: true
 ---
 
 Print a message to the Command Log within Cypress.

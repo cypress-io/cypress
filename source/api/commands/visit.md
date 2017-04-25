@@ -1,4 +1,5 @@
 title: visit
+comments: true
 ---
 
 Visit a remote url. This will most likely be the first command you run. `cy.visit` resolves when the remote page fires its `load` event.

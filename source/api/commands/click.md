@@ -1,4 +1,5 @@
 title: click
+comments: true
 ---
 
 `cy.click` is used to click a DOM element found int he previous command.  The DOM element must be in a "clickable" state prior to the click event happening (it must be visible and not covered by another element).

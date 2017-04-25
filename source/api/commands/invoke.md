@@ -1,4 +1,5 @@
 title: invoke
+comments: true
 ---
 
 `cy.invoke` invokes functions on the current subject.

@@ -1,4 +1,5 @@
 title: cookies
+comments: true
 ---
 
 `Cypress.Cookies` is a synchronous interface that allows you to do more than just get, set, or clear cookies.

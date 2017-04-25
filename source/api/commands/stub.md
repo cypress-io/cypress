@@ -1,4 +1,5 @@
 title: stub
+comments: true
 ---
 
 A stub is used to replace a function, record its usage and control its behavior. You can track calls to the functions and what arguments the function was called with. You can also control what the function returns and even cause it to throw an exception.

@@ -1,4 +1,5 @@
 title: using-the-cypress-runner
+comments: true
 ---
 
 # Overview

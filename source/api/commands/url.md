@@ -1,4 +1,5 @@
 title: url
+comments: true
 ---
 
 Get the current URL. `cy.url()` uses [`cy.location.href`](https://on.cypress.io/api/location) under the hood.

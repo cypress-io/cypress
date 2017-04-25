@@ -1,4 +1,5 @@
 title: writing-your-first-test
+comments: true
 ---
 
 # Folder Structure

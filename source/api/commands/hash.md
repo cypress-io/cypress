@@ -1,4 +1,5 @@
 title: hash
+comments: true
 ---
 
 Get the current URL hash. This is the same as [`cy.location().hash`](https://on.cypress.io/api/location)

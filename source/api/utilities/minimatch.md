@@ -1,4 +1,5 @@
 title: cypress-minimatch
+comments: true
 ---
 
 # [Cypress.minimatch()](#section-usage)

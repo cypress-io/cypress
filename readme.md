@@ -45,6 +45,8 @@ To link to a page on API:
 When creating new files, each file requires a title followed by `---`:
 ```md
 title: Making Assertions
+<!-- Set comments to true to add Disqus -->
+comments: true   
 ---
 ```
 

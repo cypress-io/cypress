@@ -1,4 +1,5 @@
 title: config
+comments: true
 ---
 
 `Cypress.config` allows you to `get` and `set` your configuration options.

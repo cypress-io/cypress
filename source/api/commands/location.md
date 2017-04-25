@@ -1,4 +1,5 @@
 title: location
+comments: true
 ---
 
 Get the remote `window.location` as a normalized object.

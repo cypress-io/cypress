@@ -1,4 +1,5 @@
 title: using-aliases
+comments: true
 ---
 
 # Async Challenges

@@ -1,4 +1,5 @@
 title: dom
+comments: true
 ---
 
 `Cypress.Dom` holds methods and logic related to DOM.

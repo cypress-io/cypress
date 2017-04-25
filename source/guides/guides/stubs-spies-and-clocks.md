@@ -1,4 +1,5 @@
 title: stubs-spies-clocks
+comments: true
 ---
 
 # Capabilities

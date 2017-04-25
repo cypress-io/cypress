@@ -1,4 +1,5 @@
 title: should
+comments: true
 ---
 
 {% note info New to Cypress? %}

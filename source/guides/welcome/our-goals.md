@@ -1,4 +1,5 @@
 title: our-goals
+comments: true
 ---
 
 # Problems with current front-end testing tools

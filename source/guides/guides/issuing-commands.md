@@ -1,4 +1,5 @@
 title: issuing-commands
+comments: true
 ---
 
 # Commands are Async

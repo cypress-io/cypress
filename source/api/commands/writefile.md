@@ -1,4 +1,5 @@
 title: writefile
+comments: true
 ---
 
 Writes to a file with the specified contents. JavaScript arrays and objects are stringified and formatted into text. If the path to the file does not exist, the file and it's path will be created. If the file already exists, it will be over-written.

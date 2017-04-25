@@ -1,4 +1,5 @@
 title: exec
+comments: true
 ---
 
 Allows you to execute a system command. The system command can be anything you would normally run on the command line, such as `npm run build`, `rake db:seed`, etc.
