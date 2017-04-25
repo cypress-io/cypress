@@ -9,6 +9,7 @@
   "scripts": {
     "start": "hexo server",
     "convert": "node ./cy_scripts/convert.js",
+    "generate": "hexo generate",
     "deploy": "hexo deploy --generate"
   },
   "author": "",
