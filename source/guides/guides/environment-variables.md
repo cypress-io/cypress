@@ -8,10 +8,7 @@ Environment variables should be used:
 - Whenever values are different across developer machines
 - Whenever values change frequently and are highly dynamic
 
-
 The most common use case is to access custom values you've written in your `hosts` file.
-
-
 
 For instance instead of hard coding this in your tests:
 

@@ -1,12 +1,16 @@
 (function(){
   'use strict';
 
+
   var header = document.getElementById('header');
   var toc = document.getElementById('article-toc');
+  var tocInner = document.querySelector('.toc');
   var tocTop = document.getElementById('article-toc-top');
   var headerHeight = header.clientHeight;
 
   if (!toc) return;
+
+  var ms = new MenuSpy(tocInner)
 
   function updateSidebarPosition(){
     var scrollTop = document.scrollingElement.scrollTop;
