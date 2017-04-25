@@ -236,29 +236,61 @@
   video {
     max-width: 100%;
   }
+
+
+
   .note {
+    font-weight: 200;
+    border: 0;
+    padding: 1em;
+    border-left: 4px solid #999;
+
     &.warning {
       border-left-color: #f0ad4e;
       background-color: #fcf8f2;
+
+      .note-title {
+        color: #f0ad4e;
+      }
     }
     &.info {
       border-left-color: #5bc0de;
       background-color: #f4f8fa;
+
+      .note-title {
+        color: #5bc0de;
+      }
     }
     &.success {
       border-left-color: #50af51;
       background-color: #f3f8f3;
+
+      .note-title {
+        color: #50af51;
+      }
     }
     &.danger {
       border-left-color: #d9534f;
       background-color: #fdf7f7;
+
+      .note-title {
+        color: #d9534f;
+      }
+    }
+
+    p {
+      margin: 0;
+    }
+
+    ul {
+      margin: 0 20px 0 40px;
     }
   }
   .note-title {
-    margin: 1em 0;
+    margin: 0;
     display: block;
-    font-size: 1em;
-    font-weight: bold;
+    font-size: 0.9em;
+    font-weight: 500;
   }
 }
 

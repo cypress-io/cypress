@@ -6,7 +6,7 @@ html, body, a, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blo
   font-weight: inherit;
   font-style: inherit;
   font-family: inherit;
-  font-size: 100%;
+  font-size: inherit;
   vertical-align: baseline;
 }
 
@@ -14,9 +14,10 @@ html {
   box-sizing: border-box;
 }
 body {
-  line-height: 1;
+  line-height: $line-height;
   background: $color-background;
   font-size: $font-size;
+  font-weight: 300;
   font-family: $font-sans;
   color: $color-default;
   text-rendering: optimizeLegibility;
