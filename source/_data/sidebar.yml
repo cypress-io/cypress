@@ -12,7 +12,7 @@ guides:
   dashboard:
     features: features.html
     projects: projects.html
-    runs: runs.html
+    recorded-runs: recorded-runs.html
     organizations: organizations.html
   guides:
     configuration: configuration.html
