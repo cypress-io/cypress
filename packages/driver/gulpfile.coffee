@@ -32,9 +32,9 @@ jsOptions =
   outputName: "driver.js"
 
 specOptions =
-  entries: ["spec/client/spec_helper.coffee"]
+  entries: ["test/support/spec_helper.coffee"]
   extensions: [".coffee", ".js"]
-  destination: "lib/public/js"
+  destination: "dist-test"
   outputName: "spec_helper.js"
 
 compileJs = ->
@@ -54,45 +54,48 @@ watchJs = (options) ->
     extensions: options.extensions
     cache: {}
     packageCache: {}
+    plugin: [watchify]
   })
 
   bundler.transform(coffeeify, {})
 
+  ## FIXME: this works the first time, but not on updates
   rebundle = (files = []) ->
     files.forEach (filePath) ->
       filePath = $.util.colors.yellow(path.basename(filePath))
       outputName = $.util.colors.cyan(options.outputName)
-      $.util.log("Re-compiled #{outputName} after #{filePath} changed")
+      $.util.log("Bundling #{outputName} after #{filePath} changed")
 
     bundler.bundle()
       .on('error', log)
       .pipe($.plumber(log))
       .pipe(source(options.outputName))
       .pipe(gulp.dest(options.destination))
+      .on 'end', ->
+        $.util.log("Finished bundling #{$.util.colors.cyan(options.outputName)}")
 
-  watchify(bundler).on('update', (files) =>
+  bundler.on 'update', (files) =>
     rebundle(files)
-  )
 
   return rebundle()
 
-gulp.task "app:img", ["vendor:img", "project:img", "project:favicon", "project:logo"]
+# gulp.task "app:img", ["vendor:img", "project:img", "project:favicon", "project:logo"]
 
-gulp.task "vendor:img", ->
-  gulp.src("bower_components/jquery-ui/themes/smoothness/images/**")
-    .pipe gulp.dest "lib/public/css/images"
-
-gulp.task "project:img", ->
-  gulp.src("app/img/**/*")
-    .pipe gulp.dest "lib/public/img"
-
-gulp.task "project:favicon", ->
-  gulp.src(cyIcons.getPathToFavicon("**/*"))
-    .pipe gulp.dest "lib/public/img"
-
-gulp.task "project:logo", ->
-  gulp.src cyIcons.getPathToIcon("icon_128x128@2x.png")
-    .pipe gulp.dest "lib/public/img"
+# gulp.task "vendor:img", ->
+#   gulp.src("bower_components/jquery-ui/themes/smoothness/images/**")
+#     .pipe gulp.dest "lib/public/css/images"
+#
+# gulp.task "project:img", ->
+#   gulp.src("app/img/**/*")
+#     .pipe gulp.dest "lib/public/img"
+#
+# gulp.task "project:favicon", ->
+#   gulp.src(cyIcons.getPathToFavicon("**/*"))
+#     .pipe gulp.dest "lib/public/img"
+#
+# gulp.task "project:logo", ->
+#   gulp.src cyIcons.getPathToIcon("icon_128x128@2x.png")
+#     .pipe gulp.dest "lib/public/img"
 
 gulp.task "app:js", ->
   compileJs()
@@ -112,9 +115,9 @@ gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", ->
   watchJs(specOptions)
-  require("./spec/server.coffee")
+  require("./test/support/server.coffee")
 
-gulp.task "app", ["app:img", "app:html", "app:watch"]
+gulp.task "app", ["app:html", "app:watch"]
 
 gulp.task "build", (cb) ->
-  runSequence ["app:img", "app:js", "app:html"], cb
+  runSequence ["app:js", "app:html"], cb

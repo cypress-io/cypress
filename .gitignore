@@ -1,6 +1,8 @@
 .DS_Store
+bower_components
 node_modules
 *.log
 *.log.*
 *.orig
 dist
+dist-*

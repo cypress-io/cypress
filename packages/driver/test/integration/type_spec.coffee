@@ -1,6 +1,6 @@
 describe "Type Integration Tests", ->
-  context "html/type", ->
-    enterCommandTestingMode("html/type")
+  context "type", ->
+    enterCommandTestingMode("type")
 
     describe "card.js", ->
       it "it correctly changes the caret position and value of card expiration", ->

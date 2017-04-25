@@ -1,13 +1,13 @@
 describe "Clicks Integration Tests", ->
-  context "html/fixed-nav", ->
-    enterCommandTestingMode("html/fixed-nav")
+  context "fixed-nav", ->
+    enterCommandTestingMode("fixed-nav")
 
     describe "fixed nav", ->
       it "can click inputs under a fixed-position nav", ->
         @cy.get("button").click()
 
-  context "html/dropdown", ->
-    enterCommandTestingMode("html/dropdown", {replaceIframeContents: false})
+  context "dropdown", ->
+    enterCommandTestingMode("dropdown", {replaceIframeContents: false})
 
     describe "animating dropdown with fixed background", ->
       ## this tests a kendo drop down opening

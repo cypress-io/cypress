@@ -8,7 +8,7 @@ glob      = require("glob")
 coffee    = require("coffee-script")
 str       = require("string-to-stream")
 Promise   = require("bluebird")
-xhrs      = require("../lib/controllers/xhrs")
+xhrs      = require("../../../app/lib/controllers/xhrs")
 
 [3500, 3501].forEach (port) ->
 
@@ -33,24 +33,19 @@ xhrs      = require("../lib/controllers/xhrs")
     if /all_specs/.test(pathName) then getAllSpecs(false) else [pathName.replace(/^\//, "")]
 
   getAllSpecs = (allSpecs = true) ->
-    specs = glob.sync "client/**/*.coffee", cwd: __dirname
+    specs = glob.sync "../!(support)/**/*.coffee", cwd: __dirname
     specs.unshift "client/all_specs.coffee" if allSpecs
-    _
-    .chain(specs)
-    ## remove the spec helper file
-    .reject (spec) -> /spec_helper/.test(spec)
-    .map (spec) ->
+    _.map specs, (spec) ->
       ## replace client/whatevs.coffee -> specs/whatevs.coffee
       spec = spec.split("/")
       spec.splice(0, 1, "specs")
 
       ## strip off the extension
       removeExtension spec.join("/")
-    .value()
 
   getSpec = (spec) ->
     spec = removeExtension(spec) + ".coffee"
-    file = fs.readFileSync path.join(__dirname, "client", spec), "utf8"
+    file = fs.readFileSync path.join(__dirname, "..", spec), "utf8"
     coffee.compile(file)
 
   app.get "/specs/*", (req, res) ->
@@ -58,10 +53,15 @@ xhrs      = require("../lib/controllers/xhrs")
 
     switch
       when /\.js$/.test spec
-        res.type "js"
-        res.send getSpec(spec)
+        res.set({
+          "Cache-Control": "no-cache, no-store, must-revalidate"
+          "Pragma": "no-cache"
+          "Expires": "0"
+        })
+        res.type("js")
+        res.send(getSpec(spec))
       else
-        res.render path.join(__dirname, "views", "spec.html"), {
+        res.render path.join(__dirname, "..", "support", "views", "spec.html"), {
           specs: getSpecPath(req.path)
         }
 
@@ -72,15 +72,15 @@ xhrs      = require("../lib/controllers/xhrs")
 
   app.get "/bower_components/*", (req, res) ->
     res.sendFile path.join("bower_components", req.params[0]),
-      root: path.join(__dirname, "..")
+      root: path.join(__dirname, "../..")
 
   app.get "/node_modules/*", (req, res) ->
     res.sendFile path.join("node_modules", req.params[0]),
-      root: path.join(__dirname, "..")
+      root: path.join(__dirname, "../..")
 
-  app.get "/lib/*", (req, res) ->
-    res.sendFile path.join("lib", req.params[0]),
-      root: path.join(__dirname, "..")
+  app.get "/dist-test/*", (req, res) ->
+    res.sendFile path.join("dist-test", req.params[0]),
+      root: path.join(__dirname, "../..")
 
   app.get "/fixtures/*", (req, res) ->
     res.sendFile "fixtures/#{req.params[0]}",

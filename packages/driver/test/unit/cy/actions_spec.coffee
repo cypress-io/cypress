@@ -287,8 +287,8 @@ describe "$Cypress.Cy Actions Commands", ->
       it "only logs once on failure", (done) ->
         logs = []
 
-        @Cypress.on "log", (attrs, @log) ->
-          logs.push log
+        @Cypress.on "log", (attrs, log) ->
+          logs.push @log
 
         @cy.on "fail", (err) ->
           ## 2 logs, 1 for cy.get, 1 for cy.select
@@ -305,7 +305,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("select:first").select("de_dust2").then ->
           expect(@log.get("name")).to.eq "select"
 
-      it.skip "passes in $el", ->
+      it "passes in $el", ->
         @cy.get("select:first").select("de_dust2").then ($select) ->
           expect(@log.get("$el")).to.eq $select
 
@@ -2073,7 +2073,7 @@ describe "$Cypress.Cy Actions Commands", ->
       beforeEach ->
         @Cypress.on "log", (attrs, @log) =>
 
-      it.skip "passes in $el", ->
+      it "passes in $el", ->
         @cy.get("input:first").type("foobar").then ($input) ->
           expect(@log.get("$el")).to.eq $input
 
@@ -2271,7 +2271,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
 
         @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+          logs.push @log
 
         @cy.on "fail", (err) =>
           ## get + type logs
@@ -2579,7 +2579,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
 
         @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+          logs.push @log
 
         @cy.on "fail", (err) =>
           ## get + type logs
@@ -2921,8 +2921,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+        @Cypress.on "log", (attrs, log) =>
+          logs.push @log
 
         @cy.on "fail", (err) =>
           ## get + type logs
@@ -3386,8 +3386,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+        @Cypress.on "log", (attrs, log) =>
+          logs.push @log
 
         @cy.on "fail", (err) =>
           ## get + type logs
@@ -4201,7 +4201,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
   context "#scrollTo", ->
     beforeEach ->
-      @win          = @cy.private("window")
+      @win          = @cy.privateState("window")
       @scrollVert   = @cy.$$("#scroll-to-vertical")
       @scrollHoriz  = @cy.$$("#scroll-to-horizontal")
       @scrollBoth   = @cy.$$("#scroll-to-both")
@@ -4221,12 +4221,12 @@ describe "$Cypress.Cy Actions Commands", ->
       @scrollBoth.scrollTop    = 0
       @scrollBoth.scrollLeft   = 0
 
-    describe "subjects", ->
-      it "subject is window by default", ->
+    describe "subject", ->
+      it "is window by default", ->
         @cy.scrollTo("125px").then (win2) ->
           expect(@win).to.eq(win2)
 
-      it "subject is DOM", ->
+      it "is DOM", ->
         @cy.get("#scroll-to-vertical").scrollTo("125px").then ($el) ->
           expect($el.get(0)).to.eq @scrollVert.get(0)
 
@@ -4604,7 +4604,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#scroll-into-view-win-vertical div").scrollIntoView().then ($el) ->
         expect(@_body.get(0).scrollTop).to.not.eq(0)
-        expect(@_body.get(0).scrollLeft).to.eq(0)
+        expect(@_body.get(0).scrollLeft).to.eq(200)
 
     it "scrolls both axes of window to element", ->
       expect(@_body.get(0).scrollTop).to.eq(0)
@@ -6124,8 +6124,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
         logs = []
 
-        @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+        @Cypress.on "log", (attrs, log) =>
+          logs.push @log
 
         @cy.on "fail", (err) =>
           ## get + click logs
@@ -6146,7 +6146,7 @@ describe "$Cypress.Cy Actions Commands", ->
         node = @Cypress.utils.stringifyElement(span)
 
         @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+          logs.push @log
 
         @cy.on "fail", (err) =>
           ## get + click logs
@@ -6181,7 +6181,7 @@ describe "$Cypress.Cy Actions Commands", ->
         node = @Cypress.utils.stringifyElement(span)
 
         @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+          logs.push @log
 
         @cy.on "fail", (err) =>
           ## get + click logs
@@ -6224,7 +6224,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
 
         @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+          logs.push @log
 
         @cy.on "fail", (err) ->
           expect(logs.length).to.eq(2)
@@ -6237,7 +6237,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
 
         @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+          logs.push @log
 
         @cy.on "fail", (err) ->
           expect(logs.length).to.eq(2)
@@ -6725,7 +6725,7 @@ describe "$Cypress.Cy Actions Commands", ->
       afterEach ->
         @chai.restore()
 
-      it.skip "eventually passes the assertion", ->
+      it "eventually passes the assertion", ->
         @cy.$$("button:first").on "mouseover", ->
           _.delay =>
             $(@).addClass("moused-over")
@@ -6945,7 +6945,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
 
         @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+          logs.push @log
 
         @cy.on "fail", (err) =>
           ## get + click logs
@@ -6959,7 +6959,7 @@ describe "$Cypress.Cy Actions Commands", ->
         logs = []
 
         @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+          logs.push @log
 
         @cy.on "fail", (err) ->
           expect(logs.length).to.eq(2)

@@ -3,7 +3,7 @@ lolex = require("lolex")
 sinon = require("sinon")
 sinonChai = require("sinon-chai")
 
-window.$Cypress = $Cypress = require("../../app/js/driver/main")
+window.$Cypress = $Cypress = require("../../src/main")
 
 $ = window.$ = $Cypress.$
 _ = window._ = $Cypress.prototype._
@@ -15,7 +15,7 @@ window.Cookies = require("js-cookie")
 ## off of the driver
 require("sinon-as-promised")(Promise)
 
-window.bililiteRange = require("../../app/js/vendor/bililiteRange")
+window.bililiteRange = require("../../vendor/bililiteRange")
 $Cypress.Chai.use(sinonChai)
 
 uncaught = Mocha.Runner::uncaught
@@ -109,7 +109,7 @@ window.enterAppTestingMode = ->
   afterEach ->
     @$iframe.remove()
 
-window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
+window.enterCommandTestingMode = (fixture = "dom", options = {}) ->
   before ->
     @loadDom = _.bind(loadDom, @)
 

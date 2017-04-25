@@ -1,0 +1,11 @@
+{
+  "name": "cypress",
+  "version": "0.0.0",
+  "moduleType": [
+    "globals"
+  ],
+  "private": true,
+  "dependencies": {
+    "kendo-ui": "~2015.1.616"
+  }
+}
