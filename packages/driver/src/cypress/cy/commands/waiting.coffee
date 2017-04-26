@@ -22,7 +22,7 @@ $Cy.extend({
       .return(subject)
 
   _waitFunction: (subject, fn, options) ->
-    $Cypress.Utils.throwErrByPath("wait.fn_deprecated")
+    utils.throwErrByPath("wait.fn_deprecated")
 
   _waitString: (subject, str, options) ->
     if options.log isnt false
@@ -48,7 +48,7 @@ $Cy.extend({
       ## return our xhr object
       return Promise.resolve(xhr) if xhr
 
-      options.error = $Cypress.Utils.errMessageByPath "wait.timed_out", {
+      options.error = utils.errMessageByPath "wait.timed_out", {
         timeout: options.timeout
         alias
         num
@@ -90,7 +90,7 @@ $Cy.extend({
         log.set "referencesAlias", aliases
 
       if command.get("name") isnt "route"
-        $Cypress.Utils.throwErrByPath("wait.invalid_alias", {
+        utils.throwErrByPath("wait.invalid_alias", {
           onFail: options._log
           args: { alias }
         })
@@ -167,7 +167,7 @@ module.exports = (Cypress, Commands) ->
       args = [subject, msOrFnOrAlias, options]
 
       throwErr = (arg) ->
-        $Cypress.Utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}})
+        utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}})
 
       try
         switch

@@ -5,6 +5,7 @@ Promise = require("./bluebird")
 
 $Cypress = require("../cypress")
 $Log = require("./log")
+utils = require("./utils")
 
 defaultGrep     = /.*/
 mochaCtxKeysRe  = /^(_runnable|test)$/
@@ -77,7 +78,7 @@ waitForHooksToResolve = (ctx, event, test = {}) ->
     ## https://github.com/petkaantonov/bluebird/issues/1104
     ## TODO: think about applying this to the other areas
     ## that use Cypress.invoke(...)
-    ctx.Cypress.utils.isInstanceOf(r, Promise)
+    utils.isInstanceOf(r, Promise)
 
   Promise.all(events)
   .catch (err) ->
@@ -353,7 +354,7 @@ class $Runner
 
         ## append a friendly message to the error indicating
         ## we're skipping the remaining tests in this suite
-        err.message += "\n\n" + @Cypress.utils.errMessageByPath("uncaught.error_in_hook", {parentTitle, hookName})
+        err.message += "\n\n" + utils.errMessageByPath("uncaught.error_in_hook", {parentTitle, hookName})
 
       ## always set runnable err so we can tap into
       ## taking a screenshot on error

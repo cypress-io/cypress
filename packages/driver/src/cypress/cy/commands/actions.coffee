@@ -1718,16 +1718,8 @@ module.exports = (Cypress, Commands) ->
           .return(options.$el)
   })
 
-  Commands.addAll({ prevSubject: "optional"}, {
+  Commands.addAll({ prevSubject: "optional" }, {
     scrollTo: (subject, xOrPosition, yOrOptions, options = {}) ->
-      ## QUESTION: would it be better on prevSubject: "optional" to just get
-      ## the subject as undefined/null and have everything else in place?
-      if subject and not utils.hasElement(subject)
-        options = yOrOptions
-        yOrOptions = xOrPosition
-        xOrPosition = subject
-        subject = null
-
       ## check for undefined or null values
       if not xOrPosition?
         utils.throwErrByPath "scrollTo.invalid_target", {args: { x }}

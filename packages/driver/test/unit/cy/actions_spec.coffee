@@ -6241,7 +6241,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(logs.length).to.eq(2)
-          expect(err.message).to.eq "Invalid position argument: 'foo'. Position may only be topLeft, topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, or bottomRight."
+          expect(err.message).to.eq "Invalid position argument: 'foo'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight."
           done()
 
         @cy.get("button:first").click("foo")
@@ -6549,8 +6549,8 @@ describe "$Cypress.Cy Actions Commands", ->
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
-          clientX: coords.x - @cy.private("window").pageXOffset
-          clientY: coords.y - @cy.private("window").pageYOffset
+          clientX: coords.x - @cy.privateState("window").pageXOffset
+          clientY: coords.y - @cy.privateState("window").pageYOffset
           target: btn.get(0)
           type: "mouseover"
         }
@@ -6560,24 +6560,24 @@ describe "$Cypress.Cy Actions Commands", ->
 
     it "bubbles up event by default", (done) ->
       mouseover = (e) =>
-        @cy.private("window").removeEventListener "mouseover", mouseover
+        @cy.privateState("window").removeEventListener "mouseover", mouseover
         done()
 
-      @cy.private("window").addEventListener "mouseover", mouseover
+      @cy.privateState("window").addEventListener "mouseover", mouseover
 
       @cy.get("#button").ttrigger("mouseover")
 
     it "does not bubble up event if specified", (done) ->
       mouseover = (e) =>
-        @cy.private("window").removeEventListener "mouseover", mouseover
+        @cy.privateState("window").removeEventListener "mouseover", mouseover
         done("Should not have bubbled to window listener")
 
-      @cy.private("window").addEventListener "mouseover", mouseover
+      @cy.privateState("window").addEventListener "mouseover", mouseover
 
       @cy.get("#button").ttrigger("mouseover", {bubbles: false})
 
       setTimeout ->
-        @cy.private("window").removeEventListener "mouseover", mouseover
+        @cy.privateState("window").removeEventListener "mouseover", mouseover
         done()
       , 500
 
@@ -6604,7 +6604,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.private("window")
+      win = @cy.privateState("window")
 
       btn.get(0).addEventListener "mouseover", (e) =>
         expect(win.pageXOffset).to.be.gt(0)
@@ -6618,7 +6618,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
-      win = @cy.private("window")
+      win = @cy.privateState("window")
 
       btn.get(0).addEventListener "mouseover", (e) =>
         expect(win.pageYOffset).to.be.gt(0)

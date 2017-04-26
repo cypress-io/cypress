@@ -189,7 +189,7 @@ module.exports = ($Cy) ->
       if position in VALID_POSITIONS
         return true
 
-      $Cypress.Utils.throwErrByPath("dom.invalid_position_argument", {
+      utils.throwErrByPath("dom.invalid_position_argument", {
         args: { position, validPositions: VALID_POSITIONS.join(', ') }
       })
 
@@ -198,8 +198,8 @@ module.exports = ($Cy) ->
 
       ## prep args to throw in error since we can't scroll
       cmd   ?= @prop("current").get("name")
-      node  = $Cypress.Utils.stringifyElement($el)
+      node  = utils.stringifyElement($el)
 
-      $Cypress.Utils.throwErrByPath("dom.not_scrollable", {
+      utils.throwErrByPath("dom.not_scrollable", {
         args: { cmd, node }
       })
