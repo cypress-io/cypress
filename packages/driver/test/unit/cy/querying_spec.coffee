@@ -1,6 +1,145 @@
 describe "$Cypress.Cy Querying Commands", ->
   enterCommandTestingMode()
 
+  context "#focused", ->
+    it "returns the activeElement", ->
+      button = @cy.$$("#button")
+      button.get(0).focus()
+
+      @cy.focused().then ($focused) ->
+        expect($focused.get(0)).to.eq(button.get(0))
+
+    it "returns null if no activeElement", ->
+      button = @cy.$$("#button")
+      button.get(0).focus()
+      button.get(0).blur()
+
+      @cy.focused().then ($focused) ->
+        expect($focused).to.be.null
+
+    it "uses forceFocusedEl if set", ->
+      input = @cy.$$("input:first")
+      @cy.state("forceFocusedEl", input.get(0))
+
+      @cy.focused().then ($focused) ->
+        expect($focused.get(0)).to.eq input.get(0)
+
+    it "does not use forceFocusedEl if that el is not in the document", ->
+      input = @cy.$$("input:first")
+
+      @cy
+        .get("input:first").focus().focused().then ->
+          input.remove()
+        .focused().then ($el) ->
+          expect($el).to.be.null
+
+    it "nulls forceFocusedEl if that el is not in the document", ->
+      input = @cy.$$("input:first")
+
+      @cy
+        .get("input:first").focus().focused().then ->
+          input.remove()
+        .focused().then ($el) ->
+          expect(cy.state("forceFocusedEl")).to.be.null
+
+    it "refuses to use blacklistFocusedEl", ->
+      input = @cy.$$("input:first")
+      @cy.state("blacklistFocusedEl", input.get(0))
+
+      @cy
+        .get("input:first").focus()
+        .focused().then ($focused) ->
+          expect($focused).to.be.null
+
+    describe "assertion verification", ->
+      beforeEach ->
+        @allowErrors()
+        @currentTest.timeout(300)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (attrs, log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it "eventually passes the assertion", ->
+        @cy.on "retry", _.after 2, =>
+          @cy.$$(":text:first").addClass("focused").focus()
+
+        @cy.focused().should("have.class", "focused").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("ended")).to.be.true
+
+      it "eventually fails the assertion", (done) ->
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.focused().should("have.class", "focused")
+
+      it "does not log an additional log on failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (attrs, log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(2)
+          done()
+
+        @cy.focused().should("have.class", "focused")
+
+    describe ".log", ->
+      beforeEach ->
+        @cy.$$("input:first").get(0).focus()
+        @Cypress.on "log", (attrs, @log) =>
+
+      it "is a parent command", ->
+        @cy.get("body").focused().then ->
+          expect(@log.get("type")).to.eq "parent"
+
+      it "ends immediately", ->
+        @cy.focused().then ->
+          expect(@log.get("ended")).to.be.true
+          expect(@log.get("state")).to.eq("passed")
+
+      it "snapshots immediately", ->
+        @cy.focused().then ->
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
+
+      it "passes in $el", ->
+        @cy.get("input:first").focused().then ($input) ->
+          expect(@log.get("$el")).to.eq $input
+
+      it "#consoleProps", ->
+        @cy.get("input:first").focused().then ($input) ->
+          expect(@log.attributes.consoleProps()).to.deep.eq {
+            Command: "focused"
+            Returned: $input.get(0)
+            Elements: 1
+          }
+
+      it "#consoleProps with null element", ->
+        @cy.focused().blur().focused().then ->
+          expect(@log.attributes.consoleProps()).to.deep.eq {
+            Command: "focused"
+            Returned: "--nothing--"
+            Elements: 0
+          }
+
   context "#within", ->
     it "scopes additional GET finders to the subject", ->
       input = @cy.$$("#by-name input:first")

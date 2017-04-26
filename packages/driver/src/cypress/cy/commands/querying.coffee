@@ -18,6 +18,76 @@ module.exports = (Cypress, Commands) ->
   Cypress.on "abort", restoreContains
 
   Commands.addAll({
+    focused: (options = {}) ->
+      _.defaults options,
+        verify: true
+        log: true
+
+      if options.log
+        options._log = $Log.command()
+
+      log = ($el) ->
+        return if options.log is false
+
+        options._log.set({
+          $el: $el
+          consoleProps: ->
+            ret = if $el
+              utils.getDomElements($el)
+            else
+              "--nothing--"
+            Returned: ret
+            Elements: $el?.length ? 0
+        })
+
+      getFocused = =>
+        try
+          d = @privateState("document")
+          forceFocusedEl = @state("forceFocusedEl")
+          if forceFocusedEl
+            if @_contains(forceFocusedEl)
+              el = forceFocusedEl
+            else
+              @state("forceFocusedEl", null)
+          else
+            el = d.activeElement
+
+          ## return null if we have an el but
+          ## the el is body or the el is currently the
+          ## blacklist focused el
+          if el and el isnt @state("blacklistFocusedEl")
+            el = $(el)
+
+            if el.is("body")
+              log(null)
+              return null
+
+            log(el)
+            return el
+          else
+            log(null)
+            return null
+
+        catch
+          log(null)
+          return null
+
+      do resolveFocused = (failedByNonAssertion = false) =>
+        Promise.try(getFocused).then ($el) =>
+          if options.verify is false
+            return $el
+
+          ## set $el here strictly so
+          ## our assertions are against a jQuery
+          ## or null object
+          options.$el = $el
+
+          ## pass in a null jquery object for assertions
+          @verifyUpcomingAssertions($el ? $(null), options, {
+            onRetry: resolveFocused
+          })
+          .return(options.$el)
+
     get: (selector, options = {}) ->
       _.defaults options,
         retry: true

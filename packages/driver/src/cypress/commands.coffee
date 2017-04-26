@@ -1,7 +1,14 @@
 _ = require("lodash")
 
 commands = [
-  require("./cy/commands/actions")
+  require("./cy/commands/actions/checkbox")
+  require("./cy/commands/actions/clicking")
+  require("./cy/commands/actions/focus")
+  require("./cy/commands/actions/form")
+  require("./cy/commands/actions/misc")
+  require("./cy/commands/actions/scrolling")
+  require("./cy/commands/actions/select")
+  require("./cy/commands/actions/text")
   require("./cy/commands/agents")
   require("./cy/commands/aliasing")
   require("./cy/commands/angular")
