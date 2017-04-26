@@ -4,3 +4,4 @@ npm-debug.log
 public
 db.json
 .deploy*/
+debug.log
