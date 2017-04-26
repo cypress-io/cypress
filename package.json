@@ -12,7 +12,7 @@
     "generate": "hexo generate",
     "deploy": "hexo deploy --generate"
   },
-  "author": "",
+  "author": "Cypress.io",
   "license": "ISC",
   "devDependencies": {
     "colors": "^1.1.2",

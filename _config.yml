@@ -8,7 +8,6 @@ subtitle:
 description:
 author: Cypress.io
 language: en
-timezone: UTC
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
@@ -16,6 +15,7 @@ url: https://cypress-io.github.io/cypress-documentation
 root: /cypress-documentation/
 permalink: :year/:month/:day/:title/
 permalink_defaults:
+
 logo: img/logo.png
 github: cypress-io/cypress-documentation
 
