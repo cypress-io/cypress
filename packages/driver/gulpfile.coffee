@@ -1,3 +1,4 @@
+fs            = require("fs")
 _             = require("lodash")
 $             = require("gulp-load-plugins")()
 gulp          = require("gulp")
@@ -54,25 +55,34 @@ watchJs = (options) ->
     extensions: options.extensions
     cache: {}
     packageCache: {}
-    plugin: [watchify]
   })
 
   bundler.transform(coffeeify, {})
+  bundler.plugin(watchify, {
+    ignoreWatch: [
+      "**/.git/**"
+      "**/.nyc_output/**"
+      "**/.sass-cache/**"
+      "**/bower_components/**"
+      "**/coverage/**"
+      "**/node_modules/**"
+    ]
+  })
 
-  ## FIXME: this works the first time, but not on updates
   rebundle = (files = []) ->
     files.forEach (filePath) ->
       filePath = $.util.colors.yellow(path.basename(filePath))
       outputName = $.util.colors.cyan(options.outputName)
       $.util.log("Bundling #{outputName} after #{filePath} changed")
 
+    outputPath = path.join(__dirname, options.destination, options.outputName)
+
     bundler.bundle()
       .on('error', log)
       .pipe($.plumber(log))
-      .pipe(source(options.outputName))
-      .pipe(gulp.dest(options.destination))
       .on 'end', ->
         $.util.log("Finished bundling #{$.util.colors.cyan(options.outputName)}")
+      .pipe(fs.createWriteStream(outputPath))
 
   bundler.on 'update', (files) =>
     rebundle(files)
