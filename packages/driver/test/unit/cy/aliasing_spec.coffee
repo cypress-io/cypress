@@ -133,14 +133,16 @@ describe "$Cypress.Cy Aliasing Commands", ->
         logs = []
 
         @Cypress.on "log", (attrs, @log) =>
-          logs.push(log)
+          logs.push(@log)
 
-        @Cypress.Commands.addAll({ "foo", =>
-          cmd = @Cypress.Log.command({})
+        @Cypress.Commands.addAll({
+          foo: =>
+            cmd = @Cypress.Log.command({})
 
-          @cy.chain().get("ul:first li", {log: false}).first({log: false}).then ($li) ->
-            cmd.snapshot().end()
-            return undefined
+            @cy.get("ul:first li", {log: false}).first({log: false}).then ($li) ->
+              cmd.snapshot().end()
+              return undefined
+        })
 
         @cy.foo().as("foo").then ->
           expect(logs.length).to.eq(1)
@@ -151,10 +153,10 @@ describe "$Cypress.Cy Aliasing Commands", ->
         logs = []
 
         @Cypress.on "log", (attrs, @log) =>
-          logs.push(log)
+          logs.push(@log)
 
         @cy
-          .visit("http://localhost:3500/fixtures/html/commands.html")
+          .visit("http://localhost:3500/fixtures/commands.html")
           .server()
           .route(/foo/, {}).as("getFoo")
           .then ->
@@ -169,7 +171,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
             expect(logs[1].get("name")).to.eq("route")
             expect(logs[1].get("alias")).to.eq("getFoo")
 
-      # it.only "does not alias previous logs when no matching chainerId", ->
+      # it "does not alias previous logs when no matching chainerId", ->
       #   @cy
       #     .get("div:first")
       #     .noop({}).as("foo").then ->

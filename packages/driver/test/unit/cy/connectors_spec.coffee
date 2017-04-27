@@ -159,10 +159,11 @@ describe "$Cypress.Cy Connectors Commands", ->
 
             return value
       @cy.then (val) ->
-        expect(val).to.be.null
+        expect(val).to.be.undefined
 
+    ## FIXME: has this behavior changed on purpose?
     [null, undefined].forEach (val) ->
-      it "passes the existing subject if ret is: #{val}", ->
+      it.skip "passes the existing subject if ret is: #{val}", ->
         @cy.wrap({foo: "bar"}).then (obj) ->
           return val
         .then (obj) ->

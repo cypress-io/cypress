@@ -8,6 +8,8 @@ utils = require("../../utils")
 
 sinonAsPromised(Promise)
 
+counts = null
+
 display = (name) ->
   switch name
     when "spy"  then "Spied Obj"
@@ -193,8 +195,6 @@ $Cy.extend({
 })
 
 module.exports = (Cypress, Commands) ->
-  counts = null
-
   do resetCounts = ->
     counts = {
       spy: 0

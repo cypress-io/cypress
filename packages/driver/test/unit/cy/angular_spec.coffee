@@ -3,7 +3,7 @@ describe "$Cypress.Cy Angular Commands", ->
 
   describe "#ng", ->
     beforeEach ->
-      @loadDom("html/angular").then =>
+      @loadDom("angular").then =>
         @setup({replaceIframeContents: false})
         @Cypress.set @currentTest
         @currentTest.timeout(200)

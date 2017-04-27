@@ -26,15 +26,13 @@ describe "$Cypress.Cy Commands", ->
 
   context "custom commands", ->
     beforeEach ->
-      @Cypress.addParentCommand "dashboard.selectWindows", =>
+      @Cypress.Commands.add "dashboard.selectWindows", =>
         @cy
-          .chain()
           .get("[contenteditable]")
           .first()
 
-      @Cypress.addChildCommand "login", (subject, email) =>
+      @Cypress.Commands.add "login", { prevSubject: true }, (subject, email) =>
         @cy
-          .chain()
           .wrap(subject.find("input:first"))
           .type(email)
 

@@ -40,12 +40,7 @@ describe "$Cypress.Cy Ensure Extensions", ->
       expect(fn).to.throw("Not enough coord points provided to calculate distance")
 
     it "throws when element is animating", ->
-      @commands = $Cypress.Commands.create()
-      @commands.splice(0, 1, {id: 1, name: "foo"})
-
-      cmd = @commands.find({name: "foo"})
-
-      @cy.state("current", cmd)
+      @cy.state("current", { get: -> "foo" })
 
       $el    = @cy.$$("button:first")
       coords = [{x: 10, y: 20}, {x: 20, y: 30}]
@@ -97,7 +92,7 @@ describe "$Cypress.Cy Ensure Extensions", ->
         $(el).appendTo(@cy.$$("body"))
 
     it "does not throw when window and body > window height", ->
-      win = @cy.private("window")
+      win = @cy.privateState("window")
 
       fn = => @cy.ensureScrollability(win, "foo")
 
@@ -107,7 +102,7 @@ describe "$Cypress.Cy Ensure Extensions", ->
 
       @cy.$$("body").html("<div>foo</div>")
 
-      win = @cy.private("window")
+      win = @cy.privateState("window")
 
       fn = => @cy.ensureScrollability(win, "foo")
 

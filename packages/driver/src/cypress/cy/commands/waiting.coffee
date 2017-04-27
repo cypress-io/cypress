@@ -149,7 +149,6 @@ $Cy.extend({
       .catch (err) ->
         _(xhrs).invoke("cancel")
         throw err
-    utils.throwErrByPath "wait.invalid_1st_arg"
 })
 
 module.exports = (Cypress, Commands) ->

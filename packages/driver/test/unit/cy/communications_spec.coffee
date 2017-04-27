@@ -1,4 +1,4 @@
-describe "$Cypress.Cy Communications Commands", ->
+describe.skip "$Cypress.Cy Communications Commands", ->
   enterCommandTestingMode()
 
   context "#msg", ->

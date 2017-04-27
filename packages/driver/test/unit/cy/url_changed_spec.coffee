@@ -6,7 +6,7 @@ describe "$Cypress Url:Changed Events", ->
       @trigger = @sandbox.spy @Cypress, "trigger"
 
     afterEach ->
-      @loadDom("html/dom")
+      @loadDom("dom")
 
     it "triggers on page unload event", (done) ->
       ## when this finishes loading

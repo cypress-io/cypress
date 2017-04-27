@@ -3,7 +3,7 @@ describe "$Cypress.Cy Snapshot Extension", ->
 
   context "invalid snapshot html", ->
     beforeEach ->
-      @loadDom("html/invalid_html").then =>
+      @loadDom("invalid_html").then =>
         @setup({replaceIframeContents: false})
         @Cypress.set @currentTest
 

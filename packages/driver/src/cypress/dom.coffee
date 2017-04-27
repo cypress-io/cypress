@@ -42,6 +42,9 @@ $Dom = {
   elHasNoEffectiveWidthOrHeight: ($el) ->
     @elOffsetWidth($el) <= 0 or @elOffsetHeight($el) <= 0 or $el[0].getClientRects().length <= 0
 
+  elHasNoOffsetWidthOrHeight: ($el) ->
+    @elOffsetWidth($el) <= 0 or @elOffsetHeight($el) <= 0
+
   elOffsetWidth: ($el) ->
     $el[0].offsetWidth
 
@@ -59,7 +62,7 @@ $Dom = {
 
   elIsScrollable: ($el) ->
     ## if we're the window, we want to get the document's
-    ## element and check it's size against the actual window
+    ## element and check its size against the actual window
     if utils.hasWindow($el)
       win = $el
       $el = $($el.document.documentElement)
@@ -108,7 +111,7 @@ $Dom = {
     ## and check if these have position fixed|absolute
     $els = $child.parentsUntil($parent).add($child)
 
-    _.any $els.get(), (el) ->
+    _.some $els.get(), (el) ->
       fixedOrAbsoluteRe.test $(el).css("position")
 
   elIsOutOfBoundsOfAncestorsOverflow: ($el) ->
@@ -192,35 +195,75 @@ $Dom = {
     ## continue to recursively walk up the chain until we reach body or html
     @elIsHiddenByAncestors($parent, $origEl)
 
+  parentHasNoOffsetWidthOrHeightAndOverflowHidden: ($el) ->
+    ## if we've walked all the way up to body or html then return false
+    return false if not $el.length or $el.is("body,html")
+
+    ## if we have overflow hidden and no effective width or height
+    if @elHasOverflowHidden($el) and @elHasNoEffectiveWidthOrHeight($el)
+      return $el
+    else
+      ## continue walking
+      return @parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())
+
+  parentHasDisplayNone: ($el) ->
+    ## if we have no $el or we've walked all the way up to document
+    ## then return false
+    return false if not $el.length or utils.hasDocument($el)
+
+    ## if we have display none then return the $el
+    if @elHasDisplayNone($el)
+      return $el
+    else
+      ## continue walking
+      return @parentHasDisplayNone($el.parent())
+
+  parentHasVisibilityNone: ($el) ->
+    ## if we've walked all the way up to document then return false
+    return false if not $el.length or utils.hasDocument($el)
+
+    ## if we have display none then return the $el
+    if @elHasVisibilityHidden($el)
+      return $el
+    else
+      ## continue walking
+      return @parentHasVisibilityNone($el.parent())
+
   getReasonElIsHidden: ($el) ->
     node = utils.stringifyElement($el, "short")
 
     ## returns the reason in human terms why an element is considered not visible
     switch
       when @elHasDisplayNone($el)
-        "This element: #{node} is not visible because it has CSS property: 'display: none'"
+        "This element (#{node}) is not visible because it has CSS property: 'display: none'"
 
       when $parent = @parentHasDisplayNone($el.parent())
         parentNode = utils.stringifyElement($parent, "short")
-        "This element: #{node} is not visible because it's parent: #{parentNode} has CSS property: 'display: none'"
+        "This element (#{node}) is not visible because its parent (#{parentNode}) has CSS property: 'display: none'"
 
       when $parent = @parentHasVisibilityNone($el.parent())
         parentNode = utils.stringifyElement($parent, "short")
-        "This element: #{node} is not visible because it's parent: #{parentNode} has CSS property: 'visibility: hidden'"
+        "This element (#{node}) is not visible because its parent (#{parentNode}) has CSS property: 'visibility: hidden'"
 
       when @elHasVisibilityHidden($el)
-        "This element: #{node} is not visible because it has CSS property: 'visibility: hidden'"
+        "This element (#{node}) is not visible because it has CSS property: 'visibility: hidden'"
 
-      when @elHasNoEffectiveWidthOrHeight($el)
+      when @elHasNoOffsetWidthOrHeight($el)
         width  = @elOffsetWidth($el)
         height = @elOffsetHeight($el)
-        "This element: #{node} is not visible because it has an effective width and height of: '#{width} x #{height}' pixels."
+        "This element (#{node}) is not visible because it has an effective width and height of: '#{width} x #{height}' pixels."
+
+      when $parent = @parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())
+        parentNode  = utils.stringifyElement($parent, "short")
+        width       = @elOffsetWidth($parent)
+        height      = @elOffsetHeight($parent)
+        "This element (#{node}) is not visible because its parent (#{parentNode}) has CSS property: 'overflow: hidden' and an effective width and height of: '#{width} x #{height}' pixels."
 
       when @elIsOutOfBoundsOfAncestorsOverflow($el)
-        "This element: #{node} is not visible because it's content is being clipped by one of it's parent elements, which has a CSS property of overflow: 'hidden', 'scroll' or 'auto'"
+        "This element (#{node}) is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: 'hidden', 'scroll' or 'auto'"
 
       else
-        "Cypress could not determine why this element: #{node} is not visible."
+        "Cypress could not determine why this element (#{node}) is not visible."
 }
 
 module.exports = $Dom

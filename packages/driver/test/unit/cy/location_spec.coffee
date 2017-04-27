@@ -4,7 +4,7 @@ describe "$Cypress.Cy Location Commands", ->
   context "#url", ->
     it "returns the location href", ->
       @cy.url().then (url) ->
-        expect(url).to.eq "http://localhost:3500/fixtures/html/dom.html"
+        expect(url).to.eq "http://localhost:3500/fixtures/dom.html"
 
     it "eventually resolves", ->
       _.delay =>
@@ -110,7 +110,7 @@ describe "$Cypress.Cy Location Commands", ->
           consoleProps = @log.attributes.consoleProps()
           expect(consoleProps).to.deep.eq {
             Command: "url"
-            Returned: "http://localhost:3500/fixtures/html/dom.html"
+            Returned: "http://localhost:3500/fixtures/dom.html"
           }
 
   context "#hash", ->
@@ -226,7 +226,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     it "returns a specific key from location object", ->
       @cy.location("href").then (href) ->
-        expect(href).to.eq "http://localhost:3500/fixtures/html/dom.html"
+        expect(href).to.eq "http://localhost:3500/fixtures/dom.html"
 
     it "eventually resolves", ->
       _.delay ->

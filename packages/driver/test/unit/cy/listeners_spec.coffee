@@ -35,7 +35,7 @@ describe "$Cypress.Cy Listeners Extensions", ->
       ## before onBeforeLoad
       bindWindowListeners = @sandbox.spy @cy, "bindWindowListeners"
 
-      @cy.visit("http://localhost:3500/fixtures/html/sinon.html", {
+      @cy.visit("http://localhost:3500/fixtures/sinon.html", {
         onBeforeLoad: (@contentWindow) =>
       }).then ->
         expect(bindWindowListeners).to.be.calledWith @contentWindow
@@ -69,4 +69,3 @@ describe "$Cypress.Cy Listeners Extensions", ->
         loading = @sandbox.stub @cy, "loading"
         @cy.get("a#change-page").click().then ->
           expect(loading).to.be.called
-
