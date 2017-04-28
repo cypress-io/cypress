@@ -7,7 +7,7 @@
     </h1>
     <nav id="main-nav">
       {{ header_menu('main-nav') }}
-      <a href="https://github.com/{{ config.github }}" class="main-nav-link"><i class="fa fa-github"></i></a>
+      <a href="https://github.com/{{ config.github_main_repo }}" class="main-nav-link"><i class="fa fa-github"></i></a>
       <div id="search-input-wrap">
         <div id="search-input-icon">
           <i class="fa fa-search"></i>
