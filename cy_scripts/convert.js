@@ -34,7 +34,7 @@ normalize = function(string) {
 
   // Don't dasherize our '_.md' file
   if (string.match(underscoreRe)) {
-    return string 
+    return string
   }
 
   return str.dasherize(string)
@@ -42,7 +42,7 @@ normalize = function(string) {
 
 find = function(type) {
   var folder = LOOKUP[type]
-  var globstar = path.join('cypress', folder, 'documentation', '**', '*.md')
+  var globstar = path.join('old_docs', folder, 'documentation', '**', '*.md')
 
   return glob(globstar, {
     realpath: true
