@@ -152,3 +152,10 @@ button, select, input, input[type="submit"]::-moz-focus-inner, input[type="butto
   transition: 0.4s;
   height: 100%;
 }
+
+.not-found h1 {
+  text-align: center;
+  font-size: 50px;
+  line-height: 100px;
+  margin: 100px 0;
+}
