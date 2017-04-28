@@ -1,3 +1,6 @@
+YAML = require('yamljs')
+_ = require('lodash')
+
 describe "Documentation", ->
   beforeEach ->
     cy.server()
@@ -43,9 +46,43 @@ describe "Documentation", ->
 
     describe "Guides & API", ->
       beforeEach ->
-        cy.visit("/guides/welcome/guides.html")
+        @guidesHomepage = "/guides/welcome/guides"
 
-      context.skip "Sidebar", ->
+        cy.visit(@guidesHomepage + ".html")
+
+      context "Header", ->
+        it.skip "should display capitalized title of doc", ->
+          cy
+            .contains("h1", "Guides")
+
+        it "should have link to edit doc", ->
+          cy
+            .contains("a", "Improve this doc").as("editLink")
+            .get("@editLink").should("have.attr", "href")
+              .and("include", @guidesHomepage + ".md")
+            .get("@editLink").should("have.attr", "href")
+              .and("include", "https://github.com/cypress-io/cypress-documentation/edit/master/source/")
+
+      context "Sidebar", ->
+        beforeEach ->
+          cy
+            .readFile("source/_data/sidebar.yml").then (yamlString) ->
+              @sidebar = YAML.parse(yamlString)
+            .readFile("themes/cypress/languages/en.yml").then (yamlString) ->
+              @english = YAML.parse(yamlString)
+
+        it.skip "displays titles in sidebar", ->
+          cy
+            .get("#sidebar")
+              .find(".sidebar-title").then (displayedTitles) ->
+
+                sidebarTitles = _.keys(@sidebar.guides)
+
+                _.each sidebarTitles, (title) =>
+                  englishTitle = @english.sidebar.guides[title]
+                  expect(displayedTitle.text()).to.eq(englishTitle)
+
+
 
       context.skip "Table of Contents", ->
 

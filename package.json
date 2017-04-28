@@ -18,7 +18,8 @@
     "colors": "^1.1.2",
     "fs-extra": "^2.1.2",
     "glob": "^7.1.1",
-    "underscore.string": "^3.3.4"
+    "underscore.string": "^3.3.4",
+    "yamljs": "^0.2.10"
   },
   "dependencies": {
     "bluebird": "^3.5.0",
