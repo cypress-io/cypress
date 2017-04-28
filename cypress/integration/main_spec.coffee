@@ -68,20 +68,36 @@ describe "Documentation", ->
           cy
             .readFile("source/_data/sidebar.yml").then (yamlString) ->
               @sidebar = YAML.parse(yamlString)
+              @sidebarTitles = _.keys(@sidebar.guides)
+              #
+              # @sidebarLinks = _
+              #   .chain(@sidebar.guides)
+              #   .map((value, key) ->
+              #     value
+              #     debugger
+              #   )
+
             .readFile("themes/cypress/languages/en.yml").then (yamlString) ->
               @english = YAML.parse(yamlString)
 
-        it.skip "displays titles in sidebar", ->
+        it.skip "displays current page as highlighted", ->
+
+        it "displays English titles in sidebar", ->
           cy
             .get("#sidebar")
-              .find(".sidebar-title").then (displayedTitles) ->
+              .find(".sidebar-title").each (displayedTitle, i) ->
+                englishTitle  = @english.sidebar.guides[@sidebarTitles[i]]
 
-                sidebarTitles = _.keys(@sidebar.guides)
+                expect(displayedTitle.text()).to.eq(englishTitle)
 
-                _.each sidebarTitles, (title) =>
-                  englishTitle = @english.sidebar.guides[title]
-                  expect(displayedTitle.text()).to.eq(englishTitle)
+        it.skip "displays English link names in sidebar", ->
+          cy
+            .get("#sidebar")
+              .find(".sidebar-link").each (displayedLink, i) ->
 
+                # englishLink  = @english.sidebar.guides[sidebarTitles[i]]
+
+                # expect(displayedLink.text()).to.eq(englishTitle)
 
 
       context.skip "Table of Contents", ->
