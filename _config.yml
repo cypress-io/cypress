@@ -18,6 +18,7 @@ permalink_defaults:
 
 logo: img/logo.png
 github: cypress-io/cypress-documentation
+github_main_repo: cypress-io/cypress
 
 # Directory
 source_dir: source
