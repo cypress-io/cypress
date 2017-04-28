@@ -7,7 +7,7 @@
     "version": "3.3.1"
   },
   "scripts": {
-    "start": "hexo server",
+    "start": "hexo server --port 2222",
     "convert": "node ./cy_scripts/convert.js",
     "generate": "hexo generate",
     "deploy": "hexo deploy --generate"
