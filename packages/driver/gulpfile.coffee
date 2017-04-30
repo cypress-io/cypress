@@ -63,7 +63,6 @@ watchJs = (options) ->
       "**/.git/**"
       "**/.nyc_output/**"
       "**/.sass-cache/**"
-      "**/bower_components/**"
       "**/coverage/**"
       "**/node_modules/**"
     ]

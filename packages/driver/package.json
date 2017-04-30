@@ -8,6 +8,7 @@
     "watch-dev": "gulp watch"
   },
   "devDependencies": {
+    "@cypress/bower-kendo-ui": "0.0.2",
     "@cypress/coffee-script": "0.1.2",
     "@cypress/core-electron": "0.3.4",
     "@cypress/icons": "0.5.2",
@@ -29,7 +30,6 @@
     "express": "^4.12.3",
     "gulp": "3.8.8",
     "gulp-awspublish": "3.3.0",
-    "gulp-bower": "0.0.6",
     "gulp-cached": "^1.1.0",
     "gulp-clean": "^0.3.1",
     "gulp-coffee": "2.3.1",
