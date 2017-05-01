@@ -65,22 +65,25 @@ describe "Documentation", ->
 
       context "Sidebar", ->
         beforeEach ->
-          cy
-            .readFile("source/_data/sidebar.yml").then (yamlString) ->
-              @sidebar = YAML.parse(yamlString)
-              @sidebarTitles = _.keys(@sidebar.guides)
-              #
-              # @sidebarLinks = _
-              #   .chain(@sidebar.guides)
-              #   .map((value, key) ->
-              #     value
-              #     debugger
-              #   )
+          cy.readFile("source/_data/sidebar.yml").then (yamlString) ->
+            @sidebar = YAML.parse(yamlString)
+            @sidebarTitles = _.keys(@sidebar.guides)
 
-            .readFile("themes/cypress/languages/en.yml").then (yamlString) ->
+            @sidebarLinkNames =  _.reduce @sidebar.guides, (memo, nestedObj, key) ->
+               memo.concat(_.keys(nestedObj))
+            , []
+
+            @sidebarLinks =  _.reduce @sidebar.guides, (memo, nestedObj, key) ->
+                 memo.concat(_.values(nestedObj))
+              , []
+
+          cy.readFile("themes/cypress/languages/en.yml").then (yamlString) ->
               @english = YAML.parse(yamlString)
 
-        it.skip "displays current page as highlighted", ->
+        it "displays current page as highlighted", ->
+          cy
+            .get("#sidebar").find(".current")
+            .should("have.attr", "href").and("include", "guides.html")
 
         it "displays English titles in sidebar", ->
           cy
@@ -90,19 +93,46 @@ describe "Documentation", ->
 
                 expect(displayedTitle.text()).to.eq(englishTitle)
 
-        it.skip "displays English link names in sidebar", ->
+        it "displays English link names in sidebar", ->
           cy
             .get("#sidebar")
               .find(".sidebar-link").each (displayedLink, i) ->
+                englishLink  = @english.sidebar.guides[@sidebarLinkNames[i]]
 
-                # englishLink  = @english.sidebar.guides[sidebarTitles[i]]
+                expect(displayedLink.text().trim()).to.eq(englishLink)
 
-                # expect(displayedLink.text()).to.eq(englishTitle)
+        it "displays English links in sidebar", ->
+          cy
+            .get("#sidebar")
+              .find(".sidebar-link").each (displayedLink, i) ->
+                sidebarLink  = @sidebarLinks[i]
 
+                expect(displayedLink.attr('href')).to.include(sidebarLink)
 
       context.skip "Table of Contents", ->
 
-      context.skip "Pagination", ->
+      context "Pagination", ->
+        beforeEach ->
+          @firstPage = "guides.html"
+          @nextPage = "our-goals.html"
+
+        it "does not display Prev link on first page", ->
+          cy.get(".article-footer").should("not.contain", "Prev")
+
+        it "displays Next link", ->
+          cy.get(".article-footer").contains("Next").should("have.attr", "href").and("include", @nextPage)
+
+        describe "click on Next page", ->
+          beforeEach ->
+            cy.get(".article-footer").contains("Next").click()
+            cy.url().should("contain", @nextPage)
+
+          it "should display Prev link", ->
+            cy.get(".article-footer").should("contain", "Prev")
+
+          it "clicking on Prev link should go back to original page", ->
+            cy.get(".article-footer").contains("Prev").click()
+            cy.url().should("contain", @firstPage)
 
       context "Comments", ->
         it "displays comments section", ->
