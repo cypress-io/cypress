@@ -9,6 +9,8 @@ coffee    = require("coffee-script")
 str       = require("string-to-stream")
 Promise   = require("bluebird")
 xhrs      = require("../../../app/lib/controllers/xhrs")
+socket    = require("../../../socket")
+Runner    = require("./server/runner")
 
 [3500, 3501].forEach (port) ->
 
@@ -25,6 +27,9 @@ xhrs      = require("../../../app/lib/controllers/xhrs")
   app.use require("morgan")(format: "dev")
   app.use require("body-parser")()
   app.use require("method-override")()
+
+  if port is 3500
+    new Runner({ port }).start(server)
 
   removeExtension = (str) ->
     str.split(".").slice(0, -1).join(".")
@@ -48,39 +53,45 @@ xhrs      = require("../../../app/lib/controllers/xhrs")
     file = fs.readFileSync path.join(__dirname, "..", spec), "utf8"
     coffee.compile(file)
 
+  sendJs = (res, pathOrContents, isContents = false) ->
+    res.set({
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+      "Pragma": "no-cache"
+      "Expires": "0"
+    })
+    res.type("js")
+    if isContents
+      res.send(pathOrContents)
+    else
+      res.sendFile(pathOrContents)
+
   app.get "/specs/*", (req, res) ->
     spec = req.params[0]
 
-    switch
-      when /\.js$/.test spec
-        res.set({
-          "Cache-Control": "no-cache, no-store, must-revalidate"
-          "Pragma": "no-cache"
-          "Expires": "0"
-        })
-        res.type("js")
-        res.send(getSpec(spec))
-      else
-        res.render path.join(__dirname, "..", "support", "views", "spec.html"), {
-          specs: getSpecPath(req.path)
-        }
+    if /\.js$/.test(spec)
+      sendJs(res, getSpec(spec), true)
+    else
+      res.render(path.join(__dirname, "..", "support", "views", "spec.html"), {
+        specs: getSpecPath(req.path)
+        ## FIXME: this path isn't right
+        socketIoPath: socket.getPathToClientSource()
+      })
 
   app.get "/timeout", (req, res) ->
     setTimeout ->
       res.send "<html></html>"
     , req.query.ms
 
-  app.get "/bower_components/*", (req, res) ->
-    res.sendFile path.join("bower_components", req.params[0]),
-      root: path.join(__dirname, "../..")
-
   app.get "/node_modules/*", (req, res) ->
     res.sendFile path.join("node_modules", req.params[0]),
       root: path.join(__dirname, "../..")
 
   app.get "/dist-test/*", (req, res) ->
-    res.sendFile path.join("dist-test", req.params[0]),
-      root: path.join(__dirname, "../..")
+    filePath = path.join(__dirname, "../../dist-test", req.params[0])
+    if /\.js$/.test(filePath)
+      sendJs(res, filePath)
+    else
+      res.sendFile(filePath)
 
   app.get "/fixtures/*", (req, res) ->
     res.sendFile "fixtures/#{req.params[0]}",
@@ -103,9 +114,11 @@ xhrs      = require("../../../app/lib/controllers/xhrs")
     }
 
   app.get "*", (req, res) ->
-    file = req.params[0].replace(/\/+$/, "")
-    res.sendFile file,
-      root: __dirname
+    filePath = req.params[0].replace(/\/+$/, "")
+    if /\.js$/.test filePath
+      sendJs(res, path.join(__dirname, filePath))
+    else
+      res.sendFile(filePath, { root: __dirname })
 
   ## errorhandler
   app.use require("errorhandler")()

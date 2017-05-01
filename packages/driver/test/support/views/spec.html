@@ -12,10 +12,7 @@
     {{#each specs}}
       <script src="/{{this}}.js"></script>
     {{/each}}
-    <script>
-       window.runner = mocha.run(function(failures){
-        console.log("Done. Failures: " + failures + " / " + runner.total + ". Duration: " + runner.stats.duration)
-      })
-    </script>
+    <script src="{{socketIoPath}}"></script>
+    <script src="/dist-test/runner.js"></script>
   </body>
 </html>

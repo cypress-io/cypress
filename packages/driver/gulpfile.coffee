@@ -26,17 +26,26 @@ log = (obj = {}) ->
   $.util.log _.compact(args)...
   $.util.beep()
 
-jsOptions =
+jsOptions = {
   entries: ["src/main.coffee"]
   extensions: [".coffee", ".js"]
   destination: "dist"
   outputName: "driver.js"
+}
 
-specOptions =
+specOptions = {
   entries: ["test/support/spec_helper.coffee"]
   extensions: [".coffee", ".js"]
   destination: "dist-test"
   outputName: "spec_helper.js"
+}
+
+runnerOptions = {
+  entries: ["test/support/client/runner.coffee"]
+  extensions: [".coffee", ".js"]
+  destination: "dist-test"
+  outputName: "runner.js"
+}
 
 compileJs = ->
   browserify({
@@ -124,6 +133,7 @@ gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", ->
   watchJs(specOptions)
+  watchJs(runnerOptions)
   require("./test/support/server.coffee")
 
 gulp.task "app", ["app:html", "app:watch"]

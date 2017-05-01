@@ -2,7 +2,6 @@ _             = require("lodash")
 fs            = require("fs-extra")
 path          = require("path")
 Promise       = require("bluebird")
-launcher      = require("../../../launcher")
 savedState    = require("../saved_state")
 utils         = require("./utils")
 
