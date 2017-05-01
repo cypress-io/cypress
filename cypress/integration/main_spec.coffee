@@ -42,7 +42,25 @@ describe "Documentation", ->
       it "displays language dropdown", ->
         cy.contains("select", "English").find("option").contains("English")
 
-    describe.skip "Search", ->
+    describe "Search", ->
+      beforeEach ->
+        cy.visit("/")
+
+      it "posts to Algolia api with correct index on search", ->
+        cy
+          .route({
+            method: "POST",
+            url: /algolia/
+          }).as("postAlgolia")
+          .get("#search-input").type("g")
+          .wait("@postAlgolia").then (xhr) ->
+            expect(xhr.requestBody.requests[0].indexName).to.eq("cypress")
+
+      it "displays algolia dropdown on search", ->
+        cy
+          .get(".aa-dropdown-menu").should("not.be.visible")
+          .get("#search-input").type("g")
+          .get(".aa-dropdown-menu").should("be.visible")
 
     describe "Guides & API", ->
       beforeEach ->
