@@ -507,6 +507,14 @@ module.exports = {
     url_invalid: "#{cmd('request')} must be provided a fully qualified url - one that begins with 'http'. By default #{cmd('request')} will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present."
     url_wrong_type: "#{cmd('request')} requires the url to be a string."
 
+  route:
+    failed_prerequisites: "#{cmd('route')} cannot be invoked before starting the #{cmd('server')}"
+    invalid_arguments: "#{cmd('route')} was not provided any arguments. You must provide valid arguments."
+    method_invalid: "#{cmd('route')} was called with an invalid method: '{{method}}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
+    response_invalid: "#{cmd('route')} cannot accept an undefined or null response. It must be set to something, even an empty string will work."
+    url_invalid: "#{cmd('route')} was called with an invalid url. Url must be either a string or regular expression."
+    url_missing: "#{cmd('route')} must be called with a url. It can be a string or regular expression."
+
   scrollIntoView:
     invalid_argument: "#{cmd('scrollIntoView')} can only be called with an options object. Your argument was: {{arg}}"
     subject_is_window: "Cannot call #{cmd('scrollIntoView')} on Window subject."
@@ -529,18 +537,6 @@ module.exports = {
     multiple_matches: "#{cmd('select')} matched more than one option by value or text: {{value}}"
     no_matches: "#{cmd('select')} failed because it could not find a single <option> with value or text matching: '{{value}}'"
     option_disabled: "#{cmd('select')} failed because this <option> you are trying to select is currently disabled:\n\n{{node}}"
-
-  route:
-    failed_prerequisites: "#{cmd('route')} cannot be invoked before starting the #{cmd('server')}"
-    invalid_arguments: "#{cmd('route')} was not provided any arguments. You must provide valid arguments."
-    method_invalid: "#{cmd('route')} was called with an invalid method: '{{method}}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
-    response_invalid: "#{cmd('route')} cannot accept an undefined or null response. It must be set to something, even an empty string will work."
-    url_invalid: "#{cmd('route')} was called with a invalid url. Url must be either a string or regular expression."
-    url_missing: "#{cmd('route')} must be called with a url. It can be a string or regular expression."
-
-    url_missing: "#{cmd('request')} requires a url. You did not provide a url."
-    url_invalid: "#{cmd('request')} must be provided a fully qualified url - one that begins with 'http'. By default #{cmd('request')} will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present."
-    url_wrong_type: "#{cmd('request')} requires the url to be a string."
 
   screenshot:
     timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."

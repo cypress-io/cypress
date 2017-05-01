@@ -1,4 +1,5 @@
-describe "$Cypress.Commands API", ->
+## FIXME: Needs re-write to test new interface
+describe.skip "$Cypress.Commands API", ->
   beforeEach ->
     @commands = $Cypress.Commands.create()
 

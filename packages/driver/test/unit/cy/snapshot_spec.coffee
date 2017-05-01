@@ -65,12 +65,12 @@ describe "$Cypress.Cy Snapshot Extension", ->
         done()
 
     it "provides object with href of external stylesheets in head", (done) ->
-      $("<link rel='stylesheet' href='http://localhost:3501/fixtures/html/generic_styles.css' />").appendTo(@cy.$$("head"))
+      $("<link rel='stylesheet' href='http://localhost:3501/fixtures/generic_styles.css' />").appendTo(@cy.$$("head"))
 
       setTimeout ->
         ## need to wait a tick for appended stylesheet to take affect
         {headStyles} = @Cypress.createSnapshot(@el)
-        expect(headStyles[0]).to.eql({href: "http://localhost:3501/fixtures/html/generic_styles.css"})
+        expect(headStyles[0]).to.eql({href: "http://localhost:3501/fixtures/generic_styles.css"})
         done()
 
     it "provides contents of style tags in body", ->
@@ -89,12 +89,12 @@ describe "$Cypress.Cy Snapshot Extension", ->
         done()
 
     it "provides object with href of external stylesheets in body", (done) ->
-      $("<link rel='stylesheet' href='http://localhost:3501/fixtures/html/generic_styles.css' />").appendTo(@cy.$$("body"))
+      $("<link rel='stylesheet' href='http://localhost:3501/fixtures/generic_styles.css' />").appendTo(@cy.$$("body"))
 
       setTimeout ->
         ## need to wait a tick for appended stylesheet to take affect
         {bodyStyles} = @Cypress.createSnapshot(@el)
-        expect(bodyStyles[bodyStyles.length - 1]).to.eql({href: "http://localhost:3501/fixtures/html/generic_styles.css"})
+        expect(bodyStyles[bodyStyles.length - 1]).to.eql({href: "http://localhost:3501/fixtures/generic_styles.css"})
         done()
 
     it "sets data-cypress-el attr", ->

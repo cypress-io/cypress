@@ -178,7 +178,7 @@ describe "$Cypress.Location API", ->
         @url "timeout?ms=1000", "timeout?ms=1000"
 
       it "does not strip path segments", ->
-        @url "fixtures/html/sinon.html", "fixtures/html/sinon.html"
+        @url "fixtures/sinon.html", "fixtures/sinon.html"
 
       it "formats urls with protocols", ->
         @url "beta.cypress.io", "http://beta.cypress.io/"
@@ -239,6 +239,6 @@ describe "$Cypress.Location API", ->
       expect(url).to.eq "http://localhost:3500/timeout?ms=1000"
 
     it "does not strip off path", ->
-      url = @normalize("fixtures/html/sinon.html")
+      url = @normalize("fixtures/sinon.html")
       url = $Cypress.Location.fullyQualifyUrl(url)
-      expect(url).to.eq "http://localhost:3500/fixtures/html/sinon.html"
+      expect(url).to.eq "http://localhost:3500/fixtures/sinon.html"

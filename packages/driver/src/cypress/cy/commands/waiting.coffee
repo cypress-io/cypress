@@ -31,11 +31,11 @@ $Cy.extend({
         aliasType: "route"
 
     getNumRequests = (alias) =>
-      requests = @prop("aliasRequests") ? {}
+      requests = @state("aliasRequests") ? {}
       requests[alias] ?= 0
       requests[alias] += 1
 
-      @prop("aliasRequests", requests)
+      @state("aliasRequests", requests)
 
       _.ordinalize requests[alias]
 
@@ -180,6 +180,7 @@ module.exports = (Cypress, Commands) ->
             arg = switch
               when _.isNaN(msOrFnOrAlias)    then "NaN"
               when msOrFnOrAlias is Infinity then "Infinity"
+              when _.isSymbol(msOrFnOrAlias) then msOrFnOrAlias.toString()
               else
                 try
                   JSON.stringify(msOrFnOrAlias)

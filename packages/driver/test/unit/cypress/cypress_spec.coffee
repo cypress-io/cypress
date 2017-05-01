@@ -14,10 +14,10 @@ describe "$Cypress API", ->
     it "returns new Cypress instance", ->
       expect(@Cypress).to.be.instanceof $Cypress
 
-    it "attaches klasses to instance", ->
+    it "attaches klasses to $Cypress", ->
       klasses = "Cy Log Utils Chai Mocha Runner Agents Server Chainer Location LocalStorage".split(" ")
       for klass in klasses
-        expect(@Cypress[klass]).to.eq $Cypress[klass]
+        expect($Cypress[klass]).to.eq $Cypress[klass]
 
   describe "#constructor", ->
     it "nulls cy, chai, mocha, runner", ->
@@ -171,22 +171,27 @@ describe "$Cypress API", ->
 
   describe "#onSpecWindow", ->
     beforeEach ->
-      _.each ["Cy", "Chai", "Mocha", "Runner"], (klass) =>
-        @sandbox.stub(@Cypress[klass], "create").returns(klass)
+      @sandbox.stub($Cypress.prototype, "restore")
+      @sandbox.stub($Cypress.Cy, "create").returns({
+        onCommand: ->
+        state: ->
+      })
+      _.each ["Chai", "Mocha", "Runner"], (klass) =>
+        @sandbox.stub($Cypress[klass], "create").returns(klass)
 
       @Cypress.onSpecWindow({})
 
     it "creates cy", ->
-      expect(@Cypress.Cy.create).to.be.calledWith(@Cypress, {})
+      expect($Cypress.Cy.create).to.be.calledWith(@Cypress, {})
 
     it "creates chai", ->
-      expect(@Cypress.Chai.create).to.be.calledWith(@Cypress, {})
+      expect($Cypress.Chai.create).to.be.calledWith(@Cypress, {})
 
     it "creates mocha", ->
-      expect(@Cypress.Mocha.create).to.be.calledWith(@Cypress, {})
+      expect($Cypress.Mocha.create).to.be.calledWith(@Cypress, {})
 
     it "creates runner", ->
-      expect(@Cypress.Runner.create).to.be.calledWith(@Cypress, {}, "Mocha")
+      expect($Cypress.Runner.create).to.be.calledWith(@Cypress, {}, "Mocha")
 
   describe "#addParentCommand", ->
     it "throws deprecation", (done) ->

@@ -553,7 +553,7 @@ describe "$Cypress.Cy Server API", ->
 #       xhr2 = new @window.XMLHttpRequest
 #       xhr3 = new @window.XMLHttpRequest
 
-#       xhr1.open("GET", "/fixtures/html/dom.html")
+#       xhr1.open("GET", "/fixtures/dom.html")
 #       xhr2.open("GET", "/timeout?ms=500")
 #       xhr3.open("GET", "/timeout?ms=500")
 

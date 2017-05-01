@@ -188,7 +188,7 @@ describe "$Cypress.Cy Screenshot Commands", ->
           logs = []
 
           @Cypress.on "log", (attrs, @log) =>
-            logs.push(log)
+            logs.push(@log)
 
           @cy.on "fail", (err) =>
             expect(logs.length).to.eq(1)

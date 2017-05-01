@@ -1045,7 +1045,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.$$("#button").hide()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "element is not visible because"
+          expect(err.message).to.include "element (<button#button>) is not visible because"
           done()
 
         @cy.get("#button").should("be.visible")
@@ -1215,7 +1215,7 @@ describe "$Cypress.Cy Querying Commands", ->
         expect($ul.find("li:first")).to.have.text("jkl 1")
 
     it "cancels existing promises", (done) ->
-      get = @sandbox.spy(@cy.sync, "get")
+      getSync = @sandbox.spy(@cy.get, "immediately")
 
       retrys = 0
 
@@ -1224,7 +1224,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
       @cy.on "cancel", ->
         _.delay ->
-          expect(get.callCount).to.be.within(2, 3)
+          expect(getSync.callCount).to.be.within(2, 3)
           expect(retrys).to.eq(2)
           done()
         , 50
@@ -1323,36 +1323,36 @@ describe "$Cypress.Cy Querying Commands", ->
           expect($count.length).to.eq(1)
           expect($count.get(0)).to.eq count.get(0)
 
-      it "retries until it finds the subject has the matching text node", (done) ->
+      it "retries until it finds the subject has the matching text node", ->
         count = $("<span class='count'>100</span>")
+        retried3Times = false
 
         ## make sure it retries 3 times.
         retry = _.after 3, =>
+          retried3Times = true
           @cy.$$("#edge-case-contains").append(count)
-
-          @cy.chain().then ($count) ->
-            expect($count.length).to.eq(1)
-            expect($count.get(0)).to.eq count.get(0)
-            done()
 
         @cy.on "retry", retry
 
-        @cy.get("#edge-case-contains").contains(100)
+        @cy.get("#edge-case-contains").contains(100).then ($count) ->
+          expect(retried3Times).to.be.true
+          expect($count.length).to.eq(1)
+          expect($count.get(0)).to.eq count.get(0)
 
-      it "retries until it finds a filtered contains has the matching text node", (done) ->
+      it "retries until it finds a filtered contains has the matching text node", ->
         count = $("<span class='count'>100</span>")
+        retried3Times = false
 
         retry = _.after 3, =>
+          retried3Times = true
           @cy.$$("#edge-case-contains").append(count)
-
-          @cy.chain().then ($count) ->
-            expect($count.length).to.eq(1)
-            expect($count.get(0)).to.eq count.get(0)
-            done()
 
         @cy.on "retry", retry
 
-        @cy.get("#edge-case-contains").contains(".count", 100)
+        @cy.get("#edge-case-contains").contains(".count", 100).then ($count) ->
+          expect(retried3Times).to.be.true
+          expect($count.length).to.eq(1)
+          expect($count.get(0)).to.eq count.get(0)
 
       it "returns the first matched element when multiple match and there is no filter", ->
         icon = @cy.$$("#edge-case-contains i:contains(25)")

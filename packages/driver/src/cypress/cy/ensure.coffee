@@ -197,7 +197,7 @@ module.exports = ($Cy) ->
       return true if $Cypress.Dom.elIsScrollable($el)
 
       ## prep args to throw in error since we can't scroll
-      cmd   ?= @prop("current").get("name")
+      cmd   ?= @state("current").get("name")
       node  = utils.stringifyElement($el)
 
       utils.throwErrByPath("dom.not_scrollable", {

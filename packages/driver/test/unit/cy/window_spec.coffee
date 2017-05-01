@@ -59,7 +59,7 @@ describe "$Cypress.Cy Window Commands", ->
         logs = []
 
         @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+          logs.push(@log)
 
         @cy.on "fail", (err) =>
           @cy.privateState("window", win)
@@ -115,7 +115,7 @@ describe "$Cypress.Cy Window Commands", ->
         logs = []
 
         @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+          logs.push(@log)
 
         @cy
           .window().as("win")
@@ -207,7 +207,7 @@ describe "$Cypress.Cy Window Commands", ->
         logs = []
 
         @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+          logs.push(@log)
 
         @cy.on "fail", (err) =>
           @cy.privateState("window", win)
@@ -263,7 +263,7 @@ describe "$Cypress.Cy Window Commands", ->
         logs = []
 
         @Cypress.on "log", (attrs, @log) =>
-          logs.push log
+          logs.push(@log)
 
         @cy
           .document().as("doc")

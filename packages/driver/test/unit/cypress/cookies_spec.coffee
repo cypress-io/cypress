@@ -2,7 +2,7 @@ describe "$Cypress.Cookies API", ->
   beforeEach ->
     @Cypress = $Cypress.create()
 
-    @Cookies = @Cypress.Cookies("__cypress", "localhost")
+    @Cookies = $Cypress.Cookies.create(@Cypress, "__cypress", "localhost")
 
     @setCookie = (key, value) ->
       Cookies.set key, value, {path: "/"}
@@ -20,7 +20,7 @@ describe "$Cypress.Cookies API", ->
   context ".setCy", ->
     it "sets cypress cookie value", ->
       @Cookies.setCy("foo", "bar")
-      expect(Cookies.get("__cypress.foo")).to.eq("bar")
+      expect(@Cookies._get("__cypress.foo")).to.eq("bar")
 
   context "._get", ->
     it "gets cookie value", ->
