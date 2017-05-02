@@ -44,7 +44,7 @@ module.exports = class Runner
     @_clients = {}
 
     unless @_config.once
-      process.on 'SIGINT', =>
+      process.on "SIGINT", =>
         @_stopBrowser -> process.exit 0
 
   start: (server) ->
@@ -68,7 +68,7 @@ module.exports = class Runner
 
   _launchBrowser: ->
     theBrowser = getArg("browser") or "chrome"
-    url = "http://localhost:#{@_config.port}/specs/integration/clicks_spec?reporter=socket"
+    url = "http://localhost:#{@_config.port}?reporter=socket"
 
     browser.launch(theBrowser, url)
     .then (instance) =>

@@ -9,8 +9,8 @@ glob      = require("glob")
 coffee    = require("coffee-script")
 str       = require("string-to-stream")
 Promise   = require("bluebird")
-xhrs      = require("../../../app/lib/controllers/xhrs")
-Runner    = require("./server/runner")
+xhrs      = require("../../../../app/lib/controllers/xhrs")
+Runner    = require("./runner")
 
 args = require("minimist")(process.argv.slice(2))
 
@@ -43,18 +43,14 @@ args = require("minimist")(process.argv.slice(2))
     if /all_specs/.test(pathName) then getAllSpecs(false) else [pathName.replace(/^\//, "")]
 
   getAllSpecs = (allSpecs = true) ->
-    specs = glob.sync "../!(support)/**/*.coffee", cwd: __dirname
-    specs.unshift "client/all_specs.coffee" if allSpecs
+    specs = glob.sync("../../!(support)/**/*.coffee", { cwd: __dirname })
+    specs.unshift("specs/all_specs.coffee") if allSpecs
     _.map specs, (spec) ->
-      ## replace client/whatevs.coffee -> specs/whatevs.coffee
-      spec = spec.split("/")
-      spec.splice(0, 1, "specs")
-
-      removeExtension(spec.join("/"))
+      removeExtension(spec.replace("../..", "specs"))
 
   getSpec = (spec) ->
     spec = "#{removeExtension(spec)}.coffee"
-    file = fs.readFileSync(path.join(__dirname, "..", spec), "utf8")
+    file = fs.readFileSync(path.join(__dirname, "../..", spec), "utf8")
     coffee.compile(file)
 
   sendJs = (res, pathOrContents, isContents = false) ->
@@ -75,7 +71,7 @@ args = require("minimist")(process.argv.slice(2))
     if /\.js$/.test(spec)
       sendJs(res, getSpec(spec), true)
     else
-      res.render(path.join(__dirname, "..", "support", "views", "spec.html"), {
+      res.render(path.join(__dirname, "views/spec.html"), {
         specs: getSpecPath(req.path)
       })
 
@@ -86,11 +82,11 @@ args = require("minimist")(process.argv.slice(2))
 
   app.get "/node_modules/*", (req, res) ->
     res.sendFile(path.join("node_modules", req.params[0]), {
-      root: path.join(__dirname, "../..")
+      root: path.join(__dirname, "../../..")
     })
 
   app.get "/dist-test/*", (req, res) ->
-    filePath = path.join(__dirname, "../../dist-test", req.params[0])
+    filePath = path.join(__dirname, "../../../dist-test", req.params[0])
     if /\.js$/.test(filePath)
       sendJs(res, filePath)
     else
@@ -105,7 +101,7 @@ args = require("minimist")(process.argv.slice(2))
     res.type("xml").send("<foo>bar</foo>")
 
   app.get "/buffer", (req, res) ->
-    fs.readFile path.join(__dirname, "fixtures", "sample.pdf"), (err, bytes) ->
+    fs.readFile path.join(__dirname, "fixtures/sample.pdf"), (err, bytes) ->
       res.type("pdf")
       res.send(bytes)
 
@@ -113,7 +109,7 @@ args = require("minimist")(process.argv.slice(2))
     xhrs.handle(req, res)
 
   app.get "/", (req, res) ->
-    res.render(path.join(__dirname, "views", "index.html"), {
+    res.render(path.join(__dirname, "views/index.html"), {
       specs: getAllSpecs()
     })
 

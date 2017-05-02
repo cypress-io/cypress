@@ -13,5 +13,13 @@
       </li>
     {{/each}}
     </ul>
+    <script>
+      (function () {
+        // preserve query string between pages
+        Array.from(document.querySelectorAll('a')).forEach(function (link) {
+          link.href = link.href + location.search
+        })
+      }())
+    </script>
   </body>
 </html>

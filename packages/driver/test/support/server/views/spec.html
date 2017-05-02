@@ -8,12 +8,19 @@
     <style>p{position:absolute;top:10px;left:15px;}</style>
   </head>
   <body>
-    <p><a href="/">&lt; Spec List</a></p>
+    <p><a id="spec-list" href="/">&lt; Spec List</a></p>
     <div id="mocha"></div>
     <script src="/dist-test/spec_helper.js"></script>
     {{#each specs}}
       <script src="/{{this}}.js"></script>
     {{/each}}
     <script src="/dist-test/runner.js"></script>
+    <script>
+      (function () {
+        // preserve query string between pages
+        var link = document.getElementById('spec-list')
+        link.href = link.href + location.search
+      }())
+    </script>
   </body>
 </html>
