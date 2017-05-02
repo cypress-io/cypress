@@ -38,6 +38,7 @@
     "gulp-debug": "^2.1.2",
     "gulp-eco": "0.0.2",
     "gulp-load-plugins": "0.5.3",
+    "gulp-nodemon": "^2.2.1",
     "gulp-plumber": "0.6.3",
     "gulp-print": "^1.1.0",
     "gulp-remember": "^0.3.0",

@@ -111,7 +111,7 @@ watchJs = (options) ->
 # gulp.task "app:img", ["vendor:img", "project:img", "project:favicon", "project:logo"]
 
 # gulp.task "vendor:img", ->
-#   gulp.src("bower_components/jquery-ui/themes/smoothness/images/**")
+#   gulp.src("node_modules/jquery-ui/themes/smoothness/images/**")
 #     .pipe gulp.dest "lib/public/css/images"
 #
 # gulp.task "project:img", ->
@@ -140,14 +140,17 @@ gulp.task "watch:app:js", -> watchJs(jsOptions)
 gulp.task "watch:app:html", ->
   gulp.watch "app/html/index.html", ["app:html"]
 
-gulp.task "server", -> require("./server.coffee")
+gulp.task "server", -> require("./server/server.coffee")
 
 gulp.task "test", ->
   watchSpecs = watchJs(specOptions)
   watchRunner = watchJs(runnerOptions)
   Promise.all([watchSpecs.promise, watchRunner.promise])
   .then ->
-    require("./test/support/server.coffee")
+    $.nodemon({
+      script: "#{__dirname}/test/support/server/server.coffee"
+      watch: ["#{__dirname}/test/support/server/**/*.coffee"]
+    })
 
   return watchSpecs.process
 
