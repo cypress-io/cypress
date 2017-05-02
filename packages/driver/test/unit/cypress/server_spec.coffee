@@ -104,7 +104,7 @@ describe "$Cypress.Cy Server API", ->
       @srh  = @sandbox.spy(@window.XMLHttpRequest.prototype, "setRequestHeader")
       @server.bindTo(@window)
       @xhr = new @window.XMLHttpRequest
-      @xhr.open("GET", "/fixtures/ajax/app.json")
+      @xhr.open("GET", "/fixtures/app.json")
       @proxy = @server.getProxyFor(@xhr)
 
     it "sets request.headers", ->
@@ -143,7 +143,7 @@ describe "$Cypress.Cy Server API", ->
       @srh  = @sandbox.spy(@window.XMLHttpRequest.prototype, "setRequestHeader")
       @server.bindTo(@window)
       @xhr = new @window.XMLHttpRequest
-      @xhr.open("GET", "/fixtures/ajax/app.json")
+      @xhr.open("GET", "/fixtures/app.json")
       @proxy = @server.getProxyFor(@xhr)
 
     it "encodes the http header value", ->
@@ -167,7 +167,7 @@ describe "$Cypress.Cy Server API", ->
       @grh  = @sandbox.spy(@window.XMLHttpRequest.prototype, "getResponseHeader")
       @server.bindTo(@window)
       @xhr = new @window.XMLHttpRequest
-      @xhr.open("GET", "/fixtures/ajax/app.json")
+      @xhr.open("GET", "/fixtures/app.json")
       @proxy = @server.getProxyFor(@xhr)
 
     it "calls the original xhr implementation", ->
@@ -183,7 +183,7 @@ describe "$Cypress.Cy Server API", ->
       @garh  = @sandbox.spy(@window.XMLHttpRequest.prototype, "getAllResponseHeaders")
       @server.bindTo(@window)
       @xhr = new @window.XMLHttpRequest
-      @xhr.open("GET", "/fixtures/ajax/app.json")
+      @xhr.open("GET", "/fixtures/app.json")
       @proxy = @server.getProxyFor(@xhr)
 
     it "calls the original xhr implementation", ->
@@ -211,7 +211,7 @@ describe "$Cypress.Cy Server API", ->
 
       @sandbox.stub(@xhr, "getAllResponseHeaders").returns(headers)
 
-      @xhr.open("GET", "/fixtures/ajax/app.json")
+      @xhr.open("GET", "/fixtures/app.json")
 
       proxy = @server.getProxyFor(@xhr)
 

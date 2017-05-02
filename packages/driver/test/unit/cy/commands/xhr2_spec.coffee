@@ -246,7 +246,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       _.each extensions, (val, ext) ->
         it "filters out non ajax requests by default for extension: .#{ext}", (done) ->
-          @cy.privateState("window").$.get("/fixtures/ajax/app.#{ext}").done (res) ->
+          @cy.privateState("window").$.get("/fixtures/app.#{ext}").done (res) ->
             expect(res).to.eq val
             done()
 
@@ -254,7 +254,7 @@ describe "$Cypress.Cy XHR Commands", ->
         ## this should throw since it should return 404 when no
         ## route matches it
         @cy.server({ignore: false}).window().then (w) ->
-          Promise.resolve(w.$.get("/fixtures/ajax/app.html")).catch -> done()
+          Promise.resolve(w.$.get("/fixtures/app.html")).catch -> done()
 
     describe "url rewriting", ->
       beforeEach ->
@@ -455,18 +455,18 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy
           .server()
           .visit("http://localhost:3500/fixtures/xhr.html")
-          .route("http://localhost:3501/fixtures/ajax/app.json").as("getPhones")
+          .route("http://localhost:3501/fixtures/app.json").as("getPhones")
           .window().then (win) ->
             @cy.state("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
             @cy.state("server").bindTo(win)
-            win.$.get("http://localhost:3501/fixtures/ajax/app.json")
+            win.$.get("http://localhost:3501/fixtures/app.json")
             null
           .wait("@getPhones")
           .then ->
             xhr = @cy.state("responses")[0].xhr
-            expect(xhr.url).to.eq("http://localhost:3501/fixtures/ajax/app.json")
-            expect(@open).to.be.calledWith("GET", "http://localhost:3501/fixtures/ajax/app.json")
+            expect(xhr.url).to.eq("http://localhost:3501/fixtures/app.json")
+            expect(@open).to.be.calledWith("GET", "http://localhost:3501/fixtures/app.json")
 
       # it "can stub root requests to CORS", ->
       #   @cy
@@ -937,14 +937,14 @@ describe "$Cypress.Cy XHR Commands", ->
         .server()
         .route(/app/, {}).as("getJSON")
         .window().then (win) ->
-          win.$.get("/fixtures/ajax/app.json")
+          win.$.get("/fixtures/app.json")
           null
         .wait("@getJSON").its("responseBody").should("deep.eq", {})
         .server({enable: false})
         .then ->
           expect(set).to.be.calledWithExactly({enable: false})
         .window().then (win) ->
-          win.$.get("/fixtures/ajax/app.json")
+          win.$.get("/fixtures/app.json")
           null
         .wait("@getJSON").its("responseBody").should("not.deep.eq", {})
 
