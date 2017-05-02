@@ -1,7 +1,7 @@
-client = window.socket.client("http://localhost:3500")
-client.on "connect", -> console.log("socket connected")
+io = require("socket.io-client")
+socket = io("http://localhost:3500")
 
 module.exports = {
   send: (event, data) ->
-    console.log("send", event, data)
+    socket.emit(event, data)
 }

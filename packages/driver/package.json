@@ -64,6 +64,8 @@
     "sinon": "cypress-io/sinon#bd2fc5665a7f83acd9931bc9aca212fd21bf3ef2",
     "sinon-as-promised": "3.0.1",
     "sinon-chai": "cypress-io/sinon-chai#84d1085cac68f85c838471577e9d8cc811ca325d",
+    "socket.io": "^1.7.3",
+    "socket.io-client": "^1.7.3",
     "string-to-stream": "^1.0.1",
     "underscore.inflection": "cypress-io/underscore.inflection#81a565ad35bfce330f513a1d0de94a0eff29611e",
     "underscore.string": "3.3.4",

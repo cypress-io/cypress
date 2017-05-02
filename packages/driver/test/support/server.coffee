@@ -9,7 +9,6 @@ coffee    = require("coffee-script")
 str       = require("string-to-stream")
 Promise   = require("bluebird")
 xhrs      = require("../../../app/lib/controllers/xhrs")
-socket    = require("../../../socket")
 Runner    = require("./server/runner")
 
 [3500, 3501].forEach (port) ->
@@ -73,8 +72,6 @@ Runner    = require("./server/runner")
     else
       res.render(path.join(__dirname, "..", "support", "views", "spec.html"), {
         specs: getSpecPath(req.path)
-        ## FIXME: this path isn't right
-        socketIoPath: socket.getPathToClientSource()
       })
 
   app.get "/timeout", (req, res) ->

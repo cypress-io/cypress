@@ -4,7 +4,7 @@ chalk = require("chalk")
 EventEmitter = require("events").EventEmitter
 
 browser = require("./browser")
-socket = require("../../../../socket")
+SocketServer = require("socket.io")
 
 reporters =
  spec: require("mocha/lib/reporters/spec")
@@ -46,7 +46,7 @@ module.exports = class Runner
         @_stopBrowser -> process.exit 0
 
   start: (server) ->
-    io = socket.server(server)
+    io = new SocketServer(server)
     io.on("connection", @_handleConnection.bind(@))
 
     @_launchBrowser()
@@ -58,8 +58,7 @@ module.exports = class Runner
   _handleConnection: (client) ->
     @_clients[client.id] = client
 
-    client.on("reporter", @_onReport.bind(@))
-    client.on("batch-report", @_onBatchReport.bind(@))
+    client.on("report", @_onReport.bind(@))
     client.on("error", @_onError.bind(@))
 
     client.on "disconnect", =>
@@ -67,7 +66,7 @@ module.exports = class Runner
 
   _launchBrowser: ->
     theBrowser = getArg("browser") or "chrome"
-    url = "http://localhost:#{@_config.port}/specs/integration/clicks_spec"
+    url = "http://localhost:#{@_config.port}/specs/integration/clicks_spec?reporter=socket"
 
     browser.launch(theBrowser, url)
     .then (instance) =>
@@ -75,11 +74,11 @@ module.exports = class Runner
     .catch (err) =>
       @_logAndFail(err)
 
-  _onBatchReport: (tests) ->
+  _onReport: ({ tests }) ->
     for test in tests
-      @_onReport(test)
+      @_report(test)
 
-  _onReport: ({ event, info, err }) ->
+  _report: ({ event, info, err }) ->
     if event is "start"
       @runner.removeAllListeners() if @runner?
       @runner = new EventEmitter()
@@ -92,7 +91,7 @@ module.exports = class Runner
         "#{info.parentTitle} #{info.title}"
       else
         info.title
-    @runner.emit event, info, err
+    @runner?.emit event, info, err
 
     if @_config.once and event is "end"
       @_stopBrowser -> process.exit 0
