@@ -1,4 +1,5 @@
 _         = require("lodash")
+bodyParser = require("body-parser")
 express   = require("express")
 http      = require("http")
 path      = require("path")
@@ -23,8 +24,8 @@ Runner    = require("./server/runner")
 
   app.use require("cors")()
   app.use require("compression")()
-  app.use require("morgan")(format: "dev")
-  app.use require("body-parser")()
+  app.use bodyParser.urlencoded({ extended: false })
+  app.use bodyParser.json()
   app.use require("method-override")()
 
   if port is 3500
