@@ -1,5 +1,7 @@
 describe "$Cypress.Cy Scrolling Commands", ->
-  enterCommandTestingMode("scrolling")
+  enterCommandTestingMode("scrolling", {
+    container: { height: 200 }
+  })
 
   context "#scrollTo", ->
     beforeEach ->

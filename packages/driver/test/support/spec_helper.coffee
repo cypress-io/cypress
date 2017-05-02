@@ -76,11 +76,13 @@ resolveUrl = (url, cb) ->
 #       on: @sandbox.stub()
 #       emit: @sandbox.stub()
 
-window.loadDom = (fixture) ->
+window.loadDom = (fixture, options = {}) ->
   loadFixture(fixture).done (iframe) =>
     @$iframe = $(iframe)
     @head = @$iframe.contents().find("head").children().prop("outerHTML")
     @body = @$iframe.contents().find("body").children().prop("outerHTML")
+    if options.container
+      @$iframe.css(options.container)
 
 window.getNames = (queue) ->
   _.map(queue, "name")
@@ -113,7 +115,7 @@ window.enterCommandTestingMode = (fixture = "dom", options = {}) ->
   before ->
     @loadDom = _.bind(loadDom, @)
 
-    @loadDom(fixture)
+    @loadDom(fixture, options)
 
   beforeEach ->
     @setup = (opts = {}) =>
@@ -218,7 +220,7 @@ window.enterCommandTestingMode = (fixture = "dom", options = {}) ->
     if _.endsWith(@$iframe.prop("contentWindow").location.href, fixture)
       @setup()
     else
-      @loadDom(fixture).then @setup
+      @loadDom(fixture, options).then @setup
 
   afterEach ->
     ## we abort here instead of restoring
