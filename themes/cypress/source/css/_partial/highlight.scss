@@ -1,138 +1,78 @@
 pre {
   font-family: $font-mono;
-  color: $color-default;
-  background: #F7F7F7;
+  color: $highlight-foreground;
+  background: $highlight-background;
   font-size: 0.9em;
   padding: 1em;
   line-height: $line-height;
 
   code {
+    color: $highlight-foreground;
     border: none;
     display: block;
     padding: 0;
   }
 
-  .comment {
-    color: #9aa7b1;
+  .comment { color: $highlight-comment; }
+
+  .variable,
+  .attribute,
+  .tag,
+  .regexp,
+  .ruby .constant,
+  .xml .tag .title,
+  .xml .pi,
+  .xml .doctype,
+  .html .doctype,
+  .css .id,
+  .css .class,
+  .css .pseudo {
+    color: $highlight-red;
   }
 
-  .title {
-    color: $color-stack;
+  .number,
+  .preprocessor,
+  .built_in,
+  .literal,
+  .params,
+  .constant,
+  .command {
+    color: $highlight-orange;
   }
 
-  .variable {
-    color: $color-persian-red;
+  .ruby .class .title,
+  .css .rules .attribute,
+  .string,
+  .value,
+  .inheritance,
+  .header,
+  .ruby .symbol,
+  .xml .cdata,
+  .special,
+  .number,
+  .formula {
+    color: $highlight-green;
   }
 
-  .attribute {
-    color: $color-persian-red;
+  .title,
+  .css .hexcolor {
+    color: $highlight-aqua;
   }
 
-  .tag {
-    color: $color-persian-red;
-  }
-
-  .regexp {
-    color: $color-persian-red;
-  }
-
-  .number {
-    color: $color-carrot-orange;
-  }
-
-  .preprocessor {
-    color: $color-carrot-orange;
-  }
-
-  .built-in {
-    color: $color-carrot-orange;
-  }
-
-  .literal {
-    color: $color-carrot-orange;
-  }
-
-  .params {
-    color: $color-carrot-orange;
-  }
-
-  .constant {
-    color: $color-carrot-orange;
-  }
-
-  .class {
-    color: #459a82;
-  }
-
-  .string {
-    color: #459a82;
-  }
-
-  .value {
-    color: #459a82;
-  }
-
-  .inheritance {
-    color: #459a82;
-  }
-
-  .header {
-    color: #459a82;
-  }
-
-
-
-  .keyword {
-    color: $color-trendy-pink;
-  }
-
+  .function,
+  .python .decorator,
+  .python .title,
+  .ruby .function .title,
+  .ruby .title .keyword,
+  .perl .sub,
+  .javascript .title,
   .coffeescript .title {
-    color: $color-san-marino;
-  }
-}
-
-.javascript pre {
-
-  .title {
-    color: $color-link;
+    color: $highlight-blue;
   }
 
-  .function {
-    color: #996bb7;
-  }
-}
-
-.html pre {
-
-  .tag {
-    color: $color-default;
-
-    .name, .attr, .doctype {
-      color: $color-carrot-orange;
-    }
-  }
-}
-
-.css pre {
-
-  .id {
-    color: $color-persian-red;
-  }
-
-  .class {
-    color: $color-persian-red;
-  }
-
-  .pseudo {
-    color: $color-persian-red;
-  }
-
-  .hexcolor {
-    color: $color-boston-blue;
-  }
-
-  .rules .attribute {
-    color: $color-limeade;
+  .keyword,
+  .javascript .function {
+    color: $highlight-purple;
   }
 }
 
@@ -161,9 +101,10 @@ a code {
 }
 
 .highlight {
-  background: #F7F7F7;
   padding: 10px 15px;
-  color: $color-emperor;
+  color: $highlight-foreground;
+  background: $highlight-background;
+  line-height: $line-height;
   overflow: auto;
   margin: 0;
 
@@ -172,6 +113,12 @@ a code {
     pre {
       color: #c4c5ca;
     }
+  }
+
+  pre {
+    border: none;
+    margin: 0;
+    padding: 1px;
   }
 
   table {
@@ -207,13 +154,10 @@ a code {
 
     a {
       float: right;
-    }
-  }
+      color: $highlight-foreground;
 
-  pre {
-    padding: 0;
-    border: none;
-    background: none;
+      &:hover { border-bottom-color: $highlight-foreground; }
+    }
   }
 
   .line {

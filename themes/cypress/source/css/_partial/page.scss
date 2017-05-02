@@ -123,7 +123,7 @@
     }
 
     tr>td:last-child {
-      border-right: 0; 
+      border-right: 0;
     }
 
     tr:nth-child(2n) {
@@ -136,7 +136,7 @@
     padding: 0 20px;
     position: relative;
     border: 1px solid $color-border;
-    border-left: 5px solid $color-alto;
+    border-left: 5px solid $highlight-comment;
     footer {
       margin: 1em 0;
       font-style: italic;

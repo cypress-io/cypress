@@ -7,8 +7,6 @@ $white-90: rgba(255,255,255,0.9);
 $white-80: rgba(255,255,255,0.8);
 $white-60: rgba(255,255,255,0.6);
 
-$red: #f00;
-
 $color-gray: #999;
 $color-default: #595d6b;
 $color-border: #e3e3e3;
@@ -16,20 +14,18 @@ $color-link: #3B94D9;
 $color-link-hover: #0369b3;
 $color-background: #24262F;
 
-$color-gallery: #eee;
-$color-alto: #ddd;
-$color-pink-swan: #bbb;
-
-$color-outer-space: #283542;
-$color-yellow-sea: #fa0;
-$color-emperor: #4d4d4c;
-$color-stack: #8e908c;
-$color-persian-red: #c82829;
-$color-carrot-orange: #f5871f;
-$color-limeade: #149c6a;
-$color-boston-blue: #3e999f;
-$color-san-marino: #4271ae;
-$color-trendy-pink: #8959a8;
+$highlight-background:    #f7f7f7;
+$highlight-current-line:  #efefef;
+$highlight-selection:     #d6d6d6;
+$highlight-foreground:    #4d4d4c;
+$highlight-comment:       #8e908c;
+$highlight-red:           #c82829;
+$highlight-orange:        #f5871f;
+$highlight-yellow:        #eab700;
+$highlight-green:         #718c00;
+$highlight-aqua:          #3e999f;
+$highlight-blue:          #4271ae;
+$highlight-purple:        #8959a8;
 
 // Typography
 $font-sans: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
