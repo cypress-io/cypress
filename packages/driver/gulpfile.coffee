@@ -59,6 +59,8 @@ compileJs = ->
     .pipe(gulp.dest(jsOptions.destination))
 
 watchJs = (options) ->
+  ret = {}
+
   bundler = browserify({
     entries: options.entries
     extensions: options.extensions
@@ -77,25 +79,34 @@ watchJs = (options) ->
     ]
   })
 
-  rebundle = (files = []) ->
-    files.forEach (filePath) ->
-      filePath = $.util.colors.yellow(path.basename(filePath))
-      outputName = $.util.colors.cyan(options.outputName)
-      $.util.log("Bundling #{outputName} after #{filePath} changed")
+  ret.promise = new Promise (resolve) ->
+    outputName = $.util.colors.cyan(options.outputName)
+    initial = true
 
-    outputPath = path.join(__dirname, options.destination, options.outputName)
+    rebundle = (files = []) ->
+      if initial
+        $.util.log("Bundling #{outputName}")
 
-    bundler.bundle()
-      .on('error', log)
-      .pipe($.plumber(log))
-      .on 'end', ->
-        $.util.log("Finished bundling #{$.util.colors.cyan(options.outputName)}")
-      .pipe(fs.createWriteStream(outputPath))
+      files.forEach (filePath) ->
+        filePath = $.util.colors.yellow(path.basename(filePath))
+        $.util.log("Bundling #{outputName} after #{filePath} changed")
 
-  bundler.on 'update', (files) =>
-    rebundle(files)
+      outputPath = path.join(__dirname, options.destination, options.outputName)
 
-  return rebundle()
+      bundler.bundle()
+        .on("error", log)
+        .pipe($.plumber(log))
+        .on "end", ->
+          $.util.log("Finished bundling #{outputName}")
+          if initial
+            initial = false
+            resolve()
+        .pipe(fs.createWriteStream(outputPath))
+
+    bundler.on("update", rebundle)
+    ret.process = rebundle()
+
+  return ret
 
 # gulp.task "app:img", ["vendor:img", "project:img", "project:favicon", "project:logo"]
 
@@ -132,9 +143,13 @@ gulp.task "watch:app:html", ->
 gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", ->
-  watchJs(specOptions)
-  watchJs(runnerOptions)
-  require("./test/support/server.coffee")
+  watchSpecs = watchJs(specOptions)
+  watchRunner = watchJs(runnerOptions)
+  Promise.all([watchSpecs.promise, watchRunner.promise])
+  .then ->
+    require("./test/support/server.coffee")
+
+  return watchSpecs.process
 
 gulp.task "app", ["app:html", "app:watch"]
 
