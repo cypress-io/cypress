@@ -33,7 +33,7 @@ commands = [
   require("../cy/commands/traversals")
   require("../cy/commands/waiting")
   require("../cy/commands/window")
-  require("../cy/commands/xhr2")
+  require("../cy/commands/xhr")
 ]
 
 getTypeByPrevSubject = (prevSubject) ->

@@ -1,4 +1,4 @@
-# describe "$Cypress.Cy XHR2 Commands", ->
+# describe "$Cypress.Cy XHR Commands", ->
 #   enterCommandTestingMode()
 
 #   it "logs all xhr requests", ->
