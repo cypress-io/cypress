@@ -12,6 +12,8 @@ Promise   = require("bluebird")
 xhrs      = require("../../../app/lib/controllers/xhrs")
 Runner    = require("./server/runner")
 
+args = require("minimist")(process.argv.slice(2))
+
 [3500, 3501].forEach (port) ->
 
   app       = express()
@@ -21,6 +23,9 @@ Runner    = require("./server/runner")
 
   app.set "view engine", "html"
   app.engine "html", hbs.__express
+
+  if args.debug
+    app.use require("morgan")({ format: "dev" })
 
   app.use require("cors")()
   app.use require("compression")()
