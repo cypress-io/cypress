@@ -1,5 +1,5 @@
 _ = require("lodash")
-Promise = require("../../bluebird")
+Promise = require("bluebird")
 sinonAsPromised = require("sinon-as-promised")
 
 $Cy = require("../../cy")

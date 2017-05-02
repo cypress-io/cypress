@@ -1,5 +1,5 @@
 _ = require("lodash")
-Promise = require("../../bluebird")
+Promise = require("bluebird")
 
 $Cy = require("../../cy")
 $Log = require("../../log")

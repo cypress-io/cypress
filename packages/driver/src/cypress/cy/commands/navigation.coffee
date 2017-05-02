@@ -1,7 +1,7 @@
 _ = require("lodash")
 moment = require("moment")
 UrlParse = require("url-parse")
-Promise = require("../../bluebird")
+Promise = require("bluebird")
 
 $Cy = require("../../cy")
 $Location = require("../../location")

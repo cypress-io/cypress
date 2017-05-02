@@ -1,7 +1,7 @@
 _ = require("lodash")
 Backbone = require("backbone")
 moment = require("moment")
-Promise = require("./bluebird")
+Promise = require("bluebird")
 
 $Cypress = require("../cypress")
 $Log = require("./log")

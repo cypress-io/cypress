@@ -3,7 +3,7 @@ require("setimmediate")
 _ = require("lodash")
 $ = require("jquery")
 Backbone = require("backbone")
-Promise = require("./bluebird")
+Promise = require("bluebird")
 
 utils = require("./utils")
 $Cypress = require("../cypress")

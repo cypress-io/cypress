@@ -1,4 +1,4 @@
-Promise = require("./bluebird")
+Promise = require("bluebird")
 
 $Cypress = require("../cypress")
 $Keyboard = require("./keyboard")

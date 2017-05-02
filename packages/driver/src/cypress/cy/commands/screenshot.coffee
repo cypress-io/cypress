@@ -1,6 +1,6 @@
 _ = require("lodash")
 moment = require("moment")
-Promise = require("../../bluebird")
+Promise = require("bluebird")
 
 $Cy = require("../../cy")
 $Log = require("../../log")

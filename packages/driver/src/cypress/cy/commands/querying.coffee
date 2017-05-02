@@ -1,6 +1,6 @@
 _ = require("lodash")
 $ = require("jquery")
-Promise = require("../../bluebird")
+Promise = require("bluebird")
 
 $Log = require("../../log")
 utils = require("../../utils")

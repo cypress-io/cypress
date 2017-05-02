@@ -1,6 +1,6 @@
 _ = require("lodash")
 Backbone = require("backbone")
-Promise = require("./bluebird")
+Promise = require("bluebird")
 
 ## adds a custom lightweight event bus
 ## to the Cypress class

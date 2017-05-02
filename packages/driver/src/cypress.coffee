@@ -4,7 +4,7 @@ Backbone = require("backbone")
 blobUtil = require("blob-util")
 minimatch = require("minimatch")
 moment = require("moment")
-Promise = require("./cypress/bluebird")
+Promise = require("bluebird")
 
 $Chai = require("./cypress/chai")
 $Chainer = require("./cypress/chainer")

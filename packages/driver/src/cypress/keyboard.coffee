@@ -1,5 +1,5 @@
 _ = require("lodash")
-Promise = require("./bluebird")
+Promise = require("bluebird")
 bililiteRange = require("../../vendor/bililiteRange")
 
 $Cypress = require("../cypress")
