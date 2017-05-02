@@ -802,15 +802,15 @@ class $Cy
 
     Cypress.cy = window.cy = new $Cy Cypress, specWindow
 
-require("./cy/aliases")($Cy)
-require("./cy/coordinates")($Cy)
-require("./cy/ensure")($Cy)
-require("./cy/errors")($Cy)
-require("./cy/jquery")($Cy)
-require("./cy/listeners")($Cy)
-require("./cy/props")($Cy)
-require("./cy/retry")($Cy)
-require("./cy/timeout")($Cy)
-require("./cy/url")($Cy)
+require("../cy/aliases")($Cy)
+require("../cy/coordinates")($Cy)
+require("../cy/ensure")($Cy)
+require("../cy/errors")($Cy)
+require("../cy/jquery")($Cy)
+require("../cy/listeners")($Cy)
+require("../cy/props")($Cy)
+require("../cy/retry")($Cy)
+require("../cy/timeout")($Cy)
+require("../cy/url")($Cy)
 
 module.exports = $Cy
