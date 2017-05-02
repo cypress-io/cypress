@@ -11,6 +11,8 @@ reporters =
  dot: require("mocha/lib/reporters/dot")
  nyan: require("mocha/lib/reporters/nyan")
 
+defaultReporter = "spec"
+
 getArg = (name)->
   args[name]
 
@@ -18,11 +20,11 @@ getConfig = (options) ->
   {
     once: options.once ? false
     port: options.port
-    reporter: getArg("reporter") ? options.reporter ? "dot"
+    reporter: getArg("reporter") ? options.reporter ? defaultReporter
   }
 
 getReporter = (config) ->
-  reporters[config.reporter.toLowerCase()] or reporters.dot
+  reporters[config.reporter.toLowerCase()] or reporters[defaultReporter]
 
 logWarning = (warning) ->
   console.log(chalk.magenta warning)
@@ -80,6 +82,7 @@ module.exports = class Runner
 
   _report: ({ event, info, err }) ->
     if event is "start"
+      console.log() ## give report some breathing room
       @runner.removeAllListeners() if @runner?
       @runner = new EventEmitter()
       new @_Reporter @runner

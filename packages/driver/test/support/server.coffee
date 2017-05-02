@@ -19,19 +19,19 @@ args = require("minimist")(process.argv.slice(2))
   app       = express()
   server    = http.Server(app)
 
-  app.set 'port', port
+  app.set("port", port)
 
-  app.set "view engine", "html"
+  app.set("view engine", "html")
   app.engine "html", hbs.__express
 
   if args.debug
-    app.use require("morgan")({ format: "dev" })
+    app.use(require("morgan")({ format: "dev" }))
 
-  app.use require("cors")()
-  app.use require("compression")()
-  app.use bodyParser.urlencoded({ extended: false })
-  app.use bodyParser.json()
-  app.use require("method-override")()
+  app.use(require("cors")())
+  app.use(require("compression")())
+  app.use(bodyParser.urlencoded({ extended: false }))
+  app.use(bodyParser.json())
+  app.use(require("method-override")())
 
   if port is 3500
     new Runner({ port }).start(server)
@@ -50,12 +50,11 @@ args = require("minimist")(process.argv.slice(2))
       spec = spec.split("/")
       spec.splice(0, 1, "specs")
 
-      ## strip off the extension
-      removeExtension spec.join("/")
+      removeExtension(spec.join("/"))
 
   getSpec = (spec) ->
-    spec = removeExtension(spec) + ".coffee"
-    file = fs.readFileSync path.join(__dirname, "..", spec), "utf8"
+    spec = "#{removeExtension(spec)}.coffee"
+    file = fs.readFileSync(path.join(__dirname, "..", spec), "utf8")
     coffee.compile(file)
 
   sendJs = (res, pathOrContents, isContents = false) ->
@@ -86,8 +85,9 @@ args = require("minimist")(process.argv.slice(2))
     , req.query.ms
 
   app.get "/node_modules/*", (req, res) ->
-    res.sendFile path.join("node_modules", req.params[0]),
+    res.sendFile(path.join("node_modules", req.params[0]), {
       root: path.join(__dirname, "../..")
+    })
 
   app.get "/dist-test/*", (req, res) ->
     filePath = path.join(__dirname, "../../dist-test", req.params[0])
@@ -97,8 +97,9 @@ args = require("minimist")(process.argv.slice(2))
       res.sendFile(filePath)
 
   app.get "/fixtures/*", (req, res) ->
-    res.sendFile "fixtures/#{req.params[0]}",
+    res.sendFile("fixtures/#{req.params[0]}", {
       root: __dirname
+    })
 
   app.get "/xml", (req, res) ->
     res.type("xml").send("<foo>bar</foo>")
@@ -112,9 +113,9 @@ args = require("minimist")(process.argv.slice(2))
     xhrs.handle(req, res)
 
   app.get "/", (req, res) ->
-    res.render path.join(__dirname, "views", "index.html"), {
+    res.render(path.join(__dirname, "views", "index.html"), {
       specs: getAllSpecs()
-    }
+    })
 
   app.get "*", (req, res) ->
     filePath = req.params[0].replace(/\/+$/, "")
@@ -123,8 +124,7 @@ args = require("minimist")(process.argv.slice(2))
     else
       res.sendFile(filePath, { root: __dirname })
 
-  ## errorhandler
-  app.use require("errorhandler")()
+  app.use(require("errorhandler")())
 
   server.listen app.get("port"), ->
-    console.log 'Express server listening on port ' + app.get('port')
+    console.log("Express server listening on port", app.get("port"))

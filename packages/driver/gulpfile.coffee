@@ -54,7 +54,7 @@ compileJs = ->
   })
     .transform(coffeeify, {})
     .bundle()
-    .on('error', log)
+    .on("error", log)
     .pipe(source(jsOptions.outputName))
     .pipe(gulp.dest(jsOptions.destination))
 
