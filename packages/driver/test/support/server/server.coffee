@@ -14,113 +14,144 @@ Runner    = require("./runner")
 
 args = require("minimist")(process.argv.slice(2))
 
-[3500, 3501].forEach (port) ->
+port = 3500
+app = express()
+server = http.Server(app)
 
-  app       = express()
-  server    = http.Server(app)
+app.set("port", port)
 
-  app.set("port", port)
+app.set("view engine", "html")
+app.engine "html", hbs.__express
 
-  app.set("view engine", "html")
-  app.engine "html", hbs.__express
+if args.debug
+  app.use(require("morgan")({ format: "dev" }))
 
-  if args.debug
-    app.use(require("morgan")({ format: "dev" }))
+app.use(require("cors")())
+app.use(require("compression")())
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
+app.use(require("method-override")())
 
-  app.use(require("cors")())
-  app.use(require("compression")())
-  app.use(bodyParser.urlencoded({ extended: false }))
-  app.use(bodyParser.json())
-  app.use(require("method-override")())
+new Runner({ port }).start(server)
 
-  if port is 3500
-    new Runner({ port }).start(server)
+removeExtension = (str) ->
+  str.split(".").slice(0, -1).join(".")
 
-  removeExtension = (str) ->
-    str.split(".").slice(0, -1).join(".")
+getSpecPath = (pathName) ->
+  if /all_specs/.test(pathName) then getAllSpecs(false) else [pathName.replace(/^\//, "")]
 
-  getSpecPath = (pathName) ->
-    if /all_specs/.test(pathName) then getAllSpecs(false) else [pathName.replace(/^\//, "")]
+getAllSpecs = (allSpecs = true) ->
+  specs = glob.sync("../../!(support)/**/*.coffee", { cwd: __dirname })
+  specs.unshift("specs/all_specs.coffee") if allSpecs
+  _.map specs, (spec) ->
+    removeExtension(spec.replace("../..", "specs"))
 
-  getAllSpecs = (allSpecs = true) ->
-    specs = glob.sync("../../!(support)/**/*.coffee", { cwd: __dirname })
-    specs.unshift("specs/all_specs.coffee") if allSpecs
-    _.map specs, (spec) ->
-      removeExtension(spec.replace("../..", "specs"))
+getSpec = (spec) ->
+  spec = "#{removeExtension(spec)}.coffee"
+  file = fs.readFileSync(path.join(__dirname, "../..", spec), "utf8")
+  coffee.compile(file)
 
-  getSpec = (spec) ->
-    spec = "#{removeExtension(spec)}.coffee"
-    file = fs.readFileSync(path.join(__dirname, "../..", spec), "utf8")
-    coffee.compile(file)
+sendJs = (res, pathOrContents, isContents = false) ->
+  res.set({
+    "Cache-Control": "no-cache, no-store, must-revalidate"
+    "Pragma": "no-cache"
+    "Expires": "0"
+  })
+  res.type("js")
+  if isContents
+    res.send(pathOrContents)
+  else
+    res.sendFile(pathOrContents)
 
-  sendJs = (res, pathOrContents, isContents = false) ->
-    res.set({
-      "Cache-Control": "no-cache, no-store, must-revalidate"
-      "Pragma": "no-cache"
-      "Expires": "0"
-    })
-    res.type("js")
-    if isContents
-      res.send(pathOrContents)
-    else
-      res.sendFile(pathOrContents)
+app.get "/specs/*", (req, res) ->
+  spec = req.params[0]
 
-  app.get "/specs/*", (req, res) ->
-    spec = req.params[0]
-
-    if /\.js$/.test(spec)
-      sendJs(res, getSpec(spec), true)
-    else
-      res.render(path.join(__dirname, "views/spec.html"), {
-        specs: getSpecPath(req.path)
-      })
-
-  app.get "/timeout", (req, res) ->
-    setTimeout ->
-      res.send "<html></html>"
-    , req.query.ms
-
-  app.get "/node_modules/*", (req, res) ->
-    res.sendFile(path.join("node_modules", req.params[0]), {
-      root: path.join(__dirname, "../../..")
+  if /\.js$/.test(spec)
+    sendJs(res, getSpec(spec), true)
+  else
+    res.render(path.join(__dirname, "views/spec.html"), {
+      specs: getSpecPath(req.path)
     })
 
-  app.get "/dist-test/*", (req, res) ->
-    filePath = path.join(__dirname, "../../../dist-test", req.params[0])
-    if /\.js$/.test(filePath)
-      sendJs(res, filePath)
-    else
-      res.sendFile(filePath)
+app.get "/timeout", (req, res) ->
+  setTimeout ->
+    res.send "<html></html>"
+  , req.query.ms
 
-  app.get "/fixtures/*", (req, res) ->
-    res.sendFile("fixtures/#{req.params[0]}", {
-      root: __dirname
-    })
+app.get "/node_modules/*", (req, res) ->
+  res.sendFile(path.join("node_modules", req.params[0]), {
+    root: path.join(__dirname, "../../..")
+  })
 
-  app.get "/xml", (req, res) ->
-    res.type("xml").send("<foo>bar</foo>")
+app.get "/dist-test/*", (req, res) ->
+  filePath = path.join(__dirname, "../../../dist-test", req.params[0])
+  if /\.js$/.test(filePath)
+    sendJs(res, filePath)
+  else
+    res.sendFile(filePath)
 
-  app.get "/buffer", (req, res) ->
-    fs.readFile path.join(__dirname, "fixtures/sample.pdf"), (err, bytes) ->
-      res.type("pdf")
-      res.send(bytes)
+app.get "/fixtures/*", (req, res) ->
+  res.sendFile("fixtures/#{req.params[0]}", {
+    root: __dirname
+  })
 
-  app.all "/__cypress/xhrs/*", (req, res) ->
-    xhrs.handle(req, res)
+app.get "/xml", (req, res) ->
+  res.type("xml").send("<foo>bar</foo>")
 
-  app.get "/", (req, res) ->
-    res.render(path.join(__dirname, "views/index.html"), {
-      specs: getAllSpecs()
-    })
+app.get "/buffer", (req, res) ->
+  fs.readFile path.join(__dirname, "fixtures/sample.pdf"), (err, bytes) ->
+    res.type("pdf")
+    res.send(bytes)
 
-  app.get "*", (req, res) ->
-    filePath = req.params[0].replace(/\/+$/, "")
-    if /\.js$/.test filePath
-      sendJs(res, path.join(__dirname, filePath))
-    else
-      res.sendFile(filePath, { root: __dirname })
+app.all "/__cypress/xhrs/*", (req, res) ->
+  xhrs.handle(req, res)
 
-  app.use(require("errorhandler")())
+app.get "/", (req, res) ->
+  res.render(path.join(__dirname, "views/index.html"), {
+    specs: getAllSpecs()
+  })
 
-  server.listen app.get("port"), ->
-    console.log("Express server listening on port", app.get("port"))
+app.get "*", (req, res) ->
+  filePath = req.params[0].replace(/\/+$/, "")
+  if /\.js$/.test filePath
+    sendJs(res, path.join(__dirname, filePath))
+  else
+    res.sendFile(filePath, { root: __dirname })
+
+app.use(require("errorhandler")())
+
+server.listen app.get("port"), ->
+  console.log("Express server listening on port", app.get("port"))
+
+
+supportApp = express()
+supportServer = http.Server(app)
+
+supportApp.set("port", 3501)
+
+supportApp.set("view engine", "html")
+supportApp.engine "html", hbs.__express
+
+if args.debug
+  supportApp.use(require("morgan")({ format: "dev" }))
+
+supportApp.use(require("cors")())
+supportApp.use(require("compression")())
+supportApp.use(bodyParser.urlencoded({ extended: false }))
+supportApp.use(bodyParser.json())
+supportApp.use(require("method-override")())
+
+supportApp.get "/fixtures/*", (req, res) ->
+  res.sendFile("fixtures/#{req.params[0]}", {
+    root: __dirname
+  })
+
+supportApp.get "/", (req, res) ->
+  res.sendFile(path.join(__dirname, "views/support.html"))
+
+supportApp.get "*", (req, res) ->
+  filePath = req.params[0].replace(/\/+$/, "")
+  res.sendFile(filePath, { root: __dirname })
+
+supportServer.listen supportApp.get("port"), ->
+  console.log("Express server listening on port", supportApp.get("port"))
