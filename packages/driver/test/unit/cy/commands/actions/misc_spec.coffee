@@ -200,7 +200,7 @@ describe "$Cypress.Cy Miscellaneous Commands", ->
       afterEach ->
         @chai.restore()
 
-      it.skip "eventually passes the assertion", ->
+      it "eventually passes the assertion", ->
         @cy.$$("button:first").on "mouseover", ->
           _.delay =>
             $(@).addClass("moused-over")
@@ -208,7 +208,6 @@ describe "$Cypress.Cy Miscellaneous Commands", ->
           return false
 
         @cy.get("button:first").ttrigger("mouseover").should("have.class", "moused-over").then ->
-          ## FIXME: skipped because it never gets here
           @chai.restore()
 
           expect(@log.get("name")).to.eq("assert")

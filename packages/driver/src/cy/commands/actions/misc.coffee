@@ -76,9 +76,11 @@ module.exports = (Cypress, Commands) ->
         el.dispatchEvent(event)
 
       Promise
-        .try(getCoords(@, $el, options))
-        .then(trigger)
-        .then ->
-          options._log.snapshot("after").end()
-        .return(subject)
+      .try(getCoords(@, $el, options))
+      .then(trigger)
+      .then =>
+        do verifyAssertions = =>
+          @verifyUpcomingAssertions(subject, options, {
+            onRetry: verifyAssertions
+          })
   })
