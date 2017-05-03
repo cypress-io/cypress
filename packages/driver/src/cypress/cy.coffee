@@ -661,6 +661,11 @@ class $Cy
     contains = (el) ->
       $.contains(doc, el)
 
+    if utils.hasDocument($el)
+      ## change $el to be the root
+      ## document element
+      $el = $el.documentElement
+
     ## either see if the raw element itself
     ## is contained in the document
     if _.isElement($el)

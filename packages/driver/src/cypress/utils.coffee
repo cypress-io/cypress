@@ -171,7 +171,7 @@ module.exports = {
         @_stringify(arg)
 
   hasDom: (obj) ->
-    @hasElement(obj) or @hasWindow(obj)
+    @hasElement(obj) or @hasWindow(obj) or @hasDocument(obj)
 
   hasWindow: (obj) ->
     try
