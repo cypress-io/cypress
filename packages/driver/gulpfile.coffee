@@ -33,19 +33,37 @@ jsOptions = {
   outputName: "driver.js"
 }
 
-specOptions = {
+specHelperOptions = {
   entries: ["test/support/spec_helper.coffee"]
   extensions: [".coffee", ".js"]
   destination: "dist-test"
   outputName: "spec_helper.js"
 }
 
-runnerOptions = {
+specIndexOptions = {
+  entries: ["test/support/client/spec-index.coffee"]
+  extensions: [".coffee", ".js"]
+  destination: "dist-test"
+  outputName: "spec-index.js"
+}
+
+specRunnerOptions = {
   entries: ["test/support/client/runner.coffee"]
   extensions: [".coffee", ".js"]
   destination: "dist-test"
   outputName: "runner.js"
 }
+
+server = { runSpec: -> }
+
+matchingSpecFile = (filePath) ->
+  specPath = filePath.replace(path.join(__dirname, "src"), path.join(__dirname, "test/unit"))
+  specPath = specPath.replace(".coffee", "_spec.coffee")
+  try
+    fs.statSync(specPath)
+    return specPath
+  catch e
+    return false
 
 compileJs = ->
   browserify({
@@ -101,12 +119,20 @@ watchJs = (options) ->
           if initial
             initial = false
             resolve()
+          else
+            files.forEach (filePath) ->
+              if specFile = matchingSpecFile(filePath)
+                server.runSpec(specFile)
         .pipe(fs.createWriteStream(outputPath))
 
     bundler.on("update", rebundle)
     ret.process = rebundle()
 
   return ret
+
+watchSpecs = ->
+  gulp.watch "test/**/*_spec.coffee", (event) ->
+    server.runSpec(event.path)
 
 # gulp.task "app:img", ["vendor:img", "project:img", "project:favicon", "project:logo"]
 
@@ -143,16 +169,15 @@ gulp.task "watch:app:html", ->
 gulp.task "server", -> require("./server/server.coffee")
 
 gulp.task "test", ->
-  watchSpecs = watchJs(specOptions)
-  watchRunner = watchJs(runnerOptions)
-  Promise.all([watchSpecs.promise, watchRunner.promise])
+  watchSpecHelper = watchJs(specHelperOptions)
+  watchIndex = watchJs(specIndexOptions)
+  watchRunner = watchJs(specRunnerOptions)
+  watchSpecs()
+  Promise.all([watchSpecHelper.promise, watchIndex.promise, watchRunner.promise])
   .then ->
-    $.nodemon({
-      script: "#{__dirname}/test/support/server/server.coffee"
-      watch: ["#{__dirname}/test/support/server/**/*.coffee"]
-    })
+    server = require("#{__dirname}/test/support/server/server.coffee")
 
-  return watchSpecs.process
+  return watchSpecHelper.process
 
 gulp.task "app", ["app:html", "app:watch"]
 

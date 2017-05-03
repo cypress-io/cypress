@@ -29,12 +29,12 @@ testInfo = (test) ->
 
 handle = (data) ->
   if not batched
-    api.send("report", { tests: [data] })
+    api.report({ tests: [data] })
     return
 
   batch.push(data)
   if batch.length >= batchLimit or data.event is "end"
-    api.send("report", { tests: batch })
+    api.report({ tests: batch })
     batch = []
 
 report = (event, test, err) ->

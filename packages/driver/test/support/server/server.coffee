@@ -32,7 +32,8 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(require("method-override")())
 
-new Runner({ port }).start(server)
+runner = new Runner({ port })
+runner.start(server)
 
 removeExtension = (str) ->
   str.split(".").slice(0, -1).join(".")
@@ -155,3 +156,9 @@ supportApp.get "*", (req, res) ->
 
 supportServer.listen supportApp.get("port"), ->
   console.log("Express server listening on port", supportApp.get("port"))
+
+
+module.exports = {
+  runSpec: (specPath) ->
+    runner.run(specPath)
+}

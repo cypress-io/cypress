@@ -19,12 +19,5 @@
       <script src="/{{this}}.js"></script>
     {{/each}}
     <script src="/dist-test/runner.js"></script>
-    <script>
-      (function () {
-        // preserve query string between pages
-        var link = document.getElementById('spec-list')
-        link.href = link.href + location.search
-      }())
-    </script>
   </body>
 </html>

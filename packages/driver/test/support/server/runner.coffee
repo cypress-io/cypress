@@ -2,6 +2,7 @@ _ = require("lodash")
 args = require("minimist")(process.argv.slice(2))
 chalk = require("chalk")
 EventEmitter = require("events").EventEmitter
+path = require("path")
 
 browser = require("./browser")
 SocketServer = require("socket.io")
@@ -27,7 +28,7 @@ getReporter = (config) ->
   reporters[config.reporter.toLowerCase()] or reporters[defaultReporter]
 
 logWarning = (warning) ->
-  console.log(chalk.magenta warning)
+  console.log(chalk.magenta(warning))
 
 logError = (err) ->
   if _.isString err
@@ -53,9 +54,13 @@ module.exports = class Runner
 
     @_launchBrowser()
 
-  rerun: ->
+  run: (specPath) ->
+    specPath = specPath
+    .replace(path.join(__dirname, "../.."), "")
+    .replace(path.extname(specPath), "")
+
     for id, client of @_clients
-      client.emit("rerun")
+      client.emit("run", specPath)
 
   _handleConnection: (client) ->
     @_clients[client.id] = client
