@@ -89,6 +89,7 @@ watchJs = (options) ->
   bundler.transform(coffeeify, {})
   bundler.plugin(watchify, {
     ignoreWatch: [
+      "**/package.json"
       "**/.git/**"
       "**/.nyc_output/**"
       "**/.sass-cache/**"
