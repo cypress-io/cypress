@@ -43,22 +43,19 @@ describe "$Cypress.Cy Clock Commands", ->
       cy = @cy
       @cy.clock().then (clock) ->
         clock.restore()
-        expect(cy.state("clock")).to.be.null
+        expect(cy._getClock()).to.be.null
         expect(@clock).to.be.null
 
-    ## FIXME: this is broken because cy.coffee#listeners listens to "restore"
-    ## and clears the state before the clock listener gets the "restore"
-    ## event to restore the clock
-    it.skip "automatically restores clock on 'restore' event", ->
+    it "automatically restores clock on 'restore' event", ->
       clock = {restore: @sandbox.stub()}
-      @cy.state("clock", clock)
+      @cy._setClock(clock)
       @Cypress.trigger("restore")
       expect(clock.restore).to.be.called
 
     it "unsets clock before test run", ->
-      @cy.state("clock", {})
+      @cy._setClock({})
       @Cypress.trigger("test:before:run", {})
-      expect(@cy.state("clock")).to.be.null
+      expect(@cy._getClock()).to.be.null
 
     it "returns clock on subsequent calls, ignoring arguments", ->
       @cy
@@ -100,9 +97,7 @@ describe "$Cypress.Cy Clock Commands", ->
             done()
           clock.tick()
 
-      ## FIXME: I think this is broken due to the "restore" listener
-      ## being broken as noted above
-      it.skip "does not replace other functions", (done) ->
+      it "does not replace other functions", (done) ->
         @cy.clock(null, ["setTimeout"]).then (clock) =>
           interval = @window.setInterval =>
             @window.clearInterval(interval)

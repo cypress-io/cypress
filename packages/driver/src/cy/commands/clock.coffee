@@ -1,28 +1,40 @@
 _ = require("lodash")
 $Clock = require("../../cypress/clock")
+$Cy = require("../../cypress/cy")
 $Log = require("../../cypress/log")
 utils = require("../../cypress/utils")
 
+clock = null
+
+## for testing purposes
+$Cy.extend({
+  _getClock: ->
+    clock
+  _setClock: (c) ->
+    clock = c
+})
+
 module.exports = (Cypress, Commands) ->
+
   Cypress.on "test:before:run", ->
     ## remove clock before each test run, so a new one is created
     ## when user calls cy.clock()
-    @state("clock", null)
+    clock = null
 
   Cypress.on "before:window:load", (contentWindow) ->
     ## if a clock has been created before this event (likely before
     ## a cy.visit(), then bind that clock to the new window
-    if clock = @state("clock")
+    if clock
       clock._bind(contentWindow)
 
-  Cypress.on "restore", ->
+  Cypress.on "restore", ->
     ## restore the clock if we've created one
-    if clock = @state("clock")
+    if clock
       clock.restore(false)
 
   Commands.addUtility({
     clock: (subject, now, methods, options = {}) ->
-      if clock = @state("clock")
+      if clock
         return clock
 
       if _.isObject(now)
@@ -86,17 +98,14 @@ module.exports = (Cypress, Commands) ->
         if shouldLog
           log("restore")
         @assign("clock", null)
-        @state("clock", null)
+        clock = null
         return ret
 
       log("clock")
 
       @assign("clock", clock)
-      @state("clock", clock)
 
     tick: (subject, ms) ->
-      clock = @state("clock")
-
       if not clock
         utils.throwErrByPath("tick.no_clock")
 
