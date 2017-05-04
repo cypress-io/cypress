@@ -76,7 +76,7 @@ compileJs = ->
     .pipe(source(jsOptions.outputName))
     .pipe(gulp.dest(jsOptions.destination))
 
-watchJs = (options) ->
+bundleJs = (options, watch = true) ->
   ret = {}
 
   bundler = browserify({
@@ -87,16 +87,17 @@ watchJs = (options) ->
   })
 
   bundler.transform(coffeeify, {})
-  bundler.plugin(watchify, {
-    ignoreWatch: [
-      "**/package.json"
-      "**/.git/**"
-      "**/.nyc_output/**"
-      "**/.sass-cache/**"
-      "**/coverage/**"
-      "**/node_modules/**"
-    ]
-  })
+  if watch
+    bundler.plugin(watchify, {
+      ignoreWatch: [
+        "**/package.json"
+        "**/.git/**"
+        "**/.nyc_output/**"
+        "**/.sass-cache/**"
+        "**/coverage/**"
+        "**/node_modules/**"
+      ]
+    })
 
   ret.promise = new Promise (resolve) ->
     outputName = $.util.colors.cyan(options.outputName)
@@ -162,7 +163,7 @@ gulp.task "app:html", ->
 
 gulp.task "watch", ["watch:app:js", "watch:app:html"]
 
-gulp.task "watch:app:js", -> watchJs(jsOptions)
+gulp.task "watch:app:js", -> bundleJs(jsOptions)
 
 gulp.task "watch:app:html", ->
   gulp.watch "app/html/index.html", ["app:html"]
@@ -170,15 +171,24 @@ gulp.task "watch:app:html", ->
 gulp.task "server", -> require("./server/server.coffee")
 
 gulp.task "test", ->
-  watchSpecHelper = watchJs(specHelperOptions)
-  watchIndex = watchJs(specIndexOptions)
-  watchRunner = watchJs(specRunnerOptions)
+  watchSpecHelper = bundleJs(specHelperOptions)
+  watchIndex = bundleJs(specIndexOptions)
+  watchRunner = bundleJs(specRunnerOptions)
   watchSpecs()
   Promise.all([watchSpecHelper.promise, watchIndex.promise, watchRunner.promise])
   .then ->
     server = require("#{__dirname}/test/support/server/server.coffee")
 
   return watchSpecHelper.process
+
+gulp.task "test:once", ->
+  buildSpecHelper = bundleJs(specHelperOptions, false)
+  buildIndex = bundleJs(specIndexOptions, false)
+  buildRunner = bundleJs(specRunnerOptions, false)
+  Promise.all([buildSpecHelper.promise, buildIndex.promise, buildRunner.promise])
+  .then ->
+    server = require("#{__dirname}/test/support/server/server.coffee")
+    server.runAllSpecsOnce()
 
 gulp.task "app", ["app:html", "app:watch"]
 

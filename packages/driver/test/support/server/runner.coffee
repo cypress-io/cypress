@@ -3,6 +3,7 @@ args = require("minimist")(process.argv.slice(2))
 chalk = require("chalk")
 EventEmitter = require("events").EventEmitter
 path = require("path")
+Promise = require("bluebird")
 
 browser = require("./browser")
 SocketServer = require("socket.io")
@@ -43,14 +44,17 @@ module.exports = class Runner
     @_config = getConfig(options)
     @_Reporter = getReporter(@_config)
     @_clients = {}
+    @_localBus = new EventEmitter()
+    @_runnerBus = new EventEmitter()
 
-    unless @_config.once
-      process.on "SIGINT", =>
-        @_stopBrowser -> process.exit 0
+    process.on "SIGINT", =>
+      @_stopBrowser().then ->
+        process.exit 0
 
   start: (server) ->
     io = new SocketServer(server)
-    io.on("connection", @_handleConnection.bind(@))
+    io.on "connection", (client) =>
+      @_handleConnection(client)
 
     @_launchBrowser()
 
@@ -61,6 +65,12 @@ module.exports = class Runner
 
     for id, client of @_clients
       client.emit("run", specPath)
+
+  runAllSpecsOnce: (allSpecsPath) ->
+    new Promise (resolve) =>
+      @_localBus.addListener "end", =>
+        @_stopBrowser().then =>
+          resolve(@_reporter.stats)
 
   _handleConnection: (client) ->
     @_clients[client.id] = client
@@ -73,13 +83,16 @@ module.exports = class Runner
 
   _launchBrowser: ->
     theBrowser = getArg("browser") or "chrome"
-    url = "http://localhost:#{@_config.port}?reporter=socket"
+    # spec = if @_config.once then "/specs/all_specs" else ""
+    spec = if @_config.once then "/specs/integration/clicks_spec" else ""
+    url = "http://localhost:#{@_config.port}#{spec}?reporter=socket"
 
     browser.launch(theBrowser, url)
     .then (instance) =>
       @_browserInstance = instance
     .catch (err) =>
-      @_logAndFail(err)
+      logError(err)
+      throw err
 
   _onReport: ({ tests }) ->
     for test in tests
@@ -88,9 +101,8 @@ module.exports = class Runner
   _report: ({ event, info, err }) ->
     if event is "start"
       console.log() ## give report some breathing room
-      @runner.removeAllListeners() if @runner?
-      @runner = new EventEmitter()
-      new @_Reporter @runner
+      @_runnerBus.removeAllListeners()
+      @_reporter = new @_Reporter(@_runnerBus)
 
     info or= {}
     info.slow = ->
@@ -99,35 +111,21 @@ module.exports = class Runner
         "#{info.parentTitle} #{info.title}"
       else
         info.title
-    @runner?.emit event, info, err
+    @_localBus.emit(event, info, err)
+    @_runnerBus.emit(event, info, err)
 
-    if @_config.once and event is "end"
-      @_stopBrowser -> process.exit 0
+  _stopBrowser: ->
+    if not @_browserInstance
+      return Promise.resolve()
 
-  _stopBrowser: (cb) ->
-    if @_browserInstance
-      timedOut = false
-      timer = setTimeout =>
-        timedOut = true
-        logError("Timed out trying to stop browser.")
-        cb()
-      , 10000 # 10 seconds
-
-      @_browserInstance.stop ->
-        return if timedOut
-        clearTimeout timer
-        cb()
-    else
-      cb()
+    new Promise (resolve) =>
+      @_browserInstance.stop(resolve)
+    .timeout(10000)
+    .catch Promise.TimeoutError, ->
+      logError("Timed out trying to stop browser")
 
   _onError: (err) ->
-    logError("Error from browser:")
+    logError("Unexpected error occurred in browser:\n")
     logError(err)
-    @_logAndFail("Unexpected error occurred - bailing")
-
-  _logAndFail: (err) ->
-    logError(err)
-    @_fail()
-
-  _fail: ->
-    @_stopBrowser -> process.exit 1
+    @_stopBrowser().then ->
+      process.exit 1

@@ -5,6 +5,7 @@
   "scripts": {
     "build-dev": "gulp build",
     "test": "gulp test",
+    "test-once": "gulp test:once",
     "watch-dev": "gulp watch"
   },
   "devDependencies": {
