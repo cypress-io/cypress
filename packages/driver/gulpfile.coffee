@@ -41,10 +41,10 @@ specHelperOptions = {
 }
 
 specIndexOptions = {
-  entries: ["test/support/client/spec-index.coffee"]
+  entries: ["test/support/client/spec_index.coffee"]
   extensions: [".coffee", ".js"]
   destination: "dist-test"
-  outputName: "spec-index.js"
+  outputName: "spec_index.js"
 }
 
 specRunnerOptions = {

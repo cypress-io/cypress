@@ -1,5 +1,5 @@
 api = require("./api")
-socketReporter = require("./socket-reporter")
+socketReporter = require("./socket_reporter")
 
 isSocketReporter = /reporter=socket/.test(location.search)
 
