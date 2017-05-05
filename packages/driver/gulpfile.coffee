@@ -178,6 +178,7 @@ gulp.task "test", ->
   Promise.all([watchSpecHelper.promise, watchIndex.promise, watchRunner.promise])
   .then ->
     server = require("#{__dirname}/test/support/server/server.coffee")
+    server.runSpecsContinuously()
 
   return watchSpecHelper.process
 

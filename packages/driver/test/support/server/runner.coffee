@@ -32,18 +32,34 @@ logWarning = (warning) ->
   console.log(chalk.magenta(warning))
 
 logError = (err) ->
-  if _.isString err
+  if _.isString(err)
     console.error(chalk.red(err))
-  else if _.isObject err
-    console.error(chalk.red "type: #{err.type}") if err.type
-    console.error(chalk.red err.message) if err.message
-    console.error(chalk.red err.stack) if err.stack
+  else if _.isObject(err)
+    console.error(chalk.red("type: #{err.type}")) if err.type
+    console.error(chalk.red(err.message)) if err.message and not err.stack
+    console.error(chalk.red(err.stack)) if err.stack
+
+## monitors a function for calls. if the function isn't called within
+## the timeout, it calls the onTimeout callback
+monitor = (fn, onTimeout, timeout) ->
+  timeoutId = null
+  wrappedFn = (args...) ->
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(onTimeout, timeout)
+    fn(args...)
+
+  wrappedFn.cancel = ->
+    clearTimeout(timeoutId)
+
+  return wrappedFn
 
 module.exports = class Runner
   constructor: (options = {}) ->
+    @_server = options.server
     @_config = getConfig(options)
     @_Reporter = getReporter(@_config)
     @_clients = {}
+    @_errors = []
     @_localBus = new EventEmitter()
     @_runnerBus = new EventEmitter()
 
@@ -51,12 +67,21 @@ module.exports = class Runner
       @_stopBrowser().then ->
         process.exit 0
 
-  start: (server) ->
-    io = new SocketServer(server)
-    io.on "connection", (client) =>
-      @_handleConnection(client)
+  runContinuously: ->
+    @_start()
 
-    @_launchBrowser()
+  runAllSpecsOnce: (allSpecsPath) ->
+    @_start().then =>
+      new Promise (resolve, reject) =>
+        @_localBus.on "timeout", =>
+          @_localBus.removeAllListeners()
+          @_stopBrowser().then =>
+            reject(new Promise.TimeoutError())
+
+        @_localBus.on "end", =>
+          @_localBus.removeAllListeners()
+          @_stopBrowser().then =>
+            resolve(@_reporter.stats)
 
   run: (specPath) ->
     specPath = specPath
@@ -66,16 +91,19 @@ module.exports = class Runner
     for id, client of @_clients
       client.emit("run", specPath)
 
-  runAllSpecsOnce: (allSpecsPath) ->
-    new Promise (resolve) =>
-      @_localBus.addListener "end", =>
-        @_stopBrowser().then =>
-          resolve(@_reporter.stats)
+  _start: ->
+    io = new SocketServer(@_server)
+    io.on "connection", (client) =>
+      @_handleConnection(client)
+
+    @_launchBrowser()
 
   _handleConnection: (client) ->
     @_clients[client.id] = client
 
-    client.on("report", @_onReport.bind(@))
+    @_monitorReport?.cancel()
+    @_monitorReport = monitor(@_onReport.bind(@), @_onTimeout.bind(@), 5000)
+    client.on("report", @_monitorReport)
     client.on("error", @_onError.bind(@))
 
     client.on "disconnect", =>
@@ -83,14 +111,14 @@ module.exports = class Runner
 
   _launchBrowser: ->
     theBrowser = getArg("browser") or "chrome"
-    # spec = if @_config.once then "/specs/all_specs" else ""
-    spec = if @_config.once then "/specs/integration/clicks_spec" else ""
+    spec = if @_config.once then "/specs/all_specs" else ""
     url = "http://localhost:#{@_config.port}#{spec}?reporter=socket"
 
     browser.launch(theBrowser, url)
     .then (instance) =>
       @_browserInstance = instance
     .catch (err) =>
+      logError("Error attempting to launch browser:")
       logError(err)
       throw err
 
@@ -104,6 +132,9 @@ module.exports = class Runner
       @_runnerBus.removeAllListeners()
       @_reporter = new @_Reporter(@_runnerBus)
 
+    if event is "end"
+      @_monitorReport.cancel()
+
     info or= {}
     info.slow = ->
     info.fullTitle = ->
@@ -114,6 +145,19 @@ module.exports = class Runner
     @_localBus.emit(event, info, err)
     @_runnerBus.emit(event, info, err)
 
+  _onTimeout: ->
+    console.log()
+    logError("Tests timed out")
+    console.log()
+    if @_errors.length
+      logError("The following errors were captured:")
+    else
+      logError("No errors were captured")
+    for error in @_errors
+      console.log()
+      logError(error)
+    @_localBus.emit("timeout")
+
   _stopBrowser: ->
     if not @_browserInstance
       return Promise.resolve()
@@ -122,10 +166,7 @@ module.exports = class Runner
       @_browserInstance.stop(resolve)
     .timeout(10000)
     .catch Promise.TimeoutError, ->
-      logError("Timed out trying to stop browser")
+      logWarning("Timed out trying to stop browser")
 
   _onError: (err) ->
-    logError("Unexpected error occurred in browser:\n")
-    logError(err)
-    @_stopBrowser().then ->
-      process.exit 1
+    @_errors.push(err)

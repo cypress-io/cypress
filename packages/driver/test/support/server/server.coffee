@@ -154,19 +154,22 @@ supportApp.get "*", (req, res) ->
 supportServer.listen supportApp.get("port"), ->
   console.log("Express server listening on port", supportApp.get("port"))
 
+runner = null
+
 module.exports = {
   runSpec: (specPath) ->
-    runner.run(specPath)
+    runner?.run(specPath)
 
-  runSpecs: ->
-    new Runner({ port }).start(server)
+  runSpecsContinuously: ->
+    runner = new Runner({ port, server })
+    runner.runContinuously()
 
   runAllSpecsOnce: ->
-    runner = new Runner({ port, once: true })
-    runner.start(server)
-    .then ->
-      runner.runAllSpecsOnce()
+    new Runner({ port, server, once: true })
+    .runAllSpecsOnce()
     .then (stats) ->
       code = if stats.failures then 1 else 0
       process.exit(code)
+    .catch Promise.TimeoutError, ->
+      process.exit(1)
 }

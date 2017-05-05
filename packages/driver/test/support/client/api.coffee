@@ -5,6 +5,9 @@ module.exports = {
   report: (data) ->
     socket.emit("report", data)
 
+  sendError: (err) ->
+    socket.emit("error", err)
+
   listenForRun: ->
     socket.on "run", (specFile) ->
       window.location = "/specs#{specFile}#{location.search}"
