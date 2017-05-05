@@ -3,6 +3,7 @@ _ = require("lodash")
 $Cy = require("../../cypress/cy")
 $Cypress = require("../../cypress")
 $Log = require("../../cypress/log")
+utils = require("../../cypress/utils")
 
 $Cy.extend({
   resume: (resumeAll = true) ->
@@ -109,10 +110,10 @@ module.exports = (Cypress, Commands) ->
 
       previous = @state("current").get("prev")
 
-      console.log "\n%c------------------------ Debug Info ------------------------", "font-weight: bold;"
-      console.log "Command Name:    ", previous and previous.get("name")
-      console.log "Command Args:    ", previous and previous.get("args")
-      console.log "Current Subject: ", subject
+      utils.log("\n%c------------------------ Debug Info ------------------------", "font-weight: bold;")
+      utils.log("Command Name:    ", previous and previous.get("name"))
+      utils.log("Command Args:    ", previous and previous.get("args"))
+      utils.log("Current Subject: ", subject)
 
       `
         ////// HOVER OVER TO INSPECT THE CURRENT SUBJECT //////

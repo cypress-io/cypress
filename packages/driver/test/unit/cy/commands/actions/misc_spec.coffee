@@ -146,8 +146,6 @@ describe "$Cypress.Cy Miscellaneous Commands", ->
       p.on "animationstart", =>
         t = Date.now()
         _.delay =>
-          console.log Date.now() - t
-
           @cy.get(".slidein").ttrigger("mouseover").then ->
             expect(retries.length).to.be.gt(5)
             done()

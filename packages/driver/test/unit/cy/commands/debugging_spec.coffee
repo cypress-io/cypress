@@ -1,6 +1,9 @@
 describe "$Cypress.Cy Debugging Commands", ->
   enterCommandTestingMode()
 
+  beforeEach ->
+    @utilsLog = @sandbox.stub($Cypress.utils, "log")
+
   context "#debug", ->
     it "does not change the subject", ->
       select = @cy.$$("select[name=maps]")
@@ -10,26 +13,20 @@ describe "$Cypress.Cy Debugging Commands", ->
 
     it "logs current subject", ->
       obj = {foo: "bar"}
-      log = @sandbox.spy(console, "log")
 
       @cy.wrap(obj).its("foo").debug().then ->
-        expect(log).to.be.calledWithMatch("Current Subject: ", "bar")
+        expect(@utilsLog).to.be.calledWithMatch("Current Subject: ", "bar")
 
     it "logs previous command", ->
-      log = @sandbox.spy(console, "log")
-
       @cy.wrap({}).debug().then ->
-        # prints bar to console.log
-        expect(log).to.be.calledWithMatch("Command Name: ", "wrap")
-        expect(log).to.be.calledWithMatch("Command Args: ", [{}])
-        expect(log).to.be.calledWithMatch("Current Subject: ", {})
+        expect(@utilsLog).to.be.calledWithMatch("Command Name: ", "wrap")
+        expect(@utilsLog).to.be.calledWithMatch("Command Args: ", [{}])
+        expect(@utilsLog).to.be.calledWithMatch("Current Subject: ", {})
 
     it "logs undefined on being parent", ->
-      log = @sandbox.spy(console, "log")
-
       @cy.debug().then ->
-        expect(log).to.be.calledWithMatch("Current Subject: ", undefined)
-        expect(log).to.be.calledWithMatch("Command Name: ", undefined)
+        expect(@utilsLog).to.be.calledWithMatch("Current Subject: ", undefined)
+        expect(@utilsLog).to.be.calledWithMatch("Command Name: ", undefined)
 
     describe ".log", ->
       beforeEach ->

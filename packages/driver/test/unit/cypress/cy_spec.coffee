@@ -11,6 +11,7 @@ describe "$Cypress.Cy API", ->
 
     beforeEach ->
       @Cypress = $Cypress.create()
+      @logWarning = @sandbox.stub(@Cypress.utils, "warning")
 
     afterEach ->
       if cy = @Cypress.cy
@@ -190,11 +191,9 @@ describe "$Cypress.Cy API", ->
         expect(@cy.Promise.pending).to.eq(Promise.pending)
 
       it "logs a deprecation", ->
-        warning = @sandbox.spy @Cypress.utils, "warning"
-
         @cy.Promise.resolve()
 
-        expect(warning).to.be.calledWithMatch("cy.Promise is now deprecated")
+        expect(@logWarning).to.be.calledWithMatch("cy.Promise is now deprecated")
 
     describe "#_", ->
       beforeEach ->
@@ -207,11 +206,9 @@ describe "$Cypress.Cy API", ->
         expect(@cy._.find).to.eq(_.find)
 
       it "logs a deprecation", ->
-        warning = @sandbox.spy @Cypress.utils, "warning"
-
         @cy._.each([], ->)
 
-        expect(warning).to.be.calledWithMatch("cy._ is now deprecated")
+        expect(@logWarning).to.be.calledWithMatch("cy._ is now deprecated")
 
     describe "#moment", ->
       beforeEach ->
@@ -222,11 +219,9 @@ describe "$Cypress.Cy API", ->
         expect(@cy.moment).to.eq(moment)
 
       it "logs a deprecation", ->
-        warning = @sandbox.spy @Cypress.utils, "warning"
-
         @cy.moment().format("MMM DD, YYYY")
 
-        expect(warning).to.be.calledWithMatch("cy.moment is now deprecated")
+        expect(@logWarning).to.be.calledWithMatch("cy.moment is now deprecated")
 
     describe "#Blob", ->
       beforeEach ->
@@ -239,14 +234,15 @@ describe "$Cypress.Cy API", ->
         expect(@cy.Blob).to.have.property("base64StringToBlob")
 
       it "logs a deprecation", ->
-        warning = @sandbox.spy @Cypress.utils, "warning"
-
         @cy.Blob.createBlob(['hello world'])
 
-        expect(warning).to.be.calledWithMatch("cy.Blob is now deprecated")
+        expect(@logWarning).to.be.calledWithMatch("cy.Blob is now deprecated")
 
   context "integration", ->
     enterCommandTestingMode()
+
+    beforeEach ->
+      @logWarning = @sandbox.stub(@Cypress.utils, "warning")
 
     describe "#state", ->
       beforeEach ->
@@ -365,11 +361,9 @@ describe "$Cypress.Cy API", ->
 
     describe "#$", ->
       it "logs a deprecation", ->
-        warning = @sandbox.spy @Cypress.utils, "warning"
-
         @cy.$("#by-name input:first")
 
-        expect(warning).to.be.calledWithMatch("cy.$ is now deprecated")
+        expect(@logWarning).to.be.calledWithMatch("cy.$ is now deprecated")
 
     describe "#run", ->
       it "calls prop next() on end if exists", (done) ->

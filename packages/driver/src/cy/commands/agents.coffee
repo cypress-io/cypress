@@ -61,39 +61,39 @@ onInvoke = (obj, args) ->
     snapshot: true
     event:    true
     consoleProps: ->
-      console = {}
-      console.Command = null
-      console.Error = null
-      console.Event = "#{getName(obj)} called"
+      consoleObj = {}
+      consoleObj.Command = null
+      consoleObj.Error = null
+      consoleObj.Event = "#{getName(obj)} called"
 
       if parent
         parentCount = obj.count.replace(/\.\d+$/, '')
         parentName = "#{obj.name}-#{parentCount}"
         name = getName(obj)
-        console[parentName] = parent
-        console["#{parentName} call #"] = parentCallCount
+        consoleObj[parentName] = parent
+        consoleObj["#{parentName} call #"] = parentCallCount
         if parent._cyAlias
-          console["#{parentName} alias"] = parent._cyAlias
-        console[name] = agent
-        console["#{name} call #"] = callCount
+          consoleObj["#{parentName} alias"] = parent._cyAlias
+        consoleObj[name] = agent
+        consoleObj["#{name} call #"] = callCount
         if alias
-          console["#{name} alias"] = alias
+          consoleObj["#{name} alias"] = alias
         ## typo in sinon! will be fixed in 2.0
-        console["#{name} matching arguments"] = agent.matchingAguments
+        consoleObj["#{name} matching arguments"] = agent.matchingAguments
       else
-        console[obj.name] = agent
-        console["Call #"] = callCount
+        consoleObj[obj.name] = agent
+        consoleObj["Call #"] = callCount
         if alias
-          console.Alias = alias
+          consoleObj.Alias = alias
 
-      console[display(obj.name)] = obj.obj
-      console.Arguments = obj.call.args
-      console.Context =   obj.call.thisValue
-      console.Returned =  obj.call.returnValue
+      consoleObj[display(obj.name)] = obj.obj
+      consoleObj.Arguments = obj.call.args
+      consoleObj.Context =   obj.call.thisValue
+      consoleObj.Returned =  obj.call.returnValue
       if obj.error
-        console.Error = obj.error.stack
+        consoleObj.Error = obj.error.stack
 
-      console
+      consoleObj
   }
 
   aliases = _.compact([agent.parent?._cyAlias, alias])

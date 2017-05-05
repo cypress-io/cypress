@@ -43,7 +43,6 @@ describe "$Cypress Url:Changed Events", ->
 
       @urlIs = (url) =>
         args =  _.filter @trigger.args, (arg) -> arg[0] is "url:changed"
-        console.log JSON.stringify(args)
         expect(_.last(args)).to.deep.eq ["url:changed", url]
 
     context "load event", ->

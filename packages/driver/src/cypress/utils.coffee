@@ -22,6 +22,12 @@ module.exports = {
   warning: (msg) ->
     console.warn("Cypress Warning: " + msg)
 
+  log: (msgs...) ->
+    console.log(msgs...)
+
+  logInfo: (msgs...) ->
+    console.info(msgs...)
+
   throwErr: (err, options = {}) ->
     if _.isString(err)
       err = @cypressErr(err)

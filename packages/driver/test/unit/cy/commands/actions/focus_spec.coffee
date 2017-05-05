@@ -48,7 +48,6 @@ describe "$Cypress.Cy Focus Commands", ->
 
     it "causes first focused element to receive blur", (done) ->
       @cy.$$("input:first").blur ->
-        console.log "first blurred"
         done()
 
       @cy

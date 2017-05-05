@@ -1,4 +1,5 @@
 $ = require("jquery")
+utils = require("../cypress/utils")
 
 module.exports = ($Cy) ->
   previousWin = null
@@ -77,8 +78,8 @@ module.exports = ($Cy) ->
         })
 
       win.get(0).alert = (str) ->
-        console.info "Automatically resolving alert: ", str
+        utils.logInfo("Automatically resolving alert: ", str)
 
       win.get(0).confirm = (message) ->
-        console.info "Confirming 'true' to: ", message
+        utils.logInfo("Confirming 'true' to: ", message)
         return true

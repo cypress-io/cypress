@@ -205,7 +205,6 @@ describe "$Cypress.Cy Clicking Commands", ->
 
     it "causes first focused element to receive blur", (done) ->
       @cy.$$("input:first").blur ->
-        console.log "input:first blurred"
         done()
 
       @cy
@@ -389,8 +388,6 @@ describe "$Cypress.Cy Clicking Commands", ->
       p.on "animationstart", =>
         t = Date.now()
         _.delay =>
-          console.log Date.now() - t
-
           @cy.get(".slidein").click({interval: 30}).then ->
             expect(retries.length).to.be.gt(5)
             done()
@@ -1241,7 +1238,6 @@ describe "$Cypress.Cy Clicking Commands", ->
 
     it "causes first focused element to receive blur", (done) ->
       @cy.$$("input:first").blur ->
-        console.log "input:first blurred"
         done()
 
       @cy
