@@ -102,7 +102,8 @@ module.exports = class Runner
     @_clients[client.id] = client
 
     @_monitorReport?.cancel()
-    @_monitorReport = monitor(@_onReport.bind(@), @_onTimeout.bind(@), 5000)
+    ## QUESTION: different timeouts for continuous vs single run?
+    @_monitorReport = monitor(@_onReport.bind(@), @_onTimeout.bind(@), 10000)
     client.on("report", @_monitorReport)
     client.on("error", @_onError.bind(@))
 
