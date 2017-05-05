@@ -1,6 +1,6 @@
 _ = require("lodash")
 
-$LocalStorage = require("../../cypress/sinon")
+$LocalStorage = require("../../cypress/local_storage")
 $Log = require("../../cypress/log")
 utils = require("../../cypress/utils")
 
