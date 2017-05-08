@@ -8,7 +8,7 @@ module.exports = function setZunderConfig (zunder) {
     staticGlobs: {
       'static/**': '',
       'node_modules/font-awesome/fonts/**': '/fonts',
-      'node_modules/@cypress/core-reporter/dist/reporter.css': '',
+      '../reporter/dist/reporter.css': '',
     },
   })
 }

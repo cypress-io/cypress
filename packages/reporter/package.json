@@ -1,7 +1,7 @@
 {
   "name": "@cypress/core-reporter",
   "version": "0.3.4",
-  "main": "src/reporter",
+  "main": "src/main",
   "scripts": {
     "build-dev": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
@@ -48,6 +48,6 @@
     "react-test-renderer": "^15.5.4",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
-    "zunder": "^3.5.5"
+    "zunder": "4.0.4"
   }
 }
