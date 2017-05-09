@@ -1,4 +1,4 @@
-/* global $, $Cypress, io */
+/* global $Cypress, io */
 
 import _ from 'lodash'
 import { EventEmitter } from 'events'
@@ -9,8 +9,9 @@ import automation from './automation'
 import logger from './logger'
 import overrides from './overrides'
 
+const $ = $Cypress.$
 // TODO: loadModules should be default true
-const driver = $Cypress.create({ loadModules: true })
+const Cypress = $Cypress.create({ loadModules: true })
 const channel = io.connect({ path: '/__socket.io' })
 
 channel.on('connect', () => {
@@ -47,7 +48,7 @@ export default {
     channel.on('automation:push:message', (msg, data = {}) => {
       switch (msg) {
         case 'change:cookie':
-          driver.Cookies.log(data.message, data.cookie, data.removed)
+          Cypress.Cookies.log(data.message, data.cookie, data.removed)
           break
         default:
           break
@@ -62,38 +63,38 @@ export default {
       channel.emit('app:connect', config.socketId)
     }
 
-    driver.on('message', (msg, data, cb) => {
+    Cypress.on('message', (msg, data, cb) => {
       channel.emit('client:request', msg, data, cb)
     })
 
     _.each(driverToSocketEvents, (event) => {
-      driver.on(event, (...args) => channel.emit(event, ...args))
+      Cypress.on(event, (...args) => channel.emit(event, ...args))
     })
 
-    driver.on('mocha', (event, ...args) => {
+    Cypress.on('mocha', (event, ...args) => {
       channel.emit('mocha', event, ...args)
     })
 
     _.each(driverAutomationEvents, (event) => {
-      driver.on(event, (...args) => channel.emit('automation:request', event, ...args))
+      Cypress.on(event, (...args) => channel.emit('automation:request', event, ...args))
     })
 
     reporterBus.on('focus:tests', this.focusTests)
 
-    driver.setConfig(_.pick(config, 'isHeadless', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote'))
+    Cypress.setConfig(_.pick(config, 'isHeadless', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote'))
 
-    driver.setVersion(config.version)
+    Cypress.setVersion(config.version)
 
-    driver.start()
+    Cypress.start()
 
     this._addListeners(config)
   },
 
   _runDriver (runner, state) {
-    driver.run(() => {})
+    Cypress.run(() => {})
 
     reporterBus.emit('reporter:start', {
-      startTime: driver.getStartTime(),
+      startTime: Cypress.getStartTime(),
       numPassed: state.passed,
       numFailed: state.failed,
       numPending: state.pending,
@@ -103,8 +104,8 @@ export default {
   },
 
   _addListeners (config) {
-    driver.on('initialized', ({ runner }) => {
-      driver.on('collect:run:state', () => new Promise((resolve) => {
+    Cypress.on('initialized', ({ runner }) => {
+      Cypress.on('collect:run:state', () => new Promise((resolve) => {
         reporterBus.emit('reporter:collect:run:state', resolve)
       }))
 
@@ -141,18 +142,18 @@ export default {
       })
     })
 
-    driver.on('log', (log) => {
-      const displayProps = driver.getDisplayPropsForLog(log)
+    Cypress.on('log', (log) => {
+      const displayProps = Cypress.getDisplayPropsForLog(log)
       reporterBus.emit('reporter:log:add', displayProps)
     })
 
-    driver.on('log:state:changed', (log) => {
-      const displayProps = driver.getDisplayPropsForLog(log)
+    Cypress.on('log:state:changed', (log) => {
+      const displayProps = Cypress.getDisplayPropsForLog(log)
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
 
     reporterBus.on('runner:console:error', (testId) => {
-      const err = driver.getErrorByTestId(testId)
+      const err = Cypress.getErrorByTestId(testId)
       if (err) {
         logger.clearLog()
         logger.logError(err.stack)
@@ -162,25 +163,25 @@ export default {
     })
 
     reporterBus.on('runner:console:log', (logId) => {
-      const consoleProps = driver.getConsolePropsForLogById(logId)
+      const consoleProps = Cypress.getConsolePropsForLogById(logId)
       logger.clearLog()
       logger.logFormatted(consoleProps)
     })
 
     _.each(driverToReporterEvents, (event) => {
-      driver.on(event, (...args) => {
+      Cypress.on(event, (...args) => {
         reporterBus.emit(event, ...args)
       })
     })
 
     _.each(driverTestEvents, (event) => {
-      driver.on(event, (test) => {
+      Cypress.on(event, (test) => {
         reporterBus.emit(event, test)
       })
     })
 
     _.each(driverToLocalAndReporterEvents, (event) => {
-      driver.on(event, (...args) => {
+      Cypress.on(event, (...args) => {
         localBus.emit(event, ...args)
         reporterBus.emit(event, ...args)
       })
@@ -189,11 +190,11 @@ export default {
     $(window).on('hashchange', this._reRun.bind(this))
 
     _.each(driverToLocalEvents, (event) => {
-      driver.on(event, (...args) => localBus.emit(event, ...args))
+      Cypress.on(event, (...args) => localBus.emit(event, ...args))
     })
 
-    driver.on('script:error', (err) => {
-      driver.abort()
+    Cypress.on('script:error', (err) => {
+      Cypress.abort()
       localBus.emit('script:error', err)
     })
 
@@ -203,7 +204,7 @@ export default {
     reporterBus.on('runner:restart', this._reRun.bind(this))
 
     function sendEventIfSnapshotProps (logId, event) {
-      const snapshotProps = driver.getSnapshotPropsForLogById(logId)
+      const snapshotProps = Cypress.getSnapshotPropsForLogById(logId)
 
       if (snapshotProps) {
         localBus.emit(event, snapshotProps)
@@ -223,15 +224,15 @@ export default {
     reporterBus.on('runner:unpin:snapshot', this._unpinSnapshot.bind(this))
 
     reporterBus.on('runner:resume', () => {
-      driver.trigger('resume:all')
+      Cypress.trigger('resume:all')
     })
 
     reporterBus.on('runner:next', () => {
-      driver.trigger('resume:next')
+      Cypress.trigger('resume:next')
     })
 
     reporterBus.on('runner:abort', () => {
-      driver.abort()
+      Cypress.abort()
     })
 
     reporterBus.on('save:state', (state) => {
@@ -261,12 +262,12 @@ export default {
 
   run (specPath, specWindow, $autIframe) {
     channel.emit('watch:test:file', specPath)
-    driver.initialize(specWindow, $autIframe)
+    Cypress.initialize(specWindow, $autIframe)
   },
 
   stop () {
     localBus.removeAllListeners()
-    driver.off()
+    Cypress.off()
     channel.off()
     overrides.restore()
   },
@@ -274,7 +275,7 @@ export default {
   _reRun () {
     // when we are re-running we first
     // need to abort cypress always
-    driver.abort()
+    Cypress.abort()
     .then(() => {
       return this._restart()
     })
@@ -324,11 +325,11 @@ export default {
   // whenever our app starts
   // and additional when we stop running our tests
   _clearAllCookies () {
-    driver.Cookies.clearCypressCookies()
+    Cypress.Cookies.clearCypressCookies()
   },
 
   _setUnload () {
-    driver.Cookies.setCy('unload', true)
+    Cypress.Cookies.setCy('unload', true)
   },
 
   saveState (state) {

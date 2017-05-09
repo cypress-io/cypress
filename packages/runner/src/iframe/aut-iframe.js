@@ -1,9 +1,11 @@
-/* global $, Cypress */
+/* global $Cypress, Cypress */
 
 import _ from 'lodash'
 import blankContents from './blank-contents'
 import { addElementBoxModelLayers, addHitBoxLayer, getOuterSize } from '../lib/dimensions'
 import visitFailure from './visit-failure'
+
+const $ = $Cypress.$
 
 export default class AutIframe {
   constructor (config) {

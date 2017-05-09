@@ -1,4 +1,4 @@
-/* global $ */
+/* global $Cypress */
 
 import Promise from 'bluebird'
 import cs from 'classnames'
@@ -14,6 +14,8 @@ import IframeModel from './iframe-model'
 import logger from '../lib/logger'
 import eventManager from '../lib/event-manager'
 import windowUtil from '../lib/window-util'
+
+const $ = $Cypress.$
 
 @observer
 export default class Iframes extends Component {

@@ -1,4 +1,4 @@
-/* global $ */
+/* global $Cypress */
 
 import cs from 'classnames'
 import { action, observable } from 'mobx'
@@ -16,6 +16,8 @@ import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import Resizer from './resizer'
 import RunnerWrap from './runner-wrap'
+
+const $ = $Cypress.$
 
 @observer
 class App extends Component {
