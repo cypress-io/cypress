@@ -10,8 +10,6 @@ import logger from './logger'
 import overrides from './overrides'
 
 const $ = $Cypress.$
-// TODO: loadModules should be default true
-const Cypress = $Cypress.create({ loadModules: true })
 const channel = io.connect({ path: '/__socket.io' })
 
 channel.on('connect', () => {
@@ -27,13 +25,18 @@ const driverToLocalEvents = 'viewport config stop url:changed page:loading visit
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 
 const localBus = new EventEmitter()
-// when detached, this will be the socket channel
 const reporterBus = new EventEmitter()
 
-export default {
+let Cypress
+
+const eventManager = {
   reporterBus,
 
-  init (state, connectionInfo) {
+  getCypress () {
+    return Cypress
+  },
+
+  addGlobalListeners (state, connectionInfo) {
     channel.emit('is:automation:client:connected', connectionInfo, action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
       channel.on('automation:disconnected', action('automationDisconnected', () => {
@@ -46,6 +49,8 @@ export default {
     })
 
     channel.on('automation:push:message', (msg, data = {}) => {
+      if (!Cypress) return
+
       switch (msg) {
         case 'change:cookie':
           Cypress.Cookies.log(data.message, data.cookie, data.removed)
@@ -53,6 +58,102 @@ export default {
         default:
           break
       }
+    })
+
+    _.each(socketRerunEvents, (event) => {
+      channel.on(event,  this._reRun.bind(this))
+    })
+
+    reporterBus.on('runner:console:error', (testId) => {
+      if (!Cypress) return
+
+      const err = Cypress.getErrorByTestId(testId)
+      if (err) {
+        logger.clearLog()
+        logger.logError(err.stack)
+      } else {
+        logger.logError('No error found for test id', testId)
+      }
+    })
+
+    reporterBus.on('runner:console:log', (logId) => {
+      if (!Cypress) return
+
+      const consoleProps = Cypress.getConsolePropsForLogById(logId)
+      logger.clearLog()
+      logger.logFormatted(consoleProps)
+    })
+
+    reporterBus.on('focus:tests', this.focusTests)
+
+    reporterBus.on('runner:restart', this._reRun.bind(this))
+
+    function sendEventIfSnapshotProps (logId, event) {
+      if (!Cypress) return
+
+      const snapshotProps = Cypress.getSnapshotPropsForLogById(logId)
+
+      if (snapshotProps) {
+        localBus.emit(event, snapshotProps)
+      }
+    }
+
+    reporterBus.on('runner:show:snapshot', (logId) => {
+      sendEventIfSnapshotProps(logId, 'show:snapshot')
+    })
+
+    reporterBus.on('runner:hide:snapshot', this._hideSnapshot.bind(this))
+
+    reporterBus.on('runner:pin:snapshot', (logId) => {
+      sendEventIfSnapshotProps(logId, 'pin:snapshot')
+    })
+
+    reporterBus.on('runner:unpin:snapshot', this._unpinSnapshot.bind(this))
+
+    reporterBus.on('runner:resume', () => {
+      if (!Cypress) return
+
+      Cypress.trigger('resume:all')
+    })
+
+    reporterBus.on('runner:next', () => {
+      if (!Cypress) return
+
+      Cypress.trigger('resume:next')
+    })
+
+    reporterBus.on('runner:abort', () => {
+      if (!Cypress) return
+
+      Cypress.abort()
+    })
+
+    reporterBus.on('save:state', (state) => {
+      this.saveState(state)
+    })
+
+    const $window = $(window)
+
+    $window.on('hashchange', this._reRun.bind(this))
+
+    // when we actually unload then
+    // nuke all of the cookies again
+    // so we clear out unload
+    $window.on('unload', () => {
+      this._clearAllCookies()
+    })
+
+    // when our window triggers beforeunload
+    // we know we've change the URL and we need
+    // to clear our cookies
+    // additionally we set unload to true so
+    // that Cypress knows not to set any more
+    // cookies
+    $window.on('beforeunload', () => {
+      reporterBus.emit('reporter:restart:test:run')
+
+      this._clearAllCookies()
+      this._setUnload()
     })
   },
 
@@ -62,7 +163,23 @@ export default {
     if (config.socketId) {
       channel.emit('app:connect', config.socketId)
     }
+  },
 
+  setup (config, specPath) {
+    Cypress = $Cypress.create({ loadModules: true })
+
+    Cypress.setConfig(_.pick(config, 'isHeadless', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote'))
+    Cypress.setVersion(config.version)
+    Cypress.start()
+    this._addListeners(config)
+    channel.emit('watch:test:file', specPath)
+  },
+
+  run (specWindow, $autIframe) {
+    Cypress.initialize(specWindow, $autIframe)
+  },
+
+  _addListeners (config) {
     Cypress.on('message', (msg, data, cb) => {
       channel.emit('client:request', msg, data, cb)
     })
@@ -79,31 +196,6 @@ export default {
       Cypress.on(event, (...args) => channel.emit('automation:request', event, ...args))
     })
 
-    reporterBus.on('focus:tests', this.focusTests)
-
-    Cypress.setConfig(_.pick(config, 'isHeadless', 'numTestsKeptInMemory', 'waitForAnimations', 'animationDistanceThreshold', 'defaultCommandTimeout', 'pageLoadTimeout', 'requestTimeout', 'responseTimeout', 'environmentVariables', 'xhrUrl', 'baseUrl', 'viewportWidth', 'viewportHeight', 'execTimeout', 'screenshotOnHeadlessFailure', 'namespace', 'remote'))
-
-    Cypress.setVersion(config.version)
-
-    Cypress.start()
-
-    this._addListeners(config)
-  },
-
-  _runDriver (runner, state) {
-    Cypress.run(() => {})
-
-    reporterBus.emit('reporter:start', {
-      startTime: Cypress.getStartTime(),
-      numPassed: state.passed,
-      numFailed: state.failed,
-      numPending: state.pending,
-      autoScrollingEnabled: state.autoScrollingEnabled,
-      scrollTop: state.scrollTop,
-    })
-  },
-
-  _addListeners (config) {
     Cypress.on('initialized', ({ runner }) => {
       Cypress.on('collect:run:state', () => new Promise((resolve) => {
         reporterBus.emit('reporter:collect:run:state', resolve)
@@ -152,22 +244,6 @@ export default {
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
 
-    reporterBus.on('runner:console:error', (testId) => {
-      const err = Cypress.getErrorByTestId(testId)
-      if (err) {
-        logger.clearLog()
-        logger.logError(err.stack)
-      } else {
-        logger.logError('No error found for test id', testId)
-      }
-    })
-
-    reporterBus.on('runner:console:log', (logId) => {
-      const consoleProps = Cypress.getConsolePropsForLogById(logId)
-      logger.clearLog()
-      logger.logFormatted(consoleProps)
-    })
-
     _.each(driverToReporterEvents, (event) => {
       Cypress.on(event, (...args) => {
         reporterBus.emit(event, ...args)
@@ -187,8 +263,6 @@ export default {
       })
     })
 
-    $(window).on('hashchange', this._reRun.bind(this))
-
     _.each(driverToLocalEvents, (event) => {
       Cypress.on(event, (...args) => localBus.emit(event, ...args))
     })
@@ -197,82 +271,30 @@ export default {
       Cypress.abort()
       localBus.emit('script:error', err)
     })
-
-    _.each(socketRerunEvents, (event) => {
-      channel.on(event,  this._reRun.bind(this))
-    })
-    reporterBus.on('runner:restart', this._reRun.bind(this))
-
-    function sendEventIfSnapshotProps (logId, event) {
-      const snapshotProps = Cypress.getSnapshotPropsForLogById(logId)
-
-      if (snapshotProps) {
-        localBus.emit(event, snapshotProps)
-      }
-    }
-
-    reporterBus.on('runner:show:snapshot', (logId) => {
-      sendEventIfSnapshotProps(logId, 'show:snapshot')
-    })
-
-    reporterBus.on('runner:hide:snapshot', this._hideSnapshot.bind(this))
-
-    reporterBus.on('runner:pin:snapshot', (logId) => {
-      sendEventIfSnapshotProps(logId, 'pin:snapshot')
-    })
-
-    reporterBus.on('runner:unpin:snapshot', this._unpinSnapshot.bind(this))
-
-    reporterBus.on('runner:resume', () => {
-      Cypress.trigger('resume:all')
-    })
-
-    reporterBus.on('runner:next', () => {
-      Cypress.trigger('resume:next')
-    })
-
-    reporterBus.on('runner:abort', () => {
-      Cypress.abort()
-    })
-
-    reporterBus.on('save:state', (state) => {
-      this.saveState(state)
-    })
-
-    // when we actually unload then
-    // nuke all of the cookies again
-    // so we clear out unload
-    $(window).on('unload', () => {
-      this._clearAllCookies()
-    })
-
-    // when our window triggers beforeunload
-    // we know we've change the URL and we need
-    // to clear our cookies
-    // additionally we set unload to true so
-    // that Cypress knows not to set any more
-    // cookies
-    $(window).on('beforeunload', () => {
-      reporterBus.emit('reporter:restart:test:run')
-
-      this._clearAllCookies()
-      this._setUnload()
-    })
   },
 
-  run (specPath, specWindow, $autIframe) {
-    channel.emit('watch:test:file', specPath)
-    Cypress.initialize(specWindow, $autIframe)
+  _runDriver (runner, state) {
+    Cypress.run(() => {})
+
+    reporterBus.emit('reporter:start', {
+      startTime: Cypress.getStartTime(),
+      numPassed: state.passed,
+      numFailed: state.failed,
+      numPending: state.pending,
+      autoScrollingEnabled: state.autoScrollingEnabled,
+      scrollTop: state.scrollTop,
+    })
   },
 
   stop () {
     localBus.removeAllListeners()
-    Cypress.off()
     channel.off()
     overrides.restore()
   },
 
   _reRun () {
+    if (!Cypress) return
+
     // when we are re-running we first
     // need to abort cypress always
     Cypress.abort()
@@ -280,6 +302,7 @@ export default {
       return this._restart()
     })
     .then(() => {
+      Cypress.off()
       localBus.emit('restart')
     })
   },
@@ -325,10 +348,14 @@ export default {
   // whenever our app starts
   // and additional when we stop running our tests
   _clearAllCookies () {
+    if (!Cypress) return
+
     Cypress.Cookies.clearCypressCookies()
   },
 
   _setUnload () {
+    if (!Cypress) return
+
     Cypress.Cookies.setCy('unload', true)
   },
 
@@ -336,3 +363,5 @@ export default {
     channel.emit('save:app:state', state)
   },
 }
+
+export default eventManager

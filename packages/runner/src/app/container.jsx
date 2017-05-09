@@ -18,7 +18,7 @@ class Container extends Component {
   componentWillMount () {
     this.randomString = `${Math.random()}`
 
-    this.props.eventManager.init(this.props.state, {
+    this.props.eventManager.addGlobalListeners(this.props.state, {
       element: automationElementId,
       string: this.randomString,
     })

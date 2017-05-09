@@ -1,4 +1,4 @@
-/* global $Cypress, Cypress */
+/* global $Cypress */
 
 import _ from 'lodash'
 import blankContents from './blank-contents'
@@ -36,7 +36,7 @@ export default class AutIframe {
     return this.$iframe.contents()
   }
 
-  detachDom = () => {
+  detachDom = (Cypress) => {
     const contents = this._contents()
     const { headStyles, bodyStyles } = Cypress.getStyles()
     const htmlAttrs = _.transform(contents.find('html')[0].attributes, (memo, attr) => {

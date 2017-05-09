@@ -44,6 +44,8 @@ export default class Iframes extends Component {
   }
 
   componentDidMount () {
+    const specPath = windowUtil.specPath()
+
     this.autIframe = new AutIframe(this.props.config)
 
     eventManager.on('visit:failed', this.autIframe.showVisitFailure)
@@ -51,16 +53,23 @@ export default class Iframes extends Component {
 
     // TODO: need to take headless mode into account
     // may need to not display reporter if more than 200 tests
-    eventManager.on('restart', this._run)
+    eventManager.on('restart', () => {
+      this._run(this.props.config, specPath)
+    })
 
-    eventManager.start(this.props.config)
+    eventManager.start(this.props.config, specPath)
 
     this.iframeModel = new IframeModel({
       state: this.props.state,
-      detachDom: this.autIframe.detachDom,
       removeHeadStyles: this.autIframe.removeHeadStyles,
       restoreDom: this.autIframe.restoreDom,
       highlightEl: this.autIframe.highlightEl,
+      detachDom: () => {
+        const Cypress = eventManager.getCypress()
+        if (Cypress) {
+          this.autIframe.detachDom(Cypress)
+        }
+      },
       snapshotControls: (snapshotProps) => (
         <SnapshotControls
           eventManager={eventManager}
@@ -72,22 +81,23 @@ export default class Iframes extends Component {
       ),
     })
     this.iframeModel.listen()
-    this._run()
+    this._run(this.props.config, specPath)
   }
 
   @action _setScriptError = (err) => {
     this.props.state.scriptError = err
   }
 
-  _run = () => {
-    const specPath = windowUtil.specPath()
+  _run = (config, specPath) => {
     this.props.eventManager.notifyRunningSpec(specPath)
     logger.clearLog()
     this._setScriptError(null)
 
+    eventManager.setup(config, specPath)
+
     this._loadIframes(specPath)
     .then(([specWindow, $autIframe]) => {
-      eventManager.run(specPath, specWindow, $autIframe)
+      eventManager.run(specWindow, $autIframe)
     })
   }
 
