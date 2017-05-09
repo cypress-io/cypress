@@ -3,14 +3,14 @@
   "version": "0.1.1",
   "description": "Internal lib for spawning browser processes",
   "main": "index.js",
-  "types": "typings.d.ts",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
     "clean-all": "npm run clean-deps",
     "lint": "tslint --fix --format stylish src/**/*.ts",
     "build": "tsc",
     "prebuild": "npm run lint",
-    "test": "mocha --opts test/mocha.opts test/unit/*spec.coffee"
+    "test": "mocha --opts test/mocha.opts test/unit/*spec.coffee",
+    "build-and-test": "npm run build && npm test"
   },
   "repository": {
     "type": "git",
