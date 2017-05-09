@@ -3,9 +3,6 @@ import Promise = require('bluebird')
 
 const execAsync = Promise.promisify(cp.exec)
 
-// TODO move duplicate definition
-type NotInstalledError = Error & {notInstalled: boolean}
-
 const notInstalledErr = (name: string) => {
   const err: NotInstalledError = new Error(`Browser not installed: ${name}`) as NotInstalledError
   err.notInstalled = true

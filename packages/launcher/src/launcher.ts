@@ -1,4 +1,4 @@
-import * as fs from 'fs-extra'
+import {writeJson} from 'fs-extra'
 
 const Promise = require('bluebird')
 const detect = require('./detect')
@@ -15,7 +15,7 @@ const wrap = all => ({
 const init = browsers =>
   browsers ? wrap(browsers) : detect().then(wrap)
 
-const api: LauncherApi = init as any as LauncherApi
+const api: LauncherApi = init as LauncherApi
 
 const update = (pathToConfig) => {
   if (!pathToConfig) {
@@ -24,7 +24,7 @@ const update = (pathToConfig) => {
 
   // detect the browsers and set the config
   const saveBrowsers = browers =>
-    fs.writeJson(pathToConfig, browers, {spaces: 2})
+    writeJson(pathToConfig, browers, {spaces: 2})
   return detect()
     .then(saveBrowsers)
 }
