@@ -9,6 +9,7 @@ xhrs        = require("./controllers/xhrs")
 client      = require("./controllers/client")
 files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
+driver      = require("./controllers/driver")
 staticCtrl  = require("./controllers/static")
 
 module.exports = (app, config, request, getRemoteState, watchers, project) ->
@@ -28,6 +29,9 @@ module.exports = (app, config, request, getRemoteState, watchers, project) ->
 
   app.get "/__cypress/runner/*", (req, res) ->
     runner.handle(req, res)
+
+  app.get "/__cypress/driver/*", (req, res) ->
+    driver.handle(req, res)
 
   app.get "/__cypress/static/*", (req, res) ->
     staticCtrl.handle(req, res)

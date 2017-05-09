@@ -136,24 +136,6 @@ watchSpecs = ->
   gulp.watch "test/**/*_spec.coffee", (event) ->
     server.runSpec(event.path)
 
-# gulp.task "app:img", ["vendor:img", "project:img", "project:favicon", "project:logo"]
-
-# gulp.task "vendor:img", ->
-#   gulp.src("node_modules/jquery-ui/themes/smoothness/images/**")
-#     .pipe gulp.dest "lib/public/css/images"
-#
-# gulp.task "project:img", ->
-#   gulp.src("app/img/**/*")
-#     .pipe gulp.dest "lib/public/img"
-#
-# gulp.task "project:favicon", ->
-#   gulp.src(cyIcons.getPathToFavicon("**/*"))
-#     .pipe gulp.dest "lib/public/img"
-#
-# gulp.task "project:logo", ->
-#   gulp.src cyIcons.getPathToIcon("icon_128x128@2x.png")
-#     .pipe gulp.dest "lib/public/img"
-
 gulp.task "app:js", ->
   compileJs()
 
