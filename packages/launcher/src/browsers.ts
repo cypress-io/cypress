@@ -7,7 +7,7 @@ const browserNotFoundErr = (browsers, name: string): BrowserNotFoundError => {
   const available = _.map(browsers, 'name').join(', ')
 
   const err: BrowserNotFoundError
-    = new Error("Browser: '#{name}' not found. Available browsers are: [#{available}]") as BrowserNotFoundError
+    = new Error(`Browser: '${name}' not found. Available browsers are: [${available}]`) as BrowserNotFoundError
   err.specificBrowserNotFound = true
   return err
 }

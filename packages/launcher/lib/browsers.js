@@ -4,7 +4,7 @@ var _ = require("lodash");
 var cp = require("child_process");
 var browserNotFoundErr = function (browsers, name) {
     var available = _.map(browsers, 'name').join(', ');
-    var err = new Error("Browser: '#{name}' not found. Available browsers are: [#{available}]");
+    var err = new Error("Browser: '" + name + "' not found. Available browsers are: [" + available + "]");
     err.specificBrowserNotFound = true;
     return err;
 };

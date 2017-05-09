@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var linux_1 = require("./linux");
 var _ = require("lodash");
 var os = require("os");
 var Promise = require("bluebird");
-var linux = require("./linux");
 var darwin = require("./darwin");
 var browsers = [
     {
@@ -44,7 +44,7 @@ function lookup(platform, obj) {
             }
             break;
         case 'linux':
-            return linux.get(obj.binary, obj.re);
+            return linux_1.linuxBrowser.get(obj.binary, obj.re);
     }
 }
 module.exports = function () {
