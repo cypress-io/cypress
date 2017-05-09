@@ -6,7 +6,9 @@
   "scripts": {
     "clean-deps": "rm -rf node_modules",
     "clean-all": "npm run clean-deps",
-    "lint": "tslint --fix --format stylish src/**/*.ts"
+    "lint": "tslint --fix --format stylish src/**/*.ts",
+    "build": "tsc",
+    "prebuild": "npm run lint"
   },
   "repository": {
     "type": "git",
