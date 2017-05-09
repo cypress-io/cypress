@@ -8,7 +8,6 @@ module.exports = function setZunderConfig (zunder) {
     staticGlobs: {
       'static/**': '',
       'node_modules/font-awesome/fonts/**': '/fonts',
-      '../reporter/dist/reporter.css': '',
     },
   })
 }
