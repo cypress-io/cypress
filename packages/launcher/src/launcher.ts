@@ -1,4 +1,4 @@
-import * as fs from 'fs'
+import * as fs from 'fs-extra'
 
 const Promise = require('bluebird')
 const detect = require('./detect')
@@ -25,7 +25,7 @@ const update = (pathToConfig) => {
   // detect the browsers and set the config
   return detect()
     .then((browers) =>
-      fs.writeJsonAsync(pathToConfig, browers, {spaces: 2})
+      fs.writeJson(pathToConfig, browers, {spaces: 2})
     )
 }
 
