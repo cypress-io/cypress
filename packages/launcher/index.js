@@ -1,4 +1,2 @@
 //@ts-check
-require("@cypress/coffee-script")
-
-module.exports = require("./lib/launcher.coffee")
+module.exports = require("./lib/launcher")

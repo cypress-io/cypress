@@ -4,7 +4,7 @@ var cp = require("child_process");
 var Promise = require("bluebird");
 var execAsync = Promise.promisify(cp.exec);
 var notInstalledErr = function (name) {
-    var err = new Error('Browser not installed: #{name}');
+    var err = new Error("Browser not installed: " + name);
     err.notInstalled = true;
     throw err;
 };

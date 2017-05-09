@@ -37,32 +37,30 @@ function lookup(platform, obj) {
             if (fn) {
                 return fn.get(obj.executable);
             }
-            else {
-                var err = new Error('Browser not installed: #{obj.name}');
-                err.notInstalled = true;
-                Promise.reject(err);
-            }
-            break;
+            var err = new Error("Browser not installed: " + obj.name);
+            err.notInstalled = true;
+            return Promise.reject(err);
         case 'linux':
             return linux_1.linuxBrowser.get(obj.binary, obj.re);
     }
 }
-module.exports = function () {
+function checkOneBrowser(browser) {
     var platform = os.platform();
-    return Promise.map(browsers, function (obj) {
-        return lookup(platform, obj)
-            .then(function (props) {
-            return _.chain({})
-                .extend(obj, props)
-                .pick('name', 'type', 'version', 'path')
-                .value();
-        })
-            .then(setMajorVersion)
-            .catch(function (err) {
-            if (err.notInstalled) {
-                return false;
-            }
-            throw err;
-        });
-    }).then(_.compact);
+    return lookup(platform, browser)
+        .then(function (props) {
+        return _.chain({})
+            .extend(browser, props)
+            .pick('name', 'type', 'version', 'path')
+            .value();
+    })
+        .then(setMajorVersion)
+        .catch(function (err) {
+        if (err.notInstalled) {
+            return false;
+        }
+        throw err;
+    });
+}
+module.exports = function () {
+    return Promise.map(browsers, checkOneBrowser).then(_.compact);
 };
