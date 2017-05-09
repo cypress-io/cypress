@@ -1,3 +1,5 @@
+_ = require("lodash")
+
 utils = require("../../../cypress/utils")
 
 delay = 50
