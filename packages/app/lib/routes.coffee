@@ -9,6 +9,7 @@ xhrs        = require("./controllers/xhrs")
 client      = require("./controllers/client")
 files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
+staticCtrl  = require("./controllers/static")
 
 module.exports = (app, config, request, getRemoteState, watchers, project) ->
   ## routing for the actual specs which are processed automatically
@@ -27,6 +28,9 @@ module.exports = (app, config, request, getRemoteState, watchers, project) ->
 
   app.get "/__cypress/runner/*", (req, res) ->
     runner.handle(req, res)
+
+  app.get "/__cypress/static/*", (req, res) ->
+    staticCtrl.handle(req, res)
 
   ## routing for /files JSON endpoint
   app.get "/__cypress/files", (req, res) ->

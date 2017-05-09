@@ -1,0 +1,11 @@
+{
+  "name": "static",
+  "main": "index.js",
+  "scripts": {
+    "build-dev": "gulp build"
+  },
+  "devDependencies": {
+    "@cypress/icons": "0.5.2",
+    "gulp": "^3.9.1"
+  }
+}
