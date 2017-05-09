@@ -3,7 +3,7 @@ import {linuxBrowser} from './linux'
 import _ = require('lodash')
 import os = require('os')
 import Promise = require('bluebird')
-import darwin = require('./darwin')
+import darwin = require('./darwin/index')
 
 // TODO remove this duplicate definition
 type NotInstalledError = Error & {notInstalled: boolean}
