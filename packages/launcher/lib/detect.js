@@ -62,5 +62,6 @@ function checkOneBrowser(browser) {
     });
 }
 module.exports = function () {
-    return Promise.map(browsers, checkOneBrowser).then(_.compact);
+    return Promise.map(browsers, checkOneBrowser)
+        .then(_.compact);
 };

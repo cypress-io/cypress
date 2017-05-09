@@ -71,5 +71,6 @@ function checkOneBrowser(browser) {
 }
 
 module.exports = () => {
-  return Promise.map(browsers, checkOneBrowser).then(_.compact)
+  return Promise.map(browsers, checkOneBrowser)
+    .then(_.compact)
 }
