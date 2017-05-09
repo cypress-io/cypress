@@ -1,10 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var linux_1 = require("./linux");
+var darwin_1 = require("./darwin");
+var debug_1 = require("debug");
 var _ = require("lodash");
 var os = require("os");
 var Promise = require("bluebird");
-var darwin = require("./darwin/index");
+var log = debug_1.default('cypress:launcher');
 var browsers = [
     {
         name: 'chrome',
@@ -31,9 +33,10 @@ var setMajorVersion = function (obj) {
     return obj;
 };
 function lookup(platform, obj) {
+    log('looking up %s on %s platform', obj.name, platform);
     switch (platform) {
         case 'darwin':
-            var fn = darwin[obj.name];
+            var fn = darwin_1.default[obj.name];
             if (fn) {
                 return fn.get(obj.executable);
             }

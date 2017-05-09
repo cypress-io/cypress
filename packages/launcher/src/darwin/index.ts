@@ -2,8 +2,10 @@ import canary from './canary'
 import chrome from './chrome'
 import chromium from './chromium'
 
-export default {
+const browsers = {
   chrome,
   canary,
   chromium
 }
+
+export default browsers

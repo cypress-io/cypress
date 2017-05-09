@@ -1,9 +1,12 @@
 import {linuxBrowser} from './linux'
+import darwin from './darwin'
+import debug from 'debug'
 
 import _ = require('lodash')
 import os = require('os')
 import Promise = require('bluebird')
-import darwin = require('./darwin/index')
+
+const log = debug('cypress:launcher')
 
 type Browser = {
   name: string,
@@ -41,6 +44,7 @@ const setMajorVersion = (obj) => {
 }
 
 function lookup (platform, obj) {
+  log('looking up %s on %s platform', obj.name, platform)
   switch (platform) {
     case 'darwin':
       const fn = darwin[obj.name]
