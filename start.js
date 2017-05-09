@@ -1,1 +1,1 @@
-require('./packages/app')
+require('./packages/server')
