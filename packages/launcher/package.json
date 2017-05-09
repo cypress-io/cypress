@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean-deps"
+    "clean-all": "npm run clean-deps",
+    "lint": "tslint --fix --format stylish src/**/*.ts"
   },
   "repository": {
     "type": "git",
@@ -19,10 +20,14 @@
   "homepage": "https://github.com/cypress-io/cypress-core-launcher#readme",
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
+    "@types/node": "^7.0.18",
     "chai": "^3.5.0",
     "mocha": "^2.4.5",
     "sinon": "^1.17.3",
-    "sinon-chai": "^2.8.0"
+    "sinon-chai": "^2.8.0",
+    "tslint": "^5.2.0",
+    "tslint-config-standard": "^5.0.2",
+    "typescript": "^2.3.2"
   },
   "dependencies": {
     "@cypress/coffee-script": "0.1.2",
