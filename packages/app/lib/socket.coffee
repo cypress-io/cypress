@@ -142,7 +142,7 @@ class Socket
       cookie: cookie
     })
 
-  _startListening: (server, watchers, automation, config, options) ->
+  startListening: (server, watchers, automation, config, options) ->
     _.defaults options,
       socketId: null
       onSetRunnables: ->
@@ -374,23 +374,6 @@ class Socket
 
   changeToUrl: (url) ->
     @toRunner("change:to:url", url)
-
-  startListening: (server, watchers, automation, config, options) ->
-    if process.env["CYPRESS_ENV"] is "development"
-      @listenToCssChanges(watchers)
-
-    @_startListening(server, watchers, automation, config, options)
-
-  listenToCssChanges: (watchers) ->
-    watchers.watch cwd("lib", "public", "css"), {
-      ignored: (path, stats) =>
-        return false if fs.statSync(path).isDirectory()
-
-        not /\.css$/.test path
-      onChange: (filePath, stats) =>
-        filePath = path.basename(filePath)
-        @io.emit "cypress:css:changed", file: filePath
-    }
 
   close: ->
     @io?.close()
