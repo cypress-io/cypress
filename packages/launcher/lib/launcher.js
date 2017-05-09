@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var fs = require("fs-extra");
+var fs_extra_1 = require("fs-extra");
 var Promise = require('bluebird');
 var detect = require('./detect');
 var browsers = require('./browsers');
@@ -23,7 +23,7 @@ var update = function (pathToConfig) {
     }
     // detect the browsers and set the config
     var saveBrowsers = function (browers) {
-        return fs.writeJson(pathToConfig, browers, { spaces: 2 });
+        return fs_extra_1.writeJson(pathToConfig, browers, { spaces: 2 });
     };
     return detect()
         .then(saveBrowsers);

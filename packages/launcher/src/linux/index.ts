@@ -24,6 +24,6 @@ export const linuxBrowser = {
           notInstalledErr(binary)
         }
       })
-      .catch(e => notInstalledErr(binary))
+      .catch(() => notInstalledErr(binary))
   }
 }
