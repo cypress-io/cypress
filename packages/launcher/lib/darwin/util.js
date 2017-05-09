@@ -12,7 +12,7 @@ function parse(p, prop) {
         .then(function (str) {
         return plist.parse(str).get(prop);
     }).catch(function () {
-        var err = new Error('Info.plist not found: #{pl}');
+        var err = new Error("Info.plist not found: " + pl);
         err.notInstalled = true;
         throw err;
     });

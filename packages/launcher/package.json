@@ -3,6 +3,7 @@
   "version": "0.1.1",
   "description": "Internal lib for spawning browser processes",
   "main": "index.js",
+  "types": "./src/types.d.ts",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
     "clean-all": "npm run clean-deps",
@@ -26,6 +27,7 @@
     "@cypress/releaser": "0.1.12",
     "@types/bluebird": "^3.5.3",
     "@types/fs-extra": "3.0.0",
+    "@types/lodash": "^4.14.64",
     "@types/node": "^7.0.18",
     "chai": "^3.5.0",
     "mocha": "^2.4.5",

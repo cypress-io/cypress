@@ -4,15 +4,6 @@ const Promise = require('bluebird')
 const detect = require('./detect')
 const browsers = require('./browsers')
 
-interface ExtraLauncherMethods {
-  update: Function,
-  detect: Function
-}
-
-type LauncherLaunch = (browsers?: any[]) => Promise<any>
-
-type LauncherApi = LauncherLaunch & ExtraLauncherMethods
-
 const missingConfig = () =>
   Promise.reject(new Error('You must provide a path to a config file.'))
 
@@ -33,7 +24,7 @@ const update = (pathToConfig) => {
 
   // detect the browsers and set the config
   const saveBrowsers = browers =>
-      fs.writeJson(pathToConfig, browers, {spaces: 2})
+    fs.writeJson(pathToConfig, browers, {spaces: 2})
   return detect()
     .then(saveBrowsers)
 }
