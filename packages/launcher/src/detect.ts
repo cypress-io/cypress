@@ -41,7 +41,7 @@ function lookup (platform, obj) {
         return fn.get(obj.executable)
       } else {
         const err: NotInstalledError =
-          new Error('Browser not installed: #{obj.name}') as any as NotInstalledError
+          new Error('Browser not installed: #{obj.name}') as NotInstalledError
         err.notInstalled = true
         Promise.reject(err)
       }
