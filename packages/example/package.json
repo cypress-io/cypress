@@ -4,6 +4,7 @@
   "description": "Interal Cypress repo for managing https://example.cypress.io",
   "main": "index.js",
   "scripts": {
+    "clean-deps": "rm -rf node_modules",
     "test-lib": "NODE_ENV=test mocha",
     "test": "cypress run",
     "build": "./bin/build.sh && gulp build",

@@ -10,6 +10,7 @@
     "server": "node index.js --mode server",
     "repl": "node repl.js",
     "bump": "gulp bump",
+    "clean-deps": "rm -rf node_modules",
     "deploy": "gulp deploy",
     "release": "gulp release",
     "test": "./spec/server/helpers/watch test-once",

@@ -123,7 +123,7 @@ module.exports = (cmd, options) => {
     })
   })
   .then(() => {
-    console.log(chalk.green('\nAll tasks compconsted successfully'))
+    console.log(chalk.green('\nAll tasks completed successfully'))
   })
   .catch(noPackagesError, (err) => {
     console.error(chalk.red(`\n${err.message}`))
