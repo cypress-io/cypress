@@ -16,6 +16,7 @@ var wrap = function (all) { return ({
 var init = function (browsers) {
     return browsers ? wrap(browsers) : detect().then(wrap);
 };
+var api = init;
 var update = function (pathToConfig) {
     if (!pathToConfig) {
         return missingConfig();
@@ -27,9 +28,7 @@ var update = function (pathToConfig) {
     return detect()
         .then(saveBrowsers);
 };
-var launcher = {
-    init: init,
-    update: update,
-    detect: detect
-};
-module.exports = launcher;
+// extend "api" with a few utility methods for convenience
+api.update = update;
+api.detect = detect;
+module.exports = api;
