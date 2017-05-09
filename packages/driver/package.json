@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "build-dev": "gulp build",
+    "clean-deps": "rm -rf node_modules",
     "test": "gulp test",
     "test-once": "gulp test:once",
     "watch-dev": "gulp watch"
