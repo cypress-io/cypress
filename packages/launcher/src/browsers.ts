@@ -1,8 +1,6 @@
 import _ = require('lodash')
 import cp = require('child_process')
 
-type BrowserNotFoundError = Error & {specificBrowserNotFound: boolean}
-
 const browserNotFoundErr = (browsers, name: string): BrowserNotFoundError => {
   const available = _.map(browsers, 'name').join(', ')
 
@@ -12,9 +10,14 @@ const browserNotFoundErr = (browsers, name: string): BrowserNotFoundError => {
   return err
 }
 
+type FoundBrowser = {
+  name: string,
+  path: string
+}
+
 module.exports = {
   launch: (browsers, name, url, args = []) => {
-    const browser = _.find(browsers, {name: name})
+    const browser:FoundBrowser = _.find(browsers, {name: name}) as FoundBrowser
 
     if (!browser) {
       throw browserNotFoundErr(browsers, name)

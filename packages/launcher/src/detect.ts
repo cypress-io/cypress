@@ -5,10 +5,15 @@ import os = require('os')
 import Promise = require('bluebird')
 import darwin = require('./darwin/index')
 
-// TODO remove this duplicate definition
-type NotInstalledError = Error & {notInstalled: boolean}
+type Browser = {
+  name: string,
+  re: RegExp,
+  profile: boolean,
+  binary: string,
+  executable: string
+}
 
-const browsers = [
+const browsers:Browser[] = [
   {
     name: 'chrome',
     re: /Google Chrome (\S+)/,
@@ -52,7 +57,7 @@ function lookup (platform, obj) {
   }
 }
 
-function checkOneBrowser(browser) {
+function checkOneBrowser(browser:Browser) {
   const platform = os.platform()
   return lookup(platform, browser)
     .then(props => {
