@@ -1,12 +1,10 @@
 import {linuxBrowser} from './linux'
 import darwin from './darwin'
-import debug from 'debug'
+import {log} from './log'
 
 import _ = require('lodash')
 import os = require('os')
 import Promise = require('bluebird')
-
-const log = debug('cypress:launcher')
 
 type Browser = {
   name: string,
@@ -40,6 +38,8 @@ const browsers:Browser[] = [
 
 const setMajorVersion = (obj) => {
   obj.majorVersion = obj.version.split('.')[0]
+  log('browser %s version %s major version %s',
+    obj.name, obj.version, obj.majorVersion)
   return obj
 }
 
@@ -73,6 +73,7 @@ function checkOneBrowser(browser:Browser) {
     .then(setMajorVersion)
     .catch(err => {
       if (err.notInstalled) {
+        log('browser %s not installed', browser.name)
         return false
       }
       throw err

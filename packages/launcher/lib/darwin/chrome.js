@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var log_1 = require("../log");
 var util_1 = require("./util");
 var path = require("path");
 var Promise = require("bluebird");
@@ -12,6 +13,7 @@ var chrome = {
     },
     get: function (executable) {
         var _this = this;
+        log_1.log('Looking for Chrome %s', executable);
         return this.path()
             .then(function (p) {
             return Promise.props({

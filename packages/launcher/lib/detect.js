@@ -2,11 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var linux_1 = require("./linux");
 var darwin_1 = require("./darwin");
-var debug_1 = require("debug");
+var log_1 = require("./log");
 var _ = require("lodash");
 var os = require("os");
 var Promise = require("bluebird");
-var log = debug_1.default('cypress:launcher');
 var browsers = [
     {
         name: 'chrome',
@@ -30,10 +29,11 @@ var browsers = [
 ];
 var setMajorVersion = function (obj) {
     obj.majorVersion = obj.version.split('.')[0];
+    log_1.log('browser %s version %s major version %s', obj.name, obj.version, obj.majorVersion);
     return obj;
 };
 function lookup(platform, obj) {
-    log('looking up %s on %s platform', obj.name, platform);
+    log_1.log('looking up %s on %s platform', obj.name, platform);
     switch (platform) {
         case 'darwin':
             var fn = darwin_1.default[obj.name];
@@ -59,6 +59,7 @@ function checkOneBrowser(browser) {
         .then(setMajorVersion)
         .catch(function (err) {
         if (err.notInstalled) {
+            log_1.log('browser %s not installed', browser.name);
             return false;
         }
         throw err;
