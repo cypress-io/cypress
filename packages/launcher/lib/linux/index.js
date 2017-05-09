@@ -24,6 +24,6 @@ exports.linuxBrowser = {
                 notInstalledErr(binary);
             }
         })
-            .catch(function (e) { return notInstalledErr(binary); });
+            .catch(function () { return notInstalledErr(binary); });
     }
 };
