@@ -20,6 +20,7 @@
   "homepage": "https://github.com/cypress-io/cypress-core-launcher#readme",
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
+    "@types/fs-extra": "3.0.0",
     "@types/node": "^7.0.18",
     "chai": "^3.5.0",
     "mocha": "^2.4.5",
@@ -32,7 +33,7 @@
   "dependencies": {
     "@cypress/coffee-script": "0.1.2",
     "bluebird": "^3.3.5",
-    "fs-extra": "^0.28.0",
+    "fs-extra": "^3.0.0",
     "lodash": "^4.11.1",
     "plist": "^1.2.0"
   }
