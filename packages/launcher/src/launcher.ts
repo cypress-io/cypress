@@ -7,15 +7,13 @@ const browsers = require('./browsers')
 const missingConfig = () =>
   Promise.reject(new Error('You must provide a path to a config file.'))
 
-const api = browser => (
-{
+const wrap = all => ({
   launch: (name, url, args = []) =>
-      browsers.launch(browser, name, url, args)
-}
-)
+      browsers.launch(all, name, url, args)
+})
 
 const init = browsers =>
-  browsers ? api(browsers) : detect().then(api)
+  browsers ? wrap(browsers) : detect().then(wrap)
 
 const update = (pathToConfig) => {
   if (!pathToConfig) {
@@ -23,10 +21,10 @@ const update = (pathToConfig) => {
   }
 
   // detect the browsers and set the config
-  return detect()
-    .then((browers) =>
+  const saveBrowsers = browers =>
       fs.writeJson(pathToConfig, browers, {spaces: 2})
-    )
+  return detect()
+    .then(saveBrowsers)
 }
 
 const launcher = {
