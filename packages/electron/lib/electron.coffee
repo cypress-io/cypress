@@ -35,6 +35,9 @@ module.exports = {
     ## make sure this path exists!
     fs.statAsync(appPath)
     .then ->
+      ## clear out the existing symlink
+      fs.removeAsync(dest)
+    .then ->
       fs.ensureSymlinkAsync(appPath, dest, "dir")
     .then ->
       cp.spawn(paths.getPathToExec(), argv, {stdio: "inherit"})
