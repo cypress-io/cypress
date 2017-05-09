@@ -7,7 +7,7 @@ const execAsync = Promise.promisify(cp.exec)
 type NotInstalledError = Error & {notInstalled: boolean}
 
 const notInstalledErr = (name: string) => {
-  const err: NotInstalledError = new Error('Browser not installed: #{name}') as NotInstalledError
+  const err: NotInstalledError = new Error(`Browser not installed: ${name}`) as NotInstalledError
   err.notInstalled = true
   throw err
 }

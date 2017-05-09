@@ -41,29 +41,25 @@ function lookup (platform, obj) {
       const fn = darwin[obj.name]
       if (fn) {
         return fn.get(obj.executable)
-      } else {
-        const err: NotInstalledError =
-          new Error('Browser not installed: #{obj.name}') as NotInstalledError
-        err.notInstalled = true
-        Promise.reject(err)
       }
-      break
+      const err: NotInstalledError =
+        new Error(`Browser not installed: ${obj.name}`) as NotInstalledError
+      err.notInstalled = true
+      return Promise.reject(err)
     case 'linux':
       return linuxBrowser.get(obj.binary, obj.re)
     // TODO handle default case?
   }
 }
 
-module.exports = () => {
+function checkOneBrowser(browser) {
   const platform = os.platform()
-
-  return Promise.map(browsers, (obj) =>
-    lookup(platform, obj)
+  return lookup(platform, browser)
     .then(props => {
       return _.chain({})
-      .extend(obj, props)
-      .pick('name', 'type', 'version', 'path')
-      .value()
+        .extend(browser, props)
+        .pick('name', 'type', 'version', 'path')
+        .value()
     })
     .then(setMajorVersion)
     .catch(err => {
@@ -72,5 +68,8 @@ module.exports = () => {
       }
       throw err
     })
-  ).then(_.compact)
+}
+
+module.exports = () => {
+  return Promise.map(browsers, checkOneBrowser).then(_.compact)
 }
