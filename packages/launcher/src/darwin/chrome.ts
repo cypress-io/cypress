@@ -2,21 +2,24 @@ import {parse, find} from './util'
 import path = require('path')
 import Promise = require('bluebird')
 
-const canary = {
-  version: (p) =>
-    parse(p, 'KSVersion'),
+const chrome = {
+  version (p) {
+    return parse(p, 'KSVersion')
+  },
 
-  path: () => find('com.google.Chrome.canary'),
+  path () {
+    return find('com.google.Chrome')
+  },
 
   get (executable) {
     return this.path()
-      .then (p => {
-        return Promise.props({
+      .then (p =>
+        Promise.props({
           path:    path.join(p, executable),
           version: this.version(p)
         })
-      })
+      )
   }
 }
 
-export default canary
+export default chrome

@@ -4,7 +4,7 @@ var linux_1 = require("./linux");
 var _ = require("lodash");
 var os = require("os");
 var Promise = require("bluebird");
-var darwin = require("./darwin");
+var darwin = require("./darwin/index");
 var browsers = [
     {
         name: 'chrome',
