@@ -5,7 +5,6 @@ var execa = require("execa");
 var fs = require("fs-extra");
 var path = require("path");
 var plist = require("plist");
-console.log('plist', plist);
 function parse(p, prop) {
     var pl = path.join(p, 'Contents', 'Info.plist');
     return fs.readFile(pl, 'utf8')
