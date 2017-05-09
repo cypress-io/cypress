@@ -5,6 +5,7 @@ import os = require('os')
 import Promise = require('bluebird')
 import darwin = require('./darwin')
 
+// TODO remove this duplicate definition
 type NotInstalledError = Error & {notInstalled: boolean}
 
 const browsers = [
