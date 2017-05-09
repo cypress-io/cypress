@@ -12,7 +12,6 @@ expect       = require("chai").expect
 Promise      = require("bluebird")
 obfuscator   = require("obfuscator")
 runSequence  = require("run-sequence")
-cypressIcons = require("@cypress/icons")
 cypressElectron = require("../../electron")
 log          = require("./log")
 meta         = require("./meta")

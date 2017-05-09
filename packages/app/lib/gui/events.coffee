@@ -1,7 +1,6 @@
 _           = require("lodash")
 ipc         = require("electron").ipcMain
 shell       = require("electron").shell
-cyIcons     = require("@cypress/icons")
 dialog      = require("./dialog")
 pgk         = require("./package")
 logs        = require("./logs")
