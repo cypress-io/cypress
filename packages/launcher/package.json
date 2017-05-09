@@ -24,6 +24,7 @@
   "homepage": "https://github.com/cypress-io/cypress-core-launcher#readme",
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
+    "@types/bluebird": "^3.5.3",
     "@types/fs-extra": "3.0.0",
     "@types/node": "^7.0.18",
     "chai": "^3.5.0",

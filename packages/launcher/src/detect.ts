@@ -1,7 +1,8 @@
+import {linuxBrowser} from './linux'
+
 import _ = require('lodash')
 import os = require('os')
 import Promise = require('bluebird')
-import linux = require('./linux')
 import darwin = require('./darwin')
 
 type NotInstalledError = Error & {notInstalled: boolean}
@@ -47,7 +48,7 @@ function lookup (platform, obj) {
       }
       break
     case 'linux':
-      return linux.get(obj.binary, obj.re)
+      return linuxBrowser.get(obj.binary, obj.re)
     // TODO handle default case?
   }
 }
