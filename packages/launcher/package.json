@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "description": "Internal lib for spawning browser processes",
   "main": "index.js",
-  "types": "./src/types.d.ts",
+  "types": "./index.d.ts",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
     "clean-all": "npm run clean-deps",
