@@ -196,8 +196,10 @@ export default class IframeModel {
   }
 
   _storeOriginalState () {
-    //// FIXME: this may return undefined
-    const { body, htmlAttrs, headStyles, bodyStyles } = this.detachDom()
+    const originalState = this.detachDom()
+    if (!originalState) return
+
+    const { body, htmlAttrs, headStyles, bodyStyles } = originalState
 
     this.originalState = {
       body,
