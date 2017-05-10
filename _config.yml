@@ -3,9 +3,9 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Cypress.io
-subtitle:
-description:
+title: Cypress.io Documentation
+subtitle: Testing, the way it should be.
+description: Cypress is a test engine that runs unit and integration tests in your browser. It makes it easy to write and debug web application tests.
 author: Cypress.io
 language: en
 
@@ -18,14 +18,10 @@ permalink_defaults:
 
 logo: img/logo.png
 github: cypress-io/cypress-documentation
-github_main_repo: cypress-io/cypress
 
 # Directory
 source_dir: source
 public_dir: public
-tag_dir: tags
-category_dir: categories
-code_dir: downloads/code
 i18n_dir: :lang
 skip_render:
 
@@ -46,6 +42,7 @@ future: true
 highlight:
   enable: true
   line_number: false
+  auto_detect: true
 
 # Category & Tag
 default_category: uncategorized
@@ -64,15 +61,23 @@ time_format: HH:mm:ss
 per_page: 10
 pagination_dir: page
 
-
 twitter_username: Cypress_io
 facebook_username: cypressio
 github_username: cypress-io
+github_main_repo: cypress-io/cypress
+email: support@cypress.io
+gitter: cypress-io/cypress
 
 # Disqus settings
 # _your_disqus_short_name_
 disqus_shortname: cypress-documentation
 fb_admins: 909781955804405
+
+# Google Plugins
+google:
+  analytics_id: UA-59606812-1
+  optimize_id: GTM-PHT3GCP
+  tag_manager_id: GTM-PHT3GCP
 
 ## Algolia Search
 ## https://github.com/LouisBarranqueiro/hexo-algoliasearch
@@ -86,6 +91,7 @@ algolia:
 ## Themes: https://hexo.io/themes/
 theme: cypress
 
+## https://github.com/mamboer/hexo-renderer-scss
 node_sass:
   outputStyle: nested
   precision: 5
@@ -95,6 +101,43 @@ node_sass:
 sitemap:
   path: sitemap.xml
   template: ./sitemap_template.xml
+
+## https://github.com/mamboer/hexo-filter-cleanup
+hfc_useref:
+  enable: true
+  concat: true
+  exclude:
+hfc_html:
+  enable: true
+  exclude:
+hfc_css:
+  enable: true
+  exclude:
+    - '*.min.css'
+hfc_js:
+  enable: true
+  mangle: true
+  output:
+  compress:
+  exclude:
+    - '*.min.js'
+hfc_img:
+  enable: true
+  interlaced: false
+  multipass: false
+  optimizationLevel: 2
+  pngquant: false
+  progressive: false
+  webp: true
+  webpQuality: 75
+  gifslice: true
+  jpegtran: true
+  jpegrecompress: false
+  jpegrecompressQuality: 'medium'
+  optipng: true
+  svgo: true
+hfc_favicons:
+  enable: false
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html

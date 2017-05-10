@@ -7,30 +7,36 @@
     "version": "3.3.1"
   },
   "scripts": {
-    "start": "hexo server --port 2222",
+    "clean": "hexo clean",
     "convert": "node ./cy_scripts/convert.js",
-    "generate": "hexo generate",
-    "deploy": "hexo deploy --generate"
+    "deploy": "npm run build && hexo deploy",
+    "prep": "gulp prep",
+    "build": "hexo clean && hexo generate && npm run prep",
+    "start": "hexo server --port 2222"
   },
   "author": "Cypress.io",
   "license": "ISC",
   "devDependencies": {
     "colors": "^1.1.2",
-    "fs-extra": "^2.1.2",
+    "fs-extra": "^3.0.1",
     "glob": "^7.1.1",
+    "gulp": "^3.9.1",
+    "gulp-clean": "^0.3.2",
+    "gulp-debug": "^3.1.0",
+    "gulp-rev-all": "^0.9.7",
+    "run-sequence": "^1.2.2",
     "underscore.string": "^3.3.4",
     "yamljs": "^0.2.10"
   },
   "dependencies": {
     "bluebird": "^3.5.0",
-    "hexo": "^3.2.0",
+    "hexo": "3.3.1",
     "hexo-algoliasearch": "^0.2.1",
     "hexo-deployer-git": "^0.2.0",
     "hexo-generator-archive": "^0.1.4",
     "hexo-generator-category": "^0.1.3",
     "hexo-generator-index": "^0.2.0",
     "hexo-generator-sitemap": "^1.1.2",
-    "hexo-generator-tag": "^0.2.0",
     "hexo-renderer-marked": "^0.2.10",
     "hexo-renderer-scss": "^1.0.2",
     "hexo-server": "^0.2.0",
