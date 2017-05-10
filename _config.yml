@@ -11,8 +11,8 @@ language: en
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: https://cypress-io.github.io/cypress-documentation
-root: /cypress-documentation/
+url: https://docs.cypress.io
+root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 
@@ -67,17 +67,18 @@ github_username: cypress-io
 github_main_repo: cypress-io/cypress
 email: support@cypress.io
 gitter: cypress-io/cypress
+facebook_admin_id: 22600147
+facebook_app_id: 446223215719535
 
 # Disqus settings
 # _your_disqus_short_name_
 disqus_shortname: cypress-documentation
-fb_admins: 909781955804405
 
 # Google Plugins
 google:
-  analytics_id: UA-59606812-1
-  optimize_id: GTM-PHT3GCP
-  tag_manager_id: GTM-PHT3GCP
+  analytics_id: UA-59606812-3
+  optimize_id: GTM-MVNP9PH
+  tag_manager_id: GTM-KNKBWLD
 
 ## Algolia Search
 ## https://github.com/LouisBarranqueiro/hexo-algoliasearch
