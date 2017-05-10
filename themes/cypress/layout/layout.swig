@@ -2,6 +2,7 @@
 <html lang="{{ page.lang }}">
 {{ partial('partial/head') }}
 <body>
+  {{ partial('partial/google-tag-manager-noscript')}}
   <div id="container">
     {{ partial('partial/header') }}
     {{ body }}
