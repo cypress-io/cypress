@@ -1,16 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs_extra_1 = require("fs-extra");
+var browsers_1 = require("./browsers");
 var Promise = require('bluebird');
 var detect = require('./detect');
-var browsers = require('./browsers');
 var missingConfig = function () {
     return Promise.reject(new Error('You must provide a path to a config file.'));
 };
 var wrap = function (all) { return ({
     launch: function (name, url, args) {
         if (args === void 0) { args = []; }
-        return browsers.launch(all, name, url, args);
+        return browsers_1.launch(all, name, url, args);
     }
 }); };
 var init = function (browsers) {

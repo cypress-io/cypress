@@ -1,15 +1,15 @@
 import {writeJson} from 'fs-extra'
+import {launch} from './browsers'
 
 const Promise = require('bluebird')
 const detect = require('./detect')
-const browsers = require('./browsers')
 
 const missingConfig = () =>
   Promise.reject(new Error('You must provide a path to a config file.'))
 
 const wrap = all => ({
   launch: (name, url, args = []) =>
-      browsers.launch(all, name, url, args)
+      launch(all, name, url, args)
 })
 
 const init = browsers =>
@@ -25,6 +25,7 @@ const update = (pathToConfig) => {
   // detect the browsers and set the config
   const saveBrowsers = browers =>
     writeJson(pathToConfig, browers, {spaces: 2})
+
   return detect()
     .then(saveBrowsers)
 }
