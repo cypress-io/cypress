@@ -1,6 +1,8 @@
-/* global $ */
+/* global $Cypress */
 
 import _ from 'lodash'
+
+const $ = $Cypress.$
 
 const resetStyles = `
   border: none !important;
