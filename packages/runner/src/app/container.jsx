@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react'
-import React, { Component, PropTypes } from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 
 import automation from '../lib/automation'
 import eventManager from '../lib/event-manager'

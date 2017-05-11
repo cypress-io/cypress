@@ -1,6 +1,7 @@
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Children, cloneElement, Component, PropTypes } from 'react'
+import PropTypes from 'prop-types'
+import React, { Children, cloneElement, Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 @observer

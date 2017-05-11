@@ -1,7 +1,8 @@
 import cs from 'classnames'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component, PropTypes } from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import EQ from 'css-element-queries/src/ElementQueries'
 
 import appState from './lib/app-state'
