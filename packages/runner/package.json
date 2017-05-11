@@ -19,7 +19,8 @@
     "clean-all": "npm run clean && npm run clean-deps",
     "test-once": "npm run test-unit-once",
     "test-unit-once": "node ./scripts/test.js",
-    "watch-dev": "node ./scripts/watch.js"
+    "watch-dev": "node ./scripts/watch.js",
+    "lint": "eslint src/**/*.jsx src/**/*.js"
   },
   "files": [
     "dist",
