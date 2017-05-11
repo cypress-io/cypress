@@ -77,4 +77,4 @@ Reporter.defaultProps = {
   statsStore,
 }
 
-export default Reporter
+export default { Reporter }
