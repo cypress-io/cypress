@@ -7,6 +7,7 @@ var runSequence = require('run-sequence')
 var revisionOpts = {
   dontGlobal: ['.ico', 'sitemap.xml', 'logo.png'],
   dontRenameFile: ['.html', 'CNAME'],
+  dontUpdateReference: ['.html'],
   dontSearchFile: ['.js'],
   debug: true
 }
