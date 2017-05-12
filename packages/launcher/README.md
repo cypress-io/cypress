@@ -1,5 +1,13 @@
 # Cypress Core Launcher
 
+## Debugging
+
+Uses [debug](https://github.com/visionmedia/debug#readme)
+to output debug log messages. To turn on, use
+
+```sh
+DEBUG=cypress:launcher npm run build-and-test
+```
 
 ## Changelog
 
