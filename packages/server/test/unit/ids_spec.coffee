@@ -1,7 +1,7 @@
 require("../spec_helper")
 
 path     = require("path")
-Fixtures = require("../helpers/fixtures")
+Fixtures = require("../support/helpers/fixtures")
 ids      = require("#{root}lib/ids")
 
 describe "lib/ids", ->

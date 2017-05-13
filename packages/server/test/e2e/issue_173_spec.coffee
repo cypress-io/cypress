@@ -1,4 +1,4 @@
-e2e = require("../helpers/e2e")
+e2e = require("../support/helpers/e2e")
 
 describe "e2e issue 173", ->
   e2e.setup()

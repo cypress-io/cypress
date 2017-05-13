@@ -5,7 +5,7 @@ path           = require("path")
 Promise        = require("bluebird")
 config         = require("#{root}lib/config")
 fixture        = require("#{root}lib/fixture")
-FixturesHelper = require("#{root}/spec/server/helpers/fixtures")
+FixturesHelper = require("#{root}/test/support/helpers/fixtures")
 
 fs = Promise.promisifyAll(fs)
 

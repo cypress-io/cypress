@@ -16,14 +16,14 @@ cjsxify       = require("cjsxify")
 streamToPromise = require("stream-to-promise")
 evilDns       = require("evil-dns")
 Promise       = require("bluebird")
-httpsServer   = require("@cypress/core-https-proxy/test/helpers/https_server")
+httpsServer   = require("#{root}../../packages/https-proxy/test/helpers/https_server")
 pkg           = require("#{root}package.json")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 Watchers      = require("#{root}lib/watchers")
 files         = require("#{root}lib/controllers/files")
 CacheBuster   = require("#{root}lib/util/cache_buster")
-Fixtures      = require("#{root}spec/server/helpers/fixtures")
+Fixtures      = require("#{root}test/support/helpers/fixtures")
 errors        = require("#{root}lib/errors")
 
 fs = Promise.promisifyAll(fs)
@@ -316,13 +316,13 @@ describe "Routes", ->
               expect(res.statusCode).to.eq(200)
 
               body = res.body
-              
+
               expect(body.integration).to.have.length(3)
 
               ## remove the absolute path key
               body.integration = _.map body.integration, (obj) ->
                 _.pick(obj, "name", "path")
-              
+
               expect(res.body).to.deep.eq({
                 integration: [
                   {
@@ -352,9 +352,9 @@ describe "Routes", ->
           })
           .then (res) ->
             expect(res.statusCode).to.eq(200)
-            
+
             body = res.body
-              
+
             expect(body.integration).to.have.length(6)
 
             ## remove the absolute path key
@@ -406,13 +406,13 @@ describe "Routes", ->
             expect(res.statusCode).to.eq(200)
 
             body = res.body
-              
+
             expect(body.integration).to.have.length(3)
 
             ## remove the absolute path key
             body.integration = _.map body.integration, (obj) ->
               _.pick(obj, "name", "path")
-              
+
             expect(body).to.deep.eq({
               integration: [
                 {

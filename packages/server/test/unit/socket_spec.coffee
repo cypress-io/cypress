@@ -5,8 +5,8 @@ os           = require("os")
 path         = require("path")
 uuid         = require("node-uuid")
 Promise      = require("bluebird")
-socketIo     = require("packages/core-socket")
-extension    = require("packages/core-extension")
+socketIo     = require("#{root}../../packages/socket")
+extension    = require("#{root}../../packages/extension")
 httpsAgent   = require("https-proxy-agent")
 open         = require("#{root}lib/util/open")
 errors       = require("#{root}lib/errors")
@@ -15,7 +15,7 @@ Socket       = require("#{root}lib/socket")
 Server       = require("#{root}lib/server")
 Watchers     = require("#{root}lib/watchers")
 automation   = require("#{root}lib/automation")
-Fixtures     = require("#{root}/spec/server/helpers/fixtures")
+Fixtures     = require("#{root}/test/support/helpers/fixtures")
 exec         = require("#{root}lib/exec")
 savedState   = require("#{root}lib/saved_state")
 
@@ -42,13 +42,13 @@ describe "lib/socket", ->
         @options = {
           onSavedStateChanged: @sandbox.spy()
         }
-        
+
         @watchers = {
           watch: ->
         }
 
         @automation = automation.create()
-        
+
         @server.startWebsockets(@watchers, @automation, @cfg, @options)
         @socket = @server._socket
 

@@ -1,4 +1,4 @@
-global.root      = "../../../"
+global.root      = "../../"
 global.supertest = require("supertest-as-promised")
 global.nock      = require("nock")
 global.fs        = require("fs-extra")
@@ -9,8 +9,8 @@ Promise          = require("bluebird")
 path             = require("path")
 sinon            = require("sinon")
 sinonPromise     = require("sinon-as-promised")(Promise)
-cache            = require("../../lib/cache")
-appData          = require("../../lib/util/app_data")
+cache            = require("../lib/cache")
+appData          = require("../lib/util/app_data")
 
 global.fs = fs = Promise.promisifyAll(global.fs)
 
@@ -27,7 +27,7 @@ mockery.enable({
 ## we must use an absolute path here because of the way mockery internally loads this
 ## module - meaning the first time electron is required it'll use this path string
 ## so because its required from a separate module we must use an absolute reference to it
-mockery.registerSubstitute("electron", path.join(__dirname, "./helpers/electron_stub"))
+mockery.registerSubstitute("electron", path.join(__dirname, "./support/helpers/electron_stub"))
 
 ## stub out electron's original-fs module which is available when running in electron
 mockery.registerMock("original-fs", {})

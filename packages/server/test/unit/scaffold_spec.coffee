@@ -3,10 +3,10 @@ require("../spec_helper")
 path       = require("path")
 glob       = require("glob")
 Promise    = require("bluebird")
-cypressEx  = require("@cypress/core-example")
+cypressEx  = require("#{root}../../packages/example")
 config     = require("#{root}lib/config")
 scaffold   = require("#{root}lib/scaffold")
-Fixtures   = require("#{root}/spec/server/helpers/fixtures")
+Fixtures   = require("#{root}/test/support/helpers/fixtures")
 
 glob = Promise.promisify(glob)
 

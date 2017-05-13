@@ -5,7 +5,7 @@ path     = require("path")
 repl     = require("repl")
 history  = require("repl.history")
 browsers = require("./browsers")
-Fixtures = require("../spec/server/helpers/fixtures")
+Fixtures = require("../test/support/helpers/fixtures")
 
 replServer = repl.start({
   prompt: "> "

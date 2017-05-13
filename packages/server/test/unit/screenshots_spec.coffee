@@ -1,6 +1,6 @@
 require("../spec_helper")
 
-Fixtures    = require("../helpers/fixtures")
+Fixtures    = require("../support/helpers/fixtures")
 config      = require("#{root}lib/config")
 settings    = require("#{root}lib/util/settings")
 screenshots = require("#{root}lib/screenshots")
