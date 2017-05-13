@@ -10,11 +10,11 @@ Updater  = require("#{root}../lib/updater")
 user     = require("#{root}../lib/user")
 errors   = require("#{root}../lib/errors")
 browsers = require("#{root}../lib/browsers")
+openProject = require("#{root}../lib/open_project")
 open     = require("#{root}../lib/util/open")
 logs     = require("#{root}../lib/gui/logs")
 events   = require("#{root}../lib/gui/events")
 dialog   = require("#{root}../lib/gui/dialog")
-project  = require("#{root}../lib/open_project")
 Windows  = require("#{root}../lib/gui/windows")
 
 describe "lib/gui/events", ->
@@ -161,14 +161,15 @@ describe "lib/gui/events", ->
 
   context "window", ->
     describe "window:open", ->
-      it "calls Windows#create with args and resolves with return of Windows.create", ->
-        @sandbox.stub(Windows, "create").withArgs({foo: "bar"}).resolves({bar: "baz"})
+      it "calls Windows#open with args and resolves with return of Windows.open", ->
+        @sandbox.stub(Windows, "open").withArgs({foo: "bar"}).resolves({bar: "baz"})
+
         @handleEvent("window:open", {foo: "bar"}).then =>
           @expectSendCalledWith({bar: "baz"})
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(Windows, "create").withArgs({foo: "bar"}).rejects(err)
+        @sandbox.stub(Windows, "open").withArgs({foo: "bar"}).rejects(err)
 
         @handleEvent("window:open", {foo: "bar"}).then =>
           @expectSendErrCalledWith(err)
@@ -423,7 +424,7 @@ describe "lib/gui/events", ->
       afterEach ->
         ## close down 'open' projects
         ## to prevent side effects
-        project.close()
+        openProject.close()
 
       it "open project + returns config", ->
         @sandbox.stub(Project.prototype, "open")
@@ -450,7 +451,7 @@ describe "lib/gui/events", ->
         @sandbox.stub(Project.prototype, "close").withArgs({sync: true}).resolves()
 
       it "is noop and returns null when no project is open", ->
-        expect(project.opened()).to.be.null
+        expect(openProject.getProject()).to.be.null
 
         @handleEvent("close:project").then =>
           @expectSendCalledWith(null)
@@ -462,24 +463,24 @@ describe "lib/gui/events", ->
         @handleEvent("open:project", "path/to/project")
         .then =>
           ## it should store the opened project
-          expect(project.opened()).not.to.be.null
+          expect(openProject.getProject()).not.to.be.null
 
           @handleEvent("close:project")
           .then =>
             ## it should store the opened project
-            expect(project.opened()).to.be.null
+            expect(openProject.getProject()).to.be.null
 
             @expectSendCalledWith(null)
 
     describe "get:builds", ->
-      it "calls project.getBuilds", ->
-        @sandbox.stub(project, "getBuilds").resolves([])
+      it "calls openProject.getBuilds", ->
+        @sandbox.stub(openProject, "getBuilds").resolves([])
 
         @handleEvent("get:builds").then =>
-          expect(project.getBuilds).to.be.called
+          expect(openProject.getBuilds).to.be.called
 
       it "returns array of builds", ->
-        @sandbox.stub(project, "getBuilds").resolves([])
+        @sandbox.stub(openProject, "getBuilds").resolves([])
 
         @handleEvent("get:builds").then =>
           @expectSendCalledWith([])
@@ -487,7 +488,7 @@ describe "lib/gui/events", ->
       it "sends UNAUTHENTICATED when statusCode is 401", ->
         err = new Error("foo")
         err.statusCode = 401
-        @sandbox.stub(project, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getBuilds").rejects(err)
 
         @handleEvent("get:builds").then =>
           expect(@send).to.be.calledWith("response")
@@ -496,7 +497,7 @@ describe "lib/gui/events", ->
       it "sends TIMED_OUT when cause.code is ESOCKETTIMEDOUT", ->
         err = new Error("foo")
         err.cause = { code: "ESOCKETTIMEDOUT" }
-        @sandbox.stub(project, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getBuilds").rejects(err)
 
         @handleEvent("get:builds").then =>
           expect(@send).to.be.calledWith("response")
@@ -505,7 +506,7 @@ describe "lib/gui/events", ->
       it "sends NO_CONNECTION when code is ENOTFOUND", ->
         err = new Error("foo")
         err.code = "ENOTFOUND"
-        @sandbox.stub(project, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getBuilds").rejects(err)
 
         @handleEvent("get:builds").then =>
           expect(@send).to.be.calledWith("response")
@@ -514,7 +515,7 @@ describe "lib/gui/events", ->
       it "sends type when if existing for other errors", ->
         err = new Error("foo")
         err.type = "NO_PROJECT_ID"
-        @sandbox.stub(project, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getBuilds").rejects(err)
 
         @handleEvent("get:builds").then =>
           expect(@send).to.be.calledWith("response")
@@ -525,51 +526,51 @@ describe "lib/gui/events", ->
         err.name = "name"
         err.message = "message"
         err.stack = "stack"
-        @sandbox.stub(project, "getBuilds").rejects(err)
+        @sandbox.stub(openProject, "getBuilds").rejects(err)
 
         @handleEvent("get:builds").then =>
           expect(@send).to.be.calledWith("response")
           expect(@send.firstCall.args[1].__error.type).to.equal("UNKNOWN")
 
     describe "setup:dashboard:project", ->
-      it "returns result of project.createCiProject", ->
-        @sandbox.stub(project, "createCiProject").resolves("response")
+      it "returns result of openProject.createCiProject", ->
+        @sandbox.stub(openProject, "createCiProject").resolves("response")
 
         @handleEvent("setup:dashboard:project").then =>
           @expectSendCalledWith("response")
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(project, "createCiProject").rejects(err)
+        @sandbox.stub(openProject, "createCiProject").rejects(err)
 
         @handleEvent("setup:dashboard:project").then =>
           @expectSendErrCalledWith(err)
 
     describe "get:record:keys", ->
       it "returns result of project.getRecordKeys", ->
-        @sandbox.stub(project, "getRecordKeys").resolves(["ci-key-123"])
+        @sandbox.stub(openProject, "getRecordKeys").resolves(["ci-key-123"])
 
         @handleEvent("get:record:keys").then =>
           @expectSendCalledWith(["ci-key-123"])
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(project, "getRecordKeys").rejects(err)
+        @sandbox.stub(openProject, "getRecordKeys").rejects(err)
 
         @handleEvent("get:record:keys").then =>
           @expectSendErrCalledWith(err)
 
     describe "request:access", ->
       it "returns result of project.requestAccess", ->
-        @sandbox.stub(project, "requestAccess").resolves("response")
+        @sandbox.stub(openProject, "requestAccess").resolves("response")
 
         @handleEvent("request:access", "org-id-123").then =>
-          expect(project.requestAccess).to.be.calledWith("org-id-123")
+          expect(openProject.requestAccess).to.be.calledWith("org-id-123")
           @expectSendCalledWith("response")
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(project, "requestAccess").rejects(err)
+        @sandbox.stub(openProject, "requestAccess").rejects(err)
 
         @handleEvent("request:access", "org-id-123").then =>
           @expectSendErrCalledWith(err)
@@ -577,7 +578,7 @@ describe "lib/gui/events", ->
       it "sends ALREADY_MEMBER when statusCode is 403", ->
         err = new Error("foo")
         err.statusCode = 403
-        @sandbox.stub(project, "requestAccess").rejects(err)
+        @sandbox.stub(openProject, "requestAccess").rejects(err)
 
         @handleEvent("request:access", "org-id-123").then =>
           expect(@send).to.be.calledWith("response")
@@ -590,7 +591,7 @@ describe "lib/gui/events", ->
           userId: [ "This User has an existing MembershipRequest to this Organization." ]
         }
 
-        @sandbox.stub(project, "requestAccess").rejects(err)
+        @sandbox.stub(openProject, "requestAccess").rejects(err)
 
         @handleEvent("request:access", "org-id-123").then =>
           expect(@send).to.be.calledWith("response")
@@ -599,7 +600,7 @@ describe "lib/gui/events", ->
       it "sends type when if existing for other errors", ->
         err = new Error("foo")
         err.type = "SOME_TYPE"
-        @sandbox.stub(project, "requestAccess").rejects(err)
+        @sandbox.stub(openProject, "requestAccess").rejects(err)
 
         @handleEvent("request:access", "org-id-123").then =>
           expect(@send).to.be.calledWith("response")
@@ -607,7 +608,7 @@ describe "lib/gui/events", ->
 
       it "sends UNKNOWN for other errors", ->
         err = new Error("foo")
-        @sandbox.stub(project, "requestAccess").rejects(err)
+        @sandbox.stub(openProject, "requestAccess").rejects(err)
 
         @handleEvent("request:access", "org-id-123").then =>
           expect(@send).to.be.calledWith("response")

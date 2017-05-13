@@ -19,9 +19,9 @@ describe "lib/screenshots", ->
   afterEach ->
     Fixtures.remove()
 
-  context ".take", ->
+  context ".save", ->
     it "outputs file and returns size and path", ->
-      screenshots.take({name: "foo/tweet"}, image, @cfg.screenshotsFolder)
+      screenshots.save({name: "foo/tweet"}, image, @cfg.screenshotsFolder)
       .then (obj) =>
         path = @cfg.screenshotsFolder + "/footweet.png"
 

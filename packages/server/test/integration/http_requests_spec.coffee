@@ -267,16 +267,12 @@ describe "Routes", ->
       .then (res) ->
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(/spec-iframe/)
-        ## there should not be debug lines in .css files
-        expect(res.body).not.to.match(/line \d/)
 
     it "can get reporter.css", ->
-      @rp("http://localhost:8443/__cypress/runner/reporter.css")
+      @rp("http://localhost:8443/__cypress/reporter/reporter.css")
       .then (res) ->
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(/command-name-assert/)
-        ## there should not be debug lines in .css files
-        expect(res.body).not.to.match(/line \d/)
 
   context "GET /__cypress/files", ->
     beforeEach ->

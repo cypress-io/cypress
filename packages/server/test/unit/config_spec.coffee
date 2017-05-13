@@ -806,13 +806,13 @@ describe "lib/config", ->
 
       obj = config.setAbsolutePaths({
         projectRoot: projectRoot
-        supportFile: "spec/server/unit/config_spec.coffee"
+        supportFile: "test/unit/config_spec.coffee"
       })
 
       expect(config.setSupportFileAndFolder(obj)).to.eql({
         projectRoot: projectRoot
-        supportFile: "#{projectRoot}/spec/server/unit/config_spec.coffee"
-        supportFolder: "#{projectRoot}/spec/server/unit"
+        supportFile: "#{projectRoot}/test/unit/config_spec.coffee"
+        supportFolder: "#{projectRoot}/test/unit"
       })
 
     it "sets the supportFile to default index.js if it does not exist and supportFile is the default", ->

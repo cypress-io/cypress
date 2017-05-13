@@ -177,18 +177,16 @@ describe "lib/fixture", ->
           """
 
     it "throws on bad coffee object", ->
-      e =
-        """
-        [stdin]:3:16: error: missing }
-          name: "brian"
-                       ^
-        """
-
       fixture.get(@fixturesFolder, "bad_coffee.coffee")
       .then ->
         throw new Error("should have failed but did not")
       .catch (err) ->
-        expect(err.message).to.eq "'bad_coffee.coffee is not a valid CoffeeScript object.\n#{e}"
+        expect(err.message).to.eq """
+        'bad_coffee.coffee is not a valid CoffeeScript object.
+        [stdin]:1:1: error: missing }
+        {
+        ^
+        """
 
   context "html files", ->
     it "returns html as a string", ->
