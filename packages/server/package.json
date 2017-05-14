@@ -151,7 +151,7 @@
     "send": "^0.14.1",
     "server-destroy": "1.0.1",
     "signal-exit": "^3.0.2",
-    "sinon": "cypress-io/sinon#bd2fc5665a7f83acd9931bc9aca212fd21bf3ef2",
+    "sinon": "1.17.7",
     "sinon-as-promised": "3.0.1",
     "sinon-chai": "cypress-io/sinon-chai#84d1085cac68f85c838471577e9d8cc811ca325d",
     "string-to-stream": "^1.0.1",

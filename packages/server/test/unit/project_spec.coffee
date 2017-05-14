@@ -10,7 +10,9 @@ cache        = require("#{root}lib/cache")
 errors       = require("#{root}lib/errors")
 config       = require("#{root}lib/config")
 scaffold     = require("#{root}lib/scaffold")
+Server       = require("#{root}lib/server")
 Project      = require("#{root}lib/project")
+Automation   = require("#{root}lib/automation")
 settings     = require("#{root}lib/util/settings")
 savedState   = require("#{root}lib/saved_state")
 git          = require("#{root}lib/util/git")
@@ -73,7 +75,7 @@ describe "lib/project", ->
       @sandbox.stub(@project, "watchSupportFile").resolves()
       @sandbox.stub(@project, "scaffold").resolves()
       @sandbox.stub(@project, "getConfig").resolves(@config)
-      @sandbox.stub(@project.server, "open").resolves()
+      @sandbox.stub(Server.prototype, "open").resolves()
 
     it "calls #watchSettingsAndStartWebsockets with options + config", ->
       opts = {changeEvents: false, onAutomationRequest: ->}
@@ -139,14 +141,6 @@ describe "lib/project", ->
 
     it "can close when server + watchers arent open", ->
       @project.close()
-
-    it "removes listeners", ->
-      @project.on "foo", ->
-
-      expect(@project.listeners("foo").length).to.eq(1)
-
-      @project.close().then =>
-        expect(@project.listeners("foo").length).to.be.eq(0)
 
   context "#determineIsNewProject", ->
     it "is false when files.length isnt 1", ->
@@ -315,22 +309,14 @@ describe "lib/project", ->
       @project.watchers = {}
       @project.server = @sandbox.stub({startWebsockets: ->})
       @sandbox.stub(@project, "watchSettings")
+      @sandbox.stub(Automation, "create").returns("automation")
 
-    it "calls server.startWebsockets with watchers + config", ->
+    it "calls server.startWebsockets with watchers, automation + config", ->
       c = {}
 
       @project.watchSettingsAndStartWebsockets({}, c)
 
-      expect(@project.server.startWebsockets).to.be.calledWith(@project.watchers, c)
-
-    it "passes onAutomationRequest callback", ->
-      fn = @sandbox.stub()
-
-      @project.server.startWebsockets.yieldsTo("onAutomationRequest")
-
-      @project.watchSettingsAndStartWebsockets({onAutomationRequest: fn}, {})
-
-      expect(fn).to.be.calledOnce
+      expect(@project.server.startWebsockets).to.be.calledWith(@project.watchers, "automation", c)
 
     it "passes onReloadBrowser callback", ->
       fn = @sandbox.stub()
