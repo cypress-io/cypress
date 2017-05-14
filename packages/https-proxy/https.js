@@ -1,2 +1,2 @@
-require("coffee-script/register")
+require("../coffee/register")
 require("./test/helpers/https_server").start(8443)

@@ -1,9 +1,6 @@
-require("coffee-script/register")
-
 const fs   = require("fs")
 const zlib = require("zlib")
 const path = require("path")
-const Fixtures = require("./test/support/helpers/fixtures")
 
 const src  = path.join("test/support/fixtures/projects/e2e/static/FiraSans-Regular.woff")
 const dest = path.join("test/support/fixtures/projects/e2e/static/FiraSans-Regular.woff.gz")
