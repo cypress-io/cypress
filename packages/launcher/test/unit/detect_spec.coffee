@@ -1,5 +1,5 @@
 require("../spec_helper")
-detect = require('../../lib/detect')
+detect = require('../../lib/detect').default
 
 describe "browser detection", ->
   it 'detects available browsers', ->

@@ -7,10 +7,11 @@
   "scripts": {
     "clean-deps": "rm -rf node_modules",
     "clean-all": "npm run clean-deps",
-    "lint": "tslint --fix --format stylish src/**/*.ts",
+    "lint": "tslint --type-check  --project . --fix --format stylish src/**/*.ts",
     "build": "tsc",
+    "build-dev": "npm run build",
     "prebuild": "npm run lint",
-    "test": "mocha --opts test/mocha.opts test/unit/*spec.coffee",
+    "test": "mocha",
     "build-and-test": "npm run build && npm test"
   },
   "repository": {

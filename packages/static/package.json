@@ -2,7 +2,8 @@
   "name": "static",
   "main": "index.js",
   "scripts": {
-    "build-dev": "gulp build"
+    "build-dev": "gulp build",
+    "test": "echo 'Nothing to test yet'"
   },
   "devDependencies": {
     "@cypress/icons": "0.5.2",

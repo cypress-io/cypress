@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "clean-deps": "rm -rf node_modules",
-    "test": "NODE_ENV=test mocha --watch",
-    "test-ci": "NODE_ENV=test mocha",
+    "test": "NODE_ENV=test mocha",
+    "test-watch": "NODE_ENV=test mocha --watch",
     "https": "node https.js",
     "release": "releaser"
   },

@@ -3,12 +3,12 @@ import path = require('path')
 import Promise = require('bluebird')
 
 const canary = {
-  version: (p) =>
+  version: (p: string) =>
     parse(p, 'KSVersion'),
 
   path: () => find('com.google.Chrome.canary'),
 
-  get (executable) {
+  get (executable: string) {
     return this.path()
       .then (p => {
         return Promise.props({

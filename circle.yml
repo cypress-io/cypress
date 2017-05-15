@@ -1,0 +1,49 @@
+machine:
+  node:
+    version: 6.5.0
+
+dependencies:
+  # CircleCI caching
+  # https://circleci.com/docs/1.0/how-cache-works/
+  cache_directories:
+    # Could not use wildcard format
+    - packages/coffee/node_modules
+    - packages/desktop-gui/node_modules
+    - packages/driver/node_modules
+    - packages/electron/node_modules
+    - packages/example/node_modules
+    - packages/extension/node_modules
+    - packages/https-proxy/node_modules
+    - packages/launcher/node_modules
+    - packages/reporter/node_modules
+    - packages/runner/node_modules
+    - packages/server/node_modules
+    - packages/socket/node_modules
+    - packages/static/node_modules
+
+test:
+  ## e2e (1)
+  ## desktop-gui (2)
+  ## driver (3)
+  ## example (4)
+  ## cli (5)
+  ## extension (5)
+  ## https-proxy (5)
+  ## launcher (5)
+  ## reporter (5)
+  ## runner (5)
+  ## server (5, 6)
+  override:
+    - echo 'Coffee Unit Tests' && cd packages/coffee && npm test
+    - echo 'Driver Unit Tests' && cd packages/driver && npm run test-once
+    - echo 'Electron Unit Tests' && cd packages/electron && npm run test
+    - echo 'Example Unit Tests' && cd packages/example && npm run test-lib
+    - echo 'Extension Unit Tests' && cd packages/extension && npm run test-once
+    - echo 'Https Proxy Unit Tests' && cd packages/https-proxy && npm test
+    - echo 'Launcher Unit Tests' && cd packages/launcher && npm test
+    - echo 'Reporter Unit Tests' && cd packages/reporter && npm run test-once
+    - echo 'Runner Unit Tests' && cd packages/runner && npm run test-once
+    - echo 'Server Unit Tests' && cd packages/server && npm run test-unit-once
+    - echo 'Socket Unit Tests' && cd packages/socket && npm run test-once
+    - echo 'Static Unit Tests' && cd packages/static && npm test
+    # TODO E2E tests
