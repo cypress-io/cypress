@@ -97,3 +97,21 @@ npm run test-unit-once ## same as 'npm run all test-unit-once -- --serial'
 npm run test-integration-once ## same as 'npm run all test-integration-once -- --serial'
 npm run test-e2e-once ## same as 'npm run all test-e2e-once -- --serial'
 ```
+
+### Debugging
+
+Some packages use [debug](https://github.com/visionmedia/debug#readme) to
+log debug messages to the console. The naming scheme should be
+`cypress:<package name>`. For example to see launcher messages during unit
+tests start it using
+
+```bash
+cd packages/launcher
+DEBUG=cypress:launcher npm test
+```
+
+If you want to see log messages from all Cypress projects use wild card
+
+```bash
+DEBUG=cypress:* ...
+```
