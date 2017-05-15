@@ -121,6 +121,7 @@ sidebar:
     then: then
     tick: tick
     title: title
+    trigger: trigger
     type: type
     uncheck: uncheck
     url: url

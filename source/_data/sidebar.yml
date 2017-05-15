@@ -105,6 +105,7 @@ api:
     then: then.html
     tick: tick.html
     title: title.html
+    trigger: trigger.html
     type: type.html
     uncheck: uncheck.html
     url: url.html

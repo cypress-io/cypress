@@ -264,7 +264,7 @@ The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#se
 
 Alternatively, it is very easy to use Cypress itself to figure this out.
 
-You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#sections-debugging-assertions) here.
+You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#debugging-assertions) here.
 
 ***
 
