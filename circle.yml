@@ -37,16 +37,18 @@ test:
   ## server (5, 6)
   override:
     - echo 'Coffee Unit Tests' && cd packages/coffee && npm test
-    - echo 'Driver Unit Tests' && cd packages/driver && npm run test-once
-    - echo 'Electron Unit Tests' && cd packages/electron && npm run test
+    - echo 'Driver Unit Tests' && cd packages/driver && npm test
+    - echo 'Electron Unit Tests' && cd packages/electron && npm test
+    # for now keeping lib command as unit test?
+    # because in this project E2E tests ARE unit tests
     - echo 'Example Unit Tests' && cd packages/example && npm run test-lib
-    - echo 'Extension Unit Tests' && cd packages/extension && npm run test-once
+    - echo 'Extension Unit Tests' && cd packages/extension && npm test
     - echo 'Https Proxy Unit Tests' && cd packages/https-proxy && npm test
     - echo 'Launcher Unit Tests' && cd packages/launcher && npm test
-    - echo 'Reporter Unit Tests' && cd packages/reporter && npm run test-once
-    - echo 'Runner Unit Tests' && cd packages/runner && npm run test-once
+    - echo 'Reporter Unit Tests' && cd packages/reporter && npm test
+    - echo 'Runner Unit Tests' && cd packages/runner && npm run test
     - echo 'TODO fix server tests'
-    # - echo 'Server Unit Tests' && cd packages/server && npm run test-unit-once
-    - echo 'Socket Unit Tests' && cd packages/socket && npm run test-once
+    # - echo 'Server Unit Tests' && cd packages/server && npm test
+    - echo 'Socket Unit Tests' && cd packages/socket && npm test
     - echo 'Static Unit Tests' && cd packages/static && npm test
     # TODO E2E tests

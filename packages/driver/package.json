@@ -5,8 +5,8 @@
   "scripts": {
     "build-dev": "gulp build",
     "clean-deps": "rm -rf node_modules",
-    "test": "gulp test",
-    "test-once": "gulp test:once",
+    "test": "gulp test:once",
+    "test-watch": "gulp test",
     "watch-dev": "gulp watch"
   },
   "devDependencies": {
