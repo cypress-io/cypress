@@ -41,7 +41,7 @@ test:
     - echo 'Extension Unit Tests' && cd packages/extension && npm run test-once
     - echo 'Https Proxy Unit Tests' && cd packages/https-proxy && npm test
     - echo 'Launcher Unit Tests' && cd packages/launcher && npm test
-    - echo 'Reporter Unit Tests' && cd packages/reporter && npm test-once
+    - echo 'Reporter Unit Tests' && cd packages/reporter && npm run test-once
     - echo 'Runner Unit Tests' && cd packages/runner && npm test-once
     - echo 'Server Unit Tests' && cd packages/server && npm test-unit-once
     - echo 'Socket Unit Tests' && cd packages/socket && npm test-once
