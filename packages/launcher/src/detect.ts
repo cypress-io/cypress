@@ -6,16 +6,6 @@ import _ = require('lodash')
 import os = require('os')
 import Promise = require('bluebird')
 
-type Browser = {
-  name: string,
-  re: RegExp,
-  profile: boolean,
-  binary: string,
-  executable: string,
-  version?: string,
-  majorVersion?: string
-}
-
 const browsers:Browser[] = [
   {
     name: 'chrome',
@@ -88,7 +78,10 @@ function checkOneBrowser(browser:Browser) {
     })
 }
 
-module.exports = () => {
+/** returns list of detected browsers */
+function detectBrowsers (): Promise<Browser[]> {
   return Promise.map(browsers, checkOneBrowser)
-    .then(_.compact)
+    .then(_.compact) as Promise<Browser[]>
 }
+
+export default detectBrowsers

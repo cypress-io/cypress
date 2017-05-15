@@ -4,7 +4,7 @@ import cp = require('child_process')
 
 type FoundBrowser = {
   name: string,
-  path: string
+  path?: string
 }
 
 const browserNotFoundErr = (browsers:FoundBrowser[], name: string): BrowserNotFoundError => {
@@ -24,6 +24,10 @@ export function launch (browsers:FoundBrowser[],
 
   if (!browser) {
     throw browserNotFoundErr(browsers, name)
+  }
+
+  if (!browser.path) {
+    throw new Error(`Found browser ${name} is missing path`)
   }
 
   if (url) {
