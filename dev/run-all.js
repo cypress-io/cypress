@@ -21,8 +21,11 @@ const packageNameFromPath = (fullPath) => {
   return fullPath.replace(`${path.resolve('packages')}/`, '')
 }
 
+const nonPackageDirs = ['docs/']
+
 const getDirs = () => {
   return globAsync('packages/*/')
+  .then((dirs) => dirs.concat(nonPackageDirs))
 }
 
 const filterDirsByPackage = (dirs, packages) => {
