@@ -119,7 +119,7 @@ In our case it would re-issue the commands: `cy.get("#todos li").first()`. Every
 
 Another use case for aliasing is with routes. Using aliases with [`cy.route`](https://on.cypress.io/api/route) makes dealing with AJAX requests much easier.
 
-![alias-routes](https://cloud.githubusercontent.com/assets/1271364/12363262/cf6fee26-bb95-11e5-8592-4f8cd3a6520e.jpg)
+![alias-commands](https://cloud.githubusercontent.com/assets/1271364/12363262/cf6fee26-bb95-11e5-8592-4f8cd3a6520e.jpg)
 
 ```javascript
 cy
