@@ -2,10 +2,6 @@ machine:
   node:
     version: 6.5.0
 
-dependencies:
-  post:
-    - npm run all build-dev
-
 test:
   ## e2e (1)
   ## desktop-gui (2)
