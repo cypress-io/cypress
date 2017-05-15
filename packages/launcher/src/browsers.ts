@@ -18,7 +18,7 @@ type FoundBrowser = {
 
 /** starts a browser by name and opens URL if given one */
 export function launch (browsers:FoundBrowser[],
-  name:string, url?:string, args = []) {
+  name:string, url?:string, args:string[] = []) {
   log('launching browser %s to open %s', name, url)
   const browser = find(browsers, {name})
 
