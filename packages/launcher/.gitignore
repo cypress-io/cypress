@@ -36,3 +36,6 @@ node_modules
 # JS files generated from TypeScript files
 lib/*.js
 lib/**/*.js
+# We no longer need coffee files, all "lib" should be generated
+lib/*.coffee
+lib/**/*.coffee
