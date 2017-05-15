@@ -38,7 +38,12 @@ test:
     - echo 'Driver Unit Tests' && cd packages/driver && npm run test-once
     - echo 'Electron Unit Tests' && cd packages/electron && npm run test
     - echo 'Example Unit Tests' && cd packages/example && npm run test-lib
-    - echo 'Extension Unit Tests' && cd packages/example && npm run test-once
-    - echo 'Launcher Unit Tests' && cd packages/launcher && npm test
+    - echo 'Extension Unit Tests' && cd packages/extension && npm run test-once
     - echo 'Https Proxy Unit Tests' && cd packages/https-proxy && npm test
+    - echo 'Launcher Unit Tests' && cd packages/launcher && npm test
+    - echo 'Reporter Unit Tests' && cd packages/reporter && npm test-once
+    - echo 'Runner Unit Tests' && cd packages/runner && npm test-once
+    - echo 'Server Unit Tests' && cd packages/server && npm test-unit-once
+    - echo 'Socket Unit Tests' && cd packages/socket && npm test-once
+    - echo 'Static Unit Tests' && cd packages/static && npm test
     # TODO E2E tests
