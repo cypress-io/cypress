@@ -27,11 +27,11 @@ describe "Documentation", ->
         cy
           .contains(".main-nav-link", "Guides")
             .should("have.attr", "href")
-              .and("include", "/cypress-documentation/guides/welcome/guides.html")
+              .and("include", "/guides/welcome/guides.html")
         cy
           .contains(".main-nav-link", "API")
             .should("have.attr", "href")
-              .and("include", "/cypress-documentation/api/welcome/api.html")
+              .and("include", "/api/welcome/api.html")
 
       it "displays link to github repo", ->
         cy

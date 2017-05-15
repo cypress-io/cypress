@@ -1,4 +1,4 @@
 {
-  "baseUrl": "http://localhost:2222/cypress-documentation",
+  "baseUrl": "http://localhost:2222",
   "projectId": "ma3dkn"
 }
