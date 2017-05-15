@@ -6,7 +6,20 @@ dependencies:
   # CircleCI caching
   # https://circleci.com/docs/1.0/how-cache-works/
   cache_directories:
-    - "packages/*/node_modules"
+    # Could not use wildcard format
+    - packages/coffee/node_modules
+    - packages/desktop-gui/node_modules
+    - packages/driver/node_modules
+    - packages/electron/node_modules
+    - packages/example/node_modules
+    - packages/extension/node_modules
+    - packages/https-proxy/node_modules
+    - packages/launcher/node_modules
+    - packages/reporter/node_modules
+    - packages/runner/node_modules
+    - packages/server/node_modules
+    - packages/socket/node_modules
+    - packages/static/node_modules
 
 test:
   ## e2e (1)
