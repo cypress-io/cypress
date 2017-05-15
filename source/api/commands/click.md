@@ -25,15 +25,9 @@ Click the DOM element.
 
 # [cy.click( *position* )](#section-position-usage)
 
-Clicks the element at the specified position. The `center` position is the default position.
+Clicks the element at the specified position. The `center` position is the default position. Valid positions are `topLeft`, `top`, `topRight`, `left`, `center`, `right`, `bottomLeft`, `bottom`, and `bottomRight`.
 
-Position | Default | Notes
---- | --- | ---
-`center` | Yes | Clicks the exact center of the element
-`topLeft` | No | Clicks the top left corner of the element
-`topRight` | No | Clicks the top right corner of the element
-`bottomLeft` | No | Clicks the bottom left corner of the element
-`bottomRight` | No | Clicks the bottom right corner of the element
+![cypress-command-positions-diagram](https://cloud.githubusercontent.com/assets/1271364/25048528/fe0c6378-210a-11e7-96bc-3773f774085b.jpg)
 
 ***
 

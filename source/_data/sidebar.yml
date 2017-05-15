@@ -91,6 +91,8 @@ api:
     root: root.html
     route: route.html
     screenshot: screenshot.html
+    scrollintoview: scrollintoview.html
+    scrollto: scrollto.html
     select: select.html
     server: server.html
     setcookie: setcookie.html

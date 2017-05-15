@@ -107,6 +107,8 @@ sidebar:
     root: root
     route: route
     screenshot: screenshot
+    scrollintoview: scrollIntoView
+    scrollto: scrollTo
     select: select
     server: server
     setcookie: setCookie
