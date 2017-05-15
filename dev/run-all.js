@@ -22,8 +22,7 @@ const packageNameFromPath = (fullPath) => {
 }
 
 const getDirs = () => {
-  const packagesDir = path.resolve('packages', '*')
-  return globAsync(packagesDir)
+  return globAsync('packages/*/')
 }
 
 const filterDirsByPackage = (dirs, packages) => {
@@ -78,7 +77,7 @@ const mapTasks = (cmd, packages) => {
       options: {
         cwd: dir,
         label: {
-          name: `${packageName}:${cmd}`,
+          name: `${packageName.replace(/\/$/, '')}:${cmd}`,
           color: colors[index],
         },
       },
