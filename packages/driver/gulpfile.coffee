@@ -1,4 +1,3 @@
-fs            = require("fs")
 _             = require("lodash")
 $             = require("gulp-load-plugins")()
 gulp          = require("gulp")
@@ -11,6 +10,7 @@ browserify    = require("browserify")
 coffeeify     = require("coffeeify")
 watchify      = require("watchify")
 source        = require("vinyl-source-stream")
+fs            = Promise.promisifyAll(require("fs-extra"))
 
 log = (obj = {}) ->
   args = [
@@ -152,7 +152,10 @@ gulp.task "watch:app:html", ->
 
 gulp.task "server", -> require("./server/server.coffee")
 
-gulp.task "test", ->
+gulp.task "ensure:dist:dir", ->
+  fs.ensureDirAsync(path.resolve("./dist-test"))
+
+gulp.task "test", ["ensure:dist:dir"], ->
   watchSpecHelper = bundleJs(specHelperOptions)
   watchIndex = bundleJs(specIndexOptions)
   watchRunner = bundleJs(specRunnerOptions)
@@ -164,7 +167,7 @@ gulp.task "test", ->
 
   return watchSpecHelper.process
 
-gulp.task "test:once", ->
+gulp.task "test:once", ["ensure:dist:dir"], ->
   buildSpecHelper = bundleJs(specHelperOptions, false)
   buildIndex = bundleJs(specIndexOptions, false)
   buildRunner = bundleJs(specRunnerOptions, false)
