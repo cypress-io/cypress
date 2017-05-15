@@ -3,7 +3,7 @@
   "main": "index.js",
   "scripts": {
     "build-dev": "gulp build",
-    "test": "Echo 'Nothing to test yet'"
+    "test": "echo 'Nothing to test yet'"
   },
   "devDependencies": {
     "@cypress/icons": "0.5.2",
