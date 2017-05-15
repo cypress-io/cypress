@@ -9,7 +9,7 @@ const argv = require('minimist')(process.argv.slice(2))
 
 const from = argv.from
 const to = path.join(argv.to, '/') // ensure trailing slash
-const branch = argv.banch || 'master'
+const branch = argv.branch || 'master'
 const remoteName = snakeCase(to)
 
 function exec (command) {
