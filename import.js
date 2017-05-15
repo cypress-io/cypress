@@ -17,12 +17,13 @@ function exec (command) {
   execSync(command, { stdio: 'inherit' })
 }
 
+console.log()
 console.log(`Importing ${from} (${branch}) to ${to}`)
 console.log('---------')
 exec(`git remote add ${remoteName} ${from}`)
 exec(`git fetch ${remoteName}`)
 exec(`git merge -s ours --allow-unrelated-histories --no-commit ${remoteName}/${branch}`)
 exec(`git read-tree --prefix=${to} -u ${remoteName}/${branch}`)
-exec(`git commit -m "import ${to} (${branch})"`)
+exec(`git commit -m "import ${from} (${branch}) to ${to}"`)
 console.log('---------')
-console.log(`Finished mporting ${from} (${branch}) to ${to}`)
+console.log(`Finished importing ${from} (${branch}) to ${to}`)
