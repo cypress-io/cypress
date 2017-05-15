@@ -21,7 +21,7 @@ export const linuxBrowser = {
             version: m[1]
           }
         } else {
-          notInstalledErr(binary)
+          return notInstalledErr(binary)
         }
       })
       .catch(() => notInstalledErr(binary))
