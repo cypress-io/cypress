@@ -8,6 +8,7 @@
   "scripts": {
     "install-app": "node cli.js --exec install",
     "postinstall": "npm run all install && npm run all build-dev",
+    "deploy:docs": "npm run all deploy -- --package docs",
     "start": "node start.js",
     "watch-dev": "npm run all watch-dev",
     "test": "mocha --watch",
