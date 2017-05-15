@@ -6,7 +6,9 @@ dependencies:
   # CircleCI caching
   # https://circleci.com/docs/1.0/how-cache-works/
   cache_directories:
-    # Could not use wildcard format
+    # downloaded Electron binary
+    - "~/.electron"
+    # could not use wildcard format, so list every subfolder
     - packages/coffee/node_modules
     - packages/desktop-gui/node_modules
     - packages/driver/node_modules
