@@ -7,6 +7,7 @@
     "watch-dev": "gulp watch",
     "build-dev": "gulp build",
     "build-prod": "gulp build",
+    "test": "npm run test-unit-once",
     "test-once": "npm run test-unit-once",
     "test-unit-once": "NODE_ENV=test mocha --require test-setup.js",
     "clean": "gulp clean",
