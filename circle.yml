@@ -2,8 +2,9 @@ machine:
   node:
     version: 6.5.0
 
-compile:
-  - npm run build-dev
+dependencies:
+  post:
+    - npm run build-dev
 
 test:
   ## e2e (1)
