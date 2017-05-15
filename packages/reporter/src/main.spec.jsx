@@ -3,14 +3,14 @@ import { shallow } from 'enzyme'
 import React from 'react'
 import sinon from 'sinon'
 
-import Reporter from './main'
+import { Reporter } from './main'
 import Header from './header/header'
 import Runnables from './runnables/runnables'
 
 const runnablesStore = {}
 const scroller = {}
 const statsStore = {}
-const error = { title: 'Some error' }
+const error = { title: 'Some error', message: '' }
 const getProps = (props) => {
   return _.extend({
     autoScrollingEnabled: true,
