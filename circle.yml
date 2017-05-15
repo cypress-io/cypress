@@ -4,7 +4,7 @@ machine:
 
 dependencies:
   post:
-    - npm run build-dev
+    - npm run all build-dev
 
 test:
   ## e2e (1)
