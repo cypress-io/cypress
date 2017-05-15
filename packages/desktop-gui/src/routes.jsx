@@ -37,7 +37,7 @@ const withUser = (ComponentClass) => {
   })
 }
 
-const devTools = () => {
+const devTools = () => { // eslint-disable-line no-unused-vars
   if (
     (window.env === 'development' || window.env === 'test') &&
     !localStorage.noDevtools

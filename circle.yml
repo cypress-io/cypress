@@ -37,6 +37,7 @@ test:
   ## server (5, 6)
   override:
     - echo 'Coffee Unit Tests' && cd packages/coffee && npm test
+    - echo 'Desktop GUI Unit Tests' && cd packages/desktop-gui && npm test
     - echo 'TODO fix driver tests'
     # - echo 'Driver Unit Tests' && cd packages/driver && npm test
     - echo 'Electron Unit Tests' && cd packages/electron && npm test
