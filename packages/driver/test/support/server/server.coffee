@@ -9,7 +9,7 @@ glob      = require("glob")
 coffee    = require("../../../../coffee")
 str       = require("string-to-stream")
 Promise   = require("bluebird")
-xhrs      = require("../../../../app/lib/controllers/xhrs")
+xhrs      = require("../../../../server/lib/controllers/xhrs")
 Runner    = require("./runner")
 
 args = require("minimist")(process.argv.slice(2))
@@ -166,10 +166,12 @@ module.exports = {
 
   runAllSpecsOnce: ->
     new Runner({ port, server, once: true })
-    .runAllSpecsOnce()
-    .then (stats) ->
-      code = if stats.failures then 1 else 0
+    .runAllSpecsOnce(getAllSpecs(false))
+    .then ({ stats, timeouts }) ->
+      code = if stats.failures or timeouts.length then 1 else 0
+      if timeouts.length
+        console.error("The following spec(s) timed out:")
+        console.log()
+        console.error(spec) for spec in timeouts
       process.exit(code)
-    .catch Promise.TimeoutError, ->
-      process.exit(1)
 }

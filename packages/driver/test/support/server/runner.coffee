@@ -68,24 +68,58 @@ module.exports = class Runner
         process.exit 0
 
   runContinuously: ->
-    @_start()
+    @_start().then =>
+      @_localBus.on "test:event", (event, info, err) =>
+        if event is "start"
+          @_errors = []
 
-  runAllSpecsOnce: (allSpecsPath) ->
+        if event is "end"
+          @_monitorReport.cancel()
+
+        if err
+          @_onError(err)
+
+        @_runnerBus.emit(event, info, err)
+
+  runAllSpecsOnce: (specPaths) ->
     @_start().then =>
       new Promise (resolve, reject) =>
-        @_localBus.on "timeout", =>
-          @_localBus.removeAllListeners()
-          @_stopBrowser().then =>
-            reject(new Promise.TimeoutError())
+        current = 0
+        timeouts = []
 
-        @_localBus.on "end", =>
+        next = =>
+          current++
+          @run(specPaths[current])
+
+        finish = (event, info, err) =>
+          @_runnerBus.emit(event, info, err)
           @_localBus.removeAllListeners()
           @_stopBrowser().then =>
-            resolve(@_reporter.stats)
+            resolve({ stats: @_reporter.stats, timeouts })
+
+        @_reporter = new @_Reporter(@_runnerBus)
+        @_runnerBus.emit("start")
+
+        @_localBus.once "client:connected", =>
+          @run(specPaths[current])
+
+        @_localBus.on "test:event", (event, info, err) =>
+          if event is "end"
+            if current is (specPaths.length - 1)
+              @_monitorReport.cancel()
+              finish(event, info, err)
+            else
+              next()
+          else if event isnt "start"
+            @_runnerBus.emit(event, info, err)
+
+        @_localBus.on "timeout", ->
+          timeouts.push(specPaths[current])
+          next()
 
   run: (specPath) ->
     specPath = specPath
-    .replace(path.join(__dirname, "../.."), "")
+    .replace(path.join(__dirname, "../.."), "specs/")
     .replace(path.extname(specPath), "")
 
     for id, client of @_clients
@@ -100,10 +134,10 @@ module.exports = class Runner
 
   _handleConnection: (client) ->
     @_clients[client.id] = client
+    @_localBus.emit("client:connected")
 
     @_monitorReport?.cancel()
-    ## QUESTION: different timeouts for continuous vs single run?
-    @_monitorReport = monitor(@_onReport.bind(@), @_onTimeout.bind(@), 10000)
+    @_monitorReport = monitor(@_onReport.bind(@), @_onTimeout.bind(@), 15000)
     client.on("report", @_monitorReport)
     client.on("error", @_onError.bind(@))
 
@@ -112,8 +146,7 @@ module.exports = class Runner
 
   _launchBrowser: ->
     theBrowser = getArg("browser") or "chrome"
-    spec = if @_config.once then "/specs/all_specs" else ""
-    url = "http://localhost:#{@_config.port}#{spec}?reporter=socket"
+    url = "http://localhost:#{@_config.port}?reporter=socket"
 
     browser.launch(theBrowser, url)
     .then (instance) =>
@@ -128,13 +161,10 @@ module.exports = class Runner
       @_report(test)
 
   _report: ({ event, info, err }) ->
-    if event is "start"
+    if event is "start" and not @_config.once
       console.log() ## give report some breathing room
       @_runnerBus.removeAllListeners()
       @_reporter = new @_Reporter(@_runnerBus)
-
-    if event is "end"
-      @_monitorReport.cancel()
 
     info or= {}
     info.slow = ->
@@ -143,20 +173,19 @@ module.exports = class Runner
         "#{info.parentTitle} #{info.title}"
       else
         info.title
-    @_localBus.emit(event, info, err)
-    @_runnerBus.emit(event, info, err)
+    @_localBus.emit("test:event", event, info, err)
 
   _onTimeout: ->
     console.log()
     logError("Tests timed out")
     console.log()
     if @_errors.length
-      logError("The following errors were captured:")
+      logWarning("The following errors were captured:")
     else
       logError("No errors were captured")
     for error in @_errors
       console.log()
-      logError(error)
+      logError(error.stack or error)
     @_localBus.emit("timeout")
 
   _stopBrowser: ->

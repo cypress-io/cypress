@@ -10,5 +10,5 @@ module.exports = {
 
   listenForRun: ->
     socket.on "run", (specFile) ->
-      window.location = "/specs#{specFile}#{location.search}"
+      window.location = "/#{specFile}#{location.search}"
 }

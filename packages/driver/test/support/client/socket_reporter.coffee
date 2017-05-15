@@ -16,32 +16,25 @@ events = [
   "end"
 ]
 
-batched = /batched=true/.test(location.search)
-batchLimit = 100
-batch = []
+testInfo = (test)->
+  return test if not test
 
-testInfo = (test) ->
-  info = null
-  if test?
-    info = _.pick(test, "root", "title", "speed", "duration")
-    info.parentTitle = test.parent?.fullTitle()
-  info
+  _.extend(_.pick(test, "root", "title", "speed", "duration"), {
+    parentTitle: test.parent?.fullTitle()
+  })
 
-handle = (data) ->
-  if not batched
-    api.report({ tests: [data] })
-    return
+errInfo = (err)->
+  return err if not err
 
-  batch.push(data)
-  if batch.length >= batchLimit or data.event is "end"
-    api.report({ tests: batch })
-    batch = []
+  _.pick(err, "message", "stack", "actual", "expected", "showDiff")
 
 report = (event, test, err) ->
-  handle({
-    event: event
-    info: testInfo test
-    err: err and _.pick(err, "message", "stack", "actual", "expected", "showDiff")
+  api.report({
+    tests: [{
+      event: event
+      info: testInfo(test)
+      err: errInfo(err)
+    }]
   })
 
 module.exports = (runner) ->
