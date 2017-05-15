@@ -2,20 +2,18 @@
   "name": "cypress-documentation",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "hexo": {
     "version": "3.3.1"
   },
   "scripts": {
     "clean": "hexo clean",
+    "clean-deps": "rm -rf node_modules",
+    "clean-all": "npm run clean && npm run clean-deps",
     "convert": "node ./cy_scripts/convert.js",
     "deploy": "npm run build && hexo deploy",
-    "prep": "gulp prep",
-    "build": "hexo clean && hexo generate && npm run prep",
-    "start": "hexo server --port 2222"
+    "build-prod": "hexo clean && hexo generate && gulp prep",
+    "watch-dev": "hexo server --port 2222"
   },
-  "author": "Cypress.io",
-  "license": "ISC",
   "devDependencies": {
     "colors": "^1.1.2",
     "fs-extra": "^3.0.1",
