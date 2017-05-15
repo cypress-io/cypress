@@ -43,7 +43,7 @@ const setMajorVersion = (obj) => {
   return obj
 }
 
-function lookup (platform, obj) {
+function lookup (platform:string, obj:Browser) {
   log('looking up %s on %s platform', obj.name, platform)
   switch (platform) {
     case 'darwin':

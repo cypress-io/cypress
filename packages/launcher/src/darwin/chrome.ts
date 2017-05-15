@@ -13,7 +13,7 @@ const chrome = {
     return find('com.google.Chrome')
   },
 
-  get (executable) {
+  get (executable: string) {
     log('Looking for Chrome %s', executable)
     return this.path()
       .then(p => {

@@ -5,7 +5,7 @@ import fs = require('fs-extra')
 import path = require('path')
 import plist = require('plist')
 
-export function parse (p, prop) {
+export function parse (p: string, prop: string) {
   const pl = path.join(p, 'Contents', 'Info.plist')
   return fs.readFile(pl, 'utf8')
     .then(str => plist.parse(str))
@@ -19,12 +19,12 @@ export function parse (p, prop) {
     })
 }
 
-export function find (id) {
+export function find (id: string): Promise<string> {
   const cmd = `mdfind 'kMDItemCFBundleIdentifier=="${id}"' | head -1`
   log('looking for bundle id %s using command: %s', id, cmd)
   return execa.shell(cmd)
     .then(result => result.stdout)
-    .then(str => {
+    .then((str: string) => {
       log('found %s at %s', id, str)
       return str
     })

@@ -10,7 +10,7 @@ const notInstalledErr = (name: string) => {
 }
 
 export const linuxBrowser = {
-  get: (binary, re): Promise<any> => {
+  get: (binary: string, re: RegExp): Promise<any> => {
     return execAsync(`${binary} --version`)
       .call('trim')
       .then (stdout => {
