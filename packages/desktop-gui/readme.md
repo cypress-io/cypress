@@ -19,6 +19,12 @@ The desktop GUI has the following responsibilities:
 
 ## Development
 
+### Lint
+
+```bash
+npm run lint
+```
+
 ### Building
 
 #### For development

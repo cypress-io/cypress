@@ -9,7 +9,7 @@ config         = require("#{root}lib/config")
 user           = require("#{root}lib/user")
 filesUtil      = require("#{root}lib/controllers/files")
 files          = require("#{root}lib/files")
-FixturesHelper = require("#{root}/spec/server/helpers/fixtures")
+FixturesHelper = require("#{root}/test/support/helpers/fixtures")
 
 describe "lib/files", ->
   beforeEach ->

@@ -94,7 +94,6 @@ describe "lib/reporter", ->
       title = "TodoMVC - React When page is initially opened should focus on the todo input field"
       expect(args[1].fullTitle()).to.eq title
 
-
   context "#stats", ->
     it "has reporterName and failingTests in stats", ->
       @sandbox.stub(Date, "now").returns(1234)
@@ -130,7 +129,7 @@ describe "lib/reporter", ->
 
     it "emits start", ->
       @reporter.emit("start")
-      expect(@emit).to.be.calledWith("start", undefined)
+      expect(@emit).to.be.calledWith("start")
       expect(@emit).to.be.calledOn(@reporter.runner)
 
     it "emits test with updated properties", ->

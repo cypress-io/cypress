@@ -1,0 +1,7 @@
+{
+  "name": "coffee",
+  "main": "index.js",
+  "dependencies": {
+    "coffee-script": "1.12.5"
+  }
+}

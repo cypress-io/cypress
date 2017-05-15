@@ -1,4 +1,4 @@
-e2e = require("../helpers/e2e")
+e2e = require("../support/helpers/e2e")
 
 describe "e2e form submissions", ->
   e2e.setup()

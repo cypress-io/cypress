@@ -1,2 +1,2 @@
-require("coffee-script/register")
+require("../coffee/register")
 require("./lib/repl")

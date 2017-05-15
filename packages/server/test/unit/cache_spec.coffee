@@ -5,7 +5,7 @@ path      = require("path")
 Promise   = require("bluebird")
 cwd       = require("#{root}lib/cwd")
 cache     = require("#{root}lib/cache")
-Fixtures  = require("../helpers/fixtures")
+Fixtures  = require("../support/helpers/fixtures")
 
 fs = Promise.promisifyAll(fs)
 

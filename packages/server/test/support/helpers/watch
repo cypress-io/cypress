@@ -4,7 +4,7 @@ CMD="$1"
 ARGS="$2"
 
 npm run $CMD $ARGS & \
-chokidar 'spec/server/**/*' 'lib/**/*' \
+chokidar 'test/**/*' 'lib/**/*' \
 -c "npm run $CMD $ARGS" \
 --polling \
 --poll-interval=250

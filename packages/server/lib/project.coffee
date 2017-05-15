@@ -37,15 +37,14 @@ class Project extends EE
       throw new Error("Instantiating lib/project requires a projectRoot!")
 
     @projectRoot = path.resolve(projectRoot)
-    @watchers    = null
+    @watchers    = Watchers()
     @server      = null
     @cfg         = null
     @memoryCheck = null
     @automation  = null
 
   open: (options = {}) ->
-    @watchers    = Watchers()
-    @server      = Server(@watchers)
+    @server = Server(@watchers)
 
     _.defaults options, {
       report:       false

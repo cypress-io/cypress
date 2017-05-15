@@ -3,9 +3,15 @@
   "version": "0.1.1",
   "description": "Internal lib for spawning browser processes",
   "main": "index.js",
+  "types": "./index.d.ts",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean-deps"
+    "clean-all": "npm run clean-deps",
+    "lint": "tslint --fix --format stylish src/**/*.ts",
+    "build": "tsc",
+    "prebuild": "npm run lint",
+    "test": "mocha --opts test/mocha.opts test/unit/*spec.coffee",
+    "build-and-test": "npm run build && npm test"
   },
   "repository": {
     "type": "git",
@@ -19,15 +25,24 @@
   "homepage": "https://github.com/cypress-io/cypress-core-launcher#readme",
   "devDependencies": {
     "@cypress/releaser": "0.1.12",
+    "@types/bluebird": "^3.5.3",
+    "@types/debug": "0.0.29",
+    "@types/fs-extra": "3.0.0",
+    "@types/lodash": "^4.14.64",
+    "@types/node": "^7.0.18",
     "chai": "^3.5.0",
     "mocha": "^2.4.5",
     "sinon": "^1.17.3",
-    "sinon-chai": "^2.8.0"
+    "sinon-chai": "^2.8.0",
+    "tslint": "^5.2.0",
+    "tslint-config-standard": "^5.0.2",
+    "typescript": "^2.3.2"
   },
   "dependencies": {
-    "@cypress/coffee-script": "0.1.2",
     "bluebird": "^3.3.5",
-    "fs-extra": "^0.28.0",
+    "debug": "^2.6.6",
+    "execa": "^0.6.3",
+    "fs-extra": "^3.0.0",
     "lodash": "^4.11.1",
     "plist": "^1.2.0"
   }

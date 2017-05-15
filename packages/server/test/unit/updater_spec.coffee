@@ -9,7 +9,7 @@ cwd         = require("#{root}lib/cwd")
 home        = require("home-or-tmp")
 request     = require("request")
 Updater     = require("#{root}lib/updater")
-Fixtures    = require("#{root}/spec/server/helpers/fixtures")
+Fixtures    = require("#{root}/test/support/helpers/fixtures")
 
 describe "lib/updater", ->
   context "interface", ->

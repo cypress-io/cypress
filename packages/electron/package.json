@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "./bin/cypress-electron",
-    "test": "mocha --compilers coffee:@cypress/coffee-script",
+    "test": "mocha --compilers coffee:../coffee/register",
     "postinstall": "./bin/cypress-electron --install",
     "clean-deps": "rm -rf node_modules",
     "clean-all": "npm run clean-deps"
@@ -31,7 +31,6 @@
     "mocha": "^3.0.2"
   },
   "dependencies": {
-    "@cypress/coffee-script": "0.1.2",
     "bluebird": "^3.4.1",
     "electron-packager": "^7.2.0",
     "fs-extra": "^0.30.0",

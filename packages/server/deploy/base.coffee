@@ -18,7 +18,7 @@ meta         = require("./meta")
 pkg          = require("../package.json")
 konfig       = require("../lib/konfig")
 appData      = require("../lib/util/app_data")
-Fixtures     = require("../spec/server/helpers/fixtures")
+Fixtures     = require("../test/support/helpers/fixtures")
 
 # pkgr     = Promise.promisify(pkgr)
 fs       = Promise.promisifyAll(fs)

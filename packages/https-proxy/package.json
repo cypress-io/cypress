@@ -35,7 +35,6 @@
     "supertest-as-promised": "^3.1.0"
   },
   "dependencies": {
-    "@cypress/coffee-script": "0.1.2",
     "bluebird": "^3.4.0",
     "fs-extra": "^0.30.0",
     "node-forge": "^0.6.39",

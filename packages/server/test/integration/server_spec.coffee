@@ -4,11 +4,11 @@ _             = require("lodash")
 rp            = require("request-promise")
 Promise       = require("bluebird")
 evilDns       = require("evil-dns")
-httpsServer   = require("@cypress/core-https-proxy/test/helpers/https_server")
+httpsServer   = require("#{root}../../packages/https-proxy/test/helpers/https_server")
 buffers       = require("#{root}lib/util/buffers")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
-Fixtures      = require("#{root}spec/server/helpers/fixtures")
+Fixtures      = require("#{root}test/support/helpers/fixtures")
 
 describe "Server", ->
   context "resolving url", ->

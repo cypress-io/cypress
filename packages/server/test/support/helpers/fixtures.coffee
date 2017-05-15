@@ -4,9 +4,9 @@ fs       = require("fs-extra")
 Promise  = require("bluebird")
 request  = require("request-promise")
 
-root       = process.cwd()
-projects   = path.join root, "spec", "fixtures", "projects"
-tmpDir     = path.join root, ".projects"
+root       = path.join(__dirname, "..", "..", "..")
+projects   = path.join(root, "test", "support", "fixtures", "projects")
+tmpDir     = path.join(root, ".projects")
 
 fs = Promise.promisifyAll(fs)
 
@@ -30,13 +30,13 @@ module.exports =
     path.join(tmpDir, name)
 
   get: (fixture, encoding = "utf8") ->
-    fs.readFileSync path.join(root, "spec", "fixtures", fixture), encoding
+    fs.readFileSync path.join(root, "test", "support", "fixtures", fixture), encoding
 
   path: (fixture) ->
-    path.join(root, "spec", "fixtures", fixture)
+    path.join(root, "test", "support", "fixtures", fixture)
 
   ensureNwZip: ->
-    zip = path.join(root, "spec", "fixtures", "nw", "cypress.zip")
+    zip = path.join(root, "test", "support", "fixtures", "nw", "cypress.zip")
 
     downloadFixture = ->
       fs.ensureDirSync zip.split("/cypress.zip").join("")

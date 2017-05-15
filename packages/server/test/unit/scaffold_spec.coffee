@@ -3,10 +3,10 @@ require("../spec_helper")
 path       = require("path")
 glob       = require("glob")
 Promise    = require("bluebird")
-cypressEx  = require("@cypress/core-example")
+cypressEx  = require("#{root}../../packages/example")
 config     = require("#{root}lib/config")
 scaffold   = require("#{root}lib/scaffold")
-Fixtures   = require("#{root}/spec/server/helpers/fixtures")
+Fixtures   = require("#{root}/test/support/helpers/fixtures")
 
 glob = Promise.promisify(glob)
 
@@ -123,8 +123,10 @@ describe "lib/scaffold", ->
 
     it "creates supportFolder and commands.js, defaults.js, and index.js when supportFolder does not exist", ->
       ## todos has a _support folder so let's first nuke it and then scaffold
-      scaffold.support(@supportFolder, @cfg).then =>
-        fs.readFileAsync(@supportFolder + "/commands.js", "utf8").then (str) =>
+      scaffold.support(@supportFolder, @cfg)
+      .then =>
+        fs.readFileAsync(@supportFolder + "/commands.js", "utf8")
+        .then (str) =>
           expect(str).to.eq """
           // ***********************************************
           // This example commands.js shows you how to
@@ -165,6 +167,7 @@ describe "lib/scaffold", ->
           //       log.snapshot().end()
           //     })
           // })
+
           """
 
           fs.readFileAsync(@supportFolder + "/defaults.js", "utf8").then (str) =>

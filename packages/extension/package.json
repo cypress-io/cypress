@@ -47,7 +47,6 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
-    "@cypress/coffee-script": "0.1.2",
     "bluebird": "^3.3.5",
     "lodash": "^4.11.2"
   }

@@ -1,8 +1,8 @@
 fs         = require("fs")
 path       = require("path")
 bodyParser = require("body-parser")
-Fixtures   = require("../helpers/fixtures")
-e2e        = require("../helpers/e2e")
+Fixtures   = require("../support/helpers/fixtures")
+e2e        = require("../support/helpers/e2e")
 
 e2ePath = Fixtures.projectPath("e2e")
 

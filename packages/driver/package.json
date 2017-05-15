@@ -11,8 +11,6 @@
   },
   "devDependencies": {
     "@cypress/bower-kendo-ui": "0.0.2",
-    "@cypress/coffee-script": "0.1.2",
-    "@cypress/core-electron": "0.3.4",
     "@cypress/icons": "0.5.2",
     "angular": "^1.3.1",
     "backbone": "^1.1.2",
@@ -74,5 +72,6 @@
     "url-parse": "^1.1.7",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.9.0"
-  }
+  },
+  "dependencies": {}
 }

@@ -1,8 +1,8 @@
 fs         = require("fs-extra")
 path       = require("path")
 Promise    = require("bluebird")
-Fixtures   = require("../helpers/fixtures")
-e2e        = require("../helpers/e2e")
+Fixtures   = require("../support/helpers/fixtures")
+e2e        = require("../support/helpers/e2e")
 
 fs = Promise.promisifyAll(fs)
 

@@ -42,7 +42,7 @@ const filterDirsByCmd = (dirs, cmd) => {
     default:
       return dirs.filter((dir) => {
         const packageJson = require(path.resolve(dir, 'package'))
-        return !!packageJson.scripts[cmd]
+        return !!packageJson.scripts && !!packageJson.scripts[cmd]
       })
   }
 }

@@ -11,7 +11,8 @@
     "watch-dev": "zunder watch",
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean && npm run clean-deps"
+    "clean-all": "npm run clean && npm run clean-deps",
+    "lint": "eslint --fix lib/*.js src/*.js* src/**/*.js* "
   },
   "repository": {
     "type": "git",

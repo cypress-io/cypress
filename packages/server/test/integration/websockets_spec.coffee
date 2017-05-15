@@ -6,12 +6,12 @@ ws          = require("ws")
 httpsAgent  = require("https-proxy-agent")
 evilDns     = require("evil-dns")
 Promise     = require("bluebird")
-socketIo    = require("packages/core-socket")
-httpsServer = require("@cypress/core-https-proxy/test/helpers/https_server")
+socketIo    = require("#{root}../../packages/socket")
+httpsServer = require("#{root}../../packages/https-proxy/test/helpers/https_server")
 config      = require("#{root}lib/config")
 Server      = require("#{root}lib/server")
 Automation  = require("#{root}lib/automation")
-Fixtures    = require("#{root}/spec/server/helpers/fixtures")
+Fixtures    = require("#{root}/test/support/helpers/fixtures")
 
 cyPort  = 12345
 otherPort = 5555
@@ -150,7 +150,7 @@ describe "Web Sockets", ->
   context "socket.io handling", ->
     beforeEach ->
       @automation = Automation.create(@cfg.namespace, @cfg.socketIoCookie, @cfg.screenshotsFolder)
-    
+
       @server.startWebsockets({}, @automation, @cfg, {})
 
     context "http", ->
