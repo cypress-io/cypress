@@ -2,6 +2,12 @@ machine:
   node:
     version: 6.5.0
 
+dependencies:
+  # CircleCI caching
+  # https://circleci.com/docs/1.0/how-cache-works/
+  cache_directories:
+    - "packages/*/node_modules"
+
 test:
   ## e2e (1)
   ## desktop-gui (2)
