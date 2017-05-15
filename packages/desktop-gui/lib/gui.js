@@ -1,15 +1,15 @@
-var path = require("path")
+let path = require("path")
 
 function file (name) {
-  return "file://" + path.join(__dirname, "..", "dist", name)
+  return `file://${path.join(__dirname, "..", "dist", name)}`
 }
 
 module.exports = {
-  getPathToIndex: function () {
+  getPathToIndex () {
     return file("index.html")
   },
 
-  getPathToUpdates: function () {
+  getPathToUpdates () {
     return file("updates.html")
   },
 }
