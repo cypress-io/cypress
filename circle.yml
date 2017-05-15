@@ -36,6 +36,9 @@ test:
   override:
     - echo 'Coffee Unit Tests' && cd packages/coffee && npm test
     - echo 'Driver Unit Tests' && cd packages/driver && npm run test-once
+    - echo 'Electron Unit Tests' && cd packages/electron && npm run test
+    - echo 'Example Unit Tests' && cd packages/example && npm run test-lib
+    - echo 'Extension Unit Tests' && cd packages/example && npm run test-once
     - echo 'Launcher Unit Tests' && cd packages/launcher && npm test
     - echo 'Https Proxy Unit Tests' && cd packages/https-proxy && npm test
     # TODO E2E tests
