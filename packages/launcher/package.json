@@ -9,9 +9,12 @@
     "clean-all": "npm run clean-deps",
     "lint": "tslint --fix --format stylish src/**/*.ts",
     "build": "tsc",
+    "build-dev": "npm run build",
     "prebuild": "npm run lint",
     "test": "mocha --opts test/mocha.opts test/unit/*spec.coffee",
-    "build-and-test": "npm run build && npm test"
+    "test-unit-once": "npm test",
+    "test-once": "npm test",
+    "pretest": "npm run build"
   },
   "repository": {
     "type": "git",
