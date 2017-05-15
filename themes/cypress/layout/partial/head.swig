@@ -39,7 +39,4 @@
 
   <!-- Google Analytics, Tag Manager, and Optimize -->
   {{ partial('google-plugins') }}
-
-  <!-- Google Analytics -->
-  {{ partial('google_analytics') }}
 </head>
