@@ -12,7 +12,9 @@
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "clean-all": "npm run clean && npm run clean-deps",
-    "lint": "eslint --fix lib/*.js src/*.js* src/**/*.js* "
+    "lint": "eslint --fix lib/*.js src/*.js* src/**/*.js*",
+    "test": "npm run build-dev",
+    "pretest": "npm run lint"
   },
   "repository": {
     "type": "git",
