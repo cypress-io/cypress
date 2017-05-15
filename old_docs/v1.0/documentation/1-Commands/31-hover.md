@@ -36,10 +36,18 @@ cy.get(".content").click({force: true})
 cy.get(".checkbox").check({force: true})
 ```
 
+If the hover behavior depends on a JavaScript event like `mouseover`, you can trigger the event to achieve that behavior.
+
+**Example of triggering a mouseover event**
+```javascript
+cy.get(".content").trigger("mouseover")
+```
+
 ***
 
 # Related
 
 - [Recipe: Dealing with Hover and Hidden Elements](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/hover_hidden_elements.js)
 - [invoke](https://on.cypress.io/api/invoke)
+- [trigger](https://on.cypress.io/api/trigger)
 - [wrap](https://on.cypress.io/api/wrap)
