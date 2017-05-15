@@ -2,7 +2,12 @@ import {log} from './log'
 import {find, map} from 'lodash'
 import cp = require('child_process')
 
-const browserNotFoundErr = (browsers, name: string): BrowserNotFoundError => {
+type FoundBrowser = {
+  name: string,
+  path?: string
+}
+
+const browserNotFoundErr = (browsers:FoundBrowser[], name: string): BrowserNotFoundError => {
   const available = map(browsers, 'name').join(', ')
 
   const err: BrowserNotFoundError
@@ -11,19 +16,18 @@ const browserNotFoundErr = (browsers, name: string): BrowserNotFoundError => {
   return err
 }
 
-type FoundBrowser = {
-  name: string,
-  path: string
-}
-
 /** starts a browser by name and opens URL if given one */
 export function launch (browsers:FoundBrowser[],
-  name:string, url?:string, args = []) {
+  name:string, url?:string, args:string[] = []) {
   log('launching browser %s to open %s', name, url)
   const browser = find(browsers, {name})
 
   if (!browser) {
     throw browserNotFoundErr(browsers, name)
+  }
+
+  if (!browser.path) {
+    throw new Error(`Found browser ${name} is missing path`)
   }
 
   if (url) {

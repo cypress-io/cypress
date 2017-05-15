@@ -3,7 +3,7 @@ import path = require('path')
 import Promise = require('bluebird')
 
 const chromium = {
-  version (p) {
+  version (p: string) {
     return parse(p, 'CFBundleShortVersionString')
   },
 
@@ -11,7 +11,7 @@ const chromium = {
     return find('org.chromium.Chromium')
   },
 
-  get (executable) {
+  get (executable: string) {
     return this.path()
     .then(p =>
       Promise.props({

@@ -22,7 +22,7 @@ const createProps = () => ({
     viewportWidth: 0,
   },
   eventManager: {
-    init: sinon.spy(),
+    addGlobalListeners: sinon.spy(),
     launchBrowser: sinon.spy(),
     notifyRunningSpec: () => {},
     reporterBus: {
@@ -40,10 +40,10 @@ describe('<Container />', () => {
   it('initializes the event manager when mounted', () => {
     const props = createProps()
     mount(<Container {...props} />)
-    expect(props.eventManager.init).to.have.been.called
-    expect(props.eventManager.init.firstCall.args[0]).to.equal(props.state)
-    expect(props.eventManager.init.firstCall.args[1].element).to.equal(automationElementId)
-    expect(props.eventManager.init.firstCall.args[1].string).to.be.a('string')
+    expect(props.eventManager.addGlobalListeners).to.have.been.called
+    expect(props.eventManager.addGlobalListeners.firstCall.args[0]).to.equal(props.state)
+    expect(props.eventManager.addGlobalListeners.firstCall.args[1].element).to.equal(automationElementId)
+    expect(props.eventManager.addGlobalListeners.firstCall.args[1].string).to.be.a('string')
   })
 
   describe('when automation is connecting', () => {
