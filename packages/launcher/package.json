@@ -11,10 +11,8 @@
     "build": "tsc",
     "build-dev": "npm run build",
     "prebuild": "npm run lint",
-    "test": "mocha --opts test/mocha.opts test/unit/*spec.coffee",
-    "test-unit-once": "npm test",
-    "test-once": "npm test",
-    "pretest": "npm run build"
+    "test": "mocha",
+    "build-and-test": "npm run build && npm test"
   },
   "repository": {
     "type": "git",

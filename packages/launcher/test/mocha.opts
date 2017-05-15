@@ -1,4 +1,3 @@
 test/unit
---reporter spec
 --compilers coffee:../coffee/register
 --recursive
