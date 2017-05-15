@@ -11,7 +11,9 @@ type Browser = {
   re: RegExp,
   profile: boolean,
   binary: string,
-  executable: string
+  executable: string,
+  version?: string,
+  majorVersion?: string
 }
 
 const browsers:Browser[] = [
@@ -36,18 +38,23 @@ const browsers:Browser[] = [
   }
 ]
 
-const setMajorVersion = (obj) => {
-  obj.majorVersion = obj.version.split('.')[0]
-  log('browser %s version %s major version %s',
-    obj.name, obj.version, obj.majorVersion)
+const setMajorVersion = (obj:Browser) => {
+  if (obj.version) {
+    obj.majorVersion = obj.version.split('.')[0]
+    log('browser %s version %s major version %s',
+      obj.name, obj.version, obj.majorVersion)
+  }
   return obj
 }
+
+type MacBrowserName = 'chrome' | 'chromium' | 'canary'
 
 function lookup (platform:string, obj:Browser) {
   log('looking up %s on %s platform', obj.name, platform)
   switch (platform) {
     case 'darwin':
-      const fn = darwin[obj.name]
+      const browserName:MacBrowserName = obj.name as MacBrowserName
+      const fn = darwin[browserName]
       if (fn) {
         return fn.get(obj.executable)
       }
@@ -57,7 +64,8 @@ function lookup (platform:string, obj:Browser) {
       return Promise.reject(err)
     case 'linux':
       return linuxBrowser.get(obj.binary, obj.re)
-    // TODO handle default case?
+    default:
+      throw new Error(`Cannot lookup browser ${obj.name} on ${platform}`)
   }
 }
 

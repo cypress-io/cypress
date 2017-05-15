@@ -5,7 +5,7 @@ import path = require('path')
 import Promise = require('bluebird')
 
 const chrome = {
-  version (p) {
+  version (p: string) {
     return parse(p, 'KSVersion')
   },
 
