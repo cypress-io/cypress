@@ -35,7 +35,7 @@ test:
   ## server (5, 6)
   override:
     - echo 'Coffee Unit Tests' && cd packages/coffee && npm test
-    - echo 'Driver Unit Tests' && cd packages/coffee && npm test-once
+    - echo 'Driver Unit Tests' && cd packages/driver && npm run test-once
     - echo 'Launcher Unit Tests' && cd packages/launcher && npm test
     - echo 'Https Proxy Unit Tests' && cd packages/https-proxy && npm test
     # TODO E2E tests
