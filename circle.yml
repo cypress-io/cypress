@@ -1,0 +1,22 @@
+machine:
+  node:
+    version: 6.5.0
+
+compile:
+  - npm run build-dev
+
+test:
+  ## e2e (1)
+  ## desktop-gui (2)
+  ## driver (3)
+  ## example (4)
+  ## cli (5)
+  ## extension (5)
+  ## https-proxy (5)
+  ## launcher (5)
+  ## reporter (5)
+  ## runner (5)
+  ## server (5, 6)
+  override:
+    - echo 'Launcher Unit Tests' && cd packages/launcher && npm test
+    - echo 'Https Proxy Unit Tests' && cd packages/https-proxy && npm test
