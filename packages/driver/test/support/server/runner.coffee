@@ -83,7 +83,8 @@ module.exports = class Runner
         @_runnerBus.emit(event, info, err)
 
   runAllSpecsOnce: (specPaths) ->
-    @_start().then =>
+    @_start()
+    .then =>
       new Promise (resolve, reject) =>
         current = 0
         timeouts = []
@@ -115,9 +116,17 @@ module.exports = class Runner
           else if event isnt "start"
             @_runnerBus.emit(event, info, err)
 
-        @_localBus.on "timeout", ->
-          timeouts.push(specPaths[current])
+        @_localBus.on "timeout", (test) ->
+          timeouts.push({ path: specPaths[current], test })
           next()
+
+        @run(specPaths[current])
+    .tap ({ timeouts }) =>
+      if timeouts.length
+        logWarning("The following spec(s) timed out:")
+        console.log()
+      for spec in timeouts
+        @_logTest(spec.test, spec.path)
 
   run: (specPath) ->
     specPath = specPath
@@ -178,20 +187,30 @@ module.exports = class Runner
         "#{info.parentTitle} #{info.title}"
       else
         info.title
+
+    if event is "test"
+      @_lastTest = { event, info, err }
+
     @_localBus.emit("test:event", event, info, err)
+
+  _logTest: ({ info, err }, path) ->
+    logWarning("Spec:", path) if path
+    logWarning("Test: #{info.fullTitle()}")
+    logWarning("Error: #{err}") if err
 
   _onTimeout: ->
     console.log()
-    logError("Tests timed out")
+    logError("Test timed out")
     console.log()
+    if @_lastTest
+      @logTest(@_lastTest)
     if @_errors.length
-      logWarning("The following errors were captured:")
-    else
-      logError("No errors were captured")
+      console.log()
+      logWarning("The following other errors were captured:")
     for error in @_errors
       console.log()
       logError(error.stack or error)
-    @_localBus.emit("timeout")
+    @_localBus.emit("timeout", @_lastTest)
 
   _stopBrowser: ->
     @_browserInstance.stop()

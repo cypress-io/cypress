@@ -169,9 +169,5 @@ module.exports = {
     .runAllSpecsOnce(getAllSpecs(false))
     .then ({ stats, timeouts }) ->
       code = if stats.failures or timeouts.length then 1 else 0
-      if timeouts.length
-        console.error("The following spec(s) timed out:")
-        console.log()
-        console.error(spec) for spec in timeouts
       process.exit(code)
 }
