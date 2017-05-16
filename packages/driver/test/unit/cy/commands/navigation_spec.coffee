@@ -500,6 +500,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     describe ".log", ->
       beforeEach ->
+        @sandbox.stub(@Cypress, "getEmissions").returns([])
         @Cypress.on "log", (attrs, @log) =>
 
       it "preserves url on subsequent visits", ->
@@ -510,12 +511,12 @@ describe "$Cypress.Cy Navigation Commands", ->
         @Cypress.on "log", (attrs, log) ->
           expect(log.pick("name", "message")).to.deep.eq {
             name: "visit"
-            message: "localhost:4200/app/foo#/hash"
+            message: "localhost:3500/app/foo#/hash"
           }
 
           done()
 
-        @cy.visit("localhost:4200/app/foo#/hash")
+        @cy.visit("localhost:3500/app/foo#/hash")
 
       it "logs obj once complete", ->
         @cy.visit("http://localhost:3500/index.html").then ->
