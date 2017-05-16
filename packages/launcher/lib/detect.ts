@@ -1,6 +1,7 @@
 import {linuxBrowser} from './linux'
 import darwin from './darwin'
 import {log} from './log'
+import {Browser, NotInstalledError} from './types'
 
 import _ = require('lodash')
 import os = require('os')

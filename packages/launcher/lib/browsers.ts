@@ -1,6 +1,7 @@
 import {log} from './log'
 import {find, map} from 'lodash'
 import cp = require('child_process')
+import {Browser, BrowserNotFoundError} from './types'
 
 type FoundBrowser = {
   name: string,
