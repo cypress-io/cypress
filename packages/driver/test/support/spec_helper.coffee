@@ -211,6 +211,9 @@ window.enterCommandTestingMode = (fixture = "dom", options = {}) ->
       ## since we bypass our Runner instance
       @Cypress.on "fail", (err) ->
         console.error(err.stack)
+        ## bubble error up to mocha
+        if ct
+          ct.callback(err)
 
     ## if we've changed the src by navigating
     ## away (aka cy.visit(...)) then we need
