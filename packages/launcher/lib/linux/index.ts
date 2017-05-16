@@ -1,5 +1,6 @@
 import cp = require('child_process')
 import Promise = require('bluebird')
+import {NotInstalledError} from '../types'
 
 const execAsync = Promise.promisify(cp.exec)
 

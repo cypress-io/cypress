@@ -1,6 +1,7 @@
 import {writeJson} from 'fs-extra'
 import {launch} from './browsers'
 import detect from './detect'
+import {Browser, LauncherApi} from './types'
 
 const Promise = require('bluebird')
 
