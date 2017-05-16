@@ -22,7 +22,7 @@ npm install
 npm start
 ```
 
-Visit [http://localhost:4000/](http://localhost:4000/)
+Visit [http://localhost:2222/](http://localhost:2222/)
 
 ### Writing Docs
 
