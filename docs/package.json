@@ -12,7 +12,7 @@
     "convert": "node ./cy_scripts/convert.js",
     "deploy": "npm run build && hexo deploy",
     "build-prod": "hexo clean && hexo generate && gulp prep",
-    "watch-dev": "hexo server --port 2222"
+    "start": "hexo server --port 2222"
   },
   "devDependencies": {
     "colors": "^1.1.2",
