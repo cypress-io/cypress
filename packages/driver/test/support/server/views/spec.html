@@ -14,6 +14,9 @@
       <a id="terminal-reporter" href="?reporter=socket">Terminal Reporter</a>
     </p>
     <div id="mocha"></div>
+    <script>
+      window.env = {{{env}}}
+    </script>
     <script src="/dist-test/spec_helper.js"></script>
     {{#each specs}}
       <script src="/{{this}}.js"></script>

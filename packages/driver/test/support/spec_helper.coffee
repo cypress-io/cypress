@@ -30,6 +30,18 @@ before ->
     c = Cypress ? @Cypress
     c.off("fail")
 
+  @assertWindowIsInFocus = (cb) ->
+    return cb() if document.hasFocus()
+
+    ct = @test or @currentTest
+
+    if window.env.isCi
+      ct.callback(
+        new Error("Test requires the browser window be in focus, but it was not")
+      )
+    else
+      ct.skip()
+
   # sinon.format = -> ""
   @sandbox = s = sinon.sandbox.create()
   @sandbox.useFakeTimers = ->
