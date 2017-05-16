@@ -29,9 +29,6 @@ args = [
   "--disable-new-avatar-menu"
   "--allow-insecure-localhost"
   "--reduce-security-for-testing"
-  ## FIXME: theme doesn't seem to work
-  "--load-extension=#{themeDir}"
-  "--user-data-dir=#{profileDir}"
 
   ## the following come frome chromedriver
   ## https://code.google.com/p/chromium/codesearch#chromium/src/chrome/test/chromedriver/chrome_launcher.cc&sq=package:chromium&l=70
@@ -46,6 +43,9 @@ args = [
   "--disable-client-side-phishing-detection"
   "--disable-component-update"
   "--disable-default-apps"
+
+  "--load-extension=#{themeDir}"
+  "--user-data-dir=#{profileDir}"
 ]
 
 module.exports = {
