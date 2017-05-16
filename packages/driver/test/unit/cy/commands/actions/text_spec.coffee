@@ -88,7 +88,7 @@ describe "$Cypress.Cy Text Commands", ->
       @cy.get(":text:first").type("foo{enter}")
 
     ## FIXME: flakiness due to animation events
-    it "waits until element stops animating", (done) ->
+    it.skip "waits until element stops animating", (done) ->
       @assertWindowIsInFocus =>
         retries = []
         input   = $("<input class='slidein' />")
