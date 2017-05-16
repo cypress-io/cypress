@@ -203,7 +203,7 @@ module.exports = class Runner
     logError("Test timed out")
     console.log()
     if @_lastTest
-      @logTest(@_lastTest)
+      @_logTest(@_lastTest)
     if @_errors.length
       console.log()
       logWarning("The following other errors were captured:")
