@@ -31,7 +31,7 @@ export function launch (browsers:FoundBrowser[],
   }
 
   if (url) {
-    args.unshift(url)
+    args = [url].concat(args)
   }
 
   return cp.spawn(browser.path, args, {stdio: 'ignore'})
