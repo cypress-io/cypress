@@ -18,7 +18,9 @@ const setTerminalTitle = (title) => {
 }
 
 const packageNameFromPath = (fullPath) => {
-  return fullPath.replace(`${path.resolve('packages')}/`, '')
+  return fullPath
+  .replace(`${process.cwd()}/`, '')
+  .replace('packages/', '')
 }
 
 const nonPackageDirs = ['docs/']
@@ -26,14 +28,15 @@ const nonPackageDirs = ['docs/']
 const getDirs = () => {
   return globAsync('packages/*/')
   .then((dirs) => dirs.concat(nonPackageDirs))
+  .map((dir) => path.join(process.cwd(), dir).replace(/\/$/, ''))
 }
 
-const filterDirsByPackage = (dirs, packages) => {
-  if (!packages) return dirs
+const filterDirsByPackage = (dirs, filter) => {
+  if (!filter) return dirs
 
   return dirs.filter((dir) => {
     const packageName = packageNameFromPath(dir)
-    return _.includes(packages, packageName)
+    return _.includes(filter, packageName)
   })
 }
 
