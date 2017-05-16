@@ -94,7 +94,9 @@ const collectStderr = through(function (data) {
 collectStderr.pipe(process.stderr)
 
 const noPackagesError = (err) => err.noPackages
-const resultsError = (err) => !!err.results
+// only consider printing a list of errors
+const resultsError = (err) => Array.isArray(err.results)
+const failProcess = () => process.exit(1)
 
 module.exports = (cmd, options) => {
   const packagesFilter = options.package || options.packages
@@ -122,9 +124,11 @@ module.exports = (cmd, options) => {
   .then(() => {
     console.log(chalk.green('\nAll tasks completed successfully'))
   })
+  // using Bluebird filtered catch
+  // http://bluebirdjs.com/docs/api/catch.html#filtered-catch
   .catch(noPackagesError, (err) => {
     console.error(chalk.red(`\n${err.message}`))
-    return process.exit(1)
+    return failProcess()
   })
   .catch(resultsError, (err) => {
     const results = AsciiTable.factory({
@@ -139,6 +143,7 @@ module.exports = (cmd, options) => {
     console.error('\nstderr:\n')
     console.error(stderrOutput)
 
-    return process.exit(1)
+    return failProcess()
   })
+  .catch(failProcess)
 }
