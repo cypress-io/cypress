@@ -11,12 +11,6 @@ const through = require('through')
 
 const globAsync = Promise.promisify(glob)
 
-const setTerminalTitle = (title) => {
-  process.stdout.write(
-    `${String.fromCharCode(27)}]0${title}${String.fromCharCode(7)}`
-  )
-}
-
 const packageNameFromPath = (fullPath) => {
   return fullPath
   .replace(`${process.cwd()}/`, '')
@@ -103,8 +97,6 @@ const noPackagesError = (err) => err.noPackages
 const resultsError = (err) => !!err.results
 
 module.exports = (cmd, options) => {
-  setTerminalTitle(`run:all:${cmd}`)
-
   const packagesFilter = options.package || options.packages
 
   return getDirs()
