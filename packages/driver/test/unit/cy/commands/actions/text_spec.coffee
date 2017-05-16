@@ -1779,7 +1779,7 @@ describe "$Cypress.Cy Text Commands", ->
         @cy.get(":text:first").type("foo")
 
       it "snapshots before typing", (done) ->
-        @cy.$$(":text:first").keydown =>
+        @cy.$$(":text:first").one "keydown", =>
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0].name).to.eq("before")
           expect(@log.get("snapshots")[0].body).to.be.an("object")
