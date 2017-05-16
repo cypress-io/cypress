@@ -7,10 +7,8 @@
   "scripts": {
     "clean-deps": "rm -rf node_modules",
     "clean-all": "npm run clean-deps",
-    "lint": "tslint --type-check  --project . --fix --format stylish src/**/*.ts",
-    "build": "tsc",
-    "build-dev": "npm run build",
-    "prebuild": "npm run lint",
+    "lint": "tslint --type-check --project ../ts --fix --format stylish launcher/lib/*.ts launcher/lib/**/*.ts",
+    "build-dev": "npm run lint",
     "test": "mocha",
     "build-and-test": "npm run build && npm test"
   },
@@ -36,8 +34,7 @@
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
     "tslint": "^5.2.0",
-    "tslint-config-standard": "^5.0.2",
-    "typescript": "^2.3.2"
+    "tslint-config-standard": "^5.0.2"
   },
   "dependencies": {
     "bluebird": "^3.3.5",
