@@ -540,7 +540,7 @@ describe "$Cypress.Cy Scrolling Commands", ->
 
           @cy.get("button").scrollIntoView()
 
-     describe "argument errors", ->
+      context "argument errors", ->
         it "throws if arg passed as non-object", (done) ->
           @cy.on "fail", (err) =>
             expect(err.message).to.include "cy.scrollIntoView() can only be called with an options object. Your argument was: foo"
