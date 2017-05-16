@@ -57,8 +57,9 @@ module.exports = {
       launch.launch(browser, url, args)
     .then (spawnedBrowser) ->
       {
-        stop: (cb) ->
-          spawnedBrowser.on("close", cb)
-          spawnedBrowser.kill()
+        stop: ->
+          new Promise (resolve) ->
+            spawnedBrowser.once("exit", resolve)
+            spawnedBrowser.kill()
       }
 }
