@@ -297,9 +297,9 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     it "can visit pages on the same originPolicy", ->
       @cy
-        .visit("http://localhost:3500")
-        .visit("http://localhost:3500")
-        .visit("http://localhost:3500")
+        .visit("http://localhost:3500/blank.html")
+        .visit("http://localhost:3500/blank.html")
+        .visit("http://localhost:3500/blank.html")
 
     it "can visit pages on different subdomain but same originPolicy", ->
       $remoteIframe = @cy.privateState("$remoteIframe")
@@ -312,8 +312,8 @@ describe "$Cypress.Cy Navigation Commands", ->
       @sandbox.stub(@cy, "_src", load)
 
       ## make it seem like we're already on www.foobar.com:3500
-      one = @Cypress.Location.create("http://www.foobar.com:3500")
-      two = @Cypress.Location.create("http://help.foobar.com:3500")
+      one = @Cypress.Location.create("http://www.foobar.com:3500/blank.html")
+      two = @Cypress.Location.create("http://help.foobar.com:3500/blank.html")
 
       @sandbox.stub(@cy, "_existing")
       .onCall(0).returns(one)
@@ -322,8 +322,8 @@ describe "$Cypress.Cy Navigation Commands", ->
       trigger = @sandbox.spy(@Cypress, "trigger")
 
       @cy
-        .visit("http://www.foobar.com:3500")
-        .visit("http://help.foobar.com:3500")
+        .visit("http://www.foobar.com:3500/blank.html")
+        .visit("http://help.foobar.com:3500/blank.html")
         .then ->
           ## we should never have to go across domains even though
           ## we're visiting a subdomain
@@ -357,22 +357,22 @@ describe "$Cypress.Cy Navigation Commands", ->
           .visit("/hash.html?foo#bar") ## yes (2)
           .visit("/hash.html?foo#foo") ## no (2)
           .visit("/hash.html?bar#bar") ## yes (3)
-          .visit("/index.html?bar#bar") ## yes (4)
-          .visit("/index.html?baz#bar") ## yes (5)
-          .visit("/index.html#bar") ## yes (6)
-          .visit("/index.html") ## yes (7)
-          .visit("/index.html#baz") ## no (7)
-          .visit("/index.html#") ## no (7)
+          .visit("/blank.html?bar#bar") ## yes (4)
+          .visit("/blank.html?baz#bar") ## yes (5)
+          .visit("/blank.html#bar") ## yes (6)
+          .visit("/blank.html") ## yes (7)
+          .visit("/blank.html#baz") ## no (7)
+          .visit("/blank.html#") ## no (7)
           .then ->
             expect(count).to.eq(7)
             expect(urls).to.deep.eq([
               "about:blank"
               "http://localhost:3500/hash.html?foo#bar"
               "http://localhost:3500/hash.html?bar#bar"
-              "http://localhost:3500/index.html?bar#bar"
-              "http://localhost:3500/index.html?baz#bar"
-              "http://localhost:3500/index.html#bar"
-              "http://localhost:3500/index.html"
+              "http://localhost:3500/blank.html?bar#bar"
+              "http://localhost:3500/blank.html?baz#bar"
+              "http://localhost:3500/blank.html#bar"
+              "http://localhost:3500/blank.html"
             ])
 
     describe "when origins don't match", ->
@@ -519,19 +519,19 @@ describe "$Cypress.Cy Navigation Commands", ->
         @cy.visit("localhost:3500/app/foo#/hash")
 
       it "logs obj once complete", ->
-        @cy.visit("http://localhost:3500/index.html").then ->
+        @cy.visit("http://localhost:3500/blank.html").then ->
           obj = {
             state: "passed"
             name: "visit"
-            message: "http://localhost:3500/index.html"
-            url: "http://localhost:3500/index.html"
+            message: "http://localhost:3500/blank.html"
+            url: "http://localhost:3500/blank.html"
           }
 
           _.each obj, (value, key) =>
             expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
       it "snapshots once", ->
-        @cy.visit("/index.html").then ->
+        @cy.visit("/blank.html").then ->
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0]).to.be.an("object")
 
@@ -633,7 +633,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(@log.get("error")).to.eq err
           done()
 
-        @cy.visit("/index.html")
+        @cy.visit("/blank.html")
 
       it "logs once on error", (done) ->
         @sandbox.stub(@cy, "_resolveUrl").rejects(new Error)
@@ -647,7 +647,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(logs).to.have.length(1)
           done()
 
-        @cy.visit("/index.html")
+        @cy.visit("/blank.html")
 
       it "logs once on timeout error", (done) ->
         logs = []
@@ -709,8 +709,8 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy
-          .visit("")
-          .visit("http://localhost:3501")
+          .visit("http://localhost:3500/blank.html")
+          .visit("http://localhost:3501/blank.html")
 
       it "throws when attempting to visit a 2nd domain on different protocol", (done) ->
         logs = []
@@ -725,8 +725,8 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy
-          .visit("")
-          .visit("https://localhost:3500")
+          .visit("http://localhost:3500/blank.html")
+          .visit("https://localhost:3500/blank.html")
 
       it "throws when attempting to visit a 2nd domain on different host", (done) ->
         logs = []
@@ -741,8 +741,8 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy
-          .visit("")
-          .visit("http://google.com:3500")
+          .visit("http://localhost:3500/blank.html")
+          .visit("http://google.com:3500/blank.html")
 
       it "throws attemping to visit 2 unique ip addresses", (done) ->
         $remoteIframe = @cy.privateState("$remoteIframe")
@@ -757,7 +757,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         logs = []
 
         ## make it seem like we're already on http://127.0.0.1:3500
-        one = @Cypress.Location.create("http://127.0.0.1:3500")
+        one = @Cypress.Location.create("http://127.0.0.1:3500/blank.html")
         @sandbox.stub(@cy, "_existing")
         .returns(one)
 
@@ -771,20 +771,20 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy
-          .visit("http://127.0.0.1:3500")
-          .visit("http://126.0.0.1:3500")
+          .visit("http://127.0.0.1:3500/blank.html")
+          .visit("http://126.0.0.1:3500/blank.html")
 
       it "does not call resolve:url when throws attemping to visit a 2nd domain", (done) ->
         trigger = @sandbox.spy(@Cypress, "trigger")
 
         @cy.on "fail", (err) =>
-          expect(trigger).to.be.calledWithMatch("resolve:url", "http://localhost:3500")
-          expect(trigger).not.to.be.calledWithMatch("resolve:url", "http://google.com:3500")
+          expect(trigger).to.be.calledWithMatch("resolve:url", "http://localhost:3500/blank.html")
+          expect(trigger).not.to.be.calledWithMatch("resolve:url", "http://google.com:3500/blank.html")
           done()
 
         @cy
-          .visit("http://localhost:3500")
-          .visit("http://google.com:3500")
+          .visit("http://localhost:3500/blank.html")
+          .visit("http://google.com:3500/blank.html")
 
       it "displays loading_network_failed when _resolveUrl throws", (done) ->
         err1 = new Error("connect ECONNREFUSED 127.0.0.1:64646")
