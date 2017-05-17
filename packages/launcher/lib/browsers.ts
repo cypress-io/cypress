@@ -1,6 +1,7 @@
 import {log} from './log'
 import {find, map} from 'lodash'
 import cp = require('child_process')
+import {BrowserNotFoundError} from './types'
 
 type FoundBrowser = {
   name: string,
@@ -31,7 +32,7 @@ export function launch (browsers:FoundBrowser[],
   }
 
   if (url) {
-    args.unshift(url)
+    args = [url].concat(args)
   }
 
   return cp.spawn(browser.path, args, {stdio: 'ignore'})

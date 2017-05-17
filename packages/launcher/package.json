@@ -3,16 +3,13 @@
   "version": "0.1.1",
   "description": "Internal lib for spawning browser processes",
   "main": "index.js",
-  "types": "./index.d.ts",
+  "types": "../ts/index.d.ts",
   "scripts": {
-    "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean-deps",
-    "lint": "tslint --type-check  --project . --fix --format stylish src/**/*.ts",
-    "build": "tsc",
-    "build-dev": "npm run build",
-    "prebuild": "npm run lint",
+    "build": "npm run lint",
+    "pretest": "npm run lint",
     "test": "mocha",
-    "build-and-test": "npm run build && npm test"
+    "clean-deps": "rm -rf node_modules",
+    "lint": "tslint --type-check --project .. --fix --format stylish launcher/lib/*.ts launcher/lib/**/*.ts"
   },
   "repository": {
     "type": "git",

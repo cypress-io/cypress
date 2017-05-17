@@ -1,10 +1,12 @@
 import {linuxBrowser} from './linux'
 import darwin from './darwin'
 import {log} from './log'
+import {Browser, NotInstalledError} from './types'
+import * as Bluebird from 'bluebird'
 
 import _ = require('lodash')
 import os = require('os')
-import Promise = require('bluebird')
+// import Promise = require('bluebird')
 
 const browsers:Browser[] = [
   {
@@ -39,21 +41,21 @@ const setMajorVersion = (obj:Browser) => {
 
 type MacBrowserName = 'chrome' | 'chromium' | 'canary'
 
-function lookup (platform:string, obj:Browser) {
+function lookup (platform:string, obj:Browser):Promise<Object> {
   log('looking up %s on %s platform', obj.name, platform)
   switch (platform) {
     case 'darwin':
       const browserName:MacBrowserName = obj.name as MacBrowserName
       const fn = darwin[browserName]
       if (fn) {
-        return fn.get(obj.executable)
+        return fn.get(obj.executable) as any as Promise<Object>
       }
       const err: NotInstalledError =
         new Error(`Browser not installed: ${obj.name}`) as NotInstalledError
       err.notInstalled = true
-      return Promise.reject(err)
+      throw err
     case 'linux':
-      return linuxBrowser.get(obj.binary, obj.re)
+      return linuxBrowser.get(obj.binary, obj.re) as any as Promise<Object>
     default:
       throw new Error(`Cannot lookup browser ${obj.name} on ${platform}`)
   }
@@ -62,7 +64,7 @@ function lookup (platform:string, obj:Browser) {
 function checkOneBrowser(browser:Browser) {
   const platform = os.platform()
   return lookup(platform, browser)
-    .then(props => {
+    .then((props:object) => {
       return _.chain({})
         .extend(browser, props)
         .pick('name', 'type', 'version', 'path')
@@ -79,9 +81,9 @@ function checkOneBrowser(browser:Browser) {
 }
 
 /** returns list of detected browsers */
-function detectBrowsers (): Promise<Browser[]> {
-  return Promise.map(browsers, checkOneBrowser)
-    .then(_.compact) as Promise<Browser[]>
+function detectBrowsers (): Bluebird<Browser[]> {
+  return Bluebird.map(browsers, checkOneBrowser)
+    .then(_.compact) as Bluebird<Browser[]>
 }
 
 export default detectBrowsers

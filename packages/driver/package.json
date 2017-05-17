@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build-dev": "gulp build",
+    "build": "gulp build",
+    "watch": "gulp watch",
     "clean-deps": "rm -rf node_modules",
-    "test": "gulp test:once",
-    "test-watch": "gulp test",
-    "watch-dev": "gulp watch"
+    "test": "gulp test",
+    "test-watch": "gulp test:watch"
   },
   "devDependencies": {
     "@cypress/bower-kendo-ui": "0.0.2",

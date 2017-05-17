@@ -62,6 +62,7 @@ module.exports = class Runner
     @_errors = []
     @_localBus = new EventEmitter()
     @_runnerBus = new EventEmitter()
+    @_browserInstance = { stop: -> Promise.resolve() }
 
     process.on "SIGINT", =>
       @_stopBrowser().then ->
@@ -82,14 +83,19 @@ module.exports = class Runner
         @_runnerBus.emit(event, info, err)
 
   runAllSpecsOnce: (specPaths) ->
-    @_start().then =>
+    @_start()
+    .then =>
       new Promise (resolve, reject) =>
         current = 0
         timeouts = []
 
         next = =>
           current++
-          @run(specPaths[current])
+          @_stopBrowser()
+          .then =>
+            @_launchBrowser()
+          .then =>
+            @run(specPaths[current])
 
         finish = (event, info, err) =>
           @_runnerBus.emit(event, info, err)
@@ -99,9 +105,6 @@ module.exports = class Runner
 
         @_reporter = new @_Reporter(@_runnerBus)
         @_runnerBus.emit("start")
-
-        @_localBus.once "client:connected", =>
-          @run(specPaths[current])
 
         @_localBus.on "test:event", (event, info, err) =>
           if event is "end"
@@ -113,9 +116,17 @@ module.exports = class Runner
           else if event isnt "start"
             @_runnerBus.emit(event, info, err)
 
-        @_localBus.on "timeout", ->
-          timeouts.push(specPaths[current])
+        @_localBus.on "timeout", (test) ->
+          timeouts.push({ path: specPaths[current], test })
           next()
+
+        @run(specPaths[current])
+    .tap ({ timeouts }) =>
+      if timeouts.length
+        logWarning("The following spec(s) timed out:")
+        console.log()
+      for spec in timeouts
+        @_logTest(spec.test, spec.path)
 
   run: (specPath) ->
     specPath = specPath
@@ -148,13 +159,16 @@ module.exports = class Runner
     theBrowser = getArg("browser") or "chrome"
     url = "http://localhost:#{@_config.port}?reporter=socket"
 
-    browser.launch(theBrowser, url)
-    .then (instance) =>
-      @_browserInstance = instance
-    .catch (err) =>
-      logError("Error attempting to launch browser:")
-      logError(err)
-      throw err
+    new Promise (resolve, reject) =>
+      @_localBus.once "client:connected", resolve
+
+      browser.launch(theBrowser, url)
+      .then (instance) =>
+        @_browserInstance = instance
+      .catch (err) =>
+        logError("Error attempting to launch browser:")
+        logError(err)
+        reject(err)
 
   _onReport: ({ tests }) ->
     for test in tests
@@ -173,27 +187,33 @@ module.exports = class Runner
         "#{info.parentTitle} #{info.title}"
       else
         info.title
+
+    if event is "test"
+      @_lastTest = { event, info, err }
+
     @_localBus.emit("test:event", event, info, err)
+
+  _logTest: ({ info, err }, path) ->
+    logWarning("Spec:", path) if path
+    logWarning("Test: #{info.fullTitle()}")
+    logWarning("Error: #{err}") if err
 
   _onTimeout: ->
     console.log()
-    logError("Tests timed out")
+    logError("Test timed out")
     console.log()
+    if @_lastTest
+      @_logTest(@_lastTest)
     if @_errors.length
-      logWarning("The following errors were captured:")
-    else
-      logError("No errors were captured")
+      console.log()
+      logWarning("The following other errors were captured:")
     for error in @_errors
       console.log()
       logError(error.stack or error)
-    @_localBus.emit("timeout")
+    @_localBus.emit("timeout", @_lastTest)
 
   _stopBrowser: ->
-    if not @_browserInstance
-      return Promise.resolve()
-
-    new Promise (resolve) =>
-      @_browserInstance.stop(resolve)
+    @_browserInstance.stop()
     .timeout(10000)
     .catch Promise.TimeoutError, ->
       logWarning("Timed out trying to stop browser")

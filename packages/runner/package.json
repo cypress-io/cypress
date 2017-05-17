@@ -12,15 +12,12 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-core-runner#readme",
   "scripts": {
-    "build-dev": "node ./scripts/build-dev.js",
+    "build": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
+    "watch": "node ./scripts/watch.js",
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean && npm run clean-deps",
-    "test": "npm run test-unit-once",
-    "test-once": "npm run test-unit-once",
-    "test-unit-once": "node ./scripts/test.js",
-    "watch-dev": "node ./scripts/watch.js",
+    "test": "node ./scripts/test.js",
     "lint": "eslint src/**/*.jsx src/**/*.js"
   },
   "files": [

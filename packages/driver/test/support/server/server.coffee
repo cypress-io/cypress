@@ -44,6 +44,12 @@ getAllSpecs = (allSpecs = true) ->
   _.map specs, (spec) ->
     removeExtension(spec.replace("../..", "specs"))
 
+  ## specify which files to run
+  # [
+  #   "specs/unit/cy/commands/agents_spec"
+  #   "specs/unit/cy/commands/assertions_spec"
+  # ]
+
 getSpec = (spec) ->
   spec = "#{removeExtension(spec)}.coffee"
   file = fs.readFileSync(path.join(__dirname, "../..", spec), "utf8")
@@ -69,6 +75,9 @@ app.get "/specs/*", (req, res) ->
   else
     res.render(path.join(__dirname, "views/spec.html"), {
       specs: getSpecPath(req.path)
+      env: JSON.stringify({
+        isCi: !!process.env.CI
+      })
     })
 
 app.get "/timeout", (req, res) ->
@@ -169,9 +178,5 @@ module.exports = {
     .runAllSpecsOnce(getAllSpecs(false))
     .then ({ stats, timeouts }) ->
       code = if stats.failures or timeouts.length then 1 else 0
-      if timeouts.length
-        console.error("The following spec(s) timed out:")
-        console.log()
-        console.error(spec) for spec in timeouts
       process.exit(code)
 }

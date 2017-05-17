@@ -6,9 +6,12 @@
     "version": "3.3.1"
   },
   "scripts": {
+    "postinstall": "npm run build",
+    "prebuild": "npm run clean",
+    "build": "hexo generate",
+    "postbuild": "gulp post:build",
     "clean": "hexo clean",
     "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean && npm run clean-deps",
     "convert": "node ./cy_scripts/convert.js",
     "deploy": "npm run build && hexo deploy",
     "build-prod": "hexo clean && hexo generate && gulp prep",
@@ -28,18 +31,20 @@
   },
   "dependencies": {
     "bluebird": "^3.5.0",
+    "docsearch.js": "^2.3.3",
     "hexo": "3.3.1",
     "hexo-algoliasearch": "^0.2.1",
     "hexo-deployer-git": "^0.2.0",
     "hexo-generator-archive": "^0.1.4",
     "hexo-generator-category": "^0.1.3",
     "hexo-generator-index": "^0.2.0",
-    "hexo-generator-sitemap": "^1.1.2",
+    "hexo-generator-seo-friendly-sitemap": "0.0.20",
     "hexo-renderer-marked": "^0.2.10",
     "hexo-renderer-scss": "^1.0.2",
     "hexo-server": "^0.2.0",
     "lodash": "^4.17.4",
     "lunr": "^2.0.1",
-    "menuspy": "^1.0.1"
+    "menuspy": "1.0.1",
+    "scrollingelement": "1.5.2"
   }
 }

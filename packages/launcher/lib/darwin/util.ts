@@ -1,4 +1,5 @@
 import {log} from '../log'
+import {NotInstalledError} from '../types'
 import execa = require('execa')
 
 import fs = require('fs-extra')

@@ -30,6 +30,18 @@ before ->
     c = Cypress ? @Cypress
     c.off("fail")
 
+  @assertWindowIsInFocus = (cb) ->
+    return cb() if document.hasFocus()
+
+    ct = @test or @currentTest
+
+    if window.env.isCi
+      ct.callback(
+        new Error("Test requires the browser window be in focus, but it was not")
+      )
+    else
+      ct.skip()
+
   # sinon.format = -> ""
   @sandbox = s = sinon.sandbox.create()
   @sandbox.useFakeTimers = ->
@@ -211,6 +223,9 @@ window.enterCommandTestingMode = (fixture = "dom", options = {}) ->
       ## since we bypass our Runner instance
       @Cypress.on "fail", (err) ->
         console.error(err.stack)
+        ## bubble error up to mocha
+        if ct
+          ct.callback(err)
 
     ## if we've changed the src by navigating
     ## away (aka cy.visit(...)) then we need

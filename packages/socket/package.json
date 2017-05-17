@@ -6,10 +6,7 @@
   "scripts": {
     "test": "NODE_ENV=test mocha",
     "test-watch": "NODE_ENV=test mocha --watch",
-    "test-once": "npm run test-unit-once",
-    "test-unit-once": "NODE_ENV=test mocha",
-    "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean-deps"
+    "clean-deps": "rm -rf node_modules"
   },
   "repository": {
     "type": "git",

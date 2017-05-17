@@ -155,7 +155,7 @@ gulp.task "server", -> require("./server/server.coffee")
 gulp.task "ensure:dist:dir", ->
   fs.ensureDirAsync(path.resolve("./dist-test"))
 
-gulp.task "test", ["ensure:dist:dir"], ->
+gulp.task "test:watch", ["ensure:dist:dir"], ->
   watchSpecHelper = bundleJs(specHelperOptions)
   watchIndex = bundleJs(specIndexOptions)
   watchRunner = bundleJs(specRunnerOptions)
@@ -167,7 +167,7 @@ gulp.task "test", ["ensure:dist:dir"], ->
 
   return watchSpecHelper.process
 
-gulp.task "test:once", ["ensure:dist:dir"], ->
+gulp.task "test", ["ensure:dist:dir"], ->
   buildSpecHelper = bundleJs(specHelperOptions, false)
   buildIndex = bundleJs(specIndexOptions, false)
   buildRunner = bundleJs(specRunnerOptions, false)

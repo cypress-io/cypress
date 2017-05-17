@@ -5,14 +5,10 @@ machine:
 dependencies:
   # CircleCI caching
   # https://circleci.com/docs/1.0/how-cache-works/
-  pre:
-    # for "simple" parallel builds on CircleCI
-    # https://github.com/michaelcontento/circleci-matrix
-    # also see file .circleci-matrix.yml
-    - curl -fsSL https://git.io/v2Ifn | bash
   cache_directories:
     # downloaded Electron binary
     - "~/.electron"
+    - docs/node_modules
     # could not use wildcard format, so list every subfolder
     - packages/coffee/node_modules
     - packages/desktop-gui/node_modules
@@ -41,6 +37,67 @@ test:
   ## runner (5)
   ## server (5, 6)
   override:
-    - circleci-matrix :
+    #
+    # things to run in the 1st CI container
+    #
+    # build docs site (fast)
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then cd docs && npm install; fi:
         parallel: true
-    # TODO E2E tests
+
+    # run linter (fast)
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all lint; fi:
+        parallel: true
+    # run unit tests (fast)
+    # separate commands for better GUI view
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package coffee; fi:
+        parallel: true
+
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package desktop-gui; fi:
+        parallel: true
+
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package electron; fi:
+        parallel: true
+
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package extension; fi:
+        parallel: true
+
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package https-proxy; fi:
+        parallel: true
+
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package launcher; fi:
+        parallel: true
+
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package reporter; fi:
+        parallel: true
+
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package runner; fi:
+        parallel: true
+
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package server; fi:
+        parallel: true
+
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package socket; fi:
+        parallel: true
+
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package static; fi:
+        parallel: true
+
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test-integration-once -- --package server; fi:
+        parallel: true
+
+    #
+    # things to run in the 2nd CI container
+    #
+    - if [ $CIRCLE_NODE_INDEX == 1 ]; then npm run all test -- --package driver; fi:
+        parallel: true
+
+    #
+    # things to run in the 3rd CI container
+    #
+    - if [ $CIRCLE_NODE_INDEX == 2 ]; then npm run all test-e2e-once -- --package server; fi:
+        parallel: true
+
+    # Example project E2E tests
+    # Hanging now, so commented out
+    # - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm start -- --project ../example/; fi:
+    #     parallel: true
