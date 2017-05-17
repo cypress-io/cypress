@@ -204,8 +204,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           .visit("/fixtures/sinon.html")
           .go("back", {timeout: 1})
 
-      ## FIXME: flaky!
-      it.skip "only logs once on error", (done) ->
+      it "only logs once on error", (done) ->
         logs = []
 
         @Cypress.on "log", (attrs, log) =>
