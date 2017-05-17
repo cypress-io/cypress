@@ -1,41 +1,42 @@
 guides:
-  welcome:
-    intro: guides.html
-    our-goals: our-goals.html
   getting-started:
-    installing-and-running: installing-and-running.html
+    why-cypress: why-cypress.html
+    installing-cypress: installing-cypress.html
     writing-your-first-test: writing-your-first-test.html
-    using-the-cypress-runner: using-the-cypress-runner.html
-  examples:
-    list-of-example-apps: list-of-example-apps.html
-    list-of-example-recipes: list-of-example-recipes.html
-  dashboard:
-    features: features.html
-    projects: projects.html
-    recorded-runs: recorded-runs.html
-    organizations: organizations.html
-  guides:
-    configuration: configuration.html
-    issuing-commands: issuing-commands.html
-    finding-elements: finding-elements.html
-    making-assertions: making-assertions.html
-    network-requests: network-requests.html
+    testing-your-app: testing-your-app.html
+    next-steps: next-steps.html
+  cypress-basics:
+    overview-of-the-gui-tool: overview-of-the-gui-tool.html
+    commands-elements-and-assertions: commands-elements-and-assertions.html
+    dead-simple-debugging: dead-simple-debugging.html
+    aliases-variables-in-an-async-world: aliases-variables-in-an-async-world.html
+    stubs-spies-clocks: stubs-spies-clocks.html
+    dealing-with-the-network: dealing-with-the-network.html
+    taking-screenshots-and-recording-videos: taking-screenshots-and-recording-videos.html
+  integrating-with-cypress:
+    cli-tool: cli-tool.html
     continuous-integration: continuous-integration.html
     environment-variables: environment-variables.html
-    stubs-spies-and-clocks: stubs-spies-and-clocks.html
-    using-aliases: using-aliases.html
-    creating-fixtures: creating-fixtures.html
-    screenshots-and-videos: screenshots-and-videos.html
-    bundled-tools: bundled-tools.html
     reporters: reporters.html
-  references:
-    cli-tool: cli-tool.html
-    error-messages: error-messages.html
-    anti-patterns: anti-patterns.html
-    known-issues: known-issues.html
-    web-security: web-security.html
     browser-management: browser-management.html
-    userland-extensions: userland-extensions.html
+    the-cypress-dashboard: the-cypress-dashboard.html
+  advanced-cypress:
+    the-cypress-workflow: the-cypress-workflow.html
+    coming-from-selenium: coming-from-selenium.html
+    custom-commands: custom-commands.html
+    web-security: web-security.html
+    how-cypress-really-works: how-cypress-really-works.html
+    talking-to-your-backend: talking-to-your-backend.html
+    spawning-processes: spawning-processes.html
+  appendices:
+    error-messages: error-messages.html
+    best-practices: best-practices.html
+    anti-patterns: anti-patterns.html
+    all-videos: all-videos.html
+    contributing: contributing.html
+    changelog: changelog.html
+    roadmap: roadmap.html
+    cypress-api-design: cypress-api-design.html
 
 api:
   welcome:

@@ -18,43 +18,44 @@ page:
 
 sidebar:
   guides:
-    welcome: Welcome
-    intro: Intro
-    our-goals: Our Goals
     getting-started: Getting Started
-    installing-and-running: Installing and Running
+    why-cypress: Why Cypress
+    installing-cypress: Installing Cypress
     writing-your-first-test: Writing Your First Test
-    using-the-cypress-runner: Using the Cypress Runner
-    examples: Examples
-    list-of-example-apps: List of Example Apps
-    list-of-example-recipes: List of Example Recipes
-    dashboard: Dashboard
-    features: Features
-    projects: Projects
-    recorded-runs: Recorded Runs
-    organizations: Organizations
-    guides: Guides
-    configuration: Configuration
-    issuing-commands: Issuing Commands
-    finding-elements: Finding Elements
-    making-assertions: Making Assertions
-    network-requests: Network Requests
+    testing-your-app: Testing Your App
+    next-steps: Next Steps
+    cypress-basics: Cypress Basics
+    overview-of-the-gui-tool: Overview of the GUI Tool
+    commands-elements-and-assertions: Commands, Elements, and Assertions
+    dead-simple-debugging: Dead Simple Debugging
+    aliases-variables-in-an-async-world: Aliases&#58; Variables in an Async World
+    stubs-spies-clocks: Stubs, Spies, and Clocks
+    dealing-with-the-network: Dealing with the Network
+    taking-screenshots-and-recording-videos: Taking Screenshots and Recording Videos
+    integrating-with-cypress: Integrating with Cypress
+    cli-tool: CLI Tool
     continuous-integration: Continuous Integration
     environment-variables: Environment Variables
-    stubs-spies-and-clocks: Stubs, Spies, and Clocks
-    using-aliases: Using Aliases
-    creating-fixtures: Creating Fixtures
-    screenshots-and-videos: Screenshots and Videos
-    bundled-tools: Bundled Tools
     reporters: Reporters
-    references: References
-    cli-tool: CLI Tool
-    error-messages: Error Messages
-    anti-patterns: Anti-patterns
-    known-issues: Known Issues
-    web-security: Web Security
     browser-management: Browser Management
-    userland-extensions: Userland Extensions
+    the-cypress-dashboard: The Cypress Dashboard
+    advanced-cypress: Advanced Cypress
+    the-cypress-workflow: The Cypress Workflow
+    coming-from-selenium: Coming from Selenium?
+    custom-commands: Custom Commands
+    web-security: Web Security
+    how-cypress-really-works: How Cypress Really Works
+    talking-to-your-backend: Talking to Your Backend
+    spawning-processes: Spawning Processes
+    appendices: Appendices
+    error-messages: Error Messages
+    best-practices: Best Practices
+    anti-patterns: Anti-patterns
+    all-videos: All Videos
+    contributing: Contributing
+    changelog: Changelog
+    roadmap: Roadmap
+    cypress-api-design: Cypress API Design
   api:
     welcome: Welcome
     api: api
