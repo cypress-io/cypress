@@ -74,13 +74,13 @@ test:
     - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package static; fi:
         parallel: true
 
-    - if [ $CIRCLE_NODE_INDEX == 1 ]; then npm run all test-integration-once -- --package server; fi:
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test-integration-once -- --package server; fi:
         parallel: true
 
     #
     # things to run in the 2nd CI container
     #
-    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package driver; fi:
+    - if [ $CIRCLE_NODE_INDEX == 1 ]; then npm run all test -- --package driver; fi:
         parallel: true
 
     #
