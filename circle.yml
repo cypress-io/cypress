@@ -8,6 +8,7 @@ dependencies:
   cache_directories:
     # downloaded Electron binary
     - "~/.electron"
+    - docs/node_modules
     # could not use wildcard format, so list every subfolder
     - packages/coffee/node_modules
     - packages/desktop-gui/node_modules
