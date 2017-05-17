@@ -46,8 +46,6 @@ Each package is responsible for building itself and testing itself and can do so
 
 **clean-deps**: Remove any dependencies installed (usually by npm or bower)
 
-**clean-all**: Run *clean* and *clean-deps* scripts
-
 **test-all**: Run all tests in watch mode
 
 **test-all-once**: Run all tests

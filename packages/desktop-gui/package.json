@@ -4,16 +4,15 @@
   "description": "Desktop GUI for managing Cypress projects.",
   "main": "lib/gui.js",
   "scripts": {
-    "build-dev": "zunder build-dev",
+    "build": "zunder build-dev",
     "build-prod": "node ./scripts/build-prod.js",
     "run-prod": "npm run build-prod && npm run server",
+    "watch": "zunder watch",
     "server": "zunder serve-prod --port 8000",
-    "watch-dev": "zunder watch",
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean && npm run clean-deps",
     "lint": "eslint --fix lib/*.js src/*.js* src/**/*.js*",
-    "test": "npm run build-dev",
+    "test": "npm run build",
     "pretest": "npm run lint"
   },
   "repository": {

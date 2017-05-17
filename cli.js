@@ -11,8 +11,7 @@ switch (args.exec) {
     require('dev/run')(args)
     break
   case 'install':
-    //// TODO: do this through lib/cli.js?
-    require('packages/core-download').install()
+    require('./lib/download').install()
     break
   case undefined:
     throw new Error('Must pass --exec option')

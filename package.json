@@ -6,19 +6,14 @@
     "cypress": "bin/cypress"
   },
   "scripts": {
-    "install-app": "node cli.js --exec install",
-    "postinstall": "npm run all install && npm run all build-dev",
-    "deploy:docs": "npm run all deploy -- --package docs",
     "start": "node start.js",
-    "watch-dev": "npm run all watch-dev",
-    "test": "mocha --watch",
-    "test-once": "mocha",
-    "test-all": "npm run all test -- --serial",
-    "test-all-once": "npm run all test-once -- --serial",
-    "test-all-unit-once": "npm run all test-unit-once -- --serial",
-    "test-all-integration-once": "npm run all test-integration-once -- --serial",
-    "test-all-e2e-once": "npm run all test-e2e-once -- --serial",
-    "all": "node cli.js --exec run"
+    "watch": "npm run all watch",
+    "build": "npm run all build",
+    "all": "node cli.js --exec run",
+    "test": "echo 'This runs just the CLI tests' && mocha",
+    "test-watch": "mocha --watch",
+    "test-e2e": "blah",
+    "postinstall": "npm run all install && npm run build"
   },
   "author": "",
   "license": "MIT",

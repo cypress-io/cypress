@@ -21,10 +21,9 @@
 
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css">
-
   <!-- CSS -->
   <!-- build:css build/css/cypress.css -->
+  {{ css('css/docsearch') }}
   {{ css('css/cypress') }}
   <!-- endbuild -->
 

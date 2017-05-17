@@ -27,7 +27,7 @@ describe "Documentation", ->
         cy
           .contains(".main-nav-link", "Guides")
             .should("have.attr", "href")
-              .and("include", "/guides/welcome/guides.html")
+              .and("include", "/guides/index.html")
         cy
           .contains(".main-nav-link", "API")
             .should("have.attr", "href")
