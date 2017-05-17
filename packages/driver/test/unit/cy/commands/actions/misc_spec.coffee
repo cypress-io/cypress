@@ -440,7 +440,8 @@ describe "$Cypress.Cy Miscellaneous Commands", ->
 
         @cy.get("button:first").ttrigger("mouseover", "foo")
 
-      ## FIXME: needs focus
+      ## FIXME: change to unit test that doesn't rely on real animation
+      ## write one test that integration tests animations
       it.skip "throws when element animation exceeds timeout", (done) ->
         @cy._timeout(100)
 
