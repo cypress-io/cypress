@@ -146,3 +146,4 @@ deploy:
   type: git
   repo: https://github.com/cypress-io/cypress-documentation
   branch: gh-pages
+  message: '[skip ci] deploying docs'
