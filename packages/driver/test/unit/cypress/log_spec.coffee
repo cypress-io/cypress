@@ -849,6 +849,7 @@ describe "$Cypress.Log API", ->
 
             @cy.get("button").contains("asdfasdfasdfasdf")
 
+          ## FIXME: timed out once on full run
           it "#consoleProps for nested children commands", (done) ->
             @Cypress.on "log", (attrs, @log) =>
 
