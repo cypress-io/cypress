@@ -12,7 +12,7 @@
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "lint": "eslint --fix lib/*.js src/*.js* src/**/*.js*",
-    "test": "npm run build-dev",
+    "test": "npm run build",
     "pretest": "npm run lint"
   },
   "repository": {
