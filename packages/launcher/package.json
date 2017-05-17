@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "description": "Internal lib for spawning browser processes",
   "main": "index.js",
-  "types": "./index.d.ts",
+  "types": "../ts/index.d.ts",
   "scripts": {
     "build": "npm run lint",
     "pretest": "npm run lint",
@@ -33,7 +33,8 @@
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
     "tslint": "^5.2.0",
-    "tslint-config-standard": "^5.0.2"
+    "tslint-config-standard": "^5.0.2",
+    "typescript": "^2.3.2"
   },
   "dependencies": {
     "bluebird": "^3.3.5",
