@@ -7,7 +7,8 @@
   },
   "scripts": {
     "postinstall": "npm run build",
-    "build": "npm run clean && hexo generate",
+    "prebuild": "npm run clean",
+    "build": "hexo generate",
     "postbuild": "gulp post:build",
     "clean": "hexo clean",
     "clean-deps": "rm -rf node_modules",
@@ -29,6 +30,7 @@
   },
   "dependencies": {
     "bluebird": "^3.5.0",
+    "docsearch.js": "^2.3.3",
     "hexo": "3.3.1",
     "hexo-algoliasearch": "^0.2.1",
     "hexo-deployer-git": "^0.2.0",
@@ -41,6 +43,7 @@
     "hexo-server": "^0.2.0",
     "lodash": "^4.17.4",
     "lunr": "^2.0.1",
-    "menuspy": "^1.0.1"
+    "menuspy": "1.0.1",
+    "scrollingelement": "1.5.2"
   }
 }
