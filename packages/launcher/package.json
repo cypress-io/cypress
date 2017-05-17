@@ -9,8 +9,8 @@
     "clean-all": "npm run clean-deps",
     "lint": "tslint --type-check --project ../ts --fix --format stylish launcher/lib/*.ts launcher/lib/**/*.ts",
     "build-dev": "npm run lint",
-    "test": "mocha",
-    "build-and-test": "npm run build && npm test"
+    "pretest": "npm run lint",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
