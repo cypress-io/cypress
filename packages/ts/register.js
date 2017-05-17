@@ -1,6 +1,6 @@
 // register TypeScript Node require hook
 // https://github.com/TypeStrong/ts-node#programmatic-usage
-const project = require('path').join(__dirname, 'tsconfig.json')
+const project = require('path').join(__dirname, '../tsconfig.json')
 require('ts-node').register({
   project
 })
