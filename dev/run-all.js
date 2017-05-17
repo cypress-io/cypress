@@ -17,11 +17,8 @@ const packageNameFromPath = (fullPath) => {
   .replace('packages/', '')
 }
 
-const nonPackageDirs = ['docs/']
-
 const getDirs = () => {
   return globAsync('packages/*/')
-  .then((dirs) => dirs.concat(nonPackageDirs))
   .map((dir) => path.join(process.cwd(), dir).replace(/\/$/, ''))
 }
 

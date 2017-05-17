@@ -17,13 +17,13 @@ function remove (folder) {
   .pipe(clean())
 }
 
-function moveJSNodeModule(path) {
+function moveJSNodeModule (path) {
   return gulp
   .src(`./node_modules/${path}`)
   .pipe(gulp.dest('./themes/cypress/source/js'))
 }
 
-function moveCSSNodeModule(path) {
+function moveCSSNodeModule (path) {
   return gulp
   .src(`./node_modules/${path}`)
   .pipe(gulp.dest('./themes/cypress/source/css'))
@@ -52,7 +52,7 @@ gulp.task('revision', () => {
   .pipe(gulp.dest('tmp'))
 })
 
-gulp.task('copyTmpToPublic', () => {
+gulp.task('copy:tmp:to:public', () => {
   return gulp
   .src('tmp/**')
   .pipe(gulp.dest('public'))
@@ -74,10 +74,8 @@ gulp.task('cname', () => {
   return gulp.src('CNAME').pipe(gulp.dest('public'))
 })
 
-gulp.task('prep:build', (cb) => {
-  runSequence('prep:start', 'clean:js', 'revision', 'clean:public', 'copyTmpToPublic', 'clean:tmp', 'cname', cb)
+gulp.task('post:build', (cb) => {
+  runSequence('copy:static:assets', 'clean:js', 'revision', 'clean:public', 'copy:tmp:to:public', 'clean:tmp', 'cname', cb)
 })
 
-gulp.task('prep:start', function (cb) {
-  runSequence('move:menu:spy:js', 'move:scrolling:element:js', 'move:doc:search:js', 'move:doc:search:css', cb)
-})
+gulp.task('copy:static:assets', ['move:menu:spy:js', 'move:scrolling:element:js', 'move:doc:search:js', 'move:doc:search:css'])
