@@ -14,12 +14,19 @@ containerClass: faq
 ## Hasn’t this been done before?
 
 
-
-## Does Cypress use Selenium / Webdriver?
+## Is Cypress free?
 
 
 
 ## What operating systems do you support?
+
+
+
+## Do you support native mobile apps?
+
+
+
+## Do you support X language or X framework?
 
 
 
@@ -30,20 +37,17 @@ containerClass: faq
 ## What are good use cases for Cypress?
 
 
-
 ## What are bad use cases for Cypress?
-
-
-
-## How can I parallelize my runs?
-
 
 
 ## Is there code coverage?
 
-
+[#346](https://github.com/cypress-io/cypress/issues/346)
 
 ## What kind of tests do I write in Cypress?
+
+
+## Does Cypress use Selenium / Webdriver?
 
 
 
@@ -52,6 +56,18 @@ containerClass: faq
 
 
 ## Does Cypress have an equivalent to Selenium IDE?
+
+
+
+## Is Cypress open source?
+
+
+
+## How can I contribute to Cypress?
+
+
+## I found a bug! What do I do?
+
 
 
 # Using Cypress (potentially split this into Beginner / Advanced sections)
@@ -63,16 +79,21 @@ containerClass: faq
 ## How do I do different things depending on what’s currently in the dom/url/cookies/localstore?
 
 
+## How can I parallelize my runs?
+
+[#64](https://github.com/cypress-io/cypress/issues/64)
+
+
 
 ## Can I run a single test or group of tests?
 
-
+[#236](https://github.com/cypress-io/cypress/issues/263)
 
 ## How do I test uploading a file?
 
+[#170](https://github.com/cypress-io/cypress/issues/170)
 
-
-## What is this projectId for?
+## What is the projectId for?
 
 
 
@@ -102,11 +123,11 @@ containerClass: faq
 
 ## How do I content inside an iframe?
 
-
+[#136](https://github.com/cypress-io/cypress/issues/136)
 
 ## How do I preserve cookies/localstorage in between my tests?
 
-
+[#461](https://github.com/cypress-io/cypress/issues/461)
 
 ## Some of my elements animate in, how do I work around that?
 
@@ -132,7 +153,7 @@ containerClass: faq
 
 
 
-## Can I create more than one CI key?
+## Can I create more than one key for CI?
 
 
 
@@ -144,11 +165,11 @@ containerClass: faq
 
 
 
-## Is there a way to watch for an xhr request and assert that the response code came back a certain way
+## Is there a way to watch for an xhr request and assert that the response code came back a certain way?
 
 
 
-## I’m running a lot of tests and the appear to have slower performance as they run, is there a way to fix this?
+## I’m running a lot of tests that appear to slow down as they run, is there a way to fix this?
 
 
 
@@ -173,7 +194,7 @@ containerClass: faq
 
 
 
-## Can I just record my app running, without the Cypress runner?
+## Can't I just record my app running, without the Cypress runner?
 
 
 
@@ -181,15 +202,15 @@ containerClass: faq
 
 
 
-## Is there a way to see console logs / app errors in a recorded run?
+## Is there a way to see console logs or application errors in a recorded run?
 
 
 
-## Is it possible to transfer a project to an organization your are not a member of?
+## Is it possible to transfer a project to an organization I'm not a member of?
 
 
 
-## Why are my tests still displaying a “still running”?
+## Why are my tests displaying a “still running”?
 
 
 
@@ -197,7 +218,7 @@ containerClass: faq
 
 
 
-## How secure is storing our test runs (videos and screenshots) on your servers?
+## How secure is storing my test runs (videos and screenshots) on your servers?
 
 
 # Company
