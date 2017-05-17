@@ -13,7 +13,7 @@
     "clean": "zunder clean",
     "clean-deps": "rm -rf node_modules",
     "lint": "eslint --fix lib/*.js src/*.js* src/**/*.js*",
-    "test": "npm run build",
+    "test": "echo 'No unit tests to run, but there are e2e tests'",
     "pretest": "npm run lint"
   },
   "repository": {
