@@ -98,10 +98,9 @@ node_sass:
   precision: 5
   sourceComments: false
 
-## https://github.com/hexojs/hexo-generator-sitemap
+## https://github.com/ludoviclefevre/hexo-generator-seo-friendly-sitemap
 sitemap:
   path: sitemap.xml
-  template: ./sitemap_template.xml
 
 ## https://github.com/mamboer/hexo-filter-cleanup
 hfc_useref:
@@ -144,5 +143,5 @@ hfc_favicons:
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: https://github.com/cypress-io/cypress-documentation
+  repo: git@github.com:cypress-io/cypress-monorepo
   branch: gh-pages
