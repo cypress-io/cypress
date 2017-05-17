@@ -39,6 +39,9 @@ test:
     #
     # things to run in the 1st CI container
     #
+    # run linter (fast)
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all lint; fi:
+        parallel: true
     # run unit tests (fast)
     # separate commands for better GUI view
     - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package coffee; fi:
