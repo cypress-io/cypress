@@ -46,6 +46,6 @@ gulp.task('cname', () => {
   return gulp.src('CNAME').pipe(gulp.dest('public'))
 })
 
-gulp.task('prep:build', (cb) => {
+gulp.task('post:build', (cb) => {
   runSequence('clean:js', 'revision', 'clean:public', 'copyTmpToPublic', 'clean:tmp', 'cname', cb)
 })

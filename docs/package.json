@@ -6,16 +6,14 @@
     "version": "3.3.1"
   },
   "scripts": {
-    "build": "npm run clean && hexo generate && npm run prep-build",
+    "postinstall": "npm run build",
+    "build": "npm run clean && hexo generate",
+    "postbuild": "gulp post:build",
     "clean": "hexo clean",
-    "clean-all": "npm run clean && npm run clean-deps",
     "clean-deps": "rm -rf node_modules",
     "convert": "node ./cy_scripts/convert.js",
     "deploy": "npm run build && hexo deploy",
-    "prep-build": "gulp prep:build",
-    "prep-start": "gulp prep:start",
-    "start": "hexo server --port 2222",
-    "watch-dev": "hexo server --port 2222"
+    "start": "hexo server --port 2222"
   },
   "devDependencies": {
     "colors": "^1.1.2",

@@ -8,8 +8,7 @@
     "start": "./bin/cypress-electron",
     "test": "mocha --compilers coffee:../coffee/register",
     "postinstall": "./bin/cypress-electron --install",
-    "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean-deps"
+    "clean-deps": "rm -rf node_modules"
   },
   "bin": {
     "cypress-electron": "./bin/cypress-electron"
