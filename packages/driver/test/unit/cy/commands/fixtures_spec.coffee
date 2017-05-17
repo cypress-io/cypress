@@ -40,9 +40,9 @@ describe "$Cypress.Cy Fixtures Commands", ->
       @cy.fixture("foo", "ascii", {timeout: 1000}).then (obj) ->
         expect(obj).to.deep.eq {foo: "bar"}
 
-    ## FIXME
-    describe.skip "cancellation", ->
-      it "cancels promise", (done) ->
+    describe "cancellation", ->
+      ## FIXME: fails when running all tests in this file
+      it.skip "cancels promise", (done) ->
         ## respond after 50 ms
         @respondWith({}, 50)
 
