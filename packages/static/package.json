@@ -2,6 +2,7 @@
   "name": "static",
   "main": "index.js",
   "scripts": {
+    "postinstall": "npm run build",
     "build": "gulp build",
     "test": "echo 'Nothing to test yet'"
   },
