@@ -1,0 +1,14 @@
+{
+  "USER": {"name": "brian", "session_token": "abc123"},
+  "PROJECTS": {
+    "aa66d179-947c-4987-b816-ae0218cd985d": {
+      "PATH": "/Users/bmann/Dev/examples-angular-circle-ci"
+    },
+    "21b1ecae-ddc3-499e-af45-31c499163178": {
+      "PATH": "/Users/bmann/Dev/cypress-core-gui"
+    },
+    "abc123": {
+      "PATH": "/Users/bmann/Dev/cypress-app/spec/fixtures/projects/todos"
+    }
+  }
+}

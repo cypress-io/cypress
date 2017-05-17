@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>Sync Errors</title>
+    <link rel="icon" href="data:;base64,=">
+    <script type='text/javascript'>
+      window.onerror = function(){
+        parent.onerror.apply(parent, arguments);
+      }
+    </script>
+    <script type="text/javascript" src="/node_modules/sinon/dist/sinon.js"></script>
+    <script type='text/javascript'>
+      var Cypress = parent.Cypress;
+      if (!Cypress){
+        throw new Error('Cypress must exist in the parent window!');
+      };
+      Cypress.onBeforeLoad(window);
+    </script>
+    <script type="text/javascript">
+      foo.bar()
+    </script>
+  </head>
+  <body>
+  </body>
+</html>

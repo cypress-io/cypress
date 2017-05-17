@@ -1,11 +1,14 @@
 # Cypress
 
+[![CircleCI](https://circleci.com/gh/cypress-io/cypress-monorepo.svg?style=svg&circle-token=ad2c9212a3dc5b80fe92c8780b2533be1ef42d7e)](https://circleci.com/gh/cypress-io/cypress-monorepo)
+
 This is the Cypress monorepo, containing all packages that make up the Cypress app. See [Issue #256](https://github.com/cypress-io/cypress/issues/256) for details.
 
 This monorepo is made up of various packages, all of which are found under the `packages` directory. They are discrete modules with different responsibilities, but each is necessary for the Cypress app and is not necessarily useful outside of the Cypress app.
 
 Some, like `core-https-proxy` and `core-launcher`, run solely in node and support the Cypress server. Others, like `core-desktop-gui` and `core-runner`, create the GUI parts of the Cypress app.
 
+[CLI Documentation](https://on.cypress.io/cli)
 
 ## Development
 
@@ -45,21 +48,21 @@ Each package is responsible for building itself and testing itself and can do so
 
 **clean-all**: Run *clean* and *clean-deps* scripts
 
-**test**: Run all tests in watch mode
+**test-all**: Run all tests in watch mode
 
-**test-once**: Run all tests
+**test-all-once**: Run all tests
 
-**test-unit**: Run unit tests in watch mode
+**test-all-unit**: Run unit tests in watch mode
 
-**test-unit-once**: Run unit tests
+**test-all-unit-once**: Run unit tests
 
-**test-integration**: Run integration tests in watch mode
+**test-all-integration**: Run integration tests in watch mode
 
-**test-integration-once**: Run integration tests
+**test-all-integration-once**: Run integration tests
 
-**test-e2e**: Run end-2-end tests in watch mode
+**test-all-e2e**: Run end-2-end tests in watch mode
 
-**test-e2e-once**: Run end-2-end tests
+**test-all-e2e-once**: Run end-2-end tests
 
 Not every package requires or makes use of every script, so it is simply omitted from that package's `package.json` and not run.
 
@@ -95,4 +98,22 @@ npm run test-once ## same as 'npm run all test-once -- --serial'
 npm run test-unit-once ## same as 'npm run all test-unit-once -- --serial'
 npm run test-integration-once ## same as 'npm run all test-integration-once -- --serial'
 npm run test-e2e-once ## same as 'npm run all test-e2e-once -- --serial'
+```
+
+### Debugging
+
+Some packages use [debug](https://github.com/visionmedia/debug#readme) to
+log debug messages to the console. The naming scheme should be
+`cypress:<package name>`. For example to see launcher messages during unit
+tests start it using
+
+```bash
+cd packages/launcher
+DEBUG=cypress:launcher npm test
+```
+
+If you want to see log messages from all Cypress projects use wild card
+
+```bash
+DEBUG=cypress:* ...
 ```

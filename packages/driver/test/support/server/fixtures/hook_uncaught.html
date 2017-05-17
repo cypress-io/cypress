@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>Uncaught Tests</title>
+    <link rel="icon" href="data:;base64,=">
+    <script type="text/javascript" src="/lib/public/js/iframe.js"></script>
+    <script type="text/javascript">
+      beforeEach(function(){
+        cy.visit("http://localhost:3500/fixtures/sync_error.html")
+      })
+      // this should never run
+      it("t1", function(){})
+
+    </script>
+  </head>
+  <body>
+  </body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html ng-app="testApp">
+  <head>
+    <title>Angular HTML Fixture</title>
+    <script type="text/javascript" src="/node_modules/angular/angular.min.js"></script>
+    <script type="text/javascript">
+      var testApp = angular.module('testApp', []);
+
+      testApp.controller("TestCtrl", function($scope){
+        $scope.phones = [1,2]
+
+        $scope.foos = [1,2]
+
+        $scope.colors = [
+          {id: 1, name: "blue"},
+          {id: 2, name: "red"},
+          {id: 3, name: "green"}
+        ];
+      });
+    </script>
+  </head>
+  <body>
+    Angular!
+
+    <div ng-controller="TestCtrl">
+      <input ng-model="query">
+      <input ng_model="query2">
+      <input data-ng-model="query3">
+      <input x-ng-model="query4">
+
+      <input ng-model="foo">
+      <input data-ng-model="foo">
+
+      <ul class="colors">
+        <li ng-repeat="color in colors">
+          <span>{{color.id}}: </span>
+          <span class="name">{{color.name}}</span>
+        </li>
+      </ul>
+
+      <ul class="phones">
+        <li ng-repeat="phone in phones | filter:query | orderBy:orderProp"></li>
+      </ul>
+
+      <ul class="phones">
+        <li ng_repeat="phone2 in phones | filter:query | orderBy:orderProp"></li>
+      </ul>
+
+      <ul class="phones">
+        <li data-ng-repeat="phone3 in phones | filter:query | orderBy:orderProp"></li>
+      </ul>
+
+      <ul class="phones">
+        <li x-ng-repeat="phone4 in phones | filter:query | orderBy:orderProp"></li>
+      </ul>
+
+      <ul class="phones">
+        <li ng-repeat="foo in foos"></li>
+        <li x-ng-repeat="foo in foos"></li>
+      </ul>
+    </div>
+  </body>
+</html>

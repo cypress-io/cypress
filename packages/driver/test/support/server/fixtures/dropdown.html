@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>DOM Fixture</title>
+    <script type="text/javascript" src="/node_modules/sinon/dist/sinon.js"></script>
+    <script type="text/javascript" src="/node_modules/jquery/dist/jquery.js"></script>
+  </head>
+  <body>
+    <div id="background">
+      <link rel="stylesheet" href="/node_modules/@cypress/bower-kendo-ui/styles/kendo.common.min.css">
+      <link rel="stylesheet" href="/node_modules/@cypress/bower-kendo-ui/styles/kendo.default.min.css">
+
+      <style>
+        #background {
+          position: fixed;
+          background-color: gray;
+          width: 100%;
+          height: 100%;
+        }
+      </style>
+
+      <input id="dropdown" />
+
+      <script type="text/javascript" src="/node_modules/@cypress/bower-kendo-ui/js/kendo.ui.core.min.js"></script>
+      <script type="text/javascript">
+        $(function(){
+          $("#dropdown").kendoDropDownList({
+            optionLabel: "--Select--",
+            dataTextField: "t",
+            dataValueField: "v",
+            dataSource: [
+              {v: 1, t: "Apples"},
+              {v: 2, t: "Bananas"},
+              {v: 3, t: "Pears"},
+              {v: 4, t: "Watermelon"},
+              {v: 5, t: "Grapes"},
+              {v: 6, t: "Strawberries"}
+            ]
+          })
+        })
+      </script>
+    </div>
+  </body>
+</html>

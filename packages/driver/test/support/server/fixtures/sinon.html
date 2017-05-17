@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sinon Fixture</title>
+    <script type='text/javascript'>
+      window.onerror = function(){
+        parent.onerror.apply(parent, arguments);
+      }
+    </script>
+    <script type="text/javascript" src="/node_modules/sinon/dist/sinon.js"></script>
+    <script type='text/javascript'>
+      var Cypress = parent.Cypress;
+      if (!Cypress){
+        throw new Error('Cypress must exist in the parent window!');
+      };
+      Cypress.onBeforeLoad(window);
+    </script>
+    <script type="text/javascript" src="/node_modules/jquery/dist/jquery.js"></script>
+  </head>
+  <body>
+    <div id="xhr">
+      Sinon Fixture
+    </div>
+    <button id="fetch">fetch</button>
+    <button id="create">create</button>
+    <button id="pushState">pushstate</button>
+    <a id="hashchange" href="#hashchange">hashchange</a>
+    <script type="text/javascript">
+      $(function(){
+        $.get("/bar")
+
+        $.getJSON("/foo", {some: "data"})
+
+        $("button#create").click(function(){
+          $.ajax({
+            method: "POST",
+            url: "/users/1",
+            data: JSON.stringify({some: "data"})
+          })
+        })
+
+        $("button#fetch").click(function(){
+          $.getJSON("/users")
+        })
+
+        $("button#pushState").click(function(){
+          window.history.pushState({foo: "bar"}, null, "pushState.html")
+        })
+      })
+    </script>
+  </body>
+</html>

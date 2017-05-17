@@ -1,0 +1,5 @@
+test/unit
+test/integration
+--reporter spec
+--compilers coffee:../coffee/register
+--recursive

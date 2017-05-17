@@ -1,0 +1,462 @@
+.reporter {
+  .hooks-container {
+    margin: 5px 0 5px 5px;
+    padding-left: 10px;
+    border-left: 1px dotted #DDD;
+
+    .hook-item {
+      margin-bottom: 5px;
+
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+    }
+
+    i {
+      margin-right: 3px;
+    }
+
+    .hook-name {
+      border-bottom: 1px solid transparent;
+      text-transform: uppercase;
+      color: #959595;
+      display: inline-block;
+      font-size: 11px;
+
+      &:hover {
+        border-bottom: 1px dotted #959595;
+        color: #333;
+        cursor: pointer;
+      }
+
+      .hook-failed-message {
+        color: #E94F5F;
+        display: none;
+      }
+    }
+
+    .hook-failed .hook-failed-message {
+      display: inline;
+    }
+  }
+
+  .commands-container {
+    font-family: $monospace;
+
+    background-color: #eef1f4;
+    padding: 0;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  .command {
+    cursor: pointer;
+    padding: 1px 5px;
+    margin: 0;
+
+    &:hover {
+      background-color: #E0E5E7;
+      box-shadow: 0 1px 2px #ccc inset;
+    }
+
+    &:hover .command-controls i.fa-pause {
+      visibility: visible;
+    }
+
+    &.active {
+      background-color: #E1E1E1 !important;
+      box-shadow: 0 1px 6px #ccc inset;
+    }
+
+    &.highlight {
+      background-color: #FFB61C !important;
+    }
+  }
+
+  .command-scaled {
+    font-size: 85%;
+    line-height: 14px;
+  }
+
+  .command-is-event {
+    font-style: italic;
+
+    span {
+      color: #9a9aaa !important;
+    }
+
+  }
+
+  .command-type-parent {
+    border-top: 1px solid #e3e3e3;
+
+    &:hover {
+      border-top: 1px solid #eef1f4;
+    }
+
+    &:first-child {
+      border-top: 0;
+    }
+  }
+
+  .command-type-child {
+    .command-method {
+      &:before {
+        float: left;
+        content: "-";
+        margin-right: 2px;
+        padding-left: 5px;
+      }
+    }
+  }
+
+  .command-wrapper {
+    position: relative;
+    overflow: hidden;
+    color: #777;
+
+    i.fa-ellipsis-h {
+      color: #fff;
+      background-color: #abaaaa;
+      border-radius: 3px;
+      padding: 0 4px;
+    }
+
+    .label {
+      font-weight: normal;
+      padding: 1px 4px;
+      border-radius: 5px;
+    }
+
+    .label-default {
+      background-color: #777;
+    }
+
+    .command-alias {
+      border-radius: 10px;
+      color: #777888;
+      padding: 0px 5px;
+      display: inline-block;
+
+      &.route {
+        background-color: lighten(#FFB61C, 25%);
+      }
+
+      &.dom {
+        background-color: darken(#D4EAFF, 3%);
+      }
+
+      &.agent,
+      &.primitive {
+        background-color: darken(#FFE0DE, 3%);
+      }
+    }
+  }
+
+  .command-number {
+    float: left;
+    width: 25px;
+    color: #bcbccc;
+    min-height: 1px; //used because some numbers are empty
+    text-align: right;
+    padding-right: 10px;
+
+    i {
+      display: none;
+    }
+  }
+
+  .command-state-pending .command-number {
+    i { display: inline-block;; }
+    span { display: none; }
+  }
+
+  .command-method {
+    padding: 0 2px;
+    display: inline-block;
+    text-transform: uppercase;
+    font-size: 11px;
+    float: left;
+    min-width: 80px;
+    font-weight: 600;
+    color: #565554;
+    position: relative;
+    top: 1px;
+  }
+
+  .command-state-pending {
+    padding-left: 3px;
+    border-left: 2px solid $pending;
+    background-color: lighten($pending, 40%);
+
+    .command-number,
+    .command-method,
+    .command-message {
+      color: lighten($pending, 15%);
+    }
+  }
+
+  .command-state-failed {
+    padding-left: 3px;
+    border-left: 2px solid $fail;
+    background-color: lighten($fail, 30%);
+
+    .command-number,
+    .command-method,
+    .command-message {
+      color: $fail;
+    }
+  }
+
+  .command-wrapper .fa-circle {
+    display: none;
+  }
+
+  .command-name-xhr,
+  .command-name-request {
+    .command-status {
+      font-weight: 700;
+      color: #565554;
+      margin-right: 3px;
+    }
+
+    .command-body {
+      color: #565554;
+    }
+
+    &.command-with-indicator .fa-circle {
+      display: inline-block;
+    }
+
+    .fa-circle.successful {
+      color: $pending;
+    }
+
+    .fa-circle.aborted {
+      color: $fail;
+    }
+
+    .fa-circle.bad {
+      color: #F0AD4E;
+    }
+
+    .fa-circle.pending {
+      color: #AAA;
+    }
+  }
+
+  .command-name-assert {
+    .command-method {
+      span {
+        border-radius: 2px;
+        padding: 0 3px;
+        font-size: 11px;
+        display: inline-block;
+        height: 14px;
+        line-height: 16px;
+      }
+    }
+
+    .command-message {
+      color: #565554;
+
+      strong {
+        font-weight: 600;
+        margin: 0 3px;
+      }
+    }
+
+    &.command-state-pending {
+      .command-method {
+        span {
+          background-color: $pending;
+          color: white;
+
+        }
+      }
+      .command-message {
+        color: $pending;
+
+        strong {
+          color: darken($pending, 10%);
+        }
+      }
+    }
+
+    &.command-state-failed {
+      .command-method {
+        span {
+          background-color: $fail;
+          color: white;
+
+        }
+      }
+      .command-message {
+        color: $fail;
+
+        strong {
+          color: darken($fail, 10%);
+        }
+      }
+    }
+
+    &.command-state-passed {
+      .command-method {
+        color: $pass;
+
+        span {
+          background-color: $pass;
+          color: white;
+        }
+      }
+      .command-message {
+        color: darken($pass, 3%);
+
+        strong {
+          color: darken($pass, 10%);
+        }
+      }
+    }
+  }
+
+  .command-message {
+    display: inline-block;
+    margin-left: 0;
+    width: 63%;
+  }
+
+  .command-controls {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    i {
+      padding: 2px;
+      color: #3f7bA1;
+    }
+
+    .command-alias {
+      font-family: $open-sans;
+      font-size: 10px;
+      line-height: 1.5;
+      margin-left: 5px;
+    }
+
+    i:hover {
+      cursor: pointer;
+    }
+
+    label {
+      font-size: 85%;
+    }
+  }
+
+  .command-invisible {
+    display: none;
+    margin-left: 5px;
+    margin-right: 0;
+  }
+
+  .command-is-invisible .command-invisible {
+    display: inline-block;
+  }
+
+  .command-num-elements {
+    border-radius: 5px;
+    color: #fff;
+    display: none;
+    font-size: 85%;
+    line-height: 1;
+    margin-left: 5px;
+    padding: 1px 4px;
+    text-align: center;
+    vertical-align: baseline;
+    white-space: nowrap;
+  }
+
+  .command-has-num-elements.command-has-no-elements .command-num-elements,
+  .command-has-num-elements.command-has-multiple-elements .command-num-elements {
+    display: inline;
+  }
+
+  .command-name-assert.command-has-num-elements .command-num-elements {
+    display: none;
+  }
+
+  .command-has-no-elements .command-num-elements {
+    background-color: #CC4239;
+  }
+
+  .command-has-multiple-elements .command-num-elements {
+    background-color: #476fc9;
+  }
+
+  .command-pin {
+    color: #999;
+    display: none;
+    float: left;
+    font-size: 14px;
+    line-height: 1;
+    margin-right: 10px;
+    outline: none;
+    padding: 2px 0 0;
+    text-align: right;
+    width: 15px;
+
+    i {
+      margin-right :0;
+    }
+  }
+
+  .command-is-pinned,
+  .command:hover {
+    .command-number {
+      display: none;
+    }
+
+    .command-pin {
+      display: block;
+    }
+  }
+
+  .command-is-pinned {
+    background: lighten($pinned, 40%);
+    border-left: 2px solid $pinned;
+    padding-left: 3px;
+
+    &,
+    &:hover {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) inset;
+    }
+
+    &:hover {
+      background: lighten($pinned, 38%);
+    }
+
+    .command-pin {
+      color: $pinned;
+    }
+  }
+
+  &.is-running .command,
+  .command-other-pinned {
+    .command-number {
+      display: block !important;
+    }
+
+    .command-pin {
+      display: none !important;
+    }
+  }
+
+  .no-commands {
+    background-color: #f5f5f5;
+    border: 1px solid #e3e3e3;
+    border-radius: 3px;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+    min-height: 20px;
+    padding: 9px;
+  }
+}
