@@ -4,7 +4,7 @@ const clean = require('gulp-clean')
 const runSequence = require('run-sequence')
 
 const revisionOpts = {
-  dontGlobal: ['.ico', 'sitemap.xml', 'logo.png'],
+  dontGlobal: ['.ico', 'sitemap.xml', 'sitemap.xsl', 'logo.png'],
   dontRenameFile: ['.html', 'CNAME'],
   dontUpdateReference: ['.html'],
   dontSearchFile: ['.js'],
@@ -46,6 +46,6 @@ gulp.task('cname', () => {
   return gulp.src('CNAME').pipe(gulp.dest('public'))
 })
 
-gulp.task('prep', (cb) => {
+gulp.task('prep:build', (cb) => {
   runSequence('clean:js', 'revision', 'clean:public', 'copyTmpToPublic', 'clean:tmp', 'cname', cb)
 })
