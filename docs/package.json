@@ -14,7 +14,7 @@
     "deploy": "npm run build && hexo deploy",
     "prep-build": "gulp prep:build",
     "prep-start": "gulp prep:start",
-    "start": "hexo server --port 2222",
+    "start": "npm run prep-start && hexo server --port 2222",
     "watch-dev": "hexo server --port 2222"
   },
   "devDependencies": {
@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "bluebird": "^3.5.0",
+    "docsearch.js": "^2.3.3",
     "hexo": "3.3.1",
     "hexo-algoliasearch": "^0.2.1",
     "hexo-deployer-git": "^0.2.0",
@@ -43,6 +44,7 @@
     "hexo-server": "^0.2.0",
     "lodash": "^4.17.4",
     "lunr": "^2.0.1",
-    "menuspy": "^1.0.1"
+    "menuspy": "1.0.1",
+    "scrollingelement": "1.5.2"
   }
 }
