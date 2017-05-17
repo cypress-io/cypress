@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
-    "test-lib": "NODE_ENV=test mocha",
-    "test": "cypress run",
+    "test": "NODE_ENV=test mocha",
+    "test-e2e": "cypress run",
     "build": "./bin/build.sh && gulp build",
     "predeploy": "npm run build",
     "deploy": "gulp deploy",

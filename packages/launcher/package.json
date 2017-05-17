@@ -5,12 +5,11 @@
   "main": "index.js",
   "types": "../ts/index.d.ts",
   "scripts": {
-    "clean-deps": "rm -rf node_modules",
-    "clean-all": "npm run clean-deps",
-    "lint": "tslint --type-check --project ../ts --fix --format stylish launcher/lib/*.ts launcher/lib/**/*.ts",
-    "build-dev": "npm run lint",
+    "build": "npm run lint",
     "pretest": "npm run lint",
-    "test": "mocha"
+    "test": "mocha",
+    "clean-deps": "rm -rf node_modules",
+    "lint": "tslint --type-check --project ../ts --fix --format stylish launcher/lib/*.ts launcher/lib/**/*.ts"
   },
   "repository": {
     "type": "git",

@@ -2,7 +2,7 @@
   "name": "static",
   "main": "index.js",
   "scripts": {
-    "build-dev": "gulp build",
+    "build": "gulp build",
     "test": "echo 'Nothing to test yet'"
   },
   "devDependencies": {
