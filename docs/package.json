@@ -16,7 +16,7 @@
     "deploy": "npm run build && hexo deploy",
     "start": "hexo server --port 2222",
     "precypress": "npm install cypress-cli",
-    "cypress": "cypress run --record --key $CYPRESS_DOCS_RECORD_KEY",
+    "cypress": "cypress run --record --key $DOCS_RECORD_KEY",
     "test-e2e": "run-p --race start cypress",
     "test": "echo 'Nothing to unit test, but there are E2E tests!'"
   },
