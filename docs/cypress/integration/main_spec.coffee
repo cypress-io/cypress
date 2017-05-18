@@ -58,9 +58,9 @@ describe "Documentation", ->
 
       it "displays algolia dropdown on search", ->
         cy
-          .get(".aa-dropdown-menu").should("not.be.visible")
+          .get(".ds-dropdown-menu").should("not.be.visible")
           .get("#search-input").type("g")
-          .get(".aa-dropdown-menu").should("be.visible")
+          .get(".ds-dropdown-menu").should("be.visible")
 
     describe "Guides & API", ->
       beforeEach ->
