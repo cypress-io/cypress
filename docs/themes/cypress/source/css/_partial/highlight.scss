@@ -1,171 +1,203 @@
-pre {
-  font-family: $font-mono;
-  color: $highlight-foreground;
-  background: $highlight-background;
-  font-size: 0.9em;
-  padding: 1em;
-  line-height: $line-height;
-
-  code {
+.article pre, .article code {
+  &[class*="language-"] {
+    font-size: 0.9em;
+    line-height: $line-height;
+    background-image: none;
+    background-color: $highlight-background;
     color: $highlight-foreground;
-    border: none;
-    display: block;
-    padding: 0;
-  }
+    box-shadow: none !important;
 
-  .comment { color: $highlight-comment; }
+    .token {
+      &.keyword, &.function {
+        color: $highlight-purple;
+      }
 
-  .variable,
-  .attribute,
-  .tag,
-  .regexp,
-  .ruby .constant,
-  .xml .tag .title,
-  .xml .pi,
-  .xml .doctype,
-  .html .doctype,
-  .css .id,
-  .css .class,
-  .css .pseudo {
-    color: $highlight-red;
-  }
+      &.comment {
+        color: $highlight-comment;
+      }
 
-  .number,
-  .preprocessor,
-  .built_in,
-  .literal,
-  .params,
-  .constant,
-  .command {
-    color: $highlight-orange;
-  }
+      &.string {
+        color: $highlight-blue;
+      }
 
-  .ruby .class .title,
-  .css .rules .attribute,
-  .string,
-  .value,
-  .inheritance,
-  .header,
-  .ruby .symbol,
-  .xml .cdata,
-  .special,
-  .number,
-  .formula {
-    color: $highlight-green;
-  }
+      &.regex {
+        color: $highlight-red;
+      }
 
-  .title,
-  .css .hexcolor {
-    color: $highlight-aqua;
-  }
+      &.keyword, .attr-value {
+        color: $highlight-aqua;
+      }
 
-  .function,
-  .python .decorator,
-  .python .title,
-  .ruby .function .title,
-  .ruby .title .keyword,
-  .perl .sub,
-  .javascript .title,
-  .coffeescript .title {
-    color: $highlight-blue;
-  }
-
-  .keyword,
-  .javascript .function {
-    color: $highlight-purple;
+    }
   }
 }
 
-code {
-  margin: 0;
-  padding: 0;
-  border: 1px solid #E9E9EF;
-  border-radius: 4px;
-  outline: 0;
-  font-weight: normal;
-  font-family: inherit;
-  font-size: 0.9em;
-  vertical-align: baseline;
-  font-family: $font-mono;
-  color: #46af91;
-  background: #F7F7F9;
-  padding: 0 5px;
-}
+.article pre {
+  &[class*="language-"] {
+    border-left: 8px solid $color-link;
+    padding: 0.5em 0.25em;
+    margin-top: 1em;
 
-a code {
-  color: $color-link;
 
-  &:hover {
-    color: $color-link-hover;
   }
 }
-
-.highlight {
-  padding: 10px 15px;
-  color: $highlight-foreground;
-  background: $highlight-background;
-  line-height: $line-height;
-  overflow: auto;
-  margin: 0;
-
-  &.shell {
-    background: #252831;
-    pre {
-      color: #c4c5ca;
-    }
-  }
-
-  pre {
-    border: none;
-    margin: 0;
-    padding: 1px;
-  }
-
-  table {
-    margin: 0 !important;
-    border: 0;
-
-    th {
-      padding: 0;
-      border: 0;
-    }
-
-    td {
-      padding: 0;
-      border: 0;
-    }
-  }
-
-  figcaption {
-    margin: -5px 0 5px;
-    font-size: 0.9em;
-    color: $color-gray;
-
-    &:before {
-      content: "";
-      display: table;
-    }
-
-    &:after {
-      content: "";
-      display: table;
-      clear: both;
-    }
-
-    a {
-      float: right;
-      color: $highlight-foreground;
-
-      &:hover { border-bottom-color: $highlight-foreground; }
-    }
-  }
-
-  .line {
-    height: 22px;
-    font-size: 0.9em;
-  }
-
-  .gutter {
-    display: none;
-  }
-}
+//
+//   .comment { color: $highlight-comment; }
+//
+//   .variable,
+//   .attribute,
+//   .tag,
+//   .regexp,
+//   .ruby .constant,
+//   .xml .tag .title,
+//   .xml .pi,
+//   .xml .doctype,
+//   .html .doctype,
+//   .css .id,
+//   .css .class,
+//   .css .pseudo {
+//     color: $highlight-red;
+//   }
+//
+//   .attr,
+//   .number {
+//     color: $highlight-purple;
+//   }
+//
+//   .preprocessor,
+//   .built_in,
+//   .literal,
+//   .params,
+//   .constant,
+//   .command {
+//     color: $highlight-orange;
+//   }
+//
+//   .ruby .class .title,
+//   .css .rules .attribute,
+//   .string,
+//   .value,
+//   .inheritance,
+//   .header,
+//   .ruby .symbol,
+//   .xml .cdata,
+//   .special,
+//   .formula {
+//     color: $highlight-blue;
+//   }
+//
+//   .title,
+//   .css .hexcolor {
+//     color: $highlight-aqua;
+//   }
+//
+//   .function,
+//   .python .decorator,
+//   .python .title,
+//   .ruby .function .title,
+//   .ruby .title .keyword,
+//   .perl .sub,
+//   .javascript .title,
+//   .coffeescript .title {
+//     color: $highlight-blue;
+//   }
+//
+//   .keyword,
+//   .javascript .function {
+//     color: $highlight-aqua;
+//   }
+// }
+//
+// code {
+//   margin: 0;
+//   padding: 0;
+//   border: 1px solid #E9E9EF;
+//   border-radius: 4px;
+//   outline: 0;
+//   font-weight: normal;
+//   font-family: inherit;
+//   font-size: 0.9em;
+//   vertical-align: baseline;
+//   font-family: $font-mono;
+//   color: #46af91;
+//   background: #F7F7F9;
+//   padding: 0 5px;
+// }
+//
+// a code {
+//   color: $color-link;
+//
+//   &:hover {
+//     color: $color-link-hover;
+//   }
+// }
+//
+// .highlight {
+//   padding: 10px 15px;
+//   color: $highlight-foreground;
+//   background: $highlight-background;
+//   line-height: $line-height;
+//   overflow: auto;
+//   margin: 0;
+//
+//   &.shell {
+//     background: #252831;
+//     pre {
+//       color: #c4c5ca;
+//     }
+//   }
+//
+//   pre {
+//     border: none;
+//     margin: 0;
+//     padding: 1px;
+//   }
+//
+//   table {
+//     margin: 0 !important;
+//     border: 0;
+//
+//     th {
+//       padding: 0;
+//       border: 0;
+//     }
+//
+//     td {
+//       padding: 0;
+//       border: 0;
+//     }
+//   }
+//
+//   figcaption {
+//     margin: -5px 0 5px;
+//     font-size: 0.95em;
+//     color: $color-gray;
+//
+//     &:before {
+//       content: "";
+//       display: table;
+//     }
+//
+//     &:after {
+//       content: "";
+//       display: table;
+//       clear: both;
+//     }
+//
+//     a {
+//       float: right;
+//       color: $highlight-foreground;
+//
+//       &:hover { border-bottom-color: $highlight-foreground; }
+//     }
+//   }
+//
+//   .line {
+//     height: 22px;
+//     font-size: 0.9em;
+//   }
+//
+//   .gutter {
+//     display: none;
+//   }
+// }
