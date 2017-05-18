@@ -13,7 +13,7 @@ guides:
     stubs-spies-clocks: stubs-spies-clocks.html
     dealing-with-the-network: dealing-with-the-network.html
     taking-screenshots-and-recording-videos: taking-screenshots-and-recording-videos.html
-  integrating-with-cypress:
+  integrating-cypress:
     cli-tool: cli-tool.html
     continuous-integration: continuous-integration.html
     environment-variables: environment-variables.html
