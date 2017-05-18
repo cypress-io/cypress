@@ -4,6 +4,7 @@ _ = require('lodash')
 describe "Documentation", ->
   beforeEach ->
     cy.server()
+    @mainGuides = "/guides/getting-started/why-cypress"
 
   context "Pages", ->
     describe "404", ->
@@ -27,7 +28,7 @@ describe "Documentation", ->
         cy
           .contains(".main-nav-link", "Guides")
             .should("have.attr", "href")
-              .and("include", "/guides/index.html")
+              .and("include", @mainGuides)
         cy
           .contains(".main-nav-link", "API")
             .should("have.attr", "href")
@@ -64,9 +65,7 @@ describe "Documentation", ->
 
     describe "Guides & API", ->
       beforeEach ->
-        @whyCypress = "/guides/getting-started/why-cypress"
-
-        cy.visit(@whyCypress + ".html")
+        cy.visit(@mainGuides + ".html")
 
       context "Header", ->
         it.skip "should display capitalized title of doc", ->
@@ -77,7 +76,7 @@ describe "Documentation", ->
           cy
             .contains("a", "Improve this doc").as("editLink")
             .get("@editLink").should("have.attr", "href")
-              .and("include", @whyCypress + ".md")
+              .and("include", @mainGuides + ".md")
             .get("@editLink").should("have.attr", "href")
               .and("include", "https://github.com/cypress-io/cypress-documentation/edit/master/source/")
 
