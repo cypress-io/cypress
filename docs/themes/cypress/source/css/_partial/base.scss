@@ -42,6 +42,7 @@ table, caption, td, th {
 
 * {
   box-sizing: inherit;
+  -webkit-font-smoothing: antialiased;
   &:before {
     box-sizing: inherit;
   }
