@@ -177,10 +177,6 @@
     padding: 0;
     font-family: $font-title;
 
-    &:first-of-type {
-      margin-top: 0.5em;
-    }
-
     &>a {
       font-family: $font-mono;
       letter-spacing: -1.5px;
@@ -255,6 +251,7 @@
   }
   img {
     max-width: 100%;
+    border: 1px solid #ddd;
   }
   video {
     max-width: 100%;
