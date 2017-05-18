@@ -27,7 +27,7 @@ describe "Documentation", ->
         cy
           .contains(".main-nav-link", "Guides")
             .should("have.attr", "href")
-              .and("include", "/guides/welcome/guides.html")
+              .and("include", "/guides/index.html")
         cy
           .contains(".main-nav-link", "API")
             .should("have.attr", "href")
@@ -64,9 +64,9 @@ describe "Documentation", ->
 
     describe "Guides & API", ->
       beforeEach ->
-        @guidesHomepage = "/guides/welcome/guides"
+        @whyCypress = "/guides/getting-started/why-cypress"
 
-        cy.visit(@guidesHomepage + ".html")
+        cy.visit(@whyCypress + ".html")
 
       context "Header", ->
         it.skip "should display capitalized title of doc", ->
@@ -77,7 +77,7 @@ describe "Documentation", ->
           cy
             .contains("a", "Improve this doc").as("editLink")
             .get("@editLink").should("have.attr", "href")
-              .and("include", @guidesHomepage + ".md")
+              .and("include", @whyCypress + ".md")
             .get("@editLink").should("have.attr", "href")
               .and("include", "https://github.com/cypress-io/cypress-documentation/edit/master/source/")
 
@@ -101,7 +101,7 @@ describe "Documentation", ->
         it "displays current page as highlighted", ->
           cy
             .get("#sidebar").find(".current")
-            .should("have.attr", "href").and("include", "guides.html")
+            .should("have.attr", "href").and("include", "why-cypress.html")
 
         it "displays English titles in sidebar", ->
           cy
@@ -114,7 +114,7 @@ describe "Documentation", ->
         it "displays English link names in sidebar", ->
           cy
             .get("#sidebar")
-              .find(".sidebar-link").each (displayedLink, i) ->
+              .find(".sidebar-link").first(5).each (displayedLink, i) ->
                 englishLink  = @english.sidebar.guides[@sidebarLinkNames[i]]
 
                 expect(displayedLink.text().trim()).to.eq(englishLink)
@@ -131,8 +131,8 @@ describe "Documentation", ->
 
       context "Pagination", ->
         beforeEach ->
-          @firstPage = "guides.html"
-          @nextPage = "our-goals.html"
+          @firstPage = "why-cypress.html"
+          @nextPage = "installing-cypress.html"
 
         it "does not display Prev link on first page", ->
           cy.get(".article-footer").should("not.contain", "Prev")
