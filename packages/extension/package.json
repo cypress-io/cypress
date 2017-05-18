@@ -4,6 +4,7 @@
   "description": "Cypress Chrome Extension",
   "main": "index.js",
   "scripts": {
+    "postinstall": "npm run build",
     "watch": "gulp watch",
     "build": "gulp build",
     "build-prod": "gulp build",

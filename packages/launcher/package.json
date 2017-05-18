@@ -5,7 +5,6 @@
   "main": "index.js",
   "types": "../ts/index.d.ts",
   "scripts": {
-    "build": "npm run lint",
     "pretest": "npm run lint",
     "test": "mocha",
     "clean-deps": "rm -rf node_modules",

@@ -5,3 +5,5 @@ node_modules
 public
 db.json
 .deploy*/
+cypress/screenshots
+cypress/videos
