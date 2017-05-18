@@ -32,7 +32,7 @@ sidebar:
     stubs-spies-clocks: Stubs, Spies, and Clocks
     dealing-with-the-network: Dealing with the Network
     taking-screenshots-and-recording-videos: Taking Screenshots and Recording Videos
-    integrating-with-cypress: Integrating Cypress
+    integrating-cypress: Integrating Cypress
     cli-tool: CLI Tool
     continuous-integration: Continuous Integration
     environment-variables: Environment Variables
