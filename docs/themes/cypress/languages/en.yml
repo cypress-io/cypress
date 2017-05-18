@@ -19,7 +19,7 @@ page:
 sidebar:
   guides:
     getting-started: Getting Started
-    why-cypress: Why Cypress
+    why-cypress: Why Cypress?
     installing-cypress: Installing Cypress
     writing-your-first-test: Writing Your First Test
     testing-your-app: Testing Your App
@@ -32,7 +32,7 @@ sidebar:
     stubs-spies-clocks: Stubs, Spies, and Clocks
     dealing-with-the-network: Dealing with the Network
     taking-screenshots-and-recording-videos: Taking Screenshots and Recording Videos
-    integrating-with-cypress: Integrating with Cypress
+    integrating-with-cypress: Integrating Cypress
     cli-tool: CLI Tool
     continuous-integration: Continuous Integration
     environment-variables: Environment Variables
