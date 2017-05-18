@@ -172,7 +172,7 @@
   h1 {
     font-size: 1.7em;
     line-height: 1em;
-    font-weight: 700;
+    font-weight: 500;
     margin: 2em 0 0 0;
     padding: 0;
     font-family: $font-title;
@@ -183,14 +183,14 @@
     }
   }
   h2 {
-    font-size: 1.5em;
+    font-size: 1.2em;
     line-height: 1em;
-    font-weight: 700;
+    font-weight: 300;
     margin: 1em 0 0 0;
     font-family: $font-title;
   }
   h3 {
-    font-size: 1.3em;
+    font-size: 1em;
     line-height: 1em;
     font-weight: bold;
     margin: 1em 0;
@@ -373,11 +373,12 @@
     clear: both;
   }
 }
+
 .article-title {
   float: left;
   font-family: $font-title;
-  font-size: 2.5em;
-  font-weight: 900;
+  font-size: 2.4em;
+  font-weight: 500;
   text-decoration: none;
   color: $color-default;
   transition: 0.2s;
