@@ -1,3 +1,4 @@
-guides: /guides/welcome/guides.html
+guides: /guides/getting-started/why-cypress.html
 api: /api/welcome/api.html
+ecosystem: /ecosystem/index.html
 faq: /faq/index.html

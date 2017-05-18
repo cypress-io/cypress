@@ -8,6 +8,9 @@ dependencies:
   cache_directories:
     # downloaded Electron binary
     - "~/.electron"
+    # downloaded Cypress binary
+    - "~/.cypress"
+    # docs folder needs modules and Cypress binary
     - docs/node_modules
     # could not use wildcard format, so list every subfolder
     - packages/coffee/node_modules
@@ -23,6 +26,7 @@ dependencies:
     - packages/server/node_modules
     - packages/socket/node_modules
     - packages/static/node_modules
+    - packages/ts/node_modules
 
 test:
   ## e2e (1)
@@ -40,6 +44,7 @@ test:
     #
     # things to run in the 1st CI container
     #
+
     # run linter (fast)
     - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all lint; fi:
         parallel: true
@@ -77,6 +82,10 @@ test:
         parallel: true
 
     - if [ $CIRCLE_NODE_INDEX == 0 ]; then npm run all test -- --package static; fi:
+        parallel: true
+
+    # run E2E tests against docs site (reasonably fast)
+    - if [ $CIRCLE_NODE_INDEX == 0 ]; then cd docs && npm run test-e2e; fi:
         parallel: true
 
     ## temporarily commenting out until these all pass locally
