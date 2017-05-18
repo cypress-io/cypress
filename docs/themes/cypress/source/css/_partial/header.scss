@@ -1,6 +1,5 @@
 #header {
   position: relative;
-  padding: 6px 0;
 }
 
 #header-inner {
@@ -36,16 +35,23 @@
 
 .main-nav-link {
   font-size: 14px;
-  color: $white-90;
+  color: $white-60;
   text-decoration: none;
   line-height: 50px;
   transition: 0.2s;
   font-family: $font-title;
   display: inline-block;
-  padding: 0 15px;
+  padding: 6px 15px;
+  font-weight: 400;  
+
   &:hover {
     opacity: 1;
     color: $white;
+  }
+
+  &.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
   }
 
   .fa-github {
