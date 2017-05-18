@@ -57,16 +57,20 @@ button, select, input, input[type="submit"]::-moz-focus-inner, input[type="butto
 }
 
 .wrapper {
+  margin: 0 auto;
+
   &:before {
     content: "";
     display: table;
   }
+
   &:after {
     content: "";
     display: table;
     clear: both;
   }
 }
+
 .inner {
   &:before {
     content: "";
@@ -80,9 +84,11 @@ button, select, input, input[type="submit"]::-moz-focus-inner, input[type="butto
 }
 
 #content-wrap {
-  background: $white;
+  background-color: white;
   border-top: 1px solid $color-background;
   border-bottom: 1px solid $color-background;
+  padding-top: 40px;
+  padding-bottom: 60px;
   margin: -1px 0;
 }
 
@@ -125,11 +131,17 @@ button, select, input, input[type="submit"]::-moz-focus-inner, input[type="butto
 }
 
 #content {
+  background-color: #fff;
+  // border-right: 1px solid #eee;
+  // border-left: 1px solid #eee;
+  // margin-top: -50px;
   position: relative;
+
   &:before {
     content: "";
     display: table;
   }
+
   &:after {
     content: "";
     display: table;

@@ -1,3 +1,6 @@
+#article-toc .sidebar-title {
+  padding: 10px 0;
+}
 
 #article-toc-top {
   margin-top: 2em;
@@ -19,6 +22,7 @@
   margin-right: -$sidebar-width;
   opacity: 0.8;
   font-size: 0.9em;
+
   &.fixed {
     position: absolute;
     top: 0;
@@ -29,16 +33,20 @@
 .toc-child {
   padding-left: 1em;
   font-size: 0.85em;
+  line-height: 1.5;
 }
 
 #article-toc-inner {
   overflow-x: hidden;
   overflow-y: auto;
+  padding: 0 20px;
   width: $sidebar-width;
+
   &:before {
     content: "";
     display: table;
   }
+
   &:after {
     content: "";
     display: table;
@@ -51,17 +59,20 @@
   display: block;
   color: #999;
   text-decoration: none;
-  padding: 0 0 0 5px;
-  line-height: $line-height;
+  padding: 3px 0 3px 5px;
+  line-height: 1.2;
+  font-size: 0.95em;
   position: relative;
   width: 100%;
   text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
+  overflow: auto;
+  white-space: normal;
   border-left: 4px solid transparent;
+
   &.current {
     color: $color-link;
   }
+
   &:hover {
     color: $color-link-hover;
   }

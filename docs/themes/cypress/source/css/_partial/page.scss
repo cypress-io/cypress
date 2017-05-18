@@ -1,3 +1,10 @@
+.article {
+  float: left;
+  width: 100%;
+  padding: 0px 80px;
+  border-right: 1px solid #eee;
+}
+
 .article-date {
   color: $color-gray;
   text-decoration: none;
@@ -103,27 +110,20 @@
   table {
     margin: 1em 0;
     width: 100%;
-    border: 1px solid $color-border;
-    border-bottom: 0;
+    border: 1px solid #e8e8e8;
+
     th {
       font-weight: bold;
       padding: 5px 15px;
       text-align: left;
-      border-bottom: 1px solid #ebeef1;
 
       &:empty {
-        border: 0;
         padding: 0;
       }
     }
+
     td {
       padding: 5px 15px;
-      border-bottom: 1px solid #ebeef1;
-      border-right: 1px solid #ebeef1;
-    }
-
-    tr>td:last-child {
-      border-right: 0;
     }
 
     tr:nth-child(2n) {
@@ -397,10 +397,4 @@
     display: table;
     clear: both;
   }
-}
-.article {
-  float: left;
-  width: 100%;
-  border: 1px solid #eee;
-  padding: 60px 30px;
 }
