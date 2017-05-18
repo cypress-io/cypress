@@ -15,7 +15,11 @@
     "convert": "node ./cy_scripts/convert.js",
     "deploy": "npm run build && hexo deploy",
     "build-prod": "hexo clean && hexo generate && gulp prep",
-    "start": "hexo server --port 2222"
+    "start": "hexo server --port 2222",
+    "precypress": "npm install cypress-cli",
+    "cypress": "cypress run --record --key $CYPRESS_DOCS_RECORD_KEY",
+    "test-e2e": "run-p --race start cypress",
+    "test": "echo 'Nothing to unit test, but there are E2E tests!'"
   },
   "devDependencies": {
     "colors": "^1.1.2",
@@ -25,6 +29,7 @@
     "gulp-clean": "^0.3.2",
     "gulp-debug": "^3.1.0",
     "gulp-rev-all": "^0.9.7",
+    "npm-run-all": "^4.0.2",
     "run-sequence": "^1.2.2",
     "underscore.string": "^3.3.4",
     "yamljs": "^0.2.10"
