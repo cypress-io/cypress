@@ -7,6 +7,7 @@ Thanks for opening an issue!
 
 * Operating System:
 * Cypress Version:
+* Browser/Browser Version:
 
 ### Are you requesting a feature or reporting a bug?
 
