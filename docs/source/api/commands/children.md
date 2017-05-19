@@ -1,5 +1,7 @@
+---
 title: children
 comments: true
+description: ''
 ---
 
 Get the children of each DOM element in the set of matched DOM elements.
@@ -7,21 +9,15 @@ Get the children of each DOM element in the set of matched DOM elements.
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.children` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.children` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.children()](#section-usage)
+# [cy.children()](#usage)
 
 Get the children of each DOM element in the set of matched DOM elements.
 
-***
-
-# [cy.children( *selector* )](#section-selector-usage)
+# [cy.children( *selector* )](#selector-usage)
 
 The `.children()` method optionally accepts a selector expression. If the selector is supplied, the DOM elements will be filtered by testing whether they match it.
-
-***
 
 # Options
 
@@ -33,9 +29,7 @@ Pass in an options object to change the default behavior of `cy.children`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry getting the element
-
-***
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
 
 # Usage
 
@@ -70,8 +64,6 @@ Option | Default | Notes
 cy.get("ul.secondary-nav").children()
 ```
 
-***
-
 # Selector Usage
 
 ## Get the children with class "active"
@@ -90,8 +82,6 @@ cy.get("ul.secondary-nav").children()
 cy.get("ul").children(".active")
 ```
 
-***
-
 # Command Log
 
 ## Assert that there should be 8 children elements in a nav
@@ -107,8 +97,6 @@ The commands above will display in the command log as:
 When clicking on the `children` command within the command log, the console outputs the following:
 
 <img width="542" alt="screen shot 2015-11-27 at 1 52 41 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447071/2e9252bc-950e-11e5-9a32-e5860da89160.png">
-
-***
 
 # Related
 

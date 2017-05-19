@@ -1,5 +1,7 @@
+---
 title: viewport
 comments: true
+description: ''
 ---
 
 Use `cy.viewport` to control the screen size and orientation of your application. This command is useful for when you need to test your application in a specific width or height, such as responsive applications or applications utilizing media queries. `cy.viewport` width and height must be between 200px and 3000px.
@@ -9,15 +11,11 @@ Use `cy.viewport` to control the screen size and orientation of your application
 | **Returns** | `null` |
 | **Timeout** | *cannot timeout* |
 
-***
-
-# [cy.viewport( *width*, *height* )](#section-usage)
+# [cy.viewport( *width*, *height* )](#usage)
 
 Resize the viewport to the specified dimensions in pixels.
 
-***
-
-# [cy.viewport( *preset*, *orientation* )](#section-preset-usage)
+# [cy.viewport( *preset*, *orientation* )](#preset-usage)
 
 Resize the viewport to a preset dimension. Viewport supports the following presets (in pixels):
 
@@ -36,8 +34,6 @@ Resize the viewport to a preset dimension. Viewport supports the following prese
 
 The **default orientation** is `portrait`. Pass `landscape` as the orientation to reverse the width/height.
 
-***
-
 # Options
 
 Pass in an options object to change the default behavior of `cy.viewport`.
@@ -51,8 +47,6 @@ Option | Default | Notes
 
 You can also set options for the viewport's `viewportWidth` and `viewportHeight` globally in [configuration](https://on.cypress.io/guides/configuration).
 
-***
-
 # Usage
 
 ## Resize the viewport to 1024 x 768
@@ -61,8 +55,6 @@ You can also set options for the viewport's `viewportWidth` and `viewportHeight`
 // the viewport will now be changed to 1024x768 pixels
 cy.viewport(1024, 768)
 ```
-
-***
 
 ## Organize desktop vs mobile tests separately
 
@@ -80,6 +72,7 @@ describe("Nav Menus", function(){
         .get("nav .desktop-menu").should("be.visible")
         .get("nav .mobile-menu").should("not.be.visible")
     })
+  })
 
   context("iphone-5 resolution", function(){
     beforeEach(function(){
@@ -100,8 +93,6 @@ describe("Nav Menus", function(){
 })
 ```
 
-***
-
 # Preset Usage
 
 ## Resize the viewport to iPhone 6 width and height
@@ -111,8 +102,6 @@ describe("Nav Menus", function(){
 cy.viewport("iphone-6")
 ```
 
-***
-
 ## Change the orientation to landscape
 
 ```javascript
@@ -121,23 +110,17 @@ cy.viewport("iphone-6")
 cy.viewport("iphone-6", "landscape")
 ```
 
-***
-
 # Known Issues
 
 ## `devicePixelRatio` is not simulated
 
 This is something Cypress will eventually do, which will match how Chrome's responsive mobile browsing simulation works. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you need this to be fixed.
 
-***
-
 # Notes
 
 ## Cypress will restore the viewport for each command
 
 When hovering over each command, Cypress will automatically restore the viewport to the dimensions that existed when that command ran.
-
-***
 
 ## Default sizing
 
@@ -153,8 +136,6 @@ You can [change these default dimensions](https://on.cypress.io/guides/configura
 ```
 
 Additionally, Cypress automatically sets the viewport to it's default size between each test.
-
-***
 
 ## Auto Scaling
 

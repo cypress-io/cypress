@@ -1,5 +1,7 @@
+---
 title: root
 comments: true
+description: ''
 ---
 
 Get the root element. By default the root is `document`. When calling `cy.root` in a [`cy.within`](https://on.cypress.io/api/within), the root element will be the return of the within command.
@@ -7,15 +9,11 @@ Get the root element. By default the root is `document`. When calling `cy.root` 
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.root` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.root` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.root()](#section-root-usage)
+# [cy.root()](#root-usage)
 
 Get the root element.
-
-***
 
 # Options
 
@@ -27,8 +25,6 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 
-***
-
 # Usage
 
 ## Get the root element
@@ -37,8 +33,6 @@ Option | Default | Notes
 // returns document
 cy.root()
 ```
-
-***
 
 ## Get the root element in a `within` scope
 
@@ -61,8 +55,6 @@ cy.get("form").within(function(){
     .root().submit()
 })
 ```
-
-***
 
 # Related
 

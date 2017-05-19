@@ -1,5 +1,7 @@
+---
 title: getcookie
 comments: true
+description: ''
 ---
 
 Get a browser cookie.
@@ -7,11 +9,9 @@ Get a browser cookie.
 | | |
 |--- | --- |
 | **Returns** | a cookie object literal |
-| **Timeout** | `cy.getCookie` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the automation server to process this command. |
+| **Timeout** | `cy.getCookie` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command. |
 
-***
-
-# [cy.getCookie( *name* )](#section-usage)
+# [cy.getCookie( *name* )](#usage)
 
 Gets a browser cookie by its name.
 
@@ -27,8 +27,6 @@ This object will have the following properties:
 | `secure` |
 | `expiry` |
 
-***
-
 # Options
 
 Pass in an options object to change the default behavior of `cy.getCookie`.
@@ -37,10 +35,8 @@ Pass in an options object to change the default behavior of `cy.getCookie`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.getCookie` command to be processed
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.getCookie` command to be processed
 `log` | `true` | whether to display command in command log
-
-***
 
 # Usage
 
@@ -59,8 +55,6 @@ cy
 Check out our example recipes using cy.getCookie to test [logging in using HTML web forms](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_html_web_form_spec.js), [logging in using XHR web forms](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_xhr_web_form_spec.js) and [logging in with single sign on](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js)
 {% endnote %}
 
-***
-
 # Command Log
 
 ## Get cookie
@@ -78,8 +72,6 @@ The commands above will display in the command log as:
 When clicking on `getCookie` within the command log, the console outputs the following:
 
 ![screen shot 2016-05-10 at 12 12 05 pm](https://cloud.githubusercontent.com/assets/1271364/15153749/7a18b00c-16a8-11e6-86ad-ea969f46bb6c.png)
-
-***
 
 # Related
 

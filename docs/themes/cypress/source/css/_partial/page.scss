@@ -30,6 +30,7 @@
 
 .article-heading:hover .article-anchor {
   display: inline-block;
+  border: 0;
 
   &:hover {
     text-decoration: none;
@@ -39,6 +40,8 @@
 .article-anchor {
   margin-left: 10px;
   display: none;
+  border: 0;
+  
   &:before {
     content: "#";
   }

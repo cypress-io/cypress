@@ -1,5 +1,7 @@
+---
 title: spread
 comments: true
+description: ''
 ---
 
 The spread command allows an expression to be expanded in places where multiple arguments are expected. Similar to [`cy.then`](https://on.cypress.io/api/then), but always expects an array as it's subject.
@@ -9,13 +11,9 @@ The spread command allows an expression to be expanded in places where multiple 
 | **Returns** | the value of the spread |
 | **Timeout** | *cannot timeout* |
 
-***
-
-# [cy.spread( *fn* )](#section-usage)
+# [cy.spread( *fn* )](#usage)
 
 Expand an array of arguments.
-
-***
 
 # Usage
 
@@ -32,8 +30,6 @@ cy
     // each XHR is now an individual argument
   })
 ```
-
-***
 
 # Related
 

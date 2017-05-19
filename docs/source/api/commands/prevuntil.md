@@ -1,5 +1,7 @@
+---
 title: prevuntil
 comments: true
+description: ''
 ---
 
 Get all previous siblings of each DOM element in the set of matched DOM elements up to, but not including, the element matched by the selector
@@ -9,31 +11,21 @@ Get all previous siblings of each DOM element in the set of matched DOM elements
 | **Returns** | the new DOM element(s) found by the command. |
 | **Timeout** | `cy.prevUntil` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
 # [cy.prevUntil( *selector* )](#usage)
 
 Get all of the previous siblings of the elements until the selector.
-
-***
 
 # [cy.prevUntil( *selector*, *filter )](#filter-usage)
 
 When a filter is provided, it retrieves all of the previous siblings up until the selector only if it matches that filter.
 
-***
-
 # [cy.prevUntil( *element* )](#element-usage)
 
 Get all of the previous siblings of the elements until the DOM node or jQuery object.
 
-***
-
 # [cy.prevUntil( *element*, *filter )](#element-filter-usage)
 
 When a filter is provided, it retrieves all of the previous siblings up until the DOM node or jQuery object only if it matches that filter.
-
-***
 
 # Options
 
@@ -48,8 +40,6 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 `timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry getting the element
-
-***
 
 # Usage
 
@@ -77,8 +67,6 @@ Option | Default | Notes
 cy.get("#nuts").nextUntil("#veggies")
 ```
 
-***
-
 # Command Log
 
 ## Find all of the element's siblings before `#nuts` until `#veggies`
@@ -94,8 +82,6 @@ The commands above will display in the command log as:
 When clicking on `prevUntil` within the command log, the console outputs the following:
 
 <img width="560" alt="screen shot 2017-03-23 at 2 45 36 pm" src="https://cloud.githubusercontent.com/assets/1271364/24264632/7743f57a-0fd7-11e7-99f8-c148acd17459.png">
-
-***
 
 # Related
 

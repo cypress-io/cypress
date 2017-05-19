@@ -1,5 +1,7 @@
+---
 title: hash
 comments: true
+description: ''
 ---
 
 Get the current URL hash. This is the same as [`cy.location().hash`](https://on.cypress.io/api/location)
@@ -9,13 +11,9 @@ Get the current URL hash. This is the same as [`cy.location().hash`](https://on.
 | **Returns** | the current URL hash as a string, including the `#` character. If no `#` character is present, an empty string will be returned. |
 | **Timeout** | *cannot timeout* |
 
-***
-
-# [cy.hash()](#section-usage)
+# [cy.hash()](#usage)
 
 Get the current URL hash.
-
-***
 
 # Options
 
@@ -28,8 +26,6 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 
-***
-
 # Usage
 
 ## Assert that the hash is `#/users/1` given the remote URL: `http://localhost:8000/app/#/users/1`
@@ -38,8 +34,6 @@ Option | Default | Notes
 // Hash returns #/users/1
 cy.hash().should("eq", "#/users/1") // => true
 ```
-
-***
 
 ## Assert that the hash matches via RegExp
 
@@ -56,8 +50,6 @@ cy
   .get("#users li").find("a")
   .hash().should("match", /users\/.+$/) // => true
 ```
-
-***
 
 # Notes
 
@@ -78,8 +70,6 @@ cy.location().its("hash").should("eq", "#/users/1")
 cy.hash().should("eq", "#/users/1")
 ```
 
-***
-
 # Command Log
 
 ## Assert that the hash matches `#users/new`
@@ -95,8 +85,6 @@ The commands above will display in the command log as:
 When clicking on `hash` within the command log, the console outputs the following:
 
 <img width="472" alt="screen shot 2015-11-29 at 1 34 17 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459153/f0aa6476-969d-11e5-9851-302957f9eb0f.png">
-
-***
 
 # Related
 
