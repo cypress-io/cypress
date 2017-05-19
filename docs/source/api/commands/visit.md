@@ -1,42 +1,38 @@
+---
 title: visit
 comments: true
+description: ''
 ---
 
 Visit a remote url. This will most likely be the first command you run. `cy.visit` resolves when the remote page fires its `load` event.
 
-Visit is prefixed with the `baseUrl` configured in the [Network Options](https://on.cypress.io/guides/configuration#section-global).
+Visit is prefixed with the `baseUrl` configured in the [Network Options](https://on.cypress.io/guides/configuration#global).
 
 Using `baseUrl` is a great way to prevent repeating yourself in every `cy.visit`.
 
 | | |
 |--- | --- |
 | **Returns** | the remote page's window object |
-| **Timeout** | `cy.visit` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Timeout** | `cy.visit` will retry for the duration of the [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options). |
 
-***
-
-# [cy.visit( *url* )](#section-usage)
+# [cy.visit( *url* )](#usage)
 
 Visit the specified url passed as a string.
-
-***
 
 # Options
 
 Pass in an options object to change the default behavior of `cy.visit`.
 
-**[cy.visit( *url*, *options* )](#section-options-usage)**
+**[cy.visit( *url*, *options* )](#options-usage)**
 
 Option | Default | Notes
 --- | --- | ---
 `onBeforeLoad` | `function` | Called before your page has loaded all of its resources.
 `onLoad`       | `function` | Called once your page has fired its load event.
-`timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait until `cy.visit` resolves
+`timeout`      | [pageLoadTimeout](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait until `cy.visit` resolves
 `log` | `true` | whether to display command in command log
 
 You can also set options for all `cy.visit` `pageLoadTimeout` and `baseUrl` globally in [configuration](https://on.cypress.io/guides/configuration).
-
-***
 
 # Usage
 
@@ -45,8 +41,6 @@ You can also set options for all `cy.visit` `pageLoadTimeout` and `baseUrl` glob
 ```javascript
 cy.visit("http://localhost:8000")
 ```
-
-***
 
 ## Protocol can be omitted from common hosts
 
@@ -59,8 +53,6 @@ cy.visit("0.0.0.0:3000")   // => http://0.0.0.0:3000
 cy.visit("127.0.0.1:3000") // => http://127.0.0.1:3000
 ```
 
-***
-
 ## Cypress can optionally act as your web server
 
 Having Cypress serve your files is useful in simple projects and example apps, but isn't recommended for real apps.  It is always better to run your own server and provide the url to Cypress.
@@ -72,8 +64,6 @@ Having Cypress serve your files is useful in simple projects and example apps, b
 // where cypress.json is stored.
 cy.visit("app/index.html")
 ```
-
-***
 
 ## Visit is automatically prefixed with `baseUrl`.
 
@@ -92,8 +82,6 @@ Simply configure `baseUrl` in the `cypress.json` file to prevent repeating yours
 cy.visit("dashboard")
 ```
 
-***
-
 # Options Usage
 
 ## Change the default timeout
@@ -102,8 +90,6 @@ cy.visit("dashboard")
 // change the timeout to be 30 seconds
 cy.visit("/index.html", {timeout: 30000})
 ```
-
-***
 
 ## Provide an `onBeforeLoad` callback function
 
@@ -123,8 +109,6 @@ cy.visit("http://localhost:3000/#dashboard", {
 Check out our example recipes using cy.visit's onBeforeLoad option to [help bootstrap app data](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/bootstrapping_app_test_data_spec.js), to [set a token to localStorage for login](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/logging_in_single_sign_on_spec.js) and to [stub window.fetch](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
 {% endnote %}
 
-***
-
 ## Provide an `onLoad` callback function
 
 ```javascript
@@ -141,8 +125,6 @@ cy.visit("http://localhost:3000/#/users", {
 })
 ```
 
-***
-
 # Notes
 
 ## Visit will always yield the remote page's window object when it resolves
@@ -150,10 +132,8 @@ cy.visit("http://localhost:3000/#/users", {
 ```javascript
 cy.visit("index.html").then(function(contentWindow)){
   // contentWindow is the remote page's window object
-}
+})
 ```
-
-***
 
 ## Visit will automatically follow redirects
 
@@ -164,8 +144,6 @@ cy
   .visit("http://localhost3000/admin")
   .url().should("match", /login/)
 ```
-
-***
 
 ## Cypress automatically wipes page state between visits
 
@@ -186,8 +164,6 @@ cy
   .visit("users")
 
 ```
-
-***
 
 ## Preventing XHR / AJAX requests before a remote page initially loads
 
@@ -216,8 +192,6 @@ cy
 ```
 
 Cypress will automatically apply the server and routes to the very next `visit` and does so immediately before any of your application code runs.
-
-***
 
 # Related
 

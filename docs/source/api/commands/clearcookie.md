@@ -1,5 +1,7 @@
+---
 title: clearcookie
 comments: true
+description: ''
 ---
 
 Clears a browser cookie.
@@ -9,15 +11,11 @@ Cypress automatically clears all cookies **before** each test to prevent state f
 | | |
 |--- | --- |
 | **Returns** | `null` |
-| **Timeout** | `cy.clearCookie` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) for the automation server to process this command. |
+| **Timeout** | `cy.clearCookie` will wait up for the duration of [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) for the automation server to process this command. |
 
-***
-
-# [cy.clearCookie( *name* )](#section-usage)
+# [cy.clearCookie( *name* )](#usage)
 
 Clears a browser cookie by its name.
-
-***
 
 # Options
 
@@ -27,10 +25,8 @@ Pass in an options object to change the default behavior of `cy.clearCookie`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to wait for the `cy.clearCookie` command to be processed
+`timeout` | [`responseTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to wait for the `cy.clearCookie` command to be processed
 `log` | `true` | whether to display command in command log
-
-***
 
 # Usage
 
@@ -45,8 +41,6 @@ cy
   .visit('/dashboard')                  // we should be redirected back to login
   .url().should('eq', 'login')
 ```
-
-***
 
 # Command Log
 
@@ -66,8 +60,6 @@ The commands above will display in the command log as:
 When clicking on `clearCookie` within the command log, the console outputs the following:
 
 ![screen shot 2016-05-22 at 9 21 32 pm](https://cloud.githubusercontent.com/assets/1268976/15458067/345dba3e-2063-11e6-8739-af971bc79068.png)
-
-***
 
 # Related
 

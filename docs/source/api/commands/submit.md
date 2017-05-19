@@ -1,5 +1,7 @@
+---
 title: submit
 comments: true
+description: ''
 ---
 
 Submits the DOM element from the previous command if it is a form. Submit can only be called on a single form.
@@ -9,15 +11,11 @@ Submits the DOM element from the previous command if it is a form. Submit can on
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.submit` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts). |
+| **Timeout** | `cy.submit` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts). |
 
-***
-
-# [cy.submit()](#section-usage)
+# [cy.submit()](#usage)
 
 Submit a form.
-
-***
 
 # Options
 
@@ -28,8 +26,6 @@ Pass in an options object to change the default behavior of `cy.submit`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-
-***
 
 # Usage
 
@@ -48,8 +44,6 @@ Option | Default | Notes
 cy.get("#contact").submit()
 ```
 
-***
-
 # Command Log
 
 ## Submit a form
@@ -66,8 +60,6 @@ The commands above will display in the command log as:
 When clicking on `submit` within the command log, the console outputs the following:
 
 ![cy.submit console log](https://cloud.githubusercontent.com/assets/1271364/12888878/222f5522-ce4a-11e5-9edd-f67be2ebce40.png)
-
-***
 
 # Related
 

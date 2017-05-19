@@ -1,5 +1,7 @@
+---
 title: its
 comments: true
+description: ''
 ---
 
 `cy.its` gets regular properties on the current subject.
@@ -9,17 +11,13 @@ If you want to call a function on the current subject, use [`cy.invoke`](https:/
 | | |
 |--- | --- |
 | **Returns** | the value of the property |
-| **Timeout** | `cy.its` cannot timeout unless you've added assertions. The assertions will retry for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.its` cannot timeout unless you've added assertions. The assertions will retry for the duration of [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.its( *propertyName* )](#section-usage)
+# [cy.its( *propertyName* )](#usage)
 
 Gets the property with the specified name.
 
 You can also access multiple nested properties with **dot notation**.
-
-***
 
 # Usage
 
@@ -38,8 +36,6 @@ cy
   .should("be.gt", 2) // ensure this length is greater than 2
 })
 ```
-
-***
 
 ## Access functions
 
@@ -73,8 +69,6 @@ cy
 [Check out our example recipe on testing window.fetch using cy.its()](https://github.com/cypress-io/cypress-example-recipes/blob/master/cypress/integration/spy_stub_clock_spec.js)
 {% endnote %}
 
-***
-
 ## Drill into nested properties
 
 You can additionally automatically drill into nested properties by using **dot notation**.
@@ -90,8 +84,6 @@ var obj = {
 
 cy.wrap(obj).its("foo.bar.baz").should("eq", "quux") // true
 ```
-
-***
 
 # Command Log
 
@@ -117,8 +109,6 @@ The commands above will display in the command log as:
 When clicking on `its` within the command log, the console outputs the following:
 
 ![screen shot 2016-05-24 at 12 40 17 pm](https://cloud.githubusercontent.com/assets/1268976/15512225/d14723cc-21ac-11e6-88d5-39ffe6c0a195.png)
-
-***
 
 # Related
 

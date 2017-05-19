@@ -1,5 +1,7 @@
+---
 title: exec
 comments: true
+description: ''
 ---
 
 Allows you to execute a system command. The system command can be anything you would normally run on the command line, such as `npm run build`, `rake db:seed`, etc.
@@ -15,15 +17,11 @@ The current working directory is set to the project root (the directory that con
 | | |
 |--- | --- |
 | **Returns** | an object with the exit `code`, the `stdout`, and the `stderr` |
-| **Timeout** | `cy.exec` will allow the command to execute for the duration of the [`execTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.exec` will allow the command to execute for the duration of the [`execTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.exec( *command* )](#section-command-usage)
+# [cy.exec( *command* )](#command-usage)
 
 Execute a system command.
-
-***
 
 # Options
 
@@ -34,11 +32,9 @@ Pass in an options object to change the default behavior of `cy.exec`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`execTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to allow the command to execute
+`timeout` | [`execTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to allow the command to execute
 `failOnNonZeroExit` | `true` | Fail if the command exits with a non-zero code
 `env` | `{}` | Object of environment variables to set before the command executes (e.g. { USERNAME: 'johndoe' }). Will be merged with existing system environment variables
-
-***
 
 # Usage
 
@@ -105,8 +101,6 @@ cy
       .fixture("comment.json").should("deep.eq", xhr.responseBody)
   })
 ```
-
-***
 
 # Command Log
 
