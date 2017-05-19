@@ -46,10 +46,10 @@
 }
 .article-content {
   line-height: $line-height;
-  color: $color-default;
 
   p {
-    margin: 1em 0;
+    margin-bottom: 0.8em;
+    word-wrap: break-word;
   }
 
   ol {
@@ -116,6 +116,7 @@
       font-weight: bold;
       padding: 5px 15px;
       text-align: left;
+      border-bottom: 1px solid #e8e8e8;
 
       &:empty {
         padding: 0;
@@ -137,9 +138,11 @@
     position: relative;
     border: 1px solid $color-border;
     border-left: 5px solid $highlight-comment;
+
     footer {
       margin: 1em 0;
       font-style: italic;
+
       cite {
         &:before {
           content: "â€”";
@@ -169,26 +172,28 @@
     border-style: solid;
     // display: none;
   }
+
   h1 {
     font-size: 1.7em;
     line-height: 1em;
     font-weight: 500;
-    margin: 2em 0 0 0;
+    margin: 1.5em 0 0.5em 0;
     padding: 0;
     font-family: $font-title;
 
     &>a {
-      font-family: $font-mono;
-      letter-spacing: -1.5px;
+      font-weight: 500;
     }
   }
+
   h2 {
-    font-size: 1.2em;
+    font-size: 1em;
     line-height: 1em;
-    font-weight: 300;
+    font-weight: 500;
     margin: 1em 0 0 0;
     font-family: $font-title;
   }
+
   h3 {
     font-size: 1em;
     line-height: 1em;
@@ -196,18 +201,21 @@
     margin: 1em 0;
     font-family: $font-title;
   }
+
   h4 {
     line-height: 1em;
     font-weight: bold;
     margin: 1em 0;
     font-family: $font-title;
   }
+
   h5 {
     line-height: 1em;
     font-weight: bold;
     margin: 1em 0;
     font-family: $font-title;
   }
+
   h6 {
     line-height: 1em;
     font-weight: bold;
@@ -218,11 +226,13 @@
   a {
     color: $color-link;
     text-decoration: none;
-    font-weight: normal;
+    border-bottom: 1px dotted #bde1fd;
+
     &:hover {
       color: $color-link-hover;
-      text-decoration: underline;
+      border-bottom: 1px solid $color-link;
     }
+
   }
   strong {
     font-weight: bold;

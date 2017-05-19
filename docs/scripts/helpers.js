@@ -59,8 +59,8 @@ hexo.extend.helper.register('doc_sidebar', function (className) {
       var itemClass = className + '-link'
       if (link === path) itemClass += ' current'
 
-      result += `<a href="${self.config.root + href}" class="${itemClass}">
-        ${self.__(prefix + text)}</a>`
+      result += `<li class='sidebar-li'><a href="${self.config.root + href}" class="${itemClass}">
+        ${self.__(prefix + text)}</a></li>`
     })
   })
 
