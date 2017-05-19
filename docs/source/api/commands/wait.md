@@ -1,5 +1,7 @@
+---
 title: wait
 comments: true
+description: ''
 ---
 
 Use `cy.wait` to wait for a number of milliseconds or for a resource to resolve.

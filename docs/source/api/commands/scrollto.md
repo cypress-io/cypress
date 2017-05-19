@@ -1,5 +1,7 @@
+---
 title: scrollto
 comments: true
+description: ''
 ---
 
 Scroll to a specific position in the window or in the element found in the previous command. The DOM element or window must be in a "scrollable" state prior to the scroll happening.

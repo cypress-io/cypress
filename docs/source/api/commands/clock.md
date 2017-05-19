@@ -1,5 +1,7 @@
+---
 title: clock
 comments: true
+description: ''
 ---
 
 `cy.clock` overrides native global functions related to time, so you can test code using those functions in an easier, synchronous way. This includes the `setTimeout`, `clearTimeout`, `setInterval`, and `clearInterval` functions as well as controlling `Date` objects. Note that this only applies to the `top` window on a web page. It will not override the time functions on any iframes embedded on the web page.

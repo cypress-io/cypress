@@ -1,5 +1,7 @@
+---
 title: hover
 comments: true
+description: ''
 ---
 
 **Cypress does not have a `cy.hover()` command.** See [Issue #10](https://github.com/cypress-io/cypress/issues/10).

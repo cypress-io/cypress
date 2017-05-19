@@ -1,5 +1,7 @@
+---
 title: eq
 comments: true
+description: ''
 ---
 
 Get a DOM element in an array of elements at the specific index.

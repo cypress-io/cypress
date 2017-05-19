@@ -1,5 +1,7 @@
+---
 title: submit
 comments: true
+description: ''
 ---
 
 Submits the DOM element from the previous command if it is a form. Submit can only be called on a single form.

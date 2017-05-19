@@ -1,5 +1,7 @@
+---
 title: wrap
 comments: true
+description: ''
 ---
 
 Return the object passed into `cy.wrap`.

@@ -1,5 +1,7 @@
+---
 title: parentsuntil
 comments: true
+description: ''
 ---
 
 Get all ancestors of each DOM element in the set of matched DOM elements up to, but not including, the element matched by the selector

@@ -1,5 +1,7 @@
+---
 title: then
 comments: true
+description: ''
 ---
 
 `cy.then()` will yield you the current subject as the first argument.

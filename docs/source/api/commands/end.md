@@ -1,5 +1,7 @@
+---
 title: end
 comments: true
+description: ''
 ---
 
 Ends the Cypress command chain and returns `null`. This is equivalent to the jQuery `end()` method.

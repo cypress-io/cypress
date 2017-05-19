@@ -1,5 +1,7 @@
+---
 title: spread
 comments: true
+description: ''
 ---
 
 The spread command allows an expression to be expanded in places where multiple arguments are expected. Similar to [`cy.then`](https://on.cypress.io/api/then), but always expects an array as it's subject.

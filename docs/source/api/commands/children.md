@@ -1,5 +1,7 @@
+---
 title: children
 comments: true
+description: ''
 ---
 
 Get the children of each DOM element in the set of matched DOM elements.

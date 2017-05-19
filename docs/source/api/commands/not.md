@@ -1,5 +1,7 @@
+---
 title: not
 comments: true
+description: ''
 ---
 
 Remove DOM elements from the set of DOM elements. Opposite of [`cy.filter()`](https://on.cypress.io/api/filter)

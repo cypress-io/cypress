@@ -1,5 +1,7 @@
+---
 title: getcookies
 comments: true
+description: ''
 ---
 
 Gets all of the browser cookies.

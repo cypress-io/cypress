@@ -1,5 +1,7 @@
+---
 title: next
 comments: true
+description: ''
 ---
 
 Get the immediately following sibling of each DOM element in the set of matched DOM elements.

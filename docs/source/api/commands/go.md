@@ -1,5 +1,7 @@
+---
 title: go
 comments: true
+description: ''
 ---
 
 Navigate back or forward to the previous or next URL in the browser's history. If going forward or back causes a full page refresh, Cypress will wait for the new page to load before moving on to new commands. Cypress additionally handles situations where a page load was not caused (such as hash routing) and will resolve immediately.
