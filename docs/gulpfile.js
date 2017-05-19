@@ -63,7 +63,7 @@ gulp.task('clean:js', () => {
 })
 
 gulp.task('clean:css', () => {
-  return remove('public/css/!(style).css')
+  return remove('public/css/!(style|prism-coy).css')
 })
 
 gulp.task('clean:tmp', () => {
