@@ -41,7 +41,7 @@
   margin-left: 10px;
   display: none;
   border: 0;
-  
+
   &:before {
     content: "#";
   }
@@ -51,8 +51,9 @@
   line-height: $line-height;
 
   p {
-    margin-bottom: 0.8em;
+    margin-bottom: 15px;
     word-wrap: break-word;
+    line-height: 1.5em;
   }
 
   ol {
@@ -166,19 +167,9 @@
     margin: 1em 0;
   }
 
-  hr {
-    border-color: #eee;
-    margin-top: 3em;
-    margin-bottom: 1em;
-    margin-left: 0;
-    border-width: 1px;
-    border-style: solid;
-    // display: none;
-  }
-
   h1 {
-    font-size: 1.7em;
-    line-height: 1em;
+    font-size: 1.6em;
+    line-height: 1.5em;
     font-weight: 500;
     margin: 1.5em 0 0.5em 0;
     padding: 0;
@@ -191,10 +182,14 @@
 
   h2 {
     font-size: 1em;
-    line-height: 1em;
+    line-height: 1.5em;
     font-weight: 500;
-    margin: 1em 0 0 0;
+    margin: 1em 0 1em 0;
     font-family: $font-title;
+
+    code {
+      font-weight: bold;
+    }
   }
 
   h3 {
