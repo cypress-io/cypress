@@ -1,5 +1,7 @@
+---
 title: clear
 comments: true
+description: ''
 ---
 
 Clears a value of an `<input>` or `<textarea>`. Under the hood this is actually a shortcut for writing:
@@ -17,15 +19,11 @@ Prior to clearing, if the element isn't currently focused, Cypress will issue a 
 | | |
 |--- | --- |
 | **Returns** | the element that was typed into |
-| **Timeout** | `cy.clear` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) or the duration of the `timeout` specified in the command's [options](#section-options).|
+| **Timeout** | `cy.clear` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) or the duration of the `timeout` specified in the command's [options](#options).|
 
-***
-
-# [cy.clear()](#section-usage)
+# [cy.clear()](#usage)
 
 Clears the value of an `<input>` or `<textarea>`.
-
-***
 
 # Options
 
@@ -37,10 +35,8 @@ Option | Default | Notes
 --- | --- | ---
 `force` | `false` | Forces clear, disables error checking prior to clear
 `interval` | `16` | Interval which to retry type
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry the type
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry the type
 `log` | `true` | whether to display command in command log
-
-***
 
 # Usage
 
@@ -54,8 +50,6 @@ Option | Default | Notes
 // clears the existing value first before typing
 cy.get("input[name='name']").clear().type("Jane Lane")
 ```
-
-***
 
 # Command Log
 
@@ -72,8 +66,6 @@ The commands above will display in the command log as:
 When clicking on `clear` within the command log, the console outputs the following:
 
 <img width="511" alt="screen shot 2015-11-29 at 12 57 07 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458940/bdc93a50-9698-11e5-8be7-ef6a0470c3ae.png">
-
-***
 
 # Related
 

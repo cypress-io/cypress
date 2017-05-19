@@ -1,5 +1,7 @@
+---
 title: blur
 comments: true
+description: ''
 ---
 
 Make the DOM element found in the previous command lose focus.
@@ -9,15 +11,11 @@ Make the DOM element found in the previous command lose focus.
 | | |
 |--- | --- |
 | **Returns** | the new DOM element(s) found by the command. |
-| **Timeout** | `cy.blur` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.blur` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.blur()](#section-usage)
+# [cy.blur()](#usage)
 
 Blur the DOM element from the previous command.
-
-***
 
 # Options
 
@@ -30,8 +28,6 @@ Option | Default | Notes
 `force` | `false` | Forces blur, disables error checking prior to blur
 `log` | `true` | whether to display command in command log
 
-***
-
 # Usage
 
 ## Blur the comment input.
@@ -41,8 +37,6 @@ Option | Default | Notes
 cy.get("[name='comment']").type("Nice Product!").blur()
 ```
 
-***
-
 # Options Usage
 
 ## Blur the first input, ignoring whether the input is currently focused.
@@ -51,8 +45,6 @@ cy.get("[name='comment']").type("Nice Product!").blur()
 // returns the same <input> for further chaining
 cy.get("input:first").blur({force: true})
 ```
-
-***
 
 # Command Log
 
@@ -70,8 +62,6 @@ When clicking on the `blur` command within the command log, the console outputs 
 
 <img width="525" alt="screen shot 2015-11-27 at 1 37 53 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446923/5c44a2ca-950c-11e5-8080-0dc108bc4959.png">
 
-***
-
 # Errors
 
 ## cy.blur() can only be called when there is a currently focused element.
@@ -85,8 +75,6 @@ If you see this error, you may want to ensure that the main browser window is cu
 ## cy.blur() can only be called on the focused element.
 
 If you want to ensure focus on a specific element before blurring, try using `cy.focus()` on the element before `cy.blur()`
-
-***
 
 # Related
 

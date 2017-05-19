@@ -4,6 +4,7 @@
   "main": "lib/reporter",
   "browser": "src/main",
   "scripts": {
+    "postinstall": "npm run build",
     "build": "node ./scripts/build-dev.js",
     "build-prod": "node ./scripts/build-prod.js",
     "watch": "node ./scripts/watch.js",

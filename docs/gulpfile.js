@@ -8,7 +8,7 @@ const revisionOpts = {
   dontRenameFile: ['.html', 'CNAME'],
   dontUpdateReference: ['.html'],
   dontSearchFile: ['.js'],
-  debug: true,
+  debug: true
 }
 
 function remove (folder) {
@@ -62,6 +62,10 @@ gulp.task('clean:js', () => {
   return remove('public/js/!(application).js')
 })
 
+gulp.task('clean:css', () => {
+  return remove('public/css/!(style|prism-coy).css')
+})
+
 gulp.task('clean:tmp', () => {
   return remove('tmp')
 })
@@ -75,7 +79,7 @@ gulp.task('cname', () => {
 })
 
 gulp.task('post:build', (cb) => {
-  runSequence('copy:static:assets', 'clean:js', 'revision', 'clean:public', 'copy:tmp:to:public', 'clean:tmp', 'cname', cb)
+  runSequence('copy:static:assets', 'clean:js', 'clean:css', 'revision', 'clean:public', 'copy:tmp:to:public', 'clean:tmp', 'cname', cb)
 })
 
 gulp.task('copy:static:assets', ['move:menu:spy:js', 'move:scrolling:element:js', 'move:doc:search:js', 'move:doc:search:css'])

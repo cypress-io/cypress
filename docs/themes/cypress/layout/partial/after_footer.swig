@@ -1,5 +1,5 @@
 <!-- Scripts -->
-<!-- build:js build/js/main.js -->
+<!-- build:js /js/application.js -->
 {{ js('js/lang_select') }}
 {{ js('js/scrollingelement') }}
 {{ js('js/menuspy') }}
@@ -8,6 +8,11 @@
 {% if config.algolia[page.lang] %}
   <!-- Algolia -->
   {{ js('js/docsearch') }}
-  {{ js('js/docsearch-config') }}
 {% endif %}
 <!-- endbuild -->
+
+
+<!-- Algolia -->
+{% if config.algolia[page.lang] %}
+  {{ partial('docsearch') }}
+{% endif %}

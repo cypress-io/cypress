@@ -1,5 +1,7 @@
+---
 title: debug
 comments: true
+description: ''
 ---
 
 `cy.debug` sets a `debugger` and logs the subject from the previous command.
@@ -11,13 +13,9 @@ Make sure you have your Developer Tools open for `cy.debug` to hit the breakpoin
 | **Returns** | the subject from the previous command for further chaining. |
 | **Timeout** | *cannot timeout* |
 
-***
-
-# [cy.debug()](#section-usage)
+# [cy.debug()](#usage)
 
 Debug the previous command.
-
-***
 
 # Options
 
@@ -29,8 +27,6 @@ Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
 
-***
-
 # Usage
 
 ## Log out the current subject for debugging
@@ -40,8 +36,6 @@ Option | Default | Notes
 // useful debugging information to your console
 cy.get("a").debug().should("have.attr", "href")
 ```
-
-***
 
 # Related
 

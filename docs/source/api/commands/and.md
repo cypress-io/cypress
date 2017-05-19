@@ -1,5 +1,7 @@
+---
 title: and
 comments: true
+description: ''
 ---
 
 {% note info New to Cypress? %}
@@ -13,37 +15,27 @@ You'd typically use `cy.and` when you are making multiple assertions about the s
 | | |
 |--- | --- |
 | **Returns** | the current subject but (in some cases) a new subject  |
-| **Timeout** | the assertion will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | the assertion will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.and( *chainers* )](#section-chainers-usage)
+# [cy.and( *chainers* )](#chainers-usage)
 
 Make an assertion about the current subject using assertion chainers.
 
-***
-
-# [cy.and( *chainers*, *value* )](#section-chainers-with-value-usage)
+# [cy.and( *chainers*, *value* )](#chainers-with-value-usage)
 
 Make an assertion about the value of the current subject.
 
 Some chai methods and chai-jQuery methods return a new (different) subject for chain-ability.
 
-***
-
-# [cy.and( *chainers*, *method*, *value* )](#section-chainers-with-method-and-value-usage)
+# [cy.and( *chainers*, *method*, *value* )](#chainers-with-method-and-value-usage)
 
 Make an assertion about the subject by calling a method and providing a value to that method.
 
-***
-
-# [cy.and( *function* )](#section-function-usage)
+# [cy.and( *function* )](#function-usage)
 
 Pass a function that can have any number of explicit assertions written within it.
 
 Does not change the subject. Whatever was passed to the function is what is returned.
-
-***
 
 # Chainers Usage
 
@@ -52,8 +44,6 @@ Does not change the subject. Whatever was passed to the function is what is retu
 ```javascript
 cy.get("button").should("have.class", "active").and("not.be.disabled")
 ```
-
-***
 
 # Chainers with Value Usage
 
@@ -91,8 +81,6 @@ cy
   .and("not.include", "#")
 ```
 
-***
-
 # Chainers with Method and Value Usage
 
 ## Assert the href is equal to '/users'
@@ -104,8 +92,6 @@ cy
   .should("have.class", "active")
   .and("have.attr", "href", "/users")
 ```
-
-***
 
 # Function Usage
 
@@ -151,8 +137,6 @@ cy
   })
 ```
 
-***
-
 ## Using a callback function will not change the subject
 
 ```javascript
@@ -176,8 +160,6 @@ cy
     // the subject is unchanged no matter what was returned
   })
 ```
-
-***
 
 ## Assertions that change the subject
 
@@ -214,8 +196,6 @@ cy
   .should("have.attr", "href", "/users")
 ```
 
-***
-
 # Notes
 
 ## Similarities to Chai
@@ -229,8 +209,6 @@ expect({foo: "bar"}).to.have.property("foo").and.eq("bar")
 ```
 
 `cy.and` reproduces this same assertion behavior.
-
-***
 
 ## Can I pass options to cy.and()?
 
@@ -253,17 +231,13 @@ cy.find("input", {timeout: 10000}).should("have.value", "foo").and("have.class",
       // be retried for up to 10 seconds
 ```
 
-***
-
 ## How do I know which assertions change the subject and which keep it the same?
 
-The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#section-chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#section-chai-jquery) will always document what they return.
+The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
 
 Alternatively, it is very easy to use Cypress itself to figure this out.
 
 You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#debugging-assertions) here.
-
-***
 
 # Command Log
 
@@ -282,8 +256,6 @@ The commands above will display in the command log as:
 When clicking on `assert` within the command log, the console outputs the following:
 
 <img width="636" alt="screen shot 2015-11-29 at 12 17 03 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458702/3b6873be-9693-11e5-88f7-a928ebdac80c.png">
-
-***
 
 # Related
 

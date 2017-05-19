@@ -5,11 +5,10 @@
   "main": "index.js",
   "types": "../ts/index.d.ts",
   "scripts": {
-    "build": "npm run lint",
     "pretest": "npm run lint",
     "test": "mocha",
     "clean-deps": "rm -rf node_modules",
-    "lint": "tslint --type-check --project ../ts --fix --format stylish launcher/lib/*.ts launcher/lib/**/*.ts"
+    "lint": "tslint --type-check --project .. --fix --format stylish launcher/lib/*.ts launcher/lib/**/*.ts"
   },
   "repository": {
     "type": "git",

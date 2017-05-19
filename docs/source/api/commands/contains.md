@@ -1,5 +1,7 @@
+---
 title: contains
 comments: true
+description: ''
 ---
 
 Get the DOM element containing the text. DOM elements can contain *more* than the desired text and still match. Additionally, Cypress will prefer some DOM elements over the deepest element found.
@@ -14,33 +16,23 @@ Get the DOM element containing the text. DOM elements can contain *more* than th
 | | |
 |--- | --- |
 | **Returns** | the deepest DOM element containing the text  |
-| **Timeout** | `cy.contains` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) |
+| **Timeout** | `cy.contains` will retry for the duration of the [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) |
 
-***
-
-# [cy.contains( *text* )](#section-text-usage)
+# [cy.contains( *text* )](#text-usage)
 
 Get the deepest DOM element containing the text.
 
-***
-
-# [cy.contains( *number* )](#section-number-usage)
+# [cy.contains( *number* )](#number-usage)
 
 Get the deepest DOM element containing the number.
 
-***
-
-# [cy.contains( *regexp* )](#section-regular-expression-usage)
+# [cy.contains( *regexp* )](#regular-expression-usage)
 
 Get the deepest DOM element containing the text matching the regular expression.
 
-***
-
-# [cy.contains( *selector*, *text* )](#section-selector-and-text-usage)
+# [cy.contains( *selector*, *text* )](#selector-and-text-usage)
 
 Specify a selector to filter DOM elements containing the text. Cypress will **ignore** it's default preference for the specified selector. Using a selector allows you to return more *shallow* elements in the tree which contain the specific text.
-
-***
 
 # Options
 
@@ -52,9 +44,7 @@ Pass in an options object to change the default behavior of `cy.contains`.
 Option | Default | Notes
 --- | --- | ---
 `log` | `true` | whether to display command in command log
-`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#section-timeouts) | Total time to retry finding an element
-
-***
+`timeout` | [`defaultCommandTimeout`](https://on.cypress.io/guides/configuration#timeouts) | Total time to retry finding an element
 
 # Text Usage
 
@@ -72,8 +62,6 @@ Option | Default | Notes
 // returns <li>apples</li>
 cy.contains("apples")
 ```
-
-***
 
 ## Find the input[type='submit'] by value
 
@@ -101,8 +89,6 @@ cy.contains("apples")
 cy.get("form").contains("submit the form!").click()
 ```
 
-***
-
 ## Favor of `button` over other deeper elements
 
 ```html
@@ -122,8 +108,6 @@ cy.get("form").contains("submit the form!").click()
 // into its children
 cy.contains("Search").children("i").should("have.class", "fa-search")
 ```
-
-***
 
 ## Favor of `a` over other deeper elements
 
@@ -149,8 +133,6 @@ cy.contains("Search").children("i").should("have.class", "fa-search")
 cy.get("nav").contains("Sign Out").should("have.attr", "href", "/signout")
 ```
 
-***
-
 ## Favor of `label` over other deeper elements
 
 ```html
@@ -175,8 +157,6 @@ cy.get("nav").contains("Sign Out").should("have.attr", "href", "/signout")
 
 cy.contains("Age").find("input").type("29")
 ```
-
-***
 
 ## Only the *first* matched element will be returned
 
@@ -206,8 +186,6 @@ cy.contains("Jane Lane")
 cy.get("#main").contains("Jane Lane")
 ```
 
-***
-
 # Number Usage
 
 ## Find the first element containing some number
@@ -226,8 +204,6 @@ cy.get("#main").contains("Jane Lane")
 cy.contains(4)
 ```
 
-***
-
 # Regular Expression Usage
 
 ## Find the first element with text matching the regular expression
@@ -244,8 +220,6 @@ cy.contains(4)
 // <li>bananas</li> is returned
 cy.contains(/^b\w+/)
 ```
-
-***
 
 # Selector and Text Usage
 
@@ -275,8 +249,6 @@ cy.contains(/^b\w+/)
 // returns <ul>...</ul>
 cy.contains("ul", "apples")
 ```
-
-***
 
 # Notes
 
@@ -352,8 +324,6 @@ cy
   .get("#dialog").contains("Yes I'm sure!").click()
 ```
 
-***
-
 # Command Log
 
 ## Element contains text "New User"
@@ -363,8 +333,6 @@ cy
 When clicking on the `contains` command within the command log, the console outputs the following:
 
 <img width="477" alt="screen shot 2015-11-27 at 1 43 50 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446977/04b31be4-950d-11e5-811e-4fd83d364d00.png">
-
-***
 
 # Related
 
