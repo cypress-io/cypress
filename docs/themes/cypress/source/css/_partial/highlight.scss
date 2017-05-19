@@ -1,3 +1,27 @@
+code {
+  margin: 0;
+  padding: 0;
+  border: 1px solid #E9E9EF;
+  border-radius: 4px;
+  outline: 0;
+  font-weight: bold;
+  font-family: inherit;
+  font-size: 0.9em;
+  vertical-align: baseline;
+  color: #46af91;
+  background: #F7F7F9;
+  padding: 0 5px;
+  font-family: $font-mono;
+}
+
+a code {
+  color: $color-link;
+
+  &:hover {
+    color: $color-link-hover;
+  }
+}
+
 .article pre, .article code {
   &[class*="language-"] {
     font-size: 0.9em;
@@ -6,6 +30,9 @@
     background-color: $highlight-background;
     color: $highlight-foreground;
     box-shadow: none !important;
+    border: 0;
+    border-radius: 0;
+    font-weight: normal;
 
     .token {
       &.keyword, &.function {
@@ -27,17 +54,13 @@
       &.keyword, .attr-value {
         color: $highlight-aqua;
       }
-
     }
   }
 }
 
 .article pre {
   &[class*="language-"] {
-    border-left: 5px solid $color-link;
+    border-left: 5px solid $color-border;
     padding: 0.5em 0.25em;
-    margin-top: 1em;
-
-
   }
 }
