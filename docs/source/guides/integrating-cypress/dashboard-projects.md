@@ -1,4 +1,4 @@
-title: projects
+title: Dashboard&#58; Projects
 comments: true
 ---
 

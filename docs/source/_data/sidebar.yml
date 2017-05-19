@@ -19,7 +19,10 @@ guides:
     environment-variables: environment-variables.html
     reporters: reporters.html
     browser-management: browser-management.html
-    the-cypress-dashboard: the-cypress-dashboard.html
+    dashboard-features: dashboard-features.html
+    dashboard-projects: dashboard-projects.html
+    dashboard-runs: dashboard-recorded-runs.html
+    dashboard-orgs: dashboard-organizations.html
   advanced-cypress:
     the-cypress-workflow: the-cypress-workflow.html
     coming-from-selenium: coming-from-selenium.html
@@ -29,6 +32,7 @@ guides:
     talking-to-your-backend: talking-to-your-backend.html
     spawning-processes: spawning-processes.html
   appendices:
+    configuration: configuration.html
     error-messages: error-messages.html
     best-practices: best-practices.html
     anti-patterns: anti-patterns.html

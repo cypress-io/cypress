@@ -38,7 +38,10 @@ sidebar:
     environment-variables: Environment Variables
     reporters: Reporters
     browser-management: Browser Management
-    the-cypress-dashboard: The Cypress Dashboard
+    dashboard-features: The Cypress Dashboard
+    dashboard-projects: Dashboard&#58; Projects
+    dashboard-runs: Dashboard&#58; Recorded Runs
+    dashboard-orgs: Dashboard&#58; Organizations
     advanced-cypress: Advanced Cypress
     the-cypress-workflow: The Cypress Workflow
     coming-from-selenium: Coming from Selenium?
@@ -48,6 +51,7 @@ sidebar:
     talking-to-your-backend: Talking to Your Backend
     spawning-processes: Spawning Processes
     appendices: Appendices
+    configuration: Configuration
     error-messages: Error Messages
     best-practices: Best Practices
     anti-patterns: Anti-patterns
